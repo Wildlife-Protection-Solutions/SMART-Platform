@@ -30,11 +30,10 @@ import javax.persistence.ManyToOne;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Transient;
 
+import org.locationtech.jts.geom.Coordinate;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.map.GeometryFactoryProvider;
-
-import org.locationtech.jts.geom.Coordinate;
 
 /**
  * Class that contains "value" fields for classes that record attribute

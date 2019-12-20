@@ -68,6 +68,8 @@ public class DesktopIntelBirtConnection extends AbstractIntelBirtConnection {
 		return SmartDB.getConservationAreaConfiguration().getConservationAreas();
 	}
 
+	
+	
 	@Override
 	public Set<IntelProfile> hasPermission(Permission permission) {
 		Set<IntelProfile> active = new HashSet<>(ProfilesManager.INSTANCE.getActiveProfiles());

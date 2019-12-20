@@ -84,6 +84,7 @@ import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelProfile;
+import org.wcs.smart.i2.model.IntelProfileRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.ui.ProfileLabelProvider;
@@ -139,13 +140,13 @@ public class RecordSourceDialog extends SmartStyledTitleDialog{
 				
 					src.getNames().size();
 				
-					src.getProfiles().forEach(p->p.getName());
+					src.getProfiles().forEach(p->p.getRecordSource().getName());
 				
 					if (src.getAttributes() != null){
 						src.getAttributes().forEach(a->{
 							a.getNames().size();
 							a.getAttribute();
-							if (a.getEntityType() != null) a.getEntityType().getProfiles().forEach(p->p.getUuid());
+							if (a.getEntityType() != null) a.getEntityType().getProfiles().forEach(p->p.getProfile().getUuid());
 						});
 					}
 					currentSelection = src;
@@ -163,7 +164,7 @@ public class RecordSourceDialog extends SmartStyledTitleDialog{
 				for (MenuItem b : attributeMenu) b.setEnabled(true);
 				tblProfiles.setInput(profiles);
 				tblProfiles.setAllChecked(false);
-				for (IntelProfile p : currentSelection.getProfiles()) tblProfiles.setChecked(p, true);
+				for (IntelProfileRecordSource p : currentSelection.getProfiles()) tblProfiles.setChecked(p.getProfile(), true);
 				comp.validate();
 				getButton(IDialogConstants.OK_ID).setEnabled(false);
 
@@ -674,11 +675,9 @@ public class RecordSourceDialog extends SmartStyledTitleDialog{
 	
 	
 	private boolean doSave(){
-		String v = ProfilesManager.INSTANCE.validateRecords(currentSelection);
-		if (v != null) {				
-			Intelligence2PlugIn.displayLog(Messages.RecordSourceAttributeDialog_SaveError + v, null);
-			return false;
-		}
+		
+		
+		
 		
 		Set<IntelProfile> newProfiles = new HashSet<>();
 		for (Object x : tblProfiles.getCheckedElements()) newProfiles.add((IntelProfile)x);
@@ -701,13 +700,26 @@ public class RecordSourceDialog extends SmartStyledTitleDialog{
 				session.saveOrUpdate(currentSelection);
 				List<IntelProfile> profiles = (List<IntelProfile>) tblProfiles.getInput();
 				for (IntelProfile ip : profiles) {
+					ip = session.get(IntelProfile.class, ip.getUuid());
+					IntelProfileRecordSource mp = new IntelProfileRecordSource();
+					mp.getId().setProfile(ip);
+					mp.getId().setRecordSource(currentSelection);
+					
 					if (tblProfiles.getChecked(ip)) {
-						currentSelection.getProfiles().add(ip);
+						if (!currentSelection.getProfiles().contains(mp)) currentSelection.getProfiles().add(mp);
 					}else {
-						currentSelection.getProfiles().remove(ip);
+						IntelProfileRecordSource temp = session.get(IntelProfileRecordSource.class, mp.getId());
+						if (temp != null) {
+							ip.getRecordSources().remove(temp);
+							temp.getRecordSource().getProfiles().remove(temp);
+							session.delete(temp);
+							currentSelection.getProfiles().remove(temp);
+						}
 					}
 				}
 				session.flush();
+				String v = ProfilesManager.INSTANCE.validateRecords(currentSelection);
+				if (v != null) throw new Exception(v);		
 				
 				//delete all attribute values for attributes removed from given source
 				for (IntelRecordSourceAttribute a : attributesToDelete){

@@ -35,16 +35,15 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.UuidItem;
-import org.wcs.smart.util.UuidUtils;
-
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKBReader;
 import org.locationtech.jts.io.WKBWriter;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Model class of i_location.

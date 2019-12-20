@@ -65,6 +65,8 @@ import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelEntityTypeAttributeGroup;
 import org.wcs.smart.i2.model.IntelPermission;
 import org.wcs.smart.i2.model.IntelProfile;
+import org.wcs.smart.i2.model.IntelProfileEntityType;
+import org.wcs.smart.i2.model.IntelProfileRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.model.IntelRelationshipGroup;
@@ -183,8 +185,14 @@ public class XmlToProfile {
 		progress.subTask(Messages.XmlToIntelData_entitytypesTask);
 		List<IntelEntityType> entities = proecessEntityTypes(data.getEntities(), attributeMapping);
 		
-		profile.getEntityTypes().addAll(entities);
-		entities.forEach(e->e.getProfiles().add(profile));
+		for (IntelEntityType e : entities) {
+			IntelProfileEntityType map = new IntelProfileEntityType();
+			map.setEntityType(e);
+			map.setProfile(profile);
+			
+			profile.getEntityTypes().add(map);
+			e.getProfiles().add(map);
+		}
 		
 		//entity mappings
 		HashMap<String, IntelEntityType> entityMappings = new HashMap<>();
@@ -196,8 +204,14 @@ public class XmlToProfile {
 		progress.split(1);
 		progress.subTask(Messages.XmlToIntelData_recourdsourceTask);
 		List<IntelRecordSource> recordSources = processRecordSources(data.getRecordSource(), attributeMapping, entityMappings);
-		profile.getRecordSources().addAll(recordSources);
-		recordSources.forEach(r->r.getProfiles().add(profile));
+		for (IntelRecordSource s : recordSources) {
+			IntelProfileRecordSource ps = new IntelProfileRecordSource();
+			ps.getId().setProfile(profile);
+			ps.getId().setRecordSource(s);
+			
+			s.getProfiles().add(ps);
+			profile.getRecordSources().add(ps);
+		}
 		
 		//processing relationship groups
 		progress.split(1);

@@ -74,6 +74,8 @@ import org.wcs.smart.i2.RecordManager;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelPermission;
 import org.wcs.smart.i2.model.IntelProfile;
+import org.wcs.smart.i2.model.IntelProfileEntityType;
+import org.wcs.smart.i2.model.IntelProfileRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.security.IntelUserUserLevel;
@@ -188,20 +190,46 @@ public class ProfileDialog extends SmartStyledDialog {
 				List<IntelEntityType> esources = QueryFactory.buildQuery(session, IntelEntityType.class, "conservationArea", SmartDB.getCurrentConservationArea()).list();
 				for (IntelEntityType s : esources) {
 					IntelEntityType src = session.get(IntelEntityType.class, s.getUuid());
+					
+					IntelProfileEntityType map = new IntelProfileEntityType();
+					map.setProfile(config);
+					map.setEntityType(s);
+
 					if (tblEntityTypes.getChecked(s)) {
-						src.getProfiles().add(config);
+						if (!src.getProfiles().contains(map)) {
+							src.getProfiles().add(map);
+						}
 					}else {
-						src.getProfiles().remove(config);
+						IntelProfileEntityType temp = session.get(IntelProfileEntityType.class, map.getId());
+						if (temp != null) {
+							temp.getProfile().getEntityTypes().remove(temp);
+							temp.getEntityType().getProfiles().remove(temp);
+							session.delete(temp);
+							src.getProfiles().remove(temp);
+						}						
 					}
 				}
 				
 				List<IntelRecordSource> sources = QueryFactory.buildQuery(session, IntelRecordSource.class, "conservationArea", SmartDB.getCurrentConservationArea()).list();
 				for (IntelRecordSource s : sources) {
 					IntelRecordSource src = session.get(IntelRecordSource.class, s.getUuid());
+					
+					IntelProfileRecordSource map = new IntelProfileRecordSource();
+					map.getId().setProfile(config);
+					map.getId().setRecordSource(s);
+					
 					if (tblRecordSources.getChecked(s)) {
-						src.getProfiles().add(config);
+						if (!src.getProfiles().contains(map)) {
+							src.getProfiles().add(map);
+						}
 					}else {
-						src.getProfiles().remove(config);
+						IntelProfileRecordSource temp = session.get(IntelProfileRecordSource.class, map.getId());
+						if (temp != null) {
+							temp.getProfile().getRecordSources().remove(temp);
+							temp.getRecordSource().getProfiles().remove(temp);
+							session.delete(temp);
+							src.getProfiles().remove(temp);
+						}						
 					}
 				}
 				
@@ -665,8 +693,8 @@ public class ProfileDialog extends SmartStyledDialog {
 			try(Session s =  HibernateManager.openSession()){
 				if (config.getUuid() != null) {
 					config = s.get(IntelProfile.class, config.getUuid());
-					config.getEntityTypes().forEach(e->e.getName());
-					config.getRecordSources().forEach(r->r.getName());
+					config.getEntityTypes().forEach(e->e.getEntityType().getName());
+					config.getRecordSources().forEach(r->r.getRecordSource().getName());
 					config.getNames().size();
 					
 					List<IntelPermission> items =QueryFactory.buildQuery(s, IntelPermission.class, 
@@ -705,13 +733,13 @@ public class ProfileDialog extends SmartStyledDialog {
 				btnAddEmployee.setEnabled(true);
 				
 				tblRecordSources.setInput(rtypes);
-				for (IntelRecordSource t : config.getRecordSources()) {
-					tblRecordSources.setChecked(t, true);
+				for (IntelProfileRecordSource t : config.getRecordSources()) {
+					tblRecordSources.setChecked(t.getRecordSource(), true);
 				}
 				
 				tblEntityTypes.setInput(types);
-				for (IntelEntityType t : config.getEntityTypes()) {
-					tblEntityTypes.setChecked(t, true);
+				for (IntelProfileEntityType t : config.getEntityTypes()) {
+					tblEntityTypes.setChecked(t.getEntityType(), true);
 				}
 				if (config.getKeyId() == null) {
 					txtName.addListener(SWT.KeyUp,generateKeyListener);

@@ -25,7 +25,6 @@ import java.sql.SQLException;
 import java.util.List;
 
 import org.hibernate.Session;
-
 import org.locationtech.jts.geom.Envelope;
 
 /**

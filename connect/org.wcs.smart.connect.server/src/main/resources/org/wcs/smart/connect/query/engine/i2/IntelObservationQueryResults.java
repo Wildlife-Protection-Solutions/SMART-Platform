@@ -49,6 +49,7 @@ import org.wcs.smart.connect.api.QueryApi;
 import org.wcs.smart.connect.query.columns.QueryColumnUtils;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.model.IntelObservationAttribute;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.query.DataModelColumn;
 import org.wcs.smart.i2.query.FilterQueryColumn;
@@ -222,6 +223,8 @@ public class IntelObservationQueryResults  implements IQueryResult, IPagedQueryR
 		if (recordSourceUuid != null) {
 			item.setRecordSource(session.get(IntelRecordSource.class, recordSourceUuid));
 		}
+		UUID profileUuid = asUuid(rowData[columnNameToIndex.get("profile_uuid")]); //$NON-NLS-1$
+		item.setProfile(profileUuid, session.get(IntelProfile.class, profileUuid).getName());
 		
 		item.setLocationId((String)rowData[columnNameToIndex.get("loc_id")]); //$NON-NLS-1$
 		item.setLocationDate((Timestamp)rowData[columnNameToIndex.get("loc_datetime")]); //$NON-NLS-1$
@@ -290,6 +293,8 @@ public class IntelObservationQueryResults  implements IQueryResult, IPagedQueryR
 				return sql + "lower(record_title)" + getSortDirectionSql(); //$NON-NLS-1$
 			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.CA_ID){
 				return sql + "lower(ca_id)" + getSortDirectionSql(); //$NON-NLS-1$
+			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.RECORD_PROFILE){
+				return sql + "profile_uuid" + getSortDirectionSql(); //$NON-NLS-1$
 			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.CA_NAME){
 				return sql + "lower(ca_name)" + getSortDirectionSql(); //$NON-NLS-1$
 			}

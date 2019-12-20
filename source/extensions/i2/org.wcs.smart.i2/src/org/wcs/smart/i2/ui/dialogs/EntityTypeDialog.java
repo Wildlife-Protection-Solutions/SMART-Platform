@@ -106,6 +106,7 @@ import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelEntityTypeAttributeGroup;
 import org.wcs.smart.i2.model.IntelProfile;
+import org.wcs.smart.i2.model.IntelProfileEntityType;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.OtherAttributeGroup;
 import org.wcs.smart.i2.ui.AttributeLabelProvider;
@@ -211,13 +212,23 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 			try {
 				s.saveOrUpdate(type);
 				
-				Set<IntelProfile> currentprofiles = new HashSet<>(type.getProfiles());
+				Set<IntelProfileEntityType> currentprofiles = new HashSet<>(type.getProfiles());
 				List<IntelProfile> profiles = (List<IntelProfile>) tblProfiles.getInput();
+				
 				for (IntelProfile ip : profiles) {
+					IntelProfileEntityType mp = new IntelProfileEntityType();
+					mp.setProfile(ip);
+					mp.setEntityType(type);
+					
 					if (tblProfiles.getChecked(ip)) {
-						type.getProfiles().add(ip);
+						if (!type.getProfiles().contains(mp)) type.getProfiles().add(mp);
 					}else {
-						type.getProfiles().remove(ip);
+						if (type.getProfiles().contains(mp)) {
+							IntelProfile pp = s.get(IntelProfile.class, ip.getUuid());
+							pp.getEntityTypes().remove(mp);
+							type.getProfiles().remove(mp);
+							s.delete(pp);
+						}
 					}
 				}
 				s.flush();
@@ -1020,7 +1031,7 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 				try(Session s = HibernateManager.openSession()){
 					
 					profiles.addAll(ProfilesManager.INSTANCE.getProfiles(s, false));
-					profiles.forEach(p->p.getEntityTypes().forEach(e->e.getName()));
+					profiles.forEach(p->p.getEntityTypes().forEach(e->e.getEntityType().getName()));
 					if (type.getUuid() != null){
 						type = (IntelEntityType) s.get(IntelEntityType.class, type.getUuid());
 						type.getNames().size();
@@ -1032,7 +1043,7 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 							monitor.subTask(MessageFormat.format(Messages.EntityTypeDialog_AttributeSubTask2, a.getAttribute().getName()));
 							kid1.worked(1);
 						}
-						type.getProfiles().forEach(e->e.getName());
+						type.getProfiles().forEach(e->e.getProfile().getName());
 					}
 					monitor.subTask(Messages.EntityTypeDialog_EntityTypeSubTask);
 					entityTypeSiblings = EntityTypeManager.INSTANCE.getEntityTypes(s, SmartDB.getCurrentConservationArea());
@@ -1060,8 +1071,8 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 						tblProfiles.setInput(profiles);
 						attributeList.addAll(type.getAttributes());
 						treeAttributes.setInput(attributeList);
-						for (IntelProfile c : type.getProfiles()) {
-							tblProfiles.setChecked(c, true);
+						for (IntelProfileEntityType c : type.getProfiles()) {
+							tblProfiles.setChecked(c.getProfile(), true);
 						}
 						refreshAttributeList();
 						

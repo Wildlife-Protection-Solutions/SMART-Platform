@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -989,7 +990,7 @@ public class RecordSummaryPage extends EditorPart{
 				try(Session s = HibernateManager.openSession()){
 					IntelProfile p = s.get(IntelProfile.class, recordEditor.getRecord().getProfile().getUuid());
 					
-					List<IntelRecordSource> sources = new ArrayList<>(p.getRecordSources());
+					List<IntelRecordSource> sources = p.getRecordSources().stream().map(e->e.getRecordSource()).collect(Collectors.toList());
 					sources.forEach(src -> {
 						src.getName();
 						if (src.getAttributes() != null){

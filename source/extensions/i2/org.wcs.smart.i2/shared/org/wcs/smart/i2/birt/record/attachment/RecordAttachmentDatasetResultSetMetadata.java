@@ -29,7 +29,6 @@ import org.wcs.smart.SmartContext;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
-import org.wcs.smart.util.UuidUtils;
 
 /**
  * Entity record datasets results metadata

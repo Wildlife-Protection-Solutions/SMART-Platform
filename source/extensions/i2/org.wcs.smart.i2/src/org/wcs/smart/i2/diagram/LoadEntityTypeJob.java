@@ -36,7 +36,7 @@ import org.wcs.smart.i2.EntityTypeManager;
 import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntityType;
-import org.wcs.smart.i2.model.IntelProfile;
+import org.wcs.smart.i2.model.IntelProfileEntityType;
 
 /**
  * Job for loading {@link IntelEntityType}.
@@ -64,8 +64,8 @@ public abstract class LoadEntityTypeJob extends Job {
 				for (Iterator<IntelEntityType> iterator = types.iterator(); iterator.hasNext();) {
 					IntelEntityType intelEntityType = (IntelEntityType) iterator.next();
 					boolean ok = false;
-					for (IntelProfile p : intelEntityType.getProfiles()) {
-						if (ProfilesManager.INSTANCE.getActiveProfiles().contains(p)) {
+					for (IntelProfileEntityType p : intelEntityType.getProfiles()) {
+						if (ProfilesManager.INSTANCE.getActiveProfiles().contains(p.getProfile())) {
 							ok = true;
 							break;
 						}

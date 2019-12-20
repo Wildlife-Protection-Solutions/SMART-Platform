@@ -24,12 +24,13 @@ package org.wcs.smart.i2.model;
 import java.awt.Color;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -50,8 +51,8 @@ public class IntelProfile extends NamedKeyItem {
 	private Integer color;
 	private ConservationArea ca;
 	
-	private Set<IntelEntityType> etypes;
-	private Set<IntelRecordSource> rsources;
+	private Set<IntelProfileEntityType> etypes;
+	private Set<IntelProfileRecordSource> rsources;
 
 	
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -65,21 +66,21 @@ public class IntelProfile extends NamedKeyItem {
 	}
 	
 
-	@ManyToMany(mappedBy="profiles")
-	public Set<IntelEntityType> getEntityTypes(){
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.profile", orphanRemoval = true, cascade={CascadeType.ALL})
+	public Set<IntelProfileEntityType> getEntityTypes(){
 		return this.etypes;
 	}
 	
-	public void setEntityTypes(Set<IntelEntityType> etypes) {
+	public void setEntityTypes(Set<IntelProfileEntityType> etypes) {
 		this.etypes = etypes;
 	}
 	
-	@ManyToMany(mappedBy="profiles")
-	public Set<IntelRecordSource> getRecordSources(){
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.profile", orphanRemoval = true, cascade={CascadeType.ALL})
+	public Set<IntelProfileRecordSource> getRecordSources(){
 		return this.rsources;
 	}
 	
-	public void setRecordSources(Set<IntelRecordSource> sources) {
+	public void setRecordSources(Set<IntelProfileRecordSource> sources) {
 		this.rsources = sources;
 	}
 	

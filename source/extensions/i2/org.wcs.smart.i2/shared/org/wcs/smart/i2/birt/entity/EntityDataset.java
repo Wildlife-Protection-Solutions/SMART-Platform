@@ -44,6 +44,7 @@ import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection.Permission;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelProfile;
+import org.wcs.smart.i2.model.IntelProfileEntityType;
 
 /**
  * Entity dataset
@@ -83,8 +84,8 @@ public class EntityDataset implements IQuery {
 				cb.equal(from.get("keyId"), queryText) //$NON-NLS-1$
 				));
 		type = connection.getSession().createQuery(c).uniqueResult();
-		for (IntelProfile ip : type.getProfiles()) {
-			if (profiles.contains(ip)) return;
+		for (IntelProfileEntityType ip : type.getProfiles()) {
+			if (profiles.contains(ip.getProfile())) return;
 		}
 		throw new OdaException(MessageFormat.format("Unauthorized.  You do not have permission to access intelligence entity type {0} dataset", queryText)); //$NON-NLS-1$
 	}

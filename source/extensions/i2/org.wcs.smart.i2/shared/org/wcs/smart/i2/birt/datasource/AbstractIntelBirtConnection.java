@@ -28,6 +28,7 @@ import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -271,13 +272,22 @@ public abstract class AbstractIntelBirtConnection implements IConnection {
 	public abstract Collection<ConservationArea> getConservationAreas();
 
 	/**
-	 * Returns a set of profiles the current user as the given
+	 * Returns a set of profiles the current user has the given
 	 * permission for or empty if none
 	 * 
 	 * @param permission
 	 * @return true if user has access to permission; false otherwise
 	 */
 	public abstract Set<IntelProfile> hasPermission(Permission permission);
+	
+	
+	/**
+	 * Returns a set of addition parameters to supply to the query engine;
+	 * 
+	 */
+	public Map<String,String> getAdditionalQueryParameters(){
+		return Collections.emptyMap();
+	}
 	
 	@SuppressWarnings("unchecked")
 	@Override

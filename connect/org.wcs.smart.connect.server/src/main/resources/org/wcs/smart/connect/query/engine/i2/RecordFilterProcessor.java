@@ -1,4 +1,4 @@
-package org.wcs.smart.i2.query.engine;
+package org.wcs.smart.connect.query.engine.i2;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -32,37 +32,26 @@ import org.wcs.smart.util.UuidUtils;
 public class RecordFilterProcessor {
 
 	private String[][] cols = new String[][] {
-		new String[] {"record_uuid", "char(16) for bit data"},
+		new String[] {"record_uuid", "uuid"},
 		new String[] {"record_date", "date"},
 		new String[] {"record_status", "varchar(128)"},
 		new String[] {"record_source_key", "varchar(128)"},
-		new String[] {"source_uuid", "char(16) for bit data"},
-		new String[] {"ca_uuid", "char(16) for bit data"},
+		new String[] {"source_uuid", "uuid"},
+		new String[] {"ca_uuid", "uuid"},
 		new String[] {"record_title", "varchar(1024)"},
 		new String[] {"date_created", "date"},
 		new String[] {"date_modified", "date"},
-		new String[] {"profile_uuid", "char(16) for bit data"},
+		new String[] {"profile_uuid", "uuid"},
 	};
 	
 	HashMap<String, Integer> colName2Index = new HashMap<>();
 	
 	public String processFilter(IQueryFilter filter, Set<UUID> profiles, 
-			Date[] dates, Collection<ConservationArea> cas, Session session, IProgressMonitor monitor) throws Exception {
+			Date[] dates, Collection<ConservationArea> cas, Session session) throws Exception {
 		
-		SubMonitor sub = SubMonitor.convert(monitor);
-		sub.beginTask("Processing Filter", 3);
-		
-		sub.subTask("Creating temporary table");
 		String tempTable = createTemporaryRecordTable(session, profiles, dates, cas);
-		sub.worked(1);
-		
-		sub.subTask("Processing filters");
-		Map<IQueryFilter,String> filterColumns = addAttributeColumns(filter, tempTable, session, sub.newChild(1));
-		
-		sub.subTask("Filtering");
+		Map<IQueryFilter,String> filterColumns = addAttributeColumns(filter, tempTable, session);
 		tempTable = filterDataTable(session, tempTable, filter,filterColumns);
-		sub.worked(1);
-		
 		return tempTable;
 	}
 	/*
@@ -128,13 +117,11 @@ public class RecordFilterProcessor {
 	/*
 	 * add all attribute columns to entity data table
 	 */
-	private Map<IQueryFilter, String> addAttributeColumns(IQueryFilter filter, String queryTable, Session session, IProgressMonitor monitor) {
+	private Map<IQueryFilter, String> addAttributeColumns(IQueryFilter filter, String queryTable, Session session) {
 		if (filter == null) return Collections.emptyMap();
-		SubMonitor progress = SubMonitor.convert(monitor, 1);
 		
 		Map<IQueryFilter, String> filterToColumn = new HashMap<>();
 				
-		progress.setWorkRemaining(1);
 		filter.accept(new IFilterVisitor() {
 			int colnumber = 1;
 			@Override
@@ -161,7 +148,6 @@ public class RecordFilterProcessor {
 				}					
 			}
 		});
-		progress.worked(1);
 		return filterToColumn;
 	}
 	

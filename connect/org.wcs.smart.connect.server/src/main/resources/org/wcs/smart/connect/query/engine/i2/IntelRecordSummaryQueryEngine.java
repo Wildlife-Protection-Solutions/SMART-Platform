@@ -19,8 +19,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.query.engine;
+package org.wcs.smart.connect.query.engine.i2;
 
+import java.security.Principal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,31 +34,31 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.connect.security.AdvIntelAction;
+import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.i2.IIntelQueryEngine;
-import org.wcs.smart.i2.InternalQueryManager;
-import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecordSummaryQuery;
+import org.wcs.smart.i2.query.CaQueryItemProvider;
+import org.wcs.smart.i2.query.CcaaQueryItemProvider;
 import org.wcs.smart.i2.query.IQueryItemProvider;
 import org.wcs.smart.i2.query.IQueryResult;
 import org.wcs.smart.i2.query.SummaryQueryResult;
 import org.wcs.smart.i2.query.SummaryResultKey;
+import org.wcs.smart.i2.query.engine.EntitySummaryQueryHeaderEngine;
 import org.wcs.smart.i2.query.observation.filter.GroupByItem;
 import org.wcs.smart.i2.query.observation.filter.GroupByItem.GroupByType;
 import org.wcs.smart.i2.query.observation.filter.SumQueryDefinition;
 import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.ValuePart.ValueOption;
-import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -78,12 +79,13 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 	 * @return
 	 */
 	@Override
+	
+	
 	public IQueryResult executeQuery(AbstractIntelQuery query,  HashMap<String, Object> parameters) throws Exception{
 		
 		Session session = (Session) parameters.get(Session.class.getName());
-		IProgressMonitor monitor = (IProgressMonitor) parameters.get(IProgressMonitor.class.getName());
-		SubMonitor progress = SubMonitor.convert(monitor, "Processing Record Summary Query", 8);
-
+		String username = ((String)parameters.get(Principal.class.getName()));
+		
 		try {
 			//Locale
 			Locale locale = (Locale) parameters.get(Locale.class.getName());
@@ -95,49 +97,52 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 			@SuppressWarnings("unchecked")
 			Collection<ConservationArea> cas = (Collection<ConservationArea>)parameters.get(ConservationArea.class.getName());
 			if (cas == null){
-				 throw new Exception(Messages.IntelObservationQueryEngine_InvalidCaParameter);
+				 throw new Exception("A valid Conservation Area must be provided in the query parameters.");
 			}
-			IQueryItemProvider itemProvider = InternalQueryManager.INSTANCE.getQueryItemProvider();
-			Date[] dates = (Date[]) parameters.get(Date.class.getName());
-			
-			Set<UUID> profiles = new HashSet<>();
+			//Profiles
+			Set<IntelProfile> profiles = new HashSet<>();
+			Set<UUID> puuids = new HashSet<>();
 			for (String ip : IntelEntityRecordQuery.convertFromProfileFilter(query.getProfileFilter())) {
 				List<IntelProfile> items = session.createQuery("FROM IntelProfile WHERE keyId = :keyId and conservationArea in (:cas)", IntelProfile.class)
 						.setParameter("keyId",  ip)
 						.setParameter("cas", cas).list();
-				for (IntelProfile ip2 : items) {
-					if (IntelSecurityManager.INSTANCE.canViewQuery(ip2)) profiles.add(ip2.getUuid());
+				if (SecurityManager.INSTANCE.canAccess(session, username, AdvIntelAction.RUNQUERY_KEY, query.getUuid()) ||
+						SecurityManager.INSTANCE.canAccess(session, username, AdvIntelAction.RUNQUERY_KEY, query.getConservationArea().getUuid())) { 
+					//we have permission to run this query so use all profiles
+					profiles.addAll(items);
 				}
 			}
+			if (profiles.isEmpty()) {
+				throw new Exception("No valid profile filters for query");
+			}
+			
+			IQueryItemProvider itemProvider = null;
+			if (!query.getConservationArea().getIsCcaa()) {
+				itemProvider = new CaQueryItemProvider(cas.iterator().next(), query.getConservationArea());
+			}else {
+				itemProvider = new CcaaQueryItemProvider(profiles, query.getConservationArea());
+			}
+			
+			Date[] dates = (Date[]) parameters.get(Date.class.getName());
+			
 			
 			//parse query
-			progress.subTask(Messages.IntelEntitySummaryQueryEngine_progressParsing);
 			SumQueryDefinition parsedQuery = IntelRecordSummaryQuery.parseQuery(query.getQueryString());
-			progress.worked(1);
-
-			//parse query
-			progress.subTask("Creating Record Table");
 			RecordFilterProcessor p = new RecordFilterProcessor();
-			String fdataTable = p.processFilter(parsedQuery.getFilter(), profiles, dates, cas, session, monitor);
+			String fdataTable = p.processFilter(parsedQuery.getFilter(), puuids, dates, cas, session);
 			dataTable = new DataTable(fdataTable);
 
 			if (dates[0] == null) {
 				dates = computeDateRange(dataTable.tableName, session);
 			}
-			progress.worked(1);
 			
 			//add attribute columns
-			progress.subTask(Messages.IntelEntitySummaryQueryEngine_progressAttributeColumns);
-			addAttributeColumns(parsedQuery, dataTable.tableName, session, progress.split(1));
+			addAttributeColumns(parsedQuery, dataTable.tableName, session);
 			
-			progress.subTask(Messages.IntelEntitySummaryQueryEngine_progressLoadingResults);
 			LocalDate[] ldates = new LocalDate[2];
 			ldates[0] = (new java.sql.Date(dates[0].getTime())).toLocalDate();
 			ldates[1] = (new java.sql.Date(dates[1].getTime())).toLocalDate();
-			SummaryQueryResult results = getResults(dataTable.tableName, parsedQuery, ldates, locale, profiles, itemProvider, session);
-			progress.worked(1);
-			
-			
+			SummaryQueryResult results = getResults(dataTable.tableName, parsedQuery, ldates, locale, puuids, itemProvider, session);
 			return results;
 		}catch (OperationCanceledException ex) {
 			return null;
@@ -232,7 +237,8 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 		List<GroupByItem> groupByItems = new ArrayList<>();
 		groupByItems.addAll(definition.getColumnGroupByPart().getItems());
 		groupByItems.addAll(definition.getRowGroupByPart().getItems());
-
+		
+//		List<String> entityTypeFilters = new ArrayList<>();
 		for (GroupByItem groupBy : groupByItems) {
 			if (cnt!= 0) {
 				selectSql.append(","); //$NON-NLS-1$
@@ -251,6 +257,9 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 				groupBySql.append("record_status "); //$NON-NLS-1$
 			}else if(groupBy.getGroupByType() == GroupByType.RECORD_ATTRIBUTE) {
 				String columnName = groupBy.getAttributeKey();
+//				if (groupBy.getEntityTypeKey() != null && !groupBy.getEntityTypeKey().isEmpty()) {
+//					entityTypeFilters.add(groupBy.getEntityTypeKey());
+//				}
 				if (groupBy.getAttributeType() == AttributeType.DATE) {
 					GroupByItem.DateOption dateOp = groupBy.getDateOption();
 					switch(dateOp) {
@@ -275,6 +284,11 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 				}else if (groupBy.getAttributeType() == AttributeType.EMPLOYEE) {
 					selectSql.append(columnName + " as c_" + cnt); //$NON-NLS-1$
 					groupBySql.append(columnName);
+					
+//				}else if (groupBy.getAttributeType() == AttributeType.POSITION) {
+//					String tableName = areaTables.get(groupBy);
+//					selectSql.append(tableName + ".keyId as c_" + cnt); //$NON-NLS-1$
+//					groupBySql.append(tableName + ".keyId ");					 //$NON-NLS-1$
 				}	
 			}else if (groupBy.getGroupByType() == GroupByType.SYSTEM) {
 				SystemAttributeFilter.SystemAttribute attribute = groupBy.getSystemAttribute();
@@ -312,7 +326,7 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 		sb.append(selectSql);
 		sb.append(" FROM "); //$NON-NLS-1$
 		sb.append(queryTable);
-
+		
 		if (groupBySql.length() > 0) {
 			sb.append(" GROUP BY "); //$NON-NLS-1$
 			sb.append(groupBySql);
@@ -370,19 +384,13 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 	/*
 	 * add all attribute columns to entity data table
 	 */
-	private Map<String, String> addAttributeColumns(SumQueryDefinition def, String queryTable, Session session, IProgressMonitor monitor) {
-
-		SubMonitor progress = SubMonitor.convert(monitor, 1);
-		
+	private Map<String, String> addAttributeColumns(SumQueryDefinition def, String queryTable, Session session) {
 		List<GroupByItem> allItems = new ArrayList<>();
 		allItems.addAll(def.getRowGroupByPart().getItems());
 		allItems.addAll(def.getColumnGroupByPart().getItems());
 		
 		Map<String, String> attributeToColumnKey = new HashMap<>();
-				
-		progress.setWorkRemaining(allItems.size()+1);
 		for (GroupByItem item : allItems) {
-			progress.worked(1);
 			String attributeKey = item.getAttributeKey();
 			if (attributeKey == null) continue;
 			if (item.getAttributeType()== AttributeType.POSITION) continue; //  position attribute dealt with outside of here
@@ -391,8 +399,6 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 				attributeToColumnKey.put(attributeKey, columnName);
 			}
 		}
-		
-
 		return attributeToColumnKey;
 	}
 	

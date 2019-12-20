@@ -329,7 +329,7 @@ public class PostgresqlCaLoader {
 		session.doWork(new Work(){
 			@Override
 			public void execute(Connection connection) throws SQLException {
-		
+				try{
 				String metadataqueryquery = "SELECT " + columns + "  FROM " + tableName + " WHERE false"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				ResultSet rs = connection.createStatement().executeQuery(metadataqueryquery);
 				ResultSetMetaData md = rs.getMetaData();
@@ -343,7 +343,7 @@ public class PostgresqlCaLoader {
 				}
 				
 				CopyManager copy = new CopyManager((BaseConnection) ((javax.sql.PooledConnection)connection).getConnection());
-				try{
+				
 					if (colsToModified.size() > 0){
 						fixHexData(dataFile, colsToModified);
 					}

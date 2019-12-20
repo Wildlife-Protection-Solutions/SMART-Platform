@@ -64,6 +64,8 @@ ALTER TABLE smart.i_relationship_type ADD CONSTRAINT i_rtype_trgprofileuuid_fk F
 
 
 ALTER TABLE smart.i_entity_record_query add column profile_filter varchar(32672);
+ALTER TABLE smart.i_entity_record_query drop column query_filter;
+
 ALTER TABLE smart.i_entity_summary_query add column profile_filter varchar(32672);
 ALTER TABLE smart.i_record_obs_query add column profile_filter varchar(32672);
 

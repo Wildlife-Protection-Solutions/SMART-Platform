@@ -61,7 +61,7 @@ import org.wcs.smart.i2.birt.IntelReportManager;
 import org.wcs.smart.i2.birt.datasource.IntelBirtDataSource;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntityType;
-import org.wcs.smart.i2.model.IntelProfile;
+import org.wcs.smart.i2.model.IntelProfileEntityType;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 
@@ -151,8 +151,8 @@ public abstract class AbstractIntelEntityTypeListWizardPage extends DataSetWizar
 			try(Session s = HibernateManager.openSession()){
 				for (IntelEntityType t : QueryFactory.buildQuery(s, IntelEntityType.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList()){
 					boolean canview = false;
-					for (IntelProfile ip : t.getProfiles()) {
-						if(IntelSecurityManager.INSTANCE.canViewEntities(ip)) {
+					for (IntelProfileEntityType ip : t.getProfiles()) {
+						if(IntelSecurityManager.INSTANCE.canViewEntities(ip.getProfile())) {
 							canview = true;
 							break;
 						}

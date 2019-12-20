@@ -23,6 +23,7 @@ package org.wcs.smart.connect.query.engine.i2;
 
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -42,6 +43,7 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.query.IQueryItemProvider;
 import org.wcs.smart.i2.query.Operator;
 import org.wcs.smart.i2.query.observation.filter.AreaFilter;
@@ -55,6 +57,7 @@ import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.query.observation.filter.IntelAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.NotFilter;
 import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter;
+import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter.SystemAttribute;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -74,13 +77,15 @@ public class ObservationFilterProcessor {
 	private IQueryItemProvider itemProvider;
 	
 	private Locale l;
+	private Set<IntelProfile> profiles;
 	
-	public ObservationFilterProcessor(IQueryFilter filter, Date[] dFilter, IQueryItemProvider itemProvider, Session s, Locale l){
+	public ObservationFilterProcessor(IQueryFilter filter, Date[] dFilter, Set<IntelProfile> profiles, IQueryItemProvider itemProvider, Session s, Locale l){
 		this.filter = filter;
 		this.dFilter = dFilter;
 		this.s = s;
 		this.itemProvider = itemProvider;
 		this.l = l;
+		this.profiles = profiles;
 	}
 	
 	public HashMap<IQueryFilter, String> getFilterToColumnNames(){
@@ -116,9 +121,10 @@ public class ObservationFilterProcessor {
 		sql.append("INSERT INTO " + obsTable); //$NON-NLS-1$
 		sql.append(" SELECT l.uuid, o.uuid, ca.id, ca.name  FROM smart.i_location l "); //$NON-NLS-1$
 		sql.append(" JOIN smart.conservation_area ca on l.ca_uuid = ca.uuid "); //$NON-NLS-1$
+		sql.append(" JOIN smart.i_record r on r.uuid = l.record_uuid "); //$NON-NLS-1$
 		sql.append(" LEFT JOIN smart.i_observation o on l.uuid = o.location_uuid "); //$NON-NLS-1$
 		sql.append( " WHERE "); //$NON-NLS-1$
-		sql.append(" l.ca_uuid in (:cas) "); //$NON-NLS-1$
+		sql.append(" l.ca_uuid in (:cas) and r.profile_uuid in (:profiles) "); //$NON-NLS-1$
 		
 		String dateFilter = SqlGenerator.generateDateClause(dFilter, "datetime"); //$NON-NLS-1$
 		if (dateFilter != null){
@@ -129,10 +135,15 @@ public class ObservationFilterProcessor {
 		List<UUID> caUuids = itemProvider.getConservationAreas().stream().map(e->e.getUuid()).collect(Collectors.toList());
 		for (UUID uuid : caUuids) {
 			logString(UuidUtils.uuidToString(uuid));
-		}		
+		}
+		Collection<UUID> profileUuids = profiles.stream().map(a->a.getUuid()).collect(Collectors.toSet());
+		for (UUID uuid : profileUuids) {
+			logString(UuidUtils.uuidToString(uuid));
+		}
 		logString(sql.toString());
 		NativeQuery<?> query = s.createNativeQuery(sql.toString());
 		query.setParameterList("cas", caUuids); //$NON-NLS-1$
+		query.setParameterList("profiles", profileUuids); //$NON-NLS-1$
 		query.executeUpdate();
 		
 		//create indexes to help with performance
@@ -762,7 +773,7 @@ private void addFilterColumn(SystemAttributeFilter filter, String obsTable, Stri
 		s.createNativeQuery(sql.toString()).executeUpdate();
 		
 		
-		if (filter.getType() == SystemAttributeFilter.Type.RECORD) {
+		if (filter.getAttribute() == SystemAttribute.RECORD_DATE_CREATED || filter.getAttribute() == SystemAttribute.RECORD_DATE_MODIFIED) {
 			sql = new StringBuilder();
 			sql.append("INSERT INTO " + t2 ); //$NON-NLS-1$
 			sql.append(" SELECT distinct a.location_uuid "); //$NON-NLS-1$
@@ -771,9 +782,9 @@ private void addFilterColumn(SystemAttributeFilter filter, String obsTable, Stri
 			
 			sql.append(" WHERE "); //$NON-NLS-1$
 			
-			if (filter.getAttribute() == SystemAttributeFilter.SystemAttribute.DATE_CREATED) {
+			if (filter.getAttribute() == SystemAttributeFilter.SystemAttribute.RECORD_DATE_CREATED) {
 				sql.append(" cast( r.date_created as date) "); //$NON-NLS-1$
-			}else if (filter.getAttribute() == SystemAttributeFilter.SystemAttribute.DATE_MODIFIED) {
+			}else if (filter.getAttribute() == SystemAttributeFilter.SystemAttribute.RECORD_DATE_MODIFIED) {
 				sql.append(" cast( r.last_modified_date as date) "); //$NON-NLS-1$
 			}
 			sql.append(SqlGenerator.operatorToSql(filter.getOperator()));
@@ -789,7 +800,7 @@ private void addFilterColumn(SystemAttributeFilter filter, String obsTable, Stri
 			logString(sql.toString());
 			query.executeUpdate();
 			
-		}else if (filter.getType() == SystemAttributeFilter.Type.ENTITY) {
+		}else if (filter.getAttribute() == SystemAttribute.ENTITY_DATE_CREATED || filter.getAttribute() == SystemAttribute.ENTITY_DATE_MODIFIED) {
 			
 		
 			sql = new StringBuilder();
@@ -801,9 +812,9 @@ private void addFilterColumn(SystemAttributeFilter filter, String obsTable, Stri
 			
 			sql.append(" WHERE "); //$NON-NLS-1$
 			
-			if (filter.getAttribute() == SystemAttributeFilter.SystemAttribute.DATE_CREATED) {
+			if (filter.getAttribute() == SystemAttributeFilter.SystemAttribute.ENTITY_DATE_CREATED) {
 				sql.append(" cast (e.date_created as date) "); //$NON-NLS-1$
-			}else if (filter.getAttribute() == SystemAttributeFilter.SystemAttribute.DATE_MODIFIED) {
+			}else if (filter.getAttribute() == SystemAttributeFilter.SystemAttribute.ENTITY_DATE_MODIFIED) {
 				sql.append(" cast( e.date_modified as date) "); //$NON-NLS-1$
 			}
 			sql.append(SqlGenerator.operatorToSql(filter.getOperator()));

@@ -711,6 +711,7 @@ public class IntelRecordQueryEditor extends EditorPart implements IQueryEditor{
 						IQueryFilter filter = IntelRecordQuery.parseQuery(query.getQueryString());
 						generatedDropItems = DropItemFactory.generateDropItems(filter, s);
 					}catch(Exception ex){
+						ex.printStackTrace();
 						DropItem di = new ErrorDropItem(Messages.IntelQueryEditor_QueryParseError + ex.getMessage());
 						generatedDropItems.add(di);
 					}

@@ -320,9 +320,6 @@ public class IntelligenceLabelProviderImpl implements
 		
 		if (item == ValuePart.ValueOption.NUMBER_ENTITIES) return Messages.IntelligenceLabelProviderImpl_NumberOfEntitiesValue;
 		if (item == ValuePart.ValueOption.NUMBER_RECORDS) return "Number of Records";
-		
-//		if (item == FixedAttribute.DATE) return Messages.IntelligenceLabelProviderImpl_RecordDateLabel;
-//		if (item == FixedAttribute.STATUS) return Messages.IntelligenceLabelProviderImpl_RecordStatusLabel;
 		 if (item instanceof SystemAttributeFilter.SystemAttribute) return getName((SystemAttributeFilter.SystemAttribute)item);
 		 
 		return ""; //$NON-NLS-1$

@@ -32,9 +32,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.Lob;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
@@ -58,17 +56,19 @@ public class IntelRecordSource extends NamedKeyItem{
 	private ConservationArea ca;
 	private byte[] icon;
 	private List<IntelRecordSourceAttribute> attributes;
-	private Set<IntelProfile> profiles;
+	private Set<IntelProfileRecordSource> profiles;
 
-	@ManyToMany()
-	@JoinTable(name = "smart.i_profile_record_source",
-		joinColumns = @JoinColumn(name = "record_source_uuid"),
-		inverseJoinColumns = @JoinColumn(name = "profile_uuid"))
-	public Set<IntelProfile> getProfiles(){
+	
+	/**
+	 * Sets the profiles associated with the record source
+	 * @return
+	 */
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.recordSource", orphanRemoval = true, cascade={CascadeType.ALL})
+	public Set<IntelProfileRecordSource> getProfiles(){
 		return this.profiles;
 	}
 	
-	public void setProfiles(Set<IntelProfile> profiles) {
+	public void setProfiles(Set<IntelProfileRecordSource> profiles) {
 		this.profiles = profiles;
 	}
 

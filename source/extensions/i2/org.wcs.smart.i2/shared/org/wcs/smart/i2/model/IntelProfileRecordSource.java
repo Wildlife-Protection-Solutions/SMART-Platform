@@ -22,7 +22,6 @@
 package org.wcs.smart.i2.model;
 
 import java.io.Serializable;
-import java.util.Objects;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Embeddable;
@@ -33,57 +32,44 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import com.google.common.base.Objects;
+
 /**
- * Mapping of entity types to profiles
+ * Mapping record sources to profiles
  * 
  * @author Emily
+ * @since 7.0.0
  *
  */
 @Entity
-@Table(name="smart.i_profile_entity_type")
-public class IntelProfileEntityType {
-
-	private IntelProfileEntityTypePk id = new IntelProfileEntityTypePk();
+@Table(name="smart.i_profile_record_source")
+public class IntelProfileRecordSource {
 	
-	/**
-	 * 
-	 * @return primary key for association
-	 */
-	@EmbeddedId
-	public IntelProfileEntityTypePk getId(){
-		return id;
+	private IProfileRecordPk id = new IProfileRecordPk();
+	
+	public IntelProfileRecordSource() {
+		
 	}
-	/**
-	 * 
-	 * @param id primary key for association
-	 */
-	public void setId(IntelProfileEntityTypePk id){
+	@EmbeddedId
+	public IProfileRecordPk getId(){
+		return this.id;
+	}
+	public void setId(IProfileRecordPk id){
 		this.id = id;
 	}
 	
 	@Transient
-	public IntelEntityType getEntityType() {
-		return id.getEntityType();
-	}
+	public IntelRecordSource getRecordSource() { return id.getRecordSource(); }
+	
 	@Transient
-	public void setEntityType(IntelEntityType entityType) {
-		id.setEntityType(entityType);
-	}
-	@Transient
-	public IntelProfile getProfile() {
-		return id.getProfile();
-	}
-	@Transient
-	public void setProfile(IntelProfile config) {
-		id.setProfile(config);
-	}
+	public IntelProfile getProfile() { return id.getProfile(); }
 	
 	@Override
 	public boolean equals(Object other) {
 		if (other == null) return false;
 		if (other == this) return true;
 		if (other.getClass() != getClass()) return false;
-		return id.equals(  ((IntelProfileEntityType)other).id);
+		return id.equals(  ((IntelProfileRecordSource)other).id);
 	}
 	
 	@Override
@@ -91,46 +77,55 @@ public class IntelProfileEntityType {
 		return id.hashCode();
 	}
 	
+	/**
+	 * Primary key object for category attribute association 
+	 * 
+	 */
 	@Embeddable
-	private static class IntelProfileEntityTypePk implements Serializable {
-
+	public static class IProfileRecordPk implements Serializable {
 		private static final long serialVersionUID = 1L;
 		
-		private IntelEntityType entityType;
-		private IntelProfile config;
+		private IntelRecordSource source;
+		private IntelProfile profile;
+		
 
-		@ManyToOne(cascade = {CascadeType.ALL})
-		@JoinColumn(name="entity_type_uuid")
-		public IntelEntityType getEntityType() {
-			return entityType;
-		}
-
-		public void setEntityType(IntelEntityType entityType) {
-			this.entityType = entityType;
+		public IProfileRecordPk(){
+			
 		}
 		
 		@ManyToOne(cascade = {CascadeType.ALL})
 		@JoinColumn(name="profile_uuid")
 		public IntelProfile getProfile() {
-			return config;
+			return profile;
 		}
 
-		public void setProfile(IntelProfile config) {
-			this.config = config;
+		public void setProfile(IntelProfile profile) {
+			this.profile = profile;
+		}
+		
+		@ManyToOne(cascade = {CascadeType.ALL})
+		@JoinColumn(name="record_source_uuid")
+		public IntelRecordSource getRecordSource() {
+			return source;
+		}
+
+		public void setRecordSource(IntelRecordSource source) {
+			this.source = source;
 		}
 		
 		@Override
 		public boolean equals(Object key) {
 			if (key == null) return false;
-			if (key == this) return true;
-			if (key.getClass() == getClass()) return true;
-			return Objects.equals(config, ((IntelProfileEntityTypePk)key).config) &&
-					Objects.equals(entityType, ((IntelProfileEntityTypePk)key).entityType);
+			if (this == key) return true;
+			if (getClass() != key.getClass()) return false;
+			IProfileRecordPk p = (IProfileRecordPk)key;
+			return Objects.equal(p.source, this.source) &&
+					Objects.equal(p.profile, this.profile);
+					
 		}
-		
 		@Override
 		public int hashCode() {
-			return Objects.hash(config, entityType);
+			return Objects.hashCode(source, profile);
 		}
 	}
 }

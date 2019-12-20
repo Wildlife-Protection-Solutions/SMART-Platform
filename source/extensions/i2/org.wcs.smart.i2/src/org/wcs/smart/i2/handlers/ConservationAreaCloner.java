@@ -44,6 +44,8 @@ import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelEntityTypeAttributeGroup;
 import org.wcs.smart.i2.model.IntelProfile;
+import org.wcs.smart.i2.model.IntelProfileEntityType;
+import org.wcs.smart.i2.model.IntelProfileRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.model.IntelRelationshipGroup;
@@ -199,10 +201,15 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 			}
 			engine.addConservationItemMapping(ia, clone);
 			
-			for (IntelProfile p : ia.getProfiles()) {
-				IntelProfile newp = engine.getNewConservationItem(p);
-				clone.getProfiles().add(newp);
-				newp.getEntityTypes().add(clone);
+			for (IntelProfileEntityType p : ia.getProfiles()) {
+				IntelProfile newp = engine.getNewConservationItem(p.getProfile());
+				
+				IntelProfileEntityType newmap = new IntelProfileEntityType();
+				newmap.setProfile(newp);
+				newmap.setEntityType(clone);
+				
+				clone.getProfiles().add(newmap);
+				newp.getEntityTypes().add(newmap);
 			}
 			
 			engine.getSession().flush();
@@ -302,10 +309,15 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 					
 			}
 			
-			for (IntelProfile p : source.getProfiles()) {
-				IntelProfile newp = engine.getNewConservationItem(p);
-				clone.getProfiles().add(newp);
-				newp.getRecordSources().add(clone);
+			for (IntelProfileRecordSource p : source.getProfiles()) {
+				IntelProfile newp = engine.getNewConservationItem(p.getProfile());
+				
+				IntelProfileRecordSource newmap = new IntelProfileRecordSource();
+				newmap.getId().setProfile(newp);
+				newmap.getId().setRecordSource(clone);
+				
+				clone.getProfiles().add(newmap);
+				newp.getRecordSources().add(newmap);
 			}
 			engine.getSession().save(clone);
 			engine.getSession().flush();

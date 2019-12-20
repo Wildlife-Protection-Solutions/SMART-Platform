@@ -787,13 +787,13 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 			EntityFilter f = (EntityFilter)queryFilter;
 			String key = "p_"+parameters.size(); //$NON-NLS-1$
 			parameters.put(key, f.getEntityUuid());
-			whereSql.append(" entity_uuid = :" + key); //$NON-NLS-1$
+			whereSql.append(" entity_uuid = :" + key + " "); //$NON-NLS-1$
 			
 		}else if (queryFilter instanceof EntityTypeFilter) {
 			EntityTypeFilter f = (EntityTypeFilter)queryFilter;
 			String key = "p_" + parameters.size(); //$NON-NLS-1$
 			parameters.put(key, f.getTypeKey());
-			whereSql.append(" t.keyId = :" + key); //$NON-NLS-1$
+			whereSql.append(" t.keyId = :" + key + " "); //$NON-NLS-1$
 			
 		}else if (queryFilter instanceof IntelAttributeFilter) {
 			IntelAttributeFilter f = (IntelAttributeFilter)queryFilter;

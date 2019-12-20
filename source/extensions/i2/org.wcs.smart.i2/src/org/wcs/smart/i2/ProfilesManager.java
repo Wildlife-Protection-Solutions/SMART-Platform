@@ -43,6 +43,8 @@ import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelProfile;
+import org.wcs.smart.i2.model.IntelProfileEntityType;
+import org.wcs.smart.i2.model.IntelProfileRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.security.IntelSecurityManager;
@@ -284,15 +286,25 @@ public enum ProfilesManager {
 		for (IntelRecordSourceAttribute ia : source.getAttributes()) {
 			if (ia.getAttribute() != null) continue;
 			IntelEntityType etype = ia.getEntityType();
-			for (IntelProfile ip : source.getProfiles()) {
-				if (!etype.getProfiles().contains(ip)) {
+			
+			for (IntelProfileRecordSource ip : source.getProfiles()) {
+				
+				boolean found = false;
+				for (IntelProfileEntityType map : etype.getProfiles()) {
+					if (map.getProfile().equals(ip.getProfile())) {
+						found = true;
+						break;
+					}
+				}
+				
+				if (!found) {
 					String name = IIntelligenceLabelProvider.getName(ia);
 					String msg = "The record source {0} is associated with profile {1}, "
 							+ "but the entity type attribute {2} is not associated "
 							+ "with this profile.  "
 							+ "The entity type {3} must also be associated "
 							+ "with the profile {4}.";
-					return MessageFormat.format(msg, source.getName(), ip.getName(), name, name, ip.getName()); 
+					return MessageFormat.format(msg, source.getName(), ip.getProfile().getName(), name, name, ip.getProfile().getName()); 
 				}
 			}
 		}

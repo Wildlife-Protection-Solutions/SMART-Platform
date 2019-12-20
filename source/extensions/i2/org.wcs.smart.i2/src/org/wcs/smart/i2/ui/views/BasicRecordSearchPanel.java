@@ -465,7 +465,7 @@ public class BasicRecordSearchPanel extends Composite {
 			if (!profiles.isEmpty()) {
 				try(Session session = HibernateManager.openSession()){
 					
-					srcs.addAll( session.createQuery("SELECT src FROM IntelRecordSource src join src.profiles p WHERE src.conservationArea = :ca AND p IN (:profiles)", IntelRecordSource.class)
+					srcs.addAll( session.createQuery("SELECT src FROM IntelRecordSource src join src.profiles p join p.id.profile pp WHERE src.conservationArea = :ca AND pp IN (:profiles)", IntelRecordSource.class)
 					.setParameter("ca",  SmartDB.getCurrentConservationArea())
 					.setParameter("profiles",profiles)
 					.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)

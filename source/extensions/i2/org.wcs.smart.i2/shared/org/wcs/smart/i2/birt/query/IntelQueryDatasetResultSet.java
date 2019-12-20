@@ -41,8 +41,8 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.i2.IIntelQueryEngine;
-import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection.Permission;
+import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
@@ -103,6 +103,7 @@ public class IntelQueryDatasetResultSet implements IResultSet {
 		eparameters.put(IProgressMonitor.class.getName(), new NullProgressMonitor());
 		eparameters.put(Locale.class.getName(), dataset.getConnection().getCurrentLocale());
 		eparameters.put(ConservationArea.class.getName(), dataset.getConnection().getConservationAreas());
+		eparameters.putAll(dataset.getConnection().getAdditionalQueryParameters());
 		
 		if (dataset.getParameterMetaData().getParameterCount() > 0) {
 			Date[] dfilter = new Date[] {null, null};

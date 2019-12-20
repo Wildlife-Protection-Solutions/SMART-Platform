@@ -84,6 +84,7 @@ import org.wcs.smart.i2.model.IntelRecordAttributeValueList;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.record.importer.RecordImportEngine;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.xml.record.AttachmentType;
 import org.wcs.smart.i2.xml.record.AttributeType;
 import org.wcs.smart.i2.xml.record.LabelUuid;
@@ -232,6 +233,10 @@ public class RecordXmlImporter {
 	}
 	
 	private boolean doSave(IntelRecord r, Session s, ArrayList<IntelEntity> modified, ArrayList<IntelRecord> deleted) throws Exception{
+		
+		if (!IntelSecurityManager.INSTANCE.canCreateRecord(r.getProfile())) {
+			throw new Exception(MessageFormat.format("You do have not have permission to create records for profile {0}", r.getProfile().getName()));
+		}
 		Long cnt = QueryFactory.buildCountQuery(session, IntelRecord.class, 
 				new Object[] {"conservationArea", r.getConservationArea()}, //$NON-NLS-1$
 				new Object[] {"title", r.getTitle()}); //$NON-NLS-1$

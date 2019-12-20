@@ -23,8 +23,14 @@ package org.wcs.smart.connect.query.engine.i2;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.Principal;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.birt.report.engine.api.HTMLRenderContext;
 import org.eclipse.birt.report.engine.api.HTMLRenderOption;
@@ -38,6 +44,7 @@ import org.wcs.smart.connect.report.query.ServerSmartConnection;
 import org.wcs.smart.connect.security.AdvIntelAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
+import org.wcs.smart.i2.model.IntelProfile;
 
 /**
  * Advanced intelligence BIRT Connection
@@ -139,21 +146,51 @@ public class IntelConnection extends AbstractIntelBirtConnection {
 		return cc.getRenderOption().getOutputFormat().equalsIgnoreCase(HTMLRenderOption.HTML);
 	}
 	
+	/**
+	 * Returns a set of addition parameters to supply to the query engine;
+	 * 
+	 */
 	@Override
-	public boolean hasPermission(Permission permission) {
-		if (appContext == null) return true;
+	public Map<String,String> getAdditionalQueryParameters(){
 		String currentUser = (String)appContext.get(ServerSmartConnection.CURRENT_USER_KEY);
-		if (currentUser == null) return false;
+		Map<String, String> params = new HashMap<>();
+		params.put(Principal.class.getName(), currentUser);
+		return params;
+	}
+	
+	@Override
+	public Set<IntelProfile> hasPermission(Permission permission) {
+		if (appContext == null) return Collections.emptySet();
+		String currentUser = (String)appContext.get(ServerSmartConnection.CURRENT_USER_KEY);
+		if (currentUser == null) return Collections.emptySet();
 		
-		switch(permission){
-		case ENTITY:
-			return SecurityManager.INSTANCE.canAccess(localSession, currentUser, AdvIntelAction.VIEWDATA_KEY);
-		case QUERY:
-			return SecurityManager.INSTANCE.canAccess(localSession, currentUser, AdvIntelAction.RUNQUERY_KEY);
-		case RECORD:
-			return SecurityManager.INSTANCE.canAccess(localSession, currentUser, AdvIntelAction.VIEWDATA_KEY);
+		if ((permission == Permission.ENTITY || permission == Permission.RECORD)) {
+			if (SecurityManager.INSTANCE.canAccess(localSession, currentUser, AdvIntelAction.VIEWDATA_KEY)) {
+				//return all profiles in the system
+				List<IntelProfile> profiles = 
+						localSession.createQuery("FROM IntelProfile WHERE ca IN (:cas)", IntelProfile.class)
+						.setParameterList("cas", getConservationAreas())
+						.list();
+					return new HashSet<>(profiles);
+			}
+			
+		}else if (permission == Permission.QUERY) {
+			Set<IntelProfile> canaccess = new HashSet<>();
+			
+			List<IntelProfile> ips = 
+					localSession.createQuery("FROM IntelProfile WHERE ca IN (:cas)", IntelProfile.class)
+					.setParameterList("cas", getConservationAreas())
+					.list();
+			for (IntelProfile ip : ips) {
+				if (SecurityManager.INSTANCE.canAccess(localSession, currentUser, AdvIntelAction.RUNQUERY_KEY, ip.getConservationArea().getUuid())) {
+					//you have permission to the query this ca; so you have permission to this profile
+					canaccess.add(ip);
+				}
+				
+				//if you have access to a specific query 
+			}
 		}
-		return false;
+		return Collections.emptySet();
 	}
 
 }

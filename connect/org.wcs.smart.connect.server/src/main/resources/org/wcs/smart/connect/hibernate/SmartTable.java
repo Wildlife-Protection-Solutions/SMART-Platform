@@ -161,13 +161,19 @@ import org.wcs.smart.i2.model.IntelEntityTypeAttributeGroup;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.model.IntelObservation;
 import org.wcs.smart.i2.model.IntelObservationAttribute;
+import org.wcs.smart.i2.model.IntelPermission;
+import org.wcs.smart.i2.model.IntelProfile;
+import org.wcs.smart.i2.model.IntelProfileEntityType;
+import org.wcs.smart.i2.model.IntelProfileRecordSource;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
 import org.wcs.smart.i2.model.IntelRecordAttributeValue;
 import org.wcs.smart.i2.model.IntelRecordAttributeValueList;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
+import org.wcs.smart.i2.model.IntelRecordQuery;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
+import org.wcs.smart.i2.model.IntelRecordSummaryQuery;
 import org.wcs.smart.i2.model.IntelRelationshipGroup;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
@@ -416,7 +422,7 @@ public enum SmartTable {
 	I2_OBSERVATION_ATTRIBUTE(IntelObservationAttribute.class,".id.attribute.conservationArea"),
 	I2_RECORD(IntelRecord.class, null),
 	I2_RECORD_ATTACHMENT(IntelRecordAttachment.class,".id.record.conservationArea"),
-	I2_RECORD_QUERY(IntelRecordObservationQuery.class, null),
+	I2_RECORD_OBS_QUERY(IntelRecordObservationQuery.class, null),
 	I2_ENTITY_SUMMARY_QUERY(IntelEntitySummaryQuery.class, null),	
 	I2_ENTITY_RECORD_QUERY(IntelEntityRecordQuery.class, null),
 	I2_RELATION_GROUP(IntelRelationshipGroup.class, null),
@@ -435,6 +441,12 @@ public enum SmartTable {
 	I2_RELATIONSHIP_DIAGRAM_STYLE(RelationshipDiagramStyle.class, null),
 	I2_RELATIONSHIP_DIAGRAM_ENTITY_TYPE_STYLE(RelationshipDiagramEntityTypeStyle.class, ".style.conservationArea"),
 	I2_RELATIONSHIP_DIAGRAM_REL_TYPE_STYLE(RelationshipDiagramRelationshipTypeStyle.class, ".style.conservationArea"),
+	I2_RECORD_SUMMARY_QUERY(IntelRecordSummaryQuery.class, null),
+	I2_RECORD_QUERY(IntelRecordQuery.class, null),
+	I2_PERMISSION(IntelPermission.class, ".employee.conservationArea"),
+	I2_PROFILE_CONFIG(IntelProfile.class, null),
+	I2_PROFILE_RECORD_SOURCE(IntelProfileRecordSource.class, ".id.profile.conservationArea"),
+	I2_PROFILE_ENTITY_TYPE(IntelProfileEntityType.class, ".id.profile.conservationArea"),
 	
 	QA_ERROR(QaError.class, null),
 	QA_ROUTINE(QaRoutine.class, null),

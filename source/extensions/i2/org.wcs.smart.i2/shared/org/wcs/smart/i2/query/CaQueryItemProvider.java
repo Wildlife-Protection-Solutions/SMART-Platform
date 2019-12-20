@@ -44,6 +44,8 @@ import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelProfile;
+import org.wcs.smart.i2.model.IntelProfileEntityType;
+import org.wcs.smart.i2.model.IntelProfileRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.util.UuidUtils;
@@ -109,8 +111,8 @@ public class CaQueryItemProvider implements IQueryItemProvider {
 		for (Iterator<IntelEntityType> iterator = types.iterator(); iterator.hasNext();) {
 			IntelEntityType t = (IntelEntityType) iterator.next();
 			boolean keep = false;
-			for (IntelProfile ip : t.getProfiles()) {
-				if (profiles.contains(ip.getUuid())) {
+			for (IntelProfileEntityType ip : t.getProfiles()) {
+				if (profiles.contains(ip.getProfile().getUuid())) {
 					keep = true;
 					break;
 				}
@@ -145,8 +147,8 @@ public class CaQueryItemProvider implements IQueryItemProvider {
 		for (Iterator<IntelRecordSource> iterator = types.iterator(); iterator.hasNext();) {
 			IntelRecordSource t = (IntelRecordSource) iterator.next();
 			boolean keep = false;
-			for (IntelProfile ip : t.getProfiles()) {
-				if (profiles.contains(ip.getUuid())) {
+			for (IntelProfileRecordSource ip : t.getProfiles()) {
+				if (profiles.contains(ip.getProfile().getUuid())) {
 					keep = true;
 					break;
 				}

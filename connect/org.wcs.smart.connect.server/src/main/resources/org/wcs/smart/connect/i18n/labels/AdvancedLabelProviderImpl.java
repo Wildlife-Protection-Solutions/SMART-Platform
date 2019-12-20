@@ -59,7 +59,6 @@ import org.wcs.smart.i2.query.Operator;
 import org.wcs.smart.i2.query.export.CsvEntitySummaryQueryExporter;
 import org.wcs.smart.i2.query.export.CsvRecordQueryExporter;
 import org.wcs.smart.i2.query.export.ShpRecordQueryExporter;
-import org.wcs.smart.i2.query.observation.filter.RecordAttributeFilter.FixedAttribute;
 import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.ValuePart;
 import org.wcs.smart.i2.search.AdvancedEntitySearch;
@@ -264,18 +263,17 @@ public class AdvancedLabelProviderImpl implements
 		if (item.equals(AdvancedEntitySearch.Error.TOKEN_NOT_SUPPORTED)) return Messages.getString("AdvancedLabelProviderImpl.AdvSearchTokenNotSupported", l); //$NON-NLS-1$
 		
 		if (item == ValuePart.ValueOption.NUMBER_ENTITIES) return Messages.getString("AdvancedLabelProviderImpl.NumberOfEntitiesValue", l); //$NON-NLS-1$
+		if (item == ValuePart.ValueOption.NUMBER_RECORDS) return "Number of Records";
 		
-		if (item == FixedAttribute.DATE) return Messages.getString("AdvancedLabelProviderImpl.RecordDateAttributeName", l); //$NON-NLS-1$
-		if (item == FixedAttribute.STATUS) return Messages.getString("AdvancedLabelProviderImpl.RecordSourceAttributeName", l); //$NON-NLS-1$
-		
-		
-		if (item instanceof SystemAttributeFilter.Type) {
-			switch ((SystemAttributeFilter.Type)item) {
-			case ENTITY:
-				return Messages.getString("AdvancedLabelProviderImpl.EntityLabel", l); //$NON-NLS-1$
-			case RECORD:
-				return Messages.getString("AdvancedLabelProviderImpl.RecordLabel", l); //$NON-NLS-1$
-			
+		if (item instanceof SystemAttributeFilter.SystemAttribute) {
+			switch ((SystemAttributeFilter.SystemAttribute)item) {
+			case RECORD_DATE_CREATED:
+			case ENTITY_DATE_CREATED: return "Date Created";
+			case RECORD_DATE_MODIFIED:
+			case ENTITY_DATE_MODIFIED: return "Date Modified";
+			case RECORD_DATE: return "Record Date";
+			case RECORD_SOURCE: return "Record Source";
+			case RECORD_STATUS: return "Record Status";
 			}
 		}
 		return ""; //$NON-NLS-1$

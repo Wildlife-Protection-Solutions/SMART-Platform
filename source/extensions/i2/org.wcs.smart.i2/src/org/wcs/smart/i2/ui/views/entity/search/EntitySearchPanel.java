@@ -527,7 +527,7 @@ public abstract class EntitySearchPanel extends Composite {
 						@Override
 						protected IStatus run(IProgressMonitor monitor) {
 							try(Session s = HibernateManager.openSession()){
-								List<IntelAttribute> ats = s.createQuery(" SELECT a FROM IntelAttribute a WHERE a IN (SELECT iea.id.attribute FROM IntelEntityTypeAttribute iea JOIN iea.id.entityType t JOIN t.profiles f WHERE t.conservationArea = :ca  and f in (:profiles))", IntelAttribute.class)
+								List<IntelAttribute> ats = s.createQuery(" SELECT a FROM IntelAttribute a WHERE a IN (SELECT iea.id.attribute FROM IntelEntityTypeAttribute iea JOIN iea.id.entityType t JOIN t.profiles f join f.id.profile p WHERE t.conservationArea = :ca  and p in (:profiles))", IntelAttribute.class)
 								.setParameter("ca",  SmartDB.getCurrentConservationArea())
 								.setParameterList("profiles", ProfilesManager.INSTANCE.getActiveProfiles())
 								.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)

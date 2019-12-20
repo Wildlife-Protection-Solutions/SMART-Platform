@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.security.Principal;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -493,7 +494,8 @@ public class QueryApi extends HttpServlet{
 		params.put(Locale.class.getName(), request.getLocale());
 		params.put(ConservationArea.class.getName(), cas);
 		params.put(AbstractQueryEngine.INCLUDE_UUID_PARAMETER, includeUuids);
-
+		params.put(Principal.class.getName(), request.getUserPrincipal().getName());
+		
 		Date[] dateFilters = new Date[] {null, null};
 		if (df.getDateFilterOption().getDates() != null) {
 			dateFilters = df.getDateFilterOption().getDates();

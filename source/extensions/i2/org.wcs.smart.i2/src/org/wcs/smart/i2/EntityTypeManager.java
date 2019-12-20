@@ -88,7 +88,7 @@ public enum EntityTypeManager {
 		if (profiles.isEmpty()) return Collections.emptyList();
 		
 		@SuppressWarnings("deprecation")
-		List<IntelEntityType> types = (session.createQuery("SELECT r FROM IntelEntityType r join r.profiles p WHERE p IN (:profiles)", IntelEntityType.class)
+		List<IntelEntityType> types = (session.createQuery("SELECT r FROM IntelEntityType r join r.profiles p join p.id.profile c WHERE c IN (:profiles)", IntelEntityType.class)
 				.setParameter("profiles", profiles)
 				.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)
 				.list());

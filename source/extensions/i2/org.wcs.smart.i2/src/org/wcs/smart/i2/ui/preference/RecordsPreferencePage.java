@@ -85,6 +85,7 @@ import org.wcs.smart.i2.RecordManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelProfile;
+import org.wcs.smart.i2.model.IntelProfileRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.ui.ProfileLabelProvider;
@@ -186,8 +187,10 @@ public class RecordsPreferencePage extends PreferencePage implements IIntelPrefe
 							@Override
 							public Image getImage(Object element) {
 								if (element instanceof IntelRecordSource) {
-									if (((IntelRecordSource) element).getProfiles().contains(p)) {
-										return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_CHECK);
+									for(IntelProfileRecordSource s : ((IntelRecordSource)element).getProfiles()) {
+										if (s.getProfile().equals(p)) {
+											return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_CHECK);	
+										}
 									}
 									return null;
 								}

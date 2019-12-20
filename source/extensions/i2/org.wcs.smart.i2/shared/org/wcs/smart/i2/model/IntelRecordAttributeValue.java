@@ -37,6 +37,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.geotools.referencing.CRS;
+import org.locationtech.jts.geom.Coordinate;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
@@ -45,8 +46,6 @@ import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
-
-import org.locationtech.jts.geom.Coordinate;
 
 /**
  * Provides attribute values for a given record

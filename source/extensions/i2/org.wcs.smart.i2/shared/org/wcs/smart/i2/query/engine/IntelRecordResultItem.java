@@ -25,7 +25,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.UUID;
 
-import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.query.IResultItem;
 
 /**

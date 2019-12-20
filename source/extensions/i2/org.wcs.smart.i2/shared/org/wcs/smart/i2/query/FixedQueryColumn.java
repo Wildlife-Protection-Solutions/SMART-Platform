@@ -25,6 +25,7 @@ import java.text.DateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import org.locationtech.jts.geom.Geometry;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.model.IntelRecord;
@@ -32,7 +33,6 @@ import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.query.engine.EntityRecordQueryResultItem;
 import org.wcs.smart.i2.query.engine.IntelObservationResultItem;
 import org.wcs.smart.i2.query.engine.IntelRecordResultItem;
-import org.locationtech.jts.geom.Geometry;
 
 /**
  * Collection of fixed query columns.

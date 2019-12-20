@@ -417,7 +417,7 @@ public class SpatialSearchPanel extends Composite{
 			List<IntelProfile> profiles = ProfilesManager.INSTANCE.getActiveProfiles().stream().filter(e->IntelSecurityManager.INSTANCE.canViewEntities(e)).collect(Collectors.toList());
 			if (!profiles.isEmpty()) {
 				try(Session session = HibernateManager.openSession()){
-					Query<IntelEntityTypeAttribute> q = session.createQuery("SELECT a FROM IntelEntityTypeAttribute a join a.id.entityType t join t.profiles p WHERE p IN (:profiles) and a.id.attribute.conservationArea = :ca and a.id.attribute.type = :type", IntelEntityTypeAttribute.class); //$NON-NLS-1$
+					Query<IntelEntityTypeAttribute> q = session.createQuery("SELECT a FROM IntelEntityTypeAttribute a join a.id.entityType t join t.profiles p join p.id.profile pp WHERE pp IN (:profiles) and a.id.attribute.conservationArea = :ca and a.id.attribute.type = :type", IntelEntityTypeAttribute.class); //$NON-NLS-1$
 					q.setParameter("ca",  SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 					q.setParameter("type",  IntelAttribute.AttributeType.POSITION); //$NON-NLS-1$
 					q.setParameterList("profiles",  profiles); //$NON-NLS-1$

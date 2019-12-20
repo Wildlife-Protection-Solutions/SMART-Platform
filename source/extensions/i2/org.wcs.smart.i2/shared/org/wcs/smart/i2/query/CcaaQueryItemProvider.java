@@ -49,6 +49,8 @@ import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelProfile;
+import org.wcs.smart.i2.model.IntelProfileEntityType;
+import org.wcs.smart.i2.model.IntelProfileRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.util.UuidUtils;
@@ -164,8 +166,8 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 		
 		for (IntelEntityType type : allTypes) {
 			boolean keep = false;
-			for (IntelProfile ip : type.getProfiles()) {
-				if (profiles.contains(ip.getUuid())) {
+			for (IntelProfileEntityType ip : type.getProfiles()) {
+				if (profiles.contains(ip.getProfile().getUuid())) {
 					keep = true;
 					break;
 				}
@@ -481,8 +483,8 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 		
 		for (IntelRecordSource type : getRecordSourcesInternal(session)) {
 			boolean add = false;
-			for (IntelProfile ip : type.getProfiles()) {
-				if (profiles.contains(ip.getUuid())) {
+			for (IntelProfileRecordSource ip : type.getProfiles()) {
+				if (profiles.contains(ip.getProfile().getUuid())) {
 					add = true;
 				}
 			}
@@ -558,8 +560,8 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 		
 		for (IntelRecordSource type : allTypes) {
 			boolean found = false;
-			for (IntelProfile t : type.getProfiles()) {
-				if (profiles.contains(t)) {
+			for (IntelProfileRecordSource ip : type.getProfiles()) {
+				if (profiles.contains(ip.getProfile())) {
 					found = true;
 					break;
 				}

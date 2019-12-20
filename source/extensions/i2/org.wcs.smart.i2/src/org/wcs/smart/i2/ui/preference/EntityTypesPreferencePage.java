@@ -86,6 +86,7 @@ import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelProfile;
+import org.wcs.smart.i2.model.IntelProfileEntityType;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.ProfileLabelProvider;
 import org.wcs.smart.i2.ui.dialogs.EntityTypeDialog;
@@ -171,8 +172,10 @@ public class EntityTypesPreferencePage extends PreferencePage implements IIntelP
 							@Override
 							public Image getImage(Object element) {
 								if (element instanceof IntelEntityType) {
-									if (((IntelEntityType) element).getProfiles().contains(p)) {
-										return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_CHECK);
+									for (IntelProfileEntityType map : ((IntelEntityType)element).getProfiles()) {
+										if (map.getProfile().equals(p)) {
+											return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_CHECK);	
+										}
 									}
 									return null;
 								}

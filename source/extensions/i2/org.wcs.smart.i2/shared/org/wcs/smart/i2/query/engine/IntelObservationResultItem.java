@@ -25,11 +25,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.UUID;
 
+import org.locationtech.jts.geom.Geometry;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.query.IGeometryResultItem;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
-
-import org.locationtech.jts.geom.Geometry;
 
 /**
  * Intelligence observation query results item
@@ -70,7 +69,7 @@ public class IntelObservationResultItem implements IGeometryResultItem {
 		
 	}
 	
-	public void setProflie(UUID profileUuid, String name) {
+	public void setProfile(UUID profileUuid, String name) {
 		this.profileUuid = profileUuid;
 		this.profileName = name;
 	}

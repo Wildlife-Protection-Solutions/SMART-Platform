@@ -181,7 +181,7 @@ public class NewEntityDialog extends SmartStyledTitleDialog{
 				@Override
 				public void run() {
 					if (cmbProfile == null) {
-						if (psel != null) cmbEntityType.setInput(psel.getEntityTypes());
+						if (psel != null) cmbEntityType.setInput(psel.getEntityTypes().stream().map(a->a.getEntityType()).collect(Collectors.toList()));
 						if (sel != null) cmbEntityType.setSelection(new StructuredSelection(sel));
 						return;
 					}
@@ -190,7 +190,7 @@ public class NewEntityDialog extends SmartStyledTitleDialog{
 					cmbProfile.setInput(profiles);
 					if (psel != null) {
 						cmbProfile.setSelection(new StructuredSelection(psel));
-						cmbEntityType.setInput(psel.getEntityTypes());
+						cmbEntityType.setInput(psel.getEntityTypes().stream().map(a->a.getEntityType()).collect(Collectors.toList()));
 						if (sel != null) cmbEntityType.setSelection(new StructuredSelection(sel));
 					}
 				}
@@ -387,7 +387,7 @@ public class NewEntityDialog extends SmartStyledTitleDialog{
 						IntelProfile type = (IntelProfile)x;
 						Intelligence2PlugIn.getDefault().getPreferenceStore().setValue(LAST_PROFILE_KEY, UuidUtils.uuidToString(type.getUuid()));
 						
-						cmbEntityType.setInput(type.getEntityTypes());
+						cmbEntityType.setInput(type.getEntityTypes().stream().map(m->m.getEntityType()).collect(Collectors.toList()));
 						if (!type.getEntityTypes().isEmpty()) {
 							cmbEntityType.setSelection(new StructuredSelection(type.getEntityTypes().iterator().next()));
 						}else {

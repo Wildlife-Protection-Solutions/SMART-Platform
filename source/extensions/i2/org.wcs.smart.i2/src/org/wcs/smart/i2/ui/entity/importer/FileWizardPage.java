@@ -365,7 +365,7 @@ public class FileWizardPage extends WizardPage{
 				types.addAll(QueryFactory.buildQuery(s, IntelEntityType.class, "conservationArea", SmartDB.getCurrentConservationArea()).list()); //$NON-NLS-1$
 				types.forEach(t -> {
 					t.getName();
-					t.getProfiles().forEach(ip->ip.getName());
+					t.getProfiles().forEach(ip->ip.getProfile().getName());
 				});
 				
 				projections.addAll(HibernateManager.getCaProjectionList(s));

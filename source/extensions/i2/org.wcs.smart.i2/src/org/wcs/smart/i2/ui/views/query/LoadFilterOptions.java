@@ -64,6 +64,7 @@ import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelEntityTypeAttributeGroup;
 import org.wcs.smart.i2.model.IntelProfile;
+import org.wcs.smart.i2.model.IntelProfileEntityType;
 import org.wcs.smart.i2.model.IntelRecordQuery;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
@@ -188,8 +189,8 @@ public class LoadFilterOptions extends Job {
 		for (IntelProfile ip : ProfilesManager.INSTANCE.getActiveProfiles()) {
 			if (!IntelSecurityManager.INSTANCE.canViewQuery(ip)) continue;
 			ip = session.get(IntelProfile.class, ip.getUuid());
-			for (IntelEntityType et : ip.getEntityTypes()) {
-				for (IntelEntityTypeAttribute e : et.getAttributes()) {
+			for (IntelProfileEntityType et : ip.getEntityTypes()) {
+				for (IntelEntityTypeAttribute e : et.getEntityType().getAttributes()) {
 					if (donotuse.contains(e.getAttribute().getKeyId())) continue;					
 					if (!attributes.containsKey(e.getAttribute().getKeyId())) {
 						attributes.put(e.getAttribute().getKeyId(), e.getAttribute());

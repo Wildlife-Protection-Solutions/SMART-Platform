@@ -49,6 +49,8 @@ import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelEntityTypeAttributeGroup;
 import org.wcs.smart.i2.model.IntelProfile;
+import org.wcs.smart.i2.model.IntelProfileEntityType;
+import org.wcs.smart.i2.model.IntelProfileRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.model.IntelRelationshipGroup;
@@ -124,18 +126,18 @@ public class ProfileToXml {
 			filesToInclude.add(recordTemplate);
 		}
 		
-		for (IntelEntityType t : profile.getEntityTypes()) {
-			for (IntelEntityTypeAttribute eta : t.getAttributes()) {
+		for (IntelProfileEntityType t : profile.getEntityTypes()) {
+			for (IntelEntityTypeAttribute eta : t.getEntityType().getAttributes()) {
 				if (eta.getAttribute() != null) iattributes.add(eta.getAttribute());
 			}
 		}
-		for (IntelRecordSource s : profile.getRecordSources()) {
-			for (IntelRecordSourceAttribute a : s.getAttributes()) {
+		for (IntelProfileRecordSource s : profile.getRecordSources()) {
+			for (IntelRecordSourceAttribute a : s.getRecordSource().getAttributes()) {
 				if (a.getAttribute() != null) iattributes.add(a.getAttribute());
 			}
 		}
 		
-		irelationshiptypes.addAll(session.createQuery("FROM IntelRelationshipType WHERE sourceProfile = :src or targetProfile = :trg")
+		irelationshiptypes.addAll(session.createQuery("FROM IntelRelationshipType WHERE sourceProfile = :src or targetProfile = :trg", IntelRelationshipType.class)
 				.setParameter("src", profile)
 				.setParameter("trg", profile)
 				.list());
@@ -235,9 +237,11 @@ public class ProfileToXml {
 		return xmlAttributes;
 	}
 	
-	private List<RecordSource> convertRecordSource(Set<IntelRecordSource> isources){
+	private List<RecordSource> convertRecordSource(Set<IntelProfileRecordSource> isources){
 		List<RecordSource> xmlSources = new ArrayList<>();
-		for (IntelRecordSource a : isources) {
+		for (IntelProfileRecordSource as : isources) {
+			IntelRecordSource a = as.getRecordSource();
+			
 			RecordSource xmlSource = new RecordSource();
 			
 			xmlSource.setKey(a.getKeyId());
@@ -308,9 +312,11 @@ public class ProfileToXml {
 		return xmlTypes;
 	}
 	
-	private List<EntityType> convertEntityType(Set<IntelEntityType> etypes, Collection<Path> filesToInclude){
+	private List<EntityType> convertEntityType(Set<IntelProfileEntityType> etypes, Collection<Path> filesToInclude){
 		List<EntityType> xmlTypes = new ArrayList<>();
-		for (IntelEntityType e : etypes) {
+		for (IntelProfileEntityType et : etypes) {
+			
+			IntelEntityType e = et.getEntityType();
 			
 			EntityType xmlType = new EntityType();
 			

@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.connect.query.engine.i2;
 
+import java.security.Principal;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
@@ -39,11 +40,14 @@ import org.hibernate.query.NativeQuery;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
+import org.wcs.smart.connect.security.AdvIntelAction;
+import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.i2.IIntelQueryEngine;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.query.CaQueryItemProvider;
 import org.wcs.smart.i2.query.CcaaQueryItemProvider;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
@@ -80,7 +84,8 @@ public class IntelEntityRecordQueryEngine implements IIntelQueryEngine {
 		IntelEntityRecordQuery query = (IntelEntityRecordQuery) iquery;
 		
 		Session session = (Session) parameters.get(Session.class.getName());
-
+		String username = ((String)parameters.get(Principal.class.getName()));
+		
 		locale = (Locale) parameters.get(Locale.class.getName());
 		if (locale == null){
 			locale = Locale.getDefault();
@@ -96,11 +101,27 @@ public class IntelEntityRecordQueryEngine implements IIntelQueryEngine {
 			 throw new Exception("No conservation areas specified"); //$NON-NLS-1$
 		}
 		
+		Set<IntelProfile> profiles = new HashSet<>();
+		for (String ip : IntelEntityRecordQuery.convertFromProfileFilter(query.getProfileFilter())) {
+			List<IntelProfile> items = session.createQuery("FROM IntelProfile WHERE keyId = :keyId and conservationArea in (:cas)", IntelProfile.class)
+					.setParameter("keyId",  ip)
+					.setParameter("cas", cas).list();
+			if (SecurityManager.INSTANCE.canAccess(session, username, AdvIntelAction.RUNQUERY_KEY, iquery.getUuid()) ||
+					SecurityManager.INSTANCE.canAccess(session, username, AdvIntelAction.RUNQUERY_KEY, iquery.getConservationArea().getUuid())) { 
+				//we have permission to run this query so use all profiles
+				profiles.addAll(items);
+			}
+		}
+		
+		if (profiles.isEmpty()) {
+			throw new Exception("No valid profile filters for query");
+		}
+		
 		IQueryItemProvider itemProvider = null;
 		if (!query.getConservationArea().getIsCcaa()) {
 			itemProvider = new CaQueryItemProvider(cas.iterator().next(), query.getConservationArea());
 		}else {
-			itemProvider = new CcaaQueryItemProvider(cas, query.getConservationArea());
+			itemProvider = new CcaaQueryItemProvider(profiles, query.getConservationArea());
 		}
 		ParsedObservationQuery parsedQuery = IntelEntityRecordQuery.parseQuery(query.getQueryString());
 
@@ -117,11 +138,11 @@ public class IntelEntityRecordQueryEngine implements IIntelQueryEngine {
 					String dataTable = null;
 					List<Object[]> filterToColumnNames = null;
 					if (parsedQuery.getFilterType() == FilterType.OBSERVATION) {
-						EntityRecordObservationFilterProcessor parser = new EntityRecordObservationFilterProcessor(parsedQuery.getFilter(), fItemProvider, session); 
+						EntityRecordObservationFilterProcessor parser = new EntityRecordObservationFilterProcessor(parsedQuery.getFilter(), profiles, fItemProvider, session); 
 						dataTable = parser.processFilter();
 						filterToColumnNames = parser.getFilterToColumnNames();
 					}else {
-						EntityRecordWaypointFilterProcessor parser = new EntityRecordWaypointFilterProcessor(parsedQuery.getFilter(), fItemProvider, session); 
+						EntityRecordWaypointFilterProcessor parser = new EntityRecordWaypointFilterProcessor(parsedQuery.getFilter(), profiles, fItemProvider, session); 
 						dataTable = parser.processFilter();	
 						filterToColumnNames = parser.getFilterToColumnNames();
 					}
@@ -313,6 +334,7 @@ public class IntelEntityRecordQueryEngine implements IIntelQueryEngine {
 		columnNameToIndex.put("entity_type_key", columnIndex++); //$NON-NLS-1$
 		columnNameToIndex.put("ca_id", columnIndex++); //$NON-NLS-1$
 		columnNameToIndex.put("ca_name", columnIndex++); //$NON-NLS-1$
+		columnNameToIndex.put("profile_uuid", columnIndex++); //$NON-NLS-1$
 		for (Object[] v : filterToColumn){
 			columnNameToIndex.put((String)v[1], columnIndex++);
 		}
