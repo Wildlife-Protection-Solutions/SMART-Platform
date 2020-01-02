@@ -37,7 +37,8 @@ ALTER TABLE smart.i_entity ADD CONSTRAINT i_entity_profileuuid_fk FOREIGN KEY (p
 CREATE TABLE smart.i_permission(
   employee_uuid char(16) for bit data not null,
   profile_uuid char(16) for bit data not null,
-  permissions integer not null
+  permissions integer not null,
+  primary key employee_uuid, profile_uuid)
 );
 
 
