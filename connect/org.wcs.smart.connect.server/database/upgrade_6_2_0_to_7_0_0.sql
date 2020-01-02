@@ -492,7 +492,7 @@ ALTER TABLE smart.i_entity ALTER COLUMN profile_uuid set not null;
 ALTER TABLE smart.i_entity ADD FOREIGN KEY (profile_uuid) REFERENCES smart.i_profile_config (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY DEFERRED;
 
 
-CREATE TABLE smart.i_permission(employee_uuid uuid not null, profile_uuid uuid not null, permissions integer not null);
+CREATE TABLE smart.i_permission(employee_uuid uuid not null, profile_uuid uuid not null, permissions integer not null, primary key (employee_uuid, profile_uuid));
 
 ALTER TABLE smart.i_permission ADD FOREIGN KEY (employee_uuid) REFERENCES smart.employee(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE smart.i_permission ADD FOREIGN KEY (profile_uuid) REFERENCES smart.i_profile_config(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
@@ -531,6 +531,44 @@ ALTER TABLE smart.i_record_query ADD FOREIGN KEY (created_by) REFERENCES smart.e
 ALTER TABLE smart.i_record_query ADD FOREIGN KEY (last_modified_by) REFERENCES smart.employee (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY DEFERRED;
 		
 ALTER TABLE smart.i_recordsource_attribute ADD COLUMN keyid varchar(128);
+
+--triggers
+	
+		
+CREATE TRIGGER trg_i_profile_config AFTER INSERT OR UPDATE OR DELETE ON smart.i_profile_config FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_i_record_query AFTER INSERT OR UPDATE OR DELETE ON smart.i_record_query FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_i_record_summary_query AFTER INSERT OR UPDATE OR DELETE ON smart.i_record_summary_query FOR EACH ROW execute procedure connect.trg_changelog_common();
+
+		
+CREATE OR REPLACE FUNCTION connect.trg_i_permission() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'employee_uuid', ROW.employee_uuid, 'profile_uuid', ROW.profile_uuid, null, i.CA_UUID 
+ 		FROM smart.i_profile_config i WHERE i.uuid = row.profile_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE TRIGGER trg_i_permission AFTER INSERT OR UPDATE OR DELETE ON smart.i_permission FOR EACH ROW execute procedure connect.trg_i_permission();
+
+
+
+CREATE OR REPLACE FUNCTION connect.i_profile_record_source() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'record_source_uuid', ROW.record_source_uuid, 'profile_uuid', ROW.profile_uuid, null, i.CA_UUID 
+ 		FROM smart.i_profile_config i WHERE i.uuid = row.profile_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE TRIGGER trg_i_profile_record_source AFTER INSERT OR UPDATE OR DELETE ON smart.i_profile_record_source FOR EACH ROW execute procedure connect.i_profile_record_source();
+
+CREATE OR REPLACE FUNCTION connect.i_profile_entity_type() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'entity_type_uuid', ROW.entity_type_uuid, 'profile_uuid', ROW.profile_uuid, null, i.CA_UUID 
+ 		FROM smart.i_profile_config i WHERE i.uuid = row.profile_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE TRIGGER trg_i_profile_entity_type AFTER INSERT OR UPDATE OR DELETE ON smart.i_profile_entity_type FOR EACH ROW execute procedure connect.i_profile_entity_type();
+
 
 --TODO: MAKE THESE UNIQUE and not null
 update smart.I_RECORDSOURCE_ATTRIBUTE set keyid = (select a.keyid from smart.i_attribute a where a.uuid = smart.i_recordsource_attribute.attribute_uuid) where attribute_uuid is not null;
