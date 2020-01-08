@@ -613,15 +613,21 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 					return 0;
 				}else{
 					addToExistingLeg(legToUpdate, wp, session);
-					//update all waypoints since the start of the group to include the defaults
-					//and the after attributes
-					for (PatrolLegDay pld : legToUpdate.getPatrolLegDays()){
-						for (PatrolWaypoint pw : pld.getWaypoints()){
-							if (pw.getWaypoint().getDateTime().equals(groupStartTime) || 
-									pw.getWaypoint().getDateTime().after(groupStartTime)){
-								
-								if (!pw.getWaypoint().getObservationGroups().isEmpty())
-									addAttributesToObservation(pw.getWaypoint().getObservationGroups().get(0).getObservations(), applyAll);
+					if (groupStartTime == null) {
+						//see bug: https://app.assembla.com/spaces/smart-cs/tickets/2868
+						//this case occurs when we have a group with only a single observation
+						addAttributesToObservation(wp.getObservationGroups().get(0).getObservations(), applyAll);
+					}else {
+						//update all waypoints since the start of the group to include the defaults
+						//and the after attributes
+						for (PatrolLegDay pld : legToUpdate.getPatrolLegDays()){
+							for (PatrolWaypoint pw : pld.getWaypoints()){
+								if (pw.getWaypoint().getDateTime().equals(groupStartTime) || 
+										pw.getWaypoint().getDateTime().after(groupStartTime)){
+									
+									if (!pw.getWaypoint().getObservationGroups().isEmpty())
+										addAttributesToObservation(pw.getWaypoint().getObservationGroups().get(0).getObservations(), applyAll);
+								}
 							}
 						}
 					}
