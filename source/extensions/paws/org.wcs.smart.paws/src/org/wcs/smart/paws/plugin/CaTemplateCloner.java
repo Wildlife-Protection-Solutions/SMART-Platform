@@ -74,17 +74,18 @@ public class CaTemplateCloner implements IConservationAreaTemplateCloner {
 				cpp.setConfiguration(clone);
 				cpp.setKey(pp.getKey());
 				
-				if (pp.getKey().equals(PawsParameter.FixedParameter.GRID_CRS.name())){
-					UUID uuid = UuidUtils.stringToUuid(pp.getValue().split(":")[0]);
-					String def = pp.getValue().substring(pp.getValue().indexOf(':')+1);
-					UuidItem prj = engine.getNewConservationItem(uuid);
-					if (prj == null){
-						pp.setValue(":" + def);
-					}else{
-						pp.setValue(UuidUtils.uuidToString(prj.getUuid()) + ":" + def);
-					}
-					clone.getParameters().add(cpp);
-				}else if (pp.getKey().equals(PawsParameter.FixedParameter.GRID_SIZE.name())){
+//				if (pp.getKey().equals(PawsParameter.FixedParameter.GRID_CRS.name())){
+//					UUID uuid = UuidUtils.stringToUuid(pp.getValue().split(":")[0]);
+//					String def = pp.getValue().substring(pp.getValue().indexOf(':')+1);
+//					UuidItem prj = engine.getNewConservationItem(uuid);
+//					if (prj == null){
+//						pp.setValue(":" + def);
+//					}else{
+//						pp.setValue(UuidUtils.uuidToString(prj.getUuid()) + ":" + def);
+//					}
+//					clone.getParameters().add(cpp);
+//				}else 
+				if (pp.getKey().equals(PawsParameter.FixedParameter.GRID_SIZE.name())){
 					cpp.setValue(pp.getValue());
 					clone.getParameters().add(cpp);
 				}else if (pp.getKey().equals(PawsParameter.FixedParameter.TRAINING_RES.name())) {

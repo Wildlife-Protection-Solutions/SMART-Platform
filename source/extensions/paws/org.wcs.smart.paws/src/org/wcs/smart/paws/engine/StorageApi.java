@@ -170,6 +170,44 @@ public enum StorageApi {
 		token = stoken;
 	}
 	
+	
+	/**
+	 * Gets a list of url to all blobs in the given container that are located
+	 * in the given url;
+	 * 
+	 * @param containerURL
+	 * @param url
+	 * @return
+	 * @throws InterruptedException 
+	 */
+	public List<String> getBlobs(ContainerURL containerURL, String url) throws InterruptedException{
+		
+		if (!url.endsWith("/")) url = url +"/";
+		final String furl = url;
+		
+		List<String> items = new ArrayList<>();
+		
+		ListBlobsOptions options = new ListBlobsOptions();
+		containerURL.listBlobsFlatSegment(null, options, null)
+			.flatMap(r -> listAllBlobs(containerURL, r, items, furl))
+			.subscribe(response -> {
+				synchronized (dlock) {
+					dlock.notify();
+				}
+			},
+			error->{
+				synchronized (dlock) {
+					dlock.notify();
+				}		
+			});
+		
+		synchronized (dlock) {
+			dlock.wait();
+		}
+		return items;
+	}
+	
+
 	/**
 	 * Remove all data associated with the given paws run
 	 * 
@@ -182,28 +220,10 @@ public enum StorageApi {
 			ContainerURL  containerURL = getContainerURL();
 			if (containerURL == null) throw new Exception("Azure storage container not configured correctly.");
 			
-			List<String> urlToDelete = new ArrayList<>();
-			ListBlobsOptions options = new ListBlobsOptions();
-			containerURL.listBlobsFlatSegment(null, options, null)
-					.flatMap(r -> listAllBlobs(containerURL, r, urlToDelete, run))
-					.subscribe(response -> {
-						synchronized (dlock) {
-							dlock.notify();
-						}
-					},
-						error->{
-							synchronized (dlock) {
-								dlock.notify();
-							}		
-			});
-
-			synchronized (dlock) {
-				dlock.wait();
-			}
-
+			List<String> urlToDelete = getBlobs(containerURL, run.getRunId());
 			List<Throwable> fails = new ArrayList<>();
 			for (String d : urlToDelete) {
-				containerURL.createBlockBlobURL(d).delete().subscribe(rsp -> {},  error -> fails.add(error));
+				containerURL.createBlockBlobURL(d).delete().subscribe(rsp -> {},  error -> fails.add(error));				
 			}
 			if (!fails.isEmpty()){
 				for (Throwable t : fails) PawsPlugIn.log(t.getMessage(), t);
@@ -216,13 +236,13 @@ public enum StorageApi {
 	}
 	
 	private Single<ContainerListBlobFlatSegmentResponse> listAllBlobs(ContainerURL url,
-			ContainerListBlobFlatSegmentResponse response, List<String> toDelete, PawsRun run) {
+			ContainerListBlobFlatSegmentResponse response, List<String> toDelete, String filterUrl) {
 
 		// Process the blobs returned in this result segment (if the segment is empty,
 		// blobs() will be null.
 		if (response.body().segment() != null) {
 			for (BlobItem b : response.body().segment().blobItems()) {
-				if (b.name().startsWith(run.getRunId() + "/")) {
+				if (b.name().startsWith(filterUrl)) {
 					toDelete.add(b.name());
 				}
 			}
@@ -248,7 +268,7 @@ public enum StorageApi {
 
 			return url.listBlobsFlatSegment(nextMarker, new ListBlobsOptions().withMaxResults(10), null)
 					.flatMap(r -> listAllBlobs(url,
-							r, toDelete, run));
+							r, toDelete, filterUrl));
 		}
 	}
 }

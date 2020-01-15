@@ -46,7 +46,7 @@ import org.wcs.smart.paws.model.PawsWorkspace;
 import org.wcs.smart.ui.SmartStyledDialog;
 
 /**
- * Dialog for logging into Azure AD and getting uathorization code
+ * Dialog for logging into Azure AD and getting authorization code
  * @author Emily
  *
  */

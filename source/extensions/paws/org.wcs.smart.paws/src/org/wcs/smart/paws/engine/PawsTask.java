@@ -68,10 +68,6 @@ public class PawsTask {
 	
 	
 	public static PawsTask parse(String json) throws Exception {
-		
-		System.out.println("result:" + json);
-		System.out.println("---------");
-		
 		JSONParser parse = new JSONParser();
 		JSONObject item = (JSONObject) parse.parse(json);
 		

@@ -29,7 +29,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.ca.ConservationAreaManager;
-import org.wcs.smart.paws.model.PawsResultManager;
 import org.wcs.smart.paws.plugin.DeleteCaHandler;
 
 public class PawsPlugIn extends AbstractUIPlugin {
@@ -40,7 +39,7 @@ public class PawsPlugIn extends AbstractUIPlugin {
 	// The shared instance
 	private static PawsPlugIn plugin;
 	
-	public static final String PAWS_DIR = PawsResultManager.PAWS_DIR;
+	public static final String PAWS_DIR = "paws";  //$NON-NLS-1$
 	
 	/*
 	 * As the plugin evolves updates may require changes to the
@@ -59,10 +58,10 @@ public class PawsPlugIn extends AbstractUIPlugin {
 	 */
 	public static final String DB_VERSION = DB_VERSION_1;
   
-	public static final String ICON_DONE = "org.wcs.smart.paws.icon.done";
-	public static final String ICON_ERROR = "org.wcs.smart.paws.icon.error";
-	public static final String ICON_WORKING = "org.wcs.smart.paws.icon.working";
-	public static final String ICON_CONFIG = "org.wcs.smart.paws.icon.config";
+	public static final String ICON_DONE = "org.wcs.smart.paws.icon.done"; //$NON-NLS-1$
+	public static final String ICON_ERROR = "org.wcs.smart.paws.icon.error"; //$NON-NLS-1$
+	public static final String ICON_WORKING = "org.wcs.smart.paws.icon.working"; //$NON-NLS-1$
+	public static final String ICON_CONFIG = "org.wcs.smart.paws.icon.config"; //$NON-NLS-1$
 
 	/**
 	 * The constructor

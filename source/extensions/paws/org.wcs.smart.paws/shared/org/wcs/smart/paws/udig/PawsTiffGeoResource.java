@@ -46,6 +46,8 @@ import org.locationtech.udig.catalog.rasterings.AbstractRasterService;
 import org.opengis.coverage.grid.GridCoverage;
 import org.opengis.geometry.Envelope;
 import org.opengis.parameter.GeneralParameterValue;
+import org.wcs.smart.paws.model.PawsResultFile;
+import org.wcs.smart.util.SharedUtils;
 
 
 /**
@@ -56,12 +58,15 @@ public class PawsTiffGeoResource extends AbstractRasterGeoResource {
 	private AbstractGridCoverage2DReader reader;
 	private Path file;
 
+	private String name;
 	/**
 	 * Construct <code>GeoTiffGeoResourceImpl</code>.
 	 */
-	public PawsTiffGeoResource(AbstractRasterService service, Path file) {
-		super(service, parsePath(file));
-		this.file = file;
+	public PawsTiffGeoResource(AbstractRasterService service, PawsResultFile rfile, Path layerfile) {
+		super(service, parsePath(layerfile));
+		this.file = layerfile;
+		this.name= SharedUtils.getFilenameWithoutExtension( rfile.getResultsFile().getFileName().toString() )
+				+ ":" + SharedUtils.getFilenameWithoutExtension( layerfile.getFileName().toString() );
 
 	}
 
@@ -158,7 +163,7 @@ public class PawsTiffGeoResource extends AbstractRasterGeoResource {
 	AbstractRasterGeoResourceInfo info = new AbstractRasterGeoResourceInfo(this, "PAWS") {
 		@Override
 		public String getTitle() {
-			return file.getFileName().toString();
+			return PawsTiffGeoResource.this.name;
 		}
 		
 		 @Override

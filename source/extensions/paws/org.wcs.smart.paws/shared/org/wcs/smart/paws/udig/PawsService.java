@@ -37,9 +37,7 @@ import org.hibernate.Session;
 import org.locationtech.udig.catalog.IServiceInfo;
 import org.locationtech.udig.catalog.rasterings.AbstractRasterGeoResource;
 import org.locationtech.udig.catalog.rasterings.AbstractRasterService;
-import org.wcs.smart.ca.ConservationArea;
-
-import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.paws.model.PawsResultFile;
 import org.wcs.smart.paws.model.PawsResultManager;
 import org.wcs.smart.paws.model.PawsRun;
 import org.wcs.smart.udig.catalog.smart.IDatabaseConnectionProvider;
@@ -56,6 +54,8 @@ public class PawsService extends AbstractRasterService {
 	private IDatabaseConnectionProvider connectionProvider;
 	
 	private static GeoTiffFormatFactorySpi factory;
+	
+	private volatile List<AbstractRasterGeoResource> resources = null;
 	
 	/**
      * Finds or creates a GeoTiffFormatFactorySpi.
@@ -88,28 +88,30 @@ public class PawsService extends AbstractRasterService {
 
 	@Override
 	public List<AbstractRasterGeoResource> resources(IProgressMonitor monitor) throws IOException {
+		if (resources != null) return resources;
 		
-		//for each results; for each layer we have a resource
-		//TODO: clean this up; this seems slow and large and unnecessary
-		ConservationArea temp = new ConservationArea();
-		temp.setUuid((UUID)params.get(PawsServiceExtension.CA_UUID_KEY));
-		
-		List<AbstractRasterGeoResource> resources = new ArrayList<>();
-		
-		try(Session session = connectionProvider.openSession()){
-			List<PawsRun> runs = QueryFactory.buildQuery(session, PawsRun.class, 
-					"conservationArea", temp).list();
-		
-			for(PawsRun r : runs) {
-				PawsResultManager m = new PawsResultManager(r);
-				for (Path p : m.getRasterFiles()) {
-					resources.add( new PawsTiffGeoResource(this, p) );
+		synchronized (this) {
+			if (resources != null) return resources;
+			
+			resources = new ArrayList<>();
+			//for each results; for each layer we have a resource
+			//TODO: clean this up; this seems slow and large and unnecessary
+			UUID runuuid = (UUID)params.get(PawsServiceExtension.RUN_UUID_KEY);
+			try(Session session = connectionProvider.openSession()){
+				PawsRun run = session.get(PawsRun.class, runuuid);
+				PawsResultManager m = new PawsResultManager(run);
+				for (PawsResultFile f : m.getResults()) {
+					for (Path p : f.getRasterFiles()) {
+						resources.add( new PawsTiffGeoResource(this, f, p) );
+					}
+				
 				}
+			}catch(Exception ex) {
+				if (ex instanceof IOException) throw (IOException)ex;
+				throw new IOException(ex);
 			}
-		}catch(Exception ex) {
-			if (ex instanceof IOException) throw (IOException)ex;
-			throw new IOException(ex);
 		}
+		
 		return resources;
 	}
 

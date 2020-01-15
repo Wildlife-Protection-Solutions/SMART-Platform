@@ -39,7 +39,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
+import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.Viewer;
@@ -58,6 +60,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.paws.PawsPlugIn;
+import org.wcs.smart.paws.model.PawsResultFile;
 import org.wcs.smart.paws.model.PawsResultManager;
 import org.wcs.smart.paws.model.PawsRun;
 import org.wcs.smart.udig.catalog.smart.SmartServiceExtension;
@@ -67,7 +70,8 @@ import org.wcs.smart.ui.properties.DialogConstants;
 public class PawsWizardPage extends AbstractUDIGImportPage implements UDIGConnectionPage {
 
 	private CheckboxTreeViewer tblResults;
-	private PawsService service;
+	
+	private HashMap<PawsRun, PawsService> services = new HashMap<>();
 
 	public PawsWizardPage() {
 		super("PAWS Results Layers");
@@ -90,10 +94,25 @@ public class PawsWizardPage extends AbstractUDIGImportPage implements UDIGConnec
 			tblResults.setLabelProvider(new LabelProvider() {
 				public String getText(Object element) {
 					if (element instanceof PawsRun) return MessageFormat.format("{0} [{1}]",((PawsRun)element).getId(),  DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).format(((PawsRun)element).getRunDate()));
-					if (element instanceof Path) return ((Path)element).getFileName().toString();
+					if (element instanceof PawsFile) return ((PawsFile)element).file.getFileName().toString();
+					if (element instanceof PawsResultFile) return ((PawsResultFile)element).getResultsFile().getFileName().toString();
 					return super.getText(element);
 				}
 			});
+			
+			tblResults.addCheckStateListener(new ICheckStateListener() {				
+				@Override
+				public void checkStateChanged(CheckStateChangedEvent event) {
+					Object[] x = ((ITreeContentProvider)tblResults.getContentProvider()).getChildren( event.getElement() );
+					if (x != null) {
+						for (Object i : x) tblResults.setChecked(i, event.getChecked());
+					}
+					getWizard().getContainer().updateButtons();
+					services.clear();
+
+				}
+			});
+			
 			
 			tblResults.setContentProvider(new ITreeContentProvider() {
 				private List<PawsRun> runs = null;
@@ -106,7 +125,8 @@ public class PawsWizardPage extends AbstractUDIGImportPage implements UDIGConnec
 				 
 				@Override
 				public boolean hasChildren(Object element) {
-					return (element instanceof PawsRun);
+					return (element instanceof PawsRun) ||
+							(element instanceof PawsResultFile);
 				}
 				
 				@Override
@@ -122,12 +142,23 @@ public class PawsWizardPage extends AbstractUDIGImportPage implements UDIGConnec
 				
 				@Override
 				public Object[] getChildren(Object parentElement) {
-					if (parentElement instanceof PawsRun) {
+					if (parentElement instanceof PawsRun) {					
 						PawsRun r = (PawsRun)parentElement;
-						PawsResultManager mng = new PawsResultManager(r);
 						try {
-							List<Path> files = mng.getRasterFiles();
-							return files.toArray( new Path[files.size()] );
+							PawsResultManager mng = new PawsResultManager(r);
+							return mng.getResults().toArray();
+						}catch (Exception ex) {
+							PawsPlugIn.displayLog(ex.getMessage(), ex);
+						}
+						return null;
+					}else if (parentElement instanceof PawsResultFile) {
+						PawsResultFile f = (PawsResultFile)parentElement;
+						try {
+							PawsFile[] results = new PawsFile[f.getRasterFiles().size()];
+							for (int i = 0; i < f.getRasterFiles().size(); i ++) {
+								results[i] = new PawsFile(f.getRasterFiles().get(i), f);
+							}
+							return results;
 						}catch (Exception ex) {
 							PawsPlugIn.displayLog(ex.getMessage(), ex);
 						}
@@ -136,39 +167,51 @@ public class PawsWizardPage extends AbstractUDIGImportPage implements UDIGConnec
 				}
 			});
 			tblResults.setInput(new String[] {DialogConstants.LOADING_TEXT});
-			tblResults.addSelectionChangedListener(e->{
-				getWizard().getContainer().updateButtons();
-			});
+//			tblResults.addSelectionChangedListener(e->{
+//				getWizard().getContainer().updateButtons();
+//			});
 			loadRuns.schedule();
 		}
 	}
 	
+	@Override
     public Collection<URL> getResourceIDs() {
-    	getService();
+    	
     	List<URL> urls = new ArrayList<>();
-    	if (service == null) return Collections.emptyList();
+    	
+    	
     	for (Object x : tblResults.getCheckedElements()) {
-    		if (x instanceof Path) {
-    			PawsTiffGeoResource r = new PawsTiffGeoResource(service, (Path)x);
+    		if (x instanceof PawsFile) {
+    			PawsFile t = (PawsFile)x;
+    			
+    			PawsService ps = services.get(t.parent.getRun());
+    			if (ps == null) {
+    				ps = getService(t.parent.getRun());
+    				services.put(t.parent.getRun(), ps);
+    			}
+    			
+    			PawsTiffGeoResource r = new PawsTiffGeoResource(ps, t.parent, t.file);
     			urls.add(r.getIdentifier());
     		}
     	}
         return urls;
     }
     
-    public Collection<IService> getServices() {
-   		return Collections.singletonList(service);
+    @Override
+    public Collection<IService> getServices(){
+    	if (services.isEmpty()) getResourceIDs();
+    	List<IService> items = new ArrayList<>();
+    	services.values().forEach(e->items.add(e));
+    	return items;
     }
-	
-    private synchronized PawsService getService()  {
-    	if (service != null) return service;
-
+    
+    private synchronized PawsService getService(PawsRun run)  {
     	HashMap<String, Serializable> params = new HashMap<>();
-    	params.put(PawsServiceExtension.CA_UUID_KEY, SmartDB.getCurrentConservationArea().getUuid());
+    	params.put(PawsServiceExtension.RUN_UUID_KEY, run.getUuid());
     	PawsService temp = new PawsService(params, new DesktopSessionProvider());
     	
-    	service = (PawsService) CatalogPlugin.getDefault().getLocalCatalog().add(temp);
-    	return service;
+    	temp = (PawsService) CatalogPlugin.getDefault().getLocalCatalog().add(temp);
+    	return temp;
     }
     
     @Override
@@ -184,7 +227,7 @@ public class PawsWizardPage extends AbstractUDIGImportPage implements UDIGConnec
 			return false;
 		}else {
 			for (Object x : tblResults.getCheckedElements()) {
-				if (x instanceof Path) return true;
+				if (x instanceof PawsFile) return true;
 			}
 			return false;
 		}
@@ -210,4 +253,13 @@ public class PawsWizardPage extends AbstractUDIGImportPage implements UDIGConnec
 		
 	};
 
+	private class PawsFile {
+		Path file;
+		PawsResultFile parent;
+		
+		public PawsFile(Path file, PawsResultFile parent) {
+			this.file = file;
+			this.parent = parent;
+		}
+	}
 }

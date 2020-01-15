@@ -43,17 +43,18 @@ public class PawsParameter extends UuidItem{
 		LYR_BOUNDARY,
 		LYR_OTHER,
 		GRID_SIZE,
-		GRID_CRS,
+//		GRID_CRS,
 //		GRID_BNDS,
-		TIMEZONE,
+//		TIMEZONE,
 		TRAINING_RES,
 		CLASSIFIER_MODEL
 		
 	}
 	
 	public static enum ClassifierModel{
-		DECISION_TREE("decison_tree");
-//		GAUSSIAN_PROCESS("gaussian_process"); //slow; not supported
+		DECISION_TREE("decison_tree"),
+		RANDOM_FOREST("random_forest"),
+		GAUSSIAN_PROCESS("gaussian_process"); //slow; not supported
 		
 		public String key;
 		

@@ -100,9 +100,11 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.paws.PawsEvent;
 import org.wcs.smart.paws.PawsManager;
 import org.wcs.smart.paws.PawsPlugIn;
+import org.wcs.smart.paws.engine.PawsDataEngine;
 import org.wcs.smart.paws.model.PawsConfiguration;
 import org.wcs.smart.paws.model.PawsParameter;
 import org.wcs.smart.paws.model.PawsParameter.FixedParameter;
+import org.wcs.smart.paws.model.PawsRun;
 import org.wcs.smart.paws.ui.ErrorText;
 import org.wcs.smart.paws.ui.HeaderComposite;
 import org.wcs.smart.paws.ui.HidePartsPartListener;
@@ -132,7 +134,7 @@ public class ConfigurationEditor extends EditorPart {
 	private FormToolkit toolkit;
 
 	private HeaderComposite compHeader;
-	private ComboViewer cmbBound,cmbCrs, cmbTimeZone, cmbTrainingRes, cmbClassifier; // cmbRoad, cmbRiver, cmbContour,
+	private ComboViewer cmbBound,cmbTrainingRes, cmbClassifier; // cmbCrs, cmbRoad, cmbRiver, cmbContour,
 	private ListViewer lstOther;
 //	private ErrorText txtBounds;
 	private ErrorText txtGridSize;
@@ -276,22 +278,16 @@ public class ConfigurationEditor extends EditorPart {
 				pp = getOrCreateParameter(pw, PawsParameter.FixedParameter.GRID_SIZE);
 				pp.setValue(txtGridSize.getText());
 				
-//				pp = getOrCreateParameter(pw, PawsParameter.FixedParameter.GRID_BNDS);
-//				pp.setValue(txtBounds.getText());
 				
-				pp = getOrCreateParameter(pw, PawsParameter.FixedParameter.TIMEZONE);
-				Object tz = cmbTimeZone.getStructuredSelection().getFirstElement();
-				pp.setValue( ((TimeZone)tz).getID() );
-				
-				pp = getOrCreateParameter(pw, PawsParameter.FixedParameter.GRID_CRS);
-				Object crs = cmbCrs.getStructuredSelection().getFirstElement();
-				Projection prj = (Projection)crs;
-				prj.setParsedCoordinateReferenceSystem(ReprojectUtils.stringToCrs(prj.getDefinition()));
-				if (prj.getUuid() != null){
-					pp.setValue( UuidUtils.uuidToString(prj.getUuid()) + ":" + prj.getParsedCoordinateReferenceSystem().toWKT() );
-				}else{
-					pp.setValue( ":" + prj.getParsedCoordinateReferenceSystem().toWKT() );
-				}
+//				pp = getOrCreateParameter(pw, PawsParameter.FixedParameter.GRID_CRS);
+//				Object crs = cmbCrs.getStructuredSelection().getFirstElement();
+//				Projection prj = (Projection)crs;
+//				prj.setParsedCoordinateReferenceSystem(ReprojectUtils.stringToCrs(prj.getDefinition()));
+//				if (prj.getUuid() != null){
+//					pp.setValue( UuidUtils.uuidToString(prj.getUuid()) + ":" + prj.getParsedCoordinateReferenceSystem().toWKT() );
+//				}else{
+//					pp.setValue( ":" + prj.getParsedCoordinateReferenceSystem().toWKT() );
+//				}
 				
 				pp = getOrCreateParameter(pw,  PawsParameter.FixedParameter.TRAINING_RES);
 				Object tr = cmbTrainingRes.getStructuredSelection().getFirstElement();
@@ -497,8 +493,6 @@ public class ConfigurationEditor extends EditorPart {
 			} catch (Exception ex) {
 				PawsPlugIn.displayLog("Unable to create new analysis from these settings." + "\n\n" + ex.getMessage(), ex);
 			}
-
-				
 			
 		});
 		
@@ -520,30 +514,14 @@ public class ConfigurationEditor extends EditorPart {
 		if (!(x instanceof Area.AreaType || x instanceof Path || x instanceof PawsParameter)) {
 			return "Conservation Area Boundary layer is required.";
 		}
-		
-		x = cmbTimeZone.getStructuredSelection().getFirstElement();
-		if (!(x instanceof TimeZone)) {
-			return "Time zone is required";
-		}
-		
-		x = cmbCrs.getStructuredSelection().getFirstElement();
-		if (!(x instanceof Projection)) {
-			return "Projection is required";
-		}
-//		if (txtBounds.getData(RE_DATA_KEY) == null){
-//			return "Valid bounds are required.";
+//		
+//		x = cmbCrs.getStructuredSelection().getFirstElement();
+//		if (!(x instanceof Projection)) {
+//			return "Projection is required";
 //		}
-		
+
 		return null;
 	}
-
-//	private void updateBounds(){
-//		ReferencedEnvelope env = (ReferencedEnvelope) txtBounds.getData(RE_DATA_KEY);
-//		if (env != null){
-//			txtBounds.setText(env.getMinX() + "  " + env.getMinY() + "  " + env.getMaxX() + "  " + env.getMaxY());
-//		}
-//
-//	}
 	
 	private void createSettingsComp(Composite parent) {
 		Composite core = toolkit.createComposite(parent);
@@ -671,23 +649,23 @@ public class ConfigurationEditor extends EditorPart {
 		inner.setLayout(new GridLayout(2, false));
 		inner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		l = toolkit.createLabel(inner, PawsManager.INSTANCE.getName(FixedParameter.GRID_CRS) + ":");
-		l.setToolTipText("Coordinate Reference System");
-		
-		cmbCrs = new ComboViewer(inner, SWT.READ_ONLY | SWT.FLAT | SWT.BORDER | SWT.DROP_DOWN);
-		cmbCrs.setContentProvider(ArrayContentProvider.getInstance());
-		cmbCrs.setLabelProvider(new LabelProvider() {
-			@Override
-			public String getText(Object element) {
-				if (element instanceof Projection) {
-					return ((Projection) element).getName();
-				}
-				return super.getText(element);
-			}
-		});
-		cmbCrs.getControl().setBackground(inner.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-		cmbCrs.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		cmbCrs.addPostSelectionChangedListener(e->{
+//		l = toolkit.createLabel(inner, PawsManager.INSTANCE.getName(FixedParameter.GRID_CRS) + ":");
+//		l.setToolTipText("Coordinate Reference System");
+//		
+//		cmbCrs = new ComboViewer(inner, SWT.READ_ONLY | SWT.FLAT | SWT.BORDER | SWT.DROP_DOWN);
+//		cmbCrs.setContentProvider(ArrayContentProvider.getInstance());
+//		cmbCrs.setLabelProvider(new LabelProvider() {
+//			@Override
+//			public String getText(Object element) {
+//				if (element instanceof Projection) {
+//					return ((Projection) element).getName();
+//				}
+//				return super.getText(element);
+//			}
+//		});
+//		cmbCrs.getControl().setBackground(inner.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+//		cmbCrs.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+//		cmbCrs.addPostSelectionChangedListener(e->{
 			//update bounds if valid
 //			ReferencedEnvelope re = (ReferencedEnvelope)txtBounds.getData(RE_DATA_KEY);
 //			CoordinateReferenceSystem crs = ((Projection)cmbCrs.getStructuredSelection().getFirstElement()).getParsedCoordinateReferenceSystem();
@@ -702,8 +680,8 @@ public class ConfigurationEditor extends EditorPart {
 //				}
 //			}
 			
-			setDirty(true);
-		});
+//			setDirty(true);
+//		});
 		
 //		l = toolkit.createLabel(inner, PawsManager.INSTANCE.getName(FixedParameter.GRID_BNDS) + ":");
 //		l.setToolTipText("xmin,ymin,xmax,ymax in selected CRS");
@@ -818,8 +796,8 @@ public class ConfigurationEditor extends EditorPart {
 //			}
 //		});
 		
-		l = toolkit.createLabel(inner, PawsManager.INSTANCE.getName(FixedParameter.GRID_SIZE) + ":");
-		l.setToolTipText("grid units are the units of the selected CRS");
+		l = toolkit.createLabel(inner, PawsManager.INSTANCE.getName(FixedParameter.GRID_SIZE) + " (meter):");
+		l.setToolTipText("units are meters; all processing is done in an appropriate utm zone");
 		
 		txtGridSize = new ErrorText(inner, txt-> {
 			try {
@@ -835,27 +813,9 @@ public class ConfigurationEditor extends EditorPart {
 			setDirty(true);	
 		});
 		
-		l = toolkit.createLabel(inner,PawsManager.INSTANCE.getName(FixedParameter.TIMEZONE) + ":");
-		cmbTimeZone = new ComboViewer(inner, SWT.READ_ONLY | SWT.FLAT | SWT.BORDER | SWT.DROP_DOWN);
-		cmbTimeZone.setContentProvider(ArrayContentProvider.getInstance());
-		cmbTimeZone.getControl().setBackground(inner.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-		cmbTimeZone.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		cmbTimeZone.setLabelProvider(new LabelProvider() {
-			@Override
-			public String getText(Object element) {
-				if (element instanceof TimeZone) return ((TimeZone)element).getDisplayName() + " (" + ((TimeZone)element).getID() + ")";
-				return super.getText(element);
-			}
-		});
-		List<TimeZone> zones = new ArrayList<>();
-		for (String id : TimeZone.getAvailableIDs()) {
-			zones.add(TimeZone.getTimeZone(id));
-		}
-		cmbTimeZone.setInput(zones);
-		cmbTimeZone.setSelection(new StructuredSelection(TimeZone.getDefault()));
-		cmbTimeZone.addPostSelectionChangedListener(e->setDirty(true));
 		
 		l = toolkit.createLabel(inner, PawsManager.INSTANCE.getName(FixedParameter.TRAINING_RES) + ":");
+		l.setToolTipText("monthly aggregation value - groups months by this value for training and prediction");
 		
 		cmbTrainingRes = new ComboViewer(inner, SWT.READ_ONLY | SWT.DROP_DOWN);
 		cmbTrainingRes.setContentProvider(ArrayContentProvider.getInstance());
@@ -872,6 +832,7 @@ public class ConfigurationEditor extends EditorPart {
 		cmbTrainingRes.addPostSelectionChangedListener(e->setDirty(true));
 		
 		l = toolkit.createLabel(inner, PawsManager.INSTANCE.getName(FixedParameter.CLASSIFIER_MODEL) + ":");
+		l.setToolTipText("model to use for the classifier");
 		
 		cmbClassifier = new ComboViewer(inner, SWT.READ_ONLY | SWT.DROP_DOWN);
 		cmbClassifier.setContentProvider(ArrayContentProvider.getInstance());
@@ -883,8 +844,9 @@ public class ConfigurationEditor extends EditorPart {
 				if (element instanceof PawsParameter.ClassifierModel) { 
 					PawsParameter.ClassifierModel tw = (PawsParameter.ClassifierModel)element;
 					switch(tw) {
-					case DECISION_TREE: return "Decision Tree";
-//					case GAUSSIAN_PROCESS: return "Gaussian Process";
+					case DECISION_TREE: return "Decision Tree (recommended)" ;
+					case RANDOM_FOREST: return "Random Forest";
+					case GAUSSIAN_PROCESS: return "Gaussian Process (slow)";
 					}
 				};
 				return super.getText(element);
@@ -1048,8 +1010,8 @@ public class ConfigurationEditor extends EditorPart {
 			Display.getDefault().syncExec(()->{
 				cmbBound.setInput(new ArrayList<>(options));
 				if (options.contains(Area.AreaType.CA)) cmbBound.setSelection(new StructuredSelection(Area.AreaType.CA));
-				cmbCrs.setInput(allPrjs);
-				cmbCrs.setSelection(new StructuredSelection(fcurrentPrj));
+//				cmbCrs.setInput(allPrjs);
+//				cmbCrs.setSelection(new StructuredSelection(fcurrentPrj));
 			});
 			
 			initFields.schedule();
@@ -1103,43 +1065,40 @@ public class ConfigurationEditor extends EditorPart {
 					
 					pp = pw.findParameter(PawsParameter.FixedParameter.GRID_SIZE.name());
 					if (pp != null) txtGridSize.setText(pp.getValue());
-					
-					pp = pw.findParameter(PawsParameter.FixedParameter.TIMEZONE.name());
-					if (pp != null) cmbTimeZone.setSelection(new StructuredSelection(TimeZone.getTimeZone(pp.getValue())));
-					
-					CoordinateReferenceSystem selectedCrs = null;
-					pp = pw.findParameter(PawsParameter.FixedParameter.GRID_CRS.name());
-					if (pp != null) {
-						String uuid = pp.getValue().split(":")[0];
-						
-						Projection temp = new Projection();
-						boolean add = false;
-						List<Projection> prjs = (List<Projection>)cmbCrs.getInput();
-						if (uuid.isBlank()){
-							add = true;
-						}else{
-							temp.setUuid( UuidUtils.stringToUuid(uuid) );
-							if (!prjs.contains(temp)){
-								add = true;
-							}
-						}
-						if (add){
-							temp.setUuid(null);
-							temp.setDefinition(pp.getValue().substring(uuid.length() + 1));
-							temp.setName("Custom");
-							prjs.add(temp);
-							cmbCrs.refresh();
-							try {
-								temp.setParsedCoordinateReferenceSystem(CRS.parseWKT(temp.getDefinition()));
-							}catch (Exception ex){
-								PawsPlugIn.log(ex.getMessage(), ex);
-							}
-						}
-						cmbCrs.setSelection(new StructuredSelection(temp));
-						selectedCrs = temp.getParsedCoordinateReferenceSystem();
-						
-						
-					}
+
+//					CoordinateReferenceSystem selectedCrs = null;
+//					pp = pw.findParameter(PawsParameter.FixedParameter.GRID_CRS.name());
+//					if (pp != null) {
+//						String uuid = pp.getValue().split(":")[0];
+//						
+//						Projection temp = new Projection();
+//						boolean add = false;
+//						List<Projection> prjs = (List<Projection>)cmbCrs.getInput();
+//						if (uuid.isBlank()){
+//							add = true;
+//						}else{
+//							temp.setUuid( UuidUtils.stringToUuid(uuid) );
+//							if (!prjs.contains(temp)){
+//								add = true;
+//							}
+//						}
+//						if (add){
+//							temp.setUuid(null);
+//							temp.setDefinition(pp.getValue().substring(uuid.length() + 1));
+//							temp.setName("Custom");
+//							prjs.add(temp);
+//							cmbCrs.refresh();
+//							try {
+//								temp.setParsedCoordinateReferenceSystem(CRS.parseWKT(temp.getDefinition()));
+//							}catch (Exception ex){
+//								PawsPlugIn.log(ex.getMessage(), ex);
+//							}
+//						}
+//						cmbCrs.setSelection(new StructuredSelection(temp));
+//						selectedCrs = temp.getParsedCoordinateReferenceSystem();
+//						
+//						
+//					}
 					pp = pw.findParameter(PawsParameter.FixedParameter.TRAINING_RES.name());
 					if (pp != null) {
 						cmbTrainingRes.setSelection(new StructuredSelection(  Integer.valueOf(pp.getValue()) ));

@@ -166,18 +166,12 @@ public enum PawsManager {
 		try(Session session = HibernateManager.openSession()){
 			config = session.get(PawsConfiguration.class, config.getUuid());
 			if (config.getParameters() == null) throw new Exception("Grid parameters not supplied");
-			
-//			PawsParameter pp = config.findParameter(PawsParameter.FixedParameter.GRID_BNDS.name());
-//			if (pp == null || pp.getValue() == null || pp.getValue().isEmpty() ) throw new Exception("Grid bounds required");
-//			
-			PawsParameter pp = config.findParameter(PawsParameter.FixedParameter.GRID_CRS.name());
-			if (pp == null || pp.getValue() == null || pp.getValue().isEmpty() ) throw new Exception("Grid coordinate reference system required");
+
+//			PawsParameter pp = config.findParameter(PawsParameter.FixedParameter.GRID_CRS.name());
+//			if (pp == null || pp.getValue() == null || pp.getValue().isEmpty() ) throw new Exception("Grid coordinate reference system required");
 	
-			pp = config.findParameter(PawsParameter.FixedParameter.GRID_SIZE.name());
+			PawsParameter pp = config.findParameter(PawsParameter.FixedParameter.GRID_SIZE.name());
 			if (pp == null || pp.getValue() == null || pp.getValue().isEmpty() ) throw new Exception("Grid size required");
-	
-			pp = config.findParameter(PawsParameter.FixedParameter.TIMEZONE.name());
-			if (pp == null || pp.getValue() == null || pp.getValue().isEmpty() ) throw new Exception("Timezone required");
 	
 			pp = config.findParameter(PawsParameter.FixedParameter.LYR_BOUNDARY.name());
 			if (pp == null || pp.getValue() == null || pp.getValue().isEmpty() ) throw new Exception("Conservation Area Boundary layer required");
@@ -187,12 +181,25 @@ public enum PawsManager {
 	public String generateUniqueName(String runname, ConservationArea ca){
 		String id = runname;
 		int cnt = 1;
+		int index = runname.lastIndexOf(' ');
+		if (index > 0) {
+			String test = runname.substring(index + 1);
+			try {
+				cnt = Integer.parseInt(test)+1;
+				runname = runname.substring(0, index);
+				id = runname + " " + (cnt++);
+			}catch (Exception ex) {
+				//fail
+			}
+		}
+		
 		try(Session session = HibernateManager.openSession()){
 			while(true) {
 				if (QueryFactory.buildCountQuery(session, PawsRun.class, 
 						new Object[] {"conservationArea", ca},
 						new Object[] {"id", id}) > 0) {
-					id = runname + " " + (cnt++);
+					
+					id = runname + " " + (cnt++); 
 				}else {
 					break;
 				}
@@ -208,8 +215,16 @@ public enum PawsManager {
 		return ds;
 	}
 	
-	public Path getDirectory(PawsRun config) {
-		return PawsResultManager.getRunDirectory(config);
+	public Path getDirectory(PawsRun run) {
+		 return Paths.get(run.getConservationArea().getFileDataStoreLocation())
+			.resolve(PawsPlugIn.PAWS_DIR)
+			.resolve("run")
+			.resolve(UuidUtils.uuidToString(run.getUuid()));
+		
+	}
+	
+	public Path getResultsDirectory(PawsRun run) {
+		return getDirectory(run).resolve("results");
 	}
 	
 	public Image getImage(PawsRun.Status status){
@@ -226,12 +241,10 @@ public enum PawsManager {
 	
 	public String getName(PawsParameter.FixedParameter fixedParameter){
 		switch(fixedParameter){
-//		case GRID_BNDS: return "Bounds";
-		case GRID_CRS: return "CRS" ;
+//		case GRID_CRS: return "CRS" ;
 		case GRID_SIZE: return "Grid Size";
 		case LYR_BOUNDARY: return "Conservation Area Boundary";
 		case LYR_OTHER: return "Shapefiles";
-		case TIMEZONE: return "Time Zone";
 		case CLASSIFIER_MODEL: return "Classifier Model";
 		case TRAINING_RES: return "Temporal Training Resolution (Months)";
 		}

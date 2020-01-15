@@ -23,9 +23,10 @@ package org.wcs.smart.paws.engine;
 
 import java.net.URL;
 import java.nio.channels.AsynchronousFileChannel;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.UUID;
+import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -35,17 +36,14 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.geotools.referencing.CRS;
 import org.hibernate.Session;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.paws.PawsEvent;
 import org.wcs.smart.paws.PawsManager;
 import org.wcs.smart.paws.PawsPlugIn;
-import org.wcs.smart.paws.model.PawsParameter;
 import org.wcs.smart.paws.model.PawsResultManager;
 import org.wcs.smart.paws.model.PawsRun;
 import org.wcs.smart.paws.model.PawsWorkspace;
-import org.wcs.smart.util.UuidUtils;
 
 import com.microsoft.azure.storage.blob.BlockBlobURL;
 import com.microsoft.azure.storage.blob.ContainerURL;
@@ -83,8 +81,7 @@ public class PawsDownloadResultJob extends Job {
 		
 		monitor.beginTask("Downloading Results", 5);
 		
-		ContainerURL containerURL;
-		Path resultsFile = null;
+		Path resultsDirectory = null;
 		String runId = null;
 		try{
 			String url = null;
@@ -95,19 +92,20 @@ public class PawsDownloadResultJob extends Job {
 					return Status.OK_STATUS;
 				}
 				runId = r.getRunId();
-				resultsFile = PawsManager.INSTANCE.getDirectory(r);
-				
-				PawsWorkspace ws = QueryFactory.buildQuery(session, PawsWorkspace.class,  
-						new Object[] {"conservationArea", run.getConservationArea()}).uniqueResult();
-				
-				if (ws == null || !ws.isConfigured()) {
-					handleError("PAWS Workspace not configured.  You must first configure the PAWS Workspace before you can run paws analysis.", new Exception("No Paws Workspace Configured."));
-					return Status.OK_STATUS;
-				}
-				url = ws.getUrl() + "?" + ws.getClientId();
+				resultsDirectory = PawsManager.INSTANCE.getResultsDirectory(r);
+				if (!Files.exists(resultsDirectory)) Files.createDirectories(resultsDirectory);
+//				
+//				PawsWorkspace ws = QueryFactory.buildQuery(session, PawsWorkspace.class,  
+//						new Object[] {"conservationArea", run.getConservationArea()}).uniqueResult();
+//				
+//				if (ws == null || !ws.isConfigured()) {
+//					handleError("PAWS Workspace not configured.  You must first configure the PAWS Workspace before you can run paws analysis.", new Exception("No Paws Workspace Configured."));
+//					return Status.OK_STATUS;
+//				}
+//				url = ws.getUrl() + "?" + ws.getClientId();
 			}
-			
-	        containerURL = new ContainerURL(new URL(url), StorageURL.createPipeline(new PipelineOptions()));
+//			
+//	        containerURL = new ContainerURL(new URL(url), StorageURL.createPipeline(new PipelineOptions()));
 		}catch (Exception ex){
 			handleError("Error loading paws workspace.", ex);
 			return Status.OK_STATUS;
@@ -117,25 +115,41 @@ public class PawsDownloadResultJob extends Job {
 		//download results
 		monitor.subTask("downloading results");
 		try{
-			resultsFile = resultsFile.resolve("results.csv"); 
-	        BlockBlobURL blobUrl = containerURL.createBlockBlobURL(runId +"/results.csv");
-	        AsynchronousFileChannel fileChannel = AsynchronousFileChannel.open(resultsFile, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+			ContainerURL containerURL = StorageApi.INSTANCE.getContainerURL();
+
+//			resultsDirectory = resultsFile.resolve("results.csv"); 
+			String endpoint = runId + "/risk_prediction";
 			
-	        final Throwable[] uperror = new Throwable[]{null}; 
-	
-	        TransferManager.downloadBlobToFile(fileChannel, blobUrl, null, null)
-	        .subscribe(response-> {
-	        		synchronized (lock) {
-	        			lock.notifyAll();
+			List<String> tocopy = StorageApi.INSTANCE.getBlobs(containerURL, endpoint);
+			
+			for (String result : tocopy) {
+				BlockBlobURL blobUrl = containerURL.createBlockBlobURL(result);
+				
+				String fname = result.substring(result.lastIndexOf('/')+1);
+				Path resultsFile = resultsDirectory.resolve(fname);
+				
+				AsynchronousFileChannel fileChannel = AsynchronousFileChannel.open(resultsFile, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+				
+				 final Throwable[] uperror = new Throwable[]{null}; 
+					
+			        TransferManager.downloadBlobToFile(fileChannel, blobUrl, null, null)
+			        .subscribe(response-> {
+			        		synchronized (lock) {
+			        			lock.notifyAll();
+			        		}
+			        	},
+			        	error->{
+			        		uperror[0] = error;
+			        		synchronized (lock) {
+			        			lock.notifyAll();
+			        		}
+			        	});
+			        synchronized (lock) {
+	        			lock.wait();
 	        		}
-	        	},
-	        	error->{
-	        		uperror[0] = error;
-	        		synchronized (lock) {
-	        			lock.notifyAll();
-	        		}
-	        	});
-	        if (uperror[0] != null) throw uperror[0];
+			        if (uperror[0] != null) throw new Exception("Unable to download results: " + uperror[0].getMessage(), uperror[0]);
+			}
+			
 		}catch (Throwable t){
 			String msg = "Unable to download results of PAWS analysis from Azure. "
 					+ "Some data may remain on Azure blob storage folder (" 
@@ -147,47 +161,30 @@ public class PawsDownloadResultJob extends Job {
 		monitor.worked(2);
 		
 		//update status
-		CoordinateReferenceSystem crs = null;
+		
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try{
 				PawsRun r = session.get(PawsRun.class, run.getUuid());
 				if (r != null){
 					r.setStatus(PawsRun.Status.COMPLETE);
-					
-					
-					PawsParameter pp = run.getConfiguration().findParameter(PawsParameter.FixedParameter.GRID_CRS.name());
-					if (pp != null) {
-						UUID projUuid = UuidUtils.stringToUuid(pp.getValue().split(":")[0]);
-						if (projUuid != null) {
-							Projection prj = session.get(Projection.class, projUuid);
-							if (prj != null) {
-								crs = CRS.parseWKT(prj.getDefinition());
-							}
-						}
-						if (crs == null) {
-							crs = CRS.parseWKT(pp.getValue().split(":")[1]);	
-						}
-					}
 				}
 				session.getTransaction().commit();
 			}catch (Exception ex){
 				try{ session.getTransaction().rollback(); }catch (Exception ex2){ PawsPlugIn.log(ex2.getMessage(),ex2); }
 				PawsPlugIn.displayLog(ex.getMessage(), ex);
 			}
+			monitor.worked(1);
 		}
-		monitor.worked(1);
+		
 		
 		//build raster files from result
 		monitor.subTask("building raster files");
-		PawsResultManager manager = new PawsResultManager(run);
-		try {
-			for (Path p : manager.getRasterFiles()) {
-				try {
-					manager.createOutput(p, crs);
-				} catch (Exception e) {
-					PawsPlugIn.displayLog(e.getMessage(), e);
-				}
+		try(Session session = HibernateManager.openSession()){
+			PawsRun r = session.get(PawsRun.class, run.getUuid());
+			if (r != null) {
+				PawsResultManager manager = new PawsResultManager(r);
+				manager.createImages();
 			}
 		} catch (Exception e) {
 			PawsPlugIn.displayLog(e.getMessage(), e);

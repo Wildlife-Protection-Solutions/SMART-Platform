@@ -121,7 +121,7 @@
          point="org.eclipse.ui.views">
       <view
             class="org.wcs.smart.paws.ui.PawsView$PawsViewWrapper"
-            icon="images/icons/run.png"
+            icon="images/icons/paws.png"
             id="org.wcs.smart.paws.view"
             name="PAWS "
             restorable="true">
@@ -152,7 +152,7 @@
       <editor
             class="org.wcs.smart.paws.ui.run.RunEditor"
             default="false"
-            icon="images/icons/run.png"
+            icon="images/icons/paws.png"
             id="org.wcs.smart.paws.run.editor"
             name="PAWS Run">
       </editor>
@@ -178,10 +178,10 @@
             id="org.wcs.smart.udig.catalog.paws">
       </factory>
       <wizardPage
-            banner="images/icons/run.png"
+            banner="images/icons/paws.png"
             class="org.wcs.smart.paws.udig.PawsWizardPage"
             description="Add PAWS Result Layer to Map"
-            icon="images/icons/run.png"
+            icon="images/icons/paws.png"
             id="org.wcs.smart.udig.catalog.paws"
             name="PAWS Result Layers">
       </wizardPage>

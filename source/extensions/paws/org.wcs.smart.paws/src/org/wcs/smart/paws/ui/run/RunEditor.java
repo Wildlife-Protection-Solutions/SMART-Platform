@@ -222,19 +222,31 @@ public class RunEditor extends MultiPageEditorPart implements MapPart{
 			try(Session s = HibernateManager.openSession()){
 				pr = s.get(PawsRun.class, getInputInternal().getUuid());
 				if (pr == null) return Status.OK_STATUS;
-				if (pr.getConfiguration() != null) pr.getConfiguration().getName();
+				if (pr.getConfiguration() != null) {
+					pr.getConfiguration().getName();
+					pr.getConfiguration().getParameters().size();
+				}
 				pr.getConservationArea().getFileDataStoreLocation();
 			}
 			
 			PawsRun fpr = pr;
 			Display.getDefault().syncExec(()->{
 				
-				PawsResultManager results = new PawsResultManager(fpr);
-
 				summaryPage.init(fpr);
-				resultsPage.refresh(results);
-				mapPage.refresh(results);
 				RunEditor.this.setPartName(fpr.getId());
+				try {
+					PawsResultManager results = new PawsResultManager(fpr);
+					try {
+						results.createImages(); //should all be created, but if not try again
+					}catch (Exception ex) {
+						PawsPlugIn.displayLog(ex.getMessage(), ex);
+					}
+					resultsPage.refresh(results);
+					mapPage.refresh(results);
+				}catch (Exception ex) {
+					PawsPlugIn.displayLog("Unable to load results." + ex.getMessage(), ex);
+				}
+				
 				
 			});
 			return Status.OK_STATUS;

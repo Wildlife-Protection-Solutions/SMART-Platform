@@ -94,7 +94,7 @@ public class PawsStatusJob extends Job {
 					PawsApi.PawsStatus taskStatus = PawsApi.INSTANCE.checkStatus(run);
 					if (taskStatus == PawsStatus.DONE){
 						readyToDownload.add(run);
-						cleanUp.add(run);
+//						cleanUp.add(run);
 					}else if (taskStatus == PawsStatus.ERROR) {
 						//delete from server
 						cleanUp.add(run);

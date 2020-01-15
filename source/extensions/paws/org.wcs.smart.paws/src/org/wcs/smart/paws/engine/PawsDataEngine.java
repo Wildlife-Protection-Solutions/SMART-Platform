@@ -39,6 +39,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -68,10 +69,12 @@ import org.opengis.feature.type.Name;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.paws.PawsManager;
+import org.wcs.smart.paws.PawsPlugIn;
 import org.wcs.smart.paws.model.PawsConfiguration;
 import org.wcs.smart.paws.model.PawsParameter;
 import org.wcs.smart.paws.model.PawsQueryClass;
@@ -80,6 +83,7 @@ import org.wcs.smart.paws.model.PawsRun.Status;
 import org.wcs.smart.paws.model.PawsSimpleClass;
 import org.wcs.smart.paws.model.PawsWorkspace;
 import org.wcs.smart.util.GeometryUtils;
+import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
 import org.wcs.smart.util.ZipUtil;
@@ -120,28 +124,21 @@ public class PawsDataEngine {
 	}
 	
 	public Path createDataPackage() throws Exception{
+		
 		packageFiles = new ArrayList<>();
 		
 		Path workingDir = null;
 		try(Session session = HibernateManager.openSession()){
 			PawsRun mrun = (PawsRun) session.merge(run);
-			
-			PawsParameter pp = mrun.getConfiguration().findParameter(PawsParameter.FixedParameter.GRID_CRS.name());
-			if (pp == null) throw new Exception("CRS must be provided.  Update the configuration and try again.");
 			workingDir = PawsManager.INSTANCE.getDirectory(mrun);
 		}
 		
+		if (!Files.exists(workingDir)) Files.createDirectories(workingDir);
 		
-		
-		if (!Files.exists(workingDir)){
-			Files.createDirectories(workingDir);
-		}
 		
 		Path dataFiles = workingDir.resolve(DATA_FILE_NAME);
 		packageData(dataFiles);
-		
 		packageBasemapFiles(workingDir);
-		
 		createConfig(workingDir);
 		
 		try(Session session = HibernateManager.openSession()){
@@ -182,47 +179,27 @@ public class PawsDataEngine {
 			}
 			String url = ws.getContainer();
 			config.put("container_name", url);
-			
 			config.put("run_id", run.getRunId());
 			
-			//CRS - everything must be in this crs
-			JSONObject crs = new JSONObject();
-			crs.put("input_wkt_filename:", "input_crs.wkt");
-			crs.put("runtime_wkt_filename:", "runtime_crs.wkt");
-//			crs.put("input_proj4:", "");
-//			crs.put("runtime_proj4:", "");
-			
-//			crs.put("input_proj4","+proj=longlat +datum=WGS84");
-//			crs.put("runtime_proj4","+proj=utm +zone=32S +south +ellps=WGS84 +datum=WGS84 +units=m +no_defs ");
-			
-			config.put("coordinate_reference_systems", crs);
-			
-			writeCRS(target.resolve("input_crs.wkt"), SmartDB.DATABASE_CRS.toWKT());
-			writeCRS(target.resolve("runtime_crs.wkt"), targetCrs.toWKT());
+//			//CRS - everything must be in this crs
+//			JSONObject crs = new JSONObject();
+//			crs.put("input_wkt_filename:", "input_crs.wkt");
+//			crs.put("runtime_wkt_filename:", "runtime_crs.wkt");
+////			crs.put("input_proj4:", "");
+////			crs.put("runtime_proj4:", "");
+//			
+////			crs.put("input_proj4","+proj=longlat +datum=WGS84");
+////			crs.put("runtime_proj4","+proj=utm +zone=32S +south +ellps=WGS84 +datum=WGS84 +units=m +no_defs ");
+//			
+//			config.put("coordinate_reference_systems", crs);
+//			
+//			writeCRS(target.resolve("input_crs.wkt"), SmartDB.DATABASE_CRS.toWKT());
+//			writeCRS(target.resolve("runtime_crs.wkt"), targetCrs.toWKT());
 			
 			PawsParameter pp = run.getConfiguration().findParameter(PawsParameter.FixedParameter.GRID_SIZE.name());
 			//TODO: this needs to be in meters; so assuming the projection is in meters
 			config.put("spatial_resolution", pp.getValue());
-			
-			
-			//area_boundary
-			//must be provided in lat/long
-//			pp = run.getConfiguration().findParameter(PawsParameter.FixedParameter.GRID_BNDS.name());
-//			String[] bits = pp.getValue().split("\\s+");
-//			double x1 = Double.parseDouble(bits[0]);
-//			double y1 = Double.parseDouble(bits[1]);
-//			double x2 = Double.parseDouble(bits[2]);
-//			double y2 = Double.parseDouble(bits[3]);
-//			ReferencedEnvelope re = new ReferencedEnvelope(x1,x2, y1, y2, targetCrs);
-//			re = ReprojectUtils.reproject(re, SmartDB.DATABASE_CRS);
-//			
-//			JSONObject bnds = new JSONObject();
-//			bnds.put("longitude_min", re.getMinX());
-//			bnds.put("longitude_max", re.getMaxX());
-//			bnds.put("latitude_min", re.getMinY());
-//			bnds.put("latitude_max", re.getMaxY());
-//			config.put("area_boundary", bnds);
-			
+					
 			
 			//shapefiles
 			JSONObject shapefiles = new JSONObject();
@@ -264,9 +241,9 @@ public class PawsDataEngine {
 			patrolobs.put("start_date", formatter.format(run.getDataStartDate()));
 			patrolobs.put("end_date", formatter.format(run.getDataEndDate()));
 
-			pp = run.getConfiguration().findParameter(PawsParameter.FixedParameter.TIMEZONE.name());
-			if (pp == null) throw new Exception("Timezone value must be provided.  Update the configuration and try again.");
-			patrolobs.put("time_zone", pp.getValue());
+//			pp = run.getConfiguration().findParameter(PawsParameter.FixedParameter.TIMEZONE.name());
+//			if (pp == null) throw new Exception("Timezone value must be provided.  Update the configuration and try again.");
+//			patrolobs.put("time_zone", pp.getValue());
 			patrolobs.put("file_name", DATA_FILE_NAME);
 			
 			

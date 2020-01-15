@@ -31,11 +31,13 @@ import java.util.Map;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.part.EditorPart;
-import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.project.internal.Layer;
+import org.locationtech.udig.project.internal.LayerFactory;
+import org.locationtech.udig.project.internal.ProjectPlugin;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
 import org.locationtech.udig.project.internal.commands.DeleteLayersCommand;
 import org.wcs.smart.paws.PawsPlugIn;
+import org.wcs.smart.paws.model.PawsResultFile;
 import org.wcs.smart.paws.model.PawsResultManager;
 import org.wcs.smart.paws.model.PawsRun;
 import org.wcs.smart.paws.udig.PawsService;
@@ -72,7 +74,7 @@ public class RunMapResultsPage extends SmartMapEditorPart{
 		addInitialZoomFunction();
 	}  
 	
-	public void refresh(PawsResultManager run) {
+	public void refresh(PawsResultManager mngr) {
 		//delete existing layers
 		if (!resultslayers.isEmpty()) {
 			DeleteLayersCommand dcmd = new DeleteLayersCommand(resultslayers.toArray(new Layer[resultslayers.size()]));
@@ -81,27 +83,60 @@ public class RunMapResultsPage extends SmartMapEditorPart{
 		}
 		
 		//only add layers if status is complete
-		if (run.getRun().getStatus() != PawsRun.Status.COMPLETE) {
+		if (mngr.getRun().getStatus() != PawsRun.Status.COMPLETE) {
 			return;
 		}
 		Map<String, Serializable> params = new HashMap<>();
-		params.put(PawsServiceExtension.CA_UUID_KEY, run.getRun().getConservationArea().getUuid());
+		params.put(PawsServiceExtension.RUN_UUID_KEY, mngr.getRun().getUuid());
 		PawsService service = new PawsService(params, new DesktopSessionProvider());
 		
-		List<IGeoResource> toadd = new ArrayList<>();
+		List<PawsTiffGeoResource> toadd = new ArrayList<>();
 		try {
-			for (Path p : run.getRasterFiles()) {
-				PawsTiffGeoResource r = new PawsTiffGeoResource(service, p);
-				toadd.add(r);
+			for (PawsResultFile f : mngr.getResults()) {
+				for (Path p : f.getRasterFiles()) {
+					PawsTiffGeoResource r = new PawsTiffGeoResource(service, f, p);
+					toadd.add(r);
+				}	
 			}
+			
 		}catch (Exception ex) {
 			PawsPlugIn.displayLog(ex.getMessage(), ex);
 			return;
 		}
 		AddLayersCommand cmd = new AddLayersCommand(toadd) {
+//		    public void run( IProgressMonitor monitor ) throws Exception {
+//		    	super.run(monitor);
+//		    	resultslayers.addAll(getLayers());
+//		    	resultslayers.forEach(l->l.setVisible(false));
+//		    }
+		    
+		    List<Layer> layers;
+		    
+		    @Override
 		    public void run( IProgressMonitor monitor ) throws Exception {
-		    	super.run(monitor);
-		    	resultslayers.addAll(getLayers());
+		        org.locationtech.udig.project.internal.Map map = super.getMap();
+		        if (layers == null) {
+		            layers = new ArrayList<Layer>();
+		            LayerFactory layerFactory = map.getLayerFactory();
+
+		            for( PawsTiffGeoResource item : toadd ) {
+		                try {
+		                    Layer layer = layerFactory.createLayer(item);
+		                    if (layer != null) {
+		                    	layer.setVisible(false);
+		                    	layer.setName(item.getTitle());
+		                        layers.add(layer);
+		                    }
+		                }
+		                catch (Throwable t){
+		                    ProjectPlugin.log("Unable to add "+ item,t);
+		                }
+		            }
+		        }
+		        if (!layers.isEmpty()) {
+		            map.getLayersInternal().addAll( map.getLayersInternal().size(), layers);
+		        }
+
 		    }
 		};
 		getMap().sendCommandASync(cmd);

@@ -59,7 +59,7 @@ public class PawsServiceExtension implements ServiceExtension {
     /**
      * Service parameter conservation area uuid key
      */
-    public static final String CA_UUID_KEY = "cauuid"; //$NON-NLS-1$
+    public static final String RUN_UUID_KEY = "runuuid"; //$NON-NLS-1$
 	
     @Override
 	public IService createService(URL id, Map<String, Serializable> params) {
@@ -67,7 +67,7 @@ public class PawsServiceExtension implements ServiceExtension {
             return null;
         
         //check for the property service key
-        if (params.containsKey(CA_UUID_KEY) && params.get(CA_UUID_KEY) instanceof UUID ){
+        if (params.containsKey(RUN_UUID_KEY) && params.get(RUN_UUID_KEY) instanceof UUID ){
         	IDatabaseConnectionProvider provider = SmartContext.INSTANCE.getClass(IDatabaseConnectionProvider.class);
             //found it, create the service handle
         	return new PawsService(params, provider);
@@ -135,9 +135,9 @@ public class PawsServiceExtension implements ServiceExtension {
 		HashMap<String, Serializable> params = new HashMap<String, Serializable>();
 		try{
 			UUID buuid = UuidUtils.stringToUuid(scauuid);
-			params.put(CA_UUID_KEY, buuid);
+			params.put(RUN_UUID_KEY, buuid);
 		}catch (Throwable ex){
-			Logger.getLogger(PawsServiceExtension.class.getName()).log(Level.WARNING, "Invalid Conservation Area UUID provided in URL.", ex); //$NON-NLS-1$
+			Logger.getLogger(PawsServiceExtension.class.getName()).log(Level.WARNING, "Invalid PAWS Run UUID provided in URL.", ex); //$NON-NLS-1$
 			return null;
 		}
 		return params;
@@ -150,10 +150,10 @@ public class PawsServiceExtension implements ServiceExtension {
 	 * @return url generated from connection parameters
 	 */
 	public static URL createURL(Map<String, Serializable> params){
-		if (params.get(CA_UUID_KEY) == null || !(params.get(CA_UUID_KEY) instanceof UUID)){
+		if (params.get(RUN_UUID_KEY) == null || !(params.get(RUN_UUID_KEY) instanceof UUID)){
 			return null;
 		}
-		String url = PROTOCOL + "://" + HOST + "/" + UuidUtils.uuidToString((UUID)params.get(CA_UUID_KEY)) ; //$NON-NLS-1$ //$NON-NLS-2$
+		String url = PROTOCOL + "://" + HOST + "/" + UuidUtils.uuidToString((UUID)params.get(RUN_UUID_KEY)) ; //$NON-NLS-1$ //$NON-NLS-2$
 		try{
 			return new URL(null, url, CorePlugin.RELAXED_HANDLER);
 		}catch (Throwable t){

@@ -46,9 +46,15 @@ public enum PawsApi {
 	INSTANCE;
 	
 	enum PawsStatus{
-		IN_PROGRESS,
-		ERROR,
-		DONE
+		IN_PROGRESS(""), //$NON-NLS-1$
+		ERROR("failed"), //$NON-NLS-1$
+		DONE("completed"); //$NON-NLS-1$
+		
+		public String responseCode;
+		
+		PawsStatus(String code){
+			this.responseCode = code;
+		}
 	};
 	
 	public void run(PawsRun run, String json) throws Exception{
@@ -181,11 +187,16 @@ public enum PawsApi {
 				if (r != null) {
 					session.beginTransaction();
 					try {
-						r.setServerStatusJson(content.toString());
-						r.setStatusMessage(task.getStatus());
-						if (task.getBackendStatus().equalsIgnoreCase("failed")) {
+						String status = task.getStatus();
+						if (status.length() > 32700) status = status.substring(0,32700);
+						r.setStatusMessage(status);
+						
+						String json = content.toString();
+						if (json.length() > 32700) json = json.substring(0, 32700);
+						r.setServerStatusJson(json);
+						
+						if (task.getBackendStatus().equalsIgnoreCase(PawsStatus.ERROR.responseCode)) {
 							r.setStatus(Status.ERROR);
-							r.setStatusMessage(task.getStatus());
 						}
 						
 						session.getTransaction().commit();
@@ -196,8 +207,8 @@ public enum PawsApi {
 				}
 			}
 
-			if (task.getBackendStatus().equalsIgnoreCase("failed")) return PawsStatus.ERROR;
-			if (task.getBackendStatus().equalsIgnoreCase("complete")) return PawsStatus.DONE;
+			if (task.getBackendStatus().equalsIgnoreCase(PawsStatus.ERROR.responseCode)) return PawsStatus.ERROR;
+			if (task.getBackendStatus().equalsIgnoreCase(PawsStatus.DONE.responseCode)) return PawsStatus.DONE;
 			return PawsStatus.IN_PROGRESS;
 		}catch (Exception ex){
 			PawsPlugIn.log(ex.getMessage(), ex);
