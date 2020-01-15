@@ -395,7 +395,7 @@
          </command>
          <command
                commandId="org.wcs.smart.query.run"
-               icon="images/icons/etool16/bullet_go.png"
+               icon="images/icons/etool16/run.png"
                label="%querydefview.toolbar.run.command.label"
                style="push"
                tooltip="%querydefview.toolbar.run.command.tooltip">
@@ -973,7 +973,7 @@
       </image>
       <image
             commandId="org.wcs.smart.query.openrun"
-            icon="images/icons/etool16/bullet_go.png">
+            icon="images/icons/etool16/run.png">
       </image>
       <image
             commandId="org.wcs.smart.query.runexport"

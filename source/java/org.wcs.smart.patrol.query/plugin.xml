@@ -178,28 +178,28 @@
       <editor
             class="org.wcs.smart.patrol.query.ui.editor.PatrolSimpleQueryResultEditor"
             default="false"
-            icon="images/icons/obj16/observation_query.png"
+            icon="images/icons/obj16/patrol.observation.png"
             id="org.wcs.smart.query.ui.QueryResultsEditor"
             name="%observationqueryeditor.editor.name">
       </editor>
       <editor
             class="org.wcs.smart.patrol.query.ui.editor.PatrolSummaryEditor"
             default="false"
-            icon="images/icons/obj16/summary_query.png"
+            icon="images/icons/obj16/patrol.summary.png"
             id="org.wcs.smart.query.ui.SummaryEditor"
             name="%summaryqueryeditor.editor.name">
       </editor>
       <editor
             class="org.wcs.smart.patrol.query.ui.editor.PatrolQueryResultsEditor"
             default="false"
-            icon="images/icons/obj16/patrol_query.png"
+            icon="images/icons/obj16/patrol.track.png"
             id="org.wcs.smart.query.ui.PatrolQueryResultsEditor"
             name="%patrolqueryeditor.editor.name">
       </editor>
       <editor
             class="org.wcs.smart.patrol.query.ui.editor.PatrolGriddedEditor"
             default="false"
-            icon="images/icons/obj16/gridded_query.png"
+            icon="images/icons/obj16/patrol.grid.png"
             id="org.wcs.smart.query.ui.GriddedEditor"
             name="%griddedqueryeditor.editor.name">
       </editor>
@@ -216,7 +216,7 @@
                tooltip="%patrolquery1.menu.tooltip">
             <command
                   commandId="org.wcs.smart.query.create.unknown"
-                  icon="images/icons/obj16/observation_query.png"
+                  icon="images/icons/obj16/patrol.observation.png"
                   label="%querytoolbar.createquery.menu.newobservationquery.command.label"
                   style="pulldown"
                   tooltip="%querytoolbar.createquery.menu.newobservationquery.command.tooltip">
@@ -227,7 +227,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.query.create.unknown"
-                  icon="images/icons/obj16/waypoint_query.16.32.png"
+                  icon="images/icons/obj16/patrol.waypoint.png"
                   label="%querytoolbar.newincident.command.label"
                   style="push"
                   tooltip="%querytoolbar.newincident.command.tooltip.">
@@ -238,7 +238,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.query.create.unknown"
-                  icon="images/icons/obj16/patrol_query.png"
+                  icon="images/icons/obj16/patrol.track.png"
                   label="%querytoolbar.createquery.menu.newpatrolquery.command.label"
                   style="push"
                   tooltip="%querytoolbar.createquery.menu.newpatrolquery.command.tooltip">
@@ -249,7 +249,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.query.create.unknown"
-                  icon="images/icons/obj16/summary_query.png"
+                  icon="images/icons/obj16/patrol.summary.png"
                   label="%querytoolbar.createquery.menu.newsummaryquery.command.label"
                   style="push"
                   tooltip="%querytoolbar.createquery.menu.newsummaryquery.command.tooltip">
@@ -260,7 +260,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.query.create.unknown"
-                  icon="images/icons/obj16/gridded_query.png"
+                  icon="images/icons/obj16/patrol.grid.png"
                   label="%querytoolbar.createquery.menu.newgridsummary.command.label"
                   style="push"
                   tooltip="%querytoolbar.createquery.menu.newgridsummary.command.tooltip">
@@ -276,7 +276,7 @@
             locationURI="popup:org.wcs.smart.menu.query.popup.newquery?after=org.wcs.smart.query.newquery.separator1">
          <command
                commandId="org.wcs.smart.query.create.unknown"
-               icon="images/icons/obj16/observation_query.png"
+               icon="images/icons/obj16/patrol.observation.png"
                label="%querytoolbar.createquery.menu.newobservationquery.command.label"
                style="pulldown"
                tooltip="%querytoolbar.createquery.menu.newobservationquery.command.tooltip">
@@ -287,7 +287,7 @@
          </command>
          <command
                commandId="org.wcs.smart.query.create.unknown"
-               icon="images/icons/obj16/waypoint_query.16.32.png"
+               icon="images/icons/obj16/patrol.waypoint.png"
                label="%querytoolbar.newincident.command.label"
                style="push"
                tooltip="%querytoolbar.newincident.command.tooltip.">
@@ -298,7 +298,7 @@
          </command>
          <command
                commandId="org.wcs.smart.query.create.unknown"
-               icon="images/icons/obj16/patrol_query.png"
+               icon="images/icons/obj16/patrol.track.png"
                label="%querytoolbar.createquery.menu.newpatrolquery.command.label"
                style="push"
                tooltip="%querytoolbar.createquery.menu.newpatrolquery.command.tooltip">
@@ -309,7 +309,7 @@
          </command>
          <command
                commandId="org.wcs.smart.query.create.unknown"
-               icon="images/icons/obj16/summary_query.png"
+               icon="images/icons/obj16/patrol.summary.png"
                label="%querytoolbar.createquery.menu.newsummaryquery.command.label"
                style="push"
                tooltip="%querytoolbar.createquery.menu.newsummaryquery.command.tooltip">
@@ -320,7 +320,7 @@
          </command>
          <command
                commandId="org.wcs.smart.query.create.unknown"
-               icon="images/icons/obj16/gridded_query.png"
+               icon="images/icons/obj16/patrol.grid.png"
                label="%querytoolbar.createquery.menu.newgridsummary.command.label"
                style="push"
                tooltip="%querytoolbar.createquery.menu.newgridsummary.command.tooltip">

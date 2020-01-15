@@ -148,19 +148,19 @@ public class PatrolQueryPlugIn extends AbstractUIPlugin {
 	public void initializeImageRegistry(ImageRegistry reg) {
 		reg.put(SUMMARY_QUERY_ICON,
 				imageDescriptorFromPlugin(PLUGIN_ID,
-						"images/icons/obj16/summary_query.png"));//$NON-NLS-1$
+						"images/icons/obj16/patrol.summary.png"));//$NON-NLS-1$
 		reg.put(WAYPOINT_QUERY_ICON,
 				imageDescriptorFromPlugin(PLUGIN_ID,
-						"images/icons/obj16/waypoint_query.16.32.png"));//$NON-NLS-1$
+						"images/icons/obj16/patrol.waypoint.png"));//$NON-NLS-1$
 		reg.put(OBSERVATION_QUERY_ICON,
 				imageDescriptorFromPlugin(PLUGIN_ID,
-						"images/icons/obj16/observation_query.png"));//$NON-NLS-1$
+						"images/icons/obj16/patrol.observation.png"));//$NON-NLS-1$
 		reg.put(PATROL_QUERY_ICON,
 				imageDescriptorFromPlugin(PLUGIN_ID,
-						"images/icons/obj16/patrol_query.png"));//$NON-NLS-1$
+						"images/icons/obj16/patrol.track.png"));//$NON-NLS-1$
 		reg.put(GRIDDED_SUMMARY_QUERY_ICON,
 				imageDescriptorFromPlugin(PLUGIN_ID,
-						"images/icons/obj16/gridded_query.png"));//$NON-NLS-1$
+						"images/icons/obj16/patrol.grid.png"));//$NON-NLS-1$
 		reg.put(VALUE_NUM_EMPLOYEES_ICON,
 				imageDescriptorFromPlugin(PLUGIN_ID,
 						"images/icons/obj16/value_numEmployees.png"));//$NON-NLS-1$
