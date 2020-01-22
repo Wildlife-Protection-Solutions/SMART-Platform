@@ -144,6 +144,14 @@
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-multipart-provider</artifactId>
 			<version>${resteasy.version}</version>
+			
+			<exclusions>
+          		<exclusion>
+            		<groupId>com.sun.mail</groupId>
+            		<artifactId>javax.mail</artifactId>
+          		</exclusion>
+        	</exclusions>
+        
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
@@ -165,10 +173,11 @@
 		</dependency>
 
 		<!--javamail -->
+		
 		<dependency>
-			<groupId>javax.mail</groupId>
-			<artifactId>mail</artifactId>
-			<version>1.4.7</version>
+			<groupId>com.sun.mail</groupId>
+            <artifactId>javax.mail</artifactId>
+			<version>1.6.2</version>
 			<scope>provided</scope>
 		</dependency>
 		
