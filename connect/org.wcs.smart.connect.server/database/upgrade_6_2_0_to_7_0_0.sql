@@ -492,7 +492,7 @@ update connect.connect_plugin_version set version = '7.0.0' where plugin_id = 'o
 
 update connect.ca_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.cybertracker.patrol';
 update connect.ca_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.cybertracker.survey';
-update connect.ca_plugin_version set version = '6.0' where plugin_id = 'org.wcs.smart.cybertracker';
+update connect.ca_plugin_version set version = '7.0' where plugin_id = 'org.wcs.smart.cybertracker';
 update connect.ca_plugin_version set version = '7.0.0' where plugin_id = 'org.wcs.smart';
 
 update connect.connect_version set version = '7.0.0', last_updated = now();		
