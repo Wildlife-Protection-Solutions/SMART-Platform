@@ -662,7 +662,7 @@ public class CtJsonExportUtils {
 
 			for (org.wcs.smart.dataentry.model.xml.generated.AttributeType at : l.getAttribute()) {
 
-				String imageLocation = null;
+				String imageLocation = HelpImageLocation.BEFORE.name();
 				String helpText = null;
 				String imageFormat = null;
 				UUID uuid = UuidUtils.stringToUuid(at.getId());
