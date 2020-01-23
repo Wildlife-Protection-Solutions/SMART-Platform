@@ -508,6 +508,7 @@ public class HelpContentComposite extends Composite {
 
 		Path p = Paths.get(filename);
 		attribute.setImportHelpFile(p);
+		attribute.setHelpImageLocation((HelpImageLocation) cmbImageLoc.getStructuredSelection().getFirstElement());
 		refreshImage();
 		listener.modelChanged();
 	}
