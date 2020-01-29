@@ -477,7 +477,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 							newGroup.getObservations().add(wo);
 						}
 						
-						session.save(newGroup);
+						if (link.getPatrolLeg().getPatrol().getUuid() != null) session.save(newGroup);
 						
 						//update patrol links
 						CtPatrolWpLink wplink = new CtPatrolWpLink();
@@ -495,7 +495,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 						//we want this newly created waypoint
 						addToExistingLeg(link.getPatrolLeg(), wp, session);
 						
-						session.saveOrUpdate(wp);
+						if (link.getPatrolLeg().getPatrol().getUuid() != null) session.saveOrUpdate(wp);
 						
 						//update patrol links
 						CtPatrolWpLink wplink = new CtPatrolWpLink();
