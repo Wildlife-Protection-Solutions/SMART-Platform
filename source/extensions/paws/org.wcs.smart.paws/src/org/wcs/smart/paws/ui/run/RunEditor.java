@@ -237,7 +237,9 @@ public class RunEditor extends MultiPageEditorPart implements MapPart{
 				try {
 					PawsResultManager results = new PawsResultManager(fpr);
 					try {
-						results.createImages(); //should all be created, but if not try again
+						if (results.getRun().getStatus() == org.wcs.smart.paws.model.PawsRun.Status.COMPLETE) {
+							results.createImages(); //should all be created, but if not try again
+						}
 					}catch (Exception ex) {
 						PawsPlugIn.displayLog(ex.getMessage(), ex);
 					}

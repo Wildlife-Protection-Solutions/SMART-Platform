@@ -27,6 +27,8 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.geotools.referencing.CRS;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.paws.PawsManager;
 
 /**
@@ -37,6 +39,7 @@ import org.wcs.smart.paws.PawsManager;
  */
 public class PawsResultManager {
 
+	public static final String PROJ_FILE = "runtime.wkt";
 	private PawsRun run;
 	private List<PawsResultFile> resultFiles;
 	
@@ -63,8 +66,14 @@ public class PawsResultManager {
 	}
 	
 	public void createImages() throws Exception{
+		//determine projection
+		Path projFile =  PawsManager.INSTANCE.getResultsDirectory(run).resolve(PROJ_FILE);
+		String wktprj = Files.readString(projFile);
+		CoordinateReferenceSystem crs = CRS.parseWKT(wktprj);
+		
+		//create image files
 		for (PawsResultFile f : resultFiles) {
-			f.createOutputImages();
+			f.createOutputImages(crs);
 		}
 		
 	}

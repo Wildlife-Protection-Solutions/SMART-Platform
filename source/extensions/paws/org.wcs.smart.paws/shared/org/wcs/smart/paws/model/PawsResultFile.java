@@ -72,22 +72,12 @@ public class PawsResultFile {
 	
 	private Path resultsFile = null;
 	private Path imageDir = null;
-	private CoordinateReferenceSystem crs;
+	
 	private List<Path> rasterFiles = null;
 	
 	public PawsResultFile(PawsRun run, Path file) {
 		this.run = run;
 		this.resultsFile = file;
-		//TODO:
-		try {
-			this.crs = CRS.decode("EPSG: 32648");
-		} catch (NoSuchAuthorityCodeException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (FactoryException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		
 		String rootName = resultsFile.getFileName().toString();
 		//remove any extensions and create a folder
@@ -179,12 +169,23 @@ public class PawsResultFile {
 		return rasterFiles;
 	}
 	
-	public void createOutputImages() throws Exception{
-		for (Path p : getRasterFiles()) createOutputImage(p);
+	public void createOutputImages(CoordinateReferenceSystem crs) throws Exception{
+		for (Path p : getRasterFiles()) createOutputImage(p, crs);
 	}
-	private void createOutputImage(Path resultFile) throws Exception{
+	private void createOutputImage(Path resultFile, CoordinateReferenceSystem crs) throws Exception{
 		if (Files.exists(resultFile)) return; //created
 		
+//		//TODO:
+//		try {
+//			if (crs == null) crs = CRS.decode("EPSG: 32648");
+//		} catch (NoSuchAuthorityCodeException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (FactoryException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+	
 		if (crs == null) throw new Exception("Projection of results could not be determined");
 
 		//create a raster files out of this layer
@@ -199,11 +200,11 @@ public class PawsResultFile {
 		for (int i = 0; i < headers.length; i ++ ) {
 			if(headers[i].equalsIgnoreCase(columnname)) {
 				index = i;
-			}else if (headers[i].equalsIgnoreCase("spatial_id")) {
-//			}else if (headers[i].equalsIgnoreCase("x")) {
-				xindex = i;
-//			}else if (headers[i].equalsIgnoreCase("y")) {
+			//}else if (headers[i].equalsIgnoreCase("spatial_id")) {
 			}else if (headers[i].equalsIgnoreCase("x")) {
+				xindex = i;
+			}else if (headers[i].equalsIgnoreCase("y")) {
+			//}else if (headers[i].equalsIgnoreCase("x")) {
 				yindex = i;
 			}
 		}
@@ -224,8 +225,7 @@ public class PawsResultFile {
 				
 				String[] data;
 				while ((data = reader.readNext()) != null) {
-					if (data[xindex].trim().isEmpty()) continue;
-					
+					//if (data[xindex].trim().isEmpty()) continue;
 					double x = Double.valueOf(data[xindex]);
 					double y = Double.valueOf(data[yindex]);
 					

@@ -84,7 +84,6 @@ public class PawsDownloadResultJob extends Job {
 		Path resultsDirectory = null;
 		String runId = null;
 		try{
-			String url = null;
 			try(Session session = HibernateManager.openSession()){
 				PawsRun r = session.get(PawsRun.class, run.getUuid());
 				if (r == null){
@@ -94,18 +93,7 @@ public class PawsDownloadResultJob extends Job {
 				runId = r.getRunId();
 				resultsDirectory = PawsManager.INSTANCE.getResultsDirectory(r);
 				if (!Files.exists(resultsDirectory)) Files.createDirectories(resultsDirectory);
-//				
-//				PawsWorkspace ws = QueryFactory.buildQuery(session, PawsWorkspace.class,  
-//						new Object[] {"conservationArea", run.getConservationArea()}).uniqueResult();
-//				
-//				if (ws == null || !ws.isConfigured()) {
-//					handleError("PAWS Workspace not configured.  You must first configure the PAWS Workspace before you can run paws analysis.", new Exception("No Paws Workspace Configured."));
-//					return Status.OK_STATUS;
-//				}
-//				url = ws.getUrl() + "?" + ws.getClientId();
 			}
-//			
-//	        containerURL = new ContainerURL(new URL(url), StorageURL.createPipeline(new PipelineOptions()));
 		}catch (Exception ex){
 			handleError("Error loading paws workspace.", ex);
 			return Status.OK_STATUS;
@@ -121,6 +109,7 @@ public class PawsDownloadResultJob extends Job {
 			String endpoint = runId + "/risk_prediction";
 			
 			List<String> tocopy = StorageApi.INSTANCE.getBlobs(containerURL, endpoint);
+			tocopy.add(runId + "/processed_data/" + PawsResultManager.PROJ_FILE);
 			
 			for (String result : tocopy) {
 				BlockBlobURL blobUrl = containerURL.createBlockBlobURL(result);
