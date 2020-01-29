@@ -438,7 +438,7 @@ public class PatrolHibernateManager extends HibernateManager{
 	}
 	
 	/**
-	 * Similar to savePatrolInTransaction except it doesn't not try to start a 
+	 * Similar to savePatrolInTransaction except it doesn't try to start a 
 	 * transaction.  It assumes a transaction is already initialized 
 	 * 
 	 * @param patrol
