@@ -137,7 +137,7 @@ public enum Resources {
 		if (recordImages.containsKey(source.getKeyId())) return recordImages.get(source.getKeyId());
 		if (source.getIcon() == null) return null;
 		
-		Display.getDefault().asyncExec(()->{
+		Display.getDefault().syncExec(()->{
 			try {
 				Image i =  AWTSWTImageUtils.createImageDescriptor(source.getIconAsImage()).createImage();
 				recordImages.put(source.getKeyId(), i);
@@ -145,7 +145,7 @@ public enum Resources {
 				Intelligence2PlugIn.log(ex.getMessage(),ex);
 			}
 		});
-		return null;
+		return recordImages.get(source.getKeyId());
 	}
 
 	

@@ -196,6 +196,20 @@ public class DeleteCaHandler implements ICaDeleteHandler{
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
+		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelRecordSummaryQuery")); //$NON-NLS-1$
+		q = session.createQuery("delete from IntelRecordSummaryQuery where conservationArea = :ca"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.executeUpdate();
+		
+		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelRecordQuery")); //$NON-NLS-1$
+		q = session.createQuery("delete from IntelRecordQuery where conservationArea = :ca"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.executeUpdate();
+		
+		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelRecordSummaryQuery")); //$NON-NLS-1$
+		q = session.createQuery("delete from IntelRecordSummaryQuery where conservationArea = :ca"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.executeUpdate();
 		
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelRecordSourceAttribute")); //$NON-NLS-1$
 		q = session.createQuery("delete from IntelRecordSourceAttribute ii where ii.source in (from IntelRecordSource where conservationArea = :ca)"); //$NON-NLS-1$
@@ -213,6 +227,11 @@ public class DeleteCaHandler implements ICaDeleteHandler{
 		q.executeUpdate();
 
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelAttribute")); //$NON-NLS-1$
+		q = session.createQuery("delete from IntelAttribute where conservationArea = :ca"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.executeUpdate();
+		
+		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "IntelProfile")); //$NON-NLS-1$
 		q = session.createQuery("delete from IntelAttribute where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();

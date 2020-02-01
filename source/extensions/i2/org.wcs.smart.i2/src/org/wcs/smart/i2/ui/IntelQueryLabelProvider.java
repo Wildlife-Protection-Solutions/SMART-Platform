@@ -95,8 +95,9 @@ public class IntelQueryLabelProvider extends OwnerDrawLabelProvider {
 			x+= img.getBounds().width + 5;
 		}
 		String txt = getText(element);
-		event.gc.setBackground(tc.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-		event.gc.drawText(txt,x,y+2);
+//		event.gc.setBackground(tc.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		event.gc.drawText(txt,x,y+2, SWT.DRAW_TRANSPARENT);
+		
 		x = tc.getParent().getBounds().width;
 		Set<String> allprofiles = getProfiles(element);
 		Set<String> current = (Set<String>)tc.getParent().getData(PROFILE_KEYS);
