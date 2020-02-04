@@ -73,6 +73,7 @@ public class FilterTreeContentProvider implements ITreeContentProvider{
 	 * @param items
 	 */
 	public void setItems(List<FilterTreeItem> items) {
+		if (viewer.getControl().isDisposed()) return;
 		this.items = items;
 		viewer.refresh();
 		
