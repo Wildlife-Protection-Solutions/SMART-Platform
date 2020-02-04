@@ -465,6 +465,19 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 							wo.setObservationGroup(mwpg);
 							mwpg.getObservations().add(wo);
 						}
+						//copy attachments
+						if (wp.getAttachments() != null) {
+							if (mwpg.getWaypoint().getAttachments() == null) mwpg.getWaypoint().setAttachments(new ArrayList<>());						
+							for (WaypointAttachment wa : wp.getAttachments()) {
+								wa.setWaypoint(mwpg.getWaypoint());
+								mwpg.getWaypoint().getAttachments().add(wa);
+								
+								wa.computeFileLocation(new File(new File(
+										SmartDB.getCurrentConservationArea().getFileDataStoreLocation(),
+										PATROL_WP_SRC.getDatastoreFileLocation(link.getPatrolLeg().getPatrol(), session)), wa.getFilename()));
+							
+							}
+						}
 					}else if (mwp != null) {
 						//create a new group with these observations
 						if (mwp.getObservationGroups() == null) mwp.setObservationGroups(new ArrayList<>());
@@ -475,6 +488,19 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 						for (WaypointObservation wo : wp.getAllObservations()) {
 							wo.setObservationGroup(newGroup);
 							newGroup.getObservations().add(wo);
+						}
+						
+						//copy attachments
+						if (wp.getAttachments() != null) {
+							if (mwp.getAttachments() == null) mwp.setAttachments(new ArrayList<>());						
+							for (WaypointAttachment wa : wp.getAttachments()) {
+								wa.setWaypoint(mwp);
+								mwp.getAttachments().add(wa);
+							
+								wa.computeFileLocation(new File(new File(
+										SmartDB.getCurrentConservationArea().getFileDataStoreLocation(),
+										PATROL_WP_SRC.getDatastoreFileLocation(link.getPatrolLeg().getPatrol(), session)), wa.getFilename()));
+							}
 						}
 						
 						if (link.getPatrolLeg().getPatrol().getUuid() != null) session.save(newGroup);
@@ -847,6 +873,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 			session.saveOrUpdate(wp);
 			session.save(pw);
 			session.saveOrUpdate(addToD.getPatrolLeg().getPatrol());
+			session.flush();
 		}
 	}
 
