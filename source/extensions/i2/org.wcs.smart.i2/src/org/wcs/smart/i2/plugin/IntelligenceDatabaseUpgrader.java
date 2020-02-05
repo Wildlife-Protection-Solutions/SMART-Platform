@@ -458,8 +458,6 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 
 		session.createNativeQuery("alter table smart.i_recordsource_attribute alter column keyid not null").executeUpdate();
 
-
-		//TODO: permissions
 		//need to map old permissions to new ones
 		//remove old permission from employee
 		results = session.createNativeQuery("select uuid, ca_uuid, smartuserlevel FROM smart.EMPLOYEE where smartuserlevel is not null").list();
@@ -535,7 +533,7 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 			
 		}
 		
-		HibernateManager.setPlugInVersion(Intelligence2PlugIn.PLUGIN_ID, Intelligence2PlugIn.DB_VERSION_4, session);
+		HibernateManager.setPlugInVersion(Intelligence2PlugIn.PLUGIN_ID, Intelligence2PlugIn.DB_VERSION_5, session);
 
 	}
 }
