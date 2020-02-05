@@ -60,7 +60,7 @@ public class RecordProcessor implements IItemProcessor {
 	public ProcessingStatus process(DataQueueItem item, IProgressMonitor monitor)
 			throws Exception {
 		
-		if (!IntelSecurityManager.INSTANCE.canCreateRecord()) {
+		if (!IntelSecurityManager.INSTANCE.canCreateRecordAny()) {
 			return new ProcessingStatus(LocalDataQueueItem.Status.ERROR, Messages.RecordProcessor_invaliduser);
 		}
 		LocalDataQueueItem litem = (LocalDataQueueItem)item;
@@ -69,8 +69,8 @@ public class RecordProcessor implements IItemProcessor {
 		IEventBroker broker = SmartPlugIn.getDefault().getWorkbench().getService(IEclipseContext.class).get(IEventBroker.class);
 		try(Session session = HibernateManager.openSession()){
 			RecordXmlImporter importer = new RecordXmlImporter(session);
-			
 			importer.importRecord(file, monitor);
+			
 			Object[] results = importer.finishSingleTransaction(broker);
 			if (results == null) {
 				return new ProcessingStatus(LocalDataQueueItem.Status.ERROR, Messages.RecordProcessor_cancelled);		

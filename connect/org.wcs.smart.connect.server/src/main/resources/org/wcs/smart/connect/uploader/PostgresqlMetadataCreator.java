@@ -25,8 +25,8 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
 
-import org.hibernate.query.NativeQuery;
 import org.hibernate.Session;
+import org.hibernate.query.NativeQuery;
 import org.hibernate.type.PostgresUUIDType;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.ConservationAreaInfo;

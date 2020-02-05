@@ -89,12 +89,12 @@ public class RecordButtonToolbar extends Composite{
 	public void setEditMode(boolean editMode){
 		if (editItem.isDisposed() || deleteItem.isDisposed()) return;
 		
-		if (IntelSecurityManager.INSTANCE.canEditRecord()) {
+		if (IntelSecurityManager.INSTANCE.canEditRecord(recordEditor.getRecord().getProfile())) {
 			editItem.setSelection(editMode);
 		}else {
 			editItem.setSelection(false);
 		}
-		if (IntelSecurityManager.INSTANCE.canDeleteRecord()){
+		if (IntelSecurityManager.INSTANCE.canDeleteRecord(recordEditor.getRecord().getProfile())){
 			deleteItem.setEnabled(editMode);		
 		}else {
 			deleteItem.setEnabled(false);
@@ -148,7 +148,7 @@ public class RecordButtonToolbar extends Composite{
 		
 		final EmitterInfo pdfFormat = pdfEmitter;
 		printItem = new ToolItem(buttonBar, SWT.DROP_DOWN);
-		printItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_PDF));
+		printItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.PDF_ICON));
 		printItem.setToolTipText(Messages.RecordButtonToolbar_pdftooltip);
 		printItem.addSelectionListener(new SelectionAdapter(){
 			@Override
@@ -170,7 +170,7 @@ public class RecordButtonToolbar extends Composite{
 		});
 		
 		ToolItem refreshItem = new ToolItem(buttonBar, SWT.PUSH);
-		refreshItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_REFRESH));
+		refreshItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
 		refreshItem.setToolTipText(Messages.RecordButtonToolbar_refreshtooltip);
 		refreshItem.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -197,9 +197,11 @@ public class RecordButtonToolbar extends Composite{
 				(new DeleteRecordHandler()).deleteRecords(Collections.singleton(recordEditor.getRecord()), recordEditor.getContext());
 			}
 		});
-		if (IntelSecurityManager.INSTANCE.canDeleteRecord() && IntelSecurityManager.INSTANCE.canEditRecord()){
+		
+		if (IntelSecurityManager.INSTANCE.canDeleteRecord(recordEditor.getInputInternal().getRecordProfileUuid()) && 
+				IntelSecurityManager.INSTANCE.canEditRecord(recordEditor.getInputInternal().getRecordProfileUuid())){
 			deleteItem.setEnabled(recordEditor.getEditMode());	
-		}else if (IntelSecurityManager.INSTANCE.canDeleteRecord()  ) {
+		}else if (IntelSecurityManager.INSTANCE.canDeleteRecord(recordEditor.getInputInternal().getRecordProfileUuid())  ) {
 			deleteItem.setEnabled(true);
 		}else{
 			deleteItem.setEnabled(false);
@@ -218,7 +220,7 @@ public class RecordButtonToolbar extends Composite{
 		wsetItem.setEnabled(false);
 		
 		editItem = new ToolItem(buttonBar, SWT.CHECK);
-		editItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EDIT));
+		editItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 		editItem.setToolTipText(Messages.RecordButtonToolbar_edittooltip);
 		editItem.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -228,7 +230,7 @@ public class RecordButtonToolbar extends Composite{
 			}
 		});
 		
-		if (IntelSecurityManager.INSTANCE.canEditRecord()){
+		if (IntelSecurityManager.INSTANCE.canEditRecord(recordEditor.getInputInternal().getRecordProfileUuid())){
 			editItem.setSelection(recordEditor.getEditMode());
 			editItem.setEnabled(true);	
 		}else{

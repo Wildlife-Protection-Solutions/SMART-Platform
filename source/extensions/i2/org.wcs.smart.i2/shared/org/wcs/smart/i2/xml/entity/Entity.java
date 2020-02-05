@@ -10,6 +10,7 @@ package org.wcs.smart.i2.xml.entity;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -29,12 +30,13 @@ import javax.xml.bind.annotation.XmlType;
  *       &lt;sequence>
  *         &lt;element name="id" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="scratchpad" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="attributes" type="{http://www.example.org/Intelligence}AttributeValue" maxOccurs="unbounded"/>
- *         &lt;element name="attachments" type="{http://www.example.org/Intelligence}Attachment" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="records" type="{http://www.example.org/Intelligence}Record" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="locations" type="{http://www.example.org/Intelligence}Location" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="attributes" type="{http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.entity}AttributeValue" maxOccurs="unbounded"/>
+ *         &lt;element name="attachments" type="{http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.entity}Attachment" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="records" type="{http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.entity}Record" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="locations" type="{http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.entity}Location" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *       &lt;attribute name="entityTypeKey" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="profileKey" type="{http://www.w3.org/2001/XMLSchema}string" />       
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -63,6 +65,8 @@ public class Entity {
     protected List<Location> locations;
     @XmlAttribute(name = "entityTypeKey")
     protected String entityTypeKey;
+    @XmlAttribute(name = "profileKey")
+    protected String profileKey;
 
     /**
      * Gets the value of the id property.
@@ -250,6 +254,30 @@ public class Entity {
      */
     public void setEntityTypeKey(String value) {
         this.entityTypeKey = value;
+    }
+
+    /**
+     * Gets the value of the profileKey property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getProfileKey() {
+        return profileKey;
+    }
+
+    /**
+     * Sets the value of the profileKey property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setProfileKey(String value) {
+        this.profileKey = value;
     }
 
 }

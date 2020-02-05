@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -42,6 +43,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntitySearch;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelProfile;
 
 
 /**
@@ -135,16 +137,20 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility 
 	 * to call done() on the given monitor
 	 */
-	public IntelSearchResult doSearch(Session session, Locale l, IProgressMonitor monitor){
+	public IntelSearchResult doSearch(Set<IntelProfile> profiles, Session session, Locale l, IProgressMonitor monitor){
 		SubMonitor.convert(monitor, 2);
 		Long now = System.nanoTime();
-		
+
+		if (profiles.isEmpty()) {
+			return new IntelSearchResult(Collections.emptyList(),0);
+		}
 		if (searchString != null && searchString.length() > 0){
 			//perform fuzzy search
-			List<IntelSearchResultItem> sresults = SearchManager.INSTANCE.fuzzySearch(searchString,  entityTypes, cas, maxResultCnt, session);
+			List<IntelSearchResultItem> sresults = SearchManager.INSTANCE.fuzzySearch(searchString,  entityTypes, cas, maxResultCnt, profiles, session);
 			return new IntelSearchResult(sresults, System.nanoTime() - now);
 		}
 
+		
 		if (searchString == null || searchString.isEmpty()){
 			CriteriaBuilder cb = session.getCriteriaBuilder();
 			
@@ -152,6 +158,7 @@ public class BasicEntitySearch implements IIntelEntitySearch{
 			Root<IntelEntity> from = c.from(IntelEntity.class);
 			c.select(from);
 			ArrayList<Predicate> filters = new ArrayList<>();
+			filters.add(from.get("profile").in(profiles)); //$NON-NLS-1$
 			filters.add(from.get("conservationArea").in(this.cas)); //$NON-NLS-1$
 			if (entityTypes != null && !entityTypes.isEmpty()){
 				filters.add(from.join("entityType").get("keyId").in(entityTypes)); //$NON-NLS-1$ //$NON-NLS-2$

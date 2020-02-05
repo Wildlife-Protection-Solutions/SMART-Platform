@@ -126,8 +126,8 @@ TOKEN :
   < #UUIDLETTER : [ "a"-"f", "A"-"F", "-"] >
  | < #LETTER : [ "a"-"z", "A"-"Z" ] >
  | < #SPECIAL_CHARS : ("." | "_")>
- | < VALUE_KEY: "numentities" >
-| < DATE_STRING : < DIGIT > < DIGIT > < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT >>  
+ | < VALUE_KEY: ( "numentities" |  "numrecords" ) >
+ | < DATE_STRING : < DIGIT > < DIGIT > < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT >>  
  | < DM_KEY : (< LETTER >)+(< DIGIT > | < LETTER > | < SPECIAL_CHARS >)* >
  | < UUID : (< DIGIT> | ["a"-"f","A"-"F","-"])+ >
  
@@ -153,10 +153,6 @@ TOKEN :
  | < ENTITY_TYPE_KEY : "entitytype:" <DM_KEY> >
  | < ENTITY_KEY : "entity:" (< DIGIT> | < UUIDLETTER >)+>
 
- | < RECORDSOURCE_KEY : "recordsource:" <DM_KEY> >
- | < RECORDSTATUS_KEY : "recordstatus " >
- | < RECORDDATE_KEY : "recorddate ">
-
  | < RATTRIBUTE_KEY_NUMERIC : "r_attribute:n:"< DM_KEY >":"(< DM_KEY >)?>
  | < RATTRIBUTE_KEY_STRING : "r_attribute:s:"< DM_KEY >":"(< DM_KEY >)?>
  | < RATTRIBUTE_KEY_BOOLEAN : "r_attribute:b:"< DM_KEY >":"(< DM_KEY >)?>
@@ -165,16 +161,22 @@ TOKEN :
  | < RATTRIBUTE_KEY_EMPLOYEE: "r_attribute:e:"< DM_KEY >":"(< DM_KEY >)?>
  | < RATTRIBUTE_KEY_ENTITY: "r_attribute:entity:"< DM_KEY >":"(< DM_KEY >)?>
 
- | < SYSTEM_ATT_KEY: "sa:" ( "record" | "entity" ) ":" ("date_created" | "date_modified") >
+ | < SYSTEM_ATT_KEY: "sa:" ("record_date_created" | "record_date_modified" | "entity_date_modified" | "entity_date_created" | "record_date" | "record_source" | "record_status") >
  
+
  | < QUERY_SPLITTER : "|" >
  | < DATE_GB_KEY : ( "day" | "month" | "year" ) >
+ | < RECORDSTATUS_GB: "recordstatus_gb:" (< DM_KEY > ":")*>
+ | < RECORDSOURCE_GB: "recordsource_gb:" (< DM_KEY > ":")*>
  | < ENTITYTYPE_GB: "entitytype_gb:" (< DM_KEY > ":")*>
  | < CA_GB: "ca_gb:" ( < DM_KEY > ":")*>
  | < EATTRIBUTE_GB_KEY_POSITION: "e_attribute_gb:p:"< DM_KEY >":"(< DM_KEY >)?":"(< AREA_TYPE_KEY >)":"(< DM_KEY > ":")*>
  | < EATTRIBUTE_GB_KEY_DATE: "e_attribute_gb:d:"< DM_KEY >":"(< DM_KEY >)?":"(< DATE_GB_KEY >)>
  | < EATTRIBUTE_GB_KEY_LIST: "e_attribute_gb:l:" < DM_KEY > ":" (< DM_KEY >)? ":" (< DM_KEY > ":")* >
  | < EATTRIBUTE_GB_KEY_EMPLOYEE: "e_attribute_gb:e:"< DM_KEY > ":" (< DM_KEY >)? ":" (< UUID > ":")* >
+ | < RATTRIBUTE_GB_KEY_DATE: "r_attribute_gb:d:"< DM_KEY >":"(< DM_KEY >)?":"(< DATE_GB_KEY >)>
+ | < RATTRIBUTE_GB_KEY_LIST: "r_attribute_gb:l:" < DM_KEY > ":" (< DM_KEY >)? ":" (< DM_KEY > ":")* >
+ | < RATTRIBUTE_GB_KEY_EMPLOYEE: "r_attribute_gb:e:"< DM_KEY > ":" (< DM_KEY >)? ":" (< UUID > ":")* >
  | < SYSTEM_ATT_KEY_GB: < SYSTEM_ATT_KEY > ":" (< DATE_GB_KEY >)>
 
  
@@ -272,9 +274,19 @@ GroupByItem GroupByItem() :
 		|
 		< EATTRIBUTE_GB_KEY_EMPLOYEE>
 		|
+		< RATTRIBUTE_GB_KEY_DATE>
+		|
+		< RATTRIBUTE_GB_KEY_LIST>
+		|
+		< RATTRIBUTE_GB_KEY_EMPLOYEE>
+		|
 		< ENTITYTYPE_GB >
 		|
 		< CA_GB >
+		|
+		< RECORDSOURCE_GB >
+		|
+		< RECORDSTATUS_GB >
 	)
 	{
 	  item = GroupByItem.parse(token.image );
@@ -382,8 +394,6 @@ IQueryFilter BooleanPart() :
 		|	 
 		filter = EntityTypeFilter()
 		|	 
-		filter = RecourdSourceFilter()
-		|	 
 		filter = EntityFilter()
 		|
 		(< OPENPAREN >filter = ExpressionPart()< CLOSEPAREN >)
@@ -429,41 +439,54 @@ IQueryFilter DataModelAttributeFilter():
 	}
 }
 
-IQueryFilter SystemDateExpression():
+IQueryFilter SystemAttributeFilter():
 {
   String key = null;
   Date date1 = null;
   Date date2 = null;
   Operator op = null;
+  String value = null;
 }
 {
 	(
 		< SYSTEM_ATT_KEY > {key = token.image;}
-		op = DateOp()
-		< DATE_STRING >  {
-		  String datestring = token.image;
-		  try
-		  {
-		    date1 = (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).parse(datestring);
-		  }catch (Exception ex)
-		  {
-		     throw new ParseException("Unable to parse date string " + datestring + ". Must be in the form yyyy-MM-dd");
-		  }
-		}
-		< K_AND >
-		< DATE_STRING > {
-		  datestring = token.image;
-		  try
-		  {
-		    date2 = (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).parse(datestring);
-		  }catch (Exception ex)
-		  {
-		     throw new ParseException("Unable to parse date string " + datestring + ". Must be in the form yyyy-MM-dd");
-		  }
-		}
+		(		  (
+			op = DateOp()
+		   < DATE_STRING >  {
+			  String datestring = token.image;
+			  try
+			  {
+			    date1 = (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).parse(datestring);
+			  }catch (Exception ex)
+			  {
+			     throw new ParseException("Unable to parse date string " + datestring + ". Must be in the form yyyy-MM-dd");
+			  }
+			}
+			< K_AND >
+			< DATE_STRING > {
+			  datestring = token.image;
+			  try
+			  {
+			    date2 = (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).parse(datestring);
+			  }catch (Exception ex)
+			  {
+			     throw new ParseException("Unable to parse date string " + datestring + ". Must be in the form yyyy-MM-dd");
+			  }
+			}
+		)
+		|
+		(
+		   <  EQUAL > {op = Operator.parse(token.image);}
+		   < DM_KEY >  {value = token.image;}
+		 )
+	) 			 
 	)
 	{
-  		return SystemAttributeFilter.create(key, op, date1, date2);
+		if ( value != null) {
+		  return SystemAttributeFilter.create(key, op, value);
+		}else { 
+  			return SystemAttributeFilter.create(key, op, date1, date2);
+  		}
 	}	
 }
 
@@ -619,7 +642,7 @@ IQueryFilter EntityAttributeFilter():
 	filter = RecordKeyExpression()
 	|
 	/* system attribute */
-	filter = SystemDateExpression() 
+	filter = SystemAttributeFilter() 
 	)
 	{
 		return filter;
@@ -774,7 +797,8 @@ IQueryFilter RecordDateExpression():
 	{
   		return RecordAttributeFilter.create(key, op, date1, date2);
 	}
-|
+
+/*|
 (
 		< RECORDDATE_KEY > {key = token.image;}
 		op = DateOp()
@@ -802,7 +826,8 @@ IQueryFilter RecordDateExpression():
 	)
 	{
   		return RecordAttributeFilter.create(key, op, date1, date2);
-	}	
+	}
+	*/
 }
 
 
@@ -847,18 +872,27 @@ IQueryFilter RecordKeyExpression():
   String value = null;
 }
 {
-	(
+	(	  
+		
 	  	( 
 			<RATTRIBUTE_KEY_LIST> {key = token.image;}
 			<  EQUAL > {op = token.image;}
 			< DM_KEY >  {value = token.image;}
 		)
-		|
+
+		/*|
 		  	( 
 			<RECORDSTATUS_KEY> {key = token.image;}
 			<  EQUAL > {op = token.image;}
 			< DM_KEY >  {value = token.image;}
-		)
+			)
+		|
+		  	( 
+			<RECORDSOURCE_KEY> {key = token.image;}
+			<  EQUAL > {op = token.image;}
+			< DM_KEY >  {value = token.image;}
+			)
+		*/
 		|
 		( 
 			<RATTRIBUTE_KEY_EMPLOYEE> {key = token.image;}
@@ -875,6 +909,7 @@ IQueryFilter RecordKeyExpression():
 	{
   		return RecordAttributeFilter.create(key, value);
 	}
+
 }
 
 IQueryFilter RecordBooleanExpression():
@@ -901,6 +936,7 @@ IQueryFilter EntityTypeFilter():
   < ENTITY_TYPE_KEY >{return EntityTypeFilter.create(token.image);}  
 }
 
+/*
 IQueryFilter RecourdSourceFilter():
 {
   String key1;
@@ -910,6 +946,7 @@ IQueryFilter RecourdSourceFilter():
   	< RECORDSOURCE_KEY >{return RecordSourceFilter.create(token.image);}
  )
 }
+*/
 
 IQueryFilter EntityFilter():
 {

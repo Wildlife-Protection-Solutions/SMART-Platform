@@ -379,7 +379,7 @@ public abstract class FilterDefinitionPanel implements IDefinitionPanel {
 		
 		Composite filterTypeComp = new Composite(parent, SWT.NONE);
 		filterTypeComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		GridLayout layout = new GridLayout(5, false);
+		GridLayout layout = new GridLayout(6, false);
 		layout.horizontalSpacing = 5;
 		layout.verticalSpacing = 0;
 		layout.marginWidth = 5;
@@ -416,6 +416,7 @@ public abstract class FilterDefinitionPanel implements IDefinitionPanel {
 		
 		
 		if (addToolbar) {
+			
 			infoPanel = new Composite(filterTypeComp, SWT.NONE);
 			infoPanel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 			infoPanel.setLayout(new GridLayout(2, false));

@@ -1,10 +1,33 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i2.birt.entity;
 
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.text.MessageFormat;
 import java.util.HashMap;
+import java.util.Set;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -20,7 +43,13 @@ import org.eclipse.datatools.connectivity.oda.spec.QuerySpecification;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection.Permission;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelProfile;
+import org.wcs.smart.i2.model.IntelProfileEntityType;
 
+/**
+ * Entity location attributes
+ * 
+ */
 public class EntityLocationAttributeDataset implements IQuery {
 	
 	public static final String DATASET_TYPE = "org.wcs.smart.i2.birt.dataset.entity.attribute.location"; //$NON-NLS-1$
@@ -41,9 +70,10 @@ public class EntityLocationAttributeDataset implements IQuery {
 	
 	@Override
 	public void prepare(String queryText) throws OdaException {
-		if (!connection.hasPermission(Permission.ENTITY)) {
-			throw new OdaException("Unauthorized.  You do not have permission to access intelligence entity datasets"); //$NON-NLS-1$
-		}
+		Set<IntelProfile> profiles = connection.hasPermission(Permission.ENTITY);
+		if (profiles.isEmpty())
+			throw new OdaException(MessageFormat.format("Unauthorized.  You do not have permission to access intelligence entity type {0} dataset", queryText)); //$NON-NLS-1$
+		
 		CriteriaBuilder cb = connection.getSession().getCriteriaBuilder();
 		CriteriaQuery<IntelEntityType> c = cb.createQuery(IntelEntityType.class);
 		Root<IntelEntityType> from = c.from(IntelEntityType.class);
@@ -52,6 +82,10 @@ public class EntityLocationAttributeDataset implements IQuery {
 				cb.equal(from.get("keyId"), queryText) //$NON-NLS-1$
 				));
 		type = connection.getSession().createQuery(c).uniqueResult();
+		for (IntelProfileEntityType ip : type.getProfiles()) {
+			if (profiles.contains(ip.getProfile())) return;
+		}
+		throw new OdaException(MessageFormat.format("Unauthorized.  You do not have permission to access intelligence entity type {0} dataset", queryText)); //$NON-NLS-1$
 	}
 
 	@Override

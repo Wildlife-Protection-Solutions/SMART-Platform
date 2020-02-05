@@ -24,6 +24,7 @@ package org.wcs.smart.i2.model;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.util.List;
+import java.util.Set;
 
 import javax.imageio.ImageIO;
 import javax.persistence.CascadeType;
@@ -55,6 +56,22 @@ public class IntelRecordSource extends NamedKeyItem{
 	private ConservationArea ca;
 	private byte[] icon;
 	private List<IntelRecordSourceAttribute> attributes;
+	private Set<IntelProfileRecordSource> profiles;
+
+	
+	/**
+	 * Sets the profiles associated with the record source
+	 * @return
+	 */
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.recordSource", orphanRemoval = true, cascade={CascadeType.ALL})
+	public Set<IntelProfileRecordSource> getProfiles(){
+		return this.profiles;
+	}
+	
+	public void setProfiles(Set<IntelProfileRecordSource> profiles) {
+		this.profiles = profiles;
+	}
+
 	
 	/**
 	 * Get the conservation_area.

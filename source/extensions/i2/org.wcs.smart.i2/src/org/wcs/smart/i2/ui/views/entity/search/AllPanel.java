@@ -60,6 +60,7 @@ import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -82,8 +83,10 @@ import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntity;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.search.AllEntitySearch;
 import org.wcs.smart.i2.security.IntelSecurityManager;
+import org.wcs.smart.i2.ui.Resources;
 import org.wcs.smart.i2.ui.dialogs.ExportEntityToFileDialog;
 import org.wcs.smart.i2.ui.editors.record.RecordEditor;
 import org.wcs.smart.i2.ui.entity.exporter.EntityRelationshipExportDialog;
@@ -334,7 +337,7 @@ public class AllPanel extends Composite {
 					if (((Double)value) < 0.5) return SmartLabelProvider.BOOLEAN_FALSE_LABEL;
 					return SmartLabelProvider.BOOLEAN_TRUE_LABEL;
 				case DATE:
-					return DateFormat.getDateInstance().format(java.sql.Date.valueOf((String)value));
+					return DateFormat.getDateInstance().format((Date)value);
 				case EMPLOYEE:
 				case LIST:
 				case NUMERIC:
@@ -344,6 +347,20 @@ public class AllPanel extends Composite {
 				}
 				
 				return ((EntityTableRowItem)element).getId();
+			}
+		});
+		
+		TableViewerColumn profileColumn = new TableViewerColumn(entityTable, SWT.NONE);
+		profileColumn.getColumn().setText(Messages.AllPanel_ProfileColumn);
+		profileColumn.getColumn().setWidth(50);
+		profileColumn.setLabelProvider(new ColumnLabelProvider() {
+			public String getText(Object element) {
+				if (element == null) return "..."; //$NON-NLS-1$
+				return ((EntityTableRowItem)element).getProfileName();
+			}
+			public Image getImage(Object element) {
+				if (element == null) return null;
+				return Resources.INSTANCE.getProfileImage(((EntityTableRowItem)element).getProfileKey());
 			}
 		});
 		
@@ -419,8 +436,19 @@ public class AllPanel extends Composite {
 			public void dragStart(DragSourceEvent event) {
 				List<IntelEntity> items = new ArrayList<>();
 				for (EntityTableRowItem i : getCurrentSelection()) {
-					IntelEntity temp = new IntelEntity();
+					IntelEntity temp = new IntelEntity() {
+						public String getIdAttributeAsText() {
+							return i.getId();
+						}
+					};
 					temp.setUuid(i.getEntityUuid());
+					
+					IntelProfile profiletemp = new IntelProfile();
+					profiletemp.setUuid(i.getProfileUuid());
+					profiletemp.setName(i.getProfileName());
+					
+					temp.setProfile(profiletemp);
+					
 					items.add(temp);
 				}
 				IntelEntitySelectionTransfer.getTransfer().setSelection(new StructuredSelection(items));				
@@ -565,7 +593,7 @@ public class AllPanel extends Composite {
 		
 		MenuItem mnuPrint = new MenuItem(menu, SWT.PUSH);
 		mnuPrint.setText(Messages.EntitySearchResultTable_PrintMenuItem);
-		mnuPrint.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_PDF));
+		mnuPrint.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.PDF_ICON));
 		mnuPrint.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -608,7 +636,7 @@ public class AllPanel extends Composite {
 			}
 		});
 		
-		if (IntelSecurityManager.INSTANCE.canDeleteEntity()){
+		if (IntelSecurityManager.INSTANCE.canDeleteEntityAny()){
 			MenuItem mnuDelete = new MenuItem(menu, SWT.PUSH);
 			mnuDelete.setText(Messages.EntitySearchResultTable_DeleteMenuItem);
 			mnuDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
@@ -661,7 +689,7 @@ public class AllPanel extends Composite {
 					}
 				}
 				
-				if (IntelSecurityManager.INSTANCE.canCreateRecord()) {
+				if (IntelSecurityManager.INSTANCE.canCreateRecordAny()) {
 					MenuItem createRecord = new MenuItem(subRecord, SWT.PUSH);
 					createRecord.setText(Messages.AllPanel_CreateRecord);
 					createRecord.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
@@ -674,7 +702,7 @@ public class AllPanel extends Composite {
 					});
 				}
 				
-				if (IntelSecurityManager.INSTANCE.canEditRecord()) {
+				if (IntelSecurityManager.INSTANCE.canEditRecordAny()) {
 					Collection<MPart> parts = context.get(EPartService.class).getParts();
 					boolean first = false;
 					for (MPart p : parts){

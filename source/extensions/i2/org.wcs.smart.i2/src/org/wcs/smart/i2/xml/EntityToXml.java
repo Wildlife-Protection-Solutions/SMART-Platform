@@ -252,6 +252,7 @@ public class EntityToXml {
 			xmlEntity.setEntityTypeKey(entity.getEntityType().getKeyId());
 			xmlEntity.setScratchpad(entity.getComment());
 			xmlEntity.setId(entity.getIdAttributeAsText());
+			xmlEntity.setProfileKey(entity.getProfile().getKeyId());
 			if (entity.getEntityAttachments() != null) {
 				for (IntelEntityAttachment attach : entity.getEntityAttachments()) {
 					Attachment xmlAttachment = new Attachment();

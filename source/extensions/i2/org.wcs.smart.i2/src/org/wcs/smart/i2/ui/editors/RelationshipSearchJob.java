@@ -36,6 +36,7 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 
 /**
@@ -48,13 +49,15 @@ public abstract class RelationshipSearchJob extends Job{
 
 	private IntelEntityType srcType, targetType;
 	protected List<IntelRelationshipType> rtypes;
+	private IntelProfile srcProfile, trgProfile;
 	
-	public RelationshipSearchJob(IntelEntityType srcType, IntelEntityType targetType) {
+	public RelationshipSearchJob(IntelProfile srcProfile, IntelEntityType srcType, IntelProfile trgProfile, IntelEntityType targetType) {
 		super("relationship type search"); //$NON-NLS-1$
 		setSystem(true);
 		this.srcType = srcType;
 		this.targetType = targetType;
-		
+		this.srcProfile = srcProfile;
+		this.trgProfile = trgProfile;
 	}
 
 	@Override
@@ -68,6 +71,16 @@ public abstract class RelationshipSearchJob extends Job{
 			Root<IntelRelationshipType> from = c.from(IntelRelationshipType.class);
 			c.where(cb.and(
 					cb.equal(from.get("conservationArea"), SmartDB.getCurrentConservationArea()), //$NON-NLS-1$
+					cb.or(
+							cb.and(
+									cb.equal(from.get("sourceProfile"), srcProfile), //$NON-NLS-1$
+									cb.equal(from.get("targetProfile"), trgProfile) //$NON-NLS-1$
+									),
+							cb.and(
+									cb.equal(from.get("sourceProfile"), trgProfile), //$NON-NLS-1$
+									cb.equal(from.get("targetProfile"), srcProfile) //$NON-NLS-1$
+									)
+							),
 					cb.or(
 							cb.and(
 									cb.equal(from.get("sourceEntityType"), srcType), //$NON-NLS-1$

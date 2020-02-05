@@ -49,6 +49,7 @@ import org.eclipse.nebula.jface.tablecomboviewer.TableComboViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -67,7 +68,9 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
+import org.wcs.smart.i2.ui.Resources;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -82,6 +85,7 @@ public class FileWizardPage extends WizardPage{
 	
 	private Text txtFile;
 	private TableComboViewer cmbEntityType;
+	private TableComboViewer cmbProfile;
 	private Button chSkipFirstLine;
 	private DelimiterCombo delimCombo;
 	private ComboViewer cmbCharset;
@@ -108,9 +112,12 @@ public class FileWizardPage extends WizardPage{
 		return ',';
 	}
 	public IntelEntityType getEntityType(){
-		return (IntelEntityType) ((StructuredSelection)cmbEntityType.getSelection()).getFirstElement() ;
+		return (IntelEntityType) cmbEntityType.getStructuredSelection().getFirstElement();
 	}
 	
+	public IntelProfile getProfile() {
+		return (IntelProfile)cmbProfile.getStructuredSelection().getFirstElement();
+	}
 	public boolean getSkipFirstLine(){
 		return chSkipFirstLine.getSelection();
 	}
@@ -142,7 +149,11 @@ public class FileWizardPage extends WizardPage{
     		setErrorMessage(Messages.FileWizardPage_InvalidEntityType);
     		return false;
     	}
-    	
+    	if (!cmbProfile.getSelection().isEmpty() && 
+    			!(((StructuredSelection)cmbProfile.getSelection()).getFirstElement() instanceof IntelProfile)){
+    		setErrorMessage(Messages.FileWizardPage_profileRequired);
+    		return false;
+    	}
     	try{
     		delimCombo.getDelimiter();
     	}catch (Exception ex){
@@ -189,7 +200,39 @@ public class FileWizardPage extends WizardPage{
 		cmbEntityType.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		cmbEntityType.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		SmartUiUtils.configure(cmbEntityType);
-		cmbEntityType.addSelectionChangedListener(event-> getWizard().getContainer().updateButtons());
+		cmbEntityType.addSelectionChangedListener(event-> {
+			Object x = cmbEntityType.getStructuredSelection().getFirstElement();
+			if (x instanceof IntelEntityType) {
+				IntelEntityType t = (IntelEntityType)x;
+				cmbProfile.setInput(t.getProfiles());
+				cmbProfile.setSelection(new StructuredSelection(t.getProfiles().iterator().next()));
+			}else {
+				cmbProfile.setInput(new String[] {Messages.FileWizardPage_SelectEntityTypeMsg});
+			}
+			getWizard().getContainer().updateButtons();
+		});
+		
+		l = new Label(upper, SWT.NONE);
+		l.setText(Messages.FileWizardPage_ProfileLbl);
+		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+
+		cmbProfile = new TableComboViewer(upper, SWT.READ_ONLY | SWT.DROP_DOWN | SWT.BORDER);
+		cmbProfile.setContentProvider(ArrayContentProvider.getInstance());
+		cmbProfile.setLabelProvider(new LabelProvider() {
+			public String getText(Object element) {
+				if (element instanceof IntelProfile) return ((IntelProfile)element).getName();
+				return super.getText(element);
+			}
+			public Image getImage(Object element) {
+				if (element instanceof IntelProfile) return Resources.INSTANCE.getImage((IntelProfile)element);
+				return null;
+			}
+		});
+		
+		cmbProfile.setInput(new String[]{DialogConstants.LOADING_TEXT});
+		cmbProfile.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		SmartUiUtils.configure(cmbProfile);
+		cmbProfile.addSelectionChangedListener(event-> getWizard().getContainer().updateButtons());
 		
 		l = new Label(upper, SWT.NONE);
 		l.setText(Messages.FileWizardPage_FileLabel);
@@ -320,7 +363,11 @@ public class FileWizardPage extends WizardPage{
 			try(Session s = HibernateManager.openSession()){
 				
 				types.addAll(QueryFactory.buildQuery(s, IntelEntityType.class, "conservationArea", SmartDB.getCurrentConservationArea()).list()); //$NON-NLS-1$
-				types.forEach(t -> t.getName());
+				types.forEach(t -> {
+					t.getName();
+					t.getProfiles().forEach(ip->ip.getProfile().getName());
+				});
+				
 				projections.addAll(HibernateManager.getCaProjectionList(s));
 				projections.forEach(p->{
 					p.getName();

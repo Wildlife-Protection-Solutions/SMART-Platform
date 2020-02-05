@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -83,14 +84,12 @@ import org.eclipse.ui.internal.SharedImages;
 import org.eclipse.ui.part.EditorPart;
 import org.geotools.referencing.CRS;
 import org.hibernate.Session;
-import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.QueryFactory;
-import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.internal.Messages;
@@ -100,6 +99,7 @@ import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
 import org.wcs.smart.i2.model.IntelEntityRecord;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecord.Status;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
@@ -110,6 +110,7 @@ import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.RecordLabelProvider;
 import org.wcs.smart.i2.ui.RecordSourceLabelProvider;
+import org.wcs.smart.i2.ui.Resources;
 import org.wcs.smart.i2.ui.SectionTabHeader;
 import org.wcs.smart.i2.ui.SmartSection;
 import org.wcs.smart.i2.ui.dialogs.AttributeFieldEditor;
@@ -447,6 +448,7 @@ public class RecordSummaryPage extends EditorPart{
 		decShortName.hide();
 		checkDuplicateName.schedule(250);
 		
+		
 		toolkit.createLabel(leftPart, Messages.RecordSummaryPage_PrimaryDateLabel);
 		if (recordEditor.getEditMode()){
 			DateTime dtPrimaryDate = new DateTime(leftPart, SWT.BORDER | SWT.DATE | SWT.LONG | SWT.CALENDAR | SWT.DROP_DOWN);
@@ -462,10 +464,24 @@ public class RecordSummaryPage extends EditorPart{
 		}else {
 			toolkit.createLabel(leftPart, DateFormat.getDateInstance().format(recordEditor.getRecord().getPrimaryDate()));
 		}
+
+		toolkit.createLabel(leftPart, Messages.RecordSummaryPage_ProfileLbl);
+		Composite pcomp = toolkit.createComposite(leftPart);
+		pcomp.setLayout(new GridLayout(2, false));
+		((GridLayout)pcomp.getLayout()).marginWidth = 0;
+		((GridLayout)pcomp.getLayout()).marginHeight = 0;
+		pcomp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Label ll = toolkit.createLabel(pcomp, ""); //$NON-NLS-1$
+		ll.setImage(Resources.INSTANCE.getImage(recordEditor.getRecord().getProfile()));
+		
+		ll = toolkit.createLabel(pcomp, ""); //$NON-NLS-1$
+		ll.setText(recordEditor.getRecord().getProfile().getName());
+		ll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
 		toolkit.createLabel(leftPart, Messages.RecordSummaryPage_StatusLabel);
 		
-		
-		if (recordEditor.getEditMode() && IntelSecurityManager.INSTANCE.canEditRecordStatus()){
+		if (recordEditor.getEditMode() && IntelSecurityManager.INSTANCE.canEditRecordStatus(recordEditor.getRecord().getProfile())){
 			TableComboViewer cmbStatus = new TableComboViewer(leftPart, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.BORDER);
 			toolkit.adapt(cmbStatus.getControl(), true, true);
 			cmbStatus.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -483,7 +499,7 @@ public class RecordSummaryPage extends EditorPart{
 				@Override
 				public Image getImage(Object element){
 					if (element instanceof IntelRecord.Status){
-						return RecordLabelProvider.getRecordStatusImage((Status)element);
+						return Resources.INSTANCE.getImage((Status)element);
 					}
 					return super.getImage(element);
 				}
@@ -505,7 +521,7 @@ public class RecordSummaryPage extends EditorPart{
 			((GridLayout)temp.getLayout()).marginWidth = 0;
 			((GridLayout)temp.getLayout()).marginHeight = 0;
 			Label l = toolkit.createLabel(temp, ""); //$NON-NLS-1$
-			l.setImage(RecordLabelProvider.getRecordStatusImage(recordEditor.getRecord().getStatus()));
+			l.setImage(Resources.INSTANCE.getImage(recordEditor.getRecord().getStatus()));
 			l = toolkit.createLabel(temp, ""); //$NON-NLS-1$
 			l.setText(RecordLabelProvider.getRecordStatusLabel(recordEditor.getRecord().getStatus()));
 		}
@@ -528,17 +544,11 @@ public class RecordSummaryPage extends EditorPart{
 			((GridLayout)temp.getLayout()).marginHeight = 0;
 			
 			Label l = toolkit.createLabel(temp, ""); //$NON-NLS-1$
-			Image img = null;
 			if (recordEditor.getRecord().getRecordSource() != null && recordEditor.getRecord().getRecordSource().getIcon() != null){
-				try{
-					img = AWTSWTImageUtils.convertToSWTImage(recordEditor.getRecord().getRecordSource().getIconAsImage());
-				}catch (Exception ex){
-					
-				}
+				Image img = Resources.INSTANCE.getImage(recordEditor.getRecord().getRecordSource());
+				l.setImage(img);
 			}
-			final Image toDispose= img;
-			l.setImage(toDispose);
-			l.addDisposeListener(e->{if (toDispose != null) toDispose.dispose();});
+			
 			if (recordEditor.getRecord().getRecordSource() != null){
 				l = toolkit.createLabel(temp,  recordEditor.getRecord().getRecordSource().getName());
 				l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -706,7 +716,7 @@ public class RecordSummaryPage extends EditorPart{
 		HashMap<IntelRecordAttributeValue, Label> readOnlyLabels = new HashMap<>();
 		if (source != null) {		
 			for (IntelRecordSourceAttribute a : source.getAttributes()){
-				String name = getName(a);
+				String name = IIntelligenceLabelProvider.getName(a);
 				IntelRecordAttributeValue v = findAttributeValue(a);
 				
 				if (recordEditor.getEditMode()){
@@ -748,7 +758,7 @@ public class RecordSummaryPage extends EditorPart{
 						((GridLayout)tmp.getLayout()).marginHeight = 0;
 						tmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 						
-						EntityCheckboxDropDownViewer editor = new EntityCheckboxDropDownViewer(tmp, a.getEntityType(), a.getIsMultiple());
+						EntityCheckboxDropDownViewer editor = new EntityCheckboxDropDownViewer(tmp, a.getEntityType(),recordEditor.getRecord().getProfile(), a.getIsMultiple());
 						editorFields.put(a, editor);
 						if (v != null) editor.initControl(v.getAttributeListItems());
 						editor.addSelectionChangedListener(dirtyListener2);
@@ -852,20 +862,7 @@ public class RecordSummaryPage extends EditorPart{
 		j.schedule();
 	}
 	
-	/*
-	 * finds the name for a record attribute
-	 */
-	private String getName(IntelRecordSourceAttribute a){
-		String name = a.getName();
-		if (name == null || name.isEmpty()){
-			if (a.getAttribute() != null){
-				name = a.getAttribute().getName();
-			}else if (a.getEntityType() != null){
-				name = a.getEntityType().getName();
-			}
-		}
-		return name;
-	}
+
 	
 	@Override
 	public void setFocus() {
@@ -991,8 +988,9 @@ public class RecordSummaryPage extends EditorPart{
 			protected IStatus run(IProgressMonitor monitor) {
 				List<Object> allInput = new ArrayList<Object>();
 				try(Session s = HibernateManager.openSession()){
+					IntelProfile p = s.get(IntelProfile.class, recordEditor.getRecord().getProfile().getUuid());
 					
-					List<IntelRecordSource> sources = QueryFactory.buildQuery(s, IntelRecordSource.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
+					List<IntelRecordSource> sources = p.getRecordSources().stream().map(e->e.getRecordSource()).collect(Collectors.toList());
 					sources.forEach(src -> {
 						src.getName();
 						if (src.getAttributes() != null){

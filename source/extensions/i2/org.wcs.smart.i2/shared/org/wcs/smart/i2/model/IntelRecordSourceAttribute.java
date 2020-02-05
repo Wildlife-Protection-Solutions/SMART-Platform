@@ -28,7 +28,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.wcs.smart.ca.NamedItem;
+import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 
 /**
@@ -40,7 +40,7 @@ import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
  */
 @Entity
 @Table(name="smart.i_recordsource_attribute")
-public class IntelRecordSourceAttribute extends NamedItem{
+public class IntelRecordSourceAttribute extends NamedKeyItem{
 
 	private static final long serialVersionUID = 1L;
 	

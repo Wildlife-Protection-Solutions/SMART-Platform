@@ -10,6 +10,7 @@ package org.wcs.smart.i2.xml.model;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -30,12 +31,14 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="names" type="{http://www.example.org/Intelligence}NamedItem" maxOccurs="unbounded"/>
+ *         &lt;element name="names" type="{http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.profile}NamedItem" maxOccurs="unbounded"/>
  *         &lt;element name="icon" type="{http://www.w3.org/2001/XMLSchema}hexBinary" minOccurs="0"/>
  *         &lt;element name="groupKey" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="srcTypeKey" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="targetTypeKey" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="attributes" type="{http://www.example.org/Intelligence}RelationshipTypeAttribute" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="srcProfileKey" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="1" maxOccurs="1"/>
+ *         &lt;element name="targetProfileKey" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="1" maxOccurs="1"/>
+ *         &lt;element name="attributes" type="{http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.profile}RelationshipTypeAttribute" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *       &lt;attribute name="key" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/restriction>
@@ -50,7 +53,9 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
     "names",
     "icon",
     "groupKey",
+    "srcProfileKey",
     "srcTypeKey",
+    "targetProfileKey",
     "targetTypeKey",
     "attributes"
 })
@@ -64,7 +69,9 @@ public class RelationshipType {
     protected byte[] icon;
     protected String groupKey;
     protected String srcTypeKey;
+    protected String srcProfileKey;
     protected String targetTypeKey;
+    protected String targetProfileKey;
     protected List<RelationshipTypeAttribute> attributes;
     @XmlAttribute(name = "key")
     protected String key;
@@ -146,6 +153,55 @@ public class RelationshipType {
         this.groupKey = value;
     }
 
+    /**
+     * Gets the value of the targetProfileKey property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getTargetProfileKey() {
+        return targetProfileKey;
+    }
+
+    /**
+     * Sets the value of the srcProfileKey property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setTargetProfileKey(String value) {
+        this.targetProfileKey = value;
+    }
+    
+    /**
+     * Gets the value of the srcProfileKey property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getSrcProfileKey() {
+        return srcProfileKey;
+    }
+
+    /**
+     * Sets the value of the srcProfileKey property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setSrcProfileKey(String value) {
+        this.srcProfileKey = value;
+    }
+    
+    
     /**
      * Gets the value of the srcTypeKey property.
      * 

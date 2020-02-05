@@ -51,7 +51,6 @@ import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService.PartState;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
@@ -63,11 +62,11 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PerspectiveAdapter;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
+import org.locationtech.jts.geom.Geometry;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
-import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.osgi.service.event.EventHandler;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
@@ -76,6 +75,7 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.AttachmentManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
@@ -93,13 +93,12 @@ import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.ui.EntityPerspective;
 import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
 import org.wcs.smart.i2.ui.IntelDataAssessmentPerspective;
+import org.wcs.smart.i2.ui.Resources;
 import org.wcs.smart.i2.ui.TransparentInfoDialog;
 import org.wcs.smart.i2.ui.views.RecordNarrativeView;
 import org.wcs.smart.i2.ui.views.RecordNarrativeView.FieldType;
 import org.wcs.smart.util.E3Utils;
 import org.wcs.smart.util.UuidUtils;
-
-import org.locationtech.jts.geom.Geometry;
 
 public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdaptable{
 	
@@ -161,9 +160,10 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 				try(Session s = HibernateManager.openSession()){
 					temp = (IntelRecord) s.get(IntelRecord.class, uuid);
 					if (temp == null){
-						closeEditor();
+						closeEditor(false);
 						return Status.OK_STATUS; //not found
 					}
+					temp.getProfile().getName();
 					temp.getCreatedBy().getFamilyName();
 					temp.getLastModifiedBy().getFamilyName();
 					if (temp.getAttachments().size() > 0){
@@ -201,6 +201,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 						for (IntelEntityRecord rr : temp.getEntities()){
 							rr.getEntity().getIdAttributeAsText();
 							rr.getEntity().getEntityType().getName();
+							rr.getEntity().getProfile().getName();
 							if (rr.getEntity().getPrimaryAttachment()!= null){
 								try{
 									rr.getEntity().getPrimaryAttachment().computeFileLocation(s);
@@ -268,6 +269,9 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		
 	};
 	
+	public RecordEditorInput getInputInternal() {
+		return (RecordEditorInput)this.getEditorInput();
+	}
 	@Override
 	public void dispose(){
 		IEventBroker event = parentContext.get(IEventBroker.class);
@@ -408,7 +412,6 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		if (isnew){
 			parentContext.get(IEventBroker.class).post(IntelEvents.RECORD_NEW, record);
 		}else{
-			//TODO: something was null here once during testing when i was switching perspectives
 			parentContext.get(IEventBroker.class).post(IntelEvents.RECORD_MODIFIED, record);
 		}
 		parentContext.get(IEventBroker.class).post(IntelEvents.RECORD_SAVED, record);
@@ -442,8 +445,8 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		setDirty(true);
 	}
 	
-	private void closeEditor(){
-		getEditorSite().getWorkbenchWindow().getActivePage().closeEditor(RecordEditor.this, false);
+	private void closeEditor(boolean promptsave){
+		getEditorSite().getWorkbenchWindow().getActivePage().closeEditor(RecordEditor.this, promptsave);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -473,7 +476,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 				
 				if (data != null){
 					for (IntelRecord r : items){
-						if (r.equals(record)) closeEditor();
+						if (r.equals(record)) closeEditor(false);
 					}
 				}
 			});
@@ -499,6 +502,12 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 				}else{
 					//refresh the entire editor
 					refresh();
+				}
+			});
+			
+			subscribeToEvent(IntelEvents.PROFILES_ALL, (event)->{
+				if (!ProfilesManager.INSTANCE.getActiveProfiles().contains(record.getProfile())) {
+					closeEditor(true);
 				}
 			});
 			
@@ -774,29 +783,8 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		infodialog.open();	
 	}
 	
-	private Image lastIcon = null;
 	private void updateImageIcon(){
-		if (lastIcon != null){
-			lastIcon.dispose();
-			lastIcon = null;
-		}
-		if (record.getRecordSource() == null){
-			super.setTitleImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RECORD));
-		}else{
-			
-			try {
-				if (record.getRecordSource().getIcon() != null){
-					lastIcon = AWTSWTImageUtils.createSWTImage(record.getRecordSource().getIconAsImage());
-					super.setTitleImage(lastIcon);
-				}else{
-					super.setTitleImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RECORD));
-				}
-			} catch (Exception e) {
-				//e.printStackTrace();
-				super.setTitleImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RECORD));
-			}
-			
-		}
+		super.setTitleImage(Resources.INSTANCE.getImage(record.getRecordSource()));
 	}
     
     

@@ -43,14 +43,12 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -101,10 +99,9 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.ui.CheckboxSelectorKeyAdapter;
 import org.wcs.smart.ui.CreateEditNamedItemDialog;
+import org.wcs.smart.ui.EmployeeSelectDialog;
 import org.wcs.smart.ui.SmartLabelProvider;
-import org.wcs.smart.ui.SmartStyledDialog;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.internal.ca.EmployeeDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -595,7 +592,7 @@ public class EmployeePropertyPage extends SmartStyledTitleDialog{
 			session.beginTransaction();
 			try {
 				List<EmployeeTeamMember> newMembers = new ArrayList<>();
-				for (Employee e : dialog.employees) {
+				for (Employee e : dialog.getSelectedEmployees()) {
 					if (current.contains(e)) continue;
 					EmployeeTeamMember m = new EmployeeTeamMember();
 					m.setEmployee(e);
@@ -1073,65 +1070,5 @@ public class EmployeePropertyPage extends SmartStyledTitleDialog{
 		}
 	};
 	
-	private class EmployeeSelectDialog extends SmartStyledDialog{
-
-		private List<Employee> employees;
-		private CheckboxTableViewer tblViewer;
-		
-		protected EmployeeSelectDialog(Shell parent) {
-			super(parent);
-		}
-		
-		@Override
-		public void okPressed() {
-			employees = new ArrayList<>();
-			for (Object o : tblViewer.getCheckedElements()) {
-				if (o instanceof Employee) employees.add((Employee)o);
-			}
-			super.okPressed();
-		}
-		
-		@Override
-		public Point getInitialSize() {
-			return new Point(350, 400);
-		}
-		
-		@Override
-		public Control createDialogArea(Composite parent) {
-			Composite main = (Composite) super.createDialogArea(parent);
-			
-			tblViewer = CheckboxTableViewer.newCheckList(main, SWT.BORDER | SWT.MULTI);
-			tblViewer.setLabelProvider(new LabelProvider() {
-				@Override
-				public String getText(Object element) {
-					if (element instanceof Employee) return SmartLabelProvider.getFullLabel((Employee)element);
-					return super.getText(element);
-				}
-			});
-			tblViewer.setContentProvider(ArrayContentProvider.getInstance());
-			tblViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			tblViewer.getTable().addKeyListener(new CheckboxSelectorKeyAdapter(tblViewer));
-			
-			Job load = new Job(Messages.EmployeePropertyPage_loadingjob2) {
-
-				@Override
-				protected IStatus run(IProgressMonitor monitor) {
-					List<Employee> items = new ArrayList<>();
-					try(Session session = HibernateManager.openSession()){
-						items.addAll(HibernateManager.getActiveEmployees(SmartDB.getCurrentConservationArea(), session));
-					}
-					items.sort((a,b)->Collator.getInstance().compare(SmartLabelProvider.getFullLabel((Employee)a), SmartLabelProvider.getFullLabel((Employee)b)));
-					Display.getDefault().syncExec(()->{
-						tblViewer.setInput(items);
-					});
-					return Status.OK_STATUS;
-				}
-				
-			};
-			load.schedule();
-			getShell().setText(Messages.EmployeePropertyPage_shelltext);
-			return main;
-		}
-		
-	}
+	
 }

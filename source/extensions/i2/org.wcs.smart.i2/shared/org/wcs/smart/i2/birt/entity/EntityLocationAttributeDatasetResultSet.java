@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i2.birt.entity;
 
 import java.math.BigDecimal;
@@ -16,12 +37,18 @@ import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.query.Query;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
+import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection.Permission;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.util.UuidUtils;
 
+/**
+ * Entity location attributes 
+ * @author Emily
+ *
+ */
 public class EntityLocationAttributeDatasetResultSet implements IResultSet {
 	
 	private long m_maxRows = -1;
@@ -49,7 +76,7 @@ public class EntityLocationAttributeDatasetResultSet implements IResultSet {
 		
 		this.metadata = metadata;
 
-		String hql = "FROM IntelEntityAttributeValue v join v.id.attribute a join v.id.entity e where a.type = :type and e.entityType = :etype"; //$NON-NLS-1$
+		String hql = "FROM IntelEntityAttributeValue v join v.id.attribute a join v.id.entity e where a.type = :type and e.entityType = :etype and v.id.entity.profile in (:profiles)"; //$NON-NLS-1$
 		
 		int index = pmetadata.findParameterIndex(DataSourceParameter.ENTITY_UUID.getName());
 		UUID entity = null;
@@ -61,6 +88,7 @@ public class EntityLocationAttributeDatasetResultSet implements IResultSet {
 		String cnt = "SELECT count(*) " + hql; //$NON-NLS-1$
 		Query<?> q = connection.getSession().createQuery(cnt);
 		q.setParameter("type", IntelAttribute.AttributeType.POSITION); //$NON-NLS-1$
+		q.setParameter("profiles", connection.hasPermission(Permission.ENTITY));
 		q.setParameter("etype", type); //$NON-NLS-1$
 		if (entity != null){
 			q.setParameter("euuid", entity); //$NON-NLS-1$
@@ -70,6 +98,7 @@ public class EntityLocationAttributeDatasetResultSet implements IResultSet {
 		
 		q = connection.getSession().createQuery(hql);
 		q.setParameter("type", IntelAttribute.AttributeType.POSITION); //$NON-NLS-1$
+		q.setParameter("profiles", connection.hasPermission(Permission.ENTITY));
 		q.setParameter("etype", type); //$NON-NLS-1$
 		if (entity != null){
 			q.setParameter("euuid", entity); //$NON-NLS-1$

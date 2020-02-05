@@ -28,6 +28,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
+import java.util.UUID;
 
 import org.hibernate.Session;
 import org.wcs.smart.ICoreLabelProvider;
@@ -40,6 +42,9 @@ import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelRecord;
+import org.wcs.smart.i2.model.IntelRecordSource;
+import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.query.IQueryItemProvider;
 import org.wcs.smart.i2.query.ListItem;
 import org.wcs.smart.util.UuidUtils;
@@ -56,7 +61,10 @@ public class GroupByItem {
 	
 	public static enum GroupByType{
 		ENTITYTYPE ("entitytype_gb"), //$NON-NLS-1$
-		ATTRIBUTE ("e_attribute_gb"), //$NON-NLS-1$
+		RECORDSOURCE ("recordsource_gb"), //$NON-NLS-1$
+		RECORDSTATUS ("recordstatus_gb"), //$NON-NLS-1$
+		ENTITY_ATTRIBUTE ("e_attribute_gb"), //$NON-NLS-1$
+		RECORD_ATTRIBUTE ("r_attribute_gb"), //$NON-NLS-1$
 		SYSTEM(SystemAttributeFilter.SA_KEY),
 		CA("ca_gb"); //$NON-NLS-1$
 		
@@ -95,6 +103,24 @@ public class GroupByItem {
 			}
 			return new GroupByItem(GroupByType.ENTITYTYPE, ops);
 		}
+		if (bits[0].equals(GroupByType.RECORDSOURCE.getKey())) {
+			//remaining bits are keys
+			List<String> ops = new ArrayList<>();
+			for (int i = 1; i < bits.length; i ++) {
+				String keyId = bits[i];
+				ops.add(keyId);
+			}
+			return new GroupByItem(GroupByType.RECORDSOURCE, ops);
+		}
+		if (bits[0].equals(GroupByType.RECORDSTATUS.getKey())) {
+			//remaining bits are keys
+			List<String> ops = new ArrayList<>();
+			for (int i = 1; i < bits.length; i ++) {
+				String keyId = bits[i];
+				ops.add(keyId);
+			}
+			return new GroupByItem(GroupByType.RECORDSTATUS, ops);
+		}
 		if (bits[0].equals(GroupByType.CA.getKey())) {
 			//remaining bits are keys
 			List<String> ops = new ArrayList<>();
@@ -106,12 +132,8 @@ public class GroupByItem {
 		}
 		
 		if (bits[0].equals(SystemAttributeFilter.SA_KEY)) {
-			String stype = bits[1];
-			String sattribute = bits[2];
-			String dateFilter = bits[3];
-			
-			SystemAttributeFilter.Type type = SystemAttributeFilter.Type.valueOf(stype.toUpperCase(Locale.ROOT));
-			if (type == null || type == SystemAttributeFilter.Type.RECORD) throw new IllegalStateException(MessageFormat.format("System attribute group by of type {0} not supported", stype)); //$NON-NLS-1$
+			String sattribute = bits[1];
+			String dateFilter = bits[2];
 			
 			SystemAttributeFilter.SystemAttribute attribute = SystemAttributeFilter.SystemAttribute.valueOf(sattribute.toUpperCase(Locale.ROOT));
 			if (attribute == null) throw new IllegalStateException(MessageFormat.format("System attribute group by of {0} not supported", sattribute)); //$NON-NLS-1$
@@ -121,10 +143,10 @@ public class GroupByItem {
 				if (key.getKey().equals(dateFilter)) op = key;
 			}
 			if (op == null) throw new IllegalStateException("Invalid date option: " + dateFilter); //$NON-NLS-1$
-			return new GroupByItem(attribute, type, op);
+			return new GroupByItem(attribute, op);
 		}
 		
-		if (bits[0].equals(GroupByType.ATTRIBUTE.getKey())) {
+		if (bits[0].equals(GroupByType.ENTITY_ATTRIBUTE.getKey())) {
 			String attributeType = bits[1];
 			String attributeKey = bits[2];
 			String entityType = ""; //$NON-NLS-1$
@@ -146,7 +168,7 @@ public class GroupByItem {
 					String keyId = bits[i];
 					ops.add(keyId);
 				}
-				return new GroupByItem(GroupByType.ATTRIBUTE, attributeKey, atype, entityType, ops);
+				return new GroupByItem(GroupByType.ENTITY_ATTRIBUTE, attributeKey, atype, entityType, ops);
 				
 			}else if (attributeType.equals(IntelAttribute.AttributeType.POSITION.key)) {
 				String positionType = bits[4];
@@ -157,7 +179,7 @@ public class GroupByItem {
 				}
 				Area.AreaType type = Area.AreaType.valueOf(positionType);
 				
-				return new GroupByItem(GroupByType.ATTRIBUTE, attributeKey, atype, entityType, type, ops);
+				return new GroupByItem(GroupByType.ENTITY_ATTRIBUTE, attributeKey, atype, entityType, type, ops);
 				
 			}else if (attributeType.equals(IntelAttribute.AttributeType.DATE.key)) {
 				String dateOp = bits[4];
@@ -166,17 +188,59 @@ public class GroupByItem {
 					if (key.getKey().equals(dateOp)) op = key;
 				}
 				if (op == null) throw new IllegalStateException("Invalid date option: " + dateOp); //$NON-NLS-1$
-				return new GroupByItem(GroupByType.ATTRIBUTE, attributeKey, atype, entityType, op);
+				return new GroupByItem(GroupByType.ENTITY_ATTRIBUTE, attributeKey, atype, entityType, op);
 			}
 			
 		}
-		
+		if (bits[0].equals(GroupByType.RECORD_ATTRIBUTE.getKey())) {
+			String attributeType = bits[1];
+			String attributeKey = bits[2];
+			String recordSource = bits[3]; //$NON-NLS-1$
+			
+			IntelAttribute.AttributeType atype = null;
+			for (IntelAttribute.AttributeType t : IntelAttribute.AttributeType.values()) {
+				if (t.key.equalsIgnoreCase(attributeType)) {
+					atype = t;
+					break;
+				}
+			}
+			if (attributeType.equals(IntelAttribute.AttributeType.LIST.key) || 
+					attributeType.equals(IntelAttribute.AttributeType.EMPLOYEE.key) ) {
+				List<String> ops = new ArrayList<>();
+				for (int i = 4; i < bits.length; i++){
+					String keyId = bits[i];
+					ops.add(keyId);
+				}
+				return new GroupByItem(GroupByType.RECORD_ATTRIBUTE, attributeKey, atype, recordSource, ops);
+				
+			}else if (attributeType.equals(IntelAttribute.AttributeType.POSITION.key)) {
+				String positionType = bits[4];
+				List<String> ops = new ArrayList<>();
+				for (int i = 5; i < bits.length; i++){
+					String keyId = bits[i];
+					ops.add(keyId);
+				}
+				Area.AreaType type = Area.AreaType.valueOf(positionType);
+				
+				return new GroupByItem(GroupByType.RECORD_ATTRIBUTE, attributeKey, atype, recordSource, type, ops);
+				
+			}else if (attributeType.equals(IntelAttribute.AttributeType.DATE.key)) {
+				String dateOp = bits[4];
+				DateOption op = null;
+				for (DateOption key : DateOption.values()) {
+					if (key.getKey().equals(dateOp)) op = key;
+				}
+				if (op == null) throw new IllegalStateException("Invalid date option: " + dateOp); //$NON-NLS-1$
+				return new GroupByItem(GroupByType.RECORD_ATTRIBUTE, attributeKey, atype, recordSource, op);
+			}
+			
+		}
 		return null;
 	}
 
 	
-	private String entityTypeKey;
-	private String attributeKey;
+	private String otherTypeKey; //for entit_attribute this is the entity key otherwise it is the recordsource key
+	private String attributeKey; //for record_attribute this is the intelrecordsourceattribute key otherwise its the intelattribute key
 	private IntelAttribute.AttributeType attributeType;
 	private List<String> optionKeys;
 	private DateOption dateOption;
@@ -184,45 +248,54 @@ public class GroupByItem {
 	private GroupByType type;
 	
 	private SystemAttributeFilter.SystemAttribute systemAttribute;
-	private SystemAttributeFilter.Type systemType;
 	
 	public GroupByItem(GroupByType type, List<String> options) {
 		this.type = type;
 		this.optionKeys = options;
 	}
 	
-	private GroupByItem(GroupByType type, String attributeKey, IntelAttribute.AttributeType attributeType, String entityTypeKey){
+	private GroupByItem(GroupByType type, String attributeKey, IntelAttribute.AttributeType attributeType, String otherTypeKey){
 		this.type = type;
 		this.attributeKey = attributeKey;
-		this.entityTypeKey = entityTypeKey;
+		this.otherTypeKey = otherTypeKey;
 		this.attributeType = attributeType;
 	}
-	public GroupByItem(GroupByType type, String attributeKey, IntelAttribute.AttributeType attributeType, String entityTypeKey, List<String> options) {
-		this(type, attributeKey, attributeType, entityTypeKey);
+	public GroupByItem(GroupByType type, String attributeKey, IntelAttribute.AttributeType attributeType, String otherTypeKey, List<String> options) {
+		this(type, attributeKey, attributeType, otherTypeKey);
 		this.optionKeys = options;
 	}
 	
-	public GroupByItem(GroupByType type, String attributeKey, IntelAttribute.AttributeType attributeType, String entityTypeKey, DateOption op) {
-		this(type, attributeKey, attributeType, entityTypeKey);
+	public GroupByItem(GroupByType type, String attributeKey, IntelAttribute.AttributeType attributeType, String otherTypeKey, DateOption op) {
+		this(type, attributeKey, attributeType, otherTypeKey);
 		this.dateOption = op;
 	}
 	
-	public GroupByItem(SystemAttributeFilter.SystemAttribute attribute, SystemAttributeFilter.Type type, DateOption op) {
+	public GroupByItem(SystemAttributeFilter.SystemAttribute attribute, DateOption op) {
 		this.type = GroupByType.SYSTEM;
 		this.systemAttribute = attribute;
-		this.systemType = type; 
 		this.dateOption = op;
 	}
 
-	public GroupByItem(GroupByType type, String attributeKey, IntelAttribute.AttributeType attributeType, String entityTypeKey,  Area.AreaType areaType, List<String> options) {
-		this(type, attributeKey, attributeType, entityTypeKey);
+	public GroupByItem(GroupByType type, String attributeKey, IntelAttribute.AttributeType attributeType, String otherTypeKey,  Area.AreaType areaType, List<String> options) {
+		this(type, attributeKey, attributeType, otherTypeKey);
 		this.areaKey = areaType;
 		this.optionKeys = options;
 	}
 	
-	public String getEntityTypeKey() {
-		return this.entityTypeKey;
+	/**
+	 * For ENTITY_ATTRIBUTE this returns the entity type key.  For RECORD_ATTRIBUTE this
+	 * returns the record source key;
+	 * @return
+	 */
+	public String getOtherKey() {
+		return this.otherTypeKey;
 	}
+	
+	/**
+	 * For ENTITY_ATTRIBUTE this returns the attribute key.  For RECORD_ATTRIBUTE this
+	 * returns the RecordSourceAttribute key
+	 * @return
+	 */
 	public String getAttributeKey() {
 		return this.attributeKey;
 	}
@@ -245,15 +318,27 @@ public class GroupByItem {
 	public SystemAttributeFilter.SystemAttribute getSystemAttribute(){
 		return systemAttribute;
 	}
-	public SystemAttributeFilter.Type getSystemType(){
-		return systemType;
-	}
+
 	
-	public List<ListItem> getAllOptions(Session session, IQueryItemProvider itemProvider, LocalDate[] dateRange, Locale l) {
+	public List<ListItem> getAllOptions(Session session, Set<UUID> profiles, IQueryItemProvider itemProvider, LocalDate[] dateRange, Locale l) {
 		if(type == GroupByType.ENTITYTYPE) {
 			List<ListItem> items = new ArrayList<>();
-			for (IntelEntityType t : itemProvider.getEntityTypes(session)) {
+			for (IntelEntityType t : itemProvider.getEntityTypes(profiles, session)) {
 				items.add(new ListItem(t.getKeyId(), t.getName(), t.getName()));
+			}
+			return items;
+		}
+		if(type == GroupByType.RECORDSOURCE) {
+			List<ListItem> items = new ArrayList<>();
+			for (IntelRecordSource t : itemProvider.getRecordSources(profiles, session)) {
+				items.add(new ListItem(t.getKeyId(), t.getName(), t.getName()));
+			}
+			return items;
+		}
+		if(type == GroupByType.RECORDSTATUS) {
+			List<ListItem> items = new ArrayList<>();
+			for (IntelRecord.Status s : IntelRecord.Status.values()) {
+				items.add(new ListItem(s.name(), SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(s, Locale.getDefault())));
 			}
 			return items;
 		}
@@ -265,11 +350,11 @@ public class GroupByItem {
 			return items;
 		}
 		
-		if (type == GroupByType.ATTRIBUTE) {
+		if (type == GroupByType.ENTITY_ATTRIBUTE) {
 			
 			String entityType = null;
-			if (entityTypeKey != null && !entityTypeKey.isEmpty()) {
-				IntelEntityType type = itemProvider.getEntityType(entityTypeKey, session);
+			if (otherTypeKey != null && !otherTypeKey.isEmpty()) {
+				IntelEntityType type = itemProvider.getEntityType(otherTypeKey, session);
 				if (type == null) return Collections.emptyList();
 				entityType = type.getName();
 			}
@@ -321,9 +406,51 @@ public class GroupByItem {
 			}
 			return items;
 		}
-		
+		if (type == GroupByType.RECORD_ATTRIBUTE) {
+			
+			IntelRecordSource type = itemProvider.getRecordSource(otherTypeKey, session);
+			if (type == null) return Collections.emptyList();
+			
+			IntelRecordSourceAttribute intelAttribute = null;
+			for (IntelRecordSourceAttribute a : type.getAttributes()) {
+				if (a.getKeyId().equalsIgnoreCase(attributeKey)) {
+					intelAttribute = a;
+					break;
+				}
+			}
+			if (intelAttribute == null) return Collections.emptyList();
+
+			String attName = IIntelligenceLabelProvider.getName(intelAttribute);
+			List<ListItem> items = new ArrayList<>();
+			if (intelAttribute.getAttribute().getType() == AttributeType.EMPLOYEE) {
+				List<Employee> types = itemProvider.getEmployees(session);
+				for (Employee t : types) {
+					String name = SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(t, l);
+					String fullName = name + " [" + attName + "]"; //$NON-NLS-1$ //$NON-NLS-2$					
+					items.add(new ListItem(UuidUtils.uuidToString(t.getUuid()), name, fullName));
+				}	
+			}else if (attributeType == AttributeType.LIST) {
+				List<IntelAttributeListItem> listItems = itemProvider.getAttributeListItems(intelAttribute.getAttribute().getKeyId(), session);
+				for (IntelAttributeListItem i : listItems) {
+					String name = i.getName();
+					String fullName = name + " [" + attName + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+					items.add(new ListItem(i.getKeyId(), name, fullName));
+				}
+			}else if (attributeType == AttributeType.POSITION) {
+				List<Area> areas = itemProvider.getAreas(areaKey, session);
+				
+				for (Area i : areas) {
+					String name = i.getName();
+					String fullName = name + " [" + SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(i.getType(), l) + ": " + attName + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					items.add(new ListItem(i.getType().name() + "_" + i.getKeyId(), name, fullName)); //$NON-NLS-1$
+				}
+			}else if (attributeType == AttributeType.DATE) {
+				return getDateOptions(dateRange, null, attName);
+			}
+			return items;
+		}
 		if (type == GroupByType.SYSTEM) {
-			return getDateOptions(dateRange, null,  SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(systemType, l));
+			return getDateOptions(dateRange, null, null);
 		}
 		return Collections.emptyList();
 		

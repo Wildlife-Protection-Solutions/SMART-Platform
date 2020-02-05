@@ -10,6 +10,7 @@ package org.wcs.smart.i2.xml.model;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -27,7 +28,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="names" type="{http://www.example.org/Intelligence}NamedItem" maxOccurs="unbounded"/>
+ *         &lt;element name="names" type="{http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.profile}NamedItem" maxOccurs="unbounded"/>
  *       &lt;/sequence>
  *       &lt;attribute name="key" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/restriction>

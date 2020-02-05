@@ -22,16 +22,19 @@
 package org.wcs.smart.connect.query.engine.i2;
 
 import java.math.BigInteger;
+import java.security.Principal;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -42,8 +45,12 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
+import org.wcs.smart.connect.security.AdvIntelAction;
+import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.i2.IIntelQueryEngine;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
+import org.wcs.smart.i2.model.IntelEntityRecordQuery;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.query.CaQueryItemProvider;
 import org.wcs.smart.i2.query.CcaaQueryItemProvider;
@@ -80,6 +87,7 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine{
 	public IntelObservationQueryResults executeQuery(AbstractIntelQuery query,  HashMap<String, Object> parameters) throws Exception{
 		
 		Session session = (Session) parameters.get(Session.class.getName());
+		String username = ((String)parameters.get(Principal.class.getName()));
 		//one or both element of array may be null
 		Date[] dfilter = (Date[]) parameters.get(Date.class.getName());
 		if (dfilter == null) return null;
@@ -99,11 +107,27 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine{
 		}
 		ParsedObservationQuery parsedQuery = IntelRecordObservationQuery.parseQuery(query.getQueryString());
 
+		Set<IntelProfile> profiles = new HashSet<>();
+		for (String ip : IntelEntityRecordQuery.convertFromProfileFilter(query.getProfileFilter())) {
+			List<IntelProfile> items = session.createQuery("FROM IntelProfile WHERE keyId = :keyId and conservationArea in (:cas)", IntelProfile.class)
+					.setParameter("keyId",  ip)
+					.setParameter("cas", cas).list();
+			
+			if (SecurityManager.INSTANCE.canAccess(session, username, AdvIntelAction.RUNQUERY_KEY, query.getUuid()) ||
+					SecurityManager.INSTANCE.canAccess(session, username, AdvIntelAction.RUNQUERY_KEY, query.getConservationArea().getUuid())) { 
+				//we have permission to run this query so use all profiles
+				profiles.addAll(items);
+			}
+		}
+		if (profiles.isEmpty()) {
+			throw new Exception("No valid profile filters for query");
+		}
+		
 		IQueryItemProvider itemProvider = null;
 		if (!query.getConservationArea().getIsCcaa()) {
 			itemProvider = new CaQueryItemProvider(cas.iterator().next(), query.getConservationArea());
 		}else {
-			itemProvider = new CcaaQueryItemProvider(cas, query.getConservationArea());
+			itemProvider = new CcaaQueryItemProvider(profiles, query.getConservationArea());
 		}
 		
 		final Locale flocale = locale;
@@ -117,7 +141,7 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine{
 						queryResults = new IntelObservationQueryResults();
 
 						//session.beginTransaction();
-						ObservationFilterProcessor parser = new ObservationFilterProcessor(parsedQuery.getFilter(), dfilter, fItemProvider, session, flocale); 
+						ObservationFilterProcessor parser = new ObservationFilterProcessor(parsedQuery.getFilter(), dfilter, profiles, fItemProvider, session, flocale); 
 						String dataTable = parser.processFilter();
 						
 						queryResults.setFilterToColumnMap(parser.getFilterToColumnNames());
@@ -134,7 +158,7 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine{
 						queryResults = new IntelObservationQueryResults();
 						
 						//session.beginTransaction();
-						WaypointFilterProcessor parser = new WaypointFilterProcessor(parsedQuery.getFilter(), dfilter, fItemProvider, session, flocale); 
+						WaypointFilterProcessor parser = new WaypointFilterProcessor(parsedQuery.getFilter(), dfilter, profiles, fItemProvider, session, flocale); 
 						String dataTable = parser.processFilter();
 						
 						queryResults.setFilterToColumnMap(parser.getFilterToColumnNames());
@@ -285,6 +309,7 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine{
 			{"source_uuid", "uuid"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"record_status", "varchar(256)"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"record_title", "varchar(1024)"}, //$NON-NLS-1$ //$NON-NLS-2$
+			{"profile_uuid", "uuid"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"loc_id", "varchar(1024)"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"loc_datetime", "timestamp"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"loc_comment", "varchar(4096)"}, //$NON-NLS-1$ //$NON-NLS-2$
@@ -330,7 +355,9 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine{
 		sb = new StringBuilder();
 		sb.append(" INSERT INTO " + newTable + " "); //$NON-NLS-1$ //$NON-NLS-2$
 		sb.append(" ( " + insert.toString() + ")" ); //$NON-NLS-1$ //$NON-NLS-2$
-		sb.append("SELECT o.uuid, a.location_uuid, a.ca_id, a.ca_name, r.uuid, r.source_uuid, r.status, r.title, l.id, l.datetime, l.comment, l.geometry, o.category_uuid "); //$NON-NLS-1$
+		sb.append("SELECT o.uuid, a.location_uuid, a.ca_id, a.ca_name, r.uuid, ");
+		sb.append(" r.source_uuid, r.status, r.title, r.profile_uuid, ");
+		sb.append(" l.id, l.datetime, l.comment, l.geometry, o.category_uuid "); //$NON-NLS-1$
 		sb.append(select);
 		sb.append(" FROM " + observationTable + " a "); //$NON-NLS-1$ //$NON-NLS-2$
 		sb.append(" JOIN smart.i_location l on a.location_uuid = l.uuid "); //$NON-NLS-1$

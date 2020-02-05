@@ -23,6 +23,8 @@ package org.wcs.smart.i2.query;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.Area;
@@ -37,7 +39,9 @@ import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecordSource;
+import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 /**
  * Query item provider for providing items for query module 
  * 
@@ -46,6 +50,21 @@ import org.wcs.smart.i2.model.IntelRecordSource;
  */
 public interface IQueryItemProvider {
 
+	/**
+	 * Get all records sources in the system
+	 * @param session
+	 * @return
+	 */
+	public List<IntelRecordSource> getRecordSources(Set<UUID> profiles, Session session);
+	
+	/**
+	 * Get all record attribute associated with the record source key
+	 * @param session
+	 * @return
+	 */
+	public List<IntelRecordSourceAttribute> getRecordSourceAttributes(IntelRecordSource recordSource, Session session);
+	
+	
 	/**
 	 * Get the record source given entity source key
 	 * @param recordsourceKey
@@ -74,8 +93,18 @@ public interface IQueryItemProvider {
 	 * @param session
 	 * @return
 	 */
-	public List<IntelEntityType> getEntityTypes(Session session);
+	public List<IntelEntityType> getEntityTypes(Set<UUID> profiles, Session session);
 	
+	/**
+	 * Gets all profiles that match a key in the given
+	 * key list
+	 * 
+	 * @param profileKeys
+	 * @param session
+	 * @return
+	 */
+	public Collection<IntelProfile> getProfiles(Set<String> profileKeys, Session session);
+		
 	/**
 	 * Get all entity types
 	 * @param session
@@ -132,7 +161,7 @@ public interface IQueryItemProvider {
 	 * @param session
 	 * @return
 	 */
-	public List<IntelEntity> getEntities(String entityTypeKey, Session session);
+	public List<IntelEntity> getEntities(Set<UUID> profiles, String entityTypeKey, Session session);
 	
 	/**
 	 * Get all data model attributes
@@ -195,8 +224,4 @@ public interface IQueryItemProvider {
 	 */
 	public int getMaxDmCategoryDepth(Session session);
 	
-	/**
-	 * resets any cached items in the query item provider
-	 */
-	public default void reset() {}
 }

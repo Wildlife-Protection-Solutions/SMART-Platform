@@ -27,6 +27,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.EntityPerspective;
@@ -43,12 +44,15 @@ import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
 public class OpenRecordHandler {
 
 	public void openRecord(RecordEditorInput input, boolean editMode){
+		IntelProfile temp = new IntelProfile();
+		temp.setUuid(input.getRecordProfileUuid());
+		
 		try {
 			String pId = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getPerspective().getId();
-			if (IntelSecurityManager.INSTANCE.canEditRecord() ) {
+			if (IntelSecurityManager.INSTANCE.canEditRecord(temp) ) {
 				//can edit record
 				input.setIsInitEditable(pId.equals(IntelDataAssessmentPerspective.ID) || pId.equals(EntityPerspective.ID) || editMode);
-			}else if (IntelSecurityManager.INSTANCE.canCreateRecord() && input.getRecord().getUuid() == null) {
+			}else if (IntelSecurityManager.INSTANCE.canCreateRecord(temp) && input.getRecord().getUuid() == null) {
 				//can create record and this is a new record
 				input.setIsInitEditable(pId.equals(IntelDataAssessmentPerspective.ID) || pId.equals(EntityPerspective.ID) || editMode);
 			}else {

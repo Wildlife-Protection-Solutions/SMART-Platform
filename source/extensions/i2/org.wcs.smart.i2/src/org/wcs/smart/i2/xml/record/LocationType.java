@@ -10,6 +10,7 @@ package org.wcs.smart.i2.xml.record;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -33,8 +34,8 @@ import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  *         &lt;element name="datetime" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="comment" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="geometry" type="{http://www.w3.org/2001/XMLSchema}hexBinary"/>
- *         &lt;element name="entities" type="{http://www.smartconservationsoftware.org/xml/1.0/org.wcs.smart.i2.record}LabelUuid" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="observation" type="{http://www.smartconservationsoftware.org/xml/1.0/org.wcs.smart.i2.record}ObservationType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="entities" type="{http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.record}LabelUuid" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="observation" type="{http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.record}ObservationType" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>

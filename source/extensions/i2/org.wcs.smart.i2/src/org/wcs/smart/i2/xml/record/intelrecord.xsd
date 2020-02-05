@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schema xmlns="http://www.w3.org/2001/XMLSchema"
- targetNamespace="http://www.smartconservationsoftware.org/xml/1.0/org.wcs.smart.i2.record" 
-xmlns:tns="http://www.smartconservationsoftware.org/xml/1.0/org.wcs.smart.i2.record" 
+ targetNamespace="http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.record" 
+xmlns:tns="http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.record" 
  elementFormDefault="qualified">
 
     <element name="IntelRecord" type="tns:RecordType"></element>
@@ -15,8 +15,8 @@ xmlns:tns="http://www.smartconservationsoftware.org/xml/1.0/org.wcs.smart.i2.rec
     		<element name="source" type="tns:LabelUuid"></element>
     		<element name="narrative" type="string"></element>
     		<element name="scratchpad" type="string"></element>
-            <element name="primary_date" type="date"></element>
-            <element name="attributes" type="tns:RecordAttributeType"
+    		<element name="primary_date" type="date"></element>
+    		<element name="attributes" type="tns:RecordAttributeType"
     			maxOccurs="unbounded" minOccurs="0">
     		</element>
     		<element name="entities" type="tns:LabelUuid"
@@ -29,8 +29,9 @@ xmlns:tns="http://www.smartconservationsoftware.org/xml/1.0/org.wcs.smart.i2.rec
     			maxOccurs="unbounded" minOccurs="0">
     		</element>
     	</sequence>
+    	<attribute name="profileKey" type="string"></attribute>
     </complexType>
-    
+
     <complexType name="LabelUuid">
     	<sequence>
     		<element name="name" type="string" maxOccurs="1"

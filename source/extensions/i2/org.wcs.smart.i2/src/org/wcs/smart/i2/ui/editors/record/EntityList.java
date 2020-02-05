@@ -206,10 +206,12 @@ public class EntityList extends Composite {
 	}
 	
 	private void openEntity(){
-		if (!IntelSecurityManager.INSTANCE.canViewEntities()) return;
-		if (!getCurrentSelection().isEmpty()){
-			(new OpenEntityHandler()).openEntity(getCurrentSelection().get(0), listParent.getEditor().getContext());
-		}
+		if (getCurrentSelection().isEmpty()) return;
+		
+		IntelEntity ie = getCurrentSelection().get(0);
+		if (!IntelSecurityManager.INSTANCE.canViewEntities(ie.getProfile())) return;
+		(new OpenEntityHandler()).openEntity(ie, listParent.getEditor().getContext());
+		
 	}
 	
 	private void createMenu(Composite parent){
@@ -244,10 +246,9 @@ public class EntityList extends Composite {
 						mnuRelationship.dispose();
 						mnuRelationship = null;
 					}
-					if (IntelSecurityManager.INSTANCE.canEditEntity()) {
-						if (!getCurrentSelection().isEmpty()){
-							
-							final IntelEntity srcEntity = getCurrentSelection().get(0);
+					if (!getCurrentSelection().isEmpty()) {
+						final IntelEntity srcEntity = getCurrentSelection().get(0);
+						if (IntelSecurityManager.INSTANCE.canEditEntity(srcEntity.getProfile())){							
 							List<IntelEntity> targets = listParent.getEditor().getRecord().getEntities()
 								.stream()
 								.map(ie->ie.getEntity())
@@ -278,7 +279,7 @@ public class EntityList extends Composite {
 											loading.setText(DialogConstants.LOADING_TEXT);
 											loading.setEnabled(false);
 											
-											(new RelationshipSearchJob(srcEntity.getEntityType(), targetEntity.getEntityType()) {
+											(new RelationshipSearchJob(srcEntity.getProfile(), srcEntity.getEntityType(), targetEntity.getProfile(), targetEntity.getEntityType()) {
 												@Override
 												protected void afterLoad() {
 													Display.getDefault().syncExec(()->{
@@ -334,7 +335,7 @@ public class EntityList extends Composite {
 			}
 		});
 		
-		if (IntelSecurityManager.INSTANCE.canViewEntities()) {
+		if (IntelSecurityManager.INSTANCE.canViewEntityAny()) {
 			mnuOpen = new MenuItem(mnuEntities, SWT.PUSH);
 			mnuOpen.setText(Messages.EntityList_OpenItem);
 			mnuOpen.addSelectionListener(new SelectionAdapter() {
@@ -363,6 +364,12 @@ public class EntityList extends Composite {
 	private void createRelationship(IntelEntity srcEntity, IntelEntity targetEntity, IntelRelationshipType rType){
 		IntelEntity e1 = srcEntity;
 		IntelEntity e2 = targetEntity;
+		
+		if (!rType.getSourceProfile().getUuid().equals(srcEntity.getProfile().getUuid()) ||
+				!rType.getTargetProfile().getUuid().equals(targetEntity.getProfile().getUuid())){
+			//invalid profiles
+			return;
+		}
 		
 		IntelEntityRelationship newRelationship = new IntelEntityRelationship();
 		newRelationship.setRelationshipType(rType);

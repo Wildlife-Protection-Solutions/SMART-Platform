@@ -39,6 +39,8 @@ import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
+import org.wcs.smart.i2.model.IntelRecordQuery;
+import org.wcs.smart.i2.model.IntelRecordSummaryQuery;
 import org.wcs.smart.i2.ui.IntelDataAnalysisPerspective;
 import org.wcs.smart.i2.ui.editors.query.QueryEditorInput;
 import org.wcs.smart.i2.ui.views.QueryView;
@@ -67,9 +69,11 @@ public class NewQueryHandler {
 			MessageDialog.openError(context.get(Shell.class), Messages.NewQueryHandler_ErrorTitle, Messages.NewQueryHandler_NoQueryType);
 			return;
 		}
-		typeKey = typeKey.toUpperCase(Locale.ROOT);
+		typeKey = typeKey.toLowerCase(Locale.ROOT);
 		if (!typeKey.equals(IntelRecordObservationQuery.KEY) && !typeKey.equals(IntelEntitySummaryQuery.KEY)
-				&& !typeKey.equals(IntelEntityRecordQuery.KEY)) {
+				&& !typeKey.equals(IntelRecordSummaryQuery.KEY)
+				&& !typeKey.equals(IntelEntityRecordQuery.KEY)
+				&& !typeKey.equals(IntelRecordQuery.KEY)) {
 			MessageDialog.openError(context.get(Shell.class), Messages.NewQueryHandler_ErrorTitle, MessageFormat.format(Messages.NewQueryHandler_InvalidQueryType, typeKey));
 			return;
 		}

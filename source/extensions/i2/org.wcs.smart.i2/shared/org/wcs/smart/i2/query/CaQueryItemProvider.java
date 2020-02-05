@@ -24,7 +24,10 @@ package org.wcs.smart.i2.query;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.Area;
@@ -40,7 +43,11 @@ import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
+import org.wcs.smart.i2.model.IntelProfile;
+import org.wcs.smart.i2.model.IntelProfileEntityType;
+import org.wcs.smart.i2.model.IntelProfileRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSource;
+import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -71,9 +78,22 @@ public class CaQueryItemProvider implements IQueryItemProvider {
 	}
 	
 	@Override
+	public Collection<IntelProfile> getProfiles(Set<String> profileKeys, Session session) {
+		return session.createQuery("FROM IntelProfile WHERE conservationArea = :ca and keyId IN (:keys)", IntelProfile.class)
+				.setParameter("ca", getCa())
+				.setParameterList("keys", profileKeys)
+				.list();
+	}
+	
+	@Override
 	public List<IntelEntityTypeAttribute> getEntityTypeAttributes(IntelEntityType entityType, Session session){
 		return entityType.getAttributes();
 	}
+	
+	public List<IntelRecordSourceAttribute> getRecordSourceAttributes(IntelRecordSource recordSource, Session session){
+		return recordSource.getAttributes();
+	}
+
 
 	@Override
 	public List<Employee> getEmployees(Session session){
@@ -84,9 +104,22 @@ public class CaQueryItemProvider implements IQueryItemProvider {
 	}
 	
 	@Override
-	public List<IntelEntityType> getEntityTypes(Session session){
-		return QueryFactory.buildQuery(session, IntelEntityType.class,
+	public List<IntelEntityType> getEntityTypes(Set<UUID> profiles, Session session){
+		List<IntelEntityType> types = QueryFactory.buildQuery(session, IntelEntityType.class,
 				new Object[] {"conservationArea", getCa()}).list(); //$NON-NLS-1$
+		
+		for (Iterator<IntelEntityType> iterator = types.iterator(); iterator.hasNext();) {
+			IntelEntityType t = (IntelEntityType) iterator.next();
+			boolean keep = false;
+			for (IntelProfileEntityType ip : t.getProfiles()) {
+				if (profiles.contains(ip.getProfile().getUuid())) {
+					keep = true;
+					break;
+				}
+			}
+			if (!keep) iterator.remove();
+		}
+		return types;
 	}
 	
 	@Override
@@ -106,6 +139,24 @@ public class CaQueryItemProvider implements IQueryItemProvider {
 				
 	}
 	
+	@Override
+	public List<IntelRecordSource> getRecordSources(Set<UUID> profiles, Session session){
+		List<IntelRecordSource> types = QueryFactory.buildQuery(session, IntelRecordSource.class,
+				new Object[] {"conservationArea", getCa()}).list(); //$NON-NLS-1$
+		
+		for (Iterator<IntelRecordSource> iterator = types.iterator(); iterator.hasNext();) {
+			IntelRecordSource t = (IntelRecordSource) iterator.next();
+			boolean keep = false;
+			for (IntelProfileRecordSource ip : t.getProfiles()) {
+				if (profiles.contains(ip.getProfile().getUuid())) {
+					keep = true;
+					break;
+				}
+			}
+			if (!keep) iterator.remove();
+		}
+		return types;
+	}
 	
 	@Override
 	public IntelRecordSource getRecordSource(String recordsourceKey, Session session) {
@@ -144,10 +195,11 @@ public class CaQueryItemProvider implements IQueryItemProvider {
 	
 	
 	@Override
-	public List<IntelEntity> getEntities(String entityTypeKey, Session session){
-		return session.createQuery("SELECT i FROM IntelEntity i join i.entityType t WHERE i.conservationArea = :ca and t.keyId = :entityType", IntelEntity.class) //$NON-NLS-1$
+	public List<IntelEntity> getEntities(Set<UUID> profiles, String entityTypeKey, Session session){
+		return session.createQuery("SELECT i FROM IntelEntity i join i.entityType t WHERE i.conservationArea = :ca and t.keyId = :entityType and i.profile.uuid in (:profiles)", IntelEntity.class) //$NON-NLS-1$
 			.setParameter("entityType", entityTypeKey) //$NON-NLS-1$
 			.setParameter("ca",  getCa()) //$NON-NLS-1$
+			.setParameterList("profiles", profiles)
 			.list();
 	}
 	
@@ -207,4 +259,5 @@ public class CaQueryItemProvider implements IQueryItemProvider {
 				.setParameter("ca",  getCa()).uniqueResult(); //$NON-NLS-1$
 		return cnt.intValue();
 	}
+
 }

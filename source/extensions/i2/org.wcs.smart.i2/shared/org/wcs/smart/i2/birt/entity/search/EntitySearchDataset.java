@@ -70,7 +70,7 @@ public class EntitySearchDataset implements IQuery {
 	
 	@Override
 	public void prepare(String queryText) throws OdaException {
-		if (!connection.hasPermission(Permission.ENTITY)) {
+		if (connection.hasPermission(Permission.ENTITY).isEmpty()) {
 			throw new OdaException("Unauthorized.  You do not have permission to access intelligence entity datasets"); //$NON-NLS-1$
 		}
 		UUID searchUuid = null;

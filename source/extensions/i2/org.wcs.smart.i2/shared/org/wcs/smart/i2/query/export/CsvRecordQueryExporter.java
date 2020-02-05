@@ -38,6 +38,7 @@ import org.wcs.smart.ca.Projection;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
+import org.wcs.smart.i2.model.IntelRecordQuery;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
 import org.wcs.smart.i2.query.IQueryColumn;
 import org.wcs.smart.i2.query.IQueryColumn.Type;
@@ -58,7 +59,8 @@ public class CsvRecordQueryExporter implements IQueryExporter{
 	@Override
 	public boolean canExport(String queryType) {
 		return queryType.equalsIgnoreCase(IntelRecordObservationQuery.KEY) || 
-				queryType.equalsIgnoreCase(IntelEntityRecordQuery.KEY);
+				queryType.equalsIgnoreCase(IntelEntityRecordQuery.KEY) || 
+				queryType.equalsIgnoreCase(IntelRecordQuery.KEY);
 	}
 	
 	@Override

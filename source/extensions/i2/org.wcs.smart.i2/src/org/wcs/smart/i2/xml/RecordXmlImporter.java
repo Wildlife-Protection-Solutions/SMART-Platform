@@ -76,6 +76,7 @@ import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.model.IntelObservation;
 import org.wcs.smart.i2.model.IntelObservationAttribute;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
 import org.wcs.smart.i2.model.IntelRecordAttributeValue;
@@ -83,6 +84,7 @@ import org.wcs.smart.i2.model.IntelRecordAttributeValueList;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.record.importer.RecordImportEngine;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.xml.record.AttachmentType;
 import org.wcs.smart.i2.xml.record.AttributeType;
 import org.wcs.smart.i2.xml.record.LabelUuid;
@@ -231,6 +233,10 @@ public class RecordXmlImporter {
 	}
 	
 	private boolean doSave(IntelRecord r, Session s, ArrayList<IntelEntity> modified, ArrayList<IntelRecord> deleted) throws Exception{
+		
+		if (!IntelSecurityManager.INSTANCE.canCreateRecord(r.getProfile())) {
+			throw new Exception(MessageFormat.format(Messages.RecordXmlImporter_NoPermission, r.getProfile().getName()));
+		}
 		Long cnt = QueryFactory.buildCountQuery(session, IntelRecord.class, 
 				new Object[] {"conservationArea", r.getConservationArea()}, //$NON-NLS-1$
 				new Object[] {"title", r.getTitle()}); //$NON-NLS-1$
@@ -373,8 +379,15 @@ public class RecordXmlImporter {
 			if (type.getTitle() == null || type.getTitle().trim().isEmpty()) {
 				throw new Exception(Messages.RecordXmlImporter_TitleRequired);
 			}
+			
+			IntelProfile profile = findProfile(session,  type.getProfileKey());
+			if(profile == null) {
+				warnings.add(MessageFormat.format(Messages.RecordXmlImporter_ProfileFound, type.getProfileKey(), xmlFile.getFileName().toString()));
+				return;
+			}
 			List<IntelEntityLocation> entitylocations = new ArrayList<>();
 			IntelRecord newRecord = new IntelRecord();
+			newRecord.setProfile(profile);
 			newRecord.setConservationArea(SmartDB.getCurrentConservationArea());
 			newRecord.setTitle(type.getTitle().trim());
 			if (type.getPrimaryDate() != null) {
@@ -744,6 +757,11 @@ public class RecordXmlImporter {
 		return QueryFactory.buildQuery(session,  IntelEntityType.class, 
 				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
 				new Object[] {"keyId", entityTypeKey}).uniqueResult(); //$NON-NLS-1$
+	}
+	private IntelProfile findProfile(Session session, String profileKey) {
+		return QueryFactory.buildQuery(session,  IntelProfile.class, 
+				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+				new Object[] {"keyId", profileKey}).uniqueResult(); //$NON-NLS-1$
 	}
 	
 	private IntelEntity parseEntity(LabelUuid entityListItem, IntelEntityType type, Session session, List<String> warnings){

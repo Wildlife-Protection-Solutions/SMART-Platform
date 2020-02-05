@@ -31,9 +31,12 @@ import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
+import org.wcs.smart.i2.model.IntelRecordQuery;
+import org.wcs.smart.i2.model.IntelRecordSummaryQuery;
 import org.wcs.smart.i2.ui.editors.query.IntelEntityRecordQueryEditor;
-import org.wcs.smart.i2.ui.editors.query.IntelEntitySummaryQueryEditor;
 import org.wcs.smart.i2.ui.editors.query.IntelRecordObservationQueryEditor;
+import org.wcs.smart.i2.ui.editors.query.IntelRecordQueryEditor;
+import org.wcs.smart.i2.ui.editors.query.IntelSummaryQueryEditor;
 import org.wcs.smart.i2.ui.editors.query.QueryEditorInput;
 
 /**
@@ -49,9 +52,13 @@ public class OpenQueryHandler {
 			if (editorInput.getTypeKey().equals(IntelRecordObservationQuery.KEY)) {
 				PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(editorInput, IntelRecordObservationQueryEditor.ID);
 			}else if (editorInput.getTypeKey().equals(IntelEntitySummaryQuery.KEY)) {
-				PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(editorInput, IntelEntitySummaryQueryEditor.ID);
+				PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(editorInput, IntelSummaryQueryEditor.ID);
+			}else if (editorInput.getTypeKey().equals(IntelRecordSummaryQuery.KEY)) {
+				PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(editorInput, IntelSummaryQueryEditor.ID);
 			}else if (editorInput.getTypeKey().equals(IntelEntityRecordQuery.KEY)) {
 				PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(editorInput, IntelEntityRecordQueryEditor.ID);
+			}else if (editorInput.getTypeKey().equals(IntelRecordQuery.KEY)) {
+				PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(editorInput, IntelRecordQueryEditor.ID);
 			}
 		} catch (PartInitException e) {
 			Intelligence2PlugIn.displayLog(MessageFormat.format(Messages.OpenQueryHandler_OpenError, e.getMessage()), e);

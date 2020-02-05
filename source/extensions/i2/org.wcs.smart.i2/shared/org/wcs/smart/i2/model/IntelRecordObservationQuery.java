@@ -47,7 +47,7 @@ public class IntelRecordObservationQuery extends AbstractIntelQuery {
 
 	private static final long serialVersionUID = 1L;
 	
-	public static final String KEY = "I2_OBS_QUERY"; //$NON-NLS-1$
+	public static final String KEY = "i2_obs_query"; //$NON-NLS-1$
 	
 	private String style;
 	private String columnFilter;

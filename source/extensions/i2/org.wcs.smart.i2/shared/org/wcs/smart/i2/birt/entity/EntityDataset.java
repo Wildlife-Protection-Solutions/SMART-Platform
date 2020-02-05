@@ -25,7 +25,9 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.text.MessageFormat;
 import java.util.HashMap;
+import java.util.Set;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -41,6 +43,8 @@ import org.eclipse.datatools.connectivity.oda.spec.QuerySpecification;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection.Permission;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelProfile;
+import org.wcs.smart.i2.model.IntelProfileEntityType;
 
 /**
  * Entity dataset
@@ -68,9 +72,10 @@ public class EntityDataset implements IQuery {
 	
 	@Override
 	public void prepare(String queryText) throws OdaException {
-		if (!connection.hasPermission(Permission.ENTITY)) {
-			throw new OdaException("Unauthorized.  You do not have permission to access intelligence entity datasets"); //$NON-NLS-1$
-		}
+		Set<IntelProfile> profiles = connection.hasPermission(Permission.ENTITY);
+		if (profiles.isEmpty())
+			throw new OdaException(MessageFormat.format("Unauthorized.  You do not have permission to access intelligence entity type {0} dataset", queryText)); //$NON-NLS-1$
+		
 		CriteriaBuilder cb = connection.getSession().getCriteriaBuilder();
 		CriteriaQuery<IntelEntityType> c = cb.createQuery(IntelEntityType.class);
 		Root<IntelEntityType> from = c.from(IntelEntityType.class);
@@ -79,6 +84,10 @@ public class EntityDataset implements IQuery {
 				cb.equal(from.get("keyId"), queryText) //$NON-NLS-1$
 				));
 		type = connection.getSession().createQuery(c).uniqueResult();
+		for (IntelProfileEntityType ip : type.getProfiles()) {
+			if (profiles.contains(ip.getProfile())) return;
+		}
+		throw new OdaException(MessageFormat.format("Unauthorized.  You do not have permission to access intelligence entity type {0} dataset", queryText)); //$NON-NLS-1$
 	}
 
 	@Override

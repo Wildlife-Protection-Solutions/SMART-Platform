@@ -61,7 +61,6 @@ import org.wcs.smart.i2.query.Operator;
 import org.wcs.smart.i2.query.export.CsvEntitySummaryQueryExporter;
 import org.wcs.smart.i2.query.export.CsvRecordQueryExporter;
 import org.wcs.smart.i2.query.export.ShpRecordQueryExporter;
-import org.wcs.smart.i2.query.observation.filter.RecordAttributeFilter.FixedAttribute;
 import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.ValuePart;
 import org.wcs.smart.i2.search.AdvancedEntitySearch;
@@ -76,6 +75,8 @@ import org.wcs.smart.ui.SmartLabelProvider;
 public class IntelligenceLabelProviderImpl implements
 		IIntelligenceLabelProvider {
 
+
+	
 	public static String getEdgeStyleName(RelationshipDiagramEdgeStyleOptions.EdgeStyle style) {
 		switch(style) {
 			case ARROW: return Messages.RelationshipDiagramEdgeStyleOptions_EdgeStyle_Arrow;
@@ -86,20 +87,22 @@ public class IntelligenceLabelProviderImpl implements
 	
 	public static String getName(SystemAttributeFilter.SystemAttribute attribute) {
 		switch (attribute) {
-		case DATE_CREATED:
+		case ENTITY_DATE_CREATED:
 			return Messages.EntitySearchPanel_DateCreatedFilter;
-		case DATE_MODIFIED:
+		case ENTITY_DATE_MODIFIED:
 			return Messages.EntitySearchPanel_DataModifiedFilter;
-		}
-		return ""; //$NON-NLS-1$
-	}
-	
-	public static String getName(SystemAttributeFilter.Type type) {
-		switch (type) {
-		case ENTITY:
-			return Messages.IntelligenceLabelProviderImpl_EntityLabel;
-		case RECORD:
-			return Messages.IntelligenceLabelProviderImpl_RecordLabel;
+		case RECORD_DATE_CREATED:
+			return Messages.EntitySearchPanel_DateCreatedFilter;
+		case RECORD_DATE_MODIFIED:
+			return Messages.EntitySearchPanel_DataModifiedFilter;
+		case RECORD_DATE:
+			return Messages.IntelligenceLabelProviderImpl_RecordDateLabel;//"Primary Date";
+		case RECORD_SOURCE:
+			return Messages.IntelligenceLabelProviderImpl_RecordSourceLabel;
+		case RECORD_STATUS:
+			return Messages.IntelligenceLabelProviderImpl_RecordStatusLabel; //"Record Status";
+		default:
+			break;
 		}
 		return ""; //$NON-NLS-1$
 	}
@@ -157,9 +160,12 @@ public class IntelligenceLabelProviderImpl implements
 		if (item == FixedQueryColumn.Column.RECORD_STATUS) return Messages.IntelligenceLabelProviderImpl_StatusColumnLabel;
 		if (item == FixedQueryColumn.Column.RECORD_TITLE) return Messages.IntelligenceLabelProviderImpl_TitleColumnLabel;
 		if (item == FixedQueryColumn.Column.RECORD_SOURCE) return Messages.IntelligenceLabelProviderImpl_Source;
+		if (item == FixedQueryColumn.Column.RECORD_DATE) return Messages.IntelligenceLabelProviderImpl_RecordDateLabel;
 		
 		if (item == FixedQueryColumn.Column.ENTITY_ID) return Messages.IntelligenceLabelProviderImpl_EntityIdColumnName;
 		if (item == FixedQueryColumn.Column.ENTITY_TYPE) return Messages.IntelligenceLabelProviderImpl_EntityTypeColumnName;
+		if (item == FixedQueryColumn.Column.ENTITY_PROFILE) return Messages.IntelligenceLabelProviderImpl_ProfileColumnName;
+		if (item == FixedQueryColumn.Column.RECORD_PROFILE) return Messages.IntelligenceLabelProviderImpl_RecordProfileColumnName;
 		
 		if (item == FixedQueryColumn.Column.CA_ID) return Messages.IntelligenceLabelProviderImpl_CaIdColumnName;
 		if (item == FixedQueryColumn.Column.CA_NAME) return Messages.IntelligenceLabelProviderImpl_CaNameColumnName;
@@ -221,6 +227,7 @@ public class IntelligenceLabelProviderImpl implements
 		if (item == EntityDatasetResultSetMetadata.Column.CREATED_BY) return Messages.IntelligenceLabelProviderImpl_EntityRsCreatedByColumn;
 		if (item == EntityDatasetResultSetMetadata.Column.MODIFIED_BY) return Messages.IntelligenceLabelProviderImpl_EntityRsLastModifiedByColumn;
 		if (item == EntityDatasetResultSetMetadata.Column.PRIMARY_IMAGE) return Messages.IntelligenceLabelProviderImpl_EntityRsPrimaryKeyColumn;
+		if (item == EntityDatasetResultSetMetadata.Column.PROFILE) return Messages.IntelligenceLabelProviderImpl_EntityProfileColumnName;
 		
 		if (item == EntitySearchDataset.NOT_FOUND_KEY) return Messages.IntelligenceLabelProviderImpl_SearchNotFound;
 		
@@ -295,6 +302,7 @@ public class IntelligenceLabelProviderImpl implements
 		if (item == RecordDatasetResultSetMetadata.Column.STATUS_KEY) return Messages.IntelligenceLabelProviderImpl_RecordRsColumnStatusKey;
 		if (item == RecordDatasetResultSetMetadata.Column.SOURCE) return Messages.IntelligenceLabelProviderImpl_RecordRsColumnSource;
 		if (item == RecordDatasetResultSetMetadata.Column.SOURCE_ICON) return Messages.IntelligenceLabelProviderImpl_RecordRsColumnSourceImage;
+		if (item == RecordDatasetResultSetMetadata.Column.PROFILE) return Messages.IntelligenceLabelProviderImpl_RecordQueryColumnName;
 		
 		
 		if (item.equals(EntityDatasetMetadata.class)) return Messages.IntelligenceLabelProviderImpl_EntityDatasetName;
@@ -311,13 +319,9 @@ public class IntelligenceLabelProviderImpl implements
 		if (item.equals(AdvancedEntitySearch.Error.TOKEN_NOT_SUPPORTED)) return Messages.IntelligenceLabelProviderImpl_AdvIntelEntitySearchTokenNotSupportedError;
 		
 		if (item == ValuePart.ValueOption.NUMBER_ENTITIES) return Messages.IntelligenceLabelProviderImpl_NumberOfEntitiesValue;
-		
-		if (item == FixedAttribute.DATE) return Messages.IntelligenceLabelProviderImpl_RecordDateLabel;
-		if (item == FixedAttribute.STATUS) return Messages.IntelligenceLabelProviderImpl_RecordStatusLabel;
-		
-		if (item instanceof SystemAttributeFilter.Type) {
-			return getName((SystemAttributeFilter.Type)item);
-		}
+		if (item == ValuePart.ValueOption.NUMBER_RECORDS) return Messages.IntelligenceLabelProviderImpl_NumberOfRecordsValue;
+		 if (item instanceof SystemAttributeFilter.SystemAttribute) return getName((SystemAttributeFilter.SystemAttribute)item);
+		 
 		return ""; //$NON-NLS-1$
 	}
 	
@@ -328,7 +332,7 @@ public class IntelligenceLabelProviderImpl implements
 		}else if (item == IntelWorkingSetCategory.ENTITY){
 			return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_ENTITY);
 		}else if (item == IntelWorkingSetCategory.QUERIES) {
-			return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_QUERY_RECORDOBS);
+			return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_QUERY);
 		}
 		return null;
 	}

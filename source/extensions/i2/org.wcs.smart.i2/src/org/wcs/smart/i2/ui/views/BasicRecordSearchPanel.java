@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -43,7 +44,6 @@ import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
@@ -60,33 +60,31 @@ import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.export.dialog.CsvExportDialog;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.search.BasicRecordSearch;
@@ -125,7 +123,8 @@ public class BasicRecordSearchPanel extends Composite {
 	private Pattern narrativePattern = null;
 	
 	private IEclipseContext context;
-	
+	private ISelection currentSelection = null;
+
 	public BasicRecordSearchPanel(Composite parent, FormToolkit toolkit, IEclipseContext context) {
 		super(parent, SWT.NONE);
 		this.context = context;
@@ -156,6 +155,8 @@ public class BasicRecordSearchPanel extends Composite {
 
 		toolkit.createLabel(top, Messages.BasicRecordSearchPanel_SourceLabel);
 
+		boolean canViewRecord = IntelSecurityManager.INSTANCE.canViewRecordAny();
+		
 		cmbSource = new TableComboViewer(top, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.BORDER);
 		cmbSource.setContentProvider(ArrayContentProvider.getInstance());
 		cmbSource.setLabelProvider(new RecordSourceLabelProvider());
@@ -166,7 +167,7 @@ public class BasicRecordSearchPanel extends Composite {
 				doSearch();
 			}
 		});
-		cmbSource.getControl().setEnabled(IntelSecurityManager.INSTANCE.canViewRecords());
+		cmbSource.getControl().setEnabled(canViewRecord);
 		
 		toolkit.createLabel(top, Messages.BasicRecordSearchPanel_NarrativeLabel);
 		
@@ -177,7 +178,7 @@ public class BasicRecordSearchPanel extends Composite {
 				doSearch();
 			}
 		});
-		txtNarrative.setEnabled(IntelSecurityManager.INSTANCE.canViewRecords());
+		txtNarrative.setEnabled(canViewRecord);
 		
 		toolkit.createLabel(top, Messages.BasicRecordSearchPanel_TitleLabel);
 		
@@ -189,14 +190,14 @@ public class BasicRecordSearchPanel extends Composite {
 				doSearch();
 			}
 		});
-		txtSearch.setEnabled(IntelSecurityManager.INSTANCE.canViewRecords());
+		txtSearch.setEnabled(canViewRecord);
 		
 		Composite btnComp = toolkit.createComposite(top);
 		btnComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		btnComp.setLayout(new GridLayout(2, false));
 		((GridLayout)btnComp.getLayout()).marginWidth  = 0;
 		((GridLayout)btnComp.getLayout()).marginHeight  = 0;
-		btnComp.setEnabled(IntelSecurityManager.INSTANCE.canViewRecords());
+		btnComp.setEnabled(canViewRecord);
 		
 		Hyperlink btnExport = toolkit.createHyperlink(btnComp, Messages.BasicRecordSearchPanel_ExportLink, SWT.NONE);
 		btnExport.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
@@ -207,12 +208,12 @@ public class BasicRecordSearchPanel extends Composite {
 			}
 		});
 		btnExport.setToolTipText(Messages.BasicRecordSearchPanel_ExportTooltip);
-		btnExport.setEnabled(IntelSecurityManager.INSTANCE.canViewRecords());
+		btnExport.setEnabled(IntelSecurityManager.INSTANCE.canViewRecordAny());
 		
 		Button btnSearch = toolkit.createButton(btnComp, Messages.BasicRecordSearchPanel_SearchBtn,  SWT.PUSH);
 		btnSearch.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 		btnSearch.addListener(SWT.Selection, e->doSearch());
-		btnSearch.setEnabled(IntelSecurityManager.INSTANCE.canViewRecords());
+		btnSearch.setEnabled(canViewRecord);
 	
 	}
 
@@ -239,65 +240,14 @@ public class BasicRecordSearchPanel extends Composite {
 				openSelection();
 			}
 		});
+		tblResults.setLabelProvider(new RecordsViewLabelProvider(context, true, true, true));
 		TableColumn tc = new TableColumn(tblResults.getTable(), SWT.NONE);
 		TableColumnLayout layout = new TableColumnLayout();
 		layout.setColumnData(tc, new ColumnWeightData(100));
-		wrapper.setLayout(layout);
-		
-		tblResults.setLabelProvider(new LabelProvider() {
-			@Override
-			public String getText(Object element) { return ""; }; //$NON-NLS-1$
-			@Override
-			public Image getImage(Object element) { return null; };
-		});
-		
-		if (!IntelSecurityManager.INSTANCE.canViewRecords()) {
+		wrapper.setLayout(layout);		
+		if (!IntelSecurityManager.INSTANCE.canViewRecordAny()) {
 			tblResults.setInput(new String[] {Messages.BasicRecordSearchPanel_unauthorized});
 		}
-		final RecordsViewLabelProvider lblprovider = new RecordsViewLabelProvider(true, context);
-		tblResults.getControl().addListener(SWT.MeasureItem, new Listener() {
-	 		public void handleEvent(Event event) {
-	 			TableItem item = (TableItem)event.item;
-	 			Image trailingImage = lblprovider.getImage(item.getData());
-	 			String txt = lblprovider.getText(item.getData());
-	 			int width = 0;
-	 			int height = 0;
-	 			if (trailingImage != null) {
-	 				width += trailingImage.getBounds().width;
-	 				height = trailingImage.getBounds().height;
-	 			}
-	 			width += event.gc.stringExtent(txt).x + 15;// + 20;
-	 			height = Math.max(height,  event.gc.stringExtent(txt).y);
-	 			event.width = width;
-	 			event.height = height;
-	 		}
-	 	});
-	 	
-		tblResults.getControl().addListener(SWT.PaintItem, new Listener() {
-			public void handleEvent(Event event) {
-				TableItem item = (TableItem) event.item;
-				Image trailingImage = lblprovider.getImage(item.getData());
-				int offset = 0;
-				Color c = event.gc.getBackground();
-				if (trailingImage != null) {
-					int x = event.x;
-					int itemHeight = tblResults.getTable().getItemHeight();
-					int imageHeight = trailingImage.getBounds().height;
-					int y = event.y + (itemHeight - imageHeight) / 2;
-					event.gc.drawImage(trailingImage, x, y);
-					offset = x + trailingImage.getBounds().width;
-				}
-				if ((event.detail & SWT.SELECTED) == SWT.SELECTED) {
-					c = LIST_SELECTION_COLOR;
-				}else if ( (event.detail & SWT.HOT) == SWT.HOT) {
-					c = LIST_HIGHLIGHT_COLOR;
-				}
-				String text = lblprovider.getText(item.getData());
-				event.gc.setBackground(c);
-				event.gc.drawText(text, offset+1, event.y+1);
-				
-			}
-		});
 		
 		tblResults.addSelectionChangedListener(new ISelectionChangedListener() {
 			
@@ -323,7 +273,7 @@ public class BasicRecordSearchPanel extends Composite {
 					Object o= iterator.next();
 					if (o instanceof IntelRecordSearchResultItem){
 						IntelRecordSearchResultItem x = (IntelRecordSearchResultItem) o;
-						selection.add(new RecordEditorInput(x.getTitle(), x.getRecordUuid(), null, x.getRecordSource().getUuid(), x.getStatus()));
+						selection.add(x.asRecordInput());
 					}
 					
 				}
@@ -370,7 +320,7 @@ public class BasicRecordSearchPanel extends Composite {
 		final MenuItem wsItem = ws;
 		
 		MenuItem delete = null;
-		if (IntelSecurityManager.INSTANCE.canDeleteRecord()){
+		if (IntelSecurityManager.INSTANCE.canDeleteRecordAny()){
 			delete = new MenuItem(mnu, SWT.PUSH);
 			delete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 			delete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
@@ -382,7 +332,7 @@ public class BasicRecordSearchPanel extends Composite {
 						Object x = (Object) iterator.next();
 						if (x instanceof IntelRecordSearchResultItem){
 							IntelRecordSearchResultItem item = (IntelRecordSearchResultItem) x;
-							toDelete.add(new RecordEditorInput(item.getTitle(), item.getRecordUuid(), null, item.getRecordSource().getUuid(), null));
+							toDelete.add(item.asRecordInput());
 						}
 					}
 					if ((new DeleteRecordHandler()).deleteRecords(toDelete, context)){
@@ -420,7 +370,7 @@ public class BasicRecordSearchPanel extends Composite {
 		for (Iterator<?> iterator = ((IStructuredSelection)tblResults.getSelection()).iterator(); iterator.hasNext();) {
 			Object x = (Object) iterator.next();	
 			if (x instanceof IntelRecordSearchResultItem){
-				RecordEditorInput e = new RecordEditorInput(null, ((IntelRecordSearchResultItem) x).getRecordUuid(), null, ((IntelRecordSearchResultItem) x).getRecordSource().getUuid(), null);
+				RecordEditorInput e = ((IntelRecordSearchResultItem) x).asRecordInput();
 				toAdd.add(e);
 			}
 		}
@@ -432,7 +382,7 @@ public class BasicRecordSearchPanel extends Composite {
 		for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
 			Object item = (Object) iterator.next();
 			if (item instanceof IntelRecordSearchResultItem){
-				RecordEditorInput in = new RecordEditorInput(null, ((IntelRecordSearchResultItem) item).getRecordUuid(), null, null, ((IntelRecordSearchResultItem)item).getStatus());
+				RecordEditorInput in = ((IntelRecordSearchResultItem) item).asRecordInput();
 				(new OpenRecordHandler()).openRecord(in, false);
 			}
 			
@@ -458,7 +408,7 @@ public class BasicRecordSearchPanel extends Composite {
 	
 	
 	
-	private void doSearch(){
+	void doSearch(){
 		String narrative = txtNarrative.getPatternFilter() == null ? null : txtNarrative.getPatternFilter().trim();
 		if (narrative != null && narrative.isEmpty()) narrative = null;
 		String title = txtSearch.getPatternFilter() == null ? null : txtSearch.getPatternFilter().trim();
@@ -496,32 +446,37 @@ public class BasicRecordSearchPanel extends Composite {
 		searchJob.schedule();
 	}
 	
-	public void refreshSource(){
-		
+	public void refreshSource(){		
+		currentSelection = cmbSource.getSelection();
+		cmbSource.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		refreshSourcesJob.setSystem(true);
 		refreshSourcesJob.schedule();
 	}
-
+	
 	private Job refreshSourcesJob = new Job("refresh source list") { //$NON-NLS-1$
-
-		private ISelection currentSelection = null;
+		@SuppressWarnings("deprecation")
 		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-		
-			Display.getDefault().syncExec(()->{
-				currentSelection = cmbSource.getSelection();
-				cmbSource.setInput(new String[]{DialogConstants.LOADING_TEXT});
-			});
+		protected IStatus run(IProgressMonitor monitor) {		
 			List<Object> srcs = new ArrayList<>();
-			try(Session session = HibernateManager.openSession()){
-				srcs.addAll(QueryFactory.buildQuery(session, IntelRecordSource.class,"conservationArea", SmartDB.getCurrentConservationArea()).getResultList()); //$NON-NLS-1$
-				srcs.forEach(e->((IntelRecordSource)e).getName());
+			
+			List<IntelProfile> profiles = new ArrayList<>(ProfilesManager.INSTANCE.getActiveProfiles());
+			profiles = profiles.stream().filter(e->IntelSecurityManager.INSTANCE.canViewRecords(e)).collect(Collectors.toList());
+			
+			if (!profiles.isEmpty()) {
+				try(Session session = HibernateManager.openSession()){
+					
+					srcs.addAll( session.createQuery("SELECT src FROM IntelRecordSource src join src.profiles p join p.id.profile pp WHERE src.conservationArea = :ca AND pp IN (:profiles)", IntelRecordSource.class) //$NON-NLS-1$
+					.setParameter("ca",  SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
+					.setParameter("profiles",profiles) //$NON-NLS-1$
+					.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)
+					.list() );
+					
+					srcs.forEach(e->((IntelRecordSource)e).getName());
+				}
+				srcs.sort((a,b)->Collator.getInstance().compare(((IntelRecordSource)a).getName(), ((IntelRecordSource)b).getName()));
+				srcs.add(0, ""); //$NON-NLS-1$
 			}
-			srcs.sort((a,b)->Collator.getInstance().compare(((IntelRecordSource)a).getName(), ((IntelRecordSource)b).getName()));
-			srcs.add(0, ""); //$NON-NLS-1$
-			Display.getDefault().asyncExec(()->{
-				
-				((RecordSourceLabelProvider)(cmbSource.getLabelProvider())).disposeImages();
+			Display.getDefault().asyncExec(()->{		
 				cmbSource.setInput(srcs);
 				if (currentSelection != null) {
 					cmbSource.setSelection(currentSelection);

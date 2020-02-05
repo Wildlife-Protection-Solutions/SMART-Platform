@@ -50,7 +50,9 @@ import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
+import org.wcs.smart.i2.model.IntelRecordQuery;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.query.observation.filter.DataModelFilter;
@@ -60,8 +62,8 @@ import org.wcs.smart.i2.query.observation.filter.IFilterVisitor;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.query.observation.filter.IntelAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.RecordAttributeFilter;
-import org.wcs.smart.i2.query.observation.filter.RecordAttributeFilter.FixedAttribute;
-import org.wcs.smart.i2.query.observation.filter.RecordSourceFilter;
+import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter;
+import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter.SystemAttribute;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -123,8 +125,58 @@ public class IntelQueryColumnProvider {
 			return getQueryColumns((IntelRecordObservationQuery)query, itemProvider, l, session);
 		}else if (query instanceof IntelEntityRecordQuery) {
 			return getQueryColumns((IntelEntityRecordQuery)query, itemProvider, l, session);
+		}else if (query instanceof IntelRecordQuery) {
+			return getQueryColumns((IntelRecordQuery)query, itemProvider, l, session);
 		}
 		throw new IllegalStateException("getQueryColumns is not support for query type " + query.getTypeKey()); //$NON-NLS-1$
+	}
+	
+	public List<IQueryColumn> getQueryColumns (IntelRecordQuery query, IQueryItemProvider itemProvider, Locale l, Session session) throws Exception{
+		
+		List<IQueryColumn> columns = new ArrayList<>();
+		
+		// Fixed query columns
+		FixedQueryColumn.Column[] thiscolumns;
+		if (query.getConservationArea().getIsCcaa()) {
+			thiscolumns = new FixedQueryColumn.Column[]{
+					FixedQueryColumn.Column.CA_ID,
+					FixedQueryColumn.Column.CA_NAME,
+					FixedQueryColumn.Column.RECORD_TITLE,
+					FixedQueryColumn.Column.RECORD_STATUS,
+					FixedQueryColumn.Column.RECORD_SOURCE,
+					FixedQueryColumn.Column.RECORD_PROFILE,
+				};
+		}else {
+			thiscolumns = new FixedQueryColumn.Column[]{
+					FixedQueryColumn.Column.RECORD_PROFILE,
+					FixedQueryColumn.Column.RECORD_TITLE,
+					FixedQueryColumn.Column.RECORD_STATUS,
+					FixedQueryColumn.Column.RECORD_SOURCE,
+					FixedQueryColumn.Column.RECORD_DATE,
+					
+				};
+		}
+		
+		for (FixedQueryColumn.Column c : thiscolumns){
+			columns.add(new FixedQueryColumn(c, l));
+		}
+		
+		Set<String> profiles = AbstractIntelQuery.convertFromProfileFilter(query.getProfileFilter());
+		Set<UUID> uuids = new HashSet<>();
+		
+		uuids.addAll(session.createQuery("SELECT uuid FROM IntelProfile WHERE keyId IN (:keys) and conservationArea in (:cas)")
+		.setParameterList("keys", profiles)
+		.setParameterList("cas", itemProvider.getConservationAreas()).list());
+		
+		
+		List<IntelRecordSource> items = itemProvider.getRecordSources(uuids, session);
+		for (IntelRecordSource rs : items) {
+			for (IntelRecordSourceAttribute ir : itemProvider.getRecordSourceAttributes(rs, session)) {
+				columns.add(new IntelRecordAttributeQueryColumn(ir));
+			}
+		}
+		
+		return columns;
 	}
 
 	public List<IQueryColumn> getQueryColumns (IntelRecordObservationQuery query, IQueryItemProvider itemProvider, Locale l, Session session) throws Exception{
@@ -140,6 +192,7 @@ public class IntelQueryColumnProvider {
 					FixedQueryColumn.Column.RECORD_TITLE,
 					FixedQueryColumn.Column.RECORD_STATUS,
 					FixedQueryColumn.Column.RECORD_SOURCE,
+					FixedQueryColumn.Column.RECORD_PROFILE,
 					FixedQueryColumn.Column.LOC_ID,
 					FixedQueryColumn.Column.LOC_DATE,
 					FixedQueryColumn.Column.LOC_TIME,
@@ -151,6 +204,7 @@ public class IntelQueryColumnProvider {
 					FixedQueryColumn.Column.RECORD_TITLE,
 					FixedQueryColumn.Column.RECORD_STATUS,
 					FixedQueryColumn.Column.RECORD_SOURCE,
+					FixedQueryColumn.Column.RECORD_PROFILE,
 					FixedQueryColumn.Column.LOC_ID,
 					FixedQueryColumn.Column.LOC_DATE,
 					FixedQueryColumn.Column.LOC_TIME,
@@ -230,11 +284,13 @@ public class IntelQueryColumnProvider {
 					FixedQueryColumn.Column.CA_NAME,
 					FixedQueryColumn.Column.ENTITY_ID,
 					FixedQueryColumn.Column.ENTITY_TYPE,
+					FixedQueryColumn.Column.ENTITY_PROFILE,
 			};	
 		}else {
 			thiscolumns = new FixedQueryColumn.Column[]{
 				FixedQueryColumn.Column.ENTITY_ID,
 				FixedQueryColumn.Column.ENTITY_TYPE,
+				FixedQueryColumn.Column.ENTITY_PROFILE,
 			};
 		}
 		
@@ -257,8 +313,8 @@ public class IntelQueryColumnProvider {
 						}else if (filter instanceof IntelAttributeFilter){
 							IntelAttributeFilter afilter = (IntelAttributeFilter)filter;
 							column = new FilterQueryColumn(generateColumnName(afilter, itemProvider, session, l), afilter.getUniqueColumnIdentifier(), afilter);
-						}else if (filter instanceof RecordSourceFilter) {
-							RecordSourceFilter afilter = (RecordSourceFilter)filter;
+						}else if (filter instanceof SystemAttributeFilter) {
+							SystemAttributeFilter afilter = (SystemAttributeFilter)filter;
 							column = generateColumnName(afilter, itemProvider, session, l);
 						}else if (filter instanceof RecordAttributeFilter) {
 							RecordAttributeFilter afilter = (RecordAttributeFilter)filter;
@@ -326,15 +382,24 @@ public class IntelQueryColumnProvider {
 		return new FilterQueryColumn(name,  filter.getUniqueColumnIdentifier(), filter);
 	}
 	
-	private IQueryColumn generateColumnName(RecordSourceFilter filter, IQueryItemProvider itemProvider, Session session, Locale l){
-		IntelRecordSource src = itemProvider.getRecordSource(filter.getTypeKey(), session);
-		String name = null;
-		if (src == null) {
-			name = filter.getTypeKey();
-		}else {
-			name = src.getName();
+	private IQueryColumn generateColumnName(SystemAttributeFilter filter, IQueryItemProvider itemProvider, Session session, Locale l){
+		if (filter.getAttribute() == SystemAttribute.RECORD_SOURCE) {
+			IntelRecordSource src = itemProvider.getRecordSource(filter.getStringKey(), session);
+			String name = null;
+			if (src == null) {
+				name = filter.getStringKey();
+			}else {
+				name = src.getName();
+			}
+			return new FilterQueryColumn(name, filter.getUniqueColumnIdentifier(), filter);
+		}else if (filter.getAttribute() == SystemAttribute.RECORD_STATUS) {
+			String name = SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(IntelRecord.Status.valueOf(filter.getStringKey()), l);
+			return new FilterQueryColumn(name, filter.getUniqueColumnIdentifier(), filter);
+		}else if (filter.getAttribute() == SystemAttribute.RECORD_DATE) {
+			String name = SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(SystemAttribute.RECORD_DATE, l);
+			return new FilterQueryColumn(name, filter.getUniqueColumnIdentifier(), filter);
 		}
-		return new FilterQueryColumn(name, filter.getUniqueColumnIdentifier(), filter);
+		return null;
 	}
 	
 	private IQueryColumn generateColumnName(DataModelFilter filter, IQueryItemProvider itemProvider, Session session, Locale l){
@@ -525,27 +590,24 @@ public class IntelQueryColumnProvider {
 	
 	private String generateColumnName(RecordAttributeFilter filter, IQueryItemProvider itemProvider, Session session, Locale l){
 		
-		if (filter.getFixedAttribute() != null) {
-			if (filter.getFixedAttribute() == FixedAttribute.DATE) return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(FixedAttribute.DATE, l);
-			if (filter.getFixedAttribute() == FixedAttribute.STATUS) return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(FixedAttribute.STATUS, l);
+		IntelRecordSource rsource = itemProvider.getRecordSource(filter.getRecordSourceKey(), session);
+		
+		IntelRecordSourceAttribute att = null;
+		for (IntelRecordSourceAttribute a : rsource.getAttributes()) {
+			if (a.getKeyId().equalsIgnoreCase(filter.getAttributeKey())) {
+				att = a;
+				break;
+			}
+		}
+		if (att == null) {
+			return "Attribute Not Found";
 		}
 		
-		if (filter.getAttributeType() != null) {
-			StringBuilder sb = new StringBuilder();
-			IntelAttribute attribute = itemProvider.getAttribute(filter.getAttributeKey(), session);
-			IntelEntityType etype = null;
-			if (filter.getEntityTypeKey() != null){
-				etype = itemProvider.getEntityType(filter.getEntityTypeKey(), session);
-			}
+		StringBuilder sb = new StringBuilder();
+		sb.append(MessageFormat.format("{0} ({1})", IIntelligenceLabelProvider.getName(att), rsource.getName()));
+
+		if (att.getAttribute() != null) {
 			
-			if (attribute != null){
-				sb.append(generateName(attribute, etype));
-			}else{
-				sb.append(filter.getAttributeKey());
-				if (filter.getEntityTypeKey() != null){
-					sb.append (" (" + filter.getEntityTypeKey() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
-				}
-			}
 			
 			switch(filter.getAttributeType()){
 				case BOOLEAN:
@@ -562,7 +624,7 @@ public class IntelQueryColumnProvider {
 						sb.append(SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(ANY_ITEM, l));
 					}else{
 						sb.append(": "); //$NON-NLS-1$
-						List<IntelAttributeListItem> items = itemProvider.getAttributeListItems(attribute.getKeyId(), session);
+						List<IntelAttributeListItem> items = itemProvider.getAttributeListItems(att.getAttribute().getKeyId(), session);
 						IntelAttributeListItem item = null;
 						for (IntelAttributeListItem i : items) {
 							if (i.getKeyId().equals(filter.getKeyValue())) {
@@ -613,19 +675,9 @@ public class IntelQueryColumnProvider {
 				case POSITION:
 					throw new UnsupportedOperationException("position attributes not supported in queries"); //$NON-NLS-1$
 			}
-			return sb.toString();
-		}else {
-			StringBuilder sb = new StringBuilder();
-			IntelEntityType etype = null;
-			if (filter.getEntityTypeKey() != null){
-				etype = itemProvider.getEntityType(filter.getEntityTypeKey(), session);
-			}
 			
-			if (etype != null) {
-				sb.append(etype.getName());
-			}else {
-				sb.append(filter.getEntityTypeKey());
-			}
+		}else {
+		
 			if (filter.getKeyValue().equals(IQueryFilter.ANY_OPTION_KEY)){
 				sb.append(": "); //$NON-NLS-1$
 				sb.append(SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(ANY_ITEM, l));
@@ -640,7 +692,7 @@ public class IntelQueryColumnProvider {
 					sb.append(filter.getKeyValue());
 				}
 			}
-			return sb.toString();
 		}
+		return sb.toString();
 	}
 }

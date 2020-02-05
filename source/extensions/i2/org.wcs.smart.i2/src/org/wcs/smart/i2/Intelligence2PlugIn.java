@@ -35,6 +35,7 @@ import org.wcs.smart.i2.birt.datasource.IConnectionFactory;
 import org.wcs.smart.i2.handlers.DeleteCaHandler;
 import org.wcs.smart.i2.internal.IntelligenceLabelProviderImpl;
 import org.wcs.smart.i2.query.engine.QueryEngineFactory;
+import org.wcs.smart.i2.ui.Resources;
 
 
 /**
@@ -50,24 +51,20 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 	public static final String DB_VERSION_2 = "2.0"; //$NON-NLS-1$
 	public static final String DB_VERSION_3 = "3.0"; //$NON-NLS-1$
 	public static final String DB_VERSION_4 = "4.0"; //$NON-NLS-1$
-	public static final String DB_VERSION = DB_VERSION_4; //the latest db version of tables
+	public static final String DB_VERSION_5 = "5.0"; //$NON-NLS-1$
+	public static final String DB_VERSION = DB_VERSION_5; //the latest db version of tables
 	
 	
 	public static final String ICON_ATTRIBUTE_GROUP = "org.wcs.smart.i2.icon.attribute.group"; //$NON-NLS-1$
 	public static final String ICON_ATTRIBUTE_GROUP_NEW = "org.wcs.smart.i2.icon.attribute.group.new"; //$NON-NLS-1$
 	public static final String ICON_ENTITY = "org.wcs.smart.i2.icon.entity"; //$NON-NLS-1$
 	public static final String ICON_ROOTENTITY = "org.wcs.smart.i2.icon.rootentity"; //$NON-NLS-1$
-	public static final String ICON_ENTITY_QUERY = "org.wcs.smart.i2.icon.query"; //$NON-NLS-1$
-	public static final String ICON_ENTITY_QUERY_NEW = "org.wcs.smart.i2.icon.query.new"; //$NON-NLS-1$
 	public static final String ICON_ENTITY_NEW = "org.wcs.smart.i2.icon.entity.new"; //$NON-NLS-1$
 	public static final String ICON_RECORD = "org.wcs.smart.i2.icon.record"; //$NON-NLS-1$
-	public static final String ICON_EDIT = "org.wcs.smart.i2.icon.edit"; //$NON-NLS-1$
-	public static final String ICON_REFRESH = "org.wcs.smart.i2.icon.refresh"; //$NON-NLS-1$
 	public static final String ICON_RECORD_NEW = "org.wcs.smart.i2.icon.record.new"; //$NON-NLS-1$
 	public static final String ICON_WORKINGSET_NEW = "org.wcs.smart.i2.icon.workingset.new"; //$NON-NLS-1$
 	public static final String ICON_WORKINGSET_SELECT = "org.wcs.smart.i2.icon.workingset.select"; //$NON-NLS-1$
 	public static final String ICON_WORKINGSET_COPY = "org.wcs.smart.i2.icon.workingset.copy"; //$NON-NLS-1$
-	public static final String ICON_PDF = "org.wcs.smart.i2.icon.print.pdf"; //$NON-NLS-1$
 	public static final String ICON_RELATIONSHIP = "org.wcs.smart.i2.icon.relationship"; //$NON-NLS-1$
 	public static final String ICON_SECTION_EXPAND = "org.wcs.smart.i2.icon.section.expand"; //$NON-NLS-1$
 	public static final String ICON_RUN = "org.wcs.smart.i2.icon.query.run"; //$NON-NLS-1$
@@ -88,10 +85,13 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 	public static final String ICON_VALUES = "org.wcs.smart.i2.query.value"; //$NON-NLS-1$
 	public static final String ICON_FILTERS = "org.wcs.smart.i2.query.filters"; //$NON-NLS-1$
 	public static final String ICON_CONFIGURE = "org.wcs.smart.i2.configure"; //$NON-NLS-1$
+	public static final String ICON_CHECK = "org.wcs.smart.i2.check"; //$NON-NLS-1$
 
-	
+	public static final String ICON_QUERY = "org.wcs.smart.i2.query"; //$NON-NLS-1$
+	public static final String ICON_QUERY_RECORD = "org.wcs.smart.i2.query.record"; //$NON-NLS-1$
 	public static final String ICON_QUERY_RECORDOBS = "org.wcs.smart.i2.query.recordobs"; //$NON-NLS-1$
 	public static final String ICON_QUERY_ENTITYSUM = "org.wcs.smart.i2.query.entitysum"; //$NON-NLS-1$
+	public static final String ICON_QUERY_RECORDSUM = "org.wcs.smart.i2.query.recordsum"; //$NON-NLS-1$
 	public static final String ICON_QUERY_ENTITYRECORD = "org.wcs.smart.i2.query.entityrecord"; //$NON-NLS-1$
 	
 	public static final String ICON_SYSTEM_DATEATTRIBUTE = "org.wcs.smart.i2.query.systemdateattribute"; //$NON-NLS-1$
@@ -117,20 +117,15 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 		reg.put(ICON_ENTITY_NEW, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/entity_add.png")); //$NON-NLS-1$);
 		reg.put(ICON_RECORD, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/script.png")); //$NON-NLS-1$);
 		reg.put(ICON_RECORD_NEW, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/script_add.png")); //$NON-NLS-1$);
-		reg.put(ICON_EDIT, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/edit.png")); //$NON-NLS-1$);
-		reg.put(ICON_REFRESH, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/refresh.png")); //$NON-NLS-1$);
 		reg.put(ICON_WORKINGSET_NEW, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/working_set_add.png")); //$NON-NLS-1$);
 		reg.put(ICON_WORKINGSET_SELECT, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/working_set_select.png")); //$NON-NLS-1$);
 		reg.put(ICON_WORKINGSET_COPY, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/working_set_copy.png")); //$NON-NLS-1$);
-		reg.put(ICON_PDF, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/printpdf.png")); //$NON-NLS-1$);
 		reg.put(ICON_RELATIONSHIP, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/relationship.png")); //$NON-NLS-1$);
 		reg.put(ICON_SECTION_EXPAND, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj12/section_expand.png")); //$NON-NLS-1$);
 		reg.put(ICON_ATTRIBUTE_GROUP, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/attribute_group.png")); //$NON-NLS-1$);
 		reg.put(ICON_ATTRIBUTE_GROUP_NEW, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/attribute_group_new.png")); //$NON-NLS-1$);
 		reg.put(ICON_RUN, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/run_query.png")); //$NON-NLS-1$);
-		
-		reg.put(ICON_ENTITY_QUERY, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/entity_query.png")); //$NON-NLS-1$);
-		reg.put(ICON_ENTITY_QUERY_NEW, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/new_entity_query.png")); //$NON-NLS-1$);
+		reg.put(ICON_QUERY, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/query.png")); //$NON-NLS-1$);
 		reg.put(ICON_AREA, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/area_polygon.png")); //$NON-NLS-1$);
 		reg.put(ICON_DELETE_SMALL, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/delete_small.png")); //$NON-NLS-1$);
 		reg.put(ICON_CLEAR, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/clear.png")); //$NON-NLS-1$);
@@ -153,14 +148,19 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 		reg.put(ICON_GROUP_BY, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/group_by.png")); //$NON-NLS-1$);
 		reg.put(ICON_FILTERS, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/filter.png")); //$NON-NLS-1$);
 		reg.put(ICON_VALUES, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/values.png")); //$NON-NLS-1$);
-		reg.put(ICON_QUERY_RECORDOBS, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/query_record_obs.png")); //$NON-NLS-1$
-		reg.put(ICON_QUERY_ENTITYSUM, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/query_entity_sum.png")); //$NON-NLS-1$
-		reg.put(ICON_QUERY_ENTITYRECORD, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/query_entity_record.png")); //$NON-NLS-1$
+		reg.put(ICON_QUERY_RECORD, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/record_query.png")); //$NON-NLS-1$);
+		reg.put(ICON_QUERY_RECORDOBS, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/record_observation_query.png")); //$NON-NLS-1$
+		reg.put(ICON_QUERY_ENTITYSUM, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/entity_summary.png")); //$NON-NLS-1$
+		reg.put(ICON_QUERY_RECORDSUM, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/record_summary.png")); //$NON-NLS-1$
+		reg.put(ICON_QUERY_ENTITYRECORD, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/entity_query.png")); //$NON-NLS-1$
 		
 		reg.put(ICON_CONFIGURE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/configure.png")); //$NON-NLS-1$
 
 		reg.put(ICON_SYSTEM_DATEATTRIBUTE,  imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/system_attribute_date.png")); //$NON-NLS-1$
 		reg.put(ICON_OPERATOR,  imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/operator.png")); //$NON-NLS-1$
+		
+		reg.put(ICON_CHECK,  imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/check_green.png")); //$NON-NLS-1$
+
 	}
 	
 	/*
@@ -183,6 +183,9 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
 	 */
 	public void stop(BundleContext context) throws Exception {
+		
+		Resources.INSTANCE.dispose();
+		
 		plugin = null;
 		super.stop(context);
 	}

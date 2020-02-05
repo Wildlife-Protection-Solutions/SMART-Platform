@@ -48,8 +48,12 @@ import org.wcs.smart.i2.query.Operator;
 public class OptionDropItem extends DropItem {
 
 	public static OptionDropItem createAndOrDropItem(boolean canEdit){
-		return new OptionDropItem(new String[]{Operator.AND.getLabel(Locale.getDefault()), Operator.OR.getLabel(Locale.getDefault())}, new String[]{Operator.AND.getKey(), Operator.OR.getKey()}, canEdit);
+		return new OptionDropItem(new String[]{
+				Operator.AND.getLabel(Locale.getDefault()), 
+				Operator.OR.getLabel(Locale.getDefault())}, 
+				new String[]{Operator.AND.getKey(), Operator.OR.getKey()}, canEdit);
 	}
+	
 	private Option[] options;
 	
 	private ComboViewer combo;

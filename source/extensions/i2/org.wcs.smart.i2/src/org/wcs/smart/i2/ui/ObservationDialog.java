@@ -275,7 +275,7 @@ public class ObservationDialog extends SmartStyledDialog {
 		observationTable.getTable().setMenu(observationMnu);
 		final MenuItem editItem = new MenuItem(observationMnu, SWT.PUSH);
 		editItem.setText(DialogConstants.EDIT_BUTTON_TEXT);
-		editItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EDIT));
+		editItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 		editItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -309,7 +309,7 @@ public class ObservationDialog extends SmartStyledDialog {
 		((GridLayout)buttonPanel.getLayout()).marginHeight = 0;
 		Button btnEdit = new Button(buttonPanel, SWT.PUSH);
 		btnEdit.setToolTipText(Messages.ObservationDialog_editTooltip);
-		btnEdit.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EDIT));
+		btnEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 		btnEdit.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e){

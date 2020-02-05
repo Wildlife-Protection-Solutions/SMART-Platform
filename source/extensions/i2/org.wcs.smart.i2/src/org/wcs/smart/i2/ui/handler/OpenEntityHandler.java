@@ -44,13 +44,13 @@ public class OpenEntityHandler {
 
 	public void openEntity(IntelEntity entity, IEclipseContext context){
 		//open entity
-		EntityEditorInput input = new EntityEditorInput(entity.getIdAttributeAsText(), entity.getUuid(), entity.getEntityType());
+		EntityEditorInput input = new EntityEditorInput(entity.getIdAttributeAsText(), entity.getUuid(),entity.getProfile().getUuid(), entity.getEntityType());
 		try {
 			String pId = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getPerspective().getId();
-			if ( (IntelSecurityManager.INSTANCE.canEditEntity() && pId.equals(IntelDataAssessmentPerspective.ID)) ){
+			if ( (IntelSecurityManager.INSTANCE.canEditEntity(entity.getProfile()) && pId.equals(IntelDataAssessmentPerspective.ID)) ){
 				input.setDefaultEditMode(true);
 			}
-			if (IntelSecurityManager.INSTANCE.canCreateEntity() && input.getUuid() == null && pId.equals(IntelDataAssessmentPerspective.ID)) {
+			if (IntelSecurityManager.INSTANCE.canCreateEntity(entity.getProfile()) && input.getUuid() == null && pId.equals(IntelDataAssessmentPerspective.ID)) {
 				input.setDefaultEditMode(true);
 			}
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, EntityEditor.ID);

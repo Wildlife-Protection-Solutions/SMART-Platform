@@ -33,11 +33,15 @@ import java.util.UUID;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.io.WKBReader;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.model.IntelObservationAttribute;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.query.DataModelColumn;
 import org.wcs.smart.i2.query.FilterQueryColumn;
@@ -50,10 +54,6 @@ import org.wcs.smart.i2.query.PagedResultSetIterator;
 import org.wcs.smart.i2.query.observation.filter.IColumnIdentifierProvider;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.util.UuidUtils;
-
-import org.locationtech.jts.geom.Envelope;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.io.WKBReader;
 
 /**
  * Intelligence observation query results
@@ -166,6 +166,8 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 			item.setRecordSource(session.get(IntelRecordSource.class, sourceUuid));
 		}
 		
+		UUID profileUuid = asUuid(rowData[columnNameToIndex.get("profile_uuid")]); //$NON-NLS-1$
+		item.setProfile(profileUuid, session.get(IntelProfile.class, profileUuid).getName());
 		item.setLocationId((String)rowData[columnNameToIndex.get("loc_id")]); //$NON-NLS-1$
 		item.setLocationDate((Timestamp)rowData[columnNameToIndex.get("loc_datetime")]); //$NON-NLS-1$
 		item.setLocationComment((String)rowData[columnNameToIndex.get("loc_comment")]); //$NON-NLS-1$
@@ -251,6 +253,8 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 				return sql + "record_status" + getSortDirectionSql(); //$NON-NLS-1$
 			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.RECORD_TITLE){
 				return sql + "lower(record_title)" + getSortDirectionSql(); //$NON-NLS-1$
+			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.RECORD_PROFILE){
+				return sql + "profile_uuid" + getSortDirectionSql(); //$NON-NLS-1$
 			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.CA_ID){
 				return sql + "lower(ca_id)" + getSortDirectionSql(); //$NON-NLS-1$
 			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.CA_NAME){

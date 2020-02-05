@@ -26,6 +26,7 @@ import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.query.IResultItem;
 import org.wcs.smart.i2.query.engine.IntelObservationResultItem;
+import org.wcs.smart.i2.query.engine.IntelRecordResultItem;
 import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
 import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
 
@@ -42,9 +43,14 @@ public class ObservationQuerySourceFinder implements IQuerySourceFinder {
 	private ObservationQuerySourceFinder(){}
 	
 	public void runAction(IResultItem item){
-		if (!(item instanceof IntelObservationResultItem)) return;	
-		IntelObservationResultItem i = (IntelObservationResultItem)item;
-		(new OpenRecordHandler()).openRecord(new RecordEditorInput(i.getRecordTitle(), i.getRecordUuid(), null, null, null), false);
+		if (item instanceof IntelObservationResultItem) {
+			IntelObservationResultItem i = (IntelObservationResultItem)item;
+			(new OpenRecordHandler()).openRecord(new RecordEditorInput(i.getRecordTitle(), i.getRecordUuid(), null, null, i.getProfileUuid(), null), false);
+		}else if (item instanceof IntelRecordResultItem) {
+			IntelRecordResultItem i = (IntelRecordResultItem)item;
+			(new OpenRecordHandler()).openRecord(new RecordEditorInput(i.getRecordTitle(), i.getRecordUuid(), null, null, i.getProfileUuid(), null), false);
+			
+		}
 	}
 
 	@Override

@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.security.Principal;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -79,7 +80,6 @@ import org.wcs.smart.connect.query.engine.HtmlExporter;
 import org.wcs.smart.connect.query.engine.IMemoryTableResultSet;
 import org.wcs.smart.connect.query.engine.ShpExporter;
 import org.wcs.smart.connect.query.engine.TiffRasterExporter;
-import org.wcs.smart.connect.query.engine.i2.IntelEntityRecordQueryResults;
 import org.wcs.smart.connect.query.engine.i2.IntelObservationQueryResults;
 import org.wcs.smart.connect.security.AdvIntelAction;
 import org.wcs.smart.connect.security.CaAdminAccountAction;
@@ -88,7 +88,7 @@ import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.IIntelQueryEngine;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
-import org.wcs.smart.i2.model.IntelRecordObservationQuery;
+import org.wcs.smart.i2.query.IPagedQueryResultSet;
 import org.wcs.smart.i2.query.export.CsvEntitySummaryQueryExporter;
 import org.wcs.smart.i2.query.export.IQueryExporter.ExportOption;
 import org.wcs.smart.query.common.engine.IQueryEngine;
@@ -476,7 +476,7 @@ public class QueryApi extends HttpServlet{
 									
 		IIntelQueryEngine engine = QueryManager.INSTANCE.findQueryEngine(query);
 		if(engine == null){
-			String error = MessageFormat.format(Messages.getString("QueryApi.NoQueryEngine", SmartUtils.getRequestLocale(request)), IntelRecordObservationQuery.KEY); //$NON-NLS-1$
+			String error = MessageFormat.format(Messages.getString("QueryApi.NoQueryEngine", SmartUtils.getRequestLocale(request)), query.getTypeKey()); //$NON-NLS-1$
 			return new QueryResult(createErrorResponse(Status.NOT_IMPLEMENTED, error));
 		}
 		
@@ -493,7 +493,8 @@ public class QueryApi extends HttpServlet{
 		params.put(Locale.class.getName(), request.getLocale());
 		params.put(ConservationArea.class.getName(), cas);
 		params.put(AbstractQueryEngine.INCLUDE_UUID_PARAMETER, includeUuids);
-
+		params.put(Principal.class.getName(), request.getUserPrincipal().getName());
+		
 		Date[] dateFilters = new Date[] {null, null};
 		if (df.getDateFilterOption().getDates() != null) {
 			dateFilters = df.getDateFilterOption().getDates();
@@ -516,22 +517,8 @@ public class QueryApi extends HttpServlet{
 		if (result instanceof IntelObservationQueryResults){
 			((IntelObservationQueryResults)result).setSorting(sortColumnName, sortDirectionInt);
 			((IntelObservationQueryResults)result).configureSort(s);
-			if (format.equalsIgnoreCase(CsvExporter.FORMAT_KEY)){
-				//TODO: delete temporary file??
-				java.nio.file.Path outputFile = SmartContext.INSTANCE.getTempFilestoreLocation().toPath().resolve(System.nanoTime() + ".smart.tmp"); //$NON-NLS-1$
-				CsvExporter exporter = new CsvExporter(outputFile, delimiter.charAt(0),request.getLocale());
-				exporter.exportResults( (IntelObservationQueryResults)result, s);
-				return new QueryResult(writeText(outputFile), new NoDisposeQueryResult());
-				
-//			}else if (format.equalsIgnoreCase(ShpExporter.FORMAT_KEY)){
-//				String filename = SmartUtils.cleanFileName(query.getName() + "_"+ query.getId()) + ".zip"; //$NON-NLS-1$ //$NON-NLS-2$
-//				java.nio.file.Path outputFile  = SmartContext.INSTANCE.getTempFilestoreLocation().toPath().resolve(filename); 
-//			
-//				ShpExporter exporter = new ShpExporter(outputFile, request.getLocale());
-//				exporter.setPrj(prjProvider);
-//				exporter.exportResults((SimpleQuery)query, (AbstractDbFeatureResultSet)result, s);
-//				return new QueryResult(writeBinary(outputFile), result);
-			}else if (format.equalsIgnoreCase(GeoJsonExporter.FORMAT_KEY)){
+			
+			if (format.equalsIgnoreCase(GeoJsonExporter.FORMAT_KEY)){
 				GeoJsonExporter exporter = new GeoJsonExporter(request.getLocale(), prjProvider);
 				exporter.exportResults( (IntelObservationQueryResults)result, s);
 				return new QueryResult(Response
@@ -539,28 +526,20 @@ public class QueryApi extends HttpServlet{
 						.header("Content-Type", MediaType.APPLICATION_JSON) //$NON-NLS-1$
 						.entity(exporter.getGeoJsonOutput() )
 						.build(), new NoDisposeQueryResult());
-			}else if (format.equalsIgnoreCase(HtmlExporter.FORMAT_KEY)){
-				HtmlExporter exporter = new HtmlExporter(request.getLocale());
-				exporter.exportResults( (IntelObservationQueryResults)result, query.getName(), s);
-				return new QueryResult( Response
-						.status(Status.OK)
-						.header("Content-Type", MediaType.TEXT_HTML) //$NON-NLS-1$
-						.entity(exporter.getHtml() )
-						.build(), new NoDisposeQueryResult());
 			}
 		}
-		if (result instanceof IntelEntityRecordQueryResults){
+		if (result instanceof IPagedQueryResultSet){
 			//TODO: sorting
 //			((IntelEntityRecordQueryResults)result).setSorting(sortColumnName, sortDirectionInt);
 //			((IntelEntityRecordQueryResults)result).configureSort(s);
 			if (format.equalsIgnoreCase(CsvExporter.FORMAT_KEY)){
 				java.nio.file.Path outputFile = SmartContext.INSTANCE.getTempFilestoreLocation().toPath().resolve(System.nanoTime() + ".smart.tmp"); //$NON-NLS-1$
 				CsvExporter exporter = new CsvExporter(outputFile, delimiter.charAt(0),request.getLocale());
-				exporter.exportResults( (IntelEntityRecordQueryResults)result, s);
+				exporter.exportResults( (IPagedQueryResultSet)result, s);
 				return new QueryResult(writeText(outputFile), new NoDisposeQueryResult());
 			}else if (format.equalsIgnoreCase(HtmlExporter.FORMAT_KEY)){
 				HtmlExporter exporter = new HtmlExporter(request.getLocale());
-				exporter.exportResults( (IntelEntityRecordQueryResults)result, query.getName(), s);
+				exporter.exportResults( (IPagedQueryResultSet)result, query.getName(), s);
 				return new QueryResult( Response
 						.status(Status.OK)
 						.header("Content-Type", MediaType.TEXT_HTML) //$NON-NLS-1$
@@ -568,6 +547,7 @@ public class QueryApi extends HttpServlet{
 						.build(), new NoDisposeQueryResult());
 			}
 		}
+
 		if (result instanceof org.wcs.smart.i2.query.SummaryQueryResult){
 			if (format.equalsIgnoreCase(CsvExporter.FORMAT_KEY)){
 				

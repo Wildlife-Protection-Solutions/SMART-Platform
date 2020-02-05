@@ -85,9 +85,9 @@ import org.wcs.smart.i2.model.IntelEntityRecord;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.DateCellEditor;
-import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.FileLocationParser;
 import org.wcs.smart.i2.ui.ObservationDialog;
+import org.wcs.smart.i2.ui.Resources;
 import org.wcs.smart.i2.ui.TransparentInfoDialog;
 import org.wcs.smart.i2.ui.WKTGeometryDialog;
 import org.wcs.smart.i2.ui.dialogs.GPSDeviceSelectionDialog;
@@ -382,8 +382,7 @@ public class LocationListComposite extends Composite{
 							MenuItem linkTo = new MenuItem(linkSubMenu, SWT.PUSH);
 							linkTo.setText(entity.getIdAttributeAsText());
 							if (entity.getEntityType().getIcon() != null){
-								linkTo.setImage(EntityTypeLabelProvider.createImageDescriptor(entity.getEntityType()).createImage());
-								linkTo.addListener(SWT.Dispose, (event) -> {if (linkTo.getImage() != null) linkTo.getImage().dispose();});
+								linkTo.setImage(Resources.INSTANCE.getImage(entity.getEntityType()));
 							}
 							linkTo.setData(entity);
 							linkTo.addSelectionListener(addEntityLinkListener);
@@ -402,8 +401,7 @@ public class LocationListComposite extends Composite{
 							MenuItem linkTo = new MenuItem(dropLinkSubMenu, SWT.PUSH);
 							linkTo.setText(entity.getIdAttributeAsText());
 							if (entity.getEntityType().getIcon() != null){
-								linkTo.setImage(EntityTypeLabelProvider.createImageDescriptor(entity.getEntityType()).createImage());
-								linkTo.addListener(SWT.Dispose, (event) -> {if (linkTo.getImage() != null) linkTo.getImage().dispose();});
+								linkTo.setImage(Resources.INSTANCE.getImage(entity.getEntityType()));
 							}
 							linkTo.setData(entity);
 							linkTo.addSelectionListener(dropEntityLinkListener);
@@ -433,7 +431,7 @@ public class LocationListComposite extends Composite{
 				
 				editObsItem = new MenuItem(linkEntities, SWT.PUSH);
 				editObsItem.setText(Messages.LocationListComposite_EditObsMenuItem);
-				editObsItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EDIT));
+				editObsItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 				editObsItem.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
@@ -451,7 +449,7 @@ public class LocationListComposite extends Composite{
 				
 				editGeometry = new MenuItem(linkEntities, SWT.PUSH);
 				editGeometry.setText(Messages.LocationListComposite_EditGeomMnuItem);
-				editGeometry.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EDIT));
+				editGeometry.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 				editGeometry.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {

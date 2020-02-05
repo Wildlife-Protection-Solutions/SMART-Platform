@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -48,6 +49,7 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
@@ -56,8 +58,10 @@ import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.search.AdvancedEntitySearch;
 import org.wcs.smart.i2.search.IntelSearchResult;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.UuidUtils;
 
@@ -96,6 +100,19 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 	@SuppressWarnings("unchecked")
 	public synchronized EntityTableData generateData() {
 		ConservationArea ca = SmartDB.getCurrentConservationArea();
+		List<IntelProfile> profiles = new ArrayList<>(ProfilesManager.INSTANCE.getActiveProfiles());
+		profiles = profiles.stream().filter(e->IntelSecurityManager.INSTANCE.canViewEntities(e)).collect(Collectors.toList());
+		
+		if (profiles.isEmpty()) {
+			EntityTableData data = new EntityTableData();
+			data.attributes = Collections.emptyList();
+			data.tableName = ""; //$NON-NLS-1$
+			data.totalCount = 0;
+			data.currentCount = 0;
+			return data;
+		}
+		
+		this.data = null;
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
@@ -124,6 +141,7 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 				sb.append(DB_NAME_NAME);
 				sb.append(" ( entity_uuid char(16) for bit data, "); //$NON-NLS-1$
 				sb.append(" entity_type_uuid char(16) for bit data, "); //$NON-NLS-1$
+				sb.append(" profile_uuid char(16) for bit data, "); //$NON-NLS-1$
 				sb.append(" i_primary_id varchar(1024), "); //$NON-NLS-1$
 				sb.append(" filter boolean, "); //$NON-NLS-1$
 				sb.append(COL_ENTITY_TYPE_NAME);
@@ -131,17 +149,18 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 				sb.append(")"); //$NON-NLS-1$
 				session.createNativeQuery(sb.toString()).executeUpdate();
 				
-								
+				
 				//now we need to populate this table
 				//entity uuid for this ca
 				sb = new StringBuilder();
 				sb.append(" INSERT INTO "); //$NON-NLS-1$
 				sb.append( DB_NAME_NAME );
-				sb.append(" (entity_uuid, entity_type_uuid, i_primary_id, filter)"); //$NON-NLS-1$
-				sb.append(" SELECT e.uuid, t.uuid, a.keyid, true FROM smart.i_entity e join smart.i_entity_type t on e.entity_type_uuid = t.uuid join smart.i_attribute a on t.id_attribute_uuid = a.uuid " ); //$NON-NLS-1$
-				sb.append(" WHERE e.ca_uuid = :ca"); //$NON-NLS-1$
+				sb.append(" (entity_uuid, entity_type_uuid, profile_uuid, i_primary_id, filter)"); //$NON-NLS-1$
+				sb.append(" SELECT e.uuid, t.uuid, e.profile_uuid, a.keyid, true FROM smart.i_entity e join smart.i_entity_type t on e.entity_type_uuid = t.uuid join smart.i_attribute a on t.id_attribute_uuid = a.uuid " ); //$NON-NLS-1$
+				sb.append(" WHERE e.ca_uuid = :ca and e.profile_uuid in (:uuids) "); //$NON-NLS-1$
 				session.createNativeQuery(sb.toString())
 					.setParameter("ca", ca.getUuid()) //$NON-NLS-1$
+					.setParameterList("uuids", profiles.stream().map(e->e.getUuid()).collect(Collectors.toList())) //$NON-NLS-1$
 					.executeUpdate();
 				sb = new StringBuilder();
 				sb.append(" CREATE INDEX i_temp_entity_uuid_idx on " + DB_NAME_NAME + "(entity_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -204,6 +223,8 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 	}
 	@Override
 	public void updateElement(int index) {
+		if (data == null) return;
+		
 		if (viewer.getElementAt(index) != null || loaded.contains(index)){
 			//EG: this is the only way I can get the table to refresh properly
 			//if refresh is called 
@@ -493,7 +514,10 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 				try(Session session = HibernateManager.openSession()){
 					session.beginTransaction();
 					try {
-						IntelSearchResult e = search.doSearch(session, Locale.getDefault(), monitor);
+						Set<IntelProfile> profiles = new HashSet<>(ProfilesManager.INSTANCE.getActiveProfiles());
+						profiles = profiles.stream().filter(e->IntelSecurityManager.INSTANCE.canViewEntities(e)).collect(Collectors.toSet());
+						
+						IntelSearchResult e = search.doSearch(profiles, session, Locale.getDefault(), monitor);
 						
 						List<UUID> items = new ArrayList<>();
 						e.getAllResults().forEach(ii->items.add(ii.getEntityUuid()));
@@ -520,9 +544,7 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 					} catch (Exception e) {
 						Intelligence2PlugIn.displayLog(e.getMessage(), e);
 						session.getTransaction().rollback();
-					}
-					
-					
+					}	
 				}
 				final int icount = newCount;
 				Display.getDefault().syncExec(()->{
@@ -648,7 +670,7 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 
 			try(Session session = HibernateManager.openSession()){
 				StringBuilder sb = new StringBuilder();
-				sb.append("SELECT entity_uuid, i_primary_id, "); //$NON-NLS-1$
+				sb.append("SELECT entity_uuid, i_primary_id, profile_uuid, "); //$NON-NLS-1$
 				sb.append(COL_ENTITY_TYPE_NAME);
 				sb.append(" FROM "); //$NON-NLS-1$
 				sb.append( data.tableName );
@@ -722,9 +744,12 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 
 			UUID entityUuid = UuidUtils.byteToUUID((byte[])rowdata[0]);
 			String id = (String)rowdata[1];
-			String type = (String)rowdata[2];
+			String type = (String)rowdata[3];
 			
-			EntityTableRowItem item = new EntityTableRowItem(entityUuid, id);
+			UUID profileUuid = UuidUtils.byteToUUID((byte[])rowdata[2]);
+			IntelProfile p = session.get(IntelProfile.class, profileUuid);
+			
+			EntityTableRowItem item = new EntityTableRowItem(entityUuid, id, p.getName(), p.getKeyId(), p.getUuid());
 			item.setType(type);
 			
 			IntelEntity ie = session.get(IntelEntity.class, entityUuid);

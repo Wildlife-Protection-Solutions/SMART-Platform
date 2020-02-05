@@ -69,6 +69,7 @@ import org.wcs.smart.i2.model.IntelEntityRelationship;
 import org.wcs.smart.i2.model.IntelEntityRelationshipAttributeValue;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelLocation;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.IntelRelationshipType;
@@ -251,9 +252,16 @@ public class XmlToEntity {
 				warnings.add(MessageFormat.format(Messages.XmlToEntity_EntityTypeNotFound, xmlEntity.getEntityTypeKey(), xmlEntity.getId()));
 				continue;
 			}
+			
+			IntelProfile profile = findProfile(xmlEntity.getProfileKey());
+			if (profile == null) {
+				warnings.add(MessageFormat.format(Messages.XmlToEntity_ProfileNotFound, xmlEntity.getProfileKey(), xmlEntity.getId()));
+				continue;
+			}
 			newEntity.setComment(xmlEntity.getScratchpad());
 			newEntity.setConservationArea(ca);
 			newEntity.setEntityType(type);
+			newEntity.setProfile(profile);
 			newEntity.setAttributes(new ArrayList<>());
 			for (AttributeValue xmlValue : xmlEntity.getAttributes()) {
 				IntelAttribute attribute = findAttribute(xmlValue.getAttributeKey(), xmlValue.getType().name());
@@ -318,7 +326,7 @@ public class XmlToEntity {
 					warnings.add(MessageFormat.format(Messages.XmlToEntity_FileNotFound, xmlAttachment.getFilename()));
 					continue;
 				}
-				//TODO: look to reuse ?  likely impossible although I supposed we could compare files byte of byte??
+
 				IntelAttachment attachment = new IntelAttachment();
 				attachment.setDateCreated(new Date());
 				attachment.setCreatedBy(SmartDB.getCurrentEmployee());
@@ -525,6 +533,12 @@ public class XmlToEntity {
 				new Object[] {"keyId", attributeKey}, //$NON-NLS-1$
 				new Object[] {"type", type}).uniqueResult(); //$NON-NLS-1$
 		return attribute;
+	}
+	
+	public IntelProfile findProfile(String profileKey) {
+		return QueryFactory.buildQuery(session, IntelProfile.class,
+				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+				new Object[] {"keyId", profileKey}).uniqueResult(); //$NON-NLS-1$
 	}
 	
 	public IntelEntityType findEntityType(String entityTypeKey) {

@@ -70,8 +70,8 @@ public class DataModelMerger {
 			IProgressMonitor monitor){
 		
 		if (l == null) l = Locale.getDefault();
-		if (cas == null || cas.length < 2){
-			throw new IllegalStateException("more than 1 conservation area must be provided");//$NON-NLS-1$
+		if (cas == null){
+			throw new IllegalStateException("at least 1 conservation area must be provided");//$NON-NLS-1$
 		}
 		// load data model for default Ca
 		monitor.beginTask(SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(ProgressMessages.TASKNAME, l), 4);

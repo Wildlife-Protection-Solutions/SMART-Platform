@@ -61,6 +61,7 @@ public class IntelRecord extends UuidItem implements IIntelAuditItem{
 	
 	private ConservationArea ca;
 	
+	private IntelProfile profile;
 
 	private Date dateCreated;
 	private Date dateModified;
@@ -109,6 +110,24 @@ public class IntelRecord extends UuidItem implements IIntelAuditItem{
 	 */
 	public void setConservationArea(ConservationArea ca) {
 		this.ca = ca;
+	}
+	
+	/**
+	 * Get the profile associated with the entity
+	 * @return
+	 */
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="profile_uuid", referencedColumnName="uuid")
+	public IntelProfile getProfile(){
+		return this.profile;
+	}
+	
+	/**
+	 * Sets the profile associated with the entity 
+	 * @param ca
+	 */
+	public void setProfile(IntelProfile profile){
+		this.profile = profile;
 	}
 	
 	/**

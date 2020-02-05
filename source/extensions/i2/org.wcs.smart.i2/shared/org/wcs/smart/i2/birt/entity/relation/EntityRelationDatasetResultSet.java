@@ -28,6 +28,7 @@ import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.UUID;
 
 import org.eclipse.datatools.connectivity.oda.IBlob;
@@ -39,6 +40,7 @@ import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.query.Query;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
+import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection.Permission;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
 import org.wcs.smart.i2.birt.entity.relation.EntityRelationDatasetResultSetMetadata.Column;
 import org.wcs.smart.i2.model.IntelAttribute;
@@ -46,6 +48,7 @@ import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntityRelationship;
 import org.wcs.smart.i2.model.IntelEntityRelationshipAttributeValue;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -91,9 +94,11 @@ public class EntityRelationDatasetResultSet implements IResultSet {
 		
 		//add the conservation area filter here otherwise we will
 		//get data from other conservation areas if no entity is provided
-		String q1 = "SELECT count(*) FROM IntelEntityRelationship l WHERE l.relationshipType.conservationArea in (:ca) AND (l.sourceEntity.entityType = :type or l.targetEntity.entityType = :type or l.sourceEntity.entityType is null or l.targetEntity.entityType is null) "; //$NON-NLS-1$
-		String q2 = "FROM IntelEntityRelationship l WHERE l.relationshipType.conservationArea in (:ca) AND (l.sourceEntity.entityType = :type or l.targetEntity.entityType = :type or l.sourceEntity.entityType is null or l.targetEntity.entityType is null) "; //$NON-NLS-1$
+		String q1 = "SELECT count(*) FROM IntelEntityRelationship l WHERE l.relationshipType.conservationArea in (:ca) AND l.sourceEntity.profile IN (:profiles1) AND l.targetEntity.profile IN (:profiles2) AND (l.sourceEntity.entityType = :type or l.targetEntity.entityType = :type or l.sourceEntity.entityType is null or l.targetEntity.entityType is null) "; //$NON-NLS-1$
+		String q2 = "FROM IntelEntityRelationship l WHERE l.relationshipType.conservationArea in (:ca) AND l.sourceEntity.profile IN (:profiles1) AND l.targetEntity.profile IN (:profiles2) AND (l.sourceEntity.entityType = :type or l.targetEntity.entityType = :type or l.sourceEntity.entityType is null or l.targetEntity.entityType is null) "; //$NON-NLS-1$
 
+		Set<IntelProfile> profiles = connection.hasPermission(Permission.ENTITY);
+		
 		HashMap<String, Object> values = new HashMap<String, Object>();
 		values.put("type", type); //$NON-NLS-1$
 		int index =pmetadata.findParameterIndex(DataSourceParameter.ENTITY_UUID.getName());
@@ -116,6 +121,10 @@ public class EntityRelationDatasetResultSet implements IResultSet {
 		}
 		query1.setParameterList("ca", connection.getConservationAreas()); //$NON-NLS-1$
 		query2.setParameterList("ca", connection.getConservationAreas()); //$NON-NLS-1$
+		query1.setParameterList("profiles1", profiles); //$NON-NLS-1$
+		query1.setParameterList("profiles2", profiles); //$NON-NLS-1$
+		query2.setParameterList("profiles1", profiles); //$NON-NLS-1$
+		query2.setParameterList("profiles2", profiles); //$NON-NLS-1$
 		
 		m_maxRows = (Long)query1.uniqueResult();
 		results = query2.setReadOnly(true)

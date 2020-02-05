@@ -25,14 +25,14 @@ import java.text.DateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import org.locationtech.jts.geom.Geometry;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.query.engine.EntityRecordQueryResultItem;
 import org.wcs.smart.i2.query.engine.IntelObservationResultItem;
-
-import org.locationtech.jts.geom.Geometry;
+import org.wcs.smart.i2.query.engine.IntelRecordResultItem;
 
 /**
  * Collection of fixed query columns.
@@ -46,6 +46,7 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 		RECORD_TITLE("record:title"), //$NON-NLS-1$
 		RECORD_STATUS("record:status"), //$NON-NLS-1$
 		RECORD_SOURCE("record:source"), //$NON-NLS-1$
+		RECORD_DATE("record:date"), //$NON-NLS-1$
 		LOC_ID("loc:id"), //$NON-NLS-1$
 		LOC_DATE("loc:date"), //$NON-NLS-1$
 		LOC_TIME("loc:time"), //$NON-NLS-1$
@@ -54,6 +55,8 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 		
 		ENTITY_ID("entity:id"),  //$NON-NLS-1$
 		ENTITY_TYPE("entity:type"), //$NON-NLS-1$
+		ENTITY_PROFILE("entity:profile"), //$NON-NLS-1$
+		RECORD_PROFILE("record:profile"), //$NON-NLS-1$
 		
 		CA_ID ("ca:id"),  //$NON-NLS-1$
 		CA_NAME("ca:name");  //$NON-NLS-1$
@@ -83,6 +86,8 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 				return ((EntityRecordQueryResultItem)item).getEnityId();
 			}else if (column == Column.ENTITY_TYPE) {
 				return ((EntityRecordQueryResultItem)item).getEnityTypeName();
+			}else if (column == Column.ENTITY_PROFILE) {
+				return ((EntityRecordQueryResultItem)item).getProfileName();
 			}else if (column == Column.CA_ID) {
 				return ((EntityRecordQueryResultItem)item).getConservationAreaId();
 			}else if (column == Column.CA_NAME) {
@@ -90,7 +95,26 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 			}
 			return null;
 		}
-		
+		if (item instanceof IntelRecordResultItem) {
+			IntelRecordResultItem i = (IntelRecordResultItem)item;
+			switch(column){
+			case RECORD_STATUS:
+				return IntelRecord.Status.valueOf(i.getRecordStatus().toUpperCase(Locale.ROOT));
+			case RECORD_SOURCE:
+				return i.getRecordSourceName();
+			case RECORD_PROFILE:
+				return i.getProfileName();
+			case RECORD_TITLE:
+				return i.getRecordTitle();
+			case RECORD_DATE:
+				return i.getRecordDate();
+			case CA_ID:
+				return i.getConservationAreaId();
+			case CA_NAME:
+				return i.getConservationAreaName();
+			default:
+			}
+		}
 		if (!(item instanceof  IntelObservationResultItem)) return null;
 		IntelObservationResultItem i = (IntelObservationResultItem) item;
 		switch(column){
@@ -110,6 +134,8 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 			return IntelRecord.Status.valueOf(i.getRecordStatus().toUpperCase(Locale.ROOT));
 		case RECORD_SOURCE:
 			return i.getRecordSource();
+		case RECORD_PROFILE:
+			return i.getProfileName();
 		case RECORD_TITLE:
 			return i.getRecordTitle();
 		case CA_ID:
@@ -127,6 +153,7 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 		if (toFormat == null) return ""; //$NON-NLS-1$
 		switch(column){
 			case LOC_DATE:
+			case RECORD_DATE:
 				return DateFormat.getDateInstance(DateFormat.DEFAULT, l).format((Date)toFormat);
 			case LOC_GEOMTRY:
 				if (toFormat instanceof Geometry) {
@@ -144,9 +171,12 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 			case ENTITY_TYPE:
 			case CA_NAME:
 			case CA_ID:
+			case ENTITY_PROFILE:
+			case RECORD_PROFILE:
 				return (String)toFormat;
 			case RECORD_SOURCE:
-				return ((IntelRecordSource)toFormat).getName();
+				if (toFormat instanceof IntelRecordSource) return ((IntelRecordSource)toFormat).getName();
+				return (String)toFormat;
 		}
 		return toFormat.toString();
 	}
@@ -161,6 +191,7 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 	public Type getDataType() {
 		switch(column){
 			case LOC_DATE:
+			case RECORD_DATE:
 				return Type.DATE;
 			case LOC_GEOMTRY:
 				return Type.GEOMETRY;

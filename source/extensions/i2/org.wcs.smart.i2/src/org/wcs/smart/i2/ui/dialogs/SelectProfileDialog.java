@@ -1,0 +1,100 @@
+/*
+ * Copyright (C) 2019 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.i2.ui.dialogs;
+
+import java.util.List;
+
+import org.eclipse.jface.layout.TableColumnLayout;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TableColumn;
+import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.model.IntelProfile;
+import org.wcs.smart.i2.ui.ProfileLabelProvider;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
+
+/**
+ * Select profiles dialog 
+ * 
+ * @author Emily
+ *
+ */
+public class SelectProfileDialog extends SmartStyledTitleDialog{
+
+	private List<IntelProfile> items;
+	
+	private TableViewer tblViewer;
+	
+	private IntelProfile selection;
+	
+	public SelectProfileDialog(Shell parent, List<IntelProfile> items) {
+		super(parent);
+		this.items = items;
+	}
+
+	public IntelProfile getSelection() {
+		return selection;
+	}
+	
+	@Override
+	public void cancelPressed() {
+		this.selection = null;
+		super.cancelPressed();
+	}
+	
+	@Override
+	public void okPressed() {
+		selection = (IntelProfile) tblViewer.getStructuredSelection().getFirstElement();
+		super.okPressed();
+	}
+	
+	@Override
+	public Control createDialogArea(Composite parent) {
+		parent = (Composite) super.createDialogArea(parent);
+		
+		Composite main = new Composite(parent, SWT.NONE);
+		main.setLayout(new TableColumnLayout());
+		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		tblViewer = new TableViewer(main, SWT.FULL_SELECTION);
+		tblViewer.setContentProvider(ArrayContentProvider.getInstance());
+		tblViewer.setLabelProvider(new ProfileLabelProvider());
+		tblViewer.setInput(items);
+		tblViewer.getTable().addListener(SWT.MeasureItem, e->{
+			e.height = 25;
+		});
+		TableColumn tc = new TableColumn(tblViewer.getTable(), SWT.NONE);
+		((TableColumnLayout)main.getLayout()).setColumnData(tc, new ColumnWeightData(1));
+		tblViewer.addDoubleClickListener(e->okPressed());
+		
+		setTitle(Messages.SelectProfileDialog_ProfileTitle);
+		setMessage(Messages.SelectProfileDialog_ProfileMessage);
+		getShell().setText(Messages.SelectProfileDialog_ShellTitle);
+		return parent;
+	}
+	
+}

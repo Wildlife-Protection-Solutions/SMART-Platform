@@ -10,8 +10,10 @@ package org.wcs.smart.i2.xml.record;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
@@ -30,15 +32,16 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *       &lt;sequence>
  *         &lt;element name="title" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="status" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="source" type="{http://www.smartconservationsoftware.org/xml/1.0/org.wcs.smart.i2.record}LabelUuid"/>
+ *         &lt;element name="source" type="{http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.record}LabelUuid"/>
  *         &lt;element name="narrative" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="scratchpad" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="primary_date" type="{http://www.w3.org/2001/XMLSchema}date"/>
- *         &lt;element name="attributes" type="{http://www.smartconservationsoftware.org/xml/1.0/org.wcs.smart.i2.record}RecordAttributeType" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="entities" type="{http://www.smartconservationsoftware.org/xml/1.0/org.wcs.smart.i2.record}LabelUuid" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="attachments" type="{http://www.smartconservationsoftware.org/xml/1.0/org.wcs.smart.i2.record}AttachmentType" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="locations" type="{http://www.smartconservationsoftware.org/xml/1.0/org.wcs.smart.i2.record}LocationType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="attributes" type="{http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.record}RecordAttributeType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="entities" type="{http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.record}LabelUuid" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="attachments" type="{http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.record}AttachmentType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="locations" type="{http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.record}LocationType" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
+ *       &lt;attribute name="profileKey" type="{http://www.w3.org/2001/XMLSchema}string" />      
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -78,6 +81,8 @@ public class RecordType {
     protected List<LabelUuid> entities;
     protected List<AttachmentType> attachments;
     protected List<LocationType> locations;
+    @XmlAttribute(name = "profileKey")
+    protected String profileKey;
 
     /**
      * Gets the value of the title property.
@@ -339,4 +344,27 @@ public class RecordType {
         return this.locations;
     }
 
+    /**
+     * Gets the value of the profileKey property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getProfileKey() {
+        return profileKey;
+    }
+
+    /**
+     * Sets the value of the profileKey property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setProfileKey(String value) {
+        this.profileKey = value;
+    }
 }

@@ -59,6 +59,8 @@ public class IntelRelationshipType extends NamedKeyItem {
 
 	private IntelEntityType srcType;
 	private IntelEntityType targetType;
+	private IntelProfile srcProfile;
+	private IntelProfile targetProfile;
 	
 	private List<IntelRelationshipTypeAttribute> attributes;
 
@@ -161,6 +163,27 @@ public class IntelRelationshipType extends NamedKeyItem {
 		this.targetType = targetType;
 	}
 
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="src_profile_uuid", referencedColumnName="uuid")
+	public IntelProfile getSourceProfile(){
+		return this.srcProfile;
+	}
+	
+	public void setSourceProfile(IntelProfile srcProfile){
+		this.srcProfile = srcProfile;
+	}
+	
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="target_profile_uuid", referencedColumnName="uuid")
+	public IntelProfile getTargetProfile(){
+		return this.targetProfile;
+	}
+	
+	public void setTargetProfile(IntelProfile targetProfile){
+		this.targetProfile = targetProfile;
+	}
 	
 	/**
 	 * Set the set of the i_relationship_attribute.

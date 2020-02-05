@@ -50,10 +50,6 @@ public class QueryProxy {
 		setIsCcaa(isCcaa);
 	}
 	
-	
-
-
-
 	public UUID getUuid() {
 		return uuid;
 	}

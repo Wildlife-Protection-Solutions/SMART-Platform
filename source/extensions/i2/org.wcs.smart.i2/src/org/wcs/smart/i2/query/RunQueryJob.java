@@ -39,9 +39,13 @@ import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
+import org.wcs.smart.i2.model.IntelRecordQuery;
+import org.wcs.smart.i2.model.IntelRecordSummaryQuery;
 import org.wcs.smart.i2.query.engine.IntelEntityRecordQueryEngine;
 import org.wcs.smart.i2.query.engine.IntelEntitySummaryQueryEngine;
 import org.wcs.smart.i2.query.engine.IntelObservationQueryEngine;
+import org.wcs.smart.i2.query.engine.IntelRecordQueryEngine;
+import org.wcs.smart.i2.query.engine.IntelRecordSummaryQueryEngine;
 import org.wcs.smart.i2.ui.editors.query.ProgressPanel;
 import org.wcs.smart.i2.ui.editors.query.QueryProgressMonitor;
 
@@ -116,8 +120,12 @@ public abstract class RunQueryJob extends Job {
 					results = (new IntelObservationQueryEngine()).executeQuery((IntelRecordObservationQuery)query, parameters);
 				}else if (query instanceof IntelEntitySummaryQuery) {
 					results = (new IntelEntitySummaryQueryEngine()).executeQuery((IntelEntitySummaryQuery)query, parameters);
+				}else if (query instanceof IntelRecordSummaryQuery) {
+					results = (new IntelRecordSummaryQueryEngine()).executeQuery((IntelRecordSummaryQuery)query, parameters);
 				}else if (query instanceof IntelEntityRecordQuery) {
 					results = (new IntelEntityRecordQueryEngine()).executeQuery((IntelEntityRecordQuery)query, parameters);
+				}else if (query instanceof IntelRecordQuery) {
+					results = (new IntelRecordQueryEngine()).executeQuery((IntelRecordQuery)query, parameters);
 				}else {
 					return Status.OK_STATUS;
 				}

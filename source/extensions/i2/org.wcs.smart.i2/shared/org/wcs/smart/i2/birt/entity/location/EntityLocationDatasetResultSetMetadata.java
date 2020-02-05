@@ -28,12 +28,11 @@ import java.util.logging.Logger;
 
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.locationtech.jts.io.ParseException;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.model.IntelEntityLocation;
-
-import org.locationtech.jts.io.ParseException;
 
 /**
  * Entity locations dataset results metadata

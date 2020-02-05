@@ -31,7 +31,7 @@ import javax.xml.namespace.QName;
 @XmlRegistry
 public class ObjectFactory {
 
-    private final static QName _Data_QNAME = new QName("http://www.example.org/Intelligence", "data"); //$NON-NLS-1$ //$NON-NLS-2$
+    private final static QName _Data_QNAME = new QName("http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.profile", "profile"); //$NON-NLS-1$ //$NON-NLS-2$
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: org.wcs.smart.i2.xml.model
@@ -41,11 +41,11 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link IntelligenceData }
+     * Create an instance of {@link Profile }
      * 
      */
-    public IntelligenceData createIntelligenceData() {
-        return new IntelligenceData();
+    public Profile createProfile() {
+        return new Profile();
     }
 
     /**
@@ -137,12 +137,12 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link IntelligenceData }{@code >}}
+     * Create an instance of {@link JAXBElement }{@code <}{@link Profile }{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "http://www.example.org/Intelligence", name = "data")
-    public JAXBElement<IntelligenceData> createData(IntelligenceData value) {
-        return new JAXBElement<IntelligenceData>(_Data_QNAME, IntelligenceData.class, null, value);
+    @XmlElementDecl(namespace = "http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.profile", name = "profile")
+    public JAXBElement<Profile> createData(Profile value) {
+        return new JAXBElement<Profile>(_Data_QNAME, Profile.class, null, value);
     }
 
 }

@@ -52,7 +52,6 @@ import org.wcs.smart.connect.apache.BcryptCredentialHandler;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.i18n.Messages;
-import org.wcs.smart.connect.model.AlertType;
 import org.wcs.smart.connect.model.SmartUser;
 import org.wcs.smart.connect.model.SmartUserRole;
 import org.wcs.smart.connect.security.AdminAccountAction;

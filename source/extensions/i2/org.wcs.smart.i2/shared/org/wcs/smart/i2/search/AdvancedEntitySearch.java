@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -47,6 +48,7 @@ import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntitySearch;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.query.Operator;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter;
@@ -122,15 +124,18 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 	 * to call done() on the given monitor
 	 */
 	@Override
-	public IntelSearchResult doSearch(Session session, Locale locale, IProgressMonitor monitor) throws Exception {
-		
+	public IntelSearchResult doSearch(Set<IntelProfile> profiles, Session session, Locale locale, IProgressMonitor monitor) throws Exception {
+		if (profiles.isEmpty()) return new IntelSearchResult(Collections.emptyList(),0);
 		if (searchString == null || searchString.trim().isEmpty()){
 			Long now = System.nanoTime();
 			
 			CriteriaBuilder cb = session.getCriteriaBuilder();
 			CriteriaQuery<IntelEntity> c = cb.createQuery(IntelEntity.class);
 			Root<IntelEntity> from = c.from(IntelEntity.class);
-			c.where(from.get("conservationArea").in(cas)); //$NON-NLS-1$
+			c.where(cb.and(
+					from.get("conservationArea").in(cas),
+					from.get("profile").in(profiles)
+					)); //$NON-NLS-1$
 			Query<IntelEntity> q = session.createQuery(c);
 			List<IntelSearchResultItem> items = new ArrayList<>(maxResultCnt);
 			try(ScrollableResults scroll = q.scroll()){
@@ -147,7 +152,7 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 			Long now = System.nanoTime();
 			List<?> uuids = null;
 			try{
-				uuids = runQueryString(session, locale);
+				uuids = runQueryString(profiles, session, locale);
 			}catch (Exception ex){
 				throw new Exception(MessageFormat.format(SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(Error.PARSE_ERROR, locale), ex.getMessage())  ,ex);
 			}
@@ -179,16 +184,17 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 	}
 
 	
-	private List<UUID> runQueryString(Session session, Locale locale) throws Exception{
+	private List<UUID> runQueryString(Set<IntelProfile> profiles, Session session, Locale locale) throws Exception{
 		String stokens[] = searchString.split("\\|"); //$NON-NLS-1$
 		
-		StringBuilder sb = new StringBuilder();
-		sb.append("DROP TABLE qt_temp");  //$NON-NLS-1$
-		try {
-			session.createNativeQuery(sb.toString()).executeUpdate();
-		}catch (Exception ex) {}
+		session.doWork(connection->{
+			try {
+				connection.createStatement().execute("DROP TABLE qt_temp");
+			}catch (Exception ex) {	}
+		});
+				
 		
-		sb = new StringBuilder();
+		StringBuilder sb = new StringBuilder();
 		sb.append(" CREATE TABLE qt_temp (entity_uuid char(16) for bit data, entity_type_key varchar(128) )"); //$NON-NLS-1$
 		session.createNativeQuery(sb.toString()).executeUpdate();
 		
@@ -196,11 +202,14 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 		sb = new StringBuilder();
 		sb.append("INSERT INTO qt_temp (entity_uuid, entity_type_key ) ");  //$NON-NLS-1$
 		sb.append(" SELECT DISTINCT ie.uuid, t.keyid "); //$NON-NLS-1$
-		sb.append(" FROM smart.i_entity ie join smart.i_entity_type t on ie.entity_type_uuid = t.uuid  WHERE ie.ca_uuid in ( :cauuids ) "); //$NON-NLS-1$
+		sb.append(" FROM smart.i_entity ie join smart.i_entity_type t on ie.entity_type_uuid = t.uuid");
+		sb.append(" WHERE ie.ca_uuid in ( :cauuids ) and ie.profile_uuid in ( :profiles )"); //$NON-NLS-1$
 		
-		List<byte[]> uuids = this.cas.stream().map(e->UuidUtils.uuidToByte(e.getUuid())).collect(Collectors.toList()); 
+		List<byte[]> uuids = this.cas.stream().map(e->UuidUtils.uuidToByte(e.getUuid())).collect(Collectors.toList());
+		 
 		session.createNativeQuery(sb.toString())
 			.setParameterList("cauuids", uuids)	 //$NON-NLS-1$
+			.setParameterList("profiles", profiles.stream().map(e->UuidUtils.uuidToByte(e.getUuid())).collect(Collectors.toList()))
 			.executeUpdate();
 
 		StringBuilder where = new StringBuilder();
@@ -227,10 +236,10 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 				
 				String column = ""; //$NON-NLS-1$
 				switch (attribute) {
-					case DATE_CREATED:
+					case ENTITY_DATE_CREATED:
 						column = "date_created"; //$NON-NLS-1$
 						break;
-					case DATE_MODIFIED:
+					case ENTITY_DATE_MODIFIED:
 						column = "date_modified"; //$NON-NLS-1$
 						break;
 				}

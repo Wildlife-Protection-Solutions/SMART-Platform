@@ -10,6 +10,7 @@ package org.wcs.smart.i2.xml.model;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -27,12 +28,13 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="names" type="{http://www.example.org/Intelligence}NamedItem" maxOccurs="unbounded"/>
+ *         &lt;element name="names" type="{http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.profile}NamedItem" maxOccurs="unbounded"/>
  *       &lt;/sequence>
  *       &lt;attribute name="attributeKey" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="entityTypeKey" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="isMulit" type="{http://www.w3.org/2001/XMLSchema}boolean" />
  *       &lt;attribute name="order" type="{http://www.w3.org/2001/XMLSchema}int" />
+ *       &lt;attribute name="key" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -56,6 +58,8 @@ public class RecordSourceAttribute {
     protected Boolean isMulit;
     @XmlAttribute(name = "order")
     protected Integer order;
+    @XmlAttribute(name = "key")
+    protected String key;
 
     /**
      * Gets the value of the names property.
@@ -132,6 +136,30 @@ public class RecordSourceAttribute {
      */
     public void setEntityTypeKey(String value) {
         this.entityTypeKey = value;
+    }
+    
+    /**
+     * Gets the value of the key property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getKey() {
+        return key;
+    }
+
+    /**
+     * Sets the value of the key property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setKey(String value) {
+        this.key = value;
     }
 
     /**

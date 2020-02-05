@@ -21,12 +21,15 @@
  */
 package org.wcs.smart.i2.ui.views.query.dropitem;
 
+import java.util.Locale;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.query.observation.filter.ValuePart;
 
 /**
@@ -37,8 +40,6 @@ import org.wcs.smart.i2.query.observation.filter.ValuePart;
  */
 public class ValueDropItem extends DropItem implements IValueDropItem {
 	
-	public static final String NAME = Messages.ValueDropItem_NumberOfEntitiesOption;
-	
 	private ValuePart.ValueOption option;
 	
 	public ValueDropItem(ValuePart.ValueOption option) {
@@ -47,7 +48,7 @@ public class ValueDropItem extends DropItem implements IValueDropItem {
 	}
 	@Override
 	public String getText() {
-		return NAME;
+		return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(option, Locale.getDefault());
 	}
 
 	@Override

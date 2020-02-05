@@ -30,6 +30,7 @@ import java.util.Map;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelProfile;
 
 /**
  * Entity import configuration.
@@ -41,6 +42,7 @@ public class EntityImportConfig {
 
 	private Path file;
 	private IntelEntityType type;
+	private IntelProfile profile;
 	private Map<IntelAttribute, Integer[]> columnMapping;
 	private boolean skipFirstLine = false;
 	
@@ -59,9 +61,10 @@ public class EntityImportConfig {
 	 * @param file
 	 * @param type
 	 */
-	public void setFile(Path file, IntelEntityType type, boolean skipFirstLine, char delimiter, String dateFormat){
+	public void setFile(Path file, IntelEntityType type, IntelProfile profile, boolean skipFirstLine, char delimiter, String dateFormat){
 		this.file = file;
 		this.type = type;
+		this.profile = profile;
 		this.skipFirstLine = skipFirstLine;
 		columnMapping = new HashMap<IntelAttribute, Integer[]>();
 		this.delimiter = delimiter;
@@ -96,6 +99,10 @@ public class EntityImportConfig {
 	
 	public IntelEntityType getType(){
 		return this.type;
+	}
+	
+	public IntelProfile getProfile(){
+		return this.profile;
 	}
 	
 	public boolean skipFirstLine(){

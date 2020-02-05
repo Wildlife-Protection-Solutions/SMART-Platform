@@ -31,14 +31,15 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.i2.InternalQueryManager;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelAttachment;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
 import org.wcs.smart.i2.model.IntelEntityRelationshipAttributeValue;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordAttributeValueList;
-import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.model.IntelWorkingSet;
 import org.wcs.smart.ui.SmartLabelProvider;
 
@@ -80,10 +81,13 @@ public class DeleteEmployeeAdvisor implements IDeleteAdvisor {
 			sb.append(MessageFormat.format(Messages.DeleteEmployeeAdvisor_WsError, SmartLabelProvider.getFullLabel(em), cnt));
 		}
 		
-		cnt = getReferenceCount(session, IntelRecordObservationQuery.class, em);
-		if (cnt != 0){
-			sb.append(MessageFormat.format(Messages.DeleteEmployeeAdvisor_QueryError, SmartLabelProvider.getFullLabel(em), cnt));
+		for (Class<? extends AbstractIntelQuery> c : InternalQueryManager.INSTANCE.getQueryTypeClasses()) {
+			cnt = getReferenceCount(session, c, em);
+			if (cnt != 0){
+				sb.append(MessageFormat.format(Messages.DeleteEmployeeAdvisor_QueryError, SmartLabelProvider.getFullLabel(em), cnt));
+			}		
 		}
+		
 		
 		cnt = getAttributeValueCount(session, em);
 		if (cnt != 0) {

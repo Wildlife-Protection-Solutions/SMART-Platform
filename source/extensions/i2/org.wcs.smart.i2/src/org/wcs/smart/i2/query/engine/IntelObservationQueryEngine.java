@@ -28,10 +28,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -40,26 +42,26 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.query.Query;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.io.WKBReader;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.i2.IIntelQueryEngine;
 import org.wcs.smart.i2.InternalQueryManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
+import org.wcs.smart.i2.model.IntelEntityRecordQuery;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
-import org.wcs.smart.i2.query.CaQueryItemProvider;
 import org.wcs.smart.i2.query.DataModelColumn;
-import org.wcs.smart.i2.query.DesktopCcaaQueryItemProvider;
 import org.wcs.smart.i2.query.IPagedQueryResultSet;
 import org.wcs.smart.i2.query.IQueryColumn;
 import org.wcs.smart.i2.query.IQueryItemProvider;
 import org.wcs.smart.i2.query.IntelQueryColumnProvider;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.query.observation.filter.ParsedObservationQuery;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.util.UuidUtils;
-
-import org.locationtech.jts.geom.Envelope;
-import org.locationtech.jts.io.WKBReader;
 
 /**
  * Query engine for intelligence observation queries.
@@ -99,10 +101,7 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine {
 		if (cas == null){
 			 throw new Exception(Messages.IntelObservationQueryEngine_InvalidCaParameter);
 		}
-		IQueryItemProvider itemProvider = new DesktopCcaaQueryItemProvider(cas, query.getConservationArea());
-		if (cas.size() == 1) {
-			itemProvider = new CaQueryItemProvider(cas.iterator().next(), query.getConservationArea());
-		}
+		IQueryItemProvider itemProvider = InternalQueryManager.INSTANCE.getQueryItemProvider();
 		
 		progress.subTask(Messages.IntelObservationQueryEngine_Progress2);
 		ParsedObservationQuery parsedQuery = IntelRecordObservationQuery.parseQuery(query.getQueryString());
@@ -110,6 +109,18 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine {
 		final SubMonitor fmonitor = progress;
 		final Locale flocale = locale;
 		final IQueryItemProvider fItemProvider = itemProvider;
+		
+		Set<IntelProfile> profiles = new HashSet<>();
+		for (String ip : IntelEntityRecordQuery.convertFromProfileFilter(query.getProfileFilter())) {
+			List<IntelProfile> items = session.createQuery("FROM IntelProfile WHERE keyId = :keyId and conservationArea in (:cas)", IntelProfile.class) //$NON-NLS-1$
+					.setParameter("keyId",  ip) //$NON-NLS-1$
+					.setParameter("cas", cas).list(); //$NON-NLS-1$
+			
+			for (IntelProfile ip2 : items) {
+				if (IntelSecurityManager.INSTANCE.canViewQuery(ip2)) profiles.add(ip2);
+			}
+		}
+		
 		return session.doReturningWork(new ReturningWork<IPagedQueryResultSet>() {
 			@Override
 			public IPagedQueryResultSet execute(Connection connection) throws SQLException {
@@ -120,7 +131,7 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine {
 						queryResults = new IntelObservationQueryResults();
 						
 						//session.beginTransaction();
-						ObservationFilterProcessor parser = new ObservationFilterProcessor(parsedQuery.getFilter(), dfilter, fItemProvider, session); 
+						ObservationFilterProcessor parser = new ObservationFilterProcessor(parsedQuery.getFilter(), profiles, dfilter, fItemProvider, session); 
 						String dataTable = parser.processFilter(fmonitor.split(2));
 						
 						queryResults.setFilterToColumnMap(parser.getFilterToColumnNames());
@@ -151,7 +162,7 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine {
 						queryResults = new IntelObservationQueryResults();
 						
 						//session.beginTransaction();
-						WaypointFilterProcessor parser = new WaypointFilterProcessor(parsedQuery.getFilter(), dfilter, fItemProvider, session); 
+						WaypointFilterProcessor parser = new WaypointFilterProcessor(parsedQuery.getFilter(), profiles, dfilter, fItemProvider, session); 
 						String dataTable = parser.processFilter(fmonitor.split(2));
 						
 						queryResults.setFilterToColumnMap(parser.getFilterToColumnNames());
@@ -268,11 +279,13 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine {
 			{"record_source_uuid", "char(16) for bit data"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"record_status", "varchar(256)"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"record_title", "varchar(1024)"}, //$NON-NLS-1$ //$NON-NLS-2$
+			{"profile_uuid", "char(16) for bit data"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"loc_id", "varchar(1024)"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"loc_datetime", "timestamp"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"loc_comment", "varchar(4096)"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"loc_geometry", "blob"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"category_uuid", "char(16) for bit data"}, //$NON-NLS-1$ //$NON-NLS-2$
+
 		};
 		
 		String[][] sortColumns = new String[][]{
@@ -313,7 +326,9 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine {
 		sb = new StringBuilder();
 		sb.append(" INSERT INTO " + newTable + " "); //$NON-NLS-1$ //$NON-NLS-2$
 		sb.append(" ( " + insert.toString() + ")" ); //$NON-NLS-1$ //$NON-NLS-2$
-		sb.append("SELECT o.uuid, a.location_uuid, a.ca_id, a.ca_name, r.uuid, r.source_uuid, r.status, r.title, l.id, l.datetime, l.comment, l.geometry, o.category_uuid "); //$NON-NLS-1$
+		sb.append("SELECT o.uuid, a.location_uuid, a.ca_id, a.ca_name, "); //$NON-NLS-1$
+		sb.append("r.uuid, r.source_uuid, r.status, r.title, r.profile_uuid, "); //$NON-NLS-1$
+		sb.append("l.id, l.datetime, l.comment, l.geometry, o.category_uuid "); //$NON-NLS-1$
 		sb.append(select);
 		sb.append(" FROM " + observationTable + " a "); //$NON-NLS-1$ //$NON-NLS-2$
 		sb.append(" JOIN smart.i_location l on a.location_uuid = l.uuid "); //$NON-NLS-1$

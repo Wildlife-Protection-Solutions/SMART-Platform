@@ -49,8 +49,8 @@ public class EntityPerspective implements IPerspectiveFactory {
 		IFolderLayout left = layout.createFolder("org.wcs.smart.i2.entity.right", IPageLayout.LEFT, 0.3f, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
 		
 		
-		if (IntelSecurityManager.INSTANCE.canViewEntities() || 
-				IntelSecurityManager.INSTANCE.canEditEntity()) {
+		if (IntelSecurityManager.INSTANCE.canViewEntityAny() || 
+				IntelSecurityManager.INSTANCE.canEditEntityAny()) {
 			left.addView(EntitySearchView.ID);
 			left.addView(LayersView.ID);
 			layout.getViewLayout(EntitySearchView.ID).setCloseable(false);
@@ -58,8 +58,8 @@ public class EntityPerspective implements IPerspectiveFactory {
 			
 		}
 		
-		if (IntelSecurityManager.INSTANCE.canViewRecords() || 
-				IntelSecurityManager.INSTANCE.canEditRecord()) {
+		if (IntelSecurityManager.INSTANCE.canViewRecordAny() || 
+				IntelSecurityManager.INSTANCE.canEditRecordAny()) {
 			left.addView(RecordsView.ID);
 			left.addPlaceholder(RecordNarrativeView.ID);
 			layout.getViewLayout(RecordsView.ID).setCloseable(false);

@@ -44,7 +44,9 @@ public class IntelBirtDataSource implements IDriver {
 		// assumes that this driver supports only one type of data source,
 		// ignores the specified dataSourceType
 		AbstractIntelBirtConnection connection = SmartContext.INSTANCE.getClass(IConnectionFactory.class).createConnection();
-		if (connection.hasPermission(Permission.ENTITY) || connection.hasPermission(Permission.RECORD) || connection.hasPermission(Permission.QUERY)) {
+		if (!connection.hasPermission(Permission.ENTITY).isEmpty() || 
+				!connection.hasPermission(Permission.RECORD).isEmpty() || 
+				!connection.hasPermission(Permission.QUERY).isEmpty()) {
 			return connection;
 		}
 		throw new OdaException("Unauthorized - You do not have permission to access to the advanced intelligence data source."); //$NON-NLS-1$

@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.i2.ui;
 
-import java.util.HashMap;
 import java.util.Locale;
 
 import org.eclipse.jface.viewers.LabelProvider;
@@ -42,7 +41,6 @@ import org.wcs.smart.i2.model.IntelWorkingSetItem;
  */
 public class WorkingSetLabelProvider extends LabelProvider {
 
-	private HashMap<IntelWorkingSetItem, Image> images = new HashMap<>();
 	
 	public String getText(Object element){
 		if (element instanceof IntelWorkingSet){
@@ -60,20 +58,10 @@ public class WorkingSetLabelProvider extends LabelProvider {
 			return ((IntelligenceLabelProviderImpl)SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class)).getImage(element);
 		}else if (element instanceof IntelWorkingSetItem){
 			IntelWorkingSetItem wi = (IntelWorkingSetItem)element;
-			Image img = images.get(wi);
-			if (img != null) return img;
-			if (wi.getImageDescriptor() == null) return null;
-			img = wi.getImageDescriptor().createImage();
-			images.put(wi, img);
-			return img;
+			return wi.getImage();
 			
 		}
 		return super.getImage(element);
 	}
-	
-	@Override
-	public void dispose(){
-		super.dispose();
-		images.values().forEach(i -> i.dispose());
-	}
+
 }

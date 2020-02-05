@@ -59,33 +59,15 @@ public class IntelReportEditorManager implements IReportEditorManager{
 	private RCPMultiPageReportEditor editor;
 	private IEventBroker eventBroker;
 	
-	@SuppressWarnings("unchecked")
 	private EventHandler deleteTypeHandler = e->{
 		Object data = e.getProperty(IEventBroker.DATA);
 		if (data.equals(getEditorInputLocal().getEntityType())) {
 			editor.closeEditor(false);	
 		}else if (data instanceof Collection<?>) {
-			((Collection) data).forEach(obj -> { if (obj.equals(getEditorInputLocal().getEntityType())) editor.closeEditor(false);});
+			((Collection<?>) data).forEach(obj -> { if (obj.equals(getEditorInputLocal().getEntityType())) editor.closeEditor(false);});
 		}
 		
 	};
-//	private static final Set<String> SUPPORTED_DATASETS = new HashSet<String>();
-//	static{
-//		SUPPORTED_DATASETS.add(EntityLocationAttributeDataset.DATASET_TYPE);
-//		SUPPORTED_DATASETS.add(EntityDataset.DATASET_TYPE);
-//		SUPPORTED_DATASETS.add(EntityLocationDataset.DATASET_TYPE);
-//		SUPPORTED_DATASETS.add(EntityRecordDataset.DATASET_TYPE);
-//		SUPPORTED_DATASETS.add(EntityAttachmentDataset.DATASET_TYPE);
-//		SUPPORTED_DATASETS.add(EntityRelationDataset.DATASET_TYPE);
-//		
-//		SUPPORTED_DATASETS.add(RecordDataset.DATASET_TYPE);
-//		SUPPORTED_DATASETS.add(RecordAttributeDataset.DATASET_TYPE);
-//		SUPPORTED_DATASETS.add(RecordEntityDataset.DATASET_TYPE);
-//		SUPPORTED_DATASETS.add(RecordAttachmentDataset.DATASET_TYPE);
-//		SUPPORTED_DATASETS.add(RecordLocationDataset.DATASET_TYPE);
-//		
-//		SUPPORTED_DATASETS.add(IntelQueryDataset.DATASET_TYPE);
-//	};
 	
 	// This listener is a hack to name the
 	// smart query datasources with the query name

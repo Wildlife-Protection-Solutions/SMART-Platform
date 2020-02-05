@@ -209,6 +209,7 @@ public class RecordXmlExporter {
 		
 		xmlRecord.setTitle(record.getTitle());
 		xmlRecord.setStatus(record.getStatus().name());
+		xmlRecord.setProfileKey(record.getProfile().getKeyId());
 		GregorianCalendar cal = new GregorianCalendar();
 		cal.setTime(record.getPrimaryDate());
 		xmlRecord.setPrimaryDate(DatatypeFactory.newInstance().newXMLGregorianCalendar(cal));

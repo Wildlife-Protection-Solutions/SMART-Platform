@@ -81,7 +81,8 @@ public class RecordLocationSummaryComposite extends Composite{
 				editor.setActiveEditor(editor.getMapPage());
 			}
 		});
-		if (IntelSecurityManager.INSTANCE.canEditRecord()){
+		
+		if (IntelSecurityManager.INSTANCE.canEditRecord( editor.getInputInternal().getRecordProfileUuid() )){
 			MenuItem editItem = new MenuItem(mnu, SWT.PUSH);
 			editItem.setText(DialogConstants.EDIT_BUTTON_TEXT);
 			editItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));

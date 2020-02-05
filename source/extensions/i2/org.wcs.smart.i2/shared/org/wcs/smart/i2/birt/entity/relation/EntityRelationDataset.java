@@ -77,7 +77,7 @@ public class EntityRelationDataset  implements IQuery {
 
 	@Override
 	public void prepare(String queryText) throws OdaException {
-		if (!connection.hasPermission(Permission.ENTITY)) {
+		if (connection.hasPermission(Permission.ENTITY).isEmpty()) {
 			throw new OdaException("Unauthorized.  You do not have permission to access intelligence entity datasets"); //$NON-NLS-1$
 		}
 		CriteriaBuilder cb = connection.getSession().getCriteriaBuilder();
@@ -91,7 +91,6 @@ public class EntityRelationDataset  implements IQuery {
 		
 		//get all attributes that are associated with an relationship that is associated with
 		//the entity type
-		
 		CriteriaQuery<IntelRelationshipType> c2 =  cb.createQuery(IntelRelationshipType.class);		
 		Root<IntelRelationshipType> from2 = c2.from(IntelRelationshipType.class);
 		c2.where(cb.and(

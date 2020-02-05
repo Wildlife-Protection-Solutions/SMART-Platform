@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -72,6 +73,7 @@ public class FilterTreeContentProvider implements ITreeContentProvider{
 	 * @param items
 	 */
 	public void setItems(List<FilterTreeItem> items) {
+		if (viewer.getControl().isDisposed()) return;
 		this.items = items;
 		viewer.refresh();
 		
@@ -81,6 +83,7 @@ public class FilterTreeContentProvider implements ITreeContentProvider{
 			viewer.getControl().setData(QueryView.REFRESHLABEL_KEY, null);
 		}
 		viewer.getControl().setEnabled(true);
+		if (viewer instanceof TreeViewer)((TreeViewer)viewer).expandToLevel(2);
 	}
 	
 	@Override

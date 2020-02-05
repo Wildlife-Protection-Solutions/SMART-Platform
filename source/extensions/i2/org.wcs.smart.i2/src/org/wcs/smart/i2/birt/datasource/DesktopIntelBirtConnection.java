@@ -22,12 +22,17 @@
 package org.wcs.smart.i2.birt.datasource;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 import org.hibernate.Session;
 import org.wcs.smart.birt.BirtConstants;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.ProfilesManager;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 
 /**
@@ -63,16 +68,26 @@ public class DesktopIntelBirtConnection extends AbstractIntelBirtConnection {
 		return SmartDB.getConservationAreaConfiguration().getConservationAreas();
 	}
 
-	public boolean hasPermission(Permission permission) {
-		switch(permission) {
-		case ENTITY:
-			return IntelSecurityManager.INSTANCE.canViewEntities();
-		case QUERY:
-			return IntelSecurityManager.INSTANCE.canViewQueries();
-		case RECORD:
-			return IntelSecurityManager.INSTANCE.canViewRecords();
+	
+	
+	@Override
+	public Set<IntelProfile> hasPermission(Permission permission) {
+		Set<IntelProfile> active = new HashSet<>(ProfilesManager.INSTANCE.getActiveProfiles());
+		for (Iterator<IntelProfile> it = active.iterator(); it.hasNext();) {
+			IntelProfile intelProfile = (IntelProfile) it.next();
+			
+			if (permission == Permission.ENTITY && !IntelSecurityManager.INSTANCE.canViewEntities(intelProfile)) {
+				it.remove();
+			}
+			if (permission == Permission.RECORD && !IntelSecurityManager.INSTANCE.canViewRecords(intelProfile)) {
+				it.remove();
+			}
+			if (permission == Permission.QUERY && !IntelSecurityManager.INSTANCE.canViewQuery(intelProfile)) {
+				it.remove();
+			}
+			
 		}
-		return false;
+		return active;
 	}
 
 }

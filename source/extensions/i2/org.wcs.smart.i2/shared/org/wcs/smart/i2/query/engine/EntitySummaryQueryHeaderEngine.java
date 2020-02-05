@@ -1,4 +1,3 @@
-
 /*
  * Copyright (C) 2016 Wildlife Conservation Society
  *
@@ -26,6 +25,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
+import java.util.UUID;
 
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
@@ -57,7 +58,7 @@ public enum EntitySummaryQueryHeaderEngine {
 	 * @param results the summary query results to update
 	 * @param session hibernate session
 	 */
-	public void getHeaderInfo(SumQueryDefinition queryDefinition, SummaryQueryResult results, LocalDate[] dateRange, IQueryItemProvider itemProvider, Locale l, Session session) throws Exception{
+	public void getHeaderInfo(SumQueryDefinition queryDefinition, SummaryQueryResult results, LocalDate[] dateRange, Set<UUID> profiles, IQueryItemProvider itemProvider, Locale l, Session session) throws Exception{
 		
 		// value headers
 		ValuePart vp = queryDefinition.getValuePart();
@@ -67,7 +68,7 @@ public enum EntitySummaryQueryHeaderEngine {
 		
 
 		for (GroupByItem item : queryDefinition.getRowGroupByPart().getItems()) {
-			List<ListItem> allItems = item.getAllOptions(session, itemProvider, dateRange, l);
+			List<ListItem> allItems = item.getAllOptions(session, profiles, itemProvider, dateRange, l);
 			String colkey = computeColumnKey(item);
 			List<SummaryHeader> rowHeaders = new ArrayList<>();
 			
@@ -90,7 +91,7 @@ public enum EntitySummaryQueryHeaderEngine {
 		}
 		
 		for (GroupByItem item : queryDefinition.getColumnGroupByPart().getItems()) {
-			List<ListItem> allItems = item.getAllOptions(session, itemProvider, dateRange, l);
+			List<ListItem> allItems = item.getAllOptions(session, profiles, itemProvider, dateRange, l);
 			String colkey = computeColumnKey(item);
 			
 			List<SummaryHeader> rowHeaders = new ArrayList<>();
@@ -119,12 +120,16 @@ public enum EntitySummaryQueryHeaderEngine {
 		String colkey = null;
 		if (item.getGroupByType() == GroupByType.ENTITYTYPE) {
 			colkey = "ET"; //$NON-NLS-1$
+		}else if (item.getGroupByType() == GroupByType.RECORDSOURCE) {
+				colkey = "RSRC"; //$NON-NLS-1$
+		}else if (item.getGroupByType() == GroupByType.RECORDSTATUS) {
+			colkey = "RSTAT"; //$NON-NLS-1$
 		}else if (item.getGroupByType() == GroupByType.CA) {
 			colkey = "CA"; //$NON-NLS-1$
 		}else {
 			colkey = item.getAttributeKey();
-			if (item.getEntityTypeKey() != null) {
-				colkey += "_" + item.getEntityTypeKey(); //$NON-NLS-1$
+			if (item.getOtherKey() != null) {
+				colkey += "_" + item.getOtherKey(); //$NON-NLS-1$
 			}
 		}
 		return colkey;

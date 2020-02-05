@@ -249,6 +249,7 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	
 	public static final String EXPORT_ICON = "org.wcs.smart.export"; //$NON-NLS-1$
 	public static final String IMPORT_ICON = "org.wcs.smart.import"; //$NON-NLS-1$
+	public static final String PDF_ICON = "org.wcs.smart.pdf"; //$NON-NLS-1$
 	
 	/**
 	 * Mutex to ensure that jobs will not be conflicting as simultaneous jobs execution
@@ -480,6 +481,7 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	     reg.put(IMPORT_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/import.png")); //$NON-NLS-1$
 	     reg.put(ENABLE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/enable.png")); //$NON-NLS-1$
 	     reg.put(DISABLE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/disable.png")); //$NON-NLS-1$
+	     reg.put(PDF_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/pdf.png")); //$NON-NLS-1$
 
 	}
 	

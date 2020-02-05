@@ -40,6 +40,7 @@ import org.hibernate.ScrollableResults;
 import org.hibernate.query.Query;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
+import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection.Permission;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
 import org.wcs.smart.i2.birt.record.RecordParameterMetadata;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
@@ -78,11 +79,13 @@ public class RecordAttachmentDatasetResultSet implements IResultSet {
 		this.metadata = metadata;
 		int index = pmetadata.findParameterIndex(DataSourceParameter.RECORD_UUID.getName());
 		String hql = "SELECT ir FROM IntelRecordAttachment ir join ir.id.record r WHERE r.conservationArea IN (:ca )"; //$NON-NLS-1$
+		hql += " and r.profile IN (:profiles) ";
 		if (index >= 0 && parameters.get(index) != null){
 			hql += " AND r.uuid = :record"; //$NON-NLS-1$
 		}
 		Query<IntelRecordAttachment> query = connection.getSession().createQuery(hql, IntelRecordAttachment.class);
 		query.setParameterList("ca", connection.getConservationAreas()); //$NON-NLS-1$
+		query.setParameterList("profiles", connection.hasPermission(Permission.RECORD)); //$NON-NLS-1$
 		
 		if (index >= 0 && parameters.get(index) != null){
 			UUID recordUuid = UuidUtils.stringToUuid((String) parameters.get(index));

@@ -24,9 +24,11 @@ package org.wcs.smart.i2.ui.views;
 import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -52,15 +54,19 @@ import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
@@ -72,6 +78,7 @@ import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
@@ -83,6 +90,8 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
 import org.osgi.service.event.Event;
@@ -98,6 +107,7 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.InternalQueryManager;
+import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
@@ -105,14 +115,19 @@ import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
+import org.wcs.smart.i2.model.IntelRecordQuery;
+import org.wcs.smart.i2.model.IntelRecordSummaryQuery;
 import org.wcs.smart.i2.query.QueryManager;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.IntelQueryLabelProvider;
+import org.wcs.smart.i2.ui.Resources;
 import org.wcs.smart.i2.ui.SectionTabHeader;
 import org.wcs.smart.i2.ui.editors.query.IQueryEditor;
+import org.wcs.smart.i2.ui.handler.NewQueryDropDownHandler;
 import org.wcs.smart.i2.ui.handler.NewQueryHandler;
 import org.wcs.smart.i2.ui.handler.OpenQueryHandler;
 import org.wcs.smart.i2.ui.views.query.EntitySummaryContentProvider;
+import org.wcs.smart.i2.ui.views.query.EntitySummaryContentProvider.Type;
 import org.wcs.smart.i2.ui.views.query.FilterTreeContentProvider;
 import org.wcs.smart.i2.ui.views.query.FilterTreeItem;
 import org.wcs.smart.i2.ui.views.query.FilterTreeLabelProvider;
@@ -181,6 +196,19 @@ public class QueryView {
 		tabList.selectTab(0);
 	}
 	
+	
+	@Optional
+	@Inject
+	private void activeProfilesChanged(@UIEventTopic(IntelEvents.PROFILES_ALL) Object data){
+		Set<String> items= ProfilesManager.INSTANCE.getActiveProfiles().stream()
+				.filter(e->IntelSecurityManager.INSTANCE.canViewQuery(e))
+				.map(e->e.getKeyId())
+				 .collect(Collectors.toSet());
+		queryList.getTable().setData(IntelQueryLabelProvider.PROFILE_KEYS, items);
+		
+		refreshView();
+	}
+	
 	@PostConstruct
 	public void createPartControl(Composite parent) {
 		
@@ -198,7 +226,24 @@ public class QueryView {
 		
 		tabList = new SectionTabHeader(new String[]{Messages.QueryView_SaveQuerySection, Messages.QueryView_FiltersSection}, parent, toolkit);
 		tabList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		((GridData)tabList.getLayoutData()).verticalIndent = 2;
+		((GridLayout)tabList.getLayout()).numColumns = ((GridLayout)tabList.getLayout()).numColumns + 1;
+		
+		
+		ToolBar tb = new ToolBar(tabList, SWT.FLAT);
+		tb.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, true, false));
+		if (IntelSecurityManager.INSTANCE.canCreateQueryAny()) {
+			ToolItem tiAdd = new ToolItem(tb, SWT.PUSH);
+			tiAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+			tiAdd.setToolTipText(Messages.QueryView_newquerytooltip);
+			tiAdd.addListener(SWT.Selection, e->{
+				NewQueryDropDownHandler h = new NewQueryDropDownHandler();
+				h.execute(context, tiAdd);
+			});
+		}
+		ToolItem tiRefresh = new ToolItem(tb, SWT.PUSH);
+		tiRefresh.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
+		tiRefresh.setToolTipText(Messages.QueryView_refreshTooltip);
+		tiRefresh.addListener(SWT.Selection, e->refreshView());
 		
 		Composite tabPart = toolkit.createComposite(parent, SWT.NONE);
 		tabPart.setLayout(new StackLayout());
@@ -240,17 +285,38 @@ public class QueryView {
 			}
 		});
 		
-		queryList = new TableViewer(part, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI);
+		Composite wrapper = toolkit.createComposite(part, SWT.NONE);
+		wrapper.setLayout(new TableColumnLayout());
+		wrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+				
+		queryList = new TableViewer(wrapper, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI);
 		queryList.setContentProvider(ArrayContentProvider.getInstance());
-		queryList.setLabelProvider(new IntelQueryLabelProvider());
 		queryList.setInput(new String[]{DialogConstants.LOADING_TEXT});
-		queryList.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+//		queryList.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		queryList.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				openSelection();
 			}
 		});
+		queryList.setComparator(new ViewerComparator() {
+		    public int compare(Viewer viewer, Object e1, Object e2) {
+		        QueryProxy a = (QueryProxy) e1;
+		        QueryProxy b = (QueryProxy) e2;
+		        return Collator.getInstance().compare(a.getName().toLowerCase(), b.getName().toLowerCase());
+		    };
+		});
+		queryList.getTable().setLinesVisible(false);
+		queryList.getTable().setHeaderVisible(false);
+		
+		TableViewerColumn qcolumn = new TableViewerColumn(queryList, SWT.NONE);
+		qcolumn.setLabelProvider(new IntelQueryLabelProvider(qcolumn.getColumn()));
+		((TableColumnLayout)wrapper.getLayout()).setColumnData(qcolumn.getColumn(), new ColumnWeightData(1));
+		queryList.getTable().setData(IntelQueryLabelProvider.PROFILE_KEYS, 
+				ProfilesManager.INSTANCE.getActiveProfiles().stream()
+				.filter(e->IntelSecurityManager.INSTANCE.canViewQuery(e))
+				.map(e->e.getKeyId())
+				.collect(Collectors.toSet()));
 		
 		//add drag support
 		queryList.addDragSupport(DND.DROP_LINK,new Transfer[]{IntelQuerySelectionTransfer.getTransfer()}, new DragSourceAdapter(){
@@ -468,13 +534,9 @@ public class QueryView {
 			for (String[] queryTypes : InternalQueryManager.INSTANCE.getSupportQueryTypes()) {
 				MenuItem mi = new MenuItem(mnuTypes, SWT.PUSH);
 				mi.setText(queryTypes[1]);
-				if (queryTypes[0].equalsIgnoreCase(IntelEntitySummaryQuery.KEY)) {
-					mi.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_QUERY_ENTITYSUM));
-				}else if (queryTypes[0].equalsIgnoreCase(IntelRecordObservationQuery.KEY)) {
-					mi.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_QUERY_RECORDOBS));
-				}else if (queryTypes[0].equalsIgnoreCase(IntelEntityRecordQuery.KEY)) {
-					mi.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_QUERY_ENTITYRECORD));
-				}
+				Image i = Resources.INSTANCE.getImage(queryTypes[0]);
+				if (i != null) mi.setImage(i);
+				
 				mi.addSelectionListener(new SelectionAdapter() {
 					@Override
 					public void widgetSelected(SelectionEvent e) {
@@ -498,7 +560,7 @@ public class QueryView {
 
 			MenuItem miRename = new MenuItem(m, SWT.PUSH);
 			miRename.setText(Messages.QueryView_RenameMenuItem);
-			miRename.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_EDIT));
+			miRename.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 			miRename.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
@@ -557,7 +619,8 @@ public class QueryView {
 	 @Optional
 	 @Inject
 	 private void configurationChanged(@UIEventTopic(SmartDB.CCAA_CONFIGURATION_MODIFIED) Object data){
-		 InternalQueryManager.INSTANCE.getQueryItemProvider().reset();
+		 ProfilesManager.INSTANCE.resetActiveProfiles();
+		 InternalQueryManager.INSTANCE.resetQueryItemProvider();
 		 sourceModified();
 	 }
 	 
@@ -571,12 +634,28 @@ public class QueryView {
 	 @Optional
 	 @Inject
 	 private void queryModified(@UIEventTopic(IntelEvents.QUERY_MODIFIED) AbstractIntelQuery data){
-		 queryList.refresh(new QueryProxy(data.getName(), data.getUuid(), data.getTypeKey()));
+		 Collection<?> items = (Collection<?>) queryList.getInput();
+		 for (Object x : items) {
+			 if (x instanceof QueryProxy && ((QueryProxy)x).getUuid().equals(data.getUuid())) {
+				 ((QueryProxy)x).update(data.getName(),data.getTypeKey(),data.getProfileFilter());
+				 break;
+			 }
+		 }
+		 queryList.refresh();
 	 }
 	 @Optional
 	 @Inject
 	 private void multiQueryModified(@UIEventTopic(IntelEvents.QUERY_MODIFIED) List<AbstractIntelQuery> data){
-		 data.forEach(i-> queryList.refresh(new QueryProxy(i.getName(), i.getUuid(), i.getTypeKey())));
+		 data.forEach(i-> {
+			 Collection<?> items = (Collection<?>) queryList.getInput();
+			 for (Object x : items) {
+				 if (x instanceof QueryProxy && ((QueryProxy)x).getUuid().equals(i.getUuid())) {
+					 ((QueryProxy)x).update(i.getName(),i.getTypeKey(),i.getProfileFilter());
+					 break;
+				 }
+			 } 
+		 });
+		 queryList.refresh();
 	 }
 	 
 	@Optional
@@ -596,11 +675,15 @@ public class QueryView {
 		ITreeContentProvider provider = queryToContentProvider.get(queryTypeKey);
 		if (provider == null) {
 			if (queryTypeKey.equals(IntelEntitySummaryQuery.KEY)) {
-				provider = new EntitySummaryContentProvider();
+				provider = new EntitySummaryContentProvider(Type.ENTITY);
+			}else if (queryTypeKey.equals(IntelRecordSummaryQuery.KEY)) {
+					provider = new EntitySummaryContentProvider(Type.RECORD);
 			}else if (queryTypeKey.equals(IntelRecordObservationQuery.KEY)) {
 				provider = new FilterTreeContentProvider(new IntelRecordObservationQuery());
 			}else if (queryTypeKey.equals(IntelEntityRecordQuery.KEY)) {
 				provider = new FilterTreeContentProvider(new IntelEntityRecordQuery());
+			}else if (queryTypeKey.equals(IntelRecordQuery.KEY)) {
+				provider = new FilterTreeContentProvider(new IntelRecordQuery());
 			}
 			queryToContentProvider.put(queryTypeKey, provider);
 		}
@@ -657,24 +740,23 @@ public class QueryView {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			List<QueryProxy> proxyItems;
+			
+			Set<String> profiles = ProfilesManager.INSTANCE.getActiveProfiles()
+					.stream().filter(e->IntelSecurityManager.INSTANCE.canViewQuery(e))
+					.map(e->e.getKeyId())
+					.collect(Collectors.toSet());
+			
 			try(Session s = HibernateManager.openSession()){
-				List<IntelRecordObservationQuery> items =
-						QueryFactory.buildQuery(s, IntelRecordObservationQuery.class, "conservationArea", SmartDB.getCurrentConservationArea()).list(); //$NON-NLS-1$
-			
-				proxyItems = items.stream().map(t->new QueryProxy(t.getName(), t.getUuid(), IntelRecordObservationQuery.KEY)).collect(Collectors.toList());
 				
-				List<IntelEntitySummaryQuery> items2 =
-						QueryFactory.buildQuery(s, IntelEntitySummaryQuery.class, "conservationArea", SmartDB.getCurrentConservationArea()).list(); //$NON-NLS-1$
-			
-				proxyItems.addAll(items2.stream().map(t->new QueryProxy(t.getName(), t.getUuid(), IntelEntitySummaryQuery.KEY)).collect(Collectors.toList()));
-				
-				List<IntelEntityRecordQuery> items3 =
-						QueryFactory.buildQuery(s, IntelEntityRecordQuery.class, "conservationArea", SmartDB.getCurrentConservationArea()).list(); //$NON-NLS-1$
-			
-				proxyItems.addAll(items3.stream().map(t->new QueryProxy(t.getName(), t.getUuid(), IntelEntityRecordQuery.KEY)).collect(Collectors.toList()));
+				proxyItems = new ArrayList<>();
+				for (Class<? extends AbstractIntelQuery> c: InternalQueryManager.INSTANCE.getQueryTypeClasses()) {
+					List<? extends AbstractIntelQuery> items =
+							QueryFactory.buildQuery(s, c, "conservationArea", SmartDB.getCurrentConservationArea())  //$NON-NLS-1$
+							.list();	
+					proxyItems.addAll(items.stream().filter(t->t.queriesProfile(profiles)).map(t->new QueryProxy(t.getName(), t.getUuid(), t.getTypeKey(), t.getProfileFilter())).collect(Collectors.toList()));
+				}
 			}
 
-			proxyItems.sort((a,b)-> Collator.getInstance().compare(a.getName().toLowerCase(), b.getName().toLowerCase()));
 			Display.getDefault().syncExec(() ->{
 				queryList.setInput(proxyItems);
 			});
@@ -699,7 +781,7 @@ public class QueryView {
 		@Override
 		public boolean select(Viewer viewer, Object parentElement, Object element) {
 			if (pattern == null) return true;
-	QueryProxy in = (QueryProxy)element;
+			QueryProxy in = (QueryProxy)element;
 			if (pattern.matcher(in.getName()).matches()) return true;
 			return false;
 		}

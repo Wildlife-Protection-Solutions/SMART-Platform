@@ -21,15 +21,8 @@
  */
 package org.wcs.smart.i2.ui;
 
-import java.awt.image.BufferedImage;
-import java.util.HashMap;
-
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.ImageData;
-import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
-import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelRecordSource;
 
 /**
@@ -38,9 +31,8 @@ import org.wcs.smart.i2.model.IntelRecordSource;
  * @author Emily
  *
  */
-public class RecordSourceLabelProvider extends LabelProvider {
+public class RecordSourceLabelProvider extends LabelProvider  {
 
-	private HashMap<IntelRecordSource, Image> images = new HashMap<>();
 	
 	@Override
 	public String getText(Object element){
@@ -57,50 +49,9 @@ public class RecordSourceLabelProvider extends LabelProvider {
 	@Override
 	public Image getImage(Object element){
 		if (element instanceof IntelRecordSource){
-			Image img = images.get((IntelRecordSource)element);
-			if (img != null) return img;
-			try{
-				BufferedImage image = ((IntelRecordSource) element).getIconAsImage();
-				if (image != null){
-					img = AWTSWTImageUtils.convertToSWTImage(image);
-					images.put((IntelRecordSource)element, img);
-					return img;
-				}
-			}catch (Exception ex){
-				Intelligence2PlugIn.log(ex.getMessage(), ex);
-			}
-			return null;
+			return Resources.INSTANCE.getImage((IntelRecordSource)element);
 		}
 		return super.getImage(element);
 	}
-	
-	@Override
-	public void dispose(){
-		disposeImages();
-		super.dispose();
-	}
-	
-	public void disposeImages(){
-		images.values().forEach(i -> i.dispose());
-		images.clear();
-	}
-	
-	public static ImageDescriptor createImageDescriptor(IntelRecordSource type){
-		if (type.getIcon() == null) return null;
-		return new ImageDescriptor() {
-			
-			@Override
-			public ImageData getImageData() {
-				try{
-					BufferedImage image = type.getIconAsImage();
-					if (image != null){
-						return AWTSWTImageUtils.convertToSWTImage(image).getImageData();
-					}
-				}catch (Exception ex){
-					
-				}
-				return null;
-			}
-		};
-	}
+
 }

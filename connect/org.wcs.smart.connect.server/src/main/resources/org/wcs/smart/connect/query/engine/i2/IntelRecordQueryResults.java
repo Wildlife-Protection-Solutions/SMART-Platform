@@ -1,0 +1,459 @@
+/*
+ * Copyright (C) 2016 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.connect.query.engine.i2;
+
+import java.sql.Date;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.UUID;
+
+import org.hibernate.Session;
+import org.hibernate.type.PostgresUUIDType;
+import org.locationtech.jts.geom.Envelope;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Employee;
+import org.wcs.smart.connect.i18n.labels.SmartLabelProvider;
+import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
+import org.wcs.smart.i2.model.IntelAttributeListItem;
+import org.wcs.smart.i2.model.IntelEntity;
+import org.wcs.smart.i2.model.IntelRecord;
+import org.wcs.smart.i2.model.IntelRecordAttributeValue;
+import org.wcs.smart.i2.model.IntelRecordAttributeValueList;
+import org.wcs.smart.i2.query.FixedQueryColumn;
+import org.wcs.smart.i2.query.FixedQueryColumn.Column;
+import org.wcs.smart.i2.query.IPagedQueryResultSet;
+import org.wcs.smart.i2.query.IQueryColumn;
+import org.wcs.smart.i2.query.IResultItem;
+import org.wcs.smart.i2.query.IntelRecordAttributeQueryColumn;
+import org.wcs.smart.i2.query.PagedResultSetIterator;
+import org.wcs.smart.i2.query.engine.IntelRecordResultItem;
+import org.wcs.smart.util.UuidUtils;
+
+/**
+ * Intelligence observation query results
+ * 
+ * @author Emily
+ *
+ */
+public class IntelRecordQueryResults implements IConnectPagedQueryResultSet {
+
+	//data details
+	private String resultsTable = null;
+	private int recordCount = 0;
+	
+	//sorting
+	private IQueryColumn lastSortColumn = null;
+	private IQueryColumn sortColumn = null;
+	private IPagedQueryResultSet.SortDirection sortDirection = null;
+	
+	//column names to results index
+	private HashMap<String, Integer> columnNameToIndex;
+	
+	private List<IQueryColumn> queryColumns;
+	private Locale l;
+	
+	public IntelRecordQueryResults(Locale l){
+		this.l = l;
+	}
+	
+	public void setResultsTable(String resultsTable){
+		this.resultsTable = resultsTable;
+	}
+	
+	public void setResultCount(int recordCount){
+		this.recordCount = recordCount;
+	}
+	
+	
+	public void setColumnNameToIndexMap(HashMap<String, Integer> columnNameToIndex){
+		this.columnNameToIndex = columnNameToIndex;
+	}
+	
+
+	public void setQueryColumns(List<IQueryColumn> columns){
+		this.queryColumns = columns;
+	}
+	
+	@Override
+	public String getQueryDataTable(){
+		return this.resultsTable;
+	}
+	
+	
+	public void setSortColumn(IQueryColumn sortColumn, IPagedQueryResultSet.SortDirection sortDirection){
+		this.sortColumn = sortColumn;
+		this.sortDirection = sortDirection;
+	}
+	
+	@Override
+	public List<IQueryColumn> getQueryColumns(){
+		return this.queryColumns;
+	}
+	
+	
+	private UUID asUuid(Object x){
+		if (x == null) return null;
+		if (x instanceof UUID) return (UUID) x;
+		if (x instanceof byte[]) return UuidUtils.byteToUUID((byte[])x);
+		return null;
+	}
+	
+	
+	
+	@Override
+	public IResultItem asResultItem(Object[] rowData, Session session){
+		
+		IntelRecordResultItem item = new IntelRecordResultItem();
+		UUID caUuid = asUuid(rowData[columnNameToIndex.get("ca_uuid")]);
+		ConservationArea ca = session.get(ConservationArea.class, caUuid);
+		item.setConservationAreaId(ca.getId());
+		item.setConservationAreaName(ca.getName());
+		
+		item.setRecordUuid(asUuid(rowData[columnNameToIndex.get("record_uuid")])); //$NON-NLS-1$
+		item.setRecordStatus((String)rowData[columnNameToIndex.get("record_status")]); //$NON-NLS-1$
+		item.setRecordTitle((String)rowData[columnNameToIndex.get("record_title")]); //$NON-NLS-1$
+		
+		UUID sourceUuid = asUuid(rowData[columnNameToIndex.get("source_uuid")]); //$NON-NLS-1$
+		String sourceName = (String)rowData[columnNameToIndex.get("record_source_name")]; //$NON-NLS-1$
+		item.setRecordSource(sourceUuid, sourceName);
+		
+		UUID profileUuid = asUuid(rowData[columnNameToIndex.get("profile_uuid")]); //$NON-NLS-1$
+		String profileName = (String) rowData[columnNameToIndex.get("profile_name")];
+		String profileKey = (String)rowData[columnNameToIndex.get("profile_key")];
+		item.setProfile(profileKey, profileUuid, profileName);
+				
+		item.setRecordDate((Date)rowData[columnNameToIndex.get("record_date")]);
+		
+		IntelRecord r = session.get(IntelRecord.class, item.getRecordUuid());
+		for (IntelRecordAttributeValue v : r.getAttributes()) {
+			String key = v.getAttribute().getKeyId();
+			
+			Object value = null;
+			
+			
+			if(v.getAttribute().getAttribute() != null){
+				AttributeType type = v.getAttribute().getAttribute().getType();
+				switch(type){
+				case BOOLEAN:
+					value = v.getNumberValue();
+					break;
+				case DATE:
+					value = v.getDateValue();
+					break;
+					
+				case LIST:
+					List<IntelAttributeListItem> items2 = new ArrayList<>();
+					for (IntelRecordAttributeValueList li : v.getAttributeListItems()) {
+						IntelAttributeListItem vli = session.get(IntelAttributeListItem.class, li.getId().getElementUuid());
+						items2.add(vli);
+					}
+					value = items2;
+					break;
+				case EMPLOYEE:
+					List<Employee> items = new ArrayList<>();
+					for (IntelRecordAttributeValueList li : v.getAttributeListItems()) {
+						items.add(session.get(Employee.class, li.getId().getElementUuid()));
+					}
+					value = items;
+					break;
+				case NUMERIC:
+					value = v.getNumberValue();
+					break;
+				case TEXT:
+					value = v.getStringValue();
+					break;
+				case POSITION:
+					value = new Object[] {v.getNumberValue(), v.getNumberValue2()};
+					break;
+				}
+			}else if (v.getAttribute().getEntityType() != null){
+				List<IntelEntity> items = new ArrayList<>();
+				for (IntelRecordAttributeValueList li : v.getAttributeListItems()) {
+					IntelEntity ie = (session.get(IntelEntity.class, li.getId().getElementUuid()));
+					ie.getIdAttributeAsText();
+					items.add(ie);
+				}
+				value = items;
+			}
+			
+			item.addAttribute(key, value);
+		}
+
+		
+		return item;
+	}
+	
+	
+	@Override
+	public List<? extends IResultItem> getData(int offset, int pageSize, Session session) {
+		throw new UnsupportedOperationException("Loading data in chunks is not supported for Connect queries");
+	}
+
+	@Override
+	public String getSelectQuery(Session session){
+		if (sortColumn == null || sortDirection == null) return "SELECT * FROM " + resultsTable; //$NON-NLS-1$
+		
+		if (sortColumn instanceof FixedQueryColumn){
+			String sql = "SELECT * FROM " + resultsTable + " order by "; //$NON-NLS-1$
+			
+			if (((FixedQueryColumn) sortColumn).getColumn() == Column.RECORD_STATUS){
+				return sql + "record_status" + getSortDirectionSql(); //$NON-NLS-1$
+			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.RECORD_TITLE){
+				return sql + "lower(record_title)" + getSortDirectionSql(); //$NON-NLS-1$
+			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.RECORD_SOURCE){
+				return sql + "lower(record_source_name)" + getSortDirectionSql(); //$NON-NLS-1$
+			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.RECORD_DATE){
+				return sql + " record_date " + getSortDirectionSql();
+			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.RECORD_PROFILE){
+				return sql + "profile_name" + getSortDirectionSql(); //$NON-NLS-1$
+			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.CA_ID){
+				return sql + "lower(ca_id)" + getSortDirectionSql(); //$NON-NLS-1$
+			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.CA_NAME){
+				return sql + "lower(ca_name)" + getSortDirectionSql(); //$NON-NLS-1$
+			}
+		}else if (sortColumn instanceof IntelRecordAttributeQueryColumn) {
+			IntelRecordAttributeQueryColumn col = ((IntelRecordAttributeQueryColumn)sortColumn);
+			
+
+			
+			
+			if (col.getAttribute().getAttribute() != null) {
+				if (col.getAttribute().getAttribute().getType() == AttributeType.BOOLEAN ||
+					col.getAttribute().getAttribute().getType() == AttributeType.DATE ||
+					col.getAttribute().getAttribute().getType() == AttributeType.NUMERIC ||
+					col.getAttribute().getAttribute().getType() == AttributeType.POSITION||
+					col.getAttribute().getAttribute().getType() == AttributeType.TEXT) {
+								
+						
+					StringBuilder sb = new StringBuilder();
+					sb.append("SELECT a.* FROM ");
+					sb.append(resultsTable + " a ");
+					sb.append(" LEFT JOIN ");
+					sb.append( " ( smart.i_record_attribute_value v ");
+					sb.append( " JOIN smart.i_recordsource_attribute b on v.attribute_uuid = b.uuid ");
+					sb.append(" AND b.keyid = '" + col.getAttribute().getKeyId() + "' ");
+					sb.append(" JOIN smart.i_recordsource s on s.uuid = b.source_uuid ");
+					sb.append(" AND s.keyid =  '" + col.getAttribute().getSource().getKeyId() + "' ");
+					sb.append( ")" );
+					sb.append(" ON a.record_uuid = v.record_uuid ");
+					
+					if (col.getAttribute().getAttribute().getType() == AttributeType.BOOLEAN || 
+							col.getAttribute().getAttribute().getType() == AttributeType.NUMERIC ) { 
+						sb.append(" ORDER BY v.double_value ");
+						sb.append(getSortDirectionSql());
+					}else if (col.getAttribute().getAttribute().getType() == AttributeType.DATE) {
+						sb.append(" ORDER BY case when v.string_value is null or v.string_value = '' then null else cast(v.string_value as date) end ");
+						sb.append(getSortDirectionSql());	
+					}else if (col.getAttribute().getAttribute().getType() == AttributeType.POSITION) {
+						sb.append(" ORDER BY v.double_value ");
+						sb.append(getSortDirectionSql());
+						sb.append(", v.double_value2 ");
+						sb.append(getSortDirectionSql());
+					}else if (col.getAttribute().getAttribute().getType() == AttributeType.TEXT) {
+						sb.append(" ORDER BY v.string_value ");
+						sb.append(getSortDirectionSql());
+					}
+					return sb.toString();
+				}else if (col.getAttribute().getAttribute().getType() == AttributeType.LIST) {
+					//only single attributes are sortable 
+					if (lastSortColumn == col) return "SELECT * FROM " + resultsTable + " order by sort_column " + getSortDirectionSql();
+					lastSortColumn = col;
+
+					StringBuilder s3 = new StringBuilder();
+					s3.append("SELECT distinct a.element_uuid as element_uuid FROM smart.i_record_attribute_value_list a ");
+					s3.append(" JOIN smart.i_record_attribute_value v on v.uuid = a.value_uuid ");
+					s3.append(" JOIN smart.i_recordsource_attribute b on b.uuid = v.attribute_uuid and b.keyid = '" + col.getAttribute().getKeyId() + "' ");
+					s3.append(" JOIN smart.i_recordsource s on s.uuid = b.source_uuid AND s.keyid = '" + col.getAttribute().getSource().getKeyId() + "' ");
+					s3.append(" JOIN ");
+					s3.append( resultsTable );
+					s3.append(" r on r.record_uuid = v.record_uuid");
+					
+					session.beginTransaction();
+					try {
+						session.createNativeQuery("UPDATE " + resultsTable + " SET sort_column = null").executeUpdate();
+						
+						List<UUID> items = session.createNativeQuery(s3.toString())
+								.addScalar("element_uuid", PostgresUUIDType.INSTANCE)
+								.list();
+						for (UUID item : items) {
+							IntelAttributeListItem li = session.get(IntelAttributeListItem.class, item);
+							
+							StringBuilder s2 = new StringBuilder();
+							s2.append("UPDATE ");
+							s2.append(resultsTable);
+							s2.append(" SET sort_column = :value ");
+							s2.append(" WHERE record_uuid IN (SELECT a.record_uuid FROM " );
+							s2.append(resultsTable + " a");
+							s2.append(" JOIN smart.i_record_attribute_value v on v.record_uuid = a.record_uuid ");
+							s2.append(" JOIN smart.i_record_attribute_value_list li on li.value_uuid = v.uuid ");
+							s2.append(" AND li.element_uuid = :uuid)");
+							
+							session.createNativeQuery(s2.toString())
+								.setParameter("uuid", li.getUuid())
+								.setParameter("value", li.getName())
+								.executeUpdate();
+							
+						}
+					}finally {
+						session.getTransaction().commit();
+					}
+					return "SELECT * FROM " + resultsTable + " order by sort_column " + getSortDirectionSql();
+				}else if (col.getAttribute().getAttribute().getType() == AttributeType.EMPLOYEE) {
+					//only single attributes are sortable 
+					if (lastSortColumn == col) return "SELECT * FROM " + resultsTable + " order by sort_column " + getSortDirectionSql();
+					lastSortColumn = col;
+					
+					StringBuilder s3 = new StringBuilder();
+					s3.append("SELECT distinct a.element_uuid as element_uuid FROM smart.i_record_attribute_value_list a ");
+					s3.append(" JOIN smart.i_record_attribute_value v on v.uuid = a.value_uuid ");
+					s3.append(" JOIN smart.i_recordsource_attribute b on b.uuid = v.attribute_uuid and b.keyid = '" + col.getAttribute().getKeyId() + "' ");
+					s3.append(" JOIN smart.i_recordsource s on s.uuid = b.source_uuid AND s.keyid = '" + col.getAttribute().getSource().getKeyId() + "' ");
+					s3.append(" JOIN ");
+					s3.append( resultsTable );
+					s3.append(" r on r.record_uuid = v.record_uuid");
+					
+					session.beginTransaction();
+					try {
+						session.createNativeQuery("UPDATE " + resultsTable + " SET sort_column = null").executeUpdate();
+						
+						List<UUID> items = session.createNativeQuery(s3.toString())
+								.addScalar("element_uuid", PostgresUUIDType.INSTANCE)
+								.list();
+						for (UUID item : items) {
+							Employee e = session.get(Employee.class, item);
+							
+							StringBuilder s2 = new StringBuilder();
+							s2.append("UPDATE ");
+							s2.append(resultsTable);
+							s2.append(" SET sort_column = :value ");
+							s2.append(" WHERE record_uuid IN (SELECT a.record_uuid FROM " );
+							s2.append(resultsTable + " a");
+							s2.append(" JOIN smart.i_record_attribute_value v on v.record_uuid = a.record_uuid ");
+							s2.append(" JOIN smart.i_record_attribute_value_list li on li.value_uuid = v.uuid ");
+							s2.append(" AND li.element_uuid = :uuid)");
+							
+							session.createNativeQuery(s2.toString())
+								.setParameter("uuid", e.getUuid())
+								.setParameter("value", SmartLabelProvider.getFullName(e, l))
+								.executeUpdate();
+							
+						}
+					}finally {
+						session.getTransaction().commit();
+					}
+					return "SELECT * FROM " + resultsTable + " order by sort_column " + getSortDirectionSql();
+				}
+			}else if (col.getAttribute().getEntityType() != null) {
+				//only single attributes are sortable 
+				if (lastSortColumn == col) return "SELECT * FROM " + resultsTable + " order by sort_column " + getSortDirectionSql();
+				lastSortColumn = col;
+
+				StringBuilder s3 = new StringBuilder();
+				s3.append("SELECT distinct a.element_uuid as element_uuid FROM smart.i_record_attribute_value_list a ");
+				s3.append(" JOIN smart.i_record_attribute_value v on v.uuid = a.value_uuid ");
+				s3.append(" JOIN smart.i_recordsource_attribute b on b.uuid = v.attribute_uuid and b.keyid = '" + col.getAttribute().getKeyId() + "' ");
+				s3.append(" JOIN smart.i_recordsource s on s.uuid = b.source_uuid AND s.keyid = '" + col.getAttribute().getSource().getKeyId() + "' ");
+				s3.append(" JOIN ");
+				s3.append( resultsTable );
+				s3.append(" r on r.record_uuid = v.record_uuid");
+				
+				session.beginTransaction();
+				try {
+					session.createNativeQuery("UPDATE " + resultsTable + " SET sort_column = null").executeUpdate();
+					
+					List<UUID> items = session.createNativeQuery(s3.toString())
+							.addScalar("element_uuid", PostgresUUIDType.INSTANCE)
+							.list();
+					for (UUID item : items) {
+						IntelEntity li = session.get(IntelEntity.class, item);
+						
+						StringBuilder s2 = new StringBuilder();
+						s2.append("UPDATE ");
+						s2.append(resultsTable);
+						s2.append(" SET sort_column = :value ");
+						s2.append(" WHERE record_uuid IN (SELECT a.record_uuid FROM " );
+						s2.append(resultsTable + " a");
+						s2.append(" JOIN smart.i_record_attribute_value v on v.record_uuid = a.record_uuid ");
+						s2.append(" JOIN smart.i_recordsource_attribute b on b.uuid = v.attribute_uuid and b.keyid = '" + col.getAttribute().getKeyId() + "' ");
+						s2.append(" JOIN smart.i_recordsource s on s.uuid = b.source_uuid AND s.keyid = '" + col.getAttribute().getSource().getKeyId() + "' ");
+						s2.append(" JOIN smart.i_record_attribute_value_list li on li.value_uuid = v.uuid ");
+						s2.append(" AND li.element_uuid = :uuid)");
+						
+						session.createNativeQuery(s2.toString())
+							.setParameter("uuid", li.getUuid())
+							.setParameter("value", li.getIdAttributeAsText())
+							.executeUpdate();
+						
+					}
+				}finally {
+					session.getTransaction().commit();
+				}
+				return "SELECT * FROM " + resultsTable + " order by sort_column " + getSortDirectionSql();
+			}
+		}
+		//no sorting
+		return "SELECT * FROM " + resultsTable;
+	}
+	
+	private String getSortDirectionSql(){
+		if (sortDirection == SortDirection.UP) return " asc"; //$NON-NLS-1$
+		return " desc"; //$NON-NLS-1$
+	}
+	
+	@Override
+	public Envelope getEnvelope() {
+		return null;
+	}
+
+	@Override
+	public void setSorting(IQueryColumn sortColumn, SortDirection direction) {
+		this.sortColumn = sortColumn;
+		this.sortDirection = direction;
+	}
+
+	@Override
+	public int getItemCount() {
+		return recordCount;
+	}
+	
+	@Override
+	public void dispose(Session session) throws SQLException {
+		String sql = "DROP TABLE " + resultsTable; //$NON-NLS-1$
+		resultsTable = null;
+		SqlGenerator.logString(sql);
+		session.createNativeQuery(sql).executeUpdate();
+	}
+
+	@Override
+	public boolean isDisposed() {
+		return resultsTable == null;
+	}
+
+	@Override
+	public PagedResultSetIterator iterator(Session session) {
+		return new ConnectPagedResultSetIterator(this, session);
+	}
+
+}

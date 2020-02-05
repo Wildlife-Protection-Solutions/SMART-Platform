@@ -23,6 +23,7 @@ package org.wcs.smart.i2.query.engine;
 
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -40,6 +41,7 @@ import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.query.IQueryItemProvider;
 import org.wcs.smart.i2.query.Operator;
 import org.wcs.smart.i2.query.observation.filter.AreaFilter;
@@ -72,11 +74,14 @@ public class WaypointFilterProcessor {
 	private Exception visitorException;
 	private HashMap<IQueryFilter, String> filterToColumnName = new HashMap<IQueryFilter, String>();
 	
-	public WaypointFilterProcessor(IQueryFilter filter, Date[] dFilter, IQueryItemProvider itemProvider, Session s){
+	private Set<IntelProfile> profileFilter;
+
+	public WaypointFilterProcessor(IQueryFilter filter, Set<IntelProfile> profileFilter, Date[] dFilter, IQueryItemProvider itemProvider, Session s){
 		this.filter = filter;
 		this.dFilter = dFilter;
 		this.s = s;
 		this.itemProvider = itemProvider;
+		this.profileFilter = profileFilter;
 	}
 	
 	public HashMap<IQueryFilter, String> getFilterToColumnNames(){
@@ -137,8 +142,9 @@ public class WaypointFilterProcessor {
 		sql.append("INSERT INTO " + obsTable); //$NON-NLS-1$
 		sql.append(" SELECT l.uuid, ca.id, ca.name FROM smart.i_location l "); //$NON-NLS-1$
 		sql.append(" JOIN smart.conservation_area ca on ca.uuid = l.ca_uuid ");  //$NON-NLS-1$
+		sql.append(" JOIN smart.i_record r on r.uuid = l.record_uuid "); //$NON-NLS-1$
 		sql.append( " WHERE "); //$NON-NLS-1$
-		sql.append(" l.ca_uuid in (:cas) "); //$NON-NLS-1$
+		sql.append(" l.ca_uuid in (:cas) and r.profile_uuid in (:profiles) "); //$NON-NLS-1$
 		String dateFilter = SqlGenerator.generateDateClause(dFilter, "datetime"); //$NON-NLS-1$
 		if (dateFilter != null){
 			sql.append( " AND "); //$NON-NLS-1$
@@ -149,10 +155,15 @@ public class WaypointFilterProcessor {
 		for (UUID uuid : caUuids) {
 			logString(UuidUtils.uuidToString(uuid));
 		}
+		Collection<UUID> profileUuids = profileFilter.stream().map(a->a.getUuid()).collect(Collectors.toSet());
+		for (UUID uuid : profileUuids) {
+			logString(UuidUtils.uuidToString(uuid));
+		}
 		logString(sql.toString());
 		if (monitor.isCanceled()) return null;
 		NativeQuery<?> query = s.createNativeQuery(sql.toString());
 		query.setParameterList("cas", caUuids); //$NON-NLS-1$
+		query.setParameterList("profiles", profileUuids); //$NON-NLS-1$
 		query.executeUpdate();
 		
 		//create indexes to help with performance
@@ -787,7 +798,7 @@ public class WaypointFilterProcessor {
 		s.createNativeQuery(sql.toString()).executeUpdate();
 		
 		
-		if (filter.getType() == SystemAttributeFilter.Type.RECORD) {
+		if (filter.getAttribute() == SystemAttribute.RECORD_DATE_CREATED || filter.getAttribute() == SystemAttribute.RECORD_DATE_MODIFIED) {
 			sql = new StringBuilder();
 			sql.append("INSERT INTO " + t2 ); //$NON-NLS-1$
 			sql.append(" SELECT distinct a.location_uuid "); //$NON-NLS-1$
@@ -796,9 +807,9 @@ public class WaypointFilterProcessor {
 			
 			sql.append(" WHERE "); //$NON-NLS-1$
 			
-			if (filter.getAttribute() == SystemAttribute.DATE_CREATED) {
+			if (filter.getAttribute() == SystemAttribute.RECORD_DATE_CREATED) {
 				sql.append(" cast( r.date_created as date) "); //$NON-NLS-1$
-			}else if (filter.getAttribute() == SystemAttribute.DATE_MODIFIED) {
+			}else if (filter.getAttribute() == SystemAttribute.RECORD_DATE_MODIFIED) {
 				sql.append(" cast( r.last_modified_date as date) "); //$NON-NLS-1$
 			}
 			sql.append(SqlGenerator.operatorToSql(filter.getOperator()));
@@ -814,9 +825,7 @@ public class WaypointFilterProcessor {
 			logString(sql.toString());
 			query.executeUpdate();
 			
-		}else if (filter.getType() == SystemAttributeFilter.Type.ENTITY) {
-			
-		
+		}else if (filter.getAttribute() == SystemAttribute.ENTITY_DATE_CREATED || filter.getAttribute() == SystemAttribute.ENTITY_DATE_MODIFIED) {
 			sql = new StringBuilder();
 			sql.append("INSERT INTO " + t2 ); //$NON-NLS-1$
 			sql.append(" SELECT distinct el.location_uuid "); //$NON-NLS-1$
@@ -826,9 +835,9 @@ public class WaypointFilterProcessor {
 			
 			sql.append(" WHERE "); //$NON-NLS-1$
 			
-			if (filter.getAttribute() == SystemAttribute.DATE_CREATED) {
+			if (filter.getAttribute() == SystemAttribute.ENTITY_DATE_CREATED) {
 				sql.append(" cast (e.date_created as date) "); //$NON-NLS-1$
-			}else if (filter.getAttribute() == SystemAttribute.DATE_MODIFIED) {
+			}else if (filter.getAttribute() == SystemAttribute.ENTITY_DATE_MODIFIED) {
 				sql.append(" cast( e.date_modified as date) "); //$NON-NLS-1$
 			}
 			sql.append(SqlGenerator.operatorToSql(filter.getOperator()));

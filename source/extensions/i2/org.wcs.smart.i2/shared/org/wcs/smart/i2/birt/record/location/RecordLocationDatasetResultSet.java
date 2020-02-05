@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -44,9 +45,11 @@ import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
+import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection.Permission;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
 import org.wcs.smart.i2.birt.record.RecordParameterMetadata;
 import org.wcs.smart.i2.model.IntelLocation;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -82,11 +85,14 @@ public class RecordLocationDatasetResultSet implements IResultSet {
 		this.metadata = metadata;
 		int index = pmetadata.findParameterIndex(DataSourceParameter.RECORD_UUID.getName());
 		
+		Set<IntelProfile> profiles = connection.hasPermission(Permission.RECORD);
+		
 		CriteriaBuilder cb = connection.getSession().getCriteriaBuilder();
 		CriteriaQuery<IntelLocation> c = cb.createQuery(IntelLocation.class);
 		Root<IntelLocation> from = c.from(IntelLocation.class);
 		List<Predicate> filters = new ArrayList<>();
 		filters.add(from.get("conservationArea").in(connection.getConservationAreas())); //$NON-NLS-1$
+		filters.add(from.get("record").get("profile").in(profiles));
 		if (index >= 0 && parameters.get(index) != null){
 			UUID recordUuid = UuidUtils.stringToUuid((String) parameters.get(index));
 			filters.add(cb.equal(from.get("record").get("uuid"), recordUuid)); //$NON-NLS-1$ //$NON-NLS-2$

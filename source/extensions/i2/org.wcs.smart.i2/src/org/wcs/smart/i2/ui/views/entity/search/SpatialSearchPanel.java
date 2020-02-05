@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -64,14 +65,18 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
 import org.osgi.service.event.EventHandler;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntitySearch;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.search.SpatialEntitySearch;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.dialogs.SelectPointMapDialog;
@@ -82,9 +87,6 @@ import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.ui.CheckBoxDropDown;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.E3Utils;
-
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Geometry;
 
 
 /**
@@ -130,7 +132,7 @@ public class SpatialSearchPanel extends Composite{
 	}
 	
 	private boolean validate() {
-		if (!IntelSecurityManager.INSTANCE.canViewEntities()) {
+		if (!IntelSecurityManager.INSTANCE.canViewEntityAny()) {
 			btnSearch.setEnabled(false);
 			return false;
 		}
@@ -178,6 +180,10 @@ public class SpatialSearchPanel extends Composite{
 	public Double getDistance() {
 		return Double.parseDouble(txtMaxDistance.getText());
 	}
+	public void refresh() {
+		cmbEntityTypeFilters.setInput(Collections.singletonList(DialogConstants.LOADING_TEXT));
+		loadEntityTypes.schedule();	
+	}
 	
 	private void doSearch() {
 		Object element = cmbLocations.getStructuredSelection().getFirstElement();
@@ -192,7 +198,7 @@ public class SpatialSearchPanel extends Composite{
 		Object r = cmbLocations.getStructuredSelection().getFirstElement();
 		if (r instanceof RecordEditorInput && ((RecordEditorInput) r).getUuid().equals(recordUuid)) return;
 		
-		RecordEditorInput temp = new RecordEditorInput(null, recordUuid,  null,  null,  null);
+		RecordEditorInput temp = new RecordEditorInput(null, recordUuid,  null,  null,  null, null);
 		cmbLocations.setSelection(new StructuredSelection(temp));
 	}
 	private void createControls() {
@@ -299,6 +305,7 @@ public class SpatialSearchPanel extends Composite{
 		});
 		
 		l = toolkit.createLabel(this, Messages.SpatialSearchPanel_FiltersLabel, SWT.NONE);
+		l.setToolTipText(Messages.SpatialSearchPanel_entitytypetooltip);
 		
 		cmbEntityTypeFilters = new CheckBoxDropDown(this);
 		toolkit.adapt(cmbEntityTypeFilters.getParent(), true, true);
@@ -339,7 +346,7 @@ public class SpatialSearchPanel extends Composite{
 		btnSearch.addListener(SWT.Selection, (event)->{
 			doSearch();
 		});
-		btnSearch.setEnabled(IntelSecurityManager.INSTANCE.canViewEntities());
+		btnSearch.setEnabled(IntelSecurityManager.INSTANCE.canViewEntityAny());
 		btnSearch.setEnabled(false);
 		
 		loadEntityTypes.schedule();
@@ -407,17 +414,20 @@ public class SpatialSearchPanel extends Composite{
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			final List<IntelEntityTypeAttribute> filterOptions = new ArrayList<>();
-			try(Session session = HibernateManager.openSession()){
-				Query<IntelEntityTypeAttribute> q = session.createQuery("FROM IntelEntityTypeAttribute a WHERE a.id.attribute.conservationArea = :ca and a.id.attribute.type = :type", IntelEntityTypeAttribute.class); //$NON-NLS-1$
-				q.setParameter("ca",  SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-				q.setParameter("type",  IntelAttribute.AttributeType.POSITION); //$NON-NLS-1$
-				
-				
-				filterOptions.addAll(q.list());
-				filterOptions.forEach(a->{
-					a.getAttribute().getName();
-					a.getEntityType().getName();
-				});
+			List<IntelProfile> profiles = ProfilesManager.INSTANCE.getActiveProfiles().stream().filter(e->IntelSecurityManager.INSTANCE.canViewEntities(e)).collect(Collectors.toList());
+			if (!profiles.isEmpty()) {
+				try(Session session = HibernateManager.openSession()){
+					Query<IntelEntityTypeAttribute> q = session.createQuery("SELECT a FROM IntelEntityTypeAttribute a join a.id.entityType t join t.profiles p join p.id.profile pp WHERE pp IN (:profiles) and a.id.attribute.conservationArea = :ca and a.id.attribute.type = :type", IntelEntityTypeAttribute.class); //$NON-NLS-1$
+					q.setParameter("ca",  SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+					q.setParameter("type",  IntelAttribute.AttributeType.POSITION); //$NON-NLS-1$
+					q.setParameterList("profiles",  profiles); //$NON-NLS-1$
+					
+					filterOptions.addAll(q.list());
+					filterOptions.forEach(a->{
+						a.getAttribute().getName();
+						a.getEntityType().getName();
+					});
+				}
 			}
 			Display.getDefault().asyncExec(()->{
 				cmbEntityTypeFilters.setInput(filterOptions);

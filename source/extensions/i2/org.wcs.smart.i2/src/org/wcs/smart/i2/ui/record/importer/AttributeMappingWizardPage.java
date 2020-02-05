@@ -92,6 +92,7 @@ public class AttributeMappingWizardPage extends WizardPage implements ISelection
 		if (mappings == null) return super.isPageComplete();
 		boolean hasTitle = false;
 		boolean hasDate = false;
+		boolean hasProfile = false;
 		for (ComboViewer c : mappings){
 			if (!c.getSelection().isEmpty()){
 				Object x = ((StructuredSelection)c.getSelection()).getFirstElement();
@@ -99,9 +100,11 @@ public class AttributeMappingWizardPage extends WizardPage implements ISelection
 					hasTitle = true;
 				}else if (x.equals(RecordImportConfig.Column.PRIMARY_DATE)){
 					hasDate = true;
+				}else if (x.equals(RecordImportConfig.Column.PROFILE)){
+					hasProfile = true;
 				}
 			}
-			if (hasTitle && hasDate) break;
+			if (hasTitle && hasDate && hasProfile) break;
 		}
 		if (!hasTitle){
 			setErrorMessage(Messages.AttributeMappingWizardPage1_TitleMappingRequired);
@@ -109,6 +112,10 @@ public class AttributeMappingWizardPage extends WizardPage implements ISelection
 		}
 		if (!hasDate){
 			setErrorMessage(Messages.AttributeMappingWizardPage_RecordDateMappingRequired); 
+			return false;
+		}
+		if (!hasProfile) {
+			setErrorMessage(Messages.AttributeMappingWizardPage_ProfileMappingRequired); 
 			return false;
 		}
 		return super.isPageComplete();
@@ -239,9 +246,10 @@ public class AttributeMappingWizardPage extends WizardPage implements ISelection
 			columnOptions.add(4, RecordImportConfig.Column.NARRATIVE);
 			columnOptions.add(5, RecordImportConfig.Column.SCRATCHPAD);
 			columnOptions.add(6, RecordImportConfig.Column.PRIMARY_DATE);
-			columnOptions.add(7, Messages.AttributeMappingWizardPage1_IntelAttribute);
+			columnOptions.add(7, RecordImportConfig.Column.PROFILE);
 			columnOptions.add(8, Messages.AttributeMappingWizardPage1_SourceSpecificAttributes);
-			columnOptions.addAll(9, attributes);
+			columnOptions.add(Messages.AttributeMappingWizardPage1_IntelAttribute);
+			columnOptions.addAll(attributes);
 			
 			Display.getDefault().syncExec(()->{
 				for (Control c : mappingPanel.getChildren()){

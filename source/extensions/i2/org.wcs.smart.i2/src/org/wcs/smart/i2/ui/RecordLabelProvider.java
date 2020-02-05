@@ -23,14 +23,12 @@ package org.wcs.smart.i2.ui;
 
 import java.text.DateFormat;
 import java.text.MessageFormat;
-import java.util.HashMap;
 import java.util.Locale;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
-import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordSource;
@@ -78,7 +76,6 @@ public class RecordLabelProvider extends ColumnLabelProvider{
 	};
 	
 	private RecordField field;
-	private HashMap<IntelRecordSource, Image> srcToImage = new HashMap<>();
 	
 	public RecordLabelProvider(){
 		this(RecordField.TITLE_CREATED);
@@ -88,9 +85,6 @@ public class RecordLabelProvider extends ColumnLabelProvider{
 		this.field = field;
 	}
 	
-	public void setSourceImages(HashMap<IntelRecordSource, Image> sourceImages){
-		this.srcToImage = sourceImages;
-	}
 	
 	@Override
 	public String getText(Object element){
@@ -113,18 +107,8 @@ public class RecordLabelProvider extends ColumnLabelProvider{
 			src = new IntelRecordSource();
 			src.setUuid(((RecordEditorInput) element).getRecordSourceUuid());
 		}
-		if (src != null){
-			return srcToImage.get(src);
-		}
+		if (src != null) return Resources.INSTANCE.getImage(src);
 		return null;
-	}
-	
-		
-	@Override
-	public void dispose(){
-		for (Image i : srcToImage.values()) i.dispose();
-		srcToImage.clear();
-		super.dispose();
 	}
 	
 	/**
@@ -134,25 +118,5 @@ public class RecordLabelProvider extends ColumnLabelProvider{
 	 */
 	public static String getRecordStatusLabel(IntelRecord.Status status) {
 		return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(status, Locale.getDefault());
-	}
-	
-	/**
-	 * Gets an image for the record status
-	 * @param status
-	 * @return
-	 */
-	public static Image getRecordStatusImage(IntelRecord.Status status) {
-		switch(status){
-		case COMPLETE:
-			return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_SRC_DONE);
-		case NEW:
-			return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_SRC_NEW);
-		case PROCESSING:
-			return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_SRC_IP);
-		default:
-			break;
-		
-		}
-		return null;
 	}
 }

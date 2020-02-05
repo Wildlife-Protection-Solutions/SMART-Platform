@@ -256,7 +256,7 @@ public class RecordNarrativeView {
 			}
 		});
 		
-		if (IntelSecurityManager.INSTANCE.canCreateEntity()){
+		if (IntelSecurityManager.INSTANCE.canCreateEntityAny()){
 			MenuItem newEntity = new MenuItem(menu, SWT.CASCADE);
 			newEntity.setText(Messages.RecordNarrativeView_NewEntities);
 			newEntity.addSelectionListener(new SelectionAdapter() {			

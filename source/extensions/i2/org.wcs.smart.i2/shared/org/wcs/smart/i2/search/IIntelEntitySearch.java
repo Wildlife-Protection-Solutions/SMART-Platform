@@ -24,11 +24,13 @@ package org.wcs.smart.i2.search;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Locale;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.i2.model.IntelEntitySearch;
+import org.wcs.smart.i2.model.IntelProfile;
 
 /**
  * Intelligence search interface 
@@ -51,7 +53,7 @@ public interface IIntelEntitySearch {
 	 * @param monitor
 	 * @return
 	 */
-	public IntelSearchResult doSearch(Session session, Locale locale, IProgressMonitor monitor) throws Exception;
+	public IntelSearchResult doSearch(Set<IntelProfile> profiles, Session session, Locale locale, IProgressMonitor monitor) throws Exception;
 	
 	/**
 	 * Serialize the search for saving the search to the database.

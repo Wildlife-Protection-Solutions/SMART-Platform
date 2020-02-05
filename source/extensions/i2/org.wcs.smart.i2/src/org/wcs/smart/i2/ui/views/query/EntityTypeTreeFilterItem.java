@@ -26,6 +26,9 @@ import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 
@@ -35,9 +38,11 @@ import org.hibernate.Session;
 import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.InternalQueryManager;
+import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 
 /**
  * Filter item for entity types; children include attributes and specific entities
@@ -81,7 +86,12 @@ public class EntityTypeTreeFilterItem extends DeferredTreeFilterItem {
 			synchronized (LOCK) {
 				if (kids == null){
 					try(Session s = HibernateManager.openSession()){
-						List<IntelEntity> entities = InternalQueryManager.INSTANCE.getQueryItemProvider().getEntities(typeKey, s);
+						Set<UUID> profiles = ProfilesManager.INSTANCE.getActiveProfiles().stream()
+								.filter(f->IntelSecurityManager.INSTANCE.canViewQuery(f))
+								.map(f->f.getUuid())
+								.collect(Collectors.toSet());
+						
+						List<IntelEntity> entities = InternalQueryManager.INSTANCE.getQueryItemProvider().getEntities(profiles, typeKey, s);
 						ArrayList<FilterTreeItem> temp = new ArrayList<>();
 						for (IntelEntity e : entities){
 							temp.add(new EntityTreeFilterItem(e));

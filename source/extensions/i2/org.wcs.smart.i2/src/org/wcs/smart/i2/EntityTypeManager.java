@@ -22,18 +22,24 @@
 package org.wcs.smart.i2;
 
 import java.text.Collator;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
+import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelProfile;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 
 /**
  * Tools for managing entity types
@@ -48,6 +54,7 @@ public enum EntityTypeManager {
 	private EntityTypeManager(){
 		
 	}
+
 	
 	/**
 	 * Loads all entity types and sorts by name
@@ -66,6 +73,37 @@ public enum EntityTypeManager {
 		return types;
 	}
 	
+	/**
+	 * returns a set of entity types that are viewable by the current user
+	 * and associated with an active profile
+	 * 
+	 * @param session
+	 * @return
+	 */
+	public List<IntelEntityType> getViewableEntityTypesActiveProfiles(Session session){
+		if (ProfilesManager.INSTANCE.getActiveProfiles().isEmpty()) return Collections.emptyList();
+		
+		List<IntelProfile> profiles = new ArrayList<>(ProfilesManager.INSTANCE.getActiveProfiles());
+		profiles = profiles.stream().filter(e->IntelSecurityManager.INSTANCE.canViewEntities(e)).collect(Collectors.toList());
+		if (profiles.isEmpty()) return Collections.emptyList();
+		
+		@SuppressWarnings("deprecation")
+		List<IntelEntityType> types = (session.createQuery("SELECT r FROM IntelEntityType r join r.profiles p join p.id.profile c WHERE c IN (:profiles)", IntelEntityType.class) //$NON-NLS-1$
+				.setParameter("profiles", profiles) //$NON-NLS-1$
+				.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)
+				.list());
+		
+		types.sort((IntelEntityType a, IntelEntityType b) -> Collator.getInstance().compare(a.getName(), b.getName()));
+		return types;
+	}
+	
+	
+	/**
+	 * validates if the given entity type can be deleted or not
+	 * @param type
+	 * @param session
+	 * @throws Exception
+	 */
 	public void canDelete(IntelEntityType type, Session session) throws Exception{
 		if (!DeleteManager.canDelete(type, session)){
 			throw new Exception(Messages.EntityTypeManager_DeleteError);
@@ -143,6 +181,10 @@ public enum EntityTypeManager {
 		q.executeUpdate();
 		
 		//delete all record source attribute values
+		q = session.createQuery("delete from IntelRecordAttributeValueList ii where ii.id.value in ( From IntelRecordAttributeValue ii where ii.attribute IN (FROM IntelRecordSourceAttribute ii where ii.entityType = :type ))"); //$NON-NLS-1$
+		q.setParameter("type", type); //$NON-NLS-1$
+		q.executeUpdate();
+		
 		q = session.createQuery("delete from IntelRecordAttributeValue ii where ii.attribute in ( FROM IntelRecordSourceAttribute ii where ii.entityType = :type )"); //$NON-NLS-1$
 		q.setParameter("type", type); //$NON-NLS-1$
 		q.executeUpdate();

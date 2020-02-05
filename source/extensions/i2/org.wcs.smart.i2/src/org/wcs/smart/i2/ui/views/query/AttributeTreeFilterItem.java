@@ -103,11 +103,11 @@ public class AttributeTreeFilterItem extends BasicTreeFilterItem {
 		if (attribute.getAttribute() != null) {
 			type = attribute.getAttribute().getType();
 			attributeKey = attribute.getAttribute().getKeyId();
-			queryKey = "r_attribute:" + attribute.getAttribute().getType().key + ":" + attribute.getAttribute().getKeyId() + ":" + attribute.getSource().getKeyId(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$	
+			queryKey = "r_attribute:" + attribute.getAttribute().getType().key + ":" + attribute.getKeyId() + ":" + attribute.getSource().getKeyId(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$	
 		}else {
 			type = null;
 			attributeKey = attribute.getEntityType().getKeyId();
-			queryKey = "r_attribute:entity:" + attribute.getEntityType().getKeyId() + ":" + attribute.getSource().getKeyId(); //$NON-NLS-1$ //$NON-NLS-2$ 
+			queryKey = "r_attribute:entity:" + attribute.getKeyId() + ":" + attribute.getSource().getKeyId(); //$NON-NLS-1$ //$NON-NLS-2$ 
 		}
 		
 	}
@@ -125,6 +125,8 @@ public class AttributeTreeFilterItem extends BasicTreeFilterItem {
 			final List<String> keys = new ArrayList<String>();
 			labels.add(DropItemFactory.ANY_LABEL);
 			keys.add(IQueryFilter.ANY_OPTION_KEY);
+			
+			//TODO: filter entities to include only those in the profile filter
 			Job j = new Job("creating attribute drop item"){ //$NON-NLS-1$
 
 				@Override

@@ -28,7 +28,7 @@ import java.util.Locale;
 import org.wcs.smart.i2.query.Operator;
 
 /**
- * System attribute filters.  Represented by the string "sa:<type>:<attribute>" 
+ * System attribute filters.  Represented by the string "sa:<attribute>" 
  *  
  * 
  * @author Emily
@@ -52,21 +52,37 @@ public class SystemAttributeFilter implements IQueryFilter, IColumnIdentifierPro
 	 *
 	 */
 	public enum SystemAttribute{
-		DATE_CREATED,
-		DATE_MODIFIED
+		ENTITY_DATE_CREATED,
+		ENTITY_DATE_MODIFIED,
+		RECORD_DATE_CREATED,
+		RECORD_DATE_MODIFIED,
+		RECORD_DATE,
+		RECORD_SOURCE,
+		RECORD_STATUS;
+		
+		public String getKey() {
+			return SA_KEY + INTERNAL_SEPERATOR + name().toLowerCase(Locale.ROOT);
+		}
+		
+		public boolean isDate() {
+			return this == ENTITY_DATE_CREATED ||
+					this == ENTITY_DATE_MODIFIED ||
+					this == RECORD_DATE_MODIFIED ||
+					this == RECORD_DATE_CREATED ||
+					this == RECORD_DATE;
+		}
 	}
 	
-	/**
-	 * Supported types for system attributes 
-	 * 
-	 * @author Emily
-	 *
-	 */
-	public enum Type{
-		RECORD,
-		ENTITY
-	}
 	
+	public static SystemAttributeFilter create(String key, Operator operator, String value){
+		String[] parts = key.split(INTERNAL_SEPERATOR);
+		if (!parts[0].toLowerCase(Locale.ROOT).equals(SA_KEY)) throw new IllegalStateException("Not a valid system attribute filter."); //$NON-NLS-1$
+		SystemAttribute sa = SystemAttribute.valueOf(parts[1].toUpperCase(Locale.ROOT));
+		if (sa == null) throw new IllegalStateException(MessageFormat.format("Invalid attribute for system attribute:{0}", parts[1])); //$NON-NLS-1$
+		
+		SystemAttributeFilter filter = new SystemAttributeFilter(sa, operator, value);
+		return filter;
+	}
 	/**
 	 * Key: sa:type:attribute 
 	 * 
@@ -82,41 +98,42 @@ public class SystemAttributeFilter implements IQueryFilter, IColumnIdentifierPro
 		
 		if (!parts[0].toLowerCase(Locale.ROOT).equals(SA_KEY)) throw new IllegalStateException("Not a valid system attribute filter."); //$NON-NLS-1$
 		
-		Type type = Type.valueOf(parts[1].toUpperCase(Locale.ROOT));
-		if (type == null) throw new IllegalStateException(MessageFormat.format("Invalid type for system attribute:{0}", parts[1])); //$NON-NLS-1$
+		SystemAttribute sa = SystemAttribute.valueOf(parts[1].toUpperCase(Locale.ROOT));
+		if (sa == null) throw new IllegalStateException(MessageFormat.format("Invalid attribute for system attribute:{0}", parts[1])); //$NON-NLS-1$
 		
-		SystemAttribute sa = SystemAttribute.valueOf(parts[2].toUpperCase(Locale.ROOT));
-		if (sa == null) throw new IllegalStateException(MessageFormat.format("Invalid attribute for system attribute:{0}", parts[2])); //$NON-NLS-1$
-		
-		SystemAttributeFilter filter = new SystemAttributeFilter(type, sa, operator, date1, date2);
+		SystemAttributeFilter filter = new SystemAttributeFilter(sa, operator, date1, date2);
 		return filter;
 	}
 
-	private Type type;
 	private SystemAttribute attribute;
 	
 	private Date[] dateValues = null;
+	private String key = null;
 	private Operator op = null;
 	
-	private SystemAttributeFilter(Type type, SystemAttribute attribute, Operator op, Date d1, Date d2) {
-		this.type = type;
+	public SystemAttributeFilter(SystemAttribute attribute, Operator op, Date d1, Date d2) {
 		this.attribute = attribute;
 		this.op = op;
+		this.key = null;
 		this.dateValues = new Date[] {d1,d2};
+	}
+	
+	public SystemAttributeFilter(SystemAttribute attribute, Operator op, String key) {
+		this(attribute,op, null,null);
+		this.key = key;
 	}
 	
 	public Operator getOperator() {
 		return this.op;
 	}
 	
+	public String getStringKey() {
+		return this.key;
+	}
 	public Date[] getDateValues() {
 		return this.dateValues;
 	}
-	
-	public Type getType() {
-		return this.type;
-	}
-	
+
 	public SystemAttribute getAttribute() {
 		return this.attribute;
 	}
@@ -125,16 +142,18 @@ public class SystemAttributeFilter implements IQueryFilter, IColumnIdentifierPro
 	public String getUniqueColumnIdentifier() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(SA_KEY);
-		sb.append("_");  //$NON-NLS-1$
-		sb.append(type.name());
 		sb.append("_"); //$NON-NLS-1$
 		sb.append(attribute.name());
 		sb.append("_"); //$NON-NLS-1$
 		sb.append(op.getKey());
-		sb.append("_"); //$NON-NLS-1$
-		sb.append(dateValues[0].getTime());
-		sb.append("_"); //$NON-NLS-1$
-		sb.append(dateValues[1].getTime());
+		if (key == null) {
+			sb.append("_"); //$NON-NLS-1$
+			sb.append(dateValues[0].getTime());
+			sb.append("_"); //$NON-NLS-1$
+			sb.append(dateValues[1].getTime());
+		}else {
+			sb.append(key);
+		}
 		
 		return sb.toString();
 	}

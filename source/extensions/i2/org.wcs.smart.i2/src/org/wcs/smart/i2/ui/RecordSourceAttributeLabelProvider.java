@@ -40,7 +40,8 @@ public class RecordSourceAttributeLabelProvider extends ColumnLabelProvider impl
 	public enum Column{
 		ROOTNAME_ICON,
 		NAME,
-		MULTI
+		MULTI,
+		KEY
 		
 	}
 	private AttributeLabelProvider attributeProvider = new AttributeLabelProvider();
@@ -72,13 +73,19 @@ public class RecordSourceAttributeLabelProvider extends ColumnLabelProvider impl
 					return null;
 				}
 			}
+			if (column == Column.KEY) {
+				return a.getKeyId();
+			}
+				
 			if (column == Column.NAME){
 				if (a.getName()!=null&&!a.getName().isEmpty()){
 					return a.getName();
 				}
 			}
-			if (a.getAttribute() != null) return attributeProvider.getText(a.getAttribute());
-			if (a.getEntityType() != null) return etProvider.getText((Object)a.getEntityType());
+			if (column == Column.NAME || column == Column.ROOTNAME_ICON) {
+				if (a.getAttribute() != null) return attributeProvider.getText(a.getAttribute());
+				if (a.getEntityType() != null) return etProvider.getText((Object)a.getEntityType());
+			}
 		}
 		return super.getText(element);
 	}

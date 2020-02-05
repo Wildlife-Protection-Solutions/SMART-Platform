@@ -4,6 +4,8 @@ import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.datatools.connectivity.oda.IConnection;
 import org.eclipse.datatools.connectivity.oda.IDriver;
@@ -19,36 +21,39 @@ import org.eclipse.datatools.connectivity.oda.design.ResultSetColumns;
 import org.eclipse.datatools.connectivity.oda.design.ResultSetDefinition;
 import org.eclipse.datatools.connectivity.oda.design.ui.designsession.DesignSessionUtil;
 import org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSetWizardPage;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.InternalQueryManager;
+import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.birt.datasource.IntelBirtDataSource;
 import org.wcs.smart.i2.birt.query.IntelQueryDataset;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
-import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
-import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.query.observation.filter.GroupByItem;
 import org.wcs.smart.i2.query.observation.filter.SumQueryDefinition;
 import org.wcs.smart.i2.security.IntelSecurityManager;
-import org.wcs.smart.i2.ui.IntelQueryLabelProvider;
+import org.wcs.smart.i2.ui.Resources;
 import org.wcs.smart.util.UuidUtils;
 
 public class IntelQueryWizardPage extends DataSetWizardPage {
@@ -100,7 +105,7 @@ public class IntelQueryWizardPage extends DataSetWizardPage {
 
 		composite.setLayoutData(gridData);
 
-		if (!IntelSecurityManager.INSTANCE.canViewQueries()) {
+		if (!IntelSecurityManager.INSTANCE.canViewQueryAny()) {
 			setPageComplete(false);
 			Label l = new Label(composite, SWT.NONE);
 			l.setText(Messages.IntelQueryWizardPage_unauthorized);
@@ -108,23 +113,37 @@ public class IntelQueryWizardPage extends DataSetWizardPage {
 			return composite;
 		}
 		
-		lstQueries = new TableViewer(composite, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
-		lstQueries.setLabelProvider(new IntelQueryLabelProvider());
-		lstQueries.setContentProvider(ArrayContentProvider.getInstance());
-		lstQueries.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		((GridData)lstQueries.getControl().getLayoutData()).heightHint = 300;
-		lstQueries.getControl().addListener(SWT.Selection, new Listener() {
-			@Override
-			public void handleEvent(Event event) {
-				validateData();
+		Composite wrapper = new Composite(composite, SWT.NONE);
+		wrapper.setLayout(new TableColumnLayout());
+		wrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		lstQueries = new TableViewer(wrapper, SWT.BORDER | SWT.SINGLE | SWT.FULL_SELECTION);
+		lstQueries.setLabelProvider(new LabelProvider() {
+			public String getText(Object element) {
+				if (element instanceof AbstractIntelQuery) return ((AbstractIntelQuery) element).getName();
+				return super.getText(element);
+			}
+			public Image getImage(Object element) {
+				if (element instanceof AbstractIntelQuery) return Resources.INSTANCE.getImage(((AbstractIntelQuery) element).getTypeKey());
+				return null;
 			}
 		});
+		lstQueries.setContentProvider(ArrayContentProvider.getInstance());
+		lstQueries.getControl().addListener(SWT.Selection, e->validateData());
 		
+		TableColumn tc = new TableColumn(lstQueries.getTable(), SWT.NONE);
+		((TableColumnLayout)wrapper.getLayout()).setColumnData(tc, new ColumnWeightData(100));
 		List<AbstractIntelQuery> queries = new ArrayList<>();
+
+		Set<String> profiles = ProfilesManager.INSTANCE.getActiveProfiles()
+				.stream().filter(e->IntelSecurityManager.INSTANCE.canViewQuery(e)).map(e->e.getKeyId()).collect(Collectors.toSet());
+
 		try(Session s = HibernateManager.openSession()){
-			queries.addAll( QueryFactory.buildQuery(s, IntelRecordObservationQuery.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList() ); //$NON-NLS-1$
-			queries.addAll( QueryFactory.buildQuery(s, IntelEntitySummaryQuery.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList() ); //$NON-NLS-1$
-			queries.addAll( QueryFactory.buildQuery(s, IntelEntityRecordQuery.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList() ); //$NON-NLS-1$
+			for (Class<? extends AbstractIntelQuery> c: InternalQueryManager.INSTANCE.getQueryTypeClasses()) {
+				List<? extends AbstractIntelQuery> items =
+						QueryFactory.buildQuery(s, c, "conservationArea", SmartDB.getCurrentConservationArea()).list(); //$NON-NLS-1$	
+				queries.addAll(items.stream().filter(t->t.queriesProfile(profiles)).collect(Collectors.toList()));
+			}
 		}
 		
 		Collections.sort(queries, (a,b) -> Collator.getInstance().compare(a.getName().toLowerCase(), b.getName().toLowerCase()));

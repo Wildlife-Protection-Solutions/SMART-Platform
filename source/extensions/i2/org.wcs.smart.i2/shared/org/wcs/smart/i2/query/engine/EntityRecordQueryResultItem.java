@@ -40,6 +40,9 @@ public class EntityRecordQueryResultItem implements IResultItem {
 	private String entityType;
 	private String entityId;
 	
+	private UUID profileUuid;
+	private String profileName;
+	
 	private HashMap<String, Object> attributes = new HashMap<String, Object>();
 	private HashMap<IQueryFilter, Boolean> filterValues = new HashMap<>(); 
 	
@@ -49,7 +52,17 @@ public class EntityRecordQueryResultItem implements IResultItem {
 	public EntityRecordQueryResultItem(){
 		
 	}
+	public void setProflie(UUID profileUuid, String name) {
+		this.profileUuid = profileUuid;
+		this.profileName = name;
+	}
 	
+	public String getProfileName() {
+		return this.profileName;
+	}
+	public UUID getProfileUuid() {
+		return this.profileUuid;
+	}
 	public void setConservationAreaId(String caId) {
 		this.caId = caId;
 	}

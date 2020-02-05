@@ -21,23 +21,28 @@
  */
 package org.wcs.smart.i2;
 
-import java.util.Collection;
-import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
+import org.wcs.smart.i2.model.IntelRecordQuery;
+import org.wcs.smart.i2.model.IntelRecordSummaryQuery;
 import org.wcs.smart.i2.query.CaQueryItemProvider;
 import org.wcs.smart.i2.query.DesktopCcaaQueryItemProvider;
 import org.wcs.smart.i2.query.IQueryItemProvider;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 
 /**
  * Query manager for intelligence queries.
@@ -53,6 +58,19 @@ public enum InternalQueryManager {
 	private volatile IQueryItemProvider queryItemProvider = null;
 	
 	/**
+	 * 
+	 * @return the array of classes that represent Intelligence queries
+	 */
+	@SuppressWarnings("unchecked")
+	public Class<? extends AbstractIntelQuery>[] getQueryTypeClasses() {
+		return new Class[] {
+			IntelRecordObservationQuery.class,
+			IntelEntityRecordQuery.class,
+			IntelEntitySummaryQuery.class,
+			IntelRecordSummaryQuery.class,
+			IntelRecordQuery.class};
+	}
+	/**
 	 * Returns the query deleted from the database if a query is deleted; otherwise
 	 * returns null
 	 * @param queryUuid
@@ -64,13 +82,11 @@ public enum InternalQueryManager {
 		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
 			try {
-				if (queryType.equals(IntelRecordObservationQuery.KEY)) {
-					removed = (IntelRecordObservationQuery) s.get(IntelRecordObservationQuery.class, queryUuid);
-				}else if (queryType.equals(IntelEntitySummaryQuery.KEY)) {
-					removed = (IntelEntitySummaryQuery) s.get(IntelEntitySummaryQuery.class, queryUuid);
-				}else if (queryType.equals(IntelEntityRecordQuery.KEY)) {
-					removed = (IntelEntityRecordQuery) s.get(IntelEntityRecordQuery.class, queryUuid);
+				for (Class<?extends AbstractIntelQuery> c : getQueryTypeClasses()) {
+					removed = s.get(c, queryUuid);
+					if (removed != null) break;
 				}
+				
 				if (removed == null) throw new Exception(Messages.QueryManager_NotFoundError);
 				
 				Query<?> wsQuery = s.createQuery("DELETE FROM IntelWorkingSetQuery WHERE id.query = :query"); //$NON-NLS-1$
@@ -98,32 +114,45 @@ public enum InternalQueryManager {
 		return new String[][] {
 			{ IntelRecordObservationQuery.KEY, Messages.InternalQueryManager_RecordObservationQueryName},
 			{ IntelEntitySummaryQuery.KEY, Messages.InternalQueryManager_EntitySummaryQueryName},
-			{ IntelEntityRecordQuery.KEY, Messages.InternalQueryManager_EntityRecordQuery}
+			{ IntelEntityRecordQuery.KEY, Messages.InternalQueryManager_EntityRecordQuery},
+			{ IntelRecordSummaryQuery.KEY, Messages.InternalQueryManager_RecordSummaryQuery},
+			{ IntelRecordQuery.KEY, Messages.InternalQueryManager_RecordQuery}
 		};
 	}
 	
+	public void resetQueryItemProvider() {
+		synchronized (INSTANCE) {
+			queryItemProvider = null;
+		}
+	}
 	
 	/**
 	 * 
-	 * @return the query item provider for the current conservation are aconfiguration
+	 * @return the query item provider for the current conservation are a configuration
 	 * 
 	 */
 	public IQueryItemProvider getQueryItemProvider() {
 		if (queryItemProvider == null) {
 			synchronized (INSTANCE) {
 				if (queryItemProvider != null) return queryItemProvider;
+				
 				if (SmartDB.isMultipleAnalysis()) {
-					queryItemProvider = new DesktopCcaaQueryItemProvider(Collections.emptyList(), SmartDB.getCurrentConservationArea()) {
-						@Override
-						public Collection<ConservationArea> getConservationAreas() {
-							return SmartDB.getConservationAreaConfiguration().getConservationAreas();
+					//determine all profiles which the current user has access to query
+					Set<IntelProfile> profiles = new HashSet<>();
+					try(Session session = HibernateManager.openSession()){
+						for (IntelProfile p : QueryFactory.buildQuery(session, IntelProfile.class).list()) {
+							if (IntelSecurityManager.INSTANCE.canViewQuery(p)) {
+								profiles.add(p);
+							}
 						}
-						
-						@Override
-						protected ConservationArea getMainConservationArea() {
-							return SmartDB.getConservationAreaConfiguration().getMainConservationArea();
-						}
-					};
+						queryItemProvider = new DesktopCcaaQueryItemProvider(profiles, SmartDB.getCurrentConservationArea()) {
+							@Override
+							protected ConservationArea getMainConservationArea() {
+								return SmartDB.getConservationAreaConfiguration().getMainConservationArea();
+							}
+						};
+					}
+					
 				}else {
 					queryItemProvider = new CaQueryItemProvider(SmartDB.getCurrentConservationArea(), SmartDB.getCurrentConservationArea());
 				}	

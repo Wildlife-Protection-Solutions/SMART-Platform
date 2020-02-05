@@ -37,6 +37,7 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.query.FilterQueryColumn;
 import org.wcs.smart.i2.query.FixedQueryColumn;
 import org.wcs.smart.i2.query.FixedQueryColumn.Column;
@@ -137,6 +138,10 @@ public class IntelEntityRecordQueryResults implements IPagedQueryResultSet {
 		item.setConservationAreaId((String)rowData[columnNameToIndex.get("ca_id")]); //$NON-NLS-1$
 		item.setConservationAreaName((String)rowData[columnNameToIndex.get("ca_name")]); //$NON-NLS-1$
 		
+		UUID puuid = asUuid(rowData[columnNameToIndex.get("profile_uuid")]); //$NON-NLS-1$
+		String name = session.get(IntelProfile.class, puuid).getName();
+		item.setProflie(puuid, name);
+		
 		IntelEntity e = session.get(IntelEntity.class, item.getEntityUuid());
 		item.setEntityId(e.getIdAttributeAsText());
 		
@@ -203,6 +208,8 @@ public class IntelEntityRecordQueryResults implements IPagedQueryResultSet {
 				return sql + "lower(ca_id)" + getSortDirectionSql(); //$NON-NLS-1$
 			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.CA_NAME){
 				return sql + "lower(ca_name)" + getSortDirectionSql(); //$NON-NLS-1$
+			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.ENTITY_PROFILE){
+				return sql += " profile_uuid " + getSortDirectionSql(); //$NON-NLS-1$
 			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.ENTITY_ID){
 				session.beginTransaction();
 				try {

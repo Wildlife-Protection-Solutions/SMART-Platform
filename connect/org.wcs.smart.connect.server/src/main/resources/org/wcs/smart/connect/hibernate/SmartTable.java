@@ -55,10 +55,6 @@ import org.wcs.smart.ca.EmployeeTeam;
 import org.wcs.smart.ca.EmployeeTeamMember;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
-import org.wcs.smart.ca.NamedDescriptionItem;
-import org.wcs.smart.ca.NamedDescriptionKeyItem;
-import org.wcs.smart.ca.NamedItem;
-import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.ca.Rank;
 import org.wcs.smart.ca.SmartStyle;
@@ -71,7 +67,6 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
-import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.ca.icon.IconSet;
@@ -161,13 +156,19 @@ import org.wcs.smart.i2.model.IntelEntityTypeAttributeGroup;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.model.IntelObservation;
 import org.wcs.smart.i2.model.IntelObservationAttribute;
+import org.wcs.smart.i2.model.IntelPermission;
+import org.wcs.smart.i2.model.IntelProfile;
+import org.wcs.smart.i2.model.IntelProfileEntityType;
+import org.wcs.smart.i2.model.IntelProfileRecordSource;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
 import org.wcs.smart.i2.model.IntelRecordAttributeValue;
 import org.wcs.smart.i2.model.IntelRecordAttributeValueList;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
+import org.wcs.smart.i2.model.IntelRecordQuery;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
+import org.wcs.smart.i2.model.IntelRecordSummaryQuery;
 import org.wcs.smart.i2.model.IntelRelationshipGroup;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
@@ -234,13 +235,7 @@ import org.wcs.smart.qa.model.QaRoutine;
 import org.wcs.smart.qa.model.QaRoutineParameter;
 import org.wcs.smart.query.common.model.CompoundMapQuery;
 import org.wcs.smart.query.common.model.CompoundMapQueryLayer;
-import org.wcs.smart.query.common.model.GriddedQuery;
-import org.wcs.smart.query.common.model.ObservationQuery;
-import org.wcs.smart.query.common.model.SummaryQuery;
-import org.wcs.smart.query.common.model.WaypointQuery;
-import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFolder;
-import org.wcs.smart.query.model.StyledQuery;
 import org.wcs.smart.r.model.RQuery;
 import org.wcs.smart.r.model.RScript;
 import org.wcs.smart.report.model.Report;
@@ -295,7 +290,6 @@ public enum SmartTable {
 	
 	CMPTPROPPROFILE(ConfigurableModelCtPropertiesProfile.class, ".id.model.conservationArea"),
 	DASHBOARD(Dashboard.class, null),
-	DMOBJECT(DmObject.class,null),
 	ENTITY(Entity.class,".entityType.conservationArea"),
 	ENTITYATTRIBUTE(EntityAttribute.class,".entityType.conservationArea"),
 	ENTITYATTRIBUTEVALUE(EntityAttributeValue.class,".id.entity.entityType.conservationArea"),
@@ -304,7 +298,6 @@ public enum SmartTable {
 	ENTITYSUMMARYQUERY(EntitySummaryQuery.class,null),
 	ENTITYTYPE(EntityType.class,null),
 	ENTITYWAYPOINTQUERY(EntityWaypointQuery.class,null),
-	GRIDDEDQUERY(GriddedQuery.class,null),
 	INFORMANT(Informant.class,null),
 	INTELLIGENCE(Intelligence.class,null),
 	INTELLIGENCEATTACHMENT(IntelligenceAttachment.class,".intelligence.conservationArea"),
@@ -324,15 +317,10 @@ public enum SmartTable {
 	MISSIONQUERY(MissionQuery.class,null),
 	MISSIONTRACK(MissionTrack.class,".missionDay.mission.survey.surveyDesign.conservationArea"),
 	MISSIONTRACKQUERY(MissionTrackQuery.class,null),
-	NAMEDDESCRIPTIONITEM(NamedDescriptionItem.class,null),
-	NAMEDDESCRIPTIONKEYITEM(NamedDescriptionKeyItem.class,null),
-	NAMEDITEM(NamedItem.class,null),
-	NAMEDKEYITEM(NamedKeyItem.class,null),
 	NUMERICPLANTARGET(NumericPlanTarget.class,".plan.conservationArea"),
 	OBSERVATIONATTACHMENT(ObservationAttachment.class,".observation.observationGroup.waypoint.conservationArea"),
 	OBSERVATIONGRIDDEDQUERY(ObservationGriddedQuery.class,null),
 	OBSERVATIONOPTIONS(ObservationOptions.class,".uuid"),
-	OBSERVATIONQUERY(ObservationQuery.class,null),
 	OBSERVATIONSUMMARYQUERY(ObservationSummaryQuery.class,null),
 	OBSERVATIONWAYPOINTQUERY(ObservationWaypointQuery.class,null),
 	OBSOBSERVATIONQUERY(ObsObservationQuery.class,null),
@@ -358,7 +346,6 @@ public enum SmartTable {
 	PLAN(Plan.class,null),
 	PLANTARGET(PlanTarget.class,null),
 	PROJECTION(Projection.class,null),
-	QUERY(Query.class,null),
 	QUERYFOLDER(QueryFolder.class,null),
 	QUICKLINK(Quicklink.class, null),
 	RANK(Rank.class,".agency.conservationArea"),
@@ -375,8 +362,6 @@ public enum SmartTable {
 	SPATIALPLANTARGET(SpatialPlanTarget.class,".plan.conservationArea"),
 	SPATIALPLANTARGETPOINT(SpatialPlanTargetPoint.class,".planTarget.plan.conservationArea"),
 	STATION(Station.class,null),
-	STYLEDQUERY(StyledQuery.class,null),
-	SUMMARYQUERY(SummaryQuery.class,null),
 	SURVEY(Survey.class,".surveyDesign.conservationArea"),
 	SURVEYDESIGN(SurveyDesign.class,null),
 	SURVEYDESIGNPROPERTY(SurveyDesignProperty.class,".surveyDesign.conservationArea"),
@@ -396,7 +381,6 @@ public enum SmartTable {
 	WAYPOINTOBSERVATION(WaypointObservation.class,".observationGroup.waypoint.conservationArea"),
 	WAYPOINTOBSERVATIONGROUP(WaypointObservationGroup.class,".waypoint.conservationArea"),
 	WAYPOINTOBSERVATIONATTRIBUTE(WaypointObservationAttribute.class,".id.observation.observationGroup.waypoint.conservationArea"),
-	WAYPOINTQUERY(WaypointQuery.class, null),
 	
 	I2_ATTACHMENT(IntelAttachment.class, null),
 	I2_ATTRIBUTE(IntelAttribute.class, null),
@@ -416,7 +400,7 @@ public enum SmartTable {
 	I2_OBSERVATION_ATTRIBUTE(IntelObservationAttribute.class,".id.attribute.conservationArea"),
 	I2_RECORD(IntelRecord.class, null),
 	I2_RECORD_ATTACHMENT(IntelRecordAttachment.class,".id.record.conservationArea"),
-	I2_RECORD_QUERY(IntelRecordObservationQuery.class, null),
+	I2_RECORD_OBS_QUERY(IntelRecordObservationQuery.class, null),
 	I2_ENTITY_SUMMARY_QUERY(IntelEntitySummaryQuery.class, null),	
 	I2_ENTITY_RECORD_QUERY(IntelEntityRecordQuery.class, null),
 	I2_RELATION_GROUP(IntelRelationshipGroup.class, null),
@@ -435,6 +419,12 @@ public enum SmartTable {
 	I2_RELATIONSHIP_DIAGRAM_STYLE(RelationshipDiagramStyle.class, null),
 	I2_RELATIONSHIP_DIAGRAM_ENTITY_TYPE_STYLE(RelationshipDiagramEntityTypeStyle.class, ".style.conservationArea"),
 	I2_RELATIONSHIP_DIAGRAM_REL_TYPE_STYLE(RelationshipDiagramRelationshipTypeStyle.class, ".style.conservationArea"),
+	I2_RECORD_SUMMARY_QUERY(IntelRecordSummaryQuery.class, null),
+	I2_RECORD_QUERY(IntelRecordQuery.class, null),
+	I2_PERMISSION(IntelPermission.class, ".id.employee.conservationArea"),
+	I2_PROFILE_CONFIG(IntelProfile.class, null),
+	I2_PROFILE_RECORD_SOURCE(IntelProfileRecordSource.class, ".id.profile.conservationArea"),
+	I2_PROFILE_ENTITY_TYPE(IntelProfileEntityType.class, ".id.profile.conservationArea"),
 	
 	QA_ERROR(QaError.class, null),
 	QA_ROUTINE(QaRoutine.class, null),

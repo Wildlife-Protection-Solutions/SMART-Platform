@@ -72,7 +72,7 @@ public class IntelRecordDetailsWizardPage extends DataSetWizardPage {
 		
 		setMessage(Messages.IntelRecordDetailsWizardPage_message);
 
-		if (!IntelSecurityManager.INSTANCE.canViewRecords()) {
+		if (!IntelSecurityManager.INSTANCE.canViewRecordAny()) {
 			setPageComplete(false);
 			Label l = new Label(composite, SWT.NONE);
 			l.setText(Messages.IntelRecordDetailsWizardPage_unauthorized);

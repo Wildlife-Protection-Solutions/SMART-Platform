@@ -26,7 +26,6 @@ import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.wcs.smart.connect.api.ConnectRESTApplication;
 import org.wcs.smart.connect.api.GlobalForestWatchApi;
 import org.wcs.smart.connect.api.noa.ConnectNoaRESTApplication;
 import org.wcs.smart.util.UuidUtils;

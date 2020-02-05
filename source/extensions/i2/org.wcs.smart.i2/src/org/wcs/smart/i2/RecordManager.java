@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.i2;
 
+import java.text.Collator;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -36,12 +38,15 @@ import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityRecord;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
+import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
 
@@ -55,6 +60,15 @@ public enum RecordManager {
 	
 	INSTANCE;
 	
+	public List<IntelRecordSource> getSources(Session session){
+		List<IntelRecordSource> sources = QueryFactory.buildQuery(session,
+				IntelRecordSource.class,"conservationArea",  //$NON-NLS-1$
+				SmartDB.getCurrentConservationArea()).getResultList();
+		sources.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
+
+		return sources;
+
+	}
 	/**
 	 * Delete an intelligence record, associated locations, and attachments
 	 * 
@@ -90,10 +104,7 @@ public enum RecordManager {
 	 *  to call done() on the given monitor. 
 	 */
 	public void deleteRecords(Collection<? extends Object> records, IEclipseContext context, IProgressMonitor monitor){
-		if (!IntelSecurityManager.INSTANCE.canDeleteRecord()){
-			MessageDialog.openError(context.get(Shell.class), Messages.RecordManager_ErrorTitle, Messages.RecordManager_InsufficientPrivileges);
-			return;
-		}
+
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.RecordManager_Progress1, records.size());
 		List<IntelEntity> entities = new ArrayList<IntelEntity>();
 		List<IntelRecord> deleted = new ArrayList<IntelRecord>();
@@ -108,6 +119,11 @@ public enum RecordManager {
 						record = (IntelRecord) s.get(IntelRecord.class, ((RecordEditorInput) x).getUuid());
 					}else{
 						//this should never happen but if we don't have a record then ignore
+						continue;
+					}
+					if (!IntelSecurityManager.INSTANCE.canDeleteRecord(record.getProfile())){
+						MessageDialog.openError(context.get(Shell.class), Messages.RecordManager_ErrorTitle, 
+								MessageFormat.format(Messages.RecordManager_InsufficientPrivileges2, record.getTitle()));
 						continue;
 					}
 					progress.subTask(record.getTitle());

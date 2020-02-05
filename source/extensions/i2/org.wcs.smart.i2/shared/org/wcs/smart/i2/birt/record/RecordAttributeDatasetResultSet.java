@@ -43,6 +43,7 @@ import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
+import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection.Permission;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
 import org.wcs.smart.i2.model.IntelRecordAttributeValue;
 import org.wcs.smart.util.UuidUtils;
@@ -85,7 +86,7 @@ public class RecordAttributeDatasetResultSet implements IResultSet {
 		
 		List<Predicate> filters = new ArrayList<>();
 		filters.add(from.join("record").get("conservationArea").in(connection.getConservationAreas())); //$NON-NLS-1$ //$NON-NLS-2$
-		
+		filters.add(from.join("record").get("profile").in(connection.hasPermission(Permission.RECORD)));
 //		Criteria c = connection.getSession().createCriteria(IntelRecordAttributeValue.class)
 //				.createAlias("record", "r") //$NON-NLS-1$ //$NON-NLS-2$
 //				.createAlias("attribute", "a") //$NON-NLS-1$ //$NON-NLS-2$

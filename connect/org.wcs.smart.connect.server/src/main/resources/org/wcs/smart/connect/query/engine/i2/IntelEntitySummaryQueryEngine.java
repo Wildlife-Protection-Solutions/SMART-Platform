@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.connect.query.engine.i2;
 
+import java.security.Principal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -38,11 +39,15 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.connect.security.AdvIntelAction;
+import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.i2.IIntelQueryEngine;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
+import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.query.CaQueryItemProvider;
 import org.wcs.smart.i2.query.CcaaQueryItemProvider;
 import org.wcs.smart.i2.query.IQueryItemProvider;
@@ -63,6 +68,7 @@ import org.wcs.smart.i2.query.observation.filter.IntelAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.NotFilter;
 import org.wcs.smart.i2.query.observation.filter.SumQueryDefinition;
 import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter;
+import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter.SystemAttribute;
 import org.wcs.smart.i2.query.observation.filter.ValuePart.ValueOption;
 import org.wcs.smart.util.UuidUtils;
 
@@ -88,7 +94,8 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 	public IQueryResult executeQuery(AbstractIntelQuery query,  HashMap<String, Object> parameters) throws Exception{
 		
 		Session session = (Session) parameters.get(Session.class.getName());
-		
+		String username = ((String)parameters.get(Principal.class.getName()));
+
 		//Locale
 		Locale locale = (Locale) parameters.get(Locale.class.getName());
 		if (locale == null){
@@ -100,18 +107,35 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		if (cas == null){
 			throw new Exception("Conservation area parameter not supplied."); //$NON-NLS-1$
 		}
+		
+		Set<IntelProfile> profiles = new HashSet<>();
+		for (String ip : IntelEntityRecordQuery.convertFromProfileFilter(query.getProfileFilter())) {
+			List<IntelProfile> items = session.createQuery("FROM IntelProfile WHERE keyId = :keyId and conservationArea in (:cas)", IntelProfile.class)
+					.setParameter("keyId",  ip)
+					.setParameter("cas", cas).list();
+			
+			if (SecurityManager.INSTANCE.canAccess(session, username, AdvIntelAction.RUNQUERY_KEY, query.getUuid()) ||
+					SecurityManager.INSTANCE.canAccess(session, username, AdvIntelAction.RUNQUERY_KEY, query.getConservationArea().getUuid())) { 
+				//we have permission to run this query so use all profiles
+				profiles.addAll(items);
+			}
+		}
+		if (profiles.isEmpty()) {
+			throw new Exception("No valid profile filters for query");
+		}
+		
 		IQueryItemProvider itemProvider = null;
 		if (!query.getConservationArea().getIsCcaa()) {
 			itemProvider = new CaQueryItemProvider(cas.iterator().next(), query.getConservationArea());
 		}else {
-			itemProvider = new CcaaQueryItemProvider(cas, query.getConservationArea());
+			itemProvider = new CcaaQueryItemProvider(profiles, query.getConservationArea());
 		}
 		
 		//parse query
 		SumQueryDefinition parsedQuery = IntelEntitySummaryQuery.parseQuery(query.getQueryString());
 	
 		//parse query
-		createTemporaryEntityTable(session,cas);
+		createTemporaryEntityTable(session, profiles, cas);
 		
 		try {
 			//add attribute columns
@@ -123,7 +147,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 			LocalDate[] dateRange = computeDateRange(parsedQuery, dataTable.tableName, attributeKeyToColumn, session);
 			Map<GroupByItem, String> areaTables = processAreaGroupBys(dataTable.tableName, parsedQuery, cas, session);
 			
-			SummaryQueryResult results = getResults(dataTable.tableName, parsedQuery, dateRange, areaTables, locale, itemProvider, session);
+			SummaryQueryResult results = getResults(dataTable.tableName, parsedQuery, dateRange, areaTables, locale, profiles, itemProvider, session);
 			
 			for (String tableName : areaTables.values()) {
 				try {
@@ -205,7 +229,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 	 * Runs a sql statement on the data table to get the results for the table
 	 */
 	private SummaryQueryResult getResults(String queryTable, SumQueryDefinition definition, LocalDate[] dateRange, 
-			Map<GroupByItem, String> areaTables, Locale l, IQueryItemProvider itemProvider, Session session) throws Exception {
+			Map<GroupByItem, String> areaTables, Locale l, Set<IntelProfile> profiles, IQueryItemProvider itemProvider, Session session) throws Exception {
 		
 		StringBuilder selectSql = new StringBuilder();
 		StringBuilder groupBySql = new StringBuilder();
@@ -223,7 +247,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 			}
 			cnt++;
 			if (groupBy.getGroupByType() == GroupByType.SYSTEM) {
-				String columnName = groupBy.getSystemType().name().toLowerCase(Locale.ROOT) + "_" + groupBy.getSystemAttribute().name().toLowerCase(Locale.ROOT); //$NON-NLS-1$
+				String columnName = groupBy.getSystemAttribute().name().toLowerCase(Locale.ROOT) + "_" + groupBy.getSystemAttribute().name().toLowerCase(Locale.ROOT); //$NON-NLS-1$
 				GroupByItem.DateOption dateOp = groupBy.getDateOption();
 				switch(dateOp) {
 					case DAY:
@@ -245,10 +269,10 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 			}else if (groupBy.getGroupByType() == GroupByType.ENTITYTYPE) {
 				selectSql.append("entity_type_key as c_" + cnt); //$NON-NLS-1$
 				groupBySql.append("entity_type_key"); //$NON-NLS-1$
-			}else if(groupBy.getGroupByType() == GroupByType.ATTRIBUTE) {
+			}else if(groupBy.getGroupByType() == GroupByType.ENTITY_ATTRIBUTE) {
 				String columnName = groupBy.getAttributeKey();
-				if (groupBy.getEntityTypeKey() != null && !groupBy.getEntityTypeKey().isEmpty()) {
-					entityTypeFilters.add(groupBy.getEntityTypeKey());
+				if (groupBy.getOtherKey() != null && !groupBy.getOtherKey().isEmpty()) {
+					entityTypeFilters.add(groupBy.getOtherKey());
 				}
 				if (groupBy.getAttributeType() == AttributeType.DATE) {
 					GroupByItem.DateOption dateOp = groupBy.getDateOption();
@@ -312,7 +336,8 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		logme(sb);
 		
 		SummaryQueryResult results = new SummaryQueryResult();
-		EntitySummaryQueryHeaderEngine.INSTANCE.getHeaderInfo(definition, results, dateRange, itemProvider, l, session);
+		Set<UUID> puuids = profiles.stream().map(e->e.getUuid()).collect(Collectors.toSet());
+		EntitySummaryQueryHeaderEngine.INSTANCE.getHeaderInfo(definition, results, dateRange, puuids, itemProvider, l, session);
 		
 		HashMap<SummaryResultKey, Double> data = new HashMap<>();
 		
@@ -363,13 +388,13 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 	 * create temporary entity table and populate with all entities
 	 * that match the given conservation area
 	 */
-	private String createTemporaryEntityTable(Session session, Collection<ConservationArea> cas) {
+	private String createTemporaryEntityTable(Session session,  Set<IntelProfile> profiles, Collection<ConservationArea> cas) {
 		String obsTable = SqlGenerator.createTempTableName();
 		
 		dataTable = new DataTable(obsTable);
 		
-		String created = SystemAttributeFilter.Type.ENTITY.name().toLowerCase(Locale.ROOT) + "_" + SystemAttributeFilter.SystemAttribute.DATE_CREATED.name().toLowerCase(Locale.ROOT); //$NON-NLS-1$
-		String modified = SystemAttributeFilter.Type.ENTITY.name().toLowerCase(Locale.ROOT) + "_" + SystemAttributeFilter.SystemAttribute.DATE_MODIFIED.name().toLowerCase(Locale.ROOT); //$NON-NLS-1$
+		String created = SystemAttributeFilter.SystemAttribute.ENTITY_DATE_CREATED.name().toLowerCase(Locale.ROOT);
+		String modified = SystemAttributeFilter.SystemAttribute.ENTITY_DATE_MODIFIED.name().toLowerCase(Locale.ROOT);
 		
 		
 		//create table
@@ -400,13 +425,15 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		sb.append(" ) "); //$NON-NLS-1$
 		sb.append("SELECT a.uuid, b.keyid, a.ca_uuid, a.date_created, a.date_modified  FROM "); //$NON-NLS-1$
 		sb.append(" smart.i_entity a join smart.i_entity_type b on a.entity_type_uuid = b.uuid "); //$NON-NLS-1$
-		sb.append(" WHERE b.ca_uuid in (:cauuids)"); //$NON-NLS-1$
+		sb.append(" WHERE b.ca_uuid in (:cauuids) and a.profile_uuid in (:profiles)"); //$NON-NLS-1$
 		
 		List<UUID> cauuids = cas.stream().map(e->e.getUuid()).collect(Collectors.toList());
+		Set<UUID> puuids = profiles.stream().map(e->e.getUuid()).collect(Collectors.toSet());
 		
 		logme(sb);
 		session.createNativeQuery(sb.toString())
 			.setParameterList("cauuids",  cauuids) //$NON-NLS-1$
+			.setParameterList("profiles",  puuids) //$NON-NLS-1$
 			.executeUpdate();
 		
 		return obsTable;
@@ -473,8 +500,9 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 			String columnName = null;
 			
 			if (item.getGroupByType() == GroupByType.SYSTEM) {
-				if (item.getSystemType() == SystemAttributeFilter.Type.ENTITY) {
-					columnName = item.getSystemType().name().toLowerCase(Locale.ROOT) + "_" + item.getSystemAttribute().name().toLowerCase(Locale.ROOT); //$NON-NLS-1$
+				if (item.getSystemAttribute() == SystemAttributeFilter.SystemAttribute.ENTITY_DATE_CREATED  ||
+						item.getSystemAttribute() == SystemAttributeFilter.SystemAttribute.ENTITY_DATE_MODIFIED) {
+					columnName = item.getSystemAttribute().name().toLowerCase(Locale.ROOT);
 					}else {
 					continue;
 				}
@@ -496,9 +524,9 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 			sb.append(") FROM "); //$NON-NLS-1$
 			sb.append(queryTable);
 				
-			if (item.getEntityTypeKey() != null && !item.getEntityTypeKey().isEmpty()) {
+			if (item.getOtherKey() != null && !item.getOtherKey().isEmpty()) {
 				sb.append(" WHERE "); //$NON-NLS-1$
-				sb.append(" entity_type_key = '" + item.getEntityTypeKey() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+				sb.append(" entity_type_key = '" + item.getOtherKey() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 				
 			Object[] dates = (Object[])session.createNativeQuery(sb.toString()).uniqueResult();
@@ -669,7 +697,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 						return;
 					}
 				}
-				if (filter instanceof SystemAttributeFilter && ((SystemAttributeFilter)filter).getType() == SystemAttributeFilter.Type.ENTITY) {
+				if (filter instanceof SystemAttributeFilter ) {
 					requiresEntity[0] = true;
 				}
 				
@@ -714,16 +742,15 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		if (queryFilter instanceof SystemAttributeFilter) {
 			
 			SystemAttributeFilter f = (SystemAttributeFilter)queryFilter;
-			if (f.getType() == SystemAttributeFilter.Type.ENTITY) {
+			if (f.getAttribute() == SystemAttribute.ENTITY_DATE_CREATED || f.getAttribute() == SystemAttribute.ENTITY_DATE_MODIFIED) {
 				String columnName = null;
-				if (f.getAttribute() == SystemAttributeFilter.SystemAttribute.DATE_CREATED) {
+				if (f.getAttribute() == SystemAttributeFilter.SystemAttribute.ENTITY_DATE_CREATED) {
 					columnName = "e.date_created"; //$NON-NLS-1$
-				}else if (f.getAttribute() == SystemAttributeFilter.SystemAttribute.DATE_MODIFIED) {
+				}else if (f.getAttribute() == SystemAttributeFilter.SystemAttribute.ENTITY_DATE_MODIFIED) {
 					columnName = "e.date_modified"; //$NON-NLS-1$
 				}
 				whereSql.append(SqlGenerator.generateDateClause(f.getDateValues(), columnName));
-
-			}else if (f.getType() == SystemAttributeFilter.Type.RECORD) {
+			}else{
 				throw new IllegalStateException("Group by record dates is not supported for entity summary queries"); //$NON-NLS-1$
 			}
 			
@@ -743,13 +770,13 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 			EntityFilter f = (EntityFilter)queryFilter;
 			String key = "p_"+parameters.size(); //$NON-NLS-1$
 			parameters.put(key, f.getEntityUuid());
-			whereSql.append(" entity_uuid = :" + key); //$NON-NLS-1$
+			whereSql.append(" entity_uuid = :" + key + " "); //$NON-NLS-1$
 			
 		}else if (queryFilter instanceof EntityTypeFilter) {
 			EntityTypeFilter f = (EntityTypeFilter)queryFilter;
 			String key = "p_" + parameters.size(); //$NON-NLS-1$
 			parameters.put(key, f.getTypeKey());
-			whereSql.append(" t.keyId = :" + key); //$NON-NLS-1$
+			whereSql.append(" t.keyId = :" + key + " "); //$NON-NLS-1$
 			
 		}else if (queryFilter instanceof IntelAttributeFilter) {
 			IntelAttributeFilter f = (IntelAttributeFilter)queryFilter;

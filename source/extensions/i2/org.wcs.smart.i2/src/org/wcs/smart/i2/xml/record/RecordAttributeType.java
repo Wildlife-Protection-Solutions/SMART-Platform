@@ -10,6 +10,7 @@ package org.wcs.smart.i2.xml.record;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -27,13 +28,13 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="record_attribute" type="{http://www.smartconservationsoftware.org/xml/1.0/org.wcs.smart.i2.record}LabelUuid" minOccurs="0"/>
+ *         &lt;element name="record_attribute" type="{http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.record}LabelUuid" minOccurs="0"/>
  *         &lt;element name="string_value" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="number_value_1" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
  *         &lt;element name="number_value_2" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
- *         &lt;element name="list_value" type="{http://www.smartconservationsoftware.org/xml/1.0/org.wcs.smart.i2.record}LabelUuid" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="list_value" type="{http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.record}LabelUuid" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
- *       &lt;attribute name="type" type="{http://www.smartconservationsoftware.org/xml/1.0/org.wcs.smart.i2.record}AttributeType" />
+ *       &lt;attribute name="type" type="{http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.record}AttributeType" />
  *       &lt;attribute name="alias" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/restriction>
  *   &lt;/complexContent>

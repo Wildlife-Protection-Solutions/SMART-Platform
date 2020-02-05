@@ -28,10 +28,12 @@ import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.eclipse.birt.report.engine.api.HTMLRenderOption;
 import org.eclipse.birt.report.engine.api.impl.EngineTask;
@@ -72,6 +74,7 @@ import org.wcs.smart.i2.birt.record.RecordMetadata;
 import org.wcs.smart.i2.birt.record.attachment.RecordAttachmentDataset;
 import org.wcs.smart.i2.birt.record.entities.RecordEntityDataset;
 import org.wcs.smart.i2.birt.record.location.RecordLocationDataset;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.util.GeometryUtils;
 
 import com.ibm.icu.util.ULocale;
@@ -269,11 +272,22 @@ public abstract class AbstractIntelBirtConnection implements IConnection {
 	public abstract Collection<ConservationArea> getConservationAreas();
 
 	/**
-	 * Returns of the current user has the given permission
+	 * Returns a set of profiles the current user has the given
+	 * permission for or empty if none
+	 * 
 	 * @param permission
 	 * @return true if user has access to permission; false otherwise
 	 */
-	public abstract boolean hasPermission(Permission permission);
+	public abstract Set<IntelProfile> hasPermission(Permission permission);
+	
+	
+	/**
+	 * Returns a set of addition parameters to supply to the query engine;
+	 * 
+	 */
+	public Map<String,String> getAdditionalQueryParameters(){
+		return Collections.emptyMap();
+	}
 	
 	@SuppressWarnings("unchecked")
 	@Override

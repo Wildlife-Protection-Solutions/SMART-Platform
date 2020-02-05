@@ -27,8 +27,12 @@ import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.imageio.ImageIO;
@@ -38,6 +42,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
@@ -48,10 +53,9 @@ import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.QueryFactory;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.InternalQueryManager;
+import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelAttribute;
@@ -59,12 +63,16 @@ import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelEntityTypeAttributeGroup;
+import org.wcs.smart.i2.model.IntelProfile;
+import org.wcs.smart.i2.model.IntelProfileEntityType;
+import org.wcs.smart.i2.model.IntelRecordQuery;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.model.OtherAttributeGroup;
 import org.wcs.smart.i2.query.Operator;
-import org.wcs.smart.i2.query.observation.filter.RecordAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter;
+import org.wcs.smart.i2.security.IntelSecurityManager;
+import org.wcs.smart.i2.ui.Resources;
 
 /**
  * Job for loading roots for filter tree
@@ -88,18 +96,21 @@ public class LoadFilterOptions extends Job {
 	protected IStatus run(IProgressMonitor monitor) {
 		List<FilterTreeItem> roots = new ArrayList<FilterTreeItem>();
 		try(Session s = HibernateManager.openSession()){
-			roots.add(loadEntity(s));
-			roots.add(loadAttributes(s));
+			
 			if (query.getTypeKey().equals(IntelEntityRecordQuery.KEY)) {
-				roots.add(loadRecords(s));
-				roots.add(loadRecordAttributes(s));
-				
+				roots.add(loadEntity(s));
+				roots.add(loadAttributes(s));
+				roots.add(loadRecordAttributes(s));				
 				BasicTreeFilterItem opRoot = new BasicTreeFilterItem(Messages.LoadFilterOptions_EntityObservationsNode);
 				opRoot.setImageDescriptor(SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.DATA_MODEL_ICON));
 				roots.add(opRoot);
 				opRoot.addChild(loadDataModel(s));
 				opRoot.addChild(loadAreas(s));
+			}else if (query.getTypeKey().equals(IntelRecordQuery.KEY)) {
+				roots.add(loadRecordAttributes(s));	
 			}else {
+				roots.add(loadEntity(s));
+				roots.add(loadAttributes(s));
 				roots.add(loadDataModel(s));
 				roots.add(loadAreas(s));
 			}
@@ -107,8 +118,7 @@ public class LoadFilterOptions extends Job {
 		}
 		
 		Display.getDefault().syncExec(()->{
-			viewer.setItems(roots);
-			
+			viewer.setItems(roots);			
 		});
 		return Status.OK_STATUS;
 	}
@@ -174,15 +184,37 @@ public class LoadFilterOptions extends Job {
 	private FilterTreeItem loadAttributes(Session session){
 		AttributeHeaderFilterItem attributeRoots = new AttributeHeaderFilterItem(Messages.LoadFilterOptions_EntityAttributeFilterLabel, false);
 		
-		List<IntelAttribute> attributes = InternalQueryManager.INSTANCE.getQueryItemProvider().getAttributes(session);
-		attributes.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
-		for (IntelAttribute a : attributes){
+		HashMap<String, IntelAttribute> attributes = new HashMap<>();
+		Set<String> donotuse = new HashSet<>();
+		for (IntelProfile ip : ProfilesManager.INSTANCE.getActiveProfiles()) {
+			if (!IntelSecurityManager.INSTANCE.canViewQuery(ip)) continue;
+			ip = session.get(IntelProfile.class, ip.getUuid());
+			for (IntelProfileEntityType et : ip.getEntityTypes()) {
+				for (IntelEntityTypeAttribute e : et.getEntityType().getAttributes()) {
+					if (donotuse.contains(e.getAttribute().getKeyId())) continue;					
+					if (!attributes.containsKey(e.getAttribute().getKeyId())) {
+						attributes.put(e.getAttribute().getKeyId(), e.getAttribute());
+					}else {
+						//if the attribute types are not the same we may want to remove the attribute
+						//and make sure we don't re-add it
+						if (!e.getAttribute().getType().equals(attributes.get(e.getAttribute().getKeyId()).getType())) {
+							attributes.remove(e.getAttribute().getKeyId());
+							donotuse.add(e.getAttribute().getKeyId());
+						}
+					}
+				}
+			}
+		}
+		List<IntelAttribute> all = new ArrayList<>(attributes.values());
+		all.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
+		for (IntelAttribute a : all){
+			//only include attribute associated with entity type that is valid
 			AttributeTreeFilterItem item = new AttributeTreeFilterItem(a, true, false);
 			attributeRoots.addChild(item);
 		}
 		
-		SystemAttributeFilterItem dateCreated = new SystemAttributeFilterItem(SystemAttributeFilter.SystemAttribute.DATE_CREATED, SystemAttributeFilter.Type.ENTITY);
-		SystemAttributeFilterItem dateModified = new SystemAttributeFilterItem(SystemAttributeFilter.SystemAttribute.DATE_MODIFIED, SystemAttributeFilter.Type.ENTITY);
+		SystemAttributeFilterItem dateCreated = new SystemAttributeFilterItem(SystemAttributeFilter.SystemAttribute.ENTITY_DATE_CREATED);
+		SystemAttributeFilterItem dateModified = new SystemAttributeFilterItem(SystemAttributeFilter.SystemAttribute.ENTITY_DATE_MODIFIED);
 		
 		attributeRoots.addChild(dateCreated);
 		attributeRoots.addChild(dateModified);
@@ -195,9 +227,8 @@ public class LoadFilterOptions extends Job {
 		entityTypeRoot.setImageDescriptor(Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_ENTITY));
 
 		List<IntelEntityType> types =
-			InternalQueryManager.INSTANCE.getQueryItemProvider().getEntityTypes(session);
-		
-		
+			InternalQueryManager.INSTANCE.getQueryItemProvider().getEntityTypes(ProfilesManager.INSTANCE.getActiveProfileIds(), session);
+				
 		types.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 		for(IntelEntityType t : types){
 			EntityTreeFilterItem entityNode = new EntityTreeFilterItem(t, false);
@@ -262,75 +293,41 @@ public class LoadFilterOptions extends Job {
 			});
 			
 		}
-		return entityTypeRoot;
-		
-		
+		return entityTypeRoot;	
 	}
 	
 	private FilterTreeItem loadRecordAttributes(Session session) {
 		BasicTreeFilterItem recordSourceRoot = new BasicTreeFilterItem(Messages.LoadFilterOptions_RecordAttributesNode);
 		recordSourceRoot.setImageDescriptor(Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_RECORD));
 		
-		RecordAttributeFilterItem dateFilter = new RecordAttributeFilterItem(RecordAttributeFilter.FixedAttribute.DATE);
-		recordSourceRoot.addChild(dateFilter);
-		
-		RecordAttributeFilterItem statusFilter = new RecordAttributeFilterItem(RecordAttributeFilter.FixedAttribute.STATUS);
-		recordSourceRoot.addChild(statusFilter);
-		
-		SystemAttributeFilterItem dateCreated = new SystemAttributeFilterItem(SystemAttributeFilter.SystemAttribute.DATE_CREATED, SystemAttributeFilter.Type.RECORD);
-		SystemAttributeFilterItem dateModified = new SystemAttributeFilterItem(SystemAttributeFilter.SystemAttribute.DATE_MODIFIED, SystemAttributeFilter.Type.RECORD);
-		recordSourceRoot.addChild(dateCreated);
-		recordSourceRoot.addChild(dateModified);
-		
-		return recordSourceRoot;
-	}
-	
-	private FilterTreeItem loadRecords(Session session){
-		BasicTreeFilterItem recordSourceRoot = new BasicTreeFilterItem(Messages.LoadFilterOptions_SourcesNode);
-		recordSourceRoot.setImageDescriptor(Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_RECORD));
-
-		List<IntelRecordSource> sources =
-				QueryFactory.buildQuery(session, IntelRecordSource.class, new Object[] {
-						"conservationArea", SmartDB.getCurrentConservationArea() //$NON-NLS-1$
-				}).list();
-			
+		recordSourceRoot.addChild(new SystemAttributeFilterItem(SystemAttributeFilter.SystemAttribute.RECORD_DATE));
+		recordSourceRoot.addChild(new SystemAttributeFilterItem(SystemAttributeFilter.SystemAttribute.RECORD_STATUS));
+		recordSourceRoot.addChild(new SystemAttributeFilterItem(SystemAttributeFilter.SystemAttribute.RECORD_SOURCE));
+		recordSourceRoot.addChild(new SystemAttributeFilterItem(SystemAttributeFilter.SystemAttribute.RECORD_DATE_CREATED));
+		recordSourceRoot.addChild(new SystemAttributeFilterItem(SystemAttributeFilter.SystemAttribute.RECORD_DATE_CREATED));
 		
 		
-		sources.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
-		for(IntelRecordSource t : sources){
-			RecordSourceFilterItem sourceNode = new RecordSourceFilterItem(t);
-			recordSourceRoot.addChild(sourceNode);
-			final byte[] icon = t.getIcon();
-			if (icon != null){
-				sourceNode.setImageDescriptor(new ImageDescriptor() {
-					@Override
-					public ImageData getImageData() {
-						try(ByteArrayInputStream in = new ByteArrayInputStream(icon)){
-							BufferedImage image = ImageIO.read(in);
-							if (image != null){
-								return AWTSWTImageUtils.convertToSWTImage(image).getImageData();
-							}
-						}catch (Exception ex){
-							
-						}
-						return null;
-					}
-				});
+		Set<UUID> profiles = ProfilesManager.INSTANCE.getActiveProfiles().stream()
+				.filter(f->IntelSecurityManager.INSTANCE.canViewQuery(f))
+				.map(f->f.getUuid()).collect(Collectors.toSet());
 				
+		List<IntelRecordSource> sources = InternalQueryManager.INSTANCE.getQueryItemProvider()
+				.getRecordSources(profiles, session);
+		
+		for (IntelRecordSource type : sources) {
+			BasicTreeFilterItem sourceRoot = new BasicTreeFilterItem(type.getName());
+			Image img = Resources.INSTANCE.getImage(type);
+			if (img != null) {
+				sourceRoot.setImageDescriptor(ImageDescriptor.createFromImage(img));
 			}
-
-			if (t.getAttributes() == null || t.getAttributes().size() == 0) {
-				sourceNode.addChild(null);
-			}else {
-				for (IntelRecordSourceAttribute a : t.getAttributes()) {
-					AttributeTreeFilterItem i = new AttributeTreeFilterItem(a);
-					sourceNode.addChild(i);
-				}
-			}
+			recordSourceRoot.addChild(sourceRoot);
 			
+			
+			List<IntelRecordSourceAttribute> thisattributes = new ArrayList<>(InternalQueryManager.INSTANCE.getQueryItemProvider().getRecordSourceAttributes(type, session));
+			for (IntelRecordSourceAttribute  a : thisattributes) {			
+				sourceRoot.addChild(new AttributeTreeFilterItem(a));
+			}
 		}
 		return recordSourceRoot;
-		
-		
 	}
 }

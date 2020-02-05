@@ -26,22 +26,29 @@ import java.util.UUID;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
-import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.ui.Resources;
 
+/**
+ * Input for entity editor 
+ * @author Emily
+ *
+ */
 public class EntityEditorInput implements IEditorInput{
 
 	private String name;
 	private UUID uuid;
 	private IntelEntityType type;
+	private UUID profileUuid;
 	
 	private boolean defaultEditMode = false;
 	
-	public EntityEditorInput(String name, UUID uuid, IntelEntityType type){
+	public EntityEditorInput(String name, UUID uuid, UUID profileUuid, IntelEntityType type){
 		this.name = name;
 		this.uuid = uuid;
 		this.type = type;
+		this.profileUuid = profileUuid;
 	}
 	
 	public boolean getDefaultEditMode() {
@@ -50,6 +57,10 @@ public class EntityEditorInput implements IEditorInput{
 	
 	public void setDefaultEditMode(boolean editMode) {
 		this.defaultEditMode = editMode;
+	}
+	
+	public UUID getProfileUuid() {
+		return this.profileUuid;
 	}
 	
 	public IntelEntityType getType(){
@@ -74,7 +85,7 @@ public class EntityEditorInput implements IEditorInput{
 	public ImageDescriptor getImageDescriptor() {
 		if (getType().getIcon() == null) return null;
 		try {
-			return AWTSWTImageUtils.createImageDescriptor(getType().getIconAsImage());
+			return ImageDescriptor.createFromImage(Resources.INSTANCE.getImage(getType()));
 		} catch (Exception e) {
 			Intelligence2PlugIn.log(e.getMessage(), e);
 		}

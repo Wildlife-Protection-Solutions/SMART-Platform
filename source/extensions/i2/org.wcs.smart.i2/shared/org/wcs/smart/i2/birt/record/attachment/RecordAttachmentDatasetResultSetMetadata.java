@@ -29,7 +29,6 @@ import org.wcs.smart.SmartContext;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
-import org.wcs.smart.util.UuidUtils;
 
 /**
  * Entity record datasets results metadata
@@ -61,7 +60,7 @@ public class RecordAttachmentDatasetResultSetMetadata implements IResultSetMetaD
 		public Object getValue(IntelRecordAttachment record) {
 			switch(this){
 			case RECORD_UUID:
-				return UuidUtils.uuidToString(record.getRecord().getUuid());
+				return record.getRecord().getUuid();
 			case FILE_NAME:
 				return record.getAttachment().getFilename();
 			case DATE_CREATED:

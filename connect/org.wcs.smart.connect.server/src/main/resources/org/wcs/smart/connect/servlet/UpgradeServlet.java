@@ -30,7 +30,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
@@ -54,6 +59,7 @@ import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.i18n.Messages;
+import org.wcs.smart.i2.model.IntelPermission;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -116,8 +122,12 @@ public class UpgradeServlet extends HttpServlet {
 				if (filestoreVersion.equals("5.0.0")) { //$NON-NLS-1$
 					upgrade500to600(s);
 					upgrade600to620(s);
+					upgrade620to700(s);
 				}else if (filestoreVersion.equals("6.0.0")) { //$NON-NLS-1$
 					upgrade600to620(s);
+					upgrade620to700(s);
+				}else if (filestoreVersion.equals("6.2.0")) { //$NON-NLS-1$
+					upgrade620to700(s);
 				}else {
 					throw new Exception("Invalid filestore version - cannot perform upgrade"); //$NON-NLS-1$
 				}
@@ -188,6 +198,226 @@ public class UpgradeServlet extends HttpServlet {
 		});
 	}
 	
+	private void upgrade620to700(Session s) {
+		s.doWork(new Work() {
+
+			@Override
+			public void execute(Connection c) throws SQLException {
+				try {
+					//disable triggers
+					c.createStatement().executeUpdate("SET session_replication_role = replica"); //$NON-NLS-1$
+					
+					updateProfilesV6toV7(c);
+					
+					//run these commands at end
+					//change ca version so users cannot sync with this and cause problems
+					c.createStatement().execute("update connect.ca_info SET version = uuid_generate_v4()"); //$NON-NLS-1$
+					c.createStatement().execute("delete from connect.change_log"); //$NON-NLS-1$
+					c.createStatement().execute("delete from connect.change_log_history"); //$NON-NLS-1$
+					
+					
+					//re-enable triggers
+					c.createStatement().executeUpdate("SET session_replication_role = DEFAULT"); //$NON-NLS-1$
+				}catch (Exception ex) {
+					throw new SQLException (ex);
+				}
+			}
+		});
+	}
+	
+	private void updateProfilesV6toV7(Connection c) throws SQLException {
+		String profilekey = "profile1";
+		String profilename = "Profile 1";
+		int color = (new java.awt.Color(51,68,107)).getRGB();
+		
+		//for each ca we need to create some sort of default profile
+		HashMap<UUID, UUID> caProfileUuids = new HashMap<>();
+
+		PreparedStatement ps = c.prepareStatement("INSERT INTO smart.i_profile_config(uuid, ca_uuid, keyid, color) VALUES(?,?,?,?)");
+		try(ResultSet rs = c.createStatement().executeQuery("SELECT uuid FROM smart.conservation_area")){
+			
+			while(rs.next()) {
+				UUID uuid = (UUID)rs.getObject(1);
+				if (uuid.equals(ConservationArea.MULTIPLE_CA)) continue;
+				
+				UUID puuid = createUuid(c);
+				
+				ps.setObject(1, puuid);
+				ps.setObject(2,  uuid);
+				ps.setString(3, profilekey);
+				ps.setInt(4, color);
+				ps.execute();
+				
+		
+				caProfileUuids.put(uuid, puuid);
+			}
+		}
+		
+		//add name to i18n table
+		c.createStatement().execute("INSERT INTO smart.i18n_label (language_uuid, element_uuid, value) "
+				+ "SELECT a.uuid, b.uuid, '" + profilename + "' FROM smart.language a join smart.i_profile_config b "
+				+ " on a.ca_uuid = b.ca_uuid");
+			
+		
+		String[] sql = new String[] {
+				"INSERT INTO smart.i_profile_entity_type(entity_type_uuid, profile_uuid) SELECT  a.uuid, b.uuid FROM smart.i_entity_type a, smart.i_profile_config b where a.ca_uuid = b.ca_uuid ",
+				"INSERT INTO smart.i_profile_record_source(record_source_uuid, profile_uuid) SELECT a.uuid, b.uuid FROM smart.i_recordsource a, smart.i_profile_config b where a.ca_uuid = b.ca_uuid ",
+					
+				"update smart.i_entity set profile_uuid = (select b.uuid from smart.I_PROFILE_CONFIG b where b.ca_uuid = smart.i_entity.ca_uuid)",
+				"update smart.i_record set profile_uuid = (select b.uuid from smart.I_PROFILE_CONFIG b where b.ca_uuid = smart.i_record.ca_uuid)",
+				
+				"update smart.i_relationship_type set src_profile_uuid = (select b.uuid from smart.I_PROFILE_CONFIG b where b.ca_uuid = smart.i_relationship_type.ca_uuid)",
+				"update smart.i_relationship_type set target_profile_uuid = src_profile_uuid",
+				
+				"ALTER TABLE smart.i_entity ALTER COLUMN profile_uuid set not null",
+				"ALTER TABLE smart.i_entity ADD CONSTRAINT i_entity_profileuuid_fk FOREIGN KEY (profile_uuid) REFERENCES smart.i_profile_config (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
+				"ALTER TABLE smart.i_record ALTER COLUMN profile_uuid set not null",
+				"ALTER TABLE smart.i_record ADD CONSTRAINT i_record_profileuuid_fk FOREIGN KEY (profile_uuid) REFERENCES smart.i_profile_config (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
+				"ALTER TABLE smart.i_relationship_type ALTER COLUMN src_profile_uuid SET not null",
+				"ALTER TABLE smart.i_relationship_type ALTER COLUMN target_profile_uuid SET not null",
+				"ALTER TABLE smart.i_relationship_type ADD CONSTRAINT i_rtype_srcprofileuuid_fk FOREIGN KEY (src_profile_uuid) REFERENCES smart.i_profile_config (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
+				"ALTER TABLE smart.i_relationship_type ADD CONSTRAINT i_rtype_trgprofileuuid_fk FOREIGN KEY (target_profile_uuid) REFERENCES smart.i_profile_config (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
+				
+				"UPDATE smart.I_ENTITY_RECORD_QUERY set profile_filter = '" + profilekey + "'", 
+				"UPDATE smart.i_entity_summary_query set profile_filter = '" + profilekey + "'", 
+				"UPDATE smart.i_record_obs_query set profile_filter = '" + profilekey + "'",
+				
+				
+		};
+		for (String s : sql) c.createStatement().execute(s);
+		
+		
+		HashMap<UUID, Set<String>> usedkeys = new HashMap<>();
+		
+		//attribute sources
+		ps = c.prepareStatement("UPDATE smart.i_recordsource_attribute SET keyid = ? WHERE uuid = ?");
+		try(ResultSet rs = c.createStatement().executeQuery("select a.uuid, b.keyid, a.source_uuid from smart.I_RECORDSOURCE_ATTRIBUTE a join smart.i_attribute b on a.attribute_uuid = b.uuid")){
+			while(rs.next()) {
+				UUID uuid = (UUID)rs.getObject(1);
+				UUID srcuuid = (UUID)rs.getObject(3);
+				String keyid = rs.getString(2);
+			
+				if (!usedkeys.containsKey(srcuuid)) usedkeys.put(srcuuid, new HashSet<>());
+				
+				Set<String> used = usedkeys.get(srcuuid);
+				String root = keyid;
+				int i = 1;
+				while(used.contains(keyid)) {
+					keyid = root + i;
+					i++;
+				}
+				used.add(keyid);
+				
+				ps.setString(1,  keyid);
+				ps.setObject(2,  uuid);
+				ps.executeUpdate();
+			}
+		}
+		//repeat for entity sources
+		ps = c.prepareStatement("UPDATE smart.i_recordsource_attribute SET keyid = ? WHERE uuid = ?");
+
+		try(ResultSet rs = c.createStatement().executeQuery("select a.uuid, b.keyid, a.source_uuid from smart.I_RECORDSOURCE_ATTRIBUTE a join smart.i_entity_type b on a.entity_type_uuid = b.uuid")){
+			while(rs.next()) {
+				UUID uuid = (UUID)rs.getObject(1);
+				UUID srcuuid = (UUID)rs.getObject(3);
+				String keyid = rs.getString(2);
+			
+				if (!usedkeys.containsKey(srcuuid)) usedkeys.put(srcuuid, new HashSet<>());
+				
+				Set<String> used = usedkeys.get(srcuuid);
+				String root = keyid;
+				int i = 1;
+				while(used.contains(keyid)) {
+					keyid = root + i;
+					i++;
+				}
+				used.add(keyid);
+				
+				ps.setString(1,  keyid);
+				ps.setObject(2,  uuid);
+				ps.executeUpdate();
+			}
+		}		
+
+		c.createStatement().executeUpdate("alter table smart.i_recordsource_attribute alter column keyid set not null");
+
+
+		//need to map old permissions to new ones
+		//remove old permission from employee
+		PreparedStatement psinsert = c.prepareStatement("INSERT INTO smart.i_permission (employee_uuid, profile_uuid, permissions) VALUES(?,?,?)");
+		PreparedStatement psupdate = c.prepareStatement("UPDATE smart.employee set smartuserlevel = ? where uuid = ?");
+
+		try(ResultSet rs = c.createStatement().executeQuery("select uuid, ca_uuid, smartuserlevel FROM smart.EMPLOYEE where smartuserlevel is not null")){
+			while(rs.next()) {
+				UUID uuid = (UUID)rs.getObject(1);
+				UUID cauuid = (UUID)rs.getObject(2);
+				String userlevel = (String)rs.getString(3);
+			
+				String[] parts = userlevel.split(",");
+			
+				List<String> newparts = new ArrayList<>();
+				Set<Integer> intelpermissions = new HashSet<>();
+				
+				for (String bit : parts) {
+					if (bit.equalsIgnoreCase("INTEL_ANALYST")) {
+						newparts.add("INTEL_ADMIN");
+						intelpermissions.add(IntelPermission.ADMIN);
+						
+					}else if (bit.toUpperCase(Locale.ROOT).startsWith("INTEL_")) {
+						if(!newparts.contains("INTEL_USER")) newparts.add("INTEL_USER");
+						
+						if (bit.equalsIgnoreCase("INTEL_ENTITY_CREATE")) intelpermissions.add(IntelPermission.ENTITY_CREATE);
+						if (bit.equalsIgnoreCase("INTEL_ENTITY_DELETE")) intelpermissions.add(IntelPermission.ENTITY_DELETE);
+						if (bit.equalsIgnoreCase("INTEL_ENTITY_EDIT")) intelpermissions.add(IntelPermission.ENTITY_EDIT);
+						if (bit.equalsIgnoreCase("INTEL_ENTITY_VIEW")) intelpermissions.add(IntelPermission.ENTITY_VIEW);
+						
+						if (bit.equalsIgnoreCase("INTEL_RECORD_CREATE")) intelpermissions.add(IntelPermission.RECORD_CREATE);
+						if (bit.equalsIgnoreCase("INTEL_RECORD_DELETE")) intelpermissions.add(IntelPermission.RECORD_DELETE);
+						if (bit.equalsIgnoreCase("INTEL_RECORD_EDIT")) intelpermissions.add(IntelPermission.RECORD_EDIT_NOTSTATUS);
+						if (bit.equalsIgnoreCase("INTEL_RECORD_EDIT_WITH_STATUS")) intelpermissions.add(IntelPermission.RECORD_EDIT_ALL);
+						if (bit.equalsIgnoreCase("INTEL_RECORD_VIEW")) intelpermissions.add(IntelPermission.RECORD_VIEW);
+						
+						if (bit.equalsIgnoreCase("INTEL_QUERY_ALL")) intelpermissions.add(IntelPermission.QUERY);
+						if (bit.equalsIgnoreCase("INTEL_READ_ONLY")) intelpermissions.add(IntelPermission.READ_ONLY);
+						
+					}else {
+						newparts.add(bit);
+					}
+				}
+				if (intelpermissions.isEmpty()) continue;
+				
+				if (newparts.contains("INTEL_ADMIN") && newparts.contains("INTEL_USER")) newparts.remove("INTEL_USER");
+				
+				if (intelpermissions.contains(IntelPermission.ADMIN)) {
+					//remove all others
+					intelpermissions.clear();
+					intelpermissions.add(IntelPermission.ADMIN);
+				}
+				
+				int permission = 0;
+				for (Integer i : intelpermissions) permission = permission | i;
+	
+				//insert permission
+				psinsert.setObject(1, uuid);
+				psinsert.setObject(2,  caProfileUuids.get(cauuid));
+				psinsert.setInt(3, permission);
+				psinsert.execute();
+				
+				
+				//update employee
+				StringBuilder sb = new StringBuilder();
+				sb.append(newparts.get(0));
+				for (int i = 1; i < newparts.size(); i ++) {
+					sb.append(",");
+					sb.append(newparts.get(i));
+				}
+				psupdate.setString(1, sb.toString());
+				psupdate.setObject(2, uuid);
+				psupdate.execute();
+				
+			}
+		}		
+	}
 	/**
 	 * Here we encrypt all files in the filestore including other plugins
 	 * @param c

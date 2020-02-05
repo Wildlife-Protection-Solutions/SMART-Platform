@@ -23,9 +23,8 @@ package org.wcs.smart.i2.model;
 
 import java.util.UUID;
 
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.wcs.smart.i2.Intelligence2PlugIn;
-import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
+import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.i2.ui.Resources;
 
 /**
  * Working set item for displaying in the working set view
@@ -38,39 +37,31 @@ public class IntelWorkingSetItem {
 	private String label;
 	private UUID uuid;
 	private boolean isVisible;
-	private ImageDescriptor descriptor;
+	private Image image;
 	private String queryType;
 	
 	public IntelWorkingSetItem(UUID uuid, boolean visible) {
 		this(null, null, visible, uuid, null);
 	}
 	public IntelWorkingSetItem(IntelWorkingSetEntity entity) {
-		this(IntelWorkingSetCategory.ENTITY, entity.getEntity().getIdAttributeAsText(), entity.getIsVisible(), entity.getEntity().getUuid(), EntityTypeLabelProvider.createImageDescriptor(entity.getEntity().getEntityType()));
+		this(IntelWorkingSetCategory.ENTITY, entity.getEntity().getIdAttributeAsText(), entity.getIsVisible(), entity.getEntity().getUuid(), Resources.INSTANCE.getImage(entity.getEntity().getEntityType()));
 	}
 	
-	public IntelWorkingSetItem(IntelWorkingSetRecord record, ImageDescriptor img) {
+	public IntelWorkingSetItem(IntelWorkingSetRecord record, Image img) {
 		this(IntelWorkingSetCategory.RECORD, record.getRecord().getTitle(), record.getIsVisible(), record.getRecord().getUuid(),img);
 	}
 	
 	public IntelWorkingSetItem(IntelWorkingSetQuery query, AbstractIntelQuery queryImpl) {
 		this(IntelWorkingSetCategory.QUERIES, queryImpl.getName(), query.getIsVisible(), queryImpl.getUuid(), null);
 		this.queryType = query.getQueryType();
-		
-		if (queryType.equals(IntelEntitySummaryQuery.KEY)) {
-			this.descriptor = Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_QUERY_ENTITYSUM);
-		}else if (queryType.equals(IntelRecordObservationQuery.KEY)){
-			this.descriptor = Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_QUERY_RECORDOBS);
-		}else if (queryType.equals(IntelEntityRecordQuery.KEY)){
-			this.descriptor = Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_QUERY_ENTITYRECORD);
-
-		}
+		this.image = Resources.INSTANCE.getImage(queryType);
 	}
 	
-	private IntelWorkingSetItem(IntelWorkingSetCategory category, String label, boolean isVisible, UUID uuid, ImageDescriptor descriptor){
+	private IntelWorkingSetItem(IntelWorkingSetCategory category, String label, boolean isVisible, UUID uuid, Image image){
 		this.category = category;
 		this.label = label;
 		this.uuid = uuid;
-		this.descriptor = descriptor;
+		this.image = image;
 		this.isVisible = isVisible;
 	}
 	
@@ -94,8 +85,8 @@ public class IntelWorkingSetItem {
 		return this.uuid;
 	}
 	
-	public ImageDescriptor getImageDescriptor(){
-		return descriptor;
+	public Image getImage(){
+		return image;
 	}
 	
 	@Override

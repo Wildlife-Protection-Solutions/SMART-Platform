@@ -199,11 +199,12 @@ public class EntityRelationshipExporter {
 			monitor.setTaskName(Messages.EntityRelationshipExporter_TaskMsg3);
 						
 			try(CSVWriter writer = new CSVWriter(Files.newBufferedWriter(entityFile, cs), delimiter)){
-				String[] data = new String[entityAttributes.size() + 3];
+				String[] data = new String[entityAttributes.size() + 4];
 				int i = 0;
 				data[i++] = Messages.EntityRelationshipExporter_UuidColumnName;
 				data[i++] = Messages.EntityRelationshipExporter_EntityColumnName;
 				data[i++] = Messages.EntityRelationshipExporter_TypeColumnName;
+				data[i++] = Messages.EntityRelationshipExporter_ProfileColumnName;
 				for (IntelAttribute ia : entityAttributes){
 					data[i++] = ia.getName();
 				}
@@ -211,10 +212,11 @@ public class EntityRelationshipExporter {
 				
 				for(IntelEntity e : entitiesToExport){
 					i = 0;
-					data = new String[entityAttributes.size() + 3];
+					data = new String[entityAttributes.size() + 4];
 					data[i++] = UuidUtils.uuidToString(e.getUuid());
 					data[i++] = e.getIdAttributeAsText();
 					data[i++] = e.getEntityType().getName();
+					data[i++] = e.getProfile().getName();
 					for (IntelAttribute ia : entityAttributes){
 						IntelEntityAttributeValue v = e.findAttributeValue(ia);
 						if (v != null){

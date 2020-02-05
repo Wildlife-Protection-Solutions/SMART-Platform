@@ -21,8 +21,12 @@
  */
 package org.wcs.smart.i2.model;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -47,6 +51,8 @@ import org.wcs.smart.ca.NamedItem;
 @Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
 public abstract class AbstractIntelQuery extends NamedItem implements IIntelAuditItem {
 	
+	public static final String PART_SEPERATOR = "|"; //$NON-NLS-1$
+
 	private static final long serialVersionUID = 1L;
 	
 	protected ConservationArea ca;
@@ -58,6 +64,9 @@ public abstract class AbstractIntelQuery extends NamedItem implements IIntelAudi
 	protected Employee createdBy;
 	protected Employee lastModifiedBy;
 
+	protected String profileFilter;
+
+	
 	/**
 	 * 
 	 * @return the key is that represents the query type
@@ -188,6 +197,80 @@ public abstract class AbstractIntelQuery extends NamedItem implements IIntelAudi
 	}
 	public void setQueryString(String queryString){
 		this.queryString = queryString;
+	}
+	
+	/**
+	 * comma separated list of profile keys
+	 *  
+	 * @return
+	 */
+	@Column(name="profile_filter")
+	public String getProfileFilter(){
+		return this.profileFilter;
+	}
+	public void setProfileFilter(String profileFilter){
+		this.profileFilter = profileFilter;
+	}
+	
+	
+	/**
+	 * returns true if the query profile filter
+	 * includes the given profile
+	 * 
+	 * @param p
+	 * @return
+	 */
+	@Transient
+	public boolean queriesProfile(IntelProfile p) {
+		Set<String> pp = convertFromProfileFilter(getProfileFilter());	
+		return pp.contains(p.getKeyId());
+	}
+	
+	/**
+	 * returns true if every query profile filter is
+	 * in the profiles set
+	 * @param profiles
+	 * @return
+	 */
+	@Transient
+	public boolean queriesProfile(Set<String> profiles) {
+		Set<String> pp = convertFromProfileFilter(getProfileFilter());	
+		for (String p : pp) {
+			if (!profiles.contains(p)) return false;
+		}
+		return true;
+	}
+	@Transient
+	public static String convertKeysToProfileFilter(Collection<String> profiles) {
+		if (profiles.isEmpty()) return "";
+		
+		StringBuilder sb = new StringBuilder();
+		for (String key : profiles) {
+			sb.append( key);
+			sb.append(",");
+		}
+		return sb.toString();
+	}
+	
+	@Transient
+	public static String convertToProfileFilter(Collection<IntelProfile> profiles) {
+		if (profiles.isEmpty()) return "";
+		
+		StringBuilder sb = new StringBuilder();
+		for (IntelProfile ip : profiles) {
+			sb.append( ip.getKeyId() );
+			sb.append(",");
+		}
+		return sb.toString();
+	}
+	@Transient
+	public static Set<String> convertFromProfileFilter(String filter) {
+		if (filter == null) return Collections.emptySet();
+		if (filter.trim().isEmpty()) return Collections.emptySet();
+		String[] bits = filter.split(",");
+		Set<String> profiles = new HashSet<>();
+		for (String x : bits) profiles.add(x);
+		return profiles;
 	}
 	
 }

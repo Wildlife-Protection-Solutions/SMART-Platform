@@ -29,18 +29,15 @@ import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -98,16 +95,16 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
-import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.export.dialog.CsvExportDialog;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.security.IntelSecurityManager;
@@ -212,10 +209,11 @@ public class RecordsView {
 				new String[]{Messages.RecordsView_unprocessedSection, Messages.RecordsView_inprogressSection, Messages.RecordsView_allSection, Messages.RecordsView_basicSection}, 
 				headerMain, toolkit);
 		tabList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-
-		ToolBar tb = new ToolBar(headerMain, SWT.FLAT);
+		((GridLayout)tabList.getLayout()).numColumns = ((GridLayout)tabList.getLayout()).numColumns + 1;
+		ToolBar tb = new ToolBar(tabList, SWT.FLAT);
+		tb.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, true, false));
 		
-		if (IntelSecurityManager.INSTANCE.canCreateRecord()) {
+		if (IntelSecurityManager.INSTANCE.canCreateRecordAny()) {
 			ToolItem newRecord = new ToolItem(tb, SWT.PUSH);
 			newRecord.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 			newRecord.setToolTipText(Messages.RecordsView_newrecordtooltip);
@@ -241,7 +239,7 @@ public class RecordsView {
 		
 		lstNewRecords = new TableViewer(wrapper, SWT.V_SCROLL | SWT.H_SCROLL| SWT.MULTI | SWT.BORDER | SWT.VIRTUAL);
 		lstNewRecords.setContentProvider(new RecordsViewContentProvider());
-		lstNewRecords.setLabelProvider(new RecordsViewLabelProvider(context));
+		lstNewRecords.setLabelProvider(new RecordsViewLabelProvider(context, true, false, true));
 		lstNewRecords.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		lstNewRecords.addDoubleClickListener(openListener);
 		lstNewRecords.addSelectionChangedListener(selectOne);
@@ -261,7 +259,7 @@ public class RecordsView {
 		
 		lstInProgress = new TableViewer(wrapper, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.VIRTUAL);
 		lstInProgress.setContentProvider(new RecordsViewContentProvider());
-		lstInProgress.setLabelProvider(new RecordsViewLabelProvider(context));
+		lstInProgress.setLabelProvider(new RecordsViewLabelProvider(context, true, false, true));
 		lstInProgress.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		lstInProgress.addDoubleClickListener(openListener);
 		lstInProgress.addSelectionChangedListener(selectOne);
@@ -312,7 +310,7 @@ public class RecordsView {
 		
 		lstAllRecords.setInput(new String[]{DialogConstants.LOADING_TEXT});
 		
-		final RecordsViewLabelProvider lblprovider = new RecordsViewLabelProvider(true, context);
+		final RecordsViewLabelProvider lblprovider = new RecordsViewLabelProvider(context, true, true, true);
 		lstAllRecords.getTree().addListener(SWT.MeasureItem, new Listener() {
 	 		public void handleEvent(Event event) {
 	 			TreeItem item = (TreeItem)event.item;
@@ -461,7 +459,7 @@ public class RecordsView {
 			public void menuHidden(MenuEvent e) {}
 		});
 		
-		if (IntelSecurityManager.INSTANCE.canCreateRecord()) {
+		if (IntelSecurityManager.INSTANCE.canCreateRecordAny()) {
 			MenuItem miNew = new MenuItem(m, SWT.PUSH);
 			miNew.setText(Messages.RecordsView_NewRecordMenuItem);
 			miNew.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
@@ -472,7 +470,7 @@ public class RecordsView {
 				}
 			});
 		}			
-		if (IntelSecurityManager.INSTANCE.canDeleteRecord()){
+		if (IntelSecurityManager.INSTANCE.canDeleteRecordAny()){
 			MenuItem miDelete = new MenuItem(m, SWT.PUSH);
 			miDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 			miDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
@@ -751,6 +749,14 @@ public class RecordsView {
 		refreshView();
 	}
 	
+	@Optional
+	@Inject
+	private void activeProfilesChanged(@UIEventTopic(IntelEvents.PROFILES_ALL) Object data){
+		refreshView();
+		basicSearchPnl.doSearch();
+		basicSearchPnl.refreshSource();
+	}
+	
 	@Focus
 	public void setFocus() {
 		lstInProgress.getControl().setFocus();
@@ -773,7 +779,7 @@ public class RecordsView {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			
-			if (!IntelSecurityManager.INSTANCE.canViewRecords()) {
+			if (!IntelSecurityManager.INSTANCE.canViewRecordAny()) {
 				Display.getDefault().syncExec(()->{
 					lstAllRecords.getControl().setEnabled(false);
 					lstInProgress.getControl().setEnabled(false);
@@ -786,66 +792,33 @@ public class RecordsView {
 				return Status.OK_STATUS;
 			}
 			
-			// -- load record source images --
-			final List<IntelRecordSource> sources = new ArrayList<>();
-			try(Session s = HibernateManager.openSession()){
-				sources.addAll(QueryFactory.buildQuery(s, IntelRecordSource.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList()); //$NON-NLS-1$					
-			}
-			
-			Display.getDefault().asyncExec(new Runnable() {
-				@Override
-				public void run() {
-					HashMap<IntelRecordSource, Image> srcImages = new HashMap<>();
-					
-					for (IntelRecordSource src : sources){
-						try{
-							if (src.getIconAsImage() != null){
-								Image i = AWTSWTImageUtils.convertToSWTImage(src.getIconAsImage());
-								srcImages.put(src, i);
-							}
-						}catch(Exception ex){
-							Intelligence2PlugIn.log(ex.getMessage(),  ex);
-						}
-					}
-					
-					
-					if (lstAllRecords.getControl().isDisposed()) return;
-					for (RecordLabelProvider l : labelProviders){
-						l.setSourceImages(srcImages);
-					}					
-				}
-			});
 			
 			// -- load new and inprogress images --
 			final List<IntelRecordProxy> inProgress = new ArrayList<IntelRecordProxy>();
 			final List<IntelRecordProxy> newRecords = new ArrayList<IntelRecordProxy>();
-			
-			try(Session s = HibernateManager.openSession()){
-				
-				CriteriaBuilder cb = s.getCriteriaBuilder();
-				CriteriaQuery<IntelRecord> c = cb.createQuery(IntelRecord.class);
-				Root<IntelRecord> from = c.from(IntelRecord.class);
-				c.where(cb.and(
-						cb.equal(from.get("conservationArea"), SmartDB.getCurrentConservationArea()), //$NON-NLS-1$
-						cb.or(
-								cb.equal(from.get("status"), IntelRecord.Status.PROCESSING), //$NON-NLS-1$
-								cb.equal(from.get("status"), IntelRecord.Status.NEW) //$NON-NLS-1$
-								)
-						));
-				c.orderBy(cb.asc(from.get("dateCreated"))); //$NON-NLS-1$
-				List<IntelRecord> records = s.createQuery(c).getResultList();
-				for (IntelRecord r : records){
-					if (r.getRecordSource() != null){
-						r.getRecordSource().getIcon();
+
+			List<IntelProfile> profiles = new ArrayList<>(ProfilesManager.INSTANCE.getActiveProfiles());
+			profiles = profiles.stream().filter(e->IntelSecurityManager.INSTANCE.canViewRecords(e)).collect(Collectors.toList());
+			if (!profiles.isEmpty()) {
+				try(Session s = HibernateManager.openSession()){
+					String hql = " FROM IntelRecord WHERE conservationArea = :ca AND status in (:items) AND profile IN (:profiles) ORDER BY dateCreated"; //$NON-NLS-1$
+					
+					List<IntelRecord> records = s.createQuery(hql, IntelRecord.class)
+							.setParameter("ca",  SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
+							.setParameterList("items", new IntelRecord.Status[] {IntelRecord.Status.PROCESSING, IntelRecord.Status.NEW}) //$NON-NLS-1$
+							.setParameterList("profiles", profiles).list(); //$NON-NLS-1$
+	
+					for (IntelRecord r : records){
+						IntelRecordProxy proxy = null;
+						proxy = new IntelRecordProxy(r.getTitle(), r.getUuid(), r.getRecordSource(), r.getProfile(), r.getStatus(), r.getPrimaryDate());
+						if (r.getStatus() == IntelRecord.Status.PROCESSING){
+							inProgress.add(proxy);
+						}else if (r.getStatus() == IntelRecord.Status.NEW){
+							newRecords.add(proxy);
+						}
+						if (r.getRecordSource() != null) r.getRecordSource().getName();
+						r.getProfile().getName();
 					}
-					IntelRecordProxy proxy = null;
-					proxy = new IntelRecordProxy(r.getTitle(), r.getUuid(), r.getRecordSource(), r.getStatus(), r.getPrimaryDate());
-					if (r.getStatus() == IntelRecord.Status.PROCESSING){
-						inProgress.add(proxy);
-					}else if (r.getStatus() == IntelRecord.Status.NEW){
-						newRecords.add(proxy);
-					}
-//					if (proxy != null) proxy.setDate(computeDate(r));
 				}
 			}
 			
@@ -862,19 +835,25 @@ public class RecordsView {
 			//--load all records --
 			
 			final List<IntelRecordProxy> allRecords = new ArrayList<IntelRecordProxy>();
-			try(Session s = HibernateManager.openSession()){
-				Query<?> q = s.createQuery("SELECT title, uuid, primaryDate, recordSource.uuid, status FROM IntelRecord WHERE conservationArea = :ca ORDER BY dateModified desc"); //$NON-NLS-1$
-				q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-				List<?> items = q.list();
-				for (Object it : items){
-					Object[] item = (Object[])it;
-					IntelRecordProxy r = new IntelRecordProxy((String)item[0], (UUID)item[1], item[3] == null ? null : s.get(IntelRecordSource.class,(UUID)item[3]), (IntelRecord.Status)item[4], (Date)item[2]);
-					allRecords.add(r);
-//					r.setDate(computeDate(s.get(IntelRecord.class, r.getUuid())));
+			if (!profiles.isEmpty()) {
+				try(Session s = HibernateManager.openSession()){
+					Query<?> q = s.createQuery("SELECT title, uuid, primaryDate, recordSource.uuid, status, profile.uuid FROM IntelRecord WHERE conservationArea = :ca AND profile IN (:profiles) ORDER BY dateModified desc"); //$NON-NLS-1$
+					q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+					q.setParameter("profiles", profiles); //$NON-NLS-1$
+					List<?> items = q.list();
+					for (Object it : items){
+						Object[] item = (Object[])it;
+						IntelProfile ip = s.get(IntelProfile.class, (UUID)item[5]);
+						String name = (String)item[0];
+						UUID uuid = (UUID)item[1];
+						IntelRecordSource rs = item[3] == null ? null : s.get(IntelRecordSource.class,(UUID)item[3]);
+						IntelRecordProxy r = new IntelRecordProxy(name, uuid, rs, ip, (IntelRecord.Status)item[4], (Date)item[2]);
+						allRecords.add(r);
+					}
+					
 				}
-				
+				allRecords.sort((x,y)->-1 * x.getDate().compareTo(y.getDate()));
 			}
-			allRecords.sort((x,y)->-1 * x.getDate().compareTo(y.getDate()));
 			Display.getDefault().asyncExec(new Runnable() {
 				@Override
 				public void run() {
@@ -882,40 +861,8 @@ public class RecordsView {
 					lstAllRecords.setInput(allRecords);
 				}
 			});
-			
-			
-
-			
 			return Status.OK_STATUS;
-		}
-		
-//		private Date computeDate(IntelRecord r) {
-//			Date d = null;
-//			if (r.getLocations() != null) {
-//				for (IntelLocation l : r.getLocations()) {
-//					if (d == null || l.getDateTime().after(d)) {
-//						d = l.getDateTime();
-//					}
-//				}
-//			}
-//			if (d == null && r.getAttributes() != null) {
-//				for (IntelRecordAttributeValue v : r.getAttributes()) {
-//					if (v.getAttribute().getAttribute().getType() == AttributeType.DATE) {
-//						Date d2 = v.getDateValue();
-//						if (d2 != null) {
-//							if (d == null || d2.after(d)) {
-//								d = d2;
-//							}
-//						}
-//					}
-//				}
-//			}
-//			if (d == null) {
-//				d = r.getDateCreated();
-//			}
-//			return d;
-//		}
-		
+		}		
 	};
 	
 	class RecordViewerFilter extends ViewerFilter{

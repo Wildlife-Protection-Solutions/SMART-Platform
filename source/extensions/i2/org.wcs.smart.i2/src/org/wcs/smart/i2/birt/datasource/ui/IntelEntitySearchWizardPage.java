@@ -119,7 +119,7 @@ public class IntelEntitySearchWizardPage extends DataSetWizardPage {
 
 		composite.setLayoutData(gridData);
 
-		if (!IntelSecurityManager.INSTANCE.canViewEntities()) {
+		if (!IntelSecurityManager.INSTANCE.canViewEntityAny()) {
 			setPageComplete(false);
 			Label l = new Label(composite, SWT.NONE);
 			l.setText(Messages.IntelEntitySearchWizardPage_unauthorized); 

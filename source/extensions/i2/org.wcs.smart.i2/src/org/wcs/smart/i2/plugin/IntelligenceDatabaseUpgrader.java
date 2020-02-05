@@ -21,21 +21,29 @@
  */
 package org.wcs.smart.i2.plugin;
 
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.model.IntelPermission;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
+import org.wcs.smart.util.DerbyUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -80,11 +88,16 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 			upgradeV1toV2(session);
 			upgradeV2toV3(session);
 			upgradeV3toV4(session);
+			upgradeV4toV5(session);
 		}else if (currentVersion.equals(Intelligence2PlugIn.DB_VERSION_2)){
 			upgradeV2toV3(session);
 			upgradeV3toV4(session);
+			upgradeV4toV5(session);
 		}else if (currentVersion.equals(Intelligence2PlugIn.DB_VERSION_3)){
 			upgradeV3toV4(session);
+			upgradeV4toV5(session);
+		}else if (currentVersion.equals(Intelligence2PlugIn.DB_VERSION_4)){
+			upgradeV4toV5(session);
 		}
 	}
 	
@@ -273,6 +286,254 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 		}
 		
 		HibernateManager.setPlugInVersion(Intelligence2PlugIn.PLUGIN_ID, Intelligence2PlugIn.DB_VERSION_4, session);
+
+	}
+	
+	
+	
+	private static void upgradeV4toV5(Session session) {
+		
+		String profilekey = "profile1"; //$NON-NLS-1$
+		String profilename = "Profile 1";  //$NON-NLS-1$
+		
+		String[] sql = new String[]{
+				//primary date field
+				"CREATE TABLE smart.i_profile_config(uuid char(16) for bit data not null, ca_uuid char(16) for bit data not null, keyid varchar(128) not null, color int, primary key (uuid))", //$NON-NLS-1$
+				"CREATE TABLE smart.i_profile_entity_type( entity_type_uuid char(16) for bit data not null, profile_uuid char(16) for bit data not null, primary key (entity_type_uuid, profile_uuid))" ,  //$NON-NLS-1$
+				"CREATE TABLE smart.i_profile_record_source(record_source_uuid char(16) for bit data not null, profile_uuid char(16) for bit data not null, primary key (record_source_uuid, profile_uuid))", //$NON-NLS-1$
+				
+				"ALTER TABLE smart.i_profile_entity_type ADD CONSTRAINT profileentitytype_entitytypeuuid_fk FOREIGN KEY (entity_type_uuid) REFERENCES smart.i_entity_type (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"ALTER TABLE smart.i_profile_entity_type ADD CONSTRAINT profileentitytype_profileuuid_fk FOREIGN KEY (profile_uuid) REFERENCES smart.i_profile_config (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"ALTER TABLE smart.i_profile_record_source ADD CONSTRAINT profilerecordtype_recordsourceuuid_fk FOREIGN KEY (record_source_uuid) REFERENCES smart.I_RECORDSOURCE (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"ALTER TABLE smart.i_profile_record_source ADD CONSTRAINT profilerecordtype_profileuuid_fk FOREIGN KEY (profile_uuid) REFERENCES smart.i_profile_config (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+		};
+		for (String s : sql){
+			session.createNativeQuery(s).executeUpdate();
+		}
+		
+		//for each ca we need to create some sort of default profile
+		List<?> items = session.createNativeQuery("SELECT uuid FROM smart.conservation_area").list();  //$NON-NLS-1$
+		int color = (new Color(51,68,107)).getRGB();
+				
+		HashMap<UUID, UUID> caProfileUuids = new HashMap<>();
+		
+		for (Object cauuid : items) {
+			UUID uuid = UuidUtils.byteToUUID( (byte[])cauuid );
+			if (uuid.equals(ConservationArea.MULTIPLE_CA)) continue;
+			
+			UUID puuid = UuidUtils.byteToUUID( DerbyUtils.createUuid() );
+			session.createNativeQuery("INSERT INTO smart.i_profile_config(uuid, ca_uuid, keyid, color) VALUES(:uuid,:cauuid,:keyid,:color)")  //$NON-NLS-1$
+				.setParameter("uuid", puuid) //$NON-NLS-1$
+				.setParameter("cauuid",uuid) //$NON-NLS-1$
+				.setParameter("color", color) //$NON-NLS-1$
+				.setParameter("keyid", profilekey) //$NON-NLS-1$
+				.executeUpdate();
+	
+			caProfileUuids.put(uuid, puuid);
+		}
+	
+		//add name to i18n table
+		session.createNativeQuery("INSERT INTO smart.i18n_label (language_uuid, element_uuid, value) " //$NON-NLS-1$
+				+ "SELECT a.uuid, b.uuid, '" + profilename + "' FROM smart.language a join smart.i_profile_config b " //$NON-NLS-1$ //$NON-NLS-2$
+				+ " on a.ca_uuid = b.ca_uuid").executeUpdate(); //$NON-NLS-1$
+			
+			
+		//link entity types to profiles
+		String q = "INSERT INTO smart.i_profile_entity_type(entity_type_uuid, profile_uuid) SELECT "; //$NON-NLS-1$
+		q += " a.uuid, b.uuid FROM "; //$NON-NLS-1$
+		q += " smart.i_entity_type a, smart.i_profile_config b where a.ca_uuid = b.ca_uuid "; //$NON-NLS-1$
+		session.createNativeQuery(q).executeUpdate();
+		
+		//line record source to profiles
+		q = "INSERT INTO smart.i_profile_record_source(record_source_uuid, profile_uuid) SELECT "; //$NON-NLS-1$
+		q += " a.uuid, b.uuid FROM "; //$NON-NLS-1$
+		q += " smart.i_recordsource a, smart.i_profile_config b where a.ca_uuid = b.ca_uuid "; //$NON-NLS-1$
+		session.createNativeQuery(q).executeUpdate();
+		
+		sql = new String[] {
+				"ALTER TABLE smart.i_entity ADD COLUMN profile_uuid char(16) for bit data", //$NON-NLS-1$
+				"ALTER TABLE smart.i_record ADD COLUMN profile_uuid char(16) for bit data", //$NON-NLS-1$
+				"ALTER TABLE smart.i_relationship_type ADD COLUMN src_profile_uuid char(16) for bit data", //$NON-NLS-1$
+				"ALTER TABLE smart.i_relationship_type ADD COLUMN target_profile_uuid char(16) for bit data", //$NON-NLS-1$
+				
+				"update smart.i_entity set profile_uuid = (select b.uuid from smart.I_PROFILE_CONFIG b where b.ca_uuid = smart.i_entity.ca_uuid)", //$NON-NLS-1$
+				"update smart.i_record set profile_uuid = (select b.uuid from smart.I_PROFILE_CONFIG b where b.ca_uuid = smart.i_record.ca_uuid)", //$NON-NLS-1$
+				
+				"update smart.i_relationship_type set src_profile_uuid = (select b.uuid from smart.I_PROFILE_CONFIG b where b.ca_uuid = smart.i_relationship_type.ca_uuid)", //$NON-NLS-1$
+				"update smart.i_relationship_type set target_profile_uuid = src_profile_uuid", //$NON-NLS-1$
+				
+
+				"ALTER TABLE smart.i_entity ALTER COLUMN profile_uuid set not null", //$NON-NLS-1$
+				"ALTER TABLE smart.i_entity ADD CONSTRAINT i_entity_profileuuid_fk FOREIGN KEY (profile_uuid) REFERENCES smart.i_profile_config (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"ALTER TABLE smart.i_record ALTER COLUMN profile_uuid set not null", //$NON-NLS-1$
+				"ALTER TABLE smart.i_record ADD CONSTRAINT i_record_profileuuid_fk FOREIGN KEY (profile_uuid) REFERENCES smart.i_profile_config (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"ALTER TABLE smart.i_relationship_type ALTER COLUMN src_profile_uuid SET not null", //$NON-NLS-1$
+				"ALTER TABLE smart.i_relationship_type ALTER COLUMN target_profile_uuid SET not null", //$NON-NLS-1$
+				"ALTER TABLE smart.i_relationship_type ADD CONSTRAINT i_rtype_srcprofileuuid_fk FOREIGN KEY (src_profile_uuid) REFERENCES smart.i_profile_config (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"ALTER TABLE smart.i_relationship_type ADD CONSTRAINT i_rtype_trgprofileuuid_fk FOREIGN KEY (target_profile_uuid) REFERENCES smart.i_profile_config (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				
+				
+				"ALTER TABLE smart.i_entity_record_query add column profile_filter varchar(32672)", //$NON-NLS-1$
+				//"ALTER TABLE smart.i_entity_record_query drop column query_filter",
+				"ALTER TABLE smart.i_entity_summary_query add column profile_filter varchar(32672)", //$NON-NLS-1$
+				"ALTER TABLE smart.i_record_obs_query add column profile_filter varchar(32672)", //$NON-NLS-1$
+				
+				"UPDATE smart.I_ENTITY_RECORD_QUERY set profile_filter = '" + profilekey + "'",  //$NON-NLS-1$ //$NON-NLS-2$
+				"UPDATE smart.i_entity_summary_query set profile_filter = '" + profilekey + "'",  //$NON-NLS-1$ //$NON-NLS-2$
+				"UPDATE smart.i_record_obs_query set profile_filter = '" + profilekey + "'", //$NON-NLS-1$ //$NON-NLS-2$
+				
+				//entity summary queries
+				"CREATE TABLE smart.i_record_summary_query(uuid char(16) for bit data NOT NULL,ca_uuid char(16) for bit data NOT NULL,query_string long varchar,date_created timestamp NOT NULL,last_modified_date timestamp,created_by char(16) for bit data NOT NULL,last_modified_by char(16) for bit data, profile_filter varchar(32672), PRIMARY KEY (uuid))", //$NON-NLS-1$
+				"ALTER TABLE smart.i_record_summary_query ADD CONSTRAINT irecordsummquery_cauuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area (uuid) DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"ALTER TABLE smart.i_record_summary_query ADD CONSTRAINT irecordsummquery_createdby_fk FOREIGN KEY (created_by) REFERENCES smart.employee (uuid) DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"ALTER TABLE smart.i_record_summary_query ADD CONSTRAINT irecordsummquery_modifiedby_fk FOREIGN KEY (last_modified_by) REFERENCES smart.employee (uuid) DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+
+				//record query			
+				"CREATE TABLE smart.i_record_query(uuid char(16) for bit data NOT NULL,ca_uuid char(16) for bit data NOT NULL,query_string long varchar,date_created timestamp NOT NULL,last_modified_date timestamp,created_by char(16) for bit data NOT NULL,last_modified_by char(16) for bit data, profile_filter varchar(32672), PRIMARY KEY (uuid))", //$NON-NLS-1$
+				"ALTER TABLE smart.i_record_query ADD CONSTRAINT irecordquery2_cauuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area (uuid) DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"ALTER TABLE smart.i_record_query ADD CONSTRAINT irecordquery2_createdby_fk FOREIGN KEY (created_by) REFERENCES smart.employee (uuid) DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"ALTER TABLE smart.i_record_query ADD CONSTRAINT irecordquery2_modifiedby_fk FOREIGN KEY (last_modified_by) REFERENCES smart.employee (uuid) DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+
+				"CREATE TABLE smart.i_permission(employee_uuid char(16) for bit data not null, profile_uuid char(16) for bit data not null, permissions integer not null, primary key (employee_uuid, profile_uuid))", //$NON-NLS-1$
+				"ALTER TABLE smart.i_permission ADD CONSTRAINT ipermission_empuuid_fk FOREIGN KEY (employee_uuid) REFERENCES smart.employee(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"ALTER TABLE smart.i_permission ADD CONSTRAINT ipermission_profileuuid_fk FOREIGN KEY (profile_uuid) REFERENCES smart.i_profile_config(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				
+				"ALTER TABLE smart.i_profile_config ADD CONSTRAINT profile_config_ca_uuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				
+				"ALTER TABLE smart.i_recordsource_attribute ADD COLUMN keyid varchar(128)" //$NON-NLS-1$
+		};
+		for (String s : sql) session.createNativeQuery(s).executeUpdate();
+		
+		
+		HashMap<UUID, Set<String>> usedkeys = new HashMap<>();
+		
+		//attribute sources
+		List<?> results = session.createNativeQuery("select a.uuid, b.keyid, a.source_uuid from smart.I_RECORDSOURCE_ATTRIBUTE a join smart.i_attribute b on a.attribute_uuid = b.uuid").list(); //$NON-NLS-1$
+		for (Object x : results) {
+			Object[] data = (Object[])x;
+			
+			UUID uuid = UuidUtils.byteToUUID((byte[])data[0]);
+			UUID srcuuid = UuidUtils.byteToUUID((byte[])data[2]);
+			String keyid = (String) data[1];
+		
+			if (!usedkeys.containsKey(srcuuid)) usedkeys.put(srcuuid, new HashSet<>());
+			
+			Set<String> used = usedkeys.get(srcuuid);
+			String root = keyid;
+			int i = 1;
+			while(used.contains(keyid)) {
+				keyid = root + i;
+				i++;
+			}
+			used.add(keyid);
+			
+			session.createNativeQuery("UPDATE smart.i_recordsource_attribute SET keyid = '" + keyid + "' WHERE uuid = :uuid") //$NON-NLS-1$ //$NON-NLS-2$
+				.setParameter("uuid", uuid) //$NON-NLS-1$
+				.executeUpdate();
+		}
+		//repeat for entity sources
+		results = session.createNativeQuery("select a.uuid, b.keyid, a.source_uuid from smart.I_RECORDSOURCE_ATTRIBUTE a join smart.i_entity_type b on a.entity_type_uuid = b.uuid").list(); //$NON-NLS-1$
+		for (Object x : results) {
+			Object[] data = (Object[])x;
+			
+			UUID uuid = UuidUtils.byteToUUID((byte[])data[0]);
+			UUID srcuuid = UuidUtils.byteToUUID((byte[])data[2]);
+			String keyid = (String) data[1];
+		
+			if (!usedkeys.containsKey(srcuuid)) usedkeys.put(srcuuid, new HashSet<>());
+			
+			Set<String> used = usedkeys.get(srcuuid);
+			String root = keyid;
+			int i = 1;
+			while(used.contains(keyid)) {
+				keyid = root + i;
+				i++;
+			}
+			used.add(keyid);
+			
+			session.createNativeQuery("UPDATE smart.i_recordsource_attribute SET keyid = '" + keyid + "' WHERE uuid = :uuid") //$NON-NLS-1$ //$NON-NLS-2$
+				.setParameter("uuid", uuid) //$NON-NLS-1$
+				.executeUpdate();
+		}		
+
+		session.createNativeQuery("alter table smart.i_recordsource_attribute alter column keyid not null").executeUpdate(); //$NON-NLS-1$
+
+		//need to map old permissions to new ones
+		//remove old permission from employee
+		results = session.createNativeQuery("select uuid, ca_uuid, smartuserlevel FROM smart.EMPLOYEE where smartuserlevel is not null").list(); //$NON-NLS-1$
+		for(Object x : results) {
+			Object[] data = (Object[])x;
+			
+			UUID uuid = UuidUtils.byteToUUID((byte[])data[0]);
+			UUID cauuid = UuidUtils.byteToUUID((byte[])data[1]);
+			String userlevel = (String)data[2];
+			
+			String[] parts = userlevel.split(","); //$NON-NLS-1$
+			
+			List<String> newparts = new ArrayList<>();
+			Set<Integer> intelpermissions = new HashSet<>();
+			
+			for (String bit : parts) {
+				if (bit.equalsIgnoreCase("INTEL_ANALYST")) { //$NON-NLS-1$
+					newparts.add("INTEL_ADMIN"); //$NON-NLS-1$
+					intelpermissions.add(IntelPermission.ADMIN);
+					
+				}else if (bit.toUpperCase(Locale.ROOT).startsWith("INTEL_")) { //$NON-NLS-1$
+					if(!newparts.contains("INTEL_USER")) newparts.add("INTEL_USER"); //$NON-NLS-1$ //$NON-NLS-2$
+					
+					if (bit.equalsIgnoreCase("INTEL_ENTITY_CREATE")) intelpermissions.add(IntelPermission.ENTITY_CREATE); //$NON-NLS-1$
+					if (bit.equalsIgnoreCase("INTEL_ENTITY_DELETE")) intelpermissions.add(IntelPermission.ENTITY_DELETE); //$NON-NLS-1$
+					if (bit.equalsIgnoreCase("INTEL_ENTITY_EDIT")) intelpermissions.add(IntelPermission.ENTITY_EDIT); //$NON-NLS-1$
+					if (bit.equalsIgnoreCase("INTEL_ENTITY_VIEW")) intelpermissions.add(IntelPermission.ENTITY_VIEW); //$NON-NLS-1$
+					
+					if (bit.equalsIgnoreCase("INTEL_RECORD_CREATE")) intelpermissions.add(IntelPermission.RECORD_CREATE); //$NON-NLS-1$
+					if (bit.equalsIgnoreCase("INTEL_RECORD_DELETE")) intelpermissions.add(IntelPermission.RECORD_DELETE); //$NON-NLS-1$
+					if (bit.equalsIgnoreCase("INTEL_RECORD_EDIT")) intelpermissions.add(IntelPermission.RECORD_EDIT_NOTSTATUS); //$NON-NLS-1$
+					if (bit.equalsIgnoreCase("INTEL_RECORD_EDIT_WITH_STATUS")) intelpermissions.add(IntelPermission.RECORD_EDIT_ALL); //$NON-NLS-1$
+					if (bit.equalsIgnoreCase("INTEL_RECORD_VIEW")) intelpermissions.add(IntelPermission.RECORD_VIEW); //$NON-NLS-1$
+					
+					if (bit.equalsIgnoreCase("INTEL_QUERY_ALL")) intelpermissions.add(IntelPermission.QUERY); //$NON-NLS-1$
+					if (bit.equalsIgnoreCase("INTEL_READ_ONLY")) intelpermissions.add(IntelPermission.READ_ONLY); //$NON-NLS-1$
+					
+				}else {
+					newparts.add(bit);
+				}
+			}
+			if (intelpermissions.isEmpty()) continue;
+			
+			if (newparts.contains("INTEL_ADMIN") && newparts.contains("INTEL_USER")) newparts.remove("INTEL_USER"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			
+			if (intelpermissions.contains(IntelPermission.ADMIN)) {
+				//remove all others
+				intelpermissions.clear();
+				intelpermissions.add(IntelPermission.ADMIN);
+			}
+			
+			int permission = 0;
+			for (Integer i : intelpermissions) permission = permission | i;
+
+			//insert permission
+			session.createNativeQuery("INSERT INTO smart.i_permission (employee_uuid, profile_uuid, permissions) VALUES(:euuid, :puuid, :p)") //$NON-NLS-1$
+				.setParameter("euuid", uuid) //$NON-NLS-1$
+				.setParameter("puuid", caProfileUuids.get(cauuid)) //$NON-NLS-1$
+				.setParameter("p", permission) //$NON-NLS-1$
+				.executeUpdate();
+			
+			//update employee
+			StringBuilder sb = new StringBuilder();
+			sb.append(newparts.get(0));
+			for (int i = 1; i < newparts.size(); i ++) {
+				sb.append(","); //$NON-NLS-1$
+				sb.append(newparts.get(i));
+			}
+			session.createNativeQuery("UPDATE smart.employee set smartuserlevel = :ul where uuid = :uuid") //$NON-NLS-1$
+				.setParameter("ul", sb.toString()) //$NON-NLS-1$
+				.setParameter("uuid", uuid) //$NON-NLS-1$
+				.executeUpdate();
+			
+		}
+		
+		HibernateManager.setPlugInVersion(Intelligence2PlugIn.PLUGIN_ID, Intelligence2PlugIn.DB_VERSION_5, session);
 
 	}
 }

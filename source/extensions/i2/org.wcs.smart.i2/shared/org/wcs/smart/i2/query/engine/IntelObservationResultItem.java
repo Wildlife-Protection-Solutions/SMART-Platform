@@ -25,14 +25,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.UUID;
 
+import org.locationtech.jts.geom.Geometry;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.query.IGeometryResultItem;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 
-import org.locationtech.jts.geom.Geometry;
-
 /**
- * Intelligence query results item
+ * Intelligence observation query results item
  * @author Emily
  *
  */
@@ -41,6 +40,7 @@ public class IntelObservationResultItem implements IGeometryResultItem {
 	private UUID observationUuid;
 	private UUID locationUuid;
 	private UUID recordUuid;
+	private UUID profileUuid;
 	private IntelRecordSource recordSource;
 	
 	private String recordStatus;
@@ -52,6 +52,8 @@ public class IntelObservationResultItem implements IGeometryResultItem {
 	
 	private Geometry locationGeometry;
 	private Exception geometryError;
+	
+	private String profileName;
 	
 	private UUID categoryUuid;
 	
@@ -67,6 +69,15 @@ public class IntelObservationResultItem implements IGeometryResultItem {
 		
 	}
 	
+	public void setProfile(UUID profileUuid, String name) {
+		this.profileUuid = profileUuid;
+		this.profileName = name;
+	}
+	
+	public String getProfileName() {
+		return this.profileName;
+	}
+
 	public void setConservationAreaId(String caId) {
 		this.caId = caId;
 	}
@@ -116,6 +127,9 @@ public class IntelObservationResultItem implements IGeometryResultItem {
 	}
 	public void setRecordUuid(UUID uuid){
 		this.recordUuid = uuid;
+	}
+	public UUID getProfileUuid(){
+		return this.profileUuid;
 	}
 	
 	public UUID getLocationUuid(){

@@ -66,8 +66,10 @@ public enum InternalEntityManager {
 	 */
 	public void deleteEntities(Shell shell, EPartService pService, IEventBroker eventBroker, List<UUID> entitiesToDelete){
 		if (entitiesToDelete.isEmpty()) return;
-		if (!IntelSecurityManager.INSTANCE.canDeleteEntity()) {
-			MessageDialog.openError(shell, Messages.InternalEntityManager_PrivilegeTitle, Messages.InternalEntityManager_PrivilegeMessage);
+		if (!IntelSecurityManager.INSTANCE.canDeleteEntityAny()) {
+			MessageDialog.openError(shell, 
+					Messages.InternalEntityManager_PrivilegeTitle, 
+					Messages.InternalEntityManager_PrivilegeMessage);
 			return;
 		}
 		
@@ -119,6 +121,13 @@ public enum InternalEntityManager {
 						try{
 							for (UUID entityUuid : entitiesToDelete){
 								IntelEntity entity = s.get(IntelEntity.class, entityUuid);
+								
+								if (!IntelSecurityManager.INSTANCE.canDeleteEntity(entity.getProfile())) {
+									MessageDialog.openError(shell, 
+											Messages.InternalEntityManager_PrivilegeTitle, 
+											MessageFormat.format(Messages.InternalEntityManager_InvalidPermissions, entity.getIdAttributeAsText()));
+									continue;
+								}
 								EntityManager.INSTANCE.deleteEntity(entity, s);
 								deletedItems.add(entity);
 								monitor.worked(1);

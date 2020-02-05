@@ -24,8 +24,13 @@ package org.wcs.smart.i2.ui.editors.query;
 import java.util.Locale;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.i2.model.IntelRecord;
+import org.wcs.smart.i2.query.FixedQueryColumn;
 import org.wcs.smart.i2.query.IQueryColumn;
 import org.wcs.smart.i2.query.IResultItem;
+import org.wcs.smart.i2.query.engine.IntelRecordResultItem;
+import org.wcs.smart.i2.ui.Resources;
 
 /**
  * Generates a label provider for query columns
@@ -43,6 +48,18 @@ public class ColumnLabelProviderGenerator {
 					return column.getValue((IResultItem)element, Locale.getDefault());	
 				}
 				return super.getText(element);
+			}
+			public Image getImage(Object element) {
+				
+				if (element instanceof IntelRecordResultItem && column instanceof FixedQueryColumn) {
+					FixedQueryColumn fx = (FixedQueryColumn)column;
+					if (fx.getColumn() == FixedQueryColumn.Column.RECORD_STATUS){
+						return Resources.INSTANCE.getImage(  IntelRecord.Status.valueOf(((IntelRecordResultItem)element).getRecordStatus() ));
+					}else if (fx.getColumn() == FixedQueryColumn.Column.RECORD_PROFILE){
+						return Resources.INSTANCE.getProfileImage( ((IntelRecordResultItem)element).getProfileKey() );
+					}	
+				}
+				return null;
 			}
 		};
 	}

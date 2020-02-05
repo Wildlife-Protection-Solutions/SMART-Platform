@@ -24,6 +24,7 @@ package org.wcs.smart.i2.model;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.util.List;
+import java.util.Set;
 
 import javax.imageio.ImageIO;
 import javax.persistence.CascadeType;
@@ -59,11 +60,26 @@ public class IntelEntityType extends NamedKeyItem {
 	private String birtTemplate;
 
 	private List<IntelEntityTypeAttribute> attributes;
+	
+	private Set<IntelProfileEntityType> profiles;
 
 	/**
 	 * Constructor.
 	 */
 	public IntelEntityType() {
+	}
+
+	/**
+	 * Sets the profiles associated with the entityType source
+	 * @return
+	 */
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.entityType", orphanRemoval = true, cascade={CascadeType.ALL})
+	public Set<IntelProfileEntityType> getProfiles(){
+		return this.profiles;
+	}
+	
+	public void setProfiles(Set<IntelProfileEntityType> profiles) {
+		this.profiles = profiles;
 	}
 
 	/**

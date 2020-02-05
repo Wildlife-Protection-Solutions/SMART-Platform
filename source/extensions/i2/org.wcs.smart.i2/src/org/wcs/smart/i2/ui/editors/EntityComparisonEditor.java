@@ -64,7 +64,6 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
-import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
@@ -77,6 +76,7 @@ import org.wcs.smart.i2.model.IntelEntityTypeAttributeGroup;
 import org.wcs.smart.i2.model.OtherAttributeGroup;
 import org.wcs.smart.i2.ui.AttachmentPopoutShell;
 import org.wcs.smart.i2.ui.AttributeValueLabelProvider;
+import org.wcs.smart.i2.ui.Resources;
 import org.wcs.smart.i2.ui.views.IntelEntitySelectionTransfer;
 import org.wcs.smart.ui.Thumbnail;
 
@@ -333,11 +333,7 @@ public class EntityComparisonEditor extends EditorPart{
 			EntityComparisonEditor.this.setPartName(input.getName());
 			if (getTitleImage() != null) getTitleImage().dispose();
 			
-			try {
-				EntityComparisonEditor.this.setTitleImage(AWTSWTImageUtils.convertToSWTImage(input.getType().getIconAsImage()));
-			} catch (Exception e) {
-				EntityComparisonEditor.this.setTitleImage(null);
-			}
+			EntityComparisonEditor.this.setTitleImage(Resources.INSTANCE.getImage(input.getType()));
 			
 			ScrolledForm form = toolkit.createScrolledForm(this);
 			form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));

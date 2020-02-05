@@ -21,26 +21,22 @@
  */
 package org.wcs.smart.connect.query.engine.i2;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.UUID;
 
-import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
-import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.query.NativeQuery;
 import org.locationtech.jts.geom.Envelope;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.query.FilterQueryColumn;
 import org.wcs.smart.i2.query.FixedQueryColumn;
 import org.wcs.smart.i2.query.FixedQueryColumn.Column;
@@ -60,7 +56,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author Emily
  *
  */
-public class IntelEntityRecordQueryResults implements IPagedQueryResultSet {
+public class IntelEntityRecordQueryResults implements IConnectPagedQueryResultSet {
 
 	//data details
 	private String resultsTable = null;
@@ -138,14 +134,18 @@ public class IntelEntityRecordQueryResults implements IPagedQueryResultSet {
 		
 		EntityRecordQueryResultItem item = new EntityRecordQueryResultItem();
 		
-		item.setEntityUuid(asUuid(rowData[columnNameToIndex.get("entity_uuid") + 1])); //$NON-NLS-1$
-		item.setEntityLastModified((Timestamp)(rowData[columnNameToIndex.get("date_modified") + 1])); //$NON-NLS-1$
+		item.setEntityUuid(asUuid(rowData[columnNameToIndex.get("entity_uuid")])); //$NON-NLS-1$
+		item.setEntityLastModified((Timestamp)(rowData[columnNameToIndex.get("date_modified")])); //$NON-NLS-1$
 		
-		String entityType = (String) rowData[columnNameToIndex.get("entity_type")+ 1]; //$NON-NLS-1$
+		String entityType = (String) rowData[columnNameToIndex.get("entity_type")]; //$NON-NLS-1$
 		item.setEntityTypeName(entityType);
 
-		item.setConservationAreaId((String)rowData[columnNameToIndex.get("ca_id") + 1]); //$NON-NLS-1$
-		item.setConservationAreaName((String)rowData[columnNameToIndex.get("ca_name") + 1]); //$NON-NLS-1$
+		item.setConservationAreaId((String)rowData[columnNameToIndex.get("ca_id")]); //$NON-NLS-1$
+		item.setConservationAreaName((String)rowData[columnNameToIndex.get("ca_name")]); //$NON-NLS-1$
+		
+		UUID puuid = asUuid(rowData[columnNameToIndex.get("profile_uuid")]);
+		String name = session.get(IntelProfile.class, puuid).getName();
+		item.setProflie(puuid, name);
 		
 		IntelEntity e = session.get(IntelEntity.class, item.getEntityUuid());
 		item.setEntityId(e.getIdAttributeAsText());
@@ -171,22 +171,16 @@ public class IntelEntityRecordQueryResults implements IPagedQueryResultSet {
 	
 	@Override
 	public List<? extends IResultItem> getData(int offset, int pageSize, Session session) {
-		final List<IResultItem> items = new ArrayList<>();
-		
+		throw new UnsupportedOperationException("Loading results in chunks not supported on Connect");
+	}
+	
+	@Override
+	public String getSelectQuery(Session session){
+		if (sortColumn == null || sortDirection == null) return "SELECT * FROM " + resultsTable; //$NON-NLS-1$
 		String sortSql = configureSort(session);
 		String sql = "SELECT * FROM " + resultsTable + sortSql; //$NON-NLS-1$
-		SqlGenerator.logString(sql);
-			
-		try(ScrollableResults sc = session.createNativeQuery(sql).scroll()){
-			if (!sc.setRowNumber(offset)) return items;
-			for (int i = 0; i <= pageSize; i ++){
-				items.add(asResultItem(sc.get(), session));
-				if (!sc.next()) break; //nothing else to get
-			}
-		}
-		return items;
+		return sql;
 	}
-
 	
 	@SuppressWarnings("unchecked")
 	private String configureSort(Session session){
@@ -211,8 +205,10 @@ public class IntelEntityRecordQueryResults implements IPagedQueryResultSet {
 				return sql + "lower(entity_type)" + getSortDirectionSql(); //$NON-NLS-1$
 			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.CA_ID){
 				return sql + "lower(ca_id)" + getSortDirectionSql(); //$NON-NLS-1$
-			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.CA_NAME){
+			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.CA_NAME){				
 				return sql + "lower(ca_name)" + getSortDirectionSql(); //$NON-NLS-1$
+			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.ENTITY_PROFILE){
+				return sql += " profile_uuid " + getSortDirectionSql();
 			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.ENTITY_ID){
 				session.beginTransaction();
 				try {
@@ -363,75 +359,15 @@ public class IntelEntityRecordQueryResults implements IPagedQueryResultSet {
 	public boolean isDisposed() {
 		return resultsTable == null;
 	}
-
-	private String getSqlSort() {
-		if (sortDirection == SortDirection.DOWN) {
-			return "DESC"; //$NON-NLS-1$
-		}else {
-			return "ASC"; //$NON-NLS-1$
-		}
-	}
 	
 	@Override
 	public PagedResultSetIterator iterator(Session session) {
-		IPagedQueryResultSet results = this;
-		return new PagedResultSetIterator( results,session ) {
-			
-			private ResultSet rs = null;
-			
-			protected void createResultSet() {
-				rs = session.doReturningWork(new ReturningWork<ResultSet>() {
-
-					@Override
-					public ResultSet execute(Connection c) throws SQLException {
-						if (sortColumn != null) {
-							return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
-									ResultSet.CONCUR_READ_ONLY).executeQuery("SELECT * FROM " + getQueryDataTable() + " ORDER BY sortkeydbl " + getSqlSort() + ", sortkeytxt " + getSqlSort()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-						}else {
-							return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
-									ResultSet.CONCUR_READ_ONLY).executeQuery("SELECT * FROM " + getQueryDataTable()); //$NON-NLS-1$
-						}
-					}});					
-			}
-			
-			public boolean hasNext(){
-				if (results == null) return false;
-				if (rs == null) createResultSet();
-				try {
-					return rs.next();
-				} catch (SQLException e) {
-					throw new IllegalStateException(e);
-				}
-			}
-			
-			public IResultItem next(){
-				try {
-					Object[] data = new Object[rs.getMetaData().getColumnCount()+1];
-					for (int i = 1; i < data.length; i ++) {
-						data[i] = rs.getObject(i);
-					}
-					return results.asResultItem(data, session);
-				}catch (SQLException e) {
-					throw new IllegalStateException(e);
-				}
-			}
-			
-			public void close() {
-				try {
-					rs.close();	
-				}catch(SQLException e) {
-					throw new IllegalStateException(e);
-				}
-				
-			}
-		};
+		return new ConnectPagedResultSetIterator(this, session);
 	}
 
 	@Override
 	public Envelope getEnvelope() {
 		return null;
 	}
-
-
 
 }

@@ -43,14 +43,14 @@ public class RelationshipDiagramStyledObjectsTreeContentProvider implements ITre
 	private IntelEntityType[] entityTypes;
 	private IntelRelationshipType[] relationshipTypes;
 	
-	private LoadEntityTypeJob entityTypeJob = new LoadEntityTypeJob() {
+	private LoadEntityTypeJob entityTypeJob = new LoadEntityTypeJob(false) {
 		@Override
 		protected void processData(List<IntelEntityType> types) {
 			entityTypes = types.toArray(new IntelEntityType[]{});
 		}
 	};
 	
-	private LoadRelationshipTypeJob relationshipTypeJob = new LoadRelationshipTypeJob() {
+	private LoadRelationshipTypeJob relationshipTypeJob = new LoadRelationshipTypeJob(false) {
 		@Override
 		protected void processData(List<IntelRelationshipType> types) {
 			relationshipTypes = types.toArray(new IntelRelationshipType[]{});;

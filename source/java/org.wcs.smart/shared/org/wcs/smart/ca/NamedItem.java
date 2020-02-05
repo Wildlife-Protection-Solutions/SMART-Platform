@@ -45,8 +45,6 @@ import org.hibernate.annotations.Type;
  * @author Emily
  *
  */
-//@Entity
-//@Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
 @MappedSuperclass
 public class NamedItem extends UuidItem {
 

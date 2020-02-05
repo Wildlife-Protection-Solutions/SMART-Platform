@@ -26,6 +26,7 @@ import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.HashMap;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -40,9 +41,11 @@ import org.hibernate.ScrollableResults;
 import org.hibernate.query.Query;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
+import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection.Permission;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
 import org.wcs.smart.i2.birt.record.RecordParameterMetadata;
 import org.wcs.smart.i2.model.IntelEntityRecord;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -76,13 +79,17 @@ public class RecordEntityDatasetResultSet implements IResultSet {
 			RecordParameterMetadata pmetadata) {
 		this.connection = connection;
 		this.metadata = metadata;
+		Set<IntelProfile> profiles = connection.hasPermission(Permission.RECORD);
+		
 		int index = pmetadata.findParameterIndex(DataSourceParameter.RECORD_UUID.getName());
 		String hql = "SELECT ir FROM IntelEntityRecord ir join ir.id.record r WHERE r.conservationArea IN (:ca )"; //$NON-NLS-1$
+		hql += " AND r.profile IN (:profiles)";
 		if (index >= 0  && parameters.get(index) != null){
 			hql += " AND r.uuid = :record"; //$NON-NLS-1$
 		}
 		Query<IntelEntityRecord> query = connection.getSession().createQuery(hql, IntelEntityRecord.class);
 		query.setParameterList("ca", connection.getConservationAreas()); //$NON-NLS-1$
+		query.setParameterList("profiles", profiles); //$NON-NLS-1$
 		
 		if (index >= 0 && parameters.get(index) != null){
 			UUID recordUuid = UuidUtils.stringToUuid((String) parameters.get(index));

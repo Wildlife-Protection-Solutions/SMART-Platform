@@ -93,6 +93,7 @@ public class SelectAttributeEntityTypeDialog extends SmartStyledTitleDialog{
 			try(Session s = HibernateManager.openSession()){
 				List<IntelEntityType> types = EntityTypeManager.INSTANCE.getEntityTypes(s, SmartDB.getCurrentConservationArea());
 				items.addAll(types);
+				types.forEach(t->t.getProfiles().forEach(p->p.getProfile().getUuid()));
 			}
 			Display.getDefault().syncExec(new Runnable(){
 				@Override

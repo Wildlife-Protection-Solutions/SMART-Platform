@@ -24,14 +24,12 @@ package org.wcs.smart.i2.ui.views.query.dropitem;
 import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
 import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.ConservationArea;
@@ -51,6 +49,7 @@ import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
+import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.query.IntelQueryColumnProvider;
@@ -68,12 +67,10 @@ import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.query.observation.filter.IntelAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.NotFilter;
 import org.wcs.smart.i2.query.observation.filter.RecordAttributeFilter;
-import org.wcs.smart.i2.query.observation.filter.RecordAttributeFilter.FixedAttribute;
-import org.wcs.smart.i2.query.observation.filter.RecordSourceFilter;
 import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.ValuePart;
 import org.wcs.smart.i2.security.IntelSecurityManager;
-import org.wcs.smart.i2.ui.views.query.RecordAttributeFilterItem;
+import org.wcs.smart.i2.ui.views.query.AttributeTreeFilterItem;
 import org.wcs.smart.i2.ui.views.query.SystemAttributeFilterItem;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.UuidUtils;
@@ -123,10 +120,9 @@ public class DropItemFactory {
 		for (GroupByItem i : part.getItems()) {
 			if (i.getGroupByType() == GroupByItem.GroupByType.SYSTEM) {
 				
-				SystemAttributeGroupByDropItem di = new SystemAttributeGroupByDropItem( i.getSystemAttribute() );
+				SystemAttributeDateGroupByDropItem di = new SystemAttributeDateGroupByDropItem( i.getSystemAttribute());
 				di.setDateOption(i.getDateOption());
-				
-				return Collections.singletonList(di);
+				allItems.add(di);
 			}else if (i.getGroupByType() == GroupByItem.GroupByType.CA) {
 				ConservationAreaGroupByDropItem di = new ConservationAreaGroupByDropItem();
 				for (String caUuid : i.getFilterOptions()) {
@@ -137,7 +133,7 @@ public class DropItemFactory {
 						}
 					}
 				}
-				return Collections.singletonList(di);
+				allItems.add(di);
 			}else if (i.getGroupByType() == GroupByItem.GroupByType.ENTITYTYPE) {
 				EntityTypeGroupByDropItem di = new EntityTypeGroupByDropItem();
 				for (String entityTypeKey : i.getFilterOptions()) {
@@ -148,23 +144,43 @@ public class DropItemFactory {
 					}	
 					di.addEntityType(type);
 				}
-				return Collections.singletonList(di);
-			}else if (i.getGroupByType() == GroupByItem.GroupByType.ATTRIBUTE) {
+				allItems.add(di);
+			}else if (i.getGroupByType() == GroupByItem.GroupByType.RECORDSOURCE) {
+				RecordSourceGroupByDropItem di = new RecordSourceGroupByDropItem();
+				for (String key : i.getFilterOptions()) {
+					IntelRecordSource type = InternalQueryManager.INSTANCE.getQueryItemProvider().getRecordSource(key, session);
+					if (type == null) {
+						DropItem edi = new ErrorDropItem(MessageFormat.format(Messages.DropItemFactory_RecordSourceNotFound, key)) ;
+						return Collections.singletonList(edi);
+					}	
+					di.addRecordSource(type);
+				}
+				allItems.add(di);
+			}else if (i.getGroupByType() == GroupByItem.GroupByType.RECORDSTATUS) {
+				RecordStatusGroupByDropItem di = new RecordStatusGroupByDropItem();
+				for (String key : i.getFilterOptions()) {
+					IntelRecord.Status ss = IntelRecord.Status.valueOf(key);
+					di.addRecordStatus(ss);
+				}
+				allItems.add(di);
+			}else if (i.getGroupByType() == GroupByItem.GroupByType.ENTITY_ATTRIBUTE) {
 				String attributeKey = i.getAttributeKey();
 				IntelAttribute attribute = InternalQueryManager.INSTANCE.getQueryItemProvider().getAttribute(attributeKey, session);
 				
 				if (attribute == null) {
 					DropItem edi = new ErrorDropItem(MessageFormat.format(Messages.DropItemFactory_AttributeNotFound, attributeKey));
-					return Collections.singletonList(edi);
+					allItems.add(edi);
+					continue;
 				}
 				
-				String entityTypeKey = i.getEntityTypeKey();
+				String entityTypeKey = i.getOtherKey();
 				IntelEntityType type = null;
 				if (entityTypeKey != null && !entityTypeKey.isEmpty()) {
 					type = InternalQueryManager.INSTANCE.getQueryItemProvider().getEntityType(entityTypeKey, session);
 					if (type == null) {
 						DropItem edi = new ErrorDropItem(MessageFormat.format(Messages.DropItemFactory_EntityTypeNotFound, entityTypeKey));
-						return Collections.singletonList(edi);
+						allItems.add(edi);
+						continue;
 					}	
 				}
 				
@@ -193,7 +209,8 @@ public class DropItemFactory {
 								new Object[] {"keyId", areaKey}).uniqueResult(); //$NON-NLS-1$
 						if (a == null) {
 							DropItem edi = new ErrorDropItem(MessageFormat.format(Messages.DropItemFactory_AreaTypeNotFound, i.getAreaType().name(), areaKey));
-							return Collections.singletonList(edi);
+							allItems.add(edi);
+							continue;
 						}
 						di.addFilterOption(new ListItem(a.getKeyId(), a.getName()));
 					}
@@ -213,6 +230,72 @@ public class DropItemFactory {
 					}
 				}
 				if (attribute.getType() == AttributeType.EMPLOYEE) {
+					List<String> keys = i.getFilterOptions();
+					for (String employeUuid : keys) {
+						UUID eu = UuidUtils.stringToUuid(employeUuid);
+						Employee e = session.get(Employee.class,  eu);
+						if (e != null) {
+							di.addFilterOption(new ListItem(UuidUtils.uuidToString(e.getUuid()), SmartLabelProvider.getFullLabel(e)));
+						}
+					}
+				}
+				allItems.add(di);
+			}else if (i.getGroupByType() == GroupByItem.GroupByType.RECORD_ATTRIBUTE) {
+				String attributeSourceKey = i.getAttributeKey();
+				IntelRecordSource src = InternalQueryManager.INSTANCE.getQueryItemProvider().getRecordSource(i.getOtherKey(), session);
+				
+				IntelRecordSourceAttribute irs = null;
+				for (IntelRecordSourceAttribute ir : src.getAttributes()) {
+					if (ir.getKeyId().equalsIgnoreCase(attributeSourceKey)) {
+						irs = ir;
+						break;
+					}
+				}
+				
+				if (irs == null) {
+					DropItem edi = new ErrorDropItem(MessageFormat.format(Messages.DropItemFactory_RecordSrcAttributeNotFound, attributeSourceKey));
+					allItems.add(edi);
+					continue;
+				}
+
+				AttributeGroupByDropItem di = new AttributeGroupByDropItem(irs);
+			
+				if (irs.getAttribute().getType() == AttributeType.DATE) {
+					di.setDateOption(i.getDateOption());
+				}
+				if (irs.getAttribute().getType() == AttributeType.POSITION) {
+					di.setAreaOption(i.getAreaType());
+					
+					List<String> keys = i.getFilterOptions();
+					for (String areaKey : keys) {
+						
+						Area a = QueryFactory.buildQuery(session, Area.class, 
+								new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+								new Object[] {"type", i.getAreaType().name()}, //$NON-NLS-1$
+								new Object[] {"keyId", areaKey}).uniqueResult(); //$NON-NLS-1$
+						if (a == null) {
+							DropItem edi = new ErrorDropItem(MessageFormat.format(Messages.DropItemFactory_AreaTypeNotFound, i.getAreaType().name(), areaKey));
+							allItems.add(edi);
+							continue;
+						}
+						di.addFilterOption(new ListItem(a.getKeyId(), a.getName()));
+					}
+					
+				}
+				if (irs.getAttribute().getType() == AttributeType.LIST) {
+					List<String> keys = i.getFilterOptions();
+					
+					for (String listItemKey : keys) {
+						List<IntelAttributeListItem> listItems = InternalQueryManager.INSTANCE.getQueryItemProvider().getAttributeListItems(irs.getAttribute().getKeyId(), session);
+						for (IntelAttributeListItem listItem : listItems) {
+							if (listItem.getKeyId().equals(listItemKey)) {
+								di.addFilterOption(new ListItem(listItem.getKeyId(), listItem.getName()));
+								break;
+							}
+						}
+					}
+				}
+				if (irs.getAttribute().getType() == AttributeType.EMPLOYEE) {
 					List<String> keys = i.getFilterOptions();
 					for (String employeUuid : keys) {
 						UUID eu = UuidUtils.stringToUuid(employeUuid);
@@ -249,8 +332,6 @@ public class DropItemFactory {
 		
 		if (filter.getClass().equals(EntityTypeFilter.class))
 			return generateDropItem((EntityTypeFilter) filter);
-		if (filter.getClass().equals(RecordSourceFilter.class))
-			return generateDropItem((RecordSourceFilter)filter);
 		
 		if (filter.getClass().equals(IntelAttributeFilter.class))
 			return generateDropItem((IntelAttributeFilter) filter);
@@ -268,17 +349,17 @@ public class DropItemFactory {
 		return Collections.singletonList(error);
 	}
 	
-	public List<DropItem> generateDropItem(RecordSourceFilter filter){
-		IntelRecordSource type = null; 
-		if (filter.getTypeKey() != null){
-			type = InternalQueryManager.INSTANCE.getQueryItemProvider().getRecordSource(filter.getTypeKey(), session);
-			if (type != null){
-				return Collections.singletonList(new TextDropItem(type.getName(), "recordsource:" + type.getKeyId())); //$NON-NLS-1$
-			}
-		}
-		ErrorDropItem item = new ErrorDropItem(MessageFormat.format(Messages.DropItemFactory_RecordSourceNotFound, filter.getTypeKey()));
-		return Collections.singletonList(item);
-	}
+//	public List<DropItem> generateDropItem(RecordSourceFilter filter){
+//		IntelRecordSource type = null; 
+//		if (filter.getTypeKey() != null){
+//			type = InternalQueryManager.INSTANCE.getQueryItemProvider().getRecordSource(filter.getTypeKey(), session);
+//			if (type != null){
+//				return Collections.singletonList(new TextDropItem(type.getName(), "recordsource:" + type.getKeyId())); //$NON-NLS-1$
+//			}
+//		}
+//		ErrorDropItem item = new ErrorDropItem(MessageFormat.format(Messages.DropItemFactory_RecordSourceNotFound, filter.getTypeKey()));
+//		return Collections.singletonList(item);
+//	}
 	
 	public List<DropItem> generateDropItem(AreaFilter filter){
 		
@@ -347,118 +428,58 @@ public class DropItemFactory {
 	}
 	
 	public List<DropItem> generateDropItem(SystemAttributeFilter filter){
-		DropItem di = new SystemAttributeFilterItem(filter.getAttribute(), filter.getType()).asDropItem()[0];
-		((DateDropItem)di).setInitialValue(filter.getOperator(), filter.getDateValues()[0], filter.getDateValues()[1]);
+		
+		DropItem di = new SystemAttributeFilterItem(filter.getAttribute()).asDropItem()[0];
+		
+		if (filter.getAttribute().isDate()) {
+			((DateDropItem)di).setInitialValue(filter.getOperator(), filter.getDateValues()[0], filter.getDateValues()[1]);
+		}else {
+			((OptionDropItem)di).setInitialValue(filter.getStringKey());
+		}
 		return Collections.singletonList(di);
 	}
 	
 	public List<DropItem> generateDropItem(RecordAttributeFilter filter){
-		if (filter.getFixedAttribute() != null) {
-			DropItem[] dis = new RecordAttributeFilterItem(filter.getFixedAttribute()).asDropItem();
-			if (filter.getFixedAttribute() == FixedAttribute.DATE) {
-				((DateDropItem)dis[0]).setInitialValue(filter.getOperator(), filter.getDateValues()[0], filter.getDateValues()[1]);
-			}else if (filter.getFixedAttribute() == FixedAttribute.STATUS) {
-				((OptionDropItem)dis[0]).setInitialValue(filter.getKeyValue());
-			}
-			return Arrays.asList(dis);
-		}
-		String queryKeyPart = "r_attribute:"; //$NON-NLS-1$
-		if (filter.getEntityTypeKey() != null) {
-			queryKeyPart += "entity:" + filter.getEntityTypeKey(); //$NON-NLS-1$
-		}else {
-			queryKeyPart += filter.getAttributeType().key + ":" + filter.getAttributeKey(); //$NON-NLS-1$
-		}
-		queryKeyPart += ":" + filter.getRecordSourceKey(); //$NON-NLS-1$
-			
-		IntelRecordSource source = InternalQueryManager.INSTANCE.getQueryItemProvider().getRecordSource(filter.getRecordSourceKey(), session);
+		IntelRecordSource source = null;
+		source = InternalQueryManager.INSTANCE.getQueryItemProvider().getRecordSource(filter.getRecordSourceKey(), session);
 		if (source == null){
 			ErrorDropItem item = new ErrorDropItem(MessageFormat.format(Messages.DropItemFactory_IntelAttributeNotFound, filter.getAttributeKey()));
 			return Collections.singletonList(item);
 		}
 		
-		IntelAttribute attribute = null;
-		IntelEntityType entityType = null;
-		if (filter.getEntityTypeKey() != null){
-			entityType = InternalQueryManager.INSTANCE.getQueryItemProvider().getEntityType(filter.getEntityTypeKey(), session);
-			if (entityType == null){
-				ErrorDropItem item = new ErrorDropItem(MessageFormat.format(Messages.DropItemFactory_IntelEntityTypeNotFound, filter.getEntityTypeKey())) ;
-				return Collections.singletonList(item);	
-			}
-		}else if (filter.getAttributeKey() != null) {
-			attribute = InternalQueryManager.INSTANCE.getQueryItemProvider().getAttribute(filter.getAttributeKey(), session);
-			if (attribute == null) {
-				ErrorDropItem item = new ErrorDropItem(MessageFormat.format(Messages.DropItemFactory_IntelAttributeNotFound, filter.getAttributeKey())) ;
-				return Collections.singletonList(item);
+		IntelRecordSourceAttribute ia = null;
+		for (IntelRecordSourceAttribute i : source.getAttributes()) {
+			if (i.getKeyId().equalsIgnoreCase(filter.getAttributeKey())) {
+				ia = i;
+				break;
 			}
 		}
-		IntelRecordSourceAttribute ia = new IntelRecordSourceAttribute();
-		ia.setSource(source);
-		if (attribute != null) ia.setAttribute(attribute);
-		if (entityType != null) ia.setEntityType(entityType);
+		if (ia == null) {
+			ErrorDropItem item = new ErrorDropItem(MessageFormat.format(Messages.DropItemFactory_IntelAttributeNotFound, filter.getAttributeKey()));
+			return Collections.singletonList(item);
+		}
 		
-		String name = IntelQueryColumnProvider.generateName(ia, source);
-		if (entityType != null) {
-			final List<String> labels = new ArrayList<String>();
-			final List<String> keys = new ArrayList<String>();
-			Query<IntelEntity> query = session.createQuery("FROM IntelEntity WHERE conservationArea = :ca AND entityType.keyId = :keyId", IntelEntity.class); //$NON-NLS-1$
-			query.setParameter("ca",  SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-			query.setParameter("keyId",  entityType.getKeyId()); //$NON-NLS-1$
-			List<IntelEntity> items = query.list();
-			items.sort((a,b)->Collator.getInstance().compare(a.getIdAttributeAsText(), b.getIdAttributeAsText()));
-			for (IntelEntity e : items) {
-				labels.add(e.getIdAttributeAsText());
-				keys.add(UuidUtils.uuidToString( e.getUuid() ));
-			}
-			OptionDropItem item = new OptionDropItem(name, queryKeyPart, labels.toArray(new String[labels.size()]), keys.toArray(new String[keys.size()]), canEdit());
-			item.setInitialValue(filter.getKeyValue());
+		DropItem item = new AttributeTreeFilterItem(ia).asDropItem()[0];
+		if (ia.getEntityType() != null) {
+			((OptionDropItem)item).setInitialValue(filter.getKeyValue());
 			return Collections.singletonList(item);
 		}else {
 			if (filter.getAttributeType() == IntelAttribute.AttributeType.NUMERIC){
-				TextBoxDropItem item = new TextBoxDropItem(name, queryKeyPart, TextBoxDropItem.InputType.NUMERIC, canEdit());
-				item.setInitialValue(filter.getOperator(), filter.getNumberValue().toString());
+				((TextBoxDropItem)item).setInitialValue(filter.getOperator(), filter.getNumberValue().toString());
 				return Collections.singletonList(item);
 			}else if (filter.getAttributeType() == IntelAttribute.AttributeType.TEXT){
-				TextBoxDropItem item = new TextBoxDropItem(name, queryKeyPart, TextBoxDropItem.InputType.TEXT, canEdit());
-				item.setInitialValue(filter.getOperator(), filter.getStringValue());
+				((TextBoxDropItem)item).setInitialValue(filter.getOperator(), filter.getStringValue());
 				return Collections.singletonList(item);
 			}else if (filter.getAttributeType() == IntelAttribute.AttributeType.DATE){
-				DateDropItem item = new DateDropItem(name, queryKeyPart, canEdit());
-				item.setInitialValue(filter.getOperator(), filter.getDateValues()[0], filter.getDateValues()[1]);
+				((DateDropItem)item).setInitialValue(filter.getOperator(), filter.getDateValues()[0], filter.getDateValues()[1]);
 				return Collections.singletonList(item);
 			}else if (filter.getAttributeType() == IntelAttribute.AttributeType.BOOLEAN){
-				TextDropItem item = new TextDropItem(name, queryKeyPart);
 				return Collections.singletonList(item);
 			}else if (filter.getAttributeType() == IntelAttribute.AttributeType.LIST){
-				final List<String> labels = new ArrayList<String>();
-				final List<String> keys = new ArrayList<String>();
-				labels.add(ANY_LABEL);
-				keys.add(IQueryFilter.ANY_OPTION_KEY);
-				
-				List<IntelAttributeListItem> listItems = InternalQueryManager.INSTANCE.getQueryItemProvider().getAttributeListItems(attribute.getKeyId(), session);
-				listItems.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
-				if (listItems != null){
-					for (IntelAttributeListItem i : listItems){
-						labels.add(i.getName());
-						keys.add(i.getKeyId());
-					}
-				}
-				OptionDropItem item = new OptionDropItem(name, queryKeyPart, labels.toArray(new String[labels.size()]), keys.toArray(new String[keys.size()]), canEdit());
-				item.setInitialValue(filter.getKeyValue());
+				((OptionDropItem)item).setInitialValue(filter.getKeyValue());
 				return Collections.singletonList(item);
 			}else if (filter.getAttributeType() == IntelAttribute.AttributeType.EMPLOYEE){
-				final List<String> labels = new ArrayList<String>();
-				final List<String> keys = new ArrayList<String>();
-				labels.add(ANY_LABEL);
-				keys.add(IQueryFilter.ANY_OPTION_KEY);
-	
-				List<Employee> emps = InternalQueryManager.INSTANCE.getQueryItemProvider().getEmployees(session);
-				emps.sort((a,b)->Collator.getInstance().compare(SmartLabelProvider.getFullLabel(a), SmartLabelProvider.getFullLabel(b)));
-				for (Employee e : emps) {
-					labels.add(SmartLabelProvider.getFullLabel(e));
-					keys.add(UuidUtils.uuidToString(e.getUuid()));
-				}
-				OptionDropItem item = new OptionDropItem(name, queryKeyPart, labels.toArray(new String[labels.size()]), keys.toArray(new String[keys.size()]), canEdit());
-				item.setInitialValue(filter.getKeyValue());
+				((OptionDropItem)item).setInitialValue(filter.getKeyValue());
 				return Collections.singletonList(item);
 			}
 		}

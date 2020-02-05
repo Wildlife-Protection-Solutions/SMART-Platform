@@ -54,6 +54,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
@@ -106,7 +107,7 @@ public class AttachmentView {
 			transform = null;
 			draw.redraw();
 		});
-		btnRefresh.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_REFRESH));
+		btnRefresh.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
 		btnRefresh.setToolTipText(Messages.AttachmentView_resettooltip);
 		
 		Point tbsize = toolbar.computeSize(SWT.DEFAULT, SWT.DEFAULT);

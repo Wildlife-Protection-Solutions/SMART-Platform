@@ -27,6 +27,7 @@ import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.HashMap;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -39,8 +40,10 @@ import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
+import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection.Permission;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntitySearch;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.search.IIntelEntitySearch;
 import org.wcs.smart.i2.search.IntelSearchResult;
 
@@ -72,9 +75,10 @@ public class EntitySearchDatasetResultSet implements IResultSet {
 			EntitySearchDatasetResultSetMetadata metadata, 
 			AbstractIntelBirtConnection connection, HashMap<Integer, Object> parameters) throws Exception {
 		
+		Set<IntelProfile> profiles = connection.hasPermission(Permission.ENTITY);
 		this.metadata = metadata;	
 		IIntelEntitySearch isearch = IIntelEntitySearch.parseSearchString(search.getSearchString(), connection.getConservationAreas());
-		result = isearch.doSearch(connection.getSession(), connection.getCurrentLocale(), new NullProgressMonitor());
+		result = isearch.doSearch(profiles, connection.getSession(), connection.getCurrentLocale(), new NullProgressMonitor());
 		m_maxRows = result.getTotalMatched();
 		
 		this.connection = connection;

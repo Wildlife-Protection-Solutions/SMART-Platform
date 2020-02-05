@@ -26,6 +26,8 @@ import org.wcs.smart.i2.IQueryEngineFactory;
 import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
+import org.wcs.smart.i2.model.IntelRecordQuery;
+import org.wcs.smart.i2.model.IntelRecordSummaryQuery;
 
 /**
  * Desktop query engine factory for intelligence queries
@@ -37,8 +39,10 @@ public class QueryEngineFactory implements IQueryEngineFactory {
 	@Override
 	public IIntelQueryEngine findQueryEngine(String queryType) {
 		if (queryType.equals(IntelEntitySummaryQuery.KEY)) return new IntelEntitySummaryQueryEngine();
+		if (queryType.equals(IntelRecordSummaryQuery.KEY)) return new IntelRecordSummaryQueryEngine();
 		if (queryType.equals(IntelRecordObservationQuery.KEY)) return new IntelObservationQueryEngine();
 		if (queryType.equals(IntelEntityRecordQuery.KEY)) return new IntelEntityRecordQueryEngine();
+		if (queryType.equals(IntelRecordQuery.KEY)) return new IntelRecordQueryEngine();
 
 		return null;
 	}

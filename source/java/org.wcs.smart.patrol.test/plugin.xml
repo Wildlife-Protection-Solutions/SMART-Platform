@@ -7,6 +7,10 @@
             id="org.wcs.smart.patrol.generate.data"
             name="Generate Test Patrol Data">
       </command>
+      <command
+            id="org.wcs.smart.patrol.generate.employee"
+            name="Generate Employees">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.menus">
@@ -18,6 +22,11 @@
                label="Generate Test Patrol Data"
                style="push">
          </command>
+         <command
+               commandId="org.wcs.smart.patrol.generate.employee"
+               label="Generate Employees"
+               style="push">
+         </command>
       </menuContribution>
    </extension>
    <extension
@@ -25,6 +34,10 @@
       <handler
             class="org.wcs.smart.patrol.test.GenerateDataHandler"
             commandId="org.wcs.smart.patrol.generate.data">
+      </handler>
+      <handler
+            class="org.wcs.smart.patrol.test.EmployeeCreatorHandler"
+            commandId="org.wcs.smart.patrol.generate.employee">
       </handler>
    </extension>
 

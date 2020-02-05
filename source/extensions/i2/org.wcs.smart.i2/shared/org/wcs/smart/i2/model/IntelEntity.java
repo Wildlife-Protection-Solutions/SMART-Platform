@@ -60,6 +60,8 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 	private Date dateCreated;
 	private Date dateModified;
 
+	private IntelProfile profile;
+	
 	private Employee createdBy;
 	private Employee lastModifiedBy;
 
@@ -96,6 +98,24 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 	 */
 	public void setConservationArea(ConservationArea ca){
 		this.conservationArea = ca;
+	}
+	
+	/**
+	 * Get the profile associated with the entity
+	 * @return
+	 */
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="profile_uuid", referencedColumnName="uuid")
+	public IntelProfile getProfile(){
+		return this.profile;
+	}
+	
+	/**
+	 * Sets the profile associated with the entity 
+	 * @param ca
+	 */
+	public void setProfile(IntelProfile profile){
+		this.profile = profile;
 	}
 
 	/**

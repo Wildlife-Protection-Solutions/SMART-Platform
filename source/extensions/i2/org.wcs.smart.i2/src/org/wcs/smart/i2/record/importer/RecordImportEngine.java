@@ -46,6 +46,8 @@ import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Point;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.wcs.smart.ca.Employee;
@@ -65,6 +67,7 @@ import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityRecord;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecord.Status;
 import org.wcs.smart.i2.model.IntelRecordAttributeValue;
@@ -77,9 +80,6 @@ import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
-
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Point;
 
 import au.com.bytecode.opencsv.CSVReader;
 
@@ -115,6 +115,7 @@ public enum RecordImportEngine {
 //		//load the attributes 
 		Set<IntelRecordSource> sources = new HashSet<>();
 		Collection<Employee> allEmployees = new ArrayList<>();
+		List<IntelProfile> profiles = null;
 		try(Session s = HibernateManager.openSession()){
 			sources.addAll( QueryFactory.buildQuery(s, IntelRecordSource.class, "conservationArea", SmartDB.getCurrentConservationArea()).getResultList() ); //$NON-NLS-1$
 			sources.forEach(src -> {
@@ -133,6 +134,8 @@ public enum RecordImportEngine {
 				allEmployees.forEach(e->{e.getUuid(); SmartLabelProvider.getFullLabel(e);});
 			});
 			
+			profiles = QueryFactory.buildQuery(s, IntelProfile.class,"conservationArea", SmartDB.getCurrentConservationArea()).list();  //$NON-NLS-1$
+					
 		}
 		monitor.worked(1);
 		monitor.checkCanceled();
@@ -206,6 +209,38 @@ public enum RecordImportEngine {
 				}
 				if (record.getPrimaryDate() == null) {
 					record.setPrimaryDate(new Date());
+				}
+				
+				String profile = data[config.getMappedColumn(Column.PROFILE)].trim();
+				for (IntelProfile ip : profiles) {
+					if (ip.getName().equalsIgnoreCase(profile)) {
+						record.setProfile(ip);
+						break;
+					}
+				}
+				if (record.getProfile() == null) {
+					for (IntelProfile ip : profiles) {
+						for(Label l : ip.getNames()) {
+							if (l.getValue().equalsIgnoreCase(profile)) {
+								record.setProfile(ip);
+								break;
+							}
+						}
+						if (record.getProfile() != null) break;
+					}
+				}
+				if (record.getProfile() == null) {
+					for (IntelProfile ip : profiles) {
+						if (ip.getKeyId().equalsIgnoreCase(profile)) {
+							record.setProfile(ip);
+							break;
+						}
+					}
+				}
+				if (record.getProfile() == null) {
+					//error
+					warnings.add(MessageFormat.format(Messages.RecordImportEngine_NoProfileFound, line, profile));
+					continue;
 				}
 				
 				//source

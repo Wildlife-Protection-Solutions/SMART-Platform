@@ -43,7 +43,8 @@ public class RecordImportConfig {
 		SOURCE (Messages.RecordImportConfig_RecordSourceColumnName),
 		NARRATIVE (Messages.RecordImportConfig_RecordNarrativeColumnName),
 		SCRATCHPAD (Messages.RecordImportConfig_RecordScratchpadColumnName),
-		PRIMARY_DATE (Messages.RecordImportConfig_RecordPrimaryDateColumnName);
+		PRIMARY_DATE (Messages.RecordImportConfig_RecordPrimaryDateColumnName),
+		PROFILE(Messages.RecordImportConfig_ProfileColumnName);
 		
 		private String gui;
 		

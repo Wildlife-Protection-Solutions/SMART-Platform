@@ -59,13 +59,12 @@ import org.wcs.smart.i2.query.Operator;
 import org.wcs.smart.i2.query.export.CsvEntitySummaryQueryExporter;
 import org.wcs.smart.i2.query.export.CsvRecordQueryExporter;
 import org.wcs.smart.i2.query.export.ShpRecordQueryExporter;
-import org.wcs.smart.i2.query.observation.filter.RecordAttributeFilter.FixedAttribute;
 import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.ValuePart;
 import org.wcs.smart.i2.search.AdvancedEntitySearch;
 
 /**
- * Desktop label provider for intelligence module.
+ * Label provider for the profile module
  * 
  * @author Emily
  *
@@ -116,6 +115,9 @@ public class AdvancedLabelProviderImpl implements
 
 		if (item == FixedQueryColumn.Column.ENTITY_ID) return Messages.getString("AdvancedLabelProviderImpl.QueryColEntityId", l); //$NON-NLS-1$
 		if (item == FixedQueryColumn.Column.ENTITY_TYPE) return Messages.getString("AdvancedLabelProviderImpl.QueryColEntityTable", l); //$NON-NLS-1$
+		if (item == FixedQueryColumn.Column.ENTITY_PROFILE) return Messages.getString("AdvancedLabelProviderImpl.QueryColEntityProfile", l); //$NON-NLS-1$
+		if (item == FixedQueryColumn.Column.RECORD_PROFILE) return Messages.getString("AdvancedLabelProviderImpl.QueryColRecordProfile", l); //$NON-NLS-1$
+		
 		
 		if (item == FixedQueryColumn.Column.CA_ID) return Messages.getString("AdvancedLabelProviderImpl.CaIdColumn", l); //$NON-NLS-1$
 		if (item == FixedQueryColumn.Column.CA_NAME) return Messages.getString("AdvancedLabelProviderImpl.CaNameColumn", l); //$NON-NLS-1$
@@ -176,7 +178,8 @@ public class AdvancedLabelProviderImpl implements
 		if (item == EntityDatasetResultSetMetadata.Column.CREATED_BY) return Messages.getString("AdvancedLabelProviderImpl.EntityDatasetColCreatedBy", l); //$NON-NLS-1$
 		if (item == EntityDatasetResultSetMetadata.Column.MODIFIED_BY) return Messages.getString("AdvancedLabelProviderImpl.EntityDatasetColModBy", l); //$NON-NLS-1$
 		if (item == EntityDatasetResultSetMetadata.Column.PRIMARY_IMAGE) return Messages.getString("AdvancedLabelProviderImpl.EntityDatasetColImage", l); //$NON-NLS-1$
-		
+		if (item == EntityDatasetResultSetMetadata.Column.PROFILE) return Messages.getString("AdvancedLabelProviderImpl.EntityDatasetColProfile", l); //$NON-NLS-1$
+
 		if (item == EntitySearchDatasetResultSetMetadata.Column.ENTITY_UUID) return Messages.getString("AdvancedLabelProviderImpl.EntityDatasetColEntityUuid", l); //$NON-NLS-1$
 		if (item == EntitySearchDatasetResultSetMetadata.Column.ID) return Messages.getString("AdvancedLabelProviderImpl.EntityDatasetColId", l); //$NON-NLS-1$
 		if (item == EntitySearchDatasetResultSetMetadata.Column.TYPE_KEY) return Messages.getString("AdvancedLabelProviderImpl.EntityDatasetColEntityTypeKey", l); //$NON-NLS-1$
@@ -248,7 +251,9 @@ public class AdvancedLabelProviderImpl implements
 		if (item == RecordDatasetResultSetMetadata.Column.STATUS_KEY) return Messages.getString("AdvancedLabelProviderImpl.RecordDatasetColStatusKey", l); //$NON-NLS-1$
 		if (item == RecordDatasetResultSetMetadata.Column.SOURCE) return Messages.getString("AdvancedLabelProviderImpl.RecordDatasetColSrc", l); //$NON-NLS-1$
 		if (item == RecordDatasetResultSetMetadata.Column.SOURCE_ICON) return Messages.getString("AdvancedLabelProviderImpl.RecordDatasetColSrcImg", l); //$NON-NLS-1$
-		
+		if (item == RecordDatasetResultSetMetadata.Column.PROFILE) return Messages.getString("AdvancedLabelProviderImpl.RecordDatasetColProfile", l); //$NON-NLS-1$
+		if (item == RecordDatasetResultSetMetadata.Column.PRIMARY_DATE) return Messages.getString("AdvancedLabelProviderImpl.RecordDatasetColRecordDate", l); //$NON-NLS-1$
+
 		
 		if (item.equals(EntityDatasetMetadata.class)) return Messages.getString("AdvancedLabelProviderImpl.EntityDataset", l); //$NON-NLS-1$
 		if (item.equals(EntityLocationAttributeDatasetMetadata.class)) return Messages.getString("AdvancedLabelProviderImpl.EntityLocationAttributes", l); //$NON-NLS-1$
@@ -264,18 +269,17 @@ public class AdvancedLabelProviderImpl implements
 		if (item.equals(AdvancedEntitySearch.Error.TOKEN_NOT_SUPPORTED)) return Messages.getString("AdvancedLabelProviderImpl.AdvSearchTokenNotSupported", l); //$NON-NLS-1$
 		
 		if (item == ValuePart.ValueOption.NUMBER_ENTITIES) return Messages.getString("AdvancedLabelProviderImpl.NumberOfEntitiesValue", l); //$NON-NLS-1$
+		if (item == ValuePart.ValueOption.NUMBER_RECORDS) return Messages.getString("AdvancedLabelProviderImpl.NumberOfRecordsValue", l); //$NON-NLS-1$
 		
-		if (item == FixedAttribute.DATE) return Messages.getString("AdvancedLabelProviderImpl.RecordDateAttributeName", l); //$NON-NLS-1$
-		if (item == FixedAttribute.STATUS) return Messages.getString("AdvancedLabelProviderImpl.RecordSourceAttributeName", l); //$NON-NLS-1$
-		
-		
-		if (item instanceof SystemAttributeFilter.Type) {
-			switch ((SystemAttributeFilter.Type)item) {
-			case ENTITY:
-				return Messages.getString("AdvancedLabelProviderImpl.EntityLabel", l); //$NON-NLS-1$
-			case RECORD:
-				return Messages.getString("AdvancedLabelProviderImpl.RecordLabel", l); //$NON-NLS-1$
-			
+		if (item instanceof SystemAttributeFilter.SystemAttribute) {
+			switch ((SystemAttributeFilter.SystemAttribute)item) {
+			case RECORD_DATE_CREATED:
+			case ENTITY_DATE_CREATED: return Messages.getString("AdvancedLabelProviderImpl.SysAttDateCreated", l); //$NON-NLS-1$
+			case RECORD_DATE_MODIFIED:
+			case ENTITY_DATE_MODIFIED: return Messages.getString("AdvancedLabelProviderImpl.SysAttDateModified", l); //$NON-NLS-1$
+			case RECORD_DATE: return Messages.getString("AdvancedLabelProviderImpl.SysAttRecordDate", l); //$NON-NLS-1$
+			case RECORD_SOURCE: return Messages.getString("AdvancedLabelProviderImpl.SysAttRecordSource", l); //$NON-NLS-1$
+			case RECORD_STATUS: return Messages.getString("AdvancedLabelProviderImpl.SysAttRecordStatus", l); //$NON-NLS-1$
 			}
 		}
 		return ""; //$NON-NLS-1$

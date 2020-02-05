@@ -71,6 +71,7 @@ import org.wcs.smart.i2.ui.views.RecordNarrativeView.FieldType;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class RecordDescriptionPage extends EditorPart{
 
 	private FormToolkit  toolkit;
@@ -270,7 +271,7 @@ public class RecordDescriptionPage extends EditorPart{
 			}
 		});
 		
-		if (IntelSecurityManager.INSTANCE.canCreateEntity()){
+		if (IntelSecurityManager.INSTANCE.canCreateEntityAny()){
 			MenuItem newEntity = new MenuItem(menu, SWT.CASCADE);
 			newEntity.setText(Messages.RecordDescriptionPage_NewEntityMenuItem);
 			newEntity.addSelectionListener(new SelectionAdapter() {			

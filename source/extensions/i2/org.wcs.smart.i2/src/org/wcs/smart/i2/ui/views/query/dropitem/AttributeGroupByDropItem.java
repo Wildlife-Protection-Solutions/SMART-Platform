@@ -46,10 +46,12 @@ import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.InternalQueryManager;
+import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
+import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.query.ListItem;
 import org.wcs.smart.i2.query.observation.filter.GroupByItem;
 import org.wcs.smart.i2.query.observation.filter.GroupByItem.GroupByType;
@@ -65,6 +67,7 @@ public class AttributeGroupByDropItem extends DropItem implements IGroupByDropIt
 	
 	private IntelEntityType type;
 	private IntelAttribute attribute;
+	private IntelRecordSourceAttribute rattribute;
 	
 	private ComboViewer cmbOptions;
 	
@@ -75,6 +78,11 @@ public class AttributeGroupByDropItem extends DropItem implements IGroupByDropIt
 	public AttributeGroupByDropItem(IntelEntityTypeAttribute entityAttribute) {
 		this(entityAttribute.getAttribute());
 		this.type = entityAttribute.getEntityType();
+	}
+	
+	public AttributeGroupByDropItem(IntelRecordSourceAttribute rAttribute) {
+		this(rAttribute.getAttribute());
+		this.rattribute = rAttribute;
 	}
 	
 	public AttributeGroupByDropItem(IntelAttribute attribute) {
@@ -107,20 +115,37 @@ public class AttributeGroupByDropItem extends DropItem implements IGroupByDropIt
 			sb.append(type.getName());
 			sb.append("]"); //$NON-NLS-1$
 		}
+		if (rattribute != null) {
+			sb.append(" ["); //$NON-NLS-1$
+			sb.append(rattribute.getSource().getName());
+			sb.append("]"); //$NON-NLS-1$
+		}
 		return sb.toString();
 	}
 
 	@Override
 	public String asQueryPart() {
+		
 		StringBuilder sb = new StringBuilder();
-		sb.append(GroupByItem.GroupByType.ATTRIBUTE.getKey());
-		sb.append(GroupByItem.INTERNAL_SEPERATOR);
-		sb.append(attribute.getType().key);
-		sb.append(GroupByItem.INTERNAL_SEPERATOR);
-		sb.append(attribute.getKeyId());
-		sb.append(GroupByItem.INTERNAL_SEPERATOR);
-		if (type != null) sb.append(type.getKeyId());
-		sb.append(GroupByItem.INTERNAL_SEPERATOR);
+		if (rattribute != null) {
+			sb.append(GroupByItem.GroupByType.RECORD_ATTRIBUTE.getKey());
+			sb.append(GroupByItem.INTERNAL_SEPERATOR);
+			sb.append(attribute.getType().key);
+			sb.append(GroupByItem.INTERNAL_SEPERATOR);
+			sb.append(rattribute.getKeyId());
+			sb.append(GroupByItem.INTERNAL_SEPERATOR);
+			sb.append(rattribute.getSource().getKeyId());
+			sb.append(GroupByItem.INTERNAL_SEPERATOR);
+		}else {
+			sb.append(GroupByItem.GroupByType.ENTITY_ATTRIBUTE.getKey());
+			sb.append(GroupByItem.INTERNAL_SEPERATOR);
+			sb.append(attribute.getType().key);
+			sb.append(GroupByItem.INTERNAL_SEPERATOR);
+			sb.append(attribute.getKeyId());
+			sb.append(GroupByItem.INTERNAL_SEPERATOR);
+			if (type != null) sb.append(type.getKeyId());
+			sb.append(GroupByItem.INTERNAL_SEPERATOR);
+		}
 		
 		if (attribute.getType() == AttributeType.LIST) {
 			for (ListItem key : filteredItems) {
@@ -252,18 +277,32 @@ public class AttributeGroupByDropItem extends DropItem implements IGroupByDropIt
 	@Override
 	public List<ListItem> getListOptions() {
 		try(Session session = HibernateManager.openSession()){
-			if (attribute.getType() == AttributeType.EMPLOYEE) {
-				return (new GroupByItem(GroupByType.ATTRIBUTE, attribute.getKeyId(), attribute.getType(), type == null ? null : type.getKeyId(), Collections.emptyList())).getAllOptions(session, InternalQueryManager.INSTANCE.getQueryItemProvider(), null, Locale.getDefault());
-			}else if (attribute.getType() == AttributeType.LIST) {
-				return (new GroupByItem(GroupByType.ATTRIBUTE, attribute.getKeyId(), attribute.getType(), type == null ? null : type.getKeyId(), Collections.emptyList())).getAllOptions(session, InternalQueryManager.INSTANCE.getQueryItemProvider(), null, Locale.getDefault());
-			}else if (attribute.getType() == AttributeType.POSITION) {
-				final Area.AreaType[] atype = new Area.AreaType[] {null};
-				Display.getDefault().syncExec(()->{
-					atype[0] = (AreaType) cmbOptions.getStructuredSelection().getFirstElement();
-				});
-				return (new GroupByItem(GroupByType.ATTRIBUTE, attribute.getKeyId(), attribute.getType(), type == null ? null : type.getKeyId(), atype[0], Collections.emptyList())).getAllOptions(session, InternalQueryManager.INSTANCE.getQueryItemProvider(), null, Locale.getDefault());
+			if (rattribute != null) {
+				if (attribute.getType() == AttributeType.EMPLOYEE) {
+					return (new GroupByItem(GroupByType.RECORD_ATTRIBUTE, rattribute.getKeyId(), attribute.getType(), rattribute.getSource().getKeyId(), Collections.emptyList())).getAllOptions(session, ProfilesManager.INSTANCE.getActiveProfileIds(), InternalQueryManager.INSTANCE.getQueryItemProvider(), null, Locale.getDefault());
+				}else if (attribute.getType() == AttributeType.LIST) {
+					return (new GroupByItem(GroupByType.RECORD_ATTRIBUTE, rattribute.getKeyId(), attribute.getType(), rattribute.getSource().getKeyId(), Collections.emptyList())).getAllOptions(session, ProfilesManager.INSTANCE.getActiveProfileIds(), InternalQueryManager.INSTANCE.getQueryItemProvider(), null, Locale.getDefault());
+				}else if (attribute.getType() == AttributeType.POSITION) {
+					final Area.AreaType[] atype = new Area.AreaType[] {null};
+					Display.getDefault().syncExec(()->{
+						atype[0] = (AreaType) cmbOptions.getStructuredSelection().getFirstElement();
+					});
+					return (new GroupByItem(GroupByType.RECORD_ATTRIBUTE, rattribute.getKeyId(), attribute.getType(), rattribute.getSource().getKeyId(), atype[0], Collections.emptyList())).getAllOptions(session,ProfilesManager.INSTANCE.getActiveProfileIds(),  InternalQueryManager.INSTANCE.getQueryItemProvider(), null, Locale.getDefault());
+				}
+			}else {
+				if (attribute.getType() == AttributeType.EMPLOYEE) {
+					return (new GroupByItem(GroupByType.ENTITY_ATTRIBUTE, attribute.getKeyId(), attribute.getType(), type == null ? null : type.getKeyId(), Collections.emptyList())).getAllOptions(session, ProfilesManager.INSTANCE.getActiveProfileIds(), InternalQueryManager.INSTANCE.getQueryItemProvider(), null, Locale.getDefault());
+				}else if (attribute.getType() == AttributeType.LIST) {
+					return (new GroupByItem(GroupByType.ENTITY_ATTRIBUTE, attribute.getKeyId(), attribute.getType(), type == null ? null : type.getKeyId(), Collections.emptyList())).getAllOptions(session, ProfilesManager.INSTANCE.getActiveProfileIds(), InternalQueryManager.INSTANCE.getQueryItemProvider(), null, Locale.getDefault());
+				}else if (attribute.getType() == AttributeType.POSITION) {
+					final Area.AreaType[] atype = new Area.AreaType[] {null};
+					Display.getDefault().syncExec(()->{
+						atype[0] = (AreaType) cmbOptions.getStructuredSelection().getFirstElement();
+					});
+					return (new GroupByItem(GroupByType.ENTITY_ATTRIBUTE, attribute.getKeyId(), attribute.getType(), type == null ? null : type.getKeyId(), atype[0], Collections.emptyList())).getAllOptions(session,ProfilesManager.INSTANCE.getActiveProfileIds(),  InternalQueryManager.INSTANCE.getQueryItemProvider(), null, Locale.getDefault());
+				}
 			}
-			
+				
 		}
 		return Collections.emptyList();
 	}

@@ -81,6 +81,7 @@ import org.wcs.smart.i2.search.IntelSearchResult;
 import org.wcs.smart.i2.search.IntelSearchResultItem;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
+import org.wcs.smart.i2.ui.Resources;
 import org.wcs.smart.i2.ui.dialogs.ExportEntityToFileDialog;
 import org.wcs.smart.i2.ui.editors.record.RecordEditor;
 import org.wcs.smart.i2.ui.entity.exporter.EntityRelationshipExportDialog;
@@ -570,7 +571,7 @@ public class EntitySearchResultTable extends Composite {
 		
 		MenuItem mnuPrint = new MenuItem(menu, SWT.PUSH);
 		mnuPrint.setText(Messages.EntitySearchResultTable_PrintMenuItem);
-		mnuPrint.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_PDF));
+		mnuPrint.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.PDF_ICON));
 		mnuPrint.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -612,7 +613,7 @@ public class EntitySearchResultTable extends Composite {
 			}
 		});
 		
-		if (IntelSecurityManager.INSTANCE.canDeleteEntity()){
+		if (IntelSecurityManager.INSTANCE.canDeleteEntityAny()){
 			MenuItem mnuDelete = new MenuItem(menu, SWT.PUSH);
 			mnuDelete.setText(Messages.EntitySearchResultTable_DeleteMenuItem);
 			mnuDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
@@ -664,7 +665,7 @@ public class EntitySearchResultTable extends Composite {
 						mi.dispose();
 					}
 				}
-				if (IntelSecurityManager.INSTANCE.canCreateRecord()) {
+				if (IntelSecurityManager.INSTANCE.canCreateRecordAny()) {
 					MenuItem createRecord = new MenuItem(subRecord, SWT.PUSH);
 					createRecord.setText(Messages.EntitySearchResultTable_CreateNewRecord);
 					createRecord.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
@@ -676,7 +677,8 @@ public class EntitySearchResultTable extends Composite {
 						(new NewRecordHandler()).createNewRecord(kid);
 					});
 				}
-				if (IntelSecurityManager.INSTANCE.canEditRecord()) {
+		
+				if (IntelSecurityManager.INSTANCE.canEditRecordAny()) {
 					Collection<MPart> parts = context.get(EPartService.class).getParts();
 					boolean first = false;
 					for (MPart p : parts){
@@ -789,26 +791,46 @@ public class EntitySearchResultTable extends Composite {
 			sb.append(MessageFormat.format(Messages.EntitySearchResultTable_DateModifiedLabel, DateFormat.getDateInstance().format(entity.getDateModified())));
 			l.setToolTipText(sb.toString());
 			
-			int spacer = 2;
-			Composite typecomp = toolkit.createComposite(right);
-			typecomp.setLayout(new GridLayout(2, false));
+			Composite entitycomp = toolkit.createComposite(right);
+			entitycomp.setLayout(new GridLayout(2, true));
+			((GridLayout)entitycomp.getLayout()).marginWidth = 0;
+			((GridLayout)entitycomp.getLayout()).marginHeight = 0;
+			entitycomp.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, false));
+			
+			Composite typecomp = toolkit.createComposite(entitycomp);
+			typecomp.setLayout(new GridLayout(entity.getEntityType().getIcon() == null ? 1 : 2, false));
 			((GridLayout)typecomp.getLayout()).marginWidth = 0;
 			((GridLayout)typecomp.getLayout()).marginHeight = 0;
 			typecomp.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, true));
 			if (entity.getEntityType().getIcon() != null){
 				final Label l1 = toolkit.createLabel(typecomp,""); //$NON-NLS-1$
-				l1.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, true));
-				l1.setImage(EntityTypeLabelProvider.createImageDescriptor(entity.getEntityType()).createImage());
-				l1.addDisposeListener((e)->{if (l1.getImage() != null) l1.getImage().dispose();});
+				l1.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
+				l1.setImage(Resources.INSTANCE.getImage(entity.getEntityType()));
 				addListener(l1);
-				spacer = 1;
 			}
 			
 			l = toolkit.createLabel(typecomp, EntityTypeLabelProvider.getText(entity.getEntityType()));
-			l.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, true, spacer, 1));
+			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			l.setToolTipText(entity.getEntityType().getName());
 			addListener(l);
 			l.setFont(smallerFont);
 			
+			typecomp = toolkit.createComposite(entitycomp);
+			typecomp.setLayout(new GridLayout(2, false));
+			((GridLayout)typecomp.getLayout()).marginWidth = 0;
+			((GridLayout)typecomp.getLayout()).marginHeight = 0;
+			typecomp.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, true));
+
+			l = toolkit.createLabel(typecomp, ""); //$NON-NLS-1$
+			l.setImage(Resources.INSTANCE.getImage(entity.getProfile()));
+			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+			addListener(l);
+			l.setFont(smallerFont);
+			
+			l = toolkit.createLabel(typecomp, entity.getProfile().getName());
+			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			addListener(l);
+			l.setFont(smallerFont);
 			
 			l = toolkit.createLabel(right, MessageFormat.format(Messages.EntitySearchResultTable_RatingLabel, item.getFormattedRating()));
 			if (item.getMatchedString() != null) l.setToolTipText(item.getMatchedString());

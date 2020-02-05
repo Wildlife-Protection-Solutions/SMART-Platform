@@ -476,6 +476,105 @@ ALTER TABLE smart.ct_incident_link add column obs_group_uuid uuid;
 ALTER TABLE smart.ct_incident_link alter column ct_group_id drop not null;
 
 
+-------- MULTI PROFILES ------------
+CREATE TABLE smart.i_profile_config(uuid uuid not null, ca_uuid uuid not null, keyid varchar(128) not null, color int, primary key (uuid));
+CREATE TABLE smart.i_profile_entity_type(entity_type_uuid uuid not null, profile_uuid uuid not null, primary key (entity_type_uuid, profile_uuid));
+CREATE TABLE smart.i_profile_record_source(record_source_uuid uuid not null, profile_uuid uuid not null, primary key (record_source_uuid, profile_uuid));
+
+
+ALTER TABLE smart.i_profile_entity_type ADD FOREIGN KEY (entity_type_uuid) REFERENCES smart.i_entity_type (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.i_profile_entity_type ADD FOREIGN KEY (profile_uuid) REFERENCES smart.i_profile_config (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.i_profile_record_source ADD FOREIGN KEY (record_source_uuid) REFERENCES smart.I_RECORDSOURCE (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.i_profile_record_source ADD FOREIGN KEY (profile_uuid) REFERENCES smart.i_profile_config (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+
+ALTER TABLE smart.i_entity ADD COLUMN profile_uuid uuid ;
+ALTER TABLE smart.i_entity ADD FOREIGN KEY (profile_uuid) REFERENCES smart.i_profile_config (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY DEFERRED;
+
+ALTER TABLE smart.i_record ADD COLUMN profile_uuid uuid ;
+ALTER TABLE smart.i_record ADD FOREIGN KEY (profile_uuid) REFERENCES smart.i_profile_config (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY DEFERRED;
+
+ALTER TABLE smart.i_relationship_type ADD COLUMN src_profile_uuid uuid;
+ALTER TABLE smart.i_relationship_type ADD COLUMN target_profile_uuid uuid;
+ALTER TABLE smart.i_relationship_type ADD FOREIGN KEY (src_profile_uuid) REFERENCES smart.i_profile_config (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.i_relationship_type ADD FOREIGN KEY (target_profile_uuid) REFERENCES smart.i_profile_config (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY DEFERRED;
+
+
+CREATE TABLE smart.i_permission(employee_uuid uuid not null, profile_uuid uuid not null, permissions integer not null, primary key (employee_uuid, profile_uuid));
+ALTER TABLE smart.i_permission ADD FOREIGN KEY (employee_uuid) REFERENCES smart.employee(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.i_permission ADD FOREIGN KEY (profile_uuid) REFERENCES smart.i_profile_config(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+
+
+ALTER TABLE smart.i_entity_record_query add column profile_filter varchar(32672);
+ALTER TABLE smart.i_entity_summary_query add column profile_filter varchar(32672);
+ALTER TABLE smart.i_record_obs_query add column profile_filter varchar(32672);
+
+--must be done last to avoid problems adding
+ALTER TABLE smart.i_profile_config ADD FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;  
+
+--entity summary queries
+CREATE TABLE smart.i_record_summary_query(uuid uuid NOT NULL,ca_uuid uuid NOT NULL,query_string varchar(32700),date_created timestamp NOT NULL,last_modified_date timestamp,created_by uuid NOT NULL,last_modified_by uuid, profile_filter varchar(32672), PRIMARY KEY (uuid));
+
+ALTER TABLE smart.i_record_summary_query ADD FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.i_record_summary_query ADD FOREIGN KEY (created_by) REFERENCES smart.employee (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.i_record_summary_query ADD FOREIGN KEY (last_modified_by) REFERENCES smart.employee (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY DEFERRED;
+
+--record query			
+CREATE TABLE smart.i_record_query(uuid uuid NOT NULL,ca_uuid uuid NOT NULL,query_string varchar(32700),date_created timestamp NOT NULL,last_modified_date timestamp,created_by uuid NOT NULL,last_modified_by uuid, profile_filter varchar(32672), PRIMARY KEY (uuid));
+
+ALTER TABLE smart.i_record_query ADD FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.i_record_query ADD FOREIGN KEY (created_by) REFERENCES smart.employee (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.i_record_query ADD FOREIGN KEY (last_modified_by) REFERENCES smart.employee (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY DEFERRED;
+		
+ALTER TABLE smart.i_recordsource_attribute ADD COLUMN keyid varchar(128);
+--remaining updates are done via in the code via the UpgradeServlet
+
+--triggers
+	
+		
+CREATE TRIGGER trg_i_profile_config AFTER INSERT OR UPDATE OR DELETE ON smart.i_profile_config FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_i_record_query AFTER INSERT OR UPDATE OR DELETE ON smart.i_record_query FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_i_record_summary_query AFTER INSERT OR UPDATE OR DELETE ON smart.i_record_summary_query FOR EACH ROW execute procedure connect.trg_changelog_common();
+
+		
+CREATE OR REPLACE FUNCTION connect.trg_i_permission() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'employee_uuid', ROW.employee_uuid, 'profile_uuid', ROW.profile_uuid, null, i.CA_UUID 
+ 		FROM smart.i_profile_config i WHERE i.uuid = row.profile_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE TRIGGER trg_i_permission AFTER INSERT OR UPDATE OR DELETE ON smart.i_permission FOR EACH ROW execute procedure connect.trg_i_permission();
+
+
+
+CREATE OR REPLACE FUNCTION connect.i_profile_record_source() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'record_source_uuid', ROW.record_source_uuid, 'profile_uuid', ROW.profile_uuid, null, i.CA_UUID 
+ 		FROM smart.i_profile_config i WHERE i.uuid = row.profile_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE TRIGGER trg_i_profile_record_source AFTER INSERT OR UPDATE OR DELETE ON smart.i_profile_record_source FOR EACH ROW execute procedure connect.i_profile_record_source();
+
+CREATE OR REPLACE FUNCTION connect.i_profile_entity_type() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'entity_type_uuid', ROW.entity_type_uuid, 'profile_uuid', ROW.profile_uuid, null, i.CA_UUID 
+ 		FROM smart.i_profile_config i WHERE i.uuid = row.profile_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE TRIGGER trg_i_profile_entity_type AFTER INSERT OR UPDATE OR DELETE ON smart.i_profile_entity_type FOR EACH ROW execute procedure connect.i_profile_entity_type();
+
+
+--TODO: MAKE THESE UNIQUE and not null
+update smart.I_RECORDSOURCE_ATTRIBUTE set keyid = (select a.keyid from smart.i_attribute a where a.uuid = smart.i_recordsource_attribute.attribute_uuid) where attribute_uuid is not null;
+update smart.I_RECORDSOURCE_ATTRIBUTE set keyid = (select a.keyid from smart.i_entity_type a where a.uuid = smart.i_recordsource_attribute.entity_type_uuid) where entity_type_uuid is not null;
+
+alter table smart.i_recordsource_attribute alter column keyid set not null;
+
+
+update connect.connect_plugin_version set version = '5.0' where plugin_id = 'org.wcs.smart.i2';
+update connect.ca_plugin_version set version = '5.0' where plugin_id = 'org.wcs.smart.i2';
 
 
 ---- change ca version so users cannot sync with this and cause problems ---- 
@@ -496,4 +595,4 @@ update connect.ca_plugin_version set version = '7.0' where plugin_id = 'org.wcs.
 update connect.ca_plugin_version set version = '7.0.0' where plugin_id = 'org.wcs.smart';
 
 update connect.connect_version set version = '7.0.0', last_updated = now();		
-update connect.connect_version set filestore_version = '7.0.0';
+--update connect.connect_version set filestore_version = '7.0.0';

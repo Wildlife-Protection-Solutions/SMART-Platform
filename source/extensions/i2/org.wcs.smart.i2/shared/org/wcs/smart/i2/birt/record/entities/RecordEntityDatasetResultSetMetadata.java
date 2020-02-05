@@ -29,7 +29,6 @@ import org.wcs.smart.SmartContext;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.model.IntelEntityRecord;
-import org.wcs.smart.util.UuidUtils;
 
 /**
  * Entity record datasets results metadata
@@ -61,9 +60,9 @@ public class RecordEntityDatasetResultSetMetadata implements IResultSetMetaData 
 		public Object getValue(IntelEntityRecord entityrecord, Locale l) {
 			switch(this){
 			case UUID:
-				return UuidUtils.uuidToString(entityrecord.getRecord().getUuid());
+				return entityrecord.getRecord().getUuid();
 			case ENTITY_UUID:
-				return UuidUtils.uuidToString(entityrecord.getEntity().getUuid());
+				return entityrecord.getEntity().getUuid();
 			case ENTITY_ID:
 				return entityrecord.getEntity().getIdAttributeAsText(l);
 			case ENTITY_IMAGE:

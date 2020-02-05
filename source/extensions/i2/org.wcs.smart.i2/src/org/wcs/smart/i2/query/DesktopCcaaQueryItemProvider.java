@@ -22,7 +22,7 @@
 package org.wcs.smart.i2.query;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Collection;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -33,16 +33,12 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.DataModelMerger;
 import org.wcs.smart.ca.datamodel.SimpleDataModel;
+import org.wcs.smart.i2.model.IntelProfile;
 
 public class DesktopCcaaQueryItemProvider extends CcaaQueryItemProvider {
 
-	public DesktopCcaaQueryItemProvider(Collection<ConservationArea> conservationAreas, ConservationArea queryCa) {
-		super(conservationAreas, queryCa);
-	}
-
-	@Override
-	public void reset() {
-		mergedDataModel = null;
+	public DesktopCcaaQueryItemProvider(Set<IntelProfile> profiles, ConservationArea queryCa) {
+		super(profiles, queryCa);
 	}
 	
 	@Override

@@ -95,8 +95,8 @@ public class EntityListComposite extends Composite{
 		toolkit.adapt(this);
 		
 		GridLayout gl = new GridLayout();
-		gl.marginHeight = 0;
-		gl.marginWidth = 0;
+		gl.marginHeight = 1;
+		gl.marginWidth = 1;
 		setLayout(gl);
 				
 		compEntityEdit = toolkit.createComposite(this, SWT.NONE);
@@ -105,7 +105,7 @@ public class EntityListComposite extends Composite{
 		((GridLayout)compEntityEdit.getLayout()).marginHeight = 0 ;
 		((GridLayout)compEntityEdit.getLayout()).marginWidth = 0 ;
 		
-		if (IntelSecurityManager.INSTANCE.canViewEntities()) {
+		if (IntelSecurityManager.INSTANCE.canViewEntityAny()) {
 			Button btnAdd = toolkit.createButton(compEntityEdit, DialogConstants.ADD_BUTTON_TEXT, SWT.PUSH);
 			btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 			btnAdd.addListener(SWT.Selection, e->addEntity(btnAdd));
@@ -123,7 +123,7 @@ public class EntityListComposite extends Composite{
 			
 			MenuItem mnuSearch = new MenuItem(mnuTemp, SWT.PUSH);
 			mnuSearch.setText(Messages.EntityListComposite_SearchMenu);
-			mnuSearch.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_ENTITY_QUERY));
+			mnuSearch.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_QUERY));
 			mnuSearch.addListener(SWT.Selection, e->searchEntity());
 			
 			compEntityEdit.setMenu(mnuTemp);
@@ -154,12 +154,23 @@ public class EntityListComposite extends Composite{
 						IStructuredSelection sel = (IStructuredSelection)s;
 						for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
 							Object element = (Object)iterator.next();
+							
+							IntelEntity entity = null;
 							if (element instanceof IntelEntity){
-								linkEntity((IntelEntity)element);
-							}
-							if (element instanceof IAdaptable){
+								entity = (IntelEntity)element;
+							}else  if (element instanceof IAdaptable){
 								Object x = ((IAdaptable)element).getAdapter(IntelEntity.class);
-								if (x != null) linkEntity((IntelEntity) x);
+								if (x != null) entity = (IntelEntity)x;
+							}
+							if (entity == null) return;
+							if (entity.getProfile().getUuid().equals(editor.getInputInternal().getRecordProfileUuid())) {
+								linkEntity((IntelEntity)element);
+							}else {
+								//show error
+								String message = MessageFormat.format(Messages.EntityListComposite_CannotAddEntity,
+										entity.getIdAttributeAsText(), entity.getProfile().getName(), editor.getRecord().getProfile().getName());
+								TransparentInfoDialog ti = new TransparentInfoDialog(getShell(), message);
+								ti.open();
 							}
 							
 						}
@@ -230,6 +241,7 @@ public class EntityListComposite extends Composite{
 				try(Session s = HibernateManager.openSession()){
 					toadd = (IntelEntity) s.get(IntelEntity.class, entity.getUuid());
 					if(toadd != null){
+						toadd.getProfile().equals(editor.getRecord().getProfile());
 						toadd.getIdAttributeAsText();
 						if (toadd.getPrimaryAttachment() != null){
 							try {
@@ -264,7 +276,9 @@ public class EntityListComposite extends Composite{
 								add = false;
 							}
 						}
-						
+						if (!toadd.getProfile().equals(editor.getRecord().getProfile())) {
+							add =  false;
+						}
 						if (add){
 							IntelEntityRecord r = new IntelEntityRecord();
 							r.setEntity(toadd);
