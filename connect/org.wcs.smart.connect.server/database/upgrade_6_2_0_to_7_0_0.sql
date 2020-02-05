@@ -488,26 +488,21 @@ ALTER TABLE smart.i_profile_record_source ADD FOREIGN KEY (record_source_uuid) R
 ALTER TABLE smart.i_profile_record_source ADD FOREIGN KEY (profile_uuid) REFERENCES smart.i_profile_config (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 
 ALTER TABLE smart.i_entity ADD COLUMN profile_uuid uuid ;
-ALTER TABLE smart.i_entity ALTER COLUMN profile_uuid set not null;
 ALTER TABLE smart.i_entity ADD FOREIGN KEY (profile_uuid) REFERENCES smart.i_profile_config (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY DEFERRED;
 
-
-CREATE TABLE smart.i_permission(employee_uuid uuid not null, profile_uuid uuid not null, permissions integer not null, primary key (employee_uuid, profile_uuid));
-
-ALTER TABLE smart.i_permission ADD FOREIGN KEY (employee_uuid) REFERENCES smart.employee(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
-ALTER TABLE smart.i_permission ADD FOREIGN KEY (profile_uuid) REFERENCES smart.i_profile_config(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
-
 ALTER TABLE smart.i_record ADD COLUMN profile_uuid uuid ;
-ALTER TABLE smart.i_record ALTER COLUMN profile_uuid set not null;
 ALTER TABLE smart.i_record ADD FOREIGN KEY (profile_uuid) REFERENCES smart.i_profile_config (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY DEFERRED;
 
 ALTER TABLE smart.i_relationship_type ADD COLUMN src_profile_uuid uuid;
-ALTER TABLE smart.i_relationship_type ALTER COLUMN src_profile_uuid SET not null;
 ALTER TABLE smart.i_relationship_type ADD COLUMN target_profile_uuid uuid;
-ALTER TABLE smart.i_relationship_type ALTER COLUMN target_profile_uuid SET not null;
-
 ALTER TABLE smart.i_relationship_type ADD FOREIGN KEY (src_profile_uuid) REFERENCES smart.i_profile_config (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE smart.i_relationship_type ADD FOREIGN KEY (target_profile_uuid) REFERENCES smart.i_profile_config (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY DEFERRED;
+
+
+CREATE TABLE smart.i_permission(employee_uuid uuid not null, profile_uuid uuid not null, permissions integer not null, primary key (employee_uuid, profile_uuid));
+ALTER TABLE smart.i_permission ADD FOREIGN KEY (employee_uuid) REFERENCES smart.employee(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.i_permission ADD FOREIGN KEY (profile_uuid) REFERENCES smart.i_profile_config(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+
 
 ALTER TABLE smart.i_entity_record_query add column profile_filter varchar(32672);
 ALTER TABLE smart.i_entity_summary_query add column profile_filter varchar(32672);
@@ -531,6 +526,7 @@ ALTER TABLE smart.i_record_query ADD FOREIGN KEY (created_by) REFERENCES smart.e
 ALTER TABLE smart.i_record_query ADD FOREIGN KEY (last_modified_by) REFERENCES smart.employee (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY DEFERRED;
 		
 ALTER TABLE smart.i_recordsource_attribute ADD COLUMN keyid varchar(128);
+--remaining updates are done via in the code via the UpgradeServlet
 
 --triggers
 	
@@ -589,14 +585,14 @@ delete from connect.change_log_history;
 ------------ VERSIONS ------------
 update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.cybertracker.patrol';
 update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.cybertracker.survey';
-update connect.connect_plugin_version set version = '6.0' where plugin_id = 'org.wcs.smart.cybertracker';
+update connect.connect_plugin_version set version = '7.0' where plugin_id = 'org.wcs.smart.cybertracker';
 insert into connect.connect_plugin_version (version, plugin_id) values ('1.0', 'org.wcs.smart.paws');
 update connect.connect_plugin_version set version = '7.0.0' where plugin_id = 'org.wcs.smart';
 
 update connect.ca_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.cybertracker.patrol';
 update connect.ca_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.cybertracker.survey';
-update connect.ca_plugin_version set version = '6.0' where plugin_id = 'org.wcs.smart.cybertracker';
+update connect.ca_plugin_version set version = '7.0' where plugin_id = 'org.wcs.smart.cybertracker';
 update connect.ca_plugin_version set version = '7.0.0' where plugin_id = 'org.wcs.smart';
 
 update connect.connect_version set version = '7.0.0', last_updated = now();		
-update connect.connect_version set filestore_version = '7.0.0';
+--update connect.connect_version set filestore_version = '7.0.0';
