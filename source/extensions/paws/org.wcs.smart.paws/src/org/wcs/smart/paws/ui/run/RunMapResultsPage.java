@@ -129,7 +129,7 @@ public class RunMapResultsPage extends SmartMapEditorPart{
 		                    }
 		                }
 		                catch (Throwable t){
-		                    ProjectPlugin.log("Unable to add "+ item,t);
+		                    ProjectPlugin.log("Unable to add "+ item,t); //$NON-NLS-1$
 		                }
 		            }
 		        }

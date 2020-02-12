@@ -39,7 +39,6 @@ public class PawsPlugIn extends AbstractUIPlugin {
 	// The shared instance
 	private static PawsPlugIn plugin;
 	
-	public static final String PAWS_DIR = "paws";  //$NON-NLS-1$
 	
 	/*
 	 * As the plugin evolves updates may require changes to the

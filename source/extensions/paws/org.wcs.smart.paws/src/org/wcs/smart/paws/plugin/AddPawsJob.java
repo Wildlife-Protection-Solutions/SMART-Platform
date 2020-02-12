@@ -34,6 +34,7 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.paws.PawsPlugIn;
+import org.wcs.smart.paws.internal.Messages;
 
 /**
  * Adds and/or upgrades the PAWS plugin database tables.
@@ -44,7 +45,7 @@ import org.wcs.smart.paws.PawsPlugIn;
 public class AddPawsJob extends Job {
 
 	public AddPawsJob() {
-		super("Install PAWS Plugin");
+		super(Messages.AddPawsJob_JobName);
 	}
 
 	@Override
@@ -62,10 +63,10 @@ public class AddPawsJob extends Job {
 				Display.getDefault().syncExec(new Runnable(){
 					@Override
 					public void run() {
-						PawsPlugIn.displayLog("ERROR Installing PAWS Plugin." + ex.getMessage(), ex);
+						PawsPlugIn.displayLog(Messages.AddPawsJob_InstallError + ex.getMessage(), ex);
 					}
 				});
-				return new Status(IStatus.ERROR, PawsPlugIn.PLUGIN_ID, 1, "ERROR Installing PAWS Plugin" + ex.getMessage(), ex);
+				return new Status(IStatus.ERROR, PawsPlugIn.PLUGIN_ID, 1, Messages.AddPawsJob_InstallError + ex.getMessage(), ex);
 			}
 		}
 		monitor.done();

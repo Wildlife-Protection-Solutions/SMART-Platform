@@ -34,6 +34,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.paws.PawsEvent;
 import org.wcs.smart.paws.PawsPlugIn;
 import org.wcs.smart.paws.engine.PawsApi.PawsStatus;
+import org.wcs.smart.paws.internal.Messages;
 import org.wcs.smart.paws.model.PawsRun;
 
 /**
@@ -58,7 +59,7 @@ public class PawsStatusJob extends Job {
 	private List<PawsRun> items = Collections.synchronizedList(new ArrayList<>());
 	
 	private PawsStatusJob() {
-		super("Checking PAWS Status");
+		super(Messages.PawsStatusJob_JobName);
 	}
 	
 	public void addItem(PawsRun run){
@@ -94,14 +95,12 @@ public class PawsStatusJob extends Job {
 					PawsApi.PawsStatus taskStatus = PawsApi.INSTANCE.checkStatus(run);
 					if (taskStatus == PawsStatus.DONE){
 						readyToDownload.add(run);
-//						cleanUp.add(run);
 					}else if (taskStatus == PawsStatus.ERROR) {
 						//delete from server
 						cleanUp.add(run);
 					}
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					PawsPlugIn.log(e.getMessage(), e);
 				}
 			}else{
 				cancelled.add(run);
@@ -125,8 +124,7 @@ public class PawsStatusJob extends Job {
 				}
 				session.getTransaction().commit();
 			} catch (Exception ex) {
-				ex.printStackTrace();
-				// TODO:
+				PawsPlugIn.log(ex.getMessage(),ex);
 			}
 		}
 		jobs.forEach(j->j.schedule());

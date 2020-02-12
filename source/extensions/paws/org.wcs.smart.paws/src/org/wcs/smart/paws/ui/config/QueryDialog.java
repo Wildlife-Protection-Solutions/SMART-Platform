@@ -46,6 +46,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.paws.internal.Messages;
 import org.wcs.smart.paws.model.PawsQueryClass;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.common.model.ObservationQuery;
@@ -97,7 +98,7 @@ public class QueryDialog extends SmartStyledDialog {
 		
 		loadQueries.schedule();
 		
-		getShell().setText("SMART Queries");
+		getShell().setText(Messages.QueryDialog_Title);
 		return parent;
 	}
 	
@@ -118,7 +119,7 @@ public class QueryDialog extends SmartStyledDialog {
 					item.setCachedQuery(q);
 					selectedItems.add(new ClassificationData(item, c.getName()));
 				}else {
-					MessageDialog.openWarning(getShell(), "Invalid Selection", MessageFormat.format("Selected item {0} cannot be added.  Please select a query.", dmObject.toString()));
+					MessageDialog.openWarning(getShell(), Messages.QueryDialog_InvalidSelectionTitle, MessageFormat.format(Messages.QueryDialog_InvalidSelectionMsg, dmObject.toString()));
 					return;
 				}	
 			}
@@ -140,7 +141,7 @@ public class QueryDialog extends SmartStyledDialog {
 		return true;
 	}
 	
-	private Job loadQueries = new Job("loading queries") {
+	private Job loadQueries = new Job(Messages.QueryDialog_loadingjobname) {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {

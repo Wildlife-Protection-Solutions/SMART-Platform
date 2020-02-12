@@ -35,6 +35,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.paws.PawsEvent;
 import org.wcs.smart.paws.PawsPlugIn;
+import org.wcs.smart.paws.internal.Messages;
 import org.wcs.smart.paws.model.PawsRun;
 import org.wcs.smart.paws.model.PawsWorkspace;
 
@@ -60,7 +61,7 @@ public class PawsRunJob extends Job{
 	
 	
 	public PawsRunJob(PawsRun run) {
-		super("packaging and uploading data for PAWS analysis: " + run.getId());
+		super(Messages.PawsRunJob_JobName + run.getId());
 		this.run = run;
 	}
 
@@ -74,7 +75,7 @@ public class PawsRunJob extends Job{
 		try{
 			packageDir = engine.createDataPackage();
 		}catch (Exception ex){
-			handleError("Unable to package SMART data for PAWS analysis.", ex);
+			handleError(Messages.PawsRunJob_PackageError, ex);
 			return Status.OK_STATUS;
 		}
 		
@@ -86,33 +87,28 @@ public class PawsRunJob extends Job{
 			PawsWorkspace ws;
 			try(Session session = HibernateManager.openSession()){
 				ws = QueryFactory.buildQuery(session, PawsWorkspace.class,  
-						new Object[] {"conservationArea", run.getConservationArea()}).uniqueResult();
+						new Object[] {"conservationArea", run.getConservationArea()}).uniqueResult(); //$NON-NLS-1$
 				
 				if (ws == null || !ws.isConfigured()){
-					handleError("PAWS Workspace not configured.  You must first configure the PAWS Workspace before you can run paws analysis.", new Exception("No Paws Workspace Configured."));
+					handleError(Messages.PawsRunJob_WorkspaceNotConfigured, new Exception(Messages.PawsRunJob_NoWorkspaceFound));
 					return Status.OK_STATUS;
-				}
-				
+				}	
 			}
-			
 			containerURL = StorageApi.INSTANCE.getContainerURL();
 						
 	        //upload files
 	        for(Path p : engine.getDataFiles()) {
 				if (Files.exists(p)){
 					//upload file to folder
-					BlockBlobURL blobURL = containerURL.createBlockBlobURL(run.getRunId() + "/" + p.getFileName().toString());
+					BlockBlobURL blobURL = containerURL.createBlockBlobURL(run.getRunId() + "/" + p.getFileName().toString()); //$NON-NLS-1$
 					blobURL.getProperties();
-					uploadFile(blobURL, p, MessageFormat.format("Error uploading basemap data for layer {0}.", p.getFileName().toString()));
+					uploadFile(blobURL, p, MessageFormat.format(Messages.PawsRunJob_BasemapFileUploadError, p.getFileName().toString()));
 				}
 			
 			}
 			
 		}catch (Throwable ex){
-			String msg = "Unable to upload SMART data to Azure instance of PAWS analysis. "
-					+ "Some data may remain on Azure blob storage folder (" 
-					+ run.getRunId() 
-					+ ").  You should remove this data manually ";
+			String msg = MessageFormat.format(Messages.PawsRunJob_UploadError, run.getRunId() );
 			handleError(msg, ex);
 			return Status.OK_STATUS;
 		}
@@ -124,7 +120,8 @@ public class PawsRunJob extends Job{
 				if (pw != null){
 					pw.setStatus(PawsRun.Status.RUNNING);
 				}else{
-					//TODO: assume this has been deleted; warn user that there might be data on azure storage folder?
+					//TODO: assume this has been deleted; warn user that there might 
+					//be data on azure storage folder?
 					//Maybe we should do this on delete
 				}
 				session.getTransaction().commit();
@@ -134,37 +131,26 @@ public class PawsRunJob extends Job{
 				}catch (Exception e3){
 					PawsPlugIn.log(e3.getMessage(), e3);	
 				}
-				PawsPlugIn.displayLog("Failed to update Paws Run status.  Run will not continue." + "\n\n" + ex2.getMessage(), ex2);
+				PawsPlugIn.displayLog(Messages.PawsRunJob_StatusFailed + "\n\n" + ex2.getMessage(), ex2); //$NON-NLS-1$
 				return Status.OK_STATUS;
 			}
 		}
 		fireModified();
 		
-		//if (true) return Status.OK_STATUS;
-		
 		//run paws analysis
 		try{
 			Path configJson = packageDir.resolve(PawsDataEngine.CONFIG_FILE_NAME);
 			String json = Files.readString(configJson);
-			System.out.println(json);
-			//TODO:
 			PawsApi.INSTANCE.run(run, json);
 			
-			//{
-			 // "TaskId": "string",
-			 // "Timestamp": "2019-06-05T23:05:01.858Z",
-			 // "Status": "string",
-			 // "Endpoint": "string"
-			//}
 		}catch (Exception ex){
-			handleError("Error calling PAWS API", ex);
+			handleError(Messages.PawsRunJob_APIError, ex);
 			return Status.OK_STATUS;
 		}
 		
 		//add to queue to check status 
 		PawsStatusJob.getInstance().addItem(run);
 		
-
 		return Status.OK_STATUS;
 	}
 
@@ -177,7 +163,7 @@ public class PawsRunJob extends Job{
 						try{
 							int stat = response.response().statusCode();
 							if (stat != HttpResponseStatus.OK.code() && stat != HttpResponseStatus.CREATED.code()) {
-								throw new Exception(errorMsg + " " + MessageFormat.format("(Server return code: {0})", stat));
+								throw new Exception(errorMsg + " " + MessageFormat.format(Messages.PawsRunJob_ServerReturnCode, stat)); //$NON-NLS-1$
 							}
 						}catch (Throwable t){
 							uperror[0] = t;
@@ -203,7 +189,7 @@ public class PawsRunJob extends Job{
 	}
 	
 	private void handleError(String msg, Throwable ex){
-		PawsPlugIn.displayLog(msg + "\n\n" + ex.getMessage(), ex);
+		PawsPlugIn.displayLog(msg + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 		
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();

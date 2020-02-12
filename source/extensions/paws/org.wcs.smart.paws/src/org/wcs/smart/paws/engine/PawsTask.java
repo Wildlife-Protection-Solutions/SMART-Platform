@@ -71,19 +71,19 @@ public class PawsTask {
 		JSONParser parse = new JSONParser();
 		JSONObject item = (JSONObject) parse.parse(json);
 		
-		String tid = (String) item.get("TaskId");
-		if (tid == null) throw new Exception("Task Id not provided.");
-		String status = (String) item.get("Status");
-		String endpoint = (String) item.get("Endpoint");
-		String endpointpath = (String) item.get("EndpointPath");
-		String body = (String) item.get("Body");
-		String backendstatus = (String)item.get("BackendStatus");
+		String tid = (String) item.get("TaskId"); //$NON-NLS-1$
+		if (tid == null) throw new Exception("Task Id not provided."); //$NON-NLS-1$
+		String status = (String) item.get("Status"); //$NON-NLS-1$
+		String endpoint = (String) item.get("Endpoint"); //$NON-NLS-1$
+		String endpointpath = (String) item.get("EndpointPath"); //$NON-NLS-1$
+		String body = (String) item.get("Body"); //$NON-NLS-1$
+		String backendstatus = (String)item.get("BackendStatus"); //$NON-NLS-1$
 		
-		Boolean publishtogrid = (Boolean)item.get("PublishToGrid");
+		Boolean publishtogrid = (Boolean)item.get("PublishToGrid"); //$NON-NLS-1$
 		
 		LocalDateTime d = null;
 		try {
-			d = DateTimeFormatter.ofPattern("M/d/yyyy h:m:s a").parse((String)item.get("Timestamp"), LocalDateTime::from);
+			d = DateTimeFormatter.ofPattern("M/d/yyyy h:m:s a").parse((String)item.get("Timestamp"), LocalDateTime::from); //$NON-NLS-1$ //$NON-NLS-2$
 		}catch (Exception ex) {
 			ex.printStackTrace();
 		}

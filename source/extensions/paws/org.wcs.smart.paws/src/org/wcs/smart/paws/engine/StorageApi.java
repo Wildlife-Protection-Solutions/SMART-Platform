@@ -39,6 +39,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.paws.PawsPlugIn;
+import org.wcs.smart.paws.internal.Messages;
 import org.wcs.smart.paws.model.PawsRun;
 import org.wcs.smart.paws.model.PawsWorkspace;
 import org.wcs.smart.paws.ui.LoginDialog;
@@ -68,8 +69,8 @@ public enum StorageApi {
 	private PawsWorkspace workspace;
 	
 	public ContainerURL getContainerURL() throws Exception {
-		if (workspace == null) throw new Exception("A call to getAuthorizationCode is required before you can continue");
-		String url = workspace.getStorageAccountUrl() + "/" + workspace.getContainer();
+		if (workspace == null) throw new Exception(Messages.StorageApi_AuthCodeRequired);
+		String url = workspace.getStorageAccountUrl() + "/" + workspace.getContainer(); //$NON-NLS-1$
 		TokenCredentials tc = new TokenCredentials(token);
 		ContainerURL  containerURL = new ContainerURL(new URL(url), StorageURL.createPipeline(tc, new PipelineOptions()));
 		return containerURL;
@@ -78,7 +79,7 @@ public enum StorageApi {
 	private void getWorkspace() {
 		try(Session session = HibernateManager.openSession()){
 			PawsWorkspace ws = QueryFactory.buildQuery(session, PawsWorkspace.class,  
-					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).uniqueResult();
+					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).uniqueResult(); //$NON-NLS-1$
 			if (ws == null || !ws.isConfigured()) {
 				token = null;
 				workspace = null;
@@ -106,7 +107,7 @@ public enum StorageApi {
 		String authorizationCode = dialog.getAuthorizationCode();
 		if (authorizationCode == null) {
 			//fail
-			MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Authorization Failed", "Authorization failed, run not created.");
+			MessageDialog.openInformation(Display.getDefault().getActiveShell(), Messages.StorageApi_AuthFailedTitle, Messages.StorageApi_AuthFailedMsg);
 			return false;
 		}
 		acquireToken(authorizationCode);
@@ -115,28 +116,28 @@ public enum StorageApi {
 	
 	private void acquireToken(String authorizationCode) throws Exception{
 	
-		String redirecturi = "https://login.microsoftonline.com/common/oauth2/nativeclient";
+		String redirecturi = "https://login.microsoftonline.com/common/oauth2/nativeclient"; //$NON-NLS-1$
 		
 		StringBuilder sb = new StringBuilder();
 		sb.append(workspace.getUrl());
-		sb.append("/");
-		sb.append("token");
+		sb.append("/"); //$NON-NLS-1$
+		sb.append("token"); //$NON-NLS-1$
 		
 		
 		StringBuilder params = new StringBuilder();
-		params.append("client_id=" + workspace.getClientId()); 
-		params.append("&code=" + authorizationCode );
-		params.append("&redirect_uri=" + redirecturi );
-		params.append("&resource=https://storage.azure.com/");
-		params.append("&grant_type=authorization_code");
+		params.append("client_id=" + workspace.getClientId());  //$NON-NLS-1$
+		params.append("&code=" + authorizationCode ); //$NON-NLS-1$
+		params.append("&redirect_uri=" + redirecturi ); //$NON-NLS-1$
+		params.append("&resource=https://storage.azure.com/"); //$NON-NLS-1$
+		params.append("&grant_type=authorization_code"); //$NON-NLS-1$
 		String pp = params.toString();	
 		
 		String stoken = null;
 		HttpURLConnection conn = (HttpURLConnection) (new URL(sb.toString())).openConnection();
 		try {
-			conn.setRequestMethod("POST");
-			conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-			conn.setRequestProperty("Content-Length", Integer.valueOf( pp.getBytes().length).toString());
+			conn.setRequestMethod("POST"); //$NON-NLS-1$
+			conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded"); //$NON-NLS-1$ //$NON-NLS-2$
+			conn.setRequestProperty("Content-Length", Integer.valueOf( pp.getBytes().length).toString()); //$NON-NLS-1$
 			conn.setDoOutput(true);
 			conn.getOutputStream().write(pp.getBytes());
 			conn.getOutputStream().close();
@@ -152,17 +153,17 @@ public enum StorageApi {
 				}
 				try {
 					JSONObject json = (JSONObject) (new JSONParser()).parse(content.toString());
-					stoken = (String) json.get("access_token");
+					stoken = (String) json.get("access_token"); //$NON-NLS-1$
 					if (stoken == null || stoken.isBlank()) {
-						throw new Exception("access_token not found");
+						throw new Exception("access_token not found"); //$NON-NLS-1$
 					}
 				
 				}catch (Exception ex) {
-					throw new Exception("Unable to parse access token from json : " +content.toString(), ex);
+					throw new Exception(Messages.StorageApi_CannotParseAuth +content.toString(), ex);
 				}
 			}else {
-				PawsPlugIn.log("Authorization token cannot be found. Response: " + status + " Request: " + sb.toString() + " " + params.toString(), null);
-				throw new Exception("Authorization Token cannot be found.  Response code: " + status);
+				PawsPlugIn.log("Authorization token cannot be found. Response: " + status + " Request: " + sb.toString() + " " + params.toString(), null);  //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
+				throw new Exception(MessageFormat.format(Messages.StorageApi_TokenNotFoundException,  status));
 			}
 		}finally {
 			conn.disconnect();
@@ -182,7 +183,7 @@ public enum StorageApi {
 	 */
 	public List<String> getBlobs(ContainerURL containerURL, String url) throws InterruptedException{
 		
-		if (!url.endsWith("/")) url = url +"/";
+		if (!url.endsWith("/")) url = url +"/"; //$NON-NLS-1$ //$NON-NLS-2$
 		final String furl = url;
 		
 		List<String> items = new ArrayList<>();
@@ -215,10 +216,9 @@ public enum StorageApi {
 	 * @throws Exception
 	 */
 	public void deleteBlobs(PawsRun run) throws Exception{
-		
 		try {
 			ContainerURL  containerURL = getContainerURL();
-			if (containerURL == null) throw new Exception("Azure storage container not configured correctly.");
+			if (containerURL == null) throw new Exception(Messages.StorageApi_StorageNotConfigured);
 			
 			List<String> urlToDelete = getBlobs(containerURL, run.getRunId());
 			List<Throwable> fails = new ArrayList<>();
@@ -227,10 +227,10 @@ public enum StorageApi {
 			}
 			if (!fails.isEmpty()){
 				for (Throwable t : fails) PawsPlugIn.log(t.getMessage(), t);
-				throw new Exception("Delete fail.");
+				throw new Exception(Messages.StorageApi_DeleteFailed);
 			}
 		}catch (Exception ex){
-			PawsPlugIn.displayLog(MessageFormat.format("Unable to remove data from Azure container ({0}). You should remove these files manually.", run.getId()), ex);
+			PawsPlugIn.displayLog(MessageFormat.format(Messages.StorageApi_UnableToCleanupAzure, run.getId()), ex);
 		}
         
 	}

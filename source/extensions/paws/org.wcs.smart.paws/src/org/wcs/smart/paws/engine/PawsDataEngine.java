@@ -39,7 +39,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -69,12 +68,11 @@ import org.opengis.feature.type.Name;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.wcs.smart.ca.Area;
-import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.paws.PawsManager;
-import org.wcs.smart.paws.PawsPlugIn;
+import org.wcs.smart.paws.PawsFileManager;
+import org.wcs.smart.paws.internal.Messages;
 import org.wcs.smart.paws.model.PawsConfiguration;
 import org.wcs.smart.paws.model.PawsParameter;
 import org.wcs.smart.paws.model.PawsQueryClass;
@@ -83,7 +81,6 @@ import org.wcs.smart.paws.model.PawsRun.Status;
 import org.wcs.smart.paws.model.PawsSimpleClass;
 import org.wcs.smart.paws.model.PawsWorkspace;
 import org.wcs.smart.util.GeometryUtils;
-import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
 import org.wcs.smart.util.ZipUtil;
@@ -98,9 +95,9 @@ import au.com.bytecode.opencsv.CSVWriter;
  */
 public class PawsDataEngine {
 
-	public static final String DATA_FILE_NAME  = "SMARTdata.csv";
+	public static final String DATA_FILE_NAME  = "SMARTdata.csv"; //$NON-NLS-1$
 	
-	public static final String CONFIG_FILE_NAME  = "config.json";
+	public static final String CONFIG_FILE_NAME  = "config.json"; //$NON-NLS-1$
 	
 	private static AtomicLong tableCnter = new AtomicLong();
 
@@ -130,7 +127,7 @@ public class PawsDataEngine {
 		Path workingDir = null;
 		try(Session session = HibernateManager.openSession()){
 			PawsRun mrun = (PawsRun) session.merge(run);
-			workingDir = PawsManager.INSTANCE.getDirectory(mrun);
+			workingDir = PawsFileManager.INSTANCE.getDirectory(mrun);
 		}
 		
 		if (!Files.exists(workingDir)) Files.createDirectories(workingDir);
@@ -161,6 +158,7 @@ public class PawsDataEngine {
 		return this.packageFiles;
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void createConfig(Path target) throws Exception{
 		Path configPath = target.resolve(CONFIG_FILE_NAME);
 		
@@ -172,14 +170,14 @@ public class PawsDataEngine {
 			
 			
 			PawsWorkspace ws = QueryFactory.buildQuery(session, PawsWorkspace.class,  
-					new Object[] {"conservationArea", run.getConservationArea()}).uniqueResult();
+					new Object[] {"conservationArea", run.getConservationArea()}).uniqueResult(); //$NON-NLS-1$
 				
 			if (ws == null || !ws.isConfigured()){
-				throw new Exception("PAWS Workspace not configured.  You must first configure the PAWS Workspace before you can run paws analysis.");
+				throw new Exception(Messages.PawsDataEngine_WorkspaceNotConfigured);
 			}
 			String url = ws.getContainer();
-			config.put("container_name", url);
-			config.put("run_id", run.getRunId());
+			config.put("container_name", url); //$NON-NLS-1$
+			config.put("run_id", run.getRunId()); //$NON-NLS-1$
 			
 //			//CRS - everything must be in this crs
 //			JSONObject crs = new JSONObject();
@@ -198,19 +196,19 @@ public class PawsDataEngine {
 			
 			PawsParameter pp = run.getConfiguration().findParameter(PawsParameter.FixedParameter.GRID_SIZE.name());
 			//TODO: this needs to be in meters; so assuming the projection is in meters
-			config.put("spatial_resolution", pp.getValue());
+			config.put("spatial_resolution", pp.getValue()); //$NON-NLS-1$
 					
 			
 			//shapefiles
 			JSONObject shapefiles = new JSONObject();
-			config.put("geo_feature_shape_files", shapefiles);
+			config.put("geo_feature_shape_files", shapefiles); //$NON-NLS-1$
 			
 			pp = run.getConfiguration().findParameter(PawsParameter.FixedParameter.LYR_BOUNDARY.name());
-			shapefiles.put("boundary_layer_name", "ca_boundary");
-			shapefiles.put("boundary_file_name", "ca_boundary.zip");
+			shapefiles.put("boundary_layer_name", "ca_boundary"); //$NON-NLS-1$ //$NON-NLS-2$
+			shapefiles.put("boundary_file_name", "ca_boundary.zip"); //$NON-NLS-1$ //$NON-NLS-2$
 			
 			JSONArray other = new JSONArray();
-			shapefiles.put("additional_shape_files", other);
+			shapefiles.put("additional_shape_files", other); //$NON-NLS-1$
 			for (PawsParameter ppc : run.getConfiguration().getParameters()) {
 				if (!ppc.getKey().equals(PawsParameter.FixedParameter.LYR_OTHER.name())) continue;
 				String value = ppc.getValue();
@@ -220,31 +218,31 @@ public class PawsDataEngine {
 					Area.AreaType atype = Area.AreaType.valueOf( value.substring(PawsParameter.AREA_PREFIX.length()) );
 					
 					JSONObject item = new JSONObject();
-					item.put("file_name", atype.name() + ".shp");
-					item.put("layer_name",  atype);
+					item.put("file_name", atype.name() + ".zip"); //$NON-NLS-1$ //$NON-NLS-2$
+					item.put("layer_name",  atype); //$NON-NLS-1$
 					other.add(item);
 					
 				}else if (value.startsWith(PawsParameter.FILE_PREFIX)) {
 					String filename = value.substring(PawsParameter.FILE_PREFIX.length());
 					JSONObject item = new JSONObject();
-					item.put("file_name", filename);
-					item.put("layer_name",  SharedUtils.getFilenameWithoutExtension(filename));
+					item.put("file_name",  SharedUtils.getFilenameWithoutExtension(filename) + ".zip"); //$NON-NLS-1$ //$NON-NLS-2$
+					item.put("layer_name",  SharedUtils.getFilenameWithoutExtension(filename)); //$NON-NLS-1$
 					other.add(item);
 				}
 			}
 
 			//patrol_observation
 			JSONObject patrolobs = new JSONObject();
-			config.put("patrol_observations", patrolobs);
+			config.put("patrol_observations", patrolobs); //$NON-NLS-1$
 			
-			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
-			patrolobs.put("start_date", formatter.format(run.getDataStartDate()));
-			patrolobs.put("end_date", formatter.format(run.getDataEndDate()));
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy"); //$NON-NLS-1$
+			patrolobs.put("start_date", formatter.format(run.getDataStartDate())); //$NON-NLS-1$
+			patrolobs.put("end_date", formatter.format(run.getDataEndDate())); //$NON-NLS-1$
 
 //			pp = run.getConfiguration().findParameter(PawsParameter.FixedParameter.TIMEZONE.name());
 //			if (pp == null) throw new Exception("Timezone value must be provided.  Update the configuration and try again.");
 //			patrolobs.put("time_zone", pp.getValue());
-			patrolobs.put("file_name", DATA_FILE_NAME);
+			patrolobs.put("file_name", DATA_FILE_NAME); //$NON-NLS-1$
 			
 			
 			//illegal class mappings
@@ -256,7 +254,7 @@ public class PawsDataEngine {
 			for (Entry<String, List<String>> firstmapping : classmappings.entrySet()) {
 				
 				JSONObject mapping = new JSONObject();
-				mapping.put("classification_class", firstmapping.getKey());
+				mapping.put("classification_class", firstmapping.getKey()); //$NON-NLS-1$
 				
 				JSONArray filters = new JSONArray();
 				
@@ -265,51 +263,41 @@ public class PawsDataEngine {
 				JSONArray columns = new JSONArray();
 				for (String col : firstmapping.getValue()) {
 					JSONObject column = new JSONObject();
-					column.put("column_name", col);
-					column.put("match_value", firstmapping.getKey());
+					column.put("column_name", col); //$NON-NLS-1$
+					column.put("match_value", firstmapping.getKey()); //$NON-NLS-1$
 					columns.add(column);
 				}
 				
-				filter.put("filter", columns);
+				filter.put("filter", columns); //$NON-NLS-1$
 				filters.add(filter);
 				
 				
-				mapping.put("classification_class_filters", filters);
+				mapping.put("classification_class_filters", filters); //$NON-NLS-1$
 				
 				mappings.add(mapping);
 			}
-			config.put("illegal_activity_class_mappings", mappings);
+			config.put("illegal_activity_class_mappings", mappings); //$NON-NLS-1$
 			
 //			config.put("protected_area_name", run.getConservationArea().getName());
 		
 			JSONObject modelexperimentation = new JSONObject();
-			config.put("model_experimentation", modelexperimentation);
+			config.put("model_experimentation", modelexperimentation); //$NON-NLS-1$
 			pp = run.getConfiguration().findParameter(PawsParameter.FixedParameter.TRAINING_RES.name());
-			modelexperimentation.put("temporal_training_resolution_month_count", Integer.valueOf( (String)pp.getValue()) );
-			modelexperimentation.put("train_start_year", run.getTrainStartYear());
-			modelexperimentation.put("train_end_year", run.getTrainEndYear());
+			modelexperimentation.put("temporal_training_resolution_month_count", Integer.valueOf( (String)pp.getValue()) ); //$NON-NLS-1$
+			modelexperimentation.put("train_start_year", run.getTrainStartYear()); //$NON-NLS-1$
+			modelexperimentation.put("train_end_year", run.getTrainEndYear()); //$NON-NLS-1$
 			
 			JSONObject modelforecasting = new JSONObject();
-			config.put("model_forecasting", modelforecasting);
+			config.put("model_forecasting", modelforecasting); //$NON-NLS-1$
 			pp = run.getConfiguration().findParameter(PawsParameter.FixedParameter.CLASSIFIER_MODEL.name());
-			modelforecasting.put("classifier_model", PawsParameter.ClassifierModel.valueOf(pp.getValue()).key);
-			modelforecasting.put("start_year", run.getForecastStartYear());
-			modelforecasting.put("end_year", run.getForecastEndYear());
-			
-			
-			
+			modelforecasting.put("classifier_model", PawsParameter.ClassifierModel.valueOf(pp.getValue()).key); //$NON-NLS-1$
+			modelforecasting.put("start_year", run.getForecastStartYear()); //$NON-NLS-1$
+			modelforecasting.put("end_year", run.getForecastEndYear()); //$NON-NLS-1$
 		}
 		
-		Files.write(configPath, Collections.singletonList(config.toJSONString()), StandardCharsets.UTF_8);
-		
+		Files.write(configPath, Collections.singletonList(config.toJSONString()), StandardCharsets.UTF_8);		
 	}
-	
-	private void writeCRS(Path target, String text) throws IOException {
-		Files.write(target, text.getBytes());
-		packageFiles.add(target);
-	}
-	
-	
+
 	private void packageBasemapFiles(Path target) throws Exception{
 		
 		PawsConfiguration configuration;
@@ -327,12 +315,12 @@ public class PawsDataEngine {
 				
 		if (pp.getValue().startsWith(PawsParameter.AREA_PREFIX)){
 			//export area to shapefiles
-			Path zip = target.resolve("ca_boundary.shp");
+			Path zip = target.resolve("ca_boundary.shp"); //$NON-NLS-1$
 			exportArea(Area.AreaType.valueOf(pp.getValue().substring(PawsParameter.AREA_PREFIX.length())), zip);
 			
 		}else if (pp.getValue().startsWith(PawsParameter.FILE_PREFIX)){
 			String filename = pp.getValue().substring(PawsParameter.FILE_PREFIX.length());
-			Path srcShp = PawsManager.INSTANCE.getDirectory(configuration).resolve(filename);
+			Path srcShp = PawsFileManager.INSTANCE.getDirectory(configuration).resolve(filename);
 			Path targetShp = target.resolve(srcShp.getFileName());
 			packageShapefile(srcShp, targetShp);
 		}
@@ -340,14 +328,14 @@ public class PawsDataEngine {
 		//ALL OTHER LAYERS
 		for (PawsParameter ppw : configuration.getParameters()) {
 			if (!ppw.getKey().equals(PawsParameter.FixedParameter.LYR_OTHER.name())) continue;
-			if (pp.getValue().startsWith(PawsParameter.AREA_PREFIX)){
+			if (ppw.getValue().startsWith(PawsParameter.AREA_PREFIX)){
 				//export area to shapefiles
 				Area.AreaType type = Area.AreaType.valueOf(pp.getValue().substring(PawsParameter.AREA_PREFIX.length()));
-				Path targetshp = target.resolve(type.name() + ".shp");
+				Path targetshp = target.resolve(type.name() + ".shp"); //$NON-NLS-1$
 				exportArea(type, targetshp);
-			}else if (pp.getValue().startsWith(PawsParameter.FILE_PREFIX)) {
-				String filename = pp.getValue().substring(PawsParameter.FILE_PREFIX.length());
-				Path srcShp = PawsManager.INSTANCE.getDirectory(configuration).resolve(filename);
+			}else if (ppw.getValue().startsWith(PawsParameter.FILE_PREFIX)) {
+				String filename = ppw.getValue().substring(PawsParameter.FILE_PREFIX.length());
+				Path srcShp = PawsFileManager.INSTANCE.getDirectory(configuration).resolve(filename);
 				Path targetShp = target.resolve(filename);
 				packageShapefile(srcShp, targetShp);
 			}
@@ -360,6 +348,7 @@ public class PawsDataEngine {
 	 * @param targetFile
 	 * @throws Exception
 	 */
+	@SuppressWarnings("unchecked")
 	private void packageShapefile(Path shpFile, Path targetFile) throws Exception{
 		
 		Map<String, Serializable> params = new HashMap<String, Serializable>();
@@ -367,7 +356,6 @@ public class PawsDataEngine {
 		DataStore raw = DataStoreFinder.getDataStore(params);
 		
 		Name name = raw.getNames().get(0);
-		CoordinateReferenceSystem srcCrs = raw.getSchema(name).getCoordinateReferenceSystem();
 		
 		FileDataStoreFactorySpi factory = FileDataStoreFinder.getDataStoreFactory("shp"); //$NON-NLS-1$
 		params = new HashMap<String, Serializable>();
@@ -390,7 +378,7 @@ public class PawsDataEngine {
 		
 		//zip 
 		String targetname = SharedUtils.getFilenameWithoutExtension(targetFile.getFileName().toString());
-		Path zipFile = targetFile.getParent().resolve(targetname + ".zip");
+		Path zipFile = targetFile.getParent().resolve(targetname + ".zip"); //$NON-NLS-1$
 		zipShapefile(targetFile, zipFile);
 		
 	}
@@ -403,9 +391,10 @@ public class PawsDataEngine {
 	 * @param targetFile target shapefile
 	 * @throws Exception
 	 */
+	@SuppressWarnings("unchecked")
 	private void exportArea(Area.AreaType type, Path targetFile) throws Exception {
 		
-		String schema = "the_geom:MultiPolygon:srid=4326,fid:String,key:String"; //$NON-NLS-1$ //$NON-NLS-2$
+		String schema = "the_geom:MultiPolygon:srid=4326,fid:String,key:String"; //$NON-NLS-1$
 
 		SimpleFeatureType ftype = SimpleFeatureTypeBuilder.retype( DataUtilities.createType(type.name(), schema.toString()), targetCrs);
 
@@ -414,8 +403,8 @@ public class PawsDataEngine {
 
 		try(Session session = HibernateManager.openSession()){
 			List<Area> areas = QueryFactory.buildQuery(session, Area.class, 
-					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()},
-					new Object[] {"type", type}).getResultList();
+					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+					new Object[] {"type", type}).getResultList(); //$NON-NLS-1$
 			for (Area a : areas) {
 				String fid = UuidUtils.uuidToString(a.getUuid());
 				Geometry g = a.getGeometry();
@@ -440,7 +429,7 @@ public class PawsDataEngine {
 		shapefile.dispose();
 		
 		String targetname = SharedUtils.getFilenameWithoutExtension(targetFile.getFileName().toString());
-		Path zipFile = targetFile.getParent().resolve(targetname + ".zip");
+		Path zipFile = targetFile.getParent().resolve(targetname + ".zip"); //$NON-NLS-1$
 		zipShapefile(targetFile, zipFile);
 		
 	}
@@ -477,10 +466,10 @@ public class PawsDataEngine {
 				PawsConfiguration configuration = session.get(PawsConfiguration.class, run.getConfiguration().getUuid());
 				
 				List<PawsSimpleClass> simple = QueryFactory.buildQuery(session, PawsSimpleClass.class, 
-						new Object[] {"configuration", configuration}).list();
+						new Object[] {"configuration", configuration}).list(); //$NON-NLS-1$
 				
 				List<PawsQueryClass> queries = QueryFactory.buildQuery(session, PawsQueryClass.class, 
-						new Object[] {"configuration", configuration}).list();
+						new Object[] {"configuration", configuration}).list(); //$NON-NLS-1$
 				
 				
 				
@@ -488,74 +477,73 @@ public class PawsDataEngine {
 				
 				//create a master table
 				StringBuilder create = new StringBuilder();
-				create.append("CREATE TABLE ");
+				create.append("CREATE TABLE "); //$NON-NLS-1$
 				create.append(mastertable);
-				create.append("( wp_uuid char(16) for bit data, obs_uuid char(16) for bit data, x double, y double, ");
-				create.append(" wp_datetime timestamp,");
+				create.append("( wp_uuid char(16) for bit data, obs_uuid char(16) for bit data, x double, y double, "); //$NON-NLS-1$
+				create.append(" wp_datetime timestamp,"); //$NON-NLS-1$
 				
 				int n = 1;
 				for (PawsSimpleClass pc : simple) {
 					String key = pc.getClassification();
-					String colname = "pawsclass" + n;
+					String colname = "pawsclass" + n; //$NON-NLS-1$
 					
 					if (!classmappings.containsKey(key)) classmappings.put(key, new ArrayList<>());
 					classmappings.get(key).add(colname);
 					
-					create.append(colname + " varchar(8192),");
+					create.append(colname + " varchar(8192),"); //$NON-NLS-1$
 					n++;
 				}
 				for (PawsQueryClass qc : queries) {
 					String key = qc.getClassification();
-					String colname = "pawsclass" + n;
+					String colname = "pawsclass" + n; //$NON-NLS-1$
 					
 					if (!classmappings.containsKey(key)) classmappings.put(key, new ArrayList<>());
 					classmappings.get(key).add(colname);
 					
-					create.append(colname + " varchar(8192),");
+					create.append(colname + " varchar(8192),"); //$NON-NLS-1$
 					n++;
 				}
 				create.deleteCharAt(create.length() - 1);
-				create.append(")");
+				create.append(")"); //$NON-NLS-1$
 				
-				System.out.println(create.toString());
 				session.createNativeQuery(create.toString()).executeUpdate();
 				
 				//create all data table
 				String alldata = createTempTable();
 				tempTables.add(alldata);
 				create = new StringBuilder();
-				create.append("CREATE TABLE ");
+				create.append("CREATE TABLE "); //$NON-NLS-1$
 				create.append(alldata);
-				create.append("( wp_uuid char(16) for bit data, obs_uuid char(16) for bit data, x double, y double, ");
-				create.append(" wp_datetime timestamp)");
-				System.out.println(create.toString());
+				create.append("( wp_uuid char(16) for bit data, obs_uuid char(16) for bit data, x double, y double, "); //$NON-NLS-1$
+				create.append(" wp_datetime timestamp)"); //$NON-NLS-1$
+
 				session.createNativeQuery(create.toString()).executeUpdate();
 				
 				//populate all data table
 				create = new StringBuilder();
-				create.append("INSERT INTO ");
+				create.append("INSERT INTO "); //$NON-NLS-1$
 				create.append(alldata);
-				create.append("(wp_uuid, obs_uuid, x, y, wp_datetime)");
-				create.append(" SELECT a.uuid, obs.uuid, a.x, a.y, a.datetime");
-				create.append(" FROM smart.waypoint a ");
-				create.append(" LEFT JOIN smart.wp_observation_group g on g.wp_uuid = a.uuid ");
-				create.append(" LEFT JOIN smart.wp_observation obs ON obs.wp_group_uuid = g.uuid " );
-				create.append(" WHERE a.ca_uuid = :ca AND a.source='PATROL' AND cast(a.datetime as date) between :start and :end ");
-				System.out.println(create.toString());
+				create.append("(wp_uuid, obs_uuid, x, y, wp_datetime)"); //$NON-NLS-1$
+				create.append(" SELECT a.uuid, obs.uuid, a.x, a.y, a.datetime"); //$NON-NLS-1$
+				create.append(" FROM smart.waypoint a "); //$NON-NLS-1$
+				create.append(" LEFT JOIN smart.wp_observation_group g on g.wp_uuid = a.uuid "); //$NON-NLS-1$
+				create.append(" LEFT JOIN smart.wp_observation obs ON obs.wp_group_uuid = g.uuid " ); //$NON-NLS-1$
+				create.append(" WHERE a.ca_uuid = :ca AND a.source='PATROL' AND cast(a.datetime as date) between :start and :end "); //$NON-NLS-1$
+
 				session.createNativeQuery(create.toString())
-					.setParameter("ca", run.getConservationArea().getUuid())
-					.setParameter("start", run.getDataStartDate())
-					.setParameter("end", run.getDataEndDate())
+					.setParameter("ca", run.getConservationArea().getUuid()) //$NON-NLS-1$
+					.setParameter("start", run.getDataStartDate()) //$NON-NLS-1$
+					.setParameter("end", run.getDataEndDate()) //$NON-NLS-1$
 					.executeUpdate();
 				
 				create = new StringBuilder();
-				create.append("INSERT INTO ");
+				create.append("INSERT INTO "); //$NON-NLS-1$
 				create.append(mastertable);
-				create.append(" SELECT a.wp_uuid, a.obs_uuid, a.x, a.y, a.wp_datetime");
+				create.append(" SELECT a.wp_uuid, a.obs_uuid, a.x, a.y, a.wp_datetime"); //$NON-NLS-1$
 				
 				StringBuilder from = new StringBuilder();
 				from.append(alldata);
-				from.append(" a ");
+				from.append(" a "); //$NON-NLS-1$
 				
 				
 				for (PawsSimpleClass pc : simple) {
@@ -564,9 +552,9 @@ public class PawsDataEngine {
 					SimpleClassEngine e = new SimpleClassEngine(pc, alldata);//, run.getDataStartDate(), run.getDataEndDate());
 					e.process(session, table);
 					
-					create.append(",");
-					create.append(table + ".pawsclass");
-					from.append(" LEFT JOIN " + table + " ON a.obs_uuid = " + table + ".obs_uuid ");
+					create.append(","); //$NON-NLS-1$
+					create.append(table + ".pawsclass"); //$NON-NLS-1$
+					from.append(" LEFT JOIN " + table + " ON a.obs_uuid = " + table + ".obs_uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
 				
 				List<QueryClassEngine> engines = new ArrayList<>();
@@ -575,18 +563,16 @@ public class PawsDataEngine {
 					e.process(session);
 					engines.add(e);
 					
-					create.append(",");
-					create.append(" case when " + e.getTable() + "." + e.getObsColumn() + " is null then null else '" + pc.getClassification() + "' end");
-					from.append(" LEFT JOIN " + e.getTable() + " ON a.obs_uuid = " + e.getTable() + "." + e.getObsColumn() + " ");
+					create.append(","); //$NON-NLS-1$
+					create.append(" case when " + e.getTable() + "." + e.getObsColumn() + " is null then null else '" + pc.getClassification() + "' end"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+					from.append(" LEFT JOIN " + e.getTable() + " ON a.obs_uuid = " + e.getTable() + "." + e.getObsColumn() + " "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 				}
 				
 				//execute
-				create.append(" FROM ");
+				create.append(" FROM "); //$NON-NLS-1$
 				create.append(from);
 				
-				System.out.println(create.toString());
 				session.createNativeQuery(create.toString()).executeUpdate();
-				
 				
 				writeToCsv(session, mastertable, datafile, simple.size() + queries.size());
 				
@@ -594,8 +580,7 @@ public class PawsDataEngine {
 				
 				//drop all temp tables
 				for (String table : tempTables) {
-					System.out.println("DROP TABLE " + table);
-					session.createNativeQuery("DROP TABLE " + table).executeUpdate();
+					session.createNativeQuery("DROP TABLE " + table).executeUpdate(); //$NON-NLS-1$
 				}
 				for (QueryClassEngine e : engines) e.dispose(session);
 			}finally {
@@ -611,13 +596,13 @@ public class PawsDataEngine {
 		try(CSVWriter writer = new CSVWriter(Files.newBufferedWriter(filename, StandardCharsets.UTF_8))){
 			//headers
 			ArrayList<String> headers = new ArrayList<>();
-			headers.add("Waypoint Date");
-			headers.add("Waypoint Time");
-			headers.add("Patrol Start Date");
-			headers.add("Patrol End Date");
-			headers.add("Patrol ID");
-			headers.add("X");
-			headers.add("Y");
+			headers.add("Waypoint Date"); //$NON-NLS-1$
+			headers.add("Waypoint Time"); //$NON-NLS-1$
+			headers.add("Patrol Start Date"); //$NON-NLS-1$
+			headers.add("Patrol End Date"); //$NON-NLS-1$
+			headers.add("Patrol ID"); //$NON-NLS-1$
+			headers.add("X"); //$NON-NLS-1$
+			headers.add("Y"); //$NON-NLS-1$
 			int datacols = 0;
 			for (Entry<String, List<String>> items : classmappings.entrySet()) {
 				for (String col :  items.getValue()) {
@@ -629,12 +614,12 @@ public class PawsDataEngine {
 			
 			//join to patrols to get start date, end date and patrol id if available
 			StringBuilder select = new StringBuilder();
-			select.append("SELECT p.id, p.start_date, p.end_date, a.* FROM ");
+			select.append("SELECT p.id, p.start_date, p.end_date, a.* FROM "); //$NON-NLS-1$
 			select.append(tablename);
-			select.append(" a LEFT JOIN smart.patrol_waypoint pw on pw.wp_uuid = a.wp_uuid ");
-			select.append(" LEFT JOIN smart.patrol_leg_day pld on pld.uuid = pw.leg_day_uuid ");
-			select.append(" left join smart.patrol_leg pl on pld.patrol_leg_uuid = pl.uuid ");
-			select.append(" left join smart.patrol p on p.uuid = pl.patrol_uuid ");
+			select.append(" a LEFT JOIN smart.patrol_waypoint pw on pw.wp_uuid = a.wp_uuid "); //$NON-NLS-1$
+			select.append(" LEFT JOIN smart.patrol_leg_day pld on pld.uuid = pw.leg_day_uuid "); //$NON-NLS-1$
+			select.append(" left join smart.patrol_leg pl on pld.patrol_leg_uuid = pl.uuid "); //$NON-NLS-1$
+			select.append(" left join smart.patrol p on p.uuid = pl.patrol_uuid "); //$NON-NLS-1$
 //			select.append(" WHERE ");
 //			for (int i = 1; i <= numclasses; i ++) {
 //				select.append("pawsclass" + i + " is not null OR ");

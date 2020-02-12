@@ -35,6 +35,7 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.paws.PawsPlugIn;
+import org.wcs.smart.paws.internal.Messages;
 import org.wcs.smart.paws.model.PawsRun;
 
 /**
@@ -50,7 +51,7 @@ import org.wcs.smart.paws.model.PawsRun;
 public class PawsStartUpJob extends Job {
 
 	public PawsStartUpJob() {
-		super("validating paws results state");
+		super(Messages.PawsStartUpJob_jobname);
 	}
 
 	@Override
@@ -65,11 +66,11 @@ public class PawsStartUpJob extends Job {
 			notcomplete.add(PawsRun.Status.RUNNING);
 			
 			
-			String query = "FROM PawsRun WHERE conservationArea = :ca and status in (:stats)";
+			String query = "FROM PawsRun WHERE conservationArea = :ca and status in (:stats)"; //$NON-NLS-1$
 			
 			items.addAll(session.createQuery(query, PawsRun.class)
-					.setParameter("ca", SmartDB.getCurrentConservationArea())
-					.setParameterList("stats", notcomplete)
+					.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
+					.setParameterList("stats", notcomplete) //$NON-NLS-1$
 					.list());
 		
 		
@@ -83,23 +84,23 @@ public class PawsStartUpJob extends Job {
 			if (!compiling.isEmpty()){
 				//update status to error/cancelled
 				StringBuilder sb = new StringBuilder();
-				sb.append(MessageFormat.format("The following {0} paws analysis were not able to compile and upload data before SMART was shutdone.  These will be cancelled, and must be restarted manually.  Orphaned data may remain on your Azure blob and must be deleted manually.", compiling.size()));
-				sb.append("\n\n");
+				sb.append(MessageFormat.format(Messages.PawsStartUpJob_ShutdownMsg, compiling.size()));
+				sb.append("\n\n"); //$NON-NLS-1$
 				for (PawsRun r : compiling){
 					sb.append(r.getId());
-					sb.append(", ");
+					sb.append(", "); //$NON-NLS-1$
 				}
 				sb.delete(sb.length() - 2, sb.length());
 				
 				Display.getDefault().asyncExec(()->{
-					MessageDialog.openInformation(Display.getDefault().getActiveShell(), "PAWS",sb.toString());
+					MessageDialog.openInformation(Display.getDefault().getActiveShell(), "PAWS",sb.toString()); //$NON-NLS-1$
 				});
 				
 				session.beginTransaction();
 				try{
 					for (PawsRun r : compiling){
 						r.setStatus(PawsRun.Status.ERROR);
-						r.setStatusMessage("Analysis cancelled due to SMART shutdown before data compiled and sent to server.");
+						r.setStatusMessage(Messages.PawsStartUpJob_Cancelled);
 					}
 					session.getTransaction().commit();
 				}catch (Exception ex){
@@ -115,15 +116,7 @@ public class PawsStartUpJob extends Job {
 			
 			if (items.isEmpty()) return Status.OK_STATUS;
 			
-			//restart associated job
-//			for (PawsRun r : items){
-//				if (r.getStatus() == PawsRun.Status.RUNNING || 
-//						r.getStatus() == PawsRun.Status.DOWNLOADING_RESULTS) {
-//					Display.getDefault().asyncExec(()->StorageApi.INSTANCE.getAuthorizationCode(Display.getDefault().getActiveShell()));
-//					break;
-//				}
-//			}
-			
+			//restart associated job			
 			for (PawsRun r : items){
 				if (r.getStatus() == PawsRun.Status.RUNNING) PawsStatusJob.getInstance().addItem(r);
 				if (r.getStatus() == PawsRun.Status.DOWNLOADING_RESULTS) (new PawsDownloadResultJob(r)).schedule();

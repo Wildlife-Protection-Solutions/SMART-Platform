@@ -44,9 +44,6 @@ import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.gce.geotiff.GeoTiffWriter;
 import org.geotools.geometry.Envelope2D;
-import org.geotools.referencing.CRS;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.util.SharedUtils;
 
@@ -161,9 +158,9 @@ public class PawsResultFile {
 		
 		List<Path> items = new ArrayList<>();
 		for (String x : getHeaders()) {
-			if (!x.startsWith("threshold")) continue;
-			String fname = x.replaceAll("=","_").replaceAll("\\.", "_");
-			items.add(imageDir.resolve(fname + ".tif"));
+			if (!x.startsWith("threshold")) continue; //$NON-NLS-1$
+			String fname = x.replaceAll("=","_").replaceAll("\\.", "_"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			items.add(imageDir.resolve(fname + ".tif")); //$NON-NLS-1$
 		}
 		rasterFiles = items;
 		return rasterFiles;
@@ -174,24 +171,12 @@ public class PawsResultFile {
 	}
 	private void createOutputImage(Path resultFile, CoordinateReferenceSystem crs) throws Exception{
 		if (Files.exists(resultFile)) return; //created
-		
-//		//TODO:
-//		try {
-//			if (crs == null) crs = CRS.decode("EPSG: 32648");
-//		} catch (NoSuchAuthorityCodeException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (FactoryException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-	
-		if (crs == null) throw new Exception("Projection of results could not be determined");
+		if (crs == null) throw new Exception("Projection of results could not be determined"); //$NON-NLS-1$
 
 		//create a raster files out of this layer
 		String headername = resultFile.getFileName().toString();
 		headername = SharedUtils.getFilenameWithoutExtension(headername);
-		String columnname = headername.replaceAll("threshold_", "threshold=").replaceAll("_", ".");
+		String columnname = headername.replaceAll("threshold_", "threshold=").replaceAll("_", "."); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		
 		String[] headers = getHeaders();
 		int index = -1;
@@ -200,17 +185,15 @@ public class PawsResultFile {
 		for (int i = 0; i < headers.length; i ++ ) {
 			if(headers[i].equalsIgnoreCase(columnname)) {
 				index = i;
-			//}else if (headers[i].equalsIgnoreCase("spatial_id")) {
-			}else if (headers[i].equalsIgnoreCase("x")) {
+			}else if (headers[i].equalsIgnoreCase("x")) { //$NON-NLS-1$
 				xindex = i;
-			}else if (headers[i].equalsIgnoreCase("y")) {
-			//}else if (headers[i].equalsIgnoreCase("x")) {
+			}else if (headers[i].equalsIgnoreCase("y")) { //$NON-NLS-1$
 				yindex = i;
 			}
 		}
-		if (index < 0) throw new Exception(MessageFormat.format("No results layer with name {0} found", columnname));
-		if (xindex < 0) throw new Exception("X coordinate column not found");
-		if (yindex < 0) throw new Exception("Y coordinate column not found");
+		if (index < 0) throw new Exception(MessageFormat.format("No results layer with name {0} found", columnname)); //$NON-NLS-1$
+		if (xindex < 0) throw new Exception("X coordinate column not found"); //$NON-NLS-1$
+		if (yindex < 0) throw new Exception("Y coordinate column not found"); //$NON-NLS-1$
 		
 		double minx = Double.MAX_VALUE;
 		double maxx = Double.MIN_NORMAL;

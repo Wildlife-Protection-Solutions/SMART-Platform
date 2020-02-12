@@ -32,6 +32,7 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.paws.PawsPlugIn;
+import org.wcs.smart.paws.internal.Messages;
 import org.wcs.smart.paws.model.PawsRun;
 import org.wcs.smart.paws.model.PawsRun.Status;
 import org.wcs.smart.paws.model.PawsService;
@@ -62,10 +63,10 @@ public enum PawsApi {
 		String key = null;
 		try(Session session = HibernateManager.openSession()){
 			PawsService service = QueryFactory.buildQuery(session, PawsService.class,  
-					new Object[] {"conservationArea", run.getConservationArea()}).uniqueResult();
+					new Object[] {"conservationArea", run.getConservationArea()}).uniqueResult(); //$NON-NLS-1$
 				
 			if (service == null || !service.isConfigured()) {
-				throw new Exception("PAWS Service not configured.  You must first configure the PAWS Service before you can run paws analysis.");
+				throw new Exception(Messages.PawsApi_ServiceNotConfigured);
 			}
 			surl = service.getHeatmapApi();
 			key = service.getApiKey();
@@ -75,9 +76,9 @@ public enum PawsApi {
 		URL url = new URL(surl);
 		HttpURLConnection conn = (HttpURLConnection)url.openConnection();
 		try{
-			conn.setRequestMethod("POST");
-			conn.setRequestProperty("Content-Type", "application/json");
-			conn.setRequestProperty("Ocp-Apim-Subscription-Key", key);
+			conn.setRequestMethod("POST"); //$NON-NLS-1$
+			conn.setRequestProperty("Content-Type", "application/json"); //$NON-NLS-1$ //$NON-NLS-2$
+			conn.setRequestProperty("Ocp-Apim-Subscription-Key", key); //$NON-NLS-1$
 			conn.setDoOutput(true);
 			//headers
 			OutputStream os = conn.getOutputStream();
@@ -88,7 +89,7 @@ public enum PawsApi {
 			if (conn.getResponseCode() != HttpURLConnection.HTTP_OK && 
 					conn.getResponseCode() != HttpURLConnection.HTTP_CREATED) {
 				
-				throw new Exception("Failed to run PAWS Service - HTTP error code : "
+				throw new Exception(Messages.PawsApi_RunFailed
 					+ conn.getResponseCode());
 			}
 			
@@ -110,7 +111,7 @@ public enum PawsApi {
 					session.getTransaction().commit();
 				}catch (Exception ex) {
 					session.getTransaction().rollback();
-					throw new Exception("Unable to update local database with PAWS task id.  Run will not be configured correctly.  You should delete it locally and all data uploaded to the cloud storage and try again.");
+					throw new Exception(Messages.PawsApi_TaskIdNotFound);
 				}
 			}
 			
@@ -127,16 +128,16 @@ public enum PawsApi {
 		String key = null;
 		try(Session session = HibernateManager.openSession()){
 			PawsRun r = (PawsRun)session.get(PawsRun.class, run.getUuid());
-			if (r == null) throw new Exception("No object found in database.");
+			if (r == null) throw new Exception(Messages.PawsApi_RunNotFound);
 			
 			PawsService service = QueryFactory.buildQuery(session, PawsService.class,  
-					new Object[] {"conservationArea", run.getConservationArea()}).uniqueResult();
+					new Object[] {"conservationArea", run.getConservationArea()}).uniqueResult(); //$NON-NLS-1$
 				
 			if (service == null || !service.isConfigured()){
-				throw new Exception("PAWS Service not configured.");
+				throw new Exception(Messages.PawsApi_ServiceNotConfigured2);
 			}
 			//TODO: header
-			surl = service.getTaskApi() + "/" + run.getTaskId();// + "?subscription-key=" + service.getApiKey();
+			surl = service.getTaskApi() + "/" + run.getTaskId();// + "?subscription-key=" + service.getApiKey(); //$NON-NLS-1$
 			key = service.getApiKey();
 		}
 		
@@ -146,8 +147,8 @@ public enum PawsApi {
 		
 		HttpURLConnection conn = (HttpURLConnection)url.openConnection();
 		try{
-			conn.setRequestMethod("GET");
-			conn.setRequestProperty("Ocp-Apim-Subscription-Key", key);
+			conn.setRequestMethod("GET"); //$NON-NLS-1$
+			conn.setRequestProperty("Ocp-Apim-Subscription-Key", key); //$NON-NLS-1$
 			if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
 				
 			}else if (conn.getResponseCode() == HttpURLConnection.HTTP_NO_CONTENT) {
@@ -158,7 +159,7 @@ public enum PawsApi {
 						session.beginTransaction();
 						try {
 							r.setStatus(Status.ERROR);
-							r.setStatusMessage("Task not found on server.");
+							r.setStatusMessage(Messages.PawsApi_TaskNotFoundOnService);
 							session.getTransaction().commit();
 						}catch (Exception ex) {
 							if (session.getTransaction().isActive()) session.getTransaction().rollback();
@@ -168,7 +169,7 @@ public enum PawsApi {
 				}
 				return PawsStatus.ERROR;
 			}else {
-				throw new Exception("Failed to run PAWS Service - HTTP error code : " + conn.getResponseCode());
+				throw new Exception(Messages.PawsApi_RunFailedWithCode + conn.getResponseCode());
 			}
 			
 			StringBuffer content = new StringBuffer();

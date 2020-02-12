@@ -42,6 +42,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.paws.PawsPlugIn;
+import org.wcs.smart.paws.internal.Messages;
 import org.wcs.smart.paws.model.PawsWorkspace;
 import org.wcs.smart.ui.SmartStyledDialog;
 
@@ -91,7 +92,7 @@ public class LoginDialog extends SmartStyledDialog {
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		
-		getShell().setText("Microsoft Azure Login");
+		getShell().setText(Messages.LoginDialog_MsLogin);
 		
 		// create a composite with standard margins and spacing
 		Composite composite = new Composite(parent, SWT.NONE);
@@ -103,12 +104,11 @@ public class LoginDialog extends SmartStyledDialog {
 		PawsWorkspace ws = null;
 		try(Session session = HibernateManager.openSession()){
 			ws = QueryFactory.buildQuery(session, PawsWorkspace.class,
-					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).uniqueResult();
+					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).uniqueResult(); //$NON-NLS-1$
 		}
 		if (ws == null || ws.getUrl() == null || ws.getUrl().isBlank()) {
-			//TODO: error
 			Label l = new Label(composite, SWT.WRAP);
-			l.setText("PAWS Workspace is not configured.  Must configure workspace using the 'Query' -> 'PAWS Server Configuration' menu before proceeding.  Contact your administrator if this option it no avaliable to you.");
+			l.setText(Messages.LoginDialog_NoWorkspace);
 			return composite;
 		}
 		
@@ -118,19 +118,19 @@ public class LoginDialog extends SmartStyledDialog {
 		browser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		String state = UUID.randomUUID().toString();
-		String redirectUri = "https://login.microsoftonline.com/common/oauth2/nativeclient";
+		String redirectUri = "https://login.microsoftonline.com/common/oauth2/nativeclient"; //$NON-NLS-1$
 		
 		StringBuilder sb = new StringBuilder();
 		sb.append(ws.getUrl());
-		sb.append("/");
-		sb.append("authorize");
-		sb.append("?");
-		sb.append("client_id=" + ws.getClientId());
-		sb.append("&response_type=code");
-		sb.append("&response_mode=query");
-		sb.append("&prompt=login");
-		sb.append("&state=" + state);
-		sb.append("&redirect_uri=" + redirectUri);
+		sb.append("/"); //$NON-NLS-1$
+		sb.append("authorize"); //$NON-NLS-1$
+		sb.append("?"); //$NON-NLS-1$
+		sb.append("client_id=" + ws.getClientId()); //$NON-NLS-1$
+		sb.append("&response_type=code"); //$NON-NLS-1$
+		sb.append("&response_mode=query"); //$NON-NLS-1$
+		sb.append("&prompt=login"); //$NON-NLS-1$
+		sb.append("&state=" + state); //$NON-NLS-1$
+		sb.append("&redirect_uri=" + redirectUri); //$NON-NLS-1$
 		
 		browser.setUrl(sb.toString());
 		
@@ -152,14 +152,14 @@ public class LoginDialog extends SmartStyledDialog {
 						try {
 							parts = parseUrl(thisurl);
 						}catch (Exception ex) {
-							PawsPlugIn.displayLog("Login Error", ex);
+							PawsPlugIn.displayLog("Login Error", ex); //$NON-NLS-1$
 							browser.setUrl(sb.toString());
 							return;
 						}
 						
-						if(parts.containsKey("state") && parts.get("state").equals(state) 
-								&& parts.containsKey("code") && !parts.get("code").isBlank()) {
-							code = parts.get("code");
+						if(parts.containsKey("state") && parts.get("state").equals(state)  //$NON-NLS-1$ //$NON-NLS-2$
+								&& parts.containsKey("code") && !parts.get("code").isBlank()) { //$NON-NLS-1$ //$NON-NLS-2$
+							code = parts.get("code"); //$NON-NLS-1$
 							LoginDialog.this.close();
 						}else {
 							//login failed
@@ -181,13 +181,13 @@ public class LoginDialog extends SmartStyledDialog {
 		String querypart = url.substring(url.indexOf('?') + 1);
 		if (querypart.isBlank()) return Collections.emptyMap();
 		
-		String[] bits = querypart.split("&");
+		String[] bits = querypart.split("&"); //$NON-NLS-1$
 		HashMap<String,String> parts = new HashMap<>();
 		for (String bit : bits) {
 			int index = bit.indexOf('=');
 			String key = index > 0 ? bit.substring(0,index) : bit;
-			String value = index > 0 && bit.length() > index + 1 ? bit.substring(index+1) : "";
-			if (parts.containsKey(key)) throw new Exception("multiple parameter parsing not supported");
+			String value = index > 0 && bit.length() > index + 1 ? bit.substring(index+1) : ""; //$NON-NLS-1$
+			if (parts.containsKey(key)) throw new Exception(Messages.LoginDialog_parameterparseerror);
 			parts.put(key,value);
 		}
 		return parts;

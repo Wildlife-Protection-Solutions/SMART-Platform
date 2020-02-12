@@ -36,25 +36,21 @@ public class PawsParameter extends UuidItem{
 
 	private static final long serialVersionUID = 1L;
 	
-	public static final String AREA_PREFIX = "area:";
-	public static final String FILE_PREFIX = "file:";
+	public static final String AREA_PREFIX = "area:"; //$NON-NLS-1$
+	public static final String FILE_PREFIX = "file:"; //$NON-NLS-1$
 	
 	public static enum FixedParameter{
 		LYR_BOUNDARY,
 		LYR_OTHER,
 		GRID_SIZE,
-//		GRID_CRS,
-//		GRID_BNDS,
-//		TIMEZONE,
 		TRAINING_RES,
-		CLASSIFIER_MODEL
-		
+		CLASSIFIER_MODEL	
 	}
 	
 	public static enum ClassifierModel{
-		DECISION_TREE("decison_tree"),
-		RANDOM_FOREST("random_forest"),
-		GAUSSIAN_PROCESS("gaussian_process"); //slow; not supported
+		DECISION_TREE("decison_tree"), //$NON-NLS-1$
+		RANDOM_FOREST("random_forest"), //$NON-NLS-1$
+		GAUSSIAN_PROCESS("gaussian_process"); //slow; not supported //$NON-NLS-1$
 		
 		public String key;
 		

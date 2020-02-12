@@ -24,6 +24,7 @@ package org.wcs.smart.paws.ui.config;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DmObject;
+import org.wcs.smart.paws.internal.Messages;
 import org.wcs.smart.paws.model.AbstractPawsClass;
 import org.wcs.smart.paws.model.PawsQueryClass;
 import org.wcs.smart.paws.model.PawsSimpleClass;
@@ -50,13 +51,13 @@ public class ClassificationData {
 	public String getClassification() {
 		if (op1 instanceof PawsSimpleClass) return op1.getClassification();
 		if (op1 instanceof PawsQueryClass) return op1.getClassification();
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 	
 	public String getDataSource() {
-		if (op1 instanceof PawsSimpleClass) return "Data Model";
-		if (op1 instanceof PawsQueryClass) return "Query";
-		return "unknown";
+		if (op1 instanceof PawsSimpleClass) return Messages.ClassificationData_DataModel;
+		if (op1 instanceof PawsQueryClass) return Messages.ClassificationData_Query;
+		return Messages.ClassificationData_unknown;
 	}
 	
 	public String getDetails() {
@@ -68,7 +69,7 @@ public class ClassificationData {
 		
 		StringBuilder sb = new StringBuilder();
 		sb.append(listortree.getName());
-		sb.append( " (" + a.getName() + ") ");
+		sb.append( " (" + a.getName() + ") "); //$NON-NLS-1$ //$NON-NLS-2$
 		sb.append(c.getFullCategoryName());
 		return sb.toString();
 	}

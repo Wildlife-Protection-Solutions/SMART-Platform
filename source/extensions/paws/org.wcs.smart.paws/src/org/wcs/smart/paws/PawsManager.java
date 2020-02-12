@@ -26,7 +26,6 @@ import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,13 +37,12 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.paws.internal.Messages;
 import org.wcs.smart.paws.model.PawsConfiguration;
 import org.wcs.smart.paws.model.PawsParameter;
-import org.wcs.smart.paws.model.PawsResultManager;
 import org.wcs.smart.paws.model.PawsRun;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.util.UuidUtils;
 
 
 /**
@@ -57,20 +55,25 @@ public enum PawsManager {
 	INSTANCE;
 	
 	public String createLabel(Query q) {
-		return q.getName() + " (" + QueryTypeManager.INSTANCE.findQueryType(q.getTypeKey()).getGuiName() + ")";
+		return q.getName() + " (" + QueryTypeManager.INSTANCE.findQueryType(q.getTypeKey()).getGuiName() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
+	/**
+	 * Delete a set of configurations
+	 * @param configurations
+	 * @param broker
+	 * @throws Exception
+	 */
 	public void deleteConfigurations(List<PawsConfiguration> configurations, IEventBroker broker) throws Exception{
-		
+		//TODO: what to do with runs and associated results
 		List<Path> toDelete = new ArrayList<>();
 		try(Session session = HibernateManager.openSession()){
-			//TODO: figure out what we do with the results (set configuration to null?)
 			session.beginTransaction();
 			try {
 				for (PawsConfiguration c : configurations) {
 					c = session.get(PawsConfiguration.class, c.getUuid());
 					if (c != null) {
-						toDelete.add(getDirectory(c));
+						toDelete.add(PawsFileManager.INSTANCE.getDirectory(c));
 						session.delete(c);
 					}
 				}
@@ -81,7 +84,7 @@ public enum PawsManager {
 				}catch (Exception ex2) {
 					PawsPlugIn.log(ex2.getMessage(), ex2);
 				}
-				throw new Exception("Unable to delete selected configurations." + "\n\n" + ex.getMessage(), ex);
+				throw new Exception(Messages.PawsManager_DeleteConfigError + "\n\n" + ex.getMessage(), ex);  //$NON-NLS-1$
 			}
 		}
 		for (Path p : toDelete) {
@@ -132,7 +135,7 @@ public enum PawsManager {
 				for (PawsRun c : runs) {
 					c = session.get(PawsRun.class, c.getUuid());
 					if (c != null) {
-						toDelete.add(getDirectory(c));
+						toDelete.add(PawsFileManager.INSTANCE.getDirectory(c));
 						session.delete(c);
 					}
 				}
@@ -143,7 +146,7 @@ public enum PawsManager {
 				}catch (Exception ex2) {
 					PawsPlugIn.log(ex2.getMessage(), ex2);
 				}
-				throw new Exception("Unable to delete selected runs." + "\n\n" + ex.getMessage(), ex);
+				throw new Exception(Messages.PawsManager_DeleteRunError + "\n\n" + ex.getMessage(), ex);  //$NON-NLS-1$
 			}
 		}
 		for (Path p : toDelete) {
@@ -165,16 +168,16 @@ public enum PawsManager {
 	public void validateConfiguration(PawsConfiguration config) throws Exception{
 		try(Session session = HibernateManager.openSession()){
 			config = session.get(PawsConfiguration.class, config.getUuid());
-			if (config.getParameters() == null) throw new Exception("Grid parameters not supplied");
+			if (config.getParameters() == null) throw new Exception(Messages.PawsManager_GridParametersRequired);
 
 //			PawsParameter pp = config.findParameter(PawsParameter.FixedParameter.GRID_CRS.name());
 //			if (pp == null || pp.getValue() == null || pp.getValue().isEmpty() ) throw new Exception("Grid coordinate reference system required");
 	
 			PawsParameter pp = config.findParameter(PawsParameter.FixedParameter.GRID_SIZE.name());
-			if (pp == null || pp.getValue() == null || pp.getValue().isEmpty() ) throw new Exception("Grid size required");
+			if (pp == null || pp.getValue() == null || pp.getValue().isEmpty() ) throw new Exception(Messages.PawsManager_GridSizeRequired);
 	
 			pp = config.findParameter(PawsParameter.FixedParameter.LYR_BOUNDARY.name());
-			if (pp == null || pp.getValue() == null || pp.getValue().isEmpty() ) throw new Exception("Conservation Area Boundary layer required");
+			if (pp == null || pp.getValue() == null || pp.getValue().isEmpty() ) throw new Exception(Messages.PawsManager_CALayerRequired);
 		}
 	}
 	
@@ -187,7 +190,7 @@ public enum PawsManager {
 			try {
 				cnt = Integer.parseInt(test)+1;
 				runname = runname.substring(0, index);
-				id = runname + " " + (cnt++);
+				id = runname + " " + (cnt++); //$NON-NLS-1$
 			}catch (Exception ex) {
 				//fail
 			}
@@ -196,10 +199,10 @@ public enum PawsManager {
 		try(Session session = HibernateManager.openSession()){
 			while(true) {
 				if (QueryFactory.buildCountQuery(session, PawsRun.class, 
-						new Object[] {"conservationArea", ca},
-						new Object[] {"id", id}) > 0) {
+						new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+						new Object[] {"id", id}) > 0) { //$NON-NLS-1$
 					
-					id = runname + " " + (cnt++); 
+					id = runname + " " + (cnt++);  //$NON-NLS-1$
 				}else {
 					break;
 				}
@@ -207,25 +210,7 @@ public enum PawsManager {
 		}
 		return id;
 	}
-	public Path getDirectory(PawsConfiguration config) {
-		Path ds = Paths.get(config.getConservationArea().getFileDataStoreLocation())
-				.resolve(PawsPlugIn.PAWS_DIR)
-				.resolve("config")
-				.resolve(UuidUtils.uuidToString(config.getUuid()));
-		return ds;
-	}
 	
-	public Path getDirectory(PawsRun run) {
-		 return Paths.get(run.getConservationArea().getFileDataStoreLocation())
-			.resolve(PawsPlugIn.PAWS_DIR)
-			.resolve("run")
-			.resolve(UuidUtils.uuidToString(run.getUuid()));
-		
-	}
-	
-	public Path getResultsDirectory(PawsRun run) {
-		return getDirectory(run).resolve("results");
-	}
 	
 	public Image getImage(PawsRun.Status status){
 		switch(status){
@@ -242,11 +227,11 @@ public enum PawsManager {
 	public String getName(PawsParameter.FixedParameter fixedParameter){
 		switch(fixedParameter){
 //		case GRID_CRS: return "CRS" ;
-		case GRID_SIZE: return "Grid Size";
-		case LYR_BOUNDARY: return "Conservation Area Boundary";
-		case LYR_OTHER: return "Shapefiles";
-		case CLASSIFIER_MODEL: return "Classifier Model";
-		case TRAINING_RES: return "Temporal Training Resolution (Months)";
+		case GRID_SIZE: return Messages.PawsManager_GridSize;
+		case LYR_BOUNDARY: return Messages.PawsManager_CABoundary;
+		case LYR_OTHER: return Messages.PawsManager_OtherFiles;
+		case CLASSIFIER_MODEL: return Messages.PawsManager_ClassifierModel;
+		case TRAINING_RES: return Messages.PawsManager_TrainingResolution;
 		}
 		return null;
 	}

@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.paws.PawsPlugIn;
+import org.wcs.smart.paws.internal.Messages;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
 
@@ -42,7 +43,7 @@ public class PawsDatabaseUpgrader implements IDatabaseUpgrader {
 
 	@Override
 	public void upgrade(IProgressMonitor monitor) throws Exception {
-		monitor.subTask("Upgrading PAWS Plugin");
+		monitor.subTask(Messages.PawsDatabaseUpgrader_TaskName);
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {

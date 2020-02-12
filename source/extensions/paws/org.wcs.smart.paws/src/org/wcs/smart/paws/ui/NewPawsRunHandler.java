@@ -45,6 +45,7 @@ import org.wcs.smart.paws.PawsManager;
 import org.wcs.smart.paws.PawsPlugIn;
 import org.wcs.smart.paws.engine.PawsRunJob;
 import org.wcs.smart.paws.engine.StorageApi;
+import org.wcs.smart.paws.internal.Messages;
 import org.wcs.smart.paws.model.PawsConfiguration;
 import org.wcs.smart.paws.model.PawsRun;
 import org.wcs.smart.paws.model.PawsService;
@@ -76,8 +77,8 @@ public class NewPawsRunHandler {
 		try{
 			PawsManager.INSTANCE.validateConfiguration(config);
 		}catch (Exception ex){
-			MessageDialog.openWarning(Display.getDefault().getActiveShell(), "PAWS", 
-					MessageFormat.format("The selected PAWS Configuration ''{0}'' is not valid.  Errors must be resolved before you can run.", config.getName()) + "\n\n" + ex.getMessage());
+			MessageDialog.openWarning(Display.getDefault().getActiveShell(), Messages.NewPawsRunHandler_Title, 
+					MessageFormat.format(Messages.NewPawsRunHandler_InvalidConfig, config.getName()) + "\n\n" + ex.getMessage()); //$NON-NLS-1$
 			
 			
 			ConfigEditorInput in = new ConfigEditorInput(config);
@@ -110,11 +111,11 @@ public class NewPawsRunHandler {
 
 	private PawsRun createInternal(PawsConfiguration config, PawsRun copy, String initName) throws Exception{
 		PawsRun prun = null;
-		if (copy == null) throw new IllegalArgumentException("PawsRun copy cannot be null.");
+		if (copy == null) throw new IllegalArgumentException("PawsRun copy cannot be null."); //$NON-NLS-1$
 		
 		try(Session session = HibernateManager.openSession()){
 			PawsConfiguration pw = session.get(PawsConfiguration.class, config.getUuid());
-			if (pw == null) throw new Exception("Configuration not found.");
+			if (pw == null) throw new Exception(Messages.NewPawsRunHandler_ConfigNotFound);
 			
 			prun = new PawsRun();
 			prun.setConfiguration(pw);
@@ -137,7 +138,7 @@ public class NewPawsRunHandler {
 		boolean openconfig = false;
 		try(Session session = HibernateManager.openSession()){
 			PawsWorkspace pw = QueryFactory.buildQuery(session, PawsWorkspace.class, 
-					new Object[]{"conservationArea", SmartDB.getCurrentConservationArea()})
+					new Object[]{"conservationArea", SmartDB.getCurrentConservationArea()}) //$NON-NLS-1$
 				.uniqueResult();
 			
 			if (pw == null || !pw.isConfigured()) {
@@ -145,7 +146,7 @@ public class NewPawsRunHandler {
 			}else{
 			
 				PawsService service = QueryFactory.buildQuery(session, PawsService.class,
-					new Object[]{"conservationArea", SmartDB.getCurrentConservationArea()})
+					new Object[]{"conservationArea", SmartDB.getCurrentConservationArea()}) //$NON-NLS-1$
 					.uniqueResult();
 				if (service == null || !service.isConfigured()){
 					openconfig = true;
@@ -153,8 +154,8 @@ public class NewPawsRunHandler {
 			}
 		}
 		if (openconfig){
-			MessageDialog.openWarning(Display.getDefault().getActiveShell(), "PAWS", 
-					"Cannot perform PAWS Analysis until an Azure workspace and PAWS service are configured.");
+			MessageDialog.openWarning(Display.getDefault().getActiveShell(), Messages.NewPawsRunHandler_Title, 
+					Messages.NewPawsRunHandler_WorkspaceServiceRequired);
 			
 			ContextInjectionFactory.invoke(new ShowConfigurationHandler(), Execute.class, context);
 			return false;
@@ -171,8 +172,8 @@ public class NewPawsRunHandler {
 		try {
 			if (!StorageApi.INSTANCE.getAuthorizationCode(Display.getDefault().getActiveShell())) return false;
 		}catch (Exception ex) {
-			MessageDialog.openWarning(Display.getDefault().getActiveShell(), "PAWS", 
-					"Cannot perform PAWS Analysis until an Azure workspace and PAWS service are configured.");
+			MessageDialog.openWarning(Display.getDefault().getActiveShell(), Messages.NewPawsRunHandler_Title, 
+					Messages.NewPawsRunHandler_WorkspaceServiceRequired);
 			return false;
 		}
 		
@@ -183,8 +184,8 @@ public class NewPawsRunHandler {
 				session.save(rr);
 				
 				LocalDateTime now = LocalDateTime.now();
-				String dpart = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
-				rr.setRunId( dpart + "_" + UuidUtils.uuidToString( rr.getUuid() ));
+				String dpart = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")); //$NON-NLS-1$
+				rr.setRunId( dpart + "_" + UuidUtils.uuidToString( rr.getUuid() )); //$NON-NLS-1$
 				
 				session.getTransaction().commit();
 			}catch (Exception ex) {
@@ -193,7 +194,7 @@ public class NewPawsRunHandler {
 				}catch (Exception ex2) {
 					PawsPlugIn.log(ex2.getMessage(), ex2);
 				}
-				PawsPlugIn.displayLog("Unable to save run to database: " + ex.getMessage(), ex);
+				PawsPlugIn.displayLog(Messages.NewPawsRunHandler_SaveError + ex.getMessage(), ex);
 				return false;
 				
 			}

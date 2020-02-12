@@ -54,9 +54,11 @@ import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.paws.PawsEvent;
+import org.wcs.smart.paws.PawsFileManager;
 import org.wcs.smart.paws.PawsManager;
 import org.wcs.smart.paws.PawsPlugIn;
 import org.wcs.smart.paws.engine.PawsTask;
+import org.wcs.smart.paws.internal.Messages;
 import org.wcs.smart.paws.model.PawsRun;
 import org.wcs.smart.paws.model.PawsService;
 import org.wcs.smart.paws.ui.HeaderComposite;
@@ -69,6 +71,7 @@ import org.wcs.smart.ui.SmartLabelProvider;
  */
 public class RunSummaryPage extends EditorPart {
 
+	private static final String RUN_KEY = "RUN"; //$NON-NLS-1$
 	private HeaderComposite header;
 	private Label lblStatus, lblStatusImg, lblStatusMsg;
 	
@@ -84,13 +87,11 @@ public class RunSummaryPage extends EditorPart {
 	
 	@Override
 	public void doSave(IProgressMonitor monitor) {
-		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	public void doSaveAs() {
-		// TODO Auto-generated method stub
 
 	}
 
@@ -108,19 +109,16 @@ public class RunSummaryPage extends EditorPart {
 	
 	@Override
 	public boolean isDirty() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public boolean isSaveAsAllowed() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public void createPartControl(Composite parent) {
-		// TODO Auto-generated method stub
 		toolkit = new FormToolkit(parent.getDisplay());
 		
 		Form main = toolkit.createForm(parent);
@@ -130,8 +128,8 @@ public class RunSummaryPage extends EditorPart {
 		header = new HeaderComposite(main.getBody(), toolkit, main.getFont(), main.getForeground());
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		header.addListener(SWT.Selection, e->{
-			if (header.getData("RUN") == null) return;
-			PawsRun run = (PawsRun)header.getData("RUN");
+			if (header.getData(RUN_KEY) == null) return;
+			PawsRun run = (PawsRun)header.getData(RUN_KEY);
 			run.setId(header.getText());
 			
 			try(Session s = HibernateManager.openSession()){
@@ -153,12 +151,12 @@ public class RunSummaryPage extends EditorPart {
 			
 		});
 		
-		Composite c = SmartUiUtils.createHeaderLabel(main.getBody(), "Status");
+		Composite c = SmartUiUtils.createHeaderLabel(main.getBody(), Messages.RunSummaryPage_StatusSection);
 		c.setLayout(new GridLayout(2, false));
 		ToolBar tb = new ToolBar(c, SWT.FLAT);
 		tb.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
 		ToolItem ti = new ToolItem(tb, SWT.PUSH);
-		ti.setToolTipText("refresh...");
+		ti.setToolTipText(Messages.RunSummaryPage_refreshtooltip);
 		ti.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
 		ti.addListener(SWT.Selection, e->RunSummaryPage.this.parent.refresh());
 		
@@ -166,12 +164,12 @@ public class RunSummaryPage extends EditorPart {
 		scomp.setLayout(new GridLayout(2, false));
 		scomp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false ));
 		
-		lblStatusImg = toolkit.createLabel(scomp, "");
+		lblStatusImg = toolkit.createLabel(scomp, ""); //$NON-NLS-1$
 		
-		lblStatus = toolkit.createLabel(scomp, "");
+		lblStatus = toolkit.createLabel(scomp, ""); //$NON-NLS-1$
 		lblStatus.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		lblStatusMsg = toolkit.createLabel(scomp, "", SWT.WRAP);
+		lblStatusMsg = toolkit.createLabel(scomp, "", SWT.WRAP); //$NON-NLS-1$
 		lblStatusMsg.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		statusComp = toolkit.createComposite(scomp);
@@ -180,7 +178,7 @@ public class RunSummaryPage extends EditorPart {
 		((GridLayout)statusComp.getLayout()).marginWidth = 0;
 		((GridLayout)statusComp.getLayout()).marginHeight = 0;
 		
-		SmartUiUtils.createHeaderLabel(main.getBody(), "Details");
+		SmartUiUtils.createHeaderLabel(main.getBody(), Messages.RunSummaryPage_DetailsSection);
 		
 		detailsComp = toolkit.createComposite(main.getBody());
 		detailsComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -188,52 +186,52 @@ public class RunSummaryPage extends EditorPart {
 	}
 
 	public void init(PawsRun run) {
-		String surl = "";
+		String surl = ""; //$NON-NLS-1$
 		for (Control c : statusComp.getChildren()) c.dispose();
 		
 		if (run.getRunId() != null) {
 			try(Session session = HibernateManager.openSession()){
 				PawsService service = QueryFactory.buildQuery(session, PawsService.class,  
-					new Object[] {"conservationArea", run.getConservationArea()}).uniqueResult();
-				surl = service.getTaskApi() + "/" + run.getTaskId();// + "?subscription-key=" + service.getApiKey();
+					new Object[] {"conservationArea", run.getConservationArea()}).uniqueResult(); //$NON-NLS-1$
+				surl = service.getTaskApi() + "/" + run.getTaskId();// + "?subscription-key=" + service.getApiKey(); //$NON-NLS-1$
 				//key = service.getApiKey();	
 			}			
 		
 			if (run.getServerStatusJson() != null) {
 				Group sgroup = new Group(statusComp, SWT.FLAT);
 				sgroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-				sgroup.setText("PAWS Server Status Details");
+				sgroup.setText(Messages.RunSummaryPage_StatusDetails);
 				sgroup.setLayout(new GridLayout(2, false));
-				toolkit.createLabel(sgroup, "Task URL:");
+				toolkit.createLabel(sgroup, Messages.RunSummaryPage_TaskURL);
 				toolkit.createLabel(sgroup, surl);
 				
 				try {
 					PawsTask task = PawsTask.parse(run.getServerStatusJson());
 				
-					toolkit.createLabel(sgroup, "PAWS Status:");
+					toolkit.createLabel(sgroup, Messages.RunSummaryPage_Status);
 					toolkit.createLabel(sgroup, task.getStatus());
 					
-					toolkit.createLabel(sgroup, "PAWS Task ID:");
+					toolkit.createLabel(sgroup, Messages.RunSummaryPage_Id);
 					toolkit.createLabel(sgroup, task.getTaskId());
 					
 					if (task.getTimestamp() != null) {
-						toolkit.createLabel(sgroup, "PAWS Status Timestamp:");
+						toolkit.createLabel(sgroup, Messages.RunSummaryPage_Timestamp);
 						toolkit.createLabel(sgroup, task.getTimestamp().toString());
 					}
 					if (task.getEndPoint() != null) {
-						toolkit.createLabel(sgroup, "PAWS Endpoint:");
+						toolkit.createLabel(sgroup, Messages.RunSummaryPage_endpoint);
 						toolkit.createLabel(sgroup, task.getEndPoint());
 					}
 					if (task.getEndPointPath() != null) {
-						toolkit.createLabel(sgroup, "PAWS Endpoint Path:");
+						toolkit.createLabel(sgroup, Messages.RunSummaryPage_endpointPath);
 						toolkit.createLabel(sgroup, task.getEndPointPath());
 					}
 					if (task.getPublishToGrid() != null) {
-						toolkit.createLabel(sgroup, "Publish To Grid:");
+						toolkit.createLabel(sgroup, Messages.RunSummaryPage_pubToGrid);
 						toolkit.createLabel(sgroup, task.getPublishToGrid() ? SmartLabelProvider.BOOLEAN_TRUE_LABEL : SmartLabelProvider.BOOLEAN_FALSE_LABEL);
 					}
 					if (task.getBody() != null) {
-						toolkit.createLabel(sgroup, "Body:");
+						toolkit.createLabel(sgroup, Messages.RunSummaryPage_Body);
 						toolkit.createLabel(sgroup, task.getBody());
 					}
 				}catch (Exception ex) {
@@ -248,44 +246,44 @@ public class RunSummaryPage extends EditorPart {
 		if (run.getStatusMessage() != null) lblStatusMsg.setText(run.getStatusMessage());
 		
 		header.setText(run.getId());
-		header.setData("RUN", run);
+		header.setData(RUN_KEY, run);
 		
 		for (Control kid : detailsComp.getChildren()) kid.dispose();
 		
 		detailsComp.setLayout(new GridLayout(2, false));
 		
-		toolkit.createLabel(detailsComp, "PAWS Run Id:");
+		toolkit.createLabel(detailsComp, Messages.RunSummaryPage_RunId);
 		toolkit.createLabel(detailsComp, run.getRunId());
 		
-		toolkit.createLabel(detailsComp, "Executed On:");
-		toolkit.createLabel(detailsComp, run.getRunDate() == null ? "" : run.getRunDate().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)));
+		toolkit.createLabel(detailsComp, Messages.RunSummaryPage_ExecutedDate);
+		toolkit.createLabel(detailsComp, run.getRunDate() == null ? "" : run.getRunDate().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM))); //$NON-NLS-1$
 		
-		toolkit.createLabel(detailsComp, "Data Dates:");
+		toolkit.createLabel(detailsComp, Messages.RunSummaryPage_DataDates);
 		if (run.getDataEndDate() != null && run.getDataStartDate() != null){
 			String value = run.getDataStartDate().format( DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM) ) +
-					" to " + run.getDataEndDate().format( DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM) );
+					Messages.RunSummaryPage_To + run.getDataEndDate().format( DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM) );
 			toolkit.createLabel(detailsComp, value);
 		}else{
-			toolkit.createLabel(detailsComp, "");
+			toolkit.createLabel(detailsComp, ""); //$NON-NLS-1$
 		}
 		
-		toolkit.createLabel(detailsComp, "Model Training Years:");
-		String value = run.getTrainStartYear() + " to " + run.getTrainEndYear();
+		toolkit.createLabel(detailsComp, Messages.RunSummaryPage_TrainingDates);
+		String value = run.getTrainStartYear() + Messages.RunSummaryPage_To + run.getTrainEndYear();
 		toolkit.createLabel(detailsComp, value);
 		
-		toolkit.createLabel(detailsComp, "Model Forecasting Years:");
-		value = run.getForecastStartYear() + " to " + run.getForecastEndYear();
+		toolkit.createLabel(detailsComp, Messages.RunSummaryPage_ForcastingDate);
+		value = run.getForecastStartYear() + Messages.RunSummaryPage_To + run.getForecastEndYear();
 		toolkit.createLabel(detailsComp, value);
 		
 		
-		toolkit.createLabel(detailsComp, "Configuration:");
+		toolkit.createLabel(detailsComp, Messages.RunSummaryPage_Configuration);
 		if (run.getConfiguration() != null){
 			toolkit.createLabel(detailsComp, run.getConfiguration().getName());
 		}else{
-			toolkit.createLabel(detailsComp, "! NOT FOUND !");
+			toolkit.createLabel(detailsComp, Messages.RunSummaryPage_NotFound);
 		}
 		
-		toolkit.createLabel(detailsComp, "Local Package File:");
+		toolkit.createLabel(detailsComp, Messages.RunSummaryPage_PackageFile);
 		if (run.getPackageFile() != null){
 			Hyperlink openhl = toolkit.createHyperlink(detailsComp, run.getPackageFile(), SWT.NONE);
 			openhl.addHyperlinkListener(new IHyperlinkListener() {
@@ -299,7 +297,7 @@ public class RunSummaryPage extends EditorPart {
 				@Override
 				public void linkActivated(HyperlinkEvent e) {
 					try {
-						Desktop.getDesktop().open(  PawsManager.INSTANCE.getDirectory(run).toFile() );
+						Desktop.getDesktop().open(  PawsFileManager.INSTANCE.getDirectory(run).toFile() );
 					} catch (IOException e1) {
 						PawsPlugIn.displayLog(e1.getMessage(), e1);
 					}
@@ -307,11 +305,11 @@ public class RunSummaryPage extends EditorPart {
 				}
 			});
 		}else{
-			toolkit.createLabel(detailsComp, "");
+			toolkit.createLabel(detailsComp, ""); //$NON-NLS-1$
 		}
 		
 		
-		toolkit.createLabel(detailsComp, "Local Results File:");
+		toolkit.createLabel(detailsComp, Messages.RunSummaryPage_Resultsfiles);
 		toolkit.createLabel(detailsComp, run.getResultLocation());
 		
 		detailsComp.layout(true);

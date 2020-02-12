@@ -47,6 +47,7 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.paws.internal.Messages;
 import org.wcs.smart.paws.model.PawsSimpleClass;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.ui.SmartStyledDialog;
@@ -116,7 +117,7 @@ public class DataModelDialog extends SmartStyledDialog {
 		
 		loadDm.schedule();
 		
-		getShell().setText("SMART Data Model");
+		getShell().setText(Messages.DataModelDialog_Text);
 		return parent;
 	}
 	
@@ -126,7 +127,7 @@ public class DataModelDialog extends SmartStyledDialog {
 			Object dmObject = (Object) iterator.next();
 			PawsSimpleClass item = null;
 
-			String lbl = "";
+			String lbl = ""; //$NON-NLS-1$
 			
 			if (dmObject instanceof Category) {
 				Category c = (Category)dmObject;
@@ -147,20 +148,20 @@ public class DataModelDialog extends SmartStyledDialog {
 				if (li != null) {
 					item.setAttributeKey(li.getAttribute().getKeyId());
 					item.setAttributeListItemKey(li.getKeyId());
-					item.setClassification(li.getName().toLowerCase() + "_" + li.getAttribute().getName().toLowerCase() + "_" + c.getName().toLowerCase());
+					item.setClassification(li.getName().toLowerCase() + "_" + li.getAttribute().getName().toLowerCase() + "_" + c.getName().toLowerCase()); //$NON-NLS-1$ //$NON-NLS-2$
 					lbl = ClassificationData.createLabel(c,  li.getAttribute(), li);
 				}else if (node != null) {
 					item.setAttributeKey(node.getAttribute().getKeyId());
 					item.setAttributeTreeNodeHkey(node.getHkey());
-					item.setClassification(node.getName().toLowerCase() + "_" + node.getAttribute().getName().toLowerCase() + "_" + c.getName().toLowerCase());
+					item.setClassification(node.getName().toLowerCase() + "_" + node.getAttribute().getName().toLowerCase() + "_" + c.getName().toLowerCase()); //$NON-NLS-1$ //$NON-NLS-2$
 					lbl = ClassificationData.createLabel(c,  node.getAttribute(), node);
 				}
 
 			}else if (dmObject instanceof CategoryAttribute) {
-				MessageDialog.openWarning(getShell(), "Invalid Selection", MessageFormat.format("Attribute cannot be added a classifications.  Please select a category, list item or tree node.", ((CategoryAttribute)dmObject).getAttribute().getName()));
+				MessageDialog.openWarning(getShell(), Messages.DataModelDialog_InvalidSelectionTitle, MessageFormat.format(Messages.DataModelDialog_Cannotaddattribute, ((CategoryAttribute)dmObject).getAttribute().getName()));
 				return;
 			}else {
-				MessageDialog.openWarning(getShell(), "Invalid Selection", MessageFormat.format("Selected item {0} cannot be added.  Please select a category, list item or tree node.", dmObject.toString()));
+				MessageDialog.openWarning(getShell(), Messages.DataModelDialog_InvalidSelectionTitle, MessageFormat.format(Messages.DataModelDialog_ItemCannotBeAdded, dmObject.toString()));
 				return;
 			}
 			
@@ -183,7 +184,7 @@ public class DataModelDialog extends SmartStyledDialog {
 		return true;
 	}
 	
-	private Job loadDm = new Job("loading datamodel") {
+	private Job loadDm = new Job(Messages.DataModelDialog_loadjobname) {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			DataModel fdm = QueryDataModelManager.getInstance().getDataModel();

@@ -49,6 +49,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.paws.PawsEvent;
 import org.wcs.smart.paws.PawsPlugIn;
+import org.wcs.smart.paws.internal.Messages;
 import org.wcs.smart.paws.model.PawsResultManager;
 import org.wcs.smart.paws.model.PawsRun;
 import org.wcs.smart.paws.ui.HidePartsPartListener;
@@ -180,21 +181,21 @@ public class RunEditor extends MultiPageEditorPart implements MapPart{
 		try{
 			summaryPage = new RunSummaryPage(this);
 			int index = addPage(summaryPage, getEditorInput());
-			super.setPageText(index, "Summary");
+			super.setPageText(index, Messages.RunEditor_SummaryPage);
 		
 			resultsPage = new RunTableResultsPage(this);
 			index = addPage(resultsPage, getEditorInput());
 			setPageImage(index, QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.TABLE_ICON));
-			super.setPageText(index, "Results");
+			super.setPageText(index, Messages.RunEditor_ResultsPage);
 			
 			mapPage = new RunMapResultsPage(this);
 			index = addPage(mapPage, getEditorInput());
 			setPageImage(index, SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.MAP_ICON));
-			super.setPageText(index, "Map");
+			super.setPageText(index, Messages.RunEditor_MapPage);
 			
 
 		}catch (Exception ex){
-			PawsPlugIn.displayLog("Error opening PAWS Analysis" + "\n\n" + ex.getMessage(), ex);
+			PawsPlugIn.displayLog(Messages.RunEditor_Error + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 			throw new RuntimeException(ex);
 		}
 		createEventHandlers();
@@ -213,7 +214,7 @@ public class RunEditor extends MultiPageEditorPart implements MapPart{
 		return this.context;
 	}
 	
-	private Job loadSettings = new Job("loading paws run settings") {
+	private Job loadSettings = new Job(Messages.RunEditor_loadingjobname) {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -246,7 +247,7 @@ public class RunEditor extends MultiPageEditorPart implements MapPart{
 					resultsPage.refresh(results);
 					mapPage.refresh(results);
 				}catch (Exception ex) {
-					PawsPlugIn.displayLog("Unable to load results." + ex.getMessage(), ex);
+					PawsPlugIn.displayLog(Messages.RunEditor_LoadError + ex.getMessage(), ex);
 				}
 				
 				

@@ -27,6 +27,7 @@ import java.time.LocalDate;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.hibernate.Session;
+import org.wcs.smart.paws.internal.Messages;
 import org.wcs.smart.paws.model.PawsQueryClass;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryTypeManager;
@@ -63,7 +64,7 @@ public class QueryClassEngine {
 	}
 	
 	private void throwException(Query query) throws Exception{
-		throw new Exception(MessageFormat.format("Query not supported {0}", query.getName())); 
+		throw new Exception(MessageFormat.format(Messages.QueryClassEngine_QueryNotSupported, query.getName())); 
 	}
 	
 	public String getTable() { return this.temptable; }
@@ -88,9 +89,7 @@ public class QueryClassEngine {
 		if (!(results instanceof IObservationPagedQueryResultSet)) {
 			throwException(query);
 		}
-		System.out.println( ((IObservationPagedQueryResultSet)results).getItemCount() );
-		System.out.println( ((IObservationPagedQueryResultSet)results).getWpCount() );
-		
+
 		temptable = ((IObservationPagedQueryResultSet)results).getResultsTable();
 		obcol = ((IObservationPagedQueryResultSet)results).getObservationColumn();
 	}

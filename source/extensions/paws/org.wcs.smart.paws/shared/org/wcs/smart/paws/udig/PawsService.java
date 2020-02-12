@@ -70,7 +70,7 @@ public class PawsService extends AbstractRasterService {
     }
     
 	public PawsService(Map<String, Serializable> params, IDatabaseConnectionProvider connectionProvider) {
-		super(PawsServiceExtension.createURL(params), "geotiff", getFactory()); 
+		super(PawsServiceExtension.createURL(params), "geotiff", getFactory());  //$NON-NLS-1$
 		this.params = params;
 		this.connectionProvider = connectionProvider;
 	}

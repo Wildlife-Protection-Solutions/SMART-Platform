@@ -28,6 +28,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.paws.PawsPlugIn;
+import org.wcs.smart.paws.internal.Messages;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.ui.ShowPerspectiveHandler;
 
@@ -48,7 +49,7 @@ public class EditConfigHandler {
 			IWorkbenchPage page = ww.getActivePage();
 			page.openEditor(input, ConfigurationEditor.ID);
 		} catch (PartInitException e) {
-			PawsPlugIn.displayLog("Error loading configuration." + "\n\n" + e.getMessage(), e);
+			PawsPlugIn.displayLog(Messages.EditConfigHandler_LoadError + "\n\n" + e.getMessage(), e); //$NON-NLS-1$
 		}
 	}
 }

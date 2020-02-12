@@ -34,7 +34,9 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.paws.PawsFileManager;
 import org.wcs.smart.paws.PawsPlugIn;
+import org.wcs.smart.paws.internal.Messages;
 
 /**
  * Job removes all PAWS related tabled from the database
@@ -45,7 +47,7 @@ import org.wcs.smart.paws.PawsPlugIn;
 public class RemovePawsJob extends Job {
 
 	public RemovePawsJob() {
-		super("Uninstalling PAWS Plugin");
+		super(Messages.RemovePawsJob_TaskName);
 	}
 
 	@Override
@@ -63,7 +65,7 @@ public class RemovePawsJob extends Job {
 				}catch (Exception ex){
 					PawsPlugIn.log(ex.getMessage(), ex);	
 				}
-				PawsPlugIn.displayLog("Error uninstalling PAWS Plugin:" + e.getMessage(), e);
+				PawsPlugIn.displayLog(Messages.RemovePawsJob_Error + e.getMessage(), e);
 				return new Status(Status.ERROR, PawsPlugIn.PLUGIN_ID, e.getMessage());
 			}
 		}	
@@ -73,7 +75,7 @@ public class RemovePawsJob extends Job {
 			//delete intelligence data from the filestore 
 			for (ConservationArea ca : cas){
 				try {
-					File folder = new File(ca.getFileDataStoreLocation() + File.separator + PawsPlugIn.PAWS_DIR);
+					File folder = new File(ca.getFileDataStoreLocation() + File.separator + PawsFileManager.PAWS_DIR);
 					FileUtils.deleteDirectory(folder);
 				} catch (IOException ex) {
 					PawsPlugIn.log("Error removing PAWS folder for Conservation Area datastore: " + ca.getId(), ex); //$NON-NLS-1$

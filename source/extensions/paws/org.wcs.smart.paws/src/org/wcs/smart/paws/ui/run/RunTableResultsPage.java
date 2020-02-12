@@ -21,8 +21,6 @@
  */
 package org.wcs.smart.paws.ui.run;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,6 +48,7 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.EditorPart;
 import org.wcs.smart.paws.PawsPlugIn;
+import org.wcs.smart.paws.internal.Messages;
 import org.wcs.smart.paws.model.PawsResultFile;
 import org.wcs.smart.paws.model.PawsResultManager;
 import org.wcs.smart.paws.model.PawsRun;
@@ -110,7 +109,7 @@ public class RunTableResultsPage extends EditorPart {
 		((GridLayout)part.getLayout()).marginWidth = 0;
 		((GridLayout)part.getLayout()).marginHeight = 0;
 		Label temp = new Label(part, SWT.NONE);
-		temp.setText("No Results");
+		temp.setText(Messages.RunTableResultsPage_NoResults);
 	}
 
 	
@@ -122,11 +121,11 @@ public class RunTableResultsPage extends EditorPart {
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			
 			if (results.getRun().getStatus() == PawsRun.Status.ERROR) {
-				l.setText("Error occurred during run.");
+				l.setText(Messages.RunTableResultsPage_Error);
 			}else if (results.getRun().getStatus() == PawsRun.Status.COMPLETE) {
-				l.setText("Results not found in local filestore.");
+				l.setText(Messages.RunTableResultsPage_NotFound);
 			}else {
-				l.setText("Results not available until run complete.");
+				l.setText(Messages.RunTableResultsPage_NotFinished);
 			}
 		}else {		
 			Composite temp = new Composite(part, SWT.NONE);
@@ -170,7 +169,7 @@ public class RunTableResultsPage extends EditorPart {
 								final int colindex = i;
 								tvc.setLabelProvider(new ColumnLabelProvider() {
 									public String getText(Object element) {
-										if (element == null) return "NULL";
+										if (element == null) return "NULL"; //$NON-NLS-1$
 										return ((String[])element)[colindex];
 									}
 								});

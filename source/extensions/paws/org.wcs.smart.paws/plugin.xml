@@ -91,7 +91,7 @@
             locationURI="menu:org.wcs.smart.menu.query?before=org.wcs.smart.query.separator.options">
          <command
                commandId="org.wcs.smart.paws.configuration.show"
-               label="PAWS Server Configuration..."
+               label="%server.config.command.label"
                style="push">
             <visibleWhen
                   checkEnabled="false">
@@ -107,7 +107,7 @@
          point="org.eclipse.ui.commands">
       <command
             id="org.wcs.smart.paws.configuration.show"
-            name="Show PAWS Configuration">
+            name="%openconfig.command.name">
       </command>
    </extension>
    <extension
@@ -123,7 +123,7 @@
             class="org.wcs.smart.paws.ui.PawsView$PawsViewWrapper"
             icon="images/icons/paws.png"
             id="org.wcs.smart.paws.view"
-            name="PAWS "
+            name="%paws.view.name"
             restorable="true">
       </view>
    </extension>
@@ -147,14 +147,14 @@
             default="false"
             icon="images/icons/config.png"
             id="org.wcs.smart.paws.configuration.editor"
-            name="PAWS Configuration">
+            name="%config.editor.name">
       </editor>
       <editor
             class="org.wcs.smart.paws.ui.run.RunEditor"
             default="false"
             icon="images/icons/paws.png"
             id="org.wcs.smart.paws.run.editor"
-            name="PAWS Run">
+            name="%run.editor.name">
       </editor>
    </extension>
    <extension
@@ -168,7 +168,7 @@
       <service
             class="org.wcs.smart.paws.udig.PawsServiceExtension"
             id="&quot;org.wcs.smart.udig.catalog.pawsService"
-            name="PAWS ResultsService">
+            name="%udig.service.name">
       </service>
    </extension>
    <extension
@@ -180,10 +180,10 @@
       <wizardPage
             banner="images/icons/paws.png"
             class="org.wcs.smart.paws.udig.PawsWizardPage"
-            description="Add PAWS Result Layer to Map"
+            description="%all.wizardPage.description"
             icon="images/icons/paws.png"
             id="org.wcs.smart.udig.catalog.paws"
-            name="PAWS Result Layers">
+            name="%all.wizardPage.name">
       </wizardPage>
    </extension>
 

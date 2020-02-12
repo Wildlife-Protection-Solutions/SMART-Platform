@@ -82,6 +82,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.paws.PawsEvent;
 import org.wcs.smart.paws.PawsManager;
 import org.wcs.smart.paws.PawsPlugIn;
+import org.wcs.smart.paws.internal.Messages;
 import org.wcs.smart.paws.model.PawsConfiguration;
 import org.wcs.smart.paws.model.PawsRun;
 import org.wcs.smart.paws.ui.config.ConfigEditorInput;
@@ -210,7 +211,7 @@ public class PawsView {
 		((GridLayout)part.getLayout()).marginWidth = 0;
 		((GridLayout)part.getLayout()).marginHeight = 0;
 		
-		Composite c = SmartUiUtils.createHeaderLabel(part, "PAWS Results");
+		Composite c = SmartUiUtils.createHeaderLabel(part, Messages.PawsView_HeaderName);
 		((GridLayout)c.getLayout()).numColumns = 2;
 		((GridLayout)c.getLayout()).marginHeight = 0;
 		
@@ -228,7 +229,7 @@ public class PawsView {
 		
 		ToolItem tiAdd = new ToolItem(tbResults, SWT.PUSH);
 		tiAdd.setImage(QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.RUN_ICON));
-		tiAdd.setToolTipText("Re-run analysis");
+		tiAdd.setToolTipText(Messages.PawsView_Rerunotoltip);
 		tiAdd.addListener(SWT.Selection, e->{
 			Object x = tblResults.getStructuredSelection().getFirstElement();
 			if (x instanceof PawsRun) {
@@ -252,7 +253,7 @@ public class PawsView {
 			public String getText(Object element) {
 				if (element instanceof PawsRun) {
 					PawsRun pc = (PawsRun)element;
-					return MessageFormat.format( "{0} [{1}]", pc.getId(), pc.getRunDate() == null ? " " : DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).format(pc.getRunDate()));
+					return MessageFormat.format( "{0} [{1}]", pc.getId(), pc.getRunDate() == null ? " " : DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).format(pc.getRunDate())); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				return super.getText(element);
 			}
@@ -272,13 +273,13 @@ public class PawsView {
 		Menu mnu = new Menu(tblResults.getTable());
 		
 		MenuItem mnuOpen = new MenuItem(mnu, SWT.PUSH);
-		mnuOpen.setText("Open");
+		mnuOpen.setText(Messages.PawsView_Open);
 		mnuOpen.addListener(SWT.Selection, e->editRun());
 		
 		new MenuItem(mnu, SWT.SEPARATOR);
 		
 		MenuItem mnuAdd = new MenuItem(mnu, SWT.PUSH);
-		mnuAdd.setText("Re-Run");
+		mnuAdd.setText(Messages.PawsView_ReRun);
 		mnuAdd.setImage(QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.RUN_ICON));
 		mnuAdd.addListener(SWT.Selection, e->{
 			Object x = tblResults.getStructuredSelection().getFirstElement();
@@ -296,7 +297,7 @@ public class PawsView {
 		new MenuItem(mnu, SWT.SEPARATOR);
 		
 		MenuItem mnuRefresh = new MenuItem(mnu, SWT.PUSH);
-		mnuRefresh.setText("Refresh");
+		mnuRefresh.setText(Messages.PawsView_Refresh);
 		mnuRefresh.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
 		mnuRefresh.addListener(SWT.Selection, e->refresh());
 		
@@ -348,7 +349,7 @@ public class PawsView {
 		((GridLayout)part.getLayout()).marginWidth = 0;
 		((GridLayout)part.getLayout()).marginHeight = 0;
 		
-		Composite c = SmartUiUtils.createHeaderLabel(part, "PAWS Configurations");
+		Composite c = SmartUiUtils.createHeaderLabel(part, Messages.PawsView_Configs);
 		((GridLayout)c.getLayout()).numColumns = 2;
 		((GridLayout)c.getLayout()).marginHeight = 0;
 
@@ -403,14 +404,14 @@ public class PawsView {
 		Menu mnu = new Menu(tblConfigs.getTable());
 		
 		MenuItem mnuRun = new MenuItem(mnu, SWT.PUSH);
-		mnuRun.setText("Run");
+		mnuRun.setText(Messages.PawsView_Run);
 		mnuRun.setImage(QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.RUN_ICON));
 		mnuRun.addListener(SWT.Selection, e->newRun(tblConfigs.getStructuredSelection().getFirstElement()));
 		
 		new MenuItem(mnu, SWT.SEPARATOR);
 		
 		MenuItem mnuAdd = new MenuItem(mnu, SWT.PUSH);
-		mnuAdd.setText("Create New...");
+		mnuAdd.setText(Messages.PawsView_New);
 		mnuAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		mnuAdd.addListener(SWT.Selection, e->newConfiguration());
 		
@@ -465,7 +466,7 @@ public class PawsView {
 					PawsRun rr = session.get(PawsRun.class, pw.getUuid());
 					if (rr != null){
 						rr.setStatus(PawsRun.Status.ERROR);
-						rr.setStatusMessage("Cancelled by user.");
+						rr.setStatusMessage(Messages.PawsView_Cancelled);
 					}
 					session.getTransaction().commit();
 				}catch (Exception ex){
@@ -474,7 +475,7 @@ public class PawsView {
 					}catch (Exception ex2){
 						PawsPlugIn.log(ex2.getMessage(),ex2);
 					}
-					PawsPlugIn.displayLog("Unable to update status." + "\n\n" + ex.getMessage(), ex);
+					PawsPlugIn.displayLog(Messages.PawsView_StatusError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 				}
 			}
 		}
@@ -553,7 +554,7 @@ public class PawsView {
 		}
 		if (runs.isEmpty()) return;
 		
-		if (!MessageDialog.openConfirm(context.get(Shell.class), "Delete", MessageFormat.format("Are you sure you want to delete the {0} selected results?  This action cannot be undone.", runs.size()))) {
+		if (!MessageDialog.openConfirm(context.get(Shell.class), Messages.PawsView_DeleteTitle, MessageFormat.format(Messages.PawsView_DeleteResultsMsg, runs.size()))) {
 			return;
 		}
 		
@@ -587,7 +588,7 @@ public class PawsView {
 		}
 		if (configs.isEmpty()) return;
 		
-		if (!MessageDialog.openConfirm(context.get(Shell.class), "Delete", MessageFormat.format("Are you sure you want to delete the {0} selected configurations?  This action cannot be undone.", configs.size()))) {
+		if (!MessageDialog.openConfirm(context.get(Shell.class), Messages.PawsView_DeleteTitle, MessageFormat.format(Messages.PawsView_DeleteConfigMsg, configs.size()))) {
 			return;
 		}
 		
@@ -599,7 +600,7 @@ public class PawsView {
 		refresh();
 	}
     
-	private Job loadResults = new Job("loading PAWS data") {
+	private Job loadResults = new Job(Messages.PawsView_loadingJobname) {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -608,9 +609,9 @@ public class PawsView {
 			
 			try(Session s = HibernateManager.openSession()){
 				runs.addAll(QueryFactory.buildQuery(s, PawsRun.class, 
-						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list());
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list()); //$NON-NLS-1$
 				configs.addAll(QueryFactory.buildQuery(s, PawsConfiguration.class, 
-						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list());
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list()); //$NON-NLS-1$
 				
 			}
 			

@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.paws.internal.Messages;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /**
@@ -80,7 +81,7 @@ public class RunDialog extends SmartStyledTitleDialog {
 	private boolean validateInt(CCombo txt){
 		try {
 			int item = Integer.valueOf(txt.getText());
-			if (item < 1950 || item > 2300) throw new Exception("value must be between 1950 and 2300");
+			if (item < 1950 || item > 2300) throw new Exception(Messages.RunDialog_validYears);
 			txt.setBackground(txt.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 			return true;
 		}catch (Exception ex) {
@@ -97,7 +98,7 @@ public class RunDialog extends SmartStyledTitleDialog {
 		if (!validateInt(dtForcastEnd)) error = true;
 		
 		if (error) {
-			MessageDialog.openInformation(getShell(), "Error", "You must resvole date error before continuing.  All years must be valid integers between 1950 and 2300");
+			MessageDialog.openInformation(getShell(), Messages.RunDialog_ErrorTitle, Messages.RunDialog_DateErrors);
 			return;
 		}
 		
@@ -110,12 +111,12 @@ public class RunDialog extends SmartStyledTitleDialog {
 		id = txtId.getText();
 		
 		if (trainStart > trainEnd){
-			MessageDialog.openError(getShell(), "Error", "Training End Date cannot be before the Start Date");
+			MessageDialog.openError(getShell(), Messages.RunDialog_ErrorTitle, Messages.RunDialog_TrainDateError1);
 			return;
 		}
 		
 		if (forcastStart > forcastEnd){
-			MessageDialog.openError(getShell(), "Error", "Forcasting End Date cannot be before the Start Date");
+			MessageDialog.openError(getShell(), Messages.RunDialog_ErrorTitle, Messages.RunDialog_ForcastDateError);
 			return;
 		}
 		
@@ -139,14 +140,14 @@ public class RunDialog extends SmartStyledTitleDialog {
 		header.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 		
 		Label l = new Label(header, SWT.NONE);
-		l.setText("Name:");
+		l.setText(Messages.RunDialog_NameLabel);
 		
 		txtId = new Text(header, SWT.BORDER);
 		txtId.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		if (id != null){
 			txtId.setText(id);
 		}else{
-			txtId.setText("New Run Identifier");
+			txtId.setText(Messages.RunDialog_RunIdText);
 		}
 		
 		Label spacer = new Label(outer, SWT.SEPARATOR | SWT.HORIZONTAL);
@@ -159,7 +160,7 @@ public class RunDialog extends SmartStyledTitleDialog {
 		g.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
 
 		l = new Label(g, SWT.NONE);
-		l.setText("Training Years:");
+		l.setText(Messages.RunDialog_TrainYearLabel);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
 		Listener validate = e->validateInt((CCombo)e.widget);
@@ -174,7 +175,7 @@ public class RunDialog extends SmartStyledTitleDialog {
 		dtTrainStart.addListener(SWT.Modify, validate);
 		
 		l = new Label(g, SWT.NONE);
-		l.setText("to");
+		l.setText(Messages.RunDialog_To);
 		
 		dtTrainEnd = createDateDropDown(g);
 		dtTrainEnd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
@@ -187,7 +188,7 @@ public class RunDialog extends SmartStyledTitleDialog {
 		
 		
 		l = new Label(g, SWT.NONE);
-		l.setText("Forecasting Years:");
+		l.setText(Messages.RunDialog_ForcaseYearLabel);
 		
 		dtForcastStart = createDateDropDown(g);
 		dtForcastStart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
@@ -200,7 +201,7 @@ public class RunDialog extends SmartStyledTitleDialog {
 		
 		
 		l = new Label(g, SWT.NONE);
-		l.setText("to");
+		l.setText(Messages.RunDialog_To);
 		dtForcastEnd = createDateDropDown(g);
 		dtForcastEnd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		if (forcastEnd != null) {
@@ -211,9 +212,9 @@ public class RunDialog extends SmartStyledTitleDialog {
 		dtForcastEnd.addListener(SWT.Modify, validate);
 
 
-		setTitle("PAWS Analysis");
-		getShell().setText("PAWS");
-		setMessage("The date range of data send to PAWS Analysis");
+		setTitle(Messages.RunDialog_Title);
+		getShell().setText(Messages.RunDialog_ShellTitle);
+		setMessage(Messages.RunDialog_Message);
 		return main;
 	}
 

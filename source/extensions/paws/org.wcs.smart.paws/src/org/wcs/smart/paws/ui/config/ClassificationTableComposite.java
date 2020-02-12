@@ -56,6 +56,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.paws.internal.Messages;
 import org.wcs.smart.paws.model.AbstractPawsClass;
 import org.wcs.smart.paws.model.PawsQueryClass;
 import org.wcs.smart.query.QueryPlugIn;
@@ -101,14 +102,14 @@ public class ClassificationTableComposite extends Composite{
 		((GridLayout)tableHeader.getLayout()).marginWidth = 0;
 		((GridLayout)tableHeader.getLayout()).marginHeight = 0;
 		
-		Label l = toolkit.createLabel(tableHeader, "Classification");
+		Label l = toolkit.createLabel(tableHeader, Messages.ClassificationTableComposite_ClassificatoinLabel);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
-		l = toolkit.createLabel(tableHeader, "Data Source");
+		l = toolkit.createLabel(tableHeader, Messages.ClassificationTableComposite_DataSourceOp);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
 
-		l = toolkit.createLabel(tableHeader, "Details");
+		l = toolkit.createLabel(tableHeader, Messages.ClassificationTableComposite_DetailsSection);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		
@@ -132,14 +133,14 @@ public class ClassificationTableComposite extends Composite{
 			});
 			MenuItem miDataModel = new MenuItem(menu, SWT.PUSH);
 			miDataModel.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DATA_MODEL_ICON));
-			miDataModel.setText("Data Model...");
+			miDataModel.setText(Messages.ClassificationTableComposite_DataModelMnuOp);
 			miDataModel.addListener(SWT.Selection, evt->{
 				addDataModelItems();
 			});
 			
 			MenuItem miQuery = new MenuItem(menu, SWT.PUSH);
 			miQuery.setImage(QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.QUERY_ICON));
-			miQuery.setText("Query...");
+			miQuery.setText(Messages.ClassificationTableComposite_QueryMnuOp);
 			miQuery.addListener(SWT.Selection, evt->{
 				addQueryItems();
 			});
@@ -300,7 +301,7 @@ public class ClassificationTableComposite extends Composite{
 		addListener(SWT.Dispose, e->newFont.dispose());
 		
 		
-		Hyperlink hl = toolkit.createHyperlink(list,"Drag and drop queries or click here to add to a query classification", SWT.NONE);
+		Hyperlink hl = toolkit.createHyperlink(list,Messages.ClassificationTableComposite_DandDmsg, SWT.NONE);
 		hl.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false, cols, 1));
 		((GridData)hl.getLayoutData()).verticalIndent = 5;
 		hl.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_DARK_GRAY));
@@ -321,13 +322,13 @@ public class ClassificationTableComposite extends Composite{
 			}
 		});
 
-		Label l = toolkit.createLabel(list,"OR");
+		Label l = toolkit.createLabel(list,Messages.ClassificationTableComposite_or);
 		l.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false, cols, 1));
 		((GridData)l.getLayoutData()).verticalIndent = 5;
 		l.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_DARK_GRAY));
 		l.setFont(newFont);
 		
-		hl = toolkit.createHyperlink(list,"Click here to add a data model classification", SWT.NONE);
+		hl = toolkit.createHyperlink(list,Messages.ClassificationTableComposite_ClickMsg, SWT.NONE);
 		hl.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false, cols, 1));
 		((GridData)hl.getLayoutData()).verticalIndent = 5;
 		hl.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_DARK_GRAY));

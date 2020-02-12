@@ -56,36 +56,35 @@ public class SimpleClassEngine {
 			@Override
 			public void execute(Connection c) throws SQLException {
 				StringBuilder sb = new StringBuilder();
-				sb.append("CREATE TABLE ");
+				sb.append("CREATE TABLE "); //$NON-NLS-1$
 				sb.append( tablename );
-				sb.append( "(obs_uuid char(16) for bit data, pawsclass varchar(8192))");
-				System.out.println(sb.toString());
+				sb.append( "(obs_uuid char(16) for bit data, pawsclass varchar(8192))"); //$NON-NLS-1$
+				
 				c.createStatement().execute(sb.toString());
 				
-				
 				sb = new StringBuilder();
-				sb.append(" INSERT INTO ");
+				sb.append(" INSERT INTO "); //$NON-NLS-1$
 				sb.append(tablename);
-				sb.append(" SELECT obs.uuid, ? ");
-				sb.append(" FROM ");
-				sb.append( mastertable + " wp ");
-				sb.append(" JOIN smart.wp_observation obs ON obs.uuid = wp.obs_uuid " );
-				sb.append(" JOIN smart.dm_category c ON obs.category_uuid = c.uuid " );
+				sb.append(" SELECT obs.uuid, ? "); //$NON-NLS-1$
+				sb.append(" FROM "); //$NON-NLS-1$
+				sb.append( mastertable + " wp "); //$NON-NLS-1$
+				sb.append(" JOIN smart.wp_observation obs ON obs.uuid = wp.obs_uuid " ); //$NON-NLS-1$
+				sb.append(" JOIN smart.dm_category c ON obs.category_uuid = c.uuid " ); //$NON-NLS-1$
 				
 				if (pc.getAttributeListItemKey() != null || pc.getAttributeTreeNodeHkey() != null) {
-					sb.append(" JOIN smart.wp_observation_attributes oba ON obs.uuid = oba.observation_uuid " );
-					sb.append(" JOIN smart.dm_attribute a on oba.attribute_uuid = a.uuid and a.keyid = ? ");
+					sb.append(" JOIN smart.wp_observation_attributes oba ON obs.uuid = oba.observation_uuid " ); //$NON-NLS-1$
+					sb.append(" JOIN smart.dm_attribute a on oba.attribute_uuid = a.uuid and a.keyid = ? "); //$NON-NLS-1$
 					if (pc.getAttributeListItemKey() != null){
-						sb.append(" JOIN smart.dm_attribute_list al on al.uuid = oba.list_element_uuid and al.keyid = ? ");
+						sb.append(" JOIN smart.dm_attribute_list al on al.uuid = oba.list_element_uuid and al.keyid = ? "); //$NON-NLS-1$
 					}
 					if (pc.getAttributeTreeNodeHkey() != null){
-						sb.append(" JOIN smart.dm_attribute_tree att on att.uuid = oba.tree_node_uuid and ( att.hkey >= ? and att.hkey < ? )" );
+						sb.append(" JOIN smart.dm_attribute_tree att on att.uuid = oba.tree_node_uuid and ( att.hkey >= ? and att.hkey < ? )" ); //$NON-NLS-1$
 					}
 				}
 				
 				
-				sb.append(" WHERE ");
-				sb.append(" (c.hkey >= ?  and c.hkey < ? ) ");
+				sb.append(" WHERE "); //$NON-NLS-1$
+				sb.append(" (c.hkey >= ?  and c.hkey < ? ) "); //$NON-NLS-1$
 		
 				PreparedStatement ps = c.prepareStatement(sb.toString());
 				int index = 1;
@@ -96,11 +95,11 @@ public class SimpleClassEngine {
 				}else if (pc.getAttributeTreeNodeHkey() != null){
 					ps.setString(index++,  pc.getAttributeKey());
 					ps.setString(index++, pc.getAttributeTreeNodeHkey());
-					ps.setString(index++, pc.getAttributeTreeNodeHkey().substring(0, pc.getAttributeTreeNodeHkey().length() - 1) + "/");
+					ps.setString(index++, pc.getAttributeTreeNodeHkey().substring(0, pc.getAttributeTreeNodeHkey().length() - 1) + "/"); //$NON-NLS-1$
 				}
 
 				ps.setString(index++, pc.getCategoryHkey());
-				ps.setString(index++, pc.getCategoryHkey().substring(0, pc.getCategoryHkey().length() - 1) + "/");
+				ps.setString(index++, pc.getCategoryHkey().substring(0, pc.getCategoryHkey().length() - 1) + "/"); //$NON-NLS-1$
 				ps.execute();
 			}
 		});

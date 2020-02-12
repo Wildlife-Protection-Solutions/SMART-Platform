@@ -178,7 +178,7 @@ public class PawsClassification extends UuidItem{
 		
 		StringBuilder sb = new StringBuilder();
 		sb.append(listortree.getName());
-		sb.append( " (" + a.getName() + ") ");
+		sb.append( " (" + a.getName() + ") "); //$NON-NLS-1$ //$NON-NLS-2$
 		sb.append(c.getFullCategoryName());
 		return sb.toString();
 	}	

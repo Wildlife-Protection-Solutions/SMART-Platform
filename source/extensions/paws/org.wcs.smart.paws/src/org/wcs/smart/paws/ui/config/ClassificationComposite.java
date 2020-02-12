@@ -45,6 +45,7 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.paws.internal.Messages;
 import org.wcs.smart.paws.model.AbstractPawsClass;
 import org.wcs.smart.paws.model.PawsConfiguration;
 import org.wcs.smart.paws.model.PawsQueryClass;
@@ -107,7 +108,7 @@ public class ClassificationComposite extends Composite{
 								if (temp instanceof ObservationQuery && temp.getIsShared()){
 									q.add(temp);
 								}else{
-									MessageDialog.openError(getShell(), "Error", MessageFormat.format("The query ''{0}'' is not supported.  Only shared queries that return a list of observations are supported.", temp.getName()));
+									MessageDialog.openError(getShell(), Messages.ClassificationComposite_ErrorTitle, MessageFormat.format(Messages.ClassificationComposite_QueryNotSupported, temp.getName()));
 								}
 							}	
 						}
@@ -134,8 +135,8 @@ public class ClassificationComposite extends Composite{
 		
 		//need to delete missing items
 		List<AbstractPawsClass> currentItems = new ArrayList<>();
-		currentItems.addAll(QueryFactory.buildQuery(session, PawsSimpleClass.class, new Object[] {"configuration", config}).list());
-		currentItems.addAll(QueryFactory.buildQuery(session, PawsQueryClass.class, new Object[] {"configuration", config}).list());
+		currentItems.addAll(QueryFactory.buildQuery(session, PawsSimpleClass.class, new Object[] {"configuration", config}).list()); //$NON-NLS-1$
+		currentItems.addAll(QueryFactory.buildQuery(session, PawsQueryClass.class, new Object[] {"configuration", config}).list()); //$NON-NLS-1$
 		
 		
 		for (AbstractPawsClass pc : currentItems) {
@@ -146,20 +147,20 @@ public class ClassificationComposite extends Composite{
 	public void initialize(PawsConfiguration config, Session session) {
 		List<ClassificationData> currentItems = new ArrayList<>();
 		
-		for (PawsSimpleClass pc : QueryFactory.buildQuery(session, PawsSimpleClass.class, new Object[] {"configuration", config}).list()){
+		for (PawsSimpleClass pc : QueryFactory.buildQuery(session, PawsSimpleClass.class, new Object[] {"configuration", config}).list()){ //$NON-NLS-1$
 			pc.getClassification();
 			
-			String lbl = "";
+			String lbl = ""; //$NON-NLS-1$
 			Category c = QueryDataModelManager.getInstance().getCategory(session, pc.getCategoryHkey());
 			if (c == null){
-				lbl = MessageFormat.format("ERROR: Category {0} not found.", pc.getCategoryHkey());
+				lbl = MessageFormat.format(Messages.ClassificationComposite_CategoryNotFound, pc.getCategoryHkey());
 			}else{
 			
 				if (pc.getAttributeKey() != null){
 					if (pc.getAttributeListItemKey() != null){
 						AttributeListItem li = QueryDataModelManager.getInstance().getAttributeListItem(session, pc.getAttributeKey(), pc.getAttributeListItemKey());
 						if (li == null){
-							lbl = MessageFormat.format("ERROR: Attribute list item {0} not found.", pc.getAttributeListItemKey());
+							lbl = MessageFormat.format(Messages.ClassificationComposite_ListItemNotFound, pc.getAttributeListItemKey());
 						}else{
 							lbl = ClassificationData.createLabel(c,  li.getAttribute(), li);
 						}
@@ -168,7 +169,7 @@ public class ClassificationComposite extends Composite{
 					if (pc.getAttributeTreeNodeHkey() != null){
 						AttributeTreeNode node = QueryDataModelManager.getInstance().getAttributeTreeNode(session, pc.getAttributeKey(), pc.getAttributeTreeNodeHkey());
 						if (node == null){
-							lbl = MessageFormat.format("ERROR: Attribute tree node {0} not found.", pc.getAttributeTreeNodeHkey());
+							lbl = MessageFormat.format(Messages.ClassificationComposite_TreeNodeNotFound, pc.getAttributeTreeNodeHkey());
 						}else{
 							lbl = ClassificationData.createLabel(c,  node.getAttribute(), node);
 						}
@@ -181,14 +182,14 @@ public class ClassificationComposite extends Composite{
 			currentItems.add(new ClassificationData(pc, lbl));
 		}
 		
-		for (PawsQueryClass pc : QueryFactory.buildQuery(session, PawsQueryClass.class, new Object[] {"configuration", config}).list()){
+		for (PawsQueryClass pc : QueryFactory.buildQuery(session, PawsQueryClass.class, new Object[] {"configuration", config}).list()){ //$NON-NLS-1$
 			Query temp = QueryHibernateManager.getInstance().findQuery(session, ((PawsQueryClass) pc).getQueryUuid(), QueryTypeManager.INSTANCE.findQueryType( ((PawsQueryClass) pc).getQueryType()));
-			String lbl = "";
+			String lbl = ""; //$NON-NLS-1$
 			if (temp != null){
 				((PawsQueryClass)pc).setCachedQuery(temp);
 				lbl = temp.getName();
 			}else{
-				lbl = "QUERY NOT FOUND";
+				lbl = Messages.ClassificationComposite_QueryNotFound;
 			}
 			
 			pc.getClassification();

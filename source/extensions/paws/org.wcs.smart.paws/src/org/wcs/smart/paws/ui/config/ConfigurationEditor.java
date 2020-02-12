@@ -36,12 +36,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.TimeZone;
 import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
@@ -78,18 +76,12 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.EditorPart;
-import org.geotools.data.FeatureStore;
-import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
 import org.hibernate.EmptyInterceptor;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.resource.transaction.spi.TransactionStatus;
-import org.locationtech.udig.catalog.CatalogPlugin;
-import org.locationtech.udig.catalog.IGeoResource;
-import org.locationtech.udig.catalog.IService;
 import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.osgi.service.event.EventHandler;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Area;
@@ -98,21 +90,19 @@ import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.paws.PawsEvent;
+import org.wcs.smart.paws.PawsFileManager;
 import org.wcs.smart.paws.PawsManager;
 import org.wcs.smart.paws.PawsPlugIn;
-import org.wcs.smart.paws.engine.PawsDataEngine;
+import org.wcs.smart.paws.internal.Messages;
 import org.wcs.smart.paws.model.PawsConfiguration;
 import org.wcs.smart.paws.model.PawsParameter;
 import org.wcs.smart.paws.model.PawsParameter.FixedParameter;
-import org.wcs.smart.paws.model.PawsRun;
 import org.wcs.smart.paws.ui.ErrorText;
 import org.wcs.smart.paws.ui.HeaderComposite;
 import org.wcs.smart.paws.ui.HidePartsPartListener;
 import org.wcs.smart.paws.ui.NewPawsRunHandler;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.SharedUtils;
-import org.wcs.smart.util.UuidUtils;
 
 
 /**
@@ -125,8 +115,7 @@ public class ConfigurationEditor extends EditorPart {
 
 	public static final String ID = "org.wcs.smart.paws.configuration.editor"; //$NON-NLS-1$
 	
-	private static final String RE_DATA_KEY = "RE";
-	private static final String CUSTOM_FILE = "Custom File...";
+	private static final String CUSTOM_FILE = Messages.ConfigurationEditor_CustomFile;
 
 	private IEclipseContext parentContext;
 	private List<EventHandler> handlers = null;
@@ -162,11 +151,11 @@ public class ConfigurationEditor extends EditorPart {
 		String extpart = SharedUtils.getFilenameExtension(fname);
 		
 		//ensure name is unique
-		Path target = PawsManager.INSTANCE.getDirectory(pw).resolve(  fname );
+		Path target = PawsFileManager.INSTANCE.getDirectory(pw).resolve(  fname );
 		int cnt = 1;
 		while(Files.exists(target)) {
-			fname = namepart + "_" + cnt + "." + extpart;
-			target = PawsManager.INSTANCE.getDirectory(pw).resolve(  fname );
+			fname = namepart + "_" + cnt + "." + extpart; //$NON-NLS-1$ //$NON-NLS-2$
+			target = PawsFileManager.INSTANCE.getDirectory(pw).resolve(  fname );
 			cnt++;
 		}
 		return target;
@@ -175,7 +164,7 @@ public class ConfigurationEditor extends EditorPart {
 	private void save(PawsConfiguration pw){
 		String valid = validate();
 		if (valid != null) {
-			MessageDialog.openError(getSite().getShell(), "Error", "Unable to save changes until all error are resovled." + "\n\n" + valid);
+			MessageDialog.openError(getSite().getShell(), Messages.ConfigurationEditor_ErrorTitls, Messages.ConfigurationEditor_SaveError + "\n\n" + valid); //$NON-NLS-1$
 			return;
 		}
 
@@ -208,7 +197,7 @@ public class ConfigurationEditor extends EditorPart {
 				
 				s.saveOrUpdate(pw);
 	
-				fileNames.add(PawsManager.INSTANCE.getDirectory(pw).toString());
+				fileNames.add(PawsFileManager.INSTANCE.getDirectory(pw).toString());
 				
 				//update boundary
 				PawsParameter pp = getOrCreateParameter(pw, PawsParameter.FixedParameter.LYR_BOUNDARY);
@@ -306,7 +295,7 @@ public class ConfigurationEditor extends EditorPart {
 				}catch (Exception e2) {
 					PawsPlugIn.log(e2.getMessage(), e2);
 				}
-				PawsPlugIn.displayLog("Unable to save changes to configuration." + "\n\n" + ex.getMessage(), ex);
+				PawsPlugIn.displayLog(Messages.ConfigurationEditor_SaveError2 + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 				return;
 			}
 		}
@@ -367,9 +356,9 @@ public class ConfigurationEditor extends EditorPart {
 	public void doSaveAs() {
 		
 		String currentName = compHeader.getText();
-		InputDialog newNameDialog = new InputDialog(getSite().getShell(), "Save As", "Enter the new Configuration name", currentName, 
+		InputDialog newNameDialog = new InputDialog(getSite().getShell(), Messages.ConfigurationEditor_SaveAsTitle, Messages.ConfigurationEditor_SaveAsMsg, currentName, 
 				e->{
-					if (e.isBlank()) return "Name must be supplied";
+					if (e.isBlank()) return Messages.ConfigurationEditor_NameRequired;
 					return null;
 				}); 
 		if (newNameDialog.open() != Window.OK) return;
@@ -454,31 +443,31 @@ public class ConfigurationEditor extends EditorPart {
 		main.getBody().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		compHeader = new HeaderComposite(main.getBody(), toolkit, main.getFont(), main.getForeground());
-		compHeader.setText("PAWS Configuration Name");
+		compHeader.setText(Messages.ConfigurationEditor_ConfigName);
 		compHeader.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		compHeader.addListener(SWT.Selection, e->setDirty(true));
 		
 		createSettingsComp(main.getBody());
 		
-		SmartUiUtils.createHeaderLabel(main.getBody(), "Classifications");
+		SmartUiUtils.createHeaderLabel(main.getBody(), Messages.ConfigurationEditor_ClassificationSection);
 	
 		classComposite = new ClassificationComposite(main.getBody(), this);
 		classComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		
 		Button btnRun = new Button(main.getBody(), SWT.PUSH);
-		btnRun.setText("Run Analysis Using These Settings");
+		btnRun.setText(Messages.ConfigurationEditor_RunBtn);
 		btnRun.setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnRun.setImage(QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.RUN_ICON));
 		btnRun.addListener(SWT.Selection,e->{
 			
 			if (isDirty) {
-				if (!MessageDialog.openQuestion(getSite().getShell(), "Save", "You must save your changes before you can run analysis.  Do you want to save your changes now?")) return;
+				if (!MessageDialog.openQuestion(getSite().getShell(), Messages.ConfigurationEditor_SaveTitle, Messages.ConfigurationEditor_SaveMessage)) return;
 				if (!getSite().getPage().saveEditor(this, false)) return;
 				if (isDirty) return;
 			}
 			if (getInputInternal().getUuid() == null) {
-				MessageDialog.openError(getSite().getShell(), "Error", "Configuration must be saved before you can run analysis");
+				MessageDialog.openError(getSite().getShell(), Messages.ConfigurationEditor_ErrorTitle, Messages.ConfigurationEditor_SaveRequired);
 				return;
 			}
 			PawsConfiguration config = null; 
@@ -491,7 +480,7 @@ public class ConfigurationEditor extends EditorPart {
 				String id = PawsManager.INSTANCE. generateUniqueName(config.getName(), config.getConservationArea());
 				ContextInjectionFactory.make(NewPawsRunHandler.class, parentContext).createAndRun(config, null, id);
 			} catch (Exception ex) {
-				PawsPlugIn.displayLog("Unable to create new analysis from these settings." + "\n\n" + ex.getMessage(), ex);
+				PawsPlugIn.displayLog(Messages.ConfigurationEditor_RunError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 			}
 			
 		});
@@ -512,17 +501,12 @@ public class ConfigurationEditor extends EditorPart {
 		
 		Object x = cmbBound.getStructuredSelection().getFirstElement();
 		if (!(x instanceof Area.AreaType || x instanceof Path || x instanceof PawsParameter)) {
-			return "Conservation Area Boundary layer is required.";
+			return Messages.ConfigurationEditor_BoundaryRequired;
 		}
-//		
-//		x = cmbCrs.getStructuredSelection().getFirstElement();
-//		if (!(x instanceof Projection)) {
-//			return "Projection is required";
-//		}
-
 		return null;
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void createSettingsComp(Composite parent) {
 		Composite core = toolkit.createComposite(parent);
 		core.setLayout(new GridLayout(2, true));
@@ -543,17 +527,17 @@ public class ConfigurationEditor extends EditorPart {
 		((GridLayout)bmlayers.getLayout()).marginHeight = 0;
 		
 		
-		SmartUiUtils.createHeaderLabel(bmlayers, "Map Layers");
+		SmartUiUtils.createHeaderLabel(bmlayers, Messages.ConfigurationEditor_MapLayers);
 		
 		Composite inner = toolkit.createComposite(bmlayers);
 		inner.setLayout(new GridLayout(2, false));
 		inner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Label l = toolkit.createLabel(inner, PawsManager.INSTANCE.getName(FixedParameter.LYR_BOUNDARY) + ":");
+		Label l = toolkit.createLabel(inner, PawsManager.INSTANCE.getName(FixedParameter.LYR_BOUNDARY) + ":"); //$NON-NLS-1$
 		cmbBound = createBmCombo(inner);
 		cmbBound.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		l = toolkit.createLabel(inner, "Other Map Layers:");
+		l = toolkit.createLabel(inner, Messages.ConfigurationEditor_OtherLayers);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		
 		Composite others = new Composite(inner, SWT.NONE);
@@ -596,8 +580,8 @@ public class ConfigurationEditor extends EditorPart {
 			
 			Set<Area.AreaType> atypes = new HashSet<>();
 			try(Session session = HibernateManager.openSession()){
-				atypes.addAll(session.createQuery("SELECT DISTINCT type FROM Area WHERE conservationArea = :ca", Area.AreaType.class)
-						.setParameter("ca", SmartDB.getCurrentConservationArea())
+				atypes.addAll(session.createQuery("SELECT DISTINCT type FROM Area WHERE conservationArea = :ca", Area.AreaType.class) //$NON-NLS-1$
+						.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
 						.list());
 			}
 			
@@ -612,12 +596,12 @@ public class ConfigurationEditor extends EditorPart {
 				});
 			}
 			MenuItem mi = new MenuItem(mnuTemp, SWT.PUSH);
-			mi.setText("Shapefiles...");
+			mi.setText(Messages.ConfigurationEditor_ShapefileOp);
 			mi.addListener(SWT.Selection, evt->{
 				FileDialog fd = new FileDialog(tb.getShell(), SWT.OPEN | SWT.MULTI);
-				fd.setText("Select Shapefile");
-				fd.setFilterExtensions(new String[] {"*.shp", "*.*"});
-				fd.setFilterNames(new String[] {"Shapefile (*.shp)", "All Files (*.*)"});
+				fd.setText(Messages.ConfigurationEditor_SelectMsg);
+				fd.setFilterExtensions(new String[] {"*.shp", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
+				fd.setFilterNames(new String[] {Messages.ConfigurationEditor_Shapefiles, Messages.ConfigurationEditor_allFiles});
 				
 				String fname = fd.open();
 				if (fname == null) return;
@@ -636,14 +620,14 @@ public class ConfigurationEditor extends EditorPart {
 		tiDelete.addListener(SWT.Selection, e->{
 			for (Iterator<Object> iterator = lstOther.getStructuredSelection().iterator(); iterator.hasNext();) {
 				Object item = (Object) iterator.next();
-				((Collection)lstOther.getInput()).remove(item);
+				((Collection<?>)lstOther.getInput()).remove(item);
 				setDirty(true);
 				lstOther.refresh();
 			}
 		});
 		lstOther.addSelectionChangedListener(e->tiDelete.setEnabled(!lstOther.getStructuredSelection().isEmpty()));
 		
-		SmartUiUtils.createHeaderLabel(modelspec, "Model Configurations");
+		SmartUiUtils.createHeaderLabel(modelspec, Messages.ConfigurationEditor_ConfigurationsSection);
 		
 		inner = toolkit.createComposite(modelspec);
 		inner.setLayout(new GridLayout(2, false));
@@ -796,26 +780,26 @@ public class ConfigurationEditor extends EditorPart {
 //			}
 //		});
 		
-		l = toolkit.createLabel(inner, PawsManager.INSTANCE.getName(FixedParameter.GRID_SIZE) + " (meter):");
-		l.setToolTipText("units are meters; all processing is done in an appropriate utm zone");
+		l = toolkit.createLabel(inner, PawsManager.INSTANCE.getName(FixedParameter.GRID_SIZE) + Messages.ConfigurationEditor_MeterLbl);
+		l.setToolTipText(Messages.ConfigurationEditor_UnitsTooltip);
 		
 		txtGridSize = new ErrorText(inner, txt-> {
 			try {
 				Double.parseDouble(txtGridSize.getText());
 				return null;
 			}catch (Exception ex) {
-				return "Grid size must be valid number.";
+				return Messages.ConfigurationEditor_InvalidGridSize;
 			}
 		});
-		txtGridSize.setText("100");
+		txtGridSize.setText("100"); //$NON-NLS-1$
 		txtGridSize.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false ));
 		txtGridSize.addListener(SWT.Modify, e->{
 			setDirty(true);	
 		});
 		
 		
-		l = toolkit.createLabel(inner, PawsManager.INSTANCE.getName(FixedParameter.TRAINING_RES) + ":");
-		l.setToolTipText("monthly aggregation value - groups months by this value for training and prediction");
+		l = toolkit.createLabel(inner, PawsManager.INSTANCE.getName(FixedParameter.TRAINING_RES) + ":"); //$NON-NLS-1$
+		l.setToolTipText(Messages.ConfigurationEditor_groupByTooltip);
 		
 		cmbTrainingRes = new ComboViewer(inner, SWT.READ_ONLY | SWT.DROP_DOWN);
 		cmbTrainingRes.setContentProvider(ArrayContentProvider.getInstance());
@@ -831,8 +815,8 @@ public class ConfigurationEditor extends EditorPart {
 		cmbTrainingRes.setSelection(new StructuredSelection(2));
 		cmbTrainingRes.addPostSelectionChangedListener(e->setDirty(true));
 		
-		l = toolkit.createLabel(inner, PawsManager.INSTANCE.getName(FixedParameter.CLASSIFIER_MODEL) + ":");
-		l.setToolTipText("model to use for the classifier");
+		l = toolkit.createLabel(inner, PawsManager.INSTANCE.getName(FixedParameter.CLASSIFIER_MODEL) + ":"); //$NON-NLS-1$
+		l.setToolTipText(Messages.ConfigurationEditor_classifiertooltip);
 		
 		cmbClassifier = new ComboViewer(inner, SWT.READ_ONLY | SWT.DROP_DOWN);
 		cmbClassifier.setContentProvider(ArrayContentProvider.getInstance());
@@ -844,9 +828,9 @@ public class ConfigurationEditor extends EditorPart {
 				if (element instanceof PawsParameter.ClassifierModel) { 
 					PawsParameter.ClassifierModel tw = (PawsParameter.ClassifierModel)element;
 					switch(tw) {
-					case DECISION_TREE: return "Decision Tree (recommended)" ;
-					case RANDOM_FOREST: return "Random Forest";
-					case GAUSSIAN_PROCESS: return "Gaussian Process (slow)";
+					case DECISION_TREE: return Messages.ConfigurationEditor_DecisionTree ;
+					case RANDOM_FOREST: return Messages.ConfigurationEditor_RandomForest;
+					case GAUSSIAN_PROCESS: return Messages.ConfigurationEditor_Gaussian;
 					}
 				};
 				return super.getText(element);
@@ -865,6 +849,7 @@ public class ConfigurationEditor extends EditorPart {
 		parentContext.get(IEventBroker.class).post(isNew ? PawsEvent.PAWS_CONFIG_NEW : PawsEvent.PAWS_CONFIG_MODIFY, data);
 	}
 	
+	@SuppressWarnings("unchecked")
 	private ComboViewer createBmCombo(Composite parent) {
 		Combo cBnd = new Combo(parent, SWT.FLAT | SWT.READ_ONLY | SWT.BORDER);
 		cBnd.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
@@ -888,9 +873,9 @@ public class ConfigurationEditor extends EditorPart {
 			Object selection = cmbLayer.getStructuredSelection().getFirstElement();
 			if (selection == CUSTOM_FILE) {
 				FileDialog fd = new FileDialog(parent.getShell(), SWT.OPEN);
-				fd.setText("Select Layer Shapefile");
-				fd.setFilterExtensions(new String[] {"*.shp", "*."});
-				fd.setFilterNames(new String[] {"Shapefile (*.shp)", "All Files (*.*)"});
+				fd.setText(Messages.ConfigurationEditor_SelectShapefile);
+				fd.setFilterExtensions(new String[] {"*.shp", "*."}); //$NON-NLS-1$ //$NON-NLS-2$
+				fd.setFilterNames(new String[] {Messages.ConfigurationEditor_Shapefiles, Messages.ConfigurationEditor_allFiles});
 				String file = fd.open();
 				if (file == null) return;
 				Path p = Paths.get(file);
@@ -916,85 +901,21 @@ public class ConfigurationEditor extends EditorPart {
 		layersJob.schedule();
 	}
 	
-	
-	private ReferencedEnvelope getBounds(Object source){
-		
-		if (source instanceof PawsParameter){
-			String value = ((PawsParameter)source).getValue();
-			if (value.startsWith(PawsParameter.AREA_PREFIX)) {
-				source = Area.AreaType.valueOf( value.substring(PawsParameter.AREA_PREFIX.length()) );
-			}else if (value.startsWith(PawsParameter.AREA_PREFIX)) {
-				PawsConfiguration temp = new PawsConfiguration();
-				temp.setUuid(getInputInternal().getUuid());
-				temp.setConservationArea(SmartDB.getCurrentConservationArea());
-				source = PawsManager.INSTANCE.getDirectory(temp).resolve( value.substring(PawsParameter.FILE_PREFIX.length()) );
-			}
-		}
-		
-		if (source instanceof Area.AreaType){
-		
-			//load bounds from database
-			ReferencedEnvelope re = null;
-			try(Session session = HibernateManager.openSession()){
-				List<Area> areas = HibernateManager.loadAreas(((Area.AreaType)source), session);
-				
-				for (Area a : areas){
-					if (re == null){
-						re = new ReferencedEnvelope(a.getGeometry().getEnvelopeInternal(), SmartDB.DATABASE_CRS);
-					}else{
-						re.expandToInclude(a.getGeometry().getEnvelopeInternal());
-					}
-				}
-			}
-			return re;
-		}
-		
-		
-		if (source  instanceof Path){
-			//assume some sort of file store
-			//read bounds using udig
-			try {
-				List<IService> services = CatalogPlugin.getDefault().getServiceFactory().createService(((Path) source).toUri().toURL());
-				if (services.isEmpty()) return null;
-				for (IService s : services){
-					for (IGeoResource r : s.resources(new NullProgressMonitor())){
-						if (r.canResolve(FeatureStore.class)){
-							ReferencedEnvelope env = r.resolve(FeatureStore.class, new NullProgressMonitor()).getBounds();
-							
-							r.dispose(new NullProgressMonitor());
-							s.dispose(new NullProgressMonitor());
-							
-							return env;
-							
-						}
-					}
-				}
-			} catch (Exception e) {
-				PawsPlugIn.log(e.getMessage(), e);
-			}
-		}
-		return null;
-	}
-	
-	private Job layersJob = new Job("loading layers") {
+	private Job layersJob = new Job(Messages.ConfigurationEditor_loadingjobname) {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			List<Object> options = new ArrayList<>();
-			Projection currentPrj = null;
 			List<Projection> allPrjs = new ArrayList<>();
 			try(Session session = HibernateManager.openSession()){			
-				List<Area.AreaType> types = session.createQuery("SELECT DISTINCT type FROM Area WHERE conservationArea = :ca", Area.AreaType.class)
-					.setParameter("ca", SmartDB.getCurrentConservationArea())
+				List<Area.AreaType> types = session.createQuery("SELECT DISTINCT type FROM Area WHERE conservationArea = :ca", Area.AreaType.class) //$NON-NLS-1$
+					.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
 					.list();
-				options.add("");
+				options.add(""); //$NON-NLS-1$
 				options.addAll(types);
 				options.add(CUSTOM_FILE);
-				
-				currentPrj = HibernateManager.getCurrentViewProjection();
-				
-				allPrjs.addAll(session.createQuery("FROM Projection WHERE conservationArea = :ca", Projection.class)
-					.setParameter("ca",  SmartDB.getCurrentConservationArea())
+				allPrjs.addAll(session.createQuery("FROM Projection WHERE conservationArea = :ca", Projection.class) //$NON-NLS-1$
+					.setParameter("ca",  SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
 					.list());
 				allPrjs.forEach(prj->{
 					try {
@@ -1005,13 +926,9 @@ public class ConfigurationEditor extends EditorPart {
 				});
 			}
 			
-			final Projection fcurrentPrj = currentPrj;
-			
 			Display.getDefault().syncExec(()->{
 				cmbBound.setInput(new ArrayList<>(options));
 				if (options.contains(Area.AreaType.CA)) cmbBound.setSelection(new StructuredSelection(Area.AreaType.CA));
-//				cmbCrs.setInput(allPrjs);
-//				cmbCrs.setSelection(new StructuredSelection(fcurrentPrj));
 			});
 			
 			initFields.schedule();
@@ -1021,8 +938,9 @@ public class ConfigurationEditor extends EditorPart {
 		
 	};
 	
-	private Job initFields = new Job("initializing configuration settings") {
+	private Job initFields = new Job(Messages.ConfigurationEditor_initJobname) {
 
+		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			ConfigEditorInput in = (ConfigEditorInput) getEditorInput();
@@ -1034,7 +952,7 @@ public class ConfigurationEditor extends EditorPart {
 			try(Session s = HibernateManager.openSession()){
 				PawsConfiguration pw = s.get(PawsConfiguration.class, in.getUuid());
 				if (pw == null) {
-					throw new Exception("Paws Configuration not found");					
+					throw new Exception(Messages.ConfigurationEditor_ConfigNotFound);					
 				}
 				
 				Display.getDefault().syncExec(()->{
@@ -1277,7 +1195,7 @@ public class ConfigurationEditor extends EditorPart {
 					try {
 						Files.createDirectories(root);
 					} catch (IOException e) {
-						PawsPlugIn.displayLog("Unable to create directory for configuration files. You should resolve the error and re-create the configuration." + e.getMessage(), e);
+						PawsPlugIn.displayLog(Messages.ConfigurationEditor_DirCreateError + e.getMessage(), e);
 					}
 				}
 
@@ -1299,18 +1217,18 @@ public class ConfigurationEditor extends EditorPart {
 								String n = SharedUtils.getFilenameWithoutExtension(fName);
 								String ext = SharedUtils.getFilenameExtension(fName);
 								if (n.equalsIgnoreCase(sourceName)) {
-									Path copyto = target.getParent().resolve(targetName + "." + ext);
+									Path copyto = target.getParent().resolve(targetName + "." + ext); //$NON-NLS-1$
 									try {
 										Files.copy(other, copyto, StandardCopyOption.REPLACE_EXISTING);
 //										Files.setPosixFilePermissions(copyto, Collections.singleton(PosixFilePermission.OWNER_WRITE));
 									} catch (Throwable e) {
-										PawsPlugIn.displayLog(MessageFormat.format("Error copying shapefile supporting files to SMART Data store {0} to {1}",  other.toString(), copyto.toString()), e);
+										PawsPlugIn.displayLog(MessageFormat.format(Messages.ConfigurationEditor_CopyError,  other.toString(), copyto.toString()), e);
 									}
 								}
 							});
 						}
 					} catch (IOException e) {
-						PawsPlugIn.displayLog("Error copying layer map file to SMART Data store." + "\n\n" + e.getMessage(), e);
+						PawsPlugIn.displayLog(Messages.ConfigurationEditor_CopyError2 + "\n\n" + e.getMessage(), e); //$NON-NLS-1$
 					}
 				}
 

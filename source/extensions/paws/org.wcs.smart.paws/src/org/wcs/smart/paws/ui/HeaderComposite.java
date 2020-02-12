@@ -43,6 +43,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.wcs.smart.paws.internal.Messages;
 
 
 /**
@@ -80,7 +81,7 @@ public class HeaderComposite extends Composite {
 	public HeaderComposite(Composite parent, FormToolkit toolkit, Font headerFont, Color headerColor) {
 		super(parent, SWT.NONE);
 		toolkit.adapt(this);
-		WidgetElement.setCSSClass(this, "SMARTFormHeader");
+		WidgetElement.setCSSClass(this, "SMARTFormHeader"); //$NON-NLS-1$
 		createComposite(headerFont, headerColor, toolkit);
 	}
 
@@ -185,8 +186,8 @@ public class HeaderComposite extends Composite {
 	
 	private boolean validateName(String name){
 		if (name.length() > MAX_NAME_LENGTH){
-			MessageDialog.openError(getShell(), "Invalid Name",
-					MessageFormat.format("Name too long.  Name must be fewer then {0} characters.", MAX_NAME_LENGTH));
+			MessageDialog.openError(getShell(), Messages.HeaderComposite_InvalidNameTitle,
+					MessageFormat.format(Messages.HeaderComposite_InvalidNameMsg, MAX_NAME_LENGTH));
 			return false;
 		}
 		return true;

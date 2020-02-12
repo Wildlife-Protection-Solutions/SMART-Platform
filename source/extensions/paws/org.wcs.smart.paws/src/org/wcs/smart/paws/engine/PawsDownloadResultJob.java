@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.paws.engine;
 
-import java.net.URL;
 import java.nio.channels.AsynchronousFileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,22 +32,18 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
-import org.geotools.referencing.CRS;
 import org.hibernate.Session;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.paws.PawsEvent;
-import org.wcs.smart.paws.PawsManager;
+import org.wcs.smart.paws.PawsFileManager;
 import org.wcs.smart.paws.PawsPlugIn;
+import org.wcs.smart.paws.internal.Messages;
 import org.wcs.smart.paws.model.PawsResultManager;
 import org.wcs.smart.paws.model.PawsRun;
-import org.wcs.smart.paws.model.PawsWorkspace;
 
+import com.ibm.icu.text.MessageFormat;
 import com.microsoft.azure.storage.blob.BlockBlobURL;
 import com.microsoft.azure.storage.blob.ContainerURL;
-import com.microsoft.azure.storage.blob.PipelineOptions;
-import com.microsoft.azure.storage.blob.StorageURL;
 import com.microsoft.azure.storage.blob.TransferManager;
 
 /*
@@ -71,7 +66,7 @@ public class PawsDownloadResultJob extends Job {
 	private PawsRun run;
 	
 	public PawsDownloadResultJob(PawsRun run) {
-		super("Donwload results from " + run.getId());
+		super(Messages.PawsDownloadResultJob_JobName + run.getId());
 		this.run = run;
 		setRule(runMutex);
 	}
@@ -79,7 +74,7 @@ public class PawsDownloadResultJob extends Job {
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
 		
-		monitor.beginTask("Downloading Results", 5);
+		monitor.beginTask(Messages.PawsDownloadResultJob_DownloadTaskName, 5);
 		
 		Path resultsDirectory = null;
 		String runId = null;
@@ -91,25 +86,25 @@ public class PawsDownloadResultJob extends Job {
 					return Status.OK_STATUS;
 				}
 				runId = r.getRunId();
-				resultsDirectory = PawsManager.INSTANCE.getResultsDirectory(r);
+				resultsDirectory = PawsFileManager.INSTANCE.getResultsDirectory(r);
 				if (!Files.exists(resultsDirectory)) Files.createDirectories(resultsDirectory);
 			}
 		}catch (Exception ex){
-			handleError("Error loading paws workspace.", ex);
+			handleError(Messages.PawsDownloadResultJob_ErrorLoadingWorkspace, ex);
 			return Status.OK_STATUS;
 		}
 		monitor.worked(1);
 		
 		//download results
-		monitor.subTask("downloading results");
+		monitor.subTask(Messages.PawsDownloadResultJob_downloadtaskname);
 		try{
 			ContainerURL containerURL = StorageApi.INSTANCE.getContainerURL();
 
 //			resultsDirectory = resultsFile.resolve("results.csv"); 
-			String endpoint = runId + "/risk_prediction";
+			String endpoint = runId + "/risk_prediction"; //$NON-NLS-1$
 			
 			List<String> tocopy = StorageApi.INSTANCE.getBlobs(containerURL, endpoint);
-			tocopy.add(runId + "/processed_data/" + PawsResultManager.PROJ_FILE);
+			tocopy.add(runId + "/processed_data/" + PawsResultManager.PROJ_FILE); //$NON-NLS-1$
 			
 			for (String result : tocopy) {
 				BlockBlobURL blobUrl = containerURL.createBlockBlobURL(result);
@@ -136,14 +131,11 @@ public class PawsDownloadResultJob extends Job {
 			        synchronized (lock) {
 	        			lock.wait();
 	        		}
-			        if (uperror[0] != null) throw new Exception("Unable to download results: " + uperror[0].getMessage(), uperror[0]);
+			        if (uperror[0] != null) throw new Exception(Messages.PawsDownloadResultJob_DownloadFailed + uperror[0].getMessage(), uperror[0]);
 			}
 			
 		}catch (Throwable t){
-			String msg = "Unable to download results of PAWS analysis from Azure. "
-					+ "Some data may remain on Azure blob storage folder (" 
-					+ run.getRunId() 
-					+ ").  You should remove this data manually ";
+			String msg = MessageFormat.format(Messages.PawsDownloadResultJob_DownloadFailedMsg, run.getRunId()); 
 			handleError(msg, t);
 			return Status.OK_STATUS;
 		}
@@ -168,7 +160,7 @@ public class PawsDownloadResultJob extends Job {
 		
 		
 		//build raster files from result
-		monitor.subTask("building raster files");
+		monitor.subTask(Messages.PawsDownloadResultJob_buildrasterstaskname);
 		try(Session session = HibernateManager.openSession()){
 			PawsRun r = session.get(PawsRun.class, run.getUuid());
 			if (r != null) {
@@ -181,7 +173,7 @@ public class PawsDownloadResultJob extends Job {
 		monitor.worked(1);
 		
 		//delete all files from azure
-		monitor.subTask("cleaning up storage");
+		monitor.subTask(Messages.PawsDownloadResultJob_cleanuptaskname);
 		try {
 			StorageApi.INSTANCE.deleteBlobs(run);
 		} catch (Exception ex) {
@@ -195,7 +187,7 @@ public class PawsDownloadResultJob extends Job {
 	
 	
 	private void handleError(String msg, Throwable ex){
-		PawsPlugIn.displayLog(msg + "\n\n" + ex.getMessage(), ex);
+		PawsPlugIn.displayLog(msg + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 		
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();

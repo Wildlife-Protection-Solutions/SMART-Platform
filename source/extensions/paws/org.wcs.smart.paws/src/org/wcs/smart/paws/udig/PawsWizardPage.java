@@ -30,7 +30,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +59,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.paws.PawsPlugIn;
+import org.wcs.smart.paws.internal.Messages;
 import org.wcs.smart.paws.model.PawsResultFile;
 import org.wcs.smart.paws.model.PawsResultManager;
 import org.wcs.smart.paws.model.PawsRun;
@@ -67,6 +67,11 @@ import org.wcs.smart.udig.catalog.smart.SmartServiceExtension;
 import org.wcs.smart.udig.catalog.smart.ui.DesktopSessionProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 
+/**
+ * PAWS Wizard page for showing results and allows users to add them to any map.
+ * @author Emily
+ *
+ */
 public class PawsWizardPage extends AbstractUDIGImportPage implements UDIGConnectionPage {
 
 	private CheckboxTreeViewer tblResults;
@@ -74,7 +79,7 @@ public class PawsWizardPage extends AbstractUDIGImportPage implements UDIGConnec
 	private HashMap<PawsRun, PawsService> services = new HashMap<>();
 
 	public PawsWizardPage() {
-		super("PAWS Results Layers");
+		super(Messages.PawsWizardPage_PageName);
 	}
 
 	@Override
@@ -86,14 +91,14 @@ public class PawsWizardPage extends AbstractUDIGImportPage implements UDIGConnec
 		if (SmartDB.isMultipleAnalysis()){
 			
 			Label lbl = new Label(main, SWT.NONE);
-			lbl.setText("PAWS Results are not available for cross Conservation Area analysis."); 
+			lbl.setText(Messages.PawsWizardPage_CCAAError); 
 			
 		}else{
 			tblResults = new CheckboxTreeViewer(main);
 			tblResults.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			tblResults.setLabelProvider(new LabelProvider() {
 				public String getText(Object element) {
-					if (element instanceof PawsRun) return MessageFormat.format("{0} [{1}]",((PawsRun)element).getId(),  DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).format(((PawsRun)element).getRunDate()));
+					if (element instanceof PawsRun) return MessageFormat.format("{0} [{1}]",((PawsRun)element).getId(),  DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).format(((PawsRun)element).getRunDate())); //$NON-NLS-1$
 					if (element instanceof PawsFile) return ((PawsFile)element).file.getFileName().toString();
 					if (element instanceof PawsResultFile) return ((PawsResultFile)element).getResultsFile().getFileName().toString();
 					return super.getText(element);
@@ -233,14 +238,14 @@ public class PawsWizardPage extends AbstractUDIGImportPage implements UDIGConnec
 		}
 	}
 	
-	private Job loadRuns = new Job("loading PAWS results") {
+	private Job loadRuns = new Job(Messages.PawsWizardPage_loadingJobName) {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			try(Session session = HibernateManager.openSession()){
 				List<PawsRun> runs = QueryFactory.buildQuery(session,  PawsRun.class,
-						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()},
-						new Object[] {"status", PawsRun.Status.COMPLETE}).list();
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+						new Object[] {"status", PawsRun.Status.COMPLETE}).list(); //$NON-NLS-1$
 				runs.forEach(r->r.getConservationArea().getFileDataStoreLocation());
 				runs.sort((a,b)->{
 					if (a.getRunDate().equals(b.getRunDate())) return Collator.getInstance().compare(a.getId(),  b.getId());

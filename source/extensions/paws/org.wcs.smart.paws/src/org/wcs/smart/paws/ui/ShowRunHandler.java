@@ -28,6 +28,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.paws.PawsPlugIn;
+import org.wcs.smart.paws.internal.Messages;
 import org.wcs.smart.paws.model.PawsRun;
 import org.wcs.smart.paws.ui.run.RunEditor;
 import org.wcs.smart.paws.ui.run.RunEditorInput;
@@ -52,7 +53,7 @@ public class ShowRunHandler {
 			RunEditorInput rinput = new RunEditorInput(pawsRun);
 			page.openEditor(rinput, RunEditor.ID);
 		} catch (PartInitException e) {
-			PawsPlugIn.displayLog("Error loading configuration." + "\n\n" + e.getMessage(), e);
+			PawsPlugIn.displayLog(Messages.ShowRunHandler_LoadError + "\n\n" + e.getMessage(), e); //$NON-NLS-1$
 		}
 	}
 }

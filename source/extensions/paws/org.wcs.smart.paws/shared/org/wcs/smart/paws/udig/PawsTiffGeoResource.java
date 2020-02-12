@@ -66,14 +66,14 @@ public class PawsTiffGeoResource extends AbstractRasterGeoResource {
 		super(service, parsePath(layerfile));
 		this.file = layerfile;
 		this.name= SharedUtils.getFilenameWithoutExtension( rfile.getResultsFile().getFileName().toString() )
-				+ ":" + SharedUtils.getFilenameWithoutExtension( layerfile.getFileName().toString() );
+				+ ":" + SharedUtils.getFilenameWithoutExtension( layerfile.getFileName().toString() ); //$NON-NLS-1$
 
 	}
 
 	private static String parsePath(Path file) {
 		String part = file.toString();
-		part = part.replaceAll("\\\\", "/");
-		if (part.startsWith(".")) return part.substring(1);
+		part = part.replaceAll("\\\\", "/"); //$NON-NLS-1$ //$NON-NLS-2$
+		if (part.startsWith(".")) return part.substring(1); //$NON-NLS-1$
 		return part;
 	}
 	/**
@@ -103,7 +103,6 @@ public class PawsTiffGeoResource extends AbstractRasterGeoResource {
 	public void dispose(IProgressMonitor monitor) {
 		super.dispose(monitor);
 		if (reader != null) reader.dispose();
-		System.out.println("DISPOSE");
 	}
 
 	public synchronized AbstractGridCoverage2DReader getReader() throws FileNotFoundException {
@@ -135,11 +134,11 @@ public class PawsTiffGeoResource extends AbstractRasterGeoResource {
 		StyleFactory sf = CommonFactoryFinder.getStyleFactory(GeoTools.getDefaultHints());
 		StyleBuilder sb = new StyleBuilder(sf);
 		
-		String[] labels = new String[] {"-no data-","","","","","","","","","","","",""};
+		String[] labels = new String[] {"-no data-","","","","","","","","","","","",""}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$ //$NON-NLS-10$ //$NON-NLS-11$ //$NON-NLS-12$ //$NON-NLS-13$
 		double[] values = new double[] {-9999,0,0.000001,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8, 0.9,1.0};
 		Color[] colors = new Color[] {
 				new Color(255,255,255,0),
-				new Color(255,255,255,0),
+				new Color(255,255,255,255),
 				new Color(255,247,236,255),
 				new Color(254,237,212,255),
 				new Color(253,225,186,255),
@@ -160,7 +159,7 @@ public class PawsTiffGeoResource extends AbstractRasterGeoResource {
 
 	}
 	
-	AbstractRasterGeoResourceInfo info = new AbstractRasterGeoResourceInfo(this, "PAWS") {
+	AbstractRasterGeoResourceInfo info = new AbstractRasterGeoResourceInfo(this, "PAWS") { //$NON-NLS-1$
 		@Override
 		public String getTitle() {
 			return PawsTiffGeoResource.this.name;

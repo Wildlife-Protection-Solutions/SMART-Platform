@@ -19,24 +19,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.paws.udig;
+package org.wcs.smart.paws;
 
-import org.locationtech.udig.catalog.rasterings.AbstractRasterServiceInfo;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import org.wcs.smart.paws.model.PawsConfiguration;
+import org.wcs.smart.paws.model.PawsRun;
+import org.wcs.smart.util.UuidUtils;
 
 /**
- * PAWS service information.
+ * Managing paws filestore details
+ * 
  * @author Emily
- * @since 1.0.0
+ *
  */
-public class PawsServiceInfo extends AbstractRasterServiceInfo{
+public enum PawsFileManager {
+	
+	INSTANCE;
+	
+	public static final String PAWS_DIR = "paws";  //$NON-NLS-1$
 
-	public PawsServiceInfo(PawsService service){
-		super(service, "PAWS"); //$NON-NLS-1$
-		this.title = "PAWS Results Layers"; //$NON-NLS-1$
+	public Path getDirectory(PawsConfiguration config) {
+		Path ds = Paths.get(config.getConservationArea().getFileDataStoreLocation())
+				.resolve(PAWS_DIR)
+				.resolve("config") //$NON-NLS-1$
+				.resolve(UuidUtils.uuidToString(config.getUuid()));
+		return ds;
 	}
 	
-	@Override
-	public double getMetric() {
-		return 1.0;
+	public Path getDirectory(PawsRun run) {
+		 return Paths.get(run.getConservationArea().getFileDataStoreLocation())
+			.resolve(PAWS_DIR)
+			.resolve("run") //$NON-NLS-1$
+			.resolve(UuidUtils.uuidToString(run.getUuid()));
+		
 	}
+	
+	public Path getResultsDirectory(PawsRun run) {
+		return getDirectory(run).resolve("results"); //$NON-NLS-1$
+	}
+	
 }
