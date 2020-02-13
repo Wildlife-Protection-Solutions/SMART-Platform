@@ -1,3 +1,5 @@
+alter table smart.cm_attribute_option alter COLUMN string_value set data type varchar(32672);
+
 -- DISTANCE & BEARING(DIRECTION) SUPPORT
 CREATE OR REPLACE FUNCTION smart.projectPoint(x double precision, y double precision, distance float, direction float) RETURNS GEOMETRY AS $$
 DECLARE
@@ -383,26 +385,50 @@ CREATE TRIGGER trg_patrol_attribute_value AFTER INSERT OR UPDATE OR DELETE ON sm
 ------------ PAWS ----------------
 CREATE TABLE smart.paws_configuration(uuid uuid NOT NULL, ca_uuid uuid NOT NULL, name varchar(8192) NOT NULL, PRIMARY KEY (uuid));
 CREATE TABLE smart.paws_parameter( uuid uuid NOT NULL, config_uuid uuid NOT NULL, keyid varchar(8192) NOT NULL, value varchar(8192), PRIMARY KEY (uuid));
-CREATE TABLE smart.paws_run(uuid uuid NOT NULL, ca_uuid uuid NOT NULL, config_uuid uuid, id varchar(256) NOT NULL, server_run_id varchar(256), run_date timestamp, package_file varchar(256), result_location varchar(256), status varchar(32) NOT NULL, status_message varchar(8192),  server_status_json varchar(8192), data_start_date date, data_end_date date, train_start_year smallint, train_end_year smallint, test_start_year smallint, test_end_year smallint, forecast_start_year smallint, forecast_end_year smallint, paws_task_id varchar(8192), PRIMARY KEY (uuid));
+CREATE TABLE smart.paws_query_class(uuid uuid NOT NULL, config_uuid uuid NOT NULL, query_uuid uuid NOT NULL, query_type varchar(32) NOT NULL, classification varchar(512) NOT NULL, PRIMARY KEY (uuid));
+CREATE TABLE smart.paws_run(uuid uuid NOT NULL, ca_uuid uuid NOT NULL, config_uuid uuid, id varchar(256) NOT NULL, server_run_id varchar(256), run_date timestamp, package_file varchar(256), result_location varchar(256), status varchar(32) NOT NULL, status_message varchar, server_status_json varchar, train_start_year smallint, train_end_year smallint, forecast_start_year smallint, forecast_end_year smallint, paws_task_id varchar(8192), PRIMARY KEY (uuid));
 CREATE TABLE smart.paws_service(uuid uuid NOT NULL, ca_uuid uuid NOT NULL UNIQUE, heatmap_api varchar(8192), task_api varchar(8192), api_key varchar(8192), PRIMARY KEY (uuid));
+CREATE TABLE smart.paws_simple_class(uuid uuid NOT NULL, config_uuid uuid NOT NULL, classification varchar(512) NOT NULL, date_range varchar(512), category_hkey varchar(32672) NOT NULL, attribute_key varchar(128), list_key varchar(128), tree_hkey varchar(32672), PRIMARY KEY (uuid));
 CREATE TABLE smart.paws_workspace(uuid uuid NOT NULL, ca_uuid uuid NOT NULL UNIQUE, url varchar(8192), client_id varchar(8192), storage_account_url varchar(8192), container_name varchar(8192), PRIMARY KEY (uuid));
-CREATE TABLE smart.paws_classification	(uuid uuid NOT NULL,config_uuid uuid NOT NULL,class_type varchar(16) NOT NULL,classification varchar(512) NOT NULL, query_uuid uuid, query_type varchar(32), category_hkey varchar(32672), attribute_key varchar(128), list_key varchar(128), tree_hkey varchar(32672), PRIMARY KEY (uuid));  
 
-ALTER TABLE smart.paws_classification ADD FOREIGN KEY(config_uuid) REFERENCES smart.paws_configuration (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE smart.paws_configuration ADD FOREIGN KEY(ca_uuid) REFERENCES smart.conservation_area (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE smart.paws_run ADD FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE smart.paws_service ADD FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE smart.paws_workspace ADD FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE smart.paws_parameter ADD FOREIGN KEY (config_uuid) REFERENCES smart.paws_configuration (uuid) ON UPDATE RESTRICT ON DELETE CASCADE  DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE smart.paws_run ADD FOREIGN KEY (config_uuid) REFERENCES smart.paws_configuration (uuid) ON UPDATE RESTRICT ON DELETE SET NULL DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.paws_query_class ADD FOREIGN KEY (config_uuid) REFERENCES smart.paws_configuration (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.paws_simple_class ADD FOREIGN KEY (config_uuid) REFERENCES smart.paws_configuration (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 
---TODO: change log
 
+--change log
 
-alter table smart.cm_attribute_option alter COLUMN string_value set data type varchar(32672);
+CREATE TRIGGER trg_paws_configuration AFTER INSERT OR UPDATE OR DELETE ON smart.paws_configuration FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_paws_run AFTER INSERT OR UPDATE OR DELETE ON smart.paws_run FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_paws_service AFTER INSERT OR UPDATE OR DELETE ON smart.paws_service FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_paws_worspace AFTER INSERT OR UPDATE OR DELETE ON smart.paws_workspace FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE OR REPLACE FUNCTION connect.trg_paws_config_join() RETURNS trigger AS $$
+	DECLARE
+	ROW RECORD;
+BEGIN
+	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
+ 	ROW = NEW;
+ 	ELSIF (TG_OP = 'DELETE') THEN
+ 		ROW = OLD;
+ 	END IF;
+ 
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, c.CA_UUID 
+ 		FROM smart.paws_configuration c WHERE c.uuid = ROW.config_uuid;
+ RETURN ROW;
+END$$ LANGUAGE 'plpgsql';
+CREATE TRIGGER trg_paws_simple_class AFTER INSERT OR UPDATE OR DELETE ON smart.paws_simple_class FOR EACH ROW execute procedure connect.trg_paws_config_join();
+CREATE TRIGGER trg_paws_query_class AFTER INSERT OR UPDATE OR DELETE ON smart.paws_query_class FOR EACH ROW execute procedure connect.trg_paws_config_join();
+CREATE TRIGGER trg_paws_parameter AFTER INSERT OR UPDATE OR DELETE ON smart.paws_parameter FOR EACH ROW execute procedure connect.trg_paws_config_join();
+
 
 ---- Observation Groups -----
-
 CREATE TABLE smart.wp_observation_group (uuid uuid not null, wp_uuid uuid not null, primary key (uuid));
 INSERT INTO smart.wp_observation_group (uuid, wp_uuid) SELECT uuid_generate_v4(), uuid FROM smart.waypoint WHERE uuid in (SELECT o.wp_uuid FROM smart.wp_observation o);
 ALTER TABLE smart.wp_observation ADD COLUMN wp_group_uuid uuid;
@@ -575,7 +601,6 @@ alter table smart.i_recordsource_attribute alter column keyid set not null;
 
 update connect.connect_plugin_version set version = '5.0' where plugin_id = 'org.wcs.smart.i2';
 update connect.ca_plugin_version set version = '5.0' where plugin_id = 'org.wcs.smart.i2';
-
 
 ---- change ca version so users cannot sync with this and cause problems ---- 
 update connect.ca_info SET version = uuid_generate_v4();

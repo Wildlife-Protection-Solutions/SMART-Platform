@@ -217,11 +217,12 @@ import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
 import org.wcs.smart.patrol.query.model.PatrolQuery;
 import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
 import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
-import org.wcs.smart.paws.model.PawsClassification;
 import org.wcs.smart.paws.model.PawsConfiguration;
 import org.wcs.smart.paws.model.PawsParameter;
+import org.wcs.smart.paws.model.PawsQueryClass;
 import org.wcs.smart.paws.model.PawsRun;
 import org.wcs.smart.paws.model.PawsService;
+import org.wcs.smart.paws.model.PawsSimpleClass;
 import org.wcs.smart.paws.model.PawsWorkspace;
 import org.wcs.smart.plan.model.AdministrativePlanTarget;
 import org.wcs.smart.plan.model.NumericPlanTarget;
@@ -481,10 +482,11 @@ public enum SmartTable {
 	
 	PAWS_CONFIG(PawsConfiguration.class, null),
 	PAWS_PARAM(PawsParameter.class, ".configuration.conservationArea"),
-	PAWS_QUERYCLASS(PawsClassification.class, ".configuration.conservationArea"),
-	PAWS_WORKSPACE(PawsWorkspace.class, ""),
-	PAWS_SERVICE(PawsService.class, ""),
-	PAWS_RUN(PawsRun.class, ""),
+	PAWS_QUERYCLASS(PawsQueryClass.class, ".configuration.conservationArea"),
+	PAWS_SIMPLECLASS(PawsSimpleClass.class, ".configuration.conservationArea"),
+	PAWS_WORKSPACE(PawsWorkspace.class, null),
+	PAWS_SERVICE(PawsService.class, null),
+	PAWS_RUN(PawsRun.class, null),
 	
 	;
 	
