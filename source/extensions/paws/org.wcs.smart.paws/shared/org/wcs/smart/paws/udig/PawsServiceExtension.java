@@ -50,7 +50,7 @@ public class PawsServiceExtension implements ServiceExtension {
 	/**
 	 * SMART service url host
 	 */
-    private static final String HOST = "smartdb"; //$NON-NLS-1$
+    private static final String HOST = "smartpaws"; //$NON-NLS-1$
     /**
      * SMART service url protocol
      */

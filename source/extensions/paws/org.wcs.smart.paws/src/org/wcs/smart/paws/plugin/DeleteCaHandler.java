@@ -65,10 +65,14 @@ public class DeleteCaHandler implements ICaDeleteHandler {
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
-		q = session.createQuery("DELETE FROM PawsClassification WHERE configuration IN (FROM PawsConfiguration WHERE conservationArea = :ca)"); //$NON-NLS-1$
+		q = session.createQuery("DELETE FROM PawsQueryClass WHERE configuration IN (FROM PawsConfiguration WHERE conservationArea = :ca)"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 				
+		q = session.createQuery("DELETE FROM PawsSimpleClass WHERE configuration IN (FROM PawsConfiguration WHERE conservationArea = :ca)"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.executeUpdate();
+		
 		q = session.createQuery("DELETE FROM PawsParameter WHERE configuration IN (FROM PawsConfiguration WHERE conservationArea = :ca)"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();

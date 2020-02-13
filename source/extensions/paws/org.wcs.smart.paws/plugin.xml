@@ -91,6 +91,7 @@
             locationURI="menu:org.wcs.smart.menu.query?before=org.wcs.smart.query.separator.options">
          <command
                commandId="org.wcs.smart.paws.configuration.show"
+               icon="images/icons/paws.png"
                label="%server.config.command.label"
                style="push">
             <visibleWhen

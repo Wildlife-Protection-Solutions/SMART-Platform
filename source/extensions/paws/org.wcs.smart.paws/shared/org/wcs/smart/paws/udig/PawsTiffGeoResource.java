@@ -26,6 +26,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -46,6 +47,7 @@ import org.locationtech.udig.catalog.rasterings.AbstractRasterService;
 import org.opengis.coverage.grid.GridCoverage;
 import org.opengis.geometry.Envelope;
 import org.opengis.parameter.GeneralParameterValue;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.paws.model.PawsResultFile;
 import org.wcs.smart.util.SharedUtils;
 
@@ -64,13 +66,16 @@ public class PawsTiffGeoResource extends AbstractRasterGeoResource {
 	 */
 	public PawsTiffGeoResource(AbstractRasterService service, PawsResultFile rfile, Path layerfile) {
 		super(service, parsePath(layerfile));
-		this.file = layerfile;
+		layerfile = Paths.get(SmartContext.INSTANCE.getFilestoreLocation()).relativize(layerfile);
+		this.file = Paths.get(SmartContext.INSTANCE.getFilestoreLocation()).resolve(layerfile);
 		this.name= SharedUtils.getFilenameWithoutExtension( rfile.getResultsFile().getFileName().toString() )
 				+ ":" + SharedUtils.getFilenameWithoutExtension( layerfile.getFileName().toString() ); //$NON-NLS-1$
 
 	}
 
 	private static String parsePath(Path file) {
+		file = Paths.get(SmartContext.INSTANCE.getFilestoreLocation()).relativize(file);
+		
 		String part = file.toString();
 		part = part.replaceAll("\\\\", "/"); //$NON-NLS-1$ //$NON-NLS-2$
 		if (part.startsWith(".")) return part.substring(1); //$NON-NLS-1$
