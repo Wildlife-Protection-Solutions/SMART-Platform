@@ -625,7 +625,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.command.ca.datamodel.show"
-                  icon="images/icons/etool16/data_model.png"
+                  icon="images/icons/obj16/category_obj.gif"
                   label="%datamodel.command.label"
                   mnemonic="%datamodel.command.mnemonic"
                   style="push">
@@ -872,7 +872,7 @@
                id="org.wcs.smart.status.toolbar">
             <command
                   commandId="org.wcs.smart.command.resetperspective"
-                  icon="images/icons/etool16/arrow_refresh.png"
+                  icon="images/icons/shared16/refresh.png"
                   label="%resetwindows.command.label1"
                   mode="FORCE_TEXT"
                   style="push"

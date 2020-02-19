@@ -452,7 +452,7 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	     
 	     reg.put(BROWSER_FORWARD, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/arrow_right.png")); //$NON-NLS-1$
 	     reg.put(BROWSER_BACKWARD, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/arrow_left.png")); //$NON-NLS-1$
-	     reg.put(BROWSER_GO, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/arrow_refresh.png")); //$NON-NLS-1$
+	     reg.put(BROWSER_GO, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/refresh.png")); //$NON-NLS-1$
 	     reg.put(BROWSER_HOME, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/home.png")); //$NON-NLS-1$
 	     reg.put(BROWSER_STOP, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/stop.png")); //$NON-NLS-1$
 	     
@@ -466,7 +466,7 @@ public class SmartPlugIn extends AbstractUIPlugin {
 
 	     
 	     reg.put(CLEAR_SELECTION_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/etool16/clear_selection.png")); //$NON-NLS-1$
-	     reg.put(REFRESH_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/etool16/arrow_refresh.png")); //$NON-NLS-1$
+	     reg.put(REFRESH_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/refresh.png")); //$NON-NLS-1$
 	     reg.put(UNDO_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/etool16/undo.png")); //$NON-NLS-1$
 	     
 	     reg.put(IMPORT_TRACK_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/track/import_track.png")); //$NON-NLS-1$

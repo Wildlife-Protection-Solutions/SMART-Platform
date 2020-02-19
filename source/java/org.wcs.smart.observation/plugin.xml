@@ -219,7 +219,7 @@
          </separator>
          <command
                commandId="org.wcs.smart.observation.waypointinfoview.refresh"
-               icon="platform:/plugin/org.wcs.smart/images/icons/etool16/arrow_refresh.png"
+               icon="platform:/plugin/org.wcs.smart/images/icons/shared16/refresh.png"
                label="Refresh"
                style="push"
                tooltip="refresh waypoint details">
