@@ -85,7 +85,6 @@ public class PawsResultFile {
 			try {
 				Files.createDirectories(imageDir);
 			}catch (Exception ex) {
-				//TODO:
 				ex.printStackTrace();
 			}
 		}

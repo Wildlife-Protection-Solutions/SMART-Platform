@@ -205,6 +205,8 @@ public class Messages extends NLS {
 
 	public static String PawsRunJob_PackageError;
 
+	public static String PawsRunJob_runnotfound;
+
 	public static String PawsRunJob_ServerReturnCode;
 
 	public static String PawsRunJob_StatusFailed;

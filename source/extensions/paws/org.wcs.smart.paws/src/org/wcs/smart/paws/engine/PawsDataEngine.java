@@ -179,23 +179,8 @@ public class PawsDataEngine {
 			config.put("container_name", url); //$NON-NLS-1$
 			config.put("run_id", run.getRunId()); //$NON-NLS-1$
 			
-//			//CRS - everything must be in this crs
-//			JSONObject crs = new JSONObject();
-//			crs.put("input_wkt_filename:", "input_crs.wkt");
-//			crs.put("runtime_wkt_filename:", "runtime_crs.wkt");
-////			crs.put("input_proj4:", "");
-////			crs.put("runtime_proj4:", "");
-//			
-////			crs.put("input_proj4","+proj=longlat +datum=WGS84");
-////			crs.put("runtime_proj4","+proj=utm +zone=32S +south +ellps=WGS84 +datum=WGS84 +units=m +no_defs ");
-//			
-//			config.put("coordinate_reference_systems", crs);
-//			
-//			writeCRS(target.resolve("input_crs.wkt"), SmartDB.DATABASE_CRS.toWKT());
-//			writeCRS(target.resolve("runtime_crs.wkt"), targetCrs.toWKT());
-			
 			PawsParameter pp = run.getConfiguration().findParameter(PawsParameter.FixedParameter.GRID_SIZE.name());
-			//TODO: this needs to be in meters; so assuming the projection is in meters
+			//this needs to be in meters
 			config.put("spatial_resolution", pp.getValue()); //$NON-NLS-1$
 					
 			

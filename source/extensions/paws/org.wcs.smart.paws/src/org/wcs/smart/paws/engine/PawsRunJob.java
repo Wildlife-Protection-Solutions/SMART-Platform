@@ -80,7 +80,6 @@ public class PawsRunJob extends Job{
 		}
 		
 		//upload package to azure
-		//TODO: update the required jar files when new build is released
 		//https://github.com/Azure/autorest-clientruntime-for-java/issues/569
 		ContainerURL containerURL;
 		try{
@@ -120,9 +119,7 @@ public class PawsRunJob extends Job{
 				if (pw != null){
 					pw.setStatus(PawsRun.Status.RUNNING);
 				}else{
-					//TODO: assume this has been deleted; warn user that there might 
-					//be data on azure storage folder?
-					//Maybe we should do this on delete
+					throw new Exception(Messages.PawsRunJob_runnotfound);
 				}
 				session.getTransaction().commit();
 			}catch (Exception ex2){

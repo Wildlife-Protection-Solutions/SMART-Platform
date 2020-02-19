@@ -147,7 +147,6 @@ public class RunTableResultsPage extends EditorPart {
 				
 				@Override
 				public void selectionChanged(SelectionChangedEvent event) {
-					// TODO Auto-generated method stub
 					Object item = fileViewer.getStructuredSelection().getFirstElement();
 					tblViewer.setInput(null);
 					tblViewer.setItemCount(0);

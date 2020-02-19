@@ -105,19 +105,19 @@
          point="org.eclipse.ui.commandImages">
       <image
             commandId="org.wcs.smart.connect.server.changelog.up"
-            icon="images/icons/obj16/server_upload.png">
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/export.png">
       </image>
       <image
             commandId="org.wcs.smart.connect.server.changelog.down"
-            icon="images/icons/obj16/server_download.png">
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/import.png">
       </image>
       <image
             commandId="org.wcs.smart.connect.configuration.show"
-            icon="images/icons/obj16/server_configure.png">
+            icon="images/icons/obj16/server.png">
       </image>
       <image
             commandId="org.wcs.smart.connect.server.exportca"
-            icon="images/icons/obj16/server_ca_upload.png">
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/export.png">
       </image>
       <image
             commandId="org.wcs.smart.connect.server.changelog.sync"
@@ -125,7 +125,7 @@
       </image>
       <image
             commandId="org.wcs.smart.connect.server.downloadccaa"
-            icon="images/icons/obj16/server_ca_download.png">
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/import.png">
       </image>
       <image
             commandId="org.wcs.smart.connect.server.web"

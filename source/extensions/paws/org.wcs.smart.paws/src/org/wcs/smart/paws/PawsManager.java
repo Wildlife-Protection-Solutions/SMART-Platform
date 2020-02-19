@@ -65,7 +65,7 @@ public enum PawsManager {
 	 * @throws Exception
 	 */
 	public void deleteConfigurations(List<PawsConfiguration> configurations, IEventBroker broker) throws Exception{
-		//TODO: what to do with runs and associated results
+		//runs and results are set with configuration set to null
 		List<Path> toDelete = new ArrayList<>();
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();

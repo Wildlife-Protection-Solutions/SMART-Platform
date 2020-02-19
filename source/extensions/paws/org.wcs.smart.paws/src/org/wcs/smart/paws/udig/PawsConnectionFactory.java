@@ -30,7 +30,6 @@ import org.locationtech.udig.catalog.ui.UDIGConnectionFactory;
 public class PawsConnectionFactory extends UDIGConnectionFactory {
 
 	public PawsConnectionFactory() {
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override

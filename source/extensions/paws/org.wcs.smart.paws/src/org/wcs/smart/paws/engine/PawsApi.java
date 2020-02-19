@@ -136,8 +136,7 @@ public enum PawsApi {
 			if (service == null || !service.isConfigured()){
 				throw new Exception(Messages.PawsApi_ServiceNotConfigured2);
 			}
-			//TODO: header
-			surl = service.getTaskApi() + "/" + run.getTaskId();// + "?subscription-key=" + service.getApiKey(); //$NON-NLS-1$
+			surl = service.getTaskApi() + "/" + run.getTaskId(); //$NON-NLS-1$
 			key = service.getApiKey();
 		}
 		
