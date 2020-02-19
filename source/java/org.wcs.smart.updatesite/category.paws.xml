@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+  
+   <feature url="features/org.wcs.smart.paws.feature_7.0.0.qualifier.jar" id="org.wcs.smart.paws.feature" version="7.0.0.qualifier">
+      <category name="paws"/>
+   </feature>
+  
+   <category-def name="paws" label="SMART PAWS Plug-in">
+      <description>
+      	Provides a link for accessing the PAWS prediction tools.
+      </description>
+   </category-def>
+</site>
