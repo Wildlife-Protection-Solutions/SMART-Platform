@@ -293,6 +293,7 @@ public class GlobalForestWatchNoa extends HttpServlet {
 			Alert alert = new Alert();
 			alert.setCa(null);
 			alert.setCreatorUuid(gfw.getCreator().getUuid());
+			alert.setSource(Alert.Source.GLOBALFORESTWATCH);
 			alert.setDate(datetime);
 			alert.setDescription(sbDescription.toString());
 			alert.setLevel(gfw.getLevel());

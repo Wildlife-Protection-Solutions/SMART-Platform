@@ -68,7 +68,8 @@ public class Alert extends ConnectUuidItem{
 	
 	public enum Source{
 		USER,
-		CYBERTRACKER
+		CYBERTRACKER,
+		GLOBALFORESTWATCH,
 	}
 	
 	private String userGeneratedId; 
