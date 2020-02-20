@@ -47,6 +47,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
@@ -76,7 +77,7 @@ public class ManageProfilesDialog extends AbstractPropertyJHeaderDialog {
 	
 	private TableViewer profilesViewer;
 	
-	private ToolItem tiCreate, tiEdit, tiDelete;
+	private Button btnCreate, btnEdit, btnDelete;
 	private MenuItem miCreate, miEdit, miDelete;
 	
 	
@@ -121,25 +122,34 @@ public class ManageProfilesDialog extends AbstractPropertyJHeaderDialog {
 		});
 		tableColumnLayout.setColumnData(profilesViewer.getTable().getColumn(0), new ColumnWeightData(1));
 		
-		ToolBar tb = new ToolBar(main, SWT.VERTICAL | SWT.FLAT | SWT.RIGHT);
-		tb.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		Composite btnPanel = new Composite(main, SWT.NONE);
+		btnPanel.setLayout(new GridLayout());
+		((GridLayout)btnPanel.getLayout()).marginWidth = 0;
+		((GridLayout)btnPanel.getLayout()).marginHeight = 0;
+		btnPanel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 		
-		tiCreate = new ToolItem(tb, SWT.PUSH);
-		tiCreate.setText(DialogConstants.ADD_BUTTON_TEXT);
-		tiCreate.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-		tiCreate.addListener(SWT.Selection, e->createNewProfile());
+		btnCreate = new Button(btnPanel, SWT.PUSH);
+		btnCreate.setText(DialogConstants.ADD_BUTTON_TEXT);
+		btnCreate.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		btnCreate.addListener(SWT.Selection, e->createNewProfile());
+		btnCreate.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		btnCreate.setBackground(btnCreate.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
-		tiEdit = new ToolItem(tb, SWT.PUSH);
-		tiEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
-		tiEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
-		tiEdit.addListener(SWT.Selection, e->editCurrentProfile());
-		tiEdit.setEnabled(false);
+		btnEdit = new Button(btnPanel, SWT.PUSH);
+		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		btnEdit.setBackground(btnEdit.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
+		btnEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		btnEdit.addListener(SWT.Selection, e->editCurrentProfile());
+		btnEdit.setEnabled(false);
 		
-		tiDelete = new ToolItem(tb, SWT.PUSH);
-		tiDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
-		tiDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		tiDelete.addListener(SWT.Selection, e->deleteCurrentProfile());
-		tiDelete.setEnabled(false);
+		btnDelete = new Button(btnPanel, SWT.PUSH);
+		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		btnDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		btnDelete.addListener(SWT.Selection, e->deleteCurrentProfile());
+		btnDelete.setEnabled(false);
+		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		btnDelete.setBackground(btnDelete.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		Menu menu = new Menu(profilesViewer.getControl());
 		
@@ -173,8 +183,8 @@ public class ManageProfilesDialog extends AbstractPropertyJHeaderDialog {
 	
 	protected void updateState() {
 		CyberTrackerPropertiesProfile p = getSelectedProfile();
-		tiEdit.setEnabled(p != null);
-		tiDelete.setEnabled(p != null && !p.isDefault());
+		btnEdit.setEnabled(p != null);
+		btnDelete.setEnabled(p != null && !p.isDefault());
 		miEdit.setEnabled(p != null);
 		miDelete.setEnabled(p != null && !p.isDefault());
 	}

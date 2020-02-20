@@ -64,6 +64,7 @@ import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption;
 import org.wcs.smart.cybertracker.model.ProjectionFormat;
+import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption.ProfileOptionID;
 
 /**
  * Composite that contains controls to edit CyberTracker properties.
@@ -74,6 +75,7 @@ import org.wcs.smart.cybertracker.model.ProjectionFormat;
 public class CyberTrackerPropertiesComposite extends Composite {
 	
 	private static final String COLOR_KEY = "COLOR"; //$NON-NLS-1$
+	private static final String COLOR_OP_KEY = "COLOROP"; //$NON-NLS-1$
 
 	private enum PhotoSize{
 		SIZE1(640,480),
@@ -144,7 +146,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
     private Button btnUseMapOnSkip;
     
     private Label btnTrackColor;
-    private Label[] btnThemeColors;
+    private List<Label> btnThemeColors;
     
     private ComboViewer cbProjection;
     private Text txtUtmZome;
@@ -1245,11 +1247,23 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		btnSetTrackColor.addListener(SWT.Selection, changeColorTrack);
 		btnTrackColor.addListener(SWT.MouseDoubleClick, changeColorTrack);
 		
-		btnThemeColors = new Label[4];
-		for (int i = 1; i <= 4; i ++) {
-			Label l = new Label(part, SWT.NONE);
-			l.setText(MessageFormat.format(Messages.CyberTrackerPropertiesComposite_ColorLabel, i));
 		
+		ProfileOptionID[] colorops = new ProfileOptionID[] {
+				ProfileOptionID.THEME_COLOR_1,
+				ProfileOptionID.THEME_COLOR_2,
+				ProfileOptionID.THEME_COLOR_3,
+				ProfileOptionID.THEME_COLOR_4,
+		};
+		btnThemeColors = new ArrayList<>(colorops.length);
+		for (ProfileOptionID op : colorops) {
+			Label l = new Label(part, SWT.NONE);
+			switch(op) {
+			case THEME_COLOR_1:l.setText(Messages.CyberTrackerPropertiesComposite_PrimaryColor); break;
+			case THEME_COLOR_2:l.setText(Messages.CyberTrackerPropertiesComposite_AccentColor); break;
+			case THEME_COLOR_3:l.setText(Messages.CyberTrackerPropertiesComposite_ForegroundColor); break;
+			case THEME_COLOR_4:l.setText(Messages.CyberTrackerPropertiesComposite_BackgroundCoor);	break;
+			}
+			
 			Label colorLabel = new Label(part, SWT.NONE);
 			colorLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)colorLabel.getLayoutData()).widthHint = 30;
@@ -1258,6 +1272,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 			colorLabel.addListener(SWT.Paint, e->{
 				if (colorLabel.getData(COLOR_KEY) != null) e.gc.drawRectangle(0, 0, colorLabel.getBounds().width-1, colorLabel.getBounds().height-1);
 			});
+			colorLabel.setData(COLOR_OP_KEY, op);
 			controls.add(colorLabel);
 
 			Button btnColor = new Button(part, SWT.PUSH);
@@ -1290,7 +1305,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 			btnColor.addListener(SWT.Selection, changeColor);
 			colorLabel.addListener(SWT.MouseDoubleClick, changeColor);
 			
-			btnThemeColors[i-1] = colorLabel;
+			btnThemeColors.add(colorLabel);
 		}
 		
 	}
@@ -1355,14 +1370,13 @@ public class CyberTrackerPropertiesComposite extends Composite {
 			btnTrackColor.setBackground(c);
 		}
 		
-		for (int i = 1; i <= 4; i ++) {
-			r = ctProperties.getThemeColor(i);
+		for (Label l : btnThemeColors) {
+			r = ctProperties.getThemeColor((ProfileOptionID) l.getData(COLOR_OP_KEY));
 			if (r != null) {
 				Color c = new Color(getDisplay(), r.getRed(), r.getGreen(), r.getBlue(), 255);
-				btnThemeColors[i-1].setData(COLOR_KEY, c);
-				btnThemeColors[i-1].setBackground(c);
+				l.setData(COLOR_KEY, c);
+				l.setBackground(c);
 			}
-			
 		}
 		
 		btnOpResize.setSelection(ctProperties.getResizePhoto());
@@ -1451,13 +1465,12 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		}else {
 			ctProperties.setTrackColor(new java.awt.Color(c.getRed(), c.getGreen(), c.getBlue()));
 		}
-		
-		for (int i = 1; i <= 4; i ++) {
-			c = (Color) btnThemeColors[i-1].getData(COLOR_KEY);
+		for (Label l : btnThemeColors) {
+			c = (Color) l.getData(COLOR_KEY);
 			if (c != null) {
-				ctProperties.setThemeColor(i, new java.awt.Color(c.getRed(), c.getGreen(), c.getBlue()));
+				ctProperties.setThemeColor((ProfileOptionID) l.getData(COLOR_OP_KEY), new java.awt.Color(c.getRed(), c.getGreen(), c.getBlue()));
 			}else {
-				ctProperties.setThemeColor(i, null);
+				ctProperties.setThemeColor((ProfileOptionID) l.getData(COLOR_OP_KEY), null);
 			}
 		}
 		

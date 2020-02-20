@@ -93,10 +93,10 @@ public class CyberTrackerPropertiesProfileOption extends UuidItem {
 		DILUTION_OF_PRECISION,
 		
 		TRACK_COLOR,
-		THEME_COLOR_1,
-		THEME_COLOR_2,
-		THEME_COLOR_3,
-		THEME_COLOR_4,
+		THEME_COLOR_1, //primary
+		THEME_COLOR_2, //accent
+		THEME_COLOR_3, //foreground
+		THEME_COLOR_4, //background
 		
 		RESIZE_IMAGE,
 		IMAGE_WIDTH,

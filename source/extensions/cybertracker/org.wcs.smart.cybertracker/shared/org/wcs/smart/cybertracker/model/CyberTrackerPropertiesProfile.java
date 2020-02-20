@@ -635,14 +635,8 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	 * @return null if not set; otherwise color
 	 */
 	@Transient
-	public Color getThemeColor(int index) {
-		Integer color = -1;
-		switch(index) {
-		case 1: color = getIntValue(ProfileOptionID.THEME_COLOR_1); break;
-		case 2: color = getIntValue(ProfileOptionID.THEME_COLOR_2); break;
-		case 3: color = getIntValue(ProfileOptionID.THEME_COLOR_3); break;
-		case 4: color = getIntValue(ProfileOptionID.THEME_COLOR_4); break;
-		}
+	public Color getThemeColor(ProfileOptionID option) {
+		Integer color = getIntValue(option);
 		if (color == -1) return null;
 		return new Color(color);
 	}
@@ -653,26 +647,12 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	 * @param index color index one-based (1-4)
 	 * @param color new color or null to clear setting
 	 */
-	public void setThemeColor(int index, Color color) {
+	public void setThemeColor(ProfileOptionID option, Color color) {
 		Integer value = null;
 		if (color != null) {
 			value = color.getRGB();
 		}
-		switch(index) {
-		case 1:
-			getOption(ProfileOptionID.THEME_COLOR_1).setIntegerValue(value);
-			break;
-		case 2:
-			getOption(ProfileOptionID.THEME_COLOR_2).setIntegerValue(value);
-			break;
-		case 3:
-			getOption(ProfileOptionID.THEME_COLOR_3).setIntegerValue(value);
-			break;
-		case 4:
-			getOption(ProfileOptionID.THEME_COLOR_4).setIntegerValue(value);
-			break;
-		}
-		
+		getOption(option).setIntegerValue(value);
 	}
 	
 }

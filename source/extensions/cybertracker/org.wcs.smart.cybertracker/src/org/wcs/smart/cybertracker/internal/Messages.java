@@ -270,6 +270,8 @@ public class Messages extends NLS {
 	public static String CyberTrackerProperties_ProjectonFormat_DecemalDegree;
 	public static String CyberTrackerProperties_ProjectonFormat_DegreeMinSec;
 	public static String CyberTrackerProperties_ProjectonFormat_UTM;
+	public static String CyberTrackerPropertiesComposite_AccentColor;
+	public static String CyberTrackerPropertiesComposite_BackgroundCoor;
 	public static String CyberTrackerPropertiesComposite_ClearButton;
 	public static String CyberTrackerPropertiesComposite_ColorLabel;
 	public static String CyberTrackerPropertiesComposite_ColorSelectionDialogTitle;
@@ -279,10 +281,12 @@ public class Messages extends NLS {
 	public static String CyberTrackerPropertiesComposite_DilutionOfPrecision;
 	public static String CyberTrackerPropertiesComposite_DilutionOfPrecision_Invalid;
 	public static String CyberTrackerPropertiesComposite_DilutionOfPrecision_Tooltip;
+	public static String CyberTrackerPropertiesComposite_ForegroundColor;
 	public static String CyberTrackerPropertiesComposite_HeightOp;
 	public static String CyberTrackerPropertiesComposite_InvalidHeight;
 	public static String CyberTrackerPropertiesComposite_InvalidWidth;
 	public static String CyberTrackerPropertiesComposite_PhotoTab;
+	public static String CyberTrackerPropertiesComposite_PrimaryColor;
 	public static String CyberTrackerPropertiesComposite_pixel;
 	public static String CyberTrackerPropertiesComposite_ResizeMsg;
 	public static String CyberTrackerPropertiesComposite_ResizeOp;
