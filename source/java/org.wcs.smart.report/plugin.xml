@@ -346,6 +346,8 @@
          </command>
          <command
                commandId="org.wcs.smart.report.saveas"
+               disabledIcon="platform:/plugin/org.wcs.smart/images/icons/shared16/saveas_disabled.png"
+               icon="platform:/plugin/org.wcs.smart/images/icons/shared16/saveas.png"
                id="Save As..."
                style="push">
             <visibleWhen
@@ -494,6 +496,8 @@
          </separator>
          <command
                commandId="org.eclipse.ui.file.save"
+               disabledIcon="platform:/plugin/org.wcs.smart/images/icons/shared16/save_disabled.png"
+               icon="platform:/plugin/org.wcs.smart/images/icons/shared16/save.png"
                id="org.wcs.smart.query.save.toolbar"
                tooltip="%file.menu.save.command.tooltip">
             <visibleWhen
@@ -508,6 +512,8 @@
          </command>
          <command
                commandId="org.eclipse.ui.file.saveAs"
+               disabledIcon="platform:/plugin/org.wcs.smart/images/icons/shared16/saveas_disabled.png"
+               icon="platform:/plugin/org.wcs.smart/images/icons/shared16/saveas.png"
                tooltip="%file.menu.saveas.command.tooltip">
             <visibleWhen
                   checkEnabled="false">
@@ -874,6 +880,8 @@
                id="vertical.org.wcs.smart.report.toolbar3">
             <command
                   commandId="org.eclipse.ui.file.save"
+                  disabledIcon="platform:/plugin/org.wcs.smart/images/icons/shared16/save_disabled.png"
+                  icon="platform:/plugin/org.wcs.smart/images/icons/shared16/save.png"
                   label="%reportedit.toolbar.save.command.name"
                   mode="FORCE_TEXT"
                   style="push"
@@ -890,6 +898,8 @@
             </command>
             <command
                   commandId="org.eclipse.ui.file.saveAs"
+                  disabledIcon="platform:/plugin/org.wcs.smart/images/icons/shared16/saveas_disabled.png"
+                  icon="platform:/plugin/org.wcs.smart/images/icons/shared16/saveas.png"
                   label="%reportedit.toolbar.saveas.command.name"
                   mode="FORCE_TEXT"
                   style="push"

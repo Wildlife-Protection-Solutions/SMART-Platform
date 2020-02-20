@@ -740,7 +740,7 @@
             locationURI="toolbar:org.wcs.smart.ui.map.MapView">
          <command
                commandId="org.wcs.smart.command.ca.basemaps.save"
-               icon="images/icons/elcl16/save_map.png"
+               icon="images/icons/shared16/save.png"
                label="%savebasemap.command.name"
                style="push"
                tooltip="%savebasemap.command.tooltip">

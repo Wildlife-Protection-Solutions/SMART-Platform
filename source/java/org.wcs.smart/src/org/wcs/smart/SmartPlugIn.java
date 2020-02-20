@@ -214,6 +214,9 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	public static final String BROWSER_HOME = "org.wsc.smart.browser.home"; //$NON-NLS-1$
 	public static final String BROWSER_STOP = "org.wsc.smart.browser.stop"; //$NON-NLS-1$
 	
+	public static final String SAVE_ICON = "org.wsc.smart.save"; //$NON-NLS-1$
+	public static final String SAVEAS_ICON = "org.wsc.smart.saveas"; //$NON-NLS-1$
+	public static final String SAVEALL_ICON = "org.wsc.smart.saveall"; //$NON-NLS-1$
 	/**
 	 * Goto Icon
 	 */
@@ -482,6 +485,10 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	     reg.put(ENABLE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/enable.png")); //$NON-NLS-1$
 	     reg.put(DISABLE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/disable.png")); //$NON-NLS-1$
 	     reg.put(PDF_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/pdf.png")); //$NON-NLS-1$
+	     
+	     reg.put(SAVE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/save.png")); //$NON-NLS-1$
+	     reg.put(SAVEAS_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/saveas.png")); //$NON-NLS-1$
+	     reg.put(SAVEALL_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/saveall.png")); //$NON-NLS-1$
 
 	}
 	

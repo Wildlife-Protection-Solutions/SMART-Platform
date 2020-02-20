@@ -752,7 +752,9 @@
                visible="true">
          </separator>
          <command
-               commandId="org.eclipse.ui.file.save">
+               commandId="org.eclipse.ui.file.save"
+               disabledIcon="platform:/plugin/org.wcs.smart/images/icons/shared16/save_disabled.png"
+               icon="platform:/plugin/org.wcs.smart/images/icons/shared16/save.png">
             <visibleWhen
                   checkEnabled="false">
                <or>
@@ -779,6 +781,8 @@
          </command>
          <command
                commandId="org.eclipse.ui.file.saveAs"
+               disabledIcon="platform:/plugin/org.wcs.smart/images/icons/shared16/saveas_disabled.png"
+               icon="platform:/plugin/org.wcs.smart/images/icons/shared16/saveas.png"
                label="%SaveAsCommand2">
             <visibleWhen
                   checkEnabled="false">
@@ -1162,6 +1166,8 @@
                id="vertical.org.wcs.smart.i2.toolbar5">
             <command
                   commandId="org.eclipse.ui.file.save"
+                  disabledIcon="platform:/plugin/org.wcs.smart/images/icons/shared16/save_disabled.png"
+                  icon="platform:/plugin/org.wcs.smart/images/icons/shared16/save.png"
                   label="%command.label.save"
                   mode="FORCE_TEXT"
                   style="push"
@@ -1191,6 +1197,8 @@
             </command>
             <command
                   commandId="org.eclipse.ui.file.saveAs"
+                  disabledIcon="platform:/plugin/org.wcs.smart/images/icons/shared16/saveas_disabled.png"
+                  icon="platform:/plugin/org.wcs.smart/images/icons/shared16/saveas.png"
                   label="%command.label.saveas"
                   mode="FORCE_TEXT"
                   style="push"
@@ -1223,6 +1231,8 @@
                id="vertical.org.wcs.smart.i2.toolbar6">
             <command
                   commandId="org.eclipse.ui.file.save"
+                  disabledIcon="platform:/plugin/org.wcs.smart/images/icons/shared16/save_disabled.png"
+                  icon="platform:/plugin/org.wcs.smart/images/icons/shared16/save.png"
                   label="%command.label.save"
                   mode="FORCE_TEXT"
                   style="push">

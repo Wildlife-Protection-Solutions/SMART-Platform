@@ -71,6 +71,7 @@ import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.filter.DateFilterComposite;
 import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.common.filter.DateFilterDropDownComposite;
@@ -356,12 +357,12 @@ public class IntelSummaryQueryEditor extends EditorPart implements IQueryEditor{
 
 		if (IntelSecurityManager.INSTANCE.canEditQuery()) {
 			saveItem = new ToolItem(headerToolbar, SWT.PUSH);
-			saveItem.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVE_EDIT));
+			saveItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.SAVE_ICON));
 			saveItem.addListener(SWT.Selection, (event)->IntelSummaryQueryEditor.this.getSite().getPage().saveEditor(IntelSummaryQueryEditor.this, false));
 			saveItem.setToolTipText(Messages.IntelQueryEditor_saveTooltip);
 			
 			ToolItem saveAsItem = new ToolItem(headerToolbar, SWT.PUSH);
-			saveAsItem.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVEAS_EDIT));
+			saveAsItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.SAVEAS_ICON));
 			saveAsItem.addListener(SWT.Selection, (event)->doSaveAs());
 			saveAsItem.setToolTipText(Messages.IntelQueryEditor_saveAsTooltip);
 		}

@@ -325,6 +325,8 @@
                id="vertical.org.wcs.smart.query.toolbar3">
             <command
                   commandId="org.eclipse.ui.file.save"
+                  disabledIcon="platform:/plugin/org.wcs.smart/images/icons/shared16/save_disabled.png"
+                  icon="platform:/plugin/org.wcs.smart/images/icons/shared16/save.png"
                   label="%command.label.save"
                   mode="FORCE_TEXT"
                   style="push">
@@ -345,6 +347,8 @@
             </command>
             <command
                   commandId="org.eclipse.ui.file.saveAs"
+                  disabledIcon="platform:/plugin/org.wcs.smart/images/icons/shared16/saveas_disabled.png"
+                  icon="platform:/plugin/org.wcs.smart/images/icons/shared16/saveas.png"
                   label="%command.label.saveas"
                   mode="FORCE_TEXT"
                   style="push">
@@ -384,6 +388,8 @@
             locationURI="toolbar:org.wcs.smart.query.parts.definition">
          <command
                commandId="org.eclipse.ui.file.save"
+               disabledIcon="platform:/plugin/org.wcs.smart/images/icons/shared16/save_disabled.png"
+               icon="platform:/plugin/org.wcs.smart/images/icons/shared16/save.png"
                label="%querydefview.toolbar.save.command.label"
                tooltip="%querydefview.toolbar.save.command.tooltip">
          </command>
@@ -484,6 +490,7 @@
          </separator>
          <command
                commandId="org.wcs.smart.query.saveas"
+               icon="platform:/plugin/org.wcs.smart/images/icons/shared16/saveas.png"
                style="push">
          </command>
          <command
@@ -795,6 +802,8 @@
          </separator>
          <command
                commandId="org.eclipse.ui.file.save"
+               disabledIcon="platform:/plugin/org.wcs.smart/images/icons/shared16/save_disabled.png"
+               icon="platform:/plugin/org.wcs.smart/images/icons/shared16/save.png"
                label="%menu.file.command.save.label"
                mnemonic="%menu.file.command.save.mnemonic"
                tooltip="%menu.file.command.save.tooltip">
@@ -810,6 +819,8 @@
          </command>
          <command
                commandId="org.eclipse.ui.file.saveAs"
+               disabledIcon="platform:/plugin/org.wcs.smart/images/icons/shared16/saveas_disabled.png"
+               icon="platform:/plugin/org.wcs.smart/images/icons/shared16/saveas.png"
                label="%menu.file.command.saveAs.label"
                mnemonic="%menu.file.command.saveAs.mnemonic"
                tooltip="%menu.file.command.saveAs.tooltip">
@@ -877,6 +888,8 @@
          </separator>
          <command
                commandId="org.eclipse.ui.file.save"
+               disabledIcon="platform:/plugin/org.wcs.smart/images/icons/shared16/save_disabled.png"
+               icon="platform:/plugin/org.wcs.smart/images/icons/shared16/save.png"
                label="%menu.file.command.save.label"
                mnemonic="%menu.file.command.save.mnemonic"
                tooltip="%menu.file.command.save.tooltip">
@@ -892,6 +905,8 @@
          </command>
          <command
                commandId="org.eclipse.ui.file.saveAs"
+               disabledIcon="platform:/plugin/org.wcs.smart/images/icons/shared16/saveas_disabled.png"
+               icon="platform:/plugin/org.wcs.smart/images/icons/shared16/saveas.png"
                label="%menu.file.command.saveAs.label"
                mnemonic="%menu.file.command.saveAs.mnemonic"
                tooltip="%menu.file.command.saveAs.tooltip">

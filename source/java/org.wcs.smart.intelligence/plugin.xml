@@ -416,6 +416,8 @@
          </command>
          <command
                commandId="org.eclipse.ui.file.save"
+               disabledIcon="platform:/plugin/org.wcs.smart/images/icons/shared16/save_disabled.png"
+               icon="platform:/plugin/org.wcs.smart/images/icons/shared16/save.png"
                style="push">
             <visibleWhen
                   checkEnabled="false">
@@ -582,6 +584,8 @@
                id="vertical.org.wcs.smart.intelligence.toolbar3">
             <command
                   commandId="org.eclipse.ui.file.save"
+                  disabledIcon="platform:/plugin/org.wcs.smart/images/icons/shared16/save_disabled.png"
+                  icon="platform:/plugin/org.wcs.smart/images/icons/shared16/save.png"
                   mode="FORCE_TEXT"
                   style="push">
                <visibleWhen>

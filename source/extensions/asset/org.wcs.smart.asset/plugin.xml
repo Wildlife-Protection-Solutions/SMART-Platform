@@ -365,7 +365,9 @@
             allPopups="false"
             locationURI="menu:org.wcs.smart.menu.file?before=org.eclipse.ui.file.export">
          <command
-               commandId="org.eclipse.ui.file.save">
+               commandId="org.eclipse.ui.file.save"
+               disabledIcon="platform:/plugin/org.wcs.smart/images/icons/shared16/save_disabled.png"
+               icon="platform:/plugin/org.wcs.smart/images/icons/shared16/save.png">
             <visibleWhen
                   checkEnabled="false">
                <with
@@ -518,6 +520,8 @@
                id="vertical.org.wcs.smart.asset.toolbar1">
             <command
                   commandId="org.eclipse.ui.file.save"
+                  disabledIcon="platform:/plugin/org.wcs.smart/images/icons/shared16/save_disabled.png"
+                  icon="platform:/plugin/org.wcs.smart/images/icons/shared16/save.png"
                   mode="FORCE_TEXT"
                   style="push">
                <visibleWhen>

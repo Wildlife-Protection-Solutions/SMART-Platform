@@ -202,7 +202,7 @@ public class SummaryDefinitionPanel implements IDefinitionPanel {
 		if (IntelSecurityManager.INSTANCE.canEditQuery()) {
 			saveItem = new ToolItem(toolbar, SWT.PUSH);
 			saveItem.setToolTipText(Messages.FilterDefinitionPanel_savetooltip);
-			saveItem.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVE_EDIT));
+			saveItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.SAVE_ICON));
 			saveItem.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {

@@ -336,12 +336,12 @@ public class IntelRecordQueryEditor extends EditorPart implements IQueryEditor{
 
 		if (IntelSecurityManager.INSTANCE.canEditQuery()) {
 			saveItem = new ToolItem(headerToolbar, SWT.PUSH);
-			saveItem.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVE_EDIT));
+			saveItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.SAVE_ICON));
 			saveItem.addListener(SWT.Selection, (event)->IntelRecordQueryEditor.this.getSite().getPage().saveEditor(IntelRecordQueryEditor.this, false));
 			saveItem.setToolTipText(Messages.IntelQueryEditor_saveTooltip);
 			
 			ToolItem saveAsItem = new ToolItem(headerToolbar, SWT.PUSH);
-			saveAsItem.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVEAS_EDIT));
+			saveAsItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.SAVEAS_ICON));
 			saveAsItem.addListener(SWT.Selection, (event)->doSaveAs());
 			saveAsItem.setToolTipText(Messages.IntelQueryEditor_saveAsTooltip);
 		}
@@ -614,7 +614,7 @@ public class IntelRecordQueryEditor extends EditorPart implements IQueryEditor{
 		if (IntelSecurityManager.INSTANCE.canEditQuery()) {
 			saveItem = new ToolItem(toolbar, SWT.PUSH);
 			saveItem.setToolTipText(Messages.FilterDefinitionPanel_savetooltip);
-			saveItem.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVE_EDIT));
+			saveItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.SAVE_ICON));
 			saveItem.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {

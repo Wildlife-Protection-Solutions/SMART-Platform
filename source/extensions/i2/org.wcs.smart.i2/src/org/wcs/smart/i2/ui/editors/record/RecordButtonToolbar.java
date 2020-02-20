@@ -132,7 +132,7 @@ public class RecordButtonToolbar extends Composite{
 			});
 		}
 		saveItem = new ToolItem(buttonBar, SWT.PUSH);
-		saveItem.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVE_EDIT));
+		saveItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.SAVE_ICON));
 		saveItem.setToolTipText(Messages.RecordButtonToolbar_savetooltip);
 		saveItem.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent event){

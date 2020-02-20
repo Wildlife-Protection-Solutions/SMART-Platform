@@ -296,7 +296,7 @@ public class ResultsPanel {
 
 		MenuItem mnuSaveFile = new MenuItem(mnu, SWT.PUSH);
 		mnuSaveFile.setText(DialogConstants.SAVE_TEXT);
-		mnuSaveFile.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVE_EDIT));
+		mnuSaveFile.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.SAVE_ICON));
 		mnuSaveFile.addListener(SWT.Selection, e -> {
 			List<FileProxy> toSave = new ArrayList<>();
 			for (Iterator<?> iterator = tblResults.getStructuredSelection().iterator(); iterator.hasNext();) {
@@ -309,7 +309,7 @@ public class ResultsPanel {
 		});
 
 		MenuItem mnuSaveFileAll = new MenuItem(mnu, SWT.PUSH);
-		mnuSaveFileAll.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVEALL_EDIT));
+		mnuSaveFileAll.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.SAVEALL_ICON));
 		mnuSaveFileAll.setText(Messages.ResultsPanel_SaveAll);
 		mnuSaveFileAll.addListener(SWT.Selection, e -> {
 			view.saveAll();

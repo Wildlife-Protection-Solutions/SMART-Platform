@@ -252,7 +252,7 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 				if (element instanceof DefaultAssetMapStyle) return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.STYLE_ICON); //return AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_STYLE_DEFAULT);
 				if (element instanceof AssetMapStyle) return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.STYLE_ICON);
 				if (element == MANAGE_STYLES) return AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_SETTINGS);
-				if (element == SAVE_STYLES) return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVE_EDIT);
+				if (element == SAVE_STYLES) return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.SAVE_ICON);
 				return null;
 				
 					

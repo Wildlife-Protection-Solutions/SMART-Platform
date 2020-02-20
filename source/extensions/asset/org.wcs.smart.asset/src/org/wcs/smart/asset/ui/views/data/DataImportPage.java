@@ -212,13 +212,13 @@ public class DataImportPage {
 		new ToolItem(tb,  SWT.SEPARATOR);
 		
 		itemSaveAll = new ToolItem(tb, SWT.PUSH);
-		itemSaveAll.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVEALL_EDIT));
+		itemSaveAll.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.SAVEALL_ICON));
 		itemSaveAll.setToolTipText(Messages.DataImportPage_saveAllTooltip);
 		itemSaveAll.setEnabled(false);
 		itemSaveAll.addListener(SWT.Selection, e->saveAll());
 		
 		itemSave = new ToolItem(tb, SWT.PUSH);
-		itemSave.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVE_EDIT));
+		itemSave.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.SAVE_ICON));
 		itemSave.setToolTipText(Messages.DataImportPage_saveTooltip);
 		itemSave.setEnabled(false);
 		itemSave.addListener(SWT.Selection, e->save(getSelection()));

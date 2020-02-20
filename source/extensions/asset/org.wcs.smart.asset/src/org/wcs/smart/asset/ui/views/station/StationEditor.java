@@ -442,7 +442,7 @@ public class StationEditor extends EditorPart implements MapPart {
 		
 		ToolItem saveItem = new ToolItem(tbRefresh, SWT.PUSH);
 		saveItem.setToolTipText(Messages.StationEditor_saveTooltip);
-		saveItem.setImage(getSite().getWorkbenchWindow().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVE_EDIT));
+		saveItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.SAVE_ICON));
 		saveItem.setEnabled(false);
 		saveItem.addListener(SWT.Selection, e->getSite().getPage().saveEditor(this, false));
 		addPropertyListener(new IPropertyListener() {
