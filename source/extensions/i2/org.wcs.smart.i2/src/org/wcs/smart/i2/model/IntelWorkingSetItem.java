@@ -57,7 +57,7 @@ public class IntelWorkingSetItem {
 		this.image = Resources.INSTANCE.getImage(queryType);
 	}
 	
-	private IntelWorkingSetItem(IntelWorkingSetCategory category, String label, boolean isVisible, UUID uuid, Image image){
+	IntelWorkingSetItem(IntelWorkingSetCategory category, String label, boolean isVisible, UUID uuid, Image image){
 		this.category = category;
 		this.label = label;
 		this.uuid = uuid;

@@ -96,6 +96,7 @@ import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
+import org.wcs.smart.i2.model.HiddenWorkingSetItem;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
@@ -108,6 +109,7 @@ import org.wcs.smart.i2.model.IntelWorkingSetRecord;
 import org.wcs.smart.i2.query.QueryManager;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.Resources;
+import org.wcs.smart.i2.ui.TransparentInfoDialog;
 import org.wcs.smart.i2.ui.WorkingSetLabelProvider;
 import org.wcs.smart.i2.ui.dialogs.WorkingSetListDialog;
 import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
@@ -287,12 +289,15 @@ public class WorkingSetView {
 				if (isConfigureVisibility) return;
 				isConfigureVisibility = true;
 				try{
+					
 					LayerVisibleEvent newEvent = new LayerVisibleEvent();
+					if (event.getElement() instanceof HiddenWorkingSetItem) return;
 					
 					if ( event.getElement() instanceof IntelWorkingSetCategory){
 						Object[] kids = ((WorkingSetTreeContentProvider)workingsetTree.getContentProvider()).getChildren(event.getElement());
 						if (kids != null){
 							for (Object x : kids){
+								if (x instanceof HiddenWorkingSetItem) continue;
 								workingsetTree.setChecked(x, event.getChecked());
 								workingsetTree.setGrayed(x, false);
 								if(event.getChecked()){
@@ -326,6 +331,8 @@ public class WorkingSetView {
 							}
 						}
 					}
+					
+					if (newEvent.allVisible.isEmpty() && newEvent.notVisible.isEmpty()) return;
 					
 					//update working set
 					try(Session s = HibernateManager.openSession()){
@@ -525,6 +532,9 @@ public class WorkingSetView {
 									
 						}else if (element instanceof IntelRecordObservationQuery){
 							queries.add(((IntelRecordObservationQuery)element).getUuid());
+						}else {
+							TransparentInfoDialog ti = new TransparentInfoDialog(WorkingSetView.this.activeShell, Messages.WorkingSetView_CannotAddItemNotMappable);
+							ti.open();
 						}
 						
 					}
@@ -666,6 +676,12 @@ public class WorkingSetView {
 			setWorkingSet(set, context);
 		}
 		
+	}
+	
+	@Optional
+	@Inject
+	private void activeProfilesChanged(@UIEventTopic(IntelEvents.PROFILES_ALL) Object data){
+		refreshWithDelay();
 	}
 	
 	@Inject
@@ -893,29 +909,42 @@ public class WorkingSetView {
 				});
 				
 				List<IntelWorkingSetItem> items = new ArrayList<IntelWorkingSetItem>();
+
 				if (workingSetUuid != null){
 					try(Session s = HibernateManager.openSession()){
 						ws = (IntelWorkingSet) s.get(IntelWorkingSet.class, workingSetUuid);
 						if (ws != null){
 							ws.getName();
 							for (IntelWorkingSetEntity entity : ws.getEntities()){
-								IntelWorkingSetItem i = new IntelWorkingSetItem(entity);
-								items.add(i);
+								if (WorkingSetManager.INSTANCE.canViewItem(entity, null)) {
+									IntelWorkingSetItem i = new IntelWorkingSetItem(entity);
+									items.add(i);
+								}else {
+									items.add(new HiddenWorkingSetItem(IntelWorkingSetCategory.ENTITY));
+								}
 							}
 							
 							
 							for (IntelWorkingSetRecord record : ws.getRecords()){
-								Image img = Resources.INSTANCE.getImage(record.getRecord().getRecordSource());
-								if (img == null) {
-									img =  Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RECORD);
+								if (WorkingSetManager.INSTANCE.canViewItem(record, null)) {
+									Image img = Resources.INSTANCE.getImage(record.getRecord().getRecordSource());
+									if (img == null) {
+										img =  Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RECORD);
+									}
+									IntelWorkingSetItem i = new IntelWorkingSetItem(record, img);
+									items.add(i);
+								}else {
+									items.add(new HiddenWorkingSetItem(IntelWorkingSetCategory.RECORD));
 								}
-								IntelWorkingSetItem i = new IntelWorkingSetItem(record, img);
-								items.add(i);
 							}
 							for (IntelWorkingSetQuery query : ws.getQueries()){
 								AbstractIntelQuery queryImpl = QueryManager.INSTANCE.findQuery(s, query.getQuery(), query.getQueryType());
-								IntelWorkingSetItem i = new IntelWorkingSetItem(query, queryImpl);
-								items.add(i);
+								if (WorkingSetManager.INSTANCE.canViewItem(query,queryImpl)) {
+									IntelWorkingSetItem i = new IntelWorkingSetItem(query, queryImpl);
+									items.add(i);
+								}else {
+									items.add(new HiddenWorkingSetItem(IntelWorkingSetCategory.QUERIES));
+								}
 							}
 						}
 					}
@@ -967,8 +996,9 @@ public class WorkingSetView {
 							workingsetTree.setExpandedElements(lastOpenElements);
 						}
 						
-						items.forEach((e) -> { if (e.isVisible()) workingsetTree.setChecked(e, true);  });
-						
+						items.forEach((e) -> { 
+							if (e.isVisible()) workingsetTree.setChecked(e, true);  
+						});
 					}
 				});
 			}finally{

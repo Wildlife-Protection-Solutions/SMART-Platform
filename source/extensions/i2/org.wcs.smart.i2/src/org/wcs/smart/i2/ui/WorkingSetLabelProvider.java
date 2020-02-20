@@ -23,11 +23,15 @@ package org.wcs.smart.i2.ui;
 
 import java.util.Locale;
 
-import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.CellLabelProvider;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ViewerCell;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.internal.IntelligenceLabelProviderImpl;
+import org.wcs.smart.i2.model.HiddenWorkingSetItem;
 import org.wcs.smart.i2.model.IntelWorkingSet;
 import org.wcs.smart.i2.model.IntelWorkingSetCategory;
 import org.wcs.smart.i2.model.IntelWorkingSetItem;
@@ -39,9 +43,9 @@ import org.wcs.smart.i2.model.IntelWorkingSetItem;
  * @author Emily
  *
  */
-public class WorkingSetLabelProvider extends LabelProvider {
+public class WorkingSetLabelProvider extends CellLabelProvider implements ILabelProvider {
 
-	
+	@Override
 	public String getText(Object element){
 		if (element instanceof IntelWorkingSet){
 			return ((IntelWorkingSet) element).getName();
@@ -50,9 +54,10 @@ public class WorkingSetLabelProvider extends LabelProvider {
 		}else if (element instanceof IntelWorkingSetItem){
 			return ((IntelWorkingSetItem) element).getLabel();
 		}
-		return super.getText(element);
+		return element.toString();
 	}
 	
+	@Override
 	public Image getImage(Object element){
 		if (element instanceof IntelWorkingSetCategory){
 			return ((IntelligenceLabelProviderImpl)SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class)).getImage(element);
@@ -61,7 +66,18 @@ public class WorkingSetLabelProvider extends LabelProvider {
 			return wi.getImage();
 			
 		}
-		return super.getImage(element);
+		return null;
+	}
+
+	@Override
+	public void update(ViewerCell cell) {
+		cell.setText( getText(cell.getElement()));
+		cell.setImage( getImage(cell.getElement()));
+		
+		if (cell.getElement() instanceof HiddenWorkingSetItem) {
+			cell.setForeground(cell.getItem().getDisplay().getSystemColor(SWT.COLOR_GRAY));
+		}
+		
 	}
 
 }

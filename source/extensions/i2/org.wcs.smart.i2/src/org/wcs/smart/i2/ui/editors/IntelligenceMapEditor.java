@@ -34,6 +34,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ISafeRunnable;
@@ -44,7 +46,9 @@ import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.notify.impl.AdapterImpl;
@@ -166,7 +170,7 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
     
     private boolean handlingLayerVisibility = false;
     
-    private Date[] refreshMapJobDates = null;;
+    private Date[] refreshMapJobDates = null;
     private Job refreshMapJob = new Job(Messages.IntelligenceMapEditor_refreshmapjob){
 
 		@Override
@@ -580,6 +584,16 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
 			}
 		};
 		parentContext.get(IEventBroker.class).subscribe(IntelEvents.ACTIVE_WS_LAYER_DATEFILTER, handler);
+		handlers.add(handler);
+		
+		
+		handler = new EventHandler() {
+			@Override
+			public void handleEvent(Event event) {
+				setWorkingSet();
+			}
+		};
+		parentContext.get(IEventBroker.class).subscribe(IntelEvents.PROFILES_ALL, handler);
 		handlers.add(handler);
 		
 		GridLayout layout = new GridLayout(1,false);

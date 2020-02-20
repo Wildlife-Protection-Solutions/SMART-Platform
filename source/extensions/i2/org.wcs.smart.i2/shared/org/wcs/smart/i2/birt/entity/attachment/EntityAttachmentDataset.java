@@ -83,6 +83,9 @@ public class EntityAttachmentDataset implements IQuery {
 				cb.equal(from.get("keyId"), queryText) //$NON-NLS-1$
 				));
 		type = connection.getSession().createQuery(c).uniqueResult();
+		
+		if (type.getProfiles().isEmpty()) return;	//type no profiles allow access
+		
 		for (IntelProfileEntityType ip : type.getProfiles()) {
 			if (profiles.contains(ip.getProfile())) return;
 		}

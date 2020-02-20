@@ -78,8 +78,11 @@ public class QueryProxy implements IAdaptable{
 			if (c == adapter) {
 				try {
 					AbstractIntelQuery q = c.getDeclaredConstructor().newInstance();
-					q.setUuid(getUuid());
-					return (T)q;
+					if (q.getTypeKey().equalsIgnoreCase(getTypeKey())) {
+						q.setUuid(getUuid());
+						return (T)q;
+					}
+					
 				}catch (Exception ex) {
 					Intelligence2PlugIn.log(ex.getMessage(), ex);
 				}

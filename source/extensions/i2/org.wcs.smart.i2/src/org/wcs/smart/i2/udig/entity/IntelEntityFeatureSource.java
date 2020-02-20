@@ -88,7 +88,7 @@ public class IntelEntityFeatureSource extends ContentFeatureSource {
 			}
 		}
 		
-		IntelEntityFeatureReader[] reader = new IntelEntityFeatureReader[]{new IntelEntityFeatureReader(entityUuid, getSchema())};
+		IntelEntityFeatureReader[] reader = new IntelEntityFeatureReader[1];
 		
 		
 		query.getFilter().accept(new AbstractFilterVisitor() {
@@ -107,7 +107,8 @@ public class IntelEntityFeatureSource extends ContentFeatureSource {
 			
 		}, null);
 		
-		return reader[0];
+		if (reader[0] != null) return reader[0];
+		return new IntelEntityFeatureReader(entityUuid, getSchema());
 	}
 
 	

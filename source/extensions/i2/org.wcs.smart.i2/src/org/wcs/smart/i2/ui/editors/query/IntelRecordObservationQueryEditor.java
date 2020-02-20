@@ -424,7 +424,7 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 		((GridLayout)headerPart.getLayout()).verticalSpacing = 0;
 		headerPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		SectionTabHeader header1 = new SectionTabHeader(new String[] {"Definition", "Profile Filter"}, headerPart, toolkit);
+		SectionTabHeader header1 = new SectionTabHeader(new String[] {Messages.IntelRecordObservationQueryEditor_DefinitionSection, Messages.IntelRecordObservationQueryEditor_ProfileSection}, headerPart, toolkit);
 		header1.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridLayout)header1.getLayout()).marginWidth = 0;
 		((GridLayout)header1.getLayout()).numColumns = ((GridLayout)header1.getLayout()).numColumns + 2; 
@@ -576,8 +576,8 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 	
 	public void setErrorMessage(String message, Exception fullMessage){
 		if (message == null) {
-			infoLabel.setToolTipText("");
-			infoLabel.setText("");
+			infoLabel.setToolTipText(""); //$NON-NLS-1$
+			infoLabel.setText(""); //$NON-NLS-1$
 			infoLabel.getParent().setVisible(false);
 		}else {
 			infoLabel.setToolTipText(fullMessage.getMessage());

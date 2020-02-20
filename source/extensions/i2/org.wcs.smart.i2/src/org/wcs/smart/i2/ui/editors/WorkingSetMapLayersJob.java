@@ -30,7 +30,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -214,9 +213,11 @@ public class WorkingSetMapLayersJob extends Job {
 	
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		HashMap<UUID, String> queryNames = new HashMap<>();
+		HashMap<IntelWorkingSetQuery, AbstractIntelQuery> queriesToAdd = new HashMap<>();
 		
 		IntelWorkingSet workingset = null;
+		
+		
 		if (WorkingSetManager.INSTANCE.getActiveWorkingSet() != null){
 			try(Session s = HibernateManager.openSession()){
 				workingset = (IntelWorkingSet) s.get(IntelWorkingSet.class, WorkingSetManager.INSTANCE.getActiveWorkingSet());
@@ -230,7 +231,9 @@ public class WorkingSetMapLayersJob extends Job {
 				if (workingset.getQueries() != null){
 					workingset.getQueries().forEach(e->{
 						AbstractIntelQuery q = QueryManager.INSTANCE.findQuery(s, e.getQuery(), e.getQueryType());
-						if (q != null) queryNames.put(q.getUuid(), q.getName());
+						if (q != null && WorkingSetManager.INSTANCE.canViewItem(e, q)) {
+							queriesToAdd.put(e, q);
+						}
 					});
 				}
 			}
@@ -265,25 +268,33 @@ public class WorkingSetMapLayersJob extends Job {
 		List<LayerInfo> toAdd = new ArrayList<LayerInfo>();
 		java.util.Map<ID, StyleBlackboard> layerStyles = new HashMap<ID, StyleBlackboard>();
 		for (IntelWorkingSetEntity layer : workingset.getEntities()){
-			HashMap<String, Serializable> params = new HashMap<String,Serializable>();
-			params.put(IntelEntityServiceExtension.ENTITY_UUID_KEY, UuidUtils.uuidToString( layer.getEntity().getUuid()));
-			IntelEntityService service = createEntityService(params);
-			computeLayers(toAdd, layerStyles, layer, service, true, monitor);
+			if (WorkingSetManager.INSTANCE.canViewItem(layer, null)) {
+				HashMap<String, Serializable> params = new HashMap<String,Serializable>();
+				params.put(IntelEntityServiceExtension.ENTITY_UUID_KEY, UuidUtils.uuidToString( layer.getEntity().getUuid()));
+				IntelEntityService service = createEntityService(params);
+				computeLayers(toAdd, layerStyles, layer, service, true, monitor);
+			}
 		}
 			
 		for (IntelWorkingSetRecord layer : workingset.getRecords()){
-			HashMap<String, Serializable> params = new HashMap<String,Serializable>();
-			params.put(IntelRecordServiceExtension.RECORD_UUID_KEY, UuidUtils.uuidToString(layer.getRecord().getUuid()));
-			IntelRecordService service = createRecordService(params);
-			computeLayers(toAdd, layerStyles, layer, service, false, monitor);
+			if (WorkingSetManager.INSTANCE.canViewItem(layer, null)) {
+				HashMap<String, Serializable> params = new HashMap<String,Serializable>();
+				params.put(IntelRecordServiceExtension.RECORD_UUID_KEY, UuidUtils.uuidToString(layer.getRecord().getUuid()));
+				IntelRecordService service = createRecordService(params);
+				computeLayers(toAdd, layerStyles, layer, service, false, monitor);
+			}
 			
 		}
 		
-		for (IntelWorkingSetQuery query : workingset.getQueries()){
-			String name = queryNames.get(query.getQuery());
-			if (name == null) name = Messages.WorkingSetMapLayersJob_QueryNotFound;
-			QueryService service = new QueryService(null, query.getQuery(), name);
-			computeLayers(toAdd, layerStyles, query, service, false, monitor);
+		for (IntelWorkingSetQuery i : workingset.getQueries()){
+			if (queriesToAdd.containsKey(i)) {
+				AbstractIntelQuery query = queriesToAdd.get(i);
+				String name = query.getName();
+				if (name == null) name = Messages.WorkingSetMapLayersJob_QueryNotFound;
+				QueryService service = new QueryService(null, query.getUuid(), name);
+				computeLayers(toAdd, layerStyles, i, service, false, monitor);	
+			}
+			
 		}
 		
 		

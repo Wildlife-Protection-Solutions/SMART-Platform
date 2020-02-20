@@ -84,6 +84,8 @@ public class EntityDataset implements IQuery {
 				cb.equal(from.get("keyId"), queryText) //$NON-NLS-1$
 				));
 		type = connection.getSession().createQuery(c).uniqueResult();
+		if (type.getProfiles().isEmpty()) return;  //no profiles are associated with this entity type
+		
 		for (IntelProfileEntityType ip : type.getProfiles()) {
 			if (profiles.contains(ip.getProfile())) return;
 		}

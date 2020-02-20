@@ -149,7 +149,7 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 		reg.put(ICON_FILTERS, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/filter.png")); //$NON-NLS-1$);
 		reg.put(ICON_VALUES, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/values.png")); //$NON-NLS-1$);
 		reg.put(ICON_QUERY_RECORD, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/record_query.png")); //$NON-NLS-1$);
-		reg.put(ICON_QUERY_RECORDOBS, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/record_observation_query.png")); //$NON-NLS-1$
+		reg.put(ICON_QUERY_RECORDOBS, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/record_observation.png")); //$NON-NLS-1$
 		reg.put(ICON_QUERY_ENTITYSUM, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/entity_summary.png")); //$NON-NLS-1$
 		reg.put(ICON_QUERY_RECORDSUM, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/record_summary.png")); //$NON-NLS-1$
 		reg.put(ICON_QUERY_ENTITYRECORD, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/entity_query.png")); //$NON-NLS-1$

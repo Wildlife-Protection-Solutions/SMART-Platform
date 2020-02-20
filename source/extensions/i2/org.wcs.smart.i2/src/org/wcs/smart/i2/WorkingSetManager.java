@@ -24,7 +24,9 @@ package org.wcs.smart.i2;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -36,13 +38,19 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
+import org.wcs.smart.i2.model.IWorkingSetMapLayer;
 import org.wcs.smart.i2.model.IntelEntity;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecord;
+import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.model.IntelWorkingSet;
+import org.wcs.smart.i2.model.IntelWorkingSetCategory;
 import org.wcs.smart.i2.model.IntelWorkingSetEntity;
+import org.wcs.smart.i2.model.IntelWorkingSetItem;
 import org.wcs.smart.i2.model.IntelWorkingSetQuery;
 import org.wcs.smart.i2.model.IntelWorkingSetRecord;
 import org.wcs.smart.i2.query.QueryManager;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
 
 /**
@@ -67,6 +75,46 @@ public enum WorkingSetManager {
 	
 	public UUID getActiveWorkingSet(){
 		return this.activeWorkingSet;
+	}
+	
+	/**
+	 * True if query can be added to working set.  Limit to queries
+	 * that return a result that can be mapped.
+	 * 
+	 * @param query
+	 * @return
+	 */
+	public boolean canAddQuery(String queryType) {
+		if (queryType.equals(IntelRecordObservationQuery.KEY)) return true;
+		return false;
+	}
+	
+	public boolean canViewItem(IWorkingSetMapLayer item, AbstractIntelQuery query) {
+		if (item instanceof IntelWorkingSetEntity){
+			IntelProfile searchfor = ((IntelWorkingSetEntity)item).getEntity().getProfile();
+			if (!IntelSecurityManager.INSTANCE.canViewEntities(searchfor)) return false;
+			for (IntelProfile ip : ProfilesManager.INSTANCE.getActiveProfiles()) {
+				if (ip.equals(searchfor) ) return true;
+			}
+			return false;
+		}
+		if (item instanceof IntelWorkingSetRecord){
+			IntelProfile searchfor = ((IntelWorkingSetRecord)item).getRecord().getProfile();
+			if (!IntelSecurityManager.INSTANCE.canViewRecords(searchfor)) return false;
+			for (IntelProfile ip : ProfilesManager.INSTANCE.getActiveProfiles()) {
+				if (ip.equals(searchfor) ) return true;
+			}
+			return false;
+		}
+		
+		if (query != null && item instanceof IntelWorkingSetQuery){
+			Set<String> queryProfiles = ProfilesManager.INSTANCE.getActiveProfiles().stream().filter(e->IntelSecurityManager.INSTANCE.canViewQuery(e)).map(e->e.getKeyId()).collect(Collectors.toSet());
+			if (query.queriesProfile(queryProfiles)) {
+				return true;
+			}
+			return false;
+		}
+		return false;
 	}
 	
 	/**
@@ -224,6 +272,8 @@ public enum WorkingSetManager {
 				
 					AbstractIntelQuery query = QueryManager.INSTANCE.findQuery(s, queryUuid);
 					if (query == null) throw new Exception(Messages.WorkingSetManager_QueryNotFound);
+					if (!canAddQuery(query.getTypeKey())) return;
+					
 					queryName = query.getName();
 					wset = (IntelWorkingSet) s.get(IntelWorkingSet.class, activeWorkingSet);
 					if (wset != null){

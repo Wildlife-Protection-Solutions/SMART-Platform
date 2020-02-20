@@ -699,6 +699,7 @@ public class Messages extends NLS {
 	public static String GPSDeviceSelectionDialog_ErrorLoadingOptions;
 	public static String GPSDeviceSelectionDialog_Message;
 	public static String GPSDeviceSelectionDialog_Title;
+	public static String HiddenWorkingSetItem_WorkingSetItemHidden;
 	public static String ImageSizeLabelProvider_Large;
 	public static String ImageSizeLabelProvider_Medium;
 	public static String ImageSizeLabelProvider_Small;
@@ -754,6 +755,7 @@ public class Messages extends NLS {
 	public static String IntelEntityRecordQueryEditor_DefinitionSection;
 	public static String IntelEntityRecordQueryEditor_FilterTypeTooltip;
 	public static String IntelEntityRecordQueryEditor_FiltetypeLabel;
+	public static String IntelEntityRecordQueryEditor_ProfilesSection;
 	public static String IntelEntityRecordQueryEditor_ResultsSection;
 	public static String IntelEntityRecordWizardPage_SelectType;
 	public static String IntelEntityRelationWizardPage_SelectType;
@@ -980,6 +982,10 @@ public class Messages extends NLS {
 	public static String IntelRecordEntityLinkWizardPage_RecordEntityLinksDatasetName;
 	public static String IntelRecordGeoResourceInfo_Title;
 	public static String IntelRecordLocationWizardPage_RecordLocationsDatasetName;
+	public static String IntelRecordObservationQueryEditor_DefinitionSection;
+	public static String IntelRecordObservationQueryEditor_ProfileSection;
+	public static String IntelRecordQueryEditor_DefinitionSection;
+	public static String IntelRecordQueryEditor_ProfileFilterSection;
 	public static String IntelRecordQueryEngine_TaskName;
 	public static String IntelRecordService_DefaultName;
 	public static String IntelRecordServiceInfo_Description;
@@ -1173,6 +1179,7 @@ public class Messages extends NLS {
 	public static String ProfileDialog_ViewField;
 	public static String ProfileFilterHandler_SelectAll;
 	public static String ProfileFilterHandler_SelectNone;
+	public static String ProfilesDefinitionPanel_ProfileRequired;
 	public static String ProfilesManager_DeleteError;
 	public static String ProfilesManager_deleteProblem;
 	public static String ProfilesPreferencePage_AllFiles;
@@ -1693,6 +1700,7 @@ public class Messages extends NLS {
 	public static String SummaryDefinitionPanel_ColumnGroupbyHeader;
 	public static String SummaryDefinitionPanel_FilterOpHeader;
 	public static String SummaryDefinitionPanel_GroupByOpHeader;
+	public static String SummaryDefinitionPanel_ProfileFilterSection;
 	public static String SummaryDefinitionPanel_RowGroupByHeader;
 	public static String SummaryDefinitionPanel_ValuesHeader;
 	public static String TextFileSearcher_CanceledMsg;
@@ -1742,6 +1750,7 @@ public class Messages extends NLS {
 	public static String WorkingSetMapLayersJob_ParseError;
 	public static String WorkingSetMapLayersJob_QueryNotFound;
 	public static String WorkingSetQueryLayersJob_QueryRunError;
+	public static String WorkingSetView_CannotAddItemNotMappable;
 	public static String WorkingSetView_copyTooltip;
 	public static String WorkingSetView_createnewTooltip;
 	public static String WorkingSetView_DefaultName;

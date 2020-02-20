@@ -582,7 +582,7 @@ public class QueryView {
 					List<UUID> queries = new ArrayList<>();
 					for (Iterator<?> iterator = ((IStructuredSelection)control.getSelection()).iterator(); iterator.hasNext();) {
 						Object x = (Object) iterator.next();	
-						if (x instanceof QueryProxy){
+						if (x instanceof QueryProxy  && WorkingSetManager.INSTANCE.canAddQuery(((QueryProxy)x).getTypeKey())) {
 							queries.add(((QueryProxy) x).getUuid());
 						}
 					}
@@ -593,7 +593,16 @@ public class QueryView {
 			m.addMenuListener(new MenuListener() {
 				@Override
 				public void menuShown(MenuEvent e) {
-					miAdd.setEnabled(!control.getSelection().isEmpty() && WorkingSetManager.INSTANCE.isSet());
+					boolean canAdd = false;
+					for (Iterator<?> iterator = ((IStructuredSelection)control.getSelection()).iterator(); iterator.hasNext();) {
+						Object x = (Object) iterator.next();
+						if (x instanceof QueryProxy && WorkingSetManager.INSTANCE.canAddQuery(((QueryProxy)x).getTypeKey())) {
+							canAdd = true;break;
+							
+						}
+						
+					}
+					miAdd.setEnabled(canAdd && WorkingSetManager.INSTANCE.isSet());
 				}
 				
 				@Override

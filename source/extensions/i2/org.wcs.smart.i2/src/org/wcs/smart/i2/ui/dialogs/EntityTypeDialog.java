@@ -199,9 +199,10 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 		Set<IntelProfile> newProfiles = new HashSet<>();
 		for (Object x : tblProfiles.getCheckedElements()) newProfiles.add((IntelProfile)x);
 		
+		
 		try(Session s = HibernateManager.openSession()){
 			
-			if (!isNew) {
+			if (!isNew && !newProfiles.isEmpty()) {
 				String hql = "SELECT count(*) FROM IntelEntity WHERE entityType = :type and profile NOT IN (:profiles)"; //$NON-NLS-1$
 				Long cnt = (Long) s.createQuery(hql).setParameter("type", type).setParameterList("profiles", newProfiles).uniqueResult(); //$NON-NLS-1$ //$NON-NLS-2$
 				if (cnt > 0) {
@@ -228,7 +229,7 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 							IntelProfile pp = s.get(IntelProfile.class, ip.getUuid());
 							pp.getEntityTypes().remove(mp);
 							type.getProfiles().remove(mp);
-							s.delete(pp);
+							//s.delete(mp);
 						}
 					}
 				}

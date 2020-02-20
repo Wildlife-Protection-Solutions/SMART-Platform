@@ -116,7 +116,7 @@ public class SummaryDefinitionPanel implements IDefinitionPanel {
 		headerPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		header = new SectionTabHeader(new String[] {Messages.SummaryDefinitionPanel_GroupByOpHeader, 
-				Messages.SummaryDefinitionPanel_FilterOpHeader, "Profile Filter"}, headerPart, toolkit);
+				Messages.SummaryDefinitionPanel_FilterOpHeader, Messages.SummaryDefinitionPanel_ProfileFilterSection}, headerPart, toolkit);
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridLayout)header.getLayout()).marginWidth = 0;
 		((GridLayout)header.getLayout()).numColumns = ((GridLayout)header.getLayout()).numColumns  + 2; 

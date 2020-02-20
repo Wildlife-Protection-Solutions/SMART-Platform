@@ -690,7 +690,7 @@ public class RecordSourceDialog extends SmartStyledTitleDialog{
 			//which means that the profile associated with the record
 			//must match one of the profiles associated with that record source
 			
-			if (currentSelection.getUuid() != null) {
+			if (!newProfiles.isEmpty() && currentSelection.getUuid() != null) {
 				String hsql = "SELECT count(*) FROM IntelRecord r WHERE r.recordSource = :source and profile not in (:profiles)"; //$NON-NLS-1$
 				Long cnt = (Long)session.createQuery(hsql).setParameter("source", currentSelection).setParameter("profiles", newProfiles).uniqueResult(); //$NON-NLS-1$ //$NON-NLS-2$
 				if (cnt > 0) {

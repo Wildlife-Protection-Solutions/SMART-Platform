@@ -132,7 +132,6 @@ public class IntelSummaryQueryEditor extends EditorPart implements IQueryEditor{
 	private SummaryDefinitionPanel summaryPanel;
 	private ToolItem[] runItem = new ToolItem[2];
 	private ToolItem saveItem;
-	private ToolItem wsetItem;
 
 	//results area
 	private Composite stackPanel;
@@ -315,14 +314,7 @@ public class IntelSummaryQueryEditor extends EditorPart implements IQueryEditor{
 		};
 		eventBroker.subscribe(IntelEvents.QUERY_DELETED, handler);
 		eventHandles.add(handler);
-		
-		handler = (e) -> {
-			if (wsetItem != null) wsetItem.setEnabled(WorkingSetManager.INSTANCE.isSet());
-		};
-		
-		eventHandles.add(handler);
-		eventBroker.subscribe(IntelEvents.ACTIVE_WS_SET, handler);
-		
+
 		//profiles modified
 		handler = event->{
 			if (!query.queriesProfile(ProfilesManager.INSTANCE.getActiveProfileKeys())) closeEditor(true);
@@ -372,12 +364,6 @@ public class IntelSummaryQueryEditor extends EditorPart implements IQueryEditor{
 			saveAsItem.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_SAVEAS_EDIT));
 			saveAsItem.addListener(SWT.Selection, (event)->doSaveAs());
 			saveAsItem.setToolTipText(Messages.IntelQueryEditor_saveAsTooltip);
-		
-			wsetItem = new ToolItem(headerToolbar, SWT.PUSH);
-			wsetItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_WORKINGSET_NEW));
-			wsetItem.addListener(SWT.Selection, (event)->WorkingSetManager.INSTANCE.addQueryToActiveWorkingSet(Collections.singleton(getQuery()), context));
-			wsetItem.setToolTipText(Messages.IntelQueryEditor_AddWsTooltip);
-			wsetItem.setEnabled(WorkingSetManager.INSTANCE.isSet());
 		}
 		
 		ToolItem exportItem = new ToolItem(headerToolbar, SWT.PUSH);

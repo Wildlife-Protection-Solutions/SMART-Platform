@@ -36,6 +36,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.i2.ProfilesManager;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.security.IntelSecurityManager;
@@ -90,7 +91,7 @@ public class ProfilesDefinitionPanel implements IDefinitionPanel {
 	 * Validates the items in the filter panel 
 	 */
 	public String validate(){
-		if (chProfiles.getCheckedElements().length == 0) return "At least one profile must be selected";
+		if (chProfiles.getCheckedElements().length == 0) return Messages.ProfilesDefinitionPanel_ProfileRequired;
 		return null;
 	}
 	
