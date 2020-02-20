@@ -137,7 +137,11 @@ public class StyleManager {
 						if (name.equals(ID_KEY)){ 
 							styleId = reader.nextString();
 						}else if (name.equals(VALUE_KEY)){ 
-							value = reader.nextString();
+							if (reader.peek() == JsonToken.NULL) {
+								reader.nextNull();	
+							}else {
+								value = reader.nextString();
+							}
 						}else{
 							reader.skipValue();
 						}

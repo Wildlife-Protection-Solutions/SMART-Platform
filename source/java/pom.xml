@@ -558,6 +558,18 @@
 			</modules>
 		</profile>
 		<profile>
+			<id>paws</id>
+			<modules>
+				<module>org.wcs.smart.license.feature</module>
+				<module>org.wcs.smart.updatesite</module>
+				
+				<module>../extensions/paws/org.wcs.smart.paws</module>
+				<module>../extensions/paws/org.wcs.smart.paws.core.feature</module>
+				<module>../extensions/paws/org.wcs.smart.paws.feature</module>
+				 
+			</modules>
+		</profile>
+		<profile>
 			<id>plugins</id>
 			
 			<modules>
@@ -649,6 +661,9 @@
 				<module>../extensions/r/org.wcs.smart.r.core.feature</module>
 				<module>../extensions/r/org.wcs.smart.r.feature</module>
 				
+				<module>../extensions/paws/org.wcs.smart.paws</module>
+				<module>../extensions/paws/org.wcs.smart.paws.core.feature</module>
+				<module>../extensions/paws/org.wcs.smart.paws.feature</module>
 			</modules>
 		</profile>
 		<profile>
@@ -729,6 +744,10 @@
 
 				<module>../extensions/r/translations/org.wcs.smart.r.nl</module>
 				<module>../extensions/r/translations/org.wcs.smart.r.feature.nl</module>		
+				
+				
+				<module>../extensions/r/translations/org.wcs.smart.paws.nl</module>
+				<module>../extensions/r/translations/org.wcs.smart.paws.feature.nl</module>
 			</modules>
 		</profile>
 	</profiles>
