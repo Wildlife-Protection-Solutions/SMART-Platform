@@ -582,6 +582,7 @@ public class CtJsonExportUtils {
 		List<? extends NamedKeyItem> items = QueryFactory.buildQuery(session, clazz, 
 				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
 				new Object[] {"isActive", true}).list(); //$NON-NLS-1$
+		
 		for (NamedKeyItem t : items) {
 			JSONObject ttype = new JSONObject();
 			ttype.put("uuid", UuidUtils.uuidToString(t.getUuid())); //$NON-NLS-1$

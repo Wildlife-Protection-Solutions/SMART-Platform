@@ -324,10 +324,14 @@ public enum PatrolPackageExporter {
 	
 		JSONArray metadataScreens = new JSONArray();
 		
-		metadataScreens.add(CtJsonExportUtils.convertKeyOptions(map.get(PatrolMetadataField.TRANSPORT.name()), 
+		JSONObject transportScreen = CtJsonExportUtils.convertKeyOptions(map.get(PatrolMetadataField.TRANSPORT.name()), 
 				PatrolTransportType.class, PatrolMetadataField.TRANSPORT.getJsonKey(), 
 				Messages.PatrolPackageExporter_TransportTypePageLabel, PatrolMetadataField.TRANSPORT.isRequired(), 
-				false, session, ctpackage.getConservationArea()));
+				false, session, ctpackage.getConservationArea());
+		JSONObject joo = (JSONObject) transportScreen.get(PatrolMetadataField.TRANSPORT.getJsonKey());
+		JSONArray it = (JSONArray) joo.get(CtJsonExportUtils.JSON_OPTION_PROP_KEY);
+		if (it.size() == 0) throw new IOException(Messages.PatrolPackageExporter_NoPatrolTypes);
+		metadataScreens.add(transportScreen);
 		
 		metadataScreens.add(convertArmed(map.get(PatrolMetadataField.ARMED.name()), session, ctpackage.getConservationArea()));
 		

@@ -225,6 +225,8 @@ public class Messages extends NLS {
 	public static String PatrolPackageExporter_CommentPageLabel;
 	public static String PatrolPackageExporter_LeaderPageLabel;
 	public static String PatrolPackageExporter_MandatePageLabel;
+
+	public static String PatrolPackageExporter_NoPatrolTypes;
 	public static String PatrolPackageExporter_ObjectivePageLabel;
 	public static String PatrolPackageExporter_PilotPageLabel;
 	public static String PatrolPackageExporter_StationFieldKey;
