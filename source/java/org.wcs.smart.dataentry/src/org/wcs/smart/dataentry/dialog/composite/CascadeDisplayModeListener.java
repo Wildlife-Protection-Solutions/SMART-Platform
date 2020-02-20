@@ -80,6 +80,7 @@ public class CascadeDisplayModeListener implements Listener {
 		}else if (attribute != null) {
 			processAttribute(attribute, newMode);
 		}
+		node.fireModelChanged();
 	}
 	
 	private void processNode(CmNode node, DisplayMode newMode) {

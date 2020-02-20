@@ -142,7 +142,7 @@ public class ConfigurableModelEditorConnectTab implements IConfigurableModelEdit
 
 	@Override
 	public String getTabName() {
-		return Messages.ConfigurableModelEditorConnectTab_TabName;
+		return Messages.ConfigurableModelEditorConnectTab_CtClassicConnect;
 	}
 
 	@Override

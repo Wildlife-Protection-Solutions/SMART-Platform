@@ -105,6 +105,8 @@ public class HelpContentComposite extends Composite {
 	private Shell previewShell;
 	private Shell importShell;
 
+	private boolean fireChanged = true;
+	
 	public HelpContentComposite(Composite parent, IModelChangedListener listener) {
 		super(parent, SWT.NONE);
 		this.listener = listener;
@@ -148,7 +150,7 @@ public class HelpContentComposite extends Composite {
 
 			attribute.setImportHelpFile(copyOptions.imagePath);
 			refreshImage();
-			listener.modelChanged();
+			fireChanged();
 		});
 
 		tiAssignAll = new ToolItem(tb, SWT.NONE);
@@ -221,7 +223,7 @@ public class HelpContentComposite extends Composite {
 			if (attribute == null)
 				return;
 			attribute.setHelpImageLocation((HelpImageLocation) cmbImageLoc.getStructuredSelection().getFirstElement());
-			listener.modelChanged();
+			fireChanged();
 		});
 
 		Button btnSelect = new Button(btnComp, SWT.NONE);
@@ -240,7 +242,7 @@ public class HelpContentComposite extends Composite {
 				attribute.setHelpFormat(null);
 			}
 			refreshImage();
-			listener.modelChanged();
+			fireChanged();
 		});
 
 		SmartUiUtils.createHeaderLabel(this, Messages.HelpContentComposite_TextSectionHeader);
@@ -251,7 +253,7 @@ public class HelpContentComposite extends Composite {
 			if (attribute == null)
 				return;
 			attribute.setHelpText(txtText.getText());
-			listener.modelChanged();
+			fireChanged();
 		});
 
 		Button btnPreview = new Button(this, SWT.NONE);
@@ -261,6 +263,11 @@ public class HelpContentComposite extends Composite {
 		btnPreview.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 	}
 
+	private void fireChanged() {
+		if (!fireChanged) return;
+		listener.modelChanged();
+
+	}
 	private void preview() {
 		if (previewShell == null || previewShell.isDisposed()) {
 			previewShell = new Shell(getShell());
@@ -276,26 +283,30 @@ public class HelpContentComposite extends Composite {
 	}
 
 	public void setAttribute(CmAttribute attribute) {
-		this.attribute = attribute;
-		if (imgCache != null) {
-			imgCache.dispose();
-			imgCache = null;
-		}
-
-		if (attribute != null) {
-			txtText.setText(attribute.getHelpText() == null ? "" : attribute.getHelpText()); //$NON-NLS-1$
-			if (attribute.getHelpImageLocation() != null) {
-				cmbImageLoc.setSelection(new StructuredSelection(attribute.getHelpImageLocation()));
+		try {
+			fireChanged = false;
+			this.attribute = attribute;
+			if (imgCache != null) {
+				imgCache.dispose();
+				imgCache = null;
 			}
-			tiAssignAll.setToolTipText(MessageFormat
-					.format(Messages.HelpContentComposite_assignalltooltip2, attribute.getName()));
-			loadCm.schedule();
-		} else {
-			txtText.setText(""); //$NON-NLS-1$
-			cmbImageLoc.setSelection(new StructuredSelection(CmAttribute.HelpImageLocation.BEFORE));
+
+			if (attribute != null) {
+				txtText.setText(attribute.getHelpText() == null ? "" : attribute.getHelpText()); //$NON-NLS-1$
+				if (attribute.getHelpImageLocation() != null) {
+					cmbImageLoc.setSelection(new StructuredSelection(attribute.getHelpImageLocation()));
+				}
+				tiAssignAll.setToolTipText(MessageFormat
+						.format(Messages.HelpContentComposite_assignalltooltip2, attribute.getName()));
+				loadCm.schedule();
+			} else {
+				txtText.setText(""); //$NON-NLS-1$
+				cmbImageLoc.setSelection(new StructuredSelection(CmAttribute.HelpImageLocation.BEFORE));
+			}
+			refreshImage();
+		}finally {
+			fireChanged = true;
 		}
-		refreshImage();
-		
 	}
 
 	private void importHelp() {
@@ -348,7 +359,7 @@ public class HelpContentComposite extends Composite {
 				}
 				imgPath = attribute.getImportHelpFile();
 				refreshImage();
-				listener.modelChanged();
+				fireChanged();
 				importShell.dispose();
 				importShell = null;
 			}
@@ -472,7 +483,7 @@ public class HelpContentComposite extends Composite {
 				}
 			}
 		}
-		listener.modelChanged();
+		fireChanged();
 	}
 
 	private void refreshImage() {
@@ -510,7 +521,7 @@ public class HelpContentComposite extends Composite {
 		attribute.setImportHelpFile(p);
 		attribute.setHelpImageLocation((HelpImageLocation) cmbImageLoc.getStructuredSelection().getFirstElement());
 		refreshImage();
-		listener.modelChanged();
+		fireChanged();
 	}
 	
 	Job loadCm = new Job(Messages.HelpContentComposite_loadingcmjobname) {

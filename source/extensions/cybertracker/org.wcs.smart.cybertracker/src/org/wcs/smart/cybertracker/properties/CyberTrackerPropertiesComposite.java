@@ -63,8 +63,8 @@ import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption;
-import org.wcs.smart.cybertracker.model.ProjectionFormat;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption.ProfileOptionID;
+import org.wcs.smart.cybertracker.model.ProjectionFormat;
 
 /**
  * Composite that contains controls to edit CyberTracker properties.

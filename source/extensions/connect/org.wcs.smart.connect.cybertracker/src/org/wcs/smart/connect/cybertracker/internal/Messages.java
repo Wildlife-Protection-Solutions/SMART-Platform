@@ -31,6 +31,7 @@ public class Messages extends NLS {
 	public static String ConfigurableModelEditorConnectTab_ConnectDialogMessage;
 	public static String ConfigurableModelEditorConnectTab_ConnectDialogText;
 	public static String ConfigurableModelEditorConnectTab_ConnectDialogTitle;
+	public static String ConfigurableModelEditorConnectTab_CtClassicConnect;
 	public static String ConfigurableModelEditorConnectTab_DataUploadLabel;
 	public static String ConfigurableModelEditorConnectTab_DataUploadTime;
 	public static String ConfigurableModelEditorConnectTab_DataUploadTooltip;

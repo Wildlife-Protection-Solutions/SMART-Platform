@@ -172,7 +172,14 @@ public class CmRootNodeInfoComposite extends AbstractInfoComposite {
 	
 	public void setSourceObject(CmRootNode rootNode, Language language) {
 		this.rootNode = rootNode;
-		fireSourceObjectChanged(rootNode, language);
+		try {
+			fireChanged = false;
+			fireSourceObjectChanged(rootNode, language);
+		}finally {
+			fireChanged = true;
+		}
+		
+		
 	}
 	
 }

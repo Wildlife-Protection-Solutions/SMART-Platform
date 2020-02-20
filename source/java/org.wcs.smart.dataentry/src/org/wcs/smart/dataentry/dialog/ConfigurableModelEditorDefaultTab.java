@@ -418,6 +418,7 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 	@Override
 	public void performSave(Session s) {
 		s.saveOrUpdate(dialog.getModel());
+		addedConfigs.forEach(e->s.saveOrUpdate(e));
 		dialog.getModel().getDefaultConfigs().values().forEach(e->s.saveOrUpdate(e));
 		deletedConfigs.clear();
 	}

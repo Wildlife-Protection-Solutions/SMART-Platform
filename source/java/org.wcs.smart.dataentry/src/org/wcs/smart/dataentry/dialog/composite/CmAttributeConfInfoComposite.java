@@ -178,7 +178,7 @@ public abstract class CmAttributeConfInfoComposite extends CmAttributeInfoCompos
 		}
 		
 		List<CmAttributeConfig> cfgList = getConfigs(getSourceObject());
-		cfgList.sort(new CmAttributeConfigComparator());
+		//cfgList.sort(new CmAttributeConfigComparator());
 		configViewer.setInput(cfgList);
 		configViewer.setSelection(new StructuredSelection(cfg));
 		handleConfigViewerSelectionChanged();

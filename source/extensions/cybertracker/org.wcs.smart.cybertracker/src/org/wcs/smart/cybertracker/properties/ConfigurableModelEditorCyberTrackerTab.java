@@ -83,7 +83,8 @@ public class ConfigurableModelEditorCyberTrackerTab implements IConfigurableMode
 	
 	@Override
 	public String getTabName() {
-		return Messages.ConfigurableModelEditorCyberTrackerTab_TabName;
+//		return Messages.ConfigurableModelEditorCyberTrackerTab_TabName;
+		return "Device Settings";
 	}
 
 	private void initProfile() {

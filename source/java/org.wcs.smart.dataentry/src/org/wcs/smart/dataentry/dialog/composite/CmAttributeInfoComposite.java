@@ -294,25 +294,30 @@ public abstract class CmAttributeInfoComposite extends AbstractInfoComposite {
 	
 	public void setSourceObject(CmAttribute attribute, Language language) {
 		this.attribute = attribute;
-		//load icon files as necessary
-		if (attribute.getAttribute().getIcon() != null) loadFiles(attribute.getAttribute().getIcon(), session);
-		if (attribute.getCurrentList() != null) {
-			for (CmAttributeListItem li : attribute.getCurrentList()) {
-				if (li.getListItem().getIcon() != null) loadFiles(li.getListItem().getIcon(), session);
+		try {
+			fireChanged = false;
+			//load icon files as necessary
+			if (attribute.getAttribute().getIcon() != null) loadFiles(attribute.getAttribute().getIcon(), session);
+			if (attribute.getCurrentList() != null) {
+				for (CmAttributeListItem li : attribute.getCurrentList()) {
+					if (li.getListItem().getIcon() != null) loadFiles(li.getListItem().getIcon(), session);
+				}
 			}
-		}
-		if (attribute.getCurrentTree() != null) {
-			List<CmAttributeTreeNode> nodes = new ArrayList<>();
-			nodes.addAll(attribute.getCurrentTree());
-			while(!nodes.isEmpty()) {
-				CmAttributeTreeNode node = nodes.remove(0);
-				if (node.getDmTreeNode() != null && node.getDmTreeNode().getIcon() != null) loadFiles(node.getDmTreeNode().getIcon(), session);
-				if (node.getChildren() != null) nodes.addAll(node.getChildren());
-
+			if (attribute.getCurrentTree() != null) {
+				List<CmAttributeTreeNode> nodes = new ArrayList<>();
+				nodes.addAll(attribute.getCurrentTree());
+				while(!nodes.isEmpty()) {
+					CmAttributeTreeNode node = nodes.remove(0);
+					if (node.getDmTreeNode() != null && node.getDmTreeNode().getIcon() != null) loadFiles(node.getDmTreeNode().getIcon(), session);
+					if (node.getChildren() != null) nodes.addAll(node.getChildren());
+	
+				}
 			}
+			imageSelection.updateImage();
+			fireSourceObjectChanged(attribute, language);
+		}finally {
+			fireChanged = true;
 		}
-		imageSelection.updateImage();
-		fireSourceObjectChanged(attribute, language);
 	}
 
 }

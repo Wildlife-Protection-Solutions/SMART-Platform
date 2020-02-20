@@ -755,7 +755,7 @@
          </command>
          <command
                commandId="org.wcs.smart.command.map.selectbasemap"
-               icon="images/icons/elcl16/load_map.png"
+               icon="images/icons/shared16/map.png"
                label="%selectbasemap.command.label"
                style="push"
                tooltip="%selectbasemap.command.tooltip">
@@ -836,7 +836,7 @@
          </separator>
          <command
                commandId="org.wcs.smart.command.map.addlayer"
-               icon="images/icons/elcl16/layer_add.png"
+               icon="images/icons/shared16/add.png"
                label="%addlayer.command.label"
                style="push"
                tooltip="%addlayer.command.tooltip">
@@ -1368,7 +1368,7 @@
       <actionTool
             categoryId="org.wcs.smart.udig.maptools"
             class="org.wcs.smart.udig.AddLayerTool"
-            icon="images/icons/elcl16/layer_add.png"
+            icon="images/icons/shared16/add.png"
             id="org.wcs.smart.udig.AddLayer"
             name="%addlayer.tool.name"
             tooltip="%addlayer.tool.tooltip">
@@ -1385,7 +1385,7 @@
       <actionTool
             categoryId="org.wcs.smart.udig.maptools"
             class="org.wcs.smart.udig.SetBasemapTool"
-            icon="images/icons/elcl16/load_map.png"
+            icon="images/icons/shared16/map.png"
             id="org.wcs.smart.map.setBasemap"
             name="%setbasemap.tool.name"
             onToolbar="false"

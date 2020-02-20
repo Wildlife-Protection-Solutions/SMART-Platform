@@ -263,7 +263,10 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 		label.setText(Messages.EditListDialog_DisplayMode);
 		
 		DisplayModeComboViewer modeViewer = new DisplayModeComboViewer(container);
-		modeViewer.addDisplayModeChangeListener(e->node.setDisplayMode(modeViewer.getSelectedDisplayMode()));
+		modeViewer.addDisplayModeChangeListener(e->{
+			node.setDisplayMode(modeViewer.getSelectedDisplayMode());
+			fireModelChanged();
+		});
 		modeViewer.addCascadeListener(new CascadeDisplayModeListener(modeViewer, this));
 		modeViewer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
@@ -405,13 +408,17 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 
 	public void setSourceObject(CmNode node, Language currentLanguage) {
 		this.node = node;
-		
-		if (node.getCategory() != null) {
-			if (node.getCategory().getIcon() != null) {
-				loadFiles(node.getCategory().getIcon(), session);
+		try {
+			fireChanged = false;
+			if (node.getCategory() != null) {
+				if (node.getCategory().getIcon() != null) {
+					loadFiles(node.getCategory().getIcon(), session);
+				}
 			}
-		}
 		
-		fireSourceObjectChanged(node, currentLanguage);
+			fireSourceObjectChanged(node, currentLanguage);
+		}finally {
+			fireChanged = true;
+		}
 	}
 }

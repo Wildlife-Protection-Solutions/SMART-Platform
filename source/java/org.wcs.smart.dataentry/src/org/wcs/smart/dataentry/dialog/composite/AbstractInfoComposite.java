@@ -84,6 +84,7 @@ public abstract class AbstractInfoComposite extends Composite {
 	private List<IModelChangedListener> modelListeners = new ArrayList<IModelChangedListener>();
 	private List<ISourceObjectChangedListener> sourceListeners = new ArrayList<ISourceObjectChangedListener>();
 
+	protected boolean fireChanged = true;
 	
 	public AbstractInfoComposite(Composite parent, ConfigurableModel model) {
 		super(parent, SWT.NONE);
@@ -412,6 +413,7 @@ public abstract class AbstractInfoComposite extends Composite {
 	}
 	
 	protected void fireModelChanged() {
+		if (!fireChanged) return;
 		for (IModelChangedListener listener : modelListeners) {
 			listener.modelChanged();
 		}
