@@ -46,6 +46,22 @@
       <ImageProvider
             class="org.wcs.smart.reporttable.TableImageProvider">
       </ImageProvider>
+      <TableCategory
+            icon="platform:/plugin/org.wcs.smart/images/icons/etool16/area_polygon.png"
+            id="org.wcs.smart.ca.areas"
+            name="Area Tables">
+      </TableCategory>
+      <DynamicTable
+            category="org.wcs.smart.ca.areas"
+            class="org.wcs.smart.reporttable.ca.AreaTables"
+            supportsCcaa="true">
+      </DynamicTable>
+   </extension>
+   <extension
+         point="org.wcs.smart.birt.map.maplayer">
+      <MapLayer
+            maplayer="org.wcs.smart.reporttable.ca.AreaTableMapLayer">
+      </MapLayer>
    </extension>
 
 </plugin>

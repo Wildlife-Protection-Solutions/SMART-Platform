@@ -1171,6 +1171,13 @@ public class Messages extends NLS {
 	public static String SmartInstallationInfoPage_GPSBabel_LocationLabel;
 	public static String SmartInstallationInfoPage_SystemLang_Label;
 	public static String SmartLabelProvider_AgencyRankColumnName;
+	public static String SmartLabelProvider_areaareamname;
+	public static String SmartLabelProvider_areaareaname;
+	public static String SmartLabelProvider_areacaidcolumnname;
+	public static String SmartLabelProvider_areacanamecolumnname;
+	public static String SmartLabelProvider_areageometryname;
+	public static String SmartLabelProvider_areakeyname;
+	public static String SmartLabelProvider_AreasTableName;
 	public static String SmartLabelProvider_AttributeNotFound;
 	public static String SmartLabelProvider_AttributeTypeNotFound;
 	public static String SmartLabelProvider_CaColumnName;

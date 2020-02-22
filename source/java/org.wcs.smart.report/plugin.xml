@@ -543,6 +543,37 @@
                   style="push"
                   tooltip="%report.menu.newreport.command.tooltip">
             </command>
+            <command
+                  commandId="org.wcs.smart.command.showperspective"
+                  icon="platform:/plugin/org.wcs.smart/images/icons/shared16/edit.png"
+                  label="Edit Report"
+                  mnemonic="e"
+                  style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <or>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="analyst">
+                     </test>
+                  </or>
+               </visibleWhen>
+               <parameter
+                     name="org.wcs.smart.perspectiveid"
+                     value="org.wcs.smart.report.ReportPerspective">
+               </parameter>
+            </command>
             <separator
                   name="org.wcs.smart.report.separator2"
                   visible="true">

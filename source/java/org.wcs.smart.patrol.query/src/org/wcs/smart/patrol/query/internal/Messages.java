@@ -1,3 +1,4 @@
+
 package org.wcs.smart.patrol.query.internal;
 
 import org.eclipse.osgi.util.NLS;
@@ -80,6 +81,8 @@ public class Messages extends NLS {
 	public static String GriddedFilterPanel_CopyError;
 	public static String GriddedFilterPanel_RefreshJobName;
 	public static String GriddedQuery_DefaultQueryName;
+	public static String PatrolAreaBufferValueDropItem_BufferText;
+	public static String PatrolAreaBufferValueDropItem_buffertooltip;
 	public static String PatrolAttachmentTooltipProvider_ObservationLbl;
 	public static String PatrolAttachmentTooltipProvider_ObsGroupHeader;
 	public static String PatrolAttachmentTooltipProvider_PatrolIdLbl;
@@ -136,6 +139,7 @@ public class Messages extends NLS {
 	public static String PatrolQueryEditorTableContent_QueryPropertiesLabel;
 	public static String PatrolQueryEditorTableContent_RunQueryLink;
 	public static String PatrolQueryLabelProvider_AgencyLabel;
+	public static String PatrolQueryLabelProvider_InvalidBufferValue;
 	public static String PatrolQueryLabelProvider_LastModified_ColumnName;
 	public static String PatrolQueryLabelProvider_LastModifiedBy_ColumnName;
 	public static String PatrolQueryLabelProvider_NumTimeRanges;
@@ -144,6 +148,7 @@ public class Messages extends NLS {
 	public static String PatrolQueryLabelProvider_RawXColumnName;
 	public static String PatrolQueryLabelProvider_RawYColumnName;
 	public static String PatrolQueryLabelProvider_TotalActivePatrolHours;
+	public static String PatrolQueryLabelProvider_TrackAreaValueItem;
 	public static String PatrolQueryMemoryResult_DeleteError;
 	public static String PatrolQueryOptions_CaGroupByOptionName;
 	public static String PatrolQueryOptions_ErrorInvalidPatrolFilterValue;
@@ -188,6 +193,7 @@ public class Messages extends NLS {
 	public static String PatrolStartDateField_PatrolStartDate;
 	public static String PatrolSummaryGroupByValuePanel_GroupByPanelTitle;
 	public static String PatrolSummaryGroupByValuePanel_ValueError;
+	public static String PatrolSummaryQueryType_invalidGroupByOptions;
 	public static String PatrolSummaryQueryType_SummaryQueryTypeName;
 	public static String PatrolValueDropItem_ExcludeDaysWithoutDataOption;
 	public static String PatrolValueItemLabelProvider_AllLabel;

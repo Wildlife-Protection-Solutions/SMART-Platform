@@ -171,7 +171,10 @@ public class Upgrader620To700 implements IDatabaseUpgrader {
 				"ALTER TABLE smart.iconfile ADD CONSTRAINT iconfile_iconuuid_fk FOREIGN KEY (icon_uuid) REFERENCES smart.icon(uuid) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 				"ALTER TABLE smart.iconfile ADD CONSTRAINT iconfile_iconsetuuid_fk FOREIGN KEY (iconset_uuid) REFERENCES smart.iconset(uuid) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 
-				"DROP FUNCTION smart.tempuuid" //$NON-NLS-1$
+				"DROP FUNCTION smart.tempuuid", //$NON-NLS-1$
+				
+				"CREATE DERBY AGGREGATE smart.unionarea FOR blob RETURNS double precision EXTERNAL NAME 'org.wcs.smart.util.AreaUnionAggregate'", //$NON-NLS-1$
+				"CREATE FUNCTION smart.buffer(geom blob, buffer double precision) returns blob LANGUAGE JAVA NOT deterministic external name 'org.wcs.smart.util.GeometryUtils.buffer' PARAMETER STYLE JAVA NO SQL RETURNS NULL ON NULL INPUT", //$NON-NLS-1$
 		};
 
 		for (String s : sql) {

@@ -206,6 +206,34 @@ public class GeometryUtils {
 	}
 	
 	/**
+	 * Buffers the given geometry by the provided value and returns
+	 * a geometry in a equal area projection (auto2)
+	 * 
+	 * @param wkb1
+	 * @param wkb2
+	 * @return
+	 */
+	public static Blob buffer(Blob wkb1, double bufferValue){
+		if (wkb1 == null) return null;
+		if (bufferValue <= 0) return wkb1;
+		try{
+			Geometry g1 = gFromWKB(wkb1.getBytes(1, (int)wkb1.length()));
+			
+			Coordinate c = g1.getCentroid().getCoordinate();
+			CoordinateReferenceSystem targetCRS = CRS.decode("AUTO2:42001,"+c.x+","+c.y); //$NON-NLS-1$ //$NON-NLS-2$
+			
+			Geometry g2 = JTS.transform(g1, ReprojectUtils.findMathTransform(targetCRS)).buffer(bufferValue);
+			//tansform back to 
+			g2 = JTS.transform(g2,CRS.findMathTransform(targetCRS, SMART_CRS));
+			
+			return new SerialBlob(wkbwriter().write(g2));
+		}catch (Throwable e){
+ 			throw new RuntimeException ( e );
+		}
+	}
+	
+	
+	/**
 	 * Computes the intersection of two geometries.
 	 * <p>Assumes the wkb geometries are in the same projection.</p>
 	 * @param wkb1

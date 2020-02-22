@@ -150,6 +150,15 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 		if (value.equals(DataModelMerger.ProgressMessages.MERGINGATTRIBUTES)) return Messages.DataModelMerger_SubTask2;
 		if (value.equals(DataModelMerger.ProgressMessages.MERGINGCATEGORIES)) return Messages.DataModelMerger_SubTask3;
 						
+		if (value.equals(AREA_TABLENAME_KEY)) return Messages.SmartLabelProvider_AreasTableName;
+		
+		if (value.equals(AREATABLE_CAID_KEY)) return Messages.SmartLabelProvider_areacaidcolumnname;
+		if (value.equals(AREATABLE_CANAME_KEY)) return Messages.SmartLabelProvider_areacanamecolumnname;
+		if (value.equals(AREATABLE_NAME_KEY)) return Messages.SmartLabelProvider_areaareaname;
+		if (value.equals(AREATABLE_KEY_KEY)) return Messages.SmartLabelProvider_areakeyname;
+		if (value.equals(AREATABLE_AREA_KEY)) return Messages.SmartLabelProvider_areaareamname;
+		if (value.equals(AREATABLE_GEOMETRY_KEY)) return Messages.SmartLabelProvider_areageometryname;
+		
 		return null;
 	}
 

@@ -54,6 +54,7 @@ import org.wcs.smart.patrol.query.parser.internal.summary.PatrolAttributeValueIt
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolCategoryValueItem;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolGroupBy;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItem;
+import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItemAreaBuffer;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItemCustomDates;
 import org.wcs.smart.patrol.query.ui.PatrolOptionData;
 import org.wcs.smart.patrol.query.ui.definition.PatrolGridNoDataFilterPanel;
@@ -62,6 +63,7 @@ import org.wcs.smart.patrol.query.ui.definition.PatrolSummaryGroupByValuePanel;
 import org.wcs.smart.patrol.query.ui.definition.SimpleValueRateFilterPanel;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.BooleanPatrolDropItem;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.CustomHourRangeValueDropItem;
+import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolAreaBufferValueDropItem;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolDropItems;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolGroupByDropItem;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolIdDropItem;
@@ -180,6 +182,10 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 			CustomHourRangeValueDropItem di = new CustomHourRangeValueDropItem(item.getPatrolValueOption());
 			di.initializeData(Arrays.asList(((PatrolValueItemCustomDates)item).getStartTime(), ((PatrolValueItemCustomDates)item).getEndTime()));
 			return di;
+		}else if (item.getPatrolValueOption() == PatrolValueOption.AREA_BUFFER) {
+			PatrolAreaBufferValueDropItem di = new PatrolAreaBufferValueDropItem(item.getPatrolValueOption());
+			di.initializeData( ((PatrolValueItemAreaBuffer)item).getBufferValue()   );
+			return di;
 		}
 		PatrolValueDropItem di = new PatrolValueDropItem(item.getPatrolValueOption());
 		di.initializeData(item.includeNoData());
@@ -189,6 +195,8 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 	public DropItem createPatrolValueDropItem(PatrolValueOption item){
 		if (item == PatrolValueOption.NUM_CUSTOM) {
 			return  new CustomHourRangeValueDropItem(item);
+		}else if (item == PatrolValueOption.AREA_BUFFER) {
+			return new PatrolAreaBufferValueDropItem(item);
 		}
 		PatrolValueDropItem di = new PatrolValueDropItem(item);
 		return di;

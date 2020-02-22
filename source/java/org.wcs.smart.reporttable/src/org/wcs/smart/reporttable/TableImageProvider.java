@@ -26,6 +26,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.data.oda.smart.impl.table.ITableImageProvider;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.reporttable.ca.AreaTable;
 import org.wcs.smart.reporttable.ca.CaTable;
 import org.wcs.smart.reporttable.ca.EmployeeTable;
 import org.wcs.smart.reporttable.ca.StationTable;
@@ -55,6 +56,8 @@ public class TableImageProvider implements ITableImageProvider {
 			return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_MANDATE_ICON);
 		}else if (table instanceof TeamTable){
 			return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_TEAM_ICON);
+		}else if (table instanceof AreaTable) {
+			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.AREA_ICON);
 		}
 		return null;
 	}

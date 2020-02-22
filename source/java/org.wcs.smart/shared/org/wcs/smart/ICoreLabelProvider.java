@@ -70,5 +70,13 @@ public interface ICoreLabelProvider extends ISharedLabelProvider {
 	public static final String CA_COUNTRY_KEY = "cacountrykey"; //$NON-NLS-1$
 	public static final String CA_OWNER_KEY = "caownerkey"; //$NON-NLS-1$
 	
+	public static final String AREA_TABLENAME_KEY = "areatablenamekey"; //$NON-NLS-1$
+	public static final String AREATABLE_CAID_KEY = "areatablecaidkey"; //$NON-NLS-1$
+	public static final String AREATABLE_CANAME_KEY = "areatablecanamekey"; //$NON-NLS-1$
+	public static final String AREATABLE_NAME_KEY = "areatableareanamekey"; //$NON-NLS-1$
+	public static final String AREATABLE_KEY_KEY = "areatablekeykey"; //$NON-NLS-1$
+	public static final String AREATABLE_AREA_KEY = "areatablecareamkey"; //$NON-NLS-1$
+	public static final String AREATABLE_GEOMETRY_KEY = "areatablegeomkey"; //$NON-NLS-1$
+	
 	public String getEmployeeShortLabel(Employee e, Locale l);
 }

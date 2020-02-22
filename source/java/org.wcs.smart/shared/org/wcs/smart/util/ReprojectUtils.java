@@ -91,11 +91,7 @@ public class ReprojectUtils {
 	 * @throws Exception
 	 */
 	public static Coordinate reproject(double x, double y, String destCrsWkt) throws Exception{
-		MathTransform t = transformMap.get(destCrsWkt);
-		if (t == null){
-			t = CRS.findMathTransform(GeometryUtils.SMART_CRS, CRS.parseWKT(destCrsWkt));
-			transformMap.put(destCrsWkt, t);
-		}
+		MathTransform t = findMathTransform(CRS.parseWKT(destCrsWkt));
 		Coordinate transformed = JTS.transform(new Coordinate(x,y), null, t);
 		return transformed;
 	}
@@ -144,11 +140,7 @@ public class ReprojectUtils {
 			
 			if (!CRS.equalsIgnoreMetadata(GeometryUtils.SMART_CRS, targetCrs)){
 				
-				MathTransform transform = transformMap.get(targetCrs);
-				if (transform == null){
-					transform = CRS.findMathTransform(GeometryUtils.SMART_CRS, targetCrs);
-					transformMap.put(targetCrs, transform);
-				}
+				MathTransform transform = findMathTransform(targetCrs);
 				Point p = (Point) JTS.transform(point, transform);
 				return p;
 			}
@@ -158,7 +150,21 @@ public class ReprojectUtils {
 		return point;
 	}
 	
-	
+	/**
+	 * Finds the math transform from db crs to target crs 
+	 * 
+	 * @param targetCrs
+	 * @return
+	 * @throws FactoryException 
+	 */
+	public static MathTransform findMathTransform(CoordinateReferenceSystem targetCrs) throws FactoryException {
+		MathTransform transform = transformMap.get(targetCrs);
+		if (transform == null){
+			transform = CRS.findMathTransform(GeometryUtils.SMART_CRS, targetCrs);
+			transformMap.put(targetCrs, transform);
+		}
+		return transform;
+	}
 	/**
 	 * Re-projects a referenced envelope to target CRS. 
 	 * crs.

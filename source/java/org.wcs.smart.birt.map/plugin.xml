@@ -189,7 +189,8 @@
             extensionName="org.wcs.smart.report.birt.SmartMap">
       </model>
       <palette
-            icon="images/icons/obj16/map.png">
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/map.png"
+            largeIcon="platform:/plugin/org.wcs.smart/images/icons/obj32/map.32.png">
       </palette>
       <editor
             canResize="true"
@@ -197,7 +198,7 @@
             showInMasterPage="true">
       </editor>
       <outline
-            icon="images/icons/obj16/map.png">
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/map.png">
       </outline>
       <reportItemImageUI
             class="org.wcs.smart.report.birt.map.SmartMapItemImageUi">

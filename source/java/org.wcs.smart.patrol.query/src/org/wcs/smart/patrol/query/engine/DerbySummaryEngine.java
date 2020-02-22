@@ -69,6 +69,7 @@ import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
 import org.wcs.smart.patrol.query.model.PatrolValueOption;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolGroupBy;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItem;
+import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItemAreaBuffer;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItemCustomDates;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
@@ -284,6 +285,9 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 					
 				}catch (OperationCanceledException ex) {
 					return;
+				}catch (Exception ex) {
+					ex.printStackTrace();
+					throw ex;
 				} finally {
 					// ensure temporary tables get dropped
 					dropTableInternal(c);
@@ -672,7 +676,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			}
 		}
 		
-		valueSql.append(getFieldName(option, hasAreaGroupBy, patrolItem.includeNoData(), innerWhere));
+		valueSql.append(getFieldName(patrolItem, hasAreaGroupBy, patrolItem.includeNoData(), innerWhere));
 		valueAggSql.append(getAggFieldName(option, hasAreaGroupBy));
 
 		if (option.getOptionClass().equals(Track.class) && !hasAreaGroupBy){
@@ -720,20 +724,65 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			sql.append(","); //$NON-NLS-1$
 		}
 		sql.append(valueAggSql);
-		sql.append(" FROM ( SELECT distinct "); //$NON-NLS-1$
-		sql.append(selectSql);
-		sql.append(groupByInnerSql);
-		if (groupByInnerSql.length() > 0){
-			sql.append(","); //$NON-NLS-1$
+		
+		if (option == PatrolValueOption.AREA_BUFFER) {
+			sql.append(" FROM "); //$NON-NLS-1$
+			
+			if (hasAreaGroupBy) {
+				sql.append("( SELECT bar.*, "); //$NON-NLS-1$
+				StringBuilder sbend = new StringBuilder();
+				for (String prefix : areaGroupByPrefix) {
+					sql.append("smart.intersection(foo_"+ prefix + ".geom,"); //$NON-NLS-1$ //$NON-NLS-2$
+					sbend.append(")"); //$NON-NLS-1$
+				}
+				sql.append("smart.buffer(t.geometry, " + ((PatrolValueItemAreaBuffer)patrolItem).getBufferValue() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append(sbend);
+				sql.append(" as bufferarea "); //$NON-NLS-1$
+			}else {
+				sql.append("( SELECT bar.*, smart.buffer(t.geometry," + ((PatrolValueItemAreaBuffer)patrolItem).getBufferValue() + ") as bufferarea"); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+			
+			sql.append(" FROM ( SELECT distinct "); //$NON-NLS-1$
+			sql.append(selectSql);
+			sql.append(groupByInnerSql);
+			if (groupByInnerSql.length() > 0){
+				sql.append(","); //$NON-NLS-1$
+			}
+			sql.append(valueSql);
+			sql.append(" FROM "); //$NON-NLS-1$
+			sql.append(fromSql);
+			if (innerWhere.length() > 0) {
+				sql.append(" WHERE "); //$NON-NLS-1$
+				sql.append(innerWhere);
+			}
+			sql.append(") bar"); //$NON-NLS-1$
+			sql.append(" join smart.track t on t.uuid = bar.trackuuid "); //$NON-NLS-1$
+			if (hasAreaGroupBy) {
+				for (int i = 0; i < areaGroupByPrefix.size(); i ++) {
+					String p = areaGroupByPrefix.get(i);
+					String k = areaGroupByKeys.get(i);
+				
+					sql.append(" join smart.area_geometries foo_" + p + " on foo_" + p + ".uuid = bar." + k); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				}
+			}
+			sql.append(") foo"); //$NON-NLS-1$
+		}else {
+	
+			sql.append(" FROM ( SELECT distinct "); //$NON-NLS-1$
+			sql.append(selectSql);
+			sql.append(groupByInnerSql);
+			if (groupByInnerSql.length() > 0){
+				sql.append(","); //$NON-NLS-1$
+			}
+			sql.append(valueSql);
+			sql.append(" FROM "); //$NON-NLS-1$
+			sql.append(fromSql);
+			if (innerWhere.length() > 0) {
+				sql.append(" WHERE "); //$NON-NLS-1$
+				sql.append(innerWhere);
+			}
+			sql.append(") foo"); //$NON-NLS-1$
 		}
-		sql.append(valueSql);
-		sql.append(" FROM "); //$NON-NLS-1$
-		sql.append(fromSql);
-		if (innerWhere.length() > 0) {
-			sql.append(" WHERE "); //$NON-NLS-1$
-			sql.append(innerWhere);
-		}
-		sql.append(") foo"); //$NON-NLS-1$
 		if (groupBySql.length() > 0){
 			sql.append(" GROUP BY " ); //$NON-NLS-1$
 			sql.append(groupBySql);
@@ -1234,13 +1283,14 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 	 * @param groupByInnerSql
 	 */
 	private List<String> areaGroupByPrefix = new ArrayList<String>();
+	private List<String> areaGroupByKeys = new ArrayList<String>();
 	
 	private void createGroupBySql(GroupByPart groupBy,
 			StringBuilder fromSql,
 			StringBuilder groupBySql, 
 			StringBuilder groupByInnerSql, IValueItem value, ConservationAreaFilter caFilter) throws SQLException{
 		areaGroupByPrefix.clear();
-		
+		areaGroupByKeys.clear();
 		int itemcnt = 1;
 		boolean waypointAdd = false;
 		boolean trackAdd = false;
@@ -1291,9 +1341,10 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 					String key = agb.getAreaType().name() + "_" + itemcnt; //$NON-NLS-1$s
 					String areaPrefix = tablePrefix(Area.class)
 							+ "_" + itemcnt; //$NON-NLS-1$
-					groupByInnerSql
-							.append(areaPrefix + ".keyid" + " as " + key); //$NON-NLS-1$ //$NON-NLS-2$
+					groupByInnerSql.append(areaPrefix + ".keyid" + " as " + key + ","); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					groupByInnerSql.append(areaPrefix + ".uuid" + " as " + key + "uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					areaGroupByPrefix.add(areaPrefix);
+					areaGroupByKeys.add(key + "uuid"); //$NON-NLS-1$
 					
 					if (!trackAdd) {
 						fromSql.append(" join "); //$NON-NLS-1$
@@ -1312,11 +1363,13 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 					fromSql.append(" and ");//$NON-NLS-1$
 					String p1 = addParameterValue(agb.getAreaType().name());
 					fromSql.append(areaPrefix + ".area_type = " + p1);//$NON-NLS-1$
-					fromSql.append(" and "); //$NON-NLS-1$
-					fromSql.append("smart.trackIntersects("); //$NON-NLS-1$
-					fromSql.append(tablePrefix(Track.class) + ".geometry, "); //$NON-NLS-1$
-					fromSql.append(areaPrefix + ".geom"); //$NON-NLS-1$
-					fromSql.append(")"); //$NON-NLS-1$
+					if (!(value instanceof PatrolValueItemAreaBuffer)) {
+						fromSql.append(" and "); //$NON-NLS-1$
+						fromSql.append("smart.trackIntersects("); //$NON-NLS-1$
+						fromSql.append(tablePrefix(Track.class) + ".geometry, "); //$NON-NLS-1$
+						fromSql.append(areaPrefix + ".geom"); //$NON-NLS-1$
+						fromSql.append(")"); //$NON-NLS-1$
+					}
 					
 					groupBySql.append(key);
 				}
@@ -1500,6 +1553,8 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 		case DISTANCE:
 		case DISTANCE_TOTAL:
 			return "sum(distance)"; //$NON-NLS-1$
+		case AREA_BUFFER:
+			return "smart.unionarea(bufferarea)"; //$NON-NLS-1$
 		case NUM_PATROLHOURS:
 		case NUM_PATROLHOURS_TOTAL:
 			if (!hasAreaGroupBy) {
@@ -1531,7 +1586,8 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 		return ""; //$NON-NLS-1$
 	}
 	
-	private String getFieldName(PatrolValueOption option, boolean hasAreaGroupBy, boolean includeNoData, StringBuilder sbWhere){
+	private String getFieldName(PatrolValueItem item, boolean hasAreaGroupBy, boolean includeNoData, StringBuilder sbWhere){
+		PatrolValueOption option = item.getPatrolValueOption();
 		switch(option){
 		case NUM_PATROLS:
 		case NUM_PATROLS_TOTAL:
@@ -1571,6 +1627,10 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 				valueSql.append(") / 1000.0 as distance "); //$NON-NLS-1$
 				return valueSql.toString();
 			}
+		case AREA_BUFFER:
+			StringBuilder sql = new StringBuilder();
+			sql.append(tablePrefix(Track.class) + ".uuid as trackuuid"); //$NON-NLS-1$
+			return sql.toString();
 		case NUM_PATROLHOURS:
 		case NUM_FIELDHOURS:
 		case NUM_PATROLHOURS_TOTAL:

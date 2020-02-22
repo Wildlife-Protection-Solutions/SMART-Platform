@@ -56,6 +56,8 @@ public class PatrolValueItem implements IValueItem {
 		String[] bits = key.split(":"); //$NON-NLS-1$
 		if (bits[2].equalsIgnoreCase(PatrolValueOption.NUM_CUSTOM.getKeyPart())) {
 			return new PatrolValueItemCustomDates(key);	
+		}else if (bits[2].equalsIgnoreCase(PatrolValueOption.AREA_BUFFER.getKeyPart())) {
+			return new PatrolValueItemAreaBuffer(key);
 		}
 		return new PatrolValueItem(key);
 	}

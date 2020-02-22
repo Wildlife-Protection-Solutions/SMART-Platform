@@ -170,7 +170,8 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	 * Image descriptor for map  icon
 	 */
 	public static final String MAP_ICON = "org.wsc.smart.MAP_ICON"; //$NON-NLS-1$
-	
+	public static final String AREA_ICON = "org.wsc.smart.AREA_ICON"; //$NON-NLS-1$
+
 	/**
 	 * Image descriptor for map  icon
 	 */
@@ -489,6 +490,8 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	     reg.put(SAVE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/save.png")); //$NON-NLS-1$
 	     reg.put(SAVEAS_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/saveas.png")); //$NON-NLS-1$
 	     reg.put(SAVEALL_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/saveall.png")); //$NON-NLS-1$
+	     
+	     reg.put(AREA_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/etool16/area_polygon.png")); //$NON-NLS-1$
 
 	}
 	

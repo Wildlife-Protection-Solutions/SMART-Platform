@@ -58,6 +58,7 @@ import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
 import org.wcs.smart.query.model.summary.AttributeGroupBy;
 import org.wcs.smart.query.model.summary.CategoryGroupBy;
+import org.wcs.smart.query.model.summary.CombinedValueItem;
 import org.wcs.smart.query.model.summary.IGroupBy;
 import org.wcs.smart.query.model.summary.IValueItem;
 import org.wcs.smart.query.model.summary.SumQueryDefinition;
@@ -246,7 +247,9 @@ public class PatrolSummaryQueryType implements IQueryType {
 	 * @return error string or null if query validates okay
 	 */
 	private void validateQueryParts(SumQueryDefinition def) throws Exception{
-		List<IGroupBy> groupBys = new ArrayList<IGroupBy>();
+		List<IGroupBy> groupBys = new ArrayList<>();
+		List<IValueItem> values = new ArrayList<>();
+
 		if (def.getRowGroupByPart() != null){
 			groupBys.addAll(def.getRowGroupByPart().getGroupBys());
 		}
@@ -255,6 +258,14 @@ public class PatrolSummaryQueryType implements IQueryType {
 		}
 		
 		for (IValueItem valueIt : def.getValuePart().getValueItems()){
+			if (valueIt instanceof CombinedValueItem) {
+				values.add(((CombinedValueItem) valueIt).getPart1());
+				values.add(((CombinedValueItem) valueIt).getPart2());
+			}else {
+				values.add(valueIt);
+			}
+		}
+		for (IValueItem valueIt : values) {
 			if (valueIt instanceof PatrolValueItem){
 				PatrolValueItem pIt = (PatrolValueItem) valueIt;
 				PatrolValueOption option = pIt.getPatrolValueOption();
@@ -283,6 +294,24 @@ public class PatrolSummaryQueryType implements IQueryType {
 							}
 						}
 					}
+				}
+			}
+		}
+		
+		//validate buffer area
+		boolean hasAreaBuffer = false;
+		for (IValueItem i : values) {
+			if (((PatrolValueItem)i).getPatrolValueOption() == PatrolValueOption.AREA_BUFFER) {
+				hasAreaBuffer = true;
+				break;
+			}
+		}
+		if (hasAreaBuffer) {
+			//make sure no data model groups by
+			for (IGroupBy gb : groupBys) {
+				if (gb instanceof CategoryGroupBy ||
+						gb  instanceof AttributeGroupBy) {
+					throw new Exception(MessageFormat.format(Messages.PatrolSummaryQueryType_invalidGroupByOptions, PatrolValueOption.AREA_BUFFER.getGuiName(Locale.getDefault()) )); 
 				}
 			}
 		}

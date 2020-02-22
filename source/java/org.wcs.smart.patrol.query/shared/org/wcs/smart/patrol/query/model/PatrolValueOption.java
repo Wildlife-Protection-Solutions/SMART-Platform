@@ -44,6 +44,7 @@ public enum PatrolValueOption {
 	NUM_NIGHTS("numnights", Patrol.class, true), //$NON-NLS-1$
 	NUM_CUSTOM("numcustom", Patrol.class, false), //$NON-NLS-1$
 	DISTANCE("distance", Track.class, false), //$NON-NLS-1$
+	AREA_BUFFER("areabuffer", Track.class, false), //$NON-NLS-1$
 	NUM_FIELDHOURS("numhours", PatrolLegDay.class, true), //$NON-NLS-1$
 	NUM_PATROLHOURS("numpatrolhours", PatrolLegDay.class, true), //$NON-NLS-1$
 	PATROLHOURS_TRACK("numtrackpatrolhours", PatrolLegDay.class, false), //$NON-NLS-1$

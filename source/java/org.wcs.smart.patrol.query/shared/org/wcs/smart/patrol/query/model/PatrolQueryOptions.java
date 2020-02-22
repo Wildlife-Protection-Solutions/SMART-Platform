@@ -142,6 +142,7 @@ public class PatrolQueryOptions {
 		PatrolValueOption.NUM_NIGHTS,
 		PatrolValueOption.NUM_CUSTOM,
 		PatrolValueOption.DISTANCE,
+		PatrolValueOption.AREA_BUFFER,
 		PatrolValueOption.NUM_FIELDHOURS,
 		PatrolValueOption.NUM_PATROLHOURS,
 		PatrolValueOption.NUM_MEMBERS,

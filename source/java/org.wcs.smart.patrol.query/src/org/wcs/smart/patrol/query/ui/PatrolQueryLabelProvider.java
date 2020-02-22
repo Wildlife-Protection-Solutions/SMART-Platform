@@ -33,6 +33,7 @@ import org.wcs.smart.patrol.query.model.PatrolQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolStartDateField;
 import org.wcs.smart.patrol.query.model.PatrolValueOption;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
+import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItemAreaBuffer;
 import org.wcs.smart.patrol.ui.IQueryPatrolLabelProvider;
 import org.wcs.smart.query.QueryPlugIn;
 
@@ -87,7 +88,8 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 				case NUM_DAYS: return Messages.PatrolQueryOptions_ValueOpNumberDays;    
 				case NUM_NIGHTS: return Messages.PatrolQueryOptions_ValueOpNumberNights;
 				case NUM_CUSTOM: return Messages.PatrolQueryLabelProvider_NumTimeRanges;
-				case DISTANCE: return Messages.PatrolQueryOptions_ValueOpDistance;    
+				case DISTANCE: return Messages.PatrolQueryOptions_ValueOpDistance;
+				case AREA_BUFFER: return Messages.PatrolQueryLabelProvider_TrackAreaValueItem;
 				case NUM_PATROLHOURS: return Messages.PatrolQueryOptions_ValueOpNumberPatrolHours;
 				case PATROLHOURS_TRACK: return Messages.PatrolQueryOptions_ValueOpNumberPatrolHours;
 				case NUM_FIELDHOURS: return Messages.PatrolQueryOptions_ValueOpNumberActivePatrolHours;  
@@ -129,6 +131,9 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 		}
 		if (item instanceof PatrolStartDateField){
 			return Messages.PatrolStartDateField_PatrolStartDate;
+		}
+		if (item == PatrolValueItemAreaBuffer.ERROR_MSG_KEY) {
+			return Messages.PatrolQueryLabelProvider_InvalidBufferValue;
 		}
 		return null;
 	}

@@ -81,6 +81,7 @@ public class PatrolSummaryQuery extends SummaryQuery {
 					}
 				}				
 			}
+			
 			return myQuery;
 		}
 	}

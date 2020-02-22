@@ -1,0 +1,57 @@
+/*
+ * Copyright (C) 2019 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.reporttable.ca;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.hibernate.Session;
+import org.wcs.smart.ca.Area;
+import org.wcs.smart.data.oda.smart.impl.SmartConnection;
+import org.wcs.smart.data.oda.smart.impl.table.IDynamicSmartTables;
+import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
+
+/**
+ * Area tables for BIRT report
+ * @author Emily
+ *
+ */
+public class AreaTables implements IDynamicSmartTables {
+
+	public AreaTables() {
+	}
+
+	@Override
+	public List<SmartBirtTable> getTables(SmartConnection connection) {
+		List<SmartBirtTable> tables = new ArrayList<SmartBirtTable>(); 
+		Session session = connection.getSession();
+		List<?> items = session.createQuery("SELECT distinct type FROM Area WHERE conservationArea in (:cas)") //$NON-NLS-1$
+		.setParameterList("cas", connection.getConservationAreas()) //$NON-NLS-1$
+		.getResultList();
+		for (Object i : items) {
+			tables.add(new AreaTable((Area.AreaType)i));
+		}
+		
+		return tables;
+	}
+
+}
