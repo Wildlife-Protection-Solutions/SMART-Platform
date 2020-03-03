@@ -125,6 +125,7 @@ public class RecordsViewLabelProvider extends ColumnLabelProvider {
 	}
 	
 	private Image combineImage(String key, Image img1, Image img2, Image img3){
+		if (img1 == null && img2 == null && img3 == null) return null;
 		if (images.containsKey(key)) return images.get(key);
 		
 		int width = 0;

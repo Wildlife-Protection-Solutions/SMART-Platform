@@ -97,6 +97,7 @@ import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelProfile;
+import org.wcs.smart.i2.model.IntelProfileEntityType;
 import org.wcs.smart.i2.model.IntelRelationshipGroup;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
@@ -430,9 +431,15 @@ public class RelationshipTypeDialog extends SmartStyledTitleDialog {
 					IntelProfile p = (IntelProfile)x;
 					List<Object> items = new ArrayList<>();
 					items.add(ANY_OP);
-					items.addAll(p.getEntityTypes());
+					for (IntelProfileEntityType t : p.getEntityTypes()) {
+						items.add(t.getEntityType());
+					}
 					cmbSrcType.setInput( items );
-					cmbSrcType.setSelection(new StructuredSelection(ANY_OP));
+					if (type.getTargetEntityType() != null) {
+						cmbSrcType.setSelection(new StructuredSelection(type.getSourceEntityType()));
+					}else {
+						cmbSrcType.setSelection(new StructuredSelection(ANY_OP));
+					}
 					type.setSourceProfile(p);
 				}
 				modified();
@@ -483,9 +490,15 @@ public class RelationshipTypeDialog extends SmartStyledTitleDialog {
 					IntelProfile p = (IntelProfile)x;
 					List<Object> items = new ArrayList<>();
 					items.add(ANY_OP);
-					items.addAll(p.getEntityTypes());
+					for (IntelProfileEntityType t : p.getEntityTypes()) {
+						items.add(t.getEntityType());
+					}
 					cmbTrgType.setInput( items );
-					cmbTrgType.setSelection(new StructuredSelection(ANY_OP));
+					if (type.getTargetEntityType() != null) {
+						cmbTrgType.setSelection(new StructuredSelection(type.getTargetEntityType()));
+					}else {
+						cmbTrgType.setSelection(new StructuredSelection(ANY_OP));
+					}
 					type.setTargetProfile(p);
 				}
 				modified();
@@ -822,20 +835,11 @@ public class RelationshipTypeDialog extends SmartStyledTitleDialog {
 			@Override
 			public void run(IProgressMonitor monitor) throws InvocationTargetException,
 					InterruptedException {
-//				List<IntelEntityType> types = new ArrayList<IntelEntityType>();
 				List<Object> groups = new ArrayList<Object>();
 				List<IntelProfile> profiles = new ArrayList<>();
 				try(Session s = HibernateManager.openSession()){
 					profiles.addAll( ProfilesManager.INSTANCE.getProfiles(s, false) );
 					profiles.forEach(p->p.getEntityTypes().size());
-//					forEach(et->et.getAttributes().forEach(a->{
-//						a.getAttribute().getNames().size();
-//						if (a.getAttribute().getAttributeList() != null) {
-//							for (IntelAttributeListItem i : a.getAttribute().getAttributeList()) {
-//								i.getNames().size();
-//							}
-//						}
-//					})));
 					
 					if (type.getUuid() != null){
 						type = (IntelRelationshipType) s.get(IntelRelationshipType.class, type.getUuid());
@@ -851,15 +855,9 @@ public class RelationshipTypeDialog extends SmartStyledTitleDialog {
 					}
 					entityTypeSiblings = RelationshipTypeManager.INSTANCE.getRelationshipTypes(s, SmartDB.getCurrentConservationArea());
 					entityTypeSiblings.remove(type);
-//					types.addAll(EntityTypeManager.INSTANCE.getEntityTypes(s, SmartDB.getCurrentConservationArea()));
 					groups.addAll(RelationshipTypeManager.INSTANCE.getRelationshipGroups(s, SmartDB.getCurrentConservationArea()));
 				}
-				
-				
-//				IntelEntityType any = new IntelEntityType();
-//				any.setName(Messages.RelationshipTypeDialog_AnyOption);
-//				types.add(0, any);
-				
+
 				Collections.sort(groups, (a,b) -> Collator.getInstance().compare(((IntelRelationshipGroup)a).getName().toLowerCase(), ((IntelRelationshipGroup)b).getName().toLowerCase()));
 				String noGroup = ""; //$NON-NLS-1$
 				groups.add(0, noGroup);
@@ -906,6 +904,8 @@ public class RelationshipTypeDialog extends SmartStyledTitleDialog {
 						}else{
 							cmbGroup.setSelection(new StructuredSelection(noGroup));
 						}
+						
+						getButton(IDialogConstants.OK_ID).setEnabled(false);
 					});
 			}
 		});
