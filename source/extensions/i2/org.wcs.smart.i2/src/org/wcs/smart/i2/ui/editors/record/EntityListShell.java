@@ -51,6 +51,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -114,7 +115,7 @@ public class EntityListShell extends SmartShellDialog {
 			
 			public Image getImage(Object element){
 				if (element == ALL_ENTITIES) return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_ENTITY);
-				if (element == NEW_ENTITY) return Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_ENTITY_NEW);
+				if (element == NEW_ENTITY) return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON);
 				return null;
 			}
 		});
@@ -251,7 +252,7 @@ public class EntityListShell extends SmartShellDialog {
 		protected IStatus run(IProgressMonitor monitor) {
 			List<IntelEntityType> types = new ArrayList<IntelEntityType>();
 			try(Session s = HibernateManager.openSession()){
-				types.addAll (s.createQuery("SELECT t FROM IntelEntityType t join t.profiles p WHERE t.conservationArea = :ca and p.uuid = :profile", IntelEntityType.class) //$NON-NLS-1$
+				types.addAll (s.createQuery("SELECT t FROM IntelEntityType t join t.profiles p WHERE t.conservationArea = :ca and p.id.profile.uuid = :profile", IntelEntityType.class) //$NON-NLS-1$
 				.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
 				.setParameter("profile", editor.getInputInternal().getRecordProfileUuid()) //$NON-NLS-1$
 				.list() );

@@ -271,16 +271,21 @@ public class NewEntityDialog extends SmartStyledTitleDialog{
 			return;
 		}
 		
-		IntelProfile profile = null;
-		x = cmbProfile.getStructuredSelection().getFirstElement();
-		if (x instanceof IntelProfile) {
-			profile = (IntelProfile) x;
+		IntelProfile thisprofile = null;
+		if (cmbProfile != null) {
+			thisprofile = null;
+			x = cmbProfile.getStructuredSelection().getFirstElement();
+			if (x instanceof IntelProfile) {
+				thisprofile = (IntelProfile) x;
+			}else {
+				MessageDialog.openWarning(getShell(), Messages.NewEntityDialog_ErrorDialogTitle, Messages.NewEntityDialog_ProfileRequired);
+				return;
+			}
 		}else {
-			MessageDialog.openWarning(getShell(), Messages.NewEntityDialog_ErrorDialogTitle, Messages.NewEntityDialog_ProfileRequired);
-			return;
+			thisprofile = profile;
 		}
 		newEntity = new IntelEntity();
-		newEntity.setProfile(profile);
+		newEntity.setProfile(thisprofile);
 		newEntity.setConservationArea(SmartDB.getCurrentConservationArea());
 		newEntity.setEntityType(type);
 		newEntity.setAttributes(new ArrayList<IntelEntityAttributeValue>());

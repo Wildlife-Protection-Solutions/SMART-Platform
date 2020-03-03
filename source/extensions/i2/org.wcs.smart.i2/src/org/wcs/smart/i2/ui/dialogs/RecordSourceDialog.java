@@ -698,31 +698,32 @@ public class RecordSourceDialog extends SmartStyledTitleDialog{
 				}
 			}
 			
+			List<IntelProfile> profiles = (List<IntelProfile>) tblProfiles.getInput();
+			for (IntelProfile ip : profiles) {
+				ip = session.get(IntelProfile.class, ip.getUuid());
+				IntelProfileRecordSource mp = new IntelProfileRecordSource();
+				mp.getId().setProfile(ip);
+				mp.getId().setRecordSource(currentSelection);
+				
+				if (tblProfiles.getChecked(ip)) {
+					if (!currentSelection.getProfiles().contains(mp)) currentSelection.getProfiles().add(mp);
+				}else {
+					IntelProfileRecordSource temp = session.get(IntelProfileRecordSource.class, mp.getId());
+					if (temp != null) {
+						ip.getRecordSources().remove(temp);
+						temp.getRecordSource().getProfiles().remove(temp);
+						currentSelection.getProfiles().remove(temp);
+					}
+				}
+			}
+
+			String v = ProfilesManager.INSTANCE.validateRecords(currentSelection);
+			if (v != null) throw new Exception(v);		
+			
 			session.beginTransaction();
 			try{
 				session.saveOrUpdate(currentSelection);
-				List<IntelProfile> profiles = (List<IntelProfile>) tblProfiles.getInput();
-				for (IntelProfile ip : profiles) {
-					ip = session.get(IntelProfile.class, ip.getUuid());
-					IntelProfileRecordSource mp = new IntelProfileRecordSource();
-					mp.getId().setProfile(ip);
-					mp.getId().setRecordSource(currentSelection);
-					
-					if (tblProfiles.getChecked(ip)) {
-						if (!currentSelection.getProfiles().contains(mp)) currentSelection.getProfiles().add(mp);
-					}else {
-						IntelProfileRecordSource temp = session.get(IntelProfileRecordSource.class, mp.getId());
-						if (temp != null) {
-							ip.getRecordSources().remove(temp);
-							temp.getRecordSource().getProfiles().remove(temp);
-							session.delete(temp);
-							currentSelection.getProfiles().remove(temp);
-						}
-					}
-				}
 				session.flush();
-				String v = ProfilesManager.INSTANCE.validateRecords(currentSelection);
-				if (v != null) throw new Exception(v);		
 				
 				//delete all attribute values for attributes removed from given source
 				for (IntelRecordSourceAttribute a : attributesToDelete){
@@ -740,8 +741,10 @@ public class RecordSourceDialog extends SmartStyledTitleDialog{
 					q.executeUpdate();
 					
 					//delete the attributes
-					session.delete(a);
+				//	session.delete(a);
+				//	currentSelection.getAttributes().remove(a);
 				}
+				session.flush();
 				
 				//delete all attributes values for attributes that changes from multi to single
 				for (IntelRecordSourceAttribute a : attributesMultiToSingle){

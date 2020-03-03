@@ -477,6 +477,7 @@ public class AllPanel extends Composite {
 	}
 	
 	public List<Object> getEntities(int limit){
+		if (entityTable.getContentProvider() == null) return Collections.emptyList();
 		return ((AllEntityContentProvider)entityTable.getContentProvider()).getAllDataItems(limit);
 	}
 	
