@@ -122,6 +122,7 @@ public class LoginDialog extends SmartStyledDialog {
 		
 		StringBuilder sb = new StringBuilder();
 		sb.append(ws.getUrl());
+		//sb.append("https://login.microsoftonline.com/548d829f-38d0-42ac-9a2c-220944e5c275/oauth2");
 		sb.append("/"); //$NON-NLS-1$
 		sb.append("authorize"); //$NON-NLS-1$
 		sb.append("?"); //$NON-NLS-1$
@@ -131,6 +132,8 @@ public class LoginDialog extends SmartStyledDialog {
 		sb.append("&prompt=login"); //$NON-NLS-1$
 		sb.append("&state=" + state); //$NON-NLS-1$
 		sb.append("&redirect_uri=" + redirectUri); //$NON-NLS-1$
+
+		System.out.println(sb.toString());
 		
 		browser.setUrl(sb.toString());
 		
@@ -147,6 +150,7 @@ public class LoginDialog extends SmartStyledDialog {
 				doChange = false;
 				try {
 					String thisurl = browser.getUrl();
+					
 					if (thisurl.startsWith(redirectUri)) {
 						Map<String,String> parts = Collections.emptyMap();
 						try {
@@ -163,6 +167,7 @@ public class LoginDialog extends SmartStyledDialog {
 							LoginDialog.this.close();
 						}else {
 							//login failed
+							browser.setText("<b>Login Failed</b><br>" + thisurl);
 						}
 					}
 				}finally {
