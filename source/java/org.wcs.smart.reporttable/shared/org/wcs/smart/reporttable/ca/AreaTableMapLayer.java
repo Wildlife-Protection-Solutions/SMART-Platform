@@ -23,7 +23,6 @@ package org.wcs.smart.reporttable.ca;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 
 import org.eclipse.birt.report.model.api.DataSetHandle;
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
