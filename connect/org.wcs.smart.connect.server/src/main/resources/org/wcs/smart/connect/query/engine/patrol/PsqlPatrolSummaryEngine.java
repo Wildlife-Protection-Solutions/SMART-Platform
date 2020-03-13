@@ -69,6 +69,7 @@ import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
 import org.wcs.smart.patrol.query.model.PatrolValueOption;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolGroupBy;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItem;
+import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItemAreaBuffer;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItemCustomDates;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.visitors.AreaFilterCollectorVisitor;
@@ -652,65 +653,111 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 		valueSql.append(getFieldName(option, hasAreaGroupBy, patrolItem.includeNoData(), innerWhere));
 		valueAggSql.append(getAggFieldName(option, hasAreaGroupBy));
 
-		if (option.getOptionClass().equals(Track.class) && !hasAreaGroupBy){
-			fromSql.append(" join "); //$NON-NLS-1$
-			fromSql.append(tableNamePrefix(Track.class));
-			fromSql.append( " on temp.pld_uuid = "); //$NON-NLS-1$ 
-			fromSql.append(tablePrefix(Track.class));
-			fromSql.append(".patrol_leg_day_uuid " ); //$NON-NLS-1$
-		}
-		if (option == PatrolValueOption.NUM_MEMBERS ||
-			option == PatrolValueOption.MAN_HOURS  ||
-			option == PatrolValueOption.MAN_HOURS_TOTAL  || 
-			option == PatrolValueOption.MAN_DAYS  ||
-			option == PatrolValueOption.MAN_DAYS_TOTAL){
-			fromSql.append(" left join "); //$NON-NLS-1$
-			fromSql.append(tableNamePrefix(PatrolLegMember.class));
-			fromSql.append(" on temp.pl_uuid = ");//$NON-NLS-1$
-			fromSql.append( tablePrefix(PatrolLegMember.class));
-			fromSql.append(".patrol_leg_uuid " ); //$NON-NLS-1$ 
-		}
-		if (option == PatrolValueOption.NUM_FIELDHOURS ||
-			  option == PatrolValueOption.NUM_PATROLHOURS ||
-			  option == PatrolValueOption.NUM_FIELDHOURS_TOTAL ||
-			  option == PatrolValueOption.NUM_PATROLHOURS_TOTAL ||
-			  option == PatrolValueOption.MAN_HOURS ||
-			  option == PatrolValueOption.MAN_HOURS_TOTAL  ||
-			  option == PatrolValueOption.MAN_DAYS  ||
-			  option == PatrolValueOption.MAN_DAYS_TOTAL){
-			fromSql.append(" left join "); //$NON-NLS-1$
-			fromSql.append(tableNamePrefix(PatrolLegDay.class));
-			fromSql.append( " on temp.pld_uuid = "); //$NON-NLS-1$
-			fromSql.append(tablePrefix(PatrolLegDay.class));
-			fromSql.append(".uuid "); //$NON-NLS-1$ 
-		}
-		if (option == PatrolValueOption.NUM_CUSTOM) {
-			fromSql.append(" left join "); //$NON-NLS-1$
-			fromSql.append(customDateTable + " c2 "); //$NON-NLS-1$
-			fromSql.append( " on c2.cpl_uuid = temp.pl_uuid"); //$NON-NLS-1$
-		}
-		
 		StringBuilder sql = new StringBuilder();
+		
 		sql.append("SELECT "); //$NON-NLS-1$
 		sql.append(groupBySql);
 		if (groupBySql.length() > 0){
 			sql.append(","); //$NON-NLS-1$
 		}
 		sql.append(valueAggSql);
-		sql.append(" FROM ( SELECT distinct "); //$NON-NLS-1$
-		sql.append(selectSql);
-		sql.append(groupByInnerSql);
-		if (groupByInnerSql.length() > 0){
-			sql.append(","); //$NON-NLS-1$
+		
+		if (option == PatrolValueOption.AREA_BUFFER) {
+			sql.append(" FROM "); //$NON-NLS-1$
+			
+			if (hasAreaGroupBy) {
+				sql.append("( SELECT bar.*, "); //$NON-NLS-1$
+				StringBuilder sbend = new StringBuilder();
+				for (String prefix : areaGroupByPrefix) {
+					sql.append("st_intersection(st_setsrid(st_geomfromwkb(foo_"+ prefix + ".geom), 4326),"); //$NON-NLS-1$ //$NON-NLS-2$
+					sbend.append(")"); //$NON-NLS-1$
+				}
+				sql.append("st_setsrid(geometry(st_buffer(geography(st_geomfromwkb(t.geometry)), " + ((PatrolValueItemAreaBuffer)patrolItem).getBufferValue() + ")),4326) "); //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append(sbend);
+				sql.append(" as bufferarea "); //$NON-NLS-1$
+			}else {
+				sql.append("( SELECT bar.*, st_setsrid(geometry(st_buffer(geography(st_geomfromwkb(t.geometry)), " + ((PatrolValueItemAreaBuffer)patrolItem).getBufferValue() + ")), 4326) as bufferarea"); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+			
+			sql.append(" FROM ( SELECT distinct "); //$NON-NLS-1$
+			sql.append(selectSql);
+			sql.append(groupByInnerSql);
+			if (groupByInnerSql.length() > 0){
+				sql.append(","); //$NON-NLS-1$
+			}
+			sql.append(valueSql);
+			sql.append(" FROM "); //$NON-NLS-1$
+			sql.append(fromSql);
+			if (innerWhere.length() > 0) {
+				sql.append(" WHERE "); //$NON-NLS-1$
+				sql.append(innerWhere);
+			}
+			sql.append(") bar"); //$NON-NLS-1$
+			sql.append(" join smart.track t on t.uuid = bar.trackuuid "); //$NON-NLS-1$
+			if (hasAreaGroupBy) {
+				for (int i = 0; i < areaGroupByPrefix.size(); i ++) {
+					String p = areaGroupByPrefix.get(i);
+					String k = areaGroupByKeys.get(i);
+				
+					sql.append(" join smart.area_geometries foo_" + p + " on foo_" + p + ".uuid = bar." + k); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				}
+			}
+			sql.append(") foo"); //$NON-NLS-1$
+		}else {
+			if (option.getOptionClass().equals(Track.class) && !hasAreaGroupBy){
+				fromSql.append(" join "); //$NON-NLS-1$
+				fromSql.append(tableNamePrefix(Track.class));
+				fromSql.append( " on temp.pld_uuid = "); //$NON-NLS-1$ 
+				fromSql.append(tablePrefix(Track.class));
+				fromSql.append(".patrol_leg_day_uuid " ); //$NON-NLS-1$
+			}
+			if (option == PatrolValueOption.NUM_MEMBERS ||
+				option == PatrolValueOption.MAN_HOURS  ||
+				option == PatrolValueOption.MAN_HOURS_TOTAL  || 
+				option == PatrolValueOption.MAN_DAYS  ||
+				option == PatrolValueOption.MAN_DAYS_TOTAL){
+				fromSql.append(" left join "); //$NON-NLS-1$
+				fromSql.append(tableNamePrefix(PatrolLegMember.class));
+				fromSql.append(" on temp.pl_uuid = ");//$NON-NLS-1$
+				fromSql.append( tablePrefix(PatrolLegMember.class));
+				fromSql.append(".patrol_leg_uuid " ); //$NON-NLS-1$ 
+			}
+			if (option == PatrolValueOption.NUM_FIELDHOURS ||
+				  option == PatrolValueOption.NUM_PATROLHOURS ||
+				  option == PatrolValueOption.NUM_FIELDHOURS_TOTAL ||
+				  option == PatrolValueOption.NUM_PATROLHOURS_TOTAL ||
+				  option == PatrolValueOption.MAN_HOURS ||
+				  option == PatrolValueOption.MAN_HOURS_TOTAL  ||
+				  option == PatrolValueOption.MAN_DAYS  ||
+				  option == PatrolValueOption.MAN_DAYS_TOTAL){
+				fromSql.append(" left join "); //$NON-NLS-1$
+				fromSql.append(tableNamePrefix(PatrolLegDay.class));
+				fromSql.append( " on temp.pld_uuid = "); //$NON-NLS-1$
+				fromSql.append(tablePrefix(PatrolLegDay.class));
+				fromSql.append(".uuid "); //$NON-NLS-1$ 
+			}
+			if (option == PatrolValueOption.NUM_CUSTOM) {
+				fromSql.append(" left join "); //$NON-NLS-1$
+				fromSql.append(customDateTable + " c2 "); //$NON-NLS-1$
+				fromSql.append( " on c2.cpl_uuid = temp.pl_uuid"); //$NON-NLS-1$
+			}
+			
+			
+			sql.append(" FROM ( SELECT distinct "); //$NON-NLS-1$
+			sql.append(selectSql);
+			sql.append(groupByInnerSql);
+			if (groupByInnerSql.length() > 0){
+				sql.append(","); //$NON-NLS-1$
+			}
+			sql.append(valueSql);
+			sql.append(" FROM "); //$NON-NLS-1$
+			sql.append(fromSql);
+			if (innerWhere.length() > 0) {
+				sql.append(" WHERE "); //$NON-NLS-1$
+				sql.append(innerWhere);
+			}
+			sql.append(") foo"); //$NON-NLS-1$
 		}
-		sql.append(valueSql);
-		sql.append(" FROM "); //$NON-NLS-1$
-		sql.append(fromSql);
-		if (innerWhere.length() > 0) {
-			sql.append(" WHERE "); //$NON-NLS-1$
-			sql.append(innerWhere);
-		}
-		sql.append(") foo"); //$NON-NLS-1$
 		if (groupBySql.length() > 0){
 			sql.append(" GROUP BY " ); //$NON-NLS-1$
 			sql.append(groupBySql);
@@ -1203,12 +1250,14 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 	 * @param groupByInnerSql
 	 */
 	private List<String> areaGroupByPrefix = new ArrayList<String>();
+	private List<String> areaGroupByKeys = new ArrayList<String>();
 	
 	private void createGroupBySql(GroupByPart groupBy,
 			StringBuilder fromSql,
 			StringBuilder groupBySql, 
 			StringBuilder groupByInnerSql, IValueItem value, ConservationAreaFilter caFilter) throws SQLException{
 		areaGroupByPrefix.clear();
+		areaGroupByKeys.clear();
 		
 		int itemcnt = 1;
 		boolean waypointAdd = false;
@@ -1262,10 +1311,12 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 					String key = agb.getAreaType().name() + "_" + itemcnt; //$NON-NLS-1$s
 					String areaPrefix = tablePrefix(Area.class)
 							+ "_" + itemcnt; //$NON-NLS-1$
-					groupByInnerSql
-							.append(areaPrefix + ".keyid" + " as " + key); //$NON-NLS-1$ //$NON-NLS-2$
-					areaGroupByPrefix.add(areaPrefix);
+					groupByInnerSql.append(areaPrefix + ".keyid" + " as " + key + ","); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					groupByInnerSql.append(areaPrefix + ".uuid" + " as " + key + "uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					
+					areaGroupByPrefix.add(areaPrefix);
+					areaGroupByKeys.add(key + "uuid"); //$NON-NLS-1$
+
 					if (!trackAdd) {
 						fromSql.append(" join "); //$NON-NLS-1$
 						fromSql.append(tableNames.get(Track.class));
@@ -1485,6 +1536,10 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 		case DISTANCE:
 		case DISTANCE_TOTAL:
 			return "sum(distance)"; //$NON-NLS-1$
+		case AREA_BUFFER:
+			
+			
+			return "st_area(geography(st_union(bufferarea)))";
 		case NUM_PATROLHOURS:
 		case NUM_PATROLHOURS_TOTAL:
 			if (!hasAreaGroupBy) {
@@ -1556,6 +1611,10 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 				valueSql.append(") / 1000.0 as distance "); //$NON-NLS-1$
 				return valueSql.toString();
 			}
+		case AREA_BUFFER:
+			StringBuilder sql = new StringBuilder();
+			sql.append(tablePrefix(Track.class) + ".uuid as trackuuid"); //$NON-NLS-1$
+			return sql.toString();
 		case NUM_PATROLHOURS:
 		case NUM_FIELDHOURS:
 		case NUM_PATROLHOURS_TOTAL:

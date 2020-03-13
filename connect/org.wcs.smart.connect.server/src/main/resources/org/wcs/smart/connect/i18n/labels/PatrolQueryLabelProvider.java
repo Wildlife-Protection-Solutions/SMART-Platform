@@ -29,6 +29,7 @@ import org.wcs.smart.patrol.query.model.PatrolQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolStartDateField;
 import org.wcs.smart.patrol.query.model.PatrolValueOption;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
+import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItemAreaBuffer;
 import org.wcs.smart.patrol.ui.IQueryPatrolLabelProvider;
 
 /**
@@ -82,6 +83,8 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 				case NUM_DAYS: return Messages.getString("PatrolQueryLabelProvider.NumDaysOp", l);     //$NON-NLS-1$
 				case NUM_NIGHTS: return Messages.getString("PatrolQueryLabelProvider.NumNightsOp", l); //$NON-NLS-1$
 				case DISTANCE: return Messages.getString("PatrolQueryLabelProvider.DistanceOp", l);       //$NON-NLS-1$
+				case AREA_BUFFER: return Messages.getString("PatrolQueryLabelProvider.TrackAreaValueItem", l); //$NON-NLS-1$
+
 				case NUM_FIELDHOURS: return Messages.getString("PatrolQueryLabelProvider.NumberActiveHoursOp", l); //$NON-NLS-1$
 				case NUM_PATROLHOURS: return Messages.getString("PatrolQueryLabelProvider.NumberHoursOp", l);   //$NON-NLS-1$
 				case NUM_MEMBERS: return Messages.getString("PatrolQueryLabelProvider.NumEmployeesOp", l); //$NON-NLS-1$
@@ -128,6 +131,9 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 		}
 		if (item instanceof PatrolStartDateField){
 			return Messages.getString("PatrolQueryLabelProvider.PatrolStartDateQueryFilterfield", l); //$NON-NLS-1$
+		}
+		if (item == PatrolValueItemAreaBuffer.ERROR_MSG_KEY) {
+			return Messages.getString("PatrolQueryLabelProvider.InvalidBufferValue",l); //$NON-NLS-1$
 		}
 		return null;
 	}

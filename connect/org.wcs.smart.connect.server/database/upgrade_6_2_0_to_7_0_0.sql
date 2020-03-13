@@ -480,7 +480,8 @@ CREATE OR REPLACE FUNCTION connect.trg_ct_patrol_wplink() RETURNS trigger AS $$ 
  	INSERT INTO connect.change_log 
  		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
  		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, pp.CA_UUID 
- 		FROM smart.patrol pp, smart.patrol_leg pl, smart.cT_patrol_wplink l WHERE pl.patrol_uuid = pp.uuid and pl.uuid = l.patrol_leg_uuid and l.ct_uuid = row.ct_patrol_link_uuid;
+		FROM smart.patrol pp, smart.patrol_leg pl, smart.ct_patrol_link l 
+		WHERE pl.patrol_uuid = pp.uuid and pl.uuid = l.patrol_leg_uuid and l.ct_uuid = row.ct_patrol_link_uuid;
 RETURN ROW; END$$ LANGUAGE 'plpgsql';
 
 CREATE TRIGGER trg_ct_patrol_wplink AFTER INSERT OR UPDATE OR DELETE ON smart.ct_patrol_wplink FOR EACH ROW execute procedure connect.trg_ct_patrol_wplink();

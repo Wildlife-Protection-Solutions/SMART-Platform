@@ -121,6 +121,15 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 		if (value.equals(XmlDataModelValidator.I18NMessages.INVALID_KEY)) return Messages.getString("SmartLabelProvider.XmlDmValidatorInvalidKey", l); //$NON-NLS-1$
 		if (value.equals(XmlDataModelValidator.I18NMessages.INVALID_NAME)) return Messages.getString("SmartLabelProvider.XmlDmValidatorInvalidName", l); //$NON-NLS-1$
 		
+		if (value.equals(AREA_TABLENAME_KEY)) return Messages.getString("SmartLabelProvider.AreaTable", l); //$NON-NLS-1$
+		
+		if (value.equals(AREATABLE_CAID_KEY)) return Messages.getString("SmartLabelProvider.AreaCaIdColumn", l); //$NON-NLS-1$
+		if (value.equals(AREATABLE_CANAME_KEY)) return Messages.getString("SmartLabelProvider.AreaCaNameColumn", l); //$NON-NLS-1$
+		if (value.equals(AREATABLE_NAME_KEY)) return Messages.getString("SmartLabelProvider.AreaNameColumn", l); //$NON-NLS-1$
+		if (value.equals(AREATABLE_KEY_KEY)) return Messages.getString("SmartLabelProvider.AreaKeyColumn", l); //$NON-NLS-1$
+		if (value.equals(AREATABLE_AREA_KEY)) return Messages.getString("SmartLabelProvider.AreaAreamColumn", l); //$NON-NLS-1$
+		if (value.equals(AREATABLE_GEOMETRY_KEY)) return Messages.getString("SmartLabelProvider.AreaGeometryColumn", l); //$NON-NLS-1$
+		
 		return null;
 	}
 	
