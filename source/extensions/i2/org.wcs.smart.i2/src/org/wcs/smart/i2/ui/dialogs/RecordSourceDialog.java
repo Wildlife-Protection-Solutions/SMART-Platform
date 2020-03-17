@@ -256,11 +256,6 @@ public class RecordSourceDialog extends SmartStyledTitleDialog{
 				modified();
 			}
 		});
-//		Composite iconc = new Composite(detailsPanel, SWT.NONE);
-//		iconc.setLayout(new GridLayout(2, false));
-//		iconc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
-//		((GridLayout)iconc.getLayout()).marginWidth = 0;
-//		((GridLayout)iconc.getLayout()).marginHeight = 0;
 		
 		Label l = new Label(detailsPanel, SWT.NONE);
 		l.setText(Messages.RecordSourceAttributeDialog_IconLabel);
@@ -678,10 +673,6 @@ public class RecordSourceDialog extends SmartStyledTitleDialog{
 	
 	@SuppressWarnings("unchecked")
 	private boolean doSave(){
-		
-		
-		
-		
 		Set<IntelProfile> newProfiles = new HashSet<>();
 		for (Object x : tblProfiles.getCheckedElements()) newProfiles.add((IntelProfile)x);
 		
@@ -689,7 +680,7 @@ public class RecordSourceDialog extends SmartStyledTitleDialog{
 			//validate that all record sources are still valid
 			//which means that the profile associated with the record
 			//must match one of the profiles associated with that record source
-			
+			if (currentSelection.getUuid() != null) session.update(currentSelection);
 			if (!newProfiles.isEmpty() && currentSelection.getUuid() != null) {
 				String hsql = "SELECT count(*) FROM IntelRecord r WHERE r.recordSource = :source and profile not in (:profiles)"; //$NON-NLS-1$
 				Long cnt = (Long)session.createQuery(hsql).setParameter("source", currentSelection).setParameter("profiles", newProfiles).uniqueResult(); //$NON-NLS-1$ //$NON-NLS-2$
@@ -699,15 +690,16 @@ public class RecordSourceDialog extends SmartStyledTitleDialog{
 			}
 			
 			List<IntelProfile> profiles = (List<IntelProfile>) tblProfiles.getInput();
+			
 			for (IntelProfile ip : profiles) {
 				ip = session.get(IntelProfile.class, ip.getUuid());
 				IntelProfileRecordSource mp = new IntelProfileRecordSource();
 				mp.getId().setProfile(ip);
 				mp.getId().setRecordSource(currentSelection);
-				
+					
 				if (tblProfiles.getChecked(ip)) {
 					if (!currentSelection.getProfiles().contains(mp)) currentSelection.getProfiles().add(mp);
-				}else {
+				}else if (currentSelection.getUuid() != null){
 					IntelProfileRecordSource temp = session.get(IntelProfileRecordSource.class, mp.getId());
 					if (temp != null) {
 						ip.getRecordSources().remove(temp);
@@ -716,7 +708,7 @@ public class RecordSourceDialog extends SmartStyledTitleDialog{
 					}
 				}
 			}
-
+			
 			String v = ProfilesManager.INSTANCE.validateRecords(currentSelection);
 			if (v != null) throw new Exception(v);		
 			

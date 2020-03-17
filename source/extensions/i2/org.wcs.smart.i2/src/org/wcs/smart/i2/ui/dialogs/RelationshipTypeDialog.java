@@ -148,6 +148,9 @@ public class RelationshipTypeDialog extends SmartStyledTitleDialog {
 	private ControlDecoration cdSrcType;
 	private ControlDecoration cdTrgType;
 	
+	private ControlDecoration cdSrcProfile;
+	private ControlDecoration cdTrgProfile;
+	
 	private MenuItem editItem;
 	private MenuItem deleteItem;
 	private MenuItem addItem;
@@ -161,6 +164,8 @@ public class RelationshipTypeDialog extends SmartStyledTitleDialog {
 	private List<IntelRelationshipTypeAttribute> attributeList = new ArrayList<IntelRelationshipTypeAttribute>();
 	private IntelEntityType initialSourceType;
 	private IntelEntityType initialTargetType;
+	
+	private boolean isinit = false;
 	
 	public RelationshipTypeDialog(Shell parentShell, IntelRelationshipType type) {
 		super(parentShell);
@@ -299,6 +304,20 @@ public class RelationshipTypeDialog extends SmartStyledTitleDialog {
 			isError = true;
 		}	
 		
+		cdTrgProfile.hide();
+		if (cmbTrgProfile.getSelection().isEmpty()){
+			isError = true;
+			cdTrgProfile.setDescriptionText(Messages.RelationshipTypeDialog_targetProfileRequired);
+			cdTrgProfile.show();
+		}
+		cdSrcProfile.hide();
+		if (cmbSrcProfile.getSelection().isEmpty()){
+			isError = true;
+			cdSrcProfile.setDescriptionText(Messages.RelationshipTypeDialog_sourceProfileRequired);
+			cdSrcProfile.show();
+		}
+		
+		
 		cdSrcType.hide();
 		if (cmbSrcType.getSelection().isEmpty()){
 			isError = true;
@@ -374,6 +393,7 @@ public class RelationshipTypeDialog extends SmartStyledTitleDialog {
 			@SuppressWarnings("unchecked")
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
+				if (isinit) return;
 				Object x = ((IStructuredSelection)cmbGroup.getSelection()).getFirstElement();
 				if (x instanceof IntelRelationshipGroup){
 					type.setRelationshipGroup((IntelRelationshipGroup) x);
@@ -426,6 +446,7 @@ public class RelationshipTypeDialog extends SmartStyledTitleDialog {
 		cmbSrcProfile.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
+				if (isinit) return;
 				Object x = ((IStructuredSelection)cmbSrcProfile.getSelection()).getFirstElement();
 				if (x instanceof IntelProfile){
 					IntelProfile p = (IntelProfile)x;
@@ -435,17 +456,14 @@ public class RelationshipTypeDialog extends SmartStyledTitleDialog {
 						items.add(t.getEntityType());
 					}
 					cmbSrcType.setInput( items );
-					if (type.getTargetEntityType() != null) {
-						cmbSrcType.setSelection(new StructuredSelection(type.getSourceEntityType()));
-					}else {
-						cmbSrcType.setSelection(new StructuredSelection(ANY_OP));
-					}
+					cmbSrcType.setSelection(new StructuredSelection(ANY_OP));
+
 					type.setSourceProfile(p);
 				}
 				modified();
 			}
 		});
-		
+		cdSrcProfile = createDecoration(cmbSrcProfile.getControl());
 		
 		l = new Label(parent, SWT.NONE);
 		l.setText(Messages.RelationshipTypeDialog_SrcLabel);
@@ -459,6 +477,7 @@ public class RelationshipTypeDialog extends SmartStyledTitleDialog {
 		cmbSrcType.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
+				if (isinit) return;
 				Object x = ((IStructuredSelection)cmbSrcType.getSelection()).getFirstElement();
 				if (x instanceof IntelEntityType){
 					if ( ((IntelEntityType)x).getUuid() == null){
@@ -485,6 +504,7 @@ public class RelationshipTypeDialog extends SmartStyledTitleDialog {
 		cmbTrgProfile.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
+				if (isinit) return;
 				Object x = ((IStructuredSelection)cmbTrgProfile.getSelection()).getFirstElement();
 				if (x instanceof IntelProfile){
 					IntelProfile p = (IntelProfile)x;
@@ -494,16 +514,15 @@ public class RelationshipTypeDialog extends SmartStyledTitleDialog {
 						items.add(t.getEntityType());
 					}
 					cmbTrgType.setInput( items );
-					if (type.getTargetEntityType() != null) {
-						cmbTrgType.setSelection(new StructuredSelection(type.getTargetEntityType()));
-					}else {
-						cmbTrgType.setSelection(new StructuredSelection(ANY_OP));
-					}
+					cmbTrgType.setSelection(new StructuredSelection(ANY_OP));
+
 					type.setTargetProfile(p);
 				}
 				modified();
+
 			}
 		});
+		cdTrgProfile = createDecoration(cmbTrgProfile.getControl());
 		
 		l = new Label(parent, SWT.NONE);
 		l.setText(Messages.RelationshipTypeDialog_TargetLabel);
@@ -517,11 +536,14 @@ public class RelationshipTypeDialog extends SmartStyledTitleDialog {
 		cmbTrgType.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
+				if (isinit) return;
 				Object x = ((IStructuredSelection)cmbTrgType.getSelection()).getFirstElement();
-				if ( ((IntelEntityType)x).getUuid() == null){
-					type.setTargetEntityType(null);
-				}else{
-					type.setTargetEntityType((IntelEntityType) x);
+				if (x instanceof IntelEntityType){
+					if ( ((IntelEntityType)x).getUuid() == null){
+						type.setTargetEntityType(null);
+					}else{
+						type.setTargetEntityType((IntelEntityType) x);
+					}
 				}
 				modified();
 			}
@@ -830,6 +852,7 @@ public class RelationshipTypeDialog extends SmartStyledTitleDialog {
 	private void initFields(){
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try{
+			isinit = true;
 		pmd.run(true,  false, new IRunnableWithProgress() {
 			
 			@Override
@@ -839,7 +862,7 @@ public class RelationshipTypeDialog extends SmartStyledTitleDialog {
 				List<IntelProfile> profiles = new ArrayList<>();
 				try(Session s = HibernateManager.openSession()){
 					profiles.addAll( ProfilesManager.INSTANCE.getProfiles(s, false) );
-					profiles.forEach(p->p.getEntityTypes().size());
+					profiles.forEach(p->p.getEntityTypes().forEach(pet->pet.getEntityType().getProfiles().size()));
 					
 					if (type.getUuid() != null){
 						type = (IntelRelationshipType) s.get(IntelRelationshipType.class, type.getUuid());
@@ -884,27 +907,43 @@ public class RelationshipTypeDialog extends SmartStyledTitleDialog {
 						if (type.getSourceProfile() != null) {
 							cmbSrcProfile.setSelection(new StructuredSelection(type.getSourceProfile()));
 							
-						}
-						if (type.getTargetProfile() != null) {
-							cmbTrgProfile.setSelection(new StructuredSelection(type.getTargetProfile()));
-						}
-						if (type.getSourceEntityType() != null){
-							cmbSrcType.setSelection(new StructuredSelection(type.getSourceEntityType()));
-						}else if (type.getSourceProfile() != null){
-							cmbSrcType.setSelection(new StructuredSelection(ANY_OP));
+							List<Object> items = new ArrayList<>();
+							items.add(ANY_OP);
+							for (IntelProfileEntityType t : type.getSourceProfile().getEntityTypes()) {
+								items.add(t.getEntityType());
+							}
+							cmbSrcType.setInput( items );
+							
+							if (type.getSourceEntityType() != null){
+								cmbSrcType.setSelection(new StructuredSelection(type.getSourceEntityType()));
+							}else if (type.getSourceProfile() != null){
+								cmbSrcType.setSelection(new StructuredSelection(ANY_OP));
+							}
+							
 						}
 						
-						if (type.getTargetEntityType() != null){
-							cmbTrgType.setSelection(new StructuredSelection(type.getTargetEntityType()));
-						}else if (type.getTargetProfile() != null) {
-							cmbTrgType.setSelection(new StructuredSelection(ANY_OP));
+						if (type.getTargetProfile() != null) {
+							cmbTrgProfile.setSelection(new StructuredSelection(type.getTargetProfile()));
+							
+							List<Object> items = new ArrayList<>();
+							items.add(ANY_OP);
+							for (IntelProfileEntityType t : type.getTargetProfile().getEntityTypes()) {
+								items.add(t.getEntityType());
+							}
+							cmbTrgType.setInput( items );
+						
+							if (type.getTargetEntityType() != null){
+								cmbTrgType.setSelection(new StructuredSelection(type.getTargetEntityType()));
+							}else if (type.getTargetProfile() != null) {
+								cmbTrgType.setSelection(new StructuredSelection(ANY_OP));
+							}
 						}
 						if (type.getRelationshipGroup() != null){
 							cmbGroup.setSelection(new StructuredSelection(type.getRelationshipGroup()));
 						}else{
 							cmbGroup.setSelection(new StructuredSelection(noGroup));
 						}
-						
+						modified();
 						getButton(IDialogConstants.OK_ID).setEnabled(false);
 					});
 			}
@@ -912,6 +951,8 @@ public class RelationshipTypeDialog extends SmartStyledTitleDialog {
 		
 		}catch (Exception ex){
 			Intelligence2PlugIn.log(MessageFormat.format(Messages.RelationshipTypeDialog_LoadError, ex.getMessage()), ex);
+		}finally {
+			isinit = false;
 		}
 	}
 	

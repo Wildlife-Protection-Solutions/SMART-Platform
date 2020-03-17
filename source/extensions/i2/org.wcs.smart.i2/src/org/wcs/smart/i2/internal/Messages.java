@@ -1626,10 +1626,12 @@ public class Messages extends NLS {
 	public static String RelationshipTypeDialog_SaveError;
 	public static String RelationshipTypeDialog_SourceEntityTypeRequired;
 	public static String RelationshipTypeDialog_SrcLabel;
+	public static String RelationshipTypeDialog_sourceProfileRequired;
 	public static String RelationshipTypeDialog_srcProfile;
 	public static String RelationshipTypeDialog_TargetEntityTypeRequired;
 	public static String RelationshipTypeDialog_TargetLabel;
 	public static String RelationshipTypeDialog_Title;
+	public static String RelationshipTypeDialog_targetProfileRequired;
 	public static String RelationshipTypeDialog_trgProfile;
 	public static String RelationshipTypeDialog_ValidSourceEntityTypeRequired;
 	public static String RelationshipTypeDialog_ValidTargetEntityTypeRequired;
