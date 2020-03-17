@@ -77,6 +77,7 @@ import org.wcs.smart.i2.InternalEntityManager;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.search.IntelSearchResult;
 import org.wcs.smart.i2.search.IntelSearchResultItem;
 import org.wcs.smart.i2.security.IntelSecurityManager;
@@ -656,6 +657,7 @@ public class EntitySearchResultTable extends Composite {
 				if (mnuAddToRecord == null || mnuAddToRecord.isDisposed()){
 					mnuAddToRecord = new MenuItem(menu, SWT.CASCADE);
 					mnuAddToRecord.setText(Messages.EntitySearchResultTable_AddToRecordMenuItem);
+					mnuAddToRecord.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RECORD));
 				
 					subRecord = new Menu(menu);
 					mnuAddToRecord.setMenu(subRecord);
@@ -665,42 +667,58 @@ public class EntitySearchResultTable extends Composite {
 						mi.dispose();
 					}
 				}
-				if (IntelSecurityManager.INSTANCE.canCreateRecordAny()) {
-					MenuItem createRecord = new MenuItem(subRecord, SWT.PUSH);
-					createRecord.setText(Messages.EntitySearchResultTable_CreateNewRecord);
-					createRecord.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
-					createRecord.addListener(SWT.Selection, cr->{
-						List<UUID> uuids = new ArrayList<>();
-						getCurrentSelection().forEach(entity->uuids.add(entity.getUuid()));
-						IEclipseContext kid = context.createChild();
-						kid.set(NewRecordHandler.ENTITY_UUID_LINK, uuids);
-						(new NewRecordHandler()).createNewRecord(kid);
-					});
+				
+				IntelProfile cProfile = null;
+				for (IntelEntity ie : getCurrentSelection()) {
+					if (cProfile == null) {
+						cProfile = ie.getProfile();
+					}else if (!cProfile.equals(ie.getProfile())) {
+						cProfile = null;
+						break;
+					}
 				}
-		
-				if (IntelSecurityManager.INSTANCE.canEditRecordAny()) {
-					Collection<MPart> parts = context.get(EPartService.class).getParts();
-					boolean first = false;
-					for (MPart p : parts){
-						if (E3Utils.isCompatibilityEditor(p)){
-							Object editor = E3Utils.getSourceObject(p);
-							if (editor instanceof RecordEditor && ((RecordEditor)editor).getEditMode()){
-								if (!first) {
-									new MenuItem(subRecord, SWT.SEPARATOR);
-									first = true;
-								}
-								MenuItem relate = new MenuItem(subRecord, SWT.PUSH);
-								relate.setText( ((RecordEditor)editor).getRecord().getTitle()  );
-								relate.addSelectionListener(new SelectionAdapter() {
-									@Override
-									public void widgetSelected(SelectionEvent e) {
-										if (!getCurrentSelection().isEmpty()){
-											for (IntelEntity entity : getCurrentSelection()){
-												((RecordEditor)editor).linkEntity(entity);
-											}
-										}
+				IntelProfile fcProfile = cProfile;
+				if (cProfile != null) {
+					if (IntelSecurityManager.INSTANCE.canCreateRecordAny()) {
+						MenuItem createRecord = new MenuItem(subRecord, SWT.PUSH);
+						createRecord.setText(Messages.EntitySearchResultTable_CreateNewRecord);
+						createRecord.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+						createRecord.addListener(SWT.Selection, cr->{
+							List<UUID> uuids = new ArrayList<>();
+							getCurrentSelection().forEach(entity->uuids.add(entity.getUuid()));
+							IEclipseContext kid = context.createChild();
+							kid.set(NewRecordHandler.ENTITY_UUID_LINK, uuids);
+							kid.set(NewRecordHandler.PROFILE_LINK, fcProfile);
+							(new NewRecordHandler()).createNewRecord(kid);
+						});
+					}
+			
+					if (IntelSecurityManager.INSTANCE.canEditRecordAny()) {
+						Collection<MPart> parts = context.get(EPartService.class).getParts();
+						boolean first = false;
+						for (MPart p : parts){
+							if (E3Utils.isCompatibilityEditor(p)){
+								Object editor = E3Utils.getSourceObject(p);
+								if (editor instanceof RecordEditor && ((RecordEditor)editor).getEditMode()){
+									if (!first) {
+										new MenuItem(subRecord, SWT.SEPARATOR);
+										first = true;
 									}
-								});
+									if (((RecordEditor)editor).getRecord().getProfile().equals(cProfile)) {
+										MenuItem relate = new MenuItem(subRecord, SWT.PUSH);
+										relate.setText( ((RecordEditor)editor).getRecord().getTitle()  );
+										relate.addSelectionListener(new SelectionAdapter() {
+											@Override
+											public void widgetSelected(SelectionEvent e) {
+												if (!getCurrentSelection().isEmpty()){
+													for (IntelEntity entity : getCurrentSelection()){
+														((RecordEditor)editor).linkEntity(entity);
+													}
+												}
+											}
+										});
+									}
+								}
 							}
 						}
 					}
