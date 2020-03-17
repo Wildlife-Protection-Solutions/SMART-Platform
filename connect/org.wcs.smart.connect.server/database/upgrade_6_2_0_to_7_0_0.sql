@@ -603,6 +603,86 @@ alter table smart.i_recordsource_attribute alter column keyid set not null;
 update connect.connect_plugin_version set version = '5.0' where plugin_id = 'org.wcs.smart.i2';
 update connect.ca_plugin_version set version = '5.0' where plugin_id = 'org.wcs.smart.i2';
 
+
+
+-- functions for utm zone area
+ CREATE OR REPLACE FUNCTION connect.toutm(lat double precision, long double precision) RETURNS integer AS $$
+ DECLARE 
+ 	zone integer;
+ 	issouth boolean;
+ 	sql varchar;
+ 	srid integer;
+ 	rec record;
+ BEGIN
+	IF (lat < -80 OR lat > 84) THEN 
+        	RETURN NULL;
+        END IF;
+ 
+ 	zone := floor((long+180) / 6 ) + 1;
+ 	
+ 	IF (lat >= 0) THEN
+ 		issouth := false;
+ 	ELSE 
+ 		issouth := true;
+ 	END IF;
+ 	 
+        IF ( lat >= 56.0 AND lat < 64.0 AND long >= 3.0 AND long < 12.0 ) THEN
+        	zone := 32;
+        END IF;        
+         
+        	IF ( lat >= 72.0 AND lat < 84.0 ) THEN
+        	IF (long >= 0 AND long < 9.0) THEN
+        		zone := 31;
+        	ELSIF (long >= 9.0 and long < 21.0 ) THEN
+        		zone := 33;
+        	ELSIF (long >= 21.0 and long < 33.0 ) THEN
+        		zone := 35;
+        	ELSIF (long >= 33.0 and long < 42.0 ) THEN
+        		zone := 37;
+        	END IF;
+	END IF;
+      
+	sql := 'SELECT srid FROM spatial_ref_sys WHERE proj4text like ''%proj=utm %'' AND proj4text like ''%zone=' || zone || ' %'' AND proj4text like ''%datum=WGS84 %''';
+	IF (issouth = true) THEN
+		sql := sql || ' AND proj4text like ''%south %''';
+	ELSE
+		sql := sql || ' AND proj4text not like ''%south %''';
+	END IF;
+      
+	srid := null;
+	FOR rec IN EXECUTE sql LOOP
+		IF (srid is not null) THEN 
+			RETURN NULL;
+		END IF;
+		srid := rec.srid;
+	END LOOP;
+      
+	RETURN srid;
+END;
+
+$$LANGUAGE plpgsql;                     
+
+
+CREATE OR REPLACE FUNCTION connect.utmarea(geom geometry) RETURNS double precision AS $$
+DECLARE
+	srid integer;
+	centroid geometry;
+BEGIN
+	centroid := st_centroid(geom);
+	srid := connect.toutm(st_y(centroid), st_x(centroid));
+	IF (srid is null) THEN
+		return st_area(geography(geom));
+	END IF;
+	RETURN st_area(st_transform( st_setsrid(geom, 4326), srid));
+END;
+$$LANGUAGE plpgsql;  
+
+
+
+
+
+
+
 ---- change ca version so users cannot sync with this and cause problems ---- 
 update connect.ca_info SET version = uuid_generate_v4();
 delete from connect.change_log;

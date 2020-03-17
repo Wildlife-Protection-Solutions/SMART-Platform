@@ -1537,9 +1537,8 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 		case DISTANCE_TOTAL:
 			return "sum(distance)"; //$NON-NLS-1$
 		case AREA_BUFFER:
-			
-			
-			return "st_area(geography(st_union(bufferarea)))";
+			return "connect.utmarea(st_union(bufferarea))"; //$NON-NLS-1$
+			//return "st_area(geography(st_union(bufferarea)))";
 		case NUM_PATROLHOURS:
 		case NUM_PATROLHOURS_TOTAL:
 			if (!hasAreaGroupBy) {
