@@ -207,7 +207,7 @@ public class GeometryUtils {
 	
 	/**
 	 * Buffers the given geometry by the provided value and returns
-	 * a geometry in a equal area projection (auto2)
+	 * a geometry in the original smart projection 
 	 * 
 	 * @param wkb1
 	 * @param wkb2
@@ -616,6 +616,9 @@ public class GeometryUtils {
 	 */
 	public static Float[] computeDistanceBearing(Coordinate c1, Coordinate c2) {
 		//initial bearing
+		c1 = new Coordinate(Math.toRadians(c1.x), Math.toRadians(c1.y));
+		c2 = new Coordinate(Math.toRadians(c2.x), Math.toRadians(c2.y));
+		
 		double y = Math.sin(c2.x-c1.x) * Math.cos(c2.y);
 		double x = Math.cos(c1.y)*Math.sin(c2.y) -
 		        Math.sin(c1.y)*Math.cos(c2.y)*Math.cos(c2.x-c1.x);
@@ -623,10 +626,10 @@ public class GeometryUtils {
 		brng = (brng + 360) % 360;
 				
 		//Distance haversine formula
-		double lat1 = Math.toRadians(c1.y);
-		double lat2 = Math.toRadians(c2.y);
-		double latdiff = Math.toRadians(c2.y-c1.y);
-		double longdiff = Math.toRadians(c2.x-c1.x);
+		double lat1 = c1.y;//Math.toRadians(c1.y);
+		double lat2 = c2.y;//Math.toRadians(c2.y);
+		double latdiff = c2.y - c1.y;//= Math.toRadians(c2.y-c1.y);
+		double longdiff = c2.x - c1.x; //Math.toRadians(c2.x-c1.x);
 		double a = Math.sin(latdiff/2) * Math.sin(latdiff/2) +
 		        Math.cos(lat1) * Math.cos(lat2) *
 		        Math.sin(longdiff/2) * Math.sin(longdiff/2);
@@ -635,4 +638,5 @@ public class GeometryUtils {
 				
 		return new Float[] {(float)d, (float)brng};
 	}
+
 }
