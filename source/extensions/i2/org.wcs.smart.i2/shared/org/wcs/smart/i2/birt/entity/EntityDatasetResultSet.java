@@ -105,12 +105,12 @@ public class EntityDatasetResultSet implements IResultSet {
 					.setParameter("profiles", connection.hasPermission(Permission.ENTITY))
 					.setReadOnly(true).scroll(ScrollMode.FORWARD_ONLY);
 		}else {
-			m_maxRows = (Long)connection.getSession().createQuery("SELECT count(*) " + hql + " WHERE uuid = :uuid")
+			m_maxRows = (Long)connection.getSession().createQuery("SELECT count(*) " + hql + " AND uuid = :uuid")
 					.setParameter("type", type)
 					.setParameter("profiles", connection.hasPermission(Permission.ENTITY))
 					.setParameter("uuid", euuid)
 					.uniqueResult();
-			results = connection.getSession().createQuery(hql+ " WHERE uuid = :uuid")
+			results = connection.getSession().createQuery(hql+ " AND uuid = :uuid")
 					.setParameter("type", type)
 					.setParameter("profiles", connection.hasPermission(Permission.ENTITY))
 					.setParameter("uuid", euuid)

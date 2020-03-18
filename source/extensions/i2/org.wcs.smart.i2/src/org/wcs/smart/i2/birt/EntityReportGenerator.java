@@ -658,7 +658,21 @@ public enum EntityReportGenerator {
 		c.setProperty("name", "ID_Date_Time"); //$NON-NLS-1$ //$NON-NLS-2$
 		c.setDisplayName("ID_Date_Time"); //$NON-NLS-1$
 		c.setDataType("string"); //$NON-NLS-1$
-		c.setExpression("dataSetRow[\"" + EntityDatasetResultSetMetadata.Column.ID.getColumnName(Locale.getDefault()) + "\"] + \"\\n\" + Formatter.format(params[\"" + DataSourceParameter.START_DATE.getName() + "\"].value, 'MMM dd, YYYY') + \" to \" + Formatter.format(params[\"" + DataSourceParameter.END_DATE.getName() + "\"].value, 'MMM dd, YYYY')");  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+	
+		StringBuilder sb = new StringBuilder();
+		sb.append("if (params[\""); //$NON-NLS-1$
+		sb.append(DataSourceParameter.START_DATE.getName());
+		sb.append("\"].value == null) { dataSetRow[\""); //$NON-NLS-1$
+		sb.append(EntityDatasetResultSetMetadata.Column.ID.getColumnName(Locale.getDefault()) );
+		sb.append("\"] } else { dataSetRow[\""); //$NON-NLS-1$
+		sb.append(EntityDatasetResultSetMetadata.Column.ID.getColumnName(Locale.getDefault()) );
+		sb.append("\"] + \"\\n\" + Formatter.format(params[\""); //$NON-NLS-1$
+		sb.append(DataSourceParameter.START_DATE.getName());
+		sb.append("\"].value, 'MMM dd, YYYY') + \" to \" + Formatter.format(params[\""); //$NON-NLS-1$
+		sb.append(DataSourceParameter.END_DATE.getName());
+		sb.append("\"].value, 'MMM dd, YYYY')}"); //$NON-NLS-1$
+		c.setExpression(sb.toString());
+		
 		di.getColumnBindings().addItem(c);
 		di.setResultSetColumn("ID_Date_Time"); //$NON-NLS-1$
 		footerGrid1.getCell(1, 1).getContent().add(di);
