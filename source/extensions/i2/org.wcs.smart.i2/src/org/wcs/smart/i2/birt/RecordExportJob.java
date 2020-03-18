@@ -91,7 +91,14 @@ public class RecordExportJob extends Job {
 		if (record == null) throw new Exception("Record not loaded."); //$NON-NLS-1$
 		//get the template
 		Path reportFile = IntelReportManager.INSTANCE.getRecordTemplate(SmartDB.getCurrentConservationArea());
-		if (reportFile == null || !Files.exists(reportFile)){
+		
+		//if the template doesn't exist try creating it
+		if (!Files.exists(reportFile)){
+			RecordReportGenerator.INSTANCE.generateReport(reportFile);
+		}
+
+		//if it still doesn't exist generate an error
+		if (!Files.exists(reportFile)){
 			throw new Exception(Messages.RecordExportJob_NoTemplate);
 			
 		}
