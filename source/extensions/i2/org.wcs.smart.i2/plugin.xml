@@ -861,9 +861,9 @@
             allPopups="false"
             locationURI="menu:org.wcs.smart.menu.query.newquery?before=org.wcs.smart.query.newquery.separator2">
          <menu
-               icon="images/icons/obj16/query.png"
+               icon="images/icons/profile.png"
                id="org.wcs.smart.menu.query.newquery.i2queries"
-               label="%menu.label.profilequery"
+               label="%menu.label.profilequery1"
                tooltip="%newprofilequerytooltip">
             <command
                   commandId="org.wcs.smart.i2.command.query.record.new"

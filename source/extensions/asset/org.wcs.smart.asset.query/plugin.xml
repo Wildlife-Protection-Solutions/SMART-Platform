@@ -140,7 +140,7 @@
          <menu
                icon="platform:/plugin/org.wcs.smart.asset/images/icons/obj16/asset.png"
                id="org.wcs.smart.menu.query.newquery.assetqueries"
-               label="%assetquery1.menu.label"
+               label="%assetquery1.menu.label1"
                tooltip="%assetquery1.menu.tooltip">
             <command
                   commandId="org.wcs.smart.query.create.unknown"

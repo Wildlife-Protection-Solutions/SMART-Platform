@@ -139,7 +139,7 @@
          <menu
                icon="platform:/plugin/org.wcs.smart.er/images/icons/obj16/survey.png"
                id="org.wcs.smart.query.createquery.surveyquery"
-               label="%surveyquery.menu.label1"
+               label="%surveyquery.menu.label2"
                tooltip="%surveyquery.menu.tooltip1">
             <command
                   commandId="org.wcs.smart.query.create.unknown"

@@ -225,6 +225,10 @@
                      name="org.wcs.smart.query.source"
                      value="org.wc.smart.query.create.dropdown.mi">
                </parameter>
+               <parameter
+                     name="org.wcs.smart.query.menutype"
+                     value="submenu">
+               </parameter>
             </command>
             <command
                   commandId="org.wcs.smart.query.export"
@@ -618,6 +622,10 @@
             <parameter
                   name="org.wcs.smart.query.source"
                   value="org.wc.smart.query.create.dropdown.mi2">
+            </parameter>
+            <parameter
+                  name="org.wcs.smart.query.menutype"
+                  value="dropdown">
             </parameter>
          </command>
       </menuContribution>
@@ -1065,6 +1073,11 @@
          <commandParameter
                id="org.wcs.smart.query.source"
                name="Source Menu Item"
+               optional="true">
+         </commandParameter>
+         <commandParameter
+               id="org.wcs.smart.query.menutype"
+               name="name"
                optional="true">
          </commandParameter>
       </command>

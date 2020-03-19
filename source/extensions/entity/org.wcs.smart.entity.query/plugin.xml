@@ -174,7 +174,7 @@
          <menu
                icon="platform:/plugin/org.wcs.smart.entity/images/icons/obj16/entitytype.png"
                id="org.wcs.smart.menu.query.newquery.entityqueries"
-               label="%entityquery.menu.name"
+               label="%entityquery.menu.name1"
                tooltip="%new.entityqueries.tooltip">
             <command
                   commandId="org.wcs.smart.query.create.unknown"

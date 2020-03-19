@@ -212,7 +212,7 @@
          <menu
                icon="platform:/plugin/org.wcs.smart.patrol/images/icons/obj16/patrol.png"
                id="org.wcs.smart.menu.query.newquery.patrolqueries"
-               label="%patrolquery1.menu.label"
+               label="%patrolquery1.menu.label1"
                tooltip="%patrolquery1.menu.tooltip">
             <command
                   commandId="org.wcs.smart.query.create.unknown"

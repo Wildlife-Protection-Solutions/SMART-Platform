@@ -9,7 +9,7 @@
          <menu
                icon="images/icons/obj16/intelligence.png"
                id="org.wcs.smart.intelligence.query.createquery"
-               label="%intelquery1.menu.label">
+               label="%intelquery1.menu.label1">
             <command
                   commandId="org.wcs.smart.query.create.unknown"
                   icon="images/icons/obj16/intelligence_summary.png"

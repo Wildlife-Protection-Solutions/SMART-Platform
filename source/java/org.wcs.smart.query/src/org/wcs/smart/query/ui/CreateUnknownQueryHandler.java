@@ -66,9 +66,8 @@ public class CreateUnknownQueryHandler {
 	private static final String QUERY_TYPE_KEY = "org.wcs.smart.query.type"; //$NON-NLS-1$
 	
 	@Execute
-	public void execute(@Optional @Named(QUERY_TYPE_KEY) String queryType, Shell activeShell, 
-			IEclipseContext context){
-		
+	public void execute(@Optional @Named(QUERY_TYPE_KEY) String queryType, IEclipseContext context){
+		Shell activeShell = context.get(Shell.class);
 		(new ShowPerspectiveHandler()).execute(QueryPlugIn.getActivePerspectiveId(), 
 				context.get(MWindow.class));
 		

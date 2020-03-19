@@ -96,8 +96,9 @@
             allPopups="false"
             locationURI="menu:org.wcs.smart.menu.query.newquery?before=org.wcs.smart.query.newquery.separator3">
          <menu
+               icon="platform:/plugin/org.wcs.smart.query/images/icons/obj16/query.png"
                id="org.wcs.smart.menu.query.newquery.alldata"
-               label="%menu.query.alldata.name"
+               label="%menu.query.alldata.name1"
                tooltip="%menu.query.alldata.tooltip">
             <command
                   commandId="org.wcs.smart.query.create.unknown"
