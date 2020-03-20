@@ -83,6 +83,7 @@ import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntity;
+import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.search.AllEntitySearch;
 import org.wcs.smart.i2.security.IntelSecurityManager;
@@ -442,6 +443,11 @@ public class AllPanel extends Composite {
 						}
 					};
 					temp.setUuid(i.getEntityUuid());
+					
+					IntelEntityType tt = new IntelEntityType();
+					tt.setUuid(i.getEntityTypeUuid());
+					
+					temp.setEntityType(tt);
 					
 					IntelProfile profiletemp = new IntelProfile();
 					profiletemp.setUuid(i.getProfileUuid());

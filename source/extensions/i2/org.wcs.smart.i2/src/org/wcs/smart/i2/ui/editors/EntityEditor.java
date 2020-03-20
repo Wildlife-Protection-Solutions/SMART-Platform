@@ -1317,11 +1317,16 @@ public class EntityEditor extends EditorPart implements MapPart{
 		
 		try(Session session = HibernateManager.openSession()){
 			rType = session.get(IntelRelationshipType.class, rType.getUuid());
+			targetEntity = session.get(IntelEntity.class, targetEntity.getUuid());
+			targetEntity.getAttributes().size();
+			
 			if (rType.getRelationshipGroup() != null) rType.getRelationshipGroup().getNames().size();
 			rType.getSourceProfile().equals(getEntity().getProfile());
 			rType.getTargetProfile().equals(targetEntity.getProfile());
 			
 			rType.getAttributes().forEach(e->e.getAttribute().getName());
+			
+			targetEntity.getEntityType().equals(null);
 		}
 		
 

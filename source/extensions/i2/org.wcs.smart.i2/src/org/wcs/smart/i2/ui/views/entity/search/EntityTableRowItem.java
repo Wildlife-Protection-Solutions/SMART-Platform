@@ -12,20 +12,25 @@ public class EntityTableRowItem {
 	private String profileName;
 	private String profileKey;
 	private UUID profileUuid;
+	private UUID entityTypeUuid;
 	
 	private HashMap<String, Object> attributes = new HashMap<>();
 	
-	public EntityTableRowItem(UUID entityUuid, String id, String profileName, String profileKey, UUID profileUuid) {
+	public EntityTableRowItem(UUID entityUuid, String id, String profileName, String profileKey, UUID profileUuid,
+			String entityTypeName, UUID entityTypeUuid) {
 		this.entityUuid = entityUuid;
 		this.id = id;
 		this.profileName = profileName;
 		this.profileKey = profileKey;
 		this.profileUuid = profileUuid;
+		
+		this.type = entityTypeName;
+		this.entityTypeUuid = entityTypeUuid;
 	}
 	
 	
-	public void setType(String type) {
-		this.type = type;
+	public UUID getEntityTypeUuid() {
+		return this.entityTypeUuid;
 	}
 	
 	public void setAttribute(String attributeKey, Object value) {

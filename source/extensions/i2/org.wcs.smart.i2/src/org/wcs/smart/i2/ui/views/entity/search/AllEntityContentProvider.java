@@ -74,6 +74,7 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class AllEntityContentProvider implements ILazyContentProvider {
 
+	private static Object TEMP_TABLE_LOCK = new Object();
 	/**
 	 * temporary table for storing all entities for querying and sorting
 	 */
@@ -98,113 +99,117 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public synchronized EntityTableData generateData() {
-		ConservationArea ca = SmartDB.getCurrentConservationArea();
-		List<IntelProfile> profiles = new ArrayList<>(ProfilesManager.INSTANCE.getActiveProfiles());
-		profiles = profiles.stream().filter(e->IntelSecurityManager.INSTANCE.canViewEntities(e)).collect(Collectors.toList());
-		
-		if (profiles.isEmpty()) {
-			EntityTableData data = new EntityTableData();
-			data.attributes = Collections.emptyList();
-			data.tableName = ""; //$NON-NLS-1$
-			data.totalCount = 0;
-			data.currentCount = 0;
-			return data;
-		}
-		
-		this.data = null;
-		try(Session session = HibernateManager.openSession()){
-			session.beginTransaction();
-			try {
-				session.createNativeQuery("DROP TABLE " + DB_NAME_NAME).executeUpdate(); //$NON-NLS-1$
-				session.getTransaction().commit();
-			}catch(Exception ex) {
-				session.getTransaction().rollback();
+	public EntityTableData generateData() {
+		synchronized (TEMP_TABLE_LOCK) {
+			
+			ConservationArea ca = SmartDB.getCurrentConservationArea();
+			List<IntelProfile> profiles = new ArrayList<>(ProfilesManager.INSTANCE.getActiveProfiles());
+			profiles = profiles.stream().filter(e->IntelSecurityManager.INSTANCE.canViewEntities(e)).collect(Collectors.toList());
+			
+			if (profiles.isEmpty()) {
+				EntityTableData data = new EntityTableData();
+				data.attributes = Collections.emptyList();
+				data.tableName = ""; //$NON-NLS-1$
+				data.totalCount = 0;
+				data.currentCount = 0;
+				return data;
 			}
 			
-			session.beginTransaction();
-			try {
-				//find all attributes
-				List<IntelEntityTypeAttribute> etattributes = session
-						.createQuery("FROM IntelEntityTypeAttribute WHERE id.attribute.conservationArea = :ca") //$NON-NLS-1$
-						.setParameter("ca", ca) //$NON-NLS-1$
-						.list();
-						
-				List<IntelAttribute> eattributes = new ArrayList<>();
-					etattributes.forEach( a-> {
-						if (!eattributes.contains(a.getAttribute())) eattributes.add(a.getAttribute());
-				});
-						
-				//create a temporary entity table for working with
-				StringBuilder sb = new StringBuilder();
-				sb.append("CREATE TABLE "); //$NON-NLS-1$
-				sb.append(DB_NAME_NAME);
-				sb.append(" ( entity_uuid char(16) for bit data, "); //$NON-NLS-1$
-				sb.append(" entity_type_uuid char(16) for bit data, "); //$NON-NLS-1$
-				sb.append(" profile_uuid char(16) for bit data, "); //$NON-NLS-1$
-				sb.append(" i_primary_id varchar(1024), "); //$NON-NLS-1$
-				sb.append(" filter boolean, "); //$NON-NLS-1$
-				sb.append(COL_ENTITY_TYPE_NAME);
-				sb.append(" varchar(1024) "); //$NON-NLS-1$
-				sb.append(")"); //$NON-NLS-1$
-				session.createNativeQuery(sb.toString()).executeUpdate();
-				
-				
-				//now we need to populate this table
-				//entity uuid for this ca
-				sb = new StringBuilder();
-				sb.append(" INSERT INTO "); //$NON-NLS-1$
-				sb.append( DB_NAME_NAME );
-				sb.append(" (entity_uuid, entity_type_uuid, profile_uuid, i_primary_id, filter)"); //$NON-NLS-1$
-				sb.append(" SELECT e.uuid, t.uuid, e.profile_uuid, a.keyid, true FROM smart.i_entity e join smart.i_entity_type t on e.entity_type_uuid = t.uuid join smart.i_attribute a on t.id_attribute_uuid = a.uuid " ); //$NON-NLS-1$
-				sb.append(" WHERE e.ca_uuid = :ca and e.profile_uuid in (:uuids) "); //$NON-NLS-1$
-				session.createNativeQuery(sb.toString())
-					.setParameter("ca", ca.getUuid()) //$NON-NLS-1$
-					.setParameterList("uuids", profiles.stream().map(e->e.getUuid()).collect(Collectors.toList())) //$NON-NLS-1$
-					.executeUpdate();
-				sb = new StringBuilder();
-				sb.append(" CREATE INDEX i_temp_entity_uuid_idx on " + DB_NAME_NAME + "(entity_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
-				session.createNativeQuery(sb.toString()).executeUpdate();
-				
-				//entity type names
-				sb = new StringBuilder();
-				sb.append("SELECT distinct entity_type_uuid FROM " + DB_NAME_NAME); //$NON-NLS-1$
-				List<?> entityTypes = session.createNativeQuery(sb.toString()).list();
-				for (Object x : entityTypes) {
-					UUID entityTypeUuid = UuidUtils.byteToUUID( (byte[]) x );
-					IntelEntityType type = session.get(IntelEntityType.class, entityTypeUuid);
-				
-					sb = new StringBuilder();
-					sb.append(" UPDATE "); //$NON-NLS-1$
-					sb.append(DB_NAME_NAME);
-					sb.append(" SET "); //$NON-NLS-1$
-					sb.append(COL_ENTITY_TYPE_NAME);
-					sb.append(" = :name WHERE entity_type_uuid = :uuid"); //$NON-NLS-1$
-					
-					session.createNativeQuery(sb.toString())
-						.setParameter("name", type.getName()) //$NON-NLS-1$
-						.setParameter("uuid", entityTypeUuid) //$NON-NLS-1$
-						.executeUpdate();
-					
+			this.data = null;
+			try(Session session = HibernateManager.openSession()){
+				session.beginTransaction();
+				try {
+					session.createNativeQuery("DROP TABLE " + DB_NAME_NAME).executeUpdate(); //$NON-NLS-1$
+					session.getTransaction().commit();
+				}catch(Exception ex) {
+					session.getTransaction().rollback();
 				}
 				
-				Integer count = (Integer) session.createNativeQuery("SELECT count(*) FROM " + DB_NAME_NAME).uniqueResult(); //$NON-NLS-1$
-
-				session.getTransaction().commit();
-				
-				//create results
-				EntityTableData data = new EntityTableData();
-				data.attributes = eattributes;
-				data.tableName = DB_NAME_NAME;
-				data.totalCount = count;
-				data.currentCount = count;
-				return data;
-				
-			}catch(Exception ex){
-				ex.printStackTrace();
-				session.getTransaction().rollback();
-				return null;
+				session.beginTransaction();
+				try {
+					//find all attributes
+					List<IntelEntityTypeAttribute> etattributes = session
+							.createQuery("FROM IntelEntityTypeAttribute WHERE id.attribute.conservationArea = :ca") //$NON-NLS-1$
+							.setParameter("ca", ca) //$NON-NLS-1$
+							.list();
+							
+					List<IntelAttribute> eattributes = new ArrayList<>();
+						etattributes.forEach( a-> {
+							if (!eattributes.contains(a.getAttribute())) eattributes.add(a.getAttribute());
+					});
+							
+					//create a temporary entity table for working with
+					StringBuilder sb = new StringBuilder();
+					sb.append("CREATE TABLE "); //$NON-NLS-1$
+					sb.append(DB_NAME_NAME);
+					sb.append(" ( entity_uuid char(16) for bit data, "); //$NON-NLS-1$
+					sb.append(" entity_type_uuid char(16) for bit data, "); //$NON-NLS-1$
+					sb.append(" profile_uuid char(16) for bit data, "); //$NON-NLS-1$
+					sb.append(" i_primary_id varchar(1024), "); //$NON-NLS-1$
+					sb.append(" filter boolean, "); //$NON-NLS-1$
+					sb.append(COL_ENTITY_TYPE_NAME);
+					sb.append(" varchar(1024) "); //$NON-NLS-1$
+					sb.append(")"); //$NON-NLS-1$
+					session.createNativeQuery(sb.toString()).executeUpdate();
+					
+					
+					//now we need to populate this table
+					//entity uuid for this ca
+					sb = new StringBuilder();
+					sb.append(" INSERT INTO "); //$NON-NLS-1$
+					sb.append( DB_NAME_NAME );
+					sb.append(" (entity_uuid, entity_type_uuid, profile_uuid, i_primary_id, filter)"); //$NON-NLS-1$
+					sb.append(" SELECT e.uuid, t.uuid, e.profile_uuid, a.keyid, true FROM smart.i_entity e join smart.i_entity_type t on e.entity_type_uuid = t.uuid join smart.i_attribute a on t.id_attribute_uuid = a.uuid " ); //$NON-NLS-1$
+					sb.append(" WHERE e.ca_uuid = :ca and e.profile_uuid in (:uuids) "); //$NON-NLS-1$
+					session.createNativeQuery(sb.toString())
+						.setParameter("ca", ca.getUuid()) //$NON-NLS-1$
+						.setParameterList("uuids", profiles.stream().map(e->e.getUuid()).collect(Collectors.toList())) //$NON-NLS-1$
+						.executeUpdate();
+					sb = new StringBuilder();
+					sb.append(" CREATE INDEX i_temp_entity_uuid_idx on " + DB_NAME_NAME + "(entity_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
+					session.createNativeQuery(sb.toString()).executeUpdate();
+					
+					//entity type names
+					sb = new StringBuilder();
+					sb.append("SELECT distinct entity_type_uuid FROM " + DB_NAME_NAME); //$NON-NLS-1$
+					List<?> entityTypes = session.createNativeQuery(sb.toString()).list();
+					for (Object x : entityTypes) {
+						UUID entityTypeUuid = UuidUtils.byteToUUID( (byte[]) x );
+						IntelEntityType type = session.get(IntelEntityType.class, entityTypeUuid);
+					
+						sb = new StringBuilder();
+						sb.append(" UPDATE "); //$NON-NLS-1$
+						sb.append(DB_NAME_NAME);
+						sb.append(" SET "); //$NON-NLS-1$
+						sb.append(COL_ENTITY_TYPE_NAME);
+						sb.append(" = :name WHERE entity_type_uuid = :uuid"); //$NON-NLS-1$
+						
+						session.createNativeQuery(sb.toString())
+							.setParameter("name", type.getName()) //$NON-NLS-1$
+							.setParameter("uuid", entityTypeUuid) //$NON-NLS-1$
+							.executeUpdate();
+						
+					}
+					
+					Integer count = (Integer) session.createNativeQuery("SELECT count(*) FROM " + DB_NAME_NAME).uniqueResult(); //$NON-NLS-1$
+	
+					session.getTransaction().commit();
+					
+					//create results
+					EntityTableData data = new EntityTableData();
+					data.attributes = eattributes;
+					data.tableName = DB_NAME_NAME;
+					data.totalCount = count;
+					data.currentCount = count;
+					return data;
+					
+				}catch(Exception ex){
+					ex.printStackTrace();
+					session.getTransaction().rollback();
+					return null;
+				}
 			}
+			
 		}
 	}
 	
@@ -672,6 +677,7 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 				StringBuilder sb = new StringBuilder();
 				sb.append("SELECT entity_uuid, i_primary_id, profile_uuid, "); //$NON-NLS-1$
 				sb.append(COL_ENTITY_TYPE_NAME);
+				sb.append(", entity_type_uuid"); //$NON-NLS-1$
 				sb.append(" FROM "); //$NON-NLS-1$
 				sb.append( data.tableName );
 				sb.append(" WHERE filter = true "); //$NON-NLS-1$
@@ -710,27 +716,31 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 					sb.append(getSortDirection() == SWT.UP ? " ASC " : " DESC "); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				
-				NativeQuery<?> query = session.createNativeQuery(sb.toString());
-				ScrollableResults results = query.scroll();
-				if (!results.first()) return Status.OK_STATUS;
-				results.scroll(startIndex);
-
-				int cnt = 0;
-				while(cnt < pageSize) {
-					Object[] data = results.get();
-					if (data == null) break;
-					EntityTableRowItem item = asRowItem(data, session);
-					final int index = startIndex + cnt;
-					if (monitor.isCanceled() || index >= this.data.currentCount) return Status.CANCEL_STATUS;
-					//input has changed; cancel job
-					Display.getDefault().syncExec(()->{
-						if (index >= this.data.currentCount) return;	
-						if(viewer.getControl().isDisposed()) return;
-						viewer.replace(item, index);
-					});
-					
-					if (!results.next()) break;
-					cnt ++;
+				
+				synchronized (TEMP_TABLE_LOCK) {
+				
+					NativeQuery<?> query = session.createNativeQuery(sb.toString());
+					ScrollableResults results = query.scroll();
+					if (!results.first()) return Status.OK_STATUS;
+					results.scroll(startIndex);
+	
+					int cnt = 0;
+					while(cnt < pageSize) {
+						Object[] data = results.get();
+						if (data == null) break;
+						EntityTableRowItem item = asRowItem(data, session);
+						final int index = startIndex + cnt;
+						if (monitor.isCanceled() || index >= this.data.currentCount) return Status.CANCEL_STATUS;
+						//input has changed; cancel job
+						Display.getDefault().syncExec(()->{
+							if (index >= this.data.currentCount) return;	
+							if(viewer.getControl().isDisposed()) return;
+							viewer.replace(item, index);
+						});
+						
+						if (!results.next()) break;
+						cnt ++;
+					}
 				}
 				
 				
@@ -743,14 +753,15 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 			//entity_uuid , i_primary_id , i_entity_type_name
 
 			UUID entityUuid = UuidUtils.byteToUUID((byte[])rowdata[0]);
+			UUID typeUuid = UuidUtils.byteToUUID((byte[])rowdata[4]);
+
 			String id = (String)rowdata[1];
 			String type = (String)rowdata[3];
 			
 			UUID profileUuid = UuidUtils.byteToUUID((byte[])rowdata[2]);
 			IntelProfile p = session.get(IntelProfile.class, profileUuid);
 			
-			EntityTableRowItem item = new EntityTableRowItem(entityUuid, id, p.getName(), p.getKeyId(), p.getUuid());
-			item.setType(type);
+			EntityTableRowItem item = new EntityTableRowItem(entityUuid, id, p.getName(), p.getKeyId(), p.getUuid(), type, typeUuid);
 			
 			IntelEntity ie = session.get(IntelEntity.class, entityUuid);
 			if (ie != null) {
