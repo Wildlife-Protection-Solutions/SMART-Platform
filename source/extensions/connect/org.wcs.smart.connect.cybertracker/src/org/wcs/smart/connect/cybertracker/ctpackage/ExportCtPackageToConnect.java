@@ -22,6 +22,7 @@
 package org.wcs.smart.connect.cybertracker.ctpackage;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
@@ -141,7 +142,9 @@ public class ExportCtPackageToConnect implements ICtExportAction {
 				
 				Response response = simple.uploadCtPackage(Files.size(file), ctpackage.getUuid().toString(), proxy);
 				if (response.getStatus() != Response.Status.OK.getStatusCode()) {
-					throw new Exception(response.getStatusInfo().getReasonPhrase());
+					String x = parseError(response);
+					if (x == null) x = response.getStatusInfo().getReasonPhrase();
+					throw new Exception(x);
 				}
 				String location = response.getHeaderString(HttpHeaders.LOCATION);
 				if (location == null) {
@@ -194,7 +197,9 @@ public class ExportCtPackageToConnect implements ICtExportAction {
 							
 				Response response = simple.uploadNavigationLayer(Files.size(tempFile), nlayer.getUuid().toString(), proxy);
 				if (response.getStatus() != Response.Status.OK.getStatusCode()) {
-					throw new Exception(response.getStatusInfo().getReasonPhrase());
+					String x = parseError(response);
+					if (x == null) x = response.getStatusInfo().getReasonPhrase();
+					throw new Exception(x);
 				}
 				String location = response.getHeaderString(HttpHeaders.LOCATION);
 				if (location == null) {
@@ -270,4 +275,11 @@ public class ExportCtPackageToConnect implements ICtExportAction {
 		return ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.SERVER32_ICON);
 	}
 
+	private String parseError(Response response) throws IOException {
+		if (response.getEntity() instanceof InputStream) {
+			String r = new String(((InputStream)response.getEntity()).readAllBytes());
+			return r;
+		}
+		return null;
+	}
 }
