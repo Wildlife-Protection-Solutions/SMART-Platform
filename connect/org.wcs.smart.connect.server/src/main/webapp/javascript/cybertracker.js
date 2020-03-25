@@ -251,25 +251,10 @@ function downloadPackage(){
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 function refreshNavigationList(){
 	
 	//clear current table
-	var objects = document.querySelectorAll("div.ctrow");
+	var objects = document.querySelectorAll("div.navrow");
 	for (var i = 0; i < objects.length; i++){
 		var ele = objects[i];
 		ele.parentElement.removeChild(ele);

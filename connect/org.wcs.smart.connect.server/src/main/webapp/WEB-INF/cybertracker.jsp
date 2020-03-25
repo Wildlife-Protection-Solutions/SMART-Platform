@@ -39,23 +39,23 @@
 		  <div class="table-cell smart-table-cell"></div>
 	  </div>
     </div>
-    <a id="refreshnow" href="#">refresh</a>
+    <a id="refreshnow" href="#"><fmt:message key="cybertracker.refresh"/></a>
   </div>	
   
   <!-- Navigation Layer Table -->
-  <p class="top-spacer label-header" style="border-top:1px solid; padding-top:4px">Navigation Layers</p>
+  <p class="top-spacer label-header" style="border-top:1px solid; padding-top:4px"><fmt:message key="cybertracker.routestable"/></p>
   
   <div class="top-spacer" >
     <div id="navlayertable" class="table-cell smart-table">
   	  <div class="table-row smart-table-header">
-		  <div class="table-cell smart-table-cell">Name</div>
-		  <div class="table-cell smart-table-cell">Conservation Area</div>
-		  <div class="table-cell smart-table-cell">Date Uploaded</div>
+		  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.routestablename"/></div>
+		  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.routestableca"/></div>
+		  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.routestableuploaddate"/></div>
 		  <div class="table-cell smart-table-cell"></div>
 		  <div class="table-cell smart-table-cell"></div>
 	  </div>
     </div>
-    <a id="navrefreshnow" href="#">refresh</a>
+    <a id="navrefreshnow" href="#"><fmt:message key="cybertracker.refresh"/></a>
   </div>
   
   <!--  API Key Table -->
@@ -95,10 +95,10 @@
 	  
 	  <form id="deletenavform" onsubmit="return deleteNavigation();" >
 	    <input type="hidden" name="navuuid"/>
-	   	<p>Are you sure you want to the delete the selected navigation layers?</p>
+	   	<p><fmt:message key="cybertracker.deletenavconfirm"/></p>
 	   	<div class="block top-spacer" style="text-align:right">
-	     <input class="button" type="submit" value="Delete" />
-	     <input class="button" type="button" value="Cancel" onclick="closeDialog('deleteNavDialog')" />
+	     <input class="button" type="submit" value="<fmt:message key="cybertracker.deletebtn"/>" />
+	     <input class="button" type="button" value="<fmt:message key="cybertracker.cancelbtn"/>" onclick="closeDialog('deleteNavDialog')" />
 	    </div>
 	  </form>
   </div>

@@ -64,44 +64,26 @@
 
 			<plugin>
   				<groupId>io.swagger.core.v3</groupId>
-  				<artifactId>swagger-maven-plugin</artifactId>
-  				<version>2.0.8</version>
-
+                		<artifactId>swagger-maven-plugin</artifactId>
+                		<version>2.1.1</version>
+				
     			<executions>
-    				<execution>
-						<id>authentication api</id>
-            			<phase>compile</phase>
-            			<goals>
-                			<goal>resolve</goal>
-            			</goals>
-            			<configuration>
-                    		<outputFileName>smart-core</outputFileName>
-                    		<contextId>openapi-1</contextId>
-                    		<outputPath>./swagger</outputPath>
-                    		<outputFormat>YAML</outputFormat>
-                    		<resourcePackages>
-                    			<package>org.wcs.smart.connect.api</package>
-                    		</resourcePackages>
-                    		<prettyPrint>TRUE</prettyPrint>
-						</configuration>
-       				 </execution>
-       				 
-        			<execution>
-        			 	<id>no authentication api</id>
-            			<phase>compile</phase>
-            			<goals>
-                			<goal>resolve</goal>
-            			</goals>
-            			<configuration>
-                    		<outputFileName>smart-noa</outputFileName>
-                    		<contextId>openapi-2</contextId>
-                    		<outputPath>./swagger</outputPath>
-                    		<outputFormat>YAML</outputFormat>
-                    		<resourcePackages>
-                    			<package>org.wcs.smart.connect.api.noa</package>
-                    		</resourcePackages>
-                    		<prettyPrint>TRUE</prettyPrint>
-						</configuration>
+    				
+				<execution>
+					<id>noa api</id>
+            				<phase>compile</phase>
+            				<goals><goal>resolve</goal></goals>
+            				<configuration>
+                    				<outputFileName>smart-noi</outputFileName>
+                    				<outputPath>./swagger</outputPath>
+                    				<outputFormat>YAML</outputFormat>
+                    				<resourceClasses>
+                        				<classname>org.wcs.smart.connect.api.noa.ConnectNoaRESTApplication</classname>
+                        				<classname>org.wcs.smart.connect.api.noa.CyberTrackerNoa</classname>
+                        				<classname>org.wcs.smart.connect.api.noa.GlobalForestWatchNoa</classname>
+                    				</resourceClasses>
+                    				<prettyPrint>TRUE</prettyPrint>
+                			</configuration>
        				 </execution>
 					
     			</executions>
