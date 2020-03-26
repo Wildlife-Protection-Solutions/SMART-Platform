@@ -22,10 +22,13 @@
 package org.wcs.smart.i2.ui.preference;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -73,6 +76,7 @@ import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.ui.ProfileLabelProvider;
+import org.wcs.smart.i2.ui.dialogs.NewProfileDialog;
 import org.wcs.smart.i2.ui.dialogs.ProfileDialog;
 import org.wcs.smart.i2.xml.ProfileToXml;
 import org.wcs.smart.i2.xml.XmlToProfile;
@@ -172,6 +176,7 @@ public class ProfilesPreferencePage extends PreferencePage implements IIntelPref
 		
 	}
 	public void importConfig() {
+
 		FileDialog fd = new FileDialog(getShell(), SWT.OPEN);
 		fd.setFilterExtensions(new String[] {"*.zip", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
 		fd.setFilterNames(new String[] {Messages.ProfilesPreferencePage_ZipFiles, Messages.ProfilesPreferencePage_AllFiles});
@@ -208,13 +213,50 @@ public class ProfilesPreferencePage extends PreferencePage implements IIntelPref
 	}
 	private void add() {
 		if (configs == null) return;
-		IntelProfile c = new IntelProfile();
-		c.setConservationArea(SmartDB.getCurrentConservationArea());
-		c.setName(Messages.ProfilesPreferencePage_NewProfileName);
-		c.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), c.getName());
-		c.updateName(SmartDB.getCurrentLanguage(), c.getName());
 		
-		ProfileDialog pd = new ProfileDialog(getShell(), c, configs);
+		NewProfileDialog newDialog = new NewProfileDialog(getShell());
+		if (newDialog.open() != Window.OK) {
+			return;
+		}
+		
+		URL template = newDialog.getTemplate();
+		IntelProfile newProfile = null;
+		if (template == null) {
+			newProfile = new IntelProfile();
+			newProfile.setConservationArea(SmartDB.getCurrentConservationArea());
+			newProfile.setName(Messages.ProfilesPreferencePage_NewProfileName);
+			newProfile.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), newProfile.getName());
+			newProfile.updateName(SmartDB.getCurrentLanguage(), newProfile.getName());
+			
+		}else {
+			try {
+				Path temp = Files.createTempFile("smart" + System.nanoTime(), ".zip"); //$NON-NLS-1$ //$NON-NLS-2$
+				try {
+					try(InputStream is = XmlToProfile.class.getResourceAsStream(template.getPath())){
+						Files.copy(is, temp, StandardCopyOption.REPLACE_EXISTING);
+					}
+					XmlToProfile mm = new XmlToProfile(SmartDB.getCurrentConservationArea());
+					ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+					IntelProfile[] tmp = new IntelProfile[] {null};
+					pmd.run(false, false, monitor->{
+						try {
+							tmp[0] = mm.importXmlData(temp, monitor, eventBroker);
+						} catch (IOException e) {
+							throw new InvocationTargetException(e);
+						}	
+					});
+					newProfile = tmp[0];
+				}finally {
+					Files.delete(temp);
+				}
+			}catch (Exception ex) {
+				Intelligence2PlugIn.displayLog(ex.getMessage(), ex);
+			}
+			
+		}
+		
+		if (newProfile == null) return;
+		ProfileDialog pd = new ProfileDialog(getShell(), newProfile, configs);
 		pd.open();
 		refresh();
 	}

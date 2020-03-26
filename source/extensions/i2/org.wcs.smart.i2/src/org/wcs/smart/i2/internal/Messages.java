@@ -1083,6 +1083,11 @@ public class Messages extends NLS {
 	public static String NewEntityDialog_SaveError;
 	public static String NewEntityDialog_SelectProfile;
 	public static String NewEntityDialog_Title;
+	public static String NewProfileDialog_CreateNew;
+	public static String NewProfileDialog_loadingtemplatesjob;
+	public static String NewProfileDialog_Message;
+	public static String NewProfileDialog_Title;
+	public static String NewProfileDialog_UseTemplate;
 	public static String NewQueryHandler_DefaultQueryName;
 	public static String NewQueryHandler_ErrorTitle;
 	public static String NewQueryHandler_InvalidQueryType;

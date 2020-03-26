@@ -24,6 +24,7 @@ package org.wcs.smart.i2.xml;
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -102,7 +103,7 @@ public class XmlToProfile {
 		this.ca = ca;
 	}
 	
-	public void importXmlData(Path zipFile, IProgressMonitor monitor, IEventBroker eventBroker) throws IOException {
+	public IntelProfile importXmlData(Path zipFile, IProgressMonitor monitor, IEventBroker eventBroker) throws IOException {
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.XmlToIntelData_conversiontask, 10);
 		warnings = new ArrayList<>();
 		rootPath = Files.createTempDirectory("smart." + System.nanoTime()); //$NON-NLS-1$
@@ -124,7 +125,7 @@ public class XmlToProfile {
 			
 			try (Session session = HibernateManager.openSession()){
 				Profile xml = readXmlFile(xmlFile);
-				toIntelData(xml, rootPath, session, eventBroker, progress.split(1));
+				return toIntelData(xml, rootPath, session, eventBroker, progress.split(1));
 			
 			}catch (Exception ex) {
 				Intelligence2PlugIn.displayLog(ex.getMessage(), ex);
@@ -138,9 +139,10 @@ public class XmlToProfile {
 				Intelligence2PlugIn.log(ex.getMessage(), ex);
 			}
 		}
+		return null;
 	}
 	
-	private Profile readXmlFile(Path xmlFile) throws JAXBException {
+	public Profile readXmlFile(Path xmlFile) throws JAXBException {
 		JAXBContext context = JAXBContext.newInstance(ProfileToXml.METADATA_CLASSES_PACKAGE);
 		Unmarshaller unmarshaller = context.createUnmarshaller();
 		@SuppressWarnings("unchecked")
@@ -148,7 +150,15 @@ public class XmlToProfile {
 		return o.getValue();
 	}
 	
-	private void toIntelData(Profile data, Path filesDir, Session session,  IEventBroker eventBroker, IProgressMonitor monitor) throws Exception {
+	public Profile readXmlFile(InputStream xmlFile) throws JAXBException {
+		JAXBContext context = JAXBContext.newInstance(ProfileToXml.METADATA_CLASSES_PACKAGE);
+		Unmarshaller unmarshaller = context.createUnmarshaller();
+		@SuppressWarnings("unchecked")
+		JAXBElement<Profile> o = (JAXBElement<Profile>) unmarshaller.unmarshal(xmlFile);
+		return o.getValue();
+	}
+	
+	private IntelProfile toIntelData(Profile data, Path filesDir, Session session,  IEventBroker eventBroker, IProgressMonitor monitor) throws Exception {
 		SubMonitor progress = SubMonitor.convert(monitor, 7);
 		
 		this.session = session;
@@ -240,7 +250,7 @@ public class XmlToProfile {
 				}
 			});	
 			//cancel
-			if (!ret[0] ) return;
+			if (!ret[0] ) return null;
 		}
 		
 		//save changes
@@ -248,7 +258,20 @@ public class XmlToProfile {
 		progress.subTask(Messages.XmlToIntelData_SaveTask);
 		session.beginTransaction();
 		try {
+			
+			List<IntelProfileEntityType> types = new ArrayList<>(profile.getEntityTypes());
+			profile.getEntityTypes().clear();
 			session.save(profile);
+			for (IntelProfileEntityType ipe : types) {
+				for (IntelEntityTypeAttribute att: ipe.getEntityType().getAttributes()) {
+					session.saveOrUpdate(att.getAttribute());
+				}
+			}
+			for (IntelProfileEntityType ipe : types) {
+				session.saveOrUpdate(ipe.getEntityType());
+			}
+			profile.getEntityTypes().addAll(types);
+			session.flush();		
 			
 			IntelPermission ip = new IntelPermission();
 			ip.setEmployee(SmartDB.getCurrentEmployee());
@@ -357,11 +380,13 @@ public class XmlToProfile {
 		Display.getDefault().syncExec(()->{
 			MessageDialog.openInformation(Display.getDefault().getActiveShell(), Messages.XmlToIntelData_NothingImported, sb.toString());
 		});
-		if (eventBroker == null) return;
+		if (eventBroker == null) return profile;
 		
 		if (entities.size() > 0) { eventBroker.post(IntelEvents.ENTITY_TYPE_NEW, entities); }
 		if (relationshipTypes.size() > 0) { eventBroker.post(IntelEvents.RELATION_TYPE_NEW, relationshipTypes); }
 		if (recordSources.size() > 0) { eventBroker.post(IntelEvents.RECORD_SOURCE_ALL, recordSources); }
+		
+		return profile;
 		
 	}
 	
