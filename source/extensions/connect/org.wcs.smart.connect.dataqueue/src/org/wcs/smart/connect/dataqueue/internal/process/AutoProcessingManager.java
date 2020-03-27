@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.connect.dataqueue.internal.process;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,16 +54,19 @@ public enum AutoProcessingManager {
 	public void onStartUp(){
 		try(Session s = HibernateManager.openSession()){
 			ConnectServer cs = ConnectHibernateManager.getConnectServer(s);
-			if (cs == null) return;
+			if (cs == null) {
+				lastStatus.updateStatus(AutoProcessingStatus.Status.INACTIVE, Messages.AutoProcessingManager_ServerNotConfigured);
+				return;
+			}
 			
 			if (DataQueueServerOptions.AUTO_CHECK.getBooleanValue(cs)){
-				int delay = DataQueueServerOptions.AUTO_MINUTES.getIntegerValue(cs);
-				enableAutoProcessing(delay);
+				enableAutoProcessing(DataQueueServerOptions.AUTO_MINUTES.getIntegerValue(cs));
 			}else{
 				lastStatus.updateStatus(AutoProcessingStatus.Status.INACTIVE, Messages.AutoProcessingManager_Status1);
 			}
 
-			if (DataQueueServerOptions.CHECK_ONSTARTUP.getBooleanValue(cs)){
+			if (!DataQueueServerOptions.AUTO_CHECK.getBooleanValue(cs) &&
+					DataQueueServerOptions.CHECK_ONSTARTUP.getBooleanValue(cs)){
 				WorkbenchJob wj = new WorkbenchJob(Messages.AutoProcessingManager_StartupJobName) {
 					@Override
 					public IStatus runInUIThread(IProgressMonitor monitor) {
@@ -88,10 +92,10 @@ public enum AutoProcessingManager {
 	 * Starts the background auto replication job after the given
 	 * delay; if it's already scheduled this has no effect
 	 * 
-	 * @param delayMinutes delay in mintues
+	 * @param delayMinutes delay in minutes
 	 */
 	public void enableAutoProcessing(int delayMinutes){
-		lastStatus.updateStatus(AutoProcessingStatus.Status.OK, null);
+		lastStatus.updateStatus(AutoProcessingStatus.Status.ERROR, MessageFormat.format(Messages.AutoProcessingManager_StatusNotKnown, delayMinutes));
 		statusModified();
 		long delaysec = delayMinutes * 60 * 1000l;
 		autoReplication.cancel();

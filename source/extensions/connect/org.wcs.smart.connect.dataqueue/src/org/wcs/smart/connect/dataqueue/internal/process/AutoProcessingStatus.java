@@ -22,6 +22,7 @@
 package org.wcs.smart.connect.dataqueue.internal.process;
 
 import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.connect.dataqueue.ConnectDataQueuePlugin;
 
 /**
@@ -32,7 +33,7 @@ import org.wcs.smart.connect.dataqueue.ConnectDataQueuePlugin;
 public class AutoProcessingStatus {
 	
 	public enum Status{
-		PROCESSING(ConnectDataQueuePlugin.DQ_PROCESSING_ICON),
+		PROCESSING(SmartPlugIn.REFRESH_ICON),
 		ERROR(ConnectDataQueuePlugin.DQ_ERROR_ICON),
 		WARNING(ConnectDataQueuePlugin.DQ_WARN_ICON),
 		INACTIVE(ConnectDataQueuePlugin.DQ_INACTIVE_ICON),
@@ -43,6 +44,7 @@ public class AutoProcessingStatus {
 			this.imageKey = imageKey;
 		}
 		public Image getImage(){
+			if (this == Status.PROCESSING) return SmartPlugIn.getDefault().getImageRegistry().get(imageKey);
 			return ConnectDataQueuePlugin.getDefault().getImageRegistry().get(imageKey);
 		}
 	}
@@ -52,7 +54,7 @@ public class AutoProcessingStatus {
 	
 	public AutoProcessingStatus(){
 		this.message = null;
-		this.status = Status.OK;
+		this.status = Status.INACTIVE;
 	}
 	
 	public void updateStatus(Status status, String message){

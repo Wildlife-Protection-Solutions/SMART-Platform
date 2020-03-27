@@ -45,6 +45,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.connect.dataqueue.internal.Messages;
 import org.wcs.smart.connect.dataqueue.internal.process.AutoProcessingManager;
+import org.wcs.smart.connect.dataqueue.internal.process.AutoProcessingStatus.Status;
 import org.wcs.smart.connect.dataqueue.model.DataQueueServerOptions;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.ui.server.configure.IServerOptionsPanel;
@@ -394,6 +395,8 @@ public class DataQueueOptionPanel implements IServerOptionsPanel{
 	public void afterSave(ConnectServer server){
 		if (DataQueueServerOptions.AUTO_CHECK.getBooleanValue(server)){
 			AutoProcessingManager.INSTANCE.enableAutoProcessing(DataQueueServerOptions.AUTO_MINUTES.getIntegerValue(server));
+		}else {
+			AutoProcessingManager.INSTANCE.updateLastStatus(Status.INACTIVE, Messages.DataQueueOptionPanel_processingNotEnabled);
 		}
 	}
 	

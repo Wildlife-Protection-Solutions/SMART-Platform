@@ -35,6 +35,8 @@ import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.connect.dataqueue.internal.Messages;
 import org.wcs.smart.connect.dataqueue.internal.process.AutoProcessingManager;
 import org.wcs.smart.connect.dataqueue.internal.process.AutoProcessingStatus;
+import org.wcs.smart.connect.dataqueue.internal.process.AutoProcessingStatus.Status;
+import org.wcs.smart.connect.dataqueue.internal.process.DataQueueStatusJob;
 import org.wcs.smart.connect.ui.IConnectStatusContribution;
 
 /**
@@ -55,18 +57,18 @@ public class StatusLineContribution implements IConnectStatusContribution {
 				public void run() {
 					updateControl(lastStatus);		
 				}});
-			
 		}
 	};
 	
 	@Override
 	public void refresh(){
-		updateControl(AutoProcessingManager.INSTANCE.getLastStatus());
+		(new DataQueueStatusJob()).schedule();
 	}
 	
 	@Override
 	public Control createControl(Composite parent){
 		statusLabel = new Label(parent, SWT.NONE);
+		statusLabel.setImage(Status.ERROR.getImage());
 		
 		AutoProcessingManager.INSTANCE.addStatusListener(listener);
 		statusLabel.addDisposeListener(new DisposeListener() {
@@ -82,6 +84,15 @@ public class StatusLineContribution implements IConnectStatusContribution {
 	private void updateControl(AutoProcessingStatus lastStatus){
 		statusLabel.setImage(lastStatus.getStatus().getImage());
 		String message = lastStatus.getMessage();
+		if (message == null) {
+			if (lastStatus.getStatus() == Status.OK) {
+				message = Messages.StatusLineContribution_queueEmpty;
+			}else if (lastStatus.getStatus() == Status.WARNING) {
+				message = Messages.StatusLineContribution_unprocessedItem;
+			}else if (lastStatus.getStatus() == Status.INACTIVE) {
+				message = Messages.StatusLineContribution_notconfigured;
+			}
+		}
 		statusLabel.setToolTipText(formatMessage(message));
 	}
 	

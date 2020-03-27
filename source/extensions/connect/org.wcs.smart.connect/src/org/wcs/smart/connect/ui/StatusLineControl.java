@@ -66,6 +66,7 @@ public class StatusLineControl extends WorkbenchWindowControlContribution {
 		gl.marginWidth = 2;
 		gl.marginHeight = 2;
 		gl.verticalSpacing = 2;
+		gl.horizontalSpacing = 5;
 		main.setLayout(gl);
 		
 		//refresh now menu

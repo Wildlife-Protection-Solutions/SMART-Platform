@@ -108,7 +108,7 @@ public class AutoReplicationJob extends Job {
 		
 		try(Session s = HibernateManager.openSession()){
 			if (!DerbyReplicationManager.INSTANCE.isReplicationEnabled(caToReplicate.getUuid(), s)){
-				setServerStatus(ServerStatus.ERROR, Messages.AutoReplicationJob_ReplicationNoEnabledError);
+				setServerStatus(ServerStatus.DISABLED, null);
 				return Status.OK_STATUS;
 			}
 			
@@ -119,13 +119,13 @@ public class AutoReplicationJob extends Job {
 		
 		if (server != null) millisecondsToRepeat = ConnectionOption.SYNC_MINUTE.getIntegerValue(server) * 60 * 1000l;
 		if (server == null || serverStatus == null){
-			setServerStatus(ConnectStatusManager.ServerStatus.ERROR, Messages.AutoReplicationJob_ServerError);
+			setServerStatus(ConnectStatusManager.ServerStatus.DISABLED, null);
 			return Status.OK_STATUS;
 		}
 		
 		if (!statusOnly && !ConnectServerOption.ConnectionOption.SYNC_AUTOMATICALLY.getBooleanValue(server)){
 			reschedule = false;
-			setServerStatus(ConnectStatusManager.ServerStatus.ERROR, Messages.AutoReplicationJob_AutoConfigError);
+			setServerStatus(ConnectStatusManager.ServerStatus.DISABLED, Messages.AutoReplicationJob_AutoConfigError);
 			return Status.OK_STATUS;
 		}
 		
@@ -181,7 +181,7 @@ public class AutoReplicationJob extends Job {
 		
 		boolean needsToDownload = false;
 		if (caInfo.getRevision() <= serverStatus.getServerRevision()){
-			setServerStatus(ConnectStatusManager.ServerStatus.UPTODATE, Messages.AutoReplicationJob_UpToDateError);
+			setServerStatus(ConnectStatusManager.ServerStatus.UPTODATE, null);
 		}else{
 			setServerStatus(ConnectStatusManager.ServerStatus.CHANGES, null);
 			needsToDownload = true;

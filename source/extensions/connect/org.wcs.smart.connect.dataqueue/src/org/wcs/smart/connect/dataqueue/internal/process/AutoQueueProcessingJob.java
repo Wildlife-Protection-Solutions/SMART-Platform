@@ -95,6 +95,9 @@ public class AutoQueueProcessingJob extends Job {
 		}finally{
 			if (!runOnce && reschedule){
 				reschedule();
+			}else if (runOnce) {
+				AutoProcessingManager.INSTANCE.updateLastStatus(AutoProcessingStatus.Status.INACTIVE, Messages.AutoQueueProcessingJob_Status2);
+
 			}
 		}
 	}
@@ -116,7 +119,7 @@ public class AutoQueueProcessingJob extends Job {
 		
 		if (server == null){
 			reschedule = false;
-			AutoProcessingManager.INSTANCE.updateLastStatus(AutoProcessingStatus.Status.ERROR, Messages.AutoQueueProcessingJob_Status1);
+			AutoProcessingManager.INSTANCE.updateLastStatus(AutoProcessingStatus.Status.INACTIVE, Messages.AutoQueueProcessingJob_Status1);
 			return Status.OK_STATUS;
 		}
 		Boolean opSchedule = DataQueueServerOptions.AUTO_CHECK.getBooleanValue(server);
@@ -132,7 +135,7 @@ public class AutoQueueProcessingJob extends Job {
 		
 		if (user == null || user.getConnectPassword() == null || user.getConnectUsername() == null){
 			if (!DataQueueServerOptions.PROMPT_USER.getBooleanValue(server)){
-				AutoProcessingManager.INSTANCE.updateLastStatus(AutoProcessingStatus.Status.WARNING, Messages.AutoQueueProcessingJob_Status3);
+				AutoProcessingManager.INSTANCE.updateLastStatus(AutoProcessingStatus.Status.ERROR, Messages.AutoQueueProcessingJob_Status3);
 				return Status.OK_STATUS;
 			}
 			//prompt user
@@ -147,7 +150,7 @@ public class AutoQueueProcessingJob extends Job {
 				}	
 			});
 			if (smartConnect == null){
-				AutoProcessingManager.INSTANCE.updateLastStatus(AutoProcessingStatus.Status.WARNING, Messages.AutoQueueProcessingJob_Status4);
+				AutoProcessingManager.INSTANCE.updateLastStatus(AutoProcessingStatus.Status.ERROR, Messages.AutoQueueProcessingJob_Status4);
 				return Status.OK_STATUS;
 			}
 		}else{
@@ -168,8 +171,8 @@ public class AutoQueueProcessingJob extends Job {
 		try{
 			serverItems = ConnectDataQueue.INSTANCE.getQueuedItems(smartConnect, SmartDB.getCurrentConservationArea());
 		}catch (Exception ex){
-			ConnectDataQueuePlugin.log("Could not download data queue items from SMART Connect Server.", ex); //$NON-NLS-1$
-			AutoProcessingManager.INSTANCE.updateLastStatus(AutoProcessingStatus.Status.ERROR, Messages.AutoQueueProcessingJob_Status6);
+			ConnectDataQueuePlugin.log("Could not communicate with the SMART Connect Server.", ex); //$NON-NLS-1$
+			AutoProcessingManager.INSTANCE.updateLastStatus(AutoProcessingStatus.Status.ERROR, Messages.AutoQueueProcessingJob_Status6a);
 			return Status.OK_STATUS;
 		}
 		try{
@@ -210,7 +213,7 @@ public class AutoQueueProcessingJob extends Job {
 				});
 				if (!cont[0]){
 					//user has decided not to process now
-					AutoProcessingManager.INSTANCE.updateLastStatus(AutoProcessingStatus.Status.OK, null);
+					AutoProcessingManager.INSTANCE.updateLastStatus(AutoProcessingStatus.Status.WARNING, null);
 					return Status.OK_STATUS;
 				}
 			}else if ((!runOnce && !DataQueueServerOptions.AUTO_AUTOPROCESS.getBooleanValue(server)) || 
@@ -235,7 +238,7 @@ public class AutoQueueProcessingJob extends Job {
 			
 		//reschedule - or only reschedule when processing done??
 		monitor.done();
-		AutoProcessingManager.INSTANCE.updateLastStatus(AutoProcessingStatus.Status.OK, null);
+		AutoProcessingManager.INSTANCE.updateLastStatus(AutoProcessingStatus.Status.OK, Messages.AutoQueueProcessingJob_Processing);
 		return Status.OK_STATUS;
 	}
 	

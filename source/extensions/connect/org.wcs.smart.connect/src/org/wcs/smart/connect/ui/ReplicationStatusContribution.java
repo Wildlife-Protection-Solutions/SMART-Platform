@@ -41,6 +41,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.ConnectStatusManager;
 import org.wcs.smart.connect.ConnectStatusManager.ServerStatus;
@@ -59,8 +60,13 @@ import org.wcs.smart.hibernate.SmartDB;
 public class ReplicationStatusContribution implements
 		IConnectStatusContribution {
 
-	private Label localStatus;
-	private Label serverStatus;
+	private Label lblStatus;
+	
+	private ServerStatus localStatus = ServerStatus.DISABLED;
+	private ServerStatus serverStatus = ServerStatus.DISABLED;
+	private String localMsg = null;
+	private String serverMsg = null;
+	
 	private AutoReplicationJob updateServerNowJob = new AutoReplicationJob(true);
 	private IConnectStatusListener serverListener = new IConnectStatusListener() {
 		
@@ -96,7 +102,7 @@ public class ReplicationStatusContribution implements
 		ConnectStatusManager.INSTANCE.addLocalStatusListener(localListener);
 		
 		Composite status = new Composite(parent, SWT.NONE);
-		GridLayout gl = new GridLayout(2, true);
+		GridLayout gl = new GridLayout();
 		gl.marginWidth = 0;
 		gl.marginHeight = 0;
 		status.setLayout(gl);
@@ -109,44 +115,24 @@ public class ReplicationStatusContribution implements
 			}
 		});
 		
-		serverStatus = new Label(status, SWT.NONE);
-		serverStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.SERVER_ERROR_ICON));
+		lblStatus = new Label(status, SWT.NONE);
+		lblStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.SERVER_ERROR_ICON));
 		
-		localStatus = new Label(status, SWT.NONE);
-		localStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.LOCAL_ERROR_ICON));
-
 		updateServerStatus(ServerStatus.ERROR, Messages.StatusLineControl_UnknownState);
 		updateLocalStatus(ServerStatus.ERROR, Messages.StatusLineControl_UnknownState);
 		
 		updateLocalChanges.setSystem(true);
 		updateLocalChanges.schedule();
 		
+		updateServerNowJob.schedule();
+		
 		return status;
 	}
 
 	private void updateServerStatus(ConnectStatusManager.ServerStatus status, String message){
-		Display.getDefault().asyncExec(new Runnable(){
-			@Override
-			public void run() {
-				if (serverStatus.isDisposed()) return;
-				if (status == ServerStatus.CHANGES){
-					serverStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.SERVER_CHANGES_ICON));
-				}else if (status == ServerStatus.UPTODATE){
-					serverStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.SERVER_OK_ICON));
-				}else if (status == ServerStatus.CONNECTING){
-					serverStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.SERVER_PROCESSING_ICON));
-				}else if (status == ServerStatus.DOWNLOADING){
-					serverStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.SERVER_PROCESSING_ICON));
-				}else if (status == ServerStatus.ERROR){
-					serverStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.SERVER_ERROR_ICON));
-				}
-				if (message == null){
-					serverStatus.setToolTipText(""); //$NON-NLS-1$
-				}else{
-					serverStatus.setToolTipText(formatMessage(message));
-				}
-			}
-		});
+		serverStatus = status;
+		serverMsg = message;
+		updateGui();
 	}
 	
 	private String formatMessage(String message){
@@ -157,42 +143,66 @@ public class ReplicationStatusContribution implements
 	private String formatLocalMessage(ConnectStatusManager.ServerStatus status, String message){
 		if (message == null){
 			if (status == ServerStatus.CHANGES){
-				message = Messages.StatusLineControl_LocalChanges;	
+				message = Messages.ReplicationStatusContribution_syncrequired;	
 			}else if (status == ServerStatus.UPTODATE){
-				message = Messages.StatusLineControl_NoLocalChanges;	
+				message = Messages.ReplicationStatusContribution_uptodate;
+			}else if (status == ServerStatus.DISABLED){
+				message = Messages.ReplicationStatusContribution_notconfigured;
 			}else{
-				message = Messages.StatusLineControl_LocalError;
+				message = Messages.ReplicationStatusContribution_error;
 			}
 		}
 		return formatMessage(message);
 	}
 	
-	private void updateLocalStatus(ConnectStatusManager.ServerStatus status, String message){
-		if (status == null){
-			updateLocalChanges.schedule(0);
-			return;
-		}
-		
+	private void updateGui() {
 		Display.getDefault().asyncExec(new Runnable(){
 			@Override
 			public void run() {
-				if (localStatus.isDisposed()) return;
-				if (status == ServerStatus.CHANGES){
-					localStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.LOCAL_CHANGES_ICON));
-				}else if (status == ServerStatus.UPTODATE){
-					localStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.LOCAL_OK_ICON));
-				}else if (status == ServerStatus.CONNECTING){
-					localStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.LOCAL_PROCESSING_ICON));
-				}else if (status == ServerStatus.DOWNLOADING){
-					localStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.LOCAL_PROCESSING_ICON));
-				}else if (status == ServerStatus.ERROR){
-					localStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.LOCAL_ERROR_ICON));
+				if (lblStatus.isDisposed()) return;
+				
+				if (serverStatus == ServerStatus.DISABLED) {
+					lblStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.SERVER_DISABLED_ICON));
+					lblStatus.setToolTipText(formatLocalMessage(ServerStatus.DISABLED, serverMsg));
+					
+				}else if (serverStatus == ServerStatus.ERROR) {
+					lblStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.SERVER_ERROR_ICON));
+					lblStatus.setToolTipText(formatLocalMessage(ServerStatus.DISABLED, serverMsg));
+					
+				}else if (serverStatus == ServerStatus.CONNECTING || serverStatus == ServerStatus.DOWNLOADING){
+					lblStatus.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
+					lblStatus.setToolTipText(formatLocalMessage(ServerStatus.DISABLED, serverMsg));
+					
+				}else if (serverStatus == ServerStatus.CHANGES || localStatus == ServerStatus.CHANGES){
+					lblStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.SERVER_CHANGES_ICON));
+					lblStatus.setToolTipText(formatLocalMessage(ServerStatus.CHANGES, serverMsg));
+				}else if (serverStatus == ServerStatus.UPTODATE && localStatus == ServerStatus.UPTODATE) {
+					lblStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.SERVER_OK_ICON));
+					lblStatus.setToolTipText(formatLocalMessage(ServerStatus.UPTODATE, null));
+				}else {
+					lblStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.SERVER_ERROR_ICON));
+					
+					String msg = serverMsg;
+					if (msg == null) {
+						msg = localMsg;
+					}else if (localMsg != null){
+						msg = msg + "\n" + localMsg; //$NON-NLS-1$
+					}
+					lblStatus.setToolTipText(formatLocalMessage(ServerStatus.ERROR, msg));
 				}
-				String tooltip = formatLocalMessage(status, message);
-				if (tooltip == null) tooltip = ""; //$NON-NLS-1$
-				localStatus.setToolTipText(tooltip);
+				
 			}
 		});
+	}
+	private void updateLocalStatus(ConnectStatusManager.ServerStatus status, String message){
+		if (status == null){
+			updateLocalChanges.schedule(0);
+		}else {
+			localMsg = message;
+			localStatus = status;
+		}
+		updateGui();
+		
 	}
 	
 	private Job updateLocalChanges = new Job(Messages.StatusLineControl_jobName){
@@ -202,42 +212,46 @@ public class ReplicationStatusContribution implements
 		protected IStatus run(IProgressMonitor monitor) {
 			String message = null;
 			ServerStatus status = ServerStatus.ERROR;
-			if (!DerbyReplicationManager.INSTANCE.getCachedReplicationState()) return Status.OK_STATUS;
-			try(Session session = HibernateManager.openSession()){
-				if (DerbyReplicationManager.INSTANCE.isReplicationEnabled(SmartDB.getCurrentConservationArea().getUuid(), session)){
-					
-					//set the transaction level so it doesn't interfere with other actions
-					//we don't care if other action changes; this is just a status
-					Boolean hasChanges = session.doReturningWork(new ReturningWork<Boolean>(){
-						@Override
-						public Boolean execute(Connection connection)
-								throws SQLException {
-							iso = connection.getTransactionIsolation();
-							connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
-							try{
-								return DerbyReplicationManager.INSTANCE.hasLocalChanges(session);
-							}catch (Exception ex){
-								return false;
-							}finally {
-								//reset transaction level
-								connection.setTransactionIsolation(iso);
-								connection.commit();
+			if (!DerbyReplicationManager.INSTANCE.getCachedReplicationState()) {
+				status = ServerStatus.DISABLED;
+				message = Messages.ReplicationStatusContribution_notenabled;
+			}else {
+				try(Session session = HibernateManager.openSession()){
+					if (DerbyReplicationManager.INSTANCE.isReplicationEnabled(SmartDB.getCurrentConservationArea().getUuid(), session)){
+						
+						//set the transaction level so it doesn't interfere with other actions
+						//we don't care if other action changes; this is just a status
+						Boolean hasChanges = session.doReturningWork(new ReturningWork<Boolean>(){
+							@Override
+							public Boolean execute(Connection connection)
+									throws SQLException {
+								iso = connection.getTransactionIsolation();
+								connection.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+								try{
+									return DerbyReplicationManager.INSTANCE.hasLocalChanges(session);
+								}catch (Exception ex){
+									return false;
+								}finally {
+									//reset transaction level
+									connection.setTransactionIsolation(iso);
+									connection.commit();
+								}
+							}
+						});
+	
+						if (hasChanges != null){
+							if (hasChanges){
+								status = ServerStatus.CHANGES;
+							}else{
+								status = ServerStatus.UPTODATE;
 							}
 						}
-					});
-
-					if (hasChanges != null){
-						if (hasChanges){
-							status = ServerStatus.CHANGES;
-						}else{
-							status = ServerStatus.UPTODATE;
-						}
+					}else{
+						message = Messages.StatusLineControl_ServernotFound;
 					}
-				}else{
-					message = Messages.StatusLineControl_ServernotFound;
+				}catch (Exception ex){
+					ConnectPlugIn.log(ex.getMessage(), ex);
 				}
-			}catch (Exception ex){
-				ConnectPlugIn.log(ex.getMessage(), ex);
 			}
 			updateLocalStatus(status, message);
 

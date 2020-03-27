@@ -305,6 +305,11 @@ public class Messages extends NLS {
 	public static String ReplicationInfoDialog_url_columnname;
 	public static String ReplicationInfoDialog_VersionLabel;
 	public static String ReplicationInfoDialog_Yes;
+	public static String ReplicationStatusContribution_error;
+	public static String ReplicationStatusContribution_notconfigured;
+	public static String ReplicationStatusContribution_notenabled;
+	public static String ReplicationStatusContribution_syncrequired;
+	public static String ReplicationStatusContribution_uptodate;
 	public static String ServerOptionLabelProvider_AutoDownloadLabel;
 	public static String ServerOptionLabelProvider_AutoDownloadTooltip;
 	public static String ServerOptionLabelProvider_AutoTooltip;

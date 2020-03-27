@@ -35,6 +35,7 @@ import javax.persistence.Transient;
 
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.connect.dataqueue.ConnectDataQueuePlugin;
 import org.wcs.smart.connect.dataqueue.internal.Messages;
 
@@ -73,7 +74,7 @@ public class LocalDataQueueItem extends DataQueueItem{
 			if (this == ERROR){
 				return ConnectDataQueuePlugin.getDefault().getImageRegistry().get(ConnectDataQueuePlugin.ERROR_ICON);
 			}else if (this == DOWNLOADING || this == PROCESSING){
-				return ConnectDataQueuePlugin.getDefault().getImageRegistry().get(ConnectDataQueuePlugin.PROCESSING_ICON);
+				return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON);
 			}else if (this == QUEUED || this == REQUEUED){
 				return ConnectDataQueuePlugin.getDefault().getImageRegistry().get(ConnectDataQueuePlugin.QUEUED_ICON);
 			}else if (this == COMPLETE){

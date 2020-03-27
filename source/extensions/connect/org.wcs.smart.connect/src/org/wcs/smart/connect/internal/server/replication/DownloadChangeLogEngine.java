@@ -167,7 +167,7 @@ public class DownloadChangeLogEngine {
 		
 		if (record.getStatus() == Status.DONE ||
 				record.getStatus() == Status.NODATA){
-			setServerStatus(ServerStatus.UPTODATE, Messages.DownloadChangeLogEngine_statusLineValueUpToDate);
+			setServerStatus(ServerStatus.UPTODATE, null);
 		}else{
 			setServerStatus(ServerStatus.ERROR, record.getErrorString());
 		}

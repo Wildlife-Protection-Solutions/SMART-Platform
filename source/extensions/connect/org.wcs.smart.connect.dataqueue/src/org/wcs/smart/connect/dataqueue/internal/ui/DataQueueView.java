@@ -73,6 +73,8 @@ import org.wcs.smart.connect.ConnectServerManager;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.dataqueue.ConnectDataQueuePlugin;
 import org.wcs.smart.connect.dataqueue.internal.Messages;
+import org.wcs.smart.connect.dataqueue.internal.process.AutoProcessingManager;
+import org.wcs.smart.connect.dataqueue.internal.process.AutoProcessingStatus;
 import org.wcs.smart.connect.dataqueue.internal.process.DataQueueManager;
 import org.wcs.smart.connect.dataqueue.internal.process.IDataQueueListener;
 import org.wcs.smart.connect.dataqueue.internal.process.ProcessorManager;
@@ -423,7 +425,7 @@ public class DataQueueView{
 		});
 		MenuItem menuReprocess = new MenuItem(dataQueueMenu, SWT.NONE);
 		menuReprocess.setText(Messages.DataQueueView_ReprocessLabel);
-		menuReprocess.setImage(ConnectDataQueuePlugin.getDefault().getImageRegistry().get(ConnectDataQueuePlugin.PROCESSING_ICON));
+		menuReprocess.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
 		menuReprocess.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e){
@@ -670,6 +672,7 @@ public class DataQueueView{
 		ProcessorManager.INSTANCE.processDataQueue(connect);
 		refreshLocalTable();
 		refreshServerTable();
+		AutoProcessingManager.INSTANCE.updateLastStatus(AutoProcessingStatus.Status.OK, Messages.DataQueueView_processingInProgress);
 	}
 	
 	@Focus

@@ -54,13 +54,13 @@ public class ConnectPlugIn extends AbstractUIPlugin {
 	private static ConnectPlugIn plugin;
 	private EmployeeDeleteHandler employeeDelete = new EmployeeDeleteHandler();
 	
-	public static final String LOCAL_CHANGES_ICON = "org.wcs.smart.connect.local.changes"; //$NON-NLS-1$
-	public static final String LOCAL_ERROR_ICON = "org.wcs.smart.connect.local.error"; //$NON-NLS-1$
-	public static final String LOCAL_OK_ICON = "org.wcs.smart.connect.local.ok"; //$NON-NLS-1$
-	public static final String LOCAL_PROCESSING_ICON = "org.wcs.smart.connect.server.processing"; //$NON-NLS-1$
+//	public static final String LOCAL_CHANGES_ICON = "org.wcs.smart.connect.local.changes"; //$NON-NLS-1$
+//	public static final String LOCAL_ERROR_ICON = "org.wcs.smart.connect.local.error"; //$NON-NLS-1$
+//	public static final String LOCAL_OK_ICON = "org.wcs.smart.connect.local.ok"; //$NON-NLS-1$
+//	public static final String LOCAL_DISABLED_ICON = "org.wcs.smart.connect.server.disabled"; //$NON-NLS-1$
 	public static final String SERVER_CHANGES_ICON = "org.wcs.smart.connect.server.changes"; //$NON-NLS-1$
 	public static final String SERVER_ERROR_ICON = "org.wcs.smart.connect.server.icon"; //$NON-NLS-1$
-	public static final String SERVER_PROCESSING_ICON = "org.wcs.smart.connect.server.processing"; //$NON-NLS-1$
+	public static final String SERVER_DISABLED_ICON = "org.wcs.smart.connect.server.disabled"; //$NON-NLS-1$
 	public static final String SERVER_OK_ICON = "org.wcs.smart.connect.server.ok"; //$NON-NLS-1$
 	public static final String OK32_ICON = "org.wcs.smart.connect.ok32"; //$NON-NLS-1$
 	public static final String SERVER32_ICON = "org.wcs.smart.connect.server32"; //$NON-NLS-1$
@@ -173,15 +173,15 @@ public class ConnectPlugIn extends AbstractUIPlugin {
 	
     protected void initializeImageRegistry(ImageRegistry reg) {
         // spec'ed to do nothing
-    	reg.put(LOCAL_CHANGES_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/local_changes.png")); //$NON-NLS-1$
-    	reg.put(LOCAL_ERROR_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/local_error.png")); //$NON-NLS-1$
-    	reg.put(LOCAL_OK_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/local_ok.png")); //$NON-NLS-1$
-    	reg.put(LOCAL_PROCESSING_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/local_processing.png"));   //$NON-NLS-1$
+//    	reg.put(LOCAL_CHANGES_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/local_changes.png")); //$NON-NLS-1$
+//    	reg.put(LOCAL_ERROR_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/local_error.png")); //$NON-NLS-1$
+//    	reg.put(LOCAL_OK_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/local_ok.png")); //$NON-NLS-1$
+//    	reg.put(LOCAL_DISABLED_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/local_disabled.png")); //$NON-NLS-1$
     
 	    reg.put(SERVER_CHANGES_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/server_changes.png")); //$NON-NLS-1$
 		reg.put(SERVER_ERROR_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/server_error.png")); //$NON-NLS-1$
 		reg.put(SERVER_OK_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/server_ok.png")); //$NON-NLS-1$
-		reg.put(SERVER_PROCESSING_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/server_processing.png")); //$NON-NLS-1$
+		reg.put(SERVER_DISABLED_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/server_disabled.png")); //$NON-NLS-1$
 		
 		reg.put(OK32_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj32/ok32.png")); //$NON-NLS-1$
 		reg.put(SERVER32_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj32/server32.png")); //$NON-NLS-1$

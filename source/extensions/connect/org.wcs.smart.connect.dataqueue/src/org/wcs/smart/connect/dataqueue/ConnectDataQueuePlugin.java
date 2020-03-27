@@ -59,14 +59,12 @@ public class ConnectDataQueuePlugin extends AbstractUIPlugin {
 
 	public static final String ERROR_ICON = "org.wcs.smart.connect.dataqueue.icon.error"; //$NON-NLS-1$
 	public static final String QUEUED_ICON = "org.wcs.smart.connect.dataqueue.icon.queued"; //$NON-NLS-1$
-	public static final String PROCESSING_ICON = "org.wcs.smart.connect.dataqueue.icon.processing"; //$NON-NLS-1$
 	public static final String COMPLETE_ICON = "org.wcs.smart.connect.dataqueue.icon.complete"; //$NON-NLS-1$
 	public static final String COMPLETE_WARN_ICON = "org.wcs.smart.connect.dataqueue.icon.completewarn"; //$NON-NLS-1$
 	
 	public static final String DQ_ERROR_ICON = "org.wcs.smart.connect.dataqueue.icon.dqerror"; //$NON-NLS-1$
 	public static final String DQ_OK_ICON = "org.wcs.smart.connect.dataqueue.icon.dqok"; //$NON-NLS-1$
 	public static final String DQ_WARN_ICON = "org.wcs.smart.connect.dataqueue.icon.dqwarn"; //$NON-NLS-1$
-	public static final String DQ_PROCESSING_ICON = "org.wcs.smart.connect.dataqueue.icon.dqprocessing"; //$NON-NLS-1$
 	public static final String DQ_INACTIVE_ICON = "org.wcs.smart.connect.dataqueue.incon.dqinactive"; //$NON-NLS-1$
 	
 	// The shared instance
@@ -152,14 +150,12 @@ public class ConnectDataQueuePlugin extends AbstractUIPlugin {
 		super.initializeImageRegistry(reg);
 	     reg.put(ERROR_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/error_icon.png")); //$NON-NLS-1$
 	     reg.put(QUEUED_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/queued_icon.png")); //$NON-NLS-1$
-	     reg.put(PROCESSING_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/processing_icon.png")); //$NON-NLS-1$
 	     reg.put(COMPLETE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/complete_icon.png")); //$NON-NLS-1$
 	     reg.put(COMPLETE_WARN_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/completewarn_icon.png")); //$NON-NLS-1$
 	    
 	     reg.put(DQ_ERROR_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/dq_error.png")); //$NON-NLS-1$
 	     reg.put(DQ_OK_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/dq_ok.png")); //$NON-NLS-1$
 	     reg.put(DQ_WARN_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/dq_warn.png")); //$NON-NLS-1$
-	     reg.put(DQ_PROCESSING_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/dq_processing.png")); //$NON-NLS-1$
 	     reg.put(DQ_INACTIVE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/dq_inactive.png")); //$NON-NLS-1$	     
 	}
 }

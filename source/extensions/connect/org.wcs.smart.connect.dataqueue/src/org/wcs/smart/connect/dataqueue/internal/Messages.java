@@ -9,18 +9,23 @@ public class Messages extends NLS {
 	public static String AddConnectDataQueueJob_InstallError;
 	public static String AddConnectDataQueueJob_JobName;
 	public static String AddConnectDataQueueJob_ProgressTask;
+	public static String AutoProcessingManager_ServerNotConfigured;
 	public static String AutoProcessingManager_StartupJobName;
 	public static String AutoProcessingManager_Status1;
+	public static String AutoProcessingManager_StatusNotKnown;
 	public static String AutoQueueProcessingJob_DialogTitle;
+	public static String AutoQueueProcessingJob_EmptyQueue;
 	public static String AutoQueueProcessingJob_Error1;
+	public static String AutoQueueProcessingJob_ItemsInQueue;
 	public static String AutoQueueProcessingJob_JobName;
+	public static String AutoQueueProcessingJob_Processing;
 	public static String AutoQueueProcessingJob_ProcessNow;
 	public static String AutoQueueProcessingJob_Status1;
 	public static String AutoQueueProcessingJob_Status2;
 	public static String AutoQueueProcessingJob_Status3;
 	public static String AutoQueueProcessingJob_Status4;
 	public static String AutoQueueProcessingJob_Status5;
-	public static String AutoQueueProcessingJob_Status6;
+	public static String AutoQueueProcessingJob_Status6a;
 	public static String AutoQueueProcessingJob_Status7;
 	public static String AutoQueueProcessingJob_Task1;
 	public static String AutoQueueProcessingJob_Task2;
@@ -74,6 +79,7 @@ public class Messages extends NLS {
 	public static String DataQueueOptionPanel_InvalidTimeUnits;
 	public static String DataQueueOptionPanel_InvalidTimeUnits2;
 	public static String DataQueueOptionPanel_PanelName;
+	public static String DataQueueOptionPanel_processingNotEnabled;
 	public static String DataQueueOptionPanel_PromptConnectUserLabel;
 	public static String DataQueueOptionPanel_PromptConnectUserTooltip;
 	public static String DataQueueOptionPanel_PromptUserLabel;
@@ -86,6 +92,8 @@ public class Messages extends NLS {
 	public static String DataQueueProcessingOptionDialog_Title;
 	public static String DataQueueServerDialog_Message;
 	public static String DataQueueServerDialog_Title;
+	public static String DataQueueStatusJob_connectCommunicationError;
+	public static String DataQueueStatusJob_jobname;
 	public static String DataQueueTable_DateProcessedLabel;
 	public static String DataQueueTable_MessagesLabel;
 	public static String DataQueueTable_NameLabel;
@@ -107,6 +115,7 @@ public class Messages extends NLS {
 	public static String DataQueueView_ProcessAll;
 	public static String DataQueueView_ProcessAllLabel;
 	public static String DataQueueView_ProcessCheckedLabel;
+	public static String DataQueueView_processingInProgress;
 	public static String DataQueueView_ProcessItem;
 	public static String DataQueueView_ProcessorDialogMessage;
 	public static String DataQueueView_ProcessorDialogTitle;
@@ -145,7 +154,10 @@ public class Messages extends NLS {
 	public static String RemoveConnectDataQueueJob_JobName;
 	public static String RemoveConnectDataQueueJob_UninstallError;
 	public static String RemoveConnectDataQueueJob_UninstallError2;
+	public static String StatusLineContribution_notconfigured;
+	public static String StatusLineContribution_queueEmpty;
 	public static String StatusLineContribution_StatusLineMessageFormat_0date_1message;
+	public static String StatusLineContribution_unprocessedItem;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

@@ -36,6 +36,7 @@ public enum ConnectStatusManager {
 	public static final int CHECK_LOCAL_STATUS = 15 * 1000; //15 seconds
 	
 	public enum ServerStatus{
+		DISABLED,
 		ERROR, 
 		CONNECTING,
 		DOWNLOADING,
