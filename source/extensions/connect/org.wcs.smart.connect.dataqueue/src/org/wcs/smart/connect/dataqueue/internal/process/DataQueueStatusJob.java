@@ -71,7 +71,7 @@ public class DataQueueStatusJob extends Job {
 		
 		
 		if (user == null || user.getConnectPassword() == null || user.getConnectUsername() == null){		
-			AutoProcessingManager.INSTANCE.updateLastStatus(AutoProcessingStatus.Status.ERROR, Messages.DataQueueStatusJob_connectCommunicationError);
+			AutoProcessingManager.INSTANCE.updateLastStatus(AutoProcessingStatus.Status.INACTIVE, null);
 			return Status.OK_STATUS;
 		
 		}else{
