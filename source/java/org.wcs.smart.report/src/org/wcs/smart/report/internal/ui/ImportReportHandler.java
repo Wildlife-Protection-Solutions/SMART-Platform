@@ -24,10 +24,10 @@ package org.wcs.smart.report.internal.ui;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
-import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.report.internal.ui.export.ImportReportWizard;
 import org.wcs.smart.ui.ShowPerspectiveHandler;
+import org.wcs.smart.ui.SmartWizardDialog;
 
 /**
  * Import report handler pojo
@@ -43,7 +43,7 @@ public class ImportReportHandler  {
 		(new ShowPerspectiveHandler()).execute(ReportViewerPerspective.ID, activeWindow);
 		
 		ImportReportWizard wizard = new ImportReportWizard();
-		WizardDialog dialog = new WizardDialog(activeShell, wizard);
+		SmartWizardDialog dialog = new SmartWizardDialog(activeShell, wizard);
 		dialog.open();
 	}
 	

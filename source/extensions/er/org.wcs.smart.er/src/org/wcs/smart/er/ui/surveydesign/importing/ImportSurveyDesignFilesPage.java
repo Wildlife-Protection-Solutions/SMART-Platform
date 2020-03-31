@@ -41,6 +41,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -93,8 +94,12 @@ public class ImportSurveyDesignFilesPage extends WizardPage {
 		Composite buttons = new Composite(main, SWT.NONE);
 		buttons.setLayout(new GridLayout());
 		buttons.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		((GridLayout)buttons.getLayout()).marginWidth = 0;
+		((GridLayout)buttons.getLayout()).marginHeight = 0;
 		
 		Button btnAdd = new Button(buttons, SWT.NONE);
+		btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		btnAdd.setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnAdd.addSelectionListener(new SelectionAdapter() {
@@ -127,6 +132,8 @@ public class ImportSurveyDesignFilesPage extends WizardPage {
 		Button btnRemove = new Button(buttons, SWT.NONE);
 		btnRemove.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		btnRemove.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		btnRemove.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		btnRemove.setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnRemove.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {

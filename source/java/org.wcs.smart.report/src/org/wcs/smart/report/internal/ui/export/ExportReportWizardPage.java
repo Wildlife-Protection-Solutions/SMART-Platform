@@ -52,6 +52,7 @@ import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.report.export.IExportFormat;
 import org.wcs.smart.report.export.internal.ExportReportEngine;
 import org.wcs.smart.report.internal.Messages;
@@ -232,7 +233,9 @@ public class ExportReportWizardPage  extends WizardPage  {
 		txtFileName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		btnBrowse = new Button(comp, SWT.NONE);
 		btnBrowse.setText(Messages.ExportReportDialog_BrowseButton);
-
+		btnBrowse.setBackground(comp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnBrowse.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		
 		String x = settings.get(FORMAT_SETTING);
 		IExportFormat defaultExport = formats[0];
 		if (x != null){
@@ -264,9 +267,13 @@ public class ExportReportWizardPage  extends WizardPage  {
 			Composite buttonPnl = new Composite(comp, SWT.NONE);
 			buttonPnl.setLayout(new GridLayout());
 			buttonPnl.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+			((GridLayout)buttonPnl.getLayout()).marginWidth = 0;
+			((GridLayout)buttonPnl.getLayout()).marginHeight = 0;
 			
 			Button btnAdd = new Button(buttonPnl, SWT.PUSH);
 			btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
+			btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+			btnAdd.setBackground(comp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 			btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			btnAdd.addSelectionListener(new SelectionAdapter(){
 				@Override
@@ -288,6 +295,8 @@ public class ExportReportWizardPage  extends WizardPage  {
 			Button btnRemove = new Button(buttonPnl, SWT.PUSH);
 			btnRemove.setText(DialogConstants.DELETE_BUTTON_TEXT);
 			btnRemove.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			btnRemove.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+			btnRemove.setBackground(comp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 			btnRemove.addSelectionListener(new SelectionAdapter() {			
 				@Override
 				public void widgetSelected(SelectionEvent e) {

@@ -53,7 +53,7 @@ public class DerbyHibernateExtensions {
 		if (reconnect){
 			try{
 				//without this hibernate will not re-connect to the database propery
-				Class.forName("org.apache.derby.jdbc.EmbeddedDriver").newInstance(); //$NON-NLS-1$
+				Class.forName("org.apache.derby.jdbc.EmbeddedDriver").getDeclaredConstructor().newInstance(); //$NON-NLS-1$
 			}catch (Exception ex){
 			}
 		}

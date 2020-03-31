@@ -178,6 +178,7 @@ public class ExportQueryLocationPage extends WizardPage {
 		});		
 		
 		Button btnBrowse = new Button(main, SWT.NONE);
+		btnBrowse.setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnBrowse.setText(Messages.ExportQueryLocationPage_BrowseButton);
 		btnBrowse.addSelectionListener(new SelectionAdapter() {
 			@Override

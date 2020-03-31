@@ -91,7 +91,7 @@ public class ExportPatrolHandler {
 		
 		PatrolViewFilter filter = null;
 		MPart pp = pService.findPart(PatrolListView.ID);
-		if (pp != null) {
+		if (pp != null && pp.getContext() != null) {
 			filter = pp.getContext().get(PatrolViewFilter.class);
 		}
 		

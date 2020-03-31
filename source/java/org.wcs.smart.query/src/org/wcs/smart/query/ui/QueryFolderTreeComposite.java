@@ -40,12 +40,17 @@ import org.eclipse.jface.viewers.TreeViewerFocusCellManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.MenuEvent;
+import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.query.event.IQueryListener;
 import org.wcs.smart.query.event.QueryEventManager;
 import org.wcs.smart.query.event.QueryListenerAdapter;
@@ -116,6 +121,8 @@ public class QueryFolderTreeComposite extends Composite{
 			}
 		});
 		setLayout(new GridLayout(1, false));
+		((GridLayout)getLayout()).marginWidth = 0;
+		((GridLayout)getLayout()).marginHeight = 0;
 		
 		tblViewer = new TreeViewer(this, SWT.BORDER);
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1);
@@ -150,23 +157,32 @@ public class QueryFolderTreeComposite extends Composite{
 		
 		TreeViewerEditor.create(tblViewer, actSupport, ColumnViewerEditor.DEFAULT);
 
+		Menu mnu = new Menu(tblViewer.getControl());
+		MenuItem miAdd = new MenuItem(mnu, SWT.PUSH);
+		miAdd.setText(Messages.QueryFolderTreeComposite_AddFolderButton);
+		miAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		miAdd.setEnabled(false);
+		miAdd.addListener(SWT.Selection, e->addFolder());
+		mnu.addMenuListener(new MenuListener() {
+			@Override
+			public void menuShown(MenuEvent e) {
+				miAdd.setEnabled(!tblViewer.getStructuredSelection().isEmpty());
+			}
+			@Override
+			public void menuHidden(MenuEvent e) {	
+			}
+		});
+		tblViewer.getControl().setMenu(mnu);
 		
 		btnAddFolder = new Button(this, SWT.NONE);
 		btnAddFolder.setText(Messages.QueryFolderTreeComposite_AddFolderButton);
+		btnAddFolder.setBackground(getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnAddFolder.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		btnAddFolder.setEnabled(false);
 		btnAddFolder.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if (!tblViewer.getSelection().isEmpty()){
-					QueryFolder selectedFolder = (QueryFolder) ((IStructuredSelection)tblViewer.getSelection()).getFirstElement();
-					QueryFolder newFolder = AddFolderHandler.addQueryFolder(selectedFolder);
-					if (newFolder != null){
-						QueryEventManager.getInstance().fireFolderAdded(newFolder);
-					}
-					tblViewer.refresh();
-					
-					tblViewer.editElement(newFolder, 0);
-				}
+				addFolder();
 			}
 		});
 		
@@ -190,4 +206,15 @@ public class QueryFolderTreeComposite extends Composite{
 		
 	}
 
+	private void addFolder() {
+		if (!tblViewer.getSelection().isEmpty()){
+			QueryFolder selectedFolder = (QueryFolder) tblViewer.getStructuredSelection().getFirstElement();
+			QueryFolder newFolder = AddFolderHandler.addQueryFolder(selectedFolder);
+			if (newFolder != null){
+				QueryEventManager.getInstance().fireFolderAdded(newFolder);
+			}
+			tblViewer.refresh();
+			tblViewer.editElement(newFolder, 0);
+		}
+	}
 }

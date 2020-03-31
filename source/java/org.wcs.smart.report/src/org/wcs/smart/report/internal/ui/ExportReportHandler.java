@@ -36,11 +36,11 @@ import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.report.internal.ui.export.ExportReportWizard;
 import org.wcs.smart.report.model.Report;
+import org.wcs.smart.ui.SmartWizardDialog;
 /**
  * Handler for exporting reports.
  * <p>Attempts to export all reports
@@ -77,7 +77,7 @@ public class ExportReportHandler {
 		
 		//get export location information
 		ExportReportWizard exportWizard = new ExportReportWizard(isMultiple, selectedReports);
-		WizardDialog wd = new WizardDialog(activeShell, exportWizard);
+		SmartWizardDialog wd = new SmartWizardDialog(activeShell, exportWizard);
 		wd.open();
 	}
 	

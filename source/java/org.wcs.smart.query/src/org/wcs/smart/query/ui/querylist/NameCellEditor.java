@@ -72,8 +72,12 @@ public class NameCellEditor implements ICellModifier {
 	public Object getValue(Object element, String property) {
 		if (element instanceof QueryEditorInput){
 			return ((QueryEditorInput) element).getName();
+		}else if ( viewer.getLabelProvider() instanceof QueryListLabelProvider) {
+			return ((QueryListLabelProvider) viewer.getLabelProvider()).getText(element);
+		}else if (viewer.getLabelProvider() instanceof LabelProvider ) {
+			return ((LabelProvider) viewer.getLabelProvider()).getText(element);
 		}
-		return ((LabelProvider) viewer.getLabelProvider()).getText(element);
+		return ""; //$NON-NLS-1$
 	}
 
 	@Override
