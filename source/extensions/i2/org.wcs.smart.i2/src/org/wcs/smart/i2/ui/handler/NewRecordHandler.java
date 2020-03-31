@@ -114,10 +114,13 @@ public class NewRecordHandler {
 		newRecord.setConservationArea(SmartDB.getCurrentConservationArea());
 		newRecord.setDateCreated(new Date());
 		newRecord.setEntities(new ArrayList<IntelEntityRecord>());
-		newRecord.setProfile(p);
 		newRecord.setPrimaryDate(new Date());
+		try(Session session = HibernateManager.openSession()){
+			p = session.get(IntelProfile.class, p.getUuid());
+			p.getName();
+			newRecord.setProfile(p);
+		}
 		RecordEditorInput input = new RecordEditorInput(newRecord);
-		
 		if (context.containsKey(ENTITY_UUID_LINK) && context.get(ENTITY_UUID_LINK) instanceof Collection) {
 			Collection<UUID> entityUuids = (Collection<UUID>) context.get(ENTITY_UUID_LINK);
 			
