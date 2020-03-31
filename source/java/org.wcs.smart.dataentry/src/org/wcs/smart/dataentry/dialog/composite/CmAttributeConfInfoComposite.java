@@ -86,7 +86,7 @@ public abstract class CmAttributeConfInfoComposite extends CmAttributeInfoCompos
 		List<CmAttributeConfig> cfgList = new ArrayList<>(DataentryHibernateManager.getCmAttributeConfigs(dialog.getSession(), cm, cmAttr.getAttribute()));
 		cfgList.removeAll(deletedConfigs);
 		for (CmAttributeConfig c : addedConfigs) {
-			if (c.getAttribute().equals(cmAttr.getAttribute())) cfgList.add(c);
+			if (c.getAttribute().equals(cmAttr.getAttribute()) && !cfgList.contains(c)) cfgList.add(c);
 		}
 		CmAttributeConfig defaultCfg = dialog.getModel().getDefaultConfigs().get(cmAttr.getAttribute());
 		if (defaultCfg != null && !cfgList.contains(defaultCfg)) {
