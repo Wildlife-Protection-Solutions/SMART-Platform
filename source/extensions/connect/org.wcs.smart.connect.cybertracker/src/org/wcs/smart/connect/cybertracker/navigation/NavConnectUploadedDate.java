@@ -39,17 +39,21 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.hibernate.Session;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
+import org.wcs.smart.connect.ConnectHibernateManager;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.cybertracker.ctpackage.CtConnectClient;
 import org.wcs.smart.connect.cybertracker.internal.Messages;
 import org.wcs.smart.connect.cybertracker.model.CyberTrackerNavigationProxy;
+import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.ui.server.ConnectDialog;
 import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackagePropertyProvider.IPropertyListener;
 import org.wcs.smart.cybertracker.model.NavigationLayer;
 import org.wcs.smart.cybertracker.navigation.INavigationLayerProperty;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -114,25 +118,31 @@ public class NavConnectUploadedDate implements INavigationLayerProperty {
 		protected IStatus run(IProgressMonitor monitor) {
 			if (connect == null) {
 				if (context == null || context.get(SmartConnect.class) == null) {
-					Display.getDefault().syncExec(new Runnable() {
-						@Override
-						public void run() {
-							ConnectDialog cd = new ConnectDialog(Display.getCurrent().getActiveShell(), true) {
-								@Override
-								protected Control createDialogArea(Composite parent) {
-									setTitle(Messages.NavConnectUploadedDate_ConnectDialogTitle);
-									getShell().setText(Messages.NavConnectUploadedDate_ConnectDialogTitle);
-									setMessage(Messages.NavConnectUploadedDate_ConnectDialogMsg);	
-									return super.createDialogArea(parent);
-								}	
-							};
-							
-							if (cd.open() == Window.OK) {
-								connect = cd.getConnection();
-								if (context != null) context.set(SmartConnect.class, connect);
+					ConnectServer cs = null;
+					try(Session s = HibernateManager.openSession()){
+						cs = ConnectHibernateManager.getConnectServer(s);
+					}
+					if (cs != null) {
+						Display.getDefault().syncExec(new Runnable() {
+							@Override
+							public void run() {
+								ConnectDialog cd = new ConnectDialog(Display.getCurrent().getActiveShell(), true) {
+									@Override
+									protected Control createDialogArea(Composite parent) {
+										setTitle(Messages.NavConnectUploadedDate_ConnectDialogTitle);
+										getShell().setText(Messages.NavConnectUploadedDate_ConnectDialogTitle);
+										setMessage(Messages.NavConnectUploadedDate_ConnectDialogMsg);	
+										return super.createDialogArea(parent);
+									}	
+								};
+								
+								if (cd.open() == Window.OK) {
+									connect = cd.getConnection();
+									if (context != null) context.set(SmartConnect.class, connect);
+								}
 							}
-						}
-					});
+						});
+					}
 				}else {
 					connect = context.get(SmartConnect.class);
 				}

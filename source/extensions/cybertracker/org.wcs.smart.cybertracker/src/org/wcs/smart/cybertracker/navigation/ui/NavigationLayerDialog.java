@@ -39,6 +39,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.layout.TableColumnLayout;
@@ -50,8 +51,11 @@ import org.eclipse.jface.viewers.ColumnViewerEditor;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationStrategy;
 import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TableViewerEditor;
@@ -68,18 +72,23 @@ import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.TransferData;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.ColorDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 import org.geotools.data.DataUtilities;
@@ -167,14 +176,13 @@ import org.wcs.smart.util.ReprojectUtils;
  */
 public class NavigationLayerDialog extends SmartStyledDialog implements MapPart, ITargetEditor{
 	
+	private static final String COLOR_KEY = "COLOR"; //$NON-NLS-1$
+	
 	private static final String UUID_PROPERTY = "uuid"; //$NON-NLS-1$
 	private static final String SELECTED_PROPERTY = "selected";  //$NON-NLS-1$
 	private static final String GEOM_PROPERTY = "the_geom";  //$NON-NLS-1$
 	
-	private static final String VERTICES_FUNCTION_NAME = "vertices";  //$NON-NLS-1$
 	private static final String GEOMTYPE_FUNCTION_NAME = "geometryType";  //$NON-NLS-1$
-	
-	private static final String CIRCLE_POINT_SYM = "circle";  //$NON-NLS-1$
 
 	private FilterFactory ff = CommonFactoryFinder.getFilterFactory(null);
 	
@@ -189,6 +197,88 @@ public class NavigationLayerDialog extends SmartStyledDialog implements MapPart,
 	private Layer targetLayer;
 	private MapToolComposite tools ;
 	
+	private Label pointColorLabel;
+	private Label lineColorLabel;
+	private Spinner txtLineWidth;
+	private Spinner txtPointSize;
+	private ComboViewer cmbMarkerStyle;
+	private ComboViewer cmbLineStyle;
+	
+	private List<Control> pointControls;
+	private List<Control> lineControls;
+	
+	
+	private static enum MarkerStyle{
+		CIRCLE("circle"), //$NON-NLS-1$
+		CROSS("cross"), //$NON-NLS-1$
+		DIAMOND("diamond"), //$NON-NLS-1$
+		SQUARE("square"), //$NON-NLS-1$
+		TRIANGLE("triangle"), //$NON-NLS-1$
+		X("x"); //$NON-NLS-1$
+		
+		String key;
+		
+		MarkerStyle(String key){
+			this.key = key;
+		}
+		
+		public String getName() {
+			switch(this) {
+			case CIRCLE: return Messages.NavigationLayerDialog_circlestyle;
+			case CROSS: return Messages.NavigationLayerDialog_crossstyle;
+			case DIAMOND: return Messages.NavigationLayerDialog_diamondstyle;
+			case SQUARE: return Messages.NavigationLayerDialog_squarestyle;
+			case TRIANGLE: return Messages.NavigationLayerDialog_trianglestyle;
+			case X: return Messages.NavigationLayerDialog_xstyle;
+			}
+			return ""; //$NON-NLS-1$
+		}
+		public static MarkerStyle parse(String item) {
+			for (MarkerStyle ms : MarkerStyle.values()) {
+				if (ms.key.equals(item)) return ms;
+			}
+			return MarkerStyle.CIRCLE;
+		}
+	}
+	private static enum LineStyle{
+		SOLID("solid"), //$NON-NLS-1$
+		DASH("dash"), //$NON-NLS-1$
+		DASHDOT("dashdot"), //$NON-NLS-1$
+		DASHDOTDOT("dashdotdot"), //$NON-NLS-1$
+		DOT("dot"); //$NON-NLS-1$
+		
+		
+		String key;
+		
+		LineStyle(String key){
+			this.key = key;
+		}
+		public String getName() {
+			switch(this) {
+			case DASH: return Messages.NavigationLayerDialog_dashstyle;
+			case SOLID: return Messages.NavigationLayerDialog_solidstyle;
+			case DASHDOT: return Messages.NavigationLayerDialog_dashdotstyle;
+			case DOT: return Messages.NavigationLayerDialog_dotstyle;
+			case DASHDOTDOT: return Messages.NavigationLayerDialog_dashdotdotstyle;
+			}
+			return ""; //$NON-NLS-1$
+		}
+		public float[] getDashArray() {
+			switch(this) {
+			case DASH: return new float[] {5};
+			case DASHDOT: return new float[] {5, 3, 1, 3};
+			case DASHDOTDOT: return new float[] {5, 3, 1, 3, 1, 3};
+			case DOT: return new float[] {1,3};
+			}
+			return null;
+		}
+		public static LineStyle parse(String item) {
+			for (LineStyle ms : LineStyle.values()) {
+				if (ms.key.equals(item)) return ms;
+			}
+			return LineStyle.SOLID;
+		}
+	}
 	private Job refreshJob = new Job(Messages.NavigationLayerDialog_refreshmapjob){
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -220,6 +310,13 @@ public class NavigationLayerDialog extends SmartStyledDialog implements MapPart,
 	@Override
 	public void okPressed() {
 		nav.setName(txtName.getText());
+		for (NavigationTarget t : targets) {
+			if (t.isLine()) {
+				t.setStyle(getColor(lineColorLabel), txtLineWidth.getSelection(), ((LineStyle)cmbLineStyle.getStructuredSelection().getFirstElement()).key);
+			}else if (t.isPoint()) {
+				t.setStyle(getColor(pointColorLabel), txtPointSize.getSelection(), ((MarkerStyle)cmbMarkerStyle.getStructuredSelection().getFirstElement()).key);
+			}
+		}
 		nav.setTargets(targets);
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
@@ -253,6 +350,19 @@ public class NavigationLayerDialog extends SmartStyledDialog implements MapPart,
 	}
 	
 	private void validate() {
+		boolean hasline = false;
+		boolean haspoint = false;
+		for (NavigationTarget t : targets) {
+			if (t.isLine()) hasline = true;
+			if (t.isPoint()) haspoint = true;
+		}
+		
+		for (Control c : pointControls) c.setEnabled(haspoint);
+		for (Control c : lineControls) c.setEnabled(hasline);
+		
+		targetLayer.getStyleBlackboard().put(SLDContent.ID, getTargetStyle());
+		targetLayer.refresh(null);
+		
 		validate(true);
 	}
 	private void validate(boolean dirty) {
@@ -411,6 +521,196 @@ public class NavigationLayerDialog extends SmartStyledDialog implements MapPart,
 		
 		tblTargets.getControl().setMenu(targetMenu);
 				
+		
+		SmartUiUtils.createHeaderLabel(listPart, Messages.NavigationLayerDialog_StylesHeader);
+		
+		Composite styleComp = new Composite(listPart, SWT.NONE);
+		styleComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		styleComp.setLayout(new GridLayout(2, false));
+		((GridLayout)styleComp.getLayout()).marginWidth = 0;
+		((GridLayout)styleComp.getLayout()).marginHeight = 0;
+		
+		java.awt.Color pointColor = new java.awt.Color(255, 0, 0);
+		int pointsize = 6;
+		java.awt.Color lineColor = new java.awt.Color(255, 0, 0);
+		int linesize = 1;
+		boolean hasline = false;
+		boolean haspoint = false;
+		MarkerStyle defaultms = MarkerStyle.CIRCLE;
+		LineStyle defaultls = LineStyle.SOLID;
+		for (NavigationTarget t : targets) {
+			if (t.isLine()) {
+				hasline = true;
+				lineColor = new java.awt.Color(Integer.parseInt(t.getColor(), 16));
+				linesize = t.getSize();
+				defaultls = LineStyle.parse(t.getStyle());
+			}else if (t.isPoint()) {
+				haspoint = true;
+				pointColor = new java.awt.Color(Integer.parseInt(t.getColor(), 16));
+				pointsize = t.getSize();
+				defaultms = MarkerStyle.parse(t.getStyle());
+			}
+			if (hasline && haspoint) break;
+		}
+		
+		
+		Composite pntComp = new Composite(styleComp, SWT.NONE);
+		pntComp.setLayout(new GridLayout(2, false));
+		pntComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridLayout)pntComp.getLayout()).marginWidth = 0;
+		((GridLayout)pntComp.getLayout()).marginHeight = 0;
+		pointControls = new ArrayList<>();
+		
+		Composite c2 = SmartUiUtils.createSubHeaderLabel(pntComp, Messages.NavigationLayerDialog_PointHeader);
+		c2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		
+		l = new Label(pntComp, SWT.NONE);
+		l.setText(Messages.NavigationLayerDialog_colorlabel);
+		l.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+		pointControls.add(l);
+		
+		pointColorLabel = new Label(pntComp, SWT.NONE);
+		pointColorLabel.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false));
+		((GridData)pointColorLabel.getLayoutData()).widthHint = 30;
+		pointColorLabel.addListener(SWT.Dispose, e->disposeColor(pointColorLabel));		
+		WidgetElement.setCSSClass(pointColorLabel, "customcolor"); //$NON-NLS-1$
+		pointColorLabel.addListener(SWT.Paint, e->{
+			if (pointColorLabel.getData(COLOR_KEY) != null) e.gc.drawRectangle(0, 0, pointColorLabel.getBounds().width-1, pointColorLabel.getBounds().height-1);
+		});
+		pointControls.add(pointColorLabel);
+		
+		Color temp = new Color(getShell().getDisplay(), pointColor.getRed(), pointColor.getGreen(), pointColor.getBlue());
+		pointColorLabel.setData(COLOR_KEY,temp);
+		pointColorLabel.setBackground(temp);
+		Listener changeColor = e->{
+			ColorDialog cd = new ColorDialog(getShell());
+			cd.setRGB(pointColorLabel.getBackground().getRGB());
+			cd.setText(Messages.CyberTrackerPropertiesComposite_ColorSelectionDialogTitle);
+			RGB rgb = cd.open();
+			if (rgb == null) return;
+			
+			disposeColor(pointColorLabel);
+			Color newColor = new Color(getShell().getDisplay(), rgb);
+			pointColorLabel.setData(COLOR_KEY, newColor);
+			pointColorLabel.setBackground(newColor);
+			validate();
+		};
+		
+		pointColorLabel.addListener(SWT.MouseDoubleClick, changeColor);
+		
+		l = new Label(pntComp, SWT.NONE);
+		l.setText(Messages.NavigationLayerDialog_sizelabel);
+		l.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+		pointControls.add(l);
+		
+		txtPointSize = new Spinner(pntComp, SWT.BORDER);
+		txtPointSize.setMinimum(0);
+		txtPointSize.setMaximum(50);
+		txtPointSize.setSelection(pointsize);
+		txtPointSize.addListener(SWT.Selection,  e->validate());
+		pointControls.add(txtPointSize);
+		
+		((GridData)pointColorLabel.getLayoutData()).widthHint = txtPointSize.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
+		((GridData)pointColorLabel.getLayoutData()).heightHint = txtPointSize.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
+		
+		l = new Label(pntComp, SWT.NONE);
+		l.setText(Messages.NavigationLayerDialog_stylelabel);
+		l.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+		pointControls.add(l);
+		
+		cmbMarkerStyle = new ComboViewer(pntComp, SWT.DROP_DOWN | SWT.READ_ONLY);
+		cmbMarkerStyle.setContentProvider(ArrayContentProvider.getInstance());
+		cmbMarkerStyle.setLabelProvider(new LabelProvider() {
+			public String getText(Object element) {
+				return ((MarkerStyle)element).getName();
+			}
+		});
+		cmbMarkerStyle.setInput(MarkerStyle.values());
+		cmbMarkerStyle.setSelection(new StructuredSelection(defaultms));
+		cmbMarkerStyle.addSelectionChangedListener(e->validate());
+		pointControls.add(cmbMarkerStyle.getControl());
+		
+		
+		Composite lineComp = new Composite(styleComp, SWT.NONE);
+		lineComp.setLayout(new GridLayout(2, false));
+		lineComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridLayout)lineComp.getLayout()).marginWidth = 0;
+		((GridLayout)lineComp.getLayout()).marginHeight = 0;
+		lineControls = new ArrayList<>();
+		
+		c2 = SmartUiUtils.createSubHeaderLabel(lineComp, Messages.NavigationLayerDialog_LinesHeader);
+		c2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		
+		l = new Label(lineComp, SWT.NONE);
+		l.setText(Messages.NavigationLayerDialog_colorlabel);
+		l.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+		lineControls.add(l);
+		
+		lineColorLabel = new Label(lineComp, SWT.NONE);
+		lineControls.add(lineColorLabel);
+		lineColorLabel.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false));
+		((GridData)lineColorLabel.getLayoutData()).widthHint = 30;
+		((GridData)lineColorLabel.getLayoutData()).heightHint = 20;
+		lineColorLabel.addListener(SWT.Dispose, e->disposeColor(lineColorLabel));		
+		WidgetElement.setCSSClass(lineColorLabel, "customcolor"); //$NON-NLS-1$
+		lineColorLabel.addListener(SWT.Paint, e->{
+			if (lineColorLabel.getData(COLOR_KEY) != null) e.gc.drawRectangle(0, 0, lineColorLabel.getBounds().width-1, lineColorLabel.getBounds().height-1);
+		});
+		temp = new Color(getShell().getDisplay(), lineColor.getRed(), lineColor.getGreen(), lineColor.getBlue());
+		lineColorLabel.setData(COLOR_KEY,temp);
+		lineColorLabel.setBackground(temp);
+
+		changeColor = e->{
+			ColorDialog cd = new ColorDialog(getShell());
+			cd.setRGB(lineColorLabel.getBackground().getRGB());
+			cd.setText(Messages.CyberTrackerPropertiesComposite_ColorSelectionDialogTitle);
+			RGB rgb = cd.open();
+			if (rgb == null) return;
+			
+			disposeColor(lineColorLabel);
+			Color newColor = new Color(getShell().getDisplay(), rgb);
+			lineColorLabel.setData(COLOR_KEY, newColor);
+			lineColorLabel.setBackground(newColor);
+			validate();
+		};
+		
+		lineColorLabel.addListener(SWT.MouseDoubleClick, changeColor);
+		
+		l = new Label(lineComp, SWT.NONE);
+		l.setText(Messages.NavigationLayerDialog_widthlabel);
+		l.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+		lineControls.add(l);
+		
+		txtLineWidth = new Spinner(lineComp, SWT.BORDER);
+		txtLineWidth.setMinimum(0);
+		txtLineWidth.setMaximum(20);
+		txtLineWidth.setSelection(linesize);
+		txtLineWidth.addListener(SWT.Selection, e->validate());
+		lineControls.add(txtLineWidth);
+
+		((GridData)lineColorLabel.getLayoutData()).widthHint = txtLineWidth.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
+		((GridData)lineColorLabel.getLayoutData()).heightHint = txtLineWidth.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
+		
+		l = new Label(lineComp, SWT.NONE);
+		l.setText(Messages.NavigationLayerDialog_stylelabel);
+		l.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+		lineControls.add(l);
+		
+		cmbLineStyle = new ComboViewer(lineComp, SWT.DROP_DOWN | SWT.READ_ONLY);
+		cmbLineStyle.setContentProvider(ArrayContentProvider.getInstance());
+		cmbLineStyle.setLabelProvider(new LabelProvider() {
+			public String getText(Object element) {
+				return ((LineStyle)element).getName();
+			}
+		});
+		cmbLineStyle.setInput(LineStyle.values());
+		cmbLineStyle.setSelection(new StructuredSelection(defaultls));
+		cmbLineStyle.addSelectionChangedListener(e->validate());
+		lineControls.add(cmbLineStyle.getControl());
+		
+		for (Control ctr : pointControls) ctr.setEnabled(haspoint);
+		for (Control ctr : lineControls) ctr.setEnabled(hasline);
+		
 		Composite mapArea = new Composite(targetsComp, SWT.NONE);
 		mapArea.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		mapArea.setLayout(new GridLayout(2, false));
@@ -502,6 +802,15 @@ public class NavigationLayerDialog extends SmartStyledDialog implements MapPart,
 		return parent;
 	}
 
+	private void disposeColor(Label l) {
+		Color c = (Color) l.getData(COLOR_KEY);
+		if (c != null) {
+			c.dispose();
+			l.setData(COLOR_KEY, null);
+		}
+		
+	}
+	
 	@Override
 	public Map getMap() {
 		return mapViewer.getMap();
@@ -702,6 +1011,11 @@ public class NavigationLayerDialog extends SmartStyledDialog implements MapPart,
 		refreshTargets();
 	}
 	
+	private String getColor(Label l) {
+		Color t = (Color)l.getData(COLOR_KEY);
+		return Integer.toHexString( new java.awt.Color(t.getRed(), t.getGreen(), t.getBlue()).getRGB() ).substring(2);
+	}
+
 	@Override
 	public void addLinearTarget(LineString ls) {
 		NavigationTarget newTarget = new NavigationTarget(MessageFormat.format(Messages.NavigationLayerDialog_DefaultTargetName, targets.size()), ls);
@@ -714,6 +1028,7 @@ public class NavigationLayerDialog extends SmartStyledDialog implements MapPart,
 		List<NavigationTarget> newTargets = new ArrayList<>();
 		int cnt = this.targets.size();
 		for (NavigationTarget ls : targets) {
+			
 			String id = ls.getId() != null ? ls.getId() : MessageFormat.format(Messages.NavigationLayerDialog_DefaultTargetName, cnt++);
 			if (ls.getGeometry() instanceof org.locationtech.jts.geom.Point) {
 				NavigationTarget newTarget = new NavigationTarget(id, (org.locationtech.jts.geom.Point)ls.getGeometry());
@@ -784,8 +1099,12 @@ public class NavigationLayerDialog extends SmartStyledDialog implements MapPart,
 				 super.run(monitor);
 				 
 				 Layer l = getLayers().get(0);
-				 l.getStyleBlackboard().put(SLDContent.ID, getTargetStyle());
 				 targetLayer = l;
+				 Display.getDefault().asyncExec(()->{
+					 targetLayer.getStyleBlackboard().put(SLDContent.ID, getTargetStyle());	 
+				 });
+				 
+				 
 			 }
 			
 		};
@@ -803,7 +1122,7 @@ public class NavigationLayerDialog extends SmartStyledDialog implements MapPart,
 		return feature;
 	}
 	
-	private static Style getTargetStyle() {
+	private Style getTargetStyle() {
 		StyleFactory sf = CommonFactoryFinder.getStyleFactory();
 		FilterFactory ff = CommonFactoryFinder.getFilterFactory(null);
 
@@ -818,16 +1137,15 @@ public class NavigationLayerDialog extends SmartStyledDialog implements MapPart,
 		org.geotools.styling.FeatureTypeStyle fts;
 
 		//--- Linear Style ---
-		Stroke linestroke = sb.createStroke(new java.awt.Color(255,100,100),2);
+		LineStyle ll = (LineStyle) cmbLineStyle.getStructuredSelection().getFirstElement();
+		Color c = (Color) lineColorLabel.getData(COLOR_KEY);
+		Stroke linestroke = sb.createStroke(
+				new java.awt.Color(c.getRed(),c.getGreen(),c.getBlue()),
+				txtLineWidth.getSelection(),
+				ll.getDashArray());
 		LineSymbolizer lines = sb.createLineSymbolizer(linestroke);
 		
-		Stroke ps = sb.createStroke(new java.awt.Color(0,0,0), 1);
-		Mark mm = sb.createMark(sb.literalExpression(CIRCLE_POINT_SYM), sb.createFill(new java.awt.Color(255,100,100)), ps);
-		Graphic pg = sb.createGraphic(null, mm, null);
-		pg.setSize(sb.literalExpression(6));
-		PointSymbolizer vsym = sb.createPointSymbolizer(pg);
-		vsym.setGeometry(ff.function(VERTICES_FUNCTION_NAME, ff.property(GEOM_PROPERTY)));
-		rr = sb.createRule(new Symbolizer[] {lines,vsym});
+		rr = sb.createRule(new Symbolizer[] {lines});
 		rr.setFilter(ff.and(fnotselected, fls));
 		fts = sf.createFeatureTypeStyle();
     	fts.setName("Line Target Style"); //$NON-NLS-1$
@@ -835,11 +1153,14 @@ public class NavigationLayerDialog extends SmartStyledDialog implements MapPart,
     	style.featureTypeStyles().add(fts);
 
 		//--- Point Style ---
-		Stroke pointstroke = sb.createStroke(new java.awt.Color(0,0,0), 1);
-		Fill pointfill = sb.createFill(new java.awt.Color(255,100,100));
-		Mark pointmark = sb.createMark(sb.literalExpression(CIRCLE_POINT_SYM), pointfill, pointstroke);
+		c = (Color) pointColorLabel.getData(COLOR_KEY);
+
+		MarkerStyle ms = (MarkerStyle) cmbMarkerStyle.getStructuredSelection().getFirstElement();
+		Stroke pointstroke = sb.createStroke(new java.awt.Color(0,0,0), 0);
+		Fill pointfill = sb.createFill(new java.awt.Color(c.getRed(), c.getGreen(), c.getBlue()));
+		Mark pointmark = sb.createMark(sb.literalExpression(ms.key), pointfill, pointstroke);
 		Graphic pointgraphic = sb.createGraphic(null,  pointmark,  null);
-		pointgraphic.setSize(sb.literalExpression(8));
+		pointgraphic.setSize(sb.literalExpression(txtPointSize.getSelection()));
         PointSymbolizer endpoint = sb.createPointSymbolizer(pointgraphic);
         rr = sb.createRule(new Symbolizer[] {endpoint});
 		rr.setFilter(ff.and(fnotselected, fpoint));
@@ -850,9 +1171,9 @@ public class NavigationLayerDialog extends SmartStyledDialog implements MapPart,
     	
 		//--- Selected Point Style ---
 		pointfill = sb.createFill(new java.awt.Color(255,255,100));
-		pointmark = sb.createMark(sb.literalExpression(CIRCLE_POINT_SYM), pointfill, pointstroke); 
+		pointmark = sb.createMark(sb.literalExpression(ms.key), pointfill, pointstroke); 
 		pointgraphic = sb.createGraphic(null,  pointmark,  null);
-		pointgraphic.setSize(sb.literalExpression(10));
+		pointgraphic.setSize(sb.literalExpression(txtPointSize.getSelection()));
         endpoint = sb.createPointSymbolizer(pointgraphic);
 		rr = sb.createRule(new Symbolizer[] {endpoint});
 		rr.setFilter(ff.and(fselected, fpoint));
@@ -864,13 +1185,7 @@ public class NavigationLayerDialog extends SmartStyledDialog implements MapPart,
 		//--- Linear Selected Style ---
 		linestroke = sb.createStroke(new java.awt.Color(255,255,100),2);
 		lines = sb.createLineSymbolizer(linestroke);
-		ps = sb.createStroke(new java.awt.Color(0,0,0), 1);
-		mm = sb.createMark(sb.literalExpression(CIRCLE_POINT_SYM), sb.createFill(new java.awt.Color(255,255,100)), ps);
-		pg = sb.createGraphic(null, mm, null);
-		pg.setSize(sb.literalExpression(6));
-		vsym = sb.createPointSymbolizer(pg);
-		vsym.setGeometry(ff.function(VERTICES_FUNCTION_NAME, ff.property(GEOM_PROPERTY)));
-		rr = sb.createRule(new Symbolizer[] {lines, vsym});
+		rr = sb.createRule(new Symbolizer[] {lines});
 		rr.setFilter(ff.and(fselected, fls));
 		fts = sf.createFeatureTypeStyle();
     	fts.setName("Selected Line Target Style"); //$NON-NLS-1$

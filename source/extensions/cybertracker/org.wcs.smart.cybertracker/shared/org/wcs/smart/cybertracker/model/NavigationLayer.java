@@ -66,6 +66,7 @@ public class NavigationLayer extends UuidItem {
 	private Employee lastModifiedBy;
 
 	private List<NavigationTarget> ntargets = null;
+
 	
 	@Column(name = "name")
 	public String getName() {

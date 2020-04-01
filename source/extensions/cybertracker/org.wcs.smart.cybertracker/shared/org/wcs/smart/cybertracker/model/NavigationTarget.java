@@ -40,6 +40,13 @@ import org.wcs.smart.map.GeometryFactoryProvider;
  */
 public class NavigationTarget {
 
+	private static final String STROKE_STYLE_KEY = "stroke-style"; //$NON-NLS-1$
+	private static final String STROKE_SIZE_KEY = "stroke-size"; //$NON-NLS-1$
+	private static final String STROKE_COLOR_KEY = "stroke-color"; //$NON-NLS-1$
+	private static final String MARKER_STYLE_KEY = "marker-style"; //$NON-NLS-1$
+	private static final String MARKER_SIZE_KEY = "marker-size"; //$NON-NLS-1$
+	private static final String MARKER_COLOR_KEY = "marker-color"; //$NON-NLS-1$
+	private static final String GEOJSON_STYLE_KEY = "style"; //$NON-NLS-1$
 	private static final String GEOJSON_TYPE_FEATURE_KEY = "Feature"; //$NON-NLS-1$
 	private static final String POINT_GEOMTYPE = "Point"; //$NON-NLS-1$
 	private static final String LINESTRING_GEOMTYPE = "LineString"; //$NON-NLS-1$
@@ -53,23 +60,46 @@ public class NavigationTarget {
 	private String uuid;
 	private Geometry geometry;
 	
+	
+	private String color= null;
+	private int size = -1;
+	private String styletype;
+	
 	public NavigationTarget() {
 		uuid = UUID.randomUUID().toString();
 	}
 	
-	
 	public NavigationTarget(String id, Point geometry) {
+		this(id, geometry, null, -1, null);
+	}
+	
+	public NavigationTarget(String id, Point geometry, String color, int size, String style) {
 		this();
 		this.id = id;
 		this.geometry = geometry;
+		this.color = color;
+		this.size = size;
+		this.styletype = style;
 	}
 	
 	public NavigationTarget(String id, LineString geometry) {
+		this(id, geometry, null, -1, null);
+	}
+	
+	public NavigationTarget(String id, LineString geometry, String color, int size, String style) {
 		this();
 		this.id = id;
 		this.geometry = geometry;
+		this.color = color;
+		this.size = size;
+		this.styletype = style;
 	}
 
+	public void setStyle(String color, int size, String style) {
+		this.color = color;
+		this.size = size;
+		this.styletype = style;
+	}
 	/**
 	 * system generated transient unqiue identifier
 	 * @return
@@ -77,13 +107,24 @@ public class NavigationTarget {
 	public String getUuid() {
 		return this.uuid;
 	}
+	
 	public String getId() {
 		return this.id;
 	}
+	
 	public void setId(String id) {
 		this.id = id;
 	}
 	
+	public String getColor() {
+		return this.color;
+	}
+	public int getSize() {
+		return this.size;
+	}
+	public String getStyle() {
+		return this.styletype;
+	}
 	
 	public Geometry getGeometry() {
 		return this.geometry;
@@ -141,14 +182,30 @@ public class NavigationTarget {
 		if (type == null) return null;
 		if (!type.equalsIgnoreCase(POINT_GEOMTYPE) && !type.equalsIgnoreCase(LINESTRING_GEOMTYPE)) return null;
 		
+		
+		JSONObject style = (JSONObject) json.get(GEOJSON_STYLE_KEY);
+		String color = "FF0000"; //$NON-NLS-1$
+		String itemstyle = null;
+		int size = 6;
+		
+				
 		JSONArray coords = (JSONArray) geom.get(GEOJSON_COORDS_KEY);
+		
 		if (coords == null) return null;
 		if (type.equalsIgnoreCase(POINT_GEOMTYPE)) {
 			double x = (double) coords.get(0);
 			double y = (double) coords.get(1);
 			
 			Point p = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(x,y));
-			return new NavigationTarget(id, p);
+			
+			if (style != null) {
+				color = (String) style.get(MARKER_COLOR_KEY);
+				size = ((Long) style.get(MARKER_SIZE_KEY)).intValue();
+				itemstyle = (String)style.get(MARKER_STYLE_KEY);
+			}else {
+				itemstyle = "circle"; //$NON-NLS-1$
+			}
+			return new NavigationTarget(id, p, color, size, itemstyle);
 		}
 		if (type.equalsIgnoreCase(LINESTRING_GEOMTYPE)) {
 			Coordinate[] items = new Coordinate[coords.size()];
@@ -159,7 +216,14 @@ public class NavigationTarget {
 				items[i] = new Coordinate(x,y);
 			}
 			LineString ls = GeometryFactoryProvider.getFactory().createLineString(items);
-			return new NavigationTarget(id, ls);
+			if (style != null) {
+				color = (String) style.get(STROKE_COLOR_KEY);
+				size = ((Long) style.get(STROKE_SIZE_KEY)).intValue();
+				itemstyle = (String)style.get(STROKE_STYLE_KEY);
+			}else {
+				itemstyle = "soild"; //$NON-NLS-1$
+			}
+			return new NavigationTarget(id, ls, color, size, itemstyle);
 		}
 		return null;
 		
@@ -179,6 +243,8 @@ public class NavigationTarget {
 		JSONObject object = new JSONObject();
 		object.put(GEOJSON_TYPE_KEY, GEOJSON_TYPE_FEATURE_KEY);
 		
+		JSONObject style = new JSONObject();
+		
 		JSONObject geom = new JSONObject();
 		if (geometry instanceof Point) {
 			geom.put(GEOJSON_TYPE_KEY, POINT_GEOMTYPE);
@@ -186,6 +252,10 @@ public class NavigationTarget {
 			c.add(((Point)getGeometry()).getX());
 			c.add(((Point)getGeometry()).getY());
 			geom.put(GEOJSON_COORDS_KEY, c);
+			
+			style.put(MARKER_SIZE_KEY, size);
+			style.put(MARKER_COLOR_KEY, color);
+			style.put(MARKER_STYLE_KEY, styletype);
 		}else if (geometry instanceof LineString) {
 			geom.put(GEOJSON_TYPE_KEY, LINESTRING_GEOMTYPE);
 			JSONArray cs = new JSONArray();
@@ -197,13 +267,17 @@ public class NavigationTarget {
 				cs.add(c);
 			}
 			geom.put(GEOJSON_COORDS_KEY, cs);
+			
+			style.put(STROKE_SIZE_KEY, size);
+			style.put(STROKE_COLOR_KEY, color);
+			style.put(STROKE_STYLE_KEY, styletype);
 		}
 		object.put(GEOJSON_GEOMETRY_KEY, geom);
 		
 		JSONObject properties = new JSONObject();
 		properties.put(GEOJSON_ID_KEY,  getId());
 		object.put(GEOJSON_PROPERTIES_KEY, properties);
-		
+		object.put(GEOJSON_STYLE_KEY,  style);
 		return object;
 	}
 }
