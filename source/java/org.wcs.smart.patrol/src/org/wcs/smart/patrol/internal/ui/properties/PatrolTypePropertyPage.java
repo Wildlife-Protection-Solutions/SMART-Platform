@@ -278,15 +278,6 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 		tiImport.setBackground(composite.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		tiImport.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.IMPORT_ICON));
 		tiImport.addListener(SWT.Selection, e->{
-			CsvExportDialog dialog = new CsvExportDialog(getShell(), new PatrolTransportCsvExportConfig());
-			dialog.open();
-		});
-		
-		Button tiExport = new Button(composite, SWT.PUSH);
-		tiExport.setText(DialogConstants.EXPORT_BUTTON_TEXT);
-		tiExport.setBackground(composite.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-		tiExport.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EXPORT_ICON));
-		tiExport.addListener(SWT.Selection, e->{
 			PatrolTransportCsvImportConfig config = new PatrolTransportCsvImportConfig();
 			CsvCaImportDialog dialog = new CsvCaImportDialog(getShell(), config);
 			if (dialog.open() == Window.OK){
@@ -312,6 +303,15 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 			}
 		});
 		
+		Button tiExport = new Button(composite, SWT.PUSH);
+		tiExport.setText(DialogConstants.EXPORT_BUTTON_TEXT);
+		tiExport.setBackground(composite.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		tiExport.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EXPORT_ICON));
+		tiExport.addListener(SWT.Selection, e->{
+			CsvExportDialog dialog = new CsvExportDialog(getShell(), new PatrolTransportCsvExportConfig());
+			dialog.open();
+		});
+		
 		
 		//table menu
 		Menu tableMenu = new Menu(transportTblViewer.getControl());
@@ -331,8 +331,7 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 		delete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		delete.addListener(SWT.Selection, l->deleteTransportType());
 		
-		tableMenu.addMenuListener(new MenuListener() {
-			
+		tableMenu.addMenuListener(new MenuListener() {			
 			@Override
 			public void menuShown(MenuEvent e) {
 				boolean isSelected = !transportTblViewer.getSelection().isEmpty();
