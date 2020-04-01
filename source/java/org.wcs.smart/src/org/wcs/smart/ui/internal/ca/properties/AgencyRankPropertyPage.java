@@ -281,12 +281,14 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 		btnAddAgency.setText(DialogConstants.ADD_BUTTON_TEXT);
 		btnAddAgency.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		btnAddAgency.addListener(SWT.Selection, e->addAgency());
+		btnAddAgency.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		Button btnEditAgency = new Button(btns, SWT.PUSH);
 		btnEditAgency.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnEditAgency.setText(DialogConstants.EDIT_KEY_BUTTON_TEXT);
 		btnEditAgency.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 		btnEditAgency.addListener(SWT.Selection, e->editAgencyKey());
+		btnEditAgency.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnEditAgency.setEnabled(false);
 
 		Button btnDeleteAgency = new Button(btns, SWT.PUSH);
@@ -294,6 +296,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 		btnDeleteAgency.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		btnDeleteAgency.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		btnDeleteAgency.addListener(SWT.Selection, e->deleteAgency());
+		btnDeleteAgency.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnDeleteAgency.setEnabled(false);
 
 		
@@ -367,13 +370,15 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 		tiAddRank.setText(DialogConstants.ADD_BUTTON_TEXT);
 		tiAddRank.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		tiAddRank.addListener(SWT.Selection, e->addRank());
-
+		tiAddRank.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		
 		tiDeleteRank = new Button(btns, SWT.PUSH);
 		tiDeleteRank.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		tiDeleteRank.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		tiDeleteRank.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		tiDeleteRank.addListener(SWT.Selection, e->deleteRank());
 		tiDeleteRank.setEnabled(false);
+		tiDeleteRank.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		enableRank(false);
 		

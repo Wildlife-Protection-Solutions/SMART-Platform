@@ -228,6 +228,8 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 			lblStatus.put(Area.AreaType.values()[i], lbl);
 			
 			btnLoad[i] = new Button(comp, SWT.NONE);
+			btnLoad[i].setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+			btnLoad[i].setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.IMPORT_ICON));
 			final Area.AreaType type = Area.AreaType.values()[i];
 			final int index = i;
 			btnLoad[i].setText(LOAD_TEXT);
@@ -237,19 +239,22 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 				}
 			});
 			
-			btnClear[i] = new Button(comp, SWT.NONE);
-			btnClear[i].setText(CLEAR_TEXT);
-			btnClear[i].addSelectionListener(new SelectionAdapter() {
-				public void widgetSelected(SelectionEvent e) {
-					deleteAll(type);
-				}
-			});
-			
 			btnUpdate[i] = new Button(comp, SWT.NONE);
+			btnUpdate[i].setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+			btnUpdate[i].setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 			btnUpdate[i].setText(UPDATE_TEXT);
 			btnUpdate[i].addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
 					updateLabels(type);
+				}
+			});
+			
+			btnClear[i] = new Button(comp, SWT.NONE);
+			btnClear[i].setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+			btnClear[i].setText(CLEAR_TEXT);
+			btnClear[i].addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					deleteAll(type);
 				}
 			});
 
