@@ -226,15 +226,15 @@ public class UpgradeServlet extends HttpServlet {
 	}
 	
 	private void updateProfilesV6toV7(Connection c) throws SQLException {
-		String profilekey = "profile1";
-		String profilename = "Profile 1";
+		String profilekey = "profile1"; //$NON-NLS-1$
+		String profilename = "Profile 1"; //$NON-NLS-1$
 		int color = (new java.awt.Color(51,68,107)).getRGB();
 		
 		//for each ca we need to create some sort of default profile
 		HashMap<UUID, UUID> caProfileUuids = new HashMap<>();
 
-		PreparedStatement ps = c.prepareStatement("INSERT INTO smart.i_profile_config(uuid, ca_uuid, keyid, color) VALUES(?,?,?,?)");
-		try(ResultSet rs = c.createStatement().executeQuery("SELECT uuid FROM smart.conservation_area")){
+		PreparedStatement ps = c.prepareStatement("INSERT INTO smart.i_profile_config(uuid, ca_uuid, keyid, color) VALUES(?,?,?,?)"); //$NON-NLS-1$
+		try(ResultSet rs = c.createStatement().executeQuery("SELECT uuid FROM smart.conservation_area")){ //$NON-NLS-1$
 			
 			while(rs.next()) {
 				UUID uuid = (UUID)rs.getObject(1);
@@ -254,33 +254,33 @@ public class UpgradeServlet extends HttpServlet {
 		}
 		
 		//add name to i18n table
-		c.createStatement().execute("INSERT INTO smart.i18n_label (language_uuid, element_uuid, value) "
-				+ "SELECT a.uuid, b.uuid, '" + profilename + "' FROM smart.language a join smart.i_profile_config b "
-				+ " on a.ca_uuid = b.ca_uuid");
+		c.createStatement().execute("INSERT INTO smart.i18n_label (language_uuid, element_uuid, value) " //$NON-NLS-1$
+				+ "SELECT a.uuid, b.uuid, '" + profilename + "' FROM smart.language a join smart.i_profile_config b " //$NON-NLS-1$ //$NON-NLS-2$
+				+ " on a.ca_uuid = b.ca_uuid"); //$NON-NLS-1$
 			
 		
 		String[] sql = new String[] {
-				"INSERT INTO smart.i_profile_entity_type(entity_type_uuid, profile_uuid) SELECT  a.uuid, b.uuid FROM smart.i_entity_type a, smart.i_profile_config b where a.ca_uuid = b.ca_uuid ",
-				"INSERT INTO smart.i_profile_record_source(record_source_uuid, profile_uuid) SELECT a.uuid, b.uuid FROM smart.i_recordsource a, smart.i_profile_config b where a.ca_uuid = b.ca_uuid ",
+				"INSERT INTO smart.i_profile_entity_type(entity_type_uuid, profile_uuid) SELECT  a.uuid, b.uuid FROM smart.i_entity_type a, smart.i_profile_config b where a.ca_uuid = b.ca_uuid ", //$NON-NLS-1$
+				"INSERT INTO smart.i_profile_record_source(record_source_uuid, profile_uuid) SELECT a.uuid, b.uuid FROM smart.i_recordsource a, smart.i_profile_config b where a.ca_uuid = b.ca_uuid ", //$NON-NLS-1$
 					
-				"update smart.i_entity set profile_uuid = (select b.uuid from smart.I_PROFILE_CONFIG b where b.ca_uuid = smart.i_entity.ca_uuid)",
-				"update smart.i_record set profile_uuid = (select b.uuid from smart.I_PROFILE_CONFIG b where b.ca_uuid = smart.i_record.ca_uuid)",
+				"update smart.i_entity set profile_uuid = (select b.uuid from smart.I_PROFILE_CONFIG b where b.ca_uuid = smart.i_entity.ca_uuid)", //$NON-NLS-1$
+				"update smart.i_record set profile_uuid = (select b.uuid from smart.I_PROFILE_CONFIG b where b.ca_uuid = smart.i_record.ca_uuid)", //$NON-NLS-1$
 				
-				"update smart.i_relationship_type set src_profile_uuid = (select b.uuid from smart.I_PROFILE_CONFIG b where b.ca_uuid = smart.i_relationship_type.ca_uuid)",
-				"update smart.i_relationship_type set target_profile_uuid = src_profile_uuid",
+				"update smart.i_relationship_type set src_profile_uuid = (select b.uuid from smart.I_PROFILE_CONFIG b where b.ca_uuid = smart.i_relationship_type.ca_uuid)", //$NON-NLS-1$
+				"update smart.i_relationship_type set target_profile_uuid = src_profile_uuid", //$NON-NLS-1$
 				
-				"ALTER TABLE smart.i_entity ALTER COLUMN profile_uuid set not null",
-				"ALTER TABLE smart.i_entity ADD CONSTRAINT i_entity_profileuuid_fk FOREIGN KEY (profile_uuid) REFERENCES smart.i_profile_config (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
-				"ALTER TABLE smart.i_record ALTER COLUMN profile_uuid set not null",
-				"ALTER TABLE smart.i_record ADD CONSTRAINT i_record_profileuuid_fk FOREIGN KEY (profile_uuid) REFERENCES smart.i_profile_config (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
-				"ALTER TABLE smart.i_relationship_type ALTER COLUMN src_profile_uuid SET not null",
-				"ALTER TABLE smart.i_relationship_type ALTER COLUMN target_profile_uuid SET not null",
-				"ALTER TABLE smart.i_relationship_type ADD CONSTRAINT i_rtype_srcprofileuuid_fk FOREIGN KEY (src_profile_uuid) REFERENCES smart.i_profile_config (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
-				"ALTER TABLE smart.i_relationship_type ADD CONSTRAINT i_rtype_trgprofileuuid_fk FOREIGN KEY (target_profile_uuid) REFERENCES smart.i_profile_config (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
+				"ALTER TABLE smart.i_entity ALTER COLUMN profile_uuid set not null", //$NON-NLS-1$
+				"ALTER TABLE smart.i_entity ADD CONSTRAINT i_entity_profileuuid_fk FOREIGN KEY (profile_uuid) REFERENCES smart.i_profile_config (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"ALTER TABLE smart.i_record ALTER COLUMN profile_uuid set not null", //$NON-NLS-1$
+				"ALTER TABLE smart.i_record ADD CONSTRAINT i_record_profileuuid_fk FOREIGN KEY (profile_uuid) REFERENCES smart.i_profile_config (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"ALTER TABLE smart.i_relationship_type ALTER COLUMN src_profile_uuid SET not null", //$NON-NLS-1$
+				"ALTER TABLE smart.i_relationship_type ALTER COLUMN target_profile_uuid SET not null", //$NON-NLS-1$
+				"ALTER TABLE smart.i_relationship_type ADD CONSTRAINT i_rtype_srcprofileuuid_fk FOREIGN KEY (src_profile_uuid) REFERENCES smart.i_profile_config (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"ALTER TABLE smart.i_relationship_type ADD CONSTRAINT i_rtype_trgprofileuuid_fk FOREIGN KEY (target_profile_uuid) REFERENCES smart.i_profile_config (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 				
-				"UPDATE smart.I_ENTITY_RECORD_QUERY set profile_filter = '" + profilekey + "'", 
-				"UPDATE smart.i_entity_summary_query set profile_filter = '" + profilekey + "'", 
-				"UPDATE smart.i_record_obs_query set profile_filter = '" + profilekey + "'",
+				"UPDATE smart.I_ENTITY_RECORD_QUERY set profile_filter = '" + profilekey + "'",  //$NON-NLS-1$ //$NON-NLS-2$
+				"UPDATE smart.i_entity_summary_query set profile_filter = '" + profilekey + "'",  //$NON-NLS-1$ //$NON-NLS-2$
+				"UPDATE smart.i_record_obs_query set profile_filter = '" + profilekey + "'", //$NON-NLS-1$ //$NON-NLS-2$
 				
 				
 		};
@@ -290,8 +290,8 @@ public class UpgradeServlet extends HttpServlet {
 		HashMap<UUID, Set<String>> usedkeys = new HashMap<>();
 		
 		//attribute sources
-		ps = c.prepareStatement("UPDATE smart.i_recordsource_attribute SET keyid = ? WHERE uuid = ?");
-		try(ResultSet rs = c.createStatement().executeQuery("select a.uuid, b.keyid, a.source_uuid from smart.I_RECORDSOURCE_ATTRIBUTE a join smart.i_attribute b on a.attribute_uuid = b.uuid")){
+		ps = c.prepareStatement("UPDATE smart.i_recordsource_attribute SET keyid = ? WHERE uuid = ?"); //$NON-NLS-1$
+		try(ResultSet rs = c.createStatement().executeQuery("select a.uuid, b.keyid, a.source_uuid from smart.I_RECORDSOURCE_ATTRIBUTE a join smart.i_attribute b on a.attribute_uuid = b.uuid")){ //$NON-NLS-1$
 			while(rs.next()) {
 				UUID uuid = (UUID)rs.getObject(1);
 				UUID srcuuid = (UUID)rs.getObject(3);
@@ -314,9 +314,9 @@ public class UpgradeServlet extends HttpServlet {
 			}
 		}
 		//repeat for entity sources
-		ps = c.prepareStatement("UPDATE smart.i_recordsource_attribute SET keyid = ? WHERE uuid = ?");
+		ps = c.prepareStatement("UPDATE smart.i_recordsource_attribute SET keyid = ? WHERE uuid = ?"); //$NON-NLS-1$
 
-		try(ResultSet rs = c.createStatement().executeQuery("select a.uuid, b.keyid, a.source_uuid from smart.I_RECORDSOURCE_ATTRIBUTE a join smart.i_entity_type b on a.entity_type_uuid = b.uuid")){
+		try(ResultSet rs = c.createStatement().executeQuery("select a.uuid, b.keyid, a.source_uuid from smart.I_RECORDSOURCE_ATTRIBUTE a join smart.i_entity_type b on a.entity_type_uuid = b.uuid")){ //$NON-NLS-1$
 			while(rs.next()) {
 				UUID uuid = (UUID)rs.getObject(1);
 				UUID srcuuid = (UUID)rs.getObject(3);
@@ -339,46 +339,46 @@ public class UpgradeServlet extends HttpServlet {
 			}
 		}		
 
-		c.createStatement().executeUpdate("alter table smart.i_recordsource_attribute alter column keyid set not null");
+		c.createStatement().executeUpdate("alter table smart.i_recordsource_attribute alter column keyid set not null"); //$NON-NLS-1$
 
 
 		//need to map old permissions to new ones
 		//remove old permission from employee
-		PreparedStatement psinsert = c.prepareStatement("INSERT INTO smart.i_permission (employee_uuid, profile_uuid, permissions) VALUES(?,?,?)");
-		PreparedStatement psupdate = c.prepareStatement("UPDATE smart.employee set smartuserlevel = ? where uuid = ?");
+		PreparedStatement psinsert = c.prepareStatement("INSERT INTO smart.i_permission (employee_uuid, profile_uuid, permissions) VALUES(?,?,?)"); //$NON-NLS-1$
+		PreparedStatement psupdate = c.prepareStatement("UPDATE smart.employee set smartuserlevel = ? where uuid = ?"); //$NON-NLS-1$
 
-		try(ResultSet rs = c.createStatement().executeQuery("select uuid, ca_uuid, smartuserlevel FROM smart.EMPLOYEE where smartuserlevel is not null")){
+		try(ResultSet rs = c.createStatement().executeQuery("select uuid, ca_uuid, smartuserlevel FROM smart.EMPLOYEE where smartuserlevel is not null")){ //$NON-NLS-1$
 			while(rs.next()) {
 				UUID uuid = (UUID)rs.getObject(1);
 				UUID cauuid = (UUID)rs.getObject(2);
 				String userlevel = (String)rs.getString(3);
 			
-				String[] parts = userlevel.split(",");
+				String[] parts = userlevel.split(","); //$NON-NLS-1$
 			
 				List<String> newparts = new ArrayList<>();
 				Set<Integer> intelpermissions = new HashSet<>();
 				
 				for (String bit : parts) {
-					if (bit.equalsIgnoreCase("INTEL_ANALYST")) {
-						newparts.add("INTEL_ADMIN");
+					if (bit.equalsIgnoreCase("INTEL_ANALYST")) { //$NON-NLS-1$
+						newparts.add("INTEL_ADMIN"); //$NON-NLS-1$
 						intelpermissions.add(IntelPermission.ADMIN);
 						
-					}else if (bit.toUpperCase(Locale.ROOT).startsWith("INTEL_")) {
-						if(!newparts.contains("INTEL_USER")) newparts.add("INTEL_USER");
+					}else if (bit.toUpperCase(Locale.ROOT).startsWith("INTEL_")) { //$NON-NLS-1$
+						if(!newparts.contains("INTEL_USER")) newparts.add("INTEL_USER"); //$NON-NLS-1$ //$NON-NLS-2$
 						
-						if (bit.equalsIgnoreCase("INTEL_ENTITY_CREATE")) intelpermissions.add(IntelPermission.ENTITY_CREATE);
-						if (bit.equalsIgnoreCase("INTEL_ENTITY_DELETE")) intelpermissions.add(IntelPermission.ENTITY_DELETE);
-						if (bit.equalsIgnoreCase("INTEL_ENTITY_EDIT")) intelpermissions.add(IntelPermission.ENTITY_EDIT);
-						if (bit.equalsIgnoreCase("INTEL_ENTITY_VIEW")) intelpermissions.add(IntelPermission.ENTITY_VIEW);
+						if (bit.equalsIgnoreCase("INTEL_ENTITY_CREATE")) intelpermissions.add(IntelPermission.ENTITY_CREATE); //$NON-NLS-1$
+						if (bit.equalsIgnoreCase("INTEL_ENTITY_DELETE")) intelpermissions.add(IntelPermission.ENTITY_DELETE); //$NON-NLS-1$
+						if (bit.equalsIgnoreCase("INTEL_ENTITY_EDIT")) intelpermissions.add(IntelPermission.ENTITY_EDIT); //$NON-NLS-1$
+						if (bit.equalsIgnoreCase("INTEL_ENTITY_VIEW")) intelpermissions.add(IntelPermission.ENTITY_VIEW); //$NON-NLS-1$
 						
-						if (bit.equalsIgnoreCase("INTEL_RECORD_CREATE")) intelpermissions.add(IntelPermission.RECORD_CREATE);
-						if (bit.equalsIgnoreCase("INTEL_RECORD_DELETE")) intelpermissions.add(IntelPermission.RECORD_DELETE);
-						if (bit.equalsIgnoreCase("INTEL_RECORD_EDIT")) intelpermissions.add(IntelPermission.RECORD_EDIT_NOTSTATUS);
-						if (bit.equalsIgnoreCase("INTEL_RECORD_EDIT_WITH_STATUS")) intelpermissions.add(IntelPermission.RECORD_EDIT_ALL);
-						if (bit.equalsIgnoreCase("INTEL_RECORD_VIEW")) intelpermissions.add(IntelPermission.RECORD_VIEW);
+						if (bit.equalsIgnoreCase("INTEL_RECORD_CREATE")) intelpermissions.add(IntelPermission.RECORD_CREATE); //$NON-NLS-1$
+						if (bit.equalsIgnoreCase("INTEL_RECORD_DELETE")) intelpermissions.add(IntelPermission.RECORD_DELETE); //$NON-NLS-1$
+						if (bit.equalsIgnoreCase("INTEL_RECORD_EDIT")) intelpermissions.add(IntelPermission.RECORD_EDIT_NOTSTATUS); //$NON-NLS-1$
+						if (bit.equalsIgnoreCase("INTEL_RECORD_EDIT_WITH_STATUS")) intelpermissions.add(IntelPermission.RECORD_EDIT_ALL); //$NON-NLS-1$
+						if (bit.equalsIgnoreCase("INTEL_RECORD_VIEW")) intelpermissions.add(IntelPermission.RECORD_VIEW); //$NON-NLS-1$
 						
-						if (bit.equalsIgnoreCase("INTEL_QUERY_ALL")) intelpermissions.add(IntelPermission.QUERY);
-						if (bit.equalsIgnoreCase("INTEL_READ_ONLY")) intelpermissions.add(IntelPermission.READ_ONLY);
+						if (bit.equalsIgnoreCase("INTEL_QUERY_ALL")) intelpermissions.add(IntelPermission.QUERY); //$NON-NLS-1$
+						if (bit.equalsIgnoreCase("INTEL_READ_ONLY")) intelpermissions.add(IntelPermission.READ_ONLY); //$NON-NLS-1$
 						
 					}else {
 						newparts.add(bit);
@@ -386,7 +386,7 @@ public class UpgradeServlet extends HttpServlet {
 				}
 				if (intelpermissions.isEmpty()) continue;
 				
-				if (newparts.contains("INTEL_ADMIN") && newparts.contains("INTEL_USER")) newparts.remove("INTEL_USER");
+				if (newparts.contains("INTEL_ADMIN") && newparts.contains("INTEL_USER")) newparts.remove("INTEL_USER"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				
 				if (intelpermissions.contains(IntelPermission.ADMIN)) {
 					//remove all others
@@ -408,7 +408,7 @@ public class UpgradeServlet extends HttpServlet {
 				StringBuilder sb = new StringBuilder();
 				sb.append(newparts.get(0));
 				for (int i = 1; i < newparts.size(); i ++) {
-					sb.append(",");
+					sb.append(","); //$NON-NLS-1$
 					sb.append(newparts.get(i));
 				}
 				psupdate.setString(1, sb.toString());
