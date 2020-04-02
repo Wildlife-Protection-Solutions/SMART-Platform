@@ -68,7 +68,40 @@
                 		<version>2.1.1</version>
 				
     			<executions>
-    				
+    				<execution>
+					<id>authentication api</id>
+            				<phase>compile</phase>
+            				<goals><goal>resolve</goal></goals>
+            				<configuration>
+                    				<outputFileName>smart-core</outputFileName>
+                    				<outputPath>./swagger</outputPath>
+                    				<outputFormat>YAML</outputFormat>
+                    				<resourceClasses>
+                        				<classname>org.wcs.smart.connect.api.CyberTracker</classname>
+                        				<classname>org.wcs.smart.connect.api.ConnectAlert</classname>
+                        				<classname>org.wcs.smart.connect.api.ConnectMapLayers</classname>
+                        				<classname>org.wcs.smart.connect.api.ConnectRESTApplication</classname>
+                        				<classname>org.wcs.smart.connect.api.ConnectStyleConfiguration</classname>
+                        				<classname>org.wcs.smart.connect.api.ConnectUser</classname>
+                        				<classname>org.wcs.smart.connect.api.ConnectUserAction</classname>
+                        				<classname>org.wcs.smart.connect.api.ConservationAreas</classname>
+                        				<classname>org.wcs.smart.connect.api.CorsFeature</classname>
+                        				<classname>org.wcs.smart.connect.api.CtDataApi</classname>
+                        				<classname>org.wcs.smart.connect.api.DashboardBetaApi</classname>
+                        				<classname>org.wcs.smart.connect.api.DataModelApi</classname>
+                        				<classname>org.wcs.smart.connect.api.DataQueue</classname>
+                        				<classname>org.wcs.smart.connect.api.DesktopUser</classname>
+                        				<classname>org.wcs.smart.connect.api.GlobalForestWatchApi</classname>
+                        				<classname>org.wcs.smart.connect.api.QueryApi</classname>
+                        				<classname>org.wcs.smart.connect.api.QueryTypeApi</classname>
+                        				<classname>org.wcs.smart.connect.api.QuicklinkApi</classname>
+                        				<classname>org.wcs.smart.connect.api.ReportApi</classname>
+                        				<classname>org.wcs.smart.connect.api.SharedLinkApi</classname>
+                        				<classname>org.wcs.smart.connect.api.Uploader</classname>
+                    				</resourceClasses>
+                    				<prettyPrint>TRUE</prettyPrint>
+                			</configuration>
+       				 </execution>
 				<execution>
 					<id>noa api</id>
             				<phase>compile</phase>
