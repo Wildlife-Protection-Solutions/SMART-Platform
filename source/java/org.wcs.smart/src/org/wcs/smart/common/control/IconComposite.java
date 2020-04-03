@@ -85,6 +85,9 @@ public class IconComposite extends Composite {
 	private void createContent(){
 		setLayout(new GridLayout(2, false));
 		
+		((GridLayout)getLayout()).marginWidth = 0;
+		((GridLayout)getLayout()).marginHeight = 0;
+		
 		image = new Label(this, SWT.NONE);
 		image.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		((GridData)image.getLayoutData()).widthHint = 16;

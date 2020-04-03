@@ -97,7 +97,7 @@ public class NameKeyDialog<T extends NamedKeyItem> extends SmartStyledDialog{
 		return composite;
 	}
 	
-	private void modified(){
+	protected void modified(){
 		if (!keyComp.validate()){
 			if (getButton(IDialogConstants.OK_ID) != null) getButton(IDialogConstants.OK_ID).setEnabled(true);
 		}else{
