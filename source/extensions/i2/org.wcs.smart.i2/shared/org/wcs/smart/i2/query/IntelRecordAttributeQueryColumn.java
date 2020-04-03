@@ -46,7 +46,7 @@ public class IntelRecordAttributeQueryColumn extends AbstractQueryColumn {
 	private IntelRecordSourceAttribute attribute;
 	
 	public IntelRecordAttributeQueryColumn(IntelRecordSourceAttribute attribute) {
-		super(IIntelligenceLabelProvider.getName(attribute) + " (" + attribute.getSource().getName() + ")", "recordattribute:" + attribute.getSource().getKeyId() + ":" + attribute.getKeyId()); //$NON-NLS-1$
+		super(IIntelligenceLabelProvider.getName(attribute) + " (" + attribute.getSource().getName() + ")", "recordattribute:" + attribute.getSource().getKeyId() + ":" + attribute.getKeyId()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		this.attribute = attribute;
 	}
 		
@@ -86,7 +86,7 @@ public class IntelRecordAttributeQueryColumn extends AbstractQueryColumn {
 			StringBuilder sb = new StringBuilder();
 			for (IntelEntity i : items) {
 				sb.append(i.getIdAttributeAsText(l));
-				sb.append(", ");
+				sb.append(", "); //$NON-NLS-1$
 			}
 			if (sb.length() > 0) return sb.substring(0, sb.length() - 2);
 			return sb.toString();
@@ -102,7 +102,7 @@ public class IntelRecordAttributeQueryColumn extends AbstractQueryColumn {
 					StringBuilder sb = new StringBuilder();
 					for (IntelAttributeListItem i : items) {
 						sb.append( i.getName() );
-						sb.append(", ");
+						sb.append(", "); //$NON-NLS-1$
 					}
 					if (sb.length() > 0) return sb.substring(0, sb.length() - 2);
 					return sb.toString();
@@ -115,13 +115,13 @@ public class IntelRecordAttributeQueryColumn extends AbstractQueryColumn {
 					StringBuilder sb2 = new StringBuilder();
 					for (Employee i : items2) {
 						sb2.append( SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getEmployeeShortLabel(i, l));
-						sb2.append(", ");
+						sb2.append(", "); //$NON-NLS-1$
 					}
 					if (sb2.length() > 0) return sb2.substring(0, sb2.length() - 2);
 					return sb2.toString();
 				case POSITION:
 					Object[] data = (Object[]) toFormat;
-					return "POINT(" + (Double)data[0] + " " + (Double)data[1] + ")";
+					return "POINT(" + (Double)data[0] + " " + (Double)data[1] + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 			return ""; //$NON-NLS-1$
 		}

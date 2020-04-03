@@ -1,4 +1,5 @@
 /*
+
  * Copyright (C) 2016 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -221,9 +222,9 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 
 	@Override
 	public Collection<IntelProfile> getProfiles(Set<String> profileKeys, Session session) {
-		return session.createQuery("FROM IntelProfile WHERE conservationArea IN (:ca) and keyId IN (:keys)", IntelProfile.class)
-				.setParameterList("ca", getConservationAreas())
-				.setParameterList("keys", profileKeys)
+		return session.createQuery("FROM IntelProfile WHERE conservationArea IN (:ca) and keyId IN (:keys)", IntelProfile.class) //$NON-NLS-1$
+				.setParameterList("ca", getConservationAreas()) //$NON-NLS-1$
+				.setParameterList("keys", profileKeys) //$NON-NLS-1$
 				.list();
 	}
 	
@@ -337,7 +338,7 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 	public List<IntelEntity> getEntities(Set<UUID> profiles, String entityTypeKey, Session session){
 		return session.createQuery("SELECT i FROM IntelEntity i join i.entityType t WHERE t.keyId = :entityType and i.profile.uuid IN (:profiles)", IntelEntity.class) //$NON-NLS-1$
 			.setParameter("entityType", entityTypeKey) //$NON-NLS-1$
-			.setParameterList("profiles", profiles)
+			.setParameterList("profiles", profiles) //$NON-NLS-1$
 			.list();
 	}
 	

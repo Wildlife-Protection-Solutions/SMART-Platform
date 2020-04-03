@@ -69,6 +69,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelProfile;
+import org.wcs.smart.i2.model.IntelProfileEntityType;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.Resources;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -116,7 +117,7 @@ public class FileWizardPage extends WizardPage{
 	}
 	
 	public IntelProfile getProfile() {
-		return (IntelProfile)cmbProfile.getStructuredSelection().getFirstElement();
+		return ((IntelProfileEntityType)cmbProfile.getStructuredSelection().getFirstElement()).getProfile();
 	}
 	public boolean getSkipFirstLine(){
 		return chSkipFirstLine.getSelection();
@@ -150,7 +151,7 @@ public class FileWizardPage extends WizardPage{
     		return false;
     	}
     	if (!cmbProfile.getSelection().isEmpty() && 
-    			!(((StructuredSelection)cmbProfile.getSelection()).getFirstElement() instanceof IntelProfile)){
+    			!(((StructuredSelection)cmbProfile.getSelection()).getFirstElement() instanceof IntelProfileEntityType)){
     		setErrorMessage(Messages.FileWizardPage_profileRequired);
     		return false;
     	}
@@ -220,11 +221,11 @@ public class FileWizardPage extends WizardPage{
 		cmbProfile.setContentProvider(ArrayContentProvider.getInstance());
 		cmbProfile.setLabelProvider(new LabelProvider() {
 			public String getText(Object element) {
-				if (element instanceof IntelProfile) return ((IntelProfile)element).getName();
+				if (element instanceof IntelProfileEntityType) return ((IntelProfileEntityType)element).getProfile().getName();
 				return super.getText(element);
 			}
 			public Image getImage(Object element) {
-				if (element instanceof IntelProfile) return Resources.INSTANCE.getImage((IntelProfile)element);
+				if (element instanceof IntelProfileEntityType) return Resources.INSTANCE.getImage( ((IntelProfileEntityType)element).getProfile() );
 				return null;
 			}
 		});

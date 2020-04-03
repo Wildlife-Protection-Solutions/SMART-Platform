@@ -86,7 +86,7 @@ public class RecordAttributeDatasetResultSet implements IResultSet {
 		
 		List<Predicate> filters = new ArrayList<>();
 		filters.add(from.join("record").get("conservationArea").in(connection.getConservationAreas())); //$NON-NLS-1$ //$NON-NLS-2$
-		filters.add(from.join("record").get("profile").in(connection.hasPermission(Permission.RECORD)));
+		filters.add(from.join("record").get("profile").in(connection.hasPermission(Permission.RECORD))); //$NON-NLS-1$ //$NON-NLS-2$
 //		Criteria c = connection.getSession().createCriteria(IntelRecordAttributeValue.class)
 //				.createAlias("record", "r") //$NON-NLS-1$ //$NON-NLS-2$
 //				.createAlias("attribute", "a") //$NON-NLS-1$ //$NON-NLS-2$

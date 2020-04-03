@@ -306,6 +306,7 @@ public class NewEntityDialog extends SmartStyledTitleDialog{
 			session.beginTransaction();
 			try {
 				session.saveOrUpdate(newEntity);
+				newEntity.createDataModelItem(session);
 				session.getTransaction().commit();
 			}catch (Exception ex){
 				if (session.getTransaction().isActive()) session.getTransaction().rollback();

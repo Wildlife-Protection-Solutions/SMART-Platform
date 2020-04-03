@@ -41,6 +41,7 @@ import javax.persistence.Transient;
 
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedKeyItem;
+import org.wcs.smart.ca.datamodel.Attribute;
 
 /**
  * Model class of i_entity_type.
@@ -62,6 +63,7 @@ public class IntelEntityType extends NamedKeyItem {
 	private List<IntelEntityTypeAttribute> attributes;
 	
 	private Set<IntelProfileEntityType> profiles;
+	private Attribute dmAttribute;
 
 	/**
 	 * Constructor.
@@ -173,6 +175,22 @@ public class IntelEntityType extends NamedKeyItem {
 	
 	public void setAttributes(List<IntelEntityTypeAttribute> attributes){
 		this.attributes = attributes;
+	}
+	
+	/**
+	 * The object in the data model
+	 * that represents this entity.
+	 * 
+	 * @return
+	 */
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="dm_attribute_uuid", referencedColumnName="uuid")
+	public Attribute getDmAttribute() {
+		return dmAttribute;
+	}
+
+	public void setDmAttribute(Attribute dmAttribute) {
+		this.dmAttribute = dmAttribute;
 	}
 	
 	@Transient

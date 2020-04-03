@@ -91,7 +91,7 @@ public enum SearchManager {
 		sql.append (" JOIN smart.i_entity b "); //$NON-NLS-1$
 		sql.append(" ON a.entity_uuid = b.uuid and b.ca_uuid in (:cas) "); //$NON-NLS-1$
 		sql.append(" AND a.string_value is not null "); //$NON-NLS-1$
-		sql.append(" AND b.profile IN (:profiles) ");
+		sql.append(" AND b.profile_uuid IN (:profiles) "); //$NON-NLS-1$
 		if (types != null ){
 			sql.append(" AND b.entity_type_uuid in (:types) "); //$NON-NLS-1$
 		}
@@ -121,7 +121,7 @@ public enum SearchManager {
 		q.addScalar("string_value", StringType.INSTANCE); //$NON-NLS-1$
 		q.addScalar("entity_uuid", SmartContext.INSTANCE.getClass(UUIDBinaryType.class)); //$NON-NLS-1$
 		q.setParameterList("cas", conservationAreas); //$NON-NLS-1$
-		q.setParameterList("profiles", profiles); //$NON-NLS-1$
+		q.setParameterList("profiles", profiles.stream().map(a->a.getUuid()).collect(Collectors.toList())); //$NON-NLS-1$
 		if (types != null){
 			q.setParameterList("types", types); //$NON-NLS-1$
 		}

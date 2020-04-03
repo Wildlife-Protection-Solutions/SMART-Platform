@@ -85,7 +85,7 @@ public class RecordDatasetResultSet implements IResultSet {
 		Root<IntelRecord> from = c.from(IntelRecord.class);
 		List<Predicate> filters = new ArrayList<>();
 		filters.add(from.get("conservationArea").in(connection.getConservationAreas())); //$NON-NLS-1$
-		filters.add(from.get("profile").in(connection.hasPermission(Permission.RECORD)));
+		filters.add(from.get("profile").in(connection.hasPermission(Permission.RECORD))); //$NON-NLS-1$
 		int index = pmetadata.findParameterIndex(DataSourceParameter.RECORD_UUID.getName());
 		if (index >= 0 && parameters.get(index) != null){
 			UUID recordUuid = UuidUtils.stringToUuid((String) parameters.get(index));

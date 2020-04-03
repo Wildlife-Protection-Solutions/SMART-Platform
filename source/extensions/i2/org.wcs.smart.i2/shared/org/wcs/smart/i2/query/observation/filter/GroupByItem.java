@@ -195,7 +195,7 @@ public class GroupByItem {
 		if (bits[0].equals(GroupByType.RECORD_ATTRIBUTE.getKey())) {
 			String attributeType = bits[1];
 			String attributeKey = bits[2];
-			String recordSource = bits[3]; //$NON-NLS-1$
+			String recordSource = bits[3]; 
 			
 			IntelAttribute.AttributeType atype = null;
 			for (IntelAttribute.AttributeType t : IntelAttribute.AttributeType.values()) {

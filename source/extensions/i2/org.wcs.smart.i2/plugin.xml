@@ -2655,5 +2655,18 @@
          </filter>
       </page>
    </extension>
+   <extension
+         point="org.wcs.smart.caDataModelAdvisor">
+      <EditAdvisor
+            advisor="org.wcs.smart.i2.DmAttributeEditAdvisor">
+      </EditAdvisor>
+   </extension>
+   <extension
+         point="org.wcs.smart.caDeleteAdvisor">
+      <DeleteAdvisor
+            advisor="org.wcs.smart.i2.DmAttributeDeleteAdvisor"
+            class="org.wcs.smart.ca.datamodel.Attribute">
+      </DeleteAdvisor>
+   </extension>
 
 </plugin>

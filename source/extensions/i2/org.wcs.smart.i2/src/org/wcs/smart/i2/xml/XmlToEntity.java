@@ -182,6 +182,7 @@ public class XmlToEntity {
 			entities.forEach(a->{
 				a.getEntityAttachments().forEach(aa -> session.save(aa.getAttachment()));
 				session.save(a);
+				a.createDataModelItem(session);
 				modifiedEntities.add(a);
 				for (IntelEntityRecord r : a.getIntelligenceRecords()) {
 					modifiedRecords.add(r.getRecord());

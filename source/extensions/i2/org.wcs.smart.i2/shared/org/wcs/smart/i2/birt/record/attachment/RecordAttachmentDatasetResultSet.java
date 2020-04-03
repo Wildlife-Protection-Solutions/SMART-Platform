@@ -79,7 +79,7 @@ public class RecordAttachmentDatasetResultSet implements IResultSet {
 		this.metadata = metadata;
 		int index = pmetadata.findParameterIndex(DataSourceParameter.RECORD_UUID.getName());
 		String hql = "SELECT ir FROM IntelRecordAttachment ir join ir.id.record r WHERE r.conservationArea IN (:ca )"; //$NON-NLS-1$
-		hql += " and r.profile IN (:profiles) ";
+		hql += " and r.profile IN (:profiles) "; //$NON-NLS-1$
 		if (index >= 0 && parameters.get(index) != null){
 			hql += " AND r.uuid = :record"; //$NON-NLS-1$
 		}

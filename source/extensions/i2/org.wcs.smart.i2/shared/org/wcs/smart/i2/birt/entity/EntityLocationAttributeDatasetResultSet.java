@@ -1,4 +1,5 @@
 /*
+
  * Copyright (C) 2012 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -88,7 +89,7 @@ public class EntityLocationAttributeDatasetResultSet implements IResultSet {
 		String cnt = "SELECT count(*) " + hql; //$NON-NLS-1$
 		Query<?> q = connection.getSession().createQuery(cnt);
 		q.setParameter("type", IntelAttribute.AttributeType.POSITION); //$NON-NLS-1$
-		q.setParameter("profiles", connection.hasPermission(Permission.ENTITY));
+		q.setParameter("profiles", connection.hasPermission(Permission.ENTITY)); //$NON-NLS-1$
 		q.setParameter("etype", type); //$NON-NLS-1$
 		if (entity != null){
 			q.setParameter("euuid", entity); //$NON-NLS-1$
@@ -98,7 +99,7 @@ public class EntityLocationAttributeDatasetResultSet implements IResultSet {
 		
 		q = connection.getSession().createQuery(hql);
 		q.setParameter("type", IntelAttribute.AttributeType.POSITION); //$NON-NLS-1$
-		q.setParameter("profiles", connection.hasPermission(Permission.ENTITY));
+		q.setParameter("profiles", connection.hasPermission(Permission.ENTITY)); //$NON-NLS-1$
 		q.setParameter("etype", type); //$NON-NLS-1$
 		if (entity != null){
 			q.setParameter("euuid", entity); //$NON-NLS-1$

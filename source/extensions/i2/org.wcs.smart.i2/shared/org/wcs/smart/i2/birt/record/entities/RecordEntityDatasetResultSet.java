@@ -83,7 +83,7 @@ public class RecordEntityDatasetResultSet implements IResultSet {
 		
 		int index = pmetadata.findParameterIndex(DataSourceParameter.RECORD_UUID.getName());
 		String hql = "SELECT ir FROM IntelEntityRecord ir join ir.id.record r WHERE r.conservationArea IN (:ca )"; //$NON-NLS-1$
-		hql += " AND r.profile IN (:profiles)";
+		hql += " AND r.profile IN (:profiles)"; //$NON-NLS-1$
 		if (index >= 0  && parameters.get(index) != null){
 			hql += " AND r.uuid = :record"; //$NON-NLS-1$
 		}

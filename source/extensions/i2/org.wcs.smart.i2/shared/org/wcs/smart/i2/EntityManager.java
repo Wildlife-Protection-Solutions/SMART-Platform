@@ -33,6 +33,7 @@ import org.geotools.styling.StyleBuilder;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntity;
@@ -121,6 +122,23 @@ public enum EntityManager {
 	
 	public void deleteEntity(IntelEntity entity, Session session) throws Exception{
 
+		//first see if the entity is linked to a data model attribute list item
+		//then determine if that list item can be deleted
+		//if ok then delete list item othrwise throw exception
+		
+		if (entity.getDmAttributeListItem() != null) {
+			
+			try {
+				if (!DeleteManager.canDelete(entity.getDmAttributeListItem(), session)) {
+					throw new Exception("Cannot delete linked data model list item"); //$NON-NLS-1$
+				}
+			}catch (Exception ex) {
+				throw new Exception("Cannot delete linked data model list item: " + ex.getMessage(), ex); //$NON-NLS-1$
+			}
+			
+			session.delete(entity.getDmAttributeListItem());
+		}
+		
 		//delete all record attribute links 
 		Query<?> q = session.createQuery("DELETE FROM IntelRecordAttributeValueList where id.elementUuid = :entityUuid");  //$NON-NLS-1$
 		q.setParameter("entityUuid", entity.getUuid()); //$NON-NLS-1$

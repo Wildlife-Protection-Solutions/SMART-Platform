@@ -126,8 +126,8 @@ public class EntityLocationDatasetResultSet implements IResultSet {
 		
 		Query<?> query1 = connection.getSession().createQuery(q1);
 		Query<?> query2 = connection.getSession().createQuery(q2);
-		query1.setParameterList("profiles", profiles);
-		query2.setParameterList("profiles", profiles);
+		query1.setParameterList("profiles", profiles); //$NON-NLS-1$
+		query2.setParameterList("profiles", profiles); //$NON-NLS-1$
 		for (Entry<String,Object> e : values.entrySet()){
 			query1.setParameter(e.getKey(), e.getValue());
 			query2.setParameter(e.getKey(), e.getValue());

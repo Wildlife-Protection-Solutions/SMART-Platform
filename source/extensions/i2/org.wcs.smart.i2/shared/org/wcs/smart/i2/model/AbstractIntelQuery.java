@@ -242,24 +242,24 @@ public abstract class AbstractIntelQuery extends NamedItem implements IIntelAudi
 	}
 	@Transient
 	public static String convertKeysToProfileFilter(Collection<String> profiles) {
-		if (profiles.isEmpty()) return "";
+		if (profiles.isEmpty()) return ""; //$NON-NLS-1$
 		
 		StringBuilder sb = new StringBuilder();
 		for (String key : profiles) {
 			sb.append( key);
-			sb.append(",");
+			sb.append(","); //$NON-NLS-1$
 		}
 		return sb.toString();
 	}
 	
 	@Transient
 	public static String convertToProfileFilter(Collection<IntelProfile> profiles) {
-		if (profiles.isEmpty()) return "";
+		if (profiles.isEmpty()) return ""; //$NON-NLS-1$
 		
 		StringBuilder sb = new StringBuilder();
 		for (IntelProfile ip : profiles) {
 			sb.append( ip.getKeyId() );
-			sb.append(",");
+			sb.append(","); //$NON-NLS-1$
 		}
 		return sb.toString();
 	}
@@ -267,7 +267,7 @@ public abstract class AbstractIntelQuery extends NamedItem implements IIntelAudi
 	public static Set<String> convertFromProfileFilter(String filter) {
 		if (filter == null) return Collections.emptySet();
 		if (filter.trim().isEmpty()) return Collections.emptySet();
-		String[] bits = filter.split(",");
+		String[] bits = filter.split(","); //$NON-NLS-1$
 		Set<String> profiles = new HashSet<>();
 		for (String x : bits) profiles.add(x);
 		return profiles;

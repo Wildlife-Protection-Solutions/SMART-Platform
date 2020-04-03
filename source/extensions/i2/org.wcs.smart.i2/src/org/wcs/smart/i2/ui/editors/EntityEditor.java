@@ -200,6 +200,10 @@ import org.wcs.smart.util.E3Utils;
 @SuppressWarnings("restriction")
 public class EntityEditor extends EditorPart implements MapPart{
 	
+	private static final String ERROR_LINK_NOT_FOUND = Messages.EntityEditor_LinkNotFound;
+
+	private static final String DATA_MODEL_ATTRIBUTE_GROUP = Messages.EntityEditor_DataModelAttGroup;
+
 	private static final String TBLRECORD_LBLPROVIDER_KEY = "LBLPROVIDER"; //$NON-NLS-1$
 
 	public static final String ID = "org.wcs.smart.i2.editor.entity"; //$NON-NLS-1$
@@ -236,6 +240,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 	private Composite compAttributes;
 	private Composite compAttachments;
 	private Text txtScratchpad;
+	private Text txtDmListItem;
 	private SashForm mainSash;
 	private int[] mainSashMinSize;
 	
@@ -298,6 +303,10 @@ public class EntityEditor extends EditorPart implements MapPart{
 				}
 				temp.getProfile().getName();
 				temp.getEntityType().getIcon();
+				if (temp.getEntityType().getDmAttribute() != null) {
+					temp.getEntityType().getDmAttribute().getName();
+					if (temp.getDmAttributeListItem() != null) temp.getDmAttributeListItem().getNames().size();
+				}
 				for(IntelEntityTypeAttribute a : temp.getEntityType().getAttributes()){
 					a.getAttribute().getName();
 					if (a.getAttribute().getAttributeList() != null){
@@ -521,7 +530,11 @@ public class EntityEditor extends EditorPart implements MapPart{
 					entity.getAttributes().remove(item);
 				}
 				
-				
+				if (entity.getDmAttributeListItem() != null) {
+					entity.getDmAttributeListItem().updateName(entity.getConservationArea().getDefaultLanguage(), entity.getIdAttributeAsText());
+					entity.getDmAttributeListItem().setName(entity.getIdAttributeAsText());
+					s.saveOrUpdate(entity.getDmAttributeListItem());
+				}
 				s.getTransaction().commit();
 				clearLists();
 			}catch (Exception ex){
@@ -533,7 +546,13 @@ public class EntityEditor extends EditorPart implements MapPart{
 		
 		lblIdentifier.setText(entity.getIdAttributeAsText());
 		lblModified.setText(DateFormat.getInstance().format(entity.getDateModified()));
-		
+		if (txtDmListItem != null) {
+			if (entity.getDmAttributeListItem() != null) {
+				txtDmListItem.setText(MessageFormat.format("{0} [{1}]", entity.getDmAttributeListItem().getName(), entity.getDmAttributeListItem().getKeyId())); //$NON-NLS-1$
+			}else {
+				txtDmListItem.setText(ERROR_LINK_NOT_FOUND);
+			}
+		}
 
 		HashMap<String, Object> data = new HashMap<String, Object>();
 		data.put(UIEvents.EventTags.ELEMENT, context.get(MPart.class));
@@ -2029,6 +2048,10 @@ public class EntityEditor extends EditorPart implements MapPart{
 			}
 		}
 		
+		if (entity.getEntityType().getDmAttribute() != null) {
+			groupHeaders.add(DATA_MODEL_ATTRIBUTE_GROUP);
+		}
+		
 		Composite outer = toolkit.createComposite(compAttributes, SWT.NONE);
 		outer.setLayout(new GridLayout());
 		((GridLayout)outer.getLayout()).marginWidth = 0;
@@ -2054,6 +2077,38 @@ public class EntityEditor extends EditorPart implements MapPart{
 			IntelEntityTypeAttributeGroup group = null;
 			if (i < groups.size()){
 				group = groups.get(i);
+			}
+			
+			if (groupHeaders.get(i) == DATA_MODEL_ATTRIBUTE_GROUP) {
+				Composite part = toolkit.createComposite(tabPart);
+				part.setLayout(new GridLayout(2, false));
+				part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				
+				toolkit.createLabel(part, Messages.EntityEditor_DmAttribute);
+				
+				Text txt = toolkit.createText(part, ""); //$NON-NLS-1$
+				txt.setEditable(false);
+				txt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				if (entity.getDmAttributeListItem() != null) {
+					txt.setText( entity.getEntityType().getDmAttribute().getName() );
+				}else {
+					txt.setText(ERROR_LINK_NOT_FOUND);
+				}
+				
+				toolkit.createLabel(part, Messages.EntityEditor_ListItemAtt);
+				
+				txtDmListItem = toolkit.createText(part, ""); //$NON-NLS-1$
+				txtDmListItem.setEditable(false);
+				txtDmListItem.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				if (entity.getDmAttributeListItem() != null) {
+					txtDmListItem.setText(MessageFormat.format("{0} [{1}]", entity.getDmAttributeListItem().getName(), entity.getDmAttributeListItem().getKeyId())); //$NON-NLS-1$
+				}else {
+					txtDmListItem.setText(ERROR_LINK_NOT_FOUND);
+				}
+				
+				parts[counter++] = part;
+
+				continue;
 			}
 			ScrolledForm attributelist = toolkit.createScrolledForm(tabPart);
 			attributelist.getBody().setLayout(new GridLayout());

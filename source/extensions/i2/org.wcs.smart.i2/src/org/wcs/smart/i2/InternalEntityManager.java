@@ -146,8 +146,8 @@ public enum InternalEntityManager {
 					}
 				}
 			});
-		}catch (Exception ex){
-			Intelligence2PlugIn.displayLog(Messages.EntitySearchResultTable_DeleteError + ex.getMessage(), ex);
+		}catch (Throwable ex){
+			Intelligence2PlugIn.displayLog(Messages.EntitySearchResultTable_DeleteError + ex.getCause().getMessage(), ex);
 			return;
 		}
 	}

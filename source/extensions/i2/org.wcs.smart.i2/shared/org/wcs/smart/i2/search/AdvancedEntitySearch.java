@@ -133,9 +133,9 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 			CriteriaQuery<IntelEntity> c = cb.createQuery(IntelEntity.class);
 			Root<IntelEntity> from = c.from(IntelEntity.class);
 			c.where(cb.and(
-					from.get("conservationArea").in(cas),
-					from.get("profile").in(profiles)
-					)); //$NON-NLS-1$
+					from.get("conservationArea").in(cas), //$NON-NLS-1$
+					from.get("profile").in(profiles) //$NON-NLS-1$
+					)); 
 			Query<IntelEntity> q = session.createQuery(c);
 			List<IntelSearchResultItem> items = new ArrayList<>(maxResultCnt);
 			try(ScrollableResults scroll = q.scroll()){
@@ -189,7 +189,7 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 		
 		session.doWork(connection->{
 			try {
-				connection.createStatement().execute("DROP TABLE qt_temp");
+				connection.createStatement().execute("DROP TABLE qt_temp"); //$NON-NLS-1$
 			}catch (Exception ex) {	}
 		});
 				
@@ -202,14 +202,14 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 		sb = new StringBuilder();
 		sb.append("INSERT INTO qt_temp (entity_uuid, entity_type_key ) ");  //$NON-NLS-1$
 		sb.append(" SELECT DISTINCT ie.uuid, t.keyid "); //$NON-NLS-1$
-		sb.append(" FROM smart.i_entity ie join smart.i_entity_type t on ie.entity_type_uuid = t.uuid");
+		sb.append(" FROM smart.i_entity ie join smart.i_entity_type t on ie.entity_type_uuid = t.uuid"); //$NON-NLS-1$
 		sb.append(" WHERE ie.ca_uuid in ( :cauuids ) and ie.profile_uuid in ( :profiles )"); //$NON-NLS-1$
 		
 		List<byte[]> uuids = this.cas.stream().map(e->UuidUtils.uuidToByte(e.getUuid())).collect(Collectors.toList());
 		 
 		session.createNativeQuery(sb.toString())
 			.setParameterList("cauuids", uuids)	 //$NON-NLS-1$
-			.setParameterList("profiles", profiles.stream().map(e->UuidUtils.uuidToByte(e.getUuid())).collect(Collectors.toList()))
+			.setParameterList("profiles", profiles.stream().map(e->UuidUtils.uuidToByte(e.getUuid())).collect(Collectors.toList())) //$NON-NLS-1$
 			.executeUpdate();
 
 		StringBuilder where = new StringBuilder();

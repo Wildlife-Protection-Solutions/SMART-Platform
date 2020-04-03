@@ -36,12 +36,16 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.Session;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.AttributeListItem;
+import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 
@@ -75,6 +79,8 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 	private List<IntelEntityLocation> entityLocations;
 	
 	private String comment;
+	
+	private AttributeListItem listItem;
 
 	/**
 	 * Constructor.
@@ -348,6 +354,22 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 	
 	 
 	/**
+	 * The object in the data model
+	 * that represents this entity.
+	 * 
+	 * @return
+	 */
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="dm_list_item_uuid", referencedColumnName="uuid")
+	public AttributeListItem getDmAttributeListItem() {
+		return listItem;
+	}
+
+	public void setDmAttributeListItem(AttributeListItem listItem) {
+		this.listItem = listItem;
+	}
+	
+	/**
 	 * Gets the label for the default locale
 	 * @param l
 	 * @return
@@ -404,5 +426,20 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 			}
 		}
 		return null;
+	}
+	
+	@Transient
+	public void createDataModelItem(Session session) {
+		if (getEntityType().getDmAttribute() == null) return;
+		
+		Attribute dmAttribute = session.get(Attribute.class, getEntityType().getDmAttribute().getUuid());
+		//make a new list item
+		AttributeListItem ali = new AttributeListItem();
+		ali.setAttribute(dmAttribute);
+		ali.setIsActive(true);
+		ali.setKeyId(DataModelManager.INSTANCE.generateKey(getIdAttributeAsText(), dmAttribute.getAttributeList()));
+		ali.updateName(getConservationArea().getDefaultLanguage(), getIdAttributeAsText());
+		dmAttribute.getAttributeList().add(ali);
+		setDmAttributeListItem(ali);
 	}
 }

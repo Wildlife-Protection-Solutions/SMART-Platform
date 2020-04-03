@@ -86,11 +86,16 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.advisors.DeleteManager;
+import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.common.control.IconComposite;
+import org.wcs.smart.common.control.NameKeyDialog;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -102,6 +107,7 @@ import org.wcs.smart.i2.birt.IntelReportManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
+import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelEntityTypeAttributeGroup;
@@ -149,6 +155,8 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 	
 	private ControlDecoration cdList;
 	private ControlDecoration cdId;
+	
+	private Composite dmAttComp;
 	
 	List<IntelEntityTypeAttribute> attributeList = new ArrayList<IntelEntityTypeAttribute>();
 	private List<IntelEntityTypeAttributeGroup> groups = new ArrayList<IntelEntityTypeAttributeGroup>();
@@ -212,8 +220,27 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 			
 			s.beginTransaction();
 			try {
-				s.saveOrUpdate(type);
+				if (type.getDmAttribute() != null && type.getDmAttribute().getUuid() == null) {
+					s.saveOrUpdate(type.getDmAttribute());
+					
+					s.saveOrUpdate(type);
+					type.getDmAttribute().setAttributeList(new ArrayList<>());
+					//create a new list item for all existing entities
+					if (type.getUuid() != null) {
+						List<IntelEntity> entity = QueryFactory.buildQuery(s, IntelEntity.class, new Object[] {"entityType", type}).list(); //$NON-NLS-1$
+						for (IntelEntity ie : entity) {
+							ie.createDataModelItem(s);
+						}
+					}					
+				}else {
+					s.saveOrUpdate(type);
+				}
 				
+				if (type.getDmAttribute() == null) {
+					s.createQuery("UPDATE IntelEntity SET dmAttributeListItem = null WHERE entityType = :type") //$NON-NLS-1$
+						.setParameter("type", type) //$NON-NLS-1$
+						.executeUpdate();
+				}
 				Set<IntelProfileEntityType> currentprofiles = new HashSet<>(type.getProfiles());
 				List<IntelProfile> profiles = (List<IntelProfile>) tblProfiles.getInput();
 				
@@ -435,29 +462,6 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 				type.setIcon(icon.getImage());
 			}
 		});
-	
-		l = new Label(parent, SWT.NONE);
-		l.setText(Messages.EntityTypeDialog_IdAttLabel);
-		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-		
-		idAttribute = new ComboViewer(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
-		idAttribute.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		idAttribute.setContentProvider(ArrayContentProvider.getInstance());
-		idAttribute.setLabelProvider(new AttributeLabelProvider());
-		idAttribute.addSelectionChangedListener(new ISelectionChangedListener() {
-			
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				Object x = ((IStructuredSelection)idAttribute.getSelection()).getFirstElement();
-				if (x instanceof IntelEntityTypeAttribute){
-					type.setIdAttribute(((IntelEntityTypeAttribute) x).getAttribute());
-				}else if (x instanceof IntelAttribute){
-					type.setIdAttribute(((IntelAttribute) x));
-				}
-				modified();
-			}
-		});
-		cdId= createDecoration(idAttribute.getControl());
 		
 		l = new Label(parent, SWT.NONE);
 		l.setText(Messages.EntityTypeDialog_BirtLabel);
@@ -486,6 +490,18 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 		}
 		
 		l = new Label(parent, SWT.NONE);
+		l.setText(Messages.EntityTypeDialog_DmAttributeLabel);
+		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		
+		dmAttComp = new Composite(parent, SWT.NONE);
+		dmAttComp.setLayout(new GridLayout(2, false));
+		((GridLayout)dmAttComp.getLayout()).marginWidth = 0;
+		((GridLayout)dmAttComp.getLayout()).marginHeight = 0;
+		dmAttComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+
+		createDataModelAttributeComposite();
+		
+		l = new Label(parent, SWT.NONE);
 		l.setText(Messages.EntityTypeDialog_ProfilesLabel);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
 		
@@ -497,6 +513,34 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 		tblProfiles.addSelectionChangedListener(e->{
 			modified();
 		});
+		
+		
+		l = new Label(parent, SWT.NONE);
+		l.setText(Messages.EntityTypeDialog_IdAttLabel);
+		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		
+		idAttribute = new ComboViewer(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
+		idAttribute.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		idAttribute.setContentProvider(ArrayContentProvider.getInstance());
+		idAttribute.setLabelProvider(new AttributeLabelProvider());
+		idAttribute.addSelectionChangedListener(new ISelectionChangedListener() {
+			
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				Object x = ((IStructuredSelection)idAttribute.getSelection()).getFirstElement();
+				if (x instanceof IntelEntityTypeAttribute){
+					type.setIdAttribute(((IntelEntityTypeAttribute) x).getAttribute());
+				}else if (x instanceof IntelAttribute){
+					type.setIdAttribute(((IntelAttribute) x));
+				}
+				modified();
+			}
+		});
+		cdId= createDecoration(idAttribute.getControl());
+		
+		
+		
+		
 		
 		l = new Label(parent, SWT.NONE);
 		l.setText(Messages.EntityTypeDialog_AttributesLabel);
@@ -786,9 +830,6 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 			}
 		});
 		
-//		s = new Label(buttonComp, SWT.HORIZONTAL | SWT.SEPARATOR);
-//		s.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		
 		setTitle(Messages.EntityTypeDialog_Title);
 		getShell().setText(Messages.EntityTypeDialog_Title);
 		setMessage(Messages.EntityTypeDialog_Message);
@@ -796,6 +837,30 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 		return parent;
 	}
 	
+	private void createDataModelAttributeComposite() {
+		for (Control c : dmAttComp.getChildren()) c.dispose();
+		if (type.getDmAttribute() == null) {
+			Button btnLink = new Button(dmAttComp, SWT.PUSH);
+			btnLink.setText(Messages.EntityTypeDialog_LinkToDmAttribute);
+			btnLink.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+			btnLink.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false, 2, 1));
+			btnLink.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+			
+			btnLink.addListener(SWT.Selection, e->addDataModelAttribute());
+		}else {
+			Text txtDmAttribute = new Text(dmAttComp, SWT.NONE);
+			txtDmAttribute.setText(MessageFormat.format("{0} ({1})", type.getDmAttribute().getName(), type.getDmAttribute().getKeyId() )); //$NON-NLS-1$
+			txtDmAttribute.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+			
+			Button btnClear = new Button(dmAttComp, SWT.PUSH);
+			btnClear.setText(Messages.EntityTypeDialog_RemoveBtn);
+			btnClear.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+			btnClear.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+			btnClear.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+			btnClear.addListener(SWT.Selection, e->deleteDataModelAttribute());
+		}
+		dmAttComp.layout();
+	}
 	private void moveAttribute(int direction){
 		for (Iterator<?> iterator = ((IStructuredSelection) treeAttributes.getSelection()).iterator(); iterator.hasNext();) {
 			Object toMove = iterator.next();
@@ -1017,6 +1082,51 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 			idAttribute.setSelection(null);
 		}
 	}
+	
+	private void deleteDataModelAttribute() {
+		if (type.getDmAttribute() == null) return;
+		
+		if (type.getDmAttribute().getUuid() != null) {
+			if (!MessageDialog.openQuestion(getShell(), Messages.EntityTypeDialog_UnlinkTitle,
+				Messages.EntityTypeDialog_UnlinkMessage)) {
+				return;
+			}
+		}
+		type.setDmAttribute(null);
+		createDataModelAttributeComposite();
+		modified();
+
+	}
+	private void addDataModelAttribute() {
+		Attribute dmAttribute = new Attribute();
+		dmAttribute.setConservationArea(type.getConservationArea());
+		dmAttribute.setType(AttributeType.LIST);
+		dmAttribute.updateName(SmartDB.getCurrentLanguage(), type.getName() + " ID"); //$NON-NLS-1$
+
+		List<Attribute> current = null;
+		try(Session session = HibernateManager.openSession()){
+			current = QueryFactory.buildQuery(session, Attribute.class, 
+					new Object[] {"conservationArea", type.getConservationArea()} ).list(); //$NON-NLS-1$
+		}
+		dmAttribute.setKeyId(DataModelManager.INSTANCE.generateKey(type.getKeyId() + "id", current)); //$NON-NLS-1$
+		
+		NameKeyDialog<Attribute> dialog = new NameKeyDialog<Attribute>(getShell(), dmAttribute, current) {
+			protected String getTitle(){
+				return Messages.EntityTypeDialog_DmAttributeTitle;
+			}
+			protected void createButtonsForButtonBar(Composite parent) {
+				super.createButtonsForButtonBar(parent);
+				super.modified();
+			}
+		} ;
+		if (dialog.open() != Window.OK) return;
+		
+		type.setDmAttribute(dmAttribute);
+		createDataModelAttributeComposite();
+		modified();
+	}
+	
+	
 	private void initFields(){
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try{

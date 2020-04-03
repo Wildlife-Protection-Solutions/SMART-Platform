@@ -79,9 +79,9 @@ public class CaQueryItemProvider implements IQueryItemProvider {
 	
 	@Override
 	public Collection<IntelProfile> getProfiles(Set<String> profileKeys, Session session) {
-		return session.createQuery("FROM IntelProfile WHERE conservationArea = :ca and keyId IN (:keys)", IntelProfile.class)
-				.setParameter("ca", getCa())
-				.setParameterList("keys", profileKeys)
+		return session.createQuery("FROM IntelProfile WHERE conservationArea = :ca and keyId IN (:keys)", IntelProfile.class) //$NON-NLS-1$
+				.setParameter("ca", getCa()) //$NON-NLS-1$
+				.setParameterList("keys", profileKeys) //$NON-NLS-1$
 				.list();
 	}
 	
@@ -199,7 +199,7 @@ public class CaQueryItemProvider implements IQueryItemProvider {
 		return session.createQuery("SELECT i FROM IntelEntity i join i.entityType t WHERE i.conservationArea = :ca and t.keyId = :entityType and i.profile.uuid in (:profiles)", IntelEntity.class) //$NON-NLS-1$
 			.setParameter("entityType", entityTypeKey) //$NON-NLS-1$
 			.setParameter("ca",  getCa()) //$NON-NLS-1$
-			.setParameterList("profiles", profiles)
+			.setParameterList("profiles", profiles) //$NON-NLS-1$
 			.list();
 	}
 	

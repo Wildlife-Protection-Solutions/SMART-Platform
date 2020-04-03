@@ -84,7 +84,7 @@ public class EntityDatasetResultSet implements IResultSet {
 		this.metadata = metadata;
 		this.type = type;
 		
-		String hql = "FROM IntelEntity WHERE entityType = :type and profile in (:profiles) ";
+		String hql = "FROM IntelEntity WHERE entityType = :type and profile in (:profiles) "; //$NON-NLS-1$
 		UUID euuid = null;
 		
 		int index = pmetadata.findParameterIndex(DataSourceParameter.ENTITY_UUID.getName());
@@ -96,24 +96,24 @@ public class EntityDatasetResultSet implements IResultSet {
 		}
 		
 		if (euuid == null) {
-			m_maxRows = (Long)connection.getSession().createQuery("SELECT count(*) " + hql)
-					.setParameter("type", type)
-					.setParameter("profiles", connection.hasPermission(Permission.ENTITY))
+			m_maxRows = (Long)connection.getSession().createQuery("SELECT count(*) " + hql) //$NON-NLS-1$
+					.setParameter("type", type) //$NON-NLS-1$
+					.setParameter("profiles", connection.hasPermission(Permission.ENTITY)) //$NON-NLS-1$
 					.uniqueResult();
 			results = connection.getSession().createQuery(hql)
-					.setParameter("type", type)
-					.setParameter("profiles", connection.hasPermission(Permission.ENTITY))
+					.setParameter("type", type) //$NON-NLS-1$
+					.setParameter("profiles", connection.hasPermission(Permission.ENTITY)) //$NON-NLS-1$
 					.setReadOnly(true).scroll(ScrollMode.FORWARD_ONLY);
 		}else {
-			m_maxRows = (Long)connection.getSession().createQuery("SELECT count(*) " + hql + " AND uuid = :uuid")
-					.setParameter("type", type)
-					.setParameter("profiles", connection.hasPermission(Permission.ENTITY))
-					.setParameter("uuid", euuid)
+			m_maxRows = (Long)connection.getSession().createQuery("SELECT count(*) " + hql + " AND uuid = :uuid") //$NON-NLS-1$ //$NON-NLS-2$
+					.setParameter("type", type) //$NON-NLS-1$
+					.setParameter("profiles", connection.hasPermission(Permission.ENTITY)) //$NON-NLS-1$
+					.setParameter("uuid", euuid) //$NON-NLS-1$
 					.uniqueResult();
-			results = connection.getSession().createQuery(hql+ " AND uuid = :uuid")
-					.setParameter("type", type)
-					.setParameter("profiles", connection.hasPermission(Permission.ENTITY))
-					.setParameter("uuid", euuid)
+			results = connection.getSession().createQuery(hql+ " AND uuid = :uuid") //$NON-NLS-1$
+					.setParameter("type", type) //$NON-NLS-1$
+					.setParameter("profiles", connection.hasPermission(Permission.ENTITY)) //$NON-NLS-1$
+					.setParameter("uuid", euuid) //$NON-NLS-1$
 					.setReadOnly(true).scroll(ScrollMode.FORWARD_ONLY);
 		}
 		

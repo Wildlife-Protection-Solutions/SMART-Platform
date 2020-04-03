@@ -323,6 +323,7 @@ public enum EntityImportEngine {
 				//save new entities
 				for (IntelEntity e : newEntities){
 					s.save(e);
+					e.createDataModelItem(s);
 					kidMonitor.worked(1);
 					kidMonitor.checkCanceled();
 				}
