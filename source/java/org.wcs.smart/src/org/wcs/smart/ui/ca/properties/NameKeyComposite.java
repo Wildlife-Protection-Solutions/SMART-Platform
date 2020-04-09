@@ -342,8 +342,9 @@ public class NameKeyComposite {
 	 * @return <code>true</code> if error on page; <code>false</code> otherwise
 	 */
 	public boolean validate(){
-		boolean error = false;
+		if (cdKey == null || cdTxt == null) return false;
 		
+		boolean error = false;
 		if (currentSelection != null ){
 			values.put(currentSelection, txtName.getText());
 		}

@@ -49,13 +49,20 @@ public class NameKeyDialog<T extends NamedKeyItem> extends SmartStyledDialog{
 	protected T item;
 	protected List<T> siblings;
 	
+	protected boolean canEdit = true;
 	
 	protected NameKeyDialog(Shell parentShell, T item, List<T> siblings) {
+		this(parentShell, item, siblings, true);
+	}
+
+	protected NameKeyDialog(Shell parentShell, T item, List<T> siblings, boolean canEdit) {
 		super(parentShell);
 		this.item = item;
 		this.siblings = siblings;
+		this.canEdit = canEdit;
 	}
 
+	
 	protected String getTitle(){
 		return Messages.NameKeyDialog_DialogTitle;
 	}
@@ -84,7 +91,7 @@ public class NameKeyDialog<T extends NamedKeyItem> extends SmartStyledDialog{
 		core.setLayout(new GridLayout(3, false));
 		core.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		keyComp = new NameKeyComposite();
-		keyComp.createControls(core, true, item.getUuid() == null, new NameKeyComposite.IChangeListener() {
+		keyComp.createControls(core, canEdit, item.getUuid() == null, new NameKeyComposite.IChangeListener() {
 			@Override
 			public void itemModified() {
 				modified();
