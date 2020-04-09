@@ -156,6 +156,20 @@ public class CtDatabaseUpgrader implements IDatabaseUpgrader {
 				"ALTER TABLE smart.ct_incident_link add column ct_root_id char(16) for bit data", //$NON-NLS-1$
 				"ALTER TABLE smart.ct_incident_link add column obs_group_uuid char(16) for bit data", //$NON-NLS-1$
 				"ALTER TABLE smart.CT_INCIDENT_LINK alter column ct_group_id drop not null", //$NON-NLS-1$
+				
+				//drop unique constraint
+				//this is the only way I could find to easily drop the unique constraint on these fields
+				"RENAME COLUMN smart.ct_metadata_value.package_uuid to package_uuid_2", //$NON-NLS-1$
+				"ALTER TABLE smart.ct_metadata_value add column package_uuid char(16) for bit data", //$NON-NLS-1$
+				"UPDATE  smart.ct_metadata_value  set package_uuid = package_uuid_2", //$NON-NLS-1$
+				"ALTER TABLE smart.ct_metadata_value alter column package_uuid set not null", //$NON-NLS-1$
+				"ALTER TABLE smart.ct_metadata_value drop column package_uuid_2", //$NON-NLS-1$
+
+				"RENAME COLUMN smart.ct_metadata_value.keyid to keyid2", //$NON-NLS-1$
+				"ALTER TABLE smart.ct_metadata_value add column keyid varchar(32)", //$NON-NLS-1$
+				"UPDATE smart.ct_metadata_value  set keyid = keyid2", //$NON-NLS-1$
+				"ALTER TABLE smart.ct_metadata_value alter column keyid set not null", //$NON-NLS-1$
+				"ALTER TABLE smart.ct_metadata_value drop column keyid2", //$NON-NLS-1$
 		};
 		
 		for (String s : sql) {

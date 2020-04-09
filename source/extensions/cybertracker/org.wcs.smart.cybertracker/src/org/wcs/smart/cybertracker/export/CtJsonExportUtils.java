@@ -79,6 +79,11 @@ import org.wcs.smart.util.UuidUtils;
 public class CtJsonExportUtils {
 	
 	/**
+	 * The SMART JSON format version
+	 */
+	public static final String SMART_JSON_VERSION = "7.0"; //$NON-NLS-1$
+	
+	/**
 	 * Distance Direction option for profile file
 	 */
 	private static final String DISTANCE_DIRECTION_OP = "RECORD_DISTANCE_BEARING"; //$NON-NLS-1$
@@ -140,6 +145,8 @@ public class CtJsonExportUtils {
 	public static final String JSON_SERVER_USERNAME_KEY= "USERNAME"; //$NON-NLS-1$
 	public static final String JSON_SERVER_FREQUENCY_KEY= "FREQUENCY_MIN"; //$NON-NLS-1$
 	public static final String JSON_SERVER_PROTOCOL_KEY= "PROTOCOL"; //$NON-NLS-1$
+	
+	public static final String JSON_SMART_VERSION_KEY= "smart_version"; //$NON-NLS-1$
 	
 	/**
 	 * JSON options property key that identifies the type
@@ -222,7 +229,7 @@ public class CtJsonExportUtils {
 		if (version != null) projectJSON.put("version",  version); //$NON-NLS-1$ 
 		projectJSON.put("creation_date",new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date())); //$NON-NLS-1$ //$NON-NLS-2$
 		projectJSON.put("logo", (logoFile == null || !Files.exists(logoFile)) ? null : logoFile.getFileName().toString()); //$NON-NLS-1$
-		
+		projectJSON.put(JSON_SMART_VERSION_KEY, SMART_JSON_VERSION);
 		if(projectAdditions != null) {
 			for (Entry<String, Object> e : projectAdditions.entrySet()) {
 				projectJSON.put(e.getKey(), e.getValue());
