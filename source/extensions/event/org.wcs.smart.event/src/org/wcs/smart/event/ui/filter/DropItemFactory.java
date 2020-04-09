@@ -96,6 +96,11 @@ public enum DropItemFactory {
 					}
 				}
 				if (found == null) {
+					if (attributeKey.equalsIgnoreCase(ANY_ATTRIBUTE.getKeyId())) {
+						found = ANY_ATTRIBUTE;
+					}
+				}
+				if (found == null) {
 					throw new Exception(MessageFormat.format(Messages.DropItemFactory_ListItemNotFound, ff.getValue().toString(), aa.getName())) ;
 				}
 				di.initializeData(found);

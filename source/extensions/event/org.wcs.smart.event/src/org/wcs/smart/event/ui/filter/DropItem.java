@@ -22,6 +22,9 @@
 package org.wcs.smart.event.ui.filter;
 
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
@@ -38,6 +41,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.event.EventPlugIn;
 import org.wcs.smart.event.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
@@ -72,6 +76,8 @@ public abstract class DropItem {
 	public void createWidget(DefinitionPanel panel, Composite parent){
 		this.targetPanel = panel;
 		widget = createCompositeInternal(parent);
+	
+		SmartUiUtils.makeTransparent(widget);
 	}
 	
 	/**
