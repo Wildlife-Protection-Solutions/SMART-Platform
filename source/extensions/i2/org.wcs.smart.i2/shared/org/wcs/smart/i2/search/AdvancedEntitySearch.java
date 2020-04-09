@@ -323,11 +323,11 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 				sb.append(columnName);
 				sb.append(" = true WHERE entity_uuid IN (");  //$NON-NLS-1$
 					
-				String atype = bits[1];
+				IntelAttribute.AttributeType atype = IntelAttribute.AttributeType.parse(bits[1]);
 			
 				where.append(" " + columnName +" ");  //$NON-NLS-1$//$NON-NLS-2$
 				
-				if (atype.equalsIgnoreCase(IntelAttribute.AttributeType.BOOLEAN.key)){
+				if (atype == IntelAttribute.AttributeType.BOOLEAN){
 					sb.append("SELECT t.entity_uuid");  //$NON-NLS-1$
 					sb.append(" FROM qt_temp t join smart.i_entity_attribute_value v on t.entity_uuid = v.entity_uuid ");  //$NON-NLS-1$
 					sb.append(" join smart.i_attribute a on a.uuid = v.attribute_uuid and a.keyId = :attributeKey ");  //$NON-NLS-1$
@@ -338,7 +338,7 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 						.setParameter("attributeKey", attributeKey)  //$NON-NLS-1$
 						.executeUpdate();
 						
-				}else if (bits[1].equalsIgnoreCase(IntelAttribute.AttributeType.TEXT.key)){
+				}else if (atype == IntelAttribute.AttributeType.TEXT){
 					sb.append("SELECT t.entity_uuid"); //$NON-NLS-1$
 					sb.append(" FROM qt_temp t join smart.i_entity_attribute_value v on t.entity_uuid = v.entity_uuid ");  //$NON-NLS-1$
 					sb.append(" join smart.i_attribute a on a.uuid = v.attribute_uuid and a.keyId = :attributeKey ");  //$NON-NLS-1$
@@ -364,7 +364,7 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 						.setParameter("value", value)  //$NON-NLS-1$
 						.executeUpdate();
 						
-				}else if (bits[1].equalsIgnoreCase(IntelAttribute.AttributeType.NUMERIC.key)){
+				}else if (atype == IntelAttribute.AttributeType.NUMERIC){
 					sb.append("SELECT t.entity_uuid"); //$NON-NLS-1$
 					sb.append(" FROM qt_temp t join smart.i_entity_attribute_value v on t.entity_uuid = v.entity_uuid "); //$NON-NLS-1$
 					sb.append(" join smart.i_attribute a on a.uuid = v.attribute_uuid and a.keyId = :attributeKey "); //$NON-NLS-1$
@@ -378,7 +378,7 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 						.setParameter("value", Double.parseDouble(qbits[2]))  //$NON-NLS-1$
 						.executeUpdate(); 
 			
-				}else if (bits[1].equalsIgnoreCase(IntelAttribute.AttributeType.DATE.key)){
+				}else if (atype == IntelAttribute.AttributeType.DATE){
 					sb.append("SELECT t.entity_uuid"); //$NON-NLS-1$
 					sb.append(" FROM qt_temp t join smart.i_entity_attribute_value v on t.entity_uuid = v.entity_uuid "); //$NON-NLS-1$
 					sb.append(" join smart.i_attribute a on a.uuid = v.attribute_uuid and a.keyId = :attributeKey "); //$NON-NLS-1$
@@ -409,7 +409,7 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 						.setParameter("date2", cal.getTime()) //$NON-NLS-1$
 						.setParameter("attributeKey", attributeKey) //$NON-NLS-1$
 						.executeUpdate();
-				}else if (bits[1].equalsIgnoreCase(IntelAttribute.AttributeType.LIST.key)){
+				}else if (atype == IntelAttribute.AttributeType.LIST){
 						
 					sb.append("SELECT t.entity_uuid"); //$NON-NLS-1$
 					sb.append(" FROM qt_temp t join smart.i_entity_attribute_value v on t.entity_uuid = v.entity_uuid ");  //$NON-NLS-1$

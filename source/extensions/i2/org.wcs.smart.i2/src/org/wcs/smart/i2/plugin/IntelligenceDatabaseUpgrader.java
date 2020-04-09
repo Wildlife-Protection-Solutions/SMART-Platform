@@ -359,8 +359,7 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 				"ALTER TABLE smart.i_relationship_type ADD COLUMN target_profile_uuid char(16) for bit data", //$NON-NLS-1$
 				"ALTER TABLE smart.i_entity_type ADD COLUMN dm_attribute_uuid char(16) for bit data",  //$NON-NLS-1$
 				"ALTER TABLE smart.i_entity_type ADD CONSTRAINT i_et_dmatt_fk FOREIGN KEY (dm_attribute_uuid) REFERENCES smart.dm_attribute(uuid) ON UPDATE RESTRICT ON DELETE NO ACTION DEFERRABLE INITIALLY IMMEDIATE;", //$NON-NLS-1$
-				
-				
+				"ALTER TABLE smart.i_entity_type ADD COLUMN dm_active_filter varchar(32000)", //$NON-NLS-1$
 				
 				"update smart.i_entity set profile_uuid = (select b.uuid from smart.I_PROFILE_CONFIG b where b.ca_uuid = smart.i_entity.ca_uuid)", //$NON-NLS-1$
 				"update smart.i_record set profile_uuid = (select b.uuid from smart.I_PROFILE_CONFIG b where b.ca_uuid = smart.i_record.ca_uuid)", //$NON-NLS-1$
@@ -368,7 +367,6 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 				"update smart.i_relationship_type set src_profile_uuid = (select b.uuid from smart.I_PROFILE_CONFIG b where b.ca_uuid = smart.i_relationship_type.ca_uuid)", //$NON-NLS-1$
 				"update smart.i_relationship_type set target_profile_uuid = src_profile_uuid", //$NON-NLS-1$
 				
-
 				"ALTER TABLE smart.i_entity ALTER COLUMN profile_uuid set not null", //$NON-NLS-1$
 				"ALTER TABLE smart.i_entity ADD CONSTRAINT i_entity_profileuuid_fk FOREIGN KEY (profile_uuid) REFERENCES smart.i_profile_config (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 				"ALTER TABLE smart.i_record ALTER COLUMN profile_uuid set not null", //$NON-NLS-1$

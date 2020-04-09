@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.wcs.smart.i2.query.Operator;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
+import org.wcs.smart.i2.ui.views.query.dropitem.DropItemFactory;
 import org.wcs.smart.i2.ui.views.query.dropitem.ErrorDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.IDefinitionPanel;
 import org.wcs.smart.i2.ui.views.query.dropitem.OptionDropItem;
@@ -121,7 +122,7 @@ public class EntitySearchDropPanel implements IDefinitionPanel {
 			if (item instanceof DropItem){
 				DropItem it = (DropItem)item;
 				query.append(it.asQueryPart());
-				query.append("|"); //$NON-NLS-1$
+				query.append(DropItemFactory.PART_SEPARATOR); 
 			}
 		}
 		

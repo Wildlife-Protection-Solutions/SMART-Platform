@@ -75,6 +75,13 @@ public class IntelAttribute extends NamedKeyItem{
 			IIntelligenceLabelProvider provider = SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class);
 			return provider.getLabel(this, l);
 		}
+		
+		public static AttributeType parse(String key) {
+			for (AttributeType at : AttributeType.values()) {
+				if (at.key.equalsIgnoreCase(key)) return at;
+			}
+			throw new RuntimeException("Attribute type with key " + key + " not supported."); //$NON-NLS-1$ //$NON-NLS-2$
+		}
 	}
 	
 	private AttributeType type;

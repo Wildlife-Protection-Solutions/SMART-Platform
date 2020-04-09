@@ -86,12 +86,11 @@ public class IntelAttributeFilter implements IQueryFilter, IColumnIdentifierProv
 	}
 	
 	private static IntelAttribute.AttributeType parseType(String attributeType){
-		for (IntelAttribute.AttributeType t : IntelAttribute.AttributeType.values()){
-			if (t.key.equalsIgnoreCase(attributeType)){
-				return t;
-			}
+		try {
+			return IntelAttribute.AttributeType.parse(attributeType);
+		}catch(RuntimeException ex) {
+			throw new IllegalStateException(attributeType + " is not a valid attribute type identifier"); //$NON-NLS-1$
 		}
-		throw new IllegalStateException(attributeType + " is not a valid attribute type identifier"); //$NON-NLS-1$
 	}
 
 

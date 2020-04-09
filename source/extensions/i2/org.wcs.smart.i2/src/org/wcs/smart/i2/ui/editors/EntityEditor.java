@@ -241,6 +241,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 	private Composite compAttachments;
 	private Text txtScratchpad;
 	private Text txtDmListItem;
+	private Text txtDmActive;
 	private SashForm mainSash;
 	private int[] mainSashMinSize;
 	
@@ -535,6 +536,8 @@ public class EntityEditor extends EditorPart implements MapPart{
 					entity.getDmAttributeListItem().setName(entity.getIdAttributeAsText());
 					s.saveOrUpdate(entity.getDmAttributeListItem());
 				}
+				
+				entity.updateActiveValue();
 				s.getTransaction().commit();
 				clearLists();
 			}catch (Exception ex){
@@ -549,8 +552,10 @@ public class EntityEditor extends EditorPart implements MapPart{
 		if (txtDmListItem != null) {
 			if (entity.getDmAttributeListItem() != null) {
 				txtDmListItem.setText(MessageFormat.format("{0} [{1}]", entity.getDmAttributeListItem().getName(), entity.getDmAttributeListItem().getKeyId())); //$NON-NLS-1$
+				txtDmActive.setText(entity.getDmAttributeListItem().getIsActive() ? SmartLabelProvider.BOOLEAN_TRUE_LABEL : SmartLabelProvider.BOOLEAN_FALSE_LABEL);
 			}else {
 				txtDmListItem.setText(ERROR_LINK_NOT_FOUND);
+				txtDmActive.setText(ERROR_LINK_NOT_FOUND);
 			}
 		}
 
@@ -2058,17 +2063,12 @@ public class EntityEditor extends EditorPart implements MapPart{
 		((GridLayout)outer.getLayout()).marginHeight = 0;
 		outer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-//		Color c = toolkit.getColors().getColor(IFormColors.TB_BG);
-//		Color e2 = new Color(getSite().getShell().getDisplay(), ColorUtil.blend(c.getRGB(), new RGB(255,255,255),50));
-//		
-		
 		SectionTabHeader tabList = new SectionTabHeader(groupHeaders.toArray(new String[groupHeaders.size()]), outer, toolkit);
 		tabList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		Composite tabPart = toolkit.createComposite(outer, SWT.NONE);
 		tabPart.setLayout(new StackLayout());
 		tabPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
-//		tabPart.addDisposeListener((e) ->  e2.dispose());
 		
 		Composite[] parts = new Composite[groupHeaders.size()];
 		int counter = 0;
@@ -2090,7 +2090,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 				txt.setEditable(false);
 				txt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				if (entity.getDmAttributeListItem() != null) {
-					txt.setText( entity.getEntityType().getDmAttribute().getName() );
+					txt.setText( MessageFormat.format("{0} [{1}]",entity.getEntityType().getDmAttribute().getName(), entity.getEntityType().getDmAttribute().getKeyId() )); //$NON-NLS-1$
 				}else {
 					txt.setText(ERROR_LINK_NOT_FOUND);
 				}
@@ -2104,6 +2104,17 @@ public class EntityEditor extends EditorPart implements MapPart{
 					txtDmListItem.setText(MessageFormat.format("{0} [{1}]", entity.getDmAttributeListItem().getName(), entity.getDmAttributeListItem().getKeyId())); //$NON-NLS-1$
 				}else {
 					txtDmListItem.setText(ERROR_LINK_NOT_FOUND);
+				}
+				
+				toolkit.createLabel(part, Messages.EntityEditor_ActiveLabel);
+				
+				txtDmActive = toolkit.createText(part, ""); //$NON-NLS-1$
+				txtDmActive.setEditable(false);
+				txtDmActive.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				if (entity.getDmAttributeListItem() != null) {
+					txtDmActive.setText( entity.getDmAttributeListItem().getIsActive() ? SmartLabelProvider.BOOLEAN_TRUE_LABEL : SmartLabelProvider.BOOLEAN_FALSE_LABEL );
+				}else {
+					txtDmActive.setText(ERROR_LINK_NOT_FOUND);
 				}
 				
 				parts[counter++] = part;

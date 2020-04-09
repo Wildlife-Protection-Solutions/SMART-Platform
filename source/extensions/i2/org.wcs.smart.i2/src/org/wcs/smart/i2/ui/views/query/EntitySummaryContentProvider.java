@@ -278,7 +278,9 @@ public class EntitySummaryContentProvider implements ITreeContentProvider{
 			}else if (item instanceof IntelAttribute) {
 				return AttributeLabelProvider.getImageDescriptor(((IntelAttribute) item).getType());
 			}else if (item instanceof IntelEntityType) {
-				return ImageDescriptor.createFromImage( Resources.INSTANCE.getImage( (IntelEntityType) item) );
+				Image x = Resources.INSTANCE.getImage( (IntelEntityType) item);
+				if (x == null) return null;
+				return ImageDescriptor.createFromImage( x );
 			}else if (item == SubRootNode.CA) {
 				return SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.DATA_MODEL_ICON);
 			}else if (item == SubRootNode.ENTITY_TYPE_ITEM) {

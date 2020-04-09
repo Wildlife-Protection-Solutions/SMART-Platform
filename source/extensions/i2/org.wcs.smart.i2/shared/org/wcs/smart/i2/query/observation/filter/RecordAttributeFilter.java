@@ -82,12 +82,11 @@ public class RecordAttributeFilter implements IQueryFilter, IColumnIdentifierPro
 	
 	private static IntelAttribute.AttributeType parseType(String attributeType){
 		if (attributeType.equalsIgnoreCase("entity")) return null; //$NON-NLS-1$
-		for (IntelAttribute.AttributeType t : IntelAttribute.AttributeType.values()){
-			if (t.key.equalsIgnoreCase(attributeType)){
-				return t;
-			}
+		try {
+			return IntelAttribute.AttributeType.parse(attributeType);
+		}catch (RuntimeException re) {
+			throw new IllegalStateException(attributeType + " is not a valid attribute type identifier"); //$NON-NLS-1$
 		}
-		throw new IllegalStateException(attributeType + " is not a valid attribute type identifier"); //$NON-NLS-1$
 	}
 
 

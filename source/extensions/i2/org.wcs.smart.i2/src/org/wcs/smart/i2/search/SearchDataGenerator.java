@@ -451,12 +451,18 @@ public class SearchDataGenerator {
 		for (int i = 0; i < numberOfEntities; i ++){
 			monitor.subTask("entities:" + i + "/" + numberOfEntities);
 			IntelEntity entity = new IntelEntity();
+			
 			entity.setAttributes(new ArrayList<IntelEntityAttributeValue>());
 			entity.setConservationArea(SmartDB.getCurrentConservationArea());
 			
 			IntelEntityType type  = types.get((int)Math.round(Math.random() * (types.size()-1)));
+			type = session.get(IntelEntityType.class, type.getUuid());
+			while (type.getProfiles().isEmpty()) {
+				type  = types.get((int)Math.round(Math.random() * (types.size()-1)));
+				type = session.get(IntelEntityType.class, type.getUuid());
+			}
 			entity.setEntityType(type);
-			
+			entity.setProfile(type.getProfiles().iterator().next().getProfile());
 			session.save(entity);
 			if (i % 10 == 0) {
 				session.flush();

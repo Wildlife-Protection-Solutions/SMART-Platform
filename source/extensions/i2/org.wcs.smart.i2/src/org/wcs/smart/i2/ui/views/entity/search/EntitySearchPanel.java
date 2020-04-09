@@ -86,11 +86,10 @@ import org.wcs.smart.i2.ui.AttributeLabelProvider;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.views.query.dropitem.DateDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
+import org.wcs.smart.i2.ui.views.query.dropitem.DropItemFactory;
 import org.wcs.smart.i2.ui.views.query.dropitem.ErrorDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.OptionDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.TextBoxDropItem;
-import org.wcs.smart.i2.ui.views.query.dropitem.TextBoxDropItem.InputType;
-import org.wcs.smart.i2.ui.views.query.dropitem.TextDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.TextOperatorDropItem;
 import org.wcs.smart.ui.SmartShellDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -234,7 +233,7 @@ public abstract class EntitySearchPanel extends Composite {
 		
 		List<DropItem> toAdd = new ArrayList<DropItem>();
 		
-		String[] parts = searchString.split("\\|"); //$NON-NLS-1$
+		String[] parts = searchString.split("\\" + DropItemFactory.PART_SEPARATOR); //$NON-NLS-1$
 		
 		for(String p : parts){
 			if (p.equalsIgnoreCase(Operator.BRACKET_OPEN.getKey())){
@@ -252,7 +251,7 @@ public abstract class EntitySearchPanel extends Composite {
 				di.setInitialValue(Operator.OR.getKey());
 				toAdd.add(di);
 			}else if (p.startsWith(SystemAttributeFilter.SA_KEY)){
-				String[] bits = p.split(" ")[0].split(":"); //$NON-NLS-1$ //$NON-NLS-2$
+				String[] bits = p.split(" ")[0].split(DropItemFactory.ITEM_SEPARATOR); //$NON-NLS-1$ 
 				SystemAttributeFilter.SystemAttribute sa = SystemAttributeFilter.SystemAttribute.valueOf(bits[2].toUpperCase(Locale.ROOT));
 				if (sa == null) {
 					toAdd.add(new ErrorDropItem(MessageFormat.format(Messages.EntitySearchPanel_SystemFilterNotSupported, bits[2])));
@@ -276,8 +275,8 @@ public abstract class EntitySearchPanel extends Composite {
 				String entityTypeKey = p.split("=")[1].trim(); //$NON-NLS-1$
 				toAdd.add(createEntityTypeDropItem(entityTypeKey));	
 				
-			}else if (p.startsWith(AdvancedEntitySearch.ATTRIBUTE_KEY + ":")){ //$NON-NLS-1$
-				String[] bits = p.split(" ")[0].split(":"); //$NON-NLS-1$ //$NON-NLS-2$
+			}else if (p.startsWith(AdvancedEntitySearch.ATTRIBUTE_KEY + DropItemFactory.ITEM_SEPARATOR)){ 
+				String[] bits = p.split(" ")[0].split(DropItemFactory.ITEM_SEPARATOR); //$NON-NLS-1$ 
 				String key = bits[2];
 				IntelAttribute ia = null;
 				try(Session session = HibernateManager.openSession()){
@@ -565,7 +564,7 @@ public abstract class EntitySearchPanel extends Composite {
 	}
 	
 	private DropItem createSystemAttributeDropItem(SystemAttributeFilter.SystemAttribute attribute){
-		String key = SystemAttributeFilter.SA_KEY + ":" + IntelAttribute.AttributeType.DATE + ":" + attribute.name().toLowerCase(Locale.ROOT);  //$NON-NLS-1$ //$NON-NLS-2$
+		String key = SystemAttributeFilter.SA_KEY + DropItemFactory.ITEM_SEPARATOR + IntelAttribute.AttributeType.DATE + DropItemFactory.ITEM_SEPARATOR + attribute.name().toLowerCase(Locale.ROOT);
 		return new DateDropItem(getName(attribute), key, true);
 	}
 	
@@ -574,35 +573,7 @@ public abstract class EntitySearchPanel extends Composite {
 	}
 	
 	private DropItem createAttributeDropItem(IntelAttribute a){
-		DropItem di = null;
-		String key = AdvancedEntitySearch.ATTRIBUTE_KEY + ":" + a.getType().key + ":" + a.getKeyId(); //$NON-NLS-1$ //$NON-NLS-2$
-		switch(a.getType()){
-		case BOOLEAN:
-			di = new TextDropItem(a.getName(), key);
-			break;
-		case DATE:
-			di = new DateDropItem(a.getName(), key, true);
-			break;
-		case LIST:
-			String[] names = new String[a.getAttributeList().size()];
-			String[] keys = new String[a.getAttributeList().size()];
-			for (int i = 0; i < a.getAttributeList().size(); i ++){
-				names[i] = a.getAttributeList().get(i).getName();
-				keys[i] = a.getAttributeList().get(i).getKeyId();
-			}
-			di = new OptionDropItem(a.getName(), key, names, keys, true);
-			break;
-		case NUMERIC:
-			di = new TextBoxDropItem(a.getName(), key, InputType.NUMERIC, true);
-			break;
-		case TEXT:
-			di = new TextBoxDropItem(a.getName(), key, InputType.TEXT, true);
-			break;
-		default:
-			break;
-		
-		}
-		return di;
+		return DropItemFactory.createAttributeDropItem(a);
 	}
 	
 	private DropItem createEntityTypeDropItem(String entityTypeKey){

@@ -69,9 +69,11 @@ import org.wcs.smart.i2.query.observation.filter.NotFilter;
 import org.wcs.smart.i2.query.observation.filter.RecordAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.ValuePart;
+import org.wcs.smart.i2.search.AdvancedEntitySearch;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.views.query.AttributeTreeFilterItem;
 import org.wcs.smart.i2.ui.views.query.SystemAttributeFilterItem;
+import org.wcs.smart.i2.ui.views.query.dropitem.TextBoxDropItem.InputType;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.UuidUtils;
 
@@ -83,6 +85,9 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class DropItemFactory {
 
+	public static final String PART_SEPARATOR = "|"; //$NON-NLS-1$
+	public static final String ITEM_SEPARATOR = ":"; //$NON-NLS-1$
+	
 	public static final String ANY_LABEL = SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(IntelQueryColumnProvider.ANY_ITEM, Locale.getDefault());
 	
 	public static List<DropItem> generateDropItems(IQueryFilter filter, Session session){
@@ -404,7 +409,7 @@ public class DropItemFactory {
 	
 	public List<DropItem> generateDropItem(NotFilter filter){
 		ArrayList<DropItem> items = new ArrayList<DropItem>();
-		items.add(new TextOperatorDropItem(Operator.NOT));
+		items.add(createNotDropItem());
 		items.addAll(generateDropItems(filter.getFilter()));
 		return items;
 	}
@@ -643,5 +648,41 @@ public class DropItemFactory {
 			return Collections.singletonList(item);
 		}
 		return Collections.emptyList();
+	}
+	
+	public static DropItem createAttributeDropItem(IntelAttribute a){
+		DropItem di = null;
+		String key = AdvancedEntitySearch.ATTRIBUTE_KEY + ":" + a.getType().key + ":" + a.getKeyId(); //$NON-NLS-1$ //$NON-NLS-2$
+		switch(a.getType()){
+		case BOOLEAN:
+			di = new TextDropItem(a.getName(), key);
+			break;
+		case DATE:
+			di = new DateDropItem(a.getName(), key, true);
+			break;
+		case LIST:
+			String[] names = new String[a.getAttributeList().size()];
+			String[] keys = new String[a.getAttributeList().size()];
+			for (int i = 0; i < a.getAttributeList().size(); i ++){
+				names[i] = a.getAttributeList().get(i).getName();
+				keys[i] = a.getAttributeList().get(i).getKeyId();
+			}
+			di = new OptionDropItem(a.getName(), key, names, keys, true);
+			break;
+		case NUMERIC:
+			di = new TextBoxDropItem(a.getName(), key, InputType.NUMERIC, true);
+			break;
+		case TEXT:
+			di = new TextBoxDropItem(a.getName(), key, InputType.TEXT, true);
+			break;
+		default:
+			break;
+		
+		}
+		return di;
+	}
+	
+	public static DropItem createNotDropItem() {
+		return new TextOperatorDropItem(Operator.NOT);
 	}
 }

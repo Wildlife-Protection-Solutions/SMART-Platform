@@ -87,6 +87,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.SmartPlugIn;
@@ -95,7 +96,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.common.control.IconComposite;
-import org.wcs.smart.common.control.NameKeyDialog;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -174,7 +175,7 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 	@Override
 	protected Point getInitialSize() {
 		Point p = super.getInitialSize();
-		return new Point(p.x,650);
+		return new Point(p.x,680);
 	}
 	
 	/*
@@ -198,146 +199,203 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 		super.cancelPressed();
 	}
 	
+	private boolean attributesModified = false;
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	protected void okPressed() {
 		boolean isNew = type.getUuid() == null;
-		boolean attributesModified = false;
-
+		
+		//validate the data model filter ensure all attributes are valid
+		String dmFilter = type.getActiveFilter();
+		//parse and make sure attributes exist
+		String error = EntityTypeManager.INSTANCE.validateDmAttributeFilter(dmFilter, attributeList);
+		if (error != null) {
+			MessageDialog.openInformation(getShell(), Messages.EntityTypeDialog_DialogFilter, error);
+			return;
+		}
+		
+		attributesModified = false;
 		Set<IntelProfile> newProfiles = new HashSet<>();
 		for (Object x : tblProfiles.getCheckedElements()) newProfiles.add((IntelProfile)x);
 		
-		
-		try(Session s = HibernateManager.openSession()){
-			
-			if (!isNew && !newProfiles.isEmpty()) {
-				String hql = "SELECT count(*) FROM IntelEntity WHERE entityType = :type and profile NOT IN (:profiles)"; //$NON-NLS-1$
-				Long cnt = (Long) s.createQuery(hql).setParameter("type", type).setParameterList("profiles", newProfiles).uniqueResult(); //$NON-NLS-1$ //$NON-NLS-2$
-				if (cnt > 0) {
-					throw new Exception(Messages.EntityTypeDialog_CannotDeleteProfile);
-				}
-			}
-			
-			s.beginTransaction();
-			try {
-				if (type.getDmAttribute() != null && type.getDmAttribute().getUuid() == null) {
-					s.saveOrUpdate(type.getDmAttribute());
-					
-					s.saveOrUpdate(type);
-					type.getDmAttribute().setAttributeList(new ArrayList<>());
-					//create a new list item for all existing entities
-					if (type.getUuid() != null) {
-						List<IntelEntity> entity = QueryFactory.buildQuery(s, IntelEntity.class, new Object[] {"entityType", type}).list(); //$NON-NLS-1$
-						for (IntelEntity ie : entity) {
-							ie.createDataModelItem(s);
-						}
-					}					
-				}else {
-					s.saveOrUpdate(type);
-				}
-				
-				if (type.getDmAttribute() == null) {
-					s.createQuery("UPDATE IntelEntity SET dmAttributeListItem = null WHERE entityType = :type") //$NON-NLS-1$
-						.setParameter("type", type) //$NON-NLS-1$
-						.executeUpdate();
-				}
-				Set<IntelProfileEntityType> currentprofiles = new HashSet<>(type.getProfiles());
-				List<IntelProfile> profiles = (List<IntelProfile>) tblProfiles.getInput();
-				
-				for (IntelProfile ip : profiles) {
-					IntelProfileEntityType mp = new IntelProfileEntityType();
-					mp.setProfile(ip);
-					mp.setEntityType(type);
-					
-					if (tblProfiles.getChecked(ip)) {
-						if (!type.getProfiles().contains(mp)) type.getProfiles().add(mp);
-					}else {
-						if (type.getProfiles().contains(mp)) {
-							IntelProfile pp = s.get(IntelProfile.class, ip.getUuid());
-							pp.getEntityTypes().remove(mp);
-							type.getProfiles().remove(mp);
-							//s.delete(mp);
-						}
-					}
-				}
-				s.flush();
-				
-				List<IntelRecordSource> sources = QueryFactory.buildQuery(s, IntelRecordSource.class,"conservationArea", type.getConservationArea()).list(); //$NON-NLS-1$
-				String v = ProfilesManager.INSTANCE.validateRecords(sources);
-				if (v != null) {
-					type.setProfiles(currentprofiles);
-					throw new Exception(v);
-				}
-				
-				//set order and update groups
-				for (int i = 0; i < groups.size(); i ++){
-					groups.get(i).setOrder(i);
-					s.saveOrUpdate(groups.get(i));
-				}
-				
-				for (IntelEntityTypeAttribute a : attributeList){
-					if (!type.getAttributes().contains(a)){
-						//new items 
-						type.getAttributes().add(a);
-						attributesModified = true;
-					}
-				}
-				
-				List<IntelEntityTypeAttribute> toDelete = new ArrayList<IntelEntityTypeAttribute>();
-				for (IntelEntityTypeAttribute a : type.getAttributes()){
-					if (!attributeList.contains(a)){
-						//delete any entity attribute value associations
-						Query<?> qDelete = s.createQuery("DELETE FROM IntelEntityAttributeValue WHERE id.attribute = :att AND id.entity IN ( FROM IntelEntity e WHERE e.entityType = :entityType ) "); //$NON-NLS-1$
-						qDelete.setParameter("att", a.getAttribute()); //$NON-NLS-1$
-						qDelete.setParameter("entityType", type); //$NON-NLS-1$
-						qDelete.executeUpdate();
-						toDelete.add(a);
-						attributesModified = true;
-					}
-				}
-				type.getAttributes().removeAll(toDelete);
-				
-				HashMap<IntelEntityTypeAttributeGroup, Integer> orderCnt = new HashMap<>();
-				for (IntelEntityTypeAttribute a : attributeList){
-					Integer x = orderCnt.get(a.getAttributeGroup());
-					if (x == null){
-						x = 0;
-					}
-					x++;
-					orderCnt.put(a.getAttributeGroup(), x);
-					for (IntelEntityTypeAttribute aa : type.getAttributes()){
-						if (aa.equals(a)){
-							aa.setOrder(x);
-							break;
-						}
-					}
-					a.setOrder(x);
-				}
-				Collections.sort(type.getAttributes(), (a,b) -> Integer.compare(a.getOrder(), b.getOrder()));
-				Collections.sort(groups, (a,b) -> Integer.compare(a.getOrder(), b.getOrder()));
-				
-				//remove groups
-				List<IntelEntityTypeAttributeGroup> currentGroups = 
-						QueryFactory.buildQuery(s,IntelEntityTypeAttributeGroup.class, "entityType", type) //$NON-NLS-1$
-						.getResultList();
-				for (IntelEntityTypeAttributeGroup g : currentGroups){
-					if (!groups.contains(g)){
-						s.delete(g);
-					}
-				}
-				s.flush();
-				s.getTransaction().commit();
-				
+		List<IntelProfile> profiles = (List<IntelProfile>) tblProfiles.getInput();
 
-				
-				if (isNew && type.getBirtTemplate() == null) {
-					//create BIRT Template -> 
-					//this can be slow; do it in a progress monitor dialog
-					ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
-					pmd.run(false, false, new IRunnableWithProgress() {
-						@Override
-						public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-							try {
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+		
+		try {
+			pmd.run(true, false, new IRunnableWithProgress() {
+
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					SubMonitor sub = SubMonitor.convert(monitor);
+					
+					sub.beginTask(Messages.EntityTypeDialog_SaveTypeTask, 2);
+					boolean filterDiff = false;
+					try(Session s = HibernateManager.openSession()){
+						
+						if (!isNew && !newProfiles.isEmpty()) {
+							String hql = "SELECT count(*) FROM IntelEntity WHERE entityType = :type and profile NOT IN (:profiles)"; //$NON-NLS-1$
+							Long cnt = (Long) s.createQuery(hql).setParameter("type", type).setParameterList("profiles", newProfiles).uniqueResult(); //$NON-NLS-1$ //$NON-NLS-2$
+							if (cnt > 0) {
+								throw new Exception(Messages.EntityTypeDialog_CannotDeleteProfile);
+							}
+							
+							if (type.getDmAttribute() != null) {
+								String activeFilter = (String) s.createQuery("SELECT activeFilter FROM IntelEntityType WHERE uuid = :uuid") //$NON-NLS-1$
+									.setParameter("uuid",  type.getUuid()) //$NON-NLS-1$
+									.uniqueResult();
+							
+								if ((type.getActiveFilter() == null && activeFilter == null) ||
+									(type.getActiveFilter() != null && activeFilter != null && type.getActiveFilter().equals(activeFilter))){
+									filterDiff = false;
+								}else {
+									filterDiff = true;
+								}
+							}
+						}
+						
+						s.beginTransaction();
+						try {
+							if (type.getDmAttribute() != null && type.getDmAttribute().getUuid() == null) {
+								s.saveOrUpdate(type.getDmAttribute());
+								s.saveOrUpdate(type);
+								type.getDmAttribute().setAttributeList(new ArrayList<>());
+								//create a new list item for all existing entities
+								if (type.getUuid() != null) {
+									Long cnt = QueryFactory.buildCountQuery(s, IntelEntity.class, 
+											new Object[] {"entityType", type}); //$NON-NLS-1$
+									
+									ScrollableResults scroll = s.createQuery("FROM IntelEntity WHERE entityType = :type") //$NON-NLS-1$
+											.setParameter("type",  type).scroll(); //$NON-NLS-1$
+									
+									
+									sub.setWorkRemaining(cnt.intValue()+1);
+									while(scroll.next()) {
+										IntelEntity ie = (IntelEntity)scroll.get(0);
+										ie.createDataModelItem(s);
+										sub.split(1);
+										s.flush();
+									}
+								}
+							}else if (type.getDmAttribute() != null && filterDiff) {
+								
+								s.saveOrUpdate(type);
+								
+								//recompute active state for all entities
+								Long cnt = QueryFactory.buildCountQuery(s, IntelEntity.class, 
+										new Object[] {"entityType", type}); //$NON-NLS-1$
+								sub.setWorkRemaining(cnt.intValue()+1);
+								ScrollableResults scroll = s.createQuery("FROM IntelEntity WHERE entityType = :type") //$NON-NLS-1$
+												.setParameter("type",  type).scroll(); //$NON-NLS-1$
+								while(scroll.next()) {
+									IntelEntity ie = (IntelEntity) scroll.get(0);
+									ie.updateActiveValue();
+									s.flush();
+									sub.split(1);
+								}
+							}else {
+								sub.split(1);
+								s.saveOrUpdate(type); 
+							}
+							
+
+							
+							if (type.getDmAttribute() == null) {
+								s.createQuery("UPDATE IntelEntity SET dmAttributeListItem = null WHERE entityType = :type") //$NON-NLS-1$
+									.setParameter("type", type) //$NON-NLS-1$
+									.executeUpdate();
+							}
+							Set<IntelProfileEntityType> currentprofiles = new HashSet<>(type.getProfiles());
+							
+							for (IntelProfile ip : profiles) {
+								IntelProfileEntityType mp = new IntelProfileEntityType();
+								mp.setProfile(ip);
+								mp.setEntityType(type);
+								
+								if (newProfiles.contains(ip)) {
+									if (!type.getProfiles().contains(mp)) type.getProfiles().add(mp);
+								}else {
+									if (type.getProfiles().contains(mp)) {
+										IntelProfile pp = s.get(IntelProfile.class, ip.getUuid());
+										pp.getEntityTypes().remove(mp);
+										type.getProfiles().remove(mp);
+										//s.delete(mp);
+									}
+								}
+							}
+							s.flush();
+							
+							List<IntelRecordSource> sources = QueryFactory.buildQuery(s, IntelRecordSource.class,"conservationArea", type.getConservationArea()).list(); //$NON-NLS-1$
+							String v = ProfilesManager.INSTANCE.validateRecords(sources);
+							if (v != null) {
+								type.setProfiles(currentprofiles);
+								throw new Exception(v);
+							}
+							
+							//set order and update groups
+							for (int i = 0; i < groups.size(); i ++){
+								groups.get(i).setOrder(i);
+								s.saveOrUpdate(groups.get(i));
+							}
+							
+							for (IntelEntityTypeAttribute a : attributeList){
+								if (!type.getAttributes().contains(a)){
+									//new items 
+									type.getAttributes().add(a);
+									attributesModified = true;
+								}
+							}
+							
+							List<IntelEntityTypeAttribute> toDelete = new ArrayList<IntelEntityTypeAttribute>();
+							for (IntelEntityTypeAttribute a : type.getAttributes()){
+								if (!attributeList.contains(a)){
+									//delete any entity attribute value associations
+									Query<?> qDelete = s.createQuery("DELETE FROM IntelEntityAttributeValue WHERE id.attribute = :att AND id.entity IN ( FROM IntelEntity e WHERE e.entityType = :entityType ) "); //$NON-NLS-1$
+									qDelete.setParameter("att", a.getAttribute()); //$NON-NLS-1$
+									qDelete.setParameter("entityType", type); //$NON-NLS-1$
+									qDelete.executeUpdate();
+									toDelete.add(a);
+									attributesModified = true;
+								}
+							}
+							type.getAttributes().removeAll(toDelete);
+							
+							HashMap<IntelEntityTypeAttributeGroup, Integer> orderCnt = new HashMap<>();
+							for (IntelEntityTypeAttribute a : attributeList){
+								Integer x = orderCnt.get(a.getAttributeGroup());
+								if (x == null){
+									x = 0;
+								}
+								x++;
+								orderCnt.put(a.getAttributeGroup(), x);
+								for (IntelEntityTypeAttribute aa : type.getAttributes()){
+									if (aa.equals(a)){
+										aa.setOrder(x);
+										break;
+									}
+								}
+								a.setOrder(x);
+							}
+							Collections.sort(type.getAttributes(), (a,b) -> Integer.compare(a.getOrder(), b.getOrder()));
+							Collections.sort(groups, (a,b) -> Integer.compare(a.getOrder(), b.getOrder()));
+							
+							//remove groups
+							List<IntelEntityTypeAttributeGroup> currentGroups = 
+									QueryFactory.buildQuery(s,IntelEntityTypeAttributeGroup.class, "entityType", type) //$NON-NLS-1$
+									.getResultList();
+							for (IntelEntityTypeAttributeGroup g : currentGroups){
+								if (!groups.contains(g)){
+									s.delete(g);
+								}
+							}
+							s.flush();
+							s.getTransaction().commit();
+							
+
+							
+							if (isNew && type.getBirtTemplate() == null) {
+								//create BIRT Template -> 
 								IntelReportManager.INSTANCE.generateTemplate(type);
 								s.beginTransaction();
 								try {
@@ -345,24 +403,25 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 									s.getTransaction().commit();
 								}catch (Exception ex) {
 									throw ex;
-								}
-							}catch (Exception ex) {
-								throw new InvocationTargetException(ex);
+								}								
 							}
+						}catch (Exception ex){
+							if (s.getTransaction().isActive())s.getTransaction().rollback();
+							Intelligence2PlugIn.displayLog(Messages.EntityTypeDialog_SaveError +ex.getMessage(), ex);
+							return;
 						}
-					});
-					
+					}catch (Exception ex){
+						Intelligence2PlugIn.displayLog(Messages.EntityTypeDialog_SaveError +ex.getMessage(), ex);
+						return;
+					}
 				}
 				
-			}catch (Exception ex){
-				if (s.getTransaction().isActive())s.getTransaction().rollback();
-				Intelligence2PlugIn.displayLog(Messages.EntityTypeDialog_SaveError +ex.getMessage(), ex);
-				return;
-			}
-		}catch (Exception ex){
+			});
+		} catch (Exception ex) {
 			Intelligence2PlugIn.displayLog(Messages.EntityTypeDialog_SaveError +ex.getMessage(), ex);
 			return;
 		}
+		
 		if (isNew){
 			broker.send(IntelEvents.ENTITY_TYPE_NEW, type);
 			btnEditTemplate.setEnabled(true);
@@ -491,12 +550,14 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 		
 		l = new Label(parent, SWT.NONE);
 		l.setText(Messages.EntityTypeDialog_DmAttributeLabel);
-		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		l.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
+		((GridData)l.getLayoutData()).verticalIndent = 5;
 		
 		dmAttComp = new Composite(parent, SWT.NONE);
-		dmAttComp.setLayout(new GridLayout(2, false));
+		dmAttComp.setLayout(new GridLayout(3, false));
 		((GridLayout)dmAttComp.getLayout()).marginWidth = 0;
 		((GridLayout)dmAttComp.getLayout()).marginHeight = 0;
+		((GridLayout)dmAttComp.getLayout()).verticalSpacing = 1;
 		dmAttComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 
 		createDataModelAttributeComposite();
@@ -843,12 +904,15 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 			Button btnLink = new Button(dmAttComp, SWT.PUSH);
 			btnLink.setText(Messages.EntityTypeDialog_LinkToDmAttribute);
 			btnLink.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-			btnLink.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false, 2, 1));
+			btnLink.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false, 3, 1));
 			btnLink.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 			
 			btnLink.addListener(SWT.Selection, e->addDataModelAttribute());
 		}else {
-			Text txtDmAttribute = new Text(dmAttComp, SWT.NONE);
+			Label l = new Label(dmAttComp, SWT.NONE);
+			l.setText(Messages.EntityTypeDialog_AttributeLabel);
+			
+			Text txtDmAttribute = new Text(dmAttComp, SWT.DEFAULT);
 			txtDmAttribute.setText(MessageFormat.format("{0} ({1})", type.getDmAttribute().getName(), type.getDmAttribute().getKeyId() )); //$NON-NLS-1$
 			txtDmAttribute.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 			
@@ -858,8 +922,24 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 			btnClear.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 			btnClear.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 			btnClear.addListener(SWT.Selection, e->deleteDataModelAttribute());
+			
+			l = new Label(dmAttComp, SWT.NONE);
+			l.setText(Messages.EntityTypeDialog_ActiveFilterLabel);
+			
+			Text txtDmFilter = new Text(dmAttComp, SWT.DEFAULT);
+			txtDmFilter.setText(type.getActiveFilter() == null ? "" : type.getActiveFilter() ); //$NON-NLS-1$
+			txtDmFilter.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+
+			Button btnEdit = new Button(dmAttComp, SWT.PUSH);
+			btnEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
+			btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+			btnEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+			btnEdit.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+			btnEdit.addListener(SWT.Selection, e->editDataModelAttribute());
 		}
+		dmAttComp.getParent().layout();
 		dmAttComp.layout();
+		SmartUiUtils.makeTransparent(dmAttComp);
 	}
 	private void moveAttribute(int direction){
 		for (Iterator<?> iterator = ((IStructuredSelection) treeAttributes.getSelection()).iterator(); iterator.hasNext();) {
@@ -1093,6 +1173,7 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 			}
 		}
 		type.setDmAttribute(null);
+		type.setActiveFilter(null);
 		createDataModelAttributeComposite();
 		modified();
 
@@ -1110,15 +1191,8 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 		}
 		dmAttribute.setKeyId(DataModelManager.INSTANCE.generateKey(type.getKeyId() + "id", current)); //$NON-NLS-1$
 		
-		NameKeyDialog<Attribute> dialog = new NameKeyDialog<Attribute>(getShell(), dmAttribute, current) {
-			protected String getTitle(){
-				return Messages.EntityTypeDialog_DmAttributeTitle;
-			}
-			protected void createButtonsForButtonBar(Composite parent) {
-				super.createButtonsForButtonBar(parent);
-				super.modified();
-			}
-		} ;
+		LinkDmAttributeDialog dialog = new LinkDmAttributeDialog(getShell(), dmAttribute, current, type, attributeList);
+		
 		if (dialog.open() != Window.OK) return;
 		
 		type.setDmAttribute(dmAttribute);
@@ -1126,6 +1200,24 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 		modified();
 	}
 	
+	private void editDataModelAttribute() {
+		if (type.getDmAttribute() == null) return;
+		
+		List<Attribute> current = null;
+		try(Session session = HibernateManager.openSession()){
+			current = QueryFactory.buildQuery(session, Attribute.class, 
+					new Object[] {"conservationArea", type.getConservationArea()} ).list(); //$NON-NLS-1$
+		}
+		current.remove(type.getDmAttribute());
+		type.getDmAttribute().getNames().size();
+		
+		LinkDmAttributeDialog dialog = new LinkDmAttributeDialog(getShell(), type.getDmAttribute(), current, type, attributeList);
+		
+		if (dialog.open() != Window.OK) return;
+		
+		createDataModelAttributeComposite();
+		modified();
+	}
 	
 	private void initFields(){
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
@@ -1156,6 +1248,9 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 							kid1.worked(1);
 						}
 						type.getProfiles().forEach(e->e.getProfile().getName());
+						if (type.getDmAttribute() != null) {
+							type.getDmAttribute().getNames().size();
+						}
 					}
 					monitor.subTask(Messages.EntityTypeDialog_EntityTypeSubTask);
 					entityTypeSiblings = EntityTypeManager.INSTANCE.getEntityTypes(s, SmartDB.getCurrentConservationArea());

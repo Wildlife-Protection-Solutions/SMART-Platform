@@ -22,6 +22,7 @@
 package org.wcs.smart.i2;
 
 import java.text.Collator;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -37,9 +38,18 @@ import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelProfile;
+import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
+import org.wcs.smart.i2.query.Operator;
+import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
+import org.wcs.smart.i2.search.AdvancedEntitySearch;
 import org.wcs.smart.i2.security.IntelSecurityManager;
+import org.wcs.smart.i2.ui.views.query.dropitem.DropItemFactory;
+
+import com.ibm.icu.text.MessageFormat;
 
 /**
  * Tools for managing entity types
@@ -195,5 +205,118 @@ public enum EntityTypeManager {
 		q.executeUpdate();
 		
 		session.delete(type);
+	}
+	
+	
+	/**
+	 * Validates the data model active filter string
+	 * 
+	 * @param filterString filter string
+	 * @param entityTypeAttributes valid attributes from the entity type
+	 * @return
+	 */
+	public String validateDmAttributeFilter(String filterString, List<IntelEntityTypeAttribute> entityTypeAttributes) {
+		
+		if (filterString == null || filterString.isEmpty()) return null;
+		
+		String[] parts = filterString.split("\\" + DropItemFactory.PART_SEPARATOR); //$NON-NLS-1$
+		
+		
+		boolean isnot = false;
+		Operator lastOp = null;
+		boolean first = true;
+		for (String x : parts) {
+			if (x.equals(Operator.NOT.getKey())) {
+				isnot = true;
+			}else if (x.equals(Operator.AND.getKey()) || x.equals(Operator.OR.getKey())) {
+				if (lastOp != null || isnot || first) return Messages.EntityTypeManager_InvalidFilterMsg;
+				lastOp = Operator.OR;
+			}else  {
+				if ((first && lastOp != null) || (!first && lastOp == null)) return Messages.EntityTypeManager_InvalidFilterMsg;
+				
+				first = false;
+				String[] ex = x.split(" "); //$NON-NLS-1$
+				String[] bits = ex[0].split(DropItemFactory.ITEM_SEPARATOR);
+				
+				if (!bits[0].equals(AdvancedEntitySearch.ATTRIBUTE_KEY)) return Messages.EntityTypeManager_InvalidFilterMsg;
+				
+				AttributeType type = AttributeType.parse(bits[1]);
+				
+				String akey = bits[2];
+				IntelEntityTypeAttribute ia = null;
+				for (IntelEntityTypeAttribute av : entityTypeAttributes) {
+					if (av.getAttribute().getKeyId().equalsIgnoreCase(akey)) {
+						ia = av;
+						break;
+					}
+				}
+				
+				if (ia == null) return MessageFormat.format(Messages.EntityTypeManager_AttributeNotFound, akey);
+				
+				if (type == AttributeType.BOOLEAN) {
+				}else if (type == AttributeType.DATE) {
+					if (ex.length != 5) return Messages.EntityTypeManager_InvalidDateFilter;
+					Operator op = Operator.parse(ex[1]);
+					if (op != Operator.BETWEEN && op != Operator.NOT_BETWEEN) return Messages.EntityTypeManager_InvalidDateOperator;
+
+					try {
+						(new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).parse(ex[2]);
+						(new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).parse(ex[4]);
+					}catch (Exception ex2) {
+						return Messages.EntityTypeManager_DateParseError;
+					}
+				}else if (type == AttributeType.LIST) {
+					if (ex.length != 3) return Messages.EntityTypeManager_InvalidListFilter;
+					boolean found = false;
+					for (IntelAttributeListItem li : ia.getAttribute().getAttributeList()) {
+						if (li.getKeyId().equalsIgnoreCase(ex[2])) {
+							found = true;
+							break;
+						}
+					}
+					if (!found) return MessageFormat.format(Messages.EntityTypeManager_ListItemNotFound, ex[2], ia.getAttribute().getName());
+					
+				}else if (type == AttributeType.NUMERIC) {
+					if (ex.length != 3) return Messages.EntityTypeManager_InvalidNumericFilter;
+					
+					if (ex[2].isEmpty()) return Messages.EntityTypeManager_InvalidNumberValueFilter;
+					try {
+						Double.parseDouble(ex[2]);
+					}catch (Exception e) {
+						return Messages.EntityTypeManager_NumericParseError;
+					}
+					
+					Operator op = Operator.parse(ex[1]);
+					if (op == Operator.EQUALS) {
+					}else if (op == Operator.LESSTHAN) {
+					}else if (op == Operator.LESSTHANEQUALS) {
+					}else if (op == Operator.GREATERTHAN) {
+					}else if (op == Operator.GREATERTHANEQUALS) {
+					}else if (op == Operator.NOTEQUALS) {
+					}else {
+						return Messages.EntityTypeManager_InvalidNumberOp;
+					}
+					
+					
+				}else if (type == AttributeType.TEXT) {
+					if (ex.length != 3) return Messages.EntityTypeManager_InvalidTextFilter;
+					Operator op = Operator.parse(ex[1]);
+					if (op == Operator.STR_EQUALS) {
+					}else if (op == Operator.STR_CONTAINS) {
+					}else if (op == Operator.STR_NOTCONTAINS) {
+					}else {
+						return Messages.EntityTypeManager_InvalidTextFilterOp;
+					}					
+				}
+				if (lastOp != null && (lastOp != Operator.AND && lastOp != Operator.OR)) return Messages.EntityTypeManager_InvalidFilterMsg;
+				lastOp = null;
+				isnot = false;
+				first = false;
+			}
+		}
+		if (isnot) return Messages.EntityTypeManager_InvalidFilterMsg;
+		
+		return null;
+		
 	}
 }

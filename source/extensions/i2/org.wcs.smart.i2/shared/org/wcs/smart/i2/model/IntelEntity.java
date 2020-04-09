@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.model;
 
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -47,7 +48,13 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
+import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
+import org.wcs.smart.i2.query.Operator;
+import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
+import org.wcs.smart.i2.search.AdvancedEntitySearch;
+import org.wcs.smart.i2.ui.views.query.dropitem.DropItemFactory;
+import org.wcs.smart.util.SharedUtils;
 
 /**
  * Model class of i_entity.
@@ -441,5 +448,143 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 		ali.updateName(getConservationArea().getDefaultLanguage(), getIdAttributeAsText());
 		dmAttribute.getAttributeList().add(ali);
 		setDmAttributeListItem(ali);
+		updateActiveValue();
+		
 	}
+	
+	@Transient
+	public void updateActiveValue()  {
+		if (getDmAttributeListItem() == null) return;
+		
+		boolean defaultActive = true;
+		
+		if (getEntityType().getActiveFilter() == null || getEntityType().getActiveFilter().isBlank()) {
+			getDmAttributeListItem().setIsActive(defaultActive);
+			return;
+		}
+		
+		String[] parts = getEntityType().getActiveFilter().split("\\" + DropItemFactory.PART_SEPARATOR); //$NON-NLS-1$
+		
+		
+		boolean result = true;
+		boolean isnot = false;
+		Operator lastOp = null;
+		for (String x : parts) {
+			if (x.equals(Operator.NOT.getKey())) {
+				isnot = true;
+			}else if (x.equals(Operator.AND.getKey())) {
+				lastOp = Operator.AND;
+			}else if (x.equals(Operator.OR.getKey())) {
+				lastOp = Operator.OR;
+			}else {
+				String[] ex = x.split(" "); //$NON-NLS-1$
+				String[] bits = ex[0].split(DropItemFactory.ITEM_SEPARATOR);
+				
+				if (!bits[0].equals(AdvancedEntitySearch.ATTRIBUTE_KEY)) throw new RuntimeException("Cannot parse active filter"); //$NON-NLS-1$
+				
+				AttributeType type = AttributeType.parse(bits[1]);
+				
+				String akey = bits[2];
+				IntelEntityAttributeValue value = null;
+				for (IntelEntityAttributeValue av : getAttributes()) {
+					if (av.getAttribute().getKeyId().equalsIgnoreCase(akey)) {
+						value = av;
+						break;
+					}
+				}
+				
+				if (value == null) {
+					getDmAttributeListItem().setIsActive(defaultActive);
+					return;
+				}
+				
+				boolean match = false;
+				if (type == AttributeType.BOOLEAN) {
+					match = value.getNumberValue() >= 0.5;
+					
+				}else if (type == AttributeType.DATE) {
+					Operator op = Operator.parse(ex[1]);
+					if (op != Operator.BETWEEN && op != Operator.NOT_BETWEEN) {
+						getDmAttributeListItem().setIsActive(defaultActive);
+						return;
+					}
+					try {
+						Date d1 =(new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).parse(ex[2]);
+						Date d2 =(new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).parse(ex[4]);
+					
+						if (op == Operator.BETWEEN) {
+							match = value.getDateValue().getTime() >= d1.getTime() && value.getDateValue().getTime() < d2.getTime();
+						}
+						if (op == Operator.NOT_BETWEEN) {
+							match = !match;
+						}
+					}catch (Exception ex2) {
+						Intelligence2PlugIn.log(ex2.getMessage(),  ex2);
+						getDmAttributeListItem().setIsActive(defaultActive);
+						return;
+					}
+				}else if (type == AttributeType.LIST) {
+					match = value.getAttributeListItem().getKeyId().equalsIgnoreCase(ex[2]);
+					
+				}else if (type == AttributeType.NUMERIC) {
+					
+					Operator op = Operator.parse(ex[1]);
+					Double d = Double.parseDouble(ex[2]);
+					
+					if (op == Operator.EQUALS) {
+						match = value.getNumberValue() == d; 
+					}else if (op == Operator.LESSTHAN) {
+						match = value.getNumberValue() < d;
+					}else if (op == Operator.LESSTHANEQUALS) {
+						match = value.getNumberValue() <= d;
+					}else if (op == Operator.GREATERTHAN) {
+						match = value.getNumberValue() > d;
+					}else if (op == Operator.GREATERTHANEQUALS) {
+						match = value.getNumberValue() >= d;
+					}else if (op == Operator.NOTEQUALS) {
+						match = value.getNumberValue() != d;
+					}else {
+						getDmAttributeListItem().setIsActive(defaultActive);
+						return;
+					}
+					
+					
+				}else if (type == AttributeType.TEXT) {
+					Operator op = Operator.parse(ex[1]);
+					String text = SharedUtils.stripQuotes(ex[2]);
+					if (op == Operator.STR_EQUALS) {
+						match = value.getStringValue().equalsIgnoreCase(text);
+					}else if (op == Operator.STR_CONTAINS) {
+						match = value.getStringValue().contains(text);
+					}else if (op == Operator.STR_NOTCONTAINS) {
+						match = !value.getStringValue().contains(text);
+					}else {
+						getDmAttributeListItem().setIsActive(defaultActive);
+						return;
+					}					
+				}
+				if (isnot) match = !match;
+				isnot = false;
+				
+				if (lastOp != null) {
+					if (lastOp == Operator.AND) {
+						result = result && match;
+					}else if (lastOp == Operator.OR) {
+						result = result || match;
+					}else {
+						getDmAttributeListItem().setIsActive(defaultActive);
+						return;
+					}
+				}else {
+					result = match;
+				}
+				lastOp = null;	
+			}	
+		}
+		getDmAttributeListItem().setIsActive(result);
+		return;
+	}
+	
+	
+	
 }

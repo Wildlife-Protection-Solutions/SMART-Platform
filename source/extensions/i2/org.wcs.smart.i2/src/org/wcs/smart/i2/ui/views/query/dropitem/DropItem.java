@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.security.IntelSecurityManager;
@@ -70,6 +71,8 @@ public abstract class DropItem {
 	public void createWidget(IDefinitionPanel panel, Composite parent){
 		this.targetPanel = panel;
 		widget = createCompositeInternal(parent);
+		
+		SmartUiUtils.makeTransparent(widget);
 	}
 	
 	/**

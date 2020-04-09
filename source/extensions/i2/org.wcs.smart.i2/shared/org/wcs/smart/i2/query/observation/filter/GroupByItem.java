@@ -153,16 +153,10 @@ public class GroupByItem {
 			if (bits.length > 3 ) {
 				entityType = bits[3];
 			}
-			IntelAttribute.AttributeType atype = null;
-			for (IntelAttribute.AttributeType t : IntelAttribute.AttributeType.values()) {
-				if (t.key.equalsIgnoreCase(attributeType)) {
-					atype = t;
-					break;
-				}
-			}
+			IntelAttribute.AttributeType atype = IntelAttribute.AttributeType.parse(attributeType);
 			
-			if (attributeType.equals(IntelAttribute.AttributeType.LIST.key) || 
-					attributeType.equals(IntelAttribute.AttributeType.EMPLOYEE.key) ) {
+			if (atype == IntelAttribute.AttributeType.LIST || 
+					atype == IntelAttribute.AttributeType.EMPLOYEE) {
 				List<String> ops = new ArrayList<>();
 				for (int i = 4; i < bits.length; i++){
 					String keyId = bits[i];
@@ -170,7 +164,7 @@ public class GroupByItem {
 				}
 				return new GroupByItem(GroupByType.ENTITY_ATTRIBUTE, attributeKey, atype, entityType, ops);
 				
-			}else if (attributeType.equals(IntelAttribute.AttributeType.POSITION.key)) {
+			}else if (atype == IntelAttribute.AttributeType.POSITION) {
 				String positionType = bits[4];
 				List<String> ops = new ArrayList<>();
 				for (int i = 5; i < bits.length; i++){
@@ -181,7 +175,7 @@ public class GroupByItem {
 				
 				return new GroupByItem(GroupByType.ENTITY_ATTRIBUTE, attributeKey, atype, entityType, type, ops);
 				
-			}else if (attributeType.equals(IntelAttribute.AttributeType.DATE.key)) {
+			}else if (atype == IntelAttribute.AttributeType.DATE) {
 				String dateOp = bits[4];
 				DateOption op = null;
 				for (DateOption key : DateOption.values()) {
@@ -197,15 +191,10 @@ public class GroupByItem {
 			String attributeKey = bits[2];
 			String recordSource = bits[3]; 
 			
-			IntelAttribute.AttributeType atype = null;
-			for (IntelAttribute.AttributeType t : IntelAttribute.AttributeType.values()) {
-				if (t.key.equalsIgnoreCase(attributeType)) {
-					atype = t;
-					break;
-				}
-			}
-			if (attributeType.equals(IntelAttribute.AttributeType.LIST.key) || 
-					attributeType.equals(IntelAttribute.AttributeType.EMPLOYEE.key) ) {
+			IntelAttribute.AttributeType atype = IntelAttribute.AttributeType.parse(attributeType);
+			
+			if (atype == IntelAttribute.AttributeType.LIST || 
+					atype == IntelAttribute.AttributeType.EMPLOYEE) {
 				List<String> ops = new ArrayList<>();
 				for (int i = 4; i < bits.length; i++){
 					String keyId = bits[i];
@@ -213,7 +202,7 @@ public class GroupByItem {
 				}
 				return new GroupByItem(GroupByType.RECORD_ATTRIBUTE, attributeKey, atype, recordSource, ops);
 				
-			}else if (attributeType.equals(IntelAttribute.AttributeType.POSITION.key)) {
+			}else if (atype == IntelAttribute.AttributeType.POSITION) {
 				String positionType = bits[4];
 				List<String> ops = new ArrayList<>();
 				for (int i = 5; i < bits.length; i++){
@@ -224,7 +213,7 @@ public class GroupByItem {
 				
 				return new GroupByItem(GroupByType.RECORD_ATTRIBUTE, attributeKey, atype, recordSource, type, ops);
 				
-			}else if (attributeType.equals(IntelAttribute.AttributeType.DATE.key)) {
+			}else if (atype == IntelAttribute.AttributeType.DATE) {
 				String dateOp = bits[4];
 				DateOption op = null;
 				for (DateOption key : DateOption.values()) {

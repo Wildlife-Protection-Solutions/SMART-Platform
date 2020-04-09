@@ -63,8 +63,10 @@ public class IntelEntityType extends NamedKeyItem {
 	private List<IntelEntityTypeAttribute> attributes;
 	
 	private Set<IntelProfileEntityType> profiles;
+	
 	private Attribute dmAttribute;
-
+	private String activeFilter;
+	
 	/**
 	 * Constructor.
 	 */
@@ -193,6 +195,14 @@ public class IntelEntityType extends NamedKeyItem {
 		this.dmAttribute = dmAttribute;
 	}
 	
+	@Column(name="dm_active_filter")
+	public String getActiveFilter() {
+		return this.activeFilter;
+	}
+	
+	public void setActiveFilter(String activeFilter) {
+		this.activeFilter = activeFilter;
+	}
 	@Transient
 	public BufferedImage getIconAsImage() throws Exception{
 		if (getIcon() == null) return null;
