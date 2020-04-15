@@ -49,7 +49,7 @@
                   label="%patrolconfig.menu.label">
                <command
                      commandId="org.wcs.smart.patrol.patrolMandate"
-                     icon="images/icons/etool16/patrol_mandate.png"
+                     icon="images/icons/obj16/patrol_mandate.png"
                      label="%patrol.mandates.command.label"
                      mnemonic="%patrol.mandates.command.mnemonic"
                      style="push"
@@ -81,7 +81,7 @@
                </command>
                <command
                      commandId="org.wcs.smart.patrol.teamList"
-                     icon="images/icons/etool16/patrol_team.png"
+                     icon="images/icons/obj16/patrol_team.png"
                      label="%patrols.teams.command.label"
                      mnemonic="%patrols.teams.command.mnemonic"
                      style="push"
@@ -188,7 +188,7 @@
          </command>
          <command
                commandId="org.wcs.smart.patrol.view.groupby"
-               icon="images/icons/etool16/groupby.png"
+               icon="images/icons/obj16/groupby.png"
                id="org.wcs.smart.patrol.groupby.menu"
                label="%command.groupby"
                style="pulldown"
@@ -244,7 +244,7 @@
                visible="true">
          </separator>
          <menu
-               icon="images/icons/etool16/groupby.png"
+               icon="images/icons/obj16/groupby.png"
                label="%menu.label.groupby">
             <command
                   commandId="org.wcs.smart.patrol.view.groupby"
@@ -259,7 +259,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.patrol.view.groupby"
-                  icon="images/icons/etool16/patrol_types.png"
+                  icon="images/icons/obj16/patrol_types.png"
                   id="org.wcs.smart.patrol.view.groupby.type"
                   label="%command.groupby.type"
                   style="radio">
@@ -270,7 +270,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.patrol.view.groupby"
-                  icon="images/icons/etool16/patrol_types.png"
+                  icon="images/icons/obj16/patrol_types.png"
                   id="org.wcs.smart.patrol.view.groupby.transport"
                   label="%command.groupby.transport"
                   style="radio">
@@ -412,7 +412,7 @@
          </command>
          <command
                commandId="org.wcs.smart.patrol.view.groupby"
-               icon="images/icons/etool16/patrol_types.png"
+               icon="images/icons/obj16/patrol.png"
                id="org.wcs.smart.patrol.view.groupby.type"
                label="%command.groupby.type"
                style="radio">
@@ -423,7 +423,7 @@
          </command>
          <command
                commandId="org.wcs.smart.patrol.view.groupby"
-               icon="images/icons/etool16/patrol_types.png"
+               icon="images/icons/obj16/patrol.png"
                id="org.wcs.smart.patrol.view.groupby.transport"
                label="%command.groupby.transport"
                style="radio">
@@ -514,7 +514,7 @@
          </command>
          <command
                commandId="org.wcs.smart.patrol.view.groupby"
-               icon="images/icons/etool16/patrol_types.png"
+               icon="images/icons/obj16/patrol.png"
                id="org.wcs.smart.patrol.view.groupby.type"
                label="%command.groupby.type"
                style="radio">
@@ -525,7 +525,7 @@
          </command>
          <command
                commandId="org.wcs.smart.patrol.view.groupby"
-               icon="images/icons/etool16/patrol_types.png"
+               icon="images/icons/obj16/patrol.png"
                id="org.wcs.smart.patrol.view.groupby.transport"
                label="%command.groupby.transport"
                style="radio">
