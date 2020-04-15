@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+   <extension-point id="org.wcs.smart.i2.profile.edit.validation" name="Edit Validation" schema="schema/org.wcs.smart.i2.profile.edit.validation.exsd"/>
    <extension
          point="org.wcs.smart.hibernate.libs.mapping">
       <class

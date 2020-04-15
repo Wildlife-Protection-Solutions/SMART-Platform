@@ -75,6 +75,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -439,6 +440,18 @@ public class EntityTypesPreferencePage extends PreferencePage implements IIntelP
 
 						for (IntelEntityType t : toDelete){
 							monitor.subTask(t.getName());
+							
+							try {
+								if (!DeleteManager.canDelete(t, s)) {
+									throw new Exception("Unable to delete entity type");
+								}
+							}catch (Exception ex) {
+								Display.getDefault().syncExec(()->{
+									MessageDialog.openError(btnNew.getShell(), "Error", MessageFormat.format("Cannot delete entity type {0}: {1}", t.getName(), ex.getMessage()));
+								});
+								continue;
+							}
+							
 							s.beginTransaction();
 							try{
 								EntityTypeManager.INSTANCE.deleteEntityType(t, s);

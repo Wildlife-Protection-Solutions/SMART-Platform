@@ -31,6 +31,10 @@ import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.model.IntelObservation;
 import org.wcs.smart.i2.model.IntelObservationAttribute;
 import org.wcs.smart.i2.model.IntelRecord;
+import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 
 /**
  * Content provider for displaying relationship data in a tree by group.
@@ -42,6 +46,7 @@ public class ObservationContentProvider implements ITreeContentProvider {
 
 	private List<IntelObservation> observations;
 	
+	private List<WaypointObservationGroup> groups;
 	public ObservationContentProvider(){
 	}
 	
@@ -52,6 +57,7 @@ public class ObservationContentProvider implements ITreeContentProvider {
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		this.observations = null;
+		this.groups = null;
 		if (newInput instanceof IntelLocation){
 			IntelLocation location = (IntelLocation) newInput;
 			observations = new ArrayList<>();
@@ -63,6 +69,9 @@ public class ObservationContentProvider implements ITreeContentProvider {
 			for (IntelLocation ll : rr.getLocations()) {
 				observations.addAll(ll.getObservations());
 			}
+		}else if (newInput instanceof Waypoint) {
+			groups = new ArrayList<>();
+			groups.addAll(((Waypoint)newInput).getObservationGroups());
 		}
 		
 		if (observations != null) {
@@ -72,9 +81,14 @@ public class ObservationContentProvider implements ITreeContentProvider {
 	
 	@Override
 	public Object[] getElements(Object inputElement) {
-		if (observations == null) return new Object[0];
-		if (observations.size() == 0) return new Object[0];
-		return observations.toArray();
+		if (observations != null) {
+			if (observations.size() == 0) return new Object[0];
+			return observations.toArray();
+		}else if (groups != null) {
+			if (groups.size() == 0) return new Object[0];
+			return groups.toArray();
+		}
+		return null;
 	}
 
 	@Override
@@ -87,12 +101,27 @@ public class ObservationContentProvider implements ITreeContentProvider {
 			a.sort((x,y)->Collator.getInstance().compare(x.getAttribute().getName(), y.getAttribute().getName()));
 			return a.toArray();
 		};
+		
+		if (parentElement instanceof WaypointObservationGroup) {
+			List<WaypointObservation> obs = new ArrayList<>();
+			obs.addAll(  ((WaypointObservationGroup)parentElement).getObservations() );
+			obs.sort((x,y) -> Collator.getInstance().compare(x.getCategory().getName(), y.getCategory().getName()));
+			return obs.toArray();
+		}
+		if (parentElement instanceof WaypointObservation) {
+			List<WaypointObservationAttribute> obs = new ArrayList<>();
+			obs.addAll(  ((WaypointObservation)parentElement).getAttributes() );
+			obs.sort((x,y) -> Collator.getInstance().compare(x.getAttribute().getName(), y.getAttribute().getName()));
+			return obs.toArray();
+		}
 		return null;
 	}
 
 	@Override
 	public Object getParent(Object element) {
 		if (element instanceof IntelObservationAttribute) return ((IntelObservationAttribute) element).getObservation();
+		if (element instanceof WaypointObservationAttribute) return ((WaypointObservationAttribute)element).getObservation();
+		if (element instanceof WaypointObservation) return ((WaypointObservation)element).getObservationGroup();
 		return null;
 	}
 
@@ -100,6 +129,9 @@ public class ObservationContentProvider implements ITreeContentProvider {
 	public boolean hasChildren(Object element) {
 		if (element instanceof IntelObservation) return true;
 		if (element instanceof IntelObservationAttribute) return false;
+		if (element instanceof WaypointObservation) return true;
+		if (element instanceof WaypointObservationGroup) return true;
+		if (element instanceof WaypointObservationAttribute) return false;
 		return false;
 		
 	}

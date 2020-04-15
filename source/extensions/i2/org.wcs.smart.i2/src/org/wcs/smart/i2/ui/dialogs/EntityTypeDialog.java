@@ -101,6 +101,7 @@ import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.EditValidator;
 import org.wcs.smart.i2.EntityTypeManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.ProfilesManager;
@@ -211,7 +212,7 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 		//parse and make sure attributes exist
 		String error = EntityTypeManager.INSTANCE.validateDmAttributeFilter(dmFilter, attributeList);
 		if (error != null) {
-			MessageDialog.openInformation(getShell(), Messages.EntityTypeDialog_DialogFilter, error);
+			MessageDialog.openInformation(getShell(), Messages.EntityTypeDialog_DialogFilter, MessageFormat.format(Messages.EntityTypeDialog_invalidActiveFilter,  error));
 			return;
 		}
 		
@@ -390,6 +391,14 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 								}
 							}
 							s.flush();
+							
+							//validate events or other extensions
+							v = EditValidator.INSTANCE.isValid(type, s);
+							if (v != null) {
+								type.setProfiles(currentprofiles);
+								throw new Exception(v);
+							}
+							
 							s.getTransaction().commit();
 							
 
@@ -407,18 +416,22 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 							}
 						}catch (Exception ex){
 							if (s.getTransaction().isActive())s.getTransaction().rollback();
-							Intelligence2PlugIn.displayLog(Messages.EntityTypeDialog_SaveError +ex.getMessage(), ex);
-							return;
+							throw new InvocationTargetException(ex);
+//							Intelligence2PlugIn.displayLog(Messages.EntityTypeDialog_SaveError +ex.getMessage(), ex);
+//							return;
 						}
 					}catch (Exception ex){
-						Intelligence2PlugIn.displayLog(Messages.EntityTypeDialog_SaveError +ex.getMessage(), ex);
-						return;
+						throw new InvocationTargetException(ex);
+//						Intelligence2PlugIn.displayLog(Messages.EntityTypeDialog_SaveError +ex.getMessage(), ex);
+//						return;
 					}
 				}
 				
 			});
 		} catch (Exception ex) {
-			Intelligence2PlugIn.displayLog(Messages.EntityTypeDialog_SaveError +ex.getMessage(), ex);
+			Throwable t = ex;
+			if (ex instanceof InvocationTargetException && ex.getCause() != null && ex.getCause().getCause() != null) t = ex.getCause().getCause();
+			Intelligence2PlugIn.displayLog(Messages.EntityTypeDialog_SaveError + t.getMessage(), t);
 			return;
 		}
 		

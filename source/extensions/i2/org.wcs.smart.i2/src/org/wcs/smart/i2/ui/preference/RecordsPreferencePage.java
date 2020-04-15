@@ -76,6 +76,7 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -419,6 +420,8 @@ public class RecordsPreferencePage extends PreferencePage implements IIntelPrefe
 				delete.add((IntelRecordSource)x);
 			}
 		}
+		
+		
 		if (delete.isEmpty()) return;
 		if (!MessageDialog.openConfirm(getShell(), Messages.RecordSourceAttributeDialog_DeleteSourceDialogTitle, MessageFormat.format(Messages.RecordSourceAttributeDialog_DeleteSourceDialogMsg, delete.size()))){
 			return;
@@ -437,6 +440,18 @@ public class RecordsPreferencePage extends PreferencePage implements IIntelPrefe
 
 						for (IntelRecordSource source : delete){
 							monitor.subTask(source.getName());
+							
+							try {
+								if (!DeleteManager.canDelete(source, session)) {
+									throw new Exception(Messages.RecordsPreferencePage_DeleteError);
+								}
+							}catch (Exception ex) {
+								Display.getDefault().syncExec(()->{
+									MessageDialog.openError(btnNew.getShell(), Messages.RecordsPreferencePage_ErrorTitle, MessageFormat.format(Messages.RecordsPreferencePage_DeleteErrorMsg, source.getName(), ex.getMessage()));
+								});
+								continue;
+							}
+							
 							session.beginTransaction();
 							try{
 								if (source.getUuid() == null) continue;

@@ -32,6 +32,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -42,7 +43,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -70,6 +70,8 @@ import org.geotools.data.FeatureSource;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.map.legend.Glyph;
 import org.hibernate.Session;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.project.internal.Layer;
@@ -79,10 +81,12 @@ import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.filter.DateFilterComposite;
 import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.common.filter.DateFilterDropDownComposite;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.EntityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
@@ -101,6 +105,11 @@ import org.wcs.smart.i2.udig.entity.IntelEntityDataSource;
 import org.wcs.smart.i2.udig.entity.IntelEntityService;
 import org.wcs.smart.i2.udig.entity.IntelEntityServiceExtension;
 import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
+import org.wcs.smart.observation.WaypointSourceEngine;
+import org.wcs.smart.observation.model.IWaypointSourceUiProvider;
+import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.udig.AddContentFilterLayersCommand;
 import org.wcs.smart.udig.ContentFilterLayerImpl;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -114,11 +123,13 @@ import org.wcs.smart.util.UuidUtils;
 public class EntityEditorMapComposite extends Composite implements MapPart{
 
 	private enum LocationTableColumn{
+		SOURCE("Source"),
 		ID(Messages.EntityEditorMapComposite_IDColumnName),
 		DATETIME(Messages.EntityEditorMapComposite_DateTimeColumnName),
-		COMMENT(Messages.EntityEditorMapComposite_CommentColumnName),
-		RECORD(Messages.EntityEditorMapComposite_RecordColumnName),
-		RECORDDATE(Messages.EntityEditorMapComposite_RecordDatecolumnName),
+//		COMMENT(Messages.EntityEditorMapComposite_CommentColumnName),
+//		RECORD(Messages.EntityEditorMapComposite_RecordColumnName),
+		SOURCE_LINK("Source Link"),
+//		RECORDDATE(Messages.EntityEditorMapComposite_RecordDatecolumnName),
 		OBSERVATION(Messages.EntityEditorMapComposite_ObservationColumnName);
 		
 		String guiName;
@@ -127,12 +138,29 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 			this.guiName = guiName;
 		}
 		
-		public String getLabel(IntelLocation location){
+		public String getLabel(Object x) {
+			if (x instanceof IntelEntityLocation) return getLocationLabel(((IntelEntityLocation) x).getLocation());
+			if (x instanceof Waypoint) return getWaypointLabel((Waypoint) x);
+			return x.toString();
+			
+		}
+		public String getWaypointLabel(Waypoint wo) {
+			if (this == ID) return String.valueOf(wo.getId());
+			if (this == DATETIME) return DateFormat.getDateTimeInstance().format(wo.getDateTime());
+			if (this == SOURCE_LINK) return WaypointSourceEngine.INSTANCE.getSource(wo.getSourceId()).getName(Locale.getDefault());
+			if (this == SOURCE) return "Observation";
+			if (this == OBSERVATION) {
+				int cnt = wo.getAllObservations().size();
+				return MessageFormat.format(Messages.EntityEditorMapComposite_ObservationsLabel, cnt);
+			}
+			return "";
+		}
+		public String getLocationLabel(IntelLocation location){
 			if (this == ID) return location.getId();
 			if (this == DATETIME) return DateFormat.getDateTimeInstance().format(location.getDateTime());
-			if (this==COMMENT) return location.getComment() == null ? "" : location.getComment(); //$NON-NLS-1$
-			if (this == RECORD) return location.getRecord().getTitle();
-			if (this == RECORDDATE) return DateFormat.getDateTimeInstance().format(location.getRecord().getDateCreated());
+//			if (this==COMMENT) return location.getComment() == null ? "" : location.getComment(); //$NON-NLS-1$
+//			if (this == RECORD) return location.getRecord().getTitle();
+//			if (this == RECORDDATE) return DateFormat.getDateTimeInstance().format(location.getRecord().getDateCreated());
 			if (this == OBSERVATION){
 				int cnt = 0;
 				if (location.getObservations() != null ){
@@ -140,6 +168,8 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 				}
 				return MessageFormat.format(Messages.EntityEditorMapComposite_ObservationsLabel, cnt);
 			};
+			if (this == SOURCE_LINK) return location.getRecord().getTitle();
+			if (this == SOURCE) return "Profile Observation";
 			return ""; //$NON-NLS-1$
 			
 		}
@@ -343,6 +373,8 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 				if (element instanceof IntelEntityLocation){
 					if (((IntelEntityLocation) element).getLocation().isPoint()) return point;
 					if (((IntelEntityLocation) element).getLocation().isPolygon()) return polygon;
+				}else if (element instanceof WaypointObservation) {
+					return point;
 				}
 				return null;
 			}
@@ -356,11 +388,7 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 			col.setLabelProvider(new ColumnLabelProvider() {
 				@Override
 				public String getText(Object element) {
-					if (element instanceof IntelEntityLocation){
-						IntelLocation location = ((IntelEntityLocation)element).getLocation();
-						return column.getLabel(location);
-					}
-					return super.getText(element);
+					return column.getLabel(element);
 				}
 			});
 		}
@@ -372,7 +400,11 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 			public void selectionChanged(SelectionChangedEvent event) {
 				//filter features on map
 				try {
-					highlightFeature(getSelectedLocation());
+					//TODO: fix this
+					Object x = getSelectedLocation();
+					if (x instanceof IntelEntityLocation) {
+						highlightFeature( ((IntelEntityLocation)x).getLocation() );
+					}
 				} catch (IOException e) {
 				}
 			}
@@ -412,10 +444,21 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 			}
 			private void doHover(int x, int y){
 				ViewerCell cell = locationTable.getCell(new Point(x, y));
-				if (cell != null && cell.getElement() instanceof IntelEntityLocation && cell.getColumnIndex() == 6){
+				if (cell == null) return;
+				if (cell.getColumnIndex() != 5) return;
+				
+				if (cell.getElement() instanceof IntelEntityLocation){
 					IntelEntityLocation location = (IntelEntityLocation) cell.getElement();
-					if (detailsShell == null || detailsShell.isDisposed() || !detailsShell.getLocationRecord().equals(location.getLocation())){
+					if (detailsShell == null || detailsShell.isDisposed() || !location.getLocation().equals(detailsShell.getLocationRecord())){
 						detailsShell = new ObservationDetailsShell(getShell(),((IntelEntityLocation)cell.getElement()).getLocation());
+						int height = detailsShell.getSize().y;
+						Point p  = locationTable.getTable().toDisplay(x, y);
+						detailsShell.open(new Point(p.x, p.y - height));
+					}
+				}else if (cell.getElement() instanceof Waypoint) {
+					Waypoint wp = (Waypoint)cell.getElement();
+					if (detailsShell == null || detailsShell.isDisposed() || !wp.equals(detailsShell.getWaypoint())){
+						detailsShell = new ObservationDetailsShell(getShell(),wp);
 						int height = detailsShell.getSize().y;
 						Point p  = locationTable.getTable().toDisplay(x, y);
 						detailsShell.open(new Point(p.x, p.y - height));
@@ -434,12 +477,21 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 		locationTable.getTable().setMenu(mnu);
 		
 		MenuItem openItem = new MenuItem(mnu, SWT.PUSH);
-		openItem.setText(Messages.EntityEditorMapComposite_OpenRecordMnuItem);
+		openItem.setText("Open Source");
+		openItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.GOTO_ICON));
 		openItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if (getSelectedLocation() != null){
-					(new OpenRecordHandler()).openRecord(getSelectedLocation().getRecord(),false);
+				Object selection = getSelectedLocation();
+				if (selection == null) return;
+				
+				if (selection instanceof IntelEntityLocation) {
+					(new OpenRecordHandler()).openRecord(((IntelEntityLocation) selection).getLocation().getRecord(),false);
+				}else if (selection instanceof Waypoint) {
+					Waypoint wp = (Waypoint)selection;
+					IWaypointSourceUiProvider srcProvider = WaypointSourceEngine.INSTANCE.findUiProvider(wp.getSourceId());
+					if (srcProvider == null) return;
+					srcProvider.findAndShow(wp.getUuid());
 				}
 			}
 		});
@@ -455,13 +507,16 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 				}
 				if (!editor.getEditMode()) return;
 				
-				IntelLocation loc = getSelectedLocation();
+				Object loc = getSelectedLocation();
 				if (loc == null) return;
-				try {
-					if (!(loc.getGeometry() instanceof org.locationtech.jts.geom.Point)) return;
-				} catch (ParseException e1) {
-					Intelligence2PlugIn.log(e1.getMessage(),e1);
-					return;
+				
+				if (loc instanceof IntelEntityLocation) {
+					try {
+						if (!( ((IntelEntityLocation)loc).getLocation().getGeometry() instanceof org.locationtech.jts.geom.Point)) return;
+					} catch (ParseException e1) {
+						Intelligence2PlugIn.log(e1.getMessage(),e1);
+						return;
+					}
 				}
 				
 				List<IntelAttribute> attributes = new ArrayList<IntelAttribute>();
@@ -484,12 +539,17 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 						public void widgetSelected(SelectionEvent e) {
 							org.locationtech.jts.geom.Point p = null;
 							try{
-								IntelLocation loc = getSelectedLocation();
-								if (!(loc.getGeometry() instanceof org.locationtech.jts.geom.Point)){
-									MessageDialog.openError(getShell(), Messages.EntityEditorMapComposite_UpdateAttributeErrorDialogTitle, Messages.EntityEditorMapComposite_UpdateAttributeErrorDialogMessage);
-									return;
+								Object loc = getSelectedLocation();
+								
+								if (loc instanceof Waypoint) {
+									p = (new GeometryFactory()).createPoint(new Coordinate(((Waypoint) loc).getX(), ((Waypoint) loc).getY())); 
+								}else if (loc instanceof IntelEntityLocation) {
+									if (!(((IntelEntityLocation)loc).getLocation().getGeometry() instanceof org.locationtech.jts.geom.Point)){
+										MessageDialog.openError(getShell(), Messages.EntityEditorMapComposite_UpdateAttributeErrorDialogTitle, Messages.EntityEditorMapComposite_UpdateAttributeErrorDialogMessage);
+										return;
+									}
+									p = (org.locationtech.jts.geom.Point) ((IntelEntityLocation)loc).getLocation().getGeometry();
 								}
-								p = (org.locationtech.jts.geom.Point) loc.getGeometry();
 							}catch (Exception ex){
 								Intelligence2PlugIn.displayLog(ex.getMessage(), ex);
 								return;
@@ -520,14 +580,8 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 		return locationsTableComp;
 	}
 	
-	private IntelLocation getSelectedLocation(){
-		if (!locationTable.getSelection().isEmpty()){
-			Object x = ((IStructuredSelection)locationTable.getSelection()).getFirstElement();
-			if (x instanceof IntelEntityLocation){
-				return ((IntelEntityLocation) x).getLocation();
-			}
-		}
-		return null;
+	private Object getSelectedLocation(){
+		return locationTable.getStructuredSelection().getFirstElement();
 	}
 	
 	//udig does not support selection from multiple layers 
@@ -626,29 +680,69 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 			IntelEntity entity = editor.getEntity();
 			if (entity == null) return Status.OK_STATUS;
 			
-			final List<IntelEntityLocation> alllocations  = new ArrayList<IntelEntityLocation>();
+			final List<Object> alllocations  = new ArrayList<>();
 			try(Session s = HibernateManager.openSession()){
 				alllocations.addAll(EntityManager.INSTANCE.getEntityLocations(s, entity.getUuid(), dateFilter));
-				for (IntelEntityLocation l : alllocations){
-					l.getLocation().getId();
-					l.getLocation().getRecord().getTitle();
-					
-					if (l.getLocation().getObservations() != null){
-						for (IntelObservation o : l.getLocation().getObservations()){
-							o.getCategory().getFullCategoryName();
-							if (o.getObservationAttributes() != null){
-								for (IntelObservationAttribute a : o.getObservationAttributes()){
-									a.getAttribute().getName();
-									if (a.getAttributeListItem() != null)a.getAttributeListItem().getName();
-									if (a.getAttributeTreeNode() != null)a.getAttributeTreeNode().getName();
+				for (Object x : alllocations){
+					if (x instanceof IntelEntityLocation) {
+						IntelEntityLocation l = (IntelEntityLocation)x;
+						
+						l.getLocation().getId();
+						l.getLocation().getRecord().getTitle();
+						
+						if (l.getLocation().getObservations() != null){
+							for (IntelObservation o : l.getLocation().getObservations()){
+								o.getCategory().getFullCategoryName();
+								if (o.getObservationAttributes() != null){
+									for (IntelObservationAttribute a : o.getObservationAttributes()){
+										a.getAttribute().getName();
+										if (a.getAttributeListItem() != null)a.getAttributeListItem().getName();
+										if (a.getAttributeTreeNode() != null)a.getAttributeTreeNode().getName();
+									}
 								}
 							}
 						}
 					}
+					
 				}
+				
+				if (entity.getEntityType().getDmAttribute() != null && entity.getDmAttributeListItem() != null) {
+					List<WaypointObservationAttribute> woa = QueryFactory.buildQuery(s, WaypointObservationAttribute.class, new Object[] {
+							"attributeListItem", entity.getDmAttributeListItem()}).list();
+					for (WaypointObservationAttribute ww : woa) {
+						if (alllocations.contains(ww.getObservation().getWaypoint())) continue;
+						
+						alllocations.add(ww.getObservation().getWaypoint());
+						ww.getObservation().getObservationGroup().getWaypoint().getId();
+						for (WaypointObservation wo : ww.getObservation().getWaypoint().getAllObservations()) {
+							wo.getCategory().getFullCategoryName();
+							for (WaypointObservationAttribute a : wo.getAttributes()) {
+								a.getAttribute().getName();
+								if (a.getAttributeListItem() != null) a.getAttributeListItem().getName();
+								if (a.getAttributeTreeNode() != null) a.getAttributeTreeNode().getName();
+							}
+						}
+					}
+					
+				}
+				
 			}
 			Collections.sort(alllocations,
-					(x,y)-> -1*x.getLocation().getDateTime().compareTo(y.getLocation().getDateTime()));
+					(x,y)-> {
+						Date d1 = null;
+						Date d2 = null;
+						if (x instanceof IntelEntityLocation) {
+							d1 = ((IntelEntityLocation)x).getLocation().getDateTime();
+						}else if (x instanceof Waypoint) {
+							d1 = ((Waypoint)x).getDateTime();
+						}
+						if (y instanceof IntelEntityLocation) {
+							d2 = ((IntelEntityLocation)y).getLocation().getDateTime();
+						}else if (y instanceof Waypoint) {
+							d2 = ((Waypoint)y).getDateTime();
+						}
+						return -1*d1.compareTo(d2);
+					});
 			
 			Display.getDefault().syncExec(() -> { 
 				if (locationTable.getTable().isDisposed()) return;

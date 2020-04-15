@@ -43,6 +43,8 @@ public class Messages extends NLS {
 	public static String CreateRecordParameterCollector_ProfileRequired;
 	public static String CreateRecordParameterCollector_SourceLabel;
 	public static String CreateRecordParameterCollector_TitleLabel;
+	public static String EntityTypeDeleteAdvisor_DeleteErrorMsg;
+	public static String EntityTypeDeleteAdvisor_InvalidType;
 	public static String EntityTypeParameter_Name;
 	public static String MappingParameter_Name;
 	public static String NewMappingDialog_AttributeLabel;
@@ -56,7 +58,16 @@ public class Messages extends NLS {
 	public static String NewMappingDialog_Title;
 	public static String NewMappingDialog_WarningMsg;
 	public static String NewMappingDialog_WarningTitle;
+	public static String ProfileDeleteAdvisor_DeleteMsgError;
+	public static String ProfileDeleteAdvisor_InvalidObject;
+	public static String ProfileEditManager_AttributeConfigurationError;
+	public static String ProfileEditManager_EnityTypeProfileExists2;
+	public static String ProfileEditManager_EntityTypeProfileExits;
+	public static String ProfileEditManager_RecordProfileExists;
+	public static String ProfileEditManager_RecordSourceProfileExists;
 	public static String ProfileParameter_ProfileParameter;
+	public static String RecordSourceDeleteAdvisor_DeleteMsgError;
+	public static String RecordSourceDeleteAdvisor_InvalidObject;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

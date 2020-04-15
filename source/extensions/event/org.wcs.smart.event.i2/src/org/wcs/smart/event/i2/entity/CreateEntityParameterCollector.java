@@ -60,7 +60,6 @@ import org.json.simple.JSONArray;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.event.i2.ProfileParameter;
-import org.wcs.smart.event.i2.SourceParameter;
 import org.wcs.smart.event.i2.entity.EntityMapping.Type;
 import org.wcs.smart.event.i2.internal.Messages;
 import org.wcs.smart.event.model.EAction;
@@ -73,8 +72,6 @@ import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelProfileEntityType;
-import org.wcs.smart.i2.model.IntelProfileRecordSource;
-import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**

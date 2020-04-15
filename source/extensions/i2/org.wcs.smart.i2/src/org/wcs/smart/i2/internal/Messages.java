@@ -542,6 +542,7 @@ public class Messages extends NLS {
 	public static String EntityTypeDialog_IconLabel;
 	public static String EntityTypeDialog_IdAttLabel;
 	public static String EntityTypeDialog_IdAttributeRequired;
+	public static String EntityTypeDialog_invalidActiveFilter;
 	public static String EntityTypeDialog_LinkToDmAttribute;
 	public static String EntityTypeDialog_LoadingTaskName;
 	public static String EntityTypeDialog_Message;
@@ -1482,7 +1483,10 @@ public class Messages extends NLS {
 	public static String RecordSummaryPage_StatusLabel;
 	public static String RecordSummaryPage_SummarySection;
 	public static String RecordSummaryPage_TitleLabel;
+	public static String RecordsPreferencePage_DeleteError;
+	public static String RecordsPreferencePage_DeleteErrorMsg;
 	public static String RecordsPreferencePage_DeleteTaskName;
+	public static String RecordsPreferencePage_ErrorTitle;
 	public static String RecordsPreferencePage_Message;
 	public static String RecordsPreferencePage_NewSourceName;
 	public static String RecordsPreferencePage_SourceColName;

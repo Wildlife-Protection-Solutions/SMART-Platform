@@ -67,6 +67,7 @@ import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.EditValidator;
 import org.wcs.smart.i2.EntityTypeManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.ProfilesManager;
@@ -195,11 +196,14 @@ public class ProfileDialog extends SmartStyledDialog {
 					IntelProfileEntityType map = new IntelProfileEntityType();
 					map.setProfile(config);
 					map.setEntityType(s);
-
+					IntelProfileEntityType ee = session.get(IntelProfileEntityType.class, map.getId());
+					if (ee != null) map = ee;
+					
 					if (tblEntityTypes.getChecked(s)) {
 						if (!src.getProfiles().contains(map)) {
 							src.getProfiles().add(map);
 						}
+						if (!config.getEntityTypes().contains(map)) config.getEntityTypes().add(map);
 					}else {
 						IntelProfileEntityType temp = session.get(IntelProfileEntityType.class, map.getId());
 						if (temp != null) {
@@ -250,6 +254,9 @@ public class ProfileDialog extends SmartStyledDialog {
 				session.flush();
 				
 				String v = ProfilesManager.INSTANCE.validateRecords(new ArrayList<>(sources));
+				if (v != null) throw new Exception(v);
+				
+				v = EditValidator.INSTANCE.isValid(config, session);
 				if (v != null) throw new Exception(v);
 				
 				session.getTransaction().commit();

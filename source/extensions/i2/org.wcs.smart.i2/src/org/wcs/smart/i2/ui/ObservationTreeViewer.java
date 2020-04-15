@@ -29,8 +29,12 @@ import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.model.IntelObservation;
 import org.wcs.smart.i2.model.IntelObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 
 /**
  * Tree table viewer for displaying observations.
@@ -41,12 +45,23 @@ import org.wcs.smart.i2.model.IntelObservationAttribute;
 public class ObservationTreeViewer {
 
 	private TreeViewer viewer;
+	private TreeViewerColumn groupCol;
 	
 	public ObservationTreeViewer(Composite parent, int style){
 		
 		viewer = new TreeViewer(parent, style);
 		viewer.setContentProvider(new ObservationContentProvider());
 		viewer.getTree().setHeaderVisible(true);
+		
+		groupCol = new TreeViewerColumn(viewer, SWT.NONE);
+		groupCol.getColumn().setWidth(60);
+		groupCol.getColumn().setText("");
+		groupCol.setLabelProvider(new ColumnLabelProvider(){
+			public String getText(Object element){
+				if (element instanceof WaypointObservationGroup) return "Group";
+				return "";
+			}
+		});
 		
 		TreeViewerColumn categoryCol = new TreeViewerColumn(viewer, SWT.NONE);
 		categoryCol.getColumn().setWidth(150);
@@ -57,6 +72,12 @@ public class ObservationTreeViewer {
 					return ((IntelObservation)element).getCategory().getName();
 				}else if (element instanceof IntelObservationAttribute){
 					return ((IntelObservationAttribute)element).getAttribute().getName();
+				}else if(element instanceof WaypointObservationAttribute) {
+					return ((WaypointObservationAttribute)element).getAttribute().getName();
+				}else if(element instanceof WaypointObservation) {
+					return ((WaypointObservation)element).getCategory().getName();
+				}else if (element instanceof WaypointObservationGroup) {
+					return "";
 				}
 				return super.getText(element);
 			}
@@ -69,6 +90,8 @@ public class ObservationTreeViewer {
 			public String getText(Object element){
 				if (element instanceof IntelObservationAttribute){
 					return ((IntelObservationAttribute)element).getAttributeValueAsString(Locale.getDefault());
+				}else if (element instanceof WaypointObservationAttribute) {
+					return ((WaypointObservationAttribute)element).getAttributeValueAsString(Locale.getDefault());
 				}
 				return ""; //$NON-NLS-1$
 			}
@@ -76,6 +99,9 @@ public class ObservationTreeViewer {
 	}
 	
 	public void setInput(Object input){
+		if (input instanceof IntelLocation) {
+			groupCol.getColumn().dispose();
+		}
 		viewer.setInput(input);
 	}
 	

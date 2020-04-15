@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?eclipse version="3.4"?>
 <plugin>
+
    <extension
          point="org.wcs.smart.event.actiontype">
       <actiontype
@@ -11,6 +11,27 @@
             class="org.wcs.smart.event.i2.entity.CreateEntityActionType"
             parameter_collector="org.wcs.smart.event.i2.entity.CreateEntityParameterCollector">
       </actiontype>
+   </extension>
+   <extension
+         point="org.wcs.smart.caDeleteAdvisor">
+      <DeleteAdvisor
+            advisor="org.wcs.smart.event.i2.RecordSourceDeleteAdvisor"
+            class="org.wcs.smart.i2.model.IntelRecordSource">
+      </DeleteAdvisor>
+      <DeleteAdvisor
+            advisor="org.wcs.smart.event.i2.ProfileDeleteAdvisor"
+            class="org.wcs.smart.i2.model.IntelProfile">
+      </DeleteAdvisor>
+      <DeleteAdvisor
+            advisor="org.wcs.smart.event.i2.EntityTypeDeleteAdvisor"
+            class="org.wcs.smart.i2.model.IntelEntityType">
+      </DeleteAdvisor>
+   </extension>
+   <extension
+         point="org.wcs.smart.i2.profile.edit.validation">
+      <validator
+            class="org.wcs.smart.event.i2.ProfileEditManager">
+      </validator>
    </extension>
 
 </plugin>

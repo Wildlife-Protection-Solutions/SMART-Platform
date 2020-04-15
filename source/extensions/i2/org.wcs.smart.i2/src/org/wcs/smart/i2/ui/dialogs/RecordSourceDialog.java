@@ -76,6 +76,7 @@ import org.wcs.smart.common.control.IconComposite;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.EditValidator;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.event.IntelEvents;
@@ -690,15 +691,20 @@ public class RecordSourceDialog extends SmartStyledTitleDialog{
 			}
 			
 			List<IntelProfile> profiles = (List<IntelProfile>) tblProfiles.getInput();
-			
+			Set<IntelProfileRecordSource> currentprofiles = new HashSet<>(currentSelection.getProfiles());
+
 			for (IntelProfile ip : profiles) {
 				ip = session.get(IntelProfile.class, ip.getUuid());
 				IntelProfileRecordSource mp = new IntelProfileRecordSource();
 				mp.getId().setProfile(ip);
 				mp.getId().setRecordSource(currentSelection);
-					
+				
+				
 				if (tblProfiles.getChecked(ip)) {
-					if (!currentSelection.getProfiles().contains(mp)) currentSelection.getProfiles().add(mp);
+					if (!currentSelection.getProfiles().contains(mp)) {
+						currentSelection.getProfiles().add(mp);
+					}
+					
 				}else if (currentSelection.getUuid() != null){
 					IntelProfileRecordSource temp = session.get(IntelProfileRecordSource.class, mp.getId());
 					if (temp != null) {
@@ -709,8 +715,19 @@ public class RecordSourceDialog extends SmartStyledTitleDialog{
 				}
 			}
 			
+			//validate the profiles
 			String v = ProfilesManager.INSTANCE.validateRecords(currentSelection);
-			if (v != null) throw new Exception(v);		
+			if (v != null) {
+				currentSelection.setProfiles(currentprofiles);
+				throw new Exception(v);		
+			}
+			
+			//validate events or other extensions
+			v = EditValidator.INSTANCE.isValid(currentSelection, session);
+			if (v != null) {
+				currentSelection.setProfiles(currentprofiles);
+				throw new Exception(v);
+			}
 			
 			session.beginTransaction();
 			try{

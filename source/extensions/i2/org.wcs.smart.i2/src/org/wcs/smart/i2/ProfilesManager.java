@@ -275,6 +275,13 @@ public enum ProfilesManager {
 		
 	}
 	
+	/**
+	 * Validates that the entity type attributes associated with the
+	 * record source are also associated with the source profile. 
+	 * 
+	 * @param source
+	 * @return error message or null if ok
+	 */
 	public String validateRecords(List<IntelRecordSource> sources) {
 		for (IntelRecordSource s : sources) {
 			String x = validateRecords(s);
@@ -283,6 +290,13 @@ public enum ProfilesManager {
 		return null;
 	}
 	
+	/**
+	 * Validates that the entity type attributes associated with the
+	 * record source are also associated with the source profile. 
+	 * 
+	 * @param source
+	 * @return error message or null if ok
+	 */
 	public String validateRecords(IntelRecordSource source) {
 		for (IntelRecordSourceAttribute ia : source.getAttributes()) {
 			if (ia.getAttribute() != null) continue;

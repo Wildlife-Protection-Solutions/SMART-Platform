@@ -3,11 +3,12 @@ Bundle-ManifestVersion: 2
 Bundle-Name: SMART Profiles Triggers PlugIn
 Bundle-SymbolicName: org.wcs.smart.event.i2;singleton:=true
 Bundle-Version: 7.0.0.qualifier
-Bundle-Vendor: org.wcs.smart
-Bundle-RequiredExecutionEnvironment: JavaSE-11
-Require-Bundle: org.wcs.smart.event;bundle-version="[7.0.0,8.0.0)";visibility:=reexport,
- org.wcs.smart.i2;bundle-version="[7.0.0,8.0.0)";visibility:=reexport
-Export-Package: org.wcs.smart.event.i2
 Bundle-Activator: org.wcs.smart.event.i2.Activator
-Bundle-ActivationPolicy: lazy
+Bundle-Vendor: org.wcs.smart
+Export-Package: org.wcs.smart.event.i2
+Require-Bundle: org.wcs.smart.event;bundle-version="[7.0.0,8.0.0)";visibility:=reexport,
+ org.wcs.smart.i2;bundle-version="[7.0.0,8.0.0)";visibility:=reexport,
+ org.eclipse.e4.ui.model.workbench;bundle-version="2.1.200.v20180920-1522"
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Automatic-Module-Name: org.wcs.smart.event.i2
+Bundle-ActivationPolicy: lazy

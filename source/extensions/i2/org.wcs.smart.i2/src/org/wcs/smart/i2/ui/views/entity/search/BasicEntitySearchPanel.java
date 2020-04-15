@@ -174,17 +174,22 @@ public class BasicEntitySearchPanel extends Composite {
 			List<Object> types = (List<Object>) cmbEntityType.getInput();
 			List<Object> selections = new ArrayList<>();
 			if (search.getEntityTypes() != null){
-				for (Object t : types){
-					if (t instanceof IntelEntityType) {
-						if ( search.getEntityTypes().contains(((IntelEntityType)t).getKeyId())) {
-							selections.add((IntelEntityType)t);
-						}else {
-							MessageDialog.openInformation(getShell(), Messages.BasicEntitySearchPanel_NotFound, 
-								MessageFormat.format(Messages.BasicEntitySearchPanel_EntityKeyNotFound, 
-										((IntelEntityType)t).getKeyId() ));
+				
+				for (String keyid : search.getEntityTypes()) {
+					IntelEntityType t = null;
+					for (Object x : types) {
+						if ( x instanceof IntelEntityType && ((IntelEntityType)x).getKeyId().equals(keyid)) {
+							t = (IntelEntityType) x;
+							break;
 						}
 					}
-						
+					if (t != null) {
+						selections.add(t);
+					}else {
+						MessageDialog.openInformation(getShell(), Messages.BasicEntitySearchPanel_NotFound, 
+								MessageFormat.format(Messages.BasicEntitySearchPanel_EntityKeyNotFound, 
+										keyid ));
+					}
 				}
 				
 			}

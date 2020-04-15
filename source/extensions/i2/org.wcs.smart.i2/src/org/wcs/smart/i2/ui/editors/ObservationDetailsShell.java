@@ -38,6 +38,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.ui.ObservationTreeViewer;
+import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.ui.SmartShellDialog;
 
 /**
@@ -49,6 +51,7 @@ import org.wcs.smart.ui.SmartShellDialog;
 public class ObservationDetailsShell extends SmartShellDialog{
 	
 	private IntelLocation location;
+	private Waypoint waypoint;
 	
 	private Color bgColor = null;
 	private Font boldFont = null;
@@ -61,7 +64,14 @@ public class ObservationDetailsShell extends SmartShellDialog{
 	public ObservationDetailsShell(Shell ownerShell, IntelLocation location){
 		super(ownerShell, SWT.RESIZE);
 		this.location = location;
+		this.waypoint = null;
 
+	}
+
+	public ObservationDetailsShell(Shell ownerShell, Waypoint waypoint){
+		super(ownerShell, SWT.RESIZE);
+		this.location = null;
+		this.waypoint = waypoint;
 	}
 	
 	public void createContents(Composite parent){
@@ -70,7 +80,7 @@ public class ObservationDetailsShell extends SmartShellDialog{
 		owner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		lblId = new Label(owner, SWT.NONE);
-		lblId.setText(location.getId());
+		lblId.setText(location == null ? String.valueOf(waypoint.getId()) : location.getId());
 		FontData fd = lblId.getFont().getFontData()[0];
 		fd.setStyle(SWT.BOLD);
 		fd.height = fd.height + 1;
@@ -85,11 +95,18 @@ public class ObservationDetailsShell extends SmartShellDialog{
 		lblId.addListener(SWT.MouseExit, this);
 		
 		
-		if (location.getObservations() != null && !location.getObservations().isEmpty()){
+		if (location != null && location.getObservations() != null && !location.getObservations().isEmpty()){
 			ObservationTreeViewer observationTree = new ObservationTreeViewer(owner, SWT.FULL_SELECTION | SWT.V_SCROLL);
 			observationTree.getViewer().getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			observationTree.setInput(location);
 			observationTree.expandToLevel(2);
+		}else if (waypoint != null && waypoint.getAllObservations().size() > 0) {
+			
+			ObservationTreeViewer observationTree = new ObservationTreeViewer(owner, SWT.FULL_SELECTION | SWT.V_SCROLL);
+			observationTree.getViewer().getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			observationTree.setInput(waypoint);
+			observationTree.expandToLevel(2);	
+			
 			
 		}else{
 			Label l = new Label(owner, SWT.NONE);
@@ -111,11 +128,18 @@ public class ObservationDetailsShell extends SmartShellDialog{
 		}	
 	}
 
+	private void createIntelLocationComposite() {
+		
+	}
 	
 	public IntelLocation getLocationRecord(){
 		return location;
 	}
 
+	public Waypoint getWaypoint() {
+		return waypoint;
+	}
+	
 	@Override
 	public void handleEvent(Event event) {
 		super.handleEvent(event);
