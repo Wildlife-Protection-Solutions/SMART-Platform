@@ -284,18 +284,18 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 						sorts.sort((a,b)->-1*a.getDate().compareTo(b.getDate()));
 						
 						Date pausepoint = null;
+						List<Double> lastValues = new ArrayList<>();
+
 						for (PatrolLegDay d : sorts) {
 							if (d.getTrack() != null && d.getTrack().getLineStrings() != null) {
-								List<Double> lastValues = new ArrayList<>();
 								for (LineString ll : d.getTrack().getLineStrings()) {
 									lastValues.add(ll.getCoordinateN(ll.getNumPoints() - 1).getZ());
 								}
-								lastValues.sort((a,b)->-1*a.compareTo(b));
-								pausepoint = new Date(lastValues.get(0).longValue());
-								
 							}
-							
 						}
+						lastValues.sort((a,b)->-1*a.compareTo(b));
+						pausepoint = new Date(lastValues.get(0).longValue());
+						
 						DateFormat dd = DateFormat.getDateTimeInstance();
 						dd.setTimeZone(Track.ZTIMEZONE);
 						pausepoint = DateFormat.getDateTimeInstance().parse(dd.format(pausepoint));
@@ -350,6 +350,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 					//update last observation count
 					link.setLastObservationCnt(observationCounter);
 					processedFeatures.add(feature);
+					modifiedPatrols.add(link.getPatrolLeg().getPatrol());
 					continue;				
 				}
 				
@@ -417,6 +418,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 						if (addWaypointToLastObservation(link.getPatrolLeg(), wp, session) == null) continue;
 						link.setLastObservationCnt(observationCounter);
 						processedFeatures.add(feature);
+						modifiedPatrols.add(link.getPatrolLeg().getPatrol());
 						continue;
 					}
 				
@@ -914,6 +916,15 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 		}
 		if (!create) return null;
 		
+		PatrolLegDay start = null;
+		for (PatrolLegDay pld : leg.getPatrolLegDays()) {
+			if (start == null || pld.getDate().before(start.getDate())) {
+				start = pld;
+			}
+		}
+		//configure the start time here so legs get created correctly
+		leg.setStartDate(SmartUtils.combineDateTime(leg.getStartDate(), start.getStartTime()));
+		
 		PatrolLegDay pld = new PatrolLegDay();
 		pld.setDate(SharedUtils.getDatePart(day, false));
 		
@@ -947,7 +958,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 			leg.getPatrol().setEndDate(pld.getDate());
 		}
 		
-		//make sure there is at least one legday for each day between the start and end date
+		//make sure there is at least one legday for each day between the start and end date		
 		leg.createLegDays(session);
 		
 		if (startTime == null){

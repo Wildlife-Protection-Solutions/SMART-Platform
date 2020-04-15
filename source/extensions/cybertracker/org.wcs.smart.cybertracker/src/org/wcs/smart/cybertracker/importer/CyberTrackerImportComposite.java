@@ -180,6 +180,7 @@ public class CyberTrackerImportComposite extends Composite {
 		((GridLayout)buttons.getLayout()).marginHeight = 0;
 		
 		Button btnImport = toolkit.createButton(buttons, Messages.CyberTrackerImportDialog_Button_Import, SWT.PUSH);
+		btnImport.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.IMPORT_ICON));
 		btnImport.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		btnImport.addSelectionListener(new SelectionAdapter() {
 			@Override

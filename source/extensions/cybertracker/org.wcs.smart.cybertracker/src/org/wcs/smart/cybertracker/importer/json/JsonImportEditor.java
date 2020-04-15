@@ -111,6 +111,7 @@ public class JsonImportEditor extends EditorPart {
 		((GridLayout)btnComp.getLayout()).marginHeight = 0;
 		
 		Button btnAddFiles = toolkit.createButton(btnComp, Messages.JsonImportEditor_ImportButton1, SWT.PUSH);
+		btnAddFiles.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.IMPORT_ICON));
 		btnAddFiles.addListener(SWT.Selection, e->{
 			ImportDialog dialog = new ImportDialog(getSite().getShell(), this);
 			dialog.open();
