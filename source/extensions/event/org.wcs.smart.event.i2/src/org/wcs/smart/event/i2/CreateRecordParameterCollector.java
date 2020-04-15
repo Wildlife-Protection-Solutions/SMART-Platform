@@ -50,6 +50,8 @@ import org.wcs.smart.event.ui.model.IActionParameterCollector;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.model.IntelProfile;
+import org.wcs.smart.i2.model.IntelProfileRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -63,8 +65,12 @@ public class CreateRecordParameterCollector implements IActionParameterCollector
 
 	private Text txtTitle;
 	private ComboViewer cmbSource;
+	private ComboViewer cmbProfile;
 	
 	private String initSourceKey = null;
+	private String initProfileKey = null;
+
+	private List<IntelRecordSource> srcs;
 	private List<Listener> modifyListeners;
 	
 	public CreateRecordParameterCollector() {
@@ -74,6 +80,13 @@ public class CreateRecordParameterCollector implements IActionParameterCollector
 	@Override
 	public void initParameters(EAction action) {
 
+		EActionParameterValue profileParam = action.findParameter(ProfileParameter.INSTANCE.getKey());
+		if (profileParam != null) {
+			initProfileKey = profileParam.getParameterValue();
+			initProfileCombo(profileParam.getParameterValue());
+		}
+
+		
 		EActionParameterValue sourceParam = action.findParameter(SourceParameter.INSTANCE.getKey());
 		if (sourceParam != null) {
 			initSourceKey = sourceParam.getParameterValue();
@@ -93,7 +106,19 @@ public class CreateRecordParameterCollector implements IActionParameterCollector
 	
 	@Override
 	public void updateParameters(EAction action) {
-		EActionParameterValue sourceParam = action.findParameter(SourceParameter.INSTANCE.getKey());
+		
+		EActionParameterValue sourceParam = action.findParameter(ProfileParameter.INSTANCE.getKey());
+		IntelProfile profile  = (IntelProfile) cmbProfile.getStructuredSelection().getFirstElement();
+		if (sourceParam == null) {
+			sourceParam = new EActionParameterValue();
+			sourceParam.getId().setAction(action);
+			sourceParam.getId().setParameterKey(ProfileParameter.INSTANCE.getKey());
+			action.getParameters().add(sourceParam);
+		}
+		sourceParam.setParameterValue(profile.getKeyId());
+		
+		
+		sourceParam = action.findParameter(SourceParameter.INSTANCE.getKey());
 		Object x = cmbSource.getStructuredSelection().getFirstElement();
 		if (x instanceof IntelRecordSource) {
 			if (sourceParam == null) {
@@ -127,6 +152,10 @@ public class CreateRecordParameterCollector implements IActionParameterCollector
 
 	@Override
 	public String validate() {
+		Object profile = cmbProfile.getStructuredSelection().getFirstElement();
+		if (profile == null || !(profile instanceof IntelProfile)) {
+			return Messages.CreateRecordParameterCollector_ProfileRequired;
+		}
 		return null;
 	}
 
@@ -137,6 +166,28 @@ public class CreateRecordParameterCollector implements IActionParameterCollector
 		main.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		Label l = new Label(main, SWT.NONE);
+		l.setText(Messages.CreateRecordParameterCollector_ProfileLabel);
+		l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		
+		cmbProfile = new ComboViewer(main, SWT.DROP_DOWN | SWT.READ_ONLY);
+		cmbProfile.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		cmbProfile.setContentProvider(ArrayContentProvider.getInstance());
+		cmbProfile.setLabelProvider(new LabelProvider() {
+			@Override
+			public String getText(Object element) {
+				if (element instanceof IntelProfile) {
+					return ((IntelProfile) element).getName();
+				}
+				return super.getText(element);
+			}
+		});
+		cmbProfile.setInput(new String[] {DialogConstants.LOADING_TEXT});
+		cmbProfile.getControl().setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		cmbProfile.addSelectionChangedListener(e->{
+			initSourceCombo(initProfileKey);
+		});
+		
+		l = new Label(main, SWT.NONE);
 		l.setText(Messages.CreateRecordParameterCollector_SourceLabel);
 		l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
@@ -177,39 +228,70 @@ public class CreateRecordParameterCollector implements IActionParameterCollector
 	}
 
 	private void initSourceCombo(String key) {
+		if (srcs == null) return;
+		
+		IntelProfile ip = (IntelProfile) cmbProfile.getStructuredSelection().getFirstElement();
+		
+		Object selection = ""; //$NON-NLS-1$
+		List<Object> items = new ArrayList<>();
+		items.add(selection);
+		for (IntelRecordSource rs : srcs) {
+			for (IntelProfileRecordSource ipr : rs.getProfiles()) {
+				if (ipr.getProfile().equals(ip)) {
+					items.add(rs);
+					if (rs.getKeyId().equalsIgnoreCase(key)) {
+						selection = rs;
+					}
+				}
+			}
+		}
+		cmbSource.setInput(items);
+		cmbSource.setSelection(new StructuredSelection(selection));
+		cmbSource.addSelectionChangedListener(evt->fireListeners());
+	}
+	
+	private void initProfileCombo(String key) {
 		if (key == null) return;
 		
-		Object x = cmbSource.getInput();
+		Object x = cmbProfile.getInput();
 		if (!(x instanceof List)) return;
 		
 		try {
 			List<?> items = (List<?>)x;
 			for (Object item : items) {
-				if ((item instanceof IntelRecordSource) && (((IntelRecordSource)item).getKeyId()).equals(key)){
-					cmbSource.setSelection(new StructuredSelection(item));
+				if ((item instanceof IntelProfile) && (((IntelProfile)item).getKeyId()).equals(key)){
+					cmbProfile.setSelection(new StructuredSelection(item));
 					return;
 				}
 			}
 		}finally {
-			cmbSource.addSelectionChangedListener(evt->fireListeners());
+			cmbProfile.addSelectionChangedListener(evt->fireListeners());
 		}
 	}
+	
 	private Job loadSources = new Job(Messages.CreateRecordParameterCollector_JobName) {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			List<Object> srcs = new ArrayList<>();
+			List<IntelProfile> profiles = new ArrayList<>();
+			
 			try(Session session = HibernateManager.openSession()){
-				srcs.addAll(QueryFactory.buildQuery(session, IntelRecordSource.class, 
-						"conservationArea", SmartDB.getCurrentConservationArea()).list()); //$NON-NLS-1$
+				profiles.addAll( QueryFactory.buildQuery(session, IntelProfile.class,
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list() ); //$NON-NLS-1$
 				
+				srcs = QueryFactory.buildQuery(session, IntelRecordSource.class, 
+						"conservationArea", SmartDB.getCurrentConservationArea()).list(); //$NON-NLS-1$
+				srcs.forEach(s->s.getProfiles().size());
 			}
+			
+			profiles.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
+			
 			srcs.sort((a,b)-> Collator.getInstance().compare(((IntelRecordSource)a).getName(), ((IntelRecordSource)b).getName()));
-			srcs.add(0, ""); //$NON-NLS-1$
 			
 			Display.getDefault().syncExec(()->{
-				if (cmbSource.getControl().isDisposed()) return;
-				cmbSource.setInput(srcs);
+				if (cmbProfile.getControl().isDisposed()) return;
+				cmbProfile.setInput(profiles);
+				initProfileCombo(initProfileKey);
 				initSourceCombo(initSourceKey);
 			});
 			

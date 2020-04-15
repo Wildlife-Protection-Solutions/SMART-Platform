@@ -69,7 +69,21 @@ public class EventDatabaseUpgrader implements IDatabaseUpgrader {
 	 * @param session is active transaction
 	 */
 	public static final void upgrade(String currentVersion, Session session){
-		//nothing to do
+		if (currentVersion.equalsIgnoreCase(EventPlugIn.DB_VERSION_1)) {
+			upgradev1tov2(session);
+		}
+	}
+	
+	private static void upgradev1tov2(Session session) {
+		//create profile parameters for intel events
+		StringBuilder sb = new StringBuilder();
+		sb.append("insert into smart.e_action_parameter_value(action_uuid, parameter_key, parameter_value)"); //$NON-NLS-1$
+		sb.append("select uuid, 'org.wcs.smart.profile.common.profile', 'profile1'"); //$NON-NLS-1$
+		sb.append(" FROM smart.e_action where type_key in ('org.wcs.smart.profile.newrecord', 'org.wcs.smart.profile.i2.newentity')"); //$NON-NLS-1$
+		
+		session.createNativeQuery(sb.toString()).executeUpdate();
+		
+		HibernateManager.setPlugInVersion(EventPlugIn.PLUGIN_ID, EventPlugIn.DB_VERSION_2, session);
 	}
 		
 }

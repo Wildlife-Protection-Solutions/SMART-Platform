@@ -59,6 +59,8 @@ import org.hibernate.Session;
 import org.json.simple.JSONArray;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.event.i2.ProfileParameter;
+import org.wcs.smart.event.i2.SourceParameter;
 import org.wcs.smart.event.i2.entity.EntityMapping.Type;
 import org.wcs.smart.event.i2.internal.Messages;
 import org.wcs.smart.event.model.EAction;
@@ -69,6 +71,10 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelProfile;
+import org.wcs.smart.i2.model.IntelProfileEntityType;
+import org.wcs.smart.i2.model.IntelProfileRecordSource;
+import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -79,8 +85,10 @@ import org.wcs.smart.ui.properties.DialogConstants;
 public class CreateEntityParameterCollector implements IActionParameterCollector {
 
 	private String initEntityTypeKey = null;
+	private String initProfileKey = null;
 
 	private ComboViewer cmbEntityType;
+	private ComboViewer cmbProfile;
 	private TableViewer tblMappings;
 
 	private List<Listener> modifyListeners;
@@ -88,6 +96,7 @@ public class CreateEntityParameterCollector implements IActionParameterCollector
 	private List<Attribute> dmAttributes;
 	
 	private IntelEntityType lastSelection = null;
+	private List<IntelEntityType> entityTypes = null;
 	
 	private Composite warningSection = null;
 	private Label warningLabel = null;
@@ -98,6 +107,12 @@ public class CreateEntityParameterCollector implements IActionParameterCollector
 
 	@Override
 	public void initParameters(EAction action) {
+		EActionParameterValue profileParam = action.findParameter(ProfileParameter.INSTANCE.getKey());
+		if (profileParam != null) {
+			initProfileKey = profileParam.getParameterValue();
+			initProfileCombo(profileParam.getParameterValue());
+		}
+		
 		EActionParameterValue sourceParam = action.findParameter(EntityTypeParameter.INSTANCE.getKey());
 		if (sourceParam != null) {
 			initEntityTypeKey = sourceParam.getParameterValue();
@@ -121,7 +136,17 @@ public class CreateEntityParameterCollector implements IActionParameterCollector
 	@SuppressWarnings("unchecked")
 	@Override
 	public void updateParameters(EAction action) {
-		EActionParameterValue sourceParam = action.findParameter(EntityTypeParameter.INSTANCE.getKey());
+		EActionParameterValue sourceParam = action.findParameter(ProfileParameter.INSTANCE.getKey());
+		IntelProfile profile  = (IntelProfile) cmbProfile.getStructuredSelection().getFirstElement();
+		if (sourceParam == null) {
+			sourceParam = new EActionParameterValue();
+			sourceParam.getId().setAction(action);
+			sourceParam.getId().setParameterKey(ProfileParameter.INSTANCE.getKey());
+			action.getParameters().add(sourceParam);
+		}
+		sourceParam.setParameterValue(profile.getKeyId());
+		
+		sourceParam = action.findParameter(EntityTypeParameter.INSTANCE.getKey());
 		Object x = cmbEntityType.getStructuredSelection().getFirstElement();
 		if (x instanceof IntelEntityType) {
 			if (sourceParam == null) {
@@ -161,6 +186,16 @@ public class CreateEntityParameterCollector implements IActionParameterCollector
 
 	@Override
 	public String validate() {
+		Object profile = cmbProfile.getStructuredSelection().getFirstElement();
+		if (profile == null || !(profile instanceof IntelProfile)) {
+			return Messages.CreateEntityParameterCollector_ProfileRequired;
+		}
+		
+		Object et = cmbEntityType.getStructuredSelection().getFirstElement();
+		if ( et == null || !(et instanceof IntelEntityType)) {
+			return Messages.CreateEntityParameterCollector_EntityTypeRequired;
+		}
+		
 		Set<String> entityAttributeKeys = new HashSet<>();
 		Set<String> duplicates = new HashSet<>();
 		for (EntityMapping mm : mappings) {
@@ -205,6 +240,28 @@ public class CreateEntityParameterCollector implements IActionParameterCollector
 		top.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		Label l = new Label(top, SWT.NONE);
+		l.setText(Messages.CreateEntityParameterCollector_ProfileLabel);
+		l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		
+		cmbProfile = new ComboViewer(top, SWT.DROP_DOWN | SWT.READ_ONLY);
+		cmbProfile.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		cmbProfile.setContentProvider(ArrayContentProvider.getInstance());
+		cmbProfile.setLabelProvider(new LabelProvider() {
+			@Override
+			public String getText(Object element) {
+				if (element instanceof IntelProfile) {
+					return ((IntelProfile) element).getName();
+				}
+				return super.getText(element);
+			}
+		});
+		cmbProfile.setInput(new String[] {DialogConstants.LOADING_TEXT});
+		cmbProfile.getControl().setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		cmbProfile.addSelectionChangedListener(e->{
+			initSourceCombo(initEntityTypeKey);
+		});
+		
+		l = new Label(top, SWT.NONE);
 		l.setText(Messages.CreateEntityParameterCollector_EntityTypeLabel);
 		l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
@@ -304,18 +361,24 @@ public class CreateEntityParameterCollector implements IActionParameterCollector
 		
 		Button btnAdd = new Button(buttonArea, SWT.PUSH);
 		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
+		btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		btnAdd.setBackground(buttonArea.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnAdd.addListener(SWT.Selection, e->addMapping());
 		btnAdd.setEnabled(false);
 		
 		Button btnEdit= new Button(buttonArea, SWT.PUSH);
 		btnEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
+		btnEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		btnEdit.setBackground(buttonArea.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnEdit.addListener(SWT.Selection, e->editMapping());
 		btnEdit.setEnabled(false);
 		
 		Button btnRemove= new Button(buttonArea, SWT.PUSH);
 		btnRemove.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		btnRemove.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		btnRemove.setBackground(buttonArea.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnRemove.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnRemove.addListener(SWT.Selection, e->deleteMapping());
 		btnRemove.setEnabled(false);
@@ -326,12 +389,14 @@ public class CreateEntityParameterCollector implements IActionParameterCollector
 
 		Button btnMoveUp= new Button(buttonArea, SWT.PUSH);
 		btnMoveUp.setText(Messages.CreateEntityParameterCollector_UpButton);
+		btnMoveUp.setBackground(buttonArea.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnMoveUp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnMoveUp.addListener(SWT.Selection, e->move(-1));
 		btnMoveUp.setEnabled(false);
 		
 		Button btnMoveDown= new Button(buttonArea, SWT.PUSH);
 		btnMoveDown.setText(Messages.CreateEntityParameterCollector_DownButton);
+		btnMoveDown.setBackground(buttonArea.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnMoveDown.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnMoveDown.addListener(SWT.Selection, e->move(1));
 		btnMoveDown.setEnabled(false);
@@ -355,7 +420,10 @@ public class CreateEntityParameterCollector implements IActionParameterCollector
 		warningLabel.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 
 		cmbEntityType.addSelectionChangedListener(e->{
-			btnAdd.setEnabled(cmbEntityType.getStructuredSelection().getFirstElement() instanceof IntelEntityType);
+			btnAdd.setEnabled(
+					cmbEntityType.getStructuredSelection().getFirstElement() instanceof IntelEntityType &&
+					cmbProfile.getStructuredSelection().getFirstElement() instanceof IntelProfile);
+			
 			if (lastSelection == cmbEntityType.getStructuredSelection().getFirstElement()) return;
 			if (!mappings.isEmpty()) {
 				if (!MessageDialog.openConfirm(main.getShell(), Messages.CreateEntityParameterCollector_ClearTitle, Messages.CreateEntityParameterCollector_ClearMessage)) {
@@ -488,43 +556,73 @@ public class CreateEntityParameterCollector implements IActionParameterCollector
 	}
 
 	private void initSourceCombo(String key) {
+		if (entityTypes == null) return;
+		
+		IntelProfile ip = (IntelProfile) cmbProfile.getStructuredSelection().getFirstElement();
+
+		Object selection = null;
+		List<Object> items = new ArrayList<>();
+		for (IntelEntityType rs : entityTypes) {
+			for (IntelProfileEntityType ipr : rs.getProfiles()) {
+				if (ipr.getProfile().equals(ip)) {
+					items.add(rs);
+					if (rs.getKeyId().equalsIgnoreCase(key)) {
+						selection = rs;
+					}else if (selection == null) {
+						selection = rs;
+					}
+				}
+			}
+		}
+		
+		cmbEntityType.setInput(items);
+		if (selection != null) cmbEntityType.setSelection(new StructuredSelection(selection));
+		cmbEntityType.addSelectionChangedListener(evt->fireListeners());
+	}
+	
+	private void initProfileCombo(String key) {
 		if (key == null) return;
 		
-		Object x = cmbEntityType.getInput();
+		Object x = cmbProfile.getInput();
 		if (!(x instanceof List)) return;
 		
 		try {
 			List<?> items = (List<?>)x;
 			for (Object item : items) {
-				if ((item instanceof IntelEntityType) && (((IntelEntityType)item).getKeyId()).equals(key)){
-					lastSelection = (IntelEntityType) item;
-					cmbEntityType.setSelection(new StructuredSelection(item));
+				if ((item instanceof IntelProfile) && (((IntelProfile)item).getKeyId()).equals(key)){
+					cmbProfile.setSelection(new StructuredSelection(item));
 					return;
 				}
 			}
 		}finally {
-			cmbEntityType.addSelectionChangedListener(evt->fireListeners());
+			cmbProfile.addSelectionChangedListener(evt->fireListeners());
 		}
 	}
-	
-	
 	private Job loadEntities = new Job(Messages.CreateEntityParameterCollector_loadingJobName) {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			List<IntelEntityType> srcs = new ArrayList<>();
 			List<Attribute> dmAttributes = new ArrayList<>();
-			
+			List<IntelProfile> profiles = new ArrayList<>();
+
 			try(Session session = HibernateManager.openSession()){
-				srcs.addAll(QueryFactory.buildQuery(session, IntelEntityType.class, 
-						"conservationArea", SmartDB.getCurrentConservationArea()).list()); //$NON-NLS-1$
-				for (IntelEntityType src : srcs) {
+				
+				profiles.addAll( QueryFactory.buildQuery(session, IntelProfile.class,
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list() ); //$NON-NLS-1$
+				
+				entityTypes = QueryFactory.buildQuery(session, IntelEntityType.class, 
+						"conservationArea", SmartDB.getCurrentConservationArea()).list(); //$NON-NLS-1$
+				for (IntelEntityType src : entityTypes) {
+					src.getProfiles().size();
 					src.getAttributes().forEach(a->{
 						a.getAttribute().getName();
 						if(a.getAttribute().getType() == AttributeType.LIST) {
 							a.getAttribute().getAttributeList().forEach(e->e.getName());
 						}
 					});
+					if (src.getKeyId().equalsIgnoreCase(initEntityTypeKey)) {
+						lastSelection = src;
+					}
 				}
 				
 				dmAttributes.addAll(QueryFactory.buildQuery(session, Attribute.class,
@@ -534,12 +632,14 @@ public class CreateEntityParameterCollector implements IActionParameterCollector
 				}
 			}
 			
-			srcs.sort((a,b)-> Collator.getInstance().compare(a.getName(), b.getName()));
+			profiles.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
+			entityTypes.sort((a,b)-> Collator.getInstance().compare(a.getName(), b.getName()));
 			dmAttributes.sort((a,b)-> Collator.getInstance().compare(a.getName(), b.getName()));
 			CreateEntityParameterCollector.this.dmAttributes = dmAttributes;
 			Display.getDefault().syncExec(()->{
-				if (cmbEntityType.getControl().isDisposed()) return;
-				cmbEntityType.setInput(srcs);
+				if (cmbProfile.getControl().isDisposed()) return;
+				cmbProfile.setInput(profiles);
+				initProfileCombo(initProfileKey);
 				initSourceCombo(initEntityTypeKey);
 			});
 			

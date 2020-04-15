@@ -51,6 +51,8 @@ import org.wcs.smart.i2.model.IntelAttachment;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.model.IntelObservation;
 import org.wcs.smart.i2.model.IntelObservationAttribute;
+import org.wcs.smart.i2.model.IntelProfile;
+import org.wcs.smart.i2.model.IntelProfileRecordSource;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
 import org.wcs.smart.i2.model.IntelRecordSource;
@@ -79,6 +81,7 @@ public class CreateRecordActionType implements IActionType {
 	
 	public CreateRecordActionType() {
 		parameters = new ArrayList<>();
+		parameters.add(ProfileParameter.INSTANCE);
 		parameters.add(SourceParameter.INSTANCE);
 		parameters.add(TitleParameter.INSTANCE);
 	}
@@ -134,7 +137,10 @@ public class CreateRecordActionType implements IActionType {
 		newRecord.setPrimaryDate(data.getWaypoint().getDateTime());
 		newRecord.setStatus(IntelRecord.Status.NEW);
 		
-
+		EActionParameterValue profileParam = action.findParameter(ProfileParameter.INSTANCE.getKey());
+		if (profileParam == null || profileParam.getParameterValue().isEmpty()) {
+			throw new RuntimeException(Messages.CreateRecordActionType_ProfileParameterNotSet);
+		}
 		EActionParameterValue sourceParam = action.findParameter(SourceParameter.INSTANCE.getKey());
 		EActionParameterValue titleParam = action.findParameter(TitleParameter.INSTANCE.getKey());
 		if (titleParam != null) {
@@ -172,6 +178,15 @@ public class CreateRecordActionType implements IActionType {
 		location.getObservations().add(io);
 		
 		try(Session session = HibernateManager.openSession(new AttachmentInterceptor(false))){
+			
+			String keyid = profileParam.getParameterValue();
+			IntelProfile ip = QueryFactory.buildQuery(session, IntelProfile.class, 
+					new Object[] {"keyId", keyid}, //$NON-NLS-1$
+					new Object[] {"conservationArea", data.getWaypoint().getConservationArea()}).uniqueResult(); //$NON-NLS-1$
+			
+			if (ip == null) throw new RuntimeException(Messages.CreateRecordActionType_ProfileNotFound);
+			
+			newRecord.setProfile(ip);
 			
 			String srcLabel = WaypointSourceEngine.INSTANCE.getSource(data.getWaypoint().getSourceId()).getSourceLabel(data.getWaypoint(), session, l);
 			newRecord.setSmartSource(data.getWaypoint().getSourceId() + ":" + UuidUtils.uuidToString( data.getWaypoint().getUuid()) + ":" + srcLabel); //$NON-NLS-1$ //$NON-NLS-2$
@@ -230,6 +245,18 @@ public class CreateRecordActionType implements IActionType {
 					IntelRecordSource source = QueryFactory.buildQuery(session, IntelRecordSource.class, 
 						new Object[] {"conservationArea", newRecord.getConservationArea()}, //$NON-NLS-1$
 						new Object[] {"keyId", sourceParam.getParameterValue()}).uniqueResult(); //$NON-NLS-1$
+					
+					//ensure profile is valid for record source
+					boolean ok = false;
+					for (IntelProfileRecordSource irs : source.getProfiles()) {
+						if (irs.getProfile().equals(ip)) {
+							ok = true;
+						}
+					}
+					if (!ok) {
+						throw new RuntimeException(MessageFormat.format(Messages.CreateRecordActionType_InvalidProfile, ip.getName(), source.getName()));
+					}
+					
 					newRecord.setRecordSource(source);
 				}
 				//create a unquie title

@@ -37,6 +37,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.event.EventPlugIn;
+import org.wcs.smart.event.i2.ProfileParameter;
 import org.wcs.smart.event.i2.entity.EntityMapping.Type;
 import org.wcs.smart.event.i2.internal.Messages;
 import org.wcs.smart.event.model.EAction;
@@ -57,6 +58,8 @@ import org.wcs.smart.i2.model.IntelEntityAttachment;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
+import org.wcs.smart.i2.model.IntelProfile;
+import org.wcs.smart.i2.model.IntelProfileEntityType;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 
@@ -74,6 +77,7 @@ public class CreateEntityActionType implements IActionType {
 	
 	public CreateEntityActionType() {
 		parameters = new ArrayList<>();
+		parameters.add(ProfileParameter.INSTANCE);
 		parameters.add(EntityTypeParameter.INSTANCE);
 		parameters.add(MappingParameter.INSTANCE);
 	}
@@ -113,8 +117,22 @@ public class CreateEntityActionType implements IActionType {
 		EActionParameterValue attributeMappings = action.findParameter(MappingParameter.INSTANCE.getKey());
 		IntelEntity newEntity = null;
 		
+		EActionParameterValue profileParam = action.findParameter(ProfileParameter.INSTANCE.getKey());
+		if (profileParam == null || profileParam.getParameterValue().isEmpty()) {
+			throw new RuntimeException(Messages.CreateEntityActionType_ProfileParameterNotSet);
+		}
+		
 		try(Session session = HibernateManager.openSession(new AttachmentInterceptor(false))){
 		
+			//find profile
+			String keyid = profileParam.getParameterValue();
+			IntelProfile ip = QueryFactory.buildQuery(session, IntelProfile.class, 
+					new Object[] {"keyId", keyid}, //$NON-NLS-1$
+					new Object[] {"conservationArea", data.getWaypoint().getConservationArea()}).uniqueResult(); //$NON-NLS-1$
+			
+			if (ip == null) throw new RuntimeException(Messages.CreateEntityActionType_ProfileNotFound);
+			
+			
 			//parse mappings
 			List<EntityMapping> mappings = new ArrayList<>();
 			if (attributeMappings != null && !attributeMappings.getParameterValue().isEmpty()) {
@@ -129,8 +147,20 @@ public class CreateEntityActionType implements IActionType {
 				return;
 			}
 			
+			//ensure profile is valid for entity type
+			boolean ok = false;
+			for (IntelProfileEntityType ipe : entityType.getProfiles()) {
+				if (ipe.getProfile().equals(ip)) {
+					ok = true;
+				}
+			}
+			if (!ok) {
+				throw new RuntimeException(MessageFormat.format(Messages.CreateEntityActionType_InvalidProfile, ip.getName(), entityType.getName()));
+			}
+			
 			//create entity
 			newEntity = new IntelEntity();
+			newEntity.setProfile(ip);
 			newEntity.setEntityType(entityType);
 			newEntity.setComment(generateComment(action,filter,data));
 			newEntity.setConservationArea(ca);

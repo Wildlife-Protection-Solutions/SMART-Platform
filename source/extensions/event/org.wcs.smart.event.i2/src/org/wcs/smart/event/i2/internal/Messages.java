@@ -16,20 +16,31 @@ public class Messages extends NLS {
 	public static String CreateEntityActionType_ActionDescription;
 	public static String CreateEntityActionType_ActionName;
 	public static String CreateEntityActionType_AttributeNotFound;
+	public static String CreateEntityActionType_InvalidProfile;
+	public static String CreateEntityActionType_ProfileNotFound;
+	public static String CreateEntityActionType_ProfileParameterNotSet;
 	public static String CreateEntityParameterCollector_AttributeColumn;
 	public static String CreateEntityParameterCollector_ClearMessage;
 	public static String CreateEntityParameterCollector_ClearTitle;
 	public static String CreateEntityParameterCollector_DmAttributeColumn;
 	public static String CreateEntityParameterCollector_DownButton;
 	public static String CreateEntityParameterCollector_EntityTypeLabel;
+	public static String CreateEntityParameterCollector_EntityTypeRequired;
 	public static String CreateEntityParameterCollector_FixedOp;
 	public static String CreateEntityParameterCollector_loadingJobName;
 	public static String CreateEntityParameterCollector_MappingsLable;
 	public static String CreateEntityParameterCollector_MultipleMappings;
 	public static String CreateEntityParameterCollector_PositionLabel;
+	public static String CreateEntityParameterCollector_ProfileLabel;
+	public static String CreateEntityParameterCollector_ProfileRequired;
 	public static String CreateEntityParameterCollector_UpButton;
+	public static String CreateRecordActionType_InvalidProfile;
+	public static String CreateRecordActionType_ProfileNotFound;
+	public static String CreateRecordActionType_ProfileParameterNotSet;
 	public static String CreateRecordActionType_WaypointIdLabel;
 	public static String CreateRecordParameterCollector_JobName;
+	public static String CreateRecordParameterCollector_ProfileLabel;
+	public static String CreateRecordParameterCollector_ProfileRequired;
 	public static String CreateRecordParameterCollector_SourceLabel;
 	public static String CreateRecordParameterCollector_TitleLabel;
 	public static String EntityTypeParameter_Name;
@@ -45,6 +56,7 @@ public class Messages extends NLS {
 	public static String NewMappingDialog_Title;
 	public static String NewMappingDialog_WarningMsg;
 	public static String NewMappingDialog_WarningTitle;
+	public static String ProfileParameter_ProfileParameter;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
