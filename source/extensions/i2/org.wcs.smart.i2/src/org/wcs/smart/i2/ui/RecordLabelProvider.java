@@ -100,6 +100,8 @@ public class RecordLabelProvider extends ColumnLabelProvider{
 	
 	@Override
 	public Image getImage(Object element){
+		if (field != RecordField.TITLE) return null;
+		
 		IntelRecordSource src = null;
 		if (element instanceof IntelRecord){
 			src = ((IntelRecord) element).getRecordSource();

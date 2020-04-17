@@ -387,7 +387,7 @@ public class RecordsPreferencePage extends PreferencePage implements IIntelPrefe
 		newItem.setAttributes(new ArrayList<>());
 		newItem.setProfiles(new HashSet<>());
 		newItem.setConservationArea(SmartDB.getCurrentConservationArea());
-		newItem.setName(Messages.RecordsPreferencePage_NewSourceName);
+		newItem.setName(""); //$NON-NLS-1$
 		newItem.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), newItem.getName());
 		openDialog(newItem);
 	}

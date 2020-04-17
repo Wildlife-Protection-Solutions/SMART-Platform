@@ -36,6 +36,9 @@ public interface IIntelligenceLabelProvider extends ISharedLabelProvider{
 	public static final Object QUERY_COLUMN_CATEGORY_LABEL = new Object();
 	public static final Object OBS_COUNT_LABEL = new Object();
 	
+	public static final Object DM_SOURCE_LABEL = new Object();
+	public static final Object PROFILE_SOURCE_LABEL = new Object();
+	
 	public String getDataSourceProductName(String dataSetType, Locale l);
 	
 	/*

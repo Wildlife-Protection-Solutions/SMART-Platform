@@ -186,8 +186,8 @@ public class EntityDatasetResultSetMetadata implements IResultSetMetaData {
 	 */
 	@Override
 	public int getColumnType(int index) throws OdaException {
-		if (index <= 8) return Column.values()[index-1].type;
-		index = index - 9;
+		if (index <= Column.values().length) return Column.values()[index-1].type;
+		index = index - Column.values().length;
 		if (index < attributes.size()){
 			AttributeType attType = attributes.get(index).getAttribute().getType();
 			return IntelHibernateManager.getAttributeSqlType(attType);

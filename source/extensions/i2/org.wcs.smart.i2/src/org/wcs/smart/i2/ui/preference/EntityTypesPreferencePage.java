@@ -443,11 +443,11 @@ public class EntityTypesPreferencePage extends PreferencePage implements IIntelP
 							
 							try {
 								if (!DeleteManager.canDelete(t, s)) {
-									throw new Exception("Unable to delete entity type");
+									throw new Exception(Messages.EntityTypesPreferencePage_DeleteError);
 								}
 							}catch (Exception ex) {
 								Display.getDefault().syncExec(()->{
-									MessageDialog.openError(btnNew.getShell(), "Error", MessageFormat.format("Cannot delete entity type {0}: {1}", t.getName(), ex.getMessage()));
+									MessageDialog.openError(btnNew.getShell(), Messages.EntityTypesPreferencePage_ErrorTitle, MessageFormat.format(Messages.EntityTypesPreferencePage_DeleteEntityTypeMsg, t.getName(), ex.getMessage()));
 								});
 								continue;
 							}

@@ -72,8 +72,6 @@ public class EntityAttachmentDataset implements IQuery {
 	@Override
 	public void prepare(String queryText) throws OdaException {
 		Set<IntelProfile> profiles = connection.hasPermission(Permission.ENTITY);
-		if (profiles.isEmpty())
-			throw new OdaException(MessageFormat.format("Unauthorized.  You do not have permission to access intelligence entity type {0} dataset", queryText)); //$NON-NLS-1$
 		
 		CriteriaBuilder cb = connection.getSession().getCriteriaBuilder();
 		CriteriaQuery<IntelEntityType> c = cb.createQuery(IntelEntityType.class);

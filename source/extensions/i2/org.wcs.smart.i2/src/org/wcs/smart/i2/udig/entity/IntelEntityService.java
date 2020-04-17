@@ -43,7 +43,10 @@ import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.catalog.IServiceInfo;
 import org.locationtech.udig.ui.UDIGDisplaySafeLock;
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntity;
@@ -68,6 +71,7 @@ public class IntelEntityService extends IService {
 	private Exception error;
 	
 	private IntelEntityDataSource ds = null;
+	private AttributeListItem dmAttribute;
 		
 	/*
 	 * this jobs configures the names of the geo resources
@@ -90,6 +94,12 @@ public class IntelEntityService extends IService {
 				for (IGeoResource lresource : new ArrayList<>(resources(monitor))){
 					if (lresource.getIdentifier().getRef().equals(LocationLayerType.ATTRIBUTE.name())){
 						((IntelEntityGeoResourceInfo)lresource.getInfo(monitor)).setTitle(MessageFormat.format(Messages.IntelEntityService_Title, recordName));
+					}else if (lresource.getIdentifier().getRef().equals(LocationLayerType.POINT.name())){
+						((IntelEntityGeoResourceInfo)lresource.getInfo(monitor)).setTitle(MessageFormat.format("{0} ({1})", recordName, SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(IIntelligenceLabelProvider.PROFILE_SOURCE_LABEL, Locale.getDefault()))); //$NON-NLS-1$
+					}else if (lresource.getIdentifier().getRef().equals(LocationLayerType.POLYGON.name())){
+						((IntelEntityGeoResourceInfo)lresource.getInfo(monitor)).setTitle(MessageFormat.format("{0} ({1})", recordName, SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(IIntelligenceLabelProvider.PROFILE_SOURCE_LABEL, Locale.getDefault()))); //$NON-NLS-1$
+					}else if (lresource.getIdentifier().getRef().equals(LocationLayerType.DM_OBS.name())){
+						((IntelEntityGeoResourceInfo)lresource.getInfo(monitor)).setTitle(MessageFormat.format("{0} ({1})", recordName, SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(IIntelligenceLabelProvider.DM_SOURCE_LABEL, Locale.getDefault()))); //$NON-NLS-1$
 					}else{
 						((IntelEntityGeoResourceInfo)lresource.getInfo(monitor)).setTitle(recordName);
 					}
@@ -186,6 +196,10 @@ public class IntelEntityService extends IService {
 									q.setParameter("uuid", entityUuid); //$NON-NLS-1$
 									Long cnt = (Long) q.uniqueResult();
 									hasPosition = cnt > 0;	
+									
+									
+									dmAttribute = s.get(IntelEntity.class, entityUuid).getDmAttributeListItem();
+									if (dmAttribute != null) dmAttribute.getAttribute().getName();
 								}
 								
 								return org.eclipse.core.runtime.Status.OK_STATUS;
@@ -203,8 +217,9 @@ public class IntelEntityService extends IService {
 					ArrayList<IntelEntityGeoResource> list = new ArrayList<>();
 					//two resources per entity one for points and one for polygons
 					list.add(new IntelEntityGeoResource(this, LocationLayerType.POINT));
+					if (dmAttribute != null) list.add(new IntelEntityGeoResource(this, LocationLayerType.DM_OBS));
 					list.add(new IntelEntityGeoResource(this, LocationLayerType.POLYGON));
-					if (hasPosition != null && hasPosition) list.add(new IntelEntityGeoResource(this, LocationLayerType.ATTRIBUTE));
+					if (hasPosition != null && hasPosition) list.add(new IntelEntityGeoResource(this, LocationLayerType.ATTRIBUTE));					
 					members = list;
 				}
 			}

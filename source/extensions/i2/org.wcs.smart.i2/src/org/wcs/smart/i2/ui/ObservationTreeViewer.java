@@ -55,11 +55,11 @@ public class ObservationTreeViewer {
 		
 		groupCol = new TreeViewerColumn(viewer, SWT.NONE);
 		groupCol.getColumn().setWidth(60);
-		groupCol.getColumn().setText("");
+		groupCol.getColumn().setText(""); //$NON-NLS-1$
 		groupCol.setLabelProvider(new ColumnLabelProvider(){
 			public String getText(Object element){
-				if (element instanceof WaypointObservationGroup) return "Group";
-				return "";
+				if (element instanceof WaypointObservationGroup) return Messages.ObservationTreeViewer_GrpLabel;
+				return ""; //$NON-NLS-1$
 			}
 		});
 		
@@ -77,7 +77,7 @@ public class ObservationTreeViewer {
 				}else if(element instanceof WaypointObservation) {
 					return ((WaypointObservation)element).getCategory().getName();
 				}else if (element instanceof WaypointObservationGroup) {
-					return "";
+					return ""; //$NON-NLS-1$
 				}
 				return super.getText(element);
 			}

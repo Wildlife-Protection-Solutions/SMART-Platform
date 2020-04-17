@@ -246,7 +246,7 @@ public enum RecordReportGenerator {
 		rdh.getBody().add(headerId);
 		
 		/* Details */
-		GridHandle headerGrid = factory.newGridItem(null, 2, 5);
+		GridHandle headerGrid = factory.newGridItem(null, 2, 6);
 		rdh.getBody().add(headerGrid);
 		headerGrid.setDataSet(recordDataset);
 		headerGrid.setStyleName(tableStyle.getName());
@@ -275,14 +275,22 @@ public enum RecordReportGenerator {
 		cc.setExpression("dataSetRow[\"" + RecordDatasetResultSetMetadata.Column.LAST_MODIFIED.getColumnName(Locale.getDefault()) + "\"] + \" (\" + dataSetRow[\"" + RecordDatasetResultSetMetadata.Column.LAST_MODIFIED_BY.getColumnName(Locale.getDefault()) + "\"] + \")\""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		headerGrid.getColumnBindings().addItem(cc);
 		
-		//status
+		//profile
 		int row = 1;
 		LabelHandle l = factory.newLabel(null);
+		l.setText(MessageFormat.format("{0}:",RecordDatasetResultSetMetadata.Column.PROFILE.getColumnName(Locale.getDefault()))); //$NON-NLS-1$
+		headerGrid.getCell(row,1).getContent().add(l);
+		DataItemHandle di = factory.newDataItem(null);
+		di.setResultSetColumn(RecordDatasetResultSetMetadata.Column.PROFILE.getColumnName(Locale.getDefault()));
+		headerGrid.getCell(row,2).getContent().add(di);
+		row++;
+		
+		//status
+		l = factory.newLabel(null);
 		l.setText(MessageFormat.format("{0}:",RecordDatasetResultSetMetadata.Column.STATUS.getColumnName(Locale.getDefault()))); //$NON-NLS-1$
 		headerGrid.getCell(row,1).getContent().add(l);
 		
-		
-		DataItemHandle di = factory.newDataItem(null);
+		di = factory.newDataItem(null);
 		di.setResultSetColumn(RecordDatasetResultSetMetadata.Column.STATUS.getColumnName(Locale.getDefault()));
 		headerGrid.getCell(row,2).getContent().add(di);
 		row++;

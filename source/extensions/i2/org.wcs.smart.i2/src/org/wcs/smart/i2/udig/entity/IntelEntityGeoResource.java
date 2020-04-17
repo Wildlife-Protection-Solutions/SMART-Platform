@@ -71,7 +71,7 @@ public class IntelEntityGeoResource extends IGeoResource implements IWorkingSetR
 
 	@Override
 	public boolean canFilter(){
-		return type == LocationLayerType.POINT || type == LocationLayerType.POLYGON;
+		return type == LocationLayerType.POINT || type == LocationLayerType.POLYGON || type == LocationLayerType.DM_OBS;
 	}
 	
 	/**

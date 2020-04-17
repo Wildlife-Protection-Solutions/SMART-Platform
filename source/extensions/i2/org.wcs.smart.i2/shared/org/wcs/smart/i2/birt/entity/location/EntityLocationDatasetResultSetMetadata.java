@@ -28,11 +28,16 @@ import java.util.logging.Logger;
 
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.io.ParseException;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
+import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityLocation;
+import org.wcs.smart.map.GeometryFactoryProvider;
+import org.wcs.smart.observation.WaypointSourceEngine;
+import org.wcs.smart.observation.model.Waypoint;
 
 /**
  * Entity locations dataset results metadata
@@ -44,11 +49,12 @@ public class EntityLocationDatasetResultSetMetadata implements IResultSetMetaDat
 
 	public static enum Column{
 		ENTITY_UUID("location:entity_uuid", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		SOURCE("location:source", java.sql.Types.VARCHAR), //$NON-NLS-1$
 		ID("location:id", java.sql.Types.VARCHAR), //$NON-NLS-1$
-		GEOM("location:geom", java.sql.Types.JAVA_OBJECT), //$NON-NLS-1$
-		DATE("location:date",  java.sql.Types.DATE), //$NON-NLS-1$
-		COMMENT("location:comment", java.sql.Types.VARCHAR), //$NON-NLS-1$
-		OBSERVATION("location:observation", java.sql.Types.VARCHAR); //$NON-NLS-1$
+		DATE("location:date",  java.sql.Types.TIMESTAMP), //$NON-NLS-1$
+		SOURCELINK("location:sourcelink", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		OBSERVATION("location:observation", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		GEOM("location:geom", java.sql.Types.JAVA_OBJECT); //$NON-NLS-1$
 		
 		String id;
 		int type;
@@ -63,9 +69,22 @@ public class EntityLocationDatasetResultSetMetadata implements IResultSetMetaDat
 		public String getId(){
 			return this.id;
 		}
-		public Object getValue(IntelEntityLocation location, Locale l) {
+		
+		public Object getValue(Object item, Locale l, IntelEntity entity) {
+			if (item instanceof IntelEntityLocation) {
+				return getValue((IntelEntityLocation)item, l);
+			}else if (item instanceof Waypoint) {
+				return getValue((Waypoint)item, l, entity);
+			}
+			return null;
+		}
+		private Object getValue(IntelEntityLocation location, Locale l) {
 			if (this == ENTITY_UUID) return location.getEntity().getUuid();
+			if (this == SOURCE) return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(IIntelligenceLabelProvider.PROFILE_SOURCE_LABEL, l);
 			if (this == ID) return location.getLocation().getId();
+			if (this == DATE) return location.getLocation().getDateTime();
+			if (this == SOURCELINK) return location.getLocation().getRecord().getTitle();
+			if (this == OBSERVATION) return MessageFormat.format(SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(IIntelligenceLabelProvider.OBS_COUNT_LABEL, l), location.getLocation().getObservations().size());
 			if (this == GEOM) {
 				try{
 					return location.getLocation().getGeometry();
@@ -74,14 +93,24 @@ public class EntityLocationDatasetResultSetMetadata implements IResultSetMetaDat
 				}
 				return null;
 			}
-			if (this == DATE) return location.getLocation().getDateTime();
-			if (this == COMMENT) return location.getLocation().getComment();
-			if (this == OBSERVATION) return MessageFormat.format(SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(IIntelligenceLabelProvider.OBS_COUNT_LABEL, l), location.getLocation().getObservations().size());
+			return null;
+		}
+		private Object getValue(Waypoint wp, Locale l, IntelEntity entity) {
+			if (this == ENTITY_UUID) return entity.getUuid();
+			if (this == SOURCE) return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(IIntelligenceLabelProvider.DM_SOURCE_LABEL, l);
+			if (this == ID) return wp.getId();
+			if (this == DATE) return wp.getDateTime();
+			if (this == SOURCELINK) return WaypointSourceEngine.INSTANCE.getSource(wp.getSourceId()).getName(l);
+			if (this == OBSERVATION) return MessageFormat.format(SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(IIntelligenceLabelProvider.OBS_COUNT_LABEL, l), wp.getAllObservations().size());
+			if (this == GEOM) {
+				return GeometryFactoryProvider.getFactory().createPoint(new Coordinate(wp.getX(), wp.getY()));
+			}
 			return null;
 		}
 	}
 	
 	private Locale l;
+	
 	public EntityLocationDatasetResultSetMetadata(Locale l){
 		this.l = l;
 	}

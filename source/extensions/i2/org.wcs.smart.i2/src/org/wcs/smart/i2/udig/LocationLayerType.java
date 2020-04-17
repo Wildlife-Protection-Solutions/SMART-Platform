@@ -41,6 +41,7 @@ import org.wcs.smart.i2.EntityManager;
  *
  */
 public enum LocationLayerType {
+	DM_OBS("Point"), //$NON-NLS-1$
 	POINT("Point"),  //$NON-NLS-1$
 	POLYGON("Polygon"), //$NON-NLS-1$
 	ATTRIBUTE("Point"); //$NON-NLS-1$
@@ -56,18 +57,21 @@ public enum LocationLayerType {
 	}
 	
 	public Style getDefaultLayerStyle(){
-		Color lineColor = new Color(69,81,140);
-    	Color fillColor = new Color(120,153,215);
+		
+    	Color aFillColor = new Color(249,176,170);
+    	Color aLineColor = new Color(176,30,37);
+
     	StyleFactory sf = CommonFactoryFinder.getStyleFactory();
     	StyleBuilder builder = new StyleBuilder(sf);
     	
     	if (this == POINT){
 	    	FeatureTypeStyle fts = sf.createFeatureTypeStyle();
 	    	fts.setName("Style 1"); //$NON-NLS-1$
-	    	Mark x = sf.getXMark();
-	    	x.setFill(sf.createFill(builder.colorExpression(fillColor), builder.literalExpression(0.5)));
+	    	Mark x = sf.getCircleMark();
+	    	x.setFill(sf.createFill(builder.colorExpression(aFillColor), builder.literalExpression(1)));
+	    	x.setStroke(sf.createStroke(builder.colorExpression(aLineColor), builder.literalExpression(1)));
 	    	PointSymbolizer point = sf.createPointSymbolizer();
-	    	point.getGraphic().setSize(builder.literalExpression(8));
+	    	point.getGraphic().setSize(builder.literalExpression(9));
 	    	point.getGraphic().graphicalSymbols().add(x);
 	    	point.getGraphic().setRotation(builder.literalExpression(0));
 	    	Rule r = sf.createRule();
@@ -84,13 +88,31 @@ public enum LocationLayerType {
     		style.featureTypeStyles().add(fts);
     		
     		PolygonSymbolizer sym = sf.createPolygonSymbolizer();
-    		sym.setFill(sf.createFill(builder.colorExpression(fillColor), builder.literalExpression(0.5)));
-    		sym.setStroke(sf.createStroke(builder.colorExpression(lineColor), builder.literalExpression(1)));
+    		sym.setFill(sf.createFill(builder.colorExpression(aFillColor), builder.literalExpression(0.5)));
+    		sym.setStroke(sf.createStroke(builder.colorExpression(aLineColor), builder.literalExpression(1)));
     		Rule r = sf.createRule();
     		r.setName("Rule 1"); //$NON-NLS-1$
     		r.symbolizers().add(sym);
     		fts.rules().add(r);
     		return style;
+    	}else if (this == DM_OBS){
+	    	FeatureTypeStyle fts = sf.createFeatureTypeStyle();
+	    	fts.setName("Style 1"); //$NON-NLS-1$
+	    	Mark x = sf.getSquareMark();
+	    	x.setFill(sf.createFill(builder.colorExpression(aFillColor), builder.literalExpression(1)));
+	    	x.setStroke(sf.createStroke(builder.colorExpression(aLineColor), builder.literalExpression(1)));
+
+	    	PointSymbolizer point = sf.createPointSymbolizer();
+	    	point.getGraphic().setSize(builder.literalExpression(9));
+	    	point.getGraphic().graphicalSymbols().add(x);
+	    	point.getGraphic().setRotation(builder.literalExpression(0));
+	    	Rule r = sf.createRule();
+	    	r.setName("Rule 1"); //$NON-NLS-1$
+	    	r.symbolizers().add(point);
+	    	fts.rules().add(r);
+	    	Style style = sf.createStyle();
+	    	style.featureTypeStyles().add(fts);
+	    	return style;
     	}else if (this == ATTRIBUTE){
 			return EntityManager.INSTANCE.buildRedStarStyle();
     	}

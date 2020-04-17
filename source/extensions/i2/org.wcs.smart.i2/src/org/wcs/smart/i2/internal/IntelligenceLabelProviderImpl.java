@@ -146,6 +146,9 @@ public class IntelligenceLabelProviderImpl implements
 				return Messages.IntelligenceLabelProviderImpl_EmployeeAttributeName;
 			}
 		}
+		if (item == DM_SOURCE_LABEL) return Messages.IntelligenceLabelProviderImpl_CoreObservationSrc;
+		if (item == PROFILE_SOURCE_LABEL) return Messages.IntelligenceLabelProviderImpl_ProfileObservationSrc;
+		
 		if (item == QUERY_COLUMN_CATEGORY_LABEL) return Messages.IntelligenceLabelProviderImpl_QueryCategoryLabel;
 		if (item == OBS_COUNT_LABEL ) return Messages.IntelligenceLabelProviderImpl_QueryObservationCntLabel;
 		if (item == IntelWorkingSetCategory.ENTITY) return Messages.IntelligenceLabelProviderImpl_EntitiesWorkingSetLabel;
@@ -256,8 +259,10 @@ public class IntelligenceLabelProviderImpl implements
 		if (item == EntityLocationDatasetResultSetMetadata.Column.ID) return Messages.IntelligenceLabelProviderImpl_EntityLocationRsEntityIdColumn;
 		if (item == EntityLocationDatasetResultSetMetadata.Column.GEOM) return Messages.IntelligenceLabelProviderImpl_EntityLocationRsGeometryColumn;
 		if (item == EntityLocationDatasetResultSetMetadata.Column.DATE) return Messages.IntelligenceLabelProviderImpl_EntityLocationRsDateColumn;
-		if (item == EntityLocationDatasetResultSetMetadata.Column.COMMENT) return Messages.IntelligenceLabelProviderImpl_EntityLocationRsCommentColumn;
 		if (item == EntityLocationDatasetResultSetMetadata.Column.OBSERVATION) return Messages.IntelligenceLabelProviderImpl_EntityLocationRsObservationColumn;
+		if (item == EntityLocationDatasetResultSetMetadata.Column.SOURCE) return Messages.IntelligenceLabelProviderImpl_SourceColumnName;
+		if (item == EntityLocationDatasetResultSetMetadata.Column.SOURCELINK) return Messages.IntelligenceLabelProviderImpl_SourceLinkColumnName;
+		
 				
 
 		if (item == EntityRecordDatasetResultSetMetadata.Column.ENTITY_UUID) return Messages.IntelligenceLabelProviderImpl_EntityRecordRsEntityUuidColumn;

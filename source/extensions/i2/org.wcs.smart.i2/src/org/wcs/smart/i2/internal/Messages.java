@@ -308,8 +308,11 @@ public class Messages extends NLS {
 	public static String EntityEditorMapComposite_ObservationColumnName;
 	public static String EntityEditorMapComposite_ObservationsLabel;
 	public static String EntityEditorMapComposite_OpenRecordMnuItem;
+	public static String EntityEditorMapComposite_OpenSrcMenuItem;
 	public static String EntityEditorMapComposite_RecordColumnName;
 	public static String EntityEditorMapComposite_RecordDatecolumnName;
+	public static String EntityEditorMapComposite_SourceColumnName;
+	public static String EntityEditorMapComposite_SourceLinkColumnName;
 	public static String EntityEditorMapComposite_UpdateAttributeErrorDialogMessage;
 	public static String EntityEditorMapComposite_UpdateAttributeErrorDialogTitle;
 	public static String EntityEditorMapComposite_UpdateMenuItem;
@@ -591,7 +594,10 @@ public class Messages extends NLS {
 	public static String EntityTypeManager_InvalidTextFilterOp;
 	public static String EntityTypeManager_ListItemNotFound;
 	public static String EntityTypeManager_NumericParseError;
+	public static String EntityTypesPreferencePage_DeleteEntityTypeMsg;
+	public static String EntityTypesPreferencePage_DeleteError;
 	public static String EntityTypesPreferencePage_EntityTypeColumn;
+	public static String EntityTypesPreferencePage_ErrorTitle;
 	public static String EntityTypesPreferencePage_Message;
 	public static String EntityTypesPreferencePage_Title;
 	public static String EntityTypeTreeFilterItem_EntitiesLabel;
@@ -826,6 +832,7 @@ public class Messages extends NLS {
 	public static String IntelligenceLabelProviderImpl_CaNameColumnName;
 	public static String IntelligenceLabelProviderImpl_CommentColumnLabel;
 	public static String IntelligenceLabelProviderImpl_ContainsLabel;
+	public static String IntelligenceLabelProviderImpl_CoreObservationSrc;
 	public static String IntelligenceLabelProviderImpl_CSVLabel;
 	public static String IntelligenceLabelProviderImpl_DateAttributeName;
 	public static String IntelligenceLabelProviderImpl_DateColumnLabel;
@@ -892,6 +899,7 @@ public class Messages extends NLS {
 	public static String IntelligenceLabelProviderImpl_OrLabel;
 	public static String IntelligenceLabelProviderImpl_PositionAttributeName;
 	public static String IntelligenceLabelProviderImpl_ProfileColumnName;
+	public static String IntelligenceLabelProviderImpl_ProfileObservationSrc;
 	public static String IntelligenceLabelProviderImpl_QueriewWorkingSetLabel;
 	public static String IntelligenceLabelProviderImpl_QueryCategoryLabel;
 	public static String IntelligenceLabelProviderImpl_QueryObservationCntLabel;
@@ -946,6 +954,8 @@ public class Messages extends NLS {
 	public static String IntelligenceLabelProviderImpl_SearchNotFound;
 	public static String IntelligenceLabelProviderImpl_ShapefileLabel;
 	public static String IntelligenceLabelProviderImpl_Source;
+	public static String IntelligenceLabelProviderImpl_SourceColumnName;
+	public static String IntelligenceLabelProviderImpl_SourceLinkColumnName;
 	public static String IntelligenceLabelProviderImpl_StatusColumnLabel;
 	public static String IntelligenceLabelProviderImpl_StrEqualsLabel;
 	public static String IntelligenceLabelProviderImpl_TextAttributeName;
@@ -1164,6 +1174,7 @@ public class Messages extends NLS {
 	public static String ObservationQuerySourceFinder_Label;
 	public static String ObservationTreeViewer_AttributeLabel;
 	public static String ObservationTreeViewer_CategoryLabel;
+	public static String ObservationTreeViewer_GrpLabel;
 	public static String OpenAttachmentViewHandler_InvalidMsg;
 	public static String OpenAttachmentViewHandler_InvalidTitle;
 	public static String OpenEntityHandler_OpenError;
@@ -1450,6 +1461,7 @@ public class Messages extends NLS {
 	public static String RecordSourceDialog_jobname;
 	public static String RecordSourceDialog_KeyColumn;
 	public static String RecordSourceDialog_NameAndKeyRequired;
+	public static String RecordSourceDialog_NewRecordSource;
 	public static String RecordSourceDialog_ProfileError;
 	public static String RecordSourceDialog_ProfilesLabel;
 	public static String RecordSourceGroupByDropItem_AllOption;

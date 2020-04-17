@@ -38,6 +38,8 @@ import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
+import org.wcs.smart.ICoreLabelProvider;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection.Permission;
@@ -212,6 +214,8 @@ public class EntityDatasetResultSet implements IResultSet {
 				if (v == null) return null;
 				if (attribute.getType() == AttributeType.LIST){
 					return ((IntelAttributeListItem)v.getAttributeValue()).getName();
+				}else if (attribute.getType() == AttributeType.EMPLOYEE) {
+					return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(v.getEmployee(), connection.getCurrentLocale());
 				}
 				return v.getAttributeValue();
 			}else{
@@ -416,7 +420,7 @@ public class EntityDatasetResultSet implements IResultSet {
 		} else if (lastRowItem instanceof Integer) {
 			return ((Integer) lastRowItem) <= 0;
 		} else if (lastRowItem instanceof Double) {
-			return ((Double) lastRowItem) <= 0.5;
+			return ((Double) lastRowItem) >= 0.5;
 		}else if (lastRowItem == null){
 			return false;
 		}

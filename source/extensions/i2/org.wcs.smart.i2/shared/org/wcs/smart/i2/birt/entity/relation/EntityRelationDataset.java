@@ -47,6 +47,8 @@ import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection.Permission;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelProfile;
+import org.wcs.smart.i2.model.IntelProfileEntityType;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 
 /**
@@ -77,9 +79,8 @@ public class EntityRelationDataset  implements IQuery {
 
 	@Override
 	public void prepare(String queryText) throws OdaException {
-		if (connection.hasPermission(Permission.ENTITY).isEmpty()) {
-			throw new OdaException("Unauthorized.  You do not have permission to access intelligence entity datasets"); //$NON-NLS-1$
-		}
+		Set<IntelProfile> profiles = connection.hasPermission(Permission.ENTITY);
+
 		CriteriaBuilder cb = connection.getSession().getCriteriaBuilder();
 		CriteriaQuery<IntelEntityType> c = cb.createQuery(IntelEntityType.class);
 		Root<IntelEntityType> from = c.from(IntelEntityType.class);
@@ -112,6 +113,14 @@ public class EntityRelationDataset  implements IQuery {
 		validAttributes = new ArrayList<IntelAttribute>();
 		validAttributes.addAll(attSet);
 		Collections.sort(validAttributes, (a,b) -> a.getKeyId().compareTo(b.getKeyId()));
+		
+		if (type.getProfiles().isEmpty()) return;
+		
+		for (IntelProfileEntityType ip : type.getProfiles()) {
+			if (profiles.contains(ip.getProfile())) return;
+		}
+		throw new OdaException("Unauthorized.  You do not have permission to access intelligence entity datasets"); //$NON-NLS-1$
+		
 	}
 
 	@Override

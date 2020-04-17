@@ -314,17 +314,26 @@ public enum EntityReportGenerator {
 		headerGrid.getCell(1, 1).getContent().add(primaryImage);
 		((ColumnHandle)headerGrid.getColumns().get(0).getElement().getHandle(rdh.getModule())).setProperty(ITableColumnModel.WIDTH_PROP, "2.2in"); //$NON-NLS-1$
 		
-		GridHandle infoGrid = factory.newGridItem(null, 2, 5);
+		GridHandle infoGrid = factory.newGridItem(null, 2, 6);
 		infoGrid.setStyleName(tableStyle.getName());
 		((ColumnHandle)infoGrid.getColumns().get(0).getElement().getHandle(rdh.getModule())).setProperty(ITableColumnModel.WIDTH_PROP, "1.3in"); //$NON-NLS-1$
 		headerGrid.getCell(1, 2).getContent().add(infoGrid);
 		
 		int row = 1;
 		LabelHandle l = factory.newLabel(null);
-		l.setText(MessageFormat.format("{0}:",EntityDatasetResultSetMetadata.Column.TYPE.getColumnName(Locale.getDefault()))); //$NON-NLS-1$
+		l.setText(MessageFormat.format("{0}:",EntityDatasetResultSetMetadata.Column.PROFILE.getColumnName(Locale.getDefault()))); //$NON-NLS-1$
 		infoGrid.getCell(row,1).getContent().add(l);
 		
 		DataItemHandle di = factory.newDataItem(null);
+		di.setResultSetColumn(EntityDatasetResultSetMetadata.Column.PROFILE.getColumnName(Locale.getDefault()));
+		infoGrid.getCell(row,2).getContent().add(di);		
+		row++;
+		
+		l = factory.newLabel(null);
+		l.setText(MessageFormat.format("{0}:",EntityDatasetResultSetMetadata.Column.TYPE.getColumnName(Locale.getDefault()))); //$NON-NLS-1$
+		infoGrid.getCell(row,1).getContent().add(l);
+		
+		di = factory.newDataItem(null);
 		di.setResultSetColumn(EntityDatasetResultSetMetadata.Column.TYPE.getColumnName(Locale.getDefault()));
 		infoGrid.getCell(row,2).getContent().add(di);		
 		row++;

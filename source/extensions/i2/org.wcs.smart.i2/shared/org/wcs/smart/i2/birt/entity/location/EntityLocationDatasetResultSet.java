@@ -25,11 +25,11 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.UUID;
 
 import org.eclipse.datatools.connectivity.oda.IBlob;
 import org.eclipse.datatools.connectivity.oda.IClob;
@@ -42,9 +42,11 @@ import org.hibernate.query.Query;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection.Permission;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
-import org.wcs.smart.i2.model.IntelEntityLocation;
+import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelProfile;
+import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -62,8 +64,11 @@ public class EntityLocationDatasetResultSet implements IResultSet {
 	private Object lastRowItem;
 	
 	private EntityLocationDatasetResultSetMetadata metadata;
-	private ScrollableResults results;
+	private ScrollableResults locationResults;
+	private ScrollableResults wpResults;
 	private Locale l;
+	
+	private IntelEntity entity = null;
 	
 	/**
 	 * Creates a new summary results set
@@ -87,41 +92,36 @@ public class EntityLocationDatasetResultSet implements IResultSet {
 		
 		HashMap<String, Object> values = new HashMap<String, Object>();
 		values.put("type", type); //$NON-NLS-1$
-		int index =pmetadata.findParameterIndex(DataSourceParameter.ENTITY_UUID.getName());
+		
+		UUID entityUuid = null;
+		int index = pmetadata.findParameterIndex(DataSourceParameter.ENTITY_UUID.getName());
 		if (index >= 0){
 			String entity = (String) parameters.get(index); 
 			if ( entity != null){
+				entityUuid = UuidUtils.stringToUuid(entity);
 				q1 += " AND l.id.entity.uuid = :uuid"; //$NON-NLS-1$
 				q2 += " AND l.id.entity.uuid = :uuid"; //$NON-NLS-1$
 				
-				values.put("uuid", UuidUtils.stringToUuid(entity)); //$NON-NLS-1$
+				values.put("uuid", entityUuid); //$NON-NLS-1$
 			}
 		}
 		
+		if (entityUuid != null) entity = connection.getSession().get(IntelEntity.class, entityUuid);
+
+		java.util.Date startDate = null;
+		java.util.Date endDate = null;
 		int index1 = pmetadata.findParameterIndex(DataSourceParameter.START_DATE.getName());
 		int index2 = pmetadata.findParameterIndex(DataSourceParameter.END_DATE.getName());
+		
 		if (index1 > 0 && index2 > 0 && parameters.get(index1) != null && parameters.get(index2) != null){
-			Date startDate = (Date) parameters.get(index1);
-			Calendar start = Calendar.getInstance();
-			start.setTime(startDate);
-			start.set(Calendar.HOUR_OF_DAY, 0);
-			start.set(Calendar.MINUTE, 0);
-			start.set(Calendar.SECOND, 0);
-			start.set(Calendar.MILLISECOND, 0);
-			
-			Date endDate = (Date) parameters.get(index2);
-			Calendar end = Calendar.getInstance();
-			end.setTime(endDate);
-			end.set(Calendar.HOUR_OF_DAY, end.getActualMaximum(Calendar.HOUR_OF_DAY));
-			end.set(Calendar.MINUTE, end.getActualMaximum(Calendar.MINUTE));
-			end.set(Calendar.SECOND, end.getActualMaximum(Calendar.SECOND));
-			end.set(Calendar.MILLISECOND, end.getActualMaximum(Calendar.MILLISECOND));
+			startDate = SharedUtils.getDatePart((Date) parameters.get(index1), false);
+			endDate = SharedUtils.getDatePart((Date) parameters.get(index1), true);
 			
 			q1 += " AND l.id.location.dateTime >= :start and l.id.location.dateTime <= :end "; //$NON-NLS-1$
 			q2 += " AND l.id.location.dateTime >= :start and l.id.location.dateTime <= :end "; //$NON-NLS-1$
 				
-			values.put("start", start.getTime()); //$NON-NLS-1$
-			values.put("end", end.getTime()); //$NON-NLS-1$
+			values.put("start", startDate); //$NON-NLS-1$
+			values.put("end", endDate); //$NON-NLS-1$
 		}
 		
 		Query<?> query1 = connection.getSession().createQuery(q1);
@@ -134,9 +134,60 @@ public class EntityLocationDatasetResultSet implements IResultSet {
 		}
 		
 		m_maxRows = (Long)query1.uniqueResult();
-		results = query2.setReadOnly(true)
+		locationResults = query2.setReadOnly(true)
 				.scroll(ScrollMode.FORWARD_ONLY);
 		
+		
+		//add data model observations if applicable
+		if (type.getDmAttribute() != null) {
+			if (entityUuid != null) {
+
+				if (entity != null && entity.getDmAttributeListItem() != null) {
+					StringBuilder sb = new StringBuilder();
+					sb.append("SELECT DISTINCT wp FROM Waypoint wp "); //$NON-NLS-1$
+					sb.append("JOIN wp.observationGroups grp JOIN grp.observations o "); //$NON-NLS-1$
+					sb.append("JOIN o.attributes a WHERE a.attributeListItem = :li "); //$NON-NLS-1$
+					
+					boolean hasDate = startDate != null && endDate != null;
+					if (hasDate) {
+						sb.append(" AND wp.dateTime BETWEEN :d1 AND :d2 "); //$NON-NLS-1$
+					}
+
+					Query<Waypoint> qb = connection.getSession().createQuery(sb.toString(), Waypoint.class)
+							.setParameter("li", entity.getDmAttributeListItem()); //$NON-NLS-1$
+					if (hasDate) {
+						qb.setParameter("d1", startDate).setParameter("d2", endDate); //$NON-NLS-1$ //$NON-NLS-2$
+					}
+					
+					ScrollableResults rs = qb.scroll();
+					while(rs.next()) m_maxRows ++;
+					wpResults = qb.setReadOnly(true).scroll(ScrollMode.FORWARD_ONLY);					
+				}
+			}else {
+				//all waypoints linked to any 
+
+				StringBuilder sb = new StringBuilder();
+				sb.append("SELECT DISTINCT e, wp FROM Waypoint wp "); //$NON-NLS-1$
+				sb.append("JOIN wp.observationGroups grp JOIN grp.observations o "); //$NON-NLS-1$
+				sb.append("JOIN o.attributes a JOIN IntelEntity e on e.dmAttributeListItem = a.attributeListItem "); //$NON-NLS-1$
+				sb.append(" WHERE e.entityType = :type "); //$NON-NLS-1$
+				
+				boolean hasDate = startDate != null && endDate != null;
+				if (hasDate) {
+					sb.append(" AND wp.dateTime BETWEEN :d1 AND :d2 "); //$NON-NLS-1$
+				}
+				
+				Query<?> qb = connection.getSession().createQuery(sb.toString())
+						.setParameter("type", type); //$NON-NLS-1$
+				if (hasDate) {
+					qb.setParameter("d1", startDate).setParameter("d2", endDate); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+				
+				ScrollableResults r = qb.scroll();
+				while(r.next()) m_maxRows++;
+				wpResults = qb.setReadOnly(true).scroll(ScrollMode.FORWARD_ONLY);		
+			}	
+		}
 		this.m_currentRowId = 0;
 	}
 	
@@ -171,8 +222,12 @@ public class EntityLocationDatasetResultSet implements IResultSet {
 	 */
 	public boolean next() throws OdaException {
 		m_currentRowId++;
-		if (results.next()){
-			currentItem = results.get();
+		if (locationResults.next()){
+			currentItem = locationResults.get();
+			return true;
+		}
+		if (wpResults.next()) {
+			currentItem = wpResults.get();
 			return true;
 		}
 		return false;
@@ -182,8 +237,8 @@ public class EntityLocationDatasetResultSet implements IResultSet {
 	 * @see org.eclipse.datatools.connectivity.oda.IResultSet#close()
 	 */
 	public void close() throws OdaException {
-		results.close();
-		results = null;
+		locationResults.close();
+		locationResults = null;
 		m_maxRows = -1;
 	}
 
@@ -209,8 +264,12 @@ public class EntityLocationDatasetResultSet implements IResultSet {
 	 */
 	private Object getCurrentItem(int colIndex) {
 		if (currentItem == null) return null;
-		IntelEntityLocation i = (IntelEntityLocation) ((Object[])currentItem)[0];
-		return EntityLocationDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i, l);
+		Object[] data = (Object[])currentItem;
+		if (data.length == 1) {
+			return EntityLocationDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(data[0], l, entity);
+		}else {
+			return EntityLocationDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(data[0], l, (IntelEntity)data[1]);
+		}
 	}
 
 	/**
@@ -344,6 +403,8 @@ public class EntityLocationDatasetResultSet implements IResultSet {
 		lastRowItem = getCurrentItem(index);
 		if (lastRowItem instanceof Timestamp) {
 			return (Timestamp) lastRowItem;
+		}else if (lastRowItem instanceof Date) {
+			return new Timestamp(((Date)lastRowItem).getTime());
 		}
 		throw new UnsupportedOperationException();
 	}
@@ -455,3 +516,4 @@ public class EntityLocationDatasetResultSet implements IResultSet {
 	}
 
 }
+

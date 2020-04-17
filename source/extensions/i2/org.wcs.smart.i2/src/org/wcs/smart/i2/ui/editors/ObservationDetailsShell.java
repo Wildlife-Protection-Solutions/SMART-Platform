@@ -39,7 +39,6 @@ import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.ui.ObservationTreeViewer;
 import org.wcs.smart.observation.model.Waypoint;
-import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.ui.SmartShellDialog;
 
 /**
@@ -105,7 +104,7 @@ public class ObservationDetailsShell extends SmartShellDialog{
 			ObservationTreeViewer observationTree = new ObservationTreeViewer(owner, SWT.FULL_SELECTION | SWT.V_SCROLL);
 			observationTree.getViewer().getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			observationTree.setInput(waypoint);
-			observationTree.expandToLevel(2);	
+			observationTree.expandToLevel(3);	
 			
 			
 		}else{
@@ -128,10 +127,6 @@ public class ObservationDetailsShell extends SmartShellDialog{
 		}	
 	}
 
-	private void createIntelLocationComposite() {
-		
-	}
-	
 	public IntelLocation getLocationRecord(){
 		return location;
 	}
