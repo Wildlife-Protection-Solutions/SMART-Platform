@@ -353,12 +353,12 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 		sql = new String[] {
 				"ALTER TABLE smart.i_entity ADD COLUMN profile_uuid char(16) for bit data", //$NON-NLS-1$
 				"ALTER TABLE smart.i_entity ADD COLUMN dm_list_item_uuid char(16) for bit data",  //$NON-NLS-1$
-				"ALTER TABLE smart.i_entity ADD CONSTRAINT i_entity_dmlistitem_fk FOREIGN KEY (dm_list_item_uuid) REFERENCES smart.dm_attribute_list(uuid) ON UPDATE RESTRICT ON DELETE NO ACTION DEFERRABLE INITIALLY IMMEDIATE;", //$NON-NLS-1$				
+				"ALTER TABLE smart.i_entity ADD CONSTRAINT i_entity_dmlistitem_fk FOREIGN KEY (dm_list_item_uuid) REFERENCES smart.dm_attribute_list(uuid) ON UPDATE RESTRICT ON DELETE NO ACTION DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$				
 				"ALTER TABLE smart.i_record ADD COLUMN profile_uuid char(16) for bit data", //$NON-NLS-1$
 				"ALTER TABLE smart.i_relationship_type ADD COLUMN src_profile_uuid char(16) for bit data", //$NON-NLS-1$
 				"ALTER TABLE smart.i_relationship_type ADD COLUMN target_profile_uuid char(16) for bit data", //$NON-NLS-1$
 				"ALTER TABLE smart.i_entity_type ADD COLUMN dm_attribute_uuid char(16) for bit data",  //$NON-NLS-1$
-				"ALTER TABLE smart.i_entity_type ADD CONSTRAINT i_et_dmatt_fk FOREIGN KEY (dm_attribute_uuid) REFERENCES smart.dm_attribute(uuid) ON UPDATE RESTRICT ON DELETE NO ACTION DEFERRABLE INITIALLY IMMEDIATE;", //$NON-NLS-1$
+				"ALTER TABLE smart.i_entity_type ADD CONSTRAINT i_et_dmatt_fk FOREIGN KEY (dm_attribute_uuid) REFERENCES smart.dm_attribute(uuid) ON UPDATE RESTRICT ON DELETE NO ACTION DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 				"ALTER TABLE smart.i_entity_type ADD COLUMN dm_active_filter varchar(32000)", //$NON-NLS-1$
 				
 				"update smart.i_entity set profile_uuid = (select b.uuid from smart.I_PROFILE_CONFIG b where b.ca_uuid = smart.i_entity.ca_uuid)", //$NON-NLS-1$

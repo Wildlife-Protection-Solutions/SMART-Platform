@@ -34,6 +34,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
+import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.birt.IntelReportManager;
 import org.wcs.smart.i2.internal.Messages;
@@ -170,6 +172,25 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 				}else{
 					clone.setBirtTemplate(null);
 				}
+			}
+			
+			if (ia.getDmAttribute() != null) {
+				Attribute dmAttribute = (Attribute)engine.getSession().createQuery("From Attribute WHERE conservationArea = :ca and keyId = :keyId") //$NON-NLS-1$
+						.setParameter("ca", engine.getNewCa()) //$NON-NLS-1$
+						.setParameter("keyId", ia.getDmAttribute().getKeyId()) //$NON-NLS-1$
+						.uniqueResult();
+				clone.setDmAttribute(dmAttribute);
+				
+				//remove all list items associated with this attribute
+				//as we don't want to clone those
+				if (dmAttribute != null) {
+					for (AttributeListItem li : dmAttribute.getAttributeList()) {
+						li.setAttribute(null);
+					}
+					dmAttribute.getAttributeList().clear();
+					engine.getSession().save(dmAttribute);
+				}
+				clone.setActiveFilter(ia.getActiveFilter());
 			}
 			
 			engine.getSession().save(clone);
