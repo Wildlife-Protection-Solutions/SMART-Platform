@@ -56,6 +56,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
@@ -92,6 +94,7 @@ import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.KeyInputDialog;
 
+
 /**
  * dialog for managing profile
  * @author Emily
@@ -127,6 +130,8 @@ public class ProfileDialog extends SmartStyledDialog {
 	private Button btnAddEmployee;
 	
 	private HashMap<Employee, IntelPermission> permissions = new HashMap<>();
+	private List<Employee> removed = new ArrayList<>();
+	
 	private Composite permissionTable;
 	
 	private HashMap<Integer,Object[]> columnSize = new HashMap<>();
@@ -238,6 +243,11 @@ public class ProfileDialog extends SmartStyledDialog {
 					}
 				}
 				
+				for (Employee e : removed) {
+					session.createQuery("DELETE FROM IntelPermission WHERE id.employee = :e") //$NON-NLS-1$
+						.setParameter("e", e) //$NON-NLS-1$
+						.executeUpdate();
+				}
 				for (IntelPermission p : permissions.values()) {
 					if (p.getPermission() == 0) {
 						session.delete(p);
@@ -260,6 +270,7 @@ public class ProfileDialog extends SmartStyledDialog {
 				if (v != null) throw new Exception(v);
 				
 				session.getTransaction().commit();
+				removed.clear();
 			}catch (Exception ex) {
 				if (session.getTransaction().isActive()) {
 					try {
@@ -498,7 +509,13 @@ public class ProfileDialog extends SmartStyledDialog {
 		btnColor.addListener(SWT.MouseDoubleClick, changeColorTrack);
 	}
 	
-
+	private void removeEmployee(Employee e) {
+		permissions.remove(e);
+		removed.add(e);
+		updatePermissionList();
+		permissionModified = true;
+		modified();
+	}
 	
 	private void createPermissionComp() {
 		permissionComp.setLayout(new GridLayout());
@@ -532,8 +549,10 @@ public class ProfileDialog extends SmartStyledDialog {
 				
 				permissions.put(ip.getEmployee(), ip);
 				permissionModified = true;
+				modified();
 			}
 			updatePermissionList();
+			
 		});
 		btnAddEmployee = btnAdd;
 		
@@ -816,12 +835,20 @@ public class ProfileDialog extends SmartStyledDialog {
 			Composite t = new Composite(parent, SWT.BORDER);
 			t.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			t.setLayout(new GridLayout());
+			((GridLayout)t.getLayout()).marginRight = 0;
+			((GridLayout)t.getLayout()).marginHeight = 0;
 			controls.add(t);
 			
 			Label ll = new Label(t, SWT.NONE);
 			ll.setText(SmartLabelProvider.getShortLabel(employee));
-			ll.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+			ll.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 
+			Menu mnu = new Menu(ll);
+			MenuItem mi = new MenuItem(mnu, SWT.PUSH);
+			mi.setText(DialogConstants.DELETE_BUTTON_TEXT);
+			mi.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+			mi.addListener(SWT.Selection, evt->removeEmployee(employee));
+			ll.setMenu(mnu);
 			
 			Composite btnAdmin = createCheckBox(parent, IntelPermission.ADMIN);
 			controls.add(btnAdmin);

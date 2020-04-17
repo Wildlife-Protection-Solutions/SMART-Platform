@@ -185,15 +185,8 @@ public enum ProfilesManager {
 	 * @param session
 	 */
 	public void deleteProfile(IntelProfile profile, Session session) {
-			
-			//update relationships references to null
-			Query<?> q = session.createQuery("DELETE FROM IntelRelationshipType WHERE sourceProfile = :profile OR targetProfile = :profile2"); //$NON-NLS-1$
-			q.setParameter("profile", profile); //$NON-NLS-1$
-			q.setParameter("profile2", profile); //$NON-NLS-1$
-			q.executeUpdate();
-			
 			//delete all entity attribute values
-			q = session.createQuery("delete from IntelEntityAttributeValue ieav where ieav.id.entity in (FROM IntelEntity WHERE profile = :profile)"); //$NON-NLS-1$
+			Query<?> q = session.createQuery("delete from IntelEntityAttributeValue ieav where ieav.id.entity in (FROM IntelEntity WHERE profile = :profile)"); //$NON-NLS-1$
 			q.setParameter("profile", profile); //$NON-NLS-1$
 			q.executeUpdate();
 			
@@ -248,6 +241,13 @@ public enum ProfilesManager {
 			q = session.createQuery("delete from IntelRecord where profile = :profile"); //$NON-NLS-1$
 			q.setParameter("profile", profile); //$NON-NLS-1$
 			q.executeUpdate();
+			
+			//update relationships references to null
+			q = session.createQuery("DELETE FROM IntelRelationshipType WHERE sourceProfile = :profile OR targetProfile = :profile2"); //$NON-NLS-1$
+			q.setParameter("profile", profile); //$NON-NLS-1$
+			q.setParameter("profile2", profile); //$NON-NLS-1$
+			q.executeUpdate();
+			
 			
 			q = session.createQuery("delete from IntelProfile where uuid = :profile"); //$NON-NLS-1$
 			q.setParameter("profile", profile.getUuid()); //$NON-NLS-1$
