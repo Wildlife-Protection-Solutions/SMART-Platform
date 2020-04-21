@@ -43,17 +43,15 @@ import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.NamedItem;
+import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
-import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
-import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.query.Operator;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.search.AdvancedEntitySearch;
-import org.wcs.smart.i2.ui.views.query.dropitem.DropItemFactory;
 import org.wcs.smart.util.SharedUtils;
 
 /**
@@ -444,7 +442,7 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 		AttributeListItem ali = new AttributeListItem();
 		ali.setAttribute(dmAttribute);
 		ali.setIsActive(true);
-		ali.setKeyId(DataModelManager.INSTANCE.generateKey(getIdAttributeAsText(), dmAttribute.getAttributeList()));
+		ali.setKeyId(NamedKeyItem.generateKey(getIdAttributeAsText(), dmAttribute.getAttributeList()));
 		ali.updateName(getConservationArea().getDefaultLanguage(), getIdAttributeAsText());
 		dmAttribute.getAttributeList().add(ali);
 		setDmAttributeListItem(ali);
@@ -463,7 +461,7 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 			return;
 		}
 		
-		String[] parts = getEntityType().getActiveFilter().split("\\" + DropItemFactory.PART_SEPARATOR); //$NON-NLS-1$
+		String[] parts = getEntityType().getActiveFilter().split("\\|"); //$NON-NLS-1$
 		
 		
 		boolean result = true;
@@ -478,7 +476,7 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 				lastOp = Operator.OR;
 			}else {
 				String[] ex = x.split(" "); //$NON-NLS-1$
-				String[] bits = ex[0].split(DropItemFactory.ITEM_SEPARATOR);
+				String[] bits = ex[0].split(":"); //$NON-NLS-1$
 				
 				if (!bits[0].equals(AdvancedEntitySearch.ATTRIBUTE_KEY)) throw new RuntimeException("Cannot parse active filter"); //$NON-NLS-1$
 				
@@ -519,7 +517,7 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 							match = !match;
 						}
 					}catch (Exception ex2) {
-						Intelligence2PlugIn.log(ex2.getMessage(),  ex2);
+						ex2.printStackTrace();
 						getDmAttributeListItem().setIsActive(defaultActive);
 						return;
 					}

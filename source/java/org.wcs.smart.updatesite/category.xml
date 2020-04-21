@@ -57,9 +57,6 @@
    <feature url="features/org.wcs.smart.event.feature_7.0.0.qualifier.jar" id="org.wcs.smart.event.feature" version="7.0.0.qualifier">
       <category name="events"/>
    </feature>
-   <feature url="features/org.wcs.smart.intelligence.feature_7.0.0.qualifier.jar" id="org.wcs.smart.intelligence.feature" version="7.0.0.qualifier">
-      <category name="intelligence"/>
-   </feature>
    <feature url="features/org.wcs.smart.cybertracker.plan.feature_7.0.0.qualifier.jar" id="org.wcs.smart.cybertracker.plan.feature" version="7.0.0.qualifier">
       <category name="cybertracker"/>
    </feature>
@@ -68,12 +65,7 @@
    </feature>
    <feature url="features/org.wcs.smart.paws.feature_7.0.0.qualifier.jar" id="org.wcs.smart.paws.feature" version="7.0.0.qualifier">
       <category name="paws"/>
-   </feature>   
-   <category-def name="intelligence" label="SMART Intelligence Plug-in">
-      <description>
-         The SMART Intelligence plug-in contains the choice of two intelligence modules that allows users to organize, maintain and query intelligence information. Intelligence information may have been gathered by earlier patrols, or may have been received from external sources. Intelligence information may be useful to Conservation Area managers when they plan future patrols.
-      </description>
-   </category-def>
+   </feature>
    <category-def name="planning" label="SMART Planning Plug-in">
       <description>
          The SMART Planning plug-in contains a plan module that allows users to organize, maintain and query planning information. Plans allow for a set of targets (such as total distance patrolled or specific locations to visit) to be assigned to a patrol or series of patrols.
@@ -134,9 +126,9 @@
          The SMART R Script plug-in supports the use of R within the SMART Desktop environment.  R Scripts can be imported into and run from within SMART using the results from queries as parameters to the scripts.
       </description>
    </category-def>
-    <category-def name="paws" label="SMART PAWS Plug-in">
+   <category-def name="paws" label="SMART PAWS Plug-in">
       <description>
-      	Provides a link for accessing the PAWS prediction tools.
+         Provides a link for accessing the PAWS prediction tools.
       </description>
-   </category-def>   
+   </category-def>
 </site>

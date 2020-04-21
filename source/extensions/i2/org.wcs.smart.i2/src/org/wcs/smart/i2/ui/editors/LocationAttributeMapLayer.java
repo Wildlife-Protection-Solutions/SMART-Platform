@@ -46,8 +46,8 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
-import org.wcs.smart.i2.EntityManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.StyleUtil;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelRecordAttributeValue;
@@ -211,7 +211,7 @@ public class LocationAttributeMapLayer {
 					super.run(monitor);
 					LocationAttributeMapLayer.this.layer = getLayers().get(0);
 					layer.setName(layerName);
-					layer.getStyleBlackboard().put("org.locationtech.udig.style.sld", EntityManager.INSTANCE.buildRedStarStyle()); //$NON-NLS-1$
+					layer.getStyleBlackboard().put("org.locationtech.udig.style.sld", StyleUtil.INSTANCE.buildRedStarStyle()); //$NON-NLS-1$
 					layer.refresh(null);
 				}
 			};

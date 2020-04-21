@@ -36,7 +36,6 @@ import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityLocation;
 import org.wcs.smart.map.GeometryFactoryProvider;
-import org.wcs.smart.observation.WaypointSourceEngine;
 import org.wcs.smart.observation.model.Waypoint;
 
 /**
@@ -100,7 +99,7 @@ public class EntityLocationDatasetResultSetMetadata implements IResultSetMetaDat
 			if (this == SOURCE) return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(IIntelligenceLabelProvider.DM_SOURCE_LABEL, l);
 			if (this == ID) return wp.getId();
 			if (this == DATE) return wp.getDateTime();
-			if (this == SOURCELINK) return WaypointSourceEngine.INSTANCE.getSource(wp.getSourceId()).getName(l);
+			if (this == SOURCELINK) return wp.getSourceId();
 			if (this == OBSERVATION) return MessageFormat.format(SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(IIntelligenceLabelProvider.OBS_COUNT_LABEL, l), wp.getAllObservations().size());
 			if (this == GEOM) {
 				return GeometryFactoryProvider.getFactory().createPoint(new Coordinate(wp.getX(), wp.getY()));

@@ -29,7 +29,7 @@ import org.eclipse.birt.report.model.api.OdaDataSetHandle;
 import org.hibernate.Session;
 import org.locationtech.udig.project.internal.ProjectFactory;
 import org.locationtech.udig.project.internal.StyleBlackboard;
-import org.wcs.smart.i2.EntityManager;
+import org.wcs.smart.i2.StyleUtil;
 import org.wcs.smart.i2.birt.entity.EntityLocationAttributeDataset;
 import org.wcs.smart.i2.birt.entity.EntityLocationAttributeDatasetResultSetMetadata;
 import org.wcs.smart.report.birt.map.IBirtLayerStyleProvider;
@@ -78,7 +78,7 @@ public class EntityAttributeMapLayer implements IBirtMapLayerManager, IBirtLayer
 		if (extensionId.equals(EntityLocationAttributeDataset.DATASET_TYPE)){
 			//return red star style
 			StyleBlackboard sb = ProjectFactory.eINSTANCE.createStyleBlackboard();
-			sb.put("org.locationtech.udig.style.sld", EntityManager.INSTANCE.buildRedStarStyle()); //$NON-NLS-1$
+			sb.put("org.locationtech.udig.style.sld", StyleUtil.INSTANCE.buildRedStarStyle()); //$NON-NLS-1$
 			return sb;
 		}
 		return null;

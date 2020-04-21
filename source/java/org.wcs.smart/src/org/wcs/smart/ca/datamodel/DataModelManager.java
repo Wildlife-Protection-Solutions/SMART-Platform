@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
-import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -387,21 +386,6 @@ public enum DataModelManager {
 		return SimpleDataModel.validateKey(key, otherValues, Locale.getDefault());
 	}
 	
-	/*
-	 * determines if a key exists in 
-	 * a set of objects
-	 */
-	private boolean checkKeyExists(String key, Collection<? extends NamedKeyItem> otherValues){
-		if (otherValues == null){
-			return false;
-		}
-		for (NamedKeyItem other : otherValues){
-			if (key.equals(other.getKeyId())){
-				return true;
-			}
-		}
-		return false;
-	}
 	
 	/**
 	 * Generates a key for a dm object from a name.
@@ -412,38 +396,6 @@ public enum DataModelManager {
 	 * @return valid key
 	 */
 	public String generateKey (String value, Collection<? extends NamedKeyItem> otherValues){
-		String raw = value.toLowerCase().replaceAll("[^a-z0-9_]", ""); //$NON-NLS-1$ //$NON-NLS-2$
-		//DM keys should not start with number or '_' character or queries will be invalid see ticket #354
-		if (!raw.isEmpty() && Pattern.matches(NamedKeyItem.INVALID_START_CHARS_KEY_PATTERN, raw.subSequence(0, 1))) {
-			raw = raw.replaceFirst(NamedKeyItem.INVALID_START_CHARS_KEY_PATTERN, ""); //$NON-NLS-1$
-		}
-		if (raw.isEmpty()){
-			raw = "object"; //$NON-NLS-1$
-		}
-	
-		int count = 0;
-		String key = raw;
-		if (raw.length() > NamedKeyItem.MAX_KEY_LENGTH){
-			key = raw.substring(0, NamedKeyItem.MAX_KEY_LENGTH);
-		}
-
-		for (String keyword: NamedKeyItem.KEYWORDS){
-			if (keyword.equals(key)){
-				key = key + "_"; //$NON-NLS-1$
-				break;
-			}
-		}
-		while(checkKeyExists(key, otherValues)){
-			count ++;
-			String cnt = String.valueOf(count);
-			if (raw.length() + cnt.length() > DmObject.MAX_KEY_LENGTH){
-				key = raw.substring(0, DmObject.MAX_KEY_LENGTH - cnt.length() ) + cnt;
-			}else{
-				key = raw + String.valueOf(count);
-			}
-			
-		}
-		
-		return key;
+		return NamedKeyItem.generateKey(value, otherValues);
 	}
 }

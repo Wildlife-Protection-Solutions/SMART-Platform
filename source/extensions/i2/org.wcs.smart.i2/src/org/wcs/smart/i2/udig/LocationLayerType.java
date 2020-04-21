@@ -32,7 +32,7 @@ import org.geotools.styling.Rule;
 import org.geotools.styling.Style;
 import org.geotools.styling.StyleBuilder;
 import org.geotools.styling.StyleFactory;
-import org.wcs.smart.i2.EntityManager;
+import org.wcs.smart.i2.StyleUtil;
 
 /**
  * Represents the two types of location layers - points and polygons
@@ -114,7 +114,7 @@ public enum LocationLayerType {
 	    	style.featureTypeStyles().add(fts);
 	    	return style;
     	}else if (this == ATTRIBUTE){
-			return EntityManager.INSTANCE.buildRedStarStyle();
+			return StyleUtil.INSTANCE.buildRedStarStyle();
     	}
     	return null;
 	}

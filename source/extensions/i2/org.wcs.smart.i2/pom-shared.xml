@@ -25,6 +25,11 @@
     			<artifactId>org.wcs.smart.core.birt</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
+				<dependency>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.observation</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>
 		<dependency>
     			<groupId>org.wcs.smart.core</groupId>
     			<artifactId>org.wcs.smart.core.birt.map</artifactId>
