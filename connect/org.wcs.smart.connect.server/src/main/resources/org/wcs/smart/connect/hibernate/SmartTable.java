@@ -179,14 +179,6 @@ import org.wcs.smart.i2.model.IntelWorkingSetRecord;
 import org.wcs.smart.i2.model.RelationshipDiagramEntityTypeStyle;
 import org.wcs.smart.i2.model.RelationshipDiagramRelationshipTypeStyle;
 import org.wcs.smart.i2.model.RelationshipDiagramStyle;
-import org.wcs.smart.intelligence.model.Informant;
-import org.wcs.smart.intelligence.model.Intelligence;
-import org.wcs.smart.intelligence.model.IntelligenceAttachment;
-import org.wcs.smart.intelligence.model.IntelligencePoint;
-import org.wcs.smart.intelligence.model.IntelligenceSource;
-import org.wcs.smart.intelligence.model.PatrolIntelligence;
-import org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery;
-import org.wcs.smart.intelligence.query.model.IntelligenceSummaryQuery;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.observation.model.Waypoint;
@@ -299,13 +291,13 @@ public enum SmartTable {
 	ENTITYSUMMARYQUERY(EntitySummaryQuery.class,null),
 	ENTITYTYPE(EntityType.class,null),
 	ENTITYWAYPOINTQUERY(EntityWaypointQuery.class,null),
-	INFORMANT(Informant.class,null),
-	INTELLIGENCE(Intelligence.class,null),
-	INTELLIGENCEATTACHMENT(IntelligenceAttachment.class,".intelligence.conservationArea"),
-	INTELLIGENCEPOINT(IntelligencePoint.class,".intelligence.conservationArea"),
-	INTELLIGENCERECORDQUERY(IntelligenceRecordQuery.class,null),
-	INTELLIGENCESOURCE(IntelligenceSource.class,null),
-	INTELLIGENCESUMMARYQUERY(IntelligenceSummaryQuery.class,null),
+//	INFORMANT(Informant.class,null),
+//	INTELLIGENCE(Intelligence.class,null),
+//	INTELLIGENCEATTACHMENT(IntelligenceAttachment.class,".intelligence.conservationArea"),
+//	INTELLIGENCEPOINT(IntelligencePoint.class,".intelligence.conservationArea"),
+//	INTELLIGENCERECORDQUERY(IntelligenceRecordQuery.class,null),
+//	INTELLIGENCESOURCE(IntelligenceSource.class,null),
+//	INTELLIGENCESUMMARYQUERY(IntelligenceSummaryQuery.class,null),
 	LABEL(Label.class,".id.language.ca"),
 	LANGUAGE(Language.class,null),
 	MISSION(Mission.class,".survey.surveyDesign.conservationArea"),
@@ -339,7 +331,7 @@ public enum SmartTable {
 	PATROLTRANSPORTTYPE(PatrolTransportType.class,null),
 	PATROLWAYPOINT(PatrolWaypoint.class,".id.waypoint.conservationArea"),
 	PATROLWAYPOINTQUERY(PatrolWaypointQuery.class,null),
-	PATROLINTELLIGENCE(PatrolIntelligence.class,".id.patrol.conservationArea"),
+//	PATROLINTELLIGENCE(PatrolIntelligence.class,".id.patrol.conservationArea"),
 	PATROLFOLDER(PatrolFolder.class,null),
 	PATROLATTRIBUTE(PatrolAttribute.class, null),
 	PATROLATTRIBUTELIST(PatrolAttributeListItem.class, ".attribute.conservationArea"),

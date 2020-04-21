@@ -49,7 +49,6 @@ import org.wcs.smart.connect.query.engine.IFilterProcessor;
 import org.wcs.smart.connect.query.engine.ISummaryEngine;
 import org.wcs.smart.connect.query.engine.ListItem;
 import org.wcs.smart.connect.query.engine.SummaryItemLabelProvider;
-import org.wcs.smart.intelligence.query.IntelligencePatrolGroupBy;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
@@ -1466,16 +1465,16 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 				fromSql.append(".keyid = " + p1); //$NON-NLS-1$
 				
 			}else if (gb instanceof IExtensionGroupBy){
-				if (gb instanceof IntelligencePatrolGroupBy){
-					String intelPrefix = "intel_" + itemcnt; //$NON-NLS-1$
-					groupBySql.append("i_" + itemcnt); //$NON-NLS-1$
-					groupByInnerSql.append(" CASE WHEN " + intelPrefix + ".patrol_uuid IS NULL THEN 'nm' else 'm' END as i_" + itemcnt); //$NON-NLS-1$ //$NON-NLS-2$
-					fromSql.append(" LEFT JOIN "); //$NON-NLS-1$
-					fromSql.append(" smart.patrol_intelligence " + intelPrefix); //$NON-NLS-1$
-					fromSql.append(" on "); //$NON-NLS-1$
-					fromSql.append("temp.p_uuid = " + intelPrefix + ".patrol_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
-					
-				}
+//				if (gb instanceof IntelligencePatrolGroupBy){
+//					String intelPrefix = "intel_" + itemcnt; //$NON-NLS-1$
+//					groupBySql.append("i_" + itemcnt); //$NON-NLS-1$
+//					groupByInnerSql.append(" CASE WHEN " + intelPrefix + ".patrol_uuid IS NULL THEN 'nm' else 'm' END as i_" + itemcnt); //$NON-NLS-1$ //$NON-NLS-2$
+//					fromSql.append(" LEFT JOIN "); //$NON-NLS-1$
+//					fromSql.append(" smart.patrol_intelligence " + intelPrefix); //$NON-NLS-1$
+//					fromSql.append(" on "); //$NON-NLS-1$
+//					fromSql.append("temp.p_uuid = " + intelPrefix + ".patrol_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+//					
+//				}
 //				PatrolContributionFinder.addGroupBySql((IExtensionGroupBy)gb, fromSql, 
 //						groupBySql, groupByInnerSql, 
 //						value, caFilter, itemcnt, this);

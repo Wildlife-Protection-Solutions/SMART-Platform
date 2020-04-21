@@ -63,8 +63,6 @@ import org.wcs.smart.connect.query.engine.er.PsqlErMissionTrackEngine;
 import org.wcs.smart.connect.query.engine.er.PsqlErObservationEngine;
 import org.wcs.smart.connect.query.engine.er.PsqlErSummaryEngine;
 import org.wcs.smart.connect.query.engine.er.PsqlErWaypointEngine;
-import org.wcs.smart.connect.query.engine.intelligence.PsqlRecordQueryIntelligenceEngine;
-import org.wcs.smart.connect.query.engine.intelligence.PsqlSummaryIntelligenceQueryEngine;
 import org.wcs.smart.connect.query.engine.observation.PsqlObsGridEngine;
 import org.wcs.smart.connect.query.engine.observation.PsqlObsObservationEngine;
 import org.wcs.smart.connect.query.engine.observation.PsqlObsSummaryEngine;
@@ -95,9 +93,6 @@ import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.model.IntelRecordQuery;
 import org.wcs.smart.i2.model.IntelRecordSummaryQuery;
-import org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery;
-import org.wcs.smart.intelligence.query.model.IntelligenceSummaryQuery;
-import org.wcs.smart.intelligence.query.model.ReceivedDateFilter;
 import org.wcs.smart.observation.query.model.ObsObservationQuery;
 import org.wcs.smart.observation.query.model.ObservationGriddedQuery;
 import org.wcs.smart.observation.query.model.ObservationSummaryQuery;
@@ -151,8 +146,8 @@ public enum QueryManager {
 		queryClasses.add(MissionQuery.class);
 		queryClasses.add(MissionTrackQuery.class);
 		
-		queryClasses.add(IntelligenceRecordQuery.class);
-		queryClasses.add(IntelligenceSummaryQuery.class);
+//		queryClasses.add(IntelligenceRecordQuery.class);
+//		queryClasses.add(IntelligenceSummaryQuery.class);
 		
 		queryClasses.add(AssetObservationQuery.class);
 		queryClasses.add(AssetWaypointQuery.class);
@@ -193,8 +188,8 @@ public enum QueryManager {
 		new PsqlErObservationEngine(),
 		new PsqlErSummaryEngine(),
 		new PsqlErWaypointEngine(),
-		new PsqlRecordQueryIntelligenceEngine(),
-		new PsqlSummaryIntelligenceQueryEngine(),
+//		new PsqlRecordQueryIntelligenceEngine(),
+//		new PsqlSummaryIntelligenceQueryEngine(),
 		new AssetSummaryEngine(),
 		new AssetObservationEngine(),
 		new AssetWaypointEngine()
@@ -207,7 +202,7 @@ public enum QueryManager {
 		PatrolEndDateField.INSTANCE, 
 		PatrolStartDateField.INSTANCE, 
 		WaypointDateField.INSTANCE, 
-		ReceivedDateFilter.INSTANCE,
+//		ReceivedDateFilter.INSTANCE,
 		RecordDateDateField.INSTANCE,
 	};
 	
@@ -238,8 +233,8 @@ public enum QueryManager {
 		DATE_FILTERS.put(EntitySummaryQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey()});
 		DATE_FILTERS.put(EntityWaypointQuery.KEY, new String[]{WaypointDateField.INSTANCE.getKey()});
 		
-		DATE_FILTERS.put(IntelligenceRecordQuery.KEY, new String[]{ReceivedDateFilter.INSTANCE.getKey()});
-		DATE_FILTERS.put(IntelligenceSummaryQuery.KEY, new String[]{ReceivedDateFilter.INSTANCE.getKey()});
+//		DATE_FILTERS.put(IntelligenceRecordQuery.KEY, new String[]{ReceivedDateFilter.INSTANCE.getKey()});
+//		DATE_FILTERS.put(IntelligenceSummaryQuery.KEY, new String[]{ReceivedDateFilter.INSTANCE.getKey()});
 		
 		DATE_FILTERS.put(IntelRecordObservationQuery.KEY.toLowerCase(Locale.ROOT), new String[]{WaypointDateField.INSTANCE.getKey()});
 		DATE_FILTERS.put(IntelRecordQuery.KEY.toLowerCase(Locale.ROOT), new String[]{RecordDateDateField.INSTANCE.getKey()});

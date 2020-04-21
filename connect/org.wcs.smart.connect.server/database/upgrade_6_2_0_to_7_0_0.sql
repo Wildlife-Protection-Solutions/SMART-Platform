@@ -699,11 +699,11 @@ delete from connect.change_log_history;
 				
 				
 ---- remove intelligence plugin ----
-DROP TABLE IF EXISTS smart.informant;
 DROP TABLE IF EXISTS smart.patrol_intelligence;
 DROP TABLE IF EXISTS smart.intelligence_attachment;
 DROP TABLE IF EXISTS smart.intelligence_point;
 DROP TABLE IF EXISTS smart.intelligence;
+DROP TABLE IF EXISTS smart.informant;
 DROP TABLE IF EXISTS smart.intelligence_source;
 DROP TABLE IF EXISTS smart.intel_record_query;
 DROP TABLE IF EXISTS smart.intel_summary_query;

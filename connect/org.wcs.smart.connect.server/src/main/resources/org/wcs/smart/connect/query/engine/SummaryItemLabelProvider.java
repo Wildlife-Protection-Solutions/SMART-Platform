@@ -85,7 +85,6 @@ import org.wcs.smart.er.query.filter.summary.SamplingUnitAttributeGroupBy;
 import org.wcs.smart.er.query.filter.summary.SamplingUnitGroupBy;
 import org.wcs.smart.er.query.filter.summary.SurveyIdGroupBy;
 import org.wcs.smart.hibernate.QueryFactory;
-import org.wcs.smart.intelligence.query.IntelligencePatrolGroupBy;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.query.model.filter.WaypointSourceGroupBy;
 import org.wcs.smart.patrol.model.Patrol;
@@ -355,8 +354,8 @@ public class SummaryItemLabelProvider {
 			results = getName((SamplingUnitAttributeGroupBy)item);	
 		}else if (item instanceof WaypointSourceGroupBy){
 			results = getName((WaypointSourceGroupBy)item);
-		}else if (item instanceof IntelligencePatrolGroupBy){
-			results = getName((IntelligencePatrolGroupBy)item);
+//		}else if (item instanceof IntelligencePatrolGroupBy){
+//			results = getName((IntelligencePatrolGroupBy)item);
 		}else if (item instanceof MissionIdGroupBy){
 			results = getName((MissionIdGroupBy)item);
 		}else if (item instanceof SurveyIdGroupBy){
@@ -1205,10 +1204,10 @@ public class SummaryItemLabelProvider {
 	}
 	
 	
-	private List<ListItem> getName(IntelligencePatrolGroupBy item){
-		ArrayList<ListItem> items = new ArrayList<ListItem>();
-		items.add(new ListItem(null, Messages.getString("SummaryItemLabelProvider.MotivateIntelOp", l), IntelligencePatrolGroupBy.Options.MOTIVATED.getKey()));  //$NON-NLS-1$
-		items.add(new ListItem(null, Messages.getString("SummaryItemLabelProvider.NotMotivatedIntlOp", l), IntelligencePatrolGroupBy.Options.NOT_MOTIVATED.getKey())); //$NON-NLS-1$
-		return items;
-	}
+//	private List<ListItem> getName(IntelligencePatrolGroupBy item){
+//		ArrayList<ListItem> items = new ArrayList<ListItem>();
+//		items.add(new ListItem(null, Messages.getString("SummaryItemLabelProvider.MotivateIntelOp", l), IntelligencePatrolGroupBy.Options.MOTIVATED.getKey()));  //$NON-NLS-1$
+//		items.add(new ListItem(null, Messages.getString("SummaryItemLabelProvider.NotMotivatedIntlOp", l), IntelligencePatrolGroupBy.Options.NOT_MOTIVATED.getKey())); //$NON-NLS-1$
+//		return items;
+//	}
 }

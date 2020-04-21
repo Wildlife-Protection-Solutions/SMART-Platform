@@ -331,6 +331,7 @@
     			<artifactId>org.wcs.smart.core.plan</artifactId>
     			<version>${smart.version}</version>
 		</dependency>		
+		<!-- REMOVED SMART 7 
 		<dependency>
     			<groupId>org.wcs.smart.core</groupId>
     			<artifactId>org.wcs.smart.core.intelligence</artifactId>
@@ -340,7 +341,13 @@
     			<groupId>org.wcs.smart.core</groupId>
     			<artifactId>org.wcs.smart.core.intelligence.query</artifactId>
     			<version>${smart.version}</version>
-		</dependency>	
+		</dependency>
+		<dependency>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.intelligence.query.report</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>
+		-->	
 		<dependency>
     			<groupId>org.wcs.smart.core</groupId>
     			<artifactId>org.wcs.smart.core.er</artifactId>
@@ -401,11 +408,7 @@
     			<artifactId>org.wcs.smart.core.patrol.query.report</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
-		<dependency>
-    			<groupId>org.wcs.smart.core</groupId>
-    			<artifactId>org.wcs.smart.core.intelligence.query.report</artifactId>
-    			<version>${smart.version}</version>
-		</dependency>
+
 		<dependency>
     			<groupId>org.wcs.smart.core</groupId>
     			<artifactId>org.wcs.smart.core.entity.query.report</artifactId>

@@ -72,7 +72,6 @@ import org.wcs.smart.er.query.model.SurveyGriddedQuery;
 import org.wcs.smart.er.query.model.SurveyObservationQuery;
 import org.wcs.smart.er.query.model.SurveySummaryQuery;
 import org.wcs.smart.er.query.model.SurveyWaypointQuery;
-import org.wcs.smart.intelligence.query.IntelligencePatrolQueryFilter;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
@@ -531,20 +530,21 @@ public enum PsqlFilterToSqlGenerator {
 	 * extension filters
 	 */
 	protected String asSql(IExtensionFilter filter, IQueryEngine engine) throws SQLException{
-		if (filter instanceof IntelligencePatrolQueryFilter){
-			IntelligencePatrolQueryFilter qFilter = (IntelligencePatrolQueryFilter)filter;
-			String prefix = engine.tablePrefix(qFilter.getPatrolQueryOption().getPatrolAttributeClass());
-			String v = SharedUtils.stripQuotes((String)qFilter.getValue());
-			//if v is empty this means that this is "Any Plan" case
-			
-			String intelPart = ""; //$NON-NLS-1$
-			if (!qFilter.isAnyIntelligence()){
-				String param = engine.addParameterValue(UuidUtils.stringToUuid(v));
-				intelPart = !qFilter.isAnyIntelligence() ? " AND p2i.intelligence_uuid = " + param  : "";  //$NON-NLS-1$//$NON-NLS-2$ 
-			}
-			String sql = "EXISTS (SELECT * FROM smart.patrol_intelligence p2i WHERE p2i.patrol_uuid = " + prefix + ".uuid" + intelPart + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			return sql;
-		}else if (filter instanceof PlanPatrolQueryFilter){
+//		if (filter instanceof IntelligencePatrolQueryFilter){
+//			IntelligencePatrolQueryFilter qFilter = (IntelligencePatrolQueryFilter)filter;
+//			String prefix = engine.tablePrefix(qFilter.getPatrolQueryOption().getPatrolAttributeClass());
+//			String v = SharedUtils.stripQuotes((String)qFilter.getValue());
+//			//if v is empty this means that this is "Any Plan" case
+//			
+//			String intelPart = ""; //$NON-NLS-1$
+//			if (!qFilter.isAnyIntelligence()){
+//				String param = engine.addParameterValue(UuidUtils.stringToUuid(v));
+//				intelPart = !qFilter.isAnyIntelligence() ? " AND p2i.intelligence_uuid = " + param  : "";  //$NON-NLS-1$//$NON-NLS-2$ 
+//			}
+//			String sql = "EXISTS (SELECT * FROM smart.patrol_intelligence p2i WHERE p2i.patrol_uuid = " + prefix + ".uuid" + intelPart + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+//			return sql;
+//		}else 
+		if (filter instanceof PlanPatrolQueryFilter){
 			PlanPatrolQueryFilter qfilter = (PlanPatrolQueryFilter)filter;
 			
 			String prefix = engine.tablePrefix(qfilter.getOption().getPatrolAttributeClass());

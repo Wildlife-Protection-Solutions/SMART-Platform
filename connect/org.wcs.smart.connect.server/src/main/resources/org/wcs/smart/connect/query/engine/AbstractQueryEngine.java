@@ -77,10 +77,6 @@ import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyWaypoint;
-import org.wcs.smart.intelligence.model.Informant;
-import org.wcs.smart.intelligence.model.Intelligence;
-import org.wcs.smart.intelligence.model.IntelligencePoint;
-import org.wcs.smart.intelligence.model.IntelligenceSource;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
@@ -174,10 +170,10 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		tablePrefix.put(SamplingUnitAttributeValue.class, "suav"); //$NON-NLS-1$
 		tablePrefix.put(SamplingUnitAttributeListItem.class, "suli"); //$NON-NLS-1$
 		
-		tablePrefix.put(Intelligence.class, "i"); //$NON-NLS-1$
-		tablePrefix.put(Informant.class, "ii"); //$NON-NLS-1$
-		tablePrefix.put(IntelligenceSource.class, "iis"); //$NON-NLS-1$
-		tablePrefix.put(IntelligencePoint.class, "iip"); //$NON-NLS-1$
+//		tablePrefix.put(Intelligence.class, "i"); //$NON-NLS-1$
+//		tablePrefix.put(Informant.class, "ii"); //$NON-NLS-1$
+//		tablePrefix.put(IntelligenceSource.class, "iis"); //$NON-NLS-1$
+//		tablePrefix.put(IntelligencePoint.class, "iip"); //$NON-NLS-1$
 		tablePrefix.put(Label.class, "lbl"); //$NON-NLS-1$
 		tablePrefix.put(Language.class, "ll"); //$NON-NLS-1$
 	}
@@ -233,11 +229,11 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		tableNames.put(SamplingUnitAttributeValue.class, "smart.sampling_unit_attribute_value"); //$NON-NLS-1$
 		tableNames.put(SamplingUnitAttributeListItem.class, "smart.sampling_unit_attribute_list"); //$NON-NLS-1$
 		
-		tableNames.put(Intelligence.class, "smart.intelligence"); //$NON-NLS-1$
-		tableNames.put(Informant.class, "smart.informant"); //$NON-NLS-1$
+//		tableNames.put(Intelligence.class, "smart.intelligence"); //$NON-NLS-1$
+//		tableNames.put(Informant.class, "smart.informant"); //$NON-NLS-1$
 		tableNames.put(Patrol.class, "smart.patrol"); //$NON-NLS-1$
-		tableNames.put(IntelligenceSource.class, "smart.intelligence_source"); //$NON-NLS-1$
-		tableNames.put(IntelligencePoint.class, "smart.intelligence_point"); //$NON-NLS-1$
+//		tableNames.put(IntelligenceSource.class, "smart.intelligence_source"); //$NON-NLS-1$
+//		tableNames.put(IntelligencePoint.class, "smart.intelligence_point"); //$NON-NLS-1$
 		tableNames.put(Label.class, "smart.i18n_label"); //$NON-NLS-1$
 		tableNames.put(Language.class, "smart.language"); //$NON-NLS-1$
 	}
