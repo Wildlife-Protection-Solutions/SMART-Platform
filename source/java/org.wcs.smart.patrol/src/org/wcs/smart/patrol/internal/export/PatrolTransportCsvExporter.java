@@ -58,8 +58,10 @@ public class PatrolTransportCsvExporter implements ICsvDataExporter {
 	@Override
 	public boolean exportCsvFile(File file, char delimiter, ConservationArea ca, boolean headers, Charset cs, IProgressMonitor monitor, Session session) {
 
-		List<Language> languages = new ArrayList<Language>(ca.getLanguages());
-		
+		List<Language> languages = new ArrayList<Language>(ca.getLanguages().size());
+		for (Language l : ca.getLanguages()) {
+			languages.add(session.get(Language.class, l.getUuid()));
+		}
 		try (CSVWriter writer = new CSVWriter(
 					new OutputStreamWriter(new FileOutputStream(file), cs),
 					delimiter, '"',SharedUtils.LINE_SEPARATOR)){
