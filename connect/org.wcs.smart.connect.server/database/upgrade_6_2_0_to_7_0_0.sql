@@ -697,6 +697,23 @@ update connect.ca_info SET version = uuid_generate_v4();
 delete from connect.change_log;
 delete from connect.change_log_history;
 				
+				
+---- remove intelligence plugin ----
+DROP TABLE IF EXISTS smart.informant;
+DROP TABLE IF EXISTS smart.patrol_intelligence;
+DROP TABLE IF EXISTS smart.intelligence_attachment;
+DROP TABLE IF EXISTS smart.intelligence_point;
+DROP TABLE IF EXISTS smart.intelligence;
+DROP TABLE IF EXISTS smart.intelligence_source;
+DROP TABLE IF EXISTS smart.intel_record_query;
+DROP TABLE IF EXISTS smart.intel_summary_query;
+
+
+DELETE FROM connect.connect_plugin_version where plugin_id = 'org.wcs.smart.intelligence';
+DELETE FROM connect.connect_plugin_version where plugin_id = 'org.wcs.smart.intelligence.query';
+DELETE FROM connect.ca_plugin_version where plugin_id = 'org.wcs.smart.intelligence';
+DELETE FROM connect.ca_plugin_version where plugin_id = 'org.wcs.smart.intelligence.query';
+
 ------------ VERSIONS ------------
 update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.event';
 update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.cybertracker.patrol';

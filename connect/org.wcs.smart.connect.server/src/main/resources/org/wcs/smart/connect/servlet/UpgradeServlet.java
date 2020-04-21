@@ -49,6 +49,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.commons.io.FileUtils;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartContext;
@@ -218,11 +219,29 @@ public class UpgradeServlet extends HttpServlet {
 					
 					//re-enable triggers
 					c.createStatement().executeUpdate("SET session_replication_role = DEFAULT"); //$NON-NLS-1$
+					
+					
+					//delete all intelligence data from datastore
+					String dir = "intelligence"; //$NON-NLS-1$
+					Path rootFs = Paths.get(SmartContext.INSTANCE.getFilestoreLocation());
+					try(ResultSet rs = c.createStatement().executeQuery("SELECT uuid FROM smart.conservation_area")){ //$NON-NLS-1$
+						while(rs.next()) {
+							UUID cauuid = (UUID) rs.getObject(1);
+							Path inteldir = rootFs.resolve(UuidUtils.uuidToString(cauuid)).resolve(dir);
+							if (Files.exists(inteldir)) {
+								FileUtils.deleteDirectory(inteldir.toFile());
+							}
+						}
+					}
+					
 				}catch (Exception ex) {
 					throw new SQLException (ex);
 				}
 			}
 		});
+		
+		
+		
 	}
 	
 	private void updateProfilesV6toV7(Connection c) throws SQLException {

@@ -973,24 +973,24 @@ BEGIN
 END$$;
 
 
-CREATE FUNCTION connect.trg_intelligence_attachment() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, i.CA_UUID 
- 		from smart.intelligence i where i.uuid = ROW.intelligence_uuid;
-RETURN ROW; END$$;
-
-
-CREATE FUNCTION connect.trg_intelligence_point() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, i.CA_UUID 
- 		from smart.intelligence i where i.uuid = ROW.intelligence_uuid;
-RETURN ROW; END$$;
+--CREATE FUNCTION connect.trg_intelligence_attachment() RETURNS trigger
+--    LANGUAGE plpgsql
+--    AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+-- 	INSERT INTO connect.change_log 
+-- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+-- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, i.CA_UUID 
+-- 		from smart.intelligence i where i.uuid = ROW.intelligence_uuid;
+--RETURN ROW; END$$;
+--
+--
+--CREATE FUNCTION connect.trg_intelligence_point() RETURNS trigger
+--    LANGUAGE plpgsql
+--    AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+-- 	INSERT INTO connect.change_log 
+-- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+-- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, i.CA_UUID 
+-- 		from smart.intelligence i where i.uuid = ROW.intelligence_uuid;
+--RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_mission() RETURNS trigger
@@ -1190,14 +1190,14 @@ BEGIN
 END$$;
 
 
-CREATE FUNCTION connect.trg_patrol_intelligence() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'patrol_uuid', ROW.patrol_uuid, 'intelligence_uuid', ROW.intelligence_uuid, null, p.CA_UUID 
- 		from smart.patrol p where p.uuid = ROW.patrol_uuid;
-RETURN ROW; END$$;
+--CREATE FUNCTION connect.trg_patrol_intelligence() RETURNS trigger
+--    LANGUAGE plpgsql
+--    AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+-- 	INSERT INTO connect.change_log 
+-- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+-- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'patrol_uuid', ROW.patrol_uuid, 'intelligence_uuid', ROW.intelligence_uuid, null, p.CA_UUID 
+-- 		from smart.patrol p where p.uuid = ROW.patrol_uuid;
+--RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_patrol_leg() RETURNS trigger
@@ -3535,82 +3535,79 @@ CREATE TABLE smart.iconset (
     PRIMARY KEY (uuid)
 );
 
-CREATE TABLE smart.informant (
-    uuid uuid NOT NULL,
-    ca_uuid uuid NOT NULL,
-    id character varying(128),
-    is_active boolean NOT NULL,
-    PRIMARY KEY (uuid)
-);
-
-CREATE TABLE smart.intel_record_query (
-    uuid uuid NOT NULL,
-    creator_uuid uuid NOT NULL,
-    query_filter character varying,
-    ca_filter character varying,
-    ca_uuid uuid NOT NULL,
-    folder_uuid uuid,
-    column_filter character varying,
-    shared boolean DEFAULT false NOT NULL,
-    id character varying(6) NOT NULL,
-    style character varying,
-    PRIMARY KEY (uuid)
-);
-
-
-CREATE TABLE smart.intel_summary_query (
-    uuid uuid NOT NULL,
-    creator_uuid uuid NOT NULL,
-    ca_filter character varying,
-    ca_uuid uuid NOT NULL,
-    folder_uuid uuid,
-    shared boolean DEFAULT false NOT NULL,
-    id character varying(6) NOT NULL,
-    PRIMARY KEY (uuid)
-);
-
-CREATE TABLE smart.intelligence (
-    uuid uuid NOT NULL,
-    ca_uuid uuid NOT NULL,
-    received_date date NOT NULL,
-    patrol_uuid uuid,
-    from_date date NOT NULL,
-    to_date date,
-    description character varying,
-    creator_uuid uuid,
-    source_uuid uuid,
-    informant_uuid uuid,
-    PRIMARY KEY (uuid)
-);
-
-
-CREATE TABLE smart.intelligence_attachment (
-    uuid uuid NOT NULL,
-    intelligence_uuid uuid NOT NULL,
-    filename character varying(1024) NOT NULL,
-    PRIMARY KEY (uuid)
-);
-
-
-
-CREATE TABLE smart.intelligence_point (
-    uuid uuid NOT NULL,
-    intelligence_uuid uuid NOT NULL,
-    x double precision NOT NULL,
-    y double precision NOT NULL,
-    PRIMARY KEY (uuid)
-);
-
-
-
-CREATE TABLE smart.intelligence_source (
-    uuid uuid NOT NULL,
-    ca_uuid uuid NOT NULL,
-    keyid character varying(128),
-    is_active boolean NOT NULL,
-    PRIMARY KEY (uuid)
-);
-
+--CREATE TABLE smart.informant (
+--    uuid uuid NOT NULL,
+--    ca_uuid uuid NOT NULL,
+--    id character varying(128),
+--    is_active boolean NOT NULL,
+--    PRIMARY KEY (uuid)
+--);
+--
+--CREATE TABLE smart.intel_record_query (
+--    uuid uuid NOT NULL,
+--    creator_uuid uuid NOT NULL,
+--    query_filter character varying,
+--    ca_filter character varying,
+--    ca_uuid uuid NOT NULL,
+--    folder_uuid uuid,
+--    column_filter character varying,
+--    shared boolean DEFAULT false NOT NULL,
+--    id character varying(6) NOT NULL,
+--    style character varying,
+--    PRIMARY KEY (uuid)
+--);
+--
+--
+--CREATE TABLE smart.intel_summary_query (
+--    uuid uuid NOT NULL,
+--    creator_uuid uuid NOT NULL,
+--    ca_filter character varying,
+--    ca_uuid uuid NOT NULL,
+--    folder_uuid uuid,
+--    shared boolean DEFAULT false NOT NULL,
+--    id character varying(6) NOT NULL,
+--    PRIMARY KEY (uuid)
+--);
+--
+--CREATE TABLE smart.intelligence (
+--    uuid uuid NOT NULL,
+--    ca_uuid uuid NOT NULL,
+--    received_date date NOT NULL,
+--    patrol_uuid uuid,
+--    from_date date NOT NULL,
+--    to_date date,
+--    description character varying,
+--    creator_uuid uuid,
+--    source_uuid uuid,
+--    informant_uuid uuid,
+--    PRIMARY KEY (uuid)
+--);
+--
+--
+--CREATE TABLE smart.intelligence_attachment (
+--    uuid uuid NOT NULL,
+--    intelligence_uuid uuid NOT NULL,
+--    filename character varying(1024) NOT NULL,
+--    PRIMARY KEY (uuid)
+--);
+--
+--
+--CREATE TABLE smart.intelligence_point (
+--    uuid uuid NOT NULL,
+--    intelligence_uuid uuid NOT NULL,
+--    x double precision NOT NULL,
+--    y double precision NOT NULL,
+--    PRIMARY KEY (uuid)
+--);
+--
+--CREATE TABLE smart.intelligence_source (
+--    uuid uuid NOT NULL,
+--    ca_uuid uuid NOT NULL,
+--    keyid character varying(128),
+--    is_active boolean NOT NULL,
+--    PRIMARY KEY (uuid)
+--);
+--
 
 CREATE TABLE smart.language (
     uuid uuid NOT NULL,
@@ -3856,11 +3853,11 @@ CREATE TABLE smart.patrol_folder (
 );
 
 
-CREATE TABLE smart.patrol_intelligence (
-    patrol_uuid uuid NOT NULL,
-    intelligence_uuid uuid NOT NULL,
-    PRIMARY KEY (patrol_uuid, intelligence_uuid)
-);
+--CREATE TABLE smart.patrol_intelligence (
+--    patrol_uuid uuid NOT NULL,
+--    intelligence_uuid uuid NOT NULL,
+--    PRIMARY KEY (patrol_uuid, intelligence_uuid)
+--);
 
 
 CREATE TABLE smart.patrol_leg (
@@ -4510,7 +4507,7 @@ ALTER TABLE ONLY smart.i_config_option ADD CONSTRAINT i_config_option_ca_uuid_ke
 ALTER TABLE ONLY smart.i_record_attribute_value ADD CONSTRAINT i_record_attribute_value_record_uuid_attribute_uuid_key UNIQUE (record_uuid, attribute_uuid);
 ALTER TABLE ONLY smart.i_recordsource_attribute ADD CONSTRAINT i_recordsource_attribute_source_uuid_attribute_uuid_entity__key UNIQUE (source_uuid, attribute_uuid, entity_type_uuid);
 ALTER TABLE ONLY smart.asset ADD CONSTRAINT id_ca_uuid_unq UNIQUE (id, ca_uuid);
-ALTER TABLE ONLY smart.intelligence_source ADD CONSTRAINT intell_source_keyid_unq UNIQUE (ca_uuid, keyid) DEFERRABLE;
+--ALTER TABLE ONLY smart.intelligence_source ADD CONSTRAINT intell_source_keyid_unq UNIQUE (ca_uuid, keyid) DEFERRABLE;
 ALTER TABLE ONLY smart.asset_attribute ADD CONSTRAINT keyid_ca_uuid_unq UNIQUE (keyid, ca_uuid);
 ALTER TABLE ONLY smart.agency ADD CONSTRAINT keyunq UNIQUE (keyid, ca_uuid);
 ALTER TABLE ONLY smart.mission_attribute ADD CONSTRAINT mission_attribute_keyid_unq UNIQUE (ca_uuid, keyid) DEFERRABLE;
@@ -4658,13 +4655,13 @@ CREATE TRIGGER trg_i_working_set_record AFTER INSERT OR DELETE OR UPDATE ON smar
 CREATE TRIGGER trg_icon AFTER INSERT OR DELETE OR UPDATE ON smart.icon FOR EACH ROW EXECUTE PROCEDURE connect.trg_changelog_common();
 CREATE TRIGGER trg_iconfile AFTER INSERT OR DELETE OR UPDATE ON smart.iconfile FOR EACH ROW EXECUTE PROCEDURE connect.trg_iconfile();
 CREATE TRIGGER trg_iconset AFTER INSERT OR DELETE OR UPDATE ON smart.iconset FOR EACH ROW EXECUTE PROCEDURE connect.trg_changelog_common();
-CREATE TRIGGER trg_informant AFTER INSERT OR DELETE OR UPDATE ON smart.informant FOR EACH ROW EXECUTE PROCEDURE connect.trg_changelog_common();
-CREATE TRIGGER trg_intel_record_query AFTER INSERT OR DELETE OR UPDATE ON smart.intel_record_query FOR EACH ROW EXECUTE PROCEDURE connect.trg_changelog_common();
-CREATE TRIGGER trg_intel_summary_query AFTER INSERT OR DELETE OR UPDATE ON smart.intel_summary_query FOR EACH ROW EXECUTE PROCEDURE connect.trg_changelog_common();
-CREATE TRIGGER trg_intelligence AFTER INSERT OR DELETE OR UPDATE ON smart.intelligence FOR EACH ROW EXECUTE PROCEDURE connect.trg_changelog_common();
-CREATE TRIGGER trg_intelligence_attachment AFTER INSERT OR DELETE OR UPDATE ON smart.intelligence_attachment FOR EACH ROW EXECUTE PROCEDURE connect.trg_intelligence_attachment();
-CREATE TRIGGER trg_intelligence_point AFTER INSERT OR DELETE OR UPDATE ON smart.intelligence_point FOR EACH ROW EXECUTE PROCEDURE connect.trg_intelligence_point();
-CREATE TRIGGER trg_intelligence_source AFTER INSERT OR DELETE OR UPDATE ON smart.intelligence_source FOR EACH ROW EXECUTE PROCEDURE connect.trg_changelog_common();
+--CREATE TRIGGER trg_informant AFTER INSERT OR DELETE OR UPDATE ON smart.informant FOR EACH ROW EXECUTE PROCEDURE connect.trg_changelog_common();
+--CREATE TRIGGER trg_intel_record_query AFTER INSERT OR DELETE OR UPDATE ON smart.intel_record_query FOR EACH ROW EXECUTE PROCEDURE connect.trg_changelog_common();
+--CREATE TRIGGER trg_intel_summary_query AFTER INSERT OR DELETE OR UPDATE ON smart.intel_summary_query FOR EACH ROW EXECUTE PROCEDURE connect.trg_changelog_common();
+--CREATE TRIGGER trg_intelligence AFTER INSERT OR DELETE OR UPDATE ON smart.intelligence FOR EACH ROW EXECUTE PROCEDURE connect.trg_changelog_common();
+--CREATE TRIGGER trg_intelligence_attachment AFTER INSERT OR DELETE OR UPDATE ON smart.intelligence_attachment FOR EACH ROW EXECUTE PROCEDURE connect.trg_intelligence_attachment();
+--CREATE TRIGGER trg_intelligence_point AFTER INSERT OR DELETE OR UPDATE ON smart.intelligence_point FOR EACH ROW EXECUTE PROCEDURE connect.trg_intelligence_point();
+--CREATE TRIGGER trg_intelligence_source AFTER INSERT OR DELETE OR UPDATE ON smart.intelligence_source FOR EACH ROW EXECUTE PROCEDURE connect.trg_changelog_common();
 CREATE TRIGGER trg_language AFTER INSERT OR DELETE OR UPDATE ON smart.language FOR EACH ROW EXECUTE PROCEDURE connect.trg_changelog_common();
 CREATE TRIGGER trg_map_styles AFTER INSERT OR DELETE OR UPDATE ON smart.map_styles FOR EACH ROW EXECUTE PROCEDURE connect.trg_changelog_common();
 CREATE TRIGGER trg_mission AFTER INSERT OR DELETE OR UPDATE ON smart.mission FOR EACH ROW EXECUTE PROCEDURE connect.trg_mission();
@@ -4687,7 +4684,7 @@ CREATE TRIGGER trg_patrol_attribute AFTER INSERT OR DELETE OR UPDATE ON smart.pa
 CREATE TRIGGER trg_patrol_attribute_list AFTER INSERT OR DELETE OR UPDATE ON smart.patrol_attribute_list FOR EACH ROW EXECUTE PROCEDURE connect.trg_patrol_attribute_list();
 CREATE TRIGGER trg_patrol_attribute_value AFTER INSERT OR DELETE OR UPDATE ON smart.patrol_attribute_value FOR EACH ROW EXECUTE PROCEDURE connect.trg_patrol_attribute_value();
 CREATE TRIGGER trg_patrol_folder AFTER INSERT OR DELETE OR UPDATE ON smart.patrol_folder FOR EACH ROW EXECUTE PROCEDURE connect.trg_changelog_common();
-CREATE TRIGGER trg_patrol_intelligence AFTER INSERT OR DELETE OR UPDATE ON smart.patrol_intelligence FOR EACH ROW EXECUTE PROCEDURE connect.trg_patrol_intelligence();
+--CREATE TRIGGER trg_patrol_intelligence AFTER INSERT OR DELETE OR UPDATE ON smart.patrol_intelligence FOR EACH ROW EXECUTE PROCEDURE connect.trg_patrol_intelligence();
 CREATE TRIGGER trg_patrol_leg AFTER INSERT OR DELETE OR UPDATE ON smart.patrol_leg FOR EACH ROW EXECUTE PROCEDURE connect.trg_patrol_leg();
 CREATE TRIGGER trg_patrol_leg_day AFTER INSERT OR DELETE OR UPDATE ON smart.patrol_leg_day FOR EACH ROW EXECUTE PROCEDURE connect.trg_patrol_leg_day();
 CREATE TRIGGER trg_patrol_leg_members AFTER INSERT OR DELETE OR UPDATE ON smart.patrol_leg_members FOR EACH ROW EXECUTE PROCEDURE connect.trg_patrol_leg_members();
@@ -4997,21 +4994,21 @@ ALTER TABLE ONLY smart.i_entity_type_attribute ADD CONSTRAINT ientitytypeattribu
 ALTER TABLE ONLY smart.i_entity_type_attribute ADD CONSTRAINT ientitytypeattribute_entitytype_fk FOREIGN KEY (entity_type_uuid) REFERENCES smart.i_entity_type(uuid) ON DELETE CASCADE DEFERRABLE;
 ALTER TABLE ONLY smart.i_entity_type_attribute_group ADD CONSTRAINT ientitytypeattributegroupentitytypeuuid_fk FOREIGN KEY (entity_type_uuid) REFERENCES smart.i_entity_type(uuid) ON DELETE CASCADE DEFERRABLE;
 ALTER TABLE ONLY smart.i_location ADD CONSTRAINT ilocation_cauuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON DELETE CASCADE DEFERRABLE;
-ALTER TABLE ONLY smart.informant ADD CONSTRAINT informant_ca_uuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON DELETE CASCADE DEFERRABLE;
-ALTER TABLE ONLY smart.intel_record_query ADD CONSTRAINT intel_record_query_ca_uuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON DELETE CASCADE DEFERRABLE;
-ALTER TABLE ONLY smart.intel_record_query ADD CONSTRAINT intel_record_query_creator_uuid_fk FOREIGN KEY (creator_uuid) REFERENCES smart.employee(uuid) ON DELETE CASCADE DEFERRABLE;
-ALTER TABLE ONLY smart.intel_record_query ADD CONSTRAINT intel_record_query_folder_uuid_fk FOREIGN KEY (folder_uuid) REFERENCES smart.query_folder(uuid) ON DELETE CASCADE DEFERRABLE;
-ALTER TABLE ONLY smart.intel_summary_query ADD CONSTRAINT intel_summary_query_ca_uuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON DELETE CASCADE DEFERRABLE;
-ALTER TABLE ONLY smart.intel_summary_query ADD CONSTRAINT intel_summary_query_creator_uuid_fk FOREIGN KEY (creator_uuid) REFERENCES smart.employee(uuid) ON DELETE CASCADE DEFERRABLE;
-ALTER TABLE ONLY smart.intel_summary_query ADD CONSTRAINT intel_summary_query_folder_uuid_fk FOREIGN KEY (folder_uuid) REFERENCES smart.query_folder(uuid) ON DELETE CASCADE DEFERRABLE;
-ALTER TABLE ONLY smart.intelligence_attachment ADD CONSTRAINT intelligence_attachment_intelligence_uuid_fk FOREIGN KEY (intelligence_uuid) REFERENCES smart.intelligence(uuid) ON DELETE CASCADE DEFERRABLE;
-ALTER TABLE ONLY smart.intelligence ADD CONSTRAINT intelligence_ca_uuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON DELETE CASCADE DEFERRABLE;
-ALTER TABLE ONLY smart.intelligence ADD CONSTRAINT intelligence_creator_uuid_fk FOREIGN KEY (creator_uuid) REFERENCES smart.employee(uuid) ON DELETE CASCADE DEFERRABLE;
-ALTER TABLE ONLY smart.intelligence ADD CONSTRAINT intelligence_informant_uuid_fk FOREIGN KEY (informant_uuid) REFERENCES smart.informant(uuid) ON DELETE CASCADE DEFERRABLE;
-ALTER TABLE ONLY smart.intelligence ADD CONSTRAINT intelligence_patrol_uuid_fk FOREIGN KEY (patrol_uuid) REFERENCES smart.patrol(uuid) ON DELETE CASCADE DEFERRABLE;
-ALTER TABLE ONLY smart.intelligence_point ADD CONSTRAINT intelligence_point_intelligence_uuid_fk FOREIGN KEY (intelligence_uuid) REFERENCES smart.intelligence(uuid) ON DELETE CASCADE DEFERRABLE;
-ALTER TABLE ONLY smart.intelligence_source ADD CONSTRAINT intelligence_source_ca_uuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON DELETE CASCADE DEFERRABLE;
-ALTER TABLE ONLY smart.intelligence ADD CONSTRAINT intelligence_source_uuid_fk FOREIGN KEY (source_uuid) REFERENCES smart.intelligence_source(uuid) ON DELETE CASCADE DEFERRABLE;
+--ALTER TABLE ONLY smart.informant ADD CONSTRAINT informant_ca_uuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON DELETE CASCADE DEFERRABLE;
+--ALTER TABLE ONLY smart.intel_record_query ADD CONSTRAINT intel_record_query_ca_uuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON DELETE CASCADE DEFERRABLE;
+--ALTER TABLE ONLY smart.intel_record_query ADD CONSTRAINT intel_record_query_creator_uuid_fk FOREIGN KEY (creator_uuid) REFERENCES smart.employee(uuid) ON DELETE CASCADE DEFERRABLE;
+--ALTER TABLE ONLY smart.intel_record_query ADD CONSTRAINT intel_record_query_folder_uuid_fk FOREIGN KEY (folder_uuid) REFERENCES smart.query_folder(uuid) ON DELETE CASCADE DEFERRABLE;
+--ALTER TABLE ONLY smart.intel_summary_query ADD CONSTRAINT intel_summary_query_ca_uuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON DELETE CASCADE DEFERRABLE;
+--ALTER TABLE ONLY smart.intel_summary_query ADD CONSTRAINT intel_summary_query_creator_uuid_fk FOREIGN KEY (creator_uuid) REFERENCES smart.employee(uuid) ON DELETE CASCADE DEFERRABLE;
+--ALTER TABLE ONLY smart.intel_summary_query ADD CONSTRAINT intel_summary_query_folder_uuid_fk FOREIGN KEY (folder_uuid) REFERENCES smart.query_folder(uuid) ON DELETE CASCADE DEFERRABLE;
+--ALTER TABLE ONLY smart.intelligence_attachment ADD CONSTRAINT intelligence_attachment_intelligence_uuid_fk FOREIGN KEY (intelligence_uuid) REFERENCES smart.intelligence(uuid) ON DELETE CASCADE DEFERRABLE;
+--ALTER TABLE ONLY smart.intelligence ADD CONSTRAINT intelligence_ca_uuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON DELETE CASCADE DEFERRABLE;
+--ALTER TABLE ONLY smart.intelligence ADD CONSTRAINT intelligence_creator_uuid_fk FOREIGN KEY (creator_uuid) REFERENCES smart.employee(uuid) ON DELETE CASCADE DEFERRABLE;
+--ALTER TABLE ONLY smart.intelligence ADD CONSTRAINT intelligence_informant_uuid_fk FOREIGN KEY (informant_uuid) REFERENCES smart.informant(uuid) ON DELETE CASCADE DEFERRABLE;
+--ALTER TABLE ONLY smart.intelligence ADD CONSTRAINT intelligence_patrol_uuid_fk FOREIGN KEY (patrol_uuid) REFERENCES smart.patrol(uuid) ON DELETE CASCADE DEFERRABLE;
+--ALTER TABLE ONLY smart.intelligence_point ADD CONSTRAINT intelligence_point_intelligence_uuid_fk FOREIGN KEY (intelligence_uuid) REFERENCES smart.intelligence(uuid) ON DELETE CASCADE DEFERRABLE;
+--ALTER TABLE ONLY smart.intelligence_source ADD CONSTRAINT intelligence_source_ca_uuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON DELETE CASCADE DEFERRABLE;
+--ALTER TABLE ONLY smart.intelligence ADD CONSTRAINT intelligence_source_uuid_fk FOREIGN KEY (source_uuid) REFERENCES smart.intelligence_source(uuid) ON DELETE CASCADE DEFERRABLE;
 ALTER TABLE ONLY smart.i_observation ADD CONSTRAINT iobservation_category_fk FOREIGN KEY (category_uuid) REFERENCES smart.dm_category(uuid) ON DELETE CASCADE DEFERRABLE;
 ALTER TABLE ONLY smart.i_observation ADD CONSTRAINT iobservation_location_fk FOREIGN KEY (location_uuid) REFERENCES smart.i_location(uuid) ON DELETE CASCADE DEFERRABLE;
 ALTER TABLE ONLY smart.i_observation_attribute ADD CONSTRAINT iobservationattribute_attributeuuid_fk FOREIGN KEY (attribute_uuid) REFERENCES smart.dm_attribute(uuid) ON DELETE CASCADE DEFERRABLE;
@@ -5097,8 +5094,8 @@ ALTER TABLE ONLY smart.patrol ADD CONSTRAINT patrol_ca_uuid_fk FOREIGN KEY (ca_u
 ALTER TABLE ONLY smart.patrol_folder ADD CONSTRAINT patrol_folder_ca_uuid_fkey FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE ONLY smart.patrol_folder ADD CONSTRAINT patrol_folder_parent_uuid_fkey FOREIGN KEY (parent_uuid) REFERENCES smart.patrol_folder(uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE ONLY smart.patrol ADD CONSTRAINT patrol_folder_uuid_fkey FOREIGN KEY (folder_uuid) REFERENCES smart.patrol_folder(uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
-ALTER TABLE ONLY smart.patrol_intelligence ADD CONSTRAINT patrol_intelligence_intelligence_uuid_fk FOREIGN KEY (intelligence_uuid) REFERENCES smart.intelligence(uuid) ON DELETE CASCADE DEFERRABLE;
-ALTER TABLE ONLY smart.patrol_intelligence ADD CONSTRAINT patrol_intelligence_patrol_uuid_fk FOREIGN KEY (patrol_uuid) REFERENCES smart.patrol(uuid) ON DELETE CASCADE DEFERRABLE;
+--ALTER TABLE ONLY smart.patrol_intelligence ADD CONSTRAINT patrol_intelligence_intelligence_uuid_fk FOREIGN KEY (intelligence_uuid) REFERENCES smart.intelligence(uuid) ON DELETE CASCADE DEFERRABLE;
+--ALTER TABLE ONLY smart.patrol_intelligence ADD CONSTRAINT patrol_intelligence_patrol_uuid_fk FOREIGN KEY (patrol_uuid) REFERENCES smart.patrol(uuid) ON DELETE CASCADE DEFERRABLE;
 ALTER TABLE ONLY smart.ct_patrol_link ADD CONSTRAINT patrol_key_uuid_fk FOREIGN KEY (patrol_leg_uuid) REFERENCES smart.patrol_leg(uuid) ON DELETE CASCADE DEFERRABLE;
 ALTER TABLE ONLY smart.patrol_leg_day ADD CONSTRAINT patrol_leg_day_leg_uuid_fk FOREIGN KEY (patrol_leg_uuid) REFERENCES smart.patrol_leg(uuid) ON DELETE CASCADE DEFERRABLE;
 ALTER TABLE ONLY smart.patrol_leg ADD CONSTRAINT patrol_leg_patrol_uuid_fk FOREIGN KEY (patrol_uuid) REFERENCES smart.patrol(uuid) ON DELETE CASCADE DEFERRABLE;
@@ -5263,8 +5260,8 @@ INSERT INTO connect.roles (role_id, rolename, is_system) VALUES ('smart', 'SYSTE
 
 INSERT INTO connect.connect_version (version, last_updated, filestore_version) VALUES ('7.0.0', now(), '7.0.0');
 
-INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.intelligence','4.0');
-INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.intelligence.query','2.0');
+--INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.intelligence','4.0');
+--INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.intelligence.query','2.0');
 INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.plan','4.0');
 INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.entity','2.0');
 INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.er','2.0');
