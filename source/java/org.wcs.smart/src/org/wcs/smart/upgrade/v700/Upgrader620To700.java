@@ -21,17 +21,25 @@
  */
 package org.wcs.smart.upgrade.v700;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.UUID;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
+import org.wcs.smart.util.UuidUtils;
 
 public class Upgrader620To700 implements IDatabaseUpgrader { 
 	private Exception thrownException = null;
@@ -185,6 +193,45 @@ public class Upgrader620To700 implements IDatabaseUpgrader {
 		/* VERSION UDATE */
 		String ssql = "update smart.db_version set version = '" + UpgradeEngine.UpgradeFromVersion.V700.toVersion + "' where plugin_id = 'org.wcs.smart'"; //$NON-NLS-1$ //$NON-NLS-2$
 		c.createStatement().execute(ssql);
+		
+		
+		/* REMOVE INTELLIGENCE DATA IF EXISTS */
+		String[] tables = new String[] {
+				"smart.patrol_intelligence", //$NON-NLS-1$
+				"smart.intelligence_point", //$NON-NLS-1$
+				"smart.intelligence_attachment", //$NON-NLS-1$
+				"smart.intelligence", //$NON-NLS-1$
+				"smart.informant",  //$NON-NLS-1$
+				"smart.intelligence_source", //$NON-NLS-1$
+				"smart.intel_record_query", //$NON-NLS-1$
+				"smart.intel_summary_query", //$NON-NLS-1$
+				
+		};
+		for (String t : tables) {
+			try {
+				c.createStatement().execute("DROP TABLE " + t); //$NON-NLS-1$
+			}catch (Exception ex) {
+				//assume table doesn't exist
+				//ex.printStackTrace();
+			}
+		}
+	
+		c.createStatement().execute("DELETE FROM smart.db_version where plugin_id = 'org.wcs.smart.intelligence'"); //$NON-NLS-1$
+		c.createStatement().execute("DELETE FROM smart.db_version where plugin_id = 'org.wcs.smart.intelligence.query'"); //$NON-NLS-1$
+		
+		//delete all intelligence data from datastore
+		String dir = "intelligence"; //$NON-NLS-1$
+		Path rootFs = Paths.get(SmartContext.INSTANCE.getFilestoreLocation());
+		try(ResultSet rs = c.createStatement().executeQuery("SELECT uuid FROM smart.conservation_area")){ //$NON-NLS-1$
+			while(rs.next()) {
+				UUID cauuid = UuidUtils.byteToUUID( rs.getBytes(1) );
+				Path inteldir = rootFs.resolve(UuidUtils.uuidToString(cauuid)).resolve(dir);
+				if (Files.exists(inteldir)) {
+					FileUtils.deleteDirectory(inteldir.toFile());
+				}
+			}
+		}
+		
 		c.commit();
 	}
 

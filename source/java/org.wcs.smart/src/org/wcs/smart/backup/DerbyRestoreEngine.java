@@ -266,12 +266,19 @@ public class DerbyRestoreEngine {
 			}
 			
 			for (String pluginId : backupVersions.keySet()){
+				if (pluginId.equalsIgnoreCase("org.wcs.smart.intelligence") || //$NON-NLS-1$
+						 pluginId.equalsIgnoreCase("org.wcs.smart.intelligence.query") ) { //$NON-NLS-1$
+					//these get remove in version 7.0 and up so we don't care if they exist
+					continue;
+				}
 				if (!versions.keySet().contains(pluginId)){
 					missingPlugins.append(pluginId);
 					missingPlugins.append("\n"); //$NON-NLS-1$
 				}
 			}	
 		}
+		
+		
 		
 		if (missingPlugins.length() > 0){
 			HibernateManager.endSessionFactory(true, true);
