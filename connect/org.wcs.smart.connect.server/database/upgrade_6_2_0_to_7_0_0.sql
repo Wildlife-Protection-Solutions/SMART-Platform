@@ -514,9 +514,16 @@ ALTER TABLE smart.i_profile_entity_type ADD FOREIGN KEY (profile_uuid) REFERENCE
 ALTER TABLE smart.i_profile_record_source ADD FOREIGN KEY (record_source_uuid) REFERENCES smart.I_RECORDSOURCE (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE smart.i_profile_record_source ADD FOREIGN KEY (profile_uuid) REFERENCES smart.i_profile_config (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 
+ALTER TABLE smart.i_entity_type ADD COLUMN dm_attribute_uuid uuid;
+ALTER TABLE smart.i_entity_type ADD COLUMN dm_active_filter varchar;
+ALTER TABLE smart.i_entity_type ADD FOREIGN KEY (dm_attribute_uuid) REFERENCES smart.dm_attribute(uuid) ON UPDATE RESTRICT ON DELETE NO ACTION DEFERRABLE INITIALLY DEFERRED;
+
+
 ALTER TABLE smart.i_entity ADD COLUMN profile_uuid uuid ;
 ALTER TABLE smart.i_entity ADD FOREIGN KEY (profile_uuid) REFERENCES smart.i_profile_config (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY DEFERRED;
-
+ALTER TABLE smart.i_entity ADD COLUMN dm_list_item_uuid uuid;
+ALTER TABLE smart.i_entity ADD FOREIGN KEY (dm_list_item_uuid) REFERENCES smart.dm_attribute_list(uuid) ON UPDATE RESTRICT ON DELETE NO ACTION DEFERRABLE INITIALLY DEFERRED;
+				
 ALTER TABLE smart.i_record ADD COLUMN profile_uuid uuid ;
 ALTER TABLE smart.i_record ADD FOREIGN KEY (profile_uuid) REFERENCES smart.i_profile_config (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY DEFERRED;
 
@@ -679,8 +686,10 @@ $$LANGUAGE plpgsql;
 
 
 
-
-
+-- profile for event parameters
+insert into smart.e_action_parameter_value(action_uuid, parameter_key, parameter_value)
+select uuid, 'org.wcs.smart.profile.common.profile', 'profile1'
+from smart.E_ACTION where type_key in ('org.wcs.smart.profile.newrecord', 'org.wcs.smart.profile.i2.newentity');
 
 
 ---- change ca version so users cannot sync with this and cause problems ---- 
@@ -689,12 +698,14 @@ delete from connect.change_log;
 delete from connect.change_log_history;
 				
 ------------ VERSIONS ------------
+update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.event';
 update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.cybertracker.patrol';
 update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.cybertracker.survey';
 update connect.connect_plugin_version set version = '7.0' where plugin_id = 'org.wcs.smart.cybertracker';
 insert into connect.connect_plugin_version (version, plugin_id) values ('1.0', 'org.wcs.smart.paws');
 update connect.connect_plugin_version set version = '7.0.0' where plugin_id = 'org.wcs.smart';
 
+update connect.ca_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.event';
 update connect.ca_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.cybertracker.patrol';
 update connect.ca_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.cybertracker.survey';
 update connect.ca_plugin_version set version = '7.0' where plugin_id = 'org.wcs.smart.cybertracker';

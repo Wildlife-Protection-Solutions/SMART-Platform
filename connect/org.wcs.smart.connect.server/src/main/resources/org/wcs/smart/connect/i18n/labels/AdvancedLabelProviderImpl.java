@@ -98,6 +98,8 @@ public class AdvancedLabelProviderImpl implements
 			case EMPLOYEE: return Messages.getString("AdvancedLabelProviderImpl.AttributeTypeEmployee", l); //$NON-NLS-1$
 			}
 		}
+		if (item == DM_SOURCE_LABEL) return Messages.getString("AdvancedLabelProviderImpl.DmObservation", l); //$NON-NLS-1$
+		if (item == PROFILE_SOURCE_LABEL) return Messages.getString("AdvancedLabelProviderImpl.ProfileObservation", l); //$NON-NLS-1$
 		if (item == QUERY_COLUMN_CATEGORY_LABEL) return Messages.getString("AdvancedLabelProviderImpl.CategoryColumnLabel", l); //$NON-NLS-1$
 		if (item == OBS_COUNT_LABEL ) return Messages.getString("AdvancedLabelProviderImpl.ObservationColumnLabel", l); //$NON-NLS-1$
 		if (item == IntelWorkingSetCategory.ENTITY) return Messages.getString("AdvancedLabelProviderImpl.WsEnitiesLabel", l); //$NON-NLS-1$
@@ -207,8 +209,9 @@ public class AdvancedLabelProviderImpl implements
 		if (item == EntityLocationDatasetResultSetMetadata.Column.ID) return Messages.getString("AdvancedLabelProviderImpl.EntityLocationDatasetColId", l); //$NON-NLS-1$
 		if (item == EntityLocationDatasetResultSetMetadata.Column.GEOM) return Messages.getString("AdvancedLabelProviderImpl.EntityLocationDatasetColGeom", l); //$NON-NLS-1$
 		if (item == EntityLocationDatasetResultSetMetadata.Column.DATE) return Messages.getString("AdvancedLabelProviderImpl.EntityLocationDatasetColDate", l); //$NON-NLS-1$
-		if (item == EntityLocationDatasetResultSetMetadata.Column.COMMENT) return Messages.getString("AdvancedLabelProviderImpl.EntityLocationDatasetColComment", l); //$NON-NLS-1$
 		if (item == EntityLocationDatasetResultSetMetadata.Column.OBSERVATION) return Messages.getString("AdvancedLabelProviderImpl.EntityLocationDatasetColObservation", l); //$NON-NLS-1$
+		if (item == EntityLocationDatasetResultSetMetadata.Column.SOURCELINK) return Messages.getString("AdvancedLabelProviderImpl.SourceLinkColumnName",l); //$NON-NLS-1$
+		if (item == EntityLocationDatasetResultSetMetadata.Column.SOURCE) return Messages.getString("AdvancedLabelProviderImpl.SourceColumnName",l); //$NON-NLS-1$
 				
 		if (item == EntityRecordDatasetResultSetMetadata.Column.ENTITY_UUID) return Messages.getString("AdvancedLabelProviderImpl.EntityRecordDatasetColEntity", l); //$NON-NLS-1$
 		if (item == EntityRecordDatasetResultSetMetadata.Column.TITLE) return Messages.getString("AdvancedLabelProviderImpl.EntityRecordDatasetColTitle", l); //$NON-NLS-1$

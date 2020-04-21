@@ -1,10 +1,11 @@
 -- GENERATES A SMART7 database from scratch
 -- requires: 
 -- 1) postgis extension to be installed: CREATE EXTENSION postgis;
--- 2) uuid-ossp extension to be installed: CREATE EXTENSION uuid-ossp;
+-- 2) uuid-ossp extension to be installed: CREATE EXTENSION "uuid-ossp";
 
 CREATE SCHEMA connect;
 CREATE SCHEMA smart;
+CREATE SCHEMA query_temp;
 
 CREATE OR REPLACE FUNCTION public.manage_user_roles() RETURNS TRIGGER AS $$
     BEGIN
@@ -3146,6 +3147,7 @@ CREATE TABLE smart.i_entity (
     entity_type_uuid uuid NOT NULL,
     comment character varying,
     profile_uuid uuid NOT NULL,
+    dm_list_item_uuid uuid,
     PRIMARY KEY (uuid)
 );
 
@@ -3249,6 +3251,8 @@ CREATE TABLE smart.i_entity_type (
     id_attribute_uuid uuid NOT NULL,
     icon bytea,
     birt_template character varying(4096),
+    dm_attribute_uuid uuid,
+    dm_active_filter varchar,
     PRIMARY KEY (uuid)
 );
 
@@ -4928,6 +4932,7 @@ ALTER TABLE ONLY smart.i_diagram_relationship_type_style ADD CONSTRAINT i_diagra
 ALTER TABLE ONLY smart.i_diagram_style ADD CONSTRAINT i_diagram_style_ca_uuid_fkey FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE ONLY smart.i_entity_attribute_value ADD CONSTRAINT i_entity_attribute_value_employee_uuid_fkey FOREIGN KEY (employee_uuid) REFERENCES smart.employee(uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE ONLY smart.i_entity ADD CONSTRAINT i_entity_profile_uuid_fkey FOREIGN KEY (profile_uuid) REFERENCES smart.i_profile_config(uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE ONLY smart.i_entity ADD FOREIGN KEY (dm_list_item_uuid) REFERENCES smart.dm_attribute_list(uuid) ON UPDATE RESTRICT ON DELETE NO ACTION DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE ONLY smart.i_entity_record_query ADD CONSTRAINT i_entity_record_query_ca_uuid_fkey FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE ONLY smart.i_entity_record_query ADD CONSTRAINT i_entity_record_query_created_by_fkey FOREIGN KEY (created_by) REFERENCES smart.employee(uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE ONLY smart.i_entity_record_query ADD CONSTRAINT i_entity_record_query_last_modified_by_fkey FOREIGN KEY (last_modified_by) REFERENCES smart.employee(uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
@@ -4987,6 +4992,7 @@ ALTER TABLE ONLY smart.i_entity_relationship_attribute_value ADD CONSTRAINT ient
 ALTER TABLE ONLY smart.i_entity_search ADD CONSTRAINT ientitysearch_cauuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON DELETE CASCADE DEFERRABLE;
 ALTER TABLE ONLY smart.i_entity_type ADD CONSTRAINT ientitytype_cauuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON DELETE CASCADE DEFERRABLE;
 ALTER TABLE ONLY smart.i_entity_type ADD CONSTRAINT ientitytype_idattributeuuid_fk FOREIGN KEY (id_attribute_uuid) REFERENCES smart.i_attribute(uuid) ON DELETE CASCADE DEFERRABLE;
+ALTER TABLE ONLY smart.i_entity_type ADD FOREIGN KEY (dm_attribute_uuid) REFERENCES smart.dm_attribute(uuid) ON UPDATE RESTRICT ON DELETE NO ACTION DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE ONLY smart.i_entity_type_attribute ADD CONSTRAINT ientitytypeattribute_attribute_fk FOREIGN KEY (attribute_uuid) REFERENCES smart.i_attribute(uuid) ON DELETE CASCADE DEFERRABLE;
 ALTER TABLE ONLY smart.i_entity_type_attribute ADD CONSTRAINT ientitytypeattribute_entitytype_fk FOREIGN KEY (entity_type_uuid) REFERENCES smart.i_entity_type(uuid) ON DELETE CASCADE DEFERRABLE;
 ALTER TABLE ONLY smart.i_entity_type_attribute_group ADD CONSTRAINT ientitytypeattributegroupentitytypeuuid_fk FOREIGN KEY (entity_type_uuid) REFERENCES smart.i_entity_type(uuid) ON DELETE CASCADE DEFERRABLE;
@@ -5255,7 +5261,7 @@ insert into smart.dm_aggregation_i18n (name, lang_code, gui_name) values ('var_s
 
 INSERT INTO connect.roles (role_id, rolename, is_system) VALUES ('smart', 'SYSTEM ROLE', true);
 
-INSERT INTO connect.connect_version (version, last_updated, filestore_version) VALUES ('7.0.0', null, '7.0.0');
+INSERT INTO connect.connect_version (version, last_updated, filestore_version) VALUES ('7.0.0', now(), '7.0.0');
 
 INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.intelligence','4.0');
 INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.intelligence.query','2.0');
