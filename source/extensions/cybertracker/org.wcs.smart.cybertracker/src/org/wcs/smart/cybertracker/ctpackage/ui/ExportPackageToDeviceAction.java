@@ -95,7 +95,7 @@ public class ExportPackageToDeviceAction implements ICtExportAction {
 			}
 		}
 		MessageDialog.openInformation(shell, Messages.ExportPackageToDeviceAction_ExportMsgTitle, MessageFormat
-				.format(Messages.ExportPackageToDeviceAction_ExportMsg, cnt, towrite.size()));
+				.format(Messages.ExportPackageToDeviceAction_ExportMsg, cnt, towrite.size()+navlayers.size() ));
 
 	}
 
