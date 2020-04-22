@@ -45,6 +45,7 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.ObservationPlugIn;
 import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.internal.Messages;
@@ -486,15 +487,6 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 				
 				session.saveOrUpdate(wp);
 				
-				
-//				for (List<WaypointObservation> wos : observations.values()){
-//					for (WaypointObservation wo : wos) {
-//						wo.setWaypoint(wp);
-//						session.saveOrUpdate(wo);
-//						if (!wp.getObservations().contains(wo)) wp.getObservations().add(wo);
-//					}
-//				}
-				
 				for (WaypointObservation wo : wp.getAllObservations()) {
 					wo.setObserver(observer);
 				}
@@ -504,6 +496,8 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 				this.deletedObservations.clear();
 				this.deletedAttachments.clear();
 				
+				ObservationHibernateManager.computeAttachmentLocations(wp, session);
+
 			}catch (Exception ex){
 				ObservationPlugIn.displayLog(Messages.ObservationWizard_SaveError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 				return false;
