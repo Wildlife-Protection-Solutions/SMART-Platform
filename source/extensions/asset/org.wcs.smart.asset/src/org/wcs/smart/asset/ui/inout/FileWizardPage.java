@@ -191,6 +191,7 @@ public class FileWizardPage extends WizardPage {
 		cmbDateFormat.setContentProvider(ArrayContentProvider.getInstance());
 		cmbDateFormat.setLabelProvider(new LabelProvider());
 		String[] dateFormats = new String[]{
+				"yyyy-MM-dd", //$NON-NLS-1$
 				DateTimeFormatterBuilder.getLocalizedDateTimePattern(FormatStyle.MEDIUM, null, IsoChronology.INSTANCE, Locale.getDefault()),
 				DateTimeFormatterBuilder.getLocalizedDateTimePattern(FormatStyle.SHORT, null, IsoChronology.INSTANCE, Locale.getDefault()),
 				"d/M/y", //$NON-NLS-1$
