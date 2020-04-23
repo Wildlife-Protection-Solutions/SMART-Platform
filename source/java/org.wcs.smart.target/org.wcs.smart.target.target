@@ -5,8 +5,8 @@
 <repository location="http://udig.refractions.net/files/update-jai/"/>
 </location>
 <location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.nebula.widgets.tablecombo.feature.feature.group" version="1.2.0.201812241324"/>
-<repository location="http://download.eclipse.org/nebula/releases/2.1.0"/>
+<repository location="http://download.eclipse.org/nebula/releases/2.3.0"/>
+	<unit id="org.eclipse.nebula.widgets.tablecombo" version="1.2.0.201912241810"/>
 </location>
 <location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="com.google.guava" version="21.0.0.v20170206-1425"/>
