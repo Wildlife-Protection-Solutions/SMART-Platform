@@ -135,6 +135,8 @@ public class Messages extends NLS {
 
 	public static String HeaderComposite_InvalidNameTitle;
 
+	public static String LoginDialog_LoginFailed;
+
 	public static String LoginDialog_MsLogin;
 
 	public static String LoginDialog_NoWorkspace;
@@ -308,6 +310,12 @@ public class Messages extends NLS {
 
 	public static String RunEditor_SummaryPage;
 
+	public static String RunMapResultsPage_HighEffort;
+
+	public static String RunMapResultsPage_LowEffort;
+
+	public static String RunMapResultsPage_PatrolEffort;
+
 	public static String RunSummaryPage_Body;
 
 	public static String RunSummaryPage_Configuration;
@@ -335,6 +343,8 @@ public class Messages extends NLS {
 	public static String RunSummaryPage_refreshtooltip;
 
 	public static String RunSummaryPage_Resultsfiles;
+
+	public static String RunSummaryPage_ResultsSection;
 
 	public static String RunSummaryPage_RunId;
 

@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.paws.ui.run;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -50,6 +51,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.paws.PawsEvent;
 import org.wcs.smart.paws.PawsPlugIn;
 import org.wcs.smart.paws.internal.Messages;
+import org.wcs.smart.paws.model.PawsResultFile;
 import org.wcs.smart.paws.model.PawsResultManager;
 import org.wcs.smart.paws.model.PawsRun;
 import org.wcs.smart.paws.ui.HidePartsPartListener;
@@ -206,12 +208,32 @@ public class RunEditor extends MultiPageEditorPart implements MapPart{
 		loadSettings.schedule();
 	}
 	
+	public void updateResultsView() {
+		if (getResultFile() == null) return;
+		
+		PawsRun pr = null;
+		try(Session s = HibernateManager.openSession()){
+			pr = s.get(PawsRun.class, getInputInternal().getUuid());
+			if (pr == null) return ;
+			
+			PawsResultManager results = new PawsResultManager(pr);
+			resultsPage.refresh(results);
+			mapPage.refresh(results);
+		}catch (IOException io) {
+			io.printStackTrace();
+		}
+	}
+	
 	public void setPartName(String name){
 		super.setPartName(name);
 	}
 	
 	public IEclipseContext getContext(){
 		return this.context;
+	}
+	
+	public PawsResultFile getResultFile() {
+		return summaryPage.getResultsSelection();
 	}
 	
 	private Job loadSettings = new Job(Messages.RunEditor_loadingjobname) {
@@ -244,6 +266,7 @@ public class RunEditor extends MultiPageEditorPart implements MapPart{
 					}catch (Exception ex) {
 						PawsPlugIn.displayLog(ex.getMessage(), ex);
 					}
+					summaryPage.refresh(results);
 					resultsPage.refresh(results);
 					mapPage.refresh(results);
 				}catch (Exception ex) {

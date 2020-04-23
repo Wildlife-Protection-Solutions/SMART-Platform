@@ -25,11 +25,17 @@ import java.awt.Desktop;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -59,6 +65,8 @@ import org.wcs.smart.paws.PawsManager;
 import org.wcs.smart.paws.PawsPlugIn;
 import org.wcs.smart.paws.engine.PawsTask;
 import org.wcs.smart.paws.internal.Messages;
+import org.wcs.smart.paws.model.PawsResultFile;
+import org.wcs.smart.paws.model.PawsResultManager;
 import org.wcs.smart.paws.model.PawsRun;
 import org.wcs.smart.paws.model.PawsService;
 import org.wcs.smart.paws.ui.HeaderComposite;
@@ -74,6 +82,7 @@ public class RunSummaryPage extends EditorPart {
 	private static final String RUN_KEY = "RUN"; //$NON-NLS-1$
 	private HeaderComposite header;
 	private Label lblStatus, lblStatusImg, lblStatusMsg;
+	private ComboViewer cmbTimeFrame ;
 	
 	private Composite statusComp ;
 	private Composite detailsComp ;
@@ -150,9 +159,29 @@ public class RunSummaryPage extends EditorPart {
 			RunSummaryPage.this.parent.getContext().get(IEventBroker.class).post(PawsEvent.PAWS_RUN_MODIFY, info);
 			
 		});
+		SmartUiUtils.createHeaderLabel(main.getBody(), Messages.RunSummaryPage_ResultsSection);
+		Composite resultscomp = toolkit.createComposite(main.getBody());
+		resultscomp.setLayout(new GridLayout(2, false));
+		resultscomp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false ));
+		
+		toolkit.createLabel(resultscomp, "View Results For Time Period:"); //$NON-NLS-1$
+		
+		cmbTimeFrame = new ComboViewer(resultscomp, SWT.READ_ONLY | SWT.DROP_DOWN);
+		toolkit.adapt(cmbTimeFrame.getControl(), true, true);
+		cmbTimeFrame.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		cmbTimeFrame.setContentProvider(ArrayContentProvider.getInstance());
+		cmbTimeFrame.setLabelProvider(new LabelProvider() {
+			public String getText(Object element) {
+				return ((PawsResultFile)element).getTimeFrameString();
+			}
+		});
+		cmbTimeFrame.addSelectionChangedListener(e->this.parent.updateResultsView());
 		
 		Composite c = SmartUiUtils.createHeaderLabel(main.getBody(), Messages.RunSummaryPage_StatusSection);
 		c.setLayout(new GridLayout(2, false));
+		((GridLayout)c.getLayout()).marginHeight = 2;
+		
+		
 		ToolBar tb = new ToolBar(c, SWT.FLAT);
 		tb.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
 		ToolItem ti = new ToolItem(tb, SWT.PUSH);
@@ -315,6 +344,38 @@ public class RunSummaryPage extends EditorPart {
 		detailsComp.layout(true);
 		header.getParent().layout(true);
 		
+	}
+	
+	public void refresh(final PawsResultManager results) {
+		if (!results.getResults().isEmpty()) {
+			List<PawsResultFile> files = new ArrayList<>(results.getResults());
+			files.sort((a,b)->{
+				int i1 = getMonth(a.getTimeFrameString());
+				int i2 = getMonth(b.getTimeFrameString());
+				return Integer.compare(i1, i2);
+			});
+			cmbTimeFrame.setInput(files);
+			cmbTimeFrame.setSelection(new StructuredSelection(results.getResults().get(0)));
+		}
+	}
+	
+	private static final int getMonth(String s1) {
+		if (s1.toLowerCase().startsWith("jan")) return 0; //$NON-NLS-1$
+		if (s1.toLowerCase().startsWith("feb")) return 1; //$NON-NLS-1$
+		if (s1.toLowerCase().startsWith("mar")) return 2; //$NON-NLS-1$
+		if (s1.toLowerCase().startsWith("apr")) return 3; //$NON-NLS-1$
+		if (s1.toLowerCase().startsWith("may")) return 4; //$NON-NLS-1$
+		if (s1.toLowerCase().startsWith("jun")) return 5; //$NON-NLS-1$
+		if (s1.toLowerCase().startsWith("jul")) return 6; //$NON-NLS-1$
+		if (s1.toLowerCase().startsWith("aug")) return 7; //$NON-NLS-1$
+		if (s1.toLowerCase().startsWith("sep")) return 8; //$NON-NLS-1$
+		if (s1.toLowerCase().startsWith("oct")) return 9; //$NON-NLS-1$
+		if (s1.toLowerCase().startsWith("nov")) return 10; //$NON-NLS-1$
+		if (s1.toLowerCase().startsWith("dec")) return 11; //$NON-NLS-1$
+		return -1;
+	}
+	public PawsResultFile getResultsSelection() {
+		return (PawsResultFile) cmbTimeFrame.getStructuredSelection().getFirstElement();
 	}
 
 	@Override

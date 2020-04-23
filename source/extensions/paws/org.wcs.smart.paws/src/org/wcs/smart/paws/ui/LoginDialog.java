@@ -167,7 +167,7 @@ public class LoginDialog extends SmartStyledDialog {
 							LoginDialog.this.close();
 						}else {
 							//login failed
-							browser.setText("<b>Login Failed</b><br>" + thisurl);
+							browser.setText("<b>" + Messages.LoginDialog_LoginFailed + "</b><br>" + thisurl); //$NON-NLS-1$ //$NON-NLS-2$
 						}
 					}
 				}finally {

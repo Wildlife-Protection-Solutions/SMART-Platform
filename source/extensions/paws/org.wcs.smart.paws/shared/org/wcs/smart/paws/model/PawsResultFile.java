@@ -95,6 +95,13 @@ public class PawsResultFile {
 		return this.resultsFile;
 	}
 
+	public String getTimeFrameString() {
+		String fname = this.resultsFile.getFileName().toString();
+		fname = fname.substring("predictions_".length(), fname.length() - "_XXXX.csv".length()); //$NON-NLS-1$ //$NON-NLS-2$
+		return fname;
+	}
+	
+	
 	public PawsRun getRun() {
 		return this.run;
 	}
@@ -149,19 +156,29 @@ public class PawsResultFile {
 	
 	/**
 	 * One raster file per output data column
-	 * @return
+	 * @return list of raster files ordered by threshold value; lower value first
 	 * @throws Exception
 	 */
 	public List<Path> getRasterFiles() throws Exception{
 		if (rasterFiles != null) return rasterFiles;
 		
-		List<Path> items = new ArrayList<>();
+		List<Path> items = new ArrayList<>();	
+		HashMap<Path, Double> threshold = new HashMap<>();
+		
 		for (String x : getHeaders()) {
 			if (!x.startsWith("threshold")) continue; //$NON-NLS-1$
+			
+			double t = Double.parseDouble( x.substring(x.indexOf('=') + 1) );
 			String fname = x.replaceAll("=","_").replaceAll("\\.", "_"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			items.add(imageDir.resolve(fname + ".tif")); //$NON-NLS-1$
+			Path p = imageDir.resolve(fname + ".tif");  //$NON-NLS-1$
+			
+			items.add(p);
+			threshold.put(p, t);
 		}
+		
 		rasterFiles = items;
+		rasterFiles.sort((a,b)->threshold.get(a).compareTo(threshold.get(b)));
+		
 		return rasterFiles;
 	}
 	

@@ -61,6 +61,8 @@ public class PawsTiffGeoResource extends AbstractRasterGeoResource {
 	private Path file;
 
 	private String name;
+	private PawsResultFile rfile;
+	
 	/**
 	 * Construct <code>GeoTiffGeoResourceImpl</code>.
 	 */
@@ -70,9 +72,12 @@ public class PawsTiffGeoResource extends AbstractRasterGeoResource {
 		this.file = Paths.get(SmartContext.INSTANCE.getFilestoreLocation()).resolve(layerfile);
 		this.name= SharedUtils.getFilenameWithoutExtension( rfile.getResultsFile().getFileName().toString() )
 				+ ":" + SharedUtils.getFilenameWithoutExtension( layerfile.getFileName().toString() ); //$NON-NLS-1$
-
+		this.rfile = rfile;
 	}
 
+	public PawsResultFile getResultsFile() {
+		return this.rfile;
+	}
 	private static String parsePath(Path file) {
 		file = Paths.get(SmartContext.INSTANCE.getFilestoreLocation()).relativize(file);
 		

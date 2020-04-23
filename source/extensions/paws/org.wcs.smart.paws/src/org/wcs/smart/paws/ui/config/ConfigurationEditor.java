@@ -281,7 +281,7 @@ public class ConfigurationEditor extends EditorPart {
 				pp = getOrCreateParameter(pw,  PawsParameter.FixedParameter.TRAINING_RES);
 				Object tr = cmbTrainingRes.getStructuredSelection().getFirstElement();
 				pp.setValue( String.valueOf((Integer)tr) );
-				
+								
 				pp = getOrCreateParameter(pw,  PawsParameter.FixedParameter.CLASSIFIER_MODEL);
 				tr = cmbClassifier.getStructuredSelection().getFirstElement();
 				pp.setValue(  ((PawsParameter.ClassifierModel)tr).name() );
@@ -811,7 +811,7 @@ public class ConfigurationEditor extends EditorPart {
 				return String.valueOf((Integer)element);
 			}
 		});		
-		cmbTrainingRes.setInput(new Integer[] {1,2,3,4,5,6,7,8,9,10,11,12});
+		cmbTrainingRes.setInput(new Integer[] {1,2,3,4,6,12});
 		cmbTrainingRes.setSelection(new StructuredSelection(2));
 		cmbTrainingRes.addPostSelectionChangedListener(e->setDirty(true));
 		
@@ -1021,7 +1021,7 @@ public class ConfigurationEditor extends EditorPart {
 					if (pp != null) {
 						cmbTrainingRes.setSelection(new StructuredSelection(  Integer.valueOf(pp.getValue()) ));
 					}
-					
+				
 					pp = pw.findParameter(PawsParameter.FixedParameter.CLASSIFIER_MODEL.name());
 					if (pp != null) {
 						cmbClassifier.setSelection(new StructuredSelection( PawsParameter.ClassifierModel.valueOf( pp.getValue() ) ));
