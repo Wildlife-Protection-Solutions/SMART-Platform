@@ -11,7 +11,7 @@
 	</page_setting>
 	<category_index>0</category_index>
 	<zoom>1.0</zoom>
-	<x>0</x>
+	<x>27</x>
 	<y>0</y>
 	<default_color>
 		<r>128</r>
@@ -135,7 +135,7 @@
 			</connections>
 			<display>false</display>
 			<creation_date>2018-05-24 11:48:15</creation_date>
-			<updated_date>2018-12-05 09:47:35</updated_date>
+			<updated_date>2020-04-24 09:22:46</updated_date>
 			<model_property>
 				<name>Project Name</name>
 				<value></value>
@@ -299,15 +299,15 @@
 			</color>
 			<connections>
 			</connections>
-			<physical_name>conservation_area</physical_name>
-			<logical_name>conservation_area</logical_name>
+			<physical_name>CONSERVATION_AREA</physical_name>
+			<logical_name>CONSERVATION_AREA</logical_name>
 			<description></description>
 			<constraint></constraint>
 			<primary_key_name></primary_key_name>
 			<option></option>
 			<columns>
 				<normal_column>
-					<word_id>5</word_id>
+					<word_id>6</word_id>
 					<id>0</id>
 					<description></description>
 					<unique_key_name></unique_key_name>
@@ -363,15 +363,15 @@
 			</color>
 			<connections>
 			</connections>
-			<physical_name>employee</physical_name>
-			<logical_name>employee</logical_name>
+			<physical_name>EMPLOYEE</physical_name>
+			<logical_name>EMPLOYEE</logical_name>
 			<description></description>
 			<constraint></constraint>
 			<primary_key_name></primary_key_name>
 			<option></option>
 			<columns>
 				<normal_column>
-					<word_id>3</word_id>
+					<word_id>5</word_id>
 					<id>1</id>
 					<description></description>
 					<unique_key_name></unique_key_name>
@@ -428,7 +428,7 @@
 			<connections>
 				<relation>
 					<id>0</id>
-					<source>0</source>
+					<source>1</source>
 					<target>2</target>
 						<source_xp>-1</source_xp>
 						<source_yp>-1</source_yp>
@@ -450,7 +450,7 @@
 				</relation>
 				<relation>
 					<id>1</id>
-					<source>1</source>
+					<source>0</source>
 					<target>2</target>
 						<source_xp>-1</source_xp>
 						<source_yp>-1</source_yp>
@@ -471,15 +471,15 @@
 					<referenced_complex_unique_key>null</referenced_complex_unique_key>
 				</relation>
 			</connections>
-			<physical_name>r_script</physical_name>
-			<logical_name>r_script</logical_name>
+			<physical_name>R_SCRIPT</physical_name>
+			<logical_name>R_SCRIPT</logical_name>
 			<description></description>
 			<constraint></constraint>
 			<primary_key_name></primary_key_name>
 			<option></option>
 			<columns>
 				<normal_column>
-					<word_id>4</word_id>
+					<word_id>3</word_id>
 					<id>2</id>
 					<description></description>
 					<unique_key_name></unique_key_name>
@@ -514,7 +514,7 @@
 				<normal_column>
 					<id>3</id>
 					<referenced_column>0</referenced_column>
-					<relation>0</relation>
+					<relation>1</relation>
 					<description></description>
 					<unique_key_name></unique_key_name>
 					<logical_name>ca_uuid</logical_name>
@@ -581,7 +581,7 @@
 				<normal_column>
 					<id>5</id>
 					<referenced_column>1</referenced_column>
-					<relation>1</relation>
+					<relation>0</relation>
 					<description></description>
 					<unique_key_name></unique_key_name>
 					<logical_name>creator_uuid</logical_name>
@@ -713,15 +713,15 @@
 					<referenced_complex_unique_key>null</referenced_complex_unique_key>
 				</relation>
 			</connections>
-			<physical_name>r_query</physical_name>
-			<logical_name>r_query</logical_name>
+			<physical_name>R_QUERY</physical_name>
+			<logical_name>R_QUERY</logical_name>
 			<description></description>
 			<constraint></constraint>
 			<primary_key_name></primary_key_name>
 			<option></option>
 			<columns>
 				<normal_column>
-					<word_id>6</word_id>
+					<word_id>4</word_id>
 					<id>7</id>
 					<description></description>
 					<unique_key_name></unique_key_name>
