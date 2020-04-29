@@ -31,6 +31,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.text.Collator;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -465,8 +466,11 @@ public class CtJsonExportUtils {
 			optionType.put(JSON_ISVISIBILE_PROP_KEY, true);
 		}
 		
+		ArrayList<Employee> sortede = new ArrayList<>(allEmployees);
+		sortede.sort( (a,b)-> Collator.getInstance().compare(SmartLabelProvider.getShortLabel(a),SmartLabelProvider.getShortLabel(b)));
+
 		JSONArray optionOptions = new JSONArray();
-		for (Employee t : allEmployees) {
+		for (Employee t : sortede) {
 			JSONObject ttype = new JSONObject();
 			ttype.put("uuid", UuidUtils.uuidToString(t.getUuid())); //$NON-NLS-1$
 			ttype.put("label", SmartLabelProvider.getShortLabel(t)); //$NON-NLS-1$
