@@ -41,12 +41,12 @@ import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
 import org.wcs.smart.util.UuidUtils;
 
-public class Upgrader620To700 implements IDatabaseUpgrader { 
+public class Upgrader630To700 implements IDatabaseUpgrader { 
 	private Exception thrownException = null;
 
 	@Override
 	public void upgrade(final IProgressMonitor monitor) throws Exception {
-		monitor.subTask(Messages.Upgrader620To700_TaskName); 
+		monitor.subTask(Messages.Upgrader630To700_TaskName); 
 		thrownException = null;
 		try(Session s = HibernateManager.openSession()){
 			s.doWork(new Work() {
@@ -59,7 +59,7 @@ public class Upgrader620To700 implements IDatabaseUpgrader {
 						c.setAutoCommit(true);
 						s.getTransaction().commit();
 					} catch (final Exception e) {
-						thrownException = new Exception(Messages.Upgrader620To700_TaskError, e); 
+						thrownException = new Exception(Messages.Upgrader630To700_TaskError, e); 
 					}
 				}
 			});

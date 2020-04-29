@@ -168,6 +168,7 @@ public class Upgrader610To620 implements IDatabaseUpgrader {
 				
 				
 				for (String[] icon : IconUtils.SMART_ICON_MAPPING) {
+					if (icon[0].equalsIgnoreCase("afropavo_congensis")) break; //anything after this is dealth with in smart630 //$NON-NLS-1$
 					
 					byte[] iconuuid = DerbyUtils.createUuid();
 					

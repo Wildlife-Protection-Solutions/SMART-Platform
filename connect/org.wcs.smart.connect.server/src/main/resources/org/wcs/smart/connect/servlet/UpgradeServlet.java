@@ -123,12 +123,17 @@ public class UpgradeServlet extends HttpServlet {
 				if (filestoreVersion.equals("5.0.0")) { //$NON-NLS-1$
 					upgrade500to600(s);
 					upgrade600to620(s);
-					upgrade620to700(s);
+					upgrade620to630(s);
+					upgrade630to700(s);
 				}else if (filestoreVersion.equals("6.0.0")) { //$NON-NLS-1$
 					upgrade600to620(s);
-					upgrade620to700(s);
+					upgrade620to630(s);
+					upgrade630to700(s);
 				}else if (filestoreVersion.equals("6.2.0")) { //$NON-NLS-1$
-					upgrade620to700(s);
+					upgrade620to630(s);
+					upgrade630to700(s);
+				}else if (filestoreVersion.equals("6.3.0")) { //$NON-NLS-1$
+					upgrade630to700(s);
 				}else {
 					throw new Exception("Invalid filestore version - cannot perform upgrade"); //$NON-NLS-1$
 				}
@@ -199,7 +204,20 @@ public class UpgradeServlet extends HttpServlet {
 		});
 	}
 	
-	private void upgrade620to700(Session s) {
+	private void upgrade620to630(Session s) {
+		s.doWork(new Work() {
+
+			@Override
+			public void execute(Connection c) throws SQLException {
+				try {
+					upgradeIcons(c);
+				}catch (Exception ex) {
+					throw new SQLException (ex);
+				}
+			}
+		});
+	}
+	private void upgrade630to700(Session s) {
 		s.doWork(new Work() {
 
 			@Override
@@ -783,6 +801,117 @@ public class UpgradeServlet extends HttpServlet {
 				
 				
 				for (String[] icon : IconUtils.SMART_ICON_MAPPING) {
+					
+					UUID iconuuid = createUuid(c);
+					
+					psicon.setObject(1, iconuuid);
+					psicon.setString(2, icon[0]);
+					psicon.setObject(3, cuuid);
+					psicon.addBatch();
+					
+					pslabel.setObject(1, luuid);
+					pslabel.setObject(2, iconuuid);
+					pslabel.setString(3, icon[1]);
+					pslabel.addBatch();
+					
+					UUID fileuuid = createUuid(c);
+					psiconfile.setObject(1, fileuuid);
+					psiconfile.setObject(2, iconuuid);
+					psiconfile.setObject(3, blackuuid);
+					psiconfile.setString(4, icon[2]);
+					psiconfile.addBatch();
+					
+					fileuuid = createUuid(c);
+					psiconfile.setObject(1, fileuuid);
+					psiconfile.setObject(2, iconuuid);
+					psiconfile.setObject(3, lineuuid);
+					psiconfile.setString(4, icon[3]);
+					psiconfile.addBatch();
+					
+					fileuuid = createUuid(c);
+					psiconfile.setObject(1, fileuuid);
+					psiconfile.setObject(2, iconuuid);
+					psiconfile.setObject(3, coloruuid);
+					psiconfile.setString(4, icon[4]);
+					psiconfile.addBatch();
+					
+					
+					psicon.executeBatch();
+					pslabel.executeBatch();
+					psiconfile.executeBatch();
+					
+					
+					//update data model items
+					IconUtils.upgradeDataModel(c, iconuuid, icon[5], cuuid);
+				}
+				
+			}
+		}
+
+	}
+	
+	
+	private void upgradeIcons(Connection c) throws SQLException {
+
+		PreparedStatement pslabel = c.prepareStatement("INSERT INTO smart.i18n_label(language_uuid, element_uuid, value) VALUES(?, ?, ?)"); //$NON-NLS-1$
+		PreparedStatement psicon = c.prepareStatement("INSERT INTO smart.icon(uuid, keyid, ca_uuid) VALUES(?, ?, ?)"); //$NON-NLS-1$
+		PreparedStatement psiconfile = c.prepareStatement("INSERT INTO smart.iconfile(uuid, icon_uuid, iconset_uuid, filename) VALUES(?, ?, ?, ?)"); //$NON-NLS-1$
+
+		
+		//create default icon sets
+		//NOTE: We cannot use hibernate objects here - this may cause issues in the future
+		try(ResultSet rs = c.createStatement().executeQuery("SELECT uuid FROM smart.conservation_area")){ //$NON-NLS-1$
+			while(rs.next()) {
+				UUID cuuid = (UUID)rs.getObject(1);
+				if (cuuid.equals(ConservationArea.MULTIPLE_CA)) continue;
+				
+				PreparedStatement ps = c.prepareStatement("SELECT uuid FROM smart.language WHERE ca_uuid = ? and isdefault"); //$NON-NLS-1$
+				ps.setObject(1, cuuid);
+				
+				UUID luuid = null;
+				try(ResultSet rs2 = ps.executeQuery()){
+					if (!rs2.next()) continue; //no default language for this ca; skip
+					luuid = (UUID)rs2.getObject(1);
+				}
+				
+				if (luuid == null) continue; 
+				
+				UUID lineuuid = null;
+				UUID blackuuid = null;
+				UUID coloruuid = null;
+				try(PreparedStatement ps1 = c.prepareStatement("SELECT uuid FROM smart.iconset WHERE keyid = 'line' AND ca_uuid = ?")){ //$NON-NLS-1$
+					ps1.setObject(1,  cuuid);
+					try(ResultSet rs1 = ps1.executeQuery()){
+						if (rs1.next()) {
+							lineuuid = (UUID)rs1.getObject(1);
+						}
+					}
+				}
+				try(PreparedStatement ps1 = c.prepareStatement("SELECT uuid FROM smart.iconset WHERE keyid = 'black' AND ca_uuid = ?")){ //$NON-NLS-1$
+					ps1.setObject(1,  cuuid);
+					try(ResultSet rs1 = ps1.executeQuery()){
+						if (rs1.next()) {
+							blackuuid = (UUID)rs1.getObject(1);
+						}
+					}
+				}
+				
+				try(PreparedStatement ps1 = c.prepareStatement("SELECT uuid FROM smart.iconset WHERE keyid = 'color' AND ca_uuid = ?")){ //$NON-NLS-1$
+					ps1.setObject(1,  cuuid);
+					try(ResultSet rs1 = ps1.executeQuery()){
+						if (rs1.next()) {
+							coloruuid = (UUID)rs1.getObject(1);
+						}
+					}
+				}
+				
+				boolean found = false;				
+				for (String[] icon : IconUtils.SMART_ICON_MAPPING) {
+					//anything after this is new in SMART630
+					if (icon[0].equalsIgnoreCase("afropavo_congensis")) { //$NON-NLS-1$
+						found = true;
+					}
+					if (!found) continue;
 					
 					UUID iconuuid = createUuid(c);
 					

@@ -438,6 +438,7 @@ public class ImportAttributeDialog extends SmartStyledTitleDialog {
 			this.isactive = type.isIsactive();
 			this.key = type.getKey();
 			this.names = type.getNames();
+			this.iconkey = type.getIconkey();
 			for (TreeNodeType child : type.getChildrens()){
 				ParentTreeNodeType t = new ParentTreeNodeType(child);
 				if (this.childrens == null){

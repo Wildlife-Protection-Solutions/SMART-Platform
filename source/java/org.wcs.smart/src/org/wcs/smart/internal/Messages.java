@@ -1413,8 +1413,9 @@ public class Messages extends NLS {
 	public static String Upgrader601To610_TastName;
 	public static String Upgrader610To620_UpgradeError;
 	public static String Upgrader610To620_UpgradeMsg;
-	public static String Upgrader620To700_TaskError;
-	public static String Upgrader620To700_TaskName;
+	public static String Upgrader620To630_620to630Error;
+	public static String Upgrader630To700_TaskError;
+	public static String Upgrader630To700_TaskName;
 	public static String UserLoginInfo_ReadError;
 	public static String UserNameControlContribution_LoggedInLabel_ToolTip;
 	public static String UserNamePasswordDialog_Password_Label;

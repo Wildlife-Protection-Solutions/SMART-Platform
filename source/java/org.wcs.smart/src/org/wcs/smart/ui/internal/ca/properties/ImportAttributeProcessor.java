@@ -35,12 +35,16 @@ import java.util.stream.Collectors;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
+import org.hibernate.Session;
 import org.wcs.smart.SmartApp;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
+import org.wcs.smart.ca.icon.Icon;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.internal.ca.datamodel.xml.DataModelXmlToSmartConverter;
 import org.wcs.smart.internal.ca.datamodel.xml.XmlSmartDataModelManager;
@@ -277,22 +281,34 @@ public class ImportAttributeProcessor {
 	 */
 	private AttributeTreeNode convertNodeCascade(TreeNodeType toClone, AttributeTreeNode parent){
 		AttributeTreeNode cloned = convertNode(toClone, parent);
+	
+		try(Session session = HibernateManager.openSession()){
+			int i = 1;
+			for (TreeNodeType child : toClone.getChildrens()){
+				AttributeTreeNode clonedchild = convertNodeCascade((ParentTreeNodeType)child, cloned);
+				clonedchild.setNodeOrder(i++);
+				clonedchild.setParent(cloned);
+				
+				cloned.getChildren().add(clonedchild);
+				if (clonedchild.getIsActive()){
+					cloned.getActiveChildren().add(clonedchild);
+				}
 		
-		int i = 1;
-		for (TreeNodeType child : toClone.getChildrens()){
-			AttributeTreeNode clonedchild = convertNodeCascade((ParentTreeNodeType)child, cloned);
-			clonedchild.setNodeOrder(i++);
-			clonedchild.setParent(cloned);
-			
-			cloned.getChildren().add(clonedchild);
-			if (clonedchild.getIsActive()){
-				cloned.getActiveChildren().add(clonedchild);
+				if (child.getIconkey() != null && !child.getIconkey().isEmpty()) {
+					Icon icon = QueryFactory.buildQuery(session, Icon.class, 
+							new Object[] {"conservationArea", attribute.getConservationArea()}, //$NON-NLS-1$
+							new Object[] {"keyId", child.getIconkey()}).uniqueResult(); //$NON-NLS-1$
+					if (icon != null) {
+						clonedchild.setIcon(icon);
+						icon.getFiles().forEach(ie->ie.computeFileLocation(session));
+					}
+				}
 			}
-			
 		}
 		return cloned;
 	}
 
+	
 	/**
 	 * 
 	 * @return <code>true</code> if there exists a predefined file
