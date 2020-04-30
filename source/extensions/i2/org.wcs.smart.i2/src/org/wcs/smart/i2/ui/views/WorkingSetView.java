@@ -93,6 +93,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
+import org.wcs.smart.i2.WorkingSetManager.LayerStatus;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
@@ -916,17 +917,19 @@ public class WorkingSetView {
 						if (ws != null){
 							ws.getName();
 							for (IntelWorkingSetEntity entity : ws.getEntities()){
-								if (WorkingSetManager.INSTANCE.canViewItem(entity, null)) {
+								LayerStatus ls = WorkingSetManager.INSTANCE.canViewItem(entity, null);
+								if (ls == LayerStatus.OK) {
 									IntelWorkingSetItem i = new IntelWorkingSetItem(entity);
 									items.add(i);
-								}else {
-									items.add(new HiddenWorkingSetItem(IntelWorkingSetCategory.ENTITY));
+								}else{
+									items.add(new HiddenWorkingSetItem(IntelWorkingSetCategory.ENTITY, ls));
 								}
 							}
 							
 							
 							for (IntelWorkingSetRecord record : ws.getRecords()){
-								if (WorkingSetManager.INSTANCE.canViewItem(record, null)) {
+								LayerStatus ls = WorkingSetManager.INSTANCE.canViewItem(record, null);
+								if (ls == LayerStatus.OK) {
 									Image img = Resources.INSTANCE.getImage(record.getRecord().getRecordSource());
 									if (img == null) {
 										img =  Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RECORD);
@@ -934,16 +937,17 @@ public class WorkingSetView {
 									IntelWorkingSetItem i = new IntelWorkingSetItem(record, img);
 									items.add(i);
 								}else {
-									items.add(new HiddenWorkingSetItem(IntelWorkingSetCategory.RECORD));
+									items.add(new HiddenWorkingSetItem(IntelWorkingSetCategory.RECORD, ls));
 								}
 							}
 							for (IntelWorkingSetQuery query : ws.getQueries()){
 								AbstractIntelQuery queryImpl = QueryManager.INSTANCE.findQuery(s, query.getQuery(), query.getQueryType());
-								if (WorkingSetManager.INSTANCE.canViewItem(query,queryImpl)) {
+								LayerStatus ls = WorkingSetManager.INSTANCE.canViewItem(query, queryImpl);
+								if (ls == LayerStatus.OK) {
 									IntelWorkingSetItem i = new IntelWorkingSetItem(query, queryImpl);
 									items.add(i);
 								}else {
-									items.add(new HiddenWorkingSetItem(IntelWorkingSetCategory.QUERIES));
+									items.add(new HiddenWorkingSetItem(IntelWorkingSetCategory.QUERIES, ls));
 								}
 							}
 						}

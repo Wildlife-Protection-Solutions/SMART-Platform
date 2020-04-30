@@ -226,7 +226,7 @@ public class EntityLocationDatasetResultSet implements IResultSet {
 			currentItem = locationResults.get();
 			return true;
 		}
-		if (wpResults.next()) {
+		if (wpResults != null && wpResults.next()) {
 			currentItem = wpResults.get();
 			return true;
 		}

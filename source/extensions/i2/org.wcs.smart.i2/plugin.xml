@@ -532,22 +532,6 @@
             </separator>
             <command
                   commandId="org.wcs.smart.i2.command.perspective.open"
-                  icon="images/icons/records.png"
-                  label="%DataAssesmentModeCommandName">
-               <parameter
-                     name="org.wcs.smart.perspectiveid"
-                     value="org.wcs.smart.i2.IntelDataAssessmentPerspective">
-               </parameter>
-               <visibleWhen
-                     checkEnabled="false">
-                  <test
-                        property="org.wcs.smart.i2.permission"
-                        value="assessment_perspective">
-                  </test>
-               </visibleWhen>
-            </command>
-            <command
-                  commandId="org.wcs.smart.i2.command.perspective.open"
                   icon="images/icons/profile.png"
                   label="%DataAnalysisModeCommandName">
                <parameter
@@ -559,6 +543,22 @@
                   <test
                         property="org.wcs.smart.i2.permission"
                         value="analyst_perspective">
+                  </test>
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="org.wcs.smart.i2.command.perspective.open"
+                  icon="images/icons/records.png"
+                  label="%DataAssesmentModeCommandName">
+               <parameter
+                     name="org.wcs.smart.perspectiveid"
+                     value="org.wcs.smart.i2.IntelDataAssessmentPerspective">
+               </parameter>
+               <visibleWhen
+                     checkEnabled="false">
+                  <test
+                        property="org.wcs.smart.i2.permission"
+                        value="assessment_perspective">
                   </test>
                </visibleWhen>
             </command>

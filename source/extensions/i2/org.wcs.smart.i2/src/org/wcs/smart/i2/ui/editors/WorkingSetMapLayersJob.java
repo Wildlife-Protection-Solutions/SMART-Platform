@@ -66,6 +66,7 @@ import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
+import org.wcs.smart.i2.WorkingSetManager.LayerStatus;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
@@ -231,7 +232,7 @@ public class WorkingSetMapLayersJob extends Job {
 				if (workingset.getQueries() != null){
 					workingset.getQueries().forEach(e->{
 						AbstractIntelQuery q = QueryManager.INSTANCE.findQuery(s, e.getQuery(), e.getQueryType());
-						if (q != null && WorkingSetManager.INSTANCE.canViewItem(e, q)) {
+						if (q != null && WorkingSetManager.INSTANCE.canViewItem(e, q) == LayerStatus.OK) {
 							queriesToAdd.put(e, q);
 						}
 					});
@@ -268,7 +269,7 @@ public class WorkingSetMapLayersJob extends Job {
 		List<LayerInfo> toAdd = new ArrayList<LayerInfo>();
 		java.util.Map<ID, StyleBlackboard> layerStyles = new HashMap<ID, StyleBlackboard>();
 		for (IntelWorkingSetEntity layer : workingset.getEntities()){
-			if (WorkingSetManager.INSTANCE.canViewItem(layer, null)) {
+			if (WorkingSetManager.INSTANCE.canViewItem(layer, null) == LayerStatus.OK) {
 				HashMap<String, Serializable> params = new HashMap<String,Serializable>();
 				params.put(IntelEntityServiceExtension.ENTITY_UUID_KEY, UuidUtils.uuidToString( layer.getEntity().getUuid()));
 				IntelEntityService service = createEntityService(params);
@@ -277,7 +278,7 @@ public class WorkingSetMapLayersJob extends Job {
 		}
 			
 		for (IntelWorkingSetRecord layer : workingset.getRecords()){
-			if (WorkingSetManager.INSTANCE.canViewItem(layer, null)) {
+			if (WorkingSetManager.INSTANCE.canViewItem(layer, null) == LayerStatus.OK) {
 				HashMap<String, Serializable> params = new HashMap<String,Serializable>();
 				params.put(IntelRecordServiceExtension.RECORD_UUID_KEY, UuidUtils.uuidToString(layer.getRecord().getUuid()));
 				IntelRecordService service = createRecordService(params);

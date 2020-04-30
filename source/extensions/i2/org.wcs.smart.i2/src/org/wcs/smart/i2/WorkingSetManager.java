@@ -62,6 +62,22 @@ public enum WorkingSetManager {
 	
 	private UUID activeWorkingSet = null;
 	
+	public enum LayerStatus{
+		INACTIVE_PROFILE,
+		INSUFFICIENT_PRIV,
+		OK;
+		
+		public String getMessage() {
+			if (this == LayerStatus.INSUFFICIENT_PRIV) {
+				return Messages.HiddenWorkingSetItem_WorkingSetItemHidden;
+			}else if (this == LayerStatus.INACTIVE_PROFILE) {
+				return Messages.WorkingSetManager_ProfileNotActive;
+			}else {
+				return ""; //$NON-NLS-1$
+			}
+		}
+	};
+	
 	/**
 	 * 
 	 * @return true if a working set is active, false otherwise
@@ -86,32 +102,32 @@ public enum WorkingSetManager {
 		return false;
 	}
 	
-	public boolean canViewItem(IWorkingSetMapLayer item, AbstractIntelQuery query) {
+	public LayerStatus canViewItem(IWorkingSetMapLayer item, AbstractIntelQuery query) {
 		if (item instanceof IntelWorkingSetEntity){
 			IntelProfile searchfor = ((IntelWorkingSetEntity)item).getEntity().getProfile();
-			if (!IntelSecurityManager.INSTANCE.canViewEntities(searchfor)) return false;
+			if (!IntelSecurityManager.INSTANCE.canViewEntities(searchfor)) return LayerStatus.INSUFFICIENT_PRIV;
 			for (IntelProfile ip : ProfilesManager.INSTANCE.getActiveProfiles()) {
-				if (ip.equals(searchfor) ) return true;
+				if (ip.equals(searchfor) ) return LayerStatus.OK;
 			}
-			return false;
+			return LayerStatus.INACTIVE_PROFILE;
 		}
 		if (item instanceof IntelWorkingSetRecord){
 			IntelProfile searchfor = ((IntelWorkingSetRecord)item).getRecord().getProfile();
-			if (!IntelSecurityManager.INSTANCE.canViewRecords(searchfor)) return false;
+			if (!IntelSecurityManager.INSTANCE.canViewRecords(searchfor)) return LayerStatus.INSUFFICIENT_PRIV;
 			for (IntelProfile ip : ProfilesManager.INSTANCE.getActiveProfiles()) {
-				if (ip.equals(searchfor) ) return true;
+				if (ip.equals(searchfor) ) return LayerStatus.OK;
 			}
-			return false;
+			return LayerStatus.INACTIVE_PROFILE;
 		}
 		
 		if (query != null && item instanceof IntelWorkingSetQuery){
 			Set<String> queryProfiles = ProfilesManager.INSTANCE.getActiveProfiles().stream().filter(e->IntelSecurityManager.INSTANCE.canViewQuery(e)).map(e->e.getKeyId()).collect(Collectors.toSet());
 			if (query.queriesProfile(queryProfiles)) {
-				return true;
+				return LayerStatus.OK;
 			}
-			return false;
+			return LayerStatus.INACTIVE_PROFILE;
 		}
-		return false;
+		return LayerStatus.INSUFFICIENT_PRIV;
 	}
 	
 	/**

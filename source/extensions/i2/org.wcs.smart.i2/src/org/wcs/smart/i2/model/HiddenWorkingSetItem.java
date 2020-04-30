@@ -23,12 +23,12 @@ package org.wcs.smart.i2.model;
 
 import java.util.UUID;
 
-import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.WorkingSetManager;
 
 public class HiddenWorkingSetItem extends IntelWorkingSetItem{
 
-	public HiddenWorkingSetItem (IntelWorkingSetCategory category){
-		super(category, Messages.HiddenWorkingSetItem_WorkingSetItemHidden, false, UUID.randomUUID(), null);
+	public HiddenWorkingSetItem (IntelWorkingSetCategory category, WorkingSetManager.LayerStatus status){
+		super(category, status.getMessage(), false, UUID.randomUUID(), null);
 		
 	}
 }

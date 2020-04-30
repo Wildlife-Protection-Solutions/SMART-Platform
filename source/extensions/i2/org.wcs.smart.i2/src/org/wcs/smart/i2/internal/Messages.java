@@ -1803,6 +1803,7 @@ public class Messages extends NLS {
 	public static String WorkingSetManager_EntityError;
 	public static String WorkingSetManager_EntityRemoveError;
 	public static String WorkingSetManager_InvalidWorkingSet;
+	public static String WorkingSetManager_ProfileNotActive;
 	public static String WorkingSetManager_QueryError;
 	public static String WorkingSetManager_QueryNotFound;
 	public static String WorkingSetManager_QueryRemoveError;
