@@ -3,7 +3,7 @@ package org.wcs.smart.cybertracker.survey.internal;
 import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
-	private static final String BUNDLE_NAME = "org.wcs.smart.cybertracker.survey.internal.messages"; //$NON-NLS-1$
+	public static final String BUNDLE_NAME = "org.wcs.smart.cybertracker.survey.internal.messages"; //$NON-NLS-1$
 	public static String AddDataQueueCtMissionJob_CreateTableTask;
 	public static String AddDataQueueCtMissionJob_ErrorMsg;
 	public static String AddDataQueueCtMissionJob_InstallError;

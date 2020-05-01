@@ -38,7 +38,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map.Entry;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.UUID;
 
@@ -51,6 +53,7 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.EmployeeTeam;
 import org.wcs.smart.ca.EmployeeTeamMember;
 import org.wcs.smart.ca.Label;
+import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
@@ -128,7 +131,9 @@ public class CtJsonExportUtils {
 	/**
 	 * JSON options key for representing the option name
 	 */
-	public static final String JSON_OPTION_LABEL_KEY = "label"; //$NON-NLS-1$
+	//public static final String JSON_OPTION_LABEL_KEY = "label"; //$NON-NLS-1$
+	public static final String JSON_OPTION_LABEL_DEFAULT_KEY = "label_default"; //$NON-NLS-1$
+	public static final String JSON_OPTION_LABEL_PREFIX_KEY = "label_"; //$NON-NLS-1$
 	
 	/**
 	 * JSON options property key that identifies the type
@@ -178,6 +183,40 @@ public class CtJsonExportUtils {
 	public static final String PROJECT_FILE = "project.json"; //$NON-NLS-1$
 	
 
+	private static HashMap<String,String> getTranslations(String defaultLabel, String key, ConservationArea ca){
+		HashMap<String,String> translations = new HashMap<>();
+		
+		//english
+		String enl = ResourceBundle.getBundle(Messages.BUNDLE_NAME, Locale.ROOT).getString(key);
+		translations.put("en", enl); //$NON-NLS-1$
+		
+		Locale locale = Locale.getDefault();
+		if (!locale.getLanguage().equalsIgnoreCase("en")) { //$NON-NLS-1$
+			if(!defaultLabel.equalsIgnoreCase(enl))
+				translations.put(locale.getLanguage(), defaultLabel);	
+		}
+		
+		for (Language l : ca.getLanguages()) {
+			locale = new Locale(l.getCode());
+			locale = new Locale(locale.getLanguage());
+			
+			if (locale.getLanguage().equalsIgnoreCase("en")) continue; //$NON-NLS-1$
+			if (locale.getLanguage().equalsIgnoreCase(Locale.getDefault().getLanguage())) continue;
+			
+			try {
+				ResourceBundle b = ResourceBundle.getBundle(Messages.BUNDLE_NAME, locale);
+				if (b != null) {
+					String value = b.getString(key);
+					if (value.equalsIgnoreCase(defaultLabel) || value.equalsIgnoreCase(enl)) continue;
+					translations.put(locale.getLanguage(), value);	
+				}
+			}catch (Exception ex) {
+			}
+		}
+		
+		return translations;
+	}
+	
 	/**
 	 * Convert cybertracker properties profile to JSON string.
 	 * 
@@ -339,10 +378,15 @@ public class CtJsonExportUtils {
 	 * @param ca
 	 * @return
 	 */
-	public static JSONObject convertStringOp(ScreenOption screenOption, String opKey, String opLabel, boolean isRequired, boolean isFixed, Session session, ConservationArea ca) {
+	public static JSONObject convertStringOp(ScreenOption screenOption, String opKey, 
+			String defaultLabel, HashMap<String,String> translations,
+			boolean isRequired, boolean isFixed, Session session, ConservationArea ca) {
 		JSONObject objective = new JSONObject();
 		objective.put(JSON_OPTION_TYPE_KEY, Type.TEXT.name());
-		objective.put(JSON_OPTION_LABEL_KEY, opLabel);
+		objective.put(JSON_OPTION_LABEL_DEFAULT_KEY, defaultLabel);
+		for (Entry<String,String> t : translations.entrySet()) {
+			objective.put(JSON_OPTION_LABEL_PREFIX_KEY + t.getKey(), t.getValue());
+		}
 		objective.put(JSON_REQUIRED_PROP_KEY, isRequired);
 		objective.put(JSON_FIXED_PROP_KEY, isFixed);
 		if (screenOption != null) {
@@ -359,10 +403,16 @@ public class CtJsonExportUtils {
 		return objectiveOp;
 	}
 	
-	public static JSONObject convertStringOp(MetadataFieldValue metadataValue, String opKey, String opLabel, boolean isRequired, boolean isFixed, Session session, ConservationArea ca) {
+	public static JSONObject convertStringOp(MetadataFieldValue metadataValue, String opKey,
+			String defaultLabel, HashMap<String,String> translations,
+			boolean isRequired, boolean isFixed, Session session, ConservationArea ca) {
 		JSONObject objective = new JSONObject();
 		objective.put(JSON_OPTION_TYPE_KEY, Type.TEXT.name());
-		objective.put(JSON_OPTION_LABEL_KEY, opLabel);
+		
+		objective.put(JSON_OPTION_LABEL_DEFAULT_KEY, defaultLabel);
+		for (Entry<String,String> t : translations.entrySet()) {
+			objective.put(JSON_OPTION_LABEL_PREFIX_KEY + t.getKey(), t.getValue());
+		}
 		objective.put(JSON_REQUIRED_PROP_KEY, isRequired);
 		objective.put(JSON_FIXED_PROP_KEY, isFixed);
 		if (metadataValue != null) {
@@ -388,10 +438,14 @@ public class CtJsonExportUtils {
 	 * @return
 	 */
 	
-	public static JSONObject convertEmployees(ScreenOption screenOption, boolean isRequired, boolean isFixed, Session session, ConservationArea ca) {
+	public static JSONObject convertEmployees(ScreenOption screenOption, boolean isRequired, 
+			boolean isFixed, Session session, ConservationArea ca) {
 		JSONObject optionType = new JSONObject();
 		optionType.put(JSON_OPTION_TYPE_KEY, Type.MULTI_CHOICE.name());
-		optionType.put(JSON_OPTION_LABEL_KEY, Messages.CtJsonExportUtils_EmployeePageLabel);
+		optionType.put(JSON_OPTION_LABEL_DEFAULT_KEY, Messages.CtJsonExportUtils_EmployeePageLabel);
+		for (Entry<String,String> t : getTranslations(Messages.CtJsonExportUtils_EmployeePageLabel, "CtJsonExportUtils_EmployeePageLabel", ca).entrySet()) { //$NON-NLS-1$
+			optionType.put(JSON_OPTION_LABEL_PREFIX_KEY + t.getKey(), t.getValue());
+		}
 		optionType.put(JSON_REQUIRED_PROP_KEY, isRequired);
 		optionType.put(JSON_FIXED_PROP_KEY, isFixed);
 		if (screenOption != null) {
@@ -428,7 +482,8 @@ public class CtJsonExportUtils {
 		return teamTypeOp;
 	}
 	
-	public static JSONObject convertEmployees(MetadataFieldValue screenOption, boolean isRequired, boolean isFixed, Session session, ConservationArea ca) {
+	public static JSONObject convertEmployees(MetadataFieldValue screenOption, boolean isRequired, 
+			boolean isFixed, Session session, ConservationArea ca) {
 		//find all employees - they are either directly linked or linked through a employee team
 		Set<Employee> allEmployees = new HashSet<>();
 		if (screenOption != null) {
@@ -450,7 +505,10 @@ public class CtJsonExportUtils {
 		
 		JSONObject optionType = new JSONObject();
 		optionType.put(JSON_OPTION_TYPE_KEY, Type.MULTI_CHOICE.name());
-		optionType.put(JSON_OPTION_LABEL_KEY, Messages.CtJsonExportUtils_EmployeePageLabel);
+		optionType.put(JSON_OPTION_LABEL_DEFAULT_KEY, Messages.CtJsonExportUtils_EmployeePageLabel);
+		for (Entry<String,String> t : getTranslations(Messages.CtJsonExportUtils_EmployeePageLabel, "CtJsonExportUtils_EmployeePageLabel", ca).entrySet()) { //$NON-NLS-1$
+			optionType.put(JSON_OPTION_LABEL_PREFIX_KEY + t.getKey(), t.getValue());
+		}
 		optionType.put(JSON_REQUIRED_PROP_KEY, isRequired);
 		optionType.put(JSON_FIXED_PROP_KEY, isFixed);
 		if (screenOption != null) {
@@ -483,11 +541,17 @@ public class CtJsonExportUtils {
 		return teamTypeOp;
 	}
 	
-	public static JSONObject convertLeaderPilot(ScreenOption screenOption, String opKey, String opLabel, boolean isRequired, boolean isFixed, Session session, ConservationArea ca) {
+	public static JSONObject convertLeaderPilot(ScreenOption screenOption, String opKey, 
+			String defaultLabel, HashMap<String,String> translations,  
+			boolean isRequired, boolean isFixed, Session session, ConservationArea ca) {
 		JSONObject objective = new JSONObject();
 		objective.put(JSON_OPTION_TYPE_KEY, Type.SINGLE_CHOICE.name());
 		objective.put(JSON_OPTION_PARENT_KEY, JSON_EMPLOYEE_METADATA_KEY);
-		objective.put(JSON_OPTION_LABEL_KEY, opLabel);
+//		objective.put(JSON_OPTION_LABEL_KEY, opLabel);
+		objective.put(JSON_OPTION_LABEL_DEFAULT_KEY, defaultLabel);
+		for (Entry<String,String> t : translations.entrySet()) {
+			objective.put(JSON_OPTION_LABEL_PREFIX_KEY + t.getKey(), t.getValue());
+		}
 		objective.put(JSON_REQUIRED_PROP_KEY, isRequired);
 		objective.put(JSON_FIXED_PROP_KEY, isFixed);
 		if (screenOption != null) {
@@ -504,11 +568,17 @@ public class CtJsonExportUtils {
 		return objectiveOp;
 	}
 	
-	public static JSONObject convertLeaderPilot(MetadataFieldValue screenOption, String opKey, String opLabel, boolean isRequired, boolean isFixed, Session session, ConservationArea ca) {
+	public static JSONObject convertLeaderPilot(MetadataFieldValue screenOption, String opKey, 
+			String defaultLabel, HashMap<String,String> translations,   
+			boolean isRequired, boolean isFixed, Session session, ConservationArea ca) {
 		JSONObject objective = new JSONObject();
 		objective.put(JSON_OPTION_TYPE_KEY, Type.SINGLE_CHOICE.name());
 		objective.put(JSON_OPTION_PARENT_KEY, JSON_EMPLOYEE_METADATA_KEY);
-		objective.put(JSON_OPTION_LABEL_KEY, opLabel);
+		
+		objective.put(JSON_OPTION_LABEL_DEFAULT_KEY, defaultLabel);
+		for (Entry<String,String> t : translations.entrySet()) {
+			objective.put(JSON_OPTION_LABEL_PREFIX_KEY + t.getKey(), t.getValue());
+		}
 		objective.put(JSON_REQUIRED_PROP_KEY, isRequired);
 		objective.put(JSON_FIXED_PROP_KEY, isFixed);
 		if (screenOption != null) {
@@ -525,10 +595,16 @@ public class CtJsonExportUtils {
 		return objectiveOp;
 	}
 	
-	public static JSONObject convertKeyOptions(ScreenOption screenOption, Class<? extends NamedKeyItem> clazz, String screenKey, String opLabel, boolean isRequired, boolean isFixed, Session session, ConservationArea ca) {
+	public static JSONObject convertKeyOptions(ScreenOption screenOption, 
+			Class<? extends NamedKeyItem> clazz, String screenKey, 
+			String defaultLabel, HashMap<String,String> translations,   
+			boolean isRequired, boolean isFixed, Session session, ConservationArea ca) {
 		JSONObject optionType = new JSONObject();
 		optionType.put(JSON_OPTION_TYPE_KEY, Type.SINGLE_CHOICE.name());
-		optionType.put(JSON_OPTION_LABEL_KEY, opLabel);
+		optionType.put(JSON_OPTION_LABEL_DEFAULT_KEY, defaultLabel);
+		for (Entry<String,String> t : translations.entrySet()) {
+			optionType.put(JSON_OPTION_LABEL_PREFIX_KEY + t.getKey(), t.getValue());
+		}
 		optionType.put(JSON_REQUIRED_PROP_KEY, isRequired);
 		optionType.put(JSON_FIXED_PROP_KEY, isFixed);
 		if (screenOption != null) {
@@ -553,9 +629,9 @@ public class CtJsonExportUtils {
 			JSONObject ttype = new JSONObject();
 			ttype.put("uuid", UuidUtils.uuidToString(t.getUuid())); //$NON-NLS-1$
 			ttype.put("key", t.getKeyId()); //$NON-NLS-1$
-			ttype.put("label_default", t.findName(ca.getDefaultLanguage())); //$NON-NLS-1$
+			ttype.put(JSON_OPTION_LABEL_DEFAULT_KEY, t.findName(ca.getDefaultLanguage())); 
 			for (Label l : t.getNames()) {
-				ttype.put("label_" + l.getLanguage().getCode(), l.getValue()); //$NON-NLS-1$
+				ttype.put(JSON_OPTION_LABEL_PREFIX_KEY + l.getLanguage().getCode(), l.getValue()); 
 				
 			}
 			optionOptions.add(ttype);
@@ -569,10 +645,16 @@ public class CtJsonExportUtils {
 	
 	public static JSONObject convertKeyOptions(MetadataFieldValue screenOption, 
 			Class<? extends NamedKeyItem> clazz, String screenKey, 
-			String opLabel, boolean isRequired, boolean isFixed, Session session, ConservationArea ca) {
+			String defaultLabel, HashMap<String,String> translations, 
+			boolean isRequired, boolean isFixed, Session session, ConservationArea ca) {
 		JSONObject optionType = new JSONObject();
 		optionType.put(JSON_OPTION_TYPE_KEY, Type.SINGLE_CHOICE.name());
-		optionType.put(JSON_OPTION_LABEL_KEY, opLabel);
+//		optionType.put(JSON_OPTION_LABEL_KEY, opLabel);
+		
+		optionType.put(JSON_OPTION_LABEL_DEFAULT_KEY, defaultLabel);
+		for (Entry<String,String> t : translations.entrySet()) {
+			optionType.put(JSON_OPTION_LABEL_PREFIX_KEY + t.getKey(), t.getValue());
+		}
 		optionType.put(JSON_REQUIRED_PROP_KEY, isRequired);
 		optionType.put(JSON_FIXED_PROP_KEY, isFixed);
 		if (screenOption != null) {
@@ -598,9 +680,9 @@ public class CtJsonExportUtils {
 			JSONObject ttype = new JSONObject();
 			ttype.put("uuid", UuidUtils.uuidToString(t.getUuid())); //$NON-NLS-1$
 			ttype.put("key", t.getKeyId()); //$NON-NLS-1$
-			ttype.put("label_default", t.findName(ca.getDefaultLanguage())); //$NON-NLS-1$
+			ttype.put(JSON_OPTION_LABEL_DEFAULT_KEY, t.findName(ca.getDefaultLanguage()));
 			for (Label l : t.getNames()) {
-				ttype.put("label_" + l.getLanguage().getCode(), l.getValue()); //$NON-NLS-1$
+				ttype.put(JSON_OPTION_LABEL_PREFIX_KEY + l.getLanguage().getCode(), l.getValue());
 				
 			}
 			optionOptions.add(ttype);
@@ -614,7 +696,7 @@ public class CtJsonExportUtils {
 	
 	public static JSONObject createPatrolId() {
 		JSONObject dataType = new JSONObject();
-		dataType.put(JSON_OPTION_LABEL_KEY, Messages.CtJsonExportUtils_IdentifierLabel);
+		dataType.put(JSON_OPTION_LABEL_DEFAULT_KEY, Messages.CtJsonExportUtils_IdentifierLabel);
 		dataType.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, CtJsonExportUtils.Type.UUID.name());
 		dataType.put(CtJsonExportUtils.JSON_ISVISIBILE_PROP_KEY, false);
 		dataType.put(CtJsonExportUtils.JSON_OPTION_GENERATED_KEY, true);
@@ -626,7 +708,7 @@ public class CtJsonExportUtils {
 	
 	public static JSONObject createStartDate() {
 		JSONObject dataType = new JSONObject();
-		dataType.put(JSON_OPTION_LABEL_KEY, Messages.CtJsonExportUtils_StartDateLabel);
+		dataType.put(JSON_OPTION_LABEL_DEFAULT_KEY, Messages.CtJsonExportUtils_StartDateLabel);
 		dataType.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, CtJsonExportUtils.Type.DATE.name());
 		dataType.put(CtJsonExportUtils.JSON_ISVISIBILE_PROP_KEY, false);
 		dataType.put(CtJsonExportUtils.JSON_OPTION_GENERATED_KEY, true);
@@ -639,7 +721,7 @@ public class CtJsonExportUtils {
 	
 	public static JSONObject createStartTime() {
 		JSONObject dataType = new JSONObject();
-		dataType.put(JSON_OPTION_LABEL_KEY, Messages.CtJsonExportUtils_StartTimeLabel);
+		dataType.put(JSON_OPTION_LABEL_DEFAULT_KEY, Messages.CtJsonExportUtils_StartTimeLabel);
 		dataType.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, CtJsonExportUtils.Type.TIME.name());
 		dataType.put(CtJsonExportUtils.JSON_ISVISIBILE_PROP_KEY, false);
 		dataType.put(CtJsonExportUtils.JSON_OPTION_GENERATED_KEY, true);
@@ -651,7 +733,7 @@ public class CtJsonExportUtils {
 	
 	public static JSONObject createDataType(String outputDataType) {
 		JSONObject dataType = new JSONObject();
-		dataType.put(JSON_OPTION_LABEL_KEY, Messages.CtJsonExportUtils_DataTypeLabel);
+		dataType.put(JSON_OPTION_LABEL_DEFAULT_KEY, Messages.CtJsonExportUtils_DataTypeLabel);
 		dataType.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, CtJsonExportUtils.Type.TEXT.name());
 		dataType.put(CtJsonExportUtils.JSON_ISVISIBILE_PROP_KEY, false);
 		dataType.put(CtJsonExportUtils.JSON_OPTION_GENERATED_KEY, false);
@@ -716,3 +798,4 @@ public class CtJsonExportUtils {
 		return filesToAdd;
 	}
 }
+

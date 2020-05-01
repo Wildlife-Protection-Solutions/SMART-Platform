@@ -31,7 +31,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
@@ -42,6 +44,8 @@ import org.hibernate.Session;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Label;
+import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.ca.icon.IconFile;
@@ -289,6 +293,40 @@ public enum SurveyPackageExporter {
 		}
 	}
 	
+	private HashMap<String,String> getTranslations(String defaultLabel, String key, ConservationArea ca){
+		HashMap<String,String> translations = new HashMap<>();
+		
+		//english
+		String enl = ResourceBundle.getBundle(Messages.BUNDLE_NAME, Locale.ROOT).getString(key);
+		translations.put("en", enl); //$NON-NLS-1$
+		
+		Locale locale = Locale.getDefault();
+		if (!locale.getLanguage().equalsIgnoreCase("en")) { //$NON-NLS-1$
+			if(!defaultLabel.equalsIgnoreCase(enl))
+				translations.put(locale.getLanguage(), defaultLabel);	
+		}
+		
+		for (Language l : ca.getLanguages()) {
+			locale = new Locale(l.getCode());
+			locale = new Locale(locale.getLanguage());
+			
+			if (locale.getLanguage().equalsIgnoreCase("en")) continue; //$NON-NLS-1$
+			if (locale.getLanguage().equalsIgnoreCase(Locale.getDefault().getLanguage())) continue;
+			
+			try {
+				ResourceBundle b = ResourceBundle.getBundle(Messages.BUNDLE_NAME, locale);
+				if (b != null) {
+					String value = b.getString(key);
+					if (value.equalsIgnoreCase(defaultLabel) || value.equalsIgnoreCase(enl)) continue;
+					translations.put(locale.getLanguage(), value);	
+				}
+			}catch (Exception ex) {
+			}
+		}
+		
+		return translations;
+	}
+	
 	@SuppressWarnings("unchecked")
 	private void metadataToJson(AbstractCtPackage ctpackage, SurveyDesign design, Session session, Path outputFile) throws IOException {
 		
@@ -313,14 +351,18 @@ public enum SurveyPackageExporter {
 		Map<String, MetadataFieldValue> map = metadataFields.stream().collect(Collectors.toMap(e->e.getMetadataKey(), e->e));
 	
 		metadataScreens.add(CtJsonExportUtils.convertStringOp(map.get(MissionMetadataField.COMMENT.name()), 
-				MissionMetadataField.COMMENT.getJsonKey(), Messages.SurveyPackageExporter_CommentPageLabel,
+				MissionMetadataField.COMMENT.getJsonKey(), 
+				Messages.SurveyPackageExporter_CommentPageLabel,
+				getTranslations(Messages.SurveyPackageExporter_CommentPageLabel, "SurveyPackageExporter_CommentPageLabel", ctpackage.getConservationArea()), //$NON-NLS-1$
 				MissionScreenOptionMeta.COMMENT.isRequired(), false, session, ctpackage.getConservationArea()));
 		
 		metadataScreens.add(CtJsonExportUtils.convertEmployees(map.get(MissionMetadataField.MEMBERS.name()), 
 				MissionMetadataField.MEMBERS.isRequired(), false, session, ctpackage.getConservationArea()));
 		
 		metadataScreens.add(CtJsonExportUtils.convertLeaderPilot(map.get(MissionMetadataField.LEADER.name()),
-				MissionMetadataField.LEADER.getJsonKey(), Messages.SurveyPackageExporter_LeaderPageLabel, 
+				MissionMetadataField.LEADER.getJsonKey(), 
+				Messages.SurveyPackageExporter_LeaderPageLabel,
+				getTranslations(Messages.SurveyPackageExporter_LeaderPageLabel, "SurveyPackageExporter_LeaderPageLabel", ctpackage.getConservationArea()), //$NON-NLS-1$
 				MissionScreenOptionMeta.LEADER.isRequired(), false, session, ctpackage.getConservationArea())); 
 		
 		metadataScreens.add(CtJsonExportUtils.createDataType(SurveyScreensUtil.DATATYPE_SURVEY));
@@ -342,7 +384,10 @@ public enum SurveyPackageExporter {
 	private JSONObject covertNumberProperty(MissionAttribute prop, Session session, ConservationArea ca) {
 		JSONObject objective = new JSONObject();
 		objective.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, Type.NUMERIC.name());
-		objective.put(CtJsonExportUtils.JSON_OPTION_LABEL_KEY, prop.getName());
+		objective.put(CtJsonExportUtils.JSON_OPTION_LABEL_DEFAULT_KEY, prop.getName());
+		for (Label l : prop.getNames()) {
+			objective.put(CtJsonExportUtils.JSON_OPTION_LABEL_PREFIX_KEY + l.getLanguage().getCode(), l.getValue());
+		}
 		objective.put(CtJsonExportUtils.JSON_REQUIRED_PROP_KEY, false);
 		objective.put(CtJsonExportUtils.JSON_ISVISIBILE_PROP_KEY, true);
 		
@@ -354,8 +399,11 @@ public enum SurveyPackageExporter {
 	@SuppressWarnings("unchecked")
 	private JSONObject covertStringProperty(MissionAttribute prop, Session session, ConservationArea ca) {
 		JSONObject objective = new JSONObject();
-		objective.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, Type.TEXT.name());
-		objective.put(CtJsonExportUtils.JSON_OPTION_LABEL_KEY, prop.getName());
+		objective.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, Type.TEXT.name());	
+		objective.put(CtJsonExportUtils.JSON_OPTION_LABEL_DEFAULT_KEY, prop.getName());
+		for (Label l : prop.getNames()) {
+			objective.put(CtJsonExportUtils.JSON_OPTION_LABEL_PREFIX_KEY + l.getLanguage().getCode(), l.getValue());
+		}
 		objective.put(CtJsonExportUtils.JSON_REQUIRED_PROP_KEY, false);
 		objective.put(CtJsonExportUtils.JSON_ISVISIBILE_PROP_KEY, true);
 		
@@ -368,7 +416,10 @@ public enum SurveyPackageExporter {
 	private JSONObject covertListProperty(MissionAttribute prop, Session session, ConservationArea ca) {
 		JSONObject objective = new JSONObject();
 		objective.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, Type.SINGLE_CHOICE.name());
-		objective.put(CtJsonExportUtils.JSON_OPTION_LABEL_KEY, prop.getName());
+		objective.put(CtJsonExportUtils.JSON_OPTION_LABEL_DEFAULT_KEY, prop.getName());
+		for (Label l : prop.getNames()) {
+			objective.put(CtJsonExportUtils.JSON_OPTION_LABEL_PREFIX_KEY + l.getLanguage().getCode(), l.getValue());
+		}
 		objective.put(CtJsonExportUtils.JSON_REQUIRED_PROP_KEY, false);
 		objective.put(CtJsonExportUtils.JSON_ISVISIBILE_PROP_KEY, true);
 		

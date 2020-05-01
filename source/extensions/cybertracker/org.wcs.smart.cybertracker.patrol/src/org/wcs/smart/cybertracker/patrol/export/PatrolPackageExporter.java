@@ -32,7 +32,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.Map.Entry;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -43,6 +46,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Label;
+import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.DmObject;
@@ -113,7 +117,6 @@ public enum PatrolPackageExporter {
 	 * @throws Exception
 	 */
 	public void exportPackage(PatrolCtPackage ctPackage, List<IPackageContribution.PackageContribution> updates, Path exportFile, IEclipseContext context, IProgressMonitor monitor) throws Exception{
-		
 		//TODO: support cancelling
 		SubMonitor sub = SubMonitor.convert(monitor, Messages.PatrolPackageExporter_TaskName, 8);
 		Path tempDir = Files.createTempDirectory("smart"); //$NON-NLS-1$
@@ -309,7 +312,39 @@ public enum PatrolPackageExporter {
 		}
 	}
 
-	
+	private HashMap<String,String> getTranslations(String defaultLabel, String key, ConservationArea ca){
+		HashMap<String,String> translations = new HashMap<>();
+		
+		//english
+		String enl = ResourceBundle.getBundle(Messages.BUNDLE_NAME, Locale.ROOT).getString(key);
+		translations.put("en", enl); //$NON-NLS-1$
+		
+		Locale locale = Locale.getDefault();
+		if (!locale.getLanguage().equalsIgnoreCase("en")) { //$NON-NLS-1$
+			if(!defaultLabel.equalsIgnoreCase(enl))
+				translations.put(locale.getLanguage(), defaultLabel);	
+		}
+		
+		for (Language l : ca.getLanguages()) {
+			locale = new Locale(l.getCode());
+			locale = new Locale(locale.getLanguage());
+			
+			if (locale.getLanguage().equalsIgnoreCase("en")) continue; //$NON-NLS-1$
+			if (locale.getLanguage().equalsIgnoreCase(Locale.getDefault().getLanguage())) continue;
+			
+			try {
+				ResourceBundle b = ResourceBundle.getBundle(Messages.BUNDLE_NAME, locale);
+				if (b != null) {
+					String value = b.getString(key);
+					if (value.equalsIgnoreCase(defaultLabel) || value.equalsIgnoreCase(enl)) continue;
+					translations.put(locale.getLanguage(), value);	
+				}
+			}catch (Exception ex) {
+			}
+		}
+		
+		return translations;
+	}
 	
 	@SuppressWarnings("unchecked")
 	private void metadataToJson(AbstractCtPackage ctpackage, Session session, Path outputFile) throws IOException {
@@ -326,7 +361,9 @@ public enum PatrolPackageExporter {
 		
 		JSONObject transportScreen = CtJsonExportUtils.convertKeyOptions(map.get(PatrolMetadataField.TRANSPORT.name()), 
 				PatrolTransportType.class, PatrolMetadataField.TRANSPORT.getJsonKey(), 
-				Messages.PatrolPackageExporter_TransportTypePageLabel, PatrolMetadataField.TRANSPORT.isRequired(), 
+				Messages.PatrolPackageExporter_TransportTypePageLabel,
+				getTranslations(Messages.PatrolPackageExporter_TransportTypePageLabel, "PatrolPackageExporter_TransportTypePageLabel", ctpackage.getConservationArea()), //$NON-NLS-1$
+				PatrolMetadataField.TRANSPORT.isRequired(), 
 				false, session, ctpackage.getConservationArea());
 		JSONObject joo = (JSONObject) transportScreen.get(PatrolMetadataField.TRANSPORT.getJsonKey());
 		JSONArray it = (JSONArray) joo.get(CtJsonExportUtils.JSON_OPTION_PROP_KEY);
@@ -337,23 +374,31 @@ public enum PatrolPackageExporter {
 		
 		metadataScreens.add(CtJsonExportUtils.convertKeyOptions(map.get(PatrolMetadataField.TEAM.name()), 
 				Team.class, PatrolMetadataField.TEAM.getJsonKey(), 
-				Messages.PatrolPackageExporter_TeamPageLabel, PatrolMetadataField.TEAM.isRequired(), 
+				Messages.PatrolPackageExporter_TeamPageLabel, 
+				getTranslations(Messages.PatrolPackageExporter_TeamPageLabel, "PatrolPackageExporter_TeamPageLabel", ctpackage.getConservationArea()), //$NON-NLS-1$
+				PatrolMetadataField.TEAM.isRequired(), 
 				PatrolMetadataField.TEAM.isFixed(), session, ctpackage.getConservationArea()));
 		
 		metadataScreens.add(convertStations(map.get(PatrolMetadataField.STATION.name()), session, ctpackage.getConservationArea()));
 		
 		metadataScreens.add(CtJsonExportUtils.convertKeyOptions(map.get(PatrolMetadataField.MANDATE.name()), 
 				PatrolMandate.class, PatrolMetadataField.MANDATE.getJsonKey(), 
-				Messages.PatrolPackageExporter_MandatePageLabel,PatrolMetadataField.MANDATE.isRequired(), 
+				Messages.PatrolPackageExporter_MandatePageLabel,
+				getTranslations(Messages.PatrolPackageExporter_MandatePageLabel, "PatrolPackageExporter_MandatePageLabel", ctpackage.getConservationArea()), //$NON-NLS-1$
+				PatrolMetadataField.MANDATE.isRequired(), 
 				PatrolMetadataField.MANDATE.isFixed(), session, ctpackage.getConservationArea()));
 		
 		metadataScreens.add(CtJsonExportUtils.convertStringOp(map.get(PatrolMetadataField.OBJECTIVE.name()), 
-				PatrolMetadataField.OBJECTIVE.getJsonKey(), Messages.PatrolPackageExporter_ObjectivePageLabel, 
+				PatrolMetadataField.OBJECTIVE.getJsonKey(), 
+				Messages.PatrolPackageExporter_ObjectivePageLabel,
+				getTranslations(Messages.PatrolPackageExporter_ObjectivePageLabel, "PatrolPackageExporter_ObjectivePageLabel", ctpackage.getConservationArea()), //$NON-NLS-1$
 				PatrolMetadataField.OBJECTIVE.isRequired(), PatrolMetadataField.OBJECTIVE.isFixed(), session, 
 				ctpackage.getConservationArea()));
 		
 		metadataScreens.add(CtJsonExportUtils.convertStringOp(map.get(PatrolMetadataField.COMMENT.name()), 
-				PatrolMetadataField.COMMENT.getJsonKey(), Messages.PatrolPackageExporter_CommentPageLabel, 
+				PatrolMetadataField.COMMENT.getJsonKey(),
+				Messages.PatrolPackageExporter_CommentPageLabel,
+				getTranslations(Messages.PatrolPackageExporter_CommentPageLabel, "PatrolPackageExporter_CommentPageLabel", ctpackage.getConservationArea()), //$NON-NLS-1$
 				PatrolMetadataField.COMMENT.isRequired(), PatrolMetadataField.COMMENT.isFixed(), session, 
 				ctpackage.getConservationArea()));
 		
@@ -376,23 +421,31 @@ public enum PatrolPackageExporter {
 		
 		if (map.get(PatrolMetadataField.MEMBERS.name()) == null || map.get(PatrolMetadataField.MEMBERS.name()).isVisible()) {
 			//force leader and pilot to be visible as well; ticket #2690
-			metadataScreens.add(CtJsonExportUtils.convertLeaderPilot((MetadataFieldValue)null, PatrolMetadataField.LEADER.getJsonKey(), 
-					Messages.PatrolPackageExporter_LeaderPageLabel, PatrolMetadataField.LEADER.isRequired(), 
+			metadataScreens.add(CtJsonExportUtils.convertLeaderPilot((MetadataFieldValue)null, PatrolMetadataField.LEADER.getJsonKey(),
+					Messages.PatrolPackageExporter_LeaderPageLabel,
+					getTranslations(Messages.PatrolPackageExporter_LeaderPageLabel, "PatrolPackageExporter_LeaderPageLabel", ctpackage.getConservationArea()), //$NON-NLS-1$
+					PatrolMetadataField.LEADER.isRequired(), 
 					PatrolMetadataField.LEADER.isFixed(), session, ctpackage.getConservationArea()));
 			
 			JSONObject oo = CtJsonExportUtils.convertLeaderPilot((MetadataFieldValue)null, PatrolMetadataField.PILOT.getJsonKey(), 
-					Messages.PatrolPackageExporter_PilotPageLabel, PatrolMetadataField.PILOT.isRequired(), 
+					Messages.PatrolPackageExporter_PilotPageLabel, 
+					getTranslations(Messages.PatrolPackageExporter_PilotPageLabel, "PatrolPackageExporter_PilotPageLabel", ctpackage.getConservationArea()), //$NON-NLS-1$
+					PatrolMetadataField.PILOT.isRequired(), 
 					PatrolMetadataField.PILOT.isFixed(), session, ctpackage.getConservationArea());
 			((JSONObject)oo.get(PatrolMetadataField.PILOT.getJsonKey())).put("required_by", jr); //$NON-NLS-1$
 			metadataScreens.add(oo);
 		}else {
 			metadataScreens.add(CtJsonExportUtils.convertLeaderPilot(map.get(PatrolMetadataField.LEADER.name()),
-					PatrolMetadataField.LEADER.getJsonKey(), Messages.PatrolPackageExporter_LeaderPageLabel, 
+					PatrolMetadataField.LEADER.getJsonKey(), 
+					Messages.PatrolPackageExporter_LeaderPageLabel,
+					getTranslations(Messages.PatrolPackageExporter_LeaderPageLabel, "PatrolPackageExporter_LeaderPageLabel", ctpackage.getConservationArea()), //$NON-NLS-1$
 					PatrolMetadataField.LEADER.isRequired(), PatrolMetadataField.LEADER.isFixed(), session, 
 					ctpackage.getConservationArea()));
 			
 			JSONObject oo = CtJsonExportUtils.convertLeaderPilot(map.get(PatrolMetadataField.PILOT.name()), 
-					PatrolMetadataField.PILOT.getJsonKey(), Messages.PatrolPackageExporter_PilotPageLabel, 
+					PatrolMetadataField.PILOT.getJsonKey(), 
+					Messages.PatrolPackageExporter_PilotPageLabel,
+					getTranslations(Messages.PatrolPackageExporter_PilotPageLabel, "PatrolPackageExporter_PilotPageLabel", ctpackage.getConservationArea()), //$NON-NLS-1$
 					PatrolMetadataField.PILOT.isRequired(), PatrolMetadataField.PILOT.isFixed(), session,
 					ctpackage.getConservationArea());
 			((JSONObject)oo.get(PatrolMetadataField.PILOT.getJsonKey())).put("required_by", jr); //$NON-NLS-1$
@@ -421,7 +474,11 @@ public enum PatrolPackageExporter {
 	private JSONObject convertArmed(MetadataFieldValue armedOp, Session session, ConservationArea ca) {
 		JSONObject isArmed = new JSONObject();
 		isArmed.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, CtJsonExportUtils.Type.BOOLEAN.name());
-		isArmed.put(CtJsonExportUtils.JSON_OPTION_LABEL_KEY, Messages.PatrolPackageExporter_ArmedPageLabel);
+		isArmed.put(CtJsonExportUtils.JSON_OPTION_LABEL_DEFAULT_KEY, Messages.PatrolPackageExporter_ArmedPageLabel);
+		for (Entry<String,String> t : getTranslations(Messages.PatrolPackageExporter_ArmedPageLabel, "PatrolPackageExporter_ArmedPageLabel", ca).entrySet()) { //$NON-NLS-1$
+			isArmed.put(CtJsonExportUtils.JSON_OPTION_LABEL_PREFIX_KEY + t.getKey(), t.getValue());
+		}
+		
 		isArmed.put(CtJsonExportUtils.JSON_REQUIRED_PROP_KEY,  PatrolMetadataField.ARMED.isRequired());
 		isArmed.put(CtJsonExportUtils.JSON_FIXED_PROP_KEY,  PatrolMetadataField.ARMED.isFixed());
 		if (armedOp != null) {
@@ -442,7 +499,12 @@ public enum PatrolPackageExporter {
 	private JSONObject convertStations(MetadataFieldValue stationOp, Session session, ConservationArea ca) {
 		JSONObject stationType = new JSONObject();
 		stationType.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, CtJsonExportUtils.Type.SINGLE_CHOICE.name());
-		stationType.put(CtJsonExportUtils.JSON_OPTION_LABEL_KEY, Messages.PatrolPackageExporter_StationFieldKey);
+
+		stationType.put(CtJsonExportUtils.JSON_OPTION_LABEL_DEFAULT_KEY, Messages.PatrolPackageExporter_StationFieldKey);
+		for (Entry<String,String> t : getTranslations(Messages.PatrolPackageExporter_StationFieldKey, "PatrolPackageExporter_StationFieldKey", ca).entrySet()) { //$NON-NLS-1$
+			stationType.put(CtJsonExportUtils.JSON_OPTION_LABEL_PREFIX_KEY + t.getKey(), t.getValue());
+		}
+		
 		stationType.put(CtJsonExportUtils.JSON_REQUIRED_PROP_KEY,  PatrolMetadataField.STATION.isRequired());
 		stationType.put(CtJsonExportUtils.JSON_FIXED_PROP_KEY,  PatrolMetadataField.STATION.isFixed());
 		if (stationOp != null) {
@@ -466,10 +528,9 @@ public enum PatrolPackageExporter {
 		for (Station t : stations) {
 			JSONObject ttype = new JSONObject();
 			ttype.put("uuid", UuidUtils.uuidToString(t.getUuid())); //$NON-NLS-1$
-			ttype.put("label_default", t.findName(t.getConservationArea().getDefaultLanguage())); //$NON-NLS-1$
+			ttype.put(CtJsonExportUtils.JSON_OPTION_LABEL_DEFAULT_KEY, t.findName(t.getConservationArea().getDefaultLanguage()));
 			for (Label l : t.getNames()) {
-				ttype.put("label_" + l.getLanguage().getCode(), l.getValue()); //$NON-NLS-1$
-				
+				ttype.put(CtJsonExportUtils.JSON_OPTION_LABEL_PREFIX_KEY + l.getLanguage().getCode(), l.getValue());
 			}
 			teamOptions.add(ttype);
 		}
@@ -505,10 +566,9 @@ public enum PatrolPackageExporter {
 			throw new IOException(MessageFormat.format(Messages.PatrolPackageExporter_attributeTypeNotSupported, pa.getType()));
 		}
 		
-		optionType.put(CtJsonExportUtils.JSON_OPTION_LABEL_KEY, pa.getName());
-		optionType.put(CtJsonExportUtils.JSON_OPTION_LABEL_KEY + "_default", pa.getName()); //$NON-NLS-1$
+		optionType.put(CtJsonExportUtils.JSON_OPTION_LABEL_DEFAULT_KEY, pa.getName());
 		for (Label l : pa.getNames()) {
-			optionType.put(CtJsonExportUtils.JSON_OPTION_LABEL_KEY + "_" + l.getLanguage().getCode(), l.getValue()); //$NON-NLS-1$
+			optionType.put(CtJsonExportUtils.JSON_OPTION_LABEL_PREFIX_KEY + l.getLanguage().getCode(), l.getValue());
 		}
 		optionType.put(CtJsonExportUtils.JSON_REQUIRED_PROP_KEY, false);
 		optionType.put(CtJsonExportUtils.JSON_FIXED_PROP_KEY, false);
@@ -522,9 +582,9 @@ public enum PatrolPackageExporter {
 				JSONObject ttype = new JSONObject();
 				ttype.put("uuid", UuidUtils.uuidToString(item.getUuid())); //$NON-NLS-1$
 				ttype.put("key", item.getKeyId()); //$NON-NLS-1$
-				ttype.put(CtJsonExportUtils.JSON_OPTION_LABEL_KEY + "_default", item.findName(pa.getConservationArea().getDefaultLanguage())); //$NON-NLS-1$
+				ttype.put(CtJsonExportUtils.JSON_OPTION_LABEL_DEFAULT_KEY, item.findName(pa.getConservationArea().getDefaultLanguage())); 
 				for (Label l : item.getNames()) {
-					ttype.put(CtJsonExportUtils.JSON_OPTION_LABEL_KEY + "_" + l.getLanguage().getCode(), l.getValue()); //$NON-NLS-1$
+					ttype.put(CtJsonExportUtils.JSON_OPTION_LABEL_PREFIX_KEY + l.getLanguage().getCode(), l.getValue());
 					
 				}
 				optionOptions.add(ttype);

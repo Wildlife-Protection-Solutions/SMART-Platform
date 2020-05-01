@@ -24,7 +24,7 @@ package org.wcs.smart.cybertracker.patrol.internal;
 import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
-	private static final String BUNDLE_NAME = "org.wcs.smart.cybertracker.patrol.internal.messages"; //$NON-NLS-1$
+	public static final String BUNDLE_NAME = "org.wcs.smart.cybertracker.patrol.internal.messages"; //$NON-NLS-1$
 	
 	public static String AddDataQueueCtPatrolJob_CreateTablesTask;
 	public static String AddDataQueueCtPatrolJob_ErrorLabel;
