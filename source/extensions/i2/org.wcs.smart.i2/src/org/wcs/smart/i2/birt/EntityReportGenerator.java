@@ -173,6 +173,7 @@ public enum EntityReportGenerator {
 			dsDesign.setOdaExtensionDataSetId(d);
 			
 			AbstractIntelBirtConnection connection  = SmartContext.INSTANCE.getClass(IConnectionFactory.class).createConnection();
+			connection.setSkipSecurityCheck(true);
 			connection.open(null);
 			try{
 				IQuery query = connection.newQuery(d);

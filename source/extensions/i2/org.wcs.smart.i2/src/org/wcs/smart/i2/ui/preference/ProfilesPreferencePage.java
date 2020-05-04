@@ -73,8 +73,11 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.ProfilesManager;
+import org.wcs.smart.i2.birt.IntelReportManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelProfile;
+import org.wcs.smart.i2.model.IntelProfileEntityType;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.ProfileLabelProvider;
 import org.wcs.smart.i2.ui.dialogs.NewProfileDialog;
 import org.wcs.smart.i2.ui.dialogs.ProfileDialog;
@@ -243,7 +246,29 @@ public class ProfilesPreferencePage extends PreferencePage implements IIntelPref
 							tmp[0] = mm.importXmlData(temp, monitor, eventBroker);
 						} catch (IOException e) {
 							throw new InvocationTargetException(e);
-						}	
+						}
+						
+						//create BIRT Templates
+						IntelSecurityManager.INSTANCE.clearCache();
+
+						if (tmp[0] != null) {
+							for (IntelProfileEntityType ie : tmp[0].getEntityTypes()) {
+								if (ie.getEntityType().getBirtTemplate() == null) {
+									try {
+										IntelReportManager.INSTANCE.generateTemplate(ie.getEntityType());
+										try(Session s = HibernateManager.openSession()){
+											s.beginTransaction();
+											s.saveOrUpdate(ie.getEntityType());
+											s.getTransaction().commit();
+										}catch (Exception ex) {
+											throw ex;
+										}	
+									}catch (Exception ex) {
+										Intelligence2PlugIn.log(ex.getMessage(),  ex);
+									}
+								}
+							}
+						}
 					});
 					newProfile = tmp[0];
 				}finally {
@@ -256,6 +281,9 @@ public class ProfilesPreferencePage extends PreferencePage implements IIntelPref
 		}
 		
 		if (newProfile == null) return;
+		
+		ProfilesManager.INSTANCE.addActiveProfile(newProfile, eventBroker);
+		
 		ProfileDialog pd = new ProfileDialog(getShell(), newProfile, configs);
 		pd.open();
 		refresh();

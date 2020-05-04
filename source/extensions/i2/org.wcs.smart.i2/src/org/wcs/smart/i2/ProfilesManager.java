@@ -116,6 +116,22 @@ public enum ProfilesManager {
 	}
 	
 	/**
+	 * Add a profile to the list of active profiles
+	 * 
+	 * @param toAdd
+	 * @param event
+	 */
+	public void addActiveProfile(IntelProfile toAdd, IEventBroker event) {
+		synchronized (INSTANCE) {
+			if (this.active == null) active = new HashSet<>();
+			if (this.active.contains(toAdd)) return;
+			HashSet<IntelProfile> temp = new HashSet<>(active);
+			temp.add(toAdd);
+			this.active = Collections.unmodifiableSet(temp);
+		}
+		event.post(IntelEvents.ACTIVE_PROFILES, this.active);		 
+	}
+	/**
 	 * Load all profiles.  If filterUser is true than this
 	 * filters it to only profiles the current user has some permission
 	 * to use.  In the case of CCAA analysis this returns all  profiles

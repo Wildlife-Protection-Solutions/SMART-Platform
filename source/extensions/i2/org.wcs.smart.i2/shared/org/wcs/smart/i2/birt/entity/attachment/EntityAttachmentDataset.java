@@ -82,6 +82,7 @@ public class EntityAttachmentDataset implements IQuery {
 				));
 		type = connection.getSession().createQuery(c).uniqueResult();
 		
+		if (connection.skipSecurityCheck()) return;
 		if (type.getProfiles().isEmpty()) return;	//type no profiles allow access
 		
 		for (IntelProfileEntityType ip : type.getProfiles()) {

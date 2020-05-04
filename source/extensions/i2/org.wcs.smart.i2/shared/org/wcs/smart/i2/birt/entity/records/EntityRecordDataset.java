@@ -82,6 +82,8 @@ public class EntityRecordDataset  implements IQuery {
 				cb.equal(from.get("keyId"), queryText) //$NON-NLS-1$
 				));
 		type = connection.getSession().createQuery(c).uniqueResult();
+		if (connection.skipSecurityCheck()) return;
+		
 		if (type.getProfiles().isEmpty()) return;	//type has no profiles so there should be no entities; allow users to access dataset so can create type with no profiles
 		
 		for (IntelProfileEntityType ip : type.getProfiles()) {

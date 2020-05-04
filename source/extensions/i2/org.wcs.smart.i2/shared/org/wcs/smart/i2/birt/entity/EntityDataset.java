@@ -80,14 +80,18 @@ public class EntityDataset implements IQuery {
 				cb.equal(from.get("keyId"), queryText) //$NON-NLS-1$
 				));
 		type = connection.getSession().createQuery(c).uniqueResult();
+		
+		if (connection.skipSecurityCheck()) {
+			return;
+		}
+		
 		if (type.getProfiles().isEmpty()) return;  //no profiles are associated with this entity type
 		
 		
 		Set<IntelProfile> profiles = connection.hasPermission(Permission.ENTITY);
 		if (profiles.isEmpty())
 			throw new OdaException(MessageFormat.format("Unauthorized.  You do not have permission to access intelligence entity type {0} dataset", queryText)); //$NON-NLS-1$
-		
-		
+
 		for (IntelProfileEntityType ip : type.getProfiles()) {
 			if (profiles.contains(ip.getProfile())) return;
 		}

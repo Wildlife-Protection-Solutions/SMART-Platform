@@ -94,7 +94,7 @@ public abstract class AbstractIntelBirtConnection implements IConnection {
 	 * App context projection provider variable
 	 */
 	public static final String PROJECTION_PROVIDER_CONTEXT_VAR = "org.wcs.smart.report.crs"; //$NON-NLS-1$
-	
+
 	public static enum Permission{
 		ENTITY,
 		RECORD,
@@ -105,6 +105,7 @@ public abstract class AbstractIntelBirtConnection implements IConnection {
 	protected Session localSession;
 	protected Map<Object,Object> appContext;
 	protected List<Path> attachmentFiles;
+	protected boolean skipSecurityCheck = false;
 	
 	private final static IProjectionProvider defaultProjectionProvider = new IProjectionProvider() {
 		private Projection p; 
@@ -161,7 +162,17 @@ public abstract class AbstractIntelBirtConnection implements IConnection {
 		return null;
 	}
 
-	
+	/**
+	 * True if security checks should be skipped when loading entities. 
+	 * This is used when configuring templates.
+	 * @return
+	 */
+	public boolean skipSecurityCheck() {
+		return skipSecurityCheck;
+	}
+	public void setSkipSecurityCheck(boolean skipSecurityCheck) {
+		this.skipSecurityCheck = skipSecurityCheck;
+	}
 	private Path getWorkingDirectory() {
 		Object x = appContext.get(BirtConstants.WORKING_DIRECTORY);
 		if (x instanceof Path) return (Path)x;

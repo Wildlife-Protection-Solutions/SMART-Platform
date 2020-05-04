@@ -114,6 +114,7 @@ public class EntityRelationDataset  implements IQuery {
 		validAttributes.addAll(attSet);
 		Collections.sort(validAttributes, (a,b) -> a.getKeyId().compareTo(b.getKeyId()));
 		
+		if (connection.skipSecurityCheck()) return;
 		if (type.getProfiles().isEmpty()) return;
 		
 		for (IntelProfileEntityType ip : type.getProfiles()) {

@@ -44,7 +44,6 @@ public class DesktopIntelBirtConnection extends AbstractIntelBirtConnection {
 	
 	private boolean cleanup;
 	
-	
 	public void openSession(){
 		cleanup = false;
 		if (appContext != null){
@@ -67,8 +66,6 @@ public class DesktopIntelBirtConnection extends AbstractIntelBirtConnection {
 	public Collection<ConservationArea> getConservationAreas() {
 		return SmartDB.getConservationAreaConfiguration().getConservationAreas();
 	}
-
-	
 	
 	@Override
 	public Set<IntelProfile> hasPermission(Permission permission) {

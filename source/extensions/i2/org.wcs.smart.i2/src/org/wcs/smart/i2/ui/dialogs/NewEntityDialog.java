@@ -142,7 +142,12 @@ public class NewEntityDialog extends SmartStyledTitleDialog{
 				}
 			}
 			
-			IntelProfile ptoSelect = profile != null ? profile : profiles.get(0);
+			IntelProfile ptoSelect = null;
+			if (profile != null) {
+				ptoSelect = profile;
+			}else if (profiles.size() > 0) {
+				ptoSelect = profiles.get(0);
+			}
 			if (profile != null) {
 				String uuid = Intelligence2PlugIn.getDefault().getPreferenceStore().getString(LAST_PROFILE_KEY);
 				if (uuid != null) {
