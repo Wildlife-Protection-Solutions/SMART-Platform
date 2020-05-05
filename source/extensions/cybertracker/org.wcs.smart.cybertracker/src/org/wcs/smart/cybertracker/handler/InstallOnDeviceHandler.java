@@ -24,7 +24,8 @@ package org.wcs.smart.cybertracker.handler;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.swt.widgets.Shell;
-import org.wcs.smart.cybertracker.export.InstallToDeviceDialog;
+import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
+import org.wcs.smart.cybertracker.MobileDeviceUtils;
 
 /**
  * Handler for exporting CT mobile app to device
@@ -35,8 +36,11 @@ public class InstallOnDeviceHandler {
 
 	@Execute
 	public void execute (Shell shell) {
-		InstallToDeviceDialog dialog = new InstallToDeviceDialog(shell);
-		dialog.open();
+		try {
+			MobileDeviceUtils.exportApkToDevice();
+		} catch (Exception e) {
+			CyberTrackerPlugIn.displayError("Error", e.getMessage(), e); //$NON-NLS-1$
+		}
 	}
 
 	public static class InstallOnDeviceHandlerWrapper extends DIHandler<InstallOnDeviceHandler>{

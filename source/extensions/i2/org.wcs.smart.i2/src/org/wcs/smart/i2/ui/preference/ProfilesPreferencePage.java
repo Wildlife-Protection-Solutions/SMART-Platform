@@ -201,7 +201,9 @@ public class ProfilesPreferencePage extends PreferencePage implements IIntelPref
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					try(Session session = HibernateManager.openSession()){
 						XmlToProfile engine = new XmlToProfile(SmartDB.getCurrentConservationArea());						
-						engine.importXmlData(p, monitor, eventBroker);
+						IntelProfile ip = engine.importXmlData(p, monitor, eventBroker);
+						createEntityTemplates(ip);
+						ProfilesManager.INSTANCE.addActiveProfile(ip, eventBroker);
 					}catch (Exception ex) {
 						throw new InvocationTargetException(ex);
 					}
@@ -247,28 +249,7 @@ public class ProfilesPreferencePage extends PreferencePage implements IIntelPref
 						} catch (IOException e) {
 							throw new InvocationTargetException(e);
 						}
-						
-						//create BIRT Templates
-						IntelSecurityManager.INSTANCE.clearCache();
-
-						if (tmp[0] != null) {
-							for (IntelProfileEntityType ie : tmp[0].getEntityTypes()) {
-								if (ie.getEntityType().getBirtTemplate() == null) {
-									try {
-										IntelReportManager.INSTANCE.generateTemplate(ie.getEntityType());
-										try(Session s = HibernateManager.openSession()){
-											s.beginTransaction();
-											s.saveOrUpdate(ie.getEntityType());
-											s.getTransaction().commit();
-										}catch (Exception ex) {
-											throw ex;
-										}	
-									}catch (Exception ex) {
-										Intelligence2PlugIn.log(ex.getMessage(),  ex);
-									}
-								}
-							}
-						}
+						createEntityTemplates(tmp[0]);
 					});
 					newProfile = tmp[0];
 				}finally {
@@ -287,6 +268,28 @@ public class ProfilesPreferencePage extends PreferencePage implements IIntelPref
 		ProfileDialog pd = new ProfileDialog(getShell(), newProfile, configs);
 		pd.open();
 		refresh();
+	}
+	
+	private void createEntityTemplates(IntelProfile ip) {
+		IntelSecurityManager.INSTANCE.clearCache();
+		if (ip == null) return;
+		//create BIRT Templates
+		for (IntelProfileEntityType ie : ip.getEntityTypes()) {
+			if (ie.getEntityType().getBirtTemplate() == null) {
+				try {
+					IntelReportManager.INSTANCE.generateTemplate(ie.getEntityType());
+					try(Session s = HibernateManager.openSession()){
+						s.beginTransaction();
+						s.saveOrUpdate(ie.getEntityType());
+						s.getTransaction().commit();
+					}catch (Exception ex) {
+						throw ex;
+					}	
+				}catch (Exception ex) {
+					Intelligence2PlugIn.log(ex.getMessage(),  ex);
+				}
+			}
+		}		
 	}
 	
 	private void edit() {

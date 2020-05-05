@@ -21,13 +21,16 @@
  */
 package org.wcs.smart.cybertracker;
 
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 
 import org.wcs.smart.cybertracker.internal.Messages;
@@ -44,8 +47,14 @@ public class MobileDeviceUtils {
 	private static final int ERROR_BAD_COMMAND_LINE = 100;
 	private static final int ERROR_DEVICE_NOT_FOUND = 101;
 	private static final int ERROR_DEVICE_NOT_CONNECTED = 102;
-	
+	/*
+	 * for copying packages and data to/from device
+	 */
 	private static final String MPTCOPY_EXE = "mtpcopy.exe"; //$NON-NLS-1$
+	/*
+	 * for copying apk files to device; adds support fo kiosk mode
+	 */
+	private static final String KISOKMODE_EXE = "KioskModeWizard.exe"; //$NON-NLS-1$
 	
 	/**
 	 * Folder containing SMART Mobile exported data files.
@@ -72,6 +81,7 @@ public class MobileDeviceUtils {
 		Path exe = null;
 		try {
 			exe = extractExe();
+			exe = exe.resolve(MPTCOPY_EXE);
 		}catch (Exception ex) {
 			throw new Exception(Messages.MobileDeviceUtils_ExtractError, ex);
 		}
@@ -102,7 +112,8 @@ public class MobileDeviceUtils {
 	 * @return
 	 * @throws Exception
 	 */
-	public static void exportApkToDevice(Path apk) throws Exception{
+//	public static void exportApkToDevice(Path apk) throws Exception{
+	public static void exportApkToDevice() throws Exception{
 		if (!CyberTrackerPlugIn.getDefault().isWindows()) {
 			throw new Exception(Messages.MobileDeviceUtils_OsNotSupported);
 		}
@@ -110,15 +121,13 @@ public class MobileDeviceUtils {
 		Path exe = null;
 		try {
 			exe = extractExe();
+			exe = exe.resolve(KISOKMODE_EXE);
 		}catch (Exception ex) {
 			throw new Exception(Messages.MobileDeviceUtils_ExtractError, ex);
 		}
 		
 		List<String> items = new ArrayList<>();
 		items.add(exe.toString());
-		items.add("/upload"); //$NON-NLS-1$
-		items.add(apk.toString());
-		items.add("\\" + apk.getFileName().toString()); //$NON-NLS-1$
 		
 		ProcessBuilder pb = new ProcessBuilder(items);
 		Process p = pb.start();
@@ -160,10 +169,11 @@ public class MobileDeviceUtils {
 		Path exe = null;
 		try {
 			exe = extractExe();
+			exe = exe.resolve(MPTCOPY_EXE);
 		}catch (Exception ex) {
 			throw new Exception(Messages.MobileDeviceUtils_ExtractError, ex);
 		}
-			
+		
 		List<String> items = new ArrayList<>();
 		items.add(exe.toString());
 		items.add("/deleteAfterDownload"); //$NON-NLS-1$
@@ -184,20 +194,35 @@ public class MobileDeviceUtils {
 	}
 	
 	private static Path extractExe() throws Exception{
-		URL bundleFile = CyberTrackerPlugIn.getDefault().getBundle().getEntry("ext/" + MPTCOPY_EXE); //$NON-NLS-1$
-		Path tempFile = CyberTrackerPlugIn.getDefault().getBundle().getDataFile("/ext/" + MPTCOPY_EXE).toPath(); //$NON-NLS-1$
-		
+		Path tempFile = CyberTrackerPlugIn.getDefault().getBundle().getDataFile("ext").toPath(); //$NON-NLS-1$		
 		CyberTrackerPlugIn.log("Extracting MPTCopy to: " + tempFile.toString(), null); //$NON-NLS-1$
 		
-		if (isExeExtracted && Files.exists(tempFile)) return tempFile;
+		if (isExeExtracted && Files.exists(tempFile.resolve(MPTCOPY_EXE))) return tempFile;
 		
-		//extract exe to temp location
-		if (!Files.exists(tempFile.getParent())) Files.createDirectories(tempFile.getParent());
-		try(InputStream is = bundleFile.openStream()){
-			Files.copy(is, tempFile, StandardCopyOption.REPLACE_EXISTING );
+		if (!Files.exists(tempFile)) Files.createDirectories(tempFile);
+
+		//extract tool to temp location 
+		
+		Enumeration<URL> tocopy = CyberTrackerPlugIn.getDefault().getBundle().findEntries("ext", "*", true); //$NON-NLS-1$ //$NON-NLS-2$
+		
+		while(tocopy.hasMoreElements()) {
+			URL u = tocopy.nextElement();	
+			Path p1 = tempFile.resolve(u.getFile().substring("/ext/".length())); //$NON-NLS-1$
+			
+			try {
+				if (!Files.exists(p1.getParent())) Files.createDirectories(p1.getParent());
+				try(InputStream is = u.openStream()){
+					Files.copy(is, p1, StandardCopyOption.REPLACE_EXISTING );
+				}
+			}catch(FileNotFoundException | NoSuchFileException ex) {
+				//assume this is a directory; skip and move on
+			}
+			
 		}
+		
 		isExeExtracted = true;
 		
 		return tempFile;
 	}
 }
+
