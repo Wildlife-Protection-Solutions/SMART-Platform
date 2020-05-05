@@ -204,10 +204,18 @@ public class MobileDeviceUtils {
 		//extract tool to temp location 
 		
 		Enumeration<URL> tocopy = CyberTrackerPlugIn.getDefault().getBundle().findEntries("ext", "*", true); //$NON-NLS-1$ //$NON-NLS-2$
+		List<URL> items = new ArrayList<>();
+		while(tocopy.hasMoreElements()) items.add(tocopy.nextElement());
 		
-		while(tocopy.hasMoreElements()) {
-			URL u = tocopy.nextElement();	
+		items.sort((a,b)->-1*Integer.compare(a.toExternalForm().length(), b.toExternalForm().length()));
+		
+		for (URL u : items) {
+				
 			Path p1 = tempFile.resolve(u.getFile().substring("/ext/".length())); //$NON-NLS-1$
+			CyberTrackerPlugIn.log("processing: " + u.toString(), null); //$NON-NLS-1$
+			CyberTrackerPlugIn.log("to: " + p1.toString(), null); //$NON-NLS-1$
+
+			if (Files.exists(p1)) continue;
 			
 			try {
 				if (!Files.exists(p1.getParent())) Files.createDirectories(p1.getParent());
@@ -216,6 +224,7 @@ public class MobileDeviceUtils {
 				}
 			}catch(FileNotFoundException | NoSuchFileException ex) {
 				//assume this is a directory; skip and move on
+				CyberTrackerPlugIn.log("error", ex); //$NON-NLS-1$
 			}
 			
 		}

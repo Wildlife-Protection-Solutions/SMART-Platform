@@ -1,0 +1,39 @@
+Usage:
+    /? or /help or --help               - This message
+    /silent                             - No console output
+    /deleteAfterDownload                - Delete files that are successfully downloaded
+    /download <sourceFilespec> <target> - Download data from attached device to target directory
+    /upload <source> <target>           - Upload a file to a target
+
+Examples:
+    mtpcopy /deleteAfterDownload /download \mydata\*.json c:\mydata
+    mtpcopy /upload c:\myapp\myapp.apk \myapp.apk
+
+Note:
+    1. Upload can only copy to the root of the device or one folder deep, i.e. you could use \myapp.apk, \ct\myapp.apk, but not \ct\sub\myapp.apk
+    2. Process exit code will be 0 in case of success
+    3. Other codes:
+        ERROR_BAD_COMMAND_LINE = 100
+        ERROR_DEVICE_NOT_FOUND = 101
+        ERROR_DEVICE_NOT_CONNECTED = 102
+
+ 
+Other Nodes:
+If folder does not exist on device when writing; the folder will not be created and the write will fail.
+
+
+** UPDATE **
+May 5, 2020
+New KioskModeWizard tool provided.
+
+May 4, 2020
+Addition of KioskModeWizard.exe.  Used from the SMART menu "Install SMART Mobile on Device". 
+It has the apk file selector in it. We need to include “platform-tools” and “usb_driver” 
+as subdirectories alongside KioskModeWizard.exe. Continue to use The mtpcopy tool is 
+for getting data from the device or export packages just like before.
+
+
+May 1, 2020 
+The new mtpcopy does each operation on every device+folder it sees that it thinks 
+is an Android device. So if your device has 3 SD cards, then it will 
+copy to all of them. Same thing for download. 
