@@ -307,7 +307,7 @@ public class XmlToProfile {
 		List<String> copyErrors = new ArrayList<String>();
 		entities.forEach(e->{
 			if (e.getBirtTemplate() != null) {
-				Path src = rootPath.resolve(e.getBirtTemplate());
+				Path src = rootPath.resolve(data.getKey()).resolve(e.getBirtTemplate());
 				Path trg = IntelReportManager.INSTANCE.getEntityTemplate(e);
 				if(Files.exists(src)) {
 					try {

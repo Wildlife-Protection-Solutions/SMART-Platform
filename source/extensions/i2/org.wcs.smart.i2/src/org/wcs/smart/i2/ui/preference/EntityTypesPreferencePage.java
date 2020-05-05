@@ -22,6 +22,8 @@
 package org.wcs.smart.i2.ui.preference;
 
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -82,6 +84,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.EntityTypeManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.ProfilesManager;
+import org.wcs.smart.i2.birt.IntelReportManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntityType;
@@ -456,6 +459,10 @@ public class EntityTypesPreferencePage extends PreferencePage implements IIntelP
 							try{
 								EntityTypeManager.INSTANCE.deleteEntityType(t, s);
 								s.getTransaction().commit();
+								if (t.getBirtTemplate() != null) {
+									Path template = IntelReportManager.INSTANCE.getEntityTemplate(t);
+									Files.deleteIfExists(template);
+								}
 								deleted.add(t);
 							}catch(Exception ex){
 								s.getTransaction().rollback();
