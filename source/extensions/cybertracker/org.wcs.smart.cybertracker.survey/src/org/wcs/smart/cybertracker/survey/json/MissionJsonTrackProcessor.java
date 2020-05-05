@@ -23,7 +23,6 @@ package org.wcs.smart.cybertracker.survey.json;
 
 import java.text.DateFormat;
 import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -33,6 +32,8 @@ import java.util.Set;
 import org.hibernate.Session;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.LineString;
 import org.wcs.smart.cybertracker.JsonUtils;
 import org.wcs.smart.cybertracker.importer.json.IJsonProcessor;
 import org.wcs.smart.cybertracker.importer.json.JsonCtParser;
@@ -45,9 +46,6 @@ import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.util.SharedUtils;
-
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.LineString;
 
 /**
  * For processing track log points.  This attempts to find a patrol
@@ -96,7 +94,7 @@ public class MissionJsonTrackProcessor  implements IJsonProcessor {
 			
 			Double x = (Double) pntArray.get(0);
 			Double y = (Double) pntArray.get(1);
-			Date dt = new SimpleDateFormat(JsonUtils.JSON_DATE_FORMAT_STR).parse((String)properties.get(JsonCtParser.DATETIME_KEY));
+			Date dt = JsonUtils.parseJsonDateTime((String)properties.get(JsonCtParser.DATETIME_KEY));
 
 			String deviceId = (String) properties.get(JsonCtParser.DEVICE_ID);
 			

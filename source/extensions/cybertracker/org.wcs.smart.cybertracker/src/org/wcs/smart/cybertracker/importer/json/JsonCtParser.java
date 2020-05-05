@@ -28,7 +28,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Time;
 import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -50,6 +49,7 @@ import org.hibernate.Session;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.locationtech.jts.geom.Coordinate;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -75,8 +75,6 @@ import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
-
-import org.locationtech.jts.geom.Coordinate;
 
 /**
  * Parses sighting data from cybertracker JSON data.
@@ -382,7 +380,7 @@ public class JsonCtParser {
 		newWaypoint.setDirection(direction);
 		newWaypoint.setDistance(distance);
 		
-		Date dt = new SimpleDateFormat(JsonUtils.JSON_DATE_FORMAT_STR).parse((String)properties.get(DATETIME_KEY));
+		Date dt = JsonUtils.parseJsonDateTime((String)properties.get(DATETIME_KEY));
 		newWaypoint.setDateTime(dt);
 
 		newWaypoint.setObservationGroups(new ArrayList<>());

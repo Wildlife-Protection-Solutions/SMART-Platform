@@ -22,6 +22,7 @@
 package org.wcs.smart.cybertracker;
 
 import java.text.MessageFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -51,11 +52,25 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class JsonUtils {
 	
-	public static final String JSON_DATE_FORMAT_STR = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX"; //$NON-NLS-1$
-	
 	//date attributes come through in a different format; only applicable to date attributes
 	public static final String JSON_ATTRIBUTE_DATE_FORMAT_STR = "yyyy/MM/dd";  //$NON-NLS-1$
 	
+	/**
+	 * JSON dates come in the format "yyyy-MM-dd'T'HH:mm:ss.SSSXXX" where
+	 * the time is the local time and the time we want to use.  We want to 
+	 * throw out the timezone information because we don't care about that 
+	 * and it causes issues with conversions if the local compute is in 
+	 * a different timezone from other computers.
+	 * @param value
+	 * @throws ParseException 
+	 */
+	//example string: "2019-12-30T22:48:26.0-08:00"
+	private static final String JSON_DATE_FORMAT_STR = "yyyy-MM-dd'T'HH:mm:ss.SSS"; //$NON-NLS-1$
+
+	public static Date parseJsonDateTime(String value) throws ParseException {
+		return new SimpleDateFormat(JSON_DATE_FORMAT_STR).parse(value);
+	}
+		
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static ParseResult parseDefaultAttributeValues(JSONObject defaultValues, Session session){
 		if (defaultValues == null) return new ParseResult();
@@ -127,7 +142,7 @@ public class JsonUtils {
 		}else if (att.getType() == AttributeType.DATE){
 			Date date = null;
 			try {
-				date = new SimpleDateFormat(JSON_DATE_FORMAT_STR).parse((String)value);				
+				date = parseJsonDateTime((String)value);				
 			}catch (Exception ex) {}
 			try {
 				date = new SimpleDateFormat(JSON_ATTRIBUTE_DATE_FORMAT_STR).parse((String)value);

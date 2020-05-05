@@ -185,7 +185,7 @@ public class MissionJsonProcessor implements IJsonProcessor {
 					link.setSamplingUnit(su);
 					
 					//add this point to track; this is not an observation
-					Date dt = new SimpleDateFormat(JsonUtils.JSON_DATE_FORMAT_STR).parse((String)properties.get(JsonCtParser.DATETIME_KEY));
+					Date dt = JsonUtils.parseJsonDateTime((String)properties.get(JsonCtParser.DATETIME_KEY));
 					addPointToTrack(link.getMission(), su, parser.readXYFromProperties(feature), dt, session);
 					
 					//update last observation count
@@ -208,7 +208,7 @@ public class MissionJsonProcessor implements IJsonProcessor {
 					//we want to find the patrol and update the end date
 					//add the position to the track, but do not create an observation 
 					//for this patrol
-					Date dt = new SimpleDateFormat(JsonUtils.JSON_DATE_FORMAT_STR).parse((String)properties.get(JsonCtParser.DATETIME_KEY));
+					Date dt = JsonUtils.parseJsonDateTime((String)properties.get(JsonCtParser.DATETIME_KEY));
 					
 					if (link == null){
 						//create a new patrol object
@@ -260,7 +260,7 @@ public class MissionJsonProcessor implements IJsonProcessor {
 				if (isResumed) {
 					//compute rest times
 					if (link != null) {
-						Date dt = new SimpleDateFormat(JsonUtils.JSON_DATE_FORMAT_STR).parse((String)properties.get(JsonCtParser.DATETIME_KEY));
+						Date dt = JsonUtils.parseJsonDateTime((String)properties.get(JsonCtParser.DATETIME_KEY));
 						
 						MissionDay currentDay = findDay(link.getMission(), dt, true, new Time(SmartUtils.getMidnight().getTime()), session);
 						//the pause event is recorded as a track point; not a waypoint
