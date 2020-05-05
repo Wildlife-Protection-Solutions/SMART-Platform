@@ -187,7 +187,7 @@ public class MobileDeviceUtils {
 		URL bundleFile = CyberTrackerPlugIn.getDefault().getBundle().getEntry("ext/" + MPTCOPY_EXE); //$NON-NLS-1$
 		Path tempFile = CyberTrackerPlugIn.getDefault().getBundle().getDataFile("/ext/" + MPTCOPY_EXE).toPath(); //$NON-NLS-1$
 		
-		System.out.println(tempFile.toString());
+		CyberTrackerPlugIn.log("Extracting MPTCopy to: " + tempFile.toString(), null); //$NON-NLS-1$
 		
 		if (isExeExtracted && Files.exists(tempFile)) return tempFile;
 		
