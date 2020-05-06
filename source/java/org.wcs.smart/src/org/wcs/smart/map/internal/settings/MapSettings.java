@@ -575,15 +575,16 @@ public class MapSettings {
     	ICatalog catalog = CatalogPlugin.getDefault().getLocalCatalog();
         
     	try {
+    		URL url = null;
     		if (uri.getScheme().equals(SMARTBM_FILE_PROTOCOL)){
     			//smart basemap file; needs to re-create uri with absolute path
     			File fileStoreDirectory = new File(SmartDB.getCurrentConservationArea().getFileDataStoreLocation(), MAP_DIRECTORY);
     			File path = new File(fileStoreDirectory, uri.getSchemeSpecificPart());
-    			String fragment = uri.getFragment();
     			uri = path.toURI();
-    			uri = new java.net.URI(uri.getScheme(), uri.getSchemeSpecificPart(), fragment);
+    			url = new URL(path.toURI().getScheme(), "", -1, path.toURI().getSchemeSpecificPart(), CorePlugin.RELAXED_HANDLER); //$NON-NLS-1$
+    		}else {
+    			url  = new URL(null, uri.toString(), CorePlugin.RELAXED_HANDLER);
     		}
-    		URL url  = new URL(null, uri.toString(), CorePlugin.RELAXED_HANDLER);
     		
         	List<IGeoResource> geoResources = null;
 			List<IResolve> resolveList = catalog.find(url, monitor);
