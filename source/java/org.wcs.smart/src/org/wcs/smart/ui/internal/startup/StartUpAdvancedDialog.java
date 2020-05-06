@@ -75,4 +75,9 @@ public class StartUpAdvancedDialog extends InitializeDialog {
 	public String getDialogText() {
 		return Messages.StartUpAdvancedDialog_DialogTitle;
 	}
+	
+	@Override
+	public boolean isResizable() {
+		return true;
+	}
 }

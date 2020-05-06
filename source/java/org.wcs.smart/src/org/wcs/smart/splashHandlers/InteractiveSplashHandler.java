@@ -52,6 +52,7 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -324,13 +325,16 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		
 		GridLayout layout = new GridLayout(F_COLUMN_COUNT, false);
 		fCompositeLogin.setLayout(layout);		
-
+		((GridLayout)fCompositeLogin.getLayout()).marginBottom = 5;
+		((GridLayout)fCompositeLogin.getLayout()).marginHeight = 0;
 		Composite left = new Composite(fCompositeLogin, SWT.NONE);
+		
 		left.setLayout(new GridLayout());
 		left.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		((GridLayout)left.getLayout()).marginWidth = 0;
 		((GridLayout)left.getLayout()).marginHeight = 0;
-		((GridData)left.getLayoutData()).widthHint = 135;
+		//((GridData)left.getLayoutData()).widthHint = 135;
+		((GridData)left.getLayoutData()).widthHint = (int)(getSplash().getBounds().width * 0.25);
 		
 		Label lblLang = new Label(left, SWT.NONE);
 		lblLang.setText(Locale.getDefault().getDisplayName());
@@ -344,10 +348,11 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		
 		Label lblSpacer = new Label(right, SWT.NONE);
 		lblSpacer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		((GridData)lblSpacer.getLayoutData()).heightHint = 90;
+		int hh = (int)(getSplash().getBounds().height * 0.3);
+		((GridData)lblSpacer.getLayoutData()).heightHint = hh;
 		
 		//version label
-		Label lblVersion = new Label(right, SWT.RIGHT);
+		Label lblVersion = new Label(right, SWT.NONE);
 		lblVersion.setText(MessageFormat.format(Messages.InteractiveSplashHandler_VersionLabel, new Object[]{System.getProperty("org.wcs.smart.version.simple")})); //$NON-NLS-1$
 		lblVersion.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 2, 1));
 		final Color blue = new Color(lblVersion.getDisplay(), 50, 74,115);
@@ -445,6 +450,30 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		btnOk.setText(Messages.InteractiveSplashHandler_Login_Button); 
 		btnOk.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
 		
+		//does different layout stuff for odd display zoom settings
+		//if the login button is off the splash screen page then
+		//move the layout around so it ends up on the page
+		Listener l = new Listener(){
+			@Override
+			public void handleEvent(Event event) {
+				Point btn = getSplash().toControl( btnOk.toDisplay(btnOk.getLocation()));
+				if (btn.y + btnOk.getBounds().height > getSplash().getBounds().height) {
+					((GridData)lblSpacer.getLayoutData()).heightHint = 0;
+					FontData fd = lblVersion.getFont().getFontData()[0];
+					fd.setHeight(fd.getHeight()-1);
+					final Font versionFont2 = new Font(lblVersion.getDisplay(),fd);
+					Font temp = lblVersion.getFont();
+					lblVersion.setFont(versionFont2);
+					temp.dispose();
+					
+					lblVersion.getParent().layout(true);
+				}
+				progressLabel.removeListener(SWT.Paint, this);
+			}
+			
+		};
+		progressLabel.addListener(SWT.Paint, l);
+		
 		widgets.add(btnOk);
 		widgets.add(btnCancel);
 	
@@ -454,13 +483,13 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		
 	}		
 	
-
 	/**
 	 * 
 	 */
 	private void configureUISplash() {
 		// Configure layout
 		FillLayout layout = new FillLayout(); 
+		layout.marginHeight = 0;
 		getSplash().setLayout(layout);
 		
 		// Force shell to inherit the splash background

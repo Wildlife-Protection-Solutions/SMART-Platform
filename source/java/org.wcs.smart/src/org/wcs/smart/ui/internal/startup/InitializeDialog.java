@@ -70,7 +70,7 @@ public abstract class InitializeDialog  extends SmartStyledDialog {
 	@Override
 	protected void setShellStyle(int arg0){
 	    //Use the following not to show the default close X button in the title bar
-	    super.setShellStyle(SWT.APPLICATION_MODAL | getDefaultOrientation() | SWT.TITLE);
+	    super.setShellStyle(SWT.APPLICATION_MODAL | getDefaultOrientation() | SWT.TITLE | SWT.RESIZE);
 	}
 	
 	@Override
