@@ -1,5 +1,5 @@
 -- GENERATES A SMART7 database from scratch
--- requires: 
+-- requires:
 -- 1) postgis extension to be installed: CREATE EXTENSION postgis;
 -- 2) uuid-ossp extension to be installed: CREATE EXTENSION "uuid-ossp";
 
@@ -33,13 +33,13 @@ CREATE FUNCTION connect.dolog(cauuid uuid) RETURNS boolean
     LANGUAGE plpgsql
     AS $$
 DECLARE
-	canrun boolean;
+    canrun boolean;
 BEGIN
-	--check if we should log this ca
-	select current_setting('ca.trigger.t' || cauuid) into canrun;
-	return canrun;
-	EXCEPTION WHEN others THEN
-		RETURN TRUE;
+    --check if we should log this ca
+    select current_setting('ca.trigger.t' || cauuid) into canrun;
+    return canrun;
+    EXCEPTION WHEN others THEN
+        RETURN TRUE;
 END$$;
 
 CREATE FUNCTION connect.dq_update_modified_column() RETURNS trigger
@@ -47,16 +47,16 @@ CREATE FUNCTION connect.dq_update_modified_column() RETURNS trigger
     AS $$
 BEGIN
     NEW.lastmodified_date = now();
-    RETURN NEW;	
+    RETURN NEW;
 END;
 $$;
 
 CREATE FUNCTION connect.i_profile_entity_type() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
-  INSERT INTO connect.change_log 
- (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'entity_type_uuid', ROW.entity_type_uuid, 'profile_uuid', ROW.profile_uuid, null, i.CA_UUID 
+  INSERT INTO connect.change_log
+ (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+ SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'entity_type_uuid', ROW.entity_type_uuid, 'profile_uuid', ROW.profile_uuid, null, i.CA_UUID
    FROM smart.i_profile_config i WHERE i.uuid = row.profile_uuid;
 RETURN ROW; END$$;
 
@@ -64,9 +64,9 @@ RETURN ROW; END$$;
 CREATE FUNCTION connect.i_profile_record_source() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
-  INSERT INTO connect.change_log 
- (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'record_source_uuid', ROW.record_source_uuid, 'profile_uuid', ROW.profile_uuid, null, i.CA_UUID 
+  INSERT INTO connect.change_log
+ (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+ SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'record_source_uuid', ROW.record_source_uuid, 'profile_uuid', ROW.profile_uuid, null, i.CA_UUID
    FROM smart.i_profile_config i WHERE i.uuid = row.profile_uuid;
 RETURN ROW; END$$;
 
@@ -74,30 +74,30 @@ RETURN ROW; END$$;
 CREATE FUNCTION connect.toutm(lat double precision, long double precision) RETURNS integer
     LANGUAGE plpgsql
     AS $$
- 
- DECLARE 
+
+ DECLARE
   zone integer;
   issouth boolean;
   sql varchar;
   srid integer;
   rec record;
  BEGIN
- IF (lat < -80 OR lat > 84) THEN 
+ IF (lat < -80 OR lat > 84) THEN
          RETURN NULL;
         END IF;
- 
+
   zone := floor((long+180) / 6 ) + 1;
-  
+
   IF (lat >= 0) THEN
    issouth := false;
-  ELSE 
+  ELSE
    issouth := true;
   END IF;
-   
+
         IF ( lat >= 56.0 AND lat < 64.0 AND long >= 3.0 AND long < 12.0 ) THEN
          zone := 32;
-        END IF;        
-         
+        END IF;
+
          IF ( lat >= 72.0 AND lat < 84.0 ) THEN
          IF (long >= 0 AND long < 9.0) THEN
           zone := 31;
@@ -109,22 +109,22 @@ CREATE FUNCTION connect.toutm(lat double precision, long double precision) RETUR
           zone := 37;
          END IF;
  END IF;
-      
+
  sql := 'SELECT srid FROM spatial_ref_sys WHERE proj4text like ''%proj=utm %'' AND proj4text like ''%zone=' || zone || ' %'' AND proj4text like ''%datum=WGS84 %''';
  IF (issouth = true) THEN
   sql := sql || ' AND proj4text like ''%south %''';
  ELSE
   sql := sql || ' AND proj4text not like ''%south %''';
  END IF;
-      
+
  srid := null;
  FOR rec IN EXECUTE sql LOOP
-  IF (srid is not null) THEN 
+  IF (srid is not null) THEN
    RETURN NULL;
   END IF;
   srid := rec.srid;
  END LOOP;
-      
+
  RETURN srid;
 END;
 
@@ -133,139 +133,139 @@ $$;
 CREATE FUNCTION connect.trg_asset_attribute_list_item() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, i.CA_UUID 
- 		from smart.asset_attribute i WHERE i.uuid = ROW.attribute_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, i.CA_UUID
+         from smart.asset_attribute i WHERE i.uuid = ROW.attribute_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_asset_attribute_value() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'asset_uuid', ROW.asset_uuid, 'attribute_uuid', ROW.attribute_uuid, null, i.CA_UUID 
- 		from smart.asset_attribute i WHERE i.uuid = ROW.attribute_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'asset_uuid', ROW.asset_uuid, 'attribute_uuid', ROW.attribute_uuid, null, i.CA_UUID
+         from smart.asset_attribute i WHERE i.uuid = ROW.attribute_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_asset_deployment() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, i.CA_UUID 
- 		from smart.asset  i WHERE i.uuid = ROW.asset_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, i.CA_UUID
+         from smart.asset  i WHERE i.uuid = ROW.asset_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_asset_deployment_attribute_value() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'asset_deployment_uuid', ROW.asset_deployment_uuid, 'attribute_uuid', ROW.attribute_uuid, null, i.CA_UUID 
- 		from smart.asset_attribute i WHERE i.uuid = ROW.attribute_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'asset_deployment_uuid', ROW.asset_deployment_uuid, 'attribute_uuid', ROW.attribute_uuid, null, i.CA_UUID
+         from smart.asset_attribute i WHERE i.uuid = ROW.attribute_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_asset_history_record() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, i.CA_UUID 
- 		from smart.asset i WHERE i.uuid = ROW.asset_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, i.CA_UUID
+         from smart.asset i WHERE i.uuid = ROW.asset_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_asset_station_attribute() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'attribute_uuid', ROW.attribute_uuid, null, null, null, i.CA_UUID 
- 		from smart.asset_attribute i WHERE i.uuid = ROW.attribute_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'attribute_uuid', ROW.attribute_uuid, null, null, null, i.CA_UUID
+         from smart.asset_attribute i WHERE i.uuid = ROW.attribute_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_asset_station_attribute_value() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'station_uuid', ROW.station_uuid, 'attribute_uuid', ROW.attribute_uuid, null, i.CA_UUID 
- 		from smart.asset_attribute i WHERE i.uuid = ROW.attribute_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'station_uuid', ROW.station_uuid, 'attribute_uuid', ROW.attribute_uuid, null, i.CA_UUID
+         from smart.asset_attribute i WHERE i.uuid = ROW.attribute_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_asset_station_location() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, i.CA_UUID 
- 		from smart.asset_station i WHERE i.uuid = ROW.station_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, i.CA_UUID
+         from smart.asset_station i WHERE i.uuid = ROW.station_uuid;
 RETURN ROW; END$$;
 
 CREATE FUNCTION connect.trg_asset_station_location_attribute() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'attribute_uuid', ROW.attribute_uuid, null, null, null, i.CA_UUID 
- 		from smart.asset_attribute i WHERE i.uuid = ROW.attribute_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'attribute_uuid', ROW.attribute_uuid, null, null, null, i.CA_UUID
+         from smart.asset_attribute i WHERE i.uuid = ROW.attribute_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_asset_station_location_attribute_value() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'station_location_uuid', ROW.station_location_uuid, 'attribute_uuid', ROW.attribute_uuid, null, i.CA_UUID 
- 		from smart.asset_attribute i WHERE i.uuid = ROW.attribute_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'station_location_uuid', ROW.station_location_uuid, 'attribute_uuid', ROW.attribute_uuid, null, i.CA_UUID
+         from smart.asset_attribute i WHERE i.uuid = ROW.attribute_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_asset_station_location_history() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, i.CA_UUID 
- 		from smart.asset_station_location loc, smart.asset_station i WHERE i.uuid = loc.station_uuid and loc.uuid = ROW.station_location_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, i.CA_UUID
+         from smart.asset_station_location loc, smart.asset_station i WHERE i.uuid = loc.station_uuid and loc.uuid = ROW.station_location_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_asset_type_attribute() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'asset_type_uuid', ROW.asset_type_uuid, 'attribute_uuid', ROW.attribute_uuid, null, i.CA_UUID 
- 		from smart.asset_attribute i WHERE i.uuid = ROW.attribute_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'asset_type_uuid', ROW.asset_type_uuid, 'attribute_uuid', ROW.attribute_uuid, null, i.CA_UUID
+         from smart.asset_attribute i WHERE i.uuid = ROW.attribute_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_asset_waypoint() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, i.CA_UUID 
- 		from smart.waypoint i WHERE i.uuid = ROW.wp_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, i.CA_UUID
+         from smart.waypoint i WHERE i.uuid = ROW.wp_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_asset_waypoint_attachment() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'wp_attachment_uuid', ROW.wp_attachment_uuid, 'asset_waypoint_uuid', ROW.asset_waypoint_uuid, null, i.CA_UUID 
- 		from smart.asset_waypoint wp, smart.waypoint i WHERE i.uuid = wp.wp_uuid and wp.uuid = ROW.asset_waypoint_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'wp_attachment_uuid', ROW.wp_attachment_uuid, 'asset_waypoint_uuid', ROW.asset_waypoint_uuid, null, i.CA_UUID
+         from smart.asset_waypoint wp, smart.waypoint i WHERE i.uuid = wp.wp_uuid and wp.uuid = ROW.asset_waypoint_uuid;
 RETURN ROW; END$$;
 
 
@@ -274,7 +274,7 @@ CREATE FUNCTION connect.trg_changelog_after() RETURNS trigger
     AS $$
 DECLARE
 BEGIN
-	PERFORM pg_advisory_unlock(a.lock_key) FROM connect.ca_info a WHERE a.ca_uuid = NEW.ca_uuid;
+    PERFORM pg_advisory_unlock(a.lock_key) FROM connect.ca_info a WHERE a.ca_uuid = NEW.ca_uuid;
 RETURN NEW; END$$;
 
 
@@ -284,29 +284,29 @@ CREATE FUNCTION connect.trg_changelog_before() RETURNS trigger
 DECLARE
   canlock boolean;
 BEGIN
-	--check if we should log this ca
-	IF (NOT connect.dolog(NEW.ca_uuid)) THEN RETURN NULL; END IF;
-	SELECT pg_try_advisory_lock(a.lock_key) into canlock FROM connect.ca_info a WHERE a.ca_uuid = NEW.ca_uuid;
-	IF (canlock) THEN return NEW; ELSE RAISE EXCEPTION 'Database Locked to Editing'; END IF;
+    --check if we should log this ca
+    IF (NOT connect.dolog(NEW.ca_uuid)) THEN RETURN NULL; END IF;
+    SELECT pg_try_advisory_lock(a.lock_key) into canlock FROM connect.ca_info a WHERE a.ca_uuid = NEW.ca_uuid;
+    IF (canlock) THEN return NEW; ELSE RAISE EXCEPTION 'Database Locked to Editing'; END IF;
 END$$;
 
 
 CREATE FUNCTION connect.trg_changelog_common() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-	DECLARE
-	ROW RECORD;
+    DECLARE
+    ROW RECORD;
 BEGIN
-	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
- 	ROW = NEW;
- 	ELSIF (TG_OP = 'DELETE') THEN
- 		ROW = OLD;
- 	END IF;
- 
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str,  ca_uuid) 
- 		VALUES
- 		(uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.UUID, null, null, null, ROW.CA_UUID);
+    IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN
+     ROW = NEW;
+     ELSIF (TG_OP = 'DELETE') THEN
+         ROW = OLD;
+     END IF;
+
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str,  ca_uuid)
+         VALUES
+         (uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.UUID, null, null, null, ROW.CA_UUID);
  RETURN ROW;
 END$$;
 
@@ -314,154 +314,154 @@ END$$;
 CREATE FUNCTION connect.trg_cm_attribute() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, a.CA_UUID 
- 		FROM smart.dm_attribute a WHERE a.uuid = ROW.attribute_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, a.CA_UUID
+         FROM smart.dm_attribute a WHERE a.uuid = ROW.attribute_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_cm_attribute_config() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, cm.CA_UUID 
- 		FROM smart.configurable_model cm where cm.uuid = ROW.cm_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, cm.CA_UUID
+         FROM smart.configurable_model cm where cm.uuid = ROW.cm_uuid;
 RETURN ROW; END$$;
 
 CREATE FUNCTION connect.trg_cm_attribute_list() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, cm.CA_UUID 
- 		FROM smart.configurable_model cm, smart.cm_attribute_config cf where cm.uuid = cf.cm_uuid and cf.uuid = ROW.config_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, cm.CA_UUID
+         FROM smart.configurable_model cm, smart.cm_attribute_config cf where cm.uuid = cf.cm_uuid and cf.uuid = ROW.config_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_cm_attribute_option() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, dm.CA_UUID 
- 		FROM smart.cm_attribute cm, smart.dm_attribute dm where cm.attribute_uuid = dm.uuid and cm.uuid = ROW.cm_attribute_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, dm.CA_UUID
+         FROM smart.cm_attribute cm, smart.dm_attribute dm where cm.attribute_uuid = dm.uuid and cm.uuid = ROW.cm_attribute_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_cm_attribute_tree_node() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, cm.CA_UUID 
- 		FROM smart.configurable_model cm, smart.cm_attribute_config cf where cm.uuid = cf.cm_uuid and cf.uuid = ROW.config_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, cm.CA_UUID
+         FROM smart.configurable_model cm, smart.cm_attribute_config cf where cm.uuid = cf.cm_uuid and cf.uuid = ROW.config_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_cm_ct_properties_profile() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-	DECLARE
-	ROW RECORD;
+    DECLARE
+    ROW RECORD;
 BEGIN
-	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
- 	ROW = NEW;
- 	ELSIF (TG_OP = 'DELETE') THEN
- 		ROW = OLD;
- 	END IF;
- 
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'cm_uuid', ROW.CM_UUID, null, null, null, cm.CA_UUID FROM smart.configurable_model cm WHERE cm.uuid = ROW.cm_uuid;
- 	RETURN ROW;
+    IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN
+     ROW = NEW;
+     ELSIF (TG_OP = 'DELETE') THEN
+         ROW = OLD;
+     END IF;
+
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'cm_uuid', ROW.CM_UUID, null, null, null, cm.CA_UUID FROM smart.configurable_model cm WHERE cm.uuid = ROW.cm_uuid;
+     RETURN ROW;
 END$$;
 
 
 CREATE FUNCTION connect.trg_cm_node() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, cm.CA_UUID 
- 		FROM smart.configurable_model cm where cm.uuid = ROW.cm_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, cm.CA_UUID
+         FROM smart.configurable_model cm where cm.uuid = ROW.cm_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_compound_query_layer() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, cq.CA_UUID 
- 		FROM smart.compound_query cq where cq.uuid = ROW.compound_query_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, cq.CA_UUID
+         FROM smart.compound_query cq where cq.uuid = ROW.compound_query_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_connect_account() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-	DECLARE
-	ROW RECORD;
+    DECLARE
+    ROW RECORD;
 BEGIN
-	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
- 	ROW = NEW;
- 	ELSIF (TG_OP = 'DELETE') THEN
- 		ROW = OLD;
- 	END IF;
- 
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'employee_uuid', ROW.EMPLOYEE_UUID, null, null, null, server.CA_UUID FROM smart.connect_server server WHERE server.uuid = ROW.connect_uuid;
+    IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN
+     ROW = NEW;
+     ELSIF (TG_OP = 'DELETE') THEN
+         ROW = OLD;
+     END IF;
+
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'employee_uuid', ROW.EMPLOYEE_UUID, null, null, null, server.CA_UUID FROM smart.connect_server server WHERE server.uuid = ROW.connect_uuid;
  RETURN ROW;
 END$$;
 
 CREATE FUNCTION connect.trg_connect_alert() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, cm.CA_UUID 
- 		FROM smart.configurable_model cm WHERE cm.uuid = ROW.cm_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, cm.CA_UUID
+         FROM smart.configurable_model cm WHERE cm.uuid = ROW.cm_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_connect_ct_properties() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, cm.CA_UUID 
- 		FROM smart.configurable_model cm WHERE cm.uuid = ROW.cm_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, cm.CA_UUID
+         FROM smart.configurable_model cm WHERE cm.uuid = ROW.cm_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_conservation_area() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		VALUES (uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, ROW.UUID); 
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         VALUES (uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, ROW.UUID);
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_ct_incident_link() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-	DECLARE
-	ROW RECORD;
+    DECLARE
+    ROW RECORD;
 BEGIN
-	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
- 	ROW = NEW;
- 	ELSIF (TG_OP = 'DELETE') THEN
- 		ROW = OLD;
- 	END IF;
- 
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.UUID, null, null, null, wp.CA_UUID 
- 		FROM smart.waypoint wp WHERE wp.uuid = ROW.wp_uuid;
+    IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN
+     ROW = NEW;
+     ELSIF (TG_OP = 'DELETE') THEN
+         ROW = OLD;
+     END IF;
+
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.UUID, null, null, null, wp.CA_UUID
+         FROM smart.waypoint wp WHERE wp.uuid = ROW.wp_uuid;
  RETURN ROW;
 END$$;
 
@@ -469,19 +469,19 @@ END$$;
 CREATE FUNCTION connect.trg_ct_metadata_value_uuid() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-	DECLARE
-	ROW RECORD;
+    DECLARE
+    ROW RECORD;
 BEGIN
-	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
- 	ROW = NEW;
- 	ELSIF (TG_OP = 'DELETE') THEN
- 		ROW = OLD;
- 	END IF;
- 
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.UUID, null, null, null, iset.CA_UUID 
- 		FROM smart.ct_metadata_value iset WHERE iset.uuid = ROW.field_uuid;
+    IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN
+     ROW = NEW;
+     ELSIF (TG_OP = 'DELETE') THEN
+         ROW = OLD;
+     END IF;
+
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.UUID, null, null, null, iset.CA_UUID
+         FROM smart.ct_metadata_value iset WHERE iset.uuid = ROW.field_uuid;
  RETURN ROW;
 END$$;
 
@@ -489,19 +489,19 @@ END$$;
 CREATE FUNCTION connect.trg_ct_mission_link() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'ct_uuid', ROW.ct_uuid, null, null, null, sd.CA_UUID 
- 		FROM smart.mission mm, smart.survey s, smart.survey_design sd WHERE mm.survey_uuid = s.uuid and s.survey_design_uuid = sd.uuid and mm.uuid = ROW.mission_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'ct_uuid', ROW.ct_uuid, null, null, null, sd.CA_UUID
+         FROM smart.mission mm, smart.survey s, smart.survey_design sd WHERE mm.survey_uuid = s.uuid and s.survey_design_uuid = sd.uuid and mm.uuid = ROW.mission_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_ct_mission_wplink() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
-  INSERT INTO connect.change_log 
- (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, sd.CA_UUID 
+  INSERT INTO connect.change_log
+ (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+ SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, sd.CA_UUID
    FROM smart.mission mm, smart.survey s, smart.survey_design sd, smart.ct_mission_wplink l WHERE mm.survey_uuid = s.uuid and s.survey_design_uuid = sd.uuid and mm.uuid = l.mission_uuid and l.ct_uuid = row.ct_mission_link.uuid;
 RETURN ROW; END$$;
 
@@ -509,20 +509,20 @@ RETURN ROW; END$$;
 CREATE FUNCTION connect.trg_ct_patrol_link() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'ct_uuid', ROW.ct_uuid, null, null, null, pp.CA_UUID 
- 		FROM smart.patrol pp, smart.patrol_leg pl WHERE pl.patrol_uuid = pp.uuid and pl.uuid = ROW.patrol_leg_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'ct_uuid', ROW.ct_uuid, null, null, null, pp.CA_UUID
+         FROM smart.patrol pp, smart.patrol_leg pl WHERE pl.patrol_uuid = pp.uuid and pl.uuid = ROW.patrol_leg_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_ct_patrol_wplink() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
-  INSERT INTO connect.change_log 
- (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, pp.CA_UUID 
-  FROM smart.patrol pp, smart.patrol_leg pl, smart.ct_patrol_link l 
+  INSERT INTO connect.change_log
+ (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+ SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, pp.CA_UUID
+  FROM smart.patrol pp, smart.patrol_leg pl, smart.ct_patrol_link l
   WHERE pl.patrol_uuid = pp.uuid and pl.uuid = l.patrol_leg_uuid and l.ct_uuid = row.ct_patrol_link_uuid;
 RETURN ROW; END$$;
 
@@ -530,18 +530,18 @@ RETURN ROW; END$$;
 CREATE FUNCTION connect.trg_ct_properties_profile_option() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-	DECLARE
-	ROW RECORD;
+    DECLARE
+    ROW RECORD;
 BEGIN
-	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
- 	ROW = NEW;
- 	ELSIF (TG_OP = 'DELETE') THEN
- 		ROW = OLD;
- 	END IF;
- 
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.UUID, null, null, null, p.CA_UUID FROM smart.ct_properties_profile p WHERE p.uuid = ROW.profile_uuid;
+    IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN
+     ROW = NEW;
+     ELSIF (TG_OP = 'DELETE') THEN
+         ROW = OLD;
+     END IF;
+
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.UUID, null, null, null, p.CA_UUID FROM smart.ct_properties_profile p WHERE p.uuid = ROW.profile_uuid;
  RETURN ROW;
 END$$;
 
@@ -549,101 +549,101 @@ END$$;
 CREATE FUNCTION connect.trg_dm_att_agg_map() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'attribute_uuid', ROW.attribute_uuid, 'agg_name', null, ROW.agg_name, a.CA_UUID 
- 		FROM smart.dm_attribute a WHERE a.uuid = ROW.attribute_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'attribute_uuid', ROW.attribute_uuid, 'agg_name', null, ROW.agg_name, a.CA_UUID
+         FROM smart.dm_attribute a WHERE a.uuid = ROW.attribute_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_dm_attribute_list() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, da.CA_UUID 
- 		FROM smart.dm_attribute da WHERE da.uuid = ROW.attribute_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, da.CA_UUID
+         FROM smart.dm_attribute da WHERE da.uuid = ROW.attribute_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_dm_attribute_tree() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, da.CA_UUID 
- 		FROM smart.dm_attribute da WHERE da.uuid = ROW.attribute_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, da.CA_UUID
+         FROM smart.dm_attribute da WHERE da.uuid = ROW.attribute_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_dm_cat_att_map() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'attribute_uuid', ROW.attribute_uuid, 'category_uuid', ROW.category_uuid, null, a.CA_UUID 
- 		FROM smart.dm_attribute a WHERE a.uuid = ROW.attribute_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'attribute_uuid', ROW.attribute_uuid, 'category_uuid', ROW.category_uuid, null, a.CA_UUID
+         FROM smart.dm_attribute a WHERE a.uuid = ROW.attribute_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_e_action_parameter_value() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-	DECLARE
-	ROW RECORD;
+    DECLARE
+    ROW RECORD;
 BEGIN
-	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
- 	ROW = NEW;
- 	ELSIF (TG_OP = 'DELETE') THEN
- 		ROW = OLD;
- 	END IF;
- 
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'action_uuid', ROW.action_uuid, 'parameter_key', null, ROW.parameter_key, a.CA_UUID 
- 		FROM smart.e_action a
- 		WHERE a.uuid = ROW.action_uuid;
- 	RETURN ROW;
+    IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN
+     ROW = NEW;
+     ELSIF (TG_OP = 'DELETE') THEN
+         ROW = OLD;
+     END IF;
+
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'action_uuid', ROW.action_uuid, 'parameter_key', null, ROW.parameter_key, a.CA_UUID
+         FROM smart.e_action a
+         WHERE a.uuid = ROW.action_uuid;
+     RETURN ROW;
 END$$;
 
 
 CREATE FUNCTION connect.trg_e_event_action() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-	DECLARE
-	ROW RECORD;
+    DECLARE
+    ROW RECORD;
 BEGIN
-	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
- 	ROW = NEW;
- 	ELSIF (TG_OP = 'DELETE') THEN
- 		ROW = OLD;
- 	END IF;
- 
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, a.CA_UUID 
- 		FROM smart.e_action a
- 		WHERE a.uuid = ROW.action_uuid;
- 	RETURN ROW;
+    IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN
+     ROW = NEW;
+     ELSIF (TG_OP = 'DELETE') THEN
+         ROW = OLD;
+     END IF;
+
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, a.CA_UUID
+         FROM smart.e_action a
+         WHERE a.uuid = ROW.action_uuid;
+     RETURN ROW;
 END$$;
 
 
 CREATE FUNCTION connect.trg_employee_team_member() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-	DECLARE
-	ROW RECORD;
+    DECLARE
+    ROW RECORD;
 BEGIN
-	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
- 	ROW = NEW;
- 	ELSIF (TG_OP = 'DELETE') THEN
- 		ROW = OLD;
- 	END IF;
- 
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'team_uuid', ROW.team_uuid, 'employee_uuid', ROW.employee_uuid, null, t.CA_UUID 
- 		FROM smart.employee_team t WHERE t.uuid = ROW.team_uuid;
+    IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN
+     ROW = NEW;
+     ELSIF (TG_OP = 'DELETE') THEN
+         ROW = OLD;
+     END IF;
+
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'team_uuid', ROW.team_uuid, 'employee_uuid', ROW.employee_uuid, null, t.CA_UUID
+         FROM smart.employee_team t WHERE t.uuid = ROW.team_uuid;
  RETURN ROW;
 END$$;
 
@@ -651,224 +651,224 @@ END$$;
 CREATE FUNCTION connect.trg_entity() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-	DECLARE
-	ROW RECORD;
+    DECLARE
+    ROW RECORD;
 BEGIN
-	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
- 	ROW = NEW;
- 	ELSIF (TG_OP = 'DELETE') THEN
- 		ROW = OLD;
- 	END IF;
- 
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.UUID, null, null, null, et.CA_UUID FROM smart.entity_type et WHERE et.uuid = ROW.entity_type_uuid;
- 	RETURN ROW;
+    IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN
+     ROW = NEW;
+     ELSIF (TG_OP = 'DELETE') THEN
+         ROW = OLD;
+     END IF;
+
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.UUID, null, null, null, et.CA_UUID FROM smart.entity_type et WHERE et.uuid = ROW.entity_type_uuid;
+     RETURN ROW;
 END$$;
 
 CREATE FUNCTION connect.trg_entity_attribute() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-	DECLARE
-	ROW RECORD;
+    DECLARE
+    ROW RECORD;
 BEGIN
-	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
- 	ROW = NEW;
- 	ELSIF (TG_OP = 'DELETE') THEN
- 		ROW = OLD;
- 	END IF;
- 
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.UUID, null, null, null, et.CA_UUID FROM smart.entity_type et WHERE et.uuid = ROW.entity_type_uuid;
- 	RETURN ROW;
+    IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN
+     ROW = NEW;
+     ELSIF (TG_OP = 'DELETE') THEN
+         ROW = OLD;
+     END IF;
+
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.UUID, null, null, null, et.CA_UUID FROM smart.entity_type et WHERE et.uuid = ROW.entity_type_uuid;
+     RETURN ROW;
 END$$;
 
 CREATE FUNCTION connect.trg_entity_attribute_value() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-	DECLARE
-	ROW RECORD;
+    DECLARE
+    ROW RECORD;
 BEGIN
-	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
- 	ROW = NEW;
- 	ELSIF (TG_OP = 'DELETE') THEN
- 		ROW = OLD;
- 	END IF;
- 
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'entity_attribute_uuid', ROW.entity_attribute_uuid, 'entity_uuid', ROW.entity_uuid, null, et.CA_UUID FROM smart.entity_type et, smart.entity e WHERE e.entity_type_uuid = et.uuid and e.uuid = ROW.entity_uuid;
- 	RETURN ROW;
+    IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN
+     ROW = NEW;
+     ELSIF (TG_OP = 'DELETE') THEN
+         ROW = OLD;
+     END IF;
+
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'entity_attribute_uuid', ROW.entity_attribute_uuid, 'entity_uuid', ROW.entity_uuid, null, et.CA_UUID FROM smart.entity_type et, smart.entity e WHERE e.entity_type_uuid = et.uuid and e.uuid = ROW.entity_uuid;
+     RETURN ROW;
 END$$;
 
 CREATE FUNCTION connect.trg_i18n_label() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'element_uuid', ROW.element_uuid, 'language_uuid', ROW.language_uuid, null, l.CA_UUID 
- 		FROM smart.language l WHERE l.uuid = ROW.language_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'element_uuid', ROW.element_uuid, 'language_uuid', ROW.language_uuid, null, l.CA_UUID
+         FROM smart.language l WHERE l.uuid = ROW.language_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_i_attribute_list_item() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, i.CA_UUID 
- 		FROM smart.i_attribute i
- 		WHERE i.uuid = ROW.attribute_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, i.CA_UUID
+         FROM smart.i_attribute i
+         WHERE i.uuid = ROW.attribute_uuid;
  RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_i_diagram_entity_type_style() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-	DECLARE
-	ROW RECORD;
+    DECLARE
+    ROW RECORD;
 BEGIN
-	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
- 	ROW = NEW;
- 	ELSIF (TG_OP = 'DELETE') THEN
- 		ROW = OLD;
- 	END IF;
- 
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, a.CA_UUID 
- 		FROM smart.i_diagram_style a
- 		WHERE a.uuid = ROW.style_uuid;
- 	RETURN ROW;
+    IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN
+     ROW = NEW;
+     ELSIF (TG_OP = 'DELETE') THEN
+         ROW = OLD;
+     END IF;
+
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, a.CA_UUID
+         FROM smart.i_diagram_style a
+         WHERE a.uuid = ROW.style_uuid;
+     RETURN ROW;
 END$$;
 
 
 CREATE FUNCTION connect.trg_i_diagram_relationship_type_style() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-	DECLARE
-	ROW RECORD;
+    DECLARE
+    ROW RECORD;
 BEGIN
-	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
- 	ROW = NEW;
- 	ELSIF (TG_OP = 'DELETE') THEN
- 		ROW = OLD;
- 	END IF;
- 
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, a.CA_UUID 
- 		FROM smart.i_diagram_style a
- 		WHERE a.uuid = ROW.style_uuid;
- 	RETURN ROW;
+    IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN
+     ROW = NEW;
+     ELSIF (TG_OP = 'DELETE') THEN
+         ROW = OLD;
+     END IF;
+
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, a.CA_UUID
+         FROM smart.i_diagram_style a
+         WHERE a.uuid = ROW.style_uuid;
+     RETURN ROW;
 END$$;
 
 
 CREATE FUNCTION connect.trg_i_entity_attachment() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'entity_uuid', ROW.entity_uuid, 'attachment_uuid', ROW.attachment_uuid, null, i.CA_UUID 
- 		from smart.i_entity i where i.uuid = ROW.entity_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'entity_uuid', ROW.entity_uuid, 'attachment_uuid', ROW.attachment_uuid, null, i.CA_UUID
+         from smart.i_entity i where i.uuid = ROW.entity_uuid;
 RETURN ROW; END$$;
 
 CREATE FUNCTION connect.trg_i_entity_attribute_value() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'entity_uuid', ROW.entity_uuid, 'attribute_uuid', ROW.attribute_uuid, null, i.CA_UUID 
- 		from smart.i_entity i where i.uuid = ROW.entity_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'entity_uuid', ROW.entity_uuid, 'attribute_uuid', ROW.attribute_uuid, null, i.CA_UUID
+         from smart.i_entity i where i.uuid = ROW.entity_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_i_entity_location() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'entity_uuid', ROW.entity_uuid, 'location_uuid', ROW.location_uuid, null, i.CA_UUID 
- 		from smart.i_entity i where i.uuid = ROW.entity_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'entity_uuid', ROW.entity_uuid, 'location_uuid', ROW.location_uuid, null, i.CA_UUID
+         from smart.i_entity i where i.uuid = ROW.entity_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_i_entity_record() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'entity_uuid', ROW.entity_uuid, 'record_uuid', ROW.record_uuid, null, i.CA_UUID 
- 		from smart.i_entity i where i.uuid = ROW.entity_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'entity_uuid', ROW.entity_uuid, 'record_uuid', ROW.record_uuid, null, i.CA_UUID
+         from smart.i_entity i where i.uuid = ROW.entity_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_i_entity_relationship() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, i.CA_UUID 
- 		from smart.i_relationship_type i where i.uuid = ROW.relationship_type_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, i.CA_UUID
+         from smart.i_relationship_type i where i.uuid = ROW.relationship_type_uuid;
 RETURN ROW; END$$;
 
 CREATE FUNCTION connect.trg_i_entity_relationship_attribute_value() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'entity_relationship_uuid', ROW.entity_relationship_uuid, 'attribute_uuid', ROW.attribute_uuid, null, i.CA_UUID 
- 		from smart.i_attribute i where i.uuid = ROW.attribute_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'entity_relationship_uuid', ROW.entity_relationship_uuid, 'attribute_uuid', ROW.attribute_uuid, null, i.CA_UUID
+         from smart.i_attribute i where i.uuid = ROW.attribute_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_i_entity_type_attribute() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'entity_type_uuid', ROW.entity_type_uuid, 'attribute_uuid', ROW.attribute_uuid, null, i.CA_UUID 
- 		from smart.i_entity_type i where i.uuid = ROW.entity_type_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'entity_type_uuid', ROW.entity_type_uuid, 'attribute_uuid', ROW.attribute_uuid, null, i.CA_UUID
+         from smart.i_entity_type i where i.uuid = ROW.entity_type_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_i_entity_type_attribute_group() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, i.CA_UUID 
- 		from smart.i_entity_type i where i.uuid = ROW.entity_type_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, i.CA_UUID
+         from smart.i_entity_type i where i.uuid = ROW.entity_type_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_i_observation() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, i.CA_UUID 
- 		from smart.i_location i where i.uuid = ROW.location_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, i.CA_UUID
+         from smart.i_location i where i.uuid = ROW.location_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_i_observation_attribute() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'observation_uuid', ROW.observation_uuid, 'attribute_uuid', ROW.attribute_uuid, null, i.CA_UUID 
- 		from smart.dm_attribute i where i.uuid = ROW.attribute_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'observation_uuid', ROW.observation_uuid, 'attribute_uuid', ROW.attribute_uuid, null, i.CA_UUID
+         from smart.dm_attribute i where i.uuid = ROW.attribute_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_i_permission() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
-  INSERT INTO connect.change_log 
- (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'employee_uuid', ROW.employee_uuid, 'profile_uuid', ROW.profile_uuid, null, i.CA_UUID 
+  INSERT INTO connect.change_log
+ (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+ SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'employee_uuid', ROW.employee_uuid, 'profile_uuid', ROW.profile_uuid, null, i.CA_UUID
    FROM smart.i_profile_config i WHERE i.uuid = row.profile_uuid;
 RETURN ROW; END$$;
 
@@ -876,99 +876,99 @@ RETURN ROW; END$$;
 CREATE FUNCTION connect.trg_i_record_attachment() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'record_uuid', ROW.record_uuid, 'attachment_uuid', ROW.attachment_uuid, null, i.CA_UUID 
- 		from smart.i_record i where i.uuid = ROW.record_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'record_uuid', ROW.record_uuid, 'attachment_uuid', ROW.attachment_uuid, null, i.CA_UUID
+         from smart.i_record i where i.uuid = ROW.record_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_i_record_attribute_value() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'record_uuid', ROW.record_uuid, 'attribute_uuid', ROW.attribute_uuid, null, i.CA_UUID 
- 		from smart.i_record i where i.uuid = ROW.record_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'record_uuid', ROW.record_uuid, 'attribute_uuid', ROW.attribute_uuid, null, i.CA_UUID
+         from smart.i_record i where i.uuid = ROW.record_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_i_record_attribute_value_list() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'value_uuid', ROW.value_uuid, 'element_uuid', ROW.element_uuid, null, i.CA_UUID 
- 		from smart.i_record_attribute_value v, smart.i_record i where v.uuid = ROW.value_uuid and i.uuid = v.record_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'value_uuid', ROW.value_uuid, 'element_uuid', ROW.element_uuid, null, i.CA_UUID
+         from smart.i_record_attribute_value v, smart.i_record i where v.uuid = ROW.value_uuid and i.uuid = v.record_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_i_recordsource_attribute() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, i.CA_UUID 
- 		from smart.i_recordsource i WHERE i.uuid = ROW.source_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, i.CA_UUID
+         from smart.i_recordsource i WHERE i.uuid = ROW.source_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_i_relationship_type_attribute() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'relationship_type_uuid', ROW.relationship_type_uuid, 'attribute_uuid', ROW.attribute_uuid, null, i.CA_UUID 
- 		from smart.i_attribute i where i.uuid = ROW.attribute_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'relationship_type_uuid', ROW.relationship_type_uuid, 'attribute_uuid', ROW.attribute_uuid, null, i.CA_UUID
+         from smart.i_attribute i where i.uuid = ROW.attribute_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_i_working_set_entity() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'working_set_uuid', ROW.working_set_uuid, 'entity_uuid', ROW.entity_uuid, null, i.CA_UUID 
- 		from smart.i_working_set i where i.uuid = ROW.working_set_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'working_set_uuid', ROW.working_set_uuid, 'entity_uuid', ROW.entity_uuid, null, i.CA_UUID
+         from smart.i_working_set i where i.uuid = ROW.working_set_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_i_working_set_query() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'working_set_uuid', ROW.working_set_uuid, 'query_uuid', ROW.query_uuid, null, i.CA_UUID 
- 		from smart.i_working_set i where i.uuid = ROW.working_set_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'working_set_uuid', ROW.working_set_uuid, 'query_uuid', ROW.query_uuid, null, i.CA_UUID
+         from smart.i_working_set i where i.uuid = ROW.working_set_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_i_working_set_record() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'working_set_uuid', ROW.working_set_uuid, 'record_uuid', ROW.record_uuid, null, i.CA_UUID 
- 		from smart.i_working_set i where i.uuid = ROW.working_set_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'working_set_uuid', ROW.working_set_uuid, 'record_uuid', ROW.record_uuid, null, i.CA_UUID
+         from smart.i_working_set i where i.uuid = ROW.working_set_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_iconfile() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-	DECLARE
-	ROW RECORD;
+    DECLARE
+    ROW RECORD;
 BEGIN
-	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
- 	ROW = NEW;
- 	ELSIF (TG_OP = 'DELETE') THEN
- 		ROW = OLD;
- 	END IF;
- 
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.UUID, null, null, null, iset.CA_UUID 
- 		FROM smart.iconset iset WHERE iset.uuid = ROW.iconset_uuid;
+    IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN
+     ROW = NEW;
+     ELSIF (TG_OP = 'DELETE') THEN
+         ROW = OLD;
+     END IF;
+
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.UUID, null, null, null, iset.CA_UUID
+         FROM smart.iconset iset WHERE iset.uuid = ROW.iconset_uuid;
  RETURN ROW;
 END$$;
 
@@ -976,168 +976,168 @@ END$$;
 --CREATE FUNCTION connect.trg_intelligence_attachment() RETURNS trigger
 --    LANGUAGE plpgsql
 --    AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
--- 	INSERT INTO connect.change_log 
--- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
--- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, i.CA_UUID 
--- 		from smart.intelligence i where i.uuid = ROW.intelligence_uuid;
+--     INSERT INTO connect.change_log
+--         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+--         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, i.CA_UUID
+--         from smart.intelligence i where i.uuid = ROW.intelligence_uuid;
 --RETURN ROW; END$$;
 --
 --
 --CREATE FUNCTION connect.trg_intelligence_point() RETURNS trigger
 --    LANGUAGE plpgsql
 --    AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
--- 	INSERT INTO connect.change_log 
--- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
--- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, i.CA_UUID 
--- 		from smart.intelligence i where i.uuid = ROW.intelligence_uuid;
+--     INSERT INTO connect.change_log
+--         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+--         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, i.CA_UUID
+--         from smart.intelligence i where i.uuid = ROW.intelligence_uuid;
 --RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_mission() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-	DECLARE
-	ROW RECORD;
+    DECLARE
+    ROW RECORD;
 BEGIN
-	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
- 	ROW = NEW;
- 	ELSIF (TG_OP = 'DELETE') THEN
- 		ROW = OLD;
- 	END IF;
- 
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, sd.CA_UUID FROM smart.survey s, smart.survey_design sd WHERE s.survey_design_uuid = sd.uuid and s.uuid = ROW.survey_uuid;
- 	RETURN ROW;
+    IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN
+     ROW = NEW;
+     ELSIF (TG_OP = 'DELETE') THEN
+         ROW = OLD;
+     END IF;
+
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, sd.CA_UUID FROM smart.survey s, smart.survey_design sd WHERE s.survey_design_uuid = sd.uuid and s.uuid = ROW.survey_uuid;
+     RETURN ROW;
 END$$;
 
 CREATE FUNCTION connect.trg_mission_attribute_list() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-	DECLARE
-	ROW RECORD;
+    DECLARE
+    ROW RECORD;
 BEGIN
-	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
- 	ROW = NEW;
- 	ELSIF (TG_OP = 'DELETE') THEN
- 		ROW = OLD;
- 	END IF;
- 
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, ma.CA_UUID FROM smart.mission_attribute ma WHERE ma.uuid = ROW.mission_attribute_uuid;
- 	RETURN ROW;
+    IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN
+     ROW = NEW;
+     ELSIF (TG_OP = 'DELETE') THEN
+         ROW = OLD;
+     END IF;
+
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, ma.CA_UUID FROM smart.mission_attribute ma WHERE ma.uuid = ROW.mission_attribute_uuid;
+     RETURN ROW;
 END$$;
 
 
 CREATE FUNCTION connect.trg_mission_day() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-	DECLARE
-	ROW RECORD;
+    DECLARE
+    ROW RECORD;
 BEGIN
-	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
- 	ROW = NEW;
- 	ELSIF (TG_OP = 'DELETE') THEN
- 		ROW = OLD;
- 	END IF;
- 
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, sd.CA_UUID FROM smart.mission m, smart.survey s, smart.survey_design sd 
- 		WHERE s.survey_design_uuid = sd.uuid and s.uuid = m.survey_uuid and m.uuid = ROW.mission_uuid;
- 	RETURN ROW;
+    IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN
+     ROW = NEW;
+     ELSIF (TG_OP = 'DELETE') THEN
+         ROW = OLD;
+     END IF;
+
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, sd.CA_UUID FROM smart.mission m, smart.survey s, smart.survey_design sd
+         WHERE s.survey_design_uuid = sd.uuid and s.uuid = m.survey_uuid and m.uuid = ROW.mission_uuid;
+     RETURN ROW;
 END$$;
 
 
 CREATE FUNCTION connect.trg_mission_member() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-	DECLARE
-	ROW RECORD;
+    DECLARE
+    ROW RECORD;
 BEGIN
-	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
- 	ROW = NEW;
- 	ELSIF (TG_OP = 'DELETE') THEN
- 		ROW = OLD;
- 	END IF;
- 
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'mission_uuid', ROW.mission_uuid, 'employee_uuid', ROW.employee_uuid, null, e.CA_UUID FROM smart.employee e
- 		WHERE e.uuid = ROW.employee_uuid;
- 	RETURN ROW;
+    IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN
+     ROW = NEW;
+     ELSIF (TG_OP = 'DELETE') THEN
+         ROW = OLD;
+     END IF;
+
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'mission_uuid', ROW.mission_uuid, 'employee_uuid', ROW.employee_uuid, null, e.CA_UUID FROM smart.employee e
+         WHERE e.uuid = ROW.employee_uuid;
+     RETURN ROW;
 END$$;
 
 
 CREATE FUNCTION connect.trg_mission_property() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-	DECLARE
-	ROW RECORD;
+    DECLARE
+    ROW RECORD;
 BEGIN
-	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
- 	ROW = NEW;
- 	ELSIF (TG_OP = 'DELETE') THEN
- 		ROW = OLD;
- 	END IF;
- 
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'survey_design_uuid', ROW.survey_design_uuid, 'mission_attribute_uuid', ROW.mission_attribute_uuid, null, sd.CA_UUID FROM smart.survey_design sd
- 		WHERE sd.uuid = ROW.survey_design_uuid;
- 	RETURN ROW;
+    IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN
+     ROW = NEW;
+     ELSIF (TG_OP = 'DELETE') THEN
+         ROW = OLD;
+     END IF;
+
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'survey_design_uuid', ROW.survey_design_uuid, 'mission_attribute_uuid', ROW.mission_attribute_uuid, null, sd.CA_UUID FROM smart.survey_design sd
+         WHERE sd.uuid = ROW.survey_design_uuid;
+     RETURN ROW;
 END$$;
 
 
 CREATE FUNCTION connect.trg_mission_property_value() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-	DECLARE
-	ROW RECORD;
+    DECLARE
+    ROW RECORD;
 BEGIN
-	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
- 	ROW = NEW;
- 	ELSIF (TG_OP = 'DELETE') THEN
- 		ROW = OLD;
- 	END IF;
- 
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'mission_uuid', ROW.mission_uuid, 'mission_attribute_uuid', ROW.mission_attribute_uuid, null, ma.CA_UUID 
- 		FROM smart.mission_attribute ma
- 		WHERE ma.uuid = ROW.mission_attribute_uuid;
- 	RETURN ROW;
+    IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN
+     ROW = NEW;
+     ELSIF (TG_OP = 'DELETE') THEN
+         ROW = OLD;
+     END IF;
+
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'mission_uuid', ROW.mission_uuid, 'mission_attribute_uuid', ROW.mission_attribute_uuid, null, ma.CA_UUID
+         FROM smart.mission_attribute ma
+         WHERE ma.uuid = ROW.mission_attribute_uuid;
+     RETURN ROW;
 END$$;
 
 
 CREATE FUNCTION connect.trg_mission_track() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-	DECLARE
-	ROW RECORD;
+    DECLARE
+    ROW RECORD;
 BEGIN
-	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
- 	ROW = NEW;
- 	ELSIF (TG_OP = 'DELETE') THEN
- 		ROW = OLD;
- 	END IF;
- 
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, sd.CA_UUID 
- 		FROM smart.mission_day md, smart.mission m, smart.survey s, smart.survey_design sd 
- 		WHERE s.survey_design_uuid = sd.uuid and s.uuid = m.survey_uuid and m.uuid = md.mission_uuid and md.uuid = ROW.mission_day_uuid;
- 	RETURN ROW;
+    IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN
+     ROW = NEW;
+     ELSIF (TG_OP = 'DELETE') THEN
+         ROW = OLD;
+     END IF;
+
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, sd.CA_UUID
+         FROM smart.mission_day md, smart.mission m, smart.survey s, smart.survey_design sd
+         WHERE s.survey_design_uuid = sd.uuid and s.uuid = m.survey_uuid and m.uuid = md.mission_uuid and md.uuid = ROW.mission_day_uuid;
+     RETURN ROW;
 END$$;
 
 
 CREATE FUNCTION connect.trg_observation_attachment() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
-  INSERT INTO connect.change_log 
- (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, wp.CA_UUID 
+  INSERT INTO connect.change_log
+ (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+ SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, wp.CA_UUID
    FROM smart.wp_observation ob, smart.waypoint wp, smart.wp_observation_group g where ob.wp_group_uuid = g.uuid and g.wp_uuid = wp.uuid and ob.uuid = ROW.obs_uuid;
 RETURN ROW; END$$;
 
@@ -1145,27 +1145,27 @@ RETURN ROW; END$$;
 CREATE FUNCTION connect.trg_observation_options() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		VALUES (uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'ca_uuid', ROW.ca_uuid, null, null, null, ROW.ca_UUID); 
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         VALUES (uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'ca_uuid', ROW.ca_uuid, null, null, null, ROW.ca_UUID);
 RETURN ROW; END$$;
 
 CREATE FUNCTION connect.trg_patrol_attribute_list() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-	DECLARE
-	ROW RECORD;
+    DECLARE
+    ROW RECORD;
 BEGIN
-	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
- 	ROW = NEW;
- 	ELSIF (TG_OP = 'DELETE') THEN
- 		ROW = OLD;
- 	END IF;
- 
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, t.CA_UUID 
- 		FROM smart.patrol_attribute t WHERE t.uuid = ROW.patrol_attribute_uuid;
+    IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN
+     ROW = NEW;
+     ELSIF (TG_OP = 'DELETE') THEN
+         ROW = OLD;
+     END IF;
+
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, t.CA_UUID
+         FROM smart.patrol_attribute t WHERE t.uuid = ROW.patrol_attribute_uuid;
  RETURN ROW;
 END$$;
 
@@ -1173,19 +1173,19 @@ END$$;
 CREATE FUNCTION connect.trg_patrol_attribute_value() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-	DECLARE
-	ROW RECORD;
+    DECLARE
+    ROW RECORD;
 BEGIN
-	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
- 	ROW = NEW;
- 	ELSIF (TG_OP = 'DELETE') THEN
- 		ROW = OLD;
- 	END IF;
- 
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'patrol_uuid', ROW.patrol_uuid, 'patrol_attribute_uuid', ROW.patrol_attribute_uuid, null, t.CA_UUID 
- 		FROM smart.patrol_attribute t WHERE t.uuid = ROW.patrol_attribute_uuid;
+    IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN
+     ROW = NEW;
+     ELSIF (TG_OP = 'DELETE') THEN
+         ROW = OLD;
+     END IF;
+
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'patrol_uuid', ROW.patrol_uuid, 'patrol_attribute_uuid', ROW.patrol_attribute_uuid, null, t.CA_UUID
+         FROM smart.patrol_attribute t WHERE t.uuid = ROW.patrol_attribute_uuid;
  RETURN ROW;
 END$$;
 
@@ -1193,39 +1193,39 @@ END$$;
 --CREATE FUNCTION connect.trg_patrol_intelligence() RETURNS trigger
 --    LANGUAGE plpgsql
 --    AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
--- 	INSERT INTO connect.change_log 
--- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
--- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'patrol_uuid', ROW.patrol_uuid, 'intelligence_uuid', ROW.intelligence_uuid, null, p.CA_UUID 
--- 		from smart.patrol p where p.uuid = ROW.patrol_uuid;
+--     INSERT INTO connect.change_log
+--         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+--         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'patrol_uuid', ROW.patrol_uuid, 'intelligence_uuid', ROW.intelligence_uuid, null, p.CA_UUID
+--         from smart.patrol p where p.uuid = ROW.patrol_uuid;
 --RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_patrol_leg() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, p.CA_UUID 
- 		FROM smart.patrol p WHERE p.uuid = ROW.patrol_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, p.CA_UUID
+         FROM smart.patrol p WHERE p.uuid = ROW.patrol_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_patrol_leg_day() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, p.CA_UUID 
- 		FROM smart.patrol p, smart.patrol_leg pl where pl.patrol_uuid = p.uuid and pl.uuid = ROW.patrol_leg_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, p.CA_UUID
+         FROM smart.patrol p, smart.patrol_leg pl where pl.patrol_uuid = p.uuid and pl.uuid = ROW.patrol_leg_uuid;
 RETURN ROW; END$$;
 
 CREATE FUNCTION connect.trg_patrol_leg_members() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'patrol_leg_uuid', ROW.patrol_leg_uuid, 'employee_uuid', ROW.employee_uuid, null, e.CA_UUID 
- 		FROM smart.employee e WHERE e.uuid = ROW.employee_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'patrol_leg_uuid', ROW.patrol_leg_uuid, 'employee_uuid', ROW.employee_uuid, null, e.CA_UUID
+         FROM smart.employee e WHERE e.uuid = ROW.employee_uuid;
 RETURN ROW; END$$;
 
 
@@ -1233,29 +1233,29 @@ RETURN ROW; END$$;
 CREATE FUNCTION connect.trg_patrol_plan() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'patrol_uuid', ROW.patrol_uuid, 'plan_uuid', ROW.plan_uuid, null, p.CA_UUID 
- 		FROM smart.patrol p where p.uuid = ROW.patrol_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'patrol_uuid', ROW.patrol_uuid, 'plan_uuid', ROW.plan_uuid, null, p.CA_UUID
+         FROM smart.patrol p where p.uuid = ROW.patrol_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_patrol_type() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		VALUES (uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'ca_uuid', ROW.ca_uuid, 'patrol_type', null, ROW.patrol_type,  ROW.CA_UUID);
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         VALUES (uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'ca_uuid', ROW.ca_uuid, 'patrol_type', null, ROW.patrol_type,  ROW.CA_UUID);
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_patrol_waypoint() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'leg_day_uuid', ROW.leg_day_uuid, 'wp_uuid', ROW.wp_uuid, null, wp.CA_UUID 
- 		FROM smart.waypoint wp WHERE wp.uuid = ROW.wp_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'leg_day_uuid', ROW.leg_day_uuid, 'wp_uuid', ROW.wp_uuid, null, wp.CA_UUID
+         FROM smart.waypoint wp WHERE wp.uuid = ROW.wp_uuid;
 RETURN ROW; END$$;
 
 
@@ -1265,15 +1265,15 @@ CREATE FUNCTION connect.trg_paws_config_join() RETURNS trigger
  DECLARE
  ROW RECORD;
 BEGIN
- IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN 
+ IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN
   ROW = NEW;
   ELSIF (TG_OP = 'DELETE') THEN
    ROW = OLD;
   END IF;
- 
-  INSERT INTO connect.change_log 
- (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, c.CA_UUID 
+
+  INSERT INTO connect.change_log
+ (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+ SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, c.CA_UUID
    FROM smart.paws_configuration c WHERE c.uuid = ROW.config_uuid;
  RETURN ROW;
 END$$;
@@ -1282,38 +1282,38 @@ END$$;
 CREATE FUNCTION connect.trg_plan_target() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, p.CA_UUID 
- 		from smart.plan p where p.uuid = ROW.plan_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, p.CA_UUID
+         from smart.plan p where p.uuid = ROW.plan_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_plan_target_point() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, p.CA_UUID 
- 		FROM smart.plan_target pt, smart.plan p WHERE p.uuid = pt.plan_uuid and pt.uuid = ROW.plan_target_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, p.CA_UUID
+         FROM smart.plan_target pt, smart.plan p WHERE p.uuid = pt.plan_uuid and pt.uuid = ROW.plan_target_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_qa_routine_parameter() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-	DECLARE
-	ROW RECORD;
+    DECLARE
+    ROW RECORD;
 BEGIN
-	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
- 	ROW = NEW;
- 	ELSIF (TG_OP = 'DELETE') THEN
- 		ROW = OLD;
- 	END IF;
- 
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.UUID, null, null, null, r.CA_UUID FROM smart.qa_routine r WHERE r.uuid = ROW.qa_routine_uuid;
+    IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN
+     ROW = NEW;
+     ELSIF (TG_OP = 'DELETE') THEN
+         ROW = OLD;
+     END IF;
+
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.UUID, null, null, null, r.CA_UUID FROM smart.qa_routine r WHERE r.uuid = ROW.qa_routine_uuid;
  RETURN ROW;
 END$$;
 
@@ -1321,20 +1321,20 @@ END$$;
 CREATE FUNCTION connect.trg_rank() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, a.CA_UUID 
- 		FROM smart.agency a WHERE a.uuid = ROW.agency_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, a.CA_UUID
+         FROM smart.agency a WHERE a.uuid = ROW.agency_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_report_query() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'report_uuid', ROW.report_uuid, 'query_uuid', ROW.query_uuid, null, r.CA_UUID 
- 		from smart.report r where r.uuid = ROW.report_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'report_uuid', ROW.report_uuid, 'query_uuid', ROW.query_uuid, null, r.CA_UUID
+         from smart.report r where r.uuid = ROW.report_uuid;
 RETURN ROW; END$$;
 
 
@@ -1342,72 +1342,72 @@ RETURN ROW; END$$;
 CREATE FUNCTION connect.trg_sampling_unit() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-	DECLARE
-	ROW RECORD;
+    DECLARE
+    ROW RECORD;
 BEGIN
-	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
- 	ROW = NEW;
- 	ELSIF (TG_OP = 'DELETE') THEN
- 		ROW = OLD;
- 	END IF;
- 
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, sd.CA_UUID 
- 		FROM smart.survey_design sd 
- 		WHERE sd.uuid = ROW.survey_design_uuid;
- 	RETURN ROW;
+    IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN
+     ROW = NEW;
+     ELSIF (TG_OP = 'DELETE') THEN
+         ROW = OLD;
+     END IF;
+
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, sd.CA_UUID
+         FROM smart.survey_design sd
+         WHERE sd.uuid = ROW.survey_design_uuid;
+     RETURN ROW;
 END$$;
 
 
 CREATE FUNCTION connect.trg_sampling_unit_attribute_list() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-	DECLARE
-	ROW RECORD;
+    DECLARE
+    ROW RECORD;
 BEGIN
-	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
- 	ROW = NEW;
- 	ELSIF (TG_OP = 'DELETE') THEN
- 		ROW = OLD;
- 	END IF;
- 
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, sa.CA_UUID 
- 		FROM smart.sampling_unit_attribute sa
- 		WHERE sa.uuid = ROW.sampling_unit_attribute_uuid;
- 	RETURN ROW;
+    IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN
+     ROW = NEW;
+     ELSIF (TG_OP = 'DELETE') THEN
+         ROW = OLD;
+     END IF;
+
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, sa.CA_UUID
+         FROM smart.sampling_unit_attribute sa
+         WHERE sa.uuid = ROW.sampling_unit_attribute_uuid;
+     RETURN ROW;
 END$$;
 
 CREATE FUNCTION connect.trg_sampling_unit_attribute_value() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-	DECLARE
-	ROW RECORD;
+    DECLARE
+    ROW RECORD;
 BEGIN
-	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
- 	ROW = NEW;
- 	ELSIF (TG_OP = 'DELETE') THEN
- 		ROW = OLD;
- 	END IF;
- 
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'su_attribute_uuid', ROW.su_attribute_uuid, 'su_uuid', ROW.su_uuid, null, sa.CA_UUID 
- 		FROM smart.sampling_unit_attribute sa
- 		WHERE sa.uuid = ROW.su_attribute_uuid;
- 	RETURN ROW;
+    IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN
+     ROW = NEW;
+     ELSIF (TG_OP = 'DELETE') THEN
+         ROW = OLD;
+     END IF;
+
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'su_attribute_uuid', ROW.su_attribute_uuid, 'su_uuid', ROW.su_uuid, null, sa.CA_UUID
+         FROM smart.sampling_unit_attribute sa
+         WHERE sa.uuid = ROW.su_attribute_uuid;
+     RETURN ROW;
 END$$;
 
 
 CREATE FUNCTION connect.trg_screen_option_uuid() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, op.CA_UUID 
- 		FROM smart.screen_option op where op.uuid = ROW.option_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, op.CA_UUID
+         FROM smart.screen_option op where op.uuid = ROW.option_uuid;
 RETURN ROW; END$$;
 
 
@@ -1415,21 +1415,21 @@ RETURN ROW; END$$;
 CREATE FUNCTION connect.trg_survey() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-	DECLARE
-	ROW RECORD;
+    DECLARE
+    ROW RECORD;
 BEGIN
-	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
- 	ROW = NEW;
- 	ELSIF (TG_OP = 'DELETE') THEN
- 		ROW = OLD;
- 	END IF;
- 
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, sd.CA_UUID 
- 		FROM smart.survey_design sd
- 		WHERE sd.uuid = ROW.survey_design_uuid;
- 	RETURN ROW;
+    IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN
+     ROW = NEW;
+     ELSIF (TG_OP = 'DELETE') THEN
+         ROW = OLD;
+     END IF;
+
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, sd.CA_UUID
+         FROM smart.survey_design sd
+         WHERE sd.uuid = ROW.survey_design_uuid;
+     RETURN ROW;
 END$$;
 
 
@@ -1437,21 +1437,21 @@ END$$;
 CREATE FUNCTION connect.trg_survey_design_property() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-	DECLARE
-	ROW RECORD;
+    DECLARE
+    ROW RECORD;
 BEGIN
-	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
- 	ROW = NEW;
- 	ELSIF (TG_OP = 'DELETE') THEN
- 		ROW = OLD;
- 	END IF;
- 
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, sd.CA_UUID 
- 		FROM smart.survey_design sd
- 		WHERE sd.uuid = ROW.survey_design_uuid;
- 	RETURN ROW;
+    IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN
+     ROW = NEW;
+     ELSIF (TG_OP = 'DELETE') THEN
+         ROW = OLD;
+     END IF;
+
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, sd.CA_UUID
+         FROM smart.survey_design sd
+         WHERE sd.uuid = ROW.survey_design_uuid;
+     RETURN ROW;
 END$$;
 
 
@@ -1459,71 +1459,71 @@ END$$;
 CREATE FUNCTION connect.trg_survey_design_sampling_unit() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-	DECLARE
-	ROW RECORD;
+    DECLARE
+    ROW RECORD;
 BEGIN
-	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
- 	ROW = NEW;
- 	ELSIF (TG_OP = 'DELETE') THEN
- 		ROW = OLD;
- 	END IF;
- 
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'survey_design_uuid', ROW.survey_design_uuid, 'su_attribute_uuid', ROW.su_attribute_uuid, null, sd.CA_UUID 
- 		FROM smart.survey_design sd
- 		WHERE sd.uuid = ROW.survey_design_uuid;
- 	RETURN ROW;
+    IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN
+     ROW = NEW;
+     ELSIF (TG_OP = 'DELETE') THEN
+         ROW = OLD;
+     END IF;
+
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'survey_design_uuid', ROW.survey_design_uuid, 'su_attribute_uuid', ROW.su_attribute_uuid, null, sd.CA_UUID
+         FROM smart.survey_design sd
+         WHERE sd.uuid = ROW.survey_design_uuid;
+     RETURN ROW;
 END$$;
 
 
 CREATE FUNCTION connect.trg_survey_waypoint() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-	DECLARE
-	ROW RECORD;
+    DECLARE
+    ROW RECORD;
 BEGIN
-	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
- 	ROW = NEW;
- 	ELSIF (TG_OP = 'DELETE') THEN
- 		ROW = OLD;
- 	END IF;
- 
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'wp_uuid', ROW.wp_uuid, 'mission_day_uuid', ROW.mission_day_uuid, null, wp.CA_UUID 
- 		FROM smart.waypoint wp
- 		WHERE wp.uuid = ROW.wp_uuid;
- 	RETURN ROW;
+    IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN
+     ROW = NEW;
+     ELSIF (TG_OP = 'DELETE') THEN
+         ROW = OLD;
+     END IF;
+
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'wp_uuid', ROW.wp_uuid, 'mission_day_uuid', ROW.mission_day_uuid, null, wp.CA_UUID
+         FROM smart.waypoint wp
+         WHERE wp.uuid = ROW.wp_uuid;
+     RETURN ROW;
 END$$;
 
 
 CREATE FUNCTION connect.trg_track() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, p.CA_UUID 
- 		FROM smart.patrol p, smart.patrol_leg pl, smart.patrol_leg_day pld WHERE p.uuid = pl.patrol_uuid and pl.uuid = pld.patrol_leg_uuid and pld.uuid = ROW.patrol_leg_day_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, p.CA_UUID
+         FROM smart.patrol p, smart.patrol_leg pl, smart.patrol_leg_day pld WHERE p.uuid = pl.patrol_uuid and pl.uuid = pld.patrol_leg_uuid and pld.uuid = ROW.patrol_leg_day_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_wp_attachments() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, wp.CA_UUID 
- 		FROM smart.waypoint wp WHERE wp.uuid = ROW.wp_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, wp.CA_UUID
+         FROM smart.waypoint wp WHERE wp.uuid = ROW.wp_uuid;
 RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.trg_wp_group_observation() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
-  INSERT INTO connect.change_log 
- (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, wp.CA_UUID 
+  INSERT INTO connect.change_log
+ (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+ SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, wp.CA_UUID
    FROM smart.waypoint wp WHERE wp.uuid = ROW.wp_uuid;
 RETURN ROW; END$$;
 
@@ -1531,9 +1531,9 @@ RETURN ROW; END$$;
 CREATE FUNCTION connect.trg_wp_observation() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
-  INSERT INTO connect.change_log 
- (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, wp.CA_UUID 
+  INSERT INTO connect.change_log
+ (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+ SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, wp.CA_UUID
    FROM smart.waypoint wp, smart.wp_observation_group g WHERE wp.uuid = g.wp_uuid and g.uuid = ROW.wp_group_uuid;
 RETURN ROW; END$$;
 
@@ -1541,10 +1541,10 @@ RETURN ROW; END$$;
 CREATE FUNCTION connect.trg_wp_observation_attributes() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
- 	INSERT INTO connect.change_log 
- 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
- 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'attribute_uuid', ROW.attribute_uuid, null, null, null, a.CA_UUID 
- 		FROM smart.dm_attribute a WHERE a.uuid = ROW.attribute_uuid;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'attribute_uuid', ROW.attribute_uuid, null, null, null, a.CA_UUID
+         FROM smart.dm_attribute a WHERE a.uuid = ROW.attribute_uuid;
 RETURN ROW; END$$;
 
 
@@ -1576,24 +1576,24 @@ DECLARE
   i integer;
   p geometry;
 BEGIN
-	p := st_geomfromwkb(geometry);
-	type := st_geometrytype(p);
-	IF (upper(type) = 'ST_POLYGON') THEN
-		RETURN smart.computeHoursPoly(geometry, linestring);
-	ELSIF (upper(type) = 'ST_MULTIPOLYGON') THEN
-		value := 0;
-		FOR i in 1..ST_NumGeometries(p) LOOP
-			value := value + computeHoursPoly( st_asewkb(ST_GeometryN(p, i), 'XDR'), linestring);
-		END LOOP;
-		RETURN value;
-	ELSIF (upper(type) = 'ST_GEOMETRYCOLLECTION') THEN
-		value := 0;
-		FOR i in 1..ST_NumGeometries(p) LOOP
-			value := value + computeHours(ST_GeometryN(p, i), linestring);
-		END LOOP;
-		RETURN value;
-	END IF;
-	RETURN 0;
+    p := st_geomfromwkb(geometry);
+    type := st_geometrytype(p);
+    IF (upper(type) = 'ST_POLYGON') THEN
+        RETURN smart.computeHoursPoly(geometry, linestring);
+    ELSIF (upper(type) = 'ST_MULTIPOLYGON') THEN
+        value := 0;
+        FOR i in 1..ST_NumGeometries(p) LOOP
+            value := value + computeHoursPoly( st_asewkb(ST_GeometryN(p, i), 'XDR'), linestring);
+        END LOOP;
+        RETURN value;
+    ELSIF (upper(type) = 'ST_GEOMETRYCOLLECTION') THEN
+        value := 0;
+        FOR i in 1..ST_NumGeometries(p) LOOP
+            value := value + computeHours(ST_GeometryN(p, i), linestring);
+        END LOOP;
+        RETURN value;
+    END IF;
+    RETURN 0;
 
 END;
 $$;
@@ -1615,7 +1615,7 @@ DECLARE
 BEGIN
  ls := st_geomfromwkb(linestring);
  p := st_geomfromwkb(polygon);
- 
+
  IF (UPPER(st_geometrytype(ls)) = 'ST_MULTILINESTRING' ) THEN
   ctime = 0;
   FOR i in 1..ST_NumGeometries(ls) LOOP
@@ -1623,7 +1623,7 @@ BEGIN
   END LOOP;
   RETURN ctime;
  END IF;
- 
+
  --wholly contained use entire time
  IF not st_isvalid(ls) and st_length(ls) = 0 THEN
   pnttemp = st_pointn(ls, 1);
@@ -1632,16 +1632,16 @@ BEGIN
   END IF;
   RETURN 0;
  END IF;
- 
+
  IF (st_contains(p, ls)) THEN
   return (st_z(st_endpoint(ls)) - st_z(st_startpoint(ls))) / 3600000.0;
  END IF;
- 
+
  value := 0;
  FOR i in 1..ST_NumPoints(ls)-1 LOOP
   pnttemp := st_pointn(ls, i);
   pnttemp2 := st_pointn(ls, i+1);
-  lstemp := st_makeline(pnttemp, pnttemp2); 
+  lstemp := st_makeline(pnttemp, pnttemp2);
   IF (NOT st_intersects(st_envelope(ls), st_envelope(lstemp))) THEN
    --do nothing; outside envelope
   ELSE
@@ -1668,7 +1668,7 @@ $$;
 CREATE FUNCTION smart.computetileid(x double precision, y double precision, distance double precision, direction double precision, srid integer, originx double precision, originy double precision, gridsize double precision) RETURNS character varying
     LANGUAGE plpgsql
     AS $$
-DECLARE 
+DECLARE
   pnt geometry;
   tx integer;
   ty integer;
@@ -1689,7 +1689,7 @@ CREATE FUNCTION smart.distanceinmeter(geom bytea) RETURNS double precision
     LANGUAGE plpgsql
     AS $$
 BEGIN
-	RETURN ST_Length_Spheroid(st_force2d(st_geomfromwkb(geom)), 'SPHEROID["WGS 84",6378137,298.257223563]');
+    RETURN ST_Length_Spheroid(st_force2d(st_geomfromwkb(geom)), 'SPHEROID["WGS 84",6378137,298.257223563]');
 
 END;
 $$;
@@ -1700,7 +1700,7 @@ CREATE FUNCTION smart.hkeylength(hkey character varying) RETURNS integer
     LANGUAGE plpgsql
     AS $$
 BEGIN
-	RETURN length(hkey) - length(replace(hkey, '.', '')) - 1;
+    RETURN length(hkey) - length(replace(hkey, '.', '')) - 1;
 
 END;
 $$;
@@ -1710,7 +1710,7 @@ CREATE FUNCTION smart.intersection(geom1 bytea, geom2 bytea) RETURNS bytea
     LANGUAGE plpgsql
     AS $$
 BEGIN
-	RETURN st_asewkb(ST_INTERSECTION(st_geomfromwkb(geom1), st_geomfromwkb(geom2)), 'XDR');
+    RETURN st_asewkb(ST_INTERSECTION(st_geomfromwkb(geom1), st_geomfromwkb(geom2)), 'XDR');
 
 END;
 $$;
@@ -1720,7 +1720,7 @@ CREATE FUNCTION smart.intersects(geom1 bytea, geom2 bytea) RETURNS boolean
     LANGUAGE plpgsql
     AS $$
 BEGIN
-	RETURN ST_INTERSECTS(st_geomfromwkb(geom1), st_geomfromwkb(geom2));
+    RETURN ST_INTERSECTS(st_geomfromwkb(geom1), st_geomfromwkb(geom2));
 
 END;
 $$;
@@ -1730,14 +1730,14 @@ CREATE FUNCTION smart.metaphonecontains(metaphone character varying, searchstrin
     LANGUAGE plpgsql
     AS $$
 DECLARE
-	part varchar;
+    part varchar;
 BEGIN
-	IF (metaphone IS NULL OR searchstring IS NULL) THEN RETURN false; END IF;
-	FOREACH PART IN ARRAY string_to_array(searchstring, ' ')
-	LOOP
-    		IF (metaphone = part) THEN RETURN TRUE; END IF;
-	END LOOP;
-	RETURN FALSE;
+    IF (metaphone IS NULL OR searchstring IS NULL) THEN RETURN false; END IF;
+    FOREACH PART IN ARRAY string_to_array(searchstring, ' ')
+    LOOP
+            IF (metaphone = part) THEN RETURN TRUE; END IF;
+    END LOOP;
+    RETURN FALSE;
 END;
 $$;
 
@@ -1769,7 +1769,7 @@ DECLARE
  prjx double precision;
 BEGIN
   a := radians(direction);
-  dR := distance / 6378100;  
+  dR := distance / 6378100;
   ry := radians(y);
   rx := radians(x);
   prjy1 := asin( sin(ry) * cos(dR) + cos(ry) * sin(dR) * cos(a) );
@@ -1789,7 +1789,7 @@ DECLARE
   pnt geometry;
 BEGIN
  ls := st_geomfromwkb(geom1);
- 
+
  IF (UPPER(st_geometrytype(ls)) = 'ST_MULTILINESTRING' ) THEN
   FOR i in 1..ST_NumGeometries(ls) LOOP
    IF (smart.trackIntersects(st_geometryn(ls, i), geom2)) THEN
@@ -1812,7 +1812,7 @@ CREATE FUNCTION smart.trimhkeytolevel(level integer, str character varying) RETU
     LANGUAGE plpgsql
     AS $$
 BEGIN
-	RETURN (regexp_matches(str, '(?:[a-zA-Z_0-9]*\.){' || level+1 || '}'))[1];
+    RETURN (regexp_matches(str, '(?:[a-zA-Z_0-9]*\.){' || level+1 || '}'))[1];
 END;
 $$;
 
@@ -1962,8 +1962,8 @@ CREATE TABLE connect.connect_version (
 );
 
 CREATE TABLE connect.ct_api_key(
-    ca_uuid uuid not null, 
-    api_key varchar(64) not null, 
+    ca_uuid uuid not null,
+    api_key varchar(64) not null,
     primary key (ca_uuid), unique(api_key)
 );
 
@@ -2201,7 +2201,7 @@ COMMENT ON COLUMN connect.work_item.status IS 'Status of upload and processing';
 COMMENT ON COLUMN connect.work_item.message IS 'Error message or other info message asociated with upload.';
 
 
--- SMART TABLES 
+-- SMART TABLES
 CREATE TABLE smart.agency (
     uuid uuid NOT NULL,
     ca_uuid uuid NOT NULL,
@@ -2340,7 +2340,7 @@ CREATE TABLE smart.asset_station (
 CREATE TABLE smart.asset_station_attribute (
     attribute_uuid uuid NOT NULL,
     seq_order integer NOT NULL,
-    PRIMARY KEY (attribute_uuid)   
+    PRIMARY KEY (attribute_uuid)
 );
 
 CREATE TABLE smart.asset_station_attribute_value (
@@ -2517,7 +2517,7 @@ CREATE TABLE smart.cm_attribute_tree_node (
 CREATE TABLE smart.cm_ct_properties_profile (
     cm_uuid uuid NOT NULL,
     profile_uuid uuid NOT NULL,
-    PRIMARY KEY (cm_uuid)    
+    PRIMARY KEY (cm_uuid)
 );
 
 
@@ -5270,7 +5270,7 @@ INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs
 INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.entity.query','4.0');
 INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.er.query','4.0');
 INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.qa','1.0');
-INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.event','1.0');
+INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.event','2.0');
 INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.connect.dataqueue','3.0');
 INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.asset','1.0');
 INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.asset.query','1.0');
@@ -5281,4 +5281,3 @@ INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs
 INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart','7.0.0');
 INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.cybertracker','7.0');
 INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.i2','5.0');
-
