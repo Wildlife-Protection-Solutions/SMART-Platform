@@ -22,7 +22,9 @@
 package org.wcs.smart.paws;
 
 import org.wcs.smart.ILoginHandler;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.paws.engine.PawsStartUpJob;
+import org.wcs.smart.user.UserLevelManager;
 
 /**
  * Conservation Area login handler that runs the PAWS start up
@@ -35,7 +37,10 @@ public class LoginHandler implements ILoginHandler {
 
 	@Override
 	public void onLogin() throws Exception {
-		(new PawsStartUpJob()).schedule();
+		if (UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(),
+				UserLevelManager.ADMIN, UserLevelManager.MANAGER, UserLevelManager.ANALYST)) {
+			(new PawsStartUpJob()).schedule();
+		}
 	}
 
 }

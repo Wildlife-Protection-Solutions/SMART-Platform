@@ -808,6 +808,24 @@ public class SmartUtils {
 		}
 	}
 	
+	/**
+	 * Loads the non text svg image into a local image object for the given size
+	 * 
+	 * @param display
+	 * @param size size of image
+	 * @return the converted image or null if error occurs
+	 * @throws IOException
+	 * @throws TranscoderException
+	 */
+	public static Image getSvgLogoNoText(Display display, Integer size) {
+		try(InputStream reader = SmartPlugIn.class.getResourceAsStream("/images/smartonly.svg")){ //$NON-NLS-1$
+			return readSvg(display, reader, size);
+		}catch (Exception ex) {
+			SmartPlugIn.log(ex.getMessage(), ex);
+		}
+		return null;
+	}
+	
 	public static Image readSvg(Display display, InputStream is, Integer size) throws IOException, TranscoderException {
 		PNGTranscoder transcoder = new PNGTranscoder();
 		if (size != null) {

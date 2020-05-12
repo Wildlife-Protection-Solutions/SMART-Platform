@@ -311,6 +311,7 @@ public enum EntityImportEngine {
 					s.saveOrUpdate(i.getAttribute());
 					updatedItems.add(i.getAttribute());
 				}
+				s.flush();
 				
 				for (IntelAttribute ia : updatedItems) {
 					int cnt = 0;
@@ -319,10 +320,13 @@ public enum EntityImportEngine {
 					}
 					s.saveOrUpdate(ia);
 				}
+				s.flush();
 				
 				//save new entities
 				for (IntelEntity e : newEntities){
 					s.save(e);
+					s.flush();
+					
 					e.createDataModelItem(s);
 					kidMonitor.worked(1);
 					kidMonitor.checkCanceled();

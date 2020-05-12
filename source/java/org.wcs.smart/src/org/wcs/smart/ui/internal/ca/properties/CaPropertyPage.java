@@ -47,6 +47,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -58,6 +59,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartWorkbenchWindowAdvisor;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
@@ -155,13 +157,23 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-//				Locale[] ls = Locale.getAvailableLocales();
 				Locale[] ls = Localization.getSupportedLocals();
 				Arrays.sort(ls,new LocaleComparator());
 			
 				ListSelectionDialog lstSelection = new ListSelectionDialog(
 					getShell(), ls, ArrayContentProvider.getInstance(),
-					new LocaleLabelProvider(), Messages.CaPropertyPage_LocaleToAddLabel);
+					new LocaleLabelProvider(), Messages.CaPropertyPage_LocaleToAddLabel) {
+					
+					@Override
+					protected Control createDialogArea(Composite parent) {
+						Control c = super.createDialogArea(parent);
+						SmartUiUtils.colorDialog(c.getShell());
+						SmartUiUtils.makeTransparent((Composite)c);
+						return c;
+					}
+
+				};
+				
 				if (lstSelection.open() == IDialogConstants.CANCEL_ID){
 					return ;
 				}

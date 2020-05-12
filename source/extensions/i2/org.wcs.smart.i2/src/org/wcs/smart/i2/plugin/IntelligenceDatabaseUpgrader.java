@@ -404,7 +404,11 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 				
 				"ALTER TABLE smart.i_profile_config ADD CONSTRAINT profile_config_ca_uuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 				
-				"ALTER TABLE smart.i_recordsource_attribute ADD COLUMN keyid varchar(128)" //$NON-NLS-1$
+				"ALTER TABLE smart.i_recordsource_attribute ADD COLUMN keyid varchar(128)", //$NON-NLS-1$
+				
+				"GRANT ALL PRIVILEGES ON smart.i_permission to data_entry", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON smart.i_permission to manager", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON smart.i_permission to analyst", //$NON-NLS-1$
 		};
 		for (String s : sql) session.createNativeQuery(s).executeUpdate();
 		

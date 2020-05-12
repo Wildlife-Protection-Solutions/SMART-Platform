@@ -260,6 +260,7 @@ public class CaInfoComposite extends Composite {
 		
 		
 		Button btnBrowse = new Button(iconComp, SWT.PUSH);
+		btnBrowse.setBackground(iconComp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnBrowse.setText("..."); //$NON-NLS-1$
 		btnBrowse.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, false, false));
 		btnBrowse.setToolTipText(Messages.CaInfoComposite_SelectFileTooltip);
@@ -283,6 +284,7 @@ public class CaInfoComposite extends Composite {
 		});
 		
 		Button btnClear = new Button(iconComp, SWT.PUSH);
+		btnClear.setBackground(iconComp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnClear.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, false, false));
 		btnClear.setText(Messages.CaInfoComposite_clearButton);
 		btnClear.setToolTipText(Messages.CaInfoComposite_clearTooltip);

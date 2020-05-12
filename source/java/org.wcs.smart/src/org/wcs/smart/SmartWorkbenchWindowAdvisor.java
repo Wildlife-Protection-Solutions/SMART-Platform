@@ -63,6 +63,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.startup.EncryptCleanUp;
+import org.wcs.smart.ui.InactivityTimeoutHandler;
 
 /**
  * Smart Workbench Window Advisor.
@@ -284,6 +285,9 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 		statusBar.getChildren().add(1, tc);
 		statusBar.getChildren().add(smartStatusBar);
 		
+		
+		InactivityTimeoutHandler.INSTANCE.reset();
+
     }
     
     public void postWindowCreate() {

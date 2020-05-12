@@ -79,8 +79,8 @@ public class Upgrader630To700 implements IDatabaseUpgrader {
 				"CREATE TABLE smart.employee_team (uuid char(16) for bit data not null, ca_uuid char(16) for bit data not null, primary key (uuid))", //$NON-NLS-1$
 				"CREATE TABLE smart.employee_team_member (employee_uuid char(16) for bit data not null, team_uuid char(16) for bit data not null, primary key(employee_uuid, team_uuid))", //$NON-NLS-1$
 				
-				"GRANT ALL PRIVILEGES ON smart.employee_team TO admin,manager,data_entry", //$NON-NLS-1$
-				"GRANT ALL PRIVILEGES ON smart.employee_team_member TO admin,manager,data_entry", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON smart.employee_team TO admin,manager,analyst", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON smart.employee_team_member TO admin,manager,analyst", //$NON-NLS-1$
 
 				"ALTER TABLE smart.employee_team ADD CONSTRAINT employeeteam_cauuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 				"ALTER TABLE smart.employee_team_member ADD CONSTRAINT employeeteammem_euuid FOREIGN KEY (employee_uuid) REFERENCES smart.employee(uuid) ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$

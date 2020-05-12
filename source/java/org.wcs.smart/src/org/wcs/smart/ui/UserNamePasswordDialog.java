@@ -44,16 +44,16 @@ import org.wcs.smart.internal.Messages;
  */
 public class UserNamePasswordDialog extends SmartStyledDialog{
 
-	private Text txtUsername;
-	private Text txtPassword;
+	protected Text txtUsername;
+	protected Text txtPassword;
 	
-	private String username;
-	private String password;
+	protected String username;
+	protected String password;
 	
-	private String dialogTitle;
-	private String confirmationMessage;
-	private String okText;
-	private String cancelText;
+	protected String dialogTitle;
+	protected String confirmationMessage;
+	protected String okText;
+	protected String cancelText;
 	
 	public UserNamePasswordDialog(Shell parentShell, 
 			String dialogTitle, 

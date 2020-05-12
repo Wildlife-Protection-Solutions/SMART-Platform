@@ -174,7 +174,7 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 			cmbUserName.setFocus();
 		}
 		//TODO: remove smart/smart before build
-		cmbUserName.setText("smart");
+//		cmbUserName.setText("smart");
 		txtPassword.setText("smart"); //$NON-NLS-1$
 		doEventLoop();
 		

@@ -525,11 +525,6 @@
                      <test
                            forcePluginActivation="true"
                            property="org.wcs.smart.smartAdminUser"
-                           value="data_entry">
-                     </test>
-                     <test
-                           forcePluginActivation="true"
-                           property="org.wcs.smart.smartAdminUser"
                            value="analyst">
                      </test>
                   </or>
@@ -553,11 +548,6 @@
                            forcePluginActivation="true"
                            property="org.wcs.smart.smartAdminUser"
                            value="manager">
-                     </test>
-                     <test
-                           forcePluginActivation="true"
-                           property="org.wcs.smart.smartAdminUser"
-                           value="data_entry">
                      </test>
                      <test
                            forcePluginActivation="true"
@@ -1634,6 +1624,11 @@
             class="org.locationtech.udig.project.ui.preferences.RenderPreferences"
             id="org.wcs.smart.udig.preferenced.render"
             name="%prefpage.render.name">
+      </page>
+      <page
+            class="org.wcs.smart.ui.internal.preference.InactivityTimeoutPreferencePage"
+            id="org.wcs.smart.preference.InactivityTimeout"
+            name="Security Timeout">
       </page>
    </extension>
    <extension
