@@ -33,8 +33,9 @@ import org.eclipse.ui.internal.about.AboutUtils;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class ViewErrorLogHandler {
-
+	
 	@Execute
 	public void execute(Shell activeShell) {
 		AboutUtils.openErrorLogBrowser(activeShell);

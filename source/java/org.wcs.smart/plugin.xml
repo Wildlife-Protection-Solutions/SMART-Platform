@@ -665,11 +665,16 @@
                   visible="true">
             </separator>
              <command
-                  commandId="org.wcs.smart.errorlog.show"
+                  commandId="org.wcs.smart.command.errorlog.show"
                   icon="images/icons/obj16/error_icon.png"
                   label="%viewerrorlog.command.label"
                   style="push">
             </command>
+             <command
+                   commandId="org.wcs.smart.command.errorlog.email"
+                   icon="images/icons/shared16/export.png"
+                   style="push">
+             </command>
             <separator
                   name="org.wcs.smart.menu.help.separator1"
                   visible="true">
@@ -996,8 +1001,12 @@
             name="%manageiconsets.command.name">
       </command>
       <command
-            id="org.wcs.smart.errorlog.show"
+            id="org.wcs.smart.command.errorlog.show"
             name="%viewererrorlog.command.name">
+      </command>
+      <command
+            id="org.wcs.smart.command.errorlog.email"
+            name="Send Error Log">
       </command>
    </extension>
    <extension
@@ -1189,7 +1198,11 @@
       </handler>
       <handler
             class="org.wcs.smart.ui.ViewErrorLogHandler$ViewErrorLogHandlerWrapper"
-            commandId="org.wcs.smart.errorlog.show">
+            commandId="org.wcs.smart.command.errorlog.show">
+      </handler>
+      <handler
+            class="org.wcs.smart.ui.EmailLogHandler$EmailLogHandlerWrapper"
+            commandId="org.wcs.smart.command.errorlog.email">
       </handler>
    </extension>
    <extension
