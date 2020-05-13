@@ -479,31 +479,33 @@ public class MapItemExecutor implements IReportItemExecutor{
 			toAdd.add(resource);
 		}
 		
-		AddLayersCommand cmd = new AddLayersCommand(toAdd, renderedMap.getMapLayers().size());
-		executeCommmand(renderedMap, cmd);
 		StringBuilder layerErrors = new StringBuilder();
-		for (Layer l : cmd.getLayers()) {
-			// setup name and style
-			for (GeoSmart smrt : layers) {
-				if (smrt.georesource != null && smrt.georesource.equals(l.getGeoResource())) {
-						l.setName(smrt.info.getLayerName());
-						if (smrt.info.getMapStyleBlackboard() != null){
-							StyleBlackboard sb = smrt.info.getMapStyleBlackboard();
-							l.getStyleBlackboard().clear();
-							l.getStyleBlackboard().addAll(sb);
-						}else if (smrt.info.getMapStyle() != null) {
-							// use user defined style
-							StyleBlackboard sb = BirtMapUtils.parseStyleString(smrt.info.getMapStyle());
-							if (sb != null) {
+		if (!toAdd.isEmpty()) {
+			AddLayersCommand cmd = new AddLayersCommand(toAdd, renderedMap.getMapLayers().size());
+			executeCommmand(renderedMap, cmd);
+			for (Layer l : cmd.getLayers()) {
+				// setup name and style
+				for (GeoSmart smrt : layers) {
+					if (smrt.georesource != null && smrt.georesource.equals(l.getGeoResource())) {
+							l.setName(smrt.info.getLayerName());
+							if (smrt.info.getMapStyleBlackboard() != null){
+								StyleBlackboard sb = smrt.info.getMapStyleBlackboard();
 								l.getStyleBlackboard().clear();
 								l.getStyleBlackboard().addAll(sb);
+							}else if (smrt.info.getMapStyle() != null) {
+								// use user defined style
+								StyleBlackboard sb = BirtMapUtils.parseStyleString(smrt.info.getMapStyle());
+								if (sb != null) {
+									l.getStyleBlackboard().clear();
+									l.getStyleBlackboard().addAll(sb);
+								}
 							}
-						}
+					}
 				}
-			}
-			if (l.getGeoResource().getMessage() != null) {
-				layerErrors.append(l.getName() + ": " + l.getGeoResource().getMessage().getMessage()); //$NON-NLS-1$
-				layerErrors.append("\n"); //$NON-NLS-1$
+				if (l.getGeoResource().getMessage() != null) {
+					layerErrors.append(l.getName() + ": " + l.getGeoResource().getMessage().getMessage()); //$NON-NLS-1$
+					layerErrors.append("\n"); //$NON-NLS-1$
+				}
 			}
 		}
 	

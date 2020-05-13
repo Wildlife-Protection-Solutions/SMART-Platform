@@ -29,8 +29,8 @@
 
         <java-version>11</java-version>
         <javafx-lib-version>11.0.2</javafx-lib-version>
-	<tycho-version>1.6.0</tycho-version>
-        <tycho-extras-version>1.6.0</tycho-extras-version>
+	<tycho-version>1.3.0</tycho-version>
+        <tycho-extras-version>1.3.0</tycho-extras-version>
         <tycho.disableP2Mirrors>true</tycho.disableP2Mirrors>
         
         <!-- necessary for e.g. hudson proxy settings
@@ -106,18 +106,6 @@
  			<groupId>org.eclipse.tycho</groupId>
  			<artifactId>tycho-compiler-plugin</artifactId>
  			<version>${tycho-version}</version>
- 			<!--<configuration>
- 				<encoding>UTF-8</encoding>
- 				<extraClasspathElements>
- 				<extraClasspathElement>
- 					<groupId>com.oracle</groupId>
- 					<artifactId>javafx</artifactId>
- 					<version>8.0.0-SNAPSHOT</version>
- 					<systemPath>${java.home}/lib/javafx-swt.jar</systemPath>
- 					<scope>system</scope>
- 				</extraClasspathElement>
- 				</extraClasspathElements>
- 			</configuration>-->
  			<configuration>
 				<encoding>UTF-8</encoding>
 				<source>11</source>
@@ -389,6 +377,7 @@
 				<module>org.wcs.smart.plan.feature</module>
 			</modules>
 		</profile>
+<!-- REMOVED SMART 7
 		<profile>
 			<id>intelligence</id>
 			<modules>
@@ -402,6 +391,7 @@
 				<module>org.wcs.smart.intelligence.feature</module>
 			</modules>
 		</profile>
+-->
 		
 		<profile>
 			<id>incident</id>
@@ -575,13 +565,14 @@
 			<modules>
 				<module>org.wcs.smart.license.feature</module>
 				<module>org.wcs.smart.updatesite</module>
-			
+
+<!-- REMOVE SMART 7			
         			<module>org.wcs.smart.intelligence</module>
 				<module>org.wcs.smart.intelligence.query</module>
 				<module>org.wcs.smart.intelligence.query.report</module>
 				<module>org.wcs.smart.intelligence.core.feature</module>
 				<module>org.wcs.smart.intelligence.feature</module>
-				
+-->				
 				<module>org.wcs.smart.plan</module>
 				<module>org.wcs.smart.plan.core.feature</module>
 				<module>org.wcs.smart.plan.feature</module>
@@ -687,9 +678,13 @@
 				<module>../translations/org.wcs.smart.reporttable.nl</module>
 				<module>../translations/org.wcs.smart.independentincident.feature.nl</module>
 				<module>../translations/org.wcs.smart.independentincident.nl</module>
+				
+				<!-- REMOVED SMART 7
 				<module>../translations/org.wcs.smart.intelligence.feature.nl</module>
 				<module>../translations/org.wcs.smart.intelligence.nl</module>
 				<module>../translations/org.wcs.smart.intelligence.query.nl</module>
+				-->
+				
 				<module>../translations/org.wcs.smart.plan.feature.nl</module>
 				<module>../translations/org.wcs.smart.plan.nl</module>
 				  

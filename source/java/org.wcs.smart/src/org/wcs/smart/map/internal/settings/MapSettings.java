@@ -614,6 +614,7 @@ public class MapSettings {
                         geoResources.add(finalResolve);
                     }
                 }
+                if (!geoResources.isEmpty()) break;
 	        }
 //	        List< ? extends ILayer> addedLayers = ApplicationGIS.addLayersToMap(map, geoResources, -1);
 //	        assert addedLayers.size() != 0;

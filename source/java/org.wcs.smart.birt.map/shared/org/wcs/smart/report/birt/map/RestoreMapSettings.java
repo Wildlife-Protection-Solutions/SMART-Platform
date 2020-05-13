@@ -209,6 +209,7 @@ public class RestoreMapSettings {
             		}
             		members.addAll(member.members(new NullProgressMonitor()));
             	}
+            	if (!geoResources.isEmpty()) break;
 	        }
 	        return geoResources;
     	} catch (Exception e){
