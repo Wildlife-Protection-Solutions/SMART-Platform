@@ -313,12 +313,16 @@ public class JsonCtParser {
 	
 	public Coordinate readXYFromProperties(JSONObject feature){
 		JSONObject properties = (JSONObject) feature.get(PROPERTIES_KEY);
-		Double x = (Double)properties.get(LONGITUDE_KEY);
-		Double y = (Double)properties.get(LATITUDE_KEY);
-		if (x == null || y == null) return null;
+		
+		if (!properties.containsKey(LATITUDE_KEY) || !properties.containsKey(LONGITUDE_KEY)) return null;
+		
+		Double x = ((Number)properties.get(LONGITUDE_KEY)).doubleValue();
+		Double y = ((Number)properties.get(LATITUDE_KEY)).doubleValue(); 
+		
 		return new Coordinate(x,y);
 		
 	}
+	
 	
 	/**
 	 * Returns the value of the SMART_ObsCounter field or null
@@ -363,11 +367,14 @@ public class JsonCtParser {
 		JSONObject properties = (JSONObject) feature.get(PROPERTIES_KEY);
 		
 		//parse x and y may be null
+		
 		Waypoint newWaypoint = new Waypoint();
-		Double x = (Double)properties.get(LONGITUDE_KEY);
-		if (x != null) newWaypoint.setRawX(x);
-		Double y = (Double)properties.get(LATITUDE_KEY);
-		if (y != null) newWaypoint.setRawY(y);
+		Coordinate c = readXYFromProperties(feature);
+		if (c == null) {
+			throw new Exception(Messages.JsonCtParser_latlongnotfound);
+		}
+		newWaypoint.setRawX(c.x);
+		newWaypoint.setRawY(c.y);
 			
 		Float direction = null;
 		Float distance = null;

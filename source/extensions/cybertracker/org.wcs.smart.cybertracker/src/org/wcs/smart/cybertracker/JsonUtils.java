@@ -163,10 +163,8 @@ public class JsonUtils {
 			toUpdate.setAttributeListItem(li);
 		}else if (att.getType() == AttributeType.NUMERIC){
 			Double value2 = null;
-			if (value instanceof Long){
-				value2 = ((Long)value).doubleValue();
-			}else if (value instanceof Double){
-				value2 = (Double) value;
+			if (value instanceof Number){
+				value2 = ((Number)value).doubleValue();
 			}
 			toUpdate.setNumberValue(value2);
 		}else if (att.getType() == AttributeType.TEXT){
