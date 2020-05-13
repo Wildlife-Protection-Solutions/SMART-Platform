@@ -31,6 +31,8 @@ import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartContext;
@@ -55,6 +57,14 @@ public class Upgrader630To700 implements IDatabaseUpgrader {
 					s.beginTransaction();
 					try {
 						c.setAutoCommit(false);
+						
+						String v = HibernateManager.getPlugInVersion("org.wcs.smart.intelligence", s); //$NON-NLS-1$
+						if(v != null) {
+							Display.getDefault().syncExec(()->{
+								MessageDialog.openInformation(Display.getDefault().getActiveShell(), Messages.Upgrader630To700_WarningTitle, Messages.Upgrader630To700_IntelRemovedWarning);
+							});
+						}
+						
 						upgrade(c, monitor);
 						c.setAutoCommit(true);
 						s.getTransaction().commit();
@@ -193,6 +203,7 @@ public class Upgrader630To700 implements IDatabaseUpgrader {
 		/* VERSION UDATE */
 		String ssql = "update smart.db_version set version = '" + UpgradeEngine.UpgradeFromVersion.V700.toVersion + "' where plugin_id = 'org.wcs.smart'"; //$NON-NLS-1$ //$NON-NLS-2$
 		c.createStatement().execute(ssql);
+		
 		
 		
 		/* REMOVE INTELLIGENCE DATA IF EXISTS */
