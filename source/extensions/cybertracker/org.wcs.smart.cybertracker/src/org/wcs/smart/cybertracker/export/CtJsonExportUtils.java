@@ -228,9 +228,9 @@ public class CtJsonExportUtils {
 		
 		for (ProfileOptionID option : ProfileOptionID.values()) {
 			CyberTrackerPropertiesProfileOption opValue = profile.getOptions().get(option);
-			Object defaultValue = profile.getDefaultValue(option);
 			
 			if (opValue == null) {
+				Object defaultValue = profile.getDefaultValue(option);
 				profileObj.put(option.name(), defaultValue);
 			}else {
 				if (isBoolean(option)) {
