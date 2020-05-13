@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.wcs.smart.asset.model.AssetWaypointSource;
 import org.wcs.smart.er.model.SurveyWaypointSource;
 import org.wcs.smart.incident.IndepedentIncidentSource;
 import org.wcs.smart.observation.model.IWaypointSource;
@@ -54,6 +55,7 @@ public enum WaypointSourceEngine implements IWaypointSourceEngine{
 		supportedSources.put(PatrolWaypointSource.PATROL_WP_SOURCE_ID, new PatrolWaypointSource());
 		supportedSources.put(IndepedentIncidentSource.KEY, new IndepedentIncidentSource());
 		supportedSources.put(SurveyWaypointSource.KEY, new SurveyWaypointSource());
+		supportedSources.put(AssetWaypointSource.KEY, new AssetWaypointSource());
 	}
 	
 	/**

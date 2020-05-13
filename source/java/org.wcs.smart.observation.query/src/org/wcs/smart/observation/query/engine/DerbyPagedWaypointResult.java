@@ -237,7 +237,7 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 				sb.append(" a join "); //$NON-NLS-1$
 				sb.append("(SELECT uuid, wp_uuid as wp_uuid FROM smart.wp_attachments "); //$NON-NLS-1$
 				sb.append(" UNION "); //$NON-NLS-1$
-				sb.append("SELECT b.uuid, c.wp_uuid as wp_uuid FROM smart.wp_observation c join "); //$NON-NLS-1$
+				sb.append("SELECT b.uuid, f.wp_uuid as wp_uuid FROM smart.wp_observation_group f join smart.wp_observation c on f.uuid = c.wp_group_uuid join "); //$NON-NLS-1$
 				sb.append("smart.observation_attachment b on c.uuid = b.obs_uuid) e "); //$NON-NLS-1$
 				sb.append("on a.wp_uuid = e.wp_uuid"); //$NON-NLS-1$
 				sb.append(" ORDER BY a.wp_time desc, a.wp_id ) z "); //$NON-NLS-1$

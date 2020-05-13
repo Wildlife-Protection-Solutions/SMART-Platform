@@ -26,6 +26,7 @@ import java.sql.Time;
 import java.util.Locale;
 
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.observation.model.IWaypointSourceEngine;
 import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
 import org.wcs.smart.observation.query.view.IObservationQueryLabelProvider;
 import org.wcs.smart.query.common.engine.IResultItem;
@@ -120,7 +121,7 @@ public class FixedQueryColumn extends QueryColumn {
 				if (item.getObservationGroupUuid() == null) return ""; //$NON-NLS-1$
 				return UuidUtils.uuidToString(item.getObservationGroupUuid());
 			case WAYPOINT_SOURCE:
-				return item.getSourceId();
+				return SmartContext.INSTANCE.getClass(IWaypointSourceEngine.class).getSource(item.getSourceId()).getName(l);
 			case WAYPOINT_COMMENT:
 				return item.getWaypointComment();
 			case WAYPOINT_OBSERVER:
