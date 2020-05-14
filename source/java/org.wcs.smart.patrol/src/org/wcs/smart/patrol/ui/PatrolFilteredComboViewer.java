@@ -44,13 +44,14 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.patrol.PatrolHibernateManager;
-import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.views.IPatrolFilteringView;
 import org.wcs.smart.patrol.internal.ui.views.PatrolFilterDialog;
@@ -67,7 +68,7 @@ import org.wcs.smart.patrol.model.Patrol;
 public class PatrolFilteredComboViewer extends Composite implements IPatrolFilteringView {
 
     private ComboViewer viewer;
-    private Button btnFilter;
+    private ToolItem btnFilter;
 
     private PatrolViewFilter filter = PatrolViewFilter.newInstance();
 	private LoadPatrolIdJob loadPatrolIdJob = new LoadPatrolIdJob();
@@ -123,11 +124,13 @@ public class PatrolFilteredComboViewer extends Composite implements IPatrolFilte
 			}
 		});
 
-		btnFilter = new Button(this, SWT.PUSH);
-		Image image = SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_FILTER_ICON);		
+		ToolBar temp = new ToolBar(this, SWT.FLAT);
+		temp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		
+		btnFilter = new ToolItem(temp, SWT.PUSH);
+		Image image = SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.FILTER_ICON);
 		btnFilter.setImage(image);
 		btnFilter.setToolTipText(Messages.PatrolFilteredComboViewerComposite_Filter_Tooltip);
-		btnFilter.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnFilter.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				PatrolFilterDialog pfd = new PatrolFilterDialog(getShell(), PatrolFilteredComboViewer.this);

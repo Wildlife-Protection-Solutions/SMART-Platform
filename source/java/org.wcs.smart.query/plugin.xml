@@ -267,65 +267,6 @@
             </visibleWhen>
          </toolbar>
          <toolbar
-               id="vertical.org.wcs.smart.query.toolbar2">
-            <command
-                  commandId="org.wcs.smart.query.import"
-                  label="%command.label.importquery"
-                  mode="FORCE_TEXT"
-                  style="push"
-                  tooltip="%command.tooltip.importquery">
-               <visibleWhen
-                     checkEnabled="false">
-                  <with
-                        variable="activeWorkbenchWindow.activePerspective">
-                     <or>
-                        <equals
-                              value="org.wcs.smart.query.persepectives.single">
-                        </equals>
-                        <equals
-                              value="org.wcs.smart.query.persepectives.multi">
-                        </equals>
-                     </or>
-                  </with>
-               </visibleWhen>
-            </command>
-            <command
-                  commandId="org.wcs.smart.query.exportmulti"
-                  label="%command.label.exportdef"
-                  mode="FORCE_TEXT"
-                  style="push"
-                  tooltip="%command.tooltip.exportdef">
-               <visibleWhen
-                     checkEnabled="false">
-                  <with
-                        variable="activeWorkbenchWindow.activePerspective">
-                     <or>
-                        <equals
-                              value="org.wcs.smart.query.persepectives.single">
-                        </equals>
-                        <equals
-                              value="org.wcs.smart.query.persepectives.multi">
-                        </equals>
-                     </or>
-                  </with>
-               </visibleWhen>
-            </command>
-            <visibleWhen
-                  checkEnabled="false">
-               <with
-                     variable="activeWorkbenchWindow.activePerspective">
-                  <or>
-                     <equals
-                           value="org.wcs.smart.query.persepectives.single">
-                     </equals>
-                     <equals
-                           value="org.wcs.smart.query.persepectives.multi">
-                     </equals>
-                  </or>
-               </with>
-            </visibleWhen>
-         </toolbar>
-         <toolbar
                id="vertical.org.wcs.smart.query.toolbar3">
             <command
                   commandId="org.eclipse.ui.file.save"

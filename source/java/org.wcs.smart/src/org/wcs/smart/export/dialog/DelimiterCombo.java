@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.export.dialog;
 
+import java.text.DecimalFormatSymbols;
 import java.text.MessageFormat;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -88,7 +89,11 @@ public class DelimiterCombo extends ComboViewer {
 				getCombo().setText(String.valueOf(x));
 			}
 		}else{
-			setSelection(new StructuredSelection(Delimiter.COMMA));
+			if (DecimalFormatSymbols.getInstance().getDecimalSeparator() == ',') {
+				setSelection(new StructuredSelection(Delimiter.SEMICOLON));	
+			}else {
+				setSelection(new StructuredSelection(Delimiter.COMMA));
+			}
 		}
 	}
 

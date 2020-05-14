@@ -110,12 +110,6 @@ public class SmartPatrolPlugIn extends AbstractUIPlugin {
 	public static final String PATROL_MANDATE_ICON = "org.wsc.smart.patrol.PATROL_MANDATE"; //$NON-NLS-1$
 
 	/**
-	 * Image descriptor key for patrol filter icon
-	 */
-	public static final String PATROL_FILTER_ICON = "org.wsc.smart.patrol.PATROL_FILTER"; //$NON-NLS-1$
-	
-
-	/**
 	 * Image descriptor key for month icon
 	 */
 	public static final String MONTH_ICON = "org.wsc.smart.patrol.YEAR"; //$NON-NLS-1$
