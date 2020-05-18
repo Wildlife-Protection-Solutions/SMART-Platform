@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Generator: Adobe Illustrator 18.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
 <svg version="1.1" baseProfile="tiny" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-	 x="0px" y="0px" viewBox="0 0 128 128" xml:space="preserve">
+	 x="0px" y="0px" viewBox="0 0 128 128" 
+width="128" height="128"
+xml:space="preserve">
 <g>
 	<polygon fill="#A3A9AE" points="73.9,23.1 57.6,39.3 53.5,35.1 69.7,18.9 	"/>
 	<path fill="#AA6D43" d="M77.2,19.8l-1.9,1.8l-2.8-2.8l1.6-1.6c0.1-0.1,0.3-0.1,0.4-0.1L77.2,19.8z"/>
