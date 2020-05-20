@@ -1,4 +1,5 @@
 /*
+
  * Copyright (C) 2012 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -504,13 +505,13 @@ public class PartolTracksComposite extends TracksComposite {
 		
 		Rule otherRule = sf.createRule();
 		otherRule.symbolizers().add(otherSym);
-		otherRule.setIsElseFilter(true);
+		otherRule.setElseFilter(true);
 		otherRule.setFilter(filter);
 		otherRule.setName(Messages.PartolTracksComposite_Legend_OtherDays);
 		
 		Rule todayRule = sf.createRule();
 		todayRule.symbolizers().add(todaySym);
-		todayRule.setIsElseFilter(false);
+		todayRule.setElseFilter(false);
 		todayRule.setFilter(filter);
 		todayRule.setName(Messages.PartolTracksComposite_Legend_CurrentDay);
 

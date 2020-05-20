@@ -171,3 +171,4 @@ Eclipse-BuddyPolicy: global
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Automatic-Module-Name: org.wcs.smart
+Import-Package: org.apache.batik.gvt

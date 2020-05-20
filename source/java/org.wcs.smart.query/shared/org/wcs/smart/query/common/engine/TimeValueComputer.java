@@ -44,7 +44,7 @@ public class TimeValueComputer implements IValueComputer<Double> {
 	 * Computes the distance of the linestring
 	 * in the tile cell.
 	 * 
-	 * @see org.wcs.smart.query.common.engine.IValueComputer#computeValue(java.lang.Object, org.org.wcs.smart.query.common.model.Tile, org.org.wcs.smart.query.common.model.Grid, com.vividsolutions.jts.geom.LineString)
+	 * @see org.wcs.smart.query.common.engine.IValueComputer#computeValue(java.lang.Object, org.org.wcs.smart.query.common.model.Tile, org.org.wcs.smart.query.common.model.Grid, org.locationtech.jts.geom.LineString)
 	 */
 	@Override
 	public Double computeValue(Double existingValue, Tile t, Grid gridDef, LineString ls) throws Exception{

@@ -587,13 +587,13 @@ public class MissionTracksComposite extends TracksComposite {
 		
 		Rule otherRule = sf.createRule();
 		otherRule.symbolizers().add(otherSym);
-		otherRule.setIsElseFilter(true);
+		otherRule.setElseFilter(true);
 		otherRule.setFilter(dateFilter);
 		otherRule.setName(Messages.TracksComposite_OtherDayRule);
 		
 		Rule todayRule = sf.createRule();
 		todayRule.symbolizers().add(todaySym);
-		todayRule.setIsElseFilter(false);
+		todayRule.setElseFilter(false);
 		todayRule.setFilter(dateFilter);
 		todayRule.setName(Messages.TracksComposite_CurrentDayRule);
 

@@ -1,4 +1,5 @@
 /*
+
  * Copyright (C) 2012 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
@@ -40,7 +41,7 @@ public class SurveyCntValueComputer implements IValueComputer<HashSet<Object>> {
 
 	
 	/**
-	 * @see org.wcs.smart.query.common.engine.IValueComputer#computeValue(java.lang.Object, org.org.wcs.smart.query.common.model.Tile, org.org.wcs.smart.query.common.model.Grid, com.vividsolutions.jts.geom.LineString)
+	 * @see org.wcs.smart.query.common.engine.IValueComputer#computeValue(java.lang.Object, org.org.wcs.smart.query.common.model.Tile, org.org.wcs.smart.query.common.model.Grid, org.locationtech.jts.geom.LineString)
 	 * 
 	 * @return a hashset that contains the hashcode patrol_uuid represented by the linestring
 	 * being processed
