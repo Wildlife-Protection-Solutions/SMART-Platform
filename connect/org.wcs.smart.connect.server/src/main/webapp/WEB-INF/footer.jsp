@@ -2,9 +2,9 @@
     pageEncoding="UTF-8"%>
 
 
-</div> <!--  end core div -->
+</div> <!-- end core -->
 
-<div id="footerid" class="float">
+<div id="footerid">
 	<c:if test="${empty style_footername }">
   		<img class="float " src="${pageContext.request.contextPath}/css/images/smart_logo.png">
   		<p class="float"> Copyright 2015-2017</p>
@@ -12,5 +12,6 @@
 	<c:if test="${not empty style_footername }">
   		${style_footername}
 	</c:if>
-</div>
+</div><!-- end footerid -->
+</div><!-- end root-container -->
 

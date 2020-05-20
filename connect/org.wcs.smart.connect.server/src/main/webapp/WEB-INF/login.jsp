@@ -29,26 +29,23 @@ function login(){
 
 
 <%@include file="header.jsp" %>
-<div style="display: table-row; height:20px"></div>
-<div style="display: table-row;">
-  <div style="min-width: 150px;" class="verticalmenu"></div>
+<div id="login-main">
   
-  <div id="main">
   <div id="error" class="errorsection" style="display: ${loginerror == null ? "none" : "block"}">${loginerror}</div>
-  <div id="login_left">
-   <form  style="width:200px;" action="${logintarget}" method="POST" id="loginform" onsubmit="return login();">
-	   <label class="top-spacer block"><fmt:message key="login.usernamelabel"/></label>
-	   <input type="text" name="j_username" class="block formtext" value="" tabindex="1" autofocus/>
-	   <label class="top-spacer block"><fmt:message key="login.passwordlabel"/></label>
-	   <input type="password" name="j_password" class="formtext" value="" tabindex="2"/>
-	   <a href="${pageContext.request.contextPath}/forgot" class="block link_small" tabindex="4"><fmt:message key="login.forgot"/></a>
-	   <input class="button block top-spacer" type="submit" value="<fmt:message key="login.login"/>" style="width: 100px" tabindex="3"/>
-  </form>
+  <div id="login-wrapper">
+	  <div id="login-left">
+	  <form action="${logintarget}" method="POST" id="loginform" onsubmit="return login();">
+		   <label class="top-spacer block"><fmt:message key="login.usernamelabel"/></label>
+		   <input type="text" name="j_username" class="block formtext" value="" tabindex="1" autofocus/>
+		   <label class="top-spacer block"><fmt:message key="login.passwordlabel"/></label>
+		   <input type="password" name="j_password" class="formtext" value="" tabindex="2"/>
+		   <a href="${pageContext.request.contextPath}/forgot" class="block link_small" tabindex="4"><fmt:message key="login.forgot"/></a>
+		   <input class="button block top-spacer" type="submit" value="<fmt:message key="login.login"/>" style="width: 100px" tabindex="3"/>
+	  </form>
+	  </div>
+  	  <div id="login-right"><img src="${pageContext.request.contextPath}/getImage?locationId=3">
+  	</div>	
   </div>
-  <div id="login_right" style="background-image:url('${pageContext.request.contextPath}/getImage?locationId=3')">
-  </div>
-  
-</div>
 </div>
 
 <%@include file="footer.jsp" %>

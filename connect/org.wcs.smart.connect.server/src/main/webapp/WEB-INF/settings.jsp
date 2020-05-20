@@ -27,9 +27,9 @@
   <div>
     <div id="message" class="msgsection"></div>
    </div>
-
+<div id="settings-scroller">
 <div><p style="padding-top:3px""><fmt:message key="seetings.connectversion" />: ${connectversion}</p></div>
-<div class="overflow settingsTable">
+<div class="settingsTable">
 
 	<div class="block settings-header"><fmt:message key="settings.layerheader" /></div>
 	<button class="button top-spacer" id="btnNewLayer"><fmt:message key="settings.newlayerbutton" /></button>
@@ -48,7 +48,7 @@
 </div>
 
 
-<div class="overflow settingsTable">
+<div class="settingsTable">
 	<div class="block settings-header"><fmt:message key="settings.styleheader" /></div> 
 	<button class="button top-spacer" id="btnNewType"><fmt:message key="settings.addnewstyle" /></button>
 	
@@ -64,7 +64,7 @@
 	</table>
 </div>
 
-<div class="overflow settingsTable">
+<div class="settingsTable">
 	<div class="block settings-header"><fmt:message key="settings.defaultsheader" />
 	</div>
 	<form class="top-spacer" id="filter-form" name="filter-form" onsubmit="return false;">
@@ -145,7 +145,7 @@
 </div>
 
 <!-- Global Forest Watch -->
-<div class="overflow settingsTable">
+<div class="settingsTable">
 	<div class="block settings-header"><fmt:message key="settings.gfwtable.sectionname"/></div>
 	<button class="button top-spacer" id="btnNewGFW"><fmt:message key="settings.gfwtable.newbutton"/></button>
 	<table id="gfwtable" class="top-spacer smart-table">
@@ -173,7 +173,7 @@
 </div>
 
 
-<div class="overflow settingsTable">
+<div class="settingsTable">
 	<div class="block settings-header"><fmt:message key="settings.styleconfigurationheader" /></div>
 	<button class="button top-spacer" id="btnNewStyleConfiguration"><fmt:message key="settings.addnewstyleconfiguration" /></button>
 	<table id="styletable" class="top-spacer smart-table">
@@ -186,6 +186,7 @@
 	</tr>
 	</table>
 
+</div>
 </div>
 </div>
 <%@include file="footer.jsp" %>

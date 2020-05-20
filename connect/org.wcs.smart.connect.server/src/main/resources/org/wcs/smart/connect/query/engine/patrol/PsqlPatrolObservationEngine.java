@@ -86,7 +86,10 @@ public class PsqlPatrolObservationEngine extends AbstractQueryEngine {
 				//dates are used for all parts of the query;
 				//otherwise different date filters will be computed
 				//for different parts of the queries
-				DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
+				DateFilter dFilter = null;
+				if(query.getDateFilter() != null) {
+					dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));
+				}
 				IFilterProcessor filterer = null;
 				try {
 					filterer = PsqlPatrolEngine.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable, PsqlPatrolObservationEngine.this);

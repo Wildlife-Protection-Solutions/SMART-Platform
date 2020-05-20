@@ -25,6 +25,16 @@
 
 
 <script type="text/javascript">
+
+var shpValues = ["entityobservation", "entitywaypoint","intelligencerecord",  "surveymission",
+    "surveymissiontrack", "observationobservation", "observationwaypoint", 
+    "patrolobservation", "patrolquery", "patrolwaypoint", 
+    "surveyobservation", "surveywaypoint",
+    "assetobservation", "assetwaypoint"
+    ];
+
+var tifValues = ["entitygrid", "observationgrid","patrolgrid",  "surveygrid"];
+
 var menuOpen = true;
 //have to call this in each page since I can't overwrite the onload function (again) and the menu doesn't exist yet if you just run it right here.
 function menuCheckOnload(){
@@ -35,14 +45,14 @@ function menuCheckOnload(){
 	    	items[i].style.display = "inline-block";
 		}
 		menuOpen = true;
-		document.getElementById("verticalmenu").style.minWidth = "180px";
+		//document.getElementById("verticalmenu").style.minWidth = "180px";
 	}else{
 		var items = document.getElementsByClassName("textMenu");
 		for (i = 0; i < items.length; i++) {
 	    	items[i].style.display = "none";
 		}
 		menuOpen = false;
-		document.getElementById("verticalmenu").style.minWidth = "0px";
+		//document.getElementById("verticalmenu").style.minWidth = "0px";
 	}
 }
 
@@ -52,12 +62,12 @@ function hamburgerMenu(){
 		writeCookie("smartMenuState","hidden",7);
 		newState = "none";
 		menuOpen = false;
-		document.getElementById("verticalmenu").style.minWidth = "0px";
+		//document.getElementById("verticalmenu").style.minWidth = "0px";
 	}else{
 		writeCookie("smartMenuState","show",7);
 		newState = "inline-block";
 		menuOpen = true;
-		document.getElementById("verticalmenu").style.minWidth = "180px";
+		//document.getElementById("verticalmenu").style.minWidth = "180px";
 	}
 	
 	var items = document.getElementsByClassName("textMenu");

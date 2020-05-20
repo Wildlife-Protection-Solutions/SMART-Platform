@@ -10,15 +10,6 @@ var definedDateKeys = ["last30days", "last60days", "monthtodate", "lastmonth", "
 
 var startDatePicker, endDatePicker;
 
-var shpValues = ["entityobservation", "entitywaypoint","intelligencerecord",  "surveymission",
-                 "surveymissiontrack", "observationobservation", "observationwaypoint", 
-                 "patrolobservation", "patrolquery", "patrolwaypoint", 
-                 "surveyobservation", "surveywaypoint",
-                 "assetobservation", "assetwaypoint"
-                 ];
-
-var tifValues = ["entitygrid", "observationgrid","patrolgrid",  "surveygrid"];
-
 var isDateChanging = false;
 
 /* configure events on html elements */
@@ -79,8 +70,6 @@ window.onload = function(){
 	document.getElementById("utmzone").onchange = function(){
 		document.getElementById("srid").value = parseInt(document.getElementById("utmzone").value) + parseInt(document.getElementById("sridDropdown").value);
 	}
-	
-	
 	
 	document.getElementById("createcustomlinklink").onclick = function(){
 		document.getElementById('createcustomlink').style.display = 'block';

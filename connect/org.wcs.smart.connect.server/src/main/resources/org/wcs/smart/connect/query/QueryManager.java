@@ -34,6 +34,10 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 import org.hibernate.Session;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.hql.spi.QueryTranslator;
@@ -107,6 +111,7 @@ import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
 import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.common.model.CompoundMapQuery;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
@@ -275,6 +280,15 @@ public enum QueryManager {
 		return null;
 	}
 	
+	public List<QueryFolder> getQueryFolders(Session session) {
+		CriteriaBuilder cb = session.getCriteriaBuilder();
+		CriteriaQuery<QueryFolder> c = cb.createQuery(QueryFolder.class);
+		Root<QueryFolder> from = c.from(QueryFolder.class);
+		c.where(cb.isNull(from.get("employee"))); //$NON-NLS-1$
+		List<QueryFolder> folders = session.createQuery(c).getResultList();
+		return folders;
+	}
+	
 	/**
 	 * Find a given query based on the uuid.
 	 * @param uuid
@@ -287,7 +301,7 @@ public enum QueryManager {
 			Query q = (Query) session.get(table, uuid);
 			if (q != null){
 				return new QueryProxy(q.getUuid(),q.getName(), table.getClass().toString(),q.getConservationArea().getNameLabel(),q.getId(),
-						q.getIsShared(), q.getConservationArea().getUuid(), false, q.getTypeKey(), q.getIconName());
+						q.getIsShared(), q.getConservationArea().getUuid(), q.getFolder().getUuid(), false, q.getTypeKey(), q.getIconName());
 			}
 		}
 		return null;
@@ -305,8 +319,8 @@ public enum QueryManager {
 		List<String> langs = new ArrayList<>();
 		langs.add(l.getLanguage());
 		if (!l.getCountry().isEmpty()) {
-			langs.add(l.getLanguage() + "_" + l.getCountry()); //$NON-NLS-1$
-			if (l.getVariant().isEmpty()) langs.add(l.getLanguage() + "_" + l.getCountry() + "_" + l.getVariant()); //$NON-NLS-1$ //$NON-NLS-2$
+			langs.add(l.getLanguage() + "_" + l.getCountry());
+			if (!l.getVariant().isEmpty()) langs.add(l.getLanguage() + "_" + l.getCountry() + "_" + l.getVariant());
 		}
 		
 		HashMap<QueryProxy, String> query2names = new HashMap<>();
@@ -329,11 +343,12 @@ public enum QueryManager {
 			String icon = c.getIconName();
 			
 			if (!query.isEmpty()) query += " UNION "; //$NON-NLS-1$
-			
-			String querypart = "SELECT q.uuid, q.id, q.isShared, q.conservationArea.uuid, " //$NON-NLS-1$
-				+ "q.conservationArea.id, l.value, z.code, '" + type +"', '" + typeKey + "', '" + icon + "' FROM " + q.getSimpleName()  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			 	+ " as q JOIN Label as l on l.id.element = q.uuid JOIN l.id.language as z WHERE l.id.element = q.uuid and (z.default = true or " //$NON-NLS-1$
-			 	+ "z.code in (:langs)) "; //$NON-NLS-1$
+
+			String querypart = "SELECT q.uuid, q.id, q.isShared, q.conservationArea.uuid, q.folder.uuid, "
+				+ "q.conservationArea.id, l.value, z.code, '" + type +"', '" + typeKey + "', '" + icon + "' FROM " + q.getSimpleName() 
+			 	+ " as q JOIN Label as l on l.id.element = q.uuid JOIN l.id.language as z WHERE l.id.element = q.uuid and (z.default = true or "
+			 	+ "z.code in (:langs)) ";
+
 	
 			QueryTranslatorFactory translatorFactory = session.getSessionFactory().getSessionFactoryOptions().getServiceRegistry().getService(QueryTranslatorFactory.class);
 			final SessionFactoryImplementor factory = (SessionFactoryImplementor) session.getSessionFactory();
@@ -352,16 +367,18 @@ public enum QueryManager {
 		}
 		//hack based on the hibernate query conversion; might be invalid in future versions of hibernate
 		//required for uuid data types
-		nq.addScalar("col_0_0_", PostgresUUIDType.INSTANCE); //$NON-NLS-1$
-		nq.addScalar("col_1_0_"); //$NON-NLS-1$
+	
+		nq.addScalar("col_0_0_", PostgresUUIDType.INSTANCE);  //$NON-NLS-1$
+		nq.addScalar("col_1_0_");  //$NON-NLS-1$
 		nq.addScalar("col_2_0_"); //$NON-NLS-1$
 		nq.addScalar("col_3_0_", PostgresUUIDType.INSTANCE); //$NON-NLS-1$
-		nq.addScalar("col_4_0_"); //$NON-NLS-1$
+		nq.addScalar("col_4_0_", PostgresUUIDType.INSTANCE); //$NON-NLS-1$
 		nq.addScalar("col_5_0_"); //$NON-NLS-1$
 		nq.addScalar("col_6_0_"); //$NON-NLS-1$
 		nq.addScalar("col_7_0_"); //$NON-NLS-1$
 		nq.addScalar("col_8_0_"); //$NON-NLS-1$
 		nq.addScalar("col_9_0_"); //$NON-NLS-1$
+		nq.addScalar("col_10_0_"); //$NON-NLS-1$
 		List<?> items = nq.list();
 
 		for (Object i : items) {
@@ -371,17 +388,18 @@ public enum QueryManager {
 			boolean isShared = (boolean)data[2];
 			
 			UUID cauuid = (UUID)data[3];
-			String caid = (String)data[4];
+			UUID folderUuid = (UUID)data[4];
+			String caid = (String)data[5];
 			
-			String value = (String)data[5];
-			String code = (String)data[6];
+			String value = (String)data[6];
+			String code = (String)data[7];
 			
-			String type = (String)data[7];
-			String typekey = (String)data[8];
-			String icon = (String)data[9];
+			String type = (String)data[8];
+			String typekey = (String)data[9];
+			String icon = (String)data[10];
 				
 			if (isShared || includeMyQueries) {
-				QueryProxy qp = new QueryProxy(uuid, value, type, caid, id, isShared,cauuid, cauuid.equals(ConservationArea.MULTIPLE_CA), typekey, icon);
+				QueryProxy qp = new QueryProxy(uuid, value, type, caid, id, isShared, cauuid, folderUuid, cauuid.equals(ConservationArea.MULTIPLE_CA), typekey, icon);
 					
 				if (!query2names.containsKey(qp)) {
 					query2names.put(qp, code);
@@ -400,7 +418,7 @@ public enum QueryManager {
 		return new ArrayList<>(query2names.keySet());
 	}
 
-	public List<QueryProxy> getAdvanedIntelligenceQueries(Session session, Locale l) throws Exception{
+	public List<QueryProxy> getAdvancedIntelligenceQueries(Session session, Locale l) throws Exception{
 		List<String> langs = new ArrayList<>();
 		langs.add(l.getLanguage());
 		if (!l.getCountry().isEmpty()) {
@@ -476,8 +494,8 @@ public enum QueryManager {
 			String type = (String)data[5];
 			String typekey = (String)data[6];
 			String icon = (String)data[7];
-				
-			QueryProxy qp = new QueryProxy(uuid, value, type, caid, "-", true, cauuid, cauuid.equals(ConservationArea.MULTIPLE_CA), typekey, icon);  //$NON-NLS-1$
+
+			QueryProxy qp = new QueryProxy(uuid, value, type, caid, "-", true, cauuid, null, cauuid.equals(ConservationArea.MULTIPLE_CA), typekey, icon);
 					
 			if (!query2names.containsKey(qp)) {
 				query2names.put(qp, code);

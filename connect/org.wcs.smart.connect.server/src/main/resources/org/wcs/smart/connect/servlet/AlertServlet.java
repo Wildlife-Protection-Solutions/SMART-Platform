@@ -41,6 +41,7 @@ import org.wcs.smart.connect.model.AlertType;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.MapLayer;
 import org.wcs.smart.connect.model.SmartUser;
+import org.wcs.smart.connect.query.QueryManager;
 import org.wcs.smart.connect.security.AlertAction;
 import org.wcs.smart.connect.security.SecurityManager;
 
@@ -90,6 +91,7 @@ public class AlertServlet extends HttpServlet{
 			session.getTransaction().rollback();
 		}
 		
+		request.setAttribute("qdatefilters", QueryManager.DATE_FILTERS); //$NON-NLS-1$
 		request.setAttribute("users", users); //$NON-NLS-1$
 		request.setAttribute("cas", authorizedCas); //$NON-NLS-1$
 		request.setAttribute("alertTypes", alertTypes); //$NON-NLS-1$

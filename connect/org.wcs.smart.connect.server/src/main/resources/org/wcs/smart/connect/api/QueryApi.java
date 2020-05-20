@@ -31,9 +31,13 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -69,6 +73,7 @@ import org.wcs.smart.connect.model.AbstractSmartAction;
 import org.wcs.smart.connect.model.SmartRoleAction;
 import org.wcs.smart.connect.model.SmartUserAction;
 import org.wcs.smart.connect.model.SmartUserRole;
+import org.wcs.smart.connect.query.QueryFolderProxy;
 import org.wcs.smart.connect.query.QueryManager;
 import org.wcs.smart.connect.query.QueryProxy;
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
@@ -98,6 +103,7 @@ import org.wcs.smart.query.common.model.QueryGridResultItem;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.AllDatesFilter;
@@ -172,8 +178,9 @@ public class QueryApi extends HttpServlet{
 	 * @return the results of the query, format is whatever is selected using the format parameter.
 	 * @throws SQLException 
 	 */
+	//: [a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}}")
 	@GET
-    @Path("/{queryuuid}")
+    @Path("/{queryuuid: [a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}}")
 	@Operation(description="Runs a query and returns the results.")
 	public Response getQueryResults(@Parameter(description="the uuid of the query requested") @PathParam("queryuuid") String queryuuid, 
 			@Parameter(description="requested format, not all options makes sense for all query types: csv, shp, html, tif, geojson") @QueryParam("format") String format,
@@ -221,22 +228,26 @@ public class QueryApi extends HttpServlet{
 		if (delimiter == null){
 			delimiter = ","; //$NON-NLS-1$
 		}
-		
-		IDateFieldFilter dateField = QueryManager.INSTANCE.findDateField(date_filter);
-		IDateFilter dfilter = null;
-		if (startDate == null && endDate == null){
-			dfilter = AllDatesFilter.INSTANCE; 
-		}else{
-			if (startDate == null){
-				startDate = new Date(0);
+
+		DateFilter df = null;
+
+		if(date_filter != null) {
+			IDateFieldFilter dateField = QueryManager.INSTANCE.findDateField(date_filter);
+			IDateFilter dfilter = null;
+			if (startDate == null && endDate == null){
+				dfilter = AllDatesFilter.INSTANCE; 
+			}else{
+				if (startDate == null){
+					startDate = new Date(0);
+				}
+				if (endDate == null){
+					endDate = new Date();
+				}
+				dfilter = new CustomDateFilter();
+				((CustomDateFilter)dfilter).setDates(startDate, endDate);
 			}
-			if (endDate == null){
-				endDate = new Date();
-			}
-			dfilter = new CustomDateFilter();
-			((CustomDateFilter)dfilter).setDates(startDate, endDate);
+			df = new DateFilter(dateField, dfilter);
 		}
-		DateFilter df = new DateFilter(dateField, dfilter);
 
 		IQueryResult result = null;
 		Session s = HibernateManager.getSession(request.getServletContext(), request.getLocale());
@@ -285,7 +296,7 @@ public class QueryApi extends HttpServlet{
 	}
 	
 	private void validateDateFilter(String queryType, String filter) {
-		if (filter.isEmpty()) filter = null;
+		if (filter != null && filter.isEmpty()) filter = null;
 		String[] dateFilters = QueryManager.DATE_FILTERS.get(queryType.toLowerCase(Locale.ROOT));
 		if (dateFilters == null && filter != null ) {
 			throw new SmartConnectException(Status.BAD_REQUEST, MessageFormat.format(Messages.getString("QueryApi.InvalidDateField", SmartUtils.getRequestLocale(request)), filter)); //$NON-NLS-1$
@@ -309,7 +320,7 @@ public class QueryApi extends HttpServlet{
 			return new QueryResult(Response.status(Status.NOT_FOUND).build());
 		}
 		UUID queryUuid = query.getUuid();	//we clone the query below but do not clone the original uuid so we want to track that here
-		if (!QueryManager.INSTANCE.supportsDateField(query.getTypeKey(), df.getDateFieldOption())){
+		if (df != null && !QueryManager.INSTANCE.supportsDateField(query.getTypeKey(), df.getDateFieldOption())){
 			return new QueryResult(createErrorResponse(Status.BAD_REQUEST, MessageFormat.format(Messages.getString("QueryApi.InvalidDateFilterForQueryType", SmartUtils.getRequestLocale(request)), df.getDateFieldOption().getGuiName(request.getLocale()), query.getTypeKey()))); //$NON-NLS-1$
 		}
 		String oldId = query.getId();
@@ -339,7 +350,9 @@ public class QueryApi extends HttpServlet{
 		}
 		
 		/* configure date filter */
-		query.setDateFilter(df);
+		if(df != null) {
+			query.setDateFilter(df);
+		}
 
 		HashMap<String, Object> params = new HashMap<String, Object>();
 		params.put(Session.class.getName(), s);
@@ -648,6 +661,101 @@ public class QueryApi extends HttpServlet{
 		validCas.deleteCharAt(0);
 		return validCas.toString();
 	}
+
+	/**
+	 * <p>Returns all queries the current user is able to view/run, in a nested folder structure</p> 
+	 * <p>
+	 * URL: ../server/api/query/tree<br>
+	 * Call Type: GET
+	 * </p>
+	 * 
+	 * @param typeFilter - optional type String - only return queries that match the type key provided, see getAllQueryTypes for list of possible values. leave blank to get everything.
+	 * @param caFilter - optional UUID - only return queries that match the CA UUID provided. leave blank to get everything.
+	 * @param isCcaaFilter - optional boolean - only returns string that are CCAA queries when True, only ones that are not when False. leave blank to get everything. 
+	 * @return A JSON list of root QueryFolderProxy objects, with nested QueryFolderProxy and QueryProxy objects. (<a href="https://www.assembla.com/spaces/smart-cs/subversion-2/source/HEAD/trunk/connect/org.wcs.smart.connect.server/src/main/resources/org/wcs/smart/connect/query/QueryFolderProxy.java">Query Folder Proxy</a>)
+	 */
+	@GET
+    @Path("/tree")
+	@Produces({ MediaType.APPLICATION_JSON })
+    public List<QueryFolderProxy> getQueryTreeForUser(@QueryParam("type") String typeFilter,
+			@QueryParam("ca") String caFilter,
+			@QueryParam("isccaa") Boolean isCcaaFilter){
+		Session s = HibernateManager.getSession(request.getServletContext(), request.getLocale());
+		s.beginTransaction();
+		
+		// build the query folder tree
+		List<QueryFolderProxy> rootFolders = new ArrayList<QueryFolderProxy>();
+		Map<UUID, QueryFolderProxy> foldersByUuid = new HashMap<UUID, QueryFolderProxy>();
+		List<QueryFolder> folders = QueryManager.INSTANCE.getQueryFolders(s);
+		Deque<QueryFolder> remainingFolders = new LinkedList<QueryFolder>(folders);
+		int loopCount = 0;
+		while(!remainingFolders.isEmpty()) {
+			loopCount++;
+			// just to prevent weird infinite loop failures
+			if(loopCount > Math.pow(folders.size(), 2)) {
+				break;
+			}
+			QueryFolder f = remainingFolders.removeFirst();
+			if(f.getParentFolder() == null) {
+				// this is a root folder
+				QueryFolderProxy fp = new QueryFolderProxy(f.getName());
+				foldersByUuid.put(f.getUuid(), fp);
+				// but the CA is the real root folder
+				QueryFolderProxy caFolder = foldersByUuid.get(f.getConservationArea().getUuid());
+				if(caFolder == null) {
+					// build the CA folder if it hasn't been made yet
+					caFolder = new QueryFolderProxy(f.getConservationArea().getName());
+					foldersByUuid.put(f.getConservationArea().getUuid(), caFolder);
+					rootFolders.add(caFolder);
+				}
+				caFolder.addSubFolder(fp);
+			} else {
+				QueryFolderProxy parentFolder = foldersByUuid.get(f.getParentFolder().getUuid());
+				if(parentFolder != null) {
+					QueryFolderProxy fp = new QueryFolderProxy(f.getName());
+					foldersByUuid.put(f.getUuid(), fp);
+					parentFolder.addSubFolder(fp);
+				} else {
+					// we haven't yet processed this folder's parent, put it back in the queue for later
+					remainingFolders.addLast(f);
+				}
+			}
+		}
+		
+		// get all the queries we have access to 
+		List<QueryProxy> allowed = new ArrayList<QueryProxy>();
+		try {
+			allowed.addAll(getQueries(s, request.getLocale()));
+			allowed.addAll(getAdvancedIntelQueries(s, request.getLocale()));			
+		} catch(Exception ex) {
+			ex.printStackTrace();
+		} finally {
+			s.getTransaction().commit();
+		}
+
+		// filter the queries
+		List<QueryProxy> filtered = filteredQueries(typeFilter, caFilter, isCcaaFilter, allowed);
+		
+		// add the queries into the folder tree
+		for(QueryProxy q: filtered) {
+			if(q.getFolderUuid() != null) {
+				foldersByUuid.get(q.getFolderUuid()).addQuery(q);
+			} else {
+				QueryFolderProxy caFolder = foldersByUuid.get(q.getCaUuid());
+				if(caFolder == null) {
+					// build the CA folder if it hasn't been made yet
+					caFolder = new QueryFolderProxy(q.getConservationArea());
+					foldersByUuid.put(q.getCaUuid(), caFolder);
+					rootFolders.add(caFolder);
+				}
+				caFolder.addQuery(q);
+
+			}
+		}
+		
+		return rootFolders;
+	}
+
 	
 	/**
 	 * <p>Returns all queries the current user is able to view/run</p> 
@@ -670,63 +778,69 @@ public class QueryApi extends HttpServlet{
     		@Parameter(description="optional boolean - only returns string that are CCAA queries when True, only ones that are not when False. leave blank to get everything.") @QueryParam("isccaa") Boolean isCcaaFilter){
 		List<QueryProxy> allowed = new ArrayList<QueryProxy>();
 
-
-		
 		Session s = HibernateManager.getSession(request.getServletContext(), request.getLocale());
 		s.beginTransaction();
-		try{
-			if (!SecurityManager.INSTANCE.canAccessAtLeastOneResouce(s, request.getUserPrincipal().getName(), QueryAction.RUNQUERY_KEY) && 
-					!SecurityManager.INSTANCE.canAccessAtLeastOneResouce(s, request.getUserPrincipal().getName(), AdvIntelAction.RUNQUERY_KEY)){
-				//no query access
-				return allowed;
-			}
-			//Check if they access to All Queries, if so it's simple, return them all
-			if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), QueryAction.RUNQUERY_KEY, null)){
-				allowed = QueryManager.INSTANCE.getQueries(s, request.getLocale());
-			}else {
-				//Get all Queries and check each one for specific permission to this user.
-				
-				//get all actions for the current user
-				List<AbstractSmartAction> allActions = new ArrayList<>();
-				allActions.addAll(QueryFactory.buildQuery(s, SmartUserAction.class, "username", request.getUserPrincipal().getName()).list()); //$NON-NLS-1$				
-				List<SmartUserRole> roles = HibernateManager.getUserRoles(s, request.getUserPrincipal().getName());
-				for (SmartUserRole r : roles) {
-					allActions.addAll(QueryFactory.buildQuery(s, SmartRoleAction.class, "role", r.getRole()).list()); //$NON-NLS-1$
-				}
-				
-				List<QueryProxy> all = QueryManager.INSTANCE.getQueries(s, request.getLocale());
-				for (QueryProxy q : all){
-					boolean canAdd = false;
-					
-					for (AbstractSmartAction a : allActions) {
-						//admin action; and permission to run all queries is captured above
-
-						if (a.getAction().equalsIgnoreCase(CaAdminAccountAction.KEY) && a.getResource().equals(q.getCaUuid())){
-							//ca admin
-							canAdd = true;
-							break;
-						}else if (a.getAction().equalsIgnoreCase(QueryAction.RUNQUERY_KEY) && a.getResource().equals(q.getCaUuid())){
-							//run query for ca
-							canAdd = true;
-							break;
-						}else if (a.getAction().equalsIgnoreCase(QueryAction.RUNQUERY_KEY) && a.getResource().equals(q.getUuid())) {
-							//run query for query
-							canAdd = true;
-							break;
-						}
-					}
-					if (canAdd) allowed.add(q);
-				}
-			}
-			allowed.addAll(getAdvancedIntelQueries(s,request.getLocale()));
-			
-		}catch (Exception ex) {
+		try {
+			allowed.addAll(getQueries(s, request.getLocale()));
+			allowed.addAll(getAdvancedIntelQueries(s, request.getLocale()));			
+		} catch(Exception ex) {
 			ex.printStackTrace();
-		}finally{
+		} finally {
 			s.getTransaction().commit();
 		}
 		
 		return filteredQueries(typeFilter, caFilter, isCcaaFilter, allowed); 
+	}
+
+	private List<QueryProxy> getQueries(Session s, Locale l) throws Exception {
+
+		if (!SecurityManager.INSTANCE.canAccessAtLeastOneResouce(s, request.getUserPrincipal().getName(), QueryAction.RUNQUERY_KEY)){
+			//no query access
+			return Collections.emptyList();
+		}
+
+		List<QueryProxy> all = QueryManager.INSTANCE.getQueries(s, l);
+
+		//Check if they access to All Queries, if so it's simple, return them all
+		if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), QueryAction.RUNQUERY_KEY, null)) {
+			return all;
+		}
+		
+		List<QueryProxy> allowed = new ArrayList<QueryProxy>();
+
+		//Get all Queries and check each one for specific permission to this user.
+		
+		//get all actions for the current user
+		List<AbstractSmartAction> allActions = new ArrayList<>();
+		allActions.addAll(QueryFactory.buildQuery(s, SmartUserAction.class, "username", request.getUserPrincipal().getName()).list()); //$NON-NLS-1$				
+		List<SmartUserRole> roles = HibernateManager.getUserRoles(s, request.getUserPrincipal().getName());
+		for (SmartUserRole r : roles) {
+			allActions.addAll(QueryFactory.buildQuery(s, SmartRoleAction.class, "role", r.getRole()).list()); //$NON-NLS-1$
+		}
+		
+		for (QueryProxy q : all) {
+			boolean canAdd = false;
+			
+			for (AbstractSmartAction a : allActions) {
+				//admin action; and permission to run all queries is captured above
+
+				if (a.getAction().equalsIgnoreCase(CaAdminAccountAction.KEY) && a.getResource().equals(q.getCaUuid())){
+					//ca admin
+					canAdd = true;
+					break;
+				} else if (a.getAction().equalsIgnoreCase(QueryAction.RUNQUERY_KEY) && a.getResource().equals(q.getCaUuid())){
+					//run query for ca
+					canAdd = true;
+					break;
+				} else if (a.getAction().equalsIgnoreCase(QueryAction.RUNQUERY_KEY) && a.getResource().equals(q.getUuid())) {
+					//run query for query
+					canAdd = true;
+					break;
+				}
+			}
+			if (canAdd) allowed.add(q);
+		}
+		return allowed;
 	}
 	
 
@@ -737,7 +851,7 @@ public class QueryApi extends HttpServlet{
 			return Collections.emptyList();
 		}
 		
-		List<QueryProxy> queries = QueryManager.INSTANCE.getAdvanedIntelligenceQueries(s,  request.getLocale());
+		List<QueryProxy> queries = QueryManager.INSTANCE.getAdvancedIntelligenceQueries(s,  request.getLocale());
 		if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), AdvIntelAction.RUNQUERY_KEY, null)){
 			//can access all queries
 			return queries;
@@ -775,43 +889,39 @@ public class QueryApi extends HttpServlet{
 	
 	private List<QueryProxy> filteredQueries(String typeFilter, String caFilter, Boolean isCcaaFilter,
 			List<QueryProxy> list) {
+		HashSet<String> types = null;
+		if(typeFilter != null && !typeFilter.isEmpty()) {
+			types = new HashSet<String>();
+			String[] typeFilters = typeFilter.split(",");
+			for(String type : typeFilters) {
+				types.add(type.toLowerCase());
+			}
+		}
+		UUID caUuid = null;
+		if(caFilter != null && !caFilter.isEmpty()) {
+			caUuid = UUID.fromString(caFilter);
+		}
 		List<QueryProxy> passed = new ArrayList<QueryProxy>();
 		for (QueryProxy q : list){
-			Boolean pass1 = false;
-			Boolean pass2 = false;
-			Boolean pass3 = false;
 			//type filter
-			if(typeFilter != null && !typeFilter.isEmpty()){
-				if(q.getTypeKey().equals(typeFilter)){
-					pass1 = true;
-				}
-			}else{
-				pass1 = true;
+			if(types != null 
+					&& !types.contains(q.getTypeKey())) {
+				continue;
 			}
-			
+
 			//ca Filter
-			if(caFilter != null && !caFilter.isEmpty()){
-				UUID uuid = UUID.fromString(caFilter);
-				if(q.getCaUuid().equals(uuid)){
-					pass2 = true;
-				}
-			}else{
-				pass2 = true;
+			if(caUuid != null 
+					&& !q.getCaUuid().equals(caUuid)) {
+				continue;
 			}
 			
 			//ccaa Filter
-			if(isCcaaFilter != null){
-				if(isCcaaFilter && q.getIsCcaa()){
-					pass3=true;
-				}else if(!isCcaaFilter && !q.getIsCcaa()){
-					pass3=true;
-				}
-			}else{
-				pass3=true;
+			if(isCcaaFilter != null
+					&& isCcaaFilter != q.getIsCcaa()) {
+				continue;
 			}
-			if(pass1 && pass2 && pass3){
-				passed.add(q);
-			}
+
+			passed.add(q);
 		}
 		return passed;
 	}

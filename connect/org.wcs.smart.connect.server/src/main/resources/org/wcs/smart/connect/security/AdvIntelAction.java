@@ -84,7 +84,7 @@ public class AdvIntelAction  implements ISmartConnectAction{
 				ops.add(r);
 			}
 			
-			List<QueryProxy> info = QueryManager.INSTANCE.getAdvanedIntelligenceQueries(s, l);
+			List<QueryProxy> info = QueryManager.INSTANCE.getAdvancedIntelligenceQueries(s, l);
 			for (QueryProxy i : info){
 				ro = new ResourceOption(i.getName() + "[" + i.getConservationArea() +"]", i.getUuid()); //$NON-NLS-1$ //$NON-NLS-2$
 				ops.add(ro);

@@ -2,7 +2,7 @@
     pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
-<div id="verticalmenu" class="verticalmenu" style="display:table-cell;width:24px;">
+<div id="verticalmenu" class="verticalmenu" >
  <div style="display:flex;flex-flow:column nowrap">
 
 <!-- Hamburger menu by (https://www.iconfinder.com/icons/134216/hamburger_lines_menu_icon) Timothy Miller under (https://creativecommons.org/licenses/by-sa/3.0/legalcode) creative commons SA-3.0 license, no changes were made.   

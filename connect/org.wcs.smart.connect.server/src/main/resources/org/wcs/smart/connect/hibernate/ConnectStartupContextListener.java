@@ -223,13 +223,14 @@ public class ConnectStartupContextListener implements ServletContextListener{
 				logger.log(Level.SEVERE, "Could now unload driver " + driver.getClass(), e); //$NON-NLS-1$
 			}
 		}
-		try {
-			Class<?> h2Driver = Class.forName("org.h2.Driver"); //$NON-NLS-1$
-			Method m = h2Driver.getMethod("unload"); //$NON-NLS-1$
-			m.invoke(null);
-		} catch (Exception e) {
-			logger.log(Level.WARNING, "Failed to unload the H2 driver", e); //$NON-NLS-1$
-		}
+// This may not be needed anymore
+//		try {
+//			Class<?> h2Driver = Class.forName("org.h2.Driver"); //$NON-NLS-1$
+//			Method m = h2Driver.getMethod("unload"); //$NON-NLS-1$
+//			m.invoke(null);
+//		} catch (Exception e) {
+//			logger.log(Level.WARNING, "Failed to unload the H2 driver", e); //$NON-NLS-1$
+//		}
         
 		
 		org.geotools.referencing.wkt.Formattable.cleanupThreadLocals(); 

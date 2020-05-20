@@ -26,97 +26,75 @@ import java.util.UUID;
 
 public class QueryProxy {
 
-	private UUID uuid;
-	private UUID caUuid;
-	private String name;
-	private String type;
-	private String typeKey;
-	private String iconName;
-	private String conservationAreaName;
-	private String id;
-	private Boolean isShared;
-	private Boolean isCcaa;
+	private final UUID uuid;
+	private final String name;
+	private final String type;
+	private final String conservationAreaName;
+	private final String id;
+	private final Boolean isShared;
+	private final UUID caUuid;
+	private final UUID folderUuid;
+	private final String typeKey;
+	private final String iconName;
+	private final Boolean isCcaa;
 	
 	public QueryProxy(UUID uuid, String name, String type, String caName, String id, 
-			Boolean isShared, UUID caUuid, Boolean isCcaa, String typeKey, String iconName){
+			Boolean isShared, UUID caUuid, UUID folderUuid, Boolean isCcaa, String typeKey, String iconName){
 		this.uuid = uuid;
 		this.name = name;
 		this.type = type;
 		this.conservationAreaName = caName;
 		this.id = id;
+		this.isShared = isShared;
+		this.caUuid = caUuid;
+		this.folderUuid = folderUuid;
+		this.isCcaa = isCcaa;
 		this.typeKey = typeKey;
-		this.setIconName(iconName);
-		this.setCaUuid(caUuid);
-		setIsCcaa(isCcaa);
+		this.iconName = iconName;
 	}
-	
+
 	public UUID getUuid() {
 		return uuid;
 	}
-	public void setUuid(UUID uuid) {
-		this.uuid = uuid;
-	}
+
 	public String getName() {
 		return name;
 	}
-	public void setName(String name) {
-		this.name = name;
-	}
+
 	public String getType() {
 		return type;
 	}
-	public void setType(String type) {
-		this.type = type;
-	}
+
 	public String getTypeKey() {
 		return typeKey;
 	}
-	public void setTypeKey(String typeKey) {
-		this.typeKey = typeKey;
-	}
+
 	public String getConservationArea() {
 		return conservationAreaName;
 	}
-	public void setConservationArea(String conservationAreaName) {
-		this.conservationAreaName = conservationAreaName;
-	}
+
 	public String getId() {
 		return id;
-	}
-	public void setId(String id) {
-		this.id = id;
 	}
 	
 	public Boolean getIsShared() {
 		return isShared;
 	}
-	public void setIsShared(Boolean isShared) {
-		this.isShared = isShared;
-	}
-
 
 	public UUID getCaUuid() {
 		return caUuid;
 	}
-	public void setCaUuid(UUID caUuid) {
-		this.caUuid = caUuid;
+
+	public UUID getFolderUuid() {
+		return folderUuid;
 	}
-	
+
 	public boolean getIsCcaa(){
 		return this.isCcaa;
 	}
-	public void setIsCcaa(boolean isCcaa){
-		this.isCcaa = isCcaa;
-	}
-
-
 
 	public String getIconName() {
 		return iconName;
-	}
-
-	public void setIconName(String iconName) {
-		this.iconName = iconName;
 	}
 	
 	@Override

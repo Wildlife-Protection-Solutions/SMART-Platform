@@ -70,7 +70,15 @@
 			</c:forEach> 
 		};
 
-	
+	var qdatefilter = {
+			<c:forEach var="entry" items="${qdatefilters}">
+			    '${entry.key}': [
+			    	<c:forEach var="op" items="${entry.value}">
+			    		'${op}',
+			    	</c:forEach>
+			    ],
+			</c:forEach>
+			};
 	
 	var startingZoom = ${startingZoom};
 	var startingLong = ${startingLong};
@@ -99,99 +107,149 @@
 <%@include file="menu.jsp" %>
 
 <div id="main">
-  <div>
-    <div id="message" class="msgsection"></div>
-  </div>
-		<div id="map"></div>
-	
-	
-	<div id="filter-controls">
-		<p style="text-align:center;font-weight:bold;height:10px"><a id="filter-link" onClick="hideShowFilters()"  class="filterIcon"></a></p>
-
-		<form id="filter-form" name="filter-form" action="" onsubmit="return false;">
-			<fieldset>
-			<legend><fmt:message key="alert.dates" /></legend>
-			<input id="sortBy" type="hidden" name="sortBy" value="date"/>
-			<input id="sortAscending" type="hidden" name="sortAscending"  value="false"/>
-			
-			<p>
-			<select id='filterDate' class='updateChange' name="time_filter" style="margin-bottom:3px">
-				<option value=1><fmt:message key="alert.within1" /></option>
-				<option value=2><fmt:message key="alert.within2" /></option>
-				<option value=4><fmt:message key="alert.within4" /></option>
-				<option value=8><fmt:message key="alert.within8" /></option>
-				<option value=12><fmt:message key="alert.within12" /></option>
-				<option value=24><fmt:message key="alert.within24" /></option>
-				<option value=48><fmt:message key="alert.within48" /></option>
-				<option value=168><fmt:message key="alert.withinweek" /></option>
-				<option value=744><fmt:message key="alert.withinmonth" /></option>
-				<option value=-99><fmt:message key="alert.alldates" /></option>
-				<option value=-1><fmt:message key="alert.customdates" /></option>
-			</select>
-			</p>
-			
-			<p class="map_date_picker">
-			<input type="text" id="datePickerFrom" class="date-input">
-			<font class="date-text">&nbsp &nbsp&nbsp<fmt:message key="alert.dateto"/>&nbsp &nbsp&nbsp</font><input type="text" id="datePickerTo" class="date-input">
-			</p>
-			</fieldset>
-			
-						
-		    <fieldset>
-			
-			<legend><fmt:message key="alert.filters.types" /></legend>
-			<c:forEach var="type" items="${alertTypes}" varStatus="count">
-				<div style="min-height: 25px;">
+	<div>
+		<div id="message" class="msgsection"></div>
+	</div>
+	<div id="map">
+		<div class="control-menu">
+		<div class="control-item">
+        	<div class="control-header">
+            	<div class="control-title"><fmt:message key="alert.queries.title" /></div>
+                <div class="control-item-icon fa fa-search fa-2x" title="<fmt:message key="alert.queries.title" />"></div>
+            </div><!-- end control-header -->
+            <div class="control-item-content">
+				<fieldset>
+				<legend><fmt:message key="alert.dates" /></legend>
+				<input id="sortBy" type="hidden" name="sortBy" value="date"/>
+				<input id="sortAscending" type="hidden" name="sortAscending"  value="false"/>
 				
-     			<input style="position: relative; vertical-align: middle; bottom: 1px; height:25px; margin:0px 0px 0px 4px; padding:0px;"  class='filterType updateChange' name = "${type.getUuid()}" value="${type.getUuid()}" type="checkbox">  
+				<p>
+				<select id='queryDate' class='updateQueryChange' style="margin-bottom:3px">
+					<option value=1><fmt:message key="alert.within1" /></option>
+					<option value=2><fmt:message key="alert.within2" /></option>
+					<option value=4><fmt:message key="alert.within4" /></option>
+					<option value=8><fmt:message key="alert.within8" /></option>
+					<option value=12><fmt:message key="alert.within12" /></option>
+					<option value=24><fmt:message key="alert.within24" /></option>
+					<option value=48><fmt:message key="alert.within48" /></option>
+					<option value=168><fmt:message key="alert.withinweek" /></option>
+					<option value=744><fmt:message key="alert.withinmonth" /></option>
+					<option value=-99><fmt:message key="alert.alldates" /></option>
+					<option value=-1><fmt:message key="alert.customdates" /></option>
+				</select>
+				</p>
+				
+				<p class="map_date_picker">
+				<input type="text" id="queryDatePickerFrom" class="date-input">
+				<font class="date-text">&nbsp;&nbsp;&nbsp;<fmt:message key="alert.dateto"/>&nbsp;&nbsp;&nbsp;</font><input type="text" id="queryDatePickerTo" class="date-input">
+				</p>
+				</fieldset>
 
-				<div style="float:left; position:relative; height:24px; width:20px;" class="awesome-marker-icon-${type.getMarkerColor()}-legend awesome-marker leaflet-zoom-animated" >
-					<i style="color:${type.getColor()}" class="fa fa-${type.getMarkerIcon()}">${type.getCustomIcon()}</i><br>
+				<fieldset>
+				<legend><fmt:message key="alert.queries.filter" /></legend>
+					<input id="queryFilterText" type="text" style="margin-bottom:3px"></input>
+				</fieldset>				
+							
+			    <fieldset style="flex: 1 1 auto; overflow: auto;">
+				<legend><fmt:message key="alert.queries.select" /></legend>
+				<div id="query-list" class="folder-container">
 				</div>
+				</fieldset>
+				
+			</div><!-- end control-item-content -->
 
-     			${type.getLabel()}
-     			</input><br>
-     			</div> 
-			</c:forEach> 
-			</p>
-			</fieldset>
-			
-			<fieldset>
-			<legend><fmt:message key="alert.filters.status" /></legend>
-			<c:forEach var="s" items="${status}" varStatus="count">
-				<label><input class='filterStatus updateChange' value="${s[0]}" type="checkbox" checked/>${s[1]}</label><br>
-			</c:forEach>
-			</fieldset>
-			
-			<fieldset>
-			<legend><fmt:message key="alert.filters.importance" /></legend>
-			<label><input class='filterImportance updateChange' type="checkbox" value=1 checked/><fmt:message key="alert.eventimportance1" /></label><br>
-			<label><input class='filterImportance updateChange' type="checkbox" value=2 checked/><fmt:message key="alert.eventimportance2" /></label><br>
-			<label><input class='filterImportance updateChange' type="checkbox" value=3 checked/><fmt:message key="alert.eventimportance3" /></label><br>
-			<label><input class='filterImportance updateChange' type="checkbox" value=4 checked/><fmt:message key="alert.eventimportance4" /></label><br>
-			<label><input class='filterImportance updateChange' type="checkbox" value=5 checked/><fmt:message key="alert.eventimportance5" /></label><br>
-			</p>
-			</fieldset>
-			
-			
-			<fieldset>
-			<legend><fmt:message key="alert.filters.ca" /></legend>
-			<c:forEach var="ca" items="${cas}" varStatus="count">
-				<input class='filterCa updateChange' name="${ca.getUuid()}" value="${ca.getUuid()}" type="checkbox">${ca.getLabel()}</input><br>
-			</c:forEach>
-			</p>
-			</fieldset>
-			
-			<fieldset style="margin-bottom:4px;">
-			<legend><fmt:message key="alert.filters.text" /></legend>
-			<input id='filterText' class='updateChange' name="textFilter" type="text" style="margin-bottom:3px"></input>
-			</fieldset>
-
-		</form>
-
-	 </div>
+        </div><!-- end control-item -->
+		<div class="control-item">
+        	<div class="control-header">
+				<div class="control-title"><fmt:message key="alert.filters.title" /></div>
+				<div class="control-item-icon fa fa-filter fa-2x" title="<fmt:message key="alert.filters.title" />"></div>
+			</div><!-- control-header -->
+			<div id="filter-control-content" class="control-item-content">
+			<form id="filter-form" name="filter-form" action="" onsubmit="return false;">
+				<fieldset>
+				<legend><fmt:message key="alert.dates" /></legend>
+				<input id="sortBy" type="hidden" name="sortBy" value="date"/>
+				<input id="sortAscending" type="hidden" name="sortAscending"  value="false"/>
+				
+				<p>
+				<select id='filterDate' class='updateChange' name="time_filter" style="margin-bottom:3px">
+					<option value=1><fmt:message key="alert.within1" /></option>
+					<option value=2><fmt:message key="alert.within2" /></option>
+					<option value=4><fmt:message key="alert.within4" /></option>
+					<option value=8><fmt:message key="alert.within8" /></option>
+					<option value=12><fmt:message key="alert.within12" /></option>
+					<option value=24><fmt:message key="alert.within24" /></option>
+					<option value=48><fmt:message key="alert.within48" /></option>
+					<option value=168><fmt:message key="alert.withinweek" /></option>
+					<option value=744><fmt:message key="alert.withinmonth" /></option>
+					<option value=-99><fmt:message key="alert.alldates" /></option>
+					<option value=-1><fmt:message key="alert.customdates" /></option>
+				</select>
+				</p>
+				
+				<p class="map_date_picker">
+				<input type="text" id="datePickerFrom" class="date-input">
+				<font class="date-text">&nbsp;&nbsp;&nbsp;<fmt:message key="alert.dateto"/>&nbsp;&nbsp;&nbsp;</font><input type="text" id="datePickerTo" class="date-input">
+				</p>
+				</fieldset>
+				
+							
+			    <fieldset>
+				
+				<legend><fmt:message key="alert.filters.types" /></legend>
+				<c:forEach var="type" items="${alertTypes}" varStatus="count">
+					<div style="min-height: 25px;">
+					
+	     			<input style="position: relative; vertical-align: middle; bottom: 1px; height:25px; margin:0px 0px 0px 4px; padding:0px;"  class="filterType updateChange" name="${type.getUuid()}" value="${type.getUuid()}" type="checkbox">  
 	
-	<div style="display:flex; flex-flow:row nowrap">
+					<div style="float:left; position:relative; height:24px; width:20px;" class="awesome-marker-icon-${type.getMarkerColor()}-legend awesome-marker leaflet-zoom-animated" >
+						<i style="color:${type.getColor()}" class="fa fa-${type.getMarkerIcon()}">${type.getCustomIcon()}</i><br>
+					</div>
+	
+	     			${type.getLabel()}
+	     			</input><br>
+	     			</div> 
+				</c:forEach> 
+				</p>
+				</fieldset>
+				
+				<fieldset>
+				<legend><fmt:message key="alert.filters.status" /></legend>
+				<c:forEach var="s" items="${status}" varStatus="count">
+					<label><input class='filterStatus updateChange' value="${s[0]}" type="checkbox" checked/>${s[1]}</label><br>
+				</c:forEach>
+				</fieldset>
+				
+				<fieldset>
+				<legend><fmt:message key="alert.filters.importance" /></legend>
+				<input class='filterImportance updateChange' type="checkbox" value=1 checked/><label><fmt:message key="alert.eventimportance1" /></label><br>
+				<label><input class='filterImportance updateChange' type="checkbox" value=2 checked/><fmt:message key="alert.eventimportance2" /></label><br>
+				<label><input class='filterImportance updateChange' type="checkbox" value=3 checked/><fmt:message key="alert.eventimportance3" /></label><br>
+				<label><input class='filterImportance updateChange' type="checkbox" value=4 checked/><fmt:message key="alert.eventimportance4" /></label><br>
+				<label><input class='filterImportance updateChange' type="checkbox" value=5 checked/><fmt:message key="alert.eventimportance5" /></label><br>
+				</fieldset>
+				
+				
+				<fieldset>
+				<legend><fmt:message key="alert.filters.ca" /></legend>
+				<c:forEach var="ca" items="${cas}" varStatus="count">
+					<input class='filterCa updateChange' name="${ca.getUuid()}" value="${ca.getUuid()}" type="checkbox">${ca.getLabel()}</input><br>
+				</c:forEach>
+				</p>
+				</fieldset>
+				
+				<fieldset style="margin-bottom:4px;">
+				<legend><fmt:message key="alert.filters.text" /></legend>
+				<input id='filterText' class='updateChange' name="textFilter" type="text" style="margin-bottom:3px"></input>
+				</fieldset>
+	
+			</form>
+			</div><!-- end control-item-content -->
+		</div><!-- end control-item -->
+		</div><!-- control-menu -->
+	</div> <!-- map -->
+	
+	<div style="flex: none; display:flex; flex-flow:row nowrap">
 	  <div id="buttons" style="justify-content: flex-start;display:flex; flex-flow: row nowrap; padding:5px;">
  		<div><a style="text-decoration:none" href='javascript:refreshAlerts()'><div class="button mapbutton"><fmt:message key="alert.refresh" /></div></a></div> 
  		<div><a style="text-decoration:none" href='javascript:buttonCreateAlert()'><div class="button mapbutton"><fmt:message key="alert.createalert" /></div></a> </div>
@@ -316,7 +374,7 @@
 <div id="manageAlertsDialog" style="display: none;width:80%" class="dialog">
 	<section id="tab3" class="">
 		<div id="alertTableMessage" class="msgsection"></div>
-		<div class="overflow">
+		<div>
 		<table id="alerttable" style="width:100%">
 		<tr class="table-row smart-table-header"><th><a onclick="sort('typeUuid')" href="#"><fmt:message key="alert.type" /></a></th><th><a onclick="sort('ca.label')" href="#"><fmt:message key="query.conservationarea" /></a></th><th><a onclick="sort('date')" href="#"><fmt:message key="alert.date" /></a></th><th><a onclick="sort('description')" href="#"><fmt:message key="alert.description" /></a></th><th><a onclick="sort('level')" href="#"><fmt:message key="alert.eventimportance" /></a></th><th><a onclick="sort('status')" href="#"><fmt:message key="alert.status" /></a></th><th><a onclick="sort('x')" href="#"><fmt:message key="alert.location" /></a></th><th><fmt:message key="actions" /></th></tr>
 		</table>

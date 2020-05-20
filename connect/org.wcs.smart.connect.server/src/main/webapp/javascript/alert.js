@@ -1,3 +1,4 @@
+const QUERY_URL = "../api/query/"
 var ALERT_URL = "../api/connectalert/";
 //var ALERT_URL = "https://office.refractions.net:8443/server/api/echoapi/";
 var FILTER_URL = "../api/connectalertfilterdefault/";
@@ -9,10 +10,16 @@ var map;
 var layerControl;
 var redMarker;
 var deletetimer;
+var queryLayers = {};
+var queryTypeKeys = {};
 
+const queryColors = ['#FF0000', '#0000FF', '#FF00FF', '#00FFFF', 
+					'#FF9933', '#FF3399', '#33FF99', '#9933FF', '#3399FF',
+					'#FF6600', '#FF0066', '#66FF00', '#00FF66', '#6600FF', '#0066FF'];
+var nextQueryColor = 0;
+var assignedQueryColors = {};
 
-
-window.onload = function(){
+window.onload = function() {
 	menuCheckOnload();
 	
 	//Hide header/footer and menu if mobile parameter is set:
@@ -23,7 +30,6 @@ window.onload = function(){
 		
 		document.body.style.width = '38em';
 	}
-
 	
 	//setup onChange events for filter buttons
 	var items = document.getElementsByClassName("updateChange");
@@ -34,11 +40,17 @@ window.onload = function(){
 	document.getElementById('datePickerFrom').addEventListener("change", refreshAlerts);
 	document.getElementById('datePickerTo').addEventListener("change", refreshAlerts);
 
-	
+	//setup onChange events for filter buttons
+	var items = document.getElementsByClassName("updateQueryChange");
+	for (var i = 0; i < items.length; i++) {
+		items[i].addEventListener("change", refreshQueries);
+	}
+	document.getElementById('queryDate').addEventListener("change", checkForCustomQueryDates);
+	document.getElementById('queryDatePickerFrom').addEventListener("change", refreshQueries);
+	document.getElementById('queryDatePickerTo').addEventListener("change", refreshQueries);
 	
 	//setup date picker for alert filters
-
-	var picker = new Pikaday({
+	new Pikaday({
 		field: document.getElementById('datePickerFrom'),
 		firstDay: 1,
         minDate: new Date('2000-01-01'),
@@ -46,7 +58,7 @@ window.onload = function(){
         i18n: pickaday_i18n
 	});
 
-	var picker = new Pikaday({
+	new Pikaday({
 		field: document.getElementById('datePickerTo'),
 		firstDay: 1,
         minDate: new Date('2000-01-01'),
@@ -54,12 +66,88 @@ window.onload = function(){
         i18n: pickaday_i18n
 	});
 
+	// setup date picker for query filters
+	new Pikaday({
+		field: document.getElementById('queryDatePickerFrom'),
+		firstDay: 1,
+        minDate: new Date('2000-01-01'),
+        yearRange: [2000,2050],
+        i18n: pickaday_i18n
+	});
 
+	new Pikaday({
+		field: document.getElementById('queryDatePickerTo'),
+		firstDay: 1,
+        minDate: new Date('2000-01-01'),
+        yearRange: [2000,2050],
+        i18n: pickaday_i18n
+	});
+
+	const controlItemIcons = document.querySelectorAll('.control-item-icon');
+	controlItemIcons.forEach(el => el.addEventListener('click', function(e) {
+		toggleDisplay(e.target.previousElementSibling);
+		toggleDisplay(e.target.parentNode.nextElementSibling);
+	}));
 	
+	// we are catching events at the query-list level
+	// in case we add or remove folders/items dynamically
+	const queryList = document.getElementById('query-list');
+	queryList.addEventListener('click', function(evt) {
+		var element = evt.target;
+		// bubble up events to the parent folder or folder-item
+		if(!element.classList.contains('folder-name')
+				&& !element.classList.contains('folder-item')) {
+			element = element.parentNode;
+		}
+		if(element.classList.contains('folder-name')) {
+			// clicking on the folder toggles the folder icon
+			// as well as toggling the display of the folder contents
+			const folderIcon = element.getElementsByClassName('folder-icon')[0];
+			if(folderIcon.classList.contains('fa-folder-open-o')) {
+				folderIcon.classList.remove('fa-folder-open-o');
+				folderIcon.classList.add('fa-folder-o');
+			} else {
+				folderIcon.classList.remove('fa-folder-o');
+				folderIcon.classList.add('fa-folder-open-o')
+			}
+			toggleDisplay(element.nextElementSibling);
+		} else if(element.classList.contains('folder-item')) {
+			// clicking on the item toggles the query layer on the map 
+			const checkbox = element.querySelectorAll("input[type='checkbox']")[0];
+			if(evt.target != checkbox) {
+				checkbox.checked = !checkbox.checked;
+			}
+			if(checkbox.checked) {
+				var color = getQueryColor(checkbox.id);
+				addQueryLayer(checkbox.id, color);
+				var colorBox = document.createElement('span');
+				colorBox.classList.add('color-box');
+				colorBox.style['background-color'] = color; 
+				checkbox.insertAdjacentElement('afterend', colorBox);
+			} else {
+				removeQueryLayer(checkbox.id);
+				if(checkbox.nextElementSibling.classList.contains('color-box')) {
+					checkbox.nextElementSibling.remove();
+				}
+			}
+		}
+	});
+	
+	document.getElementById("queryFilterText").addEventListener('input', filterQueryList);
+
+ 	//default custom dates so they are not blank to start
+ 	var today = getTodayAsString();
+    document.getElementById("datePickerFrom").value = today;
+    document.getElementById("datePickerTo").value = today;
+    document.getElementById("queryDatePickerFrom").value = today;
+    document.getElementById("queryDatePickerTo").value = today;
+ 	
+ 	checkForCustomDates();
+ 	checkForCustomQueryDates();
+ 	
 //------------------------------------------------------------
 //Setup map layers
     // The real-time layer that auto-refreshes to show alert
-
     
     //OSM Basemap Layer - the Hardcoded basemaps
     var osmUrl='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
@@ -76,7 +164,7 @@ window.onload = function(){
 	
 	var activeLayers = [osm];
 
-	//Load all saved, active layers
+	// Load all saved, active layers
 	for (i = 0; i < mapLayers.length; ++i) {
 		if(mapLayers[i][0] == "WMS"){ //WMS type
 			var token = mapLayers[i][1];
@@ -97,11 +185,8 @@ window.onload = function(){
 			if(mapLayers[i][4] == "true"){
 				activeLayers.push(wmsLayer);
 			}
-		}
-
-	    
+		}   
 	}
-
 			
 	//initialize the map
 	map = new L.Map('map', {center: new L.LatLng(startingLat, startingLong), zoom: startingZoom, layers: activeLayers});
@@ -118,7 +203,6 @@ window.onload = function(){
 	
 //Map setup complete.
 //--------------------------------------------------	
-
     
     //set the lat/long in the "new alert form", if we can get them from the device automatically
     if (navigator.geolocation) {
@@ -133,15 +217,155 @@ window.onload = function(){
 		var overlaydiv = document.querySelector(".overlay-widgetlevel2");
 		overlaydiv.parentNode.removeChild(overlaydiv);
 	};
-
+	
 	refreshAlerts();
 
-
+	loadQueries();
 
 }
 
+function toggleDisplay(element) {
+    if(element.style.display == "none") {
+      element.style.display = "";
+    } else {
+    	element.style.display = "none";
+    }
+}
 
+function loadQueries() {
+	var oReq = new XMLHttpRequest();
+ 	oReq.onload = handleQueries;
+ 	oReq.open("Get", QUERY_URL + "tree/?type=" + shpValues.join(','), true);
+ 	oReq.send();
+}
 
+function handleQueries() {
+	const data = JSON.parse(this.responseText);
+	const queryList = document.getElementById("query-list");
+	for(var i=0; i < data.length; i++) {
+		addFolder(data[i], queryList);
+	}
+}
+
+// recursively adds nested folders and queries
+function addFolder(data, parent) {
+	var folderDiv = document.createElement('div');
+	folderDiv.classList.add('folder');
+	parent.appendChild(folderDiv);
+	folderDiv.innerHTML = "<div class=\"folder-name\"><i class=\"folder-icon fa fa-folder-open-o fa-lg\"></i>" + data['name'] + "</div>";
+	folderContentsDiv = document.createElement('div');
+	folderContentsDiv.classList.add('folder-contents');
+	folderDiv.appendChild(folderContentsDiv);
+	for(var i = 0; i < data['subFolders'].length; i++) {
+		addFolder(data['subFolders'][i], folderContentsDiv);
+	}
+	for(var i = 0; i < data['queries'].length; i++) {
+		var query = data['queries'][i];
+		folderItemDiv = document.createElement('div');
+		folderItemDiv.classList.add('folder-item');
+		queryTypeKeys[query.uuid] = query.typeKey;
+		folderItemDiv.innerHTML = "<input id=\"" + query.uuid + "\" type=\"checkbox\"/><img class=\"query-icon\" src=\"../css/images/query_icons/" + query.iconName + "\" title=\"" + query.type + "\">" + query.name;
+		folderContentsDiv.appendChild(folderItemDiv);
+	}
+}
+
+function filterQueryList() {
+	const filterStr = document.getElementById('queryFilterText').value.toUpperCase();
+	var childFolders = document.getElementById('query-list').getElementsByClassName('folder');
+	for(var i = 0; i < childFolders.length; i++) {
+		var matched = filterQueryListRecursive(childFolders[i], filterStr);
+	}
+}
+
+function filterQueryListRecursive(folder, filterStr) {
+	var foundMatch = false;
+	var childFolders = folder.getElementsByClassName('folder');
+	for(var i = 0; i < childFolders.length; i++) {
+		var matched = filterQueryListRecursive(childFolders[i], filterStr);
+		foundMatch = foundMatch || matched;
+	}
+	var childQueries = folder.getElementsByClassName('folder-item');
+	for(var i = 0; i < childQueries.length; i++) {
+		if(childQueries[i].innerText.toUpperCase().indexOf(filterStr) > -1) {
+			foundMatch = true;
+			childQueries[i].style.display = '';
+		} else {
+			childQueries[i].style.display = 'none';
+		}
+	}
+	if(foundMatch) {
+		folder.style.display = '';
+	} else {
+		folder.style.display = 'none';
+	}
+	return foundMatch;
+}
+
+function getQueryColor(id) {
+	var color = assignedQueryColors[id];
+	if(!color) {
+		color = queryColors[nextQueryColor];
+		nextQueryColor = (nextQueryColor + 1) % queryColors.length;
+		assignedQueryColors[id] = color;
+	}
+	return color;
+}
+
+function addQueryLayer(id, color) {
+ 	var oReq = new XMLHttpRequest();
+ 	oReq.responseType = 'json';
+ 	oReq.onload = function() {
+ 		data = this.response;
+ 		
+ 		var pointStyle = {
+			radius: 5,
+		    fillColor: color,
+		    color: color,
+		    weight: 1,
+		    opacity: 1,
+		    fillOpacity: 0.5
+ 		};
+ 		var lineStyle = {
+ 			    color: color
+ 	 	};
+ 		var layer = L.geoJson(data.features, {
+ 			style: lineStyle,
+ 			pointToLayer: function (feature, latlng) {
+ 		        return L.circleMarker(latlng, pointStyle);
+ 		    }
+ 		});
+ 		map.addLayer(layer);
+ 		queryLayers[id] = layer;
+ 	};
+ 	var dateFilter = "";
+ 	const dateRange = getDateRange('queryDate', 'queryDatePickerFrom', 'queryDatePickerTo');
+	if(dateRange) {
+		if(dateRange['start']) {
+			dateFilter += "&start_date=" + timestampToDateString(dateRange['start']);
+		}
+		if(dateRange['end']) {
+			dateFilter += "&end_date=" + timestampToDateString(dateRange['end']);
+		}
+	}
+ 	oReq.open("Get", QUERY_URL + id + "?format=geojson&srid=4326&date_filter=" + qdatefilter[queryTypeKeys[id]][0] + dateFilter , true);
+ 	oReq.send();
+}
+
+// converts from javascript millisecond epoch timestamp to yyyy-MM-dd hh:mm:ss 
+function timestampToDateString(t) {
+	const d = new Date(t);
+	return d.getFullYear() + "-" + ("0"+(d.getMonth()+1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2)  + " " 
+		+ ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2);
+}
+
+function removeQueryLayer(id) {
+	map.removeLayer(queryLayers[id]);
+	queryLayers[id] = null;
+}
+
+function refreshQueries() {
+	//TODO - update query layers to use new date range
+}
 
 //creates a new alert
 function createNewAlert() {
@@ -301,13 +525,13 @@ function createAlertTable(){
 	if (this.status != 200 && this.status != 201 ) {
 		var msg = i18n("alert.error");
 		document.getElementById("map-info-box").innerHTML = i18n("alert.errortrying") ;
-		if (this.status == 401){
+		if (this.status == 401) {
 			msg += i18n("alert.unathorized");
-		}else if (this.status == 404){
+		} else if (this.status == 404) {
 			msg += i18n("alert.invalidurl");
-		}else if (this.status == 406){
+		} else if (this.status == 406) {
 			msg += i18n("alert.toomanyalerts");
-		}else if (this.status == 500){
+		} else if (this.status == 500) {
 			msg += i18n("alert.servererror");
 		}
 		
@@ -321,7 +545,7 @@ function createAlertTable(){
 		element.innerHTML = msg;
 		element.className = "msgsection";
 		return;
-	}else{
+	} else {
 		element.style.display = "none";//hide any previous errors
 	}
 	//clear current table
@@ -333,7 +557,7 @@ function createAlertTable(){
 	
 	var parent = document.getElementById("alerttable");
  	
-	try{
+	try {
 		var geojson = JSON.parse(this.responseText);
 	 	var alerts = geojson.features;
 	 	if(typeof alerts === "undefined" || alerts.length == 0){
@@ -362,8 +586,7 @@ function createAlertTable(){
 			cell.appendChild(a);
 			newRow2.appendChild(cell);
 
-
-		}else{
+		} else {
 			var str = document.getElementById("numberofalerts").innerHTML;
 			document.getElementById("numberofalerts").innerHTML = alerts.length/2 ;
 		 	for (var i = 0; i < alerts.length; i ++){
@@ -427,10 +650,9 @@ function createAlertTable(){
 			cell.appendChild(a);
 			lastrow.appendChild(cell);
 			
-			
 			parent.appendChild(lastrow);
 		}
-	}catch(err) {
+	} catch(err) {
  		var newRow = parent.insertRow(-1);
  		newRow.style.backgroundColor = "#F00";
  		newRow.className = "alertrow";
@@ -580,22 +802,6 @@ function AlertUpdated(){
 
 }
 
-function hideShowFilters(){
-
-
-	var current = document.getElementById('filter-form').style.display;
-	if(current == "none"){
-		document.getElementById('filter-form').style.display = "block";
-		document.getElementById('filter-link').style.display = "block";
-		document.getElementById('filter-controls').style.minWidth= "267px";
-	}else{
-		document.getElementById('filter-form').style.display = "none";
-		document.getElementById('filter-link').style.display = "block";
-		document.getElementById('filter-controls').style.minWidth = "30px";
-	}
-}
-
-
 function getFilteredUrl(base){
 	var filteredUrl = base;
 
@@ -608,29 +814,37 @@ function getFilteredUrl(base){
 	
 	filteredUrl += "&textSearchFilter=" +  document.getElementById("filterText").value;
 
-	var dateSelect = document.getElementById("filterDate").value;
-	
-	if(dateSelect == -1){//custom dates
-		var from = new Date(document.getElementById('datePickerFrom').value.substring(4)).getTime();//substring(4) drops the "Wed " from the field, which isnt' a valid date string.
-		var to = new Date(document.getElementById('datePickerTo').value.substring(4)).getTime() + 86399999; //use end of the day, since it is the "to" date.
+//	var dateSelect = document.getElementById("filterDate").value;
+//	
+//	if(dateSelect == -1){//custom dates
+//		var from = new Date(document.getElementById('datePickerFrom').value.substring(4)).getTime();//substring(4) drops the "Wed " from the field, which isnt' a valid date string.
+//		var to = new Date(document.getElementById('datePickerTo').value.substring(4)).getTime() + 86399999; //use end of the day, since it is the "to" date.
+//
+//		if(isNaN(to) || isNaN(from) || from > to){
+//			displayError(i18n("alert.invalidcustomdates"));
+//		}else{
+//			filteredUrl += "&startDateFilter=" + from;  
+//			filteredUrl += "&endDateFilter=" + to 
+//		}
+//	}else if(dateSelect == -99){//all-time
+//		//do nothing, no filter gives all dates back.
+//	}else if(dateSelect >0){ //number of trailing hours from now
+//		var now = new Date();
+//		now = now.getTime();
+//		
+//		var start = new Date()
+//		var start = start.getTime() - dateSelect*60*60*1000;  
+//		
+//		filteredUrl += "&startDateFilter=" +  start; 
+//		filteredUrl += "&endDateFilter=" + now; //leaving this out for now, we can show things in the future if times are off slightly
+//	}
 
-		if(isNaN(to) || isNaN(from) || from > to){
-			displayError(i18n("alert.invalidcustomdates"));
-		}else{
-			filteredUrl += "&startDateFilter=" + from;  
-			filteredUrl += "&endDateFilter=" + to 
-		}
-	}else if(dateSelect == -99){//all-time
-		//do nothing, no filter gives all dates back.
-	}else if(dateSelect >0){ //number of trailing hours from now
-		var now = new Date();
-		now = now.getTime();
-		
-		var start = new Date()
-		var start = start.getTime() - dateSelect*60*60*1000;  
-		
-		filteredUrl += "&startDateFilter=" +  start; 
-		filteredUrl += "&endDateFilter=" + now; //leaving this out for now, we can show things in the future if times are off slightly
+	var dateRange = getDateRange('filterDate', 'datePickerFrom', 'datePickerTo');
+	if(dateRange && dateRange['start']) {
+		filteredUrl += "&startDateFilter=" + dateRange['start'];
+	}
+	if(dateRange && dateRange['end']) {
+		filteredUrl += "&endDateFilter=" + dateRange['end'];
 	}
 
 	filteredUrl += "&sortBy=" + document.getElementById('sortBy').value + "&sortAscending=" + document.getElementById('sortAscending').value;
@@ -638,6 +852,35 @@ function getFilteredUrl(base){
 	return filteredUrl;
 }
 
+function getDateRange(dateSelectId, fromDatePickerId, toDatePickerId) {
+	var dateSelect = document.getElementById(dateSelectId).value;
+	
+	if(dateSelect == -1) { //custom dates
+		var from = new Date(document.getElementById(fromDatePickerId).value.substring(4)).getTime();//substring(4) drops the "Wed " from the field, which isnt' a valid date string.
+		var to = new Date(document.getElementById(toDatePickerId).value.substring(4)).getTime() + 86399999; //use end of the day, since it is the "to" date.
+
+		if(isNaN(to) || isNaN(from) || from > to){
+			displayError(i18n("alert.invalidcustomdates"));
+		} else {
+			return {
+				'start': from,  
+				'end': to
+			};
+		}
+	} else if(dateSelect == -99) { //all-time
+		return null;
+	} else if(dateSelect > 0) { //number of trailing hours from now
+		var now = new Date();
+		now = now.getTime();
+		
+		var start = new Date()
+		start = start.getTime() - dateSelect*60*60*1000;  
+		return {
+			'start': start,  
+			'end': now
+		};		
+	}
+}
 
 function getFilter(classname, started, filterName){
 	var url = "";
@@ -658,8 +901,8 @@ function getFilter(classname, started, filterName){
 	return url;
 }
 
-function updateRealtimeLayer(updatedUrl){
-	if(map.hasLayer(realtime)){
+function updateRealtimeLayer(updatedUrl) {
+	if(map.hasLayer(realtime)) {
 		realtime.stop();
 		map.removeLayer(realtime);
 //		layerControl.removeLayer(realtime);//doesn't quite work nicely, when you have it unselected it doesn't work.	
@@ -677,7 +920,6 @@ function updateRealtimeLayer(updatedUrl){
         pointToLayer: stylePoints,
         style: styleFunction
     });
-
    
     realtime.on('update', function(e) {
         var coordPart = function(v, dirs) {
@@ -691,16 +933,16 @@ function updateRealtimeLayer(updatedUrl){
 
                 d = new Date(Date.parse(feature.properties.date));// converts to local time by parsing into millisecs then loading millisecs into a new Date object.
                 
-                if(feature.properties.type == undefined){
+                if(feature.properties.type == undefined) {
                 	return i18n("alert.trackselected");
             	}
 
                 var text = i18n("alert.event");
-                if(feature.properties.type == 'Unknown Type'){
+                if(feature.properties.type == 'Unknown Type') {
                 	text = text + "<font color='red'>"
                 }
                 text = text + feature.properties.type;
-                if(feature.properties.type == 'Unknown Type'){
+                if(feature.properties.type == 'Unknown Type') {
                 	text = text + "</font>"
                 }
                 	
@@ -745,12 +987,11 @@ function stylePoints(feature, latlng) {
 	var markerColor = styleMarkerColor[feature.properties.typeuuid];
 	var spinStr = styleSpin[feature.properties.typeuuid];
 	var customIcon = styleCustomIcon[feature.properties.typeuuid];
-	if(spinStr == "true"){
+	if(spinStr == "true") {
 		spin = true;
-	}else{
+	} else {
 		spin = false;
-	}
-	
+	}	
 
 	marker  = L.AwesomeMarkers.icon({
 		prefix: 'fa',
@@ -759,9 +1000,7 @@ function stylePoints(feature, latlng) {
 	    markerColor: markerColor,
 	    spin: spin,
 	    html: "<b>" + customIcon + "</b>" //bold always looks better to me 
-	  });
-	
-
+	});
 	
     return L.marker(latlng, {icon: marker});
 }
@@ -784,15 +1023,14 @@ function getMapFilters(){
  	oReq.send();
 }
 
-
 function setMapFilters(){
 	if (this.status != 200 && this.status != 201 ) {
 		var msg = i18n("alert.errorlabel");
-		if (this.status == 401){
+		if (this.status == 401) {
 			msg += i18n("alert.unathorized");
-		}else if (this.status == 404){
+		} else if (this.status == 404) {
 			msg += i18n("alert.invalidurl");
-		}else{
+		} else {
 			msg = JSON.parse(this.responseText).error
 		}
 		
@@ -807,14 +1045,14 @@ function setMapFilters(){
  	interval = defaults.secondsRefresh * 1000;
  	
  	//timer to refresh the alerts at the set interval
- 	setInterval(function(){
+ 	setInterval(function() {
  		refreshAlerts()
  	}, interval);
- 	
  	
  	var filter_form = document.getElementById('filter-form');
  	
  	document.getElementById('filterDate').value = defaults.defaultPastHours;
+ 	document.getElementById('queryDate').value = defaults.defaultPastHours;
  	
  	var statuses = document.getElementsByClassName('filterStatus');
  	for(var x=0 ; x < statuses.length; x++){
@@ -846,6 +1084,7 @@ function setMapFilters(){
  		}
  	}
  	document.getElementById('filterDate').value = defaults.defaultPastHours;
+ 	checkForCustomDates();
  	
  	var str = defaults.defaultTypeUuids;
  	var typeUuids = str.split(',');
@@ -864,44 +1103,45 @@ function setMapFilters(){
  	}
 
  	document.getElementById('filterText').value = defaults.defaultText;
- 	
- 	
- 	//default custom dates so they are not blank to start
- 	var today = getTodayAsString();
-    document.getElementById("datePickerFrom").value = today;
-    document.getElementById("datePickerTo").value = today;
- 	
-
- 	
- 	checkForCustomDates();
- 	
+ 	 	
  	refreshAlerts();
 }
 
 //check if the user selected or deselected "custom dates" and grey/de-grey the custom inputs. 
-function checkForCustomDates(){
+function checkForCustomDates() {
 	var date = document.getElementById('filterDate');
-	if(date.value == -1){
+	if(date.value == -1) {
 		document.getElementById('datePickerFrom').disabled = false;
 		document.getElementById('datePickerTo').disabled = false;
-	}else{
+	} else {
 		document.getElementById('datePickerFrom').disabled = true;
 		document.getElementById('datePickerTo').disabled = true;
 	}
 }
 
+function checkForCustomQueryDates() {
+	var date = document.getElementById('queryDate');
+	if(date.value == -1) {
+		document.getElementById('queryDatePickerFrom').disabled = false;
+		document.getElementById('queryDatePickerTo').disabled = false;
+	} else {
+		document.getElementById('queryDatePickerFrom').disabled = true;
+		document.getElementById('queryDatePickerTo').disabled = true;
+	}
+	refreshQueries();
+}
 
 function getTodayAsString(){
  	var today = new Date();
     var dd = today.getDate();
-    var mm = today.getMonth()+1; //January is 0!
+    var mm = today.getMonth() + 1; //January is 0!
 
     var yyyy = today.getFullYear();
     if(dd<10){
-        dd='0'+dd
+        dd = '0' + dd
     } 
     if(mm<10){
-        mm='0'+mm
+        mm = '0' + mm
     } 
     
     
@@ -928,7 +1168,6 @@ function getTodayAsString(){
     monthText[9] = "Oct";
     monthText[10] = "Nov";
     monthText[11] = "Dec";
-    
 
     var n = weekday[today.getDay()];
     var month = monthText[today.getMonth()];
@@ -936,16 +1175,16 @@ function getTodayAsString(){
     return n + ' ' + month + ' ' + dd + ' ' + yyyy;
 }
 
-function sort(str){
+function sort(str) {
 	var asc = document.getElementById('sortAscending').value;
 	var cur = document.getElementById('sortBy').value; 
-	if( cur == str){
-		if(asc == "true"){
+	if(cur == str){
+		if(asc == "true") {
 			document.getElementById('sortAscending').value = "false";
-		}else{
+		} else {
 			document.getElementById('sortAscending').value = "true";
 		}
-	}else{
+	} else {
 		document.getElementById('sortBy').value = str;
 	}
 	
@@ -953,8 +1192,8 @@ function sort(str){
 }
 
 //Delete all alerts that meet the current filter criteria
-function deleteFilteredAlerts(){
-	displayConfirmDialog(i18n("alert.deleteallheading"), i18n("alert.areyousuredeleteallalerts"), function(){
+function deleteFilteredAlerts() {
+	displayConfirmDialog(i18n("alert.deleteallheading"), i18n("alert.areyousuredeleteallalerts"), function() {
 		var alerts = document.querySelectorAll(".alertrow");
 		for (var i = 0; i < alerts.length-1; i++){ //-1 because the delete all link is in the list as well. 
 			var uuid = alerts[i].dataset.uuid;
@@ -965,7 +1204,7 @@ function deleteFilteredAlerts(){
 		}
 	});
 }
-function allAlertDeleted(){	
+function allAlertDeleted() {	
 	if (this.status == 200  && this.status != 201 ) {
 	} else {
 		displayError(parseError(i18n("alert.errordeletealert") + " : " + this.statusText));

@@ -1,4 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<div id="root-container">
 <c:if test="${not empty pageContext.request.userPrincipal}">
 	<div id="userheader">
 		<form action="${pageContext.request.contextPath}/logout" method="post">
