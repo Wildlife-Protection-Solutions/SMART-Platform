@@ -233,7 +233,8 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 					
 					//update patrol end date and end time for last patrol leg day
 					link.getPatrolLeg().getPatrol().setEndDate(SharedUtils.getDatePart(dt, false));
-					PatrolLegDay pd = findLegDay(link.getPatrolLeg(), link.getPatrolLeg().getEndDate(), true, null, session);
+					link.getPatrolLeg().setEndDate(SharedUtils.getDatePart(dt, true));
+					PatrolLegDay pd = findLegDay(link.getPatrolLeg(), SharedUtils.getDatePart(link.getPatrolLeg().getEndDate(), false), true, null, session);
 					pd.setEndTime(new Time(dt.getTime()));
 						
 					//add point to track
