@@ -39,15 +39,19 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ColumnViewerEditorActivationStrategy;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ILazyContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.TableViewerEditor;
+import org.eclipse.jface.viewers.TableViewerFocusCellManager;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
@@ -97,7 +101,8 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 	public static enum Type {
 		SELECT,
 		NEW,
-		EDIT
+		EDIT,
+		SINGLE_SELECT
 	}
 	private Composite stackPanel;
 	
@@ -118,6 +123,10 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 	
 	private List<IconSet> activeSets;
 	
+//	private IconFile selectedFile = null;
+	private IconSet currentSet = null;
+	private TableViewerFocusCellManager focusManager ;
+	
 	public IconSelectionDialog(Shell parentShell, Type type, List<IconSet> activeSets) {
 		super(parentShell);
 		this.type = type;
@@ -137,12 +146,26 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 		this(parentShell, toUpdate, null);
 	}
 
+	public IconFile getSelectedIconFile() {
+		if (currentSet != null && selectedIcon != null) return this.selectedIcon.getIconFile(currentSet);
+		return null;
+	}
 	public Icon getSelectedIcon() {
 		return this.selectedIcon;
 	}
 	@Override
 	public void okPressed(){
-		if (type == Type.SELECT) {
+		if (type == Type.SINGLE_SELECT) {
+			int index = focusManager.getFocusCell().getColumnIndex() - 2;
+			if (index < 0) index = 0;
+			currentSet = activeSets.get(index);
+			
+			Object x = tblIcons.getStructuredSelection().getFirstElement();
+			if (x instanceof Icon) {
+				selectedIcon = (Icon)x;
+			}
+			
+		} else if (type == Type.SELECT) {
 			this.selectedIcon = null;
 			if (btnLibrary.getSelection()) {
 				Object x = tblIcons.getStructuredSelection().getFirstElement();
@@ -240,6 +263,7 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 					set.getUuid().equals(null);
 				});
 			}
+			currentSet = activeSets.get(0);
 		}
 		
 		Composite main = new Composite(parent, SWT.NONE);
@@ -284,13 +308,13 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 		((StackLayout)stackPanel.getLayout()).marginWidth = 0;
 		((StackLayout)stackPanel.getLayout()).marginHeight = 0;
 		
-		if (type == Type.SELECT) {
+		if (type == Type.SELECT || type == Type.SINGLE_SELECT) {
 			iconLibraryPanel = createLibraryComposite(stackPanel, activeSets);
 			loadDataJob.schedule();
 		}
 		importPanel = createImportComposite(stackPanel, activeSets);
 		
-		if (type == Type.SELECT) {
+		if (type == Type.SELECT || type == Type.SINGLE_SELECT) {
 			((StackLayout)stackPanel.getLayout()).topControl = iconLibraryPanel;
 		}else {
 			((StackLayout)stackPanel.getLayout()).topControl = importPanel;
@@ -419,7 +443,16 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 		((GridLayout)panel.getLayout()).marginWidth = 0;
 		((GridLayout)panel.getLayout()).marginHeight= 0;
 		
-		tblIcons = new TableViewer(panel, SWT.FULL_SELECTION | SWT.SINGLE | SWT.BORDER | SWT.VIRTUAL);
+		
+		tblIcons = new TableViewer(panel,  SWT.FULL_SELECTION | SWT.SINGLE | SWT.BORDER | SWT.VIRTUAL);
+		
+		if (type == Type.SINGLE_SELECT) {
+			IconCellHighlighter cellHighlighter = new IconCellHighlighter(tblIcons);
+			focusManager = new TableViewerFocusCellManager(tblIcons, cellHighlighter);
+			ColumnViewerEditorActivationStrategy ss = new ColumnViewerEditorActivationStrategy(tblIcons);
+			TableViewerEditor.create(tblIcons, focusManager, ss, TableViewerEditor.KEYBOARD_ACTIVATION);			
+		}		
+		
 		tblIcons.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		tblIcons.setContentProvider(new ILazyContentProvider() {
 			
@@ -438,7 +471,7 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 				tblIcons.replace(data.get(index), index);
 			}
 		});
-		
+//		tblIcons.setContentProvider(ArrayContentProvider.getInstance());
 		
 		tblIcons.getTable().setHeaderVisible(true);
 		tblIcons.getTable().setLinesVisible(false);
@@ -504,7 +537,8 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 		
 		
 		for (IconSet s : sets) {
-			TableViewerColumn colIcon = new TableViewerColumn(tblIcons, SWT.NONE);
+			TableViewerColumn colIcon = new TableViewerColumn(tblIcons, SWT.DEFAULT);
+			
 			colIcon.getColumn().setText(s.getName());
 			colIcon.setLabelProvider(new ColumnLabelProvider() {
 				private HashMap<Icon,Image> images = new HashMap<>();
@@ -516,6 +550,12 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 				public void dispose() {
 					super.dispose();
 					images.values().forEach(e->e.dispose());
+				}
+				
+				@Override
+				public Color getBackground(Object element) {
+					
+					return null;
 				}
 				@Override
 				public Image getImage(Object element) {
@@ -540,6 +580,18 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 		tblIcons.setUseHashlookup(true);
 		tblIcons.setInput(DialogConstants.LOADING_TEXT);
 
+//		tblIcons.getTable().addListener(SWT.MouseDown, e->{
+//			ViewerCell cell = tblIcons.getCell(new Point(e.x,e.y));
+//			if (cell == null) return;
+//			int index = cell.getColumnIndex() - 2;
+//			if (index < 0) index = 0;
+//			IconSet is = sets.get(index);
+//			currentSet = is;
+////			Object item = cell.getElement();
+////			System.out.println(item.toString());
+////			IconFile fileSelection = ((Icon)item).getIconFile(is);
+////			selectedFile = fileSelection;
+//		});
 		return panel;
 	}
 	

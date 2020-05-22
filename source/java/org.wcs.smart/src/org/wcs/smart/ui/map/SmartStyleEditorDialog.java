@@ -88,9 +88,11 @@ import org.locationtech.udig.project.internal.StyleEntry;
 import org.locationtech.udig.style.sld.SLDContent;
 import org.locationtech.udig.style.sld.editor.EditorPageManager;
 import org.locationtech.udig.style.sld.editor.StyleEditorDialog;
+import org.locationtech.udig.style.sld.editor.internal.IEditorNode;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.SmartStyle;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
@@ -142,8 +144,21 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 			EditorPageManager manager) {
 		super(parentShell, manager);
 	}
-
 	
+	@Override
+    protected Control createContents(final Composite parent) {
+		Control c = super.createContents(parent);
+		SmartUiUtils.colorDialog(getShell());
+		return c;
+	}
+	
+	@Override
+	public boolean showPage(IEditorNode node) {
+		boolean ok = super.showPage(node);
+		SmartUiUtils.colorDialog(getShell());
+		return ok;
+	}
+		
     @Override
     protected Control createButtonBar( Composite parent ) {
         Composite composite = new Composite(parent, SWT.NONE);
@@ -172,17 +187,20 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 		Composite outer = new Composite(parent, SWT.NONE);
 		outer.setLayout(new GridLayout());
 		outer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		((GridLayout)outer.getLayout()).marginHeight = 0;
+		((GridLayout)outer.getLayout()).marginWidth = 0;
 		outer.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 
 		// -- SMART Saved Styles area --
-		Group smartArea = new Group(outer, SWT.NONE);
-		smartArea.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+		Group smartArea = new Group(outer, SWT.DEFAULT);
+//		smartArea.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 		smartArea.setText(Messages.SmartStyleEditorDialog_SaveStylesLabel);
 		smartArea.setLayout(new GridLayout());
 		smartArea.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridLayout)smartArea.getLayout()).marginHeight = 0;
 		((GridLayout)smartArea.getLayout()).marginWidth = 0;
 		
+//		SmartUiUtils.createHeaderLabel(smartArea, Messages.SmartStyleEditorDialog_SaveStylesLabel);
 		
 		ToolBar comptool = new ToolBar(smartArea, SWT.FLAT);
 		comptool.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
@@ -262,20 +280,22 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 		
 		
 		// -- Custom style configuration area --
-		Group leftArea = new Group(outer, SWT.NONE);
+		Group leftArea = new Group(outer, SWT.DEFAULT);
 		leftArea.setText(Messages.SmartStyleEditorDialog_CustomConfigLabel);
 		leftArea.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 		leftArea.setFont(parent.getFont());
 		GridLayout leftLayout = new GridLayout();
 		leftLayout.numColumns = 1;
 		leftLayout.marginHeight = 0;
-		leftLayout.marginTop = IDialogConstants.VERTICAL_MARGIN;
+		//leftLayout.marginTop = IDialogConstants.VERTICAL_MARGIN;
 		leftLayout.marginWidth = 0;
-		leftLayout.marginLeft = IDialogConstants.HORIZONTAL_MARGIN;
+		//leftLayout.marginLeft = IDialogConstants.HORIZONTAL_MARGIN;
 		leftLayout.horizontalSpacing = 0;
-		leftLayout.verticalSpacing = 0;
+		leftLayout.verticalSpacing = 2;
 		leftArea.setLayout(leftLayout);
 		leftArea.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+//		SmartUiUtils.createHeaderLabel(leftArea, Messages.SmartStyleEditorDialog_CustomConfigLabel);
 		
 		// Build the tree an put it into the composite.
 		TreeViewer viewer = createTreeViewer(leftArea);

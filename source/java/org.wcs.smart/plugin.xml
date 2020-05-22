@@ -1743,6 +1743,12 @@
             class="org.wcs.smart.startup.EncryptCleanUp">
       </StartUpRunner>
    </extension>
+   <extension
+         point="org.locationtech.udig.style.advanced.points.symbolizer">
+      <pointsymbolizer
+            class="org.wcs.smart.udig.style.SmartIconSymbolizer">
+      </pointsymbolizer>
+   </extension>
 
 </plugin>
 

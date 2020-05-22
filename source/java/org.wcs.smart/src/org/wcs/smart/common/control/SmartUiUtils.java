@@ -140,8 +140,10 @@ public class SmartUiUtils {
 			if (item instanceof TabFolder) {
 				for (TabItem titem : ((TabFolder) item).getItems()) {
 					if (titem.getControl() instanceof Composite) comps.add((Composite)titem.getControl());
-					titem.getControl().setBackground(transparent);
-					titem.getControl().getParent().setBackground(transparent);			
+					if (titem.getControl() != null) {
+						titem.getControl().setBackground(transparent);
+						titem.getControl().getParent().setBackground(transparent);
+					}
 				}
 			}
 		}

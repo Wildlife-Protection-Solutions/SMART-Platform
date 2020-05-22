@@ -1184,6 +1184,10 @@ public class Messages extends NLS {
 	public static String SmartDB_Error_NoSmartDatabase;
 	public static String SmartFilterDialog_Apply_Button;
 	public static String SmartFilterDialog_Reset_Button;
+	public static String SmartIconSymbolizer_FilterSection;
+	public static String SmartIconSymbolizer_GeneralSection;
+	public static String SmartIconSymbolizer_SelectIconButton;
+	public static String SmartIconSymbolizer_SmartIconPointSymbolizer;
 	public static String SmartInstallationInfoPage_DBLocation_Label;
 	public static String SmartInstallationInfoPage_DbPluginVersions;
 	public static String SmartInstallationInfoPage_DefaultLang_Label;
