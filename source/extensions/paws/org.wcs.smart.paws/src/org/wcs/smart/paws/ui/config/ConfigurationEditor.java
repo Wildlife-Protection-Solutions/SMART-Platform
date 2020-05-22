@@ -791,7 +791,7 @@ public class ConfigurationEditor extends EditorPart {
 				return Messages.ConfigurationEditor_InvalidGridSize;
 			}
 		});
-		txtGridSize.setText("100"); //$NON-NLS-1$
+		txtGridSize.setText("1000"); //$NON-NLS-1$
 		txtGridSize.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false ));
 		txtGridSize.addListener(SWT.Modify, e->{
 			setDirty(true);	
@@ -829,8 +829,8 @@ public class ConfigurationEditor extends EditorPart {
 					PawsParameter.ClassifierModel tw = (PawsParameter.ClassifierModel)element;
 					switch(tw) {
 					case DECISION_TREE: return Messages.ConfigurationEditor_DecisionTree ;
-					case RANDOM_FOREST: return Messages.ConfigurationEditor_RandomForest;
-					case GAUSSIAN_PROCESS: return Messages.ConfigurationEditor_Gaussian;
+					//case RANDOM_FOREST: return Messages.ConfigurationEditor_RandomForest;
+					//case GAUSSIAN_PROCESS: return Messages.ConfigurationEditor_Gaussian;
 					}
 				};
 				return super.getText(element);

@@ -48,9 +48,9 @@ public class PawsParameter extends UuidItem{
 	}
 	
 	public static enum ClassifierModel{
-		DECISION_TREE("decison_tree"), //$NON-NLS-1$
-		RANDOM_FOREST("random_forest"), //$NON-NLS-1$
-		GAUSSIAN_PROCESS("gaussian_process"); //slow; not supported //$NON-NLS-1$
+		DECISION_TREE("decision_tree");//, //$NON-NLS-1$
+		//RANDOM_FOREST("random_forest"), //$NON-NLS-1$
+		//GAUSSIAN_PROCESS("gaussian_process"); //slow; not supported //$NON-NLS-1$
 		
 		public String key;
 		

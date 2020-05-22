@@ -83,10 +83,18 @@ public class PawsTask {
 		
 		LocalDateTime d = null;
 		try {
-			d = DateTimeFormatter.ofPattern("M/d/yyyy h:m:s a").parse((String)item.get("Timestamp"), LocalDateTime::from); //$NON-NLS-1$ //$NON-NLS-2$
+			d = DateTimeFormatter.ofPattern("M/d/yyyy H:m:s").parse((String)item.get("Timestamp"), LocalDateTime::from); //$NON-NLS-1$ //$NON-NLS-2$
 		}catch (Exception ex) {
 			ex.printStackTrace();
 		}
+		if (d == null) {
+			try {
+				d = DateTimeFormatter.ofPattern("M/d/yyyy h:m:s a").parse((String)item.get("Timestamp"), LocalDateTime::from); //$NON-NLS-1$ //$NON-NLS-2$	
+			}catch (Exception ex) {
+				ex.printStackTrace();
+			}
+		}
+//		System.out.println(json);
 		return new PawsTask(tid, status, backendstatus, endpoint, endpointpath, d, publishtogrid, body);
 	}
 }

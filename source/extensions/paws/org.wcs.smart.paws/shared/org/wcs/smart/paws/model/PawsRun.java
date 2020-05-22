@@ -145,7 +145,7 @@ public class PawsRun extends UuidItem{
 	
 	@Transient
 	public LocalDate getDataStartDate() {
-		return LocalDate.of(getTrainEndYear(), Month.JANUARY, 1);
+		return LocalDate.of(getTrainStartYear(), Month.JANUARY, 1);
 	}
 	@Transient
 	public LocalDate getDataEndDate() {

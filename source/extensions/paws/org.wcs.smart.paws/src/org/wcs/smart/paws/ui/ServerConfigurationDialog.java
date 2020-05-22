@@ -236,8 +236,8 @@ public class ServerConfigurationDialog extends SmartStyledDialog {
 			final PawsService fservice = service;
 			final PawsWorkspace fws = ws;
 			Display.getDefault().asyncExec(()->{
-				txtServiceHeatmapApi.setText("https://paws-api.azure-api.net/predict-risk"); //$NON-NLS-1$
-				txtServiceTaskApi.setText("https://paws-api.azure-api.net/taskmanagement/task"); //$NON-NLS-1$
+				txtServiceHeatmapApi.setText(" https://paws-api-backend-api-mgmt.azure-api.net/paws/predict-risk"); //$NON-NLS-1$
+				txtServiceTaskApi.setText("https://paws-api-backend-api-mgmt.azure-api.net/taskmanagement/task"); //$NON-NLS-1$
 				txtServiceKey.setText(""); //$NON-NLS-1$
 				if (fservice != null) {
 					txtServiceKey.setText(fservice.getApiKey() == null ? "" : fservice.getApiKey()); //$NON-NLS-1$
