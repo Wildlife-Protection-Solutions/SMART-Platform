@@ -871,6 +871,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 			}
 			
 			session.saveOrUpdate(wp);
+			session.saveOrUpdate(addToD);
 			session.save(pw);
 			session.saveOrUpdate(addToD.getPatrolLeg().getPatrol());
 			session.flush();
