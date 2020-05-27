@@ -255,6 +255,7 @@ th {
 }
 #login-left {
 	width: 200px;
+	margin-right: 30px;
 }
 #login-right {
 	margin-top: auto;
