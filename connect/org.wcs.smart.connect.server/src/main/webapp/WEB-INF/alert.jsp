@@ -124,19 +124,7 @@
 				<input id="sortAscending" type="hidden" name="sortAscending"  value="false"/>
 				
 				<p>
-				<select id='queryDate' class='updateQueryChange' style="margin-bottom:3px">
-					<option value=1><fmt:message key="alert.within1" /></option>
-					<option value=2><fmt:message key="alert.within2" /></option>
-					<option value=4><fmt:message key="alert.within4" /></option>
-					<option value=8><fmt:message key="alert.within8" /></option>
-					<option value=12><fmt:message key="alert.within12" /></option>
-					<option value=24><fmt:message key="alert.within24" /></option>
-					<option value=48><fmt:message key="alert.within48" /></option>
-					<option value=168><fmt:message key="alert.withinweek" /></option>
-					<option value=744><fmt:message key="alert.withinmonth" /></option>
-					<option value=-99><fmt:message key="alert.alldates" /></option>
-					<option value=-1><fmt:message key="alert.customdates" /></option>
-				</select>
+				<select id="queryDate" style="margin-bottom:3px"></select>
 				</p>
 				
 				<p class="map_date_picker">

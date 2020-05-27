@@ -288,7 +288,14 @@ public enum QueryManager {
 		List<QueryFolder> folders = session.createQuery(c).getResultList();
 		return folders;
 	}
-	
+
+	public List<ConservationArea> getConservationAreas(Session session) {
+		CriteriaBuilder builder = session.getCriteriaBuilder();
+	    CriteriaQuery<ConservationArea> criteria = builder.createQuery(ConservationArea.class);
+	    criteria.from(ConservationArea.class);
+	    return session.createQuery(criteria).getResultList();
+	}
+
 	/**
 	 * Find a given query based on the uuid.
 	 * @param uuid

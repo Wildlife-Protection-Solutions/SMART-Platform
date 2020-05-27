@@ -5,9 +5,6 @@ var queries;
 var lastSorted;
 var to; //timeout to slow auto-search a bit. It is cleared each time another character/change is typed so we don't fire too many updates too fast.
 
-var definedDates = ["query.last30days","query.last60days","query.monthtodate","query.lastmonth","query.yeartodate","query.lastyear","query.alldates","query.custom"];
-var definedDateKeys = ["last30days", "last60days", "monthtodate", "lastmonth", "yeartodate", "lastyear", "alldates", "custom"];
-
 var startDatePicker, endDatePicker;
 
 var isDateChanging = false;
@@ -101,18 +98,11 @@ window.onload = function(){
 	});
 
 	//populate predefined dates
-	var selectdiv = document.getElementById("defineddates");
-	selectdiv.onchange = updateDates;
-	for (var i = 0; i < definedDates.length; i ++){
-		var object = document.createElement("option");
-		object.value = definedDateKeys[i];
-		object.innerHTML = i18n(definedDates[i]);
-		selectdiv.appendChild(object);
-		if (definedDateKeys[i] == "alldates"){
-			selectdiv.selectedIndex = i;
-			updateDates();
-		}
-	}
+	var dateSelect = document.getElementById("defineddates");
+	populateQueryDates(dateSelect);
+	var dateUpdateHandler = buildUpdateDateHandler(dateSelect, startDatePicker, endDatePicker);
+	dateSelect.addEventListener("change", dateUpdateHandler);
+	dateUpdateHandler();
 	
 }
 
@@ -145,62 +135,6 @@ function selectCustom(){
 	}
 }
 
-function updateDates(){
-	var dd = document.getElementById("defineddates");
-	var datekey = dd.options[dd.selectedIndex].value;
-	
-	var startdate = document.getElementById("startdate");
-	var enddate = document.getElementById("enddate");
-
-	isDateChanging = true;
-		if (datekey== "last30days"){
-			var startYear = new Date();
-			startYear.setDate(startYear.getDate() - 30);
-			endDatePicker.setDate(new Date(), false);
-			startDatePicker.setDate(startYear, false);
-		}else if (datekey== "last60days"){
-			var startYear = new Date();
-			startYear.setDate(startYear.getDate() - 60);
-			endDatePicker.setDate(new Date(), false);
-			startDatePicker.setDate(startYear, false);
-		}else if (datekey== "monthtodate"){
-			var today = new Date();
-			var startYear = new Date(today.getFullYear(), today.getMonth(), 1,0,0,0);
-			endDatePicker.setDate(today, false);
-			startDatePicker.setDate(startYear, false);
-		}else if (datekey== "lastmonth"){
-			var startYear = new Date();
-			startYear.setMonth(startYear.getMonth() - 1);
-			startYear.setDate(1);
-			
-			var endYear = new Date();
-			endYear.setMonth(endYear.getMonth());
-			endYear.setDate(0);
-			
-			endDatePicker.setDate(endYear, false);
-			startDatePicker.setDate(startYear, false);
-			
-		}else if (datekey== "yeartodate"){
-			var today = new Date();
-			var startYear = new Date(today.getFullYear(), 0, 1,0,0,0);
-			endDatePicker.setDate(today, false);
-			startDatePicker.setDate(startYear, false);
-		}else if (datekey== "lastyear"){
-			var today = new Date();
-			var startYear = new Date(today.getFullYear() - 1, 0, 1,0,0,0);
-			var endYear = new Date(today.getFullYear() - 1, 11, 31, 23,59,59);
-			endDatePicker.setDate(endYear, false);
-			startDatePicker.setDate(startYear, false);
-			
-		}else if (datekey== "alldates"){
-			startdate.value = "";
-			enddate.value = "";
-		}else if (datekey== "custom"){
-			
-		}
-		isDateChanging = false;
-
-}
 function getQueryList(){
 	//clear current table
 	var objects = document.querySelectorAll("div.queryrow");

@@ -3,6 +3,8 @@ package org.wcs.smart.connect.query;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.wcs.smart.ca.ConservationArea;
+
 public class QueryFolderProxy {
 	private final String name;
 	private List<QueryFolderProxy> subFolders = new ArrayList<QueryFolderProxy>();

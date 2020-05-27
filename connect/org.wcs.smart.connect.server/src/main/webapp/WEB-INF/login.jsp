@@ -43,7 +43,7 @@ function login(){
 		   <input class="button block top-spacer" type="submit" value="<fmt:message key="login.login"/>" style="width: 100px" tabindex="3"/>
 	  </form>
 	  </div>
-  	  <div id="login-right"><img src="${pageContext.request.contextPath}/getImage?locationId=3">
+  	  <div id="login-right"><img src="${pageContext.request.contextPath}/getImage?locationId=3" onError="this.src='${pageContext.request.contextPath}/css/images/smart_logo.png'">
   	</div>	
   </div>
 </div>

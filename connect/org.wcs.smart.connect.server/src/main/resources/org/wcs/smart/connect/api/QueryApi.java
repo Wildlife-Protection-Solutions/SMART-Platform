@@ -686,13 +686,23 @@ public class QueryApi extends HttpServlet{
 		// build the query folder tree
 		List<QueryFolderProxy> rootFolders = new ArrayList<QueryFolderProxy>();
 		Map<UUID, QueryFolderProxy> foldersByUuid = new HashMap<UUID, QueryFolderProxy>();
+		
+		// CAs are the root folders
+		List<ConservationArea> cas = QueryManager.INSTANCE.getConservationAreas(s);
+		for(ConservationArea ca  :cas) {
+			QueryFolderProxy caFolder = new QueryFolderProxy(ca.getName() + " [" + ca.getId() + "]");
+			foldersByUuid.put(ca.getUuid(), caFolder);
+			rootFolders.add(caFolder);
+		}
+		
 		List<QueryFolder> folders = QueryManager.INSTANCE.getQueryFolders(s);
 		Deque<QueryFolder> remainingFolders = new LinkedList<QueryFolder>(folders);
 		int loopCount = 0;
+		int maxLoops =  folders.size() * folders.size();
 		while(!remainingFolders.isEmpty()) {
 			loopCount++;
 			// just to prevent weird infinite loop failures
-			if(loopCount > Math.pow(folders.size(), 2)) {
+			if(loopCount > maxLoops) {
 				break;
 			}
 			QueryFolder f = remainingFolders.removeFirst();
@@ -701,14 +711,7 @@ public class QueryApi extends HttpServlet{
 				QueryFolderProxy fp = new QueryFolderProxy(f.getName());
 				foldersByUuid.put(f.getUuid(), fp);
 				// but the CA is the real root folder
-				QueryFolderProxy caFolder = foldersByUuid.get(f.getConservationArea().getUuid());
-				if(caFolder == null) {
-					// build the CA folder if it hasn't been made yet
-					caFolder = new QueryFolderProxy(f.getConservationArea().getName());
-					foldersByUuid.put(f.getConservationArea().getUuid(), caFolder);
-					rootFolders.add(caFolder);
-				}
-				caFolder.addSubFolder(fp);
+				foldersByUuid.get(f.getConservationArea().getUuid()).addSubFolder(fp);
 			} else {
 				QueryFolderProxy parentFolder = foldersByUuid.get(f.getParentFolder().getUuid());
 				if(parentFolder != null) {
@@ -741,15 +744,7 @@ public class QueryApi extends HttpServlet{
 			if(q.getFolderUuid() != null) {
 				foldersByUuid.get(q.getFolderUuid()).addQuery(q);
 			} else {
-				QueryFolderProxy caFolder = foldersByUuid.get(q.getCaUuid());
-				if(caFolder == null) {
-					// build the CA folder if it hasn't been made yet
-					caFolder = new QueryFolderProxy(q.getConservationArea());
-					foldersByUuid.put(q.getCaUuid(), caFolder);
-					rootFolders.add(caFolder);
-				}
-				caFolder.addQuery(q);
-
+				foldersByUuid.get(q.getCaUuid()).addQuery(q);
 			}
 		}
 		

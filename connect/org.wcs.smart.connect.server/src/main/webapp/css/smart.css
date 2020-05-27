@@ -256,6 +256,10 @@ th {
 #login-left {
 	width: 200px;
 }
+#login-right {
+	margin-top: auto;
+	margin-bottom: auto;
+}
 
 .errorsection{
 	border-radius: 3px;

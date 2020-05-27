@@ -31,120 +31,6 @@ window.onload = function() {
 		document.body.style.width = '38em';
 	}
 	
-	//setup onChange events for filter buttons
-	var items = document.getElementsByClassName("updateChange");
-	for (var i = 0; i < items.length; i++){
-		items[i].addEventListener("change", refreshAlerts);
-	}
-	document.getElementById('filterDate').addEventListener("change", checkForCustomDates);
-	document.getElementById('datePickerFrom').addEventListener("change", refreshAlerts);
-	document.getElementById('datePickerTo').addEventListener("change", refreshAlerts);
-
-	//setup onChange events for filter buttons
-	var items = document.getElementsByClassName("updateQueryChange");
-	for (var i = 0; i < items.length; i++) {
-		items[i].addEventListener("change", refreshQueries);
-	}
-	document.getElementById('queryDate').addEventListener("change", checkForCustomQueryDates);
-	document.getElementById('queryDatePickerFrom').addEventListener("change", refreshQueries);
-	document.getElementById('queryDatePickerTo').addEventListener("change", refreshQueries);
-	
-	//setup date picker for alert filters
-	new Pikaday({
-		field: document.getElementById('datePickerFrom'),
-		firstDay: 1,
-        minDate: new Date('2000-01-01'),
-        yearRange: [2000,2050],
-        i18n: pickaday_i18n
-	});
-
-	new Pikaday({
-		field: document.getElementById('datePickerTo'),
-		firstDay: 1,
-        minDate: new Date('2000-01-01'),
-        yearRange: [2000,2050],
-        i18n: pickaday_i18n
-	});
-
-	// setup date picker for query filters
-	new Pikaday({
-		field: document.getElementById('queryDatePickerFrom'),
-		firstDay: 1,
-        minDate: new Date('2000-01-01'),
-        yearRange: [2000,2050],
-        i18n: pickaday_i18n
-	});
-
-	new Pikaday({
-		field: document.getElementById('queryDatePickerTo'),
-		firstDay: 1,
-        minDate: new Date('2000-01-01'),
-        yearRange: [2000,2050],
-        i18n: pickaday_i18n
-	});
-
-	const controlItemIcons = document.querySelectorAll('.control-item-icon');
-	controlItemIcons.forEach(el => el.addEventListener('click', function(e) {
-		toggleDisplay(e.target.previousElementSibling);
-		toggleDisplay(e.target.parentNode.nextElementSibling);
-	}));
-	
-	// we are catching events at the query-list level
-	// in case we add or remove folders/items dynamically
-	const queryList = document.getElementById('query-list');
-	queryList.addEventListener('click', function(evt) {
-		var element = evt.target;
-		// bubble up events to the parent folder or folder-item
-		if(!element.classList.contains('folder-name')
-				&& !element.classList.contains('folder-item')) {
-			element = element.parentNode;
-		}
-		if(element.classList.contains('folder-name')) {
-			// clicking on the folder toggles the folder icon
-			// as well as toggling the display of the folder contents
-			const folderIcon = element.getElementsByClassName('folder-icon')[0];
-			if(folderIcon.classList.contains('fa-folder-open-o')) {
-				folderIcon.classList.remove('fa-folder-open-o');
-				folderIcon.classList.add('fa-folder-o');
-			} else {
-				folderIcon.classList.remove('fa-folder-o');
-				folderIcon.classList.add('fa-folder-open-o')
-			}
-			toggleDisplay(element.nextElementSibling);
-		} else if(element.classList.contains('folder-item')) {
-			// clicking on the item toggles the query layer on the map 
-			const checkbox = element.querySelectorAll("input[type='checkbox']")[0];
-			if(evt.target != checkbox) {
-				checkbox.checked = !checkbox.checked;
-			}
-			if(checkbox.checked) {
-				var color = getQueryColor(checkbox.id);
-				addQueryLayer(checkbox.id, color);
-				var colorBox = document.createElement('span');
-				colorBox.classList.add('color-box');
-				colorBox.style['background-color'] = color; 
-				checkbox.insertAdjacentElement('afterend', colorBox);
-			} else {
-				removeQueryLayer(checkbox.id);
-				if(checkbox.nextElementSibling.classList.contains('color-box')) {
-					checkbox.nextElementSibling.remove();
-				}
-			}
-		}
-	});
-	
-	document.getElementById("queryFilterText").addEventListener('input', filterQueryList);
-
- 	//default custom dates so they are not blank to start
- 	var today = getTodayAsString();
-    document.getElementById("datePickerFrom").value = today;
-    document.getElementById("datePickerTo").value = today;
-    document.getElementById("queryDatePickerFrom").value = today;
-    document.getElementById("queryDatePickerTo").value = today;
- 	
- 	checkForCustomDates();
- 	checkForCustomQueryDates();
- 	
 //------------------------------------------------------------
 //Setup map layers
     // The real-time layer that auto-refreshes to show alert
@@ -203,12 +89,48 @@ window.onload = function() {
 	
 //Map setup complete.
 //--------------------------------------------------	
-    
+
     //set the lat/long in the "new alert form", if we can get them from the device automatically
     if (navigator.geolocation) {
     	navigator.geolocation.getCurrentPosition(showLatLong, showError)
     }
       
+	//setup date picker for alert filters
+	new Pikaday({
+		field: document.getElementById('datePickerFrom'),
+		firstDay: 1,
+        minDate: new Date('2000-01-01'),
+        yearRange: [2000,2050],
+        i18n: pickaday_i18n
+	});
+
+	new Pikaday({
+		field: document.getElementById('datePickerTo'),
+		firstDay: 1,
+        minDate: new Date('2000-01-01'),
+        yearRange: [2000,2050],
+        i18n: pickaday_i18n
+	});
+
+	// setup date picker for query filters
+	var queryDatePickerFrom = new Pikaday({
+		field: document.getElementById('queryDatePickerFrom'),
+		firstDay: 1,
+        minDate: new Date('2000-01-01'),
+        yearRange: [2000,2050],
+        i18n: pickaday_i18n,
+        onSelect: queryDateRangeUpdate
+	});
+
+	var queryDatePickerTo = new Pikaday({
+		field: document.getElementById('queryDatePickerTo'),
+		firstDay: 1,
+        minDate: new Date('2000-01-01'),
+        yearRange: [2000,2050],
+        i18n: pickaday_i18n,
+        onSelect: queryDateRangeUpdate
+	});
+
     //new alert and update alert actions
 	document.querySelector("#newalertform").onsubmit = createNewAlert;
 	document.querySelector("#updatealertform").onsubmit = submitUpdatedAlert;
@@ -217,6 +139,77 @@ window.onload = function() {
 		var overlaydiv = document.querySelector(".overlay-widgetlevel2");
 		overlaydiv.parentNode.removeChild(overlaydiv);
 	};
+
+	//setup onChange events for filter buttons
+	var items = document.getElementsByClassName("updateChange");
+	for (var i = 0; i < items.length; i++){
+		items[i].addEventListener("change", refreshAlerts);
+	}
+	document.getElementById('filterDate').addEventListener("change", checkForCustomDates);
+	document.getElementById('datePickerFrom').addEventListener("change", refreshAlerts);
+	document.getElementById('datePickerTo').addEventListener("change", refreshAlerts);
+
+	// setup query date range picker
+	var queryDateSelect = document.getElementById("queryDate");
+	populateQueryDates(queryDateSelect)
+	var queryDateUpdateHandler = buildUpdateDateHandler(queryDateSelect, queryDatePickerFrom, queryDatePickerTo, refreshQueries);
+	queryDateSelect.addEventListener("change", queryDateUpdateHandler);
+	queryDateUpdateHandler();
+	
+	const controlItemIcons = document.querySelectorAll('.control-item-icon');
+	controlItemIcons.forEach(el => el.addEventListener('click', function(e) {
+		toggleDisplay(e.target.previousElementSibling);
+		toggleDisplay(e.target.parentNode.nextElementSibling);
+	}));
+	
+	// we are catching events at the query-list level
+	// in case we add or remove folders/items dynamically
+	const queryList = document.getElementById('query-list');
+	queryList.addEventListener('click', function(evt) {
+		var element = evt.target;
+		// bubble up events to the parent folder or folder-item
+		if(!element.classList.contains('folder-name')
+				&& !element.classList.contains('folder-item')) {
+			element = element.parentNode;
+		}
+		if(element.classList.contains('folder-name')) {
+			// clicking on the folder toggles the folder icon
+			// as well as toggling the display of the folder contents
+			const folderIcon = element.getElementsByClassName('folder-icon')[0];
+			if(folderIcon.classList.contains('fa-folder-open-o')) {
+				folderIcon.classList.remove('fa-folder-open-o');
+				folderIcon.classList.add('fa-folder-o');
+			} else {
+				folderIcon.classList.remove('fa-folder-o');
+				folderIcon.classList.add('fa-folder-open-o')
+			}
+			toggleDisplay(element.nextElementSibling);
+		} else if(element.classList.contains('folder-item')) {
+			// clicking on the item toggles the query layer on the map 
+			const checkbox = element.querySelectorAll("input[type='checkbox']")[0];
+			if(evt.target != checkbox) {
+				checkbox.checked = !checkbox.checked;
+			}
+			var colorBox = element.querySelectorAll("span")[0];
+			if(checkbox.checked) {
+				var color = addQueryLayer(checkbox.id);
+				colorBox.style['background-color'] = color; 
+				colorBox.style.display = "";
+			} else {
+				removeQueryLayer(checkbox.id);
+				colorBox.style.display = "none";
+			}
+		}
+	});
+	
+	document.getElementById("queryFilterText").addEventListener('input', filterQueryList);
+
+ 	//default custom dates so they are not blank to start
+ 	var today = getTodayAsString();
+    document.getElementById("datePickerFrom").value = today;
+    document.getElementById("datePickerTo").value = today;
+ 	
+ 	checkForCustomDates();
 	
 	refreshAlerts();
 
@@ -264,7 +257,7 @@ function addFolder(data, parent) {
 		folderItemDiv = document.createElement('div');
 		folderItemDiv.classList.add('folder-item');
 		queryTypeKeys[query.uuid] = query.typeKey;
-		folderItemDiv.innerHTML = "<input id=\"" + query.uuid + "\" type=\"checkbox\"/><img class=\"query-icon\" src=\"../css/images/query_icons/" + query.iconName + "\" title=\"" + query.type + "\">" + query.name;
+		folderItemDiv.innerHTML = "<input id=\"" + query.uuid + "\" type=\"checkbox\"/><span style=\"display: none;\" class=\"color-box\"></span><img class=\"query-icon\" src=\"../css/images/query_icons/" + query.iconName + "\" title=\"" + query.type + "\">" + query.name;
 		folderContentsDiv.appendChild(folderItemDiv);
 	}
 }
@@ -311,7 +304,8 @@ function getQueryColor(id) {
 	return color;
 }
 
-function addQueryLayer(id, color) {
+function addQueryLayer(id) {
+	var color = getQueryColor(id);
  	var oReq = new XMLHttpRequest();
  	oReq.responseType = 'json';
  	oReq.onload = function() {
@@ -334,21 +328,28 @@ function addQueryLayer(id, color) {
  		        return L.circleMarker(latlng, pointStyle);
  		    }
  		});
+ 		if(queryLayers[id]) {
+ 			removeQueryLayer(id);
+ 		}
  		map.addLayer(layer);
  		queryLayers[id] = layer;
  	};
  	var dateFilter = "";
- 	const dateRange = getDateRange('queryDate', 'queryDatePickerFrom', 'queryDatePickerTo');
-	if(dateRange) {
-		if(dateRange['start']) {
-			dateFilter += "&start_date=" + timestampToDateString(dateRange['start']);
-		}
-		if(dateRange['end']) {
-			dateFilter += "&end_date=" + timestampToDateString(dateRange['end']);
-		}
+	if(document.getElementById('queryDatePickerFrom').value != ""){
+		var startDate = new Date(document.getElementById('queryDatePickerFrom').value.substring(4));//substring(4) drops the "Wed " from the field, which isnt' a valid date string.
+		var startDateString = startDate.getFullYear() + "-" + (startDate.getMonth() + 1) + "-" + startDate.getDate() + " 00:00:00";
+		
+		dateFilter += "&start_date=" + startDateString; 
+	}
+	if(document.getElementById('queryDatePickerTo').value != ""){
+		var endDate = new Date(document.getElementById('queryDatePickerTo').value.substring(4)); //use end of the day, since it is the "to" date.
+		var endDateString = endDate.getFullYear() + "-" + (endDate.getMonth()+1) + "-" + endDate.getDate() + " 23:59:59";
+	
+		dateFilter += "&end_date=" + endDateString; 
 	}
  	oReq.open("Get", QUERY_URL + id + "?format=geojson&srid=4326&date_filter=" + qdatefilter[queryTypeKeys[id]][0] + dateFilter , true);
  	oReq.send();
+ 	return color;
 }
 
 // converts from javascript millisecond epoch timestamp to yyyy-MM-dd hh:mm:ss 
@@ -363,8 +364,24 @@ function removeQueryLayer(id) {
 	queryLayers[id] = null;
 }
 
+function queryDateRangeUpdate() {
+	// don't refresh yet if we are in the middle of updating dates to a new range
+	if (isDateChanging) return;
+	var queryDateSelect = document.getElementById("queryDate");
+	for (var i = 0; i < definedDateKeys.length; i ++){
+		if (definedDateKeys[i] == "custom"){
+			queryDateSelect.selectedIndex = i;
+			break;
+		}
+	}
+	refreshQueries();
+}
+
 function refreshQueries() {
-	//TODO - update query layers to use new date range
+	// update query layers to use new date range
+	for(id in queryLayers) {
+		addQueryLayer(id);
+	}
 }
 
 //creates a new alert
@@ -873,7 +890,7 @@ function getDateRange(dateSelectId, fromDatePickerId, toDatePickerId) {
 		var now = new Date();
 		now = now.getTime();
 		
-		var start = new Date()
+		var start = new Date();
 		start = start.getTime() - dateSelect*60*60*1000;  
 		return {
 			'start': start,  
@@ -1052,7 +1069,6 @@ function setMapFilters(){
  	var filter_form = document.getElementById('filter-form');
  	
  	document.getElementById('filterDate').value = defaults.defaultPastHours;
- 	document.getElementById('queryDate').value = defaults.defaultPastHours;
  	
  	var statuses = document.getElementsByClassName('filterStatus');
  	for(var x=0 ; x < statuses.length; x++){
@@ -1117,18 +1133,7 @@ function checkForCustomDates() {
 		document.getElementById('datePickerFrom').disabled = true;
 		document.getElementById('datePickerTo').disabled = true;
 	}
-}
-
-function checkForCustomQueryDates() {
-	var date = document.getElementById('queryDate');
-	if(date.value == -1) {
-		document.getElementById('queryDatePickerFrom').disabled = false;
-		document.getElementById('queryDatePickerTo').disabled = false;
-	} else {
-		document.getElementById('queryDatePickerFrom').disabled = true;
-		document.getElementById('queryDatePickerTo').disabled = true;
-	}
-	refreshQueries();
+	refreshAlerts();
 }
 
 function getTodayAsString(){
