@@ -181,7 +181,7 @@ public enum PatrolPackageExporter {
 				
 				//include data model image files and update xmlModel
 				sub.split(1);
-				includeDmIcons(modelToExport, toIncludeInZip, tempDir);
+				includeDmIcons(modelToExport, toIncludeInZip, tempDir, session);
 				
 				//include ca logo
 				Path logo = modelToExport.getConservationArea().getLogo();
@@ -232,9 +232,12 @@ public enum PatrolPackageExporter {
 	}
 	
 	private void processFile(DmObject object, IImageAssociatedObject cmObject, ConfigurableModel cm, 
-			List<File> toIncludeInZip, Path tempDir) throws IOException {
+			List<File> toIncludeInZip, Path tempDir, Session session) throws IOException {
 		IconFile file = object.getIcon().getIconFile(cm.getIconSet());
 		if (file != null) {
+			
+			file.computeFileLocation(session);
+			
 			Path fromPath = file.getAttachmentFile().toPath();
 			String fileName = cmObject.getImageFile().getName();
 			if (cmObject.getUuid() == null) {
@@ -248,7 +251,8 @@ public enum PatrolPackageExporter {
 	}
 	
 	
-	private void includeDmIcons(ConfigurableModel cm, List<File> toIncludeInZip, Path tempDir) throws IOException {
+	private void includeDmIcons(ConfigurableModel cm, List<File> toIncludeInZip, 
+			Path tempDir, Session session) throws IOException {
 		List<Object> toProcess = new ArrayList<>();
 		toProcess.addAll(cm.getNodes());
 		List<Object> processed = new ArrayList<>();
@@ -262,7 +266,7 @@ public enum PatrolPackageExporter {
 				toProcess.addAll(node.getChildren());
 				
 				if (!node.hasCustomImage() && node.getCategory() != null && node.getCategory().getIcon() != null ) {
-					processFile(node.getCategory(), node, cm, toIncludeInZip, tempDir);
+					processFile(node.getCategory(), node, cm, toIncludeInZip, tempDir, session);
 				}
 				if (node.getCmAttributes() != null) {
 					toProcess.addAll(node.getCmAttributes());
@@ -271,7 +275,7 @@ public enum PatrolPackageExporter {
 				CmAttribute node = (CmAttribute)objectNode;
 				
 				if (!node.hasCustomImage() && node.getAttribute() != null && node.getAttribute().getIcon() != null ) {
-					processFile(node.getAttribute(), node, cm, toIncludeInZip, tempDir);
+					processFile(node.getAttribute(), node, cm, toIncludeInZip, tempDir, session);
 				}
 				
 				
@@ -285,13 +289,13 @@ public enum PatrolPackageExporter {
 				CmAttributeListItem node = (CmAttributeListItem)objectNode;
 				
 				if (!node.hasCustomImage() && node.getListItem() != null && node.getListItem().getIcon() != null ) {
-					processFile(node.getListItem(), node, cm, toIncludeInZip, tempDir);
+					processFile(node.getListItem(), node, cm, toIncludeInZip, tempDir, session);
 				}
 			}else if (objectNode instanceof CmAttributeTreeNode) {
 				CmAttributeTreeNode node = (CmAttributeTreeNode)objectNode;
 				
 				if (!node.hasCustomImage() && node.getDmTreeNode() != null && node.getDmTreeNode().getIcon() != null ) {
-					processFile(node.getDmTreeNode(), node, cm, toIncludeInZip, tempDir);
+					processFile(node.getDmTreeNode(), node, cm, toIncludeInZip, tempDir, session);
 				}
 				
 				

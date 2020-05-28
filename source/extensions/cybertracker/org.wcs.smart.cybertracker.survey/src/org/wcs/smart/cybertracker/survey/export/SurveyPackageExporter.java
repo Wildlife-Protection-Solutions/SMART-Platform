@@ -174,7 +174,7 @@ public enum SurveyPackageExporter {
 				}
 				
 				//include data model image files that are part of configurable model node
-				includeDmIcons(modelToExport, toIncludeInZip, tempDir);
+				includeDmIcons(modelToExport, toIncludeInZip, tempDir, session);
 				
 				//include ca logo
 				Path logo = sd.getConservationArea().getLogo();
@@ -221,9 +221,10 @@ public enum SurveyPackageExporter {
 	
 
 	private void processFile(DmObject object, IImageAssociatedObject cmObject, ConfigurableModel cm, 
-			List<File> toIncludeInZip, Path tempDir) throws IOException {
+			List<File> toIncludeInZip, Path tempDir, Session session) throws IOException {
 		IconFile file = object.getIcon().getIconFile(cm.getIconSet());
 		if (file != null) {
+			file.computeFileLocation(session);
 			Path fromPath = file.getAttachmentFile().toPath();
 			String fileName = cmObject.getImageFile().getName();
 			Path toPath = tempDir.resolve(SharedUtils.getFilenameWithoutExtension(fileName) + "." + SharedUtils.getFilenameExtension(fromPath.getFileName().toString())); //$NON-NLS-1$
@@ -233,7 +234,8 @@ public enum SurveyPackageExporter {
 	}
 	
 	
-	private void includeDmIcons(ConfigurableModel cm, List<File> toIncludeInZip, Path tempDir) throws IOException {
+	private void includeDmIcons(ConfigurableModel cm, List<File> toIncludeInZip,
+			Path tempDir, Session session) throws IOException {
 		List<Object> toProcess = new ArrayList<>();
 		toProcess.addAll(cm.getNodes());
 		List<Object> processed = new ArrayList<>();
@@ -247,7 +249,7 @@ public enum SurveyPackageExporter {
 				toProcess.addAll(node.getChildren());
 				
 				if (!node.hasCustomImage() && node.getCategory() != null && node.getCategory().getIcon() != null ) {
-					processFile(node.getCategory(), node, cm, toIncludeInZip, tempDir);
+					processFile(node.getCategory(), node, cm, toIncludeInZip, tempDir, session);
 				}
 				if (node.getCmAttributes() != null) {
 					toProcess.addAll(node.getCmAttributes());
@@ -256,7 +258,7 @@ public enum SurveyPackageExporter {
 				CmAttribute node = (CmAttribute)objectNode;
 				
 				if (!node.hasCustomImage() && node.getAttribute() != null && node.getAttribute().getIcon() != null ) {
-					processFile(node.getAttribute(), node, cm, toIncludeInZip, tempDir);
+					processFile(node.getAttribute(), node, cm, toIncludeInZip, tempDir, session);
 				}
 				
 				
@@ -270,13 +272,13 @@ public enum SurveyPackageExporter {
 				CmAttributeListItem node = (CmAttributeListItem)objectNode;
 				
 				if (!node.hasCustomImage() && node.getListItem() != null && node.getListItem().getIcon() != null ) {
-					processFile(node.getListItem(), node, cm, toIncludeInZip, tempDir);
+					processFile(node.getListItem(), node, cm, toIncludeInZip, tempDir, session);
 				}
 			}else if (objectNode instanceof CmAttributeTreeNode) {
 				CmAttributeTreeNode node = (CmAttributeTreeNode)objectNode;
 				
 				if (!node.hasCustomImage() && node.getDmTreeNode() != null && node.getDmTreeNode().getIcon() != null ) {
-					processFile(node.getDmTreeNode(), node, cm, toIncludeInZip, tempDir);
+					processFile(node.getDmTreeNode(), node, cm, toIncludeInZip, tempDir, session);
 				}
 				
 				
