@@ -305,7 +305,7 @@ public class ConfigurableModelFactory {
 	 * @param target
 	 */
 	private static void cloneImages(IImageAssociatedObject source, IImageAssociatedObject target){
-		if (source.getImageFile() != null){
+		if (source.hasCustomImage()) {
 			target.setImageFile(source.getImageFile());
 		}
 	}
