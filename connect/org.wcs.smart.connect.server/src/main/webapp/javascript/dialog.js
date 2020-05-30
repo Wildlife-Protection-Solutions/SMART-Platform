@@ -63,7 +63,7 @@ function displayDialogCenter(divId){
 	var h = window.innerHeight;
 	var dialog = document.querySelector("#" + divId);
 	
-	dialog.style.display="table";
+	dialog.style.display="block";
 	dialog.style.position="absolute";
 	
 	var divW = dialog.offsetWidth;
@@ -87,11 +87,12 @@ function displayDialogCenter(divId){
  */
 function displayDialogLocation(divId, x, y){
 	var dialog = document.querySelector("#" + divId);
-	dialog.style.display = "table";
+	dialog.style.display = "block";
 	dialog.style.position = "absolute";
 	
 	dialog.style.top = y + "px";
 	dialog.style.left = x + "px";
+	dialog.style['max-height'] = "calc(100% - " + (y + 20) + "px)";
 	
 	var overlaydiv = document.createElement('div');
 	overlaydiv.setAttribute("class", "overlay-widget");

@@ -244,7 +244,7 @@ th {
 	display: flex;
 	flex-direction: column;
 	flex-wrap: nowrap;
-	align-items: stretch;
+	align-items: center;
 }
 #login-wrapper {
 	display: flex;
@@ -300,18 +300,22 @@ th {
 	border: 1px solid #f3f3f3;
 	padding: 10px 20px 10px 10px;
 	background: white;
-	z-index:101;
-	width: 400px;
+	min-width: 300px;
+	overflow: auto;
+	max-height: 100%;
+	z-index: 2000;
 }
 
 
-.level2dialog{	
+.level2dialog{
 	border-radius: 3px;
-	border: 1px solid white;
+	border: 1px solid #f3f3f3;
 	padding: 10px 20px 10px 10px;
 	background: white;
-	z-index:201;
-	width: 400px;
+	min-width: 300px;
+	overflow: auto;
+	max-height: 100%;
+	z-index:3000;
 }
 
 .dialog-title{
@@ -327,7 +331,7 @@ th {
 .overlay-widget{
 	background: #333333;
     opacity: 0.9;
-    z-index:100;
+    z-index:1999;
     position: fixed;
     top: 0px;
     left: 0px;
@@ -337,7 +341,7 @@ th {
 .overlay-widgetlevel2{
 	background: #333333;
     opacity: 0.9;
-    z-index:200;
+    z-index:2999;
     position: fixed;
     top: 0px;
     left: 0px;
@@ -436,7 +440,11 @@ th {
 	margin-bottom: 10px;
 }
 
-#map { 
+#map-container { 
+	flex: 1 1 auto;
+}
+
+#map {
 	flex: 1 1 auto;
 }
 
@@ -453,27 +461,29 @@ th {
 
 .control-menu {
 	position: relative;
-	z-index: 10;
+	top: 0;
+	z-index: 1001;
 	display: flex;
 	flex-direction: row;
 	flex-wrap: nowrap;
 	align-items: flex-start;
 	justify-content: flex-end;
 	overflow: hidden;
-	height: 100%
+	height: 100%;
+	pointer-events: none;
 }
 .control-item {
 	display: flex;
 	flex-flow: column nowrap;  
 	margin: 10px;
-	border-top: 1px solid #ddd;
-	box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+	border: 1px solid #999;
 	background: #fff;
-	border-radius: 5px;
+	border-radius: 4px;
 	flex: none;
 	overflow: hidden;
 	cursor: auto;
 	max-height: calc(100% - 20px);
+	pointer-events: auto;
 }
 .control-header {
 	display: flex;

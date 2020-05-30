@@ -211,6 +211,10 @@ window.onload = function() {
  	
  	checkForCustomDates();
 	
+ 	var controlMenu = document.getElementById("control-menu");
+ 	L.DomEvent.disableScrollPropagation(controlMenu);
+ 	L.DomEvent.disableClickPropagation(controlMenu);
+ 	
 	refreshAlerts();
 
 	loadQueries();
@@ -715,29 +719,38 @@ function updateAlert(){
 
 //Create alert button was clicked. Show dialog
 function buttonCreateAlert(){
-	document.querySelector(".leaflet-control-container").style.display = "none";
 	document.querySelector("#dialogerror").style.display = "none";
 	displayDialog('createAlertDialog', 'main');
 	
 }
 
 function buttonCancelCreateAlert(){
-	document.querySelector(".leaflet-control-container").style.display = "block";
 	closeDialog('createAlertDialog');
 	document.getElementById("message").style.display = "none";
 }
 
 function buttonCloseManageAlerts(){
-	document.querySelector(".leaflet-control-container").style.display = "block";
 	closeDialog('manageAlertsDialog');
 	document.getElementById("message").style.display = "none";
 }
 
 function buttonManageAlerts(){
-	document.querySelector(".leaflet-control-container").style.display = "none";
 	document.querySelector("#dialogerror").style.display = "none";
 	displayDialog('manageAlertsDialog', 'main');
 	
+}
+
+function buttonExportImage() {
+	var downloadOptions = {
+        container: map._container,
+        exclude: ['.leaflet-control-container'],
+        format: 'image/png',
+        fileName: 'smart_map_export.png',
+	};
+    var promise = map.downloadExport(downloadOptions);
+    var data = promise.then(function (result) {
+    	return result;
+    });
 }
 
 //update alert clicked, fill in update alert form with current details 

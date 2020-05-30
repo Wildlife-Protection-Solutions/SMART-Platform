@@ -6,12 +6,13 @@
 
 <%@include file="includes.jsp" %>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/pikaday.css" />
-<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/leaflet/leaflet.css"/>
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="${pageContext.request.contextPath}/css/leaflet/leaflet.awesome-markers.css">
-<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/leaflet-src.js"></script>
-<script type="text/javascript" src='https://api.mapbox.com/mapbox.js/v2.2.2/mapbox.js'></script>
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/leaflet/leaflet.css" />
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" />
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/leaflet/leaflet.awesome-markers.css" />
+<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/leaflet.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/leaflet.awesome-markers.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/html2canvas.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/leaflet_export.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/alert.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/table.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/infoerror.js"></script>
@@ -19,7 +20,6 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/pickaday.js"></script>
 <script src="https://maps.google.com/maps/api/js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/leaflet-realtime.js"></script>
-<link href='https://api.mapbox.com/mapbox.js/v2.2.2/mapbox.css' rel='stylesheet' />
 
 <script type="text/javascript" >
 	var mobile="${mobile}";
@@ -110,8 +110,9 @@
 	<div>
 		<div id="message" class="msgsection"></div>
 	</div>
-	<div id="map">
-		<div class="control-menu">
+	<!-- div id="map-container" -->
+		<div id="map"><!-- /div -->
+		<div id="control-menu" class="control-menu">
 		<div class="control-item">
         	<div class="control-header">
             	<div class="control-title"><fmt:message key="alert.queries.title" /></div>
@@ -234,14 +235,15 @@
 			</form>
 			</div><!-- end control-item-content -->
 		</div><!-- end control-item -->
-		</div><!-- control-menu -->
-	</div> <!-- map -->
+		</div --><!-- control-menu -->
+	</div> <!-- map-container -->
 	
 	<div style="flex: none; display:flex; flex-flow:row nowrap">
 	  <div id="buttons" style="justify-content: flex-start;display:flex; flex-flow: row nowrap; padding:5px;">
  		<div><a style="text-decoration:none" href='javascript:refreshAlerts()'><div class="button mapbutton"><fmt:message key="alert.refresh" /></div></a></div> 
  		<div><a style="text-decoration:none" href='javascript:buttonCreateAlert()'><div class="button mapbutton"><fmt:message key="alert.createalert" /></div></a> </div>
  		<div><a style="text-decoration:none"  href='javascript:buttonManageAlerts()'><div class="button mapbutton"><fmt:message key="alert.managealerts" /></div></a></div> 
+ 		<div><a style="text-decoration:none"  href='javascript:buttonExportImage()'><div class="button mapbutton"><fmt:message key="alert.exportimage" /></div></a></div> 
  	 </div>
  	  
  	  <div style="justify-content: flex-end;display:flex;flex-flow: column nowrap; flex-grow:100">
@@ -292,9 +294,11 @@
 			<label class="top-spacer block"><fmt:message key="alert.latitudelabel" /></label>
 			<input id="lat" type="text" name="lat" class="formtext" style="width: 20em">
 			<label class="top-spacer block"><fmt:message key="alert.descriptionlabel" /></label>
-			<textarea name="alert_description" rows="5" cols="72"></textarea>
-   			<input class="button block top-spacer" type="submit" style="float:left" value="   <fmt:message key="alert.submit" />    "/>
-   			<input class="button block top-spacer" type="button" onClick="javascript:buttonCancelCreateAlert()" style="float:right" value="<fmt:message key="alert.cancel" />"/>
+			<textarea name="alert_description" rows="5" cols="45"></textarea>
+			<div class="block top-spacer" style="text-align:right">
+   			  <input class="button top-spacer" type="submit" value="   <fmt:message key="alert.submit" />    "/>
+   			  <input class="button" type="button" onClick="javascript:buttonCancelCreateAlert()" value="<fmt:message key="alert.cancel" />"/>
+   			  </div>
     	</form>
 		</p>
 	</section>
@@ -302,7 +306,7 @@
 
 	
 
-<div id="updateAlertDialog" style="display: none;z-index:201" class="dialog">
+<div id="updateAlertDialog" style="display: none;" class="level2dialog">
   <div class="dialog-title"><fmt:message key="alert.updatealert" /></div>
   <div id="dialogerror" class="errorsection"></div>
 	<form id="updatealertform" name="updatealertform">
