@@ -30,10 +30,16 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
+import javax.imageio.ImageIO;
+
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.geotools.data.DataUtilities;
 import org.geotools.feature.SchemaException;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
@@ -55,17 +61,6 @@ import org.geotools.styling.StyleBuilder;
 import org.geotools.styling.Symbolizer;
 import org.geotools.styling.TextSymbolizer;
 import org.geotools.util.NumberRange;
-import org.locationtech.udig.ui.graphics.AWTGraphics;
-import org.locationtech.udig.ui.graphics.SLDs;
-import org.locationtech.udig.ui.graphics.ViewportGraphics;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.filter.FilterFactory;
-import org.opengis.geometry.BoundingBox;
-import org.opengis.referencing.operation.MathTransform;
-import org.opengis.style.GraphicalSymbol;
-import org.wcs.smart.map.GeometryFactoryProvider;
-
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -76,6 +71,18 @@ import org.locationtech.jts.geom.MultiPoint;
 import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
+import org.locationtech.udig.project.internal.ProjectPlugin;
+import org.locationtech.udig.project.preferences.PreferenceConstants;
+import org.locationtech.udig.ui.graphics.AWTGraphics;
+import org.locationtech.udig.ui.graphics.SLDs;
+import org.locationtech.udig.ui.graphics.ViewportGraphics;
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.filter.FilterFactory;
+import org.opengis.geometry.BoundingBox;
+import org.opengis.referencing.operation.MathTransform;
+import org.opengis.style.GraphicalSymbol;
+import org.wcs.smart.map.GeometryFactoryProvider;
 
 /**
  * Drawing utility package that users only awt graphics.  Modelled
@@ -275,6 +282,15 @@ public final class DrawingAWT {
 			float[] point = new float[6];
 			shape.getPathIterator(null).currentSegment(point);
 			SLDStyleFactory styleFactory = new SLDStyleFactory();
+			
+	        IPreferenceStore store = ProjectPlugin.getPlugin().getPreferenceStore();
+            boolean antiAliasing = store.getBoolean(PreferenceConstants.P_ANTI_ALIASING);
+            RenderingHints hints = new RenderingHints(Collections.EMPTY_MAP);
+            hints.add(new RenderingHints(RenderingHints.KEY_ANTIALIASING, antiAliasing
+                    ? RenderingHints.VALUE_ANTIALIAS_ON
+                    : RenderingHints.VALUE_ANTIALIAS_OFF));
+            styleFactory.setRenderingHints(hints);
+            
 			Style2D tmp = styleFactory.createStyle(feature, pointSymbolizer,
 					new NumberRange<Double>(Double.class, Double.MIN_VALUE,
 							Double.MAX_VALUE));
@@ -310,7 +326,7 @@ public final class DrawingAWT {
 				float rotation = style.getRotation();
 
 				g.setTransform(AffineTransform.getRotateInstance(rotation));
-
+				
 				RenderedImage image = (RenderedImage) style.getImage();
 				try {
 					g.drawImage(image,

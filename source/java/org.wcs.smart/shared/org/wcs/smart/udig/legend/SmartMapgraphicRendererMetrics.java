@@ -26,7 +26,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.geotools.util.Range;
-import org.locationtech.udig.mapgraphic.MapGraphic;
 import org.locationtech.udig.project.ILayer;
 import org.locationtech.udig.project.internal.render.Renderer;
 import org.locationtech.udig.project.render.AbstractRenderMetrics;
@@ -56,12 +55,13 @@ public class SmartMapgraphicRendererMetrics extends AbstractRenderMetrics {
     }
 
     public boolean canAddLayer( ILayer layer ) {
-        if ( layer.hasResource(MapGraphic.class))
-        	return true;
+//        if ( layer.hasResource(MapGraphic.class))
+//        	return true;
         return false;
     }
     public boolean canStyle( String SyleID, Object value ) {
-        return true;
+//        return true;
+    	return false;
     }
     
     public Set<Range<Double>> getValidScaleRanges() {

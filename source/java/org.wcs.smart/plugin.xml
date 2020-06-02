@@ -1695,6 +1695,35 @@
             id="org.wcs.smart.query.grid.style.border"
             name="%gridborder.style.name">
       </style>
+      <style
+            class="org.wcs.smart.udig.legend.style.LegendLayerStyleContent"
+            id="org.locationtech.udig.legend.layer.style"
+            name="Legend Properties">
+      </style>
+   </extension>
+   <extension
+         point="org.locationtech.udig.style.styleConfigurator">
+      <styleConfigurator
+            class="org.wcs.smart.udig.legend.style.LegendLayerStyleConfigurator"
+            id="org.locationtech.udig.legend.layer.style.gridcoverage"
+            label="Legend Properties"
+            requires="org.opengis.coverage.grid.GridCoverage"
+            styleId="org.locationtech.udig.legend.layer.style">
+      </styleConfigurator>
+      <styleConfigurator
+            class="org.wcs.smart.udig.legend.style.LegendLayerStyleConfigurator"
+            id="org.locationtech.udig.legend.layer.style.featuresource"
+            label="Legend Properties"
+            requires="org.geotools.data.FeatureSource"
+            styleId="org.locationtech.udig.legend.layer.style">
+      </styleConfigurator>
+      <styleConfigurator
+            class="org.wcs.smart.udig.legend.style.LegendLayerStyleConfigurator"
+            id="org.locationtech.udig.legend.layer.style.legend"
+            label="Layer Properties"
+            requires="org.locationtech.udig.legend.ui.LegendGraphic"
+            styleId="org.locationtech.udig.legend.layer.style">
+      </styleConfigurator>
    </extension>
    <extension
          id="id2"

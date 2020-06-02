@@ -158,13 +158,9 @@ public class ColorMapLegendCreatorAWT {
 			}
 			
 			ImageDescriptor dd = null;
-			int idx = -1;
-			if (first){
-				idx = 0;
-			}else if (i > entries.length - 2){
-				idx = 2;
-			}
-			final int index = idx;
+			final boolean isFirst = first;
+			final boolean isLast = i > entries.length - 2;
+			
 			
 			first = false;
 			dd = new ImageDescriptor() {
@@ -195,9 +191,10 @@ public class ColorMapLegendCreatorAWT {
 						g.setColor(new Color(0,0,0,150));
 						g.drawLine(0, 0, 0, imageSize.height);
 						g.drawLine(imageSize.width-1, 0, imageSize.width-1, imageSize.height);
-		                if (index == 0){
+		                if (isFirst){
 		                	g.drawLine(0, 0, imageSize.width-1, 0);	
-		                }else if (index == 2){
+		                }
+		                if (isLast){
 		                	g.drawLine(0, imageSize.height - 1, imageSize.width-1, imageSize.height - 1);
 		                }
 		                
@@ -286,7 +283,7 @@ public class ColorMapLegendCreatorAWT {
 			                g.fillRect( 1, 1, imageSize.width-2, imageSize.height-2);
 			                
 			                g.setColor(new Color(0,0,0,150));
-			                g.drawRect(1, 1, imageSize.width - 2, imageSize.height-2);
+			                g.drawRect(0, 0, imageSize.width - 1, imageSize.height-1);
 			                return LegendGraphicWriter.convertToSWT(bi);
 						}finally{
 							g.dispose();
@@ -354,7 +351,7 @@ public class ColorMapLegendCreatorAWT {
 			                g.fillRect( 1, 1, imageSize.width-2, imageSize.height-2);
 			                
 			                g.setColor(new Color(0,0,0,150));
-			                g.drawRect(1, 1, imageSize.width - 2, imageSize.height-2);
+			                g.drawRect(0, 0, imageSize.width - 1, imageSize.height-1);
 			                return LegendGraphicWriter.convertToSWT(bi);
 						}finally{
 							g.dispose();

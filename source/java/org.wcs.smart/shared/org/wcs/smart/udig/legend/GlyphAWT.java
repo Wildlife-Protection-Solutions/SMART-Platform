@@ -26,13 +26,12 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.ImageData;
 import org.geotools.styling.Rule;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.simple.SimpleFeatureType;
-
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.LinearRing;
 import org.locationtech.jts.geom.MultiLineString;
@@ -40,6 +39,8 @@ import org.locationtech.jts.geom.MultiPoint;
 import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.simple.SimpleFeatureType;
 
 /**
  * Utility methods to create common ImageDescriptors using AWTGraphics only.
@@ -82,6 +83,21 @@ public class GlyphAWT {
             }
         };
     }
+    
+    public static ImageDescriptor point( final Rule rule, int imageSize ) {
+        return new ImageDescriptor(){
+            public ImageData getImageData() {
+                try {
+                	BufferedImage bimage = new BufferedImage(imageSize, imageSize,BufferedImage.TYPE_4BYTE_ABGR );
+                	d.drawDirect( bimage, d.feature(d.point(imageSize/2, imageSize/2)), rule );                     
+                	return extractImageDataAndDispose( bimage );
+                } catch(RuntimeException ex) {
+                    throw ex;
+                }
+            }
+        };
+    }
+    
     /**
      * Icon for point data in the provided color
      * <p>
@@ -199,6 +215,31 @@ public class GlyphAWT {
             }
         };       
     }
+    
+    public static ImageDescriptor line( final Rule rule, int imageSize ) {
+    	int[] dsize = new int[] {1,14,6,0,11,14,15,1};
+//    	int[] dsize = new int[] {0,0,0,15,15,15,15,0,0,0};
+    	int[] pnts = new int[dsize.length];
+    	for (int i = 0; i < dsize.length; i ++) {
+    		double p = dsize[i] / ((float)DEFAULT_WIDTH-1);
+    		pnts[i] = (int)Math.round( (imageSize-1) * p );
+    	}
+        final SimpleFeature feature=d.feature(d.line(pnts));
+        return new ImageDescriptor(){
+            public ImageData getImageData() {
+            	
+                try {
+                	BufferedImage bimage = new BufferedImage(imageSize, imageSize,BufferedImage.TYPE_4BYTE_ABGR );
+                	
+                	d.drawDirect( bimage, feature, rule );                     
+                	return extractImageDataAndDispose( bimage );            
+                } catch(RuntimeException ex) {
+                    throw ex;
+                }
+            }
+        };       
+    }
+    
     /**
      * Icon for linestring in the provided color and width.
      * <p>
@@ -287,6 +328,27 @@ public class GlyphAWT {
             }
         };       
     }
+    public static ImageDescriptor geometry( final Rule rule, int imageSize ) {
+        return new ImageDescriptor(){
+            public ImageData getImageData() {
+            	 try {
+                 	BufferedImage bimage = new BufferedImage(imageSize, imageSize, BufferedImage.TYPE_4BYTE_ABGR );
+                 	
+                 	int[] raw = new int[]{0, 12, 6, 3, 11, 12, 15, 3};
+                 	int[] pts = new int[raw.length];
+                 	for (int i = 0; i < raw.length; i ++) {
+                 		pts[i] = (raw[i] / DEFAULT_WIDTH) * imageSize;
+                 	}
+                 	 d.drawDirect(bimage, d.feature(d.line(pts)), rule);
+                     d.drawDirect(bimage, d.feature(d.point( (int)((4/(float)DEFAULT_WIDTH) * imageSize), (int)((4/(float)DEFAULT_WIDTH) * imageSize))), rule);               
+                 	
+                     return extractImageDataAndDispose( bimage );            
+                 } catch(RuntimeException ex) {
+                     throw ex;
+                 }
+            }
+        };       
+    }
     /**
      * Icon for generic Geometry or Geometry Collection.
      * @param color 
@@ -356,6 +418,29 @@ public class GlyphAWT {
 	            try{	
 	               	BufferedImage bimage = new BufferedImage(DEFAULT_WIDTH, DEFAULT_HEIGHT,BufferedImage.TYPE_4BYTE_ABGR );
 	                d.drawDirect( bimage, d.feature(d.polygon(new int[]{1,14, 3,9, 4,6,  6,4,  9,3, 14,1, 14,14})), rule );
+	                return extractImageDataAndDispose( bimage );            
+	            } catch(RuntimeException ex) {
+	                throw ex;
+	            }
+            }
+        };
+    }
+    
+    public static ImageDescriptor polygon(final Rule rule, final int imageSize) {
+    	
+    	int[] dsize = new int[]{1,14, 3,9, 4,6,  6,4,  9,3, 14,1, 14,14};
+    	//int[] dsize = new int[]{0,0, 0,15, 15,15,  15,0,  0,0};
+    	int[] pnts = new int[dsize.length];
+    	for (int i = 0; i < dsize.length; i ++) {
+    		double p = dsize[i] / ((float)DEFAULT_WIDTH-1);
+    		pnts[i] = (int)Math.round( (imageSize-1) * p );
+    	}
+    	
+    	return new ImageDescriptor(){
+            public ImageData getImageData() {
+	            try{	
+	               	BufferedImage bimage = new BufferedImage(imageSize, imageSize,BufferedImage.TYPE_4BYTE_ABGR );
+	               	d.drawDirect( bimage, d.feature(d.polygon(pnts)), rule );
 	                return extractImageDataAndDispose( bimage );            
 	            } catch(RuntimeException ex) {
 	                throw ex;
@@ -502,6 +587,61 @@ public class GlyphAWT {
         };
     }
 
+    public static ImageDescriptor grid( Color a, Color b, Color c, Color d1, int imageSize) {
+        if (a == null) {
+            a = Color.BLACK;
+        }        
+        if (b == null) {
+            b = Color.DARK_GRAY;
+        }
+        
+        if (c == null) {
+            c = Color.LIGHT_GRAY;
+        }
+        
+        if (d1 == null) {
+            d1 = Color.WHITE;
+        }        
+        final Color finalA = a;
+        final Color finalB = b;
+        final Color finalC = c;
+        final Color finalD = d1;
+        
+        return new ImageDescriptor(){
+            public ImageData getImageData() {
+                              
+            	 BufferedImage bimage = new BufferedImage(imageSize, imageSize,BufferedImage.TYPE_4BYTE_ABGR );
+                 Graphics2D gc = bimage.createGraphics();
+                 configureGc(gc);
+                 try{
+                	 int part = (int)(imageSize / 2.0);
+                	 
+                 	 gc.setColor( finalA );
+                     gc.fillRect( 0, 0, part, part);
+                     
+                     gc.setColor( finalB );
+                     gc.fillRect( part, 0, imageSize - 1, part ); 
+                     
+                     gc.setColor( finalC );
+                     gc.fillRect( 0, part, part, imageSize - 1 );
+                     
+                     gc.setColor( finalD );
+                     gc.fillRect( part, part, imageSize - 1, imageSize - 1 );                
+                     
+                     gc.setColor( Color.BLACK );
+                     gc.drawRect( 0, 0, part, part );
+                     gc.drawRect( 0, 0, imageSize - 1, part );
+                     gc.drawRect( 0, 0, part, imageSize - 1 );
+                     gc.drawRect( 0, 0, imageSize - 1, imageSize - 1 );
+                    
+                 }finally{
+                 	gc.dispose();
+                 }
+                 return extractImageDataAndDispose(bimage);
+            }
+        };
+    }
+    
     /**
      * Render of a color swatch allowing style.
      * <p>

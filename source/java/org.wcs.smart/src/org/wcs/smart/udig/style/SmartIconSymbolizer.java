@@ -103,8 +103,8 @@ public class SmartIconSymbolizer implements IPointSymbolizerComposite, IStyleCha
 		
 		Image img = (Image) imagePreview.getData(IMAGEKEY);
 		
-		if (img != null && selectedFile == null) {
-			img.dispose();
+		if ((selectedFile == null || selectedFile.getFilename().isEmpty())) {
+			if (img != null) img.dispose();
 			imagePreview.setData(IMAGEKEY, null);
 			return;
 		}
