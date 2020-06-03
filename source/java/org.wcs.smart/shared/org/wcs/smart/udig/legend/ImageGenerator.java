@@ -186,7 +186,8 @@ public class ImageGenerator {
 			System.err.println(unExpected);
 		}
 	}
-	public SimpleFeature feature() {
+	
+	private SimpleFeature feature() {
 		return SimpleFeatureBuilder.build(pointSchema, 
 				new Object[] {(new GeometryFactory()).createPoint(new Coordinate(imageSize / 2.0, imageSize/2.0))}
 		, null);
@@ -194,7 +195,7 @@ public class ImageGenerator {
 	
     //resize images down so entire image shows up in legend icon even if
     //style says size is larger
-    private Rule changeSize(Rule rule, int newsize, boolean tryagain) {
+    private Rule changeSize(Rule rule, int newsize) {
     	  DuplicatingStyleVisitor copyStyle = new DuplicatingStyleVisitor();
           rule.accept(copyStyle);
           rule = (Rule) copyStyle.getCopy();
@@ -203,30 +204,26 @@ public class ImageGenerator {
     		
     		if (s instanceof PointSymbolizer) {
     			Graphic g = ((PointSymbolizer)s).getGraphic();
-    			int psize = SLDs.pointSize((PointSymbolizer)s);
     			
-    			if (g != null && psize > newsize-2) {    	
-    				g.setSize(CommonFactoryFinder.getFilterFactory().literal(newsize-2));
-    				
-    				
-    				SLDStyleFactory styleFactory = new SLDStyleFactory();
+				SLDStyleFactory styleFactory = new SLDStyleFactory();
 
-    				Style2D tmp = styleFactory.createStyle(feature(), (PointSymbolizer)s,
-    						new NumberRange<Double>(Double.class, Double.MIN_VALUE,
-    								Double.MAX_VALUE));
-    				
-    				//hack to make rectangular shaped icons not get chopped
-    				//off 
-    				if (tmp instanceof GraphicStyle2D) {
-    					GraphicStyle2D style = (GraphicStyle2D) tmp;
-    					if (tryagain && style.getImage().getWidth() > newsize) {
-    						int newsize2 = newsize - (style.getImage().getWidth() - newsize);
-    						return changeSize(rule, newsize2, false);
-    					}
-    				}
-    			}	
+				Style2D tmp = styleFactory.createStyle(feature(), (PointSymbolizer)s,
+						new NumberRange<Double>(Double.class, Double.MIN_VALUE, Double.MAX_VALUE));
+				
+				//hack to make rectangular shaped icons not get chopped off 
+				if (tmp instanceof GraphicStyle2D) {
+					GraphicStyle2D style = (GraphicStyle2D) tmp;
+					if (style.getImage().getWidth() > newsize || 
+						style.getImage().getHeight() > newsize) {
+						
+						int newsize2 = newsize;
+						if (style.getImage().getWidth() > style.getImage().getHeight()) {
+    						newsize2 = (int)(newsize * (((float)style.getImage().getHeight() / style.getImage().getWidth() )));
+						}
+						g.setSize(CommonFactoryFinder.getFilterFactory().literal(newsize2 - 2));
+					}
+				}	
             }
-            
         }
     	return rule;
     }
@@ -238,7 +235,7 @@ public class ImageGenerator {
             if (geom != null) {
                 Class<?> geom_type = geom.getType().getBinding();
                 if (geom_type == Point.class || geom_type == MultiPoint.class) {
-                	rule = changeSize(rule, imageSize, true);
+                	rule = changeSize(rule, imageSize);
                     ImageDescriptor id = GlyphAWT.point(rule, imageSize);
                     
                     return id;

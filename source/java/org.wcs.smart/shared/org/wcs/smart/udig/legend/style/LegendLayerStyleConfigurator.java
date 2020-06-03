@@ -148,6 +148,9 @@ public final class LegendLayerStyleConfigurator extends IStyleConfigurator imple
     public void widgetSelected( SelectionEvent e ) {
     	if (getLayer().canAdaptTo(LegendGraphic.class)) {
     		for (ILayer l : getLayer().getMap().getMapLayers()) {
+    			
+				if (l.hasResource(MapGraphic.class)) continue;
+
     			LegendLayerStyle style = (LegendLayerStyle) l.getStyleBlackboard().get(LegendLayerStyleContent.ID);
     			boolean isvisible = layers.getChecked(l);
     			
@@ -159,6 +162,7 @@ public final class LegendLayerStyleConfigurator extends IStyleConfigurator imple
     				}
     			}else {
     				style.isVisible = isvisible;
+					l.getStyleBlackboard().put(LegendLayerStyleContent.ID, style);
   			    }
     		}
     	}else {
