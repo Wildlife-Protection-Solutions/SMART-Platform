@@ -14,6 +14,7 @@ Bundle-ActivationPolicy: lazy
 Export-Package: org.wcs.smart.incident,
  org.wcs.smart.incident.event,
  org.wcs.smart.incident.ui,
+ org.wcs.smart.incident.ui.newwizard,
  org.wcs.smart.incident.xml,
  org.wcs.smart.incident.xml.model.v20,
  org.wcs.smart.incident.xml.model.v21

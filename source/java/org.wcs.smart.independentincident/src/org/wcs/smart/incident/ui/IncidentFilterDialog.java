@@ -32,6 +32,7 @@ import org.wcs.smart.common.filter.DateFilterComposite;
 import org.wcs.smart.common.filter.SmartFilterDialog;
 import org.wcs.smart.common.filter.StringFilterComposite;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.incident.IncidentManager;
 import org.wcs.smart.incident.internal.Messages;
 
 /**
@@ -49,6 +50,8 @@ public class IncidentFilterDialog extends SmartFilterDialog {
 	
 	private StringFilterComposite incidentIdFilterCmp;
 		
+	private SourceFilterComposite sourceFilterCmp;
+	
 	/**
 	 * Create the dialog.
 	 * @param parent parent shell
@@ -76,6 +79,11 @@ public class IncidentFilterDialog extends SmartFilterDialog {
 		
 		currentFilter.setIncidentIdFilter(incidentIdFilterCmp.getComparisonForModel(), 
 				incidentIdFilterCmp.getFilterValueForModel());
+		
+		if (sourceFilterCmp != null) {
+			currentFilter.getSourceIds().clear();
+			currentFilter.getSourceIds().addAll(sourceFilterCmp.getIncidentFilter());
+		}
 	}
 
 	/**
@@ -89,6 +97,11 @@ public class IncidentFilterDialog extends SmartFilterDialog {
 		//incident id
 		incidentIdFilterCmp.applyState(currentFilter.getIncidentIdComparator(), 
 				currentFilter.getIncidentIdFilter(), null);
+		
+		//source filter
+		if (sourceFilterCmp != null) {
+			sourceFilterCmp.applyState(currentFilter.getSourceIds());
+		}
 	}
 	/**
 	 * Create contents of the dialog.
@@ -104,18 +117,29 @@ public class IncidentFilterDialog extends SmartFilterDialog {
 			try {
 				Composite composite = new Composite((Composite) filter, SWT.NONE);
 				composite.setLayout(new GridLayout(1, false));
-				composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 	
 				Composite dateFilterExpComp = createGroupComposite(Messages.IncidentFilterDialog_DatesLabel, composite);
+				dateFilterExpComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
 				dateFilterCmp = new DateFilterComposite(dateFilterExpComp, SWT.NONE, this);
 	
 				Composite incidentIdComp = createGroupComposite(Messages.IncidentFilterDialog_IdLabel, composite);
+				incidentIdComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				incidentIdFilterCmp = new StringFilterComposite(incidentIdComp, SWT.NONE,
 						new StringFilterComposite.TextField[]{new StringFilterComposite.TextField(Messages.IncidentFilterDialog_IdOptionLabel, "id")}, //$NON-NLS-1$
 						new StringFilterComposite.StringComparison[]{StringFilterComposite.StringComparison.EQUALS}); 
 				incidentIdFilterCmp.setIncludeAllRadioLabel(Messages.IncidentFilterDialog_IncludeAllOption);
 				incidentIdFilterCmp.setFilterRadioLabel(Messages.IncidentFilterDialog_FilterOptions);
 				
+				
+				
+				if (IncidentManager.getInstance().getIncidentProviders().size() > 1) {
+					Composite incidentsourceComp = createGroupComposite("Incident Source", composite);
+					incidentsourceComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+					
+					sourceFilterCmp = new SourceFilterComposite(incidentsourceComp, SWT.NONE);
+				}
 				updateControlsValues();
 			} finally {
 				session.getTransaction().rollback();

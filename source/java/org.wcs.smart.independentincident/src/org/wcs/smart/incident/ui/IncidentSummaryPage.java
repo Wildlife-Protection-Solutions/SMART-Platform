@@ -540,23 +540,6 @@ public class IncidentSummaryPage extends EditorPart {
 		}else {
 			lblLastModified.setLayoutData(new GridData(SWT.RIGHT, SWT.BOTTOM, true, false));
 		}
-//		Menu observationMenu = new Menu(dataViewer.getControl());
-//		
-//		MenuItem editItem = new MenuItem(observationMenu, SWT.PUSH);
-//		editItem.setText(DialogConstants.EDIT_BUTTON_TEXT);
-//		editItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
-//		editItem.addListener(SWT.Selection, e->{
-//			Object x = dataViewer.getStructuredSelection().getFirstElement();
-//			WaypointObservation wo = null;
-//			if (x instanceof WaypointObservation) {
-//				wo = (WaypointObservation)x;
-//			}else if (x instanceof WaypointObservationAttribute) {
-//				wo = ((WaypointObservationAttribute)x).getObservation();
-//			}
-//			editIncident(wo);
-//			
-//		});
-//		dataViewer.getControl().setMenu(observationMenu);
 		
 		initData(editor.getIncident());
 	}

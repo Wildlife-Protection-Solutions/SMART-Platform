@@ -42,7 +42,6 @@ import org.geotools.styling.visitor.DuplicatingStyleVisitor;
 import org.geotools.util.NumberRange;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.udig.ui.graphics.Glyph;
 import org.locationtech.udig.ui.graphics.SLDs;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;

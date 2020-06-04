@@ -298,7 +298,7 @@ public class SmartUtils {
 	 */
 	public static boolean createDirectory(final File dir) {
 		try {
-			FileUtils.forceMkdir(dir);
+			Files.createDirectories(dir.toPath());
 			return true;
 		} catch (final IOException ex) {
 			Display.getDefault().syncExec(new Runnable(){

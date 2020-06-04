@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+   <extension-point id="org.wcs.smart.independentincident.provider" name="Incident Source Provider" schema="schema/org.wcs.smart.independentincident.provider.exsd"/>
    <extension
          point="org.eclipse.ui.views">
       <view
@@ -554,6 +555,12 @@
             file="help/html/toc.xml"
             primary="false">
       </toc>
+   </extension>
+   <extension
+         point="org.wcs.smart.independentincident.provider">
+      <incidentprovider
+            class="org.wcs.smart.incident.IndependentIncidentProvider">
+      </incidentprovider>
    </extension>
 
 </plugin>

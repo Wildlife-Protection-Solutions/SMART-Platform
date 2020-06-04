@@ -116,7 +116,7 @@
  						<artifactId>javafx</artifactId>
  						<version>8.0.0-SNAPSHOT</version>
  						<!--<systemPath>${java.home}/lib/javafx-swt.jar</systemPath>-->
- 						<systemPath>C:\Java\fx11\javafx-sdk-11.0.2\lib\javafx-swt.jar</systemPath>
+ 						<systemPath>C:\Java\javafx-sdk-11.0.2\lib\javafx-swt.jar</systemPath>
  						<scope>system</scope>
  					</extraClasspathElement>
 					<extraClasspathElement>

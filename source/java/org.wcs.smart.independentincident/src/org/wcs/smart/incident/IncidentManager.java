@@ -1,8 +1,12 @@
 package org.wcs.smart.incident;
 
 import java.text.MessageFormat;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.Platform;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.incident.internal.Messages;
@@ -13,8 +17,10 @@ import org.wcs.smart.user.UserLevelManager;
 
 public class IncidentManager {
 	
+	private static final String INCIDENT_PROVIDER_EXT_ID = "org.wcs.smart.independentincident.provider";
 	
 	private static IncidentManager instance = null;
+	private static HashMap<String, IIncidentProvider> incidentProviders = null;
 	
 	private IncidentManager(){
 		
@@ -54,4 +60,31 @@ public class IncidentManager {
 			return null;
 		}
 	}
+	
+	public synchronized Collection<IIncidentProvider> getIncidentProviders(){
+		if (incidentProviders == null) {
+			loadIncidentProviders();
+		}
+		return incidentProviders.values();
+	}
+	
+	public synchronized IIncidentProvider getIncidentProvider(String sourceKey) {
+		if (incidentProviders == null) loadIncidentProviders();
+		return incidentProviders.get(sourceKey);
+	}
+	/*
+	 * Load source extension points
+	 */
+	private void loadIncidentProviders() {
+		incidentProviders = new HashMap<>();
+		IConfigurationElement[] elements = Platform.getExtensionRegistry().getConfigurationElementsFor(INCIDENT_PROVIDER_EXT_ID);
+		for (IConfigurationElement element : elements){
+			try{
+				IIncidentProvider source = (IIncidentProvider) element.createExecutableExtension("class"); //$NON-NLS-1$
+				incidentProviders.put(source.getWaypointSourceKey(), source);
+			}catch (Exception ex){
+				IncidentPlugIn.log("Error loading all incident providers", ex); //$NON-NLS-1$
+			}
+		}
+	}	
 }

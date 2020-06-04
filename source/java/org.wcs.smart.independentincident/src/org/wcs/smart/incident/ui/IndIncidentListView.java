@@ -70,7 +70,6 @@ import org.hibernate.query.Query;
 import org.osgi.service.event.Event;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.event.IIncidentListener;
 import org.wcs.smart.incident.event.IncidentEventManager;
 import org.wcs.smart.incident.internal.Messages;
@@ -129,7 +128,7 @@ public class IndIncidentListView implements IIncidentFilteringView {
 					int i = 0;
 					for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
 						Object[] data = (Object[]) iterator.next();					
-						input[i++] = new IncidentEditorInput((UUID)data[0], (Integer)data[1], (Date)data[2]);
+						input[i++] = new IncidentEditorInput((UUID)data[0], (Integer)data[1], (Date)data[2], (String)data[3]);
 					}
 					
 					monitor.internalWorked(0.5);
@@ -197,7 +196,7 @@ public class IndIncidentListView implements IIncidentFilteringView {
 			@Override
 			public Image getImage(Object element){
 				if (element instanceof IncidentEditorInput){
-					return IncidentPlugIn.getDefault().getImageRegistry().get(IncidentPlugIn.INCIDENT_ICON);
+					return ((IncidentEditorInput) element).getImage();
 				}
 				return null;
 			}
@@ -225,6 +224,7 @@ public class IndIncidentListView implements IIncidentFilteringView {
 				Object selection = ((IStructuredSelection)incidentListViewer.getSelection()).getFirstElement();;
 				if (!(selection instanceof IncidentEditorInput)) return;
 				(new OpenIncidentHandler()).openIncident(((IncidentEditorInput)selection).getUuid(),
+						((IncidentEditorInput)selection).getSourceKey(),
 						localPart.getContext().get(MWindow.class));
 			}
 		});

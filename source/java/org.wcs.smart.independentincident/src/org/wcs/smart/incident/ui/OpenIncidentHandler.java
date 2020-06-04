@@ -38,52 +38,59 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.wcs.smart.incident.IncidentManager;
 import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
 
 /**
- * Open incident handler
+ * Open incident handler.
+ * 
+ * If providing the uuid then both the incidentUuid and sourceKey must 
+ * be provided.  If using the selectionService selections must be of
+ * type IncidentEditorInput
+ * 
  * @author Emily
  *
  */
 public class OpenIncidentHandler {
 
 	public static final String UUID_PARAM = "incidentUuid"; //$NON-NLS-1$
+	public static final String SOURCE_PARAM = "incidentSource"; //$NON-NLS-1$
 	
-	public void openIncident(@Optional @Named(UUID_PARAM) UUID incidentUuid, MWindow activeWindow){
-		openIncident(incidentUuid, null, activeWindow);
+	public void openIncident(@Optional @Named(UUID_PARAM) UUID incidentUuid, @Optional @Named(SOURCE_PARAM) String sourceKey, MWindow activeWindow){
+		openIncident(incidentUuid, sourceKey, null, activeWindow);
 	}
 	
 	@Execute
 	public void openIncident(@Optional @Named(UUID_PARAM) UUID incidentUuid,
+			@Optional @Named(SOURCE_PARAM) String sourceKey,
 			ESelectionService selectionService, MWindow activeWindow){
 		
-		List<UUID> incidents = new ArrayList<>();
+		List<IncidentEditorInput> incidents = new ArrayList<>();
 	
 		if (incidentUuid == null) {
 			if (selectionService == null) return;
 			if (!(selectionService.getSelection() instanceof IStructuredSelection)) return;
 			for (Iterator<?> iterator = ((IStructuredSelection)selectionService.getSelection()).iterator(); iterator.hasNext();) {
 				Object type = (Object) iterator.next();
-				if (type instanceof UUID) {
-					incidents.add((UUID)type);
-				}else if (type instanceof IncidentEditorInput) {
-					incidents.add(((IncidentEditorInput)type).getUuid());
+				if (type instanceof IncidentEditorInput) {
+					incidents.add((IncidentEditorInput)type);
 				}	
 			}
 		}else {
-			incidents.add(incidentUuid);
+			IncidentEditorInput ii = new IncidentEditorInput(incidentUuid, sourceKey);
+			incidents.add(ii);
 		}
 		
 		//get the context here as this is not pure e4
 		(new ShowFieldDataPerspective()).execute(IndIncidentListView.ID, activeWindow);
 		
-		for (UUID iUuid : incidents) {
+		for (IncidentEditorInput input : incidents) {
 			try {
 				IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 				IWorkbenchPage page = window.getActivePage();
-				page.openEditor(new IncidentEditorInput(iUuid), IncidentEditor.ID);
+				page.openEditor(input, IncidentManager.getInstance().getIncidentProvider(input.getSourceKey()).getEditorID());
 			} catch (PartInitException e) {
 				IncidentPlugIn.displayLog(Messages.OpenIncidentHandler_IncidentOpenError + e.getLocalizedMessage(), e);
 			}

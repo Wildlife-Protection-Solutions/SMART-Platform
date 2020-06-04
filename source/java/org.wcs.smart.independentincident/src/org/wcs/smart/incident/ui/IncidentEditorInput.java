@@ -26,9 +26,10 @@ import java.util.Date;
 import java.util.UUID;
 
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
-import org.wcs.smart.incident.IncidentPlugIn;
+import org.wcs.smart.incident.IncidentManager;
 import org.wcs.smart.incident.internal.Messages;
 
 /**
@@ -43,15 +44,24 @@ public class IncidentEditorInput implements IEditorInput {
 	private int id;
 	private UUID uuid;
 	private Date dateTime;
+	private String sourceKey;
 	
-	public IncidentEditorInput(UUID uuid){
+	public IncidentEditorInput(UUID uuid, String sourceKey){
 		this.uuid = uuid;
+		this.sourceKey = sourceKey;
 	}
 	
-	public IncidentEditorInput(UUID uuid, int id, Date dateTime){
+	public IncidentEditorInput(UUID uuid, int id, Date dateTime, String sourceKey){
+		this(uuid, sourceKey);
 		this.id = id;
-		this.uuid = uuid;
 		this.dateTime = dateTime;
+	}
+	
+	/**
+	 * @return the incident source key
+	 */
+	public String getSourceKey() {
+		return this.sourceKey;
 	}
 	
 	/**
@@ -108,14 +118,19 @@ public class IncidentEditorInput implements IEditorInput {
 
 	@Override
 	public ImageDescriptor getImageDescriptor() {
-		return IncidentPlugIn.getDefault().getImageRegistry().getDescriptor(IncidentPlugIn.INCIDENT_ICON);
+		//return IncidentManager.getInstance().getIncidentProvider(sourceKey).getImage().;
+		return null;
 	}
 
+	public Image getImage() {
+		return IncidentManager.getInstance().getIncidentProvider(sourceKey).getImage();
+	}
 	/**
 	 * @see org.eclipse.ui.IEditorInput#getName()
 	 */
 	@Override
 	public String getName() {
+		//TODO:
 		return MessageFormat.format(Messages.IncidentEditorInput_EditorName, new Object[]{String.valueOf(id)});
 	}
 
@@ -132,6 +147,7 @@ public class IncidentEditorInput implements IEditorInput {
 	 */
 	@Override
 	public String getToolTipText() {
+		//TODO:
 		return MessageFormat.format(Messages.IncidentEditorInput_EditorTooltip, new Object[]{ id});
 	}
 

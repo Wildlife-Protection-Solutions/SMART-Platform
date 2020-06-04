@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.incident.IndepedentIncidentSource;
 import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.observation.model.IWaypointSourceUiProvider;
 import org.wcs.smart.observation.model.Waypoint;
@@ -60,6 +61,7 @@ public class IndIncidentSourceUiProvider implements
 			
 		IEclipseContext ctx = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
 		ctx.set(OpenIncidentHandler.UUID_PARAM, waypointUuid);
+		ctx.set(OpenIncidentHandler.SOURCE_PARAM, IndepedentIncidentSource.KEY);
 		ContextInjectionFactory.invoke(new OpenIncidentHandler(),
 					Execute.class, ctx.getActiveLeaf());
 

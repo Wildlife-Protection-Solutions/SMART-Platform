@@ -21,6 +21,10 @@
  */
 package org.wcs.smart.incident.ui.newwizard;
 
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -30,6 +34,9 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
+import org.wcs.smart.incident.IIncidentProvider;
+import org.wcs.smart.incident.IncidentManager;
+import org.wcs.smart.incident.IndepedentIncidentSource;
 import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.observation.model.Waypoint;
 
@@ -44,6 +51,8 @@ public class IdComposite extends AbstractIncidentComposite {
 	public static final String ID = "incident.id"; //$NON-NLS-1$
 	
 	private Text txtId;
+	
+	private ComboViewer cmbType;
 	
 	@Override
 	public String validate() {
@@ -63,6 +72,23 @@ public class IdComposite extends AbstractIncidentComposite {
 		Composite item = new Composite(parent, SWT.NONE);
 		item.setLayout(new GridLayout(2, false));
 		
+		if (IncidentManager.getInstance().getIncidentProviders().size() > 1) {
+			Label l = new Label(item, SWT.NONE);
+			l.setText("Source: ");
+			
+			cmbType = new ComboViewer(item, SWT.DROP_DOWN | SWT.READ_ONLY);
+			cmbType.setContentProvider(ArrayContentProvider.getInstance());
+			cmbType.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			cmbType.setInput(IncidentManager.getInstance().getIncidentProviders());
+			cmbType.setSelection(new StructuredSelection(IncidentManager.getInstance().getIncidentProviders().iterator().next()));
+			cmbType.setLabelProvider(new LabelProvider() {
+				@Override
+				public String getText(Object element) {
+					return ((IIncidentProvider)element).getName();
+				}
+			});
+		}
+		
 		Label l = new Label(item, SWT.NONE);
 		l.setText(Messages.IdComposite_Label);
 		
@@ -75,6 +101,8 @@ public class IdComposite extends AbstractIncidentComposite {
 		});
 		txtId.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
+		
+
 		return item;
 	}
 
@@ -82,6 +110,13 @@ public class IdComposite extends AbstractIncidentComposite {
 	public void updateIncident(Waypoint incident) {
 		int id = Integer.parseInt(txtId.getText());
 		incident.setId(id);
+		
+		if (cmbType == null) {
+			incident.setSourceId(IndepedentIncidentSource.KEY);
+		}else {
+			IIncidentProvider p = (IIncidentProvider) cmbType.getStructuredSelection().getFirstElement();
+			incident.setSourceId(p.getWaypointSourceKey());
+		}
 	}
 
 	@Override

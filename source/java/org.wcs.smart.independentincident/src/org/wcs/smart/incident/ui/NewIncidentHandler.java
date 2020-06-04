@@ -46,7 +46,7 @@ public class NewIncidentHandler {
 		NewIncidentWizard wizard = new NewIncidentWizard();
 		WizardDialog wd = new SmartWizardDialog(activeShell, wizard);
 		if (wd.open() == Window.OK){
-			(new OpenIncidentHandler()).openIncident(wizard.getNewIncident().getUuid(), activeWindow);
+			(new OpenIncidentHandler()).openIncident(wizard.getNewIncident().getUuid(), wizard.getNewIncident().getSourceId(), activeWindow);
 		}
 	}
 

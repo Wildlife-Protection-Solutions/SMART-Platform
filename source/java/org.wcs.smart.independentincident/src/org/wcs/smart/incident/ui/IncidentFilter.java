@@ -22,12 +22,17 @@
 package org.wcs.smart.incident.ui;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.common.filter.StringFilterComposite.StringComparison;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.incident.IIncidentProvider;
+import org.wcs.smart.incident.IncidentManager;
 import org.wcs.smart.incident.IndepedentIncidentSource;
 import org.wcs.smart.util.SharedUtils;
 
@@ -45,8 +50,26 @@ public class IncidentFilter {
 	private String incidentIdFilter = null;
 	private StringComparison stringComparator = null;
 	
+	private Set<IIncidentProvider> sourceids = null;
+	
 	private Date startDate;
 	private Date endDate;
+	
+	public IncidentFilter() {
+		sourceids = new HashSet<>();
+		for (IIncidentProvider p : IncidentManager.getInstance().getIncidentProviders()) {
+			sourceids.add(p);
+		}
+	}
+	
+	/**
+	 * 
+	 * @return the set of source ids to filter on
+	 */
+	public Set<IIncidentProvider> getSourceIds(){
+		return this.sourceids;
+	}
+	
 	
 	/**
 	 * 
@@ -124,7 +147,7 @@ public class IncidentFilter {
 	
 	/**
 	 * Builds a query that returns the following incident fields:
-	 * incident uuid, incident id, incident datetime
+	 * incident uuid, incident id, incident datetime, source
 	 * 
 	 * @param s
 	 * @return
@@ -132,10 +155,10 @@ public class IncidentFilter {
 	public Query<?> buildQuery(Session s){ 
 		StringBuilder str = new StringBuilder();
 		
-		str.append("SELECT i.uuid, i.id, i.dateTime "); //$NON-NLS-1$
+		str.append("SELECT i.uuid, i.id, i.dateTime, i.sourceId "); //$NON-NLS-1$
 		str.append("FROM Waypoint i "); //$NON-NLS-1$
 		str.append("WHERE i.conservationArea = :ca " ); //$NON-NLS-1$
-		str.append("AND i.sourceId = :source " ); //$NON-NLS-1$
+		str.append("AND i.sourceId IN ( :source ) " ); //$NON-NLS-1$
 	
 		boolean and = true;
 		boolean or = false;
@@ -171,8 +194,10 @@ public class IncidentFilter {
 		
 		str.append("ORDER BY i.dateTime desc, i.id"); //$NON-NLS-1$
 		
+		Set<String> sourcestrings = sourceids.stream().map(e->e.getWaypointSourceKey()).collect(Collectors.toSet());
+		
 		Query<?> query = s.createQuery(str.toString()).setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-		query.setParameter("source", IndepedentIncidentSource.KEY); //$NON-NLS-1$
+		query.setParameterList("source", sourcestrings); //$NON-NLS-1$
 		if (stringComparator != null && incidentIdFilter != null){
 			if (stringComparator == StringComparison.EQUALS){
 				try{

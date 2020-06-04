@@ -97,7 +97,7 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 		
 		if (getWizardLocal().getTrackObserver()){
 			Composite observerComp = new Composite(parent, SWT.NONE);
-			observerComp.setLayout(new GridLayout());
+			observerComp.setLayout(new GridLayout(2, false));
 			((GridLayout)observerComp.getLayout()).marginHeight = 0;
 			((GridLayout)observerComp.getLayout()).marginWidth = 0;
 			observerComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -105,7 +105,7 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 			Label l = new Label(observerComp, SWT.NONE);
 			l.setText(Messages.ObservationSummaryWizardPage_ObserverLabel);
 			l.setFont(boldFont);
-			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 			((GridData)l.getLayoutData()).verticalIndent = 5;
 		
 			employeeViewer = new ComboViewer(
