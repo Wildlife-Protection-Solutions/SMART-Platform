@@ -62,6 +62,7 @@ public class CyberTrackerPackage extends UuidItem{
 	private String name;
 	private UUID workItem;
 	private UUID ctpackage;
+	private String type;
 
 	@Column(name="uploaded_date")
 	public Date getUploadedDate() {
@@ -70,6 +71,15 @@ public class CyberTrackerPackage extends UuidItem{
 	
 	public void setUploadedDate(Date date) {
 		this.uploadedDate = date;
+	}
+	
+	@Column(name="package_type")
+	public String getType() {
+		return this.type;
+	}
+	
+	public void setType(String type) {
+		this.type = type;
 	}
 	
 	@Column(name="status")
@@ -139,6 +149,7 @@ public class CyberTrackerPackage extends UuidItem{
 		proxy.setVersion(getVersion());
 		proxy.setUploadedDate(getUploadedDate());
 		proxy.setName(getName());
+		proxy.setType(getType());
 		return proxy;
 	}
 }

@@ -78,6 +78,8 @@ import org.wcs.smart.connect.model.Dashboard;
 import org.wcs.smart.connect.model.Quicklink;
 import org.wcs.smart.connect.model.UserQuicklink;
 import org.wcs.smart.connect.model.UsersDefaultDashboard;
+import org.wcs.smart.cybertracker.community.model.CommunityCtPackage;
+import org.wcs.smart.cybertracker.community.model.CommunityWaypoint;
 import org.wcs.smart.cybertracker.model.ConfigurableModelCtPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CtIncidentLink;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
@@ -215,7 +217,6 @@ import org.wcs.smart.paws.model.PawsQueryClass;
 import org.wcs.smart.paws.model.PawsRun;
 import org.wcs.smart.paws.model.PawsService;
 import org.wcs.smart.paws.model.PawsSimpleClass;
-import org.wcs.smart.paws.model.PawsWorkspace;
 import org.wcs.smart.plan.model.AdministrativePlanTarget;
 import org.wcs.smart.plan.model.NumericPlanTarget;
 import org.wcs.smart.plan.model.PatrolPlan;
@@ -476,10 +477,11 @@ public enum SmartTable {
 	PAWS_PARAM(PawsParameter.class, ".configuration.conservationArea"),
 	PAWS_QUERYCLASS(PawsQueryClass.class, ".configuration.conservationArea"),
 	PAWS_SIMPLECLASS(PawsSimpleClass.class, ".configuration.conservationArea"),
-	PAWS_WORKSPACE(PawsWorkspace.class, null),
 	PAWS_SERVICE(PawsService.class, null),
 	PAWS_RUN(PawsRun.class, null),
 	
+	COMMUNITY_WAYPOINT(CommunityWaypoint.class, ".waypoint.conservationArea"),
+	COMMUNITY_PACKAGE(CommunityCtPackage.class, null),
 	;
 	
 	public Class<?> hibernateClass;

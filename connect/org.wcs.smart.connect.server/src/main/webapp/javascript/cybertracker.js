@@ -179,7 +179,7 @@ function createPackageTable(){
  		var upDate = new Date( Date.parse(packages[i].uploadedDate) );
  		
  		var row = tableCreateRow(parent, 
- 				[packages[i].name, packages[i].caLabel, upDate.toLocaleString(), rDate.toLocaleString(), packages[i].version, null, null], 
+ 				[packages[i].name, packages[i].caLabel, packages[i].type, upDate.toLocaleString(), rDate.toLocaleString(), packages[i].version, null, null], 
  				"ctrow " + (i % 2 == 1 ? "smart-table-rowon" : "smart-table-rowoff"));
  		
  		row.dataset.packageuuid = packages[i].uuid;

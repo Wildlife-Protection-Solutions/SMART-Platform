@@ -441,9 +441,14 @@
 		</dependency>
 		<dependency>
     			<groupId>org.wcs.smart.core</groupId>
-    			<artifactId>org.wcs.smart.core.connect.dataqueue.cybertracker</artifactId>
+    			<artifactId>org.wcs.smart.core.cybertracker.community</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
+		<dependency>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.connect.dataqueue.cybertracker</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>		
 		<dependency>
     			<groupId>org.wcs.smart.core</groupId>
     			<artifactId>org.wcs.smart.core.connect.dataqueue.er</artifactId>

@@ -567,7 +567,8 @@ public class CyberTracker extends HttpServlet{
 					Files.delete(toDelete);	
 				}
 			}
-			
+			ctpackage.setType(proxy.getType());
+
 			java.nio.file.Path upDir =  DataStoreManager.INSTANCE.getRootDirectory().toPath().resolve(CT_PACKAGE_DATASTORE_LOCATION);
 			if (!Files.exists(upDir)) Files.createDirectories(upDir);
 			

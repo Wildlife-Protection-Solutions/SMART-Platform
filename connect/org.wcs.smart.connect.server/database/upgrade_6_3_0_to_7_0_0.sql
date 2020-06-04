@@ -169,6 +169,7 @@ create table connect.ct_package(
   uploaded_date timestamp not null,
   version varchar(256) not null,
   filename varchar(256) not null,
+  package_type varchar(256) not null;
   name varchar(256) not null,
   status varchar(16) not null,
   work_item_uuid uuid,
@@ -386,15 +387,13 @@ CREATE TRIGGER trg_patrol_attribute_value AFTER INSERT OR UPDATE OR DELETE ON sm
 CREATE TABLE smart.paws_configuration(uuid uuid NOT NULL, ca_uuid uuid NOT NULL, name varchar(8192) NOT NULL, PRIMARY KEY (uuid));
 CREATE TABLE smart.paws_parameter( uuid uuid NOT NULL, config_uuid uuid NOT NULL, keyid varchar(8192) NOT NULL, value varchar(8192), PRIMARY KEY (uuid));
 CREATE TABLE smart.paws_query_class(uuid uuid NOT NULL, config_uuid uuid NOT NULL, query_uuid uuid NOT NULL, query_type varchar(32) NOT NULL, classification varchar(512) NOT NULL, PRIMARY KEY (uuid));
-CREATE TABLE smart.paws_run(uuid uuid NOT NULL, ca_uuid uuid NOT NULL, config_uuid uuid, id varchar(256) NOT NULL, server_run_id varchar(256), run_date timestamp, package_file varchar(256), result_location varchar(256), status varchar(32) NOT NULL, status_message varchar, server_status_json varchar, train_start_year smallint, train_end_year smallint, forecast_start_year smallint, forecast_end_year smallint, paws_task_id varchar(8192), PRIMARY KEY (uuid));
-CREATE TABLE smart.paws_service(uuid uuid NOT NULL, ca_uuid uuid NOT NULL UNIQUE, heatmap_api varchar(8192), task_api varchar(8192), api_key varchar(8192), PRIMARY KEY (uuid));
+CREATE TABLE smart.paws_run(uuid uuid NOT NULL, ca_uuid uuid NOT NULL, config_uuid uuid, id varchar(256) NOT NULL, server_run_id varchar(256), run_date timestamp, package_file varchar(256), result_location varchar(256), status varchar(32) NOT NULL, status_message varchar, server_status_json varchar, train_start_year smallint, train_end_year smallint, forecast_start_year smallint, forecast_end_year smallint, container varchar(8192), paws_task_id varchar(8192), PRIMARY KEY (uuid));
+CREATE TABLE smart.paws_service(uuid uuid NOT NULL, ca_uuid uuid NOT NULL UNIQUE, paws_api varchar(8192), task_api varchar(8192), paws_api_key varchar(8192), oauth_url varchar(8192), client_id varchar(8192), storage_account_url varchar(8192), PRIMARY KEY (uuid));
 CREATE TABLE smart.paws_simple_class(uuid uuid NOT NULL, config_uuid uuid NOT NULL, classification varchar(512) NOT NULL, date_range varchar(512), category_hkey varchar(32672) NOT NULL, attribute_key varchar(128), list_key varchar(128), tree_hkey varchar(32672), PRIMARY KEY (uuid));
-CREATE TABLE smart.paws_workspace(uuid uuid NOT NULL, ca_uuid uuid NOT NULL UNIQUE, url varchar(8192), client_id varchar(8192), storage_account_url varchar(8192), container_name varchar(8192), PRIMARY KEY (uuid));
 
 ALTER TABLE smart.paws_configuration ADD FOREIGN KEY(ca_uuid) REFERENCES smart.conservation_area (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE smart.paws_run ADD FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE smart.paws_service ADD FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
-ALTER TABLE smart.paws_workspace ADD FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE smart.paws_parameter ADD FOREIGN KEY (config_uuid) REFERENCES smart.paws_configuration (uuid) ON UPDATE RESTRICT ON DELETE CASCADE  DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE smart.paws_run ADD FOREIGN KEY (config_uuid) REFERENCES smart.paws_configuration (uuid) ON UPDATE RESTRICT ON DELETE SET NULL DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE smart.paws_query_class ADD FOREIGN KEY (config_uuid) REFERENCES smart.paws_configuration (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
@@ -406,7 +405,6 @@ ALTER TABLE smart.paws_simple_class ADD FOREIGN KEY (config_uuid) REFERENCES sma
 CREATE TRIGGER trg_paws_configuration AFTER INSERT OR UPDATE OR DELETE ON smart.paws_configuration FOR EACH ROW execute procedure connect.trg_changelog_common();
 CREATE TRIGGER trg_paws_run AFTER INSERT OR UPDATE OR DELETE ON smart.paws_run FOR EACH ROW execute procedure connect.trg_changelog_common();
 CREATE TRIGGER trg_paws_service AFTER INSERT OR UPDATE OR DELETE ON smart.paws_service FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE TRIGGER trg_paws_worspace AFTER INSERT OR UPDATE OR DELETE ON smart.paws_workspace FOR EACH ROW execute procedure connect.trg_changelog_common();
 CREATE OR REPLACE FUNCTION connect.trg_paws_config_join() RETURNS trigger AS $$
 	DECLARE
 	ROW RECORD;
@@ -691,6 +689,26 @@ insert into smart.e_action_parameter_value(action_uuid, parameter_key, parameter
 select uuid, 'org.wcs.smart.profile.common.profile', 'profile1'
 from smart.E_ACTION where type_key in ('org.wcs.smart.profile.newrecord', 'org.wcs.smart.profile.i2.newentity');
 
+
+--- community waypoint tables
+CREATE TABLE smart.community_waypoint(
+wp_uuid uuid not null,  
+source varchar(32000), primary key(wp_uuid));
+
+ALTER TABLE smart.community_waypoint ADD FOREIGN KEY (wp_uuid) REFERENCES smart.waypoint(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+
+CREATE TABLE smart.ct_community_package(
+uuid uuid not null, 
+name varchar(512), 
+ca_uuid uuid not null, 
+cm_uuid uuid, 
+ctprofile_uuid uuid,
+basemapdef varchar(32672), primary key (uuid));
+
+ALTER TABLE smart.ct_community_package ADD FOREIGN KEY (CA_UUID) REFERENCES smart.conservation_area(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.ct_community_package ADD FOREIGN KEY (CM_UUID) REFERENCES smart.configurable_model(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.ct_community_package ADD FOREIGN KEY (ctprofile_uuid) REFERENCES smart.ct_properties_profile(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+--TODO: triggers & plugin version
 
 ---- change ca version so users cannot sync with this and cause problems ---- 
 update connect.ca_info SET version = uuid_generate_v4();

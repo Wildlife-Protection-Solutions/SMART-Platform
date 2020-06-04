@@ -32,6 +32,7 @@
   	  <div class="table-row smart-table-header">
 		  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.packagetable.name"/></div>
 		  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.packagetable.ca"/></div>
+		  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.packagetable.type"/></div>
 		  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.packagetable.upload"/></div>
 		  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.packagetable.revisiondate"/></div>
 		  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.packagetable.revision"/></div>
