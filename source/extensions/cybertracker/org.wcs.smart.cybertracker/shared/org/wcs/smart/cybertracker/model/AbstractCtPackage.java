@@ -73,9 +73,6 @@ public abstract class AbstractCtPackage extends UuidItem implements ICtPackage {
 	protected ConservationArea ca;
 	
 	protected CyberTrackerPropertiesProfile ctprofile;
-
-	protected boolean hasIncident;
-	protected ConfigurableModel incidentmodel;
 	
 	protected String basemapdef;
 	
@@ -99,21 +96,7 @@ public abstract class AbstractCtPackage extends UuidItem implements ICtPackage {
 		this.ctprofile = ctprofile;
 	}
 	
-	@Column(name = "has_incident")
-	public boolean getHasIncident() {
-		return this.hasIncident;
-	}
-	public void setHasIncident(boolean hasIncident) {
-		this.hasIncident = hasIncident;
-	}
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name="incident_uuid", referencedColumnName="uuid")
-	public ConfigurableModel getIncidentModel() {
-		return this.incidentmodel;
-	}
-	public void setIncidentModel(ConfigurableModel incidentmodel) {
-		this.incidentmodel = incidentmodel;
-	}
+	
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")

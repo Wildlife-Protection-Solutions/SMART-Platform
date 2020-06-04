@@ -47,8 +47,8 @@ import org.hibernate.Session;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.cybertracker.export.IPackageUiContribution;
 import org.wcs.smart.cybertracker.incident.internal.Messages;
-import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.ICtPackage;
+import org.wcs.smart.cybertracker.model.IIncidentCtPackage;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -78,7 +78,8 @@ public class IncidentPackageUiContribution implements IPackageUiContribution{
 	
 	@Override
 	public Composite createUi(Composite parent, ICtPackage ctPackage, Listener onValidate) {
-
+		if (! (ctPackage instanceof IIncidentCtPackage) ) return null;
+		
 		Composite g = new Composite(parent, SWT.NONE);
 		g.setLayout(new GridLayout());
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -133,8 +134,8 @@ public class IncidentPackageUiContribution implements IPackageUiContribution{
 		cmbModel.getControl().setEnabled(btnCollect.getSelection());
 			
 		this.ctPackage = ctPackage;
-		if (ctPackage != null && ctPackage instanceof AbstractCtPackage) {
-			if (((AbstractCtPackage)ctPackage).getHasIncident()){
+		if (ctPackage != null && ctPackage instanceof IIncidentCtPackage) {
+			if (((IIncidentCtPackage)ctPackage).getHasIncident()){
 				btnCollect.setSelection(true);
 				cmbModel.getControl().setEnabled(true);
 				l.setEnabled(true);
@@ -171,22 +172,22 @@ public class IncidentPackageUiContribution implements IPackageUiContribution{
 	
 	@Override
 	public void updatePackage(ICtPackage ctpackage) {
-		if (ctpackage instanceof AbstractCtPackage) {
+		if (ctpackage instanceof IIncidentCtPackage) {
 			if (!btnCollect.getSelection()) {
-				((AbstractCtPackage) ctpackage).setHasIncident(false);
-				((AbstractCtPackage) ctpackage).setIncidentModel(null);	
+				((IIncidentCtPackage) ctpackage).setHasIncident(false);
+				((IIncidentCtPackage) ctpackage).setIncidentModel(null);	
 			}else {
 				Object selection = cmbModel.getStructuredSelection().getFirstElement();
 				if (selection instanceof ConfigurableModel) {
-					((AbstractCtPackage) ctpackage).setHasIncident(true);
-					((AbstractCtPackage) ctpackage).setIncidentModel((ConfigurableModel) selection);
+					((IIncidentCtPackage) ctpackage).setHasIncident(true);
+					((IIncidentCtPackage) ctpackage).setIncidentModel((ConfigurableModel) selection);
 				}else if (selection == DATAMODEL){
 					//data model
-					((AbstractCtPackage) ctpackage).setHasIncident(true);
-					((AbstractCtPackage) ctpackage).setIncidentModel(null);
+					((IIncidentCtPackage) ctpackage).setHasIncident(true);
+					((IIncidentCtPackage) ctpackage).setIncidentModel(null);
 				}else {
-					((AbstractCtPackage) ctpackage).setHasIncident(false);
-					((AbstractCtPackage) ctpackage).setIncidentModel(null);
+					((IIncidentCtPackage) ctpackage).setHasIncident(false);
+					((IIncidentCtPackage) ctpackage).setIncidentModel(null);
 				}
 			}
 		}
@@ -205,8 +206,8 @@ public class IncidentPackageUiContribution implements IPackageUiContribution{
 				ConfigurableModel selection = null;
 				UUID selectionUuid =  null;
 				String cmUuid = ""; //$NON-NLS-1$
-				if (ctPackage != null && ctPackage instanceof AbstractCtPackage) {
-					AbstractCtPackage ct = (AbstractCtPackage)ctPackage;
+				if (ctPackage != null && ctPackage instanceof IIncidentCtPackage) {
+					IIncidentCtPackage ct = (IIncidentCtPackage)ctPackage;
 					if (ct.getHasIncident()) {
 						if (ct.getIncidentModel() != null) {
 							selectionUuid = ct.getIncidentModel().getUuid();

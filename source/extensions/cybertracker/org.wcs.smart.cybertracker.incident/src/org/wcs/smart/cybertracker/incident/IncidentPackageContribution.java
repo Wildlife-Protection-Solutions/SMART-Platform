@@ -53,6 +53,7 @@ import org.wcs.smart.cybertracker.export.data.DataModelWrapper;
 import org.wcs.smart.cybertracker.incident.internal.Messages;
 import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.ICtPackage;
+import org.wcs.smart.cybertracker.model.IIncidentCtPackage;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
@@ -86,8 +87,8 @@ public class IncidentPackageContribution implements IPackageContribution{
 	}
 
 	public void createDetails(Composite parent, ICtPackage ctpackage, Session session) {
-		if (!(ctpackage instanceof AbstractCtPackage)) return;
-		AbstractCtPackage pp = (AbstractCtPackage)ctpackage;
+		if (!(ctpackage instanceof IIncidentCtPackage)) return;
+		IIncidentCtPackage pp = (IIncidentCtPackage)ctpackage;
 		
 		Label l = new Label(parent, SWT.NONE);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -111,8 +112,8 @@ public class IncidentPackageContribution implements IPackageContribution{
 	@SuppressWarnings("unchecked")
 	@Override
 	public PackageContribution packageFiles(ICtPackage ctpackage, IEclipseContext context, IProgressMonitor monitor) throws IOException {
-		if (!(ctpackage instanceof AbstractCtPackage)) return null;
-		AbstractCtPackage pp = (AbstractCtPackage)ctpackage;
+		if (!(ctpackage instanceof IIncidentCtPackage)) return null;
+		IIncidentCtPackage pp = (IIncidentCtPackage)ctpackage;
 		monitor.subTask(Messages.IncidentPackageContribution_TaskName);
 		ConfigurableModel cm = null;
 		if (pp.getHasIncident() && pp.getIncidentModel() == null) {

@@ -23,6 +23,7 @@ package org.wcs.smart.cybertracker.survey.model;
 
 import java.util.ArrayList;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -33,6 +34,7 @@ import javax.persistence.Transient;
 import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.ICmProvider;
 import org.wcs.smart.cybertracker.model.ICtPackage;
+import org.wcs.smart.cybertracker.model.IIncidentCtPackage;
 import org.wcs.smart.cybertracker.model.MetadataFieldUuidValue;
 import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
@@ -46,14 +48,33 @@ import org.wcs.smart.er.model.SurveyDesign;
  */
 @Entity
 @Table(name="smart.ct_survey_package")
-public class SurveyCtPackage extends AbstractCtPackage implements ICmProvider{
+public class SurveyCtPackage extends AbstractCtPackage implements ICmProvider, IIncidentCtPackage{
 
 	private static final long serialVersionUID = 1L;
 	
 	public static final String TYPE_NAME = "SURVEY"; //$NON-NLS-1$
 
 	private SurveyDesign sd;
-
+	protected boolean hasIncident;
+	protected ConfigurableModel incidentmodel;
+	
+	
+	@Column(name = "has_incident")
+	public boolean getHasIncident() {
+		return this.hasIncident;
+	}
+	public void setHasIncident(boolean hasIncident) {
+		this.hasIncident = hasIncident;
+	}
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="incident_uuid", referencedColumnName="uuid")
+	public ConfigurableModel getIncidentModel() {
+		return this.incidentmodel;
+	}
+	public void setIncidentModel(ConfigurableModel incidentmodel) {
+		this.incidentmodel = incidentmodel;
+	}
+	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="sd_uuid", referencedColumnName="uuid")
 	public SurveyDesign getSurveyDesign() {

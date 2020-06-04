@@ -258,6 +258,17 @@ public class CtJsonExportUtils {
 	}
 
 	
+	/**
+	 * 
+	 * @param projectName required projection name
+	 * @param version required package version
+	 * @param cmFile required configurable model file
+	 * @param logoFile optional conservation area logo for styling
+	 * @param outputFile required output file name
+	 * @param metadataFilename optional metadata file
+	 * @param projectAdditions optional addition key/value pairs to add.  Value can be single value or json object
+	 * @throws IOException
+	 */
 	public static void writeProjectJson(String projectName, String version, String cmFile, 
 			Path logoFile, Path outputFile, Path metadataFilename, HashMap<String, Object> projectAdditions) throws IOException {
 		JSONObject projectJSON = new JSONObject();
@@ -265,7 +276,7 @@ public class CtJsonExportUtils {
 		projectJSON.put("decoder","sourceparser_smartconfigurabledatamodel"); //$NON-NLS-1$ //$NON-NLS-2$
 		projectJSON.put("source",Messages.CtJsonExportUtils_SmartCtSource); //$NON-NLS-1$
 		projectJSON.put("definition",cmFile); //$NON-NLS-1$
-		projectJSON.put("metadata", metadataFilename.getFileName().toString()); //$NON-NLS-1$
+		if (metadataFilename != null) projectJSON.put("metadata", metadataFilename.getFileName().toString()); //$NON-NLS-1$
 		if (version != null) projectJSON.put("version",  version); //$NON-NLS-1$ 
 		projectJSON.put("creation_date",new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date())); //$NON-NLS-1$ //$NON-NLS-2$
 		projectJSON.put("logo", (logoFile == null || !Files.exists(logoFile)) ? null : logoFile.getFileName().toString()); //$NON-NLS-1$
