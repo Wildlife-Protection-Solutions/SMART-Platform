@@ -68,7 +68,7 @@ public class OpenIncidentAction implements IQaAction {
 				//not found
 				MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.OpenIncidentAction_NotFoundTitle, MessageFormat.format(Messages.OpenIncidentAction_NotFoundMsg, item.getErrorId()));
 			}else{
-				(new OpenIncidentHandler()).openIncident(pw.getUuid(), context.get(MWindow.class));	
+				(new OpenIncidentHandler()).openIncident(pw.getUuid(), pw.getSourceId(), context.get(MWindow.class));	
 			}
 		}
 		return false;
