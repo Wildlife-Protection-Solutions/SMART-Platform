@@ -98,7 +98,7 @@ public class PawsDownloadResultJob extends Job {
 		//download results
 		monitor.subTask(Messages.PawsDownloadResultJob_downloadtaskname);
 		try{
-			ContainerURL containerURL = StorageApi.INSTANCE.getContainerURL();
+			ContainerURL containerURL = StorageApi.INSTANCE.getContainerURL(run.getContainerName());
 
 //			resultsDirectory = resultsFile.resolve("results.csv"); 
 			String endpoint = runId + "/risk_prediction"; //$NON-NLS-1$

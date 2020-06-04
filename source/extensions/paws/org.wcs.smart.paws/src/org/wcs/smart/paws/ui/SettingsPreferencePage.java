@@ -25,36 +25,35 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.preference.PreferencePage;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.hibernate.Session;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.paws.PawsManager;
 import org.wcs.smart.paws.PawsPlugIn;
 import org.wcs.smart.paws.internal.Messages;
 import org.wcs.smart.paws.model.PawsService;
-import org.wcs.smart.paws.model.PawsWorkspace;
-import org.wcs.smart.ui.SmartStyledDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
- * Dialog for configuring PAWS Azure and AI servers
+ * Settings preference page for PAWS server settings
  * @author Emily
  *
  */
-public class ServerConfigurationDialog extends SmartStyledDialog {
+public class SettingsPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
 	private Text txtServiceHeatmapApi;
 	private Text txtServiceTaskApi;
@@ -63,21 +62,43 @@ public class ServerConfigurationDialog extends SmartStyledDialog {
 	private Text txtWorkspaceLoginURL;
 	private Text txtWorkspaceClientId;
 	private Text txtWorkspaceStorageUrl;
-	private Text txtWorkspaceContainer;
 	
-	protected ServerConfigurationDialog(Shell parent) {
-		super(parent);
+	
+	public SettingsPreferencePage() {
 	}
 
-	private void modified() {
-		Button ok = getButton(IDialogConstants.OK_ID);
-		if (ok != null) {
-			ok.setEnabled(true);
-		}
+	public SettingsPreferencePage(String title) {
+		super(title);
 	}
-	
+
+	public SettingsPreferencePage(String title, ImageDescriptor image) {
+		super(title, image);
+	}
+
 	@Override
-	public void okPressed() {
+	public void init(IWorkbench workbench) {
+		loadingJob.schedule();
+	}
+
+	@Override
+    protected void performDefaults() {
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				PawsManager.INSTANCE.createDefaultSettings(session);
+				session.getTransaction().commit();
+			}catch (Exception ex) {
+				PawsPlugIn.displayLog("Unable to reset PAWS settings: " + ex.getMessage(), ex);
+			}
+			
+		}
+		loadingJob.schedule();
+	}
+
+    	
+	@Override
+	public boolean performOk() {
+		
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try{
@@ -88,44 +109,33 @@ public class ServerConfigurationDialog extends SmartStyledDialog {
 					service.setConservationArea(SmartDB.getCurrentConservationArea());
 				}
 				service.setApiKey(txtServiceKey.getText());
-				service.setHeatmapApi(txtServiceHeatmapApi.getText());
-				service.setTaskApi(txtServiceTaskApi.getText());
-				session.saveOrUpdate(service);
+				service.setPawsApiUrl(txtServiceHeatmapApi.getText());
+				service.setTaskApiUrl(txtServiceTaskApi.getText());
+				service.setClientId(txtWorkspaceClientId.getText());
+				service.setOAuthUrl(txtWorkspaceLoginURL.getText());
+				service.setStorageUrl(txtWorkspaceStorageUrl.getText());
 				
-				PawsWorkspace ws = QueryFactory.buildQuery(session, PawsWorkspace.class,  
-						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).uniqueResult(); //$NON-NLS-1$
-				if (ws == null) {
-					ws = new PawsWorkspace();
-					ws.setConservationArea(SmartDB.getCurrentConservationArea());
-				}
-				ws.setClientId(txtWorkspaceClientId.getText());
-				ws.setUrl(txtWorkspaceLoginURL.getText());
-				ws.setStorageAccountUrl(txtWorkspaceStorageUrl.getText());
-				ws.setContainer(txtWorkspaceContainer.getText());
-				session.saveOrUpdate(ws);
+				session.saveOrUpdate(service);
 				
 				session.getTransaction().commit();
 			}catch (Exception ex) {
 				PawsPlugIn.displayLog(Messages.ServerConfigurationDialog_SaveError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
-				return;
+				return false;
 			}
 		}
-		getButton(IDialogConstants.OK_ID).setEnabled(false);
+		return true;
 	}
-	
 	@Override
-	public void createButtonsForButtonBar(Composite parent) {
-		createButton(parent, IDialogConstants.OK_ID, DialogConstants.SAVE_TEXT, true);
-		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CLOSE_LABEL, false);
-		getButton(IDialogConstants.OK_ID).setEnabled(false);
-	}
-	
-	@Override
-	public Control createDialogArea(Composite parent) {
-		Listener modifiedlistener = e->modified();
+	protected Control createContents(Composite parent) {
+		Composite main = new Composite(parent, SWT.NONE);
+		main.setLayout(new GridLayout());
+		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Composite main = (Composite) super.createDialogArea(parent);
-		
+		Label infoMessage1 = new Label(main, SWT.WRAP);
+		infoMessage1.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		infoMessage1.setText("These settings should not changed unless the PAWS service has been modified and you have been provided with new settings.");
+		((GridData)infoMessage1.getLayoutData()).widthHint = 350;
+
 		SmartUiUtils.createHeaderLabel(main, Messages.ServerConfigurationDialog_ServiceSection);
 		
 		Composite paws = new Composite(main, SWT.NONE);
@@ -145,8 +155,7 @@ public class ServerConfigurationDialog extends SmartStyledDialog {
 		txtServiceHeatmapApi = new Text(paws, SWT.BORDER);
 		txtServiceHeatmapApi.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtServiceHeatmapApi.setText(DialogConstants.LOADING_TEXT);
-		txtServiceHeatmapApi.addListener(SWT.Modify, modifiedlistener);
-		
+
 		l = new Label(paws, SWT.NONE);
 		l.setText(Messages.ServerConfigurationDialog_TaskAPI);
 		l.setToolTipText(Messages.ServerConfigurationDialog_TaskRequestURL);
@@ -154,17 +163,14 @@ public class ServerConfigurationDialog extends SmartStyledDialog {
 		txtServiceTaskApi = new Text(paws, SWT.BORDER);
 		txtServiceTaskApi.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtServiceTaskApi.setText(DialogConstants.LOADING_TEXT);
-		txtServiceTaskApi.addListener(SWT.Modify, modifiedlistener);
-		
+
 		l = new Label(paws, SWT.NONE);
 		l.setText(Messages.ServerConfigurationDialog_APIKey);
 		
 		txtServiceKey = new Text(paws, SWT.BORDER  | SWT.PASSWORD);
 		txtServiceKey.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtServiceKey.setText(DialogConstants.LOADING_TEXT);
-		txtServiceKey.addListener(SWT.Modify, modifiedlistener);
-		
-		
+
 		SmartUiUtils.createHeaderLabel(main, Messages.ServerConfigurationDialog_StorageSection);
 		
 		Composite pawws = new Composite(main, SWT.NONE);
@@ -185,8 +191,7 @@ public class ServerConfigurationDialog extends SmartStyledDialog {
 		txtWorkspaceLoginURL.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtWorkspaceLoginURL.setText(DialogConstants.LOADING_TEXT);
 		txtWorkspaceLoginURL.setText("https://login.microsoftonline.com/common/oauth2"); //$NON-NLS-1$
-		txtWorkspaceLoginURL.addListener(SWT.Modify, modifiedlistener);
-		
+
 		l = new Label(pawws, SWT.NONE);
 		l.setText(Messages.ServerConfigurationDialog_ClientId);
 		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
@@ -194,8 +199,7 @@ public class ServerConfigurationDialog extends SmartStyledDialog {
 		txtWorkspaceClientId = new Text(pawws, SWT.BORDER );
 		txtWorkspaceClientId.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtWorkspaceClientId.setText(DialogConstants.LOADING_TEXT);
-		txtWorkspaceClientId.addListener(SWT.Modify, modifiedlistener);
-		
+
 		l = new Label(pawws, SWT.NONE);
 		l.setText(Messages.ServerConfigurationDialog_Url);
 		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
@@ -203,21 +207,11 @@ public class ServerConfigurationDialog extends SmartStyledDialog {
 		txtWorkspaceStorageUrl = new Text(pawws, SWT.BORDER );
 		txtWorkspaceStorageUrl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtWorkspaceStorageUrl.setText(DialogConstants.LOADING_TEXT);
-		txtWorkspaceStorageUrl.addListener(SWT.Modify, modifiedlistener);
-		
-		l = new Label(pawws, SWT.NONE);
-		l.setText(Messages.ServerConfigurationDialog_CName);
-		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
-		
-		txtWorkspaceContainer = new Text(pawws, SWT.BORDER );
-		txtWorkspaceContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		txtWorkspaceContainer.setText(DialogConstants.LOADING_TEXT);
-		txtWorkspaceContainer.addListener(SWT.Modify, modifiedlistener);
-	
-	
+
 		getShell().setText(Messages.ServerConfigurationDialog_Title);
-		loadingJob.schedule();
-		return main;
+
+		
+		return parent;
 	}
 	
 	
@@ -226,41 +220,41 @@ public class ServerConfigurationDialog extends SmartStyledDialog {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			PawsService service = null;
-			PawsWorkspace ws = null;
 			try(Session session = HibernateManager.openSession()){
 				service = QueryFactory.buildQuery(session, PawsService.class, 
 						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).uniqueResult(); //$NON-NLS-1$
-				ws = QueryFactory.buildQuery(session, PawsWorkspace.class,  
+
+				if (service == null) {
+					session.beginTransaction();
+					try {
+						PawsManager.INSTANCE.createDefaultSettings(session);
+						session.getTransaction().commit();
+					}catch (Exception ex) {
+						PawsPlugIn.displayLog("Error creating default settings for Paws API", ex);
+					}
+				}
+				
+				service = QueryFactory.buildQuery(session, PawsService.class, 
 						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).uniqueResult(); //$NON-NLS-1$
+
 			}
 			final PawsService fservice = service;
-			final PawsWorkspace fws = ws;
 			Display.getDefault().asyncExec(()->{
-				txtServiceHeatmapApi.setText(" https://paws-api-backend-api-mgmt.azure-api.net/paws/predict-risk"); //$NON-NLS-1$
-				txtServiceTaskApi.setText("https://paws-api-backend-api-mgmt.azure-api.net/taskmanagement/task"); //$NON-NLS-1$
-				txtServiceKey.setText(""); //$NON-NLS-1$
+				
 				if (fservice != null) {
-					txtServiceKey.setText(fservice.getApiKey() == null ? "" : fservice.getApiKey()); //$NON-NLS-1$
-					if (fservice.getHeatmapApi() != null) txtServiceHeatmapApi.setText(fservice.getHeatmapApi());
-					if (fservice.getTaskApi() != null) txtServiceTaskApi.setText(fservice.getTaskApi());
-				}
+					txtServiceKey.setText(fservice.getApiKey()); //$NON-NLS-1$
+					txtServiceHeatmapApi.setText(fservice.getPawsApiUrl());
+					txtServiceTaskApi.setText(fservice.getTaskApiUrl());
 				
-				txtWorkspaceStorageUrl.setText("https://<yourblob>.blob.core.windows.net"); //$NON-NLS-1$
-				txtWorkspaceClientId.setText("<Application/Client ID>"); //$NON-NLS-1$
-				txtWorkspaceContainer.setText("<Container Name>"); //$NON-NLS-1$
-				if (fws != null) {
-					if (fws.getUrl() != null) txtWorkspaceClientId.setText(fws.getClientId());
-					if (fws.getUrl() != null) txtWorkspaceLoginURL.setText(fws.getUrl());
-					
-					if (fws.getContainer() != null)  txtWorkspaceContainer.setText(fws.getContainer());
-					if (fws.getStorageAccountUrl() != null) txtWorkspaceStorageUrl.setText(fws.getStorageAccountUrl());
+					txtWorkspaceStorageUrl.setText(fservice.getStorageUrl()); 
+					txtWorkspaceClientId.setText(fservice.getClientId()); 
+					txtWorkspaceLoginURL.setText(fservice.getOAuthUrl());
 				}
-				
-				getButton(IDialogConstants.OK_ID).setEnabled(false);
 			});
 			
 			return Status.OK_STATUS;
 		}
 		
 	};
+
 }

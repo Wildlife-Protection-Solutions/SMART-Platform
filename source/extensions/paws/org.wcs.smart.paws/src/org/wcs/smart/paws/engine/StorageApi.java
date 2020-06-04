@@ -41,7 +41,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.paws.PawsPlugIn;
 import org.wcs.smart.paws.internal.Messages;
 import org.wcs.smart.paws.model.PawsRun;
-import org.wcs.smart.paws.model.PawsWorkspace;
+import org.wcs.smart.paws.model.PawsService;
 import org.wcs.smart.paws.ui.LoginDialog;
 
 import com.microsoft.azure.storage.blob.ContainerURL;
@@ -66,11 +66,13 @@ public enum StorageApi {
 	private final Object dlock = new Object();
 
 	private String token;
-	private PawsWorkspace workspace;
+	private String containerName;
 	
-	public ContainerURL getContainerURL() throws Exception {
-		if (workspace == null) throw new Exception(Messages.StorageApi_AuthCodeRequired);
-		String url = workspace.getStorageAccountUrl() + "/" + workspace.getContainer(); //$NON-NLS-1$
+	private PawsService service;
+	
+	public ContainerURL getContainerURL(String containerName) throws Exception {
+		if (service == null) throw new Exception(Messages.StorageApi_AuthCodeRequired);
+		String url = service.getStorageUrl() + "/" + containerName; //$NON-NLS-1$
 		TokenCredentials tc = new TokenCredentials(token);
 		ContainerURL  containerURL = new ContainerURL(new URL(url), StorageURL.createPipeline(tc, new PipelineOptions()));
 		return containerURL;
@@ -78,34 +80,45 @@ public enum StorageApi {
 	
 	private void getWorkspace() {
 		try(Session session = HibernateManager.openSession()){
-			PawsWorkspace ws = QueryFactory.buildQuery(session, PawsWorkspace.class,  
+			PawsService ws = QueryFactory.buildQuery(session, PawsService.class,  
 					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).uniqueResult(); //$NON-NLS-1$
 			if (ws == null || !ws.isConfigured()) {
 				token = null;
-				workspace = null;
+				service = null;
 			}
 			
-			if (workspace != null && (
-					!workspace.getClientId().equalsIgnoreCase(ws.getClientId()) ||
-					!workspace.getContainer().equalsIgnoreCase(ws.getContainer()) ||
-					!workspace.getStorageAccountUrl().equalsIgnoreCase(ws.getStorageAccountUrl()) ||
-					!workspace.getUrl().equalsIgnoreCase(ws.getUrl()))){
+			if (service != null && (
+					!service.getClientId().equalsIgnoreCase(ws.getClientId()) ||
+					!service.getStorageUrl().equalsIgnoreCase(ws.getStorageUrl()) ||
+					!service.getOAuthUrl().equalsIgnoreCase(ws.getOAuthUrl()))){
 				//something has changed; require a new token
 				token = null;
 			}
-			this.workspace = ws;
+			this.service = ws;
 		}		
 	}
 	
-	public boolean getAuthorizationCode(Shell shell) throws Exception {
+	/**
+	 * Gets an authorization code and updates the container name for the paws run
+	 * @param shell
+	 * @param run
+	 * @return
+	 * @throws Exception
+	 */
+	public boolean getAuthorizationCode(Shell shell, PawsRun run) throws Exception {
 		getWorkspace();
-		if (token != null) return true;
+		if (token != null) {
+			run.setContainerName(containerName);
+			return true;
+		}
 		
 		LoginDialog dialog = new LoginDialog(shell);
 		dialog.open();
 		
 		String authorizationCode = dialog.getAuthorizationCode();
-		if (authorizationCode == null) {
+		containerName = dialog.getUsername().replaceAll("\\.", "").replaceAll("@","");
+		run.setContainerName(containerName);
+		if (authorizationCode == null || containerName == null) {
 			//fail
 			MessageDialog.openInformation(Display.getDefault().getActiveShell(), Messages.StorageApi_AuthFailedTitle, Messages.StorageApi_AuthFailedMsg);
 			return false;
@@ -119,13 +132,13 @@ public enum StorageApi {
 		String redirecturi = "https://login.microsoftonline.com/common/oauth2/nativeclient"; //$NON-NLS-1$
 		
 		StringBuilder sb = new StringBuilder();
-		sb.append(workspace.getUrl());
+		sb.append(service.getOAuthUrl());
 		sb.append("/"); //$NON-NLS-1$
 		sb.append("token"); //$NON-NLS-1$
 		
 		
 		StringBuilder params = new StringBuilder();
-		params.append("client_id=" + workspace.getClientId());  //$NON-NLS-1$
+		params.append("client_id=" + service.getClientId());  //$NON-NLS-1$
 		params.append("&code=" + authorizationCode ); //$NON-NLS-1$
 		params.append("&redirect_uri=" + redirecturi ); //$NON-NLS-1$
 		params.append("&resource=https://storage.azure.com/"); //$NON-NLS-1$
@@ -217,7 +230,7 @@ public enum StorageApi {
 	 */
 	public void deleteBlobs(PawsRun run) throws Exception{
 		try {
-			ContainerURL  containerURL = getContainerURL();
+			ContainerURL  containerURL = getContainerURL(run.getContainerName());
 			if (containerURL == null) throw new Exception(Messages.StorageApi_StorageNotConfigured);
 			
 			List<String> urlToDelete = getBlobs(containerURL, run.getRunId());

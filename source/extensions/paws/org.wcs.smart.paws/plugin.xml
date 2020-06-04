@@ -56,10 +56,6 @@
             supportsCcaa="true">
       </class>
       <class
-            class="org.wcs.smart.paws.model.PawsWorkspace"
-            supportsCcaa="true">
-      </class>
-      <class
             ca_property=".configuration.conservationArea"
             class="org.wcs.smart.paws.model.PawsSimpleClass"
             supportsCcaa="true">
@@ -83,40 +79,6 @@
       <FilestoreDirectory
             directory="paws">
       </FilestoreDirectory>
-   </extension>
-   <extension
-         point="org.eclipse.ui.menus">
-      <menuContribution
-            allPopups="false"
-            locationURI="menu:org.wcs.smart.menu.query?before=org.wcs.smart.query.separator.options">
-         <command
-               commandId="org.wcs.smart.paws.configuration.show"
-               icon="images/icons/paws.png"
-               label="%server.config.command.label"
-               style="push">
-            <visibleWhen
-                  checkEnabled="false">
-               <test
-                     forcePluginActivation="true"
-                     property="org.wcs.smart.caSingle">
-               </test>
-            </visibleWhen>
-         </command>
-      </menuContribution>
-   </extension>
-   <extension
-         point="org.eclipse.ui.commands">
-      <command
-            id="org.wcs.smart.paws.configuration.show"
-            name="%openconfig.command.name">
-      </command>
-   </extension>
-   <extension
-         point="org.eclipse.ui.handlers">
-      <handler
-            class="org.wcs.smart.paws.ui.ShowConfigurationHandler$ShowConfigurationHandlerWrapper"
-            commandId="org.wcs.smart.paws.configuration.show">
-      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.views">
@@ -186,6 +148,14 @@
             id="org.wcs.smart.udig.catalog.paws"
             name="%all.wizardPage.name">
       </wizardPage>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="org.wcs.smart.paws.ui.SettingsPreferencePage"
+            id="org.wcs.smart.paws.preference.settings"
+            name="PAWS Server Settings">
+      </page>
    </extension>
 
 </plugin>

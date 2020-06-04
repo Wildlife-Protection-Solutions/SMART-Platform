@@ -72,14 +72,12 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.paws.PawsFileManager;
-import org.wcs.smart.paws.internal.Messages;
 import org.wcs.smart.paws.model.PawsConfiguration;
 import org.wcs.smart.paws.model.PawsParameter;
 import org.wcs.smart.paws.model.PawsQueryClass;
 import org.wcs.smart.paws.model.PawsRun;
 import org.wcs.smart.paws.model.PawsRun.Status;
 import org.wcs.smart.paws.model.PawsSimpleClass;
-import org.wcs.smart.paws.model.PawsWorkspace;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
@@ -167,16 +165,8 @@ public class PawsDataEngine {
 		try(Session session = HibernateManager.openSession()){
 			
 			run = (PawsRun) session.merge(run);
-			
-			
-			PawsWorkspace ws = QueryFactory.buildQuery(session, PawsWorkspace.class,  
-					new Object[] {"conservationArea", run.getConservationArea()}).uniqueResult(); //$NON-NLS-1$
-				
-			if (ws == null || !ws.isConfigured()){
-				throw new Exception(Messages.PawsDataEngine_WorkspaceNotConfigured);
-			}
-			String url = ws.getContainer();
-			config.put("container_name", url); //$NON-NLS-1$
+
+			config.put("container_name", run.getContainerName()); //$NON-NLS-1$
 			config.put("run_id", run.getRunId()); //$NON-NLS-1$
 			
 			PawsParameter pp = run.getConfiguration().findParameter(PawsParameter.FixedParameter.GRID_SIZE.name());

@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.paws.ui;
 
+import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -43,7 +44,7 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.paws.PawsPlugIn;
 import org.wcs.smart.paws.internal.Messages;
-import org.wcs.smart.paws.model.PawsWorkspace;
+import org.wcs.smart.paws.model.PawsService;
 import org.wcs.smart.ui.SmartStyledDialog;
 
 /**
@@ -55,6 +56,8 @@ public class LoginDialog extends SmartStyledDialog {
 
 	private Browser browser ;
 	private String code = null;
+	
+	private String username = null;
 	
 	public LoginDialog(Shell parent) {
 		super(parent);
@@ -89,6 +92,10 @@ public class LoginDialog extends SmartStyledDialog {
 		return this.code;
 	}
 	
+	public String getUsername() {
+		return this.username;
+	}
+	
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		
@@ -101,12 +108,12 @@ public class LoginDialog extends SmartStyledDialog {
 		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
 		applyDialogFont(composite);
 		
-		PawsWorkspace ws = null;
+		PawsService ws = null;
 		try(Session session = HibernateManager.openSession()){
-			ws = QueryFactory.buildQuery(session, PawsWorkspace.class,
+			ws = QueryFactory.buildQuery(session, PawsService.class,
 					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).uniqueResult(); //$NON-NLS-1$
 		}
-		if (ws == null || ws.getUrl() == null || ws.getUrl().isBlank()) {
+		if (ws == null || !ws.isConfigured()) {
 			Label l = new Label(composite, SWT.WRAP);
 			l.setText(Messages.LoginDialog_NoWorkspace);
 			return composite;
@@ -121,7 +128,7 @@ public class LoginDialog extends SmartStyledDialog {
 		String redirectUri = "https://login.microsoftonline.com/common/oauth2/nativeclient"; //$NON-NLS-1$
 		
 		StringBuilder sb = new StringBuilder();
-		sb.append(ws.getUrl());
+		sb.append(ws.getOAuthUrl());
 		//sb.append("https://login.microsoftonline.com/548d829f-38d0-42ac-9a2c-220944e5c275/oauth2");
 		sb.append("/"); //$NON-NLS-1$
 		sb.append("authorize"); //$NON-NLS-1$
@@ -132,11 +139,8 @@ public class LoginDialog extends SmartStyledDialog {
 		sb.append("&prompt=login"); //$NON-NLS-1$
 		sb.append("&state=" + state); //$NON-NLS-1$
 		sb.append("&redirect_uri=" + redirectUri); //$NON-NLS-1$
-
 		System.out.println(sb.toString());
-		
-		browser.setUrl(sb.toString());
-		
+		browser.setUrl(sb.toString());		
 		browser.addLocationListener(new LocationListener() {
 			
 			private boolean doChange = true;
@@ -150,7 +154,17 @@ public class LoginDialog extends SmartStyledDialog {
 				doChange = false;
 				try {
 					String thisurl = browser.getUrl();
-					
+					if (thisurl.contains("username=")) {
+						try {
+							Map<String,String> parts = parseUrl(thisurl);
+							username=parts.get("username");
+						}catch (Exception ex) {
+							PawsPlugIn.displayLog("Login Error", ex); //$NON-NLS-1$
+							browser.setUrl(sb.toString());
+							return;
+						}
+					}
+
 					if (thisurl.startsWith(redirectUri)) {
 						Map<String,String> parts = Collections.emptyMap();
 						try {
@@ -182,7 +196,7 @@ public class LoginDialog extends SmartStyledDialog {
 	
 	private Map<String,String> parseUrl(String url) throws Exception{
 		if (url == null || url.isBlank()) return Collections.emptyMap();
-		
+		url = (new URI(url)).getQuery();
 		String querypart = url.substring(url.indexOf('?') + 1);
 		if (querypart.isBlank()) return Collections.emptyMap();
 		

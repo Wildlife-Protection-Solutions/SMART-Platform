@@ -27,9 +27,7 @@ import java.util.Collections;
 
 import javax.inject.Inject;
 
-import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -49,7 +47,6 @@ import org.wcs.smart.paws.internal.Messages;
 import org.wcs.smart.paws.model.PawsConfiguration;
 import org.wcs.smart.paws.model.PawsRun;
 import org.wcs.smart.paws.model.PawsService;
-import org.wcs.smart.paws.model.PawsWorkspace;
 import org.wcs.smart.paws.ui.config.ConfigEditorInput;
 import org.wcs.smart.paws.ui.config.EditConfigHandler;
 import org.wcs.smart.util.UuidUtils;
@@ -135,30 +132,21 @@ public class NewPawsRunHandler {
 	}
 	
 	private boolean validateSetup(){
-		boolean openconfig = false;
 		try(Session session = HibernateManager.openSession()){
-			PawsWorkspace pw = QueryFactory.buildQuery(session, PawsWorkspace.class, 
-					new Object[]{"conservationArea", SmartDB.getCurrentConservationArea()}) //$NON-NLS-1$
-				.uniqueResult();
-			
-			if (pw == null || !pw.isConfigured()) {
-				openconfig = true;
-			}else{
-			
-				PawsService service = QueryFactory.buildQuery(session, PawsService.class,
+			PawsService service = QueryFactory.buildQuery(session, PawsService.class,
 					new Object[]{"conservationArea", SmartDB.getCurrentConservationArea()}) //$NON-NLS-1$
 					.uniqueResult();
-				if (service == null || !service.isConfigured()){
-					openconfig = true;
+			if (service == null || !service.isConfigured()) {
+				session.beginTransaction();
+				try {
+					PawsManager.INSTANCE.createDefaultSettings(session);
+					session.getTransaction().commit();
+				}catch (Exception ex) {
+					PawsPlugIn.displayLog("Cannot configure PAWS server settings:" + ex.getMessage(), ex);
+					return false;
 				}
 			}
-		}
-		if (openconfig){
-			MessageDialog.openWarning(Display.getDefault().getActiveShell(), Messages.NewPawsRunHandler_Title, 
-					Messages.NewPawsRunHandler_WorkspaceServiceRequired);
 			
-			ContextInjectionFactory.invoke(new ShowConfigurationHandler(), Execute.class, context);
-			return false;
 		}
 		return true;
 	}
@@ -170,7 +158,7 @@ public class NewPawsRunHandler {
 	private boolean run(PawsRun rr){
 		
 		try {
-			if (!StorageApi.INSTANCE.getAuthorizationCode(Display.getDefault().getActiveShell())) return false;
+			if (!StorageApi.INSTANCE.getAuthorizationCode(Display.getDefault().getActiveShell(), rr )) return false;
 		}catch (Exception ex) {
 			MessageDialog.openWarning(Display.getDefault().getActiveShell(), Messages.NewPawsRunHandler_Title, 
 					Messages.NewPawsRunHandler_WorkspaceServiceRequired);

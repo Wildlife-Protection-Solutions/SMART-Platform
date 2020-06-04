@@ -34,10 +34,11 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.paws.PawsEvent;
+import org.wcs.smart.paws.PawsManager;
 import org.wcs.smart.paws.PawsPlugIn;
 import org.wcs.smart.paws.internal.Messages;
 import org.wcs.smart.paws.model.PawsRun;
-import org.wcs.smart.paws.model.PawsWorkspace;
+import org.wcs.smart.paws.model.PawsService;
 
 import com.microsoft.azure.storage.blob.BlockBlobURL;
 import com.microsoft.azure.storage.blob.ContainerURL;
@@ -79,21 +80,30 @@ public class PawsRunJob extends Job{
 			return Status.OK_STATUS;
 		}
 		
-		//upload package to azure
-		//https://github.com/Azure/autorest-clientruntime-for-java/issues/569
-		ContainerURL containerURL;
+
 		try{
-			PawsWorkspace ws;
+			PawsService service;
 			try(Session session = HibernateManager.openSession()){
-				ws = QueryFactory.buildQuery(session, PawsWorkspace.class,  
+				service = QueryFactory.buildQuery(session, PawsService.class,  
 						new Object[] {"conservationArea", run.getConservationArea()}).uniqueResult(); //$NON-NLS-1$
 				
-				if (ws == null || !ws.isConfigured()){
-					handleError(Messages.PawsRunJob_WorkspaceNotConfigured, new Exception(Messages.PawsRunJob_NoWorkspaceFound));
-					return Status.OK_STATUS;
-				}	
+				if (service == null || !service.isConfigured()){
+					
+					session.beginTransaction();
+					try {
+						service = PawsManager.INSTANCE.createDefaultSettings(session);
+						session.getTransaction().commit();
+					}catch (Exception ex) {
+						PawsPlugIn.log(ex.getMessage(), ex);
+						handleError(Messages.PawsRunJob_WorkspaceNotConfigured, new Exception(Messages.PawsRunJob_NoWorkspaceFound));
+						return Status.OK_STATUS;
+					}
+				}
 			}
-			containerURL = StorageApi.INSTANCE.getContainerURL();
+			
+			//upload package to azure
+			//https://github.com/Azure/autorest-clientruntime-for-java/issues/569
+			ContainerURL containerURL = StorageApi.INSTANCE.getContainerURL(run.getContainerName());
 						
 	        //upload files
 	        for(Path p : engine.getDataFiles()) {

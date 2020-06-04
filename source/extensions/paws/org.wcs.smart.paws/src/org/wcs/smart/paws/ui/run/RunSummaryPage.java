@@ -222,7 +222,7 @@ public class RunSummaryPage extends EditorPart {
 			try(Session session = HibernateManager.openSession()){
 				PawsService service = QueryFactory.buildQuery(session, PawsService.class,  
 					new Object[] {"conservationArea", run.getConservationArea()}).uniqueResult(); //$NON-NLS-1$
-				surl = service.getTaskApi() + "/" + run.getTaskId();// + "?subscription-key=" + service.getApiKey(); //$NON-NLS-1$
+				surl = service.getTaskApiUrl() + "/" + run.getTaskId();// + "?subscription-key=" + service.getApiKey(); //$NON-NLS-1$
 				//key = service.getApiKey();	
 			}			
 		

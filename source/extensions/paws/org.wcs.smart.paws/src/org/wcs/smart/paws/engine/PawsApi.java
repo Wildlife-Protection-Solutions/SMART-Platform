@@ -68,7 +68,7 @@ public enum PawsApi {
 			if (service == null || !service.isConfigured()) {
 				throw new Exception(Messages.PawsApi_ServiceNotConfigured);
 			}
-			surl = service.getHeatmapApi();
+			surl = service.getPawsApiUrl();
 			key = service.getApiKey();
 		}
 		
@@ -83,8 +83,7 @@ public enum PawsApi {
 			//headers
 			OutputStream os = conn.getOutputStream();
 			os.write(json.getBytes(StandardCharsets.UTF_8));
-			os.flush();
-			
+			os.flush();		
 			
 			if (conn.getResponseCode() != HttpURLConnection.HTTP_OK && 
 					conn.getResponseCode() != HttpURLConnection.HTTP_CREATED) {
@@ -136,7 +135,7 @@ public enum PawsApi {
 			if (service == null || !service.isConfigured()){
 				throw new Exception(Messages.PawsApi_ServiceNotConfigured2);
 			}
-			surl = service.getTaskApi() + "/" + run.getTaskId(); //$NON-NLS-1$
+			surl = service.getTaskApiUrl() + "/" + run.getTaskId(); //$NON-NLS-1$
 			key = service.getApiKey();
 		}
 		

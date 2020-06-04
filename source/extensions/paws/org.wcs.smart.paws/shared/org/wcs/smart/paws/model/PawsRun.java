@@ -77,6 +77,7 @@ public class PawsRun extends UuidItem{
 	private int forecaststartyear;
 	private int forecastendyear;
 
+	private String containerName;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
@@ -97,6 +98,16 @@ public class PawsRun extends UuidItem{
 	public void setConfiguration(PawsConfiguration config) {
 		this.config = config;
 	}
+	
+	@Column(name="container")
+	public String getContainerName() {
+		return this.containerName;
+	}
+	
+	public void setContainerName(String containerName) {
+		this.containerName = containerName;
+	}
+	
 	
 	@Column(name="run_date")
 	public LocalDateTime getRunDate() {

@@ -37,10 +37,12 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.paws.internal.Messages;
 import org.wcs.smart.paws.model.PawsConfiguration;
 import org.wcs.smart.paws.model.PawsParameter;
 import org.wcs.smart.paws.model.PawsRun;
+import org.wcs.smart.paws.model.PawsService;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.model.Query;
 
@@ -56,6 +58,27 @@ public enum PawsManager {
 	
 	public String createLabel(Query q) {
 		return q.getName() + " (" + QueryTypeManager.INSTANCE.findQueryType(q.getTypeKey()).getGuiName() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+	}
+	
+	/**
+	 * Overwrites any existing paws server settings with the fixed defaults
+	 * @param session
+	 */
+	public PawsService createDefaultSettings(Session session) {
+		PawsService service = QueryFactory.buildQuery(session, PawsService.class, 
+				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).uniqueResult(); //$NON-NLS-1$
+		if (service == null) {
+			service = new PawsService();
+			service.setConservationArea(SmartDB.getCurrentConservationArea());
+		}
+		service.setApiKey("a2e5c3f769924a1b98189b652e81c9d9");
+		service.setTaskApiUrl("https://paws-api-backend-api-mgmt.azure-api.net/taskmanagement/task");
+		service.setPawsApiUrl("https://paws-api-backend-api-mgmt.azure-api.net/paws/predict-risk");
+		service.setClientId("61619872-cd80-41ec-a799-b7c7fba349ce");
+		service.setOAuthUrl("https://login.microsoftonline.com/af58cf6f-6228-4801-8a20-caa33d81cee2/oauth2");
+		service.setStorageUrl("https://pawsparkstorage.blob.core.windows.net");
+		session.saveOrUpdate(service);
+		return service;
 	}
 	
 	/**

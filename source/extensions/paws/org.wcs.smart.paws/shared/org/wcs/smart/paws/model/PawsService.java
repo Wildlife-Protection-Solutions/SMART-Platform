@@ -39,9 +39,13 @@ public class PawsService extends UuidItem{
 	private static final long serialVersionUID = 1L;
 	
 	private ConservationArea ca;
-	private String apikey;
-	private String heatmapapi;
-	private String taskapi;
+	private String pawsApiKey;
+	private String pawsApi;
+	private String taskApi;
+	private String oauthURL;
+	private String clientId;
+	private String storageURL;
+	
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
@@ -53,36 +57,66 @@ public class PawsService extends UuidItem{
 		this.ca = ca;
 	}
 	
-	@Column(name="api_key")
+	@Column(name="paws_api_key")
 	public String getApiKey() {
-		return this.apikey;
+		return this.pawsApiKey;
 	}
 	
-	public void setApiKey(String apikey) {
-		this.apikey = apikey;
+	public void setApiKey(String pawsApiKey) {
+		this.pawsApiKey = pawsApiKey;
 	}
 	
-	@Column(name="heatmap_api")
-	public String getHeatmapApi() {
-		return this.heatmapapi;
+	@Column(name="paws_api")
+	public String getPawsApiUrl() {
+		return this.pawsApi;
 	}
 	
-	public void setHeatmapApi(String heatmapapi) {
-		this.heatmapapi = heatmapapi;
+	public void setPawsApiUrl(String pawsApi) {
+		this.pawsApi = pawsApi;
 	}
 	
 	@Column(name="task_api")
-	public String getTaskApi() {
-		return this.taskapi;
+	public String getTaskApiUrl() {
+		return this.taskApi;
 	}
 	
-	public void setTaskApi(String taskapi) {
-		this.taskapi = taskapi;
+	public void setTaskApiUrl(String taskApi) {
+		this.taskApi = taskApi;
+	}
+	
+	@Column(name="oauth_url")
+	public String getOAuthUrl() {
+		return this.oauthURL;
+	}
+	
+	public void setOAuthUrl(String oauthURL) {
+		this.oauthURL = oauthURL;
+	}
+	
+	@Column(name="client_id")
+	public String getClientId() {
+		return this.clientId;
+	}
+	
+	public void setClientId(String clientId) {
+		this.clientId = clientId;
+	}
+	
+	@Column(name="storage_account_url")
+	public String getStorageUrl() {
+		return this.storageURL;
+	}
+	
+	public void setStorageUrl(String storageURL) {
+		this.storageURL = storageURL;
 	}
 	
 	@Transient
 	public boolean isConfigured() {
-		if (taskapi == null || heatmapapi == null || apikey== null || taskapi.isEmpty() || heatmapapi.isBlank() || apikey.isBlank() ) return false;
+		if (taskApi == null || pawsApi== null || pawsApi== null ||
+				clientId == null || storageURL == null || oauthURL == null ||
+				taskApi.isEmpty() || pawsApi.isBlank() || pawsApiKey.isBlank() ||
+				clientId.isBlank() || storageURL.isBlank() || oauthURL.isBlank() ) return false;
 		return true;
 	}
 }
