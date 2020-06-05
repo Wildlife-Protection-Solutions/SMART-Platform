@@ -31,6 +31,7 @@ import java.nio.file.Path;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -603,7 +604,7 @@ public class PawsDataEngine {
 //			select.deleteCharAt(select.length() - 1);
 //			select.deleteCharAt(select.length() - 1);
 			
-			
+			SimpleDateFormat ff = new SimpleDateFormat("MMM dd, yyyy");
 			try(ScrollableResults results = session.createNativeQuery(select.toString()).scroll()){
 				while(results.next()) {
 					String[] data = new String[headers.size()];
@@ -622,14 +623,14 @@ public class PawsDataEngine {
 										
 					//Waypoint Date
 					int index = 0;
-					data[index++] = DateFormat.getDateInstance().format(datetime);
+					data[index++] = ff.format(datetime);
 					data[index++] = DateFormat.getTimeInstance().format(datetime);
 					
 					//Start Date
-					data[index++] = DateFormat.getDateInstance().format(pstart);
+					data[index++] = ff.format(pstart);
 					
 					//End Date
-					data[index++] = DateFormat.getDateInstance().format(pend);
+					data[index++] = ff.format(pend);
 					
 					//PatrolID
 					data[index++] = pid;
