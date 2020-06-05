@@ -66,6 +66,6 @@ public interface CtConnectClient extends ConnectClient{
 	
 	@GET
     @Path("/cybertracker/apikey/{cauuid}")
-    public String getApiKey(@PathParam("cauuid") String caUuid);
+    public String getApiKey(@PathParam("cauuid") String caUuid, @QueryParam("type") String type);
 
 }

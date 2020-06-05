@@ -43,13 +43,18 @@ public abstract class AbstractConnectPackageContribution  implements IPackageCon
 
 	private SmartConnect connect = null;
 	
+	public enum PackageType{
+		PRIVATE,
+		PUBLIC
+	};
+	
 	/**
 	 * 
 	 * @param context
 	 * @return Two element array; first is the connect url the second is the ct api key; null if the user cancels
 	 * @throws exception if cannot connect (invalid username etc.)
 	 */
-	protected String[] getServerDetails(IEclipseContext context, ConservationArea ca, boolean canskip) throws Exception{
+	protected String[] getServerDetails(IEclipseContext context, ConservationArea ca, boolean canskip, PackageType type) throws Exception{
 		connect = (SmartConnect) context.get(SmartConnect.class);
 
 		if (connect == null) {
@@ -87,7 +92,7 @@ public abstract class AbstractConnectPackageContribution  implements IPackageCon
 			ResteasyClient client = connect.getClient();
 			ResteasyWebTarget target = client.target(connect.getServer().getServerUrl() + SmartConnect.API_URL);
 			CtConnectClient simple = target.proxy(CtConnectClient.class);
-			apikey = simple.getApiKey(UuidUtils.uuidToString(ca.getUuid()));
+			apikey = simple.getApiKey(UuidUtils.uuidToString(ca.getUuid()), type.name());
 		}
 		
 		if (apikey == null) {

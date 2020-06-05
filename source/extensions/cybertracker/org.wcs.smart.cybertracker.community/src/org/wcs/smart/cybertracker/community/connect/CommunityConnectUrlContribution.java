@@ -19,46 +19,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.cybertracker.ctpackage;
+package org.wcs.smart.cybertracker.community.connect;
 
 import java.io.IOException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
-import org.wcs.smart.connect.cybertracker.internal.Messages;
+import org.wcs.smart.connect.cybertracker.ctpackage.AbstractConnectPackageContribution;
 import org.wcs.smart.cybertracker.export.IPackageUiContribution;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 
 /**
  * This contribution adds the status_url and download_url
- * links to the project json file.  Only added if a
- * connect server is configured.  These urls identify the location 
- * of the package and/or all packages on the connect server (for installing or
- * updating the app on the device).
+ * links to the project json file.  These urls identify the location 
+ * of the community package and/or all packages on the connect server (for installing or
+ * updating the app on the device).  Community packages have no navigation layers
  * 
  * @author Emily
  *
  */
-public class ConnectUrlContribution extends AbstractConnectPackageContribution {
+public class CommunityConnectUrlContribution extends AbstractConnectPackageContribution {
 
 	//urls for package status and package
-	private static final String STATUS_URL = "/noa/cybertracker/packages/info/"; //$NON-NLS-1$
-	private static final String PACKAGE_URL = "/noa/cybertracker/packages/"; //$NON-NLS-1$
-	private static final String NAVIGATION_URL = "/noa/cybertracker/navigation/"; //$NON-NLS-1$
+	private static final String STATUS_URL = "/noa/community/packages/info/"; //$NON-NLS-1$
+	private static final String PACKAGE_URL = "/noa/community/packages/"; //$NON-NLS-1$
+	
 
 	//json keys for status/package urls
 	private static final String JSON_STATUS_KEY = "status_url"; //$NON-NLS-1$
 	private static final String JSON_DOWNLOAD_KEY = "download_url"; //$NON-NLS-1$
-
-	//json keys for navigation urls
-	private static final String NAVLAYERS_JSONKEY = "navigation_url"; //$NON-NLS-1$
-
 	
-	public ConnectUrlContribution() {
+	public CommunityConnectUrlContribution() {
 	}
 
 	@Override
@@ -74,26 +67,17 @@ public class ConnectUrlContribution extends AbstractConnectPackageContribution {
 		if (ctpackage.getUuid() != null) {
 			String[] parts = null;
 			try {
-				parts = super.getServerDetails(context, ctpackage.getConservationArea(), true, PackageType.PRIVATE);
+				parts = super.getServerDetails(context, ctpackage.getConservationArea(), true, PackageType.PUBLIC);
 			}catch (Exception ex) {
 				throw new IOException(ex);
 			}
 			if (parts == null) {
-				//user hit cancel
-				Display.getDefault().syncExec(()->{
-					MessageDialog.openInformation(Display.getDefault().getActiveShell(), Messages.ConnectUrlContribution_Warning, Messages.ConnectUrlContribution_AutoUpdateMsg);
-				});
-				return cc;
+				throw new IOException("SMART Connect server details are required");
 			}
 			String url = parts[0];
-			String apikey = parts[1];
 			
 			cc.setProjectMetadata(JSON_STATUS_KEY, url + STATUS_URL + ctpackage.getUuid().toString());
-			cc.setProjectMetadata(NAVLAYERS_JSONKEY, url + NAVIGATION_URL);
-			cc.setProjectMetadata(JSON_DOWNLOAD_KEY, url + PACKAGE_URL + ctpackage.getUuid().toString()); 
-			cc.setProjectMetadata(JSON_APIKEY, apikey);
-			
-			
+			cc.setProjectMetadata(JSON_DOWNLOAD_KEY, url + PACKAGE_URL + ctpackage.getUuid().toString()); 			
 		}
 		
 		return cc;

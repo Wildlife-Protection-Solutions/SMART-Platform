@@ -64,6 +64,10 @@ public class ConnectAlertContribution extends AbstractConnectPackageContribution
 	public IPackageUiContribution getUiController() {
 		return new ConnectAlertUiController();
 	}
+	
+	public PackageType getPackageType() {
+		return PackageType.PRIVATE;
+	}
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -82,7 +86,7 @@ public class ConnectAlertContribution extends AbstractConnectPackageContribution
 		
 		String[] parts = null;
 		try {
-			parts = super.getServerDetails(context, ctpackage.getConservationArea(), false);
+			parts = super.getServerDetails(context, ctpackage.getConservationArea(), false, getPackageType());
 		}catch (Exception ex) {
 			throw new IOException(ex);
 		}

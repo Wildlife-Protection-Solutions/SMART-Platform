@@ -90,7 +90,7 @@ public class ConnectDataContribution extends AbstractConnectPackageContribution 
 		
 		String[] parts = null;
 		try {
-			parts = super.getServerDetails(context, ctpackage.getConservationArea(), false);
+			parts = super.getServerDetails(context, ctpackage.getConservationArea(), false, PackageType.PRIVATE);
 		}catch (Exception ex) {
 			throw new IOException(ex);
 		}

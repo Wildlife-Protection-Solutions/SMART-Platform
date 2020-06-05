@@ -37,6 +37,7 @@ public class CyberTrackerPackageProxy {
 	
 	private String caLabel;
 	private UUID caUuid;
+	private String type;
 	
 	@JsonFormat
     (shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSX")
@@ -91,5 +92,12 @@ public class CyberTrackerPackageProxy {
 	
 	public void setName(String name) {
 		this.name = name;
+	}
+	
+	public String getType() {
+		return this.type;
+	}
+	public void setType(String type) {
+		this.type = type;
 	}
 }

@@ -139,6 +139,7 @@ public class ExportCtPackageToConnect implements ICtExportAction {
 				proxy.setCaUuid(ctpackage.getConservationArea().getUuid());
 				proxy.setName(ctpackage.getName());
 				proxy.setVersion(version);
+				proxy.setType(ctpackage.getTypeIdentifier());
 				
 				Response response = simple.uploadCtPackage(Files.size(file), ctpackage.getUuid().toString(), proxy);
 				if (response.getStatus() != Response.Status.OK.getStatusCode()) {

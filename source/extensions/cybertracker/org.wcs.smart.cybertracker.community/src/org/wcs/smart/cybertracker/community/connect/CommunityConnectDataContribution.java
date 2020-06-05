@@ -32,6 +32,7 @@ import org.wcs.smart.connect.cybertracker.ctpackage.AbstractConnectPackageContri
 import org.wcs.smart.connect.cybertracker.ctpackage.ConnectDataUiController;
 import org.wcs.smart.connect.cybertracker.model.CtConnectPackageMetadata;
 import org.wcs.smart.connect.cybertracker.model.CtPackageAlert;
+import org.wcs.smart.cybertracker.community.model.CommunityCtPackage;
 import org.wcs.smart.cybertracker.export.IPackageUiContribution;
 import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.ICtPackage;
@@ -70,8 +71,8 @@ public class CommunityConnectDataContribution extends AbstractConnectPackageCont
 	@SuppressWarnings("unchecked")
 	@Override
 	public PackageContribution packageFiles(ICtPackage ctpackage, IEclipseContext context, IProgressMonitor monitor) throws IOException {
-		if (!(ctpackage instanceof AbstractCtPackage)) return null;
-		AbstractCtPackage apackage = (AbstractCtPackage) ctpackage;
+		if (!(ctpackage instanceof CommunityCtPackage)) return null;
+		CommunityCtPackage apackage = (CommunityCtPackage) ctpackage;
 
 		boolean requiresConnect = false;
 		for (MetadataFieldValue mv : apackage.getMetadataValues()) {
@@ -91,7 +92,7 @@ public class CommunityConnectDataContribution extends AbstractConnectPackageCont
 		
 		String[] parts = null;
 		try {
-			parts = super.getServerDetails(context, ctpackage.getConservationArea(), false);
+			parts = super.getServerDetails(context, ctpackage.getConservationArea(), false, PackageType.PUBLIC);
 		}catch (Exception ex) {
 			throw new IOException(ex);
 		}

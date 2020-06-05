@@ -77,7 +77,14 @@ public class ConnectDataUiController implements IPackageUiContribution{
 	@Inject private IEclipseContext context;
 
 	private boolean fireEvents = true;
+	private boolean canDisableUpload = true;
 	
+	public ConnectDataUiController() {
+		this(true);
+	}
+	public ConnectDataUiController(boolean canConfigureUpload) {
+		this.canDisableUpload = canConfigureUpload;
+	}
 	public boolean isTab() { 
 		return true; 
 	}
@@ -126,6 +133,7 @@ public class ConnectDataUiController implements IPackageUiContribution{
 		
 		btnUploadData = new Button(core, SWT.CHECK);
 		btnUploadData.setSelection(true);
+		btnUploadData.setEnabled(canDisableUpload);
 		btnUploadData.addListener(SWT.Selection, e->{
 			txtDataPeriod.setEnabled(btnUploadData.getSelection());
 			lblUp1.setEnabled(btnUploadData.getSelection());
@@ -135,13 +143,16 @@ public class ConnectDataUiController implements IPackageUiContribution{
 		
 		lblUp1 = new Label(core, SWT.NONE);
 		lblUp1.setText(Messages.ConnectDataUiController_Upload1);
-		lblUp1.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseUp(MouseEvent e) {
-				btnUploadData.setSelection(!btnUploadData.getSelection());
-				btnUploadData.notifyListeners(SWT.Selection, new Event());
-			}
-		});
+		if (canDisableUpload) {
+			lblUp1.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseUp(MouseEvent e) {
+					btnUploadData.setSelection(!btnUploadData.getSelection());
+					btnUploadData.notifyListeners(SWT.Selection, new Event());
+				}
+			});
+		}
+		
 		txtDataPeriod = new Text(core, SWT.BORDER);
 		txtDataPeriod.setText("20"); //$NON-NLS-1$
 		txtDataPeriod.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
@@ -235,7 +246,11 @@ public class ConnectDataUiController implements IPackageUiContribution{
 					btnUploadData.setSelection(true);
 					txtDataPeriod.setText(data.getStringValue());
 				}else {
-					btnUploadData.setSelection(false);
+					if (canDisableUpload) {
+						btnUploadData.setSelection(false);
+					}else {
+						btnUploadData.setSelection(true);	
+					}
 				}
 				data = findCreateMetadataField(CtConnectPackageMetadata.Properties.POSITION_UPLOAD.name(), (AbstractCtPackage)ctpackage);
 				if (data != null && data.getBooleanValue() != null && data.getBooleanValue()) {

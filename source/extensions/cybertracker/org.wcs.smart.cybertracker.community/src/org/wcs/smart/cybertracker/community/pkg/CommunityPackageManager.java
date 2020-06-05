@@ -18,10 +18,13 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
+import org.wcs.smart.connect.cybertracker.ctpackage.ConnectAlertContribution;
 import org.wcs.smart.connect.cybertracker.ctpackage.ConnectDataContribution;
 import org.wcs.smart.connect.cybertracker.ctpackage.ConnectUrlContribution;
 import org.wcs.smart.cybertracker.community.CommunityPlugIn;
+import org.wcs.smart.cybertracker.community.connect.CommunityConnectAlertContribution;
 import org.wcs.smart.cybertracker.community.connect.CommunityConnectDataContribution;
+import org.wcs.smart.cybertracker.community.connect.CommunityConnectUrlContribution;
 import org.wcs.smart.cybertracker.community.model.CommunityCtPackage;
 import org.wcs.smart.cybertracker.community.ui.CommunityPackageConfigurator;
 import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackageConfigurator;
@@ -94,13 +97,17 @@ public class CommunityPackageManager implements ICtPackageManager {
 						SubMonitor progress = SubMonitor.convert(monitor, "Exporting Community Package", ppackage.getConfigurableModel() == null ? 2 : 3);
 						List<IPackageContribution> contributions = PackageContributionManager.INSTANCE.getContributionItems();
 						contributions.add(new CommunityConnectDataContribution());
+						contributions.add(new CommunityConnectUrlContribution());
+						contributions.add(new CommunityConnectAlertContribution());
+						
 						//remove the connect 
 						for (Iterator<IPackageContribution> iterator = contributions.iterator(); iterator.hasNext();) {
 							IPackageContribution iPackageContribution = (IPackageContribution) iterator.next();
 							if (iPackageContribution.getClass().equals(ConnectDataContribution.class)) iterator.remove();
 							if (iPackageContribution.getClass().equals(ConnectUrlContribution.class)) iterator.remove();
-							
-						}						
+							if (iPackageContribution.getClass().equals(ConnectAlertContribution.class)) iterator.remove();
+						}	
+						
 						//process contributions
 						List<IPackageContribution.PackageContribution> updates = new ArrayList<>();
 						SubMonitor work = progress.split(1);
