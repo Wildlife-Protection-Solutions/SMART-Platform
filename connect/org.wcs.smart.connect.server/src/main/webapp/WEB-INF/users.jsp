@@ -28,14 +28,13 @@
     	<div id="message" class="msgsection"></div>
   	</div>
   <!--  user tab section  -->
-  <div id="users_body" class="tabbody">
+  <div id="users_body" class="tabbody" style="flex: 1 1 auto; overflow: auto;">
   	<p class="infomessage"><fmt:message key="users.usermessage"/></p>
   	<div>
     	<button class="block button top-spacer" id="btnNewUser"><fmt:message key="users.createnewbutton"/></button>
   	</div>
   
 	<div class="top-spacer" >
-
 
   		<div id="usertable" class="user-tables-float table-cell smart-table">
   			<div class="table-row smart-table-header">
@@ -104,7 +103,7 @@
 	</div>
 	
 	<!--  roles tab section  -->
-	<div id="userroles_body" class="tabbody">
+	<div id="userroles_body" class="tabbody" style="flex: 1 1 auto; overflow: auto;">
 	<p class="infomessage"><fmt:message key="users.rolemessage"/></p>
 	<div>
     	<div id="rolemessage" class="msgsection"></div>
@@ -137,7 +136,7 @@
 	</div>
 	
 	<!--  Desktop Users tab section  -->
-	<div id="desktopusers_body" class="tabbody">
+	<div id="desktopusers_body" class="tabbody" style="flex: 1 1 auto; overflow: auto;">
 	<p class="infomessage"><fmt:message key="users.desktopmessage"/></p>
 	<div>
     	<div id="desktopmessage" class="msgsection"></div>

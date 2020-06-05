@@ -1,6 +1,6 @@
 html {
-	height: 100%;
-    width: 100%;
+	height: 100vh;
+    width: 100vw;
 	font-family: -apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
 /*   font-family: "Open Sans", Helvetica, Arial, sans-serif; */
  	font-size: 0.8em;
@@ -550,7 +550,7 @@ th {
 }
 
 #settings-scroller {
-	height: 100%;
+	flex: 1 1 auto;
 	overflow: auto;
 }
 
@@ -713,9 +713,6 @@ fieldset{
 
 /* Dashboard Beta styling*/
 #report-wrapper {
-  width: 100%;
-  margin: 0 auto;
-  text-align: center;
 }
 #report1 {
   width: 49%;

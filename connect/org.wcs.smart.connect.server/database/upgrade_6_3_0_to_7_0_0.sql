@@ -251,7 +251,7 @@ END$$ LANGUAGE 'plpgsql';
 CREATE TRIGGER trg_ct_metadata_value_uuid AFTER INSERT OR UPDATE OR DELETE ON smart.ct_metadata_value_uuid FOR EACH ROW execute procedure connect.trg_ct_metadata_value_uuid();
 
 
-CREATE TABLE connect.ct_api_key(ca_uuid uuid not null, api_key varchar(64) not null, primary key (ca_uuid), unique(api_key));
+CREATE TABLE connect.ct_api_key(ca_uuid uuid not null, key_type varchar(32) not null, api_key varchar(64) not null, primary key (ca_uuid,key_type), unique(api_key));
 ALTER TABLE connect.ct_api_key ADD FOREIGN KEY (ca_uuid) REFERENCES connect.ca_info(ca_uuid) on DELETE CASCADE on UPDATE RESTRICT; 
 
 ALTER TABLE connect.alerts ADD COLUMN source VARCHAR(32) not null default 'USER';
@@ -285,6 +285,9 @@ create table connect.ct_navigation_layer(
   primary key(uuid)
 );
 ALTER TABLE connect.ct_navigation_layer ADD FOREIGN KEY (ca_uuid) REFERENCES connect.ca_info(ca_uuid) on DELETE CASCADE on UPDATE RESTRICT;
+
+
+create table connect.ct_community_user(uuid uuid not null, state varchar(32) not null, source varchar(4096) not null, validation_sent_date timestamp, validation_key varchar(64), primary key (uuid), unique(source));
 
 ------------ EMPLOYEE TEAMS ----------------
 CREATE TABLE smart.employee_team (uuid uuid not null, ca_uuid uuid not null, primary key (uuid));

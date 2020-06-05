@@ -24,54 +24,57 @@
   <div>
     <div id="message" class="msgsection"></div>
   </div>
-  <!-- Package Table -->
-  <p class="top-spacer label-header" style="border-top:1px solid; padding-top:4px"><fmt:message key="cybertracker.uploadedpackages"/></p>
   
-  <div class="top-spacer" >
-    <div id="ctpackagetable" class="table-cell smart-table">
-  	  <div class="table-row smart-table-header">
-		  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.packagetable.name"/></div>
-		  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.packagetable.ca"/></div>
-		  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.packagetable.type"/></div>
-		  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.packagetable.upload"/></div>
-		  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.packagetable.revisiondate"/></div>
-		  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.packagetable.revision"/></div>
-		  <div class="table-cell smart-table-cell"></div>
-		  <div class="table-cell smart-table-cell"></div>
+  <div style="height: 100%;overflow: auto;">
+	  <!-- Package Table -->
+	  <p class="top-spacer label-header" style="border-top:1px solid; padding-top:4px"><fmt:message key="cybertracker.uploadedpackages"/></p>
+	  
+	  <div class="top-spacer" >
+	    <div id="ctpackagetable" class="table-cell smart-table">
+	  	  <div class="table-row smart-table-header">
+			  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.packagetable.name"/></div>
+			  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.packagetable.ca"/></div>
+			  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.packagetable.type"/></div>
+			  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.packagetable.upload"/></div>
+			  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.packagetable.revisiondate"/></div>
+			  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.packagetable.revision"/></div>
+			  <div class="table-cell smart-table-cell"></div>
+			  <div class="table-cell smart-table-cell"></div>
+		  </div>
+	    </div>
+	    <a id="refreshnow" href="#"><fmt:message key="cybertracker.refresh"/></a>
+	  </div>	
+	  
+	  <!-- Navigation Layer Table -->
+	  <p class="top-spacer label-header" style="border-top:1px solid; padding-top:4px"><fmt:message key="cybertracker.routestable"/></p>
+	  
+	  <div class="top-spacer" >
+	    <div id="navlayertable" class="table-cell smart-table">
+	  	  <div class="table-row smart-table-header">
+			  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.routestablename"/></div>
+			  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.routestableca"/></div>
+			  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.routestableuploaddate"/></div>
+			  <div class="table-cell smart-table-cell"></div>
+			  <div class="table-cell smart-table-cell"></div>
+		  </div>
+	    </div>
+	    <a id="navrefreshnow" href="#"><fmt:message key="cybertracker.refresh"/></a>
 	  </div>
-    </div>
-    <a id="refreshnow" href="#"><fmt:message key="cybertracker.refresh"/></a>
-  </div>	
-  
-  <!-- Navigation Layer Table -->
-  <p class="top-spacer label-header" style="border-top:1px solid; padding-top:4px"><fmt:message key="cybertracker.routestable"/></p>
-  
-  <div class="top-spacer" >
-    <div id="navlayertable" class="table-cell smart-table">
-  	  <div class="table-row smart-table-header">
-		  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.routestablename"/></div>
-		  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.routestableca"/></div>
-		  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.routestableuploaddate"/></div>
-		  <div class="table-cell smart-table-cell"></div>
-		  <div class="table-cell smart-table-cell"></div>
-	  </div>
-    </div>
-    <a id="navrefreshnow" href="#"><fmt:message key="cybertracker.refresh"/></a>
-  </div>
-  
-  <!--  API Key Table -->
-  <p class="top-spacer label-header" style="margin-top:50px; border-top:1px solid; padding-top:4px"><fmt:message key="cybertracker.apikeys"/></p>
-  <p><fmt:message key="cybertracker.apikeysmessage"/></p>
-   <div class="top-spacer" >
-  
-     <div id="ctapikeytable" class="table-cell smart-table">
-  	  <div class="table-row smart-table-header">
-		  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.apikeytable.ca"/></div>
-		  <div class="table-cell smart-table-cell"></div>
-	  </div>
-    </div>
-   </div>
-    
+	  
+	  <!--  API Key Table -->
+	  <p class="top-spacer label-header" style="margin-top:50px; border-top:1px solid; padding-top:4px"><fmt:message key="cybertracker.apikeys"/></p>
+	  <p><fmt:message key="cybertracker.apikeysmessage1"/></p>
+	   <div class="top-spacer" >
+	  
+	     <div id="ctapikeytable" class="table-cell smart-table">
+	  	  <div class="table-row smart-table-header">
+			  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.apikeytable.ca"/></div>
+			  <div class="table-cell smart-table-cell">Private</div>
+			  <div class="table-cell smart-table-cell">Community</div>
+		  </div>
+	    </div>
+	   </div>
+	 </div>
 </div>		
 
 	<%@include file="footer.jsp" %>
@@ -110,6 +113,7 @@
 	  <form id="resetapiform" onsubmit="return resetApiKey();" >
 	    <input type="hidden" name="cauuid"/>
 	    <input type="hidden" name="label"/>
+	    <input type="hidden" name="type"/>
 	    <p><fmt:message key="cybertracker.resetkeymsg"/></p>
 	    <div class="block top-spacer" style="text-align:right">
 	     <input class="button" type="submit" value="<fmt:message key="cybertracker.resetbtn"/>" />

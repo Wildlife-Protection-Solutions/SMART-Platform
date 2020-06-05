@@ -41,7 +41,8 @@
 </div>
 
 
-<div class="top-spacer"> 
+<div class="top-spacer" style="flex: 1 1 auto; height: 0;">
+  <div style="height: 100%; overflow: auto; display: inline-block;">
   <div id="linktable" class="linktable table-cell smart-table">
   	<div class="table-row smart-table-header">
 		<div class="table-cell smart-table-cell"><fmt:message key="sharedlinks.url" /></div>
@@ -53,7 +54,7 @@
 		<div class="table-cell smart-table-cell"></div>
 	</div>
   </div>
- 
+  </div>
 </div>
 
 </div>

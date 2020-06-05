@@ -47,7 +47,7 @@ import io.swagger.v3.oas.annotations.servers.Server;
  */
 @ApplicationPath(ConnectRESTApplication.PATH_SEPERATOR + "noa")
 
-@OpenAPIDefinition(servers = {@Server(url = "https://<connectserver>/connect/noa/") }, 
+@OpenAPIDefinition(servers = {@Server(url = "https://<connectserver>/server/noa/") }, 
 	info = @Info(title = "SMART Connect API", description = "SMART Connect API avaliable without login", version = "7.0"))
 public class ConnectNoaRESTApplication extends Application {
 
@@ -68,6 +68,7 @@ public class ConnectNoaRESTApplication extends Application {
 		//api classes
 	    resources.add(CyberTrackerNoa.class);
 	    resources.add(GlobalForestWatchNoa.class);
+	    resources.add(CommunityNoa.class);
 	    
 	    //exception mappers
 	    resources.add(SmartConnectExceptionMapper.class);

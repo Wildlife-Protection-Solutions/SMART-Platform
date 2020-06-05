@@ -24,7 +24,7 @@
  	
 		<div><div id="message" class="msgsection"></div></div>
 		
-<div id="calist_body" class="tabbody">
+<div id="calist_body" class="tabbody" style="flex: 1 1 auto; overflow: auto;">
 <p class="infomessage"><fmt:message key="ca.pageinfo"/></p>
 		<div class="top-spacer" >
   			<div class="catable table-cell smart-table">
@@ -57,7 +57,7 @@
 		</c:if>
 	</div>
 	
-	<div id="dmmanager_body" class="tabbody">
+	<div id="dmmanager_body" class="tabbody" style="flex: 1 1 auto; overflow: auto;">
 
 		<div class="top-spacer"  style="" >
 		

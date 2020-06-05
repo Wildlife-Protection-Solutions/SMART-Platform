@@ -19,14 +19,14 @@
 	</div>
 	
 	<div style="padding-top: 5px">
-	<select id="admin-selectlist" class="uielement" name="admin-selectlist" onchange="javascript:showDashboard();return false;"></select>
+	<select id="admin-selectlist" class="uielement" name="admin-selectlist" onchange="javascript:showDashboard(); return false;"></select>
 	<button onClick="runReports(); return false;" class="button" style="padding:3px 10px"> <fmt:message key="dashboardbeta.refreshreports"/></button>
 
 	
 	</div>
 	<div><div id="message" class="msgsection"></div></div>
-	
-	<div id="report-wrapper" style="height: 80vh; display:table">
+	<div id="report-container" style="flex: 1 1 auto; height: 0;">
+	<div id="report-wrapper" style="display:table; height: 100%; width: 100%;">
 	<div style="display:table-row">
     	<div id="report1" style="display:table-cell; width:50%">
 			<div style="height:100%">
@@ -101,7 +101,8 @@
     		</div>
     	</div>
     	</div>
-  	</div>
+  	</div> <!-- report-wrapper -->
+  	</div> <!-- report-container -->
   	<div id="configuration" style="border-top: 1px solid; padding-top:8px">
   		<form>
   			

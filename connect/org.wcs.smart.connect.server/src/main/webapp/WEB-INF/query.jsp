@@ -69,7 +69,8 @@
 <input type="checkbox" id="qhideexe" checked onchange="searchChanged()"><fmt:message key="query.hidenonexecutable"/>
 </div>
 
-<div class="top-spacer">
+<div class="top-spacer" style="flex: 1 1 auto; height: 0;">
+  <div style="height: 100%; overflow: auto; display: inline-block;">
   <div id="querytable" class="catable table-cell smart-table">
   	<div class="table-row smart-table-header">
 		<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('conservationArea')"><fmt:message key="query.conservationarea" /></a></div>
@@ -77,7 +78,8 @@
 		<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('name')"><fmt:message key="query.name" /></a></div>
 		<div class="table-cell smart-table-cell"></div>
 	</div>
-	</div>  
+  </div>  
+  </div>
 </div>
 
 </div>

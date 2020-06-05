@@ -14,10 +14,14 @@ window.onload = function(){
 function confirmResetApi(){
 	var cauuid = this.dataset.cauuid;
 	var label = this.dataset.label;
+	var type = this.dataset.type;
+	
 	var formUuidElement = document.querySelector("#resetapiform > input[name=cauuid]");
 	formUuidElement.setAttribute("value", cauuid);
 	var formUuidElement = document.querySelector("#resetapiform > input[name=label]");
 	formUuidElement.setAttribute("value", label);
+	var formUuidElement = document.querySelector("#resetapiform > input[name=type]");
+	formUuidElement.setAttribute("value", type);
 	
 	displayDialog('resetApiDialog', 'main');
 	return false;	
@@ -30,11 +34,12 @@ function resetApiKey(){
 	hideInfo();
 	var cauuid = document.querySelector("#resetapiform > input[name=cauuid]").value;
 	var label = document.querySelector("#resetapiform > input[name=label]").value;
+	var type = document.querySelector("#resetapiform > input[name=type]").value;
 
 	var oReq = new XMLHttpRequest();
  	oReq.onload = resetApiKeyRes;
  	oReq.calabel = label;
- 	oReq.open("Delete", CTURL + "/apikey/" + cauuid, true);
+ 	oReq.open("Delete", CTURL + "/apikey/" + cauuid + "?type=" + type, true);
  	oReq.send();
  	return false;
 }
@@ -105,7 +110,7 @@ function createApiKeyTable(){
  		var label = packages[i].label;
  		var uuid = packages[i].uuid;
  	
- 		var row = tableCreateRow(parent,[label,null], 
+ 		var row = tableCreateRow(parent,[label,null, null], 
 	 			"apirow " + (i % 2 == 1 ? "smart-table-rowon" : "smart-table-rowoff"));
 	 		
 		var resetbtn = document.createElement("button");
@@ -114,7 +119,17 @@ function createApiKeyTable(){
 		resetbtn.onclick = confirmResetApi;
 		resetbtn.dataset.cauuid = uuid;
 		resetbtn.dataset.label = label;
+		resetbtn.dataset.type = "PRIVATE";
 		row.childNodes[1].appendChild(resetbtn);
+		
+		var resetbtn = document.createElement("button");
+		resetbtn.innerHTML=i18n("cybertracker.resetbtn");
+		resetbtn.className= "block button";
+		resetbtn.onclick = confirmResetApi;
+		resetbtn.dataset.cauuid = uuid;
+		resetbtn.dataset.label = label;
+		resetbtn.dataset.type = "PUBLIC";
+		row.childNodes[2].appendChild(resetbtn);
  		
  	}
 }
