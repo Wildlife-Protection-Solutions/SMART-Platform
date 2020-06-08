@@ -25,20 +25,22 @@
 		<div class="top-spacer link_small" >
 			<fmt:message key="dataqueue.lastupdated"/><span id="lastUpdateTime"></span><a id="refreshnow" style="padding-left:3px" href="#"><fmt:message key="dataqueue.refresh"/></a>
 		</div>
-		<div>
-			<div id="fileTable" class="catable table-cell smart-table">
-			  	<div class="table-row smart-table-header">
-			  		<div class="table-cell smart-table-cell"></div>
-					<div class="table-cell smart-table-cell"><fmt:message key="dataqueue.calabel"/></div>
-					<div class="table-cell smart-table-cell"><fmt:message key="dataqueue.namelabel"/></div>
-					<div class="table-cell smart-table-cell"><fmt:message key="dataqueue.typelabel"/></div>
-					<div class="table-cell smart-table-cell"><fmt:message key="dataqueue.statuslabel"/></div>
-					<div class="table-cell smart-table-cell"><fmt:message key="dataqueue.lastmodifiedlabel"/></div>
-					<div class="table-cell smart-table-cell"><fmt:message key="dataqueue.uploadeddatelabel"/></div>
-					<div class="table-cell smart-table-cell"><fmt:message key="dataqueue.uploadeduserlabel"/></div>
-					<div class="table-cell smart-table-cell"><fmt:message key="actions" /></div>
-				</div>
-  			</div>  
+		<div style="flex: 1 1 auto; height: 0;">
+  			<div style="height: 100%; overflow: auto; display: inline-block;">
+				<div id="fileTable" class="catable table-cell smart-table">
+				  	<div class="table-row smart-table-header">
+				  		<div class="table-cell smart-table-cell"></div>
+						<div class="table-cell smart-table-cell"><fmt:message key="dataqueue.calabel"/></div>
+						<div class="table-cell smart-table-cell"><fmt:message key="dataqueue.namelabel"/></div>
+						<div class="table-cell smart-table-cell"><fmt:message key="dataqueue.typelabel"/></div>
+						<div class="table-cell smart-table-cell"><fmt:message key="dataqueue.statuslabel"/></div>
+						<div class="table-cell smart-table-cell"><fmt:message key="dataqueue.lastmodifiedlabel"/></div>
+						<div class="table-cell smart-table-cell"><fmt:message key="dataqueue.uploadeddatelabel"/></div>
+						<div class="table-cell smart-table-cell"><fmt:message key="dataqueue.uploadeduserlabel"/></div>
+						<div class="table-cell smart-table-cell"><fmt:message key="actions" /></div>
+					</div>
+	  			</div> 
+	  		</div>
 		</div>
 		<div><a class="link_small" id="selectNone" href="#"><fmt:message key="dataqueue.checknone"/></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class="link_small" id="selectCompleted" href="#"><fmt:message key="dataqueue.checkcomplete"/></a> <a class="link_small" id="selectAll" href="#"><fmt:message key="dataqueue.checkall"/></a></div>
 		
