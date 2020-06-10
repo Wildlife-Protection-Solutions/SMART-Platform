@@ -9,14 +9,16 @@ import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
 import org.wcs.smart.ca.UuidItem;
-import org.wcs.smart.cybertracker.community.model.CommunityUser;
+import org.wcs.smart.smartcollect.model.SmartCollectUser;
 
 
 @Entity
-@Table(name="connect.ct_community_user")
-public class CtCommunityUser extends UuidItem{
+@Table(name="connect.smartcollect_user")
+public class SmartCollectConnectUser extends UuidItem{
 	
-	private CommunityUser.State state;
+	private static final long serialVersionUID = 1L;
+	
+	private SmartCollectUser.State state;
 	private String source;
 	
 	private Date validationSentDate;
@@ -24,10 +26,10 @@ public class CtCommunityUser extends UuidItem{
 
 	@Enumerated(EnumType.STRING)
 	@Column(name="state")
-	public CommunityUser.State getState() {
+	public SmartCollectUser.State getState() {
 		return this.state;
 	}
-	public void setState(CommunityUser.State state) {
+	public void setState(SmartCollectUser.State state) {
 		this.state = state;
 	}
 	

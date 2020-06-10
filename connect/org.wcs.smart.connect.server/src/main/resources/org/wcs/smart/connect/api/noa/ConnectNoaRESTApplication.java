@@ -68,7 +68,7 @@ public class ConnectNoaRESTApplication extends Application {
 		//api classes
 	    resources.add(CyberTrackerNoa.class);
 	    resources.add(GlobalForestWatchNoa.class);
-	    resources.add(CommunityNoa.class);
+	    resources.add(SmartCollectNoa.class);
 	    
 	    //exception mappers
 	    resources.add(SmartConnectExceptionMapper.class);

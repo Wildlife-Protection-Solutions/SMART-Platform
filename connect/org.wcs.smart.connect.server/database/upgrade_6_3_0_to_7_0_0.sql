@@ -287,7 +287,7 @@ create table connect.ct_navigation_layer(
 ALTER TABLE connect.ct_navigation_layer ADD FOREIGN KEY (ca_uuid) REFERENCES connect.ca_info(ca_uuid) on DELETE CASCADE on UPDATE RESTRICT;
 
 
-create table connect.ct_community_user(uuid uuid not null, state varchar(32) not null, source varchar(4096) not null, validation_sent_date timestamp, validation_key varchar(64), primary key (uuid), unique(source));
+create table connect.smartcollect_user(uuid uuid not null, state varchar(32) not null, source varchar(4096) not null, validation_sent_date timestamp, validation_key varchar(64), primary key (uuid), unique(source));
 
 ------------ EMPLOYEE TEAMS ----------------
 CREATE TABLE smart.employee_team (uuid uuid not null, ca_uuid uuid not null, primary key (uuid));
@@ -694,13 +694,13 @@ from smart.E_ACTION where type_key in ('org.wcs.smart.profile.newrecord', 'org.w
 
 
 --- community waypoint tables
-CREATE TABLE smart.community_waypoint(
+CREATE TABLE smart.smartcollect_waypoint(
 wp_uuid uuid not null,  
 source varchar(32000), primary key(wp_uuid));
 
-ALTER TABLE smart.community_waypoint ADD FOREIGN KEY (wp_uuid) REFERENCES smart.waypoint(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.smartcollect_waypoint ADD FOREIGN KEY (wp_uuid) REFERENCES smart.waypoint(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 
-CREATE TABLE smart.ct_community_package(
+CREATE TABLE smart.smartcollection_package(
 uuid uuid not null, 
 name varchar(512), 
 ca_uuid uuid not null, 
@@ -708,9 +708,9 @@ cm_uuid uuid,
 ctprofile_uuid uuid,
 basemapdef varchar(32672), primary key (uuid));
 
-ALTER TABLE smart.ct_community_package ADD FOREIGN KEY (CA_UUID) REFERENCES smart.conservation_area(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
-ALTER TABLE smart.ct_community_package ADD FOREIGN KEY (CM_UUID) REFERENCES smart.configurable_model(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
-ALTER TABLE smart.ct_community_package ADD FOREIGN KEY (ctprofile_uuid) REFERENCES smart.ct_properties_profile(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.smartcollection_package ADD FOREIGN KEY (CA_UUID) REFERENCES smart.conservation_area(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.smartcollection_package ADD FOREIGN KEY (CM_UUID) REFERENCES smart.configurable_model(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.smartcollection_package ADD FOREIGN KEY (ctprofile_uuid) REFERENCES smart.ct_properties_profile(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 --TODO: triggers & plugin version
 
 ---- change ca version so users cannot sync with this and cause problems ---- 

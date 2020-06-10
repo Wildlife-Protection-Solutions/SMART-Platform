@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -32,8 +33,10 @@ import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.CyberTrackerPackage;
-import org.wcs.smart.cybertracker.community.model.CommunityCtPackage;
+import org.wcs.smart.connect.model.SmartCollectConnectUser;
 import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.smartcollect.model.SmartCollectPackage;
+import org.wcs.smart.smartcollect.model.SmartCollectUser.State;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -42,13 +45,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
 
-@Path(ConnectRESTApplication.PATH_SEPERATOR + CommunityNoa.PATH)
+@Path(ConnectRESTApplication.PATH_SEPERATOR + SmartCollectNoa.PATH)
 
-public class CommunityNoa {
+public class SmartCollectNoa {
 
-	public static final String PATH = "community"; //$NON-NLS-1$
+	public static final String PATH = "smartcollect"; //$NON-NLS-1$
 	
-	private final Logger logger = Logger.getLogger(CommunityNoa.class.getName());
+	private final Logger logger = Logger.getLogger(SmartCollectNoa.class.getName());
 
 	
 	@Context private ServletContext context;
@@ -59,7 +62,7 @@ public class CommunityNoa {
 	@GET
     @Path("packages/")
 	@Produces({ MediaType.APPLICATION_JSON })
-	@Operation(description = "Gets the details about all Community packages on this server.")
+	@Operation(description = "Gets the details about all SMART Collect packages on this server.")
 	@ApiResponse(responseCode = "200", description = "OK", content = {@Content(array = @ArraySchema(arraySchema = @Schema(implementation=CyberTrackerPackageProxy.class)))})
 	public List<CyberTrackerPackageProxy> getPackages( ){
 		
@@ -67,7 +70,7 @@ public class CommunityNoa {
 		s.beginTransaction();
 		try{
 			List<CyberTrackerPackage> ctpackages = QueryFactory.buildQuery(s, CyberTrackerPackage.class, 
-					"type", CommunityCtPackage.TYPE_NAME).list(); //$NON-NLS-1$
+					"type", SmartCollectPackage.TYPE_NAME).list(); //$NON-NLS-1$
 		
 			List<CyberTrackerPackageProxy> proxies = new ArrayList<>();
 			
@@ -86,7 +89,7 @@ public class CommunityNoa {
 	 */
 	@GET
     @Path("packages/{uuid}")
-	@Operation(description = "Gets the Community package as a zip file.")
+	@Operation(description = "Gets the SMART Collect package as a zip file.")
 	@ApiResponse(responseCode = "200", description="Package returned successfully")
 	@ApiResponse(responseCode = "404", description = "Requested package not found")
 	public Response getCtPackage(@PathParam("uuid") String packageUuidstr){
@@ -105,7 +108,7 @@ public class CommunityNoa {
 			CyberTrackerPackage ctpackage = QueryFactory.buildQuery(s, CyberTrackerPackage.class, 
 					"ctPackageUuid", packageUuid).uniqueResult(); //$NON-NLS-1$
 			if (ctpackage == null) throw new SmartConnectException(Response.Status.NOT_FOUND);
-			if (!ctpackage.getType().equals(CommunityCtPackage.TYPE_NAME)) throw new SmartConnectException(Response.Status.NOT_FOUND); 
+			if (!ctpackage.getType().equals(SmartCollectPackage.TYPE_NAME)) throw new SmartConnectException(Response.Status.NOT_FOUND); 
 			
 			file = DataStoreManager.INSTANCE.getRootDirectory()
 					.toPath().resolve(CyberTracker.CT_PACKAGE_DATASTORE_LOCATION).resolve(ctpackage.getFilename());
@@ -115,7 +118,7 @@ public class CommunityNoa {
 		
 		long size = 0;
 		if (file == null || !Files.exists(file)) {
-			logger.log(Level.SEVERE,"Community package file not found.");
+			logger.log(Level.SEVERE,"SMART Collect package file not found.");
 			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR);
 		}
 		try {
@@ -150,7 +153,7 @@ public class CommunityNoa {
 	@GET
     @Path("packages/info/{uuid}")
 	@Produces({ MediaType.APPLICATION_JSON })
-	@Operation(description = "Gets the details about a given CyberTracker package including the revision number and last uploaded date.")
+	@Operation(description = "Gets the details about a given SMART Collect package including the revision number and last uploaded date.")
 	@ApiResponse(responseCode = "200", description = "OK", content = {@Content(schema = @Schema(implementation=CyberTrackerPackageProxy.class))})
 	@ApiResponse(responseCode = "400", description = "Invalid package identifier")
 	public CyberTrackerPackageProxy getPackageDetails(@PathParam("uuid") String packageUuidstr){
@@ -169,7 +172,7 @@ public class CommunityNoa {
 					"ctPackageUuid", packageUuid).uniqueResult(); //$NON-NLS-1$
 			
 			if (ctpackage == null) throw new SmartConnectException(Response.Status.NOT_FOUND);
-			if (!ctpackage.getType().equals(CommunityCtPackage.TYPE_NAME)) throw new SmartConnectException(Response.Status.NOT_FOUND); 
+			if (!ctpackage.getType().equals(SmartCollectPackage.TYPE_NAME)) throw new SmartConnectException(Response.Status.NOT_FOUND); 
 			
 			return ctpackage.asProxy();
 		}finally {
@@ -177,4 +180,49 @@ public class CommunityNoa {
 		}
 	}
 
+	/**
+	 * Gets the package details for the specific package
+	 */
+	@GET
+    @Path("source/{validationkey}")
+	@Produces({ MediaType.TEXT_HTML })
+	@Operation(description = "Accepts validation from a source user")
+	@ApiResponse(responseCode = "200", description = "OK", content = {@Content(schema = @Schema(implementation=CyberTrackerPackageProxy.class))})
+	@ApiResponse(responseCode = "400", description = "Could not authorization use")
+	public String validateUser(@PathParam("validationkey") String validationkey ){
+
+		try {
+			Session s = HibernateManager.getSession(context);
+			s.beginTransaction();
+			try{
+				
+				SmartCollectConnectUser user = s.createQuery("FROM SmartCollectConnectUser WHERE validationKey = :key", SmartCollectConnectUser.class)
+						.setParameter("key", validationkey).uniqueResult();
+				
+				if (user == null) throw new SmartConnectException(Response.Status.NOT_FOUND);
+				
+				if (user.getState() == State.BLACKLISTED) {
+					throw new SmartConnectException(Response.Status.BAD_REQUEST, "user has been blacklisted");
+				}else if (user.getState() == State.VALIDATED) {
+					//already validated
+				}else if (user.getValidateSentDate() != null && user.getValidationKey().equals(validationkey)) {
+					//check timeout
+					if ((new Date()).getTime() - user.getValidateSentDate().getTime() > 72*1000*60*60.0) {
+						throw new SmartConnectException(Response.Status.BAD_REQUEST, "validation key timeout");
+					}
+					user.setState(State.VALIDATED);
+					
+				}else {
+					throw new SmartConnectException(Response.Status.BAD_REQUEST, "invalid validation key");
+				}
+				
+			}finally {
+				s.getTransaction().commit();
+			}
+		}catch (SmartConnectException ex) {
+			return "<html><title>SMART Collect</title><body>User could not be validated: " + ex.getMessage() + "</body></html>";
+		}
+		
+		return "<html><title>SMART Collect</title><body>Your email address has been validated as your SMART Collect user</body></html>";
+	}
 }

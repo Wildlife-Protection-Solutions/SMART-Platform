@@ -26,13 +26,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.wcs.smart.asset.model.AssetWaypointSource;
-import org.wcs.smart.cybertracker.community.model.CommunityWaypoint;
-import org.wcs.smart.cybertracker.community.model.CommunityWaypointSource;
 import org.wcs.smart.er.model.SurveyWaypointSource;
 import org.wcs.smart.incident.IndepedentIncidentSource;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.model.IWaypointSourceEngine;
 import org.wcs.smart.patrol.model.PatrolWaypointSource;
+import org.wcs.smart.smartcollect.model.SmartCollectWaypointSource;
 /**
  * Manager for dealing with waypoint
  * sources.
@@ -58,7 +57,7 @@ public enum WaypointSourceEngine implements IWaypointSourceEngine{
 		supportedSources.put(IndepedentIncidentSource.KEY, new IndepedentIncidentSource());
 		supportedSources.put(SurveyWaypointSource.KEY, new SurveyWaypointSource());
 		supportedSources.put(AssetWaypointSource.KEY, new AssetWaypointSource());
-		supportedSources.put(CommunityWaypointSource.KEY, new CommunityWaypointSource());
+		supportedSources.put(SmartCollectWaypointSource.KEY, new SmartCollectWaypointSource());
 
 	}
 	

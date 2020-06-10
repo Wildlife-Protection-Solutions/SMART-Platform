@@ -403,6 +403,36 @@ th {
 	float: right;
 }
 
+.sendvalidate-icon{
+	background-image: url("images/validate_email.png");
+	width:16px;
+	height: 16px;
+	background-repeat: no-repeat;
+	display: block;
+	cursor: pointer;
+	float: right;
+}
+
+.validate-icon{
+	background-image: url("images/validate_user.png");
+	width:16px;
+	height: 16px;
+	background-repeat: no-repeat;
+	display: block;
+	cursor: pointer;
+	float: right;
+}
+
+.blacklist-icon{
+	background-image: url("images/blacklist_user.png");
+	width:16px;
+	height: 16px;
+	background-repeat: no-repeat;
+	display: block;
+	cursor: pointer;
+	float: right;
+}
+
 .update-icon{
 	background-image: url("images/edit.png");
 	width:16px;

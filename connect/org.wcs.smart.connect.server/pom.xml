@@ -53,7 +53,7 @@
 					<!--<warSourceExcludes>**/context.xml</warSourceExcludes>
 					<webResources>
 						<resource>
-							<directory>conf/${smart.env}</directory>
+							<directory>conf/deploy</directory>
 							<targetPath>META-INF</targetPath>
 							<includes><include>**/context.xml</include></includes>
 						</resource>
@@ -441,7 +441,7 @@
 		</dependency>
 		<dependency>
     			<groupId>org.wcs.smart.core</groupId>
-    			<artifactId>org.wcs.smart.core.cybertracker.community</artifactId>
+    			<artifactId>org.wcs.smart.core.smartcollect</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
 		<dependency>

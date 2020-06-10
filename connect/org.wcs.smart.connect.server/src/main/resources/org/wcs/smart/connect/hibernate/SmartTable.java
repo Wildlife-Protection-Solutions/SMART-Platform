@@ -78,8 +78,6 @@ import org.wcs.smart.connect.model.Dashboard;
 import org.wcs.smart.connect.model.Quicklink;
 import org.wcs.smart.connect.model.UserQuicklink;
 import org.wcs.smart.connect.model.UsersDefaultDashboard;
-import org.wcs.smart.cybertracker.community.model.CommunityCtPackage;
-import org.wcs.smart.cybertracker.community.model.CommunityWaypoint;
 import org.wcs.smart.cybertracker.model.ConfigurableModelCtPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CtIncidentLink;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
@@ -235,6 +233,8 @@ import org.wcs.smart.r.model.RScript;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.model.ReportFolder;
 import org.wcs.smart.report.model.ReportQuery;
+import org.wcs.smart.smartcollect.model.SmartCollectPackage;
+import org.wcs.smart.smartcollect.model.SmartCollectWaypoint;
 
 /**
  * List of SMART tables to include in hibernate mapping.
@@ -480,8 +480,8 @@ public enum SmartTable {
 	PAWS_SERVICE(PawsService.class, null),
 	PAWS_RUN(PawsRun.class, null),
 	
-	COMMUNITY_WAYPOINT(CommunityWaypoint.class, ".waypoint.conservationArea"),
-	COMMUNITY_PACKAGE(CommunityCtPackage.class, null),
+	COMMUNITY_WAYPOINT(SmartCollectWaypoint.class, ".waypoint.conservationArea"),
+	COMMUNITY_PACKAGE(SmartCollectPackage.class, null),
 	;
 	
 	public Class<?> hibernateClass;

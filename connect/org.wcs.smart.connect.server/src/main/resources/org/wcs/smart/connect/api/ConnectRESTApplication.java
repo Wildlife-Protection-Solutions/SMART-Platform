@@ -80,7 +80,7 @@ public class ConnectRESTApplication extends Application {
 		resources.add(ReportApi.class);
 		resources.add(SharedLinkApi.class);
 		resources.add(Uploader.class);
-		resources.add(CommunityApi.class);
+		resources.add(SmartCollectApi.class);
 		
 		resources.add(SmartConnectExceptionMapper.class);
 		resources.add(GeneralExceptionMapper.class);

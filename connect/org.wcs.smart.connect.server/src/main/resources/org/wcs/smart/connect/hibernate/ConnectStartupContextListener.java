@@ -103,7 +103,7 @@ import org.wcs.smart.connect.model.CaPluginVersion;
 import org.wcs.smart.connect.model.ConnectPluginVersion;
 import org.wcs.smart.connect.model.ConnectUuidItem;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
-import org.wcs.smart.connect.model.CtCommunityUser;
+import org.wcs.smart.connect.model.SmartCollectConnectUser;
 import org.wcs.smart.connect.model.CyberTrackerApiKey;
 import org.wcs.smart.connect.model.CyberTrackerNavigationLayer;
 import org.wcs.smart.connect.model.CyberTrackerPackage;
@@ -404,7 +404,7 @@ public class ConnectStartupContextListener implements ServletContextListener{
 		config.addAnnotatedClass(CyberTrackerPackage.class);
 		config.addAnnotatedClass(CyberTrackerApiKey.class);
 		config.addAnnotatedClass(CyberTrackerNavigationLayer.class);
-		config.addAnnotatedClass(CtCommunityUser.class);
+		config.addAnnotatedClass(SmartCollectConnectUser.class);
 
 		try{
 			for(Class<?> c : SmartHibernateConfiguration.INSTANCE.getTables()){

@@ -1,11 +1,15 @@
 var CTURL = "../api/cybertracker";
-	
+var CUSERURL = "../api/smartcollect";
+
+var searchtimeout;
+
 window.onload = function(){
 	menuCheckOnload();
 	
 	refreshPackageList();
 	refreshApiKeyTable();
 	refreshNavigationList();
+	getCollectUsers();
 	
 	document.querySelector("#refreshnow").onclick=function(){refreshPackageList(); return false;};
 	document.querySelector("#navrefreshnow").onclick=function(){refreshNavigationList(); return false;};
@@ -383,4 +387,183 @@ function downloadNavigation(){
 	var url = CTURL + "/navigationlayers/" + uuid;
 	window.open(url, "_self");
 	return false;
+}
+
+function searchCollectUsers(){
+	clearTimeout(searchtimeout);
+	setTimeout(function(){
+		getCollectUsers();	
+	}, 600);
+}
+
+
+
+function getCollectUsers(){
+	//clear current table
+	var parent = document.getElementById('collectusertable');
+
+ 	//clear current table
+	var objects = document.querySelectorAll("div.ctuserrow");
+	for (var i = 0; i < objects.length; i++){
+		var ele = objects[i];
+		ele.parentElement.removeChild(ele);
+	}
+	
+	var row = document.createElement("div");
+	row.className="ctuserrow";
+	row.innerHTML="searching...";
+	parent.appendChild(row);
+	
+	var searchtext = document.getElementById('collectusersearch').value;
+	
+ 	var oReq = new XMLHttpRequest();
+ 	oReq.onload = collectUserCallback;
+ 	oReq.open("Get", CUSERURL + "/source?search=" + searchtext, true);
+ 	oReq.send();
+}
+
+function collectUserCallback(){
+	if (this.status != 200) {
+		var msg = "Error: ";
+		if (this.status == 401){
+			msg += "Unauthorized";
+		}
+		try {
+			msg = JSON.parse(this.responseText).error
+		} catch (err) {
+		}
+		displayError(msg);
+		return;
+	}
+	
+	var parent = document.getElementById('collectusertable');
+
+ 	//clear current table
+	var objects = document.querySelectorAll("div.ctuserrow");
+	for (var i = 0; i < objects.length; i++){
+		var ele = objects[i];
+		ele.parentElement.removeChild(ele);
+	}
+	var drawnRowCount = 0;
+	
+	var users = JSON.parse(this.responseText);
+	
+ 	for (var i = 0; i < users.length; i ++){
+ 		drawnRowCount++;
+ 		var row = tableCreateRow(parent, 
+ 				[users[i].source, users[i].state, null], 
+ 				"ctuserrow " + (drawnRowCount % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
+
+ 					
+ 		row.dataset.sourceuuid = users[i].uuid;
+ 		
+ 		var deleteicon = document.createElement("a");
+ 		deleteicon.className="delete-icon";
+ 		deleteicon.title= "delete user";
+ 		deleteicon.style="margin-left: 5px; margin-right:5px";
+ 		deleteicon.onclick = deleteCollectUserValidate;
+		row.childNodes[2].appendChild(deleteicon);
+
+		var sendvalidateicon = document.createElement("a");
+		sendvalidateicon.className="sendvalidate-icon";
+		sendvalidateicon.title= "send validation request";
+		sendvalidateicon.style="margin-left: 5px; margin-right:5px";
+		sendvalidateicon.onclick = sendValidationRequest;
+		row.childNodes[2].appendChild(sendvalidateicon);
+		
+		var blacklisticon = document.createElement("a");
+		blacklisticon.className="blacklist-icon";
+		blacklisticon.title= "blacklist user";
+		blacklisticon.style="margin-left: 5px; margin-right:5px";
+		blacklisticon.onclick = blacklistUser;
+		row.childNodes[2].appendChild(blacklisticon);
+
+		var validateicon = document.createElement("a");
+		validateicon.className="validate-icon";
+		validateicon.title= "validate user";
+		validateicon.style="margin-left: 5px; margin-right:5px";
+		validateicon.onclick = validateUser;
+		row.childNodes[2].appendChild(validateicon);
+		
+
+ 	}
+ 	
+ 	if(users.length == 0 || drawnRowCount == 0){ //no results or they were all filtered out
+ 		var row = document.createElement("div");
+ 		row.className = "ctuserrow errorsection";
+ 	    row.innerHTML = "No results found";
+ 	    row.style.display = "block";
+ 		parent.appendChild(row);
+ 	}
+}
+
+function sendValidationRequest(){
+	var uuid = this.parentElement.parentElement.getAttribute('data-sourceuuid');
+	updateState(uuid, "VALIDATED", true);
+}
+
+function validateUser(){
+	var uuid = this.parentElement.parentElement.getAttribute('data-sourceuuid');
+	updateState(uuid, "VALIDATED", false);
+}
+
+
+function blacklistUser(){
+	var uuid = this.parentElement.parentElement.getAttribute('data-sourceuuid');
+	updateState(uuid, "BLACKLISTED", false);
+}
+
+function updateState(uuid, newstate, sendvalidation){	
+	var oReq = new XMLHttpRequest();
+	oReq.onload = function(){
+		if (this.status != 204) {
+			alert("ERROR: " + JSON.parse(this.responseText).error);
+			return;
+		}
+		getCollectUsers()
+	};
+	var request = CUSERURL + "/source/" + uuid + "?state=" + newstate;
+	if (sendvalidation){
+		request = request+"&sendvalidation=true";
+	}
+	oReq.open("PUT", request, true);
+	oReq.send();
+}
+
+
+
+function deleteCollectUserValidate(){
+	var uuid = this.parentElement.parentElement.getAttribute('data-sourceuuid');
+	var formUuidElement = document.querySelector("#deletecollectform > input[name=uuid]");
+	formUuidElement.setAttribute("value", uuid);
+	
+	displayDialog('deleteCollectUserDialog', 'main');
+	return false;
+}
+
+function deleteCollectUser(){
+	closeDialog('deleteCollectUserDialog');
+	var uuid = document.querySelector("#deletecollectform > input[name=uuid]").value;
+	var oReq = new XMLHttpRequest();
+ 	oReq.onload = collectUserDeleted;
+ 	oReq.open("Delete", CUSERURL + "/source/" + uuid, true);
+ 	oReq.send();
+ 	return false;
+}
+
+
+function collectUserDeleted(){
+	if (this.status != 204) {
+		if (this.status == 401){
+			alert(i18n("cybertracker.unauthorized"));
+		}
+		var msg="Error:";
+		try {
+			msg += JSON.parse(this.responseText).error
+		} catch (err) {
+		}
+		alert(msg);
+		return;
+	}
+	getCollectUsers();
 }
