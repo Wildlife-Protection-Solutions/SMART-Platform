@@ -301,7 +301,7 @@ public class PatrolSummaryQueryType implements IQueryType {
 		//validate buffer area
 		boolean hasAreaBuffer = false;
 		for (IValueItem i : values) {
-			if (((PatrolValueItem)i).getPatrolValueOption() == PatrolValueOption.AREA_BUFFER) {
+			if (i instanceof PatrolValueItem && ((PatrolValueItem)i).getPatrolValueOption() == PatrolValueOption.AREA_BUFFER) {
 				hasAreaBuffer = true;
 				break;
 			}

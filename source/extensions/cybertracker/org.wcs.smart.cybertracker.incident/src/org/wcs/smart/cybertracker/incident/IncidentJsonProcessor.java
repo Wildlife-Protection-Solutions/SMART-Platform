@@ -41,8 +41,8 @@ import org.wcs.smart.cybertracker.importer.json.JsonCtParser;
 import org.wcs.smart.cybertracker.importer.json.UserCancelledException;
 import org.wcs.smart.cybertracker.incident.internal.Messages;
 import org.wcs.smart.cybertracker.model.CtIncidentLink;
-import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.incident.IncidentManager;
 import org.wcs.smart.incident.IndepedentIncidentSource;
 import org.wcs.smart.incident.event.IncidentEventManager;
 import org.wcs.smart.observation.model.Waypoint;
@@ -164,11 +164,8 @@ public class IncidentJsonProcessor implements IJsonProcessor {
 					if (rootLink != null) rootLink.setWaypoint(parsedWp);
 					if (currentLink.getRootId() != null && currentLink.getIncidentGroupId() != null) currentLink.setObservationGroup(parsedWp.getObservationGroups().get(0));
 					
-					Long cnt = QueryFactory.buildCountQuery(session, Waypoint.class, 
-						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
-						new Object[] {"sourceId",IndepedentIncidentSource.KEY}).longValue(); //$NON-NLS-1$
-
-					currentLink.getWaypoint().setId((int)(cnt + 1));
+					int id = IncidentManager.getInstance().getNextIncidentId(session);
+					currentLink.getWaypoint().setId(id);
 					currentLink.getWaypoint().setSourceId(IndepedentIncidentSource.KEY);
 					currentLink.getWaypoint().setConservationArea(SmartDB.getCurrentConservationArea());
 

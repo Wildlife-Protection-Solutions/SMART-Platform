@@ -53,7 +53,8 @@ public class PawsRun extends UuidItem{
 		RUNNING,
 		DOWNLOADING_RESULTS,
 		COMPLETE,
-		ERROR
+		ERROR,
+		AUTH_TIMEOUT,
 	}
 	private PawsConfiguration config;
 	private ConservationArea ca;

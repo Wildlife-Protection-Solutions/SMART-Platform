@@ -64,11 +64,7 @@ public class PawsStatusJob extends Job {
 	
 	public void addItem(PawsRun run){
 		synchronized (items) {
-			if (items.isEmpty()){
-				items.add(run);
-			}else{
-				items.add(run);
-			}	
+			if (!items.contains(run)) items.add(run);
 			schedule(5000);
 		}
 	}
@@ -89,7 +85,7 @@ public class PawsStatusJob extends Job {
 			}
 			if (run == null) continue;
 			
-			if (run.getStatus() == PawsRun.Status.RUNNING){
+			if (run.getStatus() == PawsRun.Status.RUNNING || run.getStatus() == PawsRun.Status.AUTH_TIMEOUT){
 				//check status
 				try {
 					PawsApi.PawsStatus taskStatus = PawsApi.INSTANCE.checkStatus(run);

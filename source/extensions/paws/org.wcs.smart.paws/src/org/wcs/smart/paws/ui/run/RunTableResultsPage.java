@@ -118,6 +118,8 @@ public class RunTableResultsPage extends EditorPart {
 				l.setText(Messages.RunTableResultsPage_Error);
 			}else if (results.getRun().getStatus() == PawsRun.Status.COMPLETE) {
 				l.setText(Messages.RunTableResultsPage_NotFound);
+			}else if (results.getRun().getStatus() == PawsRun.Status.AUTH_TIMEOUT) {
+				l.setText("Token timeout before results could be downloaded.  Try downloading results manually");
 			}else {
 				l.setText(Messages.RunTableResultsPage_NotFinished);
 			}

@@ -22,9 +22,6 @@
 package org.wcs.smart.incident.ui.newwizard;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.eclipse.jface.dialogs.IPageChangingListener;
 import org.eclipse.jface.dialogs.PageChangingEvent;
@@ -32,7 +29,6 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -70,20 +66,8 @@ public class NewIncidentWizard extends Wizard implements IPageChangingListener {
 		
 		session = HibernateManager.openSession();
 		
-		Set<String> incidentsources = IncidentManager.getInstance()
-				.getIncidentProviders().stream()
-				.map(e->e.getWaypointSourceKey()).collect(Collectors.toSet());
-		
-		Query<?> q = session.createQuery("SELECT max(id) FROM Waypoint WHERE sourceId IN (:source) AND conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameterList("source", incidentsources); //$NON-NLS-1$
-		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-		List<?> maxIs = q.list();
-		if (maxIs.size() > 0 && maxIs.get(0) != null ){
-			newIncident.setId((Integer)maxIs.get(0) + 1);
-		}else{
-			//start at 1
-			newIncident.setId(1);
-		}
+		int id = IncidentManager.getInstance().getNextIncidentId(session);
+		newIncident.setId(id);
 		
 		ops = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
 		

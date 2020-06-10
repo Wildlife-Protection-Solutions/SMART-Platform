@@ -61,6 +61,7 @@ public class PawsPlugIn extends AbstractUIPlugin {
 	public static final String ICON_ERROR = "org.wcs.smart.paws.icon.error"; //$NON-NLS-1$
 	public static final String ICON_WORKING = "org.wcs.smart.paws.icon.working"; //$NON-NLS-1$
 	public static final String ICON_CONFIG = "org.wcs.smart.paws.icon.config"; //$NON-NLS-1$
+	public static final String ICON_AUTHTIMEOUT = "org.wcs.smart.paws.icon.authtimeout"; //$NON-NLS-1$
 
 	/**
 	 * The constructor
@@ -134,6 +135,7 @@ public class PawsPlugIn extends AbstractUIPlugin {
 	    reg.put(ICON_ERROR, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/status_error.png")); //$NON-NLS-1$
 	    reg.put(ICON_WORKING, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/status_working.png")); //$NON-NLS-1$
 	    reg.put(ICON_CONFIG, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/config.png")); //$NON-NLS-1$
+	    reg.put(ICON_AUTHTIMEOUT, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/status_authtimeout.png")); //$NON-NLS-1$
 	}
 	
 	

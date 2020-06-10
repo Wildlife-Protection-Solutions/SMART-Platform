@@ -95,6 +95,7 @@
       <perspectiveExtension
             targetID="org.wcs.smart.query.persepectives.single">
          <view
+               closeable="false"
                id="org.wcs.smart.paws.view"
                minimized="false"
                relationship="stack"

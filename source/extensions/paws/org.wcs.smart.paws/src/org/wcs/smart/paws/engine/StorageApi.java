@@ -78,6 +78,10 @@ public enum StorageApi {
 		return containerURL;
 	}
 	
+	public void resetToken() {
+		this.token = null;
+	}
+	
 	private void getWorkspace() {
 		try(Session session = HibernateManager.openSession()){
 			PawsService ws = QueryFactory.buildQuery(session, PawsService.class,  
@@ -116,13 +120,16 @@ public enum StorageApi {
 		dialog.open();
 		
 		String authorizationCode = dialog.getAuthorizationCode();
-		containerName = dialog.getUsername().replaceAll("\\.", "").replaceAll("@","");
-		run.setContainerName(containerName);
-		if (authorizationCode == null || containerName == null) {
+
+		if (authorizationCode == null) {
 			//fail
 			MessageDialog.openInformation(Display.getDefault().getActiveShell(), Messages.StorageApi_AuthFailedTitle, Messages.StorageApi_AuthFailedMsg);
 			return false;
 		}
+		
+		containerName = dialog.getUsername().replaceAll("\\.", "").replaceAll("@","");
+		run.setContainerName(containerName);
+		
 		acquireToken(authorizationCode);
 		return true;
 	}

@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.paws.PawsEvent;
@@ -44,7 +45,9 @@ import org.wcs.smart.paws.model.PawsRun;
 import com.ibm.icu.text.MessageFormat;
 import com.microsoft.azure.storage.blob.BlockBlobURL;
 import com.microsoft.azure.storage.blob.ContainerURL;
+import com.microsoft.azure.storage.blob.StorageException;
 import com.microsoft.azure.storage.blob.TransferManager;
+import com.microsoft.azure.storage.blob.models.StorageErrorCode;
 
 /*
  * could possibly resechduled if smart is shutdown
@@ -75,18 +78,17 @@ public class PawsDownloadResultJob extends Job {
 	protected IStatus run(IProgressMonitor monitor) {
 		
 		monitor.beginTask(Messages.PawsDownloadResultJob_DownloadTaskName, 5);
-		
+
+		PawsRun prun = null;
 		Path resultsDirectory = null;
-		String runId = null;
 		try{
 			try(Session session = HibernateManager.openSession()){
-				PawsRun r = session.get(PawsRun.class, run.getUuid());
-				if (r == null){
+				prun = session.get(PawsRun.class, run.getUuid());
+				if (prun == null){
 					//delete just return
 					return Status.OK_STATUS;
 				}
-				runId = r.getRunId();
-				resultsDirectory = PawsFileManager.INSTANCE.getResultsDirectory(r);
+				resultsDirectory = PawsFileManager.INSTANCE.getResultsDirectory(prun);
 				if (!Files.exists(resultsDirectory)) Files.createDirectories(resultsDirectory);
 			}
 		}catch (Exception ex){
@@ -95,16 +97,39 @@ public class PawsDownloadResultJob extends Job {
 		}
 		monitor.worked(1);
 		
+		//validate token
+		Exception[] fex = new Exception[]{null};
+		boolean[] iscancelled = new boolean[]{false};
+		PawsRun frun = prun;
+		Display.getDefault().syncExec(()->{
+			try {
+				if (!StorageApi.INSTANCE.getAuthorizationCode(Display.getDefault().getActiveShell(), frun)) {
+					iscancelled[0] = true;
+				}
+			} catch (Exception e) {
+				PawsPlugIn.displayLog(e.getMessage(), e);
+				fex[0] = e;
+			}
+		});
+		if (iscancelled[0]) {
+			updateStatus(PawsRun.Status.AUTH_TIMEOUT, "Authorization failed");
+			return Status.OK_STATUS;
+		}
+		if (fex[0] != null) {
+			handleError(fex[0].getMessage(), fex[0]);
+			return Status.OK_STATUS;
+		}
+		
 		//download results
 		monitor.subTask(Messages.PawsDownloadResultJob_downloadtaskname);
 		try{
+			
 			ContainerURL containerURL = StorageApi.INSTANCE.getContainerURL(run.getContainerName());
 
-//			resultsDirectory = resultsFile.resolve("results.csv"); 
-			String endpoint = runId + "/risk_prediction"; //$NON-NLS-1$
+			String endpoint = prun.getRunId() + "/risk_prediction"; //$NON-NLS-1$
 			
 			List<String> tocopy = StorageApi.INSTANCE.getBlobs(containerURL, endpoint);
-			tocopy.add(runId + "/processed_data/" + PawsResultManager.PROJ_FILE); //$NON-NLS-1$
+			tocopy.add(prun.getRunId() + "/processed_data/" + PawsResultManager.PROJ_FILE); //$NON-NLS-1$
 			
 			for (String result : tocopy) {
 				BlockBlobURL blobUrl = containerURL.createBlockBlobURL(result);
@@ -114,29 +139,38 @@ public class PawsDownloadResultJob extends Job {
 				
 				AsynchronousFileChannel fileChannel = AsynchronousFileChannel.open(resultsFile, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
 				
-				 final Throwable[] uperror = new Throwable[]{null}; 
+				final Throwable[] uperror = new Throwable[]{null}; 
 					
-			        TransferManager.downloadBlobToFile(fileChannel, blobUrl, null, null)
-			        .subscribe(response-> {
-			        		synchronized (lock) {
-			        			lock.notifyAll();
-			        		}
-			        	},
-			        	error->{
-			        		uperror[0] = error;
-			        		synchronized (lock) {
-			        			lock.notifyAll();
-			        		}
-			        	});
-			        synchronized (lock) {
-	        			lock.wait();
-	        		}
-			        if (uperror[0] != null) throw new Exception(Messages.PawsDownloadResultJob_DownloadFailed + uperror[0].getMessage(), uperror[0]);
+			    TransferManager.downloadBlobToFile(fileChannel, blobUrl, null, null)
+			    	.subscribe(response-> {
+			        	synchronized (lock) {
+			        		lock.notifyAll();
+			        	}
+			        }, error->{
+			        	uperror[0] = error;
+			        	synchronized (lock) {
+			        		lock.notifyAll();
+			        	}
+			        });
+			    synchronized (lock) {
+			    	lock.wait();
+	        	}
+			    if (uperror[0] != null) {
+			    	throw uperror[0];
+			    }
 			}
 			
 		}catch (Throwable t){
 			String msg = MessageFormat.format(Messages.PawsDownloadResultJob_DownloadFailedMsg, run.getRunId()); 
 			handleError(msg, t);
+			
+			if(t instanceof StorageException) {
+				StorageException ex = (StorageException) t;
+				if (ex.errorCode() == StorageErrorCode.AUTHENTICATION_FAILED) {
+					StorageApi.INSTANCE.resetToken();
+					schedule(500);
+				}
+			}
 			return Status.OK_STATUS;
 		}
 		monitor.worked(2);
@@ -187,14 +221,22 @@ public class PawsDownloadResultJob extends Job {
 	
 	
 	private void handleError(String msg, Throwable ex){
-		PawsPlugIn.displayLog(msg + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
+		PawsRun.Status newStatus = PawsRun.Status.ERROR;
+		if (ex instanceof StorageException && ((StorageException)ex).errorCode() == StorageErrorCode.AUTHENTICATION_FAILED) {
+			newStatus = PawsRun.Status.AUTH_TIMEOUT;
+		}
 		
+		PawsPlugIn.displayLog(msg + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
+		updateStatus(newStatus, msg + ": " + ex.getMessage());
+	}
+
+	private void updateStatus(PawsRun.Status newStatus, String message) {
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try{
 				session.saveOrUpdate(run);
-				run.setStatus(PawsRun.Status.ERROR);
-				run.setStatusMessage(msg + ex.getMessage());
+				run.setStatus(newStatus);
+				run.setStatusMessage(message);
 				session.getTransaction().commit();
 			}catch (Exception ex2){
 				PawsPlugIn.log(ex2.getMessage(), ex2);
@@ -202,6 +244,5 @@ public class PawsDownloadResultJob extends Job {
 		}
 		PawsEvent.fireModified(run);
 	}
-	
 
 }

@@ -33,7 +33,6 @@ import org.wcs.smart.common.filter.StringFilterComposite.StringComparison;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.incident.IIncidentProvider;
 import org.wcs.smart.incident.IncidentManager;
-import org.wcs.smart.incident.IndepedentIncidentSource;
 import org.wcs.smart.util.SharedUtils;
 
 /**

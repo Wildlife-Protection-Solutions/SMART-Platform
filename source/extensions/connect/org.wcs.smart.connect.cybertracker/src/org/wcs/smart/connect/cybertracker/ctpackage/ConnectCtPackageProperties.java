@@ -50,6 +50,7 @@ import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.cybertracker.internal.Messages;
 import org.wcs.smart.connect.cybertracker.model.CyberTrackerPackageProxy;
 import org.wcs.smart.connect.model.ConnectServer;
+import org.wcs.smart.connect.model.ConnectUser;
 import org.wcs.smart.connect.ui.server.ConnectDialog;
 import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackageProperty;
 import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackagePropertyProvider;
@@ -140,31 +141,49 @@ public class ConnectCtPackageProperties implements ICtPackagePropertyProvider {
 				if (context == null || context.get(SmartConnect.class) == null) {
 					
 					ConnectServer cs = null;
+					ConnectUser user = null;
 					try(Session s = HibernateManager.openSession()){
 						cs = ConnectHibernateManager.getConnectServer(s);
+						user = ConnectHibernateManager.getConnectUser(SmartDB.getCurrentEmployee(), s);			
+
 					}
 					if (cs != null) {
-						Display.getDefault().syncExec(new Runnable() {
-							@Override
-							public void run() {
-								ConnectDialog cd = new ConnectDialog(Display.getCurrent().getActiveShell(), true) {
-									@Override
-									protected Control createDialogArea(Composite parent) {
-										setTitle(Messages.ConnectCtPackageProperties_Title);
-										getShell().setText(Messages.ConnectCtPackageProperties_Title);
-										setMessage(Messages.ConnectCtPackageProperties_Message);	
-										return super.createDialogArea(parent);
-									}	
-								};
-								
-								if (cd.open() == Window.OK) {
-									connect = cd.getConnection();
-									if (context != null) context.set(SmartConnect.class, connect);
+						if (user != null && !user.getConnectPassword().isBlank()) {
+							try {
+								SmartConnect temp = SmartConnect.findInstance(cs, user.getConnectUsername(), ConnectPlugIn.decryptPassword(user));
+								if (temp != null) {
+									String error = temp.validateUser();
+									if (error == null) {
+										connect = temp;
+									}
 								}
-							}
-						});
+							}catch (Exception ex) {}
+						}
+						
+						if (connect == null) {
+							Display.getDefault().syncExec(new Runnable() {
+								@Override
+								public void run() {
+									ConnectDialog cd = new ConnectDialog(Display.getCurrent().getActiveShell(), true) {
+										@Override
+										protected Control createDialogArea(Composite parent) {
+											setTitle(Messages.ConnectCtPackageProperties_Title);
+											getShell().setText(Messages.ConnectCtPackageProperties_Title);
+											setMessage(Messages.ConnectCtPackageProperties_Message);	
+											return super.createDialogArea(parent);
+										}	
+									};
+									
+									if (cd.open() == Window.OK) {
+										connect = cd.getConnection();
+									}
+								}
+							});
+						}
+						if (context != null && connect != null) context.set(SmartConnect.class, connect);
+
 					}
-				}else {
+				} else {
 					connect = context.get(SmartConnect.class);
 				}
 			}

@@ -1,0 +1,378 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.smartcollect.ui;
+
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.UUID;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.swt.SWTError;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.part.MultiPageEditorPart;
+import org.hibernate.Session;
+import org.locationtech.udig.project.internal.Map;
+import org.locationtech.udig.project.ui.internal.MapPart;
+import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.incident.IncidentManager;
+import org.wcs.smart.incident.IncidentPlugIn;
+import org.wcs.smart.incident.event.IIncidentListener;
+import org.wcs.smart.incident.event.IncidentEventManager;
+import org.wcs.smart.incident.ui.IncidentEditorInput;
+import org.wcs.smart.observation.ObservationHibernateManager;
+import org.wcs.smart.observation.ObservationPlugIn;
+import org.wcs.smart.observation.events.IWaypointEventListener;
+import org.wcs.smart.observation.events.WaypointEventManager;
+import org.wcs.smart.observation.events.WaypointEventManager.EventType;
+import org.wcs.smart.observation.model.ObservationOptions;
+import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.smartcollect.SmartCollectPlugIn;
+import org.wcs.smart.smartcollect.model.SmartCollectWaypoint;
+/**
+ * Incident editor.
+ * 
+ * @author Emily
+ *
+ */
+public class SmartCollectIncidentEditor extends MultiPageEditorPart implements MapPart{ //,IAdaptable{
+
+	public static final String ID = "org.wcs.smart.smartcollect.ui.IncidentEditor"; //$NON-NLS-1$
+
+	private SmartCollectWaypoint incident = null;
+	private IncidentSummaryPage summaryEditor;
+	private IncidentMapPage mapPage;
+	private ObservationOptions ops;
+	
+	/*
+	 * Waypoint listener
+	 */
+	private IWaypointEventListener wlistener = new IWaypointEventListener() {
+		
+		@Override
+		public void handleEvent(Waypoint wp) {
+			if (wp.equals(incident.getWaypoint())){
+				//reset
+				reloadIncident();
+			}
+		}
+	};
+	
+	/*
+	 * Incident listener
+	 */
+	private IIncidentListener listener = new IIncidentListener() {
+		
+		@Override
+		public void handleEvent(int eventType, Object source) {
+			if (eventType == IncidentEventManager.INCIDENT_MODIFIED){
+				//if this editor matches the incident being modified
+				//we need to reload values
+				if ((source instanceof Waypoint &&
+						((Waypoint)source).equals(incident.getWaypoint()) ) ||
+						(source instanceof IncidentEditorInput &&
+								(((IncidentEditorInput)source).getUuid().equals(incident.getWaypoint().getUuid())))) {
+					Display.getDefault().asyncExec(()->reloadIncident());
+				}
+						
+			}else if (eventType == IncidentEventManager.INCIDENT_DELETED){
+				//if this editor matches the item deleted we need to
+				//close the editor
+				if ((source instanceof Waypoint &&
+						((Waypoint)source).equals(incident.getWaypoint()) ) ||
+						(source instanceof IncidentEditorInput &&
+								((IncidentEditorInput)source).getUuid().equals(incident.getWaypoint().getUuid()))) {
+					
+					//close this editor
+					getEditorSite().getShell().getDisplay().asyncExec(new Runnable(){
+						@Override
+						public void run() {
+							getEditorSite().getWorkbenchWindow().getActivePage().closeEditor(SmartCollectIncidentEditor.this, false);					
+						}});
+				}
+			}
+		}
+	};
+	
+	public SmartCollectIncidentEditor() {
+		super();
+	}
+
+	@Override
+	public void dispose() {
+		IncidentEventManager.getInstance().removeListener(listener);
+		WaypointEventManager.getInstance().removeListener(EventType.WAYPOINT_MODIFIED, wlistener);
+		getSite().setSelectionProvider(null);
+		this.listener = null;
+		this.wlistener = null;
+		
+		super.dispose();
+		
+		this.mapPage = null;
+		this.summaryEditor = null;
+	}
+
+	
+	/**
+	 * refreshed the incident and the editor values
+	 */
+	private void reloadIncident(){
+		//reload incident
+		incident = null;
+		getIncident();
+		
+		//update editor name
+		((IncidentEditorInput)getEditorInput()).setId(incident.getWaypoint().getId());
+		((IncidentEditorInput)getEditorInput()).setDateTime(incident.getWaypoint().getDateTime());
+		setPartName(((IncidentEditorInput)getEditorInput()).getName());
+		
+		summaryEditor.initData(incident);
+		mapPage.updatePointsLayer();
+		
+		super.setPartName(MessageFormat.format("SMART Collect Incident {0}", new Object[]{String.valueOf(getIncident().getWaypoint().getId())}));
+	}
+	/**
+	 * 
+	 * @return null if the incident can be editted, otherwise a string
+	 * that described reason why can't be edited.
+	 */
+	public String canEdit(){
+		return IncidentManager.getInstance().canEdit(incident.getWaypoint(), ops);
+	}
+	
+
+	public ObservationOptions getOptions(){
+		return this.ops;
+	}
+	
+	
+	/**
+	 * Loads the incident 
+	 * @return
+	 */
+	public SmartCollectWaypoint getIncident(){
+		if (this.incident == null){
+			
+			UUID uuid = ((IncidentEditorInput) getEditorInput()).getUuid();
+			try(Session session = HibernateManager.openSession()){
+				try{
+					//load incident 
+					session.beginTransaction();
+					this.incident = (SmartCollectWaypoint) session.load(SmartCollectWaypoint.class, uuid);
+					this.incident.getWaypoint().getId();
+					
+					try{
+						ObservationHibernateManager.computeAttachmentLocations(incident.getWaypoint(), session);
+					}catch (Exception ex){
+						ObservationPlugIn.displayLog(ex.getMessage(), ex);
+					}
+					
+					session.getTransaction().commit();
+					
+					if (ops == null){
+						ops = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
+					}
+				}catch (Exception ex) {
+					if (session.getTransaction().isActive()) session.getTransaction().rollback();
+				}
+			}
+		}
+		return this.incident;
+	}
+
+	/**
+	 * Updates the incident editor part name 
+	 */
+	public void updatePartName(){
+		IncidentEditorInput input = ((IncidentEditorInput) getEditorInput());
+		super.setPartName(MessageFormat.format("SMART Collect Incident {0}", input.getId()));
+	}
+	
+	
+	/** Creates the summary and map pages
+	 * @see org.eclipse.ui.part.MultiPageEditorPart#createPages()
+	 */
+	@Override
+	protected void createPages() {
+		super.setPartName(MessageFormat.format("SMART Collect Incident {0}", new Object[]{String.valueOf(getIncident().getWaypoint().getId())}));
+		showBusy(true);
+		try {
+			
+			getIncident();
+			
+			summaryEditor= new IncidentSummaryPage(this);
+			int i = addPage(summaryEditor, getEditorInput());
+			setPageText(i, "Summary");
+			setPageImage(i, IncidentPlugIn.getDefault().getImageRegistry().get(IncidentPlugIn.INCIDENT_ICON));
+			
+			mapPage = new IncidentMapPage(this);
+			int mapIndex = addPage(mapPage, getEditorInput());
+			setPageText(mapIndex, "Map");
+			setPageImage(mapIndex, SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.MAP_ICON));
+			
+			//-- event managers --
+			IncidentEventManager.getInstance().addListener(listener);
+			WaypointEventManager.getInstance().addListener(EventType.WAYPOINT_MODIFIED, wlistener);
+			
+		} catch (final Throwable t) {
+			getSite().getPage().getWorkbenchWindow().getShell().getDisplay().asyncExec(new Runnable(){
+				@Override
+						public void run() {
+							try {
+								SmartCollectIncidentEditor.this.dispose();
+								SmartCollectIncidentEditor.this.getSite().getPage().closeEditor(SmartCollectIncidentEditor.this, false);
+								if (t instanceof SWTError&& t.getMessage().contains("No more handles")) { //$NON-NLS-1$
+									SmartCollectPlugIn.displayLog("Incident editor could not be created.  Please try closing existing open editors and try again." + t.getLocalizedMessage(), t);
+								} else {
+									SmartCollectPlugIn.displayLog("Error occurred while loading editor: " + t.getLocalizedMessage(), t);
+								}
+							} catch (Exception ex) {
+								SmartCollectPlugIn.log("Failure",ex); //$NON-NLS-1$
+							}
+
+						}
+			});
+			throw new RuntimeException("Error occurred while loading editor: " + t.getMessage(), t);
+		}finally{
+			showBusy(false);
+		}
+		
+		getSite().setSelectionProvider(new ISelectionProvider() {
+			private Collection<ISelectionChangedListener> listeners = new ArrayList<ISelectionChangedListener>();
+			@Override
+			public void setSelection(ISelection selection) {
+				for (ISelectionChangedListener list: listeners){
+					list.selectionChanged(new SelectionChangedEvent(this, selection));
+				}
+			}
+			
+			@Override
+			public void removeSelectionChangedListener(
+					ISelectionChangedListener listener) {
+				listeners.remove(listener);
+			}
+			
+			@Override
+			public ISelection getSelection() {
+				return new StructuredSelection(getIncident());
+			}
+			
+			@Override
+			public void addSelectionChangedListener(ISelectionChangedListener listener) {
+				listeners.add(listener);
+			}
+		});
+	}
+	
+	/** 
+	 * @return false
+	 */
+	@Override
+	public boolean isSaveAsAllowed() {
+		return false;
+	}
+
+	
+	/** Does nothing
+	 * @see org.eclipse.ui.part.EditorPart#doSaveAs()
+	 */
+	@Override
+	public void doSave(IProgressMonitor monitor) {
+
+	}
+
+	/** Does nothing
+	 * @see org.eclipse.ui.part.EditorPart#doSaveAs()
+	 */
+	@Override
+	public void doSaveAs() {
+	}
+
+	/* (non-Javadoc)
+	 * @see org.locationtech.udig.project.ui.internal.MapPart#getMap()
+	 */
+	@Override
+	public Map getMap() {
+		if (mapPage == null){
+			return null;
+		}
+		return 	mapPage.getMap();
+	}
+
+	/* (non-Javadoc)
+	 * @see org.locationtech.udig.project.ui.internal.MapPart#openContextMenu()
+	 */
+	@Override
+	public void openContextMenu() {
+		mapPage.openContextMenu();
+		
+	}
+
+	/* (non-Javadoc)
+	 * @see org.locationtech.udig.project.ui.internal.MapPart#setFont(org.eclipse.swt.widgets.Control)
+	 */
+	@Override
+	public void setFont(Control textArea) {
+		mapPage.setFont(textArea);
+		
+	}
+
+	/* (non-Javadoc)
+	 * @see org.locationtech.udig.project.ui.internal.MapPart#setSelectionProvider(org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider)
+	 */
+	@Override
+	public void setSelectionProvider(
+			IMapEditorSelectionProvider selectionProvider) {
+		mapPage.setSelectionProvider(selectionProvider);
+		
+	}
+
+	/* (non-Javadoc)
+	 * @see org.locationtech.udig.project.ui.internal.MapPart#getStatusLineManager()
+	 */
+	@Override
+	public IStatusLineManager getStatusLineManager() {
+		return mapPage.getStatusLineManager();
+	}
+
+//	@SuppressWarnings({ "unchecked", "rawtypes" })
+//	public Object getAdapter(Class adaptee) {
+//		if (adaptee.isAssignableFrom(Map.class)) {
+//			return getMap();
+//		}
+//		return super.getAdapter(adaptee);
+//	}
+	public void setFocus() {
+		super.setFocus();
+		getSite().getSelectionProvider().setSelection(getSite().getSelectionProvider().getSelection());
+	}
+}

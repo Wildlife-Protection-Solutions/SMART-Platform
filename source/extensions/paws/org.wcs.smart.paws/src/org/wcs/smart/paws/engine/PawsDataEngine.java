@@ -604,7 +604,7 @@ public class PawsDataEngine {
 //			select.deleteCharAt(select.length() - 1);
 //			select.deleteCharAt(select.length() - 1);
 			
-			SimpleDateFormat ff = new SimpleDateFormat("MMM dd, yyyy");
+			SimpleDateFormat ff = new SimpleDateFormat("MMMM dd, yyyy");
 			try(ScrollableResults results = session.createNativeQuery(select.toString()).scroll()){
 				while(results.next()) {
 					String[] data = new String[headers.size()];

@@ -243,6 +243,20 @@ public enum PawsManager {
 		case COMPILING_DATA: return PawsPlugIn.getDefault().getImageRegistry().get(PawsPlugIn.ICON_WORKING);
 		case COMPLETE: return PawsPlugIn.getDefault().getImageRegistry().get(PawsPlugIn.ICON_DONE);
 		case ERROR: return PawsPlugIn.getDefault().getImageRegistry().get(PawsPlugIn.ICON_ERROR);
+		case AUTH_TIMEOUT:return PawsPlugIn.getDefault().getImageRegistry().get(PawsPlugIn.ICON_AUTHTIMEOUT);
+		}
+		return null;
+	}
+	
+	public String getStatusLabel(PawsRun.Status status) {
+		switch(status){
+		case UPLOADING_DATA: return "Uploading Data";
+		case RUNNING: return "Running";
+		case DOWNLOADING_RESULTS: return "Downloading Results";
+		case COMPILING_DATA: return "Compiling Data";
+		case COMPLETE: return "Complete";
+		case ERROR: return "Error";
+		case AUTH_TIMEOUT:return "Authentication Timeout";
 		}
 		return null;
 	}

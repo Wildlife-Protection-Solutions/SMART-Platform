@@ -97,7 +97,12 @@ public class PawsResultFile {
 
 	public String getTimeFrameString() {
 		String fname = this.resultsFile.getFileName().toString();
-		fname = fname.substring("predictions_".length(), fname.length() - "_XXXX.csv".length()); //$NON-NLS-1$ //$NON-NLS-2$
+		if (fname.length() == "predictions_XXXX.csv".length()) {
+			//year only
+			fname = fname.substring("predictions_".length(), fname.length() - ".csv".length()); //$NON-NLS-1$ //$NON-NLS-2$ 
+		}else {
+			fname = fname.substring("predictions_".length(), fname.length() - "_XXXX.csv".length()); //$NON-NLS-1$ //$NON-NLS-2$
+		}
 		return fname;
 	}
 	

@@ -39,6 +39,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
@@ -53,6 +54,7 @@ import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
@@ -63,11 +65,13 @@ import org.wcs.smart.paws.PawsEvent;
 import org.wcs.smart.paws.PawsFileManager;
 import org.wcs.smart.paws.PawsManager;
 import org.wcs.smart.paws.PawsPlugIn;
+import org.wcs.smart.paws.engine.PawsStatusJob;
 import org.wcs.smart.paws.engine.PawsTask;
 import org.wcs.smart.paws.internal.Messages;
 import org.wcs.smart.paws.model.PawsResultFile;
 import org.wcs.smart.paws.model.PawsResultManager;
 import org.wcs.smart.paws.model.PawsRun;
+import org.wcs.smart.paws.model.PawsRun.Status;
 import org.wcs.smart.paws.model.PawsService;
 import org.wcs.smart.paws.ui.HeaderComposite;
 import org.wcs.smart.ui.SmartLabelProvider;
@@ -87,9 +91,13 @@ public class RunSummaryPage extends EditorPart {
 	private Composite statusComp ;
 	private Composite detailsComp ;
 	
+	private Button btnRetry;
+	
 	private RunEditor parent;
 	private FormToolkit toolkit;
 
+	private PawsResultManager mgr = null;
+	
 	public RunSummaryPage(RunEditor parent) {
 		this.parent = parent;
 	}
@@ -130,9 +138,9 @@ public class RunSummaryPage extends EditorPart {
 	public void createPartControl(Composite parent) {
 		toolkit = new FormToolkit(parent.getDisplay());
 		
-		Form main = toolkit.createForm(parent);
-		main.getBody().setLayout(new GridLayout());
 		
+		ScrolledForm main = toolkit.createScrolledForm(parent);
+		main.getBody().setLayout(new GridLayout()); 
 		
 		header = new HeaderComposite(main.getBody(), toolkit, main.getFont(), main.getForeground());
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -159,6 +167,8 @@ public class RunSummaryPage extends EditorPart {
 			RunSummaryPage.this.parent.getContext().get(IEventBroker.class).post(PawsEvent.PAWS_RUN_MODIFY, info);
 			
 		});
+
+		
 		SmartUiUtils.createHeaderLabel(main.getBody(), Messages.RunSummaryPage_ResultsSection);
 		Composite resultscomp = toolkit.createComposite(main.getBody());
 		resultscomp.setLayout(new GridLayout(2, false));
@@ -190,19 +200,32 @@ public class RunSummaryPage extends EditorPart {
 		ti.addListener(SWT.Selection, e->RunSummaryPage.this.parent.refresh());
 		
 		Composite scomp = toolkit.createComposite(main.getBody());
-		scomp.setLayout(new GridLayout(2, false));
+		scomp.setLayout(new GridLayout(3, false));
 		scomp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false ));
 		
 		lblStatusImg = toolkit.createLabel(scomp, ""); //$NON-NLS-1$
 		
 		lblStatus = toolkit.createLabel(scomp, ""); //$NON-NLS-1$
-		lblStatus.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		lblStatus.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		
+		btnRetry = toolkit.createButton(scomp, "Retry",  SWT.PUSH);
+		btnRetry.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
+		btnRetry.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false));
+		btnRetry.addListener(SWT.Selection, e->{
+			if (mgr != null) {
+				btnRetry.setEnabled(false);
+				lblStatus.setText("Attempt re-authorization.  Please wait...");
+				lblStatus.getParent().layout(true);
+				PawsStatusJob.getInstance().addItem(mgr.getRun());
+			}
+		});
+		btnRetry.setVisible(false);
 		
 		lblStatusMsg = toolkit.createLabel(scomp, "", SWT.WRAP); //$NON-NLS-1$
-		lblStatusMsg.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		lblStatusMsg.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
 		
 		statusComp = toolkit.createComposite(scomp);
-		statusComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		statusComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
 		statusComp.setLayout(new GridLayout());
 		((GridLayout)statusComp.getLayout()).marginWidth = 0;
 		((GridLayout)statusComp.getLayout()).marginHeight = 0;
@@ -228,6 +251,7 @@ public class RunSummaryPage extends EditorPart {
 		
 			if (run.getServerStatusJson() != null) {
 				Group sgroup = new Group(statusComp, SWT.FLAT);
+				sgroup.setBackground(statusComp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 				sgroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				sgroup.setText(Messages.RunSummaryPage_StatusDetails);
 				sgroup.setLayout(new GridLayout(2, false));
@@ -269,10 +293,14 @@ public class RunSummaryPage extends EditorPart {
 			}
 		}
 		statusComp.layout(true);
+		btnRetry.setVisible(run.getStatus() == Status.AUTH_TIMEOUT);
 		
 		lblStatusImg.setImage(PawsManager.INSTANCE.getImage(run.getStatus()));
-		lblStatus.setText(run.getStatus().name());
+		lblStatus.setText(PawsManager.INSTANCE.getStatusLabel(run.getStatus()));
+		
 		if (run.getStatusMessage() != null) lblStatusMsg.setText(run.getStatusMessage());
+		
+		lblStatusImg.getParent().layout(true);
 		
 		header.setText(run.getId());
 		header.setData(RUN_KEY, run);
@@ -347,6 +375,7 @@ public class RunSummaryPage extends EditorPart {
 	}
 	
 	public void refresh(final PawsResultManager results) {
+		mgr = results;
 		if (!results.getResults().isEmpty()) {
 			List<PawsResultFile> files = new ArrayList<>(results.getResults());
 			files.sort((a,b)->{
