@@ -73,9 +73,9 @@
 	     		<p><fmt:message key="report.reportuuid" /><input class="formtext" id="reportuuid" type="text" name="uuid" value="" style="width:100%" disabled/></p>
      		</fieldset>
      		
-     		<p id="customParamters"></p>
+     		<p id="customParameters"></p>
      		
-     		<fieldset id="paramaters_fieldset" style="display:none">
+     		<fieldset id="parameters_fieldset" style="display:none">
 	     		<legend><fmt:message key="report.datefilter"/></legend>
 		     	<p><fmt:message key="report.datefilterlabel"/>
 		     	  <select style="width:100%" id="defineddates" class="formtext" ></select>

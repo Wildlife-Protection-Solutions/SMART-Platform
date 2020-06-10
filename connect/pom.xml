@@ -15,13 +15,14 @@
 	</modules>
 	
 	<properties>
-		project.build.sourceEncoding>UTF-8</project.build.sourceEncoding
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<smart.version>7.0.0-SNAPSHOT</smart.version>
 		<geotools.version>23.0</geotools.version>
 		<jts.version>1.16.1</jts.version>
 		<hibernate.version>5.4.3.Final</hibernate.version>
 		<resteasy.version>3.6.3.Final</resteasy.version>
-		<udig.version>3.0.0-SNAPSHOT</udig.version>    	</properties>
+		<udig.version>3.0.0-SNAPSHOT</udig.version>
+	</properties>
 	
 	<repositories>
 		<repository>

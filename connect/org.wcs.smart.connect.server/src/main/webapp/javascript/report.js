@@ -302,15 +302,18 @@ function showReportOptions(){
 	var pos = getPosition(poselement);
 	
 	//clear custom paramater from any previous reports
-	var parent = document.getElementById("customParamters");
+	var parent = document.getElementById("customParameters");
 	while (parent.firstChild) {
 		parent.removeChild(parent.firstChild);
 	}
-	parent.innerHTML = "<font style='color:red'>Loading custom parameters.</font>";
+	parent.innerHTML = "<font style='color:red'>Loading custom parameters...</font>";
 
 	//update report parameters required
 	var oReq = new XMLHttpRequest();
-	oReq.onload = showParamaterSelection;
+	oReq.onload = showParameterSelection;
+	oReq.timeout = 5000;
+	oReq.onerror = parameterError;
+	oReq.ontimeout = parameterError;
 	oReq.open("Get", REPORTURL  + uuid + "/params", true);
 	oReq.send();
 
@@ -320,11 +323,17 @@ function showReportOptions(){
 
 }
 
+// error handler for getting parameters
+function parameterError() {
+	var parent = document.getElementById("customParameters");
+	parent.innerHTML = "<font style='color:red'>Error loading custom parameters; please cancel and try again.</font>";	
+}
+
 //callback from getting parameters
 //this function adds GUI items to match each required parameter
-function showParamaterSelection(){
-	var parent = document.getElementById("customParamters");
-	document.getElementById("paramaters_fieldset").style.display = "none";
+function showParameterSelection(){
+	var parent = document.getElementById("customParameters");
+	document.getElementById("parameters_fieldset").style.display = "none";
 	parent.innerHTML = "";
 	var json = JSON.parse(this.responseText);
 	parameterNames.length = 0; //clear the array so we don't parameters from the last report that was run.
@@ -333,7 +342,7 @@ function showParamaterSelection(){
  		if(json[i].type == "GROUP"){
  			if (json[i].name=="Report Dates"){
  				//start and end dates already made; use default gui but still add to parameter list
- 				document.getElementById("paramaters_fieldset").style.display = "block";
+ 				document.getElementById("parameters_fieldset").style.display = "block";
  				for (var x = 0; x < json[i].children.length; x++){
  					parameterNames.push(json[i].children[x].name);
  				}
