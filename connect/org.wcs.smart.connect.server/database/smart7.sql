@@ -1258,27 +1258,6 @@ CREATE FUNCTION connect.trg_patrol_waypoint() RETURNS trigger
          FROM smart.waypoint wp WHERE wp.uuid = ROW.wp_uuid;
 RETURN ROW; END$$;
 
-
-CREATE FUNCTION connect.trg_paws_config_join() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
- DECLARE
- ROW RECORD;
-BEGIN
- IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN
-  ROW = NEW;
-  ELSIF (TG_OP = 'DELETE') THEN
-   ROW = OLD;
-  END IF;
-
-  INSERT INTO connect.change_log
- (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
- SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, c.CA_UUID
-   FROM smart.paws_configuration c WHERE c.uuid = ROW.config_uuid;
- RETURN ROW;
-END$$;
-
-
 CREATE FUNCTION connect.trg_plan_target() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
@@ -2199,6 +2178,16 @@ COMMENT ON COLUMN connect.work_item.local_filename IS 'Name of the file in the l
 COMMENT ON COLUMN connect.work_item.type IS 'File type.';
 COMMENT ON COLUMN connect.work_item.status IS 'Status of upload and processing';
 COMMENT ON COLUMN connect.work_item.message IS 'Error message or other info message asociated with upload.';
+
+CREATE TABLE connect.smartcollect_user(
+  uuid uuid not null, state varchar(32) not null, 
+  source varchar(4096) not null, 
+  validation_sent_date timestamp, 
+  validation_key varchar(64), 
+  primary key (uuid), 
+  unique(source)
+);
+
 
 
 -- SMART TABLES
@@ -3949,86 +3938,12 @@ CREATE TABLE smart.patrol_waypoint (
 );
 
 
-CREATE TABLE smart.paws_configuration (
-    uuid uuid NOT NULL,
-    ca_uuid uuid NOT NULL,
-    name character varying(8192) NOT NULL,
-    PRIMARY KEY (uuid)
-);
-
-
-CREATE TABLE smart.paws_parameter (
-    uuid uuid NOT NULL,
-    config_uuid uuid NOT NULL,
-    keyid character varying(8192) NOT NULL,
-    value character varying(8192),
-    PRIMARY KEY (uuid)
-);
-
-
-CREATE TABLE smart.paws_query_class (
-    uuid uuid NOT NULL,
-    config_uuid uuid NOT NULL,
-    query_uuid uuid NOT NULL,
-    query_type character varying(32) NOT NULL,
-    classification character varying(512) NOT NULL,
-    PRIMARY KEY (uuid)
-);
-
-
-CREATE TABLE smart.paws_run (
-    uuid uuid NOT NULL,
-    ca_uuid uuid NOT NULL,
-    config_uuid uuid,
-    id character varying(256) NOT NULL,
-    server_run_id character varying(256),
-    run_date timestamp without time zone,
-    package_file character varying(256),
-    result_location character varying(256),
-    status character varying(32) NOT NULL,
-    status_message character varying,
-    server_status_json character varying,
-    train_start_year smallint,
-    train_end_year smallint,
-    forecast_start_year smallint,
-    forecast_end_year smallint,
-    paws_task_id character varying(8192),
-    PRIMARY KEY (uuid)
-);
-
-
-CREATE TABLE smart.paws_service (
-    uuid uuid NOT NULL,
-    ca_uuid uuid NOT NULL,
-    heatmap_api character varying(8192),
-    task_api character varying(8192),
-    api_key character varying(8192),
-    PRIMARY KEY (uuid)
-);
-
-
-CREATE TABLE smart.paws_simple_class (
-    uuid uuid NOT NULL,
-    config_uuid uuid NOT NULL,
-    classification character varying(512) NOT NULL,
-    date_range character varying(512),
-    category_hkey character varying(32672) NOT NULL,
-    attribute_key character varying(128),
-    list_key character varying(128),
-    tree_hkey character varying(32672),
-    PRIMARY KEY (uuid)
-);
-
-
-CREATE TABLE smart.paws_workspace (
-    uuid uuid NOT NULL,
-    ca_uuid uuid NOT NULL,
-    url character varying(8192),
-    client_id character varying(8192),
-    storage_account_url character varying(8192),
-    container_name character varying(8192),
-    PRIMARY KEY (uuid)
-);
+CREATE TABLE smart.paws_configuration(uuid uuid NOT NULL, ca_uuid uuid NOT NULL, name varchar(8192) NOT NULL, PRIMARY KEY (uuid));
+CREATE TABLE smart.paws_parameter( uuid uuid NOT NULL, config_uuid uuid NOT NULL, keyid varchar(8192) NOT NULL, value varchar(8192), PRIMARY KEY (uuid));
+CREATE TABLE smart.paws_query_class(uuid uuid NOT NULL, config_uuid uuid NOT NULL, query_uuid uuid NOT NULL, query_type varchar(32) NOT NULL, classification varchar(512) NOT NULL, PRIMARY KEY (uuid));
+CREATE TABLE smart.paws_run(uuid uuid NOT NULL, ca_uuid uuid NOT NULL, config_uuid uuid, id varchar(256) NOT NULL, server_run_id varchar(256), run_date timestamp, package_file varchar(256), result_location varchar(256), status varchar(32) NOT NULL, status_message varchar, server_status_json varchar, train_start_year smallint, train_end_year smallint, forecast_start_year smallint, forecast_end_year smallint, container varchar(8192), paws_task_id varchar(8192), PRIMARY KEY (uuid));
+CREATE TABLE smart.paws_service(uuid uuid NOT NULL, ca_uuid uuid NOT NULL UNIQUE, paws_api varchar(8192), task_api varchar(8192), paws_api_key varchar(8192), oauth_url varchar(8192), client_id varchar(8192), storage_account_url varchar(8192), PRIMARY KEY (uuid));
+CREATE TABLE smart.paws_simple_class(uuid uuid NOT NULL, config_uuid uuid NOT NULL, classification varchar(512) NOT NULL, date_range varchar(512), category_hkey varchar(32672) NOT NULL, attribute_key varchar(128), list_key varchar(128), tree_hkey varchar(32672), PRIMARY KEY (uuid));
 
 
 CREATE TABLE smart.plan (
@@ -4491,6 +4406,20 @@ CREATE TABLE smart.wp_observation_group (
 );
 
 
+CREATE TABLE smart.smartcollect_waypoint(
+  wp_uuid uuid not null,  
+  source varchar(32000), 
+  primary key(wp_uuid)
+);
+
+CREATE TABLE smart.smartcollect_package(
+  uuid uuid not null, 
+  name varchar(512), 
+  ca_uuid uuid not null, 
+  cm_uuid uuid, 
+  ctprofile_uuid uuid,
+  basemapdef varchar(32672), primary key (uuid));
+
 ALTER TABLE ONLY smart.asset_attribute_list_item ADD CONSTRAINT asset_li_keyid_attribute_uuid_unq UNIQUE (keyid, attribute_uuid);
 ALTER TABLE ONLY smart.asset_module_settings ADD CONSTRAINT asset_module_key_ca_unq UNIQUE (keyid, ca_uuid);
 ALTER TABLE ONLY smart.asset_station ADD CONSTRAINT asset_sn_id_ca_unq UNIQUE (id, ca_uuid);
@@ -4521,6 +4450,14 @@ ALTER TABLE ONLY smart.sampling_unit_attribute ADD CONSTRAINT su_attribute_keyid
 ALTER TABLE ONLY smart.sampling_unit_attribute_list ADD CONSTRAINT su_list_attribute_keyid_unq UNIQUE (sampling_unit_attribute_uuid, keyid) DEFERRABLE;
 ALTER TABLE ONLY smart.survey_design ADD CONSTRAINT survey_design_keyid_unq UNIQUE (ca_uuid, keyid) DEFERRABLE;
 ALTER TABLE ONLY smart.team ADD CONSTRAINT team_keyid_unq UNIQUE (ca_uuid, keyid) DEFERRABLE;
+
+ALTER TABLE smart.paws_configuration ADD FOREIGN KEY(ca_uuid) REFERENCES smart.conservation_area (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.paws_run ADD FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.paws_service ADD FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.paws_parameter ADD FOREIGN KEY (config_uuid) REFERENCES smart.paws_configuration (uuid) ON UPDATE RESTRICT ON DELETE CASCADE  DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.paws_run ADD FOREIGN KEY (config_uuid) REFERENCES smart.paws_configuration (uuid) ON UPDATE RESTRICT ON DELETE SET NULL DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.paws_query_class ADD FOREIGN KEY (config_uuid) REFERENCES smart.paws_configuration (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.paws_simple_class ADD FOREIGN KEY (config_uuid) REFERENCES smart.paws_configuration (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 
 
 CREATE INDEX connect_change_log_ca_uuid_idx ON connect.change_log USING btree (ca_uuid);
@@ -5198,6 +5135,43 @@ ALTER TABLE ONLY smart.waypoint_query ADD CONSTRAINT waypoint_query_folder_uuid_
 ALTER TABLE ONLY smart.wp_attachments ADD CONSTRAINT wp_attachments_wp_uuid_fk FOREIGN KEY (wp_uuid) REFERENCES smart.waypoint(uuid) ON DELETE CASCADE DEFERRABLE;
 ALTER TABLE ONLY smart.wp_observation_group ADD CONSTRAINT wp_observation_group_wp_uuid_fkey FOREIGN KEY (wp_uuid) REFERENCES smart.waypoint(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE ONLY smart.wp_observation ADD CONSTRAINT wp_observation_wp_group_uuid_fkey FOREIGN KEY (wp_group_uuid) REFERENCES smart.wp_observation_group(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.smartcollect_waypoint ADD FOREIGN KEY (wp_uuid) REFERENCES smart.waypoint(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.smartcollect_package ADD FOREIGN KEY (CA_UUID) REFERENCES smart.conservation_area(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.smartcollect_package ADD FOREIGN KEY (CM_UUID) REFERENCES smart.configurable_model(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.smartcollect_package ADD FOREIGN KEY (ctprofile_uuid) REFERENCES smart.ct_properties_profile(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+
+CREATE TRIGGER trg_smartcollect_package AFTER INSERT OR UPDATE OR DELETE ON smart.smartcollect_package FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE OR REPLACE FUNCTION connect.smartcollect_waypoint() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'wp_uuid', ROW.wp_uuid, null, null, null, wp.ca_uuid 
+ 		FROM smart.waypoint wp WHERE wp.uuid = row.wp_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+CREATE TRIGGER trg_smartcollect_waypoint AFTER INSERT OR UPDATE OR DELETE ON smart.smartcollect_waypoint FOR EACH ROW execute procedure connect.smartcollect_waypoint();
+
+
+CREATE TRIGGER trg_paws_configuration AFTER INSERT OR UPDATE OR DELETE ON smart.paws_configuration FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_paws_run AFTER INSERT OR UPDATE OR DELETE ON smart.paws_run FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_paws_service AFTER INSERT OR UPDATE OR DELETE ON smart.paws_service FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE OR REPLACE FUNCTION connect.trg_paws_config_join() RETURNS trigger AS $$
+	DECLARE
+	ROW RECORD;
+BEGIN
+	IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN	
+ 	ROW = NEW;
+ 	ELSIF (TG_OP = 'DELETE') THEN
+ 		ROW = OLD;
+ 	END IF;
+ 
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, c.CA_UUID 
+ 		FROM smart.paws_configuration c WHERE c.uuid = ROW.config_uuid;
+ RETURN ROW;
+END$$ LANGUAGE 'plpgsql';
+CREATE TRIGGER trg_paws_simple_class AFTER INSERT OR UPDATE OR DELETE ON smart.paws_simple_class FOR EACH ROW execute procedure connect.trg_paws_config_join();
+CREATE TRIGGER trg_paws_query_class AFTER INSERT OR UPDATE OR DELETE ON smart.paws_query_class FOR EACH ROW execute procedure connect.trg_paws_config_join();
+CREATE TRIGGER trg_paws_parameter AFTER INSERT OR UPDATE OR DELETE ON smart.paws_parameter FOR EACH ROW execute procedure connect.trg_paws_config_join();
 
 
 insert into smart.dm_aggregation(name) values ('sum');
@@ -5281,3 +5255,5 @@ INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs
 INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart','7.0.0');
 INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.cybertracker','7.0');
 INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.i2','5.0');
+insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.smartcollect', '1.0');
+
