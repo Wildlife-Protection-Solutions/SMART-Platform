@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2020 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.incident;
 
 import java.text.MessageFormat;
@@ -19,9 +40,14 @@ import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.user.UserLevelManager;
 
+/**
+ * Manager for processing different incident sources and providing ui components
+ * @author Emily
+ *
+ */
 public class IncidentManager {
 	
-	private static final String INCIDENT_PROVIDER_EXT_ID = "org.wcs.smart.independentincident.provider";
+	private static final String INCIDENT_PROVIDER_EXT_ID = "org.wcs.smart.independentincident.provider"; //$NON-NLS-1$
 	
 	private static IncidentManager instance = null;
 	private static HashMap<String, IIncidentProvider> incidentProviders = null;
@@ -92,6 +118,12 @@ public class IncidentManager {
 		}
 	}	
 	
+	/**
+	 * Computes the next incident ID
+	 * 
+	 * @param session
+	 * @return
+	 */
 	public Integer getNextIncidentId(Session session) {
 		Set<String> incidentsources = getIncidentProviders().stream()
 				.map(e->e.getWaypointSourceKey()).collect(Collectors.toSet());

@@ -118,7 +118,6 @@ public class IncidentEditorInput implements IEditorInput {
 
 	@Override
 	public ImageDescriptor getImageDescriptor() {
-		//return IncidentManager.getInstance().getIncidentProvider(sourceKey).getImage().;
 		return null;
 	}
 
@@ -130,8 +129,7 @@ public class IncidentEditorInput implements IEditorInput {
 	 */
 	@Override
 	public String getName() {
-		//TODO:
-		return MessageFormat.format(Messages.IncidentEditorInput_EditorName, new Object[]{String.valueOf(id)});
+		return MessageFormat.format("{0} {1}", IncidentManager.getInstance().getIncidentProvider(sourceKey).getName(), String.valueOf(id)); //$NON-NLS-1$
 	}
 
 	/**
@@ -147,7 +145,6 @@ public class IncidentEditorInput implements IEditorInput {
 	 */
 	@Override
 	public String getToolTipText() {
-		//TODO:
 		return MessageFormat.format(Messages.IncidentEditorInput_EditorTooltip, new Object[]{ id});
 	}
 

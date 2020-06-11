@@ -74,7 +74,7 @@ public class IdComposite extends AbstractIncidentComposite {
 		
 		if (IncidentManager.getInstance().getIncidentProviders().size() > 1) {
 			Label l = new Label(item, SWT.NONE);
-			l.setText("Source: ");
+			l.setText(Messages.IdComposite_WaypointSourceField);
 			
 			cmbType = new ComboViewer(item, SWT.DROP_DOWN | SWT.READ_ONLY);
 			cmbType.setContentProvider(ArrayContentProvider.getInstance());

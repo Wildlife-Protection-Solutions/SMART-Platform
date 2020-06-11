@@ -9,7 +9,7 @@
             class="org.wcs.smart.incident.ui.IndIncidentListView$IndIncidentListViewWrapper"
             icon="images/icons/obj16/incident.png"
             id="org.wcs.smart.observation.ui.incidientView"
-            name="%incidentlistview.name"
+            name="%incidentlistview.name1"
             restorable="true">
       </view>
    </extension>

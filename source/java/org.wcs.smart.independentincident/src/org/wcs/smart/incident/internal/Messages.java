@@ -45,6 +45,7 @@ public class Messages extends NLS {
 	public static String IdComposite_IntegerRequired;
 	public static String IdComposite_Label;
 	public static String IdComposite_Name;
+	public static String IdComposite_WaypointSourceField;
 	public static String ImportIncidentHandler_CancelledDialogMessage;
 	public static String ImportIncidentHandler_CancelledDialogTitle;
 	public static String ImportIncidentHandler_DialogMessage1;
@@ -77,6 +78,7 @@ public class Messages extends NLS {
 	public static String IncidentFilterDialog_IdOptionLabel;
 	public static String IncidentFilterDialog_IncludeAllOption;
 	public static String IncidentFilterDialog_ShellTitle;
+	public static String IncidentFilterDialog_SourceFilterSection;
 	public static String IncidentImporter_ConvertingProgress;
 	public static String IncidentImporter_ErrorMessage;
 	public static String IncidentImporter_ErrorUnzipping;
@@ -132,6 +134,7 @@ public class Messages extends NLS {
 	public static String IncidentSummaryPage_TimeLabel;
 	public static String IncidentSummaryPage_ValueLabel;
 	public static String IndepedentIncidentSource_IndIncidentWaypointsourceName;
+	public static String IndependentIncidentProvider_IndependentIncidentName;
 	public static String IndIncidentListView_LoadingLabel;
 	public static String IndIncidentListView_UpdateJobName;
 	public static String IndIncidentSourceUiProvider_WaypointNotFound;

@@ -135,7 +135,7 @@ public class IncidentFilterDialog extends SmartFilterDialog {
 				
 				
 				if (IncidentManager.getInstance().getIncidentProviders().size() > 1) {
-					Composite incidentsourceComp = createGroupComposite("Incident Source", composite);
+					Composite incidentsourceComp = createGroupComposite(Messages.IncidentFilterDialog_SourceFilterSection, composite);
 					incidentsourceComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 					
 					sourceFilterCmp = new SourceFilterComposite(incidentsourceComp, SWT.NONE);

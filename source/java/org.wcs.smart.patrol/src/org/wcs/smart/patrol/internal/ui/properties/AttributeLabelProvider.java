@@ -108,7 +108,6 @@ public class AttributeLabelProvider extends LabelProvider implements IColorProvi
 
 	@Override
 	public Color getBackground(Object element) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 }
