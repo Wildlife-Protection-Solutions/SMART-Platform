@@ -403,7 +403,6 @@ public abstract class AbstractSmartImporter {
 				String defaultData = avList.get(avList.size()-1);
 				
 				//import either old version style data (4.0.0 or lower) or new 4.0.1 or higher
-				//TODO: fix this
 				if(ElementsUtil.isCtIdsList(defaultData)){
 					List<E> eLst = getBefore401DefaultEValues(defaultData, eMap) ;
 					for (E de : eLst) {

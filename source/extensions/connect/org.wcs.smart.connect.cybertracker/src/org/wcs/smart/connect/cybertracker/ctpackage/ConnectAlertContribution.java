@@ -45,15 +45,7 @@ import org.wcs.smart.hibernate.HibernateManager;
  */
 public class ConnectAlertContribution extends AbstractConnectPackageContribution {
 
-	private static final String ALERTS_JSONKEY = "ALERTS"; //$NON-NLS-1$
-	private static final String CMATTRIBUTE_TREENODE_UUID_JSONKEY = "CMATTRIBUTE_TREENODE_UUID"; //$NON-NLS-1$
-	private static final String CMATTRIBUTE_LISTITEM_UUID_JSONKEY = "CMATTRIBUTE_LISTITEM_UUID"; //$NON-NLS-1$
-	private static final String CMATTRIBUTE_UUID_JSONKEY = "CMATTRIBUTE_UUID"; //$NON-NLS-1$
-	private static final String CMNODE_UUID_JSONKEY = "CMNODE_UUID"; //$NON-NLS-1$
-	private static final String TYPEUUID_JSONKEY = "TYPEUUID"; //$NON-NLS-1$
-	private static final String CA_JSONKEY = "CAUUID"; //$NON-NLS-1$
-	private static final String LEVEL_JSONKEY = "LEVEL"; //$NON-NLS-1$
-	private static final String METADATA_JSONKEY = "METADATA"; //$NON-NLS-1$
+
 
 	private static final String ALERT_URL = "/noa/cybertracker/alert/"; //$NON-NLS-1$
 	
@@ -102,28 +94,28 @@ public class ConnectAlertContribution extends AbstractConnectPackageContribution
 			for (CtPackageAlert palert: CtPackageAlert.fromString(apackage, s)) { 
 				JSONObject alert = new JSONObject();
 						
-				alert.put(CMNODE_UUID_JSONKEY, palert.getCmNode().getUuid().toString());
+				alert.put(SmartMobilePackageFields.CMNODE_UUID_JSONKEY, palert.getCmNode().getUuid().toString());
 				if (palert.getCmAttribute() != null)
-					alert.put(CMATTRIBUTE_UUID_JSONKEY, palert.getCmAttribute().getUuid().toString());
+					alert.put(SmartMobilePackageFields.CMATTRIBUTE_UUID_JSONKEY, palert.getCmAttribute().getUuid().toString());
 				if (palert.getCmAttributeListItem() != null) 
-					alert.put(CMATTRIBUTE_LISTITEM_UUID_JSONKEY, palert.getCmAttributeListItem().getUuid().toString());
+					alert.put(SmartMobilePackageFields.CMATTRIBUTE_LISTITEM_UUID_JSONKEY, palert.getCmAttributeListItem().getUuid().toString());
 				if (palert.getCmAttributeTreeNode() != null) 
-					alert.put(CMATTRIBUTE_TREENODE_UUID_JSONKEY, palert.getCmAttributeTreeNode().getUuid().toString());
+					alert.put(SmartMobilePackageFields.CMATTRIBUTE_TREENODE_UUID_JSONKEY, palert.getCmAttributeTreeNode().getUuid().toString());
 				
-				alert.put(JSON_URLKEY, url + ALERT_URL);
-				alert.put(JSON_APIKEY, apikey);
+				alert.put(SmartMobilePackageFields.JSON_URLKEY, url + ALERT_URL);
+				alert.put(SmartMobilePackageFields.JSON_APIKEY, apikey);
 				
 				JSONObject metadata = new JSONObject();
-				metadata.put(TYPEUUID_JSONKEY, palert.getType().toString());
-				metadata.put(CA_JSONKEY, apackage.getConservationArea().getUuid().toString());
-				metadata.put(LEVEL_JSONKEY, palert.getLevel().value);
+				metadata.put(SmartMobilePackageFields.TYPEUUID_JSONKEY, palert.getType().toString());
+				metadata.put(SmartMobilePackageFields.CAUUID_JSONKEY, apackage.getConservationArea().getUuid().toString());
+				metadata.put(SmartMobilePackageFields.LEVEL_JSONKEY, palert.getLevel().value);
 				
-				alert.put(METADATA_JSONKEY, metadata);
+				alert.put(SmartMobilePackageFields.METADATA_JSONKEY, metadata);
 				
 				alerts.add(alert);
 			}
 		}
-		cc.addProfileMetadata(ALERTS_JSONKEY, alerts);
+		cc.addProfileMetadata(SmartMobilePackageFields.ALERTS_JSONKEY, alerts);
 		
 		return cc;
 	}

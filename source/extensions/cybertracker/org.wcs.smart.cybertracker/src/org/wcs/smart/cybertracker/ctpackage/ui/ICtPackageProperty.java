@@ -40,11 +40,16 @@ public interface ICtPackageProperty {
 	public String getValue(ICtPackage ctpackage);
 	
 	/**
-	 * The property name
+	 * The property long name
 	 * @return
 	 */
-	public String getName();
+	public String getLongName();
 	
+	/**
+	 * The property short name
+	 * @return
+	 */
+	public String getShortName();
 	
 	/**
 	 * If this should be display in summary table or not.

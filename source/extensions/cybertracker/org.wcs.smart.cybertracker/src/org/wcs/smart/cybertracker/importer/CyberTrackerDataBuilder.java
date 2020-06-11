@@ -70,7 +70,6 @@ public abstract class CyberTrackerDataBuilder {
 						//do not record it as a separate waypoint but add to end of the track
 						ctTripData.getSData().remove(ctTripData.getSData().size()-1);
 						//adding last waypoint to the track
-						//TODO: should all waypoints be part of a track?
 						Coordinate coord = toCoordinate(lastS);
 						if (coord != null)
 							trackPoints.add(coord);

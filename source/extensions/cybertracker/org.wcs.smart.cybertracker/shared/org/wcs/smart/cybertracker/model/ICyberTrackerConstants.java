@@ -61,7 +61,8 @@ public interface ICyberTrackerConstants {
 	public static final String DISPLAY_MIN_VERSION  = "3.444"; //$NON-NLS-1$
 	
 	public static final String SMART_CTX_FILENEME = "smart.ctx"; //$NON-NLS-1$
-	public static final String SMART_CTX_DOWNLOAD_FOLDER = "CyberTracker"; //$NON-NLS-1$
+	
+	public static final String CYBERTRACKER_FOLDER = "CyberTracker"; //$NON-NLS-1$
 	public static final String SMART_CTX_STORAGE_FOLDER = "storage"; //$NON-NLS-1$
 	public static final String SMART_PACKAGE_MAPFILES_FOLDER = "package_mapfiles"; //$NON-NLS-1$
 	public static final String CT_PACKAGE_FOLDER = "packages"; //$NON-NLS-1$
@@ -153,7 +154,7 @@ public interface ICyberTrackerConstants {
 	 */
 	static Path getCyberTrackerFolder(ConservationArea ca) {
 		return Paths.get(ca.getFileDataStoreLocation())
-				.resolve(SMART_CTX_DOWNLOAD_FOLDER);
+				.resolve(CYBERTRACKER_FOLDER);
 	}
 	
 	/**

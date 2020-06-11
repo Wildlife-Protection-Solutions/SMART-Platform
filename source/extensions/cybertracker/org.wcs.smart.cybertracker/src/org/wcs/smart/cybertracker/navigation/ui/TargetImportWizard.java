@@ -30,6 +30,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardPage;
+import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.model.NavigationTarget;
 import org.wcs.smart.cybertracker.navigation.ExportNavigationManager;
 
@@ -96,12 +97,9 @@ public class TargetImportWizard extends Wizard {
 					editor.addTargets(targets);
 				}
 			});
-		} catch (InvocationTargetException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (Exception ex) {
+			CyberTrackerPlugIn.log(ex.getMessage(), ex);
+			return false;
 		}
 		
 		return true;

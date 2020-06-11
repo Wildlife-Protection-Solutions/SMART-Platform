@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2020 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -57,9 +57,10 @@ import org.wcs.smart.observation.events.WaypointEventManager.EventType;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.smartcollect.SmartCollectPlugIn;
+import org.wcs.smart.smartcollect.internal.Messages;
 import org.wcs.smart.smartcollect.model.SmartCollectWaypoint;
 /**
- * Incident editor.
+ * SMARTCollect Incident editor.
  * 
  * @author Emily
  *
@@ -158,7 +159,7 @@ public class SmartCollectIncidentEditor extends MultiPageEditorPart implements M
 		summaryEditor.initData(incident);
 		mapPage.updatePointsLayer();
 		
-		super.setPartName(MessageFormat.format("SMART Collect Incident {0}", new Object[]{String.valueOf(getIncident().getWaypoint().getId())}));
+		super.setPartName(MessageFormat.format(Messages.SmartCollectIncidentEditor_PartName, new Object[]{String.valueOf(getIncident().getWaypoint().getId())}));
 	}
 	/**
 	 * 
@@ -214,7 +215,7 @@ public class SmartCollectIncidentEditor extends MultiPageEditorPart implements M
 	 */
 	public void updatePartName(){
 		IncidentEditorInput input = ((IncidentEditorInput) getEditorInput());
-		super.setPartName(MessageFormat.format("SMART Collect Incident {0}", input.getId()));
+		super.setPartName(MessageFormat.format(Messages.SmartCollectIncidentEditor_PartName, input.getId()));
 	}
 	
 	
@@ -223,7 +224,7 @@ public class SmartCollectIncidentEditor extends MultiPageEditorPart implements M
 	 */
 	@Override
 	protected void createPages() {
-		super.setPartName(MessageFormat.format("SMART Collect Incident {0}", new Object[]{String.valueOf(getIncident().getWaypoint().getId())}));
+		super.setPartName(MessageFormat.format(Messages.SmartCollectIncidentEditor_PartName, new Object[]{String.valueOf(getIncident().getWaypoint().getId())}));
 		showBusy(true);
 		try {
 			
@@ -231,12 +232,12 @@ public class SmartCollectIncidentEditor extends MultiPageEditorPart implements M
 			
 			summaryEditor= new IncidentSummaryPage(this);
 			int i = addPage(summaryEditor, getEditorInput());
-			setPageText(i, "Summary");
+			setPageText(i, Messages.SmartCollectIncidentEditor_SummaryPageName);
 			setPageImage(i, IncidentPlugIn.getDefault().getImageRegistry().get(IncidentPlugIn.INCIDENT_ICON));
 			
 			mapPage = new IncidentMapPage(this);
 			int mapIndex = addPage(mapPage, getEditorInput());
-			setPageText(mapIndex, "Map");
+			setPageText(mapIndex, Messages.SmartCollectIncidentEditor_MapPageName);
 			setPageImage(mapIndex, SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.MAP_ICON));
 			
 			//-- event managers --
@@ -251,9 +252,9 @@ public class SmartCollectIncidentEditor extends MultiPageEditorPart implements M
 								SmartCollectIncidentEditor.this.dispose();
 								SmartCollectIncidentEditor.this.getSite().getPage().closeEditor(SmartCollectIncidentEditor.this, false);
 								if (t instanceof SWTError&& t.getMessage().contains("No more handles")) { //$NON-NLS-1$
-									SmartCollectPlugIn.displayLog("Incident editor could not be created.  Please try closing existing open editors and try again." + t.getLocalizedMessage(), t);
+									SmartCollectPlugIn.displayLog(Messages.SmartCollectIncidentEditor_OpenError1 + t.getLocalizedMessage(), t);
 								} else {
-									SmartCollectPlugIn.displayLog("Error occurred while loading editor: " + t.getLocalizedMessage(), t);
+									SmartCollectPlugIn.displayLog(Messages.SmartCollectIncidentEditor_OpenError2 + t.getLocalizedMessage(), t);
 								}
 							} catch (Exception ex) {
 								SmartCollectPlugIn.log("Failure",ex); //$NON-NLS-1$
@@ -261,7 +262,7 @@ public class SmartCollectIncidentEditor extends MultiPageEditorPart implements M
 
 						}
 			});
-			throw new RuntimeException("Error occurred while loading editor: " + t.getMessage(), t);
+			throw new RuntimeException(Messages.SmartCollectIncidentEditor_OpenError2 + t.getMessage(), t);
 		}finally{
 			showBusy(false);
 		}

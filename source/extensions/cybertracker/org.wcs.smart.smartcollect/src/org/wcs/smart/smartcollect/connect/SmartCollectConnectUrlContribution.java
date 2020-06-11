@@ -28,8 +28,10 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
 import org.wcs.smart.connect.cybertracker.ctpackage.AbstractConnectPackageContribution;
+import org.wcs.smart.connect.cybertracker.ctpackage.SmartMobilePackageFields;
 import org.wcs.smart.cybertracker.export.IPackageUiContribution;
 import org.wcs.smart.cybertracker.model.ICtPackage;
+import org.wcs.smart.smartcollect.internal.Messages;
 
 /**
  * This contribution adds the status_url and download_url
@@ -45,11 +47,7 @@ public class SmartCollectConnectUrlContribution extends AbstractConnectPackageCo
 	//urls for package status and package
 	private static final String STATUS_URL = "/noa/smartcollect/packages/info/"; //$NON-NLS-1$
 	private static final String PACKAGE_URL = "/noa/smartcollect/packages/"; //$NON-NLS-1$
-	
 
-	//json keys for status/package urls
-	private static final String JSON_STATUS_KEY = "status_url"; //$NON-NLS-1$
-	private static final String JSON_DOWNLOAD_KEY = "download_url"; //$NON-NLS-1$
 	
 	public SmartCollectConnectUrlContribution() {
 	}
@@ -72,12 +70,12 @@ public class SmartCollectConnectUrlContribution extends AbstractConnectPackageCo
 				throw new IOException(ex);
 			}
 			if (parts == null) {
-				throw new IOException("SMART Connect server details are required");
+				throw new IOException(Messages.SmartCollectConnectUrlContribution_ConnectServerRequired);
 			}
 			String url = parts[0];
 			
-			cc.setProjectMetadata(JSON_STATUS_KEY, url + STATUS_URL + ctpackage.getUuid().toString());
-			cc.setProjectMetadata(JSON_DOWNLOAD_KEY, url + PACKAGE_URL + ctpackage.getUuid().toString()); 			
+			cc.setProjectMetadata(SmartMobilePackageFields.JSON_STATUS_KEY, url + STATUS_URL + ctpackage.getUuid().toString());
+			cc.setProjectMetadata(SmartMobilePackageFields.JSON_DOWNLOAD_KEY, url + PACKAGE_URL + ctpackage.getUuid().toString()); 			
 		}
 		
 		return cc;

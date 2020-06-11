@@ -52,6 +52,7 @@ public class Messages extends NLS {
 	public static String MissionJsonTrackProcessor_TrackLabel;
 	public static String CtSurveyPackageConfigurator_ConfigurationHeader;
 	public static String CtSurveyPackageConfigurator_CtPropertiesLabel;
+	public static String CtSurveyPackageConfigurator_DateProperty;
 	public static String CtSurveyPackageConfigurator_DefaultName;
 	public static String CtSurveyPackageConfigurator_DesignLabel;
 	public static String CtSurveyPackageConfigurator_DesignRequired;
@@ -60,11 +61,13 @@ public class Messages extends NLS {
 	public static String CtSurveyPackageConfigurator_LoadingError;
 	public static String CtSurveyPackageConfigurator_ModelLabel;
 	public static String CtSurveyPackageConfigurator_NameRequired;
+	public static String CtSurveyPackageConfigurator_NoPackageValue;
 	public static String CtSurveyPackageConfigurator_PackageName;
 	public static String CtSurveyPackageConfigurator_ProfileLabel;
 	public static String CtSurveyPackageConfigurator_ProfileRequired;
 	public static String CtSurveyPackageConfigurator_SettingsTab;
 	public static String CtSurveyPackageConfigurator_UnknownLabel;
+	public static String CtSurveyPackageConfigurator_VersionProperty;
 	public static String CtSurveyPackageConfigurator_vieweditdevicesettings;
 	public static String CyberTrackerSurvey_Details;
 	public static String CyberTrackerSurvey_DisplayType;

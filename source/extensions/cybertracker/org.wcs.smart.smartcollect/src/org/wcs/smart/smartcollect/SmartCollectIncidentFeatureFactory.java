@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2020 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -33,7 +33,7 @@ import org.wcs.smart.util.UuidUtils;
 import org.locationtech.jts.geom.Coordinate;
 
 /**
- * Utilities for generating feature types and features for incidents
+ * Utilities for generating feature types and features for SMART Collect incidents
  * 
  * @author Emily
  *

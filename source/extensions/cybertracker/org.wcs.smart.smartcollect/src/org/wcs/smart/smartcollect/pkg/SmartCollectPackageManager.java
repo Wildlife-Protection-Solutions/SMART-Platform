@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2020 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.smartcollect.pkg;
 
 import java.io.IOException;
@@ -35,12 +56,40 @@ import org.wcs.smart.smartcollect.SmartCollectPlugIn;
 import org.wcs.smart.smartcollect.connect.SmartCollectConnectAlertContribution;
 import org.wcs.smart.smartcollect.connect.SmartCollectConnectDataContribution;
 import org.wcs.smart.smartcollect.connect.SmartCollectConnectUrlContribution;
+import org.wcs.smart.smartcollect.internal.Messages;
 import org.wcs.smart.smartcollect.model.SmartCollectPackage;
 import org.wcs.smart.smartcollect.ui.SmartCollectPackageConfigurator;
 
+/**
+ * Package manager fo SMARTCollect packages
+ * 
+ * @author Emily
+ *
+ */
 public class SmartCollectPackageManager implements ICtPackageManager {
 	
+	/**
+	 * Mobile value identifying the waypoints as a smartcollect waypoint
+	 */
+	public static final String SMARTCOLLECT_RESOURCE_ID = "smartcollect"; //$NON-NLS-1$
+	
+	/**
+	 * Mobile device setting key for option to collect incidents by group
+	 */
+	public static final String INCIDENT_GROUPUI_KEY = "INCIDENT_GROUP_UI"; //$NON-NLS-1$
+	
+	/**
+	 * SMARTCollect package metadata key for username field
+	 */
+	public static final String USERNAMEMETADATA_KEY = "SMART_CollectUser"; //$NON-NLS-1$
 
+	/**
+	 * SMART Metadata package field value for option to collect incidents
+	 * by group 
+	 */
+	public static final String COLLECT_GROUPS_FIELDKEY = "CollectGroupsKey"; //$NON-NLS-1$
+
+	
 	@Override
 	public String getTypeIdentifier() {
 		return SmartCollectPackage.PACKAGE_TYPENAME;
@@ -48,7 +97,7 @@ public class SmartCollectPackageManager implements ICtPackageManager {
 
 	@Override
 	public String getTypeName() {
-		return "SMART Collect Package";
+		return Messages.SmartCollectPackageManager_PackageTypeName;
 	}
 
 	@Override
@@ -67,7 +116,7 @@ public class SmartCollectPackageManager implements ICtPackageManager {
 	public ICtPackage createPackage() {
 		SmartCollectPackage ctpackage = new SmartCollectPackage();
 		ctpackage.setConservationArea(SmartDB.getCurrentConservationArea());
-		ctpackage.setName("SMART Collect");
+		ctpackage.setName(Messages.SmartCollectPackageManager_DefaultPackageName);
 		return ctpackage;
 	}
 
@@ -95,7 +144,7 @@ public class SmartCollectPackageManager implements ICtPackageManager {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					try {
-						SubMonitor progress = SubMonitor.convert(monitor, "Exporting SMART Collect Package", ppackage.getConfigurableModel() == null ? 2 : 3);
+						SubMonitor progress = SubMonitor.convert(monitor, Messages.SmartCollectPackageManager_ExportTaskName, ppackage.getConfigurableModel() == null ? 2 : 3);
 						List<IPackageContribution> contributions = PackageContributionManager.INSTANCE.getContributionItems();
 						contributions.add(new SmartCollectConnectDataContribution());
 						contributions.add(new SmartCollectConnectUrlContribution());
@@ -123,7 +172,7 @@ public class SmartCollectPackageManager implements ICtPackageManager {
 						ConfigurableModel toExport = null;
 						if (ppackage.getConfigurableModel() == null) {
 							//convert data model to configurable model
-							monitor.subTask("Converting Data Model");
+							monitor.subTask(Messages.SmartCollectPackageManager_CovertTaskName);
 							try(Session session = HibernateManager.openSession()){
 								toExport = (new DataModelWrapper()).buildConfigurableModel(session, progress.split(1));
 								toExport.setConservationArea(SmartDB.getCurrentConservationArea());
@@ -136,7 +185,7 @@ public class SmartCollectPackageManager implements ICtPackageManager {
 						SmartCollectPackageExporter.INSTANCE.exportPackage(ppackage, updates, output, context, progress.split(1));
 					}catch(OperationCanceledException e) {
 						Display.getDefault().syncExec(()->{
-							MessageDialog.openError(Display.getCurrent().getActiveShell(), "Cancelled", "User cancelled export process.");	
+							MessageDialog.openError(Display.getCurrent().getActiveShell(), Messages.SmartCollectPackageManager_CancelledTitle, Messages.SmartCollectPackageManager_CancelledMessage);	
 						});
 						
 					} catch (Exception e) {

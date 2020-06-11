@@ -90,7 +90,7 @@ public class NavigationLayer extends UuidItem {
 		try {
 			features = (JSONObject) (new JSONParser()).parse(v);
 		}catch (ParseException ex) {
-			//TODO;
+			throw new IllegalArgumentException("Unable to parse JSON Targets", ex); //$NON-NLS-1$
 		}
 		if (features == null) return ntargets;
 		

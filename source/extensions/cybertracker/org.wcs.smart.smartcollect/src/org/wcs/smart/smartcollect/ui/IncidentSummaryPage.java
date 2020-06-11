@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2020 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -90,6 +90,7 @@ import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.observation.ui.input.ObservationWizard;
 import org.wcs.smart.observation.ui.input.ObservationWizardDialog;
+import org.wcs.smart.smartcollect.internal.Messages;
 import org.wcs.smart.smartcollect.model.SmartCollectWaypoint;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -97,7 +98,8 @@ import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.SmartUtils;
 
 /**
- * Incident editor summary page
+ * Summary page for editing SMARTCollect Incidents
+ * 
  * @author Emily
  *
  */
@@ -118,7 +120,6 @@ public class IncidentSummaryPage extends EditorPart {
 	private Text txtDirection;
 	private Label lblLastModified;
 	private Text txtSource;
-//	private Label lblLastModifiedBy;
 	
 	private ListViewer attachments;
 	
@@ -194,9 +195,9 @@ public class IncidentSummaryPage extends EditorPart {
 		
 			StringBuilder sb = new StringBuilder();
 			if (incident.getLastModifiedBy() != null) {
-				sb.append(MessageFormat.format("Last updated by {0} on {1}", SmartLabelProvider.getShortLabel(incident.getLastModifiedBy()), DateFormat.getDateTimeInstance().format(incident.getLastModified())));
+				sb.append(MessageFormat.format(Messages.IncidentSummaryPage_LastUpdatedMsg1, SmartLabelProvider.getShortLabel(incident.getLastModifiedBy()), DateFormat.getDateTimeInstance().format(incident.getLastModified())));
 			}else {
-				sb.append(MessageFormat.format("Last updated on {0}", DateFormat.getDateTimeInstance().format(incident.getLastModified())));
+				sb.append(MessageFormat.format(Messages.IncidentSummaryPage_LastUpdatedMsg2, DateFormat.getDateTimeInstance().format(incident.getLastModified())));
 			}
 			this.lblLastModified.setText(sb.toString());
 			
@@ -220,12 +221,12 @@ public class IncidentSummaryPage extends EditorPart {
 				IncidentPlugIn.log(ex.getMessage(), ex);
 			}
 			Point p = ReprojectUtils.transform(incident.getRawX(), incident.getRawY(), crs);
-			this.txtLocation.setText(p.getX() + "," + p.getY());
+			this.txtLocation.setText(p.getX() + "," + p.getY()); //$NON-NLS-1$
 			
 			if (editor.getOptions().getTrackDistanceDirection()){
 				
 				p = ReprojectUtils.transform(incident.getX(), incident.getY(), crs);
-				this.txtPrjLocation.setText(p.getX() + "," + p.getY());
+				this.txtPrjLocation.setText(p.getX() + "," + p.getY()); //$NON-NLS-1$
 				
 				
 				if (incident.getDirection() == null){
@@ -334,7 +335,7 @@ public class IncidentSummaryPage extends EditorPart {
 						
 					}
 					
-					Label l = toolkit.createLabel(attributes, "Attachments:");
+					Label l = toolkit.createLabel(attributes, Messages.IncidentSummaryPage_AttachmentsLbl);
 					l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 				
 					l = toolkit.createLabel(attributes, MessageFormat.format("{0}", wo.getAttachments().size())); //$NON-NLS-1$
@@ -371,12 +372,12 @@ public class IncidentSummaryPage extends EditorPart {
 			Image x = editor.getSite().getWorkbenchWindow().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_WARN_TSK);
 			lblImage.setImage(x);
 			Label lblWarning = toolkit.createLabel(warning, "", SWT.NONE); //$NON-NLS-1$
-			lblWarning.setText(MessageFormat.format("This incident cannot be modified: {0}. Please contact administrator if editing is required.", new Object[]{ canEdit }));
+			lblWarning.setText(MessageFormat.format(Messages.IncidentSummaryPage_CannotEdit, new Object[]{ canEdit }));
 		}
 		
 		Section summarySection = toolkit.createSection(frmSummary.getBody(), Section.TITLE_BAR   );
-		summarySection.setText("SMART Collect Incident Summary");
-		summarySection.setDescription("incident details");
+		summarySection.setText(Messages.IncidentSummaryPage_HeaderSection);
+		summarySection.setDescription(Messages.IncidentSummaryPage_DetailsSection);
 		summarySection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Composite top = toolkit.createComposite(summarySection, SWT.NONE);
@@ -392,57 +393,57 @@ public class IncidentSummaryPage extends EditorPart {
 		right.setLayout(new GridLayout(3, false));
 		right.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		toolkit.createLabel(left, "Source:");
+		toolkit.createLabel(left, Messages.IncidentSummaryPage_SourceLabel);
 		txtSource = toolkit.createText(left, ""); //$NON-NLS-1$
 		txtSource.setEditable(false);
 		txtSource.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
-		toolkit.createLabel(left, "Incident ID:");
+		toolkit.createLabel(left, Messages.IncidentSummaryPage_IDLabel);
 		txtIncidentId = toolkit.createText(left, ""); //$NON-NLS-1$
 		txtIncidentId.setEditable(false);
 		txtIncidentId.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		createEdit(left, canEdit, IdComposite.ID);
 		
-		toolkit.createLabel(left, "Date:");
+		toolkit.createLabel(left, Messages.IncidentSummaryPage_DateLabel);
 		txtDate = toolkit.createText(left, ""); //$NON-NLS-1$
 		txtDate.setEditable(false);
 		txtDate.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		createEdit(left, canEdit, DateTimeComposite.ID);
 		
-		toolkit.createLabel(left, "Time:");
+		toolkit.createLabel(left, Messages.IncidentSummaryPage_TimeLabel);
 		txtTime = toolkit.createText(left, ""); //$NON-NLS-1$
 		txtTime.setEditable(false);
 		txtTime.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		createEdit(left, canEdit, DateTimeComposite.ID);
 		
-		lblLocation = toolkit.createLabel(left, "Location:");
+		lblLocation = toolkit.createLabel(left, Messages.IncidentSummaryPage_LocationLabel);
 		txtLocation = toolkit.createText(left, ""); //$NON-NLS-1$
 		txtLocation.setEditable(false);
 		txtLocation.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		createEdit(left, canEdit, LocationComposite.ID);
 
 		if (editor.getOptions().getTrackDistanceDirection()){
-			toolkit.createLabel(left, "Distance (m)");
+			toolkit.createLabel(left, Messages.IncidentSummaryPage_DistanceLabel);
 			txtDistance = toolkit.createText(left, ""); //$NON-NLS-1$
 			txtDistance.setEditable(false);
 			txtDistance.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			createEdit(left, canEdit, DistanceDirectionComposite.ID);
 		
-			Label l = toolkit.createLabel(left, "Bearing (°):");
-			l.setToolTipText("true bearing in degrees (North = 0, East = 90, South = 180, West 270)");
+			Label l = toolkit.createLabel(left, Messages.IncidentSummaryPage_BearingLabel);
+			l.setToolTipText(Messages.IncidentSummaryPage_BearingTooltip);
 			txtDirection = toolkit.createText(left, ""); //$NON-NLS-1$
 			txtDirection.setEditable(false);
 			txtDirection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			createEdit(left, canEdit, DistanceDirectionComposite.ID);
 			
-			toolkit.createLabel(left, "Projected Location:");
+			toolkit.createLabel(left, Messages.IncidentSummaryPage_ProjectedLocationLabel);
 			txtPrjLocation = toolkit.createText(left, ""); //$NON-NLS-1$
 			txtPrjLocation.setEditable(false);
 			txtPrjLocation.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			toolkit.createLabel(left, ""); //$NON-NLS-1$
 		}
 		
-		Label l = toolkit.createLabel(right, "Comments:");
+		Label l = toolkit.createLabel(right, Messages.IncidentSummaryPage_CommentsLabel);
 		l.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false));
 		txtComments = toolkit.createText(right, "", SWT.MULTI | SWT.WRAP | SWT.V_SCROLL); //$NON-NLS-1$
 		txtComments.setEditable(false);
@@ -451,7 +452,7 @@ public class IncidentSummaryPage extends EditorPart {
 		((GridData)txtComments.getLayoutData()).widthHint = 100;
 		createEdit(right, canEdit, CommentComposite.ID);
 		
-		l = toolkit.createLabel(right, "Attachments:");
+		l = toolkit.createLabel(right, Messages.IncidentSummaryPage_AttachmentsLabel);
 		l.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false));
 		attachments = new ListViewer(right);
 		attachments.setContentProvider(ArrayContentProvider.getInstance());
@@ -480,11 +481,11 @@ public class IncidentSummaryPage extends EditorPart {
 		});
 		createEdit(right, canEdit, IncidentAttachmentComposite.ID);
 		toolkit.createLabel(right, ""); //$NON-NLS-1$
-		l = toolkit.createLabel(right, "**" + "Observation Attachments");
+		l = toolkit.createLabel(right, "**" + Messages.IncidentSummaryPage_ObsAttachmentsLabel); //$NON-NLS-1$
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2,1));
 		
 		Section observationSection = toolkit.createSection(frmSummary.getBody(), Section.TITLE_BAR);
-		observationSection.setText("Observations");
+		observationSection.setText(Messages.IncidentSummaryPage_ObservationSection);
 		observationSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Composite observationTableComp = toolkit.createComposite(observationSection);
@@ -515,7 +516,7 @@ public class IncidentSummaryPage extends EditorPart {
 		bottomComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		if (canEdit == null){
-			Button btnEdit = toolkit.createButton(bottomComp, "Edit Observations", SWT.PUSH);
+			Button btnEdit = toolkit.createButton(bottomComp, Messages.IncidentSummaryPage_EditObsBtn, SWT.PUSH);
 			btnEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 			btnEdit.addSelectionListener(new SelectionAdapter() {
 				@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2020 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -35,10 +35,10 @@ import org.wcs.smart.observation.model.Waypoint;
 
 
 /**
- * @author Emily
+ * SMARTCollect waypoint adds source information to a waypoint
+ * which identifies which community user provided the data
  * 
- * Link between a waypoint and the smart collect waypoint which
- * tracks the source of the waypoint.
+ * @author Emily
  * 
  */
 @Entity

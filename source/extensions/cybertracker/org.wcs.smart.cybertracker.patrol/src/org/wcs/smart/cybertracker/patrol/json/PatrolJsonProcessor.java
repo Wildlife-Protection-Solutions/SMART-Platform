@@ -199,7 +199,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 						//create a new link
 						if (!newPatrolLinks.values().contains(link)) {
 							CtPatrolLink oldLink = new CtPatrolLink();
-							oldLink.setCtUuid(UUID.randomUUID());//TODO
+							oldLink.setCtUuid(UUID.randomUUID());
 							oldLink.setPatrolLeg(link.getPatrolLeg());
 							oldLink.setDeviceId(link.getDeviceId());
 							oldLink.setLastObservationCnt(-1);
@@ -426,7 +426,6 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 					}
 
 					//add these observation to the selected patrol leg
-					//TODO: potentially we could validate metadata
 					addToExistingLeg(link.getPatrolLeg(), wp, session);
 				}else {
 					//we want to find the waypoint and/or observation group to add to
@@ -703,8 +702,6 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 		if (lastWaypoint == null){
 			//we have a problem ; there is no last waypoint to add to
 			//we cannot create a new one because we don't have position
-			
-			//TODO: we probably need to update the last observation count
 			//this observation needs to be lost; otherwise no other observations
 			//can be processed
 			return null;

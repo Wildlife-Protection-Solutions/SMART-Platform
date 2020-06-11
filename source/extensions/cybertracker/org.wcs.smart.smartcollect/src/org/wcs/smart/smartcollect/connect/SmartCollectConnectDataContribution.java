@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Wildlife Conservation Society
+ * Copyright (C) 2020 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -30,31 +30,23 @@ import org.hibernate.Session;
 import org.json.simple.JSONObject;
 import org.wcs.smart.connect.cybertracker.ctpackage.AbstractConnectPackageContribution;
 import org.wcs.smart.connect.cybertracker.ctpackage.ConnectDataUiController;
+import org.wcs.smart.connect.cybertracker.ctpackage.SmartMobilePackageFields;
 import org.wcs.smart.connect.cybertracker.model.CtConnectPackageMetadata;
 import org.wcs.smart.connect.cybertracker.model.CtPackageAlert;
 import org.wcs.smart.cybertracker.export.IPackageUiContribution;
-import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 import org.wcs.smart.cybertracker.model.MetadataFieldValue;
+import org.wcs.smart.smartcollect.internal.Messages;
 import org.wcs.smart.smartcollect.model.SmartCollectPackage;
 import org.wcs.smart.util.UuidUtils;
 
 /**
- * Contributing alerts and data upload package items 
+ * Contributing connect api details in the packages for SMARTcollect  
  * 
  * @author Emily
  *
  */
 public class SmartCollectConnectDataContribution extends AbstractConnectPackageContribution {
-
-	private static final String POSITION_UPDATES_JSONKEY = "POSITION_UPDATES"; //$NON-NLS-1$
-	private static final String METADATA_JSONKEY = "METADATA"; //$NON-NLS-1$
-	private static final String LEVEL_JSONKEY = "LEVEL"; //$NON-NLS-1$
-	private static final String CAUUID_JSONKEY = "CAUUID"; //$NON-NLS-1$
-	private static final String TYPEUUID_JSONKEY = "TYPEUUID"; //$NON-NLS-1$
-	private static final String DATA_SERVER_JSONKEY = "DATA_SERVER"; //$NON-NLS-1$
-	
-	private static final String FREQUENCY_MIN_JSONKEY = "FREQUENCY_MIN"; //$NON-NLS-1$
 
 	//urls for package status and package
 	private static final String DATA_URL = "/noa/cybertracker/data/"; //$NON-NLS-1$
@@ -96,7 +88,7 @@ public class SmartCollectConnectDataContribution extends AbstractConnectPackageC
 		}catch (Exception ex) {
 			throw new IOException(ex);
 		}
-		if (parts == null) throw new IOException("This package requires a SMART Connect server connection to export.  The package includes Connect data uploads.");
+		if (parts == null) throw new IOException(Messages.SmartCollectConnectDataContribution_ConnectServerRequired);
 		
 		String url = parts[0];
 		String apikey = parts[1];
@@ -107,27 +99,27 @@ public class SmartCollectConnectDataContribution extends AbstractConnectPackageC
 			if (mv.getMetadataKey().equals(CtConnectPackageMetadata.Properties.DATA_UPLOAD.name())) {
 				if (mv.getBooleanValue()) {
 					JSONObject dataserver = new JSONObject();
-					dataserver.put(FREQUENCY_MIN_JSONKEY, Integer.valueOf( mv.getStringValue() ) );
-					dataserver.put(JSON_URLKEY, url + DATA_URL + UuidUtils.uuidToString( ctpackage.getConservationArea().getUuid()) );
-					dataserver.put(JSON_APIKEY, apikey);
+					dataserver.put(SmartMobilePackageFields.FREQUENCY_MIN_JSONKEY, Integer.valueOf( mv.getStringValue() ) );
+					dataserver.put(SmartMobilePackageFields.JSON_URLKEY, url + DATA_URL + UuidUtils.uuidToString( ctpackage.getConservationArea().getUuid()) );
+					dataserver.put(SmartMobilePackageFields.JSON_APIKEY, apikey);
 					
-					cc.addProfileMetadata(DATA_SERVER_JSONKEY, dataserver);
+					cc.addProfileMetadata(SmartMobilePackageFields.DATA_SERVER_JSONKEY, dataserver);
 				}
 			}else if (mv.getMetadataKey().equals(CtConnectPackageMetadata.Properties.POSITION_UPLOAD.name())) {
 				if (mv.getBooleanValue()) {
 					JSONObject pingalert = new JSONObject();
 					
-					pingalert.put(FREQUENCY_MIN_JSONKEY, Integer.valueOf( mv.getStringValue() ) );
-					pingalert.put(JSON_URLKEY, url + ALERT_URL);
-					pingalert.put(JSON_APIKEY, apikey);
+					pingalert.put(SmartMobilePackageFields.FREQUENCY_MIN_JSONKEY, Integer.valueOf( mv.getStringValue() ) );
+					pingalert.put(SmartMobilePackageFields.JSON_URLKEY, url + ALERT_URL);
+					pingalert.put(SmartMobilePackageFields.JSON_APIKEY, apikey);
 					
 					JSONObject metadata = new JSONObject();
-					metadata.put(TYPEUUID_JSONKEY, mv.getUuidValue().toString());
-					metadata.put(CAUUID_JSONKEY, mv.getConservationArea().getUuid().toString());
-					metadata.put(LEVEL_JSONKEY, CtPackageAlert.Level.ONE.value);
+					metadata.put(SmartMobilePackageFields.TYPEUUID_JSONKEY, mv.getUuidValue().toString());
+					metadata.put(SmartMobilePackageFields.CAUUID_JSONKEY, mv.getConservationArea().getUuid().toString());
+					metadata.put(SmartMobilePackageFields.LEVEL_JSONKEY, CtPackageAlert.Level.ONE.value);
 					
-					pingalert.put(METADATA_JSONKEY, metadata);
-					cc.addProfileMetadata(POSITION_UPDATES_JSONKEY, pingalert);
+					pingalert.put(SmartMobilePackageFields.METADATA_JSONKEY, metadata);
+					cc.addProfileMetadata(SmartMobilePackageFields.POSITION_UPDATES_JSONKEY, pingalert);
 				}
 			}
 			

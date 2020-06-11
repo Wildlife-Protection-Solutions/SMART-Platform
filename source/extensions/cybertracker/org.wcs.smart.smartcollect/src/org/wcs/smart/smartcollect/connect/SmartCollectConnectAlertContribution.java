@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Wildlife Conservation Society
+ * Copyright (C) 2020 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -24,7 +24,8 @@ package org.wcs.smart.smartcollect.connect;
 import org.wcs.smart.connect.cybertracker.ctpackage.ConnectAlertContribution;
 
 /**
- * Alert contribution to CyberTracker packages
+ * Alert contribution to CyberTracker packages for smart collect incidents.
+ * 
  * @author Emily
  *
  */

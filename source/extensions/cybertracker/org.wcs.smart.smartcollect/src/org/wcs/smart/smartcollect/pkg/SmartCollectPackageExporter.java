@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2020 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -45,6 +45,7 @@ import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.CtJsonExportUtils;
 import org.wcs.smart.cybertracker.export.IPackageContribution;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
+import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
@@ -57,29 +58,22 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.ObservationOptions;
+import org.wcs.smart.smartcollect.internal.Messages;
 import org.wcs.smart.smartcollect.model.SmartCollectPackage;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
 import org.wcs.smart.util.ZipUtil;
 
 /**
- * SMART Collect Cybertracker package exporter. This exports the following details into
- * a single zip file for use with Cybertracker. Included are: 
- * configurable model xml (cm_model.xml), 
- * configurable model image files, 
- * cybertracker configuration options (ct_profile.json)
- * the conservation area logo 
- * directory with map files to use in the ct application (selected by user on export)
+ * SMART Collect Cybertracker package exporter.
  */
 public enum SmartCollectPackageExporter {
 
 	INSTANCE;
 	
-	public static final String CM_MODEL_FILE = "cm_model.xml"; //$NON-NLS-1$
-	
-	public static final String CT_PROFILE_FILE = "ct_profile.json"; //$NON-NLS-1$
-	
-	public static final String SMARTCOLLECT_METADATA_FILE = "smartcollect_metadata.json"; //$NON-NLS-1$
+	private static final String CM_MODEL_FILE = "cm_model.xml"; //$NON-NLS-1$
+	private static final String CT_PROFILE_FILE = "ct_profile.json"; //$NON-NLS-1$
+	private static final String SMARTCOLLECT_METADATA_FILE = "smartcollect_metadata.json"; //$NON-NLS-1$
 
 	/**
 	 * Exports patrol cybertracker package.
@@ -91,8 +85,7 @@ public enum SmartCollectPackageExporter {
 	 * @throws Exception
 	 */
 	public void exportPackage(SmartCollectPackage ctPackage, List<IPackageContribution.PackageContribution> updates, Path exportFile, IEclipseContext context, IProgressMonitor monitor) throws Exception{
-		//TODO: support cancelling
-		SubMonitor sub = SubMonitor.convert(monitor, "Exporting SMART Collect Package", 8);
+		SubMonitor sub = SubMonitor.convert(monitor, Messages.SmartCollectPackageExporter_TaskName, 8);
 		Path tempDir = Files.createTempDirectory("smart"); //$NON-NLS-1$
 		try {
 			try(Session session = HibernateManager.openSession()){
@@ -130,6 +123,14 @@ public enum SmartCollectPackageExporter {
 					}
 					if (update.getProfileMetadata() != null) {
 						ctprofileAdditions.putAll(update.getProfileMetadata());
+					}
+				}
+				
+				
+				for ( MetadataFieldValue fv : localpackage.getMetadataValues()) {
+					if (fv.getMetadataKey().equals(SmartCollectPackageManager.COLLECT_GROUPS_FIELDKEY)) {
+						ctprofileAdditions.put(SmartCollectPackageManager.INCIDENT_GROUPUI_KEY, fv.getBooleanValue());
+						break;
 					}
 				}
 				
@@ -210,7 +211,7 @@ public enum SmartCollectPackageExporter {
 	@SuppressWarnings("unchecked")
 	private void createMetadata(Path incidentJson) throws IOException {
 		JSONArray metadataScreens = new JSONArray();
-		metadataScreens.add(CtJsonExportUtils.createDataType(SmartCollectPackage.SMARTCOLLECT_RESOURCE_ID));
+		metadataScreens.add(CtJsonExportUtils.createDataType(SmartCollectPackageManager.SMARTCOLLECT_RESOURCE_ID));
 		
 		
 		JSONObject dataType = new JSONObject();
@@ -219,7 +220,7 @@ public enum SmartCollectPackageExporter {
 		dataType.put(CtJsonExportUtils.JSON_OPTION_GENERATED_KEY, true);
 		dataType.put(CtJsonExportUtils.JSON_REQUIRED_PROP_KEY, true);
 		JSONObject typeOp = new JSONObject();
-		typeOp.put(SmartCollectPackage.USERNAME_KEY, dataType);
+		typeOp.put(SmartCollectPackageManager.USERNAMEMETADATA_KEY, dataType);
 		metadataScreens.add(typeOp);
 		
 		try(BufferedWriter fw = Files.newBufferedWriter(incidentJson)){

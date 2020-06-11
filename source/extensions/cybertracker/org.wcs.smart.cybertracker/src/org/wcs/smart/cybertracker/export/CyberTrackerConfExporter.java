@@ -346,7 +346,6 @@ public class CyberTrackerConfExporter {
 			if (target != null){
 				try (BufferedWriter outR = new BufferedWriter(new FileWriter(file.getAbsolutePath() + File.separator + "Globals.xml"))){ //$NON-NLS-1$
 					outR.write("<Globals>\n"); //$NON-NLS-1$
-					//TODO: how to determine this
 					outR.write("<DatabaseVersion>3420</DatabaseVersion>"); //$NON-NLS-1$
 					outR.write("<Transfer>\n"); //$NON-NLS-1$
 					outR.write("<UploadProtocol>" + target.getProtocol().ctValue + "</UploadProtocol>\n"); //$NON-NLS-1$ //$NON-NLS-2$

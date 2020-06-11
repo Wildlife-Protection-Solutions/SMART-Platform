@@ -410,7 +410,6 @@ public class MissionJsonProcessor implements IJsonProcessor {
 					}
 					
 					//add these observation to the selected patrol leg
-					//TODO: potentially we could validate metadata
 					addToExistingMission(link.getMission(), wp, link.getSamplingUnit(), session);
 				}else {
 					//new way of processings waypoints/observation groups
@@ -660,8 +659,6 @@ public class MissionJsonProcessor implements IJsonProcessor {
 		if (lastWaypoint == null){
 			//we have a problem ; there is no last waypoint to add to
 			//we cannot create a new one because we don't have position
-			
-			//TODO: we probably need to update the last observation count
 			//this observation needs to be lost; otherwise no other observations
 			//can be processed
 			return null;

@@ -88,6 +88,7 @@ public class Messages extends NLS {
 	public static String ConnectCtHibernateManager_LoadAlertsError;
 	public static String ConnectCtPackageProperties_ConnectDetailsLabel;
 	public static String ConnectCtPackageProperties_DateColumn;
+	public static String ConnectCtPackageProperties_DatePropertyShortName;
 	public static String ConnectCtPackageProperties_ErrorLabel;
 	public static String ConnectCtPackageProperties_ErrorMessage;
 	public static String ConnectCtPackageProperties_LoadingConnectProperties;
@@ -95,6 +96,7 @@ public class Messages extends NLS {
 	public static String ConnectCtPackageProperties_NoConnect;
 	public static String ConnectCtPackageProperties_Title;
 	public static String ConnectCtPackageProperties_VersionColumn;
+	public static String ConnectCtPackageProperties_VersionPropertyShortName;
 	public static String ConnectCtTemplateCloner_CloneAlerts;
 	public static String ConnectCtTemplateCloner_TaskName;
 	public static String ConnectDataContribution_ConnectRequired;

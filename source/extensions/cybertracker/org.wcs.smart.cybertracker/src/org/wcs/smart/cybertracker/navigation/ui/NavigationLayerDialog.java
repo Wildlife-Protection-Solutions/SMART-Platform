@@ -269,6 +269,7 @@ public class NavigationLayerDialog extends SmartStyledDialog implements MapPart,
 			case DASHDOT: return new float[] {5, 3, 1, 3};
 			case DASHDOTDOT: return new float[] {5, 3, 1, 3, 1, 3};
 			case DOT: return new float[] {1,3};
+			case SOLID: return null;
 			}
 			return null;
 		}

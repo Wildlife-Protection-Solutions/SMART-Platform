@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2020 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -63,6 +63,7 @@ import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.smartcollect.SmartCollectIncidentFeatureFactory;
+import org.wcs.smart.smartcollect.internal.Messages;
 import org.wcs.smart.udig.EditPointTool;
 import org.wcs.smart.udig.IMapEditManager;
 import org.wcs.smart.udig.UndoTool;
@@ -73,7 +74,8 @@ import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.SmartUtils;
 
 /**
- * Incident editor map page
+ * Map page in for editing SMARTCollect incidents
+ * 
  * @author Emily
  *
  */
@@ -172,6 +174,7 @@ public class IncidentMapPage extends SmartMapEditorPart {
 	/**
 	 * Creates the incident layer
 	 */
+	@SuppressWarnings("unchecked")
 	private void addPointsLayer() {
         try {
 			List<IGeoResource> layers = new ArrayList<IGeoResource>();
@@ -218,7 +221,7 @@ public class IncidentMapPage extends SmartMapEditorPart {
 					//set custom style for points layer
 					int index = getLayers().size() == 1 ? 0 : 1;
 					pointLayer = getLayers().get(index);
-					pointLayer.setName("SMART Collect Incident");
+					pointLayer.setName(Messages.IncidentMapPage_IncidentLayerName);
 					pointLayer.getStyleBlackboard().put(SLDContent.ID, getStylingConfig());
 					pointLayer.setVisible(true);
 					
@@ -240,7 +243,7 @@ public class IncidentMapPage extends SmartMapEditorPart {
 			addInitialZoomFunction();
 			
         } catch (Exception exception) {
-			IncidentPlugIn.displayLog("Failed to add incident layer to map.", exception);
+			IncidentPlugIn.displayLog(Messages.IncidentMapPage_LayerAddFail, exception);
 		}
 		
 	}
@@ -281,7 +284,7 @@ public class IncidentMapPage extends SmartMapEditorPart {
 			}
 			
 		} catch (IOException e) {
-			IncidentPlugIn.displayLog("Failed to update incident on map.", e);
+			IncidentPlugIn.displayLog(Messages.IncidentMapPage_UpdateFailed, e);
 		}
 		
 		//refresh map - only refresh point layer 
@@ -314,11 +317,10 @@ public class IncidentMapPage extends SmartMapEditorPart {
     		private boolean showWarning = true;
     		@Override
     		public void activate() {
-    			//TODO: not sure this is valid
     			if (parent.getOptions().getTrackDistanceDirection() && showWarning) {
     				//down warning 
     				showWarning = false;
-    				MessageDialog.openWarning(parent.getSite().getShell(), "Edit", "Editing waypoints on the map with distance and bearing will modify the distance and bearing, not the original waypoint location.  If no distance and bearing is supplied the original waypoint location is modified.");
+    				MessageDialog.openWarning(parent.getSite().getShell(), Messages.IncidentMapPage_EditWarningTitle, Messages.IncidentMapPage_EditWarningMessage);
     			}
     		}
     		@Override
@@ -332,7 +334,7 @@ public class IncidentMapPage extends SmartMapEditorPart {
 					try{
 						crspx = ReprojectUtils.reproject(crspx.x, crspx.y, vm.getCRS(), SmartDB.DATABASE_CRS);
 					}catch (Exception ex){
-						IncidentPlugIn.displayLog("Unable to reproject incident: " + ex.getMessage(), ex);
+						IncidentPlugIn.displayLog(Messages.IncidentMapPage_ReprojectFailed + ex.getMessage(), ex);
 						return;
 					}
 				}
@@ -372,7 +374,7 @@ public class IncidentMapPage extends SmartMapEditorPart {
 						try{
 							if (s.getTransaction().isActive()) s.getTransaction().rollback();
 						}catch (Exception ex2){
-							IncidentPlugIn.displayLog("Unable to save change to waypoint: " + ex.getMessage(), ex);
+							IncidentPlugIn.displayLog(Messages.IncidentMapPage_SaveFailed + ex.getMessage(), ex);
 							return;
 						}
 						pw.setRawX(origx);
@@ -442,7 +444,7 @@ public class IncidentMapPage extends SmartMapEditorPart {
 						});
 					}catch (Exception ex){
 						if (s.getTransaction().isActive()) s.getTransaction().rollback();
-						IncidentPlugIn.displayLog("Error undoing waypoint move command: " + ex.getMessage(), ex);
+						IncidentPlugIn.displayLog(Messages.IncidentMapPage_MoveFailed + ex.getMessage(), ex);
 					}
 				}
 				updateToolbar();

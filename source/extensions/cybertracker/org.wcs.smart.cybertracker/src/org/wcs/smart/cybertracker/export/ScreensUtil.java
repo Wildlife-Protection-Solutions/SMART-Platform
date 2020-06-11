@@ -91,8 +91,8 @@ public class ScreensUtil {
 	}
 	
 	public MetaExportResult buildMetaNodes(Elements elements, CyberTrackerId dmRootId, Session session, CyberTrackerPropertiesProfile ctProps) {
-//		MetaExportResult result = new MetaExportResult();
-		return null; //TODO: in case we want to export without any meta screens logic for that should be placed here
+		//TODO: in case we want to export without any meta screens logic for that should be placed here
+		return null; 
 	}
 
 	/**

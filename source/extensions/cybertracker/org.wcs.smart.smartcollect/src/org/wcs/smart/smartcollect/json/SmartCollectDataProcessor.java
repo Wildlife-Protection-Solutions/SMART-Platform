@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2020 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.smartcollect.json;
 
 import java.text.MessageFormat;
@@ -40,12 +61,21 @@ import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.smartcollect.SmartCollectPlugIn;
 import org.wcs.smart.smartcollect.connect.SmartCollectConnectClient;
-import org.wcs.smart.smartcollect.model.SmartCollectPackage;
+import org.wcs.smart.smartcollect.internal.Messages;
 import org.wcs.smart.smartcollect.model.SmartCollectUser;
 import org.wcs.smart.smartcollect.model.SmartCollectUser.State;
 import org.wcs.smart.smartcollect.model.SmartCollectWaypoint;
 import org.wcs.smart.smartcollect.model.SmartCollectWaypointSource;
+import org.wcs.smart.smartcollect.pkg.SmartCollectPackageManager;
 
+/**
+ * JSON processor for SMARTCollect data.  Assumes all data for an individual
+ * waypoint is included in the same file in order.  More than one waypoint can 
+ * be in the file but observations must be in order.
+ * 
+ * @author Emily
+ *
+ */
 public class SmartCollectDataProcessor implements IJsonProcessor {
 
 	private SmartCollectConnectClient client;
@@ -90,10 +120,10 @@ public class SmartCollectDataProcessor implements IJsonProcessor {
 			
 			String type = (String) sighting.get(ScreensUtil.RESULT_DATATYPE);
 			// Validate data type
-			if (!SmartCollectPackage.SMARTCOLLECT_RESOURCE_ID.equalsIgnoreCase(type)) continue;
+			if (!SmartCollectPackageManager.SMARTCOLLECT_RESOURCE_ID.equalsIgnoreCase(type)) continue;
 	
 			
-			String wpsource = ((String)sighting.get(SmartCollectPackage.USERNAME_KEY));
+			String wpsource = ((String)sighting.get(SmartCollectPackageManager.USERNAMEMETADATA_KEY));
 			if (wpsource == null) continue;
 			users.add(wpsource);
 		}
@@ -114,8 +144,8 @@ public class SmartCollectDataProcessor implements IJsonProcessor {
 		if (!notok.isEmpty()) {
 			final StringBuilder sb = new StringBuilder();
 			for (SmartCollectUser u : notok) {
-				sb.append(u.getSource() + "[" + u.getState() + "]");
-				sb.append(", ");
+				sb.append(u.getSource() + "[" + u.getState() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
+				sb.append(", "); //$NON-NLS-1$
 			}
 			sb.delete(sb.length() - 2, sb.length());
 			
@@ -127,7 +157,7 @@ public class SmartCollectDataProcessor implements IJsonProcessor {
 			});
 			
 			if (cancel[0] == ProcessingOption.CANCEL) {
-				throw new UserCancelledException("User cancelled");
+				throw new UserCancelledException(Messages.SmartCollectDataProcessor_Cancelled);
 			}else if (cancel[0] == ProcessingOption.LOADDATA) {
 				//temporarily set to validated for the purposes of processing this dataset
 				for (SmartCollectUser u : notok) u.setState(State.VALIDATED);
@@ -138,7 +168,7 @@ public class SmartCollectDataProcessor implements IJsonProcessor {
 					try {
 						validateUser(u);
 					}catch (Exception ex) {
-						throw new Exception(MessageFormat.format("Unable to validate SMART Collect user {0}: {1}",u.getSource(),ex.getMessage()), ex);
+						throw new Exception(MessageFormat.format(Messages.SmartCollectDataProcessor_UserValidationFailed,u.getSource(),ex.getMessage()), ex);
 					}
 				}
 			}else if (cancel[0] == ProcessingOption.BLACKLISTANDDISCARD) {
@@ -146,7 +176,7 @@ public class SmartCollectDataProcessor implements IJsonProcessor {
 					try {
 						blacklistUser(u);
 					}catch (Exception ex) {
-						throw new Exception(MessageFormat.format("Unable to blacklist SMART Collect user {0}: {1}",u.getSource(),ex.getMessage()), ex);
+						throw new Exception(MessageFormat.format(Messages.SmartCollectDataProcessor_UserBlackListFailed,u.getSource(),ex.getMessage()), ex);
 					}
 				}
 			}else if (cancel[0] == ProcessingOption.VERIFYREQUEUE) {
@@ -154,7 +184,7 @@ public class SmartCollectDataProcessor implements IJsonProcessor {
 					try {
 						sendEmailRequest(u);
 					}catch (Exception ex) {
-						throw new Exception(MessageFormat.format("Unable to send validation email for SMART Collect user {0}: {1}",u.getSource(),ex.getMessage()), ex);
+						throw new Exception(MessageFormat.format(Messages.SmartCollectDataProcessor_EmailSendFailed,u.getSource(),ex.getMessage()), ex);
 					}
 				}
 				return Collections.emptyList();
@@ -175,7 +205,7 @@ public class SmartCollectDataProcessor implements IJsonProcessor {
 				
 				String type = (String) sighting.get(ScreensUtil.RESULT_DATATYPE);
 				// Validate data type
-				if (!SmartCollectPackage.SMARTCOLLECT_RESOURCE_ID.equalsIgnoreCase(type)) continue;
+				if (!SmartCollectPackageManager.SMARTCOLLECT_RESOURCE_ID.equalsIgnoreCase(type)) continue;
 				
 				processedFeatures.add(feature);
 				
@@ -188,9 +218,9 @@ public class SmartCollectDataProcessor implements IJsonProcessor {
 				String strGroupId = ((String) sighting.get(ScreensUtil.RESULT_SIGHTINGGROUPID)).trim();
 				if (strGroupId == null || strGroupId.isEmpty()) throw new Exception("No group id provided for independent incident.  Incident cannot be loaded"); //$NON-NLS-1$
 				
-				String wpsource = ((String)sighting.get(SmartCollectPackage.USERNAME_KEY));
+				String wpsource = ((String)sighting.get(SmartCollectPackageManager.USERNAMEMETADATA_KEY));
 				if (wpsource == null) {
-					warnings.add("No user specified for SMARTCollect feature.  Feature will not be loaded:" + feature.toString());
+					warnings.add(Messages.SmartCollectDataProcessor_NoUserForFeature + feature.toString());
 					continue;
 				}
 			
@@ -244,15 +274,15 @@ public class SmartCollectDataProcessor implements IJsonProcessor {
 				
 			}catch (Exception ex) {
 				SmartCollectPlugIn.log(ex.getMessage() + ": " + feature.toJSONString(), ex); //$NON-NLS-1$
-				warnings.add("Error parsing SMARTCollect incident: " + ex.getMessage());
+				warnings.add(Messages.SmartCollectDataProcessor_ParseError + ex.getMessage());
 			}
 		}
 		
 		if (discardall) {
-			warnings.add(MessageFormat.format("{0} features discared.", processedFeatures.size()));
+			warnings.add(MessageFormat.format(Messages.SmartCollectDataProcessor_FeaturesDiscared, processedFeatures.size()));
 		}
 		for (Entry<String, Integer> bcnt : blacklistCount.entrySet()) {
-			warnings.add(MessageFormat.format("The user {0} is blacklisted.  The {1} features reported by this user were not loaded.", bcnt.getKey(), bcnt.getValue()));
+			warnings.add(MessageFormat.format(Messages.SmartCollectDataProcessor_UserBlacklistedFeaturesDiscarded, bcnt.getKey(), bcnt.getValue()));
 		}
 		//display warnings to user; this may throw a cancelled exception if the user doesn't want to proceed
 		displayWarnings(warnings);
@@ -267,7 +297,7 @@ public class SmartCollectDataProcessor implements IJsonProcessor {
 			try{
 				IncidentEventManager.getInstance().fireEvent(IncidentEventManager.INCIDENT_MODIFIED, p);
 			}catch (Exception ex){
-				SmartCollectPlugIn.displayLog("Error notifying system of modified waypoints: " + ex.getMessage(), ex);
+				SmartCollectPlugIn.displayLog(Messages.SmartCollectDataProcessor_EventError + ex.getMessage(), ex);
 			}
 		}
 	}
@@ -278,7 +308,7 @@ public class SmartCollectDataProcessor implements IJsonProcessor {
 		
 		StringBuilder sb = new StringBuilder();
 		if (!waypoints.isEmpty()){
-			sb.append(MessageFormat.format("Created {0} SMARTCollect Incidents ", waypoints.size()));
+			sb.append(MessageFormat.format(Messages.SmartCollectDataProcessor_CreatedMessage, waypoints.size()));
 			sb.append("("); //$NON-NLS-1$
 			for(Waypoint p : waypoints){
 				sb.append(p.getId());
@@ -303,8 +333,8 @@ public class SmartCollectDataProcessor implements IJsonProcessor {
 					@Override
 					public void run() {
 						WarningDialog wd = new WarningDialog(Display.getDefault().getActiveShell(), 
-								"Warnings", 
-								"The following warnings were generated while processing SMARTCollect incidents. Do you want to continue?",
+								Messages.SmartCollectDataProcessor_WarningsTitle, 
+								Messages.SmartCollectDataProcessor_WarningsMessage,
 								warnings,
 								new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 0);
 						if (wd.open() == 0){
@@ -315,7 +345,7 @@ public class SmartCollectDataProcessor implements IJsonProcessor {
 					}	
 				});
 				if (!cont[0]){
-					throw new UserCancelledException("Import cancelled by user");
+					throw new UserCancelledException(Messages.SmartCollectDataProcessor_Cancelled);
 				}
 		 }
 	}
@@ -353,9 +383,9 @@ public class SmartCollectDataProcessor implements IJsonProcessor {
 				ConnectDialog cd = new ConnectDialog(Display.getCurrent().getActiveShell(), true) {
 					@Override
 					protected Control createDialogArea(Composite parent) {
-						setTitle("SMART Collect User Validation");
-						getShell().setText("SMART Collect User Validation");
-						setMessage("Enter Connect connection details");	
+						setTitle(Messages.SmartCollectDataProcessor_Title);
+						getShell().setText(Messages.SmartCollectDataProcessor_Title);
+						setMessage(Messages.SmartCollectDataProcessor_Message);	
 						return super.createDialogArea(parent);
 					}
 				};

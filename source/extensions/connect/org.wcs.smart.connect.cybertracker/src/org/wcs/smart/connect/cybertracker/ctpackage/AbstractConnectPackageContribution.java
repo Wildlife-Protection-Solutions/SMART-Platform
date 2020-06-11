@@ -38,8 +38,7 @@ import org.wcs.smart.util.UuidUtils;
 public abstract class AbstractConnectPackageContribution  implements IPackageContribution {
 	
 	public static final String CT_API_CONTEXT_KEY = "org.wcs.smart.connect.cybertracker.apikey"; //$NON-NLS-1$
-	protected static final String JSON_URLKEY = "URL"; //$NON-NLS-1$
-	protected static final String JSON_APIKEY = "API_KEY"; //$NON-NLS-1$
+	
 
 	private SmartConnect connect = null;
 	

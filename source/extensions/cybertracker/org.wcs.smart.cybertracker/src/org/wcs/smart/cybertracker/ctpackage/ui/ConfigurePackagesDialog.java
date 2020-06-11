@@ -211,7 +211,7 @@ public class ConfigurePackagesDialog extends SmartStyledTitleDialog {
 					}
 					
 				});
-				gc.getColumn().setText(prop.getName());
+				gc.getColumn().setText(prop.getLongName());
 				tcl.setColumnData(gc.getColumn(), new ColumnWeightData(100, 150, true));
 			}
 			pp.addPropertyUpdatedListener(()->{
@@ -324,7 +324,6 @@ public class ConfigurePackagesDialog extends SmartStyledTitleDialog {
 	
 	
 	private void addPackage() {
-		//TODO: force single package
 		//make users select the type then create new items
 		Collection<ICtPackageManager> types = CtPackageExtensionPointManager.INSTANCE.getPackageManagers();
 		if (types.isEmpty()) return;
@@ -555,7 +554,7 @@ public class ConfigurePackagesDialog extends SmartStyledTitleDialog {
 			tc.setLabelProvider(new ColumnLabelProvider() {
 				@Override
 				public String getText(Object element) {
-					if (element instanceof ICtPackageManager) return ((ICtPackageManager) element).getTypeIdentifier();
+					if (element instanceof ICtPackageManager) return ((ICtPackageManager) element).getTypeName();
 					return super.getText(element);
 				}
 				

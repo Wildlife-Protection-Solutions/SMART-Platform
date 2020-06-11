@@ -1,6 +1,28 @@
+/*
+ * Copyright (C) 2020 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.smartcollect.ui;
 
 import java.nio.file.Path;
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +52,7 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
@@ -51,6 +74,7 @@ import org.wcs.smart.cybertracker.export.data.DataModelWrapper;
 import org.wcs.smart.cybertracker.model.ConfigurableModelCtPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.ICtPackage;
+import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.cybertracker.properties.CtProfileLabelProvider;
 import org.wcs.smart.cybertracker.properties.CyberTrackerPropertiesDialog;
 import org.wcs.smart.dataentry.DataentryHibernateManager;
@@ -58,11 +82,19 @@ import org.wcs.smart.dataentry.dialog.ConfigurableModelLabelProvider;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.smartcollect.connect.SmartCollectConnectDataContribution;
+import org.wcs.smart.smartcollect.internal.Messages;
 import org.wcs.smart.smartcollect.model.SmartCollectPackage;
+import org.wcs.smart.smartcollect.pkg.SmartCollectPackageManager;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 import com.ibm.icu.text.DateFormat;
 
+/**
+ * Package configurator for SMARTCollect package
+ * 
+ * @author Emily
+ *
+ */
 public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 
 	private SmartCollectPackage ctpackage;
@@ -70,6 +102,7 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 	private ComboViewer modelViewer;
 	private ComboViewer profileViewer;
 	private Text txtName;
+	private Button btnCollectGroups;
 	
 	private List<IPackageUiContribution> contributions = null;
 	private ConfigurableModel selectedModel = null;
@@ -96,7 +129,7 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 		contributions.forEach(e->ContextInjectionFactory.inject(e, context));
 		
 		this.onValidate = validate;
-		if (!(ctitem instanceof SmartCollectPackage)) throw new IllegalStateException("Invalid package type");
+		if (!(ctitem instanceof SmartCollectPackage)) throw new IllegalStateException(Messages.SmartCollectPackageConfigurator_InvalidType);
 		this.ctpackage = (SmartCollectPackage) ctitem;
 	
 		
@@ -105,7 +138,7 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 		tabs.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		CTabItem mainTab = new CTabItem(tabs, SWT.NONE);
-		mainTab.setText("Model Settings");
+		mainTab.setText(Messages.SmartCollectPackageConfigurator_SettingsTab);
 		
 		ScrolledComposite scroll = new ScrolledComposite(tabs,  SWT.V_SCROLL);
 		scroll.setExpandHorizontal(true);
@@ -128,7 +161,7 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 		header.setLayout(new GridLayout());
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		Label headerLabel = new Label(header, SWT.NONE);
-		headerLabel.setText("Configuration");
+		headerLabel.setText(Messages.SmartCollectPackageConfigurator_ConfigurationSection);
 		WidgetElement.setCSSClass(header, SmartUiUtils.HEADER_CLASS);
 		
 		g = new Composite(g, SWT.NONE);
@@ -138,18 +171,18 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 		Label warnLabel = new Label(g, SWT.WRAP);
 		warnLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		((GridData)warnLabel.getLayoutData()).widthHint = 200;
-		warnLabel.setText("WARNING: SMART Collect packages are visible to the general public. Ensure there is no sensitive data in the models used in these packages");
+		warnLabel.setText(Messages.SmartCollectPackageConfigurator_WarningLabel);
 		
 		Label nameLabel = new Label(g, SWT.NONE);
-		nameLabel.setText("Package Name:");
+		nameLabel.setText(Messages.SmartCollectPackageConfigurator_PackageNameLabel);
 		
 		txtName = new Text(g, SWT.BORDER);
-		txtName.setText(ctitem.getName() == null ? (ctitem.getTypeIdentifier() + "SMART Collect Package") : ctitem.getName());
+		txtName.setText(ctitem.getName() == null ? (ctitem.getTypeIdentifier() + Messages.SmartCollectPackageConfigurator_DeafultName) : ctitem.getName());
 		txtName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtName.addListener(SWT.Modify, e->{ if (!isInit) validate();});
 		
 		Label modelLabel = new Label(g, SWT.NONE);
-		modelLabel.setText("Configurable Model:");
+		modelLabel.setText(Messages.SmartCollectPackageConfigurator_CMLabel);
 		
 		modelViewer = new ComboViewer(g, SWT.READ_ONLY);
 		modelViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -159,7 +192,7 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 			@Override
 			public String getText(Object element) {
 				if (element instanceof DataModelWrapper) {
-					return "Original Data Model";
+					return Messages.SmartCollectPackageConfigurator_DataModelLabel;
 				}
 				return super.getText(element);
 			}
@@ -189,7 +222,7 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 
 		
 		Label lblProfile = new Label(g, SWT.NONE);
-		lblProfile.setText("Device Settings:");
+		lblProfile.setText(Messages.SmartCollectPackageConfigurator_DeviceSettingsLabel);
 
 		Composite c = new Composite(g, SWT.NONE);
 		c.setLayout(new GridLayout(2, false));
@@ -212,7 +245,7 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 		
 		ToolBar tb = new ToolBar(c, SWT.FLAT);
 		ToolItem tiEdit = new ToolItem(tb,SWT.PUSH);
-		tiEdit.setToolTipText("view/edit device settings");
+		tiEdit.setToolTipText(Messages.SmartCollectPackageConfigurator_EditSettingsTooltip);
 		tiEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 		tiEdit.addListener(SWT.Selection, e->{
 			Object x = profileViewer.getStructuredSelection().getFirstElement();
@@ -222,6 +255,11 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 			dialog.open();
 		});
 		
+		Label lblGroups = new Label(g, SWT.NONE);
+		lblGroups.setText(Messages.SmartCollectPackageConfigurator_UserGroupOpLabel);
+		lblGroups.setToolTipText(MessageFormat.format("{0}\n{1}",Messages.SmartCollectPackageConfigurator_UserGroupOpTooltip1, Messages.SmartCollectPackageConfigurator_UserGroupOpTooltip2)); //$NON-NLS-1$
+		btnCollectGroups = new Button(g, SWT.CHECK);
+		btnCollectGroups.addListener(SWT.Selection, e->{if (!isInit) validate();});
 		
 		//main page contributions
 		if (contributions != null) {
@@ -267,7 +305,7 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 				return profile;
 			}
 		} catch (Exception ex) {
-			SmartPlugIn.displayLog("Error loading device settings", ex);
+			SmartPlugIn.displayLog(Messages.SmartCollectPackageConfigurator_DeviceSettingsError, ex);
 			return null;
 		}
 	}
@@ -276,15 +314,15 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 		
 		try {
 			if (txtName.getText().isBlank()) {
-				throw new Exception("A package name is required.");
+				throw new Exception(Messages.SmartCollectPackageConfigurator_NameRequired);
 			}
 		
 			if (modelViewer.getSelection().isEmpty()) {
-				throw new Exception("A configurable model selection is required");
+				throw new Exception(Messages.SmartCollectPackageConfigurator_CmRequired);
 			}
 		
 			if (profileViewer.getSelection().isEmpty()) {
-				throw new Exception("Device settings must be selected");
+				throw new Exception(Messages.SmartCollectPackageConfigurator_SettingsRequired);
 			}
 			for (IPackageUiContribution cc : contributions) {
 				String x = cc.isValid();
@@ -336,7 +374,7 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 			((GridLayout)inner.getLayout()).marginHeight = 0;
 			
 			Label l= new Label(inner, SWT.NONE);
-			l.setText("Configurable Model:");
+			l.setText(Messages.SmartCollectPackageConfigurator_CMLabel);
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)l.getLayoutData()).verticalIndent = 5;
 			
@@ -345,12 +383,12 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 			if (local.getConfigurableModel() != null) {
 				l.setText(local.getConfigurableModel().getName());
 			}else {
-				l.setText( "Original Data Model" );
+				l.setText( Messages.SmartCollectPackageConfigurator_DataModelLabel );
 			}
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			
 			l= new Label(inner, SWT.NONE);
-			l.setText("Device Settings:");
+			l.setText(Messages.SmartCollectPackageConfigurator_DeviceSettingsLabel);
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)l.getLayoutData()).verticalIndent = 5;
 			
@@ -364,7 +402,7 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 			}
 			
 			l= new Label(inner, SWT.NONE);
-			l.setText("Details:");
+			l.setText(Messages.SmartCollectPackageConfigurator_PackageDetails);
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)l.getLayoutData()).verticalIndent = 5;
 			
@@ -379,18 +417,39 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 					revision = revision.substring(0,index);
 					SimpleDateFormat sdf = new SimpleDateFormat(ICtPackage.PACKAGE_DATE_FORMAT);
 					
-					l= new Label(inner, SWT.NONE);
-					l.setText(DateFormat.getDateTimeInstance().format( sdf.parse(date)) );
+					Composite temp = new Composite(inner, SWT.NONE);
+					temp.setLayout(new GridLayout(2, false));
+					temp.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+					((GridLayout)(temp.getLayout())).marginWidth = 0;
+					((GridLayout)(temp.getLayout())).marginHeight = 0;
+					temp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+					
+					l = new Label(temp, SWT.NONE);
+					l.setText(Messages.SmartCollectPackageConfigurator_Date);
+					l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+
+					l= new Label(temp, SWT.NONE);
+					l.setText( DateFormat.getDateTimeInstance().format( sdf.parse(date)) );
 					l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 					l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-					l= new Label(inner, SWT.NONE);
+					
+					l = new Label(temp, SWT.NONE);
+					l.setText(Messages.SmartCollectPackageConfigurator_Version);
+					l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+
+					l= new Label(temp, SWT.NONE);
 					l.setText(revision);
+					l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+					l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+				}else{
+					l= new Label(inner, SWT.NONE);
+					l.setText(Messages.SmartCollectPackageConfigurator_NoPackage);
 					l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 					l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 				}
 			}catch (Exception ex) {
 				l= new Label(inner, SWT.NONE);
-				l.setText("Unknown");
+				l.setText(Messages.SmartCollectPackageConfigurator_UnknownErrorLabel);
 				l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 			}
@@ -403,9 +462,23 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 				l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				((GridData)l.getLayoutData()).verticalIndent = 5;
 				
+				Composite temp = new Composite(inner, SWT.NONE);
+				temp.setLayout(new GridLayout(2, false));
+				temp.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+				((GridLayout)(temp.getLayout())).marginWidth = 0;
+				((GridLayout)(temp.getLayout())).marginHeight = 0;
+				temp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				
 				for (ICtPackageProperty pprop : pp.getProperties()) {
-					l= new Label(inner, SWT.NONE);
-					l.setText( pprop.getValue(ctpackage) );
+					String value = pprop.getValue(ctpackage);
+					if (value == null || value.isBlank()) continue;
+							
+					l = new Label(temp, SWT.NONE);
+					l.setText(pprop.getShortName()  + ":"); //$NON-NLS-1$
+					l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+
+					l= new Label(temp, SWT.NONE);
+					l.setText( value);
 					l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 					l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 				}
@@ -432,6 +505,24 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 				}
 				ctpackage.setCtProfile((CyberTrackerPropertiesProfile) profileViewer.getStructuredSelection().getFirstElement());
 				ctpackage.setName(txtName.getText());
+				
+				MetadataFieldValue fv = null;
+				for (MetadataFieldValue v : ctpackage.getMetadataValues()) {
+					if (v.getMetadataKey().equals(SmartCollectPackageManager.COLLECT_GROUPS_FIELDKEY)) {
+						fv = v;
+						break;
+					}
+				}
+				if (fv == null) {
+					fv = new MetadataFieldValue();
+					fv.setMetadataKey(SmartCollectPackageManager.COLLECT_GROUPS_FIELDKEY);
+					fv.setCtPackage(ctpackage);
+					fv.setConservationArea(ctpackage.getConservationArea());
+					if (ctpackage.getMetadataValues() == null) ctpackage.setMetadataValues(new ArrayList<>());
+					ctpackage.getMetadataValues().add(fv);
+				}
+				fv.setBooleanValue(btnCollectGroups.getSelection());
+				
 				session.saveOrUpdate(ctpackage);
 				session.flush();
 				for (IPackageUiContribution cc : contributions) {
@@ -478,7 +569,11 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 							init.getCtProfile().getUuid();
 						}
 					}
+					if (init.getMetadataValues() != null) init.getMetadataValues().size();
 				}
+				
+				
+				
 				if (init.isDataModel()) {
 					context.set(ConfigurableModel.class, new ConfigurableModel());
 				}else {
@@ -489,6 +584,14 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 				Display.getDefault().syncExec(()->{
 					try {
 						isInit = true;
+						
+						for (MetadataFieldValue v : finit.getMetadataValues()) {
+							if (v.getMetadataKey().equals(SmartCollectPackageManager.COLLECT_GROUPS_FIELDKEY)) {
+								btnCollectGroups.setSelection(v.getBooleanValue());
+								break;
+							}
+						}
+						
 						profileViewer.setInput(profiles);
 						modelViewer.setInput(modelList);
 						

@@ -261,7 +261,6 @@ public class SurveyCTImportEditorContent implements IImportEditorContent {
 
 		SurveyDesign surveyDesign = ((CyberTrackerSurvey)selection.getFirstElement()).getSurveyDesign();
 		if (surveyDesign == null) {
-			//TODO: allow user to fix survey design
 			throw new IllegalStateException("Unknown survey design"); //$NON-NLS-1$
 		}
 		

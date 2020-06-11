@@ -240,10 +240,13 @@ public class ConnectCtPackageProperties implements ICtPackagePropertyProvider {
 		}
 
 		@Override
-		public String getName() {
+		public String getLongName() {
 			return Messages.ConnectCtPackageProperties_DateColumn;
 		}
-		
+		@Override
+		public String getShortName() {
+			return Messages.ConnectCtPackageProperties_DatePropertyShortName;
+		}
 	}
 	
 	private class ConnectVersionProperty implements ICtPackageProperty{
@@ -254,10 +257,14 @@ public class ConnectCtPackageProperties implements ICtPackagePropertyProvider {
 		}
 
 		@Override
-		public String getName() {
+		public String getLongName() {
 			return Messages.ConnectCtPackageProperties_VersionColumn;
 		}
-		
+		@Override
+		public String getShortName() {
+			return Messages.ConnectCtPackageProperties_VersionPropertyShortName;
+		}
+		@Override
 		public boolean showInSummaryTable() {
 			return false;
 		}

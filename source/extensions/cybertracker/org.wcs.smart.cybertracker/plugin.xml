@@ -340,7 +340,7 @@
    <extension
          point="org.wcs.smart.caFilestoreDir">
       <FilestoreDirectory
-            directory="Cybertracker">
+            directory="CyberTracker">
       </FilestoreDirectory>
    </extension>
    <extension

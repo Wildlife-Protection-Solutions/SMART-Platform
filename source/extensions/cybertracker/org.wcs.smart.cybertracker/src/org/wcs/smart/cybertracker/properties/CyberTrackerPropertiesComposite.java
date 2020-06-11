@@ -1262,6 +1262,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 			case THEME_COLOR_2:l.setText(Messages.CyberTrackerPropertiesComposite_AccentColor); break;
 			case THEME_COLOR_3:l.setText(Messages.CyberTrackerPropertiesComposite_ForegroundColor); break;
 			case THEME_COLOR_4:l.setText(Messages.CyberTrackerPropertiesComposite_BackgroundCoor);	break;
+			default: l.setText(""); //$NON-NLS-1$
 			}
 			
 			Label colorLabel = new Label(part, SWT.NONE);

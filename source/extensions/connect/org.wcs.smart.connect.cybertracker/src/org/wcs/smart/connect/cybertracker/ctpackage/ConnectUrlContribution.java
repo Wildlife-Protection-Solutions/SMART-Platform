@@ -50,12 +50,7 @@ public class ConnectUrlContribution extends AbstractConnectPackageContribution {
 	private static final String PACKAGE_URL = "/noa/cybertracker/packages/"; //$NON-NLS-1$
 	private static final String NAVIGATION_URL = "/noa/cybertracker/navigation/"; //$NON-NLS-1$
 
-	//json keys for status/package urls
-	private static final String JSON_STATUS_KEY = "status_url"; //$NON-NLS-1$
-	private static final String JSON_DOWNLOAD_KEY = "download_url"; //$NON-NLS-1$
 
-	//json keys for navigation urls
-	private static final String NAVLAYERS_JSONKEY = "navigation_url"; //$NON-NLS-1$
 
 	
 	public ConnectUrlContribution() {
@@ -88,10 +83,10 @@ public class ConnectUrlContribution extends AbstractConnectPackageContribution {
 			String url = parts[0];
 			String apikey = parts[1];
 			
-			cc.setProjectMetadata(JSON_STATUS_KEY, url + STATUS_URL + ctpackage.getUuid().toString());
-			cc.setProjectMetadata(NAVLAYERS_JSONKEY, url + NAVIGATION_URL);
-			cc.setProjectMetadata(JSON_DOWNLOAD_KEY, url + PACKAGE_URL + ctpackage.getUuid().toString()); 
-			cc.setProjectMetadata(JSON_APIKEY, apikey);
+			cc.setProjectMetadata(SmartMobilePackageFields.JSON_STATUS_KEY, url + STATUS_URL + ctpackage.getUuid().toString());
+			cc.setProjectMetadata(SmartMobilePackageFields.NAVLAYERS_JSONKEY, url + NAVIGATION_URL);
+			cc.setProjectMetadata(SmartMobilePackageFields.JSON_DOWNLOAD_KEY, url + PACKAGE_URL + ctpackage.getUuid().toString()); 
+			cc.setProjectMetadata(SmartMobilePackageFields.JSON_APIKEY, apikey);
 			
 			
 		}

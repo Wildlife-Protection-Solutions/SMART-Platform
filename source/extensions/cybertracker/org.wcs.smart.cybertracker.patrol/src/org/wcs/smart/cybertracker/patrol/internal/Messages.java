@@ -69,6 +69,8 @@ public class Messages extends NLS {
 
 	public static String CtPatrolPackageConfigurator_CmRequired;
 
+	public static String CtPatrolPackageConfigurator_DateProperty;
+
 	public static String CtPatrolPackageConfigurator_DefaultName;
 
 	public static String CtPatrolPackageConfigurator_DetailsLabel;
@@ -79,6 +81,8 @@ public class Messages extends NLS {
 
 	public static String CtPatrolPackageConfigurator_NameRequired;
 
+	public static String CtPatrolPackageConfigurator_NoPackageMsg;
+
 	public static String CtPatrolPackageConfigurator_ProfileLabel;
 
 	public static String CtPatrolPackageConfigurator_ProfileRequired;
@@ -86,6 +90,8 @@ public class Messages extends NLS {
 	public static String CtPatrolPackageConfigurator_SettingsLabel;
 
 	public static String CtPatrolPackageConfigurator_Unknown;
+
+	public static String CtPatrolPackageConfigurator_VersionProperty;
 
 	public static String CtPatrolPackageConfigurator_viewedittooltip;
 

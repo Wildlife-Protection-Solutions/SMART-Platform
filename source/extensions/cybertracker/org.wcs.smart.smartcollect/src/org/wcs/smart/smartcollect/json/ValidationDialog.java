@@ -1,8 +1,27 @@
+/*
+ * Copyright (C) 2020 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.smartcollect.json;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -12,9 +31,18 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.smartcollect.internal.Messages;
 import org.wcs.smart.smartcollect.json.SmartCollectDataProcessor.ProcessingOption;
 import org.wcs.smart.ui.SmartStyledDialog;
 
+/**
+ * SMARTCollect user validation dialog.  Displayed to the user when
+ * a collect user has not been validated and desktop user has to decide
+ * how to continue with the data.
+ * 
+ * @author Emily
+ *
+ */
 public class ValidationDialog extends SmartStyledDialog {
 
 	private String users;
@@ -38,7 +66,7 @@ public class ValidationDialog extends SmartStyledDialog {
 		 ((GridLayout)composite.getLayout()).marginRight = 20;
 		 
 		 Label l = new Label(composite, SWT.WRAP);
-		 l.setText(MessageFormat.format("The user(s): {0} have not been validated for SMART Collect data collection.  You have the following options:", users));
+		 l.setText(MessageFormat.format(Messages.ValidationDialog_UserValidationMessage, users));
 		 l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		 ((GridData)l.getLayoutData()).widthHint = 400;
 		 
@@ -47,18 +75,18 @@ public class ValidationDialog extends SmartStyledDialog {
 		 buttonComp.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
 		 
 		 Button btnLoadAnyways = new Button(buttonComp, SWT.PUSH);
-		 btnLoadAnyways.setText("Load Data");
+		 btnLoadAnyways.setText(Messages.ValidationDialog_LoadOp);
 		 btnLoadAnyways.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		 btnLoadAnyways.setToolTipText("Load all data");
+		 btnLoadAnyways.setToolTipText(Messages.ValidationDialog_LoadOpTooltip);
 		 btnLoadAnyways.addListener(SWT.Selection, e->{
 			 option = ProcessingOption.LOADDATA;
 			 okPressed();
 		 });
 		 
 		 Button btnValidateAndLoad = new Button(buttonComp, SWT.PUSH);
-		 btnValidateAndLoad.setText("Accept User(s) and Load Data");
+		 btnValidateAndLoad.setText(Messages.ValidationDialog_AcceptLoadOp);
 		 btnValidateAndLoad.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		 btnValidateAndLoad.setToolTipText("Mark the users as a valid user for future data loads and loads all data");
+		 btnValidateAndLoad.setToolTipText(Messages.ValidationDialog_AcceptLoadOpTooltip);
 		 btnValidateAndLoad.addListener(SWT.Selection, e->{
 			 option = ProcessingOption.ACCEPTANDLOAD;
 			 okPressed();
@@ -66,41 +94,41 @@ public class ValidationDialog extends SmartStyledDialog {
 		
 		 
 		 Button btnBlacklistSkip = new Button(buttonComp, SWT.PUSH);
-		 btnBlacklistSkip.setText("Blacklist User(s) and Discard Data");
+		 btnBlacklistSkip.setText(Messages.ValidationDialog_BlacklistDiscardOp);
 		 btnBlacklistSkip.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		 btnBlacklistSkip.setToolTipText("Mark the users as blacklisted and throw away data");
+		 btnBlacklistSkip.setToolTipText(Messages.ValidationDialog_BlacklistDiscardOpTooltip);
 		 btnBlacklistSkip.addListener(SWT.Selection, e->{
 			 option = ProcessingOption.BLACKLISTANDDISCARD;
 			 okPressed();
 		 });
 		 
 		 Button btnSkip = new Button(buttonComp, SWT.PUSH);
-		 btnSkip.setText("Discard Data Only");
+		 btnSkip.setText(Messages.ValidationDialog_DiscardOp);
 		 btnSkip.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		 btnSkip.setToolTipText("Throw away all the data");
+		 btnSkip.setToolTipText(Messages.ValidationDialog_DiscardOpTooltip);
 		 btnSkip.addListener(SWT.Selection, e->{
 			 option = ProcessingOption.DISCARD;
 			 okPressed();
 		 });
 		 
 		 Button btnRequeue = new Button(buttonComp, SWT.PUSH);
-		 btnRequeue.setText("Send Email Verification and Requeue Data");
+		 btnRequeue.setText(Messages.ValidationDialog_ValidateOp);
 		 btnRequeue.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		 btnRequeue.setToolTipText("Send validation requests to the user and requeue data for future processing.");
+		 btnRequeue.setToolTipText(Messages.ValidationDialog_ValidateOpTooltip);
 		 btnRequeue.addListener(SWT.Selection, e->{
 			 option = ProcessingOption.VERIFYREQUEUE;
 			 okPressed();
 		 });
 		 
 		 Button btnCancel = new Button(buttonComp, SWT.PUSH);
-		 btnCancel.setText("Cancel");
+		 btnCancel.setText(Messages.ValidationDialog_CancelOp);
 		 btnCancel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		 btnCancel.setToolTipText("Cancel data processing");
+		 btnCancel.setToolTipText(Messages.ValidationDialog_CancelOpTooltip);
 		 btnCancel.addListener(SWT.Selection, e->{
 			 option = ProcessingOption.CANCEL;
 			 okPressed();
 		 });
-		 getShell().setText("Validate SMART Collect Users");
+		 getShell().setText(Messages.ValidationDialog_Title);
 		 return composite;
 	 }
 	

@@ -501,12 +501,33 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 					revision = revision.substring(0,index);
 					SimpleDateFormat sdf = new SimpleDateFormat(ICtPackage.PACKAGE_DATE_FORMAT);
 					
-					l= new Label(inner, SWT.NONE);
-					l.setText(DateFormat.getDateTimeInstance().format( sdf.parse(date)) );
+					Composite temp = new Composite(inner, SWT.NONE);
+					temp.setLayout(new GridLayout(2, false));
+					temp.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+					((GridLayout)(temp.getLayout())).marginWidth = 0;
+					((GridLayout)(temp.getLayout())).marginHeight = 0;
+					temp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+					
+					l = new Label(temp, SWT.NONE);
+					l.setText(Messages.CtPatrolPackageConfigurator_DateProperty);
+					l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+
+					l= new Label(temp, SWT.NONE);
+					l.setText( DateFormat.getDateTimeInstance().format( sdf.parse(date)) );
 					l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 					l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-					l= new Label(inner, SWT.NONE);
+					
+					l = new Label(temp, SWT.NONE);
+					l.setText(Messages.CtPatrolPackageConfigurator_VersionProperty);
+					l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+
+					l= new Label(temp, SWT.NONE);
 					l.setText(revision);
+					l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+					l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+				}else{
+					l= new Label(inner, SWT.NONE);
+					l.setText(Messages.CtPatrolPackageConfigurator_NoPackageMsg);
 					l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 					l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 				}
@@ -525,8 +546,19 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 				l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				((GridData)l.getLayoutData()).verticalIndent = 5;
 				
+				Composite temp = new Composite(inner, SWT.NONE);
+				temp.setLayout(new GridLayout(2, false));
+				temp.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+				((GridLayout)(temp.getLayout())).marginWidth = 0;
+				((GridLayout)(temp.getLayout())).marginHeight = 0;
+				temp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				
 				for (ICtPackageProperty pprop : pp.getProperties()) {
-					l= new Label(inner, SWT.NONE);
+					l = new Label(temp, SWT.NONE);
+					l.setText(pprop.getShortName() + ":"); //$NON-NLS-1$
+					l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+
+					l= new Label(temp, SWT.NONE);
 					l.setText( pprop.getValue(ctpackage) );
 					l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 					l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));

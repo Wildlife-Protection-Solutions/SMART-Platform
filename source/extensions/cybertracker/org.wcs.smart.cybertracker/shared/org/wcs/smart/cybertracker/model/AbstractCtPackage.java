@@ -43,7 +43,6 @@ import org.locationtech.jts.geom.Envelope;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
-import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.util.UuidUtils;
 
 @Entity
@@ -69,13 +68,15 @@ public abstract class AbstractCtPackage extends UuidItem implements ICtPackage {
 		}
 	}
 	
+	//package name
 	protected String name;
+	//conservation area
 	protected ConservationArea ca;
-	
+	//device properties
 	protected CyberTrackerPropertiesProfile ctprofile;
-	
+	//basemap definition
 	protected String basemapdef;
-	
+	//package metadata values
 	protected List<MetadataFieldValue> metadataValues;
 
 	@OneToMany(fetch = FetchType.LAZY, cascade= {CascadeType.ALL}, orphanRemoval = true, mappedBy="ctPackage")
