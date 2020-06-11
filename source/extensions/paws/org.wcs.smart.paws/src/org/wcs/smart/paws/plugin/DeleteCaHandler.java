@@ -53,11 +53,7 @@ public class DeleteCaHandler implements ICaDeleteHandler {
 		
 		monitor.subTask("removing PAWS plugin data"); //$NON-NLS-1$
 		
-		Query<?>  q = session.createQuery("DELETE FROM PawsWorkspace WHERE conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameter("ca", ca); //$NON-NLS-1$
-		q.executeUpdate();
-		
-		q = session.createQuery("DELETE FROM PawsService WHERE conservationArea = :ca"); //$NON-NLS-1$
+		Query<?> q = session.createQuery("DELETE FROM PawsService WHERE conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();		
 		
