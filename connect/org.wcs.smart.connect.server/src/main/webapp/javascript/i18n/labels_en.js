@@ -9,6 +9,10 @@ labels_en= {
 "cybertracker.loadingpackageserror": "Error loading cybertracker packages: ",
 "cybertracker.packagedeleteerror": "Error deleting cybertracker package: ",
 "cybertracker.packagedeletemsg": "Package deleted.",
+"cybertracker.nousers": "No results found",
+"cybertracker.searchingusers": "searching...",
+"cybertracker.userserror": "Error: ",
+"cybertracker.usersnotauthorized": "Error:",
 
 "alert.errorcreatingalert": "Error creating Alert",
 "alert.invalidlong": "Invalid Longitude must be between -180 and 180.",

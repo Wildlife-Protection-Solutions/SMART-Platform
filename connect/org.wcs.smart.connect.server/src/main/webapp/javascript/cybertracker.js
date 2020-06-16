@@ -411,7 +411,7 @@ function getCollectUsers(){
 	
 	var row = document.createElement("div");
 	row.className="ctuserrow";
-	row.innerHTML="searching...";
+	row.innerHTML=i18n("cybertracker.searchingusers");
 	parent.appendChild(row);
 	
 	var searchtext = document.getElementById('collectusersearch').value;
@@ -424,9 +424,9 @@ function getCollectUsers(){
 
 function collectUserCallback(){
 	if (this.status != 200) {
-		var msg = "Error: ";
+		var msg = i18n("cybertracker.userserror");
 		if (this.status == 401){
-			msg += "Unauthorized";
+			msg += i18n("cybertracker.usersnotauthorized");
 		}
 		try {
 			msg = JSON.parse(this.responseText).error
@@ -484,14 +484,12 @@ function collectUserCallback(){
 		validateicon.style="margin-left: 5px; margin-right:5px";
 		validateicon.onclick = validateUser;
 		row.childNodes[2].appendChild(validateicon);
-		
-
  	}
  	
  	if(users.length == 0 || drawnRowCount == 0){ //no results or they were all filtered out
  		var row = document.createElement("div");
  		row.className = "ctuserrow errorsection";
- 	    row.innerHTML = "No results found";
+ 	    row.innerHTML = i18n("cybertracker.nousers");
  	    row.style.display = "block";
  		parent.appendChild(row);
  	}
@@ -517,7 +515,7 @@ function updateState(uuid, newstate, sendvalidation){
 	var oReq = new XMLHttpRequest();
 	oReq.onload = function(){
 		if (this.status != 204) {
-			alert("ERROR: " + JSON.parse(this.responseText).error);
+			alert(i18n("cybertracker.userserror") + JSON.parse(this.responseText).error);
 			return;
 		}
 		getCollectUsers()
@@ -557,7 +555,7 @@ function collectUserDeleted(){
 		if (this.status == 401){
 			alert(i18n("cybertracker.unauthorized"));
 		}
-		var msg="Error:";
+		var msg= i18n("cybertracker.userserror");
 		try {
 			msg += JSON.parse(this.responseText).error
 		} catch (err) {

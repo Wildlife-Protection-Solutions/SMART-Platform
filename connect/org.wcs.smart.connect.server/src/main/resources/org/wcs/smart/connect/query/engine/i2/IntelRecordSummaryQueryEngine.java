@@ -39,13 +39,13 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.security.AdvIntelAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.i2.IIntelQueryEngine;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
-import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecordSummaryQuery;
 import org.wcs.smart.i2.query.CaQueryItemProvider;
@@ -98,15 +98,15 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 			@SuppressWarnings("unchecked")
 			Collection<ConservationArea> cas = (Collection<ConservationArea>)parameters.get(ConservationArea.class.getName());
 			if (cas == null){
-				 throw new Exception("A valid Conservation Area must be provided in the query parameters.");
+				 throw new Exception(Messages.getString("IntelRecordSummaryQueryEngine.ConservationAreaRequired", locale)); //$NON-NLS-1$
 			}
 			//Profiles
 			Set<IntelProfile> profiles = new HashSet<>();
 			Set<UUID> puuids = null;
-			for (String ip : IntelEntityRecordQuery.convertFromProfileFilter(query.getProfileFilter())) {
-				List<IntelProfile> items = session.createQuery("FROM IntelProfile WHERE keyId = :keyId and conservationArea in (:cas)", IntelProfile.class)
-						.setParameter("keyId",  ip)
-						.setParameter("cas", cas).list();
+			for (String ip : AbstractIntelQuery.convertFromProfileFilter(query.getProfileFilter())) {
+				List<IntelProfile> items = session.createQuery("FROM IntelProfile WHERE keyId = :keyId and conservationArea in (:cas)", IntelProfile.class) //$NON-NLS-1$
+						.setParameter("keyId",  ip) //$NON-NLS-1$
+						.setParameter("cas", cas).list(); //$NON-NLS-1$
 				if (SecurityManager.INSTANCE.canAccess(session, username, AdvIntelAction.RUNQUERY_KEY, query.getUuid()) ||
 						SecurityManager.INSTANCE.canAccess(session, username, AdvIntelAction.RUNQUERY_KEY, query.getConservationArea().getUuid())) { 
 					//we have permission to run this query so use all profiles
@@ -115,7 +115,7 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 				}
 			}
 			if (profiles.isEmpty()) {
-				throw new Exception("No valid profile filters for query");
+				throw new Exception(Messages.getString("IntelRecordSummaryQueryEngine.NoProfileFilter",locale)); //$NON-NLS-1$
 			}
 			
 			IQueryItemProvider itemProvider = null;
@@ -221,7 +221,7 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 	 */
 	private Date[] computeDateRange(String queryTable, Session session) {
 		String field = SystemAttributeFilter.SystemAttribute.RECORD_DATE.name().toLowerCase(Locale.ROOT);
-		Object[] items = (Object[]) session.createNativeQuery("SELECT min(" +field+ "), max(" +field+ ") FROM " + queryTable).uniqueResult();
+		Object[] items = (Object[]) session.createNativeQuery("SELECT min(" +field+ "), max(" +field+ ") FROM " + queryTable).uniqueResult(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		if (items[0] == null) items[0] = new Date();
 		if (items[1] == null) items[1] = new Date();
 		return new Date[] {(Date) items[0], (Date) items[1]};
@@ -296,7 +296,7 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 			}else if (groupBy.getGroupByType() == GroupByType.SYSTEM) {
 				SystemAttributeFilter.SystemAttribute attribute = groupBy.getSystemAttribute();
 				
-				String columnName = attribute.name().toLowerCase(Locale.ROOT); //$NON-NLS-1$
+				String columnName = attribute.name().toLowerCase(Locale.ROOT);
 
 				GroupByItem.DateOption dateOp = groupBy.getDateOption();
 				switch(dateOp) {
@@ -460,8 +460,8 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 			sb.append( " SET " ); //$NON-NLS-1$
 			sb.append( columnName );
 			sb.append(" = ( SELECT cast(v.string_value as date) "); //$NON-NLS-1$
-			sb.append(" FROM smart.i_record_attribute_value v join smart.i_recordsource_attribute b on b.uuid = v.attribute_uuid ");
-			sb.append(" JOIN smart.i_recordsource c on c.uuid = b.source_uuid and c.keyid = :source and b.keyid = :keyid");
+			sb.append(" FROM smart.i_record_attribute_value v join smart.i_recordsource_attribute b on b.uuid = v.attribute_uuid "); //$NON-NLS-1$
+			sb.append(" JOIN smart.i_recordsource c on c.uuid = b.source_uuid and c.keyid = :source and b.keyid = :keyid"); //$NON-NLS-1$
 			sb.append(" WHERE v.record_uuid = " + queryTable + ".record_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
 			sb.append(" ) "); //$NON-NLS-1$
 			
@@ -493,24 +493,24 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 			session.createNativeQuery(sb.toString()).executeUpdate();
 			
 			sb = new StringBuilder();
-			sb.append(" INSERT INTO ");
+			sb.append(" INSERT INTO "); //$NON-NLS-1$
 			sb.append( temp );
-			sb.append (" SELECT a.*, al.keyid FROM ");
+			sb.append (" SELECT a.*, al.keyid FROM "); //$NON-NLS-1$
 			sb.append( dataTable.tableName );
-			sb.append(" a LEFT JOIN ( smart.i_record_attribute_value v ");
-			sb.append(" JOIN smart.i_record_attribute_value_list b on b.value_uuid = v.uuid ");
-			sb.append(" JOIN smart.i_attribute_list_item al on b.element_uuid = al.uuid ");
-			sb.append( " JOIN smart.i_recordsource_attribute c on v.attribute_uuid = c.uuid AND c.keyid = :keyid ");
-			sb.append( " JOIN smart.i_recordsource d on c.source_uuid = d.uuid AND d.keyid = :sourceid )  on v.record_uuid = a.record_uuid ");
+			sb.append(" a LEFT JOIN ( smart.i_record_attribute_value v "); //$NON-NLS-1$
+			sb.append(" JOIN smart.i_record_attribute_value_list b on b.value_uuid = v.uuid "); //$NON-NLS-1$
+			sb.append(" JOIN smart.i_attribute_list_item al on b.element_uuid = al.uuid "); //$NON-NLS-1$
+			sb.append( " JOIN smart.i_recordsource_attribute c on v.attribute_uuid = c.uuid AND c.keyid = :keyid "); //$NON-NLS-1$
+			sb.append( " JOIN smart.i_recordsource d on c.source_uuid = d.uuid AND d.keyid = :sourceid )  on v.record_uuid = a.record_uuid "); //$NON-NLS-1$
 			
 			logme(sb);
 			session.createNativeQuery(sb.toString())
-				.setParameter("keyid", attributeKey)
-				.setParameter("sourceid", recordSource).executeUpdate();
+				.setParameter("keyid", attributeKey) //$NON-NLS-1$
+				.setParameter("sourceid", recordSource).executeUpdate(); //$NON-NLS-1$
 			
-			session.createNativeQuery("DROP TABLE " + dataTable.tableName).executeUpdate();
+			session.createNativeQuery("DROP TABLE " + dataTable.tableName).executeUpdate(); //$NON-NLS-1$
 			
-			session.createNativeQuery("RENAME TABLE " + temp + " TO " + dataTable.tableName).executeUpdate();
+			session.createNativeQuery("RENAME TABLE " + temp + " TO " + dataTable.tableName).executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
 			
 		}else if (type == AttributeType.EMPLOYEE) {
 			String temp = SqlGenerator.createTempTableName();
@@ -534,24 +534,24 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 			session.createNativeQuery(sb.toString()).executeUpdate();
 			
 			sb = new StringBuilder();
-			sb.append(" INSERT INTO ");
+			sb.append(" INSERT INTO "); //$NON-NLS-1$
 			sb.append( temp );
-			sb.append (" SELECT a.*, al.uuid FROM ");
+			sb.append (" SELECT a.*, al.uuid FROM "); //$NON-NLS-1$
 			sb.append( dataTable.tableName );
-			sb.append(" a LEFT JOIN ( smart.i_record_attribute_value v ");
-			sb.append(" JOIN smart.i_record_attribute_value_list b on b.value_uuid = v.uuid ");
-			sb.append(" JOIN smart.employee al on b.element_uuid = al.uuid ");
-			sb.append( " JOIN smart.i_recordsource_attribute c on v.attribute_uuid = c.uuid AND c.keyid = :keyid ");
-			sb.append( " JOIN smart.i_recordsource d on c.source_uuid = d.uuid AND d.keyid = :sourceid )  on v.record_uuid = a.record_uuid ");
+			sb.append(" a LEFT JOIN ( smart.i_record_attribute_value v "); //$NON-NLS-1$
+			sb.append(" JOIN smart.i_record_attribute_value_list b on b.value_uuid = v.uuid "); //$NON-NLS-1$
+			sb.append(" JOIN smart.employee al on b.element_uuid = al.uuid "); //$NON-NLS-1$
+			sb.append( " JOIN smart.i_recordsource_attribute c on v.attribute_uuid = c.uuid AND c.keyid = :keyid "); //$NON-NLS-1$
+			sb.append( " JOIN smart.i_recordsource d on c.source_uuid = d.uuid AND d.keyid = :sourceid )  on v.record_uuid = a.record_uuid "); //$NON-NLS-1$
 			
 			logme(sb);
 			session.createNativeQuery(sb.toString())
-				.setParameter("keyid", attributeKey)
-				.setParameter("sourceid", recordSource).executeUpdate();
+				.setParameter("keyid", attributeKey) //$NON-NLS-1$
+				.setParameter("sourceid", recordSource).executeUpdate(); //$NON-NLS-1$
 			
-			session.createNativeQuery("DROP TABLE " + dataTable.tableName).executeUpdate();
+			session.createNativeQuery("DROP TABLE " + dataTable.tableName).executeUpdate(); //$NON-NLS-1$
 			
-			session.createNativeQuery("RENAME TABLE " + temp + " TO " + dataTable.tableName).executeUpdate();
+			session.createNativeQuery("RENAME TABLE " + temp + " TO " + dataTable.tableName).executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
 		

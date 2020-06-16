@@ -323,7 +323,7 @@ public class CyberTrackerNoa {
 		try{
 			navigationUuid = UUID.fromString(uuid);
 		}catch (Exception ex) {
-			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Navigation layer not found");
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("CyberTrackerNoa.NavLayerNotFound", request.getLocale())); //$NON-NLS-1$
 		}
 		java.nio.file.Path file = null;
 		Session s = HibernateManager.getSession(context);

@@ -39,13 +39,13 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.security.AdvIntelAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.i2.IIntelQueryEngine;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
-import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
 import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.query.CaQueryItemProvider;
@@ -109,10 +109,10 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		}
 		
 		Set<IntelProfile> profiles = new HashSet<>();
-		for (String ip : IntelEntityRecordQuery.convertFromProfileFilter(query.getProfileFilter())) {
-			List<IntelProfile> items = session.createQuery("FROM IntelProfile WHERE keyId = :keyId and conservationArea in (:cas)", IntelProfile.class)
-					.setParameter("keyId",  ip)
-					.setParameter("cas", cas).list();
+		for (String ip : AbstractIntelQuery.convertFromProfileFilter(query.getProfileFilter())) {
+			List<IntelProfile> items = session.createQuery("FROM IntelProfile WHERE keyId = :keyId and conservationArea in (:cas)", IntelProfile.class) //$NON-NLS-1$
+					.setParameter("keyId",  ip) //$NON-NLS-1$
+					.setParameter("cas", cas).list(); //$NON-NLS-1$
 			
 			if (SecurityManager.INSTANCE.canAccess(session, username, AdvIntelAction.RUNQUERY_KEY, query.getUuid()) ||
 					SecurityManager.INSTANCE.canAccess(session, username, AdvIntelAction.RUNQUERY_KEY, query.getConservationArea().getUuid())) { 
@@ -121,7 +121,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 			}
 		}
 		if (profiles.isEmpty()) {
-			throw new Exception("No valid profile filters for query");
+			throw new Exception(Messages.getString("IntelEntitySummaryQueryEngine.NoProfileFilter", locale)); //$NON-NLS-1$
 		}
 		
 		IQueryItemProvider itemProvider = null;
@@ -770,13 +770,13 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 			EntityFilter f = (EntityFilter)queryFilter;
 			String key = "p_"+parameters.size(); //$NON-NLS-1$
 			parameters.put(key, f.getEntityUuid());
-			whereSql.append(" entity_uuid = :" + key + " "); //$NON-NLS-1$
+			whereSql.append(" entity_uuid = :" + key + " "); //$NON-NLS-1$ //$NON-NLS-2$
 			
 		}else if (queryFilter instanceof EntityTypeFilter) {
 			EntityTypeFilter f = (EntityTypeFilter)queryFilter;
 			String key = "p_" + parameters.size(); //$NON-NLS-1$
 			parameters.put(key, f.getTypeKey());
-			whereSql.append(" t.keyId = :" + key + " "); //$NON-NLS-1$
+			whereSql.append(" t.keyId = :" + key + " "); //$NON-NLS-1$ //$NON-NLS-2$
 			
 		}else if (queryFilter instanceof IntelAttributeFilter) {
 			IntelAttributeFilter f = (IntelAttributeFilter)queryFilter;
@@ -801,7 +801,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 			}else if (f.getAttributeType() == AttributeType.EMPLOYEE) {
 				whereSql.append(" "); //$NON-NLS-1$
 				whereSql.append(columnName);
-				if (f.getKeyValue().equals(IntelAttributeFilter.ANY_OPTION_KEY)) {
+				if (f.getKeyValue().equals(IQueryFilter.ANY_OPTION_KEY)) {
 					whereSql.append(" is not null "); //$NON-NLS-1$
 				}else {
 					whereSql.append( " = " ); //$NON-NLS-1$
@@ -812,7 +812,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 			}else if (f.getAttributeType() == AttributeType.LIST) {
 				whereSql.append(" "); //$NON-NLS-1$
 				whereSql.append(columnName);
-				if (f.getKeyValue().equals(IntelAttributeFilter.ANY_OPTION_KEY)) {
+				if (f.getKeyValue().equals(IQueryFilter.ANY_OPTION_KEY)) {
 					whereSql.append(" is not null "); //$NON-NLS-1$
 				}else {
 					whereSql.append( " = " ); //$NON-NLS-1$

@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2020 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.connect.api;
 
 import java.text.Collator;
@@ -36,15 +57,19 @@ import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.SmartCollectConnectUser;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.smartcollect.model.SmartCollectUser;
 import org.wcs.smart.smartcollect.model.SmartCollectUser.State;
-import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.util.UuidUtils;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 
-
+/**
+ * Secure SMARTCollect api 
+ * @author Emily
+ *
+ */
 @Path(ConnectRESTApplication.PATH_SEPERATOR + SmartCollectApi.PATH)
 @Consumes({ MediaType.APPLICATION_JSON})
 @Produces({ MediaType.APPLICATION_JSON })
@@ -95,8 +120,8 @@ public class SmartCollectApi {
 					}
 					s.getTransaction().commit();
 				}catch (Exception ex) {
-					logger.log(Level.SEVERE, "Error fetching collect users", ex);
-					throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, "Error fetching collect users.", ex);
+					logger.log(Level.SEVERE, "Error fetching collect users", ex); //$NON-NLS-1$
+					throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, Messages.getString("SmartCollectApi_GetUsersError", request.getLocale()), ex); //$NON-NLS-1$
 				}
 				users.sort((a,b)->Collator.getInstance().compare(a.getSource(), b.getSource()));
 				return users;
@@ -114,8 +139,8 @@ public class SmartCollectApi {
 				Session s = HibernateManager.getSession(context);
 				try{
 					s.beginTransaction();
-					List<SmartCollectConnectUser> cus = s.createQuery("FROM SmartCollectConnectUser WHERE source like :src", SmartCollectConnectUser.class)
-							.setParameter("src", "%" + search + "%")
+					List<SmartCollectConnectUser> cus = s.createQuery("FROM SmartCollectConnectUser WHERE source like :src", SmartCollectConnectUser.class) //$NON-NLS-1$
+							.setParameter("src", "%" + search + "%") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 							.setMaxResults(thislimit)
 							.list();
 					for (SmartCollectConnectUser user : cus){
@@ -127,8 +152,8 @@ public class SmartCollectApi {
 					}
 					s.getTransaction().commit();
 				}catch (Exception ex) {
-					logger.log(Level.SEVERE, "Error fetching collect users", ex);
-					throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, "Error fetching SMART Collect users.", ex);
+					logger.log(Level.SEVERE, "Error fetching collect users", ex); //$NON-NLS-1$
+					throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, Messages.getString("SmartCollectApi_GetUsersError", request.getLocale()), ex); //$NON-NLS-1$
 				}
 				users.sort((a,b)->Collator.getInstance().compare(a.getSource(), b.getSource()));
 
@@ -142,7 +167,7 @@ public class SmartCollectApi {
 			try{
 				s.beginTransaction();
 				user = QueryFactory.buildQuery(s, SmartCollectConnectUser.class, 
-							"source", source).uniqueResult();
+							"source", source).uniqueResult(); //$NON-NLS-1$
 				if (user == null) {
 					//create a new user
 					user = new SmartCollectConnectUser();
@@ -153,7 +178,7 @@ public class SmartCollectApi {
 				}
 				s.getTransaction().commit();
 			}catch (Exception ex) {
-				throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, "Error validating SMART Collect user", ex);
+				throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, Messages.getString("SmartCollectApi_ValidateUserError", request.getLocale()), ex); //$NON-NLS-1$
 			}
 			
 			SmartCollectUser cu = new SmartCollectUser();
@@ -178,7 +203,7 @@ public class SmartCollectApi {
 			s.getTransaction().commit();
 		}catch (Exception ex) {
 			logger.log(Level.SEVERE, ex.getMessage(), ex);
-			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, "Error validating SMART Collect user", ex);
+			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, Messages.getString("SmartCollectApi_ValidateUserError", request.getLocale()), ex); //$NON-NLS-1$
 		}
 		return user;
 	}
@@ -196,7 +221,7 @@ public class SmartCollectApi {
 			if (cu != null) s.delete(cu);
 			s.getTransaction().commit();
 		}catch (Exception ex) {
-			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, "Error removing SMART Collect user.");
+			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, Messages.getString("SmartCollectApi_RemoveUserError", request.getLocale())); //$NON-NLS-1$
 		}
 	}
 	
@@ -246,8 +271,8 @@ public class SmartCollectApi {
 					user.setState(State.VALIDATION_PENDING);
 					
 					user.setValidateSentDate(new Date());
-					String v1 = UUID.randomUUID().toString().replaceAll("-","");
-					String v2 = UUID.randomUUID().toString().replaceAll("-","");
+					String v1 = UUID.randomUUID().toString().replaceAll("-",""); //$NON-NLS-1$ //$NON-NLS-2$
+					String v2 = UUID.randomUUID().toString().replaceAll("-",""); //$NON-NLS-1$ //$NON-NLS-2$
 					String key = v1 + v2;
 					user.setValidationKey(key);
 					user.setValidateSentDate(new Date());
@@ -265,20 +290,22 @@ public class SmartCollectApi {
 						if (uri != null && uri.length() > 0) {
 							url = url.substring(0, url.indexOf(uri));
 						}
-						String validationUrl = url + request.getContextPath() + "/noa/smartcollect/source/" + key;
+						String validationUrl = url + request.getContextPath() + "/noa/smartcollect/source/" + key; //$NON-NLS-1$
 								
 						Message message = new MimeMessage(session);
 						InternetAddress to[] = new InternetAddress[1];
 						to[0] = new InternetAddress(user.getSource());			
 						message.setRecipients(Message.RecipientType.TO, to);
-						message.setSubject("SMART Collect User Validation");
+						message.setSubject(Messages.getString("SmartCollectApi_ValidationEmailSubject", request.getLocale())); //$NON-NLS-1$
 						
-						message.setContent(
-								"Click <a href=\"" + validationUrl + "\">here</a> to confirm the use of your e-mail address as your username for SMART Collect."
-								+ "<br><br>If the above link doesn't work paste this url into your browser:<br>" + validationUrl, "text/html"); //$NON-NLS-1$ //$NON-NLS-2$
+						message.setContent(MessageFormat.format(
+								Messages.getString("SmartCollectApi.ValidationMessage", request.getLocale()),//$NON-NLS-1$ 
+								"<a href=\"" + validationUrl + "\">", "</a>", "<br><br>", "<br>" + validationUrl), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ 
+								"text/html");  //$NON-NLS-1$
+						
 						Transport.send(message);
 					} catch (Exception ex) {
-						logger.log(Level.SEVERE, "Sending validation email failed:" + ex.getMessage(), ex);
+						logger.log(Level.SEVERE, "Sending validation email failed:" + ex.getMessage(), ex); //$NON-NLS-1$
 						throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR);
 					}
 				}else {
@@ -293,7 +320,7 @@ public class SmartCollectApi {
 			throw ex;
 		}catch (Exception ex) {
 			if (s.getTransaction().isActive()) s.getTransaction().rollback();
-			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, "Error updating SMART Collect user state", ex);
+			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, Messages.getString("SmartCollectApi_UpdateError", request.getLocale()), ex); //$NON-NLS-1$
 		}
 
 	}

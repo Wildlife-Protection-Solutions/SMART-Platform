@@ -23,6 +23,7 @@ package org.wcs.smart.connect.query;
 
 import java.util.Locale;
 
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 
 /**
@@ -38,13 +39,13 @@ public class RecordDateDateField implements IDateFieldFilter {
 	private RecordDateDateField() {}
 	
 	@Override
-	public String getGuiName(Locale arg0) {
-		return "Record Date";
+	public String getGuiName(Locale l) {
+		return Messages.getString("RecordDateDateField.RecordDateQueryFieldName", l); //$NON-NLS-1$
 	}
 
 	@Override
 	public String getKey() {
-		return "RecordDate";
+		return "RecordDate"; //$NON-NLS-1$
 	}
 
 }

@@ -33,7 +33,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.birt.report.engine.api.HTMLRenderContext;
-import org.eclipse.birt.report.engine.api.HTMLRenderOption;
+import org.eclipse.birt.report.engine.api.IHTMLRenderOption;
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.birt.BirtConstants;
@@ -143,7 +143,7 @@ public class IntelConnection extends AbstractIntelBirtConnection {
 		if (ctx == null) return false;
 		if (!(ctx instanceof HTMLRenderContext)) return false;
 		HTMLRenderContext cc = (HTMLRenderContext)ctx;
-		return cc.getRenderOption().getOutputFormat().equalsIgnoreCase(HTMLRenderOption.HTML);
+		return cc.getRenderOption().getOutputFormat().equalsIgnoreCase(IHTMLRenderOption.HTML);
 	}
 	
 	/**
@@ -168,8 +168,8 @@ public class IntelConnection extends AbstractIntelBirtConnection {
 			if (SecurityManager.INSTANCE.canAccess(localSession, currentUser, AdvIntelAction.VIEWDATA_KEY)) {
 				//return all profiles in the system
 				List<IntelProfile> profiles = 
-						localSession.createQuery("FROM IntelProfile WHERE conservationArea IN (:cas)", IntelProfile.class)
-						.setParameterList("cas", getConservationAreas())
+						localSession.createQuery("FROM IntelProfile WHERE conservationArea IN (:cas)", IntelProfile.class) //$NON-NLS-1$
+						.setParameterList("cas", getConservationAreas()) //$NON-NLS-1$
 						.list();
 					return new HashSet<>(profiles);
 			}
@@ -178,8 +178,8 @@ public class IntelConnection extends AbstractIntelBirtConnection {
 			Set<IntelProfile> canaccess = new HashSet<>();
 			
 			List<IntelProfile> ips = 
-					localSession.createQuery("FROM IntelProfile WHERE conservationArea IN (:cas)", IntelProfile.class)
-					.setParameterList("cas", getConservationAreas())
+					localSession.createQuery("FROM IntelProfile WHERE conservationArea IN (:cas)", IntelProfile.class) //$NON-NLS-1$
+					.setParameterList("cas", getConservationAreas()) //$NON-NLS-1$
 					.list();
 			for (IntelProfile ip : ips) {
 				if (SecurityManager.INSTANCE.canAccess(localSession, currentUser, AdvIntelAction.RUNQUERY_KEY, ip.getConservationArea().getUuid())) {

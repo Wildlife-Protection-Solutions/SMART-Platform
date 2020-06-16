@@ -143,7 +143,7 @@ public class IntelEntityRecordQueryResults implements IConnectPagedQueryResultSe
 		item.setConservationAreaId((String)rowData[columnNameToIndex.get("ca_id")]); //$NON-NLS-1$
 		item.setConservationAreaName((String)rowData[columnNameToIndex.get("ca_name")]); //$NON-NLS-1$
 		
-		UUID puuid = asUuid(rowData[columnNameToIndex.get("profile_uuid")]);
+		UUID puuid = asUuid(rowData[columnNameToIndex.get("profile_uuid")]); //$NON-NLS-1$
 		String name = session.get(IntelProfile.class, puuid).getName();
 		item.setProflie(puuid, name);
 		
@@ -171,7 +171,7 @@ public class IntelEntityRecordQueryResults implements IConnectPagedQueryResultSe
 	
 	@Override
 	public List<? extends IResultItem> getData(int offset, int pageSize, Session session) {
-		throw new UnsupportedOperationException("Loading results in chunks not supported on Connect");
+		throw new UnsupportedOperationException("Loading results in chunks not supported on Connect"); //$NON-NLS-1$
 	}
 	
 	@Override
@@ -208,7 +208,7 @@ public class IntelEntityRecordQueryResults implements IConnectPagedQueryResultSe
 			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.CA_NAME){				
 				return sql + "lower(ca_name)" + getSortDirectionSql(); //$NON-NLS-1$
 			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.ENTITY_PROFILE){
-				return sql += " profile_uuid " + getSortDirectionSql();
+				return sql += " profile_uuid " + getSortDirectionSql(); //$NON-NLS-1$
 			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.ENTITY_ID){
 				session.beginTransaction();
 				try {

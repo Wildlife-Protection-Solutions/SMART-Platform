@@ -49,7 +49,6 @@ import org.wcs.smart.connect.security.AdvIntelAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.i2.IIntelQueryEngine;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
-import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.query.CaQueryItemProvider;
@@ -108,10 +107,10 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine{
 		ParsedObservationQuery parsedQuery = IntelRecordObservationQuery.parseQuery(query.getQueryString());
 
 		Set<IntelProfile> profiles = new HashSet<>();
-		for (String ip : IntelEntityRecordQuery.convertFromProfileFilter(query.getProfileFilter())) {
-			List<IntelProfile> items = session.createQuery("FROM IntelProfile WHERE keyId = :keyId and conservationArea in (:cas)", IntelProfile.class)
-					.setParameter("keyId",  ip)
-					.setParameter("cas", cas).list();
+		for (String ip : AbstractIntelQuery.convertFromProfileFilter(query.getProfileFilter())) {
+			List<IntelProfile> items = session.createQuery("FROM IntelProfile WHERE keyId = :keyId and conservationArea in (:cas)", IntelProfile.class) //$NON-NLS-1$
+					.setParameter("keyId",  ip) //$NON-NLS-1$
+					.setParameter("cas", cas).list(); //$NON-NLS-1$
 			
 			if (SecurityManager.INSTANCE.canAccess(session, username, AdvIntelAction.RUNQUERY_KEY, query.getUuid()) ||
 					SecurityManager.INSTANCE.canAccess(session, username, AdvIntelAction.RUNQUERY_KEY, query.getConservationArea().getUuid())) { 
@@ -120,7 +119,7 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine{
 			}
 		}
 		if (profiles.isEmpty()) {
-			throw new Exception("No valid profile filters for query");
+			throw new Exception(Messages.getString("IntelObservationQueryEngine.NoProfileFilter", locale)); //$NON-NLS-1$
 		}
 		
 		IQueryItemProvider itemProvider = null;
@@ -355,8 +354,8 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine{
 		sb = new StringBuilder();
 		sb.append(" INSERT INTO " + newTable + " "); //$NON-NLS-1$ //$NON-NLS-2$
 		sb.append(" ( " + insert.toString() + ")" ); //$NON-NLS-1$ //$NON-NLS-2$
-		sb.append("SELECT o.uuid, a.location_uuid, a.ca_id, a.ca_name, r.uuid, ");
-		sb.append(" r.source_uuid, r.status, r.title, r.profile_uuid, ");
+		sb.append("SELECT o.uuid, a.location_uuid, a.ca_id, a.ca_name, r.uuid, "); //$NON-NLS-1$
+		sb.append(" r.source_uuid, r.status, r.title, r.profile_uuid, "); //$NON-NLS-1$
 		sb.append(" l.id, l.datetime, l.comment, l.geometry, o.category_uuid "); //$NON-NLS-1$
 		sb.append(select);
 		sb.append(" FROM " + observationTable + " a "); //$NON-NLS-1$ //$NON-NLS-2$

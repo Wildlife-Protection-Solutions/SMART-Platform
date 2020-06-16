@@ -59,6 +59,7 @@ import javax.ws.rs.core.StreamingOutput;
 
 import org.eclipse.birt.report.engine.api.HTMLRenderOption;
 import org.eclipse.birt.report.engine.api.HTMLServerImageHandler;
+import org.eclipse.birt.report.engine.api.IHTMLRenderOption;
 import org.eclipse.birt.report.engine.api.IParameterDefn;
 import org.eclipse.birt.report.engine.api.IParameterDefnBase;
 import org.eclipse.birt.report.engine.api.IParameterGroupDefn;
@@ -215,7 +216,7 @@ public class ReportApi extends HttpServlet{
 						((HTMLRenderOption)options).setHtmlPagination(true);
 						((HTMLRenderOption)options).setEmbeddable(true);
 						((HTMLRenderOption)options).setEnableInlineStyle(true);
-						options.setOutputFormat(HTMLRenderOption.HTML);
+						options.setOutputFormat(IHTMLRenderOption.HTML);
 					}else{
 						options = new RenderOption();
 						options.setEmitterID(rformat.getEmitterId());
@@ -379,18 +380,18 @@ public class ReportApi extends HttpServlet{
 		List<String> langs = new ArrayList<>();
 		langs.add(l.getLanguage());
 		if (!l.getCountry().isEmpty()) {
-			langs.add(l.getLanguage() + "_" + l.getCountry());
-			if (l.getVariant().isEmpty()) langs.add(l.getLanguage() + "_" + l.getCountry() + "_" + l.getVariant());
+			langs.add(l.getLanguage() + "_" + l.getCountry()); //$NON-NLS-1$
+			if (l.getVariant().isEmpty()) langs.add(l.getLanguage() + "_" + l.getCountry() + "_" + l.getVariant()); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		
 		HashMap<ReportProxy, String> query2names = new HashMap<>();
 		
-		String querypart = "SELECT r.uuid, r.id, r.shared, r.conservationArea.uuid, r.conservationArea.id, l.value, z.code "
-				+ " FROM Report as r JOIN Label as l on l.id.element = r.uuid JOIN l.id.language as z "
-				+ " WHERE l.id.element = r.uuid and (z.default = true or z.code in (:langs)) ";
+		String querypart = "SELECT r.uuid, r.id, r.shared, r.conservationArea.uuid, r.conservationArea.id, l.value, z.code " //$NON-NLS-1$
+				+ " FROM Report as r JOIN Label as l on l.id.element = r.uuid JOIN l.id.language as z " //$NON-NLS-1$
+				+ " WHERE l.id.element = r.uuid and (z.default = true or z.code in (:langs)) "; //$NON-NLS-1$
 		
 		List<?> results = session.createQuery(querypart)
-				.setParameterList("langs",  langs)
+				.setParameterList("langs",  langs) //$NON-NLS-1$
 				.list();
 		
 		for (Object i : results) {

@@ -36,11 +36,11 @@ import java.util.stream.Collectors;
 import org.hibernate.Session;
 import org.hibernate.type.PostgresUUIDType;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.security.AdvIntelAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.i2.IIntelQueryEngine;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
-import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecordQuery;
 import org.wcs.smart.i2.model.IntelRecordSource;
@@ -85,14 +85,14 @@ public class IntelRecordQueryEngine implements IIntelQueryEngine {
 		@SuppressWarnings("unchecked")
 		Collection<ConservationArea> cas = (Collection<ConservationArea>)parameters.get(ConservationArea.class.getName());
 		if (cas == null){
-			 throw new Exception("A valid Conservation Area must be provided in the query parameters.");
+			 throw new Exception(Messages.getString("IntelRecordQueryEngine.ConservationAreaRequired", locale)); //$NON-NLS-1$
 		}
 		
 		Set<IntelProfile> profiles = new HashSet<>();
-		for (String ip : IntelEntityRecordQuery.convertFromProfileFilter(query.getProfileFilter())) {
-			List<IntelProfile> items = session.createQuery("FROM IntelProfile WHERE keyId = :keyId and conservationArea in (:cas)", IntelProfile.class)
-					.setParameter("keyId",  ip)
-					.setParameter("cas", cas).list();
+		for (String ip : AbstractIntelQuery.convertFromProfileFilter(query.getProfileFilter())) {
+			List<IntelProfile> items = session.createQuery("FROM IntelProfile WHERE keyId = :keyId and conservationArea in (:cas)", IntelProfile.class) //$NON-NLS-1$
+					.setParameter("keyId",  ip) //$NON-NLS-1$
+					.setParameter("cas", cas).list(); //$NON-NLS-1$
 			
 			if (SecurityManager.INSTANCE.canAccess(session, username, AdvIntelAction.RUNQUERY_KEY, iquery.getUuid()) ||
 					SecurityManager.INSTANCE.canAccess(session, username, AdvIntelAction.RUNQUERY_KEY, iquery.getConservationArea().getUuid())) { 
@@ -101,7 +101,7 @@ public class IntelRecordQueryEngine implements IIntelQueryEngine {
 			}
 		}
 		if (profiles.isEmpty()) {
-			throw new Exception("No valid profile filters for query");
+			throw new Exception(Messages.getString("IntelRecordQueryEngine.NoProfileFilter", locale)); //$NON-NLS-1$
 		}
 		
 		IQueryItemProvider itemProvider = null;
@@ -128,11 +128,11 @@ public class IntelRecordQueryEngine implements IIntelQueryEngine {
 		results.setQueryColumns(columns);
 		
 		HashMap<String, Integer> cols = p.colName2Index;
-		cols.put("profile_name", cols.size());
-		cols.put("profile_key", cols.size());
-		cols.put("record_source_name", cols.size());
+		cols.put("profile_name", cols.size()); //$NON-NLS-1$
+		cols.put("profile_key", cols.size()); //$NON-NLS-1$
+		cols.put("record_source_name", cols.size()); //$NON-NLS-1$
 		
-		session.createNativeQuery("ALTER TABLE " + data + " add column sort_column varchar(1028)").executeUpdate();
+		session.createNativeQuery("ALTER TABLE " + data + " add column sort_column varchar(1028)").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		results.setColumnNameToIndexMap(p.colName2Index);
 		return results;
@@ -140,36 +140,36 @@ public class IntelRecordQueryEngine implements IIntelQueryEngine {
 	
 	@SuppressWarnings("unchecked")
 	private void addProfile(Session session, String datatable) {
-		session.createNativeQuery("ALTER TABLE " + datatable + " ADD COLUMN profile_name varchar(1024)").executeUpdate();
-		session.createNativeQuery("ALTER TABLE " + datatable + " ADD COLUMN profile_key varchar(128)").executeUpdate();
+		session.createNativeQuery("ALTER TABLE " + datatable + " ADD COLUMN profile_name varchar(1024)").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
+		session.createNativeQuery("ALTER TABLE " + datatable + " ADD COLUMN profile_key varchar(128)").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
 		
-		List<UUID> uuids = session.createNativeQuery("SELECT distinct profile_uuid FROM " + datatable)
-				.addScalar("profile_uuid",  PostgresUUIDType.INSTANCE)
+		List<UUID> uuids = session.createNativeQuery("SELECT distinct profile_uuid FROM " + datatable) //$NON-NLS-1$
+				.addScalar("profile_uuid",  PostgresUUIDType.INSTANCE) //$NON-NLS-1$
 				.list();
 		for (UUID u : uuids) {
 			IntelProfile p = session.get(IntelProfile.class, u);
 			
-			session.createNativeQuery("UPDATE " + datatable + " SET profile_name = :name, profile_key = :pkey WHERE profile_uuid = :uuid")
-				.setParameter("name", p.getName())
-				.setParameter("uuid", p.getUuid())
-				.setParameter("pkey", p.getKeyId())
+			session.createNativeQuery("UPDATE " + datatable + " SET profile_name = :name, profile_key = :pkey WHERE profile_uuid = :uuid") //$NON-NLS-1$ //$NON-NLS-2$
+				.setParameter("name", p.getName()) //$NON-NLS-1$
+				.setParameter("uuid", p.getUuid()) //$NON-NLS-1$
+				.setParameter("pkey", p.getKeyId()) //$NON-NLS-1$
 				.executeUpdate();
 		}
 	}
 	
 	@SuppressWarnings("unchecked")
 	private void addRecordSource(Session session, String datatable) {
-		session.createNativeQuery("ALTER TABLE " + datatable + " ADD COLUMN record_source_name varchar(1024)")
+		session.createNativeQuery("ALTER TABLE " + datatable + " ADD COLUMN record_source_name varchar(1024)") //$NON-NLS-1$ //$NON-NLS-2$
 			.executeUpdate();
 		
-		List<UUID> uuids = session.createNativeQuery("SELECT distinct source_uuid FROM " + datatable + " WHERE source_uuid is not null ")
-				.addScalar("source_uuid", PostgresUUIDType.INSTANCE).list();
+		List<UUID> uuids = session.createNativeQuery("SELECT distinct source_uuid FROM " + datatable + " WHERE source_uuid is not null ") //$NON-NLS-1$ //$NON-NLS-2$
+				.addScalar("source_uuid", PostgresUUIDType.INSTANCE).list(); //$NON-NLS-1$
 		for (UUID u : uuids) {
 			IntelRecordSource p = session.get(IntelRecordSource.class, u);
 			
-			session.createNativeQuery("UPDATE " + datatable + " SET record_source_name = :name WHERE source_uuid = :uuid")
-				.setParameter("name", p.getName())
-				.setParameter("uuid", p.getUuid())
+			session.createNativeQuery("UPDATE " + datatable + " SET record_source_name = :name WHERE source_uuid = :uuid") //$NON-NLS-1$ //$NON-NLS-2$
+				.setParameter("name", p.getName()) //$NON-NLS-1$
+				.setParameter("uuid", p.getUuid()) //$NON-NLS-1$
 				.executeUpdate();
 		}
 	}

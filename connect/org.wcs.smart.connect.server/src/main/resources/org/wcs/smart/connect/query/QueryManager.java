@@ -326,8 +326,8 @@ public enum QueryManager {
 		List<String> langs = new ArrayList<>();
 		langs.add(l.getLanguage());
 		if (!l.getCountry().isEmpty()) {
-			langs.add(l.getLanguage() + "_" + l.getCountry());
-			if (!l.getVariant().isEmpty()) langs.add(l.getLanguage() + "_" + l.getCountry() + "_" + l.getVariant());
+			langs.add(l.getLanguage() + "_" + l.getCountry()); //$NON-NLS-1$
+			if (!l.getVariant().isEmpty()) langs.add(l.getLanguage() + "_" + l.getCountry() + "_" + l.getVariant()); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		
 		HashMap<QueryProxy, String> query2names = new HashMap<>();
@@ -351,10 +351,10 @@ public enum QueryManager {
 			
 			if (!query.isEmpty()) query += " UNION "; //$NON-NLS-1$
 
-			String querypart = "SELECT q.uuid, q.id, q.isShared, q.conservationArea.uuid, q.folder.uuid, "
-				+ "q.conservationArea.id, l.value, z.code, '" + type +"', '" + typeKey + "', '" + icon + "' FROM " + q.getSimpleName() 
-			 	+ " as q JOIN Label as l on l.id.element = q.uuid JOIN l.id.language as z WHERE l.id.element = q.uuid and (z.default = true or "
-			 	+ "z.code in (:langs)) ";
+			String querypart = "SELECT q.uuid, q.id, q.isShared, q.conservationArea.uuid, q.folder.uuid, " //$NON-NLS-1$
+				+ "q.conservationArea.id, l.value, z.code, '" + type +"', '" + typeKey + "', '" + icon + "' FROM " + q.getSimpleName()  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			 	+ " as q JOIN Label as l on l.id.element = q.uuid JOIN l.id.language as z WHERE l.id.element = q.uuid and (z.default = true or " //$NON-NLS-1$
+			 	+ "z.code in (:langs)) "; //$NON-NLS-1$
 
 	
 			QueryTranslatorFactory translatorFactory = session.getSessionFactory().getSessionFactoryOptions().getServiceRegistry().getService(QueryTranslatorFactory.class);
@@ -502,7 +502,7 @@ public enum QueryManager {
 			String typekey = (String)data[6];
 			String icon = (String)data[7];
 
-			QueryProxy qp = new QueryProxy(uuid, value, type, caid, "-", true, cauuid, null, cauuid.equals(ConservationArea.MULTIPLE_CA), typekey, icon);
+			QueryProxy qp = new QueryProxy(uuid, value, type, caid, "-", true, cauuid, null, cauuid.equals(ConservationArea.MULTIPLE_CA), typekey, icon); //$NON-NLS-1$
 					
 			if (!query2names.containsKey(qp)) {
 				query2names.put(qp, code);

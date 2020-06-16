@@ -47,7 +47,7 @@ public class SmartPostgresDialect extends PostgreSQL95Dialect {
 	         */
 	        registerColumnType(Types.BLOB, "bytea"); //$NON-NLS-1$
 	        //registerColumnType(Types.OTHER, "pg_uuid");
-	        registerColumnType(1111, "uuid");
+	        registerColumnType(1111, "uuid"); //$NON-NLS-1$
 	    }
 	 
 	    @Override

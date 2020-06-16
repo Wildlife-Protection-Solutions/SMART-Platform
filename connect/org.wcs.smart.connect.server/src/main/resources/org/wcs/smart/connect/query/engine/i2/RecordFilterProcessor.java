@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2020 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.connect.query.engine.i2;
 
 import java.util.Collection;
@@ -27,19 +48,25 @@ import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter;
 import org.wcs.smart.i2.query.observation.filter.SystemAttributeFilter.SystemAttribute;
 import org.wcs.smart.util.UuidUtils;
 
+/**
+ * Filter for profile record queries
+ * 
+ * @author Emily
+ *
+ */
 public class RecordFilterProcessor {
 
 	private String[][] cols = new String[][] {
-		new String[] {"record_uuid", "uuid"},
-		new String[] {"record_date", "date"},
-		new String[] {"record_status", "varchar(128)"},
-		new String[] {"record_source_key", "varchar(128)"},
-		new String[] {"source_uuid", "uuid"},
-		new String[] {"ca_uuid", "uuid"},
-		new String[] {"record_title", "varchar(1024)"},
-		new String[] {"date_created", "date"},
-		new String[] {"date_modified", "date"},
-		new String[] {"profile_uuid", "uuid"},
+		new String[] {"record_uuid", "uuid"}, //$NON-NLS-1$ //$NON-NLS-2$
+		new String[] {"record_date", "date"}, //$NON-NLS-1$ //$NON-NLS-2$
+		new String[] {"record_status", "varchar(128)"}, //$NON-NLS-1$ //$NON-NLS-2$
+		new String[] {"record_source_key", "varchar(128)"}, //$NON-NLS-1$ //$NON-NLS-2$
+		new String[] {"source_uuid", "uuid"}, //$NON-NLS-1$ //$NON-NLS-2$
+		new String[] {"ca_uuid", "uuid"}, //$NON-NLS-1$ //$NON-NLS-2$
+		new String[] {"record_title", "varchar(1024)"}, //$NON-NLS-1$ //$NON-NLS-2$
+		new String[] {"date_created", "date"}, //$NON-NLS-1$ //$NON-NLS-2$
+		new String[] {"date_modified", "date"}, //$NON-NLS-1$ //$NON-NLS-2$
+		new String[] {"profile_uuid", "uuid"}, //$NON-NLS-1$ //$NON-NLS-2$
 	};
 	
 	HashMap<String, Integer> colName2Index = new HashMap<>();
@@ -63,16 +90,16 @@ public class RecordFilterProcessor {
 		StringBuilder sb = new StringBuilder();
 		sb.append("CREATE TABLE "); //$NON-NLS-1$
 		sb.append(obsTable);
-		sb.append("(");
+		sb.append("("); //$NON-NLS-1$
 		for (int i = 0; i < cols.length; i ++) {
 			sb.append( cols[i][0] );
-			sb.append(" " );
+			sb.append(" " ); //$NON-NLS-1$
 			sb.append( cols[i][1] );
-			sb.append(",");
+			sb.append(","); //$NON-NLS-1$
 			colName2Index.put(cols[i][0], i);
 		}
 		sb.deleteCharAt(sb.length() - 1);
-		sb.append(")");
+		sb.append(")"); //$NON-NLS-1$
 		
 		logme(sb);
 		session.createNativeQuery(sb.toString()).executeUpdate();
@@ -80,21 +107,21 @@ public class RecordFilterProcessor {
 		sb = new StringBuilder();
 		sb.append("INSERT INTO "); //$NON-NLS-1$
 		sb.append(obsTable);
-		sb.append("(");
+		sb.append("("); //$NON-NLS-1$
 		for (int i = 0; i < cols.length; i ++) {
 			sb.append( cols[i][0] );
-			sb.append(",");
+			sb.append(","); //$NON-NLS-1$
 		}
 		sb.deleteCharAt(sb.length() - 1);
-		sb.append(")");
-		sb.append(" SELECT a.uuid, cast(a.primary_date as date), a.status, b.keyid, a.source_uuid , a.ca_uuid, a.title, ");
-		sb.append(" cast(a.date_created as date), cast(a.last_modified_date as date), ");
-		sb.append(" a.profile_uuid");
+		sb.append(")"); //$NON-NLS-1$
+		sb.append(" SELECT a.uuid, cast(a.primary_date as date), a.status, b.keyid, a.source_uuid , a.ca_uuid, a.title, "); //$NON-NLS-1$
+		sb.append(" cast(a.date_created as date), cast(a.last_modified_date as date), "); //$NON-NLS-1$
+		sb.append(" a.profile_uuid"); //$NON-NLS-1$
 		sb.append(" FROM "); //$NON-NLS-1$
 		sb.append(" smart.i_record a left join smart.i_recordsource b on a.source_uuid = b.uuid "); //$NON-NLS-1$
 		sb.append(" WHERE a.ca_uuid in (:cauuids) and a.profile_uuid in (:profiles)"); //$NON-NLS-1$
 		if (dates[0] != null) {
-			sb.append(" AND cast(a.primary_date as date)>= :startd and cast(a.primary_date as date) <= :endd");
+			sb.append(" AND cast(a.primary_date as date)>= :startd and cast(a.primary_date as date) <= :endd"); //$NON-NLS-1$
 		}
 		
 		List<UUID> cauuids = cas.stream().map(e->e.getUuid()).collect(Collectors.toList());
@@ -104,8 +131,8 @@ public class RecordFilterProcessor {
 			.setParameterList("cauuids",  cauuids) //$NON-NLS-1$
 			.setParameterList("profiles",  profiles); //$NON-NLS-1$
 		if (dates[0] != null) {
-			q.setParameter("startd",dates[0])
-			.setParameter("endd",dates[1]);
+			q.setParameter("startd",dates[0]) //$NON-NLS-1$
+			.setParameter("endd",dates[1]); //$NON-NLS-1$
 		}
 		q.executeUpdate();
 		
@@ -128,7 +155,7 @@ public class RecordFilterProcessor {
 					RecordAttributeFilter f = (RecordAttributeFilter)filter;
 					if (f.getAttributeType() != null) {
 						//attribute
-						String colname = "filter" + colnumber;
+						String colname = "filter" + colnumber; //$NON-NLS-1$
 						colnumber++;
 						try {
 							addAttributeFilter(queryTable,colname,f,session);
@@ -138,7 +165,7 @@ public class RecordFilterProcessor {
 						filterToColumn.put(f, colname);
 					}else  {
 						//entity
-						String colname = "filter" + colnumber;
+						String colname = "filter" + colnumber; //$NON-NLS-1$
 						colnumber++;
 						addEntityAttributeFilter(queryTable,colname,f,session);
 						filterToColumn.put(f, colname);
@@ -168,71 +195,71 @@ public class RecordFilterProcessor {
 		sb.append( " SET " ); //$NON-NLS-1$
 		sb.append( columnName );
 		sb.append(" = true where record_uuid in ( SELECT  "); //$NON-NLS-1$
-		sb.append( "v.record_uuid ");
-		sb.append(" FROM smart.i_record_attribute_value v join smart.i_recordsource_attribute b on b.uuid = v.attribute_uuid ");
-		sb.append(" JOIN smart.i_recordsource c on c.uuid = b.source_uuid and c.keyid = :sourceid");
+		sb.append( "v.record_uuid "); //$NON-NLS-1$
+		sb.append(" FROM smart.i_record_attribute_value v join smart.i_recordsource_attribute b on b.uuid = v.attribute_uuid "); //$NON-NLS-1$
+		sb.append(" JOIN smart.i_recordsource c on c.uuid = b.source_uuid and c.keyid = :sourceid"); //$NON-NLS-1$
 		if (filter.getAttributeType() == AttributeType.DATE) {
-			sb.append(" JOIN smart.i_attribute r on r.uuid = b.attribute_uuid and r.type = 'DATE' ");
+			sb.append(" JOIN smart.i_attribute r on r.uuid = b.attribute_uuid and r.type = 'DATE' "); //$NON-NLS-1$
 		}
 		if (filter.getAttributeType() == AttributeType.LIST || filter.getAttributeType() == AttributeType.EMPLOYEE) {
-			sb.append(" JOIN smart.i_record_attribute_value_list li on li.value_uuid = v.uuid ");
+			sb.append(" JOIN smart.i_record_attribute_value_list li on li.value_uuid = v.uuid "); //$NON-NLS-1$
 			if (filter.getAttributeType() == AttributeType.LIST) {
-				sb.append(" JOIN smart.i_attribute_list_item ali on ali.uuid = li.element_uuid ");
+				sb.append(" JOIN smart.i_attribute_list_item ali on ali.uuid = li.element_uuid "); //$NON-NLS-1$
 			}
 		}
-		sb.append(" WHERE "); //$NON-NLS-1$ //$NON-NLS-2$
+		sb.append(" WHERE "); //$NON-NLS-1$
 		sb.append(" b.keyid = :keyid "); //$NON-NLS-1$
 		
 		if (filter.getAttributeType() == AttributeType.BOOLEAN) {
-			sb.append(" AND v.double_value > 0.5 ");
+			sb.append(" AND v.double_value > 0.5 "); //$NON-NLS-1$
 		}else if (filter.getAttributeType() == AttributeType.DATE) {
-			sb.append(" AND v.string_value is not null AND cast(v.string_value as date) ");
+			sb.append(" AND v.string_value is not null AND cast(v.string_value as date) "); //$NON-NLS-1$
 			sb.append( SqlGenerator.operatorToSql(filter.getOperator()) );
-			sb.append(" :value and :value2 ");
+			sb.append(" :value and :value2 "); //$NON-NLS-1$
 		}else if (filter.getAttributeType() == AttributeType.NUMERIC) {
-			sb.append(" AND v.double_value ");
+			sb.append(" AND v.double_value "); //$NON-NLS-1$
 			sb.append( SqlGenerator.operatorToSql(filter.getOperator()) );
-			sb.append(" :value ");
+			sb.append(" :value "); //$NON-NLS-1$
 		}else if (filter.getAttributeType() == AttributeType.TEXT) {
-			sb.append(" AND v.string_value ");
+			sb.append(" AND v.string_value "); //$NON-NLS-1$
 			sb.append( SqlGenerator.operatorToSql(filter.getOperator()) );
-			sb.append(" :value ");
+			sb.append(" :value "); //$NON-NLS-1$
 		}else if (filter.getAttributeType() == AttributeType.EMPLOYEE) {
-			sb.append(" AND li.element_uuid = :value ");
+			sb.append(" AND li.element_uuid = :value "); //$NON-NLS-1$
 		}else if (filter.getAttributeType() == AttributeType.LIST) {
 			if (filter.getKeyValue().equalsIgnoreCase(IQueryFilter.ANY_OPTION_KEY)) {
-				sb.append(" AND ali.keyid is not null ");
+				sb.append(" AND ali.keyid is not null "); //$NON-NLS-1$
 			}else {
-				sb.append(" AND ali.keyid = :value ");
+				sb.append(" AND ali.keyid = :value "); //$NON-NLS-1$
 			}
 		}
 		
-		sb.append(")");
+		sb.append(")"); //$NON-NLS-1$
 		
 		
 		logme(sb);
 		
 		Query<?> q = session.createNativeQuery(sb.toString())
 			.setParameter("keyid", filter.getAttributeKey()) //$NON-NLS-1$
-			.setParameter("sourceid", filter.getRecordSourceKey());
+			.setParameter("sourceid", filter.getRecordSourceKey()); //$NON-NLS-1$
 		
 		
 		if (filter.getAttributeType() == AttributeType.DATE) {
-			q.setParameter("value", filter.getDateValues()[0]);
-			q.setParameter("value2", filter.getDateValues()[1]);
+			q.setParameter("value", filter.getDateValues()[0]); //$NON-NLS-1$
+			q.setParameter("value2", filter.getDateValues()[1]); //$NON-NLS-1$
 		}else if (filter.getAttributeType() == AttributeType.NUMERIC) {
-			q.setParameter("value", filter.getNumberValue());
+			q.setParameter("value", filter.getNumberValue()); //$NON-NLS-1$
 		}else if (filter.getAttributeType() == AttributeType.TEXT) {
 			if (filter.getOperator() == Operator.STR_CONTAINS || filter.getOperator() == Operator.STR_NOTCONTAINS) {
-				q.setParameter("value", "%" + filter.getStringValue() + "%");
+				q.setParameter("value", "%" + filter.getStringValue() + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}else {
-				q.setParameter("value", filter.getStringValue());
+				q.setParameter("value", filter.getStringValue()); //$NON-NLS-1$
 			}
 		}else if (filter.getAttributeType() == AttributeType.EMPLOYEE) {
-			q.setParameter("value",  UuidUtils.stringToUuid(filter.getKeyValue()));
+			q.setParameter("value",  UuidUtils.stringToUuid(filter.getKeyValue())); //$NON-NLS-1$
 		}else if (filter.getAttributeType() == AttributeType.LIST) {
 			if (!filter.getKeyValue().equalsIgnoreCase(IQueryFilter.ANY_OPTION_KEY)) {
-				q.setParameter("value", filter.getKeyValue());
+				q.setParameter("value", filter.getKeyValue()); //$NON-NLS-1$
 			}
 		}
 		q.executeUpdate();
@@ -246,7 +273,7 @@ public class RecordFilterProcessor {
 		StringBuilder sb = new StringBuilder();
 		sb.append("ALTER TABLE "); //$NON-NLS-1$
 		sb.append(queryTable);
-		sb.append( " ADD COLUMN ");
+		sb.append( " ADD COLUMN "); //$NON-NLS-1$
 		sb.append(columnName);
 		sb.append(" boolean default false "); //$NON-NLS-1$
 		
@@ -260,16 +287,16 @@ public class RecordFilterProcessor {
 		sb.append( " SET " ); //$NON-NLS-1$
 		sb.append( columnName );
 		sb.append(" = true where record_uuid in ( SELECT  "); //$NON-NLS-1$
-		sb.append( " v.record_uuid ");
-		sb.append(" FROM smart.i_record_attribute_value v join smart.i_recordsource_attribute b on b.uuid = v.attribute_uuid ");
-		sb.append(" JOIN smart.i_recordsource c on c.uuid = b.source_uuid and c.keyid = :sourceid");
-		sb.append(" JOIN smart.i_record_attribute_value_list lt on lt.value_uuid = v.uuid ");
-		sb.append(" WHERE "); //$NON-NLS-1$ //$NON-NLS-2$
-		sb.append(" b.keyid = :keyid ");
+		sb.append( " v.record_uuid "); //$NON-NLS-1$
+		sb.append(" FROM smart.i_record_attribute_value v join smart.i_recordsource_attribute b on b.uuid = v.attribute_uuid "); //$NON-NLS-1$
+		sb.append(" JOIN smart.i_recordsource c on c.uuid = b.source_uuid and c.keyid = :sourceid"); //$NON-NLS-1$
+		sb.append(" JOIN smart.i_record_attribute_value_list lt on lt.value_uuid = v.uuid "); //$NON-NLS-1$
+		sb.append(" WHERE "); //$NON-NLS-1$
+		sb.append(" b.keyid = :keyid "); //$NON-NLS-1$
 		if (!filter.getKeyValue().equalsIgnoreCase(IQueryFilter.ANY_OPTION_KEY)) {
 			sb.append("AND  lt.element_uuid = :value "); //$NON-NLS-1$"
 		}else {
-			sb.append(" AND lt.element_uuid IS NOT NULL ");
+			sb.append(" AND lt.element_uuid IS NOT NULL "); //$NON-NLS-1$
 		}
 		sb.append(" ) "); //$NON-NLS-1$
 		
@@ -277,9 +304,9 @@ public class RecordFilterProcessor {
 		
 		Query<?> q = session.createNativeQuery(sb.toString())
 			.setParameter("keyid", filter.getAttributeKey()) //$NON-NLS-1$;
-			.setParameter("sourceid", filter.getRecordSourceKey());
+			.setParameter("sourceid", filter.getRecordSourceKey()); //$NON-NLS-1$
 		if (!filter.getKeyValue().equalsIgnoreCase(IQueryFilter.ANY_OPTION_KEY)) {
-			q.setParameter("value", UuidUtils.stringToUuid(filter.getKeyValue()));
+			q.setParameter("value", UuidUtils.stringToUuid(filter.getKeyValue())); //$NON-NLS-1$
 		}
 		q.executeUpdate();		
 	}
@@ -295,17 +322,17 @@ public class RecordFilterProcessor {
 		StringBuilder sb = new StringBuilder();
 		sb.append("CREATE TABLE "); //$NON-NLS-1$
 		sb.append(table2);
-		sb.append("(");
+		sb.append("("); //$NON-NLS-1$
 		for (int i = 0; i < cols.length; i ++) {
 			sb.append( cols[i][0] );
-			sb.append(" " );
+			sb.append(" " ); //$NON-NLS-1$
 			sb.append( cols[i][1] );
-			sb.append(",");
+			sb.append(","); //$NON-NLS-1$
 			
 			colName2Index.put(cols[i][0], i);
 		}
 		sb.deleteCharAt(sb.length() - 1);
-		sb.append(")");
+		sb.append(")"); //$NON-NLS-1$
 		
 		logme(sb);
 		session.createNativeQuery(sb.toString()).executeUpdate();
@@ -314,10 +341,10 @@ public class RecordFilterProcessor {
 		sb.append(" INSERT INTO " ); //$NON-NLS-1$
 		sb.append(table2);
 		
-		sb.append(" SELECT ");
+		sb.append(" SELECT "); //$NON-NLS-1$
 		for (int i = 0; i < cols.length; i ++) {
 			sb.append( cols[i][0] );
-			sb.append(",");
+			sb.append(","); //$NON-NLS-1$
 		}
 		sb.deleteCharAt(sb.length() - 1);
 		
@@ -332,8 +359,8 @@ public class RecordFilterProcessor {
 			processFilter(queryFilter, filterToColumn, sb, parameters);
 		}
 		String querystr = sb.toString();
-		if (querystr.endsWith(" WHERE " )) {
-			querystr = querystr.substring(0, querystr.length() - " WHERE ".length());
+		if (querystr.endsWith(" WHERE " )) { //$NON-NLS-1$
+			querystr = querystr.substring(0, querystr.length() - " WHERE ".length()); //$NON-NLS-1$
 		}
 		
 		NativeQuery<?> query = session.createNativeQuery(querystr);
@@ -356,7 +383,7 @@ public class RecordFilterProcessor {
 	private void processFilter(IQueryFilter queryFilter,  Map<IQueryFilter,String> filterToColumn, StringBuilder whereSql, HashMap<String,Object> parameters) throws Exception {
 		
 		if (filterToColumn.containsKey(queryFilter)) {
-			whereSql.append(" " + filterToColumn.get(queryFilter) + " ");
+			whereSql.append(" " + filterToColumn.get(queryFilter) + " "); //$NON-NLS-1$ //$NON-NLS-2$
 			return;
 		}
 		if (queryFilter instanceof SystemAttributeFilter) {
@@ -386,7 +413,7 @@ public class RecordFilterProcessor {
 					columnName = "a.record_date"; //$NON-NLS-1$
 					whereSql.append(SqlGenerator.generateDateClause(f.getDateValues(), columnName));
 				}
-				whereSql.append(" ");
+				whereSql.append(" "); //$NON-NLS-1$
 			}else {
 				throw new IllegalStateException("Entity filters not supported for record queries"); //$NON-NLS-1$
 			}

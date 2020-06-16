@@ -690,7 +690,7 @@ public class QueryApi extends HttpServlet{
 		// CAs are the root folders
 		List<ConservationArea> cas = QueryManager.INSTANCE.getConservationAreas(s);
 		for(ConservationArea ca  :cas) {
-			QueryFolderProxy caFolder = new QueryFolderProxy(ca.getName() + " [" + ca.getId() + "]");
+			QueryFolderProxy caFolder = new QueryFolderProxy(ca.getName() + " [" + ca.getId() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
 			foldersByUuid.put(ca.getUuid(), caFolder);
 			rootFolders.add(caFolder);
 		}
@@ -887,7 +887,7 @@ public class QueryApi extends HttpServlet{
 		HashSet<String> types = null;
 		if(typeFilter != null && !typeFilter.isEmpty()) {
 			types = new HashSet<String>();
-			String[] typeFilters = typeFilter.split(",");
+			String[] typeFilters = typeFilter.split(","); //$NON-NLS-1$
 			for(String type : typeFilters) {
 				types.add(type.toLowerCase());
 			}

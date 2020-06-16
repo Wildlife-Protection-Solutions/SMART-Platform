@@ -102,10 +102,10 @@ public class IntelEntityRecordQueryEngine implements IIntelQueryEngine {
 		}
 		
 		Set<IntelProfile> profiles = new HashSet<>();
-		for (String ip : IntelEntityRecordQuery.convertFromProfileFilter(query.getProfileFilter())) {
-			List<IntelProfile> items = session.createQuery("FROM IntelProfile WHERE keyId = :keyId and conservationArea in (:cas)", IntelProfile.class)
-					.setParameter("keyId",  ip)
-					.setParameter("cas", cas).list();
+		for (String ip : AbstractIntelQuery.convertFromProfileFilter(query.getProfileFilter())) {
+			List<IntelProfile> items = session.createQuery("FROM IntelProfile WHERE keyId = :keyId and conservationArea in (:cas)", IntelProfile.class) //$NON-NLS-1$
+					.setParameter("keyId",  ip) //$NON-NLS-1$
+					.setParameter("cas", cas).list(); //$NON-NLS-1$
 			if (SecurityManager.INSTANCE.canAccess(session, username, AdvIntelAction.RUNQUERY_KEY, iquery.getUuid()) ||
 					SecurityManager.INSTANCE.canAccess(session, username, AdvIntelAction.RUNQUERY_KEY, iquery.getConservationArea().getUuid())) { 
 				//we have permission to run this query so use all profiles
@@ -114,7 +114,7 @@ public class IntelEntityRecordQueryEngine implements IIntelQueryEngine {
 		}
 		
 		if (profiles.isEmpty()) {
-			throw new Exception("No valid profile filters for query");
+			throw new Exception(Messages.getString("IntelEntityRecordQueryEngine.NoProfileFilterForQuery", locale)); //$NON-NLS-1$
 		}
 		
 		IQueryItemProvider itemProvider = null;

@@ -1,8 +1,30 @@
+/*
+ * Copyright (C) 2020 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.connect.api.noa;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -45,8 +67,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
 
+/**
+ * SMARTCollect api that is visible to the public
+ * @author Emily
+ *
+ */
 @Path(ConnectRESTApplication.PATH_SEPERATOR + SmartCollectNoa.PATH)
-
 public class SmartCollectNoa {
 
 	public static final String PATH = "smartcollect"; //$NON-NLS-1$
@@ -98,7 +124,7 @@ public class SmartCollectNoa {
 		try{
 			packageUuid = UUID.fromString(packageUuidstr);
 		}catch (Exception ex) {
-			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid package identifier"); 
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("SmartCollectNoa.InvalidIdentifier", request.getLocale()));  //$NON-NLS-1$
 		}
 		
 		java.nio.file.Path file = null;
@@ -118,7 +144,7 @@ public class SmartCollectNoa {
 		
 		long size = 0;
 		if (file == null || !Files.exists(file)) {
-			logger.log(Level.SEVERE,"SMART Collect package file not found.");
+			logger.log(Level.SEVERE,"SMART Collect package file not found."); //$NON-NLS-1$
 			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR);
 		}
 		try {
@@ -196,33 +222,33 @@ public class SmartCollectNoa {
 			s.beginTransaction();
 			try{
 				
-				SmartCollectConnectUser user = s.createQuery("FROM SmartCollectConnectUser WHERE validationKey = :key", SmartCollectConnectUser.class)
-						.setParameter("key", validationkey).uniqueResult();
+				SmartCollectConnectUser user = s.createQuery("FROM SmartCollectConnectUser WHERE validationKey = :key", SmartCollectConnectUser.class) //$NON-NLS-1$
+						.setParameter("key", validationkey).uniqueResult(); //$NON-NLS-1$
 				
 				if (user == null) throw new SmartConnectException(Response.Status.NOT_FOUND);
 				
 				if (user.getState() == State.BLACKLISTED) {
-					throw new SmartConnectException(Response.Status.BAD_REQUEST, "user has been blacklisted");
+					throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("SmartCollectNoa.BlacklistedUser", request.getLocale())); //$NON-NLS-1$
 				}else if (user.getState() == State.VALIDATED) {
 					//already validated
 				}else if (user.getValidateSentDate() != null && user.getValidationKey().equals(validationkey)) {
 					//check timeout
 					if ((new Date()).getTime() - user.getValidateSentDate().getTime() > 72*1000*60*60.0) {
-						throw new SmartConnectException(Response.Status.BAD_REQUEST, "validation key timeout");
+						throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("SmartCollectNoa.ValidationTimeout", request.getLocale())); //$NON-NLS-1$
 					}
 					user.setState(State.VALIDATED);
 					
 				}else {
-					throw new SmartConnectException(Response.Status.BAD_REQUEST, "invalid validation key");
+					throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("SmartCollectNoa.InvalidKey", request.getLocale())); //$NON-NLS-1$
 				}
 				
 			}finally {
 				s.getTransaction().commit();
 			}
 		}catch (SmartConnectException ex) {
-			return "<html><title>SMART Collect</title><body>User could not be validated: " + ex.getMessage() + "</body></html>";
+			return MessageFormat.format(Messages.getString("SmartCollectNoa.ValidationError", request.getLocale()), "<html><title>","</title><body>", ex.getMessage(), "</body></html>");  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}
 		
-		return "<html><title>SMART Collect</title><body>Your email address has been validated as your SMART Collect user</body></html>";
+		return MessageFormat.format(Messages.getString("SmartCollectNoa.Validated", request.getLocale()), "<html><title>","</title><body>","</body></html>"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	}
 }

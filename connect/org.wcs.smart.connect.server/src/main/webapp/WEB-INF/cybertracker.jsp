@@ -69,32 +69,32 @@
 	     <div id="ctapikeytable" class="table-cell smart-table">
 	  	  <div class="table-row smart-table-header">
 			  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.apikeytable.ca"/></div>
-			  <div class="table-cell smart-table-cell">Private</div>
-			  <div class="table-cell smart-table-cell">SMART Collect</div>
+			  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.privatekey"/></div>
+			  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.smartcollectkey"/></div>
 		  </div>
 	    </div>
 	   </div>
 	   
 	   
 	  <!--  collect Users -->
-	  <p class="top-spacer label-header" style="margin-top:50px; border-top:1px solid; padding-top:4px">SMART Collect Users</p>
-	  <p>Here you can search for and see the validation status of the SMART Collect Users</p>
+	  <p class="top-spacer label-header" style="margin-top:50px; border-top:1px solid; padding-top:4px"><fmt:message key="cybertracker.collectusersection"/></p>
+	  <p><fmt:message key="cybertracker.collectusersectionmsg"/></p>
 	  <div class="top-spacer"> 
 		<!-- Search Parameters -->
-		<label>Search</label>
+		<label><fmt:message key="cybertracker.collectuserseaarch"/></label>
 		<input class="formtext" type=text  id="collectusersearch" maxlength=50 oninput="searchCollectUsers()" style="width:30em"/>
 	  </div>
 	  <div class="top-spacer" >
 	  
 	     <div id="collectusertable" class="table-cell smart-table">
 	  	  <div class="table-row smart-table-header">
-			  <div class="table-cell smart-table-cell">User</div>
-			  <div class="table-cell smart-table-cell">Status</div>
-			  <div class="table-cell smart-table-cell">Actions</div>
+			  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.collectusername"/></div>
+			  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.collectuserstatus"/></div>
+			  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.collectuseractions"/></div>
 		  </div>
 	    </div>
 	   </div>
-	   <p class="top-spacer">A maximum of 50 users is returned.  For complete list click <a href="../api/collect/source" target="collectusers">here</a></p>
+	   <p class="top-spacer"><fmt:message key="cybertracker.maxusers1"/> <a href="../api/collect/source" target="collectusers"><fmt:message key="cybertracker.maxusers2"/></a></p>
 	   
 	 </div>
 </div>		
@@ -145,12 +145,12 @@
   </div>
   
    <div id="deleteCollectUserDialog" style="display: none;" class="dialog">
-	  <div class="dialog-title">Delete SMART Collect User</div>
+	  <div class="dialog-title"><fmt:message key="cybertracker.deleteuserdialogtitle"/></div>
 	  <div id="dialogerror" class="errorsection"></div>
 	  
 	  <form id="deletecollectform" onsubmit="return deleteCollectUser();" >
 	    <input type="hidden" name="uuid"/>
-	   	<p>Are you sure you want to delete the SMART Collect user?</p>
+	   	<p><fmt:message key="cybertracker.deleteuserdialogmessage"/></p>
 	   	<div class="block top-spacer" style="text-align:right">
 	     <input class="button" type="submit" value="<fmt:message key="cybertracker.deletebtn"/>" />
 	     <input class="button" type="button" value="<fmt:message key="cybertracker.cancelbtn"/>" onclick="closeDialog('deleteCollectUserDialog')" />

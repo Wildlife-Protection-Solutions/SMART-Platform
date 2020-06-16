@@ -126,7 +126,7 @@ public class IntelRecordQueryResults implements IConnectPagedQueryResultSet {
 	public IResultItem asResultItem(Object[] rowData, Session session){
 		
 		IntelRecordResultItem item = new IntelRecordResultItem();
-		UUID caUuid = asUuid(rowData[columnNameToIndex.get("ca_uuid")]);
+		UUID caUuid = asUuid(rowData[columnNameToIndex.get("ca_uuid")]); //$NON-NLS-1$
 		ConservationArea ca = session.get(ConservationArea.class, caUuid);
 		item.setConservationAreaId(ca.getId());
 		item.setConservationAreaName(ca.getName());
@@ -140,11 +140,11 @@ public class IntelRecordQueryResults implements IConnectPagedQueryResultSet {
 		item.setRecordSource(sourceUuid, sourceName);
 		
 		UUID profileUuid = asUuid(rowData[columnNameToIndex.get("profile_uuid")]); //$NON-NLS-1$
-		String profileName = (String) rowData[columnNameToIndex.get("profile_name")];
-		String profileKey = (String)rowData[columnNameToIndex.get("profile_key")];
+		String profileName = (String) rowData[columnNameToIndex.get("profile_name")]; //$NON-NLS-1$
+		String profileKey = (String)rowData[columnNameToIndex.get("profile_key")]; //$NON-NLS-1$
 		item.setProfile(profileKey, profileUuid, profileName);
 				
-		item.setRecordDate((Date)rowData[columnNameToIndex.get("record_date")]);
+		item.setRecordDate((Date)rowData[columnNameToIndex.get("record_date")]); //$NON-NLS-1$
 		
 		IntelRecord r = session.get(IntelRecord.class, item.getRecordUuid());
 		for (IntelRecordAttributeValue v : r.getAttributes()) {
@@ -208,15 +208,16 @@ public class IntelRecordQueryResults implements IConnectPagedQueryResultSet {
 	
 	@Override
 	public List<? extends IResultItem> getData(int offset, int pageSize, Session session) {
-		throw new UnsupportedOperationException("Loading data in chunks is not supported for Connect queries");
+		throw new UnsupportedOperationException("Loading data in chunks is not supported for Connect queries"); //$NON-NLS-1$
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public String getSelectQuery(Session session){
 		if (sortColumn == null || sortDirection == null) return "SELECT * FROM " + resultsTable; //$NON-NLS-1$
 		
 		if (sortColumn instanceof FixedQueryColumn){
-			String sql = "SELECT * FROM " + resultsTable + " order by "; //$NON-NLS-1$
+			String sql = "SELECT * FROM " + resultsTable + " order by "; //$NON-NLS-1$ //$NON-NLS-2$
 			
 			if (((FixedQueryColumn) sortColumn).getColumn() == Column.RECORD_STATUS){
 				return sql + "record_status" + getSortDirectionSql(); //$NON-NLS-1$
@@ -225,7 +226,7 @@ public class IntelRecordQueryResults implements IConnectPagedQueryResultSet {
 			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.RECORD_SOURCE){
 				return sql + "lower(record_source_name)" + getSortDirectionSql(); //$NON-NLS-1$
 			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.RECORD_DATE){
-				return sql + " record_date " + getSortDirectionSql();
+				return sql + " record_date " + getSortDirectionSql(); //$NON-NLS-1$
 			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.RECORD_PROFILE){
 				return sql + "profile_name" + getSortDirectionSql(); //$NON-NLS-1$
 			}else if (((FixedQueryColumn) sortColumn).getColumn() == Column.CA_ID){
@@ -248,173 +249,173 @@ public class IntelRecordQueryResults implements IConnectPagedQueryResultSet {
 								
 						
 					StringBuilder sb = new StringBuilder();
-					sb.append("SELECT a.* FROM ");
-					sb.append(resultsTable + " a ");
-					sb.append(" LEFT JOIN ");
-					sb.append( " ( smart.i_record_attribute_value v ");
-					sb.append( " JOIN smart.i_recordsource_attribute b on v.attribute_uuid = b.uuid ");
-					sb.append(" AND b.keyid = '" + col.getAttribute().getKeyId() + "' ");
-					sb.append(" JOIN smart.i_recordsource s on s.uuid = b.source_uuid ");
-					sb.append(" AND s.keyid =  '" + col.getAttribute().getSource().getKeyId() + "' ");
-					sb.append( ")" );
-					sb.append(" ON a.record_uuid = v.record_uuid ");
+					sb.append("SELECT a.* FROM "); //$NON-NLS-1$
+					sb.append(resultsTable + " a "); //$NON-NLS-1$
+					sb.append(" LEFT JOIN "); //$NON-NLS-1$
+					sb.append( " ( smart.i_record_attribute_value v "); //$NON-NLS-1$
+					sb.append( " JOIN smart.i_recordsource_attribute b on v.attribute_uuid = b.uuid "); //$NON-NLS-1$
+					sb.append(" AND b.keyid = '" + col.getAttribute().getKeyId() + "' "); //$NON-NLS-1$ //$NON-NLS-2$
+					sb.append(" JOIN smart.i_recordsource s on s.uuid = b.source_uuid "); //$NON-NLS-1$
+					sb.append(" AND s.keyid =  '" + col.getAttribute().getSource().getKeyId() + "' "); //$NON-NLS-1$ //$NON-NLS-2$
+					sb.append( ")" ); //$NON-NLS-1$
+					sb.append(" ON a.record_uuid = v.record_uuid "); //$NON-NLS-1$
 					
 					if (col.getAttribute().getAttribute().getType() == AttributeType.BOOLEAN || 
 							col.getAttribute().getAttribute().getType() == AttributeType.NUMERIC ) { 
-						sb.append(" ORDER BY v.double_value ");
+						sb.append(" ORDER BY v.double_value "); //$NON-NLS-1$
 						sb.append(getSortDirectionSql());
 					}else if (col.getAttribute().getAttribute().getType() == AttributeType.DATE) {
-						sb.append(" ORDER BY case when v.string_value is null or v.string_value = '' then null else cast(v.string_value as date) end ");
+						sb.append(" ORDER BY case when v.string_value is null or v.string_value = '' then null else cast(v.string_value as date) end "); //$NON-NLS-1$
 						sb.append(getSortDirectionSql());	
 					}else if (col.getAttribute().getAttribute().getType() == AttributeType.POSITION) {
-						sb.append(" ORDER BY v.double_value ");
+						sb.append(" ORDER BY v.double_value "); //$NON-NLS-1$
 						sb.append(getSortDirectionSql());
-						sb.append(", v.double_value2 ");
+						sb.append(", v.double_value2 "); //$NON-NLS-1$
 						sb.append(getSortDirectionSql());
 					}else if (col.getAttribute().getAttribute().getType() == AttributeType.TEXT) {
-						sb.append(" ORDER BY v.string_value ");
+						sb.append(" ORDER BY v.string_value "); //$NON-NLS-1$
 						sb.append(getSortDirectionSql());
 					}
 					return sb.toString();
 				}else if (col.getAttribute().getAttribute().getType() == AttributeType.LIST) {
 					//only single attributes are sortable 
-					if (lastSortColumn == col) return "SELECT * FROM " + resultsTable + " order by sort_column " + getSortDirectionSql();
+					if (lastSortColumn == col) return "SELECT * FROM " + resultsTable + " order by sort_column " + getSortDirectionSql(); //$NON-NLS-1$ //$NON-NLS-2$
 					lastSortColumn = col;
 
 					StringBuilder s3 = new StringBuilder();
-					s3.append("SELECT distinct a.element_uuid as element_uuid FROM smart.i_record_attribute_value_list a ");
-					s3.append(" JOIN smart.i_record_attribute_value v on v.uuid = a.value_uuid ");
-					s3.append(" JOIN smart.i_recordsource_attribute b on b.uuid = v.attribute_uuid and b.keyid = '" + col.getAttribute().getKeyId() + "' ");
-					s3.append(" JOIN smart.i_recordsource s on s.uuid = b.source_uuid AND s.keyid = '" + col.getAttribute().getSource().getKeyId() + "' ");
-					s3.append(" JOIN ");
+					s3.append("SELECT distinct a.element_uuid as element_uuid FROM smart.i_record_attribute_value_list a "); //$NON-NLS-1$
+					s3.append(" JOIN smart.i_record_attribute_value v on v.uuid = a.value_uuid "); //$NON-NLS-1$
+					s3.append(" JOIN smart.i_recordsource_attribute b on b.uuid = v.attribute_uuid and b.keyid = '" + col.getAttribute().getKeyId() + "' "); //$NON-NLS-1$ //$NON-NLS-2$
+					s3.append(" JOIN smart.i_recordsource s on s.uuid = b.source_uuid AND s.keyid = '" + col.getAttribute().getSource().getKeyId() + "' "); //$NON-NLS-1$ //$NON-NLS-2$
+					s3.append(" JOIN "); //$NON-NLS-1$
 					s3.append( resultsTable );
-					s3.append(" r on r.record_uuid = v.record_uuid");
+					s3.append(" r on r.record_uuid = v.record_uuid"); //$NON-NLS-1$
 					
 					session.beginTransaction();
 					try {
-						session.createNativeQuery("UPDATE " + resultsTable + " SET sort_column = null").executeUpdate();
+						session.createNativeQuery("UPDATE " + resultsTable + " SET sort_column = null").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
 						
 						List<UUID> items = session.createNativeQuery(s3.toString())
-								.addScalar("element_uuid", PostgresUUIDType.INSTANCE)
+								.addScalar("element_uuid", PostgresUUIDType.INSTANCE) //$NON-NLS-1$
 								.list();
 						for (UUID item : items) {
 							IntelAttributeListItem li = session.get(IntelAttributeListItem.class, item);
 							
 							StringBuilder s2 = new StringBuilder();
-							s2.append("UPDATE ");
+							s2.append("UPDATE "); //$NON-NLS-1$
 							s2.append(resultsTable);
-							s2.append(" SET sort_column = :value ");
-							s2.append(" WHERE record_uuid IN (SELECT a.record_uuid FROM " );
-							s2.append(resultsTable + " a");
-							s2.append(" JOIN smart.i_record_attribute_value v on v.record_uuid = a.record_uuid ");
-							s2.append(" JOIN smart.i_record_attribute_value_list li on li.value_uuid = v.uuid ");
-							s2.append(" AND li.element_uuid = :uuid)");
+							s2.append(" SET sort_column = :value "); //$NON-NLS-1$
+							s2.append(" WHERE record_uuid IN (SELECT a.record_uuid FROM " ); //$NON-NLS-1$
+							s2.append(resultsTable + " a"); //$NON-NLS-1$
+							s2.append(" JOIN smart.i_record_attribute_value v on v.record_uuid = a.record_uuid "); //$NON-NLS-1$
+							s2.append(" JOIN smart.i_record_attribute_value_list li on li.value_uuid = v.uuid "); //$NON-NLS-1$
+							s2.append(" AND li.element_uuid = :uuid)"); //$NON-NLS-1$
 							
 							session.createNativeQuery(s2.toString())
-								.setParameter("uuid", li.getUuid())
-								.setParameter("value", li.getName())
+								.setParameter("uuid", li.getUuid()) //$NON-NLS-1$
+								.setParameter("value", li.getName()) //$NON-NLS-1$
 								.executeUpdate();
 							
 						}
 					}finally {
 						session.getTransaction().commit();
 					}
-					return "SELECT * FROM " + resultsTable + " order by sort_column " + getSortDirectionSql();
+					return "SELECT * FROM " + resultsTable + " order by sort_column " + getSortDirectionSql(); //$NON-NLS-1$ //$NON-NLS-2$
 				}else if (col.getAttribute().getAttribute().getType() == AttributeType.EMPLOYEE) {
 					//only single attributes are sortable 
-					if (lastSortColumn == col) return "SELECT * FROM " + resultsTable + " order by sort_column " + getSortDirectionSql();
+					if (lastSortColumn == col) return "SELECT * FROM " + resultsTable + " order by sort_column " + getSortDirectionSql(); //$NON-NLS-1$ //$NON-NLS-2$
 					lastSortColumn = col;
 					
 					StringBuilder s3 = new StringBuilder();
-					s3.append("SELECT distinct a.element_uuid as element_uuid FROM smart.i_record_attribute_value_list a ");
-					s3.append(" JOIN smart.i_record_attribute_value v on v.uuid = a.value_uuid ");
-					s3.append(" JOIN smart.i_recordsource_attribute b on b.uuid = v.attribute_uuid and b.keyid = '" + col.getAttribute().getKeyId() + "' ");
-					s3.append(" JOIN smart.i_recordsource s on s.uuid = b.source_uuid AND s.keyid = '" + col.getAttribute().getSource().getKeyId() + "' ");
-					s3.append(" JOIN ");
+					s3.append("SELECT distinct a.element_uuid as element_uuid FROM smart.i_record_attribute_value_list a "); //$NON-NLS-1$
+					s3.append(" JOIN smart.i_record_attribute_value v on v.uuid = a.value_uuid "); //$NON-NLS-1$
+					s3.append(" JOIN smart.i_recordsource_attribute b on b.uuid = v.attribute_uuid and b.keyid = '" + col.getAttribute().getKeyId() + "' "); //$NON-NLS-1$ //$NON-NLS-2$
+					s3.append(" JOIN smart.i_recordsource s on s.uuid = b.source_uuid AND s.keyid = '" + col.getAttribute().getSource().getKeyId() + "' "); //$NON-NLS-1$ //$NON-NLS-2$
+					s3.append(" JOIN "); //$NON-NLS-1$
 					s3.append( resultsTable );
-					s3.append(" r on r.record_uuid = v.record_uuid");
+					s3.append(" r on r.record_uuid = v.record_uuid"); //$NON-NLS-1$
 					
 					session.beginTransaction();
 					try {
-						session.createNativeQuery("UPDATE " + resultsTable + " SET sort_column = null").executeUpdate();
+						session.createNativeQuery("UPDATE " + resultsTable + " SET sort_column = null").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
 						
 						List<UUID> items = session.createNativeQuery(s3.toString())
-								.addScalar("element_uuid", PostgresUUIDType.INSTANCE)
+								.addScalar("element_uuid", PostgresUUIDType.INSTANCE) //$NON-NLS-1$
 								.list();
 						for (UUID item : items) {
 							Employee e = session.get(Employee.class, item);
 							
 							StringBuilder s2 = new StringBuilder();
-							s2.append("UPDATE ");
+							s2.append("UPDATE "); //$NON-NLS-1$
 							s2.append(resultsTable);
-							s2.append(" SET sort_column = :value ");
-							s2.append(" WHERE record_uuid IN (SELECT a.record_uuid FROM " );
-							s2.append(resultsTable + " a");
-							s2.append(" JOIN smart.i_record_attribute_value v on v.record_uuid = a.record_uuid ");
-							s2.append(" JOIN smart.i_record_attribute_value_list li on li.value_uuid = v.uuid ");
-							s2.append(" AND li.element_uuid = :uuid)");
+							s2.append(" SET sort_column = :value "); //$NON-NLS-1$
+							s2.append(" WHERE record_uuid IN (SELECT a.record_uuid FROM " ); //$NON-NLS-1$
+							s2.append(resultsTable + " a"); //$NON-NLS-1$
+							s2.append(" JOIN smart.i_record_attribute_value v on v.record_uuid = a.record_uuid "); //$NON-NLS-1$
+							s2.append(" JOIN smart.i_record_attribute_value_list li on li.value_uuid = v.uuid "); //$NON-NLS-1$
+							s2.append(" AND li.element_uuid = :uuid)"); //$NON-NLS-1$
 							
 							session.createNativeQuery(s2.toString())
-								.setParameter("uuid", e.getUuid())
-								.setParameter("value", SmartLabelProvider.getFullName(e, l))
+								.setParameter("uuid", e.getUuid()) //$NON-NLS-1$
+								.setParameter("value", SmartLabelProvider.getFullName(e, l)) //$NON-NLS-1$
 								.executeUpdate();
 							
 						}
 					}finally {
 						session.getTransaction().commit();
 					}
-					return "SELECT * FROM " + resultsTable + " order by sort_column " + getSortDirectionSql();
+					return "SELECT * FROM " + resultsTable + " order by sort_column " + getSortDirectionSql(); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}else if (col.getAttribute().getEntityType() != null) {
 				//only single attributes are sortable 
-				if (lastSortColumn == col) return "SELECT * FROM " + resultsTable + " order by sort_column " + getSortDirectionSql();
+				if (lastSortColumn == col) return "SELECT * FROM " + resultsTable + " order by sort_column " + getSortDirectionSql(); //$NON-NLS-1$ //$NON-NLS-2$
 				lastSortColumn = col;
 
 				StringBuilder s3 = new StringBuilder();
-				s3.append("SELECT distinct a.element_uuid as element_uuid FROM smart.i_record_attribute_value_list a ");
-				s3.append(" JOIN smart.i_record_attribute_value v on v.uuid = a.value_uuid ");
-				s3.append(" JOIN smart.i_recordsource_attribute b on b.uuid = v.attribute_uuid and b.keyid = '" + col.getAttribute().getKeyId() + "' ");
-				s3.append(" JOIN smart.i_recordsource s on s.uuid = b.source_uuid AND s.keyid = '" + col.getAttribute().getSource().getKeyId() + "' ");
-				s3.append(" JOIN ");
+				s3.append("SELECT distinct a.element_uuid as element_uuid FROM smart.i_record_attribute_value_list a "); //$NON-NLS-1$
+				s3.append(" JOIN smart.i_record_attribute_value v on v.uuid = a.value_uuid "); //$NON-NLS-1$
+				s3.append(" JOIN smart.i_recordsource_attribute b on b.uuid = v.attribute_uuid and b.keyid = '" + col.getAttribute().getKeyId() + "' "); //$NON-NLS-1$ //$NON-NLS-2$
+				s3.append(" JOIN smart.i_recordsource s on s.uuid = b.source_uuid AND s.keyid = '" + col.getAttribute().getSource().getKeyId() + "' "); //$NON-NLS-1$ //$NON-NLS-2$
+				s3.append(" JOIN "); //$NON-NLS-1$
 				s3.append( resultsTable );
-				s3.append(" r on r.record_uuid = v.record_uuid");
+				s3.append(" r on r.record_uuid = v.record_uuid"); //$NON-NLS-1$
 				
 				session.beginTransaction();
 				try {
-					session.createNativeQuery("UPDATE " + resultsTable + " SET sort_column = null").executeUpdate();
+					session.createNativeQuery("UPDATE " + resultsTable + " SET sort_column = null").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
 					
 					List<UUID> items = session.createNativeQuery(s3.toString())
-							.addScalar("element_uuid", PostgresUUIDType.INSTANCE)
+							.addScalar("element_uuid", PostgresUUIDType.INSTANCE) //$NON-NLS-1$
 							.list();
 					for (UUID item : items) {
 						IntelEntity li = session.get(IntelEntity.class, item);
 						
 						StringBuilder s2 = new StringBuilder();
-						s2.append("UPDATE ");
+						s2.append("UPDATE "); //$NON-NLS-1$
 						s2.append(resultsTable);
-						s2.append(" SET sort_column = :value ");
-						s2.append(" WHERE record_uuid IN (SELECT a.record_uuid FROM " );
-						s2.append(resultsTable + " a");
-						s2.append(" JOIN smart.i_record_attribute_value v on v.record_uuid = a.record_uuid ");
-						s2.append(" JOIN smart.i_recordsource_attribute b on b.uuid = v.attribute_uuid and b.keyid = '" + col.getAttribute().getKeyId() + "' ");
-						s2.append(" JOIN smart.i_recordsource s on s.uuid = b.source_uuid AND s.keyid = '" + col.getAttribute().getSource().getKeyId() + "' ");
-						s2.append(" JOIN smart.i_record_attribute_value_list li on li.value_uuid = v.uuid ");
-						s2.append(" AND li.element_uuid = :uuid)");
+						s2.append(" SET sort_column = :value "); //$NON-NLS-1$
+						s2.append(" WHERE record_uuid IN (SELECT a.record_uuid FROM " ); //$NON-NLS-1$
+						s2.append(resultsTable + " a"); //$NON-NLS-1$
+						s2.append(" JOIN smart.i_record_attribute_value v on v.record_uuid = a.record_uuid "); //$NON-NLS-1$
+						s2.append(" JOIN smart.i_recordsource_attribute b on b.uuid = v.attribute_uuid and b.keyid = '" + col.getAttribute().getKeyId() + "' "); //$NON-NLS-1$ //$NON-NLS-2$
+						s2.append(" JOIN smart.i_recordsource s on s.uuid = b.source_uuid AND s.keyid = '" + col.getAttribute().getSource().getKeyId() + "' "); //$NON-NLS-1$ //$NON-NLS-2$
+						s2.append(" JOIN smart.i_record_attribute_value_list li on li.value_uuid = v.uuid "); //$NON-NLS-1$
+						s2.append(" AND li.element_uuid = :uuid)"); //$NON-NLS-1$
 						
 						session.createNativeQuery(s2.toString())
-							.setParameter("uuid", li.getUuid())
-							.setParameter("value", li.getIdAttributeAsText())
+							.setParameter("uuid", li.getUuid()) //$NON-NLS-1$
+							.setParameter("value", li.getIdAttributeAsText()) //$NON-NLS-1$
 							.executeUpdate();
 						
 					}
 				}finally {
 					session.getTransaction().commit();
 				}
-				return "SELECT * FROM " + resultsTable + " order by sort_column " + getSortDirectionSql();
+				return "SELECT * FROM " + resultsTable + " order by sort_column " + getSortDirectionSql(); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 		//no sorting
-		return "SELECT * FROM " + resultsTable;
+		return "SELECT * FROM " + resultsTable; //$NON-NLS-1$
 	}
 	
 	private String getSortDirectionSql(){
