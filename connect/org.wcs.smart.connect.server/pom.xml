@@ -247,7 +247,9 @@
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>2.6</version>
+			<!-- version 2.5 is the one that works with the batik pdf libraries used by BIRT -->
+			<!-- upgrading to 2.6 causes problems with class conflicts -->
+			<version>2.5</version>
 		</dependency>
 		<dependency>
           		<groupId>net.sf.opencsv</groupId>

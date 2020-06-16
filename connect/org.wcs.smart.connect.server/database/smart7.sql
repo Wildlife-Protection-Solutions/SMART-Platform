@@ -1942,6 +1942,7 @@ CREATE TABLE connect.connect_version (
 
 CREATE TABLE connect.ct_api_key(
     ca_uuid uuid not null,
+    key_type varchar(32) not null, 
     api_key varchar(64) not null,
     primary key (ca_uuid), unique(api_key)
 );
@@ -1969,6 +1970,7 @@ CREATE TABLE connect.ct_package (
     name character varying(256) NOT NULL,
     status character varying(16) NOT NULL,
     work_item_uuid uuid,
+    package_type varchar(256),
     UNIQUE(package_uuid),
     primary key(uuid)
 );
@@ -4443,8 +4445,7 @@ ALTER TABLE ONLY smart.mission_attribute ADD CONSTRAINT mission_attribute_keyid_
 ALTER TABLE ONLY smart.mission_attribute_list ADD CONSTRAINT mission_attribute_list_keyid_unq UNIQUE (mission_attribute_uuid, keyid) DEFERRABLE;
 ALTER TABLE ONLY smart.patrol_mandate ADD CONSTRAINT patrol_mandate_keyid_unq UNIQUE (ca_uuid, keyid) DEFERRABLE;
 ALTER TABLE ONLY smart.patrol_transport ADD CONSTRAINT patrol_transport_keyid_unq UNIQUE (ca_uuid, keyid) DEFERRABLE;
-ALTER TABLE ONLY smart.paws_service ADD CONSTRAINT paws_service_ca_uuid_key UNIQUE (ca_uuid);
-ALTER TABLE ONLY smart.paws_workspace ADD CONSTRAINT paws_workspace_ca_uuid_key UNIQUE (ca_uuid);
+ALTER TABLE ONLY smart.paws_service ADD CONSTRAINT paws_service_ca_uuid_unq_key UNIQUE (ca_uuid);
 ALTER TABLE ONLY smart.employee ADD CONSTRAINT smartuseridunq UNIQUE (ca_uuid, smartuserid);
 ALTER TABLE ONLY smart.sampling_unit_attribute ADD CONSTRAINT su_attribute_keyid_unq UNIQUE (ca_uuid, keyid) DEFERRABLE;
 ALTER TABLE ONLY smart.sampling_unit_attribute_list ADD CONSTRAINT su_list_attribute_keyid_unq UNIQUE (sampling_unit_attribute_uuid, keyid) DEFERRABLE;
@@ -4631,13 +4632,6 @@ CREATE TRIGGER trg_patrol_query AFTER INSERT OR DELETE OR UPDATE ON smart.patrol
 CREATE TRIGGER trg_patrol_transport AFTER INSERT OR DELETE OR UPDATE ON smart.patrol_transport FOR EACH ROW EXECUTE PROCEDURE connect.trg_changelog_common();
 CREATE TRIGGER trg_patrol_type AFTER INSERT OR DELETE OR UPDATE ON smart.patrol_type FOR EACH ROW EXECUTE PROCEDURE connect.trg_patrol_type();
 CREATE TRIGGER trg_patrol_waypoint AFTER INSERT OR DELETE OR UPDATE ON smart.patrol_waypoint FOR EACH ROW EXECUTE PROCEDURE connect.trg_patrol_waypoint();
-CREATE TRIGGER trg_paws_configuration AFTER INSERT OR DELETE OR UPDATE ON smart.paws_configuration FOR EACH ROW EXECUTE PROCEDURE connect.trg_changelog_common();
-CREATE TRIGGER trg_paws_parameter AFTER INSERT OR DELETE OR UPDATE ON smart.paws_parameter FOR EACH ROW EXECUTE PROCEDURE connect.trg_paws_config_join();
-CREATE TRIGGER trg_paws_query_class AFTER INSERT OR DELETE OR UPDATE ON smart.paws_query_class FOR EACH ROW EXECUTE PROCEDURE connect.trg_paws_config_join();
-CREATE TRIGGER trg_paws_run AFTER INSERT OR DELETE OR UPDATE ON smart.paws_run FOR EACH ROW EXECUTE PROCEDURE connect.trg_changelog_common();
-CREATE TRIGGER trg_paws_service AFTER INSERT OR DELETE OR UPDATE ON smart.paws_service FOR EACH ROW EXECUTE PROCEDURE connect.trg_changelog_common();
-CREATE TRIGGER trg_paws_simple_class AFTER INSERT OR DELETE OR UPDATE ON smart.paws_simple_class FOR EACH ROW EXECUTE PROCEDURE connect.trg_paws_config_join();
-CREATE TRIGGER trg_paws_worspace AFTER INSERT OR DELETE OR UPDATE ON smart.paws_workspace FOR EACH ROW EXECUTE PROCEDURE connect.trg_changelog_common();
 CREATE TRIGGER trg_plan AFTER INSERT OR DELETE OR UPDATE ON smart.plan FOR EACH ROW EXECUTE PROCEDURE connect.trg_changelog_common();
 CREATE TRIGGER trg_plan_target AFTER INSERT OR DELETE OR UPDATE ON smart.plan_target FOR EACH ROW EXECUTE PROCEDURE connect.trg_plan_target();
 CREATE TRIGGER trg_plan_target_point AFTER INSERT OR DELETE OR UPDATE ON smart.plan_target_point FOR EACH ROW EXECUTE PROCEDURE connect.trg_plan_target_point();
@@ -5050,14 +5044,6 @@ ALTER TABLE ONLY smart.patrol_transport ADD CONSTRAINT patrol_transport_ca_uuid_
 ALTER TABLE ONLY smart.patrol_type ADD CONSTRAINT patrol_type_ca_uuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON DELETE CASCADE DEFERRABLE;
 ALTER TABLE ONLY smart.patrol_waypoint ADD CONSTRAINT patrol_waypoint_leg_day_uuid_fk FOREIGN KEY (leg_day_uuid) REFERENCES smart.patrol_leg_day(uuid) ON DELETE CASCADE DEFERRABLE;
 ALTER TABLE ONLY smart.patrol_waypoint ADD CONSTRAINT patrol_waypoint_wp_uuid_fk FOREIGN KEY (wp_uuid) REFERENCES smart.waypoint(uuid) ON DELETE CASCADE DEFERRABLE;
-ALTER TABLE ONLY smart.paws_configuration ADD CONSTRAINT paws_configuration_ca_uuid_fkey FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
-ALTER TABLE ONLY smart.paws_parameter ADD CONSTRAINT paws_parameter_config_uuid_fkey FOREIGN KEY (config_uuid) REFERENCES smart.paws_configuration(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
-ALTER TABLE ONLY smart.paws_query_class ADD CONSTRAINT paws_query_class_config_uuid_fkey FOREIGN KEY (config_uuid) REFERENCES smart.paws_configuration(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
-ALTER TABLE ONLY smart.paws_run ADD CONSTRAINT paws_run_ca_uuid_fkey FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
-ALTER TABLE ONLY smart.paws_run ADD CONSTRAINT paws_run_config_uuid_fkey FOREIGN KEY (config_uuid) REFERENCES smart.paws_configuration(uuid) ON UPDATE RESTRICT ON DELETE SET NULL DEFERRABLE INITIALLY DEFERRED;
-ALTER TABLE ONLY smart.paws_service ADD CONSTRAINT paws_service_ca_uuid_fkey FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
-ALTER TABLE ONLY smart.paws_simple_class ADD CONSTRAINT paws_simple_class_config_uuid_fkey FOREIGN KEY (config_uuid) REFERENCES smart.paws_configuration(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
-ALTER TABLE ONLY smart.paws_workspace ADD CONSTRAINT paws_workspace_ca_uuid_fkey FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE ONLY smart.plan ADD CONSTRAINT plan_ca_uuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON DELETE CASCADE DEFERRABLE;
 ALTER TABLE ONLY smart.plan ADD CONSTRAINT plan_creator_uuid_fk FOREIGN KEY (creator_uuid) REFERENCES smart.employee(uuid) ON DELETE CASCADE DEFERRABLE;
 ALTER TABLE ONLY smart.plan ADD CONSTRAINT plan_parent_uuid_fk FOREIGN KEY (parent_uuid) REFERENCES smart.plan(uuid) ON DELETE CASCADE DEFERRABLE;
@@ -5150,9 +5136,7 @@ RETURN ROW; END$$ LANGUAGE 'plpgsql';
 CREATE TRIGGER trg_smartcollect_waypoint AFTER INSERT OR UPDATE OR DELETE ON smart.smartcollect_waypoint FOR EACH ROW execute procedure connect.smartcollect_waypoint();
 
 
-CREATE TRIGGER trg_paws_configuration AFTER INSERT OR UPDATE OR DELETE ON smart.paws_configuration FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE TRIGGER trg_paws_run AFTER INSERT OR UPDATE OR DELETE ON smart.paws_run FOR EACH ROW execute procedure connect.trg_changelog_common();
-CREATE TRIGGER trg_paws_service AFTER INSERT OR UPDATE OR DELETE ON smart.paws_service FOR EACH ROW execute procedure connect.trg_changelog_common();
+--PAWS TRIGGERS
 CREATE OR REPLACE FUNCTION connect.trg_paws_config_join() RETURNS trigger AS $$
 	DECLARE
 	ROW RECORD;
@@ -5169,6 +5153,10 @@ BEGIN
  		FROM smart.paws_configuration c WHERE c.uuid = ROW.config_uuid;
  RETURN ROW;
 END$$ LANGUAGE 'plpgsql';
+
+CREATE TRIGGER trg_paws_configuration AFTER INSERT OR UPDATE OR DELETE ON smart.paws_configuration FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_paws_run AFTER INSERT OR UPDATE OR DELETE ON smart.paws_run FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_paws_service AFTER INSERT OR UPDATE OR DELETE ON smart.paws_service FOR EACH ROW execute procedure connect.trg_changelog_common();
 CREATE TRIGGER trg_paws_simple_class AFTER INSERT OR UPDATE OR DELETE ON smart.paws_simple_class FOR EACH ROW execute procedure connect.trg_paws_config_join();
 CREATE TRIGGER trg_paws_query_class AFTER INSERT OR UPDATE OR DELETE ON smart.paws_query_class FOR EACH ROW execute procedure connect.trg_paws_config_join();
 CREATE TRIGGER trg_paws_parameter AFTER INSERT OR UPDATE OR DELETE ON smart.paws_parameter FOR EACH ROW execute procedure connect.trg_paws_config_join();
