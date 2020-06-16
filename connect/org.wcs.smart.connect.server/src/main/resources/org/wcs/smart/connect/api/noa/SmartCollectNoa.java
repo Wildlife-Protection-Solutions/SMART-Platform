@@ -70,7 +70,7 @@ public class SmartCollectNoa {
 		s.beginTransaction();
 		try{
 			List<CyberTrackerPackage> ctpackages = QueryFactory.buildQuery(s, CyberTrackerPackage.class, 
-					"type", SmartCollectPackage.TYPE_NAME).list(); //$NON-NLS-1$
+					"type", SmartCollectPackage.PACKAGE_TYPENAME).list(); //$NON-NLS-1$
 		
 			List<CyberTrackerPackageProxy> proxies = new ArrayList<>();
 			
@@ -108,7 +108,7 @@ public class SmartCollectNoa {
 			CyberTrackerPackage ctpackage = QueryFactory.buildQuery(s, CyberTrackerPackage.class, 
 					"ctPackageUuid", packageUuid).uniqueResult(); //$NON-NLS-1$
 			if (ctpackage == null) throw new SmartConnectException(Response.Status.NOT_FOUND);
-			if (!ctpackage.getType().equals(SmartCollectPackage.TYPE_NAME)) throw new SmartConnectException(Response.Status.NOT_FOUND); 
+			if (!ctpackage.getType().equals(SmartCollectPackage.PACKAGE_TYPENAME)) throw new SmartConnectException(Response.Status.NOT_FOUND); 
 			
 			file = DataStoreManager.INSTANCE.getRootDirectory()
 					.toPath().resolve(CyberTracker.CT_PACKAGE_DATASTORE_LOCATION).resolve(ctpackage.getFilename());
@@ -172,7 +172,7 @@ public class SmartCollectNoa {
 					"ctPackageUuid", packageUuid).uniqueResult(); //$NON-NLS-1$
 			
 			if (ctpackage == null) throw new SmartConnectException(Response.Status.NOT_FOUND);
-			if (!ctpackage.getType().equals(SmartCollectPackage.TYPE_NAME)) throw new SmartConnectException(Response.Status.NOT_FOUND); 
+			if (!ctpackage.getType().equals(SmartCollectPackage.PACKAGE_TYPENAME)) throw new SmartConnectException(Response.Status.NOT_FOUND); 
 			
 			return ctpackage.asProxy();
 		}finally {
