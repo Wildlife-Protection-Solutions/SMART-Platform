@@ -31,7 +31,7 @@
       <editor
             class="org.wcs.smart.smartcollect.ui.SmartCollectIncidentEditor"
             default="false"
-            icon="images/icons/community.16.png"
+            icon="images/icons/smartcollect.16.png"
             id="org.wcs.smart.smartcollect.ui.IncidentEditor"
             name="SMART Collect Editor">
       </editor>
@@ -133,6 +133,24 @@
       <dbUpgrader
             upgrader="org.wcs.smart.smartcollect.updatesite.SmartCollectDatabaseUpgrader">
       </dbUpgrader>
+   </extension>
+   <extension
+         point="org.eclipse.equinox.p2.engine.actions">
+      <action
+            class="org.wcs.smart.smartcollect.updatesite.OnInstallAction"
+            name="onInstall"
+            touchpointType="org.eclipse.equinox.p2.osgi"
+            version="7.0.0">
+      </action>
+   </extension>
+   <extension
+         point="org.eclipse.equinox.p2.engine.actions">
+      <action
+            class="org.wcs.smart.smartcollect.updatesite.OnUninstallAction"
+            name="onUninstall"
+            touchpointType="org.eclipse.equinox.p2.osgi"
+            version="7.0.0">
+      </action>
    </extension>
 
 </plugin>

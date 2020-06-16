@@ -104,8 +104,8 @@ public class SmartCollectPlugIn extends AbstractUIPlugin {
 	
 	@Override
     protected void initializeImageRegistry(ImageRegistry reg) {
-		reg.put(SMARTCOLLECT_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/community.16.png")); //$NON-NLS-1$
-		reg.put(SMARTCOLLECT32_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/community.32.png")); //$NON-NLS-1$
+		reg.put(SMARTCOLLECT_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/smartcollect.16.png")); //$NON-NLS-1$
+		reg.put(SMARTCOLLECT32_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/smartcollect.32.png")); //$NON-NLS-1$
 	}
 
 	public static void log(String message, Throwable t){

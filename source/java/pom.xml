@@ -603,6 +603,10 @@
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.incident</module>
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.incident.feature</module>
 				
+				<module>../extensions/cybertracker/org.wcs.smart.smartcollect</module>
+				<module>../extensions/cybertracker/org.wcs.smart.smartcollect.core.feature</module>
+				<module>../extensions/cybertracker/org.wcs.smart.smartcollect.feature</module>
+				
 				<module>../extensions/er/org.wcs.smart.er</module>
 				<module>../extensions/er/org.wcs.smart.er.feature</module>
 				<module>../extensions/er/org.wcs.smart.er.core.feature</module>

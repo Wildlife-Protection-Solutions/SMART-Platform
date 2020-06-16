@@ -66,6 +66,9 @@
    <feature url="features/org.wcs.smart.paws.feature_7.0.0.qualifier.jar" id="org.wcs.smart.paws.feature" version="7.0.0.qualifier">
       <category name="paws"/>
    </feature>
+   <feature url="features/org.wcs.smart.smartcollect.feature_7.0.0.qualifier.jar" id="org.wcs.smart.smartcollect.feature" version="7.0.0.qualifier">
+      <category name="smartcollect"/>
+   </feature>
    <category-def name="planning" label="SMART Planning Plug-in">
       <description>
          The SMART Planning plug-in contains a plan module that allows users to organize, maintain and query planning information. Plans allow for a set of targets (such as total distance patrolled or specific locations to visit) to be assigned to a patrol or series of patrols.
@@ -129,6 +132,11 @@
    <category-def name="paws" label="SMART PAWS Plug-in">
       <description>
          Provides a link for accessing the PAWS prediction tools.
+      </description>
+   </category-def>
+   <category-def name="smartcollect" label="SMART Collect">
+      <description>
+         Module to support SMART Collect application
       </description>
    </category-def>
 </site>
