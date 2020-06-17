@@ -96,11 +96,12 @@
             </visibleWhen>
          </menu>
          <menu
-               icon="images/etool16/cybertracker16.png"
+               icon="images/etool16/smartmobile.16.png"
                id="org.wcs.smart.cybertracker2.menu"
                label="%menu.ct2.label2">
             <command
                   commandId="org.wcs.smart.cybertracker.json.import"
+                  icon="platform:/plugin/org.wcs.smart/images/icons/shared16/import.png"
                   label="%cybertracker.import.command.label"
                   style="push">
             </command>
