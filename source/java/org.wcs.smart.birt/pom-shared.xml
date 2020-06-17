@@ -25,6 +25,13 @@
 			<groupId>org.eclipse.birt.runtime</groupId>
 			<artifactId>org.eclipse.birt.runtime</artifactId>
 			<version>${birt.version}</version>
+			
+			<exclusions>
+        			<exclusion> 
+					<groupId>org.eclipse.birt.runtime</groupId>
+         				<artifactId>org.apache.batik.pdf</artifactId>
+				</exclusion>
+      			</exclusions> 
 		</dependency>
 	</dependencies>	
 </project>

@@ -247,7 +247,7 @@ public class RunMapResultsPage extends SmartMapEditorPart{
 					Layer layer = layerFactory.createLayer(item);
 					if (layer != null) {
 						layer.setVisible(false);
-						layer.setName(item.getTitle());
+						layer.setName(item.getInfo(progressMonitor).getTitle());
 						layers.add(layer);
 					}
 				} catch (Throwable t) {

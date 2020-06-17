@@ -378,9 +378,8 @@ public class LegendGraphicWriter  {
 		if (text.length == 0){
 			return;
 		}
-		
-		Rectangle2D stringBounds = graphics.getStringBounds(text[0]);
 
+		int height = (int)graphics.getStringBounds(text[0] == null ? "W" : text[0]).getHeight(); //$NON-NLS-1$
 		/*
 		 * Center the smaller item (text or icon) according to the taller one.
 		 */
@@ -388,13 +387,13 @@ public class LegendGraphicWriter  {
 		int iconVerticalOffset = 0;
 
 		if ((position | SWT.CENTER) == position) {
-			if (imageHeight == (int) stringBounds.getHeight()) {
+			if (imageHeight == height) {
 				// items are the same height; do nothing.
-			} else if (imageHeight > (int) stringBounds.getHeight()) {
-				int difference = imageHeight - (int) stringBounds.getHeight();
+			} else if (imageHeight > height) {
+				int difference = imageHeight - height;
 				textVerticalOffset = difference / 2;
-			} else if (imageHeight < (int) stringBounds.getHeight()) {
-				int difference = (int) stringBounds.getHeight() - imageHeight;
+			} else if (imageHeight < height) {
+				int difference = height - imageHeight;
 				iconVerticalOffset = difference / 2;
 			}
 		} else if ((position | SWT.TOP) == position) {
@@ -410,7 +409,7 @@ public class LegendGraphicWriter  {
 			x += imageWidth;
 		}
 
-		if (text != null && text[0].length() != 0) {
+		if (text != null && text[0] != null && text[0].length() != 0) {
 			graphics.drawString(
 					text[0],
 					x + imageSpacing,
@@ -419,7 +418,7 @@ public class LegendGraphicWriter  {
 					ViewportGraphics.ALIGN_LEFT, ViewportGraphics.ALIGN_TOP);
 		}
 
-		if (text != null && text.length > 1) {
+		if (text != null && text.length > 1 && text[text.length - 1] != null) {
 			//draw last label at bottom of range
 			String end = text[text.length - 1];
 

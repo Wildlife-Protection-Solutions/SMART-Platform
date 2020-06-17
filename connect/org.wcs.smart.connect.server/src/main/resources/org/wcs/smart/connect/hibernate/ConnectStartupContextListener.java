@@ -24,13 +24,13 @@ package org.wcs.smart.connect.hibernate;
 import java.beans.Introspector;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Set;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
@@ -79,6 +79,7 @@ import org.wcs.smart.connect.apache.CleanUpJob;
 import org.wcs.smart.connect.apache.EnvironmentVariables;
 import org.wcs.smart.connect.dataqueue.ServerDataQueueItem;
 import org.wcs.smart.connect.datastore.DataStoreManager;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.i18n.labels.AdvancedLabelProviderImpl;
 import org.wcs.smart.connect.i18n.labels.AssetLabelProvider;
 import org.wcs.smart.connect.i18n.labels.AssetQueryLabelProvider;
@@ -103,13 +104,13 @@ import org.wcs.smart.connect.model.CaPluginVersion;
 import org.wcs.smart.connect.model.ConnectPluginVersion;
 import org.wcs.smart.connect.model.ConnectUuidItem;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
-import org.wcs.smart.connect.model.SmartCollectConnectUser;
 import org.wcs.smart.connect.model.CyberTrackerApiKey;
 import org.wcs.smart.connect.model.CyberTrackerNavigationLayer;
 import org.wcs.smart.connect.model.CyberTrackerPackage;
 import org.wcs.smart.connect.model.GlobalForestWatch;
 import org.wcs.smart.connect.model.MapLayer;
 import org.wcs.smart.connect.model.SharedLink;
+import org.wcs.smart.connect.model.SmartCollectConnectUser;
 import org.wcs.smart.connect.model.SmartRole;
 import org.wcs.smart.connect.model.SmartRoleAction;
 import org.wcs.smart.connect.model.SmartUser;
@@ -153,7 +154,11 @@ import org.wcs.smart.plan.IPlanLabelProvider;
 import org.wcs.smart.query.model.IGridQueryColumnLabelProvider;
 import org.wcs.smart.query.model.filter.IOperatorLabelProvider;
 import org.wcs.smart.query.model.filter.date.IQueryDateLabelProvider;
+import org.wcs.smart.smartcollect.model.ISmartCollectLabelProvider;
+import org.wcs.smart.smartcollect.model.SmartCollectWaypointSource;
 import org.wcs.smart.udig.catalog.smart.ISmartMapLabelProvider;
+
+import it.geosolutions.imageio.stream.input.spi.URLImageInputStreamSpi;
 
 /**
  * Web listener to configure the hibernate connection on start up and shut down.
@@ -361,7 +366,10 @@ public class ConnectStartupContextListener implements ServletContextListener{
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
 		
-		
+	    //this is required to get the geotiff writer to work when writing raster map layers
+		//for reports
+	    IIORegistry.getDefaultInstance().registerServiceProvider(new URLImageInputStreamSpi());
+	    
 		//configure file store
 		try{
 			DataStoreManager.INSTANCE.initDatastore();
@@ -491,6 +499,14 @@ public class ConnectStartupContextListener implements ServletContextListener{
 		
 		SmartContext.INSTANCE.setClass(org.wcs.smart.i2.IIntelligenceLabelProvider.class, new AdvancedLabelProviderImpl());
 		
+		SmartContext.INSTANCE.setClass(org.wcs.smart.smartcollect.model.ISmartCollectLabelProvider.class, new ISmartCollectLabelProvider() {
+			@Override
+			public String getLabel(Object item, Locale l) {
+				if (item.getClass() == SmartCollectWaypointSource.class) return Messages.getString("ConnectStartupContextListener.SmartCollectIncidentName", l);  //$NON-NLS-1$
+				return null;
+			}
+		});
+		
 		SmartContext.INSTANCE.setClass(org.wcs.smart.asset.ui.IQueryAssetLabelProvider.class, new AssetQueryLabelProvider());
 		SmartContext.INSTANCE.setClass(org.wcs.smart.asset.IAssetLabelProvider.class, new AssetLabelProvider());
 		SmartContext.INSTANCE.setClass(IAssetQueryColumnProvider.class, new AssetQueryColumnProvider());
@@ -499,5 +515,7 @@ public class ConnectStartupContextListener implements ServletContextListener{
 		
 		SmartContext.INSTANCE.setClass(UUIDBinaryType.class, PostgresUUIDType.INSTANCE);
 		SmartContext.INSTANCE.setClass(IQueryEngineFactory.class, new QueryEngineFactory());		
+		
+		
 	}
 }

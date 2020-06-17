@@ -30,5 +30,7 @@
 			<artifactId>org.locationtech.udig.catalog.rasterings</artifactId>
 			<version>${udig.version}</version>
 		</dependency>
+		
+
 	</dependencies>	
 </project>

@@ -36,12 +36,14 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.imageio.ImageIO;
-
+import org.geotools.coverage.grid.GridCoverageFactory;
+import org.geotools.gce.geotiff.GeoTiffWriter;
 import org.geotools.geometry.Envelope2D;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.util.SharedUtils;
@@ -153,9 +155,15 @@ public class RasterBuilder {
 
 		BufferedImage raster = null;
 		try {
+			
 			raster = createRaster();
 			File out = new File(fileName);
-			ImageIO.write(raster, "TIFF", out.getCanonicalFile()); //$NON-NLS-1$
+			
+			try(OutputStream fout = Files.newOutputStream(out.toPath())){
+				GeoTiffWriter writer = new GeoTiffWriter(fout);
+				writer.write((new GridCoverageFactory()).create("smartraster", raster, envelope),null);// new GeneralParameterValue[]{params}); //$NON-NLS-1$
+			}
+			
 			allFiles.add(out);
 			String baseFile = out.getCanonicalPath().substring(0,  out.getCanonicalPath().lastIndexOf('.'));
 			createProjectionFile(baseFile, envelope.getCoordinateReferenceSystem());

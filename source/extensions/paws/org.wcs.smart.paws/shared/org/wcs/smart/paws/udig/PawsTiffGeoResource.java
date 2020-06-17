@@ -144,12 +144,11 @@ public class PawsTiffGeoResource extends AbstractRasterGeoResource {
 		StyleFactory sf = CommonFactoryFinder.getStyleFactory(GeoTools.getDefaultHints());
 		StyleBuilder sb = new StyleBuilder(sf);
 		
-		String[] labels = new String[] {"-no data-","","","","","","","","","","","",""}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$ //$NON-NLS-10$ //$NON-NLS-11$ //$NON-NLS-12$ //$NON-NLS-13$
-		double[] values = new double[] {-9999,0,0.000001,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8, 0.9,1.0};
+		String[] labels = new String[] {"-no data-","","","","","","","","","","",""}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$ //$NON-NLS-10$ //$NON-NLS-11$ //$NON-NLS-12$ //$NON-NLS-13$
+		double[] values = new double[] {-9999,0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8, 0.9,1.0};
 		Color[] colors = new Color[] {
 				new Color(255,255,255,0),
 				new Color(255,255,255,255),
-				new Color(255,247,236,255),
 				new Color(254,237,212,255),
 				new Color(253,225,186,255),
 				new Color(253,212,158,255),
