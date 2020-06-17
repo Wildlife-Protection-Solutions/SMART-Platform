@@ -70,7 +70,7 @@ public class MenuItemsFilter implements Filter {
 		QUEUE("MenuItemsFilter.DataQueueLabel","dataq.png",  ConnectRESTApplication.SERVLET_PATH + "dataqueue", DataQueueAction.VIEW_KEY), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		USERS("MenuItemsFilter.AccountsLabel", "users.png", ConnectRESTApplication.SERVLET_PATH + "users", AdminAccountAction.KEY), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		CAUSERS("MenuItemsFilter.CaAccountsLabel", "users.png", ConnectRESTApplication.SERVLET_PATH + "causers", CaAdminAccountAction.KEY), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		CT("MenuItemsFilter.CyberTrackerMenuItem", "cybertracker.png", ConnectRESTApplication.SERVLET_PATH + "cybertracker", new HashSet<>(Arrays.asList(AdminAccountAction.KEY, CaAdminAccountAction.KEY, CyberTrackerAction.KEY))), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		CT("MenuItemsFilter.CyberTrackerMenuItem1", "cybertracker.png", ConnectRESTApplication.SERVLET_PATH + "cybertracker", new HashSet<>(Arrays.asList(AdminAccountAction.KEY, CaAdminAccountAction.KEY, CyberTrackerAction.KEY))), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		SETTINGS("MenuItemsFilter.ConfigurationLabel", "settings.png", ConnectRESTApplication.SERVLET_PATH +"settings", AdminAccountAction.KEY);   //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		
 		

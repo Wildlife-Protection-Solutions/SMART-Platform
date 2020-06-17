@@ -70,7 +70,7 @@ public class CyberTrackerNavigationProcessor implements IUploadItemProcessor {
 					
 			session.beginTransaction();
 			item.setStatus(org.wcs.smart.connect.model.WorkItem.Status.ERROR);
-			item.setMessage("Error uploading cybertracker package: " + ex.getMessage()); //$NON-NLS-1$
+			item.setMessage("Error uploading SMART Mobile package: " + ex.getMessage()); //$NON-NLS-1$
 			session.getTransaction().commit();
 		}
 	}

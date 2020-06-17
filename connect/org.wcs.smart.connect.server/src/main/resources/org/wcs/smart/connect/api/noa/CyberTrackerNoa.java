@@ -151,7 +151,7 @@ public class CyberTrackerNoa {
 	@GET
     @Path("packages/info/{uuid}")
 	@Produces({ MediaType.APPLICATION_JSON })
-	@Operation(description = "Gets the details about a given CyberTracker package including the revision number and last uploaded date.",
+	@Operation(description = "Gets the details about a given SMART Mobile package including the revision number and last uploaded date.",
 			security = {@SecurityRequirement(name="apikeyheader"), @SecurityRequirement(name="apikeyquery")})
 	@ApiResponse(responseCode = "200", description = "OK", content = {@Content(schema = @Schema(implementation=CyberTrackerPackageProxy.class))})
 	@ApiResponse(responseCode = "400", description = "Invalid package identifier")
@@ -186,7 +186,7 @@ public class CyberTrackerNoa {
 	@GET
     @Path("packages/")
 	@Produces({ MediaType.APPLICATION_JSON })
-	@Operation(description = "Gets the details about all CyberTracker packages authorized by the api key.",
+	@Operation(description = "Gets the details about all SMART Mobile packages authorized by the api key.",
 			security = {@SecurityRequirement(name="apikeyheader"), @SecurityRequirement(name="apikeyquery")})
 	@ApiResponse(responseCode = "200", description = "OK", content = {@Content(array = @ArraySchema(arraySchema = @Schema(implementation=CyberTrackerPackageProxy.class)))})
 	@ApiResponse(responseCode = "401", description = "Invalid authorization credientials")
@@ -218,7 +218,7 @@ public class CyberTrackerNoa {
 	 */
 	@GET
     @Path("packages/{uuid}")
-	@Operation(description = "Gets the entire CyberTracker package as a zip file.",
+	@Operation(description = "Gets the entire SMART Mobile package as a zip file.",
 			security = {@SecurityRequirement(name="apikeyheader"), @SecurityRequirement(name="apikeyquery")})
 	@ApiResponse(responseCode = "200", description="Package returned successfully")
 	@ApiResponse(responseCode = "401", description = "Invalid authorization credientials")
@@ -282,7 +282,7 @@ public class CyberTrackerNoa {
 	@GET
     @Path("navigation/")
 	@Produces({ MediaType.APPLICATION_JSON })
-	@Operation(description = "Gets the details about all CyberTracker navigation layers authorized by the api key.",
+	@Operation(description = "Gets the details about all SMART Mobile navigation layers authorized by the api key.",
 			security = {@SecurityRequirement(name="apikeyheader"), @SecurityRequirement(name="apikeyquery")})
 	@ApiResponse(responseCode = "200", description = "OK", content = {@Content(array = @ArraySchema(arraySchema = @Schema(implementation=CyberTrackerPackageProxy.class)))})
 	@ApiResponse(responseCode = "401", description = "Invalid authorization credientials")

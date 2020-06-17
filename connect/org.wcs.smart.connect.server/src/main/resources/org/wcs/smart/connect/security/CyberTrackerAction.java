@@ -46,7 +46,7 @@ public class CyberTrackerAction implements ISmartConnectAction{
 	@Override
 	public String getActionName(String actionKey, Locale l) {
 		if (actionKey.equals(KEY)){
-			return Messages.getString("CyberTrackerAction.CtApiKeyAction", l); //$NON-NLS-1$
+			return Messages.getString("CyberTrackerAction.CtApiKeyAction1", l); //$NON-NLS-1$
 		}
 		return null;
 	}

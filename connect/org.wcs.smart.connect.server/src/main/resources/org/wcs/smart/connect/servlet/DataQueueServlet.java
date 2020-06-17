@@ -71,10 +71,10 @@ public class DataQueueServlet extends HttpServlet {
 				uploadTypes.add(new Object[]{Messages.getString("DataQueueServlet.PatrolXmlName",l), type}); //$NON-NLS-1$
 				break;
 			case "JSON_CT": //$NON-NLS-1$
-				uploadTypes.add(new Object[]{Messages.getString("DataQueueServlet.CtJsonName",l), type}); //$NON-NLS-1$
+				uploadTypes.add(new Object[]{Messages.getString("DataQueueServlet.CtJsonName1",l), type}); //$NON-NLS-1$
 				break;
 			case "JSON_ZLIB_CT": //$NON-NLS-1$
-				uploadTypes.add(new Object[]{Messages.getString("DataQueueServlet.CtZLibJsonName",l), type}); //$NON-NLS-1$
+				uploadTypes.add(new Object[]{Messages.getString("DataQueueServlet.CtZLibJsonName1",l), type}); //$NON-NLS-1$
 				break;
 			case "I2_RECORD_XML": //$NON-NLS-1$
 				uploadTypes.add(new Object[]{Messages.getString("DataQueueServlet.I2RecordXmlName", l), type}); //$NON-NLS-1$
