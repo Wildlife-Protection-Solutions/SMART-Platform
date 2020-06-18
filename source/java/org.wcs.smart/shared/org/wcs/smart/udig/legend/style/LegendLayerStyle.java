@@ -19,7 +19,11 @@ package org.wcs.smart.udig.legend.style;
 public class LegendLayerStyle {
     
 	public boolean isVisible;
+	
+	public boolean excludeRoot;
     
+	public boolean hideRootImage;
+	
     /**
      * Creates a new empty legend style
      */
@@ -36,6 +40,8 @@ public class LegendLayerStyle {
 	public LegendLayerStyle(LegendLayerStyle oldStyle) {
 		super();
 		this.isVisible = oldStyle.isVisible;
+		this.excludeRoot = oldStyle.excludeRoot;
+		this.hideRootImage = oldStyle.hideRootImage;
 	}
     
 }

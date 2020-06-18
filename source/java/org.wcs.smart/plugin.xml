@@ -1724,6 +1724,13 @@
             requires="org.locationtech.udig.legend.ui.LegendGraphic"
             styleId="org.locationtech.udig.legend.layer.style">
       </styleConfigurator>
+      <styleConfigurator
+            class="org.wcs.smart.udig.legend.style.LegendLayerStyleConfigurator"
+            id="org.locationtech.udig.legend.layer.style.wms"
+            label="Legend Properties"
+            requires="org.geotools.ows.wms.WebMapServer"
+            styleId="org.locationtech.udig.legend.layer.style">
+      </styleConfigurator>
    </extension>
    <extension
          id="id2"

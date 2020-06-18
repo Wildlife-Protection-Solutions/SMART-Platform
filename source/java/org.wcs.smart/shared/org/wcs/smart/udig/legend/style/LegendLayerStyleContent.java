@@ -34,7 +34,9 @@ public class LegendLayerStyleContent extends StyleContent {
     
 	//momento keys
     private static final String VISIBLE = "isvisible"; //$NON-NLS-1$
-    
+    private static final String EXCLUDEROOT = "excluderoot"; //$NON-NLS-1$
+    private static final String HIDEROOTIMAGE = "hideroodimage"; //$NON-NLS-1$
+
     /**
      * Legend location style.
      */
@@ -49,15 +51,28 @@ public class LegendLayerStyleContent extends StyleContent {
     public Object load( IMemento memento ) {
         boolean isVisible = memento.getBoolean(VISIBLE);
         
+        boolean excludeRoot = false;
+        if (memento.getBoolean(EXCLUDEROOT) != null) {
+        	excludeRoot = memento.getBoolean(EXCLUDEROOT);
+        }
+        boolean hideRoot = false;
+        if (memento.getBoolean(HIDEROOTIMAGE) != null) {
+        	hideRoot = memento.getBoolean(HIDEROOTIMAGE);
+        }
+        
         LegendLayerStyle style = LegendLayerStyleContent.createDefaultStyle();
         style.isVisible = isVisible;
+        style.excludeRoot = excludeRoot;
+        style.hideRootImage = hideRoot;
         
         return style;
     }
 
     public void save( IMemento memento, Object item ) {
     	LegendLayerStyle style = (LegendLayerStyle) item;
-        memento.putBoolean(VISIBLE, style.isVisible);        
+        memento.putBoolean(VISIBLE, style.isVisible);
+        memento.putBoolean(EXCLUDEROOT, style.excludeRoot);
+        memento.putBoolean(HIDEROOTIMAGE, style.hideRootImage);
     }
     
     public Object createDefaultStyle(IGeoResource resource, Color colour,  IProgressMonitor monitor) throws IOException {
@@ -82,7 +97,7 @@ public class LegendLayerStyleContent extends StyleContent {
     public static LegendLayerStyle createDefaultStyle() {
     	LegendLayerStyle style = new LegendLayerStyle();
     	style.isVisible = true;
-    	
+    	style.excludeRoot = false;    	
     	return style;
     }
     

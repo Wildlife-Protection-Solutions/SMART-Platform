@@ -88,6 +88,7 @@ public class LegendGraphicWriter  {
 	private int imageWidth;
 	private int imageHeight; // size of glyph image
 	private boolean drawBorder;
+	private int maxEntryLength;
 	
 	private double scale;	//scale based on dpi
 	
@@ -125,7 +126,8 @@ public class LegendGraphicWriter  {
 		drawBorder = legendStyle.drawBorder;
 		this.imageHeight = (int)(legendStyle.imageHeight * scale);
 		this.imageWidth = (int)(legendStyle.imageWidth * scale);
-
+		this.maxEntryLength = legendStyle.maxEntryLength;
+		
 		final ViewportGraphics graphics = context.getGraphics();
 
 		if (fontStyle.getFont() != null) {
@@ -153,8 +155,8 @@ public class LegendGraphicWriter  {
 		for (int i = context.getMapLayers().size() - 1; i >= 0; i--) {
 			ILayer layer = context.getMapLayers().get(i);
 
-			LegendLayerStyle ll = (LegendLayerStyle) layer.getStyleBlackboard().get(LegendLayerStyleContent.ID);
-			if (ll != null && !ll.isVisible) continue;
+			LegendLayerStyle layerStyle = (LegendLayerStyle) layer.getStyleBlackboard().get(LegendLayerStyleContent.ID);
+			if (layerStyle != null && !layerStyle.isVisible) continue;
 					
 			
 			if (!(layer.getGeoResource() instanceof MapGraphicResource)
@@ -170,7 +172,12 @@ public class LegendGraphicWriter  {
 					layerName = null;
 				}
 				LegendEntry layerEntry = new LegendEntry(layerName);
-
+				
+				//no root icon
+				if (layerStyle != null && layerStyle.hideRootImage) {
+					layerEntry.setHideImage(true);
+				}
+				
 				FeatureTypeStyle[] styles = locateStyle(layer);
 				LegendEntry[] entries = null;
 				if (styles == null) {
@@ -180,14 +187,24 @@ public class LegendGraphicWriter  {
 					List<Rule> rules = rules(styles);
 					int ruleCount = rules.size();
 
+					boolean exclude = layerStyle == null ? false : layerStyle.excludeRoot;
+					
 					if (ruleCount == 1
 							&& layer.getGeoResource().canResolve(
 									GridCoverage.class)) {
 						// grid coverage with single rule; lets see if it is a
 						// theming style
 						List<LegendEntry> cmEntries = ColorMapLegendCreatorAWT.findEntries(styles, imageSize, textSize);
+						
 						if (cmEntries != null) {
-							cmEntries.add(0, layerEntry);
+							if (exclude) {
+								if (cmEntries.isEmpty()) {
+									cmEntries.add(0, layerEntry);	
+								}
+							}else {
+								cmEntries.forEach(e->e.setIndent(!exclude));
+								cmEntries.add(0, layerEntry);
+							}
 							entries = cmEntries.toArray(new LegendEntry[cmEntries.size()]);
 						}
 					}
@@ -195,18 +212,36 @@ public class LegendGraphicWriter  {
 						List<LegendEntry> localEntries = new ArrayList<LegendEntry>();
 						if (ruleCount == 1) {
 							layerEntry.setRule(rules.get(0));
-						}
-						localEntries.add(layerEntry); // add layer legend entry
-
-						if (ruleCount > 1) {
+							localEntries.add(layerEntry);
+						}else if (ruleCount > 1) {
+							
+							if (!exclude) {
+								//include
+								localEntries.add(layerEntry);
+							}
 							// we have more than one rule so there is likely
 							// some themeing going on; add each of these rules
 							for (Rule rule : rules) {
 								LegendEntry rentry = new LegendEntry(rule);
+								rentry.setIndent(!exclude);
 								localEntries.add(rentry);
 							}
 						}
 						entries = localEntries.toArray(new LegendEntry[localEntries.size()]);
+					}
+				}
+				
+				//trim legend entries if required
+				if (this.maxEntryLength > 0) {
+					for (LegendEntry e : entries) {
+						if (e.getText() == null) continue;
+						for (int k = 0; k < e.getText().length; k ++) {
+							String label  = e.getText()[k];
+							if (label.length() > this.maxEntryLength) {
+								label = label.substring(0, this.maxEntryLength) + "..."; //$NON-NLS-1$
+								e.getText()[k] = label;
+							}
+						}
 					}
 				}
 				layers.add(Collections.singletonMap(layer, entries));
@@ -324,28 +359,30 @@ public class LegendGraphicWriter  {
 	
 				for (int k = 0; k < entries.length; k++) {
 					BufferedImage awtIcon = null;
-					if (entries[k].getRule() != null) {
-						// generate icon from use
-						ImageDescriptor descriptor = imageGenerator.generateStyledIcon(layer, entries[k].getRule());
-						if (descriptor == null) {
-							descriptor = imageGenerator.generateIcon((Layer) layer);
-						}
-						if (descriptor != null) {
-							awtIcon = AWTSWTImageUtils
-									.convertToAWT(descriptor.getImageData());
+					if (!entries[k].getHideImage()) {
+						if (entries[k].getRule() != null) {
+							// generate icon from use
+							ImageDescriptor descriptor = imageGenerator.generateStyledIcon(layer, entries[k].getRule());
+							if (descriptor == null) {
+								descriptor = imageGenerator.generateIcon((Layer) layer);
 							}
-					} else if (entries[k].getIcon() != null) {
-						// use set icon
-						awtIcon = AWTSWTImageUtils.convertToAWT(entries[k]
-									.getIcon().getImageData());
-					} else {
-						// no rule, no icon, try default for layer
-						ImageDescriptor descriptor = imageGenerator.generateIcon((Layer) layer);
-						if (descriptor != null) {
-							awtIcon = AWTSWTImageUtils.convertToAWT(descriptor.getImageData());
+							if (descriptor != null) {
+								awtIcon = AWTSWTImageUtils
+										.convertToAWT(descriptor.getImageData());
+								}
+						} else if (entries[k].getIcon() != null) {
+							// use set icon
+							awtIcon = AWTSWTImageUtils.convertToAWT(entries[k]
+										.getIcon().getImageData());
+						} else {
+							// no rule, no icon, try default for layer
+							ImageDescriptor descriptor = imageGenerator.generateIcon((Layer) layer);
+							if (descriptor != null) {
+								awtIcon = AWTSWTImageUtils.convertToAWT(descriptor.getImageData());
+							}
 						}
 					}
-					drawRow(graphics, x, y, awtIcon, entries[k].getText(), k != 0, entries[k].getTextPosition());
+					drawRow(graphics, x, y, awtIcon, entries[k].getText(), entries[k].isIndent(), entries[k].getTextPosition());
 					y += rowHeight;
 					
 					if (entries[k].getSpacingAfter() != null){
@@ -379,6 +416,7 @@ public class LegendGraphicWriter  {
 			return;
 		}
 
+		
 		int height = (int)graphics.getStringBounds(text[0] == null ? "W" : text[0]).getHeight(); //$NON-NLS-1$
 		/*
 		 * Center the smaller item (text or icon) according to the taller one.
@@ -410,8 +448,9 @@ public class LegendGraphicWriter  {
 		}
 
 		if (text != null && text[0] != null && text[0].length() != 0) {
+			String label = text[0];
 			graphics.drawString(
-					text[0],
+					label,
 					x + imageSpacing,
 					y + textVerticalOffset
 					- (int) (graphics.getFontHeight() - graphics.getFontAscent()),
@@ -420,9 +459,8 @@ public class LegendGraphicWriter  {
 
 		if (text != null && text.length > 1 && text[text.length - 1] != null) {
 			//draw last label at bottom of range
-			String end = text[text.length - 1];
-
-			graphics.drawString(end, x + imageSpacing, y + imageHeight
+			String label = text[text.length - 1];
+			graphics.drawString(label, x + imageSpacing, y + imageHeight
 					+ (int) (graphics.getFontAscent() * 0.3),
 					ViewportGraphics.ALIGN_LEFT, ViewportGraphics.ALIGN_BOTTOM);
 		}

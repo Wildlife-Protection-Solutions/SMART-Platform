@@ -31,12 +31,12 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.locationtech.udig.legend.ui.LegendGraphic;
 import org.locationtech.udig.mapgraphic.MapGraphic;
-import org.locationtech.udig.mapgraphic.internal.MapGraphicResource;
 import org.locationtech.udig.project.IBlackboard;
 import org.locationtech.udig.project.ILayer;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.locationtech.udig.style.IStyleConfigurator;
+import org.wcs.smart.internal.Messages;
 
 /**
  * Style to identify in the layer should appear in the legend mapgraphic or not
@@ -45,8 +45,11 @@ import org.locationtech.udig.style.IStyleConfigurator;
  */
 public final class LegendLayerStyleConfigurator extends IStyleConfigurator implements SelectionListener, ModifyListener {
 
-    /** vertical alignment constants * */
 	private Button btnVisible;
+	private Button btnExcludeRoot;
+	private Button btnHideRootImage;
+	private Label lblHideRootImage;
+	
 	private CheckboxTableViewer layers;
 	
 	private Composite parent;
@@ -70,7 +73,7 @@ public final class LegendLayerStyleConfigurator extends IStyleConfigurator imple
 			if (getLayer().canAdaptTo(LegendGraphic.class)) {
 				parent.setLayout( new GridLayout( ));		
 				Label xLabel = new Label(parent, SWT.RIGHT);
-				xLabel.setText("Layers selected below will appear in the legend");
+				xLabel.setText(Messages.LegendLayerStyleConfigurator_VisibleLayers);
 				
 				layers = CheckboxTableViewer.newCheckList(parent, SWT.BORDER | SWT.V_SCROLL);
 				layers.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -85,14 +88,35 @@ public final class LegendLayerStyleConfigurator extends IStyleConfigurator imple
 				parent.setLayout( new GridLayout( 2, false ));
 				
 				Label xLabel = new Label(parent, SWT.RIGHT);
-				xLabel.setText("Show In Legend:");
-				xLabel.setToolTipText("deselect to exclude the layer from the legend");
+				xLabel.setText(Messages.LegendLayerStyleConfigurator_ShowInLegendImage);
+				xLabel.setToolTipText(Messages.LegendLayerStyleConfigurator_ShowInLegendTooltip);
 
 				btnVisible = new Button(parent, SWT.CHECK);
 				btnVisible.addSelectionListener(this);
 				btnVisible.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+				
+				Label label = new Label(parent, SWT.RIGHT);
+				label.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, false, 2, 1));
+				
+				label = new Label(parent, SWT.RIGHT);
+				label.setText(Messages.LegendLayerStyleConfigurator_HideHeaderLabel);
+				label.setToolTipText(Messages.LegendLayerStyleConfigurator_HideHeaderTooltip);
+
+				btnExcludeRoot = new Button(parent, SWT.CHECK);
+				btnExcludeRoot.addSelectionListener(this);
+				btnExcludeRoot.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+				
+				
+				lblHideRootImage = new Label(parent, SWT.RIGHT);
+				lblHideRootImage.setText(Messages.LegendLayerStyleConfigurator_HideHeaderImageLabel);
+				lblHideRootImage.setToolTipText(Messages.LegendLayerStyleConfigurator_HideHeaderImageTooltip);
+
+				btnHideRootImage = new Button(parent, SWT.CHECK);
+				btnHideRootImage.addSelectionListener(this);
+				btnHideRootImage.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 			}
 		}
+		
 		if (getLayer().canAdaptTo(LegendGraphic.class)) {
 			
 			List<ILayer> configurelayers = new ArrayList<>();
@@ -128,11 +152,15 @@ public final class LegendLayerStyleConfigurator extends IStyleConfigurator imple
 	        }
 	
 	        btnVisible.setSelection(style.isVisible);
+	        btnExcludeRoot.setSelection(style.excludeRoot);
+	        btnHideRootImage.setSelection(style.hideRootImage);
+	        
+	        btnHideRootImage.setEnabled(!btnExcludeRoot.getSelection());
+	        lblHideRootImage.setEnabled(!btnExcludeRoot.getSelection());
 		}
     }
 	
     public boolean canStyle( Layer layer ) {
-//        return layer.hasResource(MapGraphic.class);
     	return true;
     }
 
@@ -158,6 +186,8 @@ public final class LegendLayerStyleConfigurator extends IStyleConfigurator imple
     				if (!isvisible) {
     					style = LegendLayerStyleContent.createDefaultStyle();
     					style.isVisible = false;
+    					style.excludeRoot = false;
+    					style.hideRootImage = false;
     					l.getStyleBlackboard().put(LegendLayerStyleContent.ID, style);
     				}
     			}else {
@@ -177,6 +207,11 @@ public final class LegendLayerStyleConfigurator extends IStyleConfigurator imple
 	        }
 	        
 	        style.isVisible = btnVisible.getSelection();
+	        style.excludeRoot = btnExcludeRoot.getSelection();
+	        style.hideRootImage = btnHideRootImage.getSelection();
+	        
+	        btnHideRootImage.setEnabled(!btnExcludeRoot.getSelection());
+	        lblHideRootImage.setEnabled(!btnExcludeRoot.getSelection());
     	}
         
     }

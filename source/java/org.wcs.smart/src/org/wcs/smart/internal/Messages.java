@@ -1042,6 +1042,13 @@ public class Messages extends NLS {
 	public static String KeyInputDialog_EditKeyWarning;
 	public static String LanguageSelectionDialog_Dialog_Title;
 	public static String LanguageSelectionDialog_MissingLanguageMessage;
+	public static String LegendLayerStyleConfigurator_HideHeaderImageLabel;
+	public static String LegendLayerStyleConfigurator_HideHeaderImageTooltip;
+	public static String LegendLayerStyleConfigurator_HideHeaderLabel;
+	public static String LegendLayerStyleConfigurator_HideHeaderTooltip;
+	public static String LegendLayerStyleConfigurator_ShowInLegendImage;
+	public static String LegendLayerStyleConfigurator_ShowInLegendTooltip;
+	public static String LegendLayerStyleConfigurator_VisibleLayers;
 	public static String LoadBasemapDialog_Error_BasemapNoSelected;
 	public static String LoadBasemapDialog_LoadButton;
 	public static String LoadBasemapDialog_Loading;
