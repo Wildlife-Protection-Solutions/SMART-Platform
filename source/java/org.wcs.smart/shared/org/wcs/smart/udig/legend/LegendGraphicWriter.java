@@ -368,17 +368,17 @@ public class LegendGraphicWriter  {
 							}
 							if (descriptor != null) {
 								awtIcon = AWTSWTImageUtils
-										.convertToAWT(descriptor.getImageData());
+										.convertToAWT(descriptor.getImageData(100));
 								}
 						} else if (entries[k].getIcon() != null) {
 							// use set icon
 							awtIcon = AWTSWTImageUtils.convertToAWT(entries[k]
-										.getIcon().getImageData());
+										.getIcon().getImageData(100));
 						} else {
 							// no rule, no icon, try default for layer
 							ImageDescriptor descriptor = imageGenerator.generateIcon((Layer) layer);
 							if (descriptor != null) {
-								awtIcon = AWTSWTImageUtils.convertToAWT(descriptor.getImageData());
+								awtIcon = AWTSWTImageUtils.convertToAWT(descriptor.getImageData(100));
 							}
 						}
 					}

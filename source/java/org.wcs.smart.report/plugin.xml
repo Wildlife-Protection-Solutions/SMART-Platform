@@ -1094,8 +1094,8 @@
       </image>
       <image
             commandId="org.wcs.smart.report.saveas"
-            disabledIcon="platform:/plugin/org.eclipse.ui/$nl$/icons/full/dtool16/saveas_edit.png"
-            icon="platform:/plugin/org.eclipse.ui/$nl$/icons/full/etool16/saveas_edit.png">
+            disabledIcon="platform:/plugin/org.wcs.smart/images/icons/shared16/saveas_disabled.png"
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/saveas.png">
       </image>
    </extension>
    <extension

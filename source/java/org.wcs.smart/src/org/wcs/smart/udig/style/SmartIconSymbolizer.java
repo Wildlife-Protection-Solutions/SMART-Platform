@@ -32,9 +32,11 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.geotools.filter.text.ecql.ECQL;
+import org.geotools.styling.Style;
 import org.locationtech.udig.style.advanced.common.FiltersComposite;
 import org.locationtech.udig.style.advanced.common.IStyleChangesListener;
 import org.locationtech.udig.style.advanced.common.styleattributeclasses.PointSymbolizerWrapper;
@@ -45,6 +47,7 @@ import org.locationtech.udig.style.advanced.points.widgets.PointGeneralParameter
 import org.opengis.filter.Filter;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.icon.IconFile;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.internal.ca.properties.IconSelectionDialog;
 import org.wcs.smart.ui.internal.ca.properties.IconSelectionDialog.Type;
@@ -147,10 +150,19 @@ public class SmartIconSymbolizer implements IPointSymbolizerComposite, IStyleCha
 		((GridLayout)composite.getLayout()).marginHeight = 0;
 		((GridLayout)composite.getLayout()).marginWidth = 0;
 		
+		
+		
+		if (SmartDB.isMultipleAnalysis()) {
+			Label l = new Label(composite, SWT.NONE);
+			l.setText(Messages.SmartIconSymbolizer_NotSupported);
+			return;
+		}
+		
 		Composite iconbit = new Composite(composite, SWT.NONE);
-		iconbit.setLayout(new GridLayout(2, false));
+		iconbit.setLayout(new GridLayout(3, false));
 		((GridLayout)iconbit.getLayout()).marginHeight = 0;
 		((GridLayout)iconbit.getLayout()).marginWidth = 0;
+		iconbit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		imagePreview = new Canvas(iconbit, SWT.BORDER);
 		imagePreview.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
@@ -166,22 +178,28 @@ public class SmartIconSymbolizer implements IPointSymbolizerComposite, IStyleCha
 		Button btnSelect = new Button(iconbit, SWT.PUSH);
 		btnSelect.setText(Messages.SmartIconSymbolizer_SelectIconButton);
 		btnSelect.setBackground(iconbit.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-		btnSelect.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, true, false));
+		btnSelect.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, false, false));
 		btnSelect.addListener(SWT.Selection, e->{
 			IconSelectionDialog dialog = new IconSelectionDialog(composite.getShell(), Type.SINGLE_SELECT);
 			if (dialog.open() != Window.OK) return;
 			
 			IconFile iconfile = dialog.getSelectedIconFile();
 			if (iconfile == null) return;
-			
-//			Icon icon = dialog.getSelectedIcon();
-//			IconFile iconfile = icon.getFiles().get(0);
 			selectedFile = iconfile;
-			
 			updateImagePreview();
 	        
 		});
 		
+		if (!SmartDB.isMultipleAnalysis()) {
+			Button btnGenerate = new Button(iconbit, SWT.NONE);
+			btnGenerate.setText(Messages.SmartIconSymbolizer_GenerateButton);
+			btnGenerate.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, true, false));
+			btnGenerate.setToolTipText(Messages.SmartIconSymbolizer_GenerateButtonTooltip );
+			btnGenerate.setBackground(composite.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+			btnGenerate.addListener(SWT.Selection, e->{
+				generateIconStyles();
+			});
+		}
 		TabFolder tabFolder = new TabFolder(composite, SWT.NONE);
 		tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 
@@ -210,6 +228,8 @@ public class SmartIconSymbolizer implements IPointSymbolizerComposite, IStyleCha
 	public void update(RuleWrapper ruleWrapper) {
 		this.ruleWrapper = ruleWrapper;
 		
+		if (SmartDB.isMultipleAnalysis()) return;
+		
 		generalParametersComposite.update(ruleWrapper);
 		fontFiltersComposite.update(ruleWrapper);
 		
@@ -229,7 +249,9 @@ public class SmartIconSymbolizer implements IPointSymbolizerComposite, IStyleCha
 	
 	
 	public void onStyleChanged( Object source, String[] values, boolean fromField, STYLEEVENTTYPE styleEventType ) {
-        String value = values[0];
+		if (SmartDB.isMultipleAnalysis()) return;
+		
+		String value = values[0];
 
         PointSymbolizerWrapper pointSymbolizerWrapper = ruleWrapper.getGeometrySymbolizersWrapper().adapt(PointSymbolizerWrapper.class);
 
@@ -272,5 +294,14 @@ public class SmartIconSymbolizer implements IPointSymbolizerComposite, IStyleCha
         editor.refreshPreviewCanvasOnStyle();
 
     }
+	
+	private void generateIconStyles() {
+		GenerateSmartThemeDialog dialog = new GenerateSmartThemeDialog(getComposite().getShell(), editor.getLayer());
+		dialog.open();
+		Style style = dialog.getStyle();
+		if (style != null) {
+			editor.updateStyle(style);
+		}
+	}
 
 }

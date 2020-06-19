@@ -28,19 +28,12 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.IPageChangingListener;
-import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.export.internal.ReportDefintionExporter;
@@ -247,49 +240,4 @@ public class ImportReportWizard extends Wizard implements IPageChangingListener{
 		}
 	}
 
-}
-
-class ConfirmInputDialog extends InputDialog{
-
-	/**
-	 * @param parentShell
-	 * @param dialogTitle
-	 * @param dialogMessage
-	 * @param initialValue
-	 * @param validator
-	 */
-	public ConfirmInputDialog(Shell parentShell, String dialogTitle,
-			String dialogMessage, String initialValue,
-			IInputValidator validator) {
-		super(parentShell, dialogTitle, dialogMessage, initialValue, validator);
-		
-		
-	}
-	
-	@Override
-	public int getInputTextStyle(){
-		return SWT.MULTI | SWT.BORDER | SWT.V_SCROLL | SWT.WRAP ;
-	}
-	
-	@Override
-	protected Control createDialogArea(Composite parent){
-		Control res = super.createDialogArea(parent);
-		((GridData)this.getText().getLayoutData()).heightHint = 200;
-		((GridData)this.getText().getLayoutData()).widthHint = 500;
-		this.getText().setEditable(false);
-		this.getText().setBackground(getText().getDisplay().getSystemColor(SWT.COLOR_WHITE));
-		
-		return res;
-	}
-	
-	@Override
-	protected void createButtonsForButtonBar(Composite parent) {
-		super.createButtonsForButtonBar(parent);
-		this.getText().clearSelection();
-	}
-	
-	@Override
-	public boolean isResizable(){
-		return true;
-	}
 }

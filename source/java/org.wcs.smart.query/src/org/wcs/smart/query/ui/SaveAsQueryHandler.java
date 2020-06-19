@@ -43,6 +43,7 @@ import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
 import org.wcs.smart.query.ui.querylist.OpenQueryHandler;
+import org.wcs.smart.ui.SmartStyledInputDialog;
 
 /**
  * Handler for creating a new SMART report from existing report
@@ -69,13 +70,15 @@ public class SaveAsQueryHandler {
 		
 		if (tocopy == null) return;
 		
-		InputDialog id = new InputDialog(activeShell, Messages.SaveAsQueryHandler_DialogTitle, Messages.SaveAsQueryHandler_DialogMsg, tocopy.getName() + Messages.SaveAsQueryHandler_CopyName, new IInputValidator() {
+		InputDialog id = new SmartStyledInputDialog(activeShell, Messages.SaveAsQueryHandler_DialogTitle, Messages.SaveAsQueryHandler_DialogMsg, tocopy.getName() + Messages.SaveAsQueryHandler_CopyName, new IInputValidator() {
 			@Override
 			public String isValid(String newText) {
 				if (newText.strip().isEmpty()) return Messages.SaveAsQueryHandler_NameRequired;
 				return null;
 			}
+			
 		});
+		
 		if (id.open() != Window.OK) return;
 		
 		Query clone;

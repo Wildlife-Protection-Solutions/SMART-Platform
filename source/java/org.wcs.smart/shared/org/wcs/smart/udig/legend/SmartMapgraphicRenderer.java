@@ -192,12 +192,16 @@ public class SmartMapgraphicRenderer extends RendererImpl implements
 			}
 		}
 
-		if (cached == null) {
+		if (cached == null && getContext().getMapDisplay().getWidth() > 0 && getContext().getMapDisplay().getHeight() > 0 ) {
 			Object values[] = backgroundRenderImage(getContext(), exceptions);
 			cached = new BlackboardItem((BufferedImage) values[0],
 					(ReferencedEnvelope) values[1], getContext().getLayers());
 			layer.getBlackboard().put(BLACKBOARD_IMAGE_KEY, cached);
 
+		}
+		if (cached == null) {
+			setState(DONE);
+			return;
 		}
 		BufferedImage cache = cached.image;
 		ReferencedEnvelope imageBounds = cached.env;

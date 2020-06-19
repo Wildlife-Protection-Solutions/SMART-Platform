@@ -50,6 +50,7 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.SmartStyledInputDialog;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.SmartUtils.RegExLevel;
@@ -118,7 +119,7 @@ public class ChangeUserPasswordDialog extends AbstractPropertyJHeaderDialog{
 		modifyUser.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				InputDialog dialog = new InputDialog(ChangeUserPasswordDialog.this.getParentShell(), Messages.ChangeUserPasswordDialog_ChangeUser_DialogTitle, Messages.ChangeUserPasswordDialog_ChangeUser_DialogMessage, toUpdate.getSmartUserId(), 
+				InputDialog dialog = new SmartStyledInputDialog(ChangeUserPasswordDialog.this.getParentShell(), Messages.ChangeUserPasswordDialog_ChangeUser_DialogTitle, Messages.ChangeUserPasswordDialog_ChangeUser_DialogMessage, toUpdate.getSmartUserId(), 
 						new IInputValidator() {
 							@Override
 							public String isValid(String newText) {

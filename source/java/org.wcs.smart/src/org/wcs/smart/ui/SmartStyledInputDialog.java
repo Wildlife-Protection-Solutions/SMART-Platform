@@ -21,30 +21,27 @@
  */
 package org.wcs.smart.ui;
 
-import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IInputValidator;
+import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.common.control.SmartUiUtils;
 
 /**
- * Extends TitleAreaDialog to color controls according to new 
- * SMART Style.  Also make dialog resizeable
+ * Extends InputDialog to color controls according to new 
+ * SMART Style.
  * 
  * @author Emily
  */
-public abstract class SmartStyledDialog extends Dialog {
+public class SmartStyledInputDialog extends InputDialog {
 
-	protected SmartStyledDialog(Shell parent) {
-		super(parent);
+	public SmartStyledInputDialog(Shell parentShell, String dialogTitle, String dialogMessage, String initialValue,
+			IInputValidator validator) {
+		super(parentShell, dialogTitle, dialogMessage, initialValue, validator);
 	}
 
 	@Override
 	public void create() {
 		super.create();
 		SmartUiUtils.colorDialog(getShell());
-	}
-	
-	@Override
-	protected boolean isResizable() {
-		return true;
 	}
 }

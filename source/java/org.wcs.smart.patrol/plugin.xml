@@ -259,7 +259,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.patrol.view.groupby"
-                  icon="images/icons/obj16/patrol_types.png"
+                  icon="images/icons/obj16/patrol.png"
                   id="org.wcs.smart.patrol.view.groupby.type"
                   label="%command.groupby.type"
                   style="radio">
@@ -270,7 +270,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.patrol.view.groupby"
-                  icon="images/icons/obj16/patrol_types.png"
+                  icon="images/icons/obj16/patrol.png"
                   id="org.wcs.smart.patrol.view.groupby.transport"
                   label="%command.groupby.transport"
                   style="radio">

@@ -30,7 +30,6 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.IPageChangingListener;
-import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -57,6 +56,7 @@ import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
 import org.wcs.smart.query.ui.querylist.OpenQueryHandler;
+import org.wcs.smart.ui.SmartStyledInputDialog;
 import org.wcs.smart.util.SharedUtils;
 
 
@@ -333,7 +333,7 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 
 }
 
-class ConfirmInputDialog extends InputDialog{
+class ConfirmInputDialog extends SmartStyledInputDialog{
 
 	/**
 	 * @param parentShell

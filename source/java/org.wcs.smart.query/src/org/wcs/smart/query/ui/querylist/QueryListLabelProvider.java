@@ -27,7 +27,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Tree;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.model.Query;

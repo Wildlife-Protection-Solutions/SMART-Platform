@@ -35,7 +35,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IInputValidator;
-import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -53,6 +52,7 @@ import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.WaypointAttachmentInterceptor;
 import org.wcs.smart.patrol.xml.PatrolXmlManager;
 import org.wcs.smart.patrol.xml.external.IConvertedExtraData;
+import org.wcs.smart.ui.SmartStyledInputDialog;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 
@@ -339,7 +339,7 @@ public class PatrolImporter {
 }
 
 
-class ConfirmInputDialog extends InputDialog{
+class ConfirmInputDialog extends SmartStyledInputDialog{
 
 	/**
 	 * @param parentShell

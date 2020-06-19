@@ -36,7 +36,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IInputValidator;
-import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -53,6 +52,7 @@ import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.IndepedentIncidentSource;
 import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.ui.SmartStyledInputDialog;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 
@@ -312,7 +312,7 @@ public class IncidentImporter {
 }
 
 
-class ConfirmInputDialog extends InputDialog{
+class ConfirmInputDialog extends SmartStyledInputDialog{
 
 	/**
 	 * @param parentShell

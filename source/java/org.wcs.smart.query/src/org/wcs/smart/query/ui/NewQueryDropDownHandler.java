@@ -129,6 +129,11 @@ public class NewQueryDropDownHandler {
 						params.put(mp.getName(), mp.getValue());
 					}
 					
+					//specifically displose this shell
+					//otherwise it gets used in the ccaa merge dialog progress dialog
+					//but ends up getting disposed and throws an error
+					menu.getShell().dispose();
+					
 					ParameterizedCommand pcmd = ecmd.createCommand(cmd.getElementId(), params);
 					ehandler.executeHandler(pcmd, context);
 					onSelection.run();
@@ -215,7 +220,6 @@ public class NewQueryDropDownHandler {
 		outer.pack();
 		
 		x = x - outer.getSize().x/2;
-		if (x < 0) x = 0;
 		
 		outer.setLocation(x,y);
 		outer.setVisible(true);

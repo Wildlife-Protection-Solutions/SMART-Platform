@@ -28,13 +28,13 @@
          point="org.eclipse.ui.perspectives">
       <perspective
             class="org.wcs.smart.query.ui.QueryPerspective"
-            icon="images/icons/view16/querypatrol.gif"
+            icon="images/icons/obj16/query.png"
             id="org.wcs.smart.query.persepectives.single"
             name="%query.perspective.name">
       </perspective>
       <perspective
             class="org.wcs.smart.query.ui.MultiCaQueryPerspective"
-            icon="images/icons/view16/querypatrol.gif"
+            icon="images/icons/obj16/query.png"
             id="org.wcs.smart.query.persepectives.multi"
             name="%multieca.perspective.name">
       </perspective>
@@ -945,8 +945,8 @@
       </image>
       <image
             commandId="org.wcs.smart.query.saveas"
-            disabledIcon="platform:/plugin/org.eclipse.ui/$nl$/icons/full/dtool16/saveas_edit.png"
-            icon="platform:/plugin/org.eclipse.ui/$nl$/icons/full/etool16/saveas_edit.png">
+            disabledIcon="platform:/plugin/org.wcs.smart/images/icons/shared16/saveas_disabled.png"
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/saveas.png">
       </image>
    </extension>
    <extension

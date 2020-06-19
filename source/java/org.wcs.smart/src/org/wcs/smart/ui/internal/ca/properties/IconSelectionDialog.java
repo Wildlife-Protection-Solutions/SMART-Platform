@@ -158,7 +158,7 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 		if (type == Type.SINGLE_SELECT) {
 			int index = focusManager.getFocusCell().getColumnIndex() - 2;
 			if (index < 0) index = 0;
-			currentSet = activeSets.get(index);
+			if (!activeSets.isEmpty()) currentSet = activeSets.get(index);
 			
 			Object x = tblIcons.getStructuredSelection().getFirstElement();
 			if (x instanceof Icon) {
@@ -263,7 +263,7 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 					set.getUuid().equals(null);
 				});
 			}
-			currentSet = activeSets.get(0);
+			if (!activeSets.isEmpty()) currentSet = activeSets.get(0);
 		}
 		
 		Composite main = new Composite(parent, SWT.NONE);

@@ -42,6 +42,7 @@ import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.Report;
+import org.wcs.smart.ui.SmartStyledInputDialog;
 
 /**
  * Handler for creating a new SMART report from existing report
@@ -65,7 +66,7 @@ public class SaveAsReportHandler {
 		
 		if (tocopy == null) return;
 		
-		InputDialog id = new InputDialog(activeShell, Messages.SaveAsReportHandler_DialogTitle, Messages.SaveAsReportHandler_DialogMsg, tocopy.getName() + Messages.SaveAsReportHandler_Copy, new IInputValidator() {
+		InputDialog id = new SmartStyledInputDialog(activeShell, Messages.SaveAsReportHandler_DialogTitle, Messages.SaveAsReportHandler_DialogMsg, tocopy.getName() + Messages.SaveAsReportHandler_Copy, new IInputValidator() {
 			@Override
 			public String isValid(String newText) {
 				if (newText.strip().isEmpty()) return Messages.SaveAsReportHandler_NameRequiredMsg;

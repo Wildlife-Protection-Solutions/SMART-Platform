@@ -1,14 +1,14 @@
 package org.wcs.smart.dataentry.model.xml;
 
 import org.eclipse.jface.dialogs.IInputValidator;
-import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.ui.SmartStyledInputDialog;
 
-public class ProblemInputDialog extends InputDialog {
+public class ProblemInputDialog extends SmartStyledInputDialog {
 
 	/**
 	 * @param parentShell

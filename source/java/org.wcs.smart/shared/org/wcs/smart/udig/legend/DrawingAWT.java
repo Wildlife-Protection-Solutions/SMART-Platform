@@ -30,14 +30,10 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import javax.imageio.ImageIO;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.geotools.data.DataUtilities;
@@ -285,7 +281,7 @@ public final class DrawingAWT {
 			
 	        IPreferenceStore store = ProjectPlugin.getPlugin().getPreferenceStore();
             boolean antiAliasing = store.getBoolean(PreferenceConstants.P_ANTI_ALIASING);
-            RenderingHints hints = new RenderingHints(Collections.EMPTY_MAP);
+            RenderingHints hints = new RenderingHints(Collections.emptyMap());
             hints.add(new RenderingHints(RenderingHints.KEY_ANTIALIASING, antiAliasing
                     ? RenderingHints.VALUE_ANTIALIAS_ON
                     : RenderingHints.VALUE_ANTIALIAS_OFF));
