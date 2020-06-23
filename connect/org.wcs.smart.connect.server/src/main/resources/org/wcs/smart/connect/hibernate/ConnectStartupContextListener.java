@@ -24,6 +24,9 @@ package org.wcs.smart.connect.hibernate;
 import java.beans.Introspector;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.net.URL;
+import java.net.URLStreamHandlerFactory;
 import java.nio.charset.StandardCharsets;
 import java.sql.Driver;
 import java.sql.DriverManager;
@@ -369,6 +372,28 @@ public class ConnectStartupContextListener implements ServletContextListener{
 	    //this is required to get the geotiff writer to work when writing raster map layers
 		//for reports
 	    IIORegistry.getDefaultInstance().registerServiceProvider(new URLImageInputStreamSpi());
+
+	    //hack to support smart icons in map styling in reports
+	    //allows a custom url handler that deals with the platform:/plugin
+	    //urls and loads the corresponding image from the jar file
+	    try {
+			final Field factoryField = URL.class.getDeclaredField("factory"); //$NON-NLS-1$
+			factoryField.setAccessible(true);
+			final Field lockField = URL.class.getDeclaredField("streamHandlerLock"); //$NON-NLS-1$
+			lockField.setAccessible(true);
+
+			// use same lock as in java.net.URL.setURLStreamHandlerFactory
+			synchronized (lockField.get(null)) {
+				final URLStreamHandlerFactory urlStreamHandlerFactory = (URLStreamHandlerFactory) factoryField
+						.get(null);
+				// Reset the value to prevent Error due to a factory already defined
+				factoryField.set(null, null);
+				URL.setURLStreamHandlerFactory(new SMARTURLStreamHandlerProvider(urlStreamHandlerFactory));
+			}
+		} catch (Exception ex) {
+			throw new IllegalStateException("Cannot url stream handler factory.", ex); //$NON-NLS-1$
+
+		}
 	    
 		//configure file store
 		try{
