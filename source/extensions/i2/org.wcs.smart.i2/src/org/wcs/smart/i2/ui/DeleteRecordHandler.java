@@ -37,6 +37,7 @@ import org.wcs.smart.i2.RecordManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
+import org.wcs.smart.ui.SmartStyledInputDialog;
 
 public class DeleteRecordHandler {
 
@@ -61,7 +62,7 @@ public class DeleteRecordHandler {
 		}
 		
 		String message = null;
-		InputDialog confirm = new InputDialog(context.get(Shell.class), Messages.RecordsView_DeleteTitle, 
+		InputDialog confirm = new SmartStyledInputDialog(context.get(Shell.class), Messages.RecordsView_DeleteTitle, 
 				(message == null ? "" :  message + "\n") + confirmMessage, "",null){ //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					
 			@Override

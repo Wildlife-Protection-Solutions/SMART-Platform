@@ -83,6 +83,7 @@ import org.wcs.smart.i2.ui.dialogs.NewProfileDialog;
 import org.wcs.smart.i2.ui.dialogs.ProfileDialog;
 import org.wcs.smart.i2.xml.ProfileToXml;
 import org.wcs.smart.i2.xml.XmlToProfile;
+import org.wcs.smart.ui.SmartStyledInputDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 import com.ibm.icu.text.MessageFormat;
@@ -315,7 +316,7 @@ public class ProfilesPreferencePage extends PreferencePage implements IIntelPref
 		}
 		
 		//confirm password
-		InputDialog confirm = new InputDialog(getShell(), Messages.RecordsView_DeleteTitle, 
+		InputDialog confirm = new SmartStyledInputDialog(getShell(), Messages.RecordsView_DeleteTitle, 
 				Messages.ProfilesPreferencePage_PasswordRequired, "",null){  //$NON-NLS-1$
 			@Override
 			protected void okPressed() {

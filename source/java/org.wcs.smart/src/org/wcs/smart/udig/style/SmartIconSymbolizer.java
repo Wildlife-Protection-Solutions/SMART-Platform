@@ -36,7 +36,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.geotools.filter.text.ecql.ECQL;
-import org.geotools.styling.Style;
 import org.locationtech.udig.style.advanced.common.FiltersComposite;
 import org.locationtech.udig.style.advanced.common.IStyleChangesListener;
 import org.locationtech.udig.style.advanced.common.styleattributeclasses.PointSymbolizerWrapper;
@@ -159,7 +158,7 @@ public class SmartIconSymbolizer implements IPointSymbolizerComposite, IStyleCha
 		}
 		
 		Composite iconbit = new Composite(composite, SWT.NONE);
-		iconbit.setLayout(new GridLayout(3, false));
+		iconbit.setLayout(new GridLayout(2, false));
 		((GridLayout)iconbit.getLayout()).marginHeight = 0;
 		((GridLayout)iconbit.getLayout()).marginWidth = 0;
 		iconbit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -190,16 +189,7 @@ public class SmartIconSymbolizer implements IPointSymbolizerComposite, IStyleCha
 	        
 		});
 		
-		if (!SmartDB.isMultipleAnalysis()) {
-			Button btnGenerate = new Button(iconbit, SWT.NONE);
-			btnGenerate.setText(Messages.SmartIconSymbolizer_GenerateButton);
-			btnGenerate.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, true, false));
-			btnGenerate.setToolTipText(Messages.SmartIconSymbolizer_GenerateButtonTooltip );
-			btnGenerate.setBackground(composite.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-			btnGenerate.addListener(SWT.Selection, e->{
-				generateIconStyles();
-			});
-		}
+		
 		TabFolder tabFolder = new TabFolder(composite, SWT.NONE);
 		tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 
@@ -295,13 +285,4 @@ public class SmartIconSymbolizer implements IPointSymbolizerComposite, IStyleCha
 
     }
 	
-	private void generateIconStyles() {
-		GenerateSmartThemeDialog dialog = new GenerateSmartThemeDialog(getComposite().getShell(), editor.getLayer());
-		dialog.open();
-		Style style = dialog.getStyle();
-		if (style != null) {
-			editor.updateStyle(style);
-		}
-	}
-
 }

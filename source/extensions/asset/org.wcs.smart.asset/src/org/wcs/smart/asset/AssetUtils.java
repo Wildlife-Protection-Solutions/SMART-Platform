@@ -34,6 +34,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.ui.SmartStyledInputDialog;
 
 /**
  * Utilties for the asset plugin
@@ -93,7 +94,7 @@ public class AssetUtils {
 	 * @return
 	 */
 	public static boolean confirmPassword(Shell shell, String title, String message) {
-		InputDialog confirm = new InputDialog(shell, title, message, "", null){ //$NON-NLS-1$
+		InputDialog confirm = new SmartStyledInputDialog(shell, title, message, "", null){ //$NON-NLS-1$
 					
 			@Override
 			protected void okPressed() {

@@ -110,7 +110,7 @@ public class NewQueryDropDownHandler {
 	}
 
 	
-	private void processChild(MMenuElement e, Menu menu, IEclipseContext context, Runnable onSelection) {
+	private void processChild(MMenuElement e, Menu menu, IEclipseContext context, Runnable onSelection, boolean dispose) {
 		if (e instanceof MHandledMenuItem) {
 			MenuItem mi = new MenuItem(menu, SWT.PUSH);
 			try {
@@ -132,7 +132,7 @@ public class NewQueryDropDownHandler {
 					//specifically displose this shell
 					//otherwise it gets used in the ccaa merge dialog progress dialog
 					//but ends up getting disposed and throws an error
-					menu.getShell().dispose();
+					if (dispose) menu.getShell().dispose();
 					
 					ParameterizedCommand pcmd = ecmd.createCommand(cmd.getElementId(), params);
 					ehandler.executeHandler(pcmd, context);
@@ -148,7 +148,7 @@ public class NewQueryDropDownHandler {
 				new MenuItem(menu, SWT.SEPARATOR);
 			}
 			for (MMenuElement kid : ((MMenu) e).getChildren()) {
-				processChild(kid, menu, context, onSelection);
+				processChild(kid, menu, context, onSelection, dispose);
 			}
 		}else if (e instanceof MMenuSeparator) {
 //			MenuItem mi = new MenuItem(menu, SWT.SEPARATOR);
@@ -209,7 +209,7 @@ public class NewQueryDropDownHandler {
 				ti.addListener(SWT.Selection, ev->{
 					if(!ti.getSelection()) return;
 					Menu mnu = new Menu(tb);
-					processChild(e,mnu,fcontext, ()->outer.dispose());
+					processChild(e,mnu,fcontext, ()->outer.dispose(), true);
 					Point p = tb.getParent().toDisplay(ti.getBounds().x, ti.getBounds().y + tb.getBounds().height);
 					mnu.setLocation(p.x,p.y);
 					mnu.setVisible(true);
@@ -233,7 +233,7 @@ public class NewQueryDropDownHandler {
 		EModelService mService = context.get(EModelService.class);
 		MMenu createMenu = (MMenu) mService.find("org.wcs.smart.menu.query.newquery", context.get(MWindow.class).getMainMenu()); //$NON-NLS-1$
 		for (MMenuElement e : createMenu.getChildren()) {
-			processChild(e, mnu, context, ()->{});
+			processChild(e, mnu, context, ()->{}, false);
 		}
 		mnu.addMenuListener(new MenuListener() {
 			@Override

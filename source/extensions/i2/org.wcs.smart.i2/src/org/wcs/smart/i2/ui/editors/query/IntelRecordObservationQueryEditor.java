@@ -102,6 +102,7 @@ import org.wcs.smart.i2.ui.dialogs.query.ExportQueryWizard;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItemFactory;
 import org.wcs.smart.i2.ui.views.query.dropitem.ErrorDropItem;
+import org.wcs.smart.ui.SmartStyledInputDialog;
 import org.wcs.smart.ui.SmartWizardDialog;
 
 /**
@@ -198,7 +199,7 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 			return;
 		}
 		
-		InputDialog newName = new InputDialog(getSite().getShell(), Messages.IntelQueryEditor_SaveAsTitle, Messages.IntelQueryEditor_SaveAsMessage, MessageFormat.format(Messages.IntelQueryEditor_DefaultQueryName, query.getName()), new IInputValidator() {
+		InputDialog newName = new SmartStyledInputDialog(getSite().getShell(), Messages.IntelQueryEditor_SaveAsTitle, Messages.IntelQueryEditor_SaveAsMessage, MessageFormat.format(Messages.IntelQueryEditor_DefaultQueryName, query.getName()), new IInputValidator() {
 			@Override
 			public String isValid(String newText) {
 				if (newText == null || newText.trim().length() == 0) return Messages.IntelQueryEditor_NameRequireError;

@@ -53,6 +53,7 @@ import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.ui.SmartStyledInputDialog;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.SmartUtils.RegExLevel;
 
@@ -99,7 +100,7 @@ public class SurveyFilteredComboViewer extends FilteredComboViewer<Survey> {
 				ISelection selection = viewer.getSelection();
 				if (selection instanceof IStructuredSelection) {
 					if (! (((IStructuredSelection)selection).getFirstElement() instanceof Survey)){
-						InputDialog id = new InputDialog(getShell(), Messages.SurveyFilteredComboViewer_Title, Messages.SurveyFilteredComboViewer_Message, "", new IInputValidator() { //$NON-NLS-1$
+						InputDialog id = new SmartStyledInputDialog(getShell(), Messages.SurveyFilteredComboViewer_Title, Messages.SurveyFilteredComboViewer_Message, "", new IInputValidator() { //$NON-NLS-1$
 							@Override
 							public String isValid(String newText) {
 								if (!SmartUtils.isSimpleString(newText, RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Survey.ID_MAX_LENGTH)){

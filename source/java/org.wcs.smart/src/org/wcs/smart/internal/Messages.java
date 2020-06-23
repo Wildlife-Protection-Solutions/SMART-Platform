@@ -1209,6 +1209,8 @@ public class Messages extends NLS {
 	public static String SmartDB_Error_NoSmartDatabase;
 	public static String SmartFilterDialog_Apply_Button;
 	public static String SmartFilterDialog_Reset_Button;
+	public static String SmartGenerateIconSymbolizer_CCAANotSupported;
+	public static String SmartGenerateIconSymbolizer_Name;
 	public static String SmartIconSymbolizer_FilterSection;
 	public static String SmartIconSymbolizer_GeneralSection;
 	public static String SmartIconSymbolizer_GenerateButton;

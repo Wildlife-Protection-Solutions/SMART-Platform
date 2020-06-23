@@ -55,6 +55,7 @@ import org.wcs.smart.asset.model.AssetMapStyle;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.SmartStyledInputDialog;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -124,7 +125,7 @@ public class MapStyleListDialog extends SmartStyledTitleDialog {
 		}
 		if (toEdit == null) return;
 		
-		InputDialog nameDialog = new InputDialog(getShell(), Messages.MapStyleListDialog_NameDialogTitle, Messages.MapStyleListDialog_NameDialogMsg, toEdit.getName(), new IInputValidator() {
+		InputDialog nameDialog = new SmartStyledInputDialog(getShell(), Messages.MapStyleListDialog_NameDialogTitle, Messages.MapStyleListDialog_NameDialogMsg, toEdit.getName(), new IInputValidator() {
 			@Override
 			public String isValid(String newText) {
 				if (newText == null || newText.trim().isEmpty()) return Messages.MapStyleListDialog_NameRequired;

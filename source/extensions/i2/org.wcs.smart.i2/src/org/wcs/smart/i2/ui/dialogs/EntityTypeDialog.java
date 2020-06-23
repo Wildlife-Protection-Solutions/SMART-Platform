@@ -120,6 +120,7 @@ import org.wcs.smart.i2.model.OtherAttributeGroup;
 import org.wcs.smart.i2.ui.AttributeLabelProvider;
 import org.wcs.smart.i2.ui.ProfileLabelProvider;
 import org.wcs.smart.i2.ui.Resources;
+import org.wcs.smart.ui.SmartStyledInputDialog;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite;
@@ -996,7 +997,7 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 	}
 	
 	private void addGroup(){
-		InputDialog dialog = new InputDialog(getParentShell(), Messages.EntityTypeDialog_NewGroupTitle, Messages.EntityTypeDialog_NewGroupName,
+		InputDialog dialog = new SmartStyledInputDialog(getParentShell(), Messages.EntityTypeDialog_NewGroupTitle, Messages.EntityTypeDialog_NewGroupName,
 				Messages.EntityTypeDialog_NewGroupDefault, (text)-> text.trim().isEmpty() ? Messages.EntityTypeDialog_NameRequired : null);
 		if (dialog.open() == Window.OK){
 			IntelEntityTypeAttributeGroup newGroup = new IntelEntityTypeAttributeGroup();

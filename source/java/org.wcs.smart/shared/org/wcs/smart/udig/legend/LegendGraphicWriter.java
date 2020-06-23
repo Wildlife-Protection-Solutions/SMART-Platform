@@ -367,18 +367,21 @@ public class LegendGraphicWriter  {
 								descriptor = imageGenerator.generateIcon((Layer) layer);
 							}
 							if (descriptor != null) {
+								//DO NOT add number to getImageData as we use
+								//an older version of eclipse on connect that 
+								//does not support that method 
 								awtIcon = AWTSWTImageUtils
-										.convertToAWT(descriptor.getImageData(100));
+										.convertToAWT(descriptor.getImageData());
 								}
 						} else if (entries[k].getIcon() != null) {
 							// use set icon
 							awtIcon = AWTSWTImageUtils.convertToAWT(entries[k]
-										.getIcon().getImageData(100));
+										.getIcon().getImageData());
 						} else {
 							// no rule, no icon, try default for layer
 							ImageDescriptor descriptor = imageGenerator.generateIcon((Layer) layer);
 							if (descriptor != null) {
-								awtIcon = AWTSWTImageUtils.convertToAWT(descriptor.getImageData(100));
+								awtIcon = AWTSWTImageUtils.convertToAWT(descriptor.getImageData());
 							}
 						}
 					}

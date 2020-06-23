@@ -117,9 +117,14 @@
 		<artifactId>org.eclipse.birt.runtime</artifactId>
 		<version>${birt.version}</version>
 		<exclusions>
+		
 			<exclusion> 
 				<groupId>org.eclipse.birt.runtime.3_7_1</groupId>
          			<artifactId>org.apache.batik.pdf</artifactId>
+			</exclusion>
+			<exclusion> 
+				<groupId>org.eclipse.birt.runtime.3_7_1</groupId>
+         			<artifactId>org.apache.batik.bridge</artifactId>
 			</exclusion>
 			<exclusion> 
 				<groupId>org.eclipse.birt.runtime</groupId>

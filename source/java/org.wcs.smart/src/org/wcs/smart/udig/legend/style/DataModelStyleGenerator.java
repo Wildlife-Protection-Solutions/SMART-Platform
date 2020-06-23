@@ -37,6 +37,7 @@ import java.util.Set;
 import org.geotools.data.simple.SimpleFeatureIterator;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.geotools.factory.CommonFactoryFinder;
+import org.geotools.feature.NameImpl;
 import org.geotools.styling.ExternalGraphic;
 import org.geotools.styling.FeatureTypeStyle;
 import org.geotools.styling.Fill;
@@ -50,11 +51,13 @@ import org.geotools.styling.StyleBuilder;
 import org.geotools.styling.Symbolizer;
 import org.geotools.util.factory.GeoTools;
 import org.hibernate.Session;
+import org.locationtech.udig.ui.graphics.SLDs;
 import org.locationtech.udig.ui.palette.ColourScheme;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
+import org.opengis.style.SemanticType;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -172,11 +175,7 @@ public class DataModelStyleGenerator {
 			Rule r = createRule(Messages.DataModelStyleGenerator_NoValueLabel, buildNoDataPointSymbol(), createEmptyFilter(fattribute));
 			rules.add(r);
 		}
-		FeatureTypeStyle fts = styleBuilder.createFeatureTypeStyle(fsource.getSchema().getTypeName(), rules.toArray(new Rule[rules.size()]));
-		Style style = styleBuilder.createStyle();
-		style.featureTypeStyles().add(fts);
-		return style;
-		
+		return createStyle(rules);
 	}
 	
 	public Style generateThemesAttribute(AttributeDescriptor fattribute, Attribute dmAttribute, Session session) throws IOException {
@@ -245,11 +244,7 @@ public class DataModelStyleGenerator {
 			rules.add(r);
 		}
 			
-		FeatureTypeStyle fts = styleBuilder.createFeatureTypeStyle(fsource.getSchema().getTypeName(), rules.toArray(new Rule[rules.size()]));
-		Style style = styleBuilder.createStyle();
-		style.featureTypeStyles().add(fts);
-		return style;
-		
+		return createStyle(rules);		
 	}
 	
 	private Style generateThemesAttributeTree(SimpleFeatureSource fsource, AttributeDescriptor fattribute, Attribute dmAttribute, Session session) throws IOException {
@@ -321,11 +316,22 @@ public class DataModelStyleGenerator {
 			rules.add(r);
 		}
 			
+		return createStyle(rules);
+	}
+	
+	private Style createStyle(List<Rule> rules) {
 		FeatureTypeStyle fts = styleBuilder.createFeatureTypeStyle(fsource.getSchema().getTypeName(), rules.toArray(new Rule[rules.size()]));
 		Style style = styleBuilder.createStyle();
+		
+		fts.featureTypeNames().clear();
+        fts.featureTypeNames().add(new NameImpl(SLDs.GENERIC_FEATURE_TYPENAME));
+		
+        fts.semanticTypeIdentifiers().clear();
+        fts.semanticTypeIdentifiers().add(new SemanticType("generic:geometry")); //$NON-NLS-1$
+        fts.semanticTypeIdentifiers().add(new SemanticType("simple")); //$NON-NLS-1$
+		
 		style.featureTypeStyles().add(fts);
 		return style;
-		
 	}
 	
 	/*

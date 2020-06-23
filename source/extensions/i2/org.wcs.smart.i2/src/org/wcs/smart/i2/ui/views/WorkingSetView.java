@@ -117,6 +117,7 @@ import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
 import org.wcs.smart.i2.ui.handler.OpenEntityHandler;
 import org.wcs.smart.i2.ui.handler.OpenQueryHandler;
 import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
+import org.wcs.smart.ui.SmartStyledInputDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.UuidUtils;
 
@@ -834,7 +835,7 @@ public class WorkingSetView {
 	
 	public static String getWorkingsetName(Shell activeShell, String initialValue){
 		if (initialValue == null) initialValue = Messages.WorkingSetView_DefaultName;
-		InputDialog in = new InputDialog(activeShell, Messages.WorkingSetView_NewDialogTitle, Messages.WorkingSetView_NewDialogMsg, initialValue, new IInputValidator() {
+		InputDialog in = new SmartStyledInputDialog(activeShell, Messages.WorkingSetView_NewDialogTitle, Messages.WorkingSetView_NewDialogMsg, initialValue, new IInputValidator() {
 			@Override
 			public String isValid(String newText) {
 				if (newText.trim().isEmpty() || newText.trim().length() > org.wcs.smart.ca.Label.MAX_LENGTH){

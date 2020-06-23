@@ -102,6 +102,7 @@ import org.wcs.smart.paws.ui.HeaderComposite;
 import org.wcs.smart.paws.ui.HidePartsPartListener;
 import org.wcs.smart.paws.ui.NewPawsRunHandler;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.ui.SmartStyledInputDialog;
 import org.wcs.smart.util.SharedUtils;
 
 
@@ -356,7 +357,7 @@ public class ConfigurationEditor extends EditorPart {
 	public void doSaveAs() {
 		
 		String currentName = compHeader.getText();
-		InputDialog newNameDialog = new InputDialog(getSite().getShell(), Messages.ConfigurationEditor_SaveAsTitle, Messages.ConfigurationEditor_SaveAsMsg, currentName, 
+		InputDialog newNameDialog = new SmartStyledInputDialog(getSite().getShell(), Messages.ConfigurationEditor_SaveAsTitle, Messages.ConfigurationEditor_SaveAsMsg, currentName, 
 				e->{
 					if (e.isBlank()) return Messages.ConfigurationEditor_NameRequired;
 					return null;

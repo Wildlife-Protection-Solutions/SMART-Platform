@@ -1784,6 +1784,9 @@
       <pointsymbolizer
             class="org.wcs.smart.udig.style.SmartIconSymbolizer">
       </pointsymbolizer>
+      <pointsymbolizer
+            class="org.wcs.smart.udig.style.SmartGenerateIconSymbolizer">
+      </pointsymbolizer>
    </extension>
 
 </plugin>
