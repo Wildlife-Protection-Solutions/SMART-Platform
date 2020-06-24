@@ -127,6 +127,38 @@
          			<artifactId>org.apache.batik.bridge</artifactId>
 			</exclusion>
 			<exclusion> 
+				<groupId>org.eclipse.birt.runtime.3_7_1</groupId>
+         			<artifactId>org.apache.batik.dom.svg</artifactId>
+			</exclusion>
+			<exclusion> 
+				<groupId>org.eclipse.birt.runtime.3_7_1</groupId>
+         			<artifactId>org.apache.batik.util</artifactId>
+			</exclusion>
+			<exclusion> 
+				<groupId>org.eclipse.birt.runtime.3_7_1</groupId>
+         			<artifactId>org.apache.batik.svggen</artifactId>
+			</exclusion>	
+			<exclusion> 
+				<groupId>org.eclipse.birt.runtime.3_7_1</groupId>
+         			<artifactId>org.apache.batik.transcoder</artifactId>
+			</exclusion>		
+			<exclusion> 
+				<groupId>org.eclipse.birt.runtime.3_7_1</groupId>
+         			<artifactId>org.apache.batik.css</artifactId>
+			</exclusion>						
+			<exclusion> 
+				<groupId>org.eclipse.birt.runtime</groupId>
+         			<artifactId>org.apache.batik.dom</artifactId>
+			</exclusion>	
+			<exclusion> 
+				<groupId>org.eclipse.birt.runtime.3_7_1</groupId>
+         			<artifactId>org.apache.batik.xml</artifactId>
+			</exclusion>												
+			<exclusion> 
+				<groupId>org.eclipse.birt.runtime.3_7_1</groupId>
+         			<artifactId>org.apache.batik.util.gui</artifactId>
+			</exclusion>												
+			<exclusion> 
 				<groupId>org.eclipse.birt.runtime</groupId>
          			<artifactId>org.eclipse.emf.ecore.xmi</artifactId>
 			</exclusion>
