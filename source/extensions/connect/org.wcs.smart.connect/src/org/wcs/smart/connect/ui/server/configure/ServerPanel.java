@@ -41,6 +41,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.internal.Messages;
@@ -84,10 +85,23 @@ public class ServerPanel extends Composite implements ModifyListener {
 		txtServer.setData(CD_KEY, cd);
 		txtServer.setData(VALID_KEY, false);
 		
-		l = new Label(this, SWT.NONE);
+		Link lnkAdvanced = new Link(this, SWT.NONE);
+		lnkAdvanced.setText("<a>" + Messages.ServerPanel_AdvancedOptionsLbl + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
+		lnkAdvanced.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
+
+		Composite temp = new Composite(this, SWT.BORDER);
+		temp.setLayout(new GridLayout(3, false));
+		temp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
+		temp.setVisible(false);
+		
+		lnkAdvanced.addListener(SWT.Selection, e->{
+			temp.setVisible(!temp.isVisible());
+		});
+		
+		l = new Label(temp, SWT.NONE);
 		l.setText(Messages.ServerPanel_CertificateLabel);
 		
-		txtCertificate = new Text(this, SWT.BORDER);
+		txtCertificate = new Text(temp, SWT.BORDER);
 		txtCertificate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		txtCertificate.addModifyListener(this);
 		txtCertificate.setData(VALID_KEY, false);
@@ -95,7 +109,7 @@ public class ServerPanel extends Composite implements ModifyListener {
 		cd = createControlDecoration(txtCertificate);
 		txtCertificate.setData(CD_KEY, cd);
 		
-		Button btnSelect = new Button(this, SWT.PUSH);
+		Button btnSelect = new Button(temp, SWT.PUSH);
 		btnSelect.setText("..."); //$NON-NLS-1$
 		btnSelect.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -112,7 +126,7 @@ public class ServerPanel extends Composite implements ModifyListener {
 			}
 		});
 		
-		l = new Label(this, SWT.WRAP);
+		l = new Label(temp, SWT.WRAP);
 		l.setText(Messages.ServerPanel_CertificateMessage);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
 		((GridData)l.getLayoutData()).widthHint = 300;

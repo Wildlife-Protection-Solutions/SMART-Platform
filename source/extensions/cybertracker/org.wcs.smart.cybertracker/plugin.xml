@@ -272,9 +272,9 @@
       <editor
             class="org.wcs.smart.cybertracker.importer.json.JsonImportEditor"
             default="false"
-            icon="images/etool16/cybertracker16.png"
+            icon="images/etool16/smartmobile.16.png"
             id="org.wcs.smart.cybertracker.importer.json.ImportEditor"
-            name="%editor.import.json.name">
+            name="%editor.import.json.name1">
       </editor>
    </extension>
    <extension

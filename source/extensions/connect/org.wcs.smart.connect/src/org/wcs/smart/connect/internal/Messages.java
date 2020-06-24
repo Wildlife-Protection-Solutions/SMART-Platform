@@ -343,6 +343,7 @@ public class Messages extends NLS {
 	public static String ServerOptionsPanel_InvalidNumber;
 	public static String ServerOptionsPanel_NotApplicable;
 	public static String ServerOptionsWizardPage_Title;
+	public static String ServerPanel_AdvancedOptionsLbl;
 	public static String ServerPanel_AllFiles;
 	public static String ServerPanel_CertificateFilterName;
 	public static String ServerPanel_CertificateLabel;

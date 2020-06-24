@@ -29,7 +29,7 @@ public class Messages extends NLS {
 	public static String JsonImportEditor_ErrorColumn;
 	public static String JsonImportEditor_ErrorLabel;
 	public static String JsonImportEditor_FileColumn;
-	public static String JsonImportEditor_FormText;
+	public static String JsonImportEditor_FormText1;
 	public static String JsonImportEditor_ImportButton1;
 	public static String JsonImportEditor_MessageColumn;
 	public static String JsonImportEditor_MessageLabel;
@@ -470,8 +470,8 @@ public class Messages extends NLS {
 	public static String ImportDialog_DeviceImportError;
 	public static String ImportDialog_DeviceMsg;
 	public static String ImportDialog_DeviceOption;
-	public static String ImportDialog_DialogMessage;
-	public static String ImportDialog_DialogTitle;
+	public static String ImportDialog_DialogMessage1;
+	public static String ImportDialog_DialogTitle1;
 	public static String ImportDialog_Error;
 	public static String ImportDialog_fileinfotooltip;
 	public static String ImportDialog_FeatureCountLabel;
@@ -490,7 +490,7 @@ public class Messages extends NLS {
 	public static String ImportDialog_ObsCountLabel;
 	public static String ImportDialog_ParseErrorMsg;
 	public static String ImportDialog_ReadError;
-	public static String ImportDialog_ShellText;
+	public static String ImportDialog_ShellText1;
 	public static String ImportTool_ErrorTitle;
 	public static String ImportTool_GeomNotSupported;
 	public static String ImportTool_GpxErrorMsg;

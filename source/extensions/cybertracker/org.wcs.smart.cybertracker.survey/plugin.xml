@@ -28,7 +28,7 @@
                id="vertical.org.wcs.smart.cybertracker.er.toolbar2">
             <command
                   commandId="org.wcs.smart.cybertracker.json.import"
-                  icon="platform:/plugin/org.wcs.smart.cybertracker/images/etool16/import.png"
+                  icon="platform:/plugin/org.wcs.smart.cybertracker/images/etool16/smartmobileimport.png"
                   label="%command.import.label"
                   mode="FORCE_TEXT"
                   style="push"
@@ -76,7 +76,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.cybertracker.packages.show"
-                  icon="platform:/plugin/org.wcs.smart.cybertracker/images/etool16/export.png"
+                  icon="platform:/plugin/org.wcs.smart.cybertracker/images/etool16/smartmobileexport.png"
                   label="%command.export.label"
                   mode="FORCE_TEXT"
                   style="push"

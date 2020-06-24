@@ -287,7 +287,7 @@ public class ConfigurePackagesDialog extends SmartStyledTitleDialog {
 		setMessage(Messages.ConfigurePackagesDialog_ShellMessage);
 		setTitle(Messages.ConfigurePackagesDialog_ShellTitle);
 		getShell().setText(Messages.ConfigurePackagesDialog_ShellTitle);
-		
+
 		return parent;
 	}
 	

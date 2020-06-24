@@ -324,11 +324,10 @@ public class ImportDialog extends SmartStyledTitleDialog{
 			stack.layout(true);
 			validate();
 		});
-//		lst.addListener(SWT.Modify, e->validate());
 		
-		getShell().setText(Messages.ImportDialog_ShellText);
-		setTitle(Messages.ImportDialog_DialogTitle);
-		setMessage(Messages.ImportDialog_DialogMessage);
+		getShell().setText(Messages.ImportDialog_ShellText1);
+		setTitle(Messages.ImportDialog_DialogTitle1);
+		setMessage(Messages.ImportDialog_DialogMessage1);
 		return parent;
 	}
 

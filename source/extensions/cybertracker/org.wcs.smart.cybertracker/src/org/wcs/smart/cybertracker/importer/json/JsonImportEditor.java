@@ -92,7 +92,7 @@ public class JsonImportEditor extends EditorPart {
 		spacer.setLayout(new GridLayout());
 		
 		Form form = toolkit.createForm(spacer);
-		form.setText(Messages.JsonImportEditor_FormText);
+		form.setText(Messages.JsonImportEditor_FormText1);
 		GridLayout layout = new GridLayout();
 		layout.marginWidth = 0;
 		layout.marginHeight = 0;

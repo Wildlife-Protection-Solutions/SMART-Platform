@@ -67,7 +67,7 @@
                id="vertical.org.wcs.smartcollect.toolbar">
             <command
                   commandId="org.wcs.smart.cybertracker.packages.show"
-                  icon="platform:/plugin/org.wcs.smart.cybertracker/images/etool16/export.png"
+                  icon="platform:/plugin/org.wcs.smart.cybertracker/images/etool16/smartmobileexport.png"
                   label="Export"
                   mode="FORCE_TEXT"
                   style="push"

@@ -28,7 +28,7 @@
                id="vertical.org.wcs.smart.cybertracker.patrol.toolbar1">
             <command
                   commandId="org.wcs.smart.cybertracker.packages.show"
-                  icon="platform:/plugin/org.wcs.smart.cybertracker/images/etool16/export.png"
+                  icon="platform:/plugin/org.wcs.smart.cybertracker/images/etool16/smartmobileexport.png"
                   label="Export Mobile Package"
                   mode="FORCE_TEXT"
                   style="push"
@@ -131,7 +131,7 @@
                id="vertical.org.wcs.smart.cybertracker.patrol.toolbar2">
             <command
                   commandId="org.wcs.smart.cybertracker.json.import"
-                  icon="platform:/plugin/org.wcs.smart.cybertracker/images/etool16/import.png"
+                  icon="platform:/plugin/org.wcs.smart.cybertracker/images/etool16/smartmobileimport.png"
                   label="Import Mobile Data"
                   mode="FORCE_TEXT"
                   style="push"
