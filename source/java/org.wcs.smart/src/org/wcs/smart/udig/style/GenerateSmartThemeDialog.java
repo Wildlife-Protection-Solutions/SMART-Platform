@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.udig.style;
 
+import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -314,12 +315,7 @@ public class GenerateSmartThemeDialog extends SmartStyledDialog {
 				Query<?> q = session.createQuery(query)
 						.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 
-				Integer maxInt = (Integer) q.uniqueResult();
-				if (maxInt != null) {
-					for (int i = 0; i <= maxInt; i ++) {
-						dmItems.add(i);
-					}
-				}				
+						
 				
 				//load all list and tree attributes and category levels
 				List<Attribute.AttributeType> types = new ArrayList<>();
@@ -329,6 +325,15 @@ public class GenerateSmartThemeDialog extends SmartStyledDialog {
 					.setParameter("ca",  SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
 					.setParameterList("types", types) //$NON-NLS-1$
 					.list());
+				
+				dmItems.sort((a,b)->Collator.getInstance().compare(((Attribute)a).getName(), ((Attribute)b).getName()));
+				
+				Integer maxInt = (Integer) q.uniqueResult();
+				if (maxInt != null) {
+					for (int i = 0; i <= maxInt; i ++) {
+						dmItems.add(i, i);
+					}
+				}		
 				
 				iset.addAll(session.createQuery("FROM IconSet WHERE conservationArea =: ca", IconSet.class) //$NON-NLS-1$
 						.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
