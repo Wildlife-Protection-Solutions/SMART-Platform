@@ -225,20 +225,22 @@ public class AssetXmlToAssetData {
 	private List<AssetStationLocationAttribute> processStationLocationAttributes(AssetData xmlData, HashMap<String, AssetAttribute> attributeMappings, Session session){
 		List<AssetStationLocationAttribute> stationAttributes = new ArrayList<>();
 		
-		for (AttributeMapping xmlMapping : xmlData.getStationLocationAttributes().getAttributes()) {
-			AssetStationLocationAttribute newAttribute = new AssetStationLocationAttribute();
-			newAttribute.setOrder(xmlMapping.getOrder());
-			
-			AssetAttribute assetAttribute = attributeMappings.get(xmlMapping.getAttributeKey().toLowerCase());
-			if (assetAttribute == null) {
-				warnings.add(MessageFormat.format(Messages.AssetXmlToAssetData_AttributeNotFound, xmlMapping.getAttributeKey()));
-				continue;
-			}else if (!assetAttribute.getType().name().equalsIgnoreCase(xmlMapping.getAttributeType())) {
-				warnings.add(MessageFormat.format(Messages.AssetXmlToAssetData_AssettypeDoesNotMatch, xmlMapping.getAttributeType(), assetAttribute.getType().name(), assetAttribute.getName()));
-				continue;
+		if (xmlData.getStationLocationAttributes() != null && xmlData.getStationLocationAttributes().getAttributes() != null) {
+			for (AttributeMapping xmlMapping : xmlData.getStationLocationAttributes().getAttributes()) {
+				AssetStationLocationAttribute newAttribute = new AssetStationLocationAttribute();
+				newAttribute.setOrder(xmlMapping.getOrder());
+				
+				AssetAttribute assetAttribute = attributeMappings.get(xmlMapping.getAttributeKey().toLowerCase());
+				if (assetAttribute == null) {
+					warnings.add(MessageFormat.format(Messages.AssetXmlToAssetData_AttributeNotFound, xmlMapping.getAttributeKey()));
+					continue;
+				}else if (!assetAttribute.getType().name().equalsIgnoreCase(xmlMapping.getAttributeType())) {
+					warnings.add(MessageFormat.format(Messages.AssetXmlToAssetData_AssettypeDoesNotMatch, xmlMapping.getAttributeType(), assetAttribute.getType().name(), assetAttribute.getName()));
+					continue;
+				}
+				newAttribute.setAttribute(assetAttribute);
+				stationAttributes.add(newAttribute);
 			}
-			newAttribute.setAttribute(assetAttribute);
-			stationAttributes.add(newAttribute);
 		}
 
 		//validate
@@ -265,20 +267,22 @@ public class AssetXmlToAssetData {
 	private List<AssetStationAttribute> processStationAttributes(AssetData xmlData, HashMap<String, AssetAttribute> attributeMappings, Session session){
 		List<AssetStationAttribute> stationAttributes = new ArrayList<>();
 		
-		for (AttributeMapping xmlMapping : xmlData.getStationAttributes().getAttributes()) {
-			AssetStationAttribute newAttribute = new AssetStationAttribute();
-			newAttribute.setOrder(xmlMapping.getOrder());
-			
-			AssetAttribute assetAttribute = attributeMappings.get(xmlMapping.getAttributeKey().toLowerCase());
-			if (assetAttribute == null) {
-				warnings.add(MessageFormat.format(Messages.AssetXmlToAssetData_AttributeNotFoundStation, xmlMapping.getAttributeKey()));
-				continue;
-			}else if (!assetAttribute.getType().name().equalsIgnoreCase(xmlMapping.getAttributeType())) {
-				warnings.add(MessageFormat.format(Messages.AssetXmlToAssetData_TypeDoesNotMatchStation, xmlMapping.getAttributeType(), assetAttribute.getType().name(), assetAttribute.getName()));
-				continue;
+		if (xmlData.getStationAttributes() != null && xmlData.getStationLocationAttributes().getAttributes() != null) {
+			for (AttributeMapping xmlMapping : xmlData.getStationAttributes().getAttributes()) {
+				AssetStationAttribute newAttribute = new AssetStationAttribute();
+				newAttribute.setOrder(xmlMapping.getOrder());
+				
+				AssetAttribute assetAttribute = attributeMappings.get(xmlMapping.getAttributeKey().toLowerCase());
+				if (assetAttribute == null) {
+					warnings.add(MessageFormat.format(Messages.AssetXmlToAssetData_AttributeNotFoundStation, xmlMapping.getAttributeKey()));
+					continue;
+				}else if (!assetAttribute.getType().name().equalsIgnoreCase(xmlMapping.getAttributeType())) {
+					warnings.add(MessageFormat.format(Messages.AssetXmlToAssetData_TypeDoesNotMatchStation, xmlMapping.getAttributeType(), assetAttribute.getType().name(), assetAttribute.getName()));
+					continue;
+				}
+				newAttribute.setAttribute(assetAttribute);
+				stationAttributes.add(newAttribute);
 			}
-			newAttribute.setAttribute(assetAttribute);
-			stationAttributes.add(newAttribute);
 		}
 
 		//validate
