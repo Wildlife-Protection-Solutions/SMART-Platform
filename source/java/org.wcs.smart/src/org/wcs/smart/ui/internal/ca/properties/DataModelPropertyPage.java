@@ -982,7 +982,6 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			return;
 		}
 		
-		if (newCat.getIcon() != null) session.saveOrUpdate(newCat.getIcon());
 		if (o instanceof DataModelContentProvider.RootNode){
 			DataModel dm = (DataModel)viewer.getInput();
 			newCat.setParent(null);
