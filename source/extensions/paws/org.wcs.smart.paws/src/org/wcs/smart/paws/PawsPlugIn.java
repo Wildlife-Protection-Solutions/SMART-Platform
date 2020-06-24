@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.ca.ConservationAreaManager;
+import org.wcs.smart.paws.engine.StorageApi;
 import org.wcs.smart.paws.plugin.DeleteCaHandler;
 
 public class PawsPlugIn extends AbstractUIPlugin {
@@ -104,6 +105,11 @@ public class PawsPlugIn extends AbstractUIPlugin {
 	 * @param t the exception thrown or null 
 	 */
 	public static void log(String message, Throwable t){
+		String token = StorageApi.INSTANCE.getToken();
+		if (token != null && message != null) {
+			message = message.replaceAll(token, "<token>"); //$NON-NLS-1$
+		}
+		
 		int status = t instanceof Exception || message != null ? IStatus.ERROR : IStatus.WARNING;
         getDefault().getLog().log(new Status(status, PLUGIN_ID, IStatus.OK, message, t));
 	}
@@ -118,10 +124,17 @@ public class PawsPlugIn extends AbstractUIPlugin {
 	 */
 	public static void displayLog(final String message, Throwable t){
 		log(message, t);
+		
+		String token = StorageApi.INSTANCE.getToken();
+		String m = message;
+		if (token != null && m != null) {
+			m = m.replaceAll(token, "<token>"); //$NON-NLS-1$
+		}
+		final String fm = m;
 		Display.getDefault().syncExec(new Runnable(){
 			@Override
 			public void run() {
-				MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", message); //$NON-NLS-1$
+				MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", fm); //$NON-NLS-1$
 			}
 			
 		});

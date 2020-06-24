@@ -72,7 +72,8 @@ public enum StorageApi {
 	
 	public ContainerURL getContainerURL(String containerName) throws Exception {
 		if (service == null) throw new Exception(Messages.StorageApi_AuthCodeRequired);
-		String url = service.getStorageUrl() + "/" + containerName; //$NON-NLS-1$
+		String url = service.getStorageUrl() + "/" + containerName+"abc"; //$NON-NLS-1$
+		
 		TokenCredentials tc = new TokenCredentials(token);
 		ContainerURL  containerURL = new ContainerURL(new URL(url), StorageURL.createPipeline(tc, new PipelineOptions()));
 		return containerURL;
@@ -80,6 +81,14 @@ public enum StorageApi {
 	
 	public void resetToken() {
 		this.token = null;
+	}
+	
+	/**
+	 * 
+	 * @return the token if generated or null if not yet generated
+	 */
+	public String getToken(){
+		return this.token;
 	}
 	
 	private void getWorkspace() {
