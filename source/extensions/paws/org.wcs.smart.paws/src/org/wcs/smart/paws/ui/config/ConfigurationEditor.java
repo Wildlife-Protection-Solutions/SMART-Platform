@@ -235,8 +235,9 @@ public class ConfigurationEditor extends EditorPart {
 						PawsParameter newpp = new PawsParameter();
 						newpp.setConfiguration(pw);
 						newpp.setKey(PawsParameter.FixedParameter.LYR_OTHER.name());
+						newpp.setValue(PawsParameter.AREA_PREFIX + ((Area.AreaType)item).name());
+						
 						pw.getParameters().add(newpp);
-						pp.setValue(PawsParameter.AREA_PREFIX + ((Area.AreaType)item).name());
 						tokeep.add(newpp);
 					}else if (item instanceof Path) {
 						//import file
@@ -249,8 +250,9 @@ public class ConfigurationEditor extends EditorPart {
 						PawsParameter newpp = new PawsParameter();
 						newpp.setConfiguration(pw);
 						newpp.setKey(PawsParameter.FixedParameter.LYR_OTHER.name());
-						pw.getParameters().add(newpp);
 						newpp.setValue(PawsParameter.FILE_PREFIX + target.getFileName().toString());
+						
+						pw.getParameters().add(newpp);
 						tokeep.add(newpp);
 					}
 				}
@@ -267,17 +269,6 @@ public class ConfigurationEditor extends EditorPart {
 				
 				pp = getOrCreateParameter(pw, PawsParameter.FixedParameter.GRID_SIZE);
 				pp.setValue(txtGridSize.getText());
-				
-				
-//				pp = getOrCreateParameter(pw, PawsParameter.FixedParameter.GRID_CRS);
-//				Object crs = cmbCrs.getStructuredSelection().getFirstElement();
-//				Projection prj = (Projection)crs;
-//				prj.setParsedCoordinateReferenceSystem(ReprojectUtils.stringToCrs(prj.getDefinition()));
-//				if (prj.getUuid() != null){
-//					pp.setValue( UuidUtils.uuidToString(prj.getUuid()) + ":" + prj.getParsedCoordinateReferenceSystem().toWKT() );
-//				}else{
-//					pp.setValue( ":" + prj.getParsedCoordinateReferenceSystem().toWKT() );
-//				}
 				
 				pp = getOrCreateParameter(pw,  PawsParameter.FixedParameter.TRAINING_RES);
 				Object tr = cmbTrainingRes.getStructuredSelection().getFirstElement();
@@ -634,153 +625,6 @@ public class ConfigurationEditor extends EditorPart {
 		inner.setLayout(new GridLayout(2, false));
 		inner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-//		l = toolkit.createLabel(inner, PawsManager.INSTANCE.getName(FixedParameter.GRID_CRS) + ":");
-//		l.setToolTipText("Coordinate Reference System");
-//		
-//		cmbCrs = new ComboViewer(inner, SWT.READ_ONLY | SWT.FLAT | SWT.BORDER | SWT.DROP_DOWN);
-//		cmbCrs.setContentProvider(ArrayContentProvider.getInstance());
-//		cmbCrs.setLabelProvider(new LabelProvider() {
-//			@Override
-//			public String getText(Object element) {
-//				if (element instanceof Projection) {
-//					return ((Projection) element).getName();
-//				}
-//				return super.getText(element);
-//			}
-//		});
-//		cmbCrs.getControl().setBackground(inner.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-//		cmbCrs.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-//		cmbCrs.addPostSelectionChangedListener(e->{
-			//update bounds if valid
-//			ReferencedEnvelope re = (ReferencedEnvelope)txtBounds.getData(RE_DATA_KEY);
-//			CoordinateReferenceSystem crs = ((Projection)cmbCrs.getStructuredSelection().getFirstElement()).getParsedCoordinateReferenceSystem();
-//
-//			if (re != null){
-//				try{
-//					re = ReprojectUtils.reproject(re, crs);
-//					txtBounds.setData(RE_DATA_KEY, re);
-//					updateBounds();
-//				}catch (Exception ex){
-//					
-//				}
-//			}
-			
-//			setDirty(true);
-//		});
-		
-//		l = toolkit.createLabel(inner, PawsManager.INSTANCE.getName(FixedParameter.GRID_BNDS) + ":");
-//		l.setToolTipText("xmin,ymin,xmax,ymax in selected CRS");
-		
-//		Composite bnds = toolkit.createComposite(inner);
-//		bnds.setLayout(new GridLayout(2, false));
-//		bnds.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false ));
-//		((GridLayout)bnds.getLayout()).marginWidth = 0;
-//		((GridLayout)bnds.getLayout()).marginHeight = 0;
-//		
-//		txtBounds = new ErrorText(bnds, txt-> {
-//			try {
-//				String[] bits = txt.split("\\s+");
-//				if (bits.length != 4) throw new Exception();
-//				for (int i = 0; i < 4; i ++) Double.parseDouble(bits[i]);
-//				return null;
-//			}catch (Exception ex) {
-//				return "Bounds must be of the format \"xmin ymin xmax ymax\"";
-//			}
-//		});
-//		txtBounds.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false ));
-//		txtBounds.setText("");
-//		txtBounds.addListener(SWT.Modify, e->{
-//			try {
-//				String[] bits = txtBounds.getText().split("\\s+");
-//				if (bits.length != 4) throw new Exception();
-//				double xmin= Double.parseDouble(bits[0]);
-//				double ymin= Double.parseDouble(bits[1]);
-//				double xmax= Double.parseDouble(bits[2]);
-//				double ymax= Double.parseDouble(bits[3]);
-//				CoordinateReferenceSystem crs = ((Projection)cmbCrs.getStructuredSelection().getFirstElement()).getParsedCoordinateReferenceSystem();
-//				txtBounds.setData(RE_DATA_KEY, new ReferencedEnvelope(xmin, xmax, ymin, ymax, crs));
-//				
-//			}catch (Exception ex) {
-//				txtBounds.setData(RE_DATA_KEY, null);
-//			}
-//			setDirty(true);
-//		});
-//		
-//		Hyperlink lnkBnds = toolkit.createHyperlink(bnds, "set...", SWT.NONE);
-//		
-//		Menu mnu = new Menu(lnkBnds);
-//		
-//		Object[] items = new Object[] {PawsParameter.FixedParameter.LYR_BOUNDARY, cmbBound,
-////				PawsParameter.FixedParameter.LYR_ROAD, cmbRoad,
-////				PawsParameter.FixedParameter.LYR_CONTOUR, cmbContour,
-////				PawsParameter.FixedParameter.LYR_WATER, cmbRiver,
-//		};
-//		for (int i = 0; i < items.length; i +=2){
-//			MenuItem mi = new MenuItem(mnu, SWT.PUSH);
-//			mi.setEnabled(false);
-//			mi.setText("Set to " + PawsManager.INSTANCE.getName((PawsParameter.FixedParameter)items[i]) + " Bounds");
-//			final ComboViewer cmbViewer = (ComboViewer) items[i+1];
-//			cmbViewer.addSelectionChangedListener(e->{mi.setEnabled(cmbViewer.getStructuredSelection().getFirstElement() != null);});
-//			mi.addListener(SWT.Selection, e->{
-//				Job temp = new Job("computing bounds"){
-//					@Override
-//					protected IStatus run(IProgressMonitor monitor) {
-//						Object[] selection = new Object[]{null};
-//						getSite().getShell().getDisplay().syncExec(()->{
-//							selection[0] = cmbViewer.getStructuredSelection().getFirstElement();
-//						});
-//						
-//						final ReferencedEnvelope re = getBounds(selection[0]);
-//						if (re == null) return Status.OK_STATUS;
-//						getSite().getShell().getDisplay().syncExec(()->{
-//							try {
-//								CoordinateReferenceSystem crs = ((Projection)cmbCrs.getStructuredSelection().getFirstElement()).getParsedCoordinateReferenceSystem();
-//								ReferencedEnvelope re2 = ReprojectUtils.reproject(re, crs);
-//								txtBounds.setData(RE_DATA_KEY, re2);
-//								updateBounds();
-//							} catch (Exception e1) {
-//								PawsPlugIn.displayLog(e1.getMessage(), e1);
-//							}
-//						});
-//						return Status.OK_STATUS;
-//					}
-//					
-//				};
-//				temp.schedule();
-//				
-//			});
-//		}
-//		new MenuItem(mnu, SWT.SEPARATOR);
-//		MenuItem mi = new MenuItem(mnu, SWT.PUSH);
-//		mi.setText("Custom...");
-//		mi.addListener(SWT.Selection, e->{
-//			CoordinateReferenceSystem crs = ((Projection)cmbCrs.getStructuredSelection().getFirstElement()).getParsedCoordinateReferenceSystem();
-//			
-//			ReferencedEnvelope init = (ReferencedEnvelope) txtBounds.getData(RE_DATA_KEY);
-//			SelectBoundsMapDialog md = new SelectBoundsMapDialog(Display.getDefault().getActiveShell(), null, init);
-//			if (md.open() != Window.OK) return;
-//			ReferencedEnvelope re = md.getBounds();
-//			try {
-//				re = ReprojectUtils.reproject(re, crs);
-//				txtBounds.setData(RE_DATA_KEY, re);
-//				updateBounds();
-//			} catch (Exception e1) {
-//				PawsPlugIn.displayLog(e1.getMessage(), e1);
-//			}
-//		});
-//		
-//		lnkBnds.addHyperlinkListener(new IHyperlinkListener() {
-//			@Override
-//			public void linkExited(HyperlinkEvent e) { }
-//			@Override
-//			public void linkEntered(HyperlinkEvent e) { }
-//			
-//			@Override
-//			public void linkActivated(HyperlinkEvent e) {
-//				mnu.setVisible(true);
-//			}
-//		});
-		
 		l = toolkit.createLabel(inner, PawsManager.INSTANCE.getName(FixedParameter.GRID_SIZE) + Messages.ConfigurationEditor_MeterLbl);
 		l.setToolTipText(Messages.ConfigurationEditor_UnitsTooltip);
 		
@@ -985,39 +829,6 @@ public class ConfigurationEditor extends EditorPart {
 					pp = pw.findParameter(PawsParameter.FixedParameter.GRID_SIZE.name());
 					if (pp != null) txtGridSize.setText(pp.getValue());
 
-//					CoordinateReferenceSystem selectedCrs = null;
-//					pp = pw.findParameter(PawsParameter.FixedParameter.GRID_CRS.name());
-//					if (pp != null) {
-//						String uuid = pp.getValue().split(":")[0];
-//						
-//						Projection temp = new Projection();
-//						boolean add = false;
-//						List<Projection> prjs = (List<Projection>)cmbCrs.getInput();
-//						if (uuid.isBlank()){
-//							add = true;
-//						}else{
-//							temp.setUuid( UuidUtils.stringToUuid(uuid) );
-//							if (!prjs.contains(temp)){
-//								add = true;
-//							}
-//						}
-//						if (add){
-//							temp.setUuid(null);
-//							temp.setDefinition(pp.getValue().substring(uuid.length() + 1));
-//							temp.setName("Custom");
-//							prjs.add(temp);
-//							cmbCrs.refresh();
-//							try {
-//								temp.setParsedCoordinateReferenceSystem(CRS.parseWKT(temp.getDefinition()));
-//							}catch (Exception ex){
-//								PawsPlugIn.log(ex.getMessage(), ex);
-//							}
-//						}
-//						cmbCrs.setSelection(new StructuredSelection(temp));
-//						selectedCrs = temp.getParsedCoordinateReferenceSystem();
-//						
-//						
-//					}
 					pp = pw.findParameter(PawsParameter.FixedParameter.TRAINING_RES.name());
 					if (pp != null) {
 						cmbTrainingRes.setSelection(new StructuredSelection(  Integer.valueOf(pp.getValue()) ));
@@ -1027,135 +838,7 @@ public class ConfigurationEditor extends EditorPart {
 					if (pp != null) {
 						cmbClassifier.setSelection(new StructuredSelection( PawsParameter.ClassifierModel.valueOf( pp.getValue() ) ));
 					}
-					
-//					pp = pw.findParameter(PawsParameter.FixedParameter.GRID_BNDS.name());
-//					if (pp != null){
-//						try{
-//							String[] bits = pp.getValue().split("\\s+");
-//							double x1 = Double.parseDouble(bits[0]);
-//							double y1 = Double.parseDouble(bits[1]);
-//							double x2 = Double.parseDouble(bits[2]);
-//							double y2 = Double.parseDouble(bits[3]);
-//							ReferencedEnvelope re = new ReferencedEnvelope(x1,x2, y1, y2, selectedCrs);
-//							txtBounds.setData(RE_DATA_KEY, re);
-//							updateBounds();
-//						}catch (Exception ex){
-//							txtBounds.setText("");
-//						}
-//						
-//						
-//					}
-					
-//<<<<<<< .working
-//					if (pc.getType() == Type.DATAMODEL) {
-//						btnOpDataModel.setSelection(true);
-//						btnOpQuery.setSelection(false);
-//						Category c = QueryDataModelManager.getInstance().getCategory(s, pc.getCategoryHkey());
-//				        if (c == null){
-//				        	pc.cacheLabel( MessageFormat.format("ERROR: Category {0} not found.", pc.getCategoryHkey()) );
-//				        }else{
-//				        	if (pc.getAttributeKey() != null) {
-//								if (pc.getAttributeListItemKey() != null) {
-//									AttributeListItem li = QueryDataModelManager.getInstance().getAttributeListItem(s, pc.getAttributeKey(), pc.getAttributeListItemKey());
-//									if (li == null) {
-//										pc.cacheLabel( MessageFormat.format("ERROR: Attribute list item {0} not found.", pc.getAttributeListItemKey()) );
-//									} else {
-//										pc.cacheLabel( PawsClassification.createLabel(c, li.getAttribute(), li) );
-//										lblDataModel.setData(SRC_VALUE, pc);
-//									}
-//								}
-//
-//								if (pc.getAttributeTreeNodeHkey() != null) {
-//									AttributeTreeNode node = QueryDataModelManager.getInstance().getAttributeTreeNode( s, pc.getAttributeKey(), pc.getAttributeTreeNodeHkey());
-//									if (node == null) {
-//										pc.cacheLabel( MessageFormat.format("ERROR: Attribute tree node {0} not found.",pc.getAttributeTreeNodeHkey()));
-//									} else {
-//										pc.cacheLabel( PawsClassification.createLabel(c, node.getAttribute(), node));
-//										lblDataModel.setData(SRC_VALUE, pc);
-//									}
-//
-//								}
-//
-//							} else {
-//								pc.cacheLabel(PawsClassification.createLabel(c, null, null));
-//								lblDataModel.setData(SRC_VALUE, pc);
-//							}
-//						}
-//				        lblDataModel.setText(pc.getCachedLabel());
-//				        lblDataModel.getParent().layout(true);
-//					}
-//					if (pc.getType() == Type.QUERY) {
-//						btnOpQuery.setSelection(true);
-//						btnOpDataModel.setSelection(false);
-//			            Query temp = QueryHibernateManager.getInstance().findQuery(s, pc.getQueryUuid(), QueryTypeManager.INSTANCE.findQueryType( pc.getQueryType()));
-//			            if (temp != null){
-//			                pc.setCachedQuery(temp);
-//			                pc.cacheLabel(PawsManager.INSTANCE.createLabel(temp));
-//							lblQuery.setData(SRC_VALUE, pc);
-//			            }else{
-//			                pc.cacheLabel( "QUERY NOT FOUND" );
-//			            }
-//			            lblQuery.setText(pc.getCachedLabel());
-//			            lblQuery.getParent().layout(true);
-//					}
-//					
-//					updateClassificationUi();
-//||||||| .merge-left.r7405
-//					if (pc.getType() == Type.DATAMODEL) {
-//						btnOpDataModel.setSelection(true);
-//						btnOpQuery.setSelection(false);
-//						Category c = QueryDataModelManager.getInstance().getCategory(s, pc.getCategoryHkey());
-//				        if (c == null){
-//				        	pc.cacheLabel( MessageFormat.format("ERROR: Category {0} not found.", pc.getCategoryHkey()) );
-//				        }else{
-//				        	if (pc.getAttributeKey() != null) {
-//								if (pc.getAttributeListItemKey() != null) {
-//									AttributeListItem li = QueryDataModelManager.getInstance().getAttributeListItem(s, pc.getAttributeKey(), pc.getAttributeListItemKey());
-//									if (li == null) {
-//										pc.cacheLabel( MessageFormat.format("ERROR: Attribute list item {0} not found.", pc.getAttributeListItemKey()) );
-//									} else {
-//										pc.cacheLabel( PawsClassification.createLabel(c, li.getAttribute(), li) );
-//										lblDataModel.setData(SRC_VALUE, pc);
-//									}
-//								}
-//
-//								if (pc.getAttributeTreeNodeHkey() != null) {
-//									AttributeTreeNode node = QueryDataModelManager.getInstance().getAttributeTreeNode( s, pc.getAttributeKey(), pc.getAttributeTreeNodeHkey());
-//									if (node == null) {
-//										pc.cacheLabel( MessageFormat.format("ERROR: Attribute tree node {0} not found.",pc.getAttributeTreeNodeHkey()));
-//									} else {
-//										pc.cacheLabel( PawsClassification.createLabel(c, node.getAttribute(), node));
-//										lblDataModel.setData(SRC_VALUE, pc);
-//									}
-//
-//								}
-//
-//							} else {
-//								pc.cacheLabel(PawsClassification.createLabel(c, null, null));
-//								lblDataModel.setData(SRC_VALUE, pc);
-//							}
-//						}
-//				        lblDataModel.setText(pc.getCachedLabel());
-//				        lblDataModel.getParent().layout(true);
-//					}
-//					if (pc.getType() == Type.QUERY) {
-//						btnOpQuery.setSelection(true);
-//						btnOpDataModel.setSelection(false);
-//			            Query temp = QueryHibernateManager.getInstance().findQuery(s, pc.getQueryUuid(), QueryTypeManager.INSTANCE.findQueryType( pc.getQueryType()));
-//			            if (temp != null){
-//			                pc.setCachedQuery(temp);
-//			                pc.cacheLabel(PawsClassification.createLabel(temp));
-//							lblQuery.setData(SRC_VALUE, pc);
-//			            }else{
-//			                pc.cacheLabel( "QUERY NOT FOUND" );
-//			            }
-//			            lblQuery.setText(pc.getCachedLabel());
-//			            lblQuery.getParent().layout(true);
-//					}
-//					
-//					updateClassificationUi();
-//=======
-//>>>>>>> .merge-right.r7404
+				
 					setDirty(false);
 				});
 				
@@ -1221,7 +904,6 @@ public class ConfigurationEditor extends EditorPart {
 									Path copyto = target.getParent().resolve(targetName + "." + ext); //$NON-NLS-1$
 									try {
 										Files.copy(other, copyto, StandardCopyOption.REPLACE_EXISTING);
-//										Files.setPosixFilePermissions(copyto, Collections.singleton(PosixFilePermission.OWNER_WRITE));
 									} catch (Throwable e) {
 										PawsPlugIn.displayLog(MessageFormat.format(Messages.ConfigurationEditor_CopyError,  other.toString(), copyto.toString()), e);
 									}
