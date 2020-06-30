@@ -160,6 +160,7 @@ public class NewPawsRunHandler {
 		try {
 			if (!StorageApi.INSTANCE.getAuthorizationCode(Display.getDefault().getActiveShell(), rr )) return false;
 		}catch (Exception ex) {
+			PawsPlugIn.log(ex.getMessage(), ex);
 			MessageDialog.openWarning(Display.getDefault().getActiveShell(), Messages.NewPawsRunHandler_Title, 
 					Messages.NewPawsRunHandler_WorkspaceServiceRequired);
 			return false;

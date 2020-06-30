@@ -72,7 +72,7 @@ public enum StorageApi {
 	
 	public ContainerURL getContainerURL(String containerName) throws Exception {
 		if (service == null) throw new Exception(Messages.StorageApi_AuthCodeRequired);
-		String url = service.getStorageUrl() + "/" + containerName+"abc"; //$NON-NLS-1$
+		String url = service.getStorageUrl() + "/" + containerName; //$NON-NLS-1$
 		
 		TokenCredentials tc = new TokenCredentials(token);
 		ContainerURL  containerURL = new ContainerURL(new URL(url), StorageURL.createPipeline(tc, new PipelineOptions()));
@@ -136,7 +136,9 @@ public enum StorageApi {
 			return false;
 		}
 		
-		containerName = dialog.getUsername().replaceAll("\\.", "").replaceAll("@","");
+		containerName = dialog.getUsername().replaceAll("\\.", "") //$NON-NLS-1$ //$NON-NLS-2$ 
+				.replaceAll("@","") //$NON-NLS-1$ //$NON-NLS-2$ 
+				.toLowerCase(); 
 		run.setContainerName(containerName);
 		
 		acquireToken(authorizationCode);
