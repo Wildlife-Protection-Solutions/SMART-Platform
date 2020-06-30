@@ -92,8 +92,8 @@ public class MissionJsonTrackProcessor  implements IJsonProcessor {
 			JSONArray pntArray = (JSONArray) geom.get(JsonCtParser.GEOMETRY_COORDINATE_KEY);
 			if (pntArray.size() < 2 || pntArray.get(0) == null || pntArray.get(1) == null) continue;
 			
-			Double x = (Double) pntArray.get(0);
-			Double y = (Double) pntArray.get(1);
+			Double x = ((Number) pntArray.get(0)).doubleValue();
+			Double y = ((Number) pntArray.get(1)).doubleValue();
 			Date dt = JsonUtils.parseJsonDateTime((String)properties.get(JsonCtParser.DATETIME_KEY));
 
 			String deviceId = (String) properties.get(JsonCtParser.DEVICE_ID);

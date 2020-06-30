@@ -128,6 +128,9 @@ public class SmartCollectDataProcessor implements IJsonProcessor {
 			users.add(wpsource);
 		}
 		
+		if (users.isEmpty()) {
+			return Collections.emptyList();
+		}
 		
 		//check the state for the users
 		Map<String, SmartCollectUser> userStatus = getUserState(users);
