@@ -472,10 +472,11 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 		for(Object x : results) {
 			Object[] data = (Object[])x;
 			
-			UUID uuid = UuidUtils.byteToUUID((byte[])data[0]);
 			UUID cauuid = UuidUtils.byteToUUID((byte[])data[1]);
-			String userlevel = (String)data[2];
+			if (cauuid.equals(ConservationArea.MULTIPLE_CA)) continue;
 			
+			UUID uuid = UuidUtils.byteToUUID((byte[])data[0]);
+			String userlevel = (String)data[2];
 			String[] parts = userlevel.split(","); //$NON-NLS-1$
 			
 			List<String> newparts = new ArrayList<>();
