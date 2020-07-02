@@ -27,6 +27,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -136,12 +137,14 @@ public enum StorageApi {
 			return false;
 		}
 		
-		containerName = dialog.getUsername().replaceAll("\\.", "") //$NON-NLS-1$ //$NON-NLS-2$ 
-				.replaceAll("@","") //$NON-NLS-1$ //$NON-NLS-2$ 
-				.toLowerCase(); 
+		acquireToken(authorizationCode);
+		
+		if (containerName == null || containerName.isBlank()) {
+			throw new Exception("Could not determine container name for the user.  Email field is not provided in authentication token id_token field."); //$NON-NLS-1$
+		}
 		run.setContainerName(containerName);
 		
-		acquireToken(authorizationCode);
+		
 		return true;
 	}
 	
@@ -189,8 +192,21 @@ public enum StorageApi {
 						throw new Exception("access_token not found"); //$NON-NLS-1$
 					}
 				
+					String idtoken = (String) json.get("id_token"); //$NON-NLS-1$
+					if (idtoken == null || idtoken.isBlank()) {
+						throw new Exception("id_token not found in token request"); //$NON-NLS-1$
+					}
+					String body = idtoken.split("\\.")[1]; //$NON-NLS-1$
+					String bodyjson = new String(Base64.getDecoder().decode(body));
+
+					JSONObject id = (JSONObject) (new JSONParser()).parse(bodyjson);
+					String email = (String) id.get("email"); //$NON-NLS-1$
+					containerName = email.replaceAll("\\.", "") //$NON-NLS-1$ //$NON-NLS-2$ 
+							.replaceAll("@","") //$NON-NLS-1$ //$NON-NLS-2$ 
+							.toLowerCase();
+					
 				}catch (Exception ex) {
-					throw new Exception(Messages.StorageApi_CannotParseAuth +content.toString(), ex);
+					throw new Exception(MessageFormat.format(Messages.StorageApi_CannotParseAuth, ex.getMessage()) , ex);
 				}
 			}else {
 				PawsPlugIn.log("Authorization token cannot be found. Response: " + status + " Request: " + sb.toString() + " " + params.toString(), null);  //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$

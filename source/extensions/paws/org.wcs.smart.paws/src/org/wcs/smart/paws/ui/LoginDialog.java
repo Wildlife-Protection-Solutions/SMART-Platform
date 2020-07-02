@@ -57,7 +57,6 @@ public class LoginDialog extends SmartStyledDialog {
 	private Browser browser ;
 	private String code = null;
 	
-	private String username = null;
 	
 	public LoginDialog(Shell parent) {
 		super(parent);
@@ -91,10 +90,7 @@ public class LoginDialog extends SmartStyledDialog {
 	public String getAuthorizationCode() {
 		return this.code;
 	}
-	
-	public String getUsername() {
-		return this.username;
-	}
+
 	
 	@Override
 	protected Control createDialogArea(Composite parent) {
@@ -139,7 +135,7 @@ public class LoginDialog extends SmartStyledDialog {
 		sb.append("&prompt=login"); //$NON-NLS-1$
 		sb.append("&state=" + state); //$NON-NLS-1$
 		sb.append("&redirect_uri=" + redirectUri); //$NON-NLS-1$
-		System.out.println(sb.toString());
+
 		browser.setUrl(sb.toString());		
 		browser.addLocationListener(new LocationListener() {
 			
@@ -154,17 +150,6 @@ public class LoginDialog extends SmartStyledDialog {
 				doChange = false;
 				try {
 					String thisurl = browser.getUrl();
-					if (thisurl.contains("username=")) {
-						try {
-							Map<String,String> parts = parseUrl(thisurl);
-							username=parts.get("username");
-						}catch (Exception ex) {
-							PawsPlugIn.displayLog("Login Error", ex); //$NON-NLS-1$
-							browser.setUrl(sb.toString());
-							return;
-						}
-					}
-
 					if (thisurl.startsWith(redirectUri)) {
 						Map<String,String> parts = Collections.emptyMap();
 						try {
