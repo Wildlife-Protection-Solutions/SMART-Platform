@@ -11,6 +11,7 @@ package org.wcs.smart.query.udig.render;
 
 import java.awt.Color;
 import java.util.Arrays;
+import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -37,6 +38,7 @@ import org.locationtech.udig.style.IStyleConfigurator;
 import org.locationtech.udig.ui.ColorEditor;
 import org.opengis.coverage.grid.GridCoverage;
 import org.opengis.filter.FilterFactory;
+import org.opengis.filter.expression.Expression;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
@@ -76,6 +78,8 @@ public class SmartGridCellStyleConfigurator extends IStyleConfigurator implement
 		LineStyle.LINE_DOT.localName};
 	
 	private Button btnCheck;
+	
+	private Button btnNonZero, btnZero, btnNoData;
 	
 	private Composite cStyle;
 	private ColorEditor btnColor;
@@ -128,12 +132,40 @@ public class SmartGridCellStyleConfigurator extends IStyleConfigurator implement
         cmbLineStyle.setItems(LINE_STYLES);
         cmbLineStyle.select(0); 
    	
+        
+        l = new Label(cStyle, SWT.NONE);
+        l.setText(Messages.SmartGridCellStyleConfigurator_DrawBorderLbl);
+        l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+        ((GridData)l.getLayoutData()).verticalIndent = 3;
+        
+        Composite ops = new Composite(cStyle, SWT.NONE);
+        ops.setLayout(new GridLayout());
+        ops.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+        
+        btnNonZero = new Button(ops, SWT.CHECK);
+        btnNonZero.setText(Messages.SmartGridCellStyleConfigurator_NonZeroOp);
+        btnNonZero.setToolTipText(Messages.SmartGridCellStyleConfigurator_NonZeroTooltip);
+        btnNonZero.setSelection(true);
+        
+        btnZero = new Button(ops, SWT.CHECK);
+        btnZero.setText(Messages.SmartGridCellStyleConfigurator_ZeroOp);
+        btnZero.setToolTipText(Messages.SmartGridCellStyleConfigurator_ZeroTooltip);
+        btnZero.setSelection(true);
+        
+        btnNoData = new Button(ops, SWT.CHECK);
+        btnNoData.setText(Messages.SmartGridCellStyleConfigurator_NoDataOp);
+        btnNoData.setToolTipText(Messages.SmartGridCellStyleConfigurator_NoDataTooltip);
+        btnNoData.setSelection(false);
+        
         btnCheck.addSelectionListener(this);
         
         cStyle.setEnabled(false);
         for (Control c : cStyle.getChildren()){
 			c.setEnabled(cStyle.getEnabled());
 		}
+        btnNonZero.setEnabled(cStyle.getEnabled());
+        btnNoData.setEnabled(cStyle.getEnabled());
+        btnZero.setEnabled(cStyle.getEnabled());
     }
     
 	@Override
@@ -185,6 +217,15 @@ public class SmartGridCellStyleConfigurator extends IStyleConfigurator implement
         	}
         	if (!found) cmbLineStyle.add(text);
         	cmbLineStyle.setText(text);
+        	
+        	String x = style.featureTypeStyles().get(0).getOptions().get(SmartMemoryGridCoverageRenderer.DRAW_NOTZERO_OP);
+        	if (x != null) btnNonZero.setSelection(Boolean.valueOf(x));
+        	
+        	x = style.featureTypeStyles().get(0).getOptions().get(SmartMemoryGridCoverageRenderer.DRAW_ZERODATA_OP);
+        	if (x != null) btnZero.setSelection(Boolean.valueOf(x));
+        	
+        	x = style.featureTypeStyles().get(0).getOptions().get(SmartMemoryGridCoverageRenderer.DRAW_NODATA_OP);
+        	if (x != null) btnNoData.setSelection(Boolean.valueOf(x));
         }
         updateEnabledState();
     }
@@ -202,7 +243,16 @@ public class SmartGridCellStyleConfigurator extends IStyleConfigurator implement
 			}
 			gridSymbolizer.getStroke().setWidth(ff.literal(cmbSize.getSelection()));
 			gridSymbolizer.getStroke().setColor(ConstantExpression.color(btnColor.getColor()));
-			gridSymbolizer.getStroke().setDashArray(getDashArray());
+			float[] da = getDashArray();
+			if (da == null) {
+				gridSymbolizer.getStroke().setDashArray((List<Expression>)null);
+			}else {
+				gridSymbolizer.getStroke().setDashArray(getDashArray());
+			}
+			
+			style.featureTypeStyles().get(0).getOptions().put(SmartMemoryGridCoverageRenderer.DRAW_NOTZERO_OP, Boolean.toString( btnNonZero.getSelection()));
+			style.featureTypeStyles().get(0).getOptions().put(SmartMemoryGridCoverageRenderer.DRAW_ZERODATA_OP, Boolean.toString( btnZero.getSelection()));
+			style.featureTypeStyles().get(0).getOptions().put(SmartMemoryGridCoverageRenderer.DRAW_NODATA_OP, Boolean.toString( btnNoData.getSelection()));
 			
 			getStyleBlackboard().put(SmartGridCellStyleContent.STYLE_ID, style);	
 		}else{			
@@ -225,6 +275,9 @@ public class SmartGridCellStyleConfigurator extends IStyleConfigurator implement
     	for (Control c : cStyle.getChildren()){
 			c.setEnabled(enabled);
 		}
+    	btnNonZero.setEnabled(cStyle.getEnabled());
+        btnNoData.setEnabled(cStyle.getEnabled());
+        btnZero.setEnabled(cStyle.getEnabled());
     }
     
 	@Override

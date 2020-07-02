@@ -40,13 +40,18 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.gce.geotiff.GeoTiffWriter;
 import org.geotools.geometry.Envelope2D;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.util.SharedUtils;
+
+import it.geosolutions.jaiext.range.NoDataContainer;
 
 
 /**
@@ -161,7 +166,13 @@ public class RasterBuilder {
 			
 			try(OutputStream fout = Files.newOutputStream(out.toPath())){
 				GeoTiffWriter writer = new GeoTiffWriter(fout);
-				writer.write((new GridCoverageFactory()).create("smartraster", raster, envelope),null);// new GeneralParameterValue[]{params}); //$NON-NLS-1$
+
+				GridCoverageFactory gcf = new GridCoverageFactory();
+				Map<String, Object> properties = new HashMap<>();
+				properties.put(NoDataContainer.GC_NODATA, new NoDataContainer(NO_DATA));
+				GridCoverage2D inputCov = gcf.create("smartraster", raster, envelope, null, null, properties); //$NON-NLS-1$
+
+				writer.write(inputCov, null);
 			}
 			
 			allFiles.add(out);

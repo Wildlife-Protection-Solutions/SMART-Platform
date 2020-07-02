@@ -571,6 +571,7 @@ public class Messages extends NLS {
 	public static String SimpleQueryDefinitionImporter_InvalidPatrolType;
 	public static String SmartGridCellStyleConfigurator_CellBorderLabel;
 	public static String SmartGridCellStyleConfigurator_ColorLabel;
+	public static String SmartGridCellStyleConfigurator_DrawBorderLbl;
 	public static String SmartGridCellStyleConfigurator_linestyle_dash;
 	public static String SmartGridCellStyleConfigurator_linestyle_dashdot;
 	public static String SmartGridCellStyleConfigurator_linestyle_dashdotdot;
@@ -578,7 +579,13 @@ public class Messages extends NLS {
 	public static String SmartGridCellStyleConfigurator_linestyle_solid;
 	public static String SmartGridCellStyleConfigurator_LineStyleLabel;
 	public static String SmartGridCellStyleConfigurator_LineStyleTooltip;
+	public static String SmartGridCellStyleConfigurator_NoDataOp;
+	public static String SmartGridCellStyleConfigurator_NoDataTooltip;
+	public static String SmartGridCellStyleConfigurator_NonZeroOp;
+	public static String SmartGridCellStyleConfigurator_NonZeroTooltip;
 	public static String SmartGridCellStyleConfigurator_SizeLabel;
+	public static String SmartGridCellStyleConfigurator_ZeroOp;
+	public static String SmartGridCellStyleConfigurator_ZeroTooltip;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
