@@ -279,45 +279,4 @@ public class AssetObservationResult extends AbstractDbFeatureResultSet {
 		return ((AssetQueryResultItem)rs).getWaypointId() + "." + System.nanoTime(); //$NON-NLS-1$
 	}
 	
-	protected AssetQueryResultItem asQueryResultItem(ResultSet rs) throws SQLException{
-		AssetQueryResultItem it = new AssetQueryResultItem();
-		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
-		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
-		
-		it.setWaypointUuid((UUID)rs.getObject("wp_uuid")); //$NON-NLS-1$
-		it.setWaypointId(rs.getInt("wp_id")); //$NON-NLS-1$
-		it.setWaypointX(rs.getDouble("wp_x")); //$NON-NLS-1$
-		it.setWaypointY(rs.getDouble("wp_y")); //$NON-NLS-1$
-		it.setWaypointDate(rs.getTimestamp("wp_date")); //$NON-NLS-1$
-		it.setWaypointDirection(rs.getObject("wp_direction") == null ? null : rs.getFloat("wp_direction")); //$NON-NLS-1$ //$NON-NLS-2$
-		it.setWaypointDistance(rs.getObject("wp_distance") == null ? null : rs.getFloat("wp_distance")); //$NON-NLS-1$ //$NON-NLS-2$
-		it.setWaypointComment(rs.getString("wp_comment")); //$NON-NLS-1$
-		
-		it.setAssets(rs.getString("asset_asset")); //$NON-NLS-1$
-		it.setStation(rs.getString("asset_station")); //$NON-NLS-1$
-		it.setLocations(rs.getString("asset_location")); //$NON-NLS-1$
-		
-		UUID t = (UUID)rs.getObject("ob_uuid"); //$NON-NLS-1$
-		if (t == null){
-			it.setObservationUuid(null);
-		}else{
-			it.setObservationUuid(t); 
-		}
-		
-		//build categories
-		List<String> categories = new ArrayList<String>();
-		for (int i = 0; i < engine.getCategoryCnt(); i ++){
-			String category = rs.getString("category_"+i); //$NON-NLS-1$
-			if (category == null){
-				break;
-			}
-			categories.add(category);
-		}
-		
-		it.setCategory(categories.toArray(new String[categories.size()]));
-		return it;
-	}
-
-
-	
 }

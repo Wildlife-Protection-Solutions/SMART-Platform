@@ -187,6 +187,7 @@ public class ErObservationQueryResult extends ErSurveyQueryResultSet {
 		it.setWaypointDistance(rs.getObject("wp_distance") == null ? null : rs.getFloat("wp_distance")); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setWaypointComment(rs.getString("wp_comment")); //$NON-NLS-1$
 		it.setWaypointObserver(rs.getString("ob_observer")); //$NON-NLS-1$
+		it.setObservationGroupUuid((UUID)rs.getObject("wp_group_uuid")); //$NON-NLS-1$
 		it.setObservationUuid((UUID)rs.getObject("ob_uuid")); //$NON-NLS-1$
 		it.setLastModifiedDate(rs.getTimestamp("wp_lastmodified")); //$NON-NLS-1$
 		it.setLastModifiedBy(rs.getString("wp_lastmodifiedbyname")); //$NON-NLS-1$

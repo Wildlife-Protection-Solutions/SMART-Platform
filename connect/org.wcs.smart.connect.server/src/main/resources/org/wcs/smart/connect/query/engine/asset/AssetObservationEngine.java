@@ -48,6 +48,7 @@ import org.wcs.smart.connect.query.engine.IFilterProcessor;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.Query;
@@ -289,6 +290,7 @@ public class AssetObservationEngine extends AssetQueryEngine {
 		sql.append(tablePrefix(Waypoint.class) + ".last_modified, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".last_modified_by, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".ca_uuid, "); //$NON-NLS-1$
+		sql.append(tablePrefix(WaypointObservationGroup.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(WaypointObservation.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(WaypointObservation.class) + ".category_uuid "); //$NON-NLS-1$
 		return sql.toString();
@@ -309,6 +311,7 @@ public class AssetObservationEngine extends AssetQueryEngine {
 		sql.append("wp_lastmodified timestamp,"); //$NON-NLS-1$
 		sql.append("wp_lastmodifiedby uuid,"); //$NON-NLS-1$
 		sql.append("wp_ca_uuid uuid,"); //$NON-NLS-1$
+		sql.append("wp_group_uuid uuid,"); //$NON-NLS-1$
 		sql.append("ob_uuid uuid,"); //$NON-NLS-1$
 		sql.append("ob_category_uuid uuid"); //$NON-NLS-1$
 		sql.append(")"); //$NON-NLS-1$
@@ -340,6 +343,9 @@ public class AssetObservationEngine extends AssetQueryEngine {
 		
 		UUID t = (UUID)rs.getObject("ob_uuid"); //$NON-NLS-1$
 		it.setObservationUuid(t); 
+		
+		t = (UUID) rs.getObject("wp_group_uuid"); //$NON-NLS-1$
+		it.setObservationGroupUuid(t); 
 		
 		//build categories
 		List<String> categories = new ArrayList<String>();

@@ -413,7 +413,7 @@ public class CyberTrackerNoa {
 			item.setFile(null);
 			item.setStatus(Status.UPLOADING);
 			item.setStatusMessage(null);
-			item.setUploadedBy(request.getUserPrincipal().getName());
+			item.setUploadedBy("SMART Mobile"); //$NON-NLS-1$
 			item.setUploadedDate(new Date());
 			item.setWorkItem(null);
 		

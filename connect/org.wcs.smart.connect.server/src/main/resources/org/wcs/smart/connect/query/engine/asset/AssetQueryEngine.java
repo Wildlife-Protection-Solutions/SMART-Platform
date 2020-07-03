@@ -31,9 +31,15 @@ import java.util.Set;
 
 import org.hibernate.Session;
 import org.wcs.smart.asset.model.Asset;
+import org.wcs.smart.asset.model.AssetAttribute;
+import org.wcs.smart.asset.model.AssetAttributeListItem;
+import org.wcs.smart.asset.model.AssetAttributeValue;
 import org.wcs.smart.asset.model.AssetDeployment;
+import org.wcs.smart.asset.model.AssetDeploymentAttributeValue;
 import org.wcs.smart.asset.model.AssetStation;
+import org.wcs.smart.asset.model.AssetStationAttributeValue;
 import org.wcs.smart.asset.model.AssetStationLocation;
+import org.wcs.smart.asset.model.AssetStationLocationAttributeValue;
 import org.wcs.smart.asset.model.AssetWaypoint;
 import org.wcs.smart.asset.query.model.AssetQueryResultItem;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
@@ -56,6 +62,12 @@ public abstract class AssetQueryEngine extends AbstractQueryEngine {
 		tablePrefix.put(Asset.class, "aa"); //$NON-NLS-1$
 		tablePrefix.put(AssetStation.class, "astn"); //$NON-NLS-1$
 		tablePrefix.put(AssetStationLocation.class, "al"); //$NON-NLS-1$
+		tablePrefix.put(AssetDeploymentAttributeValue.class, "adav"); //$NON-NLS-1$\
+		tablePrefix.put(AssetAttributeValue.class, "aav"); //$NON-NLS-1$\
+		tablePrefix.put(AssetStationAttributeValue.class, "asav"); //$NON-NLS-1$\
+		tablePrefix.put(AssetStationLocationAttributeValue.class, "aslav"); //$NON-NLS-1$\
+		tablePrefix.put(AssetAttribute.class, "aat"); //$NON-NLS-1$
+		tablePrefix.put(AssetAttributeListItem.class, "aal"); //$NON-NLS-1$
 	}
 	
 	/**
@@ -67,6 +79,12 @@ public abstract class AssetQueryEngine extends AbstractQueryEngine {
 		tableNames.put(Asset.class, "smart.asset"); //$NON-NLS-1$
 		tableNames.put(AssetStation.class, "smart.asset_station"); //$NON-NLS-1$
 		tableNames.put(AssetStationLocation.class, "smart.asset_station_location"); //$NON-NLS-1$\
+		tableNames.put(AssetDeploymentAttributeValue.class, "smart.asset_deployment_attribute_value"); //$NON-NLS-1$\
+		tableNames.put(AssetAttributeValue.class, "smart.asset_attribute_value"); //$NON-NLS-1$\
+		tableNames.put(AssetStationAttributeValue.class, "smart.asset_station_attribute_value"); //$NON-NLS-1$\
+		tableNames.put(AssetStationLocationAttributeValue.class, "smart.asset_station_location_attribute_value"); //$NON-NLS-1$\
+		tableNames.put(AssetAttribute.class, "smart.asset_attribute"); //$NON-NLS-1$
+		tableNames.put(AssetAttributeListItem.class, "smart.asset_attribute_list_item"); //$NON-NLS-1$
 	}
 
 	public static String asString(Set<String> strings) {

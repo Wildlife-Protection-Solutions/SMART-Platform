@@ -45,6 +45,7 @@ import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.model.SurveyObservationQuery;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
@@ -259,6 +260,7 @@ public class PsqlErObservationEngine extends PsqlErEngine {
 		sql.append(tablePrefix(Waypoint.class) + ".wp_comment, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".last_modified, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".last_modified_by, "); //$NON-NLS-1$
+		sql.append(tablePrefix(WaypointObservationGroup.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(WaypointObservation.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(WaypointObservation.class) + ".employee_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(WaypointObservation.class) + ".category_uuid "); //$NON-NLS-1$
@@ -301,6 +303,7 @@ public class PsqlErObservationEngine extends PsqlErEngine {
 		sql.append("wp_lastmodified timestamp,"); //$NON-NLS-1$
 		sql.append("wp_lastmodifiedby uuid,"); //$NON-NLS-1$
 		
+		sql.append("wp_group_uuid UUID,"); //$NON-NLS-1$
 		sql.append("ob_uuid UUID,"); //$NON-NLS-1$
 		sql.append("ob_observer_uuid UUID,"); //$NON-NLS-1$
 		sql.append("ob_category_uuid UUID"); //$NON-NLS-1$

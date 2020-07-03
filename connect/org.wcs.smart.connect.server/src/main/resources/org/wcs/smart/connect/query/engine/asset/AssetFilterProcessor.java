@@ -29,13 +29,22 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import org.wcs.smart.asset.model.Asset;
+import org.wcs.smart.asset.model.AssetAttribute;
+import org.wcs.smart.asset.model.AssetAttributeListItem;
+import org.wcs.smart.asset.model.AssetAttributeValue;
 import org.wcs.smart.asset.model.AssetDeployment;
+import org.wcs.smart.asset.model.AssetDeploymentAttributeValue;
+import org.wcs.smart.asset.model.AssetStation;
+import org.wcs.smart.asset.model.AssetStationAttributeValue;
 import org.wcs.smart.asset.model.AssetStationLocation;
+import org.wcs.smart.asset.model.AssetStationLocationAttributeValue;
 import org.wcs.smart.asset.model.AssetWaypoint;
 import org.wcs.smart.asset.model.AssetWaypointSource;
 import org.wcs.smart.asset.query.engine.visitors.AreaFilterVisitor;
 import org.wcs.smart.asset.query.engine.visitors.AssetFilterCollector;
 import org.wcs.smart.asset.query.model.AssetFilterOption;
+import org.wcs.smart.asset.query.parser.internal.filter.AssetAttributeFilter;
+import org.wcs.smart.asset.query.parser.internal.filter.AssetAttributeFilter.Source;
 import org.wcs.smart.asset.query.parser.internal.filter.AssetFilter;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
@@ -129,7 +138,7 @@ public class AssetFilterProcessor implements IFilterProcessor {
 		}
 		qFilter.accept(observationFilterVisitor);	
 		
-		Map<AssetFilter, FilterTable> assetFilterToTableName = processAssetTables(c, queryFilter, dateFilter, caFilter);
+		Map<IFilter, FilterTable> assetFilterToTableName = processAssetTables(c, queryFilter, dateFilter, caFilter);
 		
 		if (observationFilterVisitor.hasAttributeFilter()){
 			createObservationTable(c, qFilter, dateFilter, caFilter);
@@ -198,7 +207,7 @@ public class AssetFilterProcessor implements IFilterProcessor {
 			DateFilter dateFilter, 
 			ConservationAreaFilter caFilter,
 			Connection c,
-			boolean populateObservation, Map<AssetFilter,FilterTable> assetFilterTables)
+			boolean populateObservation, Map<IFilter,FilterTable> assetFilterTables)
 			throws SQLException {
 
 		AssetFilterCollector assetVisitor = new AssetFilterCollector();
@@ -494,21 +503,21 @@ public class AssetFilterProcessor implements IFilterProcessor {
 	 * @param monitor
 	 * @throws SQLException
 	 */
-	private Map<AssetFilter, FilterTable> processAssetTables(Connection c, IFilter filter, 
+	private Map<IFilter, FilterTable> processAssetTables(Connection c, IFilter filter, 
 			DateFilter dateFilter, ConservationAreaFilter caFilter)
 			throws SQLException {
 
 		AssetFilterCollector collector = new AssetFilterCollector();
 		filter.accept(collector);
-		Collection<AssetFilter> filters = collector.getFilters();
+		Collection<IFilter> filters = collector.getFilters();
 		
-		Map<AssetFilter, FilterTable> filterToTableName = new HashMap<>();
+		Map<IFilter, FilterTable> filterToTableName = new HashMap<>();
 		
-		for (AssetFilter assetFilter : filters) {
+		for (IFilter part : filters) {
 			engine.clearParameters();
 			
 			String assetTable = engine.createTempTableName();
-			filterToTableName.put(assetFilter, new FilterTable(assetTable, "wp_uuid")); //$NON-NLS-1$
+			filterToTableName.put(part, new FilterTable(assetTable, "wp_uuid")); //$NON-NLS-1$
 
 			// -- build temporary table
 			StringBuilder sql = new StringBuilder();
@@ -560,33 +569,126 @@ public class AssetFilterProcessor implements IFilterProcessor {
 			
 			StringBuilder where = new StringBuilder();
 			
-			if (assetFilter.getAssetOption() == AssetFilterOption.ASSETTYPE) {
-				sql.append(" LEFT JOIN "); //$NON-NLS-1$
-				sql.append(namePrefix(Asset.class));
-				sql.append(" ON " ); //$NON-NLS-1$
-				sql.append(prefix(AssetDeployment.class) + ".asset_uuid = " + prefix(Asset.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$
-			
-				String key = engine.addParameterValue(assetFilter.getValue());
-				where.append(prefix(Asset.class) + ".asset_type_uuid = " + key); //$NON-NLS-1$
-			}
-			if (assetFilter.getAssetOption() == AssetFilterOption.ASSET) {
-				String key = engine.addParameterValue(assetFilter.getValue());
-				where.append(prefix(AssetDeployment.class) + ".asset_uuid = " + key); //$NON-NLS-1$
-			}
-			
-			if (assetFilter.getAssetOption() == AssetFilterOption.STATIONLOCATION) {
-				String key = engine.addParameterValue(assetFilter.getValue());
-				where.append(prefix(AssetDeployment.class) + ".station_location_uuid = " + key); //$NON-NLS-1$
-			}
-			if (assetFilter.getAssetOption() == AssetFilterOption.STATION) {
-				sql.append(" LEFT JOIN "); //$NON-NLS-1$
-				sql.append(namePrefix(AssetStationLocation.class));
-				sql.append(" ON " ); //$NON-NLS-1$
-				sql.append(prefix(AssetDeployment.class) + ".station_location_uuid = " + prefix(AssetStationLocation.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+			if (part instanceof AssetFilter) {
+				AssetFilter assetFilter = (AssetFilter)part;
 				
-				String key = engine.addParameterValue(assetFilter.getValue());
-				where.append(prefix(AssetStationLocation.class) + ".station_uuid = " + key); //$NON-NLS-1$
+				if (assetFilter.getAssetOption() == AssetFilterOption.ASSETTYPE) {
+					sql.append(" LEFT JOIN "); //$NON-NLS-1$
+					sql.append(namePrefix(Asset.class));
+					sql.append(" ON " ); //$NON-NLS-1$
+					sql.append(prefix(AssetDeployment.class) + ".asset_uuid = " + prefix(Asset.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+				
+					String key = engine.addParameterValue(assetFilter.getValue());
+					where.append(prefix(Asset.class) + ".asset_type_uuid = " + key); //$NON-NLS-1$
+				}
+				if (assetFilter.getAssetOption() == AssetFilterOption.ASSET) {
+					String key = engine.addParameterValue(assetFilter.getValue());
+					where.append(prefix(AssetDeployment.class) + ".asset_uuid = " + key); //$NON-NLS-1$
+				}
+				
+				if (assetFilter.getAssetOption() == AssetFilterOption.STATIONLOCATION) {
+					String key = engine.addParameterValue(assetFilter.getValue());
+					where.append(prefix(AssetDeployment.class) + ".station_location_uuid = " + key); //$NON-NLS-1$
+				}
+				if (assetFilter.getAssetOption() == AssetFilterOption.STATION) {
+					sql.append(" LEFT JOIN "); //$NON-NLS-1$
+					sql.append(namePrefix(AssetStationLocation.class));
+					sql.append(" ON " ); //$NON-NLS-1$
+					sql.append(prefix(AssetDeployment.class) + ".station_location_uuid = " + prefix(AssetStationLocation.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+					
+					String key = engine.addParameterValue(assetFilter.getValue());
+					where.append(prefix(AssetStationLocation.class) + ".station_uuid = " + key); //$NON-NLS-1$
+				}
+			}else if (part instanceof AssetAttributeFilter) {
+				AssetAttributeFilter aFilter = (AssetAttributeFilter)part;
+				
+				Class<?> valueClass = null;
+				if (aFilter.getSource() == Source.ASSET) {
+					valueClass = AssetAttributeValue.class;
+					
+					sql.append(" LEFT JOIN "); //$NON-NLS-1$
+					sql.append(namePrefix(Asset.class));
+					sql.append(" ON " ); //$NON-NLS-1$
+					sql.append(prefix(AssetDeployment.class) + ".asset_uuid = " + prefix(Asset.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+					
+					sql.append(" LEFT JOIN "); //$NON-NLS-1$
+					sql.append(namePrefix(valueClass));
+					sql.append(" ON " ); //$NON-NLS-1$
+					sql.append(prefix(Asset.class) + ".uuid = " + prefix(valueClass) + ".asset_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+					
+					
+				}else if (aFilter.getSource() == Source.STATION) {
+					valueClass = AssetStationAttributeValue.class;
+					
+					sql.append(" LEFT JOIN "); //$NON-NLS-1$
+					sql.append(namePrefix(AssetStationLocation.class));
+					sql.append(" ON " ); //$NON-NLS-1$
+					sql.append(prefix(AssetDeployment.class) + ".station_location_uuid = " + prefix(AssetStationLocation.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+					
+					sql.append(" LEFT JOIN "); //$NON-NLS-1$
+					sql.append(namePrefix(AssetStation.class));
+					sql.append(" ON " ); //$NON-NLS-1$
+					sql.append(prefix(AssetStationLocation.class) + ".station_uuid = " + prefix(AssetStation.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+					
+					sql.append(" LEFT JOIN "); //$NON-NLS-1$
+					sql.append(namePrefix(valueClass));
+					sql.append(" ON " ); //$NON-NLS-1$
+					sql.append(prefix(AssetStation.class) + ".uuid = " + prefix(valueClass) + ".station_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+					
+					
+					 
+				}else if (aFilter.getSource() == Source.STATIONLOCATION) {
+					valueClass = AssetStationLocationAttributeValue.class;
+					
+					sql.append(" LEFT JOIN "); //$NON-NLS-1$
+					sql.append(namePrefix(AssetStationLocation.class));
+					sql.append(" ON " ); //$NON-NLS-1$
+					sql.append(prefix(AssetDeployment.class) + ".station_location_uuid = " + prefix(AssetStationLocation.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+					
+					sql.append(" LEFT JOIN "); //$NON-NLS-1$
+					sql.append(namePrefix(valueClass));
+					sql.append(" ON " ); //$NON-NLS-1$
+					sql.append(prefix(AssetStationLocation.class) + ".uuid = " + prefix(valueClass) + ".station_location_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+					
+				}else if (aFilter.getSource() == Source.DEPLOYMENT) {
+					valueClass = AssetDeploymentAttributeValue.class;
+					
+					sql.append(" LEFT JOIN "); //$NON-NLS-1$
+					sql.append(namePrefix(valueClass));
+					sql.append(" ON " ); //$NON-NLS-1$
+					sql.append(prefix(AssetDeployment.class) + ".uuid = " + prefix(valueClass) + ".asset_deployment_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+					
+				}
+					
+					
+				sql.append(" LEFT JOIN "); //$NON-NLS-1$
+				sql.append(namePrefix(AssetAttribute.class));
+				sql.append(" ON " ); //$NON-NLS-1$
+				sql.append(prefix(valueClass) + ".attribute_uuid = " + prefix(AssetAttribute.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+				String key = engine.addParameterValue(aFilter.getAttributeKey());
+				sql.append(" AND " + prefix(AssetAttribute.class) + ".keyid = " + key);  //$NON-NLS-1$//$NON-NLS-2$
+				
+				String tprefix = prefix(valueClass);
+					
+				if (aFilter.getAttributeType() == AttributeType.LIST) {
+					sql.append(" LEFT JOIN "); //$NON-NLS-1$
+					sql.append(namePrefix(AssetAttributeListItem.class));
+					sql.append(" ON " ); //$NON-NLS-1$
+					sql.append(prefix(valueClass) + ".list_item_uuid = " + prefix(AssetAttributeListItem.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+						
+					tprefix = prefix(AssetAttributeListItem.class);
+				}
+				
+				key = engine.addParameterValue(aFilter.getAttributeKey());
+				where.append(prefix(AssetAttribute.class) + ".keyid = " + key); //$NON-NLS-1$
+					
+				where.append(" AND "); //$NON-NLS-1$
+				String q = PsqlFilterToSqlGenerator.INSTANCE.asSql(aFilter, tprefix, engine);
+				where.append(q);
+				
 			}
+			
+			
 			sql.append (" WHERE "); //$NON-NLS-1$
 			sql.append(where);
 			

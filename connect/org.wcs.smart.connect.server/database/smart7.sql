@@ -1944,7 +1944,7 @@ CREATE TABLE connect.ct_api_key(
     ca_uuid uuid not null,
     key_type varchar(32) not null, 
     api_key varchar(64) not null,
-    primary key (ca_uuid), unique(api_key)
+    primary key (ca_uuid, key_type), unique(api_key)
 );
 
 
