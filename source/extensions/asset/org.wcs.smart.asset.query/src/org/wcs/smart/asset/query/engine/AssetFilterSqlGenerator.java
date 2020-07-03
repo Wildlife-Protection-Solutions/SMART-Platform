@@ -175,7 +175,7 @@ public class AssetFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	
 	
 	/*
-	 * Attribute filter
+	 * Asset Attribute filter
 	 */
 	public String asSql(AssetAttributeFilter filter, String valuePrefix, IQueryEngine engine) throws SQLException{
 		
