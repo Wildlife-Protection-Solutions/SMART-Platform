@@ -27,6 +27,7 @@ import java.util.Locale;
 
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.er.query.ISurveyQueryLabelProvider;
+import org.wcs.smart.observation.query.model.columns.FixedQueryColumn;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.util.UuidUtils;
@@ -213,6 +214,10 @@ public class SurveyQueryColumn extends QueryColumn {
 			key = "waypoint:lastmodifiedbyname"; //$NON-NLS-1$
 		}else if (key.equals(FixedColumns.OBS_GROUP_ID.getKey() )){
 			key = "wp:group_uuid"; //$NON-NLS-1$
+		}else if (key.equals(FixedQueryColumn.FixedColumns.WAYPOINT_RAWX.getKey() )){
+			key = "wp:x"; //$NON-NLS-1$
+		}else if (key.equals(FixedQueryColumn.FixedColumns.WAYPOINT_RAWY.getKey() )){
+			key = "wp:y"; //$NON-NLS-1$
 		}
 		key = key.replace(":", "_"); //$NON-NLS-1$ //$NON-NLS-2$ 
 		for (String[] data : FIXED_COLUMN_KEY_TO_ROW) {

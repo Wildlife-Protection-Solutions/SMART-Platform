@@ -79,10 +79,7 @@ public class AttributeDropItem extends DropItem implements IFilterDropItem {
 	 * @param att the category attribute to make up the drop item
 	 */
 	public AttributeDropItem(CategoryAttribute att) {
-		//super(parent, target);
-		this.type = att.getAttribute().getType();
-		this.text = att.getAttribute().getName() + " (" + att.getCategory().getFullCategoryName() + ")";		 //$NON-NLS-1$ //$NON-NLS-2$
-		this.key = "category:" + att.getCategory().getHkey() + ":attribute:" + att.getAttribute().getType().typeKey +":" + att.getAttribute().getKeyId();  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+		this(att.getAttribute().getType(), att.getAttribute().getName(), "category:" + att.getCategory().getHkey() + ":attribute:" + att.getAttribute().getType().typeKey +":" + att.getAttribute().getKeyId());
 	}
 	
 	/**
@@ -93,10 +90,13 @@ public class AttributeDropItem extends DropItem implements IFilterDropItem {
 	 * @param att the category attribute to make up the drop item
 	 */
 	public AttributeDropItem(Attribute att) {
-		//super(parent, target);
-		this.type = att.getType();
-		this.text = att.getName();
-		this.key = "attribute:" + att.getType().typeKey + ":" + att.getKeyId(); //$NON-NLS-1$ //$NON-NLS-2$
+		this(att.getType(), att.getName(), "attribute:" + att.getType().typeKey + ":" + att.getKeyId());
+	}
+	
+	public AttributeDropItem(Attribute.AttributeType type, String text, String key) {
+		this.type = type;
+		this.text = text;
+		this.key = key;
 	}
 	
 	/**

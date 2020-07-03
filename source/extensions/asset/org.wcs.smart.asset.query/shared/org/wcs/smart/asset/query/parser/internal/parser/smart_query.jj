@@ -132,6 +132,14 @@ TOKEN :
  | < ATT_LIST_KEY : "attribute:l:"< DM_KEY > >
  | < ATT_TREE_KEY : "attribute:t:"< DM_KEY > >
  | < ATT_DATE_KEY : "attribute:d:"< DM_KEY > >
+
+ | < ASSETSRC : "a" | "s" | "l" | "d" >
+ | < ASSETATT_STR_KEY : "assetattribute:"< ASSETSRC >":s:"< DM_KEY > >
+ | < ASSETATT_VALUE_KEY : "assetattribute:"< ASSETSRC >":n:"< DM_KEY > >
+ | < ASSETATT_BOOL_KEY : "assetattribute:"< ASSETSRC >":b:"< DM_KEY > >
+ | < ASSETATT_LIST_KEY : "assetattribute:"< ASSETSRC >":l:"< DM_KEY > >
+ | < ASSETATT_DATE_KEY : "assetattribute:"< ASSETSRC >":d:"< DM_KEY > >
+ 
  | <CAT_ATT_STR_KEY : "category:"<DM_KEY>":attribute:s:"<DM_KEY>>
  | <CAT_ATT_VALUE_KEY : "category:"<DM_KEY>":attribute:n:"<DM_KEY>>
  | <CAT_ATT_BOOL_KEY : "category:"<DM_KEY>":attribute:b:"<DM_KEY>>
@@ -476,6 +484,11 @@ IFilter BooleanItemExpression():
   		{
     		filter = CategoryAttributeFilter.createBooleanFilter(token.image);
   		}
+   |
+    	< ASSETATT_BOOL_KEY >
+  		{
+    		filter = AssetAttributeFilter.createBooleanFilter(token.image);
+  		}
    	)	
  {
    return filter;
@@ -510,6 +523,15 @@ IFilter NumberExpression():
 		)
 		{
   			filter = CategoryAttributeFilter.createValueFilter(key, op, value);
+		}
+	| 
+		(
+			< ASSETATT_VALUE_KEY> {key = token.image;}
+	    	op = NumberOp()
+	    	< NUMBER > {value = Double.parseDouble(token.image);}
+		)
+		{
+  			filter = AssetAttributeFilter.createValueFilter(key, op, value);
 		}
 	)
 
@@ -579,7 +601,17 @@ IFilter AttributeExpression():
 	)
 	{
 		filter = CategoryAttributeFilter.createTreeItemFilter(key,op,value);
-	} 	
+	}
+	| 
+	/* asset attribute list items */
+	(
+		< ASSETATT_LIST_KEY > {key = token.image;}		    
+		<  EQUAL > {op = Operator.parseOperator(token.image);}
+		< DM_KEY >  {value = token.image;}
+	)
+	{
+		filter = AssetAttributeFilter.createListItemFilter(key,op,value);
+	}	
 	)
 	{
 		return filter;
@@ -617,6 +649,17 @@ IFilter DateItemExpression():
 		{
   			filter = CategoryAttributeFilter.createDateFilter(key, date1, date2, op);
 		}
+	|
+	  	(
+			< ASSETATT_DATE_KEY > {key = token.image;}
+			op = DateOp()
+			< DATE_STRING >  {date1 = token.image;}
+			< K_AND >
+			< DATE_STRING > {date2 = token.image;}
+		)
+		{
+  			filter = AssetAttributeFilter.createDateFilter(key, date1, date2, op);
+		}
 	)
 	{
 		return filter;
@@ -652,6 +695,16 @@ IFilter StringExpression():
 		{
   			filter = CategoryAttributeFilter.createStringFilter(key, op, value);
 		}
+	|
+	
+		( 
+			< ASSETATT_STR_KEY > {key = token.image;}
+			op = StringOp()
+			< QUOTED_STRING > {value = token.image;}
+		)
+		{
+  			filter = AssetAttributeFilter.createStringFilter(key, op, value);
+		}		
 
 	|
  		(

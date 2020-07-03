@@ -126,8 +126,8 @@ public class AttributeListDropItem extends DropItem implements IFilterDropItem{
 	private IConfigurationChangeListener queryConfChangeListener = new IConfigurationChangeListener() {
 		@Override
 		public void configurationChanged(QueryFilterConfiguration config) {
-			loadItemsJobs.cancel();
-			loadItemsJobs.schedule();
+			getLoadJob().cancel();
+			getLoadJob().schedule();
 		}
 	};
 		
@@ -140,8 +140,8 @@ public class AttributeListDropItem extends DropItem implements IFilterDropItem{
 	 */
 	public AttributeListDropItem(CategoryAttribute att) {
 		//super(parent, panel);
-		this.key = "category:" + att.getCategory().getHkey() + ":attribute:" + att.getAttribute().getType().typeKey + ":" + att.getAttribute().getKeyId(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		this.text = att.getAttribute().getName() + " (" + att.getCategory().getFullCategoryName() + ")";  //$NON-NLS-1$//$NON-NLS-2$
+		this(att.getAttribute().getName() + " (" + att.getCategory().getFullCategoryName() + ")", 
+				"category:" + att.getCategory().getHkey() + ":attribute:" + att.getAttribute().getType().typeKey + ":" + att.getAttribute().getKeyId());
 		this.attribute = att.getAttribute();
 	}
 
@@ -154,11 +154,14 @@ public class AttributeListDropItem extends DropItem implements IFilterDropItem{
 	 */
 	public AttributeListDropItem(Attribute att) {
 		//super(parent, panel);
-		this.key = "attribute:" + att.getType().typeKey + ":" + att.getKeyId(); //$NON-NLS-1$ //$NON-NLS-2$
-		this.text = att.getName() ;
+		this(att.getName(), "attribute:" + att.getType().typeKey + ":" + att.getKeyId());
 		this.attribute = att;
 	}
 	
+	protected AttributeListDropItem(String text, String key) {
+		this.text = text;
+		this.key = key;
+	}
 	
 	/**
 	 * @param data - a listItem 
@@ -174,7 +177,7 @@ public class AttributeListDropItem extends DropItem implements IFilterDropItem{
 	public void dispose(){
 		QueryFilterConfigManager.getInstance().removeChangeListener(queryConfChangeListener);
 		super.dispose();
-		loadItemsJobs.cancel();
+		getLoadJob().cancel();
 		if (smallerFont != null){
 			smallerFont.dispose();
 		}
@@ -259,9 +262,11 @@ public class AttributeListDropItem extends DropItem implements IFilterDropItem{
 		
 		
 		lblAttribute.setText(formatStringForLabel(this.text + " = ")); //$NON-NLS-1$
-		loadItemsJobs.schedule();
+		getLoadJob().schedule();
 		QueryFilterConfigManager.getInstance().addChangeListener(queryConfChangeListener);
 	}
 
-
+	protected Job getLoadJob() {
+		return loadItemsJobs;
+	}
 }

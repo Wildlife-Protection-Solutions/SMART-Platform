@@ -171,6 +171,10 @@ public class FixedQueryColumn extends QueryColumn {
 			key = "waypoint:lastmodified"; //$NON-NLS-1$
 		}else if (key.equals(FixedColumns.WAYPOINT_LASTMODIFIEDBY.getKey() )){
 			key = "waypoint:lastmodifiedbyname"; //$NON-NLS-1$
+		}else if (key.equals(FixedQueryColumn.FixedColumns.WAYPOINT_RAWX.getKey() )){
+			key = "wp:x"; //$NON-NLS-1$
+		}else if (key.equals(FixedQueryColumn.FixedColumns.WAYPOINT_RAWY.getKey() )){
+			key = "wp:y"; //$NON-NLS-1$
 		}
 		key = key.replace(":", "_"); //$NON-NLS-1$ //$NON-NLS-2$ 
 		for (String[] data : FIXED_COLUMN_KEY_TO_ROW) {

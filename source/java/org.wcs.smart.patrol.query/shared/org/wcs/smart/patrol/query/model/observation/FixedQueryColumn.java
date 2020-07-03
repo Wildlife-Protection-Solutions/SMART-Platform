@@ -223,6 +223,10 @@ public class FixedQueryColumn extends QueryColumn {
 			key = "waypoint:lastmodifiedbyname"; //$NON-NLS-1$
 		}else if (key.equals(FixedColumns.OBS_GROUP_ID.getKey() )){
 			key = "wp:group_uuid"; //$NON-NLS-1$
+		}else if (key.equals(FixedQueryColumn.FixedColumns.WAYPOINT_RAWX.getKey() )){
+			key = "wp:x"; //$NON-NLS-1$
+		}else if (key.equals(FixedQueryColumn.FixedColumns.WAYPOINT_RAWY.getKey() )){
+			key = "wp:y"; //$NON-NLS-1$
 		}
 		
 		key = key.replace(":", "_"); //$NON-NLS-1$ //$NON-NLS-2$

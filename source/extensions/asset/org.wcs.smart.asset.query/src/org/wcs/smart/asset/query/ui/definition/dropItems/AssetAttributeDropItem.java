@@ -1,6 +1,5 @@
-
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2020 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -20,50 +19,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.asset.query.ui.itempanel;
+package org.wcs.smart.asset.query.ui.definition.dropItems;
 
-import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.Viewer;
+import org.wcs.smart.asset.model.AssetAttribute;
+import org.wcs.smart.asset.query.ui.itempanel.AttributeWrapper;
+import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.query.ui.model.impl.AttributeDropItem;
 
 /**
- * Tree content provider for asset options.  This simply takes
- * an array of objects as input and returns them as the
- * root elements.  There are no children.
+ * drop item for asset attributes
  * 
  * @author Emily
  *
  */
-public class AssetOptionContentProvider implements ITreeContentProvider {
+public class AssetAttributeDropItem extends AttributeDropItem {
 
-	private Object[] ops;
+	public AssetAttributeDropItem(AttributeWrapper att) {
+		super(convertType(att.getAttribute()), att.getAttribute().getName(), "assetattribute:" + att.getType().key + ":" + att.getAttribute().getType().key + ":" + att.getAttribute().getKeyId());	 //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	}
+
 	
-	@Override
-	public void dispose() {
+	private static Attribute.AttributeType convertType(AssetAttribute a){
+		switch(a.getType()) {
+		case BOOLEAN: return Attribute.AttributeType.BOOLEAN;
+		case DATE: return Attribute.AttributeType.DATE;
+		case LIST: return Attribute.AttributeType.LIST;
+		case NUMERIC: return Attribute.AttributeType.NUMERIC;
+		case TEXT: return Attribute.AttributeType.TEXT;
+		default: return null;
+		}
 	}
-
-	@Override
-	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		this.ops = (Object[])newInput;
-	}
-
-	@Override
-	public Object[] getElements(Object inputElement) {
-		return ops;
-	}
-
-	@Override
-	public Object[] getChildren(Object parentElement) {
-		return null;
-	}
-
-	@Override
-	public Object getParent(Object element) {
-		return null;
-	}
-
-	@Override
-	public boolean hasChildren(Object element) {
-		return false;
-	}
-	
 }

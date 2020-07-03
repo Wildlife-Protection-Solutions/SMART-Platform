@@ -81,73 +81,85 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int ATT_DATE_KEY = 39;
   /** RegularExpression Id. */
-  int CAT_ATT_STR_KEY = 40;
+  int ASSETSRC = 40;
   /** RegularExpression Id. */
-  int CAT_ATT_VALUE_KEY = 41;
+  int ASSETATT_STR_KEY = 41;
   /** RegularExpression Id. */
-  int CAT_ATT_BOOL_KEY = 42;
+  int ASSETATT_VALUE_KEY = 42;
   /** RegularExpression Id. */
-  int CAT_ATT_LIST_KEY = 43;
+  int ASSETATT_BOOL_KEY = 43;
   /** RegularExpression Id. */
-  int CAT_ATT_TREE_KEY = 44;
+  int ASSETATT_LIST_KEY = 44;
   /** RegularExpression Id. */
-  int CAT_ATT_DATE_KEY = 45;
+  int ASSETATT_DATE_KEY = 45;
   /** RegularExpression Id. */
-  int DATE_STRING = 46;
+  int CAT_ATT_STR_KEY = 46;
   /** RegularExpression Id. */
-  int DM_KEY = 47;
+  int CAT_ATT_VALUE_KEY = 47;
   /** RegularExpression Id. */
-  int LETTER = 48;
+  int CAT_ATT_BOOL_KEY = 48;
   /** RegularExpression Id. */
-  int SPECIAL_CHARS = 49;
+  int CAT_ATT_LIST_KEY = 49;
   /** RegularExpression Id. */
-  int ASSET_FILTER_KEY = 50;
+  int CAT_ATT_TREE_KEY = 50;
   /** RegularExpression Id. */
-  int STATION_FILTER_KEY = 51;
+  int CAT_ATT_DATE_KEY = 51;
   /** RegularExpression Id. */
-  int ASSET_TYPE_FILTER_KEY = 52;
+  int DATE_STRING = 52;
   /** RegularExpression Id. */
-  int STATION_LOCATION_FILTER_KEY = 53;
+  int DM_KEY = 53;
   /** RegularExpression Id. */
-  int AREA_TYPE_KEY = 54;
+  int LETTER = 54;
   /** RegularExpression Id. */
-  int AREA_KEY = 55;
+  int SPECIAL_CHARS = 55;
   /** RegularExpression Id. */
-  int OBSERVATION_FILTER_TYPE_KEY = 56;
+  int ASSET_FILTER_KEY = 56;
   /** RegularExpression Id. */
-  int WAYPOINT_FILTER_TYPE_KEY = 57;
+  int STATION_FILTER_KEY = 57;
   /** RegularExpression Id. */
-  int ASSET_VALUE_ITEM = 58;
+  int ASSET_TYPE_FILTER_KEY = 58;
   /** RegularExpression Id. */
-  int ASSET_VALUE_KEY = 59;
+  int STATION_LOCATION_FILTER_KEY = 59;
   /** RegularExpression Id. */
-  int SUM_CAT_VALUE_KEY = 60;
+  int AREA_TYPE_KEY = 60;
   /** RegularExpression Id. */
-  int SUM_ATTRIBUTE_VALUE_KEY = 61;
+  int AREA_KEY = 61;
   /** RegularExpression Id. */
-  int SUM_CAT_ATT_VALUE_KEY = 62;
+  int OBSERVATION_FILTER_TYPE_KEY = 62;
   /** RegularExpression Id. */
-  int SUM_ATTRIBUTE_VALUE_LISTTREE_KEY = 63;
+  int WAYPOINT_FILTER_TYPE_KEY = 63;
   /** RegularExpression Id. */
-  int SUM_CAT_ATT_VALUE_LISTTREE_KEY = 64;
+  int ASSET_VALUE_ITEM = 64;
   /** RegularExpression Id. */
-  int AGG = 65;
+  int ASSET_VALUE_KEY = 65;
   /** RegularExpression Id. */
-  int DATE_GROUPBY_ITEM = 66;
+  int SUM_CAT_VALUE_KEY = 66;
   /** RegularExpression Id. */
-  int QUERY_SPLITTER = 67;
+  int SUM_ATTRIBUTE_VALUE_KEY = 67;
   /** RegularExpression Id. */
-  int ASSET_GROUPBY_OPTION = 68;
+  int SUM_CAT_ATT_VALUE_KEY = 68;
   /** RegularExpression Id. */
-  int CATEGORY_GROUPBY_ITEM = 69;
+  int SUM_ATTRIBUTE_VALUE_LISTTREE_KEY = 69;
   /** RegularExpression Id. */
-  int AREA_GROUPBY_ITEM = 70;
+  int SUM_CAT_ATT_VALUE_LISTTREE_KEY = 70;
   /** RegularExpression Id. */
-  int ATTRIBUTE_GROUPBY_ITEM = 71;
+  int AGG = 71;
   /** RegularExpression Id. */
-  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 72;
+  int DATE_GROUPBY_ITEM = 72;
   /** RegularExpression Id. */
-  int QUOTED_STRING = 73;
+  int QUERY_SPLITTER = 73;
+  /** RegularExpression Id. */
+  int ASSET_GROUPBY_OPTION = 74;
+  /** RegularExpression Id. */
+  int CATEGORY_GROUPBY_ITEM = 75;
+  /** RegularExpression Id. */
+  int AREA_GROUPBY_ITEM = 76;
+  /** RegularExpression Id. */
+  int ATTRIBUTE_GROUPBY_ITEM = 77;
+  /** RegularExpression Id. */
+  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 78;
+  /** RegularExpression Id. */
+  int QUOTED_STRING = 79;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -194,6 +206,12 @@ public interface ParserConstants {
     "<ATT_LIST_KEY>",
     "<ATT_TREE_KEY>",
     "<ATT_DATE_KEY>",
+    "<ASSETSRC>",
+    "<ASSETATT_STR_KEY>",
+    "<ASSETATT_VALUE_KEY>",
+    "<ASSETATT_BOOL_KEY>",
+    "<ASSETATT_LIST_KEY>",
+    "<ASSETATT_DATE_KEY>",
     "<CAT_ATT_STR_KEY>",
     "<CAT_ATT_VALUE_KEY>",
     "<CAT_ATT_BOOL_KEY>",

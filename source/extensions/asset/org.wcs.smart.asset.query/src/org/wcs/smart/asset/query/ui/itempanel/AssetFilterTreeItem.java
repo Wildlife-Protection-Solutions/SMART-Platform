@@ -28,13 +28,16 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.model.Asset;
+import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetType;
 import org.wcs.smart.asset.query.AssetQueryPlugIn;
 import org.wcs.smart.asset.query.internal.Messages;
+import org.wcs.smart.asset.ui.AttributeLabelProvider;
 import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
 
 /**
@@ -96,6 +99,8 @@ public class AssetFilterTreeItem implements IItemTreeNode{
 				return ((AssetStation)element).getId();
 			}else if (element instanceof AssetStationLocation) {
 				return ((AssetStationLocation)element).getId();
+			}else if (element instanceof AttributeWrapper) {
+				return ((AttributeWrapper)element).getAttribute().getName();
 			}
 			return super.getText(element);
 		}
@@ -111,6 +116,19 @@ public class AssetFilterTreeItem implements IItemTreeNode{
 				return AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_STATION_LOCATION);
 			}else if (element == AssetFilterContentProvider.STATION_ROOT) {
 				return AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_STATION); 
+			}else if (element == AssetFilterContentProvider.ASSET_ATTRIBUTE_ROOT) {
+				return AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_ASSET);
+			}else if (element == AssetFilterContentProvider.STATION_ATTRIBUTE_ROOT) {
+				return AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_STATION);
+			}else if (element == AssetFilterContentProvider.STATIONLOCATION_ATTRIBUTE_ROOT) {
+				return AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_STATION_LOCATION);				
+			}else if (element == AssetFilterContentProvider.DEPLOYMENT_ATTRIBUTE_ROOT) {
+				return null;
+			}else if (element == AssetFilterContentProvider.ATTRIBUTE_ROOT) {
+				return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_NUMBER_ICON);
+			}else if (element instanceof AttributeWrapper) {
+				AssetAttribute a = ((AttributeWrapper)element).getAttribute();
+				return AttributeLabelProvider.getImage(a.getType());
 			}else {
 				return AssetPlugIn.getDefault().getImageRegistry().get(AssetPlugIn.ICON_ASSET);
 			}

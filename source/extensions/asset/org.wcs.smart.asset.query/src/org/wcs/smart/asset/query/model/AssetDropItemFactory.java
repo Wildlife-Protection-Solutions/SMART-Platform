@@ -28,6 +28,7 @@ import java.util.UUID;
 
 import org.hibernate.Session;
 import org.wcs.smart.asset.model.Asset;
+import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetType;
@@ -41,9 +42,12 @@ import org.wcs.smart.asset.query.parser.internal.summary.AssetValueItem;
 import org.wcs.smart.asset.query.ui.AssetOptionData;
 import org.wcs.smart.asset.query.ui.definition.AssetSimpleFilterPanel;
 import org.wcs.smart.asset.query.ui.definition.AssetSummaryGroupByValuePanel;
+import org.wcs.smart.asset.query.ui.definition.dropItems.AssetAttributeDropItem;
+import org.wcs.smart.asset.query.ui.definition.dropItems.AssetAttributeListDropItem;
 import org.wcs.smart.asset.query.ui.definition.dropItems.AssetFillterDropItem;
 import org.wcs.smart.asset.query.ui.definition.dropItems.AssetGroupByDropItem;
 import org.wcs.smart.asset.query.ui.definition.dropItems.AssetValueDropItem;
+import org.wcs.smart.asset.query.ui.itempanel.AttributeWrapper;
 import org.wcs.smart.asset.query.ui.itempanel.SummaryFilterPanel;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
@@ -141,6 +145,18 @@ public class AssetDropItemFactory extends BasicDropItemFactory implements IDropI
 			if (queryItemPanelId.equals(SummaryFilterPanel.ID) ){
 				items = new DropItem[]{createCategoryValueDropItem(null)};
 			}
+		}else if (source instanceof AttributeWrapper) {
+			AttributeWrapper w = (AttributeWrapper)source;
+			if (w.getAttribute().getType() == AssetAttribute.AttributeType.DATE ||
+				w.getAttribute().getType() == AssetAttribute.AttributeType.BOOLEAN ||
+				w.getAttribute().getType() == AssetAttribute.AttributeType.NUMERIC ||
+				w.getAttribute().getType() == AssetAttribute.AttributeType.TEXT) { 
+				
+				items = new DropItem[] {new AssetAttributeDropItem(w)};
+			}else if (w.getAttribute().getType() == AssetAttribute.AttributeType.LIST) {
+				items = new DropItem[] {new AssetAttributeListDropItem(w)};
+			}
+			
 		}
 
 		return items;

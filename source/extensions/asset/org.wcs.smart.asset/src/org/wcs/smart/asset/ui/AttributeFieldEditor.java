@@ -413,7 +413,7 @@ public class AttributeFieldEditor {
 			cmbViewer.getControl().setEnabled(enabled);
 		}else if (attribute.getType() ==  AttributeType.DATE){
 			btnChDateTime.setEnabled(enabled);
-			dtDateTime.setEnabled(enabled);
+			dtDateTime.setEnabled(btnChDateTime.getSelection() && enabled);
 		}else if (attribute.getType() ==  AttributeType.BOOLEAN){
 			btnOnOff.setEnabled(enabled);
 			if (!enabled) {

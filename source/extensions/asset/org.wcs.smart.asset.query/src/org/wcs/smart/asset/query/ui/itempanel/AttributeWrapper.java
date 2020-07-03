@@ -1,6 +1,5 @@
-
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2020 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -22,48 +21,31 @@
  */
 package org.wcs.smart.asset.query.ui.itempanel;
 
-import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.Viewer;
+import org.wcs.smart.asset.model.AssetAttribute;
+import org.wcs.smart.asset.query.parser.internal.filter.AssetAttributeFilter;
 
 /**
- * Tree content provider for asset options.  This simply takes
- * an array of objects as input and returns them as the
- * root elements.  There are no children.
+ * For querying asset attributes, wraps an attribute and
+ * associated it with a source type
  * 
  * @author Emily
  *
  */
-public class AssetOptionContentProvider implements ITreeContentProvider {
-
-	private Object[] ops;
+public class AttributeWrapper {
 	
-	@Override
-	public void dispose() {
-	}
-
-	@Override
-	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		this.ops = (Object[])newInput;
-	}
-
-	@Override
-	public Object[] getElements(Object inputElement) {
-		return ops;
-	}
-
-	@Override
-	public Object[] getChildren(Object parentElement) {
-		return null;
-	}
-
-	@Override
-	public Object getParent(Object element) {
-		return null;
-	}
-
-	@Override
-	public boolean hasChildren(Object element) {
-		return false;
+	private AssetAttribute attribute;
+	private AssetAttributeFilter.Source type;
+	
+	public AttributeWrapper (AssetAttribute attribute, AssetAttributeFilter.Source type) {
+		this.attribute = attribute;
+		this.type = type;
 	}
 	
+	public AssetAttribute getAttribute() {
+		return this.attribute;
+	}
+	
+	public AssetAttributeFilter.Source getType() {
+		return this.type;
+	}
 }

@@ -103,12 +103,12 @@ public class AttributeFilter implements IFilter {
 	}
 	
 	
-	private String fullIdentifier;
-	private String attributeKey;
-	private AttributeType attributeType;
-	private Operator op;
-	private Object value1;
-	private Object value2;
+	protected String fullIdentifier;
+	protected String attributeKey;
+	protected AttributeType attributeType;
+	protected Operator op;
+	protected Object value1;
+	protected Object value2;
 	
 	
 	/**

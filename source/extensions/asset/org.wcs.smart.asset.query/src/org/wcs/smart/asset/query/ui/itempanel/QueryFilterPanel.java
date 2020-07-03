@@ -41,7 +41,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.asset.model.Asset;
+import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetStation;
+import org.wcs.smart.asset.model.AssetTypeAttribute;
 import org.wcs.smart.asset.query.internal.Messages;
 import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.ConservationAreaManager;
@@ -170,19 +172,40 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 			
 			if (!SmartDB.isMultipleAnalysis()){
 				
-				List<Asset> assets = null;
-				List<AssetStation> stations = null;
+				AssetFilterContentProvider.AssetFilterInput ainput = new AssetFilterContentProvider.AssetFilterInput();
+				
 				try(Session session = HibernateManager.openSession()){
-					assets = QueryFactory.buildQuery(session, Asset.class, 
+					ainput.assets = QueryFactory.buildQuery(session, Asset.class, 
 							new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
 							new Object[] {"isRetired", false}).list(); //$NON-NLS-1$
 					
-					assets.forEach(a->a.getAssetType().getName());
+					ainput.assets.forEach(a->a.getAssetType().getName());
 					
-					stations = QueryFactory.buildQuery(session, AssetStation.class, "conservationArea", SmartDB.getCurrentConservationArea()).list(); //$NON-NLS-1$
-					stations.forEach(s->s.getLocations().forEach(l->l.getId()));
+					ainput.stations = QueryFactory.buildQuery(session, AssetStation.class, "conservationArea", SmartDB.getCurrentConservationArea()).list(); //$NON-NLS-1$
+					ainput.stations.forEach(s->s.getLocations().forEach(l->l.getId()));
+					
+					ainput.assetAttributes = session.createQuery("FROM AssetAttribute a WHERE a in (SELECT id.attribute FROM AssetTypeAttribute WHERE id.attribute.conservationArea = :ca and id.attribute.type != :type)", AssetAttribute.class) //$NON-NLS-1$
+							.setParameter("type",  AssetAttribute.AttributeType.POSITION) //$NON-NLS-1$
+							.setParameter("ca",  SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
+							.list();
+					
+					ainput.stationAttributes = session.createQuery("FROM AssetAttribute a WHERE a in (SELECT id.attribute FROM AssetStationAttribute WHERE id.attribute.conservationArea = :ca and id.attribute.type != :type)", AssetAttribute.class) //$NON-NLS-1$
+							.setParameter("type",  AssetAttribute.AttributeType.POSITION) //$NON-NLS-1$
+							.setParameter("ca",  SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
+							.list();
+					
+					ainput.stationLocationAttributes = session.createQuery("FROM AssetAttribute a WHERE a in (SELECT id.attribute FROM AssetStationLocationAttribute WHERE id.attribute.conservationArea = :ca and id.attribute.type != :type)", AssetAttribute.class) //$NON-NLS-1$
+							.setParameter("type",  AssetAttribute.AttributeType.POSITION) //$NON-NLS-1$
+							.setParameter("ca",  SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
+							.list();
+					
+					ainput.deploymentAttributes = session.createQuery("FROM AssetAttribute a WHERE a in (SELECT id.attribute FROM AssetTypeDeploymentAttribute WHERE id.attribute.conservationArea = :ca and id.attribute.type != :type)", AssetAttribute.class) //$NON-NLS-1$
+							.setParameter("type",  AssetAttribute.AttributeType.POSITION) //$NON-NLS-1$
+							.setParameter("ca",  SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
+							.list();
 				}
-				input.put(AssetFilterTreeItem.KEY, new Object[] {assets, stations});
+				
+				input.put(AssetFilterTreeItem.KEY, ainput);
 			}
 
 			Display.getDefault().asyncExec(new Runnable(){

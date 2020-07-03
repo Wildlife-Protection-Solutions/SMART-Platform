@@ -23,9 +23,14 @@ package org.wcs.smart.asset.query.engine;
 
 import java.sql.SQLException;
 
+import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.query.internal.Messages;
+import org.wcs.smart.asset.query.parser.internal.filter.AssetAttributeFilter;
 import org.wcs.smart.asset.query.parser.internal.filter.AssetFilter;
+import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.query.common.engine.DerbyFilterToSqlGenerator;
 import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.common.engine.AbstractQueryEngine.FilterTable;
@@ -37,6 +42,7 @@ import org.wcs.smart.query.model.filter.CategoryFilter;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.IFilter;
+import org.wcs.smart.query.model.filter.Operator;
 
 /**
  * Converts filters to sql for the Derby query engine.
@@ -166,5 +172,45 @@ public class AssetFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 
 		return f;
 	}
+	
+	
+	/*
+	 * Attribute filter
+	 */
+	public String asSql(AssetAttributeFilter filter, String valuePrefix, IQueryEngine engine) throws SQLException{
+		
+		if (filter.getAttributeType() == AttributeType.BOOLEAN){
+			return " (" + valuePrefix + ".double_value1 > 0.5 ) ";			//$NON-NLS-1$ //$NON-NLS-2$
+		}else if (filter.getAttributeType() == AttributeType.NUMERIC){			
+			return " (" + valuePrefix + ".double_value1 " + asSql(filter.getOperator()) + " " + engine.addParameterValue((Double)filter.getValue()) +" ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		}else if (filter.getAttributeType() == AttributeType.TEXT){
+			
+			String queryStr = ""; //$NON-NLS-1$
+			String val = (String)filter.getValue();
+			if (filter.getOperator() == Operator.STR_CONTAINS || 
+					filter.getOperator() == Operator.STR_NOTCONTAINS){
+				String param = engine.addParameterValue("%" + val + "%"); //$NON-NLS-1$ //$NON-NLS-2$ 
+				queryStr = "( LOWER(" + valuePrefix + ".string_value ) " + asSql(filter.getOperator()) + " LOWER(" + param + ") )"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 	
+			}else if (filter.getOperator() == Operator.STR_EQUALS){
+				String param = engine.addParameterValue(val); 
+				queryStr = "( LOWER(" + valuePrefix + ".string_value) " + asSql(filter.getOperator()) + " LOWER(" + param + ") )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
+			}
+			return queryStr;
+		}else if (filter.getAttributeType() == AttributeType.DATE){
+			String p1 = engine.addParameterValue((String) filter.getValue()); 
+			String p2 = engine.addParameterValue((String) filter.getValue2()); 
+			return "( " + valuePrefix + ".string_value is not null AND DATE(" + valuePrefix + ".string_value) " + " " + asSql(filter.getOperator()) + " CAST(" + p1 + " as DATE) " + asSql(Operator.AND) + " CAST(" + p2 + " as DATE) )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
+		}else if (filter.getAttributeType() == AttributeType.LIST ){
+			if (filter.getValue().equals(AttributeFilter.ANY_OPTION_KEY)){
+				//any option
+				return "( "+ valuePrefix + ".keyid is not null )";  //$NON-NLS-1$ //$NON-NLS-2$
+			}else{
+				String p = engine.addParameterValue(filter.getValue()); 
+				return "( "+ valuePrefix + ".keyid " + asSql(filter.getOperator()) + " " + p + ")";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
+			}		
+		}
+		return ""; //$NON-NLS-1$
+	}
+	
 	
 }

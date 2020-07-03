@@ -30,14 +30,23 @@ import java.util.Map.Entry;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.wcs.smart.asset.model.Asset;
+import org.wcs.smart.asset.model.AssetAttribute;
+import org.wcs.smart.asset.model.AssetAttributeListItem;
+import org.wcs.smart.asset.model.AssetAttributeValue;
 import org.wcs.smart.asset.model.AssetDeployment;
+import org.wcs.smart.asset.model.AssetDeploymentAttributeValue;
+import org.wcs.smart.asset.model.AssetStation;
+import org.wcs.smart.asset.model.AssetStationAttributeValue;
 import org.wcs.smart.asset.model.AssetStationLocation;
+import org.wcs.smart.asset.model.AssetStationLocationAttributeValue;
 import org.wcs.smart.asset.model.AssetWaypoint;
 import org.wcs.smart.asset.model.AssetWaypointSource;
 import org.wcs.smart.asset.query.engine.visitors.AreaFilterVisitor;
 import org.wcs.smart.asset.query.internal.Messages;
 import org.wcs.smart.asset.query.model.AssetFilterOption;
+import org.wcs.smart.asset.query.parser.internal.filter.AssetAttributeFilter;
 import org.wcs.smart.asset.query.parser.internal.filter.AssetFilter;
+import org.wcs.smart.asset.query.parser.internal.filter.AssetAttributeFilter.Source;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -333,7 +342,8 @@ public class WaypointGroupFilterProcessor implements IFilterProcessor{
 				if ( filter instanceof AttributeFilter ||
 					filter instanceof CategoryFilter  ||	
 					filter instanceof CategoryAttributeFilter ||
-					filter instanceof AssetFilter){						
+					filter instanceof AssetFilter ||
+					filter instanceof AssetAttributeFilter ){						
 					
 					String colName = engine.createTempTableName();
 					engine.filterTables.put(filter, new FilterTable(colName, "wp_group_uuid")); //$NON-NLS-1$
@@ -364,25 +374,17 @@ public class WaypointGroupFilterProcessor implements IFilterProcessor{
 			sql.append(t.tablename + "(" + t.columnname + ") "); //$NON-NLS-1$ //$NON-NLS-2$
 			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().execute(sql.toString());
-						
-			AttributeFilter attfilter = null;
-			CategoryFilter catfilter = null;
-			AssetFilter assetFilter = null;
-			if (lfilter instanceof AttributeFilter){
-				attfilter = (AttributeFilter) lfilter;
+					
+			if (lfilter instanceof AssetAttributeFilter) {
+				processAssetAttributeFilter((AssetAttributeFilter)lfilter, t, c);
+			}else if (lfilter instanceof AttributeFilter){
+				processDataModelFilter(null, (AttributeFilter)lfilter, t, c);
 			}else if (lfilter instanceof CategoryAttributeFilter){
-				attfilter = ((CategoryAttributeFilter) lfilter).getAttributeFilter();
-				catfilter = ((CategoryAttributeFilter) lfilter).getCategoryFilter();
+				processDataModelFilter(((CategoryAttributeFilter) lfilter).getCategoryFilter(), ((CategoryAttributeFilter) lfilter).getAttributeFilter(), t, c);
 			}else if (lfilter instanceof CategoryFilter){
-				catfilter = (CategoryFilter) lfilter;
+				processDataModelFilter((CategoryFilter)lfilter, null, t, c);
 			}else if (lfilter instanceof AssetFilter) {
-				assetFilter = (AssetFilter)lfilter;
-			}
-			
-			if (attfilter != null || catfilter != null) {
-				processDataModelFilter(catfilter, attfilter, t, c);
-			}else if (assetFilter != null) {
-				processAssetFilter(assetFilter, t, c);
+				processAssetFilter((AssetFilter)lfilter, t, c);
 			}
 		}
 	}
@@ -396,10 +398,16 @@ public class WaypointGroupFilterProcessor implements IFilterProcessor{
 		sql.append("a.wp_group_uuid "); //$NON-NLS-1$
 		sql.append(" FROM "); //$NON-NLS-1$
 		sql.append(waypointTable + " a"); //$NON-NLS-1$
+		
+		sql.append(" JOIN "); //$NON-NLS-1$
+		sql.append(namePrefix(WaypointObservationGroup.class));
+		sql.append(" ON "); //$NON-NLS-1$
+		sql.append("a.wp_group_uuid = " + prefix(WaypointObservationGroup.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+				
 		sql.append(" JOIN "); //$NON-NLS-1$
 		sql.append(namePrefix(AssetWaypoint.class));
 		sql.append(" ON "); //$NON-NLS-1$
-		sql.append("a.wp_uuid = " + prefix(AssetWaypoint.class) + ".wp_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+		sql.append(prefix(WaypointObservationGroup.class) + ".wp_uuid = " + prefix(AssetWaypoint.class) + ".wp_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		sql.append(" LEFT JOIN "); //$NON-NLS-1$
 		sql.append(namePrefix(AssetDeployment.class));
@@ -443,7 +451,121 @@ public class WaypointGroupFilterProcessor implements IFilterProcessor{
 			ps.executeUpdate();
 		}
 	}
+	private void processAssetAttributeFilter(AssetAttributeFilter assetFilter, FilterTable t, Connection c) throws SQLException {
+		//create temporary table for attribute observations
+		StringBuilder sql = new StringBuilder();
+		sql.append("INSERT INTO "); //$NON-NLS-1$
+		sql.append(t.tablename + " (" + t.columnname + ")"); //$NON-NLS-1$ //$NON-NLS-2$	
+		sql.append(" SELECT "); //$NON-NLS-1$
+		sql.append("a.wp_group_uuid "); //$NON-NLS-1$
+		sql.append(" FROM "); //$NON-NLS-1$
+		sql.append(waypointTable + " a"); //$NON-NLS-1$
+		sql.append(" JOIN "); //$NON-NLS-1$
+		sql.append(namePrefix(WaypointObservationGroup.class));
+		sql.append(" ON "); //$NON-NLS-1$
+		sql.append("a.wp_group_uuid = " + prefix(WaypointObservationGroup.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+				
+		sql.append(" JOIN "); //$NON-NLS-1$
+		sql.append(namePrefix(AssetWaypoint.class));
+		sql.append(" ON "); //$NON-NLS-1$
+		sql.append(prefix(WaypointObservationGroup.class) + ".wp_uuid = " + prefix(AssetWaypoint.class) + ".wp_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
 		
+		sql.append(" LEFT JOIN "); //$NON-NLS-1$
+		sql.append(namePrefix(AssetDeployment.class));
+		sql.append(" ON " ); //$NON-NLS-1$
+		sql.append(prefix(AssetDeployment.class) + ".uuid = " + prefix(AssetWaypoint.class) + ".asset_deployment_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+		
+		StringBuilder where = new StringBuilder();
+		
+		Class<?> valueClass = null;
+		if (assetFilter.getSource() == Source.ASSET) {
+			valueClass = AssetAttributeValue.class;
+			
+			sql.append(" LEFT JOIN "); //$NON-NLS-1$
+			sql.append(namePrefix(Asset.class));
+			sql.append(" ON " ); //$NON-NLS-1$
+			sql.append(prefix(AssetDeployment.class) + ".asset_uuid = " + prefix(Asset.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+			
+			sql.append(" LEFT JOIN "); //$NON-NLS-1$
+			sql.append(namePrefix(valueClass));
+			sql.append(" ON " ); //$NON-NLS-1$
+			sql.append(prefix(Asset.class) + ".uuid = " + prefix(valueClass) + ".asset_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+			
+			
+		}else if (assetFilter.getSource() == Source.STATION) {
+			valueClass = AssetStationAttributeValue.class;
+			
+			sql.append(" LEFT JOIN "); //$NON-NLS-1$
+			sql.append(namePrefix(AssetStationLocation.class));
+			sql.append(" ON " ); //$NON-NLS-1$
+			sql.append(prefix(AssetDeployment.class) + ".station_location_uuid = " + prefix(AssetStationLocation.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+			
+			sql.append(" LEFT JOIN "); //$NON-NLS-1$
+			sql.append(namePrefix(AssetStation.class));
+			sql.append(" ON " ); //$NON-NLS-1$
+			sql.append(prefix(AssetStationLocation.class) + ".station_uuid = " + prefix(AssetStation.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+			
+			sql.append(" LEFT JOIN "); //$NON-NLS-1$
+			sql.append(namePrefix(valueClass));
+			sql.append(" ON " ); //$NON-NLS-1$
+			sql.append(prefix(AssetStation.class) + ".uuid = " + prefix(valueClass) + ".station_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+			
+			
+			 
+		}else if (assetFilter.getSource() == Source.STATIONLOCATION) {
+			valueClass = AssetStationLocationAttributeValue.class;
+			
+			sql.append(" LEFT JOIN "); //$NON-NLS-1$
+			sql.append(namePrefix(AssetStationLocation.class));
+			sql.append(" ON " ); //$NON-NLS-1$
+			sql.append(prefix(AssetDeployment.class) + ".station_location_uuid = " + prefix(AssetStationLocation.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+			
+			sql.append(" LEFT JOIN "); //$NON-NLS-1$
+			sql.append(namePrefix(valueClass));
+			sql.append(" ON " ); //$NON-NLS-1$
+			sql.append(prefix(AssetStationLocation.class) + ".uuid = " + prefix(valueClass) + ".station_location_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+			
+		}else if (assetFilter.getSource() == Source.DEPLOYMENT) {
+			valueClass = AssetDeploymentAttributeValue.class;
+			
+			sql.append(" LEFT JOIN "); //$NON-NLS-1$
+			sql.append(namePrefix(valueClass));
+			sql.append(" ON " ); //$NON-NLS-1$
+			sql.append(prefix(AssetDeployment.class) + ".uuid = " + prefix(valueClass) + ".asset_deployment_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+			
+		sql.append(" LEFT JOIN "); //$NON-NLS-1$
+		sql.append(namePrefix(AssetAttribute.class));
+		sql.append(" ON " ); //$NON-NLS-1$
+		sql.append(prefix(valueClass) + ".attribute_uuid = " + prefix(AssetAttribute.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+		String key = engine.addParameterValue(assetFilter.getAttributeKey());
+		sql.append(" AND " + prefix(AssetAttribute.class) + ".keyid = " + key);  //$NON-NLS-1$//$NON-NLS-2$
+		
+		String tprefix = prefix(valueClass);
+			
+		if (assetFilter.getAttributeType() == AttributeType.LIST) {
+			sql.append(" LEFT JOIN "); //$NON-NLS-1$
+			sql.append(namePrefix(AssetAttributeListItem.class));
+			sql.append(" ON " ); //$NON-NLS-1$
+			sql.append(prefix(valueClass) + ".list_item_uuid = " + prefix(AssetAttributeListItem.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+				
+			tprefix = prefix(AssetAttributeListItem.class);
+		}
+		
+		key = engine.addParameterValue(assetFilter.getAttributeKey());
+		where.append(prefix(AssetAttribute.class) + ".keyid = " + key); //$NON-NLS-1$
+		where.append(" AND "); //$NON-NLS-1$
+		String q = AssetFilterSqlGenerator.INSTANCE.asSql(assetFilter, tprefix, engine);
+		where.append(q);
+		
+		sql.append (" WHERE "); //$NON-NLS-1$
+		sql.append(where);
+		
+		QueryPlugIn.logSql(sql.toString());
+		try(PreparedStatement ps = engine.parseQueryString(c, sql.toString())){
+			ps.executeUpdate();
+		}
+	}		
 	private void processDataModelFilter(CategoryFilter catfilter, AttributeFilter attfilter, FilterTable t, Connection c) throws SQLException {
 		StringBuilder sql = new StringBuilder();
 		

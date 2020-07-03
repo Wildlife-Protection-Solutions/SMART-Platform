@@ -62,6 +62,11 @@ public class Messages extends NLS {
 	public static String AssetDropItemFactory_AssetTypeNotFound;
 	public static String AssetDropItemFactory_AssetTypeNotFound2;
 	public static String AssetFilterContentProvider_AssetFilterTreeNodeName;
+	public static String AssetFilterContentProvider_AttributeFieldSensorTreeNodeName;
+	public static String AssetFilterContentProvider_AttributeTreeNodeName;
+	public static String AssetFilterContentProvider_DeploymentAttributeTreeNodeName;
+	public static String AssetFilterContentProvider_StationAttributeTreeNodeName;
+	public static String AssetFilterContentProvider_StationLocationAttributeTreeNodeName;
 	public static String AssetFilterContentProvider_StationsLocationFilterTreeNodeName;
 	public static String AssetFilterSqlGenerator_AssetFilterError;
 	public static String AssetFilterTreeItem_AssetFiltersTreeItem;
