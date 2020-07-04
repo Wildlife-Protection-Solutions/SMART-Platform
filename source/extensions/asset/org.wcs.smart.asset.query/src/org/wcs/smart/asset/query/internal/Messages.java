@@ -55,6 +55,7 @@ public class Messages extends NLS {
 	public static String AssetAttributeValueItem_ListItemNotFound;
 	public static String AssetAttributeValueItem_TreeNodeNotFound;
 	public static String AssetCategoryValueItem_CategoryNotFound;
+	public static String AssetDropItemFactory_AssetAttributeNotFound;
 	public static String AssetDropItemFactory_AssetLocationNotFound;
 	public static String AssetDropItemFactory_AssetNotFound;
 	public static String AssetDropItemFactory_AssetNotFound2;

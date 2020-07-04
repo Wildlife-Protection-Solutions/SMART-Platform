@@ -34,6 +34,7 @@ import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetType;
 import org.wcs.smart.asset.query.AssetQueryPlugIn;
 import org.wcs.smart.asset.query.internal.Messages;
+import org.wcs.smart.asset.query.parser.internal.filter.AssetAttributeFilter;
 import org.wcs.smart.asset.query.parser.internal.filter.AssetFilter;
 import org.wcs.smart.asset.query.parser.internal.summary.AssetAttributeValueItem;
 import org.wcs.smart.asset.query.parser.internal.summary.AssetCategoryValueItem;
@@ -383,9 +384,43 @@ public class AssetDropItemFactory extends BasicDropItemFactory implements IDropI
 			return createDropItems((AssetFilter)f, session);
 		}else if (f instanceof BooleanExpression){
 			return createDropItems((BooleanExpression)f, session);
+		}else if (f instanceof AssetAttributeFilter) {
+			return createDropItems((AssetAttributeFilter)f, session);
 		}
 		return super.filterToDropItem(f, session);
 		
+	}
+	
+	public DropItem[] createDropItems(AssetAttributeFilter filter, Session session) throws Exception{
+		try{
+			AssetAttribute attribute = getAssetAttribute(filter.getAttributeKey(), session);
+			AttributeWrapper wrapper = new AttributeWrapper(attribute, filter.getSource());
+			
+			DropItem it = null;
+			if (attribute.getType() == AssetAttribute.AttributeType.LIST) {
+				it = new AssetAttributeListDropItem(wrapper);
+			}else {
+				it = new AssetAttributeDropItem(wrapper);
+			}
+			
+			initAttributeDropItem(filter, it, session);
+			return new DropItem[]{it};
+		}catch (Exception ex){
+			return new DropItem[]{new ErrorDropItem(ex.getMessage())};
+		}
+	}
+	
+	public AssetAttribute getAssetAttribute(String attributeKey, Session session) throws Exception{
+		//TODO: ccaa support is currently not implemented for any asset related features
+		AssetAttribute att = session.createQuery("FROM AssetAttribute WHERE keyid = :keyid and conservationArea = :ca", AssetAttribute.class) //$NON-NLS-1$
+				.setParameter("keyid", attributeKey) //$NON-NLS-1$
+				.setParameter("ca",  SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
+				.uniqueResult();
+		
+		if (att == null){
+			throw new Exception(MessageFormat.format(Messages.AssetDropItemFactory_AssetAttributeNotFound, new Object[]{attributeKey}));
+		}
+		return att;
 	}
 	
 	public DropItem[] createDropItems(BooleanExpression exp, Session session) throws Exception{
