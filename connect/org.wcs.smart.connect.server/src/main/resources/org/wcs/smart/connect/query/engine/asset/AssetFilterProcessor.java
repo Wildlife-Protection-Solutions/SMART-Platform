@@ -665,8 +665,6 @@ public class AssetFilterProcessor implements IFilterProcessor {
 				sql.append(namePrefix(AssetAttribute.class));
 				sql.append(" ON " ); //$NON-NLS-1$
 				sql.append(prefix(valueClass) + ".attribute_uuid = " + prefix(AssetAttribute.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$
-				String key = engine.addParameterValue(aFilter.getAttributeKey());
-				sql.append(" AND " + prefix(AssetAttribute.class) + ".keyid = " + key);  //$NON-NLS-1$//$NON-NLS-2$
 				
 				String tprefix = prefix(valueClass);
 					
@@ -679,13 +677,19 @@ public class AssetFilterProcessor implements IFilterProcessor {
 					tprefix = prefix(AssetAttributeListItem.class);
 				}
 				
-				key = engine.addParameterValue(aFilter.getAttributeKey());
-				where.append(prefix(AssetAttribute.class) + ".keyid = " + key); //$NON-NLS-1$
-					
-				where.append(" AND "); //$NON-NLS-1$
 				String q = PsqlFilterToSqlGenerator.INSTANCE.asSql(aFilter, tprefix, engine);
-				where.append(q);
 				
+				String key = engine.addParameterValue(aFilter.getAttributeKey());
+				if (aFilter.getAttributeType() == AttributeType.DATE) {
+					where.append("CASE WHEN " + prefix(AssetAttribute.class) + ".keyid = " + key); //$NON-NLS-1$ //$NON-NLS-2$
+					where.append(" THEN "); //$NON-NLS-1$
+					where.append(q);
+					where.append(" ELSE null END"); //$NON-NLS-1$
+				}else {
+					where.append(prefix(AssetAttribute.class) + ".keyid = " + key); //$NON-NLS-1$
+					where.append(" AND "); //$NON-NLS-1$
+					where.append(q);
+				}
 			}
 			
 			
