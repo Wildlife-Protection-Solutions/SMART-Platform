@@ -21,8 +21,10 @@
  */
 package org.wcs.smart.patrol.xml.in;
 
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.Collections;
@@ -72,8 +74,8 @@ public class ImportPatrolHandler {
 		ImportConfig config = dialog.getConfig();
 
 		if (files.size() == 1){
-			File file = new File(files.get(0));
-			if (!file.exists()) {
+			Path file = Paths.get(files.get(0));
+			if (!Files.exists(file)) {
 				MessageDialog.openError(activeShell,
 						Messages.ImportPatrolHandler_ErrorDialog_Title, MessageFormat.format(Messages.ImportPatrolHandler_Error_DirectoryNotFound,  new Object[]{file.toString()}));
 				return;
@@ -132,10 +134,10 @@ public class ImportPatrolHandler {
 						
 					int imported = 0;
 					for (int i = 0; i < files.size(); i ++){
-						File file = new File(files.get(i));
+						Path file = Paths.get(files.get(i));
 						monitor.subTask(Messages.ImportPatrolHandler_Progress_ProcessingFile + file.toString());
 						monitor.worked(1);
-						if (file.isDirectory()) continue;
+						if (Files.isDirectory(file)) continue;
 						try{
 							Patrol p = PatrolImporter.importPatrol(file, config, nullPm);
 							if (p != null) {
@@ -173,7 +175,7 @@ public class ImportPatrolHandler {
 	}
 	
 	
-	public void importFile(final Shell shell, final File file, final ImportConfig config, final IEclipseContext context) {
+	public void importFile(final Shell shell, final Path file, final ImportConfig config, final IEclipseContext context) {
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(shell);
 		try {
 			pmd.run(true, false, new IRunnableWithProgress() {

@@ -240,11 +240,11 @@ public class Thumbnail {
 		if (attachment == null){
 			fileName = ""; //$NON-NLS-1$
 		}else if (attachment.getCopyFromLocation() != null){
-			fileName = attachment.getCopyFromLocation().getName();
+			fileName = attachment.getCopyFromLocation().getFileName().toString();
 		}else if (imageName != null) {
 			fileName = imageName;
 		}else{
-			fileName = attachment.getAttachmentFile().getName();
+			fileName = attachment.getAttachmentFile().getFileName().toString();
 		}
 		
 		final String filename = fileName;

@@ -21,8 +21,10 @@
  */
 package org.wcs.smart.er.ui.samplingunit.load.wizard;
 
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.HashMap;
 
@@ -153,13 +155,13 @@ public class FileWizardPage extends WizardPage {
 		return this.importer;
 	}
 	
-	public File getFile(){
-		return new File(txtFile.getText());
+	public Path getFile(){
+		return Paths.get(txtFile.getText());
 	}
 	
 	public String[] getFieldNames(final HashMap<String, Object> options){
 		fieldsNames = null;
-		final File f = new File(txtFile.getText());
+		final Path f = Paths.get(txtFile.getText());
 		final boolean isCsv = delimiter.getControl().getEnabled();
 		
 		Character lDelim = null;
@@ -173,9 +175,9 @@ public class FileWizardPage extends WizardPage {
 		}
 		final Character delimi = lDelim;
 		
-		if (!f.exists()){
+		if (!Files.exists(f)){
 			MessageDialog.openInformation(getShell(), Messages.FileWizardPage_ErrorTitle, 
-					MessageFormat.format(Messages.FileWizardPage_FileNotFound, new Object[]{f.getAbsolutePath()}));
+					MessageFormat.format(Messages.FileWizardPage_FileNotFound, new Object[]{f.toAbsolutePath().toString()}));
 			return null;
 		}
 		
@@ -200,7 +202,7 @@ public class FileWizardPage extends WizardPage {
 						fieldsNames = importer.getFieldNames(f, params);
 					} catch (Exception e) {
 						MessageDialog.openInformation(getShell(), Messages.FileWizardPage_ErrorTitle, 
-								MessageFormat.format(Messages.FileWizardPage_ErrorReadingFile + "\n\n" + e.getMessage(), new Object[]{f.getAbsolutePath()})); //$NON-NLS-1$
+								MessageFormat.format(Messages.FileWizardPage_ErrorReadingFile + "\n\n" + e.getMessage(), new Object[]{f.toAbsolutePath().toString()})); //$NON-NLS-1$
 					}
 					monitor.worked(1);
 					monitor.done();
@@ -208,7 +210,7 @@ public class FileWizardPage extends WizardPage {
 			});
 		} catch (Exception e) {
 			MessageDialog.openInformation(getShell(), Messages.FileWizardPage_ErrorTitle, 
-					MessageFormat.format(Messages.FileWizardPage_ErrorReadingFile + "\n\n" + e.getMessage(), new Object[]{f.getAbsolutePath()})); //$NON-NLS-1$
+					MessageFormat.format(Messages.FileWizardPage_ErrorReadingFile + "\n\n" + e.getMessage(), new Object[]{f.toAbsolutePath().toString()})); //$NON-NLS-1$
 		}
 		return fieldsNames;
 	}

@@ -21,8 +21,9 @@
  */
 package org.wcs.smart.map.internal;
 
-import java.io.File;
 import java.io.Serializable;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,7 +52,7 @@ public class BasemapInterceptor extends SessionInterceptor {
 
 	//track files to delete; only delete
 	//after transaction has been committed
-	protected List<File> toDelete = new ArrayList<File>();
+	protected List<Path> toDelete = new ArrayList<>();
 	
 	protected boolean shouldIntercept(Object entity) {
 		return (entity instanceof BasemapDefinition);
@@ -60,9 +61,9 @@ public class BasemapInterceptor extends SessionInterceptor {
 	@Override
 	public void afterTransactionCompletion(Transaction tx){
 		if (tx.getStatus() == TransactionStatus.COMMITTED){
-			for (File f : toDelete){
+			for (Path f : toDelete){
 				try{
-					f.delete();
+					Files.delete(f);
 				}catch (Exception ex){
 					SmartPlugIn.log("Could not delete file: " + f.toString(), ex); //$NON-NLS-1$
 				}

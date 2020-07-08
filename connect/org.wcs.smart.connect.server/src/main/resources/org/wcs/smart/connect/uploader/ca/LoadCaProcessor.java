@@ -128,7 +128,7 @@ public class LoadCaProcessor implements IUploadItemProcessor {
 	
 	private void cleanUp(WorkItem item){
 		try{
-			Files.deleteIfExists(DataStoreManager.INSTANCE.getFile(item.getLocalFilename()).toPath());
+			Files.deleteIfExists(DataStoreManager.INSTANCE.getFile(item.getLocalFilename()));
 		}catch (Exception ex){
 			logger.log(Level.WARNING, "Could not delete ca upload file.", ex); //$NON-NLS-1$
 		}

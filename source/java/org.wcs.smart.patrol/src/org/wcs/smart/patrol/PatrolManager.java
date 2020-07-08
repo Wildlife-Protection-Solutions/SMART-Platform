@@ -21,7 +21,9 @@
  */
 package org.wcs.smart.patrol;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,7 +32,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
@@ -44,6 +45,7 @@ import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.user.UserLevelManager;
+import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -132,7 +134,8 @@ public class PatrolManager {
 			}
 			session.beginTransaction();
 			try{
-				File fileStore = new File(SmartDB.getCurrentConservationArea().getFileDataStoreLocation() + File.separator + patrol.getPatrolDatastorePath());
+				Path fileStore = Paths.get(SmartDB.getCurrentConservationArea().getFileDataStoreLocation())
+						.resolve(patrol.getPatrolDatastorePath());
 			
 				if (!runDeleteHandlers(patrol, session, progress.split(1))){
 					return false;
@@ -153,12 +156,12 @@ public class PatrolManager {
 			
 				runAfterDeleteHandlers(patrol, progress.split(1));
 			
-				if (fileStore.exists()){
+				if (Files.exists(fileStore)){
 					progress.subTask(Messages.PatrolManager_Progress_RemovingFileStore);
 					try{
-						FileUtils.forceDelete(fileStore);
+						SmartUtils.deleteDirectory(fileStore);
 					}catch(Exception ex){
-						SmartPatrolPlugIn.displayLog(Messages.PatrolManager_Error_CouldNotDeleteFilestore + fileStore.getAbsolutePath(), ex);
+						SmartPatrolPlugIn.displayLog(Messages.PatrolManager_Error_CouldNotDeleteFilestore + fileStore.toAbsolutePath().toString(), ex);
 					}
 				}
 				progress.worked(1);

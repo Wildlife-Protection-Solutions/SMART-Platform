@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.er.model;
 
-import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -208,12 +209,9 @@ public class Mission extends UuidItem{
 	 * mission waypoints
 	 */
 	@Transient
-	public File getFilestoreLocation(ConservationArea ca){
-		return new File(
-				ca.getFileDataStoreLocation()
-				+ File.separator 
-				+ SurveyDesign.SURVEY_FILESTORE_LOC
-				+ File.separator
-				+ UuidUtils.getDirectoryPath(getUuid()));
+	public Path getFilestoreLocation(ConservationArea ca){
+		return Paths.get(ca.getFileDataStoreLocation())
+				.resolve(SurveyDesign.SURVEY_FILESTORE_LOC)
+				.resolve(UuidUtils.getDirectoryPath(getUuid()));
 	}
 }

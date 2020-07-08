@@ -243,7 +243,7 @@ public class CyberTrackerNoa {
 			if (!ctpackage.getConservationArea().getUuid().equals(tokenCaUuid)) throw new SmartConnectException(Response.Status.FORBIDDEN); 
 			
 			file = DataStoreManager.INSTANCE.getRootDirectory()
-					.toPath().resolve(CyberTracker.CT_PACKAGE_DATASTORE_LOCATION).resolve(ctpackage.getFilename());
+					.resolve(CyberTracker.CT_PACKAGE_DATASTORE_LOCATION).resolve(ctpackage.getFilename());
 		}finally {
 			s.getTransaction().commit();
 		}
@@ -335,7 +335,7 @@ public class CyberTrackerNoa {
 			if (!layer.getConservationArea().getUuid().equals(tokenCaUuid)) throw new SmartConnectException(Response.Status.FORBIDDEN); 
 			
 			file = DataStoreManager.INSTANCE.getRootDirectory()
-					.toPath().resolve(CyberTracker.CT_NAVIGATION_DATASTORE_LOCATION).resolve(layer.getFilename());
+					.resolve(CyberTracker.CT_NAVIGATION_DATASTORE_LOCATION).resolve(layer.getFilename());
 		}finally {
 			s.getTransaction().commit();
 		}
@@ -436,7 +436,7 @@ public class CyberTrackerNoa {
 				+ File.separator + UuidUtils.uuidToString(item.getUuid()) + ".file"); //$NON-NLS-1$
 		item.setFile(localName);
 		
-		java.nio.file.Path upfile = DataStoreManager.INSTANCE.getFile(item.getFile()).toPath();
+		java.nio.file.Path upfile = DataStoreManager.INSTANCE.getFile(item.getFile());
 		if (!Files.exists(upfile.getParent())) {
 			try {
 				Files.createDirectories(upfile.getParent());

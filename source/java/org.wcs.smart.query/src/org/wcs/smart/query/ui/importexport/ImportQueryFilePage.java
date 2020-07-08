@@ -22,6 +22,8 @@
 package org.wcs.smart.query.ui.importexport;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -56,14 +58,14 @@ public class ImportQueryFilePage extends WizardPage {
 	
 	public static final String PAGENAME = "QueryFiles"; //$NON-NLS-1$
 	
-	private List<File> files = null;
+	private List<Path> files = null;
 	
 	/**
 	 * Creates a new query wizard page.
 	 */
 	protected ImportQueryFilePage() {
 		super(PAGENAME);
-		files = new ArrayList<File>();
+		files = new ArrayList<>();
 	}
 
 	/**
@@ -119,8 +121,9 @@ public class ImportQueryFilePage extends WizardPage {
 				String f = fd.open();
 				
 				if (f != null) {
+					Path root = Paths.get(fd.getFilterPath());
 					for (String f2 : fd.getFileNames()){
-						File newF = new File(fd.getFilterPath(), f2);
+						Path newF = root.resolve(f2);
 						if (!files.contains(newF)){
 							files.add(newF);
 							lstFiles.refresh();	
@@ -160,7 +163,7 @@ public class ImportQueryFilePage extends WizardPage {
 	/**
 	 * @return the selected file
 	 */
-	public List<File> getFiles(){
+	public List<Path> getFiles(){
 		return files;
 	}
 	

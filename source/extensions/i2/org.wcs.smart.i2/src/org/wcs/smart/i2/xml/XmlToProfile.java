@@ -22,7 +22,6 @@
 package org.wcs.smart.i2.xml;
 
 import java.awt.Color;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -34,6 +33,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -109,7 +109,7 @@ public class XmlToProfile {
 		rootPath = Files.createTempDirectory("smart." + System.nanoTime()); //$NON-NLS-1$
 		try {
 			try {
-				ZipUtil.unzipFolder(zipFile.toFile(), rootPath.toFile());
+				ZipUtil.unzipFolder(zipFile, rootPath);
 			} catch (Exception e) {
 				throw new IOException(e);
 			}
@@ -117,9 +117,10 @@ public class XmlToProfile {
 			//lets find all xml files
 			
 			Path xmlFile = null;
-			for (File f : rootPath.toFile().listFiles()) {
-				if (f.getName().endsWith(".xml")) { //$NON-NLS-1$
-					xmlFile = f.toPath();
+			List<Path> files = Files.list(rootPath).collect(Collectors.toList());
+			for (Path f : files) {
+				if (f.getFileName().toString().endsWith(".xml")) { //$NON-NLS-1$
+					xmlFile = f;
 				}
 			}
 			

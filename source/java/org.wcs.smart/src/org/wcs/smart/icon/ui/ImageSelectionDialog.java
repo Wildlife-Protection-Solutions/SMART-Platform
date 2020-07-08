@@ -446,7 +446,7 @@ public class ImageSelectionDialog extends SmartStyledTitleDialog {
 							}else {
 								file.computeFileLocation(session);
 								try {
-									items.add(file.getAttachmentFile().getAbsoluteFile().toURI().toURL().toString()); 
+									items.add(file.getAttachmentFile().normalize().toAbsolutePath().toUri().toURL().toString()); 
 								} catch (MalformedURLException e) {
 									e.printStackTrace();
 								}

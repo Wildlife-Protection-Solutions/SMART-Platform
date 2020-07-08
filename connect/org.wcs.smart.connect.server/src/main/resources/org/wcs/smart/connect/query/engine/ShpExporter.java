@@ -35,6 +35,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -164,9 +165,9 @@ public class ShpExporter {
 			}			
 		});
 		
-		ZipUtil.createZip(Files.newDirectoryStream(outDirectory), zipFile);
+		ZipUtil.createZip(Files.list(outDirectory).collect(Collectors.toList()), zipFile);
 		
-		FileUtils.deleteDirectory(outDirectory.toFile());
+		FileUtils.deleteDirectory(outDirectory.toAbsolutePath().normalize().toFile());
 	}
 	
 }

@@ -21,8 +21,9 @@
  */
 package org.wcs.smart.plan.report;
 
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -62,7 +63,7 @@ public class ExportPlanJob extends Job {
 	private static final String NONE = Messages.ExportPlanJob_NoneLabel;
 	
 	private UUID planUuid;
-	private File outputFile;
+	private Path outputFile;
 	private int dpi;
 	
 	public ExportPlanJob(UUID planUuid) {
@@ -80,8 +81,8 @@ public class ExportPlanJob extends Job {
 			Plan plan = null;
 			try{
 				plan = (Plan) session.load(Plan.class, planUuid);
-				this.outputFile = File.createTempFile(URLUtils.cleanFilename(plan.getId()) + "_", ".pdf"); //$NON-NLS-1$ //$NON-NLS-2$
-				outputFile.deleteOnExit();
+				this.outputFile = Files.createTempFile(URLUtils.cleanFilename(plan.getId()) + "_", ".pdf"); //$NON-NLS-1$ //$NON-NLS-2$
+				outputFile.toAbsolutePath().toFile().deleteOnExit();
 				
 				reportParameters.put(ReportPlan.PLAN_UUID, UuidUtils.uuidToString(plan.getUuid()));
 				reportParameters.put(ReportPlan.PLAN_ID, plan.getId());
@@ -126,7 +127,7 @@ public class ExportPlanJob extends Job {
 					reportParameters.put(ReportPlan.PLAN_PARENT, plan.getParent().getLabel());
 				}
 			
-				try(FileOutputStream fout = new FileOutputStream(outputFile)){
+				try(OutputStream fout = Files.newOutputStream(outputFile)){
 					IRenderOption options = new RenderOption();
 					options.setOutputStream(fout);
 					options.setEmitterID("org.eclipse.birt.report.engine.emitter.pdf"); //$NON-NLS-1$

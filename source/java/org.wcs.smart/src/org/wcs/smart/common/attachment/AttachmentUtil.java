@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.common.attachment;
 
-import java.io.File;
 import java.nio.file.Path;
 
 import org.eclipse.swt.program.Program;
@@ -44,7 +43,7 @@ public class AttachmentUtil {
 				Path p = EncryptUtils.decryptAttachment(attachment);
 				if (p != null) {
 					p.toFile().deleteOnExit();
-					launch(p.toFile());
+					launch(p);
 				}
 				
 			}catch (Exception ex){
@@ -53,12 +52,8 @@ public class AttachmentUtil {
 		}
 	}
 	
-	public static final void launch(File file) {
-		try {
-			Program.launch(file.getCanonicalPath());
-		} catch (Exception ex) {
-			Program.launch(file.getAbsolutePath());
-		}
+	public static final void launch(Path file) {
+		Program.launch(file.normalize().toAbsolutePath().toString());
 	}
 	
 	public static final void launch(String url) {

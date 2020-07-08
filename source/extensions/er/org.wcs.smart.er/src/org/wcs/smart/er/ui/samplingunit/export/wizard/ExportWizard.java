@@ -21,13 +21,12 @@
  */
 package org.wcs.smart.er.ui.samplingunit.export.wizard;
 
-import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.HashMap;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.IPageChangingListener;
@@ -46,6 +45,7 @@ import org.wcs.smart.er.ui.samplingunit.export.CsvSamplingUnitExporter;
 import org.wcs.smart.er.ui.samplingunit.export.ISamplingUnitExporter;
 import org.wcs.smart.er.ui.samplingunit.export.ShpSamplingUnitExporter;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Import sampling unit wizard.
@@ -87,18 +87,13 @@ public class ExportWizard extends Wizard implements IPageChangingListener{
 	
 	@Override
 	public boolean performFinish() {
-		final File dir = locationPage.getDirectory();
-		if (!dir.exists()){
+		final Path dir = locationPage.getDirectory();
+		if (!Files.exists(dir)){
 			if (!MessageDialog.openQuestion(getShell(), Messages.ExportWizard_ExportDialogTitle, 
-				MessageFormat.format(Messages.ExportWizard_DirectoryMessage, new Object[]{dir.getAbsolutePath()}))){
+				MessageFormat.format(Messages.ExportWizard_DirectoryMessage, new Object[]{dir.toAbsolutePath().toString()}))){
 				return false;
 			}
-			try{
-				FileUtils.forceMkdir(dir);
-			}catch(IOException ex){
-				EcologicalRecordsPlugIn.displayLog(ex.getMessage(), ex);
-				return false;
-			}
+			if (!SmartUtils.createDirectory(dir)) return false;
 		}
 		
 		final HashMap<Object, Object> options = new HashMap<Object, Object>();
@@ -125,7 +120,7 @@ public class ExportWizard extends Wizard implements IPageChangingListener{
 						if (exportPlots) {
 							Session session = HibernateManager.openSession();
 							try {
-								File plotFile = new File(dir, surveyDesign.getName() + "_" + "plots" + "." + exporter.getFileExtension()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+								Path plotFile = dir.resolve( surveyDesign.getName() + "_" + "plots" + "." + exporter.getFileExtension()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 								options.put(ISamplingUnitExporter.SU_TYPE_KEY, GeometryType.PLOT);
 								exporter.exportFile(plotFile, surveyDesign, session, options, progress.split(1));
 							}finally{
@@ -141,7 +136,7 @@ public class ExportWizard extends Wizard implements IPageChangingListener{
 							Session session = HibernateManager.openSession();
 							try{
 								options.put(ISamplingUnitExporter.SU_TYPE_KEY, GeometryType.TRANSECT);
-								File transectFile = new File(dir, surveyDesign.getName() + "_" + "transects" + "." + exporter.getFileExtension()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+								Path transectFile = dir.resolve(surveyDesign.getName() + "_" + "transects" + "." + exporter.getFileExtension()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 								exporter.exportFile(transectFile, surveyDesign, session, options, progress.split(1));
 							}finally{
 								if (session.isOpen()){

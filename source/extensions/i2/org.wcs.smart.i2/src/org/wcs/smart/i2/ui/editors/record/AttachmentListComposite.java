@@ -419,7 +419,7 @@ public class AttachmentListComposite extends Composite{
 			for (String file : dialog.getFileNames()){
 				IntelAttachment ia = new IntelAttachment();
 				ia.setConservationArea(SmartDB.getCurrentConservationArea());
-				ia.setCopyFromLocation(Paths.get(dialog.getFilterPath()).resolve(file).toFile());
+				ia.setCopyFromLocation(Paths.get(dialog.getFilterPath()).resolve(file));
 				ia.setCreatedBy(SmartDB.getCurrentEmployee());
 				ia.setDateCreated(new Date());
 				ia.setFilename(Paths.get(dialog.getFilterPath()).resolve(file).getFileName().toString());

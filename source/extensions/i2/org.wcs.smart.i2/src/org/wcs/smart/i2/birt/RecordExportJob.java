@@ -77,7 +77,7 @@ public class RecordExportJob extends Job {
 	protected IStatus run(IProgressMonitor monitor) {
 		try{
 			final Path out = runRecord();
-			Display.getDefault().syncExec(() ->  AttachmentUtil.launch(out.toFile()));
+			Display.getDefault().syncExec(() ->  AttachmentUtil.launch(out));
 		}catch (Exception ex){
 			Intelligence2PlugIn.displayLog(ex.getMessage(), ex);
 		}		

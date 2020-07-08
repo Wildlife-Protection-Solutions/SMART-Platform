@@ -21,11 +21,11 @@
  */
 package org.wcs.smart.query.common.importexport;
 
-import java.io.File;
 import java.io.Serializable;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -133,7 +133,7 @@ public abstract class ShapeQueryExporter extends SimpleQueryExporter implements 
 	@SuppressWarnings("unchecked")
 	@Override
 	protected void finish() throws Exception {
-		URL shpFileURL = URLUtils.fileToURL(this.outputFile);
+		URL shpFileURL = URLUtils.fileToURL(this.outputFile.toAbsolutePath().toFile());
 		
 		FileDataStoreFactorySpi factory = FileDataStoreFinder.getDataStoreFactory("shp"); //$NON-NLS-1$
         Map<String, Serializable> params = new HashMap<String, Serializable>();
@@ -204,7 +204,7 @@ public abstract class ShapeQueryExporter extends SimpleQueryExporter implements 
 	
 
 	@Override
-	public void export(Query query, IQueryResult results, File file, HashMap<String, Object> parameters, IProgressMonitor monitor) throws Exception {
+	public void export(Query query, IQueryResult results, Path file, HashMap<String, Object> parameters, IProgressMonitor monitor) throws Exception {
 		this.query = ((SimpleQuery)query);
 		outputPrj = (Projection) parameters.get(IQueryExporter.PROJECTION_PARAM_KEY);
 		IProjectionProvider provider = new IProjectionProvider() {

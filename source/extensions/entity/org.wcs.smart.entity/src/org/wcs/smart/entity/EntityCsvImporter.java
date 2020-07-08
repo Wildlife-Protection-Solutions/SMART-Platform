@@ -21,10 +21,10 @@
  */
 package org.wcs.smart.entity;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -67,7 +67,7 @@ import au.com.bytecode.opencsv.CSVReader;
 public class EntityCsvImporter {
 
 	private EntityType entityType;
-	private File importFile;
+	private Path importFile;
 	private CsvImporterConfig configuration;
 	
 	/**
@@ -100,7 +100,7 @@ public class EntityCsvImporter {
 	 * 
 	 * @param importFile
 	 */
-	public void setFile(File importFile){
+	public void setFile(Path importFile){
 		this.importFile = importFile;
 	}
 	
@@ -120,7 +120,7 @@ public class EntityCsvImporter {
 	 */
 	private String[] readHeaders() throws Exception{
 	
-		try(CSVReader csvReader = new CSVReader(new InputStreamReader(new FileInputStream(importFile), StandardCharsets.UTF_8), configuration.getDelimiter())){ 
+		try(CSVReader csvReader = new CSVReader(new InputStreamReader(Files.newInputStream(importFile), StandardCharsets.UTF_8), configuration.getDelimiter())){ 
 			return csvReader.readNext();
 		}
 	}
@@ -128,7 +128,7 @@ public class EntityCsvImporter {
 	/**
 	 * Imports all entities from the configured file.
 	 * 
-	 * The file must be set {@link #setFile(File)}, and the 
+	 * The file must be set {@link #setFile(Path)}, and the 
 	 * configuration {@link #getConfiguration()} initialized.
 	 * 	
 	 * @param s
@@ -145,7 +145,7 @@ public class EntityCsvImporter {
 		int totalCount = -1;
 		// read all to get the total count
 		try(CSVReader csvReader = new CSVReader(
-				new InputStreamReader(new FileInputStream(importFile), StandardCharsets.UTF_8), configuration.getDelimiter())){ 
+				new InputStreamReader(Files.newInputStream(importFile), StandardCharsets.UTF_8), configuration.getDelimiter())){ 
 
 			totalCount = csvReader.readAll().size();
 		}
@@ -154,7 +154,7 @@ public class EntityCsvImporter {
 		CoordinateReferenceSystem crs = ReprojectUtils.stringToCrs(configuration.getProjection().getDefinition());
 		int lineCount = 0;
 		try(CSVReader csvReader = new CSVReader(
-				new InputStreamReader(new FileInputStream(importFile), StandardCharsets.UTF_8), configuration.getDelimiter())){  
+				new InputStreamReader(Files.newInputStream(importFile), StandardCharsets.UTF_8), configuration.getDelimiter())){  
 			
 			if (configuration.getSkipHeader()){
 				csvReader.readNext();

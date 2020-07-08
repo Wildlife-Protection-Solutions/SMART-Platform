@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.ui.internal.backup;
 
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.HashMap;
 
@@ -95,7 +95,7 @@ public class ExportCaHandler {
 				@Override
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
-					File f = dialog.getSelectedFile();
+					Path f = dialog.getSelectedFile();
 
 					CaExporter exporter = new CaExporter();
 					try{

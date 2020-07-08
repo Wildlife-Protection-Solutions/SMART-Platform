@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.export.config;
 
-import java.io.File;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
@@ -48,7 +48,7 @@ public interface ICsvDataExporter {
 	 * @return
 	 * @throws Exception
 	 */
-	public boolean exportCsvFile(File file, char delimiter, ConservationArea ca, 
+	public boolean exportCsvFile(Path file, char delimiter, ConservationArea ca, 
 			boolean headers, Charset cs, IProgressMonitor monitor, Session session) throws Exception;
 	
 }

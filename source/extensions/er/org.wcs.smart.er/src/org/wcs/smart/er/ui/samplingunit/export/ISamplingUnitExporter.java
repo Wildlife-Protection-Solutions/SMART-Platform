@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.er.ui.samplingunit.export;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.HashMap;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -54,7 +54,7 @@ public interface ISamplingUnitExporter {
 	 * 
 	 * @throws Exception
 	 */
-	public void exportFile(File f, SurveyDesign sd, Session session,
+	public void exportFile(Path f, SurveyDesign sd, Session session,
 			HashMap<Object, Object> options, IProgressMonitor monitor) throws Exception;
 	
 }

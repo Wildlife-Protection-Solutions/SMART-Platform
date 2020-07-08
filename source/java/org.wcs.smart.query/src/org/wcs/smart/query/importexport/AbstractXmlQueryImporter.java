@@ -1,9 +1,9 @@
 package org.wcs.smart.query.importexport;
 
 import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,10 +20,10 @@ import org.wcs.smart.query.xml.model.QueryType;
 public abstract class AbstractXmlQueryImporter implements IQueryImporter {
 
 	@Override
-	public boolean canImport(File file) {
+	public boolean canImport(Path file) {
 		try{
 			org.wcs.smart.query.xml.model.Query q = null;
-			try(InputStream fin = new BufferedInputStream(new FileInputStream(file))){
+			try(InputStream fin = new BufferedInputStream(Files.newInputStream(file))){
 				q = QueryXmlManager.readQueryFile(fin);
 			}
 		
@@ -50,9 +50,9 @@ public abstract class AbstractXmlQueryImporter implements IQueryImporter {
 	public abstract boolean canImport(IQueryType qt);
 	
 	@Override
-	public List<Query> importQuery(File file, ConservationArea ca) throws Exception {
+	public List<Query> importQuery(Path file, ConservationArea ca) throws Exception {
 		org.wcs.smart.query.xml.model.Query q = null;
-		try(InputStream fin = new BufferedInputStream(new FileInputStream(file))){
+		try(InputStream fin = new BufferedInputStream(Files.newInputStream(file))){
 			q = QueryXmlManager.readQueryFile(fin);
 		}
 		return Collections.singletonList(importQuery(q.getQuery(), ca));

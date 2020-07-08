@@ -23,12 +23,14 @@ package org.wcs.smart.report;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.birt.report.model.api.DataSetHandle;
 import org.eclipse.birt.report.model.api.DesignConfig;
 import org.eclipse.birt.report.model.api.DesignEngine;
@@ -51,6 +53,7 @@ import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.model.ReportFolder;
 import org.wcs.smart.report.model.ReportQuery;
+import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 
 import com.ibm.icu.util.ULocale;
@@ -92,13 +95,13 @@ public class ReportTemplateCloner implements
 	 * directory)
 	 */
 	private void cloneLibrary(ConservationAreaClonerEngine engine) throws IOException{
-		File templateDir = new File(engine.getTemplateCa().getFileDataStoreLocation(), Report.REPORT_DIR);
-		File templateLibraryDir = new File(templateDir, SmartBirtLibrary.LIBRARY_DIR);
+		Path templateDir = Paths.get(engine.getTemplateCa().getFileDataStoreLocation()).resolve( Report.REPORT_DIR) ;
+		Path templateLibraryDir = templateDir.resolve(SmartBirtLibrary.LIBRARY_DIR);
 		
-		if (templateLibraryDir.exists()){
-			File caDir = new File(engine.getNewCa().getFileDataStoreLocation(), Report.REPORT_DIR);
-			File caLibraryDir = new File(caDir, SmartBirtLibrary.LIBRARY_DIR);
-			FileUtils.copyDirectory(templateLibraryDir, caLibraryDir);
+		if (Files.exists(templateLibraryDir)){
+			Path caDir = Paths.get(engine.getNewCa().getFileDataStoreLocation()).resolve(Report.REPORT_DIR);
+			Path caLibraryDir = caDir.resolve(SmartBirtLibrary.LIBRARY_DIR);
+			SmartUtils.copyDirectory(templateLibraryDir, caLibraryDir);
 		}
 	}
 	
@@ -160,19 +163,19 @@ public class ReportTemplateCloner implements
 			clone.setShared(r.getShared());
 			clone.setFilename(r.getFilename());
 			
-			File src = new File(new File(engine.getTemplateCa().getFileDataStoreLocation(), Report.REPORT_DIR), r.getFilename());
-			File dest = new File(new File(engine.getNewCa().getFileDataStoreLocation(), Report.REPORT_DIR), clone.getFilename());
+			Path src = Paths.get(engine.getTemplateCa().getFileDataStoreLocation()).resolve(Report.REPORT_DIR).resolve(r.getFilename());
+			Path dest = Paths.get(engine.getNewCa().getFileDataStoreLocation()).resolve(Report.REPORT_DIR).resolve(clone.getFilename());
 			
 			boolean save = false;
-			if (src.exists()) {
-				FileUtils.copyFile(src, dest);
+			if (Files.exists(src)) {
+				Files.copy(src, dest);
 				save = true;
 				try{
 					updateReportFile(clone, dest,  engine);	
 				}catch (Exception ex){
 					save = false;
 					ReportPlugIn.log(ex.getMessage(), ex);
-					dest.delete();
+					Files.delete(dest);
 				}
 			}
 			
@@ -193,12 +196,12 @@ public class ReportTemplateCloner implements
 		engine.getSession().flush();
 	}
 	
-	private void updateReportFile(Report report, File dest, ConservationAreaClonerEngine engine) throws Exception{
+	private void updateReportFile(Report report, Path dest, ConservationAreaClonerEngine engine) throws Exception{
 
 		DesignConfig config = new DesignConfig();
 		config.setResourceLocator(BirtResourceLocator.INSTANCE);
 		SessionHandle session = new DesignEngine( config ).newSessionHandle( ULocale.getDefault( ) );
-		ReportDesignHandle rdh = session.openDesign(dest.getAbsolutePath());
+		ReportDesignHandle rdh = session.openDesign(dest.toAbsolutePath().toString());
 		
 		//update library reference
 		//here we look for the templateuuid in the library file name

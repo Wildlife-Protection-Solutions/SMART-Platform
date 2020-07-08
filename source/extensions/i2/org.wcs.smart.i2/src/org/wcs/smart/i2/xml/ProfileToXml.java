@@ -28,13 +28,13 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
@@ -69,6 +69,7 @@ import org.wcs.smart.i2.xml.model.RecordSourceAttribute;
 import org.wcs.smart.i2.xml.model.RelationshipGroup;
 import org.wcs.smart.i2.xml.model.RelationshipType;
 import org.wcs.smart.i2.xml.model.RelationshipTypeAttribute;
+import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 import org.wcs.smart.util.ZipUtil;
 
@@ -100,10 +101,11 @@ public class ProfileToXml {
 			toXml(p, tempDir, progress.split(1));
 			
 			progress.subTask(Messages.ProfileToXml_zippingTaskName);
-			ZipUtil.createZip(tempDir.toFile().listFiles(), outputFile.toFile(), progress.split(1));
+			List<Path> toInclude = Files.list(tempDir).collect(Collectors.toList());
+			ZipUtil.createZip(toInclude, outputFile, progress.split(1));
 		}finally {
 			//clean up
-			FileUtils.deleteDirectory(tempDir.toFile());
+			SmartUtils.deleteDirectory(tempDir);
 		}
 	}
 		

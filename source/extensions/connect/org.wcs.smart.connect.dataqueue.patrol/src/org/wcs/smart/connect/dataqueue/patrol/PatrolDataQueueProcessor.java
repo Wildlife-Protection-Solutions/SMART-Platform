@@ -76,7 +76,7 @@ public class PatrolDataQueueProcessor implements IItemProcessor {
 		config.setKeepIDs(!PatrolDataQueueProcessorOption.PATROL_GENERATE_IDS.getValueAsBoolean(keepIdoption));
 		
 		//fire events
-		Patrol p = PatrolImporter.importPatrol(file.toFile(), config, monitor);
+		Patrol p = PatrolImporter.importPatrol(file, config, monitor);
 		if (p != null){
 			try{
 				PatrolEventManager.getInstance().patrolAdded(p);

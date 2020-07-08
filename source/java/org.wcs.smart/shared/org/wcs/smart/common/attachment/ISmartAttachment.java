@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.common.attachment;
 
-import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
@@ -48,9 +49,9 @@ public abstract class ISmartAttachment extends UuidItem{
 	private String filename;
 	
 	@Transient
-	protected File copyFromLocation;
+	protected Path copyFromLocation;
 	@Transient
-	protected File attachmentFile;
+	protected Path attachmentFile;
 	
 	/**
 	 * Getter for file name
@@ -77,7 +78,7 @@ public abstract class ISmartAttachment extends UuidItem{
 	 * @return File
 	 */
 	@Transient
-	public File getCopyFromLocation() {
+	public Path getCopyFromLocation() {
 		return copyFromLocation;
 	}
 
@@ -85,7 +86,7 @@ public abstract class ISmartAttachment extends UuidItem{
 	 * Location to copy files from.  Temporarily set
 	 * for newly added attachments until saved. 
 	 */
-	public void setCopyFromLocation(File newFile) {
+	public void setCopyFromLocation(Path newFile) {
 		this.copyFromLocation = newFile;
 	}
 
@@ -97,7 +98,7 @@ public abstract class ISmartAttachment extends UuidItem{
 	@Transient
 	public void computeFileLocation(Session session) throws Exception{
 		if (attachmentFile != null) return;
-		attachmentFile = new File(getDatastoreFolderPath(session), getFilename()); 
+		attachmentFile = Paths.get(getDatastoreFolderPath(session), getFilename()); 
 	}
 	/**
 	 * To be used with care.  This should only be used when it is not possible to
@@ -108,12 +109,12 @@ public abstract class ISmartAttachment extends UuidItem{
 	 * @throws Exception
 	 */
 	@Transient
-	public void computeFileLocation(File location) {
+	public void computeFileLocation(Path location) {
 		this.attachmentFile = location; 
 	}
 	
 	@Transient
-	public File getAttachmentFile(){
+	public Path getAttachmentFile(){
 		if (attachmentFile == null){
 			throw new IllegalStateException("Attachment file not set.  You must first call computeFileLocaion."); //$NON-NLS-1$
 		}

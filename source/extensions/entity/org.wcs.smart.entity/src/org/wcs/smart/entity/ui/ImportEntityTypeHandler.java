@@ -21,9 +21,11 @@
  */
 package org.wcs.smart.entity.ui;
 
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.util.HashSet;
@@ -82,7 +84,7 @@ public class ImportEntityTypeHandler{
 		if (dialog.open() != Window.OK) return;
 		
 			
-		final File importFile = dialog.getFile();
+		final Path importFile = dialog.getFile();
 		final MWindow activeWindow = context.get(MWindow.class);
 		final Object[] returnInfo = new Object[3]; //0 = errormessage; 1 = exception; 2 = newType
 		
@@ -97,7 +99,7 @@ public class ImportEntityTypeHandler{
 					
 					monitor.subTask(Messages.ImportEntityTypeHandler_ImportProgress2);
 					org.wcs.smart.entity.xml.model.EntityType xmlEntityType = null;
-					try(FileInputStream fin = new FileInputStream(importFile)){
+					try(InputStream fin = Files.newInputStream(importFile)){
 						xmlEntityType = EntityTypeXmlManager.readDataModel(fin);
 					}catch (Exception ex){
 						returnInfo[0] = Messages.ImportEntityTypeHandler_XmlError;
@@ -208,26 +210,26 @@ public class ImportEntityTypeHandler{
 		private static final String LAST_DIR_KEY = "LAST_IMPORT_DIR"; //$NON-NLS-1$
 		
 		private Text txtFile;
-		private File file;
+		private Path file;
 		
 		public ImportEntityTypeDialog(Shell parentShell) {
 			super(parentShell);
 		}
 		
-		public File getFile(){
+		public Path getFile(){
 			return this.file;
 		}
 		
 		protected void okPressed() {
 			
-			file = new File(txtFile.getText());
+			file = Paths.get(txtFile.getText());
 
-			if (!file.exists()){
+			if (!Files.exists(file)){
 				MessageDialog.openError(getShell(), Messages.ImportEntityTypeHandler_ErrorDialogTitle, 
 						MessageFormat.format(Messages.ImportEntityTypeHandler_FileNotFoundError, new Object[]{file.toString()}));
 				return;
 			}
-			EntityPlugIn.getDefault().getDialogSettings().put(LAST_DIR_KEY, file.toString());
+			EntityPlugIn.getDefault().getDialogSettings().put(LAST_DIR_KEY, file.toAbsolutePath().toString());
 			
 			super.okPressed();
 		}

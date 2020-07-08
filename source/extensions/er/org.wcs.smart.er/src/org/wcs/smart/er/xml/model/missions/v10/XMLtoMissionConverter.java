@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.er.xml.model.missions.v10;
 
-import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -90,7 +89,7 @@ public class XMLtoMissionConverter implements IXmlToMissionConverter{
 	
 	private List<String> validationErrors = new ArrayList<String>();
 	
-	private File attachmentLocation = null;
+	private Path attachmentLocation = null;
 	
 	
 	public XMLtoMissionConverter(){
@@ -135,7 +134,7 @@ public class XMLtoMissionConverter implements IXmlToMissionConverter{
 	 * @param attachmentLocation
 	 * @throws Exception
 	 */
-	public void fromXml(Path xmlPath, boolean keepIDs, Session session, ConservationArea ca, File attachmentLocation) throws Exception {
+	public void fromXml(Path xmlPath, boolean keepIDs, Session session, ConservationArea ca, Path attachmentLocation) throws Exception {
 		
 		MissionType xml = null;
 		try(InputStream is = Files.newInputStream(xmlPath)){
@@ -330,10 +329,11 @@ public class XMLtoMissionConverter implements IXmlToMissionConverter{
 				wp.setAttachments(new ArrayList<WaypointAttachment>());
 				for ( String filename : xml.getAttachments()){
 					WaypointAttachment att = new WaypointAttachment();
-					File f = new File(attachmentLocation.getAbsoluteFile() + File.separator + MissionXmlManager.ATTACHMENT_DIR_NAME + File.separator + filename );
-					if (!f.exists()){
+					Path f = attachmentLocation.resolve(MissionXmlManager.ATTACHMENT_DIR_NAME)
+							.resolve(filename );
+					if (!Files.exists(f)){
 						warnings.add(MessageFormat.format(
-								Messages.XMLtoMissionConverter_0, new Object[]{ filename, f.getAbsolutePath()}));
+								Messages.XMLtoMissionConverter_0, new Object[]{ filename, f.toAbsolutePath().toString()}));
 								
 					}else{
 						att.setCopyFromLocation(f);
@@ -373,10 +373,12 @@ public class XMLtoMissionConverter implements IXmlToMissionConverter{
 				ob.setAttachments(new ArrayList<ObservationAttachment>());
 				for ( String filename : xml.getAttachments()){
 					ObservationAttachment att = new ObservationAttachment();
-					File f = new File(attachmentLocation.getAbsoluteFile() + File.separator + MissionXmlManager.ATTACHMENT_DIR_NAME + File.separator + filename );
-					if (!f.exists()){
+					
+					Path f = attachmentLocation.resolve(MissionXmlManager.ATTACHMENT_DIR_NAME)
+							.resolve(filename );
+					if (!Files.exists(f)){
 						warnings.add(MessageFormat.format(
-								Messages.XMLtoMissionConverter_1, new Object[]{ filename, f.getAbsolutePath()}));
+								Messages.XMLtoMissionConverter_1, new Object[]{ filename, f.toAbsolutePath().toString()}));
 					}else{
 						att.setCopyFromLocation(f);
 						att.setFilename(filename);

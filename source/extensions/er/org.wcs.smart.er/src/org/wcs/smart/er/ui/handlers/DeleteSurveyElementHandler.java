@@ -21,15 +21,15 @@
  */
 package org.wcs.smart.er.ui.handlers;
 
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
@@ -61,6 +61,7 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.ObservationOptions;
+import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -201,7 +202,7 @@ public class DeleteSurveyElementHandler {
 			}
 		
 			if (DeleteManager.canDelete(design, session)){
-				List<File> dirsToDelete = new ArrayList<File>();
+				List<Path> dirsToDelete = new ArrayList<>();
 				List<Survey> surveys = QueryFactory.buildQuery(session, Survey.class, "surveyDesign", design).getResultList(); //$NON-NLS-1$
 				for (Survey survey : surveys){
 					//delete all waypoints
@@ -230,13 +231,13 @@ public class DeleteSurveyElementHandler {
 				session.delete(design);
 				session.getTransaction().commit();
 				
-				for (File f : dirsToDelete){
-					if (f.exists()){
+				for (Path f : dirsToDelete){
+					if (Files.exists(f)){
 						try{
-							FileUtils.forceDelete(f);
+							SmartUtils.deleteDirectory(f);
 						}catch(Exception ex){
 							EcologicalRecordsPlugIn.displayLog(
-									Messages.DeleteSurveyElementHandler_FsSurveyDesignDeleteError + f.getAbsolutePath(), ex);
+									Messages.DeleteSurveyElementHandler_FsSurveyDesignDeleteError + f.toAbsolutePath().toString(), ex);
 						}
 					}
 				}
@@ -288,7 +289,7 @@ public class DeleteSurveyElementHandler {
 			}
 			
 			if (DeleteManager.canDelete(survey, session)){
-				List<File> dirsToDelete = new ArrayList<File>();
+				List<Path> dirsToDelete = new ArrayList<>();
 				//delete all waypoints
 				if (survey.getMissions() != null){
 					for (Mission m : survey.getMissions()){
@@ -308,13 +309,13 @@ public class DeleteSurveyElementHandler {
 				session.getTransaction().commit();
 
 				//delete filestore dir
-				for (File f : dirsToDelete){
-					if (f.exists()){
+				for (Path f : dirsToDelete){
+					if (Files.exists(f)){
 						try{
-							FileUtils.forceDelete(f);
+							SmartUtils.deleteDirectory(f);
 						}catch(Exception ex){
 							EcologicalRecordsPlugIn.displayLog(
-									Messages.DeleteSurveyElementHandler_FsSurveyDeleteError + f.getAbsolutePath(), ex);
+									Messages.DeleteSurveyElementHandler_FsSurveyDeleteError + f.toAbsolutePath().toString(), ex);
 						}
 					}
 				}
@@ -367,7 +368,7 @@ public class DeleteSurveyElementHandler {
 				throw new Exception(error);
 			}
 			
-			File fileStore = mission.getFilestoreLocation(SmartDB.getCurrentConservationArea());
+			Path fileStore = mission.getFilestoreLocation(SmartDB.getCurrentConservationArea());
 			if (DeleteManager.canDelete(mission, session)){
 				
 				//waypoint delete not cascaded so we need to delete
@@ -386,12 +387,12 @@ public class DeleteSurveyElementHandler {
 				
 				//delete filestore
 				try{
-					if (fileStore.exists()){
-						FileUtils.forceDelete(fileStore);
+					if (Files.exists(fileStore)){
+						SmartUtils.deleteDirectory(fileStore);
 					}
 				}catch(Exception ex){
 					EcologicalRecordsPlugIn.displayLog(
-							Messages.DeleteSurveyElementHandler_FsMissionDeleteError + fileStore.getAbsolutePath(), ex);
+							Messages.DeleteSurveyElementHandler_FsMissionDeleteError + fileStore.toAbsolutePath().toString(), ex);
 				}
 				
 				//fire events

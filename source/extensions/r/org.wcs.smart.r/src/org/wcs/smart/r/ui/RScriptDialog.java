@@ -172,14 +172,14 @@ public class RScriptDialog extends SmartStyledTitleDialog{
 			link.setText("<a>" + Messages.RScriptDialog_EditOp + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$ 
 			link.setToolTipText(Messages.RScriptDialog_edittooltip);
 			link.addListener(SWT.Selection, evt->{
-				AttachmentUtil.launch( RScriptManager.INSTANCE.getScriptPath( this.script ).toFile() );
+				AttachmentUtil.launch( RScriptManager.INSTANCE.getScriptPath( this.script ) );
 			});
 			
 			link = new Link(temp,  SWT.NONE);
 			link.setText("<a>" + Messages.RScriptDialog_ShowOp + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$ 
 			link.setToolTipText(Messages.RScriptDialog_showtooltip);
 			link.addListener(SWT.Selection, evt->{
-				AttachmentUtil.launch( RScriptManager.INSTANCE.getScriptPath( this.script ).getParent().toFile() );
+				AttachmentUtil.launch( RScriptManager.INSTANCE.getScriptPath( this.script ).getParent() );
 			});
 		}
 		

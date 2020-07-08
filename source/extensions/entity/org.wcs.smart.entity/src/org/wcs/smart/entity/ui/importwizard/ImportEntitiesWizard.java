@@ -21,8 +21,10 @@
  */
 package org.wcs.smart.entity.ui.importwizard;
 
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -134,8 +136,8 @@ public class ImportEntitiesWizard extends Wizard implements IPageChangingListene
 	@Override
 	public void handlePageChanging(PageChangingEvent event) {
 		if (event.getCurrentPage() == filePage){
-			final File f = new File(filePage.getFile());
-			if (!f.exists()){
+			final Path f = Paths.get(filePage.getFile());
+			if (!Files.exists(f)){
 				MessageDialog.openError(getShell(), Messages.ImportEntitiesWizard_ErrorDialogTitle, 
 					MessageFormat.format(Messages.ImportEntitiesWizard_FileNotFoundError, new Object[]{f.toString()}));
 				event.doit = false;

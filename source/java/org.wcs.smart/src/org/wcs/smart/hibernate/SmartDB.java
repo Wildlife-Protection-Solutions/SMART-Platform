@@ -22,6 +22,9 @@
 package org.wcs.smart.hibernate;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import org.hibernate.Session;
@@ -140,12 +143,12 @@ public class SmartDB {
 	 */
 	public static boolean dbExists(){
 		String embeddedDb = SmartProperties.getInstance().getProperty(SmartProperties.PROP_SMART_DB);
-		File db = new File(embeddedDb); 
-		boolean exists = db.exists();
-		if (!exists){
-			SmartPlugIn.log(Messages.SmartDB_Error_NoSmartDatabase + db.getAbsolutePath().toString(), null);
+		Path db = Paths.get(embeddedDb).toAbsolutePath().normalize();
+		if (!Files.exists(db)){
+			SmartPlugIn.log(Messages.SmartDB_Error_NoSmartDatabase + db.toAbsolutePath().normalize().toString(), null);
+			return false;
 		}
-		return exists;
+		return true;
 	}
 	
 	/**

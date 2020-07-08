@@ -340,12 +340,12 @@ public class RecordXmlImporter {
 			
 			Path xmlFile = null;
 			
-			if (SmartUtils.isZip(zipFile.toFile())) {
+			if (SmartUtils.isZip(zipFile)) {
 				isZip = true;
 				//unzip file
 				tempDir = Files.createTempDirectory("smart"); //$NON-NLS-1$
 				tempDirs.add(tempDir);
-				ZipUtil.unzipFolder(zipFile.toFile(), tempDir.toFile());
+				ZipUtil.unzipFolder(zipFile, tempDir);
 				
 				//search temp dir for xml file
 				
@@ -433,7 +433,7 @@ public class RecordXmlImporter {
 					for (AttachmentType xmlAttachment : type.getAttachments()) {
 						Path importFile = xmlFile.getParent().resolve(RecordXmlExporter.ATTACHMENT_DIR).resolve(xmlAttachment.getFilename());
 						IntelAttachment newAttachment = new IntelAttachment();
-						newAttachment.setCopyFromLocation(importFile.toFile());
+						newAttachment.setCopyFromLocation(importFile);
 						newAttachment.setFilename(xmlAttachment.getFilename());
 						newAttachment.setConservationArea(SmartDB.getCurrentConservationArea());
 						newAttachment.setDateCreated(new Date());

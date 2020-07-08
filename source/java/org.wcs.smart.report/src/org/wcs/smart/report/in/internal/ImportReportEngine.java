@@ -22,20 +22,18 @@
 package org.wcs.smart.report.in.internal;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
+import java.util.stream.Collectors;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.birt.report.designer.core.model.SessionHandleAdapter;
 import org.eclipse.birt.report.model.api.DataSetHandle;
 import org.eclipse.birt.report.model.api.ExtendedItemHandle;
@@ -95,6 +93,7 @@ import org.wcs.smart.report.model.ReportFolder;
 import org.wcs.smart.report.model.RootReportFolder;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
+import org.wcs.smart.util.ZipUtil;
 
 /**
  * Report importer.
@@ -132,26 +131,24 @@ public class ImportReportEngine {
 	 * @return <code>true</code> if successful, <code>false</code> if cancelled
 	 * @throws Exception if error occurs
 	 */
-	public boolean importReport(File file, Object folder, ConservationArea importCa) throws Exception{
+	public boolean importReport(Path file, Object folder, ConservationArea importCa) throws Exception{
 		this.display = Display.getDefault();
 		
 		//unzip report deifnition file
 		if (!SmartUtils.isZip(file)){
 			throw new Exception (MessageFormat.format(
-				Messages.ImportReportEngine_Error_InvalidFile, new Object[]{file.getAbsolutePath()}));
+				Messages.ImportReportEngine_Error_InvalidFile, new Object[]{file.toString()}));
 		}
-		File tmpDir = unzip(file);
+		Path tmpDir = ZipUtil.unzip(file);
 		try{
 		
 		//find the and read the .rpt file
-		File reportPropFile = null;
-		File[] f = tmpDir.listFiles();
-		if (f == null){
-			throw new Exception(Messages.ImportReportEngine_Error_NoPropertiesFile);
-		}
-		for (int i = 0; i < f.length; i ++){
-			if (f[i].getName().endsWith(".rpt")){ //$NON-NLS-1$
-				reportPropFile = f[i];
+		Path reportPropFile = null;
+		
+		for (Path r : Files.list(tmpDir).collect(Collectors.toList())) {
+			if (r.getFileName().toString().endsWith(".rpt")) { //$NON-NLS-1$
+				reportPropFile = r;
+				break;
 			}
 		}
 		if (reportPropFile == null){
@@ -197,7 +194,7 @@ public class ImportReportEngine {
 				q.executeUpdate();
 			}
 			
-			File reportXmlFile = new File(tmpDir, newReport.getFilename());
+			Path reportXmlFile = tmpDir.resolve(newReport.getFilename());
 			
 			//process queries
 			if (!processQueries(reportXmlFile, tmpDir, importReport.getShared(), importReport.getOwner(), importCa)){
@@ -208,7 +205,7 @@ public class ImportReportEngine {
 			session.saveOrUpdate(importReport);
 			
 			SessionHandle handle = SessionHandleAdapter.getInstance().getSessionHandle();
-			ReportDesignHandle rdh = handle.openDesign(reportXmlFile.getAbsolutePath());
+			ReportDesignHandle rdh = handle.openDesign(reportXmlFile.toAbsolutePath().toString());
 			
 			//remove existing library & make sure it points to the library associated with this conservation area
 			LibraryHandle library = rdh.getLibrary(SmartBirtLibrary.DEFAULT_LIBRARY_NAMESPACE);
@@ -311,9 +308,9 @@ public class ImportReportEngine {
 			session.close();
 		}
 		}finally{
-			if (tmpDir.exists()){
+			if (Files.exists(tmpDir)){
 				try{
-					FileUtils.deleteDirectory(tmpDir);
+					SmartUtils.deleteDirectory(tmpDir);
 				}catch (Throwable t){
 					ReportPlugIn.displayLog(t.getMessage(), t);
 				}
@@ -334,11 +331,11 @@ public class ImportReportEngine {
 	 * @param r the report
 	 * @throws Exception
 	 */
-	private void copyToFileStore(File source, Report r) throws Exception{
-		File f = ReportPlugIn.getDefault().getReportFile(r);
+	private void copyToFileStore(Path source, Report r) throws Exception{
+		Path f = ReportPlugIn.getDefault().getReportFile(r);
 		if (r.getUuid() != null){
 			//delete existing definition file if it exists
-			f.delete();
+			Files.deleteIfExists(f);
 		}
 		SmartUtils.copyFile(source, f);
 	}
@@ -351,9 +348,9 @@ public class ImportReportEngine {
 	 * @return newly created report object
 	 * @throws Exception
 	 */
-	private Report readReportInfo(File f, ConservationArea newCa) throws Exception{
+	private Report readReportInfo(Path f, ConservationArea newCa) throws Exception{
 		Properties prop = new Properties();
-		try(InputStream inStream = new FileInputStream(f)){
+		try(InputStream inStream = Files.newInputStream(f)){
 			prop.load(inStream);
 		}		
 		final Report r = new Report();
@@ -510,38 +507,6 @@ public class ImportReportEngine {
 		return report;
 	}
 	
-	/**
-	 * Unzips the content of the zip
-	 * file to a temporary directory.
-	 * 
-	 * @param zipFile the zip file to unzip
-	 * @return the location of the files
-	 * @throws Exception
-	 */
-	private static File unzip(File zipFile) throws Exception{
-		File tempDir = null;
-		try(ZipFile zout = new ZipFile(zipFile)) {
-			tempDir = File.createTempFile(zipFile.getName(),
-					Long.toString(System.nanoTime()));
-			tempDir.delete();
-			tempDir.mkdir();
-		
-			Enumeration<? extends ZipEntry> elements = zout.entries();
-			while(elements.hasMoreElements()){
-				ZipEntry entry = elements.nextElement();
-				
-				File fout = new File(tempDir.getAbsoluteFile() + File.separator + entry.getName());
-				if (entry.isDirectory()){
-					FileUtils.forceMkdir(fout);
-				}else{
-					try(InputStream is = zout.getInputStream(entry)){
-						FileUtils.copyInputStreamToFile(is, fout);
-					}
-				}
-			}	
-		}
-		return tempDir;
-	}
 	
 	/**
 	 * Process the queries in the report file 
@@ -552,14 +517,14 @@ public class ImportReportEngine {
 	 * @return <code>true</code> if queries processed ok, <code>false</code> if import should exit
 	 * @throws Exception
 	 */
-	private boolean  processQueries(File reportFile, 
-			File queryDir, boolean sharedReport,
+	private boolean  processQueries(Path reportFile, 
+			Path queryDir, boolean sharedReport,
 			Employee reportEmployee,
 			ConservationArea importCa) throws Exception{
 		
 		SessionHandle session = SessionHandleAdapter.getInstance().getSessionHandle();
 
-		ReportDesignHandle rdh = session.openDesign(reportFile.getAbsolutePath());
+		ReportDesignHandle rdh = session.openDesign(reportFile.toAbsolutePath().toString());
 		try{
 			List<?> datasets = rdh.getDataSets().getContents();
 			for (Iterator<?> iterator = datasets.iterator(); iterator.hasNext();) {
@@ -604,14 +569,14 @@ public class ImportReportEngine {
 	 */
 	
 	private boolean processQuery(String queryUuid, 
-			File queryDir, 
+			Path queryDir, 
 			OdaDataSetHandle handle,
 			boolean sharedReport,
 			Employee reportEmployee, 
 			final ConservationArea importCa) throws Exception{
 		
-		final File queryFile = new File(queryDir, queryUuid + ".query"); //$NON-NLS-1$
-		if (!queryFile.exists()){
+		final Path queryFile = queryDir.resolve(queryUuid + ".query"); //$NON-NLS-1$
+		if (!Files.exists(queryFile)){
 			throw new Exception(MessageFormat.format(
 					Messages.ImportReportEngine_Error_QueryNotFound, new Object[]{queryUuid}));
 		}

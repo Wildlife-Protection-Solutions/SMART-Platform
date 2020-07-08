@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.query.common.importexport;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.HashMap;
 
@@ -70,14 +71,14 @@ public class GridTiffImageExporter implements IQueryExporter {
 	}
 
 	@Override
-	public void export(Query query, IQueryResult result, File file,
+	public void export(Query query, IQueryResult result, Path file,
 			HashMap<String, Object> parameters, IProgressMonitor monitor)
 			throws Exception {
 		if ( ((GridQueryResult)result).getData().size() == 0 )
 			throw new Exception(Messages.GridTiffImageExporter_EmptyTiffError);
 		
-		File sourceFile = ((GridQueryResult)result).getRasterFile();
-		if (sourceFile == null || !sourceFile.exists()){
+		Path sourceFile = ((GridQueryResult)result).getRasterFile();
+		if (sourceFile == null || !Files.exists(sourceFile)){
 			sourceFile = RasterService.createRasterFile((GridQueryResult)result, (GriddedQuery) query, ((GriddedQuery)query).getRasterFileName().getAbsolutePath().toString());
 			if (sourceFile == null) {
 				throw new Exception(Messages.GridTiffImageExporter_QueryError, 

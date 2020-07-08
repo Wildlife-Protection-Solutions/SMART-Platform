@@ -21,7 +21,9 @@
  */
 package org.wcs.smart.ca;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,7 +33,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -50,6 +51,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Engine for manging the creation of a conservation area using another conservation
@@ -386,10 +388,10 @@ public class ConservationAreaClonerEngine {
 			t.rollback();
 			
 			//remove anything copied to the filestore
-			File f = new File(newCa.getFileDataStoreLocation());
-			if (f.exists()){
+			Path f = Paths.get(newCa.getFileDataStoreLocation());
+			if (Files.exists(f)){
 				try{
-					FileUtils.forceDelete(f);
+					SmartUtils.deleteDirectory(f);
 				}catch(Exception ex2){
 					SmartPlugIn.displayLog( MessageFormat.format(Messages.ConservationAreaClonerEngine_ErrorCleanUpRequired, new Object[]{f.toString()}), ex2);
 				}

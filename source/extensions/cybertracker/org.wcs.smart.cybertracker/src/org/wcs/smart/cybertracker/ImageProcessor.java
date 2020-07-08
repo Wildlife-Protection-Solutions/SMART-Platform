@@ -23,7 +23,6 @@ package org.wcs.smart.cybertracker;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Iterator;
@@ -61,9 +60,9 @@ public class ImageProcessor {
 			Path tempDir = Files.createTempDirectory("smart.import"); //$NON-NLS-1$
 			tempDir.toFile().deleteOnExit();
 			Path outImage = tempDir.resolve(attachment.getFilename());
-			if (ImageProcessor.resizeImage(attachment.getCopyFromLocation(), outImage.toFile(), width, height)){
+			if (ImageProcessor.resizeImage(attachment.getCopyFromLocation(), outImage, width, height)){
 				if (Files.exists(outImage)){
-					attachment.setCopyFromLocation(outImage.toFile());
+					attachment.setCopyFromLocation(outImage);
 					outImage.toFile().deleteOnExit();
 				}
 			}
@@ -77,10 +76,10 @@ public class ImageProcessor {
 	 * @param inFile
 	 * @return
 	 */
-	public static BufferedImage readImage(File inFile){
+	public static BufferedImage readImage(Path inFile){
 		BufferedImage toResize = null;
 		//attempt to resize
-		try(ImageInputStream iis = ImageIO.createImageInputStream(inFile)){
+		try(ImageInputStream iis = ImageIO.createImageInputStream(inFile.toAbsolutePath().toFile())){
 				
 			Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
 			if (!readers.hasNext()) return null;	//no image reader
@@ -108,12 +107,13 @@ public class ImageProcessor {
 	 * Aspect ratios are preserved.  False is returned if the file cannot be 
 	 * resized.  If target sizes are less than 0 image will not be resized
 	 * 
-	 * @param file
+	 * @param inFile
+	 * @param outFile
 	 * @param targetWidth
 	 * @param targetHeight
 	 * @return
 	 */
-	public static boolean resizeImage(File inFile, File outFile, int targetWidth, int targetHeight){
+	public static boolean resizeImage(Path inFile, Path outFile, int targetWidth, int targetHeight){
 		if(targetWidth <=0 || targetHeight <= 0) return false;
 		
 		try{
@@ -121,7 +121,7 @@ public class ImageProcessor {
 			IIOMetadata metadata = null;
 			ImageReader reader = null;
 			//attempt to resize
-			try(ImageInputStream iis = ImageIO.createImageInputStream(inFile)){
+			try(ImageInputStream iis = ImageIO.createImageInputStream(inFile.toAbsolutePath().toFile())){
 				Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
 				if (!readers.hasNext()) return false;	//no image reader
 				reader = readers.next();
@@ -167,7 +167,7 @@ public class ImageProcessor {
 			}
 
 			try (ImageOutputStream ios = ImageIO
-					.createImageOutputStream(outFile)) {
+					.createImageOutputStream(outFile.toAbsolutePath().toFile())) {
 				ImageWriter writer = ImageIO.getImageWriter(reader);
 				try {
 					ImageWriteParam imageWriteParam = writer.getDefaultWriteParam();

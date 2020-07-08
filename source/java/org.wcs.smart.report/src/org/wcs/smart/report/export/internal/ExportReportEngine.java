@@ -23,8 +23,10 @@ package org.wcs.smart.report.export.internal;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -99,7 +101,7 @@ public class ExportReportEngine {
 	 * @param outputFormat output format
 	 * @param exporter the report exportor
 	 */
-	private static void exportReports(List<Report> reports, File directory, File file, EmitterInfo outputFormat, IReportExporter exporter, int dpi){
+	private static void exportReports(List<Report> reports, Path directory, Path file, EmitterInfo outputFormat, IReportExporter exporter, int dpi){
 		if (exporter == null && outputFormat == null){
 			return;
 		}
@@ -122,7 +124,7 @@ public class ExportReportEngine {
 		};
 		
 		for (int i = 0; i < reports.size(); i ++){
-			File outputFile = file;
+			Path outputFile = file;
 			if (outputFile == null){
 				if (outputFormat != null){
 					outputFile = getOutputFileName(reports.get(i), directory,outputFormat.getFormat());
@@ -130,7 +132,7 @@ public class ExportReportEngine {
 					outputFile = getOutputFileName(reports.get(i), directory,exporter.getExportFormat());
 				}
 			}
-			if (outputFile.exists()){
+			if (Files.exists(outputFile)){
 				if (!yesToOverwrite){
 					MessageDialog md = new MessageDialog(Display.getDefault().getActiveShell(),
 							Messages.ExportReportEngine_OverwriteFile,
@@ -173,7 +175,7 @@ public class ExportReportEngine {
 	 * @param file the full path file to output to; only valid is reports.size() == 1
 	 * @param outputFormat output format
 	 */
-	public static void exportReports(List<Report> reports, File directory, File file, EmitterInfo outputFormat, int dpi){
+	public static void exportReports(List<Report> reports, Path directory, Path file, EmitterInfo outputFormat, int dpi){
 		exportReports(reports, directory, file, outputFormat, null, dpi);
 	}
 	
@@ -185,7 +187,7 @@ public class ExportReportEngine {
 	 * @param file the full path file to output to; only valid is reports.size() == 1
 	 * @param outputFormat output format
 	 */
-	public static void exportReports(List<Report> reports, File directory, File file, IReportExporter exporter, int dpi){
+	public static void exportReports(List<Report> reports, Path directory, Path file, IReportExporter exporter, int dpi){
 		exportReports(reports, directory, file, null, exporter, dpi);
 		
 	}
@@ -223,8 +225,8 @@ public class ExportReportEngine {
 	/*
 	 * Ensure the given directory exists
 	 */
-	public static void validateDirectory(File directory){
-		if (!directory.exists()){
+	public static void validateDirectory(Path directory){
+		if (!Files.exists(directory)){
 			SmartUtils.createDirectory(directory);
 		}
 	}
@@ -238,16 +240,16 @@ public class ExportReportEngine {
 	 * @param directory location of output file can be null
 	 * @param extension new file extension
 	 */
-	public static File getOutputFileName(Report report, File directory, String extension){
+	public static Path getOutputFileName(Report report, Path directory, String extension){
 		String f = URLUtils.cleanFilename(report.getName() + "_" + report.getId()); //$NON-NLS-1$
 		int index = f.lastIndexOf('.');
 		if (index > 0){
 			f = f.substring(0, index);
 		}
 		if (directory != null){
-			return new File(directory, f + "." + extension); //$NON-NLS-1$
+			return directory.resolve(f + "." + extension); //$NON-NLS-1$
 		}else{
-			return new File(f + "." + extension); //$NON-NLS-1$
+			return Paths.get(f + "." + extension); //$NON-NLS-1$
 		}
 	}
 	
@@ -279,14 +281,14 @@ public class ExportReportEngine {
 			return;
 		}
 		
-		File reportFile = ReportPlugIn.getDefault().getReportFile(report);
+		Path reportFile = ReportPlugIn.getDefault().getReportFile(report);
 	
 		if (reportFile == null ){
 			throw new Exception("Cannot run report."); //$NON-NLS-1$
 		}
 		IReportEngine engine = ReportEngineManager.getBirtReportEngine();
 		
-		final IReportRunnable design = engine.openReportDesign(reportFile.getAbsolutePath());
+		final IReportRunnable design = engine.openReportDesign(reportFile.toAbsolutePath().toString());
 		IRenderOption options = new RenderOption();
 		try(ByteArrayOutputStream out = new ByteArrayOutputStream()){
 		

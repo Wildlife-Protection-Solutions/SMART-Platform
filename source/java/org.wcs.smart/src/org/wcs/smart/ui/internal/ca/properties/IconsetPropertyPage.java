@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.ui.internal.ca.properties;
 
-import java.io.File;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -321,13 +320,13 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 						IconFile ff = ((Icon)element).getIconFile(s);
 						if (ff == null) return null;
 						try {
-							File f = null;
+							Path f = null;
 							if (ff.getCopyFromLocation() != null) {
 								f = ff.getCopyFromLocation();
 							}else {
 								f = ff.getAttachmentFile();
 							}
-							Image img = SmartUtils.getImage(f.toPath(),SIZE);
+							Image img = SmartUtils.getImage(f,SIZE);
 							if (img != null) images.add(img);
 							return img;
 						}catch (Throwable t) {
@@ -607,16 +606,16 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 							newfile.setFilename(copyIcon.getFilename());
 						}else {
 							Path temp = Files.createTempFile("smart", "icon"); //$NON-NLS-1$ //$NON-NLS-2$
-							File inputFile = null;
+							Path inputFile = null;
 							if (copyIcon.getCopyFromLocation() != null) {
 								inputFile = copyIcon.getCopyFromLocation();
 							}else {
 								inputFile = copyIcon.getAttachmentFile();
 							}
 							try(OutputStream out = Files.newOutputStream(temp)){
-								Files.copy(inputFile.toPath(), out);
+								Files.copy(inputFile, out);
 							}
-							newfile.setCopyFromLocation(temp.toFile());
+							newfile.setCopyFromLocation(temp);
 							newfile.setFilename(copyIcon.getFilename());
 							
 							toDeleteFiles.add(temp);

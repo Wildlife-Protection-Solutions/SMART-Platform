@@ -22,6 +22,7 @@
 package org.wcs.smart.report.internal.ui.export;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -106,7 +107,7 @@ public class ExportReportWizardPage  extends WizardPage  {
 		if (multipleFiles){
 			settings.put(DIRECTORY_SETTING, txtFileName.getText());
 		}else{
-			settings.put(DIRECTORY_SETTING, (new File(txtFileName.getText())).getParent());
+			settings.put(DIRECTORY_SETTING, Paths.get(txtFileName.getText()).getParent().toString());
 		}
 		settings.put(FORMAT_SETTING, getExporter().getName());
 	}
@@ -321,7 +322,8 @@ public class ExportReportWizardPage  extends WizardPage  {
 			txtFileName.setText(location);
 			addDirectoryListener(btnBrowse);
 		}else{
-			location += File.separator + ExportReportEngine.getOutputFileName(selectedReports.get(0), null, defaultExport.getFileExtension()).getName();
+			location += File.separator + 
+					ExportReportEngine.getOutputFileName(selectedReports.get(0), null, defaultExport.getFileExtension()).getFileName().toString();
 			txtFileName.setText(location);
 			addFileListner(btnBrowse);
 		}

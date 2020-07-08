@@ -21,7 +21,9 @@
  */
 package org.wcs.smart.ui.internal.preference;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Properties;
 
 import org.eclipse.jface.fieldassist.ControlDecoration;
@@ -111,8 +113,8 @@ public class AutoBackupPerferencePage extends PreferencePage implements
 		partDays.setText(DEFAULT_TIMER);
 		deleteDays.setText(DEFAULT_DELETE_TIMER);
 		
-		File temp = new File(System.getProperty("user.dir")); //$NON-NLS-1$
-		String loc = temp.getParent() + File.separatorChar + "SMART_Backups"; //$NON-NLS-1$
+		Path temp = Paths.get(System.getProperty("user.dir")); //$NON-NLS-1$
+		String loc = temp.getParent().resolve("SMART_Backups").toAbsolutePath().normalize().toString(); //$NON-NLS-1$
 		txtBackupDir.setText(loc);
 		validate();
 	}
@@ -287,14 +289,13 @@ public class AutoBackupPerferencePage extends PreferencePage implements
 		
 		
 		txtBackupDir = new Text(backup, SWT.BORDER | SWT.SINGLE);
-		File temp = new File(System.getProperty("user.dir")); //$NON-NLS-1$
-		String loc = temp.getParent() + File.separatorChar + "SMART_Backups"; //$NON-NLS-1$
-		File b = new File(loc);
-		if(!b.exists()){
+		Path temp = Paths.get(System.getProperty("user.dir")); //$NON-NLS-1$
+		Path b = temp.getParent().resolve("SMART_Backups"); //$NON-NLS-1$
+		if(!Files.exists(b)){
 			SmartUtils.createDirectory(b);
 		}
 		
-		txtBackupDir.setText(loc);
+		txtBackupDir.setText(b.toAbsolutePath().normalize().toString());
 		
 		txtBackupDir.setEditable(true);
 		txtBackupDir.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -310,8 +311,8 @@ public class AutoBackupPerferencePage extends PreferencePage implements
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				DirectoryDialog fd = new DirectoryDialog(getShell(), SWT.SAVE);
-				File f = new File(txtBackupDir.getText());
-				fd.setFilterPath(f.getParent());
+				Path f = Paths.get(txtBackupDir.getText());
+				fd.setFilterPath(f.getParent().toString());
 				
 				String file = fd.open();
 				if (file == null){
@@ -378,8 +379,8 @@ public class AutoBackupPerferencePage extends PreferencePage implements
 			cdDeleteTimer.hide();
 			
 		}
-		File f = new File(txtBackupDir.getText());
-		if (!f.exists()){
+		Path f = Paths.get(txtBackupDir.getText());
+		if (!Files.exists(f)){
 			cdLoc.show();
 			error = Messages.AutoBackupDialog_Error_InvalidDirectory;
 			cdLoc.setDescriptionText(Messages.AutoBackupDialog_Error_InvalidDirectory);

@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.incident.xml;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -55,7 +54,7 @@ public interface IXmlToIncidentConverter {
 	 * @param attachmentLocation
 	 * @throws Exception
 	 */
-	public void fromXml(Path file, Session session, ConservationArea ca,  File attachmentLocation) throws Exception;
+	public void fromXml(Path file, Session session, ConservationArea ca,  Path attachmentLocation) throws Exception;
 	/**
 	 * @return any warnings generated during the import process
 	 */

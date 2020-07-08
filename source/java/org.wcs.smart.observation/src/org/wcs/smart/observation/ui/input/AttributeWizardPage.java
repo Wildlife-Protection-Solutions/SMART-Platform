@@ -21,7 +21,9 @@
  */
 package org.wcs.smart.observation.ui.input;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -719,16 +721,17 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 		if (file == null) {
 			return;
 		}
+		Path root = Paths.get(fd.getFilterPath());
 		for (int i = 0; i < fd.getFileNames().length; i ++){
-			File f = new File(fd.getFilterPath() + File.separator +  fd.getFileNames()[i]);
-			if (!f.exists()){
-				ObservationPlugIn.displayLog(MessageFormat.format(Messages.AttributeWizardPage_FileNotFoundError, new Object[]{f.getAbsolutePath()}), null);
+			Path f = root.resolve(fd.getFileNames()[i]);
+			if (!Files.exists(f)){
+				ObservationPlugIn.displayLog(MessageFormat.format(Messages.AttributeWizardPage_FileNotFoundError, new Object[]{f.toAbsolutePath().toString()}), null);
 				return;
 			}
 			
 			ObservationAttachment oa = new ObservationAttachment();
 			oa.setCopyFromLocation(f);
-			oa.setFilename(f.getName());
+			oa.setFilename(f.getFileName().toString());
 			currentAttachments.add(oa);
 		}
 		attachmentViewer.refresh();

@@ -22,7 +22,9 @@
 
 package org.wcs.smart.patrol.xml.export;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.MessageFormat;
@@ -117,16 +119,16 @@ public class MultiPatrolExportDialog extends XmlMultiExportDialog implements IPa
 			return false;
 		}
 		
-		File dir = new File(txtFile.getText());
-		if (!dir.exists()) {
-			if (!MessageDialog.openQuestion(getShell(), EXPORT_DIALOGTITLE, MessageFormat.format(Messages.ExportPatrolHandler_Warning_DirNotExist, new Object[]{dir.getAbsolutePath()}))) {
+		Path dir = Paths.get(txtFile.getText());
+		if (!Files.exists(dir)) {
+			if (!MessageDialog.openQuestion(getShell(), EXPORT_DIALOGTITLE, MessageFormat.format(Messages.ExportPatrolHandler_Warning_DirNotExist, new Object[]{dir.toAbsolutePath().toString()}))) {
 				return false;
 			}
 			if (!SmartUtils.createDirectory(dir)){
 				SmartPatrolPlugIn.displayLog(Messages.MultiPatrolExportDialog_CouldNotCreateDirectory, null);
 				return false;
 			}
-		}else if (!dir.isDirectory()){
+		}else if (!Files.isDirectory(dir)){
 			SmartPatrolPlugIn.displayLog(MessageFormat.format(Messages.MultiPatrolExportDialog_InvalidDirectory, new Object[]{dir.toString()}),null);
 			return false;
 		}

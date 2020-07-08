@@ -21,11 +21,11 @@
  */
 package org.wcs.smart.entity;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
 
@@ -109,12 +109,12 @@ public class EntityCsvExporter implements ICsvDataExporter {
 	}
 	
 	@Override
-	public boolean exportCsvFile(File file, char delimiter, ConservationArea ca,
+	public boolean exportCsvFile(Path file, char delimiter, ConservationArea ca,
 			boolean headers, Charset cs, IProgressMonitor monitor, Session session)
 			throws Exception {
 		
 		try (CSVWriter writer = new CSVWriter(
-					new OutputStreamWriter(new FileOutputStream(file), cs), 
+					new OutputStreamWriter(Files.newOutputStream(file), cs), 
 					delimiter, '"',SharedUtils.LINE_SEPARATOR)){
 			
 			List<Entity> stations = getEntities(session, activeOnly);

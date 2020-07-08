@@ -22,13 +22,8 @@
 package org.wcs.smart.connect.uploader.ca;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.FilenameFilter;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
@@ -47,6 +42,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.hibernate.Session;
@@ -100,8 +96,8 @@ public class PostgresqlCaLoader {
 		this.item = item;
 	}
 	
-	public void importData(File zipFile, ConservationAreaInfo ca) throws Exception {
-		File tempDir = ZipUtil.createTemporaryDirectory();
+	public void importData(Path zipFile, ConservationAreaInfo ca) throws Exception {
+		Path tempDir = ZipUtil.createTemporaryDirectory();
 		try{
 			ZipUtil.unzipFolder(zipFile, tempDir);
 			processDatabaseFiles(tempDir);
@@ -110,28 +106,29 @@ public class PostgresqlCaLoader {
 			processFilestore(tempDir, ca);
 		}finally{
 			try{
-				FileUtils.forceDelete(tempDir);
+				FileUtils.forceDelete(tempDir.toAbsolutePath().normalize().toFile());
 			}catch (Exception ex){
 				logger.log(Level.WARNING, "Unable to delete temporary directory.", ex); //$NON-NLS-1$
 			}
 		}
 	}
 	
-	private void processFilestore(File dir, ConservationAreaInfo ca) throws Exception{
-		File toDir = DataStoreManager.INSTANCE.getConservationAreaFullPath(ca);
-		if (!toDir.exists()){
-			FileUtils.forceMkdir(toDir);
+	private void processFilestore(Path dir, ConservationAreaInfo ca) throws Exception{
+		Path toDir = DataStoreManager.INSTANCE.getConservationAreaFullPath(ca);
+		if (!Files.exists(toDir)){
+			Files.createDirectories(toDir);
 		}
 		
-		File filestore = new File(dir, "filestore"); //$NON-NLS-1$
+		Path filestore = dir.resolve("filestore"); //$NON-NLS-1$
 		
-		for (File f: filestore.listFiles()){
-			if (f.isDirectory()){
-				FileUtils.copyDirectory(f, new File(toDir, f.getName()));
-			}else if (f.isFile()){
-				FileUtils.copyFile(f, new File(toDir, f.getName()));
+		List<Path> paths = Files.list(filestore).collect(Collectors.toList());
+		for (Path f : paths) {
+			if (Files.isDirectory(f)) {
+				Path to = toDir.resolve(f.getFileName().toString());
+				FileUtils.copyDirectory(f.toAbsolutePath().normalize().toFile(), to.toAbsolutePath().normalize().toFile());
+			}else {
+				Files.copy(f, toDir.resolve(f.getFileName().toString()));
 			}
-			
 		}
 	}
 	
@@ -144,7 +141,7 @@ public class PostgresqlCaLoader {
 	 * @param monitor progress monitor
 	 * @throws Exception
 	 */
-	private void processDatabaseFiles(File dir) throws Exception{
+	private void processDatabaseFiles(Path dir) throws Exception{
 		HashMap<String, List<TableInfo>> tables = scanTables(dir);
 
 		//for each table check to ensure the table exists in the database
@@ -192,8 +189,8 @@ public class PostgresqlCaLoader {
 				List<TableInfo> infos = tables.get(tableName);
 				if (infos == null) throw new Exception(MessageFormat.format(Messages.getString("PostgresqlCaLoader.TableInfoNotFound", item.getLocale()), tableName)); //$NON-NLS-1$
 				for (TableInfo info : infos){
-					if (!info.getDataFile().exists()){
-						throw new Exception(MessageFormat.format(Messages.getString("PostgresqlCaLoader.MissingDataFile", item.getLocale()), tableName, info.getDataFile().getAbsolutePath())); //$NON-NLS-1$
+					if (!Files.exists(info.getDataFile())){
+						throw new Exception(MessageFormat.format(Messages.getString("PostgresqlCaLoader.MissingDataFile", item.getLocale()), tableName, info.getDataFile().toAbsolutePath().toString())); //$NON-NLS-1$
 					}
 					if (!toIngore.contains(tableName.toLowerCase(Locale.ROOT))){
 						importData(tableName, info.getColumns(), info.getDataFile() );
@@ -208,10 +205,10 @@ public class PostgresqlCaLoader {
 		}
 	}
 
-	private void inportPlugInVersionFile(File dir, ConservationAreaInfo info) throws Exception{
-		File f = new File(new File(dir, DATABASE_DIR), "db_versions.dat"); //$NON-NLS-1$
+	private void inportPlugInVersionFile(Path dir, ConservationAreaInfo info) throws Exception{
+		Path f = dir.resolve(DATABASE_DIR).resolve("db_versions.dat"); //$NON-NLS-1$
 		
-		try(CSVReader reader = new CSVReader(new FileReader(f))){
+		try(CSVReader reader = new CSVReader(Files.newBufferedReader(f))){
 			String[] data = null;
 			while((data = reader.readNext()) != null){
 				
@@ -274,23 +271,22 @@ public class PostgresqlCaLoader {
 	 * 
 	 * @throws Exception
 	 */
-	private HashMap<String, List<TableInfo>> scanTables(File dir) throws Exception{
-		File dataFileDir = new File(dir, DATABASE_DIR);
+	private HashMap<String, List<TableInfo>> scanTables(Path dir) throws Exception{
+		Path dataFileDir = dir.resolve( DATABASE_DIR);
 		//list all .def file
-		String files[] = dataFileDir.list(new FilenameFilter() {
-			@Override
-			public boolean accept(File dir, String name) {
-				return (name.endsWith(".def")); //$NON-NLS-1$
-			}
-		});
+		
+		List<Path> files = Files.list(dataFileDir)
+				.filter(e->e.getFileName().toString().endsWith(".def")) //$NON-NLS-1$
+				.collect(Collectors.toList());
+		
 		
 		//read info in files
 		HashMap<String, List<TableInfo>> map = new HashMap<String, List<TableInfo>>();
-		for (int i = 0; i < files.length; i++){
-			try(BufferedReader reader = new BufferedReader(new FileReader(new File(dataFileDir, files[i])))){
+		for (Path file : files){
+			try(BufferedReader reader = Files.newBufferedReader(file)){
 				String tablename = reader.readLine().toUpperCase(Locale.ROOT);
 				String columns = reader.readLine();
-				String data = files[i].substring(0,files[i].lastIndexOf(".def")); //$NON-NLS-1$
+				String data = file.getFileName().toString().substring(0,file.getFileName().toString().lastIndexOf(".def")); //$NON-NLS-1$
 				
 				List<TableInfo> tablefiles = map.get(tablename);
 				if (tablefiles  == null){
@@ -298,7 +294,7 @@ public class PostgresqlCaLoader {
 					map.put(tablename, tablefiles);
 				}
 				tablefiles.add(new TableInfo(tablename, columns, 
-						new File(dataFileDir,data + ".dat"))); //$NON-NLS-1$
+						dataFileDir.resolve(data + ".dat"))); //$NON-NLS-1$
 			}
 		}
 
@@ -316,7 +312,7 @@ public class PostgresqlCaLoader {
 	 * @throws Exception
 	 */
 	private void importData(String tableName, 
-			String columns, File dataFile) throws Exception{
+			String columns, Path dataFile) throws Exception{
 		
 		String bits[] = tableName.split("\\."); //$NON-NLS-1$
 		final StringBuilder query = new StringBuilder();
@@ -347,7 +343,7 @@ public class PostgresqlCaLoader {
 					if (colsToModified.size() > 0){
 						fixHexData(dataFile, colsToModified);
 					}
-					try(InputStreamReader reader = new InputStreamReader(new FileInputStream(dataFile), StandardCharsets.UTF_8)){
+					try(InputStreamReader reader = new InputStreamReader(Files.newInputStream(dataFile), StandardCharsets.UTF_8)){
 						copy.copyIn(query.toString(), reader);
 					}
 				}catch(Exception ex){
@@ -361,10 +357,10 @@ public class PostgresqlCaLoader {
 	/*
 	 * converts derby hex values to postgresql hex values
 	 */
-	private void fixHexData(File dataFile, List<Integer> colsToModify ) throws Exception{
-		Path tempFile = FileSystems.getDefault().getPath(dataFile.getAbsolutePath() + ".temp"); //$NON-NLS-1$
+	private void fixHexData(Path dataFile, List<Integer> colsToModify ) throws Exception{
+		Path tempFile = dataFile.getParent().resolve(dataFile.getFileName().toString() + ".temp"); //$NON-NLS-1$
 		
-		try(CSVReader reader = new CSVReader(Files.newBufferedReader(dataFile.toPath()));
+		try(CSVReader reader = new CSVReader(Files.newBufferedReader(dataFile));
 				CSVWriter writer = new CSVWriter(Files.newBufferedWriter(tempFile)) ){
 			
 			String[] line = null;
@@ -381,8 +377,8 @@ public class PostgresqlCaLoader {
 			}
 		}
 		
-		Files.delete(dataFile.toPath());
-		Files.move(tempFile, dataFile.toPath());
+		Files.delete(dataFile);
+		Files.move(tempFile, dataFile);
 		
 	}
 	/**
@@ -435,14 +431,14 @@ public class PostgresqlCaLoader {
 
 		private String tableName;
 		private String columns;
-		private File dataFile;
+		private Path dataFile;
 		
 		/**
 		 * @param tableName the table name
 		 * @param columns the table columns
 		 * @param dataFile the data file
 		 */
-		public TableInfo(String tableName, String columns, File dataFile){
+		public TableInfo(String tableName, String columns, Path dataFile){
 			this.tableName = tableName;
 			this.columns = columns;
 			this.dataFile = dataFile;
@@ -466,7 +462,7 @@ public class PostgresqlCaLoader {
 		/**
 		 * @return the data file
 		 */
-		public File getDataFile() {
+		public Path getDataFile() {
 			return dataFile;
 		}
 	}

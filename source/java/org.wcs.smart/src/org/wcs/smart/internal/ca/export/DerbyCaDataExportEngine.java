@@ -22,8 +22,8 @@
 package org.wcs.smart.internal.ca.export;
 
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -46,12 +46,12 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class DerbyCaDataExportEngine implements ICaDataExportEngine{
 
-	private File outputLocation;
+	private Path outputLocation;
 	private ConservationArea ca;
 	private Session session;
 	private HashMap<String, String> options;
 	
-	public DerbyCaDataExportEngine(File outputLocation, ConservationArea ca, Session session){
+	public DerbyCaDataExportEngine(Path outputLocation, ConservationArea ca, Session session){
 		this.session = session;
 		this.ca = ca;
 		this.outputLocation = outputLocation;
@@ -83,13 +83,13 @@ public class DerbyCaDataExportEngine implements ICaDataExportEngine{
 	}
 
 	/**
-	 * @see org.wcs.smart.ca.export.ICaDataExportEngine#writeTableDefinitionFile(java.io.File, java.lang.String, java.lang.String[])
+	 * 
 	 */
 	@Override
 	public void writeTableDefinitionFile(String tableName, String hibernateClass,
 			String[] columns) throws Exception {
-		File columnFile = createFileName(getExportLocation(), tableName + "." + hibernateClass + ".def"); //$NON-NLS-1$ //$NON-NLS-2$
-		try(BufferedWriter writer = new BufferedWriter(new FileWriter(columnFile))){
+		Path columnFile = createFileName(getExportLocation(), tableName + "." + hibernateClass + ".def"); //$NON-NLS-1$ //$NON-NLS-2$
+		try(BufferedWriter writer = Files.newBufferedWriter(columnFile)){
 			writer.write(tableName);
 			writer.newLine();
 			StringBuilder record = new StringBuilder();
@@ -105,7 +105,7 @@ public class DerbyCaDataExportEngine implements ICaDataExportEngine{
 	}
 
 	/**
-	 * @see org.wcs.smart.ca.export.ICaDataExportEngine#exportTableData(java.io.File, java.lang.String, java.lang.String, org.hibernate.Session)
+	 * 
 	 */
 	@Override
 	public void exportTableData(String tableName,
@@ -187,15 +187,15 @@ public class DerbyCaDataExportEngine implements ICaDataExportEngine{
 	@Override
 	public void writeQuery(String fileName, String query){
 		NativeQuery<?> sqlQuery = getSession().createNativeQuery("CALL SYSCS_UTIL.SYSCS_EXPORT_QUERY('" + query + "', '" + //$NON-NLS-1$ //$NON-NLS-2$
-				createFileName(getExportLocation(), fileName + ".dat").getAbsolutePath() + "', null, null, 'utf-8')" ); //$NON-NLS-1$ //$NON-NLS-2$
+				createFileName(getExportLocation(), fileName + ".dat"). //$NON-NLS-1$
+				normalize().toAbsolutePath().toString() + "', null, null, 'utf-8')" ); //$NON-NLS-1$
 		sqlQuery.executeUpdate();
 	}
 	
-	private File createFileName(File destDir, String tableName){
-		File dir = new File(destDir, ICaDataExportEngine.DATABASE_DIR);
+	private Path createFileName(Path destDir, String tableName){
+		Path dir = destDir.resolve(ICaDataExportEngine.DATABASE_DIR);
 		SmartUtils.createDirectory(dir);
-		File f = new File(dir, File.separator + tableName);
-		return f;
+		return dir.resolve(tableName);
 	}
 
 	/**
@@ -218,7 +218,7 @@ public class DerbyCaDataExportEngine implements ICaDataExportEngine{
 	 * @see org.wcs.smart.ca.export.ICaDataExportEngine#getExportLocation()
 	 */
 	@Override
-	public File getExportLocation() {
+	public Path getExportLocation() {
 		return this.outputLocation;
 	}
 

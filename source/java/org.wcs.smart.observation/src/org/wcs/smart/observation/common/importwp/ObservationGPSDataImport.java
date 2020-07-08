@@ -21,7 +21,9 @@
  */
 package org.wcs.smart.observation.common.importwp;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -35,6 +37,8 @@ import java.util.Set;
 import java.util.TimeZone;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.LineString;
 import org.wcs.smart.gpx.GPSDataImport;
 import org.wcs.smart.gpx.xml.TrkType;
 import org.wcs.smart.gpx.xml.TrksegType;
@@ -44,9 +48,6 @@ import org.wcs.smart.observation.ObservationPlugIn;
 import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.util.SharedUtils;
-
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.LineString;
 
 /**
  * Class of utilties that support
@@ -73,16 +74,16 @@ public class ObservationGPSDataImport extends GPSDataImport{
 		final HashMap<ImportType, List<Waypoint>> data = new HashMap<ImportType, List<Waypoint>>();
 
 		monitor.setTaskName(Messages.GPSDataImport_Progress_ImportingFromGPS);
-		File f = importFromDevice(deviceType, dataType);
+		Path f = importFromDevice(deviceType, dataType);
 		try {
 			monitor.setTaskName(Messages.GPSDataImport_Progress_ReadingData);
-			Map<ImportType, List<Waypoint>> vals = convertGpx(Collections.singletonList(f.getCanonicalPath()), day, dataType, monitor);
+			Map<ImportType, List<Waypoint>> vals = convertGpx(Collections.singletonList(f.toAbsolutePath().toString()), day, dataType, monitor);
 			for (ImportType type : dataType) {
 				data.put(type, vals.get(type));
 			}
 		} finally {
 			try {
-				f.delete();
+				Files.delete(f);
 			} catch (Exception ex) {
 				ObservationPlugIn.log("Error deleting patrol data file.", ex); //$NON-NLS-1$
 			}
@@ -160,10 +161,10 @@ public class ObservationGPSDataImport extends GPSDataImport{
 			plddt = SharedUtils.getDatePart(day, false);
 		}
 		for (String file : gpxFiles) {
-			File gpxFile = new File(file);
+			Path gpxFile = Paths.get(file);
 
 			if (dataType.contains(ImportType.WAYPOINT)) {
-				List<WptType> waypoints = getWaypointsGpx(Collections.singletonList(gpxFile.getAbsolutePath()), monitor);
+				List<WptType> waypoints = getWaypointsGpx(Collections.singletonList(gpxFile.toAbsolutePath().toString()), monitor);
 				monitor.subTask(Messages.GPSDataImport_Progress_ParsingWaypoints);
 				ArrayList<Waypoint> newwaypoints = new ArrayList<Waypoint>();
 				for (Iterator<WptType> iterator = waypoints.iterator(); iterator

@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.report.birt.map;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.List;
 
 import org.eclipse.birt.report.engine.extension.IBaseResultSet;
@@ -39,13 +39,13 @@ public interface IRasterCreator {
 	 * Creates a raster and returns the file that contains the raster
 	 * @return
 	 */
-	public File createRaster(IExecutorContext context, String datasetId, IBaseResultSet results) throws Exception;
+	public Path createRaster(IExecutorContext context, String datasetId, IBaseResultSet results) throws Exception;
 
 	/**
 	 * Files to remove after raster rendered
 	 * @return
 	 */
-	public List<File> getFilesToCleanUp();
+	public List<Path> getFilesToCleanUp();
 	
 	/**
 	 * 

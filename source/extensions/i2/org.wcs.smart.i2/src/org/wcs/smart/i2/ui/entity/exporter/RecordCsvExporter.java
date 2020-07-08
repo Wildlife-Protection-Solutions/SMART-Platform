@@ -24,6 +24,7 @@ package org.wcs.smart.i2.ui.entity.exporter;
 import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.DateFormat;
 import java.util.List;
 import java.util.Locale;
@@ -71,12 +72,12 @@ public class RecordCsvExporter implements ICsvDataExporter {
 	}
 	
 	@Override
-	public boolean exportCsvFile(File file, char delimiter,
+	public boolean exportCsvFile(Path file, char delimiter,
 			ConservationArea ca, boolean headers, Charset cs, IProgressMonitor monitor,
 			Session session) throws Exception {
 		
 		//update last file name
-		String lastFile = file.getName();
+		String lastFile = file.getFileName().toString();
 		if (lastFile.lastIndexOf('.') > 0){
 			lastFile = lastFile.substring(0, lastFile.lastIndexOf('.'));
 		}
@@ -119,7 +120,7 @@ public class RecordCsvExporter implements ICsvDataExporter {
 		IIntelligenceLabelProvider ll = SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class);
 		monitor.worked(1);
 		monitor.subTask(Messages.RecordCsvExporter_SubTask2);
-		try(CSVWriter writer = new CSVWriter(Files.newBufferedWriter(file.toPath(), cs), delimiter)){
+		try(CSVWriter writer = new CSVWriter(Files.newBufferedWriter(file, cs), delimiter)){
 			writer.writeNext(data);
 			
 			data = new String[data.length];

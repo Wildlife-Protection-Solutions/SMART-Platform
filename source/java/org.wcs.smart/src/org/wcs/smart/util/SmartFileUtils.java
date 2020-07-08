@@ -21,10 +21,10 @@
  */
 package org.wcs.smart.util;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
-import org.apache.commons.io.FileUtils;
 import org.wcs.smart.SmartPlugIn;
 
 /**
@@ -35,23 +35,20 @@ import org.wcs.smart.SmartPlugIn;
  */
 public class SmartFileUtils {
 
-	public static File createTempDirectory(String prefix) throws IOException {
-		final File temp;
-		temp = File.createTempFile(prefix, Long.toString(System.nanoTime()));
-		if(!(temp.delete())) {
-			throw new IOException("Could not delete temp file: " + temp.getAbsolutePath()); //$NON-NLS-1$
-		}
-		if(!(temp.mkdir())) {
-			throw new IOException("Could not create temp directory: " + temp.getAbsolutePath()); //$NON-NLS-1$
-		}
+	public static Path createTempDirectory(String prefix) throws IOException {
+		final Path temp;
+		temp = Files.createTempFile(prefix, Long.toString(System.nanoTime()));
+		
+		SmartUtils.deleteDirectory(temp);
+		SmartUtils.createDirectory(temp);
+		
 		return temp;
 	}	
 
-	public static void deleteTempDirectory(File tempDir) {
-		if (tempDir == null)
-			return;
+	public static void deleteTempDirectory(Path tempDir) {
+		if (tempDir == null) return;
 		try {
-			FileUtils.deleteDirectory(tempDir);
+			SmartUtils.deleteDirectory(tempDir);
 		} catch (IOException e) {
 			//ignore
 			SmartPlugIn.log(e.getMessage(), e);
@@ -59,3 +56,5 @@ public class SmartFileUtils {
 	}	
 	
 }
+
+

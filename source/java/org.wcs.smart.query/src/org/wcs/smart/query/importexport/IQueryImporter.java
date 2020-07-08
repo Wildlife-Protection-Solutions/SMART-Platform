@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.query.importexport;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,7 +47,7 @@ public interface IQueryImporter {
 	 * Determines if the importer can import the given file
 	 * 
 	 */
-	public boolean canImport(File file);
+	public boolean canImport(Path file);
 	
 	/**
 	 * Imports the given xml query.  This function is responsible
@@ -60,7 +60,7 @@ public interface IQueryImporter {
 	 * @return the imported query definition
 	 * @throws Exception if the query cannot be imported
 	 */
-	public List<Query> importQuery(File file, ConservationArea ca) throws Exception;
+	public List<Query> importQuery(Path file, ConservationArea ca) throws Exception;
 	
 	/**
 	 * Warnings are displayed to the user and the user is allowed to choose

@@ -22,9 +22,9 @@
 package org.wcs.smart.query.common.importexport;
 
 import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -93,7 +93,7 @@ public abstract class DefinitionQueryExporter implements IQueryExporter {
 	 * @see org.wcs.smart.query.export.IQueryExporter#export(org.wcs.smart.query.model.Query, java.io.File, org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	@Override
-	public void export(org.wcs.smart.query.model.Query query, IQueryResult result, File file,
+	public void export(org.wcs.smart.query.model.Query query, IQueryResult result, Path file,
 			HashMap<String, Object> parameters, IProgressMonitor monitor)
 			throws Exception {
 		Query wpquery = new Query();
@@ -139,7 +139,7 @@ public abstract class DefinitionQueryExporter implements IQueryExporter {
 			}
 		}
 		
-		try(OutputStream fout = new BufferedOutputStream(new FileOutputStream(file))){
+		try(OutputStream fout = new BufferedOutputStream(Files.newOutputStream(file))){
 			QueryXmlManager.writeQuery(wpquery, fout);
 		}		
 	}

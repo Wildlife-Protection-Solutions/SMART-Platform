@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.gpx;
 
-import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.ParseException;
@@ -38,14 +39,13 @@ import javax.xml.bind.Unmarshaller;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
+import org.locationtech.jts.geom.Coordinate;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.gpx.xml.GpxType;
 import org.wcs.smart.gpx.xml.TrkType;
 import org.wcs.smart.gpx.xml.TrksegType;
 import org.wcs.smart.gpx.xml.WptType;
 import org.wcs.smart.internal.Messages;
-
-import org.locationtech.jts.geom.Coordinate;
 
 /**
  * Class of utilties that support
@@ -91,9 +91,8 @@ public class GPSDataImport {
 	 * @return a map of type of data imported 
 	 * @throws Exception 
 	 */
-	public static File importFromDevice(final String deviceType, final Set<ImportType> dataType) throws Exception {
-		File f = GPSBabel.getData(deviceType, dataType);
-		return f;
+	public static Path importFromDevice(final String deviceType, final Set<ImportType> dataType) throws Exception {
+		return GPSBabel.getData(deviceType, dataType);
 	}
 	
 	/**
@@ -104,21 +103,21 @@ public class GPSDataImport {
 	 * 
 	 * @return list of trackpoints
 	 */
-	public static List<TrkType> getTracksGpx(File gpxFile, IProgressMonitor monitor) throws Exception{
+	public static List<TrkType> getTracksGpx(Path gpxFile, IProgressMonitor monitor) throws Exception{
 		GpxType type = null;
 		try {
 			monitor.subTask(Messages.GPSDataImport_TrackProgress_ReadingGPXData);
 			JAXBContext context = JAXBContext.newInstance(GPX_METADATA_CLASSES);
 			Unmarshaller un = context.createUnmarshaller();
-			Object o = un.unmarshal(gpxFile);
+			Object o = un.unmarshal(gpxFile.toAbsolutePath().normalize().toFile());
 			type = (GpxType) ((JAXBElement<?>) o).getValue();
 		} catch (Exception ex) {
 			throw new Exception(MessageFormat.format(
-					Messages.GPSDataImport_TrackError_CouldNotReadFile, new Object[]{gpxFile.getAbsolutePath()}) + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
+					Messages.GPSDataImport_TrackError_CouldNotReadFile, new Object[]{gpxFile.toAbsolutePath().normalize().toString()}) + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 		}
 		
 		if (type == null){
-			throw new Exception(MessageFormat.format(Messages.GPSDataImport_TrackError_CouldNotParseFile, new Object[]{ gpxFile.getAbsolutePath()}), null);
+			throw new Exception(MessageFormat.format(Messages.GPSDataImport_TrackError_CouldNotParseFile, new Object[]{ gpxFile.toAbsolutePath().normalize().toString()}), null);
 		}
 		
 		monitor.subTask(Messages.GPSDataImport_Progress_ParsingTracks);
@@ -139,23 +138,23 @@ public class GPSDataImport {
 		List<WptType> waypoints = new ArrayList<WptType>();
 		
 		for (String file : gpxFiles){
-			File gpxFile = new File(file);
+			Path gpxFile = Paths.get(file);
 			GpxType type = null;
 			try {
 				progress.subTask(Messages.GPSDataImport_WaypointProgress_ReadingGpx);
 				JAXBContext context = JAXBContext.newInstance(GPX_METADATA_CLASSES);
 				Unmarshaller un = context.createUnmarshaller();
-				Object o = un.unmarshal(gpxFile);
+				Object o = un.unmarshal(gpxFile.toAbsolutePath().normalize().toFile());
 				type = (GpxType) ((JAXBElement<?>) o).getValue();
 			} catch (Exception ex) {
 				SmartPlugIn.displayLog(MessageFormat.format(
 						Messages.GPSDataImport_WaypointError_CouldNotReadFile,
-						new Object[]{gpxFile.getAbsolutePath()}) + "\n" + ex.getMessage(), ex); //$NON-NLS-1$
+						new Object[]{gpxFile.toAbsolutePath().normalize().toString()}) + "\n" + ex.getMessage(), ex); //$NON-NLS-1$
 				continue;
 			}
 		
 			if (type == null){
-				SmartPlugIn.displayLog(MessageFormat.format(Messages.GPSDataImport_WaypointError_CouldNotParse, new Object[]{gpxFile.getAbsolutePath()}), null);
+				SmartPlugIn.displayLog(MessageFormat.format(Messages.GPSDataImport_WaypointError_CouldNotParse, new Object[]{gpxFile.toAbsolutePath().normalize().toString()}), null);
 				continue;
 			}
 			progress.subTask(Messages.GPSDataImport_Progress_ParsingWaypoints);
@@ -178,21 +177,21 @@ public class GPSDataImport {
 	public static List<WptType> getTrackPoints(List<String> gpxFiles, IProgressMonitor monitor){
 		List<WptType> waypoints = new ArrayList<WptType>();
 		for (String file : gpxFiles) {
-			File gpxFile = new File(file);
+			Path gpxFile = Paths.get(file);
 			GpxType type = null;
 			try {
 				monitor.subTask(MessageFormat.format(Messages.GPSDataImport_Progress_ReadingGpxFileName, new Object[]{gpxFile.toString()}));
 				JAXBContext context = JAXBContext.newInstance(GPX_METADATA_CLASSES);
 				Unmarshaller un = context.createUnmarshaller();
-				Object o = un.unmarshal(gpxFile);
+				Object o = un.unmarshal(gpxFile.toAbsolutePath().normalize().toFile());
 				type = (GpxType) ((JAXBElement<?>) o).getValue();
 			} catch (Exception ex) {
-				SmartPlugIn.displayLog(MessageFormat.format(Messages.GPSDataImport_TrackPointError_CouldNotRead, new Object[]{gpxFile.getAbsolutePath()}) + ex.getLocalizedMessage(), ex);
+				SmartPlugIn.displayLog(MessageFormat.format(Messages.GPSDataImport_TrackPointError_CouldNotRead, new Object[]{gpxFile.toAbsolutePath().normalize().toString()}) + ex.getLocalizedMessage(), ex);
 				continue;
 			}
 
 			if (type == null) {
-				SmartPlugIn.displayLog(MessageFormat.format(Messages.GPSDataImport_TrackPointError_CouldNotParse, new Object[]{gpxFile.getAbsolutePath()}), null);
+				SmartPlugIn.displayLog(MessageFormat.format(Messages.GPSDataImport_TrackPointError_CouldNotParse, new Object[]{gpxFile.toAbsolutePath().normalize().toString()}), null);
 				continue;
 			}
 

@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.connect.server;
 
-import java.io.File;
+import java.nio.file.Path;
 
 /**
  * A preprocessor for Conservation Area Exports that are going to
@@ -44,5 +44,5 @@ public interface ICaExportPreprocessor {
 	 * 
 	 * @param tempDirectory the temporary location of the export
 	 */
-	public void processExport(File tempDirectory);
+	public void processExport(Path tempDirectory);
 }

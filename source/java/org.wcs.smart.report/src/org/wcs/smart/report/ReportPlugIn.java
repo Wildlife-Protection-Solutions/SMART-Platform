@@ -21,8 +21,9 @@
  */
 package org.wcs.smart.report;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.eclipse.birt.report.designer.core.model.SessionHandleAdapter;
 import org.eclipse.birt.report.designer.ui.ReportPlugin;
@@ -110,14 +111,12 @@ public class ReportPlugIn extends AbstractUIPlugin {
 		});
 	}
 	
-	public static File getReportDirectory(ConservationArea ca) {
+	public static Path getReportDirectory(ConservationArea ca) {
 		return getReportDirectory(ca.getFileDataStoreLocation());
 	}
 
-	public static File getReportDirectory(String caFileDataStoreLocation) {
-		return new File(caFileDataStoreLocation
-				+ File.separator
-				+ Report.REPORT_DIR + File.separator);
+	public static Path getReportDirectory(String caFileDataStoreLocation) {
+		return Paths.get(caFileDataStoreLocation).resolve(Report.REPORT_DIR);
 	}
 	
 	/**
@@ -133,11 +132,11 @@ public class ReportPlugIn extends AbstractUIPlugin {
 	public void initReports(){
 		try {
 			String fileStore = SmartContext.INSTANCE.getFilestoreLocation();
-			ReportPlugin.getDefault().setResourcePreference(SmartBirtLibrary.getInstance().getLibraryLocation().getCanonicalPath());
+			ReportPlugin.getDefault().setResourcePreference(SmartBirtLibrary.getInstance().getLibraryLocation().toString());
 			SessionHandle.setBirtResourcePath(fileStore);
 			SessionHandleAdapter.getInstance( ).getSessionHandle( ).setResourceFolder(fileStore);
 			SessionHandleAdapter.getInstance().getSessionHandle().setResourceLocator(BirtResourceLocator.INSTANCE);			
-		} catch (IOException e) {
+		} catch (Exception e) {
 			org.wcs.smart.report.ReportPlugIn.displayLog(
 					Messages.ReportPlugIn_Error_InitializingParams+ e.getLocalizedMessage(), e);
 		}
@@ -204,7 +203,7 @@ public class ReportPlugIn extends AbstractUIPlugin {
 	/**
 	 * @return the full report filename including path
 	 */
-	public File getReportFile(Report r){
-		return new File(ReportPlugIn.getReportDirectory(r.getConservationArea()), r.getFilename());
+	public Path getReportFile(Report r){
+		return getReportDirectory(r.getConservationArea()).resolve(r.getFilename());
 	}
 }

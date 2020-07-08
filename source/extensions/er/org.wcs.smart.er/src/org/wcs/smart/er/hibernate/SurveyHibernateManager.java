@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.er.hibernate;
 
-import java.io.File;
+import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -120,9 +120,9 @@ public class SurveyHibernateManager {
 						if (wp.getWaypoint().getAttachments() != null){
 							//update all the waypoint attachments directory
 							for (WaypointAttachment wa : wp.getWaypoint().getAttachments()){
-								wa.computeFileLocation(new File(new File(
-										SmartDB.getCurrentConservationArea().getFileDataStoreLocation(),
-										src.getDatastoreFileLocation(mission, session)), wa.getFilename()));
+								wa.computeFileLocation(Paths.get(SmartDB.getCurrentConservationArea().getFileDataStoreLocation())
+										.resolve(src.getDatastoreFileLocation(mission, session))
+										.resolve(wa.getFilename()));
 							}
 						}
 						if (wp.getWaypoint().getObservationGroups() != null){
@@ -130,9 +130,9 @@ public class SurveyHibernateManager {
 								for (WaypointObservation wo : grp.getObservations()){
 									if (wo.getAttachments() != null){
 										for (ObservationAttachment wa : wo.getAttachments()){
-											wa.computeFileLocation(new File(new File(
-													SmartDB.getCurrentConservationArea().getFileDataStoreLocation(),
-													src.getDatastoreFileLocation(mission, session)), wa.getFilename()));
+											wa.computeFileLocation(Paths.get(SmartDB.getCurrentConservationArea().getFileDataStoreLocation())
+													.resolve(src.getDatastoreFileLocation(mission, session))
+													.resolve(wa.getFilename()));
 										}
 									}
 								}

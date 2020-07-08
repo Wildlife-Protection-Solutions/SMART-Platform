@@ -23,13 +23,15 @@ package org.wcs.smart.connect;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.DirectoryStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Enumeration;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
@@ -44,28 +46,33 @@ import org.wcs.smart.connect.datastore.DataStoreManager;
  */
 public class ZipUtil {
 
-	public static File createTemporaryDirectory(){
-		File baseDir = DataStoreManager.INSTANCE.getTemporaryDirectory();
-		String basename = "smart_" + Long.toString(System.nanoTime()); //$NON-NLS-1$
-		
-		for (int i = 0; i < 1000; i ++){
-			File tempDir = new File(baseDir, basename + "_"+ i); //$NON-NLS-1$
-			if (tempDir.mkdir()){
-				return tempDir;
+	public static Path createTemporaryDirectory(){
+		try {
+			Path baseDir = DataStoreManager.INSTANCE.getTemporaryDirectory();
+			String basename = "smart_" + Long.toString(System.nanoTime()); //$NON-NLS-1$
+			
+			for (int i = 0; i < 1000; i ++){
+				Path tempDir = baseDir.resolve(basename + "_"+ i); //$NON-NLS-1$
+				if (!Files.exists(tempDir)) {
+					Files.createDirectories(tempDir);
+					return tempDir;
+				}
 			}
+		}catch(IOException ex) {
+			throw new IllegalStateException("Could not create temporary directory", ex); //$NON-NLS-1$
 		}
 		throw new IllegalStateException("Could not create temporary directory"); //$NON-NLS-1$
 		
 	}
 	
-	public static boolean createZip(DirectoryStream<Path> inputs, Path outputZipFile) throws IOException{
+	public static boolean createZip(List<Path> inputs, Path outputZipFile) throws IOException{
 		  try (FileOutputStream fOut = new FileOutputStream(outputZipFile.toFile());
 				  BufferedOutputStream bOut = new BufferedOutputStream(fOut);
 		       	ZipArchiveOutputStream tOut = new ZipArchiveOutputStream(bOut);){
 		       
-			  for (Path p : inputs){
-				  addFileToZip(tOut,p.toFile().getAbsoluteFile(), ""); //$NON-NLS-1$
-		        }
+			for (Path p : inputs) {
+				addFileToZip(tOut, p, ""); //$NON-NLS-1$
+			}
 		            
 		  }
 		   return true;
@@ -81,16 +88,16 @@ public class ZipUtil {
 	 * @throws IOException
 	 */
 	public static boolean createZip(
-			File[] directories, 
-			File outputZipFile) throws IOException{
+			Path[] directories, 
+			Path outputZipFile) throws IOException{
 
         
-        try (FileOutputStream fOut = new FileOutputStream(outputZipFile);
+        try (OutputStream fOut = Files.newOutputStream(outputZipFile);
         	 BufferedOutputStream bOut = new BufferedOutputStream(fOut);
         	ZipArchiveOutputStream tOut = new ZipArchiveOutputStream(bOut);){
             
             for (int i = 0; i < directories.length; i ++){
-            	addFileToZip(tOut,directories[i].getAbsoluteFile(), ""); //$NON-NLS-1$
+            	addFileToZip(tOut,directories[i], ""); //$NON-NLS-1$
             }
             
         }
@@ -109,34 +116,32 @@ public class ZipUtil {
      * @throws IOException If anything goes wrong
      */
     private static boolean addFileToZip(ZipArchiveOutputStream zOut, 
-    		File path, 
+    		Path path, 
     		String base) throws IOException {
     	
-    	String entryName = base + path.getName();
-        if (path.isFile()) {
-            ZipArchiveEntry zipEntry = new ZipArchiveEntry(path, entryName); 
+    	String entryName = base + path.getFileName().toString();
+    	if (!Files.exists(path)) {
+    		//assume empty directory and ignore
+    	}else if (!Files.isDirectory(path)) {
+            ZipArchiveEntry zipEntry = new ZipArchiveEntry(path.toAbsolutePath().normalize().toFile(), entryName); 
             zOut.putArchiveEntry(zipEntry);
-            try(FileInputStream in = new FileInputStream(path)){
+            try(InputStream in = Files.newInputStream(path)){
             	IOUtils.copy(in, zOut);
             }
             zOut.closeArchiveEntry();
-        }else if (path.isDirectory() && path.list().length == 0){
+        }else if (Files.isDirectory(path) && Files.list(path).count() == 0){
         	//empty directory
     		ZipArchiveEntry zipEntry = new ZipArchiveEntry(entryName + File.separator); 
             zOut.putArchiveEntry(zipEntry);
             zOut.closeArchiveEntry();
         } else {
-            File[] children = path.listFiles();
-            if (children != null) {
-                for (File child : children) {
-                    if (!addFileToZip(zOut, child, entryName + File.separator)){
-                    	return false;
-                    }
-                }
-            }else{
-            	//empty directory; this should be ok; just skip
-            	//throw new IllegalStateException(MessageFormat.format("Error creating zip file. {0}", new Object[]{path.toString()}));
+        	List<Path> kids = Files.list(path).collect(Collectors.toList());
+            for (Path child : kids) {
+				if (!addFileToZip(zOut, child, entryName + File.separator)) {
+					return false;
+				}
             }
+
         }
         return true;
     }
@@ -148,16 +153,14 @@ public class ZipUtil {
      * @return
      * @throws Exception  
      */
-    public static void unzipFolder(File file,
-			File destinationLocation)
+    public static void unzipFolder(Path file,
+    		Path destinationLocation)
 			throws Exception {
     	
     	
     	String[] outputZipRootFolder = new String[] { "null" }; //$NON-NLS-1$
     	
-		try (ZipFile archiveFile = new ZipFile(file)){
-			byte[] buf = new byte[65536];
-
+		try (ZipFile archiveFile = new ZipFile(file.toAbsolutePath().normalize().toFile())){
 			Enumeration<ZipArchiveEntry> entries = archiveFile.getEntries();
 			while (entries.hasMoreElements()) {
 				ZipArchiveEntry zipEntry = entries.nextElement();
@@ -169,37 +172,17 @@ public class ZipUtil {
 				}
 				// name = name.substring(i + 1);
 
-				File destinationFile = new File(destinationLocation, name);
+				Path destinationFile = destinationLocation.resolve(name);
+				Path parent = destinationFile.getParent();
 				if (name.endsWith("/")) { //$NON-NLS-1$
-					if (!destinationFile.isDirectory()
-							&& !destinationFile.mkdirs()) {
-						throw new Exception(
-								"Could not create temp directory:" //$NON-NLS-1$
-										+ destinationFile.getPath());
-					}
-					continue;
-				} else if (name.indexOf('/') != -1) {
-					// Create the the parent directory if it doesn't exist
-					File parentFolder = destinationFile.getParentFile();
-					if (!parentFolder.isDirectory()) {
-						if (!parentFolder.mkdirs()) {
-							throw new Exception(
-								"Could not create temp directory:" //$NON-NLS-1$
-											+ parentFolder.getPath());
-						}
-					}
+					parent = destinationFile;
 				}
+				Files.createDirectories(parent);
 
-				
-				try (FileOutputStream fos = new FileOutputStream(destinationFile);
-					InputStream entryContent = archiveFile.getInputStream(zipEntry)) {
-					int n;
-					while ((n = entryContent.read(buf)) != -1) {
-						if (n > 0) {
-							fos.write(buf, 0, n);
-						}
+				if (!Files.isDirectory(destinationFile)) {
+					try (InputStream is = archiveFile.getInputStream(zipEntry)){
+						Files.copy(is, destinationFile);
 					}
-					
 				}
 			}
 		} catch (IOException e) {

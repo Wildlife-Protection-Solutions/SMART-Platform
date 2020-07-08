@@ -22,7 +22,7 @@
 package org.wcs.smart.query.common.importexport;
 
 import java.io.Closeable;
-import java.io.File;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -46,7 +46,7 @@ public abstract class SimpleQueryExporter {
 	private Iterator<? extends IResultItem> data;
 	private int dataSize;
 	protected List<QueryColumn> queryColumns; 
-	protected File outputFile;
+	protected Path outputFile;
 	
 	/**
 	 * Exports all the data.
@@ -120,7 +120,7 @@ public abstract class SimpleQueryExporter {
 	 * @param queryColumns the columns to export
 	 * @param outputFile the file to export to
 	 */
-	protected void setData(Collection<? extends IResultItem> data, List<QueryColumn> queryColumns, File outputFile ) {
+	protected void setData(Collection<? extends IResultItem> data, List<QueryColumn> queryColumns, Path outputFile ) {
 		this.data = data != null ? data.iterator() : null;
 		dataSize = data != null ? data.size() : 0;
 		this.queryColumns = queryColumns;
@@ -133,7 +133,7 @@ public abstract class SimpleQueryExporter {
 	 * @param queryColumns the columns to export
 	 * @param outputFile the file to export to
 	 */
-	protected void setData(IPagedQueryResultSet derbyResult, List<QueryColumn> queryColumns, File outputFile ) {
+	protected void setData(IPagedQueryResultSet derbyResult, List<QueryColumn> queryColumns, Path outputFile ) {
 		this.data = derbyResult != null ? derbyResult.iterator(IPagedQueryResultSet.MAP_PAGE_SIZE) : null;
 		this.dataSize = derbyResult != null ? derbyResult.getItemCount() : 0;
 		this.queryColumns = queryColumns;

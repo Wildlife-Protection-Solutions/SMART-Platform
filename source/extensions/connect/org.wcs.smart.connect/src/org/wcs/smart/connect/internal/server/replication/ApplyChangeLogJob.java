@@ -265,10 +265,10 @@ public class ApplyChangeLogJob extends Job {
 	}
 	
 	private void unpackValidateFile() throws Exception{
-		tempDirectory = SmartUtils.createTemporaryDirectory().toPath();		
+		tempDirectory = SmartUtils.createTemporaryDirectory();		
 		
 		//unzip file
-		ZipUtil.unzipFolder(changeLogPackageFile.toFile(), tempDirectory.toFile());
+		ZipUtil.unzipFolder(changeLogPackageFile, tempDirectory);
 
 		Path metadataFile = null;
 		

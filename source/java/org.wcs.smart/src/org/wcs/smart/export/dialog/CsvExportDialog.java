@@ -21,8 +21,10 @@
  */
 package org.wcs.smart.export.dialog;
 
-import java.io.File;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.List;
 
@@ -57,7 +59,7 @@ public class CsvExportDialog extends AbstractCsvDialog {
 	}
 
 	@Override
-	protected boolean performAction(File file, char delimiter, boolean headers, Charset cs, IProgressMonitor monitor, Session session) throws Exception {
+	protected boolean performAction(Path file, char delimiter, boolean headers, Charset cs, IProgressMonitor monitor, Session session) throws Exception {
 		return config.getExporter().exportCsvFile(file, delimiter, SmartDB.getCurrentConservationArea(), headers, cs, monitor, session);
 	}
 
@@ -75,17 +77,17 @@ public class CsvExportDialog extends AbstractCsvDialog {
 	 */
 	@Override
 	protected boolean validateFilename(String fileName){
-		File f = new File(fileName);
-		if (f.exists()){
+		Path f = Paths.get(fileName);
+		if (Files.exists(f)){
 			boolean ok = MessageDialog.openQuestion(getShell(), Messages.CsvExportDialog_DialogTitle, MessageFormat.format(Messages.CsvExportDialog_OverwriteFile, new Object[]{f.toString()}));
 			if (!ok){
 				return false;
 			}
 		}
-		if (!f.getParentFile().exists()){
+		if (!Files.exists(f.getParent())){
 			boolean ok = MessageDialog.openQuestion(getShell(), Messages.CsvExportDialog_DialogTitle, MessageFormat.format(Messages.CsvExportDialog_CreateDirectory, new Object[]{f.getParent()}));
 			if (ok){
-				if (!SmartUtils.createDirectory(f.getParentFile())){
+				if (!SmartUtils.createDirectory(f.getParent())){
 					return false;
 				}
 			}else{

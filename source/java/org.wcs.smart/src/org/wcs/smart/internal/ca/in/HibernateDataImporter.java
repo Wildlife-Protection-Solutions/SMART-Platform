@@ -22,9 +22,8 @@
 package org.wcs.smart.internal.ca.in;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FilenameFilter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,6 +33,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Queue;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
@@ -72,7 +72,7 @@ public class HibernateDataImporter implements ICaDataImporter{
 	 * @param monitor progress monitor
 	 * @throws Exception
 	 */
-	private void processDatabaseFiles(File dir, Session session, IProgressMonitor monitor) throws Exception{
+	private void processDatabaseFiles(Path dir, Session session, IProgressMonitor monitor) throws Exception{
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.CaImporter_Progress_processingTables, 20);
 		
 		HashMap<String, List<TableInfo>> tables = scanTables(dir);
@@ -127,7 +127,7 @@ public class HibernateDataImporter implements ICaDataImporter{
 				List<TableInfo> infos = tables.get(tableName);
 				if (infos == null) throw new Exception(Messages.CaImporter_Error_TableInfo + tableName);
 				for (TableInfo info : infos){
-					if (!info.getDataFile().exists()) throw new Exception(MessageFormat.format(Messages.CaImporter_Error_TableDataFiles, new Object[]{ tableName, info.getDataFile().getAbsolutePath()}));
+					if (!Files.exists(info.getDataFile())) throw new Exception(MessageFormat.format(Messages.CaImporter_Error_TableDataFiles, new Object[]{ tableName, info.getDataFile().toString()}));
 					importData(session,tableName, info.getColumns(), info.getDataFile() );
 					processed.add(tableName);
 				}
@@ -157,31 +157,27 @@ public class HibernateDataImporter implements ICaDataImporter{
 	 * 
 	 * @throws Exception
 	 */
-	private HashMap<String, List<TableInfo>> scanTables(File dir) throws Exception{
-		File dataFileDir = new File(dir, ICaDataExportEngine.DATABASE_DIR);
+	private HashMap<String, List<TableInfo>> scanTables(Path dir) throws Exception{
+		Path dataFileDir = dir.resolve(ICaDataExportEngine.DATABASE_DIR);
 		//list all .def file
-		String files[] = dataFileDir.list(new FilenameFilter() {
-			@Override
-			public boolean accept(File dir, String name) {
-				return (name.endsWith(".def")); //$NON-NLS-1$
-			}
-		});
-		
+		List<Path> files = Files.list(dataFileDir)
+				.filter(e->e.getFileName().toString().endsWith(".def")) //$NON-NLS-1$
+				.collect(Collectors.toList());
 		//read info in files
 		HashMap<String, List<TableInfo>> map = new HashMap<String, List<TableInfo>>();
-		for (int i = 0; i < files.length; i++){
-			try(BufferedReader reader = new BufferedReader(new FileReader(new File(dataFileDir, files[i])))){
+		for (Path file : files) {
+			try(BufferedReader reader = Files.newBufferedReader(file)){
 				String tablename = reader.readLine().toUpperCase(Locale.ROOT);
 				String columns = reader.readLine();
-				String data = files[i].substring(0,files[i].lastIndexOf(".def")); //$NON-NLS-1$
+				String data = file.getFileName().toString().substring(0,file.getFileName().toString().lastIndexOf(".def")); //$NON-NLS-1$
 				
 				List<TableInfo> tablefiles = map.get(tablename);
 				if (tablefiles  == null){
 					tablefiles = new ArrayList<TableInfo>();
 					map.put(tablename, tablefiles);
 				}
-				tablefiles.add(new TableInfo(tablename, columns, 
-						new File(dataFileDir,data + ".dat"))); //$NON-NLS-1$
+				tablefiles.add(new TableInfo(tablename, columns, dataFileDir.resolve(data + ".dat")));  //$NON-NLS-1$
+						
 			}
 		}
 
@@ -199,7 +195,7 @@ public class HibernateDataImporter implements ICaDataImporter{
 	 * @throws Exception
 	 */
 	private void importData(Session session, String tableName, 
-			String columns, File dataFile) throws Exception{
+			String columns, Path dataFile) throws Exception{
 		String bits[] = tableName.split("\\."); //$NON-NLS-1$
 		StringBuilder query = new StringBuilder();
 		query.append("CALL SYSCS_UTIL.SYSCS_IMPORT_DATA("); //$NON-NLS-1$
@@ -207,7 +203,7 @@ public class HibernateDataImporter implements ICaDataImporter{
 		query.append("'" + bits[1] + "',"); //table //$NON-NLS-1$ //$NON-NLS-2$
 		query.append("'" + columns + "'," ); //columns //$NON-NLS-1$ //$NON-NLS-2$
 		query.append("NULL,"); //column indexes //$NON-NLS-1$
-		query.append("'" + dataFile.getCanonicalPath() + "',"); //filename //$NON-NLS-1$ //$NON-NLS-2$
+		query.append("'" + dataFile.toAbsolutePath().normalize().toString() + "',"); //filename //$NON-NLS-1$ //$NON-NLS-2$
 		query.append("NULL,"); //column delimiter //$NON-NLS-1$
 		query.append("NULL,"); //character delimiter //$NON-NLS-1$
 		query.append("'utf-8',"); //codeset //$NON-NLS-1$
@@ -275,14 +271,14 @@ public class HibernateDataImporter implements ICaDataImporter{
 
 		private String tableName;
 		private String columns;
-		private File dataFile;
+		private Path dataFile;
 		
 		/**
 		 * @param tableName the table name
 		 * @param columns the table columns
 		 * @param dataFile the data file
 		 */
-		public TableInfo(String tableName, String columns, File dataFile){
+		public TableInfo(String tableName, String columns, Path dataFile){
 			this.tableName = tableName;
 			this.columns = columns;
 			this.dataFile = dataFile;
@@ -306,7 +302,7 @@ public class HibernateDataImporter implements ICaDataImporter{
 		/**
 		 * @return the data file
 		 */
-		public File getDataFile() {
+		public Path getDataFile() {
 			return dataFile;
 		}
 	}

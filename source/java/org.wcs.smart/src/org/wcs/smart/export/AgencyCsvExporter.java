@@ -21,11 +21,11 @@
  */
 package org.wcs.smart.export;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -64,13 +64,12 @@ public class AgencyCsvExporter implements ICsvDataExporter {
 	}
 
 	@Override
-	public boolean exportCsvFile(File file, char delimiter, ConservationArea ca, boolean headers, Charset cs, IProgressMonitor monitor, Session session) {
+	public boolean exportCsvFile(Path file, char delimiter, ConservationArea ca, boolean headers, Charset cs, IProgressMonitor monitor, Session session) {
 		this.ca = ca;
 		languages = new ArrayList<Language>(ca.getLanguages());
 
 		try (
-			CSVWriter writer = new CSVWriter(
-					new OutputStreamWriter(new FileOutputStream(file), cs),
+			CSVWriter writer = new CSVWriter(new OutputStreamWriter(Files.newOutputStream(file), cs),
 					delimiter, '"',SharedUtils.LINE_SEPARATOR)){ 
 			List<Agency> agencies = getAgencies(session);
 

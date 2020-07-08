@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.report.export.internal;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.HashMap;
 
@@ -42,7 +42,7 @@ import org.wcs.smart.report.model.Report;
 public class ExportReportJob extends Job {
 
 	private Report report = null;
-	private File outputFile = null;
+	private Path outputFile = null;
 	private IReportExporter exporter = null;
 	
 	private HashMap<String, Object> reportParameters = null; 
@@ -53,7 +53,7 @@ public class ExportReportJob extends Job {
 	 * @param exporter output format info
 	 * @param reportParams report parameters
 	 */
-	public ExportReportJob(Report report, File file, IReportExporter exporter, HashMap<String, Object> reportParams){
+	public ExportReportJob(Report report, Path file, IReportExporter exporter, HashMap<String, Object> reportParams){
 		super(MessageFormat.format(Messages.ExportReportJob_ExportReportJobName, new Object[]{ report.getName()}));
 		
 		this.report = report;

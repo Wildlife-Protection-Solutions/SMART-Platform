@@ -21,10 +21,10 @@
  */
 package org.wcs.smart.er.ui.samplingunit.load;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -65,11 +65,11 @@ public class CsvSamplingUnitImporter extends ISamplingUnitImporter {
 	 * Reads the file names from the csv file.
 	 */
 	@Override
-	public String[] getFieldNames(File f, Map<String, Object> options) throws Exception {
+	public String[] getFieldNames(Path f, Map<String, Object> options) throws Exception {
 		Character delim = (Character) options.get(DELIMETER_KEY);
 		String[] headers = new String[0];
 		
-		try(CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(f), StandardCharsets.UTF_8), delim.charValue())){ 
+		try(CSVReader reader = new CSVReader(new InputStreamReader(Files.newInputStream(f), StandardCharsets.UTF_8), delim.charValue())){ 
 			//read the first line
 			headers = reader.readNext();
 		}
@@ -93,7 +93,7 @@ public class CsvSamplingUnitImporter extends ISamplingUnitImporter {
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<SamplingUnit> importFile(File f, HashMap<Object, Object> options, IProgressMonitor monitor) throws Exception {
+	public List<SamplingUnit> importFile(Path f, HashMap<Object, Object> options, IProgressMonitor monitor) throws Exception {
 		
 		List<SamplingUnit> units = new ArrayList<SamplingUnit>();
 		
@@ -117,7 +117,7 @@ public class CsvSamplingUnitImporter extends ISamplingUnitImporter {
 		//read file - getting cnt for progress
 		
 		int fileCnt = 0;
-		try(CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(f), StandardCharsets.UTF_8), delim.charValue())){ 
+		try(CSVReader reader = new CSVReader(new InputStreamReader(Files.newInputStream(f), StandardCharsets.UTF_8), delim.charValue())){ 
 			while(reader.readNext() != null){
 				fileCnt++;
 			}
@@ -125,9 +125,9 @@ public class CsvSamplingUnitImporter extends ISamplingUnitImporter {
 		
 		final List<String> warnings = new ArrayList<String>();
 		//read file 
-		monitor.beginTask(MessageFormat.format(Messages.CsvSamplingUnitImporter_Progress1, new Object[]{f.getAbsoluteFile()}), fileCnt);
+		monitor.beginTask(MessageFormat.format(Messages.CsvSamplingUnitImporter_Progress1, new Object[]{f.toAbsolutePath().toString()}), fileCnt);
 		
-		try(CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(f), StandardCharsets.UTF_8), delim.charValue())){ 
+		try(CSVReader reader = new CSVReader(new InputStreamReader(Files.newInputStream(f), StandardCharsets.UTF_8), delim.charValue())){ 
 			//read the first line
 			String[] headers = reader.readNext();
 			monitor.worked(1);

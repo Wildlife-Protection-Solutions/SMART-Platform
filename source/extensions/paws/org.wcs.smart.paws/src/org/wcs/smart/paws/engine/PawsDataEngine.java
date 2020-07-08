@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.paws.engine;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.URL;
@@ -413,16 +412,15 @@ public class PawsDataEngine {
 	private void zipShapefile(Path shapefile, Path zipFile) throws IOException {
 		String targetname = SharedUtils.getFilenameWithoutExtension(zipFile.getFileName().toString());
 
-		List<File> allFiles = new ArrayList<>();
+		List<Path> allFiles = new ArrayList<>();
 		try(Stream<Path> files = Files.list(shapefile.getParent())){
 			allFiles.addAll(files.filter(item -> SharedUtils.getFilenameWithoutExtension(item.getFileName().toString()).equals(targetname))
-				.map(item->item.toFile())
 				.collect(Collectors.toList()));
 		}
-		ZipUtil.createZip(allFiles, zipFile.toFile(), new NullProgressMonitor());
+		ZipUtil.createZip(allFiles, zipFile, new NullProgressMonitor());
 		
-		for (File f : allFiles ) {
-			Files.delete(f.toPath());
+		for (Path f : allFiles ) {
+			Files.delete(f);
 		}
 		packageFiles.add(zipFile);
 	}

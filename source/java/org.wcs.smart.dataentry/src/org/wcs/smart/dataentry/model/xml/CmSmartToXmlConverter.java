@@ -21,7 +21,9 @@
  */
 package org.wcs.smart.dataentry.model.xml;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Collections;
@@ -409,7 +411,7 @@ public class CmSmartToXmlConverter {
 		return false;
 	}
 	private static String getImageFileRef(IImageAssociatedObject obj, ConfigurableModel cm, boolean includeDmIcon) {
-		File file = obj.getImageFile();
+		Path file = obj.getImageFile();
 		if (obj.getUuid() == null) {
 			DmObject dm = null;
 			if (obj instanceof CmNode) {
@@ -426,10 +428,10 @@ public class CmSmartToXmlConverter {
 				dm = ((CmAttributeTreeNode)obj).getDmTreeNode();
 			}
 			if (dm == null) return null;
-			file = new File( UuidUtils.uuidToString( dm.getUuid()) );
+			file = Paths.get( UuidUtils.uuidToString( dm.getUuid()) );
 		}
 		if (file == null) return null;
-		if (file.exists()) return file.getName();
+		if (!Files.exists(file)) return file.getFileName().toString();
 		
 		if (obj instanceof CmNode) {
 			CmNode node = (CmNode) obj;
@@ -437,28 +439,28 @@ public class CmSmartToXmlConverter {
 			if (node.getCategory().getIcon() == null) return null;
 			IconFile iconFile = node.getCategory().getIcon().getIconFile(cm.getIconSet());
 			if (iconFile == null) return null;
-			if (iconFile != null) return findFileName(file.getName(), iconFile.getFilename());
+			if (iconFile != null) return findFileName(file.getFileName().toString(), iconFile.getFilename());
 		}else if (obj instanceof CmAttribute) {
 			CmAttribute node = (CmAttribute) obj;
 			if (node.getAttribute() == null) return null;
 			if (node.getAttribute().getIcon() == null) return null;
 			IconFile iconFile = node.getAttribute().getIcon().getIconFile(cm.getIconSet());
 			if (iconFile == null) return null;
-			if (iconFile != null) return findFileName(file.getName(), iconFile.getFilename());
+			if (iconFile != null) return findFileName(file.getFileName().toString(), iconFile.getFilename());
 		}else if (obj instanceof CmAttributeListItem) {
 			CmAttributeListItem node = (CmAttributeListItem) obj;
 			if (node.getListItem() == null) return null;
 			if (node.getListItem().getIcon() == null) return null;
 			IconFile iconFile = node.getListItem().getIcon().getIconFile(cm.getIconSet());
 			if (iconFile == null) return null;
-			if (iconFile != null) return findFileName(file.getName(), iconFile.getFilename());
+			if (iconFile != null) return findFileName(file.getFileName().toString(), iconFile.getFilename());
 		}else if (obj instanceof CmAttributeTreeNode) {
 			CmAttributeTreeNode node = (CmAttributeTreeNode) obj;
 			if (node.getDmTreeNode() == null) return null;
 			if (node.getDmTreeNode().getIcon() == null) return null;
 			IconFile iconFile = node.getDmTreeNode().getIcon().getIconFile(cm.getIconSet());
 			if (iconFile == null) return null;
-			if (iconFile != null) return findFileName(file.getName(), iconFile.getFilename());
+			if (iconFile != null) return findFileName(file.getFileName().toString(), iconFile.getFilename());
 		}
 		return null;
 	}

@@ -315,7 +315,7 @@ public class GlobalForestWatchNoa extends HttpServlet {
 	 */
 	private Path[] getJsonFileNames() throws IOException {
 		
-		Path gfwDir = DataStoreManager.INSTANCE.getRootDirectory().toPath().resolve(LOG_DIRECTORY);
+		Path gfwDir = DataStoreManager.INSTANCE.getRootDirectory().resolve(LOG_DIRECTORY);
 		if (!Files.exists(gfwDir)) Files.createDirectories(gfwDir);
 		
 		SimpleDateFormat df = new SimpleDateFormat(DATE_FORMAT);

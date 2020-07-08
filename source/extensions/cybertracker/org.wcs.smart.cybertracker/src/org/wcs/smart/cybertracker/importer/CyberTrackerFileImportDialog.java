@@ -4,14 +4,16 @@
 package org.wcs.smart.cybertracker.importer;
 
 import java.awt.Desktop;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -62,7 +64,7 @@ public class CyberTrackerFileImportDialog extends SmartStyledTitleDialog {
 
 	private Label lblFile;
 	
-	private File[] files;
+	private Path[] files;
 
 	private enum StorageColumn {
 		FILEDATE (Messages.CyberTrackerFileImportDialog_Column_Date),
@@ -262,9 +264,16 @@ public class CyberTrackerFileImportDialog extends SmartStyledTitleDialog {
 		return composite;
 	}
 
-	private File[] getStorageFiles() {
-		File storageFolder = ICyberTrackerConstants.getStorageFolder(SmartDB.getCurrentConservationArea()).toFile();
-		return storageFolder.listFiles();
+	private Path[] getStorageFiles() {
+		Path storageFolder = ICyberTrackerConstants.getStorageFolder(SmartDB.getCurrentConservationArea());
+		
+		try {
+			List<Path> items = Files.list(storageFolder).collect(Collectors.toList());
+			return items.toArray(new Path[items.size()]);
+		}catch (IOException ex) {
+			CyberTrackerPlugIn.log(ex.getMessage(), ex);
+			return new Path[] {};
+		}
 	}
 
 	protected void importOptionChanged() {
@@ -277,7 +286,7 @@ public class CyberTrackerFileImportDialog extends SmartStyledTitleDialog {
 			importBtn.setEnabled((btnFromStorage.getSelection() && !storageViewer.getSelection().isEmpty()) || (btnFromFile.getSelection() && txtFile.getText() != null && !txtFile.getText().isEmpty()));
 	}
 
-	private File[] selectFile() {
+	private Path[] selectFile() {
 		FileDialog fd = new FileDialog(getShell(), SWT.MULTI | SWT.OPEN);
 		fd.setFilterExtensions(new String[] {
 				"*.xml;*.ctx", //$NON-NLS-1$
@@ -294,9 +303,9 @@ public class CyberTrackerFileImportDialog extends SmartStyledTitleDialog {
 		String f = fd.open();
 		
 		if (f != null) {
-			File[] files = new File[fd.getFileNames().length];
+			Path[] files = new Path[fd.getFileNames().length];
 			for (int i = 0; i < fd.getFileNames().length; i ++){
-				files[i] = new File(fd.getFilterPath(), fd.getFileNames()[i]);
+				files[i] = Paths.get(fd.getFilterPath()).resolve(fd.getFileNames()[i]);
 			}
 			return files;
 		}
@@ -324,12 +333,12 @@ public class CyberTrackerFileImportDialog extends SmartStyledTitleDialog {
 		if (IDialogConstants.OK_ID == buttonId) {
 			if (btnFromStorage.getSelection()) {
 				IStructuredSelection selection = (IStructuredSelection)storageViewer.getSelection();
-				List<File> fList = new ArrayList<File>();
+				List<Path> fList = new ArrayList<>();
 				for (Iterator<?> i = selection.iterator(); i.hasNext();) {
-					File f = (File) i.next();
+					Path f = (Path) i.next();
 					fList.add(f);
 				}
-				files = fList.toArray(new File[selection.size()]);
+				files = fList.toArray(new Path[selection.size()]);
 			} else if (btnFromFile.getSelection()) {
 				//nothing (files were already assigned)
 			}
@@ -338,7 +347,7 @@ public class CyberTrackerFileImportDialog extends SmartStyledTitleDialog {
 		close();
 	}
 	
-	public File[] getSelectedFiles() {
+	public Path[] getSelectedFiles() {
 		return files;
 	}
 
@@ -364,22 +373,24 @@ public class CyberTrackerFileImportDialog extends SmartStyledTitleDialog {
 		public int compare(Viewer viewer, Object e1, Object e2) {
 			if (column == null)
 				return super.compare(viewer, e1, e2);
-			if (e1 instanceof File && e2 instanceof File) {
-				File f1 = (File) e1;
-				File f2 = (File) e2;
+			if (e1 instanceof Path && e2 instanceof Path) {
+				Path f1 = (Path) e1;
+				Path f2 = (Path) e2;
 				switch (column) {
 				case FILENAME:
 					if (direction == SWT.UP) {
-						return super.compare(viewer, f1.getName(), f2.getName());
+						return super.compare(viewer, f1.getFileName().toString(), f2.getFileName().toString());
 					} else {
-						return -super.compare(viewer, f1.getName(), f2.getName());
+						return -super.compare(viewer, f1.getFileName().toString(), f2.getFileName().toString());
 					}
 				case FILEDATE:
-					if (direction == SWT.UP) {
-						return super.compare(viewer, f1.lastModified(), f2.lastModified());
-					} else {
-						return -super.compare(viewer, f1.lastModified(), f2.lastModified());
-					}
+					try {
+						if (direction == SWT.UP) {
+							return super.compare(viewer, Files.getLastModifiedTime(f1).toMillis(), Files.getLastModifiedTime(f2).toMillis());
+						} else {
+							return -super.compare(viewer, Files.getLastModifiedTime(f1).toMillis(), Files.getLastModifiedTime(f2).toMillis());
+						}
+					}catch (IOException ex) { return 0; }
 				default:
 					break;
 				}
@@ -391,9 +402,9 @@ public class CyberTrackerFileImportDialog extends SmartStyledTitleDialog {
 	private final class StorageFileNameLabelProvider extends ColumnLabelProvider {
 		@Override
 		public String getText(Object element) {
-			if (element instanceof File) {
-				File file = (File) element;
-				return file.getName();
+			if (element instanceof Path) {
+				Path file = (Path) element;
+				return file.getFileName().toString();
 			}
 			return super.getText(element);
 		}
@@ -402,9 +413,13 @@ public class CyberTrackerFileImportDialog extends SmartStyledTitleDialog {
 	private final class StorageFileDateLabelProvider extends ColumnLabelProvider {
 		@Override
 		public String getText(Object element) {
-			if (element instanceof File) {
-				File file = (File) element;
-				return DateFormat.getDateTimeInstance().format(file.lastModified());
+			if (element instanceof Path) {
+				Path file = (Path) element;
+				try {
+					return DateFormat.getDateTimeInstance().format(new Date(Files.getLastModifiedTime(file).toMillis()));
+				}catch(IOException ex) {
+					return ""; //$NON-NLS-1$
+				}
 			}
 			return super.getText(element);
 		}

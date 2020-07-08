@@ -21,8 +21,10 @@
  */
 package org.wcs.smart.er.ui.handlers;
  
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.Collections;
@@ -65,8 +67,8 @@ public class MissionImportHandler {
 		List<String> files = dialog.getFileNames();
 		
 		if (files.size() == 1){
-			File file = new File(files.get(0));
-			if (!file.exists()) {
+			Path file = Paths.get(files.get(0));
+			if (!Files.exists(file)) {
 				MessageDialog.openError(activeShell,
 						Messages.MissionImportHandler_1 , MessageFormat.format(Messages.MissionImportHandler_2,  new Object[]{file.toString()}));
 				return;
@@ -105,10 +107,10 @@ public class MissionImportHandler {
 						
 					int imported = 0;
 					for (int i = 0; i < files.size(); i ++){
-						File file = new File(files.get(i));
+						Path file = Paths.get(files.get(i));
 						monitor.subTask(Messages.MissionImportHandler_4 + file.toString());
 						monitor.worked(1);
-						if (file.isDirectory()) continue;
+						if (Files.isDirectory(file)) continue;
 						try{
 							Mission m = MissionImporter.importMission(file, keepIDs, nullPm);
 							if (m != null) {
@@ -146,7 +148,7 @@ public class MissionImportHandler {
 	}
 	
 	
-	public void importFile(final Shell shell, final File file, final boolean keepIDs) {
+	public void importFile(final Shell shell, final Path file, final boolean keepIDs) {
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(shell);
 		try {
 			pmd.run(true, false, new IRunnableWithProgress() {

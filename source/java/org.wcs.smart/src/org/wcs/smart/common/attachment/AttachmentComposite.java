@@ -21,7 +21,9 @@
  */
 package org.wcs.smart.common.attachment;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -206,15 +208,16 @@ public abstract class AttachmentComposite<T extends ISmartAttachment> extends Co
 		if (file == null) {
 			return;
 		}
+		Path root = Paths.get(fd.getFilterPath());
 		for (int i = 0; i < fd.getFileNames().length; i ++){
-			File f = new File(fd.getFilterPath() + File.separator +  fd.getFileNames()[i]);
-			if (!f.exists()){
-				SmartPlugIn.displayLog(MessageFormat.format(Messages.AttachmentComposite_Error_FileNotFound, new Object[]{f.getAbsolutePath()}), null);
+			Path f = root.resolve(fd.getFileNames()[i]);
+			if (!Files.exists(f)){
+				SmartPlugIn.displayLog(MessageFormat.format(Messages.AttachmentComposite_Error_FileNotFound, new Object[]{f.toAbsolutePath().toString()}), null);
 				return;
 			}
 			T wpa = createNewAttachement();
 			wpa.setCopyFromLocation(f);
-			wpa.setFilename(f.getName());
+			wpa.setFilename(f.getFileName().toString());
 			attachments.add(wpa);
 		}
 		fireAttachmentsChangeListeners();

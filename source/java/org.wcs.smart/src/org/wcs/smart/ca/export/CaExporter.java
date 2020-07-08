@@ -21,9 +21,11 @@
  */
 package org.wcs.smart.ca.export;
 
-import java.io.File;
-import java.io.FileWriter;
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,7 +35,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -71,11 +72,7 @@ public class CaExporter {
 	public static String getDefaultFileName(){
 		String backupDir = SmartProperties.getInstance().getProperty(SmartProperties.PROP_BACKUP_DIR);
 		SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd"); //$NON-NLS-1$
-		try{
-			return new File(backupDir + File.separator + "SMART_" + SmartDB.getCurrentConservationArea().getId() + "_" + format.format(new Date()) + ".bak.zip").getCanonicalPath(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		}catch (Exception ex){
-			return new File(backupDir + File.separator + "SMART_" + SmartDB.getCurrentConservationArea().getId() + "_" + format.format(new Date()) + ".bak.zip").getAbsolutePath(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		}
+		return Paths.get(backupDir).resolve("SMART_" + SmartDB.getCurrentConservationArea().getId() + "_" + format.format(new Date()) + ".bak.zip").normalize().toAbsolutePath().toString(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 	
 	/**
@@ -85,9 +82,9 @@ public class CaExporter {
 	 * 
 	 * 
 	 */
-	public void export(File destFile,  HashMap<String,String> options, IProgressMonitor monitor) throws Exception{
+	public void export(Path destFile,  HashMap<String,String> options, IProgressMonitor monitor) throws Exception{
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.CaExporter_TaskName, 3); 
-		File tempDir = SmartUtils.createTemporaryDirectory();
+		Path tempDir = SmartUtils.createTemporaryDirectory();
 		try{
 			exportToTempDirectory(tempDir, options, progress.split(2));
 			zipTempDirectory(tempDir, destFile, progress.split(1));
@@ -95,9 +92,9 @@ public class CaExporter {
 			return;
 		}finally{
 			try{
-				FileUtils.deleteDirectory(tempDir);
+				SmartUtils.deleteDirectory(tempDir);
 			}catch(Exception ex){
-				SmartPlugIn.log(Messages.CaExporter_Error_TempDirDelete + tempDir.getAbsolutePath(), ex);
+				SmartPlugIn.log(Messages.CaExporter_Error_TempDirDelete + tempDir.normalize().toAbsolutePath().toString(), ex);
 			}
 		}
 	}
@@ -109,7 +106,7 @@ public class CaExporter {
 	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility to call done() on the given monitor
 	 * @throws Exception
 	 */
-	protected void exportToTempDirectory(File tempDir, HashMap<String,String> options, IProgressMonitor monitor) throws Exception{
+	protected void exportToTempDirectory(Path tempDir, HashMap<String,String> options, IProgressMonitor monitor) throws Exception{
 
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.CaExporter_ProgressExportCA, 1);
 		
@@ -149,8 +146,8 @@ public class CaExporter {
 		}
 	}
 	
-	protected void zipTempDirectory(File tempDir, File destFile, IProgressMonitor monitor) throws Exception{
-		ZipUtil.createZip(tempDir.listFiles(), destFile, monitor);		
+	protected void zipTempDirectory(Path tempDir, Path destFile, IProgressMonitor monitor) throws Exception{
+		ZipUtil.createZip(Files.list(tempDir).collect(Collectors.toList()), destFile, monitor);		
 	}
 	
 	/**
@@ -160,8 +157,8 @@ public class CaExporter {
 	 * @param ca
 	 * @throws IOException
 	 */
-	protected void writeConservationAreaInfo(File directory, ConservationArea ca) throws IOException{
-		try(FileWriter fw = new FileWriter(new File(directory, ICaDataExportEngine.CA_INFO_FILENAME))){
+	protected void writeConservationAreaInfo(Path directory, ConservationArea ca) throws IOException{
+		try(BufferedWriter fw = Files.newBufferedWriter(directory.resolve(ICaDataExportEngine.CA_INFO_FILENAME))){
 			fw.write(UuidUtils.uuidToString(ca.getUuid()));
 			fw.write(SharedUtils.LINE_SEPARATOR);
 			fw.write(ca.getId());

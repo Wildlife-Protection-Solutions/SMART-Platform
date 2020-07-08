@@ -252,7 +252,7 @@ public class FileDetailsPanel {
 		imageCanvas.addListener(SWT.MouseDoubleClick, e->{
 			final FileProxy p = (FileProxy)imageCanvas.getData(IMAGE_PROXY_DATAKEY);
 			if (p == null) return;
-			AttachmentUtil.launch(p.getFile().toFile());
+			AttachmentUtil.launch(p.getFile());
 		});
 		detailsSash.setWeights(new int[] {3,2});
 		
@@ -351,7 +351,7 @@ public class FileDetailsPanel {
 				canvas.addListener(SWT.MouseDoubleClick, e->{
 					final FileProxy p = (FileProxy)canvas.getData(IMAGE_PROXY_DATAKEY);
 					if (p == null) return;
-					AttachmentUtil.launch(p.getFile().toFile());
+					AttachmentUtil.launch(p.getFile());
 				});
 				
 				
@@ -607,7 +607,7 @@ public class FileDetailsPanel {
 				try{
 					img = new Image(toUpdate.getDisplay(), proxy.getFile().toString());
 					// transform based on exif orientation data
-					Transform imageTransform = SmartUtils.getExifImageTransform(proxy.getFile().toFile(), img.getBounds().width, img.getBounds().height);
+					Transform imageTransform = SmartUtils.getExifImageTransform(proxy.getFile(), img.getBounds().width, img.getBounds().height);
 					if (imageTransform != null) {
 						//TODO: performance
 						Image image3 = new Image(Display.getDefault(), img.getBounds().height, img.getBounds().width);

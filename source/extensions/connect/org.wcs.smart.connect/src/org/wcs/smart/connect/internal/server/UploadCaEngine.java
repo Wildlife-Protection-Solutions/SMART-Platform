@@ -22,6 +22,9 @@
 package org.wcs.smart.connect.internal.server;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Properties;
@@ -126,8 +129,9 @@ public class UploadCaEngine {
 									//we have a problem because we do not have a local file to upload anymore
 									throw new Exception(Messages.UploadCaEngine_FileNotFound);
 								}else{
-									File f = new File(SmartContext.INSTANCE.getFilestoreLocation(), localStatus.getLocalFile());
-									if (!f.exists()){
+									Path f = Paths.get(SmartContext.INSTANCE.getFilestoreLocation())
+											.resolve(localStatus.getLocalFile());
+									if (!Files.exists(f)){
 										throw new Exception(Messages.UploadCaEngine_FileDeleted);	
 									}
 								}
@@ -182,7 +186,7 @@ public class UploadCaEngine {
 					
 					String uploadURL = connect.getCaUploadUrl(localStatus.getUuid(), 
 							localStatus.getVersion(), 
-							new File(SmartContext.INSTANCE.getFilestoreLocation(), localStatus.getLocalFile()));
+							Paths.get(SmartContext.INSTANCE.getFilestoreLocation()).resolve(localStatus.getLocalFile()));
 					
 					localStatus.setUploadUrl(uploadURL);
 					try(Session s = HibernateManager.openSession()){
@@ -316,9 +320,9 @@ public class UploadCaEngine {
 	private void packageCa(String filename, IProgressMonitor monitor) throws Exception{
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.UploadCaEngine_packingTaskName, 1);
 		
-		File f = new File(SmartContext.INSTANCE.getFilestoreLocation(), filename);
-		if (!f.getParentFile().exists()){
-			SmartUtils.createDirectory(f.getParentFile());
+		Path f = Paths.get(SmartContext.INSTANCE.getFilestoreLocation()).resolve(filename);
+		if (!Files.exists(f.getParent())){
+			SmartUtils.createDirectory(f.getParent());
 		}
 	
 		HashMap<String, String> options = new HashMap<String, String>();

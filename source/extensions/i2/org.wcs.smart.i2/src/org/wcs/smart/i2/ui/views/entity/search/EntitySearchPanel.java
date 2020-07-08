@@ -552,7 +552,7 @@ public abstract class EntitySearchPanel extends Composite {
 			case SYSTEM_ENTITY_ATTRIBUTE:
 				SystemAttributeFilter.SystemAttribute[] items = new SystemAttributeFilter.SystemAttribute[] {
 						SystemAttributeFilter.SystemAttribute.ENTITY_DATE_CREATED,
-						SystemAttributeFilter.SystemAttribute.ENTITY_DATE_CREATED
+						SystemAttributeFilter.SystemAttribute.ENTITY_DATE_MODIFIED
 				};
 				attributeTable.setInput(items);
 				

@@ -123,7 +123,9 @@ public class CreateEntityActionType implements IActionType {
 		}
 		
 		try(Session session = HibernateManager.openSession(new AttachmentInterceptor(false))){
-		
+			WaypointObservation temp = session.get(WaypointObservation.class, data.getUuid());
+			if (temp != null) data = temp;
+			
 			//find profile
 			String keyid = profileParam.getParameterValue();
 			IntelProfile ip = QueryFactory.buildQuery(session, IntelProfile.class, 

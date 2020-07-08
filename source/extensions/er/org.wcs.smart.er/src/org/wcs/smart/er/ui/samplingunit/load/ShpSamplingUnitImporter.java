@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.er.ui.samplingunit.load;
 
-import java.io.File;
 import java.io.Serializable;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -73,12 +73,12 @@ public class ShpSamplingUnitImporter extends ISamplingUnitImporter{
 	 *
 	 */
 	@Override
-	public String[] getFieldNames(File f, Map<String, Object> options)
+	public String[] getFieldNames(Path f, Map<String, Object> options)
 			throws Exception {
 		ArrayList<String> attributes = new ArrayList<String>();
 		
 		Map<String, Serializable> params = new HashMap<String, Serializable>();
-		params.put(ShapefileDataStoreFactory.URLP.key, f.toURI().toURL());
+		params.put(ShapefileDataStoreFactory.URLP.key, f.toUri().toURL());
 		DataStore store = DataStoreFinder.getDataStore(params);
 		
 		try{
@@ -121,12 +121,12 @@ public class ShpSamplingUnitImporter extends ISamplingUnitImporter{
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<SamplingUnit> importFile(File f, HashMap<Object, Object> options, IProgressMonitor monitor)
+	public List<SamplingUnit> importFile(Path f, HashMap<Object, Object> options, IProgressMonitor monitor)
 			throws Exception {
 
-		monitor.beginTask(MessageFormat.format(Messages.ShpSamplingUnitImporter_Progress1, new Object[]{f.getAbsolutePath()}), 2);
+		monitor.beginTask(MessageFormat.format(Messages.ShpSamplingUnitImporter_Progress1, new Object[]{f.toAbsolutePath().toString()}), 2);
 		List<SamplingUnit> units = new ArrayList<SamplingUnit>();
-		ShapefileDataStore store = new ShapefileDataStore(f.toURI().toURL());
+		ShapefileDataStore store = new ShapefileDataStore(f.toUri().toURL());
 		final List<String> warnings = new ArrayList<String>();
 		HashSet<String> existingIds = (HashSet<String>) options.get(EXISTING_IDS_KEY);
 		

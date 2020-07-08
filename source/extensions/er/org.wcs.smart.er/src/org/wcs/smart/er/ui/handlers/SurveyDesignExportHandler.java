@@ -22,9 +22,11 @@
 package org.wcs.smart.er.ui.handlers;
 
 
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -110,7 +112,7 @@ public class SurveyDesignExportHandler {
 			return;
 		}
 			
-		final File exportDir = dialog.getDirectory();
+		final Path exportDir = dialog.getDirectory();
 		final List<SurveyDesignEditorInput> types = dialog.getTypes();
 		
 		final ProgressMonitorDialog pmd = new ProgressMonitorDialog(activeShell);
@@ -127,9 +129,9 @@ public class SurveyDesignExportHandler {
 						for (SurveyDesignEditorInput sdei : types){
 							SurveyDesign sd = (SurveyDesign) s.load(SurveyDesign.class, sdei.getUuid());
 							progress.subTask(MessageFormat.format(Messages.SurveyDesignExportHandler_Progress2, new Object[]{sd.getName()}));
-							final File exportFile = new File(exportDir, URLUtils.cleanFilename(sd.getName()) + ".xml"); //$NON-NLS-1$
+							final Path exportFile = exportDir.resolve(URLUtils.cleanFilename(sd.getName()) + ".xml"); //$NON-NLS-1$
 							
-							if (!overwriteall[0] && exportFile.exists()){
+							if (!overwriteall[0] && Files.exists(exportFile)){
 								final boolean[] cont = new boolean[]{true};
 								pmd.getShell().getDisplay().syncExec(new Runnable(){
 
@@ -155,7 +157,7 @@ public class SurveyDesignExportHandler {
 									continue;
 								}
 							}
-							try(FileOutputStream fout = new FileOutputStream(exportFile)){
+							try(OutputStream fout = Files.newOutputStream(exportFile)){
 								SurveyDesignXMLManager.writeDataModel(SurveyDesignToXmlConverter.toXml(sd, s, progress.split(3)), fout);
 								exportedCnt++;
 							}catch (Exception ex){
@@ -188,7 +190,7 @@ public class SurveyDesignExportHandler {
 		
 		private Text txtFile;
 		private SurveyDesign sd;
-		private File file;
+		private Path file;
 		private CheckboxTableViewer tblEntities;
 		private List<SurveyDesignEditorInput> types;
 		
@@ -197,7 +199,7 @@ public class SurveyDesignExportHandler {
 			this.sd = sd;
 		}
 		
-		public File getDirectory(){
+		public Path getDirectory(){
 			return this.file;
 		}
 		
@@ -206,7 +208,7 @@ public class SurveyDesignExportHandler {
 		}
 		
 		protected void okPressed() {
-			file = new File(txtFile.getText());
+			file = Paths.get(txtFile.getText());
 			types = new ArrayList<SurveyDesignEditorInput>();
 			for (Object x : tblEntities.getCheckedElements()){
 				if (x instanceof SurveyDesignEditorInput){
@@ -217,7 +219,7 @@ public class SurveyDesignExportHandler {
 				MessageDialog.openError(getShell(), Messages.SurveyDesignExportHandler_DialogTitle, Messages.SurveyDesignExportHandler_NoItemsSelected);
 				return;
 			}
-			if (!file.exists()){
+			if (!Files.exists(file)){
 				if (!MessageDialog.openConfirm(getShell(), Messages.SurveyDesignExportHandler_DialogTitle, 
 						MessageFormat.format(Messages.SurveyDesignExportHandler_DirectoryMission, new Object[]{file.toString()}))){
 					return;
@@ -225,7 +227,7 @@ public class SurveyDesignExportHandler {
 					SmartUtils.createDirectory(file);
 				}
 			}
-			if (!file.isDirectory()){
+			if (!Files.isDirectory(file)){
 				MessageDialog.openError(getShell(), Messages.SurveyDesignExportHandler_DialogTitle, 
 						MessageFormat.format(Messages.SurveyDesignExportHandler_InvalidDirectory, new Object[]{file.toString()}));
 				return;
@@ -262,8 +264,8 @@ public class SurveyDesignExportHandler {
 				location = System.getProperty("user.home"); //$NON-NLS-1$
 			}
 			
-			File init = new File(location);
-			txtFile.setText(init.getAbsolutePath());
+			Path init = Paths.get(location);
+			txtFile.setText(init.toAbsolutePath().toString());
 			txtFile.addModifyListener(new ModifyListener() {
 				@Override
 				public void modifyText(ModifyEvent e) {

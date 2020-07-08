@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.common.control;
 
-import java.io.File;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -150,7 +150,7 @@ public class XmlImportDialog  extends SmartStyledTitleDialog {
 				String x = fd.open();
 				if (x != null){
 					for (int i = 0; i < fd.getFileNames().length; i ++){
-						String file = (new File(fd.getFilterPath(),fd.getFileNames()[i])).toString() ;
+						String file = (Paths.get(fd.getFilterPath(),fd.getFileNames()[i])).toString() ;
 						if (!files.contains(file)){
 							files.add(file);
 						}

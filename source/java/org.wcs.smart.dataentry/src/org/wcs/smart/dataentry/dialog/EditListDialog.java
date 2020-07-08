@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.dataentry.dialog;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.List;
 
@@ -381,7 +381,7 @@ public class EditListDialog extends SmartStyledTitleDialog{
 			}
 			
 			@Override
-			public File getImageFile() {
+			public Path getImageFile() {
 				if (cmNode == null) return null;
 				if (cmNode.hasCustomImage()) return cmNode.getImageFile();
 				if (cmNode.getListItem() == null) return null;
@@ -392,7 +392,7 @@ public class EditListDialog extends SmartStyledTitleDialog{
 			}
 
 			@Override
-			public void setImageFile(File file) {
+			public void setImageFile(Path file) {
 				if (cmNode != null) {
 					cmNode.setImageFile(file);
 					if (cmNode.getUuid() != null) {

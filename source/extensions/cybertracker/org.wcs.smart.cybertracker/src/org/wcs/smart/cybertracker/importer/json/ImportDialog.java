@@ -381,7 +381,7 @@ public class ImportDialog extends SmartStyledTitleDialog{
 			//create a temp dir for flies
 			Path importPath = null;
 			try {
-				Path p = SmartContext.INSTANCE.getTempFilestoreLocation().toPath();
+				Path p = SmartContext.INSTANCE.getTempFilestoreLocation();
 				importPath = Files.createTempDirectory(p, "ctimport"); //$NON-NLS-1$
 			}catch (Exception ex) {
 				CyberTrackerPlugIn.displayError(Messages.ImportDialog_Error, Messages.ImportDialog_CannotCreateFile + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$

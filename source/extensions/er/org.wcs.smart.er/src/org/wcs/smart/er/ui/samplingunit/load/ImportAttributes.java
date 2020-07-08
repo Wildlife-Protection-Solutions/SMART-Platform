@@ -21,12 +21,11 @@
  */
 package org.wcs.smart.er.ui.samplingunit.load;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -62,7 +61,7 @@ import au.com.bytecode.opencsv.CSVReader;
  */
 public class ImportAttributes implements IRunnableWithProgress {
 
-	private File file;
+	private Path file;
 	private Character delimiter;
 	private String idField;
 	private HashMap<SamplingUnitAttribute, String> attributeFields;
@@ -78,7 +77,7 @@ public class ImportAttributes implements IRunnableWithProgress {
 	 * @param attributeFields mapping of attribute fields
 	 * @param survey survey design
 	 */
-	public ImportAttributes(File file, Character delimiter, String idField,
+	public ImportAttributes(Path file, Character delimiter, String idField,
 			HashMap<SamplingUnitAttribute, String> attributeFields, SurveyDesign survey){
 		this.file = file;
 		this.delimiter = delimiter;
@@ -108,7 +107,7 @@ public class ImportAttributes implements IRunnableWithProgress {
 			try {
 				//read file count for progress
 				int fileCnt = 0;
-				try( CSVReader reader = new CSVReader(new FileReader(file), delimiter)){
+				try( CSVReader reader = new CSVReader(Files.newBufferedReader(file), delimiter)){
 					while(reader.readNext() != null){
 						fileCnt++;
 					}
@@ -119,7 +118,7 @@ public class ImportAttributes implements IRunnableWithProgress {
 				final List<String> warnings = new ArrayList<String>();
 				boolean changes = false;
 				
-				try( CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8), delimiter)){
+				try( CSVReader reader = new CSVReader(new InputStreamReader(Files.newInputStream(file), StandardCharsets.UTF_8), delimiter)){
 					String[] headers = reader.readNext();
 					monitor.worked(1);
 					int idIndex = -1;

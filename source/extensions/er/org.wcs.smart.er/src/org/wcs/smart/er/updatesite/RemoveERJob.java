@@ -21,11 +21,11 @@
  */
 package org.wcs.smart.er.updatesite;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -39,6 +39,7 @@ import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyWaypointSource;
 import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Job removes all Ecological Records plug-in related tabled from the database
@@ -122,8 +123,8 @@ public class RemoveERJob extends Job {
 		if (cas != null){
 			for (ConservationArea ca : cas){
 				try {
-					File deleteMe = new File(ca.getFileDataStoreLocation(), SurveyDesign.SURVEY_FILESTORE_LOC);
-					FileUtils.deleteDirectory(deleteMe);
+					Path deleteMe = Paths.get(ca.getFileDataStoreLocation()).resolve(SurveyDesign.SURVEY_FILESTORE_LOC);
+					SmartUtils.deleteDirectory(deleteMe);
 				} catch (IOException ex) {
 					//some errors deleting filestore
 					EcologicalRecordsPlugIn.log(ex.getMessage(), ex);

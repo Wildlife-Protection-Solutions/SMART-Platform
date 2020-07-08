@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.dataentry.model;
 
-import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.UUID;
 
 /**
@@ -32,7 +33,7 @@ import java.util.UUID;
  */
 public interface IImageAssociatedObject {
 	
-	public static final File NULL_FILE = new File("NO-SUCH-FILE"); //$NON-NLS-1$
+	public static final Path NULL_FILE = Paths.get("NO-SUCH-FILE"); //$NON-NLS-1$
 	
 	/**
 	 * Item UUID
@@ -55,14 +56,14 @@ public interface IImageAssociatedObject {
 	 * 
 	 * @return
 	 */
-	public File getImageFile();
+	public Path getImageFile();
 	
 	/**
 	 * Sets the image file.  This is the location to copy the image from.
 	 * 
 	 * @param file
 	 */
-	public void setImageFile(File file);
+	public void setImageFile(Path file);
 	
 	/**
 	 * Clears the cached image file

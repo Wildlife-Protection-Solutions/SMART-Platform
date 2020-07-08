@@ -22,8 +22,9 @@
 package org.wcs.smart.i2.ui.editors.record;
 
 import java.awt.Color;
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -560,7 +561,7 @@ public class LocationListComposite extends Composite{
 						InterruptedException {
 					monitor.beginTask(Messages.LocationListComposite_GPSTaskName, IProgressMonitor.UNKNOWN);
 					try{
-						File f = GPSBabel.getData(gpsDialog.getDeviceType(), Collections.singleton(GPSDataImport.ImportType.WAYPOINT));
+						Path f = GPSBabel.getData(gpsDialog.getDeviceType(), Collections.singleton(GPSDataImport.ImportType.WAYPOINT));
 						locations[0] = importGpx(f, monitor);
 					}catch (Exception ex){
 						Intelligence2PlugIn.displayLog(Messages.LocationListComposite_GPSError, ex);
@@ -599,7 +600,7 @@ public class LocationListComposite extends Composite{
 					
 					if (file[0] == null) return;
 					
-					locations[0] = importGpx(new File(file[0]), monitor);
+					locations[0] = importGpx(Paths.get(file[0]), monitor);
 					monitor.done();
 				}
 			});
@@ -618,7 +619,7 @@ public class LocationListComposite extends Composite{
 	/*
 	 * imports location from the given file
 	 */
-	private List<IntelLocation> importGpx(File f, IProgressMonitor monitor){
+	private List<IntelLocation> importGpx(Path f, IProgressMonitor monitor){
 		List<IntelLocation> locations = FileLocationParser.INSTANCE.parseFromGpx(f, monitor);
 		
 		Display.getDefault().syncExec(()->editor.addNewLocations(locations));

@@ -22,9 +22,9 @@
 package org.wcs.smart.patrol.xml.export;
 
 import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.Deflater;
@@ -86,7 +86,7 @@ public class PatrolExporter {
 	 * 
 	 * @throws Exception 
 	 */
-	public static File exportPatrol(Patrol patrol, File file, boolean includeAttachments, IProgressMonitor monitor) throws Exception{
+	public static Path exportPatrol(Patrol patrol, Path file, boolean includeAttachments, IProgressMonitor monitor) throws Exception{
 		monitor.beginTask(Messages.PatrolExporter_Progress_Exporting, includeAttachments ? 4 : 2);
 		Session session = HibernateManager.openSession();
 		try {
@@ -126,9 +126,9 @@ public class PatrolExporter {
 	/**
 	 * Writes the patrol without including attachments
 	 */
-	private static File exportPatrolWithoutAttachments(PatrolType xml, File file, IProgressMonitor monitor) throws Exception {
+	private static Path exportPatrolWithoutAttachments(PatrolType xml, Path file, IProgressMonitor monitor) throws Exception {
 		monitor.subTask(Messages.PatrolExporter_Progress_WritingToFile);
-		try(BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file))) {
+		try(BufferedOutputStream out = new BufferedOutputStream(Files.newOutputStream(file))) {
 			PatrolXmlManager.writeDataModel(xml, out);
 		}
 		monitor.worked(1);
@@ -138,27 +138,27 @@ public class PatrolExporter {
 	/**
 	 * Writes the patrol including attachments
 	 */
-	private static File exportPatrolWithAttachments(Patrol patrol, PatrolType xml, File f, IProgressMonitor monitor) throws Exception{
-		int index = f.getName().lastIndexOf('.');
-		String name = f.getName();
+	private static Path exportPatrolWithAttachments(Patrol patrol, PatrolType xml, Path f, IProgressMonitor monitor) throws Exception{
+		int index = f.getFileName().toString().lastIndexOf('.');
+		String name = f.getFileName().toString();
 		if (index >= 0){
 			name= name.substring(0, index);
 		}
-		File xmlFile = File.createTempFile("temp_patrol_export", ".xml"); //$NON-NLS-1$ //$NON-NLS-2$
+		Path xmlFile = Files.createTempFile("temp_patrol_export", ".xml"); //$NON-NLS-1$ //$NON-NLS-2$
 		exportPatrolWithoutAttachments(xml, xmlFile, monitor);
 		
 		
 		monitor.subTask(Messages.PatrolExporter_Progress_PackagingResults);
 		//create zip file
-		File zipFile = new File(f.getParent() + File.separator + name + ".zip"); //$NON-NLS-1$
+		Path zipFile = f.getParent().resolve(name + ".zip"); //$NON-NLS-1$
 		
-		try(ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(zipFile))) {
+		try(ZipOutputStream zout = new ZipOutputStream(Files.newOutputStream(zipFile))) {
 			zout.setLevel(Deflater.DEFAULT_COMPRESSION);
 
 			/* add xml file to zip */
 			zout.putNextEntry(new ZipEntry(name	+ ".xml")); //$NON-NLS-1$
 			
-			try(FileInputStream inStream = new FileInputStream(xmlFile)){
+			try(InputStream inStream = Files.newInputStream(xmlFile)){
 				byte[] buffer = new byte[1024];
 				int bytesRead;
 				while ((bytesRead = inStream.read(buffer)) > 0) {
@@ -196,7 +196,7 @@ public class PatrolExporter {
         
         try{
         	//delete temp file
-        	xmlFile.delete();
+        	Files.delete(xmlFile);
         }catch(Exception ex){
         	SmartPatrolPlugIn.log(null, ex);
         }
@@ -214,10 +214,10 @@ public class PatrolExporter {
 	 * @param includeAttributes
 	 * @return
 	 */
-	public static File getOutputFile(File dir, String name, boolean includeAttachs) throws Exception {
+	public static Path getOutputFile(Path dir, String name, boolean includeAttachs) throws Exception {
 		name = SmartUtils.getFileName(name);
 		String ext = includeAttachs ? ".zip" : ".xml"; //$NON-NLS-1$ //$NON-NLS-2$
-		return new File(dir, name + ext);
+		return dir.resolve(name + ext);
 	}
 	
 }

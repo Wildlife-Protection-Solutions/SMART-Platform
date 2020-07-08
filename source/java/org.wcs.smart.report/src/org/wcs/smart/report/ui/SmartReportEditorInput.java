@@ -38,7 +38,7 @@ public class SmartReportEditorInput extends ReportEditorInput {
 	 * @param report the report object
 	 */
 	public SmartReportEditorInput(Report report) {
-		super(ReportPlugIn.getDefault().getReportFile(report));
+		super(ReportPlugIn.getDefault().getReportFile(report).toAbsolutePath().toFile());
 		this.report = report;
 	}
 	

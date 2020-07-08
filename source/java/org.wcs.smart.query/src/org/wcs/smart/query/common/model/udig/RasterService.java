@@ -22,16 +22,19 @@
 package org.wcs.smart.query.common.model.udig;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringReader;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -86,7 +89,7 @@ public class RasterService extends AbstractRasterService implements IQueryServic
 	private static GeoTiffFormatFactorySpi factory = null;
 	
 	private String rasterFileName;
-	private File rasterFile;
+	private Path rasterFile;
 	private List<AbstractRasterGeoResource> geoResources = null;
 	private GriddedQuery query = null;
 
@@ -158,7 +161,7 @@ public class RasterService extends AbstractRasterService implements IQueryServic
 	 * @throws RasterServiceException 
 	 * @throws IOException 
 	 */
-	private File createRaster() throws Exception {
+	private Path createRaster() throws Exception {
 		
 		RasterBuilder rb = new RasterBuilder();
 		rb.setFileName(rasterFileName);
@@ -180,7 +183,7 @@ public class RasterService extends AbstractRasterService implements IQueryServic
 			rb.build();
 			return rb.getImageFile();	
 		}
-		File f = createRasterFile((GridQueryResult) query.getCachedResults(), query, rasterFileName);
+		Path f = createRasterFile((GridQueryResult) query.getCachedResults(), query, rasterFileName);
 		if (f == null) return null;
 		((GridQueryResult) query.getCachedResults()).setLastRasterFile(f);
 		return f;
@@ -410,37 +413,55 @@ public class RasterService extends AbstractRasterService implements IQueryServic
 	 * Removes all rester files that were created in the temporal directory
 	 */
 	private void cleanTemporaryDirectory() {
-		File tempDirectory = SmartContext.INSTANCE.getTempFilestoreLocation();
-		if(tempDirectory.exists()){
-			if(this.rasterFile != null && this.rasterFile.exists()){
-				final String[] fullName = this.rasterFile.getName().split("[.]");				 //$NON-NLS-1$
+		Path tempDirectory = SmartContext.INSTANCE.getTempFilestoreLocation();
+		if(Files.exists(tempDirectory)){
+			if(this.rasterFile != null && Files.exists(this.rasterFile)){
+				final String[] fullName = this.rasterFile.getFileName().toString().split("[.]");				 //$NON-NLS-1$
 				final String namePrefix = fullName[0];
 
 				// remove the tiff file
-				if( !this.rasterFile.delete()){
+				try {
+					Files.delete(this.rasterFile);
+				}catch(Exception ex) {
 					//this is a serious problem as we won't be
 					//able to regenerate this file
 					QueryPlugIn.log("cannot delete the file " + this.rasterFile.toString() , null); //$NON-NLS-1$
 				}
 
-				String[] toDelete = tempDirectory.list(new FilenameFilter() {					
-					@Override
-					public boolean accept(File dir, String name) {
-						int index = name.lastIndexOf('.');
-						if (index < 0){
-							return false;
-						}
-						String subpart = name.substring(0, index);
-						return (subpart.equals(namePrefix));
-					}
-				});
-				if (toDelete != null){
-					for (int i = 0; i < toDelete.length; i ++){
-						File f = new File(tempDirectory, toDelete[i]);
-						if( !f.delete()){
-							QueryPlugIn.log("cannot delete the file.  Should delete on shutdown " + f.toString(), null); //$NON-NLS-1$
+				try {
+					List<Path> kids = Files.list(tempDirectory).collect(Collectors.toList());
+					List<Path> toDelete = new ArrayList<>();
+					for (Path p : kids){
+						int index = p.getFileName().toString().lastIndexOf('.');
+						if (index > 0) {
+							String subpart = p.getFileName().toString().substring(0,index);
+							if (subpart.equals(namePrefix)) {
+								toDelete.add(p);
+							}
 						}
 					}
+	//				String[] toDelete = tempDirectory.list(new FilenameFilter() {					
+	//					@Override
+	//					public boolean accept(File dir, String name) {
+	//						int index = name.lastIndexOf('.');
+	//						if (index < 0){
+	//							return false;
+	//						}
+	//						String subpart = name.substring(0, index);
+	//						return (subpart.equals(namePrefix));
+	//					}
+	//				});
+					
+					for (Path p : toDelete) {
+						try {
+							Files.delete(p);
+						}catch (Exception ex) {
+							QueryPlugIn.log("cannot delete the file.  Should delete on shutdown " + p.toString(), null); //$NON-NLS-1$
+						}
+						
+					}
+				}catch (Exception ex) {
+					QueryPlugIn.displayLog("could not cleanup raster service: " + ex.getMessage(),ex); //$NON-NLS-1$
 				}
 				
 			}
@@ -475,7 +496,7 @@ public class RasterService extends AbstractRasterService implements IQueryServic
 
 	}
 	
-	public static File createRasterFile(GridQueryResult results, GriddedQuery query, String fileName) throws Exception {
+	public static Path createRasterFile(GridQueryResult results, GriddedQuery query, String fileName) throws Exception {
 		RasterBuilder rb = new RasterBuilder();
 		rb.setFileName(fileName);
 		if (results == null){

@@ -137,7 +137,7 @@ public class SmartCollectNoa {
 			if (!ctpackage.getType().equals(SmartCollectPackage.PACKAGE_TYPENAME)) throw new SmartConnectException(Response.Status.NOT_FOUND); 
 			
 			file = DataStoreManager.INSTANCE.getRootDirectory()
-					.toPath().resolve(CyberTracker.CT_PACKAGE_DATASTORE_LOCATION).resolve(ctpackage.getFilename());
+					.resolve(CyberTracker.CT_PACKAGE_DATASTORE_LOCATION).resolve(ctpackage.getFilename());
 		}finally {
 			s.getTransaction().commit();
 		}

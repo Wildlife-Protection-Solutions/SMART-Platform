@@ -21,7 +21,9 @@
  */
 package org.wcs.smart.backup;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,7 +36,6 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -167,21 +168,21 @@ public class DerbyRestoreEngine {
 	 * @param backupFile the backup file to restore
 	 * @param monitor the progress monitor
 	 */
-	public static void restoreSystem(File backupFile, IProgressMonitor monitor)
+	public static void restoreSystem(Path backupFile, IProgressMonitor monitor)
 			throws Exception {
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.DerbyRestoreEngine_Progress_RestoringFile, 14);
-		if (!backupFile.exists()) {
-			throw new Exception(Messages.DerbyRestoreEngine_Error_NoBackupFile + " '" + backupFile.getAbsolutePath() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+		if (!Files.exists(backupFile)) {
+			throw new Exception(Messages.DerbyRestoreEngine_Error_NoBackupFile + " '" + backupFile.normalize().toAbsolutePath().toString() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
 		progress.subTask(Messages.DerbyRestoreEngine_Progress_ExtractingBackup);
 		/* extract contents of backup file to temporary directory */
-		File temp = SmartUtils.createTemporaryDirectory();
+		Path temp = SmartUtils.createTemporaryDirectory();
 		
 		try {
 			ZipUtil.unzipFolder(backupFile, temp);
 		} catch (Exception ex) {
-			String cleanUpErr = cleanUp(new File[] { temp });
+			String cleanUpErr = cleanUp(new Path[] { temp });
 			if (cleanUpErr.length() > 0) {
 				throw new Exception(
 						Messages.DerbyRestoreEngine_Error_CouldNotExtractFile
@@ -196,17 +197,16 @@ public class DerbyRestoreEngine {
 		}
 		progress.worked(1);
 
-		File dbFile = new File(SmartProperties.getInstance().getProperty(SmartProperties.PROP_SMART_DB));
-		File dataFile = new File(SmartProperties.getInstance().getProperty( SmartProperties.PROP_FILESTORE));
-		if (!dataFile.exists()){
-			dataFile.mkdir();
+		Path dbFile = Paths.get(SmartProperties.getInstance().getProperty(SmartProperties.PROP_SMART_DB));
+		Path dataFile = Paths.get(SmartProperties.getInstance().getProperty( SmartProperties.PROP_FILESTORE));
+		if (!Files.exists(dataFile)){
+			SmartUtils.createDirectory(dataFile);
 		}
-		File extractedDb = new File(temp.getAbsolutePath() + File.separator
-				+ dbFile.getName());
-		File extractedFilestore = new File(temp.getAbsolutePath() + File.separator
-				+ dataFile.getName());
-		if (!extractedDb.exists()){
-			String cleanUpErr = cleanUp(new File[] { temp });
+		Path extractedDb = temp.normalize().resolve(dbFile.getFileName().toString());
+		Path extractedFilestore = temp.normalize().resolve(dataFile.getFileName().toString());
+				
+		if (!Files.exists(extractedDb)){
+			String cleanUpErr = cleanUp(new Path[] { temp });
 			if (cleanUpErr.length() > 0) {
 				throw new Exception(
 						Messages.DerbyRestoreEngine_Error_NoDbInBackupFile
@@ -216,13 +216,13 @@ public class DerbyRestoreEngine {
 			}
 			throw new Exception(Messages.DerbyRestoreEngine_Error_NoDbInBackupFile);
 		}
-		if (!extractedFilestore.exists()){
+		if (!Files.exists(extractedFilestore)){
 			Display.getDefault().syncExec(()->{
 				MessageDialog.openWarning(Display.getDefault().getActiveShell(), Messages.DerbyRestoreEngine_FileStoreMissingTitle,
 						Messages.DerbyRestoreEngine_FileStoreMissingMessage);	
 			});
 			
-			extractedFilestore.mkdir();
+			SmartUtils.createDirectory(extractedFilestore);
 		}
 		
 		/* get database versions */
@@ -243,7 +243,7 @@ public class DerbyRestoreEngine {
 		progress.worked(1);
 
 		/* connect to the extractedDb and verify version */
-		SmartHibernateManager.setDatabaseParameter(extractedDb.getAbsolutePath());
+		SmartHibernateManager.setDatabaseParameter(extractedDb.normalize().toAbsolutePath().toString());
 		/* need to login as admin user to perform upgrade */
 		SmartHibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
 		
@@ -282,7 +282,7 @@ public class DerbyRestoreEngine {
 		
 		if (missingPlugins.length() > 0){
 			HibernateManager.endSessionFactory(true, true);
-			cleanUp(new File[] { temp });
+			cleanUp(new Path[] { temp });
 			throw new Exception(Messages.DerbyRestoreEngine_MissingSystemPlugins + "\n\n" + missingPlugins.toString()); //$NON-NLS-1$
 		}
 		
@@ -290,14 +290,14 @@ public class DerbyRestoreEngine {
 		String datastore = SmartContext.INSTANCE.getFilestoreLocation();
 		SmartContext.INSTANCE.setFilestoreLocation(SmartProperties.getInstance().getProperty(SmartProperties.PROP_FILESTORE));
 		try{
-			SmartContext.INSTANCE.setFilestoreLocation(extractedFilestore.getAbsolutePath());
+			SmartContext.INSTANCE.setFilestoreLocation(extractedFilestore.normalize().toAbsolutePath().toString());
 			UpgradeEngine upgrader = new UpgradeEngine();
 			upgrader.upgradeSystem(progress.split(7), versions);
 			validateConfiguration(versions);
 			upgrader.postProcess(progress.split(1));
 		}catch (Exception ex){
 			HibernateManager.endSessionFactory(true, true);
-			String cleanUpErr = cleanUp(new File[] { temp });
+			String cleanUpErr = cleanUp(new Path[] { temp });
 			if (cleanUpErr.length() > 0) {
 				throw new Exception(
 						ex.getLocalizedMessage()
@@ -317,20 +317,17 @@ public class DerbyRestoreEngine {
 		
 		/* create a copy of the current files incase something goes wrong */
 		progress.subTask(Messages.DerbyRestoreEngine_Progress_MovingFiles);
-		File dbFileBack = null;
-		File dataFileBack = null;
+		Path dbFileBack = null;
+		Path dataFileBack = null;
 		try {
-			dbFileBack = new File(dbFile.getParentFile().getCanonicalPath()
-					+ File.separator + dbFile.getName() + ".bak"); //$NON-NLS-1$
-			dataFileBack = new File(dataFile.getParentFile().getCanonicalPath()
-					+ File.separator + dataFile.getName() + ".bak"); //$NON-NLS-1$
+			dbFileBack = dbFile.getParent().normalize().resolve(dbFile.getFileName().toString() + ".bak"); //$NON-NLS-1$
+			dataFileBack = dataFile.getParent().normalize().resolve(dataFile.getFileName() + ".bak"); //$NON-NLS-1$
 
-			FileUtils.copyDirectory(dbFile, dbFileBack);
-			FileUtils.copyDirectory(dataFile, dataFileBack);
+			SmartUtils.copyDirectory(dbFile, dbFileBack);
+			SmartUtils.copyDirectory(dataFile, dataFileBack);
 		} catch (Exception ex) {
 			// clean up temporary directory
-			String cleanUpErr = cleanUp(new File[] { temp, dbFileBack,
-					dataFileBack });
+			String cleanUpErr = cleanUp(new Path[] { temp, dbFileBack, dataFileBack });
 			if (cleanUpErr.length() > 0) {
 				throw new Exception(
 						Messages.DerbyRestoreEngine_Error_CouldNotCreateTempCopy
@@ -348,10 +345,10 @@ public class DerbyRestoreEngine {
 
 		/* delete existing data */
 		try {
-			FileUtils.deleteDirectory(dbFile);
-			FileUtils.deleteDirectory(dataFile);
+			SmartUtils.deleteDirectory(dbFile);
+			SmartUtils.deleteDirectory(dataFile);
 		} catch (Exception ex) {
-			String cleanUpErr = cleanUp(new File[] { temp, dbFileBack,
+			String cleanUpErr = cleanUp(new Path[] { temp, dbFileBack,
 					dataFileBack });
 			if (cleanUpErr.length() > 0) {
 				throw new Exception(
@@ -369,21 +366,21 @@ public class DerbyRestoreEngine {
 		/* restore the unzipped backup files */
 		progress.subTask(Messages.DerbyRestoreEngine_Progress_RestoringFiles);
 		try {
-			FileUtils.copyDirectory(extractedDb, dbFile);
-			if (extractedFilestore.isFile()){
+			SmartUtils.copyDirectory(extractedDb, dbFile);
+			if (!Files.isDirectory(extractedFilestore)){
 				//directory was empty
-				dataFile.mkdir();
+				SmartUtils.createDirectory(dataFile);
 			}else{
-				FileUtils.copyDirectory(extractedFilestore, dataFile);
+				SmartUtils.copyDirectory(extractedFilestore, dataFile);
 			}
 		} catch (Exception ex) {
 			// backup failed
 			// try to restore copied files
 			try {
-				FileUtils.deleteDirectory(dbFile);
-				FileUtils.deleteDirectory(dataFile);
-				FileUtils.moveDirectory(dbFileBack, dbFile);
-				FileUtils.moveDirectory(dataFileBack, dataFile);
+				SmartUtils.deleteDirectory(dbFile);
+				SmartUtils.deleteDirectory(dataFile);
+				SmartUtils.moveDirectory(dbFileBack, dbFile);
+				SmartUtils.moveDirectory(dataFileBack, dataFile);
 			} catch (Exception ex2) {
 				throw new Exception(
 						Messages.DerbyRestoreEngine_Error_RestoreFailedCouldNotRevert
@@ -398,7 +395,7 @@ public class DerbyRestoreEngine {
 
 		/* clean up */
 		progress.subTask(Messages.DerbyRestoreEngine_Progress_CleanUp);
-		final String cleanUpErr = cleanUp(new File[] { temp, dbFileBack, dataFileBack });
+		final String cleanUpErr = cleanUp(new Path[] { temp, dbFileBack, dataFileBack });
 		if (cleanUpErr.length() > 0) {
 			Display.getDefault().syncExec(new Runnable(){
 
@@ -500,17 +497,17 @@ public class DerbyRestoreEngine {
 		}
 	}
 
-	private static String cleanUp(File[] dirs) {
+	private static String cleanUp(Path[] dirs) {
 		StringBuilder strNoDelete = new StringBuilder();
 		for (int i = 0; i < dirs.length; i++) {
-			if (dirs[i].exists()) {
+			if (Files.exists(dirs[i])) {
 				try {
-					FileUtils.deleteDirectory(dirs[i]);
+					SmartUtils.deleteDirectory(dirs[i]);
 				} catch (Exception ex) {
 					try {
-						strNoDelete.append(dirs[i].getCanonicalPath() + "\n"); //$NON-NLS-1$
+						strNoDelete.append(dirs[i].normalize().toString() + "\n"); //$NON-NLS-1$
 					} catch (Exception ex2) {
-						strNoDelete.append(dirs[i].getAbsolutePath() + "\n"); //$NON-NLS-1$
+						strNoDelete.append(dirs[i].normalize().toString() + "\n"); //$NON-NLS-1$
 					}
 				}
 			}

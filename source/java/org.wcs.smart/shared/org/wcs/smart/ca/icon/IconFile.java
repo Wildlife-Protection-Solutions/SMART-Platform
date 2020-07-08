@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.ca.icon;
 
-import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
@@ -128,7 +127,7 @@ public class IconFile extends ISmartAttachment{
 	public void computeFileLocation(Session session) {
 		if (attachmentFile != null) return;
 		if (isSystemIcon()) return;
-		attachmentFile = Paths.get(getConservationArea().getFileDataStoreLocation()).resolve(ICON_DIR).resolve(getFilename()).toFile();
+		attachmentFile = Paths.get(getConservationArea().getFileDataStoreLocation()).resolve(ICON_DIR).resolve(getFilename());
 	}
 	
 	@Transient
@@ -139,7 +138,7 @@ public class IconFile extends ISmartAttachment{
 	
 	@Transient
 	@Override
-	public File getAttachmentFile(){
+	public Path getAttachmentFile(){
 		if (isSystemIcon()) {
 			try {
 				//extract to a local temp directory
@@ -147,8 +146,8 @@ public class IconFile extends ISmartAttachment{
 				Path temp = null;
 				String ext = SharedUtils.getFilenameExtension(getFilename());
 				if (getUuid() != null) {
-					temp = SmartContext.INSTANCE.getTempFilestoreLocation().toPath().resolve(ICON_DIR).resolve(UuidUtils.uuidToString(getUuid()) + "." + ext); //$NON-NLS-1$
-					if (Files.exists(temp)) return temp.toFile();
+					temp = SmartContext.INSTANCE.getTempFilestoreLocation().resolve(ICON_DIR).resolve(UuidUtils.uuidToString(getUuid()) + "." + ext); //$NON-NLS-1$
+					if (Files.exists(temp)) return temp;
 					if (!Files.exists(temp.getParent())) Files.createDirectories(temp.getParent());
 				}else {
 					temp = Files.createTempFile("smart", "." + ext); //$NON-NLS-1$ //$NON-NLS-2$
@@ -158,7 +157,7 @@ public class IconFile extends ISmartAttachment{
 			
 				try(InputStream inputStream = url.openConnection().getInputStream()){
 					Files.copy(inputStream, temp, StandardCopyOption.REPLACE_EXISTING);
-					return temp.toFile();
+					return temp;
 				}
 				
 			} catch (Exception e) {

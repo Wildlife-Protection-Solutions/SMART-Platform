@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.dataentry.model;
 
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -74,7 +73,7 @@ public class CmAttribute extends NamedItem implements IImageAssociatedObject{
 	@Transient
 	private Path importHelpFile;
 	@Transient
-	private File imageFile;
+	private Path imageFile;
 	
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name="node_uuid", referencedColumnName="uuid")
@@ -317,14 +316,14 @@ public class CmAttribute extends NamedItem implements IImageAssociatedObject{
 	
 	@Transient
 	@Override
-	public File getImageFile() {
+	public Path getImageFile() {
 		if (imageFile != null) return imageFile;
-		return new File(getImagePersistenceLocation()); 
+		return Paths.get(getImagePersistenceLocation()); 
 	}
 	
 	@Transient
 	@Override
-	public void setImageFile(File file) {
+	public void setImageFile(Path file) {
 		this.imageFile = file;
 		//TODO: figure out how to delete old files if extension has change - if
 		//extension is the same then the file will be overwritten and this
@@ -332,7 +331,7 @@ public class CmAttribute extends NamedItem implements IImageAssociatedObject{
 		if (file == null) {
 			getCmAttributeOptions().put(CmAttributeOption.ID_IMAGE_EXT, null);
 		}else {
-			String fileName = file.getName();
+			String fileName = file.getFileName().toString();
 			int index = fileName.lastIndexOf('.');
 			if (index >= 0) {
 				CmAttributeOption op = getCmAttributeOptions().get(CmAttributeOption.ID_IMAGE_EXT);

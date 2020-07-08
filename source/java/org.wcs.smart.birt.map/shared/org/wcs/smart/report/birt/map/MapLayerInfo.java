@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.report.birt.map;
 
-import java.io.File;
+import java.nio.file.Path;
 
 import org.locationtech.udig.project.internal.StyleBlackboard;
 
@@ -63,7 +63,7 @@ public class MapLayerInfo {
 	
 	private StyleBlackboard blackboard;
 		
-	private File rasterFile;
+	private Path rasterFile;
 		
 	public MapLayerInfo(String layerName, String mapStyle, LayerType type, String gometryColumn){
 		this.layerName = layerName;
@@ -113,11 +113,11 @@ public class MapLayerInfo {
 	}
 
 
-	public void setRasterFile(File file) {
+	public void setRasterFile(Path file) {
 		this.rasterFile = file;
 	}
 	
-	public File getRasterFile(){
+	public Path getRasterFile(){
 		return this.rasterFile;
 	}
 }

@@ -22,7 +22,8 @@
 package org.wcs.smart.report.birt.map.execute.raster;
 
 import java.awt.Point;
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,8 +43,8 @@ import org.wcs.smart.map.raster.RasterBuilder;
  */
 public class BirtRasterBuilder {
 
-	private File rasterTempFile;
-	private List<File> generatedFiles;
+	private Path rasterTempFile;
+	private List<Path> generatedFiles;
 	
 	private CoordinateReferenceSystem crs;
 	private double originX;
@@ -73,7 +74,7 @@ public class BirtRasterBuilder {
 	 * 
 	 * @return the raster image file
 	 */
-	public File getFileImage(){
+	public Path getFileImage(){
 		return this.rasterTempFile;
 	}
 	
@@ -82,7 +83,7 @@ public class BirtRasterBuilder {
 	 * the raster layer
 	 * @return
 	 */
-	public List<File> getAllFiles(){
+	public List<Path> getAllFiles(){
 		return this.generatedFiles;
 	}
 	
@@ -108,7 +109,7 @@ public class BirtRasterBuilder {
 	 * @throws Exception
 	 */
 	public void buildRaster(IQueryResults results) throws Exception{
-		generatedFiles = new ArrayList<File>();
+		generatedFiles = new ArrayList<Path>();
 		
 		
 		IResultIterator data = results.getPreparedQuery().execute(null).getResultIterator();
@@ -148,10 +149,10 @@ public class BirtRasterBuilder {
 				(minY-1) * cellSize - 0.5*cellSize + originY, 
 				rasterWidth * cellSize , rasterHeight * cellSize);
 		
-		rasterTempFile = File.createTempFile("smart" + System.nanoTime(), ".tiff"); //$NON-NLS-1$ //$NON-NLS-2$
+		rasterTempFile = Files.createTempFile("smart" + System.nanoTime(), ".tiff"); //$NON-NLS-1$ //$NON-NLS-2$
 		RasterBuilder builder = new RasterBuilder();
 		builder.setEnvelope(env);
-		builder.setFileName(rasterTempFile.getAbsolutePath());
+		builder.setFileName(rasterTempFile.toAbsolutePath().toString());
 		builder.setGridCellSize(cellSize);
 		builder.setRasterDimensions((int)rasterWidth, (int)rasterHeight);
 		builder.setTable(gridresults, md);

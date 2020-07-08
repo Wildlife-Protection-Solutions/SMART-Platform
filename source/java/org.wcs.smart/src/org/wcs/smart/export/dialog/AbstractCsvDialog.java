@@ -24,6 +24,8 @@ package org.wcs.smart.export.dialog;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -140,7 +142,7 @@ public abstract class AbstractCsvDialog extends SmartStyledTitleDialog {
 				
 				if (validateFilename(fileName)){
 					SmartPlugIn.getDefault().getDialogSettings().put(SmartPlugIn.DEFAULT_DELIMITER_KEY, String.valueOf(delimiter));	
-					SmartPlugIn.getDefault().getDialogSettings().put(LAST_DIR_KEY, (new File(fileName)).getParent());
+					SmartPlugIn.getDefault().getDialogSettings().put(LAST_DIR_KEY, (Paths.get(fileName)).getParent().toString());
 				
 					if (process(fileName, delimiter, cs)){
 						setReturnCode(OK);
@@ -207,7 +209,7 @@ public abstract class AbstractCsvDialog extends SmartStyledTitleDialog {
 	 * @return
 	 * @throws Exception
 	 */
-	protected abstract boolean performAction(File file, char delimiter, 
+	protected abstract boolean performAction(Path file, char delimiter, 
 			boolean headers, Charset cs, IProgressMonitor monitor, Session session) throws Exception;
 
 	/**
@@ -240,7 +242,7 @@ public abstract class AbstractCsvDialog extends SmartStyledTitleDialog {
 		public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 			
 			try (Session session = HibernateManager.openSession()){
-				boolean ok = performAction(new File(file), delimiter, headers, cs, monitor, session);
+				boolean ok = performAction(Paths.get(file), delimiter, headers, cs, monitor, session);
 				setSuccess(ok);
 			} catch (final Exception ex) {
 				setSuccess(false);

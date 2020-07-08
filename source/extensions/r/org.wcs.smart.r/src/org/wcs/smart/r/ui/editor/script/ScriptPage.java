@@ -129,7 +129,7 @@ public class ScriptPage extends EditorPart {
 				public void linkEntered(HyperlinkEvent e) {}
 				@Override
 				public void linkActivated(HyperlinkEvent e) {
-					AttachmentUtil.launch(RScriptManager.INSTANCE.getScriptPath(ScriptPage.this.parent.getQuery().getScript()).getParent().toFile());
+					AttachmentUtil.launch(RScriptManager.INSTANCE.getScriptPath(ScriptPage.this.parent.getQuery().getScript()).getParent());
 				}
 			});
 			
@@ -143,7 +143,7 @@ public class ScriptPage extends EditorPart {
 				public void linkEntered(HyperlinkEvent e) {}
 				@Override
 				public void linkActivated(HyperlinkEvent e) {
-					AttachmentUtil.launch(RScriptManager.INSTANCE.getScriptPath(ScriptPage.this.parent.getQuery().getScript()).toFile());
+					AttachmentUtil.launch(RScriptManager.INSTANCE.getScriptPath(ScriptPage.this.parent.getQuery().getScript()));
 				}
 			});
 		}

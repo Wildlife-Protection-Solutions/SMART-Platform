@@ -21,17 +21,14 @@
  */
 package org.wcs.smart.er.xml;
 
-import java.io.File;
-import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Enumeration;
+import java.util.Collections;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
+import java.util.stream.Collectors;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -55,6 +52,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.SmartStyledInputDialog;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.ZipUtil;
 
 /**
  * Class responsible for importing a mission.
@@ -74,7 +72,7 @@ public class MissionImporter {
 	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility to call done() on the given monitor
 	 * @throws Exception
 	 */
-	public static Mission importMission(File file, boolean keepIDs, IProgressMonitor monitor) throws Exception{
+	public static Mission importMission(Path file, boolean keepIDs, IProgressMonitor monitor) throws Exception{
 		return importXmlToMission(file, keepIDs, monitor);
 	}
 	
@@ -86,55 +84,49 @@ public class MissionImporter {
 	 * @return mission created or null
 	 * @throws Exception
 	 */
-	private static Mission importXmlToMission(File zipFile, boolean keepIDs, IProgressMonitor monitor) throws Exception{
+	private static Mission importXmlToMission(Path zipFile, boolean keepIDs, IProgressMonitor monitor) throws Exception{
 		SubMonitor progress = SubMonitor.convert(monitor, IMPORTING_MISSION_TASKNAME, 4);
 		
 		progress.split(1);
 		
-		String[] files;
-		File directory;
+		List<Path> files;
+		Path directory;
+		
 		if (SmartUtils.isZip(zipFile)){
 			//unzip 
-			directory = unzip(zipFile);
-			if (directory == null || !directory.isDirectory()){
-				throw new Exception (MessageFormat.format(Messages.MissionImporter_1, new Object[]{ zipFile.getAbsoluteFile()}));
+			directory = ZipUtil.unzip(zipFile);
+			if (directory == null || !Files.isDirectory(directory)){
+				throw new Exception (MessageFormat.format(Messages.MissionImporter_1, new Object[]{ zipFile.toAbsolutePath().toString()}));
 			}
 			//file xml file
-			files = directory.list();
+			files = Files.list(directory).collect(Collectors.toList());
 		}else{
-			files = new String[1];
-			files[0] = zipFile.getName();
+			files = Collections.singletonList(zipFile);
 			directory = zipFile;
 		}
 		
 		progress.split(1);
 		IXmlToMissionConverter converter = null;
 		Path xmlFile = null;
-		if (files != null){
-			//search for xml file
-			progress.subTask(Messages.MissionImporter_2);
-			for (int i = 0; i < files.length; i ++){
-				File f;
-				if(directory.isFile()){
-					f = new File(directory.getAbsolutePath());
-				}else{
-					f = new File(directory.getAbsoluteFile() + File.separator + files[i]);
+	
+		//search for xml file
+		progress.subTask(Messages.MissionImporter_2);
+		for(Path f : files) {
+			if (!Files.isDirectory(f)){
+				try {
+					converter = MissionXmlManager.findXmlConverter(f);
+					xmlFile = f;
+				}catch (Exception ex) {
+					
 				}
-				if (f.isFile()){
-					try {
-						converter = MissionXmlManager.findXmlConverter(f);
-						xmlFile = f.toPath();
-					}catch (Exception ex) {
-						
-					}
-					if (converter != null) break; //found it
-				}
+				if (converter != null) break; //found it
 			}
 		}
+		
 		if (converter == null){
 			try{
-				if(directory.isDirectory()){
-					FileUtils.deleteDirectory(directory);
+				if(Files.isDirectory(directory)){
+					SmartUtils.deleteDirectory(directory);
 				}
 			}catch (Exception ex){
 				EcologicalRecordsPlugIn.log("Error deleting temporary directory", ex); //$NON-NLS-1$
@@ -146,8 +138,8 @@ public class MissionImporter {
 		
 		progress.subTask(Messages.MissionImporter_4);
 		try{
-			if(directory.isDirectory()){
-				FileUtils.deleteDirectory(directory);
+			if(Files.isDirectory(directory)){
+				SmartUtils.deleteDirectory(directory);
 			}
 		}catch (Exception ex){
 			EcologicalRecordsPlugIn.log("Error deleting temporary directory", ex); //$NON-NLS-1$
@@ -172,7 +164,7 @@ public class MissionImporter {
 	 * @return created mission or null
 	 * @throws Exception
 	 */
-	private static Mission  convertAndSave(IXmlToMissionConverter converter, Path file, final boolean keepIDs, File attachmentDirectory, IProgressMonitor monitor) throws Exception {
+	private static Mission  convertAndSave(IXmlToMissionConverter converter, Path file, final boolean keepIDs, Path attachmentDirectory, IProgressMonitor monitor) throws Exception {
 		SubMonitor progress = SubMonitor.convert(monitor, IMPORTING_MISSION_TASKNAME, 3);
 		
 		try (Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor())){
@@ -310,38 +302,6 @@ public class MissionImporter {
 		return SurveyHibernateManager.getInstance().getSurveyById(session, imported.getSurvey().getId());
 	}
 
-	/**
-	 * Unzips the content of the zip
-	 * file to a temporary directory.
-	 * 
-	 * @param zipFile the zip file to unzip
-	 * @return the location of the files
-	 * @throws Exception
-	 */
-	private static File unzip(File zipFile) throws Exception{
-		File tempDir = null;
-		try (ZipFile zout = new ZipFile(zipFile)){
-			tempDir = File.createTempFile(zipFile.getName(),
-					Long.toString(System.nanoTime()));
-			tempDir.delete();
-			tempDir.mkdir();
-		
-			Enumeration<? extends ZipEntry> elements = zout.entries();
-			while(elements.hasMoreElements()){
-				ZipEntry entry = elements.nextElement();
-				
-				File fout = new File(tempDir.getAbsoluteFile() + File.separator + entry.getName());
-				if (entry.isDirectory()){
-					FileUtils.forceMkdir(fout);
-				}else{
-					try(InputStream is = zout.getInputStream(entry)){
-						FileUtils.copyInputStreamToFile(is, fout);
-					}
-				}
-			}	
-		}
-		return tempDir;
-	}	
 }
 
 

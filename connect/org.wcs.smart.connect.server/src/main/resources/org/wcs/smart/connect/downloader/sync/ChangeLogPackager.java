@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.connect.downloader.sync;
 
-import java.io.File;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -67,7 +66,7 @@ public class ChangeLogPackager {
 	private Path metadataFile;
 	private Path zipFile;
 	private Path filestorePath;
-	private File tempDir;
+	private Path tempDir;
 	private Session session;
 	private WorkItem item;
 	
@@ -78,16 +77,16 @@ public class ChangeLogPackager {
 		this.item = item;
 		
 		tempDir = ZipUtil.createTemporaryDirectory();
-		filestorePath = tempDir.toPath().resolve(ConnectSyncHistoryRecord.PACKAGE_FILESTORE_DIR);
-		metadataFile = tempDir.toPath().resolve(UuidUtils.uuidToString(caUuid) + "." + System.nanoTime() + ".changelog.metadata"); //$NON-NLS-1$ //$NON-NLS-2$
-		changelogFile = tempDir.toPath().resolve(UuidUtils.uuidToString(caUuid) + "." + System.nanoTime() + ".changelog"); //$NON-NLS-1$ //$NON-NLS-2$
-		zipFile = tempDir.toPath().getParent().resolve(UuidUtils.uuidToString(caUuid) + "." + System.nanoTime() + ".changelog.zip"); //$NON-NLS-1$ //$NON-NLS-2$
+		filestorePath = tempDir.resolve(ConnectSyncHistoryRecord.PACKAGE_FILESTORE_DIR);
+		metadataFile = tempDir.resolve(UuidUtils.uuidToString(caUuid) + "." + System.nanoTime() + ".changelog.metadata"); //$NON-NLS-1$ //$NON-NLS-2$
+		changelogFile = tempDir.resolve(UuidUtils.uuidToString(caUuid) + "." + System.nanoTime() + ".changelog"); //$NON-NLS-1$ //$NON-NLS-2$
+		zipFile = tempDir.getParent().resolve(UuidUtils.uuidToString(caUuid) + "." + System.nanoTime() + ".changelog.zip"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	
 	public void cleanUp(){
 		try{
-			FileUtils.forceDelete(tempDir);
+			FileUtils.forceDelete(tempDir.toAbsolutePath().normalize().toFile());
 		}catch (Exception ex){
 			logger.log(Level.WARNING, "could not delete directory " + tempDir.toString(), ex); //$NON-NLS-1$
 		}
@@ -108,13 +107,13 @@ public class ChangeLogPackager {
 			cleanUp();
 		}
 		
-		return DataStoreManager.INSTANCE.getRootDirectory().toPath().relativize(zipFile);
+		return DataStoreManager.INSTANCE.getRootDirectory().relativize(zipFile);
 	}
 	
 	private void zipPackage() throws Exception{
-		ZipUtil.createZip(new File[]{changelogFile.toFile(), 
-				metadataFile.toFile(), 
-				filestorePath.toFile()}, zipFile.toFile());
+		ZipUtil.createZip(new Path[]{changelogFile, 
+				metadataFile, 
+				filestorePath}, zipFile);
 	}
 	
 	private void packageMetadata() throws Exception{

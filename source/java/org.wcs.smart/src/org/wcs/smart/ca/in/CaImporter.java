@@ -22,11 +22,10 @@
 package org.wcs.smart.ca.in;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,7 +37,6 @@ import java.util.UUID;
 
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
@@ -85,7 +83,7 @@ public class CaImporter {
       //        to call done() on the given monitor
 	 * @throws Exception
 	 */
-	public static void importCa(File file, IProgressMonitor monitor) throws Exception{
+	public static void importCa(Path file, IProgressMonitor monitor) throws Exception{
 		if (!validateCaImport(file)) return;
 		CaImporter importer = new CaImporter();
 		importer.importCaFromFile(file, monitor);
@@ -105,14 +103,14 @@ public class CaImporter {
 	 * @return
 	 * @throws Exception
 	 */
-	public static boolean validateCaImport(File file) throws Exception{
+	public static boolean validateCaImport(Path file) throws Exception{
 		
-		File temp = SmartUtils.createTemporaryDirectory();
+		Path temp = SmartUtils.createTemporaryDirectory();
 		try {		
 			//to validate we only need to unzip a few files to do validation the CA_INFO_FILENAME from the package
-			try(ZipFile archiveFile = new ZipFile(file)){
+			try(ZipFile archiveFile = new ZipFile(file.normalize().toAbsolutePath().toFile())){
 				ZipArchiveEntry zipEntry = archiveFile.getEntry(ICaDataExportEngine.CA_INFO_FILENAME);
-				Path p = temp.toPath().resolve(ICaDataExportEngine.CA_INFO_FILENAME);
+				Path p = temp.resolve(ICaDataExportEngine.CA_INFO_FILENAME);
 				Files.createDirectories(p.getParent());
 				Files.copy(archiveFile.getInputStream(zipEntry), p);
 				
@@ -122,7 +120,7 @@ public class CaImporter {
 				while(files.hasMoreElements()) {
 					ZipArchiveEntry e = files.nextElement();
 					if (e.getName().endsWith(versionFile)) {
-						p = temp.toPath().resolve(ICaDataExportEngine.DATABASE_DIR).resolve(versionFile);
+						p = temp.resolve(ICaDataExportEngine.DATABASE_DIR).resolve(versionFile);
 						Files.createDirectories(p.getParent());
 						Files.copy(archiveFile.getInputStream(e), p);
 						break;
@@ -139,7 +137,7 @@ public class CaImporter {
 				}
 			}
 		}finally {
-			FileUtils.deleteDirectory(temp);
+			SmartUtils.deleteDirectory(temp);
 		}
 		return true;
 	}
@@ -151,9 +149,9 @@ public class CaImporter {
       //        to call done() on the given monitor
 	 * @throws Exception
 	 */
-	private void importCaFromFile(File f, IProgressMonitor monitor) throws Exception{
-		if (!f.exists()){
-			throw new IOException(Messages.CaImporter_Error_CouldNotFindImportFile + f.getAbsolutePath());
+	private void importCaFromFile(Path f, IProgressMonitor monitor) throws Exception{
+		if (!Files.exists(f)){
+			throw new IOException(Messages.CaImporter_Error_CouldNotFindImportFile + f.toAbsolutePath().toString());
 		}
 		
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.CaImporter_Progress_ImportingCa, 1); 
@@ -165,11 +163,11 @@ public class CaImporter {
 		//enough disk space for this operation
 		progress.subTask(Messages.CaImporter_Progress_BackupCurrent);
 		HibernateManager.endSessionFactory(true, false);
-		File dbBackup = backup();
+		Path dbBackup = backup();
 		progress.worked(10);
 		
 		progress.subTask(Messages.CaImporter_Progress_UnzippingFile);
-		File dir = unzipFile(f);
+		Path dir = unzipFile(f);
 		
 		/* need to login as admin user to restore */
 		if (!HibernateManager.getCurrentUserName().equals(DbUser.ADMIN.getUserName()))
@@ -187,7 +185,6 @@ public class CaImporter {
 				return;
 			}
 			progress.worked(10);
-			
 			
 			CaImportEngine engine = new CaImportEngine(session, dir, cauuid);
 			try{
@@ -235,14 +232,14 @@ public class CaImporter {
 	 * @return the name of the copy of the database
 	 * @throws Exception
 	 */
-	private File backup() throws Exception{
-		File databaseDir = new File(SmartProperties.getInstance().getProperty(SmartProperties.PROP_SMART_DB));
-		File copyTo = new File(databaseDir.getParentFile(), "smartdb.bak"); //$NON-NLS-1$
-		if (copyTo.exists()){
-			FileUtils.deleteDirectory(copyTo);
+	private Path backup() throws Exception{
+		Path databaseDir = Paths.get(SmartProperties.getInstance().getProperty(SmartProperties.PROP_SMART_DB));
+		Path copyTo = databaseDir.getParent().resolve("smartdb.bak"); //$NON-NLS-1$
+		if (Files.exists(copyTo)){
+			SmartUtils.deleteDirectory(copyTo);
 		}
 		
-		FileUtils.copyDirectory(databaseDir, copyTo);
+		SmartUtils.copyDirectory(databaseDir, copyTo);
 		
 		return copyTo;
 	}
@@ -252,8 +249,8 @@ public class CaImporter {
 	 * @param backup
 	 * @throws Exception
 	 */
-	private void cleanUp(File backup) throws Exception{
-		FileUtils.deleteDirectory(backup);
+	private void cleanUp(Path backup) throws Exception{
+		SmartUtils.deleteDirectory(backup);
 	}
 	
 	/**
@@ -261,10 +258,10 @@ public class CaImporter {
 	 * @param backup
 	 * @throws Exception
 	 */
-	private void restoreBackup(File backup) throws Exception{
-		File databaseDir = new File(SmartProperties.getInstance().getProperty(SmartProperties.PROP_SMART_DB));
-		FileUtils.deleteDirectory(databaseDir);
-		FileUtils.copyDirectory(backup, databaseDir);
+	private void restoreBackup(Path backup) throws Exception{
+		Path databaseDir = Paths.get(SmartProperties.getInstance().getProperty(SmartProperties.PROP_SMART_DB));
+		SmartUtils.deleteDirectory(databaseDir);
+		SmartUtils.copyDirectory(backup, databaseDir);
 		cleanUp(backup);
 	}
 	
@@ -279,12 +276,12 @@ public class CaImporter {
 	 * @return conservation area uuid
 	 * @throws Exception
 	 */
-	private static UUID validateConservationAreaInfo(File dir, Session session, boolean includeExistingCa) throws Exception{
-		File caInfo = new File(dir, ICaDataExportEngine.CA_INFO_FILENAME);
+	private static UUID validateConservationAreaInfo(Path dir, Session session, boolean includeExistingCa) throws Exception{
+		Path caInfo = dir.resolve(ICaDataExportEngine.CA_INFO_FILENAME);
 		String dbVersion = Messages.SmartPlugIn_UnknownVersion;
 		UUID uuid = null;
 		
-		try(BufferedReader reader = new BufferedReader(new FileReader(caInfo))){
+		try(BufferedReader reader = Files.newBufferedReader(caInfo)){
 			String cauuid = reader.readLine();
 			if (cauuid == null){
 				throw new Exception(Messages.CaImporter_Error_NoCaIdentifierFound);
@@ -337,11 +334,11 @@ public class CaImporter {
 	 * @param session
 	 * @throws Exception
 	 */
-	private static boolean validatePlugInConfiguration(File dir, Session session) throws Exception{
-		File caInfo = new File(new File(dir, ICaDataExportEngine.DATABASE_DIR), PlugInConfigurationExporter.CONFIG_TABLE_NAME + ".dat"); //$NON-NLS-1$
+	private static boolean validatePlugInConfiguration(Path dir, Session session) throws Exception{
+		Path caInfo = dir.resolve(ICaDataExportEngine.DATABASE_DIR).resolve(PlugInConfigurationExporter.CONFIG_TABLE_NAME + ".dat"); //$NON-NLS-1$
 		
 		HashMap<String, String> versions = new HashMap<String, String>();
-		try(CSVReader reader = new CSVReader(new FileReader(caInfo))){
+		try(CSVReader reader = new CSVReader(Files.newBufferedReader(caInfo))){
 			String[] data= reader.readNext();
 			while(data != null){
 				versions.put(data[0], data[1]);
@@ -397,8 +394,8 @@ public class CaImporter {
 	 * @return the temporary directory
 	 * @throws Exception
 	 */
-	private File unzipFile(File file) throws Exception{
-		File temp = SmartUtils.createTemporaryDirectory();
+	private Path unzipFile(Path file) throws Exception{
+		Path temp = SmartUtils.createTemporaryDirectory();
 		ZipUtil.unzipFolder(file, temp);
 		return temp;
 	}

@@ -245,7 +245,7 @@ public class CyberTracker extends HttpServlet{
 			//TODO: clean up these files in the clean up code
 			//delete the file 
 			java.nio.file.Path toDelete = DataStoreManager.INSTANCE.getRootDirectory()
-					.toPath().resolve(CT_NAVIGATION_DATASTORE_LOCATION).resolve(p.getFilename());
+					.resolve(CT_NAVIGATION_DATASTORE_LOCATION).resolve(p.getFilename());
 			Files.delete(toDelete);
 			
 			s.delete(p);
@@ -298,7 +298,7 @@ public class CyberTracker extends HttpServlet{
 			//TODO: clean up these files in the clean up code
 			//delete the file 
 			java.nio.file.Path toDelete = DataStoreManager.INSTANCE.getRootDirectory()
-					.toPath().resolve(CT_PACKAGE_DATASTORE_LOCATION).resolve(p.getFilename());
+					.resolve(CT_PACKAGE_DATASTORE_LOCATION).resolve(p.getFilename());
 			Files.delete(toDelete);
 			
 			s.delete(p);
@@ -340,7 +340,7 @@ public class CyberTracker extends HttpServlet{
 				throw new SmartConnectException(Response.Status.NOT_FOUND);
 			}
 			file = DataStoreManager.INSTANCE.getRootDirectory()
-					.toPath().resolve(CT_NAVIGATION_DATASTORE_LOCATION).resolve(ctpackage.getFilename());
+					.resolve(CT_NAVIGATION_DATASTORE_LOCATION).resolve(ctpackage.getFilename());
 		}finally {
 			s.getTransaction().commit();
 		}
@@ -401,7 +401,7 @@ public class CyberTracker extends HttpServlet{
 				throw new SmartConnectException(Response.Status.NOT_FOUND);
 			}
 			file = DataStoreManager.INSTANCE.getRootDirectory()
-					.toPath().resolve(CT_PACKAGE_DATASTORE_LOCATION).resolve(ctpackage.getFilename());
+					.resolve(CT_PACKAGE_DATASTORE_LOCATION).resolve(ctpackage.getFilename());
 		}finally {
 			s.getTransaction().commit();
 		}
@@ -562,14 +562,14 @@ public class CyberTracker extends HttpServlet{
 				
 				//delete file
 				java.nio.file.Path toDelete = DataStoreManager.INSTANCE.getRootDirectory()
-						.toPath().resolve(CT_PACKAGE_DATASTORE_LOCATION).resolve(ctpackage.getFilename());
+						.resolve(CT_PACKAGE_DATASTORE_LOCATION).resolve(ctpackage.getFilename());
 				if (Files.exists(toDelete)) {
 					Files.delete(toDelete);	
 				}
 			}
 			ctpackage.setType(proxy.getType());
 
-			java.nio.file.Path upDir =  DataStoreManager.INSTANCE.getRootDirectory().toPath().resolve(CT_PACKAGE_DATASTORE_LOCATION);
+			java.nio.file.Path upDir =  DataStoreManager.INSTANCE.getRootDirectory().resolve(CT_PACKAGE_DATASTORE_LOCATION);
 			if (!Files.exists(upDir)) Files.createDirectories(upDir);
 			
 			ctpackage.setStatus(Status.UPLOADING);
@@ -603,7 +603,7 @@ public class CyberTracker extends HttpServlet{
 			}
 
 			up.setLocalFilename(p.resolve(ctpackage.getFilename()).toString()); 
-			java.nio.file.Path upFile = DataStoreManager.INSTANCE.getRootDirectory().toPath().resolve(up.getLocalFilename());
+			java.nio.file.Path upFile = DataStoreManager.INSTANCE.getRootDirectory().resolve(up.getLocalFilename());
 			if (Files.exists(upFile)) Files.delete(upFile);
 			
 			s.saveOrUpdate(ctpackage);
@@ -705,13 +705,13 @@ public class CyberTracker extends HttpServlet{
 				
 				//delete file
 				java.nio.file.Path toDelete = DataStoreManager.INSTANCE.getRootDirectory()
-						.toPath().resolve(CT_NAVIGATION_DATASTORE_LOCATION).resolve(ctpackage.getFilename());
+						.resolve(CT_NAVIGATION_DATASTORE_LOCATION).resolve(ctpackage.getFilename());
 				if (Files.exists(toDelete)) {
 					Files.delete(toDelete);	
 				}
 			}
 			
-			java.nio.file.Path upDir =  DataStoreManager.INSTANCE.getRootDirectory().toPath().resolve(CT_NAVIGATION_DATASTORE_LOCATION);
+			java.nio.file.Path upDir =  DataStoreManager.INSTANCE.getRootDirectory().resolve(CT_NAVIGATION_DATASTORE_LOCATION);
 			if (!Files.exists(upDir)) Files.createDirectories(upDir);
 			
 			ctpackage.setStatus(org.wcs.smart.connect.model.CyberTrackerNavigationLayer.Status.UPLOADING);

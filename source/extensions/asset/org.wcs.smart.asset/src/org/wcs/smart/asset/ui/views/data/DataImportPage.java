@@ -331,7 +331,7 @@ public class DataImportPage {
 							
 							WaypointAttachment wa = new WaypointAttachment();
 							wa.setWaypoint(wp);
-							wa.setCopyFromLocation(p.getFile().toFile());
+							wa.setCopyFromLocation(p.getFile());
 							wa.setFilename(p.getFile().getFileName().toString());
 							wp.getAttachments().add(wa);
 							wp.setObservationGroups(new ArrayList<>());
@@ -372,7 +372,7 @@ public class DataImportPage {
 								}
 								wa = new WaypointAttachment();
 								wa.setWaypoint(wp);
-								wa.setCopyFromLocation(pp.getFile().toFile());
+								wa.setCopyFromLocation(pp.getFile());
 								wa.setFilename(pp.getFile().getFileName().toString());
 								wp.getAttachments().add(wa);
 								

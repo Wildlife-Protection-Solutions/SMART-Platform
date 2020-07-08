@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.cybertracker.properties;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -1599,7 +1600,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 	}
 
 	private boolean isFileNameDecorationValid() {
-		return txtFileName.getText().isEmpty() || new File(txtFileName.getText()).isFile();
+		return txtFileName.getText().isEmpty() || !Files.isDirectory(Paths.get(txtFileName.getText()));
 	}
 
 	private boolean validate() {

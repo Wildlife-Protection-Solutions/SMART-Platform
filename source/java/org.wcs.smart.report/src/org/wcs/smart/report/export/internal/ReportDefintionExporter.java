@@ -21,9 +21,10 @@
  */
 package org.wcs.smart.report.export.internal;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -82,9 +83,9 @@ public class ReportDefintionExporter implements IReportExporter {
 	 * Exports each report to a different zip file
 	 */
 	@Override
-	public void exportReport(File file, Report report, HashMap<String, Object> reportParams, IProgressMonitor monitor) throws Exception {
+	public void exportReport(Path file, Report report, HashMap<String, Object> reportParams, IProgressMonitor monitor) throws Exception {
 		monitor.beginTask(Messages.ReportDefintionExporter_Progress_Exporting, 3);
-		try(ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(file))){
+		try(ZipOutputStream zout = new ZipOutputStream(Files.newOutputStream(file))){
 			zout.setLevel(Deflater.DEFAULT_COMPRESSION);
 			
 			//export queries
@@ -100,13 +101,13 @@ public class ReportDefintionExporter implements IReportExporter {
 			//add report info file
 			monitor.subTask(Messages.ReportDefintionExporter_Progress_ReportInfo);
 			
-			String filename = ExportReportEngine.getOutputFileName(report, null, "rpt").getName(); //$NON-NLS-1$
-			File reportInfo = File.createTempFile(filename,".tmp"); //$NON-NLS-1$ 
+			String filename = ExportReportEngine.getOutputFileName(report, null, "rpt").getFileName().toString(); //$NON-NLS-1$
+			Path reportInfo = Files.createTempFile(filename,".tmp"); //$NON-NLS-1$ 
 			try{
 				writeReportInfo(reportInfo, report);
 				addFile(reportInfo, filename, zout);
 			}finally{
-				reportInfo.delete();
+				Files.delete(reportInfo);
 			}
 			monitor.worked(1);
 		}		
@@ -120,7 +121,7 @@ public class ReportDefintionExporter implements IReportExporter {
 	 * @param report report 
 	 * @throws Exception
 	 */
-	private void writeReportInfo(File f, Report report) throws Exception{
+	private void writeReportInfo(Path f, Report report) throws Exception{
 		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
 			try {
@@ -132,7 +133,7 @@ public class ReportDefintionExporter implements IReportExporter {
 				}
 				prop.setProperty(FILENAME_KEY, report.getFilename());
 				prop.setProperty(VERSION_KEY, VERSION_2);
-				try(FileOutputStream fout = new FileOutputStream(f)){
+				try(OutputStream fout = Files.newOutputStream(f)){
 					prop.store(fout, null);
 				}
 			} finally {
@@ -151,11 +152,11 @@ public class ReportDefintionExporter implements IReportExporter {
 	 */
 	private void exportQueries(ZipOutputStream zout, Report report) throws Exception{
 		
-		File reportFile = new File(ReportPlugIn.getReportDirectory(report.getConservationArea()), report.getFilename());
+		Path reportFile = ReportPlugIn.getReportDirectory(report.getConservationArea()).resolve(report.getFilename());
 
 		SessionHandle session = SessionHandleAdapter.getInstance().getSessionHandle();
 
-		ReportDesignHandle rdh = session.openDesign(reportFile.getAbsolutePath());
+		ReportDesignHandle rdh = session.openDesign(reportFile.toAbsolutePath().toString());
 		HashSet<String> processedQueries = new HashSet<String>();
 		List<?> datasets = rdh.getDataSets().getContents();
 		for (Iterator<?> iterator = datasets.iterator(); iterator.hasNext();) {
@@ -205,12 +206,12 @@ public class ReportDefintionExporter implements IReportExporter {
 			throw new Exception(MessageFormat.format(Messages.ReportDefintionExporter_Error_NoExporter, new Object[]{ query.getName()}));
 		}
 		
-		File tmpFile = File.createTempFile(UuidUtils.uuidToString(query.getUuid()), QUERYFILE_EXTENSION);
+		Path tmpFile = Files.createTempFile(UuidUtils.uuidToString(query.getUuid()), QUERYFILE_EXTENSION);
 		try{
 			definitionExporter.export(query, null, tmpFile, null, new NullProgressMonitor());
 			addFile(tmpFile, UuidUtils.uuidToString(query.getUuid()) + QUERYFILE_EXTENSION, zipOut);
 		}finally{
-			tmpFile.delete();
+			Files.delete(tmpFile);
 		}
 	}
 	
@@ -222,13 +223,13 @@ public class ReportDefintionExporter implements IReportExporter {
 	 * @param zout
 	 * @throws Exception
 	 */
-	private void addFile(File f, String name, ZipOutputStream zout) throws Exception{
+	private void addFile(Path f, String name, ZipOutputStream zout) throws Exception{
 		zout.putNextEntry(new ZipEntry(name));
 		
 
 		byte[] buffer = new byte[1024];
 		int bytesRead;
-		try (FileInputStream inStream = new FileInputStream(f)){
+		try (InputStream inStream = Files.newInputStream(f)){
 			while ((bytesRead = inStream.read(buffer)) > 0) {
 				zout.write(buffer, 0, bytesRead);
 			}

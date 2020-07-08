@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.ui.internal.ca.properties;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
@@ -200,7 +199,7 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 				
 				IconFile f = selectedIcon.getIconFile(item.getKey());
 				if (f != null) {
-					if (getIconFile(f).equals(file.toFile())) continue;
+					if (getIconFile(f).equals(file)) continue;
 					
 					selectedIcon.getFiles().remove(f);
 				}
@@ -208,9 +207,9 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 				f = new IconFile();
 				f.setIcon(selectedIcon);
 				f.setIconSet(item.getKey());
-				f.setCopyFromLocation(file.toFile());
+				f.setCopyFromLocation(file);
 				f.setFilename(file.getFileName().toString());
-				f.setCopyFromLocation(file.toFile());
+				f.setCopyFromLocation(file);
 				f.setFilename(file.getFileName().toString());
 				
 				selectedIcon.getFiles().add(f);
@@ -219,7 +218,7 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 		super.okPressed();
 	}
 	
-	private File getIconFile(IconFile f) {
+	private Path getIconFile(IconFile f) {
 		if (f.getCopyFromLocation() != null) return f.getCopyFromLocation();
 		return f.getAttachmentFile();
 	}
@@ -242,7 +241,7 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 			IconFile f = new IconFile();
 			f.setIcon(icon);
 			f.setIconSet(item.getKey());
-			f.setCopyFromLocation(file.toFile());
+			f.setCopyFromLocation(file);
 			f.setFilename(file.getFileName().toString());
 			
 			icon.getFiles().add(f);
@@ -419,10 +418,10 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 			if (selectedIcon != null) {
 				IconFile f = selectedIcon.getIconFile(s);
 				if (f != null) {
-					File file = getIconFile(f);
-					imageLabel.setData(PATH_KEY, file.toPath());
+					Path file = getIconFile(f);
+					imageLabel.setData(PATH_KEY, file);
 					try {
-						Image i = SmartUtils.getImage(file.toPath(), SIZE);
+						Image i = SmartUtils.getImage(file, SIZE);
 						imageLabel.setText(""); //$NON-NLS-1$
 						imageLabel.setImage(i);
 					} catch (Exception e1) {
@@ -563,7 +562,7 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 					if (element instanceof Icon) {
 						IconFile ff = ((Icon)element).getIconFile(s);
 						try {
-							Image img = SmartUtils.getImage(ff.getAttachmentFile().toPath(), SIZE);
+							Image img = SmartUtils.getImage(ff.getAttachmentFile(), SIZE);
 							images.put((Icon)element, img);
 							return img;
 						}catch (Throwable t) {

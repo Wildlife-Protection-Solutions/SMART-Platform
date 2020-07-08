@@ -401,8 +401,8 @@ public class ConnectStartupContextListener implements ServletContextListener{
 		}catch(NamingException ex){
 			throw new IllegalStateException("Cannot initialize datastore.", ex); //$NON-NLS-1$
 		}
-		SmartContext.INSTANCE.setFilestoreLocation(DataStoreManager.INSTANCE.getRootDirectory().getAbsolutePath());
-		SmartContext.INSTANCE.setTempFilestoreLocation((File)sce.getServletContext().getAttribute(ServletContext.TEMPDIR));
+		SmartContext.INSTANCE.setFilestoreLocation(DataStoreManager.INSTANCE.getRootDirectory().toAbsolutePath().normalize().toString());
+		SmartContext.INSTANCE.setTempFilestoreLocation(((File)sce.getServletContext().getAttribute(ServletContext.TEMPDIR)).toPath());
 		
 		//configure geotools properties
 		System.setProperty("org.eclipse.emf.common.util.ReferenceClearingQueue", "false"); //$NON-NLS-1$ //$NON-NLS-2$

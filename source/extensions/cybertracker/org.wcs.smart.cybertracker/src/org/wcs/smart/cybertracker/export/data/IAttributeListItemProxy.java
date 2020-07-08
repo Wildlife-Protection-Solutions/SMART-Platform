@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.cybertracker.export.data;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.UUID;
 
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
@@ -39,7 +39,7 @@ public interface IAttributeListItemProxy {
 	
 	public UUID getUuid();
 
-	public File getImageFile();
+	public Path getImageFile();
 
 	public CmAttributeListItem getListItem();
 }

@@ -23,17 +23,21 @@
 package org.wcs.smart.backup;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -42,6 +46,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Engine responsible for checking if the auto-backup is supposed to run,
@@ -130,11 +135,11 @@ public class AutoBackupEngine {
 	private static void performBackup(final Properties properties , final Shell shell, boolean full, IProgressMonitor monitor){
 		DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss"); //$NON-NLS-1$
 		Date date = new Date();
-		final File tmp = new File(properties.getProperty(PROP_BACKUP_LOCATION));
+		final Path tmp = Paths.get(properties.getProperty(PROP_BACKUP_LOCATION));
 		
-		if(!tmp.exists()){						
+		if(!Files.exists(tmp)){						
 			try{
-				FileUtils.forceMkdir(tmp);
+				SmartUtils.createDirectory(tmp);
 			}catch (final Exception ex){
 				final String error = MessageFormat.format(Messages.AutoBackupEngine_MakeDirectoryFailed, new Object[]{ex.getLocalizedMessage()});
 				shell.getDisplay().syncExec(new Runnable(){
@@ -159,7 +164,7 @@ public class AutoBackupEngine {
 			sb.append("partial"); //$NON-NLS-1$
 		}
 		sb.append(".zip"); //$NON-NLS-1$
-		File f = new File(sb.toString()); 
+		Path f = Paths.get(sb.toString()); 
 		try{
 			if(DerbyBackupEngine.backupSystem(f, !full, monitor)){					
 				//do nothing if success
@@ -191,21 +196,27 @@ public class AutoBackupEngine {
 		Date cutoffDate = new Date();
 		cutoffDate.setTime(cutoffDate.getTime() - (long)(Double.valueOf(properties.getProperty(PROP_DELETE_TIMER)) * 86400 * 1000)); //1 day in milliseconds 86k*1000
 
-		File dir = new File(properties.getProperty(PROP_BACKUP_LOCATION));
-		if (dir.listFiles() == null){
-			//no files, nothing to delete
-			return;
+		try {
+			Path dir = Paths.get(properties.getProperty(PROP_BACKUP_LOCATION));
+			if (Files.list(dir).count() == 0 ){
+				//no files, nothing to delete
+				return;
+			}
+			
+			List<Path> kids = Files.list(dir).collect(Collectors.toList());
+			for (Path child : kids) {
+			 
+			  if (child.getFileName().toString().equals(".") || //$NON-NLS-1$
+						  child.getFileName().toString().equals("..")){ //$NON-NLS-1$
+			      continue;  // Ignore the self and parent aliases.
+			    }
+			    if(Files.getLastModifiedTime(child).toMillis() < cutoffDate.getTime() && child.getFileName().toString().contains(BACKUP_FILENAME_PREFIX)){
+			    	Files.delete(child);
+			    }
+			}
+		}catch(IOException ex) {
+			SmartPlugIn.log(ex.getMessage(), ex);
 		}
-		  for (File child : dir.listFiles()) {
-			  if (child.getName().equals(".") || //$NON-NLS-1$
-					  child.getName().equals("..")){ //$NON-NLS-1$
-		      continue;  // Ignore the self and parent aliases.
-		    }
-		    if(child.lastModified() < cutoffDate.getTime() && child.getName().contains(BACKUP_FILENAME_PREFIX)){
-		    	child.delete();
-		    }
-		  }
-
 	}
 
 	/**
@@ -250,11 +261,11 @@ public class AutoBackupEngine {
 		Properties properties = new Properties();
 		try {
 			String location = SmartProperties.getInstance().getProperty(SmartProperties.PROP_FILESTORE) + SMART_BACKUP_PROPERTIES_FILE;
-			File f = new File(location);
-			if (!f.exists()){
+			Path f = Paths.get(location);
+			if (!Files.exists(f)){
 				return properties;
 			}
-			try(FileInputStream fis = new FileInputStream(location)){
+			try(InputStream fis = Files.newInputStream(f)){
 				properties.load(fis);
 			}
 		} catch (IOException e) {
@@ -273,7 +284,7 @@ public class AutoBackupEngine {
 		try {
 			String location = SmartProperties.getInstance().getProperty(SmartProperties.PROP_FILESTORE) + SMART_BACKUP_PROPERTIES_FILE;
 			
-			try(FileOutputStream fout = new FileOutputStream(location)){
+			try(OutputStream fout = Files.newOutputStream(Paths.get(location))){
 				prop.store(fout, null);
 			}
 			return true;

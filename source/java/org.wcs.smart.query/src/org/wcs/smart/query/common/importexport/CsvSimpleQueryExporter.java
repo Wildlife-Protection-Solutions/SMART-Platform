@@ -21,11 +21,11 @@
  */
 package org.wcs.smart.query.common.importexport;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -86,7 +86,7 @@ public class CsvSimpleQueryExporter extends SimpleQueryExporter implements ICsvQ
 	@Override
 	protected void init() throws Exception {
 		writer = new CSVWriter(
-				new OutputStreamWriter(new FileOutputStream(outputFile), cs),
+				new OutputStreamWriter(Files.newOutputStream(outputFile), cs),
 				delimiter, '"', SharedUtils.LINE_SEPARATOR); 
 		
 		String data[] = new String[queryColumns.size()]; 
@@ -147,7 +147,7 @@ public class CsvSimpleQueryExporter extends SimpleQueryExporter implements ICsvQ
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void export(Query query, IQueryResult result, File file,
+	public void export(Query query, IQueryResult result, Path file,
 			HashMap<String, Object> parameters, IProgressMonitor monitor)
 			throws Exception {
 		//delimiter

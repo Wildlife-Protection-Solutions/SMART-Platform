@@ -21,10 +21,10 @@
  */
 package org.wcs.smart.report.internal.ui;
 
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.birt.report.designer.core.model.SessionHandleAdapter;
 import org.eclipse.birt.report.designer.ui.lib.explorer.LibraryExplorerView;
 import org.eclipse.birt.report.model.api.command.LibraryChangeEvent;
@@ -47,6 +47,7 @@ import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.library.SmartBirtLibrary;
 import org.wcs.smart.report.ui.SmartLibraryEditorInput;
+import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.ZipUtil;
 
 /**
@@ -71,6 +72,8 @@ public class ImportLibraryHandler {
 		final String importFile = fd.open();
 		if (importFile == null) return;
 		
+		Path iFile = Paths.get(importFile);
+		
 		//close existing report library editor
 		SmartLibraryEditorInput ri = new SmartLibraryEditorInput(SmartBirtLibrary.getInstance().getLibraryFile());
 		
@@ -87,10 +90,10 @@ public class ImportLibraryHandler {
 			@Override
 			public void run(IProgressMonitor monitor) throws InvocationTargetException,
 					InterruptedException {
-				File dirToZip = SmartBirtLibrary.getInstance().getLibraryLocation();
+				Path dirToZip = SmartBirtLibrary.getInstance().getLibraryLocation();
 				try {
-					FileUtils.deleteDirectory(dirToZip);
-					ZipUtil.unzipFolder(new File(importFile), dirToZip.getParentFile());
+					SmartUtils.deleteDirectory(dirToZip);
+					ZipUtil.unzipFolder(iFile, dirToZip.getParent());
 					activeShell.getDisplay().syncExec(new Runnable(){
 						@Override
 						public void run() {
@@ -98,7 +101,7 @@ public class ImportLibraryHandler {
 						}});
 					
 					//fire library change event
-					SessionHandleAdapter.getInstance().getSessionHandle().fireResourceChange(new LibraryChangeEvent(SmartBirtLibrary.getInstance().getLibraryFile().getAbsolutePath()));
+					SessionHandleAdapter.getInstance().getSessionHandle().fireResourceChange(new LibraryChangeEvent(SmartBirtLibrary.getInstance().getLibraryFile().toAbsolutePath().toString()));
 
 					//refresh shared resources programatically; this does not refresh editors
 					

@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.query.ui.importexport;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.List;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -100,7 +100,7 @@ public class ImportQueryUtil {
 	 * provided ConservationArea and the associated query folder.
 	 * 
 	 */
-	public static List<Query> importQuery(File file, QueryFolder qf, ConservationArea ca, Shell shell) throws Exception{
+	public static List<Query> importQuery(Path file, QueryFolder qf, ConservationArea ca, Shell shell) throws Exception{
 		QueryImportEngine importer = new QueryImportEngine();
 		List<Query> queries = importer.importQuery(file, ca);
 		

@@ -21,8 +21,10 @@
  */
 package org.wcs.smart.incident.ui;
 
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.UUID;
@@ -69,11 +71,11 @@ public class ExportIncidentHandler {
 		
 		final List<UUID> incidents = dialog.getObjectUuids();	
 		final boolean includeAtt = dialog.getIncludeAttachments();
-		final File dir = new File(dialog.getDirectory());
+		final Path dir = Paths.get(dialog.getDirectory());
 		if (incidents.size() == 0){
 			return;
 		}
-		if (!dir.exists() || !dir.isDirectory()){
+		if (!Files.exists(dir) || !Files.isDirectory(dir)){
 			return;
 		}
 		
@@ -108,7 +110,7 @@ public class ExportIncidentHandler {
 
 							monitor.subTask(MessageFormat.format(Messages.ExportIncidentHandler_ExportingIncidentProgress,new Object[]{ String.valueOf(id) }));
 
-							File outFile = IncidentExporter.getOutputFile(dir, String.valueOf(wp.getId()), includeAtt);
+							Path outFile = IncidentExporter.getOutputFile(dir, String.valueOf(wp.getId()), includeAtt);
 							IncidentExporter.exportIncident(wp, outFile, includeAtt, new NullProgressMonitor());
 							exportCnt++;
 						} catch (Exception ex) {

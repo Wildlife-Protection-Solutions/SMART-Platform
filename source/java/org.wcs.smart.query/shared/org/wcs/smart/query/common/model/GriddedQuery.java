@@ -23,6 +23,9 @@ package org.wcs.smart.query.common.model;
 
 import java.awt.Point;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -263,9 +266,13 @@ public abstract class GriddedQuery extends StyledQuery {
 	@Transient
 	public File getRasterFileName() {
 		// ensure query dir exists
-		File dir = SmartContext.INSTANCE.getTempFilestoreLocation();
-		if (!dir.exists()) {
-			dir.mkdir();
+		Path dir = SmartContext.INSTANCE.getTempFilestoreLocation();
+		if (!Files.exists(dir)) {
+			try {
+				Files.createDirectories(dir);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 
 		// create raster file name
@@ -279,7 +286,7 @@ public abstract class GriddedQuery extends StyledQuery {
 		}
 
 		StringBuilder pathBuilder = new StringBuilder(50);
-		pathBuilder.append(dir.getAbsolutePath()).append(File.separator)
+		pathBuilder.append(dir.toAbsolutePath()).append(File.separator)
 				.append(fName).append(".tiff"); //$NON-NLS-1$
 
 		File lastRasterFile = new File(pathBuilder.toString());

@@ -74,7 +74,7 @@ public class MissionProcessor implements IItemProcessor {
 		}
 		
 		//fire events
-		Mission mission = MissionImporter.importMission(file.toFile(), !ErDataQueueProcessorOption.ER_GENERATE_IDS.getValueAsBoolean(keepIdoption), monitor);
+		Mission mission = MissionImporter.importMission(file, !ErDataQueueProcessorOption.ER_GENERATE_IDS.getValueAsBoolean(keepIdoption), monitor);
 		if (mission != null){
 			try{
 				SurveyEventHandler.getInstance().fireEvent(SurveyEventHandler.EventType.MISSION_ADDED, mission);

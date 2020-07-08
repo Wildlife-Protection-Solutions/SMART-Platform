@@ -21,8 +21,10 @@
  */
 package org.wcs.smart.incident.ui;
 
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.Collections;
@@ -69,8 +71,8 @@ public class ImportIncidentHandler {
 		List<String> files = dialog.getFileNames();
 		
 		if (files.size() == 1){
-			File file = new File(files.get(0));
-			if (!file.exists()) {
+			Path file = Paths.get(files.get(0));
+			if (!Files.exists(file)) {
 				MessageDialog.openError(activeShell,
 						Messages.ImportIncidentHandler_ErrorDialog, MessageFormat.format(Messages.ImportIncidentHandler_LocationNotFoundError,  new Object[]{file.toString()}));
 				return;
@@ -107,11 +109,11 @@ public class ImportIncidentHandler {
 					IProgressMonitor nullPm = new NullProgressMonitor();
 						
 					for (int i = 0; i < files.size(); i ++){
-						File file = new File(files.get(i));
+						Path file = Paths.get(files.get(i));
 						monitor.subTask(MessageFormat.format(Messages.ImportIncidentHandler_ProcessingProgress, new Object[]{file.toString()}));
 					
 						monitor.worked(1);
-						if (file.isDirectory()) continue;
+						if (Files.isDirectory(file)) continue;
 						try{
 							Waypoint wp = IncidentImporter.importIncident(file, nullPm);
 							if (wp != null) {

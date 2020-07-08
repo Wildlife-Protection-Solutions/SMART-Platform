@@ -1,6 +1,6 @@
 package org.wcs.smart.ca.export;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.UUID;
 
 import org.hibernate.Session;
@@ -16,7 +16,7 @@ public interface ICaDataImportEngine {
 	 * @return the location of the unzipped
 	 * import file
 	 */
-	public File getImportDataDirectory();
+	public Path getImportDataDirectory();
 		
 	
 	/**

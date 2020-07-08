@@ -26,6 +26,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -118,7 +119,7 @@ public class IconComposite extends Composite {
 			image.setImage(null);
 		}
 		try{
-			BufferedImage img = ImageIO.read(new File(filename));
+			BufferedImage img = ImageIO.read(Paths.get(filename).normalize().toAbsolutePath().toFile());
 			
 			if (img.getWidth() !=  16 || img.getHeight() != 16){
 				Image tmp = img.getScaledInstance(16, 16, java.awt.Image.SCALE_SMOOTH);

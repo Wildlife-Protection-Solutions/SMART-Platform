@@ -110,7 +110,7 @@ public class CybertrackerItemProcessor implements IItemProcessor, IRunnableWithP
 		final CloseMsgDialog[] id = {null};
 		
 		if (item.getType().toUpperCase(Locale.ROOT).equals(CT_ZIP_TYPE)){
-			json = ZLibUtil.decompressFile(litem.getFullFilePath().toFile());
+			json = ZLibUtil.decompressFile(litem.getFullFilePath());
 		}else if (item.getType().toUpperCase(Locale.ROOT).equals(CT_TYPE)){
 			try(Reader in = Files.newBufferedReader(litem.getFullFilePath(), StandardCharsets.UTF_8)){
 				json = IOUtils.toString(in);

@@ -336,12 +336,12 @@ public class SmartConnect {
 	 * @param caUuid
 	 * @return the upload url for the new conservation area
 	 */
-	public String getCaUploadUrl(UUID caUuid, UUID version, File f) throws WebApplicationException{
+	public String getCaUploadUrl(UUID caUuid, UUID version, Path f) throws WebApplicationException{
 		createClient();
 		
 		ResteasyWebTarget target = client.target(server.getServerUrl() + API_URL);
 		ConnectClient simple = target.proxy(ConnectClient.class);
-		try(Response r = simple.getDataUploadUrl(f.length(), caUuid.toString(), version.toString())){
+		try(Response r = simple.getDataUploadUrl(f.toAbsolutePath().toFile().length(), caUuid.toString(), version.toString())){
 			if (r.getStatus() == HttpStatus.SC_OK){
 				return r.getHeaderString(HttpHeaders.LOCATION);
 			}else{

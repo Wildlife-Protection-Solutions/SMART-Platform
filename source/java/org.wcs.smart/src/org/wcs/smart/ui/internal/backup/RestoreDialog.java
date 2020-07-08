@@ -22,6 +22,9 @@
 package org.wcs.smart.ui.internal.backup;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -49,7 +52,7 @@ import org.wcs.smart.ui.SmartStyledTitleDialog;
 public class RestoreDialog extends SmartStyledTitleDialog {
 
 	private Text txtRestorefile;
-	private File selectedFile;
+	private Path selectedFile;
 	
 	private String title;
 	private String message;
@@ -72,7 +75,7 @@ public class RestoreDialog extends SmartStyledTitleDialog {
 	/**
 	 * @return the restore file selected by the user
 	 */
-	public File getSelectedFile(){
+	public Path getSelectedFile(){
 		return this.selectedFile;
 	}
 	
@@ -154,9 +157,9 @@ public class RestoreDialog extends SmartStyledTitleDialog {
 	@Override
 	protected void buttonPressed(int buttonId) {
 		if (IDialogConstants.OK_ID == buttonId) {
-			File file = new File(txtRestorefile.getText());
-			if (!file.exists()){
-				MessageDialog.openError(getShell(), Messages.RestoreDialog_Error_DialogTitle, Messages.RestoreDialog_FileError_DialogMessage + file.getAbsolutePath() );
+			Path file = Paths.get(txtRestorefile.getText());
+			if (!Files.exists(file)){
+				MessageDialog.openError(getShell(), Messages.RestoreDialog_Error_DialogTitle, Messages.RestoreDialog_FileError_DialogMessage + file.toAbsolutePath() );
 				return;
 			}
 			selectedFile = file;

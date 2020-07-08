@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.patrol.query.exportimport;
 
-import java.io.File;
 import java.math.BigDecimal;
+import java.nio.file.Path;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -37,6 +37,10 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.MultiLineString;
 import org.wcs.smart.gpx.xml.GpxType;
 import org.wcs.smart.gpx.xml.ObjectFactory;
 import org.wcs.smart.gpx.xml.TrkType;
@@ -57,11 +61,6 @@ import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.importexport.IQueryExporter;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
-
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.LineString;
-import org.locationtech.jts.geom.MultiLineString;
 
 /**
  * GPX Query exporter for patrols.
@@ -105,7 +104,7 @@ public class PatrolGpxQueryExporter extends SimpleQueryExporter implements IQuer
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void export(Query query, IQueryResult result, File file, HashMap<String, Object> parameters, IProgressMonitor monitor) throws Exception {
+	public void export(Query query, IQueryResult result, Path file, HashMap<String, Object> parameters, IProgressMonitor monitor) throws Exception {
 		List<QueryColumn> columns = (((SimpleQuery)query).computeQueryColumns(Locale.getDefault(), null, null));
 		
 		//set data
@@ -141,7 +140,7 @@ public class PatrolGpxQueryExporter extends SimpleQueryExporter implements IQuer
 		JAXBContext context = JAXBContext.newInstance(GpxType.class);
 		Marshaller marshaller = context.createMarshaller();
 		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-		marshaller.marshal(gpxFactory.createGpx(gpx), outputFile);
+		marshaller.marshal(gpxFactory.createGpx(gpx), outputFile.toAbsolutePath().toFile());
 	}
 
 	private void recordTrack(PatrolQueryResultItem item) throws DatatypeConfigurationException {

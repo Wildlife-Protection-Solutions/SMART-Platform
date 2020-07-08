@@ -21,9 +21,10 @@
  */
 package org.wcs.smart.report.internal.ui;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -70,9 +71,9 @@ public class ExportLibraryHandler {
 			@Override
 			public void run(IProgressMonitor monitor) throws InvocationTargetException,
 					InterruptedException {
-				File dirToZip = SmartBirtLibrary.getInstance().getLibraryLocation();
+				Path dirToZip = SmartBirtLibrary.getInstance().getLibraryLocation();
 				try {
-					ZipUtil.createZip(new File[]{dirToZip}, new File(exportFile), new NullProgressMonitor());
+					ZipUtil.createZip(new Path[]{dirToZip}, Paths.get(exportFile), new NullProgressMonitor());
 					activeShell.getDisplay().syncExec(new Runnable(){
 						@Override
 						public void run() {

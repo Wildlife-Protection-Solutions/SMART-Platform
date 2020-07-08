@@ -21,13 +21,12 @@
  */
 package org.wcs.smart.connect.internal.server;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
@@ -56,9 +55,9 @@ public class ConnectCaExporter extends CaExporter{
 	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility to call done() on the given monitor
 	 */
 	@Override
-	public void export(File destFile, HashMap<String, String> options, IProgressMonitor monitor) throws Exception{
+	public void export(Path destFile, HashMap<String, String> options, IProgressMonitor monitor) throws Exception{
 		SubMonitor progress = SubMonitor.convert(monitor, "", 3); //$NON-NLS-1$
-		File tempDir = SmartUtils.createTemporaryDirectory();
+		Path tempDir = SmartUtils.createTemporaryDirectory();
 		try{
 			exportToTempDirectory(tempDir, options, progress.split(2));
 			
@@ -69,14 +68,14 @@ public class ConnectCaExporter extends CaExporter{
 			zipTempDirectory(tempDir, destFile, progress.split(1));
 		}finally{
 			try{
-				FileUtils.deleteDirectory(tempDir);
+				SmartUtils.deleteDirectory(tempDir);
 			}catch(Exception ex){
-				SmartPlugIn.log("Error deleting temporary continaing ca backup." + tempDir.getAbsolutePath(), ex); //$NON-NLS-1$
+				SmartPlugIn.log("Error deleting temporary continaing ca backup." + tempDir.toAbsolutePath().toString(), ex); //$NON-NLS-1$
 			}
 		}
 	}
 	
-	protected void preprocess(File tempDir){
+	protected void preprocess(Path tempDir){
 		for (ICaExportPreprocessor processor: getExportProcessors()){
 			processor.processExport(tempDir);
 		}

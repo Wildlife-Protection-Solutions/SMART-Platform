@@ -21,10 +21,11 @@
  */
 package org.wcs.smart.ui.internal.ca.properties;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -97,7 +98,7 @@ public class ImportAttributeProcessor {
 						MessageFormat.format(Messages.ImportAttributeProcessor_NoAttributeFileMessage, new Object[]{attribute.getName() }));
 				
 				//read the selected file
-				File f = promptForFile();
+				Path f = promptForFile();
 				if (f == null){
 					return;
 				}
@@ -199,7 +200,7 @@ public class ImportAttributeProcessor {
 	 * Prompts the user for a data model file.
 	 * @return
 	 */
-	public File promptForFile(){
+	public Path promptForFile(){
 		
 		FileDialog fileDialog = new FileDialog(Display.getDefault().getActiveShell());
 		fileDialog.setFilterExtensions(new String[]{"*.xml", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
@@ -208,8 +209,8 @@ public class ImportAttributeProcessor {
 		if (selectedFile == null){
 			return null;
 		}
-		File f = new File(selectedFile);
-		if (!f.exists()){
+		Path f = Paths.get(selectedFile);
+		if (!Files.exists(f)){
 			SmartPlugIn.displayLog(Messages.ImportAttributeProcessor_FileNotFoundError, new Exception("File: " + f.toString() + " does not exist."));  //$NON-NLS-1$//$NON-NLS-2$
 			return null;
 		}
@@ -334,9 +335,10 @@ public class ImportAttributeProcessor {
 	 * @param f the file to read
 	 * @throws Exception
 	 */
-	public void readDataModel(File f) throws Exception{
-		FileInputStream in = new FileInputStream(f);
-		importAttributeDataModel(in);
+	public void readDataModel(Path f) throws Exception{
+		try(InputStream is = Files.newInputStream(f)){	
+			importAttributeDataModel(is);
+		}
 		
 	}
 	
@@ -359,11 +361,8 @@ public class ImportAttributeProcessor {
 		matchedAttribute = null;
 		defaultLangCode = null;
 		
-		try{
-			xmlDataModel = XmlSmartDataModelManager.readDataModel(in, Locale.getDefault());
-		}finally{
-			in.close();
-		}
+		xmlDataModel = XmlSmartDataModelManager.readDataModel(in, Locale.getDefault());
+		
 		if (xmlDataModel == null){
 			throw new Exception("Data model is null."); //$NON-NLS-1$
 		}

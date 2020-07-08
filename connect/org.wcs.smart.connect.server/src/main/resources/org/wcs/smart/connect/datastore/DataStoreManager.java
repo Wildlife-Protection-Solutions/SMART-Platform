@@ -21,8 +21,10 @@
  */
 package org.wcs.smart.connect.datastore;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.UUID;
 
 import javax.naming.NamingException;
@@ -60,11 +62,13 @@ public enum DataStoreManager {
 	 * and removed after finished.
 	 * 
 	 * @return the temporary working directory in the filestore.
+	 * @throws IOException 
 	 */
-	public File getTemporaryDirectory(){
-		File f = new File(getRootDirectory(), "temp"); //$NON-NLS-1$
-		if(!f.exists()){
-			f.mkdir();
+	public Path getTemporaryDirectory() throws IOException{
+		Path f = getRootDirectory().resolve("temp"); //$NON-NLS-1$
+		if(!Files.exists(f)){ 
+			Files.createDirectories(f);
+
 		}
 		return f;
 	}
@@ -78,10 +82,12 @@ public enum DataStoreManager {
 	public void deleteDirectory(ConservationAreaInfo info) throws IOException{
 		deleteDirectory(info.getUuid());
 	}
+	
 	public void deleteDirectory(UUID caUuid) throws IOException{
-		File f = new File(getRootDirectory() + File.separator + UuidUtils.uuidToString(caUuid));
-		FileUtils.deleteDirectory(f);
+		Path f = getRootDirectory().resolve(UuidUtils.uuidToString(caUuid));
+		FileUtils.deleteDirectory(f.toAbsolutePath().normalize().toFile());
 	}
+	
 	/**
 	 * Return the folder name of the conservation area data folder in the filestore. 
 	 * 
@@ -101,8 +107,8 @@ public enum DataStoreManager {
 	 * @return
 	 */
 	public String generateFileName(String requestedName){
-		File f = new File(getRootDirectory(), requestedName);
-		if (!f.exists()){
+		Path f = getRootDirectory().resolve(requestedName);
+		if (!Files.exists(f)){
 			return requestedName;
 		}
 		
@@ -117,9 +123,9 @@ public enum DataStoreManager {
 			ext = requestedName.substring(index+1);
 		}
 		int cnt = 0;
-		while(f.exists()){
+		while(Files.exists(f)){
 			cnt++;
-			f = new File(datastoreLocation, name + "." + cnt + "." + ext); //$NON-NLS-1$ //$NON-NLS-2$
+			f = Paths.get(datastoreLocation, name + "." + cnt + "." + ext); //$NON-NLS-1$ //$NON-NLS-2$
 			
 		}
 		return name + "." + cnt + "." + ext; //$NON-NLS-1$ //$NON-NLS-2$
@@ -133,16 +139,16 @@ public enum DataStoreManager {
 	 * @param fileName
 	 * @return
 	 */
-	public File getFile(String fileName){
-		return new File(datastoreLocation, fileName);
+	public Path getFile(String fileName){
+		return Paths.get(datastoreLocation, fileName);
 	}
 	
 	/**
 	 * 
 	 * @return the root filestore location
 	 */
-	public File getRootDirectory(){
-		return new File(datastoreLocation);		
+	public Path getRootDirectory(){
+		return Paths.get(datastoreLocation);		
 	}
 	
 	/**
@@ -150,8 +156,7 @@ public enum DataStoreManager {
 	 * @param info
 	 * @return
 	 */
-	public File getConservationAreaFullPath(ConservationAreaInfo info){
-		File f = new File(getRootDirectory() + File.separator + getConservationAreaFolder(info));
-		return f;
+	public Path getConservationAreaFullPath(ConservationAreaInfo info){
+		return getRootDirectory().resolve(getConservationAreaFolder(info));
 	}
 }

@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.er.query.export.distance;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -145,7 +144,7 @@ public class DistanceQueryExporter implements ICsvQueryExporter {
 	}
 	
 	@Override
-	public void export(Query query, IQueryResult results, File file, HashMap<String, Object> parameters,
+	public void export(Query query, IQueryResult results, Path file, HashMap<String, Object> parameters,
 			IProgressMonitor monitor) throws Exception {
 		
 		try {
@@ -164,7 +163,7 @@ public class DistanceQueryExporter implements ICsvQueryExporter {
 		}
 	}
 	
-	private void exportInternal(Query query, IQueryResult results, File file, HashMap<String, Object> parameters,
+	private void exportInternal(Query query, IQueryResult results, Path file, HashMap<String, Object> parameters,
 			IProgressMonitor monitor) throws Exception {
 		SurveyObservationQuery suquery = (SurveyObservationQuery)query;
 		SurveyDesign sd = null;
@@ -389,7 +388,7 @@ public class DistanceQueryExporter implements ICsvQueryExporter {
 			}
 		}
 		
-		init(file.toPath(), columns);
+		init(file, columns);
 		
 		//export results to file
 		IQueryResultSetIterator<IResultItem> it = qresults.iterator(IPagedQueryResultSet.MAP_PAGE_SIZE);

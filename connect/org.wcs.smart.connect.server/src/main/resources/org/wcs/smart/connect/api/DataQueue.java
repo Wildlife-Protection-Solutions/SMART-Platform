@@ -57,7 +57,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.Session;
 import org.wcs.smart.connect.SmartUtils;
@@ -315,10 +314,12 @@ public class DataQueue {
 			
 			validateDelete(item.getConservationArea(), s);
 			if (item.getFile() != null){
-				File toDelete = DataStoreManager.INSTANCE.getFile(item.getFile());
-				if (toDelete.exists()){
-					if (!toDelete.delete()){
-						logger.log(Level.WARNING, "Could not delete data queue file: " + toDelete.toString()); //$NON-NLS-1$
+				java.nio.file.Path toDelete = DataStoreManager.INSTANCE.getFile(item.getFile());
+				if (Files.exists(toDelete)){
+					try {
+						Files.delete(toDelete);
+					}catch (Exception ex) {
+						logger.log(Level.WARNING, "Could not delete data queue file: " + toDelete.toString(), ex); //$NON-NLS-1$
 					}
 				}else{
 					logger.log(Level.WARNING, "Data queue file does not exist to delete: " + toDelete.toString()); //$NON-NLS-1$
@@ -424,9 +425,9 @@ public class DataQueue {
 			up.setLocalFilename(""); //$NON-NLS-1$
 			s.save(up);
 			
-			File updir = DataStoreManager.INSTANCE.getFile(FILE_STORE_LOCATION);
-			if (!updir.exists()){
-				FileUtils.forceMkdir(updir);
+			java.nio.file.Path updir = DataStoreManager.INSTANCE.getFile(FILE_STORE_LOCATION);
+			if (!Files.exists(updir)){
+				Files.createDirectories(updir);
 			}
 
 			up.setLocalFilename(DataStoreManager.INSTANCE.generateFileName(FILE_STORE_LOCATION 
@@ -632,14 +633,20 @@ public class DataQueue {
 			throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("DataQueue.DqFileNotFound", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 		}
 		
-		final File toReturn = DataStoreManager.INSTANCE.getFile(item.getFile());
-		if (!toReturn.exists()){
+		final java.nio.file.Path toReturn = DataStoreManager.INSTANCE.getFile(item.getFile());
+		if (!Files.exists(toReturn)){
 			throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("DataQueue.DqFileNotFound", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 		}
 		
+		long fileSize = -1;
+		try {
+			fileSize = Files.size(toReturn);
+		}catch (IOException ex) {
+			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, ex.getMessage(),ex);
+		}
 		String range = request.getHeader("Range"); //$NON-NLS-1$
 		long start = 0;
-		long end = toReturn.length()-1;
+		long end = fileSize-1;
 		boolean hasRange = false;
 		if (range != null && range.length() > 0){
 			hasRange = true;
@@ -658,7 +665,7 @@ public class DataQueue {
 					end = Long.parseLong(p2);
 				}
 				
-				if (end > toReturn.length()-1){
+				if (end > Files.size(toReturn)-1){
 					throw new SmartConnectException(Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE, Messages.getString("DataQueue.InvalidRange", SmartUtils.getRequestLocale(request)));	 //$NON-NLS-1$
 				}
 				if (start > end){
@@ -674,7 +681,7 @@ public class DataQueue {
 				@Override
 				public void write(OutputStream output) throws IOException {
 					try {
-						Files.copy(toReturn.toPath(), output);
+						Files.copy(toReturn, output);
 					} catch (Exception e) {
 						logger.log(Level.SEVERE, "Error writing to output stream." + e.getMessage(), e); //$NON-NLS-1$
 					}
@@ -682,8 +689,8 @@ public class DataQueue {
 		    };
 			    
 			return Response.ok(stream, MediaType.APPLICATION_OCTET_STREAM)
-					.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + toReturn.getName() + "\"") //$NON-NLS-1$ //$NON-NLS-2$
-					.header(HttpHeaders.CONTENT_LENGTH, toReturn.length())
+					.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + toReturn.getFileName().toString() + "\"") //$NON-NLS-1$ //$NON-NLS-2$
+					.header(HttpHeaders.CONTENT_LENGTH, fileSize)
 					.header("Accept-Ranges", "bytes") //$NON-NLS-1$ //$NON-NLS-2$
 					.build();
 		}else{
@@ -692,7 +699,7 @@ public class DataQueue {
 			StreamingOutput stream = new StreamingOutput() {
 				@Override
 				public void write(OutputStream output) throws IOException {
-					try (InputStream in = Files.newInputStream(toReturn.toPath())){
+					try (InputStream in = Files.newInputStream(toReturn)){
 						IOUtils.copyLarge(in, output, startat, endat - startat + 1);
 					}
 				}
@@ -701,10 +708,10 @@ public class DataQueue {
 			return Response.status(Response.Status.PARTIAL_CONTENT)
 					.entity(stream)
 					.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM)
-					.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + toReturn.getName() + "\"") //$NON-NLS-1$ //$NON-NLS-2$
+					.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + toReturn.getFileName().toString() + "\"") //$NON-NLS-1$ //$NON-NLS-2$
 					.header(HttpHeaders.CONTENT_LENGTH, end - start + 1)
 					.header("Accept-Ranges", "bytes") //$NON-NLS-1$ //$NON-NLS-2$
-					.header("Content-Range", "bytes " + start + "-" + end + "/" + toReturn.length()) //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+					.header("Content-Range", "bytes " + start + "-" + end + "/" + fileSize) //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 					.build();
 		}
 	}

@@ -57,7 +57,7 @@ public class OpenAttachmentViewHandler {
 		Image rawImage = null;
 		if (attachment.getUuid() == null) {
 			//not yet saved and encrypted
-			rawImage = new Image(Display.getDefault(), attachment.getCopyFromLocation().toPath().toString());
+			rawImage = new Image(Display.getDefault(), attachment.getCopyFromLocation().toAbsolutePath().toString());
 		}else {
 			try{
 				Path p = EncryptUtils.decryptAttachment(attachment);

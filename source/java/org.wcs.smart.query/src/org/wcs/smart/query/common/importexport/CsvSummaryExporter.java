@@ -21,11 +21,11 @@
  */
 package org.wcs.smart.query.common.importexport;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -80,7 +80,7 @@ public class CsvSummaryExporter implements ICsvQueryExporter {
 	 * @see org.wcs.smart.query.export.IQueryExporter#export(org.wcs.smart.query.model.Query, java.io.File, org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	@Override
-	public void export(Query query, IQueryResult result, File file,
+	public void export(Query query, IQueryResult result, Path file,
 			HashMap<String, Object> parameters, IProgressMonitor monitor)
 			throws Exception {
 		SummaryQueryResult results = (SummaryQueryResult) result;
@@ -100,7 +100,7 @@ public class CsvSummaryExporter implements ICsvQueryExporter {
 		}
 		//column headers
 		try(CSVWriter writer = new CSVWriter(
-				new OutputStreamWriter(new FileOutputStream(file), cs),
+				new OutputStreamWriter(Files.newOutputStream(file), cs),
 				delimiter, '"',SharedUtils.LINE_SEPARATOR)){ 
 		
 			for (int i = 0; i < results.getColumnHeaderValues().length; i ++){

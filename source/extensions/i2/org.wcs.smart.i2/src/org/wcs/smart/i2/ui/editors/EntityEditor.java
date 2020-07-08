@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.ui.editors;
 
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.MessageFormat;
@@ -1813,7 +1814,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 					for (String file : dialog.getFileNames()){
 						IntelAttachment ia = new IntelAttachment();
 						ia.setConservationArea(SmartDB.getCurrentConservationArea());
-						ia.setCopyFromLocation(Paths.get(dialog.getFilterPath()).resolve(file).toFile());
+						ia.setCopyFromLocation(Paths.get(dialog.getFilterPath()).resolve(file));
 						ia.setCreatedBy(SmartDB.getCurrentEmployee());
 						ia.setDateCreated(new Date());
 						ia.setFilename(Paths.get(dialog.getFilterPath()).resolve(file).getFileName().toString());
@@ -2028,7 +2029,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		for (Listener l : ls) txtScratchpad.addListener(SWT.Modify, l);
 		
 		if (entity.getPrimaryAttachment() != null){
-			if (entity.getPrimaryAttachment().getAttachmentFile().exists()){
+			if (Files.exists(entity.getPrimaryAttachment().getAttachmentFile())){
 				Thumbnail thum = new Thumbnail(entity.getPrimaryAttachment(), THUMB_SIZE);
 				imgMain = thum.getImage();
 				lblMainImage.redraw();

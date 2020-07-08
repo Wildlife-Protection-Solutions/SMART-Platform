@@ -21,8 +21,9 @@
  */
 package org.wcs.smart.dataentry.model.xml;
 
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -101,7 +102,7 @@ public class CmXmlToSmartImporter {
 	private Map<String, AttributeListItem> listItemLookup;
 	private Map<String, AttributeTreeNode> treeNodeLookup;
 	private Map<String, CmAttributeConfig> configLookup;
-	private Map<String, File> fileLookup;
+	private Map<String, Path> fileLookup;
 
 	private Map<String, Integer> compatibilityConfigIndexes;
 
@@ -115,22 +116,23 @@ public class CmXmlToSmartImporter {
 	 * @return null if error or monitor cancelled
 	 * @throws Exception
 	 */
-	public ConfigurableModel importZip(File zipFile, IProgressMonitor monitor) throws Exception {
-		File tempFolder = null;
+	public ConfigurableModel importZip(Path zipFile, IProgressMonitor monitor) throws Exception {
+		Path tempFolder = null;
 		try {
 			monitor.beginTask(Messages.CmXmlToSmartImporter_ExtractingZip, 1);
 			tempFolder = SmartFileUtils.createTempDirectory("smart_cm_import"); //$NON-NLS-1$
 			ZipUtil.unzipFolder(zipFile, tempFolder);
-			File xmlFile = null;
-			fileLookup = new HashMap<String, File>();
-			for (File file : tempFolder.listFiles()) {
-				fileLookup.put(file.getName(), file);
-				if (file.getName().endsWith(".xml")) { //$NON-NLS-1$
-					xmlFile = file;
+			Path[] xmlFile = {null};
+			fileLookup = new HashMap<>();
+			
+			Files.list(tempFolder).forEach(file->{
+				fileLookup.put(file.getFileName().toString(), file);
+				if (file.getFileName().toString().endsWith(".xml")) { //$NON-NLS-1$
+					xmlFile[0] = file;
 				}
-			}
-			if (xmlFile != null) {
-				return importXml(xmlFile, monitor);
+			});
+			if (xmlFile[0] != null) {
+				return importXml(xmlFile[0], monitor);
 			}
 		} finally  {
 			fileLookup = null;
@@ -146,11 +148,11 @@ public class CmXmlToSmartImporter {
 	 * @return null if error or monitor cancelled
 	 * @throws Exception
 	 */
-	public ConfigurableModel importXml(File xmlFile, IProgressMonitor monitor) throws Exception {
+	public ConfigurableModel importXml(Path xmlFile, IProgressMonitor monitor) throws Exception {
 		monitor.beginTask(Messages.CmXmlToSmartImporter_ImportingFromXml, 3);
 		org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xmlCm = null;
 		
-		try (FileInputStream in = new FileInputStream(xmlFile)){
+		try (InputStream in = Files.newInputStream(xmlFile)){
 			monitor.subTask(Messages.CmXmlToSmartImporter_Reading);
 			xmlCm = CmXmlManager.readDataModel(in);
 			monitor.worked(1);
@@ -591,8 +593,8 @@ public class CmXmlToSmartImporter {
 				CmAttribute temp = new CmAttribute();
 				temp.setUuid(UuidUtils.stringToUuid( xmlAttr.getId()) );
 				String helpFileName = temp.getHelpImageFileRootName() + "." + cmAttr.getHelpFormat(); //$NON-NLS-1$
-				File f = fileLookup.get(helpFileName);
-				if (f != null && f.exists()) cmAttr.setImportHelpFile(f.toPath());
+				Path f = fileLookup.get(helpFileName);
+				if (f != null && Files.exists(f)) cmAttr.setImportHelpFile(f);
 			}
 			if ( (xmlAttr.isIsCustomImage() == null || xmlAttr.isIsCustomImage() == Boolean.TRUE) && xmlAttr.getImageFile() != null) {
 				cmAttr.setImageFile(findFile(xmlAttr.getImageFile()));
@@ -848,7 +850,7 @@ public class CmXmlToSmartImporter {
 		return a;
 	}
 
-	private File findFile(String name) {
+	private Path findFile(String name) {
 		if (name == null) {
 			return null;
 		}

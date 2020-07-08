@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.er.ui.surveydesign.importing;
 
-import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -55,14 +56,14 @@ public class ImportSurveyDesignFilesPage extends WizardPage {
 
 	public static final String PAGENAME = "Files"; //$NON-NLS-1$
 	
-	private List<File> files = null;
+	private List<Path> files = null;
 	
 	/**
 	 * Creates a new query wizard page.
 	 */
 	protected ImportSurveyDesignFilesPage() {
 		super(PAGENAME);
-		files = new ArrayList<File>();
+		files = new ArrayList<>();
 	}
 
 	/**
@@ -82,8 +83,8 @@ public class ImportSurveyDesignFilesPage extends WizardPage {
 		lstFiles.setLabelProvider(new LabelProvider(){
 			@Override
 			public String getText(Object element){
-				if (element instanceof File){
-					return ((File) element).getAbsolutePath();
+				if (element instanceof Path){
+					return ((Path) element).toAbsolutePath().toString();
 				}
 				return super.getText(element);
 			}
@@ -118,7 +119,7 @@ public class ImportSurveyDesignFilesPage extends WizardPage {
 				
 				if (f != null) {
 					for (String f2 : fd.getFileNames()){
-						File newF = new File(fd.getFilterPath(), f2);
+						Path newF = Paths.get(fd.getFilterPath()).resolve(f2);
 						if (!files.contains(newF)){
 							files.add(newF);
 							lstFiles.refresh();	
@@ -140,7 +141,7 @@ public class ImportSurveyDesignFilesPage extends WizardPage {
 				IStructuredSelection sel = (IStructuredSelection) lstFiles.getSelection();
 				for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
 					Object file = (Object) iterator.next();
-					if (file instanceof File){
+					if (file instanceof Path){
 						files.remove(file);
 					}
 				}
@@ -158,7 +159,7 @@ public class ImportSurveyDesignFilesPage extends WizardPage {
 	/**
 	 * @return the selected file
 	 */
-	public List<File> getFiles() {
+	public List<Path> getFiles() {
 		return files;
 	}
 	

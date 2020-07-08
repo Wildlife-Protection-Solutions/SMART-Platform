@@ -21,9 +21,9 @@
  */
 package org.wcs.smart.patrol.xml.model.v13;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.Time;
 import java.text.DateFormat;
 import java.text.MessageFormat;
@@ -95,7 +95,7 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 	private Patrol patrol;
 	private List<String> warnings = new ArrayList<String>();
 	
-	private File attachmentLocation = null;
+	private Path attachmentLocation = null;
 	private PatrolType xml = null;
 	
 	public XmlToPatrolConverter(){
@@ -168,8 +168,8 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 	 * @param attachmentLocation
 	 * @throws Exception
 	 */
-	public void convertFile(File xmlFile, Session session, ConservationArea ca, File attachmentLocation) throws Exception {
-		try(InputStream is = new FileInputStream(xmlFile)){
+	public void convertFile(Path xmlFile, Session session, ConservationArea ca, Path attachmentLocation) throws Exception {
+		try(InputStream is = Files.newInputStream(xmlFile)){
 			xml = readDataModel(is);
 		}
 		if (xml == null) throw new Exception(Messages.XmlToPatrolConverter_ReadError);
@@ -396,10 +396,12 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 				wp.setAttachments(new ArrayList<WaypointAttachment>());
 				for ( String filename : xml.getAttachments()){
 					WaypointAttachment att = new WaypointAttachment();
-					File f = new File(attachmentLocation.getAbsoluteFile() + File.separator + PatrolXmlManager.ATTACHMENT_DIR_NAME + File.separator + filename );
-					if (!f.exists()){
+					Path f = attachmentLocation.resolve(PatrolXmlManager.ATTACHMENT_DIR_NAME)
+							.resolve(filename );
+					if (!Files.exists(f)){
 						warnings.add(MessageFormat.format(
-								Messages.XmlToPatrolConverter_Warning_AttachmentFileNotFound, new Object[]{ filename, f.getAbsolutePath()}));
+								Messages.XmlToPatrolConverter_Warning_AttachmentFileNotFound, 
+								new Object[]{ filename, f.toAbsolutePath().toString()}));
 								
 					}else{
 						att.setCopyFromLocation(f);
@@ -439,10 +441,11 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 				ob.setAttachments(new ArrayList<ObservationAttachment>());
 				for ( String filename : xml.getAttachments()){
 					ObservationAttachment att = new ObservationAttachment();
-					File f = new File(attachmentLocation.getAbsoluteFile() + File.separator + PatrolXmlManager.ATTACHMENT_DIR_NAME + File.separator + filename );
-					if (!f.exists()){
+					Path f = attachmentLocation.resolve(PatrolXmlManager.ATTACHMENT_DIR_NAME)
+							.resolve( filename );
+					if (!Files.exists(f)){
 						warnings.add(MessageFormat.format(
-								Messages.XmlToPatrolConverter_Warning_AttachmentFileNotFound, new Object[]{ filename, f.getAbsolutePath()}));
+								Messages.XmlToPatrolConverter_Warning_AttachmentFileNotFound, new Object[]{ filename, f.toAbsolutePath().toString()}));
 					}else{
 						att.setCopyFromLocation(f);
 						att.setFilename(filename);

@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.patrol.xml.in;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,15 +60,15 @@ public class ImportConfig {
 		return warnFiles;
 	}
 	
-	public void addWarnings(List<String> warnings, File f){
+	public void addWarnings(List<String> warnings, Path f){
 		if(warnings.size() > 0){
-			this.warnFiles.add(f.getAbsolutePath());
+			this.warnFiles.add(f.toAbsolutePath().toString());
 		}
 		this.warnings.addAll(warnings);
 	}
 
-	public void addWarning(String warning, File f) {
-		this.warnFiles.add(f.getAbsolutePath());
+	public void addWarning(String warning, Path f) {
+		this.warnFiles.add(f.toAbsolutePath().toString());
 		this.warnings.add(warning);
 	}
 }

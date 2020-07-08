@@ -21,8 +21,10 @@
  */
 package org.wcs.smart.entity.ui;
 
-import java.io.File;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.List;
 
@@ -86,13 +88,13 @@ public class ExportEntityDialog extends AbstractCsvDialog {
 			}else{
 				selectedPrj = null;
 			}
-			EntityPlugIn.getDefault().getDialogSettings().put(EXPORT_ENTITIES_DIRKEY, (new File(csvComposite.getFileText())).getParent()); 
+			EntityPlugIn.getDefault().getDialogSettings().put(EXPORT_ENTITIES_DIRKEY, (Paths.get(csvComposite.getFileText())).getParent().toString()); 
 		}
 		super.buttonPressed(buttonId);
 	}
 	
 	@Override
-	protected boolean performAction(File file, char delimiter, boolean headers, Charset cs,
+	protected boolean performAction(Path file, char delimiter, boolean headers, Charset cs,
 			IProgressMonitor monitor, Session session) throws Exception {
 		
 		config.setActiveOnly(activeOnly);
@@ -138,7 +140,7 @@ public class ExportEntityDialog extends AbstractCsvDialog {
 		if (file == null){
 			file = System.getProperty("user.home"); //$NON-NLS-1$
 		}
-		File init = new File(file, URLUtils.cleanFilename(config.getEntityType().getName()) + ".csv"); //$NON-NLS-1$
+		Path init = Paths.get(file).resolve(URLUtils.cleanFilename(config.getEntityType().getName()) + ".csv"); //$NON-NLS-1$
 		super.csvComposite.setFileText(init.toString());
 		
 		return comp;
@@ -151,17 +153,17 @@ public class ExportEntityDialog extends AbstractCsvDialog {
 	 */
 	@Override
 	protected boolean validateFilename(String fileName){
-		File f = new File(fileName);
-		if (f.getAbsoluteFile().exists()){
-			boolean ok = MessageDialog.openQuestion(getShell(), Messages.ExportEntityDialog_ExportDialogTitle, MessageFormat.format(Messages.ExportEntityDialog_FileExists, new Object[]{f.getAbsoluteFile().toString()}));
+		Path f = Paths.get(fileName);
+		if (Files.exists(f)){
+			boolean ok = MessageDialog.openQuestion(getShell(), Messages.ExportEntityDialog_ExportDialogTitle, MessageFormat.format(Messages.ExportEntityDialog_FileExists, new Object[]{f.toAbsolutePath().toString()}));
 			if (!ok){
 				return false;
 			}
 		}
-		if (!f.getAbsoluteFile().getParentFile().exists()){
+		if (!Files.exists(f.getParent())){
 			boolean ok = MessageDialog.openQuestion(getShell(), Messages.ExportEntityDialog_ExportDialogTitle, MessageFormat.format(Messages.ExportEntityDialog_DirectoryNotFound, new Object[]{f.getParent()}));
 			if (ok){
-				if (!SmartUtils.createDirectory(f.getParentFile())){
+				if (!SmartUtils.createDirectory(f.getParent())){
 					return false;
 				}
 			}else{

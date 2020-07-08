@@ -106,7 +106,7 @@ public class FileProxy extends ISmartAttachment{
 	 * @param ca the conservation area
 	 */
 	public FileProxy(Path file, ConservationArea ca) {
-		super.attachmentFile = file.toFile();
+		super.attachmentFile = file;
 		super.setFilename(file.getFileName().toString());
 		this.file = file;
 		this.ca = ca;

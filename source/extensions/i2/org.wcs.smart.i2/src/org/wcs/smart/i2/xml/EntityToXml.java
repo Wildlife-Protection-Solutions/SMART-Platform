@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.i2.xml;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -163,11 +162,7 @@ public class EntityToXml {
 			//zip together
 			progress.subTask(Messages.EntityToXml_compresssubtask);
 			List<Path> files = Files.list(tempDir).collect(Collectors.toList());
-			File[] toExport = new File[files.size()];
-			for (int i = 0; i < files.size(); i ++) {
-				toExport[i] = files.get(i).toFile();
-			}
-			ZipUtil.createZip(toExport, outputFile.toFile(), progress.split(1));
+			ZipUtil.createZip(files, outputFile, progress.split(1));
 		}finally {
 			//clean up
 			try {

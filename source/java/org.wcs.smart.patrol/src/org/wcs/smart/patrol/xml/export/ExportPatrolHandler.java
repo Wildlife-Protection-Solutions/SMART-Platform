@@ -21,8 +21,10 @@
  */
 package org.wcs.smart.patrol.xml.export;
 
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -102,11 +104,11 @@ public class ExportPatrolHandler {
 		
 		final List<UUID> patrols = dialog.getObjectUuids();	
 		final boolean includeAtt = dialog.getIncludeAttachments();
-		final File dir = new File(dialog.getDirectory());
+		final Path dir = Paths.get(dialog.getDirectory());
 		if (patrols.size() == 0){
 			return;
 		}
-		if (!dir.exists() || !dir.isDirectory()){
+		if (!Files.exists(dir) || !Files.isDirectory(dir)){
 			return;
 		}
 		
@@ -140,7 +142,7 @@ public class ExportPatrolHandler {
 
 							monitor.subTask(MessageFormat.format(Messages.ExportPatrolHandler_Progress_ExportingPatrol,new Object[]{ id }));
 
-							File outFile = PatrolExporter.getOutputFile(dir, p.getId(), includeAtt);
+							Path outFile = PatrolExporter.getOutputFile(dir, p.getId(), includeAtt);
 							PatrolExporter.exportPatrol(p, outFile, includeAtt, new NullProgressMonitor());
 							exportCnt++;
 						} catch (Exception ex) {

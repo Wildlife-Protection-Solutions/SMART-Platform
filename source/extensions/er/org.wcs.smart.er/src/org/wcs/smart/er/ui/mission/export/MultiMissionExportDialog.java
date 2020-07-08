@@ -23,7 +23,9 @@
 
 package org.wcs.smart.er.ui.mission.export;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -112,16 +114,16 @@ public class MultiMissionExportDialog extends XmlMultiExportTreeViewerDialog imp
 			return false;
 		}
 		
-		File dir = new File(txtFile.getText());
-		if (!dir.exists()) {
-			if (!MessageDialog.openQuestion(getShell(), EXPORT_DIALOGTITLE, MessageFormat.format(Messages.MultiMissionExportDialog_DirectoryDoesNotExist, new Object[]{dir.getAbsolutePath()}))) {
+		Path dir = Paths.get(txtFile.getText());
+		if (!Files.exists(dir)) {
+			if (!MessageDialog.openQuestion(getShell(), EXPORT_DIALOGTITLE, MessageFormat.format(Messages.MultiMissionExportDialog_DirectoryDoesNotExist, new Object[]{dir.toAbsolutePath().toString()}))) {
 				return false;
 			}
 			if (!SmartUtils.createDirectory(dir)){
 				EcologicalRecordsPlugIn.displayLog(Messages.MultiMissionExportDialog_CouldNotCreate, null);
 				return false;
 			}
-		}else if (!dir.isDirectory()){
+		}else if (!Files.isDirectory(dir)){
 			EcologicalRecordsPlugIn.displayLog(MessageFormat.format(Messages.MultiMissionExportDialog_InvalidDirectory, new Object[]{dir.toString()}),null);
 			return false;
 		}

@@ -124,7 +124,7 @@ public class AttachmentView {
 		try {
 			Path temp = EncryptUtils.decryptAttachment(att);
 			try {
-				exifTransform = SmartUtils.getExifImageTransform(temp.toFile(), rawImage.getBounds().width, rawImage.getBounds().height);
+				exifTransform = SmartUtils.getExifImageTransform(temp, rawImage.getBounds().width, rawImage.getBounds().height);
 			}finally {
 				if (temp != null) {
 					try {

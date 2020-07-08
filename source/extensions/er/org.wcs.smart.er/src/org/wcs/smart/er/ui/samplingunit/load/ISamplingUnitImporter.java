@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.er.ui.samplingunit.load;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -64,7 +64,7 @@ public abstract class ISamplingUnitImporter {
 	 * @return list of field names
 	 * @throws Exception
 	 */
-	public abstract String[] getFieldNames(File f, Map<String, Object> options) throws Exception;
+	public abstract String[] getFieldNames(Path f, Map<String, Object> options) throws Exception;
 	
 	/**
 	 * Imports all sampling units from the file.
@@ -75,7 +75,7 @@ public abstract class ISamplingUnitImporter {
 	 * @return
 	 * @throws Exception
 	 */
-	public abstract List<SamplingUnit> importFile(File f, HashMap<Object, Object> options, IProgressMonitor monitor) throws Exception;
+	public abstract List<SamplingUnit> importFile(Path f, HashMap<Object, Object> options, IProgressMonitor monitor) throws Exception;
 
 	
 	/**

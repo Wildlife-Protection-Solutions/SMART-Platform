@@ -79,14 +79,14 @@ public enum SmartReportRunner {
 		
 		if (Files.exists(renderFile)) Files.delete(renderFile);
 		
-		File reportFile = report.getFullPath().toFile();
+		Path reportFile = report.getFullPath();
 		
 		//temporary directory for decrypted attachments
 		Object temp = options.getOption(HTMLRenderOption.IMAGE_DIRECTROY);
 		Path workingDirectory = null;
 		if (temp != null && temp instanceof Path) workingDirectory = (Path) temp;
 		
-		IReportRunnable reportRunnable = engine.openReportDesign(reportFile.getAbsolutePath());
+		IReportRunnable reportRunnable = engine.openReportDesign(reportFile.toAbsolutePath().toString());
 		
 		IRunTask runTask = new SmartRunTask((ReportEngine)engine, reportRunnable, report.getConservationArea(), currentUser, options);
 		runTask.setParameterValues(reportParameters);
@@ -136,7 +136,7 @@ public enum SmartReportRunner {
 	public void runReport(Report report, String currentUser, IReportEngine engine, IRenderOption options, 
 			Session session, HashMap<String, Object> reportParameters, int defaultDpi) throws Exception{
 		
-		File reportFile = report.getFullPath().toFile();
+		Path reportFile = report.getFullPath();
 		runFile(reportFile, report.getConservationArea(), currentUser, engine, options, session, reportParameters, defaultDpi);
 	}
 	
@@ -152,10 +152,10 @@ public enum SmartReportRunner {
 	 * @throws Exception
 	 */
 	@SuppressWarnings("unchecked")
-	public void runFile(File file, ConservationArea ca, String currentUser, IReportEngine engine, IRenderOption options, 
+	public void runFile(Path file, ConservationArea ca, String currentUser, IReportEngine engine, IRenderOption options, 
 			Session session, HashMap<String, Object> reportParameters, int defaultDpi) throws Exception{
 		
-		IReportRunnable design = engine.openReportDesign(file.getAbsolutePath());
+		IReportRunnable design = engine.openReportDesign(file.toAbsolutePath().toString());
 		IRunAndRenderTask task = new SmartRunAndRender((ReportEngine) engine, design, ca, currentUser);
 		try{
 			task.getAppContext().put(BirtConstants.CA_PARAM, ca);

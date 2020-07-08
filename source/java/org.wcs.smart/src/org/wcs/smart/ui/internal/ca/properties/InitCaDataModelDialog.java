@@ -21,9 +21,10 @@
  */
 package org.wcs.smart.ui.internal.ca.properties;
 
-import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -194,7 +195,7 @@ public class InitCaDataModelDialog extends SmartStyledTitleDialog {
 				
 				String file = fd.open();
 				if (file != null) {
-					final File f = new File(file);
+					final Path f = Paths.get(file);
 					try {
 						ProgressMonitorDialog pmd = new ProgressMonitorDialog(
 								getShell());
@@ -218,7 +219,7 @@ public class InitCaDataModelDialog extends SmartStyledTitleDialog {
 
 						});
 
-						lblFileName.setText(f.getAbsolutePath());
+						lblFileName.setText(f.toAbsolutePath().normalize().toString());
 					} catch (Exception ex) {
 						SmartPlugIn.displayLog(Messages.InitCaDataModelDialog_Error_CouldNotReadXml +"\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 						dm = null;

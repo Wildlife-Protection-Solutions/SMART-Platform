@@ -166,7 +166,7 @@ public class ImageResizeProcessor extends Job{
 	}
 
 	private boolean processFile(ISmartAttachment attachment) throws Exception{
-		if (attachment.getAttachmentFile().length() <  maxSize * 1048576l) return false;
+		if (attachment.getAttachmentFile().toAbsolutePath().toFile().length() <  maxSize * 1048576l) return false;
 		if (!isImage(attachment)) return false;
 		return true;
 	}
@@ -282,7 +282,7 @@ public class ImageResizeProcessor extends Job{
 			Path encryptedFile = EncryptUtils.uniqueFile(core.resolve(item.getAttachment().getFilename()));
 			EncryptUtils.encryptFile(outputFile, encryptedFile, item.getAttachment());
 			if (Files.exists(encryptedFile)) {
-				Files.move(encryptedFile, item.getAttachment().getAttachmentFile().toPath(), StandardCopyOption.REPLACE_EXISTING);
+				Files.move(encryptedFile, item.getAttachment().getAttachmentFile(), StandardCopyOption.REPLACE_EXISTING);
 			}
 			
 			for (Path p : new Path[] {outputFile, encryptedFile}) {

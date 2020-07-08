@@ -22,7 +22,6 @@
 package org.wcs.smart.connect.downloader.ca;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -59,12 +58,12 @@ import org.wcs.smart.ca.export.ICaDataExportEngine;
  */
 public class PostgresqlCaDataExportEngine implements ICaDataExportEngine{
 
-	private File outputLocation;
+	private Path outputLocation;
 	private ConservationArea ca;
 	private Session session;
 	private HashMap<String, String> options;
 	
-	public PostgresqlCaDataExportEngine(File outputLocation, ConservationArea ca, Session session){
+	public PostgresqlCaDataExportEngine(Path outputLocation, ConservationArea ca, Session session){
 		this.session = session;
 		this.ca = ca;
 		this.outputLocation = outputLocation;
@@ -93,12 +92,12 @@ public class PostgresqlCaDataExportEngine implements ICaDataExportEngine{
 	}
 
 	/**
-	 * @see org.wcs.smart.ca.export.ICaDataExportEngine#writeTableDefinitionFile(java.io.File, java.lang.String, java.lang.String[])
+	 * 
 	 */
 	@Override
 	public void writeTableDefinitionFile(String tableName, String hibernateClass,
 			String[] columns) throws Exception {
-		Path columnFile = createFileName( getExportLocation().toPath(), tableName + "." + hibernateClass + ".def"); //$NON-NLS-1$ //$NON-NLS-2$
+		Path columnFile = createFileName( getExportLocation(), tableName + "." + hibernateClass + ".def"); //$NON-NLS-1$ //$NON-NLS-2$
 		try(BufferedWriter writer = Files.newBufferedWriter(columnFile, StandardCharsets.UTF_8)){
 			writer.write(tableName.toUpperCase(Locale.ROOT));
 			writer.newLine();
@@ -115,7 +114,7 @@ public class PostgresqlCaDataExportEngine implements ICaDataExportEngine{
 	}
 
 	/**
-	 * @see org.wcs.smart.ca.export.ICaDataExportEngine#exportTableData(java.io.File, java.lang.String, java.lang.String, org.hibernate.Session)
+	 * 
 	 */
 	@Override
 	public void exportTableData(String tableName,
@@ -198,7 +197,7 @@ public class PostgresqlCaDataExportEngine implements ICaDataExportEngine{
 	@Override
 	public void writeQuery(String fileName, String query) throws IOException{
 		
-		final Path outputFile = createFileName(getExportLocation().toPath(), fileName + ".dat"); //$NON-NLS-1$
+		final Path outputFile = createFileName(getExportLocation(), fileName + ".dat"); //$NON-NLS-1$
 		session.doWork(new Work(){
 			@Override
 			public void execute(Connection connection) throws SQLException {
@@ -270,7 +269,7 @@ public class PostgresqlCaDataExportEngine implements ICaDataExportEngine{
 	 * @see org.wcs.smart.ca.export.ICaDataExportEngine#getExportLocation()
 	 */
 	@Override
-	public File getExportLocation() {
+	public Path getExportLocation() {
 		return this.outputLocation;
 	}
 

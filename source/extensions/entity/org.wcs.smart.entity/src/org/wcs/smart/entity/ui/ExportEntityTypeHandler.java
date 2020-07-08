@@ -21,9 +21,11 @@
  */
 package org.wcs.smart.entity.ui;
 
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -105,7 +107,7 @@ public class ExportEntityTypeHandler {
 		ExportEntityTypeDialog dialog = new ExportEntityTypeDialog(activeShell, et);
 		if (dialog.open() != Window.OK) return;
 			
-		final File exportDir = dialog.getDirectory();
+		final Path exportDir = dialog.getDirectory();
 		final List<EntityType> types = dialog.getTypes();
 			
 		final ProgressMonitorDialog pmd = new ProgressMonitorDialog(activeShell);
@@ -125,9 +127,9 @@ public class ExportEntityTypeHandler {
 							progress.subTask(MessageFormat.format(Messages.ExportEntityTypeHandler_ExportProgress, new Object[]{et.getName()}));
 							progress.worked(1);
 							
-							final File exportFile = new File(exportDir, URLUtils.cleanFilename(et.getName()) + ".xml"); //$NON-NLS-1$
+							final Path exportFile = exportDir.resolve(URLUtils.cleanFilename(et.getName()) + ".xml"); //$NON-NLS-1$
 							
-							if (!overwriteall[0] && exportFile.exists()){
+							if (!overwriteall[0] && Files.exists(exportFile)){
 								final boolean[] cont = new boolean[]{true};
 								pmd.getShell().getDisplay().syncExec(new Runnable(){
 
@@ -153,7 +155,7 @@ public class ExportEntityTypeHandler {
 									continue;
 								}
 							}
-							try(FileOutputStream fout = new FileOutputStream(exportFile)){
+							try(OutputStream fout = Files.newOutputStream(exportFile)){
 								EntityTypeXmlManager.writeDataModel(EntityTypeToXmlConverter.toXml(et, progress.split(3)), fout);
 								exportedCnt++;
 							}catch (Exception ex){
@@ -182,7 +184,7 @@ public class ExportEntityTypeHandler {
 		
 		private Text txtFile;
 		private EntityType et;
-		private File file;
+		private Path file;
 		private CheckboxTableViewer tblEntities;
 		private List<EntityType> types;
 		
@@ -191,7 +193,7 @@ public class ExportEntityTypeHandler {
 			this.et = et;
 		}
 		
-		public File getDirectory(){
+		public Path getDirectory(){
 			return this.file;
 		}
 		
@@ -200,14 +202,14 @@ public class ExportEntityTypeHandler {
 		}
 		
 		protected void okPressed() {
-			file = new File(txtFile.getText());
+			file = Paths.get(txtFile.getText());
 			types = new ArrayList<EntityType>();
 			for (Object x : tblEntities.getCheckedElements()){
 				if (x instanceof EntityType){
 					types.add((EntityType)x);
 				}
 			}
-			if (!file.exists()){
+			if (!Files.exists(file)){
 				if (!MessageDialog.openConfirm(getShell(), Messages.ExportEntityTypeHandler_WarningDialogTitle, 
 						MessageFormat.format(Messages.ExportEntityTypeHandler_DirectoryNotExistant, new Object[]{file.toString()}))){
 					return;
@@ -215,7 +217,7 @@ public class ExportEntityTypeHandler {
 					SmartUtils.createDirectory(file);
 				}
 			}
-			if (!file.isDirectory()){
+			if (!Files.isDirectory(file)){
 				MessageDialog.openError(getShell(), Messages.ExportEntityTypeHandler_WarningDialogTitle, 
 						MessageFormat.format(Messages.ExportEntityTypeHandler_InvalidDirectory, new Object[]{file.toString()}));
 				return;
@@ -252,8 +254,8 @@ public class ExportEntityTypeHandler {
 				location = System.getProperty("user.home"); //$NON-NLS-1$
 			}
 			
-			File init = new File(location);
-			txtFile.setText(init.getAbsolutePath());
+			Path init = Paths.get(location);
+			txtFile.setText(init.toAbsolutePath().toString());
 			txtFile.addModifyListener(new ModifyListener() {
 				@Override
 				public void modifyText(ModifyEvent e) {

@@ -21,11 +21,11 @@
  */
 package org.wcs.smart.paws.plugin;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -37,6 +37,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.paws.PawsFileManager;
 import org.wcs.smart.paws.PawsPlugIn;
 import org.wcs.smart.paws.internal.Messages;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Job removes all PAWS related tabled from the database
@@ -75,8 +76,8 @@ public class RemovePawsJob extends Job {
 			//delete intelligence data from the filestore 
 			for (ConservationArea ca : cas){
 				try {
-					File folder = new File(ca.getFileDataStoreLocation() + File.separator + PawsFileManager.PAWS_DIR);
-					FileUtils.deleteDirectory(folder);
+					Path folder = Paths.get(ca.getFileDataStoreLocation()).resolve(PawsFileManager.PAWS_DIR);
+					SmartUtils.deleteDirectory(folder);
 				} catch (IOException ex) {
 					PawsPlugIn.log("Error removing PAWS folder for Conservation Area datastore: " + ca.getId(), ex); //$NON-NLS-1$
 				}

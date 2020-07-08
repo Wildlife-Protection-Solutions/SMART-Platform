@@ -21,17 +21,17 @@
  */
 package org.wcs.smart.report.internal.ui.export;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.birt.report.engine.api.EmitterInfo;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -56,6 +56,7 @@ import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.model.RootReportFolder;
 import org.wcs.smart.user.UserLevelManager;
+import org.wcs.smart.util.SmartUtils;
 
 
 /**
@@ -115,7 +116,7 @@ public class ExportReportWizard extends Wizard implements IPageChangingListener{
 	public boolean performFinish() {
 		page1.updateSettings();
 		IExportFormat exporter = page1.getExporter();
-		File outputLocation = new File(page1.getOutputDir());
+		Path outputLocation = Paths.get(page1.getOutputDir());
 		final List<Report> selectedReports = page1.getSelectedReports();
 		boolean toCa = page1.exportToConservationArea();
 		final List<ConservationArea> cas = page2.getConservationAreasToExport();
@@ -176,9 +177,9 @@ public class ExportReportWizard extends Wizard implements IPageChangingListener{
 
 	private void exportToConservationArea(IProgressMonitor monitor, List<Report> selectedReports, List<ConservationArea> cas, int dpi){
 		//export to ca
-		File tempDir;
+		Path tempDir;
 		try {
-			tempDir = Files.createTempDirectory("smartreports").toFile(); //$NON-NLS-1$
+			tempDir = Files.createTempDirectory("smartreports"); //$NON-NLS-1$
 		} catch (IOException e1) {
 			ReportPlugIn.displayLog(e1.getMessage(), e1);
 			return;
@@ -186,10 +187,10 @@ public class ExportReportWizard extends Wizard implements IPageChangingListener{
 		try{
 			final List<String> errors = new ArrayList<String>();
 			ReportDefintionExporter defexporter = new ReportDefintionExporter();
-			HashMap<Report, File> exports = new HashMap<Report, File>();
+			HashMap<Report, Path> exports = new HashMap<>();
 			
 			for (Report r : selectedReports){
-				File file = new File(tempDir, r.getId() + System.nanoTime() + ".zip"); //$NON-NLS-1$
+				Path file = tempDir.resolve(r.getId() + System.nanoTime() + ".zip"); //$NON-NLS-1$
 				try {
 					defexporter.exportReport(file, r, null, new NullProgressMonitor());
 					exports.put(r, file);
@@ -214,7 +215,7 @@ public class ExportReportWizard extends Wizard implements IPageChangingListener{
 					//error
 				}
 				int incnt = 0;
-				for (Entry<Report, File> export : exports.entrySet()){
+				for (Entry<Report, Path> export : exports.entrySet()){
 					try{
 						ImportReportEngine importer = new ImportReportEngine();
 						importer.importReport(export.getValue(), folder, ca);
@@ -246,7 +247,7 @@ public class ExportReportWizard extends Wizard implements IPageChangingListener{
 			
 		}finally{
 			try{
-				FileUtils.deleteDirectory(tempDir);
+				SmartUtils.deleteDirectory(tempDir);
 			}catch(Exception ex){}
 		}
 	}

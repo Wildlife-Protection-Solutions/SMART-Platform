@@ -21,7 +21,8 @@
  */
 package org.wcs.smart;
 
-import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 
 import org.hibernate.type.UUIDBinaryType;
@@ -70,12 +71,12 @@ public enum SmartContext {
 	 * 
 	 * @return
 	 */
-	public File getTempFilestoreLocation(){
-		return new File(pairs.get(TEMP_FILESTORE_KEY));
+	public Path getTempFilestoreLocation(){
+		return Paths.get(pairs.get(TEMP_FILESTORE_KEY));
 	}
 	
-	public void setTempFilestoreLocation(File location){
-		pairs.put(TEMP_FILESTORE_KEY, location.getAbsolutePath());
+	public void setTempFilestoreLocation(Path location){
+		pairs.put(TEMP_FILESTORE_KEY, location.toAbsolutePath().toString());
 	}
 
 }

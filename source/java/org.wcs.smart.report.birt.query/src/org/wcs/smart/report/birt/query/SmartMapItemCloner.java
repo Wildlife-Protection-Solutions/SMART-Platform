@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.report.birt.query;
 
-import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.Iterator;
 import java.util.List;
@@ -69,7 +70,8 @@ public class SmartMapItemCloner implements IConservationAreaTemplateCloner {
 		
 		progress.setWorkRemaining(newReports.size());
 		for (Report r : newReports){
-			File reportFile = new File(new File(engine.getNewCa().getFileDataStoreLocation(), Report.REPORT_DIR), r.getFilename());
+			Path reportFile = Paths.get(engine.getNewCa().getFileDataStoreLocation())
+					.resolve(Report.REPORT_DIR).resolve(r.getFilename());
 			updateReportFile(r, reportFile, engine);
 			progress.worked(1);
 		}
@@ -82,11 +84,11 @@ public class SmartMapItemCloner implements IConservationAreaTemplateCloner {
 	 * @param engine
 	 * @throws Exception
 	 */
-	private void updateReportFile(Report report, File dest, ConservationAreaClonerEngine engine) throws Exception{
+	private void updateReportFile(Report report, Path dest, ConservationAreaClonerEngine engine) throws Exception{
 		DesignConfig config = new DesignConfig();
 		config.setResourceLocator(BirtResourceLocator.INSTANCE);
 		SessionHandle session = new DesignEngine( config ).newSessionHandle( ULocale.getDefault( ) );
-		ReportDesignHandle rdh = session.openDesign(dest.getAbsolutePath());
+		ReportDesignHandle rdh = session.openDesign(dest.toAbsolutePath().toString());
 		
 		rdh.getRoot().getComponents();
 		

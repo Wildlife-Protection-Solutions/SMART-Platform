@@ -21,7 +21,9 @@
  */
 package org.wcs.smart.observation.model;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -35,7 +37,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.apache.commons.io.FileUtils;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.UuidItem;
@@ -158,12 +159,12 @@ public class WaypointObservation extends UuidItem {
 				try {
 					// copy file to temp location so it won't be deleted out from
 					// under us
-					File tmpLocation = File.createTempFile(
+					Path tmpLocation = Files.createTempFile(
 							"smart_" + System.nanoTime(), ""); //$NON-NLS-1$ //$NON-NLS-2$
-					tmpLocation.deleteOnExit();
+					tmpLocation.toAbsolutePath().toFile().deleteOnExit();
 					sp.computeFileLocation(session);
-					FileUtils.copyFile(sp.getAttachmentFile(), tmpLocation);
-
+					Files.copy(sp.getAttachmentFile(), tmpLocation, StandardCopyOption.REPLACE_EXISTING);
+					
 					att.setCopyFromLocation(tmpLocation);
 					att.setFilename(sp.getFilename());
 					att.setObservation(clone);

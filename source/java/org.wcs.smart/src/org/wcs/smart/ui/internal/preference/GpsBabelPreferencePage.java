@@ -21,7 +21,9 @@
  */
 package org.wcs.smart.ui.internal.preference;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -76,8 +78,8 @@ public class GpsBabelPreferencePage extends PreferencePage implements
 			return true;
 		}
 
-		File f = new File(gpsLoc.getStringValue());
-		if (!f.exists()) {
+		Path f = Paths.get(gpsLoc.getStringValue());
+		if (!Files.exists(f)) {
 			if (!MessageDialog.openConfirm(getShell(),
 					Messages.GpsBabelPreferencePage_WarningDialogTitle,
 					MessageFormat.format(
@@ -89,8 +91,9 @@ public class GpsBabelPreferencePage extends PreferencePage implements
 		// try to keep relative location of gps babel
 		String newLocation = f.toString();
 		try {
-			newLocation = f.getCanonicalPath();
-			String appLoc = new File(".").getCanonicalPath(); //$NON-NLS-1$
+			//TODO: test this
+			newLocation = f.toAbsolutePath().normalize().toString();
+			String appLoc = Paths.get("").toAbsolutePath().normalize().toString(); //$NON-NLS-1$
 			if (newLocation.startsWith(appLoc)) {
 				newLocation = "." + newLocation.substring(appLoc.length()); //$NON-NLS-1$
 			}

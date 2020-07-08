@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.patrol.ui;
 
-import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -509,7 +510,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		Job moveJob = new Job(SAVE_PATROL_JOB_NAME) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				try(Session saveSession = HibernateManager.openSession(new WaypointAttachmentInterceptor())){
+				try(Session saveSession = HibernateManager.openSession(new WaypointAttachmentInterceptor(false))){
 					saveSession.beginTransaction();
 					try{
 						/* delete waypoints */
@@ -518,11 +519,11 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 							saveSession.delete(wp.getWaypoint());					
 						}
 						Patrol p = null;
-						File rootFolder = null;
+						Path rootFolder = null;
 						if (toSave.size() > 0){
 							PatrolWaypointSource pws = (PatrolWaypointSource) WaypointSourceEngine.INSTANCE.getSource(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
 							p = toSave.iterator().next().getPatrolLegDay().getPatrolLeg().getPatrol();
-							rootFolder = new File(p.getConservationArea().getFileDataStoreLocation(), pws.getDatastoreFileLocation(p));
+							rootFolder = Paths.get(p.getConservationArea().getFileDataStoreLocation()).resolve(pws.getDatastoreFileLocation(p));
 						}
 						/* save waypoints */
 						for (PatrolWaypoint wp : toSave) {
@@ -536,13 +537,13 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 							//the filestore location
 							if (wp.getWaypoint().getAttachments() != null){
 								for (WaypointAttachment wa : wp.getWaypoint().getAttachments()){
-									wa.computeFileLocation(new File(rootFolder, wa.getFilename()));
+									wa.computeFileLocation(rootFolder.resolve(wa.getFilename()));
 								}
 							}
 							for (WaypointObservation wo : wp.getWaypoint().getAllObservations()){
 								if (wo.getAttachments() != null){
 									for (ObservationAttachment wa : wo.getAttachments()){
-										wa.computeFileLocation(new File(rootFolder, wa.getFilename()));
+										wa.computeFileLocation(rootFolder.resolve(wa.getFilename()));
 									}
 								}
 							}

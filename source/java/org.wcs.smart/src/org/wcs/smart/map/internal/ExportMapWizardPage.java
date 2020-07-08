@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.map.internal;
 
-import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -182,8 +183,8 @@ public class ExportMapWizardPage extends WizardPage {
 	 * 
 	 * @return the export directory
 	 */
-	public File getOutputDir(){
-		return new File(this.destDir.getText());
+	public Path getOutputDir(){
+		return Paths.get(this.destDir.getText());
 	}
 	
 	/**

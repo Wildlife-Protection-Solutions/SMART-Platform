@@ -21,10 +21,10 @@
  */
 package org.wcs.smart.common.attachment;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -56,7 +56,7 @@ public class AttachmentInterceptor extends SessionInterceptor {
 
 	//track files to delete; only delete
 	//after transaction has been committed
-	protected List<File> toDelete = new ArrayList<File>();
+	protected List<Path> toDelete = new ArrayList<>();
 	
 	//if attachment files are encrypted when they are copied from
 	//the source
@@ -86,19 +86,19 @@ public class AttachmentInterceptor extends SessionInterceptor {
 	@Override
 	public void afterTransactionCompletion(Transaction tx){
 		if (tx.getStatus() == TransactionStatus.COMMITTED){
-			for (File f : toDelete){
+			for (Path f : toDelete){
 				try{
-					f.delete();
+					Files.delete(f);
 				}catch (Exception ex){
 					SmartPlugIn.log("Could not delete file: " + f.toString(), ex); //$NON-NLS-1$
 				}
-				if (f.getParentFile().list().length == 0) {
-					//if there are no more files then we delete the directory too
-					try {
-						f.getParentFile().delete();
-					}catch (Exception ex) {
-						SmartPlugIn.log("Could not delete empty directory: " + f.toString(), ex); //$NON-NLS-1$
+				//if there are no more files then we delete the directory too
+				try {
+					if (Files.list(f.getParent()).count() == 0) {
+						SmartUtils.deleteDirectory(f.getParent());
 					}
+				}catch (Exception ex) {
+					SmartPlugIn.log("Could not delete empty directory: " + f.toString(), ex); //$NON-NLS-1$
 				}
 			}
 			toDelete.clear();
@@ -118,7 +118,7 @@ public class AttachmentInterceptor extends SessionInterceptor {
     		ISmartAttachment attachment = (ISmartAttachment) entity;
     		try {
     			attachment.computeFileLocation(session);
-				toDelete.add(attachment.getAttachmentFile().getCanonicalFile());
+				toDelete.add(attachment.getAttachmentFile());
 			} catch (Exception ex) {
 				SmartPlugIn.log("Unable to delete attachment", ex); //$NON-NLS-1$
 			}
@@ -146,9 +146,9 @@ public class AttachmentInterceptor extends SessionInterceptor {
 				} catch (Exception e) {
 					throw new RuntimeException(e);
 				}
-    			File to = attachment.getAttachmentFile();
-    			if (!to.getParentFile().exists()){
-    				SmartUtils.createDirectory(to.getParentFile());
+    			Path to = attachment.getAttachmentFile();
+    			if (!Files.exists(to.getParent())){
+    				SmartUtils.createDirectory(to.getParent());
     			}
     			
     			String name = attachment.getFilename();
@@ -163,25 +163,25 @@ public class AttachmentInterceptor extends SessionInterceptor {
     			Pattern p = Pattern.compile("(.*)_(\\d+)"); //$NON-NLS-1$
     			int counter = 1;
     			
-    			while(to.exists()){
+    			while(Files.exists(to)){
     				Matcher m = p.matcher(basename);
     				if (m.matches()){
     					basename = m.group(1) + "_" + (Integer.parseInt(m.group(2)) +1 ); //$NON-NLS-1$
     				}else{
     					basename = basename + "_" + (counter++); //$NON-NLS-1$
     				}
-    				to = new File(to.getParentFile(), basename + extension);
+    				to = to.getParent().resolve(basename + extension);
     			}
     			if (encryptFiles && attachment.isEncrypted()) {
 	    			try {
-	    				EncryptUtils.encryptFile(attachment.getCopyFromLocation().toPath(), to.toPath(), attachment);
+	    				EncryptUtils.encryptFile(attachment.getCopyFromLocation(), to, attachment);
 	    			}catch (Exception ex) {
 	    				throw new RuntimeException(getExceptionErrorMessage() + ": " + ex.getMessage(), ex); //$NON-NLS-1$
 	    			}
     			}else {
     				//just copy files
     				try {
-						Files.copy(attachment.getCopyFromLocation().toPath(), to.toPath());
+						Files.copy(attachment.getCopyFromLocation(), to);
 					} catch (IOException e) {
 	    				throw new RuntimeException(getExceptionErrorMessage() + ": " + e.getMessage(), e); //$NON-NLS-1$
 
@@ -189,10 +189,10 @@ public class AttachmentInterceptor extends SessionInterceptor {
     			}
     			
     			//state is what is written to db and should be updated
-    			attachment.setFilename(to.getName());
+    			attachment.setFilename(to.getFileName().toString());
     			for (int i = 0; i < propertyNames.length;i++){
     				if (propertyNames[i].equals("filename")){ //$NON-NLS-1$
-    					state[i] = to.getName();
+    					state[i] = to.getFileName().toString();
     				}
     			}
     			attachment.setCopyFromLocation(null);

@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.connect.apache;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileVisitResult;
@@ -116,7 +115,7 @@ public class CleanUpJob implements Runnable {
 	private void cleanUp(){
 		try(Session s = sessionFactory.openSession()){
 			//list all files in uploads directory			
-			Path uploadDir = DataStoreManager.INSTANCE.getRootDirectory().toPath().resolve(Uploader.DATASTORE_DIR);
+			Path uploadDir = DataStoreManager.INSTANCE.getRootDirectory().resolve(Uploader.DATASTORE_DIR);
 			try(DirectoryStream<Path> stream = Files.newDirectoryStream(uploadDir)){
 				for (Path path : stream){
 					checkAndDelete(s, path);
@@ -126,7 +125,7 @@ public class CleanUpJob implements Runnable {
 			}
 			
 			//ca export directory
-			Path caExportDirectory = DataStoreManager.INSTANCE.getRootDirectory().toPath().resolve(DataStoreManager.CA_EXPORT_LOCATION);
+			Path caExportDirectory = DataStoreManager.INSTANCE.getRootDirectory().resolve(DataStoreManager.CA_EXPORT_LOCATION);
 			if (Files.exists(caExportDirectory)) {
 				try(DirectoryStream<Path> stream = Files.newDirectoryStream(caExportDirectory)){
 					for (Path path : stream){
@@ -138,13 +137,15 @@ public class CleanUpJob implements Runnable {
 			}
 			
 			//tempDir
-			Path tempDir = DataStoreManager.INSTANCE.getTemporaryDirectory().toPath();
-			try(DirectoryStream<Path> stream = Files.newDirectoryStream(tempDir)){
-				for (Path path : stream){
-					if (!Files.isDirectory(path)){
-						//only check files here as directories as likely being used
-						//to process item
-						checkAndDelete(s, path);
+			try {
+				Path tempDir = DataStoreManager.INSTANCE.getTemporaryDirectory();
+				try(DirectoryStream<Path> stream = Files.newDirectoryStream(tempDir)){
+					for (Path path : stream){
+						if (!Files.isDirectory(path)){
+							//only check files here as directories as likely being used
+							//to process item
+							checkAndDelete(s, path);
+						}
 					}
 				}
 			}catch (Exception ex){
@@ -172,7 +173,7 @@ public class CleanUpJob implements Runnable {
 	}
 	
 	private void cleanTemporaryFiles() {
-		Path uploadDir = DataStoreManager.INSTANCE.getRootDirectory().toPath().resolve(EncryptUtils.TEMP_DIR);
+		Path uploadDir = DataStoreManager.INSTANCE.getRootDirectory().resolve(EncryptUtils.TEMP_DIR);
 		deleteFilesInDir(uploadDir);
 	}
 	
@@ -236,7 +237,7 @@ public class CleanUpJob implements Runnable {
 	 * it if the file can be deleted
 	 */
 	private void checkAndDelete(Session s, Path p){
-		String localFilename = DataStoreManager.INSTANCE.getRootDirectory().toPath().relativize(p).toString();
+		String localFilename = DataStoreManager.INSTANCE.getRootDirectory().relativize(p).toString();
 		
 		List<WorkItem> items = QueryFactory.buildQuery(s, WorkItem.class, "localFilename", localFilename).list(); //$NON-NLS-1$
 		
@@ -350,7 +351,7 @@ public class CleanUpJob implements Runnable {
 	private void cleanUpGlobalForestWatchFiles(){
 		if (gfwCleanUpDays == null || gfwCleanUpDays <= 0) return;
 		
-		Path gfwPath = DataStoreManager.INSTANCE.getRootDirectory().toPath().resolve(GlobalForestWatchNoa.LOG_DIRECTORY);
+		Path gfwPath = DataStoreManager.INSTANCE.getRootDirectory().resolve(GlobalForestWatchNoa.LOG_DIRECTORY);
 		if (!Files.exists(gfwPath)) return;
 		
 		Date lastDate = new Date((new Date()).getTime() - gfwCleanUpDays * 24l * 60 *60 *1000);
@@ -406,7 +407,7 @@ public class CleanUpJob implements Runnable {
 		}
 		if (days != null && days > 0){
 			//remove all items
-			List<File> filesToDelete = new ArrayList<File>();
+			List<Path> filesToDelete = new ArrayList<>();
 			Date lastDate = new Date((new Date()).getTime() - days * 24l * 60 *60 *1000);
 			s.beginTransaction();
 			try{
@@ -420,7 +421,7 @@ public class CleanUpJob implements Runnable {
 				List<ServerDataQueueItem> toDelete = s.createQuery(c).list();
 				
 				for (ServerDataQueueItem delete : toDelete){
-					File fToDelete = DataStoreManager.INSTANCE.getFile(delete.getFile());
+					Path fToDelete = DataStoreManager.INSTANCE.getFile(delete.getFile());
 					filesToDelete.add(fToDelete);
 					s.delete(delete);
 				}
@@ -431,9 +432,9 @@ public class CleanUpJob implements Runnable {
 				logger.log(Level.WARNING, "Unable to clean up data queue items.", ex); //$NON-NLS-1$
 			}
 			//delete associated files
-			for (File f : filesToDelete){
+			for (Path f : filesToDelete){
 				try{
-					Files.deleteIfExists(f.toPath());
+					Files.deleteIfExists(f);
 				}catch (Exception ex){
 					logger.log(Level.WARNING, MessageFormat.format("Unable to delete data queue file: {0}.", f.toString()), ex); //$NON-NLS-1$
 				}
@@ -452,8 +453,8 @@ public class CleanUpJob implements Runnable {
 			s.getTransaction().rollback();
 			logger.log(Level.WARNING, "Unable to clean up data queue items.", ex); //$NON-NLS-1$
 		}
-		Path dataqueueDir = DataStoreManager.INSTANCE.getFile(DataQueue.FILE_STORE_LOCATION).toPath();
-		Path root = DataStoreManager.INSTANCE.getRootDirectory().toPath();
+		Path dataqueueDir = DataStoreManager.INSTANCE.getFile(DataQueue.FILE_STORE_LOCATION);
+		Path root = DataStoreManager.INSTANCE.getRootDirectory();
 		if (Files.exists(dataqueueDir)) {
 			try(DirectoryStream<Path> files = Files.newDirectoryStream(dataqueueDir)){
 				for (Path f : files){

@@ -21,11 +21,11 @@
  */
 package org.wcs.smart.export;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -88,16 +88,16 @@ public class EmployeeCsvImporter implements ICsvDataImporter {
 	 * @throws Exception if there are any issues with the data in the csv file
 	 */
 	@Override
-	public boolean importCsvFile(File file, char delimiter, boolean skipHeader, Charset cs, IProgressMonitor monitor, Session session) throws Exception {
+	public boolean importCsvFile(Path file, char delimiter, boolean skipHeader, Charset cs, IProgressMonitor monitor, Session session) throws Exception {
 		warnings = new ArrayList<String>();
 		
-		if (!file.exists()){
+		if (!Files.exists(file)){
 			throw new IOException(MessageFormat.format(Messages.EmployeeCsvImporter_Error_InputFileDoesNotExist1, new Object[]{file.toString()}));
 		}
 		
 		List<Employee> employees = new ArrayList<Employee>();
 		try(CSVReader reader = new CSVReader(
-				new InputStreamReader(new FileInputStream(file), cs), delimiter)){
+				new InputStreamReader(Files.newInputStream(file), cs), delimiter)){
 			int line = 1;
 			if (skipHeader){
 				reader.readNext();

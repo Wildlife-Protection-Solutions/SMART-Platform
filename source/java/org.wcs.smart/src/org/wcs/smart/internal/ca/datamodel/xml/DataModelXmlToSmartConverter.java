@@ -21,10 +21,10 @@
  */
 package org.wcs.smart.internal.ca.datamodel.xml;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -81,8 +81,8 @@ public class DataModelXmlToSmartConverter {
 	 * @throws ParseException
 	 * @throws IOException 
 	 */
-	public DataModel convert(File file, ConservationArea targetCa, Collection<Icon> icons, boolean synchronizeLang) throws JAXBException, ParseException, IOException {
-		try(FileInputStream is = new FileInputStream(file)){
+	public DataModel convert(Path file, ConservationArea targetCa, Collection<Icon> icons, boolean synchronizeLang) throws JAXBException, ParseException, IOException {
+		try(InputStream is = Files.newInputStream(file)){
 			return convert(is, targetCa, icons, synchronizeLang);
 		}
 	}

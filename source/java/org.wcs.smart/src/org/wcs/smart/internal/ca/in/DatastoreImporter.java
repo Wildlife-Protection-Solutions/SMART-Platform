@@ -21,14 +21,15 @@
  */
 package org.wcs.smart.internal.ca.in;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
@@ -39,6 +40,7 @@ import org.wcs.smart.ca.export.ICaDataExportEngine;
 import org.wcs.smart.ca.export.ICaDataImportEngine;
 import org.wcs.smart.ca.export.ICaDataImporter;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -74,37 +76,37 @@ public class DatastoreImporter implements ICaDataImporter {
 	 * @param monitor progress monitor
 	 * @throws IOException
 	 */
-	private void importFileStore(File dir, UUID cauuid, IProgressMonitor monitor) throws IOException{
+	private void importFileStore(Path dir, UUID cauuid, IProgressMonitor monitor) throws IOException{
 		monitor.subTask(Messages.CaImporter_Progress_ImportingFileStore);
-		File sourceFile = new File(dir, ICaDataExportEngine.FILESTORE_DIR);
+		Path sourceFile = dir.resolve(ICaDataExportEngine.FILESTORE_DIR);
 		
 		
-		String filestore = SmartProperties.getInstance().getProperty(SmartProperties.PROP_FILESTORE);
-		filestore = filestore + File.separator + UuidUtils.getDirectoryPath(cauuid);
-		File destLocation = new File(filestore);
-		if (!destLocation.exists()){
-			destLocation.mkdir();
+		Path destLocation = Paths.get(SmartProperties.getInstance().getProperty(SmartProperties.PROP_FILESTORE))
+				.resolve(UuidUtils.getDirectoryPath(cauuid));
+		
+		if (!Files.exists(destLocation)){
+			SmartUtils.createDirectory(destLocation);
 		}
-		if (sourceFile.isDirectory()){
-			FileUtils.copyDirectory(sourceFile, destLocation);
+		if (Files.isDirectory(sourceFile)){
+			SmartUtils.copyDirectory(sourceFile, destLocation);
 		}
 		
 		//now we want to remove any directories that are not supported
 		//by one of the existing plugins
 		List<String> validDirs = getFilestoreDirections();
-		for (File f : destLocation.listFiles()){
-			if (f.isDirectory()){
-				if (!validDirs.contains(f.getName())){
+		
+		Files.list(destLocation).forEach(f->{
+			if (Files.isDirectory(f)) {
+				if (!validDirs.contains(f.getFileName().toString())){
 					//this is not supported by any of the plugins so we want to remove it
 					try{
-						FileUtils.deleteDirectory(f);
+						SmartUtils.deleteDirectory(f);
 					}catch (IOException ex){
 						SmartPlugIn.log(ex.getMessage(), ex);
 					}
 				}
 			}
-			
-		}
+		});
 	}
 	
 	/**

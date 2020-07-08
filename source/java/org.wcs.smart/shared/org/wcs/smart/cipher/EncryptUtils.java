@@ -119,7 +119,7 @@ public class EncryptUtils {
 	public static Path decryptAttachment(ISmartAttachment attachment, Path outputFile) throws Exception {
 		SecretKeySpec key = new SecretKeySpec(UuidUtils.uuidToByte(attachment.getConservationArea().getUuid()), ENCRYPTION_TYPE);
 		
-		try (InputStream in = Files.newInputStream(attachment.getAttachmentFile().toPath())){
+		try (InputStream in = Files.newInputStream(attachment.getAttachmentFile())){
 			byte[] iv = new byte[128/8];
 			in.read(iv);
 			IvParameterSpec ivspec = new IvParameterSpec(iv);
@@ -166,7 +166,7 @@ public class EncryptUtils {
 	public static void decryptAttachment(ISmartAttachment attachment, OutputStream outStream) throws Exception {
 		SecretKeySpec key = new SecretKeySpec(UuidUtils.uuidToByte(attachment.getConservationArea().getUuid()), ENCRYPTION_TYPE);
 		
-		try (InputStream in = Files.newInputStream(attachment.getAttachmentFile().toPath())){
+		try (InputStream in = Files.newInputStream(attachment.getAttachmentFile())){
 			byte[] iv = new byte[128/8];
 			in.read(iv);
 			IvParameterSpec ivspec = new IvParameterSpec(iv);

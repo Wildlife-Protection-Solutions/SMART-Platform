@@ -21,10 +21,10 @@
  */
 package org.wcs.smart.ui.internal.ca.properties;
 
-import java.io.File;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -359,8 +359,7 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 		String filenames = fileDialog.getFileName();
 		URL url = null;
 		try {
-			url = new File(path
-					+ System.getProperty("file.separator") + filenames).toURI().toURL(); //$NON-NLS-1$
+			url = Paths.get(path).resolve(filenames).toUri().toURL();
 		} catch (Throwable e) {
 			SmartPlugIn.displayLog("Cannot determine file selected.", e); //$NON-NLS-1$
 		}

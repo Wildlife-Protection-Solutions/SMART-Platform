@@ -21,11 +21,11 @@
  */
 package org.wcs.smart.report.library;
 
-import java.io.File;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
-import org.apache.commons.io.FileUtils;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.report.ReportPlugIn;
@@ -76,8 +76,8 @@ public class SmartBirtLibrary {
 		return instance;
 	}
 	
-	private File libraryLocation = null;
-	private File libraryFile = null;
+	private Path libraryLocation = null;
+	private Path libraryFile = null;
 
 	/**
 	 * Creates a new SMART Birt library instance.
@@ -87,15 +87,15 @@ public class SmartBirtLibrary {
 	 * </p>
 	 */
 	public SmartBirtLibrary(){
-		libraryLocation = new File(ReportPlugIn.getReportDirectory(SmartDB.getCurrentConservationArea()), LIBRARY_DIR + File.separator);
-		if (!libraryLocation.exists()){
+		libraryLocation = ReportPlugIn.getReportDirectory(SmartDB.getCurrentConservationArea()).resolve( LIBRARY_DIR );
+		if (!Files.exists(libraryLocation)){
 			SmartUtils.createDirectory(libraryLocation);
 		}
 		
-		libraryFile = new File(libraryLocation, LIBRARY_FILENAME);
-		if (!libraryFile.exists()){			
+		libraryFile = libraryLocation.resolve(LIBRARY_FILENAME);
+		if (!Files.exists(libraryFile)){			
 			try (InputStream library = ReportPlugIn.class.getClassLoader().getResourceAsStream(DEFAULT_LIBRARY_FILENAME)){
-				FileUtils.copyInputStreamToFile(library, libraryFile);
+				Files.copy(library, libraryFile);
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
@@ -106,14 +106,14 @@ public class SmartBirtLibrary {
 	 * 
 	 * @return the birt smart library directory location
 	 */
-	public File getLibraryLocation(){
+	public Path getLibraryLocation(){
 		return this.libraryLocation;
 	}
 	/**
 	 * This returns the path to the BIRT SMART Library File 
 	 * @return the birt smart library file
 	 */
-	public File getLibraryFile(){
+	public Path getLibraryFile(){
 		return this.libraryFile;
 	}
 	
@@ -127,8 +127,8 @@ public class SmartBirtLibrary {
 	 * @return
 	 */
 	public String getLibraryFileString(){
-		Path p = getLibraryFile().toPath();
-		Path fs = (new File(SmartContext.INSTANCE.getFilestoreLocation())).toPath();
+		Path p = getLibraryFile();
+		Path fs = Paths.get(SmartContext.INSTANCE.getFilestoreLocation());
 		return fs.relativize(p).toString();
 	}
 	

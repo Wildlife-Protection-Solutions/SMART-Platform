@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.query.ui.importexport;
 
-import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -235,9 +236,9 @@ public class ExportQueryDefLocationPage extends WizardPage {
 	 * @return the export folder location or null if should export
 	 * to conservation area
 	 */
-	public File getExportLocation(){
+	public Path getExportLocation(){
 		if (btnFolder.getSelection()){
-			return new File(txtFile.getText());
+			return Paths.get(txtFile.getText());
 		}
 		return null;
 	}

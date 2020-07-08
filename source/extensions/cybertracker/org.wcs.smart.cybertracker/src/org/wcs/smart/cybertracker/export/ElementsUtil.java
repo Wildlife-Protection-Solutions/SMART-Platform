@@ -21,9 +21,9 @@
  */
 package org.wcs.smart.cybertracker.export;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -161,15 +161,15 @@ public class ElementsUtil {
 		return item;
 	}
 
-	public static Elements.List.Items.Item addElementsItemMedia(Elements.List.Items.Item item, File image1) {
-		if (image1 != null && image1.exists() && image1.isFile()) {
+	public static Elements.List.Items.Item addElementsItemMedia(Elements.List.Items.Item item, Path image1) {
+		if (image1 != null && Files.exists(image1) && !Files.isDirectory(image1)) {
 			try {
-				byte[] fileData = Files.readAllBytes(image1.toPath());
+				byte[] fileData = Files.readAllBytes(image1);
 				Media media = new Media();
 				media.setImage1(bytesToHex(fileData));
 				item.setMedia(media);
 			} catch (IOException e) {
-				SmartPlugIn.displayLog(MessageFormat.format(Messages.ElementsUtil_MediaFileReadError, image1.getAbsolutePath()) + SharedUtils.LINE_SEPARATOR + e.getMessage() , e);
+				SmartPlugIn.displayLog(MessageFormat.format(Messages.ElementsUtil_MediaFileReadError, image1.toAbsolutePath().toString()) + SharedUtils.LINE_SEPARATOR + e.getMessage() , e);
 			}
 		}
 		return item;

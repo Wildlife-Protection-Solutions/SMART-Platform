@@ -352,7 +352,7 @@ public abstract class AbstractPatrolImporter extends AbstractSmartImporter {
 			//attempt to resize image automatically
 			int[] size = getImageAutoResizeSizeOption(ca, session);		
 			for (ISmartAttachment attachment : attachments){
-				if (attachment.getCopyFromLocation().length() >= maxsizebytes){
+				if (attachment.getCopyFromLocation().toAbsolutePath().toFile().length() >= maxsizebytes){
 					ImageProcessor.processAttachment(attachment,size[0], size[1]);
 				}
 			}	
@@ -360,7 +360,7 @@ public abstract class AbstractPatrolImporter extends AbstractSmartImporter {
 			//prompt user for image size
 			Point[] allSize = new Point[]{null};
 			for (ISmartAttachment attachment : attachments){
-				if (attachment.getCopyFromLocation().length() < maxsizebytes) continue;
+				if (attachment.getCopyFromLocation().toAbsolutePath().toFile().length() < maxsizebytes) continue;
 				final BufferedImage image = ImageProcessor.readImage(attachment.getCopyFromLocation());
 				if (image == null) continue;
 				

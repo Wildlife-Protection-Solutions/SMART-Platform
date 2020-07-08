@@ -110,7 +110,7 @@ public class XmlToEntity {
 		rootPath = Files.createTempDirectory("smart." + System.nanoTime()); //$NON-NLS-1$
 		try {
 			try {
-				ZipUtil.unzipFolder(zipFile.toFile(), rootPath.toFile());
+				ZipUtil.unzipFolder(zipFile, rootPath);
 			} catch (Exception e) {
 				throw new IOException(e);
 			}
@@ -332,7 +332,7 @@ public class XmlToEntity {
 				attachment.setDateCreated(new Date());
 				attachment.setCreatedBy(SmartDB.getCurrentEmployee());
 				attachment.setConservationArea(ca);
-				attachment.setCopyFromLocation(file.toFile());
+				attachment.setCopyFromLocation(file);
 				attachment.setFilename(xmlAttachment.getFilename());
 				attachment.setDescription(xmlAttachment.getDescription());
 				

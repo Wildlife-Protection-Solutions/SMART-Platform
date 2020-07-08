@@ -21,13 +21,13 @@
  */
 package org.wcs.smart.connect.dataqueue.internal.server;
 
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.apache.commons.io.FileUtils;
 import org.hibernate.Session;
 import org.wcs.smart.ca.export.ICaDataExportEngine;
+import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.dataqueue.ConnectDataQueuePlugin;
 import org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem;
 import org.wcs.smart.connect.server.ICaExportPreprocessor;
@@ -48,7 +48,7 @@ public class ConnectCaExportProcessor implements ICaExportPreprocessor{
 	};
 	
 	@Override
-	public void processExport(File tempDirectory) {
+	public void processExport(Path tempDirectory) {
 		try(Session s = HibernateManager.openSession()){
 			for (Class<?> c : classesToRemove){
 				
@@ -58,19 +58,19 @@ public class ConnectCaExportProcessor implements ICaExportPreprocessor{
 				String fileName2 = tableName + "." + c.getSimpleName() + ".dat"; //$NON-NLS-1$ //$NON-NLS-2$
 				
 				for (String filename : new String[]{fileName1, fileName2}){
-					File f = new File(new File(tempDirectory, ICaDataExportEngine.DATABASE_DIR), filename);
+					Path f = tempDirectory.resolve(ICaDataExportEngine.DATABASE_DIR).resolve(filename);
 					try{
-						if (f.exists()) f.delete();
+						Files.deleteIfExists(f);
 					}catch (Exception ex){
-						f.delete();
+						ConnectPlugIn.log(ex.getMessage(), ex);
 					}
-				}
+				}	
 					
 			}
 		}
 		
 		//we also want to remove any items from the dataqueue folder in the data store
-		Path filestore = tempDirectory.toPath().resolve(ICaDataExportEngine.FILESTORE_DIR);
+		Path filestore = tempDirectory.resolve(ICaDataExportEngine.FILESTORE_DIR);
 		
 		Path dataqueue = filestore.resolve(ConnectDataQueuePlugin.DATA_QUEUE_DIR);
 		if (Files.exists(dataqueue) && Files.isDirectory(dataqueue)){

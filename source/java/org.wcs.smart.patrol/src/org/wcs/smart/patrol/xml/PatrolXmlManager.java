@@ -21,9 +21,9 @@
  */
 package org.wcs.smart.patrol.xml;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Path;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -73,12 +73,12 @@ public class PatrolXmlManager {
 	 * @param xmlFile
 	 * @return
 	 */
-	public static IXmlToPatrolConverter findVersion(File xmlFile){
+	public static IXmlToPatrolConverter findVersion(Path xmlFile){
 		try{
 			DocumentBuilderFactory factory =
 					DocumentBuilderFactory.newInstance();
 					DocumentBuilder builder = factory.newDocumentBuilder();
-			Document doc = builder.parse(xmlFile);
+			Document doc = builder.parse(xmlFile.toAbsolutePath().toFile());
 			String nodeName = doc.getFirstChild().getNodeName();
 			String ns = ""; //$NON-NLS-1$
 			if (nodeName.indexOf(':') > 0){

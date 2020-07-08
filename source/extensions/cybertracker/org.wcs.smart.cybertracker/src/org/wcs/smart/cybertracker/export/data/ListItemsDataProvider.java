@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.cybertracker.export.data;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -83,7 +83,7 @@ public class ListItemsDataProvider {
 		}
 
 		@Override
-		public File getImageFile() {
+		public Path getImageFile() {
 			return item.getImageFile();
 		}
 

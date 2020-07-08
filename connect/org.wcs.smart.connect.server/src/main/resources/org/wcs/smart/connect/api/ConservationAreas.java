@@ -62,7 +62,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.Session;
 import org.hibernate.exception.GenericJDBCException;
@@ -495,14 +494,19 @@ public class ConservationAreas extends HttpServlet{
 			throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("ConservationAreas.PackageNotCreated", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 		}
 		
-		final File toReturn = DataStoreManager.INSTANCE.getFile(item.getLocalFilename());
-		if (!toReturn.exists()){
+		final java.nio.file.Path toReturn = DataStoreManager.INSTANCE.getFile(item.getLocalFilename());
+		if (!Files.exists(toReturn)){
 			throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("ConservationAreas.CaExportNotFound", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 		}
-		
+		long fileSize = -1;
+		try {
+			fileSize = Files.size(toReturn);
+		}catch (IOException ex) {
+			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, ex.getMessage(),ex);
+		}
 		String range = request.getHeader("Range"); //$NON-NLS-1$
 		long start = 0;
-		long end = toReturn.length()-1;
+		long end = fileSize-1;
 		boolean hasRange = false;
 		if (range != null && range.length() > 0){
 			hasRange = true;
@@ -521,7 +525,7 @@ public class ConservationAreas extends HttpServlet{
 					end = Long.parseLong(p2);
 				}
 				
-				if (end > toReturn.length()-1){
+				if (end > fileSize-1){
 					throw new SmartConnectException(Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE, Messages.getString("ConservationAreas.InvalidRange", SmartUtils.getRequestLocale(request)));	 //$NON-NLS-1$
 				}
 				if (start > end){
@@ -537,19 +541,19 @@ public class ConservationAreas extends HttpServlet{
 				@Override
 				public void write(OutputStream output) throws IOException {
 					try {
-						Files.copy(toReturn.toPath(), output);
+						Files.copy(toReturn, output);
 					} catch (Exception e) {
 						logger.log(Level.SEVERE, "Error writing to output stream." + e.getMessage(), e); //$NON-NLS-1$
 					}
 				}
 		    };
-			String fileName = toReturn.getName();
+			String fileName = toReturn.getFileName().toString();
 			if (item.getType() == WorkItem.Type.DOWN_CA) {
 				fileName = wkCa.getId() + ".smart" + (new SimpleDateFormat("yyyyMMdd")).format(item.getStartTime()) + fileName.substring(fileName.lastIndexOf('.'));  //$NON-NLS-1$//$NON-NLS-2$
 			}
 			return Response.ok(stream, MediaType.APPLICATION_OCTET_STREAM)
 					.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName+ "\"") //$NON-NLS-1$ //$NON-NLS-2$
-					.header(HttpHeaders.CONTENT_LENGTH, toReturn.length())
+					.header(HttpHeaders.CONTENT_LENGTH, fileSize)
 					.header("Accept-Ranges", "bytes") //$NON-NLS-1$ //$NON-NLS-2$
 					.build();
 		}else{
@@ -558,7 +562,7 @@ public class ConservationAreas extends HttpServlet{
 			StreamingOutput stream = new StreamingOutput() {
 				@Override
 				public void write(OutputStream output) throws IOException {
-					try (InputStream in = Files.newInputStream(toReturn.toPath())){
+					try (InputStream in = Files.newInputStream(toReturn)){
 						IOUtils.copyLarge(in, output, startat, endat - startat + 1);
 					}
 				}
@@ -567,10 +571,10 @@ public class ConservationAreas extends HttpServlet{
 			return Response.status(Response.Status.PARTIAL_CONTENT)
 					.entity(stream)
 					.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM)
-					.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + toReturn.getName() + "\"") //$NON-NLS-1$ //$NON-NLS-2$
+					.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + toReturn.getFileName().toString() + "\"") //$NON-NLS-1$ //$NON-NLS-2$
 					.header(HttpHeaders.CONTENT_LENGTH, end - start + 1)
 					.header("Accept-Ranges", "bytes") //$NON-NLS-1$ //$NON-NLS-2$
-					.header("Content-Range", "bytes " + start + "-" + end + "/" + toReturn.length()) //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+					.header("Content-Range", "bytes " + start + "-" + end + "/" + fileSize) //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 					.build();
 		}
 	}
@@ -1045,9 +1049,9 @@ public class ConservationAreas extends HttpServlet{
 			up.setLocalFilename(""); //$NON-NLS-1$
 			s.save(up);
 			
-			File updir = DataStoreManager.INSTANCE.getFile(Uploader.DATASTORE_DIR);
-			if (!updir.exists()){
-				FileUtils.forceMkdir(updir);
+			java.nio.file.Path updir = DataStoreManager.INSTANCE.getFile(Uploader.DATASTORE_DIR);
+			if (!Files.exists(updir)){
+				Files.createDirectories(updir);
 			}
 			up.setLocalFilename(DataStoreManager.INSTANCE.generateFileName(Uploader.DATASTORE_DIR 
 					+ File.separator + UuidUtils.uuidToString(up.getUuid()) + ".zip")); //$NON-NLS-1$
@@ -1119,9 +1123,9 @@ public class ConservationAreas extends HttpServlet{
 			up.setLocalFilename(""); //$NON-NLS-1$
 			s.save(up);
 			
-			File updir = DataStoreManager.INSTANCE.getFile(Uploader.DATASTORE_DIR);
-			if (!updir.exists()){
-				FileUtils.forceMkdir(updir);
+			java.nio.file.Path updir = DataStoreManager.INSTANCE.getFile(Uploader.DATASTORE_DIR);
+			if (!Files.exists(updir)){
+				Files.createDirectories(updir);
 			}
 			up.setLocalFilename(DataStoreManager.INSTANCE.generateFileName(Uploader.DATASTORE_DIR 
 					+ File.separator + UuidUtils.uuidToString(up.getUuid()) + ".zip")); //$NON-NLS-1$

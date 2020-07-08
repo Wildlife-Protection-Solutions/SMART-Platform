@@ -84,7 +84,7 @@ public class SyncUploadCaProcessor implements IUploadItemProcessor {
 				}
 				
 				//load data
-				Path file = DataStoreManager.INSTANCE.getFile(item.getLocalFilename()).toPath();
+				Path file = DataStoreManager.INSTANCE.getFile(item.getLocalFilename());
 				PostgresqlSyncProcessor processor = new PostgresqlSyncProcessor(file, info, session, item);
 				processor.processFile();
 				
@@ -124,7 +124,7 @@ public class SyncUploadCaProcessor implements IUploadItemProcessor {
 	
 	private void cleanUp(WorkItem item){
 		try{
-			Files.deleteIfExists(DataStoreManager.INSTANCE.getFile(item.getLocalFilename()).toPath());
+			Files.deleteIfExists(DataStoreManager.INSTANCE.getFile(item.getLocalFilename()));
 		}catch (Exception ex){
 			logger.log(Level.WARNING, "Could not delete ca upload file.", ex); //$NON-NLS-1$
 		}

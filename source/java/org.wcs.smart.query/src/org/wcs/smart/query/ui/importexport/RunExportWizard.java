@@ -148,7 +148,7 @@ public class RunExportWizard extends Wizard {
 						
 						String fname = URLUtils.cleanFilename(item.getKey().getName() + "_" + item.getKey().getId()) + "." + item.getValue().getDefaultExtension(); //$NON-NLS-1$ //$NON-NLS-2$
 						try {
-							item.getValue().export(item.getKey(), item.getKey().getCachedResults(), outdir.resolve(fname).toFile(), exportOps, mm.split(1));
+							item.getValue().export(item.getKey(), item.getKey().getCachedResults(), outdir.resolve(fname), exportOps, mm.split(1));
 						}catch (OperationCanceledException ex) {
 							cancelled = true;
 							break;

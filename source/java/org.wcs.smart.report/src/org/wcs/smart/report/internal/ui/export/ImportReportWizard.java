@@ -22,7 +22,10 @@
 package org.wcs.smart.report.internal.ui.export;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.List;
 
@@ -129,9 +132,9 @@ public class ImportReportWizard extends Wizard implements IPageChangingListener{
 				for (Report report : reports){
 					monitor.subTask(MessageFormat.format(Messages.ImportReportWizard_TaskProgress, new Object[]{report.getName() + " [" + report.getId() + "]"})); //$NON-NLS-1$ //$NON-NLS-2$
 					
-					File outputFile = null;
+					Path outputFile = null;
 					try{
-						outputFile = File.createTempFile(report.getId(), ".xml"); //$NON-NLS-1$
+						outputFile = Files.createTempFile(report.getId(), ".xml"); //$NON-NLS-1$
 						exporter.exportReport(outputFile, report, null, new NullProgressMonitor());//new SubProgressMonitor(monitor, 2));
 						monitor.worked(1);
 						
@@ -143,7 +146,11 @@ public class ImportReportWizard extends Wizard implements IPageChangingListener{
 						ReportPlugIn.displayLog(MessageFormat.format(Messages.ImportReportWizard_ErrorMsg + "\n\n" + ex.getLocalizedMessage(), new Object[]{report.getName() + " [" + report.getId() + "]"}), ex); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}finally{
 						if (outputFile != null){
-							outputFile.delete();
+							try {
+								Files.delete(outputFile);
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
 						}
 					}
 					if (monitor.isCanceled()){
@@ -173,7 +180,7 @@ public class ImportReportWizard extends Wizard implements IPageChangingListener{
 		
 	}
 			
-	private void importFiles(final List<File> files) throws Exception {
+	private void importFiles(final List<Path> files) throws Exception {
 		
 		final Object inputFolder = page2.getFolder();
 		getContainer().run(true, true, new IRunnableWithProgress() {
@@ -184,15 +191,15 @@ public class ImportReportWizard extends Wizard implements IPageChangingListener{
 				monitor.beginTask(Messages.ImportReportWizard_TaskName2, files.size());
 				int importCnt = 0;
 				
-				for (File f : files){
-					monitor.subTask(MessageFormat.format(Messages.ImportReportWizard_TaskProgress2, new Object[]{f.getName()}));
+				for (Path f : files){
+					monitor.subTask(MessageFormat.format(Messages.ImportReportWizard_TaskProgress2, new Object[]{f.getFileName().toString()}));
 					monitor.worked(1);
 					try{
 						if (importReport(f, inputFolder)){
 							importCnt++;	
 						}
 					}catch (Exception ex){
-						ReportPlugIn.displayLog(MessageFormat.format(Messages.ImportReportWizard_FileError, new Object[]{f.getAbsolutePath()}) + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
+						ReportPlugIn.displayLog(MessageFormat.format(Messages.ImportReportWizard_FileError, new Object[]{f.toString()}) + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 					}	
 					if (monitor.isCanceled()){
 						break;
@@ -220,7 +227,7 @@ public class ImportReportWizard extends Wizard implements IPageChangingListener{
 		});
 	}
 	
-	private boolean importReport(File file, Object reportFolder) throws Exception{
+	private boolean importReport(Path file, Object reportFolder) throws Exception{
 		ImportReportEngine importer = new ImportReportEngine();
 		return importer.importReport(file, reportFolder, SmartDB.getCurrentConservationArea());
 	}

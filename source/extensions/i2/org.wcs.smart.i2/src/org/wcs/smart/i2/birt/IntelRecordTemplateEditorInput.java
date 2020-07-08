@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.birt;
 
 import java.io.File;
+import java.nio.file.Path;
 
 import org.eclipse.birt.report.designer.internal.ui.editors.ReportEditorInput;
 
@@ -33,8 +34,8 @@ import org.eclipse.birt.report.designer.internal.ui.editors.ReportEditorInput;
  */
 public class IntelRecordTemplateEditorInput  extends ReportEditorInput {
 
-	public IntelRecordTemplateEditorInput(File file) {
-		super(file);
+	public IntelRecordTemplateEditorInput(Path file) {
+		super(file.toAbsolutePath().toFile());
 	}
 	
 	public boolean equals(Object other){

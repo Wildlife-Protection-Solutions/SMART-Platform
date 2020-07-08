@@ -21,8 +21,9 @@
  */
 package org.wcs.smart.cybertracker.importer;
 
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -304,13 +305,13 @@ public class CyberTrackerImportComposite extends Composite {
 	}
 	
 	private void performImport(final boolean fromPda) {
-		File[] dialogFiles = null;
+		Path[] dialogFiles = null;
 		if (!fromPda) {
 			dialogFiles = selectFile();
 			if (dialogFiles == null) return;
 		}
 		
-		final File[] files = dialogFiles;
+		final Path[] files = dialogFiles;
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try {
 			pmd.run(true, false, new IRunnableWithProgress() {
@@ -329,10 +330,10 @@ public class CyberTrackerImportComposite extends Composite {
 							progress.setWorkRemaining(files.length);
 							data = new ArrayList<ICyberTrackerData>();
 							for (int i = 0; i < files.length; i ++){
-								File currentFile = files[i];
-								if (!currentFile.exists()){
+								Path currentFile = files[i];
+								if (!Files.exists(currentFile)){
 									progress.worked(1);
-									final File fcurrentFile = currentFile;
+									final Path fcurrentFile = currentFile;
 									Display.getDefault().syncExec(new Runnable(){
 										@Override
 										public void run() {
@@ -400,7 +401,7 @@ public class CyberTrackerImportComposite extends Composite {
 		}
 	}
 
-	private File[] selectFile() {
+	private Path[] selectFile() {
 		CyberTrackerFileImportDialog fileDialog = new CyberTrackerFileImportDialog(getShell());
 		if (fileDialog.open() == IDialogConstants.OK_ID)
 			return fileDialog.getSelectedFiles();

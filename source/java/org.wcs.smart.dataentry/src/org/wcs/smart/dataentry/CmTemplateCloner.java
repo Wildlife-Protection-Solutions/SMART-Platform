@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.dataentry;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -147,8 +148,8 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 			}else{
 				clone.setListItem(null);
 			}
-			File imgFile = listItem.getImageFile();
-			if (imgFile != null && imgFile.exists()) {
+			Path imgFile = listItem.getImageFile();
+			if (imgFile != null && Files.exists(imgFile)) {
 				clone.setImageFile(listItem.getImageFile());
 			}
 			engine.getSession().saveOrUpdate(clone);
@@ -175,8 +176,8 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 			}
 			clone.setConfig(clonedCfg);
 			clone.setDisplayMode(treeItem.getDisplayMode());
-			File imgFile = treeItem.getImageFile();
-			if (imgFile != null && imgFile.exists()) {
+			Path imgFile = treeItem.getImageFile();
+			if (imgFile != null && Files.exists(imgFile)) {
 				clone.setImageFile(treeItem.getImageFile());
 			}
 			clone.setChildren(new ArrayList<CmAttributeTreeNode>());
@@ -216,8 +217,9 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 		clonedNode.setCollectMultipleObservations(toCopy.isCollectMultipleObservations());
 		clonedNode.setUseSingleGpsPoint(toCopy.isUseSingleGpsPoint());
 		clonedNode.setDisplayMode(toCopy.getDisplayMode());
-		File imgFile = toCopy.getImageFile();
-		if (imgFile != null && imgFile.exists()) {
+		
+		Path imgFile = toCopy.getImageFile();
+		if (imgFile != null && Files.exists(imgFile)) {
 			clonedNode.setImageFile(toCopy.getImageFile());
 		}
 		

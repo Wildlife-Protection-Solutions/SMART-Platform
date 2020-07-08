@@ -21,11 +21,11 @@
  */
 package org.wcs.smart.r.plugin;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -37,6 +37,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.r.RPlugIn;
 import org.wcs.smart.r.RScriptManager;
 import org.wcs.smart.r.internal.Messages;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Job removes all plan related tabled from the database
@@ -75,8 +76,9 @@ public class RemoveRJob extends Job {
 			//delete intelligence data from the filestore 
 			for (ConservationArea ca : cas){
 				try {
-					File folder = new File(ca.getFileDataStoreLocation() + File.separator + RScriptManager.RSCRIPT_DIR);
-					FileUtils.deleteDirectory(folder);
+					Path folder = Paths.get(ca.getFileDataStoreLocation())
+							.resolve(RScriptManager.RSCRIPT_DIR);
+					SmartUtils.deleteDirectory(folder);
 				} catch (IOException ex) {
 					RPlugIn.log("Error removing r script folder for Conservation Area: " + ca.getId(), ex); //$NON-NLS-1$
 				}

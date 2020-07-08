@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.imageprocessor.ui;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -200,8 +200,8 @@ public class ProcessingStatusDialog extends SmartStyledTitleDialog{
 				if (col == 0) {
 					return ""; //$NON-NLS-1$
 				}else if (col == 1) {
-					File f = ((ProcessingItem) element).getAttachment().getAttachmentFile();
-					return f.getName() + " (" + f.toString() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+					Path f = ((ProcessingItem) element).getAttachment().getAttachmentFile();
+					return f.getFileName().toString() + " (" + f.toString() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 				}else if (col == 2) {
 					return ((ProcessingItem) element).getMessage();
 				}

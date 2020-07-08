@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.query.compound.ui;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map.Entry;
@@ -82,13 +83,13 @@ public class CompoundQueryExporter implements IQueryExporter {
 	}
 
 	@Override
-	public void export(Query query, IQueryResult results, File file,
+	public void export(Query query, IQueryResult results, Path file,
 			HashMap<String, Object> parameters, IProgressMonitor monitor) throws Exception {
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.CompoundQueryExporter_TaskName, 5);
 		if (results== null) {
 			throw new Exception(Messages.SimpleQueryExporter_Error_QueryNotRun);
 		}
-		if (!file.isDirectory()){
+		if (!Files.isDirectory(file)){
 			throw new Exception(Messages.CompoundQueryExporter_DirectoryRequired);
 		}
 		CompoundMapQuery mapQuery = (CompoundMapQuery)query;
@@ -134,7 +135,7 @@ public class CompoundQueryExporter implements IQueryExporter {
 		
 		for(Entry<Query, IQueryExporter> exporter: exports.entrySet()){
 			String queryName = URLUtils.cleanFilename(exporter.getKey().getName() + "_" + exporter.getKey().getId()) + "." + exporter.getValue().getDefaultExtension(); //$NON-NLS-1$ //$NON-NLS-2$
-			File f = new File(file, queryName); 
+			Path f = file.resolve(queryName); 
 			
 			exporter.getValue().export(exporter.getKey(), cqresults.getResults(exporter.getKey().getUuid()), f, 
 					parameters, progress.split(1));

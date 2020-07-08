@@ -21,8 +21,10 @@
  */
 package org.wcs.smart.query.ui.importexport;
 
-import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.List;
@@ -169,9 +171,9 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 						continue;
 					}
 
-					File outputFile = null;
+					Path outputFile = null;
 					try{
-						outputFile = File.createTempFile(qi.getId(), ".xml"); //$NON-NLS-1$
+						outputFile = Files.createTempFile(qi.getId(), ".xml"); //$NON-NLS-1$
 						HashMap<String, Object> params = new HashMap<String, Object>();
 						def.export(query, null, outputFile, params, monitor);
 						
@@ -192,7 +194,11 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 						QueryPlugIn.log(ex.getMessage(), ex);
 					}finally{
 						if (outputFile != null){
-							outputFile.delete();
+							try {
+								Files.delete(outputFile);
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
 						}
 					}
 				}
@@ -210,7 +216,7 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 		
 	}
 			
-	private void importFiles(final List<File> files) throws Exception {
+	private void importFiles(final List<Path> files) throws Exception {
 		
 		getContainer().run(false, false, new IRunnableWithProgress() {
 			@Override
@@ -224,8 +230,8 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 				
 				Query firstQuery = null;
 				
-				for (File f : files){
-					monitor.subTask(MessageFormat.format(Messages.ImportQueryWizard_ImportingProgress, new Object[]{f.getName()}));
+				for (Path f : files){
+					monitor.subTask(MessageFormat.format(Messages.ImportQueryWizard_ImportingProgress, new Object[]{f.getFileName().toString()}));
 					monitor.worked(1);
 					try{
 						List<Query> q = importQuery(f, qf);
@@ -239,7 +245,7 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 							}
 						}
 					}catch (Exception ex){
-						QueryPlugIn.displayLog(MessageFormat.format(Messages.ImportQueryWizard_ErrorImportingFile, new Object[]{f.getAbsolutePath()}) + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
+						QueryPlugIn.displayLog(MessageFormat.format(Messages.ImportQueryWizard_ErrorImportingFile, new Object[]{f.toAbsolutePath().toString()}) + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 					}	
 				
 				}
@@ -255,7 +261,7 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 		});
 	}
 	
-	private List<Query> importQuery(File file, QueryFolder qf) throws Exception{
+	private List<Query> importQuery(Path file, QueryFolder qf) throws Exception{
 		QueryImportEngine importer = new QueryImportEngine();
 		List<Query> queries = importer.importQuery(file, SmartDB.getCurrentConservationArea());
 		

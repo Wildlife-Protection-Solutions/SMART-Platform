@@ -21,13 +21,13 @@
  */
 package org.wcs.smart.connect.downloader.ca;
 
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.hibernate.Session;
@@ -100,14 +100,14 @@ public class CaExporterJob implements Runnable {
 					 + ".zip"; //$NON-NLS-1$
 			
 				destFile = DataStoreManager.INSTANCE
-					.getRootDirectory().toPath()
+					.getRootDirectory()
 					.resolve(DataStoreManager.CA_EXPORT_LOCATION)
 					.resolve(filename);
 				if (!Files.exists(destFile.getParent())){
 					Files.createDirectories(destFile.getParent());
 				}
 				
-				item.setLocalFilename(DataStoreManager.INSTANCE.getRootDirectory().toPath().relativize(destFile).toString());
+				item.setLocalFilename(DataStoreManager.INSTANCE.getRootDirectory().relativize(destFile).toString());
 				
 				if (Files.exists(destFile)){
 					
@@ -159,17 +159,17 @@ public class CaExporterJob implements Runnable {
 	
 		ConservationArea ca = (ConservationArea) session.get(ConservationArea.class, caUuid);
 		
-		Path tempDir = new File(DataStoreManager.INSTANCE.getTemporaryDirectory().getAbsoluteFile(), System.nanoTime()+"").toPath(); //$NON-NLS-1$
+		Path tempDir = DataStoreManager.INSTANCE.getTemporaryDirectory().resolve(System.nanoTime()+""); //$NON-NLS-1$
 		if (!Files.exists(tempDir)){
 			Files.createDirectories(tempDir);
 		}
 		try{
 			//export ca
-			ICaDataExportEngine engine = new PostgresqlCaDataExportEngine(tempDir.toFile(), ca, session);
+			ICaDataExportEngine engine = new PostgresqlCaDataExportEngine(tempDir, ca, session);
 			(new PostgresqlExporters()).exportAll(engine);
 			
 			//zip
-			ZipUtil.createZip(tempDir.toFile().listFiles(), destFile.toFile());
+			ZipUtil.createZip(Files.list(tempDir).collect(Collectors.toList()), destFile);
 		}finally{
 			FileUtils.deleteDirectory(tempDir.toFile());
 		}

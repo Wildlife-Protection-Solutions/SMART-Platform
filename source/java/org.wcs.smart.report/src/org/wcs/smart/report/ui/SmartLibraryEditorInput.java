@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.report.ui;
 
-import java.io.File;
+import java.nio.file.Path;
 
 import org.eclipse.birt.report.designer.internal.ui.editors.ReportEditorInput;
 
@@ -37,8 +37,8 @@ public class SmartLibraryEditorInput  extends ReportEditorInput {
 	/**
 	 * @param report the report object
 	 */
-	public SmartLibraryEditorInput(File file) {
-		super(file);
+	public SmartLibraryEditorInput(Path file) {
+		super(file.toAbsolutePath().toFile());
 	}
 	
 	

@@ -21,7 +21,9 @@
  */
 package org.wcs.smart.incident.ui;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -29,7 +31,6 @@ import java.util.List;
 
 import javax.inject.Named;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
@@ -99,13 +100,15 @@ public class DeleteIncidentHandler{
 				return;
 			}
 			for (IncidentEditorInput w : toDelete){
-				File f = new File(new File(SmartDB.getCurrentConservationArea().getFileDataStoreLocation(), IndepedentIncidentSource.FILESTORE_LOC), UuidUtils.getDirectoryPath(w.getUuid()));
-				if (f.exists()){
+				Path f = Paths.get(SmartDB.getCurrentConservationArea().getFileDataStoreLocation())
+						.resolve(IndepedentIncidentSource.FILESTORE_LOC)
+						.resolve(UuidUtils.getDirectoryPath(w.getUuid()));
+				if (Files.exists(f)){
 					try{
-						FileUtils.forceDelete(f);
+						Files.delete(f);
 					}catch(Exception ex){
 						IncidentPlugIn.displayLog(
-								MessageFormat.format(Messages.DeleteIncidentHandler_DeleteError, f.getAbsolutePath()), ex);
+								MessageFormat.format(Messages.DeleteIncidentHandler_DeleteError, f.toAbsolutePath().toString()), ex);
 					}
 				}
 			}

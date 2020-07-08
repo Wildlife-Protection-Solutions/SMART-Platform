@@ -21,9 +21,10 @@
  */
 package org.wcs.smart.export.dialog;
 
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -87,10 +88,10 @@ public class CsvCaImportDialog extends AbstractCsvDialog {
 	}
 
 	@Override
-	protected boolean performAction(File file, char delimiter, boolean headers, Charset cs, IProgressMonitor monitor, Session session) throws Exception {
+	protected boolean performAction(Path file, char delimiter, boolean headers, Charset cs, IProgressMonitor monitor, Session session) throws Exception {
 		boolean result = false;
 		if (isImportFromCa) {
-			File tmpFile = File.createTempFile("tempImport", ".csv"); //$NON-NLS-1$ //$NON-NLS-2$
+			Path tmpFile = Files.createTempFile("tempImport", ".csv"); //$NON-NLS-1$ //$NON-NLS-2$
 			try {
 				result = config.getExporter().exportCsvFile(tmpFile,  DelimiterCombo.Delimiter.COMMA.value, caToExportFrom, false, cs, monitor, session);
 				if (result) {
@@ -98,7 +99,7 @@ public class CsvCaImportDialog extends AbstractCsvDialog {
 				}
 				
 			} finally {
-				tmpFile.deleteOnExit();
+				tmpFile.normalize().toAbsolutePath().toFile().deleteOnExit();
 			}
 		}else{
 			result = config.getImporter().importCsvFile(file, delimiter, headers, cs, monitor, session);

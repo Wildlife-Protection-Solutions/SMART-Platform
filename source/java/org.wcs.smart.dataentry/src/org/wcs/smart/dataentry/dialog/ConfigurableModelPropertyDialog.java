@@ -21,13 +21,14 @@
  */
 package org.wcs.smart.dataentry.dialog;
 
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -413,10 +414,10 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 			//nothing selected
 			return;
 		}
-		final File f = new File(file);
-		if (f.exists()){
+		final Path f = Paths.get(file);
+		if (Files.exists(f)){
 			if (!MessageDialog.openQuestion(getShell(), Messages.ConfigurableModelPropertyDialog_Overwrite_Dialog_Title, 
-					MessageFormat.format(Messages.ConfigurableModelPropertyDialog_Overwrite_Dialog_Message, new Object[]{ f.getName()}))){
+					MessageFormat.format(Messages.ConfigurableModelPropertyDialog_Overwrite_Dialog_Message, new Object[]{ f.getFileName().toString()}))){
 				return;
 			}
 		}
@@ -427,7 +428,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					File tmpFolder = null;
+					Path tmpFolder = null;
 					try {
 						monitor.beginTask(Messages.ConfigurableModelPropertyDialog_Exporting, 8);
 						monitor.subTask(Messages.ConfigurableModelPropertyDialog_Converting);
@@ -436,15 +437,15 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 						monitor.subTask(Messages.ConfigurableModelPropertyDialog_Writing);
 						if (xml == null || monitor.isCanceled()) return;
 						
-						int index = f.getName().lastIndexOf('.');
-						String name = f.getName();
+						int index = f.getFileName().toString().lastIndexOf('.');
+						String name = f.getFileName().toString();
 						if (index >= 0){
 							name= name.substring(0, index);
 						}
 						tmpFolder = SmartFileUtils.createTempDirectory("smart_cm_export"); //$NON-NLS-1$
-						File xmlFile = new File(tmpFolder.getAbsolutePath() + File.separator + name + ".xml"); //$NON-NLS-1$
+						Path xmlFile = tmpFolder.resolve(name + ".xml"); //$NON-NLS-1$
 						
-						try(FileOutputStream fout = new FileOutputStream(xmlFile)){
+						try(OutputStream fout = Files.newOutputStream(xmlFile)){
 							CmXmlManager.writeDataModel(xml, fout);
 						}
 						
@@ -452,16 +453,16 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 						monitor.subTask(Messages.ConfigurableModelPropertyDialog_Zipping);
 						if (monitor.isCanceled()) return;
 						
-						List<File> toZip = new ArrayList<>();
+						List<Path> toZip = new ArrayList<>();
 						toZip.add(xmlFile);
-						File dataFolder = new File(cm.getFileDataStoreLocation());
-						if (dataFolder != null && dataFolder.exists() && dataFolder.isDirectory()) {
-							toZip.addAll(Arrays.asList(dataFolder.listFiles()));
+						Path dataFolder = Paths.get(cm.getFileDataStoreLocation());
+						if (dataFolder != null && Files.exists(dataFolder) && Files.isDirectory(dataFolder)) {
+							Files.list(dataFolder).forEach(file->toZip.add(file));							
 						}
 						//we don't add the data model icons here as they are not required
 						//for importing the configurable model
 						
-						ZipUtil.createZip(toZip.toArray(new File[toZip.size()]), f, monitor);
+						ZipUtil.createZip(toZip.toArray(new Path[toZip.size()]), f, monitor);
 						if (monitor.isCanceled()) return;
 						
 						monitor.done();
@@ -495,7 +496,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		
 		String file = fd.open();
 		if (file != null) {
-			final File f = new File(file);
+			final Path f = Paths.get(file);
 			try {
 				ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 				pmd.run(true, true, new IRunnableWithProgress() {
@@ -503,7 +504,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 						try {
 							CmXmlToSmartImporter importer = new CmXmlToSmartImporter();
-							final ConfigurableModel cm = f.getName().endsWith(".zip") ? importer.importZip(f, monitor) : importer.importXml(f, monitor); //$NON-NLS-1$
+							final ConfigurableModel cm = f.getFileName().toString().endsWith(".zip") ? importer.importZip(f, monitor) : importer.importXml(f, monitor); //$NON-NLS-1$
 							if (cm != null) {
 								Display.getDefault().syncExec(new Runnable() {
 									@Override

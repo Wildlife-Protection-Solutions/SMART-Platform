@@ -61,12 +61,12 @@ public class PostgresqlExporters {
 	}
 	
 	private void exportDataStore(ICaDataExportEngine exportEngine) throws Exception {
-		Path filestore = exportEngine.getExportLocation().toPath().resolve(ICaDataExportEngine.FILESTORE_DIR);
+		Path filestore = exportEngine.getExportLocation().resolve(ICaDataExportEngine.FILESTORE_DIR);
 		
 		Files.createDirectories(filestore);
 		
 		ConservationAreaInfo info = (ConservationAreaInfo) exportEngine.getSession().get(ConservationAreaInfo.class, exportEngine.getConservationArea().getUuid());
-		Path filestoreLocation = DataStoreManager.INSTANCE.getConservationAreaFullPath(info).toPath();
+		Path filestoreLocation = DataStoreManager.INSTANCE.getConservationAreaFullPath(info);
 		if (Files.exists(filestoreLocation)){
 			FileUtils.copyDirectory(filestoreLocation.toFile(), filestore.toFile());
 		}
@@ -192,7 +192,7 @@ public class PostgresqlExporters {
 			.createNativeQuery("SELECT version FROM " + PLUGIN_VERSION_TBL + " WHERE ca_uuid = '" + exportEngine.getConservationArea().getUuid().toString() + "' AND plugin_id = 'org.wcs.smart'") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			.uniqueResult();
 		
-		Path file = exportEngine.getExportLocation().toPath().resolve(ICaDataExportEngine.CA_INFO_FILENAME);
+		Path file = exportEngine.getExportLocation().resolve(ICaDataExportEngine.CA_INFO_FILENAME);
 		ConservationArea ca = exportEngine.getConservationArea();
 		try(BufferedWriter writer = Files.newBufferedWriter(file)){
 			writer.write(UuidUtils.uuidToString(ca.getUuid()));

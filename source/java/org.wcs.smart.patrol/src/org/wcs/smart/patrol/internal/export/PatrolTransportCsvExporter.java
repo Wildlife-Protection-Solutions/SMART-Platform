@@ -21,11 +21,11 @@
  */
 package org.wcs.smart.patrol.internal.export;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,14 +56,14 @@ public class PatrolTransportCsvExporter implements ICsvDataExporter {
 	}
 
 	@Override
-	public boolean exportCsvFile(File file, char delimiter, ConservationArea ca, boolean headers, Charset cs, IProgressMonitor monitor, Session session) {
+	public boolean exportCsvFile(Path file, char delimiter, ConservationArea ca, boolean headers, Charset cs, IProgressMonitor monitor, Session session) {
 
 		List<Language> languages = new ArrayList<Language>(ca.getLanguages().size());
 		for (Language l : ca.getLanguages()) {
 			languages.add(session.get(Language.class, l.getUuid()));
 		}
 		try (CSVWriter writer = new CSVWriter(
-					new OutputStreamWriter(new FileOutputStream(file), cs),
+					new OutputStreamWriter(Files.newOutputStream(file), cs),
 					delimiter, '"',SharedUtils.LINE_SEPARATOR)){
 
 			List<PatrolTransportType> types = getTransportTypes(ca, session);

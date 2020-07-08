@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.ui.ca.properties;
 
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Path;
 import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -389,13 +389,13 @@ public class AttributeInfoPanel extends Composite {
 							try {
 								for (int i = 0; i < files.size(); i++) {
 									IconFile ff = files.get(i);
-									File f = null;
+									Path f = null;
 									if (ff.getCopyFromLocation() != null) {
 										f = ff.getCopyFromLocation();
 									}else {
 										f = ff.getAttachmentFile();
 									}
-									Image mm = SmartUtils.getImage(f.toPath(), LIST_ICON_SIZE);
+									Image mm = SmartUtils.getImage(f, LIST_ICON_SIZE);
 									try {
 										gc.drawImage(mm, 0,0, LIST_ICON_SIZE,LIST_ICON_SIZE,i*(LIST_ICON_SIZE+5),0,LIST_ICON_SIZE,LIST_ICON_SIZE);
 									}finally{

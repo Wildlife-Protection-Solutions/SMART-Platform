@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.ui.internal.backup;
 
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Path;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.di.annotations.Execute;
@@ -50,7 +50,7 @@ import org.wcs.smart.internal.Messages;
 public class BackupHandler {
 
 	private int backupState = 0;
-	private File backupFile = null;
+	private Path backupFile = null;
 	/**
 	 * @see org.eclipse.core.commands.AbstractHandler#execute(org.eclipse.core.commands.ExecutionEvent)
 	 */
@@ -127,7 +127,7 @@ public class BackupHandler {
 			MessageDialog.openInformation(shell,
 					Messages.BackupHandler_BackupComplete_DialogTitle,
 					Messages.BackupHandler_BackupComplete_DialogMessage + "\n\n" //$NON-NLS-1$
-							+ backupFile.getAbsolutePath());
+							+ backupFile.toAbsolutePath());
 		}else if (backupState == 2){
 			MessageDialog.openError(shell,
 					Messages.BackupHandler_BackupFailed_DialogTitle,

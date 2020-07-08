@@ -22,6 +22,7 @@
 package org.wcs.smart.cybertracker;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Date;
@@ -110,11 +111,19 @@ public class CyberTrackerStartupJob extends Job {
 			return;
 		long current = new Date().getTime();
 		long bound = dayLimit * 24 * 60 * 60 * 1000;
-		for (File file : folder.toFile().listFiles()) {
-			if (current - file.lastModified() > bound) {
-				FileUtils.deleteQuietly(file);
-			}
-		}
+		
+		try {
+			Files.list(folder).forEach(file->{
+				try {
+					if (current - Files.getLastModifiedTime(file).toMillis() > bound) {
+						Files.delete(file);
+					}
+				}catch (Exception ex) {
+					
+				}
+			});
+		}catch(IOException ex) {}
+		
 	}
 	
 }

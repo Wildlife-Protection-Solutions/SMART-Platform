@@ -22,6 +22,7 @@
 package org.wcs.smart.asset.ui.data;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DateFormat;
@@ -370,10 +371,10 @@ public abstract class AssetDataPanel {
 				for (WaypointAttachment sp : attachments) {
 					WaypointAttachment att = new WaypointAttachment();
 					// copy file to temp location so it won't be deleted out from under us
-					File tmpLocation = File.createTempFile("smart_" + System.nanoTime(), ""); //$NON-NLS-1$ //$NON-NLS-2$
-					tmpLocation.deleteOnExit();
+					Path tmpLocation = Files.createTempFile("smart_" + System.nanoTime(), ""); //$NON-NLS-1$ //$NON-NLS-2$
+					tmpLocation.toAbsolutePath().toFile().deleteOnExit();
 					sp.computeFileLocation(session);
-					FileUtils.copyFile(sp.getAttachmentFile(), tmpLocation);
+					Files.copy(sp.getAttachmentFile(), tmpLocation);
 					att.setCopyFromLocation(tmpLocation);
 					att.setFilename(sp.getFilename());
 					att.setWaypoint(cloneWp);
@@ -971,10 +972,10 @@ public abstract class AssetDataPanel {
 								
 								WaypointAttachment att = new WaypointAttachment();
 								// copy file to temp location so it won't be deleted out from under us
-								File tmpLocation = File.createTempFile("smart_" + System.nanoTime(), ""); //$NON-NLS-1$ //$NON-NLS-2$
-								tmpLocation.deleteOnExit();
+								Path tmpLocation = Files.createTempFile("smart_" + System.nanoTime(), ""); //$NON-NLS-1$ //$NON-NLS-2$
+								tmpLocation.toAbsolutePath().toFile().deleteOnExit();
 								source.computeFileLocation(session);
-								FileUtils.copyFile(source.getAttachmentFile(), tmpLocation);
+								Files.copy(source.getAttachmentFile(), tmpLocation);
 								att.setCopyFromLocation(tmpLocation);
 								att.setFilename(source.getFilename());
 								att.setWaypoint(core.getWaypoint());
@@ -1270,7 +1271,7 @@ public abstract class AssetDataPanel {
 
 					//create new waypoint attachment
 					WaypointAttachment wa = new WaypointAttachment();
-					wa.setCopyFromLocation(p.toFile());
+					wa.setCopyFromLocation(p);
 					wa.setWaypoint(waypoint.getWaypoint());
 					wa.setFilename(s);
 					toAdd.add(wa);

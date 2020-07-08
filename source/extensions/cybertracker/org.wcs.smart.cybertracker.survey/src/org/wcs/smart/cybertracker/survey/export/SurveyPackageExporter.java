@@ -22,13 +22,12 @@
 package org.wcs.smart.cybertracker.survey.export;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -124,7 +123,7 @@ public enum SurveyPackageExporter {
 					throw new Exception("Survey design requires a configurable model at this time.  Data models are not exported."); //$NON-NLS-1$
 				}
 				
-				List<File> toIncludeInZip = new ArrayList<>();
+				List<Path> toIncludeInZip = new ArrayList<>();
 				
 				//contribution files
 				HashMap<String, Object> projectAdditions = new HashMap<>();
@@ -136,12 +135,12 @@ public enum SurveyPackageExporter {
 							Path dirPath = tempDir.resolve(p.getFileName().toString());
 							Files.createDirectory(dirPath);
 							Path mapfiles = CtJsonExportUtils.copyFiles(p, dirPath);
-							if (mapfiles != null) toIncludeInZip.add(mapfiles.toFile());
+							if (mapfiles != null) toIncludeInZip.add(mapfiles);
 							
 						}else {
 							Path moveTo = tempDir.resolve(p.getFileName().toString());
 							Files.move(p, moveTo);
-							toIncludeInZip.add(moveTo.toFile());
+							toIncludeInZip.add(moveTo);
 						}
 					}
 					if (update.getProjectMetadata() != null) {
@@ -164,13 +163,13 @@ public enum SurveyPackageExporter {
 				try(OutputStream out = Files.newOutputStream(cmFile)){
 					CmXmlManager.writeDataModel(xmlModel, out);
 				}
-				toIncludeInZip.add(cmFile.toFile());
+				toIncludeInZip.add(cmFile);
 				
 				//include configurable model image files
 				sub.split(1);
-				File dataFolder = new File(modelToExport.getFileDataStoreLocation());
-				if (dataFolder != null && dataFolder.exists() && dataFolder.isDirectory()) {
-					toIncludeInZip.addAll(Arrays.asList(dataFolder.listFiles()));
+				Path dataFolder = Paths.get(modelToExport.getFileDataStoreLocation());
+				if (dataFolder != null && Files.exists(dataFolder) && Files.isDirectory(dataFolder)) {
+					toIncludeInZip.addAll(Files.list(dataFolder).collect(Collectors.toList()));
 				}
 				
 				//include data model image files that are part of configurable model node
@@ -179,20 +178,20 @@ public enum SurveyPackageExporter {
 				//include ca logo
 				Path logo = sd.getConservationArea().getLogo();
 				if (logo != null && Files.exists(logo)) {
-					toIncludeInZip.add(logo.toFile());
+					toIncludeInZip.add(logo);
 				}
 				
 				sub.split(1);
 				Path metadataFile = tempDir.resolve(PATROL_METADATA_FILE);
 				metadataToJson(ctpackage, sd, session,  metadataFile);
-				toIncludeInZip.add(metadataFile.toFile());
+				toIncludeInZip.add(metadataFile);
 				
 				sub.split(1);
 				Path profileFile = tempDir.resolve(CT_PROFILE_FILE);
 				
 				profileToJson(ctpackage.getCtProfile(), sd.getTrackDistanceDirection(), session, context, profileFile, ctprofileAdditions);
 
-				toIncludeInZip.add(profileFile.toFile());
+				toIncludeInZip.add(profileFile);
 								
 				//get version number from output file
 				String fname = exportFile.getFileName().toString();
@@ -203,9 +202,9 @@ public enum SurveyPackageExporter {
 				sub.split(1);
 				Path projectFile = tempDir.resolve(CtJsonExportUtils.PROJECT_FILE);
 				writeProjectFile( ctpackage.getName(), modelToExport, version, logo, projectFile, metadataFile, projectAdditions);
-				toIncludeInZip.add(projectFile.toFile());
+				toIncludeInZip.add(projectFile);
 				
-				ZipUtil.createZip(toIncludeInZip.toArray(new File[toIncludeInZip.size()]), exportFile.toFile(), sub.split(1));
+				ZipUtil.createZip(toIncludeInZip, exportFile, sub.split(1));
 			}
 		}finally {
 			try {
@@ -221,20 +220,20 @@ public enum SurveyPackageExporter {
 	
 
 	private void processFile(DmObject object, IImageAssociatedObject cmObject, ConfigurableModel cm, 
-			List<File> toIncludeInZip, Path tempDir, Session session) throws IOException {
+			List<Path> toIncludeInZip, Path tempDir, Session session) throws IOException {
 		IconFile file = object.getIcon().getIconFile(cm.getIconSet());
 		if (file != null) {
 			file.computeFileLocation(session);
-			Path fromPath = file.getAttachmentFile().toPath();
-			String fileName = cmObject.getImageFile().getName();
+			Path fromPath = file.getAttachmentFile();
+			String fileName = cmObject.getImageFile().getFileName().toString();
 			Path toPath = tempDir.resolve(SharedUtils.getFilenameWithoutExtension(fileName) + "." + SharedUtils.getFilenameExtension(fromPath.getFileName().toString())); //$NON-NLS-1$
 			Files.copy(fromPath, toPath);
-			if (!toIncludeInZip.contains(toPath.toFile())) toIncludeInZip.add(toPath.toFile());
+			if (!toIncludeInZip.contains(toPath)) toIncludeInZip.add(toPath);
 		}
 	}
 	
 	
-	private void includeDmIcons(ConfigurableModel cm, List<File> toIncludeInZip,
+	private void includeDmIcons(ConfigurableModel cm, List<Path> toIncludeInZip,
 			Path tempDir, Session session) throws IOException {
 		List<Object> toProcess = new ArrayList<>();
 		toProcess.addAll(cm.getNodes());

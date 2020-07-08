@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.connect.api;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -119,12 +118,12 @@ public class Uploader extends HttpServlet {
 				throw new SmartConnectException(Response.Status.NOT_FOUND);
 			}
 			UploadStatus status = new UploadStatus(item);
-			File f = DataStoreManager.INSTANCE.getFile(item.getLocalFilename());
+			java.nio.file.Path f = DataStoreManager.INSTANCE.getFile(item.getLocalFilename());
 			
-			if (item.getLocalFilename().isEmpty() || !f.exists()){
+			if (item.getLocalFilename().isEmpty() || !Files.exists(f)){
 				status.setCurrentSize(0);
 			}else{
-				Long size = Files.size(f.toPath());
+				Long size = Files.size(f);
 				status.setCurrentSize(size);
 			}
 			return status;
@@ -240,14 +239,14 @@ public class Uploader extends HttpServlet {
 
 	private void processInputStream(InputStream data, WorkItem item) throws IOException, Exception {
 		Session s;
-		File datastoreFile = DataStoreManager.INSTANCE.getFile(item.getLocalFilename());
-		try(OutputStream out = Files.newOutputStream(datastoreFile.toPath(), StandardOpenOption.APPEND, StandardOpenOption.CREATE)){
+		java.nio.file.Path datastoreFile = DataStoreManager.INSTANCE.getFile(item.getLocalFilename());
+		try(OutputStream out = Files.newOutputStream(datastoreFile, StandardOpenOption.APPEND, StandardOpenOption.CREATE)){
 			IOUtils.copy(data, out);
 		}
 
 		//if start at bytes already provided we should probably either fail or skip 
 		//bytes
-		long newFileSize = Files.size(datastoreFile.toPath());		
+		long newFileSize = Files.size(datastoreFile);		
 		if (newFileSize == item.getTotalBytes()){
 			//we are finished uploading and ready to start processing
 			s = HibernateManager.getSession(context);

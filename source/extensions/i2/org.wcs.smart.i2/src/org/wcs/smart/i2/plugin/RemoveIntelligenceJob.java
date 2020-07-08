@@ -21,13 +21,13 @@
  */
 package org.wcs.smart.i2.plugin;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -40,6 +40,7 @@ import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.birt.IntelReportManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttachment;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Job removes all plan related tabled from the database
@@ -80,14 +81,16 @@ public class RemoveIntelligenceJob extends Job {
 			//delete intelligence data from the filestore 
 			for (ConservationArea ca : cas){
 				try {
-					File folder = new File(ca.getFileDataStoreLocation() + File.separator + IntelAttachment.INTELLIGENCE_FS_DIR);
-					FileUtils.deleteDirectory(folder);
+					Path folder = Paths.get(ca.getFileDataStoreLocation())
+							.resolve(IntelAttachment.INTELLIGENCE_FS_DIR);
+					SmartUtils.deleteDirectory(folder);
 				} catch (IOException ex) {
 					Intelligence2PlugIn.log(Messages.RemoveIntelligenceJob_DeleteFolderError + ex.getMessage(), ex);
 				}
 				try {
-					File folder = new File(ca.getFileDataStoreLocation() + File.separator + IntelReportManager.TEMP_DIRECTORY);
-					FileUtils.deleteDirectory(folder);
+					Path folder = Paths.get(ca.getFileDataStoreLocation())
+							.resolve(IntelReportManager.TEMP_DIRECTORY);
+					SmartUtils.deleteDirectory(folder);
 				} catch (IOException ex) {
 					Intelligence2PlugIn.log(Messages.RemoveIntelligenceJob_DeleteFolderError + ex.getMessage(), ex);
 				}

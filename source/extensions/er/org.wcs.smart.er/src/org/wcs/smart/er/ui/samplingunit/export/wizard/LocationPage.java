@@ -21,7 +21,9 @@
  */
 package org.wcs.smart.er.ui.samplingunit.export.wizard;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -109,8 +111,8 @@ public class LocationPage extends WizardPage {
 	}
 	
 	private void validate(){
-		File f = new File(txtDirectory.getText());
-		if(f.isFile()){
+		Path f = Paths.get(txtDirectory.getText());
+		if(!Files.isDirectory(f)){
 			setErrorMessage(Messages.LocationPage_ErrorMessage);
 		}else{
 			setErrorMessage(null);
@@ -124,8 +126,8 @@ public class LocationPage extends WizardPage {
 		}
 	}
 	
-	public File getDirectory(){
-		File f = new File(txtDirectory.getText());
+	public Path getDirectory(){
+		Path f = Paths.get(txtDirectory.getText());
 		getWizard().getDialogSettings().put(DIR_KEY, txtDirectory.getText());
 		return f;
 	}

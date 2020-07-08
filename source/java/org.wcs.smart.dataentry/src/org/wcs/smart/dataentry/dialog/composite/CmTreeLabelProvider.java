@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.dataentry.dialog.composite;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -89,8 +90,8 @@ public class CmTreeLabelProvider extends AttributeTreeLabelProvider {
 	public Image getImage(Object element) {
 		CmAttributeTreeNode node = getTreeNode(element);
 		if (node != null){
-			File f = node.getImageFile();
-			if (!f.exists()) {
+			Path f = node.getImageFile();
+			if (!Files.exists(f)) {
 				if (node.getDmTreeNode() == null || node.getDmTreeNode().getIcon() == null) return null;
 				IconFile icon = node.getDmTreeNode().getIcon().getIconFile(node.getConfig().getModel().getIconSet());
 				if (icon != null) {
@@ -98,7 +99,7 @@ public class CmTreeLabelProvider extends AttributeTreeLabelProvider {
 				}
 			}
 			if (f == null) return null;
-			Image img = SmartUtils.getImage(f.toPath(), 16);
+			Image img = SmartUtils.getImage(f, 16);
 			if (img != null) {
 				images.add(img);
 				return img;

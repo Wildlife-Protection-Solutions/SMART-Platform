@@ -21,7 +21,9 @@
  */
 package org.wcs.smart.report.manger;
 
-import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -162,13 +164,15 @@ public class ReportManager {
 				throw ex;
 			}
 		}
-		File f = ReportPlugIn.getDefault().getReportFile(report);
-		if (!f.exists()){
+		Path f = ReportPlugIn.getDefault().getReportFile(report);
+		if (!Files.exists(f)){
 			throw new Exception(Messages.ReportManager_Deleteok_ReportFileNotFound + f.toString());
 		}
 		try{
-			if (!f.delete()){
-				throw new Exception(Messages.ReportManager_Deleteok_ReportFileNotRemoved + f.toString());
+			try {
+				Files.delete(f);
+			}catch(IOException ex) {
+				throw new Exception(Messages.ReportManager_Deleteok_ReportFileNotRemoved + f.toString(), ex);
 			}
 		}catch (Exception ex){
 			throw new Exception(Messages.ReportManager_Deleteok_ReportFileNotRemovedB + ex.getLocalizedMessage(), ex);
@@ -205,21 +209,21 @@ public class ReportManager {
 	 * @throws Exception if cannot determine a filename for the report
 	 */
 	public synchronized static String generateFilename(Report r) throws Exception{
-		File dir = ReportPlugIn.getReportDirectory(r.getConservationArea());
+		Path dir = ReportPlugIn.getReportDirectory(r.getConservationArea());
 
 		String fname = r.getId().replaceAll("[^\\p{Ll}\\p{Lu}\\p{Lt}\\p{Nd}]", ""); //$NON-NLS-1$ //$NON-NLS-2$  letters and digits
 		String suffix =  ".rptdesign"; //$NON-NLS-1$
 		
 		int cnt = 0;
-		File f = new File(dir, fname+suffix);
-		while(f.exists()){
+		Path f = dir.resolve(fname+suffix);
+		while(Files.exists(f)){
 			cnt ++;
 			if (cnt > 1000){
 				throw new Exception(Messages.ReportManager_GeneratingFileError);
 			}
-			f = new File(dir, fname + "_" + cnt + suffix); //$NON-NLS-1$
+			f = dir.resolve(fname + "_" + cnt + suffix); //$NON-NLS-1$
 		}
-		return f.getName();
+		return f.getFileName().toString();
 	}
 	
 	/**
@@ -262,7 +266,7 @@ public class ReportManager {
 		//create report file with default library
 		SessionHandle session = SessionHandleAdapter.getInstance().getSessionHandle();
 
-		ReportDesignHandle rdh = session.openDesign(ReportPlugIn.getDefault().getReportFile(report).getAbsolutePath());
+		ReportDesignHandle rdh = session.openDesign(ReportPlugIn.getDefault().getReportFile(report).toAbsolutePath().toString());
 		
 		List<?> datasets = rdh.getDataSets().getContents();
 		for (Iterator<?> iterator = datasets.iterator(); iterator.hasNext();) {

@@ -373,7 +373,7 @@ public class QueryApi extends HttpServlet{
 		}
 		 
 		if (format.equalsIgnoreCase(CsvExporter.FORMAT_KEY)){
-			java.nio.file.Path outputFile = SmartContext.INSTANCE.getTempFilestoreLocation().toPath().resolve(System.nanoTime() + ".smart.tmp"); //$NON-NLS-1$
+			java.nio.file.Path outputFile = SmartContext.INSTANCE.getTempFilestoreLocation().resolve(System.nanoTime() + ".smart.tmp"); //$NON-NLS-1$
 			CsvExporter exporter = new CsvExporter(outputFile, delimiter.charAt(0),request.getLocale());
 			
 			if (result instanceof AbstractDbFeatureResultSet
@@ -397,7 +397,7 @@ public class QueryApi extends HttpServlet{
 				
 		}else if (format.equalsIgnoreCase(ShpExporter.FORMAT_KEY)){
 			String filename = SmartUtils.cleanFileName(query.getName() + "_"+ query.getId()) + ".zip"; //$NON-NLS-1$ //$NON-NLS-2$
-			java.nio.file.Path outputFile  = SmartContext.INSTANCE.getTempFilestoreLocation().toPath().resolve(filename); 
+			java.nio.file.Path outputFile  = SmartContext.INSTANCE.getTempFilestoreLocation().resolve(filename); 
 			
 			ShpExporter exporter = new ShpExporter(outputFile, request.getLocale());
 			exporter.setPrj(prjProvider);
@@ -411,7 +411,7 @@ public class QueryApi extends HttpServlet{
 			return new QueryResult(writeBinary(outputFile), result);
 		}else if (format.equalsIgnoreCase(TiffRasterExporter.FORMAT_KEY)){
 			String filename = SmartUtils.cleanFileName(query.getName() + "_"+ query.getId()) + ".tiff"; //$NON-NLS-1$ //$NON-NLS-2$
-			java.nio.file.Path outputFile  = SmartContext.INSTANCE.getTempFilestoreLocation().toPath().resolve(filename); 
+			java.nio.file.Path outputFile  = SmartContext.INSTANCE.getTempFilestoreLocation().resolve(filename); 
 			
 			TiffRasterExporter exporter = new TiffRasterExporter(outputFile, request.getLocale());
 			
@@ -546,7 +546,7 @@ public class QueryApi extends HttpServlet{
 //			((IntelEntityRecordQueryResults)result).setSorting(sortColumnName, sortDirectionInt);
 //			((IntelEntityRecordQueryResults)result).configureSort(s);
 			if (format.equalsIgnoreCase(CsvExporter.FORMAT_KEY)){
-				java.nio.file.Path outputFile = SmartContext.INSTANCE.getTempFilestoreLocation().toPath().resolve(System.nanoTime() + ".smart.tmp"); //$NON-NLS-1$
+				java.nio.file.Path outputFile = SmartContext.INSTANCE.getTempFilestoreLocation().resolve(System.nanoTime() + ".smart.tmp"); //$NON-NLS-1$
 				CsvExporter exporter = new CsvExporter(outputFile, delimiter.charAt(0),request.getLocale());
 				exporter.exportResults( (IPagedQueryResultSet)result, s);
 				return new QueryResult(writeText(outputFile), new NoDisposeQueryResult());
@@ -567,7 +567,7 @@ public class QueryApi extends HttpServlet{
 				HashMap<ExportOption, Object> exportOptions = new HashMap<>();
 				exportOptions.put(ExportOption.DELIMITER, delimiter.charAt(0));
 				
-				java.nio.file.Path outputFile = SmartContext.INSTANCE.getTempFilestoreLocation().toPath().resolve(System.nanoTime() + ".smart.tmp"); //$NON-NLS-1$
+				java.nio.file.Path outputFile = SmartContext.INSTANCE.getTempFilestoreLocation().resolve(System.nanoTime() + ".smart.tmp"); //$NON-NLS-1$
 				CsvEntitySummaryQueryExporter exporter = new CsvEntitySummaryQueryExporter();
 				exporter.exportQuery( s, result, outputFile, exportOptions);
 				

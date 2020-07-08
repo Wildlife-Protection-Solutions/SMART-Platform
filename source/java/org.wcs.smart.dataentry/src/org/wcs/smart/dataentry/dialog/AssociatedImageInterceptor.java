@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.dataentry.dialog;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Files;
@@ -32,7 +31,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.apache.commons.io.FileUtils;
 import org.hibernate.EmptyInterceptor;
 import org.hibernate.Transaction;
 import org.hibernate.resource.transaction.spi.TransactionStatus;
@@ -44,6 +42,7 @@ import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.IImageAssociatedObject;
 import org.wcs.smart.util.SharedUtils;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * An interceptor for images associated with some of the objects.
@@ -161,7 +160,7 @@ public class AssociatedImageInterceptor extends EmptyInterceptor {
 	}
 
 	private void handleDelete(IImageAssociatedObject imgObject) {
-		File file = new File(imgObject.getImagePersistenceLocation());
+		Path file = Paths.get(imgObject.getImagePersistenceLocation());
 		
 		Object t = imgObject;
 		if (t instanceof CmAttributeOption) {
@@ -170,7 +169,7 @@ public class AssociatedImageInterceptor extends EmptyInterceptor {
 		if (t instanceof CmAttribute) {
 			Path helpImage = ((CmAttribute) t).getHelpImage();
 			if (helpImage != null && !helpImage.equals(((CmAttribute) t).getImportHelpFile()))
-				operations.add(new DeleteOperation(helpImage.toFile()));
+				operations.add(new DeleteOperation(helpImage));
 		}
 		
 		operations.add(new DeleteOperation(file));
@@ -195,17 +194,17 @@ public class AssociatedImageInterceptor extends EmptyInterceptor {
 	 */
 	private class DeleteOperation implements IOperation {
 		
-		private File toDelete;
+		private Path toDelete;
 		
-		public DeleteOperation(File toDelete) {
+		public DeleteOperation(Path toDelete) {
 			this.toDelete = toDelete;
 		}
 
 		@Override
 		public void execute() {
-			if (toDelete.exists()) {
+			if (Files.exists(toDelete)) {
 				try {
-					toDelete.delete();
+					Files.delete(toDelete);
 				} catch (Exception ex) {
 					SmartPlugIn.log("Could not delete file: " + toDelete.toString(), ex); //$NON-NLS-1$
 				}
@@ -231,54 +230,53 @@ public class AssociatedImageInterceptor extends EmptyInterceptor {
 		@Override
 		public void execute() {
 			//need some from-to mapping; and also objects can be cleared
-			File from = imgObject.getImageFile();
-			File to = new File(imgObject.getImagePersistenceLocation());
+			Path from = imgObject.getImageFile();
+			Path to = Paths.get(imgObject.getImagePersistenceLocation());
 			
 			if (from == null || from.equals(IImageAssociatedObject.NULL_FILE)) {
 				//find all files that start with "to" and delete them
 				//(changed for 6.1 when we support multiple image formats)
-				if (!to.getParentFile().exists()) {
-					try {
-						Files.createDirectories(to.getParentFile().toPath());
-					} catch (IOException e) {
-						SmartPlugIn.log(e.getMessage(), e);
-					}
-				}
-				for (File file : to.getParentFile().listFiles()) {
-					if (file.getName().startsWith(to.getName() + ".")) { //$NON-NLS-1$
-						try {
-							file.delete();
-						}catch (Exception ex) {
-							SmartPlugIn.log("Could not delete cleared file: " + to.toString(), ex); //$NON-NLS-1$	
-						}
-					}
-				}
-			} else if (from.exists() && !from.equals(to)) {
-				//delete any existing files for this node before copying over new files 
-				//from 6.1 to support image formats
-				String fName = to.getName();
-				int index = fName.lastIndexOf('.');
-				fName = fName.substring(0, index);
-				
-				if (!to.getParentFile().exists()) {
-					try {
-						Files.createDirectories(to.getParentFile().toPath());
-					} catch (IOException e) {
-						SmartPlugIn.log(e.getMessage(), e);
-					}
-				}
-				for (File file : to.getParentFile().listFiles()) {
-					if (file.getName().startsWith(fName + ".")) { //$NON-NLS-1$
-						try {
-							file.delete();
-						}catch (Exception ex) {
-							SmartPlugIn.log("Could not delete cleared file: " + to.toString(), ex); //$NON-NLS-1$	
-						}
-					}
+				if (!Files.exists(to.getParent())) {
+					SmartUtils.createDirectory(to.getParent());
 				}
 				
 				try {
-					FileUtils.copyFile(from, to);
+					Files.list( to.getParent() ).forEach(file ->{
+						if (file.getFileName().toString().startsWith(to.getFileName().toString() + ".")) { //$NON-NLS-1$
+							try {
+								Files.delete(file);
+							}catch (Exception ex) {
+								SmartPlugIn.log("Could not delete cleared file: " + to.toString(), ex); //$NON-NLS-1$	
+							}
+						}
+					});
+				} catch (IOException e) {
+					SmartPlugIn.log(e.getMessage(),e);
+				}
+			} else if (Files.exists(from) && !from.equals(to)) {
+				//delete any existing files for this node before copying over new files 
+				//from 6.1 to support image formats
+				String fName = to.getFileName().toString();
+				int index = fName.lastIndexOf('.');
+				fName = fName.substring(0, index);
+				
+				if (!Files.exists(to.getParent())) {
+					SmartUtils.createDirectory(to.getParent());
+				}
+				final String fName2 = fName;
+				try {
+					Files.list( to.getParent() ).forEach(file ->{
+						if (file.getFileName().toString().startsWith(fName2 + ".")) { //$NON-NLS-1$
+							try {
+								Files.delete(file);
+							}catch (Exception ex) {
+								SmartPlugIn.log("Could not delete cleared file: " + to.toString(), ex); //$NON-NLS-1$	
+							}
+						}
+					});
+					
+					
+					Files.copy(from, to);
 				} catch (IOException e) {
 					SmartPlugIn.log("Could not copy file: " + from.toString() + " to " + to.toString(), e); //$NON-NLS-1$ //$NON-NLS-2$
 				}

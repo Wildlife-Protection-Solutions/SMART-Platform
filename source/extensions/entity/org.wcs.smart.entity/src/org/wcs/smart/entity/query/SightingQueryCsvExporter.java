@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.entity.query;
 
-import java.io.File;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -55,7 +55,7 @@ public class SightingQueryCsvExporter extends CsvSimpleQueryExporter {
 	 * @see org.wcs.smart.query.export.IQueryExporter#export(org.wcs.smart.query.model.Query, org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	@Override
-	public void export(Query query, IQueryResult result, File file,
+	public void export(Query query, IQueryResult result, Path file,
 			HashMap<String, Object> parameters, IProgressMonitor monitor)
 			throws Exception {
 		

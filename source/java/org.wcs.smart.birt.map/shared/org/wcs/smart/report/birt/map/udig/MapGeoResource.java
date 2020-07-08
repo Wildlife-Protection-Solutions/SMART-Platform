@@ -21,10 +21,10 @@
  */
 package org.wcs.smart.report.birt.map.udig;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -244,7 +244,7 @@ public class MapGeoResource extends IGeoResource {
 				if (reader == null){
 	                if (mapInfo.getRasterFile() != null) {
 	                	AbstractGridFormat frmt = (new GeoTiffFormatFactorySpi()).createFormat();
-	                    File file = mapInfo.getRasterFile();
+	                    Path file = mapInfo.getRasterFile();
 	                	this.reader = (AbstractGridCoverage2DReader) frmt.getReader(file);
 	                }
 				}

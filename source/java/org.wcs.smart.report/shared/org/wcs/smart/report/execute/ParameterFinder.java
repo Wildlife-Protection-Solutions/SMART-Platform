@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.report.execute;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.HashMap;
@@ -50,8 +50,8 @@ public enum ParameterFinder {
 	public HashMap<String, IParameterDefnBase> getParameters(Report report, IReportEngine engine) throws Exception{
 		HashMap<String, IParameterDefnBase> allParameters = new HashMap<String, IParameterDefnBase>();
 		
-		File reportFile = report.getFullPath().toFile();
-		final IReportRunnable design = engine.openReportDesign(reportFile.getAbsolutePath());
+		Path reportFile = report.getFullPath();
+		final IReportRunnable design = engine.openReportDesign(reportFile.toAbsolutePath().toString());
 		final IGetParameterDefinitionTask paramDefnTask = engine.createGetParameterDefinitionTask( design );
 		Collection<?> parameters = paramDefnTask.getParameterDefns(true);
 		

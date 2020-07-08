@@ -22,7 +22,6 @@
 package org.wcs.smart.cybertracker.incident;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.FileVisitResult;
@@ -153,8 +152,8 @@ public class IncidentPackageContribution implements IPackageContribution{
 		//convert to xml
 		org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xmlModel = CmSmartToXmlConverter.convert(cm, true, monitor);
 		//create and add help files
-		for (File f :  CtJsonExportUtils.addHelpFiles(xmlModel, tempDir)  ) {
-			updates.addFile(f.toPath());
+		for (Path f :  CtJsonExportUtils.addHelpFiles(xmlModel, tempDir)  ) {
+			updates.addFile(f);
 		}
 
 		//write file
@@ -258,8 +257,8 @@ public class IncidentPackageContribution implements IPackageContribution{
 		
 		IconFile file = object.getIcon().getIconFile(cm.getIconSet());
 		if (file != null) {
-			Path fromPath = file.getAttachmentFile().toPath();
-			String fileName = cmObject.getImageFile().getName();
+			Path fromPath = file.getAttachmentFile();
+			String fileName = cmObject.getImageFile().getFileName().toString();
 			if (cmObject.getUuid() == null) {
 				fileName = UuidUtils.uuidToString(object.getUuid());
 			}

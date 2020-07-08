@@ -96,7 +96,7 @@ public enum ChangeLogManager {
 		 * files; however that is only necessaary if we are going to be editing informant
 		 * files on the server
 		 */
-		fileWatcher.register( DataStoreManager.INSTANCE.getRootDirectory().toPath()  );
+		fileWatcher.register( DataStoreManager.INSTANCE.getRootDirectory()  );
 		//run filestore watcher in new thread (background)		
 		fileStoreReplication = new Thread(fileWatcher);
 		fileStoreReplication.start();

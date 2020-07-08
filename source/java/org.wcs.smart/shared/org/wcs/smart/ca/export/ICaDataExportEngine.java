@@ -22,6 +22,7 @@
 package org.wcs.smart.ca.export;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.HashMap;
 
 import org.hibernate.Session;
@@ -63,7 +64,7 @@ public interface ICaDataExportEngine {
 	/**
 	 * @return the location to export data to
 	 */
-	public File getExportLocation();
+	public Path getExportLocation();
 	
 	/**
 	 * Finds all the columns in a given table

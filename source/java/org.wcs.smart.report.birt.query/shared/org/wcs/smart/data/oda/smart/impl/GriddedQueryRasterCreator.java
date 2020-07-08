@@ -1,6 +1,6 @@
 package org.wcs.smart.data.oda.smart.impl;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,13 +17,13 @@ public class GriddedQueryRasterCreator implements IRasterCreator{
 
 	private Double minValue = null;
 	private Double maxValue = null;
-	private List<File> cleanUp =  new ArrayList<File>();
+	private List<Path> cleanUp =  new ArrayList<Path>();
 	
 	private GriddedQueryResultSetMetadata metadata;
 	
 	@Override
-	public File createRaster(IExecutorContext context, String datasetId, IBaseResultSet qresult) throws Exception {
-		File f = null;
+	public Path createRaster(IExecutorContext context, String datasetId, IBaseResultSet qresult) throws Exception {
+		Path f = null;
 		//metadata should be configured by canprocess function
 		if (metadata != null){
 			//build the raster
@@ -52,7 +52,7 @@ public class GriddedQueryRasterCreator implements IRasterCreator{
 	}
 
 	@Override
-	public List<File> getFilesToCleanUp() {
+	public List<Path> getFilesToCleanUp() {
 		return cleanUp;
 	}
 

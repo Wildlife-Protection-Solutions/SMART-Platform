@@ -23,7 +23,6 @@ package org.wcs.smart.cybertracker.export;
 
 import java.awt.Color;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -755,11 +754,11 @@ public class CtJsonExportUtils {
 		return typeOp;
 	}
 	
-	public static List<File> addHelpFiles(org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xmlModel, Path targetDir) throws IOException {
+	public static List<Path> addHelpFiles(org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xmlModel, Path targetDir) throws IOException {
 		//create html help files 
 		List<NodeType> xmlnodes = new ArrayList<>();
 		xmlnodes.addAll(xmlModel.getNodes().getNode());
-		List<File> filesToAdd = new ArrayList<>();
+		List<Path> filesToAdd = new ArrayList<>();
 		
 		while (!xmlnodes.isEmpty()) {
 			NodeType l = xmlnodes.remove(0);
@@ -796,7 +795,7 @@ public class CtJsonExportUtils {
 
 					Path p = targetDir.resolve(Paths.get("cm_help_" + UuidUtils.uuidToString(temp.getUuid()) + ".html")); //$NON-NLS-1$ //$NON-NLS-2$
 					Files.writeString(p, html);
-					filesToAdd.add(p.toFile());
+					filesToAdd.add(p);
 					
 					AttributeOptionType op = new AttributeOptionType();
 					op.setId("HELP_HTML_FILE"); //$NON-NLS-1$

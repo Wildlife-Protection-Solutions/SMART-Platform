@@ -24,6 +24,8 @@ package org.wcs.smart.query.ui.importexport;
 import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -296,8 +298,8 @@ public class ExportQueryLocationPage extends WizardPage {
 	/**
 	 * @return the selected file
 	 */
-	public File getFile(){
-		return new File(txtFile.getText());
+	public Path getFile(){
+		return Paths.get(txtFile.getText());
 	}
 	
 	public HashMap<String, Object> getOptions() throws Exception{

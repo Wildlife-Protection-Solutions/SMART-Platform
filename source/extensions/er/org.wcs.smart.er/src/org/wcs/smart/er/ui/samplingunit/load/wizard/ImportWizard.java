@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.er.ui.samplingunit.load.wizard;
 
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -123,7 +123,7 @@ public class ImportWizard extends Wizard implements IPageChangingListener{
 		//get importer
 		final ISamplingUnitImporter importer = filePage.getImporter();
 		
-		final File file = filePage.getFile();
+		final Path file = filePage.getFile();
 		
 		try {
 			getContainer().run(true, false, new IRunnableWithProgress() {

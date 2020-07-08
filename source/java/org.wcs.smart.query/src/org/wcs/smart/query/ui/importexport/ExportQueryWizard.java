@@ -21,16 +21,15 @@
  */
 package org.wcs.smart.query.ui.importexport;
 
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -242,25 +241,25 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 	 * Exports a single query to the selected format/file.
 	 */
 	private boolean exportSingleFile(IQueryExporter exporter, IProgressMonitor monitor) throws Exception{
-		File outputFile = page2.getFile();
+		Path outputFile = page2.getFile();
 		if (exporter.getDefaultExtension() == null){
 			getDialogSettings().put(LAST_DIR_KEY, outputFile.toString());
 		}else{
 			getDialogSettings().put(LAST_DIR_KEY, outputFile.getParent().toString());
 		}
 		
-		if (outputFile.isFile() && !outputFile.getParentFile().exists()){
+		if (!Files.isDirectory(outputFile) && !Files.exists(outputFile.getParent())){
 			boolean create = MessageDialog.openQuestion(getShell(), Messages.ExportQueryWizard_DialogTitle, MessageFormat.format(Messages.ExportQueryWizard_DirectoryDoesNotExist, new Object[]{outputFile.getParent()}));
 			if (!create){
 				return false;
 			}else{
-				if (!SmartUtils.createDirectory(outputFile.getParentFile())){
+				if (!SmartUtils.createDirectory(outputFile.getParent())){
 					return false;
 				}
 			}
 		}
 		
-		if (outputFile.isFile() && outputFile.exists()){
+		if (!Files.isDirectory(outputFile) && Files.exists(outputFile)){
 			if (!MessageDialog.openConfirm(getShell(), 
 					Messages.ExportQueryWizard_OverwriteDialogTitle, 
 					MessageFormat.format(Messages.ExportQueryWizard_OverwriteDialogMessage, new Object[]{outputFile.toString()}))){
@@ -300,7 +299,7 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 	 */
 	@SuppressWarnings("unchecked")
 	private void exportMultiDefs(IProgressMonitor monitor) {
-		File outputLocation = page4.getExportLocation();
+		Path outputLocation = page4.getExportLocation();
 		List<ConservationArea> cas = page4.getConservationAreasToExport();
 		
 		HashMap<String, Object> ops = null;
@@ -320,7 +319,7 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 		if (outputLocation != null){
 			getDialogSettings().put(LAST_DIR_KEY, outputLocation.toString());
 			
-			if (!outputLocation.exists()){
+			if (!Files.exists(outputLocation)){
 				boolean create = MessageDialog.openQuestion(getShell(), Messages.ExportQueryWizard_DialogTitle, MessageFormat.format(Messages.ExportQueryWizard_DirectoryDoesNotExist, new Object[]{outputLocation.toString()}));
 				if (!create){
 					hasError = true;
@@ -335,7 +334,7 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 		}else{
 			//exporting to ca; create a temp directory to work with
 			try{
-				outputLocation = Files.createTempDirectory("queryexports").toFile(); //$NON-NLS-1$
+				outputLocation = Files.createTempDirectory("queryexports"); //$NON-NLS-1$
 			}catch (Exception ex){
 				QueryPlugIn.displayLog(ex.getMessage(), ex);
 				hasError = true;
@@ -345,7 +344,7 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 		
 		monitor.beginTask(Messages.ExportQueryWizard_ExportProgress, page3.getQueries().size()  * (cas == null ? 1 : (cas.size() + 1)));
 		
-		HashMap<Query, File> exportedQueries = exportQueriesToFile(outputLocation, page3.getQueries(), ops, monitor);
+		HashMap<Query, Path> exportedQueries = exportQueriesToFile(outputLocation, page3.getQueries(), ops, monitor);
 		
 		if (cas == null){
 			if (monitor.isCanceled()){
@@ -365,7 +364,7 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 			int cnt = (int) results[0];
 			List<String> error = (List<String>) results[1];
 			try{
-				FileUtils.deleteDirectory(outputLocation);
+				SmartUtils.deleteDirectory(outputLocation);
 			}catch(Exception ex){
 				QueryPlugIn.log(ex.getMessage(), ex);
 			}
@@ -390,7 +389,7 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 				message);
 	}
 	
-	private Object[] importQueries(List<ConservationArea> cas, HashMap<Query, File> queriesToImport, IProgressMonitor monitor){
+	private Object[] importQueries(List<ConservationArea> cas, HashMap<Query, Path> queriesToImport, IProgressMonitor monitor){
 		List<String> errors = new ArrayList<String>();
 		List<String> overview = new ArrayList<String>();
 		int ok = 0;
@@ -411,7 +410,7 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 			
 			monitor.subTask(MessageFormat.format(Messages.ExportQueryWizard_ImportProgress, ca.getNameLabel()));
 			int lcnt = 0;
-			for (Entry<Query, File> key: queriesToImport.entrySet()){
+			for (Entry<Query, Path> key: queriesToImport.entrySet()){
 				try {
 					ImportQueryUtil.importQuery(key.getValue(), root, ca, getContainer().getShell());
 					ok++;
@@ -436,9 +435,9 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 	}
 	
 	
-	private HashMap<Query, File> exportQueriesToFile(File outputLocation, List<Object> queries, HashMap<String, Object> ops, IProgressMonitor monitor){
+	private HashMap<Query, Path> exportQueriesToFile(Path outputLocation, List<Object> queries, HashMap<String, Object> ops, IProgressMonitor monitor){
 		boolean overwriteall = false;
-		HashMap<Query, File> exportedFiles = new HashMap<Query, File>();
+		HashMap<Query, Path> exportedFiles = new HashMap<>();
 		for (Object qi : queries){
 			monitor.worked(1);
 			
@@ -472,8 +471,8 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 				continue;
 			}
 			
-			File outputFile = new File(outputLocation, URLUtils.cleanFilename(query.getName()) +"_" + query.getId() + "." + lexporter.getDefaultExtension()); //$NON-NLS-1$ //$NON-NLS-2$
-			if (!overwriteall && outputFile.exists()){
+			Path outputFile = outputLocation.resolve(URLUtils.cleanFilename(query.getName()) +"_" + query.getId() + "." + lexporter.getDefaultExtension()); //$NON-NLS-1$ //$NON-NLS-2$
+			if (!overwriteall && Files.exists(outputFile)){
 				MessageDialog md = new MessageDialog(getShell(), Messages.ExportQueryWizard_OverwriteDialogTitle,
 						MessageDialog.getImage(Dialog.DLG_IMG_MESSAGE_INFO),
 						MessageFormat.format(Messages.ExportQueryWizard_OverwriteDialogMessage, new Object[]{outputFile.toString()}), 

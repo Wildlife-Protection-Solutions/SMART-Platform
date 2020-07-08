@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.cybertracker.export.data;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
 
@@ -45,7 +45,7 @@ public interface IAttributeTreeNodeProxy {
 	
 	public DisplayMode getDisplayMode();
 	
-	public File getImageFile();
+	public Path getImageFile();
 
 	public CmAttributeTreeNode getTreeNode();
 

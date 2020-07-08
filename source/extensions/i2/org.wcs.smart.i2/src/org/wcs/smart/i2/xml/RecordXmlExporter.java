@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.i2.xml;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -177,12 +176,12 @@ public class RecordXmlExporter {
 		}
 		progress.worked(1);
 		
-		File[] zip = new File[]{xmlFile.toFile()};
+		Path[] zip = new Path[]{xmlFile};
 		if (attachDir != null){
-			zip = new File[]{xmlFile.toFile(), attachDir.toFile()};
+			zip = new Path[]{xmlFile, attachDir};
 		}
 		//zip of Files
-		ZipUtil.createZip(zip, outputFile.toFile(), progress.split(1));
+		ZipUtil.createZip(zip, outputFile, progress.split(1));
 			
 		try{
 			FileUtils.deleteDirectory(tempDir.toFile());

@@ -21,7 +21,8 @@
  */
 package org.wcs.smart;
 
-import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.List;
 
@@ -319,7 +320,7 @@ public class SmartPlugIn extends AbstractUIPlugin {
 		SmartContext.INSTANCE.setClass(ICoreLabelProvider.class, new SmartLabelProvider());
 		SmartContext.INSTANCE.setFilestoreLocation(SmartProperties.getInstance().getProperty(SmartProperties.PROP_FILESTORE));
 		
-		File tempDir = new File(SmartProperties.getInstance().getProperty(SmartProperties.PROP_FILESTORE), DATASTORE_TEMP_FOLDER);
+		Path tempDir = Paths.get(SmartProperties.getInstance().getProperty(SmartProperties.PROP_FILESTORE), DATASTORE_TEMP_FOLDER);
 		SmartContext.INSTANCE.setTempFilestoreLocation(tempDir);
 				
 

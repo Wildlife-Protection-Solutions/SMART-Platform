@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.i2.ui;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -69,7 +69,7 @@ public enum FileLocationParser {
 	 * @param f
 	 * @return
 	 */
-	public List<IntelLocation> parseFile(File f){
+	public List<IntelLocation> parseFile(Path f){
 		List<IntelLocation> locations = new ArrayList<IntelLocation>();
 		locations.addAll(parseFromGpx(f, null));
 		locations.addAll(parseFromImage(f));
@@ -83,17 +83,17 @@ public enum FileLocationParser {
 	 * @param gpxFile
 	 * @return
 	 */
-	public List<IntelLocation> parseFromGpx(File gpxFile, IProgressMonitor monitor){
+	public List<IntelLocation> parseFromGpx(Path gpxFile, IProgressMonitor monitor){
 		SubMonitor progress  = SubMonitor.convert(monitor, 2);
 		
-		if (!gpxFile.getName().toLowerCase(Locale.ROOT).endsWith(GPX_EXTENSION)) return Collections.emptyList();
+		if (!gpxFile.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(GPX_EXTENSION)) return Collections.emptyList();
 		List<IntelLocation> locations = new ArrayList<IntelLocation>();
 		try{
-			List<WptType> waypoints = GPSDataImport.getWaypointsGpx(Collections.singletonList(gpxFile.getAbsolutePath()), progress.split(1));
+			List<WptType> waypoints = GPSDataImport.getWaypointsGpx(Collections.singletonList(gpxFile.toAbsolutePath().toString()), progress.split(1));
 			
 			List<WptType> selectedPoints = new ArrayList<WptType>();
 			Display.getDefault().syncExec(()->{
-				WptTypeSelectionDialog dialog = new WptTypeSelectionDialog(Display.getDefault().getActiveShell(), waypoints, MessageFormat.format(Messages.FileLocationParser_OptionDialogMsg, gpxFile.getName()));
+				WptTypeSelectionDialog dialog = new WptTypeSelectionDialog(Display.getDefault().getActiveShell(), waypoints, MessageFormat.format(Messages.FileLocationParser_OptionDialogMsg, gpxFile.getFileName().toString()));
 				if (dialog.open() == Window.OK){
 					selectedPoints.addAll(dialog.getWaypoints());
 				}
@@ -131,10 +131,10 @@ public enum FileLocationParser {
 	 * @param imageFile
 	 * @return
 	 */
-	public List<IntelLocation> parseFromImage(File imageFile){
+	public List<IntelLocation> parseFromImage(Path imageFile){
 		List<IntelLocation> locations = new ArrayList<IntelLocation>();
 		try{
-			Metadata metadata = ImageMetadataReader.readMetadata(imageFile);
+			Metadata metadata = ImageMetadataReader.readMetadata(imageFile.toAbsolutePath().toFile());
 			for (Directory directory : metadata.getDirectoriesOfType(GpsDirectory.class)) {
 				GeoLocation geoLocation = ((GpsDirectory)directory).getGeoLocation();
 				if (geoLocation != null){

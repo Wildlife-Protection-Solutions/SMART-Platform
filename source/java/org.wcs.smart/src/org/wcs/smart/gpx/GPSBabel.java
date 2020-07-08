@@ -22,11 +22,13 @@
 package org.wcs.smart.gpx;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Set;
@@ -71,7 +73,7 @@ public class GPSBabel {
 	 */
 	private static String getGpsBabelLocation(){
 		String location = SmartProperties.getInstance().getProperty(SmartProperties.PROP_GPS_BABEL);
-		return new File(location).getAbsolutePath();
+		return Paths.get(location).normalize().toAbsolutePath().toString();
 	}
 	
 	
@@ -151,10 +153,10 @@ public class GPSBabel {
 	 * @return A gpx file of the data imported from the device.  May return null if file not created.
 	 * @throws IOException
 	 */
-	public static File getData(String deviceType, Set<GPSDataImport.ImportType> types) throws IOException{
+	public static Path getData(String deviceType, Set<GPSDataImport.ImportType> types) throws IOException{
 		
 		//create temporary file
-		File file = File.createTempFile("smart_import", ".gpx"); //$NON-NLS-1$ //$NON-NLS-2$
+		Path file = Files.createTempFile("smart_import", ".gpx"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		//CommandLine cmdLine = CommandLine.parse(getGpsBabelLocation());
 		CommandLine cmdLine = new CommandLine(getGpsBabelLocation());
@@ -173,7 +175,7 @@ public class GPSBabel {
 		cmdLine.addArgument("-o"); //$NON-NLS-1$
 		cmdLine.addArgument("gpx,gpxver=1.1"); //$NON-NLS-1$
 		cmdLine.addArgument("-F"); //$NON-NLS-1$
-		cmdLine.addArgument(file.getAbsolutePath());
+		cmdLine.addArgument(file.toAbsolutePath().normalize().toString());
 		SmartPlugIn.logInfo("Running: " + cmdLine.toString()); //$NON-NLS-1$
 		
 		DefaultExecutor exec = new DefaultExecutor();
@@ -190,7 +192,7 @@ public class GPSBabel {
 			throw new RuntimeException(ERROR_MSG_COULD_NOT_IMPORT + ex.getLocalizedMessage() , ex);
 		}
 
-		if (!file.exists()){
+		if (!Files.exists(file)){
 			//try com1 port
 			cmdLine = CommandLine.parse(getGpsBabelLocation());
 			if (types.contains(GPSDataImport.ImportType.WAYPOINT)){
@@ -207,7 +209,7 @@ public class GPSBabel {
 			cmdLine.addArgument("-o"); //$NON-NLS-1$
 			cmdLine.addArgument("gpx,gpxver=1.1"); //$NON-NLS-1$
 			cmdLine.addArgument("-F"); //$NON-NLS-1$
-			cmdLine.addArgument(file.getAbsolutePath());
+			cmdLine.addArgument(file.toAbsolutePath().normalize().toString());
 			
 			exec = new DefaultExecutor();
 			
@@ -222,7 +224,7 @@ public class GPSBabel {
 				throw new RuntimeException(ERROR_MSG_COULD_NOT_IMPORT + ex.getLocalizedMessage() , ex);
 			}
 			
-			if (!file.exists()){
+			if (!Files.exists(file)){
 				//cannot import for whatever reason
 				return null;
 			}

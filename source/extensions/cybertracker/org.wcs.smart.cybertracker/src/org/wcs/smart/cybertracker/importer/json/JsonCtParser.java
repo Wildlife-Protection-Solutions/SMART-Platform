@@ -185,7 +185,7 @@ public class JsonCtParser {
 		List<ISmartAttachment> attachments = new ArrayList<>();
 		if (waypoint.getAttachments() != null ){
 			for (WaypointAttachment attachment : waypoint.getAttachments()){
-				if (attachment.getCopyFromLocation().length() >= maxsizebytes)
+				if (attachment.getCopyFromLocation().toAbsolutePath().toFile().length() >= maxsizebytes)
 					attachments.add(attachment);
 			}
 		}
@@ -193,7 +193,7 @@ public class JsonCtParser {
 		for (WaypointObservation wo : waypoint.getAllObservations()){
 			if (wo.getAttachments() == null) continue;
 			for (ObservationAttachment attachment : wo.getAttachments()){
-				if (attachment.getCopyFromLocation().length() >= maxsizebytes)
+				if (attachment.getCopyFromLocation().toAbsolutePath().toFile().length() >= maxsizebytes)
 					attachments.add(attachment);
 			}						
 		}
@@ -208,7 +208,7 @@ public class JsonCtParser {
 		}else if (opResize.getStringValue().equalsIgnoreCase(CyberTrackerPropertiesOption.ImageResizeOption.MANUAL.name())){
 			//prompt user for image size
 			for (ISmartAttachment attachment : attachments){
-				if (attachment.getCopyFromLocation().length() < maxsizebytes) continue;
+				if (attachment.getCopyFromLocation().toAbsolutePath().toFile().length() < maxsizebytes) continue;
 				final BufferedImage image = ImageProcessor.readImage(attachment.getCopyFromLocation());
 				if (image == null) continue;
 				
@@ -627,9 +627,9 @@ public class JsonCtParser {
 			if (image == null){
 				warnings.add(MessageFormat.format(Messages.JsonCtParser_CouldNotImportPhoto, value));
 			}else{
-				ImageIO.write(image, JPEG_EXT.toUpperCase(Locale.ROOT), temp.toFile());	
+				ImageIO.write(image, JPEG_EXT.toUpperCase(Locale.ROOT), temp.toAbsolutePath().toFile());	
 				WaypointAttachment attachment = new WaypointAttachment();
-				attachment.setCopyFromLocation(temp.toFile());
+				attachment.setCopyFromLocation(temp);
 				attachment.setFilename(fileName);
 				attachments.add(attachment);
 			}

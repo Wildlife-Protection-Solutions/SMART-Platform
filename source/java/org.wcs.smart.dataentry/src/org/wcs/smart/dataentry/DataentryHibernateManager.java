@@ -21,13 +21,14 @@
  */
 package org.wcs.smart.dataentry;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import org.apache.commons.io.FileUtils;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
@@ -39,6 +40,7 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Dataentry related database functions.
@@ -135,12 +137,12 @@ public class DataentryHibernateManager extends HibernateManager {
 	 * @param {@link ConfigurableModel} who's filestore to delete
 	 */
 	public static void deleteFilestore(ConfigurableModel model) {
-		File fileStore = new File(model.getFileDataStoreLocation());
-		if (fileStore.exists()) {
+		Path fileStore = Paths.get(model.getFileDataStoreLocation());
+		if (Files.exists(fileStore)) {
 			try {
-				FileUtils.forceDelete(fileStore);
+				SmartUtils.deleteDirectory(fileStore);
 			} catch(Exception ex) {
-				SmartPlugIn.displayLog(MessageFormat.format(Messages.DataentryHibernateManager_DeleteConfigurableModelFilestoreError, fileStore.getAbsolutePath()), ex);
+				SmartPlugIn.displayLog(MessageFormat.format(Messages.DataentryHibernateManager_DeleteConfigurableModelFilestoreError, fileStore.toAbsolutePath().toString()), ex);
 			}
 		}
 	}

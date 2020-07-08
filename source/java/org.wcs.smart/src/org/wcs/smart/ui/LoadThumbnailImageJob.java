@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.ui;
 
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -89,7 +88,7 @@ public class LoadThumbnailImageJob extends Job {
 			if (attachment == null)
 				return;
 			try {
-				File file = null;
+				Path file = null;
 				boolean deleteMe = false;
 				try {
 					if (attachment.getCopyFromLocation() != null) {
@@ -99,7 +98,7 @@ public class LoadThumbnailImageJob extends Job {
 							if (attachment.isEncrypted()) {
 								deleteMe = true;
 								Path p = EncryptUtils.decryptAttachment(attachment);
-								if (p != null) file = p.toFile();
+								if (p != null) file = p;
 							}else {
 								file = attachment.getAttachmentFile();
 							}
@@ -109,15 +108,15 @@ public class LoadThumbnailImageJob extends Job {
 						
 					}
 					
-					if (file == null || file.length() > 200 * Math.pow(10, 6)) {
+					if (file == null || file.toAbsolutePath().normalize().toFile().length() > 200 * Math.pow(10, 6)) {
 						// skip images > 200MB
 						return;
 					}
-					image = SmartUtils.getImage(file.toPath(), thumbnailSize);
+					image = SmartUtils.getImage(file, thumbnailSize);
 				}finally {
 					if (deleteMe && file != null) {
 						try {
-							Files.delete(file.toPath());
+							Files.delete(file);
 						}catch (Exception ex) {}
 					}
 				}

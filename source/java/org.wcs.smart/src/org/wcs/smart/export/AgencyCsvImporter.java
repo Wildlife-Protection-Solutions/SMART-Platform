@@ -21,11 +21,11 @@
  */
 package org.wcs.smart.export;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -86,12 +86,12 @@ public class AgencyCsvImporter implements ICsvDataImporter {
 	}
 	
 	@Override
-	public boolean importCsvFile(File file, char delimiter, boolean headers, Charset cs, IProgressMonitor monitor, Session session) throws Exception {
-		if (!file.exists()){
+	public boolean importCsvFile(Path file, char delimiter, boolean headers, Charset cs, IProgressMonitor monitor, Session session) throws Exception {
+		if (!Files.exists(file)){
 			throw new IOException(MessageFormat.format(Messages.EmployeeCsvImporter_Error_InputFileDoesNotExist1, new Object[]{file.toString()}));
 		}
 		
-		try(CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(file), cs), delimiter)){
+		try(CSVReader reader = new CSVReader(new InputStreamReader(Files.newInputStream(file), cs), delimiter)){
 			//reading the first line with language codes
 			String[] row = reader.readNext();
 			int size = row.length;

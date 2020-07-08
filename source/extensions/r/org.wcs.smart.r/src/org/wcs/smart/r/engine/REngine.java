@@ -136,13 +136,13 @@ public class REngine {
 					
 					String filename = UuidUtils.uuidToString(query.getQuery().getUuid()) + "." + System.nanoTime() + "." + query.getQueryExporter().getDefaultExtension(); //$NON-NLS-1$ //$NON-NLS-2$
 					
-					Path p = SmartContext.INSTANCE.getTempFilestoreLocation().toPath().resolve(filename).normalize();
+					Path p = SmartContext.INSTANCE.getTempFilestoreLocation().resolve(filename).normalize();
 					Files.createDirectories(p.getParent());
 					queryFiles.add(p);
 					HashMap<String, Object> parameters = new HashMap<>();
 					
 					//we don't delete these until smart is re-run; that way users can use them for debugging if desired
-					query.getQueryExporter().export(query.getQuery(), results, p.toFile(), parameters, new NullProgressMonitor());
+					query.getQueryExporter().export(query.getQuery(), results, p, parameters, new NullProgressMonitor());
 					writeString(Messages.REngine_ExportFile + p.toString());
 					writeString("-----------------------------------------------------------------------------------------------"); //$NON-NLS-1$
 				}

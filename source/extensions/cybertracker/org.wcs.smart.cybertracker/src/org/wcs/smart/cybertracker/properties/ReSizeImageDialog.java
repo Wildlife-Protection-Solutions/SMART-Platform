@@ -166,7 +166,7 @@ public class ReSizeImageDialog extends SmartStyledTitleDialog{
 		l.setText(String.valueOf(image.getWidth()) + " x " + String.valueOf(image.getHeight()) ); //$NON-NLS-1$
 		
 		l = new Label(left, SWT.NONE);
-		l.setText( NUMBER_FORMAT.format(attachment.getCopyFromLocation().length() / (1048576.0)) + "MB" ); //$NON-NLS-1$
+		l.setText( NUMBER_FORMAT.format(attachment.getCopyFromLocation().toAbsolutePath().toFile().length() / (1048576.0)) + "MB" ); //$NON-NLS-1$
 		
 		Composite right = new Composite(main, SWT.NONE);
 		right.setLayout(new GridLayout());

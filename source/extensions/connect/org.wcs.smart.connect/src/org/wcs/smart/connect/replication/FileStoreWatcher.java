@@ -197,9 +197,9 @@ public class FileStoreWatcher implements Runnable, IFileStoreWatcher{
 	    	    item.setFileName(relativeFileName);
 	    	    item.setSource(Source.LOCAL);
 	    	    
-	    	    s.beginTransaction();
+	    	    
 	    	    ChangeLogTableManager.INSTANCE.addItem(s, item);
-	    		s.getTransaction().commit();
+	    	    
 	    		if (LOGME) SmartPlugIn.logInfo("FileStoreWatcher: Process Event: ADDED: event added to change log table"); //$NON-NLS-1$
     		}else {
     			if (LOGME) SmartPlugIn.logInfo("FileStoreWatcher: Process Event: IGNORED: replication is not enabled"); //$NON-NLS-1$

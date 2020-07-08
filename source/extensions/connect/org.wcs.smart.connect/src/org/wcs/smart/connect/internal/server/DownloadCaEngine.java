@@ -129,7 +129,7 @@ public class DownloadCaEngine {
 			progress.subTask(Messages.DownloadCaEngine_VersionValidation);
 			HibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
 			try {
-				if (!CaImporter.validateCaImport(p.toFile())) {
+				if (!CaImporter.validateCaImport(p)) {
 					return false;
 				}
 			}catch (Exception ex) {
@@ -156,7 +156,7 @@ public class DownloadCaEngine {
 			progress.subTask(Messages.DownloadCaEngine_InstallSubtaskName);
 			try{
 				progress.checkCanceled();	
-				CaImporter.importCa(p.toFile(), progress.split(1));
+				CaImporter.importCa(p, progress.split(1));
 			}finally{
 				Files.delete(p);
 			}

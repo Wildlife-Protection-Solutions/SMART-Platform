@@ -22,6 +22,7 @@
 package org.wcs.smart.dataentry.model;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import javax.persistence.Column;
@@ -54,7 +55,7 @@ public class CmAttributeListItem extends NamedItem implements IImageAssociatedOb
 	
 	private CmAttributeConfig config;
 	private int listOrder;
-	private File imageFile;
+	private Path imageFile;
 	private String extension; //image name extension
 	
 	@Column(name="is_active")
@@ -111,8 +112,8 @@ public class CmAttributeListItem extends NamedItem implements IImageAssociatedOb
 	
 	@Transient
 	@Override
-	public File getImageFile() {
-		return imageFile != null ? imageFile : new File(getImagePersistenceLocation());
+	public Path getImageFile() {
+		return imageFile != null ? imageFile : Paths.get(getImagePersistenceLocation());
 	}
 
 	
@@ -124,12 +125,12 @@ public class CmAttributeListItem extends NamedItem implements IImageAssociatedOb
 	
 	@Transient
 	@Override
-	public void setImageFile(File file) {
+	public void setImageFile(Path file) {
 		imageFile = file;
 		if (imageFile == null) {
 			setExtension(null);
 		}else {
-			String fileName = imageFile.getName();
+			String fileName = imageFile.getFileName().toString();
 			int index = fileName.lastIndexOf('.');
 			if (index >= 0) {
 				setExtension(fileName.substring(index+1));

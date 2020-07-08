@@ -27,8 +27,8 @@ import org.hibernate.persister.entity.EntityPersister;
 import org.wcs.smart.observation.model.WaypointObservation;
 
 /**
- * Hibernate listener for audit items to update
- * date created, date modified, and employees fields
+ * Hibernate listener for waypoint observations to all them 
+ * to the list of events to process.
  * 
  * @author Emily
  *

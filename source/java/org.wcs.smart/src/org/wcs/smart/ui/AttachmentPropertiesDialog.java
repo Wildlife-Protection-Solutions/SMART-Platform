@@ -195,7 +195,7 @@ public class AttachmentPropertiesDialog {
 			
 			try {
 				attachment.computeFileLocation(s);
-				details.add(new Entry(Messages.AttachmentPropertiesDialog_PathSection, attachment.getAttachmentFile().getAbsolutePath()));
+				details.add(new Entry(Messages.AttachmentPropertiesDialog_PathSection, attachment.getAttachmentFile().toAbsolutePath().normalize().toString()));
 			} catch (Exception e) {
 				SmartPlugIn.log(e.getMessage(), e);
 				details.add(new Entry(Messages.AttachmentPropertiesDialog_PathSection, Messages.AttachmentPropertiesDialog_Error + e.getMessage()));

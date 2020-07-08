@@ -71,10 +71,10 @@ public class PostgresqlSyncProcessor {
 	public void processFile() throws Exception{
 		
 		//create a temporary location to unzip file
-		Path tempDir = ZipUtil.createTemporaryDirectory().toPath();		
+		Path tempDir = ZipUtil.createTemporaryDirectory();		
 		try{
 			//unzip file
-			ZipUtil.unzipFolder(zipFile.toFile(), tempDir.toFile());
+			ZipUtil.unzipFolder(zipFile, tempDir);
 
 			Path metadataFile = null;
 			Path changeLogFile = null;

@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.event;
 
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -99,7 +100,7 @@ public class EventProcessingJob extends Job {
 				try {
 					processEvent(event, o);
 				}catch (Exception ex) {
-					EventPlugIn.displayLog(ex.getMessage(), ex);
+					EventPlugIn.displayLog(MessageFormat.format(Messages.EventProcessingJob_EventProcessingError, ex.getMessage()), ex);
 				}
 			}
 		}

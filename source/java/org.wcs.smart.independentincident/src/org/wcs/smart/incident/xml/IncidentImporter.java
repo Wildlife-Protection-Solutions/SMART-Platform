@@ -21,17 +21,13 @@
  */
 package org.wcs.smart.incident.xml;
 
-import java.io.File;
-import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
+import java.util.stream.Collectors;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -55,6 +51,7 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.ui.SmartStyledInputDialog;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.ZipUtil;
 
 /**
  * Class responsible for importing a incidents.
@@ -74,7 +71,7 @@ public class IncidentImporter {
 	 * @param monitor progress monitor 
 	 * @throws Exception
 	 */
-	public static Waypoint importIncident(File file, IProgressMonitor monitor) throws Exception{
+	public static Waypoint importIncident(Path file, IProgressMonitor monitor) throws Exception{
 		
 		if (SmartUtils.isZip(file)){
 			//process as zip file
@@ -92,45 +89,44 @@ public class IncidentImporter {
 	 * @return incident created or null
 	 * @throws Exception
 	 */
-	private static Waypoint importIncidentFromZip(File zipFile, IProgressMonitor monitor) throws Exception{
+	private static Waypoint importIncidentFromZip(Path zipFile, IProgressMonitor monitor) throws Exception{
 		SubMonitor progress = SubMonitor.convert(monitor, IMPORTING_INCIDENT_TASKNAME, 2);
 		Path xmlfile = null;
 		//unzip 
 		progress.subTask(Messages.IncidentImporter_ProcessingzipFile);
 		progress.split(1);
-		File directory = unzip(zipFile);
-		if (directory == null || !directory.isDirectory()){
-			throw new Exception (MessageFormat.format(Messages.IncidentImporter_ErrorUnzipping, new Object[]{ zipFile.getAbsoluteFile()}));
+		Path directory = ZipUtil.unzip(zipFile);
+		if (directory == null || !Files.isDirectory(directory)){
+			throw new Exception (MessageFormat.format(Messages.IncidentImporter_ErrorUnzipping, new Object[]{ zipFile.toAbsolutePath().toString()}));
 		}
 		
 		
 		//file xml file
-		String[] files = directory.list();
-		if (files != null){
-			progress.subTask(Messages.IncidentImporter_ReadingXmlProgress);
+		List<Path> files = Files.list(directory).collect(Collectors.toList());
+		
+		progress.subTask(Messages.IncidentImporter_ReadingXmlProgress);
 			
-			for (int i = 0; i < files.length; i ++){
-				File f = new File(directory.getAbsoluteFile() + File.separator + files[i]);
-				if (f.isFile()){
-					//lets try reading the
-					try{
-						IncidentXmlManager.findVersion(f.toPath());
-						xmlfile = f.toPath();
-					}catch (Exception ex){
-						IncidentPlugIn.log(null, ex);
-						xmlfile = null;
-					}
-					if (xmlfile != null){
-						//we've found it!
-						break;
-					}
+		for(Path f : files) {
+			if (!Files.isDirectory(f)) {
+				//lets try reading the
+				try{
+					IncidentXmlManager.findVersion(f);
+					xmlfile = f;
+				}catch (Exception ex){
+					IncidentPlugIn.log(null, ex);
+					xmlfile = null;
 				}
+				if (xmlfile != null){
+					//we've found it!
+					break;
+				}
+				
 			}
 		}
 		
 		if (xmlfile == null){	
 			try{
-				FileUtils.deleteDirectory(directory);
+				SmartUtils.deleteDirectory(directory);
 			}catch (Exception ex){
 				IncidentPlugIn.log("Error deleting temporary directory", ex); //$NON-NLS-1$
 			}
@@ -141,7 +137,7 @@ public class IncidentImporter {
 		
 		progress.subTask(Messages.IncidentImporter_RemoveTempFiles);
 		try{
-			FileUtils.deleteDirectory(directory);
+			SmartUtils.deleteDirectory(directory);
 		}catch (Exception ex){
 			IncidentPlugIn.log("Error deleting temporary directory", ex); //$NON-NLS-1$
 		}
@@ -155,9 +151,9 @@ public class IncidentImporter {
 	 * @return incident created or null
 	 * @throws Exception
 	 */
-	private static Waypoint importIncidentFromFile(File xmlFile, IProgressMonitor monitor) throws Exception{
+	private static Waypoint importIncidentFromFile(Path xmlFile, IProgressMonitor monitor) throws Exception{
 		SubMonitor progress = SubMonitor.convert(monitor, IMPORTING_INCIDENT_TASKNAME, 2);
-		return convertAndSave(xmlFile.toPath(), null, progress.split(1));
+		return convertAndSave(xmlFile, null, progress.split(1));
 	}
 
 	/**
@@ -175,7 +171,7 @@ public class IncidentImporter {
 	 * @return created Incident or null
 	 * @throws Exception
 	 */
-	private static Waypoint convertAndSave(Path incidentFile, File attachmentDirectory, IProgressMonitor monitor) throws Exception {
+	private static Waypoint convertAndSave(Path incidentFile, Path attachmentDirectory, IProgressMonitor monitor) throws Exception {
 		SubMonitor progress = SubMonitor.convert(monitor, IMPORTING_INCIDENT_TASKNAME, 2);
 		IXmlToIncidentConverter converter = IncidentXmlManager.findVersion(incidentFile);
 		
@@ -276,40 +272,7 @@ public class IncidentImporter {
 		
 		return imported;
 	}
-	
-	/**
-	 * Unzips the content of the zip
-	 * file to a temporary directory.
-	 * 
-	 * @param zipFile the zip file to unzip
-	 * @return the location of the files
-	 * @throws Exception
-	 */
-	private static File unzip(File zipFile) throws Exception{
-		File tempDir = null;
-		try(ZipFile zout = new ZipFile(zipFile)) {
-			tempDir = File.createTempFile(zipFile.getName(),
-					Long.toString(System.nanoTime()));
-			tempDir.delete();
-			tempDir.mkdir();
-		
-			Enumeration<? extends ZipEntry> elements = zout.entries();
-			while(elements.hasMoreElements()){
-				ZipEntry entry = elements.nextElement();
-				
-				File fout = new File(tempDir.getAbsoluteFile() + File.separator + entry.getName());
-				if (entry.isDirectory()){
-					FileUtils.forceMkdir(fout);
-				}else{
-					try(InputStream is = zout.getInputStream(entry)){
-						FileUtils.copyInputStreamToFile(is, fout);
-					}
-				}
-			}	
-		}
-		return tempDir;
-	}	
-}
+	}
 
 
 class ConfirmInputDialog extends SmartStyledInputDialog{

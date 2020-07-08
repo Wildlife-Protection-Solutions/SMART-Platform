@@ -22,26 +22,22 @@
 package org.wcs.smart.util;
 
 import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipOutputStream;
 
-import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
-import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
-import org.apache.commons.compress.archivers.zip.ZipFile;
-import org.apache.commons.compress.utils.IOUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubMonitor;
@@ -72,8 +68,8 @@ public class ZipUtil {
 	 * @throws IOException
 	 */
 	public static boolean createZip(
-			File[] directories, 
-			File outputZipFile, 
+			Path[] directories, 
+			Path outputZipFile, 
 			IProgressMonitor monitor) throws IOException{
 		return createZip(directories, outputZipFile, Collections.emptySet(), monitor);
 	}
@@ -91,22 +87,22 @@ public class ZipUtil {
 	 * @throws IOException
 	 */
 	public static boolean createZip(
-			File[] directories, 
-			File outputZipFile, 
-			Set<File> itemsToExclude,			
+			Path[] directories, 
+			Path outputZipFile, 
+			Set<Path> itemsToExclude,			
 			IProgressMonitor monitor) throws IOException{
 
         SubMonitor progress = SubMonitor.convert(monitor, Messages.ZipUtil_Progress_CreatingZip, 100);
         progress.subTask(Messages.ZipUtil_Progress_CreatingZip);
-        try (FileOutputStream fOut = new FileOutputStream(outputZipFile);
+        try (OutputStream fOut =Files.newOutputStream(outputZipFile);
         	 BufferedOutputStream bOut = new BufferedOutputStream(fOut);
-        	ZipArchiveOutputStream tOut = new ZipArchiveOutputStream(bOut);){
+        	ZipOutputStream tOut = new ZipOutputStream(bOut);){
             
             progress.setWorkRemaining(directories.length);
             for (int i = 0; i < directories.length; i ++){
-            	File f = directories[i];
+            	Path f = directories[i];
             	if (!itemsToExclude.contains(f)) {
-            		addFileToZip(tOut, directories[i].getAbsoluteFile(), "", itemsToExclude, progress.split(1)); //$NON-NLS-1$
+            		addFileToZip(tOut, directories[i], "", itemsToExclude, progress.split(1)); //$NON-NLS-1$
             	}
             }
             
@@ -128,18 +124,18 @@ public class ZipUtil {
 	 * @throws IOException
 	 */
 	public static boolean createZip(
-			Collection<File> files,
-			File outputZipFile, 			
+			Collection<Path> files,
+			Path outputZipFile, 			
 			IProgressMonitor monitor) throws IOException{
 
         SubMonitor progress = SubMonitor.convert(monitor, Messages.ZipUtil_Progress_CreatingZip, 100);
         progress.subTask(Messages.ZipUtil_Progress_CreatingZip);
-        try (FileOutputStream fOut = new FileOutputStream(outputZipFile);
+        try (OutputStream fOut = Files.newOutputStream(outputZipFile);
         	 BufferedOutputStream bOut = new BufferedOutputStream(fOut);
-        	ZipArchiveOutputStream tOut = new ZipArchiveOutputStream(bOut);){
+        	ZipOutputStream tOut = new ZipOutputStream(bOut);){
             
             progress.setWorkRemaining(files.size());
-            for (File f : files){
+            for (Path f : files){
             	addFileToZip(tOut, f, "", Collections.emptySet(), progress.split(1)); //$NON-NLS-1$
             }
             
@@ -158,44 +154,41 @@ public class ZipUtil {
      *
      * @throws IOException If anything goes wrong
      */
-    private static boolean addFileToZip(ZipArchiveOutputStream zOut, 
-    		File path, 
+    private static boolean addFileToZip(ZipOutputStream zOut, 
+    		Path path, 
     		String base, 
-			Set<File> itemsToExclude,
+			Set<Path> itemsToExclude,
 			IProgressMonitor monitor) throws IOException {
     	
     	SubMonitor progress = SubMonitor.convert(monitor, 1);
-    	progress.subTask( Messages.ZipUtil_Progress_ProcessingFile + path.getAbsolutePath() );
+    	progress.subTask( Messages.ZipUtil_Progress_ProcessingFile + path.toAbsolutePath().toString() );
     	try {
-	    	String entryName = base + path.getName();
+	    	String entryName = base + path.getFileName().toString();
 	        progress.checkCanceled();
 	       
-	        
-	        if (path.isFile()) {
-	            ZipArchiveEntry zipEntry = new ZipArchiveEntry(path, entryName); 
-	            zOut.putArchiveEntry(zipEntry);
-	            try(FileInputStream in = new FileInputStream(path)){
-	            	IOUtils.copy(in, zOut);
+	        if (!Files.exists(path)) {
+	    		//assume empty directory and ignore
+	        }else if (!Files.isDirectory(path)) {
+	            ZipEntry zipEntry = new ZipEntry(entryName); 
+	            zOut.putNextEntry(zipEntry);
+	            try(InputStream in = Files.newInputStream(path)){
+	            	zOut.write(in.readAllBytes());
 	            }
-	            zOut.closeArchiveEntry();
-	        }else if (path.isDirectory() && path.list().length == 0){
+	            zOut.closeEntry();
+	        }else if (Files.isDirectory(path) && Files.list(path).count() == 0){
 	        	//empty directory
-	    		ZipArchiveEntry zipEntry = new ZipArchiveEntry(entryName + DIR_PATH_SEPERATOR);  
-	            zOut.putArchiveEntry(zipEntry);
-	            zOut.closeArchiveEntry();
+	        	ZipEntry zipEntry = new ZipEntry(entryName + DIR_PATH_SEPERATOR);  
+	            zOut.putNextEntry(zipEntry);
+	            zOut.closeEntry();
 	        } else {
-	            File[] children = path.listFiles();
-	            if (children != null) {
-	            	progress.setWorkRemaining(children.length);
-	                for (File child : children) {
-	                	if (!itemsToExclude.contains(child)) {
-	                		if (!addFileToZip(zOut, child, entryName + DIR_PATH_SEPERATOR, itemsToExclude, progress.split(1))){
-	                			return false;
-	                		}
+	        	List<Path> kids = Files.list(path).collect(Collectors.toList());
+	            progress.setWorkRemaining(kids.size());
+	            for (Path child : kids) {
+	                if (!itemsToExclude.contains(child)) {
+	                	if (!addFileToZip(zOut, child, entryName + DIR_PATH_SEPERATOR, itemsToExclude, progress.split(1))){
+	                		return false;
 	                	}
 	                }
-	            }else{
-	            	throw new IllegalStateException(MessageFormat.format(Messages.ZipUtil_BackupError, new Object[]{path.toString()}));
 	            }
 	        }
     	}catch (OperationCanceledException ex) {
@@ -211,18 +204,16 @@ public class ZipUtil {
      * @return
      * @throws Exception  
      */
-    public static void unzipFolder(File file,
-			File destinationLocation)
+    public static void unzipFolder(Path file,
+			Path destinationLocation)
 			throws Exception {
     	
     	String[] outputZipRootFolder = new String[] { "null" }; //$NON-NLS-1$
     	
-		try(ZipFile archiveFile = new ZipFile(file)) {
-			byte[] buf = new byte[65536];
-
-			Enumeration<ZipArchiveEntry> entries = archiveFile.getEntries();
+		try(ZipFile archiveFile = new ZipFile(file.normalize().toAbsolutePath().toFile())) {
+			Enumeration<? extends ZipEntry> entries = archiveFile.entries();
 			while (entries.hasMoreElements()) {
-				ZipArchiveEntry zipEntry = entries.nextElement();
+				ZipEntry zipEntry = entries.nextElement();
 				String name = zipEntry.getName();
 				name = name.replace('\\', '/');
 				int i = name.indexOf('/');
@@ -231,36 +222,17 @@ public class ZipUtil {
 				}
 				// name = name.substring(i + 1);
 
-				File destinationFile = new File(destinationLocation, name);
-				if (name.endsWith("/")) { //$NON-NLS-1$
-					if (!destinationFile.isDirectory()
-							&& !destinationFile.mkdirs()) {
-						throw new Exception(
-								Messages.ZipUtil_Error_CreatingTempDir
-										+ destinationFile.getPath());
-					}
-					continue;
-				} else if (name.indexOf('/') != -1) {
-					// Create the the parent directory if it doesn't exist
-					File parentFolder = destinationFile.getParentFile();
-					if (!parentFolder.isDirectory()) {
-						if (!parentFolder.mkdirs()) {
-							throw new Exception(
-									Messages.ZipUtil_Error_CreatingTempDir
-											+ parentFolder.getPath());
-						}
-					}
-				}
-
+				Path destinationFile = destinationLocation.resolve(name);
+				Path parent = destinationFile.getParent();
 				
-				try (FileOutputStream fos = new FileOutputStream(destinationFile)) {
-					int n;
-					InputStream entryContent = archiveFile
-							.getInputStream(zipEntry);
-					while ((n = entryContent.read(buf)) != -1) {
-						if (n > 0) {
-							fos.write(buf, 0, n);
-						}
+				if (name.endsWith("/")) { //$NON-NLS-1$
+					parent = destinationFile;
+				} 
+				SmartUtils.createDirectory(parent);
+
+				if (!Files.isDirectory(destinationFile)) {
+					try (InputStream in = archiveFile.getInputStream(zipEntry)) {
+						Files.copy(in, destinationFile);
 					}
 				}
 			}
@@ -281,17 +253,53 @@ public class ZipUtil {
      */
     public static void writeToZip(Path zipFile, String[]... filecontents) throws IOException {
     	 try (OutputStream fOut = Files.newOutputStream(zipFile);
-	        	 BufferedOutputStream bOut = new BufferedOutputStream(fOut);
-	        	ZipArchiveOutputStream tOut = new ZipArchiveOutputStream(bOut);){
+	        	BufferedOutputStream bOut = new BufferedOutputStream(fOut);
+	        	ZipOutputStream tOut = new ZipOutputStream(bOut);){
+    		 
     		 for (String[] item: filecontents) {
     			 String fname = item[0];
     			 String content = item[1];
-        		 ZipArchiveEntry zipEntry = new ZipArchiveEntry(fname); 
-    	         tOut.putArchiveEntry(zipEntry);
-    	         IOUtils.copy(new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)), tOut);
-    	         tOut.closeArchiveEntry();
+        		 ZipEntry zipEntry = new ZipEntry(fname); 
+    	         tOut.putNextEntry(zipEntry);
+    	         fOut.write(content.getBytes(StandardCharsets.UTF_8));
+    	         tOut.closeEntry();
     		 }
 
     	 }
     }
+    
+    
+    /**
+	 * Unzips the content of the zip
+	 * file to a temporary directory.
+	 * 
+	 * @param zipFile the zip file to unzip
+	 * @return the location of the files
+	 * @throws Exception
+	 */
+	public static Path unzip(Path zipFile) throws Exception{
+		Path tempDir = null;
+		try(ZipFile zout = new ZipFile(zipFile.toAbsolutePath().toFile())) {
+			tempDir = Files.createTempFile(zipFile.getFileName().toString(),
+					Long.toString(System.nanoTime()));
+			Files.delete(tempDir);
+			SmartUtils.createDirectory(tempDir);
+		
+			Enumeration<? extends ZipEntry> elements = zout.entries();
+			while(elements.hasMoreElements()){
+				ZipEntry entry = elements.nextElement();
+				
+				Path fout = tempDir.resolve(entry.getName());
+				if (entry.isDirectory()){
+					SmartUtils.createDirectory(fout);
+				}else{
+					SmartUtils.createDirectory(fout.getParent());
+					try(InputStream is = zout.getInputStream(entry)){
+						Files.copy(is, fout);
+					}
+				}
+			}	
+		}
+		return tempDir;
+	}	
 }

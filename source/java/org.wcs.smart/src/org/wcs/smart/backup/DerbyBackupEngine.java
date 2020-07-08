@@ -21,8 +21,10 @@
  */
 package org.wcs.smart.backup;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -65,11 +67,7 @@ public class DerbyBackupEngine {
 	public static String getDefaultFileName(){
 		String backupDir = SmartProperties.getInstance().getProperty(SmartProperties.PROP_BACKUP_DIR);
 		SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd"); //$NON-NLS-1$
-		try{
-			return new File(backupDir + File.separator + "SMART_" + format.format(new Date()) + ".bak.zip").getCanonicalPath(); //$NON-NLS-1$ //$NON-NLS-2$
-		}catch (Exception ex){
-			return new File(backupDir + File.separator + "SMART_" + format.format(new Date()) + ".bak.zip").getAbsolutePath();  //$NON-NLS-1$ //$NON-NLS-2$
-		}
+		return Paths.get(backupDir).resolve("SMART_" + format.format(new Date()) + ".bak.zip").normalize().toAbsolutePath().toString(); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	/**
@@ -81,7 +79,7 @@ public class DerbyBackupEngine {
 	 * @throws IOException
 	 */
 	//apache derby database backup: http://db.apache.org/derby/docs/10.0/manuals/admin/hubprnt43.html
-	public static boolean backupSystem(File outputFile, IProgressMonitor monitor) throws IOException{
+	public static boolean backupSystem(Path outputFile, IProgressMonitor monitor) throws IOException{
 		return backupSystem(outputFile, false, monitor);
 	}
 	
@@ -95,19 +93,21 @@ public class DerbyBackupEngine {
 	 * @return <code>true</code> if backup successful, <code>false</code> if cancelled or failed
 	 * @throws IOException
 	 */
-	public static boolean  backupSystem(File outputFile, boolean excludeFilestore, IProgressMonitor monitor) throws IOException{
+	public static boolean  backupSystem(Path outputFile, boolean excludeFilestore, IProgressMonitor monitor) throws IOException{
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.DerbyBackupEngine_ProgressMessage, 10);
-		if (outputFile.exists()){
-			if (!outputFile.delete()){
-				throw new IllegalStateException(Messages.DerbyBackupEngine_DeleteOutputFileError + " '" + outputFile.getAbsolutePath() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+		if (Files.exists(outputFile)){
+			try {
+				Files.delete(outputFile);
+			}catch(IOException ex) {
+				throw new IllegalStateException(Messages.DerbyBackupEngine_DeleteOutputFileError + " '" + outputFile.toString() + "'", ex); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
-		if (!outputFile.getParentFile().exists()){
+		if (!Files.exists(outputFile.getParent())){
 			//try to create backup directory
 			try{
-				SmartUtils.createDirectory(outputFile.getParentFile());
+				SmartUtils.createDirectory(outputFile.getParent());
 			}catch (Exception ex){
-				throw new IllegalStateException(Messages.DerbyBackupEngine_CreateDirectoryError + " '" + outputFile.getParentFile().toString() + "' \n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$ //$NON-NLS-2$
+				throw new IllegalStateException(Messages.DerbyBackupEngine_CreateDirectoryError + " '" + outputFile.getParent().toString() + "' \n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 		
@@ -118,20 +118,20 @@ public class DerbyBackupEngine {
 				//here we freeze the database to put it into a state for copying
 				NativeQuery<?> q = session.createNativeQuery("CALL SYSCS_UTIL.SYSCS_FREEZE_DATABASE()"); //$NON-NLS-1$
 				q.executeUpdate();
-				File filestore = new File (SmartProperties.getInstance().getProperty(SmartProperties.PROP_FILESTORE));
-				File database = new File (SmartProperties.getInstance().getProperty(SmartProperties.PROP_SMART_DB));
+				Path filestore = Paths.get(SmartProperties.getInstance().getProperty(SmartProperties.PROP_FILESTORE));
+				Path database = Paths.get(SmartProperties.getInstance().getProperty(SmartProperties.PROP_SMART_DB));
 							
-				File[] dirsToBackup = new File[]{database};
+				Path[] dirsToBackup = new Path[]{database};
 				if (!excludeFilestore){
-					if (!filestore.exists()){
-						filestore.mkdir();
+					if (!Files.exists(filestore)){
+						SmartUtils.createDirectory(filestore);
 					}
-					dirsToBackup = new File[]{filestore, database};
+					dirsToBackup = new Path[]{filestore, database};
 				}
 			
 				//Exclude temp directory from backup 
 				//SmartContext.INSTANCE.getTempFilestoreLocation();			
-				Set<File> itemsToExclude = new HashSet<>();
+				Set<Path> itemsToExclude = new HashSet<>();
 				itemsToExclude.add(SmartContext.INSTANCE.getTempFilestoreLocation());
 				
 				if (ZipUtil.createZip(dirsToBackup, outputFile, itemsToExclude, progress.split(9))) {
@@ -160,11 +160,7 @@ public class DerbyBackupEngine {
 	 */
 	public static String getDefaultAutoBackupLocation() { 
 		String backupDir = SmartProperties.getInstance().getProperty(SmartProperties.PROP_BACKUP_DIR);
-		try{
-			return new File(backupDir).getCanonicalPath();
-		}catch (Exception ex){
-			return new File(backupDir).getAbsolutePath(); 
-		}
+		return Paths.get(backupDir).normalize().toAbsolutePath().toString();
 	}
 	
 	/**

@@ -1,6 +1,5 @@
 package org.wcs.smart.er.xml;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -19,7 +18,7 @@ public interface IXmlToMissionConverter {
 	 * @param attachmentLocation
 	 * @throws Exception
 	 */
-	public void fromXml(Path xml, boolean keepIDs, Session session, ConservationArea ca, File attachmentLocation) throws Exception;
+	public void fromXml(Path xml, boolean keepIDs, Session session, ConservationArea ca, Path attachmentLocation) throws Exception;
 		
 	/**
 	 * Add a validation error

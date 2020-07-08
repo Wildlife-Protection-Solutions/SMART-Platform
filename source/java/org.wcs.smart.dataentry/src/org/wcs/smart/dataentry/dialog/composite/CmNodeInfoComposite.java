@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.dataentry.dialog.composite;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Set;
@@ -141,7 +141,7 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 			}
 			
 			@Override
-			public File getImageFile() {
+			public Path getImageFile() {
 				if (getSourceObject().hasCustomImage()) {
 					return getSourceObject().getImageFile();
 				}
@@ -157,7 +157,7 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 			}
 			
 			@Override
-			public void setImageFile(File file) {
+			public void setImageFile(Path file) {
 				CmNode cmNode = getSourceObject();
 				cmNode.setImageFile(file);
 				if (cmNode.getUuid() != null) {

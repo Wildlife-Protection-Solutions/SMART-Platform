@@ -299,7 +299,7 @@ public class IncidentSummaryPage extends EditorPart {
 							Label img = new Label(left, SWT.NONE);
 							img.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1, 2));
 							img.setBackground(left.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-							Image image = SmartUtils.getImage(file.getAttachmentFile().toPath(), 32);
+							Image image = SmartUtils.getImage(file.getAttachmentFile(), 32);
 							img.setImage(image);
 							img.addListener(SWT.Dispose, e->image.dispose());
 						}

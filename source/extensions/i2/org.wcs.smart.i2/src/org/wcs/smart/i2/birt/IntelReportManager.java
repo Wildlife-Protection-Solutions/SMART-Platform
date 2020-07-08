@@ -322,7 +322,7 @@ public enum IntelReportManager {
 			}
 		
 			PlatformUI.getWorkbench().showPerspective(IntelEntityReportPerspective.ID, PlatformUI.getWorkbench().getActiveWorkbenchWindow());
-			IntelEntityTypeEditorInput input = new IntelEntityTypeEditorInput(getEntityTemplate(entityType).toFile(), entityType);
+			IntelEntityTypeEditorInput input = new IntelEntityTypeEditorInput(getEntityTemplate(entityType), entityType);
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, IReportEditorContants.DESIGN_EDITOR_ID);
 		}catch (Exception ex){
 			Intelligence2PlugIn.displayLog("Error opening entity printing template. Try refreshing datasets, if error persists you can reset the template by right-clicking and selecting reset for the intelligence type in the Intelligence Templates View." + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$ //$NON-NLS-2$
@@ -422,7 +422,7 @@ public enum IntelReportManager {
 			}
 	
 			PlatformUI.getWorkbench().showPerspective(IntelEntityReportPerspective.ID, PlatformUI.getWorkbench().getActiveWorkbenchWindow());
-			IntelRecordTemplateEditorInput input = new IntelRecordTemplateEditorInput(p.toFile());
+			IntelRecordTemplateEditorInput input = new IntelRecordTemplateEditorInput(p);
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, IReportEditorContants.DESIGN_EDITOR_ID);
 		}catch (Exception ex){
 			Intelligence2PlugIn.displayLog("Error opening intelligence record printing template." + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$ //$NON-NLS-2$

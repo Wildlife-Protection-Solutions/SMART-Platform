@@ -21,9 +21,11 @@
  */
 package org.wcs.smart.ui.internal.ca.properties;
 
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -546,8 +548,8 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		int code = mergeDialog.open();
 		if (code == Window.CANCEL) return;
 
-		final File f = new File(mergeDialog.getFile());
-		if (!f.exists()){
+		final Path f = Paths.get(mergeDialog.getFile());
+		if (!Files.exists(f)){
 			MessageDialog.openError(getShell(), Messages.DataModelPropertyPage_ErrorDialogTitle, MessageFormat.format(Messages.DataModelPropertyPage_FileNotFound, f.toString()));
 			return;
 		}
@@ -686,10 +688,10 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			//nothing selected
 			return;
 		}
-		final File f = new File(file);
-		if (f.exists()){
+		final Path f = Paths.get(file);
+		if (Files.exists(f)){
 			if (!MessageDialog.openQuestion(getShell(), Messages.DataModelPropertyPage_OverwriteFile_DialogTitle, 
-					MessageFormat.format(Messages.DataModelPropertyPage_OverwriteFile_DialogMessage, new Object[]{ f.getName()}))){
+					MessageFormat.format(Messages.DataModelPropertyPage_OverwriteFile_DialogMessage, new Object[]{ f.getFileName()}))){
 				return;
 			}
 		}
@@ -709,7 +711,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 						monitor.worked(1);
 						
 						monitor.subTask(Messages.DataModelPropertyPage_Progress_WritingXml);
-						try(FileOutputStream fout = new FileOutputStream(f)){
+						try(OutputStream fout = Files.newOutputStream(f)){
 							XmlSmartDataModelManager.writeDataModel(xml,fout);
 						}
 						monitor.done();

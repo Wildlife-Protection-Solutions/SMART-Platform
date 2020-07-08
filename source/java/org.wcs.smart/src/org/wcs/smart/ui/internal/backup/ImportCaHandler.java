@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.ui.internal.backup;
 
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Path;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -87,7 +87,7 @@ public class ImportCaHandler {
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
 					DisplayAccess.accessDisplayDuringStartup();
-					File f = dialog.getSelectedFile();
+					Path f = dialog.getSelectedFile();
 					try{
 						CaImporter.importCa(f, monitor);
 						Display.getDefault().syncExec(new Runnable(){

@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.ui.internal;
 
-import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Locale;
 
@@ -68,34 +69,25 @@ public class SmartInstallationInfoPage extends InstallationPage {
 		sb.append(Messages.SmartInstallationInfoPage_DBLocation_Label);
 		
 		String embeddedDb = SmartProperties.getInstance().getProperty(SmartProperties.PROP_SMART_DB);
-		File db = new File(embeddedDb);
-		try{
-			sb.append(db.getCanonicalPath());
-		}catch (Exception ex){
-			sb.append(db.getAbsolutePath());
-		}
+		Path db = Paths.get(embeddedDb);
+		sb.append(db.toAbsolutePath().normalize().toString());
+		
 		sb.append(SharedUtils.LINE_SEPARATOR);
 		sb.append(SharedUtils.LINE_SEPARATOR);
 		
 		sb.append(Messages.SmartInstallationInfoPage_FilestoreLocation_Label);
 		embeddedDb = SmartProperties.getInstance().getProperty(SmartProperties.PROP_FILESTORE);
-		db = new File(embeddedDb);
-		try{
-			sb.append(db.getCanonicalPath());
-		}catch (Exception ex){
-			sb.append(db.getAbsolutePath());
-		}
+		db = Paths.get(embeddedDb);
+		sb.append(db.toAbsolutePath().normalize().toString());
+		
 		sb.append(SharedUtils.LINE_SEPARATOR);
 		sb.append(SharedUtils.LINE_SEPARATOR);
 		
 		sb.append(Messages.SmartInstallationInfoPage_GPSBabel_LocationLabel);
 		embeddedDb = SmartProperties.getInstance().getProperty(SmartProperties.PROP_GPS_BABEL);
-		db = new File(embeddedDb);
-		try{
-			sb.append(db.getCanonicalPath());
-		}catch (Exception ex){
-			sb.append(db.getAbsolutePath());
-		}
+		db = Paths.get(embeddedDb);
+		sb.append(db.toAbsolutePath().normalize().toString());
+		
 		sb.append(SharedUtils.LINE_SEPARATOR);
 		sb.append(SharedUtils.LINE_SEPARATOR);
 		

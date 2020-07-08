@@ -22,9 +22,9 @@
 package org.wcs.smart.incident.xml;
 
 import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.Deflater;
@@ -75,7 +75,7 @@ public class IncidentExporter {
 	 * 
 	 * @throws Exception 
 	 */
-	public static File exportIncident(Waypoint incident, File file, boolean includeAttachments, IProgressMonitor monitor) throws Exception{
+	public static Path exportIncident(Waypoint incident, Path file, boolean includeAttachments, IProgressMonitor monitor) throws Exception{
 		monitor.beginTask(Messages.IncidentExporter_ExportProgress, includeAttachments ? 4 : 2);
 		Session session = HibernateManager.openSession();
 		try {
@@ -102,9 +102,9 @@ public class IncidentExporter {
 	/**
 	 * Writes the incident without including attachments
 	 */
-	private static File exportIncidentWithoutAttachments(WaypointType xml, File file, IProgressMonitor monitor) throws Exception {
+	private static Path exportIncidentWithoutAttachments(WaypointType xml, Path file, IProgressMonitor monitor) throws Exception {
 		monitor.subTask(Messages.IncidentExporter_ExportProgress2);
-		try (BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file))){
+		try (BufferedOutputStream out = new BufferedOutputStream(Files.newOutputStream(file))){
 			IncidentXmlManager.writeIncident(xml, out);
 		}
 		monitor.worked(1);
@@ -114,20 +114,20 @@ public class IncidentExporter {
 	/**
 	 * Writes the incident including attachments
 	 */
-	private static File exportIncidentWithAttachments(Waypoint incident, WaypointType xml, File f, IProgressMonitor monitor) throws Exception{
-		int index = f.getName().lastIndexOf('.');
-		String name = f.getName();
+	private static Path exportIncidentWithAttachments(Waypoint incident, WaypointType xml, Path f, IProgressMonitor monitor) throws Exception{
+		int index = f.getFileName().toString().lastIndexOf('.');
+		String name = f.getFileName().toString();
 		if (index >= 0){
 			name= name.substring(0, index);
 		}
-		File xmlFile = File.createTempFile("temp_incident_export", ".xml"); //$NON-NLS-1$ //$NON-NLS-2$
+		Path xmlFile = Files.createTempFile("temp_incident_export", ".xml"); //$NON-NLS-1$ //$NON-NLS-2$
 		exportIncidentWithoutAttachments(xml, xmlFile, monitor);
 		
 		
 		monitor.subTask(Messages.IncidentExporter_ExportProgress3);
 		//create zip file
-		File zipFile = new File(f.getParent() + File.separator + name + ".zip"); //$NON-NLS-1$
-		try (ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(zipFile))){
+		Path zipFile = f.getParent().resolve(name + ".zip"); //$NON-NLS-1$
+		try (ZipOutputStream zout = new ZipOutputStream(Files.newOutputStream(zipFile))){
 			zout.setLevel(Deflater.DEFAULT_COMPRESSION);
 
 			/* add xml file to zip */
@@ -135,7 +135,7 @@ public class IncidentExporter {
 			
 			byte[] buffer = new byte[1024];
 			int bytesRead;
-			try (FileInputStream inStream = new FileInputStream(xmlFile)){
+			try (InputStream inStream = Files.newInputStream(xmlFile)){
 				while ((bytesRead = inStream.read(buffer)) > 0) {
 					zout.write(buffer, 0, bytesRead);
 				}
@@ -165,7 +165,7 @@ public class IncidentExporter {
         
         try{
         	//delete temp file
-        	xmlFile.delete();
+        	Files.delete(xmlFile);
         }catch(Exception ex){
         	IncidentPlugIn.log(null, ex);
         }
@@ -183,10 +183,10 @@ public class IncidentExporter {
 	 * @param includeAttributes
 	 * @return
 	 */
-	public static File getOutputFile(File dir, String name, boolean includeAttachs) throws Exception {
+	public static Path getOutputFile(Path dir, String name, boolean includeAttachs) throws Exception {
 		name = SmartUtils.getFileName(name);
 		String ext = includeAttachs ? ".zip" : ".xml"; //$NON-NLS-1$ //$NON-NLS-2$
-		return new File(dir, name + ext);
+		return dir.resolve(name + ext);
 	}
 	
 }

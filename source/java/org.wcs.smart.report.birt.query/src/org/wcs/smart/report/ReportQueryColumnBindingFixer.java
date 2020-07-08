@@ -62,7 +62,7 @@ public class ReportQueryColumnBindingFixer {
 		SubMonitor progress = SubMonitor.convert(monitor, "", 1); //$NON-NLS-1$
 		this.report = report;
 		SessionHandle session = SessionHandleAdapter.getInstance().getSessionHandle();
-		ReportDesignHandle rdh = session.openDesign(ReportPlugIn.getDefault().getReportFile(report).getAbsolutePath());
+		ReportDesignHandle rdh = session.openDesign(ReportPlugIn.getDefault().getReportFile(report).toAbsolutePath().toString());
 		try{
 			fixReport(rdh.getModuleHandle(), progress.split(1));
 			rdh.save();

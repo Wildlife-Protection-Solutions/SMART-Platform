@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.er.ui.samplingunit.export;
 
-import java.io.File;
-import java.io.FileWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -62,7 +62,7 @@ public class CsvSamplingUnitExporter implements ISamplingUnitExporter {
 	}
 
 	@Override
-	public void exportFile(File f, SurveyDesign sd,
+	public void exportFile(Path f, SurveyDesign sd,
 			Session session,
 			HashMap<Object, Object> options, IProgressMonitor monitor) throws Exception {
 		
@@ -86,7 +86,7 @@ public class CsvSamplingUnitExporter implements ISamplingUnitExporter {
 		
 		sd = (SurveyDesign) session.load(SurveyDesign.class, sd.getUuid());
 		
-		try(CSVWriter writer = new CSVWriter(new FileWriter(f), delimiter)){
+		try(CSVWriter writer = new CSVWriter(Files.newBufferedWriter(f), delimiter)){
 			exportPlotsAndTransects(type, writer, sd, session, progress);
 		}
 	}

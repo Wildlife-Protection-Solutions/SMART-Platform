@@ -21,8 +21,9 @@
  */
 package org.wcs.smart.report.export.internal;
 
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.HashMap;
 
@@ -52,8 +53,8 @@ import org.wcs.smart.ui.SmartLabelProvider;
  */
 public class RunReportJob extends Job {
 
-	private File reportFile = null;
-	private File outputFile = null;
+	private Path reportFile = null;
+	private Path outputFile = null;
 	private EmitterInfo info = null;
 	private Report report;
 	private HashMap<String, Object> reportParameters = null; 
@@ -67,7 +68,7 @@ public class RunReportJob extends Job {
 	 * @param info output format info
 	 * @param reportParams report parameters
 	 */
-	public RunReportJob(Report report, File file, EmitterInfo info, HashMap<String, Object> reportParams, int defaultDpi){
+	public RunReportJob(Report report, Path file, EmitterInfo info, HashMap<String, Object> reportParams, int defaultDpi){
 		super(MessageFormat.format(Messages.RunReportJob_JobName, new Object[]{report.getName()}));
 		
 		this.report = report;
@@ -90,7 +91,7 @@ public class RunReportJob extends Job {
 			}
 
 			IRenderOption options = new RenderOption();
-			try(FileOutputStream fout = new FileOutputStream(outputFile)){
+			try(OutputStream fout = Files.newOutputStream(outputFile)){
 				options.setOutputStream(fout);
 				options.setEmitterID(info.getID());
 				options.setOption(HTMLRenderOption.IMAGE_DIRECTROY, outputFile.getParent());

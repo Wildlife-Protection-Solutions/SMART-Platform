@@ -29,7 +29,6 @@ import java.util.List;
 
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
-import org.hibernate.jdbc.Work;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.query.Query;
 import org.hibernate.type.TextType;
@@ -101,24 +100,25 @@ public enum ChangeLogTableManager {
 	public void addItem(Session s, ChangeLogItem item){		
 		//i tired doing just a s.save(item) however I could not
 		//get this to work with the revision identify field
-		String tableName = HibernateManager.getTableName(ChangeLogItem.class);		
+		String tableName = HibernateManager.getTableName(ChangeLogItem.class);
 		
-		//wait until we get a lock on this table to
-		//continue
-		s.doWork(new Work(){
-			@Override
-			public void execute(Connection c) throws SQLException {
-				boolean doAgain = true;
-				while(doAgain){
-					try{
-						c.createStatement().execute("LOCK TABLE " + ChangeLogItem.TABLENAME + " IN EXCLUSIVE MODE"); //$NON-NLS-1$ //$NON-NLS-2$
-						doAgain = false;
-					}catch (Exception ex){
-						
-					}
-				}
-				
-			}});
+		boolean doAgain = true;
+		
+		//this may cause deadlock, if thats the case release the
+		//transaction and try again; note with current settings
+		//derby takes 60sec to timeout
+		while(doAgain) {
+			s.beginTransaction();
+		
+			try {
+				s.createNativeQuery("LOCK TABLE " + ChangeLogItem.TABLENAME + " IN EXCLUSIVE MODE") //$NON-NLS-1$ //$NON-NLS-2$
+					.executeUpdate();
+				doAgain = false;
+			}catch (Exception ex) {
+				s.getTransaction().rollback();
+			}
+			
+		}
 		
 		
 		StringBuilder sb = new StringBuilder();
@@ -144,6 +144,8 @@ public enum ChangeLogTableManager {
 		query.setParameter("key2uuid", item.getKey2() == null ? null : UuidUtils.uuidToByte(item.getKey2())); //$NON-NLS-1$
 		query.setParameter("source", item.getSource().name()); //$NON-NLS-1$
 		query.executeUpdate();
+		
+		s.getTransaction().commit();
 	}
 	
 	/**

@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.dataentry.dialog.composite;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -75,8 +76,8 @@ public class CmListItemLabelProvider extends NamedItemLabelProvider implements I
 	public Image getImage(Object element) {
 		CmAttributeListItem node = getListItem(element);
 		if (node != null){
-			File f = node.getImageFile();
-			if (!f.exists()) {
+			Path f = node.getImageFile();
+			if (!Files.exists(f)) {
 				if (node.getListItem().getIcon() == null) return null;
 				IconFile icon = node.getListItem().getIcon().getIconFile(node.getConfig().getModel().getIconSet());
 				if (icon != null) {
@@ -84,7 +85,7 @@ public class CmListItemLabelProvider extends NamedItemLabelProvider implements I
 				}
 			}
 			if (f == null) return null;
-			Image img = SmartUtils.getImage(f.toPath(), 16);
+			Image img = SmartUtils.getImage(f, 16);
 			if (img != null) {
 				images.add(img);
 				return img;

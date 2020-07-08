@@ -21,9 +21,9 @@
  */
 package org.wcs.smart.cybertracker.util;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.zip.InflaterInputStream;
 
 import org.apache.commons.io.IOUtils;
@@ -39,8 +39,8 @@ public class ZLibUtil {
     /**
      * Decompresses a zlib compressed file to a json string.
      */
-    public static String decompressFile(File compressed) throws Exception {
-    	try (InputStream in = new InflaterInputStream(new FileInputStream(compressed))) {
+    public static String decompressFile(Path compressed) throws Exception {
+    	try (InputStream in = new InflaterInputStream(Files.newInputStream(compressed))) {
 			return IOUtils.toString(in, "UTF-8"); //$NON-NLS-1$
 		} 
     }

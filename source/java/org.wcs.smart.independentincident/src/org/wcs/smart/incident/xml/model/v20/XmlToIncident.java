@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.incident.xml.model.v20;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -76,7 +75,7 @@ public class XmlToIncident implements IXmlToIncidentConverter {
 	private Waypoint incident;
 	private List<String> warnings = new ArrayList<String>();
 	
-	private File attachmentLocation = null;
+	private Path attachmentLocation = null;
 	
 	
 	public XmlToIncident(){
@@ -127,7 +126,7 @@ public class XmlToIncident implements IXmlToIncidentConverter {
 	 */
 	public void fromXml(Path file, 
 			Session session, ConservationArea ca, 
-			File attachmentLocation) throws Exception {
+			Path attachmentLocation) throws Exception {
 		WaypointType xml = readIncident(file);
 		
 		this.session = session;
@@ -150,10 +149,14 @@ public class XmlToIncident implements IXmlToIncidentConverter {
 				incident.setAttachments(new ArrayList<WaypointAttachment>());
 				for ( String filename : xml.getAttachments()){
 					WaypointAttachment att = new WaypointAttachment();
-					File f = new File(attachmentLocation.getAbsoluteFile() + File.separator + IncidentXmlManager.ATTACHMENT_DIR_NAME + File.separator + filename );
-					if (!f.exists()){
+					
+					Path f = attachmentLocation.toAbsolutePath()
+							.resolve(IncidentXmlManager.ATTACHMENT_DIR_NAME)
+							.resolve(filename);
+					
+					if (!Files.exists(f)){
 						warnings.add(MessageFormat.format(
-								Messages.XmlToIncident_AttachmentNotImported, new Object[]{ filename, f.getAbsolutePath()}));
+								Messages.XmlToIncident_AttachmentNotImported, new Object[]{ filename, f.toAbsolutePath().toString()}));
 								
 					}else{
 						att.setCopyFromLocation(f);
@@ -190,10 +193,14 @@ public class XmlToIncident implements IXmlToIncidentConverter {
 				ob.setAttachments(new ArrayList<ObservationAttachment>());
 				for ( String filename : xml.getAttachments()){
 					ObservationAttachment att = new ObservationAttachment();
-					File f = new File(attachmentLocation.getAbsoluteFile() + File.separator + IncidentXmlManager.ATTACHMENT_DIR_NAME + File.separator + filename );
-					if (!f.exists()){
+					
+					Path f = attachmentLocation.toAbsolutePath()
+							.resolve(IncidentXmlManager.ATTACHMENT_DIR_NAME)
+							.resolve(filename);
+					
+					if (!Files.exists(f)){
 						warnings.add(MessageFormat.format(
-								Messages.XmlToIncident_AttachmentNotImported, new Object[]{ filename, f.getAbsolutePath()}));
+								Messages.XmlToIncident_AttachmentNotImported, new Object[]{ filename, f.toAbsolutePath().toString()}));
 					}else{
 						att.setCopyFromLocation(f);
 						att.setFilename(filename);

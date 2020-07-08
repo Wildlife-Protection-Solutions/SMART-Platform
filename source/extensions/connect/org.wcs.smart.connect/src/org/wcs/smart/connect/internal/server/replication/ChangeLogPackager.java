@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.connect.internal.server.replication;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
@@ -127,16 +126,16 @@ public class ChangeLogPackager {
 	 * Zips changelog file and metadata file
 	 */
 	private void zipPackage(IProgressMonitor monitor) throws Exception{
-		File[] filesToZip;
+		Path[] filesToZip;
 		if (Files.exists(filestorePath)){
-			filesToZip = new File[]{changelogFile.toFile(), 
-					metadataFile.toFile(),
-					filestorePath.toFile()};
+			filesToZip = new Path[]{changelogFile, 
+					metadataFile,
+					filestorePath};
 		}else{
-			filesToZip = new File[]{changelogFile.toFile(), 
-					metadataFile.toFile()};
+			filesToZip = new Path[]{changelogFile, 
+					metadataFile};
 		}
-		ZipUtil.createZip(filesToZip, zipFile.toFile(), monitor);
+		ZipUtil.createZip(filesToZip, zipFile, monitor);
 	}
 	
 	/*

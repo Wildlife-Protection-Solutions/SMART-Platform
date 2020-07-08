@@ -149,8 +149,8 @@ public class ConservationAreaTemplateCloner implements
 				if (!newFile.isSystemIcon()) {
 					file.computeFileLocation(session);
 					newFile.computeFileLocation(session);
-					Path from = file.getAttachmentFile().toPath();
-					Path to = newFile.getAttachmentFile().toPath();
+					Path from = file.getAttachmentFile();
+					Path to = newFile.getAttachmentFile();
 					
 					try {
 						Files.createDirectories(to.getParent());

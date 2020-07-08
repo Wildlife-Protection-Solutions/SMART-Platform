@@ -21,9 +21,10 @@
  */
 package org.wcs.smart.er.ui.surveydesign.importing;
 
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.util.List;
@@ -161,7 +162,7 @@ public class ImportSurveyDesignWizard  extends Wizard implements IPageChangingLi
 		}
 	}
 
-	private void importFiles(final List<File> importFiles) {
+	private void importFiles(final List<Path> importFiles) {
 		final ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try{
 			pmd.run(true, false, new IRunnableWithProgress() {
@@ -174,14 +175,14 @@ public class ImportSurveyDesignWizard  extends Wizard implements IPageChangingLi
 					SurveyDesign lastDesign = null;
 					int successCount = 0;
 					try(Session session = HibernateManager.openSession()){
-						for(File file : importFiles){
+						for(Path file : importFiles){
 							try{
 								monitor.subTask(Messages.SurveyDesignImportHandler_1);
-								try(FileInputStream fin = new FileInputStream(file)){
+								try(InputStream fin = Files.newInputStream(file)){
 									xmlsd = SurveyDesignXMLManager.readDataModel(fin);
 								}
 							}catch (Exception ex){
-								EcologicalRecordsPlugIn.displayLog(MessageFormat.format(Messages.SurveyDesignImportHandler_2, file.getName()), ex);
+								EcologicalRecordsPlugIn.displayLog(MessageFormat.format(Messages.SurveyDesignImportHandler_2, file.getFileName().toString()), ex);
 								continue; //continue importing other files
 							}
 	

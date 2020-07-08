@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.cybertracker.survey.json;
 
-import java.io.File;
+import java.nio.file.Paths;
 import java.sql.Time;
 import java.text.DateFormat;
 import java.text.MessageFormat;
@@ -844,18 +844,18 @@ public class MissionJsonProcessor implements IJsonProcessor {
 				for (WaypointAttachment wa : wp.getAttachments()){
 					//the associated patrol waypoint has not been saved yet
 					//so we need to fix up all attachment
-					wa.computeFileLocation(new File(new File(
-							SmartDB.getCurrentConservationArea().getFileDataStoreLocation(),
-							SURVEY_WP_SRC.getDatastoreFileLocation(addTo, session)), wa.getFilename()));
+					wa.computeFileLocation(Paths.get(SmartDB.getCurrentConservationArea().getFileDataStoreLocation())
+							.resolve(SURVEY_WP_SRC.getDatastoreFileLocation(addTo, session))
+							.resolve(wa.getFilename()));
 					
 				}
 			}
 			for(WaypointObservation wo : wp.getAllObservations()){
 				if (wo.getAttachments() != null){
 					for (ObservationAttachment a : wo.getAttachments()){
-						a.computeFileLocation(new File(new File(
-								SmartDB.getCurrentConservationArea().getFileDataStoreLocation(),
-							SURVEY_WP_SRC.getDatastoreFileLocation(addTo, session)), a.getFilename()));
+						a.computeFileLocation(Paths.get(SmartDB.getCurrentConservationArea().getFileDataStoreLocation())
+								.resolve(SURVEY_WP_SRC.getDatastoreFileLocation(addTo, session))
+								.resolve(a.getFilename()));
 					}
 				}
 			}

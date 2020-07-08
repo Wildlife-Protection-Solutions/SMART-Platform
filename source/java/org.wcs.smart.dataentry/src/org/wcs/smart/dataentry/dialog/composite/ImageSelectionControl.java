@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.dataentry.dialog.composite;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -139,17 +140,17 @@ public class ImageSelectionControl extends Composite {
 			}
 		}
 		
-		File file = contentProvider.getImageFile();
-		if (file != null && file.exists() && file.isFile()) {
+		Path file = contentProvider.getImageFile();
+		if (file != null && Files.exists(file) && !Files.isDirectory(file)) {
 			
-			if (file.getName().endsWith(".svg") || file.getName().endsWith(".png")) { //$NON-NLS-1$ //$NON-NLS-2$
+			if (file.getFileName().toString().endsWith(".svg") || file.getFileName().toString().endsWith(".png")) { //$NON-NLS-1$ //$NON-NLS-2$
 				lblWarnText.setText(Messages.ImageSelectionControl_BetaCtFormat);
 				warningArea.setVisible(true);
 			}
 		}
 		warningArea.getParent().getParent().layout(true);
 		
-		canvas.setToolTipText(file == null ? "" : file.getName()); //$NON-NLS-1$
+		canvas.setToolTipText(file == null ? "" : file.getFileName().toString()); //$NON-NLS-1$
 	}
 	
 	private void initControls() {
@@ -183,10 +184,10 @@ public class ImageSelectionControl extends Composite {
 			@Override
 			public void paintControl(PaintEvent e) {
 				
-				File file = contentProvider.getImageFile();
-				if (file != null && file.exists() && file.isFile()) {
+				Path file = contentProvider.getImageFile();
+				if (file != null && Files.exists(file) && !Files.isDirectory(file)) {
 					
-					Image image = SmartUtils.getImage(file.toPath(), size);
+					Image image = SmartUtils.getImage(file, size);
 					try {
 						e.gc.drawImage(image, 0, 0, size, size, 0, 0, size, size);
 					}finally {
@@ -217,7 +218,7 @@ public class ImageSelectionControl extends Composite {
 			public void widgetSelected(SelectionEvent e) {
 				String imageFile = selectImage();
 				if (imageFile == null) return;
-				contentProvider.setImageFile(Paths.get(imageFile).toFile());
+				contentProvider.setImageFile(Paths.get(imageFile));
 				updateImage();
 			}
 		});
@@ -256,7 +257,7 @@ public class ImageSelectionControl extends Composite {
 				}else if (type == Type.CUSTOM && lastSelection != Type.CUSTOM) {
 					String imageFile = selectImage();
 					if (imageFile == null) return;
-					contentProvider.setImageFile(Paths.get(imageFile).toFile());
+					contentProvider.setImageFile(Paths.get(imageFile));
 					updateImage();
 				}
 				lastSelection = type;
@@ -317,13 +318,13 @@ public class ImageSelectionControl extends Composite {
 		/**
 		 * @return an image that is supposed to be displayed.
 		 */
-		public File getImageFile();
+		public Path getImageFile();
 		
 		/**
 		 * Called when new image was selected.
 		 * @param file
 		 */
-		public void setImageFile(File file);
+		public void setImageFile(Path file);
 		
 		/**
 		 * The configurable model being modified

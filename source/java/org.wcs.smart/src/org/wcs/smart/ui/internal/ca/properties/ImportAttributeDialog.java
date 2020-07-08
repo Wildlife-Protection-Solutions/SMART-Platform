@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.ui.internal.ca.properties;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -262,7 +262,7 @@ public class ImportAttributeDialog extends SmartStyledTitleDialog {
 			}
 		}
 		//get file
-		File file = processor.promptForFile();
+		Path file = processor.promptForFile();
 		if (file == null){
 			return;
 		}

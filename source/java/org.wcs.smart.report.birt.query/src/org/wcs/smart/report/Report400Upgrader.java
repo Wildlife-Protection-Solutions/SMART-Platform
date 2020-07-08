@@ -27,6 +27,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -145,14 +146,18 @@ public class Report400Upgrader implements IDatabaseUpgrader {
 	}
 
 	private void upgradePlan(ConservationArea ca) throws Exception{
-		File planFile = new File(ca.getFileDataStoreLocation() + File.separator + "plans" + File.separator + "planTemplate.rptdesign"); //$NON-NLS-1$ //$NON-NLS-2$
-		if (planFile.exists()){
+		Path planFile = Paths.get(ca.getFileDataStoreLocation()).resolve("plans") //$NON-NLS-1$
+				.resolve("planTemplate.rptdesign"); //$NON-NLS-1$
+		if (Files.exists(planFile)){
 			xmlUpdater(planFile);
 		}
 	}
 	private void upgradeIntelligence(ConservationArea ca) throws Exception{
-		File planFile = new File(ca.getFileDataStoreLocation() + File.separator + "intelligence" + File.separator + "intelligenceTemplate.rptdesign"); //$NON-NLS-1$ //$NON-NLS-2$
-		if (planFile.exists()){
+		Path planFile = Paths.get(ca.getFileDataStoreLocation())
+				.resolve("intelligence") //$NON-NLS-1$
+				.resolve("intelligenceTemplate.rptdesign"); //$NON-NLS-1$
+
+		if (Files.exists(planFile)){
 			xmlUpdater(planFile);
 		}
 	}
@@ -171,7 +176,7 @@ public class Report400Upgrader implements IDatabaseUpgrader {
 						String reportId = r_rs.getString(4);
 						String caFileDataStoreLocation = SmartContext.INSTANCE.getFilestoreLocation() + File.separator + UuidUtils.getDirectoryPath(UuidUtils.byteToUUID(ca_uuid));
 						try {
-							xmlUpdater(new File(ReportPlugIn.getReportDirectory(caFileDataStoreLocation), reportFilename));
+							xmlUpdater(ReportPlugIn.getReportDirectory(caFileDataStoreLocation).resolve(reportFilename));
 						} catch (Exception ex) {
 							String reportName = reportId;
 							PreparedStatement ps = c.prepareStatement("select lbl.VALUE from smart.REPORT rpt left join smart.I18N_LABEL lbl on lbl.ELEMENT_UUID=rpt.uuid left join smart.LANGUAGE lng on lbl.LANGUAGE_UUID=lng.UUID where rpt.UUID=? and lng.ISDEFAULT"); //$NON-NLS-1$
@@ -209,10 +214,10 @@ public class Report400Upgrader implements IDatabaseUpgrader {
 	 * @param file
 	 * @throws Exception
 	 */
-	public static void xmlUpdater(File file) throws Exception {
+	public static void xmlUpdater(Path file) throws Exception {
 		DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-		Document doc = docBuilder.parse(file);
+		Document doc = docBuilder.parse(file.toAbsolutePath().toFile());
 
 		// update library
 		NodeList nl = doc.getElementsByTagName(LIST_PROPERTY_TAG_NAME);
@@ -264,13 +269,13 @@ public class Report400Upgrader implements IDatabaseUpgrader {
 //		transformer.transform(source, result);
 //		
 //		
-		final DOMImplementationLS dom = (DOMImplementationLS) DOMImplementationRegistry.newInstance().getDOMImplementation("LS");
+		final DOMImplementationLS dom = (DOMImplementationLS) DOMImplementationRegistry.newInstance().getDOMImplementation("LS"); //$NON-NLS-1$
 		final LSSerializer serializer = dom.createLSSerializer();
-		serializer.setNewLine("\n");
+		serializer.setNewLine("\n"); //$NON-NLS-1$
 	
 		final LSOutput destination = dom.createLSOutput();
 		destination.setEncoding(StandardCharsets.UTF_8.name());
-		try(OutputStream fos = Files.newOutputStream(file.toPath())){
+		try(OutputStream fos = Files.newOutputStream(file)){
 			destination.setByteStream(fos);
 			serializer.write(doc, destination);
 		}

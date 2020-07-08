@@ -21,9 +21,9 @@
  */
 package org.wcs.smart.er.ui.samplingunit.export;
 
-import java.io.File;
 import java.io.Serializable;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -61,7 +61,7 @@ public class ShpSamplingUnitExporter implements ISamplingUnitExporter{
 	}
 	
 	@Override
-	public void exportFile(File f, SurveyDesign sd, Session session,
+	public void exportFile(Path f, SurveyDesign sd, Session session,
 			HashMap<Object, Object> options, IProgressMonitor monitor) throws Exception {
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.ShpSamplingUnitExporter_Progress1, 1);
 		
@@ -79,7 +79,7 @@ public class ShpSamplingUnitExporter implements ISamplingUnitExporter{
 		
 		String typeName = type.name();
 		
-		URL shpFileURL = URLUtils.fileToURL(f);
+		URL shpFileURL = URLUtils.fileToURL(f.toAbsolutePath().toFile());
 		
 		FileDataStoreFactorySpi factory = FileDataStoreFinder.getDataStoreFactory("shp"); //$NON-NLS-1$
         Map<String, Serializable> params = new HashMap<String, Serializable>();

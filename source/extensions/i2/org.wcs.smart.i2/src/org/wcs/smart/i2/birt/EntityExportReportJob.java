@@ -95,7 +95,7 @@ public class EntityExportReportJob extends Job {
 			try{
 				final Path out = runEntityType(e, dFilter);
 				if (outputDir == null){
-					Display.getDefault().syncExec(() ->  AttachmentUtil.launch(out.toFile()));
+					Display.getDefault().syncExec(() ->  AttachmentUtil.launch(out));
 				}else{
 					Files.move(out, outputDir.resolve(out.getFileName()), StandardCopyOption.REPLACE_EXISTING);
 				}

@@ -21,7 +21,9 @@
  */
 package org.wcs.smart.incident.ui;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.MessageFormat;
@@ -111,16 +113,16 @@ public class MultiIncidentExportDialog extends XmlMultiExportDialog implements I
 			return false;
 		}
 		
-		File dir = new File(txtFile.getText());
-		if (!dir.exists()) {
-			if (!MessageDialog.openQuestion(getShell(), EXPORT_DIALOGTITLE, MessageFormat.format(Messages.MultiIncidentExportDialog_DirectoryNotFound, new Object[]{dir.getAbsolutePath()}))) {
+		Path dir = Paths.get(txtFile.getText());
+		if (!Files.exists(dir)) {
+			if (!MessageDialog.openQuestion(getShell(), EXPORT_DIALOGTITLE, MessageFormat.format(Messages.MultiIncidentExportDialog_DirectoryNotFound, new Object[]{dir.toAbsolutePath().toString()}))) {
 				return false;
 			}
 			if (!SmartUtils.createDirectory(dir)){
 				IncidentPlugIn.displayLog(Messages.MultiIncidentExportDialog_CouldNotCreateDirector, null);
 				return false;
 			}
-		}else if (!dir.isDirectory()){
+		}else if (!Files.isDirectory(dir)){
 			IncidentPlugIn.displayLog(MessageFormat.format(Messages.MultiIncidentExportDialog_InvalidDirectory, new Object[]{dir.toString()}),null);
 			return false;
 		}

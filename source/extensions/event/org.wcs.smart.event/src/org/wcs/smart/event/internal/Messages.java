@@ -70,6 +70,7 @@ public class Messages extends NLS {
 	public static String DropItemFactory_TreeNodeNotFound;
 	public static String EventDatabaseUpgrader_SubTaskName;
 	public static String EventDatabaseUpgrader_TaskName;
+	public static String EventProcessingJob_EventProcessingError;
 	public static String EventProcessingJob_FilterEvalError;
 	public static String EventProcessingJob_InvalidOpException;
 	public static String EventProcessingJob_JobName;

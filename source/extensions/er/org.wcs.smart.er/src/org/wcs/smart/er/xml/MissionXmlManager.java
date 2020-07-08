@@ -21,9 +21,9 @@
  */
 package org.wcs.smart.er.xml;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Path;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -74,12 +74,12 @@ public class MissionXmlManager {
 	 * @param xmlFile
 	 * @return
 	 */
-	public static IXmlToMissionConverter findXmlConverter(File xmlFile){
+	public static IXmlToMissionConverter findXmlConverter(Path xmlFile){
 		try{
 			DocumentBuilderFactory factory =
 					DocumentBuilderFactory.newInstance();
 					DocumentBuilder builder = factory.newDocumentBuilder();
-			Document doc = builder.parse(xmlFile);
+			Document doc = builder.parse(xmlFile.toAbsolutePath().toFile());
 			String nodeName = doc.getFirstChild().getNodeName();
 			String ns = ""; //$NON-NLS-1$
 			if (nodeName.indexOf(':') > 0){

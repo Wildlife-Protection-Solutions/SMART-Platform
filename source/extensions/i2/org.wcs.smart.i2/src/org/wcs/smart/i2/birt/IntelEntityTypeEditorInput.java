@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.i2.birt;
 
-import java.io.File;
+import java.nio.file.Path;
 
 import org.eclipse.birt.report.designer.internal.ui.editors.ReportEditorInput;
 import org.wcs.smart.i2.model.IntelEntityType;
@@ -33,8 +33,8 @@ public class IntelEntityTypeEditorInput extends ReportEditorInput {
 
 	private IntelEntityType type;
 	
-	public IntelEntityTypeEditorInput(File file, IntelEntityType type) {
-		super(file);
+	public IntelEntityTypeEditorInput(Path file, IntelEntityType type) {
+		super(file.toAbsolutePath().toFile());
 		this.type = type;
 	}
 	

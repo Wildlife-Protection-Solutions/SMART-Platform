@@ -21,13 +21,15 @@
  */
 package org.wcs.smart.cybertracker.util;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.util.SmartFileUtils;
+import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -54,7 +56,7 @@ public class PdaUtil {
 		return media;
 	}
 	
-	public static File createTempDirectory() throws IOException {
+	public static Path createTempDirectory() throws IOException {
 		return SmartFileUtils.createTempDirectory("cybertracker"); //$NON-NLS-1$
 	}	
 
@@ -63,9 +65,9 @@ public class PdaUtil {
 	}
 
 	public static void updateRegistryKey(ConservationArea ca) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, IOException {
-		File folder = ICyberTrackerConstants.getDowloadFolder(ca).toFile();
-		if (!folder.exists())
-			folder.mkdirs();
+		Path folder = ICyberTrackerConstants.getDowloadFolder(ca);
+		if (!Files.exists(folder)) SmartUtils.createDirectory(folder);
+
 
 //		WinRegistry.writeStringValue(WinRegistry.HKEY_CURRENT_USER, ICyberTrackerConstants.REG_KEY_PATH,
 //				getRegistryKey(ca), folder.getCanonicalPath());
@@ -75,9 +77,9 @@ public class PdaUtil {
 //		WinRegistry.deleteValue(WinRegistry.HKEY_CURRENT_USER, ICyberTrackerConstants.REG_KEY_PATH, getRegistryKey(ca));
 	}
 	
-	public static int uploadPda(File file) throws Exception {
+	public static int uploadPda(Path file) throws Exception {
 		String appPath = getCTAppPath();
-		String[] uploadCommands = {appPath, ICyberTrackerConstants.COMMAND_SILENT, ICyberTrackerConstants.COMMAND_UPLOAD, file.getAbsolutePath()};
+		String[] uploadCommands = {appPath, ICyberTrackerConstants.COMMAND_SILENT, ICyberTrackerConstants.COMMAND_UPLOAD, file.toAbsolutePath().toString()};
 		Process proc = Runtime.getRuntime().exec(uploadCommands);
 		int code = proc.waitFor();
 		return code;

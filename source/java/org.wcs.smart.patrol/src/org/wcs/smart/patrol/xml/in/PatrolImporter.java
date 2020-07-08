@@ -21,16 +21,17 @@
  */
 package org.wcs.smart.patrol.xml.in;
 
-import java.io.File;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -55,6 +56,7 @@ import org.wcs.smart.patrol.xml.external.IConvertedExtraData;
 import org.wcs.smart.ui.SmartStyledInputDialog;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.ZipUtil;
 
 /**
  * Class responsible for importing a patrol.
@@ -75,7 +77,7 @@ public class PatrolImporter {
 	 * to call done() on the given monitor
 	 * @throws Exception
 	 */
-	public static Patrol importPatrol(File file, ImportConfig config, IProgressMonitor monitor) throws Exception{
+	public static Patrol importPatrol(Path file, ImportConfig config, IProgressMonitor monitor) throws Exception{
 		
 		if (SmartUtils.isZip(file)){
 			//process as zip file
@@ -94,39 +96,36 @@ public class PatrolImporter {
 	 * @return patrol created or null
 	 * @throws Exception
 	 */
-	private static Patrol importXmlToPatrol(File zipFile, ImportConfig config, IProgressMonitor monitor) throws Exception{
+	private static Patrol importXmlToPatrol(Path zipFile, ImportConfig config, IProgressMonitor monitor) throws Exception{
 		SubMonitor progress = SubMonitor.convert(monitor, IMPORTING_PATROL_TASKNAME, 3);
 		progress.subTask(Messages.PatrolImporter_Progress_ProcessingFile);
 		progress.split(1);
-		File directory = unzip(zipFile);
-		if (directory == null || !directory.isDirectory()){
-			throw new Exception (MessageFormat.format(Messages.PatrolImporter_Error_UnzipError, new Object[]{ zipFile.getAbsoluteFile()}));
+		Path directory = ZipUtil.unzip(zipFile);
+		if (directory == null || !Files.isDirectory(directory)){
+			throw new Exception (MessageFormat.format(Messages.PatrolImporter_Error_UnzipError, new Object[]{ zipFile.toAbsolutePath().toString()}));
 		}
 		
 		
 		//file xml file
 		progress.split(1);
 		IXmlToPatrolConverter converter = null;
-		File xmlFile = null;
-		String[] files = directory.list();
-		if (files != null){
-			progress.subTask(Messages.PatrolImporter_Progress_ReadingFile);
-			for (int i = 0; i < files.length; i ++){
-				File f = new File(directory.getAbsoluteFile() + File.separator + files[i]);
-				if (f.isFile()){
-					//lets try reading the 
-					converter = PatrolXmlManager.findVersion(f);
-					if (converter != null){
-						//we've found the patrol xml file; otherwise we probably found an attachment file
-						xmlFile = f;
-						break;
-					}
+		Path xmlFile = null;
+		List<Path> files = Files.list(directory).collect(Collectors.toList());
+		progress.subTask(Messages.PatrolImporter_Progress_ReadingFile);
+		for (Path f : files) {
+			if (!Files.isDirectory(f)){
+				//lets try reading the 
+				converter = PatrolXmlManager.findVersion(f);
+				if (converter != null){
+					//we've found the patrol xml file; otherwise we probably found an attachment file
+					xmlFile = f;
+					break;
 				}
 			}
 		}
 		if (converter == null){
 			try{
-				FileUtils.deleteDirectory(directory);
+				SmartUtils.deleteDirectory(directory);
 			}catch (Exception ex){
 				SmartPatrolPlugIn.log("Error deleting temporary directory", ex); //$NON-NLS-1$
 			}
@@ -137,7 +136,7 @@ public class PatrolImporter {
 		
 		progress.subTask(Messages.PatrolImporter_Progress_RemovingTempFiles);
 		try{
-			FileUtils.deleteDirectory(directory);
+			SmartUtils.deleteDirectory(directory);
 		}catch (Exception ex){
 			SmartPatrolPlugIn.log("Error deleting temporary directory", ex); //$NON-NLS-1$
 		}
@@ -153,7 +152,7 @@ public class PatrolImporter {
 	 * @return patrol created or null
 	 * @throws Exception
 	 */
-	private static Patrol importPatrolFromFile(File xmlFile, ImportConfig config, IProgressMonitor monitor) throws Exception{
+	private static Patrol importPatrolFromFile(Path xmlFile, ImportConfig config, IProgressMonitor monitor) throws Exception{
 		IXmlToPatrolConverter converter = PatrolXmlManager.findVersion(xmlFile);
 		if (converter == null){
 			throw new Exception(MessageFormat.format(Messages.PatrolImporter_UnableToProcessFile, xmlFile));
@@ -177,7 +176,7 @@ public class PatrolImporter {
 	 * @throws Exception
 	 */
 	private static Patrol  convertAndSave(IXmlToPatrolConverter converter, final ImportConfig config, 
-			File attachmentDirectory, File sourceFile, IProgressMonitor monitor) throws Exception {
+			Path attachmentDirectory, Path sourceFile, IProgressMonitor monitor) throws Exception {
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.PatrolImporter_ReadingProgress, 5);
 		
 		
@@ -230,7 +229,7 @@ public class PatrolImporter {
 					} else {
 						//duplicate patrol id but user chose to ignore warnings
 						String pid = imported.getId();
-						String fileName = sourceFile.getName();
+						String fileName = sourceFile.getFileName().toString();
 						String message = config.isKeepIDs() ? MessageFormat.format(Messages.PatrolImporter_Warn_SameId, imported.getId(), fileName) : MessageFormat.format(Messages.PatrolImporter_Warn_DataDuplicate, pid, fileName);
 						config.addWarning(message, sourceFile);
 					}
@@ -304,38 +303,7 @@ public class PatrolImporter {
 		return imported;
 	}
 	
-	/**
-	 * Unzips the content of the zip
-	 * file to a temporary directory.
-	 * 
-	 * @param zipFile the zip file to unzip
-	 * @return the location of the files
-	 * @throws Exception
-	 */
-	private static File unzip(File zipFile) throws Exception{
-		File tempDir = null;
-		try(ZipFile zout = new ZipFile(zipFile)) {
-			tempDir = File.createTempFile(zipFile.getName(),
-					Long.toString(System.nanoTime()));
-			tempDir.delete();
-			tempDir.mkdir();
-		
-			Enumeration<? extends ZipEntry> elements = zout.entries();
-			while(elements.hasMoreElements()){
-				ZipEntry entry = elements.nextElement();
-				
-				File fout = new File(tempDir.getAbsoluteFile() + File.separator + entry.getName());
-				if (entry.isDirectory()){
-					FileUtils.forceMkdir(fout);
-				}else{
-					try(InputStream is = zout.getInputStream(entry)){
-						FileUtils.copyInputStreamToFile(is, fout);
-					}
-				}
-			}	
-		}
-		return tempDir;
-	}	
+	
 }
 
 

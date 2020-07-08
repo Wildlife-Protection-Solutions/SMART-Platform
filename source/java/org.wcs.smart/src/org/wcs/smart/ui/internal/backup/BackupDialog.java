@@ -21,8 +21,10 @@
  */
 package org.wcs.smart.ui.internal.backup;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 
 import org.apache.commons.io.FileUtils;
@@ -46,6 +48,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Dialog for displaying system
@@ -60,7 +63,7 @@ public class BackupDialog extends SmartStyledTitleDialog {
 	private final static DialogSettings localSettings = new DialogSettings(""); //$NON-NLS-1$
 	
 	private Text txtBackupFile;
-	private File selectedFile;
+	private Path selectedFile;
 	private Boolean excludeFilestore;
 	private String title;
 	private String message;
@@ -97,8 +100,8 @@ public class BackupDialog extends SmartStyledTitleDialog {
 	/**
 	 * @return the backup file selected by the user
 	 */
-	public File getSelectedFile(){
-		localSettings.put(fileNameKey, selectedFile.getParent());
+	public Path getSelectedFile(){
+		localSettings.put(fileNameKey, selectedFile.getParent().toString());
 		return this.selectedFile;
 	}
 	
@@ -130,7 +133,7 @@ public class BackupDialog extends SmartStyledTitleDialog {
 		if (set == null || set.trim().isEmpty()){
 			txtBackupFile.setText(this.defaultFileName);
 		}else{
-			File tmp = new File(set, (new File(defaultFileName)).getName());
+			Path tmp = Paths.get(set).resolve(defaultFileName);
 			txtBackupFile.setText(tmp.toString());
 		}
 		
@@ -149,9 +152,9 @@ public class BackupDialog extends SmartStyledTitleDialog {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				FileDialog fd = new FileDialog(getShell(), SWT.SAVE);
-				File f = new File(txtBackupFile.getText());
-				fd.setFilterPath(f.getParent());
-				fd.setFileName(f.getName());
+				Path f = Paths.get(txtBackupFile.getText());
+				fd.setFilterPath(f.getParent().toString());
+				fd.setFileName(f.getFileName().toString());
 				fd.setFilterNames(new String[]{"zip (*.zip)", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
 				fd.setFilterExtensions(new String[]{"*.zip", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
 				
@@ -241,30 +244,27 @@ public class BackupDialog extends SmartStyledTitleDialog {
 				excludeFilestore = true;
 			}
 			
-			File file = new File(txtBackupFile.getText());
+			Path file = Paths.get(txtBackupFile.getText());
 			
-			if (file.exists()){
-				if (!file.isFile()){
+			if (Files.exists(file)){
+				if (Files.isDirectory(file)){
 					MessageDialog.openError(getShell(), Messages.BackupDialog_ErrorDialogTitle, MessageFormat.format(Messages.BackupDialog_InvalidFile, file.toString()));
 					return;
 				}
-				if (!MessageDialog.openConfirm(getShell(), Messages.BackupDialog_Confirm_DialogTitle, MessageFormat.format(Messages.BackupDialog_Confirm_Message, new Object[]{ file.getAbsolutePath()}) )){
+				if (!MessageDialog.openConfirm(getShell(), Messages.BackupDialog_Confirm_DialogTitle, MessageFormat.format(Messages.BackupDialog_Confirm_Message, new Object[]{ file.toAbsolutePath()}) )){
 					return;
 				}
 			}
-			if (!file.getParentFile().exists()){
+			if (!Files.exists(file.getParent())){
 				if (!MessageDialog.openConfirm(getShell(), 
 						Messages.BackupDialog_ConfirmCreateDirTitle, 
 						MessageFormat.format(Messages.BackupDialog_ConfirmCreateDirMsg, 
 								new Object[]{ file.getParent()}) )){
 					return;
 				}
-				try{
-					FileUtils.forceMkdir(file.getParentFile());
-				}catch (IOException ex){
-					MessageDialog.openError(getShell(), Messages.BackupDialog_ErrorDialogTitle, Messages.BackupDialog_CouldNotCreateOutputDir);
-					return;	
-				}
+				
+				if (!SmartUtils.createDirectory(file.getParent())) return;
+				
 			}
 			
 			selectedFile = file;

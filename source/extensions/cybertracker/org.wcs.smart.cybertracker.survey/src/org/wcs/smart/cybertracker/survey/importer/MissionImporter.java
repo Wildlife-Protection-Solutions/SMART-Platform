@@ -607,7 +607,7 @@ public class MissionImporter extends AbstractSmartImporter {
 			int[] size = getImageAutoResizeSizeOption(ca, session);		
 			for (ISmartAttachment attachment : attachments){
 				//only process new attachments
-				if (attachment.getCopyFromLocation() != null && attachment.getCopyFromLocation().length() >= maxsizebytes){
+				if (attachment.getCopyFromLocation() != null && attachment.getCopyFromLocation().toAbsolutePath().toFile().length() >= maxsizebytes){
 					ImageProcessor.processAttachment(attachment,size[0], size[1]);
 				}
 			}	
@@ -616,7 +616,7 @@ public class MissionImporter extends AbstractSmartImporter {
 			Point[] allSize = new Point[]{null};
 			for (ISmartAttachment attachment : attachments){
 				//only process new attachments
-				if (attachment.getCopyFromLocation() != null && attachment.getCopyFromLocation().length() < maxsizebytes) continue;
+				if (attachment.getCopyFromLocation() != null && attachment.getCopyFromLocation().toAbsolutePath().toFile().length() < maxsizebytes) continue;
 				final BufferedImage image = ImageProcessor.readImage(attachment.getCopyFromLocation());
 				if (image == null) continue;
 				

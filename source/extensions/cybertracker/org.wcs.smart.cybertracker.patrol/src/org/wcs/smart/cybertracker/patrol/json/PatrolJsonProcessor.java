@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.cybertracker.patrol.json;
 
-import java.io.File;
+import java.nio.file.Paths;
 import java.sql.Time;
 import java.text.DateFormat;
 import java.text.MessageFormat;
@@ -471,9 +471,9 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 								wa.setWaypoint(mwpg.getWaypoint());
 								mwpg.getWaypoint().getAttachments().add(wa);
 								
-								wa.computeFileLocation(new File(new File(
-										SmartDB.getCurrentConservationArea().getFileDataStoreLocation(),
-										PATROL_WP_SRC.getDatastoreFileLocation(link.getPatrolLeg().getPatrol(), session)), wa.getFilename()));
+								wa.computeFileLocation(Paths.get(SmartDB.getCurrentConservationArea().getFileDataStoreLocation())
+										.resolve(PATROL_WP_SRC.getDatastoreFileLocation(link.getPatrolLeg().getPatrol(), session))
+										.resolve(wa.getFilename()));
 							
 							}
 						}
@@ -496,9 +496,9 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 								wa.setWaypoint(mwp);
 								mwp.getAttachments().add(wa);
 							
-								wa.computeFileLocation(new File(new File(
-										SmartDB.getCurrentConservationArea().getFileDataStoreLocation(),
-										PATROL_WP_SRC.getDatastoreFileLocation(link.getPatrolLeg().getPatrol(), session)), wa.getFilename()));
+								wa.computeFileLocation(Paths.get(SmartDB.getCurrentConservationArea().getFileDataStoreLocation())
+										.resolve(PATROL_WP_SRC.getDatastoreFileLocation(link.getPatrolLeg().getPatrol(), session))
+										.resolve(wa.getFilename()));
 							}
 						}
 						
@@ -850,19 +850,18 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 				for (WaypointAttachment wa : wp.getAttachments()){
 					//the associated patrol waypoint has not been saved yet
 					//so we need to fix up all attachment
-					wa.computeFileLocation(new File(new File(
-							SmartDB.getCurrentConservationArea().getFileDataStoreLocation(),
-							PATROL_WP_SRC.getDatastoreFileLocation(addTo.getPatrol(), session)), wa.getFilename()));
-					
+					wa.computeFileLocation(Paths.get(SmartDB.getCurrentConservationArea().getFileDataStoreLocation())
+							.resolve(PATROL_WP_SRC.getDatastoreFileLocation(addTo.getPatrol(), session))
+							.resolve(wa.getFilename()));
 				}
 			}
 			
 			for(WaypointObservation wo : wp.getAllObservations()){
 				if (wo.getAttachments() != null){
 					for (ObservationAttachment a : wo.getAttachments()){
-						a.computeFileLocation(new File(new File(
-								SmartDB.getCurrentConservationArea().getFileDataStoreLocation(),
-								PATROL_WP_SRC.getDatastoreFileLocation(addTo.getPatrol(), session)), a.getFilename()));
+						a.computeFileLocation(Paths.get(SmartDB.getCurrentConservationArea().getFileDataStoreLocation())
+								.resolve(PATROL_WP_SRC.getDatastoreFileLocation(addTo.getPatrol(), session))
+								.resolve(a.getFilename()));
 					}
 				}
 			}

@@ -28,11 +28,12 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -141,7 +142,7 @@ public class MapItemExecutor implements IReportItemExecutor{
 	private IExecutorContext context;
 	private IReportItemExecutor parent;
 	
-	private List<File> cleanUp;
+	private List<Path> cleanUp;
 	private List<IRasterCreator> creators;
 	
 	private IForeignContent content = null;
@@ -226,11 +227,15 @@ public class MapItemExecutor implements IReportItemExecutor{
 	@Override
 	public void close() throws BirtException {
 		//delete all temporary raster files
-		for (File f : cleanUp){
+		for (Path f : cleanUp){
 			try{
-				if (!f.delete()) f.deleteOnExit();	//if we cannot delete now try on exit 
-			}catch (Throwable t){
-				Logger.getLogger(MapItemExecutor.class.getName()).log(Level.WARNING, t.getMessage(), t);
+				Files.delete(f);
+			}catch (Throwable t2) {
+				try {
+					f.toFile().deleteOnExit();//if we cannot delete now try on exit
+				}catch (Throwable t) {
+					Logger.getLogger(MapItemExecutor.class.getName()).log(Level.WARNING, t.getMessage(), t);
+				}
 			}
 		}
 	}
@@ -257,7 +262,7 @@ public class MapItemExecutor implements IReportItemExecutor{
 	}
 	
 	protected byte[] executeQuery( ) throws Exception {
-		cleanUp = new ArrayList<File>();
+		cleanUp = new ArrayList<>();
 		
 		MapConfiguration configuration = new MapConfiguration(96);
 		
@@ -286,7 +291,7 @@ public class MapItemExecutor implements IReportItemExecutor{
 					for (IRasterCreator creator : getRasterCreators()){
 						try{
 							if (creator.canProcess(context, datasetId, queryText)){
-								File f = creator.createRaster(context, datasetId, qresult);
+								Path f = creator.createRaster(context, datasetId, qresult);
 								if (f != null){
 									info.setRasterFile(f);
 									minValue = creator.getRasterMinValue();

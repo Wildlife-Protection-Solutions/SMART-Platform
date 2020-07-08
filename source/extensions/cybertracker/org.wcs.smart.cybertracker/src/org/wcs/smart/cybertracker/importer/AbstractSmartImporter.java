@@ -21,7 +21,9 @@
  */
 package org.wcs.smart.cybertracker.importer;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Time;
 import java.text.DateFormat;
 import java.text.MessageFormat;
@@ -46,6 +48,7 @@ import java.util.stream.Collectors;
 import org.hibernate.Session;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.locationtech.jts.geom.Coordinate;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -78,8 +81,6 @@ import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.util.SharedUtils;
-
-import org.locationtech.jts.geom.Coordinate;
 
 /**
  * Common smart importing logic.
@@ -645,8 +646,8 @@ public abstract class AbstractSmartImporter {
 					addWarning(MessageFormat.format(Messages.SmartImporter_Warn_ExportMedia_UnknownFolder, a.getV()));
 					continue;
 				}
-				File file = new File(mediaFolder + a.getV());
-				if (!file.exists()) {
+				Path file = Paths.get(mediaFolder).resolve(a.getV());
+				if (!Files.exists(file)) {
 					addWarning(MessageFormat.format(Messages.SmartImporter_Warn_ExportMedia_FileNotFound, mediaFolder, a.getV()));
 					continue;
 				}

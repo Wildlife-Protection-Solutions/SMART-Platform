@@ -21,14 +21,15 @@
  */
 package org.wcs.smart.cybertracker.export;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -105,7 +106,7 @@ public abstract class CyberTrackerExportDialog extends SmartStyledTitleDialog {
 	private Button btnLaunchCT;
 	
 	private Label lblFile;
-	private File selectedFile;
+	private Path selectedFile;
 
     private LanguageViewer languageViewer;
     private ComboViewer profileViewer;
@@ -340,7 +341,7 @@ public abstract class CyberTrackerExportDialog extends SmartStyledTitleDialog {
 				if (selectedFile == null) {
 					return;
 				}
-				dialogSettings.put(OUTPUT_FILE, selectedFile.getAbsolutePath());
+				dialogSettings.put(OUTPUT_FILE, selectedFile.toAbsolutePath().toString());
 				dialogSettings.put(LAUNCH_CT, Boolean.valueOf(btnLaunchCT.getSelection()));
 			}
 			handleExport(btnToDevice.getSelection());
@@ -350,12 +351,12 @@ public abstract class CyberTrackerExportDialog extends SmartStyledTitleDialog {
 		close();
 	}
 
-	private File getOutputFile() {
-		File file = new File(txtFile.getText());
-		if (!file.exists()) {
-			if (!file.getParentFile().exists()) {
+	private Path getOutputFile() {
+		Path file = Paths.get(txtFile.getText());
+		if (!Files.exists(file)) {
+			if (!Files.exists(file.getParent())) {
 				if (MessageDialog.openQuestion(getShell(), Messages.CyberTrackerExportDialog_ConfirmOverwrite_Title, MessageFormat.format(Messages.CyberTrackerExportDialog_ConfirmCreateDir_Message, file.getParent()))) {
-					if (!SmartUtils.createDirectory(file.getParentFile())) {
+					if (!SmartUtils.createDirectory(file.getParent())) {
 						return null;
 					}
 					return file;
@@ -386,7 +387,7 @@ public abstract class CyberTrackerExportDialog extends SmartStyledTitleDialog {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					SubMonitor progress = SubMonitor.convert(monitor, "", 2); //$NON-NLS-1$
-					File tempDir;
+					Path tempDir;
 					try {
 						tempDir = PdaUtil.createTempDirectory();
 					} catch (IOException e) {
@@ -395,7 +396,7 @@ public abstract class CyberTrackerExportDialog extends SmartStyledTitleDialog {
 					}
 	
 					try {
-						File generated = exporter.export(tempDir, getConfigurableModelProvider(), null, progress.split(1));
+						Path generated = exporter.export(tempDir, getConfigurableModelProvider(), null, progress.split(1));
 						if (generated == null) {
 							return; //error is supposed to be tracked inside export call
 						}
@@ -417,7 +418,7 @@ public abstract class CyberTrackerExportDialog extends SmartStyledTitleDialog {
 						} else {
 							progress.subTask(Messages.CyberTrackerExportDialog_Task_Copy);
 							try {
-								FileUtils.copyFile(generated, selectedFile);
+								Files.copy(generated, selectedFile);
 							} catch (IOException e) {
 								CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.CyberTrackerExportDialog_Error_CopyFailed, e);
 								return;
@@ -534,9 +535,9 @@ public abstract class CyberTrackerExportDialog extends SmartStyledTitleDialog {
 	
 	private class LaunchCTJob extends Job {
 
-		private File file;
+		private Path file;
 		
-		public LaunchCTJob(File file) {
+		public LaunchCTJob(Path file) {
 			super(Messages.CyberTrackerExportDialog_Job_LaunchCT);
 			this.file = file;
 		}
@@ -545,7 +546,7 @@ public abstract class CyberTrackerExportDialog extends SmartStyledTitleDialog {
 		protected IStatus run(IProgressMonitor monitor) {
 			try {
 				String ctPath = PdaUtil.getCTAppPath();
-				String[] launchCommands = {ctPath, ICyberTrackerConstants.COMMAND_DATAFILE, file.getAbsolutePath()};
+				String[] launchCommands = {ctPath, ICyberTrackerConstants.COMMAND_DATAFILE, file.toAbsolutePath().toString()};
 				Runtime.getRuntime().exec(launchCommands);
 			} catch (Exception e) {
 				CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.CyberTrackerExportDialog_Error_LaunchCT, e);

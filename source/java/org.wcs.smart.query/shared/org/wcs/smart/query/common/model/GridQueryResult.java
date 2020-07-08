@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.query.common.model;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.Collection;
 
@@ -38,7 +39,7 @@ import org.wcs.smart.query.common.engine.IQueryResult;
 public class GridQueryResult implements IQueryResult {
 	
 	protected Collection<QueryGridResultItem> data;
-	private File lastFile;
+	private Path lastFile;
 	protected boolean isDisposed = false;
 	
 	protected GridMetadata resultMetadata;
@@ -60,10 +61,10 @@ public class GridQueryResult implements IQueryResult {
 		 return this.resultMetadata;
 	 }
 	 
-	 public void setLastRasterFile(File f){
+	 public void setLastRasterFile(Path f){
 		 this.lastFile = f;
 	 }
-	 public File getRasterFile(){
+	 public Path getRasterFile(){
 		 return this.lastFile;
 	 }
 
@@ -73,7 +74,7 @@ public class GridQueryResult implements IQueryResult {
 		data = null;
 		if (lastFile != null){
 			try{
-				lastFile.delete();
+				Files.delete(lastFile);
 			}catch (Exception ex){
 		
 			}

@@ -23,12 +23,12 @@ package org.wcs.smart.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Time;
 import java.text.MessageFormat;
 import java.util.Calendar;
@@ -291,23 +291,39 @@ public class SmartUtils {
 	}
 
 
+	public static void deleteDirectory(final Path dir) throws IOException { 
+		//TODO:
+		System.out.println(dir.toString());
+		FileUtils.deleteDirectory(dir.toAbsolutePath().normalize().toFile());
+	}
+
+	public static void copyDirectory(Path source, Path target) throws IOException {
+		FileUtils.copyDirectory(source.toAbsolutePath().normalize().toFile(), 
+				target.toAbsolutePath().normalize().toFile());
+
+	}
+	
+	public static void moveDirectory(Path source, Path target) throws IOException {
+		FileUtils.moveDirectory(source.toAbsolutePath().normalize().toFile(), 
+				target.toAbsolutePath().normalize().toFile());
+
+	}
+	
 	/**
 	 * Creates the given directory.  
 	 * @param dir the directory to created
 	 * @return <code>false</code> if not created, <code>true</code> otherwise
 	 */
-	public static boolean createDirectory(final File dir) {
+	public static boolean createDirectory(final Path dir) {
 		try {
-			Files.createDirectories(dir.toPath());
+			Files.createDirectories(dir);
 			return true;
 		} catch (final IOException ex) {
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
 					SmartPlugIn
-					.displayLog(
-							Messages.SmartUtils_Error_CouldNotCreateDir + dir.getAbsolutePath(),
-							ex);
+					.displayLog(Messages.SmartUtils_Error_CouldNotCreateDir + dir.toAbsolutePath().toString(),ex);
 				}});
 			
 		}
@@ -320,15 +336,15 @@ public class SmartUtils {
 	 * @param to file to copy to
 	 * @return
 	 */
-	public static boolean copyFile(File from, File to) {
+	public static boolean copyFile(Path from, Path to) {
 		// if (true) return false;
 		try {
-			FileUtils.copyFile(from, to);
+			Files.copy(from, to);
 			return true;
 		} catch (IOException e) {
 			SmartPlugIn.displayLog(MessageFormat.format(
 					Messages.SmartUtils_Error_CouldNotCopy,
-					new Object[]{from.getAbsolutePath(), to.getAbsolutePath()}), e);
+					new Object[]{from.toAbsolutePath().toString(), to.toAbsolutePath().toString()}), e);
 		}
 		return false;
 	}
@@ -484,38 +500,17 @@ public class SmartUtils {
 	}
 	
 	/**
-	 * Counts all the files in a directory including
-	 * all sub-directories.
-	 * 
-	 * @param directory the directory to start at
-	 * @return the total number of files
-	 */
-	public static int countFiles(File directory){
-		int count = 0;
-		for (File f : directory.listFiles()){
-			if (f.isFile()){
-				count++;
-			}else{
-				count += countFiles(f);
-			}
-		}
-		return count;
-	}
-	
-	/**
 	 * Creates a temporary directory.
 	 * 
 	 * @return the temporary directory 
 	 */
-	public static File createTemporaryDirectory(){
-		File baseDir = new File(System.getProperty("java.io.tmpdir")); //$NON-NLS-1$
+	public static Path createTemporaryDirectory(){
+		Path baseDir = Paths.get(System.getProperty("java.io.tmpdir")); //$NON-NLS-1$
 		String basename = "smart_" + Long.toString(System.nanoTime()); //$NON-NLS-1$
 		
 		for (int i = 0; i < 1000; i ++){
-			File tempDir = new File(baseDir, basename + "_"+ i); //$NON-NLS-1$
-			if (tempDir.mkdir()){
-				return tempDir;
-			}
+			Path tempDir = baseDir.resolve(basename + "_"+ i); //$NON-NLS-1$
+			if (createDirectory(tempDir)) return tempDir;
 		}
 		throw new IllegalStateException(Messages.SmartUtils_Error_CouldNotCreateTempDir);
 		
@@ -527,8 +522,8 @@ public class SmartUtils {
 	 * @param file the file to check
 	 * @return <code>true</code> if file is zip file, <code>false</code> otherwise
 	 */
-	public static boolean isZip(File file){
-		try(ZipFile zout = new ZipFile(file)){
+	public static boolean isZip(Path file){
+		try(ZipFile zout = new ZipFile(file.toAbsolutePath().toFile())){
 			zout.entries();
 			zout.close();
 			return true;
@@ -637,11 +632,11 @@ public class SmartUtils {
 	 * @param height
 	 * @return scalex, scaley, rotation - assumption is the scaling is applied before rotation
 	 */
-	public static double[] getExifRotation(File file){
+	public static double[] getExifRotation(Path file){
 		
 		Metadata metadata = null;
 		try {
-			metadata = ImageMetadataReader.readMetadata(file.getAbsoluteFile());
+			metadata = ImageMetadataReader.readMetadata(file.toAbsolutePath().toFile());
 		} catch (Exception e) {
 			return new double[] {0,1,1};
 		}
@@ -736,8 +731,8 @@ public class SmartUtils {
 		return imageTransform;
 	}
 	
-	public static Transform getExifImageTransform(File file, int width, int height) throws IOException{
-		try(InputStream is = Files.newInputStream(file.toPath())){
+	public static Transform getExifImageTransform(Path file, int width, int height) throws IOException{
+		try(InputStream is = Files.newInputStream(file)){
 			return getExifImageTransform(is, width, height);
 		}
 	}
@@ -887,7 +882,7 @@ public class SmartUtils {
 		
 		try {
 			//check fo exif metadata for transform
-			Transform imageTransform = SmartUtils.getExifImageTransform(file.toFile(), sizeW, sizeH);
+			Transform imageTransform = SmartUtils.getExifImageTransform(file, sizeW, sizeH);
 		 	if (imageTransform != null) {
 				Image image3 = new Image(Display.getDefault(), sizeW, sizeH);
 				GC gc3 = new GC(image3);

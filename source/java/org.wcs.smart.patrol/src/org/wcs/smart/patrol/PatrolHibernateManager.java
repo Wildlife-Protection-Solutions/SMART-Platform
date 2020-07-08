@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.patrol;
 
-import java.io.File;
+import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -470,17 +470,19 @@ public class PatrolHibernateManager extends HibernateManager{
 									if (wp.getWaypoint().getAttachments() != null){
 										//update all the waypoint attachments directory
 										for (WaypointAttachment wa : wp.getWaypoint().getAttachments()){
-											wa.computeFileLocation(new File(new File(
-													SmartDB.getCurrentConservationArea().getFileDataStoreLocation(),
-													src.getDatastoreFileLocation(patrol, session)), wa.getFilename()));
+											wa.computeFileLocation(Paths.get(
+													SmartDB.getCurrentConservationArea().getFileDataStoreLocation())
+													.resolve(src.getDatastoreFileLocation(patrol, session))
+													.resolve(wa.getFilename()));
 										}
 									}
 									for (WaypointObservation wo : wp.getWaypoint().getAllObservations()){
 										if (wo.getAttachments() != null){
 											for (ObservationAttachment wa : wo.getAttachments()){
-												wa.computeFileLocation(new File(new File(
-														SmartDB.getCurrentConservationArea().getFileDataStoreLocation(),
-														src.getDatastoreFileLocation(patrol, session)), wa.getFilename()));
+												wa.computeFileLocation(
+														Paths.get(SmartDB.getCurrentConservationArea().getFileDataStoreLocation())
+														.resolve(src.getDatastoreFileLocation(patrol, session))
+														.resolve(wa.getFilename()));
 											}
 										}
 									}

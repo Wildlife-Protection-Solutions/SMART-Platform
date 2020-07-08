@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.patrol.xml.in;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.List;
 
 import org.hibernate.Session;
@@ -63,7 +63,7 @@ public interface IXmlToPatrolConverter {
 	 * @param attachmentLocation
 	 * @throws Exception
 	 */
-	public void convertFile(File xmlFile, Session session, ConservationArea ca, File attachmentLocation) throws Exception;
+	public void convertFile(Path xmlFile, Session session, ConservationArea ca, Path attachmentLocation) throws Exception;
 	
 	/**
 	 * Must be called after convertFile.  Converts the xml plugin additions

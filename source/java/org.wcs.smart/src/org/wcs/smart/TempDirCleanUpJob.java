@@ -21,7 +21,9 @@
  */
 package org.wcs.smart;
 
-import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -31,6 +33,7 @@ import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Cleans up query temporary tables from the database.
@@ -47,13 +50,24 @@ public class TempDirCleanUpJob extends Job{
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
 		//clean up queries directory
-		File dir = SmartContext.INSTANCE.getTempFilestoreLocation();
-		if (dir.exists() && dir.isDirectory()){
-			File[] toDel = dir.listFiles();
-			if (toDel != null){
-				for (int i = 0; i < toDel.length; i ++){
-					toDel[i].delete();
-				}
+		Path dir = SmartContext.INSTANCE.getTempFilestoreLocation();
+		
+		
+		if (Files.exists(dir) && Files.isDirectory(dir)){
+			try {
+				Files.list(dir).forEach(file->{
+					try {
+						if (Files.isDirectory(file)) {
+							SmartUtils.deleteDirectory(file);
+						}else {
+							Files.delete(file);
+						}
+					} catch (IOException e) {
+						SmartPlugIn.log(e.getMessage(), e);
+					}
+				});
+			}catch (IOException e) {
+				SmartPlugIn.log(e.getMessage(), e);
 			}
 		}
 		

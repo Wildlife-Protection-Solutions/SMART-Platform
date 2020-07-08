@@ -272,7 +272,7 @@ public class ObservationItemList {
 					Label img = new Label(left, SWT.NONE);
 					img.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 1, 2));
 					
-					Image image = SmartUtils.getImage(file.getAttachmentFile().toPath(), 32);
+					Image image = SmartUtils.getImage(file.getAttachmentFile(), 32);
 					img.setImage(image);
 					img.addListener(SWT.Dispose, e->image.dispose());
 				}

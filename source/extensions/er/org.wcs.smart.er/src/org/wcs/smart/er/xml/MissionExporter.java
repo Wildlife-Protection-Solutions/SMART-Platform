@@ -23,9 +23,9 @@
 package org.wcs.smart.er.xml;
 
 import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.Deflater;
@@ -80,7 +80,7 @@ public class MissionExporter {
 	 * 
 	 * @throws Exception 
 	 */
-	public static File exportMission(Mission mission, File file, boolean includeAttachments, IProgressMonitor monitor) throws Exception{
+	public static Path exportMission(Mission mission, Path file, boolean includeAttachments, IProgressMonitor monitor) throws Exception{
 		monitor.beginTask(Messages.MissionExporter_0, includeAttachments ? 4 : 2);
 		Session session = HibernateManager.openSession();
 		try {
@@ -112,9 +112,9 @@ public class MissionExporter {
 	/**
 	 * Writes the patrol without including attachments
 	 */
-	private static File exportMissionWithoutAttachments(MissionType xml, File file, IProgressMonitor monitor) throws Exception {
+	private static Path exportMissionWithoutAttachments(MissionType xml, Path file, IProgressMonitor monitor) throws Exception {
 		monitor.subTask(Messages.MissionExporter_2);
-		try(BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file))) {
+		try(BufferedOutputStream out = new BufferedOutputStream(Files.newOutputStream(file))) {
 			MissionXmlManager.writeDataModel(xml, out);
 		}
 		monitor.worked(1);
@@ -124,20 +124,20 @@ public class MissionExporter {
 	/**
 	 * Writes the patrol including attachments
 	 */
-	private static File exportMissionWithAttachments(Mission mission, MissionType xml, File f, IProgressMonitor monitor) throws Exception{
-		int index = f.getName().lastIndexOf('.');
-		String name = f.getName();
+	private static Path exportMissionWithAttachments(Mission mission, MissionType xml, Path f, IProgressMonitor monitor) throws Exception{
+		int index = f.getFileName().toString().lastIndexOf('.');
+		String name = f.getFileName().toString();
 		if (index >= 0){
 			name= name.substring(0, index);
 		}
-		File xmlFile = File.createTempFile("temp_patrol_export", ".xml"); //$NON-NLS-1$ //$NON-NLS-2$
+		Path xmlFile = Files.createTempFile("temp_patrol_export", ".xml"); //$NON-NLS-1$ //$NON-NLS-2$
 		exportMissionWithoutAttachments(xml, xmlFile, monitor);
 		
 		
 		monitor.subTask(Messages.MissionExporter_3);
 		//create zip file
-		File zipFile = new File(f.getParent() + File.separator + name + ".zip"); //$NON-NLS-1$
-		try(ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(zipFile))) {
+		Path zipFile = f.getParent().resolve(name + ".zip"); //$NON-NLS-1$
+		try(ZipOutputStream zout = new ZipOutputStream(Files.newOutputStream(zipFile))) {
 			zout.setLevel(Deflater.DEFAULT_COMPRESSION);
 
 			/* add xml file to zip */
@@ -145,7 +145,7 @@ public class MissionExporter {
 
 			byte[] buffer = new byte[1024];
 			int bytesRead;
-			try(FileInputStream inStream = new FileInputStream(xmlFile)) {
+			try(InputStream inStream = Files.newInputStream(xmlFile)) {
 				while ((bytesRead = inStream.read(buffer)) > 0) {
 					zout.write(buffer, 0, bytesRead);
 				}
@@ -180,7 +180,7 @@ public class MissionExporter {
         
         try{
         	//delete temp file
-        	xmlFile.delete();
+        	Files.delete(xmlFile);
         }catch(Exception ex){
         	EcologicalRecordsPlugIn.log(null, ex);
         }
@@ -198,10 +198,10 @@ public class MissionExporter {
 	 * @param includeAttributes
 	 * @return
 	 */
-	public static File getOutputFile(File dir, String name, boolean includeAttachs) throws Exception {
+	public static Path getOutputFile(Path dir, String name, boolean includeAttachs) throws Exception {
 		name = SmartUtils.getFileName(name);
 		String ext = includeAttachs ? ".zip" : ".xml"; //$NON-NLS-1$ //$NON-NLS-2$
-		return new File(dir, name + ext);
+		return dir.resolve(name + ext);
 	}
 	
 }

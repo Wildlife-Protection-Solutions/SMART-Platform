@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.backup;
 
-import java.io.File;
+import java.nio.file.Path;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
@@ -35,6 +35,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
  */
 public interface IBackupContributor {
 	
-	public void process(File backupZipFile, IProgressMonitor monitor);
+	public void process(Path backupZipFile, IProgressMonitor monitor);
 	
 }

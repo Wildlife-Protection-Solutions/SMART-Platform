@@ -21,13 +21,14 @@
  */
 package org.wcs.smart.qa.incident;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
@@ -41,6 +42,7 @@ import org.wcs.smart.qa.QaPlugIn;
 import org.wcs.smart.qa.incident.internal.Messages;
 import org.wcs.smart.qa.model.IQaAction;
 import org.wcs.smart.qa.model.QaError;
+import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -107,10 +109,12 @@ public class DeleteIncidentAction implements IQaAction {
 		
 		//delete filestore and fire events
 		wpDeleted.forEach((w)->{
-			File f = new File(new File(SmartDB.getCurrentConservationArea().getFileDataStoreLocation(), IndepedentIncidentSource.FILESTORE_LOC), UuidUtils.getDirectoryPath(w.getUuid()));
-			if (f.exists()){
+			Path f = Paths.get(SmartDB.getCurrentConservationArea().getFileDataStoreLocation())
+					.resolve(IndepedentIncidentSource.FILESTORE_LOC)
+					.resolve(UuidUtils.getDirectoryPath(w.getUuid()));
+			if (Files.exists(f)){
 				try{
-					FileUtils.forceDelete(f);
+					SmartUtils.deleteDirectory(f);
 				}catch(Exception ex){
 					QaPlugIn.log(Messages.DeleteIncidentAction_FilestoreDeleteError + ex.getMessage(), ex);
 				}

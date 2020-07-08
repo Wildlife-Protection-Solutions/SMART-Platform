@@ -22,7 +22,6 @@
 package org.wcs.smart.query.compound.ui;
 
 import java.io.BufferedOutputStream;
-import java.io.File;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -88,7 +87,7 @@ public class CompoundQueryDefinitionExporter extends DefinitionQueryExporter  {
 	}
 	
 	@Override
-	public void export(org.wcs.smart.query.model.Query query, IQueryResult result, File file,
+	public void export(org.wcs.smart.query.model.Query query, IQueryResult result, Path file,
 			HashMap<String, Object> parameters, IProgressMonitor monitor)
 			throws Exception {
 		SubMonitor progress = SubMonitor.convert(monitor, "", 3); //$NON-NLS-1$
@@ -175,11 +174,11 @@ public class CompoundQueryDefinitionExporter extends DefinitionQueryExporter  {
 				Path output = subDir.resolve(UuidUtils.uuidToString(q.getUuid()) + ".xml"); //$NON-NLS-1$
 				//to definition exporter found for query type
 				if (lexporter != null){
-					lexporter.export(q, null, output.toFile(), parameters, progress.split(2));
+					lexporter.export(q, null, output, parameters, progress.split(2));
 				}
 			}
 			
-			ZipUtil.createZip(new File[]{queryFile.toFile(), subDir.toFile()}, file, progress.split(1));
+			ZipUtil.createZip(new Path[]{queryFile, subDir}, file, progress.split(1));
 		}finally{
 			FileUtils.forceDelete(tempDir.toFile());
 		}

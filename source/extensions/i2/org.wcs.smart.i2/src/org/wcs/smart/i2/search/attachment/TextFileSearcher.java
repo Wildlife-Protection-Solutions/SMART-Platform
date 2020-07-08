@@ -58,7 +58,7 @@ public class TextFileSearcher implements IFileSearcher {
 		Path file = null;
 		boolean deleteme = false;
 		if (attachment.getCopyFromLocation() != null){
-			file = attachment.getCopyFromLocation().toPath();
+			file = attachment.getCopyFromLocation();
 		}else{
 			try {
 				file = EncryptUtils.decryptAttachment(attachment);

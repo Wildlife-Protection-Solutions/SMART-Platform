@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.report.internal.ui;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.List;
 
@@ -91,8 +92,8 @@ public class NewReportHandler {
 			}
 		}
 		
-		final File smartLibrary = SmartBirtLibrary.getInstance().getLibraryFile();
-		if (!smartLibrary.exists()) {
+		final Path smartLibrary = SmartBirtLibrary.getInstance().getLibraryFile();
+		if (!Files.exists(smartLibrary)) {
 			throw new IllegalStateException(Messages.NewReportHandler_Error_NoLibrary);
 		}
 
@@ -133,7 +134,7 @@ public class NewReportHandler {
 		Job createReportJob = new Job(Messages.NewReportHandler_Progress_CreatingReport) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				File reportFile = null;
+				Path reportFile = null;
 				try(Session hsession = HibernateManager.openSession()){
 					
 					hsession.beginTransaction();
@@ -153,12 +154,12 @@ public class NewReportHandler {
 				boolean canEdit = true;
 				try{
 					//create report file with default library
-					reportFile = new File(ReportPlugIn.getReportDirectory(report.getConservationArea()), report.getFilename());
+					reportFile = ReportPlugIn.getReportDirectory(report.getConservationArea()).resolve(report.getFilename());
 
 					SessionHandle session = SessionHandleAdapter.getInstance().getSessionHandle();
 
 					//open the library so we can copy stuff from the library to the report
-					LibraryHandle library = session.openLibrary(smartLibrary.getPath());
+					LibraryHandle library = session.openLibrary(smartLibrary.toAbsolutePath().toString());
 					DesignElementHandle param = null;
 					
 					List<?> paramGroups = library.getParametersAndParameterGroups();
@@ -185,7 +186,7 @@ public class NewReportHandler {
 					}
 					
 					//open the report
-					ReportDesignHandle rdh = session.createDesign(reportFile.getAbsolutePath());
+					ReportDesignHandle rdh = session.createDesign(reportFile.toAbsolutePath().toString());
 					rdh.setTitle(report.getName());
 					//initialize layout to auto-layout (see ticket #2437)
 					rdh.setProperty(IReportDesignModel.LAYOUT_PREFERENCE_PROP, DesignChoiceConstants.REPORT_LAYOUT_PREFERENCE_AUTO_LAYOUT);

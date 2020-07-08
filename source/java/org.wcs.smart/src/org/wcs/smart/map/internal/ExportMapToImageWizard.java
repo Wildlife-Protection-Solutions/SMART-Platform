@@ -24,9 +24,11 @@ package org.wcs.smart.map.internal;
 import java.awt.Graphics2D;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -169,7 +171,7 @@ public class ExportMapToImageWizard extends Wizard implements IExportWizard {
 
 		monitor.beginTask(Messages.ExportMapToImageWizard_Progress_Rendering, 3);
 		monitor.setTaskName(MessageFormat.format(Messages.ExportMapToImageWizard_Progress_Prepare, new Object[] { map.getName() }));
-		File destination = determineDestinationFile(map);
+		Path destination = determineDestinationFile(map);
 		if (destination == null) {
 			return false;
 		}
@@ -238,7 +240,7 @@ public class ExportMapToImageWizard extends Wizard implements IExportWizard {
 		}
 		monitor.worked(1);
 		monitor.setTaskName(MessageFormat.format(Messages.ExportMapToImageWizard_Progress_WriteDisk, new Object[] { map.getName() }));
-		mapSelectorPage.getSelectedFormat().write(renderedMap, image, destination);
+		mapSelectorPage.getSelectedFormat().write(renderedMap, image, destination.toAbsolutePath().normalize().toFile());
 
 		resetCatalog( destination ); 
 
@@ -250,16 +252,16 @@ public class ExportMapToImageWizard extends Wizard implements IExportWizard {
 
 	//reset the catalog if service exists
 	//SMART BUG #1592
-	private void resetCatalog(final File file) {
-		if (!file.exists()) return; //file not created
-        if ( file.getAbsolutePath().toLowerCase(Locale.ROOT).endsWith("pdf") ) return; //$NON-NLS-1$
+	private void resetCatalog(final Path file) {
+		if (!Files.exists(file)) return; //file not created
+        if ( file.getFileName().toString().toLowerCase(Locale.ROOT).endsWith("pdf") ) return; //$NON-NLS-1$
 
-        Job resetCatalog = new Job("Resetting " + file.getName() ){ //$NON-NLS-1$
+        Job resetCatalog = new Job("Resetting " + file.getFileName() ){ //$NON-NLS-1$
             @Override
             protected IStatus run(IProgressMonitor monitor) {
                 ICatalog localCatalog = CatalogPlugin.getDefault().getLocalCatalog();                
                 IServiceFactory serviceFactory = CatalogPlugin.getDefault().getServiceFactory();
-                List<IService> services = serviceFactory.createService(new ID(file,null).toURL());
+                List<IService> services = serviceFactory.createService(new ID(file.toAbsolutePath().normalize().toFile(),null).toURL());
                 if (!services.isEmpty()) {
                 	ID id = services.get(0).getID();
                 	IService found = localCatalog.getById(IService.class, id, new NullProgressMonitor());
@@ -300,9 +302,9 @@ public class ExportMapToImageWizard extends Wizard implements IExportWizard {
         resetCatalog.schedule();
 	}
 	
-	private File determineDestinationFile(IMap map) {
-		File exportDir = mapSelectorPage.getOutputDir();
-		if (!exportDir.exists()){
+	private Path determineDestinationFile(IMap map) {
+		Path exportDir = mapSelectorPage.getOutputDir();
+		if (!Files.exists(exportDir)){
 			boolean createDir = MessageDialog.openQuestion(getContainer()
 					.getShell(), Messages.ExportMapToImageWizard_OverwriteDialogTitle,MessageFormat.format(Messages.ExportMapToImageWizard_OutputDirDoesNotExist, new Object[]{exportDir.toString()}));
 			if (!createDir){
@@ -313,19 +315,21 @@ public class ExportMapToImageWizard extends Wizard implements IExportWizard {
 				}
 			}
 		}
-		if (!exportDir.isDirectory()){
+		if (!Files.isDirectory(exportDir)){
 			MessageDialog.openError(getContainer().getShell(), Messages.ExportMapToImageWizard_OverwriteDialogTitle, Messages.ExportMapToImageWizard_InvalidOutputDir + exportDir.toString());
 			return null;			
 		}
 		
 		String name = URLUtils.cleanFilename(mapSelectorPage.getFileName());
-		File destination = addSuffix(new File(exportDir, name));
-		if (destination.exists()) {
+		Path destination = addSuffix(exportDir, name);
+		if (Files.exists(destination)) {
 			boolean overwrite = !MessageDialog.openQuestion(getContainer()
-					.getShell(), Messages.ExportMapToImageWizard_OverwriteDialogTitle,Messages.ExportMapToImageWizard_OverwriteDialogMessage + destination.getName());
+					.getShell(), Messages.ExportMapToImageWizard_OverwriteDialogTitle,Messages.ExportMapToImageWizard_OverwriteDialogMessage + destination.getFileName());
 
 			if (!overwrite) {
-				if (!destination.delete()) {
+				try {
+					Files.delete(destination);
+				}catch (Exception ex) {
 					destination = selectFile(destination, Messages.ExportMapToImageWizard_OverwriteError);
 				}
 
@@ -338,39 +342,28 @@ public class ExportMapToImageWizard extends Wizard implements IExportWizard {
 			return null;
 		}
 
-		return addSuffix(destination);
+		return addSuffix(destination.getParent(), destination.getFileName().toString());
 	}
 
-	private File addSuffix(File file) {
-		String path = stripEndSlash(file.getPath());
-
-		File destination;
+	private Path addSuffix(Path file, String name) {
 		String extension = mapSelectorPage.getSelectedFormat().getExtension();
-		if (!path.endsWith(extension)) {
-			destination = new File(path + "." + extension); //$NON-NLS-1$
+		if (!name.endsWith(extension)) {
+			return file.resolve(name + "." + extension);
 		} else {
-			return file;
+			return file.resolve(name);
 		}
-		return destination;
 	}
 
-	private String stripEndSlash(String path) {
-		if (path.endsWith("/")) //$NON-NLS-1$
-			return stripEndSlash(path.substring(0, path.length() - 1));
-		return path;
-	}
-
-	private File selectFile(File destination, String string) {
+	private Path selectFile(Path destination, String string) {
 		FileDialog dialog = new FileDialog(getShell(), SWT.SAVE);
 		dialog.setText(string);
-		dialog.setFilterPath(destination.getParent());
-		dialog.setFileName(destination.getName());
+		dialog.setFilterPath(destination.getParent().toString());
+		dialog.setFileName(destination.getFileName().toString());
 		String file = dialog.open();
 		if (file == null) {
-			destination = null;
+			return null;
 		} else {
-			destination = new File(file);
+			return Paths.get(file);
 		}
-		return destination;
 	}
 }

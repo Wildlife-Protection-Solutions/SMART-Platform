@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.query.importexport;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -64,7 +64,7 @@ public class QueryImportEngine {
 	 * @param query
 	 * @return
 	 */
-	public static final IQueryImporter getQueryImporter(File f){
+	public static final IQueryImporter getQueryImporter(Path f){
 		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(MAPPING_ID);
 		
 		for (IConfigurationElement e : config) {
@@ -74,7 +74,7 @@ public class QueryImportEngine {
 					return importer;
 				}
 			}catch (Exception ex){
-				QueryPlugIn.log(MessageFormat.format(Messages.QueryImportEngine_QueryImporterNotFound1, new Object[]{f.getAbsolutePath()}),ex);
+				QueryPlugIn.log(MessageFormat.format(Messages.QueryImportEngine_QueryImporterNotFound1, new Object[]{f.toString()}),ex);
 			}
 		}
 		return null;
@@ -96,12 +96,12 @@ public class QueryImportEngine {
 	 * @throws Exception if the file cannot be converted to a query.
 	 * 
 	 */
-	public List<org.wcs.smart.query.model.Query> importQuery(File file, ConservationArea importCa) throws Exception{
+	public List<org.wcs.smart.query.model.Query> importQuery(Path file, ConservationArea importCa) throws Exception{
 		warnings.clear();
 
 		importer = getQueryImporter(file);
 		if (importer == null){
-			throw new Exception(MessageFormat.format(Messages.QueryImporter_InvalidQueryType1, new Object[]{ file.getAbsolutePath()}));
+			throw new Exception(MessageFormat.format(Messages.QueryImporter_InvalidQueryType1, new Object[]{ file.toString()}));
 		}
 		
 		List<org.wcs.smart.query.model.Query> importedQuery = importer.importQuery(file, importCa);

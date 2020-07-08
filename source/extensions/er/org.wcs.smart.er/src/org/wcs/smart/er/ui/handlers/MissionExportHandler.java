@@ -21,8 +21,10 @@
 */
 package org.wcs.smart.er.ui.handlers;
 
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.UUID;
@@ -61,10 +63,10 @@ public class MissionExportHandler{
 
 		final List<UUID> missions = dialog.getObjectUuids();	
 		final boolean includeAtt = dialog.getIncludeAttachments();
-		final File dir = new File(dialog.getDirectory());
+		final Path dir = Paths.get(dialog.getDirectory());
 		if (missions.size() == 0) return;
 			
-		if (!dir.exists() || !dir.isDirectory()) return;
+		if (!Files.exists(dir) || !Files.isDirectory(dir)) return;
 			
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(shell);
 		try {
@@ -96,7 +98,7 @@ public class MissionExportHandler{
 
 							monitor.subTask(MessageFormat.format(Messages.MissionExportHandler_3,new Object[]{ id }));
 
-							File outFile = MissionExporter.getOutputFile(dir, m.getId(), includeAtt);
+							Path outFile = MissionExporter.getOutputFile(dir, m.getId(), includeAtt);
 							MissionExporter.exportMission(m, outFile, includeAtt, new NullProgressMonitor());
 							exportCnt++;
 						} catch (Exception ex) {

@@ -21,13 +21,14 @@
  */
 package org.wcs.smart.ca;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.swt.widgets.Display;
@@ -36,6 +37,7 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * This is a manager for conservation areas.
@@ -93,11 +95,11 @@ public class ConservationAreaManager {
 		
 		
 		try(Session session = HibernateManager.openSession()){
-			File fStore = null;
+			Path fStore = null;
 			session.beginTransaction();
 			try {
 				ca = (ConservationArea)session.get(ConservationArea.class, ca.getUuid());
-				fStore = new File(ca.getFileDataStoreLocation());
+				fStore = Paths.get(ca.getFileDataStoreLocation());
 				
 				runDeleteHandlers(ca, session, progress.split(1));
 				
@@ -110,16 +112,16 @@ public class ConservationAreaManager {
 			}
 			progress.worked(1);
 				
-			final File fileStore = fStore;
-			if (fileStore.exists()){
+			final Path fileStore = fStore;
+			if (Files.exists(fileStore)){
 				progress.subTask(Messages.ConservationAreaManager_Progress_RemoveFileStore);
 				try{
-					FileUtils.forceDelete(fileStore);
+					SmartUtils.deleteDirectory(fileStore);
 				}catch(final Exception ex){
 					Display.getDefault().syncExec(new Runnable(){
 						@Override
 						public void run() {
-							SmartPlugIn.displayLog(Messages.ConservationAreaManager_Error_DeletingFilestore + fileStore.getAbsolutePath(), ex);
+							SmartPlugIn.displayLog(Messages.ConservationAreaManager_Error_DeletingFilestore + fileStore.toAbsolutePath().toString(), ex);
 						}});
 				}
 			}

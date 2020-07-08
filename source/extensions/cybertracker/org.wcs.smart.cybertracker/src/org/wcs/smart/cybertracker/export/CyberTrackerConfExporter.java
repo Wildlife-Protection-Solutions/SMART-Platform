@@ -23,11 +23,10 @@ package org.wcs.smart.cybertracker.export;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -169,7 +168,7 @@ public class CyberTrackerConfExporter {
 	 * @return
 	 * @throws Exception
 	 */
-	public File export(File destFolder, IConfigurableModelProvider cmProvider, IEclipseContext context, IProgressMonitor monitor) throws Exception {
+	public Path export(Path destFolder, IConfigurableModelProvider cmProvider, IEclipseContext context, IProgressMonitor monitor) throws Exception {
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.CyberTrackerExportHandler_TaskName, 100);
 		session = HibernateManager.openSession();
 		session.beginTransaction();
@@ -234,7 +233,7 @@ public class CyberTrackerConfExporter {
 		return new ScreensUtil(ctu);
 	}
 
-	private File performExport(File file, IProgressMonitor monitor) throws Exception {
+	private Path performExport(Path file, IProgressMonitor monitor) throws Exception {
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.CyberTrackerExporter_Progress_Fetch_Configuration, 100);
 		
 		if (ctProperties != null) {
@@ -302,7 +301,7 @@ public class CyberTrackerConfExporter {
 			//----------------creating Screens.xml----------------
 			progress.subTask(Messages.CyberTrackerExporter_Progress_Generate_Screens);
 			progress.split(10);
-			try (BufferedOutputStream outS = new BufferedOutputStream(new FileOutputStream(file.getAbsolutePath() + File.separator + ICyberTrackerConstants.XML_SCREENS))){
+			try (BufferedOutputStream outS = new BufferedOutputStream(Files.newOutputStream(file.resolve(ICyberTrackerConstants.XML_SCREENS)))){
 				writeDataModel(screens, outS, Screens.class);
 			}
 			
@@ -311,7 +310,7 @@ public class CyberTrackerConfExporter {
 			progress.subTask(Messages.CyberTrackerExporter_Progress_Generate_Elements);
 			ElementsUtil.addNodeElements(elements, keyMap, currentLanguage);
 			
-			try (BufferedOutputStream outE = new BufferedOutputStream(new FileOutputStream(file.getAbsolutePath() + File.separator + ICyberTrackerConstants.XML_ELEMENTS))){ 
+			try (BufferedOutputStream outE = new BufferedOutputStream(Files.newOutputStream(file.resolve(ICyberTrackerConstants.XML_ELEMENTS)))){ 
 				writeDataModel(elements, outE, Elements.class);
 			}
 			
@@ -336,7 +335,7 @@ public class CyberTrackerConfExporter {
 			columnItems.add(ReportsObjectFactory.createColumnItem(newWpResultId.getItemId(), ScreensUtil.RESULT_NEW_WAYPOINT));
 			Reports reports = ReportsObjectFactory.createReports(columnItems);
 			
-			try (BufferedOutputStream outR = new BufferedOutputStream(new FileOutputStream(file.getAbsolutePath() + File.separator + ICyberTrackerConstants.XML_REPORTS))){
+			try (BufferedOutputStream outR = new BufferedOutputStream(Files.newOutputStream(file.resolve(ICyberTrackerConstants.XML_REPORTS)))){
 				writeDataModel(reports, outR, Reports.class);
 			}
 			
@@ -344,7 +343,7 @@ public class CyberTrackerConfExporter {
 			try{
 			IDataTargetProvider.DataTarget target = alertDataProvider.getDataTarget();
 			if (target != null){
-				try (BufferedWriter outR = new BufferedWriter(new FileWriter(file.getAbsolutePath() + File.separator + "Globals.xml"))){ //$NON-NLS-1$
+				try (BufferedWriter outR = Files.newBufferedWriter(file.resolve("Globals.xml"))){ //$NON-NLS-1$
 					outR.write("<Globals>\n"); //$NON-NLS-1$
 					outR.write("<DatabaseVersion>3420</DatabaseVersion>"); //$NON-NLS-1$
 					outR.write("<Transfer>\n"); //$NON-NLS-1$
@@ -370,7 +369,7 @@ public class CyberTrackerConfExporter {
 		progress.subTask(Messages.CyberTrackerExporter_Progress_GenerateCTX);
 		try {
 			String appPath = PdaUtil.getCTAppPath();
-			String[] createCommands = {appPath, ICyberTrackerConstants.COMMAND_CREATE, file.getAbsolutePath(),file.getAbsolutePath()+"\\"+ICyberTrackerConstants.SMART_CTX_FILENEME}; //$NON-NLS-1$
+			String[] createCommands = {appPath, ICyberTrackerConstants.COMMAND_CREATE, file.toAbsolutePath().toString(),file.resolve(ICyberTrackerConstants.SMART_CTX_FILENEME).toAbsolutePath().toString()}; 
 			Process proc = Runtime.getRuntime().exec(createCommands);
 			proc.waitFor();
 		} catch (Exception e) {
@@ -378,7 +377,7 @@ public class CyberTrackerConfExporter {
 			return null;
 		}
 
-		return new File(file.getAbsolutePath()+"\\"+ICyberTrackerConstants.SMART_CTX_FILENEME); //$NON-NLS-1$
+		return file.resolve(ICyberTrackerConstants.SMART_CTX_FILENEME); 
 	}
 
 	private List<Node> buildCategoryNodes(CmNode node, Map<CmNode, CyberTrackerId> keyMap, Integer level) throws Exception {

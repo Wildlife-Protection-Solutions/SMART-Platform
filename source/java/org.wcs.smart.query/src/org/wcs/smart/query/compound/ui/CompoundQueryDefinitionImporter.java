@@ -22,7 +22,6 @@
 package org.wcs.smart.query.compound.ui;
 
 import java.io.BufferedInputStream;
-import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -66,12 +65,12 @@ public class CompoundQueryDefinitionImporter implements IQueryImporter {
 	private HashMap<Integer, Query> layerQueryMap;
 	
 	@Override
-	public boolean canImport(File file) {
+	public boolean canImport(Path file) {
 		try{
 			Path tempDir = Files.createTempDirectory("smart" + System.nanoTime()); //$NON-NLS-1$
 			try{
 			
-				ZipUtil.unzipFolder(file, tempDir.toFile());
+				ZipUtil.unzipFolder(file, tempDir);
 				Path queryfile = tempDir.resolve(CompoundQueryDefinitionExporter.MAIN_QUERY_FILE);
 				if (Files.exists(queryfile)){
 					org.wcs.smart.query.xml.model.Query q = null;
@@ -93,14 +92,14 @@ public class CompoundQueryDefinitionImporter implements IQueryImporter {
 	}
 
 	@Override
-	public List<Query> importQuery(File file, ConservationArea ca) throws Exception {
+	public List<Query> importQuery(Path file, ConservationArea ca) throws Exception {
 		layerQueryMap = new HashMap<Integer, Query>();
 		
 		List<Query> imported = new ArrayList<Query>();
 		Path tempDir = Files.createTempDirectory("smart" + System.nanoTime()); //$NON-NLS-1$
 		try{
 		
-			ZipUtil.unzipFolder(file, tempDir.toFile());
+			ZipUtil.unzipFolder(file, tempDir);
 			Path queryfile = tempDir.resolve(CompoundQueryDefinitionExporter.MAIN_QUERY_FILE); 
 			if (Files.exists(queryfile)){
 				org.wcs.smart.query.xml.model.Query q = null;
@@ -155,13 +154,13 @@ public class CompoundQueryDefinitionImporter implements IQueryImporter {
 					 
 						//need to import query
 						Path queryPath = tempDir.resolve(CompoundQueryDefinitionExporter.SUBFOLDER_NAME).resolve( UuidUtils.uuidToString(l.getQueryUuid()) + ".xml"); //$NON-NLS-1$
-						IQueryImporter importer = QueryImportEngine.getQueryImporter(queryPath.toFile());
+						IQueryImporter importer = QueryImportEngine.getQueryImporter(queryPath);
 						if (importer == null){
 							warnings.add(Messages.CompoundQueryDefinitionImporter_ImporterNotFound);
 						}else{
 							try{
 								//we only reference a single query
-								List<Query> importedQuery = importer.importQuery(queryPath.toFile(), ca);
+								List<Query> importedQuery = importer.importQuery(queryPath, ca);
 								Query importedQueryMain = importedQuery.get(0);
 								//lets find the same query in the current database 
 								
