@@ -88,7 +88,7 @@ public class BackupHandler {
 				Messages.BackupHandler_Backup_DialotMessage, 
 				Messages.BackupHandler_Backup_DialogButton,
 				"org.wcs.smart.backup.location", //$NON-NLS-1$
-				DerbyBackupEngine.getDefaultFileName(), true); 
+				DerbyBackupEngine.getDefaultFileName(), true, true); 
 		
 		if (dialog.open() != IDialogConstants.OK_ID) {
 			return ;

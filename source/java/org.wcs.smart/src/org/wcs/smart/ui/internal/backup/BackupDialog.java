@@ -21,13 +21,11 @@
  */
 package org.wcs.smart.ui.internal.backup;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -74,7 +72,7 @@ public class BackupDialog extends SmartStyledTitleDialog {
 	
 	private String fileNameKey;
 	private boolean upgradeInstructions;
-	
+	private boolean excludeDatastoreOp;
 	/**
 	 * @param parentShell
 	 * @param title dialog title
@@ -86,7 +84,8 @@ public class BackupDialog extends SmartStyledTitleDialog {
 	 * @param upgradeInstructions if upgrade instructions should be displayed
 	 */
 	public BackupDialog(Shell parentShell, String title, String message, 
-			String buttonText, String fileNameKey, String defaultFileName, boolean upgradeInstructions) {
+			String buttonText, String fileNameKey, String defaultFileName,
+			boolean upgradeInstructions, boolean exludeDatastoreOp) {
 		super(parentShell);
 		this.title = title;
 		this.message = message;
@@ -95,6 +94,7 @@ public class BackupDialog extends SmartStyledTitleDialog {
 		this.fileNameKey = fileNameKey;
 		this.defaultFileName = defaultFileName;
 		this.upgradeInstructions = upgradeInstructions;
+		this.excludeDatastoreOp = exludeDatastoreOp;
 	}
 	
 	/**
@@ -106,7 +106,8 @@ public class BackupDialog extends SmartStyledTitleDialog {
 	}
 	
 	public boolean getExcludeFilestore(){
-		return this.excludeFilestore;
+		if (excludeDatastoreOp) return this.excludeFilestore;
+		return false;
 	}
 	
 	@Override
@@ -171,11 +172,13 @@ public class BackupDialog extends SmartStyledTitleDialog {
 		});
 		btnBrowse.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 
-		new Label(main, SWT.NONE);
-		chExcludeFile = new Button(main, SWT.CHECK);
-		chExcludeFile.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		chExcludeFile.setText(Messages.BackupDialog_ExcludeFilestoreOp);
-		chExcludeFile.setToolTipText(Messages.BackupDialog_ExcludeFilestoreTooltip);
+		if (excludeDatastoreOp) {
+			new Label(main, SWT.NONE);
+			chExcludeFile = new Button(main, SWT.CHECK);
+			chExcludeFile.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+			chExcludeFile.setText(Messages.BackupDialog_ExcludeFilestoreOp);
+			chExcludeFile.setToolTipText(Messages.BackupDialog_ExcludeFilestoreTooltip);
+		}
 		
 		if (upgradeInstructions){
 			
@@ -230,18 +233,20 @@ public class BackupDialog extends SmartStyledTitleDialog {
 	protected void buttonPressed(int buttonId) {
 		if (IDialogConstants.OK_ID == buttonId) {
 			excludeFilestore = false;
-			if (chExcludeFile.getSelection()){
-				MessageDialog md = new MessageDialog(getShell(),
-						Messages.BackupDialog_ExcludeMsgTitle, 
-						null,
-						Messages.BackupDialog_ExcludeMsg,
-						MessageDialog.WARNING, 
-						new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL},
-						1);
-				if (md.open() == 1){
-					return;
+			if (chExcludeFile != null) {
+				if (chExcludeFile.getSelection()){
+					MessageDialog md = new MessageDialog(getShell(),
+							Messages.BackupDialog_ExcludeMsgTitle, 
+							null,
+							Messages.BackupDialog_ExcludeMsg,
+							MessageDialog.WARNING, 
+							new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL},
+							1);
+					if (md.open() == 1){
+						return;
+					}
+					excludeFilestore = true;
 				}
-				excludeFilestore = true;
 			}
 			
 			Path file = Paths.get(txtBackupFile.getText());
