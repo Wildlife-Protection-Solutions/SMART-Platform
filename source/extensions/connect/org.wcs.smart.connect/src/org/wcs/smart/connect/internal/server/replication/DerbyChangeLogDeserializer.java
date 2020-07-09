@@ -176,9 +176,9 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 				return true;
 			}
 		}catch (ConflictException i){
-			if (!it.getFileName().endsWith(".qix")) throw i; //$NON-NLS-1$
-			//this are udig index files and are likely to be rebuilt for various reasons, but this is not an issue
-			ConnectPlugIn.log("The qix file is has been modified on client and server causing potential conflict.  This conflict is ignored and file is overwriteen as this is likely a shp index file.", i); //$NON-NLS-1$
+			if (!it.getFileName().endsWith(".qix") && !it.getFileName().endsWith(".fix")) throw i; //$NON-NLS-1$ //$NON-NLS-2$
+			//these are shapefile index files and are likely to be rebuilt for various reasons, but this is not an issue
+			ConnectPlugIn.log("The qix/fix file is has been modified on client and server causing potential conflict.  This conflict is ignored and file is overwriteen as this is likely a shp index file.", i); //$NON-NLS-1$
 		}
 
 		// Conflict checking data records
