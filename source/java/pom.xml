@@ -71,8 +71,6 @@
                     		<includePackedArtifacts>false</includePackedArtifacts>				
 			</configuration>
 		</plugin>
-		
-		
 	</plugins>
 	
 	 <pluginManagement>
