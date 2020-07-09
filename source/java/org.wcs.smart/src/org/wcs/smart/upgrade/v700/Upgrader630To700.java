@@ -83,6 +83,13 @@ public class Upgrader630To700 implements IDatabaseUpgrader {
 	private void upgrade(Connection c, IProgressMonitor monitor)
 			throws Exception {
 		
+		
+		/* remove orphaned patrols */
+		String delete = "delete from smart.waypoint where SOURCE = 'PATROL' " //$NON-NLS-1$
+					+ "and uuid not in (select wp_uuid from smart.PATROL_WAYPOINT)"; //$NON-NLS-1$
+		c.createStatement().execute(delete);
+		
+		
 		String[] sql = new String[] {
 				"CREATE FUNCTION smart.tempuuid() returns char(16) for bit data LANGUAGE JAVA NOT deterministic external name 'org.wcs.smart.util.DerbyUtils.createUuid' PARAMETER STYLE JAVA NO SQL RETURNS NULL ON NULL INPUT", //$NON-NLS-1$
 				
