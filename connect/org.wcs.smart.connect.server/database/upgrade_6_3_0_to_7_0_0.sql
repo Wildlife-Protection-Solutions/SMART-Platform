@@ -740,7 +740,12 @@ CREATE TRIGGER trg_smartcollect_waypoint AFTER INSERT OR UPDATE OR DELETE ON sma
 update connect.ca_info SET version = uuid_generate_v4();
 delete from connect.change_log;
 delete from connect.change_log_history;
-				
+
+--- remove orphaned patrol waypoints ---
+
+DELETE FROM smart.waypoint WHERE SOURCE = 'PATROL' 
+AND uuid NOT IN (SELECT wp_uuid FROM smart.PATROL_WAYPOINT);
+					
 				
 ---- remove intelligence plugin ----
 DROP TABLE IF EXISTS smart.patrol_intelligence;
