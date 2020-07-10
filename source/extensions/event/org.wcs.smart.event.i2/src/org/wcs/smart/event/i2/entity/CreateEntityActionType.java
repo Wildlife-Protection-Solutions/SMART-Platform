@@ -104,9 +104,6 @@ public class CreateEntityActionType implements IActionType {
 
 	@Override
 	public void performAction(EAction action, EFilter filter, WaypointObservation data, Locale l) {
-		
-		ConservationArea ca = data.getWaypoint().getConservationArea();
-		
 		EActionParameterValue entityTypeParameter = action.findParameter(EntityTypeParameter.INSTANCE.getKey());
 		if (entityTypeParameter == null) {
 			EventPlugIn.log("No entity type parameter specified for create entity action.", null); //$NON-NLS-1$
@@ -122,10 +119,11 @@ public class CreateEntityActionType implements IActionType {
 			throw new RuntimeException(Messages.CreateEntityActionType_ProfileParameterNotSet);
 		}
 		
-		try(Session session = HibernateManager.openSession(new AttachmentInterceptor(false))){
-			WaypointObservation temp = session.get(WaypointObservation.class, data.getUuid());
-			if (temp != null) data = temp;
-			
+		try(Session session = HibernateManager.openSession(new AttachmentInterceptor(false))) {
+			//WaypointObservation temp = session.get(WaypointObservation.class, data.getUuid());
+			//if (temp != null) data = temp;
+			ConservationArea ca = data.getWaypoint().getConservationArea();
+
 			//find profile
 			String keyid = profileParam.getParameterValue();
 			IntelProfile ip = QueryFactory.buildQuery(session, IntelProfile.class, 

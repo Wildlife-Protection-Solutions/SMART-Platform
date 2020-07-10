@@ -50,8 +50,10 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.PatrolManager;
+import org.wcs.smart.patrol.PatrolUtils;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
@@ -64,9 +66,9 @@ import org.wcs.smart.ui.SmartStyledTitleDialog;
 
 /*
  * Dialog allowing users to select details of how to merge Patrols
+ * 
  * @author Jeff
  */
-
 public class MergePatrolsDialog extends SmartStyledTitleDialog {
 
 	private Session session;
@@ -169,7 +171,6 @@ public class MergePatrolsDialog extends SmartStyledTitleDialog {
     		return super.getText(element);
     	}
     }
-
 	
 	/**
 	 * Create the new Patrol and assign all the legs of each patrol to be merged to the new one.
@@ -242,7 +243,6 @@ public class MergePatrolsDialog extends SmartStyledTitleDialog {
 			MessageDialog.openError(getShell(), Messages.MergePatrolsDialog_ErrorDialogTitle, MessageFormat.format(Messages.MergePatrolsDialog_PatrolToLong, Patrol.MAX_PATROL_LENGTH_DAYS));
 			return;
 		}
-
 		
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try {
@@ -270,17 +270,17 @@ public class MergePatrolsDialog extends SmartStyledTitleDialog {
 
 									ArrayList<PatrolWaypoint> allWaypoints = new ArrayList<PatrolWaypoint>();
 
-									for (PatrolWaypoint wp : pld.getWaypoints()) {
-										Waypoint toClone = wp.getWaypoint();
-										if (toClone.getUuid() != null) {
-											toClone = (Waypoint) session.merge(toClone);
-										}
-										Waypoint wpclone = toClone.clone(session);
-
-										PatrolWaypoint pw = new PatrolWaypoint();
-										pw.setWaypoint(wpclone);
-										pw.setPatrolLegDay(legdayClone);
-										allWaypoints.add(pw);
+									for (PatrolWaypoint pw : pld.getWaypoints()) {
+										Waypoint waypoint = pw.getWaypoint();
+//										if (wayPoint.getUuid() != null) {
+//											wayPoint = (Waypoint) session.merge(wayPoint);
+//										}
+//										Waypoint wpClone = wayPoint.clone(session);
+//										session.delete(wayPoint);
+										PatrolWaypoint newPw = new PatrolWaypoint();
+										newPw.setWaypoint(waypoint);
+										newPw.setPatrolLegDay(legdayClone);
+										allWaypoints.add(newPw);
 									}
 									legdayClone.setWaypoints(allWaypoints);
 									legdayClone.setPatrolLeg(legClone);
@@ -294,7 +294,7 @@ public class MergePatrolsDialog extends SmartStyledTitleDialog {
 					}
 					
 					try {
-						newPatrol.createLegs(session);
+						PatrolUtils.createLegDaysForMissingDays(newPatrol);
 						PatrolHibernateManager.savePatrol(newPatrol, session,  true);
 					} catch (Exception e1) {
 						SmartPatrolPlugIn.displayLog(
@@ -324,8 +324,13 @@ public class MergePatrolsDialog extends SmartStyledTitleDialog {
 					ex);
 			session.getTransaction().rollback();
 		}
+		
+		//fire events
+		PatrolEventManager.getInstance().patrolAdded(newPatrol);
+		
 		super.okPressed();
 	}
+	
 }
 
 

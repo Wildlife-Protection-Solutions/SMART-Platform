@@ -23,7 +23,6 @@
 package org.wcs.smart.patrol.internal.ui;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -35,12 +34,14 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.patrol.PatrolUtils;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
+
 /**
  * Dialog to let you name the new Patrol you create when using the "Split leg into new Patrol" button
  * You can move more than one leg, they all go into a single, new patrol.
@@ -49,16 +50,12 @@ import org.wcs.smart.ui.SmartStyledTitleDialog;
  * @since 5.0.0
  * 
  */
-
-
 public class MovePatrolLegDialog extends SmartStyledTitleDialog{
-
 
 	private List<PatrolLeg> legsToMove;
 	private Patrol newPatrol;
 	private Text txtPatrolId;
 	private Patrol originalPatrol;
-	
 	
 	/**
 	 * Creates a new move patrol leg dialog 
@@ -72,8 +69,6 @@ public class MovePatrolLegDialog extends SmartStyledTitleDialog{
 		originalPatrol = legsToMove.get(0).getPatrol();
 	}
 	
-
-	
 	@Override
 	protected boolean isResizable() {
 		return true;
@@ -83,7 +78,6 @@ public class MovePatrolLegDialog extends SmartStyledTitleDialog{
 	 * Create the dialog elements
 	 * 
 	 **/
-	
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		Label lbl;
@@ -107,8 +101,6 @@ public class MovePatrolLegDialog extends SmartStyledTitleDialog{
 		return parent;
 	}
 	
-	
-	
 	/**
 	 * Create the new Patrol and assign the legs to it.
 	 */
@@ -118,31 +110,16 @@ public class MovePatrolLegDialog extends SmartStyledTitleDialog{
 		newPatrol = originalPatrol.simpleClone();
 		newPatrol.setLegs(new ArrayList<PatrolLeg>());
 		newPatrol.setId(txtPatrolId.getText());
-		Date e;
-		Date start;
 
-		Calendar cal = Calendar.getInstance();
-		cal.set(Calendar.YEAR, 2200);
-		cal.set(Calendar.MONTH, Calendar.JANUARY);
-		cal.set(Calendar.DAY_OF_MONTH, 1);
-		start = cal.getTime(); 
-
-		cal.set(Calendar.YEAR, 1900);
-		cal.set(Calendar.MONTH, Calendar.JANUARY);
-		cal.set(Calendar.DAY_OF_MONTH, 1);
-		e = cal.getTime();
-		for(PatrolLeg  pl : legsToMove){
-			if(pl.getStartDate().before(start))start = pl.getStartDate();
-			if(pl.getEndDate().after(e))e = pl.getEndDate();
-		}
-		newPatrol.setStartDate(start);
-		newPatrol.setEndDate(e);
+		Date[] dates = PatrolUtils.calculateDateRange(legsToMove);
+		newPatrol.setStartDate(dates[0]);
+		newPatrol.setEndDate(dates[1]);
 		
 		for(PatrolLeg pl : legsToMove){
 			PatrolLeg legClone = pl.simpleClone();
 			legClone.setPatrolLegDays(new ArrayList<PatrolLegDay>());
 			if (pl.getPatrolLegDays() != null && pl.getPatrolLegDays().size() > 0){
-				//Clone Leg Days as well
+				// Clone Leg Days as well
 				for (PatrolLegDay pld : pl.getPatrolLegDays()){
 					PatrolLegDay clone = pld.clone();
 					
@@ -162,10 +139,9 @@ public class MovePatrolLegDialog extends SmartStyledTitleDialog{
 			legClone.setPatrol(newPatrol);
 			newPatrol.getLegs().add(legClone);
 		}
-		
+		PatrolUtils.createLegDaysForMissingDays(newPatrol);
 		super.okPressed();
 	}
-
 	
 	/**
 	 * return the Patrol that is created when the dialog's 'ok' button is pressed.
@@ -173,6 +149,5 @@ public class MovePatrolLegDialog extends SmartStyledTitleDialog{
 	public Patrol getNewPatrol() {
 		return newPatrol;
 	}
-
 
 }

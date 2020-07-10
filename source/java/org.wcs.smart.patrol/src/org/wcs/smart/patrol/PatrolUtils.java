@@ -21,18 +21,26 @@
  */
 package org.wcs.smart.patrol;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.LineString;
+import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolLeg;
+import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.SharedUtils;
+import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.TrackUtil;
-
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.LineString;
 
 /**
  * A set of utility classes.
@@ -102,6 +110,93 @@ public class PatrolUtils {
 		Track t = new Track();
 		t.setLineStrings(Arrays.asList(track));
 		return t;
+	}
+	
+	/**
+	 * Takes a Patrol adds in single-day PatrolLegs(with PatrolLegDays) for any days
+	 *  between the start and end dates that do not have a PatrolLeg on them. 
+	 *  
+	 * @param patrol
+	 */
+	public static void createLegDaysForMissingDays(Patrol patrol) {
+		List<PatrolLeg> legList = patrol.getLegs();
+		if(legList == null) {
+			legList = new ArrayList<PatrolLeg>();
+			patrol.setLegs(legList);
+		}
+		createLegDaysForMissingDays(patrol, patrol.getStartDate(), patrol.getEndDate(), legList);
+	}
+
+	/**
+	 * Takes a Patrol and a list of PatrolLegs and extends PatrolLegs (with emptry PatrolLegDays) for any days
+	 * between the start and end dates that do not have a PatrolLeg on them. The date range and list of legs is passed in
+	 * because the PatrolLegsComposite works on a cloned list of legs.
+	 * 
+	 * @param patrol
+	 * @param legs
+	 */
+	public static void createLegDaysForMissingDays(Patrol patrol, Date startDate, Date endDate, List<PatrolLeg> legs){
+		// convert the patrol end date into an easier to deal with Calendar
+		Calendar calEnd= SharedUtils.convertDate( SharedUtils.getDatePart(endDate, false) );
+
+		// sort patrols by start date
+		Collections.sort(legs, new PatrolLegStartDateComparator());
+		
+		// loop over each leg from the start to the end
+		for(PatrolLeg leg : legs) {
+			// while there is no leg on the day after this leg ends, and it is still within the patrol date range,
+			Calendar cal = SharedUtils.convertDate( SharedUtils.getDatePart(leg.getEndDate(), false));
+			cal.add(Calendar.DAY_OF_MONTH, 1);
+			while(!cal.after(calEnd) && !hasLegOnDate(legs, cal)){
+				// extend this leg by one day
+				PatrolLegDay pld = new PatrolLegDay();
+				pld.setPatrolLeg(leg);
+				pld.setDate(cal.getTime());
+				pld.setStartTime(SmartUtils.convertDateToTime(cal.getTime()));
+				pld.setEndTime(SmartUtils.createPatrolTime(23, 59, 59));
+				leg.getPatrolLegDays().add(pld);
+				leg.setEndDate(cal.getTime());
+				cal.add(Calendar.DAY_OF_MONTH, 1);
+			}	
+			
+		}
+	}
+
+	/**
+	 * Loops through a list of PatrolLegs to determine if there is at least one leg on the given date.
+	 * 
+	 * @param legList the list of PatrolLegs to search
+	 * @param cal the date to search for
+	 * @return true if at least one PatrolLeg in the list is on the given date, false otherwise
+	 */
+	public static boolean hasLegOnDate(List<PatrolLeg> legList, Calendar cal) {
+		for (PatrolLeg leg : legList){
+			Calendar legStart = SharedUtils.convertDate( SharedUtils.getDatePart(leg.getStartDate(), false));
+			Calendar legEnd = SharedUtils.convertDate( SharedUtils.getDatePart(leg.getEndDate(), false));
+			if(cal.equals(legStart) || cal.equals(legEnd) ||  (cal.after(legStart) && cal.before(legEnd)) ){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Loops through a list of PatrolLegs and returns the earliest startDate and latest EndDate.
+	 * 
+	 * @param legList the list of PatrolLegs to loop through
+	 * @return an array of two Dates, the start and end, in that order
+	 */
+	public static Date[] calculateDateRange(List<PatrolLeg> legList) {
+		Date[] dates = new Date[2];
+		for (PatrolLeg leg : legList) {
+			if(dates[0] == null || leg.getStartDate().before(dates[0])) {
+				dates[0] = leg.getStartDate();
+			}
+			if(dates[1] == null || leg.getEndDate().after(dates[1])) {
+				dates[1] = leg.getEndDate();
+			}
+		}
+		return dates;
 	}
 	
 }

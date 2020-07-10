@@ -95,12 +95,16 @@ public class EventProcessingJob extends Job {
 		while(!observations.isEmpty()) {
 			monitor.setTaskName(Messages.EventProcessingJob_RemainingTaskLabel + observations.size());
 			WaypointObservation o = observations.remove(0);
-			for(EActionEvent event : getEventActions()) {
-				if (!event.isEnabled()) continue;
-				try {
-					processEvent(event, o);
-				}catch (Exception ex) {
-					EventPlugIn.displayLog(MessageFormat.format(Messages.EventProcessingJob_EventProcessingError, ex.getMessage()), ex);
+			try(Session session = HibernateManager.openSession()){
+				WaypointObservation temp = session.get(WaypointObservation.class, o.getUuid());
+				if (temp != null) o = temp;
+				for(EActionEvent event : getEventActions()) {
+					if (!event.isEnabled()) continue;
+					try {
+						processEvent(event, o);
+					}catch (Exception ex) {
+						EventPlugIn.displayLog(MessageFormat.format(Messages.EventProcessingJob_EventProcessingError, ex.getMessage()), ex);
+					}
 				}
 			}
 		}

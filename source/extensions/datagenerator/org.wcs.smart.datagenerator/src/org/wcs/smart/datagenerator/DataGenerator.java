@@ -245,6 +245,9 @@ public class DataGenerator implements IDataEngine{
 		pl.getMembers().get(0).setIsLeader(true);
 		pl.setLeader(pl.getMembers().get(0));
 		pl.setPatrolLegDays(new ArrayList<PatrolLegDay>());
+		if (pl.getPatrol().getPatrolType().requiresPilot()) {
+			pl.setPilot(pl.getMembers().get(0));	
+		}
 		
 		//generate a start position for the patrol
 		Coordinate startc = generatePosition();

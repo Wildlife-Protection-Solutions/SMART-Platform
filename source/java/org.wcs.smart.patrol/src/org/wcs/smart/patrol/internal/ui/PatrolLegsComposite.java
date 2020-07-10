@@ -21,18 +21,16 @@
  */
 package org.wcs.smart.patrol.internal.ui;
 
-import java.text.Collator;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
@@ -60,6 +58,7 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.patrol.IPatrolEditContribution;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
+import org.wcs.smart.patrol.PatrolLegStartDateComparator;
 import org.wcs.smart.patrol.PatrolUtils;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
@@ -113,7 +112,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 	private Composite main;
 	
 	private ArrayList<Patrol> newPatrols = new ArrayList<Patrol>();
-	private HashMap movedPoints = new HashMap();
+	private HashSet<UUID> movedPoints = new HashSet<UUID>();
 
 	/**
 	 * Creates a new patrol legs composite
@@ -169,7 +168,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 					if (dialog.open() == Window.OK){
 						patrolStartDate = dialog.getStartDate();
 						patrolEndDate = dialog.getEndDate();
-						lblDateInfo.setText(START_INFO_LABEL + ": " + dateFormatter.format(patrolStartDate) + "  " + END_INFO_LABEL + ": " + dateFormatter.format(patrolEndDate) ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
+						updateDateText();
 						fireChangeListeners();
 					}
 				}
@@ -367,6 +366,10 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		return main;
 	}
 
+	private void updateDateText() {
+		lblDateInfo.setText(START_INFO_LABEL + ": " + dateFormatter.format(patrolStartDate) + "  " + END_INFO_LABEL + ": " + dateFormatter.format(patrolEndDate) ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
+	}
+	
 	private void mergeLegs() {
 		IStructuredSelection selection = (IStructuredSelection)patrolLegViewer.getSelection();
 		ArrayList<PatrolLeg> toBeMerged = new ArrayList<PatrolLeg>(); 
@@ -397,7 +400,14 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 	
 	private void deleteLeg() {
 		if (MessageDialog.openConfirm(getShell(), Messages.PatrolLegsComposite_DeleteLeg_ConfirmDialog_Title, Messages.PatrolLegsComposite_DeleteLeg_ConfirmDialog_Message)){
-			removeLeg();	
+			removeLeg();
+			Date[] dates = PatrolUtils.calculateDateRange(legs);
+			patrolStartDate = dates[0];
+			patrolEndDate = dates[1];
+			updateDateText();
+			PatrolUtils.createLegDaysForMissingDays(patrol, dates[0], dates[1], legs);
+			sortAndRefresh();
+			fireChangeListeners();
 		}
 	}
 	
@@ -406,16 +416,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 	}
 
 	private void sortAndRefresh(){
-		Collections.sort(legs, new Comparator<PatrolLeg>() {
-			@Override
-			public int compare(PatrolLeg o1, PatrolLeg o2) {
-				int x =  o1.getStartDate().compareTo(o2.getStartDate());
-				if (x == 0){
-					return Collator.getInstance().compare(o1.getId(), o2.getId());
-				}
-				return x;
-			}
-		});
+		Collections.sort(legs, new PatrolLegStartDateComparator());
 		patrolLegViewer.showPilotColum(isPilotColumnRequired());
 		patrolLegViewer.refresh();
 		patrolLegViewer.getTable().setSelection(null);
@@ -491,8 +492,8 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		
 		this.patrolStartDate = (Date)patrol.getStartDate().clone();
 		this.patrolEndDate = (Date)patrol.getEndDate().clone();
+		updateDateText();
 		
-		lblDateInfo.setText(START_INFO_LABEL + ": " + dateFormatter.format(patrolStartDate) + "  " + END_INFO_LABEL + ": " + dateFormatter.format(patrolEndDate) ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		patrolLegViewer.showPilotColum(patrol.hasPilot());
 		sortAndRefresh();
 	}
@@ -545,8 +546,10 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 			//put all the waypoints into our 'moved' hash so they don't get deleted when we delete the leg from the old patrol
 			for(PatrolLeg pl : p2.getLegs()){
 				for(PatrolLegDay pld : pl.getPatrolLegDays()){
-					for(PatrolWaypoint pwp : pld.getWaypoints()){
-						movedPoints.put(pwp.getWaypoint().getUuid(), "true");	 //$NON-NLS-1$
+					if (pld.getWaypoints() != null){
+						for(PatrolWaypoint pwp : pld.getWaypoints()){
+							movedPoints.add(pwp.getWaypoint().getUuid());
+						}
 					}
 				}
 			}
@@ -599,10 +602,11 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 			//save the waypoints in each leg-day, they are not cascaded like everything else, presumably for a reason, so I don't want to break everything else by changing it.
 			for(PatrolLegDay pld : clone.getPatrolLegDays()){
 				if (pld.getWaypoints() != null){
-				for(PatrolWaypoint wp : pld.getWaypoints()){
-					wp.setPatrolLegDay(pld);
-					movedPoints.put(wp.getWaypoint().getUuid(), "true"); //$NON-NLS-1$
-				}}
+					for(PatrolWaypoint wp : pld.getWaypoints()){
+						wp.setPatrolLegDay(pld);
+						movedPoints.add(wp.getWaypoint().getUuid());
+					}
+				}
 			}
 		}
 		if (session.getTransaction().isActive()) session.flush();
@@ -614,7 +618,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 				for (PatrolLegDay pld : toRemove.getPatrolLegDays()){
 					if (pld.getWaypoints() != null){
 						for (PatrolWaypoint pw : pld.getWaypoints()){
-							if(movedPoints.get(pw.getWaypoint().getUuid()) == null){ //only delete the waypoints if they didn't get moved into a new leg.
+							if(!movedPoints.contains(pw.getWaypoint().getUuid())){ //only delete the waypoints if they didn't get moved into a new leg.
 								session.delete(pw.getWaypoint());
 							}
 						}
@@ -648,10 +652,12 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 				session.saveOrUpdate(p2);
 				//save the waypoints, they are not cascaded like everything else.
 				for(PatrolLeg pl : p2.getLegs()){
-					for(PatrolLegDay pld : pl.getPatrolLegDays()){
-						for(PatrolWaypoint pwp : pld.getWaypoints()){
-							//pwp.setPatrolLegDay(pld);
-							session.saveOrUpdate(pwp);
+					for(PatrolLegDay pld : pl.getPatrolLegDays()) {
+						if (pld.getWaypoints() != null) {
+							for(PatrolWaypoint pwp : pld.getWaypoints()) {
+								//pwp.setPatrolLegDay(pld);
+								session.saveOrUpdate(pwp);
+							}
 						}
 					}
 				}
