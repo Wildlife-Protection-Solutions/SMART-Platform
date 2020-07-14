@@ -54,6 +54,7 @@ public class AssetDeploymentTableColumn extends ColumnLabelProvider{
 		LOCATION(Messages.AssetDeploymentTableColumn_LocationColumnName),
 		START_DATE(Messages.AssetDeploymentTableColumn_StartDateColumnName),
 		END_DATE(Messages.AssetDeploymentTableColumn_EndDateColumnName),
+		ACTIVE_TIME(Messages.AssetDeploymentTableColumn_ActiveTimeColumnName),
 		TOTAL_TIME(Messages.AssetDeploymentTableColumn_TimeColumnName),
 		NUM_INCIDENTS(Messages.AssetDeploymentTableColumn_IncCntColumnName);
 		
@@ -106,7 +107,9 @@ public class AssetDeploymentTableColumn extends ColumnLabelProvider{
 			case STATION:
 				return deployment.getStationLocation().getStation().getId();
 			case TOTAL_TIME:
-				return AssetUtils.formatTime(deployment.getActiveTimeInSeconds());			
+				return AssetUtils.formatTime(deployment.getTimeOutInSeconds());
+			case ACTIVE_TIME:
+				return AssetUtils.formatTime(deployment.getActiveTimeOutInSeconds());
 			}
 		}else if (attribute != null ) {
 			if (deployment.getAttributeValues() != null) {

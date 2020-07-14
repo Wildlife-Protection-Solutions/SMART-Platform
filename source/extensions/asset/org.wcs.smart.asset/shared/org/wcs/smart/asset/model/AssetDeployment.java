@@ -56,6 +56,8 @@ public class AssetDeployment extends UuidItem {
 	private Date startDate;
 	private Date endDate;
 	private List<AssetDeploymentAttributeValue> attributes;
+	private List<AssetDeploymentDisruption> disruptions;
+
 	private List<AssetWaypoint> waypoints;
 	
 	private byte[] track;
@@ -172,6 +174,26 @@ public class AssetDeployment extends UuidItem {
 
 
 	/**
+	 * Get the set of disruptions associated with this deployment
+	 * 
+	 * @return The set of asset_deployment_attribute_value
+	 */
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="assetDeployment", 
+			orphanRemoval = true, cascade={CascadeType.ALL})
+	public List<AssetDeploymentDisruption> getDisruptions() {
+		return this.disruptions;
+	}
+	
+	/**
+	 * Set the set of the asset disruptions collection.
+	 * 
+	 * @param disruptions
+	 */
+	public void setDisruptions(List<AssetDeploymentDisruption> disruptions) {
+		this.disruptions = disruptions;
+	}
+	
+	/**
 	 * Get the set of the asset_deployment_attribute_value.
 	 * 
 	 * @return The set of asset_deployment_attribute_value
@@ -214,6 +236,23 @@ public class AssetDeployment extends UuidItem {
 	}
 
 	/**
+	 * Computes the time in field of this asset deployment minus the disruption times.
+	 * This is computed as the number of seconds from the start date to either the current time
+	 * or the end time (whichever is older) minus all disruptions piror to current time.
+	 * Future dates/disruption are not included in the active time.
+	 * 
+	 * @return
+	 */
+	@Transient
+	public double getActiveTimeOutInSeconds() {
+		double out = getTimeOutInSeconds();
+		for (AssetDeploymentDisruption d : getDisruptions()) {
+			out = out - d.getActiveTimeInSeconds();
+		}
+		return out;
+	}
+	
+	/**
 	 * Computes the time in field of this asset deployment. This is computed
 	 * as the number of seconds from the start date to either the current time
 	 * or the end time (whichever is older).  So future dates are not
@@ -221,7 +260,7 @@ public class AssetDeployment extends UuidItem {
 	 * @return
 	 */
 	@Transient
-	public double getActiveTimeInSeconds() {
+	public double getTimeOutInSeconds() {
 		Date now = new Date();
 		if (getStartDate().after(now)) return 0;
 		long start = getStartDate().getTime();

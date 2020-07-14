@@ -176,7 +176,7 @@ public class StationHistoryPage {
 			case START_DATE: return DateFormat.getDateTimeInstance().format(record.getStartDate());
 			case END_DATE: return record.getEndDate() == null ? Messages.StationHistoryPage_CurrentLabel : DateFormat.getDateTimeInstance().format(record.getEndDate()); 
 			case TOTAL_TIME:
-				return AssetUtils.formatTime( record.getActiveTimeInSeconds() );
+				return AssetUtils.formatTime( record.getTimeOutInSeconds() );
 			}
 			return "";  //$NON-NLS-1$
 		}

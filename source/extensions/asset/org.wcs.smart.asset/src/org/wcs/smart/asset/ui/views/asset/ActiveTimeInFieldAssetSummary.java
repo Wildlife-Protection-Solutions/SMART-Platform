@@ -30,23 +30,24 @@ import org.wcs.smart.asset.model.AssetDeployment;
 import org.wcs.smart.hibernate.QueryFactory;
 
 /**
- * Asset summary computation that computes the total time
- * the asset spent in the field (over all deployments)
+ * Asset summary computation that computes the active total time
+ * the asset spent in the field (over all deployments).  Active time
+ * is total time minus deployment disruption time
  * 
  * @author Emily
  *
  */
-public class TimeInFieldAssetSummary implements IAssetSummary {
+public class ActiveTimeInFieldAssetSummary implements IAssetSummary {
 	
-	public static TimeInFieldAssetSummary INSTANCE = new TimeInFieldAssetSummary();
+	public static ActiveTimeInFieldAssetSummary INSTANCE = new ActiveTimeInFieldAssetSummary();
 	
-	private TimeInFieldAssetSummary() {
+	private ActiveTimeInFieldAssetSummary() {
 		
 	}
 	
 	@Override
 	public String getSummaryName() {
-		return Messages.TimeInFieldAssetSummary_TimeInField;
+		return Messages.ActiveTimeInFieldAssetSummary_FieldLabel;
 	}
 
 	@Override
@@ -56,7 +57,7 @@ public class TimeInFieldAssetSummary implements IAssetSummary {
 			try(ScrollableResults results = QueryFactory.buildQuery(session, AssetDeployment.class, "asset", asset).scroll()){ //$NON-NLS-1$
 				while(results.next()) {
 					AssetDeployment as = (AssetDeployment) results.get(0);
-					totalHours += as.getTimeOutInSeconds();
+					totalHours += as.getActiveTimeOutInSeconds();
 				}
 			}
 		}

@@ -70,8 +70,9 @@ public class AssetSummaryTable {
 		ASSET_TYPE(Messages.AssetSummaryTable_TypeColumnName),
 		DEP_START(Messages.AssetSummaryTable_StartColumnName),
 		DEP_END(Messages.AssetSummaryTable_EndColumnName),
+		DEP_ACTIVE_TIME(Messages.AssetSummaryTable_ActiveTimeColumnName),
 		DEP_TIME(Messages.AssetSummaryTable_TotalTimeColumnName);
-		
+				
 		String label;
 		
 		Column(String l) {
@@ -112,6 +113,7 @@ public class AssetSummaryTable {
 		columns.add(new TableColumn(Column.ASSET_TYPE));
 		columns.add(new TableColumn(Column.DEP_START));
 		columns.add(new TableColumn(Column.DEP_END));
+		columns.add(new TableColumn(Column.DEP_ACTIVE_TIME));
 		columns.add(new TableColumn(Column.DEP_TIME));
 		
 		HashSet<AssetAttribute> atts = new HashSet<>();
@@ -239,7 +241,11 @@ public class AssetSummaryTable {
 				}
 				if (c == Column.DEP_TIME) {
 					if (dw.deployment == null) return ""; //$NON-NLS-1$
-					return AssetUtils.formatTime(dw.deployment.getActiveTimeInSeconds());
+					return AssetUtils.formatTime(dw.deployment.getTimeOutInSeconds());
+				}
+				if (c == Column.DEP_ACTIVE_TIME) {
+					if (dw.deployment == null) return ""; //$NON-NLS-1$
+					return AssetUtils.formatTime(dw.deployment.getActiveTimeOutInSeconds());
 				}
 			}
 			if (d != null) {

@@ -65,9 +65,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IPersistableElement;
-import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.FormToolkit;
@@ -187,7 +185,7 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 		
 		SashForm sash = new SashForm(parent,  SWT.VERTICAL);
 		
-		Composite mapPart = toolkit.createComposite(sash, SWT.NONE);
+		Composite mapPart = toolkit.createComposite(sash);
 		mapPart.setLayout(new GridLayout());
 		mapPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridLayout)mapPart.getLayout()).marginWidth = 0;
@@ -297,6 +295,12 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 		((GridLayout)tableComposite.getLayout()).verticalSpacing = 0;
 		((GridLayout)tableComposite.getLayout()).marginWidth = 0;
 		((GridLayout)tableComposite.getLayout()).marginHeight = 0;
+		((GridLayout)tableComposite.getLayout()).marginTop = 1;
+		
+		tableComposite.addListener(SWT.Paint, e->{
+			e.gc.setForeground(stackPart.getDisplay().getSystemColor(SWT.COLOR_GRAY));
+			e.gc.drawLine(0, 0, tableComposite.getSize().x, 0);
+		});
 		
 		statusTableComposite = toolkit.createComposite(stackPart);
 		statusTableComposite.setLayout(new GridLayout());
@@ -304,6 +308,11 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 		((GridLayout)statusTableComposite.getLayout()).verticalSpacing = 0;
 		((GridLayout)statusTableComposite.getLayout()).marginWidth = 0;
 		((GridLayout)statusTableComposite.getLayout()).marginHeight = 0;
+		((GridLayout)statusTableComposite.getLayout()).marginTop = 1;
+		statusTableComposite.addListener(SWT.Paint, e->{
+			e.gc.setForeground(stackPart.getDisplay().getSystemColor(SWT.COLOR_GRAY));
+			e.gc.drawLine(0, 0, statusTableComposite.getSize().x, 0);
+		});
 		
 		assetTableComposite = toolkit.createComposite(stackPart);
 		assetTableComposite.setLayout(new GridLayout());
@@ -311,6 +320,11 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 		((GridLayout)assetTableComposite.getLayout()).verticalSpacing = 0;
 		((GridLayout)assetTableComposite.getLayout()).marginWidth = 0;
 		((GridLayout)assetTableComposite.getLayout()).marginHeight = 0;
+		((GridLayout)assetTableComposite.getLayout()).marginTop = 1;
+		assetTableComposite.addListener(SWT.Paint, e->{
+			e.gc.setForeground(stackPart.getDisplay().getSystemColor(SWT.COLOR_GRAY));
+			e.gc.drawLine(0, 0, assetTableComposite.getSize().x, 0);
+		});
 		
 		((StackLayout)stackPart.getLayout()).topControl = tableComposite;
 		
@@ -418,11 +432,12 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 	private void createTablePart() {
 		for (Control c : tableComposite.getChildren()) c.dispose();
 		
-		summaryTable = new TableViewer(tableComposite, SWT.FULL_SELECTION | SWT.MULTI);
+		summaryTable = new TableViewer(tableComposite, SWT.FULL_SELECTION | SWT.MULTI );
 		summaryTable.getTable().setHeaderVisible(true);
 		summaryTable.getTable().setLinesVisible(true);
 		summaryTable.setContentProvider(ArrayContentProvider.getInstance());
 		summaryTable.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
 		ColumnViewerToolTipSupport.enableFor(summaryTable);
 		
 		for (OverviewTableColumnWrapper column : tableConfiguration.getColumns()) {

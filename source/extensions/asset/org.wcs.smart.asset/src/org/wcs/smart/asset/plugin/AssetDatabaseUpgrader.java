@@ -71,6 +71,28 @@ public class AssetDatabaseUpgrader implements IDatabaseUpgrader {
 	 */
 	public static final void upgrade(String currentVersion, Session session){
 		//nothing to do
+		if (currentVersion.equals(AssetPlugIn.DB_VERSION_1)) {
+			upgradeV1toV2(session);
+		}
+	}
+	
+	private static void upgradeV1toV2(Session session) {
+		String[] sql = new String[]{
+				//primary date field
+				"create table smart.asset_deployment_disruption(uuid char(16) for bit data not null, asset_deployment_uuid char(16) for bit data not null, start_date timestamp not null, end_date timestamp not null, comment varchar(32672), primary key (uuid))", //$NON-NLS-1$
+				
+				"alter table smart.asset_deployment_disruption add constraint assdep_uuid_fk foreign key (asset_deployment_uuid) REFERENCES smart.asset_deployment (uuid) DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				
+				"GRANT SELECT ON smart.asset_deployment_disruption TO ANALYST", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON smart.asset_deployment_disruption TO MANAGER", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON smart.asset_deployment_disruption TO DATA_ENTRY", //$NON-NLS-1$
+		};
+		for (String s : sql){
+			session.createNativeQuery(s).executeUpdate();
+		}
+		
+		HibernateManager.setPlugInVersion(AssetPlugIn.PLUGIN_ID, AssetPlugIn.DB_VERSION_2, session);
+
 	}
 		
 }

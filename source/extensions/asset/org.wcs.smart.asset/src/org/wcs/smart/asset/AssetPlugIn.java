@@ -40,9 +40,9 @@ public class AssetPlugIn extends AbstractUIPlugin {
 	public static final String PLUGIN_ID = "org.wcs.smart.asset"; //$NON-NLS-1$
 	
 	public static final String DB_VERSION_1 = "1.0"; //$NON-NLS-1$
-	public static final String DB_VERSION = DB_VERSION_1; //current database version
-	
-	
+	public static final String DB_VERSION_2 = "2.0"; //$NON-NLS-1$
+
+	public static final String DB_VERSION = DB_VERSION_2; //current database version
 	
 	// The shared instance
 	private static AssetPlugIn plugin;

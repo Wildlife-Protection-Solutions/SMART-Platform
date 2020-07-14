@@ -252,7 +252,7 @@ public class AssetCurrentPage {
 			}
 		});
 		
-		toolkit.createLabel(mapPart, "Location:"); //$NON-NLS-1$
+		toolkit.createLabel(mapPart, Messages.AssetCurrentPage_LocationLbl); 
 		lblStatLocation = toolkit.createHyperlink(mapPart, "", SWT.NONE); //$NON-NLS-1$
 		lblStatLocation.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
@@ -357,6 +357,9 @@ public class AssetCurrentPage {
 					e.getAttributeValueAsString(Locale.getDefault(), SmartDB.DATABASE_CRS);
 				});
 				
+				deploy.getActiveTimeOutInSeconds();
+				deploy.getTimeOutInSeconds();
+				
 				currentDeployment = deploy;
 				
 				double stationBuffer = AssetHibernateManager.getStationBuffer(session, SmartDB.getCurrentConservationArea());
@@ -431,9 +434,13 @@ public class AssetCurrentPage {
 				ll.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 				toolkit.createLabel(statDetailsSection, thisdeploy.getEndDate() == null ? "" : DateFormat.getDateTimeInstance().format(thisdeploy.getEndDate())); //$NON-NLS-1$
 				
-				ll = toolkit.createLabel(statDetailsSection, Messages.AssetCurrentPage_TimeDeployedLabel);
+				ll = toolkit.createLabel(statDetailsSection, Messages.AssetCurrentPage_ActiveTimeDeployedLbl);
 				ll.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
-				toolkit.createLabel(statDetailsSection, (AssetUtils.formatTime( thisdeploy.getActiveTimeInSeconds() )));
+				toolkit.createLabel(statDetailsSection, (AssetUtils.formatTime( thisdeploy.getActiveTimeOutInSeconds() )));
+				
+				ll = toolkit.createLabel(statDetailsSection, Messages.AssetCurrentPage_TotalTimeDeployedLbl);
+				ll.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
+				toolkit.createLabel(statDetailsSection, (AssetUtils.formatTime( thisdeploy.getTimeOutInSeconds() )));
 				
 				if (thisdeploy.getEndDate() != null) {
 					ll = toolkit.createLabel(statDetailsSection, Messages.AssetCurrentPage_TimeToEndDate);
