@@ -84,6 +84,7 @@ public class RemoveAssetJob extends Job {
 				"asset_type_deployment_attribute",
 				"asset_waypoint_attachment",
 				"asset_waypoint",
+				"asset_deployment_disruption",
 				"asset_deployment",
 				"asset_metadata_mapping",
 				"asset_station_location_history",

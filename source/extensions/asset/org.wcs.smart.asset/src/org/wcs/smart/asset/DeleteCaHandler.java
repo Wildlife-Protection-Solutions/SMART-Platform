@@ -106,6 +106,11 @@ public class DeleteCaHandler implements ICaDeleteHandler{
 		q.executeUpdate();
 
 		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "Asset Deployment ")); //$NON-NLS-1$
+		q = session.createQuery("delete from  AssetDeploymentDisruption sa where sa.assetDeployment in (select a from AssetDeployment a join a.asset b where b.conservationArea = :ca)"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.executeUpdate();
+		
+		monitor.subTask(MessageFormat.format(SUB_TASK_MSG, "Asset Deployment ")); //$NON-NLS-1$
 		q = session.createQuery("delete from  AssetDeployment sa where sa.asset in (select a from Asset a where conservationArea = :ca)"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
