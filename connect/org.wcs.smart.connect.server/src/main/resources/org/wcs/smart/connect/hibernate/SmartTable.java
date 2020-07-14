@@ -27,6 +27,7 @@ import org.wcs.smart.asset.model.AssetAttributeListItem;
 import org.wcs.smart.asset.model.AssetAttributeValue;
 import org.wcs.smart.asset.model.AssetDeployment;
 import org.wcs.smart.asset.model.AssetDeploymentAttributeValue;
+import org.wcs.smart.asset.model.AssetDeploymentDisruption;
 import org.wcs.smart.asset.model.AssetHistoryRecord;
 import org.wcs.smart.asset.model.AssetMapStyle;
 import org.wcs.smart.asset.model.AssetMetadataMapping;
@@ -429,6 +430,7 @@ public enum SmartTable {
 	ASSET_ATTRIBUTE_LIST_ITEM(AssetAttributeListItem.class, ".attribute.conservationArea"),
 	ASSET_ATTRIBUTE_VALUE(AssetAttributeValue.class, ".id.attribute.conservationArea"),
 	ASSET_DEPOLYMENT(AssetDeployment.class, ".asset.conservationArea"),
+	ASSET_DEPOLYMENT_DISRUPTION(AssetDeploymentDisruption.class, ".assetDeployment.asset.conservationArea"),
 	ASSET_DEPLOYMENT_ATTRIBUTE_VALUE(AssetDeploymentAttributeValue.class, ".id.attribute.conservationArea"),
 	ASSET_HISTORY_RECORD(AssetHistoryRecord.class, ".asset.conservationArea"),
 	ASSET_MAP_STYLE(AssetMapStyle.class, null),

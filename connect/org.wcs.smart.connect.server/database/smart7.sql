@@ -130,6 +130,14 @@ END;
 
 $$;
 
+
+CREATE OR REPLACE FUNCTION connect.trg_asset_deployment_disruption() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, asset.ca_uuid 
+ 		FROM smart.asset_deployment deploy, smart.asset asset WHERE asset.uuid = deploy.asset_uuid and deploy.uuid = row.asset_deployment_uuid ;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
 CREATE FUNCTION connect.trg_asset_attribute_list_item() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
@@ -2254,6 +2262,16 @@ CREATE TABLE smart.asset_deployment (
     track bytea,
     PRIMARY KEY (uuid)
 );
+
+CREATE TABLE smart.asset_deployment_disruption (
+    uuid uuid not null,
+    asset_deployment_uuid uuid not null,
+    start_date timestamp not null,
+    end_date timestamp not null,
+    comment varchar(32672),
+    primary key (uuid)
+);
+
 
 CREATE TABLE smart.asset_deployment_attribute_value (
     asset_deployment_uuid uuid NOT NULL,
@@ -4473,6 +4491,7 @@ CREATE TRIGGER trg_agency AFTER INSERT OR DELETE OR UPDATE ON smart.agency FOR E
 CREATE TRIGGER trg_area_geometries AFTER INSERT OR DELETE OR UPDATE ON smart.area_geometries FOR EACH ROW EXECUTE PROCEDURE connect.trg_changelog_common();
 CREATE TRIGGER trg_asset AFTER INSERT OR DELETE OR UPDATE ON smart.asset FOR EACH ROW EXECUTE PROCEDURE connect.trg_changelog_common();
 CREATE TRIGGER trg_asset_attribute AFTER INSERT OR DELETE OR UPDATE ON smart.asset_attribute FOR EACH ROW EXECUTE PROCEDURE connect.trg_changelog_common();
+CREATE TRIGGER trg_asset_deployment_disruption AFTER INSERT OR UPDATE OR DELETE ON smart.asset_deployment_disruption FOR EACH ROW execute procedure connect.trg_asset_deployment_disruption();
 CREATE TRIGGER trg_asset_attribute_list_item AFTER INSERT OR DELETE OR UPDATE ON smart.asset_attribute_list_item FOR EACH ROW EXECUTE PROCEDURE connect.trg_asset_attribute_list_item();
 CREATE TRIGGER trg_asset_attribute_value AFTER INSERT OR DELETE OR UPDATE ON smart.asset_attribute_value FOR EACH ROW EXECUTE PROCEDURE connect.trg_asset_attribute_value();
 CREATE TRIGGER trg_asset_deployment AFTER INSERT OR DELETE OR UPDATE ON smart.asset_deployment FOR EACH ROW EXECUTE PROCEDURE connect.trg_asset_deployment();
@@ -4712,6 +4731,7 @@ ALTER TABLE ONLY smart.asset_attribute_value ADD CONSTRAINT asset_attribute_valu
 ALTER TABLE ONLY smart.asset ADD CONSTRAINT asset_ca_uuid_fkey FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE ONLY smart.asset_deployment ADD CONSTRAINT asset_deployment_asset_uuid_fkey FOREIGN KEY (asset_uuid) REFERENCES smart.asset(uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE ONLY smart.asset_deployment ADD CONSTRAINT asset_deployment_asset_uuid_fkey1 FOREIGN KEY (asset_uuid) REFERENCES smart.asset(uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.asset_deployment_disruption ADD FOREIGN KEY (asset_deployment_uuid) REFERENCES smart.asset_deployment (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE ONLY smart.asset_deployment_attribute_value ADD CONSTRAINT asset_deployment_attribute_value_asset_deployment_uuid_fkey FOREIGN KEY (asset_deployment_uuid) REFERENCES smart.asset_deployment(uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE ONLY smart.asset_deployment_attribute_value ADD CONSTRAINT asset_deployment_attribute_value_attribute_uuid_fkey FOREIGN KEY (attribute_uuid) REFERENCES smart.asset_attribute(uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE ONLY smart.asset_deployment_attribute_value ADD CONSTRAINT asset_deployment_attribute_value_list_item_uuid_fkey FOREIGN KEY (list_item_uuid) REFERENCES smart.asset_attribute_list_item(uuid) ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
@@ -5234,7 +5254,7 @@ INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs
 INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.qa','1.0');
 INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.event','2.0');
 INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.connect.dataqueue','3.0');
-INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.asset','1.0');
+INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.asset','2.0');
 INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.asset.query','1.0');
 INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.r','1.0');
 INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.cybertracker.patrol','2.0');

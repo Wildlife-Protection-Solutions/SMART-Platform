@@ -763,9 +763,25 @@ DELETE FROM connect.connect_plugin_version where plugin_id = 'org.wcs.smart.inte
 DELETE FROM connect.ca_plugin_version where plugin_id = 'org.wcs.smart.intelligence';
 DELETE FROM connect.ca_plugin_version where plugin_id = 'org.wcs.smart.intelligence.query';
 
+
+------- field sensor updates ----------
+CREATE TABLE smart.asset_deployment_disruption(uuid uuid not null,asset_deployment_uuid uuid not null, start_date timestamp not null, end_date timestamp not null, comment varchar(32672), primary key (uuid));
+ALTER TABLE smart.asset_deployment_disruption ADD FOREIGN KEY (asset_deployment_uuid) REFERENCES smart.asset_deployment (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+
+CREATE OR REPLACE FUNCTION connect.trg_asset_deployment_disruption() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+ 	INSERT INTO connect.change_log 
+ 		(uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid) 
+ 		SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, asset.ca_uuid 
+ 		FROM smart.asset_deployment deploy, smart.asset asset WHERE asset.uuid = deploy.asset_uuid and deploy.uuid = row.asset_deployment_uuid ;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
+
+CREATE TRIGGER trg_asset_deployment_disruption AFTER INSERT OR UPDATE OR DELETE ON smart.asset_deployment_disruption FOR EACH ROW execute procedure connect.trg_asset_deployment_disruption();
+
+
 ------------ VERSIONS ------------
 insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.smartcollect', '1.0');
 
+update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.asset';
 update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.event';
 update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.cybertracker.patrol';
 update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.cybertracker.survey';
@@ -773,6 +789,7 @@ update connect.connect_plugin_version set version = '7.0' where plugin_id = 'org
 insert into connect.connect_plugin_version (version, plugin_id) values ('1.0', 'org.wcs.smart.paws');
 update connect.connect_plugin_version set version = '7.0.0' where plugin_id = 'org.wcs.smart';
 
+update connect.ca_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.asset';
 update connect.ca_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.event';
 update connect.ca_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.cybertracker.patrol';
 update connect.ca_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.cybertracker.survey';
