@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.util;
 
+import java.sql.Time;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -140,5 +141,23 @@ public class SharedUtils {
 		int index = part.lastIndexOf('.');
 		if (index < 0) return ""; //$NON-NLS-1$
 		return part.substring(index+1);
+	}
+	
+	public static Time createPatrolTime(int hours, int minute, int second){
+		Calendar cForProcessing = Calendar.getInstance();
+		cForProcessing.setTimeInMillis(0);
+		
+		cForProcessing.set(Calendar.HOUR_OF_DAY, hours);
+		cForProcessing.set(Calendar.MINUTE, minute);
+		cForProcessing.set(Calendar.SECOND, second);
+		cForProcessing.set(Calendar.MILLISECOND, 0);
+		
+		return new Time(cForProcessing.getTime().getTime());
+	}
+	
+	public static Time convertDateToTime(Date d){
+		Calendar c = Calendar.getInstance();
+		c.setTime(d);		
+		return createPatrolTime(c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), c.get(Calendar.SECOND));		
 	}
 }

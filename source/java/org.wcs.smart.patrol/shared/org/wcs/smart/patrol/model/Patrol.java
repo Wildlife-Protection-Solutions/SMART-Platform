@@ -23,7 +23,6 @@ package org.wcs.smart.patrol.model;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -47,9 +46,6 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.IFolderItem;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.ca.UuidItem;
-import org.wcs.smart.patrol.PatrolUtils;
-import org.wcs.smart.util.SharedUtils;
-import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**

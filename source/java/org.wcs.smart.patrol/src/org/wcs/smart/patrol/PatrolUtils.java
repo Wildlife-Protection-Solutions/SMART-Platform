@@ -39,7 +39,6 @@ import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SharedUtils;
-import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.TrackUtil;
 
 /**
@@ -152,8 +151,8 @@ public class PatrolUtils {
 				PatrolLegDay pld = new PatrolLegDay();
 				pld.setPatrolLeg(leg);
 				pld.setDate(cal.getTime());
-				pld.setStartTime(SmartUtils.convertDateToTime(cal.getTime()));
-				pld.setEndTime(SmartUtils.createPatrolTime(23, 59, 59));
+				pld.setStartTime(SharedUtils.convertDateToTime(cal.getTime()));
+				pld.setEndTime(SharedUtils.createPatrolTime(23, 59, 59));
 				leg.getPatrolLegDays().add(pld);
 				leg.setEndDate(cal.getTime());
 				cal.add(Calendar.DAY_OF_MONTH, 1);

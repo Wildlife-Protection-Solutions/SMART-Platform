@@ -36,16 +36,15 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.wcs.smart.ca.UuidItem;
-import org.wcs.smart.map.GeometryFactoryProvider;
-import org.wcs.smart.util.GeometryUtils;
-
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.MultiLineString;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKBReader;
 import org.locationtech.jts.io.WKBWriter;
+import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.map.GeometryFactoryProvider;
+import org.wcs.smart.util.GeometryUtils;
 
 /**
  * Patrol track

@@ -39,7 +39,7 @@ public class SmartFileUtils {
 		final Path temp;
 		temp = Files.createTempFile(prefix, Long.toString(System.nanoTime()));
 		
-		SmartUtils.deleteDirectory(temp);
+		Files.delete(temp);
 		SmartUtils.createDirectory(temp);
 		
 		return temp;

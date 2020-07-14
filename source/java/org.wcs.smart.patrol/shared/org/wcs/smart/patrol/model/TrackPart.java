@@ -21,10 +21,9 @@
  */
 package org.wcs.smart.patrol.model;
 
-import org.wcs.smart.util.UuidUtils;
-
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.MultiLineString;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Part of a {@link Track}. Represents a single {@link LineString} from a {@link MultiLineString} track.

@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.patrol.model;
 
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -46,7 +45,7 @@ import org.hibernate.annotations.OrderBy;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.util.SharedUtils;
-import org.wcs.smart.util.SmartUtils;
+//import org.wcs.smart.util.SmartUtils;
 
 /**
  * Patrol Leg object
@@ -270,17 +269,17 @@ public class PatrolLeg extends UuidItem {
 			//update the start time
 			previousDay = existing;
 			if (existing.getStartTime() == null){
-				existing.setStartTime(SmartUtils.createPatrolTime(0, 0, 0));
+				existing.setStartTime(SharedUtils.createPatrolTime(0, 0, 0));
 			}
 			if (existing.getEndTime() == null){
-				existing.setEndTime(SmartUtils.createPatrolTime(23, 59, 59));
+				existing.setEndTime(SharedUtils.createPatrolTime(23, 59, 59));
 			}
 		}else{
 			previousDay = new PatrolLegDay();
 			previousDay.setPatrolLeg(this);
 			previousDay.setDate( calStart.getTime() );
-			previousDay.setStartTime(SmartUtils.convertDateToTime(calStart.getTime()));
-			previousDay.setEndTime(SmartUtils.createPatrolTime(23, 59, 59));
+			previousDay.setStartTime(SharedUtils.convertDateToTime(calStart.getTime()));
+			previousDay.setEndTime(SharedUtils.createPatrolTime(23, 59, 59));
 			this.days.add(previousDay);
 		}
 		
@@ -291,16 +290,16 @@ public class PatrolLeg extends UuidItem {
 			if (existing != null){
 				previousDay = existing;
 				if (existing.getStartTime() == null){
-					existing.setStartTime(SmartUtils.createPatrolTime(0, 0, 0));
+					existing.setStartTime(SharedUtils.createPatrolTime(0, 0, 0));
 				}
 				if (existing.getEndTime() == null){
-					existing.setEndTime(SmartUtils.createPatrolTime(23, 59, 59));
+					existing.setEndTime(SharedUtils.createPatrolTime(23, 59, 59));
 				}
 			}else{
 				previousDay = new PatrolLegDay();
 				previousDay.setDate( SharedUtils.getDatePart(calStart.getTime(), false) );
-				previousDay.setStartTime(SmartUtils.createPatrolTime(0, 0, 0));
-				previousDay.setEndTime(SmartUtils.createPatrolTime(23, 59, 59));
+				previousDay.setStartTime(SharedUtils.createPatrolTime(0, 0, 0));
+				previousDay.setEndTime(SharedUtils.createPatrolTime(23, 59, 59));
 				previousDay.setPatrolLeg(this);
 				this.days.add(previousDay);
 				
@@ -330,8 +329,8 @@ public class PatrolLeg extends UuidItem {
 		});
 		
 		//update the end time of the last day
-		this.days.get(0).setStartTime(SmartUtils.convertDateToTime(getStartDate()));
-		this.days.get(this.days.size() - 1).setEndTime(SmartUtils.convertDateToTime(getEndDate()));
+		this.days.get(0).setStartTime(SharedUtils.convertDateToTime(getStartDate()));
+		this.days.get(this.days.size() - 1).setEndTime(SharedUtils.convertDateToTime(getEndDate()));
 
 		//if there is only one leg day we are done.
 		//otherwise if check the first and last patrol days; if they are < 1 second in length than remove the leg day
@@ -341,7 +340,7 @@ public class PatrolLeg extends UuidItem {
 				//remove this day
 				firstDay.setPatrolLeg(null);
 				this.days.remove(firstDay);
-				this.days.get(0).setStartTime(SmartUtils.createPatrolTime(0, 0, 0));
+				this.days.get(0).setStartTime(SharedUtils.createPatrolTime(0, 0, 0));
 				setStartDate( SharedUtils.getDatePart(this.days.get(0).getDate(), false) );
 			}
 		}
@@ -351,7 +350,7 @@ public class PatrolLeg extends UuidItem {
 				//remove this day
 				lastDay.setPatrolLeg(null);
 				this.days.remove(lastDay);
-				this.days.get(this.days.size() - 1).setEndTime(SmartUtils.createPatrolTime(23, 59, 59));
+				this.days.get(this.days.size() - 1).setEndTime(SharedUtils.createPatrolTime(23, 59, 59));
 				setEndDate( SharedUtils.getDatePart(this.days.get(this.days.size() - 1).getDate(), true) );
 				
 			}
