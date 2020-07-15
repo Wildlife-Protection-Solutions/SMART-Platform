@@ -31,8 +31,10 @@
 		<module>./org.wcs.smart.patrol.query/pom-shared.xml</module>
 		<module>./org.wcs.smart.observation.query/pom-shared.xml</module>
 		<module>./org.wcs.smart.plan/pom-shared.xml</module>
+		<!-- remove smart7
 		<module>./org.wcs.smart.intelligence/pom-shared.xml</module>
 		<module>./org.wcs.smart.intelligence.query/pom-shared.xml</module>
+		-->
 		<module>./org.wcs.smart.independentincident/pom-shared.xml</module>
 		<module>./org.wcs.smart.report.birt.query/pom-shared.xml</module>
 		<module>./org.wcs.smart.birt.map/pom-shared.xml</module>
