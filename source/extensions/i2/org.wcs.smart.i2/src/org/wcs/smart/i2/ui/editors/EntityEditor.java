@@ -1209,7 +1209,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		((GridLayout)compScratchpad.getLayout()).marginHeight = 0;
 		((GridLayout)compScratchpad.getLayout()).marginWidth = 0;
 		
-		txtScratchpad = toolkit.createText(compScratchpad, "", SWT.MULTI | SWT.V_SCROLL | SWT.BORDER); //$NON-NLS-1$
+		txtScratchpad = toolkit.createText(compScratchpad, "", SWT.MULTI | SWT.V_SCROLL | SWT.BORDER | SWT.WRAP); //$NON-NLS-1$
 		txtScratchpad.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		txtScratchpad.addListener(SWT.Modify, e->setDirty(true));
 		
