@@ -72,7 +72,7 @@ public class MultiIncidentExportDialog extends XmlMultiExportDialog implements I
 		dialogSettings.put(INCLUDE_ATTACHMENT, true);
 	}
 
-	private IncidentFilter currentFilter = new IncidentFilter();
+	private IncidentFilter currentFilter = null;
 	
 	/**
 	 * Creates a new dialog.
@@ -80,9 +80,14 @@ public class MultiIncidentExportDialog extends XmlMultiExportDialog implements I
 	 * @param parentShell parent shell
 	 * @param incident incident to export
 	 */
-	public MultiIncidentExportDialog(Shell parentShell) {
+	public MultiIncidentExportDialog(Shell parentShell, IncidentFilter defaultFilter) {
 		super(parentShell, Messages.MultiIncidentExportDialog_ChangeFilter);
-		this.currentFilter.setDateFilter(DateFilter.LAST_30_DAYS, null, null);
+		if (defaultFilter != null) {
+			currentFilter = defaultFilter;
+		}else {
+			this.currentFilter = new IncidentFilter();
+			this.currentFilter.setDateFilter(DateFilter.LAST_30_DAYS, null, null);
+		}
 	}
 
 	@Override

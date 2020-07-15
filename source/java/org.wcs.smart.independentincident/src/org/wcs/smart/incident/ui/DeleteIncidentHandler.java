@@ -48,6 +48,7 @@ import org.wcs.smart.incident.event.IncidentEventManager;
 import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -103,9 +104,10 @@ public class DeleteIncidentHandler{
 				Path f = Paths.get(SmartDB.getCurrentConservationArea().getFileDataStoreLocation())
 						.resolve(IndepedentIncidentSource.FILESTORE_LOC)
 						.resolve(UuidUtils.getDirectoryPath(w.getUuid()));
+				
 				if (Files.exists(f)){
 					try{
-						Files.delete(f);
+						SmartUtils.deleteDirectory(f);
 					}catch(Exception ex){
 						IncidentPlugIn.displayLog(
 								MessageFormat.format(Messages.DeleteIncidentHandler_DeleteError, f.toAbsolutePath().toString()), ex);

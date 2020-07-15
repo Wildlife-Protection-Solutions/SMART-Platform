@@ -33,6 +33,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -40,9 +42,11 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.incident.IIncidentXmlExporter;
+import org.wcs.smart.incident.IIncidentProvider;
+import org.wcs.smart.incident.IncidentManager;
 import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.internal.Messages;
-import org.wcs.smart.incident.xml.IncidentExporter;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.util.UuidUtils;
 
@@ -62,9 +66,16 @@ public class ExportIncidentHandler {
 
 	
 	@Execute
-	public void execute(final Shell activeShell){
+	public void execute(final Shell activeShell, EPartService pService){
 
-		MultiIncidentExportDialog dialog = new MultiIncidentExportDialog(activeShell);
+		
+		IncidentFilter filter = null;
+		MPart pp = pService.findPart(IndIncidentListView.ID);
+		if (pp != null && pp.getContext() != null) {
+			filter = pp.getContext().get(IncidentFilter.class);
+		}
+		
+		MultiIncidentExportDialog dialog = new MultiIncidentExportDialog(activeShell, filter);
 		if (dialog.open() != IDialogConstants.OK_ID) {
 			return;
 		}
@@ -91,6 +102,7 @@ public class ExportIncidentHandler {
 						if (monitor.isCanceled()) break;
 						UUID puuid = incidents.get(i);
 						Integer id = null;
+						
 						try {
 							monitor.subTask(MessageFormat.format(Messages.ExportIncidentHandler_IncidentProgress,new Object[]{ UuidUtils.uuidToString(puuid)}));
 							Waypoint wp = null;
@@ -110,8 +122,9 @@ public class ExportIncidentHandler {
 
 							monitor.subTask(MessageFormat.format(Messages.ExportIncidentHandler_ExportingIncidentProgress,new Object[]{ String.valueOf(id) }));
 
-							Path outFile = IncidentExporter.getOutputFile(dir, String.valueOf(wp.getId()), includeAtt);
-							IncidentExporter.exportIncident(wp, outFile, includeAtt, new NullProgressMonitor());
+							IIncidentProvider provider = IncidentManager.getInstance().getIncidentProvider(wp.getSourceId());
+							Path outFile = IIncidentXmlExporter.getOutputFile(dir, String.valueOf(wp.getId()), includeAtt);
+							provider.getXmlExporter().exportIncident(wp, outFile, includeAtt, new NullProgressMonitor());
 							exportCnt++;
 						} catch (Exception ex) {
 							IncidentPlugIn.displayLog(MessageFormat.format("Error exporting incident.  Skipping ID {0}." , new Object[]{id!= null ? id : UuidUtils.uuidToString(puuid)}) + "\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$ //$NON-NLS-2$

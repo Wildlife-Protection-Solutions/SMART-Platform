@@ -8,6 +8,24 @@ public class Messages extends NLS {
 	public static String AddSmartCollectJob_ErrorTitle;
 	public static String AddSmartCollectJob_InstallJobName;
 	public static String AddSmartCollectJob_TaskName;
+	public static String IncidentExporter_progress1;
+	public static String IncidentExporter_progress2;
+	public static String IncidentExporter_progress3;
+	public static String IncidentExporter_progress4;
+	public static String IncidentImporter_ErrorMsg;
+	public static String IncidentImporter_ErrorTitle;
+	public static String IncidentImporter_FileNotFound;
+	public static String IncidentImporter_progress1;
+	public static String IncidentImporter_progress2;
+	public static String IncidentImporter_progress3;
+	public static String IncidentImporter_progress4;
+	public static String IncidentImporter_progress5;
+	public static String IncidentImporter_progress6;
+	public static String IncidentImporter_progress7;
+	public static String IncidentImporter_SaveError;
+	public static String IncidentImporter_unziperror;
+	public static String IncidentImporter_WarnMsg;
+	public static String IncidentImporter_WarnTitle;
 	public static String IncidentMapPage_EditWarningMessage;
 	public static String IncidentMapPage_EditWarningTitle;
 	public static String IncidentMapPage_IncidentLayerName;
@@ -107,6 +125,20 @@ public class Messages extends NLS {
 	public static String ValidationDialog_UserValidationMessage;
 	public static String ValidationDialog_ValidateOp;
 	public static String ValidationDialog_ValidateOpTooltip;
+	public static String XmlToIncident_AttachmentError;
+	public static String XmlToIncident_AttFileNotFound;
+	public static String XmlToIncident_AttributeCategoryNotFound;
+	public static String XmlToIncident_CategoryNotFound;
+	public static String XmlToIncident_DataNotImported;
+	public static String XmlToIncident_InvalidDate;
+	public static String XmlToIncident_ListKeyNotFound;
+	public static String XmlToIncident_MultiKeys;
+	public static String XmlToIncident_MultiValues;
+	public static String XmlToIncident_NoDoubleValue;
+	public static String XmlToIncident_NoStringValue;
+	public static String XmlToIncident_NoValue;
+	public static String XmlToIncident_ObserverNotFound;
+	public static String XmlToIncident_TreeItemNotFound;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

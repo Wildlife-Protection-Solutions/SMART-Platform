@@ -60,7 +60,7 @@ public class IncidentProcessor implements IItemProcessor {
 		LocalDataQueueItem litem = (LocalDataQueueItem)item;
 		Path file = litem.getFullFilePath();
 		
-		Waypoint wp = IncidentImporter.importIncident(file, monitor);
+		Waypoint wp = IncidentImporter.INSTANCE.importIncident(file, monitor);
 		if (wp == null){
 			return new ProcessingStatus(LocalDataQueueItem.Status.COMPLETE_WARN, Messages.IncidentProcessor_nothingloaded);	
 		}else{

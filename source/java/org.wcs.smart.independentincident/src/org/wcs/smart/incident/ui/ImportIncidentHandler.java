@@ -41,10 +41,11 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.common.control.XmlImportDialog;
+import org.wcs.smart.incident.IIncidentProvider;
+import org.wcs.smart.incident.IncidentManager;
 import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.event.IncidentEventManager;
 import org.wcs.smart.incident.internal.Messages;
-import org.wcs.smart.incident.xml.IncidentImporter;
 import org.wcs.smart.observation.model.Waypoint;
 
 /**
@@ -115,12 +116,22 @@ public class ImportIncidentHandler {
 						monitor.worked(1);
 						if (Files.isDirectory(file)) continue;
 						try{
-							Waypoint wp = IncidentImporter.importIncident(file, nullPm);
-							if (wp != null) {
-								IncidentEventManager.getInstance().fireEvent(IncidentEventManager.INCIDENT_ADDED, wp);
+							boolean found = false;
+							for (IIncidentProvider p : IncidentManager.getInstance().getIncidentProviders()) {
+								if (p.getXmlImporter().canImport(file)) {
+									found = true;
+									Waypoint wp = p.getXmlImporter().importIncident(file, nullPm);
+									if (wp != null) {
+										IncidentEventManager.getInstance().fireEvent(IncidentEventManager.INCIDENT_ADDED, wp);
+									}
+									break;
+								}
+							}
+							if (!found) {
+								throw new Exception(Messages.ImportIncidentHandler_ImporterNotFound);																	
 							}
 						}catch (Exception ex){
-							IncidentPlugIn.displayLog(MessageFormat.format(Messages.ImportIncidentHandler_FileError, new Object[]{file.toString()}) + ex.getLocalizedMessage(), ex);
+							IncidentPlugIn.displayLog(MessageFormat.format(Messages.ImportIncidentHandler_FileError, new Object[]{file.toString()}) + " " + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 						}
 						if (monitor.isCanceled()){
 							shell.getDisplay().syncExec(new Runnable() {

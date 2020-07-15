@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.incident.xml;
+package org.wcs.smart.smartcollect.xml;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -51,9 +51,11 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.incident.IIncidentXmlImporter;
 import org.wcs.smart.incident.IncidentPlugIn;
-import org.wcs.smart.incident.IndepedentIncidentSource;
-import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.smartcollect.internal.Messages;
+import org.wcs.smart.smartcollect.model.SmartCollectWaypoint;
+import org.wcs.smart.smartcollect.model.SmartCollectWaypointSource;
+import org.wcs.smart.smartcollect.xml.model.XmlToIncident;
 import org.wcs.smart.ui.SmartStyledInputDialog;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
@@ -67,7 +69,7 @@ import org.wcs.smart.util.ZipUtil;
  */
 public class IncidentImporter implements IIncidentXmlImporter{
 	
-	private static final String IMPORTING_INCIDENT_TASKNAME = Messages.IncidentImporter_ImportingTaskName;
+	private static final String IMPORTING_INCIDENT_TASKNAME = Messages.IncidentImporter_progress1;
 
 	public static final IncidentImporter INSTANCE = new IncidentImporter();
 	
@@ -110,10 +112,10 @@ public class IncidentImporter implements IIncidentXmlImporter{
 	
 	private boolean supportsNamespace(String ns) {
 		if (ns == null) return false;
-		if (ns.equals(org.wcs.smart.incident.xml.model.v20.ObjectFactory._Waypoint_QNAME.getNamespaceURI())) return true;
-		if (ns.equals(org.wcs.smart.incident.xml.model.v21.ObjectFactory._Waypoint_QNAME.getNamespaceURI())) return true;
+		if (ns.equals(org.wcs.smart.smartcollect.xml.model.ObjectFactory._Waypoint_QNAME.getNamespaceURI())) return true;
 		return false;
 	}
+	
 	/**
 	 * Imports incident data from the given file.
 	 * 
@@ -122,12 +124,11 @@ public class IncidentImporter implements IIncidentXmlImporter{
 	 * @throws Exception
 	 */
 	public Waypoint importIncident(Path file, IProgressMonitor monitor) throws Exception{
-		
 		if (SmartUtils.isZip(file)){
 			//process as zip file
-			return importIncidentFromZip(file, monitor);
+			return importIncidentFromZip(file, monitor).getWaypoint();
 		}else{
-			return importIncidentFromFile(file, monitor);
+			return importIncidentFromFile(file, monitor).getWaypoint();
 		}
 	}
 	
@@ -139,38 +140,29 @@ public class IncidentImporter implements IIncidentXmlImporter{
 	 * @return incident created or null
 	 * @throws Exception
 	 */
-	private static Waypoint importIncidentFromZip(Path zipFile, IProgressMonitor monitor) throws Exception{
+	private SmartCollectWaypoint importIncidentFromZip(Path zipFile, IProgressMonitor monitor) throws Exception{
 		SubMonitor progress = SubMonitor.convert(monitor, IMPORTING_INCIDENT_TASKNAME, 2);
 		Path xmlfile = null;
 		//unzip 
-		progress.subTask(Messages.IncidentImporter_ProcessingzipFile);
+		progress.subTask(Messages.IncidentImporter_progress2);
 		progress.split(1);
 		Path directory = ZipUtil.unzip(zipFile);
 		if (directory == null || !Files.isDirectory(directory)){
-			throw new Exception (MessageFormat.format(Messages.IncidentImporter_ErrorUnzipping, new Object[]{ zipFile.toAbsolutePath().toString()}));
+			throw new Exception (MessageFormat.format(Messages.IncidentImporter_unziperror, new Object[]{ zipFile.toAbsolutePath().toString()}));
 		}
 		
 		
 		//file xml file
 		List<Path> files = Files.list(directory).collect(Collectors.toList());
 		
-		progress.subTask(Messages.IncidentImporter_ReadingXmlProgress);
+		progress.subTask(Messages.IncidentImporter_progress3);
 			
 		for(Path f : files) {
-			if (!Files.isDirectory(f)) {
-				//lets try reading the
-				try{
-					IncidentXmlManager.findVersion(f);
+			if (!Files.isDirectory(f) && f.getFileName().toString().endsWith("xml")) { //$NON-NLS-1$
+				if (canImport(f)) {
 					xmlfile = f;
-				}catch (Exception ex){
-					IncidentPlugIn.log(null, ex);
-					xmlfile = null;
-				}
-				if (xmlfile != null){
-					//we've found it!
 					break;
 				}
-				
 			}
 		}
 		
@@ -180,12 +172,12 @@ public class IncidentImporter implements IIncidentXmlImporter{
 			}catch (Exception ex){
 				IncidentPlugIn.log("Error deleting temporary directory", ex); //$NON-NLS-1$
 			}
-			throw new Exception (Messages.IncidentImporter_XmlNotFound);
+			throw new Exception (Messages.IncidentImporter_FileNotFound);
 		}
 		
-		Waypoint p = convertAndSave(xmlfile, directory, progress.split(1));
+		SmartCollectWaypoint p = convertAndSave(xmlfile, directory, progress.split(1));
 		
-		progress.subTask(Messages.IncidentImporter_RemoveTempFiles);
+		progress.subTask(Messages.IncidentImporter_progress4);
 		try{
 			SmartUtils.deleteDirectory(directory);
 		}catch (Exception ex){
@@ -201,7 +193,7 @@ public class IncidentImporter implements IIncidentXmlImporter{
 	 * @return incident created or null
 	 * @throws Exception
 	 */
-	private static Waypoint importIncidentFromFile(Path xmlFile, IProgressMonitor monitor) throws Exception{
+	private static SmartCollectWaypoint importIncidentFromFile(Path xmlFile, IProgressMonitor monitor) throws Exception{
 		SubMonitor progress = SubMonitor.convert(monitor, IMPORTING_INCIDENT_TASKNAME, 2);
 		return convertAndSave(xmlFile, null, progress.split(1));
 	}
@@ -221,37 +213,40 @@ public class IncidentImporter implements IIncidentXmlImporter{
 	 * @return created Incident or null
 	 * @throws Exception
 	 */
-	private static Waypoint convertAndSave(Path incidentFile, Path attachmentDirectory, IProgressMonitor monitor) throws Exception {
+	private static SmartCollectWaypoint convertAndSave(Path incidentFile, Path attachmentDirectory, IProgressMonitor monitor) throws Exception {
 		SubMonitor progress = SubMonitor.convert(monitor, IMPORTING_INCIDENT_TASKNAME, 2);
-		IXmlToIncidentConverter converter = IncidentXmlManager.findVersion(incidentFile);
+		
+		
+		XmlToIncident converter = new XmlToIncident();
 		
 		try (Session session = HibernateManager.openSession(new AttachmentInterceptor())){
 			progress.split(1);
-			progress.subTask(Messages.IncidentImporter_ConvertingProgress);
+			progress.subTask(Messages.IncidentImporter_progress5);
 			
 			//convert
 			converter.fromXml(incidentFile, session, SmartDB.getCurrentConservationArea(), attachmentDirectory);
 
 			progress.split(1);
-			progress.subTask(Messages.IncidentImporter_ValidatingProgress);
-			Waypoint wp = converter.getImportedIncident();
+			progress.subTask(Messages.IncidentImporter_progress6);
+			SmartCollectWaypoint wp = converter.getImportedIncident();
 			
 			//check if a incident already exists
 			Long cnt = QueryFactory.buildCountQuery(session, Waypoint.class, 
 					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
-					new Object[] {"id", wp.getId() }, //$NON-NLS-1$
-					new Object[] {"sourceId", IndepedentIncidentSource.KEY}); //$NON-NLS-1$
+					new Object[] {"id", wp.getWaypoint().getId() }, //$NON-NLS-1$
+					new Object[] {"sourceId", SmartCollectWaypointSource.KEY}); //$NON-NLS-1$
 			if (cnt > 0){
 				final boolean[] cont = new boolean[]{true};
-				final int  pid = wp.getId();
+				final int  pid = wp.getWaypoint().getId();
 				Display.getDefault().syncExec(new Runnable(){
 
 						@Override
 						public void run() {
-							MessageDialog dialog = new MessageDialog(Display.getDefault().getActiveShell(), Messages.IncidentImporter_ImportDialogTitle, 
+							MessageDialog dialog = new MessageDialog(Display.getDefault().getActiveShell(),
+									Messages.IncidentImporter_WarnTitle, 
 									null,
 									MessageFormat.format(
-											Messages.IncidentImporter_IdDuplicated,new Object[]{String.valueOf(pid)}),
+										Messages.IncidentImporter_WarnMsg,new Object[]{String.valueOf(pid)}),
 									MessageDialog.QUESTION, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 1);
 							int ret = dialog.open();
 							if (ret == 1){
@@ -286,8 +281,8 @@ public class IncidentImporter implements IIncidentXmlImporter{
 				public void run() {
 					ConfirmInputDialog dialog = new ConfirmInputDialog(
 							Display.getDefault().getActiveShell(),
-							Messages.IncidentImporter_OkDialogTitle,
-							Messages.IncidentImporter_ErrorMessage,
+							Messages.IncidentImporter_ErrorTitle,
+							Messages.IncidentImporter_ErrorMsg,
 							message, null);
 					if (dialog.open() != ConfirmInputDialog.OK){
 						cont[0] = false;
@@ -303,19 +298,20 @@ public class IncidentImporter implements IIncidentXmlImporter{
 		
 		//performing actual save in database
 		progress.split(1);
-		progress.subTask(Messages.IncidentImporter_SavingProgress);
-		Waypoint imported = converter.getImportedIncident();
+		progress.subTask(Messages.IncidentImporter_progress7);
+		SmartCollectWaypoint imported = converter.getImportedIncident();
 		if (imported == null)
 			return null;
 		
 		try(Session session = HibernateManager.openSession(new AttachmentInterceptor())){
 			session.beginTransaction();
 			try {
+				session.save(imported.getWaypoint());
 				session.save(imported);
 				session.getTransaction().commit();
 			} catch (Exception ex) {
 				session.getTransaction().rollback();
-				IncidentPlugIn.displayLog(Messages.IncidentImporter_saveError + ex.getLocalizedMessage(), ex);
+				IncidentPlugIn.displayLog(Messages.IncidentImporter_SaveError + ex.getLocalizedMessage(), ex);
 				return null;
 			}
 		}

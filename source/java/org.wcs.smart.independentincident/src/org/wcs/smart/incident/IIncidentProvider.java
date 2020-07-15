@@ -68,5 +68,15 @@ public interface IIncidentProvider {
 	 */
 	public void waypointCreated(Waypoint wp, Session session);
 
-
+	/**
+	 * 
+	 * @return the xml exporter for the given incident type
+	 */
+	public IIncidentXmlExporter getXmlExporter();
+	
+	/**
+	 * 
+	 * @return the xml importer for the given incident ype
+	 */
+	public IIncidentXmlImporter getXmlImporter();
 }

@@ -53,6 +53,7 @@ public class Messages extends NLS {
 	public static String ImportIncidentHandler_DialogTitle;
 	public static String ImportIncidentHandler_ErrorDialog;
 	public static String ImportIncidentHandler_FileError;
+	public static String ImportIncidentHandler_ImporterNotFound;
 	public static String ImportIncidentHandler_ImportError;
 	public static String ImportIncidentHandler_LoadingProgress;
 	public static String ImportIncidentHandler_LocationNotFoundError;

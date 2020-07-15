@@ -53,6 +53,7 @@ import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
  * @author Emily
  *
  */
+@SuppressWarnings("restriction")
 public class OpenIncidentHandler {
 
 	public static final String UUID_PARAM = "incidentUuid"; //$NON-NLS-1$

@@ -19,10 +19,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.incident.xml;
+package org.wcs.smart.smartcollect.xml;
 
 import java.io.BufferedOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -31,18 +33,26 @@ import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.incident.IIncidentXmlExporter;
-import org.wcs.smart.incident.IncidentPlugIn;
-import org.wcs.smart.incident.internal.Messages;
-import org.wcs.smart.incident.xml.model.v21.WaypointType;
+import org.wcs.smart.incident.xml.IncidentXmlManager;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.smartcollect.SmartCollectPlugIn;
+import org.wcs.smart.smartcollect.internal.Messages;
+import org.wcs.smart.smartcollect.model.SmartCollectWaypoint;
+import org.wcs.smart.smartcollect.xml.model.ObjectFactory;
+import org.wcs.smart.smartcollect.xml.model.WaypointType;
 import org.wcs.smart.util.ZipUtil;
 
 /**
@@ -79,13 +89,14 @@ public class IncidentExporter implements IIncidentXmlExporter{
 	 * @throws Exception 
 	 */
 	public Path exportIncident(Waypoint incident, Path file, boolean includeAttachments, IProgressMonitor monitor) throws Exception{
-		monitor.beginTask(Messages.IncidentExporter_ExportProgress, includeAttachments ? 4 : 2);
+		monitor.beginTask(Messages.IncidentExporter_progress1, includeAttachments ? 4 : 2);
 		Session session = HibernateManager.openSession();
 		try {
 			session.refresh(incident);
+			SmartCollectWaypoint wp = session.get(SmartCollectWaypoint.class, incident.getUuid());
 			
-			monitor.subTask(Messages.IncidentExporter_ExportProgress1);
-			WaypointType xml = IncidentToXml.toXml(incident);
+			monitor.subTask(Messages.IncidentExporter_progress2);
+			WaypointType xml = IncidentToXml.toXml(wp);
 			monitor.worked(1);
 			
 			if (!includeAttachments){
@@ -106,12 +117,24 @@ public class IncidentExporter implements IIncidentXmlExporter{
 	 * Writes the incident without including attachments
 	 */
 	private static Path exportIncidentWithoutAttachments(WaypointType xml, Path file, IProgressMonitor monitor) throws Exception {
-		monitor.subTask(Messages.IncidentExporter_ExportProgress2);
+		monitor.subTask(Messages.IncidentExporter_progress3);
 		try (BufferedOutputStream out = new BufferedOutputStream(Files.newOutputStream(file))){
-			IncidentXmlManager.writeIncident(xml, out);
+			writeIncident(xml, out);
 		}
 		monitor.worked(1);
 		return file;
+	}
+	
+	
+	private static void writeIncident(WaypointType type, OutputStream file) throws JAXBException, IOException{
+		JAXBContext context = JAXBContext.newInstance("org.wcs.smart.smartcollect.xml.model"); //$NON-NLS-1$
+		Marshaller marshaller = context.createMarshaller();
+		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+		
+		ObjectFactory objFactor = new ObjectFactory();
+		
+		JAXBElement<WaypointType> element = objFactor.createWaypoint(type);
+		marshaller.marshal(element, file);
 	}
 	
 	/**
@@ -127,7 +150,7 @@ public class IncidentExporter implements IIncidentXmlExporter{
 		exportIncidentWithoutAttachments(xml, xmlFile, monitor);
 		
 		
-		monitor.subTask(Messages.IncidentExporter_ExportProgress3);
+		monitor.subTask(Messages.IncidentExporter_progress4);
 		//create zip file
 		Path zipFile = f.getParent().resolve(name + ".zip"); //$NON-NLS-1$
 		try (ZipOutputStream zout = new ZipOutputStream(Files.newOutputStream(zipFile))){
@@ -170,7 +193,7 @@ public class IncidentExporter implements IIncidentXmlExporter{
         	//delete temp file
         	Files.delete(xmlFile);
         }catch(Exception ex){
-        	IncidentPlugIn.log(null, ex);
+        	SmartCollectPlugIn.log(ex.getMessage(), ex);
         }
         
         return zipFile;

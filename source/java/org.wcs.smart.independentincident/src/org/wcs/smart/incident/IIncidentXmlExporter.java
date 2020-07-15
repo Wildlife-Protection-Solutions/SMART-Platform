@@ -21,55 +21,47 @@
  */
 package org.wcs.smart.incident;
 
-import org.eclipse.swt.graphics.Image;
-import org.hibernate.Session;
-import org.wcs.smart.incident.internal.Messages;
-import org.wcs.smart.incident.ui.IncidentEditor;
-import org.wcs.smart.incident.xml.IncidentExporter;
-import org.wcs.smart.incident.xml.IncidentImporter;
+import java.nio.file.Path;
+
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.util.SmartUtils;
+
 /**
- * Incident provider for Independent Incidents
+ * Interface for incident xml exporters for plugins that
+ * contribute additional incidents
  * 
  * @author Emily
+ * @since 7.0.0
  *
  */
-public class IndependentIncidentProvider implements IIncidentProvider {
+public interface IIncidentXmlExporter {
 
-	@Override
-	public String getWaypointSourceKey() {
-		return IndepedentIncidentSource.KEY;
+	/**
+	 * Determines the output file name for incident export
+	 * based on given input file and if attachments are included.
+	 * 
+	 * @param dir
+	 * @param name
+	 * @param includeAttributes
+	 * @return
+	 */
+	public static Path getOutputFile(Path dir, String name, boolean includeAttachs) throws Exception {
+		name = SmartUtils.getFileName(name);
+		String ext = includeAttachs ? ".zip" : ".xml"; //$NON-NLS-1$ //$NON-NLS-2$
+		return dir.resolve(name + ext);
 	}
 	
-	@Override
-	public String getName() {
-		return Messages.IndependentIncidentProvider_IndependentIncidentName;
-	}
-
-	@Override
-	public Image getImage() {
-		return IncidentPlugIn.getDefault().getImageRegistry().get(IncidentPlugIn.INCIDENT_ICON);
-	}
-
-
-	@Override
-	public String getEditorID() {
-		return IncidentEditor.ID;
-	}
-
-	@Override
-	public void waypointCreated(Waypoint wp, Session session) {
-
-	}
-
-	@Override
-	public IIncidentXmlExporter getXmlExporter() {
-		return IncidentExporter.INSTANCE;
-	}
-
-	@Override
-	public IIncidentXmlImporter getXmlImporter() {
-		return IncidentImporter.INSTANCE;
-	}
+	/**
+	 * Exports the given waypoint to the file.
+	 * 
+	 * @param incident
+	 * @param file
+	 * @param includeAttachments
+	 * @param monitor
+	 * @return
+	 * @throws Exception
+	 */
+	public Path exportIncident(Waypoint incident, Path file, boolean includeAttachments, IProgressMonitor monitor) throws Exception;
 
 }

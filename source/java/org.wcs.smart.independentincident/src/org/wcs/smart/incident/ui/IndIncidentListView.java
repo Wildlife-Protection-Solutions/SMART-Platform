@@ -180,6 +180,8 @@ public class IndIncidentListView implements IIncidentFilteringView {
 
 	@PostConstruct
 	public void createPartControl(Composite parent) {
+		localPart.getContext().set(IncidentFilter.class, filter);
+		
 		((FillLayout)parent.getLayout()).marginHeight = 0;
 		((FillLayout)parent.getLayout()).marginWidth = 0;
 		

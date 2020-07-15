@@ -25,11 +25,15 @@ import org.eclipse.swt.graphics.Image;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.incident.IIncidentProvider;
+import org.wcs.smart.incident.IIncidentXmlExporter;
+import org.wcs.smart.incident.IIncidentXmlImporter;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.smartcollect.internal.Messages;
 import org.wcs.smart.smartcollect.model.SmartCollectWaypoint;
 import org.wcs.smart.smartcollect.model.SmartCollectWaypointSource;
 import org.wcs.smart.smartcollect.ui.SmartCollectIncidentEditor;
+import org.wcs.smart.smartcollect.xml.IncidentExporter;
+import org.wcs.smart.smartcollect.xml.IncidentImporter;
 
 /**
  * Incident provider for SMARTCollect incidents
@@ -66,6 +70,16 @@ public class SmartCollectIncidentProvider implements IIncidentProvider {
 		cm.setSource(SmartDB.getCurrentEmployee().getSmartUserId() + " [SMART]"); //$NON-NLS-1$
 		cm.setWaypoint(wp);
 		session.save(cm);
+	}
+
+	@Override
+	public IIncidentXmlExporter getXmlExporter() {
+		return IncidentExporter.INSTANCE;
+	}
+
+	@Override
+	public IIncidentXmlImporter getXmlImporter() {
+		return IncidentImporter.INSTANCE;		
 	}
 
 }
