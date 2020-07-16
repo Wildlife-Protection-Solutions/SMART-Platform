@@ -431,8 +431,13 @@ CREATE TRIGGER trg_paws_parameter AFTER INSERT OR UPDATE OR DELETE ON smart.paws
 ---- Observation Groups -----
 CREATE TABLE smart.wp_observation_group (uuid uuid not null, wp_uuid uuid not null, primary key (uuid));
 INSERT INTO smart.wp_observation_group (uuid, wp_uuid) SELECT uuid_generate_v4(), uuid FROM smart.waypoint WHERE uuid in (SELECT o.wp_uuid FROM smart.wp_observation o);
+
+CREATE TABLE smart.wp_observation_temp (uuid uuid not null, wp_group_uuid uuid not null, primary key (uuid))
+INSERT INTO smart.wp_observation_temp (uuid, wp_group_uuid) SELECT a.uuid, b.uuid FROM smart.wp_observation a JOIN smart.wp_observation_group b on b.wp_uuid = a.wp_uuid
 ALTER TABLE smart.wp_observation ADD COLUMN wp_group_uuid uuid;
-UPDATE smart.wp_observation SET wp_group_uuid = (select a.uuid from smart.wp_observation_group a where a.wp_uuid = smart.wp_observation.wp_uuid);
+UPDATE smart.wp_observation set wp_group_uuid = a.wp_group_uuid FROM smart.wp_observation_temp a WHERE a.uuid = smart.wp_observation.uuid;
+DROP table smart.wp_observation_temp;
+
 ALTER table smart.wp_observation drop column wp_uuid;
 ALTER table smart.wp_observation_group ADD FOREIGN KEY (wp_uuid) REFERENCES smart.waypoint (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER table smart.wp_observation ADD FOREIGN KEY (wp_group_uuid) REFERENCES smart.wp_observation_group (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
