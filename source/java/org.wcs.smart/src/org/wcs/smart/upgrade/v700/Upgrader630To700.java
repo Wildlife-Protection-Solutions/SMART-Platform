@@ -151,15 +151,18 @@ public class Upgrader630To700 implements IDatabaseUpgrader {
 				
 				"INSERT INTO smart.wp_observation_group (uuid, wp_uuid) SELECT smart.tempuuid(), uuid FROM smart.waypoint WHERE uuid in (SELECT wp_uuid FROM smart.wp_observation)", //$NON-NLS-1$
 				
-				"ALTER TABLE smart.wp_observation ADD COLUMN wp_group_uuid char(16) for bit data", //$NON-NLS-1$
-				"UPDATE smart.wp_observation SET wp_group_uuid = (select a.uuid from smart.wp_observation_group a where a.wp_uuid = smart.wp_observation.wp_uuid)", //$NON-NLS-1$
-				"alter table smart.wp_observation drop column wp_uuid", //$NON-NLS-1$
+				//make a temp table
+				"CREATE TABLE smart.wp_observation_temp (uuid char(16) for bit data not null, wp_group_uuid char(16) for bit data not null, category_uuid char(16) for bit data not null, employee_uuid char(16) for bit data, primary key (uuid))", //$NON-NLS-1$
+				//insert data
+				"INSERT INTO smart.wp_observation_temp (uuid, wp_group_uuid, category_uuid, employee_uuid) select a.uuid, b.uuid, a.category_uuid, a.employee_uuid from smart.wp_observation a join smart.wp_observation_group b on b.wp_uuid = a.wp_uuid", //$NON-NLS-1$
+				"ALTER TABLE smart.WP_OBSERVATION_ATTRIBUTES drop constraint obs_attribute_obs_uuid_fk", //$NON-NLS-1$
+				"ALTER TABLE smart.OBSERVATION_ATTACHMENT drop constraint OBSERVATION_ATTACHMENT_OBS_UUID_FK", //$NON-NLS-1$
+				"DROP TABLE smart.WP_OBSERVATION", //$NON-NLS-1$
+				"RENAME TABLE smart.WP_OBSERVATION_TEMP to wp_observation", //$NON-NLS-1$
 				
 				//configure foreign keys - note we have to drop and recreate most of them to ensure 
 				//they are created correctly
-				"alter table smart.WP_OBSERVATION drop constraint obs_employee_uuid_fk", //$NON-NLS-1$
-				"alter table smart.WP_OBSERVATION drop constraint observation_category_uuid_fk", //$NON-NLS-1$
-
+				
 				"alter table smart.DM_CATEGORY drop constraint dm_category_ca_uuid_fk", //$NON-NLS-1$
 				"alter table smart.DM_ATTRIBUTE drop constraint dm_attribute_ca_uuid_fk", //$NON-NLS-1$
 
@@ -178,7 +181,9 @@ public class Upgrader630To700 implements IDatabaseUpgrader {
 				"ALTER table smart.wp_observation_group ADD CONSTRAINT wo_obs_grp_wp_uuid_fk FOREIGN KEY (wp_uuid) REFERENCES smart.waypoint (uuid) ON UPDATE RESTRICT ON DELETE CASCADE  DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 				"alter table smart.wp_observation add constraint obs_employee_uuid_fk foreign key (employee_uuid) REFERENCES smart.employee (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT  DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 				"alter table smart.wp_observation add constraint observation_category_uuid_fk foreign key (category_uuid) REFERENCES smart.dm_category (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT  DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
-
+				"ALTER TABLE SMART.OBSERVATION_ATTACHMENT ADD CONSTRAINT OBSERVATION_ATTACHMENT_OBS_UUID_FK FOREIGN KEY (OBS_UUID) REFERENCES SMART.WP_OBSERVATION(UUID)  ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"ALTER TABLE SMART.WP_OBSERVATION_ATTRIBUTES ADD CONSTRAINT OBS_ATTRIBUTE_OBS_UUID_FK FOREIGN KEY (OBSERVATION_UUID) REFERENCES SMART.WP_OBSERVATION(UUID)  ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				
 				"alter table smart.dm_category add constraint dm_category_ca_uuid_fk foreign key (ca_uuid) references smart.CONSERVATION_AREA(uuid) ON UPDATE NO ACTION ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 				"alter table smart.DM_ATTRIBUTE add constraint dm_attribute_ca_uuid_fk foreign key (ca_uuid) references smart.CONSERVATION_AREA(uuid) ON UPDATE NO ACTION ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 
