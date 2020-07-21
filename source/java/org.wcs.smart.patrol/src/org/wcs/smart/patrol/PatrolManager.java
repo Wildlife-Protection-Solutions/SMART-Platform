@@ -119,7 +119,7 @@ public class PatrolManager {
 	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility to call done() on the given monitor. Accepts null, indicating that no progress should be
 	 * @throws Exception if conservation area not deleted
 	 */
-	public boolean deletePatrol(UUID patrolUuid, IProgressMonitor monitor) throws Exception{
+	public boolean deletePatrol(UUID patrolUuid, boolean deleteWaypoints, IProgressMonitor monitor) throws Exception{
 		SubMonitor progress = SubMonitor.convert(monitor, MessageFormat.format(Messages.PatrolManager_Progress_DeletingPatrol1, new Object[]{UuidUtils.uuidToString(patrolUuid)}), 4);
 		
 		Patrol patrol = null;
@@ -142,11 +142,13 @@ public class PatrolManager {
 				}
 				progress.subTask(Messages.PatrolManager_Progress_SubDeletingPatrol);
 				
-				//waypoint deletion is not cascaded; we must delete this explicitly
-				for (PatrolLeg pl : patrol.getLegs()){
-					for (PatrolLegDay pld : pl.getPatrolLegDays()){
-						for (PatrolWaypoint pw : pld.getWaypoints()){
-							session.delete(pw.getWaypoint());
+				if(deleteWaypoints) {
+					//waypoint deletion is not cascaded; we must delete this explicitly
+					for (PatrolLeg pl : patrol.getLegs()){
+						for (PatrolLegDay pld : pl.getPatrolLegDays()){
+							for (PatrolWaypoint pw : pld.getWaypoints()){
+								session.delete(pw.getWaypoint());
+							}
 						}
 					}
 				}

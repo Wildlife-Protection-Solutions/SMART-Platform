@@ -114,7 +114,7 @@ public class DeletePatrolHandler {
 					SubMonitor progress = SubMonitor.convert(monitor, Messages.DeletePatrolHandler_ProgressTaskName, toDelete.size());
 					for (PatrolEditorInput delete : toDelete){
 						try {
-							if (PatrolManager.getInstance().deletePatrol(delete.getUuid(), progress.split(1))){
+							if (PatrolManager.getInstance().deletePatrol(delete.getUuid(), true, progress.split(1))){
 								deleted++;
 							}
 						}catch (Exception ex){

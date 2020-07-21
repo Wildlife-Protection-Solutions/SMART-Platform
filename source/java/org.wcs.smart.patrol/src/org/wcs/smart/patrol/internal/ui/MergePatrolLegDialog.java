@@ -24,9 +24,10 @@ package org.wcs.smart.patrol.internal.ui;
 
 import java.sql.Time;
 import java.text.Collator;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -246,36 +247,24 @@ public class MergePatrolLegDialog extends SmartStyledTitleDialog{
 		newLeg = new PatrolLeg();
 		newLeg.setId(txtLegId.getText());
 		
-
 		//get date from all legs to be merged
-		Date endDate;
-		Date startDate;
+		Date startDate = null;
+		Date endDate = null;
 		ArrayList<PatrolLegMember> allMembers = new ArrayList<PatrolLegMember>();
-
-		Calendar cal = Calendar.getInstance();
-		cal.set(Calendar.YEAR, 2200);
-		cal.set(Calendar.MONTH, Calendar.JANUARY);
-		cal.set(Calendar.DAY_OF_MONTH, 1);
-		startDate = cal.getTime(); 
-
-		cal.set(Calendar.YEAR, 1900);
-		cal.set(Calendar.MONTH, Calendar.JANUARY);
-		cal.set(Calendar.DAY_OF_MONTH, 1);
-		endDate = cal.getTime();
-
 
 		//gather start date and member type data from list of legs.
 		for(PatrolLeg l : legsToMerge){
-			if(l.getStartDate().before(startDate)) startDate = l.getStartDate();
-			if(l.getEndDate().after(endDate)) endDate = l.getEndDate();
-			List<PatrolLegMember> members = l.getMembers();
+			if(startDate == null || l.getStartDate().before(startDate)) startDate = l.getStartDate();
+			if(endDate == null || l.getEndDate().after(endDate)) endDate = l.getEndDate();
 
-			
-			for(PatrolLegMember m : members){
+			for(PatrolLegMember m : l.getMembers()){
 				//check if this employee is already in the list
 				boolean duplicate = false;
 				for(PatrolLegMember existing : allMembers){
-					if(existing.getMember().equals(m.getMember()))duplicate = true;
+					if(existing.getMember().equals(m.getMember())) {
+						duplicate = true;
+						break;
+					}
 				}
 				if(!duplicate){
 					PatrolLegMember plm = new PatrolLegMember();
@@ -286,7 +275,6 @@ public class MergePatrolLegDialog extends SmartStyledTitleDialog{
 					Employee e = (Employee) selected.getFirstElement();
 					if(plm.getMember().equals( e ) ){
 						plm.setIsLeader(true);
-						//newLeg.setLeader(plm);
 					}
 					
 					if(groupPilot != null){
@@ -294,14 +282,12 @@ public class MergePatrolLegDialog extends SmartStyledTitleDialog{
 					}
 					if(groupPilot != null && (plm.getMember().equals( e ) )){
 						plm.setIsPilot(true);
-						//newLeg.setPilot(plm);
 					}
 					allMembers.add(plm);
 				}
 			}
 		}
-		
-		
+			
 		//set the start and end date to the earliest and latest of all legs we are merging
 		newLeg.setStartDate(startDate);
 		newLeg.setEndDate(endDate);
@@ -311,13 +297,11 @@ public class MergePatrolLegDialog extends SmartStyledTitleDialog{
 		StructuredSelection selected = (StructuredSelection) cmbTransportTypes.getSelection();
 		newLeg.setType((PatrolTransportType)selected.getFirstElement());
 		
-		
-		
 		//Create a new list of merged PatrolLegDays
 		
 		//Put all the PatrolLegDays in a single list
 		ArrayList<PatrolLegDay> pldsToMerge = new ArrayList<PatrolLegDay>();
-		for(PatrolLeg l : legsToMerge){
+		for(PatrolLeg l : legsToMerge) {
 			List<PatrolLegDay> legDays = l.getPatrolLegDays();
 			if(legDays != null){
 				for(PatrolLegDay ld: legDays){
@@ -325,62 +309,46 @@ public class MergePatrolLegDialog extends SmartStyledTitleDialog{
 				}
 			}
 		}
-		//get the range of days we need to create for the new list
-		Date e;
-		Date s;
-
-		cal.set(Calendar.YEAR, 2200);
-		cal.set(Calendar.MONTH, Calendar.JANUARY);
-		cal.set(Calendar.DAY_OF_MONTH, 1);
-		s = cal.getTime(); 
-
-		cal.set(Calendar.YEAR, 1900);
-		cal.set(Calendar.MONTH, Calendar.JANUARY);
-		cal.set(Calendar.DAY_OF_MONTH, 1);
-		e = cal.getTime();
+		// determine the range of days we need to create for the new list
+		Date s = null;
+		Date e = null;		
 		for(PatrolLegDay  pld : pldsToMerge){
-			if(pld.getDate().before(s))s = pld.getDate();
-			if(pld.getDate().after(e))e = pld.getDate();
+			if(s == null || pld.getDate().before(s))s = pld.getDate();
+			if(e == null || pld.getDate().after(e))e = pld.getDate();
 		}
-
-		int days = (int)( (e.getTime() - s.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+		LocalDate curDay = LocalDate.ofInstant(s.toInstant(), ZoneId.systemDefault());
+		LocalDate lastDay = LocalDate.ofInstant(e.toInstant(), ZoneId.systemDefault());
 		
 		ArrayList<PatrolLegDay> newDays = new ArrayList<PatrolLegDay>();
-		for(int day=0; day< days; day++){
+		for(;!curDay.isAfter(lastDay); curDay = curDay.plusDays(1)) {
 			PatrolLegDay newpld = new PatrolLegDay();
-			Calendar c = Calendar.getInstance();
-			c.setTime(s);
-		    c.add(Calendar.DATE, day);  // number of days to add 
-			newpld.setDate(c.getTime());
+			
+			newpld.setDate(java.sql.Date.valueOf(curDay));
 			newpld.setPatrolLeg(newLeg);
 
+			Time st = null;
+			Time et = null;
+			ArrayList<PatrolLegDay> todaysPlds = new ArrayList<PatrolLegDay>();
 			
-			cal.set(Calendar.HOUR_OF_DAY, 23);
-			cal.set(Calendar.MINUTE, 59);
-			cal.set(Calendar.SECOND, 59);
-			
-			Time st = new Time(cal.getTime().getTime());
-
-			cal.set(Calendar.HOUR_OF_DAY, 0);
-			cal.set(Calendar.MINUTE, 0);
-			cal.set(Calendar.SECOND, 1);
-			Time et = new Time(cal.getTime().getTime());
-
 			int totalRestTime = 0;
 			for(PatrolLegDay  pld : pldsToMerge){
-				if(pld.getStartTime().before(st))st = pld.getStartTime();
-				if(pld.getEndTime().after(et))et = pld.getEndTime();
-				if(pld.getRestMinutes() != null)totalRestTime += pld.getRestMinutes();
+				// check if the pld is on the day we are currently doing
+				LocalDate d = LocalDate.ofInstant(pld.getDate().toInstant(), ZoneId.systemDefault());
+				if(curDay.equals(d)) {
+					todaysPlds.add(pld);
+					if(st == null || pld.getStartTime().before(st)) st = pld.getStartTime();
+					if(et == null || pld.getEndTime().after(et)) et = pld.getEndTime();
+					if(pld.getRestMinutes() != null) totalRestTime += pld.getRestMinutes();
+				}
 			}
 			
-			newpld.setEndTime(et);
-			newpld.setRestMinutes(totalRestTime);
 			newpld.setStartTime(st);
-			
+			newpld.setEndTime(et);
+			newpld.setRestMinutes(totalRestTime);			
 			
 			ArrayList<byte[]> allTracks = new ArrayList<byte[]>();
 			ArrayList<PatrolWaypoint> allWaypoints = new ArrayList<PatrolWaypoint>();
-			for(PatrolLegDay  pld : pldsToMerge){
+			for(PatrolLegDay pld : todaysPlds){
 				if(pld.getWaypoints() != null){
 					for(PatrolWaypoint wp : pld.getWaypoints() ){
 						PatrolWaypoint pw = new PatrolWaypoint();

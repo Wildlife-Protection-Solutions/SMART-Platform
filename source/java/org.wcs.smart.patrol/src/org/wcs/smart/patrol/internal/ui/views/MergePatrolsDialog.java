@@ -310,7 +310,7 @@ public class MergePatrolsDialog extends SmartStyledTitleDialog {
 					progress.setWorkRemaining(patrolsToMerge.size());
 					for (Patrol p: patrolsToMerge){
 						try {
-							PatrolManager.getInstance().deletePatrol(p.getUuid(), progress.split(1));
+							PatrolManager.getInstance().deletePatrol(p.getUuid(), false, progress.split(1));
 						} catch (Exception e) {
 							SmartPatrolPlugIn.displayLog(
 									Messages.DeletePatrolHandler_Error_CouldNotDeletePatrol, e);
