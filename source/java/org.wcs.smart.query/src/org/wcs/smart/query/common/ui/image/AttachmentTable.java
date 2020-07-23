@@ -44,7 +44,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.wcs.smart.query.common.engine.IDesktopPagedImageResultSet;
 import org.wcs.smart.query.common.engine.IPagedImageResultSet;
-import org.wcs.smart.query.common.engine.IQueryImageData;
+import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 import org.wcs.smart.ui.Thumbnail;
 import org.wcs.smart.util.SmartUtils;
 
@@ -89,7 +89,7 @@ public class AttachmentTable extends Composite implements Listener {
 				if (currentIndex > resultSet.getImageCount()) {
 					break;
 				}
-				List<IQueryImageData> items = resultSet.getImageData(currentIndex, pageSize);
+				List<IAttachmentResultItem> items = resultSet.getImageData(currentIndex, pageSize);
 				currentIndex += pageSize;
 				//create spaces for remaining images
 
@@ -282,8 +282,8 @@ public class AttachmentTable extends Composite implements Listener {
 	/*
 	 * get selected attachments
 	 */
-	public List<IQueryImageData> getSelection(){
-		List<IQueryImageData> sel = new ArrayList<IQueryImageData>();
+	public List<IAttachmentResultItem> getSelection(){
+		List<IAttachmentResultItem> sel = new ArrayList<IAttachmentResultItem>();
 		for (ThumbnailComposite.ThumbInfo t : thumb.thumbs){
 			if (t.isSelected) sel.add(t.file);
 		}
@@ -344,11 +344,11 @@ public class AttachmentTable extends Composite implements Listener {
 			setLayout(gl);
 		}
 		
-		public void addFiles(List<IQueryImageData> fileNames) {
+		public void addFiles(List<IAttachmentResultItem> fileNames) {
 			if (thumbs == null){
 				thumbs = new ArrayList<AttachmentTable.ThumbnailComposite.ThumbInfo>();
 			}
-			for (IQueryImageData a : fileNames){
+			for (IAttachmentResultItem a : fileNames){
 				thumbs.add(new ThumbInfo(a));
 			}
 			int index = 0;
@@ -392,7 +392,7 @@ public class AttachmentTable extends Composite implements Listener {
 		
 		private class ThumbInfo implements Listener{
 			private static final String LAST_SELECTION_INDEX_KEY = "last_selection_index"; //$NON-NLS-1$
-			IQueryImageData file;
+			IAttachmentResultItem file;
 			Thumbnail thumb;
 //			String tooltip;
 			Composite thumbGui;
@@ -401,7 +401,7 @@ public class AttachmentTable extends Composite implements Listener {
 			boolean mouseOver;
 			int index;
 			
-			public ThumbInfo(IQueryImageData file){
+			public ThumbInfo(IAttachmentResultItem file){
 				this.file = file;
 //				tooltip = file.getHeaderString();
 			}

@@ -39,7 +39,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.WaypointAttachment;
-import org.wcs.smart.query.common.engine.IQueryImageData;
+import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.IQueryResultInfoProvider;
 
@@ -81,12 +81,12 @@ public class AssetResultInfoProvider implements IQueryResultInfoProvider {
 		try(Session s = HibernateManager.openSession()){
 			if (resultItem instanceof AssetQueryResultItem) {
 				wpUuid = ((AssetQueryResultItem)resultItem).getWaypointUuid();
-			}else if (resultItem instanceof IQueryImageData) {
-				ObservationAttachment a = s.get(ObservationAttachment.class, ((IQueryImageData)resultItem).getAttachment().getUuid());
+			}else if (resultItem instanceof IAttachmentResultItem) {
+				ObservationAttachment a = s.get(ObservationAttachment.class, ((IAttachmentResultItem)resultItem).getAttachment().getUuid());
 				if (a != null) {
 					wpUuid = a.getObservation().getWaypoint().getUuid();
 				}else {
-					WaypointAttachment wa = s.get(WaypointAttachment.class, ((IQueryImageData)resultItem).getAttachment().getUuid());
+					WaypointAttachment wa = s.get(WaypointAttachment.class, ((IAttachmentResultItem)resultItem).getAttachment().getUuid());
 					if (wa != null) wpUuid = wa.getWaypoint().getUuid();
 				}
 			}

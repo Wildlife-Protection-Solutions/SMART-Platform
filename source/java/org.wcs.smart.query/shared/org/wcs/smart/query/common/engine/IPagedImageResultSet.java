@@ -21,7 +21,10 @@
  */
 package org.wcs.smart.query.common.engine;
 
+import java.sql.SQLException;
 import java.util.List;
+
+import org.hibernate.Session;
 
 /**
  * Interface for queries that also return a set of attachments associated
@@ -33,14 +36,34 @@ import java.util.List;
 public interface IPagedImageResultSet {
 
 	/**
-	 * Gets all data starting from the given offset
+	 * Gets all attachments starting from the given offset
 	 * for the given page size.
+	 * 
+	 * This is used by the ui and the result item doesn't
+	 * need to include all the observation information.
 	 * 
 	 * @param offset
 	 * @param pageSize
 	 * @return
 	 */
-	public List<IQueryImageData> getImageData(int offset, int pageSize);
+	public List<IAttachmentResultItem> getImageData(int offset, int pageSize);
+
+	
+	/**
+	 * Gets an iterator that iterates over all the
+	 * attachments in a result set.
+	 * 
+	 * This is used by the reports the the associated
+	 * resultitems should generally include all the
+	 * observation details including the attachment.
+	 * 
+	 * @param session
+	 * @return
+	 * @throws SQLException
+	 */
+	public default IQueryResultSetIterator<? extends IAttachmentResultItem> getImageIterator(Session session) throws SQLException{
+		return null;
+	}
 
 	/**
 	 * 

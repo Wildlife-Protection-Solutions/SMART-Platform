@@ -73,6 +73,7 @@ import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolGridQueryDefinition;
 import org.wcs.smart.patrol.query.model.PatrolGridQueryDefinition.ZeroFilterOption;
 import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
+import org.wcs.smart.patrol.query.model.PatrolQueryAttachmentResultItem;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.PatrolValueOption;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItem;
@@ -857,8 +858,14 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 	@Override
 	protected PatrolQueryResultItem asQueryResultItem(ResultSet rs, Session session)
 			throws SQLException {
-		return null;
+		throw new UnsupportedOperationException();
 	}
+	
+	@Override
+	protected PatrolQueryAttachmentResultItem asQueryAttachmentResultItem(ResultSet rs, Session session) throws SQLException{
+		throw new UnsupportedOperationException();
+	}
+
 
 	@Override
 	public Session getCurrentConnection() {

@@ -67,6 +67,7 @@ import org.wcs.smart.er.query.filter.summary.SamplingUnitGroupBy;
 import org.wcs.smart.er.query.filter.summary.SurveyIdGroupBy;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.internal.SurveyValueItemLabelProvider;
+import org.wcs.smart.er.query.model.SurveyQueryAttachmentResultItem;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.er.query.model.SurveySummaryQuery;
 import org.wcs.smart.er.query.ui.dropitems.SurveyDropItemFactory;
@@ -945,6 +946,9 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 					case KEY:
 						key += ":" + rs.getString(rsindex++); //$NON-NLS-1$
 						break;
+					case TIME:
+						throw new UnsupportedOperationException("TIME attribute not supports in summary values"); //$NON-NLS-1$
+				
 				}
 				groupby[i] = key;
 			}
@@ -1630,6 +1634,13 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 	@Override
 	protected SurveyQueryResultItem asQueryResultItem(ResultSet rs, Session session)
 			throws SQLException {
+		return null;
+	}
+	
+	@Override
+	protected SurveyQueryAttachmentResultItem asQueryAttachmentResultItem(ResultSet rs, Session session)
+			throws SQLException {
+		
 		return null;
 	}
 

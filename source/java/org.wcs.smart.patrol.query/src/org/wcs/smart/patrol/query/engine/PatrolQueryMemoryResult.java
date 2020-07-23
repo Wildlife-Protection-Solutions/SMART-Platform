@@ -72,7 +72,7 @@ public class PatrolQueryMemoryResult extends MemoryQueryResult<PatrolQueryResult
 		try{
 			pmd.run(true, false, m->{
 				try{
-					if (!PatrolManager.getInstance().deletePatrol(patrolUuid, m)){
+					if (!PatrolManager.getInstance().deletePatrol(patrolUuid, true, m)){
 						error[0] = new Exception(Messages.PatrolQueryMemoryResult_DeleteError);
 					}
 				}catch (Exception ex){

@@ -33,7 +33,7 @@ import org.wcs.smart.asset.query.model.AssetWaypointQuery;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.WaypointAttachment;
-import org.wcs.smart.query.common.engine.IQueryImageData;
+import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.ui.QueryResultsEditor;
 import org.wcs.smart.query.common.ui.ShowInTableInfoProvider;
@@ -46,14 +46,14 @@ public class AssetQueryShowInTableResultProvider extends ShowInTableInfoProvider
 	 */
 	@Override
 	public void doWork(IResultItem resultItem) {
-		if (resultItem instanceof IQueryImageData) {
+		if (resultItem instanceof IAttachmentResultItem) {
 			UUID wpUuid = null;
 			UUID obsUuid = null;
 			try(Session s = HibernateManager.openSession()){
-				ObservationAttachment a = s.get(ObservationAttachment.class, ((IQueryImageData)resultItem).getAttachment().getUuid());
+				ObservationAttachment a = s.get(ObservationAttachment.class, ((IAttachmentResultItem)resultItem).getAttachment().getUuid());
 				if (a == null) {
 					//waypoint attachment
-					WaypointAttachment wa = s.get(WaypointAttachment.class, ((IQueryImageData)resultItem).getAttachment().getUuid());
+					WaypointAttachment wa = s.get(WaypointAttachment.class, ((IAttachmentResultItem)resultItem).getAttachment().getUuid());
 					wpUuid = wa.getWaypoint().getUuid();
 					//pick a random observation to zoom to
 					if (!wa.getWaypoint().getObservationGroups().isEmpty() && !wa.getWaypoint().getObservationGroups().get(0).getObservations().isEmpty()) {

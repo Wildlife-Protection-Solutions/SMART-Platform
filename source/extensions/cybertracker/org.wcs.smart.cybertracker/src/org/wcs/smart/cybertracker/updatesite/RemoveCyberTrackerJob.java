@@ -23,7 +23,6 @@ package org.wcs.smart.cybertracker.updatesite;
 
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -36,6 +35,7 @@ import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Job removes all CyberTracker related tabled from the database and files from filestore
@@ -79,7 +79,7 @@ public class RemoveCyberTrackerJob extends Job {
 				}		
 				//clean filestore
 				for (ConservationArea ca : caList) {
-					FileUtils.deleteDirectory(ICyberTrackerConstants.getDowloadFolder(ca).toFile());
+					SmartUtils.deleteDirectory(ICyberTrackerConstants.getDowloadFolder(ca));
 				}
 				HibernateManager.setPlugInVersion(CyberTrackerPlugIn.PLUGIN_ID, null, session);
 				session.getTransaction().commit();

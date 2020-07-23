@@ -21,7 +21,9 @@
  */
 package org.wcs.smart.plan.ui.handlers;
 
-import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
@@ -29,6 +31,7 @@ import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.report.PlanReportPerspective;
 import org.wcs.smart.plan.report.ReportPlan;
@@ -49,12 +52,15 @@ public class RevertPlanTemplate {
 				Messages.RevertPlanTemplate_OverwriteTemplateWarningMessage);
 		if (!revert) return;
 
-		File customTemplate = ReportPlan.getCustomPlanTemplateLocation();
+		Path customTemplate = ReportPlan.getCustomPlanTemplateLocation();
 		if (customTemplate == null) return;
 		
 		boolean open = ReportPlan.closeTemplateEditor();
 		//delete
-		if (!ReportPlan.getCustomPlanTemplateLocation().delete()){
+		try {
+			Files.delete(ReportPlan.getCustomPlanTemplateLocation());
+		}catch (IOException ex) {
+			SmartPlugIn.log(ex.getMessage(), ex);
 			MessageDialog.openError(activeShell, 
 					Messages.RevertPlanTemplate_Error, 
 					Messages.RevertPlanTemplate_ErrorRevertingTemplate);

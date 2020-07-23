@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.plan.report;
 
-import java.io.File;
+import java.nio.file.Path;
 
 import org.eclipse.birt.report.designer.internal.ui.editors.ReportEditorInput;
 /**
@@ -32,8 +32,8 @@ import org.eclipse.birt.report.designer.internal.ui.editors.ReportEditorInput;
  */
 public class ReportPlanEditorInput extends ReportEditorInput{
 
-	public ReportPlanEditorInput(File file) {
-		super(file);
+	public ReportPlanEditorInput(Path file) {
+		super(file.toAbsolutePath().normalize().toFile());
 	}
 	
 	public boolean equals(Object other){

@@ -21,6 +21,8 @@
  */
 package org.wcs.smart;
 
+import java.io.File;
+
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.ui.PlatformUI;
@@ -44,7 +46,6 @@ public class LogoutHandler {
 	 */
 	@Execute
 	public void execute()  {
-		
 //		try(Session session = HibernateManager.openSession()){
 //			session.beginTransaction();
 //			try {

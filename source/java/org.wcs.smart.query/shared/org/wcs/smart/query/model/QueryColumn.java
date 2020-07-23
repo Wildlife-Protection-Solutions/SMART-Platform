@@ -54,7 +54,8 @@ public abstract class QueryColumn implements Cloneable{
 		DATE("Date", java.sql.Types.DATE), //$NON-NLS-1$
 		DATETIME("Date", java.sql.Types.TIMESTAMP), //$NON-NLS-1$ 
 		TIME("Date", java.sql.Types.TIME), //$NON-NLS-1$
-		TIME_STR("String", java.sql.Types.VARCHAR); //$NON-NLS-1$
+		TIME_STR("String", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		BLOB("Blob", java.sql.Types.BLOB); //$NON-NLS-1$
 		
 		public String geotoolsType;
 		public int sqlType;

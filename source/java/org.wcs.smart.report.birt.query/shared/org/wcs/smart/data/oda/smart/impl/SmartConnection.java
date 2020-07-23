@@ -106,7 +106,13 @@ public abstract class SmartConnection implements IConnection {
 	
 	public abstract IQueryResult executeQuery(Query query) throws Exception;
 
-	protected abstract AbstractSmartBirtQuery createQuery();
+	/**
+	 * Creates a new query given the dataset type
+	 * 
+	 * @param dataSetType
+	 * @return
+	 */
+	protected abstract AbstractSmartBirtQuery createQuery(String dataSetType);
 	
 	public abstract SmartBirtTable findSmartBirtTable(String queryText) throws OdaException;
 	
@@ -175,8 +181,9 @@ public abstract class SmartConnection implements IConnection {
 	 */
 	public IQuery newQuery(String dataSetType) throws OdaException {
 		try {
-			if (dataSetType.equals(AbstractSmartBirtQuery.SMART_DATASET_TYPE)) {
-				return createQuery();
+			if (dataSetType.equals(AbstractSmartBirtQuery.SMART_DATASET_TYPE) || 
+				dataSetType.equals(AbstractSmartBirtQuery.SMART_ATTACHMENT_DATASET_TYPE)){ 
+				return createQuery(dataSetType);
 			}else if (dataSetType.equals(SmartTableQuery.SMART_DATASET_TYPE)){
 				return createTableQuery();
 			}

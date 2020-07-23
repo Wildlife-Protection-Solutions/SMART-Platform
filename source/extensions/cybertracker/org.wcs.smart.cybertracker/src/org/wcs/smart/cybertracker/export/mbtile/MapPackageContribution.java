@@ -26,7 +26,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.swt.SWT;
@@ -49,6 +48,7 @@ import org.wcs.smart.cybertracker.model.ICtPackage;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -131,7 +131,7 @@ public class MapPackageContribution implements IPackageContribution{
 		PackageContribution updates = new PackageContribution() {
 			@Override
 			public void cleanUp() throws IOException{
-				FileUtils.deleteDirectory(tempDir.toFile());
+				SmartUtils.deleteDirectory(tempDir);
 			}
 		};
 		

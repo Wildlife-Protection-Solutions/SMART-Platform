@@ -27,7 +27,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
@@ -36,6 +35,7 @@ import org.wcs.smart.connect.internal.CaConnectDeleteHandler;
 import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Manages the connect server instance.  
@@ -97,7 +97,7 @@ public enum ConnectServerManager {
 				Path fs = Paths.get(ca.getFileDataStoreLocation(), ConnectDatastore.CONNECT_FILESTORE_DIR);
 				if (Files.exists(fs)){
 					try{
-						FileUtils.forceDelete(fs.toFile());
+						SmartUtils.deleteDirectory(fs);
 					}catch (Exception ex){
 						ConnectPlugIn.log(ex.getMessage(), ex);
 					}

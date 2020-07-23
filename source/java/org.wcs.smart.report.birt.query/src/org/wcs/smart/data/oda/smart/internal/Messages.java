@@ -5,6 +5,8 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.data.oda.smart.internal.messages"; //$NON-NLS-1$
 	
+	public static String CustomDataSetWizardPage_PickQuery_Message;
+
 	public static String Report400Upgrader_ErrorMessage;
 	public static String Report400Upgrader_ErrorTitle;
 	public static String Report400Upgrader_IntelTemplateError;
@@ -17,6 +19,8 @@ public class Messages extends NLS {
 	public static String SmartDatasetMetadata_SmartDataSourceName;
 	public static String SmartQuery_QueryTypeNotSupported;
 	public static String SmartQuery_QueryTypeNotSupportedReports;
+
+	public static String SmartQueryAttachmentDatasetWizardPage_AttachmentsDatasetDefaultName;
 	public static String SmartMapItemCloner_CloneError;
 	public static String SmartMapItemCloner_CloningReportItem;
 

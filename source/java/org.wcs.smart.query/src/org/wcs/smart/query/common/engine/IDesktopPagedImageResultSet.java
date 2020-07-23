@@ -37,5 +37,5 @@ public interface IDesktopPagedImageResultSet extends IPagedImageResultSet{
 	 * @param data
 	 * @param parent
 	 */
-	public void createTooltip(IQueryImageData data, Composite parent);
+	public void createTooltip(IAttachmentResultItem data, Composite parent);
 }

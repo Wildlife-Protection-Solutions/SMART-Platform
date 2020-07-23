@@ -31,7 +31,7 @@ import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
-import org.wcs.smart.query.common.engine.IQueryImageData;
+import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
 
 /**
@@ -50,9 +50,9 @@ public class ObservationZoomToResultProvider extends AbstractZoomToInfoProvider 
 			zoomTo(item.getWaypointX(null), item.getWaypointY(null));
 			return;
 		}
-		if (resultItem instanceof IQueryImageData) {
+		if (resultItem instanceof IAttachmentResultItem) {
 			Waypoint wp = null;
-			IQueryImageData data = (IQueryImageData)resultItem;
+			IAttachmentResultItem data = (IAttachmentResultItem)resultItem;
 			try(Session s = HibernateManager.openSession()){
 				ObservationAttachment a = s.get(ObservationAttachment.class, data.getAttachment().getUuid());
 				if (a != null) {

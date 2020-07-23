@@ -84,10 +84,10 @@ public class SmartQueryDatasetWizardPage extends DataSetWizardPage {
 
 	public static final String DEFAULT_MESSAGE = Messages.CustomDataSetWizardPage_PickQuery_Message;
 
-	private TreeViewer queryTree;
-	private boolean hideUserQueries = false;
+	protected TreeViewer queryTree;
+	protected boolean hideUserQueries = false;
 	
-	private UUID init;
+	protected UUID init;
 	
 	private Job loadQueriesJob = new Job(Messages.CustomDataSetWizardPage_LoadQueryJobName) {
 	
@@ -101,7 +101,7 @@ public class SmartQueryDatasetWizardPage extends DataSetWizardPage {
 			for(Entry<UUID, List<QueryEditorInput>> qs : queries.entrySet()){
 				List<QueryEditorInput> newInput = new ArrayList<QueryEditorInput>();
 				for(QueryEditorInput in: qs.getValue()){
-					if (in.getType().supportsReports()){
+					if (canAddQuery(in)){
 						newInput.add(in);
 					}
 				}
@@ -167,8 +167,6 @@ public class SmartQueryDatasetWizardPage extends DataSetWizardPage {
 		super(pageName);
 		setTitle(pageName);
 		setMessage(DEFAULT_MESSAGE);
-		
-		
 	}
 
 	/**
@@ -301,7 +299,7 @@ public class SmartQueryDatasetWizardPage extends DataSetWizardPage {
 	 * Validates the user-defined value in the page control exists and not a
 	 * blank text. Set page message accordingly.
 	 */
-	private void validateData() {
+	protected void validateData() {
 		boolean isValid = true;
 		if (queryTree.getSelection().isEmpty()) {
 			isValid = false;
@@ -328,7 +326,6 @@ public class SmartQueryDatasetWizardPage extends DataSetWizardPage {
 	 */
 	private boolean hasValidData() {
 		validateData();
-
 		return canLeave();
 	}
 
@@ -374,7 +371,7 @@ public class SmartQueryDatasetWizardPage extends DataSetWizardPage {
 	 * Updates the given dataSetDesign with the queryText and its derived
 	 * metadata obtained from the ODA runtime connection.
 	 */
-	private void updateDesign(DataSetDesign dataSetDesign, IConnection conn,
+	protected void updateDesign(DataSetDesign dataSetDesign, IConnection conn,
 			QueryEditorInput smartQuery) throws OdaException {
 
 		//create dataests
@@ -426,7 +423,7 @@ public class SmartQueryDatasetWizardPage extends DataSetWizardPage {
 	 *            data set design instance to update
 	 * @throws OdaException
 	 */
-	private void updateResultSetDesign(IResultSetMetaData md,
+	protected void updateResultSetDesign(IResultSetMetaData md,
 			DataSetDesign dataSetDesign) throws OdaException {
 		ResultSetColumns columns = DesignSessionUtil
 				.toResultSetColumnsDesign(md);
@@ -453,7 +450,7 @@ public class SmartQueryDatasetWizardPage extends DataSetWizardPage {
 	 *            data set design instance to update
 	 * @throws OdaException
 	 */
-	private void updateParameterDesign(IParameterMetaData paramMd,
+	protected void updateParameterDesign(IParameterMetaData paramMd,
 			DataSetDesign dataSetDesign) throws OdaException {
 		
 		DataSetParameters paramDesign = DesignSessionUtil
@@ -491,4 +488,7 @@ public class SmartQueryDatasetWizardPage extends DataSetWizardPage {
 		}
 	}
 
+	protected boolean canAddQuery(QueryEditorInput in) {
+		return in.getType().supportsReports();
+	}
 }

@@ -37,6 +37,7 @@ import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.model.Track;
+import org.wcs.smart.patrol.query.model.PatrolQueryAttachmentResultItem;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.AbstractQueryEngine;
@@ -104,6 +105,18 @@ public abstract class DerbyPatrolQueryEngine extends AbstractQueryEngine impleme
 	 * @throws SQLException
 	 */
 	protected abstract PatrolQueryResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException;
+	
+	/**
+	 * Converts the a row in the temporary table select clause to
+	 * a result item that includes the row attachment 
+	 * 
+	 * @param rs result set item to convert to the queryresultitem
+	 * @param session current database connection
+	 * @return
+	 * @throws SQLException
+	 */
+	protected abstract PatrolQueryAttachmentResultItem asQueryAttachmentResultItem(ResultSet rs, Session session) throws SQLException;
+	
 	
 	/**
 	 * Create the temporary table for hold observation data

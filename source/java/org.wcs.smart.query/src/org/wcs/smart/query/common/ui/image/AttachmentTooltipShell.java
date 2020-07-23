@@ -31,7 +31,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.query.common.engine.IDesktopPagedImageResultSet;
-import org.wcs.smart.query.common.engine.IQueryImageData;
+import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 import org.wcs.smart.ui.SmartShellDialog;
 
 /**
@@ -42,9 +42,9 @@ import org.wcs.smart.ui.SmartShellDialog;
 public class AttachmentTooltipShell extends SmartShellDialog{
 
 	private IDesktopPagedImageResultSet results;
-	private IQueryImageData data;
+	private IAttachmentResultItem data;
 	
-	public AttachmentTooltipShell(Shell parentShell, IDesktopPagedImageResultSet results, IQueryImageData data) {
+	public AttachmentTooltipShell(Shell parentShell, IDesktopPagedImageResultSet results, IAttachmentResultItem data) {
 		super(parentShell, SWT.RESIZE);
 		this.results = results;
 		this.data = data;

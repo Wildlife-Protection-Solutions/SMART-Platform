@@ -30,5 +30,5 @@ package org.wcs.smart.query.common.engine;
  * @since 1.0.0
  */
 public interface IResultItem {
-	
+
 }

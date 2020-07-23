@@ -21,15 +21,17 @@
  */
 package org.wcs.smart.plan;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
 import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.report.ReportPlan;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Template cloner than copies the plan printing template
@@ -46,14 +48,14 @@ public class PlanTemplateCloner implements
 		SubMonitor.convert(monitor, Messages.PlanTemplateCloner_Progress, 1);
 		
 		//need to clone: the plan template
-		File f = new File(engine.getTemplateCa().getFileDataStoreLocation(),SmartPlanPlugIn.PLAN_DIR);
-		File templateFile = new File(f, ReportPlan.PLAN_TEMPLATE);
+		Path f = Paths.get(engine.getTemplateCa().getFileDataStoreLocation()).resolve(SmartPlanPlugIn.PLAN_DIR);
+		Path templateFile = f.resolve(ReportPlan.PLAN_TEMPLATE);
 		
-		if (templateFile.exists()){
+		if (Files.exists(templateFile)){
 			//copy plan template
-			f = new File(engine.getNewCa().getFileDataStoreLocation(),SmartPlanPlugIn.PLAN_DIR);
-			File newFile = new File(f, ReportPlan.PLAN_TEMPLATE);
-			FileUtils.copyFile(templateFile, newFile);
+			f = Paths.get(engine.getNewCa().getFileDataStoreLocation()).resolve(SmartPlanPlugIn.PLAN_DIR);
+			Path newFile = f.resolve(ReportPlan.PLAN_TEMPLATE);
+			SmartUtils.copyFile(templateFile, newFile);
 		}
 		
 	}

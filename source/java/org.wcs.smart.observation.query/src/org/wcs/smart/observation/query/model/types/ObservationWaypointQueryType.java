@@ -117,6 +117,10 @@ public class ObservationWaypointQueryType implements IMappableQueryType {
 		return true;
 	}
 
+	@Override
+	public boolean supportsImageResult() {
+		return true;
+	}
 	/**
 	 * @see org.wcs.smart.query.model.IQueryType#getDropItemFactory()
 	 */

@@ -51,11 +51,4 @@ public interface ITablePagedQueryResultSet extends IPagedQueryResultSet{
 	 */
 	public ResultSet getResultSet(Session session);
 	
-//	/**
-//	 * Destroys the result set and any table associated with it
-//	 * 
-//	 * @param session
-//	 */
-//	public void destory(Session session) throws SQLException;
-	
 }

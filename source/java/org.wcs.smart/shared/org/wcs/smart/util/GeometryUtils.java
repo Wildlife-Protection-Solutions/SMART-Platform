@@ -218,6 +218,7 @@ public class GeometryUtils {
 		if (bufferValue <= 0) return wkb1;
 		try{
 			Geometry g1 = gFromWKB(wkb1.getBytes(1, (int)wkb1.length()));
+			if (g1.isEmpty()) return null;
 			
 			Coordinate c = g1.getCentroid().getCoordinate();
 			CoordinateReferenceSystem targetCRS = CRS.decode("AUTO2:42001,"+c.x+","+c.y); //$NON-NLS-1$ //$NON-NLS-2$

@@ -61,7 +61,9 @@ import org.wcs.smart.patrol.query.model.observation.PatrolCategoryQueryColumn;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IPagedImageResultSet;
-import org.wcs.smart.query.common.engine.IQueryImageData;
+import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
+import org.wcs.smart.query.common.engine.AttachmentResultSetIterator;
+import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.IObservationPagedQueryResultSet;
 import org.wcs.smart.query.common.ui.image.PagedImageQueryResults;
@@ -774,12 +776,12 @@ public class DerbyPagedObservationResult extends DerbyPagedWaypointResult implem
 	}
 	
 	@Override
-	public List<IQueryImageData> getImageData(int offset, int pageSize) {
+	public List<IAttachmentResultItem> getImageData(int offset, int pageSize) {
 		return imageResults.getImageData(offset, pageSize);
 	}
 
 	@Override
-	public void createTooltip(IQueryImageData data, final Composite parent) {
+	public void createTooltip(IAttachmentResultItem data, final Composite parent) {
 		PatrolAttachmentTooltipProvider job = new PatrolAttachmentTooltipProvider(data, parent);
 		job.schedule();
 	}
@@ -787,6 +789,35 @@ public class DerbyPagedObservationResult extends DerbyPagedWaypointResult implem
 	@Override
 	public int getImageCount() {
 		return imageResults.getImageCount();
+	}
+	
+	@Override
+	public IQueryResultSetIterator<? extends IAttachmentResultItem> getImageIterator(Session session) throws SQLException{
+		initImageData();
+
+		StringBuilder sb = new StringBuilder();
+		String part = ((DerbyObservationEngine)engine).getDistinctWaypointQuery("r.", true); //$NON-NLS-1$
+		
+		//join together attachments specifically associated with an observation
+		//or attachments associated with a waypoint that has an observation
+		//in the result set
+		sb.append("SELECT " + part + ", b.attach_uuid as attach_uuid FROM " ); //$NON-NLS-1$ //$NON-NLS-2$
+		sb.append(queryTempTable + " r "); //$NON-NLS-1$
+		sb.append(" join " + imageResults.getResultsTable() + " b "); //$NON-NLS-1$ //$NON-NLS-2$
+		sb.append("on ( b.ob_uuid is not null and r.ob_uuid = b.ob_uuid ) "); //$NON-NLS-1$
+		
+		sb.append(" UNION "); //$NON-NLS-1$
+		
+		part = ((DerbyObservationEngine)engine).getDistinctWaypointQuery("r.", false); //$NON-NLS-1$
+		
+		sb.append("SELECT foo.*, b.attach_uuid as attach_uuid FROM "); //$NON-NLS-1$
+		sb.append("(SELECT DISTINCT " + part + " FROM " + queryTempTable + " r ) foo"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sb.append(" join " + imageResults.getResultsTable() + " b "); //$NON-NLS-1$ //$NON-NLS-2$
+		sb.append(" ON b.wp_uuid = foo.wp_uuid and b.ob_uuid is null"); //$NON-NLS-1$
+		
+		return new AttachmentResultSetIterator(session, 
+				e->engine.asQueryAttachmentResultItem(e, session),
+				()->sb.toString());
 	}
 	
 	private synchronized void initImageData() {
@@ -798,26 +829,29 @@ public class DerbyPagedObservationResult extends DerbyPagedWaypointResult implem
 				StringBuilder sb = new StringBuilder();
 				sb.append("CREATE TABLE "); //$NON-NLS-1$
 				sb.append(imageTempTable);
-				sb.append("(attach_uuid char(16) for bit data, seq_order integer GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1))"); //$NON-NLS-1$
+				sb.append("(attach_uuid char(16) for bit data, "); //$NON-NLS-1$
+				sb.append("wp_uuid char(16) for bit data, "); //$NON-NLS-1$
+				sb.append("ob_uuid char(16) for bit data, "); //$NON-NLS-1$
+				sb.append("seq_order integer GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1))"); //$NON-NLS-1$
 				s.createNativeQuery(sb.toString()).executeUpdate();
 				
 				sb = new StringBuilder();
 				sb.append(" INSERT INTO "); //$NON-NLS-1$
-				sb.append(imageTempTable + "(attach_uuid) "); //$NON-NLS-1$
-				sb.append(" SELECT z.attach_uuid FROM ( "); //$NON-NLS-1$
-				sb.append("SELECT c.uuid as attach_uuid, a.wp_date, a.wp_id " ); //$NON-NLS-1$
+				sb.append(imageTempTable + "(attach_uuid, wp_uuid, ob_uuid) "); //$NON-NLS-1$
+				sb.append(" SELECT z.attach_uuid, z.wp_uuid, z.ob_uuid FROM ( "); //$NON-NLS-1$
+				sb.append("SELECT c.uuid as attach_uuid, a.wp_date, a.wp_id, a.wp_uuid as wp_uuid, a.ob_uuid as ob_uuid" ); //$NON-NLS-1$
 				sb.append(" FROM "); //$NON-NLS-1$
 				sb.append( queryTempTable + " a "); //$NON-NLS-1$
 				sb.append(" JOIN "); //$NON-NLS-1$
 				sb.append(" smart.observation_attachment c on a.ob_uuid = c.obs_uuid "); //$NON-NLS-1$
 				sb.append( " UNION "); //$NON-NLS-1$
-				sb.append("SELECT c.uuid as attach_uuid, a.wp_date, a.wp_id " ); //$NON-NLS-1$
+				sb.append("SELECT c.uuid as attach_uuid, a.wp_date, a.wp_id, a.wp_uuid as wp_uuid, cast(null as char(16) for bit data) as ob_uuid" ); //$NON-NLS-1$
 				sb.append(" FROM "); //$NON-NLS-1$
 				sb.append( queryTempTable + " a "); //$NON-NLS-1$
 				sb.append(" JOIN "); //$NON-NLS-1$
 				sb.append(" smart.wp_attachments c on c.wp_uuid = a.wp_uuid "); //$NON-NLS-1$
 				sb.append(" ) z ORDER BY z.wp_date desc, z.wp_id "); //$NON-NLS-1$
-				
+
 				s.createNativeQuery(sb.toString()).executeUpdate();
 				
 				sb = new StringBuilder();

@@ -47,6 +47,7 @@ import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolQuery;
+import org.wcs.smart.patrol.query.model.PatrolQueryAttachmentResultItem;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
@@ -392,6 +393,11 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 		return it;
 	}
 	
+	@Override
+	protected PatrolQueryAttachmentResultItem asQueryAttachmentResultItem(ResultSet rs, Session session) throws SQLException{
+		throw new UnsupportedOperationException();
+	}
+
 	@Override
 	public Session getCurrentConnection() {
 		return session;

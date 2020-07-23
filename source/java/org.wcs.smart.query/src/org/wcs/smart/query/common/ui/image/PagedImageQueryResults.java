@@ -35,8 +35,8 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.common.engine.IQueryImageData;
-import org.wcs.smart.query.common.engine.QueryImageDataImpl;
+import org.wcs.smart.query.common.engine.IAttachmentResultItem;
+import org.wcs.smart.query.common.engine.AttachmentResultItemImpl;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -88,14 +88,14 @@ public abstract class PagedImageQueryResults {
 		this.imageDataCnt = imageDataCnt;
 	}
 	
-	public List<IQueryImageData> getImageData(int offset, int pageSize) {
+	public List<IAttachmentResultItem> getImageData(int offset, int pageSize) {
 		if (imageTempTable == null) {
 			initImageData();
 		}
 		
 		final String imageSql = "SELECT * FROM " + imageTempTable + " order by seq_order" ;  //$NON-NLS-1$ //$NON-NLS-2$
 			
-		List<IQueryImageData>  imageData = new ArrayList<>();
+		List<IAttachmentResultItem>  imageData = new ArrayList<>();
 		try(Session session = HibernateManager.openSession()){
 		
 			ResultSet imageResultSet = session.doReturningWork(new ReturningWork<ResultSet>() {
@@ -132,7 +132,7 @@ public abstract class PagedImageQueryResults {
 					} catch (Exception e) {
 						QueryPlugIn.log(e.getMessage(), e);
 					}
-					QueryImageDataImpl d = new QueryImageDataImpl(a);
+					AttachmentResultItemImpl d = new AttachmentResultItemImpl(a);
 					imageData.add(d);
 				}
 			}

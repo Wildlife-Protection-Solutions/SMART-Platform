@@ -39,6 +39,7 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Label;
+import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionMember;
 import org.wcs.smart.er.model.MissionPropertyValue;
@@ -48,13 +49,17 @@ import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.internal.Messages;
+import org.wcs.smart.er.query.model.SurveyQueryAttachmentResultItem;
 import org.wcs.smart.er.query.model.SurveyObservationQuery;
 import org.wcs.smart.er.query.model.SurveyQueryColumn;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
+import org.wcs.smart.observation.query.ObservationQueryPlugIn;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
@@ -733,9 +738,41 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 		return sql.toString();
 	}
 	
+	
+	@Override
+	protected SurveyQueryAttachmentResultItem asQueryAttachmentResultItem(ResultSet rs, Session session) throws SQLException{
+		
+		SurveyQueryAttachmentResultItem item = (SurveyQueryAttachmentResultItem) asQueryResultItemInternal(rs, true, session);
+		
+		UUID auuid = UuidUtils.byteToUUID(rs.getBytes("attach_uuid")); //$NON-NLS-1$
+		ISmartAttachment a = session.get(ObservationAttachment.class, auuid);
+		if (a == null) {
+			a = session.get(WaypointAttachment.class, auuid);
+		}
+		try {
+			a.computeFileLocation(session);
+		} catch (Exception e) {
+			ObservationQueryPlugIn.log(e.getMessage(), e);
+		}
+		item.setAttachment(a);
+		return item;
+	}
+	
+	
 	@Override
 	protected SurveyQueryResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException{
-		SurveyQueryResultItem it = new SurveyQueryResultItem();
+		return asQueryResultItemInternal(rs, false, session);
+	}
+		
+	
+	private SurveyQueryResultItem asQueryResultItemInternal(ResultSet rs, boolean isAttachment, Session session) throws SQLException{
+		SurveyQueryResultItem it = null;
+		if (isAttachment) {
+			it = new SurveyQueryAttachmentResultItem();
+		}else {
+			it = new SurveyQueryResultItem();
+		}
+	
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
 		
@@ -789,6 +826,50 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 		it.setCategory(categories.toArray(new String[categories.size()]));
 
 		return it;
+	}
+	
+	public String getDistinctWaypointQuery(String prefix, boolean includeObservation) {
+		StringBuilder sb = new StringBuilder();
+
+		String[] selectFields = new String[] {
+				"ca_id","ca_name","mission_uuid","mission_enddate", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				"mission_id","mission_startdate","mission_leader", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				"surveydesign_name","surveydesign_enddate","surveydesign_startdate", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				"survey_id","survey_enddate","survey_startdate", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				"samplingunit_uuid","samplingunit_id", //$NON-NLS-1$ //$NON-NLS-2$
+				"wp_uuid","wp_id","wp_x","wp_y","wp_date", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+				"wp_direction","wp_distance","wp_comment","wp_lastmodified", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				"wp_lastmodifiedbyname" //$NON-NLS-1$
+		};
+		
+		for (String s : selectFields) {
+			sb.append(prefix);
+			sb.append(s);
+			sb.append(","); //$NON-NLS-1$
+		}
+		
+		if (includeObservation) {
+			sb.append(prefix);
+			sb.append("ob_observer,"); //$NON-NLS-1$
+			sb.append(prefix);
+			sb.append("ob_uuid,"); //$NON-NLS-1$
+			sb.append(prefix);
+			sb.append("wp_group_uuid"); //$NON-NLS-1$
+			for (int i = 0; i < categoryCount; i ++){
+				sb.append(","); //$NON-NLS-1$
+				sb.append(prefix);
+				sb.append("category_" + i); //$NON-NLS-1$
+			}
+		
+		}else {
+			sb.append("cast(null as varchar(32000)) as ob_observer,"); //$NON-NLS-1$
+			sb.append("cast(null as char(16) for bit data) as ob_uuid,"); //$NON-NLS-1$
+			sb.append("cast(null as char(16) for bit data) as wp_group_uuid"); //$NON-NLS-1$
+			for (int i = 0; i < categoryCount; i ++){
+				sb.append(",cast(null as varchar(32000)) as category_" + i); //$NON-NLS-1$
+			}
+		}
+		return sb.toString();
 	}
 
 	@Override

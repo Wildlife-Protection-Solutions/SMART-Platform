@@ -29,7 +29,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
@@ -56,6 +55,7 @@ import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
 import org.wcs.smart.i2.model.RelationshipDiagramEntityTypeStyle;
 import org.wcs.smart.i2.model.RelationshipDiagramRelationshipTypeStyle;
 import org.wcs.smart.i2.model.RelationshipDiagramStyle;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Clones intelligence template details
@@ -106,7 +106,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 		//clone record template
 		Path source = IntelReportManager.INSTANCE.getRecordTemplate(engine.getTemplateCa());
 		Path target = IntelReportManager.INSTANCE.getRecordTemplate(engine.getNewCa());
-		if (Files.exists(source)) FileUtils.copyFile(source.toFile(), target.toFile());
+		if (Files.exists(source)) SmartUtils.copyFile(source, target);
 		progress.worked(1);
 		
 	}
@@ -168,7 +168,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 				Path source = IntelReportManager.INSTANCE.getEntityTemplate(ia);
 				Path target = IntelReportManager.INSTANCE.getEntityTemplate(clone);
 				if (Files.exists(source)){	
-					FileUtils.copyFile(source.toFile(), target.toFile());
+					SmartUtils.copyFile(source, target);
 				}else{
 					clone.setBirtTemplate(null);
 				}

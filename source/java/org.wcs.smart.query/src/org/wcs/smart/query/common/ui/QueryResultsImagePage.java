@@ -51,7 +51,7 @@ import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.engine.IPagedImageResultSet;
-import org.wcs.smart.query.common.engine.IQueryImageData;
+import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 import org.wcs.smart.query.common.ui.image.AttachmentTable;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IQueryEditCommand;
@@ -268,7 +268,7 @@ public class QueryResultsImagePage extends EditorPart  implements AttachmentTabl
 					
 					int cnt = 0;
 					int size = 0;
-					for (IQueryImageData a : imageTable.getSelection()) {
+					for (IAttachmentResultItem a : imageTable.getSelection()) {
 						size++;
 
 						//check duplicate filenames

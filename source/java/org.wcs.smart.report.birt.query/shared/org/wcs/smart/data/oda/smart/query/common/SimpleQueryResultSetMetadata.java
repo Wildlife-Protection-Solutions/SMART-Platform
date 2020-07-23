@@ -53,12 +53,12 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 	 * Creates a new metadata object
 	 * @param query the query to gather metadata for
 	 */
-	public SimpleQueryResultSetMetadata(SimpleQuery query, GeometryColumn[] geometryColumns, SmartConnection connection){
-		this(query, connection);
+	public SimpleQueryResultSetMetadata(SimpleQuery query, boolean hasAttachment, GeometryColumn[] geometryColumns, SmartConnection connection){
+		this(query, hasAttachment, connection);
 		this.geometryColumns = geometryColumns;
 	}
 	
-	protected SimpleQueryResultSetMetadata(SimpleQuery query, SmartConnection connection){
+	protected SimpleQueryResultSetMetadata(SimpleQuery query, boolean hasAttachment, SmartConnection connection){
 		List<QueryColumn> vis = new ArrayList<QueryColumn>();
 		
 		IProjectionProvider provider = null;
@@ -84,6 +84,13 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 				vis.add(col);
 			}
 		}
+		
+		//add attachment column if this is an attachment dataset
+		if (hasAttachment) {
+			vis.add(AttachmentFilenameQueryColumn.INSTANCE);
+			vis.add(AttachmentByteQueryColumn.INSTANCE);
+		}
+			
 		queryColumns = vis.toArray(new QueryColumn[vis.size()]);
 		
 		//search duplicate names and update 

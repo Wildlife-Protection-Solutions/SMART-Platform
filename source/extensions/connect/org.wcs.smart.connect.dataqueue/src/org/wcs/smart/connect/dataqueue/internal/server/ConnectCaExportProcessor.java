@@ -24,7 +24,6 @@ package org.wcs.smart.connect.dataqueue.internal.server;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import org.apache.commons.io.FileUtils;
 import org.hibernate.Session;
 import org.wcs.smart.ca.export.ICaDataExportEngine;
 import org.wcs.smart.connect.ConnectPlugIn;
@@ -32,6 +31,7 @@ import org.wcs.smart.connect.dataqueue.ConnectDataQueuePlugin;
 import org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem;
 import org.wcs.smart.connect.server.ICaExportPreprocessor;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * A Conservation Area export processor that removes the data queue
@@ -75,7 +75,7 @@ public class ConnectCaExportProcessor implements ICaExportPreprocessor{
 		Path dataqueue = filestore.resolve(ConnectDataQueuePlugin.DATA_QUEUE_DIR);
 		if (Files.exists(dataqueue) && Files.isDirectory(dataqueue)){
 			try{
-				FileUtils.deleteDirectory(dataqueue.toFile());
+				SmartUtils.deleteDirectory(dataqueue);
 			}catch(Exception ex){
 				ConnectDataQueuePlugin.log("Failed to remove data queue folder from Conservation Area export.", ex);			 //$NON-NLS-1$
 			}

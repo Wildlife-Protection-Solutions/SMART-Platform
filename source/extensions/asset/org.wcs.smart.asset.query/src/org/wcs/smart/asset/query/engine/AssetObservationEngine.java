@@ -49,13 +49,17 @@ import org.wcs.smart.asset.model.AssetWaypoint;
 import org.wcs.smart.asset.query.AssetQueryPlugIn;
 import org.wcs.smart.asset.query.internal.Messages;
 import org.wcs.smart.asset.query.model.AssetObservationQuery;
+import org.wcs.smart.asset.query.model.AssetQueryAttachmentResultItem;
 import org.wcs.smart.asset.query.model.AssetQueryResultItem;
 import org.wcs.smart.asset.query.model.observation.FixedQueryColumn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
+import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.query.QueryDataModelManager;
@@ -602,8 +606,72 @@ public class AssetObservationEngine extends AssetQueryEngine implements IDerbyWa
 	}
 	
 	@Override
+	protected AssetQueryAttachmentResultItem asQueryAttachmentResultItem(ResultSet rs, Session session) throws SQLException{
+		AssetQueryAttachmentResultItem item = (AssetQueryAttachmentResultItem)asQueryResultItemInternal(true, rs, session);
+		
+		UUID auuid = UuidUtils.byteToUUID(rs.getBytes("attach_uuid")); //$NON-NLS-1$
+		ISmartAttachment a = session.get(ObservationAttachment.class, auuid);
+		if (a == null) {
+			a = session.get(WaypointAttachment.class, auuid);
+		}
+		try {
+			a.computeFileLocation(session);
+		} catch (Exception e) {
+			AssetQueryPlugIn.log(e.getMessage(), e);
+		}
+		item.setAttachment(a);
+		
+		return item;
+	}
+	
 	protected AssetQueryResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException{
-		AssetQueryResultItem it = new AssetQueryResultItem();
+		return asQueryResultItemInternal(false, rs, session);
+	}
+	
+	public String getDistinctWaypointQuery(String prefix, boolean includeObservation) {
+		StringBuilder sb = new StringBuilder();
+
+		String[] selectFields = new String[] {
+			"ca_id","ca_name","wp_uuid", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			"wp_id","wp_x","wp_y","wp_date", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			"wp_direction","wp_distance","wp_comment","asset_asset", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			"asset_station","asset_location","incident_length", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			"wp_lastmodified","wp_lastmodifiedbyname" //$NON-NLS-1$ //$NON-NLS-2$
+		};
+		for (String s : selectFields) {
+			sb.append(prefix);
+			sb.append(s);
+			sb.append(","); //$NON-NLS-1$
+		}
+		
+		if (includeObservation) {
+			sb.append(prefix);
+			sb.append("ob_uuid,"); //$NON-NLS-1$
+			sb.append(prefix);
+			sb.append("wp_group_uuid"); //$NON-NLS-1$
+			for (int i = 0; i < categoryCount; i ++){
+				sb.append(","); //$NON-NLS-1$
+				sb.append(prefix);
+				sb.append("category_" + i); //$NON-NLS-1$
+			}
+		
+		}else {
+			sb.append("cast(null as char(16) for bit data) as ob_uuid,"); //$NON-NLS-1$
+			sb.append("cast(null as char(16) for bit data) as wp_group_uuid"); //$NON-NLS-1$
+			for (int i = 0; i < categoryCount; i ++){
+				sb.append(",cast(null as varchar(32000)) as category_" + i); //$NON-NLS-1$
+			}
+		}
+		return sb.toString();
+	}
+	
+	private AssetQueryResultItem asQueryResultItemInternal(boolean isAttachment, ResultSet rs, Session session) throws SQLException{
+		AssetQueryResultItem it = null;
+		if (isAttachment) {
+			it = new AssetQueryAttachmentResultItem();
+		}else {
+			it= new AssetQueryResultItem();
+		}
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
 		

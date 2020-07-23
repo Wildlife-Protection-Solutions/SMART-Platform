@@ -40,7 +40,6 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.e4.core.services.events.IEventBroker;
@@ -85,6 +84,7 @@ import org.wcs.smart.i2.xml.model.RecordSourceAttribute;
 import org.wcs.smart.i2.xml.model.RelationshipGroup;
 import org.wcs.smart.i2.xml.model.RelationshipType;
 import org.wcs.smart.i2.xml.model.RelationshipTypeAttribute;
+import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.ZipUtil;
 /**
  * Converts xml data to intelligence model objects
@@ -135,7 +135,7 @@ public class XmlToProfile {
 		}finally{
 			//clean up
 			try {
-				FileUtils.deleteDirectory(rootPath.toFile());
+				SmartUtils.deleteDirectory(rootPath);
 			}catch (Exception ex) {
 				Intelligence2PlugIn.log(ex.getMessage(), ex);
 			}

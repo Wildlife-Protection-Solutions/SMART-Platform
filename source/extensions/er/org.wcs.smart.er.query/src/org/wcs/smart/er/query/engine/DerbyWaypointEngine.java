@@ -26,6 +26,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -33,6 +34,7 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionMember;
 import org.wcs.smart.er.model.MissionPropertyValue;
@@ -42,10 +44,14 @@ import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.internal.Messages;
+import org.wcs.smart.er.query.model.SurveyQueryAttachmentResultItem;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.er.query.model.SurveyWaypointQuery;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointAttachment;
+import org.wcs.smart.observation.query.ObservationQueryPlugIn;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.common.engine.IQueryResult;
@@ -503,8 +509,35 @@ public class DerbyWaypointEngine extends DerbySurveyQueryEngine {
 		return sql.toString();
 	}
 
+	@Override
 	protected SurveyQueryResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException{
-		SurveyQueryResultItem it = new SurveyQueryResultItem();
+		return asQueryResultItemInternal(rs, false, session);
+	}
+	
+	@Override
+	protected SurveyQueryAttachmentResultItem asQueryAttachmentResultItem(ResultSet rs, Session session) throws SQLException{
+		SurveyQueryAttachmentResultItem item = (SurveyQueryAttachmentResultItem) asQueryResultItemInternal(rs, true, session);
+		UUID auuid = UuidUtils.byteToUUID(rs.getBytes("attach_uuid")); //$NON-NLS-1$
+		ISmartAttachment a = session.get(ObservationAttachment.class, auuid);
+		if (a == null) {
+			a = session.get(WaypointAttachment.class, auuid);
+		}
+		try {
+			a.computeFileLocation(session);
+		} catch (Exception e) {
+			ObservationQueryPlugIn.log(e.getMessage(), e);
+		}
+		item.setAttachment(a);
+		return item;
+	}
+	protected SurveyQueryResultItem asQueryResultItemInternal(ResultSet rs,boolean isAttachment, Session session) throws SQLException{
+		
+		SurveyQueryResultItem it = null;
+		if (isAttachment) {
+			it = new SurveyQueryAttachmentResultItem();
+		}else {
+			it = new SurveyQueryResultItem();
+		}
 
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$

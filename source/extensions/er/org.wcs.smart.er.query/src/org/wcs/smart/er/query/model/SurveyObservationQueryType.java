@@ -95,6 +95,11 @@ public class SurveyObservationQueryType implements IMappableQueryType {
 	public boolean supportsSingleCaQueries() {
 		return true;
 	}
+	
+	@Override
+	public boolean supportsImageResult() {
+		return true;
+	}
 
 	@Override
 	public IDropItemFactory getDropItemFactory() {

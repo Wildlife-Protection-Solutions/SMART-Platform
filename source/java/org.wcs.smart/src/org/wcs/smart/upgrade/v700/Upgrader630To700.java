@@ -29,7 +29,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
@@ -41,6 +40,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
+import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 
 public class Upgrader630To700 implements IDatabaseUpgrader { 
@@ -250,7 +250,7 @@ public class Upgrader630To700 implements IDatabaseUpgrader {
 				UUID cauuid = UuidUtils.byteToUUID( rs.getBytes(1) );
 				Path inteldir = rootFs.resolve(UuidUtils.uuidToString(cauuid)).resolve(dir);
 				if (Files.exists(inteldir)) {
-					FileUtils.deleteDirectory(inteldir.toFile());
+					SmartUtils.deleteDirectory(inteldir);
 				}
 			}
 		}

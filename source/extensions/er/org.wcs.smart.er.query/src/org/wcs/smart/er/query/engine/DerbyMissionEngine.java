@@ -45,6 +45,7 @@ import org.wcs.smart.er.query.engine.visitors.SurveyHasObservationFilterVisitor;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.MissionQuery;
+import org.wcs.smart.er.query.model.SurveyQueryAttachmentResultItem;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryPlugIn;
@@ -434,6 +435,13 @@ public class DerbyMissionEngine extends DerbySurveyQueryEngine {
 		return it;
 	}
 
+	@Override
+	protected SurveyQueryAttachmentResultItem asQueryAttachmentResultItem(ResultSet rs, Session session)
+			throws SQLException {
+		
+		return null;
+	}
+	
 	@Override
 	protected void buildTemporaryTableIndexes(Connection c, String tableName)
 			throws SQLException {

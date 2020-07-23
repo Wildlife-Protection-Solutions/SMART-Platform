@@ -47,7 +47,7 @@ import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
-import org.wcs.smart.query.common.engine.IQueryImageData;
+import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -169,7 +169,7 @@ public class AssetQueryPlugIn extends AbstractUIPlugin {
 		});
 	}
 
-	public static List<AssetWaypoint> findWaypoint(Session session, IQueryImageData data) {
+	public static List<AssetWaypoint> findWaypoint(Session session, IAttachmentResultItem data) {
 		ObservationAttachment a = session.get(ObservationAttachment.class, data.getAttachment().getUuid());
 		Waypoint wp = null;
 		if (a != null) {
@@ -184,7 +184,7 @@ public class AssetQueryPlugIn extends AbstractUIPlugin {
 		return null;
 	}
 	
-	public static WaypointObservation findObservation(Session session, IQueryImageData data) {
+	public static WaypointObservation findObservation(Session session, IAttachmentResultItem data) {
 		ObservationAttachment a = session.get(ObservationAttachment.class, data.getAttachment().getUuid());
 		if (a != null) {
 			return a.getObservation();

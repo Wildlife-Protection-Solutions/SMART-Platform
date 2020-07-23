@@ -72,6 +72,7 @@ import org.wcs.smart.er.query.filter.SamplingUnitFilter.Source;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.filter.summary.MissionValueItem;
 import org.wcs.smart.er.query.internal.Messages;
+import org.wcs.smart.er.query.model.SurveyQueryAttachmentResultItem;
 import org.wcs.smart.er.query.model.SurveyGriddedQuery;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.hibernate.SmartDB;
@@ -763,6 +764,12 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 		return null;
 	}
 
+	@Override
+	protected SurveyQueryAttachmentResultItem asQueryAttachmentResultItem(ResultSet rs, Session session)
+			throws SQLException {
+		return null;
+	}
+	
 	private Collection<QueryGridResultItem> computeSurveyValue(Connection c,
 			MissionValueItem item, 
 			Grid gridDef) throws Exception{

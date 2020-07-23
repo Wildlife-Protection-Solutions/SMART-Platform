@@ -31,7 +31,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.Job;
@@ -258,7 +257,7 @@ public class ApplyChangeLogJob extends Job {
 		}
 
 		try{
-			FileUtils.deleteDirectory(tempDirectory.toFile());
+			SmartUtils.deleteDirectory(tempDirectory);
 		}catch (Exception ex){
 			ConnectPlugIn.log("Error cleaning up changelog directory." + ex.getMessage(), ex); //$NON-NLS-1$
 		}

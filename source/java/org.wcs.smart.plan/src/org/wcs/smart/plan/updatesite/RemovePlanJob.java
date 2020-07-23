@@ -21,11 +21,11 @@
  */
 package org.wcs.smart.plan.updatesite;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -36,6 +36,7 @@ import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.internal.Messages;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Job removes all plan related tabled from the database
@@ -88,8 +89,8 @@ public class RemovePlanJob extends Job {
 			//delete filestores
 			for (ConservationArea ca : cas){
 				try {
-					File folder = new File(ca.getFileDataStoreLocation() + File.separator + SmartPlanPlugIn.PLAN_DIR);
-					FileUtils.deleteDirectory(folder);
+					Path folder = Paths.get(ca.getFileDataStoreLocation()).resolve(SmartPlanPlugIn.PLAN_DIR);
+					SmartUtils.deleteDirectory(folder);
 				} catch (IOException ex) {
 					SmartPlanPlugIn.log(ex.getMessage(), ex);
 				}

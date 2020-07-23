@@ -30,7 +30,6 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.swt.graphics.Image;
 import org.hibernate.Session;
@@ -45,6 +44,7 @@ import org.wcs.smart.paws.model.PawsRun;
 import org.wcs.smart.paws.model.PawsService;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.util.SmartUtils;
 
 
 /**
@@ -176,7 +176,7 @@ public enum PawsManager {
 			if (Files.exists(p)) {
 				//delete directory and all files
 				try {
-					FileUtils.deleteDirectory(p.toFile());
+					SmartUtils.deleteDirectory(p);
 				}catch (IOException ex) {
 					PawsPlugIn.displayLog(ex.getMessage(), ex);
 				}

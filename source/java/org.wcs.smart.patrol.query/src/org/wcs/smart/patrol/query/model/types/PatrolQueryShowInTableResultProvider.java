@@ -33,7 +33,7 @@ import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
 import org.wcs.smart.patrol.query.ui.editor.PatrolQueryResultsEditor;
-import org.wcs.smart.query.common.engine.IQueryImageData;
+import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.ui.QueryResultsEditor;
 import org.wcs.smart.query.common.ui.ShowInTableInfoProvider;
@@ -46,12 +46,12 @@ public class PatrolQueryShowInTableResultProvider extends ShowInTableInfoProvide
 	 */
 	@Override
 	public void doWork(IResultItem resultItem) {
-		if (resultItem instanceof IQueryImageData) {
+		if (resultItem instanceof IAttachmentResultItem) {
 			try(Session s = HibernateManager.openSession()){
-				PatrolWaypoint pw = PatrolQueryPlugIn.findWaypoint(s, (IQueryImageData)resultItem);
+				PatrolWaypoint pw = PatrolQueryPlugIn.findWaypoint(s, (IAttachmentResultItem)resultItem);
 				if (pw == null) return;
 				
-				WaypointObservation wo = PatrolQueryPlugIn.findObservation(s, (IQueryImageData)resultItem);
+				WaypointObservation wo = PatrolQueryPlugIn.findObservation(s, (IAttachmentResultItem)resultItem);
 				PatrolQueryResultItem tmp = new PatrolQueryResultItem();
 				tmp.setPatrolUuid(pw.getPatrolLegDay().getPatrolLeg().getPatrol().getUuid());
 				//tmp.setPatrolLegUuid(pw.getPatrolLegDay().getPatrolLeg().getUuid());

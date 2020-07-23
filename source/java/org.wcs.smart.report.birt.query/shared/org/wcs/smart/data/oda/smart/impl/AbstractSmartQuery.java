@@ -33,6 +33,7 @@ import org.wcs.smart.data.oda.smart.query.common.PagedQueryResultSet;
 import org.wcs.smart.data.oda.smart.query.common.SimpleQueryResultSetMetadata;
 import org.wcs.smart.data.oda.smart.query.common.SummaryQueryResultSet;
 import org.wcs.smart.data.oda.smart.query.common.SummaryQueryResultSetMetadata;
+import org.wcs.smart.query.common.engine.IPagedImageResultSet;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.MemoryQueryResult;
@@ -106,7 +107,7 @@ public abstract class AbstractSmartQuery {
 	 * users the metadata provider to create the metadata
 	 */
 	protected IResultSetMetaData getMetaDataInternal(AbstractSmartBirtQuery smartQuery, SmartConnection connection) throws OdaException{
-		return metadataProvider.createMetadata(smartQuery.getQuery(), getGeometryColumns(smartQuery.getQuery().getTypeKey(), connection.getCurrentLocale()), connection);
+		return metadataProvider.createMetadata(smartQuery.getQuery(), smartQuery.isAttachment, getGeometryColumns(smartQuery.getQuery().getTypeKey(), connection.getCurrentLocale()), connection);
 	}
 	
 	public void dispose(SmartConnection connection) throws SQLException{
@@ -128,6 +129,22 @@ public abstract class AbstractSmartQuery {
 			query.getQuery().setCachedResults(result);
 		}
 
+		if (query.isAttachment) {
+			if (result instanceof IPagedImageResultSet) {
+				try {
+					return new PagedQueryResultSet(
+						((IPagedImageResultSet)result).getImageIterator(connection.getSession()),
+						((IPagedImageResultSet)result).getImageCount(),
+						(SimpleQueryResultSetMetadata) getMetaDataInternal(query,connection),
+						connection);
+				}catch (SQLException ex) {
+					throw new OdaException(ex);
+				}
+						
+			}else {
+				throw new UnsupportedOperationException();
+			}
+		}
 		if (result instanceof MemoryQueryResult<?>) {
 			return new MemoryQueryResultSet((MemoryQueryResult<?>) result,
 					(SimpleQueryResultSetMetadata) getMetaDataInternal(query,connection),

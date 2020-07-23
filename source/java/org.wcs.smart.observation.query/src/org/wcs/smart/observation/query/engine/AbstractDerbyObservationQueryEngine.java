@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import org.hibernate.Session;
+import org.wcs.smart.observation.query.model.ObservationAttachmentQueryResultItem;
 import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.AbstractQueryEngine;
@@ -66,6 +67,19 @@ public abstract class AbstractDerbyObservationQueryEngine extends AbstractQueryE
 	 * @throws SQLException
 	 */
 	protected abstract ObservationQueryResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException;
+	/**
+	 * Converts the a row in the temporary table select clause to
+	 * a result item that includes the row attachment.   Only implement
+	 * for queries where it makes sense to add attachments
+	 * 
+	 * @param rs result set item to convert to the queryresultitem
+	 * @param session current database connection
+	 * @return
+	 * @throws SQLException
+	 */
+	protected ObservationAttachmentQueryResultItem asQueryAttachmentResultItem(ResultSet rs, Session session) throws SQLException{
+		return null;
+	}
 	
 	/**
 	 * Create the temporary table for hold observation data

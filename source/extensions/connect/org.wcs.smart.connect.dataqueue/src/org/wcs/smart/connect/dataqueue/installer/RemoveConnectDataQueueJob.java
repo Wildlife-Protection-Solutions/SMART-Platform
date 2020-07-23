@@ -26,7 +26,6 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -39,6 +38,7 @@ import org.wcs.smart.connect.dataqueue.ConnectDataQueuePlugin;
 import org.wcs.smart.connect.dataqueue.internal.Messages;
 import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Job removes all entity plug-in related tabled from the database
@@ -85,7 +85,7 @@ public class RemoveConnectDataQueueJob extends Job {
 						Path dataqueue = p.resolve(ConnectDataQueuePlugin.DATA_QUEUE_DIR);
 						if (Files.exists(dataqueue) && Files.isDirectory(dataqueue)){
 							try{
-								FileUtils.deleteDirectory(dataqueue.toFile());
+								SmartUtils.deleteDirectory(dataqueue);
 							}catch (Exception ex){
 								ConnectDataQueuePlugin.log("Could not remove data queue folder from filestore when uninstalled Connect DataQueue Plugin", ex); //$NON-NLS-1$
 							}

@@ -550,7 +550,7 @@ public class SmartTableDataSetWizardPage extends DataSetWizardPage {
 		}
 
 		@Override
-		protected AbstractSmartBirtQuery createQuery() {
+		protected AbstractSmartBirtQuery createQuery(String dataSetType) {
 			return null;
 		}
 

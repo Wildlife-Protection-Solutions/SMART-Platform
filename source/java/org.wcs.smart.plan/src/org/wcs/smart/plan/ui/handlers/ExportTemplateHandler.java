@@ -21,10 +21,11 @@
  */
 package org.wcs.smart.plan.ui.handlers;
 
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
@@ -59,7 +60,7 @@ public class ExportTemplateHandler  {
 		if (exportFile == null){
 			return;
 		}
-		final File outFile = new File(exportFile);
+		final Path outFile = Paths.get(exportFile);
 		//zip up the contents of the rptlibrary
 		ProgressMonitorDialog outputDialog = new ProgressMonitorDialog(activeShell);
 		try{
@@ -68,7 +69,7 @@ public class ExportTemplateHandler  {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 					InterruptedException {
 					try {
-						FileUtils.copyInputStreamToFile(ReportPlan.getPlanTemplate(), outFile);
+						Files.copy(ReportPlan.getPlanTemplate(), outFile);
 					} catch (Exception ex) {
 						SmartPlanPlugIn.displayLog(Messages.ExportTemplateHandler_ErrorExportingTemplate + ex.getMessage(), ex);
 					}	

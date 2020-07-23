@@ -37,7 +37,6 @@ import org.wcs.smart.query.model.QueryColumn;
  */
 public class PagedQueryResultSet extends AbstractQueryResultSet {
 
-	private IPagedQueryResultSet pagedQueryResults;
 	private IQueryResultSetIterator<? extends IResultItem> iterator;
 	private IResultItem currentItem = null;
 	/**
@@ -52,30 +51,48 @@ public class PagedQueryResultSet extends AbstractQueryResultSet {
 		super(metadata);
 
 		try {
-			pagedQueryResults = results;
-			setMaxRows(pagedQueryResults.getItemCount());
-			this.iterator = pagedQueryResults.iterator(500, connection.getSession());
+			setMaxRows(results.getItemCount());
+			this.iterator = results.iterator(500, connection.getSession());
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
 	
+	public PagedQueryResultSet(IQueryResultSetIterator<? extends IResultItem> iterator,
+			int count,
+			SimpleQueryResultSetMetadata metadata,
+			SmartConnection connection) {
+		super(metadata);
+
+		try {
+			setMaxRows(count);
+			this.iterator = iterator;
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	@Override
 	protected int getDatasetSize() {
-		return pagedQueryResults.getItemCount();
+		return getMaxRows();
 	}
 
 	@Override
 	public boolean next() throws OdaException{
 		boolean value = super.next();
 		if (value){
-			currentItem = iterator.next();
+			if (iterator.hasNext()) {
+				currentItem = iterator.next();
+			}else {
+				currentItem = null;
+			}
 		}
 		return value;
 	}
 	
 	@Override
 	protected Object getCurrentItem(int colIndex) throws OdaException {
+		if (currentItem == null) return null;
 		QueryColumn col = ((SimpleQueryResultSetMetadata) metadata).getQueryColumn(colIndex - 1);
 		if (col != null) return col.getValue(currentItem);
 		

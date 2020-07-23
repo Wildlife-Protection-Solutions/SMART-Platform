@@ -96,6 +96,17 @@ public interface IQueryType {
 	 */
 	public boolean supportsReports();
 	
+	
+	/**
+	 * 
+	 * @return true if query type is supports 
+	 * images in the results
+	 * 
+	 */
+	public default boolean supportsImageResult() {
+		return false;
+	}
+	
 	/**
 	 * 
 	 * @return drop item factory for query type

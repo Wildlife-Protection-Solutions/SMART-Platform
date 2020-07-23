@@ -26,7 +26,6 @@ import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.graphics.Image;
@@ -35,6 +34,7 @@ import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.MobileDeviceUtils;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.NavigationLayer;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Exports cybertracker navigation layer to local filestore/device.
@@ -83,7 +83,7 @@ public class ExportNavigationToDeviceAction implements INavigationExportAction {
 						.format(Messages.ExportNavigationToDeviceAction_ExportOkMsg, cnt, towrite.size()));
 
 			}finally {
-				FileUtils.deleteDirectory(dir.toFile());
+				SmartUtils.deleteDirectory(dir);
 			}
 			
 		}catch (Exception ex) {

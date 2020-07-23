@@ -38,7 +38,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -72,6 +71,7 @@ import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Dialog for importing new CyberTracker data.
@@ -407,7 +407,7 @@ public class ImportDialog extends SmartStyledTitleDialog{
 				MessageDialog.openWarning(getShell(), Messages.ImportDialog_ImportTitle, Messages.ImportDialog_NoData);
 				if (Files.exists(importPath)) {
 					try {
-						FileUtils.deleteDirectory(importPath.toFile());
+						SmartUtils.deleteDirectory(importPath);
 					}catch (Exception e) {
 						CyberTrackerPlugIn.log(e.getMessage(), e);
 					}
@@ -442,7 +442,7 @@ public class ImportDialog extends SmartStyledTitleDialog{
 			if (!error) {
 				//delete temp directory (otherwise there is likely data in it)
 				try {
-					FileUtils.deleteDirectory(importPath.toFile());
+					SmartUtils.deleteDirectory(importPath);
 				}catch (Exception e) {
 					CyberTrackerPlugIn.log(e.getMessage(), e);
 				}

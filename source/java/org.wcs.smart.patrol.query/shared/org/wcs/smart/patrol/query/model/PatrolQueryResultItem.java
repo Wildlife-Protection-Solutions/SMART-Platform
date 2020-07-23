@@ -636,6 +636,7 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IAdaptable{
 		this.waypointObserver = observer;
 	}
 
+	
 	/**
 	 * Converts the result item to a geometry in the database projection (4326)
 	 */

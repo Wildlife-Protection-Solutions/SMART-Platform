@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -48,6 +47,7 @@ import org.wcs.smart.query.ui.importexport.ImportQueryUtil;
 import org.wcs.smart.query.xml.QueryXmlManager;
 import org.wcs.smart.query.xml.model.QueryPart;
 import org.wcs.smart.query.xml.model.QueryType;
+import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 import org.wcs.smart.util.ZipUtil;
 
@@ -83,7 +83,7 @@ public class CompoundQueryDefinitionImporter implements IQueryImporter {
 					}
 				}
 			}finally{
-				FileUtils.forceDelete(tempDir.toFile());
+				SmartUtils.deleteDirectory(tempDir);
 			}
 		}catch (Exception ex){
 			
@@ -200,7 +200,7 @@ public class CompoundQueryDefinitionImporter implements IQueryImporter {
 				throw new Exception(Messages.CompoundQueryDefinitionImporter_QueryNotFound);
 			}
 		}finally{
-			FileUtils.forceDelete(tempDir.toFile());
+			SmartUtils.deleteDirectory(tempDir);
 		}
 	}
 

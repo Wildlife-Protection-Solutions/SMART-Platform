@@ -41,8 +41,11 @@ import org.hibernate.query.NativeQuery;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
+import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.patrol.model.Patrol;
@@ -50,8 +53,10 @@ import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolType;
+import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
+import org.wcs.smart.patrol.query.model.PatrolQueryAttachmentResultItem;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
 import org.wcs.smart.query.QueryDataModelManager;
@@ -651,7 +656,79 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine implements ID
 	
 	@Override
 	protected PatrolQueryResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException{
-		PatrolQueryResultItem it = new PatrolQueryResultItem();
+		return asQueryResultItemInternal(false, rs, session);
+	}
+
+	@Override
+	protected PatrolQueryAttachmentResultItem asQueryAttachmentResultItem(ResultSet rs, Session session) throws SQLException{
+		PatrolQueryAttachmentResultItem item = (PatrolQueryAttachmentResultItem) asQueryResultItemInternal(true,  rs, session);
+		
+		UUID auuid = UuidUtils.byteToUUID(rs.getBytes("attach_uuid")); //$NON-NLS-1$
+		ISmartAttachment a = session.get(ObservationAttachment.class, auuid);
+		if (a == null) {
+			a = session.get(WaypointAttachment.class, auuid);
+		}
+		try {
+			a.computeFileLocation(session);
+		} catch (Exception e) {
+			PatrolQueryPlugIn.log(e.getMessage(), e);
+		}
+		item.setAttachment(a);
+		return item;	
+	}
+	
+	public String getDistinctWaypointQuery(String prefix, boolean includeObservation) {
+		StringBuilder sb = new StringBuilder();
+
+		String[] selectFields = new String[] {
+				"ca_id","ca_name","p_uuid","p_id", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				"p_startdate","p_enddate","p_station", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				"p_team","p_objective","p_mandate", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				"p_type","p_armed","p_transporttype", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				"p_legid","wp_date","p_leader", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				"p_pilot","wp_uuid","wp_id", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				"wp_x","wp_y","wp_time", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				"wp_lastmodified","wp_lastmodifiedbyname", //$NON-NLS-1$ //$NON-NLS-2$
+				"wp_direction","wp_distance","wp_comment" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		};
+		for (String s : selectFields) {
+			sb.append(prefix);
+			sb.append(s);
+			sb.append(","); //$NON-NLS-1$
+		}
+		
+		if (includeObservation) {
+			sb.append(prefix);
+			sb.append("ob_observer,"); //$NON-NLS-1$
+			sb.append(prefix);
+			sb.append("ob_uuid,"); //$NON-NLS-1$
+			sb.append(prefix);
+			sb.append("wp_group_uuid"); //$NON-NLS-1$
+			for (int i = 0; i < categoryCount; i ++){
+				sb.append(","); //$NON-NLS-1$
+				sb.append(prefix);
+				sb.append("category_" + i); //$NON-NLS-1$
+			}
+		
+		}else {
+			sb.append("cast(null as varchar(32000)) as ob_observer,"); //$NON-NLS-1$
+			sb.append("cast(null as char(16) for bit data) as ob_uuid,"); //$NON-NLS-1$
+			sb.append("cast(null as char(16) for bit data) as wp_group_uuid"); //$NON-NLS-1$
+			for (int i = 0; i < categoryCount; i ++){
+				sb.append(",cast(null as varchar(32000)) as category_" + i); //$NON-NLS-1$
+			}
+		}
+		return sb.toString();
+	}
+	
+	private PatrolQueryResultItem asQueryResultItemInternal(boolean isAttachment, ResultSet rs, Session session) throws SQLException{
+		PatrolQueryResultItem it = null;
+		if (isAttachment) {
+			it = new PatrolQueryAttachmentResultItem();
+		}else {
+			it = new PatrolQueryResultItem();
+		}
+		
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
 		it.setPatrolUuid(UuidUtils.byteToUUID(rs.getBytes("p_uuid"))); //$NON-NLS-1$
@@ -709,6 +786,7 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine implements ID
 		return it;
 	}
 
+	
 	public int getCategoryCount(){
 		return this.categoryCount;
 	}

@@ -31,7 +31,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.e4.core.contexts.IEclipseContext;
@@ -60,6 +59,7 @@ import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.smartcollect.internal.Messages;
 import org.wcs.smart.smartcollect.model.SmartCollectPackage;
 import org.wcs.smart.util.SharedUtils;
+import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 import org.wcs.smart.util.ZipUtil;
 
@@ -197,7 +197,7 @@ public enum SmartCollectPackageExporter {
 			}
 		}finally {
 			try {
-				FileUtils.forceDelete(tempDir.toFile());
+				SmartUtils.deleteDirectory(tempDir);
 			} catch (IOException e) {
 				CyberTrackerPlugIn.log("Error cleaning up directory after exporting ct patrol package", e); //$NON-NLS-1$
 			}

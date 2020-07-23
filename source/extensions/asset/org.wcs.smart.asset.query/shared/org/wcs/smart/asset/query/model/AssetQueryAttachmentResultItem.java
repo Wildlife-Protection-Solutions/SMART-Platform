@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2020 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,18 +19,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.common.engine;
+package org.wcs.smart.asset.query.model;
+
 
 import org.wcs.smart.common.attachment.ISmartAttachment;
+import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 
 /**
- * Interface for query attachment result set.
+ * Extension of a asset query result item that
+ * include attachment information. 
  * 
  * @author Emily
- *
+ * @since 7.0.0
  */
-public interface IQueryImageData extends IResultItem{
+public class AssetQueryAttachmentResultItem extends AssetQueryResultItem implements IAttachmentResultItem{
+
+	private ISmartAttachment attachment;
 	
-	public ISmartAttachment getAttachment();
+	@Override
+	public ISmartAttachment getAttachment() {
+		return attachment;
+	}
+	
+	@Override
+	public void setAttachment(ISmartAttachment filename) {
+		this.attachment = filename;
+	}
+	
 	
 }

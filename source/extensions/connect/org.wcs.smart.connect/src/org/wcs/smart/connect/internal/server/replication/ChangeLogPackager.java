@@ -34,7 +34,6 @@ import java.sql.Types;
 import java.util.List;
 import java.util.UUID;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
@@ -48,6 +47,7 @@ import org.wcs.smart.connect.replication.DerbyMetadataPackager;
 import org.wcs.smart.connect.replication.changelog.ChangeLogItemSerializer;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 import org.wcs.smart.util.ZipUtil;
 
@@ -95,7 +95,7 @@ public class ChangeLogPackager {
 		Files.deleteIfExists(metadataFile);
 		
 		if (Files.exists(filestorePath.getParent())){
-			FileUtils.forceDelete(filestorePath.getParent().toFile());
+			SmartUtils.deleteDirectory(filestorePath.getParent());
 		}
 	}
 	

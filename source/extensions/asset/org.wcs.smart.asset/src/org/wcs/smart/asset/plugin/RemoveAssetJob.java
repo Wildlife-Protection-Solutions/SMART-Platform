@@ -21,11 +21,11 @@
  */
 package org.wcs.smart.asset.plugin;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -38,6 +38,7 @@ import org.wcs.smart.asset.model.AssetWaypointSource;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Job removes all plan related tabled from the database
@@ -136,8 +137,8 @@ public class RemoveAssetJob extends Job {
 		if (cas != null){
 			for (ConservationArea ca : cas){
 				try {
-					File deleteMe = new File(ca.getFileDataStoreLocation(), AssetWaypointSource.FILESTORE_LOC);
-					FileUtils.deleteDirectory(deleteMe);
+					Path deleteMe = Paths.get(ca.getFileDataStoreLocation()).resolve(AssetWaypointSource.FILESTORE_LOC);
+					SmartUtils.deleteDirectory(deleteMe);
 				} catch (IOException ex) {
 					//some errors deleting filestore
 					AssetPlugIn.log(ex.getMessage(), ex);

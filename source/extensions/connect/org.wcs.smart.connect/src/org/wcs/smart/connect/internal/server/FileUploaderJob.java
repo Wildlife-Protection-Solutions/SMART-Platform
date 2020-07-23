@@ -60,7 +60,7 @@ public abstract class FileUploaderJob extends Job {
 	protected FileUploaderJob(String url, Path file, SmartConnect connect, String name){
 		super(name);
 		this.url = url;
-		this.file = file;
+		this.file = file.toAbsolutePath().normalize();
 		this.connect = connect;
 	}
 	

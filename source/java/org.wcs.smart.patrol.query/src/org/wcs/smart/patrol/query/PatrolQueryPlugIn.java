@@ -43,7 +43,7 @@ import org.wcs.smart.patrol.query.model.IPatrolQueryColumnProvider;
 import org.wcs.smart.patrol.query.model.observation.PatrolQueryColumnProvider;
 import org.wcs.smart.patrol.query.ui.PatrolQueryLabelProvider;
 import org.wcs.smart.patrol.ui.IQueryPatrolLabelProvider;
-import org.wcs.smart.query.common.engine.IQueryImageData;
+import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -210,7 +210,7 @@ public class PatrolQueryPlugIn extends AbstractUIPlugin {
 		});
 	}
 
-	public static PatrolWaypoint findWaypoint(Session session, IQueryImageData data) {
+	public static PatrolWaypoint findWaypoint(Session session, IAttachmentResultItem data) {
 		ObservationAttachment a = session.get(ObservationAttachment.class, data.getAttachment().getUuid());
 		Waypoint wp = null;
 		if (a != null) {
@@ -226,7 +226,7 @@ public class PatrolQueryPlugIn extends AbstractUIPlugin {
 		return null;
 	}
 	
-	public static WaypointObservation findObservation(Session session, IQueryImageData data) {
+	public static WaypointObservation findObservation(Session session, IAttachmentResultItem data) {
 		ObservationAttachment a = session.get(ObservationAttachment.class, data.getAttachment().getUuid());
 		if (a != null) {
 			return a.getObservation();

@@ -29,7 +29,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -61,6 +60,7 @@ import org.wcs.smart.connect.ui.server.ConnectDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Login handler to clean up SMART connect processes in cases
@@ -266,7 +266,7 @@ public class LoginHandler implements ILoginHandler {
 				for (Path p : stream){
 					try{
 						if (Files.isDirectory(p)){
-							FileUtils.deleteDirectory(p.toFile());
+							SmartUtils.deleteDirectory(p);
 						}else if (Files.exists(p)){
 							Files.delete(p);
 						}

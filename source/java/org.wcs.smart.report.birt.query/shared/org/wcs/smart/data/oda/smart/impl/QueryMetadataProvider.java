@@ -41,9 +41,9 @@ public enum QueryMetadataProvider implements IMetadataProvider{
 	INSTANCE;
 	
 	@Override
-	public IResultSetMetaData createMetadata(Query query, GeometryColumn[] geometryColumns, SmartConnection c)throws OdaException {
+	public IResultSetMetaData createMetadata(Query query, boolean isAttachment, GeometryColumn[] geometryColumns, SmartConnection c)throws OdaException {
 		if (query instanceof SimpleQuery){
-			return new SimpleQueryResultSetMetadata((SimpleQuery)query, geometryColumns, c);
+			return new SimpleQueryResultSetMetadata((SimpleQuery)query, isAttachment, geometryColumns, c);
 		}
 		if (query instanceof GriddedQuery){
 			return new GriddedQueryResultSetMetadata((GriddedQuery)query, c);

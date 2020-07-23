@@ -118,6 +118,10 @@ public class ObservationQueryType implements IMappableQueryType {
 		return true;
 	}
 
+	@Override
+	public boolean supportsImageResult() {
+		return true;
+	}
 	/**
 	 * @see org.wcs.smart.query.model.IQueryType#getDropItemFactory()
 	 */
@@ -183,7 +187,7 @@ public class ObservationQueryType implements IMappableQueryType {
 			Parser parser = new Parser(is);
 			parser.QueryFilter();
 		}catch (Throwable ex){
-			ex.printStackTrace();
+			//ex.printStackTrace();
 			return ex.getMessage();
 		}
 		return null;

@@ -37,7 +37,7 @@ public class ParsedQuery {
 		this.queryType = queryType;
 		this.uuid = uuid;
 	}
-	
+		
 	public UUID getUuid(){
 		return this.uuid;
 	}
@@ -45,4 +45,5 @@ public class ParsedQuery {
 	public String getType(){
 		return this.queryType;
 	}
+		
 }

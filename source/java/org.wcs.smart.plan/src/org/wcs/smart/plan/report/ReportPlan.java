@@ -21,21 +21,20 @@
  */
 package org.wcs.smart.plan.report;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.UUID;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.birt.report.designer.ui.editors.IReportEditorContants;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.internal.Messages;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Main class for managing the exporting of plans to 
@@ -77,11 +76,9 @@ public class ReportPlan {
 	 * @return the custom plan template file or null
 	 * if file does not exist
 	 */
-	public static File getCustomPlanTemplateLocation(){
-		File f = new File(SmartPlanPlugIn.getDefault().getPlanDirectory(), PLAN_TEMPLATE);
-		if (!f.exists()){
-			return null;
-		}
+	public static Path getCustomPlanTemplateLocation(){
+		Path f = SmartPlanPlugIn.getDefault().getPlanDirectory().resolve(PLAN_TEMPLATE);
+		if (!Files.exists(f)) return null;
 		return f;
 	}
 	
@@ -91,9 +88,9 @@ public class ReportPlan {
 	 * @throws Exception
 	 */
 	public static InputStream getPlanTemplate() throws Exception{
-		File custom = getCustomPlanTemplateLocation();
+		Path custom = getCustomPlanTemplateLocation();
 		if (custom != null){
-			return new FileInputStream(custom);
+			return Files.newInputStream(custom);
 		}
 		return SmartPlanPlugIn.getDefault().getBundle().getResource("/org/wcs/smart/plan/report/planTemplate.rptdesign").openStream(); //$NON-NLS-1$
 	}
@@ -104,9 +101,9 @@ public class ReportPlan {
 	 * @param newTemplate
 	 * @throws IOException
 	 */
-	public static void importPlanTemplate(File newTemplate) throws IOException{
-		File f = new File(SmartPlanPlugIn.getDefault().getPlanDirectory(), PLAN_TEMPLATE);
-		FileUtils.copyFile(newTemplate, f);
+	public static void importPlanTemplate(Path newTemplate) throws IOException{
+		Path f = SmartPlanPlugIn.getDefault().getPlanDirectory().resolve(PLAN_TEMPLATE);
+		SmartUtils.copyFile(newTemplate, f);
 	}
 	
 	/**
@@ -127,9 +124,9 @@ public class ReportPlan {
 			//copy the default template to the template location if 
 			//it doesn't already exist
 			if (getCustomPlanTemplateLocation() == null){
-				File f = new File(SmartPlanPlugIn.getDefault().getPlanDirectory(), PLAN_TEMPLATE);
+				Path f = SmartPlanPlugIn.getDefault().getPlanDirectory().resolve(PLAN_TEMPLATE);
 				try(InputStream in = getPlanTemplate();
-						OutputStream out = new FileOutputStream(f)){
+						OutputStream out = Files.newOutputStream(f)){
 					IOUtils.copy(in, out);
 				}
 			}

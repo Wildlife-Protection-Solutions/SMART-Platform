@@ -17,7 +17,67 @@
          </properties>
       </dataSource>
       <dataSet
-            defaultDisplayName="%query.dataset.display.name"
+            defaultDisplayName="SMART Query Attachments"
+            id="org.wcs.smart.data.oda.smart.smartQueryAttachmentDataset">
+ 		<dataTypeMapping
+               nativeDataType="String"
+               nativeDataTypeCode="1"
+               odaScalarDataType="String">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Integer"
+               nativeDataTypeCode="4"
+               odaScalarDataType="Integer">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Double"
+               nativeDataTypeCode="8"
+               odaScalarDataType="Double">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="BigDecimal"
+               nativeDataTypeCode="3"
+               odaScalarDataType="Decimal">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Date"
+               nativeDataTypeCode="91"
+               odaScalarDataType="Date">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Time"
+               nativeDataTypeCode="92"
+               odaScalarDataType="Time">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Timestamp"
+               nativeDataTypeCode="93"
+               odaScalarDataType="Timestamp">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Boolean"
+               nativeDataTypeCode="16"
+               odaScalarDataType="Boolean">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="String"
+               nativeDataTypeCode="12"
+               odaScalarDataType="String">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Java Object"
+               nativeDataTypeCode="2000"
+               odaScalarDataType="JavaObject">
+         </dataTypeMapping>
+         <dataTypeMapping
+               nativeDataType="Blob"
+               nativeDataTypeCode="2004"
+               odaScalarDataType="Blob">
+         </dataTypeMapping>
+         
+      </dataSet>
+      <dataSet
+            defaultDisplayName="SMART Queries"
             id="org.wcs.smart.data.oda.smart.smartQueryDataset">
          <dataTypeMapping
                nativeDataType="String"
@@ -156,19 +216,20 @@
          </newDataSourceWizard>
       </dataSourceUI>
       <dataSetUI
-            id="org.wcs.smart.data.oda.smart.smartTableDataset"
+            id="org.wcs.smart.data.oda.smart.smartQueryAttachmentDataset"
+            initialPageId="org.wcs.smart.data.ods.smart.smartAttachmentQuery.page1"
             supportsInParameters="true"
             supportsOutParameters="false">
          <dataSetWizard
                class="org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSetWizard"
-               windowTitle="%wizard.dataset.tables.page.title">
+               windowTitle="SMART Query Images">
          </dataSetWizard>
          <dataSetPage
-               displayName="%wizard.dataset.tables.page1.displayName"
+               displayName="SMART Query Attachments"
                icon="icons/datasetpage.ico"
-               id="org.wcs.smart.data.ods.smart.smartTable.page1"
+               id="org.wcs.smart.data.ods.smart.smartAttachmentQuery.page1"
                path="/"
-               wizardPageClass="org.wcs.smart.data.oda.smart.ui.impl.SmartTableDataSetWizardPage">
+               wizardPageClass="org.wcs.smart.data.oda.smart.ui.impl.SmartQueryAttachmentDatasetWizardPage">
          </dataSetPage>
       </dataSetUI>
       <dataSetUI
@@ -186,6 +247,23 @@
                id="org.wcs.smart.data.ods.smart.smartQuery.page1"
                path="/"
                wizardPageClass="org.wcs.smart.data.oda.smart.ui.impl.SmartQueryDatasetWizardPage">
+         </dataSetPage>
+      </dataSetUI>
+      <dataSetUI
+            id="org.wcs.smart.data.oda.smart.smartTableDataset"
+            initialPageId="org.wcs.smart.data.ods.smart.smartTable.page1"
+            supportsInParameters="true"
+            supportsOutParameters="false">
+         <dataSetWizard
+               class="org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSetWizard"
+               windowTitle="%wizard.dataset.tables.page.title">
+         </dataSetWizard>
+         <dataSetPage
+               displayName="%wizard.dataset.tables.page1.displayName"
+               icon="icons/datasetpage.ico"
+               id="org.wcs.smart.data.ods.smart.smartTable.page1"
+               path="/"
+               wizardPageClass="org.wcs.smart.data.oda.smart.ui.impl.SmartTableDataSetWizardPage">
          </dataSetPage>
       </dataSetUI>
    </extension>

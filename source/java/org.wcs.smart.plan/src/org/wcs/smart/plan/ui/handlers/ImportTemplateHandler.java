@@ -21,7 +21,9 @@
  */
 package org.wcs.smart.plan.ui.handlers;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 
 import org.eclipse.e4.core.di.annotations.Execute;
@@ -65,8 +67,8 @@ public class ImportTemplateHandler {
 		if (exportFile == null){
 			return ;
 		}
-		final File inFile = new File(exportFile);
-		if (!inFile.exists()){
+		final Path inFile = Paths.get(exportFile);
+		if (!Files.exists(inFile)){
 			MessageDialog.openError(activeShell, Messages.ImportTemplateHandler_ErrordialogTitle, 
 					MessageFormat.format(Messages.ImportTemplateHandler_FileDoesNotExist, 
 							new Object[]{exportFile}));

@@ -37,7 +37,6 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.datatype.DatatypeFactory;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -74,6 +73,7 @@ import org.wcs.smart.i2.xml.record.ObservationType;
 import org.wcs.smart.i2.xml.record.RecordAttributeType;
 import org.wcs.smart.i2.xml.record.RecordType;
 import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 import org.wcs.smart.util.ZipUtil;
 
@@ -184,7 +184,7 @@ public class RecordXmlExporter {
 		ZipUtil.createZip(zip, outputFile, progress.split(1));
 			
 		try{
-			FileUtils.deleteDirectory(tempDir.toFile());
+			SmartUtils.deleteDirectory(tempDir);
 		}catch (Exception ex){
 			ex.printStackTrace();
 		}

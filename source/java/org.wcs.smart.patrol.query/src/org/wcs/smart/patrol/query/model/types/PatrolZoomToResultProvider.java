@@ -34,7 +34,7 @@ import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
-import org.wcs.smart.query.common.engine.IQueryImageData;
+import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
 
 import org.locationtech.jts.geom.Geometry;
@@ -69,11 +69,11 @@ public class PatrolZoomToResultProvider extends AbstractZoomToInfoProvider {
 			}
 			
 		}
-		if (resultItem instanceof IQueryImageData) {
+		if (resultItem instanceof IAttachmentResultItem) {
 			PatrolEditorInput input = null;
 			PatrolWaypoint pw = null;
 			try(Session s = HibernateManager.openSession()){
-				pw = PatrolQueryPlugIn.findWaypoint(s, (IQueryImageData)resultItem);
+				pw = PatrolQueryPlugIn.findWaypoint(s, (IAttachmentResultItem)resultItem);
 				if (pw != null) {
 					Patrol p = pw.getPatrolLegDay().getPatrolLeg().getPatrol();
 					input = new PatrolEditorInput(p);

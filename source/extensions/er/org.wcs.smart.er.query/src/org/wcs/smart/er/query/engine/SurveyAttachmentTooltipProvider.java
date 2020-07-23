@@ -46,7 +46,7 @@ import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
-import org.wcs.smart.query.common.engine.IQueryImageData;
+import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 
 /**
  * Tooltip provider for survey query attachments
@@ -56,10 +56,10 @@ import org.wcs.smart.query.common.engine.IQueryImageData;
  */
 public class SurveyAttachmentTooltipProvider extends Job {
 
-	private IQueryImageData data;
+	private IAttachmentResultItem data;
 	private Composite details;
 	
-	public SurveyAttachmentTooltipProvider(IQueryImageData data, Composite details) {
+	public SurveyAttachmentTooltipProvider(IAttachmentResultItem data, Composite details) {
 		super("loading waypoint details"); //$NON-NLS-1$
 		setSystem(true);
 		this.data = data;

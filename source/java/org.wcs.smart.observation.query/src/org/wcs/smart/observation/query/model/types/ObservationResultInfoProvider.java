@@ -32,7 +32,7 @@ import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
-import org.wcs.smart.query.common.engine.IQueryImageData;
+import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
 
 /**
@@ -53,14 +53,14 @@ public class ObservationResultInfoProvider extends AbstractObservationInfoProvid
 			showItem(waypointUuid, waypointSourceKey);
 			return;
 		}
-		if (resultItem instanceof IQueryImageData) {
+		if (resultItem instanceof IAttachmentResultItem) {
 			try(Session s = HibernateManager.openSession()){
-				ObservationAttachment a = s.get(ObservationAttachment.class, ((IQueryImageData) resultItem).getAttachment().getUuid());
+				ObservationAttachment a = s.get(ObservationAttachment.class, ((IAttachmentResultItem) resultItem).getAttachment().getUuid());
 				Waypoint wp = null;
 				if (a != null) {
 					wp = a.getObservation().getWaypoint();
 				}else {
-					WaypointAttachment w = s.get(WaypointAttachment.class, ((IQueryImageData) resultItem).getAttachment().getUuid());
+					WaypointAttachment w = s.get(WaypointAttachment.class, ((IAttachmentResultItem) resultItem).getAttachment().getUuid());
 					wp = w.getWaypoint();
 				}
 				if (wp != null) {

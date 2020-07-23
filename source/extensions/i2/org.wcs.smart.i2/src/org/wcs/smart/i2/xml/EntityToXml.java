@@ -40,7 +40,6 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
@@ -71,6 +70,7 @@ import org.wcs.smart.i2.xml.entity.Record;
 import org.wcs.smart.i2.xml.entity.Relationship;
 import org.wcs.smart.i2.xml.record.RecordType;
 import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 import org.wcs.smart.util.ZipUtil;
 
@@ -166,7 +166,7 @@ public class EntityToXml {
 		}finally {
 			//clean up
 			try {
-				FileUtils.deleteDirectory(tempDir.toFile());
+				SmartUtils.deleteDirectory(tempDir);
 			}catch (Exception ex) {
 				Intelligence2PlugIn.log(ex.getMessage(), ex);
 			}

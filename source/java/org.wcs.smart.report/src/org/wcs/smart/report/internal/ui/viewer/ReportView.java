@@ -34,7 +34,6 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.birt.report.engine.api.HTMLRenderOption;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -72,6 +71,7 @@ import org.wcs.smart.report.internal.ui.designer.SmartReportPerspective;
 import org.wcs.smart.report.internal.ui.export.ParameterCollecter;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 
 
@@ -169,7 +169,7 @@ public class ReportView implements IReportListener{
 		if (cleanUp == null) return;
 		
 		try {
-			FileUtils.deleteDirectory(cleanUp.toFile());
+			SmartUtils.deleteDirectory(cleanUp);
 		} catch (IOException e) {
 			ReportPlugIn.log(e.getMessage(), e);
 		}

@@ -53,8 +53,10 @@ import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.engine.AttachmentResultSetIterator;
+import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 import org.wcs.smart.query.common.engine.IDesktopPagedImageResultSet;
-import org.wcs.smart.query.common.engine.IQueryImageData;
+import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.AbstractPagedQueryResultSet;
 import org.wcs.smart.query.common.model.ISearchabledResultSet;
@@ -201,7 +203,7 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 		
 		return items;
 	}
-	
+
 	/**
 	 *Opens a result set in the given session that accessed the query results
 	 */
@@ -545,16 +547,31 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 	}
 	
 	@Override
-	public List<IQueryImageData> getImageData(int offset, int pageSize) {
+	public List<IAttachmentResultItem> getImageData(int offset, int pageSize) {
 		return imageResults.getImageData(offset, pageSize);
 	}
 
 	@Override
-	public void createTooltip(IQueryImageData data, final Composite parent) {
+	public void createTooltip(IAttachmentResultItem data, final Composite parent) {
 		PatrolAttachmentTooltipProvider job = new PatrolAttachmentTooltipProvider(data, parent);
 		job.schedule();
 	}
 
+	@Override
+	public IQueryResultSetIterator<? extends IAttachmentResultItem> getImageIterator(Session session) throws SQLException{
+		initImageData();
+
+		StringBuilder sb = new StringBuilder();
+		sb.append("SELECT r.*, b.attach_uuid as attach_uuid FROM " ); //$NON-NLS-1$
+		sb.append(queryTempTable + " r "); //$NON-NLS-1$
+		sb.append(" join " + imageResults.getResultsTable() + " b "); //$NON-NLS-1$ //$NON-NLS-2$
+		sb.append("on r.wp_uuid = b.wp_uuid "); //$NON-NLS-1$
+		
+		return new AttachmentResultSetIterator(session, 
+				e->engine.asQueryAttachmentResultItem(e, session),
+				()->sb.toString());
+	}
+	
 	@Override
 	public int getImageCount() {
 		return imageResults.getImageCount();
@@ -569,15 +586,15 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 				StringBuilder sb = new StringBuilder();
 				sb.append("CREATE TABLE "); //$NON-NLS-1$
 				sb.append(imageTempTable);
-				sb.append("(attach_uuid char(16) for bit data, seq_order integer GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1))"); //$NON-NLS-1$
+				sb.append("(attach_uuid char(16) for bit data, wp_uuid char(16) for bit data, seq_order integer GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1))"); //$NON-NLS-1$
 				s.createNativeQuery(sb.toString()).executeUpdate();
 				
 				sb = new StringBuilder();
 				sb.append(" INSERT INTO "); //$NON-NLS-1$
-				sb.append(imageTempTable + " (attach_uuid) "); //$NON-NLS-1$
-				sb.append(" SELECT z.uuid "); //$NON-NLS-1$
+				sb.append(imageTempTable + " (attach_uuid, wp_uuid) "); //$NON-NLS-1$
+				sb.append(" SELECT z.uuid, z.wp_uuid "); //$NON-NLS-1$
 				sb.append("FROM "); //$NON-NLS-1$
-				sb.append(" (SELECT distinct e.uuid, a.wp_date, a.wp_id FROM "); //$NON-NLS-1$
+				sb.append(" (SELECT distinct e.uuid, a.wp_date, a.wp_id, a.wp_uuid FROM "); //$NON-NLS-1$
 				sb.append(queryTempTable);
 				sb.append(" a join "); //$NON-NLS-1$
 				sb.append("(SELECT uuid, wp_uuid as wp_uuid FROM smart.wp_attachments "); //$NON-NLS-1$
@@ -587,7 +604,7 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 				sb.append(" join smart.observation_attachment b on c.uuid = b.obs_uuid) e "); //$NON-NLS-1$
 				sb.append("on a.wp_uuid = e.wp_uuid"); //$NON-NLS-1$
 				sb.append(" ORDER BY a.wp_date desc, a.wp_id ) z "); //$NON-NLS-1$
-				
+
 				s.createNativeQuery(sb.toString()).executeUpdate();
 				
 				sb = new StringBuilder();

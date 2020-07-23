@@ -238,11 +238,12 @@ public class DistanceQueryExporter implements ICsvQueryExporter {
 
 				//--add missing sampling units to results table--
 				//get sampling units
-				ScrollableResults scroll = session.createNativeQuery("SELECT samplingunit_uuid, samplingunit_id FROM " + helpers.getDataTable() ).scroll(); //$NON-NLS-1$
-				while(scroll.next()) {
-					foundSu.add(UuidUtils.byteToUUID((byte[])scroll.get()[0]));
+				try(ScrollableResults scroll = session.createNativeQuery("SELECT samplingunit_uuid, samplingunit_id FROM " + helpers.getDataTable() ).scroll()){ //$NON-NLS-1$
+					while(scroll.next()) {
+						foundSu.add(UuidUtils.byteToUUID((byte[])scroll.get()[0]));
+					}
 				}
-				scroll.close();
+				
 				List<SamplingUnit> sunits = SurveyHibernateManager.getInstance().getSamplingUnits(sd, session, State.ACTIVE);
 				//add su's that don't exist
 				for (SamplingUnit e : sunits) {
@@ -391,44 +392,44 @@ public class DistanceQueryExporter implements ICsvQueryExporter {
 		init(file, columns);
 		
 		//export results to file
-		IQueryResultSetIterator<IResultItem> it = qresults.iterator(IPagedQueryResultSet.MAP_PAGE_SIZE);
-		while(it.hasNext()){
-			SurveyQueryResultItem ri = (SurveyQueryResultItem)it.next();
-			
-			String data[] = new String[columns.size()];
-			
-			if (ri.getWaypointUuid() == null) {
-				for (int i = 0; i < data.length; i ++){
-					QueryColumn qc = columns.get(i);
-					
-					data[i] = "";  //$NON-NLS-1$
-					if (qc.getKey().startsWith(SU_COLUMN_KEY_PREFIX + ":")) { //$NON-NLS-1$
-						SamplingUnit su = units.get(ri.getSamplingUnitUuid());
-						if (su != null) {
-							for (SamplingUnitAttributeValue v : su.getAttributes()) {
-								if (v.getSamplingUnitAttribute().getKeyId().equals(qc.getKey().split(":")[1])) { //$NON-NLS-1$
-									data[i] = v.getValueAsString();
-									break;
+		try(IQueryResultSetIterator<IResultItem> it = qresults.iterator(IPagedQueryResultSet.MAP_PAGE_SIZE)){
+			while(it.hasNext()){
+				SurveyQueryResultItem ri = (SurveyQueryResultItem)it.next();
+				
+				String data[] = new String[columns.size()];
+				
+				if (ri.getWaypointUuid() == null) {
+					for (int i = 0; i < data.length; i ++){
+						QueryColumn qc = columns.get(i);
+						
+						data[i] = "";  //$NON-NLS-1$
+						if (qc.getKey().startsWith(SU_COLUMN_KEY_PREFIX + ":")) { //$NON-NLS-1$
+							SamplingUnit su = units.get(ri.getSamplingUnitUuid());
+							if (su != null) {
+								for (SamplingUnitAttributeValue v : su.getAttributes()) {
+									if (v.getSamplingUnitAttribute().getKeyId().equals(qc.getKey().split(":")[1])) { //$NON-NLS-1$
+										data[i] = v.getValueAsString();
+										break;
+									}
 								}
 							}
+						}else if (qc.getKey().equals("su:length") || qc.getKey().contentEquals("su:effort")) { //$NON-NLS-1$ //$NON-NLS-2$
+							data[i] = qc.getValueAsString(qc.getValue(ri));
+						}else if (qc instanceof SurveyQueryColumn
+								&& ((SurveyQueryColumn)qc).getKey().equals(SurveyQueryColumn.FixedColumns.SAMPLING_UNIT.getKey())) {
+							data[i] = qc.getValueAsString(qc.getValue(ri));
 						}
-					}else if (qc.getKey().equals("su:length") || qc.getKey().contentEquals("su:effort")) { //$NON-NLS-1$ //$NON-NLS-2$
-						data[i] = qc.getValueAsString(qc.getValue(ri));
-					}else if (qc instanceof SurveyQueryColumn
-							&& ((SurveyQueryColumn)qc).getKey().equals(SurveyQueryColumn.FixedColumns.SAMPLING_UNIT.getKey())) {
+					}
+				}else {
+					for (int i = 0; i < data.length; i ++){
+						QueryColumn qc = columns.get(i);
 						data[i] = qc.getValueAsString(qc.getValue(ri));
 					}
 				}
-			}else {
-				for (int i = 0; i < data.length; i ++){
-					QueryColumn qc = columns.get(i);
-					data[i] = qc.getValueAsString(qc.getValue(ri));
-				}
+				writer.writeNext(data);
+	
 			}
-			writer.writeNext(data);
-
 		}
-		it.close();
 		
 		
 		

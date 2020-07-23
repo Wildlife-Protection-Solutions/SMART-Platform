@@ -21,7 +21,10 @@
  * SOFTWARE.
  */package org.wcs.smart.plan;
 
-import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -236,13 +239,15 @@ public class SmartPlanPlugIn extends AbstractUIPlugin {
 	 * If the directory does not exist it will create it.
 	 * @return
 	 */
-	public File getPlanDirectory() {
-		File f =  new File(SmartDB.getCurrentConservationArea()
-				.getFileDataStoreLocation()
-				+ File.separator
-				+ SmartPlanPlugIn.PLAN_DIR + File.separator);
-		if (!f.exists()){
-			f.mkdir();
+	public Path getPlanDirectory() {
+		Path f =  Paths.get(SmartDB.getCurrentConservationArea().getFileDataStoreLocation())
+					.resolve(SmartPlanPlugIn.PLAN_DIR);
+		if (!Files.exists(f)){
+			try {
+				Files.createDirectories(f);
+			} catch (IOException e) {
+				log(e.getMessage(), e);
+			}
 		}
 		return f;
 	}

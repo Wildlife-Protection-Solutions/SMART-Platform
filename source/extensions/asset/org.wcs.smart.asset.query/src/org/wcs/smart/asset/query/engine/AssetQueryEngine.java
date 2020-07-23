@@ -38,6 +38,7 @@ import org.wcs.smart.asset.model.AssetStationAttributeValue;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetStationLocationAttributeValue;
 import org.wcs.smart.asset.model.AssetWaypoint;
+import org.wcs.smart.asset.query.model.AssetQueryAttachmentResultItem;
 import org.wcs.smart.asset.query.model.AssetQueryResultItem;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.AbstractQueryEngine;
@@ -108,6 +109,22 @@ public abstract class AssetQueryEngine extends AbstractQueryEngine implements IA
 	 * @throws SQLException
 	 */
 	protected abstract AssetQueryResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException;
+	
+	/**
+	 * Converts the a row in the temporary table select clause to
+	 * a result item that includes the row attachment.  Only implement
+	 * for queries that return attachment datasets
+	 * 
+	 * @param rs result set item to convert to the queryresultitem
+	 * @param session current database connection
+	 * @return
+	 * @throws SQLException
+	 */
+	protected AssetQueryAttachmentResultItem asQueryAttachmentResultItem(ResultSet rs, Session session) throws SQLException{
+		return null;
+	}
+	
+
 	
 	/**
 	 * Create the temporary table to hold observation data

@@ -47,7 +47,7 @@ import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.query.internal.Messages;
-import org.wcs.smart.query.common.engine.IQueryImageData;
+import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 /**
  * Tooltip provider for patrol attachments.
  * 
@@ -56,10 +56,10 @@ import org.wcs.smart.query.common.engine.IQueryImageData;
  */
 public class PatrolAttachmentTooltipProvider extends Job {
 
-	private IQueryImageData data;
+	private IAttachmentResultItem data;
 	private Composite details;
 	
-	public PatrolAttachmentTooltipProvider(IQueryImageData data, Composite details) {
+	public PatrolAttachmentTooltipProvider(IAttachmentResultItem data, Composite details) {
 		super("loading waypoint details"); //$NON-NLS-1$
 		setSystem(true);
 		this.data = data;

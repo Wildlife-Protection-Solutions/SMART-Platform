@@ -42,7 +42,6 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.e4.core.services.events.IEventBroker;
@@ -312,7 +311,7 @@ public class RecordXmlImporter {
 	private void cleanUp(){
 		for (Path p : tempDirs){
 			try{
-				FileUtils.deleteDirectory(p.toFile());
+				SmartUtils.deleteDirectory(p);
 			}catch (Exception ex){
 			}
 		}		

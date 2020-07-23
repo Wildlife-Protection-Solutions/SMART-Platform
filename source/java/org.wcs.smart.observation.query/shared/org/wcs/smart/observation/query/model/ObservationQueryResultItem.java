@@ -74,7 +74,7 @@ public class ObservationQueryResultItem implements IGeometryResultItem, IAdaptab
 	
 	private UUID groupUuid;
 	private UUID observationUuid;
-	
+
 	/**
 	 * the waypoint last modified date
 	 * @param lastModified
@@ -380,7 +380,7 @@ public class ObservationQueryResultItem implements IGeometryResultItem, IAdaptab
 	public void setWaypointObserver(String observer){
 		this.waypointObserver = observer;
 	}
-
+	
 	@Override
 	public Geometry asGeometry(String columnName) {
 		if (columnName.equals(GEOMCOLUMN_KEY))

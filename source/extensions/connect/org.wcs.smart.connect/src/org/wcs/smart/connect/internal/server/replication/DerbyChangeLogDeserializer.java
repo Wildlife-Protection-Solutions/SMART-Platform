@@ -39,7 +39,6 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import org.apache.commons.io.FileUtils;
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
@@ -52,6 +51,7 @@ import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Type;
 import org.wcs.smart.connect.replication.changelog.ChangeLogDeserializer;
 import org.wcs.smart.connect.replication.changelog.ConflictException;
+import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -225,7 +225,7 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 			throws Exception {
 		Path toPath = FileSystems.getDefault().getPath(SmartContext.INSTANCE.getFilestoreLocation(), item.getFileName());
 		if (Files.isDirectory(toPath)){
-			FileUtils.deleteDirectory(toPath.toFile());
+			SmartUtils.deleteDirectory(toPath);
 		}else{
 			Files.deleteIfExists(toPath);
 		}

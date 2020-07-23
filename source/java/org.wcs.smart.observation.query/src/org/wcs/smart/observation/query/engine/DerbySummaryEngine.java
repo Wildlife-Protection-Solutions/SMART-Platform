@@ -1111,6 +1111,7 @@ public class DerbySummaryEngine extends AbstractDerbyObservationQueryEngine {
 		return null;
 	}
 	
+	
 	@Override
 	public void dropTables(Connection c) throws SQLException{
 		

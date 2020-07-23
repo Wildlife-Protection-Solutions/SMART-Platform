@@ -40,7 +40,7 @@ import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.ui.OpenPatrolHandler;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
-import org.wcs.smart.query.common.engine.IQueryImageData;
+import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.IQueryResultInfoProvider;
 
@@ -80,11 +80,11 @@ public class PatrolResultInfoProvider implements IQueryResultInfoProvider {
 			PatrolEditorInput in = new PatrolEditorInput(it.getPatrolUuid(), it.getPatrolId(), it.getPatrolType(), it.getPatrolStartDate(), it.getPatrolEndDate());
 			showItem(in, ((PatrolQueryResultItem)resultItem).getWaypointUuid());
 			return;
-		}else if (resultItem instanceof IQueryImageData) {
+		}else if (resultItem instanceof IAttachmentResultItem) {
 			PatrolEditorInput input = null;
 			PatrolWaypoint pw = null;
 			try(Session s = HibernateManager.openSession()){
-				pw = PatrolQueryPlugIn.findWaypoint(s, (IQueryImageData)resultItem);
+				pw = PatrolQueryPlugIn.findWaypoint(s, (IAttachmentResultItem)resultItem);
 				if (pw != null) {
 					Patrol p = pw.getPatrolLegDay().getPatrolLeg().getPatrol();
 					input = new PatrolEditorInput(p);

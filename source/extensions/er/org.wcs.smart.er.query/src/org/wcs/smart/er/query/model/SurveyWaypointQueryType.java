@@ -97,6 +97,11 @@ public class SurveyWaypointQueryType implements IMappableQueryType {
 	}
 
 	@Override
+	public boolean supportsImageResult() {
+		return true;
+	}
+
+	@Override
 	public IDropItemFactory getDropItemFactory() {
 		return SurveyDropItemFactory.INSTANCE;		
 	}

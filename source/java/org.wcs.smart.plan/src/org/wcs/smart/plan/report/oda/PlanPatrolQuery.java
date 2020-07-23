@@ -59,7 +59,7 @@ public class PlanPatrolQuery extends SmartQuery {
 	 * Creates a new smart query
 	 */
 	public PlanPatrolQuery(SmartPlanConnection connection) {
-		super(connection);
+		super(PlanPatrolQuery.SMART_DATASET_TYPE, connection);
 		this.smartQuery = createQuery();
 	}
 

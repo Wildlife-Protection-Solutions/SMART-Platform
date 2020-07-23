@@ -46,6 +46,7 @@ import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.MissionTrackQuery;
 import org.wcs.smart.er.query.model.MissionTrackResultItem;
+import org.wcs.smart.er.query.model.SurveyQueryAttachmentResultItem;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
@@ -454,6 +455,13 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 		it.setGeometry(rs.getBytes("mission_track")); //$NON-NLS-1$
 		
 		return it;
+	}
+	
+	@Override
+	protected SurveyQueryAttachmentResultItem asQueryAttachmentResultItem(ResultSet rs, Session session)
+			throws SQLException {
+		
+		return null;
 	}
 
 	@Override

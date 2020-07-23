@@ -34,9 +34,14 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointAttachment;
+import org.wcs.smart.observation.query.ObservationQueryPlugIn;
 import org.wcs.smart.observation.query.internal.Messages;
+import org.wcs.smart.observation.query.model.ObservationAttachmentQueryResultItem;
 import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
 import org.wcs.smart.observation.query.model.ObservationWaypointQuery;
 import org.wcs.smart.query.QueryPlugIn;
@@ -267,8 +272,38 @@ public class DerbyWaypointEngine extends AbstractDerbyObservationQueryEngine {
 		return sql.toString();
 	}
 
+	protected ObservationAttachmentQueryResultItem asQueryAttachmentResultItem(ResultSet rs, Session session) throws SQLException{
+		
+		ObservationAttachmentQueryResultItem item = (ObservationAttachmentQueryResultItem) asQueryResultItemInternal(true,  rs, session);
+		
+		UUID auuid = UuidUtils.byteToUUID(rs.getBytes("attach_uuid")); //$NON-NLS-1$
+		ISmartAttachment a = session.get(ObservationAttachment.class, auuid);
+		if (a == null) {
+			a = session.get(WaypointAttachment.class, auuid);
+		}
+		try {
+			a.computeFileLocation(session);
+		} catch (Exception e) {
+			ObservationQueryPlugIn.log(e.getMessage(), e);
+		}
+		item.setAttachment(a);
+		return item;
+	}
+	
 	protected ObservationQueryResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException{
-		ObservationQueryResultItem it = new ObservationQueryResultItem();
+		return asQueryResultItemInternal(false, rs, session);
+	}
+	
+	protected ObservationQueryResultItem asQueryResultItemInternal(boolean includeAttachment,
+			ResultSet rs, Session session) throws SQLException{
+		
+		ObservationQueryResultItem it = null;
+		if (includeAttachment) {
+			it = new ObservationAttachmentQueryResultItem();
+		}else {
+			it = new ObservationQueryResultItem();
+		}
+		
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
 		it.setSourceId(rs.getString("wp_source")); //$NON-NLS-1$
@@ -285,7 +320,6 @@ public class DerbyWaypointEngine extends AbstractDerbyObservationQueryEngine {
 		
 		return it;
 	}
-	
 	
 	@Override
 	protected void buildTemporaryTableIndexes(Connection c, String tableName)

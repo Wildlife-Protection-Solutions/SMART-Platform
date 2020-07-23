@@ -48,12 +48,14 @@ import org.wcs.smart.util.UuidUtils;
 public abstract class AbstractSmartBirtQuery implements IQuery{
 
 	public static final String SMART_DATASET_TYPE = "org.wcs.smart.data.oda.smart.smartQueryDataset"; //$NON-NLS-1$
-	
+	public static final String SMART_ATTACHMENT_DATASET_TYPE = "org.wcs.smart.data.oda.smart.smartQueryAttachmentDataset"; //$NON-NLS-1$
 	protected int m_maxRows;
 
 	//the query uuid and type
 	protected UUID uuid;
-	
+	protected boolean isAttachment;
+	protected String dataSetType;
+
 	//the loaded query
 	protected Query smartQuery;
 	protected AbstractSmartQuery wrapperObject;
@@ -74,6 +76,7 @@ public abstract class AbstractSmartBirtQuery implements IQuery{
 		String[] bits = queryText.split(":"); //$NON-NLS-1$
 		String queryType = bits[0];
 		UUID uuid = null;
+		
 		if (bits.length >= 2 &&  !bits[1].isEmpty()){
 			uuid = UuidUtils.stringToUuid(bits[1]);
 		}
@@ -83,9 +86,9 @@ public abstract class AbstractSmartBirtQuery implements IQuery{
 	/**
 	 * Creates a new smart query
 	 */
-	public AbstractSmartBirtQuery(SmartConnection connection) {
+	public AbstractSmartBirtQuery(String dataSetType, SmartConnection connection) {
 		this.connection = connection;
-		
+		this.dataSetType = dataSetType;		
 	}
 
 	public Query getQuery(){

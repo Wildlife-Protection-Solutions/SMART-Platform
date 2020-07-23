@@ -42,7 +42,7 @@ import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
-import org.wcs.smart.query.common.engine.IQueryImageData;
+import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.IQueryResultInfoProvider;
 
@@ -84,15 +84,15 @@ public class SurveyResultInfoProvider implements IQueryResultInfoProvider {
 			waypointUuid = ((SurveyQueryResultItem)resultItem).getWaypointUuid();
 		}
 		
-		if (resultItem instanceof IQueryImageData) {
+		if (resultItem instanceof IAttachmentResultItem) {
 			SurveyWaypoint sw = null;
 			try(Session s = HibernateManager.openSession()){
-				ObservationAttachment a = s.get(ObservationAttachment.class, ((IQueryImageData) resultItem).getAttachment().getUuid());
+				ObservationAttachment a = s.get(ObservationAttachment.class, ((IAttachmentResultItem) resultItem).getAttachment().getUuid());
 				Waypoint wp = null;
 				if (a != null) {
 					wp = a.getObservation().getWaypoint();
 				}else {
-					WaypointAttachment w = s.get(WaypointAttachment.class, ((IQueryImageData) resultItem).getAttachment().getUuid());
+					WaypointAttachment w = s.get(WaypointAttachment.class, ((IAttachmentResultItem) resultItem).getAttachment().getUuid());
 					wp = w.getWaypoint();
 				}
 				if(wp != null) {

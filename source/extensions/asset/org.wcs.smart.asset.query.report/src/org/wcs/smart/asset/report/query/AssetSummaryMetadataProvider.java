@@ -45,7 +45,7 @@ import org.wcs.smart.query.model.filter.date.WaypointDateField;
 public class AssetSummaryMetadataProvider implements IMetadataProvider {
 
 	@Override
-	public IResultSetMetaData createMetadata(Query query, GeometryColumn[] geometryColumns, SmartConnection c) throws OdaException {
+	public IResultSetMetaData createMetadata(Query query, boolean isAttachment, GeometryColumn[] geometryColumns, SmartConnection c) throws OdaException {
 		AssetSummaryQuery q = (AssetSummaryQuery)query;
 		
 		//set a default date filter for parsing

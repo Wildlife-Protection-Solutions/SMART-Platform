@@ -273,6 +273,8 @@ public abstract class AbstractQueryResultSet implements IResultSet {
 		lastObject = getCurrentItem(index);
 		if (lastObject instanceof Timestamp) {
 			return (Timestamp) lastObject;
+		}else if (lastObject == null) {
+			return null;
 		}
 		throw new UnsupportedOperationException();
 	}

@@ -40,12 +40,11 @@ public class SmartQuery extends AbstractSmartBirtQuery {
 
 	//the query uuid and type
 	private IQueryType queryType;
-
 	/**
 	 * Creates a new smart query
 	 */
-	public SmartQuery(SmartConnection connection) {
-		super(connection);
+	public SmartQuery(String dataSetType, SmartConnection connection) {
+		super(dataSetType, connection);
 		this.queryType = null;
 		
 	}
@@ -71,6 +70,7 @@ public class SmartQuery extends AbstractSmartBirtQuery {
 		}
 		
 		this.uuid = parsed.getUuid();
+		this.isAttachment = dataSetType.equalsIgnoreCase(AbstractSmartBirtQuery.SMART_ATTACHMENT_DATASET_TYPE);
 		
 		String[] bits = queryText.split(":"); //$NON-NLS-1$
 		this.queryType = QueryTypeManager.INSTANCE.findQueryType(parsed.getType());

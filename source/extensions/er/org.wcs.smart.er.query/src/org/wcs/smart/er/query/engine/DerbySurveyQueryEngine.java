@@ -44,6 +44,7 @@ import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
+import org.wcs.smart.er.query.model.SurveyQueryAttachmentResultItem;
 import org.wcs.smart.query.common.engine.AbstractQueryEngine;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.common.engine.IResultItem;
@@ -122,6 +123,18 @@ public abstract class DerbySurveyQueryEngine extends AbstractQueryEngine {
 	 */
 	protected abstract IResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException;
 	
+	/**
+	 * Converts the a row in the temporary table select clause to
+	 * a result item that includes the row attachment 
+	 * 
+	 * @param rs result set item to convert to the queryresultitem
+	 * @param session current database connection
+	 * @return
+	 * @throws SQLException
+	 */
+	protected abstract SurveyQueryAttachmentResultItem asQueryAttachmentResultItem(ResultSet rs, Session session) throws SQLException;	
+
+		
 	/**
 	 * Create the temporary table for hold observation data
 	 * for querying

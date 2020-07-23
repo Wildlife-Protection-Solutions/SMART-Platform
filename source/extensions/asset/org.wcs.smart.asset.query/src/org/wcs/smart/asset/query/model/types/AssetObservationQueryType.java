@@ -232,4 +232,9 @@ public class AssetObservationQueryType implements IMappableQueryType {
 	public boolean supportsReports(){
 		return true;
 	}
+	
+	@Override
+	public boolean supportsImageResult() {
+		return true;
+	}
 }

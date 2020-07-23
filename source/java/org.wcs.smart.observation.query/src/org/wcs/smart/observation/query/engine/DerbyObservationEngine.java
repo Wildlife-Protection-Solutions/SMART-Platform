@@ -39,13 +39,18 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
+import org.wcs.smart.observation.query.ObservationQueryPlugIn;
 import org.wcs.smart.observation.query.internal.Messages;
 import org.wcs.smart.observation.query.model.ObsObservationQuery;
+import org.wcs.smart.observation.query.model.ObservationAttachmentQueryResultItem;
 import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
 import org.wcs.smart.observation.query.model.columns.FixedQueryColumn;
 import org.wcs.smart.query.QueryDataModelManager;
@@ -534,8 +539,40 @@ public class DerbyObservationEngine extends AbstractDerbyObservationQueryEngine 
 	}
 	
 	@Override
+	protected ObservationAttachmentQueryResultItem asQueryAttachmentResultItem(ResultSet rs, Session session) throws SQLException{
+		
+		ObservationAttachmentQueryResultItem item = (ObservationAttachmentQueryResultItem) asQueryResultItemInternal(true,  rs, session);
+		
+		UUID auuid = UuidUtils.byteToUUID(rs.getBytes("attach_uuid")); //$NON-NLS-1$
+		ISmartAttachment a = session.get(ObservationAttachment.class, auuid);
+		if (a == null) {
+			a = session.get(WaypointAttachment.class, auuid);
+		}
+		try {
+			a.computeFileLocation(session);
+		} catch (Exception e) {
+			ObservationQueryPlugIn.log(e.getMessage(), e);
+		}
+		item.setAttachment(a);
+		return item;
+	}
+	
+	@Override
 	protected ObservationQueryResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException{
-		ObservationQueryResultItem it = new ObservationQueryResultItem();
+		return asQueryResultItemInternal(false, rs, session);
+	}
+	
+	
+	
+	protected ObservationQueryResultItem asQueryResultItemInternal(boolean isAttachment, ResultSet rs, Session session) throws SQLException{
+		
+		ObservationQueryResultItem it = null;
+		if (isAttachment) {
+			it = new ObservationAttachmentQueryResultItem();
+		}else {
+			it = new ObservationQueryResultItem();
+		}
+		
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
 		it.setSourceId(rs.getString("wp_source")); //$NON-NLS-1$
@@ -578,6 +615,43 @@ public class DerbyObservationEngine extends AbstractDerbyObservationQueryEngine 
 		return it;
 	}
 
+	String getDistinctWaypointQuery(String prefix, boolean includeObs) {
+		String[] fields = new String[] {"ca_id","ca_name","wp_source","wp_uuid", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				"wp_id","wp_x","wp_y","wp_time", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				"wp_lastmodified","wp_lastmodifiedbyname","wp_direction", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				"wp_distance","wp_comment"}; //$NON-NLS-1$ //$NON-NLS-2$
+		StringBuilder sb = new StringBuilder();
+		for (String s : fields) {
+			sb.append(prefix);
+			sb.append(s);
+			sb.append(","); //$NON-NLS-1$
+		}
+		if (includeObs){
+			sb.append(prefix);
+			sb.append("ob_observer,"); //$NON-NLS-1$
+			sb.append(prefix);
+			sb.append("ob_uuid,"); //$NON-NLS-1$
+			sb.append(prefix);
+			sb.append("wp_group_uuid"); //$NON-NLS-1$
+
+			for (int i = 0; i < categoryCount; i ++){
+				sb.append(","); //$NON-NLS-1$
+				sb.append(prefix);
+				sb.append("category_" + i); //$NON-NLS-1$
+			}
+			
+		}else {
+			sb.append("cast(null as varchar(32000)) as ob_observer,"); //$NON-NLS-1$
+			sb.append("cast(null as char(16) for bit data) as ob_uuid,"); //$NON-NLS-1$
+			sb.append("cast(null as char(16) for bit data) as wp_group_uuid"); //$NON-NLS-1$
+
+			for (int i = 0; i < categoryCount; i ++){
+				sb.append(","); //$NON-NLS-1$
+				sb.append("cast(null as varchar(32000)) as category_" + i); //$NON-NLS-1$
+			}			
+		}
+		return sb.toString();
+	}
 	@Override
 	protected void buildTemporaryTableIndexes(Connection c, String tableName)
 			throws SQLException {

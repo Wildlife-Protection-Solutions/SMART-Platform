@@ -43,7 +43,6 @@ import org.hibernate.Session;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetStation;
-import org.wcs.smart.asset.model.AssetTypeAttribute;
 import org.wcs.smart.asset.query.internal.Messages;
 import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.ConservationAreaManager;

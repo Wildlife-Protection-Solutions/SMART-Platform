@@ -44,11 +44,15 @@ import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetWaypoint;
 import org.wcs.smart.asset.query.AssetQueryPlugIn;
 import org.wcs.smart.asset.query.internal.Messages;
+import org.wcs.smart.asset.query.model.AssetQueryAttachmentResultItem;
 import org.wcs.smart.asset.query.model.AssetQueryResultItem;
 import org.wcs.smart.asset.query.model.AssetWaypointQuery;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.common.engine.IQueryResult;
@@ -374,8 +378,36 @@ public class AssetWaypointEngine extends AssetQueryEngine implements IDerbyWaypo
 		return sql.toString();
 	}
 
+	@Override
+	protected AssetQueryAttachmentResultItem asQueryAttachmentResultItem(ResultSet rs, Session session) throws SQLException{
+		AssetQueryAttachmentResultItem item = (AssetQueryAttachmentResultItem)asQueryResultItemInternal(true, rs, session);
+		
+		UUID auuid = UuidUtils.byteToUUID(rs.getBytes("attach_uuid")); //$NON-NLS-1$
+		ISmartAttachment a = session.get(ObservationAttachment.class, auuid);
+		if (a == null) {
+			a = session.get(WaypointAttachment.class, auuid);
+		}
+		try {
+			a.computeFileLocation(session);
+		} catch (Exception e) {
+			AssetQueryPlugIn.log(e.getMessage(), e);
+		}
+		item.setAttachment(a);
+		
+		return item;
+	}
+	
 	protected AssetQueryResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException{
-		AssetQueryResultItem it = new AssetQueryResultItem();
+		return asQueryResultItemInternal(false, rs, session);
+	}
+	
+	protected AssetQueryResultItem asQueryResultItemInternal(boolean isAttachment, ResultSet rs, Session session) throws SQLException{
+		AssetQueryResultItem it = null;
+		if (isAttachment) {
+			it = new AssetQueryAttachmentResultItem();
+		}else{
+			it = new AssetQueryResultItem();
+		}
 
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
@@ -395,7 +427,6 @@ public class AssetWaypointEngine extends AssetQueryEngine implements IDerbyWaypo
 		it.setLastModifiedBy(rs.getString("wp_lastmodifiedbyname")); //$NON-NLS-1$
 		return it;
 	}
-	
 	
 	@Override
 	protected void buildTemporaryTableIndexes(Connection c, String tableName)

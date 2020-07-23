@@ -61,6 +61,7 @@ import org.wcs.smart.patrol.query.ext.PatrolContributionFinder;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.internal.PatrolValueItemLabelProvider;
 import org.wcs.smart.patrol.query.model.PatrolDropItemFactory;
+import org.wcs.smart.patrol.query.model.PatrolQueryAttachmentResultItem;
 import org.wcs.smart.patrol.query.model.PatrolQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolQueryOptionType;
 import org.wcs.smart.patrol.query.model.PatrolQueryOptions;
@@ -1581,6 +1582,9 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 		case MAN_DAYS:
 		case MAN_DAYS_TOTAL:
 			return "count(pld_patrol_day) "; //$NON-NLS-1$
+		case PATROLHOURS_TRACK:
+			throw new UnsupportedOperationException();
+		
 		}
 		assert false;
 		return ""; //$NON-NLS-1$
@@ -1706,6 +1710,8 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 				sbWhere.append(" has_data is not null ");	 //$NON-NLS-1$
 			}	
 			return "pld_patrol_day, " + tablePrefix(PatrolLegMember.class) + ".employee_uuid as pl_member"; //$NON-NLS-1$ //$NON-NLS-2$
+		case PATROLHOURS_TRACK:
+			throw new UnsupportedOperationException();
 		}
 		//should not get here
 		return null;
@@ -1967,6 +1973,10 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 	protected PatrolQueryResultItem asQueryResultItem(ResultSet rs, Session session)
 			throws SQLException {
 		return null;
+	}
+	@Override
+	protected PatrolQueryAttachmentResultItem asQueryAttachmentResultItem(ResultSet rs, Session session) throws SQLException{
+		throw new UnsupportedOperationException();
 	}
 
 }

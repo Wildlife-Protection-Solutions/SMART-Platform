@@ -24,22 +24,31 @@ package org.wcs.smart.query.common.engine;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 
 /**
- * Wraps a smart attachment
+ * Query result item and include a single attachment.
+ * 
+ * The associated attachment object should have it's
+ * filepath computed before setting (attachment.computeFileLocation(session)
+ * should be called).
  * 
  * @author Emily
  *
  */
-public class QueryImageDataImpl implements IQueryImageData {
+public class AttachmentResultItemImpl implements IAttachmentResultItem {
 
 	private ISmartAttachment attachment;
 	
-	public QueryImageDataImpl(ISmartAttachment attachment) {
-		this.attachment = attachment;
+	public AttachmentResultItemImpl(ISmartAttachment attachment) {
+		setAttachment(attachment);
 	}
 	
 	@Override
 	public ISmartAttachment getAttachment() {
 		return this.attachment;
+	}
+
+	@Override
+	public void setAttachment(ISmartAttachment attachment) {
+		this.attachment = attachment;
 	}
 
 }
