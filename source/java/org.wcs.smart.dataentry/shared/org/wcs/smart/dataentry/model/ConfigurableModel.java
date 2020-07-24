@@ -201,6 +201,8 @@ public class ConfigurableModel extends NamedItem {
 	 */
 	@Transient
 	public String getFileDataStoreLocation() {
+		if (getUuid() == null) return ""; //$NON-NLS-1$
+		
 		return Paths.get(getConservationArea().getFileDataStoreLocation())
 				.resolve("dataentry")  //$NON-NLS-1$
 				.resolve(UuidUtils.getDirectoryPath(getUuid())).toString();
