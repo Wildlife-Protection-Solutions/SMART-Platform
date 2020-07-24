@@ -267,7 +267,7 @@ public class AssetXmlToAssetData {
 	private List<AssetStationAttribute> processStationAttributes(AssetData xmlData, HashMap<String, AssetAttribute> attributeMappings, Session session){
 		List<AssetStationAttribute> stationAttributes = new ArrayList<>();
 		
-		if (xmlData.getStationAttributes() != null && xmlData.getStationLocationAttributes().getAttributes() != null) {
+		if (xmlData.getStationAttributes() != null  && xmlData.getStationAttributes().getAttributes() != null) {
 			for (AttributeMapping xmlMapping : xmlData.getStationAttributes().getAttributes()) {
 				AssetStationAttribute newAttribute = new AssetStationAttribute();
 				newAttribute.setOrder(xmlMapping.getOrder());
