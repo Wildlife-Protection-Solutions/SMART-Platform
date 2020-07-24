@@ -311,7 +311,7 @@ function showReportOptions(){
 	//update report parameters required
 	var oReq = new XMLHttpRequest();
 	oReq.onload = showParameterSelection;
-	oReq.timeout = 5000;
+	oReq.timeout = 15000;
 	oReq.onerror = parameterError;
 	oReq.ontimeout = parameterError;
 	oReq.open("Get", REPORTURL  + uuid + "/params", true);
