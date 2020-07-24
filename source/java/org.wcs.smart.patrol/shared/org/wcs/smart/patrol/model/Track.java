@@ -141,7 +141,9 @@ public class Track extends UuidItem {
 	}
 	
 	/**
-	 * Sets the linestring array. Also updates the distance field. Linestring must be in EPSG:4326
+	 * Sets the LineString array, updating the geometry and distance fields.
+	 * Linestring must be in EPSG:4326
+	 * If empty the geometry will be set to null.
 	 * 
 	 * @param lsArray new linestring array
 	 */
@@ -150,18 +152,28 @@ public class Track extends UuidItem {
 		lsList = null;
 		trackParts = null;
 		this.distance = 0.0f;
+		
 		if (ls == null || ls.isEmpty()) {
 			this.geometry = null;
 			this.geom = null;
 			return;
 		}
-
+		
+		List<LineString> copy = new ArrayList<>();
 		for (LineString lineString : ls) {
-			this.distance += (float)(GeometryUtils.distanceInMeters(lineString) / 1000.0);
+			if (!lineString.isEmpty()) {
+				this.distance += (float)(GeometryUtils.distanceInMeters(lineString) / 1000.0);
+				copy.add(lineString);
+			}
+		}
+		if (copy.isEmpty()) {
+			this.geometry = null;
+			this.geom = null;
+			return;
 		}
 		
 		WKBWriter writer = new WKBWriter(3);
-		geometry = new MultiLineString(ls.toArray(new LineString[ls.size()]), GeometryFactoryProvider.getFactory());
+		geometry = new MultiLineString(copy.toArray(new LineString[copy.size()]), GeometryFactoryProvider.getFactory());
 		this.geom = writer.write(geometry);
 	}
 

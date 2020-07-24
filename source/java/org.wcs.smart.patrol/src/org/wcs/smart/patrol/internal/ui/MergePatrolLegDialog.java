@@ -51,7 +51,6 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKBReader;
-import org.locationtech.jts.io.WKBWriter;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.createpatrol.EmployeeLabelProvider;
@@ -362,10 +361,13 @@ public class MergePatrolLegDialog extends SmartStyledTitleDialog{
 					allTracks.add(pld.getTrack().getGeom());
 				}
 			}
+			
+			
 			Track t = rebuildTrackFromGeometries(allTracks);
 			t.setPatrolLegDay(newpld);
 			ArrayList<Track> tracks = new ArrayList<Track>();
-			tracks.add(t);
+			if (t.getGeom() != null)  tracks.add(t);
+			
 			newpld.setTracks(tracks);
 			newpld.setWaypoints(allWaypoints);
 			
@@ -406,11 +408,7 @@ public class MergePatrolLegDialog extends SmartStyledTitleDialog{
 		LineString ls = geomFact.createLineString(orderedPoints);
 		
 		Track newTrack = new Track();
-		newTrack.setLineStrings(Arrays.asList(ls));
-		newTrack.setDistance((float) ls.getLength());
-		WKBWriter writer = new WKBWriter();
-		newTrack.setGeom(writer.write(ls));
-		
+		newTrack.setLineStrings(Arrays.asList(ls));		
 		return newTrack;		
 	}
 
