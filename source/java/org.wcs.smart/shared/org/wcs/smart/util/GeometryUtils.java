@@ -195,6 +195,7 @@ public class GeometryUtils {
 		if (track == null || area == null) return false;
 		try{
 			Geometry g1 = gFromWKB(track.getBytes(1, (int)track.length()));
+			if (g1.isEmpty()) return false;
 			if (g1.getLength() == 0){
 				return pointInPolygon(g1.getCoordinate().x, g1.getCoordinate().y, null, null, area);
 			}

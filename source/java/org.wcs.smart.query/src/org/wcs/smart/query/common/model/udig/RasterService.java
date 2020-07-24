@@ -321,7 +321,7 @@ public class RasterService extends AbstractRasterService implements IQueryServic
         	
             try {
                 AbstractGridFormat frmt = (AbstractGridFormat) getFormat();
-                this.reader = (AbstractGridCoverage2DReader) frmt.getReader(this.rasterFile);
+                this.reader = (AbstractGridCoverage2DReader) frmt.getReader(this.rasterFile.toAbsolutePath().normalize().toFile());
                 return this.reader;
 	            
             } catch (Exception ex) {

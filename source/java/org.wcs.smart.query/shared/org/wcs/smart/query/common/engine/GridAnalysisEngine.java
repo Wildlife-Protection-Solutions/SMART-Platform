@@ -137,6 +137,7 @@ public class GridAnalysisEngine<T> {
 //			QueryPlugIn.log("Error occurred rasterizing linestring. Linestring or coordinates is null after transform. (" + orig.toText() + ")", null); //$NON-NLS-1$ //$NON-NLS-2$
 //			return;
 		}
+		if(ls.isEmpty()) return;
 		
 		//find ls envelope
 		Envelope env = ls.getEnvelopeInternal();
