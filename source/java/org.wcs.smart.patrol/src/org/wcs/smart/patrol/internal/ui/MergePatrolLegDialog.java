@@ -363,14 +363,16 @@ public class MergePatrolLegDialog extends SmartStyledTitleDialog{
 			}
 			
 			
-			Track t = rebuildTrackFromGeometries(allTracks);
-			t.setPatrolLegDay(newpld);
 			ArrayList<Track> tracks = new ArrayList<Track>();
-			if (t.getGeom() != null)  tracks.add(t);
-			
 			newpld.setTracks(tracks);
-			newpld.setWaypoints(allWaypoints);
 			
+			Track t = rebuildTrackFromGeometries(allTracks);
+			if (t != null) {
+				t.setPatrolLegDay(newpld);
+				tracks.add(t);
+			}
+			
+			newpld.setWaypoints(allWaypoints);
 			newpld.setPatrolLeg(newLeg);
 			newDays.add(newpld);
 		}
@@ -403,6 +405,8 @@ public class MergePatrolLegDialog extends SmartStyledTitleDialog{
 			x++;
 			allPoints.remove(earliest);
 		}
+		
+		if (orderedPoints.length == 0) return null;
 		
 		GeometryFactory geomFact = new GeometryFactory();
 		LineString ls = geomFact.createLineString(orderedPoints);
