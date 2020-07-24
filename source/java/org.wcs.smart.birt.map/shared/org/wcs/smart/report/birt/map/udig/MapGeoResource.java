@@ -245,7 +245,7 @@ public class MapGeoResource extends IGeoResource {
 	                if (mapInfo.getRasterFile() != null) {
 	                	AbstractGridFormat frmt = (new GeoTiffFormatFactorySpi()).createFormat();
 	                    Path file = mapInfo.getRasterFile();
-	                	this.reader = (AbstractGridCoverage2DReader) frmt.getReader(file);
+	                	this.reader = (AbstractGridCoverage2DReader) frmt.getReader(file.toAbsolutePath().normalize().toFile());
 	                }
 				}
 			}

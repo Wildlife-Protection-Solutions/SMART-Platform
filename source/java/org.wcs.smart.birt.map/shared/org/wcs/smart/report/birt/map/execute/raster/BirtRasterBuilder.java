@@ -34,6 +34,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.map.raster.GridMetadata;
 import org.wcs.smart.map.raster.GridResultItem;
 import org.wcs.smart.map.raster.RasterBuilder;
+import org.wcs.smart.query.common.model.Grid;
 
 /**
  * Builds raster file from BIRT query results
@@ -150,6 +151,11 @@ public class BirtRasterBuilder {
 				rasterWidth * cellSize , rasterHeight * cellSize);
 		
 		rasterTempFile = Files.createTempFile("smart" + System.nanoTime(), ".tiff"); //$NON-NLS-1$ //$NON-NLS-2$
+		
+		if (rasterWidth > Integer.MAX_VALUE || rasterHeight > Integer.MAX_VALUE || rasterWidth * rasterHeight > Grid.MAX_GRID_CELLS){
+			throw Grid.GRID_TO_BIG_EXCEPTION;
+		}
+		
 		RasterBuilder builder = new RasterBuilder();
 		builder.setEnvelope(env);
 		builder.setFileName(rasterTempFile.toAbsolutePath().toString());

@@ -88,7 +88,7 @@ public class GridTiffImageExporter implements IQueryExporter {
 		}
 
 	    GeoTiffFormat frmt = new GeoTiffFormat();
-	    AbstractGridCoverage2DReader reader = (AbstractGridCoverage2DReader) frmt.getReader(sourceFile);
+	    AbstractGridCoverage2DReader reader = (AbstractGridCoverage2DReader) frmt.getReader(sourceFile.toAbsolutePath().normalize().toFile());
 	    GridCoverage gridCoverage = reader.read(null);
 	        
 	    GridCoverageWriter writer = frmt.getWriter(file);

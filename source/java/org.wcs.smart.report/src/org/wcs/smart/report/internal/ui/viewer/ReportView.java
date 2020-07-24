@@ -153,7 +153,15 @@ public class ReportView implements IReportListener{
 					
 				}
 		} catch (Exception e) {
-			ReportPlugIn.displayLog(MessageFormat.format(Messages.ReportView_RunReportError1, new Object[]{report.getName()}) + e.getLocalizedMessage(), e);
+			StringBuilder sb = new StringBuilder();
+			sb.append("\n"); //$NON-NLS-1$
+			sb.append(e.getLocalizedMessage());
+			if (e.getCause() != null) {
+				sb.append("\n"); //$NON-NLS-1$
+				sb.append(e.getCause().getLocalizedMessage());
+			}
+			
+			ReportPlugIn.displayLog(MessageFormat.format(Messages.ReportView_RunReportError1, new Object[]{report.getName()}) + sb.toString(), e);
 		}			
 		return Status.OK_STATUS;
 	}};

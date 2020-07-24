@@ -271,6 +271,8 @@ public class MapItemExecutor implements IReportItemExecutor{
 		IDataQueryDefinition[] query = context.getQueries( modelHandle );
 		
 		//I am assuming here that the queries are returned in the same order as the map Item layers property
+		StringBuilder exceptions = new StringBuilder();
+		
 		for ( int i = 0; i < mapItem.getLayersProperty().getContentCount(); i++ ){
 			LayerItem layer = mapItem.getLayer(i);
 			IQueryDefinition q2 = (IQueryDefinition) query[i];	
@@ -302,11 +304,16 @@ public class MapItemExecutor implements IReportItemExecutor{
 							}
 						}catch (Exception ex){
 							Logger.getLogger(MapItemExecutor.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
+							if (exceptions.length() != 0) exceptions.append("\n"); //$NON-NLS-1$
+							exceptions.append(layer.getLayerName() + ": " + ex.getLocalizedMessage()); //$NON-NLS-1$
 						}
 					}
 				}
 				//Configure layer styles
 				processStyles(info, layer, queryText, minValue, maxValue);
+			}
+			if (exceptions.length() > 0) {
+				throw new BirtException(exceptions.toString());
 			}
 		}		
 		
