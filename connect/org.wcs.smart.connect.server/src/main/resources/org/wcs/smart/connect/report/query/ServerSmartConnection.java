@@ -62,8 +62,8 @@ public class ServerSmartConnection extends SmartConnection {
 	}
 
 	@Override
-	public AbstractSmartBirtQuery createQuery(){
-		return new SmartQuery(this);
+	public AbstractSmartBirtQuery createQuery(String dataSetType){
+		return new SmartQuery(dataSetType, this);
 	}
 
 	@Override

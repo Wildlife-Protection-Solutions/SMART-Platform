@@ -49,7 +49,7 @@ public enum ServerQueryMetadataProvider implements IMetadataProvider {
 	INSTANCE; 
 	
 	@Override
-	public IResultSetMetaData createMetadata(Query query, GeometryColumn[] geom, SmartConnection c)
+	public IResultSetMetaData createMetadata(Query query, boolean isAttachment, GeometryColumn[] geom, SmartConnection c)
 			throws OdaException {
 		
 		if (query instanceof SummaryQuery){
@@ -72,7 +72,7 @@ public enum ServerQueryMetadataProvider implements IMetadataProvider {
 				throw new OdaException(ex);
 			}
 		}
-		return QueryMetadataProvider.INSTANCE.createMetadata(query, geom, c);
+		return QueryMetadataProvider.INSTANCE.createMetadata(query, isAttachment, geom, c);
 	}
 
 }

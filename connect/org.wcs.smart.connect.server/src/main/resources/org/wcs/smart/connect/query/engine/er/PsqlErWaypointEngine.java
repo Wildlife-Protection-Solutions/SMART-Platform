@@ -250,7 +250,7 @@ public class PsqlErWaypointEngine extends PsqlErEngine {
 		sql.append("wp_y double precision,"); //$NON-NLS-1$
 		sql.append("wp_direction real,"); //$NON-NLS-1$
 		sql.append("wp_distance real,"); //$NON-NLS-1$
-		sql.append("wp_date timestamp,"); //$NON-NLS-1$ 
+		sql.append("wp_time timestamp,"); //$NON-NLS-1$ 
 		sql.append("wp_comment varchar(4096),"); //$NON-NLS-1$
 		sql.append("wp_lastmodified timestamp,"); //$NON-NLS-1$
 		sql.append("wp_lastmodifiedby uuid"); //$NON-NLS-1$

@@ -35,7 +35,12 @@ import org.hibernate.jdbc.Work;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.wcs.smart.IProjectionProvider;
+import org.wcs.smart.er.query.model.SurveyQueryAttachmentResultItem;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
+import org.wcs.smart.query.common.engine.AttachmentResultSetIterator;
+import org.wcs.smart.query.common.engine.IAttachmentResultItem;
+import org.wcs.smart.query.common.engine.IPagedImageResultSet;
+import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.QueryColumn;
@@ -47,9 +52,11 @@ import org.wcs.smart.util.UuidUtils;
  * @author Emily
  *
  */
-public class ErWaypointQueryResult extends ErSurveyQueryResultSet {
+public class ErWaypointQueryResult extends ErSurveyQueryResultSet implements IPagedImageResultSet {
 
 	private boolean includeUuids;
+	private String imageDataTable;
+	private int imageCount;
 	
 	public ErWaypointQueryResult(PsqlErWaypointEngine engine, int itemcnt, boolean includeUuids){
 		super(engine);
@@ -141,8 +148,20 @@ public class ErWaypointQueryResult extends ErSurveyQueryResultSet {
 		});
 	}
 	
+	protected SurveyQueryAttachmentResultItem asAttachmentQueryResultItem(ResultSet rs, Session session) throws SQLException{
+		SurveyQueryAttachmentResultItem item = new SurveyQueryAttachmentResultItem();
+		setFields(item, rs);
+		setAttachmentField(session, rs, item);
+		return item;
+	}
+	
 	protected SurveyQueryResultItem asQueryResultItem(ResultSet rs) throws SQLException{
-		SurveyQueryResultItem it = new SurveyQueryResultItem();
+		SurveyQueryResultItem item = new SurveyQueryResultItem();
+		setFields(item, rs);
+		return item;
+	}
+	
+	protected void setFields(SurveyQueryResultItem it, ResultSet rs) throws SQLException{
 
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
@@ -168,19 +187,43 @@ public class ErWaypointQueryResult extends ErSurveyQueryResultSet {
 		it.setWaypointId(rs.getInt("wp_id")); //$NON-NLS-1$
 		it.setWaypointX(rs.getDouble("wp_x")); //$NON-NLS-1$
 		it.setWaypointY(rs.getDouble("wp_y")); //$NON-NLS-1$
-		it.setWaypointDateTime(rs.getTimestamp("wp_date")); //$NON-NLS-1$
+		it.setWaypointDateTime(rs.getTimestamp("wp_time")); //$NON-NLS-1$
 		it.setWaypointDirection(rs.getObject("wp_direction") == null ? null : rs.getFloat("wp_direction")); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setWaypointDistance(rs.getObject("wp_distance") == null ? null : rs.getFloat("wp_distance")); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setWaypointComment(rs.getString("wp_comment")); //$NON-NLS-1$
 		it.setLastModifiedDate(rs.getTimestamp("wp_lastmodified")); //$NON-NLS-1$
 		it.setLastModifiedBy(rs.getString("wp_lastmodifiedbyname")); //$NON-NLS-1$
 		
-		return it;
+	}
+	
+	@Override
+	public List<IAttachmentResultItem> getImageData(int offset, int pageSize){
+		throw new UnsupportedOperationException("use getImageIterator"); //$NON-NLS-1$
+	}
+	
+	@Override
+	public int getImageCount() {
+		return imageCount;
+	}
+
+	@Override
+	public IQueryResultSetIterator<? extends IAttachmentResultItem> getImageIterator(Session session) throws SQLException{
+		
+		imageDataTable = engine.createTempTableName();
+		imageCount = createImageDataWaypoint(session, engine.getQueryDataTable(), imageDataTable);
+		
+		String query = getImageQueryWaypoint(engine.getQueryDataTable(), imageDataTable);
+		return new AttachmentResultSetIterator(session, 
+				e->asAttachmentQueryResultItem(e, session),
+				()->query);
 	}
 	
 	@Override
 	public void dispose(Session session) throws SQLException {
 		super.dispose(session);
+		if (imageDataTable != null) {
+			engine.dropTable(session, imageDataTable);
+		}
 		engine.cleanUp(session);
 	}
 	

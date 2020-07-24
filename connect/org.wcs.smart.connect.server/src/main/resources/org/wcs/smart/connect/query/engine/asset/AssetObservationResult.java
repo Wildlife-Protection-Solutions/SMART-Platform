@@ -37,8 +37,13 @@ import org.hibernate.jdbc.Work;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.wcs.smart.IProjectionProvider;
+import org.wcs.smart.asset.query.model.AssetQueryAttachmentResultItem;
 import org.wcs.smart.asset.query.model.AssetQueryResultItem;
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
+import org.wcs.smart.query.common.engine.AttachmentResultSetIterator;
+import org.wcs.smart.query.common.engine.IAttachmentResultItem;
+import org.wcs.smart.query.common.engine.IPagedImageResultSet;
+import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.QueryColumn;
@@ -50,10 +55,13 @@ import org.wcs.smart.util.UuidUtils;
  * Provides ability to lazy load items from this table and sorting  functionality.
  *  
  */
-public class AssetObservationResult extends AbstractDbFeatureResultSet {
+public class AssetObservationResult extends AbstractDbFeatureResultSet implements IPagedImageResultSet {
 
 	private AssetQueryEngine engine;
 	private boolean includeUuids;
+	
+	private String imageDataTable;
+	private int imageCount;
 	
 	public AssetObservationResult(AssetQueryEngine engine, int itemCount, boolean includeUuids) {
 		this.engine = engine;
@@ -105,8 +113,42 @@ public class AssetObservationResult extends AbstractDbFeatureResultSet {
 	}
 		
 	@Override
+	public List<IAttachmentResultItem> getImageData(int offset, int pageSize){
+		throw new UnsupportedOperationException("use getImageIterator"); //$NON-NLS-1$
+	}
+	@Override
+	public int getImageCount() {
+		return imageCount;
+	}
+
+	protected AssetQueryAttachmentResultItem asAttachmentQueryResultItem(ResultSet rs, Session session) throws SQLException{
+		AssetQueryAttachmentResultItem item = new AssetQueryAttachmentResultItem();
+		((AssetObservationEngine)engine).setFields(item, rs);
+		setAttachmentField(session, rs, item);
+		return item;
+	}
+	
+	@Override
+	public IQueryResultSetIterator<? extends IAttachmentResultItem> getImageIterator(Session session) throws SQLException{
+		
+		imageDataTable = engine.createTempTableName();		
+		imageCount = createImageDataObservation(session, engine.getQueryDataTable(), imageDataTable);
+		
+		String query = getImageQueryObservation(engine.getQueryDataTable(), imageDataTable, 
+				getDistinctWaypointQuery("r.", true),  //$NON-NLS-1$
+				getDistinctWaypointQuery("r.", false)); //$NON-NLS-1$
+		
+		return new AttachmentResultSetIterator(session, 
+				e->asAttachmentQueryResultItem(e, session),
+				()->query);
+	}
+	
+	@Override
 	public void dispose(Session session) throws SQLException {
 		super.dispose(session);
+		if (imageDataTable != null) {
+			engine.dropTable(session, imageDataTable);
+		}
 		engine.cleanUp(session);
 	}
 
@@ -279,4 +321,43 @@ public class AssetObservationResult extends AbstractDbFeatureResultSet {
 		return ((AssetQueryResultItem)rs).getWaypointId() + "." + System.nanoTime(); //$NON-NLS-1$
 	}
 	
+	
+	private String getDistinctWaypointQuery(String prefix, boolean includeObservation) {
+		StringBuilder sb = new StringBuilder();
+
+		String[] selectFields = new String[] {
+				"ca_id","ca_name","wp_uuid", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				"wp_id","wp_x","wp_y","wp_time", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				"wp_direction","wp_distance", //$NON-NLS-1$ //$NON-NLS-2$
+				"wp_comment","asset_asset","asset_station", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				"asset_location","incident_length", //$NON-NLS-1$ //$NON-NLS-2$
+				"wp_lastmodified","wp_lastmodifiedbyname" //$NON-NLS-1$ //$NON-NLS-2$
+						
+		};
+		for (String s : selectFields) {
+			sb.append(prefix);
+			sb.append(s);
+			sb.append(","); //$NON-NLS-1$
+		}
+		
+		if (includeObservation) {
+			sb.append(prefix);
+			sb.append("ob_uuid,"); //$NON-NLS-1$
+			sb.append(prefix);
+			sb.append("wp_group_uuid"); //$NON-NLS-1$
+			for (int i = 0; i < engine.getCategoryCnt(); i ++){
+				sb.append(","); //$NON-NLS-1$
+				sb.append(prefix);
+				sb.append("category_" + i); //$NON-NLS-1$
+			}
+		
+		}else {
+			sb.append("cast(null as uuid) as ob_uuid,"); //$NON-NLS-1$
+			sb.append("cast(null as uuid) as wp_group_uuid"); //$NON-NLS-1$
+			for (int i = 0; i < engine.getCategoryCnt(); i ++){
+				sb.append(",cast(null as varchar(32000)) as category_" + i); //$NON-NLS-1$
+			}
+		}
+		return sb.toString();
+	}
 }

@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.connect.query.engine;
 
+import java.math.BigInteger;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DateFormat;
@@ -28,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.hibernate.Session;
@@ -38,11 +40,15 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.connect.api.QueryApi;
 import org.wcs.smart.connect.api.QueryApi.Direction;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.QueryManager;
 import org.wcs.smart.connect.query.columns.QueryColumnUtils;
+import org.wcs.smart.observation.model.ObservationAttachment;
+import org.wcs.smart.observation.model.WaypointAttachment;
+import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.engine.ITablePagedQueryResultSet;
@@ -356,5 +362,118 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 		
 	}
 	
+	protected void setAttachmentField(Session session, ResultSet rs, IAttachmentResultItem item) throws SQLException {
+		UUID auuid = (UUID) rs.getObject("attach_uuid"); //$NON-NLS-1$
+		ISmartAttachment a = session.get(ObservationAttachment.class, auuid);
+		if (a == null) {
+			a = session.get(WaypointAttachment.class, auuid);
+		}
+		try {
+			a.computeFileLocation(session);
+		} catch (Exception e) {
+			//TODO: log this
+		}
+		item.setAttachment(a);
+	}
 	
+	protected String getImageQueryWaypoint(String datatable, String imagetable) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("SELECT r.*, b.attach_uuid as attach_uuid FROM " ); //$NON-NLS-1$
+		sb.append(datatable + " r "); //$NON-NLS-1$
+		sb.append(" join " + imagetable + " b "); //$NON-NLS-1$ //$NON-NLS-2$
+		sb.append("on r.wp_uuid = b.wp_uuid "); //$NON-NLS-1$
+		
+		return sb.toString();
+	}
+	
+	protected String getImageQueryObservation(String datatable, String imagetable, String selectpartwp, String selectpartobs) {
+		StringBuilder sb = new StringBuilder();
+		
+		sb.append("SELECT " + selectpartwp + ", b.attach_uuid as attach_uuid FROM " ); //$NON-NLS-1$ //$NON-NLS-2$
+		sb.append(datatable + " r "); //$NON-NLS-1$
+		sb.append(" join " + imagetable + " b "); //$NON-NLS-1$ //$NON-NLS-2$
+		sb.append("on ( b.ob_uuid is not null and r.ob_uuid = b.ob_uuid ) "); //$NON-NLS-1$
+		
+		sb.append(" UNION "); //$NON-NLS-1$
+
+		sb.append("SELECT foo.*, b.attach_uuid as attach_uuid FROM "); //$NON-NLS-1$
+		sb.append("(SELECT DISTINCT " + selectpartobs + " FROM " + datatable + " r ) foo"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sb.append(" join " + imagetable + " b "); //$NON-NLS-1$ //$NON-NLS-2$
+		sb.append(" ON b.wp_uuid = foo.wp_uuid and b.ob_uuid is null"); //$NON-NLS-1$
+		
+		return sb.toString();
+	}
+	
+	protected int createImageDataObservation(Session session, String dataTable, String imageTempTable) {
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append("CREATE TABLE "); //$NON-NLS-1$
+		sb.append(imageTempTable);
+		sb.append("(attach_uuid uuid, "); //$NON-NLS-1$
+		sb.append("wp_uuid uuid, "); //$NON-NLS-1$
+		sb.append("ob_uuid uuid)"); //$NON-NLS-1$
+		session.createNativeQuery(sb.toString()).executeUpdate();
+		
+		sb = new StringBuilder();
+		sb.append(" INSERT INTO "); //$NON-NLS-1$
+		sb.append(imageTempTable + "(attach_uuid, wp_uuid, ob_uuid) "); //$NON-NLS-1$
+		sb.append(" SELECT z.attach_uuid, z.wp_uuid, z.ob_uuid FROM ( "); //$NON-NLS-1$
+		sb.append("SELECT c.uuid as attach_uuid, a.wp_time, a.wp_id, a.wp_uuid as wp_uuid, a.ob_uuid as ob_uuid" ); //$NON-NLS-1$
+		sb.append(" FROM "); //$NON-NLS-1$
+		sb.append( dataTable + " a "); //$NON-NLS-1$
+		sb.append(" JOIN "); //$NON-NLS-1$
+		sb.append(" smart.observation_attachment c on a.ob_uuid = c.obs_uuid "); //$NON-NLS-1$
+		sb.append( " UNION "); //$NON-NLS-1$
+		sb.append("SELECT c.uuid as attach_uuid, a.wp_time, a.wp_id, a.wp_uuid as wp_uuid, cast(null as uuid) as ob_uuid" ); //$NON-NLS-1$
+		sb.append(" FROM "); //$NON-NLS-1$
+		sb.append( dataTable + " a "); //$NON-NLS-1$
+		sb.append(" JOIN "); //$NON-NLS-1$
+		sb.append(" smart.wp_attachments c on c.wp_uuid = a.wp_uuid "); //$NON-NLS-1$
+		sb.append(" ) z ORDER BY z.wp_time desc, z.wp_id "); //$NON-NLS-1$
+
+		session.createNativeQuery(sb.toString()).executeUpdate();
+		
+		sb = new StringBuilder();
+		sb.append("SELECT count(*) FROM "); //$NON-NLS-1$
+		sb.append(imageTempTable);
+		
+		int imageDataCnt = ((BigInteger) session.createNativeQuery(sb.toString()).uniqueResult()).intValue();
+		return imageDataCnt;
+		
+	}
+	
+	protected int createImageDataWaypoint(Session session, String dataTable, String imageTempTable) {
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append("CREATE TABLE "); //$NON-NLS-1$
+		sb.append(imageTempTable);
+		sb.append("(attach_uuid uuid, wp_uuid uuid)"); //$NON-NLS-1$
+		session.createNativeQuery(sb.toString()).executeUpdate();
+		
+		sb = new StringBuilder();
+		sb.append(" INSERT INTO "); //$NON-NLS-1$
+		sb.append(imageTempTable + " (attach_uuid, wp_uuid) "); //$NON-NLS-1$
+		sb.append(" SELECT z.uuid, z.wp_uuid "); //$NON-NLS-1$
+		sb.append("FROM "); //$NON-NLS-1$
+		sb.append(" (SELECT distinct e.uuid, a.wp_time, a.wp_id, a.wp_uuid FROM "); //$NON-NLS-1$
+		sb.append(dataTable);
+		sb.append(" a join "); //$NON-NLS-1$
+		sb.append("(SELECT uuid, wp_uuid as wp_uuid FROM smart.wp_attachments "); //$NON-NLS-1$
+		sb.append(" UNION "); //$NON-NLS-1$
+		sb.append("SELECT b.uuid, g.wp_uuid as wp_uuid FROM "); //$NON-NLS-1$
+		sb.append(" smart.wp_observation_group g join smart.wp_observation c on c.wp_group_uuid = g.uuid "); //$NON-NLS-1$
+		sb.append(" join smart.observation_attachment b on c.uuid = b.obs_uuid) e "); //$NON-NLS-1$
+		sb.append("on a.wp_uuid = e.wp_uuid"); //$NON-NLS-1$
+		sb.append(" ORDER BY a.wp_time desc, a.wp_id ) z "); //$NON-NLS-1$
+
+		session.createNativeQuery(sb.toString()).executeUpdate();
+		
+		sb = new StringBuilder();
+		sb.append("SELECT count(*) FROM "); //$NON-NLS-1$
+		sb.append(imageTempTable);
+		
+		int imageDataCnt = ((BigInteger) session.createNativeQuery(sb.toString()).uniqueResult()).intValue();		
+		return imageDataCnt;
+		
+	}
 }

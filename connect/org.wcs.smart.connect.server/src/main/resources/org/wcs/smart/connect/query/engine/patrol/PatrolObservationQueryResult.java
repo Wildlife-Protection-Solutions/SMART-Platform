@@ -39,7 +39,12 @@ import org.locationtech.jts.geom.Geometry;
 import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
 import org.wcs.smart.patrol.model.PatrolType;
+import org.wcs.smart.patrol.query.model.PatrolQueryAttachmentResultItem;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
+import org.wcs.smart.query.common.engine.AttachmentResultSetIterator;
+import org.wcs.smart.query.common.engine.IAttachmentResultItem;
+import org.wcs.smart.query.common.engine.IPagedImageResultSet;
+import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.QueryColumn;
@@ -51,10 +56,13 @@ import org.wcs.smart.util.UuidUtils;
  * @author Emily
  *
  */
-public class PatrolObservationQueryResult extends AbstractDbFeatureResultSet {
+public class PatrolObservationQueryResult extends AbstractDbFeatureResultSet implements IPagedImageResultSet {
 
 	private PsqlPatrolObservationEngine engine;
 	private boolean includeUuids;
+	
+	private String imageDataTable;
+	private int imageCount;
 	
 	public PatrolObservationQueryResult(PsqlPatrolObservationEngine engine, int itemcnt, boolean includeUuids){
 		this.engine = engine;
@@ -258,8 +266,21 @@ public class PatrolObservationQueryResult extends AbstractDbFeatureResultSet {
 		return ((PatrolQueryResultItem)rs).getWaypointId() + "." + System.nanoTime(); //$NON-NLS-1$
 	}
 	
+	protected PatrolQueryAttachmentResultItem asAttachmentQueryResultItem(ResultSet rs, Session session) throws SQLException{
+		PatrolQueryAttachmentResultItem item = new PatrolQueryAttachmentResultItem();
+		setFields(item, rs);
+		setAttachmentField(session, rs, item);
+		return item;
+	}
+	
 	protected PatrolQueryResultItem asQueryResultItem(ResultSet rs) throws SQLException{
-		PatrolQueryResultItem it = new PatrolQueryResultItem();
+		PatrolQueryResultItem item = new PatrolQueryResultItem();
+		setFields(item, rs);
+		return item;
+	}
+	
+	protected void setFields(PatrolQueryResultItem it, ResultSet rs) throws SQLException{
+		
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
 		it.setPatrolUuid((UUID)rs.getObject("p_uuid")); //$NON-NLS-1$
@@ -312,17 +333,88 @@ public class PatrolObservationQueryResult extends AbstractDbFeatureResultSet {
 		}
 		
 		it.setCategory(categories.toArray(new String[categories.size()]));
-		return it;
 	}
+	
+	@Override
+	public List<IAttachmentResultItem> getImageData(int offset, int pageSize){
+		throw new UnsupportedOperationException("use getImageIterator"); //$NON-NLS-1$
+	}
+	@Override
+	public int getImageCount() {
+		return imageCount;
+	}
+
+	@Override
+	public IQueryResultSetIterator<? extends IAttachmentResultItem> getImageIterator(Session session) throws SQLException{
+		
+		imageDataTable = engine.createTempTableName();		
+		imageCount = createImageDataObservation(session, engine.getQueryDataTable(), imageDataTable);
+		
+		String query = getImageQueryObservation(engine.getQueryDataTable(), imageDataTable, 
+				getDistinctWaypointQuery("r.", true),  //$NON-NLS-1$
+				getDistinctWaypointQuery("r.", false)); //$NON-NLS-1$
+		
+		return new AttachmentResultSetIterator(session, 
+				e->asAttachmentQueryResultItem(e, session),
+				()->query);
+	}
+	
 	
 	@Override
 	public void dispose(Session session) throws SQLException {
 		super.dispose(session);
+		if (imageDataTable != null) {
+			engine.dropTable(session, imageDataTable);
+		}
 		engine.cleanUp(session);
 	}
 
 	@Override
 	public void updateSortColumn(Session session) throws SQLException {
 		updateSortColumnGeneral(session, engine.getQueryDataTable(), engine.getCaFilter(), "value", ".ob_", "_LIST", "_TREE", "uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+	}
+	
+	private String getDistinctWaypointQuery(String prefix, boolean includeObservation) {
+		StringBuilder sb = new StringBuilder();
+
+		String[] selectFields = new String[] {
+				"ca_id","ca_name","p_uuid","p_id", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				"p_startdate","p_enddate","p_station", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				"p_team","p_objective","pl_mandate", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				"p_type","p_armed","p_transporttype", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				"p_legid","wp_date","p_leader", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				"p_pilot","wp_uuid","wp_id", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				"wp_x","wp_y","wp_time", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				"wp_lastmodified","wp_lastmodifiedbyname", //$NON-NLS-1$ //$NON-NLS-2$
+				"wp_direction","wp_distance","wp_comment" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		};
+		for (String s : selectFields) {
+			sb.append(prefix);
+			sb.append(s);
+			sb.append(","); //$NON-NLS-1$
+		}
+		
+		if (includeObservation) {
+			sb.append(prefix);
+			sb.append("ob_observer,"); //$NON-NLS-1$
+			sb.append(prefix);
+			sb.append("ob_uuid,"); //$NON-NLS-1$
+			sb.append(prefix);
+			sb.append("wp_group_uuid"); //$NON-NLS-1$
+			for (int i = 0; i < engine.getCategoryCnt(); i ++){
+				sb.append(","); //$NON-NLS-1$
+				sb.append(prefix);
+				sb.append("category_" + i); //$NON-NLS-1$
+			}
+		
+		}else {
+			sb.append("cast(null as varchar(32000)) as ob_observer,"); //$NON-NLS-1$
+			sb.append("cast(null as uuid) as ob_uuid,"); //$NON-NLS-1$
+			sb.append("cast(null as uuid) as wp_group_uuid"); //$NON-NLS-1$
+			for (int i = 0; i < engine.getCategoryCnt(); i ++){
+				sb.append(",cast(null as varchar(32000)) as category_" + i); //$NON-NLS-1$
+			}
+		}
+		return sb.toString();
 	}
 }

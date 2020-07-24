@@ -36,7 +36,12 @@ import org.locationtech.jts.geom.Geometry;
 import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
 import org.wcs.smart.patrol.model.PatrolType;
+import org.wcs.smart.patrol.query.model.PatrolQueryAttachmentResultItem;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
+import org.wcs.smart.query.common.engine.AttachmentResultSetIterator;
+import org.wcs.smart.query.common.engine.IAttachmentResultItem;
+import org.wcs.smart.query.common.engine.IPagedImageResultSet;
+import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.QueryColumn;
@@ -48,10 +53,13 @@ import org.wcs.smart.util.UuidUtils;
  * @author Emily
  *
  */
-public class PatrolWaypointQueryResult extends AbstractDbFeatureResultSet {
+public class PatrolWaypointQueryResult extends AbstractDbFeatureResultSet implements IPagedImageResultSet {
 
 	private PsqlPatrolWaypointEngine engine;
 	private boolean includeUuids;
+	
+	private String imageDataTable;
+	private int imageCount;
 	
 	public PatrolWaypointQueryResult(PsqlPatrolWaypointEngine engine, int itemcnt, boolean includeUuids){
 		this.engine = engine;
@@ -125,8 +133,20 @@ public class PatrolWaypointQueryResult extends AbstractDbFeatureResultSet {
 		return ((PatrolQueryResultItem)rs).getWaypointId() + "." + System.nanoTime(); //$NON-NLS-1$
 	}
 	
+	protected PatrolQueryAttachmentResultItem asAttachmentQueryResultItem(ResultSet rs, Session session) throws SQLException{
+		PatrolQueryAttachmentResultItem item = new PatrolQueryAttachmentResultItem();
+		setFields(item, rs);
+		setAttachmentField(session, rs, item);
+		return item;
+	}
+	
 	protected PatrolQueryResultItem asQueryResultItem(ResultSet rs) throws SQLException{
-		PatrolQueryResultItem it = new PatrolQueryResultItem();
+		PatrolQueryResultItem item = new PatrolQueryResultItem();
+		setFields(item, rs);
+		return item;
+	}
+	
+	protected void setFields(PatrolQueryResultItem it, ResultSet rs) throws SQLException{
 
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
@@ -157,12 +177,37 @@ public class PatrolWaypointQueryResult extends AbstractDbFeatureResultSet {
 		it.setLastModifiedDate(rs.getTimestamp("wp_lastmodified")); //$NON-NLS-1$
 		it.setLastModifiedBy(rs.getString("wp_lastmodifiedbyname")); //$NON-NLS-1$
 		
-		return it;
 	}
+	
+	@Override
+	public List<IAttachmentResultItem> getImageData(int offset, int pageSize){
+		throw new UnsupportedOperationException("use getImageIterator"); //$NON-NLS-1$
+	}
+	
+	@Override
+	public int getImageCount() {
+		return imageCount;
+	}
+
+	@Override
+	public IQueryResultSetIterator<? extends IAttachmentResultItem> getImageIterator(Session session) throws SQLException{
+		
+		imageDataTable = engine.createTempTableName();
+		imageCount = createImageDataWaypoint(session, engine.getQueryDataTable(), imageDataTable);
+		
+		String query = getImageQueryWaypoint(engine.getQueryDataTable(), imageDataTable);
+		return new AttachmentResultSetIterator(session, 
+				e->asAttachmentQueryResultItem(e, session),
+				()->query);
+	}
+	
 	
 	@Override
 	public void dispose(Session session) throws SQLException {
 		super.dispose(session);
+		if (imageDataTable != null) {
+			engine.dropTable(session, imageDataTable);
+		}
 		engine.cleanUp(session);
 	}
 	

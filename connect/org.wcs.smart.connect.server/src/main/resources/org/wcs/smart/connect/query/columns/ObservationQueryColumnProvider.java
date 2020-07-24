@@ -122,6 +122,8 @@ public class ObservationQueryColumnProvider implements IObservationQueryColumnPr
 				add = QueryColumnUtils.trackDistanceDirection(ops);
 			}else if (item == FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER){
 				add = false;
+			}else if (item == FixedQueryColumn.FixedColumns.OBS_GROUP_ID){
+				add = false;
 			}
 			if (add){
 				keys.add(new FixedQueryColumn(item, l));

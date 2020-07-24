@@ -35,7 +35,12 @@ import org.hibernate.jdbc.Work;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.wcs.smart.IProjectionProvider;
+import org.wcs.smart.er.query.model.SurveyQueryAttachmentResultItem;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
+import org.wcs.smart.query.common.engine.AttachmentResultSetIterator;
+import org.wcs.smart.query.common.engine.IAttachmentResultItem;
+import org.wcs.smart.query.common.engine.IPagedImageResultSet;
+import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.QueryColumn;
@@ -47,9 +52,11 @@ import org.wcs.smart.util.UuidUtils;
  * @author Emily
  *
  */
-public class ErObservationQueryResult extends ErSurveyQueryResultSet {
+public class ErObservationQueryResult extends ErSurveyQueryResultSet implements IPagedImageResultSet {
 
 	private boolean includeUuids;
+	private String imageDataTable;
+	private int imageCount;
 	
 	public ErObservationQueryResult(PsqlErObservationEngine engine, int itemcnt, boolean includeUuids){
 		super(engine);
@@ -156,8 +163,20 @@ public class ErObservationQueryResult extends ErSurveyQueryResultSet {
 		});
 	}
 	
+	protected SurveyQueryAttachmentResultItem asAttachmentQueryResultItem(ResultSet rs, Session session) throws SQLException{
+		SurveyQueryAttachmentResultItem item = new SurveyQueryAttachmentResultItem();
+		setFields(item, rs);
+		setAttachmentField(session, rs, item);
+		return item;
+	}
+	
 	protected SurveyQueryResultItem asQueryResultItem(ResultSet rs) throws SQLException{
-		SurveyQueryResultItem it = new SurveyQueryResultItem();
+		SurveyQueryResultItem item = new SurveyQueryResultItem();
+		setFields(item, rs);
+		return item;
+	}
+	
+	protected void setFields(SurveyQueryResultItem it, ResultSet rs) throws SQLException{
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
 		
@@ -182,7 +201,7 @@ public class ErObservationQueryResult extends ErSurveyQueryResultSet {
 		it.setWaypointId(rs.getInt("wp_id")); //$NON-NLS-1$
 		it.setWaypointX(rs.getDouble("wp_x")); //$NON-NLS-1$
 		it.setWaypointY(rs.getDouble("wp_y")); //$NON-NLS-1$
-		it.setWaypointDateTime(rs.getTimestamp("wp_date")); //$NON-NLS-1$
+		it.setWaypointDateTime(rs.getTimestamp("wp_time")); //$NON-NLS-1$
 		it.setWaypointDirection(rs.getObject("wp_direction") == null ? null : rs.getFloat("wp_direction")); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setWaypointDistance(rs.getObject("wp_distance") == null ? null : rs.getFloat("wp_distance")); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setWaypointComment(rs.getString("wp_comment")); //$NON-NLS-1$
@@ -203,13 +222,39 @@ public class ErObservationQueryResult extends ErSurveyQueryResultSet {
 		}
 		
 		it.setCategory(categories.toArray(new String[categories.size()]));
-
-		return it;
 	}
+	
+	@Override
+	public List<IAttachmentResultItem> getImageData(int offset, int pageSize){
+		throw new UnsupportedOperationException("use getImageIterator"); //$NON-NLS-1$
+	}
+	@Override
+	public int getImageCount() {
+		return imageCount;
+	}
+
+	@Override
+	public IQueryResultSetIterator<? extends IAttachmentResultItem> getImageIterator(Session session) throws SQLException{
+		
+		imageDataTable = engine.createTempTableName();		
+		imageCount = createImageDataObservation(session, engine.getQueryDataTable(), imageDataTable);
+		
+		String query = getImageQueryObservation(engine.getQueryDataTable(), imageDataTable, 
+				getDistinctWaypointQuery("r.", true),  //$NON-NLS-1$
+				getDistinctWaypointQuery("r.", false)); //$NON-NLS-1$
+		
+		return new AttachmentResultSetIterator(session, 
+				e->asAttachmentQueryResultItem(e, session),
+				()->query);
+	}
+	
 	
 	@Override
 	public void dispose(Session session) throws SQLException {
 		super.dispose(session);
+		if (imageDataTable != null) {
+			engine.dropTable(session, imageDataTable);
+		}
 		engine.cleanUp(session);
 	}
 	
@@ -217,7 +262,48 @@ public class ErObservationQueryResult extends ErSurveyQueryResultSet {
 	@Override
 	public void updateSortColumn(Session session) throws SQLException {
 		updateSortColumnGeneral(session, engine.getQueryDataTable(), engine.getCaFilter(), "value", ".ob_", "_LIST", "_TREE", "uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+	}
+	
+	private String getDistinctWaypointQuery(String prefix, boolean includeObservation) {
+		StringBuilder sb = new StringBuilder();
+
+		String[] selectFields = new String[] {
+				"ca_id","ca_name","mission_uuid","mission_enddate", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				"mission_id","mission_startdate","mission_leader", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				"surveydesign_name","surveydesign_enddate", //$NON-NLS-1$ //$NON-NLS-2$
+				"surveydesign_startdate","survey_id","survey_enddate", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				"survey_startdate","samplingunit_uuid","samplingunit_id",  //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
+				"wp_uuid","wp_id","wp_x","wp_y","wp_time","wp_direction", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+				"wp_distance","wp_comment","wp_lastmodified","wp_lastmodifiedbyname" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		};
+		for (String s : selectFields) {
+			sb.append(prefix);
+			sb.append(s);
+			sb.append(","); //$NON-NLS-1$
+		}
 		
+		if (includeObservation) {
+			sb.append(prefix);
+			sb.append("ob_observer,"); //$NON-NLS-1$
+			sb.append(prefix);
+			sb.append("ob_uuid,"); //$NON-NLS-1$
+			sb.append(prefix);
+			sb.append("wp_group_uuid"); //$NON-NLS-1$
+			for (int i = 0; i < engine.getCategoryCnt(); i ++){
+				sb.append(","); //$NON-NLS-1$
+				sb.append(prefix);
+				sb.append("category_" + i); //$NON-NLS-1$
+			}
+		
+		}else {
+			sb.append("cast(null as varchar(32000)) as ob_observer,"); //$NON-NLS-1$
+			sb.append("cast(null as uuid) as ob_uuid,"); //$NON-NLS-1$
+			sb.append("cast(null as uuid) as wp_group_uuid"); //$NON-NLS-1$
+			for (int i = 0; i < engine.getCategoryCnt(); i ++){
+				sb.append(",cast(null as varchar(32000)) as category_" + i); //$NON-NLS-1$
+			}
+		}
+		return sb.toString();
 	}
 }
 

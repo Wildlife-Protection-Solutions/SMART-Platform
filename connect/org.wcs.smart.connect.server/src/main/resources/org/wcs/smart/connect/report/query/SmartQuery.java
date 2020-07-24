@@ -43,9 +43,8 @@ public class SmartQuery extends AbstractSmartBirtQuery {
 	/**
 	 * Creates a new smart query
 	 */
-	public SmartQuery(SmartConnection connection) {
-		super(connection);
-		
+	public SmartQuery(String dataSetType, SmartConnection connection) {
+		super(dataSetType, connection);
 	}
 
 	
@@ -75,6 +74,8 @@ public class SmartQuery extends AbstractSmartBirtQuery {
 		}else if (queryTypeKey.equals("WAYPOINT")){ //$NON-NLS-1$
 			queryTypeKey = "patrolwaypoint"; //$NON-NLS-1$
 		}
+
+		this.isAttachment = dataSetType.equalsIgnoreCase(AbstractSmartBirtQuery.SMART_ATTACHMENT_DATASET_TYPE);
 
 		try {
 			this.uuid = UuidUtils.stringToUuid(bits[1]);

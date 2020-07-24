@@ -306,7 +306,7 @@ public class AssetObservationEngine extends AssetQueryEngine {
 		sql.append("wp_y double precision,"); //$NON-NLS-1$
 		sql.append("wp_direction double precision,"); //$NON-NLS-1$
 		sql.append("wp_distance double precision,"); //$NON-NLS-1$
-		sql.append("wp_date timestamp,"); //$NON-NLS-1$
+		sql.append("wp_time timestamp,"); //$NON-NLS-1$
 		sql.append("wp_comment varchar(4096),"); //$NON-NLS-1$
 		sql.append("wp_lastmodified timestamp,"); //$NON-NLS-1$
 		sql.append("wp_lastmodifiedby uuid,"); //$NON-NLS-1$
@@ -318,9 +318,16 @@ public class AssetObservationEngine extends AssetQueryEngine {
 		return sql.toString();
 	}
 	
+
 	@Override
 	protected AssetQueryResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException{
-		AssetQueryResultItem it = new AssetQueryResultItem();
+		AssetQueryResultItem item = new AssetQueryResultItem();
+		setFields(item, rs);
+		return item;
+	}
+	
+	protected void setFields(AssetQueryResultItem it, ResultSet rs) throws SQLException{
+	
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
 		
@@ -328,7 +335,7 @@ public class AssetObservationEngine extends AssetQueryEngine {
 		it.setWaypointId(rs.getInt("wp_id")); //$NON-NLS-1$
 		it.setWaypointX(rs.getDouble("wp_x")); //$NON-NLS-1$
 		it.setWaypointY(rs.getDouble("wp_y")); //$NON-NLS-1$
-		it.setWaypointDate(rs.getTimestamp("wp_date")); //$NON-NLS-1$
+		it.setWaypointDate(rs.getTimestamp("wp_time")); //$NON-NLS-1$
 		it.setWaypointDirection(rs.getObject("wp_direction") == null ? null : rs.getFloat("wp_direction")); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setWaypointDistance(rs.getObject("wp_distance") == null ? null : rs.getFloat("wp_distance")); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setWaypointComment(rs.getString("wp_comment")); //$NON-NLS-1$
@@ -358,8 +365,6 @@ public class AssetObservationEngine extends AssetQueryEngine {
 		}
 		
 		it.setCategory(categories.toArray(new String[categories.size()]));
-		return it;
-
 	}
 
 	public int getCategoryCount(){

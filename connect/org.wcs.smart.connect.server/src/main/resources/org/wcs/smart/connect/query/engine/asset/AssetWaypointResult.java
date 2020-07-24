@@ -34,17 +34,25 @@ import org.hibernate.jdbc.ReturningWork;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.wcs.smart.IProjectionProvider;
+import org.wcs.smart.asset.query.model.AssetQueryAttachmentResultItem;
 import org.wcs.smart.asset.query.model.AssetQueryResultItem;
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
+import org.wcs.smart.query.common.engine.AttachmentResultSetIterator;
+import org.wcs.smart.query.common.engine.IAttachmentResultItem;
+import org.wcs.smart.query.common.engine.IPagedImageResultSet;
+import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.util.UuidUtils;
 
-public class AssetWaypointResult extends AbstractDbFeatureResultSet {
+public class AssetWaypointResult extends AbstractDbFeatureResultSet implements IPagedImageResultSet {
 
 	protected AssetQueryEngine engine;
 	private boolean includeUuids;
+	
+	private String imageDataTable;
+	private int imageCount;
 	
 	public AssetWaypointResult(AssetWaypointEngine engine, int itemcnt, boolean includeUuids){
 		this.engine = engine;
@@ -101,8 +109,41 @@ public class AssetWaypointResult extends AbstractDbFeatureResultSet {
 	}
 	
 	@Override
+	public List<IAttachmentResultItem> getImageData(int offset, int pageSize){
+		throw new UnsupportedOperationException("use getImageIterator"); //$NON-NLS-1$
+	}
+	
+	@Override
+	public int getImageCount() {
+		return imageCount;
+	}
+
+	protected AssetQueryAttachmentResultItem asAttachmentQueryResultItem(ResultSet rs, Session session) throws SQLException{
+		AssetQueryAttachmentResultItem item = new AssetQueryAttachmentResultItem();
+		((AssetWaypointEngine)engine).setFields(item, rs);
+		setAttachmentField(session, rs, item);
+		return item;
+	}
+	
+	
+	@Override
+	public IQueryResultSetIterator<? extends IAttachmentResultItem> getImageIterator(Session session) throws SQLException{
+		
+		imageDataTable = engine.createTempTableName();
+		imageCount = createImageDataWaypoint(session, engine.getQueryDataTable(), imageDataTable);
+		
+		String query = getImageQueryWaypoint(engine.getQueryDataTable(), imageDataTable);
+		return new AttachmentResultSetIterator(session, 
+				e->asAttachmentQueryResultItem(e, session),
+				()->query);
+	}
+	
+	@Override
 	public void dispose(Session session) throws SQLException {
 		super.dispose(session);
+		if (imageDataTable != null) {
+			engine.dropTable(session, imageDataTable);
+		}
 		engine.cleanUp(session);
 	}
 	
