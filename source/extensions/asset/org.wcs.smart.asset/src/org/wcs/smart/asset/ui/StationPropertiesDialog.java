@@ -35,6 +35,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -64,6 +65,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetAttribute;
@@ -151,6 +153,9 @@ public class StationPropertiesDialog extends SmartStyledTitleDialog {
 				return;
 			}
 		}
+		
+		context.get(IEventBroker.class).post(AssetEvents.ASSETSTATIONLOCATION_CONFIG_MODIFIED, null);
+
 		getButton(IDialogConstants.OK_ID).setEnabled(false);
 	}
 	

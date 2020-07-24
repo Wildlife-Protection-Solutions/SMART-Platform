@@ -25,10 +25,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -40,6 +43,8 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
+import org.osgi.service.event.EventHandler;
+import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetStation;
@@ -76,6 +81,8 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 	
 	private AreaTreeNode areaNode;
 	
+	private @Inject IEventBroker eventBroker;
+
 	/*
 	 * listener for refreshing areas
 	 */
@@ -136,6 +143,15 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 		createAddButton(filterTreeViewer, main);
 		
 		refreshPanel();
+		
+		EventHandler handler = event->refreshPanel();
+		eventBroker.subscribe(AssetEvents.ASSET_ALL, handler);
+		eventBroker.subscribe(AssetEvents.ASSETSTATION_ALL, handler);
+		eventBroker.subscribe(AssetEvents.ASSETSTATIONLOCATION_ALL, handler);
+		eventBroker.subscribe(AssetEvents.ASSETTYPE_ALL, handler);
+		eventBroker.subscribe(AssetEvents.ASSETSTATIONLOCATION_CONFIG_MODIFIED, handler);
+		
+		
 		return main;
 	}
 	

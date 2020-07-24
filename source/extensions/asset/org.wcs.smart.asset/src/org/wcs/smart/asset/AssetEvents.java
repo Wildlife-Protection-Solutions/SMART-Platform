@@ -70,6 +70,13 @@ public class AssetEvents {
 	public static final String ASSETDEPLOYMENT_DELETE = "ASSETDEPLOYMENT/DELETE"; //$NON-NLS-1$
 	public static final String ASSETDEPLOYMENT_MODIFIED = "ASSETDEPLOYMENT/UPDATED"; //$NON-NLS-1$
 	
+	
+	/**
+	 * Event fired when configuration (attributes) associated
+	 * with stations or location is modified.  No payload is provided.
+	 */
+	public static final String ASSETSTATIONLOCATION_CONFIG_MODIFIED = "ASSETSTATIONLOCATIONCONFIG/UPDATED"; //$NON-NLS-1$
+	
 	/**
 	 * when asset data has modified (waypoints, links etc) payload is null
 	 */

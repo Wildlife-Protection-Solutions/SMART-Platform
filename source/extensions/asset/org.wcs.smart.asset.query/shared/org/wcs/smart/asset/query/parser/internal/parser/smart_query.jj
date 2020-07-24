@@ -133,12 +133,12 @@ TOKEN :
  | < ATT_TREE_KEY : "attribute:t:"< DM_KEY > >
  | < ATT_DATE_KEY : "attribute:d:"< DM_KEY > >
 
- | < ASSETSRC : "a" | "s" | "l" | "d" >
- | < ASSETATT_STR_KEY : "assetattribute:"< ASSETSRC >":s:"< DM_KEY > >
- | < ASSETATT_VALUE_KEY : "assetattribute:"< ASSETSRC >":n:"< DM_KEY > >
- | < ASSETATT_BOOL_KEY : "assetattribute:"< ASSETSRC >":b:"< DM_KEY > >
- | < ASSETATT_LIST_KEY : "assetattribute:"< ASSETSRC >":l:"< DM_KEY > >
- | < ASSETATT_DATE_KEY : "assetattribute:"< ASSETSRC >":d:"< DM_KEY > >
+ 
+ | < ASSETATT_STR_KEY : "assetattribute:" ( "a" | "s" | "l" | "d" ) ":s:"< DM_KEY > >
+ | < ASSETATT_VALUE_KEY : "assetattribute:" ( "a" | "s" | "l" | "d" ) ":n:"< DM_KEY > >
+ | < ASSETATT_BOOL_KEY : "assetattribute:" ( "a" | "s" | "l" | "d" ) ":b:"< DM_KEY > >
+ | < ASSETATT_LIST_KEY : "assetattribute:" ( "a" | "s" | "l" | "d" ) ":l:"< DM_KEY > >
+ | < ASSETATT_DATE_KEY : "assetattribute:" ( "a" | "s" | "l" | "d" ) ":d:"< DM_KEY > >
  
  | <CAT_ATT_STR_KEY : "category:"<DM_KEY>":attribute:s:"<DM_KEY>>
  | <CAT_ATT_VALUE_KEY : "category:"<DM_KEY>":attribute:n:"<DM_KEY>>
