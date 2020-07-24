@@ -26,6 +26,11 @@
     			<version>${smart.version}</version>
 		</dependency>
 		<dependency>
+    			<groupId>org.wcs.smart.core</groupId>
+    			<artifactId>org.wcs.smart.core.query</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>org.geotools</groupId>
 			<artifactId>gt-geotiff</artifactId>
 			<version>${geotools.version}</version>
