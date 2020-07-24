@@ -312,11 +312,11 @@ public class MapItemExecutor implements IReportItemExecutor{
 				//Configure layer styles
 				processStyles(info, layer, queryText, minValue, maxValue);
 			}
-			if (exceptions.length() > 0) {
-				throw new BirtException(exceptions.toString());
-			}
 		}		
 		
+		if (exceptions.length() > 0) {
+			throw new BirtException(exceptions.toString());
+		}
 		
 		ByteArrayOutputStream stream = createMap(configuration, mapItem);
 		return stream.toByteArray();
