@@ -119,7 +119,7 @@ public class PawsTiffGeoResource extends AbstractRasterGeoResource {
 		if (this.reader == null) {
 			AbstractGridFormat frmt = (AbstractGridFormat) ((PawsService) service).getFormat();
 			if (Files.exists(file)) {
-				this.reader = (AbstractGridCoverage2DReader) frmt.getReader(file.toFile());
+				this.reader = (AbstractGridCoverage2DReader) frmt.getReader(file.toAbsolutePath().normalize().toFile());
 			}else {
 				throw new FileNotFoundException(file.toString());
 			}
@@ -144,7 +144,7 @@ public class PawsTiffGeoResource extends AbstractRasterGeoResource {
 		StyleFactory sf = CommonFactoryFinder.getStyleFactory(GeoTools.getDefaultHints());
 		StyleBuilder sb = new StyleBuilder(sf);
 		
-		String[] labels = new String[] {"-no data-","","","","","","","","","","",""}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$ //$NON-NLS-10$ //$NON-NLS-11$ //$NON-NLS-12$ //$NON-NLS-13$
+		String[] labels = new String[] {"-no data-","","","","","","","","","","",""}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$ //$NON-NLS-10$ //$NON-NLS-11$ //$NON-NLS-12$
 		double[] values = new double[] {-9999,0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8, 0.9,1.0};
 		Color[] colors = new Color[] {
 				new Color(255,255,255,0),
