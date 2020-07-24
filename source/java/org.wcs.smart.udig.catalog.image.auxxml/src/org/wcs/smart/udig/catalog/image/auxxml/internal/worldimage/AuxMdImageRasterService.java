@@ -82,7 +82,6 @@ public class AuxMdImageRasterService extends AbstractRasterService {
             	    try {
 						prjURL = f.toURI().toURL();
 					} catch (MalformedURLException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
                  }

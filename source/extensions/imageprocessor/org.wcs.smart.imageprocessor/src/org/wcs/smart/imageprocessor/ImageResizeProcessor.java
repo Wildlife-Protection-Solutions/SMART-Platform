@@ -107,37 +107,37 @@ public class ImageResizeProcessor extends Job{
 			List<String> srcKeys = sources.stream().map(src->src.getKey()).collect(Collectors.toList());
 			try(Session session = HibernateManager.openSession()){
 				
-				ScrollableResults results = session.createQuery("FROM WaypointAttachment WHERE waypoint in (FROM Waypoint WHERE conservationArea = :ca and source in (:srcs))") //$NON-NLS-1$
+				try(ScrollableResults results = session.createQuery("FROM WaypointAttachment WHERE waypoint in (FROM Waypoint WHERE conservationArea = :ca and source in (:srcs))") //$NON-NLS-1$
 					.setParameter("ca",  SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
 					.setParameter("srcs", srcKeys) //$NON-NLS-1$
-					.scroll();
+					.scroll()){
 				
-				while(results.next()) {
-					WaypointAttachment wp = (WaypointAttachment) results.get(0);
-					try {
-						wp.computeFileLocation(session);
-						if (processFile(wp)) items.add(new ProcessingItem(wp));
-					}catch (Exception ex) {
-						ImageProcessingPlugIn.log(ex.getMessage(), ex);
+					while(results.next()) {
+						WaypointAttachment wp = (WaypointAttachment) results.get(0);
+						try {
+							wp.computeFileLocation(session);
+							if (processFile(wp)) items.add(new ProcessingItem(wp));
+						}catch (Exception ex) {
+							ImageProcessingPlugIn.log(ex.getMessage(), ex);
+						}
 					}
 				}
-				results.close();
 				
-				results = session.createQuery("FROM ObservationAttachment WHERE observation.waypoint in (FROM Waypoint WHERE conservationArea = :ca and source in (:srcs))") //$NON-NLS-1$
+				try(ScrollableResults results = session.createQuery("FROM ObservationAttachment WHERE observation.waypoint in (FROM Waypoint WHERE conservationArea = :ca and source in (:srcs))") //$NON-NLS-1$
 						.setParameter("ca",  SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
 						.setParameter("srcs", srcKeys) //$NON-NLS-1$
-						.scroll();
+						.scroll()){
 					
-				while(results.next()) {
-					ObservationAttachment wp = (ObservationAttachment) results.get(0);
-					try {
-						wp.computeFileLocation(session);
-						if (processFile(wp)) items.add(new ProcessingItem(wp));
-					}catch (Exception ex) {
-						ImageProcessingPlugIn.log(ex.getMessage(), ex);
+					while(results.next()) {
+						ObservationAttachment wp = (ObservationAttachment) results.get(0);
+						try {
+							wp.computeFileLocation(session);
+							if (processFile(wp)) items.add(new ProcessingItem(wp));
+						}catch (Exception ex) {
+							ImageProcessingPlugIn.log(ex.getMessage(), ex);
+						}
 					}
 				}
-				results.close();
 			}
 			statusReporter.setItems(items);
 			
@@ -174,16 +174,13 @@ public class ImageResizeProcessor extends Job{
 	private boolean isImage(ISmartAttachment file) throws Exception {
 		Path p = EncryptUtils.decryptAttachment(file);
 		try (InputStream is = Files.newInputStream(p)){
-			ImageInputStream iis = ImageIO.createImageInputStream(is);
-			try {
+			try (ImageInputStream iis = ImageIO.createImageInputStream(is)){
 				Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
 				if (!readers.hasNext()) return false;	//no image reader
 				readers.forEachRemaining(r->r.dispose());
 				return true;
 			}catch (Exception ex){
 				return false;
-			}finally {
-				iis.close();
 			}
 		}finally {
 			Files.delete(p);

@@ -56,7 +56,8 @@ public class PatrolQueryShowInTableResultProvider extends ShowInTableInfoProvide
 				tmp.setPatrolUuid(pw.getPatrolLegDay().getPatrolLeg().getPatrol().getUuid());
 				//tmp.setPatrolLegUuid(pw.getPatrolLegDay().getPatrolLeg().getUuid());
 				tmp.setWaypointUuid(pw.getWaypoint().getUuid());
-				//TODO: this is only applicable for observation queries
+
+				//this is only applicable for observation queries
 				if (wo != null) {
 					tmp.setObservationUuid(wo.getUuid());
 				}else if (!pw.getWaypoint().getAllObservations().isEmpty()) {

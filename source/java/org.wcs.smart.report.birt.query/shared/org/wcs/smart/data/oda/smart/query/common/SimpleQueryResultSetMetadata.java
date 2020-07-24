@@ -25,6 +25,8 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
@@ -63,9 +65,9 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 		
 		IProjectionProvider provider = null;
 		try{
-			provider =connection.getProjectionProvider();
+			provider = connection.getProjectionProvider();
 		}catch (Exception ex){
-			//TODO: log me
+			Logger.getLogger(SimpleQueryResultSetMetadata.class.getName()).log(Level.WARNING, "No projection provider found for query results.", ex); //$NON-NLS-1$
 		}
 		
 		//observation queries that are flagged with show

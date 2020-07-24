@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.i2.ui.entity.exporter;
 
-import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;

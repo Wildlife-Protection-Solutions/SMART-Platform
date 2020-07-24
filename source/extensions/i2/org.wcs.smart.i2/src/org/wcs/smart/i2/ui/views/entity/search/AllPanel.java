@@ -438,6 +438,8 @@ public class AllPanel extends Composite {
 				List<IntelEntity> items = new ArrayList<>();
 				for (EntityTableRowItem i : getCurrentSelection()) {
 					IntelEntity temp = new IntelEntity() {
+						private static final long serialVersionUID = 1L;
+
 						public String getIdAttributeAsText() {
 							return i.getId();
 						}

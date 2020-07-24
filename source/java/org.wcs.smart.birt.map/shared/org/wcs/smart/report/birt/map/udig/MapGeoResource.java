@@ -196,8 +196,6 @@ public class MapGeoResource extends IGeoResource {
 		if (isRaster()){
 			if (adaptee.isAssignableFrom(AbstractGridCoverage2DReader.class) || 
 					adaptee.isAssignableFrom(GridCoverage2D.class)){
-				//TODO: test without this this
-				//adaptee.isAssignableFrom(GriddedQuery.class)){
 				return true;
 			}
 		}

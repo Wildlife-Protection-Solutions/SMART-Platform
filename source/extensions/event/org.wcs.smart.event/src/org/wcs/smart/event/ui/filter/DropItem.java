@@ -22,9 +22,6 @@
 package org.wcs.smart.event.ui.filter;
 
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;

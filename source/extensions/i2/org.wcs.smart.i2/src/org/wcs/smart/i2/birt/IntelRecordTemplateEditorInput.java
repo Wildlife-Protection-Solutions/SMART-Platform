@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.i2.birt;
 
-import java.io.File;
 import java.nio.file.Path;
 
 import org.eclipse.birt.report.designer.internal.ui.editors.ReportEditorInput;

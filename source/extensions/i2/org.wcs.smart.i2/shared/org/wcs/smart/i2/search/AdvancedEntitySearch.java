@@ -242,6 +242,7 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 					case ENTITY_DATE_MODIFIED:
 						column = "date_modified"; //$NON-NLS-1$
 						break;
+					default: throw new UnsupportedOperationException("System attribute: " + attribute.name() + " no supported");  //$NON-NLS-1$//$NON-NLS-2$
 				}
 				sb = new StringBuilder();
 				sb.append("UPDATE qt_temp SET " );  //$NON-NLS-1$

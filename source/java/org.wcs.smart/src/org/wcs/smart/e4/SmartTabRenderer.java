@@ -306,11 +306,8 @@ public class SmartTabRenderer extends CTabFolderRenderer implements ICTabRenderi
 		int circX = bounds.x + delta / 2 + radius;
 		int circY = bounds.y + radius;
 
-		int header = shadowEnabled ? onBottom ? 6 : 3 : 1; // TODO: this
-															// needs
-		// to be added to
-		// computeTrim for
-		// HEADER
+		int header = shadowEnabled ? onBottom ? 6 : 3 : 1; 
+		// this needs to be added to computeTrim for HEADER
 		Rectangle trim = computeTrim(PART_HEADER, state, 0, 0, 0, 0);
 		trim.width = bounds.width - trim.width;
 

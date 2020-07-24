@@ -291,8 +291,6 @@ public class SmartUtils {
 	}
 
 	public static void deleteDirectory(final Path dir) throws IOException { 
-		//TODO:
-		System.out.println(dir.toString());
 		FileUtils.deleteDirectory(dir.toAbsolutePath().normalize().toFile());
 	}
 

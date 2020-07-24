@@ -55,18 +55,7 @@ public class IntelRecordProxy implements IAdaptable{
 		this.date = date;
 		this.profile = profile;
 	}
-	
-//	/**
-//	 * For proxy items the date should be the most recent location date OR if there
-//	 * are not location dates then the most recent date attribute OR if there
-//	 * are not date attributes then the creation date
-//	 * 
-//	 * @param date
-//	 */
-//	public void setDate(Date date) {
-//		this.date = date;
-//	}
-	
+		
 	public Date getDate() {
 		return this.date;
 	}

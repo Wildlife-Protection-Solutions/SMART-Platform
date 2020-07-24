@@ -24,8 +24,9 @@ package org.wcs.smart.data.oda.smart.query.common;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import org.eclipse.datatools.connectivity.oda.consumer.helper.OdaBlob;
 import org.eclipse.datatools.connectivity.oda.impl.Blob;
 import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.common.attachment.ISmartAttachment;
@@ -62,7 +63,7 @@ public class AttachmentByteQueryColumn extends QueryColumn{
 					Files.delete(tempImage);
 				}
 			}catch (Exception ex) {
-				//TODO:
+				Logger.getLogger(AttachmentByteQueryColumn.class.getName()).log(Level.WARNING, "Unable to decrypt attachment.", ex); //$NON-NLS-1$
 				return null;
 			}
 		}

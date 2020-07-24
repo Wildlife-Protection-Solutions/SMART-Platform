@@ -21,8 +21,10 @@
  */
 package org.wcs.smart.smartcollect.ui;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.text.MessageFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -447,7 +449,7 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 					l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 					l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 				}
-			}catch (Exception ex) {
+			}catch (IOException | ParseException ex) {
 				l= new Label(inner, SWT.NONE);
 				l.setText(Messages.SmartCollectPackageConfigurator_UnknownErrorLabel);
 				l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));

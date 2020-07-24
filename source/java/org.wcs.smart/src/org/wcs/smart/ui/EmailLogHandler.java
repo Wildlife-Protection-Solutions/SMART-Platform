@@ -135,19 +135,6 @@ public class EmailLogHandler {
 			SmartPlugIn.log(e.getMessage(), e);
 		}		
 	}
-//
-//	private void launchEmailDefault(String email) {
-//		Program.launch(email);
-//	}
-//
-//	private void launchEmailLinux(String email) {
-//		try {
-//			Runtime.getRuntime().exec("xdg-open " + email);
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//	}
 
 	private String enc(String p) {
 		if (p == null) return ""; //$NON-NLS-1$

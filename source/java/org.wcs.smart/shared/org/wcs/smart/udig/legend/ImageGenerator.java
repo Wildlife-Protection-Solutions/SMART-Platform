@@ -349,7 +349,7 @@ public class ImageGenerator {
                 return icon;
         }
         if (layer.hasResource(FeatureSource.class)) {
-            ImageDescriptor icon = GlyphAWT.geometry(null, null);//TODO, imageSize);
+            ImageDescriptor icon = GlyphAWT.geometry(null, imageSize);
             if (icon != null)
                 return icon;
         }

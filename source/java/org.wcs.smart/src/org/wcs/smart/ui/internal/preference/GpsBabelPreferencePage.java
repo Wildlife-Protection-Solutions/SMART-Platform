@@ -91,7 +91,6 @@ public class GpsBabelPreferencePage extends PreferencePage implements
 		// try to keep relative location of gps babel
 		String newLocation = f.toString();
 		try {
-			//TODO: test this
 			newLocation = f.toAbsolutePath().normalize().toString();
 			String appLoc = Paths.get("").toAbsolutePath().normalize().toString(); //$NON-NLS-1$
 			if (newLocation.startsWith(appLoc)) {

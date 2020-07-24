@@ -76,6 +76,7 @@ public class IntelRecordAttributeQueryColumn extends AbstractQueryColumn {
 		return null;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public String getValue(IResultItem item, Locale l) {
 		Object toFormat = getValue(item);

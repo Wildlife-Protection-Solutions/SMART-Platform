@@ -131,6 +131,7 @@ public class IntelQueryColumnProvider {
 		throw new IllegalStateException("getQueryColumns is not support for query type " + query.getTypeKey()); //$NON-NLS-1$
 	}
 	
+	@SuppressWarnings("unchecked")
 	public List<IQueryColumn> getQueryColumns (IntelRecordQuery query, IQueryItemProvider itemProvider, Locale l, Session session) throws Exception{
 		
 		List<IQueryColumn> columns = new ArrayList<>();
@@ -164,9 +165,9 @@ public class IntelQueryColumnProvider {
 		Set<String> profiles = AbstractIntelQuery.convertFromProfileFilter(query.getProfileFilter());
 		Set<UUID> uuids = new HashSet<>();
 		
-		uuids.addAll(session.createQuery("SELECT uuid FROM IntelProfile WHERE keyId IN (:keys) and conservationArea in (:cas)")
-		.setParameterList("keys", profiles)
-		.setParameterList("cas", itemProvider.getConservationAreas()).list());
+		uuids.addAll(session.createQuery("SELECT uuid FROM IntelProfile WHERE keyId IN (:keys) and conservationArea in (:cas)") //$NON-NLS-1$
+		.setParameterList("keys", profiles) //$NON-NLS-1$
+		.setParameterList("cas", itemProvider.getConservationAreas()).list()); //$NON-NLS-1$
 		
 		
 		List<IntelRecordSource> items = itemProvider.getRecordSources(uuids, session);
@@ -600,11 +601,11 @@ public class IntelQueryColumnProvider {
 			}
 		}
 		if (att == null) {
-			return "Attribute Not Found";
+			return "Attribute Not Found"; //$NON-NLS-1$
 		}
 		
 		StringBuilder sb = new StringBuilder();
-		sb.append(MessageFormat.format("{0} ({1})", IIntelligenceLabelProvider.getName(att), rsource.getName()));
+		sb.append(MessageFormat.format("{0} ({1})", IIntelligenceLabelProvider.getName(att), rsource.getName())); //$NON-NLS-1$
 
 		if (att.getAttribute() != null) {
 			
