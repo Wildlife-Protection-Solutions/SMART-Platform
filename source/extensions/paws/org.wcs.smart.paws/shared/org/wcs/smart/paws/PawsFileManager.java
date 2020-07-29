@@ -24,6 +24,7 @@ package org.wcs.smart.paws;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.paws.model.PawsConfiguration;
 import org.wcs.smart.paws.model.PawsRun;
 import org.wcs.smart.util.UuidUtils;
@@ -49,11 +50,21 @@ public enum PawsFileManager {
 	}
 	
 	public Path getDirectory(PawsRun run) {
-		 return Paths.get(run.getConservationArea().getFileDataStoreLocation())
-			.resolve(PAWS_DIR)
-			.resolve("run") //$NON-NLS-1$
+		 return getRunDirectory(run.getConservationArea())
 			.resolve(UuidUtils.uuidToString(run.getUuid()));
-		
+	}
+	
+	/**
+	 * Gets the directory where PAWS run data and
+	 * results are stored.
+	 * 
+	 * @param ca
+	 * @return
+	 */
+	public Path getRunDirectory(ConservationArea ca) {
+		 return Paths.get(ca.getFileDataStoreLocation())
+					.resolve(PAWS_DIR)
+					.resolve("run"); //$NON-NLS-1$
 	}
 	
 	public Path getResultsDirectory(PawsRun run) {

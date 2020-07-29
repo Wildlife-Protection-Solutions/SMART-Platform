@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -42,7 +43,9 @@ import org.wcs.smart.paws.model.PawsService;
 
 import com.microsoft.azure.storage.blob.BlockBlobURL;
 import com.microsoft.azure.storage.blob.ContainerURL;
+import com.microsoft.azure.storage.blob.StorageException;
 import com.microsoft.azure.storage.blob.TransferManager;
+import com.microsoft.azure.storage.blob.models.StorageErrorCode;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 
@@ -56,6 +59,7 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 public class PawsRunJob extends Job{
 	
 	private PawsRun run;
+	private ContainerURL containerURL;
 	
 	//object to wait on for azure callbacks 
 	private final Object lock = new Object();
@@ -103,17 +107,43 @@ public class PawsRunJob extends Job{
 			
 			//upload package to azure
 			//https://github.com/Azure/autorest-clientruntime-for-java/issues/569
-			ContainerURL containerURL = StorageApi.INSTANCE.getContainerURL(run.getContainerName());
-						
-	        //upload files
-	        for(Path p : engine.getDataFiles()) {
-				if (Files.exists(p)){
-					//upload file to folder
-					BlockBlobURL blobURL = containerURL.createBlockBlobURL(run.getRunId() + "/" + p.getFileName().toString()); //$NON-NLS-1$
-					blobURL.getProperties();
-					uploadFile(blobURL, p, MessageFormat.format(Messages.PawsRunJob_BasemapFileUploadError, p.getFileName().toString()));
-				}
+			containerURL = StorageApi.INSTANCE.getContainerURL(run.getContainerName());
 			
+			boolean done = false;
+			while(!done) {
+				try {
+			        //upload files
+			        for(Path p : engine.getDataFiles()) {
+						if (Files.exists(p)){
+							//upload file to folder
+							BlockBlobURL blobURL = containerURL.createBlockBlobURL(run.getRunId() + "/" + p.getFileName().toString()); //$NON-NLS-1$
+							blobURL.getProperties();
+							uploadFile(blobURL, p, MessageFormat.format(Messages.PawsRunJob_BasemapFileUploadError, p.getFileName().toString()));
+						}
+						
+					}
+			        done = true;
+				}catch(StorageException se){
+					if (se.errorCode() == StorageErrorCode.AUTHENTICATION_FAILED) {
+						StorageApi.INSTANCE.resetToken();
+						Exception[] temp = new Exception[]{null};
+						Display.getDefault().syncExec(()->{
+							try {
+								if (!StorageApi.INSTANCE.getAuthorizationCode(Display.getDefault().getActiveShell(), run )) {
+									temp[0] = new Exception(Messages.PawsRunJob_TokenRefreshFail);
+								}
+								containerURL = StorageApi.INSTANCE.getContainerURL(run.getContainerName());
+							}catch (Exception ex) {
+								temp[0] = ex;
+							}
+						});
+						if (temp[0] != null) throw temp[0];
+						done = false;
+					}else {
+						throw se;
+					}
+					
+				}
 			}
 			
 		}catch (Throwable ex){

@@ -21,9 +21,12 @@
  */
 package org.wcs.smart.paws.engine;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -34,9 +37,12 @@ import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.paws.PawsFileManager;
 import org.wcs.smart.paws.PawsPlugIn;
 import org.wcs.smart.paws.internal.Messages;
 import org.wcs.smart.paws.model.PawsRun;
+import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * This job is intended to be run when a user logs into a Conservation
@@ -44,6 +50,11 @@ import org.wcs.smart.paws.model.PawsRun;
  * any that are not complete, it will process them accordingly.  Items
  * that were in the processing of uploading data are cancelled, items that
  * were running or downloading and restarted. 
+ * 
+ * It also cleans up the PAWS filestore.  If the run doesn't exist in the
+ * database, but the directory exists in the filestore it
+ * attempts to delete it.  This is to deal with the issue of geotools hanging on
+ * to raster files and not allowing them to be deleted in some cases.
  * 
  * @author Emily
  *
@@ -56,6 +67,9 @@ public class PawsStartUpJob extends Job {
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
+		
+		cleanUp();
+		
 		List<PawsRun> items = new ArrayList<>();
 		
 		try(Session session = HibernateManager.openSession()){
@@ -122,7 +136,46 @@ public class PawsStartUpJob extends Job {
 				if (r.getStatus() == PawsRun.Status.DOWNLOADING_RESULTS) (new PawsDownloadResultJob(r)).schedule();
 			}
 		}
+
 		return Status.OK_STATUS;
 	}
 
+	
+	private void cleanUp() {
+		Job cleanUp = new Job("cleanup paws") { //$NON-NLS-1$
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				Path dir = PawsFileManager.INSTANCE.getRunDirectory(SmartDB.getCurrentConservationArea());
+				List<Path> toDelete = new ArrayList<>();
+
+				try (Session session = HibernateManager.openSession()){
+					Files.list(dir).forEach(path->{
+						if (Files.exists(path) && Files.isDirectory(path)) {
+							UUID runuuid = UuidUtils.stringToUuid(path.getFileName().toString());
+							PawsRun r = session.get(PawsRun.class, runuuid);
+							if (r == null) {
+								toDelete.add(path);
+							}
+						}
+					});
+					
+				}catch (Exception ex) {
+					ex.printStackTrace();
+				}
+				
+				for(Path p : toDelete) {
+					try {
+						SmartUtils.deleteDirectory(p);
+					}catch (Exception ex) {
+						ex.printStackTrace();
+					}
+				}
+				return Status.OK_STATUS;
+			}
+			
+		};
+		cleanUp.schedule();
+	}
+	
 }

@@ -161,16 +161,18 @@ public class PawsDownloadResultJob extends Job {
 			}
 			
 		}catch (Throwable t){
-			String msg = MessageFormat.format(Messages.PawsDownloadResultJob_DownloadFailedMsg, run.getRunId()); 
-			handleError(msg, t);
 			
 			if(t instanceof StorageException) {
 				StorageException ex = (StorageException) t;
 				if (ex.errorCode() == StorageErrorCode.AUTHENTICATION_FAILED) {
 					StorageApi.INSTANCE.resetToken();
 					schedule(500);
+					return Status.OK_STATUS;
 				}
 			}
+			
+			String msg = MessageFormat.format(Messages.PawsDownloadResultJob_DownloadFailedMsg, run.getRunId()); 
+			handleError(msg, t);
 			return Status.OK_STATUS;
 		}
 		monitor.worked(2);
@@ -227,7 +229,7 @@ public class PawsDownloadResultJob extends Job {
 		}
 		
 		PawsPlugIn.displayLog(msg + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
-		updateStatus(newStatus, msg + ": " + ex.getMessage());
+		updateStatus(newStatus, msg + ": " + ex.getMessage()); //$NON-NLS-1$
 	}
 
 	private void updateStatus(PawsRun.Status newStatus, String message) {

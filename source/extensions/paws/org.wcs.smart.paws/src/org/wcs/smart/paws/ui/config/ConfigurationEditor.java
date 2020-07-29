@@ -162,6 +162,7 @@ public class ConfigurationEditor extends EditorPart {
 		return target;
 		
 	}
+	@SuppressWarnings("unchecked")
 	private void save(PawsConfiguration pw){
 		String valid = validate();
 		if (valid != null) {
@@ -441,11 +442,11 @@ public class ConfigurationEditor extends EditorPart {
 		
 		createSettingsComp(main.getBody());
 		
-		SmartUiUtils.createHeaderLabel(main.getBody(), Messages.ConfigurationEditor_ClassificationSection);
-	
+		Composite c = SmartUiUtils.createHeaderLabel(main.getBody(), Messages.ConfigurationEditor_ClassificationSection);
+		((Label)c.getChildren()[0]).setToolTipText(Messages.ConfigurationEditor_ClassificationTooltip);
+		
 		classComposite = new ClassificationComposite(main.getBody(), this);
 		classComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
 		
 		Button btnRun = new Button(main.getBody(), SWT.PUSH);
 		btnRun.setText(Messages.ConfigurationEditor_RunBtn);
@@ -531,6 +532,7 @@ public class ConfigurationEditor extends EditorPart {
 		
 		l = toolkit.createLabel(inner, Messages.ConfigurationEditor_OtherLayers);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		l.setToolTipText(Messages.ConfigurationEditor_GISLayersTooltip);
 		
 		Composite others = new Composite(inner, SWT.NONE);
 		others.setLayout(new GridLayout(2, false));
@@ -626,7 +628,7 @@ public class ConfigurationEditor extends EditorPart {
 		inner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		l = toolkit.createLabel(inner, PawsManager.INSTANCE.getName(FixedParameter.GRID_SIZE) + Messages.ConfigurationEditor_MeterLbl);
-		l.setToolTipText(Messages.ConfigurationEditor_UnitsTooltip);
+		l.setToolTipText(MessageFormat.format("{0}\n{1}", Messages.ConfigurationEditor_unitsTooltip1, Messages.ConfigurationEditor_unitsTooltip2)); //$NON-NLS-1$
 		
 		txtGridSize = new ErrorText(inner, txt-> {
 			try {
@@ -645,7 +647,7 @@ public class ConfigurationEditor extends EditorPart {
 		
 		l = toolkit.createLabel(inner, PawsManager.INSTANCE.getName(FixedParameter.TRAINING_RES) + ":"); //$NON-NLS-1$
 		l.setToolTipText(Messages.ConfigurationEditor_groupByTooltip);
-		
+				
 		cmbTrainingRes = new ComboViewer(inner, SWT.READ_ONLY | SWT.DROP_DOWN);
 		cmbTrainingRes.setContentProvider(ArrayContentProvider.getInstance());
 		cmbTrainingRes.getControl().setBackground(inner.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
@@ -673,9 +675,7 @@ public class ConfigurationEditor extends EditorPart {
 				if (element instanceof PawsParameter.ClassifierModel) { 
 					PawsParameter.ClassifierModel tw = (PawsParameter.ClassifierModel)element;
 					switch(tw) {
-					case DECISION_TREE: return Messages.ConfigurationEditor_DecisionTree ;
-					//case RANDOM_FOREST: return Messages.ConfigurationEditor_RandomForest;
-					//case GAUSSIAN_PROCESS: return Messages.ConfigurationEditor_Gaussian;
+						case DECISION_TREE: return Messages.ConfigurationEditor_DecisionTree ;
 					}
 				};
 				return super.getText(element);

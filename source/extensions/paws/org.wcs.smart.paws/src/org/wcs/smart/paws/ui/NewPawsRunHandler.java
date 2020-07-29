@@ -142,7 +142,7 @@ public class NewPawsRunHandler {
 					PawsManager.INSTANCE.createDefaultSettings(session);
 					session.getTransaction().commit();
 				}catch (Exception ex) {
-					PawsPlugIn.displayLog("Cannot configure PAWS server settings:" + ex.getMessage(), ex);
+					PawsPlugIn.displayLog(MessageFormat.format(Messages.NewPawsRunHandler_CannotConfigurePaws, ex.getMessage()), ex);
 					return false;
 				}
 			}

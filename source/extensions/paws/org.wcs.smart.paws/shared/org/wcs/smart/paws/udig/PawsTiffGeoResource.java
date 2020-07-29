@@ -70,8 +70,29 @@ public class PawsTiffGeoResource extends AbstractRasterGeoResource {
 		super(service, parsePath(layerfile));
 		layerfile = Paths.get(SmartContext.INSTANCE.getFilestoreLocation()).relativize(layerfile);
 		this.file = Paths.get(SmartContext.INSTANCE.getFilestoreLocation()).resolve(layerfile);
-		this.name= SharedUtils.getFilenameWithoutExtension( rfile.getResultsFile().getFileName().toString() )
-				+ ":" + SharedUtils.getFilenameWithoutExtension( layerfile.getFileName().toString() ); //$NON-NLS-1$
+
+		try {
+			String threshold = SharedUtils.getFilenameWithoutExtension( layerfile.getFileName().toString() );
+			int s1 = threshold.indexOf('_');
+			
+			String num = threshold.substring(s1 + 1).replace("_", "."); //$NON-NLS-1$ //$NON-NLS-2$
+			Double v = Double.valueOf(num);
+			
+			double x = Math.round(v*100.0) / 100.0;
+			double y = 100;
+			while(x <= 0) {
+				y = y * 10;
+				x = Math.round(v*y) / y;
+			}
+			String part = String.valueOf(x);
+			
+			this.name = part + "  [" + rfile.getTimeFrameString() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+			
+		}catch (Exception ex) {
+			this.name= SharedUtils.getFilenameWithoutExtension( rfile.getResultsFile().getFileName().toString() )
+					+ ":" + SharedUtils.getFilenameWithoutExtension( layerfile.getFileName().toString() ); //$NON-NLS-1$
+			
+		}
 		this.rfile = rfile;
 	}
 

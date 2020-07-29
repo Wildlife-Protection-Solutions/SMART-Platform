@@ -54,6 +54,7 @@ import org.wcs.smart.util.SmartUtils;
  *
  */
 public enum PawsManager {
+	
 	INSTANCE;
 	
 	public String createLabel(Query q) {
@@ -71,12 +72,12 @@ public enum PawsManager {
 			service = new PawsService();
 			service.setConservationArea(SmartDB.getCurrentConservationArea());
 		}
-		service.setApiKey("a2e5c3f769924a1b98189b652e81c9d9");
-		service.setTaskApiUrl("https://paws-api-backend-api-mgmt.azure-api.net/taskmanagement/task");
-		service.setPawsApiUrl("https://paws-api-backend-api-mgmt.azure-api.net/paws/predict-risk");
-		service.setClientId("61619872-cd80-41ec-a799-b7c7fba349ce");
-		service.setOAuthUrl("https://login.microsoftonline.com/af58cf6f-6228-4801-8a20-caa33d81cee2/oauth2");
-		service.setStorageUrl("https://pawsparkstorage.blob.core.windows.net");
+		service.setApiKey("a2e5c3f769924a1b98189b652e81c9d9"); //$NON-NLS-1$
+		service.setTaskApiUrl("https://paws-api-backend-api-mgmt.azure-api.net/taskmanagement/task"); //$NON-NLS-1$
+		service.setPawsApiUrl("https://paws-api-backend-api-mgmt.azure-api.net/paws/predict-risk"); //$NON-NLS-1$
+		service.setClientId("61619872-cd80-41ec-a799-b7c7fba349ce"); //$NON-NLS-1$
+		service.setOAuthUrl("https://login.microsoftonline.com/af58cf6f-6228-4801-8a20-caa33d81cee2/oauth2"); //$NON-NLS-1$
+		service.setStorageUrl("https://pawsparkstorage.blob.core.windows.net"); //$NON-NLS-1$
 		session.saveOrUpdate(service);
 		return service;
 	}
@@ -250,13 +251,13 @@ public enum PawsManager {
 	
 	public String getStatusLabel(PawsRun.Status status) {
 		switch(status){
-		case UPLOADING_DATA: return "Uploading Data";
-		case RUNNING: return "Running";
-		case DOWNLOADING_RESULTS: return "Downloading Results";
-		case COMPILING_DATA: return "Compiling Data";
-		case COMPLETE: return "Complete";
-		case ERROR: return "Error";
-		case AUTH_TIMEOUT:return "Authentication Timeout";
+		case UPLOADING_DATA: return "Uploading Data"; //$NON-NLS-1$
+		case RUNNING: return "Running"; //$NON-NLS-1$
+		case DOWNLOADING_RESULTS: return "Downloading Results"; //$NON-NLS-1$
+		case COMPILING_DATA: return "Compiling Data"; //$NON-NLS-1$
+		case COMPLETE: return "Complete"; //$NON-NLS-1$
+		case ERROR: return "Error"; //$NON-NLS-1$
+		case AUTH_TIMEOUT:return "Authentication Timeout"; //$NON-NLS-1$
 		}
 		return null;
 	}

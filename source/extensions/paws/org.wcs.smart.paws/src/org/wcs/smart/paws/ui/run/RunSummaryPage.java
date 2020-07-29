@@ -42,19 +42,19 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.events.IHyperlinkListener;
-import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
+import org.eclipse.ui.forms.widgets.Twistie;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
@@ -74,6 +74,7 @@ import org.wcs.smart.paws.model.PawsRun;
 import org.wcs.smart.paws.model.PawsRun.Status;
 import org.wcs.smart.paws.model.PawsService;
 import org.wcs.smart.paws.ui.HeaderComposite;
+import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
@@ -85,7 +86,7 @@ public class RunSummaryPage extends EditorPart {
 
 	private static final String RUN_KEY = "RUN"; //$NON-NLS-1$
 	private HeaderComposite header;
-	private Label lblStatus, lblStatusImg, lblStatusMsg;
+	private Label lblStatus, lblStatus2, lblStatusImg;
 	private ComboViewer cmbTimeFrame ;
 	
 	private Composite statusComp ;
@@ -134,12 +135,14 @@ public class RunSummaryPage extends EditorPart {
 		return false;
 	}
 
+	private ScrolledForm main;
+	
 	@Override
 	public void createPartControl(Composite parent) {
 		toolkit = new FormToolkit(parent.getDisplay());
 		
 		
-		ScrolledForm main = toolkit.createScrolledForm(parent);
+		main = toolkit.createScrolledForm(parent);
 		main.getBody().setLayout(new GridLayout()); 
 		
 		header = new HeaderComposite(main.getBody(), toolkit, main.getFont(), main.getForeground());
@@ -168,9 +171,145 @@ public class RunSummaryPage extends EditorPart {
 			
 		});
 
+		createStatusSection(main.getBody());
+		createResultsSection(main.getBody());
+		createStatusDetailsSection(main.getBody());
+		createDetailsSection(main.getBody());
+	}
+	
+	
+	private void createStatusSection(Composite parent) {
+		Composite c = SmartUiUtils.createHeaderLabel(parent, Messages.RunSummaryPage_StatusSection);
+		c.setLayout(new GridLayout(2, false));
+		((GridLayout)c.getLayout()).marginHeight = 2;
 		
-		SmartUiUtils.createHeaderLabel(main.getBody(), Messages.RunSummaryPage_ResultsSection);
-		Composite resultscomp = toolkit.createComposite(main.getBody());
+		ToolBar tb = new ToolBar(c, SWT.FLAT);
+		tb.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
+		ToolItem ti = new ToolItem(tb, SWT.PUSH);
+		ti.setToolTipText(Messages.RunSummaryPage_refreshtooltip);
+		ti.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
+		ti.addListener(SWT.Selection, e->RunSummaryPage.this.parent.refresh());
+
+		Composite body = toolkit.createComposite(parent, SWT.NONE);
+		body.setLayout(new GridLayout());
+		((GridLayout)body.getLayout()).marginWidth = 0;
+		((GridLayout)body.getLayout()).marginHeight = 0;
+		((GridLayout)body.getLayout()).verticalSpacing = 0;
+		body.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		
+		Composite statusArea = toolkit.createComposite(body);
+		statusArea.setLayout(new GridLayout(4, false));
+		((GridLayout)statusArea.getLayout()).marginHeight = 0;
+		lblStatusImg = toolkit.createLabel(statusArea, ""); //$NON-NLS-1$
+		
+		lblStatus = toolkit.createLabel(statusArea, ""); //$NON-NLS-1$
+		lblStatus.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		
+		lblStatus2 = toolkit.createLabel(statusArea, ""); //$NON-NLS-1$
+		lblStatus2.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		
+		btnRetry = toolkit.createButton(statusArea, Messages.RunSummaryPage_RetryButton,  SWT.PUSH);
+		btnRetry.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
+		btnRetry.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false));
+		btnRetry.addListener(SWT.Selection, e->{
+			if (mgr != null) {
+				btnRetry.setEnabled(false);
+				lblStatus.setText(Messages.RunSummaryPage_AttemptReAuth);
+				lblStatus.getParent().layout(true);
+				PawsStatusJob.getInstance().addItem(mgr.getRun());
+			}
+		});
+		btnRetry.setVisible(false);
+	}
+	
+	private void showHideStatusDetails(boolean expanded) {
+		showHidePanel(expanded, statusComp);
+	}
+	
+	private void showHidePawsDetails(boolean expanded) {
+		showHidePanel(expanded, detailsComp);
+	}
+	
+	private void showHidePanel(boolean expanded, Composite panel) {
+		if (expanded) {
+			panel.setVisible(true);
+			((GridData)panel.getLayoutData()).heightHint = panel.computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
+		}else {
+			panel.setVisible(false);
+			((GridData)panel.getLayoutData()).heightHint = 0;
+		}
+		main.reflow(true);
+	}
+	
+	private void createStatusDetailsSection(Composite parent) {
+		Composite part = SmartUiUtils.createHeaderLabel(parent, Messages.RunSummaryPage_StatusDetailsSection);
+		
+		Label headerLabel = (Label) part.getChildren()[0];
+		
+		((GridLayout)part.getLayout()).numColumns = 2;
+		
+		Twistie tw = new Twistie(part, SWT.NONE);
+		tw.setBackground(part.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		tw.moveAbove(headerLabel);
+		
+		headerLabel.addListener(SWT.MouseEnter, e->headerLabel.setCursor(headerLabel.getDisplay().getSystemCursor(SWT.CURSOR_HAND)));
+		headerLabel.addListener(SWT.MouseExit, e->headerLabel.setCursor(null));
+		headerLabel.addListener(SWT.MouseDown,e->{
+			tw.setExpanded(!tw.isExpanded());
+			showHideStatusDetails(tw.isExpanded());
+		});
+
+		tw.addHyperlinkListener(new HyperlinkAdapter() {
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				showHideStatusDetails(tw.isExpanded());
+			}
+		});
+		
+		statusComp = toolkit.createComposite(parent, SWT.NONE);
+		statusComp.setLayout(new GridLayout());
+		statusComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		showHideStatusDetails(tw.isExpanded());
+
+	}
+	
+	private void createDetailsSection(Composite parent) {
+		Composite part = SmartUiUtils.createHeaderLabel(parent, Messages.RunSummaryPage_PawsRunSectionSettings);
+		
+		Label headerLabel = (Label) part.getChildren()[0];
+		
+		((GridLayout)part.getLayout()).numColumns = 2;
+		
+		Twistie tw = new Twistie(part, SWT.NONE);
+		tw.setBackground(part.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		tw.moveAbove(headerLabel);
+		
+		headerLabel.addListener(SWT.MouseEnter, e->headerLabel.setCursor(headerLabel.getDisplay().getSystemCursor(SWT.CURSOR_HAND)));
+		headerLabel.addListener(SWT.MouseExit, e->headerLabel.setCursor(null));
+		headerLabel.addListener(SWT.MouseDown,e->{
+			tw.setExpanded(!tw.isExpanded());
+			showHidePawsDetails(tw.isExpanded());
+		});
+
+		tw.addHyperlinkListener(new HyperlinkAdapter() {
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				showHidePawsDetails(tw.isExpanded());
+			}
+		});
+		
+		detailsComp = toolkit.createComposite(parent);
+		detailsComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		showHidePawsDetails(tw.isExpanded());
+
+	}
+	
+	private void createResultsSection(Composite parent) {
+		SmartUiUtils.createHeaderLabel(parent, Messages.RunSummaryPage_ViewingResultsSection);
+		Composite resultscomp = toolkit.createComposite(parent);
 		resultscomp.setLayout(new GridLayout(2, false));
 		resultscomp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false ));
 		
@@ -185,61 +324,51 @@ public class RunSummaryPage extends EditorPart {
 				return ((PawsResultFile)element).getTimeFrameString();
 			}
 		});
-		cmbTimeFrame.addSelectionChangedListener(e->this.parent.updateResultsView());
 		
-		Composite c = SmartUiUtils.createHeaderLabel(main.getBody(), Messages.RunSummaryPage_StatusSection);
-		c.setLayout(new GridLayout(2, false));
-		((GridLayout)c.getLayout()).marginHeight = 2;
+		Composite btnComp = toolkit.createComposite(resultscomp);
+		btnComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		btnComp.setLayout(new GridLayout(2, false));
+		((GridLayout)btnComp.getLayout()).marginWidth = 0;
+		((GridLayout)btnComp.getLayout()).marginHeight = 0;
 		
+		Button btnView = new Button(btnComp, SWT.PUSH);
+		btnView.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.MAP_ICON));
+		btnView.setText(Messages.RunSummaryPage_MapButton);
+		btnView.setBackground(resultscomp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnView.setEnabled(false);
 		
-		ToolBar tb = new ToolBar(c, SWT.FLAT);
-		tb.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
-		ToolItem ti = new ToolItem(tb, SWT.PUSH);
-		ti.setToolTipText(Messages.RunSummaryPage_refreshtooltip);
-		ti.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
-		ti.addListener(SWT.Selection, e->RunSummaryPage.this.parent.refresh());
-		
-		Composite scomp = toolkit.createComposite(main.getBody());
-		scomp.setLayout(new GridLayout(3, false));
-		scomp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false ));
-		
-		lblStatusImg = toolkit.createLabel(scomp, ""); //$NON-NLS-1$
-		
-		lblStatus = toolkit.createLabel(scomp, ""); //$NON-NLS-1$
-		lblStatus.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		
-		btnRetry = toolkit.createButton(scomp, "Retry",  SWT.PUSH);
-		btnRetry.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
-		btnRetry.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false));
-		btnRetry.addListener(SWT.Selection, e->{
-			if (mgr != null) {
-				btnRetry.setEnabled(false);
-				lblStatus.setText("Attempt re-authorization.  Please wait...");
-				lblStatus.getParent().layout(true);
-				PawsStatusJob.getInstance().addItem(mgr.getRun());
-			}
+		btnView.addListener(SWT.Selection,e->{
+			RunSummaryPage.this.parent.showMap();
 		});
-		btnRetry.setVisible(false);
 		
-		lblStatusMsg = toolkit.createLabel(scomp, "", SWT.WRAP); //$NON-NLS-1$
-		lblStatusMsg.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
+		Button btnViewTable = new Button(btnComp, SWT.PUSH);
+		btnViewTable.setImage(QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.TABLE_ICON));
+		btnViewTable.setText(Messages.RunSummaryPage_TableButton);
+		btnViewTable.setBackground(resultscomp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnViewTable.setEnabled(false);
 		
-		statusComp = toolkit.createComposite(scomp);
-		statusComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
-		statusComp.setLayout(new GridLayout());
-		((GridLayout)statusComp.getLayout()).marginWidth = 0;
-		((GridLayout)statusComp.getLayout()).marginHeight = 0;
+		btnViewTable.addListener(SWT.Selection,e->{
+			RunSummaryPage.this.parent.showTable();
+		});
 		
-		SmartUiUtils.createHeaderLabel(main.getBody(), Messages.RunSummaryPage_DetailsSection);
-		
-		detailsComp = toolkit.createComposite(main.getBody());
-		detailsComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		cmbTimeFrame.addSelectionChangedListener(e->{
+			btnView.setEnabled( !cmbTimeFrame.getStructuredSelection().isEmpty() && cmbTimeFrame.getStructuredSelection().getFirstElement() instanceof PawsResultFile);
+			btnViewTable.setEnabled( !cmbTimeFrame.getStructuredSelection().isEmpty() && cmbTimeFrame.getStructuredSelection().getFirstElement() instanceof PawsResultFile);
 
+			this.parent.updateResultsView();
+		});
 	}
 
 	public void init(PawsRun run) {
 		String surl = ""; //$NON-NLS-1$
 		for (Control c : statusComp.getChildren()) c.dispose();
+		
+		Composite sgroup = toolkit.createComposite(statusComp);
+		sgroup.setLayout(new GridLayout(2, false));
+		sgroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		toolkit.createLabel(sgroup, Messages.RunSummaryPage_StatusLabel);
+		toolkit.createLabel(sgroup, run.getStatusMessage() == null ? "" : run.getStatusMessage()); //$NON-NLS-1$
 		
 		if (run.getRunId() != null) {
 			try(Session session = HibernateManager.openSession()){
@@ -250,11 +379,7 @@ public class RunSummaryPage extends EditorPart {
 			}			
 		
 			if (run.getServerStatusJson() != null) {
-				Group sgroup = new Group(statusComp, SWT.FLAT);
-				sgroup.setBackground(statusComp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-				sgroup.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-				sgroup.setText(Messages.RunSummaryPage_StatusDetails);
-				sgroup.setLayout(new GridLayout(2, false));
+
 				toolkit.createLabel(sgroup, Messages.RunSummaryPage_TaskURL);
 				toolkit.createLabel(sgroup, surl);
 				
@@ -263,7 +388,7 @@ public class RunSummaryPage extends EditorPart {
 				
 					toolkit.createLabel(sgroup, Messages.RunSummaryPage_Status);
 					toolkit.createLabel(sgroup, task.getStatus());
-					
+				
 					toolkit.createLabel(sgroup, Messages.RunSummaryPage_Id);
 					toolkit.createLabel(sgroup, task.getTaskId());
 					
@@ -296,11 +421,16 @@ public class RunSummaryPage extends EditorPart {
 		btnRetry.setVisible(run.getStatus() == Status.AUTH_TIMEOUT);
 		
 		lblStatusImg.setImage(PawsManager.INSTANCE.getImage(run.getStatus()));
+		
+		
 		lblStatus.setText(PawsManager.INSTANCE.getStatusLabel(run.getStatus()));
+		if (run.getStatusMessage() != null && run.getStatus().isRunning()) {
+			lblStatus2.setText(run.getStatusMessage());
+		}else {
+			lblStatus2.setText(""); //$NON-NLS-1$
+		}
 		
-		if (run.getStatusMessage() != null) lblStatusMsg.setText(run.getStatusMessage());
-		
-		lblStatusImg.getParent().layout(true);
+		lblStatusImg.getParent().getParent().layout(true);
 		
 		header.setText(run.getId());
 		header.setData(RUN_KEY, run);

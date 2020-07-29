@@ -71,6 +71,7 @@ public class RunEditor extends MultiPageEditorPart implements MapPart{
 	private RunSummaryPage summaryPage;
 	private RunTableResultsPage resultsPage;
 	private RunMapResultsPage mapPage;
+	private int mapPageIndex, tablePageIndex = 0;
 	
 	private List<EventHandler> handlers = null;
 	private IEclipseContext context;
@@ -186,14 +187,14 @@ public class RunEditor extends MultiPageEditorPart implements MapPart{
 			super.setPageText(index, Messages.RunEditor_SummaryPage);
 		
 			resultsPage = new RunTableResultsPage(this);
-			index = addPage(resultsPage, getEditorInput());
-			setPageImage(index, QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.TABLE_ICON));
-			super.setPageText(index, Messages.RunEditor_ResultsPage);
+			tablePageIndex = addPage(resultsPage, getEditorInput());
+			setPageImage(tablePageIndex, QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.TABLE_ICON));
+			super.setPageText(tablePageIndex, Messages.RunEditor_ResultsPage);
 			
 			mapPage = new RunMapResultsPage(this);
-			index = addPage(mapPage, getEditorInput());
-			setPageImage(index, SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.MAP_ICON));
-			super.setPageText(index, Messages.RunEditor_MapPage);
+			mapPageIndex = addPage(mapPage, getEditorInput());
+			setPageImage(mapPageIndex, SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.MAP_ICON));
+			super.setPageText(mapPageIndex, Messages.RunEditor_MapPage);
 			
 
 		}catch (Exception ex){
@@ -234,6 +235,15 @@ public class RunEditor extends MultiPageEditorPart implements MapPart{
 	
 	public PawsResultFile getResultFile() {
 		return summaryPage.getResultsSelection();
+	}
+	
+	public void showMap() {
+		setActivePage(mapPageIndex);
+	}
+	
+
+	public void showTable() {
+		setActivePage(tablePageIndex);
 	}
 	
 	private Job loadSettings = new Job(Messages.RunEditor_loadingjobname) {

@@ -166,7 +166,7 @@ public enum StorageApi {
 		params.append("&grant_type=authorization_code"); //$NON-NLS-1$
 		String pp = params.toString();	
 		
-		String stoken = null;
+		token = null;
 		HttpURLConnection conn = (HttpURLConnection) (new URL(sb.toString())).openConnection();
 		try {
 			conn.setRequestMethod("POST"); //$NON-NLS-1$
@@ -187,8 +187,8 @@ public enum StorageApi {
 				}
 				try {
 					JSONObject json = (JSONObject) (new JSONParser()).parse(content.toString());
-					stoken = (String) json.get("access_token"); //$NON-NLS-1$
-					if (stoken == null || stoken.isBlank()) {
+					String temptoken = (String) json.get("access_token"); //$NON-NLS-1$
+					if (temptoken == null || temptoken.isBlank()) {
 						throw new Exception("access_token not found"); //$NON-NLS-1$
 					}
 				
@@ -201,6 +201,8 @@ public enum StorageApi {
 
 					JSONObject id = (JSONObject) (new JSONParser()).parse(bodyjson);
 					String email = (String) id.get("email"); //$NON-NLS-1$
+					
+					token = temptoken;
 					containerName = email.replaceAll("\\.", "") //$NON-NLS-1$ //$NON-NLS-2$ 
 							.replaceAll("@","") //$NON-NLS-1$ //$NON-NLS-2$ 
 							.toLowerCase();
@@ -215,7 +217,6 @@ public enum StorageApi {
 		}finally {
 			conn.disconnect();
 		}
-		token = stoken;
 	}
 	
 	

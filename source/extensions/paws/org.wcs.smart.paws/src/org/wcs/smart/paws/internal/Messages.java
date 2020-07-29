@@ -49,6 +49,8 @@ public class Messages extends NLS {
 
 	public static String ConfigurationEditor_ClassificationSection;
 
+	public static String ConfigurationEditor_ClassificationTooltip;
+
 	public static String ConfigurationEditor_classifiertooltip;
 
 	public static String ConfigurationEditor_ConfigName;
@@ -71,7 +73,7 @@ public class Messages extends NLS {
 
 	public static String ConfigurationEditor_ErrorTitls;
 
-	public static String ConfigurationEditor_Gaussian;
+	public static String ConfigurationEditor_GISLayersTooltip;
 
 	public static String ConfigurationEditor_groupByTooltip;
 
@@ -88,8 +90,6 @@ public class Messages extends NLS {
 	public static String ConfigurationEditor_NameRequired;
 
 	public static String ConfigurationEditor_OtherLayers;
-
-	public static String ConfigurationEditor_RandomForest;
 
 	public static String ConfigurationEditor_RunBtn;
 
@@ -117,7 +117,9 @@ public class Messages extends NLS {
 
 	public static String ConfigurationEditor_Shapefiles;
 
-	public static String ConfigurationEditor_UnitsTooltip;
+	public static String ConfigurationEditor_unitsTooltip1;
+
+	public static String ConfigurationEditor_unitsTooltip2;
 
 	public static String DataModelDialog_Cannotaddattribute;
 
@@ -142,6 +144,8 @@ public class Messages extends NLS {
 	public static String LoginDialog_NoWorkspace;
 
 	public static String LoginDialog_parameterparseerror;
+
+	public static String NewPawsRunHandler_CannotConfigurePaws;
 
 	public static String NewPawsRunHandler_ConfigNotFound;
 
@@ -169,15 +173,11 @@ public class Messages extends NLS {
 
 	public static String PawsDatabaseUpgrader_TaskName;
 
-	public static String PawsDataEngine_WorkspaceNotConfigured;
-
 	public static String PawsDownloadResultJob_buildrasterstaskname;
 
 	public static String PawsDownloadResultJob_cleanuptaskname;
 
 	public static String PawsDownloadResultJob_downloadtaskname;
-
-	public static String PawsDownloadResultJob_DownloadFailed;
 
 	public static String PawsDownloadResultJob_DownloadFailedMsg;
 
@@ -212,6 +212,8 @@ public class Messages extends NLS {
 	public static String PawsRunJob_ServerReturnCode;
 
 	public static String PawsRunJob_StatusFailed;
+
+	public static String PawsRunJob_TokenRefreshFail;
 
 	public static String PawsRunJob_UploadError;
 
@@ -278,8 +280,6 @@ public class Messages extends NLS {
 
 	public static String RunDialog_ForcaseYearLabel;
 
-	public static String RunDialog_ForcastDateError;
-
 	public static String RunDialog_Message;
 
 	public static String RunDialog_NameLabel;
@@ -316,13 +316,13 @@ public class Messages extends NLS {
 
 	public static String RunMapResultsPage_PatrolEffort;
 
+	public static String RunSummaryPage_AttemptReAuth;
+
 	public static String RunSummaryPage_Body;
 
 	public static String RunSummaryPage_Configuration;
 
 	public static String RunSummaryPage_DataDates;
-
-	public static String RunSummaryPage_DetailsSection;
 
 	public static String RunSummaryPage_endpoint;
 
@@ -334,9 +334,13 @@ public class Messages extends NLS {
 
 	public static String RunSummaryPage_Id;
 
+	public static String RunSummaryPage_MapButton;
+
 	public static String RunSummaryPage_NotFound;
 
 	public static String RunSummaryPage_PackageFile;
+
+	public static String RunSummaryPage_PawsRunSectionSettings;
 
 	public static String RunSummaryPage_pubToGrid;
 
@@ -344,15 +348,19 @@ public class Messages extends NLS {
 
 	public static String RunSummaryPage_Resultsfiles;
 
-	public static String RunSummaryPage_ResultsSection;
+	public static String RunSummaryPage_RetryButton;
 
 	public static String RunSummaryPage_RunId;
 
 	public static String RunSummaryPage_Status;
 
-	public static String RunSummaryPage_StatusDetails;
+	public static String RunSummaryPage_StatusDetailsSection;
+
+	public static String RunSummaryPage_StatusLabel;
 
 	public static String RunSummaryPage_StatusSection;
+
+	public static String RunSummaryPage_TableButton;
 
 	public static String RunSummaryPage_TaskURL;
 
@@ -361,6 +369,8 @@ public class Messages extends NLS {
 	public static String RunSummaryPage_To;
 
 	public static String RunSummaryPage_TrainingDates;
+
+	public static String RunSummaryPage_ViewingResultsSection;
 
 	public static String RunTableResultsPage_Error;
 
@@ -377,8 +387,6 @@ public class Messages extends NLS {
 	public static String ServerConfigurationDialog_APITooltip;
 
 	public static String ServerConfigurationDialog_ClientId;
-
-	public static String ServerConfigurationDialog_CName;
 
 	public static String ServerConfigurationDialog_LoadJobName;
 

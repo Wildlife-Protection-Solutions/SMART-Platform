@@ -93,6 +93,8 @@ import au.com.bytecode.opencsv.CSVWriter;
  */
 public class PawsDataEngine {
 
+	private static final String DATE_FORMAT = "MMMM dd, yyyy"; //$NON-NLS-1$
+
 	public static final String DATA_FILE_NAME  = "SMARTdata.csv"; //$NON-NLS-1$
 	
 	public static final String CONFIG_FILE_NAME  = "config.json"; //$NON-NLS-1$
@@ -594,15 +596,9 @@ public class PawsDataEngine {
 			select.append(" LEFT JOIN smart.patrol_leg_day pld on pld.uuid = pw.leg_day_uuid "); //$NON-NLS-1$
 			select.append(" left join smart.patrol_leg pl on pld.patrol_leg_uuid = pl.uuid "); //$NON-NLS-1$
 			select.append(" left join smart.patrol p on p.uuid = pl.patrol_uuid "); //$NON-NLS-1$
-//			select.append(" WHERE ");
-//			for (int i = 1; i <= numclasses; i ++) {
-//				select.append("pawsclass" + i + " is not null OR ");
-//			}
-//			select.deleteCharAt(select.length() - 1);
-//			select.deleteCharAt(select.length() - 1);
-//			select.deleteCharAt(select.length() - 1);
+
 			
-			SimpleDateFormat ff = new SimpleDateFormat("MMMM dd, yyyy");
+			SimpleDateFormat ff = new SimpleDateFormat(DATE_FORMAT);
 			try(ScrollableResults results = session.createNativeQuery(select.toString()).scroll()){
 				while(results.next()) {
 					String[] data = new String[headers.size()];
@@ -613,8 +609,6 @@ public class PawsDataEngine {
 					Date pstart = (Date)items[1];
 					Date pend = (Date)items[2];
 					
-//					byte[] wpuuid = (byte[]) items[0];
-//					byte[] obsuuid = (byte[]) items[1];
 					double x = (double)items[5];
 					double y = (double)items[6];
 					Timestamp datetime = (Timestamp)items[7];
