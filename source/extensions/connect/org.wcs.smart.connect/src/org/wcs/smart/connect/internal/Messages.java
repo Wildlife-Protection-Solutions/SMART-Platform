@@ -353,7 +353,7 @@ public class Messages extends NLS {
 	public static String ServerPanel_ServerRequired;
 	public static String ServerPanel_UrlLabel;
 	public static String ServerPanel_UseExistingCert;
-	public static String ServerWizardPage_Message;
+	public static String ServerWizardPage_Message1;
 	public static String ServerWizardPage_Title;
 	public static String SmartConnect_connectError;
 	public static String SmartConnect_ConnectionError;

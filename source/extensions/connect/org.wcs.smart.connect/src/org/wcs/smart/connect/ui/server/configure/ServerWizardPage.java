@@ -58,7 +58,7 @@ public class ServerWizardPage extends WizardPage implements ModifyListener {
 		panel.initValues(new ConnectServer());
 		
 		setTitle(Messages.ServerWizardPage_Title);
-		setMessage(Messages.ServerWizardPage_Message);
+		setMessage(Messages.ServerWizardPage_Message1);
 		
 		setControl(outer);
 		
