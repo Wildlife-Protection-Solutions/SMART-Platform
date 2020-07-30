@@ -160,7 +160,8 @@ public class AssetCurrentPage {
 	
 	private void createDeploymentPanel() {
 		if (mainControl == null) return;
-		for (Control c : mainControl.getChildren()) c.dispose();
+		
+		disposeMainPanel();
 		
 		SashForm mainPart = new SashForm(mainControl, SWT.VERTICAL);
 		currentForm = mainPart;
@@ -322,11 +323,19 @@ public class AssetCurrentPage {
 	
 	private void createNotActivePanel() {
 		if (mainControl == null) return;
-		for (Control c : mainControl.getChildren()) c.dispose();
+		disposeMainPanel();
 		toolkit.createLabel(mainControl, Messages.AssetCurrentPage_AssetNotActive);
 		mainControl.layout(true);
 	}
 
+	private void disposeMainPanel() {
+		for (Control c : mainControl.getChildren()) c.dispose();
+		
+		if (mapViewer != null) {
+			mapViewer.dispose();
+			mapViewer = null;
+		}
+	}
 	private Job computeSummaryStatisticsJob = new Job(Messages.AssetCurrentPage_statusJobName) {
 
 		@Override

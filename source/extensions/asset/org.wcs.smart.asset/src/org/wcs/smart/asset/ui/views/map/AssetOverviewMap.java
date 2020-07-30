@@ -443,6 +443,7 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 		for (OverviewTableColumnWrapper column : tableConfiguration.getColumns()) {
 			TableViewerColumn tColumn = new TableViewerColumn(summaryTable, SWT.NONE);
 			tColumn.getColumn().setText(column.getColumn().getName());
+			if (column.getColumn().getToolTip() != null) tColumn.getColumn().setToolTipText(column.getColumn().getToolTip());
 			tColumn.setLabelProvider(new ColumnLabelProvider() {
 				public String getText(Object element) {
 					if (statEngine.isComputed(column.getColumn())) {

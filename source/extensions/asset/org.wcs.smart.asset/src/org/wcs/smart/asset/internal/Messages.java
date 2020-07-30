@@ -679,12 +679,15 @@ public class Messages extends NLS {
 	public static String FileWizardPage_SkipTooltip;
 	public static String FileWizardPage_Title;
 	public static String FixedColumn_ActiveDaysColumnName;
-	public static String FixedColumn_AssetDaysColumnName;
+	public static String FixedColumn_AssetColumnTooltip;
+	public static String FixedColumn_AssetDaysColumnName1;
 	public static String FixedColumn_CurrentAssetLabel;
 	public static String FixedColumn_IdColumnName;
 	public static String FixedColumn_IncidentCntColumnName;
 	public static String FixedColumn_StatusColumnName;
 	public static String FixedColumn_StatusKeyColumnName;
+	public static String FixedColumn_TotalActiveDaysColumnTooltip;
+	public static String FixedColumn_TotalSensortDaysColumnTooltip;
 	public static String FixedColumn_UnknownValue;
 	public static String FixedColumn_UuidColumnName;
 	public static String IdFieldHeader_InvalidIdMessage;

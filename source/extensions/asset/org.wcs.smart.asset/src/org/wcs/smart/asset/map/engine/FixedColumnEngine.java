@@ -22,6 +22,9 @@
 package org.wcs.smart.asset.map.engine;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.HashMap;
@@ -34,6 +37,7 @@ import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.asset.model.AssetDeployment;
+import org.wcs.smart.asset.model.AssetDeploymentDisruption;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.ui.views.map.FixedColumn;
@@ -157,15 +161,33 @@ public class FixedColumnEngine implements IColumnEngine {
 				}
 				int cnt = 0;
 				while(!startDate.isAfter(endDate)) {
-					if (dFilter == null) {
-						dates.add(startDate.toEpochDay());
-						cnt++;
-					}else if (!startDate.isBefore(filterStart) && !startDate.isAfter(filterEnd)) {
-						dates.add(startDate.toEpochDay());
-						cnt++;
+					
+					//if startDate is wholly contained within a asset disruption then we don't want to 
+					//count this day
+					LocalDateTime startOfDay = startDate.atStartOfDay();
+					LocalDateTime endOfDay = startDate.atTime(LocalTime.MAX);
+					boolean skipDay = false;
+					
+					for (AssetDeploymentDisruption dd : d.getDisruptions()) {
+						
+						if (startOfDay.isAfter(dd.getStartDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime())
+								&& endOfDay.isBefore(dd.getEndDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()) ) {
+							//skip this day 
+							skipDay = true;
+							break;
+						}
+					}
+					
+					if (!skipDay) {
+						if (dFilter == null) {
+							dates.add(startDate.toEpochDay());
+							cnt++;
+						}else if (!startDate.isBefore(filterStart) && !startDate.isAfter(filterEnd)) {
+							dates.add(startDate.toEpochDay());
+							cnt++;
+						}
 					}
 					startDate = startDate.plus(1, ChronoUnit.DAYS);
-					
 				}
 				
 				Integer days = (Integer) daysCnt.get(s.getUuid());
@@ -229,12 +251,28 @@ public class FixedColumnEngine implements IColumnEngine {
 				}
 				int cnt = 0;
 				while(!startDate.isAfter(endDate)) {
-					if (dFilter == null) {
-						dates.add(startDate.toEpochDay());
-						cnt++;
-					}else if (!startDate.isBefore(filterStart) && !startDate.isAfter(filterEnd)) {
-						dates.add(startDate.toEpochDay());
-						cnt++;
+					
+					LocalDateTime startOfDay = startDate.atStartOfDay();
+					LocalDateTime endOfDay = startDate.atTime(LocalTime.MAX);
+					boolean skipDay = false;
+					for (AssetDeploymentDisruption dd : d.getDisruptions()) {
+						
+						if (startOfDay.isAfter(dd.getStartDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime())
+								&& endOfDay.isBefore(dd.getEndDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()) ) {
+							//skip this day 
+							skipDay = true;
+							break;
+						}
+					}
+					
+					if (!skipDay) {
+						if (dFilter == null) {
+							dates.add(startDate.toEpochDay());
+							cnt++;
+						}else if (!startDate.isBefore(filterStart) && !startDate.isAfter(filterEnd)) {
+							dates.add(startDate.toEpochDay());
+							cnt++;
+						}
 					}
 					startDate = startDate.plus(1, ChronoUnit.DAYS);
 					

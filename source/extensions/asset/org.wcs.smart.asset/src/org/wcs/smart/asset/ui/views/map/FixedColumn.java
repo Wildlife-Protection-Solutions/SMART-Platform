@@ -43,7 +43,7 @@ public class FixedColumn implements IOverviewTableColumn{
 		STATUS_KEY(Messages.FixedColumn_StatusKeyColumnName, IOverviewTableColumn.ColumnType.STRING, false),
 		ASSETS(Messages.FixedColumn_CurrentAssetLabel, IOverviewTableColumn.ColumnType.STRING, true),
 		ACTIVE_DAYS(Messages.FixedColumn_ActiveDaysColumnName, IOverviewTableColumn.ColumnType.INTEGER, true),
-		ASSET_DAYS(Messages.FixedColumn_AssetDaysColumnName, IOverviewTableColumn.ColumnType.INTEGER, true),
+		ASSET_DAYS(Messages.FixedColumn_AssetDaysColumnName1, IOverviewTableColumn.ColumnType.INTEGER, true),
 		INCIDENTS(Messages.FixedColumn_IncidentCntColumnName, IOverviewTableColumn.ColumnType.INTEGER, true);
 		
 		private String guiName;
@@ -81,6 +81,18 @@ public class FixedColumn implements IOverviewTableColumn{
 		return column.guiName;
 	}
 
+	@Override
+	public String getToolTip() {
+		if (column == Column.ASSETS) {
+			return Messages.FixedColumn_AssetColumnTooltip;
+		}else if (column == Column.ACTIVE_DAYS) {
+			return Messages.FixedColumn_TotalActiveDaysColumnTooltip;
+		}else if (column == Column.ASSET_DAYS) {
+			return Messages.FixedColumn_TotalSensortDaysColumnTooltip; 
+		}
+		return null;
+	}
+	
 	@Override
 	public Object getValue(StationData data) {
 		if (this.column == Column.STATUS) {

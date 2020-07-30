@@ -115,6 +115,13 @@ public interface IOverviewTableColumn {
 	 */
 	public String getName();
 	
+	/**
+	 * 
+	 * @return the tooltip for the column can be null if no valid tooltip
+	 */
+	public default String getToolTip() {
+		return null;
+	}
 	
 	/**
 	 * A unique key for identifying the column.  This is used for
