@@ -302,8 +302,9 @@ public class ConfigurationEditor extends EditorPart {
 		
 		for (Iterator<Object> iterator = citems.iterator(); iterator.hasNext();) {
 			Object object = (Object) iterator.next();
-			if (object instanceof Path) citems.remove(object);
+			if (object instanceof Path) iterator.remove();
 		}
+		
 		cmbBound.refresh();
 		cmbBound.setSelection(new StructuredSelection(pp));
 		
@@ -917,13 +918,16 @@ public class ConfigurationEditor extends EditorPart {
 
 				try {
 					//delete any files not referenced
+					List<Path> toDelete = new ArrayList<>();
 					try(Stream<Path> files = Files.list(root)){
 						files.forEach(other->{
 					
 						String name = SharedUtils.getFilenameWithoutExtension(other.getFileName().toString());
 						if (!fileNames.contains(name)) {
 							deletedFiles.add(other.getFileName().toString());
+							toDelete.add(other);
 							try{
+								
 								Files.deleteIfExists(other);
 							}catch (IOException ex) {
 								PawsPlugIn.log(ex.getMessage(), ex);

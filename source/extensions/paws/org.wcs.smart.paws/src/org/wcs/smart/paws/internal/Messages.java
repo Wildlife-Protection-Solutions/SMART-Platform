@@ -173,6 +173,8 @@ public class Messages extends NLS {
 
 	public static String PawsDatabaseUpgrader_TaskName;
 
+	public static String PawsDownloadResultJob_AuthorizatoinFailed;
+
 	public static String PawsDownloadResultJob_buildrasterstaskname;
 
 	public static String PawsDownloadResultJob_cleanuptaskname;
@@ -380,6 +382,8 @@ public class Messages extends NLS {
 
 	public static String RunTableResultsPage_NotFound;
 
+	public static String RunTableResultsPage_TokenTimeout;
+
 	public static String ServerConfigurationDialog_APIKey;
 
 	public static String ServerConfigurationDialog_APILbl;
@@ -409,6 +413,10 @@ public class Messages extends NLS {
 	public static String ServerConfigurationDialog_Title;
 
 	public static String ServerConfigurationDialog_Url;
+
+	public static String SettingsPreferencePage_DefaultSettingsError;
+
+	public static String SettingsPreferencePage_WarningMessage;
 
 	public static String ShowRunHandler_LoadError;
 

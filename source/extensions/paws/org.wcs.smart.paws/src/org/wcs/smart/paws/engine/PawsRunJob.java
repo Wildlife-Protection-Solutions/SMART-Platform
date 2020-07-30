@@ -147,8 +147,7 @@ public class PawsRunJob extends Job{
 			}
 			
 		}catch (Throwable ex){
-			String msg = MessageFormat.format(Messages.PawsRunJob_UploadError, run.getRunId() );
-			handleError(msg, ex);
+			handleError(Messages.PawsRunJob_UploadError, ex);
 			return Status.OK_STATUS;
 		}
 		

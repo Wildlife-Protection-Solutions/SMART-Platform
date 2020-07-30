@@ -42,7 +42,6 @@ import org.wcs.smart.paws.internal.Messages;
 import org.wcs.smart.paws.model.PawsResultManager;
 import org.wcs.smart.paws.model.PawsRun;
 
-import com.ibm.icu.text.MessageFormat;
 import com.microsoft.azure.storage.blob.BlockBlobURL;
 import com.microsoft.azure.storage.blob.ContainerURL;
 import com.microsoft.azure.storage.blob.StorageException;
@@ -112,7 +111,7 @@ public class PawsDownloadResultJob extends Job {
 			}
 		});
 		if (iscancelled[0]) {
-			updateStatus(PawsRun.Status.AUTH_TIMEOUT, "Authorization failed");
+			updateStatus(PawsRun.Status.AUTH_TIMEOUT, Messages.PawsDownloadResultJob_AuthorizatoinFailed);
 			return Status.OK_STATUS;
 		}
 		if (fex[0] != null) {
@@ -171,7 +170,7 @@ public class PawsDownloadResultJob extends Job {
 				}
 			}
 			
-			String msg = MessageFormat.format(Messages.PawsDownloadResultJob_DownloadFailedMsg, run.getRunId()); 
+			String msg = Messages.PawsDownloadResultJob_DownloadFailedMsg; 
 			handleError(msg, t);
 			return Status.OK_STATUS;
 		}

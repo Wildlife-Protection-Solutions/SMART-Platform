@@ -97,7 +97,7 @@ public class PawsResultFile {
 
 	public String getTimeFrameString() {
 		String fname = this.resultsFile.getFileName().toString();
-		if (fname.length() == "predictions_XXXX.csv".length()) {
+		if (fname.length() == "predictions_XXXX.csv".length()) { //$NON-NLS-1$
 			//year only
 			fname = fname.substring("predictions_".length(), fname.length() - ".csv".length()); //$NON-NLS-1$ //$NON-NLS-2$ 
 		}else {

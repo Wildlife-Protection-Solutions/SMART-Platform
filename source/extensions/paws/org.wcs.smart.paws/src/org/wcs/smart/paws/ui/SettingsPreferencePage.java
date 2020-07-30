@@ -88,7 +88,7 @@ public class SettingsPreferencePage extends PreferencePage implements IWorkbench
 				PawsManager.INSTANCE.createDefaultSettings(session);
 				session.getTransaction().commit();
 			}catch (Exception ex) {
-				PawsPlugIn.displayLog("Unable to reset PAWS settings: " + ex.getMessage(), ex);
+				PawsPlugIn.displayLog("Unable to reset PAWS settings: " + ex.getMessage(), ex); //$NON-NLS-1$
 			}
 			
 		}
@@ -133,7 +133,7 @@ public class SettingsPreferencePage extends PreferencePage implements IWorkbench
 		
 		Label infoMessage1 = new Label(main, SWT.WRAP);
 		infoMessage1.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		infoMessage1.setText("These settings should not changed unless the PAWS service has been modified and you have been provided with new settings.");
+		infoMessage1.setText(Messages.SettingsPreferencePage_WarningMessage);
 		((GridData)infoMessage1.getLayoutData()).widthHint = 350;
 
 		SmartUiUtils.createHeaderLabel(main, Messages.ServerConfigurationDialog_ServiceSection);
@@ -230,7 +230,7 @@ public class SettingsPreferencePage extends PreferencePage implements IWorkbench
 						PawsManager.INSTANCE.createDefaultSettings(session);
 						session.getTransaction().commit();
 					}catch (Exception ex) {
-						PawsPlugIn.displayLog("Error creating default settings for Paws API", ex);
+						PawsPlugIn.displayLog(Messages.SettingsPreferencePage_DefaultSettingsError, ex);
 					}
 				}
 				
@@ -242,7 +242,7 @@ public class SettingsPreferencePage extends PreferencePage implements IWorkbench
 			Display.getDefault().asyncExec(()->{
 				
 				if (fservice != null) {
-					txtServiceKey.setText(fservice.getApiKey()); //$NON-NLS-1$
+					txtServiceKey.setText(fservice.getApiKey());
 					txtServiceHeatmapApi.setText(fservice.getPawsApiUrl());
 					txtServiceTaskApi.setText(fservice.getTaskApiUrl());
 				
