@@ -126,6 +126,10 @@ public class Upgrader620To630 implements IDatabaseUpgrader {
 					}
 				}
 				
+				if (lineuuid == null && blackuuid == null && coloruuid == null) {
+					//not iconsets in this conservation area
+					continue;
+				}
 				boolean found = false;
 				for (String[] icon : IconUtils.SMART_ICON_MAPPING) {
 					
@@ -134,6 +138,7 @@ public class Upgrader620To630 implements IDatabaseUpgrader {
 						found = true;
 					}
 					if (!found) continue;
+					
 					
 					byte[] iconuuid = DerbyUtils.createUuid();
 					
@@ -147,27 +152,32 @@ public class Upgrader620To630 implements IDatabaseUpgrader {
 					pslabel.setString(3, icon[1]);
 					pslabel.addBatch();
 					
-					byte[] fileuuid = DerbyUtils.createUuid();
-					psiconfile.setBytes(1, fileuuid);
-					psiconfile.setBytes(2, iconuuid);
-					psiconfile.setBytes(3, blackuuid);
-					psiconfile.setString(4, icon[2]);
-					psiconfile.addBatch();
+					if (blackuuid != null) {
+						byte[] fileuuid = DerbyUtils.createUuid();
+						psiconfile.setBytes(1, fileuuid);
+						psiconfile.setBytes(2, iconuuid);
+						psiconfile.setBytes(3, blackuuid);
+						psiconfile.setString(4, icon[2]);
+						psiconfile.addBatch();
+					}
 					
-					fileuuid = DerbyUtils.createUuid();
-					psiconfile.setBytes(1, fileuuid);
-					psiconfile.setBytes(2, iconuuid);
-					psiconfile.setBytes(3, lineuuid);
-					psiconfile.setString(4, icon[3]);
-					psiconfile.addBatch();
+					if (lineuuid != null) {
+						byte[] fileuuid = DerbyUtils.createUuid();
+						psiconfile.setBytes(1, fileuuid);
+						psiconfile.setBytes(2, iconuuid);
+						psiconfile.setBytes(3, lineuuid);
+						psiconfile.setString(4, icon[3]);
+						psiconfile.addBatch();
+					}
 					
-					fileuuid = DerbyUtils.createUuid();
-					psiconfile.setBytes(1, fileuuid);
-					psiconfile.setBytes(2, iconuuid);
-					psiconfile.setBytes(3, coloruuid);
-					psiconfile.setString(4, icon[4]);
-					psiconfile.addBatch();
-					
+					if (coloruuid != null) {
+						byte[] fileuuid = DerbyUtils.createUuid();
+						psiconfile.setBytes(1, fileuuid);
+						psiconfile.setBytes(2, iconuuid);
+						psiconfile.setBytes(3, coloruuid);
+						psiconfile.setString(4, icon[4]);
+						psiconfile.addBatch();
+					}
 					
 					psicon.executeBatch();
 					pslabel.executeBatch();
