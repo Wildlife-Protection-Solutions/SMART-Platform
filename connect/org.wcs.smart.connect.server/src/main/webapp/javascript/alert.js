@@ -10,6 +10,7 @@ var map;
 var layerControl;
 var redMarker;
 var deletetimer;
+var queryNames = {};
 var queryLayers = {};
 var queryTypeKeys = {};
 
@@ -240,12 +241,12 @@ function handleQueries() {
 	const data = JSON.parse(this.responseText);
 	const queryList = document.getElementById("query-list");
 	for(var i=0; i < data.length; i++) {
-		addFolder(data[i], queryList);
+		addFolder(data[i], queryList, "");
 	}
 }
 
 // recursively adds nested folders and queries
-function addFolder(data, parent) {
+function addFolder(data, parent, parentName) {
 	var folderDiv = document.createElement('div');
 	folderDiv.classList.add('folder');
 	parent.appendChild(folderDiv);
@@ -253,14 +254,16 @@ function addFolder(data, parent) {
 	folderContentsDiv = document.createElement('div');
 	folderContentsDiv.classList.add('folder-contents');
 	folderDiv.appendChild(folderContentsDiv);
+	var thisParentName = (parentName == "" ? "CA: " : parentName + "Folder: ") + data['name'] + "<br/>";
 	for(var i = 0; i < data['subFolders'].length; i++) {
-		addFolder(data['subFolders'][i], folderContentsDiv);
+		addFolder(data['subFolders'][i], folderContentsDiv, thisParentName);
 	}
 	for(var i = 0; i < data['queries'].length; i++) {
 		var query = data['queries'][i];
 		folderItemDiv = document.createElement('div');
 		folderItemDiv.classList.add('folder-item');
 		queryTypeKeys[query.uuid] = query.typeKey;
+		queryNames[query.uuid] = thisParentName + "Query: " + query.name + " [" + query.type + "]";
 		folderItemDiv.innerHTML = "<input id=\"" + query.uuid + "\" type=\"checkbox\"/><span style=\"display: none;\" class=\"color-box\"></span><img class=\"query-icon\" src=\"../css/images/query_icons/" + query.iconName + "\" title=\"" + query.type + "\">" + query.name;
 		folderContentsDiv.appendChild(folderItemDiv);
 	}
@@ -331,7 +334,15 @@ function addQueryLayer(id) {
  			pointToLayer: function (feature, latlng) {
  		        return L.circleMarker(latlng, pointStyle);
  		    }
- 		});
+ 		}).bindPopup(function (layer) {
+ 		    var p = layer.feature.properties;
+ 		    var c = '<div class="queryPopupTitle">' + queryNames[id] + '</div><div class="queryPopupTable"><table><tbody>';
+ 		    for(const prop in p) {
+ 		    	c += "<tr><td>" + prop + "</td><td>" + p[prop] + "</td></tr>";
+ 		    }
+ 		    c += "</tbody></table></div>";
+ 		    return c;
+ 		},  {maxWidth: 325});
  		if(queryLayers[id]) {
  			removeQueryLayer(id);
  		}

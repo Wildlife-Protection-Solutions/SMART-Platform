@@ -561,6 +561,21 @@ th {
 	padding: 1px 7px 1px 7px;
 	border: 1px solid black;
 }
+.queryPopupTitle {
+	font-weight: bold;
+}
+.queryPopupTable {
+	border: 1px solid darkgrey;
+	max-width: 323px;
+	max-height: 250px;
+	overflow: auto;
+}
+.queryPopupTable table {
+	border-collapse: collapse;
+}
+.queryPopupTable table td {
+	border: 1px solid darkgrey;
+}
 #map-info-box{
     margin-top: 2px;
     z-index: 10;
