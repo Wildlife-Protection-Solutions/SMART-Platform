@@ -71,8 +71,6 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.ca.icon.IconSet;
-import org.wcs.smart.ca.icon.IconUtils;
-import org.wcs.smart.ca.icon.IconUtils.FixedIconSet;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.common.control.NameKeyDialog;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -539,19 +537,12 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 	
 	private void addIconSet() {
 		if (sets == null) return;
-		List<IconSet> allSets = new ArrayList<>();
-		allSets.addAll( sets );
-		for (FixedIconSet fixed : IconUtils.FixedIconSet.values()) {
-			IconSet t1 = new IconSet();
-			t1.setKeyId(fixed.key);
-			allSets.add(t1);
-		}
 		
 		IconSet newIconSet = new IconSet();
 		newIconSet.setConservationArea(SmartDB.getCurrentConservationArea());;
 		newIconSet.setIsDefault(false);
 		
-		NameKeyDialog<IconSet> dialog = new NameKeyDialog<IconSet>(getShell(), newIconSet, allSets){
+		NameKeyDialog<IconSet> dialog = new NameKeyDialog<IconSet>(getShell(), newIconSet, sets){
 			@Override
 			protected String getTitle(){
 				return Messages.IconPreferencePage_NewIconDialogTitle;
@@ -669,20 +660,13 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 
 	private void editIconSet() {
 		if (sets == null) return;
-		List<IconSet> allSets = new ArrayList<>();
-		allSets.addAll( sets );
-		for (FixedIconSet fixed : IconUtils.FixedIconSet.values()) {
-			IconSet t1 = new IconSet();
-			t1.setKeyId(fixed.key);
-			allSets.add(t1);
-		}
 		
 		Object item = lstIconsets.getStructuredSelection().getFirstElement();
 		if (item == null) return;
 		if (!(item instanceof IconSet)) return;
 		IconSet toEdit = (IconSet)item;
 		
-		NameKeyDialog<IconSet> dialog = new NameKeyDialog<IconSet>(getShell(), toEdit, allSets){
+		NameKeyDialog<IconSet> dialog = new NameKeyDialog<IconSet>(getShell(), toEdit, sets){
 			@Override
 			protected String getTitle(){
 				return Messages.IconPreferencePage_EditIconDialogTitle;
