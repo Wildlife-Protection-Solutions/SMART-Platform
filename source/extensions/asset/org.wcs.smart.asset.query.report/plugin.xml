@@ -28,6 +28,11 @@
             class="org.wcs.smart.asset.report.query.data.oda.query.AssetSmartQuery"
             queryTypeKey="assetwaypoint">
       </QueryTypeDataset>
+      <QueryTypeDataset
+            class="org.wcs.smart.asset.report.query.data.oda.query.AssetSmartQuery"
+            metadataProvider="org.wcs.smart.asset.report.query.AssetSummaryMetadataProvider"
+            queryTypeKey="assetdeploymentsummary">
+      </QueryTypeDataset>
    </extension>
    <extension
          point="org.wcs.smart.report.birt.query.smartTable">

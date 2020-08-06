@@ -61,6 +61,7 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.connect.query.engine.ISummaryEngine;
 import org.wcs.smart.connect.query.engine.ListItem;
 import org.wcs.smart.connect.query.engine.PsqlNamedPreparedStatement;
 import org.wcs.smart.connect.query.engine.SummaryItemLabelProvider;
@@ -98,7 +99,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author egouge
  * @since 1.0.0
  */
-public class AssetDeploymentSummaryEngine extends AssetQueryEngine{
+public class AssetDeploymentSummaryEngine extends AssetQueryEngine implements ISummaryEngine{
 
 	private final Logger logger = Logger.getLogger(AssetDeploymentSummaryEngine.class.getName());
 
@@ -950,7 +951,6 @@ public class AssetDeploymentSummaryEngine extends AssetQueryEngine{
 			sb.append(gbsql.substring(0, gbsql.length() - 1));
 		}
 
-		System.out.println(sb.toString());
 		ResultSet rs = parseQueryString(c, sb.toString()).executeQuery();
 		return createValueResults(rs, groupBy, valueItem.asString());
 	}

@@ -146,6 +146,11 @@ public class SummaryQueryResultSetMetadata implements IResultSetMetaData {
 		}else if (isGeometryColumn(index)) {
 			return Types.JAVA_OBJECT;
 		}else{
+			//check if results are formatted or not
+			int vindex = index % results.getValueHeaders().size();
+			if (results.getValueHeaders().get(vindex).getFormatter() != null) {
+				return QueryColumn.ColumnType.STRING.getSqlType();	
+			}
 			return QueryColumn.ColumnType.NUMBER.getSqlType();
 		}
 	}

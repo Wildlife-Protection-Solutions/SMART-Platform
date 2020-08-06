@@ -23,8 +23,10 @@ package org.wcs.smart.asset.report.query;
 
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.wcs.smart.asset.query.engine.AssetDeploymentSummaryEngine;
 import org.wcs.smart.asset.query.engine.AssetSummaryEngine;
 import org.wcs.smart.asset.query.model.AssetSummaryQuery;
+import org.wcs.smart.asset.query.parser.internal.filter.AssetDeploymentDateField;
 import org.wcs.smart.data.oda.smart.impl.GeometryColumn;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.data.oda.smart.query.common.IMetadataProvider;
@@ -50,7 +52,11 @@ public class AssetSummaryMetadataProvider implements IMetadataProvider {
 		
 		//set a default date filter for parsing
 		if (q.getDateFilter() == null){
-			q.setDateFilter(new DateFilter(WaypointDateField.INSTANCE, Last30DaysDateFilter.INSTANCE));
+			if(q.getTypeKey().equalsIgnoreCase(AssetSummaryQuery.ASSET_SUMMARY_KEY)) {
+				q.setDateFilter(new DateFilter(WaypointDateField.INSTANCE, Last30DaysDateFilter.INSTANCE));
+			}else if (q.getTypeKey().equalsIgnoreCase(AssetSummaryQuery.DEPLOYMENT_SUMMARY_KEY)) {
+				q.setDateFilter(new DateFilter(AssetDeploymentDateField.INSTANCE, Last30DaysDateFilter.INSTANCE));
+			}
 		}
 		
 		try {
@@ -60,7 +66,11 @@ public class AssetSummaryMetadataProvider implements IMetadataProvider {
 			}else {
 				results = new SummaryQueryResult();
 			}
-			AssetSummaryEngine.getHeaderInfo(q, results, c.getSession());
+			if(q.getTypeKey().equalsIgnoreCase(AssetSummaryQuery.ASSET_SUMMARY_KEY)) {
+				AssetSummaryEngine.getHeaderInfo(q, results, c.getSession());
+			}else if(q.getTypeKey().equalsIgnoreCase(AssetSummaryQuery.DEPLOYMENT_SUMMARY_KEY)) {
+				AssetDeploymentSummaryEngine.getHeaderInfo(q, results, c.getSession());
+			}
 			return new SummaryQueryResultSetMetadata(results);
 		} catch (Exception e) {
 			throw new OdaException(e);

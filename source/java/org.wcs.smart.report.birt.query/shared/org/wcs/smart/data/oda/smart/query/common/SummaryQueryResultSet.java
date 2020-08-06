@@ -26,6 +26,7 @@ import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.UUID;
+import java.util.function.Function;
 
 import org.eclipse.datatools.connectivity.oda.IBlob;
 import org.eclipse.datatools.connectivity.oda.IClob;
@@ -144,8 +145,14 @@ public class SummaryQueryResultSet implements IResultSet {
 			return p.toText();
 		} else {
 			index = index - results.getRowHeaders().size();
+			
+			int vindex = index % results.getValueHeaders().size();
+			Function<Double, String> formatter = results.getValueHeaders().get(vindex).getFormatter();
+			
 			Double data = results.getData()[m_currentRowId][index];
 			lastIsNull = (data == null);
+			
+			if (formatter != null) return formatter.apply(data);
 			return String.valueOf(data);
 		}
 	}

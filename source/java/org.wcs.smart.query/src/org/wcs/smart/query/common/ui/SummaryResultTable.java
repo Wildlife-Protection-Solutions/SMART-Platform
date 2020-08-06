@@ -457,11 +457,11 @@ public class SummaryResultTable extends Composite {
 		public String getColumnText(Object element, int columnIndex) {
 			Double[] data = (Double[])element;
 			
+			if (columnIndex >= data.length) return ""; //$NON-NLS-1$
+			
 			int vindex = columnIndex % results.getValueHeaders().size();
 			Function<Double, String> formatter = results.getValueHeaders().get(vindex).getFormatter();
 			
-			
-			if (columnIndex >= data.length) return ""; //$NON-NLS-1$
 			Double value = data[columnIndex];
 			if (formatter != null) {
 				return formatter.apply(value);

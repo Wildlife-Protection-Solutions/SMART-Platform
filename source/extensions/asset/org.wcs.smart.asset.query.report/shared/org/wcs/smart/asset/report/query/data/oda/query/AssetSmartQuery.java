@@ -35,6 +35,7 @@ import org.wcs.smart.asset.query.model.AssetObservationQuery;
 import org.wcs.smart.asset.query.model.AssetQueryResultItem;
 import org.wcs.smart.asset.query.model.AssetSummaryQuery;
 import org.wcs.smart.asset.query.model.AssetWaypointQuery;
+import org.wcs.smart.asset.query.parser.internal.filter.AssetDeploymentDateField;
 import org.wcs.smart.data.oda.smart.impl.AbstractSmartBirtQuery;
 import org.wcs.smart.data.oda.smart.impl.AbstractSmartQuery;
 import org.wcs.smart.data.oda.smart.impl.GeometryColumn;
@@ -122,9 +123,16 @@ public class AssetSmartQuery extends AbstractSmartQuery {
 		
 		CustomDateFilter cd = new CustomDateFilter();
 		cd.setDates(startDate, endDate);
-		DateFilter dateFilter = new DateFilter(
-				WaypointDateField.INSTANCE,cd);
-
+		
+		DateFilter dateFilter = null;
+		
+		if (query.getQuery().getTypeKey().equals(AssetSummaryQuery.ASSET_SUMMARY_KEY)) {
+			dateFilter = new DateFilter(WaypointDateField.INSTANCE,cd);
+		}else if (query.getQuery().getTypeKey().equals(AssetSummaryQuery.DEPLOYMENT_SUMMARY_KEY)) {
+			dateFilter = new DateFilter(AssetDeploymentDateField.INSTANCE,cd);
+		}else {
+			dateFilter = new DateFilter(WaypointDateField.INSTANCE,cd);
+		}
 		query.getQuery().setDateFilter(dateFilter);
 
 		return super.executeQueryInternal(query, connection);
