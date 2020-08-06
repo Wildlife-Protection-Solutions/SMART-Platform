@@ -107,7 +107,7 @@ public class AssetSmartQuery extends AbstractSmartQuery {
 		Date endDate = (Date) query.getParameters().get(SmartParameterMetaData.Parameter.ENDDATE);
 		
 		if (startDate == null || endDate == null){
-			if (query.getQuery().getTypeKey().equals(AssetSummaryQuery.KEY)){
+			if (AssetSummaryQuery.isAssetSummary(query.getQuery().getTypeKey())){
 				//we choose to run summaries in order to get 
 				//all header information
 				Calendar cal = Calendar.getInstance();

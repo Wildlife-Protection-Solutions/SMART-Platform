@@ -94,7 +94,7 @@ public class AssetQueryTemplateCloner implements
 				.getResultList();
 		
 		for(AssetSummaryQuery query : queries){
-			AssetSummaryQuery clone = (AssetSummaryQuery) AssetQueryFactory.createBlankQuery(QueryTypeManager.INSTANCE.findQueryType( AssetSummaryQuery.KEY) );
+			AssetSummaryQuery clone = (AssetSummaryQuery) AssetQueryFactory.createBlankQuery(QueryTypeManager.INSTANCE.findQueryType( query.getTypeKey() ) );
 			clone.setConservationArea(engine.getNewCa());
 			engine.copyLabels(query, clone);
 			clone.setConservationAreaFilter( (new ConservationAreaFilter(true, engine.getNewCa())).asString());

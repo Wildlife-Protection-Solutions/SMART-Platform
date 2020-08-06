@@ -49,7 +49,8 @@ import org.wcs.smart.asset.query.ui.definition.dropItems.AssetFillterDropItem;
 import org.wcs.smart.asset.query.ui.definition.dropItems.AssetGroupByDropItem;
 import org.wcs.smart.asset.query.ui.definition.dropItems.AssetValueDropItem;
 import org.wcs.smart.asset.query.ui.itempanel.AttributeWrapper;
-import org.wcs.smart.asset.query.ui.itempanel.SummaryFilterPanel;
+import org.wcs.smart.asset.query.ui.itempanel.SummaryDeploymentItemPanel;
+import org.wcs.smart.asset.query.ui.itempanel.SummaryItemPanel;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -136,14 +137,18 @@ public class AssetDropItemFactory extends BasicDropItemFactory implements IDropI
 			}else {
 				items = new DropItem[] {new AssetFillterDropItem((AssetStationLocation)source) };
 			}
+		}else if (source instanceof AssetValueOption) {
+			items = new DropItem[] {new AssetValueDropItem((AssetValueOption)source, null)};
 		} else if (source instanceof SummaryDmObject) {
 			items = new DropItem[]{createSummaryDmDropItem((SummaryDmObject)source)};
 		} else if (source instanceof AssetFilterOption) {
-			if (queryItemPanelId == SummaryFilterPanel.ID){
+			if (queryItemPanelId.equals(SummaryItemPanel.ID) ||
+					queryItemPanelId.equals(SummaryDeploymentItemPanel.ID)){
 				items = new DropItem[]{createAssetGroupByDropItem((AssetFilterOption) source)};
 			}
 		}else if (source == SummaryDataModelContentProvider.DataModelItem.CATEGORIES_VALUE){
-			if (queryItemPanelId.equals(SummaryFilterPanel.ID) ){
+			if (queryItemPanelId.equals(SummaryItemPanel.ID)  ||
+					queryItemPanelId.equals(SummaryDeploymentItemPanel.ID)){
 				items = new DropItem[]{createCategoryValueDropItem(null)};
 			}
 		}else if (source instanceof AttributeWrapper) {
@@ -169,8 +174,8 @@ public class AssetDropItemFactory extends BasicDropItemFactory implements IDropI
 	 * @param item
 	 * @return
 	 */
-	public DropItem createAssetValueDropItem(AssetValueOption item){
-		return new AssetValueDropItem(item);
+	public DropItem createAssetValueDropItem(AssetValueOption item, AssetFormatOption format){
+		return new AssetValueDropItem(item, format);
 	}
 	
 	/**
@@ -216,6 +221,8 @@ public class AssetDropItemFactory extends BasicDropItemFactory implements IDropI
 				}else{
 					return createAttributeTreeNodeValueDropItem((AttributeTreeNode)object.getObject());
 				}
+			} else if (object.getObject() instanceof AssetValueOption ) {
+				return createAssetValueDropItem( (AssetValueOption)object.getObject(), null);
 			}
 		} else {
 			// category
@@ -333,7 +340,8 @@ public class AssetDropItemFactory extends BasicDropItemFactory implements IDropI
 				IFilter queryFilter = ((SimpleQuery)proxy.getQuery()).getFilter().getFilter();
 				proxy.setDropItems(BasicFilterDefintionPanel.ID, asDropItems(queryFilter, session));
 	
-			}else if (proxy.getQuery().getTypeKey().equals(AssetSummaryQuery.KEY)){
+			}else if (AssetSummaryQuery.isAssetSummary(proxy.getQuery().getTypeKey())) { 
+				
 				AssetSummaryQuery q = (AssetSummaryQuery) proxy.getQuery();
 				SumQueryDefinition def = q.getQueryDefinition();
 
@@ -466,13 +474,15 @@ public class AssetDropItemFactory extends BasicDropItemFactory implements IDropI
 			return asDropItem((AssetAttributeValueItem) item, session);
 		}else if (item instanceof AssetCategoryValueItem){
 			return asDropItem((AssetCategoryValueItem) item, session);
+		}else if (item instanceof AssetValueItem) {
+			return asDropItem ((AssetValueItem)item);
 		}
 		return super.valueItemToDropItem(item, session);
 	}
 	
 	
-	public DropItem asDropItem(AssetValueItem item, Session session) throws Exception{
-		return createAssetValueDropItem(item.getAssetValueOption());
+	public DropItem asDropItem(AssetValueItem item) {
+		return createAssetValueDropItem(item.getAssetValueOption(), item.getAssetFormatOption());
 	}
 	
 	public DropItem asDropItem(AssetCategoryValueItem item, Session session) throws Exception{

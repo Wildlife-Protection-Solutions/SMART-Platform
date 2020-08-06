@@ -24,6 +24,7 @@ package org.wcs.smart.asset.query.model.types;
 import java.io.Reader;
 import java.io.StringReader;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IPath;
@@ -36,11 +37,14 @@ import org.wcs.smart.asset.query.internal.Messages;
 import org.wcs.smart.asset.query.map.udig.QueryService;
 import org.wcs.smart.asset.query.model.AssetDropItemFactory;
 import org.wcs.smart.asset.query.model.AssetSummaryQuery;
+import org.wcs.smart.asset.query.parser.internal.filter.AssetDeploymentDateField;
 import org.wcs.smart.asset.query.parser.internal.parser.Parser;
-import org.wcs.smart.asset.query.ui.definition.AssetSimpleFilterPanel;
+import org.wcs.smart.asset.query.parser.internal.summary.AssetGroupBy;
+import org.wcs.smart.asset.query.parser.internal.summary.AssetValueItem;
+import org.wcs.smart.asset.query.ui.definition.AssetFilterPanel;
 import org.wcs.smart.asset.query.ui.definition.AssetSummaryGroupByValuePanel;
 import org.wcs.smart.asset.query.ui.editor.AssetSummaryEditor;
-import org.wcs.smart.asset.query.ui.itempanel.SummaryItemPanel;
+import org.wcs.smart.asset.query.ui.itempanel.SummaryDeploymentItemPanel;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.query.QueryPlugIn;
@@ -48,9 +52,11 @@ import org.wcs.smart.query.common.model.udig.IQueryService;
 import org.wcs.smart.query.model.IMappableQueryType;
 import org.wcs.smart.query.model.IQueryResultInfoProvider;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.filter.AreaFilter;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
-import org.wcs.smart.query.model.filter.date.WaypointDateField;
+import org.wcs.smart.query.model.summary.AreaGroupBy;
+import org.wcs.smart.query.model.summary.IGroupBy;
+import org.wcs.smart.query.model.summary.IValueItem;
+import org.wcs.smart.query.model.summary.SumQueryDefinition;
 import org.wcs.smart.query.ui.definition.ConservationAreaFilterPanel;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IDefinitionPanel;
@@ -61,7 +67,7 @@ import org.wcs.smart.query.ui.model.IDropItemFactory;
  * @author Emily
  *
  */
-public class AssetSummaryQueryType implements IMappableQueryType {
+public class AssetDeploymentSummaryQueryType implements IMappableQueryType {
 		
 	private static IDropItemFactory dropItemFactory = null;
 	
@@ -78,7 +84,7 @@ public class AssetSummaryQueryType implements IMappableQueryType {
 	 */
 	@Override
 	public String getKey() {
-		return AssetSummaryQuery.ASSET_SUMMARY_KEY;
+		return AssetSummaryQuery.DEPLOYMENT_SUMMARY_KEY;
 	}
 
 	/**
@@ -86,7 +92,7 @@ public class AssetSummaryQueryType implements IMappableQueryType {
 	 */
 	@Override
 	public String getGuiName() {
-		return Messages.AssetSummaryQueryType_SummaryQueryTypeName;
+		return Messages.AssetDeploymentSummaryQueryType_QueryTypeName;
 	}
 
 	/**
@@ -133,14 +139,12 @@ public class AssetSummaryQueryType implements IMappableQueryType {
 					DropItem[] items = super.generateDropItem(source, queryItemPanelId);
 					
 					if (source instanceof Area){
-						if (queryItemPanelId.equals(SummaryItemPanel.ID)){
+						if (queryItemPanelId.equals(SummaryDeploymentItemPanel.ID)){
 							items = new DropItem[]{ createAreaGroupByDropItem((Area)source) };
-						}else {
-							items = new DropItem[]{ createAreaDropItem((Area)source, AreaFilter.AreaFilterGeometryType.TRACK) };
 						}
 					}
 					if (source instanceof AreaType) {
-						if (queryItemPanelId.equals(SummaryItemPanel.ID)){
+						if (queryItemPanelId.equals(SummaryDeploymentItemPanel.ID)){
 							items = new DropItem[]{ createAreaGroupByDropItem((AreaType)source) };
 						}
 					}
@@ -163,7 +167,7 @@ public class AssetSummaryQueryType implements IMappableQueryType {
 		String definition = ""; //$NON-NLS-1$
 		
 		for (IDefinitionPanel p : components){
-			if (p.getId().equals(AssetSimpleFilterPanel.ID)){
+			if (p.getId().equals(AssetFilterPanel.ID)){
 				filters = p.getQueryPart();
 			}else if (p.getId().equals(AssetSummaryGroupByValuePanel.ID)){
 				definition = p.getQueryPart();
@@ -188,7 +192,7 @@ public class AssetSummaryQueryType implements IMappableQueryType {
 			if (panelError != null){
 				return panelError;
 			}
-			if (p.getId().equals(AssetSimpleFilterPanel.ID)){
+			if (p.getId().equals(AssetFilterPanel.ID)){
 				filters = p.getQueryPart();
 			}else  if (p.getId().equals(AssetSummaryGroupByValuePanel.ID)){
 				definition = p.getQueryPart();
@@ -197,11 +201,31 @@ public class AssetSummaryQueryType implements IMappableQueryType {
 		
 		//validate query
 		String queryString = definition + "|" + filters ; //$NON-NLS-1$
+		SumQueryDefinition def = null;
 		try(Reader is = new StringReader(queryString)){
 			Parser parser = new Parser(is);
-			parser.SumQuery();			
+			def = parser.SumQuery();			
 		}catch (Throwable ex){
 			return ex.getMessage();
+		}
+		
+		//if value item include asset time then can group by
+		//can only be station, location, asset or assettype
+		boolean hasTimeValue = false;
+		for (IValueItem vi : def.getValuePart().getValueItems()) {
+			if (vi.getClass().equals(AssetValueItem.class)) {
+				hasTimeValue = true;
+				break;
+			}
+		}
+		if (!hasTimeValue) return null;
+		
+		List<IGroupBy> all = new ArrayList<>(def.getColumnGroupByPart().getGroupBys());
+		all.addAll(def.getRowGroupByPart().getGroupBys());
+		for (IGroupBy gb : all) {
+			if (!(gb instanceof AssetGroupBy || gb instanceof AreaGroupBy)) {
+				return Messages.AssetDeploymentSummaryQueryType_groupbyValidation;
+			}
 		}
 		
 		return null;
@@ -212,7 +236,7 @@ public class AssetSummaryQueryType implements IMappableQueryType {
 	 */
 	@Override
 	public IDateFieldFilter[] getDateFilterOptions() {
-		return new IDateFieldFilter[]{WaypointDateField.INSTANCE};
+		return new IDateFieldFilter[]{AssetDeploymentDateField.INSTANCE};
 	}
 
 	

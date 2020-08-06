@@ -154,7 +154,7 @@ public class EditWaypointDialog extends SmartStyledTitleDialog{
 		int hours = 0;
 		try {
 			hours = Integer.parseInt(txtHours.getText().trim());
-			if (hours< 0) {
+			if (hours < 0) {
 				setErrorMessage(Messages.EditWaypointDialog_HoursPositive);
 				return false;	
 			}
@@ -166,7 +166,7 @@ public class EditWaypointDialog extends SmartStyledTitleDialog{
 		int minutes = 0;
 		try {
 			minutes = Integer.parseInt(txtMins.getText().trim());
-			if (minutes< 0) {
+			if (minutes < 0) {
 				setErrorMessage(Messages.EditWaypointDialog_MintuesPositivie);
 				return false;	
 			}
@@ -178,7 +178,7 @@ public class EditWaypointDialog extends SmartStyledTitleDialog{
 		int sec = 0;
 		try {
 			sec = Integer.parseInt(txtSecs.getText().trim());
-			if (hours< 0) {
+			if (sec < 0) {
 				setErrorMessage(Messages.EditWaypointDialog_SecondsPositive);
 				return false;	
 			}

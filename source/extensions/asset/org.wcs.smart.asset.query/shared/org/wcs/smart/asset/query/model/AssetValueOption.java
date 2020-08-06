@@ -16,8 +16,10 @@ import org.wcs.smart.asset.ui.IQueryAssetLabelProvider;
  */
 public enum AssetValueOption {
 
-	ASSET_HOURS("assethours", AssetDeployment.class); //$NON-NLS-1$
-		String key;		//unique key
+	ASSET_HOURS("assethours", AssetDeployment.class), //$NON-NLS-1$
+	ASSET_ACTIVEHOURS("assetactivehours", AssetDeployment.class); //$NON-NLS-1$
+	
+	String key;		//unique key
 	Class<?> clazz; //class that contains the value variable
 	
 	AssetValueOption(String queryKey, Class<?> clazz){

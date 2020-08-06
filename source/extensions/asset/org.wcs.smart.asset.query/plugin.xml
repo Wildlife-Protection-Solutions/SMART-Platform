@@ -4,22 +4,36 @@
    <extension
          point="org.wcs.smart.query.queryDefinitionPanel">
       <QueryDefinitionPanel
-            id="org.wcs.smart.asset.query.AssetSummaryGroupByValuePanel"
+            id="org.wcs.smart.asset.query.def.summary.groupby.panel"
             isMultiCa="true"
             isSingleCa="true"
             panel="org.wcs.smart.asset.query.ui.definition.AssetSummaryGroupByValuePanel">
+      </QueryDefinitionPanel>
+      <QueryDefinitionPanel
+            id="org.wcs.smart.asset.query.def.deployment.filter.panel"
+            isMultiCa="true"
+            isSingleCa="true"
+            panel="org.wcs.smart.asset.query.ui.definition.AssetFilterPanel">
       </QueryDefinitionPanel>
 
    </extension>
    <extension
          point="org.wcs.smart.query.queryItemPanel">
       <QueryItemPanel
-            id="org.wcs.smart.query.asset.summaryItemPanel"
-            panel="org.wcs.smart.asset.query.ui.itempanel.SummaryFilterPanel">
+            id="org.wcs.smart.query.asset.summary.itempanel"
+            panel="org.wcs.smart.asset.query.ui.itempanel.SummaryItemPanel">
       </QueryItemPanel>
       <QueryItemPanel
-            id="org.wcs.smart.query.asset.filterPanel"
-            panel="org.wcs.smart.asset.query.ui.itempanel.QueryFilterPanel">
+            id="org.wcs.smart.query.asset.itempanel"
+            panel="org.wcs.smart.asset.query.ui.itempanel.QueryItemPanel">
+      </QueryItemPanel>
+      <QueryItemPanel
+            id="org.wcs.smart.query.asset.deployment.itempanel"
+            panel="org.wcs.smart.asset.query.ui.itempanel.AssetDeploymentItemPanel">
+      </QueryItemPanel>
+      <QueryItemPanel
+            id="org.wcs.smart.query.asset.summary.deployment.itempanel"
+            panel="org.wcs.smart.asset.query.ui.itempanel.SummaryDeploymentItemPanel">
       </QueryItemPanel>
    </extension>
    <extension
@@ -36,7 +50,7 @@
             executor="org.wcs.smart.asset.query.engine.AssetObservationEngine">
          <DefinitionPanel
                id="org.wcs.smart.query.common.definition.filter"
-               itemPanelId="org.wcs.smart.query.asset.filterPanel">
+               itemPanelId="org.wcs.smart.query.asset.itempanel">
          </DefinitionPanel>
       </QueryType>
       <QueryType
@@ -45,7 +59,7 @@
             executor="org.wcs.smart.asset.query.engine.AssetWaypointEngine">
          <DefinitionPanel
                id="org.wcs.smart.query.common.definition.filter"
-               itemPanelId="org.wcs.smart.query.asset.filterPanel">
+               itemPanelId="org.wcs.smart.query.asset.itempanel">
          </DefinitionPanel>
       </QueryType>
      
@@ -54,12 +68,25 @@
             class="org.wcs.smart.asset.query.model.types.AssetSummaryQueryType"
             executor="org.wcs.smart.asset.query.engine.AssetSummaryEngine">
          <DefinitionPanel
-               id="org.wcs.smart.asset.query.AssetSummaryGroupByValuePanel"
-               itemPanelId="org.wcs.smart.query.asset.summaryItemPanel">
+               id="org.wcs.smart.asset.query.def.summary.groupby.panel"
+               itemPanelId="org.wcs.smart.query.asset.summary.itempanel">
          </DefinitionPanel>
          <DefinitionPanel
                id="org.wcs.smart.query.common.definition.filter"
-               itemPanelId="org.wcs.smart.query.asset.filterPanel">
+               itemPanelId="org.wcs.smart.query.asset.itempanel">
+         </DefinitionPanel>
+      </QueryType>
+      <QueryType
+            QueryCategory="org.wcs.smart.asset.query.group.AssetQueries"
+            class="org.wcs.smart.asset.query.model.types.AssetDeploymentSummaryQueryType"
+            executor="org.wcs.smart.asset.query.engine.AssetDeploymentSummaryEngine">
+         <DefinitionPanel
+               id="org.wcs.smart.asset.query.def.summary.groupby.panel"
+               itemPanelId="org.wcs.smart.query.asset.summary.deployment.itempanel">
+         </DefinitionPanel>
+         <DefinitionPanel
+               id="org.wcs.smart.asset.query.def.deployment.filter.panel"
+               itemPanelId="org.wcs.smart.query.asset.deployment.itempanel">
          </DefinitionPanel>
       </QueryType>
    </extension>
@@ -175,6 +202,17 @@
                      value="assetsummary">
                </parameter>
             </command>
+            <command
+                  commandId="org.wcs.smart.query.create.unknown"
+                  icon="images/icons/obj16/summary_query.png"
+                  label="New Field Sensor Deployment Summary Query..."
+                  style="push"
+                  tooltip="create a new deployment summary query">
+               <parameter
+                     name="org.wcs.smart.query.type"
+                     value="assetdeploymentsummary">
+               </parameter>
+            </command>
          </menu>
       </menuContribution>
       <menuContribution
@@ -211,6 +249,17 @@
             <parameter
                   name="org.wcs.smart.query.type"
                   value="assetsummary">
+            </parameter>
+         </command>
+         <command
+               commandId="org.wcs.smart.query.create.unknown"
+               icon="images/icons/obj16/summary_query.png"
+               label="New Field Sensor Deployment Summary Query..."
+               style="push"
+               tooltip="create a new deployment summary query">
+            <parameter
+                  name="org.wcs.smart.query.type"
+                  value="assetdeploymentsummary">
             </parameter>
          </command>
          <separator

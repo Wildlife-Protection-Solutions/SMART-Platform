@@ -25,13 +25,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -42,47 +39,40 @@ import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.hibernate.Session;
-import org.osgi.service.event.EventHandler;
-import org.wcs.smart.asset.AssetEvents;
-import org.wcs.smart.asset.model.Asset;
-import org.wcs.smart.asset.model.AssetAttribute;
-import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.query.internal.Messages;
+import org.wcs.smart.asset.query.model.AssetFilterOption;
 import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.ui.itempanel.AreaTreeNode;
 import org.wcs.smart.query.common.ui.itempanel.DataModelTreeNode;
+import org.wcs.smart.query.common.ui.itempanel.DateTreeNode;
 import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
 import org.wcs.smart.query.common.ui.itempanel.ItemTreeNodeContentProvider;
 import org.wcs.smart.query.common.ui.itempanel.ItemTreeNodeTree;
-import org.wcs.smart.query.common.ui.itempanel.OperatorsTreeNode;
-import org.wcs.smart.query.model.filter.Operator;
+import org.wcs.smart.query.model.filter.date.DateGroupByViewer;
+import org.wcs.smart.query.model.filter.date.DayDateGroupBy;
+import org.wcs.smart.query.model.filter.date.MonthDateGroupBy;
+import org.wcs.smart.query.model.filter.date.YearDateGroupBy;
+import org.wcs.smart.query.model.summary.DateGroupBy;
 import org.wcs.smart.query.ui.itempanel.AbstractQueryItemPanel;
-
 /**
- * Panel displaying default filter items for filtering
- * query results.
+ * Panel for displaying summary value
+ * and group by options.
  * 
  * @author Emily
  *
  */
-public class QueryFilterPanel extends AbstractQueryItemPanel {
+public class SummaryItemPanel extends AbstractQueryItemPanel{
 	
-	public static final String ID = "org.wcs.smart.query.asset.filterPanel"; //$NON-NLS-1$
+	public static final String ID = "org.wcs.smart.query.asset.summary.itempanel"; //$NON-NLS-1$
 	
-	private Composite main = null;
 	private TreeViewer filterTreeViewer;
+	private Composite main;
+	private AreaTreeNode areaTreeNode;
 	
-	private AreaTreeNode areaNode;
-	
-	private @Inject IEventBroker eventBroker;
-
 	/*
 	 * listener for refreshing areas
 	 */
@@ -90,8 +80,8 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 		@Override
 		public void areasUpdated(AreaType type) {
 			//clear areas from content provider & refresh tree
-			if (areaNode != null){
-				areaNode.clearAreas();
+			if (areaTreeNode != null){
+				areaTreeNode.clearAreas();
 				Display.getDefault().syncExec(new Runnable(){
 					@Override
 					public void run() {
@@ -101,10 +91,10 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 		}
 	};
 	
-	public QueryFilterPanel() {
-		
+	public  SummaryItemPanel(){
 	}
-
+	
+	
 	protected Composite createPanel(Composite parent) {
 		Composite main = new Composite(parent, SWT.NONE);
 		GridLayout gl = new GridLayout();
@@ -119,16 +109,20 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 			}
 		});
 		
-		List<IItemTreeNode> nodes = new ArrayList<IItemTreeNode>();
-		nodes.add(new AssetFilterTreeItem());
-		nodes.add(new DataModelTreeNode(DataModelTreeNode.Type.FILTER));
 		
-		areaNode = new AreaTreeNode(Messages.QueryFilterPanel_TreeNodeLabel);
-		nodes.add(areaNode);
+		List<IItemTreeNode> groupbynodes = new ArrayList<IItemTreeNode>();
+		groupbynodes.add(new AssetGroupByTreeItem());
+		groupbynodes.add(new DateTreeNode());
 		
-		nodes.add(new OperatorsTreeNode());
+		areaTreeNode = new AreaTreeNode(Messages.SummaryFilterPanel_TreeNodeLabel);
+		groupbynodes.add(areaTreeNode);
 		
-		ItemTreeNodeTree tree = new ItemTreeNodeTree(main, SWT.NONE, nodes);
+		groupbynodes.add(new DataModelTreeNode(DataModelTreeNode.Type.GROUPBY));
+		
+		List<IItemTreeNode> valuenodes = new ArrayList<IItemTreeNode>();
+		valuenodes.add(new DataModelTreeNode(DataModelTreeNode.Type.VALUE));
+		
+		ItemTreeNodeTree tree = new ItemTreeNodeTree(main, SWT.NONE,  groupbynodes, valuenodes);
 		filterTreeViewer = tree.getTreeViewer();
 
 		filterTreeViewer.addDoubleClickListener(new IDoubleClickListener() {
@@ -143,87 +137,52 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 		createAddButton(filterTreeViewer, main);
 		
 		refreshPanel();
-		
-		EventHandler handler = event->refreshPanel();
-		eventBroker.subscribe(AssetEvents.ASSET_ALL, handler);
-		eventBroker.subscribe(AssetEvents.ASSETSTATION_ALL, handler);
-		eventBroker.subscribe(AssetEvents.ASSETSTATIONLOCATION_ALL, handler);
-		eventBroker.subscribe(AssetEvents.ASSETTYPE_ALL, handler);
-		eventBroker.subscribe(AssetEvents.ASSETSTATIONLOCATION_CONFIG_MODIFIED, handler);
-		
-		
 		return main;
 	}
 	
 
 	@Override
 	protected void addItem(){
-		addQueryItem( ItemTreeNodeContentProvider.unwrapSelection((IStructuredSelection) filterTreeViewer.getSelection()));		
+		addQueryItem( ItemTreeNodeContentProvider.unwrapSelection((IStructuredSelection) filterTreeViewer.getSelection()));
 	}
 	
 	@Override
 	public void refreshPanel(){
 		if (filterTreeViewer != null){
-			if (areaNode != null) areaNode.clearAreas();
+			if (areaTreeNode != null) areaTreeNode.clearAreas();
 			filterTreeViewer.setInput(LOADING_TEXT);
 			filterTreeViewer.refresh();
-			refreshJob.cancel();
 			refreshJob.schedule();
 		}
 	}
-
-	private Job refreshJob = new Job(Messages.QueryFilterPanel_RefreshTree_JobTitle) {
+	
+	private Job refreshJob = new Job(Messages.SummaryFilterPanel_RefreshTreeJobName){
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			final HashMap<Object, Object> input = new HashMap<Object, Object> ();
-
-			List<Operator> ops = new ArrayList<Operator>();
-			ops.add(Operator.NOT);
-			ops.add(Operator.BRACKETS);
 			
-			input.put(OperatorsTreeNode.KEY, ops);
+			
+			final HashMap<Object, Object> input = new HashMap<Object, Object> ();
 			input.put(DataModelTreeNode.KEY,  QueryDataModelManager.getInstance().getDataModel());
 			
+			List<DateGroupByViewer> dates = new ArrayList<DateGroupByViewer>();
+			dates.add(new DateGroupByViewer(new DateGroupBy(DayDateGroupBy.INSTANCE.getKey())));
+			dates.add(new DateGroupByViewer(new DateGroupBy(MonthDateGroupBy.INSTANCE.getKey())));
+			dates.add(new DateGroupByViewer(new DateGroupBy(YearDateGroupBy.INSTANCE.getKey())));			
+			input.put(DateTreeNode.KEY, dates);
+			
 			if (!SmartDB.isMultipleAnalysis()){
+				List<Object> options = new ArrayList<Object>();
+				options.add(AssetFilterOption.STATION);
+				options.add(AssetFilterOption.STATIONLOCATION);
+				options.add(AssetFilterOption.ASSET);
+				options.add(AssetFilterOption.ASSETTYPE);
+				input.put(AssetGroupByTreeItem.KEY, options.toArray());
 				
-				AssetFilterContentProvider.AssetFilterInput ainput = new AssetFilterContentProvider.AssetFilterInput();
-				
-				try(Session session = HibernateManager.openSession()){
-					ainput.assets = QueryFactory.buildQuery(session, Asset.class, 
-							new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
-							new Object[] {"isRetired", false}).list(); //$NON-NLS-1$
-					
-					ainput.assets.forEach(a->a.getAssetType().getName());
-					
-					ainput.stations = QueryFactory.buildQuery(session, AssetStation.class, "conservationArea", SmartDB.getCurrentConservationArea()).list(); //$NON-NLS-1$
-					ainput.stations.forEach(s->s.getLocations().forEach(l->l.getId()));
-					
-					ainput.assetAttributes = session.createQuery("FROM AssetAttribute a WHERE a in (SELECT id.attribute FROM AssetTypeAttribute WHERE id.attribute.conservationArea = :ca and id.attribute.type != :type)", AssetAttribute.class) //$NON-NLS-1$
-							.setParameter("type",  AssetAttribute.AttributeType.POSITION) //$NON-NLS-1$
-							.setParameter("ca",  SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
-							.list();
-					
-					ainput.stationAttributes = session.createQuery("FROM AssetAttribute a WHERE a in (SELECT id.attribute FROM AssetStationAttribute WHERE id.attribute.conservationArea = :ca and id.attribute.type != :type)", AssetAttribute.class) //$NON-NLS-1$
-							.setParameter("type",  AssetAttribute.AttributeType.POSITION) //$NON-NLS-1$
-							.setParameter("ca",  SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
-							.list();
-					
-					ainput.stationLocationAttributes = session.createQuery("FROM AssetAttribute a WHERE a in (SELECT id.attribute FROM AssetStationLocationAttribute WHERE id.attribute.conservationArea = :ca and id.attribute.type != :type)", AssetAttribute.class) //$NON-NLS-1$
-							.setParameter("type",  AssetAttribute.AttributeType.POSITION) //$NON-NLS-1$
-							.setParameter("ca",  SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
-							.list();
-					
-					ainput.deploymentAttributes = session.createQuery("FROM AssetAttribute a WHERE a in (SELECT id.attribute FROM AssetTypeDeploymentAttribute WHERE id.attribute.conservationArea = :ca and id.attribute.type != :type)", AssetAttribute.class) //$NON-NLS-1$
-							.setParameter("type",  AssetAttribute.AttributeType.POSITION) //$NON-NLS-1$
-							.setParameter("ca",  SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
-							.list();
-				}
-				
-				input.put(AssetFilterTreeItem.KEY, ainput);
 			}
 
 			Display.getDefault().asyncExec(new Runnable(){
+
 				@Override
 				public void run() {
 					filterTreeViewer.setInput(input);
@@ -233,7 +192,7 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 			});
 			return Status.OK_STATUS;
 		}
-
+		
 	};
 
 	@Override
@@ -248,4 +207,5 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 		}
 		return main;
 	}
+
 }

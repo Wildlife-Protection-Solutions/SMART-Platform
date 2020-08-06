@@ -125,7 +125,7 @@ public class AssetSummaryEngine extends AssetQueryEngine{
 	
 	@Override
 	public boolean canExecute(String querytype) {
-		return AssetSummaryQuery.KEY.equals(querytype);
+		return AssetSummaryQuery.ASSET_SUMMARY_KEY.equals(querytype);
 	}
 
 	@Override
@@ -460,7 +460,7 @@ public class AssetSummaryEngine extends AssetQueryEngine{
 		
 		String dataTable = null;
 		if (it instanceof AttributeValueItem ||
-				  it instanceof CategoryValueItem){
+				  it instanceof CategoryValueItem ){
 			dataTable = getFilterTable(AreaFilterGeometryType.WAYPOINT, caFilter, c, monitor);
 		}else if (it instanceof CombinedValueItem){
 			//don't do anything here - each value is dealt with separatly in the getCombindValue function
@@ -473,9 +473,9 @@ public class AssetSummaryEngine extends AssetQueryEngine{
 			return results;
 		}
 		if (it instanceof AttributeValueItem){
-			results =  (getAttributeValue(dataTable, c, s, groupBy, (AttributeValueItem)it, caFilter));
+			results = getAttributeValue(dataTable, c, s, groupBy, (AttributeValueItem)it, caFilter);
 		}else if (it instanceof CategoryValueItem){
-			results = (getCategoryValue(dataTable, c, s, groupBy, (CategoryValueItem)it, caFilter));
+			results = getCategoryValue(dataTable, c, s, groupBy, (CategoryValueItem)it, caFilter);
 		}
 		if (results != null){
 			cachedValueToResults.put(cacheKey, results); 
@@ -877,6 +877,7 @@ public class AssetSummaryEngine extends AssetQueryEngine{
 		return createValueResults(rs, groupBy, categoryItem.asString());
 	}
 	
+	
 	/**
 	 * Updates group by string builder string with
 	 * given group by part. 
@@ -1098,10 +1099,10 @@ public class AssetSummaryEngine extends AssetQueryEngine{
 		ValuePart vp = query.getQueryDefinition().getValuePart();
 		for (IValueItem item : vp.getValueItems()){
 			SummaryHeader header = new SummaryHeader(
-					AssetValueItemLabelProvider.INSTANCE.getName(item, session),
-					AssetValueItemLabelProvider.INSTANCE.getFullName(item, session),
-					item.asString(), true);
-			results.addValueHeader(header);
+				AssetValueItemLabelProvider.INSTANCE.getName(item, session),
+				AssetValueItemLabelProvider.INSTANCE.getFullName(item, session),
+				item.asString(), true);
+			results.addValueHeader(header);			
 		}
 		
 		DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
@@ -1150,8 +1151,12 @@ public class AssetSummaryEngine extends AssetQueryEngine{
 		StringBuilder sql = new StringBuilder();
 		sql.append(" SELECT DISTINCT "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".uuid, "); //$NON-NLS-1$
-		sql.append(tablePrefix(Waypoint.class) + ".datetime, "); //$NON-NLS-1$
-		sql.append(tablePrefix(WaypointObservation.class) + ".uuid "); //$NON-NLS-1$
+		sql.append(tablePrefix(Waypoint.class) + ".datetime,"); //$NON-NLS-1$
+		if (includeObservations) {
+			sql.append(tablePrefix(WaypointObservation.class) + ".uuid "); //$NON-NLS-1$
+		}else {
+			sql.append("cast(null as char(16) for bit data)"); //$NON-NLS-1$
+		}
 		return sql.toString();
 	}
 
@@ -1160,7 +1165,7 @@ public class AssetSummaryEngine extends AssetQueryEngine{
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
 		sql.append("wp_uuid char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("wp_date timestamp,"); //$NON-NLS-1$
+		sql.append("wp_date timestamp, "); //$NON-NLS-1$
 		sql.append("ob_uuid char(16) for bit data"); //$NON-NLS-1$
 		sql.append(")"); //$NON-NLS-1$
 		return sql.toString();

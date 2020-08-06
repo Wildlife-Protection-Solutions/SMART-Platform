@@ -33,6 +33,7 @@ import org.wcs.smart.asset.model.AssetAttributeListItem;
 import org.wcs.smart.asset.model.AssetAttributeValue;
 import org.wcs.smart.asset.model.AssetDeployment;
 import org.wcs.smart.asset.model.AssetDeploymentAttributeValue;
+import org.wcs.smart.asset.model.AssetDeploymentDisruption;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationAttributeValue;
 import org.wcs.smart.asset.model.AssetStationLocation;
@@ -60,6 +61,7 @@ public abstract class AssetQueryEngine extends AbstractQueryEngine implements IA
 	static {
 		tablePrefix.put(AssetWaypoint.class, "aw"); //$NON-NLS-1$
 		tablePrefix.put(AssetDeployment.class, "ad"); //$NON-NLS-1$
+		tablePrefix.put(AssetDeploymentDisruption.class, "adda"); //$NON-NLS-1$
 		tablePrefix.put(Asset.class, "aa"); //$NON-NLS-1$
 		tablePrefix.put(AssetStation.class, "astn"); //$NON-NLS-1$
 		tablePrefix.put(AssetStationLocation.class, "asl"); //$NON-NLS-1$
@@ -81,6 +83,7 @@ public abstract class AssetQueryEngine extends AbstractQueryEngine implements IA
 		tableNames.put(Asset.class, "smart.asset"); //$NON-NLS-1$
 		tableNames.put(AssetStation.class, "smart.asset_station"); //$NON-NLS-1$
 		tableNames.put(AssetStationLocation.class, "smart.asset_station_location"); //$NON-NLS-1$\
+		tableNames.put(AssetDeploymentDisruption.class, "smart.asset_deployment_disruption"); //$NON-NLS-1$
 		
 		tableNames.put(AssetDeploymentAttributeValue.class, "smart.asset_deployment_attribute_value"); //$NON-NLS-1$\
 		tableNames.put(AssetAttributeValue.class, "smart.asset_attribute_value"); //$NON-NLS-1$\

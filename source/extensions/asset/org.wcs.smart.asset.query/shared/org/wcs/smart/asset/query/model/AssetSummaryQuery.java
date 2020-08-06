@@ -49,10 +49,11 @@ public class AssetSummaryQuery extends SummaryQuery implements IStyledQuery {
 
 	private static final long serialVersionUID = 1L;
 	
-	public static final String KEY = "assetsummary"; //$NON-NLS-1$
+	public static final String ASSET_SUMMARY_KEY = "assetsummary"; //$NON-NLS-1$
+	public static final String DEPLOYMENT_SUMMARY_KEY = "assetdeploymentsummary"; //$NON-NLS-1$
 	
 	private String styleMemento;
-
+	private String querytype;
 	
 	/**
 	 * The string representation of the layer style
@@ -93,9 +94,13 @@ public class AssetSummaryQuery extends SummaryQuery implements IStyledQuery {
 	 * @see org.wcs.smart.query.model.Query#getType()
 	 */
 	@Override
-	@Transient
+	@Column(name="query_type_key")
 	public String getTypeKey() {
-		return KEY;
+		return this.querytype;
+	}
+	
+	public void setTypeKey(String querytype) {
+		this.querytype = querytype;
 	}
 	
 	/**
@@ -116,16 +121,24 @@ public class AssetSummaryQuery extends SummaryQuery implements IStyledQuery {
 		q.setDateFilter(getDateFilter());
 		q.setOwner(newOwner);
 		q.setQuery(getQuery());
+		q.setTypeKey(getTypeKey());
 		return q;
 	}
 	
 	public static final boolean canAddGeometry(SumQueryDefinition definition) {
 		if (definition.getRowGroupByPart().getGroupBys().size() != 1) return false;
+			
 		IGroupBy gb = definition.getRowGroupByPart().getGroupBys().get(0);
 		if (!(gb instanceof AssetGroupBy)) return false;
 		AssetGroupBy asset = (AssetGroupBy)gb;
 		if (asset.getOption() == AssetFilterOption.STATION) return true;
 		if (asset.getOption() == AssetFilterOption.STATIONLOCATION) return true;
+		
 		return false;
+	}
+	
+	public static boolean isAssetSummary(String typeKey) {
+		return typeKey.equalsIgnoreCase(ASSET_SUMMARY_KEY) || 
+				typeKey.equalsIgnoreCase(DEPLOYMENT_SUMMARY_KEY);
 	}
 }

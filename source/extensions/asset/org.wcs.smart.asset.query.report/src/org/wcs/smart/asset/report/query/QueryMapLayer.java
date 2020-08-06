@@ -69,7 +69,7 @@ public class QueryMapLayer extends AbstractQueryMapLayer {
 			String queryTypeKey = queryText.split(":")[0]; //$NON-NLS-1$
 			if (canAddToMap(queryTypeKey)) return true;
 			
-			if (queryTypeKey.equals(AssetSummaryQuery.KEY)) {
+			if (AssetSummaryQuery.isAssetSummary(queryTypeKey)){
 				try(Session session = HibernateManager.openSession()){
 					UUID uuid = UuidUtils.stringToUuid(queryText.split(":")[1]); //$NON-NLS-1$
 					AssetSummaryQuery q = session.get(AssetSummaryQuery.class, uuid);
@@ -90,7 +90,7 @@ public class QueryMapLayer extends AbstractQueryMapLayer {
 				queryTypeKey.equals(AssetObservationQuery.KEY)){
 			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.POINT, AssetQueryResultItem.WAYPOINT_GEOMCOLUMN_KEY);
 			return Collections.singletonList(def);
-		}else if (queryTypeKey.equals(AssetSummaryQuery.KEY)) {
+		}else if (AssetSummaryQuery.isAssetSummary(queryTypeKey)){
 			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.POINT, GeometrySummaryQueryResult.GEOMETRY_COLUMN_KEY);
 			return Collections.singletonList(def);
 		}

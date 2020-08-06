@@ -81,8 +81,8 @@ public class AssetQueryFactory {
 			return createObservationQuery();
 		}else if (querytype.getClass().equals(AssetWaypointQueryType.class)){
 			return createWaypointQuery();
-		}else if (querytype.getClass().equals(AssetSummaryQueryType.class)){
-			return createSummaryQuery();
+		}else if (AssetSummaryQuery.isAssetSummary(querytype.getKey()) ){
+			return createSummaryQuery(querytype.getKey());
 		}
 		return null;
 	}
@@ -101,8 +101,9 @@ public class AssetQueryFactory {
 		return query;
 	}
 
-	public static AssetSummaryQuery createSummaryQuery(){
+	public static AssetSummaryQuery createSummaryQuery(String typeKey){
 		AssetSummaryQuery query = new AssetSummaryQuery();
+		query.setTypeKey(typeKey);
 		initQuery(query, Messages.SummaryQuery_DefaultQueryName);
 		
 		query.setConservationAreaFilter( (new ConservationAreaFilter(true, SmartDB.getCurrentConservationArea())).asString() );

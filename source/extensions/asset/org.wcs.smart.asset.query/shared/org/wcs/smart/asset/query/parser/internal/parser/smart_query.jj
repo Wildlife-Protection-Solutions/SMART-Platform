@@ -163,8 +163,7 @@ TOKEN :
 /* Summary Query */
 TOKEN :
 {
-     < ASSET_VALUE_ITEM : ( "asset:" < AGG > ":" < ASSET_VALUE_KEY > ) >
-|  	 < ASSET_VALUE_KEY  : ( "assethours") >
+     < ASSET_VALUE_ITEM : ( "asset:" < AGG > ":" ("assethours" | "assetactivehours" ) ( ":" ( "dayshour" | "second") )? ) >
 |    < SUM_CAT_VALUE_KEY : "category:sum:" ("obs" | "wp") ":" ( < DM_KEY > | "") >
 |    < SUM_ATTRIBUTE_VALUE_KEY : "attribute:n:" < AGG > ":" < DM_KEY > >
 |    < SUM_CAT_ATT_VALUE_KEY : "category:" < DM_KEY > ":" < SUM_ATTRIBUTE_VALUE_KEY > > 
@@ -321,6 +320,11 @@ IValueItem SingleValueItem() :
 {
 	(
 	
+	< ASSET_VALUE_ITEM >
+		{
+			item = AssetValueItem.createItem( token.image );
+		}
+	| 
 		< SUM_CAT_VALUE_KEY >
 		{
 			item = AssetCategoryValueItem.createItem( token.image );

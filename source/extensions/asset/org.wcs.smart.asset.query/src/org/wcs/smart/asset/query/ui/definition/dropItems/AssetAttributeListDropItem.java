@@ -51,62 +51,53 @@ public class AssetAttributeListDropItem extends AttributeListDropItem {
 	public AssetAttributeListDropItem(AttributeWrapper att) {
 		super(att.getAttribute().getName(), "assetattribute:" + att.getType().key + ":" + att.getAttribute().getType().key + ":" + att.getAttribute().getKeyId()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		this.attribute = att.getAttribute();
-	}
+		
+		this.loadItemsJobs = new Job("Loading list items"){ //$NON-NLS-1$
 
-	
-	protected Job getLoadJob() {
-		return loadItemsJobs;
-	}
-	
-	
-	/*
-	 * Job to load the attribute list options
-	 */
-	protected Job loadItemsJobs = new Job("Loading list items"){ //$NON-NLS-1$
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				
+				final ArrayList<ListItem> items = new ArrayList<ListItem>();
+				try(Session s = HibernateManager.openSession()){
+					s.beginTransaction();
+					try{
 
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			
-			final ArrayList<ListItem> items = new ArrayList<ListItem>();
-			try(Session s = HibernateManager.openSession()){
-				s.beginTransaction();
-				try{
-
-					AssetAttribute assetattribute = s.get(AssetAttribute.class, attribute.getUuid());
-					if (assetattribute != null && assetattribute.getAttributeList() != null) {
-						for (AssetAttributeListItem list : assetattribute.getAttributeList()) {
-							items.add(new ListItem(list.getUuid(), list.getName(), list.getKeyId(), true));
+						AssetAttribute assetattribute = s.get(AssetAttribute.class, attribute.getUuid());
+						if (assetattribute != null && assetattribute.getAttributeList() != null) {
+							for (AssetAttributeListItem list : assetattribute.getAttributeList()) {
+								items.add(new ListItem(list.getUuid(), list.getName(), list.getKeyId(), true));
+							}
 						}
+				
+						//add the any item
+						items.add(0, BasicDropItemFactory.ANY_OPTION);				
+						if (currentSelection != null && !items.contains(currentSelection)){
+							//item is not longer active; but still in query
+							items.add(currentSelection);
+						}
+					}finally{
+						s.getTransaction().rollback();
 					}
-			
-					//add the any item
-					items.add(0, BasicDropItemFactory.ANY_OPTION);				
-					if (currentSelection != null && !items.contains(currentSelection)){
-						//item is not longer active; but still in query
-						items.add(currentSelection);
-					}
-				}finally{
-					s.getTransaction().rollback();
 				}
+				Display.getDefault().asyncExec(new Runnable(){
+					@Override
+					public void run() {
+						if (listViewer == null || listViewer.getCombo().isDisposed()){
+							return;
+						}
+						if (currentSelection != null && !items.contains(currentSelection)){
+							items.add(currentSelection);
+						}
+						listViewer.setInput(items.toArray(new ListItem[items.size()]));
+						if (currentSelection != null){
+							listViewer.setSelection(new StructuredSelection(currentSelection));
+						}else{
+							listViewer.setSelection(new StructuredSelection(BasicDropItemFactory.ANY_OPTION));
+						}
+						getTargetPanel().redraw();
+					}});
+				return Status.OK_STATUS;
 			}
-			Display.getDefault().asyncExec(new Runnable(){
-				@Override
-				public void run() {
-					if (listViewer == null || listViewer.getCombo().isDisposed()){
-						return;
-					}
-					if (currentSelection != null && !items.contains(currentSelection)){
-						items.add(currentSelection);
-					}
-					listViewer.setInput(items.toArray(new ListItem[items.size()]));
-					if (currentSelection != null){
-						listViewer.setSelection(new StructuredSelection(currentSelection));
-					}else{
-						listViewer.setSelection(new StructuredSelection(BasicDropItemFactory.ANY_OPTION));
-					}
-					getTargetPanel().redraw();
-				}});
-			return Status.OK_STATUS;
-		}
-	};
+		};
+	}
 }

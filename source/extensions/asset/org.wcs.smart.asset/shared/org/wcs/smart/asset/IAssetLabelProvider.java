@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.asset;
 
+import java.util.Locale;
+
 import org.wcs.smart.ISharedLabelProvider;
 
 /**
@@ -42,4 +44,11 @@ public interface IAssetLabelProvider extends ISharedLabelProvider {
 	public static final String STATUSKEY_COL_NAME = "asset_status_key_col_name"; //$NON-NLS-1$
 	public static final String POSITION_COL_NAME = "asset_position"; //$NON-NLS-1$
 
+	/**
+	 * Formats the time in seconds to days, hours (ex. 34 days, 34.56 hours)
+	 * @param timeInSeconds
+	 * @param l
+	 * @return
+	 */
+	public String formatTime(double timeInSeconds, Locale l);
 }

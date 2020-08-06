@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.asset.query.parser.internal.summary;
 
+import org.wcs.smart.asset.query.model.AssetFormatOption;
 import org.wcs.smart.asset.query.model.AssetValueOption;
 import org.wcs.smart.query.model.filter.IValueVisitor;
 import org.wcs.smart.query.model.summary.IValueItem;
@@ -36,7 +37,7 @@ public class AssetValueItem implements IValueItem {
 
 	/**
 	 * Creates a asset value item from a key of the form
-	 * asset:<aggregation>:assetkey
+	 * asset:<aggregation>:assetkey:<formatop>
 	 * 
 	 * @param part
 	 * @return
@@ -45,10 +46,10 @@ public class AssetValueItem implements IValueItem {
 		return new AssetValueItem(key);
 	}
 	
-
 	private String key = null;
 	private String aggregation = null;
 	private AssetValueOption assetOp;
+	private AssetFormatOption formatOp;
 	
 	/**
 	 * Creates a asset value item from a key of the form
@@ -65,8 +66,19 @@ public class AssetValueItem implements IValueItem {
 				break;
 			}
 		}
+		
+		formatOp = AssetFormatOption.DAYS_HOUR;
+		if (bits.length >= 4) {
+			for (AssetFormatOption op : AssetFormatOption.values()) {
+				if (bits[3].trim().equalsIgnoreCase(op.getKey())) {
+					formatOp = op;
+					break;
+				}
+			}
+		}
 		this.aggregation = bits[1];		
 	}
+
 	
 	/**
 	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#asString()
@@ -80,6 +92,13 @@ public class AssetValueItem implements IValueItem {
 	 */
 	public AssetValueOption getAssetValueOption(){
 		return assetOp;
+	}
+	
+	/**
+	 * @return the asset format option
+	 */
+	public AssetFormatOption getAssetFormatOption(){
+		return formatOp;
 	}
 	
 	public void accept(IValueVisitor visitor){

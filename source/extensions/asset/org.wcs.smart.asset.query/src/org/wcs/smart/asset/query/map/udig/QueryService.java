@@ -164,7 +164,7 @@ public class QueryService extends IService implements IQueryService {
 					if (query.getTypeKey().equals(AssetObservationQuery.KEY) || 
 							query.getTypeKey().equals(AssetWaypointQuery.KEY) ){
 						temp.add(new QueryGeoResource(this, QueryDataSource.WAYPOINT_TYPE));
-					}else if (query.getTypeKey().equals(AssetSummaryQuery.KEY)) {
+					}else if (AssetSummaryQuery.isAssetSummary(query.getTypeKey())) {
 						temp.add(new QueryGeoResource(this, QueryDataSource.WAYPOINT_TYPE));
 					}
 					this.members = temp;
@@ -230,7 +230,7 @@ public class QueryService extends IService implements IQueryService {
                 			ds = new QueryDataSource((AssetObservationQuery)query, prjProvider);
                 		}else if (query.getTypeKey().equals(AssetWaypointQuery.KEY) ){
                     		ds = new QueryDataSource((AssetWaypointQuery)query, prjProvider);
-                		}else if (query.getTypeKey().equals(AssetSummaryQuery.KEY)) {
+                		}else if (AssetSummaryQuery.isAssetSummary(query.getTypeKey())) {
                 			ds = new QueryDataSource((AssetSummaryQuery)query);
                 		}
                 	}else{

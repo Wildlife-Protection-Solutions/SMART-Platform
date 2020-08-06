@@ -127,7 +127,7 @@ public class AssetSummaryEditor extends MultiPageEditorPart implements IQueryEdi
 			page1 = new SummaryEditor() {
 				@Override
 				public Query createNewQuery() {
-					return AssetQueryFactory.createSummaryQuery();
+					return AssetQueryFactory.createSummaryQuery(input.getType().getKey());
 				}
 				
 				@Override

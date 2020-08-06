@@ -76,7 +76,7 @@ public class EntitySummaryQueryDefinitionImporter extends SummaryQueryDefinition
 	}
 
 	@Override
-	public SummaryQuery createQuery() {
+	public SummaryQuery createQuery(String queryType) {
 		return EntityQueryFactory.createSummaryQuery();
 	}
 	

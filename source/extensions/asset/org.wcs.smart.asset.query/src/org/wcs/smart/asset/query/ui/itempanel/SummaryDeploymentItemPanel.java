@@ -48,15 +48,9 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.ui.itempanel.AreaTreeNode;
 import org.wcs.smart.query.common.ui.itempanel.DataModelTreeNode;
-import org.wcs.smart.query.common.ui.itempanel.DateTreeNode;
 import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
 import org.wcs.smart.query.common.ui.itempanel.ItemTreeNodeContentProvider;
 import org.wcs.smart.query.common.ui.itempanel.ItemTreeNodeTree;
-import org.wcs.smart.query.model.filter.date.DateGroupByViewer;
-import org.wcs.smart.query.model.filter.date.DayDateGroupBy;
-import org.wcs.smart.query.model.filter.date.MonthDateGroupBy;
-import org.wcs.smart.query.model.filter.date.YearDateGroupBy;
-import org.wcs.smart.query.model.summary.DateGroupBy;
 import org.wcs.smart.query.ui.itempanel.AbstractQueryItemPanel;
 /**
  * Panel for displaying summary value
@@ -65,9 +59,9 @@ import org.wcs.smart.query.ui.itempanel.AbstractQueryItemPanel;
  * @author Emily
  *
  */
-public class SummaryFilterPanel extends AbstractQueryItemPanel{
+public class SummaryDeploymentItemPanel extends AbstractQueryItemPanel{
 	
-	public static final String ID = "org.wcs.smart.query.asset.summaryItemPanel"; //$NON-NLS-1$
+	public static final String ID = "org.wcs.smart.query.asset.summary.deployment.itempanel"; //$NON-NLS-1$
 	
 	private TreeViewer filterTreeViewer;
 	private Composite main;
@@ -91,7 +85,7 @@ public class SummaryFilterPanel extends AbstractQueryItemPanel{
 		}
 	};
 	
-	public  SummaryFilterPanel(){
+	public  SummaryDeploymentItemPanel(){
 	}
 	
 	
@@ -112,14 +106,12 @@ public class SummaryFilterPanel extends AbstractQueryItemPanel{
 		
 		List<IItemTreeNode> groupbynodes = new ArrayList<IItemTreeNode>();
 		groupbynodes.add(new AssetGroupByTreeItem());
-		groupbynodes.add(new DateTreeNode());
 		
 		areaTreeNode = new AreaTreeNode(Messages.SummaryFilterPanel_TreeNodeLabel);
 		groupbynodes.add(areaTreeNode);
 		
-		groupbynodes.add(new DataModelTreeNode(DataModelTreeNode.Type.GROUPBY));
-		
 		List<IItemTreeNode> valuenodes = new ArrayList<IItemTreeNode>();
+		valuenodes.add(new AssetValueTreeItemNode());
 		valuenodes.add(new DataModelTreeNode(DataModelTreeNode.Type.VALUE));
 		
 		ItemTreeNodeTree tree = new ItemTreeNodeTree(main, SWT.NONE,  groupbynodes, valuenodes);
@@ -159,17 +151,9 @@ public class SummaryFilterPanel extends AbstractQueryItemPanel{
 	private Job refreshJob = new Job(Messages.SummaryFilterPanel_RefreshTreeJobName){
 
 		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			
-			
+		protected IStatus run(IProgressMonitor monitor) {	
 			final HashMap<Object, Object> input = new HashMap<Object, Object> ();
 			input.put(DataModelTreeNode.KEY,  QueryDataModelManager.getInstance().getDataModel());
-			
-			List<DateGroupByViewer> dates = new ArrayList<DateGroupByViewer>();
-			dates.add(new DateGroupByViewer(new DateGroupBy(DayDateGroupBy.INSTANCE.getKey())));
-			dates.add(new DateGroupByViewer(new DateGroupBy(MonthDateGroupBy.INSTANCE.getKey())));
-			dates.add(new DateGroupByViewer(new DateGroupBy(YearDateGroupBy.INSTANCE.getKey())));			
-			input.put(DateTreeNode.KEY, dates);
 			
 			if (!SmartDB.isMultipleAnalysis()){
 				List<Object> options = new ArrayList<Object>();

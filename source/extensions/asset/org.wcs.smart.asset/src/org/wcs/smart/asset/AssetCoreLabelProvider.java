@@ -45,6 +45,10 @@ public class AssetCoreLabelProvider implements IAssetLabelProvider {
 		return getStatusImage(asset.getCachedStatus());
 	}
 	
+	public String formatTime(double timeInSeconds, Locale l) {
+		return AssetUtils.formatTime(timeInSeconds);
+	}
+	
 	public static Image getStatusImage(Asset.Status status) {
 		switch(status) {
 		case ACTIVE:
@@ -69,6 +73,7 @@ public class AssetCoreLabelProvider implements IAssetLabelProvider {
 			case TEXT: return Messages.AssetCoreLabelProvider_TextAttributeType;			
 			}
 		}
+		
 		if (item instanceof AssetWaypointSource) {
 			return Messages.AssetCoreLabelProvider_AssetSource;
 		}

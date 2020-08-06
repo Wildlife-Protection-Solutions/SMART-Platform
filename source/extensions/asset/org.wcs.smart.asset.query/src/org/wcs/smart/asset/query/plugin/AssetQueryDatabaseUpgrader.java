@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.asset.query.AssetQueryPlugIn;
 import org.wcs.smart.asset.query.internal.Messages;
+import org.wcs.smart.asset.query.model.AssetSummaryQuery;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
@@ -73,9 +74,25 @@ public class AssetQueryDatabaseUpgrader implements IDatabaseUpgrader {
 	 * @param session
 	 *            in active transaction
 	 */
-	public static final void upgrade(String currentVersion, Session session) {
-		
+	public static final void upgrade(String currentVersion, Session session){
+		//nothing to do
+		if (currentVersion.equals(AssetQueryPlugIn.DB_VERSION_1)) {
+			upgradeV1toV2(session);
+		}
 	}
+	
+	private static void upgradeV1toV2(Session session) {
+		String[] sql = new String[]{
+			"ALTER TABLE smart.asset_summary_query ADD COLUMN query_type_key varchar (32)", //$NON-NLS-1$
+			"UPDATE smart.asset_summary_query SET query_type_key = '" + AssetSummaryQuery.ASSET_SUMMARY_KEY + "'", //$NON-NLS-1$ //$NON-NLS-2$
+			"ALTER TABLE smart.asset_summary_query alter column query_type_key set not null", //$NON-NLS-1$
+		};
+		for (String s : sql){
+			session.createNativeQuery(s).executeUpdate();
+		}
+		
+		HibernateManager.setPlugInVersion(AssetQueryPlugIn.PLUGIN_ID, AssetQueryPlugIn.DB_VERSION_2, session);
 
+	}
 	
 }

@@ -89,7 +89,7 @@ public class SurveySummaryQueryDefinitionImporter extends SummaryQueryDefinition
 	}
 
 	@Override
-	public SummaryQuery createQuery() {
+	public SummaryQuery createQuery(String queryType) {
 		return SurveyQueryFactory.createSummaryQuery();
 	}
 	

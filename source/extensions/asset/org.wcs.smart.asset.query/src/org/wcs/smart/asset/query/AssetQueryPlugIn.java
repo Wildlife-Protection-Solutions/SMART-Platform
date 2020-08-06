@@ -59,7 +59,8 @@ public class AssetQueryPlugIn extends AbstractUIPlugin {
 
 	//The current db version
 	public static final String DB_VERSION_1 = "1.0"; //$NON-NLS-1$
-	public static final String DB_VERSION = DB_VERSION_1; //current
+	public static final String DB_VERSION_2 = "2.0"; //$NON-NLS-1$
+	public static final String DB_VERSION = DB_VERSION_2; //current
 		
 	// The shared instance
 	private static AssetQueryPlugIn plugin;
@@ -209,3 +210,4 @@ public class AssetQueryPlugIn extends AbstractUIPlugin {
 	}
 
 }
+

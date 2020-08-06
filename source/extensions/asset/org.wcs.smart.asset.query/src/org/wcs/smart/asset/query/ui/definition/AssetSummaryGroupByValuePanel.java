@@ -36,7 +36,7 @@ import org.wcs.smart.query.ui.model.impl.AbstractValueDropItem;
  */
 public class AssetSummaryGroupByValuePanel extends AbstractSummaryGroupByValuePanel{
 
-	public static final String ID = "org.wcs.smart.asset.query.AssetSummaryGroupByValuePanel"; //$NON-NLS-1$
+	public static final String ID = "org.wcs.smart.asset.query.def.summary.groupby.panel"; //$NON-NLS-1$
 	
 	public AssetSummaryGroupByValuePanel(){
 		super();

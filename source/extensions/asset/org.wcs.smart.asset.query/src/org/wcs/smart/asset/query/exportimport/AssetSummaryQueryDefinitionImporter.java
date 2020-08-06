@@ -46,7 +46,7 @@ public class AssetSummaryQueryDefinitionImporter extends SummaryQueryDefinitionI
 
 	@Override
 	public boolean canImport(IQueryType qt) {
-		return qt.getKey().equals(AssetSummaryQuery.KEY);
+		return AssetSummaryQuery.isAssetSummary(qt.getKey());
 	}
 
 	@Override
@@ -76,8 +76,8 @@ public class AssetSummaryQueryDefinitionImporter extends SummaryQueryDefinitionI
 	}
 
 	@Override
-	public SummaryQuery createQuery() {
-		return AssetQueryFactory.createSummaryQuery();
+	public SummaryQuery createQuery(String queryType) {
+		return AssetQueryFactory.createSummaryQuery(queryType);
 	}
 	
 }

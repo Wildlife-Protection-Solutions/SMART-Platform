@@ -129,35 +129,33 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int ASSET_VALUE_ITEM = 63;
   /** RegularExpression Id. */
-  int ASSET_VALUE_KEY = 64;
+  int SUM_CAT_VALUE_KEY = 64;
   /** RegularExpression Id. */
-  int SUM_CAT_VALUE_KEY = 65;
+  int SUM_ATTRIBUTE_VALUE_KEY = 65;
   /** RegularExpression Id. */
-  int SUM_ATTRIBUTE_VALUE_KEY = 66;
+  int SUM_CAT_ATT_VALUE_KEY = 66;
   /** RegularExpression Id. */
-  int SUM_CAT_ATT_VALUE_KEY = 67;
+  int SUM_ATTRIBUTE_VALUE_LISTTREE_KEY = 67;
   /** RegularExpression Id. */
-  int SUM_ATTRIBUTE_VALUE_LISTTREE_KEY = 68;
+  int SUM_CAT_ATT_VALUE_LISTTREE_KEY = 68;
   /** RegularExpression Id. */
-  int SUM_CAT_ATT_VALUE_LISTTREE_KEY = 69;
+  int AGG = 69;
   /** RegularExpression Id. */
-  int AGG = 70;
+  int DATE_GROUPBY_ITEM = 70;
   /** RegularExpression Id. */
-  int DATE_GROUPBY_ITEM = 71;
+  int QUERY_SPLITTER = 71;
   /** RegularExpression Id. */
-  int QUERY_SPLITTER = 72;
+  int ASSET_GROUPBY_OPTION = 72;
   /** RegularExpression Id. */
-  int ASSET_GROUPBY_OPTION = 73;
+  int CATEGORY_GROUPBY_ITEM = 73;
   /** RegularExpression Id. */
-  int CATEGORY_GROUPBY_ITEM = 74;
+  int AREA_GROUPBY_ITEM = 74;
   /** RegularExpression Id. */
-  int AREA_GROUPBY_ITEM = 75;
+  int ATTRIBUTE_GROUPBY_ITEM = 75;
   /** RegularExpression Id. */
-  int ATTRIBUTE_GROUPBY_ITEM = 76;
+  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 76;
   /** RegularExpression Id. */
-  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 77;
-  /** RegularExpression Id. */
-  int QUOTED_STRING = 78;
+  int QUOTED_STRING = 77;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -228,7 +226,6 @@ public interface ParserConstants {
     "\"observation\"",
     "\"waypoint\"",
     "<ASSET_VALUE_ITEM>",
-    "\"assethours\"",
     "<SUM_CAT_VALUE_KEY>",
     "<SUM_ATTRIBUTE_VALUE_KEY>",
     "<SUM_CAT_ATT_VALUE_KEY>",

@@ -474,7 +474,7 @@ public class AssetPagedObservationResult extends AssetPagedWaypointResult implem
 					updated = true;
 				}else if (newValue instanceof Double){
 					Double newDouble = (Double)newValue;
-					if (toUpdate.getNumberValue() != newDouble){
+					if (toUpdate.getNumberValue().doubleValue() != newDouble.doubleValue()){
 						toUpdate.setNumberValue(newDouble);
 						updated = true;
 					}

@@ -591,7 +591,7 @@ public class StationLocationEditor extends EditorPart implements MapPart {
 					throw new IllegalStateException(Messages.StationLocationEditor_StationLocationNotFound);
 				}else {
 					stationlocation = session.get(AssetStationLocation.class, in.getStationLocationUuid());
-					if (stationlocation != null) stationlocation.equals(null);
+					if (stationlocation != null) stationlocation.getUuid().equals(null);
 				}
 				
 				if (stationlocation == null) {
