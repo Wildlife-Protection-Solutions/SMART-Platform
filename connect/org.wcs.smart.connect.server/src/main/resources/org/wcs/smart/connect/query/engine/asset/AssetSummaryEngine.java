@@ -124,7 +124,7 @@ public class AssetSummaryEngine extends AssetQueryEngine implements ISummaryEngi
 	
 	@Override
 	public boolean canExecute(String querytype) {
-		return AssetSummaryQuery.KEY.equals(querytype);
+		return AssetSummaryQuery.ASSET_SUMMARY_KEY.equals(querytype);
 	}
 
 	

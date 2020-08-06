@@ -29,6 +29,7 @@ import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -301,8 +302,14 @@ public class CsvExporter {
 				for(int k = 0; k < results.getData()[i].length; k ++){
 					if (results.getData()[i][k] == null){
 						data[results.getRowHeaders().size() + k] = null;
-					}else{
-						data[results.getRowHeaders().size() + k] = String.valueOf(results.getData()[i][k]);
+					}else {
+						int vindex = k % results.getValueHeaders().size();
+						Function<Double, String> formatter = results.getValueHeaders().get(vindex).getFormatter();
+						if (formatter == null) {
+							data[results.getRowHeaders().size() + k] = String.valueOf(results.getData()[i][k]);
+						}else {
+							data[results.getRowHeaders().size() + k] = formatter.apply(results.getData()[i][k]);
+						}
 					}
 				}
 				writer.writeNext(data);

@@ -25,6 +25,7 @@ import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -262,7 +263,18 @@ public class HtmlExporter {
 					if (results.getData()[i][k] == null){
 						htmlText.append("<td style='border: solid 1px grey;'></td>");
 					}else{
-						htmlText.append("<td style='border: solid 1px grey;'>" + String.valueOf(results.getData()[i][k]) + "</td>");
+						
+						int vindex = k % results.getValueHeaders().size();
+						Function<Double, String> formatter = results.getValueHeaders().get(vindex).getFormatter();
+						String value = "";
+						if (formatter == null) {
+							value = String.valueOf(results.getData()[i][k]);
+						}else {
+							value = formatter.apply(results.getData()[i][k]);
+						}
+						htmlText.append("<td style='border: solid 1px grey;'>" + String.valueOf(value) + "</td>");
+						
+						
 					}
 				}
 				htmlText.append("</tr>");

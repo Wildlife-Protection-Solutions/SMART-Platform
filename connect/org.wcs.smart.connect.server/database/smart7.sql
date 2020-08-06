@@ -2405,6 +2405,7 @@ CREATE TABLE smart.asset_summary_query (
     folder_uuid uuid,
     shared boolean NOT NULL,
     style character varying,
+    query_type_key varchar(32) not null,
     PRIMARY KEY (uuid)
 );
 

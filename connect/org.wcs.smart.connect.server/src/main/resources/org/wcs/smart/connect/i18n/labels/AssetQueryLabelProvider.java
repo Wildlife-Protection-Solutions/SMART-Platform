@@ -26,6 +26,7 @@ import java.util.Locale;
 import org.wcs.smart.asset.query.model.AssetFilterOption;
 import org.wcs.smart.asset.query.model.AssetValueOption;
 import org.wcs.smart.asset.query.model.observation.FixedQueryColumn;
+import org.wcs.smart.asset.query.parser.internal.filter.AssetDeploymentDateField;
 import org.wcs.smart.asset.ui.IQueryAssetLabelProvider;
 import org.wcs.smart.connect.i18n.Messages;
 
@@ -63,6 +64,7 @@ public class AssetQueryLabelProvider implements IQueryAssetLabelProvider {
 		if (item instanceof AssetValueOption){
 			switch((AssetValueOption)item){
 			case ASSET_HOURS: return Messages.getString("AssetQueryLabelProvider.TotalAssetHoursLabel", l); //$NON-NLS-1$
+			case ASSET_ACTIVEHOURS: return Messages.getString("AssetQueryLabelProvider.TotalActiveHours", l); //$NON-NLS-1$
 			}
 		}
 		if (item instanceof AssetFilterOption){
@@ -74,7 +76,8 @@ public class AssetQueryLabelProvider implements IQueryAssetLabelProvider {
 			case STATIONLOCATION: return Messages.getString("AssetQueryLabelProvider.StationLocationFilterOp", l); //$NON-NLS-1$
 			}
 		}
-		
+		if (item instanceof AssetDeploymentDateField) return Messages.getString("AssetQueryLabelProvider.DeploymentDateFilter", l); //$NON-NLS-1$
+
 		return null;
 	}
 }

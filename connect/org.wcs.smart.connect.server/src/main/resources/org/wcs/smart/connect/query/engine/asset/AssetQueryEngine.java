@@ -36,6 +36,7 @@ import org.wcs.smart.asset.model.AssetAttributeListItem;
 import org.wcs.smart.asset.model.AssetAttributeValue;
 import org.wcs.smart.asset.model.AssetDeployment;
 import org.wcs.smart.asset.model.AssetDeploymentAttributeValue;
+import org.wcs.smart.asset.model.AssetDeploymentDisruption;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationAttributeValue;
 import org.wcs.smart.asset.model.AssetStationLocation;
@@ -68,6 +69,7 @@ public abstract class AssetQueryEngine extends AbstractQueryEngine {
 		tablePrefix.put(AssetStationLocationAttributeValue.class, "aslav"); //$NON-NLS-1$\
 		tablePrefix.put(AssetAttribute.class, "aat"); //$NON-NLS-1$
 		tablePrefix.put(AssetAttributeListItem.class, "aal"); //$NON-NLS-1$
+		tablePrefix.put(AssetDeploymentDisruption.class, "adda"); //$NON-NLS-1$
 	}
 	
 	/**
@@ -85,6 +87,7 @@ public abstract class AssetQueryEngine extends AbstractQueryEngine {
 		tableNames.put(AssetStationLocationAttributeValue.class, "smart.asset_station_location_attribute_value"); //$NON-NLS-1$\
 		tableNames.put(AssetAttribute.class, "smart.asset_attribute"); //$NON-NLS-1$
 		tableNames.put(AssetAttributeListItem.class, "smart.asset_attribute_list_item"); //$NON-NLS-1$
+		tableNames.put(AssetDeploymentDisruption.class, "smart.asset_deployment_disruption"); //$NON-NLS-1$
 	}
 
 	public static String asString(Set<String> strings) {

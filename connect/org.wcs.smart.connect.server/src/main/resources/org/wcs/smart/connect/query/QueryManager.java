@@ -42,18 +42,19 @@ import org.hibernate.Session;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.hql.spi.QueryTranslator;
 import org.hibernate.hql.spi.QueryTranslatorFactory;
-import org.hibernate.internal.util.ReflectHelper;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.type.PostgresUUIDType;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.asset.query.model.AssetObservationQuery;
 import org.wcs.smart.asset.query.model.AssetSummaryQuery;
 import org.wcs.smart.asset.query.model.AssetWaypointQuery;
+import org.wcs.smart.asset.query.parser.internal.filter.AssetDeploymentDateField;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.connect.model.SharedLink;
 import org.wcs.smart.connect.model.SmartUser;
+import org.wcs.smart.connect.query.engine.asset.AssetDeploymentSummaryEngine;
 import org.wcs.smart.connect.query.engine.asset.AssetObservationEngine;
 import org.wcs.smart.connect.query.engine.asset.AssetSummaryEngine;
 import org.wcs.smart.connect.query.engine.asset.AssetWaypointEngine;
@@ -126,6 +127,41 @@ public enum QueryManager {
 
 	INSTANCE;
 	
+	private static String[] queryTypeKeys = new String[] {
+			PatrolObservationQuery.KEY,
+			PatrolQuery.KEY,
+			PatrolWaypointQuery.KEY,
+			PatrolSummaryQuery.KEY,
+			PatrolGriddedQuery.KEY,
+
+			ObsObservationQuery.KEY,
+			ObservationWaypointQuery.KEY,
+			ObservationSummaryQuery.KEY,
+			ObservationGriddedQuery.KEY,
+
+			EntityObservationQuery.KEY,
+			EntityWaypointQuery.KEY,
+			EntitySummaryQuery.KEY,
+			EntityGriddedQuery.KEY,
+
+			SurveyObservationQuery.KEY,
+			SurveyWaypointQuery.KEY,
+			SurveySummaryQuery.KEY,
+			SurveyGriddedQuery.KEY,
+			MissionQuery.KEY,
+			MissionTrackQuery.KEY,
+
+			//IntelligenceRecordQuery.KEY,
+			//IntelligenceSummaryQuery.KEY,
+
+			AssetObservationQuery.KEY,
+			AssetWaypointQuery.KEY,
+			AssetSummaryQuery.ASSET_SUMMARY_KEY,
+			AssetSummaryQuery.DEPLOYMENT_SUMMARY_KEY,
+
+			CompoundMapQuery.TYPE_KEY,
+	};
+	
 	private static List<Class<? extends Query>> queryClasses = new ArrayList<>();
 	static{
 		queryClasses.add(PatrolObservationQuery.class);
@@ -159,7 +195,6 @@ public enum QueryManager {
 		queryClasses.add(AssetSummaryQuery.class);
 		
 		queryClasses.add(CompoundMapQuery.class);
-		
 	}
 	
 	private static List<Class<? extends AbstractIntelQuery >> advQueryClasses = new ArrayList<>();
@@ -196,6 +231,7 @@ public enum QueryManager {
 //		new PsqlRecordQueryIntelligenceEngine(),
 //		new PsqlSummaryIntelligenceQueryEngine(),
 		new AssetSummaryEngine(),
+		new AssetDeploymentSummaryEngine(),
 		new AssetObservationEngine(),
 		new AssetWaypointEngine()
 	};
@@ -209,6 +245,7 @@ public enum QueryManager {
 		WaypointDateField.INSTANCE, 
 //		ReceivedDateFilter.INSTANCE,
 		RecordDateDateField.INSTANCE,
+		AssetDeploymentDateField.INSTANCE,
 	};
 	
 	public static HashMap<String, String[]> DATE_FILTERS = new HashMap<String, String[]>();
@@ -247,7 +284,8 @@ public enum QueryManager {
 
 		DATE_FILTERS.put(AssetObservationQuery.KEY.toLowerCase(Locale.ROOT), new String[]{WaypointDateField.INSTANCE.getKey()});
 		DATE_FILTERS.put(AssetWaypointQuery.KEY.toLowerCase(Locale.ROOT), new String[]{WaypointDateField.INSTANCE.getKey()});
-		DATE_FILTERS.put(AssetSummaryQuery.KEY.toLowerCase(Locale.ROOT), new String[]{WaypointDateField.INSTANCE.getKey()});
+		DATE_FILTERS.put(AssetSummaryQuery.ASSET_SUMMARY_KEY.toLowerCase(Locale.ROOT), new String[]{WaypointDateField.INSTANCE.getKey()});
+		DATE_FILTERS.put(AssetSummaryQuery.DEPLOYMENT_SUMMARY_KEY.toLowerCase(Locale.ROOT), new String[]{AssetDeploymentDateField.INSTANCE.getKey()});
 	}
 	
 	/**
@@ -351,10 +389,20 @@ public enum QueryManager {
 			
 			if (!query.isEmpty()) query += " UNION "; //$NON-NLS-1$
 
+			
 			String querypart = "SELECT q.uuid, q.id, q.isShared, q.conservationArea.uuid, q.folder.uuid, " //$NON-NLS-1$
-				+ "q.conservationArea.id, l.value, z.code, '" + type +"', '" + typeKey + "', '" + icon + "' FROM " + q.getSimpleName()  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			 	+ " as q JOIN Label as l on l.id.element = q.uuid JOIN l.id.language as z WHERE l.id.element = q.uuid and (z.default = true or " //$NON-NLS-1$
-			 	+ "z.code in (:langs)) "; //$NON-NLS-1$
+					+ "q.conservationArea.id, l.value, z.code, '" + type +"', '" + typeKey + "', '" + icon + "' FROM " + q.getSimpleName()  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				 	+ " as q JOIN Label as l on l.id.element = q.uuid JOIN l.id.language as z WHERE l.id.element = q.uuid and (z.default = true or " //$NON-NLS-1$
+				 	+ "z.code in (:langs)) "; //$NON-NLS-1$
+			
+			if (typeKey == null) {
+				//get query type from database
+				querypart = "SELECT q.uuid, q.id, q.isShared, q.conservationArea.uuid, q.folder.uuid, " //$NON-NLS-1$
+						+ "q.conservationArea.id, l.value, z.code, '" + type +"', q.typeKey, q.typeKey || '.png' FROM " + q.getSimpleName()  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+					 	+ " as q JOIN Label as l on l.id.element = q.uuid JOIN l.id.language as z WHERE l.id.element = q.uuid and (z.default = true or " //$NON-NLS-1$
+					 	+ "z.code in (:langs)) "; //$NON-NLS-1$	
+			}
+			
 
 	
 			QueryTranslatorFactory translatorFactory = session.getSessionFactory().getSessionFactoryOptions().getServiceRegistry().getService(QueryTranslatorFactory.class);
@@ -367,7 +415,7 @@ public enum QueryManager {
 			cnt++;
 			query += sql;
 		}
-		
+		System.out.println(query);
 		NativeQuery<?> nq = session.createNativeQuery(query);
 		for (Entry<String, Object> param : params.entrySet()) {
 			nq.setParameter(param.getKey(),  param.getValue());
@@ -570,14 +618,8 @@ public enum QueryManager {
 	 * @throws IllegalAccessException 
 	 * @throws InstantiationException 
 	 */
-	public String[] getQueryTypes() throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		String[] types = new String[queryClasses.size()];
-		for (int i = 0; i < queryClasses.size(); i ++){
-			Constructor<?> c = ReflectHelper.getDefaultConstructor(queryClasses.get(i));
-			Query q = (Query)c.newInstance( );
-			types[i] = q.getTypeKey();
-		}
-		return types;
+	public String[] getQueryTypes() {
+		return queryTypeKeys;
 	}
 	
 	public List<Class<? extends AbstractIntelQuery>> getAdvIntelQueryTypes()  {

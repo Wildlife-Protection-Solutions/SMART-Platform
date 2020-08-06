@@ -54,6 +54,7 @@ import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetType;
 import org.wcs.smart.asset.query.model.AssetFilterOption;
 import org.wcs.smart.asset.query.parser.internal.summary.AssetGroupBy;
+import org.wcs.smart.asset.query.parser.internal.summary.AssetValueItem;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -167,6 +168,8 @@ public class SummaryItemLabelProvider {
 			return getName((CategoryValueItem)item, false);
 		}else if (item instanceof  AttributeValueItem){
 			return getName((AttributeValueItem)item, false);
+		}else if (item instanceof AssetValueItem) {
+			return ((AssetValueItem)item).getAssetValueOption().getGuiName(l);
 		}
 		return MessageFormat.format(Messages.getString("SummaryItemLabelProvider.Valuenotsupported", l), item.asString()); //$NON-NLS-1$
 	}
@@ -183,6 +186,8 @@ public class SummaryItemLabelProvider {
 			getName((CategoryValueItem)item, true);
 		}else if (item instanceof  AttributeValueItem){
 			return getName((AttributeValueItem)item, true);
+		}else if (item instanceof AssetValueItem) {
+			return getName(item);
 		}
 		return MessageFormat.format(Messages.getString("SummaryItemLabelProvider.Valuenotsupported", l), item.asString()); //$NON-NLS-1$
 	}

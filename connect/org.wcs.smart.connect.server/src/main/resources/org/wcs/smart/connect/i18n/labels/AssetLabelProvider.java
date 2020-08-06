@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.connect.i18n.labels;
 
+import java.text.MessageFormat;
 import java.util.Locale;
 
 import org.wcs.smart.asset.IAssetLabelProvider;
@@ -36,6 +37,17 @@ import org.wcs.smart.connect.i18n.Messages;
  */
 public class AssetLabelProvider implements IAssetLabelProvider {
 
+	@Override
+	public String formatTime(double timeInSeconds, Locale l) {
+		int days = (int) Math.floor( timeInSeconds / 86_400.0 );
+		
+		double remainder = timeInSeconds - days * 86_400.0;
+		double hours = remainder / 3_600.0;
+			
+		if (timeInSeconds == 0) return Messages.getString("AssetDeploymentSummaryEngine.zeroDaysFormat", l); //$NON-NLS-1$
+		return MessageFormat.format(Messages.getString("AssetDeploymentSummaryEngine.DaysHoursFormat", l), days, hours); //$NON-NLS-1$
+	}
+	
 	@Override
 	public String getLabel(Object item, Locale l) {
 		

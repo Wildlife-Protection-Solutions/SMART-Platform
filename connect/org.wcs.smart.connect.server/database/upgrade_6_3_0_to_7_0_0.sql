@@ -782,6 +782,9 @@ RETURN ROW; END$$ LANGUAGE 'plpgsql';
 
 CREATE TRIGGER trg_asset_deployment_disruption AFTER INSERT OR UPDATE OR DELETE ON smart.asset_deployment_disruption FOR EACH ROW execute procedure connect.trg_asset_deployment_disruption();
 
+ALTER TABLE smart.asset_summary_query ADD COLUMN query_type_key varchar (32);
+UPDATE smart.asset_summary_query SET query_type_key = 'assetsummary';
+ALTER TABLE smart.asset_summary_query alter column query_type_key set not null;
 
 ------------ VERSIONS ------------
 insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.smartcollect', '1.0');
