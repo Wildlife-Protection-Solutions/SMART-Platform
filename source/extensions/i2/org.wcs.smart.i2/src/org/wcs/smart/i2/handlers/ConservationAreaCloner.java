@@ -167,7 +167,8 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 				clone.setBirtTemplate(ia.getBirtTemplate());
 				Path source = IntelReportManager.INSTANCE.getEntityTemplate(ia);
 				Path target = IntelReportManager.INSTANCE.getEntityTemplate(clone);
-				if (Files.exists(source)){	
+				
+				if (Files.exists(source)){
 					SmartUtils.copyFile(source, target);
 				}else{
 					clone.setBirtTemplate(null);

@@ -23,7 +23,6 @@ package org.wcs.smart.asset.query.model;
 
 import org.wcs.smart.asset.query.internal.Messages;
 import org.wcs.smart.asset.query.model.types.AssetObservationQueryType;
-import org.wcs.smart.asset.query.model.types.AssetSummaryQueryType;
 import org.wcs.smart.asset.query.model.types.AssetWaypointQueryType;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.model.IQueryType;
@@ -63,8 +62,11 @@ public class AssetQueryFactory {
 			return new AssetObservationQuery();
 		}else if (querytype.getClass().equals(AssetWaypointQueryType.class)){
 			return new AssetWaypointQuery();
-		}else if (querytype.getClass().equals(AssetSummaryQueryType.class)){
-			return new AssetSummaryQuery();
+		}else if (AssetSummaryQuery.isAssetSummary(querytype.getKey())) {
+			AssetSummaryQuery query = new AssetSummaryQuery();
+			query.setTypeKey(querytype.getKey());
+			return query;
+		
 		}
 		return null;
 	}

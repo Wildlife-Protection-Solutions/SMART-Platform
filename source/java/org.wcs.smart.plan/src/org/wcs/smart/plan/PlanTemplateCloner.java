@@ -55,6 +55,7 @@ public class PlanTemplateCloner implements
 			//copy plan template
 			f = Paths.get(engine.getNewCa().getFileDataStoreLocation()).resolve(SmartPlanPlugIn.PLAN_DIR);
 			Path newFile = f.resolve(ReportPlan.PLAN_TEMPLATE);
+			
 			SmartUtils.copyFile(templateFile, newFile);
 		}
 		

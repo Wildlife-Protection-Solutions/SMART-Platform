@@ -334,8 +334,8 @@ public class SmartUtils {
 	 * @return
 	 */
 	public static boolean copyFile(Path from, Path to) {
-		// if (true) return false;
 		try {
+			Files.createDirectories(to.getParent());
 			Files.copy(from, to);
 			return true;
 		} catch (IOException e) {
