@@ -299,7 +299,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 				log.append("x'"+ UuidUtils.uuidToString((UUID)entry.getValue()) + ", "); //$NON-NLS-1$ //$NON-NLS-2$
 			}else{
 				pp.setObject(entry.getKey(), entry.getValue());
-				log.append(entry.getValue().toString().toString() + ", "); //$NON-NLS-1$
+				log.append(entry.getValue().toString() + ", "); //$NON-NLS-1$
 			}
 		}
 		QueryPlugIn.logSql(log.toString());

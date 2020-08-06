@@ -76,7 +76,7 @@ public class ObsSummaryQueryDefinitionImporter extends SummaryQueryDefinitionImp
 	}
 
 	@Override
-	public SummaryQuery createQuery() {
+	public SummaryQuery createQuery(String queryType) {
 		return ObservationQueryFactory.createSummaryQuery();
 	}
 	

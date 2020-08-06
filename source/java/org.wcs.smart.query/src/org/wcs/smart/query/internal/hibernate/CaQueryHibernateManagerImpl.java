@@ -133,6 +133,7 @@ public class CaQueryHibernateManagerImpl extends AbstractQueryHibernateManager {
 				//query is not mapped to hibernate class so skip it
 				continue;
 			}
+			
 			CriteriaBuilder cb = session.getCriteriaBuilder();
 			CriteriaQuery<? extends Query> c = cb.createQuery(type.getHibernateClass());
 			Root<? extends Query> from = c.from(type.getHibernateClass());
@@ -145,7 +146,9 @@ public class CaQueryHibernateManagerImpl extends AbstractQueryHibernateManager {
 			
 			List<? extends Query> objects = session.createQuery(c).getResultList();
 			for (org.wcs.smart.query.model.Query q : objects){
-				QueryEditorInput proxy = new QueryEditorInput(q.getUuid(),q.getName(),q.getId(),q.getIsShared(),
+				if(!q.getTypeKey().equalsIgnoreCase(type.getKey())) continue;
+				QueryEditorInput proxy = new QueryEditorInput(q.getUuid(),q.getName(),
+						q.getId(),q.getIsShared(),
 						QueryTypeManager.INSTANCE.findQueryType(q.getTypeKey()));
 				UUID key = null;
 				if (q.getFolder() == null) {

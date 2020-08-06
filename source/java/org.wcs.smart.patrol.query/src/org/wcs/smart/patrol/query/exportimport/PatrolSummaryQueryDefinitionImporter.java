@@ -76,7 +76,7 @@ public class PatrolSummaryQueryDefinitionImporter extends SummaryQueryDefinition
 	}
 
 	@Override
-	public SummaryQuery createQuery() {
+	public SummaryQuery createQuery(String queryType) {
 		return PatrolQueryFactory.createSummaryQuery();
 	}
 	

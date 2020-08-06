@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.query.common.model;
 
+import java.util.function.Function;
+
 /**
  * A header for a summary row/column.
  * <p>
@@ -47,6 +49,7 @@ public class SummaryHeader {
 	private String identifier;  //hex encoded uuid, string or other key value
 	private boolean isValue = false;
 	
+	private Function<Double, String> formatter;	//formatter only applicable for value column headers
 	/**
 	 * Creates a new summary header with a null identifier 
 	 * @param name the gui name
@@ -78,6 +81,23 @@ public class SummaryHeader {
 	 */
 	public boolean isValue(){
 		return this.isValue;
+	}
+	
+	/**
+	 * Sets the formatter to use for converting double values to string
+	 * results.  only applicable for value columns
+	 * @param formatter
+	 */
+	public void setFormatter(Function<Double, String> formatter){
+		this.formatter = formatter;
+	}
+	/**
+	 * Gets the formatter to use for converting double values to string
+	 * results.  only applicable for value columns
+	 * 
+	 */
+	public Function<Double, String> getFormatter(){
+		return this.formatter;
 	}
 	
 	/**

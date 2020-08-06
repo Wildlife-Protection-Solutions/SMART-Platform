@@ -23,6 +23,7 @@ package org.wcs.smart.query.common.importexport;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
@@ -72,7 +73,7 @@ public abstract class SummaryQueryDefinitionImporter extends AbstractXmlQueryImp
 		warnings.clear();
 		
 		String langCode = xmlQuery.getLanguage();
-		SummaryQuery summaryQuery = createQuery();
+		SummaryQuery summaryQuery = createQuery(xmlQuery.getQueryType().toUpperCase(Locale.ROOT));
 		QueryImportEngine.importNames(summaryQuery, xmlQuery, ca);
 		
 		HashMap<String, UuidItemType> uuidLookup = new HashMap<String, UuidItemType>();
@@ -136,6 +137,6 @@ public abstract class SummaryQueryDefinitionImporter extends AbstractXmlQueryImp
 	 * @param at
 	 * @return
 	 */
-	public abstract SummaryQuery createQuery();
+	public abstract SummaryQuery createQuery(String queryType);
 	
 }

@@ -158,6 +158,7 @@ public class MultiCaQueryHibernateManagerImpl extends
 			
 			List<? extends Query> objects = session.createQuery(c).getResultList();
 			for (org.wcs.smart.query.model.Query q : objects){
+				if(!q.getTypeKey().equalsIgnoreCase(type.getKey())) continue;
 				QueryEditorInput proxy = new QueryEditorInput(q.getUuid(),q.getName(),q.getId(),q.getIsShared(),
 						QueryTypeManager.INSTANCE.findQueryType(q.getTypeKey()));
 				UUID key = null;

@@ -126,8 +126,8 @@ public class AttributeListDropItem extends DropItem implements IFilterDropItem{
 	private IConfigurationChangeListener queryConfChangeListener = new IConfigurationChangeListener() {
 		@Override
 		public void configurationChanged(QueryFilterConfiguration config) {
-			getLoadJob().cancel();
-			getLoadJob().schedule();
+			loadItemsJobs.cancel();
+			loadItemsJobs.schedule();
 		}
 	};
 		
@@ -140,8 +140,8 @@ public class AttributeListDropItem extends DropItem implements IFilterDropItem{
 	 */
 	public AttributeListDropItem(CategoryAttribute att) {
 		//super(parent, panel);
-		this(att.getAttribute().getName() + " (" + att.getCategory().getFullCategoryName() + ")", 
-				"category:" + att.getCategory().getHkey() + ":attribute:" + att.getAttribute().getType().typeKey + ":" + att.getAttribute().getKeyId());
+		this(att.getAttribute().getName() + " (" + att.getCategory().getFullCategoryName() + ")",  //$NON-NLS-1$ //$NON-NLS-2$
+				"category:" + att.getCategory().getHkey() + ":attribute:" + att.getAttribute().getType().typeKey + ":" + att.getAttribute().getKeyId()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		this.attribute = att.getAttribute();
 	}
 
@@ -154,7 +154,7 @@ public class AttributeListDropItem extends DropItem implements IFilterDropItem{
 	 */
 	public AttributeListDropItem(Attribute att) {
 		//super(parent, panel);
-		this(att.getName(), "attribute:" + att.getType().typeKey + ":" + att.getKeyId());
+		this(att.getName(), "attribute:" + att.getType().typeKey + ":" + att.getKeyId()); //$NON-NLS-1$ //$NON-NLS-2$
 		this.attribute = att;
 	}
 	
@@ -177,7 +177,7 @@ public class AttributeListDropItem extends DropItem implements IFilterDropItem{
 	public void dispose(){
 		QueryFilterConfigManager.getInstance().removeChangeListener(queryConfChangeListener);
 		super.dispose();
-		getLoadJob().cancel();
+		loadItemsJobs.cancel();
 		if (smallerFont != null){
 			smallerFont.dispose();
 		}
@@ -262,11 +262,8 @@ public class AttributeListDropItem extends DropItem implements IFilterDropItem{
 		
 		
 		lblAttribute.setText(formatStringForLabel(this.text + " = ")); //$NON-NLS-1$
-		getLoadJob().schedule();
+		loadItemsJobs.schedule();
 		QueryFilterConfigManager.getInstance().addChangeListener(queryConfChangeListener);
 	}
 
-	protected Job getLoadJob() {
-		return loadItemsJobs;
-	}
 }

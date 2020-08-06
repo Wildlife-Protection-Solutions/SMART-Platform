@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.query.common.ui;
 
+import java.util.function.Function;
+
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
@@ -454,14 +456,18 @@ public class SummaryResultTable extends Composite {
 		@Override
 		public String getColumnText(Object element, int columnIndex) {
 			Double[] data = (Double[])element;
+			
+			int vindex = columnIndex % results.getValueHeaders().size();
+			Function<Double, String> formatter = results.getValueHeaders().get(vindex).getFormatter();
+			
+			
 			if (columnIndex >= data.length) return ""; //$NON-NLS-1$
-			Object value = data[columnIndex];
-			if (value == null){
-				return ""; //$NON-NLS-1$
-			}else if (value instanceof Double){
+			Double value = data[columnIndex];
+			if (formatter != null) {
+				return formatter.apply(value);
+			}else {
+				if (value == null) return ""; //$NON-NLS-1$
 				return  String.valueOf((Double)value);
-			}else{
-				return value.toString();
 			}
 		}
 
