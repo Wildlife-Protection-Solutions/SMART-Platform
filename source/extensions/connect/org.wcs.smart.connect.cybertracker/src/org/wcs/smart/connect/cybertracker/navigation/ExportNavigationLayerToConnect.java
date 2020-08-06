@@ -137,13 +137,16 @@ public class ExportNavigationLayerToConnect implements INavigationExportAction {
 				proxy.setCaUuid(navigationlayer.getConservationArea().getUuid());
 				proxy.setName(navigationlayer.getName());
 				
-				Response response = simple.uploadNavigationLayer(Files.size(tempFile), 
-						navigationlayer.getUuid().toString(), proxy);
+				String location = null;
+				try(Response response = simple.uploadNavigationLayer(Files.size(tempFile), 
+						navigationlayer.getUuid().toString(), proxy)){
 				
-				if (response.getStatus() != Response.Status.OK.getStatusCode()) {
-					throw new Exception(response.getStatusInfo().getReasonPhrase());
+					if (response.getStatus() != Response.Status.OK.getStatusCode()) {
+						throw new Exception(response.getStatusInfo().getReasonPhrase());
+					}
+					location = response.getHeaderString(HttpHeaders.LOCATION);
 				}
-				String location = response.getHeaderString(HttpHeaders.LOCATION);
+				
 				if (location == null) {
 					throw new Exception(Messages.ExportNavigationLayerToConnect_NotUrl);
 				}

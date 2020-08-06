@@ -145,6 +145,8 @@ public class Messages extends NLS {
 
 	public static String LoginDialog_parameterparseerror;
 
+	public static String NewPawsRunHandler_AuthFailed;
+
 	public static String NewPawsRunHandler_CannotConfigurePaws;
 
 	public static String NewPawsRunHandler_ConfigNotFound;

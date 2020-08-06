@@ -31,6 +31,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import javax.ws.rs.core.Response;
+
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.graphics.Point;
@@ -415,16 +417,18 @@ public class SmartCollectDataProcessor implements IJsonProcessor {
 	}
 	
 	private void sendEmailRequest(SmartCollectUser user) {
-		client.updateUserState(user.getUuid().toString(), SmartCollectUser.State.VALIDATED.name(), Boolean.TRUE.toString());
+		try(Response r = client.updateUserState(user.getUuid().toString(), SmartCollectUser.State.VALIDATED.name(), Boolean.TRUE.toString())){}
 	}
 	
 	private void validateUser(SmartCollectUser user) {
-		client.updateUserState(user.getUuid().toString(), SmartCollectUser.State.VALIDATED.name(), Boolean.FALSE.toString());
-		user.setState(State.VALIDATED);
+		try(Response r = client.updateUserState(user.getUuid().toString(), SmartCollectUser.State.VALIDATED.name(), Boolean.FALSE.toString())){
+			user.setState(State.VALIDATED);
+		}
 	}
 	
 	private void blacklistUser(SmartCollectUser user) {
-		client.updateUserState(user.getUuid().toString(), SmartCollectUser.State.BLACKLISTED.name(), Boolean.FALSE.toString());
-		user.setState(State.BLACKLISTED);
+		try(Response r = client.updateUserState(user.getUuid().toString(), SmartCollectUser.State.BLACKLISTED.name(), Boolean.FALSE.toString())){
+			user.setState(State.BLACKLISTED);
+		}
 	}
 }

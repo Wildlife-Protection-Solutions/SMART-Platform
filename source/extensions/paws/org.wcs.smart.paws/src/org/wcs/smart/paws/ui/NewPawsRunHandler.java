@@ -161,8 +161,9 @@ public class NewPawsRunHandler {
 			if (!StorageApi.INSTANCE.getAuthorizationCode(Display.getDefault().getActiveShell(), rr )) return false;
 		}catch (Exception ex) {
 			PawsPlugIn.log(ex.getMessage(), ex);
-			MessageDialog.openWarning(Display.getDefault().getActiveShell(), Messages.NewPawsRunHandler_Title, 
-					Messages.NewPawsRunHandler_WorkspaceServiceRequired);
+			MessageDialog.openWarning(Display.getDefault().getActiveShell(), 
+					Messages.NewPawsRunHandler_Title, 
+					Messages.NewPawsRunHandler_AuthFailed + "\n\n" + ex.getMessage()); //$NON-NLS-1$
 			return false;
 		}
 		

@@ -141,13 +141,15 @@ public class ExportCtPackageToConnect implements ICtExportAction {
 				proxy.setVersion(version);
 				proxy.setType(ctpackage.getTypeIdentifier());
 				
-				Response response = simple.uploadCtPackage(Files.size(file), ctpackage.getUuid().toString(), proxy);
-				if (response.getStatus() != Response.Status.OK.getStatusCode()) {
-					String x = parseError(response);
-					if (x == null) x = response.getStatusInfo().getReasonPhrase();
-					throw new Exception(x);
+				String location = null;
+				try(Response response = simple.uploadCtPackage(Files.size(file), ctpackage.getUuid().toString(), proxy)){
+					if (response.getStatus() != Response.Status.OK.getStatusCode()) {
+						String x = parseError(response);
+						if (x == null) x = response.getStatusInfo().getReasonPhrase();
+						throw new Exception(x);
+					}
+					location = response.getHeaderString(HttpHeaders.LOCATION);	
 				}
-				String location = response.getHeaderString(HttpHeaders.LOCATION);
 				if (location == null) {
 					throw new Exception(Messages.ExportCtPackageToConnect_NoUrl);
 				}
@@ -195,14 +197,16 @@ public class ExportCtPackageToConnect implements ICtExportAction {
 				proxy.setCaLabel(nlayer.getConservationArea().getName());
 				proxy.setCaUuid(nlayer.getConservationArea().getUuid());
 				proxy.setName(nlayer.getName());
-							
-				Response response = simple.uploadNavigationLayer(Files.size(tempFile), nlayer.getUuid().toString(), proxy);
-				if (response.getStatus() != Response.Status.OK.getStatusCode()) {
-					String x = parseError(response);
-					if (x == null) x = response.getStatusInfo().getReasonPhrase();
-					throw new Exception(x);
+				
+				String location = null;
+				try(Response response = simple.uploadNavigationLayer(Files.size(tempFile), nlayer.getUuid().toString(), proxy)){
+					if (response.getStatus() != Response.Status.OK.getStatusCode()) {
+						String x = parseError(response);
+						if (x == null) x = response.getStatusInfo().getReasonPhrase();
+						throw new Exception(x);
+					}
+					location = response.getHeaderString(HttpHeaders.LOCATION);
 				}
-				String location = response.getHeaderString(HttpHeaders.LOCATION);
 				if (location == null) {
 					throw new Exception(Messages.ExportCtPackageToConnect_NoUrl);
 				}

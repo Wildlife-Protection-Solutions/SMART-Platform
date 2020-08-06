@@ -360,6 +360,7 @@ public class RunSummaryPage extends EditorPart {
 	}
 
 	public void init(PawsRun run) {
+		if (statusComp.isDisposed()) return;
 		String surl = ""; //$NON-NLS-1$
 		for (Control c : statusComp.getChildren()) c.dispose();
 		
