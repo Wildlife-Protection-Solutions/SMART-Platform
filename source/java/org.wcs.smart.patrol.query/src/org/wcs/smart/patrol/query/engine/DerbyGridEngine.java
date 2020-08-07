@@ -239,7 +239,7 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 				}catch (OperationCanceledException ex) {
 					return;
 				}catch (Exception ex){
-					throw new SQLException(ex);
+					throw new SQLException(ex.getMessage(), ex);
 				} finally {
 					// ensure temporary tables get dropped
 					dropTemporaryGridTable(c);

@@ -39,6 +39,7 @@ import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.MemoryQueryResult;
 import org.wcs.smart.query.common.model.GridQueryResult;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
+import org.wcs.smart.report.birt.map.execute.SmartQueryExecutionException;
 
 /**
  * Query dataset handler for allowing queries
@@ -124,7 +125,7 @@ public abstract class AbstractSmartQuery {
 			try {
 				result = connection.executeQuery(query.getQuery());
 			} catch (Exception ex) {
-				throw new RuntimeException(ex);
+				throw new SmartQueryExecutionException(ex.getCause() != null ? ex.getCause() : ex);
 			}
 			query.getQuery().setCachedResults(result);
 		}

@@ -23,7 +23,9 @@ package org.wcs.smart.report.internal.ui.viewer;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -56,6 +58,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.birt.ui.ReportEngineManager;
 import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -160,7 +163,22 @@ public class ReportView implements IReportListener{
 				sb.append("\n"); //$NON-NLS-1$
 				sb.append(e.getCause().getLocalizedMessage());
 			}
+			StringBuilder all = new StringBuilder(sb);
+			try(ByteArrayOutputStream out = new ByteArrayOutputStream();
+					PrintStream stream = new PrintStream(out, true, StandardCharsets.UTF_8)){
+				e.printStackTrace(stream);
+				
+				all.append("<br><br>"); //$NON-NLS-1$
+				all.append(out.toString(StandardCharsets.UTF_8));
+			}catch(IOException ex) {}
 			
+			browser.getDisplay().syncExec(new Runnable(){
+				@Override
+				public void run() {
+					browser.setText(all.toString());
+					
+					
+				}});
 			ReportPlugIn.displayLog(MessageFormat.format(Messages.ReportView_RunReportError1, new Object[]{report.getName()}) + sb.toString(), e);
 		}			
 		return Status.OK_STATUS;

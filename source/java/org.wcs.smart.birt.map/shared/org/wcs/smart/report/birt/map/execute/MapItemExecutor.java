@@ -278,8 +278,17 @@ public class MapItemExecutor implements IReportItemExecutor{
 			IQueryDefinition q2 = (IQueryDefinition) query[i];	
 			if (q2 == null) continue;
 			MapLayerInfo info = new MapLayerInfo(layer.getLayerName(), layer.getLayerStyle(), layer.getLayerType(), layer.getGeometryColumn());
-			IBaseResultSet qresult = context.executeQuery( null, q2, elementHandle );
-
+			
+			IBaseResultSet qresult = null;
+			try {
+				qresult = context.executeQuery( null, q2, elementHandle );
+			}catch (SmartQueryExecutionException ex) {
+				Logger.getLogger(MapItemExecutor.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
+				if (exceptions.length() != 0) exceptions.append("\n"); //$NON-NLS-1$
+				exceptions.append(layer.getLayerName() + ": " + ex.getLocalizedMessage()); //$NON-NLS-1$
+				continue;
+			}
+			
 			if (qresult != null){
 				//if qresult is null we were unable to execute the query for some reason
 				configuration.addQuery(qresult,info);
