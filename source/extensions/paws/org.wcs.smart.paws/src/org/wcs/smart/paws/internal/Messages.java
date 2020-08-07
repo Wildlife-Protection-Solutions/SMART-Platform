@@ -316,6 +316,8 @@ public class Messages extends NLS {
 
 	public static String RunMapResultsPage_HighEffort;
 
+	public static String RunMapResultsPage_kmlabel;
+
 	public static String RunMapResultsPage_LowEffort;
 
 	public static String RunMapResultsPage_PatrolEffort;

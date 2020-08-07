@@ -293,4 +293,22 @@ public class PawsResultFile {
 		writer.write(gc, null);
 
 	}
+	
+	public static String getPatrolEffortString(Path filename) {
+		String threshold = SharedUtils.getFilenameWithoutExtension( filename.getFileName().toString() );
+
+		int s1 = threshold.indexOf('_');
+		
+		String num = threshold.substring(s1 + 1).replace("_", "."); //$NON-NLS-1$ //$NON-NLS-2$
+		Double v = Double.valueOf(num);
+		
+		double x = Math.round(v*100.0) / 100.0;
+		double y = 100;
+		while(x <= 0) {
+			y = y * 10;
+			x = Math.round(v*y) / y;
+		}
+		String part = String.valueOf(x);
+		return part;
+	}
 }

@@ -75,6 +75,9 @@ public class RunMapResultsPage extends SmartMapEditorPart{
 	private Composite temp1;
 	private Scale scEffort;
 	
+	private Label lblLow;
+	private Label lblHigh;
+	
 	private AddJob addlayerjob;
 	
 	public RunMapResultsPage(RunEditor parent) {
@@ -123,24 +126,24 @@ public class RunMapResultsPage extends SmartMapEditorPart{
     	((GridLayout)b.getLayout()).marginWidth = 0;
     	((GridLayout)b.getLayout()).marginHeight = 0;
     	
-    	Label low = new Label(b, SWT.NONE);
-    	low.setText(Messages.RunMapResultsPage_LowEffort);
-    	low.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false));
-    	FontData fd = low.getFont().getFontData()[0];
+    	lblLow = new Label(b, SWT.NONE);
+    	lblLow.setText(Messages.RunMapResultsPage_LowEffort);
+    	lblLow.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, true, false));
+    	FontData fd = lblLow.getFont().getFontData()[0];
     	fd.setHeight(fd.getHeight() - 2);
     	Font smaller = new Font(b.getDisplay(), fd);
-    	low.addListener(SWT.Dispose, e->smaller.dispose());
-    	low.setFont(smaller);
+    	lblLow.addListener(SWT.Dispose, e->smaller.dispose());
+    	lblLow.setFont(smaller);
     	
     	Label l = new Label(b, SWT.NONE);
     	l.setText(Messages.RunMapResultsPage_PatrolEffort);
     	l.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false));
     	
-    	Label high = new Label(b, SWT.NONE);
-    	high.setText(Messages.RunMapResultsPage_HighEffort);
-    	high.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, true, false));		
-    	((GridData)high.getLayoutData()).horizontalIndent = 20;
-    	high.setFont(smaller);	
+    	lblHigh = new Label(b, SWT.NONE);
+    	lblHigh.setText(Messages.RunMapResultsPage_HighEffort);
+    	lblHigh.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, true, false));		
+    	((GridData)lblHigh.getLayoutData()).horizontalIndent = 20;
+    	lblHigh.setFont(smaller);	
 		
 		Composite part2 = new Composite(part, SWT.NONE);
 		super.createPartControl(part2);
@@ -199,6 +202,9 @@ public class RunMapResultsPage extends SmartMapEditorPart{
 				PawsTiffGeoResource r = new PawsTiffGeoResource(service, editor.getResultFile(), p);
 				toadd.add(r);
 			}	
+			
+			lblLow.setToolTipText(PawsResultFile.getPatrolEffortString(editor.getResultFile().getRasterFiles().get(0)) + Messages.RunMapResultsPage_kmlabel);
+			lblHigh.setToolTipText(PawsResultFile.getPatrolEffortString(editor.getResultFile().getRasterFiles().get(editor.getResultFile().getRasterFiles().size() - 1)) + Messages.RunMapResultsPage_kmlabel);
 		}catch (Exception ex) {
 			PawsPlugIn.displayLog(ex.getMessage(), ex);
 			return;
@@ -266,6 +272,7 @@ public class RunMapResultsPage extends SmartMapEditorPart{
 				map.getLayersInternal().addAll(map.getLayersInternal().size(), layers);
 				resultslayers.get(selectionindex).setVisible(true);
 			}
+			
 			return Status.OK_STATUS;
 		}
 
