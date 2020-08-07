@@ -172,7 +172,7 @@ public class QueryView {
 	private IDataModelListener dmListener = new IDataModelListener() {
 		@Override
 		public void modified() {
-			sourceModified();
+			Display.getDefault().asyncExec(()->sourceModified());
 		}
 	};
 	private EventHandler entityEvent = new EventHandler() {
