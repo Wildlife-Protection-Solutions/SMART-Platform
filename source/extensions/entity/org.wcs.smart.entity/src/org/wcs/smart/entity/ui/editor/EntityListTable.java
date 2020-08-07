@@ -22,6 +22,7 @@
 package org.wcs.smart.entity.ui.editor;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -75,6 +76,8 @@ import org.wcs.smart.ui.properties.FilterComposite;
  */
 public class EntityListTable extends Composite {
 
+	private static final String SORTERKEY = "SORTER"; //$NON-NLS-1$
+	
 	private HashMap<TableViewerColumn, ColumnLabelProvider> tableLabelProviders;
 	private TableViewer entityTable;
 	private EntityTableViewerComparator tableSorter = new EntityTableViewerComparator();
@@ -309,6 +312,41 @@ public class EntityListTable extends Composite {
 							return super.getText(element);
 						}
 					});
+					Comparator<Entity> comp = null;
+					switch(ea.getDmAttribute().getType()) {
+						case BOOLEAN:
+						case NUMERIC:
+							comp = (o1, o2)->{
+								EntityAttributeValue v1 = o1.findAttribute(ea.getKeyId());
+								EntityAttributeValue v2 = o2.findAttribute(ea.getKeyId());
+								if (v1 != null && v2 != null) return v1.getNumberValue().compareTo(v2.getNumberValue());
+								if (v1 != null) return 1;
+								return -1;
+							};
+							break;
+						case DATE:
+							comp = (o1, o2)->{
+								EntityAttributeValue v1 = o1.findAttribute(ea.getKeyId());
+								EntityAttributeValue v2 = o2.findAttribute(ea.getKeyId());
+								if (v1 != null && v2 != null) return v1.getDateValue().compareTo(v2.getDateValue());
+								if (v1 != null) return 1;
+								return -1;
+							};
+							break;
+						case LIST:
+						case TEXT:
+						case TREE:
+							comp = (o1, o2)->{
+								EntityAttributeValue v1 = o1.findAttribute(ea.getKeyId());
+								EntityAttributeValue v2 = o2.findAttribute(ea.getKeyId());
+								if (v1 != null && v2 != null) return v1.getValueAsString(Locale.getDefault()).compareTo(v2.getValueAsString(Locale.getDefault()));
+								if (v1 != null) return 1;
+								return -1;
+							};
+							break;
+					}
+					col.getColumn().setData(SORTERKEY, comp);
+					
 					if (ea.getDmAttribute().getType() == Attribute.AttributeType.LIST || 
 						ea.getDmAttribute().getType() == Attribute.AttributeType.TREE ||
 						ea.getDmAttribute().getType() == Attribute.AttributeType.TEXT ){
@@ -340,7 +378,7 @@ public class EntityListTable extends Composite {
 			public void widgetSelected(SelectionEvent e) {
 				entityTable.getTable().setSortDirection(tableSorter.getDirection());
 				entityTable.getTable().setSortColumn(column.getColumn());
-				tableSorter.setColumn(provider);
+				tableSorter.setColumn(column, provider);
 				entityTable.refresh();
 			}
 
@@ -406,7 +444,10 @@ public class EntityListTable extends Composite {
 	}
 	
 	private class EntityTableViewerComparator extends ViewerComparator {
-		  private ColumnLabelProvider sortColumn;
+		
+		  private TableViewerColumn sortColumn;
+		  private ColumnLabelProvider lblProvider;
+		  
 		  private static final int DESCENDING = 1;
 		  private int direction = DESCENDING;
 
@@ -419,24 +460,32 @@ public class EntityListTable extends Composite {
 		    return direction == 1 ? SWT.DOWN : SWT.UP;
 		  }
 
-		  public void setColumn(ColumnLabelProvider column) {
+		  public void setColumn(TableViewerColumn column, ColumnLabelProvider lblProvider) {
 		    if (column == this.sortColumn) {
 		      // Same column as last sort; toggle the direction
 		      direction = 1 - direction;
 		    } else {
 		      // New column; do an ascending sort
 		      this.sortColumn = column;
+		      this.lblProvider = lblProvider;
 		      direction = DESCENDING;
 		    }
 		  }
 
 		  @Override
 		  public int compare(Viewer viewer, Object e1, Object e2) {
-			  if (sortColumn == null){
-				  return 0;
+			  if (sortColumn == null ||sortColumn.getColumn().isDisposed()) return 0;
+			  
+			  Comparator<Entity> comp = (Comparator<Entity>) sortColumn.getColumn().getData(SORTERKEY);
+			  
+			  if (comp != null && e1 instanceof Entity && e2 instanceof Entity) {
+				  int rc = comp.compare((Entity)e1, (Entity)e2);
+				  if (direction == DESCENDING) rc = -rc;
+				  return rc;
 			  }
-			  String l1 = sortColumn.getText(e1);
-			  String l2 = sortColumn.getText(e2);
+			  
+			  String l1 = lblProvider.getText(e1).toLowerCase();
+			  String l2 = lblProvider.getText(e2).toLowerCase();
 			  int rc = l1.compareTo(l2);
 			  // If descending order, flip the direction
 			  if (direction == DESCENDING) {
