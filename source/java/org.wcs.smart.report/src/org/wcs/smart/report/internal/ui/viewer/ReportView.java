@@ -58,7 +58,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.birt.ui.ReportEngineManager;
 import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.hibernate.HibernateManager;
