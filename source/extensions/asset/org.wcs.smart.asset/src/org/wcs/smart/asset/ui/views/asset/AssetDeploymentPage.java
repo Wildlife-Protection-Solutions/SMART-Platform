@@ -21,8 +21,12 @@
  */
 package org.wcs.smart.asset.ui.views.asset;
 
+import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -38,12 +42,17 @@ import javax.inject.Inject;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -64,23 +73,29 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
+import org.locationtech.udig.catalog.URLUtils;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.AssetSecurityManager;
 import org.wcs.smart.asset.AssetUtils;
+import org.wcs.smart.asset.data.inout.deployment.DeploymentFromXml;
+import org.wcs.smart.asset.data.inout.deployment.DeploymentToXml;
 import org.wcs.smart.asset.engine.StatisticsEngine;
 import org.wcs.smart.asset.engine.StatisticsEngine.Statistic;
 import org.wcs.smart.asset.internal.Messages;
@@ -101,6 +116,7 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Asset deployment page for asset editor
@@ -191,9 +207,23 @@ public class AssetDeploymentPage {
 		
 		ToolItem itemDelete = null;
 		ToolItem itemEdit = null;
+		ToolItem itemExport = null;
+		ToolItem itemImport = null;
+		
 		if (canEdit()) {
 			ToolBar toolbar = new ToolBar(headerPanel, SWT.FLAT);
 			toolbar.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
+			
+			itemImport = new ToolItem(toolbar, SWT.PUSH);
+			itemImport.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.IMPORT_ICON));
+			itemImport.setToolTipText(Messages.AssetDeploymentPage_importTooltip);
+			itemImport.addListener(SWT.Selection, e->importDeployments());
+			
+			itemExport = new ToolItem(toolbar, SWT.PUSH);
+			itemExport.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EXPORT_ICON));
+			itemExport.setToolTipText(Messages.AssetDeploymentPage_exportTooltip);
+			itemExport.addListener(SWT.Selection, e->exportSelectedDeployments());
+			itemExport.setEnabled(false);
 			
 			itemDelete = new ToolItem(toolbar, SWT.PUSH);
 			itemDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
@@ -252,9 +282,18 @@ public class AssetDeploymentPage {
 					
 		});
 		
+		final ToolItem fitemExport = itemExport;
+		tblDeployments.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				fitemExport.setEnabled(!tblDeployments.getSelection().isEmpty());
+			}
+		});
+		
 		if (canEdit()) {
 			final ToolItem fitemDelete = itemDelete;
 			final ToolItem fitemEdit = itemEdit;
+
 			tblDeployments.addSelectionChangedListener(new ISelectionChangedListener() {
 				@Override
 				public void selectionChanged(SelectionChangedEvent event) {
@@ -274,7 +313,21 @@ public class AssetDeploymentPage {
 			mnuAdd.setText(Messages.AssetDeploymentPage_NewDeploymentLbl);
 			mnuAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 			mnuAdd.addListener(SWT.Selection, e-> addDeployment());
-					
+			
+			new MenuItem(mnuDeployments, SWT.SEPARATOR);
+
+			MenuItem mnuImport = new MenuItem(mnuDeployments, SWT.PUSH);
+			mnuImport.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.IMPORT_ICON));
+			mnuImport.addListener(SWT.Selection, e-> importDeployments());
+			mnuImport.setText(DialogConstants.IMPORT_BUTTON_TEXT);
+			
+			MenuItem mnuExport = new MenuItem(mnuDeployments, SWT.PUSH);
+			mnuExport.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EXPORT_ICON));
+			mnuExport.addListener(SWT.Selection, e-> exportSelectedDeployments());
+			mnuExport.setText(DialogConstants.EXPORT_BUTTON_TEXT);
+			
+			new MenuItem(mnuDeployments, SWT.SEPARATOR);
+			
 			MenuItem mnuEdit = new MenuItem(mnuDeployments, SWT.PUSH);
 			mnuEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 			mnuEdit.addListener(SWT.Selection, e-> editSelectedDeployments());
@@ -290,6 +343,7 @@ public class AssetDeploymentPage {
 			mnuDeployments.addMenuListener(new MenuListener() {
 				@Override
 				public void menuShown(MenuEvent e) {
+					mnuExport.setEnabled(!tblDeployments.getSelection().isEmpty());
 					mnuEdit.setEnabled(!tblDeployments.getSelection().isEmpty());
 					mnuDelete.setEnabled(!tblDeployments.getSelection().isEmpty());
 				}
@@ -536,6 +590,147 @@ public class AssetDeploymentPage {
 		parentEditor.deploymentModified(Collections.singletonList(newDeployment), AssetEvents.ASSETDEPLOYMENT_NEW);
 	}
 	
+	private void importDeployments() {
+			
+		FileDialog dir = new FileDialog(detailsPane.getShell(), SWT.OPEN | SWT.MULTI);
+		dir.setText(Messages.AssetDeploymentPage_DirDialogTitle);
+		dir.setFilterNames(new String[] {Messages.AssetDeploymentPage_zipFiles, Messages.AssetDeploymentPage_AllFiles});
+		dir.setFilterExtensions(new String[] {"*.zip", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
+		
+		String path = dir.open();
+		if (path == null) return;
+		
+		Path directory = Paths.get(dir.getFilterPath());
+		List<Path> files = new ArrayList<>();
+		for (String s : dir.getFileNames()) {
+			files.add(directory.resolve(s));
+		}
+		
+		List<AssetDeployment> deployments = new ArrayList<>();
+		
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(detailsPane.getShell());
+		final Shell parent = detailsPane.getShell();
+		try {
+			pmd.run(true,  true, new IRunnableWithProgress() {
+				
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					SubMonitor sub = SubMonitor.convert(monitor);
+					sub.beginTask(Messages.AssetDeploymentPage_importingTask, files.size());
+					
+					for (Path item : files) {
+						
+						try(Session session = HibernateManager.openSession(new AttachmentInterceptor())){
+					
+							DeploymentFromXml engine = new DeploymentFromXml();
+							AssetDeployment in = engine.importDeployment(item, session, parent, parentContext.get(IEventBroker.class), sub.split(1));
+							if (in != null) deployments.add(in);
+						
+
+						}catch(OperationCanceledException ex) {
+							return;
+						}catch (Exception ex) {
+							AssetPlugIn.displayLog(MessageFormat.format(Messages.AssetDeploymentPage_ImportError,  item.getFileName().toString()),ex);
+						}
+						
+					}
+				}
+			});
+		}catch (Exception ex) {
+			AssetPlugIn.displayLog(ex.getMessage(), ex);
+		}
+
+		MessageDialog.openInformation(detailsPane.getShell(), Messages.AssetDeploymentPage_SaveOkTitle,
+				MessageFormat.format(Messages.AssetDeploymentPage_SaveOkMessage, deployments.size(), files.size()));
+
+		try(Session session = HibernateManager.openSession()){
+			parentEditor.getAsset().computeStatus(session);
+		}
+		
+		for (AssetDeployment d : deployments) {
+			allDeployments.add(new AssetDeploymentWrapper(d));
+		}
+		
+		sortDeployments();
+		tblDeployments.refresh();
+		parentEditor.fireAssetModified(false);
+		parentEditor.reloadDataPage();
+	}
+	
+	private void exportSelectedDeployments() {
+		if (tblDeployments == null) return;
+	
+		List<AssetDeploymentWrapper> toExport = new ArrayList<>();
+		for (Iterator<?> iterator = ((IStructuredSelection)tblDeployments.getSelection()).iterator(); iterator.hasNext();) {
+			Object x = iterator.next();
+			if (x instanceof AssetDeploymentWrapper) {
+				toExport.add((AssetDeploymentWrapper)x);			
+			}
+		}
+		if (toExport.isEmpty()) return;
+		
+		
+		DirectoryDialog dir = new DirectoryDialog(detailsPane.getShell());
+		String path = dir.open();
+		if (path == null) return;
+		
+		Path outputDirectory  = Paths.get(path);
+		SmartUtils.createDirectory(outputDirectory);
+		
+		SimpleDateFormat dformat = new SimpleDateFormat("yyyyMMdd"); //$NON-NLS-1$
+		
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(detailsPane.getShell());
+		try {
+			pmd.run(true, true, new IRunnableWithProgress() {
+				
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					SubMonitor sub = SubMonitor.convert(monitor, toExport.size());
+					sub.beginTask(Messages.AssetDeploymentPage_ExportingTask, toExport.size());
+					int cnt = 0;
+					try(Session session = HibernateManager.openSession()){
+					
+						for (AssetDeploymentWrapper deploy : toExport) {
+							
+							try {
+								AssetDeployment d = session.get(AssetDeployment.class, deploy.getDeployment().getUuid());
+								
+								String fname = URLUtils.cleanFilename( d.getAsset().getId() + "_" + dformat.format(d.getStartDate()) + "-" + dformat.format(d.getEndDate() == null ? new Date() : d.getEndDate()) ); //$NON-NLS-1$ //$NON-NLS-2$
+								fname += ".zip"; //$NON-NLS-1$
+								
+								Path outFile = outputDirectory.resolve(fname);
+								
+								DeploymentToXml engine = new DeploymentToXml();
+								try {
+									engine.writeDeployment(d, session, outFile, sub.split(1));
+									cnt++;
+								}catch(OperationCanceledException ex) {
+									throw ex;
+								}catch (Exception ex) {
+									AssetPlugIn.displayLog(Messages.AssetDeploymentPage_ExportError + ex.getMessage(), ex);
+								}
+								if(sub.isCanceled()) throw new OperationCanceledException();
+							}catch(OperationCanceledException ex) {
+								break;
+							}
+						}
+					}
+
+					final int fcnt = cnt;
+					detailsPane.getDisplay().asyncExec(()->{
+						MessageDialog.openInformation(detailsPane.getShell(), Messages.AssetDeploymentPage_ExportOkTitle, 
+							MessageFormat.format(Messages.AssetDeploymentPage_ExportOkMessage, fcnt, toExport.size(), outputDirectory.toString()));
+					});
+					
+				}
+			});
+		}catch (Exception ex) {
+			AssetPlugIn.displayLog(ex.getMessage(), ex);
+		}
+		
+	}
+	
+	
 	private void deleteSelectedDeployments() {
 		if (tblDeployments == null) return;
 		List<AssetDeploymentWrapper> toDelete = new ArrayList<>();
@@ -593,6 +788,7 @@ public class AssetDeploymentPage {
 		tblDeployments.refresh();
 		parentEditor.fireAssetModified(false);
 		parentEditor.deploymentModified(toDelete.stream().map(e->e.getDeployment()).collect(Collectors.toList()), AssetEvents.ASSETDEPLOYMENT_DELETE);
+		parentEditor.reloadDataPage();
 	}
 	
 	private void editSelectedDeployments() {

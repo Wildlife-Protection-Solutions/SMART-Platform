@@ -77,7 +77,6 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IPropertyListener;
-import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.widgets.Form;
@@ -857,6 +856,13 @@ public class AssetEditor extends EditorPart implements MapPart {
 		return ((IEditorSite)getSite()).getActionBars().getStatusLineManager();
 	}
 	
+	/**
+	 * reloads the data page
+	 */
+	public void reloadDataPage() {
+		dataPage.reloadData();
+	}
+	
 	
 	private Job refreshJob = new Job(Messages.AssetEditor_refreshJobName) {
 
@@ -865,7 +871,6 @@ public class AssetEditor extends EditorPart implements MapPart {
 			AssetEditorInput in = (AssetEditorInput) AssetEditor.this.getEditorInput();
 			
 			activeHistoryRecords = new ArrayList<>();
-//			toDeleteHistoryRecords = new ArrayList<>();
 			
 			try(Session session = HibernateManager.openSession()){
 				//load asset data
