@@ -442,8 +442,10 @@ RETURNS NULL ON NULL INPUT;
 	}
 	
 	/**
-	 * Gets attributes that are active or inactive.  Only searches the direct category - does not get 
-	 * attributes inherited from parents.
+	 * Gets attributes that are active or inactive. Includes attributes
+	 * that are directly associated with this category or any parent
+	 * category.  
+	 * 
 	 * @param active <code>true</code> for active only attributes, 
 	 * <code>false</code> for in-active only attributes
 	 * <code>null</code> for all attributes
