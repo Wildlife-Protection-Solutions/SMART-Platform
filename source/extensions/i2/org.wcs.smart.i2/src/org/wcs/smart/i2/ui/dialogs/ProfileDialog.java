@@ -189,17 +189,35 @@ public class ProfileDialog extends SmartStyledDialog {
 			txtKey.setText(config.getKeyId());
 		}
 		
+		IntelProfile tosave = config;
+		if (config.getUuid() == null) {
+			//copy info to tosave
+			tosave = new IntelProfile();
+			tosave.setColor(config.getColor());
+			tosave.setConservationArea(config.getConservationArea());
+			tosave.setEntityTypes(new HashSet<>());
+			tosave.setKeyId(config.getKeyId());
+			tosave.setNames(new HashSet<>());
+			tosave.setRecordSources(new HashSet<>());
+			for (org.wcs.smart.ca.Label l : config.getNames()) {
+				tosave.updateName(l.getLanguage(), l.getValue());
+			}
+			tosave.setName(config.getName());
+		}
+		 
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
-				session.saveOrUpdate(config);
+				session.saveOrUpdate(tosave);
 
+				session.flush();
+				
 				List<IntelEntityType> esources = QueryFactory.buildQuery(session, IntelEntityType.class, "conservationArea", SmartDB.getCurrentConservationArea()).list(); //$NON-NLS-1$
 				for (IntelEntityType s : esources) {
 					IntelEntityType src = session.get(IntelEntityType.class, s.getUuid());
 					
 					IntelProfileEntityType map = new IntelProfileEntityType();
-					map.setProfile(config);
+					map.setProfile(tosave);
 					map.setEntityType(s);
 					IntelProfileEntityType ee = session.get(IntelProfileEntityType.class, map.getId());
 					if (ee != null) map = ee;
@@ -208,7 +226,7 @@ public class ProfileDialog extends SmartStyledDialog {
 						if (!src.getProfiles().contains(map)) {
 							src.getProfiles().add(map);
 						}
-						if (!config.getEntityTypes().contains(map)) config.getEntityTypes().add(map);
+						if (!tosave.getEntityTypes().contains(map)) tosave.getEntityTypes().add(map);
 					}else {
 						IntelProfileEntityType temp = session.get(IntelProfileEntityType.class, map.getId());
 						if (temp != null) {
@@ -225,7 +243,7 @@ public class ProfileDialog extends SmartStyledDialog {
 					IntelRecordSource src = session.get(IntelRecordSource.class, s.getUuid());
 					
 					IntelProfileRecordSource map = new IntelProfileRecordSource();
-					map.getId().setProfile(config);
+					map.getId().setProfile(tosave);
 					map.getId().setRecordSource(s);
 					
 					if (tblRecordSources.getChecked(s)) {
@@ -249,6 +267,7 @@ public class ProfileDialog extends SmartStyledDialog {
 						.executeUpdate();
 				}
 				for (IntelPermission p : permissions.values()) {
+					p.setProfile(tosave);
 					if (p.getPermission() == 0) {
 						session.delete(p);
 					}else {
@@ -266,10 +285,11 @@ public class ProfileDialog extends SmartStyledDialog {
 				String v = ProfilesManager.INSTANCE.validateRecords(new ArrayList<>(sources));
 				if (v != null) throw new Exception(v);
 				
-				v = EditValidator.INSTANCE.isValid(config, session);
+				v = EditValidator.INSTANCE.isValid(tosave, session);
 				if (v != null) throw new Exception(v);
 				
 				session.getTransaction().commit();
+				config = tosave;
 				removed.clear();
 			}catch (Exception ex) {
 				if (session.getTransaction().isActive()) {
@@ -279,6 +299,7 @@ public class ProfileDialog extends SmartStyledDialog {
 						Intelligence2PlugIn.log(ex2.getMessage(), ex2);
 					}
 				}
+				
 				Intelligence2PlugIn.displayLog(Messages.ProfileDialog_SaveError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 				return;
 			}

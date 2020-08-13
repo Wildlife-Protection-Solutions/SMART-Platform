@@ -189,6 +189,7 @@ public class LoadFilterOptions extends Job {
 		for (IntelProfile ip : ProfilesManager.INSTANCE.getActiveProfiles()) {
 			if (!IntelSecurityManager.INSTANCE.canViewQuery(ip)) continue;
 			ip = session.get(IntelProfile.class, ip.getUuid());
+			if (ip == null) continue;
 			for (IntelProfileEntityType et : ip.getEntityTypes()) {
 				for (IntelEntityTypeAttribute e : et.getEntityType().getAttributes()) {
 					if (donotuse.contains(e.getAttribute().getKeyId())) continue;					

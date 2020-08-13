@@ -150,7 +150,7 @@ public class RelationshipGraphComposite extends Composite {
 	private RelationshipGraphLoadDataJob loadGraphDataJob = new RelationshipGraphLoadDataJob() {
 		@Override
 		protected void processData(IRelationshipGraphData graphData) {
-			Display.getDefault().syncExec(new Runnable() {
+			Display.getDefault().asyncExec(new Runnable() {
 				@Override
 				public void run() {
 					if (!RelationshipGraphComposite.this.isDisposed()) {
@@ -164,7 +164,7 @@ public class RelationshipGraphComposite extends Composite {
 	private RelationshipDiagramStyleListLoadJob loadStyleListJob = new RelationshipDiagramStyleListLoadJob() {
 		@Override
 		protected void processData(List<RelationshipDiagramStyle> styles) {
-			Display.getDefault().syncExec(new Runnable() {
+			Display.getDefault().asyncExec(new Runnable() {
 				@Override
 				public void run() {
 					updateStylesInput(styles);
@@ -176,7 +176,7 @@ public class RelationshipGraphComposite extends Composite {
 	private RelationshipDiagramStyleLoadJob loadStyleJob = new RelationshipDiagramStyleLoadJob() {
 		@Override
 		protected void processData(RelationshipDiagramStyle style) {
-			Display.getDefault().syncExec(new Runnable() {
+			Display.getDefault().asyncExec(new Runnable() {
 				@Override
 				public void run() {
 					if (!RelationshipGraphComposite.this.isDisposed()) {

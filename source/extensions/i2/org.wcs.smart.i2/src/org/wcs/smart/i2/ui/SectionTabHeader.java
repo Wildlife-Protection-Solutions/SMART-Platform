@@ -112,7 +112,7 @@ public class SectionTabHeader extends Composite implements Listener{
 					header.setCursor(getDisplay().getSystemCursor(SWT.CURSOR_HAND));
 					
 					lastClass = WidgetElement.getCSSClass(header);
-					if (!lastClass.equals(TAB_SELECTED_CLASS)) {
+					if (lastClass != null && !lastClass.equals(TAB_SELECTED_CLASS)) {
 						WidgetElement.setCSSClass(header, TAB_MOUSEOVER_CLASS);
 						WidgetElement.applyStyles(header, true);
 					}

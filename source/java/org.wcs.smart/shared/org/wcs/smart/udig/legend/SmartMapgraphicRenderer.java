@@ -70,15 +70,16 @@ public class SmartMapgraphicRenderer extends RendererImpl implements
 	 */
 	private Object[] backgroundRenderImage(ICompositeRenderContext context,
 			List<IOException> exceptions) {
-		BufferedImage cache = new BufferedImage(context.getMapDisplay()
-				.getWidth(), context.getMapDisplay().getHeight(),
-				BufferedImage.TYPE_INT_ARGB);
+		
+		int width = context.getMapDisplay().getWidth();
+		int height = context.getMapDisplay().getHeight();
+		if (width <= 0 || height <= 0) return null;
+		
+		BufferedImage cache = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 		ReferencedEnvelope imageBounds = context.getViewportModel().getBounds();
 
 		for (IRenderContext l : context.getContexts()) {
 			Graphics2D copy = (Graphics2D) cache.createGraphics();
-			// final NonDisposableGraphics graphics = new
-			// NonDisposableGraphics(copy);
 			try {
 				if (!l.getLayer().isVisible())
 					continue;
@@ -194,6 +195,10 @@ public class SmartMapgraphicRenderer extends RendererImpl implements
 
 		if (cached == null && getContext().getMapDisplay().getWidth() > 0 && getContext().getMapDisplay().getHeight() > 0 ) {
 			Object values[] = backgroundRenderImage(getContext(), exceptions);
+			if (values == null) {
+				setState(DONE);
+				return;
+			}
 			cached = new BlackboardItem((BufferedImage) values[0],
 					(ReferencedEnvelope) values[1], getContext().getLayers());
 			layer.getBlackboard().put(BLACKBOARD_IMAGE_KEY, cached);
