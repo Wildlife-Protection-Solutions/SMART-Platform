@@ -272,13 +272,13 @@ public class MergePatrolsDialog extends SmartStyledTitleDialog {
 
 									for (PatrolWaypoint pw : pld.getWaypoints()) {
 										Waypoint waypoint = pw.getWaypoint();
-//										if (wayPoint.getUuid() != null) {
-//											wayPoint = (Waypoint) session.merge(wayPoint);
-//										}
-//										Waypoint wpClone = wayPoint.clone(session);
-//										session.delete(wayPoint);
+										if (waypoint.getUuid() != null) {
+											waypoint = (Waypoint) session.merge(waypoint);
+										}
+										Waypoint wpClone = waypoint.clone(session);
+										session.delete(waypoint);
 										PatrolWaypoint newPw = new PatrolWaypoint();
-										newPw.setWaypoint(waypoint);
+										newPw.setWaypoint(wpClone);
 										newPw.setPatrolLegDay(legdayClone);
 										allWaypoints.add(newPw);
 									}
