@@ -121,7 +121,7 @@ public class IntelRecordAttributeQueryColumn extends AbstractQueryColumn {
 					if (sb2.length() > 0) return sb2.substring(0, sb2.length() - 2);
 					return sb2.toString();
 				case POSITION:
-					Object[] data = (Object[]) toFormat;
+					Double[] data = (Double[]) toFormat;
 					return "POINT(" + (Double)data[0] + " " + (Double)data[1] + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 			return ""; //$NON-NLS-1$
@@ -141,9 +141,10 @@ public class IntelRecordAttributeQueryColumn extends AbstractQueryColumn {
 			return Type.NUMERIC;
 		case EMPLOYEE:
 		case LIST:
-		case POSITION:
 		case TEXT:
 			return Type.STRING;
+		case POSITION:
+			return Type.GEOMETRY;
 		}
 		return null;
 	}

@@ -27,6 +27,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -54,6 +55,7 @@ public class IntelQueryNameLabel extends Composite implements Listener{
 	private static final int MAX_NAME_LENGTH = 1024;
 	
 	private Label lblName;
+	private Label lblType;
 	private Text txtName;
 	
 	private boolean cancelled = false;
@@ -67,16 +69,17 @@ public class IntelQueryNameLabel extends Composite implements Listener{
 		createComposite(headerFont, headerColor, toolkit);
 	}
 
-	public void setText(String text){
+	public void setText(String text, String queryType){
 		this.lblName.setText(text);
 		this.txtName.setText(text);
+		this.lblType.setText( queryType );
 		super.layout();
 	}
 	
 	
 	private void createComposite(Font headerFont, Color headerColor, FormToolkit toolkit) {
 		
-		GridLayout gl = new GridLayout(3, false);
+		GridLayout gl = new GridLayout(4, false);
 		gl.marginHeight = 0;
 		gl.marginWidth = 0;
 		gl.verticalSpacing = 0;
@@ -98,6 +101,14 @@ public class IntelQueryNameLabel extends Composite implements Listener{
 		
 		lblName = toolkit.createLabel(it, ""); //$NON-NLS-1$
 		txtName = toolkit.createText(it, ""); //$NON-NLS-1$
+		
+		lblType = toolkit.createLabel(this, ""); //$NON-NLS-1$
+		lblType.setLayoutData(new GridData(SWT.FILL,SWT.CENTER, false, false));
+		FontData fd = lblType.getFont().getFontData()[0];
+		fd.setHeight(fd.getHeight() -2);
+		Font temp = new Font(lblType.getDisplay(), fd);
+		lblType.addListener(SWT.Dispose, e->temp.dispose());
+		lblType.setFont(temp);
 		
 		txtName.setVisible(false);
 		txtName.setBounds(lblName.getBounds());

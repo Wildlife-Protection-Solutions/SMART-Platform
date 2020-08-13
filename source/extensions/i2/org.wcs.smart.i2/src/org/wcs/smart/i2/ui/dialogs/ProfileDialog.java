@@ -568,14 +568,28 @@ public class ProfileDialog extends SmartStyledDialog {
 		Composite headComp = new Composite(permissionTable, SWT.NONE);
 		headComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		String headers1[] = new String[] {Messages.ProfileDialog_EmployeeField, Messages.ProfileDialog_AnalystField, Messages.ProfileDialog_ReadOnlyField, Messages.ProfileDialog_EntityField, Messages.ProfileDialog_Recordfield, Messages.ProfileDialog_QueryField};
+		String headers1[] = new String[] {
+				Messages.ProfileDialog_EmployeeField,
+				Messages.ProfileDialog_AnalystField, 
+				Messages.ProfileDialog_ReadOnlyField, 
+				Messages.ProfileDialog_EntityField, 
+				Messages.ProfileDialog_Recordfield, 
+				Messages.ProfileDialog_QueryField};
+		
+		String tooltips1[] = new String[] {
+				null,
+				Messages.ProfileDialog_anaylsttooltip, 
+				Messages.ProfileDialog_readonlytooltip, 
+				Messages.ProfileDialog_entitytooltip, 
+				Messages.ProfileDialog_recordtooltip,
+				Messages.ProfileDialog_queriestooltip};
 		Control[] groupheader = new Control[headers1.length];
 		for (int i = 0; i < headers1.length; i ++) {
 			Composite c = new Composite(headComp, SWT.BORDER);
 			c.setLayout(new GridLayout());
 			Label l = new Label(c, SWT.NONE);
 			l.setText(headers1[i]);
-			l.setToolTipText(headers1[i]);
+			if (tooltips1[i] != null) l.setToolTipText(tooltips1[i]);
 			l.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
 			groupheader[i] = c;
 		}

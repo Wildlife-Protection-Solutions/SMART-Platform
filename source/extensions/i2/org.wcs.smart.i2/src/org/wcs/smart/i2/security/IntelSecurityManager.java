@@ -79,6 +79,7 @@ public enum IntelSecurityManager {
 		if ((permissions.get(profileUuid) & permission) != 0) return true;
 		return false;
 	}
+	
 	private boolean supportsPermissionAny(int permission) {
 		if (permissions == null) loadPermissions();
 		for (Integer p : permissions.values()) {

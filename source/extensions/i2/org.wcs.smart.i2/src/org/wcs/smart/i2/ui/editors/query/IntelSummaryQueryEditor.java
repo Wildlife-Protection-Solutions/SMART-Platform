@@ -75,6 +75,7 @@ import org.wcs.smart.common.filter.DateFilterDropDownComposite;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.InternalQueryManager;
 import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
@@ -546,7 +547,7 @@ public class IntelSummaryQueryEditor extends EditorPart implements IQueryEditor{
 	
 	private void initUiField(){
 		setPartName(query.getName());
-		header.setText(query.getName());
+		header.setText(query.getName(), InternalQueryManager.INSTANCE.getName(query.getTypeKey()));
 		if (query.getUuid() == null) setDirty(true);
 	}
 	

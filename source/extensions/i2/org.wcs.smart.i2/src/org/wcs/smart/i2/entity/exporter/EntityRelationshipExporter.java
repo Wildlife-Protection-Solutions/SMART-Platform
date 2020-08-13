@@ -42,6 +42,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
+import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttributeValue;
 import org.wcs.smart.i2.model.IntelEntityRelationship;
@@ -52,6 +53,8 @@ import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
 import org.wcs.smart.i2.ui.AttributeValueLabelProvider;
 import org.wcs.smart.util.UuidUtils;
+
+import com.ibm.icu.text.MessageFormat;
 
 import au.com.bytecode.opencsv.CSVWriter;
 
@@ -199,33 +202,48 @@ public class EntityRelationshipExporter {
 			monitor.setTaskName(Messages.EntityRelationshipExporter_TaskMsg3);
 						
 			try(CSVWriter writer = new CSVWriter(Files.newBufferedWriter(entityFile, cs), delimiter)){
-				String[] data = new String[entityAttributes.size() + 4];
-				int i = 0;
-				data[i++] = Messages.EntityRelationshipExporter_UuidColumnName;
-				data[i++] = Messages.EntityRelationshipExporter_EntityColumnName;
-				data[i++] = Messages.EntityRelationshipExporter_TypeColumnName;
-				data[i++] = Messages.EntityRelationshipExporter_ProfileColumnName;
+				
+				
+				List<String> headers = new ArrayList<>();
+				headers.add( Messages.EntityRelationshipExporter_UuidColumnName );
+				headers.add(Messages.EntityRelationshipExporter_EntityColumnName );
+				headers.add( Messages.EntityRelationshipExporter_TypeColumnName );
+				headers.add( Messages.EntityRelationshipExporter_ProfileColumnName );
 				for (IntelAttribute ia : entityAttributes){
-					data[i++] = ia.getName();
+					if (ia.getType() == AttributeType.POSITION) {
+						headers.add(MessageFormat.format("{0} X", ia.getName())); //$NON-NLS-1$
+						headers.add(MessageFormat.format("{0} Y", ia.getName())); //$NON-NLS-1$
+						headers.add(MessageFormat.format("{0} Geometry", ia.getName())); //$NON-NLS-1$
+					}else {
+						headers.add(ia.getName());
+					}
 				}
-				writer.writeNext(data);
+				writer.writeNext(headers.toArray(new String[headers.size()]));
 				
 				for(IntelEntity e : entitiesToExport){
-					i = 0;
-					data = new String[entityAttributes.size() + 4];
-					data[i++] = UuidUtils.uuidToString(e.getUuid());
-					data[i++] = e.getIdAttributeAsText();
-					data[i++] = e.getEntityType().getName();
-					data[i++] = e.getProfile().getName();
+					headers.clear();
+					headers.add(UuidUtils.uuidToString(e.getUuid()));
+					headers.add(e.getIdAttributeAsText());
+					headers.add(e.getEntityType().getName());
+					headers.add(e.getProfile().getName());
+					
 					for (IntelAttribute ia : entityAttributes){
 						IntelEntityAttributeValue v = e.findAttributeValue(ia);
 						if (v != null){
-							data[i++] = provider.getText(v);
+							if (ia.getType() == AttributeType.POSITION) {
+								headers.add(v.getNumberValue().toString());
+								headers.add(v.getNumberValue2().toString());
+							}
+							headers.add(provider.getText(v));
 						}else{
-							data[i++] = ""; //$NON-NLS-1$
+							headers.add(null);
+							if (ia.getType() == AttributeType.POSITION) {
+								headers.add(null);
+								headers.add(null);
+							}
 						}
 					}
-					writer.writeNext(data);
+					writer.writeNext(headers.toArray(new String[headers.size()]));
 					if (monitor.isCanceled()) return false;
 				}
 			}
@@ -235,38 +253,53 @@ public class EntityRelationshipExporter {
 			
 			if (relationshipFile != null) {
 				try(CSVWriter writer = new CSVWriter(Files.newBufferedWriter(relationshipFile, cs), delimiter)){
-					String[] data = new String[relationshipAttributes.size() + 6];
-					int i = 0;
-					data[i++] = Messages.EntityRelationshipExporter_RelationshipUuidColumnName;
-					data[i++] = Messages.EntityRelationshipExporter_RelationshipType;
-					data[i++] = Messages.EntityRelationshipExporter_SrcEntityUuid;
-					data[i++] = Messages.EntityRelationshipExporter_SrcEntityId;
-					data[i++] = Messages.EntityRelationshipExporter_TargetEntityUuid;
-					data[i++] = Messages.EntityRelationshipExporter_TargetEntityId;
+					List<String> headers = new ArrayList<>();
+					
+					headers.add( Messages.EntityRelationshipExporter_RelationshipUuidColumnName );
+					headers.add( Messages.EntityRelationshipExporter_RelationshipType );
+					headers.add( Messages.EntityRelationshipExporter_SrcEntityUuid );
+					headers.add( Messages.EntityRelationshipExporter_SrcEntityId );
+					headers.add( Messages.EntityRelationshipExporter_TargetEntityUuid );
+					headers.add( Messages.EntityRelationshipExporter_TargetEntityId );
 					
 					for (IntelAttribute ia : relationshipAttributes){
-						data[i++] = ia.getName();
+						if (ia.getType() == AttributeType.POSITION) {
+							headers.add(MessageFormat.format("{0} X", ia.getName())); //$NON-NLS-1$
+							headers.add(MessageFormat.format("{0} Y", ia.getName())); //$NON-NLS-1$
+							headers.add(MessageFormat.format("{0} Geometry", ia.getName())); //$NON-NLS-1$
+						}else {
+							headers.add(ia.getName());
+						}
 					}
-					writer.writeNext(data);
+					writer.writeNext(headers.toArray(new String[headers.size()]));
 					
 					for(IntelEntityRelationship e : relationshipsToExport){
-						data = new String[data.length];
-						i=0;
-						data[i++] = UuidUtils.uuidToString(e.getUuid());
-						data[i++] = e.getRelationshipType().getName();
-						data[i++] = UuidUtils.uuidToString(e.getSourceEntity().getUuid());
-						data[i++] = e.getSourceEntity().getIdAttributeAsText();
-						data[i++] = UuidUtils.uuidToString(e.getTargetEntity().getUuid());
-						data[i++] = e.getTargetEntity().getIdAttributeAsText();
+						headers.clear();
+						
+						headers.add( UuidUtils.uuidToString(e.getUuid()) );
+						headers.add( e.getRelationshipType().getName() );
+						headers.add( UuidUtils.uuidToString(e.getSourceEntity().getUuid()) );
+						headers.add( e.getSourceEntity().getIdAttributeAsText() );
+						headers.add( UuidUtils.uuidToString(e.getTargetEntity().getUuid()) );
+						headers.add( e.getTargetEntity().getIdAttributeAsText() );
 						for (IntelAttribute ia : relationshipAttributes){
 							IntelEntityRelationshipAttributeValue v = e.findAttributeValue(ia);
-							if (v != null){
-								data[i++] = provider.getText(v);
+							if (ia.getType() == AttributeType.POSITION) {
+								if (v == null) {
+									headers.add(null);
+									headers.add(null);
+								}else {
+									headers.add(v.getNumberValue().toString());
+									headers.add(v.getNumberValue2().toString());
+								}
+							}
+							if ( v == null) {
+								headers.add(null);
 							}else{
-								data[i++] = ""; //$NON-NLS-1$
+								headers.add(provider.getText(v));
 							}
 						}
-						writer.writeNext(data);
+						writer.writeNext(headers.toArray(new String[headers.size()]));
 						
 						if (monitor.isCanceled()) return false;
 					}

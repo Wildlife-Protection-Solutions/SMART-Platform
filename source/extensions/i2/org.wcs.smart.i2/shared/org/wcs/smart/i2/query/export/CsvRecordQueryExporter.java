@@ -25,13 +25,18 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.hibernate.Session;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
 import org.opengis.referencing.operation.MathTransform;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.Projection;
@@ -46,6 +51,8 @@ import org.wcs.smart.i2.query.IQueryResult;
 import org.wcs.smart.i2.query.IResultItem;
 import org.wcs.smart.i2.query.PagedResultSetIterator;
 import org.wcs.smart.util.GeometryUtils;
+
+import com.ibm.icu.text.MessageFormat;
 
 import au.com.bytecode.opencsv.CSVWriter;
 
@@ -93,31 +100,67 @@ public class CsvRecordQueryExporter implements IQueryExporter{
 			
 			//headers
 			int dataSize = results.getQueryColumns().size();
-			String[] data = new String[dataSize];
+			
+			List<String> data = new ArrayList<>();
 			for (int i = 0; i < dataSize; i ++){
-				data[i] = results.getQueryColumns().get(i).getColumnName();
+				if (results.getQueryColumns().get(i).getDataType() == Type.GEOMETRY) {
+					data.add( MessageFormat.format("{0} X", results.getQueryColumns().get(i).getColumnName() )); //$NON-NLS-1$
+					data.add( MessageFormat.format("{0} Y", results.getQueryColumns().get(i).getColumnName() )); //$NON-NLS-1$
+					data.add( MessageFormat.format("{0} Geometry", results.getQueryColumns().get(i).getColumnName() )); //$NON-NLS-1$
+				}else {
+					data.add( results.getQueryColumns().get(i).getColumnName() );
+				}
 			}
-			writer.writeNext(data);
+			writer.writeNext(data.toArray(new String[data.size()]));
 			
 			
 			PagedResultSetIterator iterator = new PagedResultSetIterator(results, session);
 			while(iterator.hasNext()){
 				IResultItem item = iterator.next();
-				data = new String[dataSize];
+				data.clear();
 				for (int i = 0; i < dataSize; i ++){
 					IQueryColumn cc = results.getQueryColumns().get(i);
 					if (cc.getDataType() == Type.GEOMETRY && transform != null){
 						try{
-							Geometry g = (Geometry) results.getQueryColumns().get(i).getValue(item);
-							data[i] = JTS.transform(g, transform).toText();
+							Object v = results.getQueryColumns().get(i).getValue(item);
+							
+							if (v == null) {
+								data.add(null);
+								data.add(null);
+								data.add(null);
+							}else {
+								Geometry g = null;
+								if (v instanceof Geometry) {
+									g = (Geometry) v;
+								}else  if( v instanceof Double[]) {
+									double x = ((Double[])v)[0];
+									double y = ((Double[])v)[1];
+									g = (new GeometryFactory()).createPoint(new Coordinate(x, y));
+								}else {
+									throw new Exception("Cannot covert object of " + v.toString() + " to Geometry"); //$NON-NLS-1$ //$NON-NLS-2$
+								}
+								g= JTS.transform(g, transform);
+								if (g instanceof Point) {
+									data.add( String.valueOf(((Point)g).getX()));
+									data.add( String.valueOf(((Point)g).getY()));
+								}else {
+									data.add(null);
+									data.add(null);
+								}
+								data.add(g.toText());
+							}
 						}catch (Exception ex){
-							data[i] = "Error parsing geometry: " + ex.getMessage(); //$NON-NLS-1$
+							data.add(null);
+							data.add(null);
+							data.add("Error parsing geometry: " + ex.getMessage()); //$NON-NLS-1$
+							
 						}
 					}else{
-						data[i] = results.getQueryColumns().get(i).getValue(item,l);
+						data.add(results.getQueryColumns().get(i).getValue(item,l));
 					}
 				}
-				writer.writeNext(data);
+				writer.writeNext(data.toArray(new String[data.size()]));
+				
 			}
 				
 		}

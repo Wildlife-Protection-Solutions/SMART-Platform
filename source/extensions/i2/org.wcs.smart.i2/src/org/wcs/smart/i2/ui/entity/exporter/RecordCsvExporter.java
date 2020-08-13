@@ -25,6 +25,8 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.DateFormat;
+import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -72,7 +74,7 @@ public class RecordCsvExporter implements ICsvDataExporter {
 	
 	@Override
 	public boolean exportCsvFile(Path file, char delimiter,
-			ConservationArea ca, boolean headers, Charset cs, IProgressMonitor monitor,
+			ConservationArea ca, boolean writeHeaders, Charset cs, IProgressMonitor monitor,
 			Session session) throws Exception {
 		
 		//update last file name
@@ -94,82 +96,108 @@ public class RecordCsvExporter implements ICsvDataExporter {
 		List<IntelRecordSourceAttribute> attributes = q.list();
 		
 		
-		String[] data = new String[attributes.size() + 7];
-		int i = 0;
-		data[i++] = Messages.RecordCsvExporter_TitleColumn;
-		data[i++] = Messages.RecordCsvExporter_PrimaryDateColumn;
-		data[i++] = Messages.RecordCsvExporter_DateCreatedColumn;
-		data[i++] = Messages.RecordCsvExporter_DateModifiedColumn;
-		data[i++] = Messages.RecordCsvExporter_StatusColumn;
-		data[i++] = Messages.RecordCsvExporter_Sourcecolumn;
-		data[i++] = Messages.RecordCsvExporter_ProfileColumn;
+		List<String> headers = new ArrayList<>();
+
+		headers.add(Messages.RecordCsvExporter_TitleColumn);
+		headers.add(Messages.RecordCsvExporter_PrimaryDateColumn);
+		headers.add(Messages.RecordCsvExporter_DateCreatedColumn);
+		headers.add(Messages.RecordCsvExporter_DateModifiedColumn);
+		headers.add(Messages.RecordCsvExporter_StatusColumn);
+		headers.add(Messages.RecordCsvExporter_Sourcecolumn);
+		headers.add(Messages.RecordCsvExporter_ProfileColumn);
 		for (IntelRecordSourceAttribute ia : attributes){
+			
 			String name = ia.getName();
-			if (name == null){
-				if (ia.getAttribute() != null){
-					name = ia.getAttribute().getName();
-				}else if (ia.getEntityType() != null){
-					name = ia.getEntityType().getName();
+			
+			if (ia.getAttribute() != null && ia.getAttribute().getType() == AttributeType.POSITION) {
+				if (name == null) name = ia.getAttribute().getName();
+				headers.add(MessageFormat.format("{0} X ({1})", name, ia.getSource().getName())); //$NON-NLS-1$
+				headers.add(MessageFormat.format("{0} Y ({1})", name, ia.getSource().getName())); //$NON-NLS-1$
+				headers.add(MessageFormat.format("{0} Geometry ({1})", name, ia.getSource().getName())); //$NON-NLS-1$
+			}else {
+				if (name == null){
+					if (ia.getAttribute() != null){
+						name = ia.getAttribute().getName();
+					}else if (ia.getEntityType() != null){
+						name = ia.getEntityType().getName();
+					}
 				}
+				headers.add(MessageFormat.format("{0}({1})", name, ia.getSource().getName())); //$NON-NLS-1$
 			}
 			
-			data[i++] = name + "(" + ia.getSource().getName() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+			
+
 		}
 		
 		IIntelligenceLabelProvider ll = SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class);
 		monitor.worked(1);
 		monitor.subTask(Messages.RecordCsvExporter_SubTask2);
 		try(CSVWriter writer = new CSVWriter(Files.newBufferedWriter(file, cs), delimiter)){
-			writer.writeNext(data);
 			
-			data = new String[data.length];
+			writer.writeNext(headers.toArray(new String[headers.size()]));
+			
 			for (UUID uuid : uuids){
 				IntelRecord r = (IntelRecord)session.get(IntelRecord.class, uuid);
 				if (r == null) continue;
-				i = 0;
-				data[i++] = r.getTitle();
-				data[i++] = DateFormat.getDateInstance().format(r.getPrimaryDate());
-				data[i++] = DateFormat.getDateInstance().format(r.getDateCreated());
-				data[i++] = DateFormat.getDateInstance().format(r.getDateModified());
-				data[i++] = ll.getLabel(r.getStatus(), Locale.getDefault());
-				data[i++] = r.getRecordSource() == null ? "" : r.getRecordSource().getName(); //$NON-NLS-1$
-				data[i++] = r.getProfile().getName();
+				headers.clear();
+
+				headers.add(r.getTitle());
+				headers.add(DateFormat.getDateInstance().format(r.getPrimaryDate()));
+				headers.add(DateFormat.getDateInstance().format(r.getDateCreated()));
+				headers.add(DateFormat.getDateInstance().format(r.getDateModified()));
+				headers.add(ll.getLabel(r.getStatus(), Locale.getDefault()));
+				headers.add(r.getRecordSource() == null ? "" : r.getRecordSource().getName()); //$NON-NLS-1$
+				headers.add(r.getProfile().getName());
 				
 				for (IntelRecordSourceAttribute ia : attributes){
-					data[i++] = null;
+					IntelRecordAttributeValue found = null;
 					for (IntelRecordAttributeValue v : r.getAttributes()){
 						if (v.getAttribute().equals(ia)){
-							if (ia.isListAttribute()){
-								StringBuilder sb = new StringBuilder();
-								sb.append("("); //$NON-NLS-1$
-								sb.append(v.getAttributeValueAsString(Locale.getDefault(), GeometryUtils.SMART_CRS));
-								sb.append(") "); //$NON-NLS-1$
-								
-								for ( IntelRecordAttributeValueList  listItem : v.getAttributeListItems()){
-									if (ia.getAttribute() != null){
-										if (ia.getAttribute().getType() == AttributeType.LIST) {
-											IntelAttributeListItem list = (IntelAttributeListItem) session.get(IntelAttributeListItem.class, listItem.getId().getElementUuid());
-											sb.append(list.getName());
-										}else if (ia.getAttribute().getType() == AttributeType.EMPLOYEE) {
-											Employee e = (Employee) session.get(Employee.class, listItem.getId().getElementUuid());
-											sb.append(SmartLabelProvider.getFullLabel(e));
-										}
-									}else if (ia.getEntityType() != null){
-										IntelEntity list = (IntelEntity) session.get(IntelEntity.class, listItem.getId().getElementUuid());
-										sb.append(list.getIdAttributeAsText());
-									}
-									sb.append(","); //$NON-NLS-1$
-								}
-								sb.deleteCharAt(sb.length() - 1);
-								data[i-1] = sb.toString();
-							}else{
-								data[i-1] = v.getAttributeValueAsString(Locale.getDefault(), GeometryUtils.SMART_CRS);
-							}
+							found = v;
 							break;
 						}
 					}
+					
+					if (found == null) {
+						headers.add(null);
+						if (ia.getAttribute() != null && ia.getAttribute().getType() == AttributeType.POSITION) {
+							headers.add(null);
+							headers.add(null);
+						}
+					}else {
+						if (ia.isListAttribute()){
+							StringBuilder sb = new StringBuilder();
+							sb.append("("); //$NON-NLS-1$
+							sb.append(found.getAttributeValueAsString(Locale.getDefault(), GeometryUtils.SMART_CRS));
+							sb.append(") "); //$NON-NLS-1$
+								
+							for ( IntelRecordAttributeValueList  listItem : found.getAttributeListItems()){
+								if (ia.getAttribute() != null){
+									if (ia.getAttribute().getType() == AttributeType.LIST) {
+										IntelAttributeListItem list = (IntelAttributeListItem) session.get(IntelAttributeListItem.class, listItem.getId().getElementUuid());
+										sb.append(list.getName());
+									}else if (ia.getAttribute().getType() == AttributeType.EMPLOYEE) {
+										Employee e = (Employee) session.get(Employee.class, listItem.getId().getElementUuid());
+										sb.append(SmartLabelProvider.getFullLabel(e));
+									}
+								}else if (ia.getEntityType() != null){
+									IntelEntity list = (IntelEntity) session.get(IntelEntity.class, listItem.getId().getElementUuid());
+									sb.append(list.getIdAttributeAsText());
+								}
+								sb.append(","); //$NON-NLS-1$
+							}
+							sb.deleteCharAt(sb.length() - 1);
+							headers.add(sb.toString());
+						}else if(ia.getAttribute() != null && ia.getAttribute().getType() == AttributeType.POSITION) {
+							headers.add(found.getNumberValue().toString());
+							headers.add(found.getNumberValue2().toString());
+							headers.add(found.getAttributeValueAsString(Locale.getDefault(), GeometryUtils.SMART_CRS));
+						}else{
+							headers.add(found.getAttributeValueAsString(Locale.getDefault(), GeometryUtils.SMART_CRS));
+						}
+					}
 				}
-				writer.writeNext(data);
+				writer.writeNext(headers.toArray(new String[headers.size()]));
 				monitor.worked(1);
 			}	
 		}

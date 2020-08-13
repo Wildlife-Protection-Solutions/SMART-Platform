@@ -32,6 +32,7 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
+import org.wcs.smart.i2.model.IntelRecordSummaryQuery;
 import org.wcs.smart.i2.query.IQueryResult;
 import org.wcs.smart.i2.query.SummaryQueryResult;
 import org.wcs.smart.util.SharedUtils;
@@ -48,7 +49,8 @@ public class CsvEntitySummaryQueryExporter implements IQueryExporter{
 
 	@Override
 	public boolean canExport(String queryType) {
-		return queryType.equalsIgnoreCase(IntelEntitySummaryQuery.KEY);
+		return queryType.equalsIgnoreCase(IntelEntitySummaryQuery.KEY)  ||
+				queryType.equalsIgnoreCase(IntelRecordSummaryQuery.KEY);
 	}
 	
 	@Override

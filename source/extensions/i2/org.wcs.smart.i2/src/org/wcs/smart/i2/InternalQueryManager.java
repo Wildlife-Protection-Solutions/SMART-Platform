@@ -120,6 +120,19 @@ public enum InternalQueryManager {
 		};
 	}
 	
+	/**
+	 * Gets the full query type name for a given query type key
+	 *  
+	 * @param queryTypeKey
+	 * @return
+	 */
+	public String getName(String queryTypeKey) {
+		for (String[] x : getSupportQueryTypes()) {
+			if (x[0].equalsIgnoreCase(queryTypeKey)) return x[1];
+		}
+		return "Unknown"; //$NON-NLS-1$
+	}
+	
 	public void resetQueryItemProvider() {
 		synchronized (INSTANCE) {
 			queryItemProvider = null;

@@ -1191,6 +1191,7 @@ public class Messages extends NLS {
 	public static String ProfileDialog_AddEmployeeBtn;
 	public static String ProfileDialog_AllField;
 	public static String ProfileDialog_alltooltip;
+	public static String ProfileDialog_anaylsttooltip;
 	public static String ProfileDialog_AnalystField;
 	public static String ProfileDialog_ColorField;
 	public static String ProfileDialog_ColorText;
@@ -1203,6 +1204,7 @@ public class Messages extends NLS {
 	public static String ProfileDialog_editentitytooltip;
 	public static String ProfileDialog_editreporttooltip;
 	public static String ProfileDialog_editstatustooltip;
+	public static String ProfileDialog_entitytooltip;
 	public static String ProfileDialog_EditField;
 	public static String ProfileDialog_EditStatusField;
 	public static String ProfileDialog_EmployeeField;
@@ -1220,8 +1222,11 @@ public class Messages extends NLS {
 	public static String ProfileDialog_PermissionPage;
 	public static String ProfileDialog_PermissionTitle;
 	public static String ProfileDialog_QueryField;
+	public static String ProfileDialog_queriestooltip;
 	public static String ProfileDialog_querytooltip;
 	public static String ProfileDialog_ReadOnlyField;
+	public static String ProfileDialog_readonlytooltip;
+	public static String ProfileDialog_recordtooltip;
 	public static String ProfileDialog_Recordfield;
 	public static String ProfileDialog_SaveError;
 	public static String ProfileDialog_SaveMsg;
@@ -1278,6 +1283,7 @@ public class Messages extends NLS {
 	public static String QueryLazyResultsTable_CntLabel2;
 	public static String QueryLazyResultsTable_DisplayError;
 	public static String QueryLazyResultsTable_EntitiesCntLabel;
+	public static String QueryLazyResultsTable_RecordCntLabel;
 	public static String QueryLazyResultsTable_ResultsCntLabel;
 	public static String QueryManager_DeleteError;
 	public static String QueryManager_NotFoundError;

@@ -96,9 +96,10 @@ public class IntelAttributeQueryColumn extends AbstractQueryColumn {
 			return Type.NUMERIC;
 		case EMPLOYEE:
 		case LIST:
-		case POSITION:
 		case TEXT:
 			return Type.STRING;
+		case POSITION:
+			return Type.GEOMETRY;
 		}
 		return null;
 	}

@@ -181,7 +181,7 @@ public class IntelRecordQueryResults implements IPagedQueryResultSet {
 					value = v.getStringValue();
 					break;
 				case POSITION:
-					value = new Object[] {v.getNumberValue(), v.getNumberValue2()};
+					value = new Double[] {v.getNumberValue(), v.getNumberValue2()};
 					break;
 				}
 			}else if (v.getAttribute().getEntityType() != null){

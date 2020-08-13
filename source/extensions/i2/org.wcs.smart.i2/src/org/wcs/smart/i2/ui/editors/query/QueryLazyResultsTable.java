@@ -50,6 +50,7 @@ import org.wcs.smart.i2.query.IQueryColumn;
 import org.wcs.smart.i2.query.IResultItem;
 import org.wcs.smart.i2.query.engine.IntelEntityRecordQueryResults;
 import org.wcs.smart.i2.query.engine.IntelObservationQueryResults;
+import org.wcs.smart.i2.query.engine.IntelRecordQueryResults;
 
 /**
  * Displays results of a query in a table lazily loading
@@ -209,6 +210,8 @@ public class QueryLazyResultsTable extends Composite{
 				resultCnt.setText(MessageFormat.format(Messages.QueryLazyResultsTable_CntLabel1,result.getItemCount(), ((IntelObservationQueryResults)result).getWaypointCount()));
 			}else if (result instanceof IntelEntityRecordQueryResults){
 				resultCnt.setText(MessageFormat.format(Messages.QueryLazyResultsTable_EntitiesCntLabel, result.getItemCount()));
+			}else if (result instanceof IntelRecordQueryResults) {
+				resultCnt.setText(MessageFormat.format(Messages.QueryLazyResultsTable_RecordCntLabel, result.getItemCount()));
 			}else{
 				resultCnt.setText(MessageFormat.format(Messages.QueryLazyResultsTable_CntLabel2,result.getItemCount()));
 			}
