@@ -23,10 +23,13 @@ package org.wcs.smart.plan.internal.ui.patrol;
 
 import java.util.UUID;
 
+import javax.inject.Inject;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -60,6 +63,7 @@ import org.wcs.smart.plan.ui.editor.PlanEditor;
 import org.wcs.smart.plan.ui.editor.PlanEditorInput;
 import org.wcs.smart.plan.ui.panel.PlanCompositeFactory.PanelType;
 import org.wcs.smart.plan.ui.perspective.PlanPerspective;
+import org.wcs.smart.ui.ShowPerspectiveHandler;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -75,6 +79,9 @@ public class PatrolPlanContribution implements IPatrolEditorContribution {
 	private Plan currentPlan = null;
 	private Patrol currentPatrol = null;
 
+	@Inject
+	private MWindow mwindow;
+	
 	private IPlanEventListener planDeleteListener = new IPlanEventListener() {
 		@Override
 		public void eventFired(int attributeChanged, Plan source) {
@@ -254,10 +261,11 @@ public class PatrolPlanContribution implements IPatrolEditorContribution {
 		PlanEditorInput in = new PlanEditorInput(currentPlan.getUuid(), 
 				currentPlan.getLabel(), currentPlan.getType());
 		try {
-			PlatformUI.getWorkbench().showPerspective(PlanPerspective.ID, 
-					PlatformUI.getWorkbench().getActiveWorkbenchWindow());
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow()
-					.getActivePage().openEditor(in, PlanEditor.ID);
+			
+			(new ShowPerspectiveHandler()).execute(PlanPerspective.ID,mwindow);
+
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage()
+				.openEditor(in, PlanEditor.ID);
 		} catch (Exception e1) {
 			SmartPlanPlugIn.displayLog(
 					Messages.PatrolPlanContribution_Open_Error

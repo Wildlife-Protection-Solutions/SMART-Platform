@@ -29,6 +29,7 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -54,6 +55,8 @@ import org.wcs.smart.patrol.internal.ui.views.IPatrolFilteringView;
 import org.wcs.smart.patrol.internal.ui.views.PatrolFilterDialog;
 import org.wcs.smart.patrol.internal.ui.views.PatrolViewFilter;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
+import org.wcs.smart.patrol.xml.XmlExtraDataContributionFactory;
+import org.wcs.smart.patrol.xml.external.IPatrolExportContribution;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -79,6 +82,8 @@ public class MultiPatrolExportDialog extends XmlMultiExportDialog implements IPa
 	private PatrolViewFilter currentFilter = PatrolViewFilter.newInstance();
 	
 	private List<PatrolEditorInput> initValues;
+	private List<IPatrolExportContribution> options;
+	
 	/**
 	 * Creates a new dialog.
 	 * 
@@ -98,6 +103,24 @@ public class MultiPatrolExportDialog extends XmlMultiExportDialog implements IPa
 		getShell().setText(Messages.MultiPatrolExportDialog_Title);
 		return super.createDialogArea(parent);
 	}
+	
+	public HashMap<Object,Object> getExportOptions(){
+		HashMap<Object,Object> ops = new HashMap<>();
+		for (IPatrolExportContribution c: options) {
+			ops.putAll(c.getOptions());
+		}
+		return ops;
+	}
+	
+	@Override
+	public void addOptions(Composite parent) {
+		options = new ArrayList<>();
+		for (IPatrolExportContribution c : XmlExtraDataContributionFactory.getUiContributions()) {
+			options.add(c);
+			c.createControls(parent);
+		}
+	}
+	
 	/**
 	 * @see org.eclipse.jface.dialogs.Dialog#buttonPressed(int)
 	 */
@@ -131,6 +154,14 @@ public class MultiPatrolExportDialog extends XmlMultiExportDialog implements IPa
 		}else if (!Files.isDirectory(dir)){
 			SmartPatrolPlugIn.displayLog(MessageFormat.format(Messages.MultiPatrolExportDialog_InvalidDirectory, new Object[]{dir.toString()}),null);
 			return false;
+		}
+		
+		for (IPatrolExportContribution c : options) {
+			String x = c.validate();
+			if (x != null) {
+				MessageDialog.openInformation(getShell(), EXPORT_DIALOGTITLE, x);
+				return false;
+			}
 		}
 		return true;
 	}

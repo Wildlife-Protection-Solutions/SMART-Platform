@@ -59,6 +59,16 @@
                </appinfo>
             </annotation>
          </attribute>
+         <attribute name="uiclass" type="string">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appinfo>
+                  <meta.attribute kind="java" basedOn=":org.wcs.smart.patrol.xml.external.IPatrolExportContribution"/>
+               </appinfo>
+            </annotation>
+         </attribute>
       </complexType>
    </element>
 

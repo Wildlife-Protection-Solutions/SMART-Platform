@@ -21,6 +21,10 @@
  */
 package org.wcs.smart.plan.ui.handlers;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import javax.inject.Named;
 
 import org.eclipse.core.commands.AbstractHandler;
@@ -50,32 +54,36 @@ public class ExportPlanPdf {
 
 	private final static String ISEDITOR_PARAM = "org.wcs.smart.plan.exportpdf.editor"; //$NON-NLS-1$
 	
+	@SuppressWarnings("unchecked")
 	@Execute
 	public void execute(EPartService pService, 
 			@Optional @Named(IServiceConstants.ACTIVE_SELECTION) Object thisSelection,
 			@Optional @Named(ISEDITOR_PARAM) String isEditor){
 		
-		PlanEditorInput in = null;
+		List<PlanEditorInput> in = new ArrayList<>();
 		
 		if (isEditor != null && isEditor.equalsIgnoreCase("true")){ //$NON-NLS-1$
 			for (MPart p : pService.getParts()){
 				if (E3Utils.isCompatibilityEditor(p) &&
 						E3Utils.getSourceObject(p) instanceof PlanEditor &&
 						pService.isPartVisible(p)){
-					in = (PlanEditorInput) ((PlanEditor)E3Utils.getSourceObject(p)).getEditorInput();
+					in.add ( (PlanEditorInput) ((PlanEditor)E3Utils.getSourceObject(p)).getEditorInput() );
 					break;
 				}
 			}
 		}else{
 			if (thisSelection == null || !(thisSelection instanceof IStructuredSelection) || ((IStructuredSelection)thisSelection).isEmpty()) return;
-			final IStructuredSelection lastSelection = (IStructuredSelection) thisSelection;
-			if (lastSelection.getFirstElement() instanceof PlanEditorInput){
-				in = (PlanEditorInput) lastSelection.getFirstElement();	
-			}			
+			for (Iterator<Object> iterator = ((IStructuredSelection)thisSelection).iterator(); iterator.hasNext();) {
+				Object item = (Object) iterator.next();
+				if (item instanceof PlanEditorInput){
+					in.add( (PlanEditorInput) item );	
+				}	
+			}
+						
 		}
-		if (in != null){
-			ReportPlan.exportPlan(in.getUuid());
-		}
+		if (in.isEmpty()) return;
+		in.forEach(e->ReportPlan.exportPlan(e.getUuid()));
+		
 	}
 
 	public static class ExportPlanPdfWrapper extends AbstractHandler {

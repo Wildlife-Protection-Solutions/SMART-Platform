@@ -29,6 +29,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
@@ -158,6 +159,7 @@ public class PatrolContributionPageEditor extends EditorPart{
 			for (IConfigurationElement e : config) {
 				if (e.getName().equals("uieditor")){ //$NON-NLS-1$
 					IPatrolEditorContribution page = (IPatrolEditorContribution)e.createExecutableExtension("class"); //$NON-NLS-1$
+					ContextInjectionFactory.inject(page, editor.getContext());
 					items.add(page);
 				}
 			}

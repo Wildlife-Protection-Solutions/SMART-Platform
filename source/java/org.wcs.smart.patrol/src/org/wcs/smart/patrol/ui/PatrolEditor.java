@@ -42,6 +42,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
@@ -50,7 +51,10 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
 import org.locationtech.udig.project.internal.Map;
@@ -104,6 +108,8 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	private static final String SAVE_PATROL_JOB_NAME = Messages.PatrolEditor_SavePatrol_JobName;
 	
 	public static final DecimalFormat DISTANCE_FORMATTER = new DecimalFormat("#0.##"); //$NON-NLS-1$
+	
+	private IEclipseContext parentContext;
 	
 	private Patrol patrol = null;
 	private ObservationOptions ops = null;
@@ -220,6 +226,17 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 
 	public Projection[] getAvailableProjections(){
 		return this.projections;
+	}
+	
+	@Override
+	public void init(IEditorSite site, IEditorInput input) throws PartInitException {
+		super.setInput(input);
+		super.setSite(site);
+		parentContext = (IEclipseContext) getSite().getService(IEclipseContext.class);
+	}
+	
+	public IEclipseContext getContext() {
+		return this.parentContext;
 	}
 	
 	@Override

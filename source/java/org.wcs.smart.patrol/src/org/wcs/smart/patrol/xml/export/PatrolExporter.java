@@ -27,6 +27,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -48,7 +49,7 @@ import org.wcs.smart.patrol.xml.PatrolToXmlConverter;
 import org.wcs.smart.patrol.xml.PatrolXmlManager;
 import org.wcs.smart.patrol.xml.XmlExtraDataContributionFactory;
 import org.wcs.smart.patrol.xml.external.IXmlExtraDataContribution;
-import org.wcs.smart.patrol.xml.model.ExtraDataType;
+import org.wcs.smart.patrol.xml.external.IXmlExtraDataContribution.PatrolXmlContribution;
 import org.wcs.smart.patrol.xml.model.v13.PatrolType;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.ZipUtil;
@@ -86,24 +87,35 @@ public class PatrolExporter {
 	 * 
 	 * @throws Exception 
 	 */
-	public static Path exportPatrol(Patrol patrol, Path file, boolean includeAttachments, IProgressMonitor monitor) throws Exception{
+	public static Path exportPatrol(Patrol patrol, Path file, boolean includeAttachments, Map<Object,Object> options, IProgressMonitor monitor) throws Exception{
 		monitor.beginTask(Messages.PatrolExporter_Progress_Exporting, includeAttachments ? 4 : 2);
+		
+		List<Path> additionalFiles = new ArrayList<>();
+		
+		List<PatrolXmlContribution> extras = new ArrayList<>();
+		
 		Session session = HibernateManager.openSession();
 		try {
 			session.refresh(patrol);
 			
 			monitor.subTask(Messages.PatrolExporter_Progress_Converting);
 			PatrolType xml = PatrolToXmlConverter.toXml(patrol);
+			
+			
 			for (IXmlExtraDataContribution edc : XmlExtraDataContributionFactory.getContributions()) {
-				List<ExtraDataType> extraData = edc.exportData(patrol);
+				PatrolXmlContribution extraData = edc.exportData(patrol, options);
 				if (extraData != null) {
-					xml.getExtraData().addAll(extraData);
+					extras.add(extraData);
+					xml.getExtraData().addAll(extraData.getExtraData());
+					additionalFiles.addAll(extraData.getExtraFiles());
 				}
 			}
 			monitor.worked(1);
 			
-			if (!includeAttachments){
+			if (!includeAttachments && additionalFiles.isEmpty()){
 				return exportPatrolWithoutAttachments(xml, file, monitor);
+			}else if (!includeAttachments && !additionalFiles.isEmpty()) {
+				return exportPatrolWithAttachments(patrol, xml, file, false, additionalFiles, monitor);
 			}else{
 				for (PatrolLeg pl : patrol.getLegs()){
 					for (PatrolLegDay pld : pl.getPatrolLegDays()){
@@ -113,11 +125,15 @@ public class PatrolExporter {
 					}
 				}
 				
-				return exportPatrolWithAttachments(patrol, xml, file, monitor);
+				return exportPatrolWithAttachments(patrol, xml, file, true, additionalFiles, monitor);
 			}
 		} finally {
 			if (session.isOpen()) {
 				session.close();
+			}
+			
+			for (PatrolXmlContribution c : extras) {
+				c.cleanUp();
 			}
 		}
 	}
@@ -138,7 +154,9 @@ public class PatrolExporter {
 	/**
 	 * Writes the patrol including attachments
 	 */
-	private static Path exportPatrolWithAttachments(Patrol patrol, PatrolType xml, Path f, IProgressMonitor monitor) throws Exception{
+	private static Path exportPatrolWithAttachments(Patrol patrol, PatrolType xml, Path f, 
+			boolean includePatrolAttachments,
+			List<Path> additionalFiles, IProgressMonitor monitor) throws Exception{
 		int index = f.getFileName().toString().lastIndexOf('.');
 		String name = f.getFileName().toString();
 		if (index >= 0){
@@ -157,38 +175,47 @@ public class PatrolExporter {
 
 			/* add xml file to zip */
 			zout.putNextEntry(new ZipEntry(name	+ ".xml")); //$NON-NLS-1$
+			try(InputStream in = Files.newInputStream(xmlFile)){
+            	zout.write(in.readAllBytes());
+            }
+			zout.closeEntry();
 			
-			try(InputStream inStream = Files.newInputStream(xmlFile)){
-				byte[] buffer = new byte[1024];
-				int bytesRead;
-				while ((bytesRead = inStream.read(buffer)) > 0) {
-					zout.write(buffer, 0, bytesRead);
-				}
-			}
 			monitor.worked(1);
 
-			/* add all attachments */
-			List<ISmartAttachment> allAttach = new ArrayList<ISmartAttachment>();
-			for (PatrolLeg leg : patrol.getLegs()) {
-				for (PatrolLegDay legday : leg.getPatrolLegDays()) {
-					for (PatrolWaypoint wp : legday.getWaypoints()) {
-						if (wp.getWaypoint().getAttachments() != null){
-							allAttach.addAll(wp.getWaypoint().getAttachments());
-						}
-						for (WaypointObservation wo : wp.getWaypoint().getAllObservations()){
-							if (wo.getAttachments() != null){
-								allAttach.addAll(wo.getAttachments());
+			//add additional files
+			for (Path p : additionalFiles) {
+				zout.putNextEntry(new ZipEntry(p.getFileName().toString()));
+				try(InputStream in = Files.newInputStream(p)){
+	            	zout.write(in.readAllBytes());
+	            }
+	            zout.closeEntry();
+			}
+			
+			if (includePatrolAttachments) {
+				/* add all attachments */
+				List<ISmartAttachment> allAttach = new ArrayList<ISmartAttachment>();
+				for (PatrolLeg leg : patrol.getLegs()) {
+					for (PatrolLegDay legday : leg.getPatrolLegDays()) {
+						for (PatrolWaypoint wp : legday.getWaypoints()) {
+							if (wp.getWaypoint().getAttachments() != null){
+								allAttach.addAll(wp.getWaypoint().getAttachments());
+							}
+							for (WaypointObservation wo : wp.getWaypoint().getAllObservations()){
+								if (wo.getAttachments() != null){
+									allAttach.addAll(wo.getAttachments());
+								}
 							}
 						}
 					}
 				}
-			}
-			for (ISmartAttachment att : allAttach){
-				zout.putNextEntry(new ZipEntry(PatrolXmlManager.ATTACHMENT_DIR_NAME + ZipUtil.DIR_PATH_SEPERATOR + att.getFilename()));
-				try {
-					EncryptUtils.decryptAttachment(att, zout);
-				}catch (Exception ex) {
-					//unable to decrypt file; option to include encrypted version
+				for (ISmartAttachment att : allAttach){
+					zout.putNextEntry(new ZipEntry(PatrolXmlManager.ATTACHMENT_DIR_NAME + ZipUtil.DIR_PATH_SEPERATOR + att.getFilename()));
+					try {
+						EncryptUtils.decryptAttachment(att, zout);
+					}catch (Exception ex) {
+						//unable to decrypt file; option to include encrypted version
+					}
+					zout.closeEntry();
 				}
 			}
 		}

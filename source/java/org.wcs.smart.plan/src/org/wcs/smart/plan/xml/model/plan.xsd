@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+targetNamespace="http://www.smartconservationsoftware.org/xml/1.0/plan" 
+xmlns:tns="http://www.smartconservationsoftware.org/xml/1.0/plan" elementFormDefault="qualified">
+
+    <complexType name="XmlPlan">
+    	<sequence>
+    		<element name="station" type="string"></element>
+    		<element name="team" type="string"></element>
+    		<element name="description" type="string"></element>
+    		<element name="unavaliableEmployees" type="int"></element>
+    		<element name="avaliableEmployees" type="int"></element>
+    		<element name="comment" type="string"></element>
+    		<element name="names" type="tns:XmlName"
+    			maxOccurs="unbounded" minOccurs="1">
+    		</element>
+    		<element name="targets" type="tns:XmlPlanTarget"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    		<element name="children" type="tns:XmlPlan"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    		<element name="parent" type="tns:XmlPlan" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    	</sequence>
+    	<attribute name="type" type="string"></attribute>
+    	<attribute name="id" type="string"></attribute>
+        <attribute name="startDate" type="dateTime"></attribute>
+    	<attribute name="endDate" type="dateTime"></attribute>
+    	<attribute name="parentid" type="string"></attribute>
+    </complexType>
+
+    <complexType name="XmlPlanTarget">
+    	<sequence>
+    		<element name="description" type="string"></element>
+    		<element name="points" type="tns:XmlPlanTargetPoint" maxOccurs="unbounded" minOccurs="0"></element>
+    	</sequence>
+        <attribute name="type" type="string"></attribute>
+        <attribute name="name" type="string"></attribute>
+    	<attribute name="value" type="double"></attribute>
+    	<attribute name="operator" type="string"></attribute>
+    	<attribute name="completed" type="boolean"></attribute>
+    	<attribute name="successDistance" type="int"></attribute>
+    </complexType>
+
+    <complexType name="XmlPlanTargetPoint">
+    	<attribute name="x" type="double"></attribute>
+    	<attribute name="y" type="double"></attribute>
+    </complexType>
+
+    <element name="Plan" type="tns:XmlPlan"></element>
+
+    <complexType name="XmlName">
+    	<attribute name="language" type="string"></attribute>
+    	<attribute name="value" type="string"></attribute>
+    	<attribute name="isdeafult" type="boolean"></attribute>
+    </complexType>
+</schema>

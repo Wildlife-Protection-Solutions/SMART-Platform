@@ -27,6 +27,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -111,6 +112,7 @@ public class ExportPatrolHandler {
 		if (!Files.exists(dir) || !Files.isDirectory(dir)){
 			return;
 		}
+		final HashMap<Object,Object> options = dialog.getExportOptions();
 		
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(shell);
 		try {
@@ -143,7 +145,7 @@ public class ExportPatrolHandler {
 							monitor.subTask(MessageFormat.format(Messages.ExportPatrolHandler_Progress_ExportingPatrol,new Object[]{ id }));
 
 							Path outFile = PatrolExporter.getOutputFile(dir, p.getId(), includeAtt);
-							PatrolExporter.exportPatrol(p, outFile, includeAtt, new NullProgressMonitor());
+							PatrolExporter.exportPatrol(p, outFile, includeAtt, options, new NullProgressMonitor());
 							exportCnt++;
 						} catch (Exception ex) {
 							SmartPatrolPlugIn.displayLog(MessageFormat.format(Messages.ExportPatrolHandler_Error_ExportingPatrol , new Object[]{id!= null ? id : UuidUtils.uuidToString(puuid)}) + "\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$

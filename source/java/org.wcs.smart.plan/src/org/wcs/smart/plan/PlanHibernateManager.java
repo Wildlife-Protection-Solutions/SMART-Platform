@@ -145,7 +145,17 @@ public class PlanHibernateManager{
 	 * @return plan id for given plan
 	 */
 	public static String generatePlanId(Plan p, Session s) {
-		
+		return generatePlanId(p, s, Collections.emptySet());
+	}
+	
+	/**
+	 * 
+	 * @param p
+	 * @param s
+	 * @param others set of other ids that cannot be used
+	 * @return
+	 */
+	public static String generatePlanId(Plan p, Session s, Set<String> others) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(p.getConservationArea().getId());
 		sb.append("_"); //$NON-NLS-1$
@@ -168,9 +178,12 @@ public class PlanHibernateManager{
 					// not of the form CAID_# skip this one
 				}
 			}
-			idNumber = (idNumber + 1) % 1000000;
-			if (idNumber <= 0) {
-				idNumber = 1;
+			for (int i = 0; i < 100_000; i++) {
+				idNumber = (idNumber + 1) % 1000000;
+				if (idNumber <= 0) idNumber = 1;
+				
+				String id = sb.toString() + PLAN_ID_FORMATTER.format(idNumber);
+				if (!others.contains(id)) break;
 			}
 			
 			sb.append(PLAN_ID_FORMATTER.format(idNumber));

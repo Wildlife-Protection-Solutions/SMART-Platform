@@ -68,7 +68,7 @@ public interface IXmlToPatrolConverter {
 	/**
 	 * Must be called after convertFile.  Converts the xml plugin additions
 	 */
-	public List<IConvertedExtraData> convertExtraData();
+	public List<IConvertedExtraData> convertExtraData(Path extraDirectory);
 }
 
 

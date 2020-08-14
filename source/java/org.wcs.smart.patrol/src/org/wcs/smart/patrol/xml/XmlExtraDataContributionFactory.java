@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
+import org.wcs.smart.patrol.xml.external.IPatrolExportContribution;
 import org.wcs.smart.patrol.xml.external.IXmlExtraDataContribution;
 
 /**
@@ -45,7 +46,7 @@ public class XmlExtraDataContributionFactory {
 	public static List<IXmlExtraDataContribution> getContributions() {
 		if (contributions == null) {
 			if (Platform.getExtensionRegistry() == null) return Collections.emptyList();
-			List<IXmlExtraDataContribution> items = new ArrayList<IXmlExtraDataContribution>();
+			List<IXmlExtraDataContribution> items = new ArrayList<>();
 			IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(IXmlExtraDataContribution.EXTENSION_ID);
 			try {
 				for (IConfigurationElement e : config) {
@@ -61,4 +62,19 @@ public class XmlExtraDataContributionFactory {
 		return contributions;
 	}
 	
+	public static List<IPatrolExportContribution> getUiContributions() {
+		if (Platform.getExtensionRegistry() == null) return Collections.emptyList();
+		List<IPatrolExportContribution> items = new ArrayList<>();
+		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(IXmlExtraDataContribution.EXTENSION_ID);
+		try {
+			for (IConfigurationElement e : config) {
+				IPatrolExportContribution contribution = (IPatrolExportContribution)e.createExecutableExtension("uiclass"); //$NON-NLS-1$
+				items.add(contribution);
+			}
+		} catch (Exception ex) {
+			SmartPatrolPlugIn.displayLog(Messages.XmlExtraDataContributionFactory_ErrorParsingExtraData, ex);
+			return Collections.emptyList();
+		}
+		return items;
+	}
 }

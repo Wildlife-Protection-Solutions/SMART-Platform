@@ -212,6 +212,8 @@ public abstract class XmlMultiExportDialog extends SmartStyledTitleDialog implem
 		GridData gd = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
 		btnIncludeAttachments.setLayoutData(gd);
 		
+		addOptions(main);
+		
 		filterLink = new Link(main, SWT.NONE);
 		gd = new GridData(SWT.FILL, SWT.CENTER, false, false, 3, 1);
 		filterLink.setLayoutData(gd);
@@ -285,6 +287,10 @@ public abstract class XmlMultiExportDialog extends SmartStyledTitleDialog implem
 
 	}
 
+	public void addOptions(Composite parent) {
+		
+	}
+	
 	protected CheckboxTableViewer getTableViewer() {
 		return tableViewer;
 	}

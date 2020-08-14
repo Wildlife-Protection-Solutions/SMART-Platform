@@ -14,6 +14,7 @@ Require-Bundle: org.eclipse.ui.forms,
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: org.wcs.smart.plan,
- org.wcs.smart.plan.model
+ org.wcs.smart.plan.model,
+ org.wcs.smart.plan.xml.model
 Bundle-Vendor: org.wcs.smart
 Automatic-Module-Name: org.wcs.smart.plan

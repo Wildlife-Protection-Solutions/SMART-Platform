@@ -21,7 +21,10 @@
  */
 package org.wcs.smart.patrol.xml.external;
 
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.xml.model.ExtraDataType;
@@ -46,11 +49,13 @@ public interface IXmlExtraDataContribution {
 	 * to XML file for given patrol.
 	 * 
 	 * @param patrol
+	 * @param options export options from ui
 	 * @return List<ExtraDataType>
 	 * @throws Exception
 	 */
-	public List<ExtraDataType> exportData(Patrol patrol) throws Exception;
+	public PatrolXmlContribution exportData(Patrol patrol, Map<Object,Object> options) throws Exception;
 
+	
 	/**
 	 * Converts XML extra-data to some inner structure but do not perform actual save operation.
 	 * Extension point is supposed to convert only items that it contributed.
@@ -59,8 +64,43 @@ public interface IXmlExtraDataContribution {
 	 * @see IConvertedExtraData
 	 * 
 	 * @param extraDataList
+	 * @param rootDirectory root directory of unzipped package where other files are added
 	 * @return
 	 */
-	public IConvertedExtraData fromXml(List<ExtraDataType> extraDataList);
+	public IConvertedExtraData fromXml(List<ExtraDataType> extraDataList, Path rootDirectory);
 	
+	
+	class PatrolXmlContribution{
+		
+		private List<ExtraDataType> extraData;
+		private List<Path> files;
+		
+		public PatrolXmlContribution() {
+			files = new ArrayList<>();
+			extraData = new ArrayList<>();
+		}
+		
+		public void addExtraData(ExtraDataType data) {
+			extraData.add(data);
+		}
+		
+		public void addExtraFile(Path file) {
+			files.add(file);
+		}
+		
+		public List<Path> getExtraFiles(){
+			return this.files;
+		}
+		public List<ExtraDataType> getExtraData(){
+			return this.extraData;
+		}
+		
+		/**
+		 * Called after package is created to cleanup any temporary 
+		 * files
+		 */
+		public void cleanUp() {
+			
+		}
+	}
 }

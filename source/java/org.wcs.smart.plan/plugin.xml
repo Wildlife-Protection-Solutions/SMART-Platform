@@ -145,6 +145,10 @@
                style="push"
                tooltip="%exportplanpdf.command.tooltip">
          </command>
+         <command
+               commandId="org.wcs.smart.plan.export"
+               style="push">
+         </command>
          <separator
                name="org.wcs.smart.plan.separator3"
                visible="true">
@@ -280,12 +284,96 @@
                </visibleWhen>
             </command>
             <command
+                  commandId="org.wcs.smart.plan.import"
+                  label="Import"
+                  mode="FORCE_TEXT"
+                  style="push">
+               <visibleWhen>
+                  <and>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.caSingle">
+                     </test>
+                     <with
+                           variable="activeWorkbenchWindow.activePerspective">
+                        <equals
+                              value="org.wcs.smart.plan.planPerspective">
+                        </equals>
+                     </with>
+                     <or>
+                        <test
+                              property="org.wcs.smart.smartAdminUser"
+                              value="admin">
+                        </test>
+                        <test
+                              property="org.wcs.smart.smartAdminUser"
+                              value="dataentry">
+                        </test>
+                        <test
+                              property="org.wcs.smart.smartAdminUser"
+                              value="manager">
+                        </test>
+                     </or>
+                  </and>
+               </visibleWhen>
+            </command>
+         </toolbar>
+         <toolbar
+               id="vertical.org.wcs.smart.plan.toolbar.2">
+            <command
                   commandId="org.wcs.smart.plan.editor.exportPdf"
                   label="%command.label.exportpdf"
                   mode="FORCE_TEXT"
                   style="push">
                <parameter
                      name="org.wcs.smart.plan.exportpdf.editor"
+                     value="true">
+               </parameter>
+               <visibleWhen>
+                  <and>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.caSingle">
+                     </test>
+                     <with
+                           variable="activeWorkbenchWindow.activePerspective">
+                        <equals
+                              value="org.wcs.smart.plan.planPerspective">
+                        </equals>
+                     </with>
+                     <or>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="admin">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="dataentry">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="analyst">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="manager">
+                        </test>
+                     </or>
+                  </and>
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="org.wcs.smart.plan.editor.export"
+                  label="Export"
+                  mode="FORCE_TEXT"
+                  style="push"
+                  tooltip="exports the plan to xml format">
+               <parameter
+                     name="org.wcs.smart.plan.export.editor"
                      value="true">
                </parameter>
                <visibleWhen>
@@ -624,6 +712,55 @@
             </with>
          </enabledWhen>
       </handler>
+      <handler
+            class="org.wcs.smart.plan.ui.handlers.ExportPlanHandler$ExportPlanHandlerWrapper"
+            commandId="org.wcs.smart.plan.export">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
+         <enabledWhen>
+            <with
+                  variable="selection">
+               <iterate
+                     operator="or">
+                  <instanceof
+                        value="org.wcs.smart.plan.ui.editor.PlanEditorInput">
+                  </instanceof>
+               </iterate>
+            </with>
+         </enabledWhen>
+      </handler>
+      <handler
+            class="org.wcs.smart.plan.ui.handlers.ExportPlanHandler$ExportPlanHandlerWrapper"
+            commandId="org.wcs.smart.plan.editor.export">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
+         <enabledWhen>
+            <with
+                  variable="activeEditorId">
+               <equals
+                     value="org.wcs.smart.plan.ui.editor.PlanEditor">
+               </equals>
+            </with>
+         </enabledWhen>
+      </handler>
+      <handler
+            class="org.wcs.smart.plan.ui.handlers.ImportPlanHandler$ImportPlanHandlerWrapper"
+            commandId="org.wcs.smart.plan.import">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -677,6 +814,28 @@
             id="org.wcs.smart.plan.importTemplate"
             name="%importtemplate.command.name">
       </command>
+      <command
+            id="org.wcs.smart.plan.export"
+            name="Export Plan...">
+         <commandParameter
+               id="org.wcs.smart.plan.export.editor"
+               name="Editor Export"
+               optional="true">
+         </commandParameter>
+      </command>
+      <command
+            id="org.wcs.smart.plan.editor.export"
+            name="Export Plan...">
+         <commandParameter
+               id="org.wcs.smart.plan.export.editor"
+               name="Editor Export"
+               optional="true">
+         </commandParameter>
+      </command>
+      <command
+            id="org.wcs.smart.plan.import"
+            name="Import Plan...">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.commandImages">
@@ -699,6 +858,18 @@
       <image
             commandId="org.wcs.smart.plan.NewPlan"
             icon="platform:/plugin/org.wcs.smart/images/icons/shared16/add.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.plan.export"
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/export.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.plan.editor.export"
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/export.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.plan.import"
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/import.png">
       </image>
    </extension>
 
@@ -793,7 +964,8 @@
    <extension
          point="org.wcs.smart.patrol.xml">
       <contribution
-            class="org.wcs.smart.plan.xml.patrol.PatrolPlanXmlExtraDataContribution">
+            class="org.wcs.smart.plan.xml.patrol.PatrolPlanXmlExtraDataContribution"
+            uiclass="org.wcs.smart.plan.xml.patrol.IncludeDefOp">
       </contribution>
    </extension>
    <extension

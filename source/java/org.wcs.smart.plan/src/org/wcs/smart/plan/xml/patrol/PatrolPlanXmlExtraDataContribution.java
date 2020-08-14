@@ -21,8 +21,11 @@
  */
 package org.wcs.smart.plan.xml.patrol;
 
-import java.util.ArrayList;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -32,7 +35,10 @@ import org.wcs.smart.patrol.xml.external.IXmlExtraDataContribution;
 import org.wcs.smart.patrol.xml.model.ExtraDataStringKeyType;
 import org.wcs.smart.patrol.xml.model.ExtraDataType;
 import org.wcs.smart.plan.PlanHibernateManager;
+import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.model.Plan;
+import org.wcs.smart.plan.xml.PlanToXml;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Plan contribution for Patrol module to provide ability to 
@@ -43,16 +49,35 @@ import org.wcs.smart.plan.model.Plan;
  */
 public class PatrolPlanXmlExtraDataContribution implements IXmlExtraDataContribution {
 
+	public static final String INCLUDE_PLAN_DEF = "org.wcs.smart.plan.xml.export.def"; //$NON-NLS-1$
+	
+	public static final String PLAN_FILENAME = "plans.xml"; //$NON-NLS-1$
+	
 	static final String PLAN_TYPE = "plan"; //$NON-NLS-1$
 
 	static final String PLAN_ID_KEY = "id"; //$NON-NLS-1$
 
 	@Override
-	public List<ExtraDataType> exportData(Patrol patrol) throws Exception {
+	public PatrolXmlContribution exportData(Patrol patrol, Map<Object,Object> options) throws Exception {
+		
+		Path temp = Files.createTempDirectory("patrolexport").resolve(PLAN_FILENAME); //$NON-NLS-1$
+		PatrolXmlContribution results = new PatrolXmlContribution() {
+		
+			@Override
+			public void cleanUp() {
+				super.cleanUp();
+				try {
+					SmartUtils.deleteDirectory(temp.getParent());
+				} catch (IOException e) {
+					SmartPlanPlugIn.log("Unable to delete temporary directory: " + temp.getParent().toString(), e); //$NON-NLS-1$
+				}
+			}
+		};
+		
 		try (Session session = HibernateManager.openSession()){
-			List<ExtraDataType> result = new ArrayList<ExtraDataType>();
 			//plan to which the patrol belong
 			Plan plan = PlanHibernateManager.getPlanForPatrol(patrol, session);
+		
 			if (plan != null) {
 				ExtraDataType planData = new ExtraDataType();
 				planData.setType(PLAN_TYPE);
@@ -62,14 +87,21 @@ public class PatrolPlanXmlExtraDataContribution implements IXmlExtraDataContribu
 				idKey.setValue(plan.getId());
 				planData.getStringKey().add(idKey);
 				
-				result.add(planData);
+				results.addExtraData(planData);
+				
+				if (options.get(INCLUDE_PLAN_DEF) != null && (boolean)options.get(INCLUDE_PLAN_DEF)){
+					PlanToXml toXml = new PlanToXml();
+					toXml.convertPlan(plan, temp);
+					results.addExtraFile(temp);
+				}
+				
 			}
-			return result;
+			return results;
 		}
 	}
 
 	@Override
-	public IConvertedExtraData fromXml(List<ExtraDataType> extraDataList) {
-		return new ConvertedPlanExtraData(extraDataList);
+	public IConvertedExtraData fromXml(List<ExtraDataType> extraDataList, Path fileDir) {
+		return new ConvertedPlanExtraData(extraDataList, fileDir);
 	}
 }

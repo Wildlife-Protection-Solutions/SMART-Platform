@@ -21,9 +21,13 @@
  */
 package org.wcs.smart.plan.xml.patrol;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.transaction.Synchronization;
 
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -33,9 +37,11 @@ import org.wcs.smart.patrol.xml.external.IConvertedExtraData;
 import org.wcs.smart.patrol.xml.model.ExtraDataStringKeyType;
 import org.wcs.smart.patrol.xml.model.ExtraDataType;
 import org.wcs.smart.plan.PlanHibernateManager;
+import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.PatrolPlan;
 import org.wcs.smart.plan.model.Plan;
+import org.wcs.smart.plan.xml.PlanFromXml;
 
 /**
  * Wrapper for plan extra-data conversion (from XML) result.
@@ -47,11 +53,14 @@ public class ConvertedPlanExtraData implements IConvertedExtraData {
 
 	private List<String> warnings = new ArrayList<String>();
 
-	private Plan plan;
+	private String planId;
+	private Path tempDir;
 	
-	public ConvertedPlanExtraData(List<ExtraDataType> extraDataList) {
+	public ConvertedPlanExtraData(List<ExtraDataType> extraDataList, Path tempDir) {
 		boolean found = false;
-		String planId = null;
+		planId = null;
+		this.tempDir = tempDir;
+		
 		for (ExtraDataType extraDataType : extraDataList) {
 			if(PatrolPlanXmlExtraDataContribution.PLAN_TYPE.equals(extraDataType.getType())) {
 				if (found) {
@@ -74,10 +83,6 @@ public class ConvertedPlanExtraData implements IConvertedExtraData {
 			}
 		}
 		
-		if (found) {
-			plan = fetchReferedPlan(planId);
-		}
-		
 	}
 
 	@Override
@@ -87,6 +92,40 @@ public class ConvertedPlanExtraData implements IConvertedExtraData {
 
 	@Override
 	public boolean saveInTransaction(Session session, Patrol patrol) {
+		
+		//check plan file
+		Path planFile = tempDir.resolve(PatrolPlanXmlExtraDataContribution.PLAN_FILENAME);
+		Plan plan = null;
+		if (Files.exists(planFile)) {
+			PlanFromXml xml = new PlanFromXml();
+			xml.setAllDuplicateMessage(Messages.ConvertedPlanExtraData_AllPlansFound);
+
+			try {
+				if (xml.convertPlan(planFile)) {
+					xml.doSave(session);
+					plan = xml.getRootPlan();
+					
+					session.getTransaction().registerSynchronization(new Synchronization() {
+						@Override
+						public void beforeCompletion() {
+						}
+						
+						@Override
+						public void afterCompletion(int arg0) {
+							xml.fireEvents();
+						}
+					});
+				}
+			}catch (Exception ex) {
+				SmartPlanPlugIn.displayLog(Messages.ConvertedPlanExtraData_PlanImportError + ex.getMessage(), ex);
+			}
+		}
+		
+		//check plan id
+		if (plan == null && planId != null) {
+			plan = fetchReferedPlan(planId);
+		}
+		
 		if (plan != null) {
 			PatrolPlan pp = new PatrolPlan();
 			pp.setPatrol(patrol);

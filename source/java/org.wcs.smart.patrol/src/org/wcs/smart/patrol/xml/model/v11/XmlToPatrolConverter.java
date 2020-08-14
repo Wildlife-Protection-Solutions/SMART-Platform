@@ -139,11 +139,11 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 	/**
 	 * Must be called after convertFile
 	 */
-	public List<IConvertedExtraData> convertExtraData(){
+	public List<IConvertedExtraData> convertExtraData(Path fileDir){
 		if (xml == null) return Collections.emptyList();
 		List<IConvertedExtraData> convertedExtraData = new ArrayList<IConvertedExtraData>();
 		for (IXmlExtraDataContribution edc : XmlExtraDataContributionFactory.getContributions()) {
-			IConvertedExtraData extraData = edc.fromXml(xml.getExtraData());
+			IConvertedExtraData extraData = edc.fromXml(xml.getExtraData(), fileDir);
 			if (extraData != null) {
 				if (extraData.getWarnings() != null) {
 					warnings.addAll(extraData.getWarnings());

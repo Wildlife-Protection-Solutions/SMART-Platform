@@ -21,16 +21,12 @@
  */
 package org.wcs.smart.patrol.xml.in;
 
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
@@ -242,7 +238,7 @@ public class PatrolImporter {
 		List<String> warnings = new ArrayList<String>();
 		warnings.addAll(converter.getWarnings());
 		//converting extra data
-		List<IConvertedExtraData> convertedExtraData = converter.convertExtraData();
+		List<IConvertedExtraData> convertedExtraData = converter.convertExtraData(attachmentDirectory);
 		
 		
 		//display reported conversion warnings if they present
