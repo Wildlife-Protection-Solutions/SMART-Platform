@@ -84,6 +84,7 @@ import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
+import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.ZipUtil;
 
 
@@ -111,312 +112,319 @@ public class DeploymentFromXml {
 			AssetPlugIn.displayLog(Messages.DeploymentFromXml_unzipError +ex.getMessage(), ex);
 			return null;
 		}
-		
-		Path deploymentFile = workingDir.resolve(DeploymentToXml.XML_FILE);
-		if (!Files.exists(deploymentFile)) {
-			AssetPlugIn.displayLog(Messages.DeploymentFromXml_InvalidFile,  null);
-			return null;
-		}
-		sub.subTask(Messages.DeploymentFromXml_ConvertSubtask);
-		sub.split(1);
-		
-		XmlAssetDeployment xml = null;
-		try{
-			xml = readXmlFile(deploymentFile);
-		}catch (Exception ex) {
-			AssetPlugIn.displayLog(Messages.DeploymentFromXml_XmlFileError + ex.getMessage(), ex);
-			return null;
-		}
-		
-		AssetDeployment deployment = new AssetDeployment();
-
 		try {
-			Asset asset = findAsset(xml.getAssetKey(), xml.getAssetTypeKey(), session);
-			AssetStationLocation location = findStationLocation(xml.getStationId(), xml.getLocationId(), session);
-		
-			deployment.setAsset(asset);
-			deployment.setStationLocation(location);
-		}catch (Exception ex) {
-			AssetPlugIn.displayLog(ex.getMessage(), ex);
-			return null;
-		}
-		
-		Date sDate = new Date(xml.getStartDateTime().toGregorianCalendar().getTime().getTime());
-		Date eDate = null;
-		if (xml.getEndDateTime() != null) {
-			eDate = new Date(xml.getEndDateTime().toGregorianCalendar().getTime().getTime());
-		}
-		
-		deployment.setAssetWaypoints(new ArrayList<>());
-		deployment.setAttributeValues(new ArrayList<>());
-		deployment.setDisruptions(new ArrayList<>());
-		deployment.setEndDate(eDate);
-		deployment.setStartDate(sDate);
-		
-		
-		//ensure deployment does not overlap an existing deployment for this asset
-		List<AssetDeployment> deployments = QueryFactory.buildQuery(session, 
-				AssetDeployment.class,
-				new Object[] {"asset", deployment.getAsset()}).list(); //$NON-NLS-1$
-		
-		
-		LocalDateTime start = sDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-		LocalDateTime now = LocalDateTime.now();
-		LocalDateTime end = (eDate == null ? now : eDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
-		
-		boolean overlaps = false;
-		for (AssetDeployment other : deployments) {
-		
-			LocalDateTime startTest = other.getStartDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-			LocalDateTime endTest = now;
-			if (other.getEndDate() != null) endTest = other.getEndDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-			
-			if (!(endTest.isBefore(start) || startTest.isAfter(end))) { 
-				overlaps = true;
-				break;
+			Path deploymentFile = workingDir.resolve(DeploymentToXml.XML_FILE);
+			if (!Files.exists(deploymentFile)) {
+				AssetPlugIn.displayLog(Messages.DeploymentFromXml_InvalidFile,  null);
+				return null;
 			}
-		}
-		if (overlaps) {
-			AssetPlugIn.displayLog(Messages.DeploymentFromXml_OverlappingTimeFrame, null);
-			return null;
-		}
-		
-		List<String> warnings = new ArrayList<>();
-		
-		sub.subTask(Messages.DeploymentFromXml_CovertingAttributesSubTask);
-		sub.split(1);
-		for (XmlAssetDeploymentAttribute xmla : xml.getAttributes()) {
-			try {
-				AssetAttribute attribute = findAttribute(xmla.getAttributeKey(), xmla.getAttributeTypeKey(), session);
-				
-				AssetDeploymentAttributeValue value = new AssetDeploymentAttributeValue();
-				value.setAttribute(attribute);
-				value.setNumberValue(xmla.getDoubleValue1());
-				value.setNumberValue2(xmla.getDoubleValue2());
-				if (attribute.getType() == AttributeType.LIST) {
-					value.setAttributeListItem(findAttributeListItem(attribute, xmla.getStringValue()));
-				}else {
-					value.setStringValue(xmla.getStringValue());
-				}
-				value.setAssetDeployment(deployment);
-				deployment.getAttributeValues().add(value);
-			}catch (Exception ex) {
-				warnings.add(Messages.DeploymentFromXml_NotImportedError + ex.getMessage());
-			}
-		}
-		
-		sub.subTask(Messages.DeploymentFromXml_ConvertDisruptionsSubTask);
-		sub.split(1);
-		for (XmlAssetDeploymentDisruption xmld : xml.getDisruptions()) {
-			AssetDeploymentDisruption disruption = new AssetDeploymentDisruption();
-			disruption.setComment(xmld.getComment());
-			disruption.setStartDate( new Date(xmld.getStartDateTime().toGregorianCalendar().getTime().getTime()));
-			disruption.setEndDate( new Date(xmld.getEndDateTime().toGregorianCalendar().getTime().getTime()));
-			disruption.setAssetDeployment(deployment);
-			deployment.getDisruptions().add(disruption);
-		}
-		
-		sub.subTask(Messages.DeploymentFromXml_ConvertDeploymentSubTask);
-		sub.setWorkRemaining(xml.getWaypoints().size() + 1);
-		
-		for (XmlWaypoint xmlwp : xml.getWaypoints()) {
+			sub.subTask(Messages.DeploymentFromXml_ConvertSubtask);
 			sub.split(1);
 			
-			AssetWaypoint aw = new AssetWaypoint();
-			
-			aw.setAssetDeployment(deployment);
-			aw.setAttachments(new HashSet<>());
-			aw.setIncidentLength(xmlwp.getLength());
-			
-			try {
-				aw.setState(AssetWaypoint.State.valueOf(xmlwp.getState()));
+			XmlAssetDeployment xml = null;
+			try{
+				xml = readXmlFile(deploymentFile);
 			}catch (Exception ex) {
-				aw.setState(AssetWaypoint.State.DIRTY);
+				AssetPlugIn.displayLog(Messages.DeploymentFromXml_XmlFileError + ex.getMessage(), ex);
+				return null;
 			}
 			
-
+			AssetDeployment deployment = new AssetDeployment();
+	
+			try {
+				Asset asset = findAsset(xml.getAssetKey(), xml.getAssetTypeKey(), session);
+				AssetStationLocation location = findStationLocation(xml.getStationId(), xml.getLocationId(), session);
 			
-			Waypoint wp = new Waypoint();
-			wp.setComment(xmlwp.getComment());
-			wp.setRawX(xmlwp.getX());
-			wp.setRawY(xmlwp.getY());
-			wp.setId(xmlwp.getId());
-			wp.setConservationArea(ca);
-			wp.setDateTime(new Date(xmlwp.getDateTime().toGregorianCalendar().getTime().getTime()));
-			wp.setObservationGroups(new ArrayList<>());
-			wp.setSourceId(AssetWaypointSource.KEY);
-			wp.setAttachments(new ArrayList<>());
+				deployment.setAsset(asset);
+				deployment.setStationLocation(location);
+			}catch (Exception ex) {
+				AssetPlugIn.displayLog(ex.getMessage(), ex);
+				return null;
+			}
 			
-			deployment.getAssetWaypoints().add(aw);
+			Date sDate = new Date(xml.getStartDateTime().toGregorianCalendar().getTime().getTime());
+			Date eDate = null;
+			if (xml.getEndDateTime() != null) {
+				eDate = new Date(xml.getEndDateTime().toGregorianCalendar().getTime().getTime());
+			}
 			
-			for (String filename : xmlwp.getAttachments()) {
-				WaypointAttachment attachment = new WaypointAttachment();
-				Path fname = workingDir.resolve(DeploymentToXml.ATTCHMENT_DIR).resolve(filename);
-				if (!Files.exists(fname)) {
-					warnings.add(MessageFormat.format(Messages.DeploymentFromXml_WaypointAttachmentNotFound, fname));
-					continue;
+			deployment.setAssetWaypoints(new ArrayList<>());
+			deployment.setAttributeValues(new ArrayList<>());
+			deployment.setDisruptions(new ArrayList<>());
+			deployment.setEndDate(eDate);
+			deployment.setStartDate(sDate);
+			
+			
+			//ensure deployment does not overlap an existing deployment for this asset
+			List<AssetDeployment> deployments = QueryFactory.buildQuery(session, 
+					AssetDeployment.class,
+					new Object[] {"asset", deployment.getAsset()}).list(); //$NON-NLS-1$
+			
+			
+			LocalDateTime start = sDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+			LocalDateTime now = LocalDateTime.now();
+			LocalDateTime end = (eDate == null ? now : eDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
+			
+			boolean overlaps = false;
+			for (AssetDeployment other : deployments) {
+			
+				LocalDateTime startTest = other.getStartDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+				LocalDateTime endTest = now;
+				if (other.getEndDate() != null) endTest = other.getEndDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+				
+				if (!(endTest.isBefore(start) || startTest.isAfter(end))) { 
+					overlaps = true;
+					break;
 				}
-				attachment.setWaypoint(wp);
-				attachment.setFilename(filename);
-				attachment.setCopyFromLocation(fname);
-				wp.getAttachments().add(attachment);
-				
-				AssetWaypointAttachment awa = new AssetWaypointAttachment();
-				awa.setAssetWaypoint(aw);
-				awa.setWaypointAttachment(attachment);
-				
-				aw.getAttachments().add(awa);
+			}
+			if (overlaps) {
+				AssetPlugIn.displayLog(Messages.DeploymentFromXml_OverlappingTimeFrame, null);
+				return null;
 			}
 			
+			List<String> warnings = new ArrayList<>();
 			
-			for (XmlWaypointObservationGroup xmlg : xmlwp.getObservations()) {
-				WaypointObservationGroup group = new WaypointObservationGroup();
-				group.setObservations(new ArrayList<>());
-				group.setWaypoint(wp);
-				
-				for (XmlWaypointObservation xmlo : xmlg.getObservations()) {
+			sub.subTask(Messages.DeploymentFromXml_CovertingAttributesSubTask);
+			sub.split(1);
+			for (XmlAssetDeploymentAttribute xmla : xml.getAttributes()) {
+				try {
+					AssetAttribute attribute = findAttribute(xmla.getAttributeKey(), xmla.getAttributeTypeKey(), session);
 					
-					WaypointObservation wo = new WaypointObservation();
-					wo.setAttachments(new ArrayList<>());
-					wo.setAttributes(new ArrayList<>());
-					try {
-						wo.setCategory(findDmCategory(xmlo.getCategoryKey(), session));
-					}catch (Exception ex) {
-						warnings.add(Messages.DeploymentFromXml_ObservationNotImported + ex.getMessage());
+					AssetDeploymentAttributeValue value = new AssetDeploymentAttributeValue();
+					value.setAttribute(attribute);
+					value.setNumberValue(xmla.getDoubleValue1());
+					value.setNumberValue2(xmla.getDoubleValue2());
+					if (attribute.getType() == AttributeType.LIST) {
+						value.setAttributeListItem(findAttributeListItem(attribute, xmla.getStringValue()));
+					}else {
+						value.setStringValue(xmla.getStringValue());
+					}
+					value.setAssetDeployment(deployment);
+					deployment.getAttributeValues().add(value);
+				}catch (Exception ex) {
+					warnings.add(Messages.DeploymentFromXml_NotImportedError + ex.getMessage());
+				}
+			}
+			
+			sub.subTask(Messages.DeploymentFromXml_ConvertDisruptionsSubTask);
+			sub.split(1);
+			for (XmlAssetDeploymentDisruption xmld : xml.getDisruptions()) {
+				AssetDeploymentDisruption disruption = new AssetDeploymentDisruption();
+				disruption.setComment(xmld.getComment());
+				disruption.setStartDate( new Date(xmld.getStartDateTime().toGregorianCalendar().getTime().getTime()));
+				disruption.setEndDate( new Date(xmld.getEndDateTime().toGregorianCalendar().getTime().getTime()));
+				disruption.setAssetDeployment(deployment);
+				deployment.getDisruptions().add(disruption);
+			}
+			
+			sub.subTask(Messages.DeploymentFromXml_ConvertDeploymentSubTask);
+			sub.setWorkRemaining(xml.getWaypoints().size() + 1);
+			
+			for (XmlWaypoint xmlwp : xml.getWaypoints()) {
+				sub.split(1);
+				
+				AssetWaypoint aw = new AssetWaypoint();
+				
+				aw.setAssetDeployment(deployment);
+				aw.setAttachments(new HashSet<>());
+				aw.setIncidentLength(xmlwp.getLength());
+				
+				try {
+					aw.setState(AssetWaypoint.State.valueOf(xmlwp.getState()));
+				}catch (Exception ex) {
+					aw.setState(AssetWaypoint.State.DIRTY);
+				}
+				
+	
+				
+				Waypoint wp = new Waypoint();
+				wp.setComment(xmlwp.getComment());
+				wp.setRawX(xmlwp.getX());
+				wp.setRawY(xmlwp.getY());
+				wp.setId(xmlwp.getId());
+				wp.setConservationArea(ca);
+				wp.setDateTime(new Date(xmlwp.getDateTime().toGregorianCalendar().getTime().getTime()));
+				wp.setObservationGroups(new ArrayList<>());
+				wp.setSourceId(AssetWaypointSource.KEY);
+				wp.setAttachments(new ArrayList<>());
+				
+				deployment.getAssetWaypoints().add(aw);
+				
+				for (String filename : xmlwp.getAttachments()) {
+					WaypointAttachment attachment = new WaypointAttachment();
+					Path fname = workingDir.resolve(DeploymentToXml.ATTCHMENT_DIR).resolve(filename);
+					if (!Files.exists(fname)) {
+						warnings.add(MessageFormat.format(Messages.DeploymentFromXml_WaypointAttachmentNotFound, fname));
 						continue;
 					}
+					attachment.setWaypoint(wp);
+					attachment.setFilename(filename);
+					attachment.setCopyFromLocation(fname);
+					wp.getAttachments().add(attachment);
 					
-					wo.setObservationGroup(group);
-					try {
-						if (xmlo.getObserverId() != null) 
-							wo.setObserver(findEmployee(xmlo.getObserverId(), session));
-					}catch (Exception ex) {
-						warnings.add(Messages.DeploymentFromXml_ObserverNotSet + ex.getMessage());
-					}
-					group.getObservations().add(wo);
+					AssetWaypointAttachment awa = new AssetWaypointAttachment();
+					awa.setAssetWaypoint(aw);
+					awa.setWaypointAttachment(attachment);
 					
-					for (String filename : xmlo.getAttachments()) {
-						ObservationAttachment attachment = new ObservationAttachment();
+					aw.getAttachments().add(awa);
+				}
+				
+				
+				for (XmlWaypointObservationGroup xmlg : xmlwp.getObservations()) {
+					WaypointObservationGroup group = new WaypointObservationGroup();
+					group.setObservations(new ArrayList<>());
+					group.setWaypoint(wp);
+					
+					for (XmlWaypointObservation xmlo : xmlg.getObservations()) {
 						
-						Path fname = workingDir.resolve(DeploymentToXml.ATTCHMENT_DIR).resolve(filename);
-						if (!Files.exists(fname)) {
-							warnings.add(MessageFormat.format(Messages.DeploymentFromXml_AttachmentNotImported, fname));
-							continue;
-						}
-						attachment.setObservation(wo);
-						attachment.setFilename(filename);
-						attachment.setCopyFromLocation(fname);
-						wo.getAttachments().add(attachment);
-					}
-					
-					for (XmlWaypointObservationAttribute xmla : xmlo.getAttributes()) {
-						WaypointObservationAttribute woa = new WaypointObservationAttribute();
+						WaypointObservation wo = new WaypointObservation();
+						wo.setAttachments(new ArrayList<>());
+						wo.setAttributes(new ArrayList<>());
 						try {
-							woa.setAttribute(findAttribute(wo.getCategory(), xmla.getAttributeKey(), xmla.getAttributeType()));
-							switch(woa.getAttribute().getType()) {
-							case BOOLEAN:
-							case NUMERIC:
-								 woa.setNumberValue(xmla.getDoubleValue());
-								 break;
-							case DATE:
-							case TEXT:
-								woa.setStringValue(xmla.getStringValue());
-								break;
-							case LIST:
-								woa.setAttributeListItem(findDmAttributeListItem(woa.getAttribute(), xmla.getStringValue()));
-								break;
-							case TREE:
-								woa.setAttributeTreeNode(findDmAttributeTreeNode(woa.getAttribute(), xmla.getStringValue(), session));
-								break;
-							
-							}
+							wo.setCategory(findDmCategory(xmlo.getCategoryKey(), session));
 						}catch (Exception ex) {
-							warnings.add(Messages.DeploymentFromXml_AttributeNotImported + ex.getMessage());
+							warnings.add(Messages.DeploymentFromXml_ObservationNotImported + ex.getMessage());
 							continue;
 						}
-						wo.getAttributes().add(woa);
-						woa.setObservation(wo);
+						
+						wo.setObservationGroup(group);
+						try {
+							if (xmlo.getObserverId() != null) 
+								wo.setObserver(findEmployee(xmlo.getObserverId(), session));
+						}catch (Exception ex) {
+							warnings.add(Messages.DeploymentFromXml_ObserverNotSet + ex.getMessage());
+						}
+						group.getObservations().add(wo);
+						
+						for (String filename : xmlo.getAttachments()) {
+							ObservationAttachment attachment = new ObservationAttachment();
+							
+							Path fname = workingDir.resolve(DeploymentToXml.ATTCHMENT_DIR).resolve(filename);
+							if (!Files.exists(fname)) {
+								warnings.add(MessageFormat.format(Messages.DeploymentFromXml_AttachmentNotImported, fname));
+								continue;
+							}
+							attachment.setObservation(wo);
+							attachment.setFilename(filename);
+							attachment.setCopyFromLocation(fname);
+							wo.getAttachments().add(attachment);
+						}
+						
+						for (XmlWaypointObservationAttribute xmla : xmlo.getAttributes()) {
+							WaypointObservationAttribute woa = new WaypointObservationAttribute();
+							try {
+								woa.setAttribute(findAttribute(wo.getCategory(), xmla.getAttributeKey(), xmla.getAttributeType()));
+								switch(woa.getAttribute().getType()) {
+								case BOOLEAN:
+								case NUMERIC:
+									 woa.setNumberValue(xmla.getDoubleValue());
+									 break;
+								case DATE:
+								case TEXT:
+									woa.setStringValue(xmla.getStringValue());
+									break;
+								case LIST:
+									woa.setAttributeListItem(findDmAttributeListItem(woa.getAttribute(), xmla.getStringValue()));
+									break;
+								case TREE:
+									woa.setAttributeTreeNode(findDmAttributeTreeNode(woa.getAttribute(), xmla.getStringValue(), session));
+									break;
+								
+								}
+							}catch (Exception ex) {
+								warnings.add(Messages.DeploymentFromXml_AttributeNotImported + ex.getMessage());
+								continue;
+							}
+							wo.getAttributes().add(woa);
+							woa.setObservation(wo);
+						}
+					}
+					
+					wp.getObservationGroups().add(group);
+	
+				}
+				
+				//merge with an existing waypoint
+				//find another asset waypoint at the same station with 
+				//the same time and link this asset to that waypoint; adding observations
+				//if necessary
+				Date wpdt = new Date(xmlwp.getDateTime().toGregorianCalendar().getTime().getTime());
+				List<Waypoint> test = QueryFactory.buildQuery(session, Waypoint.class, 
+						new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+						new Object[] {"sourceId", AssetWaypointSource.KEY}, //$NON-NLS-1$
+						new Object[] {"dateTime", wpdt}).list(); //$NON-NLS-1$
+				Waypoint tomerge = null;
+				for(Waypoint w : test) {
+					List<AssetWaypoint> aws = QueryFactory.buildQuery(session, AssetWaypoint.class, new Object[] {"waypoint",w}).list();  //$NON-NLS-1$
+					for (AssetWaypoint awtest : aws){
+						 if (awtest.getAssetDeployment().getStationLocation().getStation().equals(deployment.getStationLocation().getStation())) {
+							 tomerge = w;
+							 break;
+						 }
+						
 					}
 				}
-				
-				wp.getObservationGroups().add(group);
-
-			}
-			
-			//merge with an existing waypoint
-			//find another asset waypoint at the same station with 
-			//the same time and link this asset to that waypoint; adding observations
-			//if necessary
-			Date wpdt = new Date(xmlwp.getDateTime().toGregorianCalendar().getTime().getTime());
-			List<Waypoint> test = QueryFactory.buildQuery(session, Waypoint.class, 
-					new Object[] {"conservationArea", ca}, //$NON-NLS-1$
-					new Object[] {"sourceId", AssetWaypointSource.KEY}, //$NON-NLS-1$
-					new Object[] {"dateTime", wpdt}).list(); //$NON-NLS-1$
-			Waypoint tomerge = null;
-			for(Waypoint w : test) {
-				List<AssetWaypoint> aws = QueryFactory.buildQuery(session, AssetWaypoint.class, new Object[] {"waypoint",w}).list();  //$NON-NLS-1$
-				for (AssetWaypoint awtest : aws){
-					 if (awtest.getAssetDeployment().getStationLocation().getStation().equals(deployment.getStationLocation().getStation())) {
-						 tomerge = w;
-						 break;
-					 }
+				if (tomerge != null) {
+					mergeWaypoints(tomerge, wp);
+					aw.setWaypoint(tomerge);
 					
+					for (WaypointAttachment awa : wp.getAttachments()) {
+						awa.setWaypoint(tomerge);
+						tomerge.getAttachments().add(awa);
+					}
+				}else {
+					aw.setWaypoint(wp);
 				}
 			}
-			if (tomerge != null) {
-				mergeWaypoints(tomerge, wp);
-				aw.setWaypoint(tomerge);
+			
+			
+			sub.subTask(Messages.DeploymentFromXml_SavingSubTask);
+			sub.setWorkRemaining(1);
+			
+			if (!warnings.isEmpty()) {
+				final int[] warnr = new int[1];
 				
-				for (WaypointAttachment awa : wp.getAttachments()) {
-					awa.setWaypoint(tomerge);
-					tomerge.getAttachments().add(awa);
-				}
-			}else {
-				aw.setWaypoint(wp);
+				Display.getDefault().syncExec(()->{
+					WarningDialog warn = new WarningDialog(shell, 
+							Messages.DeploymentFromXml_WarnTitle, 
+							Messages.DeploymentFromXml_WarnMessage, 
+							warnings,
+							new String[] {IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 0);
+					warnr[0] = warn.open();
+				});
+				
+				if (warnr[0] != 0) return null;
 			}
-		}
-		
-		
-		sub.subTask(Messages.DeploymentFromXml_SavingSubTask);
-		sub.setWorkRemaining(1);
-		
-		if (!warnings.isEmpty()) {
-			final int[] warnr = new int[1];
 			
-			Display.getDefault().syncExec(()->{
-				WarningDialog warn = new WarningDialog(shell, 
-						Messages.DeploymentFromXml_WarnTitle, 
-						Messages.DeploymentFromXml_WarnMessage, 
-						warnings,
-						new String[] {IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 0);
-				warnr[0] = warn.open();
-			});
-			
-			if (warnr[0] != 0) return null;
-		}
-		
-		//save 
-		session.beginTransaction();
-		try {
-			for (AssetWaypoint aw : deployment.getAssetWaypoints()) {
-				session.saveOrUpdate(aw.getWaypoint());
-			}
-			session.flush();
-			session.save(deployment);
-			session.getTransaction().commit();
-		}catch (Exception ex) {
+			//save 
+			session.beginTransaction();
 			try {
-				if (session.getTransaction().isActive()) session.getTransaction().rollback();
-			}catch (Exception e) {
-				AssetPlugIn.log(e.getMessage(), e);
+				for (AssetWaypoint aw : deployment.getAssetWaypoints()) {
+					session.saveOrUpdate(aw.getWaypoint());
+				}
+				session.flush();
+				session.save(deployment);
+				session.getTransaction().commit();
+			}catch (Exception ex) {
+				try {
+					if (session.getTransaction().isActive()) session.getTransaction().rollback();
+				}catch (Exception e) {
+					AssetPlugIn.log(e.getMessage(), e);
+				}
+				AssetPlugIn.displayLog(Messages.DeploymentFromXml_SaveError + ex.getMessage(), ex);
+				return null;
 			}
-			AssetPlugIn.displayLog(Messages.DeploymentFromXml_SaveError + ex.getMessage(), ex);
-			return null;
+			
+			broker.post(AssetEvents.ASSETDEPLOYMENT_NEW, Collections.singleton(deployment));
+			
+			return deployment;
+		}finally {
+			try {
+				SmartUtils.deleteDirectory(workingDir);
+			}catch (Exception ex) {
+				AssetPlugIn.log(ex.getMessage(), ex);
+			}
 		}
-		
-		broker.post(AssetEvents.ASSETDEPLOYMENT_NEW, Collections.singleton(deployment));
-		
-		return deployment;
 	}
 	
 
