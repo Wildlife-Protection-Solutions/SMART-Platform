@@ -34,7 +34,10 @@ import org.eclipse.birt.report.designer.internal.ui.views.attributes.section.Sep
 import org.eclipse.birt.report.designer.ui.views.attributes.AttributesUtil;
 import org.eclipse.birt.report.model.api.ExtendedItemHandle;
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
+import org.eclipse.birt.report.model.api.SlotHandle;
 import org.eclipse.birt.report.model.api.activity.SemanticException;
+import org.eclipse.birt.report.model.elements.ExtendedItem;
+import org.eclipse.birt.report.model.elements.ReportDesign;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -54,6 +57,8 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
+import org.eclipse.swt.events.MenuAdapter;
+import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
@@ -66,6 +71,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
@@ -89,6 +96,7 @@ import org.wcs.smart.ui.BasemapLabelProvider;
 import org.wcs.smart.ui.SelectBoundsMapDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.UuidUtils;
+
 /**
  * A birt property tab for displaying map options
  * to user.
@@ -99,6 +107,8 @@ import org.wcs.smart.util.UuidUtils;
 public class SmartLayersPage extends AttributesUtil.PageWrapper {
 
 	private static final UUID DEFAULT_BASEMAP = UuidUtils.stringToUuid("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");  //$NON-NLS-1$
+	
+	private static ReferencedEnvelope boundsCopySettings = null; 
 	
 	private static final String ERROR_DIALOG_TITLE = Messages.SmartLayersPage_ErrorDialog_Title;
 	public static final String PAGE_KEY = "MapLayers"; //$NON-NLS-1$
@@ -395,7 +405,7 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 	 */
 	private void createBasemapBounds(Composite parent){
 		Composite bm = toolkit.createComposite(parent);
-		bm.setLayout(new GridLayout(6, false));
+		bm.setLayout(new GridLayout(7, false));
 		bm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		toolkit.createLabel(bm, Messages.SmartLayersPage_BasemapLabel);
 		
@@ -438,6 +448,51 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		txtBounds.setEditable(false);
 		txtBounds.setLayoutData(gd);
 
+		Menu mnu = new Menu(txtBounds);
+		MenuItem miCopy = new MenuItem(mnu, SWT.PUSH);
+		miCopy.setText(Messages.SmartLayersPage_CopyBounds);
+		miCopy.addListener(SWT.Selection, e->{
+			boundsCopySettings = mapItem.getMapBounds();
+		});
+
+		MenuItem miPaste = new MenuItem(mnu, SWT.PUSH);
+		miPaste.setText(Messages.SmartLayersPage_PasteBounds);
+		miPaste.addListener(SWT.Selection, e->{
+			if (boundsCopySettings == null) return;
+			
+			txtBounds.setData(new ReferencedEnvelope(boundsCopySettings));
+			updateModel(SmartMapItem.SMART_BOUNDS_GROUP);
+		});
+		
+		
+		new MenuItem(mnu, SWT.SEPARATOR);
+		
+		MenuItem miSet = new MenuItem(mnu, SWT.PUSH);
+		miSet.setText( Messages.SmartLayersPage_SetBoundsLink1);
+		miSet.addListener(SWT.Selection, e->setBounds());
+		
+		MenuItem miClear = new MenuItem(mnu, SWT.PUSH);
+		miClear.setText( Messages.SmartLayersPage_ClearBoundsLink);
+		miClear.addListener(SWT.Selection, e->clearBounds());
+		
+		new MenuItem(mnu, SWT.SEPARATOR);
+
+		MenuItem miApplyAll = new MenuItem(mnu, SWT.PUSH);
+		miApplyAll.setText( Messages.SmartLayersPage_ApplyBoundsToAll );
+		miApplyAll.addListener(SWT.Selection, e->applyAll());
+		
+		mnu.addMenuListener(new MenuAdapter() {
+			@Override
+			public void menuShown(MenuEvent e) {
+				miPaste.setEnabled( boundsCopySettings != null );
+				
+			}
+			
+		});
+		
+		
+		txtBounds.setMenu(mnu);
+
 		Hyperlink btnSetBounds = toolkit.createHyperlink(bm, Messages.SmartLayersPage_SetBoundsLink1, SWT.NONE);
 		btnSetBounds.setToolTipText(Messages.SmartLayersPage_boundstooltip);
 		gd = new GridData(SWT.FILL, SWT.BOTTOM, false, false);
@@ -445,16 +500,7 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		btnSetBounds.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
-				SelectBoundsMapDialog md = new SelectBoundsMapDialog(Display.getDefault().getActiveShell(), 
-						getSelectedBasemapUuid(), mapItem.getMapBounds());
-				if (md.open() != Window.OK){
-					return;
-				}
-				
-				ReferencedEnvelope re = md.getBounds();
-				txtBounds.setData(re);
-				updateModel(SmartMapItem.SMART_BOUNDS_GROUP);
-				
+				setBounds();
 			}
 		});
 		
@@ -466,12 +512,66 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		btnClearBounds.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
-				txtBounds.setData(null);
-				updateModel(SmartMapItem.SMART_BOUNDS_GROUP);
+				clearBounds();
 			}
 		});
+		
+		
+		Hyperlink btnApplyAllMaps = toolkit.createHyperlink(bm, Messages.SmartLayersPage_ApplyBoundsToAll, SWT.NONE);
+		btnApplyAllMaps.setToolTipText(Messages.SmartLayersPage_ApplyBoundsToAllTooltip);
+		gd = new GridData(SWT.FILL, SWT.BOTTOM, false, false);
+		btnApplyAllMaps.setLayoutData(gd);
+		btnApplyAllMaps.addHyperlinkListener(new HyperlinkAdapter() {
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				applyAll();		
+			}
+		});
+		
 	}
 	
+	private void setBounds() {
+		//ticket #1420 open dialog to same radio as item handle
+		double x = itemHandle.getWidth().getMeasure();
+		double y = itemHandle.getHeight().getMeasure();
+		
+		SelectBoundsMapDialog md = new SelectBoundsMapDialog(Display.getDefault().getActiveShell(), 
+				getSelectedBasemapUuid(), mapItem.getMapBounds(), x/y);
+		
+		
+		if (md.open() != Window.OK){
+			return;
+		}
+		
+		ReferencedEnvelope re = md.getBounds();
+		txtBounds.setData(re);
+		updateModel(SmartMapItem.SMART_BOUNDS_GROUP);
+	}
+	
+	
+	private void clearBounds() {
+		txtBounds.setData(null);
+		updateModel(SmartMapItem.SMART_BOUNDS_GROUP);
+	}
+	
+	private void applyAll() {
+		SlotHandle h  = itemHandle.getRoot().getComponents();
+		
+		for (Object o : ((ReportDesign)h.getElement()).getAllElements()) {
+			if (o instanceof ExtendedItem && ((ExtendedItem)o).getExtendedElement() instanceof SmartMapItem) {
+				
+				SmartMapItem smartItem = (SmartMapItem) ((ExtendedItem)o).getExtendedElement();
+				if (smartItem == SmartLayersPage.this.mapItem) continue;
+				
+				try {
+					smartItem.setMapBounds(SmartLayersPage.this.mapItem.getMapBounds());
+				}catch (Exception ex) {
+					SmartMapItemPlugIn.displayLog(ex.getMessage(), ex);
+				}
+				
+			}
+		}
+	}
 	Job basemapJob = new Job("loading basemapes"){ //$NON-NLS-1$
 
 		@Override

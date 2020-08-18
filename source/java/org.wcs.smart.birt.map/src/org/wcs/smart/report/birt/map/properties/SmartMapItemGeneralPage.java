@@ -33,6 +33,7 @@ import org.eclipse.birt.report.designer.internal.ui.views.attributes.section.Sec
 import org.eclipse.birt.report.designer.internal.ui.views.attributes.section.SeperatorSection;
 import org.eclipse.birt.report.designer.internal.ui.views.attributes.section.TextSection;
 import org.eclipse.birt.report.designer.ui.views.attributes.AttributesUtil;
+import org.eclipse.birt.report.model.api.ExtendedItemHandle;
 import org.eclipse.birt.report.model.api.ReportItemHandle;
 import org.eclipse.birt.report.model.api.elements.ReportDesignConstants;
 import org.eclipse.swt.SWT;
@@ -41,6 +42,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.wcs.smart.report.birt.map.SmartMapItemPlugIn;
+import org.wcs.smart.report.birt.map.internal.Messages;
 import org.wcs.smart.report.birt.map.item.SmartMapItem;
 
 /**
@@ -56,7 +59,10 @@ public class SmartMapItemGeneralPage extends AttributesUtil.PageWrapper {
 
 	private List<Section> sections;
 
+	private ExtendedItemHandle itemHandle;
+	
 	public void buildUI(Composite parent) {
+		
 		if (toolkit == null) {
 			toolkit = new FormToolkit(Display.getCurrent());
 			toolkit.setBorderStyle(SWT.NULL);
@@ -133,19 +139,48 @@ public class SmartMapItemGeneralPage extends AttributesUtil.PageWrapper {
 			dpiSection.setWidth(200);
 			sections.add(dpiSection);
 			
+
+			ApplyAllSection allSection = new ApplyAllSection(contentpane, true, toolkit, itemHandle);
+			sections.add(allSection);
+			
+			SeperatorSection seperator2 = new SeperatorSection(contentpane, SWT.HORIZONTAL);
+			sections.add(seperator2);
+			
 			for (Section sec : sections) {
 				sec.createSection();
 				sec.layout();
 			}
 			
+			
 			contentpane.layout(true);
 			contentpane.redraw();
+			
 		}
 	}
+	
+	
 
 	@Override
 	public void setInput(Object input) {
 		this.input = input;
+		
+		Object element = input;
+		if (input instanceof List && ((List<?>) input).size() > 0) {
+			element = ((List<?>) input).get(0);
+		}
+			
+		if ( element instanceof ExtendedItemHandle ){
+			try{
+				itemHandle = (ExtendedItemHandle) element;
+			}catch (Exception ex){
+				SmartMapItemPlugIn.displayLog(Messages.SmartLayersPage_Error_settingMap + ex.getMessage(), ex);
+				return;
+			}
+			
+		}else{
+			return;
+		}
+	
 	}
 
 	@Override

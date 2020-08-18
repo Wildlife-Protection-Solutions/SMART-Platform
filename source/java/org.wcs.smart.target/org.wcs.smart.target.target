@@ -140,6 +140,10 @@
 		<unit id="org.eclipse.birt.rcp.feature.group" version="4.9.0.v201905231911"/>
 		<unit id="org.eclipse.birt.feature.group" version="4.9.0.v201905231911"/>
 	</location>
+	<location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="slicer" includeSource="true" type="InstallableUnit">
+		<unit id="org.eclipse.e4.tools.spies.feature.feature.group" version="0.18.0.v20200203-1625"/>
+		<repository location="http://download.eclipse.org/e4/snapshots/org.eclipse.e4.tools/latest/"/>
+	</location>
 </locations>
 	
 </target>

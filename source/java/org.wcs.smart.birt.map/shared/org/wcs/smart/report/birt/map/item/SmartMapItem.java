@@ -29,11 +29,13 @@ import org.eclipse.birt.report.model.api.ExtendedItemHandle;
 import org.eclipse.birt.report.model.api.PropertyHandle;
 import org.eclipse.birt.report.model.api.activity.SemanticException;
 import org.eclipse.birt.report.model.api.extension.ExtendedElementException;
+import org.eclipse.birt.report.model.api.extension.IReportItem;
 import org.eclipse.birt.report.model.api.extension.ReportItem;
 import org.eclipse.birt.report.model.api.metadata.IChoice;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.wcs.smart.report.birt.map.SmartMapItemPlugIn;
 
 /**
  * A Smart map report item.
@@ -98,6 +100,10 @@ public class SmartMapItem extends ReportItem {
 		this.handle = item;		
 	}
 
+	@Override
+	public void setHandle( ExtendedItemHandle handle ){
+		this.handle = handle;
+	}
 
 	/**
 	 * @return the basemap layer name
@@ -261,5 +267,36 @@ public class SmartMapItem extends ReportItem {
 		handle.setProperty(SMART_DPI, String.valueOf(dpi));
 	}
 	
+	@Override
+	public IReportItem copy( )
+	{
+
+		SmartMapItem item =  (SmartMapItem) super.copy( );
+
+		ExtendedItemHandle newhandle = item.handle.getElementFactory().newExtendedItem(null, EXTENSION_NAME);
+		item.setHandle(newhandle);
+
+		try {
+			item.setMapBounds(new ReferencedEnvelope(getMapBounds()));
+		}catch (Exception ex) {
+			try {
+				item.setMapBounds(null);
+			} catch (SemanticException e) {
+				SmartMapItemPlugIn.log(e.getMessage(), e);
+			}
+		}
+		
+		try {
+			item.setBasemapName(getBasemapName());
+		} catch (SemanticException ex) {
+			try {
+				item.setBasemapName(null);
+			} catch (SemanticException e) {
+				SmartMapItemPlugIn.log(e.getMessage(), e);
+			}
+		}
+
+		return item;
+	}
 	
 }

@@ -83,12 +83,13 @@ import org.wcs.smart.util.ReprojectUtils;
  * @author Emily
  *
  */
-public class SelectBoundsMapDialog extends SmartStyledTitleDialog implements MapPart{
+public class SelectBoundsMapDialog extends SmartStyledDialog implements MapPart{
 
 	private MapViewer viewer;
 	private Label lblCoordinates;
 	private UUID basemapUuid = null;
 	private ReferencedEnvelope  bounds = null;
+	private double ratio;
 	
 	private Job refreshJob = new Job(Messages.MapDialog_ResizeJobName){
 		@Override
@@ -98,21 +99,33 @@ public class SelectBoundsMapDialog extends SmartStyledTitleDialog implements Map
 		}
 	};
 	
-	public SelectBoundsMapDialog(Shell parentShell, UUID basemapUuid, ReferencedEnvelope mapBounds) {
+	public SelectBoundsMapDialog(Shell parentShell, UUID basemapUuid, 
+			ReferencedEnvelope mapBounds, double ratio) {
 		super(parentShell);
+		
 		this.basemapUuid = basemapUuid;
 		this.bounds = mapBounds;
+		this.ratio = ratio;
 	}
 
 	@Override
 	protected Point getInitialSize() {
 		Point p = super.getInitialSize();
-		if (p.x < 400){
-			p.x = 400;
+		if (p.x < 600){
+			p.x = 600;
 		}
 		if (p.y < 400){
 			p.y = 400;
 		}
+		
+		p.y = (int)(p.x / ratio);
+		if (p.y  < 500) {
+			int off = 500 - p.y;
+			p.y = p.y + off;
+			p.x = (int)(p.y * ratio);
+		}
+		
+		p.y = p.y + 60;
 		return p;
 	}
 	

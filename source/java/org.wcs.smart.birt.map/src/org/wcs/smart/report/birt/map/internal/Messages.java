@@ -4,16 +4,21 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.report.birt.map.internal.messages"; //$NON-NLS-1$
+	public static String ApplyAllSection_ApplyToAllMaps;
+	public static String ApplyAllSection_ApplyToAllTooltip;
 	public static String DatasetComobInputDialog_Error_NoDataset;
 	
 	public static String SmartLayersPage_AddLayer_DialogMessage;
 	public static String SmartLayersPage_AddLayer_DialogTitle;
+	public static String SmartLayersPage_ApplyBoundsToAll;
+	public static String SmartLayersPage_ApplyBoundsToAllTooltip;
 	public static String SmartLayersPage_addtooltip;
 	public static String SmartLayersPage_BasemapLabel;
 	public static String SmartLayersPage_basemaptooltipe;
 	public static String SmartLayersPage_boundstooltip;
 	public static String SmartLayersPage_ClearBoundsLink;
 	public static String SmartLayersPage_ClearStyleButton;
+	public static String SmartLayersPage_CopyBounds;
 	public static String SmartLayersPage_cleartooltip;
 	public static String SmartLayersPage_DefaultBasemapLabel;
 	public static String SmartLayersPage_DefaultStyleLabel;
@@ -32,6 +37,7 @@ public class Messages extends NLS {
 	public static String SmartLayersPage_MoveDownButton;
 	public static String SmartLayersPage_MoveUpButton;
 	public static String SmartLayersPage_NoBasemapLabel;
+	public static String SmartLayersPage_PasteBounds;
 	public static String SmartLayersPage_removetooltip;
 	public static String SmartLayersPage_resettooltip;
 	public static String SmartLayersPage_ReportDataset_ColumnName;

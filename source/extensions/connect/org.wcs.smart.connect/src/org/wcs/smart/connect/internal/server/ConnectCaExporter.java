@@ -70,7 +70,7 @@ public class ConnectCaExporter extends CaExporter{
 			try{
 				SmartUtils.deleteDirectory(tempDir);
 			}catch(Exception ex){
-				SmartPlugIn.log("Error deleting temporary continaing ca backup." + tempDir.toAbsolutePath().toString(), ex); //$NON-NLS-1$
+				SmartPlugIn.log("Error deleting temporary folder contanining ca backup." + tempDir.toAbsolutePath().toString(), ex); //$NON-NLS-1$
 			}
 		}
 	}

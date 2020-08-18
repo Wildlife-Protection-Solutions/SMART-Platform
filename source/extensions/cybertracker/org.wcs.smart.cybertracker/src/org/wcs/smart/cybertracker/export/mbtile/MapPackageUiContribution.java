@@ -403,7 +403,7 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 			BasemapDefinition def = getBasemapSelection();
 			if (def == null) return;
 			ReferencedEnvelope re = (ReferencedEnvelope) txtBounds.getData(RE_KEY);
-			SelectBoundsMapDialog mapDialog = new SelectBoundsMapDialog(smartComp.getShell(), def.getUuid(), re);
+			SelectBoundsMapDialog mapDialog = new SelectBoundsMapDialog(smartComp.getShell(), def.getUuid(), re, 1.0);
 			if (mapDialog.open() != Window.OK)  return;
 			
 			re = mapDialog.getBounds();

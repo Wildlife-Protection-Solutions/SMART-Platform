@@ -23,8 +23,10 @@ package org.wcs.smart.report.birt.map.item;
 
 import org.eclipse.birt.report.model.api.ExtendedItemHandle;
 import org.eclipse.birt.report.model.api.activity.SemanticException;
+import org.eclipse.birt.report.model.api.extension.IReportItem;
 import org.eclipse.birt.report.model.api.extension.ReportItem;
 import org.wcs.smart.report.birt.map.MapLayerInfo;
+import org.wcs.smart.report.birt.map.SmartMapItemPlugIn;
 
 /**
  * Birt Map Layer Item
@@ -71,6 +73,12 @@ public class LayerItem extends ReportItem {
  
 	public ExtendedItemHandle getHandle(){
 		return handle;
+	}
+	
+	
+	@Override
+	public void setHandle( ExtendedItemHandle handle ){
+		this.handle = handle;
 	}
 	
 	/**
@@ -142,4 +150,22 @@ public class LayerItem extends ReportItem {
 	public void setGeometryColumn(String geomColumn) throws SemanticException{
 		handle.setProperty(SMART_GEOMCOLUMN_PROP, geomColumn);
 	}
+	
+	@Override
+	public IReportItem copy( )
+	{
+		LayerItem clone = (LayerItem) super.copy();
+		ExtendedItemHandle newhandle = clone.handle.getElementFactory().newExtendedItem(null, EXTENSION_NAME);
+		clone.setHandle(newhandle);
+		try {
+			clone.setGeometryColumn(getGeometryColumn());
+			clone.setLayerName(getLayerName());
+			clone.setLayerStyles(getLayerStyle());
+			clone.setLayerType(getLayerType());
+		}catch (SemanticException se) {
+			SmartMapItemPlugIn.log(se.getMessage(), se);
+		}
+		return clone;
+	}
+	
 }
