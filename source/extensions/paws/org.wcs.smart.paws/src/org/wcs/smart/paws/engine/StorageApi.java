@@ -204,7 +204,8 @@ public enum StorageApi {
 					
 					token = temptoken;
 					containerName = email.replaceAll("\\.", "") //$NON-NLS-1$ //$NON-NLS-2$ 
-							.replaceAll("@","") //$NON-NLS-1$ //$NON-NLS-2$ 
+							.replaceAll("@","") //$NON-NLS-1$ //$NON-NLS-2$
+							.replaceAll("_","") //$NON-NLS-1$ //$NON-NLS-2$
 							.toLowerCase();
 					
 				}catch (Exception ex) {
