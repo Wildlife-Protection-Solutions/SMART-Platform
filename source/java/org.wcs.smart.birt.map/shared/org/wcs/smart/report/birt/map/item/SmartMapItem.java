@@ -22,6 +22,8 @@
 package org.wcs.smart.report.birt.map.item;
 
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.eclipse.birt.report.model.api.CommandStack;
 import org.eclipse.birt.report.model.api.DesignElementHandle;
@@ -35,7 +37,6 @@ import org.eclipse.birt.report.model.api.metadata.IChoice;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.wcs.smart.report.birt.map.SmartMapItemPlugIn;
 
 /**
  * A Smart map report item.
@@ -279,20 +280,22 @@ public class SmartMapItem extends ReportItem {
 		try {
 			item.setMapBounds(new ReferencedEnvelope(getMapBounds()));
 		}catch (Exception ex) {
+			Logger.getLogger(SmartMapItem.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
 			try {
 				item.setMapBounds(null);
 			} catch (SemanticException e) {
-				SmartMapItemPlugIn.log(e.getMessage(), e);
+				Logger.getLogger(SmartMapItem.class.getName()).log(Level.WARNING, e.getMessage(), e);
 			}
 		}
 		
 		try {
 			item.setBasemapName(getBasemapName());
 		} catch (SemanticException ex) {
+			Logger.getLogger(SmartMapItem.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
 			try {
 				item.setBasemapName(null);
 			} catch (SemanticException e) {
-				SmartMapItemPlugIn.log(e.getMessage(), e);
+				Logger.getLogger(SmartMapItem.class.getName()).log(Level.WARNING, e.getMessage(), e);
 			}
 		}
 

@@ -21,12 +21,14 @@
  */
 package org.wcs.smart.report.birt.map.item;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.eclipse.birt.report.model.api.ExtendedItemHandle;
 import org.eclipse.birt.report.model.api.activity.SemanticException;
 import org.eclipse.birt.report.model.api.extension.IReportItem;
 import org.eclipse.birt.report.model.api.extension.ReportItem;
 import org.wcs.smart.report.birt.map.MapLayerInfo;
-import org.wcs.smart.report.birt.map.SmartMapItemPlugIn;
 
 /**
  * Birt Map Layer Item
@@ -163,7 +165,8 @@ public class LayerItem extends ReportItem {
 			clone.setLayerStyles(getLayerStyle());
 			clone.setLayerType(getLayerType());
 		}catch (SemanticException se) {
-			SmartMapItemPlugIn.log(se.getMessage(), se);
+			Logger.getLogger(LayerItem.class.getName()).log(Level.WARNING, se.getMessage(), se);
+
 		}
 		return clone;
 	}
