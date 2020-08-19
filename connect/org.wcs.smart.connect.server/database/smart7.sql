@@ -5256,7 +5256,7 @@ INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs
 INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.event','2.0');
 INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.connect.dataqueue','3.0');
 INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.asset','2.0');
-INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.asset.query','1.0');
+INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.asset.query','2.0');
 INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.r','1.0');
 INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.cybertracker.patrol','2.0');
 INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.cybertracker.survey','2.0');

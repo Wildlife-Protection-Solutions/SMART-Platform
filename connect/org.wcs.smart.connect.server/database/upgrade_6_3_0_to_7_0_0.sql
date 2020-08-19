@@ -790,6 +790,7 @@ ALTER TABLE smart.asset_summary_query alter column query_type_key set not null;
 insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.smartcollect', '1.0');
 
 update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.asset';
+update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.asset.query';
 update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.event';
 update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.cybertracker.patrol';
 update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.cybertracker.survey';
@@ -798,6 +799,7 @@ insert into connect.connect_plugin_version (version, plugin_id) values ('1.0', '
 update connect.connect_plugin_version set version = '7.0.0' where plugin_id = 'org.wcs.smart';
 
 update connect.ca_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.asset';
+update connect.ca_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.asset.query';
 update connect.ca_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.event';
 update connect.ca_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.cybertracker.patrol';
 update connect.ca_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.cybertracker.survey';
