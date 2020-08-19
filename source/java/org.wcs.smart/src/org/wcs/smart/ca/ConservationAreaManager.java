@@ -90,9 +90,7 @@ public class ConservationAreaManager {
 	 * @throws Exception if conservation area not deleted
 	 */
 	public void deleteConservationArea(ConservationArea ca, IProgressMonitor monitor, boolean restart) throws Exception{
-		SubMonitor progress = SubMonitor.convert(monitor, Messages.ConservationAreaManager_Progress_DeleteCa, 3); 
-		
-		
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.ConservationAreaManager_Progress_DeleteCa, 5); 
 		
 		try(Session session = HibernateManager.openSession()){
 			Path fStore = null;
@@ -109,6 +107,13 @@ public class ConservationAreaManager {
 			}catch (Exception ex){
 				session.getTransaction().rollback();
 				throw ex;
+			}
+			
+			progress.subTask(Messages.ConservationAreaManager_CompressingTables);
+			try {
+				HibernateManager.compressTables(session, progress.split(2));
+			}catch (Exception ex) {
+				SmartPlugIn.log(ex.getMessage(), ex);
 			}
 			progress.worked(1);
 				

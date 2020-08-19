@@ -147,6 +147,8 @@ public class PawsStartUpJob extends Job {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				Path dir = PawsFileManager.INSTANCE.getRunDirectory(SmartDB.getCurrentConservationArea());
+				if (!Files.exists(dir)) return Status.OK_STATUS;
+				
 				List<Path> toDelete = new ArrayList<>();
 
 				try (Session session = HibernateManager.openSession()){

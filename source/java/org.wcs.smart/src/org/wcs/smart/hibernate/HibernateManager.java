@@ -23,8 +23,11 @@ package org.wcs.smart.hibernate;
 
 
 import java.nio.file.Path;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.text.Collator;
 import java.text.DecimalFormat;
+import java.text.MessageFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -41,12 +44,14 @@ import javax.persistence.metamodel.EntityType;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.geotools.referencing.CRS;
 import org.hibernate.Interceptor;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.hibernate.jdbc.Work;
 import org.hibernate.metadata.ClassMetadata;
 import org.hibernate.metamodel.spi.MetamodelImplementor;
 import org.hibernate.persister.entity.AbstractEntityPersister;
@@ -187,6 +192,35 @@ public class HibernateManager extends SmartHibernateManager{
 				new Object[]{"type", type}).uniqueResult(); //$NON-NLS-1$
 	}
 	
+	/**
+	 * Compresses all smart database tables
+	 * 
+	 * @param session
+	 * @param monitor
+	 */
+	public static void compressTables(Session session, SubMonitor monitor) {
+		session.doWork(new Work() {
+			
+			@Override
+			public void execute(Connection connection) throws SQLException {
+				List<TableInfo> all = getTableInformation();
+				monitor.beginTask("", all.size()); //$NON-NLS-1$
+
+				for (TableInfo ti : getTableInformation()) {
+					try {
+						monitor.split(1);
+						monitor.subTask(MessageFormat.format(Messages.HibernateManager_TaskName, ti.getTableName()));
+						String[] bits = ti.getTableName().split("\\."); //$NON-NLS-1$
+						String q = "CALL SYSCS_UTIL.SYSCS_COMPRESS_TABLE('" + bits[0].toUpperCase() + "', '" + bits[1].toUpperCase() + "', 1)"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+						connection.createStatement().execute(q);
+						connection.commit();
+					}catch (Exception ex) {
+						SmartPlugIn.log(ex.getMessage(),ex);
+					}
+				}
+			}
+		});
+	}
 	/**
 	 * For each hibernate mapping which maps 1-1 to a database
 	 * table this function returns the information about that

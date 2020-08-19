@@ -110,7 +110,7 @@ public class UpgradeEngine {
 	 * @throws Exception
 	 */
 	public void upgradeSystem(IProgressMonitor monitor, Map<String, String> currentVersions) throws Exception {
-		SubMonitor progress = SubMonitor.convert(monitor, Messages.UpgradeEngine_UpgradeTask, 4);
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.UpgradeEngine_UpgradeTask, 5);
 		
 		progress.subTask(Messages.UpgradeEngine_subprogress1);
 		final boolean[] isOk = {false};
@@ -140,17 +140,7 @@ public class UpgradeEngine {
 			}
 			
 			if (fromVersion == null) {
-//				Display.getDefault().syncExec(new Runnable(){
-//					@Override
-//					public void run() {
-//						MessageDialog.openError(
-//								Display.getDefault().getActiveShell(),
-//								Messages.UpgradeEngine_Error_Title,
-//								MessageFormat.format(Messages.UpgradeEngine_Error_Message1, newDbVersion, UpgradeFromVersion.V320.toVersion));
-//					}
-//				});
 				throw new Exception(MessageFormat.format(Messages.UpgradeEngine_Error_Message1, newDbVersion, UpgradeFromVersion.V320.toVersion));
-//				return;
 			}
 			
 			Display.getDefault().syncExec(new Runnable(){
@@ -272,6 +262,10 @@ public class UpgradeEngine {
 				ChangeLogInstaller.INSTANCE.installChangeLogTracking(s);
 				s.getTransaction().commit();
 			}
+		}
+		
+		try(Session s = HibernateManager.openSession()){
+			HibernateManager.compressTables(s, progress.split(1));
 		}
 		progress.done();
 	}

@@ -407,6 +407,7 @@ public class Messages extends NLS {
 	public static String ConservationAreaListView_CaInfo;
 	public static String ConservationAreaListView_CaLabel;
 	public static String ConservationAreaListView_ModifyLink;
+	public static String ConservationAreaManager_CompressingTables;
 	public static String ConservationAreaManager_Error_DeletingFilestore;
 	public static String ConservationAreaManager_Progress_DeleteCa;
 	public static String ConservationAreaManager_Progress_RemoveFileStore;
@@ -905,6 +906,7 @@ public class Messages extends NLS {
 	public static String HibernateManager_Error_Dialog_Title;
 	public static String HibernateManager_Error_LoadingDataModel;
 	public static String HibernateManager_Error_ValidatingUserId;
+	public static String HibernateManager_TaskName;
 	public static String IconComposite_AllFilesOp;
 	public static String IconComposite_CouldNotReadDb;
 	public static String IconComposite_CouldNotReadFile;
