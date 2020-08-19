@@ -63,6 +63,13 @@ public class LayerItem extends ReportItem {
 	 */
 	public static final String SMART_GEOMCOLUMN_PROP = "org.wcs.smart.birt.map.geomColumn"; //$NON-NLS-1$
 	
+	/**
+	 * Zoom to property; if the layer is used to
+	 * determine bounds for resulting map
+	 */
+	public static final String SMART_ZOOM_TO = "org.wcs.smart.birt.map.zoomTo"; //$NON-NLS-1$
+
+	
 	private ExtendedItemHandle handle;
 	
 	/**
@@ -153,6 +160,24 @@ public class LayerItem extends ReportItem {
 		handle.setProperty(SMART_GEOMCOLUMN_PROP, geomColumn);
 	}
 	
+	/**
+	 * @return the zoom to property
+	 */
+	public Boolean getZoomTo(){
+		return handle.getBooleanProperty(SMART_ZOOM_TO);
+	}
+	
+	/**
+	 * Sets the layer zoom to property (if this layer is
+	 * to be used for map bounds)
+	 * 
+	 * @param layers
+	 * @throws SemanticException
+	 */
+	public void setZoomTo(boolean zoomTo) throws SemanticException{
+		handle.setProperty(SMART_ZOOM_TO, zoomTo);
+	}
+	
 	@Override
 	public IReportItem copy( )
 	{
@@ -164,6 +189,7 @@ public class LayerItem extends ReportItem {
 			clone.setLayerName(getLayerName());
 			clone.setLayerStyles(getLayerStyle());
 			clone.setLayerType(getLayerType());
+			clone.setZoomTo(getZoomTo());
 		}catch (SemanticException se) {
 			Logger.getLogger(LayerItem.class.getName()).log(Level.WARNING, se.getMessage(), se);
 

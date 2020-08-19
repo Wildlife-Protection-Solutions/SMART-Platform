@@ -103,6 +103,8 @@ import org.wcs.smart.report.birt.map.AddLayersCommand;
 import org.wcs.smart.report.birt.map.BirtMapFactory;
 import org.wcs.smart.report.birt.map.BirtMapUtils;
 import org.wcs.smart.report.birt.map.BirtMapViewportModelImpl;
+import org.wcs.smart.report.birt.map.BoundsSetting;
+import org.wcs.smart.report.birt.map.BoundsSetting.BoundsOption;
 import org.wcs.smart.report.birt.map.ExtensionManager;
 import org.wcs.smart.report.birt.map.IRasterCreator;
 import org.wcs.smart.report.birt.map.MapLayerInfo;
@@ -277,7 +279,7 @@ public class MapItemExecutor implements IReportItemExecutor{
 			LayerItem layer = mapItem.getLayer(i);
 			IQueryDefinition q2 = (IQueryDefinition) query[i];	
 			if (q2 == null) continue;
-			MapLayerInfo info = new MapLayerInfo(layer.getLayerName(), layer.getLayerStyle(), layer.getLayerType(), layer.getGeometryColumn());
+			MapLayerInfo info = new MapLayerInfo(layer);
 			
 			IBaseResultSet qresult = null;
 			try {
@@ -495,32 +497,47 @@ public class MapItemExecutor implements IReportItemExecutor{
 			GeoSmart geoSmart = new GeoSmart();
 			geoSmart.info = queryResults.getInfo(i);
 			geoSmart.georesource = resource;
+			
 
 			layers.add(geoSmart);
 			toAdd.add(resource);
 		}
 		
 		StringBuilder layerErrors = new StringBuilder();
+		
+		AddLayersCommand addCommand = null;
+		ReferencedEnvelope zoomToBounds = null;
+		
 		if (!toAdd.isEmpty()) {
-			AddLayersCommand cmd = new AddLayersCommand(toAdd, renderedMap.getMapLayers().size());
-			executeCommmand(renderedMap, cmd);
-			for (Layer l : cmd.getLayers()) {
+			addCommand = new AddLayersCommand(toAdd, renderedMap.getMapLayers().size());
+			executeCommmand(renderedMap, addCommand);
+			
+			for (Layer l : addCommand.getLayers()) {
 				// setup name and style
 				for (GeoSmart smrt : layers) {
 					if (smrt.georesource != null && smrt.georesource.equals(l.getGeoResource())) {
-							l.setName(smrt.info.getLayerName());
-							if (smrt.info.getMapStyleBlackboard() != null){
-								StyleBlackboard sb = smrt.info.getMapStyleBlackboard();
+						
+						l.setName(smrt.info.getLayerName());
+						if (smrt.info.getMapStyleBlackboard() != null){
+							StyleBlackboard sb = smrt.info.getMapStyleBlackboard();
+							l.getStyleBlackboard().clear();
+							l.getStyleBlackboard().addAll(sb);
+						}else if (smrt.info.getMapStyle() != null) {
+							// use user defined style
+							StyleBlackboard sb = BirtMapUtils.parseStyleString(smrt.info.getMapStyle());
+							if (sb != null) {
 								l.getStyleBlackboard().clear();
 								l.getStyleBlackboard().addAll(sb);
-							}else if (smrt.info.getMapStyle() != null) {
-								// use user defined style
-								StyleBlackboard sb = BirtMapUtils.parseStyleString(smrt.info.getMapStyle());
-								if (sb != null) {
-									l.getStyleBlackboard().clear();
-									l.getStyleBlackboard().addAll(sb);
-								}
 							}
+						}
+						
+						if (smrt.info.getIncludeZoom()) {
+							if (zoomToBounds == null) {
+								zoomToBounds = l.getBounds(new NullProgressMonitor(), renderedMap.getViewportModel().getCRS());
+							}else {
+								zoomToBounds.expandToInclude(l.getBounds(new NullProgressMonitor(), renderedMap.getViewportModel().getCRS()));
+							}
+						}
 					}
 				}
 				if (l.getGeoResource().getMessage() != null) {
@@ -530,15 +547,36 @@ public class MapItemExecutor implements IReportItemExecutor{
 			}
 		}
 	
-		ReferencedEnvelope bounds = null;
-		if (mapItem.getMapBounds() == null) {
+		BoundsSetting bounds = mapItem.getMapBounds();
+		if (bounds == null) bounds = new BoundsSetting();
+		
+		if(bounds.getOption() == BoundsOption.MAP_EXTENTS) {
 			if (renderedMap.getMapLayers().isEmpty()) {
-				bounds = new ReferencedEnvelope(renderedMap.getViewportModel().getCRS());
+				zoomToBounds = new ReferencedEnvelope(renderedMap.getViewportModel().getCRS());
 			}else {
-				bounds = renderedMap.getBounds(new NullProgressMonitor());
+				zoomToBounds = renderedMap.getBounds(new NullProgressMonitor());
 			}
-		} else {
-			bounds = mapItem.getMapBounds();
+		} else if (bounds.getOption() == BoundsOption.CUSTOM) {
+			zoomToBounds = bounds.getEnvelope();
+			
+		} else if (bounds.getOption() == BoundsOption.ALL_QUERY_LAYERS){
+			for (Layer l : addCommand.getLayers()) {
+				if (zoomToBounds == null) {
+					zoomToBounds = l.getBounds(new NullProgressMonitor(), renderedMap.getViewportModel().getCRS());
+				}else {
+					zoomToBounds.expandToInclude(l.getBounds(new NullProgressMonitor(), renderedMap.getViewportModel().getCRS()));
+				}
+			}
+			if (zoomToBounds == null) {
+				//not layers; zoom to map extents
+				if (renderedMap.getMapLayers().isEmpty()) {
+					zoomToBounds = new ReferencedEnvelope(renderedMap.getViewportModel().getCRS());
+				}else {
+					zoomToBounds = renderedMap.getBounds(new NullProgressMonitor());
+				}
+			}
+		} else if (bounds.getOption() == BoundsOption.LAYER){
+			//set above
 		}
 		
 
@@ -572,7 +610,7 @@ public class MapItemExecutor implements IReportItemExecutor{
 		}
 		((MapImpl) renderedMap).getLayersInternal().clear();
 		((MapImpl) renderedMap).getLayersInternal().addAll(0, orderedLayers);
-		((BirtMapViewportModelImpl)renderedMap.getViewportModel()).setBounds(bounds);
+		((BirtMapViewportModelImpl)renderedMap.getViewportModel()).setBounds(zoomToBounds);
 
 		//draw map
 		BufferedImage image = new BufferedImage(iwidth, iheight, BufferedImage.TYPE_INT_ARGB);

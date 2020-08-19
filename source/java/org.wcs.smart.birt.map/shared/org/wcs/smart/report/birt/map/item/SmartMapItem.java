@@ -37,6 +37,7 @@ import org.eclipse.birt.report.model.api.metadata.IChoice;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.wcs.smart.report.birt.map.BoundsSetting;
 
 /**
  * A Smart map report item.
@@ -60,6 +61,11 @@ public class SmartMapItem extends ReportItem {
 	 * List of layers
 	 */
 	public static final String SMART_LAYER_PROP2 = "org.wcs.smart.birt.map.layers2"; //$NON-NLS-1$
+	
+	/**
+	 * xmin bounds option property
+	 */
+	public static final String SMART_BOUNDS_OPTION_PROP = "org.wcs.smart.report.birt.map.bounds.option"; //$NON-NLS-1$
 	
 	/**
 	 * xmin map bounds property
@@ -204,47 +210,82 @@ public class SmartMapItem extends ReportItem {
 	/**
 	 * @return the map bounds
 	 */
-	public ReferencedEnvelope getMapBounds(){
-		String srs = handle.getStringProperty(SMART_BOUNDS_SRID_PROP);
-		if (srs == null){
-			return null;
-		}
-		CoordinateReferenceSystem crs = null;
+	public BoundsSetting getMapBounds(){
+		BoundsSetting.BoundsOption op = BoundsSetting.BoundsOption.MAP_EXTENTS;
 		try{
-			crs = CRS.parseWKT(handle.getStringProperty(SMART_BOUNDS_SRID_PROP));
-		}catch (Exception ex){
-			throw new IllegalStateException("Could not parse coordinate reference system.", ex); //$NON-NLS-1$
+			op = BoundsSetting.BoundsOption.valueOf( handle.getStringProperty(SMART_BOUNDS_OPTION_PROP) );
+		}catch (Exception ex) {
+			
 		}
 		
-		double x1 = handle.getFloatProperty(SMART_BOUNDS_XMIN_PROP);
-		double x2 = handle.getFloatProperty(SMART_BOUNDS_XMAX_PROP);
-		double y1 = handle.getFloatProperty(SMART_BOUNDS_YMIN_PROP);
-		double y2 = handle.getFloatProperty(SMART_BOUNDS_YMAX_PROP);
+		if (op == BoundsSetting.BoundsOption.CUSTOM) {
 		
-		return new ReferencedEnvelope(x1, x2, y1, y2, crs);
+			String srs = handle.getStringProperty(SMART_BOUNDS_SRID_PROP);
+			if (srs == null){
+				return null;
+			}
+			CoordinateReferenceSystem crs = null;
+			try{
+				crs = CRS.parseWKT(handle.getStringProperty(SMART_BOUNDS_SRID_PROP));
+			}catch (Exception ex){
+				throw new IllegalStateException("Could not parse coordinate reference system.", ex); //$NON-NLS-1$
+			}
+			
+			double x1 = handle.getFloatProperty(SMART_BOUNDS_XMIN_PROP);
+			double x2 = handle.getFloatProperty(SMART_BOUNDS_XMAX_PROP);
+			double y1 = handle.getFloatProperty(SMART_BOUNDS_YMIN_PROP);
+			double y2 = handle.getFloatProperty(SMART_BOUNDS_YMAX_PROP);
+		
+			return new BoundsSetting(new ReferencedEnvelope(x1, x2, y1, y2, crs));
+		}else if (op == BoundsSetting.BoundsOption.LAYER) {
+			BoundsSetting settings = new BoundsSetting(BoundsSetting.BoundsOption.LAYER);
+			try {
+				for (Object li : getLayersProperty().getListValue()) {
+					LayerItem item = (LayerItem)(((ExtendedItemHandle)li).getReportItem());
+					if (item.getZoomTo()) {
+						settings.setLayerItem(item);
+						return settings;
+					}
+				}
+			}catch (Exception ex) {
+				Logger.getLogger(SmartMapItem.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
+			}
+			return new BoundsSetting();
+		}
+		
+		return new BoundsSetting(op);	
 	}
-	
-	/**
-	 * Sets the map bounds
-	 * @param bounds
-	 * @throws SemanticException
-	 */
-	public void setMapBounds(ReferencedEnvelope e) throws SemanticException{
-		if (e == null){
+
+	@SuppressWarnings("restriction")
+	public void setMapBounds(BoundsSetting settings) throws SemanticException{
+		handle.getModule().getActivityStack().startTrans("update basemap properties"); //$NON-NLS-1$
+		handle.setStringProperty(SMART_BOUNDS_OPTION_PROP, settings.getOption().name());
+		
+		if (settings.getOption() != BoundsSetting.BoundsOption.CUSTOM) {
 			handle.setProperty(SMART_BOUNDS_XMIN_PROP, null);
 			handle.setProperty(SMART_BOUNDS_XMAX_PROP, null);
 			handle.setProperty(SMART_BOUNDS_YMIN_PROP, null);
 			handle.setProperty(SMART_BOUNDS_YMAX_PROP, null);
 			handle.setProperty(SMART_BOUNDS_SRID_PROP, null);
 		}else{
+			ReferencedEnvelope e = settings.getEnvelope();
 			handle.setFloatProperty(SMART_BOUNDS_XMIN_PROP, e.getMinX());
 			handle.setFloatProperty(SMART_BOUNDS_XMAX_PROP, e.getMaxX());
 			handle.setFloatProperty(SMART_BOUNDS_YMIN_PROP, e.getMinY());
 			handle.setFloatProperty(SMART_BOUNDS_YMAX_PROP, e.getMaxY());
 			handle.setProperty(SMART_BOUNDS_SRID_PROP, e.getCoordinateReferenceSystem().toWKT());
 		}
+		
+		for (Object li : getLayersProperty().getListValue()) {
+			((LayerItem)((ExtendedItemHandle)li).getReportItem()).setZoomTo(false);
+		}
+		if (settings.getOption() == BoundsSetting.BoundsOption.LAYER && settings.getLayerItem() != null) {
+			settings.getLayerItem().setZoomTo(true);
+		}
+		handle.getModule().getActivityStack().commit();
 	}
-
+	
+	
 	/**
 	 * Gets the DPI setting as an integer
 	 * @return
@@ -278,13 +319,14 @@ public class SmartMapItem extends ReportItem {
 		item.setHandle(newhandle);
 
 		try {
-			item.setMapBounds(new ReferencedEnvelope(getMapBounds()));
+			BoundsSetting settings = getMapBounds();
+			item.setMapBounds(settings.clone());
 		}catch (Exception ex) {
 			Logger.getLogger(SmartMapItem.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
 			try {
-				item.setMapBounds(null);
+				item.setMapBounds(new BoundsSetting());
 			} catch (SemanticException e) {
-				Logger.getLogger(SmartMapItem.class.getName()).log(Level.WARNING, e.getMessage(), e);
+				Logger.getLogger(SmartMapItem.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
 			}
 		}
 		

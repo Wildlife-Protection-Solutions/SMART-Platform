@@ -65,6 +65,15 @@
                   name="org.wcs.smart.report.birt.map.bounds.srid"
                   type="string">
             </property>
+            <property
+                  canInherit="true"
+                  defaultDisplayName="Bounds Option"
+                  hasOwnModel="true"
+                  isEncryptable="false"
+                  isList="false"
+                  name="org.wcs.smart.report.birt.map.bounds.option"
+                  type="string">
+            </property>
          </propertyGroup>
          <overrideProperty
                allowedUnits="CM,IN,MM,PT,PC,PX"
@@ -153,6 +162,14 @@
                isList="false"
                name="org.wcs.smart.birt.map.geomColumn"
                type="string">
+         </property>
+         <property
+               canInherit="false"
+               hasOwnModel="true"
+               isEncryptable="false"
+               isList="false"
+               name="org.wcs.smart.birt.map.zoomTo"
+               type="boolean">
          </property>
       </reportItem>
    </extension>

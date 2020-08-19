@@ -91,7 +91,7 @@ public class StyleCellEditor extends DialogCellEditor {
 
 					try {
 						MapQueryService service = new MapQueryService();
-						MapLayerInfo info = new MapLayerInfo(mapLayer.getLayerName(), mapLayer.getLayerStyle(), mapLayer.getLayerType(), mapLayer.getGeometryColumn());
+						MapLayerInfo info = new MapLayerInfo(mapLayer);
 						MapGeoResource iGeoResource = new MapGeoResource((OdaDataSetHandle)mapLayer.getHandle().getDataSet(), info, service);
 						
 						ArrayList<IGeoResource> thisresources = new ArrayList<IGeoResource>();

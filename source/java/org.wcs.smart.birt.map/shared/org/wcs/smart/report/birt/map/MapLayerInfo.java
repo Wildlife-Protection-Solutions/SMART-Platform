@@ -24,6 +24,7 @@ package org.wcs.smart.report.birt.map;
 import java.nio.file.Path;
 
 import org.locationtech.udig.project.internal.StyleBlackboard;
+import org.wcs.smart.report.birt.map.item.LayerItem;
 
 /**
  * A simple class for tracking information about a map layer.
@@ -59,19 +60,34 @@ public class MapLayerInfo {
 	
 	private LayerType layerType;
 	
-	private String gometryColumn;
+	private String geometryColumn;
 	
 	private StyleBlackboard blackboard;
 		
 	private Path rasterFile;
 		
-	public MapLayerInfo(String layerName, String mapStyle, LayerType type, String gometryColumn){
+	private boolean zoomTo;
+	
+	public MapLayerInfo(LayerItem item) {
+		this(item.getLayerName(), item.getLayerStyle(), item.getLayerType(), item.getGeometryColumn(), item.getZoomTo());
+	}
+	
+	public MapLayerInfo(String layerName, String mapStyle, LayerType type, String geometryColumn){
+		this(layerName, mapStyle, type, geometryColumn, false);
+	}
+	
+	private MapLayerInfo(String layerName, String mapStyle, LayerType type, String geometryColumn, boolean zoomTo){
 		this.layerName = layerName;
 		this.mapStyle = mapStyle;
 		this.layerType = type;
-		this.gometryColumn = gometryColumn;
+		this.geometryColumn = geometryColumn;
+		this.zoomTo = zoomTo;
 	}
 
+	public boolean getIncludeZoom() {
+		return this.zoomTo;
+	}
+	
 	public String getLayerName() {
 		return layerName;
 	}
@@ -105,11 +121,11 @@ public class MapLayerInfo {
 	}
 
 	public String getGeometryColumn() {
-		return gometryColumn;
+		return geometryColumn;
 	}
 
-	public void setGometryColumn(String gometryColumn) {
-		this.gometryColumn = gometryColumn;
+	public void setGometryColumn(String geometryColumn) {
+		this.geometryColumn = geometryColumn;
 	}
 
 

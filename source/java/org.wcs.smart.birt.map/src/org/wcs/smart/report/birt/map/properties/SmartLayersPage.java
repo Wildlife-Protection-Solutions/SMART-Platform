@@ -22,6 +22,7 @@
 package org.wcs.smart.report.birt.map.properties;
 
 import java.text.Collator;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -49,6 +50,7 @@ import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -61,6 +63,8 @@ import org.eclipse.swt.events.MenuAdapter;
 import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -73,7 +77,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
@@ -84,6 +87,8 @@ import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.report.birt.map.BirtMapUtils;
 import org.wcs.smart.report.birt.map.BirtUiUtils;
+import org.wcs.smart.report.birt.map.BoundsSetting;
+import org.wcs.smart.report.birt.map.BoundsSetting.BoundsOption;
 import org.wcs.smart.report.birt.map.ExtensionManager;
 import org.wcs.smart.report.birt.map.LayerDefinition;
 import org.wcs.smart.report.birt.map.MapLayerInfo.LayerType;
@@ -108,7 +113,7 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 
 	private static final UUID DEFAULT_BASEMAP = UuidUtils.stringToUuid("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");  //$NON-NLS-1$
 	
-	private static ReferencedEnvelope boundsCopySettings = null; 
+	private static BoundsSetting boundsCopySettings = null; 
 	
 	private static final String ERROR_DIALOG_TITLE = Messages.SmartLayersPage_ErrorDialog_Title;
 	public static final String PAGE_KEY = "MapLayers"; //$NON-NLS-1$
@@ -119,12 +124,16 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 	private boolean basemapListenerEnabled = false;
 	private TableViewer tblLayers ;
 
-	private Text txtBounds;
-
+	private ComboViewer cmbBounds;
+	private Label txtCustom;
+	
 	private ExtendedItemHandle itemHandle;
 	private SmartMapItem mapItem;
 	private StyleCellEditor cellEditor;
 	private HashMap<LayerItem, Image> styleImageCache;
+	private Hyperlink btnApplyAllMaps;
+	
+	private boolean fire = true;
 	
 	public SmartLayersPage() {
 		super();
@@ -405,9 +414,12 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 	 */
 	private void createBasemapBounds(Composite parent){
 		Composite bm = toolkit.createComposite(parent);
-		bm.setLayout(new GridLayout(7, false));
+		bm.setLayout(new GridLayout(6, false));
 		bm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		toolkit.createLabel(bm, Messages.SmartLayersPage_BasemapLabel);
+		((GridLayout)bm.getLayout()).marginWidth = 0;
+		
+		Label l = toolkit.createLabel(bm, Messages.SmartLayersPage_BasemapLabel);
+		l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		basemapCombo = new ComboViewer(bm, SWT.READ_ONLY | SWT.DROP_DOWN);
 		basemapCombo.setLabelProvider(new BasemapLabelProvider());
@@ -416,9 +428,8 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		basemapCombo.getCombo().setToolTipText(Messages.SmartLayersPage_basemaptooltipe);
 	
 		//toolkit.adapt(basemapCombo.getCombo());
-		basemapCombo.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		((GridData)basemapCombo.getControl().getLayoutData()).minimumWidth = 100;
-		((GridData)basemapCombo.getControl().getLayoutData()).widthHint = 200;
+		basemapCombo.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)basemapCombo.getControl().getLayoutData()).minimumWidth = 40;
 		
 		basemapCombo.getControl().addListener(SWT.Modify, new Listener() {
 			@Override
@@ -440,40 +451,64 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 			}
 		});
 		
-		toolkit.createLabel(bm, Messages.SmartLayersPage_MapBoundsLabel);
+		l = toolkit.createLabel(bm, Messages.SmartLayersPage_MapBoundsLabel);
+		l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
-		txtBounds = toolkit.createText(bm, ""); //$NON-NLS-1$
-		GridData gd = new GridData(SWT.FILL, SWT.CENTER, true, false);
-		gd.minimumWidth = 30;
-		txtBounds.setEditable(false);
-		txtBounds.setLayoutData(gd);
+		cmbBounds = new ComboViewer(bm, SWT.DROP_DOWN | SWT.READ_ONLY);
+		cmbBounds.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		((GridData)cmbBounds.getControl().getLayoutData()).minimumWidth = 40;
+		cmbBounds.setContentProvider(ArrayContentProvider.getInstance());
+		cmbBounds.setLabelProvider(new LabelProvider() {
+			@Override
+			public String getText(Object element) {
+				if (element == BoundsOption.CUSTOM) return Messages.SmartLayersPage_CustomBoundsLabel;	
+				if (element == BoundsOption.MAP_EXTENTS) return Messages.SmartLayersPage_MapExtentBoundsLabel;
+				if (element == BoundsOption.ALL_QUERY_LAYERS) return Messages.SmartLayersPage_AllQueriesBoundsLabel;
+				if (element instanceof LayerItem) return ((LayerItem) element).getHandle().getDataSet().getElement().getDisplayName();
+				
+				return super.getText(element);
+			}
+		});
+		toolkit.adapt(cmbBounds.getControl(), true, true);
+		
+		cmbBounds.addSelectionChangedListener(event->{
+			btnApplyAllMaps.setEnabled(cmbBounds.getStructuredSelection().getFirstElement() instanceof BoundsOption);
+			
+			if (!fire) return;
+			
+			Object x = cmbBounds.getStructuredSelection().getFirstElement();
+			if (x == BoundsOption.CUSTOM) {
+				setBounds();
+			}else {
+				BoundsSetting settings = null;
+				if (x == BoundsOption.ALL_QUERY_LAYERS) {
+					settings = new BoundsSetting(BoundsOption.ALL_QUERY_LAYERS);
+				}else if (x == BoundsOption.MAP_EXTENTS) {
+					settings = new BoundsSetting(BoundsOption.MAP_EXTENTS);
+				}else if (x instanceof LayerItem) {
+					settings = new BoundsSetting(BoundsOption.LAYER);
+					settings.setLayerItem((LayerItem)x);
+				}
+				cmbBounds.getControl().setData(settings);
+				updateModel(SmartMapItem.SMART_BOUNDS_GROUP);
+			}
+		});
 
-		Menu mnu = new Menu(txtBounds);
+		Menu mnu = new Menu(l);
 		MenuItem miCopy = new MenuItem(mnu, SWT.PUSH);
 		miCopy.setText(Messages.SmartLayersPage_CopyBounds);
 		miCopy.addListener(SWT.Selection, e->{
-			boundsCopySettings = mapItem.getMapBounds();
+			if (mapItem.getMapBounds().getOption() != BoundsOption.LAYER)
+				boundsCopySettings = mapItem.getMapBounds().clone();
 		});
 
 		MenuItem miPaste = new MenuItem(mnu, SWT.PUSH);
 		miPaste.setText(Messages.SmartLayersPage_PasteBounds);
 		miPaste.addListener(SWT.Selection, e->{
-			if (boundsCopySettings == null) return;
-			
-			txtBounds.setData(new ReferencedEnvelope(boundsCopySettings));
+			if (boundsCopySettings == null) return;			
+			cmbBounds.getControl().setData(boundsCopySettings.clone());
 			updateModel(SmartMapItem.SMART_BOUNDS_GROUP);
 		});
-		
-		
-		new MenuItem(mnu, SWT.SEPARATOR);
-		
-		MenuItem miSet = new MenuItem(mnu, SWT.PUSH);
-		miSet.setText( Messages.SmartLayersPage_SetBoundsLink1);
-		miSet.addListener(SWT.Selection, e->setBounds());
-		
-		MenuItem miClear = new MenuItem(mnu, SWT.PUSH);
-		miClear.setText( Messages.SmartLayersPage_ClearBoundsLink);
-		miClear.addListener(SWT.Selection, e->clearBounds());
 		
 		new MenuItem(mnu, SWT.SEPARATOR);
 
@@ -485,42 +520,30 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 			@Override
 			public void menuShown(MenuEvent e) {
 				miPaste.setEnabled( boundsCopySettings != null );
+				miCopy.setEnabled( mapItem.getMapBounds().getOption() != BoundsOption.LAYER );
+				miApplyAll.setEnabled( mapItem.getMapBounds().getOption() != BoundsOption.LAYER );
 				
 			}
 			
 		});
 		
+		l.setMenu(mnu);
+//		cmbBounds.getControl().setMenu(mnu);
+	
+		txtCustom = new Label(bm, SWT.NONE);
+		txtCustom.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		((GridData)txtCustom.getLayoutData()).minimumWidth = 40;
 		
-		txtBounds.setMenu(mnu);
-
-		Hyperlink btnSetBounds = toolkit.createHyperlink(bm, Messages.SmartLayersPage_SetBoundsLink1, SWT.NONE);
-		btnSetBounds.setToolTipText(Messages.SmartLayersPage_boundstooltip);
-		gd = new GridData(SWT.FILL, SWT.BOTTOM, false, false);
-		btnSetBounds.setLayoutData(gd);
-		btnSetBounds.addHyperlinkListener(new HyperlinkAdapter() {
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				setBounds();
-			}
-		});
-		
-		
-		Hyperlink btnClearBounds = toolkit.createHyperlink(bm, Messages.SmartLayersPage_ClearBoundsLink, SWT.NONE);
-		btnClearBounds.setToolTipText(Messages.SmartLayersPage_resettooltip);
-		gd = new GridData(SWT.FILL, SWT.BOTTOM, false, false);
-		btnClearBounds.setLayoutData(gd);
-		btnClearBounds.addHyperlinkListener(new HyperlinkAdapter() {
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				clearBounds();
-			}
-		});
+		FontData fd = txtCustom.getFont().getFontData()[0];
+		fd.setHeight( fd.getHeight() - 2);
+		Font f = new Font(txtCustom.getDisplay(), fd);
+		txtCustom.addListener(SWT.Dispose, e->f.dispose());
+		txtCustom.setFont(f);
 		
 		
-		Hyperlink btnApplyAllMaps = toolkit.createHyperlink(bm, Messages.SmartLayersPage_ApplyBoundsToAll, SWT.NONE);
+		btnApplyAllMaps = toolkit.createHyperlink(bm, Messages.SmartLayersPage_ApplyBoundsToAll, SWT.NONE);
 		btnApplyAllMaps.setToolTipText(Messages.SmartLayersPage_ApplyBoundsToAllTooltip);
-		gd = new GridData(SWT.FILL, SWT.BOTTOM, false, false);
-		btnApplyAllMaps.setLayoutData(gd);
+		btnApplyAllMaps.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
 		btnApplyAllMaps.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
@@ -536,7 +559,7 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		double y = itemHandle.getHeight().getMeasure();
 		
 		SelectBoundsMapDialog md = new SelectBoundsMapDialog(Display.getDefault().getActiveShell(), 
-				getSelectedBasemapUuid(), mapItem.getMapBounds(), x/y);
+				getSelectedBasemapUuid(), mapItem.getMapBounds().getEnvelope(), x/y);
 		
 		
 		if (md.open() != Window.OK){
@@ -544,16 +567,11 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		}
 		
 		ReferencedEnvelope re = md.getBounds();
-		txtBounds.setData(re);
+		cmbBounds.getControl().setData(new BoundsSetting(re));
 		updateModel(SmartMapItem.SMART_BOUNDS_GROUP);
 	}
 	
-	
-	private void clearBounds() {
-		txtBounds.setData(null);
-		updateModel(SmartMapItem.SMART_BOUNDS_GROUP);
-	}
-	
+
 	private void applyAll() {
 		SlotHandle h  = itemHandle.getRoot().getComponents();
 		
@@ -668,10 +686,11 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 					mapItem.setBasemapName(name);
 				}
 			} else if (prop.equals(SmartMapItem.SMART_BOUNDS_GROUP)) {
-				if (txtBounds.getData() == null){
-					mapItem.setMapBounds(null);
+				if (cmbBounds.getControl().getData() == null){
+					mapItem.setMapBounds(new BoundsSetting());
 				}else{
-					mapItem.setMapBounds((ReferencedEnvelope)txtBounds.getData());
+					mapItem.setMapBounds((BoundsSetting)cmbBounds.getControl().getData());
+
 				}
 			}
 			
@@ -752,6 +771,43 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 	
 	protected void updateTable(){
 		tblLayers.setInput(mapItem.getLayersProperty().getListValue());
+		
+		List<Object> boundsOptions = new ArrayList<>();
+		boundsOptions.add(BoundsOption.MAP_EXTENTS);
+		boundsOptions.add(BoundsOption.ALL_QUERY_LAYERS);
+		for (Object item : mapItem.getLayersProperty().getListValue()) {
+			LayerItem eitem = getLayerItem(item);
+			if (eitem != null) boundsOptions.add(eitem);			
+		}
+		boundsOptions.add(BoundsOption.CUSTOM);
+		
+		cmbBounds.setInput(boundsOptions);
+		updateBoundsCombo(mapItem.getMapBounds());
+	}
+	
+	protected void updateBoundsCombo(BoundsSetting settings) {
+		try {
+			fire = false;
+			if (settings.getOption() != BoundsOption.LAYER) {
+				cmbBounds.setSelection(new StructuredSelection(settings.getOption()));
+			}else {
+				cmbBounds.setSelection(new StructuredSelection(settings.getLayerItem()));
+			}
+			
+			if (settings.getEnvelope() != null) {
+				ReferencedEnvelope re = settings.getEnvelope();
+				txtCustom.setText(MessageFormat.format("{0} [({1} {2}) ({3} {4})]", re.getCoordinateReferenceSystem().getName().toString(),  //$NON-NLS-1$
+						String.valueOf(re.getMinX()),
+						String.valueOf(re.getMinY()),
+						String.valueOf(re.getMaxX()),
+						String.valueOf(re.getMaxY())));
+			}else {
+				txtCustom.setText(""); //$NON-NLS-1$
+			}
+			txtCustom.setToolTipText(txtCustom.getText());
+		}finally {
+			fire = true;
+		}
 	}
 	
 	protected void updateUI() {
@@ -760,12 +816,9 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		}
 		updateTable();
 		
-		if (mapItem.getMapBounds() == null){
-			txtBounds.setText(Messages.SmartLayersPage_MapExtentsBoundsLabel);
-		}else{
-			ReferencedEnvelope env = mapItem.getMapBounds();
-			txtBounds.setText(env.getCoordinateReferenceSystem().getName().getCode() + ": (" + env.getMinX() + "," + env.getMinY() + "),(" + env.getMaxX() + "," + env.getMaxY() + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-		}
+		BoundsSetting settings = mapItem.getMapBounds();
+		updateBoundsCombo(settings);
+		
 		//basemapCombo.set
 		loadBasemaps();
 		//for mac ui table issue see smart bug 1349
@@ -880,4 +933,5 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		}
 		updateTable();
 	}
+	
 }

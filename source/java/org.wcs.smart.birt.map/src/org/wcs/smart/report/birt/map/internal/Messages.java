@@ -10,6 +10,7 @@ public class Messages extends NLS {
 	
 	public static String SmartLayersPage_AddLayer_DialogMessage;
 	public static String SmartLayersPage_AddLayer_DialogTitle;
+	public static String SmartLayersPage_AllQueriesBoundsLabel;
 	public static String SmartLayersPage_ApplyBoundsToAll;
 	public static String SmartLayersPage_ApplyBoundsToAllTooltip;
 	public static String SmartLayersPage_addtooltip;
@@ -19,6 +20,7 @@ public class Messages extends NLS {
 	public static String SmartLayersPage_ClearBoundsLink;
 	public static String SmartLayersPage_ClearStyleButton;
 	public static String SmartLayersPage_CopyBounds;
+	public static String SmartLayersPage_CustomBoundsLabel;
 	public static String SmartLayersPage_cleartooltip;
 	public static String SmartLayersPage_DefaultBasemapLabel;
 	public static String SmartLayersPage_DefaultStyleLabel;
@@ -32,6 +34,7 @@ public class Messages extends NLS {
 	public static String SmartLayersPage_LayerName_ColumnHeader;
 	public static String SmartLayersPage_LoadingLbl;
 	public static String SmartLayersPage_MapBoundsLabel;
+	public static String SmartLayersPage_MapExtentBoundsLabel;
 	public static String SmartLayersPage_MapExtentsBoundsLabel;
 	public static String SmartLayersPage_MapLayersLabel;
 	public static String SmartLayersPage_MoveDownButton;
