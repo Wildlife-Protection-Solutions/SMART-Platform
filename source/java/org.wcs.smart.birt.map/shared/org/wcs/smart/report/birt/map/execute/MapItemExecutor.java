@@ -200,8 +200,7 @@ public class MapItemExecutor implements IReportItemExecutor{
 		try {
 			content.setRawValue(executeQuery());
 		}catch(Exception ex) {
-			ex.printStackTrace();
-			throw new BirtException(ex.getMessage());
+			throw new BirtException("org.wcs.smart.birt.map", ex.getMessage(), new Object[] {}, ex); //$NON-NLS-1$
 		}
 		return content;
 	}
@@ -577,6 +576,9 @@ public class MapItemExecutor implements IReportItemExecutor{
 			}
 		} else if (bounds.getOption() == BoundsOption.LAYER){
 			//set above
+			if (zoomToBounds.isNull()) {
+				zoomToBounds = renderedMap.getBounds(new NullProgressMonitor());
+			}
 		}
 		
 

@@ -23,7 +23,7 @@ package org.wcs.smart.report.export.internal;
 
 import java.nio.file.Path;
 import java.text.MessageFormat;
-import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -45,7 +45,7 @@ public class ExportReportJob extends Job {
 	private Path outputFile = null;
 	private IReportExporter exporter = null;
 	
-	private HashMap<String, Object> reportParameters = null; 
+	private Map<String, Object> reportParameters = null; 
 	
 	/**
 	 * @param report report to export
@@ -53,7 +53,7 @@ public class ExportReportJob extends Job {
 	 * @param exporter output format info
 	 * @param reportParams report parameters
 	 */
-	public ExportReportJob(Report report, Path file, IReportExporter exporter, HashMap<String, Object> reportParams){
+	public ExportReportJob(Report report, Path file, IReportExporter exporter, Map<String, Object> reportParams){
 		super(MessageFormat.format(Messages.ExportReportJob_ExportReportJobName, new Object[]{ report.getName()}));
 		
 		this.report = report;

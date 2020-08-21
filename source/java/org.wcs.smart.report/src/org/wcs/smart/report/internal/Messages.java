@@ -144,6 +144,12 @@ public class Messages extends NLS {
 	public static String NumberParameterComponent_ConversionError;
 	public static String ParameterCollecter_TypeNotSupported;
 	public static String ParameterCollecter_TypeXNotSupported;
+	public static String ParameterSelectionDialog_DefaultName;
+	public static String ParameterSelectionDialog_IsRequired;
+	public static String ParameterSelectionDialog_List;
+	public static String ParameterSelectionDialog_Message;
+	public static String ParameterSelectionDialog_Name;
+	public static String ParameterSelectionDialog_Title;
 	public static String QueryReportPropertyProvider_ErrorLabel;
 	public static String QueryReportPropertyProvider_NoReportsLabel;
 	public static String QueryReportPropertyProvider_OwnerLabel;

@@ -25,13 +25,13 @@ import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.eclipse.birt.report.engine.api.IParameterDefn;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DateTime;
-import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -52,13 +52,14 @@ public class DateParameterComponent extends AbstractBirtParameter {
 	 * @param name parameter name
 	 * @param displayText parameter display text
 	 */
-	public DateParameterComponent(String name, String displayText, boolean includeDate, boolean includeTime, Object defaultValue){
-		super(name, displayText, defaultValue);
+	public DateParameterComponent(IParameterDefn def){
+		super(def);
 		
-		if (includeDate){
+		if (def.getDataType() == IParameterDefn.TYPE_DATE  || def.getDataType() == IParameterDefn.TYPE_DATE_TIME) {
 			dFormat = SWT.DROP_DOWN | SWT.MEDIUM | SWT.BORDER | SWT.DATE;
 		}
-		if (includeTime){
+		
+		if (def.getDataType() == IParameterDefn.TYPE_TIME  || def.getDataType() == IParameterDefn.TYPE_DATE_TIME) {
 			tFormat = SWT.DROP_DOWN | SWT.MEDIUM | SWT.BORDER | SWT.TIME;
 		}
 	}
@@ -67,7 +68,7 @@ public class DateParameterComponent extends AbstractBirtParameter {
 	 * @see org.wcs.smart.report.internal.ui.viewer.parameter.IBirtParameter#createComponent(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
-	public Composite createComposite(Composite parent, IDialogSettings settings) {
+	public void createComposite(Composite parent, IDialogSettings settings) {
 		SimpleDateFormat sdf = new SimpleDateFormat(ReportParameterDialog.SIMPLE_DATE_FORMAT);
 		Object initValue = super.getInitializeValue(settings);
 		
@@ -79,17 +80,20 @@ public class DateParameterComponent extends AbstractBirtParameter {
 				//eat me
 			}
 		}
+		
+		
+		createNameLabel(parent);
+		
+		
 		Composite param = new Composite(parent, SWT.NONE);
-		int numcolumns = 2;
+		int numcolumns = 1;
 		if (dFormat != -1 && tFormat != -1){
-			numcolumns = 3;
+			numcolumns = 2;
 		}
 		GridLayout gl = new GridLayout(numcolumns, false);
 		gl.marginWidth = gl.marginHeight = gl.horizontalSpacing = gl.verticalSpacing = 0;
 		param.setLayout(gl);
 
-		Label lbl = new Label(param, SWT.NONE);
-		lbl.setText(getDisplayText() + ": "); //$NON-NLS-1$
 		if (dFormat != -1){
 			datePicker = new DateTime(param, dFormat);
 			datePicker.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -105,7 +109,6 @@ public class DateParameterComponent extends AbstractBirtParameter {
 				SmartUtils.initTimeDateTimeWidget(timePicker, initDate);
 			}
 		}
-		return param;
 	}
 
 

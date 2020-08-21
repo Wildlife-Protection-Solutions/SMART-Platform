@@ -25,7 +25,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
-import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.birt.report.engine.api.EmitterInfo;
 import org.eclipse.birt.report.engine.api.HTMLRenderOption;
@@ -57,7 +57,7 @@ public class RunReportJob extends Job {
 	private Path outputFile = null;
 	private EmitterInfo info = null;
 	private Report report;
-	private HashMap<String, Object> reportParameters = null; 
+	private Map<String, Object> reportParameters = null; 
 	private int dpi;
 	
 	/**
@@ -68,7 +68,7 @@ public class RunReportJob extends Job {
 	 * @param info output format info
 	 * @param reportParams report parameters
 	 */
-	public RunReportJob(Report report, Path file, EmitterInfo info, HashMap<String, Object> reportParams, int defaultDpi){
+	public RunReportJob(Report report, Path file, EmitterInfo info, Map<String, Object> reportParams, int defaultDpi){
 		super(MessageFormat.format(Messages.RunReportJob_JobName, new Object[]{report.getName()}));
 		
 		this.report = report;

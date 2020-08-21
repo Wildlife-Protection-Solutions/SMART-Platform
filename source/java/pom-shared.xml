@@ -91,6 +91,7 @@
       			</resource>
       			<resource>
         			<directory>schema</directory>
+        			<targetPath>schema</targetPath>
         		</resource>
 		</resources>
 		<plugins>

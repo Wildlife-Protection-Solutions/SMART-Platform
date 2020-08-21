@@ -25,13 +25,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.eclipse.birt.report.engine.api.IParameterDefn;
 import org.eclipse.birt.report.engine.api.IParameterGroupDefn;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Group;
+import org.wcs.smart.common.control.SmartUiUtils;
 
 /**
  * Grouped BIRT parameters.  Wraps a collection of parameters into a group.
@@ -43,16 +44,19 @@ public class GroupedReportParameters implements IBirtParameterComponent {
 
 	private List<IBirtParameterComponent> params = new ArrayList<IBirtParameterComponent>();
 	
-	private IParameterGroupDefn base;
+//	private IParameterGroupDefn base;
+	private String displayName;
 	
 	/**
 	 * creates a new group
 	 * @param base
 	 */
 	public GroupedReportParameters(IParameterGroupDefn base){
-		this.base = base;
-		
-		
+		this.displayName = base.getDisplayName() != null ? base.getDisplayName() : base.getName();
+	}
+	
+	public GroupedReportParameters(String displayName){
+		this.displayName = displayName;
 	}
 	
 	/**
@@ -67,8 +71,8 @@ public class GroupedReportParameters implements IBirtParameterComponent {
 	 * @see org.wcs.smart.report.internal.ui.viewer.parameter.IBirtParameterComponent#getParameters()
 	 */
 	@Override
-	public HashMap<String, Object> getParameters() {
-		HashMap<String, Object> values = new HashMap<String, Object>();
+	public HashMap<IParameterDefn, Object> getParameters() {
+		HashMap<IParameterDefn, Object> values = new HashMap<IParameterDefn, Object>();
 		for(IBirtParameterComponent p : params){
 			values.putAll(p.getParameters());
 		}
@@ -79,16 +83,20 @@ public class GroupedReportParameters implements IBirtParameterComponent {
 	 * @see org.wcs.smart.report.internal.ui.viewer.parameter.IBirtParameterComponent#createComposite(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
-	public Composite createComposite(Composite parent, IDialogSettings settings) {
-		Group g = new Group(parent, SWT.NONE);
-		g.setText(base.getDisplayName() != null ? base.getDisplayName() : base.getName());
-		g.setLayout(new GridLayout(1, false));
+	public void createComposite(Composite parent, IDialogSettings settings) {
+
+		Composite group = new Composite(parent, SWT.NONE);
+		group.setLayout(new GridLayout(2, false));
+		((GridLayout)group.getLayout()).marginWidth = 0;
+		((GridLayout)group.getLayout()).marginHeight = 0;
+		group.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Composite t = SmartUiUtils.createHeaderLabel(group, displayName );
+		t.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		for (IBirtParameterComponent p : params){
-			Composite c = p.createComposite(g, settings);
-			c.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+			p.createComposite(group, settings);
 		}
-		return g;
 	}
 
 }

@@ -366,6 +366,9 @@ function showParameterSelection(){
  		}else if(json[i].type == "BOOLEAN"){
  			addBooleanParamater(json[i], parent, true);
  			parameterNames.push(json[i].name);
+ 		}else if (json[i].options.length > 0){
+ 			addOptionParameter(json[i], parent, true)
+ 			parameterNames.push(json[i].name);
  		}else{// use a basic textbox for all other types: strings, integers, floats etc.
  			addTextboxParamater(json[i], parent, true);
  			parameterNames.push(json[i].name);
@@ -618,6 +621,34 @@ function addTextboxParamater(param, parent, newGroup){
 	newInput.style.width="100%";
 	newInput.type = "text";
 	newInput.className = "formtext";
+
+	f.appendChild(newInput);
+	parent.insertBefore(f, parent.childNodes[4]);
+
+}
+
+function addOptionParameter(param, parent, newGroup){
+	if(newGroup == true){
+		var f = document.createElement("fieldset");
+		if(param.displayText != null){
+			f.innerHTML = "<legend>" + param.displayText + ":" + "</legend>";
+		}else{
+			f.innerHTML = "<legend>" + param.name + ":" + "</legend>";
+		}
+	}else{
+		var f = document.createElement("p");
+	}
+	var newInput = document.createElement("select");
+	newInput.setAttribute("id", param.name);
+	newInput.style.width="100%";
+	newInput.className = "formtext";
+
+ 	for (var i = 0; i < param.options.length; i++){
+ 		var op = document.createElement("option");
+ 		op.value=param.options[i][1];
+ 		op.text = param.options[i][0];
+ 		newInput.appendChild(op);
+ 	}
 
 	f.appendChild(newInput);
 	parent.insertBefore(f, parent.childNodes[4]);

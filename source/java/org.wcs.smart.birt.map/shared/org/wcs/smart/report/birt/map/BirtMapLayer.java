@@ -1748,12 +1748,9 @@ public class BirtMapLayer extends EObjectImpl implements Layer {
                     ProjectPlugin.log("failure to transform layer bounds", fe); //$NON-NLS-1$
                 }
             }
-        } else {
-            return new ReferencedEnvelope(new Envelope(), null);
         }
 
         return result;
-
     }
 
     private ReferencedEnvelope obtainBoundsFromResources(IProgressMonitor monitor) {

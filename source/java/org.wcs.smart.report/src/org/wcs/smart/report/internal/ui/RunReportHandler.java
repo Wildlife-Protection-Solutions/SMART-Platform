@@ -23,9 +23,9 @@
 package org.wcs.smart.report.internal.ui;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Named;
 
@@ -73,7 +73,7 @@ public class RunReportHandler {
 			//nothing to run
 			return;
 		}
-		HashMap<String, Object> reportParamseters = null;
+		Map<Report, Map<String, Object>> reportParamseters = null;
 		try{
 			ParameterCollecter param = new ParameterCollecter();
 			reportParamseters = param.getParameters(reportsToRun.toArray(new Report[reportsToRun.size()]));
@@ -84,7 +84,7 @@ public class RunReportHandler {
 		}
 		
 		for (Report r : reportsToRun){
-			ReportManager.viewReport(r, reportParamseters, context);
+			ReportManager.viewReport(r, reportParamseters.get(r), context);
 		}
 	}
 	

@@ -26,10 +26,10 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.zip.Deflater;
@@ -83,7 +83,7 @@ public class ReportDefintionExporter implements IReportExporter {
 	 * Exports each report to a different zip file
 	 */
 	@Override
-	public void exportReport(Path file, Report report, HashMap<String, Object> reportParams, IProgressMonitor monitor) throws Exception {
+	public void exportReport(Path file, Report report, Map<String, Object> reportParams, IProgressMonitor monitor) throws Exception {
 		monitor.beginTask(Messages.ReportDefintionExporter_Progress_Exporting, 3);
 		try(ZipOutputStream zout = new ZipOutputStream(Files.newOutputStream(file))){
 			zout.setLevel(Deflater.DEFAULT_COMPRESSION);

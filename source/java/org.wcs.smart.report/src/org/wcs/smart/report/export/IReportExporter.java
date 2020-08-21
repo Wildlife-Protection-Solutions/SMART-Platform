@@ -22,7 +22,7 @@
 package org.wcs.smart.report.export;
 
 import java.nio.file.Path;
-import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.wcs.smart.report.model.Report;
@@ -46,7 +46,7 @@ public interface IReportExporter {
 	 * @param monitor
 	 * @throws Exception if error occurs during the export
 	 */
-	public void exportReport(Path file, Report report, HashMap<String, Object> reportParams, IProgressMonitor monitor) throws Exception ;
+	public void exportReport(Path file, Report report, Map<String, Object> reportParams, IProgressMonitor monitor) throws Exception ;
 	
 	/**
 	 * @return the exporter name

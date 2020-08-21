@@ -24,6 +24,7 @@ Bundle-ClassPath: .
 Export-Package: org.wcs.smart.report,
  org.wcs.smart.report.execute,
  org.wcs.smart.report.in,
+ org.wcs.smart.report.internal.ui.viewer.parameter,
  org.wcs.smart.report.model,
  org.wcs.smart.report.ui
 Automatic-Module-Name: org.wcs.smart.report

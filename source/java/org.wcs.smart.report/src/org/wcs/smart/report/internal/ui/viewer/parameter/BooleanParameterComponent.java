@@ -21,12 +21,12 @@
  */
 package org.wcs.smart.report.internal.ui.viewer.parameter;
 
+import org.eclipse.birt.report.engine.api.IParameterDefn;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.report.internal.Messages;
 
 /**
@@ -40,29 +40,28 @@ public class BooleanParameterComponent extends AbstractBirtParameter{
 	 * @param name
 	 * @param displayText
 	 */
-	public BooleanParameterComponent(String name, String displayText, Object defaultValue) {
-		super(name, displayText, defaultValue != null ? Boolean.valueOf(defaultValue.toString()) : null);
+	public BooleanParameterComponent(IParameterDefn def){
+		super(def);
 	}
 
 	private Button btnFalse;
 	private Button btnTrue;
 	
 	@Override
-	public Composite createComposite(Composite parent, IDialogSettings settings) {
+	public void createComposite(Composite parent, IDialogSettings settings) {
 		Object initValue = super.getInitializeValue(settings);
 		
-		Composite param = new Composite(parent, SWT.NONE);
-		GridLayout gl = new GridLayout(3, false);
-		gl.marginWidth = gl.marginHeight = gl.horizontalSpacing = gl.verticalSpacing = 0;
-		param.setLayout(gl);
+		createNameLabel(parent);
 		
-		Label lbl = new Label(param, SWT.NONE);
-		lbl.setText(getDisplayText() + ": "); //$NON-NLS-1$
+		Composite temp = new Composite(parent, SWT.NONE);
+		temp.setLayout(new GridLayout(2, false));
+		((GridLayout)temp.getLayout()).marginWidth = 0;
+		((GridLayout)temp.getLayout()).marginHeight = 0;
 		
-		btnTrue = new Button(param, SWT.RADIO);
+		btnTrue = new Button(temp, SWT.RADIO);
 		btnTrue.setText(Messages.BooleanParameterComponent_True_Label);
 		
-		btnFalse = new Button(param, SWT.RADIO);
+		btnFalse = new Button(temp, SWT.RADIO);
 		btnFalse.setText(Messages.BooleanParameterComponent_False_Label);
 		
 		if (initValue != null && initValue instanceof Boolean){
@@ -72,7 +71,6 @@ public class BooleanParameterComponent extends AbstractBirtParameter{
 			btnTrue.setSelection(true);
 		}
 
-		return param;
 	}
 
 	@Override

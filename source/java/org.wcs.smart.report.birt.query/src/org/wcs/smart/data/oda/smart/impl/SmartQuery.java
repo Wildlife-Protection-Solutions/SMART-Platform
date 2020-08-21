@@ -40,6 +40,7 @@ public class SmartQuery extends AbstractSmartBirtQuery {
 
 	//the query uuid and type
 	private IQueryType queryType;
+	
 	/**
 	 * Creates a new smart query
 	 */

@@ -23,8 +23,12 @@ package org.wcs.smart.report.internal.ui.viewer.parameter;
 
 import java.util.HashMap;
 
+import org.eclipse.birt.report.engine.api.IParameterDefn;
+import org.eclipse.birt.report.engine.api.impl.ScalarParameterDefn;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 
 /**
  * Abstract class for ui component for displaying report parameters.
@@ -35,18 +39,19 @@ import org.eclipse.swt.widgets.Composite;
  */
 public abstract class AbstractBirtParameter implements IBirtParameterComponent {
 
-	private String paramName = null;
-	private String displayText = null;
 	protected Object defaultValue = null;
+	
+	protected IParameterDefn def;
 	/**
 	 * Creates anew parameter element
 	 * @param name the parameter name
 	 * @param displayText the parameter display text
 	 */
-	public AbstractBirtParameter(String name, String displayText, Object defaultValue){
-		this.paramName = name;
-		this.displayText = displayText;
-		this.defaultValue = defaultValue;
+	public AbstractBirtParameter(IParameterDefn def){
+		this.def = def;
+		if (def instanceof ScalarParameterDefn){
+			defaultValue = ((ScalarParameterDefn)def).getDefaultValue(); 
+		}
 	}
 	
 	/**
@@ -58,9 +63,11 @@ public abstract class AbstractBirtParameter implements IBirtParameterComponent {
 	 * @return
 	 */
 	protected Object getInitializeValue(IDialogSettings settings) {
-		if (this.defaultValue != null) return this.defaultValue;
 		String x = settings.get(getParameterName());
 		if (x != null) return x;
+		
+		if (this.defaultValue != null) return this.defaultValue;
+
 		return null;
 	}
 	
@@ -69,14 +76,20 @@ public abstract class AbstractBirtParameter implements IBirtParameterComponent {
 	 * @param parent
 	 * @return
 	 */
-	public abstract Composite createComposite(Composite parent, IDialogSettings settings);
+	public abstract void createComposite(Composite parent, IDialogSettings settings);
+	
+	protected void createNameLabel(Composite parent) {
+		Label lbl = new Label(parent, SWT.NONE);
+		lbl.setText(getDisplayText() + ": "); //$NON-NLS-1$
+		if (def.getHelpText() != null) lbl.setToolTipText(def.getHelpText());
+	}
 	
 	/**
 	 * 
 	 * @return the parameter name
 	 */
 	public String getParameterName(){
-		return this.paramName;
+		return def.getName();
 	}
 	
 	/**
@@ -84,11 +97,8 @@ public abstract class AbstractBirtParameter implements IBirtParameterComponent {
 	 * @return the display text
 	 */
 	protected String getDisplayText(){
-		if (this.displayText != null){
-			return this.displayText;
-		}else{
-			return this.paramName;
-		}
+		if (def.getDisplayName() != null) return def.getDisplayName();
+		return def.getName();
 	}
 	
 	public abstract Object getParameterValue();
@@ -97,9 +107,9 @@ public abstract class AbstractBirtParameter implements IBirtParameterComponent {
 	 * @return the parameter value selected by the user
 	 */
 	@Override
-	public HashMap<String, Object> getParameters(){
-		HashMap<String, Object> params = new HashMap<String, Object>();
-		params.put(getParameterName(), getParameterValue());
+	public HashMap<IParameterDefn, Object> getParameters(){
+		HashMap<IParameterDefn, Object> params = new HashMap<IParameterDefn, Object>();
+		params.put(def, getParameterValue());
 		return params;
 		
 	}

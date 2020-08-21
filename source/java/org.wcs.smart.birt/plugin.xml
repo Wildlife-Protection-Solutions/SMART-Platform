@@ -2,6 +2,7 @@
 <?eclipse version="3.4"?>
 <plugin>
    <extension-point id="org.wcs.smart.birt.reportEditorManager" name="ReportEditorManager" schema="schema/org.wcs.smart.birt.reportEditorManager.exsd"/>
+   <extension-point id="org.wcs.smart.birt.parameter" name="SMART BIRT Parameter" schema="schema/org.wcs.smart.birt.parameter.exsd"/>
    <extension
          point="org.eclipse.ui.editors">
       <editor

@@ -61,6 +61,10 @@
             id="org.wcs.smart.report.saveas"
             name="%saveas.command.name">
       </command>
+      <command
+            id="org.wcs.smart.report.birt.query.newsmartparameter"
+            name="New SMART Parameter">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -206,6 +210,10 @@
       <handler
             class="org.wcs.smart.report.internal.ui.SaveAsReportHandler$SaveAsReportHandlerWrapper"
             commandId="org.wcs.smart.report.saveas">
+      </handler>
+      <handler
+            class="org.wcs.smart.report.internal.ui.NewSmartParameterHandler$NewSmartParameterHandlerWrapper"
+            commandId="org.wcs.smart.report.birt.query.newsmartparameter">
       </handler>
    </extension>
    <extension
@@ -974,6 +982,14 @@
             </visibleWhen>
          </toolbar>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:outlinemenu?before=additions-parameters">
+         <command
+               commandId="org.wcs.smart.report.birt.query.newsmartparameter"
+               style="push">
+         </command>
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.perspectives">
@@ -1147,5 +1163,12 @@
       <FilestoreDirectory
             directory="reports">
       </FilestoreDirectory>
+   </extension>
+   <extension
+         point="org.wcs.smart.birt.parameter">
+      <parameter
+            class="org.wcs.smart.report.parameter.StationParameter"
+            image="platform:/plugin/org.wcs.smart/images/icons/obj16/station.png">
+      </parameter>
    </extension>
 </plugin>

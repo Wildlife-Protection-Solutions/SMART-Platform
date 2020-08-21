@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2020 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,45 +19,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.report.internal.ui.viewer.parameter;
+package org.wcs.smart.birt.parameter;
 
-import org.eclipse.birt.report.engine.api.IParameterDefn;
-import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Text;
+import java.util.Collection;
+import java.util.List;
+import java.util.Locale;
+
+import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
 
 /**
- * String parameter component.
- * @author egouge
- * @since 1.0.0
+ * Custom BIRT parameter that represents a SMART list 
+ * property (ex. Employee, Station etc)
+ * 
+ * @author Emily
+ * @since 7.0.0
+ *
  */
-public class StringParameterComponent extends AbstractBirtParameter{
-			
-	private Text inputValue = null;
+public interface ISmartBirtParameter {
+
+	public static final String KEY = "smart."; //$NON-NLS-1$
+	/**
+	 * The list name
+	 * @return
+	 */
+	public String getName(Locale l);
 	
-	public StringParameterComponent(IParameterDefn def) {
-		super(def);
-	}
-
-	@Override
-	public void createComposite(Composite parent, IDialogSettings settings) {
-		Object initValue = super.getInitializeValue(settings);
+	/**
+	 * The unique key
+	 * @return
+	 */
+	public String getKey();
 		
-		createNameLabel(parent);
-		
-		inputValue = new Text(parent, SWT.SINGLE | SWT.BORDER);
-		inputValue.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		if (initValue != null){
-			inputValue.setText(initValue.toString());
-		}
-	}
-
-	@Override
-	public Object getParameterValue() {
-		return inputValue.getText();
-	}
-
+	/**
+	 * 
+	 * @return the list of valid values for the parameter
+	 */
+	public List<String> getValues(Session session, Collection<ConservationArea> cas, Locale l);
+	
 }
-

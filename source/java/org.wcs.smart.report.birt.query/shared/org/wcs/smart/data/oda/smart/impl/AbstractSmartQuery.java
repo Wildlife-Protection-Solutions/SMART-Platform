@@ -120,14 +120,14 @@ public abstract class AbstractSmartQuery {
 	protected IResultSet executeQueryInternal(AbstractSmartBirtQuery query,
 			SmartConnection connection) throws OdaException {
 		// the result set
-		result = query.getQuery().getCachedResults();
+		result = query.getCachedResults();
 		if (result == null || result.isDisposed()) {
 			try {
 				result = connection.executeQuery(query.getQuery());
+				query.setCachedResults( result );
 			} catch (Exception ex) {
 				throw new SmartQueryExecutionException(ex.getCause() != null ? ex.getCause() : ex);
 			}
-			query.getQuery().setCachedResults(result);
 		}
 
 		if (query.isAttachment) {

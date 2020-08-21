@@ -57,6 +57,8 @@ import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 
 import org.apache.commons.logging.LogFactory;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.Platform;
 import org.geotools.data.DataAccessFinder;
 import org.geotools.data.DataStoreFinder;
 import org.geotools.factory.CommonFactoryFinder;
@@ -368,7 +370,7 @@ public class ConnectStartupContextListener implements ServletContextListener{
 	
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
-		
+
 	    //this is required to get the geotiff writer to work when writing raster map layers
 		//for reports
 	    IIORegistry.getDefaultInstance().registerServiceProvider(new URLImageInputStreamSpi());

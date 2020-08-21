@@ -25,10 +25,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.DecimalFormat;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.birt.report.designer.core.model.SessionHandleAdapter;
@@ -302,7 +302,7 @@ public class ReportManager {
 	 * the parameters provided.
 	 * @param report
 	 */
-	public static void viewReport(final Report report, final HashMap<String, Object> reportParameters, IEclipseContext context){
+	public static void viewReport(final Report report, final Map<String, Object> reportParameters, IEclipseContext context){
 		MPart part = createReportViewer(report, context);
 		((ReportView)E3Utils.getSourceObject(part)).setReport(report,reportParameters);
 	}

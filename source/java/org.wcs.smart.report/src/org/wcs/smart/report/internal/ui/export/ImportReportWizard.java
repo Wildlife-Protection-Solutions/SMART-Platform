@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.report.internal.ui.export;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;

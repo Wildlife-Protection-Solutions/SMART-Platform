@@ -30,7 +30,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
-import java.util.HashMap;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -92,7 +92,7 @@ public class ReportView implements IReportListener{
 	
 	private Browser browser;
 	private Report report;
-	private HashMap<String, Object> selectedParams;
+	private Map<String, Object> selectedParams;
 	private int dpi = Display.getDefault().getDPI().x;
 	
 	@Inject private MPart part;
@@ -279,7 +279,7 @@ public class ReportView implements IReportListener{
 	 * Sets the report to display in the review and runs the report.
 	 * @param report
 	 */
-	public void setReport(Report report, HashMap<String, Object> reportParamseters){
+	public void setReport(Report report, Map<String, Object> reportParamseters){
 		this.report = report;
 		updateName();
 		this.selectedParams = reportParamseters;
@@ -318,9 +318,9 @@ public class ReportView implements IReportListener{
 		
 	}
 	
-	private HashMap<String, Object> getParameters() throws Exception{
+	private Map<String, Object> getParameters() throws Exception{
 		ParameterCollecter paramCollector = new ParameterCollecter();	
-		HashMap<String, Object> selectedParams = paramCollector.getParameters(new Report[]{report});
+		Map<String, Object> selectedParams = paramCollector.getParameters(new Report[]{report}).get(report);
 		return selectedParams;
 	}
 

@@ -29,6 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 
+import org.eclipse.birt.report.engine.api.IParameterDefn;
 import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -56,7 +57,7 @@ public class ReportParameterDialog extends SmartStyledTitleDialog {
 	private static IDialogSettings dialogSettings = new DialogSettings("org.wcs.smart.report.parameters"); //$NON-NLS-1$
 	
 	private List<IBirtParameterComponent> params = new ArrayList<IBirtParameterComponent>();
-	private HashMap<String, Object> values = null;
+	private HashMap<IParameterDefn, Object> values = null;
 	
 	
 	/**
@@ -92,10 +93,7 @@ public class ReportParameterDialog extends SmartStyledTitleDialog {
 		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		for(IBirtParameterComponent param: params){
-			Composite c = param.createComposite(comp, dialogSettings);
-			GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
-			gd.widthHint = 200;
-			c.setLayoutData(gd);
+			param.createComposite(comp, dialogSettings);
 		}
 		
 		super.getShell().setText(Messages.ReportParameterDialog_DialogTitle);
@@ -128,23 +126,25 @@ public class ReportParameterDialog extends SmartStyledTitleDialog {
 	 * 
 	 * @return maps of parameter name to parameter value enter by the user
 	 */
-	public HashMap<String, Object> getValues(){
+	public HashMap<IParameterDefn, Object> getValues(){
 		return values;
 	}
 	
-	private HashMap<String, Object> updateValues(){
-		values = new HashMap<String, Object>();
+	private HashMap<IParameterDefn, Object> updateValues(){
+		values = new HashMap<>();
 		SimpleDateFormat sdf = new SimpleDateFormat(SIMPLE_DATE_FORMAT);
 		for(IBirtParameterComponent param: params){
 			values.putAll(param.getParameters());
-			HashMap<String, Object> values = param.getParameters();
-			for (Iterator<Entry<String, Object>> iterator = values.entrySet().iterator(); iterator.hasNext();) {
-				Entry<String, Object> type = iterator.next();
+			HashMap<IParameterDefn, Object> values = param.getParameters();
+			for (Iterator<Entry<IParameterDefn, Object>> iterator = values.entrySet().iterator(); iterator.hasNext();) {
+				Entry<IParameterDefn, Object> type = iterator.next();
+				if (type.getValue() == null) return null;
+				
 				if (Date.class.isAssignableFrom(type.getValue().getClass())){
 					String value = sdf.format((Date)type.getValue());
-					dialogSettings.put(type.getKey(), value);
+					dialogSettings.put(type.getKey().getName(), value);
 				}else{
-					dialogSettings.put(type.getKey(), type.getValue().toString());
+					dialogSettings.put(type.getKey().getName(), type.getValue().toString());
 				}
 			}
 		}

@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.report;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 

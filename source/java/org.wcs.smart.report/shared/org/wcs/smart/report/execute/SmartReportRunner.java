@@ -21,11 +21,11 @@
  */
 package org.wcs.smart.report.execute;
 
-import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.birt.report.engine.api.EngineException;
 import org.eclipse.birt.report.engine.api.HTMLRenderOption;
@@ -74,7 +74,7 @@ public enum SmartReportRunner {
 	 * @throws Exception
 	 */
 	public void runReport(Report report, String currentUser, IReportEngine engine, IRenderOption options, 
-			Session session, HashMap<String, Object> reportParameters,
+			Session session, Map<String, Object> reportParameters,
 			Path renderFile, int defaultDpi) throws Exception{
 		
 		if (Files.exists(renderFile)) Files.delete(renderFile);
@@ -134,7 +134,7 @@ public enum SmartReportRunner {
 	 * @throws Exception
 	 */
 	public void runReport(Report report, String currentUser, IReportEngine engine, IRenderOption options, 
-			Session session, HashMap<String, Object> reportParameters, int defaultDpi) throws Exception{
+			Session session, Map<String, Object> reportParameters, int defaultDpi) throws Exception{
 		
 		Path reportFile = report.getFullPath();
 		runFile(reportFile, report.getConservationArea(), currentUser, engine, options, session, reportParameters, defaultDpi);
@@ -153,7 +153,7 @@ public enum SmartReportRunner {
 	 */
 	@SuppressWarnings("unchecked")
 	public void runFile(Path file, ConservationArea ca, String currentUser, IReportEngine engine, IRenderOption options, 
-			Session session, HashMap<String, Object> reportParameters, int defaultDpi) throws Exception{
+			Session session, Map<String, Object> reportParameters, int defaultDpi) throws Exception{
 		
 		IReportRunnable design = engine.openReportDesign(file.toAbsolutePath().toString());
 		IRunAndRenderTask task = new SmartRunAndRender((ReportEngine) engine, design, ca, currentUser);

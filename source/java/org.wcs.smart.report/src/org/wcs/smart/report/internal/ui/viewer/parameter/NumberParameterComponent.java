@@ -21,14 +21,13 @@
  */
 package org.wcs.smart.report.internal.ui.viewer.parameter;
 
+import org.eclipse.birt.report.engine.api.IParameterDefn;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.internal.Messages;
@@ -83,24 +82,18 @@ public class NumberParameterComponent extends AbstractBirtParameter{
 	 * @param displayText display text
 	 * @param validator validator
 	 */
-	public NumberParameterComponent(String name, String displayText, INumberValidator validator, Object defaultValue) {
-		super(name, displayText, defaultValue);
+	public NumberParameterComponent(IParameterDefn def, INumberValidator validator) {
+		super(def);
 		this.validator = validator;
 	}
 
 	@Override
-	public Composite createComposite(Composite parent, IDialogSettings settings) {
+	public void createComposite(Composite parent, IDialogSettings settings) {
 		Object initValue = super.getInitializeValue(settings);
 
-		Composite param = new Composite(parent, SWT.NONE);
-		GridLayout gl = new GridLayout(2, false);
-		gl.marginWidth = gl.marginHeight = gl.horizontalSpacing = gl.verticalSpacing = 0;
-		param.setLayout(gl);
-		
-		Label lbl = new Label(param, SWT.NONE);
-		lbl.setText(getDisplayText() + ": "); //$NON-NLS-1$
-		
-		inputValue = new Text(param, SWT.SINGLE | SWT.BORDER);
+		createNameLabel(parent);
+
+		inputValue = new Text(parent, SWT.SINGLE | SWT.BORDER);
 		inputValue.addVerifyListener(new VerifyListener(){
 			@Override
 			public void verifyText(VerifyEvent e) {
@@ -116,9 +109,7 @@ public class NumberParameterComponent extends AbstractBirtParameter{
 		inputValue.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		if (initValue != null){
 			inputValue.setText(initValue.toString());
-		}
-		
-		return param;
+		}		
 	}
 
 	@Override

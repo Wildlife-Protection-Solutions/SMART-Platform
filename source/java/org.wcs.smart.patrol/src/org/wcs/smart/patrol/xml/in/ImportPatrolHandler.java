@@ -27,6 +27,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.Collator;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -131,8 +132,8 @@ public class ImportPatrolHandler {
 					
 					monitor.beginTask(Messages.ImportPatrolHandler_Progress_LoadingPatrols, files.size());
 					IProgressMonitor nullPm = new NullProgressMonitor();
-						
-					int imported = 0;
+					boolean cancelled = false;
+					List<Patrol> imported = new ArrayList<>();
 					for (int i = 0; i < files.size(); i ++){
 						Path file = Paths.get(files.get(i));
 						monitor.subTask(Messages.ImportPatrolHandler_Progress_ProcessingFile + file.toString());
@@ -140,30 +141,32 @@ public class ImportPatrolHandler {
 						if (Files.isDirectory(file)) continue;
 						try{
 							Patrol p = PatrolImporter.importPatrol(file, config, nullPm);
-							if (p != null) {
-								imported ++;
-								PatrolEventManager.getInstance().patrolAdded(p);
-							}
+							if (p != null) imported.add(p);
 						}catch (Exception ex){
 							SmartPatrolPlugIn.displayLog(MessageFormat.format(Messages.ImportPatrolHandler_Error_FileNotImported + "\n\n", new Object[]{file.toString()}) + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 						}
 						if (monitor.isCanceled()){
-							final int aimported = imported;
-							shell.getDisplay().syncExec(new Runnable() {
-								@Override
-								public void run() {
-									MessageDialog.openInformation(shell, Messages.ImportPatrolHandler_Cancelled_DialogTitle, MessageFormat.format(Messages.ImportPatrolHandler_Cancelled_DialogMessage1, aimported, files.size()));									
-								}
-							});
-							
-							return;
+							cancelled = true;
+							break;
 						}
 					}
-					final int iimported = imported;
+					for (Patrol p : imported) {
+						try {
+							PatrolEventManager.getInstance().patrolAdded(p);
+						}catch (Exception ex) {
+							SmartPatrolPlugIn.log(ex.getMessage(), ex);
+						}
+					}
+
+					boolean fcancelled = cancelled;
 					shell.getDisplay().syncExec(new Runnable(){
 						@Override
 						public void run() {
-							MessageDialog.openInformation(shell, Messages.ImportPatrolHandler_MessageTitle, MessageFormat.format(Messages.ImportPatrolHandler_CompleteMessage, iimported, files.size()));
+							if (fcancelled) {
+								MessageDialog.openInformation(shell, Messages.ImportPatrolHandler_Cancelled_DialogTitle, MessageFormat.format(Messages.ImportPatrolHandler_Cancelled_DialogMessage1, imported.size(), files.size()));									
+							}else {
+								MessageDialog.openInformation(shell, Messages.ImportPatrolHandler_MessageTitle, MessageFormat.format(Messages.ImportPatrolHandler_CompleteMessage, imported.size(), files.size()));
+							}
 							
 						}});
 				}

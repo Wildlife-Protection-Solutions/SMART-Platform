@@ -320,7 +320,7 @@
          <command
                commandId="org.wcs.smart.report.query.bindings.fix"
                style="push"
-               tooltip="%updatebindings.command.tooltip.">
+               tooltip="%updatebindings.menu.command.tooltip">
          </command>
       </menuContribution>
    </extension>

@@ -22,12 +22,15 @@
 package org.wcs.smart.report.execute;
 
 import java.nio.file.Path;
-import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 import org.eclipse.birt.report.engine.api.IGetParameterDefinitionTask;
+import org.eclipse.birt.report.engine.api.IParameterDefn;
 import org.eclipse.birt.report.engine.api.IParameterDefnBase;
 import org.eclipse.birt.report.engine.api.IReportEngine;
 import org.eclipse.birt.report.engine.api.IReportRunnable;
@@ -47,8 +50,10 @@ public enum ParameterFinder {
 	 * Determines all parameters for a given report
 	 * and adds them to the local report collection.
 	 */
-	public HashMap<String, IParameterDefnBase> getParameters(Report report, IReportEngine engine) throws Exception{
-		HashMap<String, IParameterDefnBase> allParameters = new HashMap<String, IParameterDefnBase>();
+	public List<IParameterDefnBase> getParameters(Report report, IReportEngine engine) throws Exception{
+		List<IParameterDefnBase> allParameters = new ArrayList<>();
+		
+		Set<String> names = new HashSet<>();
 		
 		Path reportFile = report.getFullPath();
 		final IReportRunnable design = engine.openReportDesign(reportFile.toAbsolutePath().toString());
@@ -57,15 +62,19 @@ public enum ParameterFinder {
 		
 		for (Iterator<?> iterator = parameters.iterator(); iterator.hasNext();) {
 			IParameterDefnBase param = (IParameterDefnBase)iterator.next();
-			IParameterDefnBase def = allParameters.get(param.getName());
-			if (def == null){
-				allParameters.put(param.getName(), param);	
-			}else{
-				if (def.getParameterType() != param.getParameterType()){
-					throw new Exception(MessageFormat.format("Reports contain parameters with the same name ({0}) but require different parameter types.  These reports cannot be run at the same time.", new Object[]{param.getName()})); //$NON-NLS-1$
-				}
-				//TODO: implement more here to make sure they are the same
-			}
+			allParameters.add(param);
+//			if (names.contains(param.getName())) {
+//				
+//			}
+//			IParameterDefnBase def = allParameters.get(param.getName());
+//			if (def == null){
+//				allParameters.put(param.getName(), param);	
+//			}else{
+//				if (def.getParameterType() != param.getParameterType()){
+//					throw new Exception(MessageFormat.format("Reports contain parameters with the same name ({0}) but require different parameter types.  These reports cannot be run at the same time.", new Object[]{param.getName()})); //$NON-NLS-1$
+//				}
+//				//TODO: implement more here to make sure they are the same
+//			}
 			
 		}
 		return allParameters;

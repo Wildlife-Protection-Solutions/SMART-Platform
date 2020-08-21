@@ -34,5 +34,20 @@
             queryTypeKey="patrolwaypoint">
       </QueryTypeDataset>
    </extension>
+   <extension
+         point="org.wcs.smart.birt.parameter">
+      <parameter
+            class="org.wcs.smart.patrol.report.parameter.TeamParameter"
+            image="platform:/plugin/org.wcs.smart.patrol/images/icons/obj16/patrol_team.png">
+      </parameter>
+      <parameter
+            class="org.wcs.smart.patrol.report.parameter.MandateParameter"
+            image="platform:/plugin/org.wcs.smart.patrol/images/icons/obj16/patrol_mandate.png">
+      </parameter>
+      <parameter
+            class="org.wcs.smart.patrol.report.parameter.PatrolTransportTypeParameter"
+            image="platform:/plugin/org.wcs.smart.patrol/images/icons/obj16/patrol.png">
+      </parameter>
+   </extension>
 
 </plugin>

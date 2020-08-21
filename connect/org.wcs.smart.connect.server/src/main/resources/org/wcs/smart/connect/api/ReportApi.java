@@ -32,6 +32,7 @@ import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -66,13 +67,19 @@ import org.eclipse.birt.report.engine.api.IParameterGroupDefn;
 import org.eclipse.birt.report.engine.api.IReportEngine;
 import org.eclipse.birt.report.engine.api.IReportRunnable;
 import org.eclipse.birt.report.engine.api.IRunAndRenderTask;
+import org.eclipse.birt.report.engine.api.IScalarParameterDefn;
 import org.eclipse.birt.report.engine.api.RenderOption;
+import org.eclipse.birt.report.engine.api.impl.ParameterSelectionChoice;
 import org.eclipse.birt.report.engine.api.impl.ReportEngine;
 import org.eclipse.birt.report.engine.api.impl.ScalarParameterDefn;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.Platform;
 import org.hibernate.Session;
 import org.locationtech.udig.catalog.URLUtils;
 import org.wcs.smart.birt.BirtConstants;
 import org.wcs.smart.birt.SmartRunAndRender;
+import org.wcs.smart.birt.parameter.ISmartBirtParameter;
+import org.wcs.smart.birt.parameter.ParameterManager;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
@@ -477,7 +484,6 @@ public class ReportApi extends HttpServlet{
 	@Produces({ MediaType.APPLICATION_JSON })
 	@Operation(description="Returns all of the parameters of the given report")
 	public List<ReportParameter> getReportsParameters(@Parameter(description="the report uuid") @PathParam("reportuuid") String reportUuid) throws SmartConnectException{
-		
 		UUID uuid = UuidUtils.stringToUuid(reportUuid);
 		Session s = HibernateManager.getSession(context, request.getLocale());
 		
@@ -500,10 +506,17 @@ public class ReportApi extends HttpServlet{
 		Report report = (Report) s.get(Report.class, uuid);
 		if (report == null) throw new SmartConnectException(Status.NOT_FOUND, Messages.getString("ReportApi.ReportNotFound", request.getLocale())); //$NON-NLS-1$
 			
-		HashMap<String, IParameterDefnBase> parameters = ParameterFinder.INSTANCE.getParameters(report, BirtEngine.getBirtEngine(context));
-		for (IParameterDefnBase param : parameters.values()){
+		List<IParameterDefnBase> parameters = ParameterFinder.INSTANCE.getParameters(report, BirtEngine.getBirtEngine(context));
+
+		List<ConservationArea> cas = new ArrayList<>();
+		if (!report.getConservationArea().getIsCcaa()) {
+			cas.add(report.getConservationArea());
+		}else {
+			//TODO:
+		}
+		for (IParameterDefnBase param : parameters){
 			if (param instanceof IParameterDefn){
-				rparameters.add(createParameter((IParameterDefn) param));
+				rparameters.add(createParameter(s, (IParameterDefn) param, cas));
 			}else if (param instanceof IParameterGroupDefn){
 				ReportParameter pp = new ReportParameter();
 				pp.setName(param.getName());
@@ -513,7 +526,7 @@ public class ReportApi extends HttpServlet{
 				
 				for (Object child: ((IParameterGroupDefn) param).getContents()){
 					if (child instanceof IParameterDefn){
-						pp.getChildren().add(createParameter((IParameterDefn) child));
+						pp.getChildren().add(createParameter(s,(IParameterDefn) child, cas));
 					}else{
 						throw new Exception(MessageFormat.format(Messages.getString("ReportApi.ParameterNotSupported", request.getLocale()), param.getName())); //$NON-NLS-1$
 					}
@@ -525,40 +538,72 @@ public class ReportApi extends HttpServlet{
 		return rparameters;
 	}
 	
-	private ReportParameter createParameter(IParameterDefn param) throws Exception{
+	private ReportParameter createParameter(Session session, IParameterDefn param, List<ConservationArea> cas) throws Exception{
 		ReportParameter pp = new ReportParameter();
 		pp.setName(param.getName());
 		pp.setDisplayText(param.getPromptText());
+		
+		boolean isList = false;
 		if (param instanceof ScalarParameterDefn){
 			pp.setDefaultValue(((ScalarParameterDefn)param).getDefaultValue());
-		}
-		switch(param.getDataType()){
-		case IParameterDefn.TYPE_DATE:
-			pp.setType(Type.DATE);
-			break;
-		case IParameterDefn.TYPE_TIME:
-			pp.setType(Type.TIME);
-			break;
-		case IParameterDefn.TYPE_DATE_TIME:
-			pp.setType(Type.DATETIME);
-			break;
-		case IParameterDefn.TYPE_BOOLEAN:
-			pp.setType(Type.BOOLEAN);
-			break;
-		case IParameterDefn.TYPE_DECIMAL:
-		case IParameterDefn.TYPE_FLOAT:
-			pp.setType(Type.DOUBLE);
-			break;		
-		case IParameterDefn.TYPE_INTEGER:
-			pp.setType(Type.INTEGER);
-			break;
-		case IParameterDefn.TYPE_STRING:
-			pp.setType(Type.STRING);
-			break;
-		case IParameterDefn.TYPE_ANY:
-		default:
-			throw new Exception(MessageFormat.format(Messages.getString("ReportApi.ParameterTypeNotSupported", request.getLocale()), new Object[]{ param.getDataType() })); //$NON-NLS-1$
 			
+			if (((ScalarParameterDefn)param).getControlType() == IScalarParameterDefn.LIST_BOX) {
+				isList = true;
+			}		
+		}
+		
+		
+		if (isList) {
+			pp.setType(Type.STRING);
+			
+			if(param.getHandle().getCustomXml() != null && 
+					param.getHandle().getCustomXml().startsWith(ISmartBirtParameter.KEY)) {
+				String key = param.getHandle().getCustomXml().substring(ISmartBirtParameter.KEY.length());
+				
+				
+				for (String xkey : ParameterManager.INSTANCE.findParameter(key)
+							.getValues(session, cas, request.getLocale())) {
+					pp.addOption(xkey, xkey);
+				}
+
+			}else {
+				for (Object x : param.getSelectionList()) {
+					if (x instanceof ParameterSelectionChoice) {
+						ParameterSelectionChoice c = (ParameterSelectionChoice)x;
+						pp.addOption(c.getLabel(), c.getValue().toString());
+					}
+				}
+			}
+
+		} else {
+			switch(param.getDataType()){
+			case IParameterDefn.TYPE_DATE:
+				pp.setType(Type.DATE);
+				break;
+			case IParameterDefn.TYPE_TIME:
+				pp.setType(Type.TIME);
+				break;
+			case IParameterDefn.TYPE_DATE_TIME:
+				pp.setType(Type.DATETIME);
+				break;
+			case IParameterDefn.TYPE_BOOLEAN:
+				pp.setType(Type.BOOLEAN);
+				break;
+			case IParameterDefn.TYPE_DECIMAL:
+			case IParameterDefn.TYPE_FLOAT:
+				pp.setType(Type.DOUBLE);
+				break;		
+			case IParameterDefn.TYPE_INTEGER:
+				pp.setType(Type.INTEGER);
+				break;
+			case IParameterDefn.TYPE_STRING:
+				pp.setType(Type.STRING);
+				break;
+			case IParameterDefn.TYPE_ANY:
+			default:
+				throw new Exception(MessageFormat.format(Messages.getString("ReportApi.ParameterTypeNotSupported", request.getLocale()), new Object[]{ param.getDataType() })); //$NON-NLS-1$
+				
+			}
 		}
 		return pp;
 	}

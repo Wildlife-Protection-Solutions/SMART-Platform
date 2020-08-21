@@ -36,6 +36,7 @@ import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.eclipse.datatools.connectivity.oda.SortSpec;
 import org.eclipse.datatools.connectivity.oda.spec.QuerySpecification;
+import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.util.UuidUtils;
 
@@ -66,6 +67,8 @@ public abstract class AbstractSmartBirtQuery implements IQuery{
 	//dataset metadata
 	protected SmartParameterMetaData pMetadata = null;
 	protected SmartConnection connection;
+	
+	protected IQueryResult localCache = null;
 
 	/**
 	 * Parses the query text in the query type and query UUID
@@ -91,6 +94,14 @@ public abstract class AbstractSmartBirtQuery implements IQuery{
 		this.dataSetType = dataSetType;		
 	}
 
+	public IQueryResult getCachedResults() {
+		return this.localCache;
+	}
+	
+	public void setCachedResults(IQueryResult result) {
+		this.localCache = result;
+	}
+	
 	public Query getQuery(){
 		return this.smartQuery;
 	}

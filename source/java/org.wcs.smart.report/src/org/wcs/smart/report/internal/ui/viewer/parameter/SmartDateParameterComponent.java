@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+import org.eclipse.birt.report.engine.api.IParameterDefn;
 import org.eclipse.birt.report.engine.api.IParameterGroupDefn;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.fieldassist.ControlDecoration;
@@ -66,6 +67,8 @@ import org.wcs.smart.util.SmartUtils;
 public class SmartDateParameterComponent implements IBirtParameterComponent, Listener{
 
 	
+	private static final String DATE_OP_KEY = "org.wcs.smart.report.parameter.dateOp"; //$NON-NLS-1$
+	
 	private DateTime startPicker = null;
 	private DateTime endPicker = null;
 	
@@ -75,24 +78,39 @@ public class SmartDateParameterComponent implements IBirtParameterComponent, Lis
 	
 	private ControlDecoration cdEnd;
 	
+	private IParameterDefn startDef;
+	private IParameterDefn endDef;
+	
+	private IDialogSettings settings;
 	/**
 	 * 
 	 * @param name parameter name
 	 * @param displayText parameter display text
 	 */
 	public SmartDateParameterComponent(IParameterGroupDefn def){
-		
+		for (Object x : ((IParameterGroupDefn)def).getContents()) {
+			if (x instanceof IParameterDefn) {
+				if ( ((IParameterDefn) x).getName().equals(SmartReportParameters.PARAM_START_DATE_KEY)) {
+					startDef = (IParameterDefn) x;
+				}
+				if ( ((IParameterDefn) x).getName().equals(SmartReportParameters.PARAM_END_DATE_KEY)) {
+					endDef = (IParameterDefn) x;
+				}
+			}
+		}
 	}
 	
 	/* (non-Javadoc)
 	 * @see org.wcs.smart.report.internal.ui.viewer.parameter.IBirtParameter#createComponent(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
-	public Composite createComposite(Composite parent, IDialogSettings settings) {
+	public void createComposite(Composite parent, IDialogSettings settings) {
+		this.settings = settings;
+		
 		Composite param = new Composite(parent, SWT.NONE);
+		param.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		GridLayout gl = new GridLayout(2, false);
-		
 		param.setLayout(gl);
 		
 		Label lbl = new Label(param, SWT.NONE);
@@ -110,35 +128,33 @@ public class SmartDateParameterComponent implements IBirtParameterComponent, Lis
 			}
 		});
 		cmbDatesOps.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		lblStart = new Label(param, SWT.NONE);
-		lblStart.setText(Messages.SmartDateParameterComponent_StartDateLabel);
-		startPicker = new DateTime(param, SWT.DROP_DOWN | SWT.MEDIUM | SWT.BORDER | SWT.DATE);
 		
-		SimpleDateFormat sdf = new SimpleDateFormat(ReportParameterDialog.SIMPLE_DATE_FORMAT);
-		String x = settings.get(SmartReportParameters.PARAM_START_DATE_KEY);
-		if (x != null){
-			try{
-				Date d = sdf.parse(x);
-				SmartUtils.initDateDateTimeWidget(startPicker, d);
-			}catch (Exception ex){
-				//eat me
-			}
-		}
+		
+		Composite custom = new Composite(param, SWT.NONE);
+		custom.setLayout(new GridLayout(4, false));
+		custom.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		((GridLayout)custom.getLayout()).marginWidth = 0;
+		((GridLayout)custom.getLayout()).marginHeight = 0;
+		
+		lblStart = new Label(custom, SWT.NONE);
+		lblStart.setText(Messages.SmartDateParameterComponent_StartDateLabel);
+		lblStart.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		((GridData)lblStart.getLayoutData()).widthHint = lbl.computeSize(SWT.DEFAULT,  SWT.DEFAULT).x;
+		
+		startPicker = new DateTime(custom, SWT.DROP_DOWN | SWT.MEDIUM | SWT.BORDER | SWT.DATE);
+		startPicker.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		initDateTime(SmartReportParameters.PARAM_START_DATE_KEY, startPicker, settings);
 		startPicker.addListener(SWT.Selection, this);
 		
-		
-		lblEnd = new Label(param, SWT.NONE);
+		lblEnd = new Label(custom, SWT.NONE);
 		lblEnd.setText(Messages.SmartDateParameterComponent_EndDateLabel);
-		endPicker = new DateTime(param, SWT.DROP_DOWN | SWT.MEDIUM | SWT.BORDER | SWT.DATE);
-		x = settings.get(SmartReportParameters.PARAM_END_DATE_KEY);
-		if (x != null){
-			try{
-				Date d = sdf.parse(x);
-				SmartUtils.initDateDateTimeWidget(endPicker, d);
-			}catch (Exception ex){
-				//eat me
-			}
-		}
+		lblEnd.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		((GridData)lblEnd.getLayoutData()).horizontalIndent = 15;
+
+		
+		endPicker = new DateTime(custom, SWT.DROP_DOWN | SWT.MEDIUM | SWT.BORDER | SWT.DATE);
+		endPicker.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		initDateTime(SmartReportParameters.PARAM_END_DATE_KEY, endPicker, settings);
 		endPicker.addListener(SWT.Selection, this);
 		
 		cdEnd = new ControlDecoration(endPicker, SWT.LEFT | SWT.TOP);
@@ -174,7 +190,7 @@ public class SmartDateParameterComponent implements IBirtParameterComponent, Lis
 				}
 		}});
 		
-		x = settings.get("org.wcs.smart.report.parameter.dateOp"); //$NON-NLS-1$
+		String x = settings.get(DATE_OP_KEY);
 		IDateFilter defaultSelection = IDateFilter.DATE_FILTERS[0];
 		for (int i = 0; i < IDateFilter.DATE_FILTERS.length; i++){
 			if (IDateFilter.DATE_FILTERS[i].getQueryKey().equals(x)){
@@ -183,7 +199,19 @@ public class SmartDateParameterComponent implements IBirtParameterComponent, Lis
 			}
 		}		
 		cmbDatesOps.setSelection(new StructuredSelection(defaultSelection));
-		return param;
+	}
+	
+	private void initDateTime(String parameter, DateTime dtime, IDialogSettings settings) {
+		SimpleDateFormat sdf = new SimpleDateFormat(ReportParameterDialog.SIMPLE_DATE_FORMAT);
+		String x = settings.get(parameter);
+		if (x != null){
+			try{
+				Date d = sdf.parse(x);
+				SmartUtils.initDateDateTimeWidget(dtime, d);
+			}catch (Exception ex){
+				//eat me
+			}
+		}
 	}
 
 
@@ -191,9 +219,9 @@ public class SmartDateParameterComponent implements IBirtParameterComponent, Lis
 	 * @see org.wcs.smart.report.internal.ui.viewer.parameter.IBirtParameterComponent#getParameters()
 	 */
 	@Override
-	public HashMap<String, Object> getParameters() {
+	public HashMap<IParameterDefn, Object> getParameters() {
 
-		HashMap<String, Object> params = new HashMap<String, Object>();
+		HashMap<IParameterDefn, Object> params = new HashMap<>();
 		
 		IDateFilter op = (IDateFilter) ((IStructuredSelection)cmbDatesOps.getSelection()).getFirstElement();
 
@@ -205,11 +233,9 @@ public class SmartDateParameterComponent implements IBirtParameterComponent, Lis
 		java.sql.Date dates[] = op.getDates();
 		if (dates == null) {
 			if (op.getQueryKey().equals(AllDatesFilter.INSTANCE.getQueryKey())) {
-				params.put(SmartReportParameters.PARAM_START_DATE_KEY,
-						new java.sql.Date(-2208998272375l)); // JAN 01 1900
+				params.put(startDef, new java.sql.Date(-2208998272375l)); // JAN 01 1900
 				
-				params.put(SmartReportParameters.PARAM_END_DATE_KEY,
-						new java.sql.Date((new Date()).getTime() + 86400000));  // today plus 1 day
+				params.put(endDef, new java.sql.Date((new Date()).getTime() + 86400000));  // today plus 1 day
 				
 				try(Session session = HibernateManager.openSession()){
 					try {
@@ -223,15 +249,13 @@ public class SmartDateParameterComponent implements IBirtParameterComponent, Lis
 						if (data != null && data.size() >= 1) {
 							Date startdate = (Date) ((Object[])data.get(0))[0];
 							if (startdate != null) {
-								params.put(SmartReportParameters.PARAM_START_DATE_KEY,
-									new java.sql.Date(startdate.getTime() - 86400000)); //subtract one day to ensure we get everything
+								params.put(startDef, new java.sql.Date(startdate.getTime() - 86400000)); //subtract one day to ensure we get everything
 							}
 							
 							Date enddate = (Date) ((Object[])data.get(0))[1];
 							if (enddate != null) {
-								if (enddate.getTime() > ((java.sql.Date)params.get(SmartReportParameters.PARAM_END_DATE_KEY)).getTime()) {
-									params.put(SmartReportParameters.PARAM_END_DATE_KEY,
-										new java.sql.Date(enddate.getTime() + 86400000));  // last date plus 1 day to ensure we get everything
+								if (enddate.getTime() > ((java.sql.Date)params.get(endDef)).getTime()) {
+									params.put(endDef, new java.sql.Date(enddate.getTime() + 86400000));  // last date plus 1 day to ensure we get everything
 								}
 							}
 						}
@@ -253,13 +277,13 @@ public class SmartDateParameterComponent implements IBirtParameterComponent, Lis
 										new Object[] { op.getGuiName(Locale.getDefault()) }));
 			}
 		}else if (dates.length == 1){
-			params.put(SmartReportParameters.PARAM_START_DATE_KEY, dates[0]);
-			params.put(SmartReportParameters.PARAM_END_DATE_KEY, new java.sql.Date( (new Date()).getTime() + 86400000));  //add one day just to make sure we get everything
+			params.put(startDef, dates[0]);
+			params.put(endDef, new java.sql.Date( (new Date()).getTime() + 86400000));  //add one day just to make sure we get everything
 		}else if (dates.length == 2){
-			params.put(SmartReportParameters.PARAM_START_DATE_KEY, dates[0]);
-			params.put(SmartReportParameters.PARAM_END_DATE_KEY, dates[1]);
+			params.put(startDef, dates[0]);
+			params.put(endDef, dates[1]);
 		}
-		params.put("org.wcs.smart.report.parameter.dateOp", op.getQueryKey()); //$NON-NLS-1$
+		settings.put(DATE_OP_KEY, op.getQueryKey());
 		return params;
 	}
 

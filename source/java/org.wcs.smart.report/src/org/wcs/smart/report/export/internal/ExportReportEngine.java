@@ -29,9 +29,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import javax.print.Doc;
 import javax.print.DocFlavor;
@@ -105,7 +105,7 @@ public class ExportReportEngine {
 		if (exporter == null && outputFormat == null){
 			return;
 		}
-		HashMap<String, Object> params = null;
+		Map<Report,Map<String, Object>> params = null;
 		if (outputFormat != null){
 			params  = collectParameters(reports);
 			if (params == null) return;
@@ -153,9 +153,9 @@ public class ExportReportEngine {
 			
 			Job rr = null;
 			if (outputFormat != null){
-				rr = new RunReportJob(reports.get(i), outputFile, outputFormat, params, dpi);
+				rr = new RunReportJob(reports.get(i), outputFile, outputFormat, params.get(reports.get(i)), dpi);
 			}else if (exporter != null){
-				rr = new ExportReportJob(reports.get(i), outputFile, exporter, params);
+				rr = new ExportReportJob(reports.get(i), outputFile, exporter, params.get(reports.get(i)));
 			}
 			if (rr != null){
 				rr.addJobChangeListener(endJob);
@@ -192,8 +192,8 @@ public class ExportReportEngine {
 		
 	}
 	
-	public static HashMap<String, Object> collectParameters(List<Report> reports){
-		HashMap<String, Object> params  = null;
+	public static Map<Report,Map<String, Object>> collectParameters(List<Report> reports){
+		Map<Report,Map<String, Object>> params  = null;
 		try{
 			ParameterCollecter paramCollector = new ParameterCollecter();
 			params = paramCollector.getParameters(reports.toArray(new Report[reports.size()]));
@@ -259,7 +259,7 @@ public class ExportReportEngine {
 		
 		
 		ParameterCollecter paramCollector = new ParameterCollecter();
-		HashMap<String, Object> reportParameters = paramCollector.getParameters(new Report[]{report});
+		Map<String, Object> reportParameters = paramCollector.getParameters(new Report[]{report}).get(report);
 		
 		PrintDialog pd = new PrintDialog(Display.getDefault().getActiveShell());
 		PrinterData data = pd.open();

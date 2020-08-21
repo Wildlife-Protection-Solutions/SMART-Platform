@@ -18,6 +18,7 @@ Require-Bundle: org.eclipse.ui,
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: org.wcs.smart.birt,
+ org.wcs.smart.birt.parameter,
  org.wcs.smart.birt.ui
 Bundle-Vendor: org.wcs.smart
 Import-Package: org.locationtech.jts,
