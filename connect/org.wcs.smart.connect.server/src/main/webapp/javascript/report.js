@@ -41,7 +41,7 @@ window.onload = function(){
 		var csString = "";
 		for(x=0; x < parameterNames.length; x++){
 			name = parameterNames[x];
-			if(document.getElementById(name).value == ""){
+			if(document.getElementById(name).dataset.isRequired === 'true' && document.getElementById(name).value == ""){
 				window.alert("Missing Parameter Valid for: " + name);
 				return false;
 			}
@@ -292,6 +292,7 @@ function showReportOptions(){
 	
 	document.getElementById("runreportform").uuid.value = uuid;
 	document.getElementById("runreportform").name.value = name;
+	document.getElementById("runreportform").querySelector("#reportname").innerHTML = name;
 	if (isccaa === "true"){
 		document.getElementById("cafilter").style.display="block";
 	}else{
@@ -338,6 +339,14 @@ function showParameterSelection(){
 	var json = JSON.parse(this.responseText);
 	parameterNames.length = 0; //clear the array so we don't parameters from the last report that was run.
 	
+	var otherparams = document.createElement("fieldset");
+	otherparams.innerHTML = "<legend>" + "Other Parameters" + "</legend>";
+	var otherdiv = document.createElement("div");
+	otherparams.appendChild(otherdiv);
+	otherdiv.className = "table";
+	otherdiv.style.width = "100%";
+	
+	var hasother = false;
  	for (var i = 0; i < json.length; i++){
  		if(json[i].type == "GROUP"){
  			if (json[i].name=="Report Dates"){
@@ -349,31 +358,43 @@ function showParameterSelection(){
  			}else{ 	
  				var f = document.createElement("fieldset");
  				if(json[i].displayText != null){
- 					f.innerHTML = "<legend>" + json[i].displayText + ":" + "</legend>";
+ 					f.innerHTML = "<legend>" + json[i].displayText +  "</legend>";
  				}else{
- 					f.innerHTML = "<legend>" + json[i].name + ":" + "</legend>";
+ 					f.innerHTML = "<legend>" + json[i].name + "</legend>";
  				}
+ 				
+ 				var div = document.createElement("div");
+ 				f.appendChild(div);
+ 				div.className = "table";
+ 				div.style.width = "100%";
  				for (var x = 0; x < json[i].children.length; x++){
  					parameterNames.push(json[i].children[x].name);
  					if(json[i].children[x].type == "BOOLEAN"){
- 						addBooleanParamater(json[i].children[x], f, false);
+ 						addBooleanParamater(json[i].children[x], div);
+ 					}else if (json[i].options.length > 0){
+ 			 			addOptionParameter(json[i].children[x], div)
  					}else{
- 						addTextboxParamater(json[i].children[x], f,false);
+ 						addTextboxParamater(json[i].children[x], div);
  					}
  				}
  				parent.insertBefore(f, parent.childNodes[4]);
  			}
- 		}else if(json[i].type == "BOOLEAN"){
- 			addBooleanParamater(json[i], parent, true);
+ 		}else{
+ 			hasother = true;
  			parameterNames.push(json[i].name);
- 		}else if (json[i].options.length > 0){
- 			addOptionParameter(json[i], parent, true)
- 			parameterNames.push(json[i].name);
- 		}else{// use a basic textbox for all other types: strings, integers, floats etc.
- 			addTextboxParamater(json[i], parent, true);
- 			parameterNames.push(json[i].name);
+ 			
+ 			if(json[i].type == "BOOLEAN"){
+ 	 			addBooleanParamater(json[i], otherdiv);
+ 	 		}else if (json[i].options.length > 0){
+ 	 			addOptionParameter(json[i], otherdiv)
+ 	 		}else{
+ 	 			addTextboxParamater(json[i], otherdiv);
+ 	 		}
  		}
+ 		
  	}
+ 	if (hasother) parent.insertBefore(otherparams, parent.childNodes[4]);
+
  }
 
 function isFoundInRow(row){
@@ -578,71 +599,70 @@ function resolve(url) {
 }
 
 
-function addBooleanParamater(param, parent, newGroup){
-	if(newGroup == true){
-		var f = document.createElement("fieldset");
-		if(param.displayText != null){
-			f.innerHTML = "<legend>" + param.displayText + ":" + "</legend>";
-		}else{
-			f.innerHTML = "<legend>" + param.name + ":" + "</legend>";
-		}
-	}else{
-		var f = document.createElement("p");
-	}
+function addBooleanParamater(param, parent){
 
+	var div = document.createElement("div");
+	div.className = "reportparameterrow";
+	
+	var lbl = document.createElement("label");
+	lbl.setAttribute("for",param.name);
+	lbl.innerHTML = param.name;
+	
+	div.appendChild(lbl);
+	
 	var newList = document.createElement("select");
 	newList.setAttribute("id", param.name);
+	newList.dataset.isRequired = param.isRequired;
 	var optionT = new Option("true", "true");
 	var optionF = new Option("false", "false");
 	//Here we append that text node to our drop down list.
 	newList.appendChild(optionT);
 	newList.appendChild(optionF);
-	newList.style.width="100%";
-
-	f.appendChild(newList);
-	parent.insertBefore(f, parent.childNodes[4]);
+	div.appendChild(newList);
+	
+	parent.appendChild(div);
 	
 }
 
 
-function addTextboxParamater(param, parent, newGroup){
-	if(newGroup == true){
-		var f = document.createElement("fieldset");
-		if(param.displayText != null){
-			f.innerHTML = "<legend>" + param.displayText + ":" + "</legend>";
-		}else{
-			f.innerHTML = "<legend>" + param.name + ":" + "</legend>";
-		}
-	}else{
-		var f = document.createElement("p");
-	}
+function addTextboxParamater(param, parent){
+	
+	var div = document.createElement("div");
+	div.className = "reportparameterrow";
+	
+	var lbl = document.createElement("label");
+	lbl.setAttribute("for",param.name);
+	lbl.innerHTML = param.name;
+	
+	div.appendChild(lbl);
+	
 	var newInput = document.createElement("input");
 	newInput.setAttribute("id", param.name);
-	newInput.style.width="100%";
+	newInput.dataset.isRequired = param.isRequired;
 	newInput.type = "text";
 	newInput.className = "formtext";
 
-	f.appendChild(newInput);
-	parent.insertBefore(f, parent.childNodes[4]);
-
+	div.appendChild(newInput);
+	
+	parent.appendChild(div);
 }
 
-function addOptionParameter(param, parent, newGroup){
-	if(newGroup == true){
-		var f = document.createElement("fieldset");
-		if(param.displayText != null){
-			f.innerHTML = "<legend>" + param.displayText + ":" + "</legend>";
-		}else{
-			f.innerHTML = "<legend>" + param.name + ":" + "</legend>";
-		}
-	}else{
-		var f = document.createElement("p");
-	}
+function addOptionParameter(param, parent){
+	
+	var div = document.createElement("div");
+	div.className = "reportparameterrow";
+	
+	var lbl = document.createElement("label");
+	lbl.setAttribute("for",param.name);
+	lbl.innerHTML = param.name;
+	
+	div.appendChild(lbl);
+	
 	var newInput = document.createElement("select");
 	newInput.setAttribute("id", param.name);
-	newInput.style.width="100%";
 	newInput.className = "formtext";
-
+	newInput.dataset.isRequired = param.isRequired;
+	
  	for (var i = 0; i < param.options.length; i++){
  		var op = document.createElement("option");
  		op.value=param.options[i][1];
@@ -650,9 +670,8 @@ function addOptionParameter(param, parent, newGroup){
  		newInput.appendChild(op);
  	}
 
-	f.appendChild(newInput);
-	parent.insertBefore(f, parent.childNodes[4]);
-
+	div.appendChild(newInput);
+	parent.appendChild(div);
 }
 
 function initializeUrlDialog(){

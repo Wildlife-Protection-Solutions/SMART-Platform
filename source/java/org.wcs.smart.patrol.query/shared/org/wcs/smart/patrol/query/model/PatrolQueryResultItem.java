@@ -304,6 +304,10 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IAdaptable{
 	 * @param station patrol station name
 	 */
 	public void setStation(String station) {
+		if (station == null) {
+			this.station = ""; //$NON-NLS-1$
+			return;
+		}
 		this.station = station;
 	}
 	
@@ -317,6 +321,10 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IAdaptable{
 	 * @param team patrol team name
 	 */
 	public void setTeam(String team) {
+		if (team == null) {
+			this.team = ""; //$NON-NLS-1$
+			return;
+		}
 		this.team = team;
 	}
 	
@@ -343,6 +351,10 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IAdaptable{
 	 * @param mandate the patrol mandate
 	 */
 	public void setMandate(String mandate) {
+		if (mandate == null) {
+			this.mandate = ""; //$NON-NLS-1$
+			return;
+		}
 		this.mandate = mandate;
 	}
 	

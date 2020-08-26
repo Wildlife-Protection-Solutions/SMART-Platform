@@ -61,27 +61,23 @@
 <%@include file="footer.jsp" %>
 
 
-<div id="urlOptionsDialog" style="display: none;" class="dialog">
+<div id="urlOptionsDialog" style="display: none; min-width: 450px;" class="dialog">
   <div class="dialog-title"><fmt:message key="report.runreport" /></div>
   <div id="dialogerror" class="errorsection"></div>
 	<form id="runreportform">
      		<div id="error" class="errorsection" style="display:none;"> </div>
      		
-     		<fieldset>
-	     		<legend><fmt:message key="report.reportproperties"/></legend>
-	     		<p><fmt:message key="report.reportname" /><input class="formtext" id="reportname" type="text" name="name" value="" style="width:100%" disabled/></p>
-	     		<p><fmt:message key="report.reportuuid" /><input class="formtext" id="reportuuid" type="text" name="uuid" value="" style="width:100%" disabled/></p>
-     		</fieldset>
+     		<p class="runreport-title" id="reportname"></p>
      		
-     		<p id="customParameters"></p>
+	     	<input class="formtext" id="reportuuid" type="hidden" name="uuid" value="" style="width:100%" disabled/>
+     		
+     		<div id="customParameters"></div>
      		
      		<fieldset id="parameters_fieldset" style="display:none">
 	     		<legend><fmt:message key="report.datefilter"/></legend>
-		     	<p><fmt:message key="report.datefilterlabel"/>
-		     	  <select style="width:100%" id="defineddates" class="formtext" ></select>
-		     	</p>
-	     		
-	     		<div>
+		     	
+		     	<select style="width:100%" id="defineddates" class="formtext" ></select>
+		     	<div>
 		     		<p><fmt:message key="report.startdate" /> <input id="Start Date" type="text" name="startdate" class="formtext date-input" style="float:none; margin-top:5px"/>
 		     		<fmt:message key="report.enddate" /> <input id="End Date" type="text" name="enddate" class="formtext date-input" style="float:none; margin-top:5px"/></p>
 	     		</div>
@@ -100,7 +96,7 @@
 	     		<legend><fmt:message key="report.cafilters"/></legend>
 	     		<div style="font-size:0.9em; margin-bottom:3px">
 	     			<div class="warn-icon" style="display:inline-block; float:left"></div>
-	     			<div><fmt:message key="report.ccaabindingwarn"/></div>
+	     			<div style="width: 450px"><fmt:message key="report.ccaabindingwarn"/></div>
 	     			<p><a href="javascript:selectAll();">select all</a>
 					<a href="javascript:selectNone();">select none</a>
 	     		</div>

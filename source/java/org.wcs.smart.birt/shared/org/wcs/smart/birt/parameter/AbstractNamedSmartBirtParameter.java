@@ -25,8 +25,10 @@ import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
@@ -46,15 +48,16 @@ public abstract class AbstractNamedSmartBirtParameter implements ISmartBirtParam
 			Collection<ConservationArea> cas, Locale l) {
 		if (cas.isEmpty()) return Collections.emptyList();
 		
-		List<String> items = new ArrayList<>();
+		Set<String> items = new HashSet<>();
 		
 		List<? extends NamedItem> stations = session.createQuery("FROM "+ clazz.getSimpleName() + " WHERE conservationArea in (:cas)", clazz) //$NON-NLS-1$ //$NON-NLS-2$
 				.setParameter("cas",  cas) //$NON-NLS-1$
 				.list();
 		
 		stations.forEach(s->items.add(s.getName()));
-		items.sort((a,b)->Collator.getInstance(l).compare(a, b));
+		List<String> sortedItems = new ArrayList<>(items);
+		sortedItems.sort((a,b)->Collator.getInstance(l).compare(a, b));
 		
-		return items;
+		return sortedItems;
 	}
 }

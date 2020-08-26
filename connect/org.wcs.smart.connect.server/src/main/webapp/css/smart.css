@@ -59,6 +59,34 @@ th {
 #footerid {
 	flex: none;	
 }    
+
+.runreport-title{
+	font-weight: bold;
+	padding-bottom: 10px;
+	font-size: 1.5em;
+}
+
+.reportparameterrow 
+{
+    display:table-row;
+    
+}
+.reportparameterrow label
+{
+	text-align:left;
+    display:table-cell;
+    width: 30%;
+}
+
+.reportparameterrow input, .reportparameterrow select 
+{
+    margin-top:8px;
+    margin-left:8px;
+    text-align:left;
+    display:table-cell;
+    width: calc(100% - 20px);
+}
+
 .smart-warninghighlight{
 	color: red;
 	font-weight:bold;

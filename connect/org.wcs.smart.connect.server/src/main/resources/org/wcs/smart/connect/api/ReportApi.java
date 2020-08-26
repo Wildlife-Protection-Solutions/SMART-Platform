@@ -32,7 +32,6 @@ import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -72,8 +71,6 @@ import org.eclipse.birt.report.engine.api.RenderOption;
 import org.eclipse.birt.report.engine.api.impl.ParameterSelectionChoice;
 import org.eclipse.birt.report.engine.api.impl.ReportEngine;
 import org.eclipse.birt.report.engine.api.impl.ScalarParameterDefn;
-import org.eclipse.core.runtime.IExtensionPoint;
-import org.eclipse.core.runtime.Platform;
 import org.hibernate.Session;
 import org.locationtech.udig.catalog.URLUtils;
 import org.wcs.smart.birt.BirtConstants;
@@ -85,15 +82,19 @@ import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.i18n.Messages;
+import org.wcs.smart.connect.model.ConservationAreaInfo;
+import org.wcs.smart.connect.model.ConservationAreaProxy;
 import org.wcs.smart.connect.model.ReportParameter;
 import org.wcs.smart.connect.model.ReportParameter.Type;
 import org.wcs.smart.connect.report.BirtEngine;
 import org.wcs.smart.connect.report.ReportFormat;
 import org.wcs.smart.connect.report.ReportProxy;
 import org.wcs.smart.connect.report.query.ServerSmartConnection;
+import org.wcs.smart.connect.security.CaAction;
 import org.wcs.smart.connect.security.ReportAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.report.execute.ParameterFinder;
 import org.wcs.smart.report.model.Report;
@@ -512,8 +513,18 @@ public class ReportApi extends HttpServlet{
 		if (!report.getConservationArea().getIsCcaa()) {
 			cas.add(report.getConservationArea());
 		}else {
-			//TODO:
+			//add all CA's this user has access to
+			List<ConservationAreaInfo> db = QueryFactory.buildQuery(s, ConservationAreaInfo.class).list();
+			for (ConservationAreaInfo ca : db){
+				ConservationArea smartca = (ConservationArea) s.get(ConservationArea.class, ca.getUuid());
+				//check to determine if ca is accessible by current user
+				if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), 
+						CaAction.VIEWCA_KEY, smartca.getUuid())) {
+					cas.add(smartca);
+				}
+			}
 		}
+		
 		for (IParameterDefnBase param : parameters){
 			if (param instanceof IParameterDefn){
 				rparameters.add(createParameter(s, (IParameterDefn) param, cas));
@@ -522,6 +533,7 @@ public class ReportApi extends HttpServlet{
 				pp.setName(param.getName());
 				pp.setDisplayText(param.getPromptText());
 				pp.setType(Type.GROUP);
+				pp.setIsRequired(false);
 				rparameters.add(pp);
 				
 				for (Object child: ((IParameterGroupDefn) param).getContents()){
@@ -542,7 +554,7 @@ public class ReportApi extends HttpServlet{
 		ReportParameter pp = new ReportParameter();
 		pp.setName(param.getName());
 		pp.setDisplayText(param.getPromptText());
-		
+		pp.setIsRequired(param.isRequired());
 		boolean isList = false;
 		if (param instanceof ScalarParameterDefn){
 			pp.setDefaultValue(((ScalarParameterDefn)param).getDefaultValue());
@@ -554,18 +566,14 @@ public class ReportApi extends HttpServlet{
 		
 		
 		if (isList) {
-			pp.setType(Type.STRING);
-			
 			if(param.getHandle().getCustomXml() != null && 
 					param.getHandle().getCustomXml().startsWith(ISmartBirtParameter.KEY)) {
 				String key = param.getHandle().getCustomXml().substring(ISmartBirtParameter.KEY.length());
-				
-				
 				for (String xkey : ParameterManager.INSTANCE.findParameter(key)
 							.getValues(session, cas, request.getLocale())) {
 					pp.addOption(xkey, xkey);
 				}
-
+				
 			}else {
 				for (Object x : param.getSelectionList()) {
 					if (x instanceof ParameterSelectionChoice) {
@@ -574,9 +582,13 @@ public class ReportApi extends HttpServlet{
 					}
 				}
 			}
-
-		} else {
-			switch(param.getDataType()){
+			
+			if (!param.isRequired()) {
+				pp.addOption(0, "", ""); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+		} 
+		
+		switch(param.getDataType()){
 			case IParameterDefn.TYPE_DATE:
 				pp.setType(Type.DATE);
 				break;
@@ -602,8 +614,6 @@ public class ReportApi extends HttpServlet{
 			case IParameterDefn.TYPE_ANY:
 			default:
 				throw new Exception(MessageFormat.format(Messages.getString("ReportApi.ParameterTypeNotSupported", request.getLocale()), new Object[]{ param.getDataType() })); //$NON-NLS-1$
-				
-			}
 		}
 		return pp;
 	}
@@ -620,13 +630,28 @@ public class ReportApi extends HttpServlet{
 	private void covertParametersToMap(Map<String, Object> m, String l, Session s, UUID uuid) throws Exception {
 		if (l.trim().isEmpty()) return;
 		List<ReportParameter> parameters = getParameters(uuid, s);
+		
+		Map<String, ReportParameter> pmap = new HashMap<>();
+		
+		List<ReportParameter> toSearch = new ArrayList<ReportParameter>(parameters);
+		while(toSearch.size() > 0){
+			ReportParameter rp = toSearch.remove(0);
+			if (rp.getType() == Type.GROUP){
+				toSearch.addAll(rp.getChildren());
+			}else {
+				pmap.put(rp.getName(), rp);
+			}
+		}
+		
 		Object value;
-		List<String> items = Arrays.asList(l.split(",")); //$NON-NLS-1$
-		for(int x=0; x < items.size(); x=x+2){
+		List<String> items = Arrays.asList(l.split(",", -1)); //$NON-NLS-1$
+		for(int x=0; x < items.size()-1; x=x+2){	//parameters always come through with an extra , on the end
 			String name = items.get(x);
-			Type type = getType(name, parameters);
-			if (type == null) throw new SmartConnectException(Status.BAD_REQUEST, MessageFormat.format(Messages.getString("ReportApi.InvalidParameter", request.getLocale()), name)); //$NON-NLS-1$
-			switch(type){
+			
+			ReportParameter p = pmap.get(name);
+			if (p == null) throw new SmartConnectException(Status.BAD_REQUEST, MessageFormat.format(Messages.getString("ReportApi.InvalidParameter", request.getLocale()), name)); //$NON-NLS-1$
+			
+			switch(p.getType()){
 				case DATE:
 					value = new java.sql.Date(SmartUtils.parseDate(items.get(x+1)).getTime());
 					break;
@@ -634,10 +659,18 @@ public class ReportApi extends HttpServlet{
 					value = java.sql.Timestamp.valueOf(items.get(x+1));
 					break;
 				case DOUBLE:
-					value = Double.valueOf(items.get(x+1));
+					try {
+						value = Double.valueOf(items.get(x+1));
+					}catch (NumberFormatException ex) {
+						throw new NumberFormatException(MessageFormat.format(Messages.getString("ReportApi.NumberRequired", request.getLocale()), p.getName(), items.get(x+1))); //$NON-NLS-1$
+					}
 					break;
 				case INTEGER:
-					value = Integer.valueOf(items.get(x+1));
+					try {
+						value = Integer.valueOf(items.get(x+1));
+					}catch (NumberFormatException ex) {
+						throw new NumberFormatException(MessageFormat.format(Messages.getString("ReportApi.IntegerRequired", request.getLocale()), p.getName(), items.get(x+1)));  //$NON-NLS-1$
+					}
 					break;
 				case STRING:
 					value = items.get(x+1);
@@ -651,22 +684,6 @@ public class ReportApi extends HttpServlet{
 			}
 			m.put(name, value);
 		}
-	}
-
-	private Type getType(String name, List<ReportParameter> parameters) {
-		List<ReportParameter> toSearch = new ArrayList<ReportParameter>();
-		toSearch.addAll(parameters);
-		
-		while(toSearch.size() > 0){
-			ReportParameter rp = toSearch.remove(0);
-			if(rp.getName().equals(name)){
-				return rp.getType();
-			}
-			if (rp.getType() == Type.GROUP){
-				toSearch.addAll(rp.getChildren());
-			}
-		}
-		return null;
 	}
 }
 

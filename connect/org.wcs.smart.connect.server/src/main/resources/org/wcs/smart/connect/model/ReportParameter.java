@@ -45,18 +45,19 @@ public class ReportParameter {
 	private List<ReportParameter> kids;
 	
 	private List<String[]> options;
+	private boolean required = true;
 	
 	public ReportParameter(){
 		kids = new ArrayList<ReportParameter>();
 		options = new ArrayList<>();
 	}
 	
-	public ReportParameter(Type type, String name, String displayText, Object defaultValue){
-		this();
-		this.type = type;
-		this.name = name;
-		this.displayText = displayText;
-		this.defaultValue = defaultValue;
+	public boolean getIsRequired() {
+		return this.required;
+	}
+	
+	public void setIsRequired(boolean isRequired) {
+		this.required = isRequired;
 	}
 	
 	public String getName(){
@@ -101,5 +102,9 @@ public class ReportParameter {
 	}
 	public void addOption(String key, String value) {
 		options.add(new String[] {key, value});
+	}
+	
+	public void addOption(int index, String key, String value) {
+		options.add(index, new String[] {key, value});
 	}
 }

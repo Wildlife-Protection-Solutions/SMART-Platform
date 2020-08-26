@@ -343,7 +343,8 @@ public class PatrolQueryColumnCache {
 											item == FixedQueryColumn.FixedColumns.WAYPOINT_TIME ||
 											item == FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER || 
 											item == FixedQueryColumn.FixedColumns.WAYPOINT_LASTMODIFIED || 
-											item == FixedQueryColumn.FixedColumns.WAYPOINT_LASTMODIFIEDBY){
+											item == FixedQueryColumn.FixedColumns.WAYPOINT_LASTMODIFIEDBY ||
+											item == FixedQueryColumn.FixedColumns.OBS_GROUP_ID){
 									// do nothing, don't want these columns for patrol queries
 									add = false;
 								}else{

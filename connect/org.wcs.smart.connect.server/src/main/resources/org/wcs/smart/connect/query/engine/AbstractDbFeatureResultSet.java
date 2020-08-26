@@ -476,4 +476,5 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 		return imageDataCnt;
 		
 	}
+
 }
