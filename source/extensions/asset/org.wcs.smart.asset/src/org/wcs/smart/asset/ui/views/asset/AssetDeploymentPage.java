@@ -567,6 +567,7 @@ public class AssetDeploymentPage {
 		newDeployment.setAsset(parentEditor.getAsset());
 		newDeployment.setStartDate(new Date());
 		newDeployment.setAssetWaypoints(new ArrayList<>());
+		newDeployment.setDisruptions(new ArrayList<>());
 		AssetDeploymentDialog dialog = new AssetDeploymentDialog(parentEditor.getSite().getShell(), newDeployment, allDeployments);
 		ContextInjectionFactory.inject(dialog, parentContext);
 		if (dialog.open() != Window.OK) return;

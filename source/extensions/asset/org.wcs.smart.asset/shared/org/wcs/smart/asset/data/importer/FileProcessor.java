@@ -883,6 +883,7 @@ public class FileProcessor {
 		newDeployment.setAsset(asset);
 		newDeployment.setAssetWaypoints(new ArrayList<>());
 		newDeployment.setAttributeValues(new ArrayList<>());
+		newDeployment.setDisruptions(new ArrayList<>());
 		newDeployment.setStartDate(startDate);
 		newDeployment.setEndDate(null);
 		newDeployment.setStationLocation(location);
