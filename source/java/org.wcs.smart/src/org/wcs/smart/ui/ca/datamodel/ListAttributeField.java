@@ -116,7 +116,7 @@ public class ListAttributeField implements IAttributeField<AttributeListItem> {
 		cmbViewer = new ComboViewer(new Combo(parent, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY));
 		cmbViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)cmbViewer.getControl().getLayoutData()).horizontalIndent = 5;
-		((GridData)cmbViewer.getControl().getLayoutData()).widthHint = 250;
+		((GridData)cmbViewer.getControl().getLayoutData()).widthHint = 50;
 		cmbViewer.setContentProvider(ArrayContentProvider.getInstance());	
 		cmbViewer.setLabelProvider(new LabelProvider(){
 			@Override
