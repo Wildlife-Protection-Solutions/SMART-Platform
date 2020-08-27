@@ -23,7 +23,6 @@ package org.wcs.smart.report.internal.ui.viewer.parameter;
 
 import java.net.URL;
 import java.text.Collator;
-import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -60,6 +59,8 @@ import org.wcs.smart.ui.SmartStyledTitleDialog;
  */
 public class ParameterSelectionDialog extends SmartStyledTitleDialog {
 
+	private static final String MODIFY_KEY = "MOD"; //$NON-NLS-1$
+	
 	private ISmartBirtParameter selection;
 	private String name;
 	private boolean isRequired;
@@ -90,6 +91,10 @@ public class ParameterSelectionDialog extends SmartStyledTitleDialog {
 			name = txtName.getText();
 			validate();
 		});
+		txtName.addListener(SWT.KeyDown, e->{
+			txtName.setData(MODIFY_KEY, true);
+		});
+		txtName.setData(MODIFY_KEY, false);
 		
 		l = new Label(part, SWT.NONE);
 		l.setText(Messages.ParameterSelectionDialog_IsRequired);
@@ -148,7 +153,7 @@ public class ParameterSelectionDialog extends SmartStyledTitleDialog {
 		lstParams.addSelectionChangedListener(e->{
 			if (lstParams.getStructuredSelection().getFirstElement() instanceof ISmartBirtParameter) {
 				selection = (ISmartBirtParameter) lstParams.getStructuredSelection().getFirstElement();
-				if (txtName.getText().isBlank()) txtName.setText(MessageFormat.format(Messages.ParameterSelectionDialog_DefaultName,selection.getName(Locale.getDefault())));
+				if (!(Boolean)txtName.getData(MODIFY_KEY)) txtName.setText(selection.getName(Locale.getDefault()));
 			}
 			validate();
 		});

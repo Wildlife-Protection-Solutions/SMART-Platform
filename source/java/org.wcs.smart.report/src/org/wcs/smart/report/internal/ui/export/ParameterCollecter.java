@@ -215,7 +215,7 @@ public class ParameterCollecter {
 		
 		//other group
 		if (!others.isEmpty()) {
-			GroupedReportParameters groupedComponent = new GroupedReportParameters("Other Parameters");
+			GroupedReportParameters groupedComponent = new GroupedReportParameters(Messages.ParameterCollecter_OtherParamGroup);
 			for (IBirtParameterComponent other : others) {
 				groupedComponent.addComponent(other);
 			}

@@ -1170,5 +1170,9 @@
             class="org.wcs.smart.report.parameter.StationParameter"
             image="platform:/plugin/org.wcs.smart/images/icons/obj16/station.png">
       </parameter>
+      <parameter
+            class="org.wcs.smart.report.parameter.EmployeeParameter"
+            image="platform:/plugin/org.wcs.smart/images/icons/obj16/user_green.png">
+      </parameter>
    </extension>
 </plugin>

@@ -61,11 +61,11 @@ public class EmployeeParameter implements ISmartBirtParameter {
 		
 		List<String> items = new ArrayList<>();
 		
-		List<Employee> stations = session.createQuery("FROM Station WHERE conservationArea in (:cas)", Employee.class) //$NON-NLS-1$
+		List<Employee> employees = session.createQuery("FROM Employee WHERE conservationArea in (:cas)", Employee.class) //$NON-NLS-1$
 				.setParameter("cas",  cas) //$NON-NLS-1$
 				.list();
 		
-		stations.forEach(s->items.add(SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getEmployeeShortLabel(s, l)));
+		employees.forEach(s->items.add(SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getEmployeeShortLabel(s, l)));
 		items.sort((a,b)->Collator.getInstance(l).compare(a, b));
 		
 		return items;
