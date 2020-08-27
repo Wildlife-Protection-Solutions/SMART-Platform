@@ -139,7 +139,6 @@ public class Upgrader620To630 implements IDatabaseUpgrader {
 					}
 					if (!found) continue;
 					
-					
 					byte[] iconuuid = DerbyUtils.createUuid();
 					
 					psicon.setBytes(1, iconuuid);
