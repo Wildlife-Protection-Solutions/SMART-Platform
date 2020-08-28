@@ -60,10 +60,10 @@ th {
 	flex: none;	
 }    
 
-.runreport-title{
+.run-title{
 	font-weight: bold;
-	padding-bottom: 10px;
-	font-size: 1.5em;
+	padding-bottom: 8px;
+	font-size: 1.2em;
 }
 
 .reportparameterrow 
@@ -736,6 +736,10 @@ fieldset{
 
 #runqueryform legend{
 	font-weight:bold;
+}
+
+#runreportform legend{
+	font-weight: bold;
 }
 
 .user-tables-wrapper{

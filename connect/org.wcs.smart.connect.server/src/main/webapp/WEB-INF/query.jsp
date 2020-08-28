@@ -93,11 +93,8 @@
 	<form id="runqueryform" name="runqueryform">
      		<div id="error" class="errorsection" style="display:none;"> </div>
      		
-     		<fieldset>
-	     		<legend><fmt:message key="query.queryproperties"/></legend>
-	     		<p><fmt:message key="query.queryname" /><input id="queryname" class="formtext" type="text" name="name" value="" style="width:100%" disabled/></p>
-	     		<p><fmt:message key="query.queryuuid" /><input id="queryuuid" class="formtext" type="text" name="uuid" value="" style="width:100%" disabled/></p>
-     		</fieldset>
+     		<p class="run-title" id="queryname"></p>
+     		<input id="queryuuid" class="formtext" type="hidden" name="uuid" value="" style="width:100%" disabled/>
      		
      		<fieldset id="datefieldset">
 	     		<legend><fmt:message key="query.datefilter"/></legend>

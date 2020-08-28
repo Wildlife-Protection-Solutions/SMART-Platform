@@ -253,6 +253,7 @@ function showQueryOptions(){
 	
 	document.getElementById("runqueryform").uuid.value = uuid;
 	document.getElementById("runqueryform").name.value = name;
+	document.getElementById("runqueryform").querySelector("#queryname").innerHTML = name;
 	if (isccaa === "true"){
 		document.getElementById("cafilter").style.display="block";
 	}else{

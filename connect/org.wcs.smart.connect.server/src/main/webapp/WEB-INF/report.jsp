@@ -67,7 +67,7 @@
 	<form id="runreportform">
      		<div id="error" class="errorsection" style="display:none;"> </div>
      		
-     		<p class="runreport-title" id="reportname"></p>
+     		<p class="run-title" id="reportname"></p>
      		
 	     	<input class="formtext" id="reportuuid" type="hidden" name="uuid" value="" style="width:100%" disabled/>
      		
