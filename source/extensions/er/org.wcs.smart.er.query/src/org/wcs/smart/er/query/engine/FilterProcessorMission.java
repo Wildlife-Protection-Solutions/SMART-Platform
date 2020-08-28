@@ -397,7 +397,7 @@ public class FilterProcessorMission implements IFilterProcessor {
 							+ "." + key.getColumn()); //$NON-NLS-1$						
 				}
 				sql.append(" as "); //$NON-NLS-1$
-				sql.append(key.getKey());
+				sql.append("ma_" + key.getKey()); //$NON-NLS-1$
 				sql.append(" "); //$NON-NLS-1$
 
 				sql.append("FROM "); //$NON-NLS-1$

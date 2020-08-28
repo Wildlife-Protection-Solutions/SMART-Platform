@@ -141,38 +141,38 @@ public class DerbyFilterToSqlGenerator {
 		}
 
 		if (filter.getAttributeType() == AttributeType.BOOLEAN){
-			return " (qa." + filter.getAttributeKey() + " > 0.5 ) ";			//$NON-NLS-1$ //$NON-NLS-2$
+			return " (qa.\"" + filter.getAttributeKey() + "\" > 0.5 ) ";			//$NON-NLS-1$ //$NON-NLS-2$
 		}else if (filter.getAttributeType() == AttributeType.NUMERIC){
 			
-			return " (qa." + filter.getAttributeKey() + " " + asSql(filter.getOperator()) + " " + engine.addParameterValue((Double)filter.getValue()) +" ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			return " (qa.\"" + filter.getAttributeKey() + "\" " + asSql(filter.getOperator()) + " " + engine.addParameterValue((Double)filter.getValue()) +" ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}else if (filter.getAttributeType() == AttributeType.TEXT){
 			String queryStr = ""; //$NON-NLS-1$
 			String val = (String)filter.getValue();
 			if (filter.getOperator() == Operator.STR_CONTAINS || 
 					filter.getOperator() == Operator.STR_NOTCONTAINS){
 				String param = engine.addParameterValue("%" + val + "%"); //$NON-NLS-1$ //$NON-NLS-2$ 
-				queryStr = "( LOWER(qa." + filter.getAttributeKey() + ") " + asSql(filter.getOperator()) + " LOWER(" + param + ") )"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 	
+				queryStr = "( LOWER(qa.\"" + filter.getAttributeKey() + "\") " + asSql(filter.getOperator()) + " LOWER(" + param + ") )"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 	
 			}else if (filter.getOperator() == Operator.STR_EQUALS){
 				String param = engine.addParameterValue(val); 
-				queryStr = "( LOWER(qa." + filter.getAttributeKey() + ") " + asSql(filter.getOperator()) + " LOWER(" + param + ") )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
+				queryStr = "( LOWER(qa.\"" + filter.getAttributeKey() + "\") " + asSql(filter.getOperator()) + " LOWER(" + param + ") )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
 			}
 			return queryStr;
 		}else if (filter.getAttributeType() == AttributeType.DATE){
 			String p1 = engine.addParameterValue((String) filter.getValue()); 
 			String p2 = engine.addParameterValue((String) filter.getValue2()); 
-			return "( qa." + filter.getAttributeKey() + " is not null AND DATE(qa." + filter.getAttributeKey() + ") " + " " + asSql(filter.getOperator()) + " CAST(" + p1 + " as DATE) " + asSql(Operator.AND) + " CAST(" + p2 + " as DATE) )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
+			return "( qa.\"" + filter.getAttributeKey() + "\" is not null AND DATE(qa.\"" + filter.getAttributeKey() + "\") " + " " + asSql(filter.getOperator()) + " CAST(" + p1 + " as DATE) " + asSql(Operator.AND) + " CAST(" + p2 + " as DATE) )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
 		}else if (filter.getAttributeType() == AttributeType.LIST ){
 			if (filter.getValue().equals(AttributeFilter.ANY_OPTION_KEY)){
 				//any option
-				return "( qa."+ filter.getAttributeKey()  + " is not null )";  //$NON-NLS-1$ //$NON-NLS-2$
+				return "( qa.\""+ filter.getAttributeKey()  + "\" is not null )";  //$NON-NLS-1$ //$NON-NLS-2$
 			}else{
 				String p = engine.addParameterValue(filter.getValue()); 
-				return "( qa."+ filter.getAttributeKey()  + " " + asSql(filter.getOperator()) + " " + p + ")";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
+				return "( qa.\""+ filter.getAttributeKey()  + "\" " + asSql(filter.getOperator()) + " " + p + ")";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
 			}
 		}else if (filter.getAttributeType() == AttributeType.TREE){
 			String p1 = engine.addParameterValue(filter.getValue()); 
 			String p2 = engine.addParameterValue(((String)filter.getValue()).substring(0,  ((String)filter.getValue()).length() -1) + "/"); //$NON-NLS-1$ 
-			return "( qa." + filter.getAttributeKey() + " >= " + p1 + " and qa." + filter.getAttributeKey() + "< " + p2 + " )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+			return "( qa.\"" + filter.getAttributeKey() + "\" >= " + p1 + " and qa.\"" + filter.getAttributeKey() + "\" < " + p2 + " )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		
 		}
 		return ""; //$NON-NLS-1$

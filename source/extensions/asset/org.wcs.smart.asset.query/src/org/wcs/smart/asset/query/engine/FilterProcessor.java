@@ -351,7 +351,7 @@ public class FilterProcessor implements IFilterProcessor {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + observationTable + " (observation_uuid char(16) for bit data"); //$NON-NLS-1$ //$NON-NLS-2$
 		for (AttributeInfo key : keys) {
-			sql.append(", " + key.getKey() + " " //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append(", \"" + key.getKey() + "\" " //$NON-NLS-1$ //$NON-NLS-2$
 					+ engine.getDataType(key.getType()));
 		}
 		sql.append(")"); //$NON-NLS-1$
@@ -400,7 +400,7 @@ public class FilterProcessor implements IFilterProcessor {
 							+ "." + key.getColumn()); //$NON-NLS-1$						
 				}
 				sql.append(" as "); //$NON-NLS-1$
-				sql.append(key.getKey());
+				sql.append("\"" + key.getKey() + "\""); //$NON-NLS-1$ //$NON-NLS-2$
 				sql.append(" "); //$NON-NLS-1$
 
 				sql.append("FROM "); //$NON-NLS-1$
@@ -478,7 +478,7 @@ public class FilterProcessor implements IFilterProcessor {
 				sql.append("UPDATE "); //$NON-NLS-1$
 				sql.append(observationTable);
 				sql.append(" set "); //$NON-NLS-1$
-				sql.append(key.getKey());
+				sql.append("\"" + key.getKey() + "\"");  //$NON-NLS-1$//$NON-NLS-2$
 				sql.append(" = "); //$NON-NLS-1$
 				sql.append("(SELECT a.value FROM "); //$NON-NLS-1$
 				sql.append(attributeTempTable);
@@ -493,7 +493,7 @@ public class FilterProcessor implements IFilterProcessor {
 				sql.append("INSERT INTO "); //$NON-NLS-1$
 				sql.append(observationTable);
 				sql.append("(observation_uuid, "); //$NON-NLS-1$
-				sql.append(key.getKey());
+				sql.append("\"" + key.getKey() + "\"");  //$NON-NLS-1$//$NON-NLS-2$
 				sql.append(")"); //$NON-NLS-1$
 				sql.append("(SELECT  observation_uuid, value FROM "); //$NON-NLS-1$
 				sql.append(attributeTempTable);

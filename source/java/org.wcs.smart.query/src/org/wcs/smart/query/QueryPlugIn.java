@@ -384,7 +384,7 @@ public class QueryPlugIn extends AbstractUIPlugin {
 	 *            error
 	 */
 	public static void logSql(String sql) {
-//		System.out.println(sql);
+		System.out.println(sql);
 		if (!LOG_QUERY)
 			return;
 		int status = IStatus.INFO;

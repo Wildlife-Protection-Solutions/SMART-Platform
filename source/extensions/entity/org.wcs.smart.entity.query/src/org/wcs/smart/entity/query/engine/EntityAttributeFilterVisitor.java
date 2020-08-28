@@ -244,7 +244,7 @@ public class EntityAttributeFilterVisitor  implements IFilterVisitor{
 				sql.append(" " + tableName); //$NON-NLS-1$
 				sql.append(" on "); //$NON-NLS-1$
 				sql.append(tableName + ".entity_keyid = "); //$NON-NLS-1$
-				sql.append("qa." + engine.getEntityDmAttributeKey(ff.getEntityKey(), c)); //$NON-NLS-1$
+				sql.append("qa.\"" + engine.getEntityDmAttributeKey(ff.getEntityKey(), c) + "\""); //$NON-NLS-1$ //$NON-NLS-2$
 
 			}
 		}

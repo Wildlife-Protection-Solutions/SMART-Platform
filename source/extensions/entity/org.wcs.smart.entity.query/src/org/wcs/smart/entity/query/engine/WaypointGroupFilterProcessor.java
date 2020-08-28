@@ -333,7 +333,8 @@ public class WaypointGroupFilterProcessor implements IFilterProcessor{
 			public void visit(IFilter filter) {
 				if ( filter instanceof AttributeFilter ||
 					filter instanceof CategoryFilter  ||	
-					filter instanceof CategoryAttributeFilter ){						
+					filter instanceof CategoryAttributeFilter  ||
+					filter instanceof EntityAttributeFilter){						
 					
 					String colName = engine.createTempTableName();
 					engine.filterTables.put(filter, new FilterTable(colName, "wp_group_uuid")); //$NON-NLS-1$
