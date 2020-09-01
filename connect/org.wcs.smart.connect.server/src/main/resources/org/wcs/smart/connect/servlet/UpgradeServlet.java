@@ -911,7 +911,7 @@ public class UpgradeServlet extends HttpServlet {
 				boolean found = false;				
 				for (String[] icon : IconUtils.SMART_ICON_MAPPING) {
 					//anything after this is new in SMART630
-					if (icon[0].equalsIgnoreCase(startkey)) { //$NON-NLS-1$
+					if (icon[0].equalsIgnoreCase(startkey)) {
 						found = true;
 					}
 					if (!found) continue;
@@ -958,8 +958,7 @@ public class UpgradeServlet extends HttpServlet {
 					//update data model items
 					IconUtils.upgradeDataModel(c, iconuuid, icon[5], cuuid);
 					
-					if (icon[0].equalsIgnoreCase(endkey)) break; //$NON-NLS-1$
-
+					if (icon[0].equalsIgnoreCase(endkey)) break;
 				}
 				
 			}

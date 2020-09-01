@@ -1,3 +1,4 @@
+alter table smart.LANGUAGE alter column code set data type varchar(6);
 alter table smart.cm_attribute_option alter COLUMN string_value set data type varchar(32672);
 
 -- DISTANCE & BEARING(DIRECTION) SUPPORT
