@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -174,7 +173,7 @@ public enum PatrolPackageExporter {
 				
 				//include configurable model image files
 				sub.split(1);
-				Path dataFolder = Paths.get(modelToExport.getFileDataStoreLocation());
+				Path dataFolder = modelToExport.getFileDataStoreLocation();
 				if (dataFolder != null && Files.exists(dataFolder) && Files.isDirectory(dataFolder)) {
 					toIncludeInZip.addAll(Files.list(dataFolder).collect(Collectors.toList()));
 				}
@@ -239,7 +238,7 @@ public enum PatrolPackageExporter {
 			file.computeFileLocation(session);
 			
 			Path fromPath = file.getAttachmentFile();
-			String fileName = cmObject.getImageFile().getFileName().toString();
+			String fileName = cmObject.getImageFile() == null? cmObject.getDefaultImageFileName() : cmObject.getImageFile().getFileName().toString();
 			if (cmObject.getUuid() == null) {
 				fileName = UuidUtils.uuidToString(object.getUuid());
 			}

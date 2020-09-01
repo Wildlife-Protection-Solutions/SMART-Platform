@@ -431,7 +431,7 @@ public class CmSmartToXmlConverter {
 			file = Paths.get( UuidUtils.uuidToString( dm.getUuid()) );
 		}
 		if (file == null) return null;
-		if (!Files.exists(file)) return file.getFileName().toString();
+		if (Files.exists(file)) return file.getFileName().toString();
 		
 		if (obj instanceof CmNode) {
 			CmNode node = (CmNode) obj;

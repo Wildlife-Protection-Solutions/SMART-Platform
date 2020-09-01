@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -167,7 +166,7 @@ public enum SurveyPackageExporter {
 				
 				//include configurable model image files
 				sub.split(1);
-				Path dataFolder = Paths.get(modelToExport.getFileDataStoreLocation());
+				Path dataFolder = modelToExport.getFileDataStoreLocation();
 				if (dataFolder != null && Files.exists(dataFolder) && Files.isDirectory(dataFolder)) {
 					toIncludeInZip.addAll(Files.list(dataFolder).collect(Collectors.toList()));
 				}
@@ -225,8 +224,7 @@ public enum SurveyPackageExporter {
 		if (file != null) {
 			file.computeFileLocation(session);
 			Path fromPath = file.getAttachmentFile();
-			String fileName = cmObject.getImageFile().getFileName().toString();
-			Path toPath = tempDir.resolve(SharedUtils.getFilenameWithoutExtension(fileName) + "." + SharedUtils.getFilenameExtension(fromPath.getFileName().toString())); //$NON-NLS-1$
+			String fileName = cmObject.getImageFile() == null? cmObject.getDefaultImageFileName() : cmObject.getImageFile().getFileName().toString();			Path toPath = tempDir.resolve(SharedUtils.getFilenameWithoutExtension(fileName) + "." + SharedUtils.getFilenameExtension(fromPath.getFileName().toString())); //$NON-NLS-1$
 			Files.copy(fromPath, toPath);
 			if (!toIncludeInZip.contains(toPath)) toIncludeInZip.add(toPath);
 		}

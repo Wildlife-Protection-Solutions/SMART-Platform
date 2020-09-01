@@ -217,8 +217,10 @@ public class CmAttribute extends NamedItem implements IImageAssociatedObject{
 		if (getHelpFormat() == null) return null;
 		if (getNode() == null) return Paths.get( getHelpImageFileRootName() + "." + getHelpFormat() ); //$NON-NLS-1$
 		
-		Path p = Paths.get(getNode().getModel().getFileDataStoreLocation())
-				.resolve(getHelpImageFileRootName() + "." + getHelpFormat()); //$NON-NLS-1$
+		Path cmroot = getNode().getModel().getFileDataStoreLocation();
+		if (cmroot == null) return null;
+		
+		Path p = cmroot.resolve(getHelpImageFileRootName() + "." + getHelpFormat()); //$NON-NLS-1$
 		if (!Files.exists(p)) return null;
 		return p;
 	}
@@ -318,7 +320,7 @@ public class CmAttribute extends NamedItem implements IImageAssociatedObject{
 	@Override
 	public Path getImageFile() {
 		if (imageFile != null) return imageFile;
-		return Paths.get(getImagePersistenceLocation()); 
+		return getImagePersistenceLocation(); 
 	}
 	
 	@Transient
@@ -350,7 +352,15 @@ public class CmAttribute extends NamedItem implements IImageAssociatedObject{
 	
 	@Override
 	@Transient
-	public String getImagePersistenceLocation() {
+	public Path getImagePersistenceLocation() {
+		Path cmroot = getNode().getModel().getFileDataStoreLocation();
+		if (cmroot == null) return null;
+		return cmroot.resolve(getDefaultImageFileName());
+	}
+	
+	@Override
+	@Transient
+	public String getDefaultImageFileName() {
 		//filename
 		StringBuilder sb = new StringBuilder();
 		sb.append("cn_img1_"); //$NON-NLS-1$
@@ -363,14 +373,7 @@ public class CmAttribute extends NamedItem implements IImageAssociatedObject{
 			sb.append("."); //$NON-NLS-1$
 			sb.append(getImageFileExtension());
 		}
-		
-		
-		//path
-		String filename = Paths.get(getNode().getModel().getFileDataStoreLocation())
-			.resolve(sb.toString())
-			.toString();
-		
-		return filename;
+		return sb.toString();
 	}
 	
 	@Override

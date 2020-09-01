@@ -558,7 +558,8 @@ public class CmXmlToSmartImporter {
 			cmNode.setCmAttributes(processAttributes(xmlNode.getAttribute(), cmNode, monitor));
 			cmNode.setDisplayMode(getDisplayMode(xmlNode.getDisplayMode()));
 			
-			if ( (xmlNode.isIsCustomImage() == null || xmlNode.isIsCustomImage() == Boolean.TRUE) && xmlNode.getImageFile() != null) {
+			if ( (xmlNode.isIsCustomImage() == null || xmlNode.isIsCustomImage() == Boolean.TRUE) && 
+					xmlNode.getImageFile() != null) {
 				cmNode.setImageFile(findFile(xmlNode.getImageFile()));
 			}
 			

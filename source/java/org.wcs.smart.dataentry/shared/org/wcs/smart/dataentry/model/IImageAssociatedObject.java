@@ -75,6 +75,11 @@ public interface IImageAssociatedObject {
 	 * 
 	 * @return
 	 */
-	public String getImagePersistenceLocation();
+	public Path getImagePersistenceLocation();
 	
+	/**
+	 * 
+	 * @return The name of the image for this node in the configurable model 
+	 */
+	public String getDefaultImageFileName();
 }

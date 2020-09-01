@@ -22,7 +22,6 @@
 package org.wcs.smart.dataentry.model;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -152,7 +151,8 @@ public class CmAttributeTreeNode extends NamedItem implements IImageAssociatedOb
 	@Transient
 	@Override
 	public Path getImageFile() {
-		return imageFile != null ? imageFile : Paths.get(getImagePersistenceLocation());
+		if (imageFile != null) return imageFile;
+		return getImagePersistenceLocation();
 	}
 
 
@@ -189,7 +189,15 @@ public class CmAttributeTreeNode extends NamedItem implements IImageAssociatedOb
 	
 	@Transient
 	@Override
-	public String getImagePersistenceLocation() {
+	public Path getImagePersistenceLocation() {
+		Path cmroot = getConfig().getModel().getFileDataStoreLocation();
+		if (cmroot == null) return null;
+		return cmroot.resolve(getDefaultImageFileName());
+	}
+	
+	@Override
+	@Transient
+	public String getDefaultImageFileName() {
 		//filename
 		StringBuilder sb = new StringBuilder();
 		sb.append("tn_img1_"); //$NON-NLS-1$
@@ -202,12 +210,6 @@ public class CmAttributeTreeNode extends NamedItem implements IImageAssociatedOb
 			sb.append("."); //$NON-NLS-1$
 			sb.append(getExtension());
 		}
-		
-		//path
-		String filename = Paths.get(getConfig().getModel().getFileDataStoreLocation())
-			.resolve(sb.toString())
-			.toString();
-		
-		return filename;
+		return sb.toString();
 	}
 }

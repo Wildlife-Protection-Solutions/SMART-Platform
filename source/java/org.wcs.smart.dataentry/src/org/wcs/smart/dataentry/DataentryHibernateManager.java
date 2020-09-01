@@ -137,8 +137,8 @@ public class DataentryHibernateManager extends HibernateManager {
 	 * @param {@link ConfigurableModel} who's filestore to delete
 	 */
 	public static void deleteFilestore(ConfigurableModel model) {
-		Path fileStore = Paths.get(model.getFileDataStoreLocation());
-		if (Files.exists(fileStore)) {
+		Path fileStore =  model.getFileDataStoreLocation();
+		if (fileStore != null && Files.exists(fileStore)) {
 			try {
 				SmartUtils.deleteDirectory(fileStore);
 			} catch(Exception ex) {

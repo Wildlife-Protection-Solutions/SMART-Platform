@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -150,7 +149,7 @@ public enum SmartCollectPackageExporter {
 				
 				//include configurable model image files
 				sub.split(1);
-				Path dataFolder = Paths.get(modelToExport.getFileDataStoreLocation());
+				Path dataFolder = modelToExport.getFileDataStoreLocation();
 				if (dataFolder != null && Files.exists(dataFolder) && Files.isDirectory(dataFolder)) {
 					Files.list(dataFolder).forEach(f->toIncludeInZip.add(f));
 				}
@@ -230,12 +229,12 @@ public enum SmartCollectPackageExporter {
 	private void processFile(DmObject object, IImageAssociatedObject cmObject, ConfigurableModel cm, 
 			List<Path> toIncludeInZip, Path tempDir, Session session) throws IOException {
 		IconFile file = object.getIcon().getIconFile(cm.getIconSet());
-		if (file != null) {
+		if (file != null ) {
 			
 			file.computeFileLocation(session);
 			
 			Path fromPath = file.getAttachmentFile();
-			String fileName = cmObject.getImageFile().getFileName().toString();
+			String fileName = cmObject.getImageFile() == null? cmObject.getDefaultImageFileName() : cmObject.getImageFile().getFileName().toString();			
 			if (cmObject.getUuid() == null) {
 				fileName = UuidUtils.uuidToString(object.getUuid());
 			}

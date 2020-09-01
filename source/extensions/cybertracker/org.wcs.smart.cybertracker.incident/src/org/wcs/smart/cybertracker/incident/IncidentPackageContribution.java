@@ -258,7 +258,7 @@ public class IncidentPackageContribution implements IPackageContribution{
 		IconFile file = object.getIcon().getIconFile(cm.getIconSet());
 		if (file != null) {
 			Path fromPath = file.getAttachmentFile();
-			String fileName = cmObject.getImageFile().getFileName().toString();
+			String fileName = cmObject.getImageFile() == null? cmObject.getDefaultImageFileName() : cmObject.getImageFile().getFileName().toString();
 			if (cmObject.getUuid() == null) {
 				fileName = UuidUtils.uuidToString(object.getUuid());
 			}

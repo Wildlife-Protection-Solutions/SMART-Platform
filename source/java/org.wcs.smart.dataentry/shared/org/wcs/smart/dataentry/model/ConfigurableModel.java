@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.dataentry.model;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -200,12 +201,12 @@ public class ConfigurableModel extends NamedItem {
 	 * @return the filestore location for the given configurable model
 	 */
 	@Transient
-	public String getFileDataStoreLocation() {
-		if (getUuid() == null) return ""; //$NON-NLS-1$
+	public Path getFileDataStoreLocation() {
+		if (getUuid() == null) return null;
 		
 		return Paths.get(getConservationArea().getFileDataStoreLocation())
 				.resolve("dataentry")  //$NON-NLS-1$
-				.resolve(UuidUtils.getDirectoryPath(getUuid())).toString();
+				.resolve(UuidUtils.getDirectoryPath(getUuid()));
 	}
 	
 }

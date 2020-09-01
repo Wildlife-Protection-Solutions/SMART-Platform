@@ -455,7 +455,8 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 						
 						List<Path> toZip = new ArrayList<>();
 						toZip.add(xmlFile);
-						Path dataFolder = Paths.get(cm.getFileDataStoreLocation());
+						
+						Path dataFolder = cm.getFileDataStoreLocation();
 						if (dataFolder != null && Files.exists(dataFolder) && Files.isDirectory(dataFolder)) {
 							Files.list(dataFolder).forEach(file->toZip.add(file));							
 						}

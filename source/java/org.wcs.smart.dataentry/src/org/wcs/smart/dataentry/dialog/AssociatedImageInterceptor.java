@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
@@ -160,7 +159,8 @@ public class AssociatedImageInterceptor extends EmptyInterceptor {
 	}
 
 	private void handleDelete(IImageAssociatedObject imgObject) {
-		Path file = Paths.get(imgObject.getImagePersistenceLocation());
+		Path file = imgObject.getImagePersistenceLocation();
+		if (file == null) return;
 		
 		Object t = imgObject;
 		if (t instanceof CmAttributeOption) {
@@ -229,9 +229,11 @@ public class AssociatedImageInterceptor extends EmptyInterceptor {
 
 		@Override
 		public void execute() {
+			if (imgObject.getImagePersistenceLocation() == null) return;
+			
 			//need some from-to mapping; and also objects can be cleared
 			Path from = imgObject.getImageFile();
-			Path to = Paths.get(imgObject.getImagePersistenceLocation());
+			Path to = imgObject.getImagePersistenceLocation();
 			
 			if (from == null || from.equals(IImageAssociatedObject.NULL_FILE)) {
 				//find all files that start with "to" and delete them
@@ -298,21 +300,27 @@ public class AssociatedImageInterceptor extends EmptyInterceptor {
 				}
 
 				if (att.getImportHelpFile() != null) {
-					//delete all existinf iles
-					deleteFiles(Paths.get(att.getNode().getModel().getFileDataStoreLocation()), att.getHelpImageFileRootName());
-					//copy import to image path
-					try {
-						Path imagePath = Paths.get(att.getNode().getModel().getFileDataStoreLocation())
-								.resolve(att.getHelpImageFileRootName() + "." + att.getHelpFormat()); //$NON-NLS-1$
-						if (!Files.exists(imagePath.getParent())) Files.createDirectories(imagePath.getParent());
-						Files.copy(att.getImportHelpFile(), imagePath, StandardCopyOption.REPLACE_EXISTING);
-					} catch (IOException e) {
-						SmartPlugIn.log("Could not copy file: " + from.toString() + " to " + to.toString(), e); //$NON-NLS-1$ //$NON-NLS-2$
+					
+					Path rootpath = att.getNode().getModel().getFileDataStoreLocation();
+					if (rootpath != null) {
+						//delete all existing files
+						deleteFiles(rootpath, att.getHelpImageFileRootName());
+						//copy import to image path
+						try {
+							Path imagePath = rootpath.resolve(att.getHelpImageFileRootName() + "." + att.getHelpFormat()); //$NON-NLS-1$
+							if (!Files.exists(imagePath.getParent())) Files.createDirectories(imagePath.getParent());
+							Files.copy(att.getImportHelpFile(), imagePath, StandardCopyOption.REPLACE_EXISTING);
+						} catch (IOException e) {
+							SmartPlugIn.log("Could not copy file: " + from.toString() + " to " + to.toString(), e); //$NON-NLS-1$ //$NON-NLS-2$
+						}
+						att.setImportHelpFile(null);
 					}
-					att.setImportHelpFile(null);
 				}else if (att.getHelpFormat() == null) {
 					//no image; we want to delete any existing images that may be set for the node
-					deleteFiles(Paths.get(att.getNode().getModel().getFileDataStoreLocation()), att.getHelpImageFileRootName());
+					Path rootpath = att.getNode().getModel().getFileDataStoreLocation();
+					if (rootpath != null) {
+						deleteFiles(rootpath, att.getHelpImageFileRootName());
+					}
 				}
 			}
 		}
