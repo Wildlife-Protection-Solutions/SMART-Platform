@@ -210,7 +210,7 @@ public class UpgradeServlet extends HttpServlet {
 			@Override
 			public void execute(Connection c) throws SQLException {
 				try {
-					upgradeIcons(c);
+					upgradeIcons(c, "afropavo_congensis", "xenopirostris_damii");  //$NON-NLS-1$//$NON-NLS-2$
 				}catch (Exception ex) {
 					throw new SQLException (ex);
 				}
@@ -251,6 +251,9 @@ public class UpgradeServlet extends HttpServlet {
 							}
 						}
 					}
+					
+					//upgrade icons
+					upgradeIcons(c, "agouti_paca", "xanthopsar_flavus");  //$NON-NLS-1$//$NON-NLS-2$
 					
 				}catch (Exception ex) {
 					throw new SQLException (ex);
@@ -851,7 +854,7 @@ public class UpgradeServlet extends HttpServlet {
 	}
 	
 	
-	private void upgradeIcons(Connection c) throws SQLException {
+	private void upgradeIcons(Connection c, String startkey, String endkey) throws SQLException {
 
 		PreparedStatement pslabel = c.prepareStatement("INSERT INTO smart.i18n_label(language_uuid, element_uuid, value) VALUES(?, ?, ?)"); //$NON-NLS-1$
 		PreparedStatement psicon = c.prepareStatement("INSERT INTO smart.icon(uuid, keyid, ca_uuid) VALUES(?, ?, ?)"); //$NON-NLS-1$
@@ -908,7 +911,7 @@ public class UpgradeServlet extends HttpServlet {
 				boolean found = false;				
 				for (String[] icon : IconUtils.SMART_ICON_MAPPING) {
 					//anything after this is new in SMART630
-					if (icon[0].equalsIgnoreCase("afropavo_congensis")) { //$NON-NLS-1$
+					if (icon[0].equalsIgnoreCase(startkey)) { //$NON-NLS-1$
 						found = true;
 					}
 					if (!found) continue;
@@ -954,6 +957,9 @@ public class UpgradeServlet extends HttpServlet {
 					
 					//update data model items
 					IconUtils.upgradeDataModel(c, iconuuid, icon[5], cuuid);
+					
+					if (icon[0].equalsIgnoreCase(endkey)) break; //$NON-NLS-1$
+
 				}
 				
 			}

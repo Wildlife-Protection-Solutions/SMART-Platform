@@ -377,6 +377,9 @@ public class Upgrader630To700 implements IDatabaseUpgrader {
 					
 					//update data model items
 					IconUtils.upgradeDataModel(c, iconuuid, icon[5], cuuid);
+					
+					//end of updates
+					if (icon[0].equalsIgnoreCase("xanthopsar_flavus")) break; //$NON-NLS-1$
 				}
 				
 			}

@@ -185,6 +185,8 @@ public class Upgrader620To630 implements IDatabaseUpgrader {
 					
 					//update data model items
 					IconUtils.upgradeDataModel(c, iconuuid, icon[5], cuuid);
+					
+					if (icon[0].equalsIgnoreCase("xenopirostris_damii")) break; //$NON-NLS-1$
 				}
 				
 			}
