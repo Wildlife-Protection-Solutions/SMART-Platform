@@ -67,7 +67,7 @@ public class SmartIconSymbolizer implements IPointSymbolizerComposite, IStyleCha
 	private Composite composite;
 	
 	private FiltersComposite fontFiltersComposite ;
-	private  PointGeneralParametersComposite generalParametersComposite;
+	private PointGeneralParametersComposite generalParametersComposite;
 	
 	private IconFile selectedFile = null;
 	private RuleWrapper ruleWrapper;
@@ -247,6 +247,9 @@ public class SmartIconSymbolizer implements IPointSymbolizerComposite, IStyleCha
 
         switch( styleEventType ) {
         // GENERAL PARAMETERS
+        case TITLE:
+            ruleWrapper.setTitle(value);
+            break;
         case NAME:
             ruleWrapper.setName(value);
             break;
@@ -273,6 +276,8 @@ public class SmartIconSymbolizer implements IPointSymbolizerComposite, IStyleCha
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+            }else {
+            	ruleWrapper.getRule().setFilter(null);
             }
             break;
         }

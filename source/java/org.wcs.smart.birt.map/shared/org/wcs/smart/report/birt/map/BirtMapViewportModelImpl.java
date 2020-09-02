@@ -49,6 +49,8 @@ import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultEngineeringCRS;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Envelope;
 import org.locationtech.udig.aoi.IAOIService;
 import org.locationtech.udig.internal.aoi.AOIServiceImpl;
 import org.locationtech.udig.project.ILayer;
@@ -71,9 +73,6 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.opengis.referencing.operation.TransformException;
-
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Envelope;
 
 /**
  * Viewport model for rendering SMART Birt Maps.
@@ -110,15 +109,6 @@ public class BirtMapViewportModelImpl extends EObjectImpl implements ViewportMod
      */
     protected boolean cRSESet = false;
 
-    /**
-     * The default value of the '{@link #getBounds() <em>Bounds</em>}' attribute. <!--
-     * begin-user-doc --> <!-- end-user-doc -->
-     * 
-     * @see #getBounds()
-     * @generated NOT
-     * @ordered
-     */
-    protected static final ReferencedEnvelope BOUNDS_EDEFAULT = NIL_BBOX;
 
     /**
      * The cached value of the '{@link #getBounds() <em>Bounds</em>}' attribute. <!--
@@ -128,7 +118,7 @@ public class BirtMapViewportModelImpl extends EObjectImpl implements ViewportMod
      * @generated NOT
      * @ordered
      */
-    protected ReferencedEnvelope bounds = BOUNDS_EDEFAULT;
+    protected ReferencedEnvelope bounds = getDefaultReferencedEnvelope();
 
     /**
      * The default value of the '{@link #getCenter() <em>Center</em>}' attribute. <!--
@@ -269,6 +259,8 @@ public class BirtMapViewportModelImpl extends EObjectImpl implements ViewportMod
     public BirtMapViewportModelImpl() {
     }
 
+
+    
     /**
      * <!-- begin-user-doc --> <!-- end-user-doc -->
      * @generated
@@ -1115,6 +1107,13 @@ public class BirtMapViewportModelImpl extends EObjectImpl implements ViewportMod
     }
 
     /**
+     * @returns a default NIL Bounding Box based on system wide default CRS
+     * @return
+     */
+    public static ReferencedEnvelope getDefaultReferencedEnvelope() {
+    	return new ReferencedEnvelope(0, 0, 0, 0, getDefaultCRS());
+    }
+    /**
      * <!-- begin-user-doc -->
      * <!-- end-user-doc -->
      * @generated
@@ -1126,7 +1125,7 @@ public class BirtMapViewportModelImpl extends EObjectImpl implements ViewportMod
             unsetCRS();
             return;
         case RenderPackage.VIEWPORT_MODEL__BOUNDS:
-            setBounds(BOUNDS_EDEFAULT);
+            setBounds(getDefaultReferencedEnvelope());
             return;
         case RenderPackage.VIEWPORT_MODEL__CENTER:
             setCenter(CENTER_EDEFAULT);
@@ -1173,7 +1172,7 @@ public class BirtMapViewportModelImpl extends EObjectImpl implements ViewportMod
         case RenderPackage.VIEWPORT_MODEL__CRS:
             return isSetCRS();
         case RenderPackage.VIEWPORT_MODEL__BOUNDS:
-            return BOUNDS_EDEFAULT == null ? bounds != null : !BOUNDS_EDEFAULT.equals(bounds);
+            return getDefaultReferencedEnvelope() == null ? bounds != null : !getDefaultReferencedEnvelope().equals(bounds);
         case RenderPackage.VIEWPORT_MODEL__CENTER:
             return CENTER_EDEFAULT == null ? getCenter() != null : !CENTER_EDEFAULT
                     .equals(getCenter());
