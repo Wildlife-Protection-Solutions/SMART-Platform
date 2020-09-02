@@ -63,7 +63,6 @@ import org.wcs.smart.plan.xml.model.XmlName;
 import org.wcs.smart.plan.xml.model.XmlPlan;
 import org.wcs.smart.plan.xml.model.XmlPlanTarget;
 import org.wcs.smart.plan.xml.model.XmlPlanTargetPoint;
-import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
  * Converts plan from xml file into SMART Plan data model object
@@ -166,7 +165,7 @@ public class PlanFromXml {
 								Messages.PlanFromXml_ImportTitle, 
 								null, 
 								allDuplicateMessage, MessageDialog.QUESTION, 1, 
-								new String[] {DialogConstants.IMPORT_BUTTON_TEXT, Messages.PlanFromXml_SkipButton});
+								new String[] {Messages.PlanFromXml_ImportButton, Messages.PlanFromXml_SkipButton});
 
 						int x = md.open();
 						if (x == 0) {

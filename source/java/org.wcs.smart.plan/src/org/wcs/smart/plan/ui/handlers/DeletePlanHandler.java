@@ -23,6 +23,7 @@ package org.wcs.smart.plan.ui.handlers;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -111,16 +112,16 @@ public class DeletePlanHandler{
 
         @Override
         protected IStatus run(IProgressMonitor monitor) {
+        	Set<Plan> dp = new HashSet<>();
+        	
         	while(uuids.size() > 0){
         		UUID uuid = uuids.remove(0);
         		Set<Plan> deletedPlans = PlanHibernateManager.deletePlan(uuid);
-        		if (deletedPlans != null) {
-        			for (Plan deletedPlan : deletedPlans){
-        				PlanEventManager.getInstance().planDeleted(deletedPlan);
-        			}
-        		}	
+        		if (deletedPlans != null) dp.addAll(deletedPlans);
         	}
-            return Status.OK_STATUS;
+        	
+    		dp.forEach(p->PlanEventManager.getInstance().planDeleted(p));
+    		return Status.OK_STATUS;
         }
     }
 

@@ -178,6 +178,7 @@ public class Messages extends NLS {
 	public static String PlanFilterDialog_Title;
 	public static String PlanFromXml_CancelOp;
 	public static String PlanFromXml_ImportAllOp;
+	public static String PlanFromXml_ImportButton;
 	public static String PlanFromXml_ImportNewOp;
 	public static String PlanFromXml_ImportTitle;
 	public static String PlanFromXml_InvalidNumericOperator;
