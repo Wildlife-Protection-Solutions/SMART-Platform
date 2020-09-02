@@ -34,6 +34,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -68,6 +69,7 @@ import org.opengis.feature.type.Name;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -504,10 +506,16 @@ public class PawsDataEngine {
 				create.append(" FROM smart.waypoint a "); //$NON-NLS-1$
 				create.append(" LEFT JOIN smart.wp_observation_group g on g.wp_uuid = a.uuid "); //$NON-NLS-1$
 				create.append(" LEFT JOIN smart.wp_observation obs ON obs.wp_group_uuid = g.uuid " ); //$NON-NLS-1$
-				create.append(" WHERE a.ca_uuid = :ca AND a.source='PATROL' AND cast(a.datetime as date) between :start and :end "); //$NON-NLS-1$
+				create.append(" WHERE a.ca_uuid IN (:ca) AND a.source='PATROL' AND cast(a.datetime as date) between :start and :end "); //$NON-NLS-1$
 
+				Collection<ConservationArea> cas;
+				if (SmartDB.isMultipleAnalysis()) {
+					cas = SmartDB.getConservationAreaConfiguration().getConservationAreas();
+				}else {
+					cas = Collections.singleton(run.getConservationArea());
+				}
 				session.createNativeQuery(create.toString())
-					.setParameter("ca", run.getConservationArea().getUuid()) //$NON-NLS-1$
+					.setParameterList("ca", cas) //$NON-NLS-1$
 					.setParameter("start", run.getDataStartDate()) //$NON-NLS-1$
 					.setParameter("end", run.getDataEndDate()) //$NON-NLS-1$
 					.executeUpdate();

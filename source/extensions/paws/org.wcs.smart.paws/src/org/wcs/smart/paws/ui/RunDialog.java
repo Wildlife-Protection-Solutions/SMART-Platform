@@ -22,6 +22,8 @@
 package org.wcs.smart.paws.ui;
 
 import java.time.LocalDate;
+import java.util.Collection;
+import java.util.Collections;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
@@ -36,6 +38,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.paws.internal.Messages;
@@ -124,10 +127,16 @@ public class RunDialog extends SmartStyledTitleDialog {
 	public Control createDialogArea(Composite parent){
 
 		try(Session session = HibernateManager.openSession()){
-			Integer startyear = (Integer) session.createQuery("SELECT min(year(dateTime)) FROM Waypoint WHERE conservationArea = :ca") //$NON-NLS-1$
-					.setParameter("ca",  SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
+			Collection<ConservationArea> cas;
+			if (SmartDB.isMultipleAnalysis()) {
+				cas = SmartDB.getConservationAreaConfiguration().getConservationAreas();
+			}else {
+				cas = Collections.singletonList(SmartDB.getCurrentConservationArea());
+			}
+			Integer startyear = (Integer) session.createQuery("SELECT min(year(dateTime)) FROM Waypoint WHERE conservationArea IN (:cas)") //$NON-NLS-1$
+					.setParameterList("cas",  cas) //$NON-NLS-1$
 					.uniqueResult();
-			smartDataStartYear = startyear;
+			if (startyear != null) smartDataStartYear = startyear;
 			
 		}
 		

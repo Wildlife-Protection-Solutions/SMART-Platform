@@ -103,6 +103,17 @@
                visible="true">
          </view>
       </perspectiveExtension>
+      <perspectiveExtension
+            targetID="org.wcs.smart.query.persepectives.multi">
+         <view
+               closeable="false"
+               id="org.wcs.smart.paws.view"
+               minimized="false"
+               relationship="stack"
+               relative="org.wcs.smart.query.parts.itemlist"
+               visible="true">
+         </view>
+      </perspectiveExtension>
    </extension>
    <extension
          point="org.eclipse.ui.editors">
