@@ -3623,7 +3623,7 @@ CREATE TABLE smart.language (
     uuid uuid NOT NULL,
     ca_uuid uuid NOT NULL,
     isdefault boolean DEFAULT false NOT NULL,
-    code character varying(6),
+    code character varying(8),
     PRIMARY KEY (uuid)
 );
 

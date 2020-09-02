@@ -96,7 +96,7 @@ public class Upgrader630To700 implements IDatabaseUpgrader {
 		
 		String[] sql = new String[] {
 				
-				"alter table smart.LANGUAGE alter column code set data type varchar(6)",  //$NON-NLS-1$
+				"alter table smart.LANGUAGE alter column code set data type varchar(8)",  //$NON-NLS-1$
 				"CREATE FUNCTION smart.tempuuid() returns char(16) for bit data LANGUAGE JAVA NOT deterministic external name 'org.wcs.smart.util.DerbyUtils.createUuid' PARAMETER STYLE JAVA NO SQL RETURNS NULL ON NULL INPUT", //$NON-NLS-1$
 				
 				"CREATE TABLE smart.employee_team (uuid char(16) for bit data not null, ca_uuid char(16) for bit data not null, primary key (uuid))", //$NON-NLS-1$
