@@ -63,6 +63,7 @@ import org.wcs.smart.plan.xml.model.XmlName;
 import org.wcs.smart.plan.xml.model.XmlPlan;
 import org.wcs.smart.plan.xml.model.XmlPlanTarget;
 import org.wcs.smart.plan.xml.model.XmlPlanTargetPoint;
+import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
  * Converts plan from xml file into SMART Plan data model object
@@ -158,10 +159,19 @@ public class PlanFromXml {
 					//they all already exists
 					//options are to import plans anyways and assign new ids OR skip
 					
-					final boolean[] r = new boolean[1];
+					final boolean[] r = new boolean[]{false};
+					
 					Display.getDefault().syncExec(()->{
-						r[0] = MessageDialog.openQuestion(Display.getDefault().getActiveShell(), Messages.PlanFromXml_ImportTitle, 
-								allDuplicateMessage);						
+						MessageDialog md = new MessageDialog(Display.getDefault().getActiveShell(), 
+								Messages.PlanFromXml_ImportTitle, 
+								null, 
+								allDuplicateMessage, MessageDialog.QUESTION, 1, 
+								new String[] {DialogConstants.IMPORT_BUTTON_TEXT, Messages.PlanFromXml_SkipButton});
+
+						int x = md.open();
+						if (x == 0) {
+							r[0] = true;
+						}					
 					});
 					if (!r[0]) return false;
 					

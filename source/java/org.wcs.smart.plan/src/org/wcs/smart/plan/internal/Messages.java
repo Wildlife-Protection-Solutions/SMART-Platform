@@ -186,6 +186,7 @@ public class Messages extends NLS {
 	public static String PlanFromXml_InvalidTargetType;
 	public static String PlanFromXml_ParentNotFound;
 	public static String PlanFromXml_PlansAlreadyExist;
+	public static String PlanFromXml_SkipButton;
 	public static String PlanFromXml_SomePlansAlreadyExist;
 	public static String PlanFromXml_StationNameNotFound;
 	public static String PlanFromXml_StationNotFound;
