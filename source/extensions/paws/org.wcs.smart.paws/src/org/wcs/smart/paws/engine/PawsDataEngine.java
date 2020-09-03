@@ -149,7 +149,7 @@ public class PawsDataEngine {
 				run.setRunDate(LocalDateTime.now());
 				session.getTransaction().commit();
 			}catch (Exception ex){
-				session.getTransaction().rollback();;
+				session.getTransaction().rollback();
 				throw ex;
 			}
 		}
@@ -217,19 +217,12 @@ public class PawsDataEngine {
 			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy"); //$NON-NLS-1$
 			patrolobs.put("start_date", formatter.format(run.getDataStartDate())); //$NON-NLS-1$
 			patrolobs.put("end_date", formatter.format(run.getDataEndDate())); //$NON-NLS-1$
-
-//			pp = run.getConfiguration().findParameter(PawsParameter.FixedParameter.TIMEZONE.name());
-//			if (pp == null) throw new Exception("Timezone value must be provided.  Update the configuration and try again.");
-//			patrolobs.put("time_zone", pp.getValue());
 			patrolobs.put("file_name", DATA_FILE_NAME); //$NON-NLS-1$
-			
 			
 			//illegal class mappings
 			JSONArray mappings = new JSONArray();
 			
 			//just add single mapping for now
-			
-			
 			for (Entry<String, List<String>> firstmapping : classmappings.entrySet()) {
 				
 				JSONObject mapping = new JSONObject();

@@ -97,14 +97,18 @@ public class ConservationAreaFilterPanel implements IDefinitionPanel, SelectionL
 		((FillLayout)main.getLayout()).marginHeight = 0;
 		((FillLayout)main.getLayout()).marginWidth = 0;
 		
+		main.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
+		
 		scroll = new ScrolledComposite(main, SWT.NONE | SWT.H_SCROLL | SWT.V_SCROLL);
 		scroll.setAlwaysShowScrollBars(false);
 		scroll.setExpandHorizontal(true);
 		scroll.setExpandVertical(true);
+		scroll.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		content = new Composite(scroll, SWT.NONE);
 		content.setLayout(new GridLayout());
 		content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		content.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		caWarning = new Composite(content, SWT.NONE | SWT.BORDER);
 		caWarning.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
