@@ -52,6 +52,7 @@ import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.ProjectPackage;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
+import org.locationtech.udig.project.internal.render.impl.RenderManagerImpl;
 import org.locationtech.udig.project.render.IViewportModel;
 import org.locationtech.udig.style.sld.SLDContent;
 import org.opengis.feature.simple.SimpleFeature;
@@ -156,13 +157,20 @@ public class IncidentMapPage extends SmartMapEditorPart {
 			protected IStatus run(IProgressMonitor monitor) {
 				IStatus s = super.run(monitor);
 				Display.getDefault().asyncExec(()->{
-					addPointsLayer();
-					updatePointsLayer();	
+    				((RenderManagerImpl)getMap().getRenderManager()).disableRendering();
+    				try {
+						addPointsLayer();
+						updatePointsLayer();
+    				}finally {
+    					((RenderManagerImpl)getMap().getRenderManager()).enableRendering();
+    				}
 				});
 				return s;
 			}
 		};
 		loadDefaultLayers.schedule();
+		
+		addInitialZoomFunction();
 		
 		if (this.parent.canEdit() == null){
         	getMap().getBlackboard().put(IMapEditManager.BLACKBOARD_KEY, getEditManager());
@@ -181,6 +189,7 @@ public class IncidentMapPage extends SmartMapEditorPart {
 			featureType = IncidentFeatureFactory.createSimpleIncidentSchema(IncidentFeatureFactory.SMART_POINT_TYPE_NAME);
 			featureCollection = new ListFeatureCollection(featureType);
 			pointResource = CatalogPlugin.getDefault().getLocalCatalog().createTemporaryResource(featureType);
+			
 			store = pointResource.resolve(FeatureStore.class, null);
 			layers.add(pointResource);
 			
@@ -236,9 +245,7 @@ public class IncidentMapPage extends SmartMapEditorPart {
 					
 				}
 			};
-			getMap().sendCommandASync(command);
-			
-			addInitialZoomFunction();
+			getMap().sendCommandSync(command);
 			
         } catch (Exception exception) {
 			IncidentPlugIn.displayLog(Messages.IncidentMapPage_Error1, exception);
