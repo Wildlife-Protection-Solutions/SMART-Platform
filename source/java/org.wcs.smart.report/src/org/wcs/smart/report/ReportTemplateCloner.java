@@ -216,7 +216,7 @@ public class ReportTemplateCloner implements
 		for (Iterator<?> iterator = datasets.iterator(); iterator.hasNext();) {
 			DataSetHandle dataset = (DataSetHandle) iterator.next();
 			if (dataset instanceof OdaDataSetHandle){
-				if (((OdaDataSetHandle)dataset).getExtensionID().equals(ReportManager.SMART_DATASET_TYPE)){
+				if (ReportManager.isSmartQueryHandle((OdaDataSetHandle) dataset)) {
 					String bits[] = ((OdaDataSetHandle) dataset).getQueryText().split(":"); //$NON-NLS-1$
 					
 					String queryUuid = ((OdaDataSetHandle) dataset).getQueryText().split(":")[1]; //$NON-NLS-1$

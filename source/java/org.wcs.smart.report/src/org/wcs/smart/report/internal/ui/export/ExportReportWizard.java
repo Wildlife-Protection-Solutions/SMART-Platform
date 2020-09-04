@@ -28,6 +28,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
@@ -74,8 +75,10 @@ public class ExportReportWizard extends Wizard implements IPageChangingListener{
 	private boolean isMultiple;
 	private List<Report> initReports;
 	
+	private Path renderFile = null;
+	
 	/**
-	 * Creates a new wizard.
+	 * Creates a new wizard for running and exporting a report.
 	 *
 	 */
 	public ExportReportWizard(boolean isMultiple, List<Report> initReports) {
@@ -87,13 +90,28 @@ public class ExportReportWizard extends Wizard implements IPageChangingListener{
 	}
 
 	/**
+	 * For exporting a previously generated report render file.
+	 * 
+	 * @param renderFile
+	 * @param report
+	 */
+	public ExportReportWizard(Path renderFile, Report report) {
+		setWindowTitle(Messages.ExportReportWizard_SaveReportOutput);
+
+		super.setNeedsProgressMonitor(true);
+		this.isMultiple = false;
+		this.initReports = Collections.singletonList(report);
+		this.renderFile = renderFile;
+	}
+	
+	/**
 	 * @see org.eclipse.jface.wizard.Wizard#addPages()
 	 */
 	@Override
 	public void addPages() {
 		((WizardDialog)getContainer()).addPageChangingListener(this);
 		
-		page1 = new ExportReportWizardPage(isMultiple, initReports);
+		page1 = new ExportReportWizardPage(renderFile != null, isMultiple, initReports);
 		super.addPage(page1);
 		
 		page2 = new ExportReportCaListPage();
@@ -132,7 +150,12 @@ public class ExportReportWizard extends Wizard implements IPageChangingListener{
 				EmitterInfo outputFormat = (EmitterInfo) exporter.getExporter();
 				//export reports
 				try {
-					if (isMultiple){
+					if (renderFile != null) {
+						//render the file
+						if (!ExportReportEngine.printReport(renderFile, selectedReports.get(0), outputLocation, outputFormat, dpi)) {
+							return false;
+						}
+					}else if (isMultiple){
 						ExportReportEngine.exportReports(selectedReports, outputLocation, null, outputFormat, dpi);
 					}else{
 						ExportReportEngine.exportReports(selectedReports, null, outputLocation, outputFormat, dpi);

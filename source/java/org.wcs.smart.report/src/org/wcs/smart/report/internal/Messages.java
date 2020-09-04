@@ -51,11 +51,14 @@ public class Messages extends NLS {
 	public static String ExportReportDialog_OutputDirectoryLabel;
 	public static String ExportReportDialog_OutputFileLabel;
 	public static String ExportReportDialog_ReportsLabel;
+	public static String ExportReportEngine_CompleteTitle;
 	public static String ExportReportEngine_Error_GatheringParameters;
 	public static String ExportReportEngine_ExportComplete_DialogMessage;
 	public static String ExportReportEngine_ExportComplete_DialogTitle;
 	public static String ExportReportEngine_FileExists;
 	public static String ExportReportEngine_OverwriteFile;
+	public static String ExportReportEngine_SaveCompleteMsg;
+	public static String ExportReportEngine_SaveErrorMsg;
 	public static String ExportReportHandler_ExportError;
 	public static String ExportReportJob_ErrorExportingReport;
 	public static String ExportReportJob_ExportReportJobName;
@@ -64,9 +67,11 @@ public class Messages extends NLS {
 	public static String ExportReportWizard_ExportError;
 	public static String ExportReportWizard_ExportReportWizardTitle;
 	public static String ExportReportWizard_ImportComplete;
+	public static String ExportReportWizard_SaveReportOutput;
 	public static String ExportReportWizardPage_CaOption;
 	public static String ExportReportWizardPage_OutputRequired;
 	public static String ExportReportWizardPage_ReportRequired;
+	public static String ExportReportWizardPage_SaveAsTitle;
 	public static String ImportLibraryHandler_AllFilesFilterName;
 	public static String ImportLibraryHandler_ErrorImportingLibrary;
 	public static String ImportLibraryHandler_FileLabel;

@@ -531,7 +531,7 @@ public class ImportReportEngine {
 				DataSetHandle dataset = (DataSetHandle) iterator.next();
 				if (dataset instanceof OdaDataSetHandle){
 					OdaDataSetHandle handle = (OdaDataSetHandle)dataset;
-					if (handle.getExtensionID().equals(ReportManager.SMART_DATASET_TYPE)){
+					if (ReportManager.isSmartQueryHandle(handle)){
 						//smart dataset
 						if (!processQuery(handle.getQueryText().split(":")[1],  //$NON-NLS-1$
 								queryDir, handle, sharedReport, reportEmployee, importCa)){

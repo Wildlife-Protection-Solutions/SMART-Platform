@@ -21,9 +21,6 @@
  */
 package org.wcs.smart.report.birt.map.item;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.eclipse.birt.report.model.api.ExtendedItemHandle;
 import org.eclipse.birt.report.model.api.activity.SemanticException;
 import org.eclipse.birt.report.model.api.extension.IReportItem;
@@ -182,18 +179,6 @@ public class LayerItem extends ReportItem {
 	public IReportItem copy( )
 	{
 		LayerItem clone = (LayerItem) super.copy();
-		ExtendedItemHandle newhandle = clone.handle.getElementFactory().newExtendedItem(null, EXTENSION_NAME);
-		clone.setHandle(newhandle);
-		try {
-			clone.setGeometryColumn(getGeometryColumn());
-			clone.setLayerName(getLayerName());
-			clone.setLayerStyles(getLayerStyle());
-			clone.setLayerType(getLayerType());
-			clone.setZoomTo(getZoomTo());
-		}catch (SemanticException se) {
-			Logger.getLogger(LayerItem.class.getName()).log(Level.WARNING, se.getMessage(), se);
-
-		}
 		return clone;
 	}
 	

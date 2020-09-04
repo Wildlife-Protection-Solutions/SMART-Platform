@@ -65,6 +65,10 @@
             id="org.wcs.smart.report.birt.query.newsmartparameter"
             name="New SMART Parameter">
       </command>
+      <command
+            id="org.wcs.smart.report.print"
+            name="Save Output As...">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -214,6 +218,15 @@
       <handler
             class="org.wcs.smart.report.internal.ui.NewSmartParameterHandler$NewSmartParameterHandlerWrapper"
             commandId="org.wcs.smart.report.birt.query.newsmartparameter">
+      </handler>
+      <handler
+            class="org.wcs.smart.report.internal.ui.PrintReportHandler$PrintReportHandlerWrapper"
+            commandId="org.wcs.smart.report.print">
+         <enabledWhen>
+            <test
+                  property="org.wcs.smart.report.canExport">
+            </test>
+         </enabledWhen>
       </handler>
    </extension>
    <extension
@@ -981,6 +994,68 @@
                </and>
             </visibleWhen>
          </toolbar>
+         <toolbar
+               id="vertical.org.wcs.smart.report.toolbar4">
+            <command
+                  commandId="org.wcs.smart.report.print"
+                  mode="FORCE_TEXT"
+                  style="push">
+               <visibleWhen>
+                  <and>
+                     <with
+                           variable="activeWorkbenchWindow.activePerspective">
+                        <equals
+                              value="org.wcs.smart.report.ReportViewerPerspective">
+                        </equals>
+                     </with>
+                     <or>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="admin">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="analyst">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="manager">
+                        </test>
+                     </or>
+                  </and>
+               </visibleWhen>
+            </command>
+            <visibleWhen>
+               <and>
+                  <with
+                        variable="activeWorkbenchWindow.activePerspective">
+                     <equals
+                           value="org.wcs.smart.report.ReportViewerPerspective">
+                     </equals>
+                  </with>
+                  <or>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="analyst">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                  </or>
+               </and>
+            </visibleWhen>
+         </toolbar>
       </menuContribution>
       <menuContribution
             allPopups="false"
@@ -1113,6 +1188,11 @@
             disabledIcon="platform:/plugin/org.wcs.smart/images/icons/shared16/saveas_disabled.png"
             icon="platform:/plugin/org.wcs.smart/images/icons/shared16/saveas.png">
       </image>
+      <image
+            commandId="org.wcs.smart.report.print"
+            disabledIcon="platform:/plugin/org.wcs.smart/images/icons/shared16/saveas_disabled.png"
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/saveas.png">
+      </image>
    </extension>
    <extension
          point="org.wcs.smart.query.property">
@@ -1174,5 +1254,15 @@
             class="org.wcs.smart.report.parameter.EmployeeParameter"
             image="platform:/plugin/org.wcs.smart/images/icons/obj16/user_green.png">
       </parameter>
+   </extension>
+   <extension
+         point="org.eclipse.core.expressions.propertyTesters">
+      <propertyTester
+            class="org.wcs.smart.report.ExportablePropertyTester"
+            id="org.wcs.smart.report.canExport"
+            namespace="org.wcs.smart.report"
+            properties="canExport"
+            type="java.lang.Object">
+      </propertyTester>
    </extension>
 </plugin>

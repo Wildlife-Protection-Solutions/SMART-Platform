@@ -82,6 +82,7 @@ public class ReportManager {
 	public static final String SMART_DATASOURCE_ID = "org.wcs.smart.data.oda.smart"; //$NON-NLS-1$
 	public static final String SMART_DATASET_TYPE = "org.wcs.smart.data.oda.smart.smartQueryDataset"; //$NON-NLS-1$
 	public static final String SMART_DATASET_TABLE_TYPE = "org.wcs.smart.data.oda.smart.smartTableDataset"; //$NON-NLS-1$
+	public static final String SMART_ATTACHMENT_DATASET_TYPE = "org.wcs.smart.data.oda.smart.smartQueryAttachmentDataset"; //$NON-NLS-1$
 
 	/**
 	 * Determines if the current user can modify the conservation area level
@@ -354,7 +355,7 @@ public class ReportManager {
 			DataSetHandle dataset = (DataSetHandle) iterator.next();
 			if (dataset instanceof OdaDataSetHandle){
 				OdaDataSetHandle h = (OdaDataSetHandle)dataset;
-				if (h.getExtensionID().equals(SMART_DATASET_TYPE) && !h.getQueryText().isEmpty()){
+				if (isSmartQueryHandle(h) && !h.getQueryText().isEmpty()){
 					reportQueries.add(new ReportQuery(r, UuidUtils.stringToUuid(h.getQueryText().split(":")[1]))); //$NON-NLS-1$
 				}
 			}
@@ -366,6 +367,10 @@ public class ReportManager {
 		for (ReportQuery rq: reportQueries){
 			s.saveOrUpdate(rq);
 		}
+	}
+	
+	public static boolean isSmartQueryHandle(OdaDataSetHandle handle) {
+		return handle.getExtensionID().equals(SMART_DATASET_TYPE) || handle.getExtensionID().equals(SMART_ATTACHMENT_DATASET_TYPE);
 	}
 
 }

@@ -24,6 +24,7 @@ package org.wcs.smart.report.export.internal;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -45,6 +46,7 @@ import javax.print.attribute.standard.Copies;
 import javax.print.attribute.standard.SheetCollate;
 
 import org.eclipse.birt.report.engine.api.EmitterInfo;
+import org.eclipse.birt.report.engine.api.HTMLRenderOption;
 import org.eclipse.birt.report.engine.api.IRenderOption;
 import org.eclipse.birt.report.engine.api.IReportEngine;
 import org.eclipse.birt.report.engine.api.IReportRunnable;
@@ -61,14 +63,19 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.printing.PrintDialog;
 import org.eclipse.swt.printing.PrinterData;
 import org.eclipse.swt.widgets.Display;
+import org.hibernate.Session;
 import org.locationtech.udig.catalog.URLUtils;
 import org.wcs.smart.birt.ui.ReportEngineManager;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.report.ReportPlugIn;
+import org.wcs.smart.report.execute.SmartReportRunner;
 import org.wcs.smart.report.export.IExportFormat;
 import org.wcs.smart.report.export.IReportExporter;
 import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.internal.ui.export.ParameterCollecter;
 import org.wcs.smart.report.model.Report;
+import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -99,7 +106,7 @@ public class ExportReportEngine {
 	 * @param directory output directory. Only one of directory or file is used and only one of them should be supplied.
 	 * @param file the full path file to output to; only valid is reports.size() == 1
 	 * @param outputFormat output format
-	 * @param exporter the report exportor
+	 * @param exporter the report exporter
 	 */
 	private static void exportReports(List<Report> reports, Path directory, Path file, EmitterInfo outputFormat, IReportExporter exporter, int dpi){
 		if (exporter == null && outputFormat == null){
@@ -155,7 +162,7 @@ public class ExportReportEngine {
 			if (outputFormat != null){
 				rr = new RunReportJob(reports.get(i), outputFile, outputFormat, params.get(reports.get(i)), dpi);
 			}else if (exporter != null){
-				rr = new ExportReportJob(reports.get(i), outputFile, exporter, params.get(reports.get(i)));
+				rr = new ExportReportJob(reports.get(i), outputFile, exporter, params == null ? null : params.get(reports.get(i)));
 			}
 			if (rr != null){
 				rr.addJobChangeListener(endJob);
@@ -165,6 +172,46 @@ public class ExportReportEngine {
 		
 		for (Job j : jobs){
 			j.schedule();
+		}
+	}
+	
+	public static boolean printReport(Path renderFile, Report report, Path outputFile, EmitterInfo info, int dpi) {
+		
+		if (Files.exists(outputFile)) {
+			if (!MessageDialog.openQuestion(Display.getDefault().getActiveShell(), 
+					Messages.ExportReportEngine_OverwriteFile,
+					MessageFormat.format(Messages.ExportReportEngine_FileExists, new Object[]{outputFile.toString()}))){
+				return false;
+			}
+			
+		}
+		try {
+			IRenderOption options = new RenderOption();
+			try(OutputStream fout = Files.newOutputStream(outputFile)){
+				options.setOutputStream(fout);
+				options.setEmitterID(info.getID());
+				options.setOption(HTMLRenderOption.IMAGE_DIRECTROY, outputFile.getParent());
+				options.setSupportedImageFormats("PNG"); //$NON-NLS-1$
+				
+				try(Session s = HibernateManager.openSession()){
+					try {
+						s.beginTransaction();
+						SmartReportRunner.INSTANCE.renderFile(ReportEngineManager.getBirtReportEngine(), 
+								options, 
+								renderFile, SmartLabelProvider.getShortLabel(SmartDB.getCurrentEmployee()), 
+								report.getConservationArea(), 
+								dpi, s);
+					}finally {
+						s.getTransaction().rollback();
+					}
+					
+				}			
+				MessageDialog.openInformation(Display.getDefault().getActiveShell(), Messages.ExportReportEngine_CompleteTitle, MessageFormat.format(Messages.ExportReportEngine_SaveCompleteMsg, outputFile.toString()));
+			}
+			return true;
+		}catch (Throwable ex) {
+			ReportPlugIn.displayLog(MessageFormat.format(Messages.ExportReportEngine_SaveErrorMsg, ex.getMessage()),ex);
+			return false;
 		}
 	}
 	/**
@@ -332,12 +379,14 @@ public class ExportReportEngine {
 	 * 
 	 * @return an array of support export formats
 	 */
-	public static IExportFormat[] getSupportedExportFormats(){
+	public static IExportFormat[] getSupportedExportFormats(boolean emittersOnly){
 		EmitterInfo[] info = ReportEngineManager.getBirtReportEngine().getEmitterInfo();
 		List<IExportFormat> formats = new ArrayList<IExportFormat>();
 		for (int i = 0; i < info.length; i ++){
 			formats.add(new BirtEmitterExportFormat(info[i]));
 		}
+		if (emittersOnly) return formats.toArray(new IExportFormat[formats.size()]);
+		
 		if (Platform.getExtensionRegistry() != null){
 			IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(REPORT_EXPORT_EXTENSION_ID);
 			try {

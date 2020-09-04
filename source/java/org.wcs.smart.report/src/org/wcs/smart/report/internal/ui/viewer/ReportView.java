@@ -41,9 +41,11 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.tools.compat.parts.DIViewPart;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
@@ -95,15 +97,23 @@ public class ReportView implements IReportListener{
 	private Map<String, Object> selectedParams;
 	private int dpi = Display.getDefault().getDPI().x;
 	
-	@Inject private MPart part;
-
-	private Path imageDirectory;
+	@Inject 
+	private MPart part;
+	@Inject 
+	private IEventBroker ebroker;
 	
+	private Path imageDirectory;
 	private Path tempReportDocument;
 	
 	Job reportRunner = new Job(Messages.ReportView_PreviewReportJobName){
 		
 		protected IStatus run(IProgressMonitor monitor) {
+			Path localReportDoc = tempReportDocument;
+			tempReportDocument = null;
+			
+			//for button updates
+			ebroker.post(UIEvents.REQUEST_ENABLEMENT_UPDATE_TOPIC, UIEvents.ALL_ELEMENT_ID);
+			
 			cleanUpFiles();
 			imageDirectory = Paths.get(SmartContext.INSTANCE.getFilestoreLocation()).resolve(EncryptUtils.TEMP_DIR).resolve(UuidUtils.uuidToString(report.getUuid()));
 			try {
@@ -112,9 +122,10 @@ public class ReportView implements IReportListener{
 				ReportPlugIn.log(e1.getMessage(), e1);
 			}
 			
-			if (tempReportDocument == null) {
+			
+			if (localReportDoc == null) {
 				String fileName = report.getFilename().replaceFirst(".rptdesign", ".rptdocument"); //$NON-NLS-1$ //$NON-NLS-2$
-				tempReportDocument = Paths.get(SmartContext.INSTANCE.getFilestoreLocation()).resolve(EncryptUtils.TEMP_DIR).resolve(fileName);
+				localReportDoc = Paths.get(SmartContext.INSTANCE.getFilestoreLocation()).resolve(EncryptUtils.TEMP_DIR).resolve(fileName);
 			}
 			try{
 				try(ByteArrayOutputStream bos = new ByteArrayOutputStream()){
@@ -134,7 +145,10 @@ public class ReportView implements IReportListener{
 							SmartReportRunner.INSTANCE.runReport(report,
 								SmartLabelProvider.getShortLabel(SmartDB.getCurrentEmployee()),
 								ReportEngineManager.getBirtReportEngine(), 
-								options, s, selectedParams, tempReportDocument, dpi);
+								options, s, selectedParams, localReportDoc, dpi);
+						}catch (Exception ex) {
+							localReportDoc = null;
+							throw ex;
 						}finally {
 							s.getTransaction().rollback();
 						}
@@ -153,8 +167,12 @@ public class ReportView implements IReportListener{
 							}
 						}});
 					
+					//force button updates
+					ebroker.post(UIEvents.REQUEST_ENABLEMENT_UPDATE_TOPIC, UIEvents.ALL_ELEMENT_ID);
 				}
 		} catch (Exception e) {
+			localReportDoc = null;
+
 			StringBuilder sb = new StringBuilder();
 			sb.append("\n"); //$NON-NLS-1$
 			sb.append(e.getLocalizedMessage());
@@ -179,9 +197,15 @@ public class ReportView implements IReportListener{
 					
 				}});
 			ReportPlugIn.displayLog(MessageFormat.format(Messages.ReportView_RunReportError1, new Object[]{report.getName()}) + sb.toString(), e);
-		}			
+		}finally {
+			tempReportDocument = localReportDoc;
+		}
 		return Status.OK_STATUS;
 	}};
+	
+	public Path getRenderFile() {
+		return this.tempReportDocument;
+	}
 	
 	@PreDestroy
 	public void dispose(){

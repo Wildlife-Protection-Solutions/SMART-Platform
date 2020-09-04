@@ -78,6 +78,7 @@ public class ExportReportWizardPage  extends WizardPage  {
 	private static IDialogSettings settings = new DialogSettings("org.wcs.smart.report.exportdialog"); //$NON-NLS-1$
 	
 	private boolean multipleFiles;
+	private boolean renderOnly;
 	
 	private Text txtFileName;
 	private ComboViewer cmbEmitters;
@@ -116,10 +117,11 @@ public class ExportReportWizardPage  extends WizardPage  {
 	 * @param reports to export 
 	 * 
 	 */
-	public ExportReportWizardPage(boolean isMultiple, List<Report> initReports) {
+	public ExportReportWizardPage(boolean renderOnly, boolean isMultiple, List<Report> initReports) {
 		super("page1"); //$NON-NLS-1$
 		this.multipleFiles = isMultiple;
 		this.selectedReports = initReports;
+		this.renderOnly = renderOnly;
 	}
 	
 	/**
@@ -141,7 +143,9 @@ public class ExportReportWizardPage  extends WizardPage  {
 	@Override
 	public void createControl(Composite parent) {
 		
-		if (!multipleFiles){
+		if (renderOnly) {
+			setTitle(Messages.ExportReportWizardPage_SaveAsTitle + ": " + selectedReports.get(0).getName()); //$NON-NLS-1$
+		}else if (!multipleFiles){
 			setTitle(Messages.ExportReportDialog_DialogTitleA1 + ": " + selectedReports.get(0).getName()); //$NON-NLS-1$
 		}else{
 			setTitle(Messages.ExportReportDialog_MultiExportPageTitle);
@@ -169,16 +173,30 @@ public class ExportReportWizardPage  extends WizardPage  {
 				return name;
 			}
 		});
-		IExportFormat[] formats= ExportReportEngine.getSupportedExportFormats();
-		Arrays.sort(formats, new Comparator<IExportFormat>() {
-			@Override
-			public int compare(IExportFormat o1, IExportFormat o2) {
-				return Collator.getInstance().compare(o1.getName(), o2.getName());
-			}
-		});
-		List<IExportFormat> allFormats = new ArrayList<IExportFormat>(Arrays.asList(formats));
-		allFormats.add(caExport);
-		cmbEmitters.setInput(allFormats);
+		
+		IExportFormat[] formats = null;
+		if (renderOnly) {
+			//include only BIRT emitters
+			formats = ExportReportEngine.getSupportedExportFormats(true);
+			Arrays.sort(formats, new Comparator<IExportFormat>() {
+				@Override
+				public int compare(IExportFormat o1, IExportFormat o2) {
+					return Collator.getInstance().compare(o1.getName(), o2.getName());
+				}
+			});
+			cmbEmitters.setInput(Arrays.asList(formats));
+		}else {
+			formats= ExportReportEngine.getSupportedExportFormats(false);
+			Arrays.sort(formats, new Comparator<IExportFormat>() {
+				@Override
+				public int compare(IExportFormat o1, IExportFormat o2) {
+					return Collator.getInstance().compare(o1.getName(), o2.getName());
+				}
+			});
+			List<IExportFormat> allFormats = new ArrayList<IExportFormat>(Arrays.asList(formats));
+			allFormats.add(caExport);
+			cmbEmitters.setInput(allFormats);
+		}
 		
 		cmbEmitters.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override

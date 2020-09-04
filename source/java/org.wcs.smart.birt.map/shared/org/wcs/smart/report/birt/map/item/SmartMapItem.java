@@ -312,35 +312,7 @@ public class SmartMapItem extends ReportItem {
 	@Override
 	public IReportItem copy( )
 	{
-
 		SmartMapItem item =  (SmartMapItem) super.copy( );
-
-		ExtendedItemHandle newhandle = item.handle.getElementFactory().newExtendedItem(null, EXTENSION_NAME);
-		item.setHandle(newhandle);
-
-		try {
-			BoundsSetting settings = getMapBounds();
-			item.setMapBounds(settings.clone());
-		}catch (Exception ex) {
-			Logger.getLogger(SmartMapItem.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
-			try {
-				item.setMapBounds(new BoundsSetting());
-			} catch (SemanticException e) {
-				Logger.getLogger(SmartMapItem.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
-			}
-		}
-		
-		try {
-			item.setBasemapName(getBasemapName());
-		} catch (SemanticException ex) {
-			Logger.getLogger(SmartMapItem.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
-			try {
-				item.setBasemapName(null);
-			} catch (SemanticException e) {
-				Logger.getLogger(SmartMapItem.class.getName()).log(Level.WARNING, e.getMessage(), e);
-			}
-		}
-
 		return item;
 	}
 	
