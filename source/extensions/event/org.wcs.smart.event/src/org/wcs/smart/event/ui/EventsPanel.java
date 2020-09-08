@@ -126,9 +126,9 @@ public class EventsPanel extends Composite {
 				if (element instanceof EActionEvent) {
 					boolean isEnabled = ((EActionEvent) element).isEnabled();
 					if (!isEnabled) {
-						return EventPlugIn.getDefault().getImageRegistry().get(EventPlugIn.ICON_DISABLED);
+						return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLED_ICON);
 					}else {
-						return EventPlugIn.getDefault().getImageRegistry().get(EventPlugIn.ICON_ENABLED);
+						return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLED_ICON );
 					}
 				}
 				return super.getImage(element);
@@ -399,10 +399,10 @@ public class EventsPanel extends Composite {
 		
 		if (action == null || action.isEnabled()) {
 			adddiableItem.setToolTipText(Messages.EventsPanel_disableTooltip);
-			adddiableItem.setImage(EventPlugIn.getDefault().getImageRegistry().get(EventPlugIn.ICON_DISABLED));
+			adddiableItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLED_ICON));
 		}else {
 			adddiableItem.setToolTipText(Messages.EventsPanel_enableTooltip);
-			adddiableItem.setImage(EventPlugIn.getDefault().getImageRegistry().get(EventPlugIn.ICON_ENABLED));
+			adddiableItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLED_ICON));
 		}
 		
 		adddiableItem.addListener(SWT.Selection, e->changeEventState());

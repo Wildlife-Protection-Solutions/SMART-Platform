@@ -59,6 +59,7 @@ import org.wcs.smart.asset.model.AssetStationLocationAttribute;
 import org.wcs.smart.asset.model.AssetType;
 import org.wcs.smart.asset.model.AssetTypeAttribute;
 import org.wcs.smart.asset.model.AssetTypeDeploymentAttribute;
+import org.wcs.smart.asset.model.AssetMetadataMapping.State;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
@@ -347,6 +348,12 @@ public class AssetXmlToAssetData {
 			newMapping.setMetadataKey(xmlMapping.getMappingString());
 			newMapping.setSearchOrder(xmlMapping.getOrder());
 			
+			newMapping.setState(State.ENABLED);
+			try {
+				newMapping.setState(State.valueOf(xmlMapping.getState()));
+			}catch (Exception ex) {
+				//eat this
+			}
 			
 			if (xmlMapping.getType() != null && !xmlMapping.getType().isEmpty()) {
 				try {

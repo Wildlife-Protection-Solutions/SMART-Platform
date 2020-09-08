@@ -182,6 +182,8 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	public static final String ADD_ICON = "org.wsc.smart.ADD_ICON"; //$NON-NLS-1$
 	public static final String ENABLE_ICON = "org.wsc.smart.ENABLE_ICON"; //$NON-NLS-1$
 	public static final String DISABLE_ICON = "org.wsc.smart.DISABLE_ICON"; //$NON-NLS-1$
+	public static final String ENABLED_ICON = "org.wsc.smart.ENABLED_ICON"; //$NON-NLS-1$
+	public static final String DISABLED_ICON = "org.wsc.smart.DISABLED_ICON"; //$NON-NLS-1$
 	public static final String GROUP_ICON = "org.wsc.smart.GROUP_ICON"; //$NON-NLS-1$
 	/**
 	 * Image descriptor for map  icon
@@ -486,6 +488,9 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	     reg.put(IMPORT_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/import.png")); //$NON-NLS-1$
 	     reg.put(ENABLE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/enable.png")); //$NON-NLS-1$
 	     reg.put(DISABLE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/disable.png")); //$NON-NLS-1$
+	     reg.put(ENABLED_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/enabled.png")); //$NON-NLS-1$
+	     reg.put(DISABLED_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/disabled.png")); //$NON-NLS-1$
+	     
 	     reg.put(PDF_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/pdf.png")); //$NON-NLS-1$
 	     
 	     reg.put(SAVE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/save.png")); //$NON-NLS-1$

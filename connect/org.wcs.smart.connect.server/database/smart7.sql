@@ -2310,6 +2310,7 @@ CREATE TABLE smart.asset_metadata_mapping (
     attribute_uuid uuid,
     attribute_list_item_uuid uuid,
     attribute_tree_node_uuid uuid,
+    state varchar(10) not null,
     PRIMARY KEY (uuid)
 );
 

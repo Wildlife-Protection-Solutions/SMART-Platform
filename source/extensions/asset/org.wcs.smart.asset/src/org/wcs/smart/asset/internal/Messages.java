@@ -785,6 +785,8 @@ public class Messages extends NLS {
 	public static String MetadataMappingDialog_DataModelColumn;
 	public static String MetadataMappingDialog_DeleteMessage;
 	public static String MetadataMappingDialog_DeleteTitle;
+	public static String MetadataMappingDialog_DisabledStateLabel;
+	public static String MetadataMappingDialog_EnabledStateLabel;
 	public static String MetadataMappingDialog_loadingJobName;
 	public static String MetadataMappingDialog_Message;
 	public static String MetadataMappingDialog_MetadataColumn;
@@ -793,6 +795,7 @@ public class Messages extends NLS {
 	public static String MetadataMappingDialog_MoveUp;
 	public static String MetadataMappingDialog_ParseError;
 	public static String MetadataMappingDialog_SaveError;
+	public static String MetadataMappingDialog_StateColumnName;
 	public static String MetadataMappingDialog_Title;
 	public static String MetadataMappingDialog_TypeColumn;
 	public static String NewAssetAction_ActionName;

@@ -50,6 +50,7 @@ import javax.xml.bind.annotation.XmlType;
  *         &lt;/simpleType>
  *       &lt;/attribute>
  *       &lt;attribute name="order" type="{http://www.w3.org/2001/XMLSchema}int" />
+*        &lt;attribute name="state" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -84,7 +85,8 @@ public class MetadataMapping {
     protected String type;
     @XmlAttribute(name = "order")
     protected Integer order;
-
+    @XmlAttribute(name = "state")
+    protected String state;
     /**
      * Gets the value of the mappingString property.
      * 
@@ -276,5 +278,28 @@ public class MetadataMapping {
     public void setOrder(Integer value) {
         this.order = value;
     }
+    
+    /**
+     * Gets the value of the state property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getState() {
+        return state;
+    }
 
+    /**
+     * Sets the value of the state property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setState(String value) {
+        this.state = value;
+    }
 }

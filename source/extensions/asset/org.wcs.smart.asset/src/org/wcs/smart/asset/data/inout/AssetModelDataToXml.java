@@ -192,6 +192,7 @@ public class AssetModelDataToXml {
 			if (mapping.getMappedCategory() != null) xmlMapping.setCategoryKey(mapping.getMappedCategory().getHkey());
 			xmlMapping.setMappingString(mapping.getMetadataKey());
 			xmlMapping.setOrder(mapping.getSearchOrder());
+			xmlMapping.setState(mapping.getState().name());
 			xmlMapping.setType(mapping.getMetadataType().name());
 			
 			xmlData.getMetadataMappings().add(xmlMapping);

@@ -65,6 +65,11 @@ public class AssetMetadataMapping extends UuidItem {
 		XMP
 	}
 	
+	public enum State{
+		ENABLED,
+		DISABLED
+	}
+	
 	private ConservationArea conservationArea;
 	
 	private String mappingstring;
@@ -77,6 +82,8 @@ public class AssetMetadataMapping extends UuidItem {
 	private Attribute mappedAttribute;
 	private AttributeListItem mappedListItem;
 	private AttributeTreeNode mappedTreeNode;
+	
+	private State state;
 	
 	//parsed metadata mapping
 	@Transient
@@ -130,6 +137,23 @@ public class AssetMetadataMapping extends UuidItem {
 		this.type = type;
 	}
 
+	/**
+	 * Set the state
+	 * 
+	 */
+	@Column(name="state")
+	@Enumerated(EnumType.STRING)
+	public State getState() {
+		return this.state;
+	}
+
+	/**
+	 * 
+	 */
+	public void setState(State state) {
+		this.state = state;
+	}
+	
 	/**
 	 * Set the metadata mapping key.
 	 * 

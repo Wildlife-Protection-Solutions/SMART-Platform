@@ -40,6 +40,7 @@ import org.wcs.smart.asset.model.AssetMetadataMapping;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetWaypoint;
+import org.wcs.smart.asset.model.AssetMetadataMapping.State;
 import org.wcs.smart.asset.model.mapping.ExifMetadataField;
 import org.wcs.smart.asset.model.mapping.XmpMetadataField;
 import org.wcs.smart.ca.ConservationArea;
@@ -224,6 +225,7 @@ public class FileProcessor {
 		}
 		//process mappings in order
 		for (AssetMetadataMapping mapping : mappings) {
+			if (mapping.getState() == State.DISABLED) continue;
 			processMetadata(p, mapping, session);
 		}
 		

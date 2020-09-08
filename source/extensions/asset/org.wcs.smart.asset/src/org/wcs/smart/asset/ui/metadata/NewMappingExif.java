@@ -43,6 +43,7 @@ import org.wcs.smart.asset.data.importer.FileMetadataReader;
 import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetMetadataMapping;
 import org.wcs.smart.asset.model.AssetMetadataMapping.MetadataType;
+import org.wcs.smart.asset.model.AssetMetadataMapping.State;
 import org.wcs.smart.asset.model.mapping.ExifMetadataField;
 import org.wcs.smart.hibernate.SmartDB;
 
@@ -82,6 +83,11 @@ public class NewMappingExif extends AbstractNewMappingComposite{
 	public List<AssetMetadataMapping> getMappings() {
 		Integer tagNum = Integer.parseInt(txtExifTag.getText());
 		
+		AssetMetadataMapping.State state = AssetMetadataMapping.State.ENABLED;
+		if (dialog.getEditItem() != null) {
+			state = dialog.getEditItem().getState();
+		}
+		
 		if (btnExifSingle.getSelection()) {
 			Object x = cmbExifMappingField.getStructuredSelection().getFirstElement();
 			if (x instanceof AssetMetadataMapping.AssetProperty) {
@@ -91,6 +97,7 @@ public class NewMappingExif extends AbstractNewMappingComposite{
 				map.setMetadataType(AssetMetadataMapping.MetadataType.EXIF);
 				map.setMappedAssetProperty((AssetMetadataMapping.AssetProperty)x);
 				map.setMetadataKey(field);
+				map.setState(state);
 				return Collections.singletonList(map);
 			}
 		}else if (btnExifMulti.getSelection()) {
@@ -106,6 +113,7 @@ public class NewMappingExif extends AbstractNewMappingComposite{
 				map.setMappedListItem(m.listItem);
 				map.setMappedTreeNode(m.treeNode);
 				map.setMetadataKey(field);
+				map.setState(state);
 				mappings.add(map);
 			}
 			return mappings;

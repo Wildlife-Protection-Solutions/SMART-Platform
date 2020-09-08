@@ -50,6 +50,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
@@ -136,6 +137,35 @@ public class MetadataMappingDialog extends SmartStyledTitleDialog{
 		tblMappings.setInput(new String[] {DialogConstants.LOADING_TEXT});
 		tblMappings.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)tblMappings.getTable().getLayoutData()).heightHint = 300;
+		
+		TableViewerColumn colState = new TableViewerColumn(tblMappings, SWT.NONE);
+		colState.getColumn().setText(Messages.MetadataMappingDialog_StateColumnName);
+		colState.getColumn().setWidth(50);
+		colState.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				if (element instanceof AssetMetadataMapping) {
+					switch(((AssetMetadataMapping) element).getState()) {
+					case DISABLED:return Messages.MetadataMappingDialog_DisabledStateLabel;
+					case ENABLED:return Messages.MetadataMappingDialog_EnabledStateLabel;
+					
+					}
+				}
+				return super.getText(element);
+			}
+			@Override
+			public Image getImage(Object element) {
+				if (element instanceof AssetMetadataMapping) {
+					switch(((AssetMetadataMapping) element).getState()) {
+					case DISABLED:return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLED_ICON);
+					case ENABLED:return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLED_ICON);
+					
+					}
+				}
+				return null;
+			}
+		});
+
 		TableViewerColumn colType = new TableViewerColumn(tblMappings, SWT.NONE);
 		colType.getColumn().setText(Messages.MetadataMappingDialog_TypeColumn);
 		colType.getColumn().setWidth(50);
@@ -226,6 +256,12 @@ public class MetadataMappingDialog extends SmartStyledTitleDialog{
 		Button btnDelete = createButton(buttonPanel, DialogConstants.DELETE_BUTTON_TEXT, SmartPlugIn.DELETE_ICON, ()->deleteMappings());
 		Label l = new Label(buttonPanel, SWT.SEPARATOR | SWT.HORIZONTAL);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Button btnEnable = createButton(buttonPanel, DialogConstants.ENABLE_BUTTON_TEXT, SmartPlugIn.ENABLE_ICON, ()->enableMappings());
+		Button btnDisable = createButton(buttonPanel, DialogConstants.DISABLE_BUTTON_TEXT, SmartPlugIn.DISABLE_ICON, ()->disableMappings());
+		
+		l = new Label(buttonPanel, SWT.SEPARATOR | SWT.HORIZONTAL);
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		Button btnMoveUp = createButton(buttonPanel, Messages.MetadataMappingDialog_MoveUp, null, ()->moveUp());
 		Button btnMoveDown = createButton(buttonPanel, Messages.MetadataMappingDialog_MoveDown, null, ()->moveDown());
 		
@@ -236,6 +272,9 @@ public class MetadataMappingDialog extends SmartStyledTitleDialog{
 			btnDelete.setEnabled(hasSelection);
 			btnMoveUp.setEnabled(hasSelection);
 			btnMoveDown.setEnabled(hasSelection);
+			
+			btnEnable.setEnabled(hasSelection);
+			btnDisable.setEnabled(hasSelection);
 		});
 		
 		Menu tblMenu = new Menu(tblMappings.getControl());
@@ -243,6 +282,9 @@ public class MetadataMappingDialog extends SmartStyledTitleDialog{
 		MenuItem addItem = createMenuItem(tblMenu, DialogConstants.ADD_BUTTON_TEXT, SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON), ()->addMapping());
 		MenuItem editItem = createMenuItem(tblMenu, DialogConstants.EDIT_BUTTON_TEXT, SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON), ()->editMapping());
 		MenuItem deleteItem = createMenuItem(tblMenu, DialogConstants.DELETE_BUTTON_TEXT, SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON), ()->deleteMappings());
+		new MenuItem(tblMenu, SWT.SEPARATOR);
+		MenuItem enableItem = createMenuItem(tblMenu, DialogConstants.ENABLE_BUTTON_TEXT, SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON), ()->enableMappings());
+		MenuItem disableItem = createMenuItem(tblMenu, DialogConstants.DISABLE_BUTTON_TEXT, SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON), ()->disableMappings());
 		new MenuItem(tblMenu, SWT.SEPARATOR);
 		MenuItem moveUpItem = createMenuItem(tblMenu, Messages.MetadataMappingDialog_MoveUp, null, ()->moveUp());
 		MenuItem moveDownItem = createMenuItem(tblMenu, Messages.MetadataMappingDialog_MoveDown, null, ()->moveDown());
@@ -255,6 +297,8 @@ public class MetadataMappingDialog extends SmartStyledTitleDialog{
 				deleteItem.setEnabled(hasSelection);
 				moveUpItem.setEnabled(hasSelection);
 				moveDownItem.setEnabled(hasSelection);
+				enableItem.setEnabled(hasSelection);
+				disableItem.setEnabled(hasSelection);
 			}
 			
 			@Override
@@ -262,6 +306,25 @@ public class MetadataMappingDialog extends SmartStyledTitleDialog{
 			}
 		});
 		tblMappings.getControl().setMenu(tblMenu);
+		
+		
+		Composite linkPanel = new Composite(cmp, SWT.NONE);
+		linkPanel.setLayout(new GridLayout(3, false));
+		((GridLayout)linkPanel.getLayout()).marginWidth = 0;
+		((GridLayout)linkPanel.getLayout()).marginHeight = 0;
+		linkPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
+
+		Link enableAll = new Link(linkPanel, SWT.NONE);
+		enableAll.setText("<a>" + DialogConstants.ENABLEALL_BUTTON_TEXT + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
+		enableAll.addListener(SWT.Selection, e->setStateAll(AssetMetadataMapping.State.ENABLED));
+		
+		l = new Label(linkPanel, SWT.NONE);
+		l.setText("|"); //$NON-NLS-1$
+		
+		Link disableAll = new Link(linkPanel, SWT.NONE);
+		disableAll.setText("<a>" + DialogConstants.DISABLEALL_BUTTON_TEXT + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
+		disableAll.addListener(SWT.Selection, e->setStateAll(AssetMetadataMapping.State.DISABLED));
+		disableAll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		setTitle(Messages.MetadataMappingDialog_Title);
 		setMessage(Messages.MetadataMappingDialog_Message);
@@ -311,6 +374,39 @@ public class MetadataMappingDialog extends SmartStyledTitleDialog{
 		button.setEnabled(false);
 		return button;
 	}
+	
+	
+	private Void enableMappings() {
+		setState(AssetMetadataMapping.State.ENABLED);
+		return null;
+	}
+	private Void disableMappings() {
+		setState(AssetMetadataMapping.State.DISABLED);
+		return null;
+	}
+	
+	private void setState(AssetMetadataMapping.State state) {
+		for (Iterator<?> iterator = ((IStructuredSelection) tblMappings.getSelection()).iterator(); iterator.hasNext();) {
+			Object toUpdate = iterator.next();
+			if (toUpdate instanceof AssetMetadataMapping) {
+				((AssetMetadataMapping) toUpdate).setState(state);
+			}
+		}
+		tblMappings.refresh();
+		modified();
+	}
+	
+	private void setStateAll(AssetMetadataMapping.State state) {
+		List<?> in = (List<?>) tblMappings.getInput();
+		for (Object toUpdate : in) {
+			if (toUpdate instanceof AssetMetadataMapping) {
+				((AssetMetadataMapping) toUpdate).setState(state);
+			}
+		}
+		tblMappings.refresh();
+		modified();
+	}
+	
 	
 	private Void addMapping() {
 		NewMappingDialog dialog = new NewMappingDialog(getShell());
@@ -364,7 +460,7 @@ public class MetadataMappingDialog extends SmartStyledTitleDialog{
 		
 	}
 	public List<AssetMetadataMapping> getSelection(){
-		 List<AssetMetadataMapping> selection = new ArrayList<>();
+		List<AssetMetadataMapping> selection = new ArrayList<>();
 		for (Iterator<?> iterator = ((IStructuredSelection) tblMappings.getSelection()).iterator(); iterator.hasNext();) {
 			Object toMove = iterator.next();
 			if (toMove instanceof AssetMetadataMapping) {

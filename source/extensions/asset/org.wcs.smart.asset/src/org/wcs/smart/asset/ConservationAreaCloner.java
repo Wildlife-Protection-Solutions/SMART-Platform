@@ -92,6 +92,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 		
 		for (AssetMetadataMapping mapping : mappings){
 			AssetMetadataMapping clone = new AssetMetadataMapping();
+			clone.setState(mapping.getState());
 			clone.setConservationArea(engine.getNewCa());
 			clone.setMappedAssetProperty(mapping.getMappedAssetProperty());
 			if (mapping.getMappedAttribute() != null) {

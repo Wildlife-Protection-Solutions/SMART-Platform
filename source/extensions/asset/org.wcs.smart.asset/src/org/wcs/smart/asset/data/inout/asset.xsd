@@ -113,6 +113,7 @@
     		</simpleType>
     	</attribute>
     	<attribute name="order" type="int"></attribute>
+    	<attribute name="state" type="string"></attribute>
     </complexType>
 
     <complexType name="AssetData">

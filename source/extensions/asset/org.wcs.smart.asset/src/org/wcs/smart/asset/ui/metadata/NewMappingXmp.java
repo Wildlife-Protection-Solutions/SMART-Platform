@@ -77,6 +77,11 @@ public class NewMappingXmp extends AbstractNewMappingComposite{
 	public List<AssetMetadataMapping> getMappings() {
 		String path = txtXmpPath.getText().trim();
 		
+		AssetMetadataMapping.State state = AssetMetadataMapping.State.ENABLED;
+		if (dialog.getEditItem() != null) {
+			state = dialog.getEditItem().getState();
+		}
+		
 		if (btnExifSingle.getSelection()) {
 			Object x = cmbExifMappingField.getStructuredSelection().getFirstElement();
 			if (x instanceof AssetMetadataMapping.AssetProperty) {
@@ -86,6 +91,7 @@ public class NewMappingXmp extends AbstractNewMappingComposite{
 				map.setMetadataType(AssetMetadataMapping.MetadataType.XMP);
 				map.setMappedAssetProperty((AssetMetadataMapping.AssetProperty)x);
 				map.setMetadataKey(field);
+				map.setState(state);
 				return Collections.singletonList(map);
 			}
 		}else if (btnExifMulti.getSelection()) {
@@ -101,6 +107,7 @@ public class NewMappingXmp extends AbstractNewMappingComposite{
 				map.setMappedListItem(m.listItem);
 				map.setMappedTreeNode(m.treeNode);
 				map.setMetadataKey(field);
+				map.setState(state);
 				mappings.add(map);
 			}
 			return mappings;

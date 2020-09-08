@@ -86,6 +86,10 @@ public class AssetDatabaseUpgrader implements IDatabaseUpgrader {
 				"GRANT SELECT ON smart.asset_deployment_disruption TO ANALYST", //$NON-NLS-1$
 				"GRANT ALL PRIVILEGES ON smart.asset_deployment_disruption TO MANAGER", //$NON-NLS-1$
 				"GRANT ALL PRIVILEGES ON smart.asset_deployment_disruption TO DATA_ENTRY", //$NON-NLS-1$
+				
+				"ALTER TABLE smart.asset_metadata_mapping ADD COLUMN state varchar(10)", //$NON-NLS-1$
+				"UPDATE smart.asset_metadata_mapping SET state = 'ENABLED'", //$NON-NLS-1$
+				"ALTER TABLE smart.asset_metadata_mapping ALTER COLUMN state set not null" //$NON-NLS-1$
 		};
 		for (String s : sql){
 			session.createNativeQuery(s).executeUpdate();
