@@ -29,11 +29,13 @@ import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -130,7 +132,7 @@ public enum PatrolPackageExporter {
 				//reload package so we don't have hiberante issues
 				PatrolCtPackage localpackage = session.get(PatrolCtPackage.class, ctPackage.getUuid());		
 
-				List<Path> toIncludeInZip = new ArrayList<>();
+				Set<Path> toIncludeInZip = new HashSet<>();
 				HashMap<String, Object> projectAdditions = new HashMap<>();
 				HashMap<String, Object> ctprofileAdditions = new HashMap<>();
 				
@@ -231,7 +233,7 @@ public enum PatrolPackageExporter {
 	}
 	
 	private void processFile(DmObject object, IImageAssociatedObject cmObject, ConfigurableModel cm, 
-			List<Path> toIncludeInZip, Path tempDir, Session session) throws IOException {
+			Set<Path> toIncludeInZip, Path tempDir, Session session) throws IOException {
 		IconFile file = object.getIcon().getIconFile(cm.getIconSet());
 		if (file != null) {
 			
@@ -250,7 +252,7 @@ public enum PatrolPackageExporter {
 	}
 	
 	
-	private void includeDmIcons(ConfigurableModel cm, List<Path> toIncludeInZip, 
+	private void includeDmIcons(ConfigurableModel cm, Set<Path> toIncludeInZip, 
 			Path tempDir, Session session) throws IOException {
 		List<Object> toProcess = new ArrayList<>();
 		toProcess.addAll(cm.getNodes());

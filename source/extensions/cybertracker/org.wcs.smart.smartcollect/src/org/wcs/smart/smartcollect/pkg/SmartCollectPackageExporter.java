@@ -28,7 +28,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
@@ -98,7 +100,7 @@ public enum SmartCollectPackageExporter {
 				SmartCollectPackage localpackage = session.get(SmartCollectPackage.class, ctPackage.getUuid());
 				
 				
-				List<Path> toIncludeInZip = new ArrayList<>();
+				Set<Path> toIncludeInZip = new HashSet<>();
 				HashMap<String, Object> projectAdditions = new HashMap<>();
 				HashMap<String, Object> ctprofileAdditions = new HashMap<>();
 				
@@ -227,7 +229,7 @@ public enum SmartCollectPackageExporter {
 	}
 	
 	private void processFile(DmObject object, IImageAssociatedObject cmObject, ConfigurableModel cm, 
-			List<Path> toIncludeInZip, Path tempDir, Session session) throws IOException {
+			Set<Path> toIncludeInZip, Path tempDir, Session session) throws IOException {
 		IconFile file = object.getIcon().getIconFile(cm.getIconSet());
 		if (file != null ) {
 			
@@ -246,7 +248,7 @@ public enum SmartCollectPackageExporter {
 	}
 	
 	
-	private void includeDmIcons(ConfigurableModel cm, List<Path> toIncludeInZip, 
+	private void includeDmIcons(ConfigurableModel cm, Set<Path> toIncludeInZip, 
 			Path tempDir, Session session) throws IOException {
 		List<Object> toProcess = new ArrayList<>();
 		toProcess.addAll(cm.getNodes());
