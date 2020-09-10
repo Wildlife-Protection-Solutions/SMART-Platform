@@ -62,7 +62,6 @@ import org.locationtech.udig.project.internal.command.navigation.SetViewportBBox
 import org.locationtech.udig.project.ui.viewers.MapViewer;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetCoreLabelProvider;
-import org.wcs.smart.asset.AssetHibernateManager;
 import org.wcs.smart.asset.AssetSecurityManager;
 import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.Asset;
@@ -222,7 +221,7 @@ public class StationLocationPage {
 		};
 		basemap.schedule();
 		
-		drawCommand = new StationLocationDrawCommand(0, 0);
+		drawCommand = new StationLocationDrawCommand();
 		
 		mapViewer.getViewport().addDrawCommand(drawCommand);
 		mapViewer.getViewport().enableDrawCommands(true);
@@ -338,11 +337,6 @@ public class StationLocationPage {
 							value.getAttributeValueAsString(Locale.getDefault(), SmartDB.DATABASE_CRS);
 						}
 					}
-					
-					//Get Station & Station Location Buffer
-					double stationBuffer = AssetHibernateManager.getStationBuffer(session, SmartDB.getCurrentConservationArea());
-					double locationBuffer = AssetHibernateManager.getStationLocationBuffer(session,  SmartDB.getCurrentConservationArea());
-					drawCommand.setBuffers(stationBuffer, locationBuffer);
 				}
 				
 				drawCommand.setStations(Collections.singletonList(parentEditor.getAssetStation()));

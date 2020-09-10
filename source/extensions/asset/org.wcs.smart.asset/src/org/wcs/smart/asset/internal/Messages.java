@@ -95,7 +95,6 @@ public class Messages extends NLS {
 	public static String AssetCurrentPage_StationLabel;
 	public static String AssetCurrentPage_statusJobName;
 	public static String AssetCurrentPage_SummaryLabel;
-	public static String AssetCurrentPage_TimeDeployedLabel;
 	public static String AssetCurrentPage_TimeToEndDate;
 	public static String AssetCurrentPage_TotalTimeDeployedLbl;
 	public static String AssetCurrentPage_UntaggedLabel;
@@ -282,10 +281,12 @@ public class Messages extends NLS {
 	public static String AssetLocationCsvImporter_10;
 	public static String AssetLocationCsvImporter_8;
 	public static String AssetLocationCsvImporter_BooleanParseError;
+	public static String AssetLocationCsvImporter_CouldNotParseBuffer;
 	public static String AssetLocationCsvImporter_DateParseError;
 	public static String AssetLocationCsvImporter_IdDuplicated;
 	public static String AssetLocationCsvImporter_IdRequired;
 	public static String AssetLocationCsvImporter_ImportingTitle;
+	public static String AssetLocationCsvImporter_InvalidBuffer;
 	public static String AssetLocationCsvImporter_ListParseError;
 	public static String AssetLocationCsvImporter_LocationParseError;
 	public static String AssetLocationCsvImporter_NoData;
@@ -350,9 +351,11 @@ public class Messages extends NLS {
 	public static String AssetSettingsDialog_Message;
 	public static String AssetSettingsDialog_Title;
 	public static String AssetStationCsvImporter_BooleanParseError;
+	public static String AssetStationCsvImporter_BufferValueNotParsed;
 	public static String AssetStationCsvImporter_DateParseError;
 	public static String AssetStationCsvImporter_duplicateIds;
 	public static String AssetStationCsvImporter_ImportTitle;
+	public static String AssetStationCsvImporter_InvalidBuffer;
 	public static String AssetStationCsvImporter_ListParseError;
 	public static String AssetStationCsvImporter_NoDataMsg;
 	public static String AssetStationCsvImporter_NumericParseError;
@@ -491,6 +494,9 @@ public class Messages extends NLS {
 	public static String AttributeListPanel_DeleteMsg;
 	public static String AttributeListPanel_DeleteTitle;
 	public static String AttributeManager_unknownError;
+	public static String BufferAttributeFieldEditor_BufferMustBePositive;
+	public static String BufferAttributeFieldEditor_BufferRequired;
+	public static String BufferAttributeFieldEditor_BufferTooltip;
 	public static String CategoryColumnComposite_CategoryLabel;
 	public static String CategoryColumnComposite_categoryRequired;
 	public static String CategoryColumnComposite_DefinitionSectionLabel;
@@ -687,6 +693,7 @@ public class Messages extends NLS {
 	public static String ExportModelToXmlDialog_NoneOption;
 	public static String ExportModelToXmlDialog_NothingToExportMsg;
 	public static String ExportModelToXmlDialog_Overwrite;
+	public static String ExportModelToXmlDialog_settingstooltip;
 	public static String ExportModelToXmlDialog_SubTaskName;
 	public static String ExportModelToXmlDialog_Title;
 	public static String ExportModelToXmlDialog_XMLFile;
@@ -750,6 +757,7 @@ public class Messages extends NLS {
 	public static String ImportTypePage_Title;
 	public static String IncidentAssetSummary_CntFormat;
 	public static String IncidentAssetSummary_Name;
+	public static String LocationMappingPage_BufferLabel;
 	public static String LocationMappingPage_ErrorMessage;
 	public static String LocationMappingPage_FileNotFound;
 	public static String LocationMappingPage_ImportError;
@@ -925,13 +933,17 @@ public class Messages extends NLS {
 	public static String StationDataPage_DateFilter;
 	public static String StationDataPage_loadJobName;
 	public static String StationDetailsPage_AttributesLabel;
+	public static String StationDetailsPage_BufferLabel;
+	public static String StationDetailsPage_InvalidBuffer;
 	public static String StationDetailsPage_PositionLabel;
+	public static String StationDialog_BufferLabel;
 	public static String StationDialog_DuplicateIdMessage;
 	public static String StationDialog_DuplicateIdTitle;
 	public static String StationDialog_ErrorTitle;
 	public static String StationDialog_IdLabel;
 	public static String StationDialog_IdRequired;
 	public static String StationDialog_InvalidAttributes;
+	public static String StationDialog_InvalidBuffer;
 	public static String StationDialog_LocationRequired;
 	public static String StationDialog_Message;
 	public static String StationDialog_PositionLabel;
@@ -941,12 +953,14 @@ public class Messages extends NLS {
 	public static String StationEditor_CurrentStatusSection;
 	public static String StationEditor_DataSection;
 	public static String StationEditor_DupIdError;
+	public static String StationEditor_ErrorTitle;
 	public static String StationEditor_IdDialogTitle;
 	public static String StationEditor_IdErrorMsg;
 	public static String StationEditor_LocationsSection;
 	public static String StationEditor_PropertiesSection;
 	public static String StationEditor_RefreshMsg;
 	public static String StationEditor_RefreshTitle;
+	public static String StationEditor_ResolveErrors;
 	public static String StationEditor_refreshJobName;
 	public static String StationEditor_refreshTooltip;
 	public static String StationEditor_SaveError;
@@ -984,20 +998,27 @@ public class Messages extends NLS {
 	public static String StationLocationDataPage_FilterLabel;
 	public static String StationLocationDataPage_loadJobName;
 	public static String StationLocationDetailsPage_AttributesFieldName;
+	public static String StationLocationDetailsPage_BufferLabel;
+	public static String StationLocationDetailsPage_InvalidBufferValue;
 	public static String StationLocationDetailsPage_PositionFieldName;
 	public static String StationLocationDetailsPage_StationFieldName;
+	public static String StationLocationDialog_BufferLabel;
 	public static String StationLocationDialog_ErrorTitle;
 	public static String StationLocationDialog_IdLabel;
 	public static String StationLocationDialog_IdRequired;
 	public static String StationLocationDialog_InvalidAttributes;
+	public static String StationLocationDialog_InvalidBuffer;
 	public static String StationLocationDialog_LocationLabel;
 	public static String StationLocationDialog_Message;
 	public static String StationLocationDialog_PositionAttributeName;
 	public static String StationLocationDialog_SaveError;
 	public static String StationLocationDialog_StationLabel;
 	public static String StationLocationDialog_Title;
+	public static String StationLocationDialog_ValidPositionRequired;
 	public static String StationLocationEditor_DataSectionHeader;
 	public static String StationLocationEditor_DuplicateIdError;
+	public static String StationLocationEditor_ErrorsExist;
+	public static String StationLocationEditor_ErrorTitle;
 	public static String StationLocationEditor_HistorySectionHeader;
 	public static String StationLocationEditor_InvalidLocationMsg;
 	public static String StationLocationEditor_InvalidLocationTitle;
@@ -1034,6 +1055,7 @@ public class Messages extends NLS {
 	public static String StationLocationPage_StatusColumnName;
 	public static String StationManager_DeleteLocationError;
 	public static String StationManager_DeleteStationError;
+	public static String StationMappingPage_BufferLabel;
 	public static String StationMappingPage_ErrorMessage;
 	public static String StationMappingPage_Errortitle;
 	public static String StationMappingPage_ImportError;
@@ -1092,4 +1114,5 @@ public class Messages extends NLS {
 
 	private Messages() {
 	}
+
 }

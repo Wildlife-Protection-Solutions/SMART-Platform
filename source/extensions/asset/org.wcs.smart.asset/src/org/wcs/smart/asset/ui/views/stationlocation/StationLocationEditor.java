@@ -149,6 +149,14 @@ public class StationLocationEditor extends EditorPart implements MapPart {
     
 	@Override
 	public void doSave(IProgressMonitor monitor) {
+		
+		String error = detailsPage.getErrorMessage();
+		if (error != null) {
+			MessageDialog.openError(getSite().getShell(), Messages.StationLocationEditor_ErrorTitle, 
+					MessageFormat.format(Messages.StationLocationEditor_ErrorsExist, "\n\n", error)); //$NON-NLS-1$
+			return;
+		}
+		
 		boolean isNew = stationlocation.getUuid() == null;
 		try(Session s = HibernateManager.openSession(new AttachmentInterceptor())){
 			try {

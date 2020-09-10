@@ -60,7 +60,8 @@ public class AssetStation extends UuidItem {
 	private String id;
 	private Double x;
 	private Double y;
-
+	private Double buffer;
+	
 	private List<AssetStationAttributeValue> attributes;
 	private List<AssetStationLocation> locations;
 	
@@ -122,6 +123,29 @@ public class AssetStation extends UuidItem {
 		this.id = id;
 	}
 
+	/**
+	 * Get the buffer.  
+	 * Value to be stored in meters.
+	 * The maximum distance between an station location and the station 
+	 * position for the asset deployment to be associated with that station
+	 * 
+	 * @return buffer
+	 */
+	@Column(name="buffer")
+	public Double getBuffer() {
+		return this.buffer;
+	}
+	
+	/**
+	 * Set the buffer.  This id should be unique across the Conservation Area
+	 * 
+	 * @param buffer
+	 */
+	
+	public void setBuffer(Double buffer) {
+		this.buffer = buffer;
+	}
+	
 	/**
 	 * Get the longitude position value
 	 * 

@@ -52,6 +52,7 @@ import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetAttributeListItem;
+import org.wcs.smart.asset.model.AssetModuleSettings;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetStationLocationAttributeValue;
@@ -83,6 +84,7 @@ public class AssetLocationCsvImporter {
 	private Integer stationIdField;
 	private Integer xField;
 	private Integer yField;
+	private Integer bufferField;
 	private boolean skipFirst;
 	private HashMap<AssetAttribute, Integer> attributeMappings;
 	private DateTimeFormatter dateTimeFormat;
@@ -96,13 +98,16 @@ public class AssetLocationCsvImporter {
 	IEventBroker broker;
 	
 	
-	public AssetLocationCsvImporter(Path file, char delimiter, boolean skipFirst, Integer idField, Integer stationField, Integer xField, Integer yField, HashMap<AssetAttribute, Integer> attributeMappings, String dateTimeFormat, Projection projection) {
+	public AssetLocationCsvImporter(Path file, char delimiter, boolean skipFirst, 
+			Integer idField, Integer stationField, Integer xField, Integer yField, Integer bufferField,
+			HashMap<AssetAttribute, Integer> attributeMappings, String dateTimeFormat, Projection projection) {
 		this.file = file;
 		this.delimiter = delimiter;
 		
 		this.idField = idField;
 		this.xField = xField;
 		this.yField = yField;
+		this.bufferField = bufferField;
 		this.attributeMappings = attributeMappings;
 		this.skipFirst = skipFirst;
 		this.dateTimeFormat = DateTimeFormatter.ofPattern(dateTimeFormat);
@@ -227,8 +232,20 @@ public class AssetLocationCsvImporter {
 			return null;
 		}
 		
+		Double buffer = AssetModuleSettings.LOCATION_BUFFER_DEFAULT_VALUE;
+		if (bufferField != null) {
+			try {
+				buffer = Double.parseDouble(data[bufferField]);
+				if (buffer <= 0) throw new Exception(Messages.AssetLocationCsvImporter_InvalidBuffer);
+			}catch (Exception ex) {
+				buffer = AssetModuleSettings.LOCATION_BUFFER_DEFAULT_VALUE;
+				warnings.add(MessageFormat.format(Messages.AssetLocationCsvImporter_CouldNotParseBuffer, data[bufferField], row, AssetModuleSettings.LOCATION_BUFFER_DEFAULT_VALUE));
+			}
+		}
+		
 		AssetStationLocation newLocation = new AssetStationLocation();
 		newLocation.setStation(stn);
+		newLocation.setBuffer(buffer);
 		newLocation.setId(id);
 		newLocation.setX(p.getX());
 		newLocation.setY(p.getY());

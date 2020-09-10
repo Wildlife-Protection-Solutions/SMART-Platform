@@ -61,35 +61,11 @@ public class StationLocationDrawCommand extends AbstractDrawCommand{
 	private Collection<AssetStationLocation> selectedLocations = new HashSet<>();
 	private Collection<AssetStation> selectedStations = new HashSet<>();
 	
-	private double stationBuffer;
-	private double locationBuffer;
-	
 	private ReferencedEnvelope bounds = null;
 	
 	public StationLocationDrawCommand() {
-		this(0,0);
 	}
 		
-	/**
-	 * Buffers in meters 
-	 * @param stationBuffer
-	 * @param locationBuffer
-	 */
-	public StationLocationDrawCommand(double stationBuffer, double locationBuffer) {
-		this.stationBuffer = stationBuffer;
-		this.locationBuffer = locationBuffer;
-	}
-	
-	/**
-	 * Buffers in meters
-	 * @param stationBuffer
-	 * @param locationBuffer
-	 */
-	public void setBuffers(double stationBuffer, double locationBuffer) {
-		this.stationBuffer = stationBuffer;
-		this.locationBuffer = locationBuffer;
-	}
-	
 	public void clearSelections() {
 		selectedLocations.clear();
 		selectedStations.clear();
@@ -127,35 +103,41 @@ public class StationLocationDrawCommand extends AbstractDrawCommand{
 	public ReferencedEnvelope getBounds() {
 		if (bounds != null) return bounds;
 		
-		Double xmin = null;
-		Double xmax = null;
-		Double ymin = null;
-		Double ymax = null;
-		
+		ReferencedEnvelope temp = null;
 		
 		if (stationsToDraw != null) {
 			for (AssetStation s : stationsToDraw) {
-				if (xmin == null || s.getX() < xmin) xmin = s.getX();
-				if (ymin == null || s.getY() < ymin) ymin = s.getY();
-				if (xmax == null || s.getX() > xmax) xmax = s.getX();
-				if (ymax == null || s.getY() > ymax) ymax = s.getY();
+				
+				ReferencedEnvelope re = new ReferencedEnvelope(s.getX(), s.getX(), s.getY(), s.getY(), SmartDB.DATABASE_CRS);
+				double offset = findBufferDistance(s.getX(), s.getY(), s.getBuffer());
+				re.expandBy(offset);
+				
+				if (temp == null) {
+					temp = re;
+				}else {
+					temp.expandToInclude(re);
+				}
 			}
 		}
 		if (locationsToDraw != null) {
 			for (AssetStationLocation s : locationsToDraw) {
-				if (xmin == null || s.getX() < xmin) xmin = s.getX();
-				if (ymin == null || s.getY() < ymin) ymin = s.getY();
-				if (xmax == null || s.getX() > xmax) xmax = s.getX();
-				if (ymax == null || s.getY() > ymax) ymax = s.getY();
+				ReferencedEnvelope re = new ReferencedEnvelope(s.getX(), s.getX(), s.getY(), s.getY(), SmartDB.DATABASE_CRS);
+				double offset = findBufferDistance(s.getX(), s.getY(), s.getBuffer());
+				re.expandBy(offset);
+				
+				if (temp == null) {
+					temp = re;
+				}else {
+					temp.expandToInclude(re);
+				}
 			}
 		}
 		
 		
-		if (xmin == null) {
+		if (temp == null) {
 			bounds = new ReferencedEnvelope();
 		}else {
-			double offset = Math.max(findBufferDistance(xmin, ymin, Math.max(stationBuffer, locationBuffer)), findBufferDistance(xmax, ymax, Math.max(stationBuffer, locationBuffer)));
-			bounds = new ReferencedEnvelope(xmin-offset, xmax+offset, ymin-offset, ymax+offset, SmartDB.DATABASE_CRS);
+			bounds = temp;
 		}
 		return bounds;
 	}
@@ -210,7 +192,7 @@ public class StationLocationDrawCommand extends AbstractDrawCommand{
 		if (stationsToDraw != null) {
 			for (AssetStation s : stationsToDraw) {
 				Coordinate station = new Coordinate(s.getX(),  s.getY());
-				double radius_ll = findBufferDistance(station.x, station.y, stationBuffer);
+				double radius_ll = findBufferDistance(station.x, station.y, s.getBuffer());
 				Coordinate bufferpnt = new Coordinate(station.x + radius_ll, station.y + radius_ll);
 				
 				Point pnt = map.getViewportModel().worldToPixel(reproject(transform, station));
@@ -240,7 +222,7 @@ public class StationLocationDrawCommand extends AbstractDrawCommand{
 		for (AssetStationLocation loc : locationsToDraw) {
 				
 			Coordinate location = new Coordinate(loc.getX(),  loc.getY());
-			double radius_ll = findBufferDistance(location.x, location.y, locationBuffer);
+			double radius_ll = findBufferDistance(location.x, location.y, loc.getBuffer());
 			Coordinate bufferpnt = new Coordinate(location.x + radius_ll, location.y + radius_ll);
 			
 			Point pnt = map.getViewportModel().worldToPixel(reproject(transform, location));

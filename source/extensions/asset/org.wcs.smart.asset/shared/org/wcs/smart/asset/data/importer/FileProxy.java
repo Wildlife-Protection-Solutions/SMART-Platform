@@ -36,9 +36,9 @@ import org.geotools.geometry.jts.JTS;
 import org.hibernate.Session;
 import org.locationtech.jts.geom.Coordinate;
 import org.wcs.smart.SmartContext;
-import org.wcs.smart.asset.AssetHibernateManager;
 import org.wcs.smart.asset.IAssetLabelProvider;
 import org.wcs.smart.asset.model.Asset;
+import org.wcs.smart.asset.model.AssetModuleSettings;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.ca.ConservationArea;
@@ -50,6 +50,7 @@ import org.wcs.smart.util.GeometryUtils;
 /**
  * Wrapper around asset file to track details computed
  * about files.
+ * 
  * @author Emily
  *
  */
@@ -544,9 +545,9 @@ public class FileProxy extends ISmartAttachment{
 				}
 			}
 			
-			double stnBufferM = AssetHibernateManager.getStationBuffer(session, ca);
-			if (bestDistance == null || bestDistance > stnBufferM) {
-				//this is not within buffer of current locations so we need to create a new one
+			if (bestDistance == null || bestDistance > matching.getBuffer()) {
+				//this is not within buffer of current station 
+				//so we need to create a new one
 				matching = null;
 			}
 			if (matching == null) {
@@ -555,6 +556,7 @@ public class FileProxy extends ISmartAttachment{
 				matching.setX(x);
 				matching.setY(y);
 				matching.setConservationArea(ca);
+				matching.setBuffer(AssetModuleSettings.STATION_BUFFER_DEFAULT_VALUE);
 				//when we save we need to generate valid station ids
 				matching.setId(MessageFormat.format(ErrorMessage.NEW_STATION.getMessage(processor.getLocale()), processor.NewObjectCounter.getAndIncrement())); 
 				matching.setLocations(new ArrayList<>());
@@ -581,9 +583,8 @@ public class FileProxy extends ISmartAttachment{
 			}
 		}
 		
-		double stnBufferM = AssetHibernateManager.getStationLocationBuffer(session, ca);
-		if (bestDistance == null || bestDistance > stnBufferM) {
-			//this is not within buffer of current locations so we need to create a new one
+		if (bestDistance == null || bestDistance > matching.getBuffer()) {
+			//this is not within buffer of current location so we need to create a new one
 			matching = null;
 		}
 		
@@ -592,7 +593,8 @@ public class FileProxy extends ISmartAttachment{
 			matching.setStation(station);
 			matching.setAttributeValues(new ArrayList<>());
 			//when we save we set a valid id
-			matching.setId(MessageFormat.format(ErrorMessage.NEW_STATION_LOCATION.getMessage(processor.getLocale()), processor.NewObjectCounter.getAndIncrement())); 
+			matching.setId(MessageFormat.format(ErrorMessage.NEW_STATION_LOCATION.getMessage(processor.getLocale()), processor.NewObjectCounter.getAndIncrement()));
+			matching.setBuffer(AssetModuleSettings.LOCATION_BUFFER_DEFAULT_VALUE);
 			matching.setX(x);
 			matching.setY(y);
 			station.getLocations().add(matching);

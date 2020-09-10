@@ -17,6 +17,7 @@ Export-Package: org.wcs.smart.asset,
  org.wcs.smart.asset.data.inout.deployment.xml,
  org.wcs.smart.asset.data.inout.xml,
  org.wcs.smart.asset.model,
+ org.wcs.smart.asset.plugin,
  org.wcs.smart.asset.ui,
  org.wcs.smart.asset.ui.handler,
  org.wcs.smart.asset.ui.views.station

@@ -91,24 +91,25 @@ public class AttributeFieldEditor {
 
 	private static final String SELELECTION_KEY = "sel"; //$NON-NLS-1$
 	
-	private AssetAttribute attribute;
+	protected AssetAttribute attribute;
 	
-	private Composite parent;
-	private Text txtValue;
-	private MultiLineText txtMulti;
-	private Text txtValue2;
-	private Label lblProj;
-	private OnOffButton btnOnOff;
-	private ComboViewer cmbViewer;
-	private DateTime dtDateTime;
-	private Button btnChDateTime;
-	private Button btnChOnOff;
-	private ControlDecoration cd;
+	protected Composite parent;
+	protected Text txtValue;
+	protected MultiLineText txtMulti;
+	protected Text txtValue2;
+	protected Label lblProj;
+	protected Label lblAttribute;
+	protected OnOffButton btnOnOff;
+	protected ComboViewer cmbViewer;
+	protected DateTime dtDateTime;
+	protected Button btnChDateTime;
+	protected Button btnChOnOff;
+	protected ControlDecoration cd;
 	
-	private String warnMessage;
-	private String name = null;
-	private CoordinateReferenceSystem crs = GeometryUtils.SMART_CRS;
-	private String crsLabel = null;
+	protected String warnMessage;
+	protected String name = null;
+	protected CoordinateReferenceSystem crs = GeometryUtils.SMART_CRS;
+	protected String crsLabel = null;
 	
 	private boolean fireListeners = true;
 	private List<SelectionListener> listeners = new ArrayList<SelectionListener>();
@@ -194,7 +195,7 @@ public class AttributeFieldEditor {
 	/*
 	 * validates and updates control decoration icon/message
 	 */
-	private boolean validate(){
+	protected boolean validate(){
 		String msg = null;
 		
 		if (attribute.getType() == AttributeType.NUMERIC){
@@ -489,11 +490,10 @@ public class AttributeFieldEditor {
 	}
 	
 	
-	private void createControl(){
-		Label l = new Label(parent, SWT.NONE);
-		l.setText(this.name + ":"); //$NON-NLS-1$
-		
-		l.setLayoutData(new GridData(SWT.RIGHT, attribute.getType() == AttributeType.TEXT ? SWT.TOP : SWT.CENTER, false, false));
+	protected void createControl(){
+		lblAttribute = new Label(parent, SWT.NONE);
+		lblAttribute.setText(this.name + ":"); //$NON-NLS-1$
+		lblAttribute.setLayoutData(new GridData(SWT.RIGHT, attribute.getType() == AttributeType.TEXT ? SWT.TOP : SWT.CENTER, false, false));
 		
 		if (attribute.getType() == AttributeType.TEXT){
 			txtMulti = new MultiLineText(parent);
@@ -604,7 +604,7 @@ public class AttributeFieldEditor {
 			((GridData)txtValue.getLayoutData()).widthHint = 50;
 			cd = createDecoration(txtValue);
 				
-			l = new Label(c, SWT.NONE);
+			Label l = new Label(c, SWT.NONE);
 			l.setText(":"); //$NON-NLS-1$
 			l.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 

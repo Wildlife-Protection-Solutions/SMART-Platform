@@ -68,7 +68,6 @@ import org.locationtech.udig.project.internal.command.navigation.SetViewportBBox
 import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.locationtech.udig.project.ui.viewers.MapViewer;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.asset.AssetHibernateManager;
 import org.wcs.smart.asset.engine.StatisticsEngine;
 import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetAttribute;
@@ -151,8 +150,6 @@ public class StationLocationCurrentPage {
 						a.getAttributeValueAsString(Locale.getDefault(), SmartDB.DATABASE_CRS);
 					});
 				});
-				
-				drawCommand.setBuffers(AssetHibernateManager.getStationBuffer(s, SmartDB.getCurrentConservationArea()), AssetHibernateManager.getStationLocationBuffer(s, SmartDB.getCurrentConservationArea()));
 			}
 			if (currentDeployments.isEmpty()) {
 				Display.getDefault().syncExec(()->createNotActivePanel());

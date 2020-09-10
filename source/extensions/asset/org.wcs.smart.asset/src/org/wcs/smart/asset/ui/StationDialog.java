@@ -51,9 +51,11 @@ import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetAttribute.AttributeType;
+import org.wcs.smart.asset.model.AssetModuleSettings;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationAttribute;
 import org.wcs.smart.asset.model.AssetStationAttributeValue;
+import org.wcs.smart.asset.model.AssetStationLocationAttributeValue;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -72,7 +74,8 @@ public class StationDialog extends SmartStyledTitleDialog{
 	
 	private Text txtStation;
 	private AttributeFieldEditor locationEditor;
-	
+	private BufferAttributeFieldEditor bufferEditor;
+
 	private List<AttributeFieldEditor> attributeEditors;
 	
 	@Inject
@@ -81,6 +84,7 @@ public class StationDialog extends SmartStyledTitleDialog{
 	public StationDialog(Shell parentShell, AssetStation toUpdate) {
 		super(parentShell);
 		this.toUpdate = toUpdate;
+		if (toUpdate.getBuffer() == null)toUpdate.setBuffer(AssetModuleSettings.STATION_BUFFER_DEFAULT_VALUE);
 	}
 	
 	@Override
@@ -106,6 +110,9 @@ public class StationDialog extends SmartStyledTitleDialog{
 		locationEditor.updateValue(tmp);
 		toUpdate.setX(tmp.getNumberValue());
 		toUpdate.setY(tmp.getNumberValue2());
+		
+		bufferEditor.updateValue(tmp);
+		toUpdate.setBuffer(tmp.getNumberValue());
 		
 		if (toUpdate.getAttributeValues() == null) toUpdate.setAttributeValues(new ArrayList<>());
 		
@@ -174,6 +181,10 @@ public class StationDialog extends SmartStyledTitleDialog{
 			setErrorMessage(Messages.StationDialog_LocationRequired);
 			return false;
 		}
+		if (!bufferEditor.isValid()) {
+			setErrorMessage(Messages.StationDialog_InvalidBuffer);
+			return false;
+		}
 		AssetStationAttributeValue tmp = new AssetStationAttributeValue();
 		locationEditor.updateValue(tmp);
 		if (tmp.getNumberValue() == null || tmp.getNumberValue2() == null) {
@@ -236,6 +247,17 @@ public class StationDialog extends SmartStyledTitleDialog{
 			locationEditor.initControl(value);
 		}
 				
+		tmp = new AssetAttribute();
+		tmp.setName(Messages.StationDialog_BufferLabel);
+		tmp.setType(AttributeType.NUMERIC);
+		
+		bufferEditor = new BufferAttributeFieldEditor(form, tmp);
+		AssetStationLocationAttributeValue value = new AssetStationLocationAttributeValue();
+		value.setAttribute(tmp);
+		value.setNumberValue(toUpdate.getBuffer());
+		bufferEditor.initControl(value);
+		bufferEditor.addSelectionListener(validateListener);
+		
 		l = new Label(form, SWT.SEPARATOR | SWT.HORIZONTAL);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		

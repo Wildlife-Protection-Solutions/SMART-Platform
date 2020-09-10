@@ -49,6 +49,7 @@ import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetStationLocationAttribute;
 import org.wcs.smart.asset.model.AssetStationLocationAttributeValue;
 import org.wcs.smart.asset.ui.AttributeFieldEditor;
+import org.wcs.smart.asset.ui.BufferAttributeFieldEditor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 
@@ -73,7 +74,10 @@ public class StationLocationDetailsPage {
 	private FormToolkit toolkit;
 	
 	private AssetStationLocationAttributeValue tmpLocationAttribute;
+	private AssetStationLocationAttributeValue tmpBufferAttribute;
+	
 	private AttributeFieldEditor locFieldEditor;
+	private BufferAttributeFieldEditor locBufferEditor;
 	
 	private boolean isInitializing = false;
 	
@@ -85,6 +89,12 @@ public class StationLocationDetailsPage {
 		tmp.setName(Messages.StationLocationDetailsPage_PositionFieldName);
 		tmpLocationAttribute = new AssetStationLocationAttributeValue();
 		tmpLocationAttribute.setAttribute(tmp);
+		
+		tmp = new AssetAttribute();
+		tmp.setType(AttributeType.NUMERIC);
+		tmp.setName(Messages.StationLocationDetailsPage_BufferLabel);
+		tmpBufferAttribute = new AssetStationLocationAttributeValue();
+		tmpBufferAttribute.setAttribute(tmp);
 	}
 	
 	public void createControl(Composite parent, FormToolkit toolkit) {
@@ -97,7 +107,7 @@ public class StationLocationDetailsPage {
 		((GridLayout)panel.getLayout()).marginHeight = 0;
 		
 		Composite toppanel = toolkit.createComposite(panel, SWT.BORDER);
-		toppanel.setLayout(new GridLayout(3, false));
+		toppanel.setLayout(new GridLayout(2, false));
 		toppanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		toolkit.createLabel(toppanel, Messages.StationLocationDetailsPage_StationFieldName);
@@ -110,7 +120,6 @@ public class StationLocationDetailsPage {
 				parentEditor.openStation(stn);
 			}
 		});
-		linkStn.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		locFieldEditor = new AttributeFieldEditor(toppanel, tmpLocationAttribute.getAttribute());
 		locFieldEditor.addSelectionListener(new SelectionAdapter() {
@@ -131,6 +140,24 @@ public class StationLocationDetailsPage {
 		});
 		locFieldEditor.setEnabled(AssetSecurityManager.INSTANCE.canEditStationLocation());
 
+		locBufferEditor = new BufferAttributeFieldEditor(toppanel, tmpBufferAttribute.getAttribute());
+		locBufferEditor.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (isInitializing) return;
+				if (locBufferEditor.isValid()) {
+					if (locBufferEditor.updateValue(tmpBufferAttribute)) {
+						AssetStationLocation location = (AssetStationLocation) attributePanel.getData(LOCATION_KEY);
+						if (location != null) {
+							location.setBuffer(tmpBufferAttribute.getNumberValue());
+						}
+					}
+				}
+				parentEditor.setDirty(true);				
+			}
+		});
+		locBufferEditor.setEnabled(AssetSecurityManager.INSTANCE.canEditStationLocation());
+		
 		Composite attributeComp = toolkit.createComposite(panel, SWT.BORDER);
 		attributeComp.setLayout(new GridLayout());
 		attributeComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -150,6 +177,11 @@ public class StationLocationDetailsPage {
 		((GridLayout)attributePanel.getLayout()).marginWidth = 0;
 		((GridLayout)attributePanel.getLayout()).marginHeight = 0;
 	}
+
+	public String getErrorMessage() {
+		if (!locBufferEditor.isValid()) return Messages.StationLocationDetailsPage_InvalidBufferValue;
+		return null;
+	}
 	
 	public void initializeAttributes(AssetStationLocation location) {
 		if (location == null) return;
@@ -158,10 +190,12 @@ public class StationLocationDetailsPage {
 		
 		tmpLocationAttribute.setNumberValue(location.getX());
 		tmpLocationAttribute.setNumberValue2(location.getY());
+		tmpBufferAttribute.setNumberValue(location.getBuffer());
 		
 		try {
 			isInitializing = true;
 			locFieldEditor.initControl(tmpLocationAttribute);
+			locBufferEditor.initControl(tmpBufferAttribute);
 			attributePanel.setData(LOCATION_KEY, location);
 		}finally {
 			isInitializing = false;

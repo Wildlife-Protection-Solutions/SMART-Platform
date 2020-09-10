@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.internal.Messages;
+import org.wcs.smart.asset.model.AssetModuleSettings;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
@@ -89,8 +90,27 @@ public class AssetDatabaseUpgrader implements IDatabaseUpgrader {
 				
 				"ALTER TABLE smart.asset_metadata_mapping ADD COLUMN state varchar(10)", //$NON-NLS-1$
 				"UPDATE smart.asset_metadata_mapping SET state = 'ENABLED'", //$NON-NLS-1$
-				"ALTER TABLE smart.asset_metadata_mapping ALTER COLUMN state set not null" //$NON-NLS-1$
+				"ALTER TABLE smart.asset_metadata_mapping ALTER COLUMN state set not null", //$NON-NLS-1$
+				
+				//add buffers to station/location objects
+				"ALTER TABLE smart.asset_station add column buffer double precision", //$NON-NLS-1$
+				"ALTER TABLE smart.asset_station_location add column buffer double precision", //$NON-NLS-1$
+				
+				"CREATE FUNCTION smart.to_double( stringvalue varchar(32000) ) RETURNS double precision PARAMETER STYLE JAVA NO SQL LANGUAGE JAVA EXTERNAL NAME 'org.wcs.smart.asset.plugin.AssetDatabaseUpgrader.toDouble'", //$NON-NLS-1$
+
+				"UPDATE smart.asset_station set buffer = (select smart.to_double(c.value) from smart.asset_module_settings c where c.keyid = 'station_buffer' and c.ca_uuid = smart.asset_station.ca_uuid)", //$NON-NLS-1$
+				"UPDATE smart.asset_station set buffer = " + AssetModuleSettings.STATION_BUFFER_DEFAULT_VALUE + " where buffer is null or buffer < 0", //$NON-NLS-1$ //$NON-NLS-2$
+				
+				"UPDATE smart.asset_station_location set buffer = (select smart.to_double(c.value) from smart.asset_module_settings c, smart.ASSET_STATION d where c.ca_uuid = d.ca_uuid and c.keyid = 'location_buffer' and d.uuid = smart.asset_station_location.station_uuid)", //$NON-NLS-1$
+				"UPDATE smart.asset_station_location set buffer = " + AssetModuleSettings.LOCATION_BUFFER_DEFAULT_VALUE + " where buffer is null or buffer < 0", //$NON-NLS-1$ //$NON-NLS-2$
+				
+				"DROP FUNCTION smart.to_double", //$NON-NLS-1$
+				
+				"ALTER TABLE smart.asset_station alter column buffer set not null",  //$NON-NLS-1$
+				"ALTER TABLE smart.asset_station_location alter column buffer set not null" //$NON-NLS-1$
+
 		};
+		
 		for (String s : sql){
 			session.createNativeQuery(s).executeUpdate();
 		}
@@ -98,5 +118,12 @@ public class AssetDatabaseUpgrader implements IDatabaseUpgrader {
 		HibernateManager.setPlugInVersion(AssetPlugIn.PLUGIN_ID, AssetPlugIn.DB_VERSION_2, session);
 
 	}
-		
+	
+	public static Double toDouble(String value) {
+		try {
+			return Double.valueOf(value);
+		}catch (Exception ex) {
+			return -1.0;
+		}
+	}
 }

@@ -64,7 +64,6 @@ import org.locationtech.udig.project.internal.ProjectFactory;
 import org.locationtech.udig.project.internal.command.navigation.SetViewportBBoxCommand;
 import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.locationtech.udig.project.ui.viewers.MapViewer;
-import org.wcs.smart.asset.AssetHibernateManager;
 import org.wcs.smart.asset.AssetUtils;
 import org.wcs.smart.asset.engine.StatisticsEngine;
 import org.wcs.smart.asset.engine.StatisticsEngine.Statistic;
@@ -370,10 +369,6 @@ public class AssetCurrentPage {
 				deploy.getTimeOutInSeconds();
 				
 				currentDeployment = deploy;
-				
-				double stationBuffer = AssetHibernateManager.getStationBuffer(session, SmartDB.getCurrentConservationArea());
-				double locationBuffer = AssetHibernateManager.getStationLocationBuffer(session, SmartDB.getCurrentConservationArea());
-				drawCommand.setBuffers(stationBuffer, locationBuffer);
 			}
 			
 			final Map<Statistic, Object> stats = new HashMap<>();

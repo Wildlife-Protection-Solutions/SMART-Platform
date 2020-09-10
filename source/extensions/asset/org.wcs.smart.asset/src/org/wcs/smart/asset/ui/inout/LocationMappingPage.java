@@ -78,6 +78,7 @@ public class LocationMappingPage extends WizardPage{
 	private ComboViewer cmbStationId;
 	private ComboViewer cmbPositionX;
 	private ComboViewer cmbPositionY;
+	private ComboViewer cmbBuffer;
 	
 	private List<ComboViewer> attributeMappings;
 	
@@ -109,6 +110,13 @@ public class LocationMappingPage extends WizardPage{
 		main.setLayout(new GridLayout(2, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
+		ISelectionChangedListener validatelistener = new ISelectionChangedListener() {			
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				validate();
+			}
+		};
+		
 		Label l = new Label(main, SWT.NONE);
 		l.setText(Messages.LocationMappingPage_LocationIdlabel);
 		
@@ -116,12 +124,7 @@ public class LocationMappingPage extends WizardPage{
 		cmbLocationId.setContentProvider(ArrayContentProvider.getInstance());
 		cmbLocationId.setLabelProvider(lblProvider);
 		cmbLocationId.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		cmbLocationId.addSelectionChangedListener(new ISelectionChangedListener() {			
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				validate();
-			}
-		});
+		cmbLocationId.addSelectionChangedListener(validatelistener);
 		
 		l = new Label(main, SWT.NONE);
 		l.setText(Messages.LocationMappingPage_StationIdLabel);
@@ -130,12 +133,7 @@ public class LocationMappingPage extends WizardPage{
 		cmbStationId.setContentProvider(ArrayContentProvider.getInstance());
 		cmbStationId.setLabelProvider(lblProvider);
 		cmbStationId.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		cmbStationId.addSelectionChangedListener(new ISelectionChangedListener() {			
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				validate();
-			}
-		});
+		cmbStationId.addSelectionChangedListener(validatelistener);
 		
 		l = new Label(main, SWT.NONE);
 		l.setText(Messages.LocationMappingPage_PositionLabel);
@@ -159,13 +157,8 @@ public class LocationMappingPage extends WizardPage{
 		cmbPositionX.setContentProvider(ArrayContentProvider.getInstance());
 		cmbPositionX.setLabelProvider(lblProvider);
 		cmbPositionX.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		cmbPositionX.addSelectionChangedListener(new ISelectionChangedListener() {			
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				validate();
-			}
-		});
-		
+		cmbPositionX.addSelectionChangedListener(validatelistener);
+
 		Composite yComp = new Composite(locComp, SWT.NONE);
 		yComp.setLayout(new GridLayout(2, false));
 		yComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -178,13 +171,17 @@ public class LocationMappingPage extends WizardPage{
 		cmbPositionY.setContentProvider(ArrayContentProvider.getInstance());
 		cmbPositionY.setLabelProvider(lblProvider);
 		cmbPositionY.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		cmbPositionY.addSelectionChangedListener(new ISelectionChangedListener() {			
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				validate();
-			}
-		});
+		cmbPositionY.addSelectionChangedListener(validatelistener);
 		
+		l = new Label(main, SWT.NONE);
+		l.setText(Messages.LocationMappingPage_BufferLabel);
+		
+		cmbBuffer = new ComboViewer(main, SWT.DROP_DOWN | SWT.READ_ONLY);
+		cmbBuffer.setContentProvider(ArrayContentProvider.getInstance());
+		cmbBuffer.setLabelProvider(lblProvider);
+		cmbBuffer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		cmbBuffer.addSelectionChangedListener(validatelistener);
+
 		fields = new Composite(main, SWT.NONE);
 		fields.setBackgroundMode(SWT.INHERIT_FORCE);
 		fields.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
@@ -199,6 +196,7 @@ public class LocationMappingPage extends WizardPage{
 		cmbStationId.setInput(new String[] {DialogConstants.LOADING_TEXT});
 		cmbPositionX.setInput(new String[] {DialogConstants.LOADING_TEXT});
 		cmbPositionY.setInput(new String[] {DialogConstants.LOADING_TEXT});
+		cmbBuffer.setInput(new String[] {DialogConstants.LOADING_TEXT});
 
 		for (Control c : fields.getChildren()) c.dispose();
 		
@@ -246,7 +244,7 @@ public class LocationMappingPage extends WizardPage{
 		cmbLocationId.setInput(headers);
 		cmbPositionX.setInput(headers);
 		cmbPositionY.setInput(headers);
-		
+		cmbBuffer.setInput(headers);
 		
 		
 		attributeMappings = new ArrayList<>();
@@ -309,6 +307,10 @@ public class LocationMappingPage extends WizardPage{
 		return ((HeaderIndex) cmbPositionY.getStructuredSelection().getFirstElement()).index;
 	}
 
+	public Integer getBufferMapping() {
+		if (cmbBuffer.getSelection().isEmpty()) return null;
+		return ((HeaderIndex)cmbBuffer.getStructuredSelection().getFirstElement()).index;
+	}
 	
 	public HashMap<AssetAttribute, Integer> getAttributeMappings(){
 		HashMap<AssetAttribute, Integer> mappings = new HashMap<>();
@@ -352,7 +354,10 @@ public class LocationMappingPage extends WizardPage{
 			return false;
 		}
 		
-		AssetLocationCsvImporter importer = new AssetLocationCsvImporter(file, delimiter,skipFirst, getLocationIdMapping(), getStationIdMapping(), getLocationXMapping(), getLocationYMapping(), getAttributeMappings(), dateFormat, proj);
+		AssetLocationCsvImporter importer = new AssetLocationCsvImporter(file, delimiter,skipFirst,
+				getLocationIdMapping(), getStationIdMapping(), getLocationXMapping(), getLocationYMapping(), 
+				getBufferMapping(), getAttributeMappings(), dateFormat, proj);
+		
 		ContextInjectionFactory.inject(importer, context);
 		try {
 			return importer.processFile();

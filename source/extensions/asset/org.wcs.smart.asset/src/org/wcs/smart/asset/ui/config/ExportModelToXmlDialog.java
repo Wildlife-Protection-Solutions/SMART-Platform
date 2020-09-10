@@ -400,7 +400,7 @@ public class ExportModelToXmlDialog extends SmartStyledTitleDialog {
 		
 		btnIncludeModuleSettings= new Button(configSection, SWT.CHECK);
 		btnIncludeModuleSettings.setText(Messages.ExportModelToXmlDialog_IncludeSettiongsOp);
-		btnIncludeModuleSettings.setToolTipText(Messages.ExportModelToXmlDialog_IncludeSettingstooltip);
+		btnIncludeModuleSettings.setToolTipText(Messages.ExportModelToXmlDialog_settingstooltip);
 		btnIncludeModuleSettings.setSelection(true);
 		
 		btnIncludeStationAttributes= new Button(configSection, SWT.CHECK);

@@ -791,6 +791,18 @@ ALTER TABLE smart.asset_summary_query ADD COLUMN query_type_key varchar (32);
 UPDATE smart.asset_summary_query SET query_type_key = 'assetsummary';
 ALTER TABLE smart.asset_summary_query alter column query_type_key set not null;
 
+
+ALTER TABLE smart.asset_station add column buffer double precision;
+ALTER TABLE smart.asset_station_location add column buffer double precision;
+				
+UPDATE smart.asset_station set buffer = (select c.value::double precision from smart.asset_module_settings c where c.keyid = 'station_buffer' and c.ca_uuid = smart.asset_station.ca_uuid);
+UPDATE smart.asset_station set buffer = 50 where buffer is null or buffer < 0;
+			
+UPDATE smart.asset_station_location set buffer = (select c.value::double precision from smart.asset_module_settings c, smart.ASSET_STATION d where c.ca_uuid = d.ca_uuid and c.keyid = 'location_buffer' and d.uuid = smart.asset_station_location.station_uuid);
+UPDATE smart.asset_station_location set buffer = 5 where buffer is null or buffer < 0;
+				
+ALTER TABLE smart.asset_station alter column buffer set not null;
+ALTER TABLE smart.asset_station_location alter column buffer set not null;
 ------------ VERSIONS ------------
 insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.smartcollect', '1.0');
 

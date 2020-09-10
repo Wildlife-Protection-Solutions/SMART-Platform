@@ -45,6 +45,7 @@ import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationAttribute;
 import org.wcs.smart.asset.model.AssetStationAttributeValue;
 import org.wcs.smart.asset.ui.AttributeFieldEditor;
+import org.wcs.smart.asset.ui.BufferAttributeFieldEditor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 
@@ -66,7 +67,11 @@ public class StationDetailsPage {
 	private FormToolkit toolkit;
 	
 	private AssetStationAttributeValue tmpLocationAttribute;
+	private AssetStationAttributeValue tmpBufferAttribute;
+	
 	private AttributeFieldEditor locFieldEditor;
+	private BufferAttributeFieldEditor locBufferEditor;
+
 	
 	private boolean isInitializing = false;
 	
@@ -78,7 +83,18 @@ public class StationDetailsPage {
 		tmp.setName(Messages.StationDetailsPage_PositionLabel);
 		tmpLocationAttribute = new AssetStationAttributeValue();
 		tmpLocationAttribute.setAttribute(tmp);
+		
+		tmp = new AssetAttribute();
+		tmp.setType(AttributeType.NUMERIC);
+		tmp.setName(Messages.StationDetailsPage_BufferLabel);
+		tmpBufferAttribute = new AssetStationAttributeValue();
+		tmpBufferAttribute.setAttribute(tmp);
 	}
+	
+	public String getErrorMessage() {
+		if (!locBufferEditor.isValid()) return Messages.StationDetailsPage_InvalidBuffer;
+		return null;
+	} 
 	
 	public void createControl(Composite parent, FormToolkit toolkit) {
 		this.toolkit = toolkit;
@@ -91,7 +107,7 @@ public class StationDetailsPage {
 		((GridLayout)panel.getLayout()).marginHeight = 0;
 		
 		Composite toppanel = toolkit.createComposite(panel, SWT.BORDER);
-		toppanel.setLayout(new GridLayout(3, false));
+		toppanel.setLayout(new GridLayout(2, false));
 		toppanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		locFieldEditor = new AttributeFieldEditor(toppanel, tmpLocationAttribute.getAttribute());
@@ -113,6 +129,25 @@ public class StationDetailsPage {
 		});
 		locFieldEditor.setEnabled(AssetSecurityManager.INSTANCE.canEditStationLocation());
 
+		locBufferEditor = new BufferAttributeFieldEditor(toppanel, tmpBufferAttribute.getAttribute());
+		locBufferEditor.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (isInitializing) return;
+				if (locBufferEditor.isValid()) {
+					if (locBufferEditor.updateValue(tmpBufferAttribute)) {
+						AssetStation station = (AssetStation) attributePanel.getData(STATION_KEY);
+						if (station != null) {
+							station.setBuffer(tmpBufferAttribute.getNumberValue());
+						}
+					}
+				}
+				parentEditor.setDirty(true);
+				
+			}
+		});
+		locBufferEditor.setEnabled(AssetSecurityManager.INSTANCE.canEditStationLocation());
+		
 		Composite attributeComp = toolkit.createComposite(panel, SWT.BORDER);
 		attributeComp.setLayout(new GridLayout());
 		attributeComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -137,10 +172,12 @@ public class StationDetailsPage {
 		if (station == null) return;
 		tmpLocationAttribute.setNumberValue(station.getX());
 		tmpLocationAttribute.setNumberValue2(station.getY());
+		tmpBufferAttribute.setNumberValue(station.getBuffer());
 		
 		try {
 			isInitializing = true;
 			locFieldEditor.initControl(tmpLocationAttribute);
+			locBufferEditor.initControl(tmpBufferAttribute);
 			attributePanel.setData(STATION_KEY, station);
 		}finally {
 			isInitializing = false;

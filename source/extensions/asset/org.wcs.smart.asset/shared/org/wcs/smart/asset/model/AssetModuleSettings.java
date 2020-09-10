@@ -44,28 +44,23 @@ public class AssetModuleSettings extends UuidItem {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Value to be stored in meters
-	 * 
-	 * The maximum distance between an station location and the station 
-	 * position for the asset deployment to be associated with that station
-	 */
-	public static final String STATION_BUFFER_KEY = "station_buffer"; //$NON-NLS-1$
-	
-	/**
-	 * Value to be stored in meters
-	 * 
-	 * The maximum distance between an asset deployment location and the location
-	 * position for the asset deployment to be associated with that station location
-	 */
-	public static final String LOCATION_BUFFER_KEY = "location_buffer"; //$NON-NLS-1$
-	
-	/**
 	 * Columns to be included in the overview map
 	 */
 	public static final String OVERVIEW_MAP_COLUMN_KEY = "overview_map_columns"; //$NON-NLS-1$
-	
-	public static final int STATION_BUFFER_DEFAULT_VALUE = 50;
-	public static final int LOCATION_BUFFER_DEFAULT_VALUE = 5;
+
+	/*
+	 * since smart7 the buffers are not longer conservation area specific,
+	 * but instead individual station/location specific.  These are just the
+	 * default values.
+	 */
+	/**
+	 * Default value for station buffers
+	 */
+	public static final double STATION_BUFFER_DEFAULT_VALUE = 50;
+	/**
+	 * Default value for unit location buffers
+	 */
+	public static final double LOCATION_BUFFER_DEFAULT_VALUE = 5;
 
 	
 	private ConservationArea conservationArea;

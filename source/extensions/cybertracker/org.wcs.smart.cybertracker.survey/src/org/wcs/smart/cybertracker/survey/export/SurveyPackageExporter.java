@@ -93,11 +93,11 @@ public enum SurveyPackageExporter {
 
 	INSTANCE;
 	
-	public static final String CM_MODEL_FILE = "cm_model.xml"; //$NON-NLS-1$
+	private static final String CM_MODEL_FILE = "cm_model.xml"; //$NON-NLS-1$
 	
-	public static final String PATROL_METADATA_FILE = "survey_metadata.json"; //$NON-NLS-1$
+	private static final String METADATA_FILE = "survey_metadata.json"; //$NON-NLS-1$
 	
-	public static final String CT_PROFILE_FILE = "ct_profile.json"; //$NON-NLS-1$
+	private static final String CT_PROFILE_FILE = "ct_profile.json"; //$NON-NLS-1$
 	
 	/**
 	 * Exports survey data to package for cybertracker.
@@ -183,7 +183,7 @@ public enum SurveyPackageExporter {
 				}
 				
 				sub.split(1);
-				Path metadataFile = tempDir.resolve(PATROL_METADATA_FILE);
+				Path metadataFile = tempDir.resolve(METADATA_FILE);
 				metadataToJson(ctpackage, sd, session,  metadataFile);
 				toIncludeInZip.add(metadataFile);
 				

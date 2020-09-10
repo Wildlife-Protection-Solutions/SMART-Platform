@@ -24,15 +24,12 @@ package org.wcs.smart.asset;
 import java.text.Collator;
 import java.util.List;
 import java.util.UUID;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.hibernate.Session;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetAttribute.AttributeType;
 import org.wcs.smart.asset.model.AssetAttributeListItem;
-import org.wcs.smart.asset.model.AssetModuleSettings;
 import org.wcs.smart.asset.model.AssetType;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -45,8 +42,6 @@ import org.wcs.smart.hibernate.QueryFactory;
  *
  */
 public class AssetHibernateManager {
-	
-	private static Logger logger = Logger.getLogger(AssetHibernateManager.class.getCanonicalName());
 	
 	public static AssetAttribute getAttribute(String keyId, ConservationArea ca, Session session){ 
 		return QueryFactory.buildQuery(session, AssetAttribute.class, 
@@ -108,49 +103,4 @@ public class AssetHibernateManager {
 		return -1;
 	}
 	
-	/**
-	 * Return the current value for the station buffer.
-	 * 
-	 * @param session
-	 * @param ca
-	 * @return
-	 */
-	public static double getStationBuffer(Session session, ConservationArea ca) {
-		AssetModuleSettings setting = QueryFactory.buildQuery(session, AssetModuleSettings.class, 
-				new Object[]{"conservationArea", ca}, //$NON-NLS-1$
-				new Object[] {"keyId", AssetModuleSettings.STATION_BUFFER_KEY}).uniqueResult(); //$NON-NLS-1$
-		if (setting == null) {
-			return AssetModuleSettings.STATION_BUFFER_DEFAULT_VALUE;
-		}
-		try {
-			Double d = Double.valueOf(setting.getValue());
-			return d;
-		}catch (Exception ex) {
-			logger.log(Level.WARNING, ex.getMessage(), ex);
-		}
-		return AssetModuleSettings.STATION_BUFFER_DEFAULT_VALUE;
-	}
-	
-	/**
-	 * Return the current value for the station location buffer.
-	 * 
-	 * @param session
-	 * @param ca
-	 * @return
-	 */
-	public static double getStationLocationBuffer(Session session, ConservationArea ca) {
-		AssetModuleSettings setting = QueryFactory.buildQuery(session, AssetModuleSettings.class, 
-				new Object[]{"conservationArea", ca}, //$NON-NLS-1$
-				new Object[] {"keyId", AssetModuleSettings.LOCATION_BUFFER_KEY}).uniqueResult(); //$NON-NLS-1$
-		if (setting == null) {
-			return AssetModuleSettings.LOCATION_BUFFER_DEFAULT_VALUE;
-		}
-		try {
-			Double d = Double.valueOf(setting.getValue());
-			return d;
-		}catch (Exception ex) {
-			logger.log(Level.WARNING, ex.getMessage(), ex);
-		}
-		return AssetModuleSettings.LOCATION_BUFFER_DEFAULT_VALUE;
-	}
 }

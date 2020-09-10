@@ -51,7 +51,7 @@ import javax.xml.namespace.QName;
 @XmlRegistry
 public class ObjectFactory {
 
-    private final static QName _Deployment_QNAME = new QName("http://www.smartconservationsoftware.org/xml/1.0/assetdeployment", "Deployment");
+    private final static QName _Deployment_QNAME = new QName("http://www.smartconservationsoftware.org/xml/1.0/assetdeployment", "Deployment"); //$NON-NLS-1$ //$NON-NLS-2$
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: org.wcs.smart.asset.data.inout.deployment.xml

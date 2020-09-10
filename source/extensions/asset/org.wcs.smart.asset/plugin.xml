@@ -256,25 +256,6 @@
                   </or>
                </visibleWhen>
             </command>
-            <command
-                  commandId="org.wcs.smart.asset.command.settings.open"
-                  icon="images/icons/obj16/configure.png"
-                  label="%settings.command.label"
-                  style="push">
-               <visibleWhen
-                     checkEnabled="false">
-                  <or>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="admin">
-                     </test>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="manager">
-                     </test>
-                  </or>
-               </visibleWhen>
-            </command>
             <menu
                   label="%importexport.menu.label">
                <command
@@ -570,10 +551,6 @@
             name="%mappings.command.name">
       </command>
       <command
-            id="org.wcs.smart.asset.command.settings.open"
-            name="%settings.command.name">
-      </command>
-      <command
             id="org.wcs.smart.asset.command.model.xml.export"
             name="%exportmodel.command.name">
       </command>
@@ -607,10 +584,6 @@
       <handler
             class="org.wcs.smart.asset.ui.handler.OpenMappingDialogHandler$OpenMappingDialogHandlerWrapper"
             commandId="org.wcs.smart.asset.command.metadata.mapping.open">
-      </handler>
-      <handler
-            class="org.wcs.smart.asset.ui.handler.ShowSettingHandler$ShowSettingHandlerWrapper"
-            commandId="org.wcs.smart.asset.command.settings.open">
       </handler>
       <handler
             class="org.wcs.smart.asset.ui.handler.ExportModelToXmlDialogHandler$ExportModelToXmlDialogHandlerWrapper"

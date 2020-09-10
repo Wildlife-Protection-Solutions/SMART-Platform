@@ -50,6 +50,7 @@ import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetAttribute.AttributeType;
+import org.wcs.smart.asset.model.AssetModuleSettings;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetStationLocationAttribute;
@@ -70,7 +71,9 @@ public class StationLocationDialog extends SmartStyledTitleDialog{
 	private AssetStationLocation toUpdate;
 	
 	private Text txtStationLocation;
+	
 	private AttributeFieldEditor locationEditor;
+	private BufferAttributeFieldEditor bufferEditor;
 	
 	private List<AttributeFieldEditor> attributeEditors;
 	
@@ -80,6 +83,8 @@ public class StationLocationDialog extends SmartStyledTitleDialog{
 	public StationLocationDialog(Shell parentShell, AssetStationLocation toUpdate) {
 		super(parentShell);
 		this.toUpdate = toUpdate;
+		
+		if (toUpdate.getBuffer() == null) toUpdate.setBuffer(AssetModuleSettings.LOCATION_BUFFER_DEFAULT_VALUE);
 	}
 	
 	@Override
@@ -106,6 +111,9 @@ public class StationLocationDialog extends SmartStyledTitleDialog{
 		locationEditor.updateValue(tmp);
 		toUpdate.setX(tmp.getNumberValue());
 		toUpdate.setY(tmp.getNumberValue2());
+		
+		bufferEditor.updateValue(tmp);
+		toUpdate.setBuffer(tmp.getNumberValue());
 		
 		if (toUpdate.getAttributeValues() == null) toUpdate.setAttributeValues(new ArrayList<>());
 		
@@ -158,7 +166,20 @@ public class StationLocationDialog extends SmartStyledTitleDialog{
 			setErrorMessage(Messages.StationLocationDialog_IdRequired);
 			return false;
 		}
-		
+		if (!locationEditor.isValid()) {
+			setErrorMessage(Messages.StationLocationDialog_ValidPositionRequired);
+			return false;
+		}
+		AssetStationLocationAttributeValue tmp = new AssetStationLocationAttributeValue();
+		locationEditor.updateValue(tmp);
+		if (tmp.getNumberValue() == null || tmp.getNumberValue2() == null) {
+			setErrorMessage(Messages.StationLocationDialog_ValidPositionRequired);
+			return false;
+		}
+		if (!bufferEditor.isValid()) {
+			setErrorMessage(Messages.StationLocationDialog_InvalidBuffer);
+			return false;
+		}
 		//check duplicate station id
 		
 		if (attributeEditors != null) {
@@ -171,6 +192,8 @@ public class StationLocationDialog extends SmartStyledTitleDialog{
 			};
 			if (!ok) return false;
 		}
+		
+		
 		btnOk.setEnabled(true);
 		return true;
 	}
@@ -194,6 +217,17 @@ public class StationLocationDialog extends SmartStyledTitleDialog{
 		l = new Label(form, SWT.NONE);
 		l.setText(Messages.StationLocationDialog_IdLabel);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
+		
+		SelectionListener validatelistener = new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				validate();
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+			}
+		};
 		
 		txtStationLocation = new Text(form, SWT.BORDER);
 		txtStationLocation.setTextLimit(AssetStation.MAX_LENGTH);
@@ -223,6 +257,18 @@ public class StationLocationDialog extends SmartStyledTitleDialog{
 			value.setNumberValue2(toUpdate.getStation().getY());
 			locationEditor.initControl(value);
 		}
+		locationEditor.addSelectionListener(validatelistener);
+		
+		tmp = new AssetAttribute();
+		tmp.setName(Messages.StationLocationDialog_BufferLabel);
+		tmp.setType(AttributeType.NUMERIC);
+		
+		bufferEditor = new BufferAttributeFieldEditor(form, tmp);
+		AssetStationLocationAttributeValue value = new AssetStationLocationAttributeValue();
+		value.setAttribute(tmp);
+		value.setNumberValue(toUpdate.getBuffer());
+		bufferEditor.initControl(value);
+		bufferEditor.addSelectionListener(validatelistener);
 		
 		l = new Label(form, SWT.SEPARATOR | SWT.HORIZONTAL);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));

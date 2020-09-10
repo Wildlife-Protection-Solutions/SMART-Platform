@@ -52,6 +52,7 @@ import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetAttributeListItem;
+import org.wcs.smart.asset.model.AssetModuleSettings;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationAttributeValue;
 import org.wcs.smart.ca.ConservationArea;
@@ -81,6 +82,7 @@ public class AssetStationCsvImporter {
 	private Integer idField;
 	private Integer xField;
 	private Integer yField;
+	private Integer bufferField;
 	private boolean skipFirst;
 	private HashMap<AssetAttribute, Integer> attributeMappings;
 	private DateTimeFormatter dateTimeFormat;
@@ -93,13 +95,16 @@ public class AssetStationCsvImporter {
 	IEventBroker broker;
 	
 	
-	public AssetStationCsvImporter(Path file, char delimiter, boolean skipFirst, Integer idField, Integer xField, Integer yField, HashMap<AssetAttribute, Integer> attributeMappings, String dateTimeFormat, Projection projection) {
+	public AssetStationCsvImporter(Path file, char delimiter, boolean skipFirst, Integer idField, 
+			Integer xField, Integer yField, Integer bufferField, 
+			HashMap<AssetAttribute, Integer> attributeMappings, String dateTimeFormat, Projection projection) {
 		this.file = file;
 		this.delimiter = delimiter;
 		
 		this.idField = idField;
 		this.xField = xField;
 		this.yField = yField;
+		this.bufferField = bufferField;
 		this.attributeMappings = attributeMappings;
 		this.skipFirst = skipFirst;
 		this.dateTimeFormat = DateTimeFormatter.ofPattern(dateTimeFormat);
@@ -206,8 +211,20 @@ public class AssetStationCsvImporter {
 			return null;
 		}
 		
+		Double buffer = AssetModuleSettings.STATION_BUFFER_DEFAULT_VALUE;
+		if (bufferField != null) {
+			try {
+				buffer = Double.parseDouble(data[bufferField]);
+				if (buffer <= 0) throw new Exception(Messages.AssetStationCsvImporter_InvalidBuffer);
+			}catch (Exception ex) {
+				buffer = AssetModuleSettings.STATION_BUFFER_DEFAULT_VALUE;
+				warnings.add(MessageFormat.format(Messages.AssetStationCsvImporter_BufferValueNotParsed, data[bufferField], row, AssetModuleSettings.STATION_BUFFER_DEFAULT_VALUE));
+			}
+		}
+		
 		AssetStation newStation = new AssetStation();
 		newStation.setConservationArea(ca);
+		newStation.setBuffer(buffer);
 		newStation.setId(id);
 		newStation.setX(p.getX());
 		newStation.setY(p.getY());

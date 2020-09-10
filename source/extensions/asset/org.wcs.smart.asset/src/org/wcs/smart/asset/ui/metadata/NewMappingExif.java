@@ -43,7 +43,6 @@ import org.wcs.smart.asset.data.importer.FileMetadataReader;
 import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetMetadataMapping;
 import org.wcs.smart.asset.model.AssetMetadataMapping.MetadataType;
-import org.wcs.smart.asset.model.AssetMetadataMapping.State;
 import org.wcs.smart.asset.model.mapping.ExifMetadataField;
 import org.wcs.smart.hibernate.SmartDB;
 

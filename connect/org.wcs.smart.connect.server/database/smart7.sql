@@ -2343,6 +2343,7 @@ CREATE TABLE smart.asset_station (
     id character varying(128) NOT NULL,
     x double precision NOT NULL,
     y double precision NOT NULL,
+    buffer double precision not null,
     PRIMARY KEY (uuid)
 );
 
@@ -2369,6 +2370,7 @@ CREATE TABLE smart.asset_station_location (
     id character varying(128) NOT NULL,
     x double precision NOT NULL,
     y double precision NOT NULL,
+    buffer double precision not null,
     PRIMARY KEY (uuid)
 );
 

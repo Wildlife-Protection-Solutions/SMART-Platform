@@ -39,7 +39,6 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
@@ -76,7 +75,7 @@ public class StationMappingPage extends WizardPage{
 	private static final String ATTRIBUTE2 = "ATTRIBUTE"; //$NON-NLS-1$
 
 	private ComboViewer cmbStationId;
-	
+	private ComboViewer cmbBuffer;
 	private ComboViewer cmbPositionX;
 	private ComboViewer cmbPositionY;
 	
@@ -113,16 +112,13 @@ public class StationMappingPage extends WizardPage{
 		Label l = new Label(main, SWT.NONE);
 		l.setText(Messages.StationMappingPage_StationLabel);
 		
+		ISelectionChangedListener validatelistener = e->validate();
+		
 		cmbStationId = new ComboViewer(main, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbStationId.setContentProvider(ArrayContentProvider.getInstance());
 		cmbStationId.setLabelProvider(lblProvider);
 		cmbStationId.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		cmbStationId.addSelectionChangedListener(new ISelectionChangedListener() {			
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				validate();
-			}
-		});
+		cmbStationId.addSelectionChangedListener(validatelistener);
 		
 		l = new Label(main, SWT.NONE);
 		l.setText(Messages.StationMappingPage_PositionLabel);
@@ -146,12 +142,7 @@ public class StationMappingPage extends WizardPage{
 		cmbPositionX.setContentProvider(ArrayContentProvider.getInstance());
 		cmbPositionX.setLabelProvider(lblProvider);
 		cmbPositionX.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		cmbPositionX.addSelectionChangedListener(new ISelectionChangedListener() {			
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				validate();
-			}
-		});
+		cmbPositionX.addSelectionChangedListener(validatelistener);
 		
 		Composite yComp = new Composite(locComp, SWT.NONE);
 		yComp.setLayout(new GridLayout(2, false));
@@ -165,12 +156,16 @@ public class StationMappingPage extends WizardPage{
 		cmbPositionY.setContentProvider(ArrayContentProvider.getInstance());
 		cmbPositionY.setLabelProvider(lblProvider);
 		cmbPositionY.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		cmbPositionY.addSelectionChangedListener(new ISelectionChangedListener() {			
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				validate();
-			}
-		});
+		cmbPositionY.addSelectionChangedListener(validatelistener);
+		
+		l = new Label(main, SWT.NONE);
+		l.setText(Messages.StationMappingPage_BufferLabel);
+		
+		cmbBuffer = new ComboViewer(main, SWT.DROP_DOWN | SWT.READ_ONLY);
+		cmbBuffer.setContentProvider(ArrayContentProvider.getInstance());
+		cmbBuffer.setLabelProvider(lblProvider);
+		cmbBuffer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		cmbBuffer.addSelectionChangedListener(validatelistener);
 		
 		fields = new Composite(main, SWT.NONE);
 		fields.setBackgroundMode(SWT.INHERIT_FORCE);
@@ -230,8 +225,7 @@ public class StationMappingPage extends WizardPage{
 		}
 		cmbPositionX.setInput(headers);
 		cmbPositionY.setInput(headers);
-		
-		
+		cmbBuffer.setInput(headers);
 		
 		attributeMappings = new ArrayList<>();
 		
@@ -290,6 +284,10 @@ public class StationMappingPage extends WizardPage{
 		return ((HeaderIndex) cmbPositionY.getStructuredSelection().getFirstElement()).index;
 	}
 
+	public Integer getBufferMapping() {
+		if (cmbBuffer.getSelection().isEmpty()) return null;
+		return ((HeaderIndex)cmbBuffer.getStructuredSelection().getFirstElement()).index;
+	}
 	
 	public HashMap<AssetAttribute, Integer> getAttributeMappings(){
 		HashMap<AssetAttribute, Integer> mappings = new HashMap<>();
@@ -329,7 +327,9 @@ public class StationMappingPage extends WizardPage{
 			return false;
 		}
 		
-		AssetStationCsvImporter importer = new AssetStationCsvImporter(file, delimiter,skipFirst, getStationIdMapping(), getStationXMapping(), getStationYMapping(), getAttributeMappings(), dateFormat, proj);
+		AssetStationCsvImporter importer = new AssetStationCsvImporter(file, delimiter,skipFirst, 
+				getStationIdMapping(), getStationXMapping(), getStationYMapping(),
+				getBufferMapping(), getAttributeMappings(), dateFormat, proj);
 		ContextInjectionFactory.inject(importer, context);
 		try {
 			return importer.processFile();
