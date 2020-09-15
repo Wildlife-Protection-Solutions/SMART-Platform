@@ -171,7 +171,7 @@ public class IncidentPackageContribution implements IPackageContribution{
 			if (tm.getUuid() != null) {
 				tm = s.get(ConfigurableModel.class, cm.getUuid());
 			}
-			includeDmIcons(tm, updates, tempDir);	
+			includeDmIcons(tm, updates, tempDir, s);	
 		}
 		
 		
@@ -198,7 +198,7 @@ public class IncidentPackageContribution implements IPackageContribution{
 		}
 	}
 	
-	private void includeDmIcons(ConfigurableModel cm, PackageContribution updates, Path tempDir) throws IOException {
+	private void includeDmIcons(ConfigurableModel cm, PackageContribution updates, Path tempDir, Session session) throws IOException {
 		List<Object> toProcess = new ArrayList<>();
 		toProcess.addAll(cm.getNodes());
 		List<Object> processed = new ArrayList<>();
@@ -212,7 +212,7 @@ public class IncidentPackageContribution implements IPackageContribution{
 				toProcess.addAll(node.getChildren());
 				
 				if (!node.hasCustomImage() && node.getCategory() != null && node.getCategory().getIcon() != null ) {
-					processFile(node.getCategory(), node, cm, updates, tempDir);
+					processFile(node.getCategory(), node, cm, updates, tempDir, session);
 				}
 				if (node.getCmAttributes() != null) {
 					toProcess.addAll(node.getCmAttributes());
@@ -221,7 +221,7 @@ public class IncidentPackageContribution implements IPackageContribution{
 				CmAttribute node = (CmAttribute)objectNode;
 				
 				if (!node.hasCustomImage() && node.getAttribute() != null && node.getAttribute().getIcon() != null ) {
-					processFile(node.getAttribute(), node, cm, updates, tempDir);
+					processFile(node.getAttribute(), node, cm, updates, tempDir, session);
 				}
 				
 				if (node.getCurrentList() != null) {
@@ -234,13 +234,13 @@ public class IncidentPackageContribution implements IPackageContribution{
 				CmAttributeListItem node = (CmAttributeListItem)objectNode;
 				
 				if (!node.hasCustomImage() && node.getListItem() != null && node.getListItem().getIcon() != null ) {
-					processFile(node.getListItem(), node, cm, updates, tempDir);
+					processFile(node.getListItem(), node, cm, updates, tempDir, session);
 				}
 			}else if (objectNode instanceof CmAttributeTreeNode) {
 				CmAttributeTreeNode node = (CmAttributeTreeNode)objectNode;
 				
 				if (!node.hasCustomImage() && node.getDmTreeNode() != null && node.getDmTreeNode().getIcon() != null ) {
-					processFile(node.getDmTreeNode(), node, cm, updates, tempDir);
+					processFile(node.getDmTreeNode(), node, cm, updates, tempDir, session);
 				}
 				
 				
@@ -253,10 +253,11 @@ public class IncidentPackageContribution implements IPackageContribution{
 	}
 	
 	private void processFile(DmObject object, IImageAssociatedObject cmObject, ConfigurableModel cm, 
-			PackageContribution updates, Path tempDir) throws IOException {
+			PackageContribution updates, Path tempDir, Session session) throws IOException {
 		
 		IconFile file = object.getIcon().getIconFile(cm.getIconSet());
 		if (file != null) {
+			file.computeFileLocation(session);
 			Path fromPath = file.getAttachmentFile();
 			String fileName = cmObject.getImageFile() == null? cmObject.getDefaultImageFileName() : cmObject.getImageFile().getFileName().toString();
 			if (cmObject.getUuid() == null) {

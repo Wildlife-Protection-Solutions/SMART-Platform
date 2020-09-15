@@ -586,7 +586,7 @@ public class MapSettings {
     			}
     			Path path = fileStoreDirectory.resolve(filename);
     			uri = path.toUri();
-    			url = new URL(path.toUri().getScheme(), "", -1, path.toUri().getSchemeSpecificPart(), CorePlugin.RELAXED_HANDLER); //$NON-NLS-1$
+    			url = uri.toURL();//new URL(path.toUri().getScheme(), "", -1, path.toUri().getSchemeSpecificPart(), CorePlugin.RELAXED_HANDLER); //$NON-NLS-1$
     		}else {
     			url  = new URL(null, uri.toString(), CorePlugin.RELAXED_HANDLER);
     		}
