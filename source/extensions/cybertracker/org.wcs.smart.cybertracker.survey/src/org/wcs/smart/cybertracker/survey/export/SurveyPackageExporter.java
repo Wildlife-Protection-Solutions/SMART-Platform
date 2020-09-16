@@ -24,6 +24,7 @@ package org.wcs.smart.cybertracker.survey.export;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -39,9 +40,11 @@ import java.util.stream.Collectors;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.geotools.geojson.geom.GeometryJSON;
 import org.hibernate.Session;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
@@ -70,9 +73,11 @@ import org.wcs.smart.dataentry.model.xml.CmXmlManager;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.er.model.MissionProperty;
+import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.meta.MissionScreenOptionMeta;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
@@ -365,6 +370,34 @@ public enum SurveyPackageExporter {
 				Messages.SurveyPackageExporter_LeaderPageLabel,
 				getTranslations(Messages.SurveyPackageExporter_LeaderPageLabel, "SurveyPackageExporter_LeaderPageLabel", ctpackage.getConservationArea()), //$NON-NLS-1$
 				MissionScreenOptionMeta.LEADER.isRequired(), false, session, ctpackage.getConservationArea())); 
+		
+		
+		//add sampling units
+		JSONArray sus = new JSONArray();	
+		List<SamplingUnit> units = QueryFactory.buildQuery(session, SamplingUnit.class, 
+				new Object[] {"surveyDesign", design}).list(); //$NON-NLS-1$
+		
+		GeometryJSON util = new GeometryJSON();
+		
+		for (SamplingUnit unit : units) {
+			JSONObject su = new JSONObject();
+			su.put("uuid", UuidUtils.uuidToString(unit.getUuid())); //$NON-NLS-1$
+			su.put("id", unit.getId()); //$NON-NLS-1$
+			sus.add(su);
+			
+			try {
+				StringWriter ww = new StringWriter();
+				util.write(unit.getGeometry(), ww);
+				JSONParser p = new JSONParser();
+				su.put("geometry", p.parse(ww.getBuffer().toString())); //$NON-NLS-1$
+			}catch (Exception ex) {
+				throw new IOException("Cannot convert geometry to json object: " + ex.getMessage()); //$NON-NLS-1$
+			}
+			
+		}
+		JSONObject su = new JSONObject();
+		su.put(MissionMetadataField.SAMPING_UNIT.getJsonKey(), sus);
+		metadataScreens.add(su);
 		
 		metadataScreens.add(CtJsonExportUtils.createDataType(SurveyScreensUtil.DATATYPE_SURVEY));
 		metadataScreens.add(CtJsonExportUtils.createPatrolId());
