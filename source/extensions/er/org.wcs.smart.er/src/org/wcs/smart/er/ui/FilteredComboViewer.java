@@ -35,14 +35,13 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.filter.IUpdatableView;
-import org.wcs.smart.er.EcologicalRecordsPlugIn;
 
 /**
  * Combo viewer with a filter button that can filter what is displayed in the 
@@ -100,15 +99,15 @@ public abstract class FilteredComboViewer<T> extends Composite implements IUpdat
 	
 	private void createControls() {
 		GridLayout layout = new GridLayout(2, false);
-		layout.horizontalSpacing = 0;
+		layout.horizontalSpacing = 5;
 		layout.verticalSpacing = 0;
 		layout.marginWidth = 0;
 		layout.marginHeight = 0;
 		this.setLayout(layout);
-		this.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
 		viewer = new ComboViewer(this, SWT.READ_ONLY);
-		viewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		viewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		viewer.setContentProvider(ArrayContentProvider.getInstance());
 		viewer.setLabelProvider(getLabelProvider());
 		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -118,11 +117,12 @@ public abstract class FilteredComboViewer<T> extends Composite implements IUpdat
 			}
 		});
 
-		btnFilter = new Button(this, SWT.PUSH);
-		Image image = EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.FILTER_ICON);		
-		btnFilter.setImage(image);
+		btnFilter = new Button(this, SWT.PUSH);		
+		btnFilter.setBackground(btnFilter.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnFilter.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.FILTER_ICON));
 		btnFilter.setToolTipText(getTooltip());
 		btnFilter.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		((GridData)btnFilter.getLayoutData()).heightHint = viewer.getControl().computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
 		btnFilter.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				showFilterDialog();

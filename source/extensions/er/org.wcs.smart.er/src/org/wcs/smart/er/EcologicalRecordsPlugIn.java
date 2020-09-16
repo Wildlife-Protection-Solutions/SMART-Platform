@@ -69,7 +69,6 @@ public class EcologicalRecordsPlugIn extends AbstractUIPlugin {
 	public static final String SAMPLING_UNIT_RECON_ICON = "org.wcs.smart.survey.samplingunit.recon"; //$NON-NLS-1$
 	public static final String OBS_SAMPLING_UNIT_ICON= "org.wcs.smart.survey.samplingunit.obs"; //$NON-NLS-1$
 	public static final String TRK_SAMPLING_UNIT_ICON = "org.wcs.smart.survey.samplingunit.trk"; //$NON-NLS-1$
-	public static final String FILTER_ICON = "org.wcs.smart.survey.filter.icon"; //$NON-NLS-1$
 	
 	public static final String CLEAR_SELECTION_ICON = "org.wcs.smart.er.clearselection"; //$NON-NLS-1$
 	public static final String CHANGE_STATE_ICON = "org.wcs.smart.er.su.state"; //$NON-NLS-1$
