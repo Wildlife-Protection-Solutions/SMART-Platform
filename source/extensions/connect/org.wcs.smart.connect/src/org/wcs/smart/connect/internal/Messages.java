@@ -83,12 +83,9 @@ public class Messages extends NLS {
 	public static String AutoReplicationJob_LoadingServerSubTask;
 	public static String AutoReplicationJob_NoCredentialsError;
 	public static String AutoReplicationJob_packJobName;
-	public static String AutoReplicationJob_ReplicationNoEnabledError;
-	public static String AutoReplicationJob_ServerError;
 	public static String AutoReplicationJob_ServerSubTaskName;
 	public static String AutoReplicationJob_TaskName;
 	public static String AutoReplicationJob_uploadSubTaskName;
-	public static String AutoReplicationJob_UpToDateError;
 	public static String AutoReplicationJob_VersionsDoNoMatchError;
 	public static String CaConnectDeleteHandler_TaskName;
 	public static String CaReplicationDeleteHandler_DeleteError;
@@ -200,7 +197,6 @@ public class Messages extends NLS {
 	public static String DownloadChangeLogEngine_ServerNotFoundError;
 	public static String DownloadChangeLogEngine_statusLineValue;
 	public static String DownloadChangeLogEngine_statusLineValueError;
-	public static String DownloadChangeLogEngine_statusLineValueUpToDate;
 	public static String DownloadChangeLogEngine_TooOldError;
 	public static String DownloadChangeLogHandler_BackgroundProcessMessage;
 	public static String DownloadChangeLogHandler_DialogTitle;
@@ -370,10 +366,7 @@ public class Messages extends NLS {
 	public static String SmartConnect_SshError2;
 	public static String SmartConnect_UserCanceledError;
 	public static String StatusLineControl_jobName;
-	public static String StatusLineControl_LocalChanges;
-	public static String StatusLineControl_LocalError;
 	public static String StatusLineControl_MessageFormatDateString;
-	public static String StatusLineControl_NoLocalChanges;
 	public static String StatusLineControl_RefreshNowMneuItem;
 	public static String StatusLineControl_ServernotFound;
 	public static String StatusLineControl_StatusLabel;

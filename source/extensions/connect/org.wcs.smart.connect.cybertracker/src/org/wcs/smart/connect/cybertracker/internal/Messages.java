@@ -51,7 +51,6 @@ public class Messages extends NLS {
 	public static String ConfigurableModelEditorConnectTab_RefreshToolTip;
 	public static String ConfigurableModelEditorConnectTab_RefreshTypes;
 	public static String ConfigurableModelEditorConnectTab_SettingsWarning;
-	public static String ConfigurableModelEditorConnectTab_TabName;
 	public static String ConfigurableModelEditorConnectTab_TypeMustBeSelected;
 	public static String ConfigurableModelEditorConnectTab_TypeNotValid;
 	public static String ConfigurableModelEditorConnectTab_TypeRequired;

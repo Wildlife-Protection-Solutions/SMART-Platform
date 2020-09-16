@@ -19,9 +19,7 @@ public class Messages extends NLS {
 	public static String DistanceDirectionComposite_BearingLbl;
 	public static String DistanceDirectionComposite_BearingTooltip;
 	public static String DistanceDirectionComposite_Description;
-	public static String DistanceDirectionComposite_DirectionLabel;
 	public static String DistanceDirectionComposite_DirectionNumberRequired1;
-	public static String DistanceDirectionComposite_DistanceLabel;
 	public static String DistanceDirectionComposite_DistanceLbl;
 	public static String DistanceDirectionComposite_DistanceNumberRequired1;
 	public static String DistanceDirectionComposite_DistanceTooltip;
@@ -93,7 +91,6 @@ public class Messages extends NLS {
 	public static String IncidentImporter_saveError;
 	public static String IncidentImporter_SavingProgress;
 	public static String IncidentImporter_ValidatingProgress;
-	public static String IncidentImporter_XmlIncidentNotFound;
 	public static String IncidentImporter_XmlNotFound;
 	public static String IncidentManager_IncidentTooOldToEdit;
 	public static String IncidentManager_Insufficientprivleges;
@@ -106,14 +103,9 @@ public class Messages extends NLS {
 	public static String IncidentMapPage_SaveError;
 	public static String IncidentMapPage_UndonError;
 	public static String IncidentPlugIn_ErrorDialogTitle;
-	public static String IncidentSummaryPage_AttachmentsColumnContent;
-	public static String IncidentSummaryPage_AttachmentsColumnName;
 	public static String IncidentSummaryPage_AttachmentsLabel;
-	public static String IncidentSummaryPage_AttributeLabel;
 	public static String IncidentSummaryPage_bearingtooltip;
 	public static String IncidentSummaryPage_CannotEdit;
-	public static String IncidentSummaryPage_CategoryLabel;
-	public static String IncidentSummaryPage_ObserverLabel;
 	public static String IncidentSummaryPage_ObserverLbl;
 	public static String IncidentSummaryPage_CommentsLabel;
 	public static String IncidentSummaryPage_DateLabel;
@@ -133,7 +125,6 @@ public class Messages extends NLS {
 	public static String IncidentSummaryPage_SectionDescription;
 	public static String IncidentSummaryPage_SectionLabel;
 	public static String IncidentSummaryPage_TimeLabel;
-	public static String IncidentSummaryPage_ValueLabel;
 	public static String IndepedentIncidentSource_IndIncidentWaypointsourceName;
 	public static String IndependentIncidentProvider_IndependentIncidentName;
 	public static String IndIncidentListView_LoadingLabel;

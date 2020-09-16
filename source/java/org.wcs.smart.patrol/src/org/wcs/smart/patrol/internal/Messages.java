@@ -257,14 +257,10 @@ public class Messages extends NLS {
 	public static String PatrolAttributeComposite_ErrorMessage;
 	public static String PatrolAttributeComposite_errorTitle;
 	public static String PatrolAttributeComposite_Title;
-	public static String PatrolAttributeDialog_addtoolitp;
 	public static String PatrolAttributeDialog_deletedialogheader;
 	public static String PatrolAttributeDialog_deletedialogmessage;
 	public static String PatrolAttributeDialog_deleteerror;
-	public static String PatrolAttributeDialog_deletetooltip;
-	public static String PatrolAttributeDialog_disableenabletooltiptext;
 	public static String PatrolAttributeDialog_disabletooltiptext;
-	public static String PatrolAttributeDialog_edittooltip;
 	public static String PatrolAttributeDialog_enabletooltiptext;
 	public static String PatrolAttributeDialog_errorupdatingstate;
 	public static String PatrolAttributeDialog_loadjobname;

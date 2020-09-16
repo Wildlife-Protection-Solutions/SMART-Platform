@@ -80,7 +80,6 @@ public class Messages extends NLS {
 	public static String MappingPage_IncidentSection;
 	public static String MappingPage_jobname;
 	public static String MappingPage_LivestockField;
-	public static String MappingPage_MappingformName;
 	public static String MappingPage_MeansofDeathField;
 	public static String MappingPage_NoneOp;
 	public static String MappingPage_numfield;

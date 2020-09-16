@@ -70,7 +70,6 @@ public class Messages extends NLS {
 	public static String ConfigurableModelEditorCyberTrackerTab_ProfileDetails;
 	public static String ConfigurableModelEditorCyberTrackerTab_ProfileDetailsMessage;
 	public static String ConfigurableModelEditorCyberTrackerTab_profileLoadJobname;
-	public static String ConfigurableModelEditorCyberTrackerTab_TabName;
 	public static String ConfigurePackageDialog_ErrorMessage;
 	public static String ConfigurePackageDialog_ErrorTitle;
 	public static String ConfigurePackageDialog_ManagerNotFound;
@@ -275,7 +274,6 @@ public class Messages extends NLS {
 	public static String CyberTrackerPropertiesComposite_AccentColor;
 	public static String CyberTrackerPropertiesComposite_BackgroundCoor;
 	public static String CyberTrackerPropertiesComposite_ClearButton;
-	public static String CyberTrackerPropertiesComposite_ColorLabel;
 	public static String CyberTrackerPropertiesComposite_ColorSelectionDialogTitle;
 	public static String CyberTrackerPropertiesComposite_CtDataFormatLbl;
 	public static String CyberTrackerPropertiesComposite_CtDataFormatTp;
@@ -500,20 +498,6 @@ public class Messages extends NLS {
 	public static String ImportTool_ShpErrorMsg;
 	public static String ImportTool_SupportedFiles;
 	public static String ImportTool_wizardtitle;
-	public static String InstallToDeviceDialog_AllFiles;
-	public static String InstallToDeviceDialog_APKFileLabel;
-	public static String InstallToDeviceDialog_APKFiles;
-	public static String InstallToDeviceDialog_APKInstallInfo;
-	public static String InstallToDeviceDialog_CopyComplete;
-	public static String InstallToDeviceDialog_CopyCompleteMsg;
-	public static String InstallToDeviceDialog_ErrorTitle;
-	public static String InstallToDeviceDialog_FileNotFound;
-	public static String InstallToDeviceDialog_InstallButtonText;
-	public static String InstallToDeviceDialog_InstallFailed;
-	public static String InstallToDeviceDialog_Message;
-	public static String InstallToDeviceDialog_MessageTitle;
-	public static String InstallToDeviceDialog_NotSupportedMessage;
-	public static String InstallToDeviceDialog_ShellTitle;
 	public static String JsonUtils_AttributeNotFound;
 	public static String JsonUtils_CannotConvertToBoolean;
 	public static String JsonUtils_CouldNotParseValue;
@@ -588,7 +572,6 @@ public class Messages extends NLS {
 	public static String NavigationLayerDialog_dashstyle;
 	public static String NavigationLayerDialog_diamondstyle;
 	public static String NavigationLayerDialog_dotstyle;
-	public static String NavigationLayerDialog_ErrorDialogTitle;
 	public static String NavigationLayerDialog_ErrorTitle;
 	public static String NavigationLayerDialog_LinesHeader;
 	public static String NavigationLayerDialog_MapName;

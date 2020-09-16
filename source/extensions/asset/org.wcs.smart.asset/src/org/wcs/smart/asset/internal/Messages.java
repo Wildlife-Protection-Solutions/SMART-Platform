@@ -341,15 +341,6 @@ public class Messages extends NLS {
 	public static String AssetPropertyPage_UpdateStateError;
 	public static String AssetPropertyPage_unRetireAssetComment;
 	public static String AssetPropertyPage_unretireLabel;
-	public static String AssetSettingsDialog_BufferLabel;
-	public static String AssetSettingsDialog_BufferTooltip;
-	public static String AssetSettingsDialog_InvalidBufferValue;
-	public static String AssetSettingsDialog_InvalidBufferValueLocation;
-	public static String AssetSettingsDialog_loadingJobName;
-	public static String AssetSettingsDialog_LocationBufferLabel;
-	public static String AssetSettingsDialog_LocationBufferTooltip;
-	public static String AssetSettingsDialog_Message;
-	public static String AssetSettingsDialog_Title;
 	public static String AssetStationCsvImporter_BooleanParseError;
 	public static String AssetStationCsvImporter_BufferValueNotParsed;
 	public static String AssetStationCsvImporter_DateParseError;
@@ -682,7 +673,6 @@ public class Messages extends NLS {
 	public static String ExportModelToXmlDialog_FileRequired;
 	public static String ExportModelToXmlDialog_IncludeLocations;
 	public static String ExportModelToXmlDialog_IncludeLocationsTooltip;
-	public static String ExportModelToXmlDialog_IncludeSettingstooltip;
 	public static String ExportModelToXmlDialog_IncludeSettiongsOp;
 	public static String ExportModelToXmlDialog_IncludeStationsOption;
 	public static String ExportModelToXmlDialog_IncludeStationsTooltips;
@@ -733,7 +723,6 @@ public class Messages extends NLS {
 	public static String FileWizardPage_ProjectionTooltip;
 	public static String FileWizardPage_SkipLabel;
 	public static String FileWizardPage_SkipTooltip;
-	public static String FileWizardPage_Title;
 	public static String FixedColumn_ActiveDaysColumnName;
 	public static String FixedColumn_AssetColumnTooltip;
 	public static String FixedColumn_AssetDaysColumnName1;

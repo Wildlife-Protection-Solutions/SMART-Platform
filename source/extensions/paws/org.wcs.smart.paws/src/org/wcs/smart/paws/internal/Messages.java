@@ -157,8 +157,6 @@ public class Messages extends NLS {
 
 	public static String NewPawsRunHandler_Title;
 
-	public static String NewPawsRunHandler_WorkspaceServiceRequired;
-
 	public static String PawsApi_RunFailed;
 
 	public static String PawsApi_RunFailedWithCode;

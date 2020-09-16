@@ -109,7 +109,6 @@ public class Messages extends NLS {
 	public static String ConfigurableModelEditDialog_ErrorTitle;
 	public static String ConfigurableModelEditDialog_LoadExtensionError;
 	public static String ConfigurableModelEditDialog_Message;
-	public static String ConfigurableModelEditDialog_PropertiesLabel;
 	public static String ConfigurableModelEditDialog_SaveCmProgress;
 	public static String ConfigurableModelEditDialog_SaveError;
 	public static String ConfigurableModelEditDialog_SaveMessage;
@@ -237,7 +236,6 @@ public class Messages extends NLS {
 	public static String NumericAttributeInfoComposite_ErrorDialogTitle;
 	public static String NumericAttributeInfoComposite_numericOpTooltip;
 	public static String NumericAttributeInfoComposite_previousInfo;
-	public static String RenameListDialog_DialogMessage;
 	public static String ScreenOptionGroup_DefaultValue;
 	public static String ScreenOptionGroup_PageVisible;
 	public static String ShowConfigurableModelHandler_LoadDataModel;

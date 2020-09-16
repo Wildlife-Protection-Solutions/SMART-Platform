@@ -150,7 +150,6 @@ public class Messages extends NLS {
 	public static String ParameterCollecter_OtherParamGroup;
 	public static String ParameterCollecter_TypeNotSupported;
 	public static String ParameterCollecter_TypeXNotSupported;
-	public static String ParameterSelectionDialog_DefaultName;
 	public static String ParameterSelectionDialog_IsRequired;
 	public static String ParameterSelectionDialog_List;
 	public static String ParameterSelectionDialog_Message;
@@ -218,7 +217,6 @@ public class Messages extends NLS {
 	public static String RunReportJob_Error_RunningReport1;
 	public static String RunReportJob_JobName;
 	public static String SaveAsReportHandler_Copy;
-	public static String SaveAsReportHandler_CopyLabel;
 	public static String SaveAsReportHandler_DialogMsg;
 	public static String SaveAsReportHandler_DialogTitle;
 	public static String SaveAsReportHandler_NameRequiredMsg;

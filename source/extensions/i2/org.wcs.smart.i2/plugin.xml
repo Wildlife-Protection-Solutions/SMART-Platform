@@ -1580,10 +1580,6 @@
             commandId="org.wcs.smart.i2.command.record.view.refresh"
             icon="platform:/plugin/org.wcs.smart/images/icons/shared16/refresh.png">
       </image>
-      <image
-            commandId="org.wcs.smart.i2.command.query.refresh"
-            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/refresh.png">
-      </image>
    </extension>
    <extension
          point="org.locationtech.udig.project.ui.tool">

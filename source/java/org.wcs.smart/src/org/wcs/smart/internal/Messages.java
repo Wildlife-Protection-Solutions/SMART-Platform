@@ -225,7 +225,6 @@ public class Messages extends NLS {
 	public static String BackupDialog_Confirm_Message;
 	public static String BackupDialog_ConfirmCreateDirMsg;
 	public static String BackupDialog_ConfirmCreateDirTitle;
-	public static String BackupDialog_CouldNotCreateOutputDir;
 	public static String BackupDialog_ErrorDialogTitle;
 	public static String BackupDialog_ExcludeFilestoreOp;
 	public static String BackupDialog_ExcludeFilestoreTooltip;
@@ -750,7 +749,6 @@ public class Messages extends NLS {
 	public static String EmployeePropertyPage_CouldNotDeleteEmployee;
 	public static String EmployeePropertyPage_CreateNew_Button;
 	public static String EmployeePropertyPage_createteamtooltip;
-	public static String EmployeePropertyPage_Delete_Tooltip;
 	public static String EmployeePropertyPage_DeleteEmployee_DialogMessage;
 	public static String EmployeePropertyPage_deleteconfirm;
 	public static String EmployeePropertyPage_deleteemployeetooltip;
@@ -759,10 +757,7 @@ public class Messages extends NLS {
 	public static String EmployeePropertyPage_deletemembertooltip;
 	public static String EmployeePropertyPage_deleteteamtooltip;
 	public static String EmployeePropertyPage_deletetitle;
-	public static String EmployeePropertyPage_DIalog_Message;
-	public static String EmployeePropertyPage_Dialog_Title;
 	public static String EmployeePropertyPage_DialogMessage;
-	public static String EmployeePropertyPage_Edit_ToolTip;
 	public static String EmployeePropertyPage_editemployeetooltip;
 	public static String EmployeePropertyPage_editteamerror;
 	public static String EmployeePropertyPage_editteammessage;
@@ -933,10 +928,8 @@ public class Messages extends NLS {
 	public static String IconPreferencePage_NameColumn;
 	public static String IconPreferencePage_NewIconDialogTitle;
 	public static String IconPreferencePage_newiconsettooltip;
-	public static String IconPreferencePage_SaveError;
 	public static String IconPreferencePage_TemplateIconLabel;
 	public static String IconSelectionDialog_15;
-	public static String IconSelectionDialog_allFile;
 	public static String IconSelectionDialog_DefaultName;
 	public static String IconSelectionDialog_DialogMsg;
 	public static String IconSelectionDialog_DialogTitle;
@@ -947,11 +940,9 @@ public class Messages extends NLS {
 	public static String IconSelectionDialog_NameColumn;
 	public static String IconSelectionDialog_NameLabel;
 	public static String IconSelectionDialog_NewSrc;
-	public static String IconSelectionDialog_pngFile;
 	public static String IconSelectionDialog_SmartSrc;
 	public static String IconSelectionDialog_SourceOp;
 	public static String IconSelectionDialog_SystemGenerated;
-	public static String IconSelectionDialog_svgFile;
 	public static String IconsetPropertyPage_Closedialog;
 	public static String IconsetPropertyPage_CloseMessage;
 	public static String IconsetPropertyPage_Message;
@@ -1422,7 +1413,6 @@ public class Messages extends NLS {
 	public static String UpgradeEngine_Confirm_Message;
 	public static String UpgradeEngine_Confirm_Title;
 	public static String UpgradeEngine_Error_Message1;
-	public static String UpgradeEngine_Error_Title;
 	public static String UpgradeEngine_IncompatibleVersion;
 	public static String UpgradeEngine_Plugin_Missing;
 	public static String UpgradeEngine_Plugin_UpgradeMessage;
@@ -1499,8 +1489,6 @@ public class Messages extends NLS {
 	public static String XmlMultiExportDialog_OverwriteWarningLabel;
 	public static String XmlMultiExportDialog_SelectAllLabel;
 	public static String XmlMultiExportDialog_WarnDialog_Title;
-	public static String ZipUtil_BackupError;
-	public static String ZipUtil_Error_CreatingTempDir;
 	public static String ZipUtil_Error_UnzipFailed;
 	public static String ZipUtil_Progress_CreatingZip;
 	public static String ZipUtil_Progress_ProcessingFile;

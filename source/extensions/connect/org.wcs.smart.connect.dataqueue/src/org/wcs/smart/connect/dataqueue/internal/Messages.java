@@ -14,9 +14,7 @@ public class Messages extends NLS {
 	public static String AutoProcessingManager_Status1;
 	public static String AutoProcessingManager_StatusNotKnown;
 	public static String AutoQueueProcessingJob_DialogTitle;
-	public static String AutoQueueProcessingJob_EmptyQueue;
 	public static String AutoQueueProcessingJob_Error1;
-	public static String AutoQueueProcessingJob_ItemsInQueue;
 	public static String AutoQueueProcessingJob_JobName;
 	public static String AutoQueueProcessingJob_Processing;
 	public static String AutoQueueProcessingJob_ProcessNow;

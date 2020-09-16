@@ -184,7 +184,6 @@ public class Messages extends NLS {
 	public static String ObservationOptionsPropertyPage_ObserverLabel;
 
 	public static String ObservationOptionsPropertyPage_ObserverOp;
-	public static String ObservationOptionsPropertyPage_WaypointOptionsLbl;
 
 	public static String PatrolHibernateManager_Error_CouldNoLoadPatrolOptions;
 	public static String ObservationSummaryWizardPage_ObserverLabel;
