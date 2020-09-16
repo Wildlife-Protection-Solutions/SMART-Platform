@@ -828,6 +828,7 @@ public class MissionJsonProcessor implements IJsonProcessor {
 		link.setMission(mission);
 		link.setNewSurveyDesign(ct.getSurveyDesign());
 		link.setSamplingUnit(su);
+		link.setWaypointLinks(new ArrayList<>());
 		
 		newMissionLinks.put(ctUuid, link);
 		return link;
