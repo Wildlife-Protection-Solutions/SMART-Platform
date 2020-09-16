@@ -219,7 +219,7 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 		if (xml.getTeam() != null){
 			Team team = (Team) findValue(xml.getTeam().getLanguageCode(), xml.getTeam().getValue(), "Team"); //$NON-NLS-1$
 			if (team == null){
-				warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_Warning_TemNotFound, new Object[]{xml.getTeam().getValue(),xml.getTeam().getLanguageCode()}));
+				warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_Warning_TemNotFound1, new Object[]{xml.getTeam().getValue(),xml.getTeam().getLanguageCode()}));
 			}else{
 				patrol.setTeam(team);
 			}

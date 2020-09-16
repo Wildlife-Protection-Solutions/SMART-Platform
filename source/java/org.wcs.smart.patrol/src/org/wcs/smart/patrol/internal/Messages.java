@@ -824,7 +824,7 @@ public static String PatrolFeatureSource_ProjectedWaypointLayerName;
 	public static String XmlToPatrolConverter_Warning_NotAllDataImported;
 	public static String XmlToPatrolConverter_Warning_NoTreeItem;
 	public static String XmlToPatrolConverter_Warning_StationNoFound;
-	public static String XmlToPatrolConverter_Warning_TemNotFound;
+	public static String XmlToPatrolConverter_Warning_TemNotFound1;
 	public static String XmlToPatrolConverter_Warning_TreeItemNotFound;
 	public static String MovePatrolLegDialog_CreateNewPatrol;
 	public static String MovePatrolLegDialog_NewPatrolID;
