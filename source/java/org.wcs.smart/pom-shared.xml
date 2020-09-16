@@ -191,6 +191,14 @@
           			<groupId>org.eclipse.platform</groupId>
           			<artifactId>org.eclipse.swt</artifactId>
         		</exclusion>
+        		<exclusion>
+          			<groupId>com.sun.jna</groupId>
+          			<artifactId>com.sun.jna</artifactId>
+        		</exclusion>
+        		<exclusion>
+          			<groupId>com.sun.jna</groupId>
+          			<artifactId>com.sun.jna.platform</artifactId>
+        		</exclusion>
       		</exclusions> 
 	</dependency>
 	<dependency>
