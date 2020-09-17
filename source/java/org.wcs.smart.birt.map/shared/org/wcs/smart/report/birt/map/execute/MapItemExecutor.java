@@ -573,15 +573,19 @@ public class MapItemExecutor implements IReportItemExecutor{
 				}else {
 					zoomToBounds = renderedMap.getBounds(new NullProgressMonitor());
 				}
+			}else {
+				//expand slightly so full styling appears on map
+				zoomToBounds.expandBy(zoomToBounds.maxExtent() * 0.05);
 			}
 		} else if (bounds.getOption() == BoundsOption.LAYER){
 			//set above
 			if (zoomToBounds.isNull()) {
 				zoomToBounds = renderedMap.getBounds(new NullProgressMonitor());
 			}
-		}
+			//expand slightly so full styling appears on map
+			zoomToBounds.expandBy(zoomToBounds.maxExtent() * 0.05);
+		}	
 		
-
 		List<Layer> maplayers = ((Map)renderedMap).getLayersInternal();
 		
 		//scale style to match map dpi settings (scales symbols and fonts)
