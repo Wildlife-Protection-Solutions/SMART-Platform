@@ -60,7 +60,6 @@ import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
@@ -74,7 +73,7 @@ import au.com.bytecode.opencsv.CSVReader;
  */
 public class AssetStationCsvImporter {
 
-	private ConservationArea ca = SmartDB.getCurrentConservationArea();
+	private ConservationArea ca ;
 	
 	private Path file;
 	private char delimiter;
@@ -95,9 +94,11 @@ public class AssetStationCsvImporter {
 	IEventBroker broker;
 	
 	
-	public AssetStationCsvImporter(Path file, char delimiter, boolean skipFirst, Integer idField, 
+	public AssetStationCsvImporter(ConservationArea ca, Path file, char delimiter, boolean skipFirst, Integer idField, 
 			Integer xField, Integer yField, Integer bufferField, 
-			HashMap<AssetAttribute, Integer> attributeMappings, String dateTimeFormat, Projection projection) {
+			HashMap<AssetAttribute, Integer> attributeMappings, 
+			DateTimeFormatter dateTimeFormat, Projection projection) {
+		this.ca = ca;
 		this.file = file;
 		this.delimiter = delimiter;
 		
@@ -107,7 +108,7 @@ public class AssetStationCsvImporter {
 		this.bufferField = bufferField;
 		this.attributeMappings = attributeMappings;
 		this.skipFirst = skipFirst;
-		this.dateTimeFormat = DateTimeFormatter.ofPattern(dateTimeFormat);
+		this.dateTimeFormat = dateTimeFormat;
 		this.projection =  projection;
 	}
 	
@@ -143,14 +144,20 @@ public class AssetStationCsvImporter {
 		
 		//process warnings from user
 		if (!warnings.isEmpty()) {
-			WarningDialog warn = new WarningDialog(Display.getDefault().getActiveShell(), Messages.AssetStationCsvImporter_ImportTitle, Messages.AssetStationCsvImporter_WarningsMsg, warnings, 
+			int[] ret = new int[1];
+			Display.getDefault().syncExec(()->{
+				WarningDialog warn = new WarningDialog(Display.getDefault().getActiveShell(), Messages.AssetStationCsvImporter_ImportTitle, Messages.AssetStationCsvImporter_WarningsMsg, warnings, 
 					new String[] {IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 1);
-			if (warn.open() != 0) {
+				ret[0] = warn.open();
+			});
+			if (ret[0] != 0) {
 				return false;
 			}
 		}
 		if (newStations.isEmpty()) {
-			MessageDialog.openWarning(Display.getDefault().getActiveShell(),Messages.AssetStationCsvImporter_ImportTitle, Messages.AssetStationCsvImporter_NoDataMsg);
+			Display.getDefault().syncExec(()->{
+				MessageDialog.openWarning(Display.getDefault().getActiveShell(),Messages.AssetStationCsvImporter_ImportTitle, Messages.AssetStationCsvImporter_NoDataMsg);
+			});
 			return true;
 		}
 		
@@ -168,7 +175,9 @@ public class AssetStationCsvImporter {
 			}
 		}
 		
-		MessageDialog.openInformation(Display.getDefault().getActiveShell(),  Messages.AssetStationCsvImporter_ImportTitle, MessageFormat.format(Messages.AssetStationCsvImporter_SuccessMsg, newStations.size()));
+		Display.getDefault().syncExec(()->{
+			MessageDialog.openInformation(Display.getDefault().getActiveShell(),  Messages.AssetStationCsvImporter_ImportTitle, MessageFormat.format(Messages.AssetStationCsvImporter_SuccessMsg, newStations.size()));
+		});
 		broker.post(AssetEvents.ASSETSTATION_NEW, newStations);
 		
 		return true;

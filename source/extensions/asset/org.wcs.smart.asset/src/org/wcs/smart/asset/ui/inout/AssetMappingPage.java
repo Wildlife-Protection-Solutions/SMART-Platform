@@ -26,6 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.Collator;
 import java.text.MessageFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -291,7 +292,9 @@ public class AssetMappingPage extends WizardPage{
 			return false;
 		}
 		
-		AssetCsvImporter importer = new AssetCsvImporter(file, delimiter,skipFirst, getAssetIdMapping(), getAssetTypeMapping(), getAttributeMappings(), dateFormat);
+		AssetCsvImporter importer = new AssetCsvImporter(SmartDB.getCurrentConservationArea(), 
+				file, delimiter,skipFirst,  getAssetIdMapping(), getAssetTypeMapping(), 
+				getAttributeMappings(), DateTimeFormatter.ofPattern(dateFormat));
 		ContextInjectionFactory.inject(importer, context);
 		try {
 			return importer.processFile();

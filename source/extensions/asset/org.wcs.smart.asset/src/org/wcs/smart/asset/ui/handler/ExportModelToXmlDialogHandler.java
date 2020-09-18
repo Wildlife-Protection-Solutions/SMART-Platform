@@ -21,8 +21,14 @@
  */
 package org.wcs.smart.asset.ui.handler;
 
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
-import org.wcs.smart.asset.ui.config.ExportModelToXmlDialog;
+import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.asset.ui.inout.AssetDataExportWizard;
+import org.wcs.smart.ui.SmartWizardDialog;
 
 /**
  * Handler for displaying asset module settings dialog
@@ -31,12 +37,16 @@ import org.wcs.smart.asset.ui.config.ExportModelToXmlDialog;
  *
  */
 @SuppressWarnings("restriction")
-public class ExportModelToXmlDialogHandler extends ShowDialogHandler{
-
-	public ExportModelToXmlDialogHandler() {
-		super(ExportModelToXmlDialog.class);
+public class ExportModelToXmlDialogHandler {
+	
+	@Execute
+	public void execute(IEclipseContext context) {
+		
+		AssetDataExportWizard wizard = new AssetDataExportWizard();
+		ContextInjectionFactory.inject(wizard, context);
+		WizardDialog wd = new SmartWizardDialog(context.get(Shell.class), wizard);
+		wd.open();
 	}
-
 	
 	// E3
 	public static class ExportModelToXmlDialogHandlerWrapper extends DIHandler<ExportModelToXmlDialogHandler> {
@@ -44,4 +54,5 @@ public class ExportModelToXmlDialogHandler extends ShowDialogHandler{
 			super(ExportModelToXmlDialogHandler.class);
 		}
 	}
+
 }

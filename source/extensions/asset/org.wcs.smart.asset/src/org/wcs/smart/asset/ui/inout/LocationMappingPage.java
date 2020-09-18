@@ -26,6 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.Collator;
 import java.text.MessageFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -354,9 +355,10 @@ public class LocationMappingPage extends WizardPage{
 			return false;
 		}
 		
-		AssetLocationCsvImporter importer = new AssetLocationCsvImporter(file, delimiter,skipFirst,
+		AssetLocationCsvImporter importer = new AssetLocationCsvImporter(SmartDB.getCurrentConservationArea(),
+				file, delimiter,skipFirst,
 				getLocationIdMapping(), getStationIdMapping(), getLocationXMapping(), getLocationYMapping(), 
-				getBufferMapping(), getAttributeMappings(), dateFormat, proj);
+				getBufferMapping(), getAttributeMappings(), DateTimeFormatter.ofPattern(dateFormat), proj);
 		
 		ContextInjectionFactory.inject(importer, context);
 		try {

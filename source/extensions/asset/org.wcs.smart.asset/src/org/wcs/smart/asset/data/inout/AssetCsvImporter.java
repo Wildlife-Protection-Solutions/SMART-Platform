@@ -55,18 +55,18 @@ import org.wcs.smart.ca.Label;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
-import org.wcs.smart.hibernate.SmartDB;
 
 import au.com.bytecode.opencsv.CSVReader;
 
 /**
- * Tools for importing asset data from CSV File
+ * Tools for importing field sensor data from CSV File
+ * 
  * @author Emily
  *
  */
 public class AssetCsvImporter {
 
-	private ConservationArea ca = SmartDB.getCurrentConservationArea();
+	private ConservationArea ca = null;
 	
 	private Path file;
 	private char delimiter;
@@ -85,7 +85,10 @@ public class AssetCsvImporter {
 	IEventBroker broker;
 	
 	
-	public AssetCsvImporter(Path file, char delimiter, boolean skipFirst, Integer idField, Object typeField, HashMap<AssetAttribute, Integer> attributeMappings, String dateTimeFormat) {
+	public AssetCsvImporter(ConservationArea ca, Path file, char delimiter, boolean skipFirst, 
+			Integer idField, Object typeField, HashMap<AssetAttribute, Integer> attributeMappings, 
+			DateTimeFormatter formatter) {
+		this.ca = ca;
 		this.file = file;
 		this.delimiter = delimiter;
 		
@@ -93,7 +96,7 @@ public class AssetCsvImporter {
 		this.typeField = typeField;
 		this.attributeMappings = attributeMappings;
 		this.skipFirst = skipFirst;
-		this.dateTimeFormat = DateTimeFormatter.ofPattern(dateTimeFormat);
+		this.dateTimeFormat = formatter;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -146,17 +149,25 @@ public class AssetCsvImporter {
 				if (a != null) newAssets.add(a);
 			}
 		}
-		
+
 		//process warnings from user
 		if (!warnings.isEmpty()) {
-			WarningDialog warn = new WarningDialog(Display.getDefault().getActiveShell(), Messages.AssetCsvImporter_ImportingTitle, Messages.AssetCsvImporter_WarningsMsg, warnings, 
+			int[] r = new int[1];
+			Display.getDefault().syncExec(()->{
+				WarningDialog warn = new WarningDialog(Display.getDefault().getActiveShell(), Messages.AssetCsvImporter_ImportingTitle, Messages.AssetCsvImporter_WarningsMsg, warnings, 
 					new String[] {IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 1);
-			if (warn.open() != 0) {
+				r[0] = warn.open();
+			});
+			
+			if (r[0]!= 0) {
 				return false;
 			}
 		}
+
 		if (newAssets.isEmpty()) {
-			MessageDialog.openWarning(Display.getDefault().getActiveShell(),Messages.AssetCsvImporter_ImportingTitle, Messages.AssetCsvImporter_NoDataMsg);
+			Display.getDefault().syncExec(()->{
+				MessageDialog.openWarning(Display.getDefault().getActiveShell(),Messages.AssetCsvImporter_ImportingTitle, Messages.AssetCsvImporter_NoDataMsg);
+			});
 			return true;
 		}
 		
@@ -173,8 +184,11 @@ public class AssetCsvImporter {
 				return false;
 			}
 		}
+
+		Display.getDefault().syncExec(()->{
+			MessageDialog.openInformation(Display.getDefault().getActiveShell(),  Messages.AssetCsvImporter_ImportingTitle, MessageFormat.format(Messages.AssetCsvImporter_SuccessMsg, newAssets.size()));
+		});
 		
-		MessageDialog.openInformation(Display.getDefault().getActiveShell(),  Messages.AssetCsvImporter_ImportingTitle, MessageFormat.format(Messages.AssetCsvImporter_SuccessMsg, newAssets.size()));
 		broker.post(AssetEvents.ASSET_NEW, newAssets);
 		
 		return true;

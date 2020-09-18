@@ -26,6 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.Collator;
 import java.text.MessageFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -327,9 +328,10 @@ public class StationMappingPage extends WizardPage{
 			return false;
 		}
 		
-		AssetStationCsvImporter importer = new AssetStationCsvImporter(file, delimiter,skipFirst, 
+		AssetStationCsvImporter importer = new AssetStationCsvImporter(SmartDB.getCurrentConservationArea(),
+				file, delimiter,skipFirst, 
 				getStationIdMapping(), getStationXMapping(), getStationYMapping(),
-				getBufferMapping(), getAttributeMappings(), dateFormat, proj);
+				getBufferMapping(), getAttributeMappings(), DateTimeFormatter.ofPattern(dateFormat), proj);
 		ContextInjectionFactory.inject(importer, context);
 		try {
 			return importer.processFile();

@@ -22,6 +22,9 @@
 package org.wcs.smart.asset.model;
 
 import java.text.DateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.Date;
 import java.util.Locale;
 
@@ -90,12 +93,12 @@ public abstract class AbstractAssetAttributeValue {
 	}
 	
 	@Transient
-	public Date getDateValue(){
+	public LocalDate getDateValue(){
 		if (getStringValue() == null){
 			return null;
 		}
 		try{
-			return java.sql.Date.valueOf(getStringValue());
+			return java.sql.Date.valueOf(getStringValue()).toLocalDate();
 		}catch (Exception ex){
 			return null;
 		}
@@ -154,7 +157,7 @@ public abstract class AbstractAssetAttributeValue {
 					return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(Boolean.FALSE, l);
 				}
 			case DATE:
-				return DateFormat.getDateInstance().format(getDateValue());
+				return DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format( getDateValue() );
 			case LIST:
 				return getAttributeListItem().getName();
 			case NUMERIC:

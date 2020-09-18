@@ -61,7 +61,6 @@ import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
@@ -75,7 +74,7 @@ import au.com.bytecode.opencsv.CSVReader;
  */
 public class AssetLocationCsvImporter {
 
-	private ConservationArea ca = SmartDB.getCurrentConservationArea();
+	private ConservationArea ca;
 	
 	private Path file;
 	private char delimiter;
@@ -98,9 +97,10 @@ public class AssetLocationCsvImporter {
 	IEventBroker broker;
 	
 	
-	public AssetLocationCsvImporter(Path file, char delimiter, boolean skipFirst, 
+	public AssetLocationCsvImporter(ConservationArea ca, Path file, char delimiter, boolean skipFirst, 
 			Integer idField, Integer stationField, Integer xField, Integer yField, Integer bufferField,
-			HashMap<AssetAttribute, Integer> attributeMappings, String dateTimeFormat, Projection projection) {
+			HashMap<AssetAttribute, Integer> attributeMappings, DateTimeFormatter dateTimeFormat, Projection projection) {
+		this.ca = ca;
 		this.file = file;
 		this.delimiter = delimiter;
 		
@@ -110,7 +110,7 @@ public class AssetLocationCsvImporter {
 		this.bufferField = bufferField;
 		this.attributeMappings = attributeMappings;
 		this.skipFirst = skipFirst;
-		this.dateTimeFormat = DateTimeFormatter.ofPattern(dateTimeFormat);
+		this.dateTimeFormat = dateTimeFormat;
 		this.projection =  projection;
 		this.stationIdField = stationField;
 	}
@@ -151,14 +151,18 @@ public class AssetLocationCsvImporter {
 		
 		//process warnings from user
 		if (!warnings.isEmpty()) {
-			WarningDialog warn = new WarningDialog(Display.getDefault().getActiveShell(), Messages.AssetLocationCsvImporter_ImportingTitle, Messages.AssetLocationCsvImporter_WarningsMsg, warnings, 
-					new String[] {IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 1);
-			if (warn.open() != 0) {
+			int[] ret = new int[1];
+			Display.getDefault().syncExec(()->{
+				WarningDialog warn = new WarningDialog(Display.getDefault().getActiveShell(), Messages.AssetLocationCsvImporter_ImportingTitle, Messages.AssetLocationCsvImporter_WarningsMsg, warnings, 
+						new String[] {IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 1);
+				ret[0] = warn.open();
+			});
+			if (ret[0] != 0) {
 				return false;
 			}
 		}
 		if (newLocations.isEmpty()) {
-			MessageDialog.openWarning(Display.getDefault().getActiveShell(),Messages.AssetLocationCsvImporter_ImportingTitle, Messages.AssetLocationCsvImporter_NoData);
+			Display.getDefault().syncExec(()->MessageDialog.openWarning(Display.getDefault().getActiveShell(),Messages.AssetLocationCsvImporter_ImportingTitle, Messages.AssetLocationCsvImporter_NoData));
 			return true;
 		}
 		
@@ -176,7 +180,7 @@ public class AssetLocationCsvImporter {
 			}
 		}
 		
-		MessageDialog.openInformation(Display.getDefault().getActiveShell(),  Messages.AssetLocationCsvImporter_SuccessMsg, MessageFormat.format(Messages.AssetLocationCsvImporter_10, newLocations.size()));
+		Display.getDefault().syncExec(() -> MessageDialog.openInformation(Display.getDefault().getActiveShell(),  Messages.AssetLocationCsvImporter_SuccessMsg, MessageFormat.format(Messages.AssetLocationCsvImporter_10, newLocations.size())));
 		broker.post(AssetEvents.ASSETSTATION_NEW, newLocations);
 		
 		return true;
