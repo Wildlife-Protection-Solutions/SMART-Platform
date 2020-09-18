@@ -31,6 +31,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Time;
 import java.text.MessageFormat;
+import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Comparator;
@@ -219,6 +220,9 @@ public class SmartUtils {
 		dtWidget.setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DATE));
 	}
 	
+	public static void initDateDateTimeWidget(DateTime dtWidget, LocalDate date){
+		dtWidget.setDate(date.getYear(), date.getMonthValue()-1, date.getDayOfMonth());
+	}
 	/**
 	 * initialized the time fields of a datetime widget
 	 * @param dtWidget
