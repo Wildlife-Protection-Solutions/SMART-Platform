@@ -22,6 +22,8 @@
 package org.wcs.smart.asset.ui.views.asset;
 
 import java.text.DateFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -95,7 +97,7 @@ public class AssetDeploymentTableColumn extends ColumnLabelProvider{
 			switch(column) {
 			case END_DATE:
 				if (deployment.getEndDate() == null) return Messages.AssetDeploymentTableColumn_CurrentLabel;
-				return DateFormat.getDateTimeInstance().format(deployment.getEndDate());
+				return deployment.getEndDate().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM));
 			case LOCATION:
 				return deployment.getStationLocation().getId();
 			case NUM_INCIDENTS:
@@ -103,7 +105,7 @@ public class AssetDeploymentTableColumn extends ColumnLabelProvider{
 				if (x == null) return DialogConstants.LOADING_TEXT;
 				return x.toString();
 			case START_DATE:
-				return DateFormat.getDateTimeInstance().format(deployment.getStartDate());
+				return deployment.getStartDate().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM));
 			case STATION:
 				return deployment.getStationLocation().getStation().getId();
 			case TOTAL_TIME:

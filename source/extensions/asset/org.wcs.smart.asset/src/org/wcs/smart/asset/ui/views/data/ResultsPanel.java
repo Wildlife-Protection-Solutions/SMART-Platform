@@ -23,6 +23,8 @@ package org.wcs.smart.asset.ui.views.data;
 
 import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -424,7 +426,7 @@ public class ResultsPanel {
 			case ASSET:
 				return proxy.getAsset() == null ? "" : proxy.getAsset().getId(); //$NON-NLS-1$
 			case DATE:
-				return proxy.getImageDate() == null ? "" : DateFormat.getDateTimeInstance().format(proxy.getImageDate()); //$NON-NLS-1$
+				return proxy.getImageDate() == null ? "" : proxy.getImageDate().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)); //$NON-NLS-1$
 			case FILE:
 				return proxy.getFile().getFileName().toString();
 			case LOCATION:

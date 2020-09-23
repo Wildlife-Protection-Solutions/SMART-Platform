@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.asset.ui.views.asset;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -94,7 +95,7 @@ public class AssetPropertyPage {
 		AssetHistoryRecord historyRecord = new AssetHistoryRecord();
 		historyRecord.setAsset(asset);
 		historyRecord.setComment(action + dialog.getComment());
-		historyRecord.setDate(new Date());
+		historyRecord.setDate(LocalDateTime.now());
 		
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();

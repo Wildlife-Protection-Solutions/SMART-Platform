@@ -22,8 +22,8 @@
 package org.wcs.smart.asset.map.engine;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -58,7 +58,7 @@ public class StatusEngine {
 	 * @param groupBy
 	 * @return
 	 */
-	public HashMap<Object, Set<Long>> computeStatus(Session session, Date[] dFilter, ConservationArea ca, GroupByOption groupBy){
+	public HashMap<Object, Set<Long>> computeStatus(Session session, LocalDate[] dFilter, ConservationArea ca, GroupByOption groupBy){
 		if (groupBy == GroupByOption.LOCATION) {
 			return computeStationLocationStatus(session, ca, dFilter);
 		}else {
@@ -66,7 +66,7 @@ public class StatusEngine {
 		}
 	}
 	
-	private HashMap<Object, Set<Long>> computeStationStatus(Session session, ConservationArea ca, Date[] dFilter){
+	private HashMap<Object, Set<Long>> computeStationStatus(Session session, ConservationArea ca, LocalDate[] dFilter){
 		HashMap<Object, Set<Long>> data = computeStatus(session, dFilter, true, ca);
 		List<AssetStation> stations = QueryFactory.buildQuery(session,  AssetStation.class, 
 				new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
@@ -78,7 +78,7 @@ public class StatusEngine {
 		return data;
 	}
 	
-	private HashMap<Object, Set<Long>> computeStationLocationStatus(Session session, ConservationArea ca, Date[] dFilter){
+	private HashMap<Object, Set<Long>> computeStationLocationStatus(Session session, ConservationArea ca, LocalDate[] dFilter){
 		HashMap<Object, Set<Long>> data = computeStatus(session, dFilter, false, ca);
 		List<AssetStation> stations = QueryFactory.buildQuery(session,  AssetStation.class, 
 				new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
@@ -94,15 +94,15 @@ public class StatusEngine {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private <T> HashMap<T, Set<Long>> computeStatus(Session session, Date[] dFilter, boolean isStation, ConservationArea ca){
+	private <T> HashMap<T, Set<Long>> computeStatus(Session session, LocalDate[] dFilter, boolean isStation, ConservationArea ca){
 		
 		Query<AssetDeployment> query = null;
 		if (dFilter != null) {
 			String hql = "FROM AssetDeployment a WHERE a.asset.conservationArea = :ca and startDate <= :endDate and (endDate is null or endDate >= :startDate)"; //$NON-NLS-1$
 			query = session.createQuery(hql, AssetDeployment.class)
 				.setParameter("ca", ca) //$NON-NLS-1$
-				.setParameter("endDate", dFilter[1]) //$NON-NLS-1$
-				.setParameter("startDate", dFilter[0]); //$NON-NLS-1$
+				.setParameter("endDate", dFilter[1].atStartOfDay()) //$NON-NLS-1$
+				.setParameter("startDate", dFilter[0].atTime(LocalTime.MAX)); //$NON-NLS-1$
 		}else {
 			String hql = "FROM AssetDeployment a WHERE a.asset.conservationArea = :ca"; //$NON-NLS-1$
 			query = session.createQuery(hql, AssetDeployment.class)
@@ -115,11 +115,11 @@ public class StatusEngine {
 			while(results.next()) {
 				AssetDeployment d = (AssetDeployment) results.get(0);
 				
-				LocalDate startDate = new java.sql.Date( d.getStartDate().getTime() ).toLocalDate();
+				LocalDate startDate = d.getStartDate().toLocalDate();
 				LocalDate endDate = LocalDate.now();
 				
 				if (d.getEndDate() != null) {
-					endDate = new java.sql.Date( d.getEndDate().getTime() ).toLocalDate();
+					endDate = d.getEndDate().toLocalDate();
 				}
 				
 				T s = (T) getId(d, isStation, session);

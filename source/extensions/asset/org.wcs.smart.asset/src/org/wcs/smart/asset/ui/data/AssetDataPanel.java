@@ -26,6 +26,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -111,6 +112,7 @@ import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.ui.AttachmentPropertiesDialog;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -853,26 +855,26 @@ public abstract class AssetDataPanel {
 	 * @param assetlinks
 	 */
 	private void validateAndExtend(Waypoint wp, Collection<AssetWaypoint> assetlinks, Session session) throws Exception{
-		Long wpTime = wp.getDateTime().getTime();
+		LocalDateTime wpTime = SharedUtils.toLocalDateTime( wp.getDateTime() );
 		for (AssetWaypoint fromaw : assetlinks) {
 			
 			boolean check = false;
-			Long deploymentStart = fromaw.getAssetDeployment().getStartDate().getTime();
-			Long deploymentEnd = null;
+			LocalDateTime deploymentStart = fromaw.getAssetDeployment().getStartDate();
+			LocalDateTime deploymentEnd = null;
 			if (fromaw.getAssetDeployment().getEndDate() != null) {
-				deploymentEnd = fromaw.getAssetDeployment().getEndDate().getTime();
+				deploymentEnd = fromaw.getAssetDeployment().getEndDate();
 			}
 			
 			//we need to extend the asset deployment 
-			if (deploymentStart > wpTime) {
+			if (deploymentStart.isAfter(wpTime) ) {
 				deploymentStart = wpTime;
-				fromaw.getAssetDeployment().setStartDate(new Date(deploymentStart));
+				fromaw.getAssetDeployment().setStartDate(LocalDateTime.from( deploymentStart) );
 				session.saveOrUpdate(fromaw.getAssetDeployment());
 				check = true;
 			}
-			if (deploymentEnd != null && deploymentEnd < wpTime) {
+			if (deploymentEnd != null && deploymentEnd.isBefore(wpTime)) {
 				deploymentEnd = wpTime;
-				fromaw.getAssetDeployment().setEndDate(new Date(deploymentEnd));
+				fromaw.getAssetDeployment().setEndDate(LocalDateTime.from(deploymentEnd));
 				session.saveOrUpdate(fromaw.getAssetDeployment());
 				check = true;
 			}

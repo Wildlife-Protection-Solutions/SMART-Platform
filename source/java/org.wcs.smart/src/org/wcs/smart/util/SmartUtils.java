@@ -32,6 +32,8 @@ import java.nio.file.Paths;
 import java.sql.Time;
 import java.text.MessageFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Comparator;
@@ -181,6 +183,17 @@ public class SmartUtils {
 		return getCalendar(dt).getTime();
 	}
 
+	public static LocalDateTime toDateTime(DateTime date, DateTime time) {
+		LocalDateTime ldt = LocalDateTime.of(date.getYear(), date.getMonth()+1, date.getDay(), 
+				time.getHours(), time.getMinutes(), time.getSeconds());
+		return ldt;
+		
+	}
+	
+	public static LocalDate toDate(DateTime date) {
+		return LocalDate.of(date.getYear(), date.getMonth()+1, date.getDay());
+		
+	}
 	/**
 	 * Converts a date time widget to a date object only setting year
 	 * month and day.  The hour, minute, second and millisecond are all set to 0
@@ -223,6 +236,11 @@ public class SmartUtils {
 	public static void initDateDateTimeWidget(DateTime dtWidget, LocalDate date){
 		dtWidget.setDate(date.getYear(), date.getMonthValue()-1, date.getDayOfMonth());
 	}
+	
+	public static void initDateDateTimeWidget(DateTime dtWidget, LocalTime time){
+		dtWidget.setTime(time.getHour(), time.getMinute(), time.getSecond());
+	}
+	
 	/**
 	 * initialized the time fields of a datetime widget
 	 * @param dtWidget
@@ -257,6 +275,7 @@ public class SmartUtils {
 		return calendar.getTime();
 	}
 
+	
 	/**
 	 * Combines the date and time into a single object
 	 * 
@@ -1048,4 +1067,5 @@ public class SmartUtils {
     	style.featureTypeStyles().add(fts);
 		return style;
 	}
+
 }

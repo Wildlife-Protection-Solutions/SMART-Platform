@@ -22,8 +22,8 @@
 package org.wcs.smart.asset.ui.views.data;
 
 import java.text.Collator;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -100,7 +100,7 @@ public class StationAssetSelectionDialog extends SmartStyledDialog{
 	
 	private AssetStationLocation selectedLocation;
 	private Asset selectedAsset;
-	private Date selectedDate;
+	private LocalDateTime selectedDate;
 	private AssetStation selectedStation;
 	
 	private AssetStation definedStation = null;
@@ -123,7 +123,7 @@ public class StationAssetSelectionDialog extends SmartStyledDialog{
 		return this.selectedLocation;
 	}
 	
-	public Date getSelectedDate() {
+	public LocalDateTime getSelectedDate() {
 		return this.selectedDate;
 	}
 	
@@ -159,7 +159,7 @@ public class StationAssetSelectionDialog extends SmartStyledDialog{
 			}
 		}
 		if (dtDate != null) {
-			selectedDate = SmartUtils.combineDateTime(SmartUtils.getDate(dtDate), SmartUtils.getTime(dtTime));
+			selectedDate = SmartUtils.toDateTime(dtDate,  dtTime);
 		}
 		super.okPressed();
 	}

@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.asset.model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
 
@@ -205,7 +205,7 @@ public class Asset extends UuidItem {
 			return;
 		}
 		
-		Date now = new Date();
+		LocalDateTime now = LocalDateTime.now();
 		String sql = "FROM AssetDeployment WHERE asset = :asset and startDate <= :now and (endDate is null or endDate >= :now2)"; //$NON-NLS-1$
 		List<AssetDeployment> ad = session.createQuery(sql, AssetDeployment.class)
 				.setParameter("asset",  this) //$NON-NLS-1$
@@ -227,7 +227,7 @@ public class Asset extends UuidItem {
 	 */
 	@Transient
 	public AssetDeployment findActiveDeployment(Session session) {
-		Date now = new Date();
+		LocalDateTime now = LocalDateTime.now();
 		String sql = "FROM AssetDeployment WHERE asset = :asset and startDate <= :now and (endDate is null or endDate >= :now2)"; //$NON-NLS-1$
 		List<AssetDeployment> ad = session.createQuery(sql, AssetDeployment.class)
 				.setParameter("asset",  this) //$NON-NLS-1$

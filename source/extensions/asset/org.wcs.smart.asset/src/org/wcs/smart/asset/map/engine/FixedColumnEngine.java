@@ -24,9 +24,7 @@ package org.wcs.smart.asset.map.engine;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -54,7 +52,7 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class FixedColumnEngine implements IColumnEngine {
 
-	private Date[] dFilter;
+	private LocalDate[] dFilter;
 	private IOverviewTableColumn.GroupByOption groupBy;
 	private Session session;
 	private ConservationArea ca;
@@ -64,7 +62,7 @@ public class FixedColumnEngine implements IColumnEngine {
 	private HashMap<UUID, Object> numberOfDaysLocation  = null;
 	private HashMap<UUID, Object> numberOfAssetDaysLocation = null;
 	
-	public FixedColumnEngine(Date[] dFilter, IOverviewTableColumn.GroupByOption groupBy, ConservationArea ca, Session session) {
+	public FixedColumnEngine(LocalDate[] dFilter, IOverviewTableColumn.GroupByOption groupBy, ConservationArea ca, Session session) {
 		this.dFilter = dFilter;
 		this.session = session;
 		this.groupBy = groupBy;
@@ -119,7 +117,7 @@ public class FixedColumnEngine implements IColumnEngine {
 		return new HashMap<>();
 	}
 	
-	private void computeNumberOfPerStation(Session session, Date[] dFilter){
+	private void computeNumberOfPerStation(Session session, LocalDate[] dFilter){
 		if (numberOfDaysStation != null) return;
 		
 		Query<AssetDeployment> query = null;
@@ -129,11 +127,11 @@ public class FixedColumnEngine implements IColumnEngine {
 			String hql = "FROM AssetDeployment a WHERE a.asset.conservationArea = :ca and startDate <= :endDate and (endDate is null or endDate >= :startDate)"; //$NON-NLS-1$
 			query = session.createQuery(hql, AssetDeployment.class)
 				.setParameter("ca", ca) //$NON-NLS-1$
-				.setParameter("endDate", dFilter[1]) //$NON-NLS-1$
-				.setParameter("startDate", dFilter[0]); //$NON-NLS-1$
+				.setParameter("endDate", dFilter[1].atTime(LocalTime.MAX)) //$NON-NLS-1$
+				.setParameter("startDate", dFilter[0].atStartOfDay()); //$NON-NLS-1$
 			
-			filterStart = new java.sql.Date(dFilter[0].getTime()).toLocalDate();
-			filterEnd= new java.sql.Date(dFilter[1].getTime()).toLocalDate();
+			filterStart = dFilter[0];
+			filterEnd= dFilter[1];
 		}else {
 			String hql = "FROM AssetDeployment a WHERE a.asset.conservationArea = :ca "; //$NON-NLS-1$
 			query = session.createQuery(hql, AssetDeployment.class)
@@ -147,10 +145,10 @@ public class FixedColumnEngine implements IColumnEngine {
 			while(results.next()) {
 				AssetDeployment d = (AssetDeployment) results.get(0);
 				
-				LocalDate startDate = new java.sql.Date(d.getStartDate().getTime()).toLocalDate();
+				LocalDate startDate = d.getStartDate().toLocalDate();
 				LocalDate endDate = LocalDate.now();
-				if (d.getEndDate() != null && d.getEndDate().before(new Date())) {
-					endDate = new java.sql.Date(d.getEndDate().getTime()).toLocalDate();
+				if (d.getEndDate() != null && d.getEndDate().toLocalDate().isBefore(LocalDate.now())) {
+					endDate = d.getEndDate().toLocalDate();
 				}
 				
 				AssetStation s = d.getStationLocation().getStation();
@@ -170,8 +168,8 @@ public class FixedColumnEngine implements IColumnEngine {
 					
 					for (AssetDeploymentDisruption dd : d.getDisruptions()) {
 						
-						if (startOfDay.isAfter(dd.getStartDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime())
-								&& endOfDay.isBefore(dd.getEndDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()) ) {
+						if (startOfDay.isAfter(dd.getStartDate())
+								&& endOfDay.isBefore(dd.getEndDate()) ) {
 							//skip this day 
 							skipDay = true;
 							break;
@@ -209,7 +207,7 @@ public class FixedColumnEngine implements IColumnEngine {
 		numberOfDaysStation = results;
 		return;
 	}
-	private void computeNumberOfPerLocation(Session session, Date[] dFilter){
+	private void computeNumberOfPerLocation(Session session, LocalDate[] dFilter){
 		if (numberOfDaysLocation!= null) return;
 		
 		Query<AssetDeployment> query = null;
@@ -219,11 +217,11 @@ public class FixedColumnEngine implements IColumnEngine {
 			String hql = "FROM AssetDeployment a WHERE a.asset.conservationArea = :ca  AND startDate <= :endDate and (endDate is null or endDate >= :startDate)"; //$NON-NLS-1$
 			query = session.createQuery(hql, AssetDeployment.class)
 				.setParameter("ca", ca) //$NON-NLS-1$
-				.setParameter("endDate", dFilter[1]) //$NON-NLS-1$
-				.setParameter("startDate", dFilter[0]); //$NON-NLS-1$
+				.setParameter("endDate", dFilter[1].atTime(LocalTime.MAX)) //$NON-NLS-1$
+				.setParameter("startDate", dFilter[0].atStartOfDay()); //$NON-NLS-1$
 			
-			filterStart = new java.sql.Date(dFilter[0].getTime()).toLocalDate();
-			filterEnd= new java.sql.Date(dFilter[1].getTime()).toLocalDate();
+			filterStart = dFilter[0];
+			filterEnd= dFilter[1];
 		}else {
 			String hql = "FROM AssetDeployment a WHERE a.asset.conservationArea = :ca "; //$NON-NLS-1$
 			query = session.createQuery(hql, AssetDeployment.class)
@@ -237,10 +235,10 @@ public class FixedColumnEngine implements IColumnEngine {
 			while(results.next()) {
 				AssetDeployment d = (AssetDeployment) results.get(0);
 				
-				LocalDate startDate = new java.sql.Date(d.getStartDate().getTime()).toLocalDate();
+				LocalDate startDate = d.getStartDate().toLocalDate();
 				LocalDate endDate = LocalDate.now();
-				if (d.getEndDate() != null && d.getEndDate().before(new Date())) {
-					endDate = new java.sql.Date(d.getEndDate().getTime()).toLocalDate();
+				if (d.getEndDate() != null && d.getEndDate().toLocalDate().isBefore(LocalDate.now())) {
+					endDate = d.getEndDate().toLocalDate();
 				}
 				
 				AssetStationLocation s = d.getStationLocation();
@@ -257,8 +255,8 @@ public class FixedColumnEngine implements IColumnEngine {
 					boolean skipDay = false;
 					for (AssetDeploymentDisruption dd : d.getDisruptions()) {
 						
-						if (startOfDay.isAfter(dd.getStartDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime())
-								&& endOfDay.isBefore(dd.getEndDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()) ) {
+						if (startOfDay.isAfter(dd.getStartDate())
+								&& endOfDay.isBefore(dd.getEndDate())) {
 							//skip this day 
 							skipDay = true;
 							break;
@@ -298,7 +296,7 @@ public class FixedColumnEngine implements IColumnEngine {
 		return;
 	}
 
-	private HashMap<UUID, Object> incidentsPerStation(Session session, Date[] dFilter){
+	private HashMap<UUID, Object> incidentsPerStation(Session session, LocalDate[] dFilter){
 		
 		HashMap<UUID, Object> results = new HashMap<>();
 		
@@ -321,8 +319,8 @@ public class FixedColumnEngine implements IColumnEngine {
 		Query<?> query = session.createNativeQuery(sb.toString());
 		query.setParameter("ca", ca); //$NON-NLS-1$
 		if (dFilter != null) {
-				query.setParameter("startDate", dFilter[0]) //$NON-NLS-1$
-				.setParameter("endDate", dFilter[1]); //$NON-NLS-1$
+				query.setParameter("startDate", dFilter[0].atStartOfDay()) //$NON-NLS-1$
+				.setParameter("endDate", dFilter[1].atTime(LocalTime.MAX)); //$NON-NLS-1$
 		}
 		List<?> qresults = query.list();
 		for (Object result : qresults) {
@@ -336,7 +334,7 @@ public class FixedColumnEngine implements IColumnEngine {
 	}
 	
 
-	private HashMap<UUID, Object> incidentsPerLocation(Session session, Date[] dFilter){
+	private HashMap<UUID, Object> incidentsPerLocation(Session session, LocalDate[] dFilter){
 		
 		HashMap<UUID, Object> results = new HashMap<>();
 		

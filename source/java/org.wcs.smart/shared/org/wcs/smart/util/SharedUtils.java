@@ -22,6 +22,10 @@
 package org.wcs.smart.util;
 
 import java.sql.Time;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -160,4 +164,16 @@ public class SharedUtils {
 		c.setTime(d);		
 		return createPatrolTime(c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), c.get(Calendar.SECOND));		
 	}
+	
+	
+	public static LocalDateTime toLocalDateTime(Date date) {
+		return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+	}
+	public static LocalDate toLocalDate(Date date) {
+		return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+	}
+	public static Date toDate(LocalDateTime date) {
+		return Date.from(date.atZone(ZoneId.systemDefault()).toInstant());
+	}
+
 }

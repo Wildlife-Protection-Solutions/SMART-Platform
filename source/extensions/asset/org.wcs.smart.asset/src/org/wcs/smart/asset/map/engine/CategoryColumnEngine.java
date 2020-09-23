@@ -29,8 +29,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
@@ -76,7 +76,7 @@ public class CategoryColumnEngine implements IColumnEngine {
 	}
 	
 	private String waypointFilterTable;
-	private Date[] dFilter;
+	private LocalDate[] dFilter;
 	private Session session;
 	private Map<String, String> attributeToColumn;
 	private Map<String, Attribute> attributeKeyToAttribute;
@@ -84,7 +84,7 @@ public class CategoryColumnEngine implements IColumnEngine {
 	private ConservationArea ca ;
 	private IOverviewTableColumn.GroupByOption groupBy;
 	
-	public CategoryColumnEngine(Date[] dFilter, IOverviewTableColumn.GroupByOption groupBy, ConservationArea ca, Session session) {
+	public CategoryColumnEngine(LocalDate[] dFilter, IOverviewTableColumn.GroupByOption groupBy, ConservationArea ca, Session session) {
 		attributeToColumn = new HashMap<>();
 		attributeKeyToAttribute = new HashMap<>();
 		this.dFilter = dFilter;
@@ -328,8 +328,8 @@ public class CategoryColumnEngine implements IColumnEngine {
 		sb.append(" JOIN smart.dm_category c ON c.uuid = b.category_uuid "); //$NON-NLS-1$
 		sb.append(" WHERE "); //$NON-NLS-1$
 		sb.append(" a.ca_uuid = ? "); //$NON-NLS-1$
-		Date date1 = null;
-		Date date2 = null;
+		LocalDate date1 = null;
+		LocalDate date2 = null;
 		if (this.dFilter != null) {
 			if (this.dFilter[0] != null) {
 				date1 = dFilter[0];
@@ -341,13 +341,13 @@ public class CategoryColumnEngine implements IColumnEngine {
 			}
 		}
 		log(sb.toString());
-		log((date1 == null ? "" : date1.getTime()) + ":" + (date2== null ? "" : date2.getTime())); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		log((date1 == null ? "" : date1.toString()) + ":" + (date2== null ? "" : date2.toString())); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		
 		PreparedStatement ps = connection.prepareStatement(sb.toString());
 		int index = 1;
 		ps.setBytes(index++, UuidUtils.uuidToByte(ca.getUuid()));
-		if (date1 != null) ps.setTimestamp(index++, new Timestamp(date1.getTime()));
-		if (date2 != null) ps.setTimestamp(index, new Timestamp(date2.getTime()));
+		if (date1 != null) ps.setObject(index++, Timestamp.valueOf(date1.atStartOfDay()));//new Timestamp(date1.getTime()));
+		if (date2 != null) ps.setObject(index, Timestamp.valueOf(date2.atTime(LocalTime.MAX)));//new Timestamp(date2.getTime()));
 		ps.executeUpdate();
 		
 	}
@@ -396,11 +396,11 @@ public class CategoryColumnEngine implements IColumnEngine {
 					&& filter.getOperator().operator != Operator.Op.STR_EQUAL) {
 				throw new Exception(MessageFormat.format(Messages.CategoryColumnEngine_OpNotSupported3, filter.getOperator().operator.key));
 			}
-			Date d = null;
-			try {
-				d = new SimpleDateFormat(AttributeExpression.JAVA_DATE_FORMAT).parse(filter.getStringValue());
-			}catch (Exception ex) {}
-			if (d == null) throw new Exception(MessageFormat.format(Messages.CategoryColumnEngine_DateParseError, filter.getStringValue()));
+//			Date d = null;
+//			try {
+//				d = new SimpleDateFormat(AttributeExpression.JAVA_DATE_FORMAT).parse(filter.getStringValue());
+//			}catch (Exception ex) {}
+//			if (d == null) throw new Exception(MessageFormat.format(Messages.CategoryColumnEngine_DateParseError, filter.getStringValue()));
 			
 			sb.append("cast(" ); //$NON-NLS-1$
 			sb.append(columnName);

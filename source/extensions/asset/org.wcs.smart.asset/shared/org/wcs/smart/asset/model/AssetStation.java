@@ -22,7 +22,7 @@
 
 package org.wcs.smart.asset.model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -250,7 +250,7 @@ public class AssetStation extends UuidItem {
 			status = Status.INACTIVE;
 			return;
 		}
-		Date now = new Date();
+		LocalDateTime now = LocalDateTime.now();
 		String query = "SELECT count(*) FROM AssetDeployment d join d.id.stationLocation c WHERE c.station = :station and d.startDate <= :now1 and (d.endDate is null or d.endDate >= :now2)"; //$NON-NLS-1$
 
 		Long activeDeployments = (Long) session.createQuery(query)
@@ -273,7 +273,7 @@ public class AssetStation extends UuidItem {
 	 */
 	@Transient
 	public List<AssetDeployment> getActiveDeployments(Session session) {
-		Date now = new Date();
+		LocalDateTime now = LocalDateTime.now();
 		
 		String query = "SELECT d FROM AssetDeployment d join d.id.stationLocation c WHERE c.station = :station and d.startDate <= :now and (d.endDate is null or d.endDate >= :now2)"; //$NON-NLS-1$
 		List<AssetDeployment> ad = session.createQuery(query, AssetDeployment.class)

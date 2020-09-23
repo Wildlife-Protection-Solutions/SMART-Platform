@@ -23,9 +23,9 @@ package org.wcs.smart.asset.data.importer;
 
 import java.nio.file.Path;
 import java.text.MessageFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -74,7 +74,7 @@ public class FileProxy extends ISmartAttachment{
 	
 	private Path file;
 	
-	private Date imageDate;
+	private LocalDateTime imageDate;
 	private Double x;
 	private Double y;
 	private Asset asset;
@@ -354,7 +354,7 @@ public class FileProxy extends ISmartAttachment{
 	 * Get the image date
 	 * @param imageDate
 	 */
-	public void setImageDate(Date imageDate) {
+	public void setImageDate(LocalDateTime imageDate) {
 		this.imageDate = imageDate;
 	}
 	
@@ -425,7 +425,7 @@ public class FileProxy extends ISmartAttachment{
 	 * Get the image date
 	 * @return
 	 */
-	public Date getImageDate() {
+	public LocalDateTime getImageDate() {
 		return this.imageDate;
 	}
 	

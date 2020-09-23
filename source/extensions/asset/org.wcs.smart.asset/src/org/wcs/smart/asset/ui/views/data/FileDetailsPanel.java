@@ -23,6 +23,8 @@ package org.wcs.smart.asset.ui.views.data;
 
 import java.text.Collator;
 import java.text.DateFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -464,7 +466,7 @@ public class FileDetailsPanel {
 		}
 		
 		l = toolkit.createLabel(fileSection, Messages.FileDetailsPanel_DateTimeLabel);
-		l = toolkit.createLabel(fileSection, proxy.getImageDate() == null ? "" : DateFormat.getDateTimeInstance().format(proxy.getImageDate()) ); //$NON-NLS-1$
+		l = toolkit.createLabel(fileSection, proxy.getImageDate() == null ? "" : proxy.getImageDate().format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)) ); //$NON-NLS-1$
 		
 		l = toolkit.createLabel(fileSection, Messages.FileDetailsPanel_AssetLabel);
 		l = toolkit.createLabel(fileSection, proxy.getAsset() == null ? "" : proxy.getAsset().getId() ); //$NON-NLS-1$

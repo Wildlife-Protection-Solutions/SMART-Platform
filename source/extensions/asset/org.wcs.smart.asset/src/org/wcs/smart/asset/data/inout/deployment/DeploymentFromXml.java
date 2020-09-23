@@ -25,7 +25,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -84,6 +83,7 @@ import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.ZipUtil;
 
@@ -142,10 +142,10 @@ public class DeploymentFromXml {
 				return null;
 			}
 			
-			Date sDate = new Date(xml.getStartDateTime().toGregorianCalendar().getTime().getTime());
-			Date eDate = null;
+			LocalDateTime sDate = SharedUtils.toLocalDateTime(xml.getStartDateTime().toGregorianCalendar().getTime());
+			LocalDateTime eDate = null;
 			if (xml.getEndDateTime() != null) {
-				eDate = new Date(xml.getEndDateTime().toGregorianCalendar().getTime().getTime());
+				eDate = SharedUtils.toLocalDateTime(xml.getEndDateTime().toGregorianCalendar().getTime());
 			}
 			
 			deployment.setAssetWaypoints(new ArrayList<>());
@@ -161,16 +161,16 @@ public class DeploymentFromXml {
 					new Object[] {"asset", deployment.getAsset()}).list(); //$NON-NLS-1$
 			
 			
-			LocalDateTime start = sDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+			LocalDateTime start = sDate;
 			LocalDateTime now = LocalDateTime.now();
-			LocalDateTime end = (eDate == null ? now : eDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
+			LocalDateTime end = (eDate == null ? now : eDate);
 			
 			boolean overlaps = false;
 			for (AssetDeployment other : deployments) {
 			
-				LocalDateTime startTest = other.getStartDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+				LocalDateTime startTest = other.getStartDate();
 				LocalDateTime endTest = now;
-				if (other.getEndDate() != null) endTest = other.getEndDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+				if (other.getEndDate() != null) endTest = other.getEndDate();
 				
 				if (!(endTest.isBefore(start) || startTest.isAfter(end))) { 
 					overlaps = true;
@@ -211,8 +211,8 @@ public class DeploymentFromXml {
 			for (XmlAssetDeploymentDisruption xmld : xml.getDisruptions()) {
 				AssetDeploymentDisruption disruption = new AssetDeploymentDisruption();
 				disruption.setComment(xmld.getComment());
-				disruption.setStartDate( new Date(xmld.getStartDateTime().toGregorianCalendar().getTime().getTime()));
-				disruption.setEndDate( new Date(xmld.getEndDateTime().toGregorianCalendar().getTime().getTime()));
+				disruption.setStartDate( SharedUtils.toLocalDateTime(xmld.getStartDateTime().toGregorianCalendar().getTime()));
+				disruption.setEndDate( SharedUtils.toLocalDateTime(xmld.getEndDateTime().toGregorianCalendar().getTime()));
 				disruption.setAssetDeployment(deployment);
 				deployment.getDisruptions().add(disruption);
 			}

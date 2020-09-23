@@ -25,10 +25,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -89,6 +90,7 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -319,7 +321,7 @@ public class DataImportPage {
 							
 							Waypoint wp = new Waypoint();
 							wp.setConservationArea(SmartDB.getCurrentConservationArea());
-							wp.setDateTime(p.getImageDate());
+							wp.setDateTime(SharedUtils.toDate( p.getImageDate()) );
 							wp.setId(1); //updated below
 							wp.setSourceId(AssetWaypointSource.KEY);
 							wp.setRawX(p.getX());
@@ -355,19 +357,19 @@ public class DataImportPage {
 							assets.put(p.getAsset(), p.getStationLocation());
 							relations.addAll(p.getRelations());
 							if (p.getFixedRelations() != null) relations.addAll(p.getFixedRelations());
-							Date minDate = wp.getDateTime();
-							Date maxDate = wp.getDateTime();
+							LocalDateTime minDate = SharedUtils.toLocalDateTime( wp.getDateTime() );
+							LocalDateTime maxDate = minDate;
 							
 							for (FileProxy pp : relations) {
 								if (!items.contains(pp)) items.add(pp);
 								toProcess.remove(pp);
-								if (pp.getImageDate().before(wp.getDateTime())) {
-									wp.setDateTime(pp.getImageDate());
+								if (pp.getImageDate().isBefore(SharedUtils.toLocalDateTime( wp.getDateTime()))) {
+									wp.setDateTime(SharedUtils.toDate( pp.getImageDate()) );
 								}
-								if (pp.getImageDate().before(minDate)) {
+								if (pp.getImageDate().isBefore(minDate)) {
 									minDate = pp.getImageDate();
 								}
-								if (pp.getImageDate().after(maxDate)) {
+								if (pp.getImageDate().isAfter(maxDate)) {
 									maxDate = pp.getImageDate();
 								}
 								wa = new WaypointAttachment();
@@ -397,7 +399,7 @@ public class DataImportPage {
 								wp.getObservationGroups().add(g);
 							}
 							
-							int incidentLength =  (int)Math.ceil( ( maxDate.getTime() - minDate.getTime()) / 1000.0);
+							int incidentLength =  (int) Math.ceil( ChronoUnit.MILLIS.between( maxDate, minDate) / 1000.0);
 							
 							session.save(wp);
 							session.flush();

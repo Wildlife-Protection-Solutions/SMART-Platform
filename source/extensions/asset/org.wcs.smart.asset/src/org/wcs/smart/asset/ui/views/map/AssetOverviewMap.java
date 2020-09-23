@@ -24,7 +24,6 @@ package org.wcs.smart.asset.ui.views.map;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -640,17 +639,17 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 
-			final Date[] start = new Date[] {null};
-			final Date[] end = new Date[] {null};
+			final LocalDate[] start = new LocalDate[] {null};
+			final LocalDate[] end = new LocalDate[] {null};
 			
 			Display.getDefault().syncExec(()->{
 				if (summaryTable.getTable().isDisposed()) return;
 				if (dateFilters.getDateFilter() == DateFilter.CUSTOM) {
-					start[0] = dateFilters.getCustomStartDate();
-					end[0] = dateFilters.getCustomEndDate();
+					start[0] = SharedUtils.toLocalDate( dateFilters.getCustomStartDate() );
+					end[0] = SharedUtils.toLocalDate( dateFilters.getCustomEndDate() );
 				}else {
-					start[0] = dateFilters.getDateFilter().getStartDate();
-					end[0] = dateFilters.getDateFilter().getEndDate();	
+					start[0] = dateFilters.getDateFilter().getStartDate() == null ? null : SharedUtils.toLocalDate( dateFilters.getDateFilter().getStartDate() );
+					end[0] = dateFilters.getDateFilter().getEndDate() == null ? null : SharedUtils.toLocalDate( dateFilters.getDateFilter().getEndDate() );	
 				}
 				summaryTable.setInput(statEngine.getData());
 			});
@@ -677,16 +676,13 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 				}
 			}
 			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
-			Date[] dFilters = null;
+			LocalDate[] dFilters = null;
 			if (start[0] != null) {
 				if (end[0] == null) {
-					end[0] = new Date();
+					end[0] = LocalDate.now();
 				}
 				
-				dFilters = new Date[] {
-						SharedUtils.getDatePart(start[0], false),
-						SharedUtils.getDatePart(end[0], true),
-				};
+				dFilters = new LocalDate[] {start[0], end[0]};
 			}
 			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 			statEngine.computeStatistics(tableConfiguration.getColumns().stream().map(e->e.getColumn()).collect(Collectors.toList()), dFilters, currentGroupByOption, monitor);
@@ -702,30 +698,27 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 
-			final Date[] start = new Date[] {null};
-			final Date[] end = new Date[] {null};
+			final LocalDate[] start = new LocalDate[] {null};
+			final LocalDate[] end = new LocalDate[] {null};
 			
 			Display.getDefault().syncExec(()->{
 				if (canvas.isDisposed()) return;
 				if (dateFilters.getDateFilter() == DateFilter.CUSTOM) {
-					start[0] = dateFilters.getCustomStartDate();
-					end[0] = dateFilters.getCustomEndDate();
+					start[0] = SharedUtils.toLocalDate( dateFilters.getCustomStartDate() );
+					end[0] = SharedUtils.toLocalDate( dateFilters.getCustomEndDate() );
 				}else {
-					start[0] = dateFilters.getDateFilter().getStartDate();
-					end[0] = dateFilters.getDateFilter().getEndDate();	
+					start[0] = dateFilters.getDateFilter().getStartDate() == null ? null : SharedUtils.toLocalDate( dateFilters.getDateFilter().getStartDate() );
+					end[0] = dateFilters.getDateFilter().getEndDate() == null ? null : SharedUtils.toLocalDate( dateFilters.getDateFilter().getEndDate() );
 				}
 			});
 			if (monitor.isCanceled()) return Status.CANCEL_STATUS;	
-			Date[] dFilters = null;
+			LocalDate[] dFilters = null;
 			if (start[0] != null) {
 				if (end[0] == null) {
-					end[0] = new Date();
+					end[0] = LocalDate.now();
 				}
 				
-				dFilters = new Date[] {
-						SharedUtils.getDatePart(start[0], false),
-						SharedUtils.getDatePart(end[0], true),
-				};
+				dFilters = new LocalDate[] {start[0], end[0]};
 			}
 		
 			HashMap<Object, Set<Long>> data = new HashMap<>();
@@ -744,8 +737,8 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 					}
 				}
 			}else {
-				sstart = new java.sql.Date(dFilters[0].getTime()).toLocalDate().toEpochDay();
-				send = new java.sql.Date(dFilters[1].getTime()).toLocalDate().toEpochDay();
+				sstart = dFilters[0].toEpochDay();
+				send = dFilters[1].toEpochDay();
 			}
 			final LocalDate fsstart = LocalDate.ofEpochDay(sstart);
 			final LocalDate fsend = LocalDate.ofEpochDay(send);

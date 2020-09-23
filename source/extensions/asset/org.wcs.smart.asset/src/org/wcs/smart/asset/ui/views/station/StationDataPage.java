@@ -21,8 +21,9 @@
  */
 package org.wcs.smart.asset.ui.views.station;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -48,6 +49,7 @@ import org.wcs.smart.asset.ui.data.AssetDataPanel;
 import org.wcs.smart.common.filter.DateFilterComposite;
 import org.wcs.smart.common.filter.DateFilterDropDownComposite;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.util.SharedUtils;
 
 /**
  * Station editor data page
@@ -127,8 +129,9 @@ public class StationDataPage {
 	
 	
 	public void reloadData() {
-		final Date startDate = dateFilter.getDateFilter().getStartDate();
-		final Date endDate = dateFilter.getDateFilter().getEndDate();
+		
+		final LocalDateTime startDate = dateFilter.getDateFilter().getStartDate() == null ? null : SharedUtils.toLocalDate( dateFilter.getDateFilter().getStartDate() ).atStartOfDay();
+		final LocalDateTime endDate = dateFilter.getDateFilter().getEndDate() == null ? null : SharedUtils.toLocalDate( dateFilter.getDateFilter().getEndDate() ).atTime(LocalTime.MAX);
 
 		Job loadData = new Job(Messages.StationDataPage_loadJobName) {
 			@Override
@@ -145,8 +148,8 @@ public class StationDataPage {
 					}
 					query += " ORDER BY id.waypoint.dateTime desc "; //$NON-NLS-1$
 					Query<?> q = session.createQuery(query);
-					if (startDate != null) q.setParameter("startDate",  startDate); //$NON-NLS-1$
-					if (endDate != null) q.setParameter("endDate", endDate); //$NON-NLS-1$
+					if (startDate != null) q.setParameter("startDate",  SharedUtils.toDate(startDate)); //$NON-NLS-1$
+					if (endDate != null) q.setParameter("endDate", SharedUtils.toDate(endDate)); //$NON-NLS-1$
 					q.setParameter("station", parentEditor.getAssetStation()); //$NON-NLS-1$
 					for (Object x : q.list()) {
 						waypointUuids.add( (UUID)((Object[])x)[0]);  

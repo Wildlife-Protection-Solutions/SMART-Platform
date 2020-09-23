@@ -27,6 +27,9 @@ import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -442,12 +445,15 @@ public class AssetDeploymentPage {
 		((GridLayout)dateDetails.getLayout()).marginWidth = 0;
 		((GridLayout)dateDetails.getLayout()).marginHeight = 0;
 		
-		Label l = toolkit.createLabel(dateDetails, DateFormat.getDateInstance().format(deployment.getStartDate()) + "\n" + DateFormat.getTimeInstance().format(deployment.getStartDate())); //$NON-NLS-1$
+		Label l = toolkit.createLabel(dateDetails, 
+				deployment.getStartDate().format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)) + "\n" + deployment.getStartDate().format(DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM)));  //$NON-NLS-1$
+					
 		l = toolkit.createLabel(dateDetails, "   -   "); //$NON-NLS-1$
 		if (deployment.getEndDate() == null) {
 			l = toolkit.createLabel(dateDetails, Messages.AssetDeploymentPage_CurrentDateLabel);
 		}else {
-			l = toolkit.createLabel(dateDetails, DateFormat.getDateInstance().format(deployment.getEndDate()) + "\n" + DateFormat.getTimeInstance().format(deployment.getEndDate())); //$NON-NLS-1$
+			l = toolkit.createLabel(dateDetails,
+					deployment.getEndDate().format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)) + "\n" + deployment.getEndDate().format(DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM)));  //$NON-NLS-1$
 		}
 
 		l = toolkit.createLabel(detailsPane, "", SWT.SEPARATOR | SWT.HORIZONTAL); //$NON-NLS-1$
@@ -509,10 +515,10 @@ public class AssetDeploymentPage {
 			((GridLayout)dateDetails.getLayout()).marginWidth = 0;
 			((GridLayout)dateDetails.getLayout()).marginHeight = 0;
 			
-			l = toolkit.createLabel(dateDetails, DateFormat.getDateInstance().format(d.getStartDate()) + "\n" + DateFormat.getTimeInstance().format(d.getStartDate())); //$NON-NLS-1$
+			l = toolkit.createLabel(dateDetails, d.getStartDate().format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)) + "\n" + d.getStartDate().format(DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM)));  //$NON-NLS-1$
 			l = toolkit.createLabel(dateDetails, "   -   "); //$NON-NLS-1$
-			l = toolkit.createLabel(dateDetails, DateFormat.getDateInstance().format(d.getEndDate()) + "\n" + DateFormat.getTimeInstance().format(d.getEndDate())); //$NON-NLS-1$
-			
+			l = toolkit.createLabel(dateDetails, d.getEndDate().format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)) + "\n" + d.getEndDate().format(DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM)));  //$NON-NLS-1$
+						
 			if (canEdit()) {
 				ToolBar tb = new ToolBar(dateDetails, SWT.FLAT);
 				tb.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
@@ -565,7 +571,7 @@ public class AssetDeploymentPage {
 	private void addDeployment() {
 		AssetDeployment newDeployment = new AssetDeployment();
 		newDeployment.setAsset(parentEditor.getAsset());
-		newDeployment.setStartDate(new Date());
+		newDeployment.setStartDate(LocalDateTime.now());
 		newDeployment.setAssetWaypoints(new ArrayList<>());
 		newDeployment.setDisruptions(new ArrayList<>());
 		AssetDeploymentDialog dialog = new AssetDeploymentDialog(parentEditor.getSite().getShell(), newDeployment, allDeployments);

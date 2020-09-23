@@ -21,11 +21,10 @@
  */
 package org.wcs.smart.asset.model;
 
-import java.text.DateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
-import java.util.Date;
 import java.util.Locale;
 
 import javax.persistence.Column;
@@ -98,19 +97,21 @@ public abstract class AbstractAssetAttributeValue {
 			return null;
 		}
 		try{
-			return java.sql.Date.valueOf(getStringValue()).toLocalDate();
+			return LocalDate.parse(getStringValue(), DateTimeFormatter.ofPattern("uuuu-MM-dd"));
+//			return java.sql.Date.valueOf(getStringValue()).toLocalDate();
 		}catch (Exception ex){
 			return null;
 		}
 	}
 	@Transient
-	public void setDateValue(Date date){
+	public void setDateValue(LocalDate date){
 		if (date == null){
 			setStringValue(null);
 			return;
 		}
-		java.sql.Date tmp = new java.sql.Date(date.getTime());
-		setStringValue(tmp.toString());
+		
+		setStringValue(DateTimeFormatter.ofPattern("uuuu-MM-dd").format(date));
+		
 	}
 	/**
 	 * 

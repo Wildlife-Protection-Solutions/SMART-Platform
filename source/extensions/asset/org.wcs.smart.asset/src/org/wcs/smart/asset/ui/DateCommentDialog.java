@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.asset.ui;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -44,23 +44,23 @@ public class DateCommentDialog extends CommentDialog {
 	protected DateTime dtDate;
 	protected DateTime dtTime;
 	
-	protected Date selectedDateTime;
+	protected LocalDateTime selectedDateTime;
 	
 	public DateCommentDialog(Shell parentShell, String title, String message) {
 		super(parentShell, title, message);
 	}
 
-	public void setValues(Date dateTime, String comment) {
+	public void setValues(LocalDateTime dateTime, String comment) {
 		this.selectedDateTime = dateTime;
 		this.comment = comment;
 	}
 	
 	public void okPressed() {
-		this.selectedDateTime = SmartUtils.combineDateTime(SmartUtils.getDate(dtDate), SmartUtils.getTime(dtTime));
+		this.selectedDateTime = SmartUtils.toDateTime(dtDate,  dtTime);
 		super.okPressed();
 	}
 	
-	public Date getSelectedDateTime() {
+	public LocalDateTime getSelectedDateTime() {
 		return this.selectedDateTime;
 	}
 	
@@ -76,9 +76,10 @@ public class DateCommentDialog extends CommentDialog {
 	
 		dtDate = new DateTime(main, SWT.DATE | SWT.DROP_DOWN);
 		dtTime = new DateTime(main, SWT.TIME | SWT.DROP_DOWN);
-		if (selectedDateTime == null) selectedDateTime = new Date();
-		SmartUtils.initDateDateTimeWidget(dtDate, selectedDateTime);
-		SmartUtils.initDateDateTimeWidget(dtTime, selectedDateTime);
+		if (selectedDateTime == null) selectedDateTime = LocalDateTime.now();
+		
+		SmartUtils.initDateDateTimeWidget(dtDate, selectedDateTime.toLocalDate());
+		SmartUtils.initDateDateTimeWidget(dtTime, selectedDateTime.toLocalTime());
 		
 		l = new Label(main, SWT.NONE);
 		l.setText(Messages.DateCommentDialog_CommentLabel);

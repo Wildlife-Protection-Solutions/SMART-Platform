@@ -22,6 +22,8 @@
 package org.wcs.smart.asset.ui.views.station;
 
 import java.text.DateFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -173,8 +175,8 @@ public class StationHistoryPage {
 			case ASSET_TYPE: return record.getAsset().getAssetType().getName();
 			case ASSET_ID: return record.getAsset().getId();
 			case LOCATION: return record.getStationLocation().getId();
-			case START_DATE: return DateFormat.getDateTimeInstance().format(record.getStartDate());
-			case END_DATE: return record.getEndDate() == null ? Messages.StationHistoryPage_CurrentLabel : DateFormat.getDateTimeInstance().format(record.getEndDate()); 
+			case START_DATE: return record.getStartDate().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM));
+			case END_DATE: return record.getEndDate() == null ? Messages.StationHistoryPage_CurrentLabel : record.getEndDate().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)); 
 			case TOTAL_TIME:
 				return AssetUtils.formatTime( record.getTimeOutInSeconds() );
 			}

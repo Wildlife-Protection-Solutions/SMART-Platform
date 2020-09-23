@@ -24,6 +24,8 @@ package org.wcs.smart.asset.ui.views.station;
 import java.text.Collator;
 import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -520,10 +522,10 @@ public class StationCurrentPage {
 			case LOCATION:
 				return element.getStationLocation().getId();
 			case START_DATE:
-				return DateFormat.getDateTimeInstance().format(element.getStartDate());
+				return element.getStartDate().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM));
 			case END_DATE:
 				if (element.getEndDate() == null) return ""; //$NON-NLS-1$
-				return DateFormat.getDateTimeInstance().format(element.getEndDate());
+				return element.getEndDate().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM));
 			}
 			return null;
 		}

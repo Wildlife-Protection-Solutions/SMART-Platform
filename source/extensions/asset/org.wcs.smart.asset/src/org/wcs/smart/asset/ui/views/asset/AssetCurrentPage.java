@@ -22,6 +22,8 @@
 package org.wcs.smart.asset.ui.views.asset;
 
 import java.text.DateFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -432,11 +434,11 @@ public class AssetCurrentPage {
 				
 				Label ll = toolkit.createLabel(statDetailsSection, Messages.AssetCurrentPage_StartDateLabel);
 				ll.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
-				toolkit.createLabel(statDetailsSection, DateFormat.getDateTimeInstance().format(thisdeploy.getStartDate()));
+				toolkit.createLabel(statDetailsSection, thisdeploy.getStartDate().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM))); 
 				
 				ll = toolkit.createLabel(statDetailsSection, Messages.AssetCurrentPage_EndDateLabel);
 				ll.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
-				toolkit.createLabel(statDetailsSection, thisdeploy.getEndDate() == null ? "" : DateFormat.getDateTimeInstance().format(thisdeploy.getEndDate())); //$NON-NLS-1$
+				toolkit.createLabel(statDetailsSection, thisdeploy.getEndDate() == null ? "" : thisdeploy.getEndDate().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM))); //$NON-NLS-1$
 				
 				ll = toolkit.createLabel(statDetailsSection, Messages.AssetCurrentPage_ActiveTimeDeployedLbl);
 				ll.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));

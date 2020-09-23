@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.asset.model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -49,8 +50,8 @@ public class AssetDeploymentDisruption extends UuidItem{
 
 	private static final long serialVersionUID = 1L;
 	
-	private Date startDate;
-	private Date endDate;
+	private LocalDateTime startDate;
+	private LocalDateTime endDate;
 	private String comment;
 	
 	private AssetDeployment deployment;
@@ -99,7 +100,7 @@ public class AssetDeploymentDisruption extends UuidItem{
 	 * @return start_date
 	 */
 	@Column(name="start_date")
-	public Date getStartDate() {
+	public LocalDateTime getStartDate() {
 		return this.startDate;
 	}
 	
@@ -108,7 +109,7 @@ public class AssetDeploymentDisruption extends UuidItem{
 	 * 
 	 * @param startDate
 	 */
-	public void setStartDate(Date startDate) {
+	public void setStartDate(LocalDateTime startDate) {
 		this.startDate = startDate;
 	}
 
@@ -119,7 +120,7 @@ public class AssetDeploymentDisruption extends UuidItem{
 	 * @return end_date
 	 */
 	@Column(name="end_date")
-	public Date getEndDate() {
+	public LocalDateTime getEndDate() {
 		return this.endDate;
 	}
 	
@@ -128,7 +129,7 @@ public class AssetDeploymentDisruption extends UuidItem{
 	 * 
 	 * @param endDate
 	 */
-	public void setEndDate(Date endDate) {
+	public void setEndDate(LocalDateTime endDate) {
 		this.endDate = endDate;
 	}
 	
@@ -141,13 +142,14 @@ public class AssetDeploymentDisruption extends UuidItem{
 	 */
 	@Transient
 	public double getActiveTimeInSeconds() {
-		Date now = new Date();
-		if (getStartDate().after(now)) return 0;
-		long start = getStartDate().getTime();
-		long end = now.getTime();
-		if (getEndDate() != null && getEndDate().before(now)) {
-			end = getEndDate().getTime();
+		LocalDateTime now = LocalDateTime.now();
+		
+		if (getStartDate().isAfter(now)) return 0;
+		
+		LocalDateTime end = now;
+		if (getEndDate() != null && getEndDate().isBefore(now)) {
+			end = getEndDate();
 		}
-		return (end-start) / 1000.0;
+		return ChronoUnit.MILLIS.between(end, getStartDate()) / 1000.0;
 	}
 }

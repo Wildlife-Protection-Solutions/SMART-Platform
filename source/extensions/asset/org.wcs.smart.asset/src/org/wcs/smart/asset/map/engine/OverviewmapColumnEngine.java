@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.asset.map.engine;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -108,7 +108,7 @@ public class OverviewmapColumnEngine {
 	 * @param groupBy type of statistic to compute
 	 * 
 	 */
-	public void computeStatistics(List<IOverviewTableColumn> column, Date[] dFilter, IOverviewTableColumn.GroupByOption groupBy, IProgressMonitor monitor) {
+	public void computeStatistics(List<IOverviewTableColumn> column, LocalDate[] dFilter, IOverviewTableColumn.GroupByOption groupBy, IProgressMonitor monitor) {
 		//clear existing datay
 		data.clear();
 		map.clear();

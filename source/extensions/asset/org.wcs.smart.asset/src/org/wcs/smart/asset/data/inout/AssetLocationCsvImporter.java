@@ -28,7 +28,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -297,9 +296,9 @@ public class AssetLocationCsvImporter {
 			break;
 			
 		case DATE:
-			Date d = null;
+			LocalDate d = null;
 			try {
-				d = Date.from(LocalDate.parse(data, dateTimeFormat).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+				d = LocalDate.parse(data, dateTimeFormat);
 			}catch (Exception e) {
 				d = null;
 			}

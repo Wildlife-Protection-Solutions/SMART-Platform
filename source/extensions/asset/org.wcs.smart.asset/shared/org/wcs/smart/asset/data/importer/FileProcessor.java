@@ -24,6 +24,11 @@ package org.wcs.smart.asset.data.importer;
 import java.nio.file.Path;
 import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -54,6 +59,7 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.util.SharedUtils;
 
 import com.drew.lang.Rational;
 import com.drew.metadata.Directory;
@@ -249,7 +255,7 @@ public class FileProcessor {
 			if (file.getAsset() != null && // && file.getAsset().equals(fp.getAsset())
 					(fp.getStationLocation() != null && file.getStationLocation() != null && file.getStationLocation().getStation().equals(fp.getStationLocation().getStation())) &&
 					file.getImageDate() != null && fp.getImageDate() != null 
-					&& Math.abs(file.getImageDate().getTime() - fp.getImageDate().getTime()) < seconds * 1000)
+					&& Math.abs(ChronoUnit.MILLIS.between(file.getImageDate(), fp.getImageDate())) < seconds * 1000)
 				{
 				fp.addRelation(file);
 			}
@@ -451,19 +457,19 @@ public class FileProcessor {
 					}
 					woa.setNumberValue(value == true ? 1.0 : 0);
 				}else if (mapping.getMappedAttribute().getType() == Attribute.AttributeType.DATE) {
-					Date d = null;
+					LocalDateTime d = null;
 					try {
-						d = DateFormat.getDateInstance(DateFormat.MEDIUM).parse(pathValue);
+						d = LocalDateTime.parse(pathValue, DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM));
 					}catch (Exception ex) {
 						d = null;
 					}
 					try {
-						d = DateFormat.getDateInstance(DateFormat.LONG).parse(pathValue);
+						d = LocalDateTime.parse(pathValue, DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG));
 					}catch (Exception ex) {
 						d = null;
 					}
 					try {
-						d = DateFormat.getDateInstance(DateFormat.SHORT).parse(pathValue);
+						d = LocalDateTime.parse(pathValue, DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT));
 					}catch (Exception ex) {
 						d = null;
 					}
@@ -471,7 +477,7 @@ public class FileProcessor {
 						p.addWarning(new ActionableWarning(MessageFormat.format(ErrorMessages.DATE_PARSE_ERROR.getMessage(locale), pathValue, mapping.getMappedAttribute().getName())));
 						return;
 					}
-					woa.setDateValue(d);
+					woa.setDateValue(SharedUtils.toDate(d));
 				}else if (mapping.getMappedAttribute().getType() == Attribute.AttributeType.LIST) {
 					if (mapping.getMappedListItem() != null) {
 						if (pathValue.equalsIgnoreCase(field.getValue())) {
@@ -781,8 +787,8 @@ public class FileProcessor {
 		//1.  Find a deployment for the asset that is between the start and end date of the waypoint
 		String hql = "FROM AssetDeployment WHERE asset = :asset and startDate <= :date1 and (endDate is null or endDate>=:date2)"; //$NON-NLS-1$
 		List<AssetDeployment> matchingDeployment = session.createQuery(hql, AssetDeployment.class)
-			.setParameter("date1", wp.getDateTime()) //$NON-NLS-1$
-			.setParameter("date2",  wp.getDateTime()) //$NON-NLS-1$
+			.setParameter("date1", SharedUtils.toLocalDateTime(wp.getDateTime())) //$NON-NLS-1$
+			.setParameter("date2", SharedUtils.toLocalDateTime(wp.getDateTime())) //$NON-NLS-1$
 			.setParameter("asset", asset) //$NON-NLS-1$
 			.list();
 		
@@ -799,18 +805,18 @@ public class FileProcessor {
 			if (matchedDeployment.getEndDate() == null) {
 				//we can update this deployment
 				//set the end date to the last waypoint date we have
-				Date endDate = null;
+				LocalDateTime endDate = null;
 				for (AssetWaypoint aw : matchedDeployment.getAssetWaypoints()) {
-					if (endDate == null || aw.getWaypoint().getDateTime().after(endDate)) endDate = aw.getWaypoint().getDateTime();
+					if (endDate == null || SharedUtils.toLocalDateTime(aw.getWaypoint().getDateTime()).isAfter(endDate)) endDate = SharedUtils.toLocalDateTime( aw.getWaypoint().getDateTime() );
 				}
 				if (endDate == null) {
 					//deployment had not waypoints the best we can do is take the current time and subtract a minute
-					endDate = new Date(wp.getDateTime().getTime() - 60_000);
+					endDate = SharedUtils.toLocalDateTime(wp.getDateTime()).minus(1, ChronoUnit.MINUTES);
 				}
 				matchedDeployment.setEndDate(endDate);
 				
 				//create a new deployment & return it
-				return createNewDeployment(asset, wp.getDateTime(), location);
+				return createNewDeployment(asset, SharedUtils.toLocalDateTime( wp.getDateTime() ), location);
 			
 			}else {
 				throw new IllegalStateException(MessageFormat.format(ErrorMessages.MULTIPLE_DEPLOYMENTS.getMessage(l), asset.getId() ));
@@ -826,61 +832,62 @@ public class FileProcessor {
 			AssetDeployment next = null;
 			
 			for (AssetDeployment d : allDeployments) {
-				if (d.getEndDate() != null && d.getEndDate().before(wp.getDateTime())) {
+				if (d.getEndDate() != null && d.getEndDate().isBefore(SharedUtils.toLocalDateTime(wp.getDateTime()))) {
 					if (prev == null) {
 						prev = d;
-					}else if (d.getEndDate().after(prev.getEndDate())) {
+					}else if (d.getEndDate().isAfter(prev.getEndDate())) {
 						prev = d;
 					}
 				}
-				if (d.getStartDate().after(wp.getDateTime())) {
+				if (d.getStartDate().isAfter(SharedUtils.toLocalDateTime(wp.getDateTime()))) {
 					if (next == null) {
 						next = d;
-					}else if (d.getStartDate().before(next.getStartDate())) {
+					}else if (d.getStartDate().isBefore(next.getStartDate())) {
 						next = d;
 					}
 				}
 			}
 			
 			if (prev == null && next == null) {
-				return createNewDeployment(asset, wp.getDateTime(), location);
+				return createNewDeployment(asset, SharedUtils.toLocalDateTime( wp.getDateTime()), location);
 			}
 			if (prev != null && prev.getStationLocation().equals(location) && next != null && next.getStationLocation().equals(location)) {
 				//both prev and next are candidates, pick the closer one and extend it
-				if (wp.getDateTime().getTime() - prev.getEndDate().getTime() > next.getStartDate().getTime() - wp.getDateTime().getTime()) {
+				if (ChronoUnit.MILLIS.between(SharedUtils.toLocalDateTime(wp.getDateTime()),prev.getEndDate()) > ChronoUnit.MILLIS.between(next.getStartDate(), SharedUtils.toLocalDateTime(wp.getDateTime()))) {
+				
 					//pick next
-					next.setStartDate(wp.getDateTime());
+					next.setStartDate(SharedUtils.toLocalDateTime( wp.getDateTime()) );
 					return next;
 				}else {
 					//pick prev
-					prev.setEndDate(wp.getDateTime());
+					prev.setEndDate(SharedUtils.toLocalDateTime( wp.getDateTime()) );
 					return prev;
 				}
 			}
 			if (prev != null && prev.getStationLocation().equals(location)) {
 				//only previous is a candidate
-				prev.setEndDate(wp.getDateTime());
+				prev.setEndDate(SharedUtils.toLocalDateTime( wp.getDateTime()) );
 				return prev;
 			}
 			if (next != null && next.getStationLocation().equals(location)) {
 				//only next is candidate
-				next.setStartDate(wp.getDateTime());
+				next.setStartDate(SharedUtils.toLocalDateTime( wp.getDateTime()) );
 				return next;
 			}
 			if (next != null) {
 				//create a new with an end date of next start time
-				AssetDeployment d = createNewDeployment(asset, wp.getDateTime(), location);
+				AssetDeployment d = createNewDeployment(asset, SharedUtils.toLocalDateTime( wp.getDateTime()) , location);
 				d.setEndDate(next.getStartDate());
 				return d;
 			}else {
 				//create a new one with no end date
-				return createNewDeployment(asset, wp.getDateTime(), location);
+				return createNewDeployment(asset, SharedUtils.toLocalDateTime( wp.getDateTime()) , location);
 			}
 			
 		}
 	}
 	
-	private static AssetDeployment createNewDeployment(Asset asset, Date startDate, AssetStationLocation location) {
+	private static AssetDeployment createNewDeployment(Asset asset, LocalDateTime startDate, AssetStationLocation location) {
 		AssetDeployment newDeployment = new AssetDeployment();
 		newDeployment.setAsset(asset);
 		newDeployment.setAssetWaypoints(new ArrayList<>());

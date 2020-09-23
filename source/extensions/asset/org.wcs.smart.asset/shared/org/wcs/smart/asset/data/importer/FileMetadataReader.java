@@ -23,8 +23,8 @@ package org.wcs.smart.asset.data.importer;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.TimeZone;
@@ -33,6 +33,7 @@ import java.util.logging.Logger;
 
 import org.wcs.smart.asset.model.mapping.XmpMetadataField;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.util.SharedUtils;
 
 import com.adobe.xmp.XMPIterator;
 import com.adobe.xmp.XMPMeta;
@@ -75,25 +76,25 @@ public class FileMetadataReader {
 	private static void readExifMetadata(Path file, FileProxy fileInfo) throws ImageProcessingException, IOException {
 		Metadata metadata = ImageMetadataReader.readMetadata(file.toFile());
 		
-		Date gpsDateTime = null;
+		LocalDateTime gpsDateTime = null;
 		for (Directory directory : metadata.getDirectoriesOfType(GpsDirectory.class)) {
 			GeoLocation geoLocation = ((GpsDirectory)directory).getGeoLocation();
 			if (geoLocation != null){
-				gpsDateTime = ((GpsDirectory) directory).getGpsDate();
+				gpsDateTime = SharedUtils.toLocalDateTime(  ((GpsDirectory) directory).getGpsDate() );
 				fileInfo.setPosition(geoLocation.getLongitude(), geoLocation.getLatitude());
 			}			
 		}
 		
 		//check other directories for a date
-		Date dateDigit = null;
+		LocalDateTime dateDigit = null;
 		if (fileInfo.getImageDate() == null) {
 			for (Directory directory : metadata.getDirectoriesOfType(ExifSubIFDDirectory.class)) {
-				Date orig = ((ExifSubIFDDirectory)directory).getDateOriginal(TimeZone.getDefault());
+				LocalDateTime orig = SharedUtils.toLocalDateTime( ((ExifSubIFDDirectory)directory).getDateOriginal(TimeZone.getDefault()) );
 				if (orig != null) {
 					fileInfo.setImageDate(orig);
 					break;
 				}
-				dateDigit = ((ExifSubIFDDirectory)directory).getDateDigitized(TimeZone.getDefault());
+				dateDigit = SharedUtils.toLocalDateTime( ((ExifSubIFDDirectory)directory).getDateDigitized(TimeZone.getDefault()) );
 				
 			}
 		}
@@ -103,7 +104,7 @@ public class FileMetadataReader {
 		
 		if (fileInfo.getImageDate() == null) {
 			for (Directory directory : metadata.getDirectoriesOfType(ExifIFD0Directory.class)) {
-				Date date = directory.getDate(ExifDirectoryBase.TAG_DATETIME, TimeZone.getDefault());
+				LocalDateTime date = SharedUtils.toLocalDateTime( directory.getDate(ExifDirectoryBase.TAG_DATETIME, TimeZone.getDefault()) );
 				if (date != null) {
 					fileInfo.setImageDate(date);
 				}

@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.asset.ui;
 
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -41,6 +42,7 @@ import org.wcs.smart.asset.model.AssetWaypointMapping;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -102,11 +104,12 @@ public class EditWaypointDialog extends SmartStyledTitleDialog{
 			return;
 		}
 		
-		Date newDateTime =  SmartUtils.combineDateTime(SmartUtils.getDate(dDate), SmartUtils.getTime(dTime));
-		if (Math.abs(toUpdate.getWaypoint().getDateTime().getTime() - newDateTime.getTime()) > 1000 * 60 * 60 * 24) {
+		LocalDateTime newDateTime =  SmartUtils.toDateTime(dDate, dTime);
+		LocalDateTime wp = SharedUtils.toLocalDateTime( toUpdate.getWaypoint().getDateTime() );
+		if (Math.abs(ChronoUnit.MILLIS.between(wp, newDateTime)) > 1000 * 60 * 60 * 24) {
 			if (!MessageDialog.openQuestion(getShell(), Messages.EditWaypointDialog_EditTitle, Messages.EditWaypointDialog_EditMessage)) return;
 		}
-		toUpdate.getWaypoint().setDateTime(newDateTime);
+		toUpdate.getWaypoint().setDateTime(SharedUtils.toDate( newDateTime) );
 		
 		int hours = Integer.parseInt(txtHours.getText().trim());
 		int minutes = Integer.parseInt(txtMins.getText().trim());

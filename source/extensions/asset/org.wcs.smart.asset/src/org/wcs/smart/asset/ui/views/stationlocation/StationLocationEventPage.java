@@ -24,6 +24,8 @@ package org.wcs.smart.asset.ui.views.stationlocation;
 import java.text.Collator;
 import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -59,6 +61,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.AssetSecurityManager;
 import org.wcs.smart.asset.internal.Messages;
+import org.wcs.smart.asset.model.AssetHistoryRecord;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetStationLocationHistoryRecord;
 import org.wcs.smart.asset.ui.CommentDialog;
@@ -111,7 +114,9 @@ public class StationLocationEventPage {
 		col.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				if (element instanceof AssetStationLocationHistoryRecord) return DateFormat.getDateTimeInstance().format(((AssetStationLocationHistoryRecord) element).getDate());
+				if (element instanceof AssetStationLocationHistoryRecord)
+					return ((AssetStationLocationHistoryRecord)element).getDate().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM));
+
 				return super.getText(element);
 			}
 		});

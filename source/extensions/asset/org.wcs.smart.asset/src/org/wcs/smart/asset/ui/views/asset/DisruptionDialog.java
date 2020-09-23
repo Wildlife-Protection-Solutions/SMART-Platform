@@ -22,7 +22,6 @@
 package org.wcs.smart.asset.ui.views.asset;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
@@ -75,8 +74,8 @@ public class DisruptionDialog extends SmartStyledTitleDialog {
 		if (!validate()) return;
 		
 		//update disruption
-		Date start = SmartUtils.combineDateTime(SmartUtils.getDate(dtStartDate), SmartUtils.getTime(dtStartTime));
-		Date end = SmartUtils.combineDateTime(SmartUtils.getDate(dtEndDate), SmartUtils.getTime(dtEndTime));
+		LocalDateTime start = SmartUtils.toDateTime(dtStartDate, dtStartTime);
+		LocalDateTime end = SmartUtils.toDateTime(dtEndDate, dtEndTime);
 
 		disruption.setComment(txtComment.getText());
 		disruption.setStartDate(start);
@@ -94,17 +93,18 @@ public class DisruptionDialog extends SmartStyledTitleDialog {
 		
 		boolean overlaps = false;
 		
-		LocalDateTime start = new java.sql.Timestamp(SmartUtils.combineDateTime(SmartUtils.getDate(dtStartDate), SmartUtils.getTime(dtStartTime)).getTime()).toLocalDateTime();
-		LocalDateTime end = new java.sql.Timestamp(SmartUtils.combineDateTime(SmartUtils.getDate(dtEndDate), SmartUtils.getTime(dtEndTime)).getTime()).toLocalDateTime();
-
-		if (start.isAfter(end)) {
+		
+		LocalDateTime start = SmartUtils.toDateTime(dtStartDate, dtStartTime);
+		LocalDateTime end = SmartUtils.toDateTime(dtEndDate, dtEndTime);
+		
+		if (start.isAfter(end) || start.isEqual(end)) {
 			setErrorMessage(Messages.DisruptionDialog_startEndError);
 			return false;
 		}
-		LocalDateTime dstart = (new java.sql.Timestamp(deployment.getStartDate().getTime())).toLocalDateTime();
+		LocalDateTime dstart = deployment.getStartDate();
 		LocalDateTime dend = LocalDateTime.now();
 		if (deployment.getEndDate() != null) {
-			dend = (new java.sql.Timestamp(deployment.getEndDate().getTime())).toLocalDateTime();
+			dend = deployment.getEndDate();
 		}
 		
 		if (start.isAfter(dend) || start.isBefore(dstart) || end.isAfter(dend) || end.isBefore(dstart)) {
@@ -115,8 +115,8 @@ public class DisruptionDialog extends SmartStyledTitleDialog {
 		for (AssetDeploymentDisruption other: deployment.getDisruptions()) {
 			if (other.equals(disruption)) continue;
 				
-			LocalDateTime startTest = new java.sql.Timestamp(other.getStartDate().getTime()).toLocalDateTime();
-			LocalDateTime endTest = new java.sql.Timestamp(other.getEndDate().getTime()).toLocalDateTime();
+			LocalDateTime startTest = other.getStartDate();
+			LocalDateTime endTest =other.getEndDate();
 			
 			if (!(endTest.isBefore(start) || startTest.isAfter(end))) { 
 				overlaps = true;
@@ -154,8 +154,8 @@ public class DisruptionDialog extends SmartStyledTitleDialog {
 		dtStartTime.addListener(SWT.Selection, e->validate());
 		
 		if (disruption.getStartDate() != null) {
-			SmartUtils.initDateDateTimeWidget(dtStartDate, disruption.getStartDate());
-			SmartUtils.initTimeDateTimeWidget(dtStartTime, disruption.getStartDate());
+			SmartUtils.initDateDateTimeWidget(dtStartDate, disruption.getStartDate().toLocalDate());
+			SmartUtils.initDateDateTimeWidget(dtStartTime, disruption.getStartDate().toLocalTime());
 		}else {
 			SmartUtils.initTimeDateTimeWidget(dtStartTime, SmartUtils.getMidnight());
 		}
@@ -174,8 +174,8 @@ public class DisruptionDialog extends SmartStyledTitleDialog {
 		dtEndTime.addListener(SWT.Selection, e->validate());
 		
 		if (disruption.getEndDate() != null) {
-			SmartUtils.initDateDateTimeWidget(dtEndDate, disruption.getEndDate());
-			SmartUtils.initTimeDateTimeWidget(dtEndTime, disruption.getEndDate());
+			SmartUtils.initDateDateTimeWidget(dtEndDate, disruption.getEndDate().toLocalDate());
+			SmartUtils.initDateDateTimeWidget(dtEndTime, disruption.getEndDate().toLocalTime());
 		}else {
 			SmartUtils.initTimeDateTimeWidget(dtEndTime, SmartUtils.getMidnight());
 		}

@@ -21,9 +21,10 @@
  */
 package org.wcs.smart.asset;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.hibernate.ScrollableResults;
@@ -132,18 +133,24 @@ public enum AssetManager {
 	}
 	
 	public boolean overlaps(AssetDeployment toValidate, Collection<AssetDeployment> allDeployments) {
-		long now = (new Date()).getTime();
-		long start = toValidate.getStartDate().getTime();
-		Long endTime = toValidate.getEndDate() == null ? null : toValidate.getEndDate().getTime();
+//		long now = LocalDate.now().(new Date()).getTime();
+//		long start = toValidate.getStartDate().getTime();
+//		Long endTime = toValidate.getEndDate() == null ? null : toValidate.getEndDate().getTime();
+		
+		LocalDateTime now = LocalDateTime.now();
+		LocalDateTime start = toValidate.getStartDate();
+		LocalDateTime endTime = toValidate.getEndDate() == null ? null : toValidate.getEndDate();
 		
 		for (AssetDeployment deploy : allDeployments) {
 			if (deploy.equals(toValidate)) continue;
-			long starttest = deploy.getStartDate().getTime();
-			long endtest = now;
-			if (deploy.getEndDate() != null) endtest = deploy.getEndDate().getTime();
+
+			LocalDateTime starttest = deploy.getStartDate(); 
+			LocalDateTime endtest = now;
+			
+			if (deploy.getEndDate() != null) endtest = deploy.getEndDate();
 			
 			
-			if (!(endtest < start || (endTime != null && starttest > endTime))) {
+			if (!(endtest.isBefore(start) || (endTime != null && starttest.isAfter(endTime)))) {
 				return true;
 			}
 			if (endTime == null && deploy.getEndDate() == null) {

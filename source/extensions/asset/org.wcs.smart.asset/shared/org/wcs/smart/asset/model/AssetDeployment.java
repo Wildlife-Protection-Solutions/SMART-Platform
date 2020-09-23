@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.asset.model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import javax.persistence.Basic;
@@ -53,8 +54,8 @@ public class AssetDeployment extends UuidItem {
 	private Asset asset;
 	private AssetStationLocation location;
 
-	private Date startDate;
-	private Date endDate;
+	private LocalDateTime startDate;
+	private LocalDateTime endDate;
 	private List<AssetDeploymentAttributeValue> attributes;
 	private List<AssetDeploymentDisruption> disruptions;
 
@@ -116,7 +117,7 @@ public class AssetDeployment extends UuidItem {
 	 * @return start_date
 	 */
 	@Column(name="start_date")
-	public Date getStartDate() {
+	public LocalDateTime getStartDate() {
 		return this.startDate;
 	}
 	
@@ -125,7 +126,7 @@ public class AssetDeployment extends UuidItem {
 	 * 
 	 * @param startDate
 	 */
-	public void setStartDate(Date startDate) {
+	public void setStartDate(LocalDateTime startDate) {
 		this.startDate = startDate;
 	}
 
@@ -136,7 +137,7 @@ public class AssetDeployment extends UuidItem {
 	 * @return end_date
 	 */
 	@Column(name="end_date")
-	public Date getEndDate() {
+	public LocalDateTime getEndDate() {
 		return this.endDate;
 	}
 	
@@ -145,7 +146,7 @@ public class AssetDeployment extends UuidItem {
 	 * 
 	 * @param endDate
 	 */
-	public void setEndDate(Date endDate) {
+	public void setEndDate(LocalDateTime endDate) {
 		this.endDate = endDate;
 	}
 
@@ -261,14 +262,18 @@ public class AssetDeployment extends UuidItem {
 	 */
 	@Transient
 	public double getTimeOutInSeconds() {
-		Date now = new Date();
-		if (getStartDate().after(now)) return 0;
-		long start = getStartDate().getTime();
-		long end = now.getTime();
-		if (getEndDate() != null && getEndDate().before(now)) {
-			end = getEndDate().getTime();
+		
+		LocalDateTime now = LocalDateTime.now();
+		if (getStartDate().isAfter(now)) return 0;
+		
+		LocalDateTime start = getStartDate();
+		LocalDateTime end = now;
+		
+		if (getEndDate() != null && getEndDate().isBefore(now)) {
+			end = getEndDate();
 		}
-		return (end-start) / 1000.0;
+		
+		return ChronoUnit.MILLIS.between(start, end) / 1000.0;
 	}
 
 	/**
@@ -279,10 +284,10 @@ public class AssetDeployment extends UuidItem {
 	@Transient
 	public double getTimeToEndDate() {
 		if (getEndDate() == null) return 0;
-		if (getEndDate().before(new Date())) return 0;
 		
-		Date now = new Date();
-		long end = getEndDate().getTime();
-		return (end-now.getTime()) / 1000.0;
+		LocalDateTime now = LocalDateTime.now();
+		if (getEndDate().isBefore(now)) return 0;
+		
+		return ChronoUnit.MILLIS.between(getEndDate(), now) / 1000.0;
 	}
 }

@@ -22,7 +22,8 @@
 package org.wcs.smart.asset.ui.views.map;
 
 import java.text.Collator;
-import java.text.DateFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -231,12 +232,12 @@ public class AssetSummaryTable {
 				if (c == Column.DEP_END) {
 					if (dw.deployment == null) return ""; //$NON-NLS-1$
 					if (dw.deployment.getEndDate() == null) return ""; //$NON-NLS-1$
-					return DateFormat.getDateInstance().format(dw.deployment.getEndDate());
+					return DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(dw.deployment.getEndDate());
 					
 				}
 				if (c == Column.DEP_START) {
 					if (dw.deployment == null) return ""; //$NON-NLS-1$
-					return DateFormat.getDateInstance().format(dw.deployment.getStartDate());
+					return DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(dw.deployment.getStartDate());
 					
 				}
 				if (c == Column.DEP_TIME) {

@@ -24,6 +24,8 @@ package org.wcs.smart.asset.ui.views.stationlocation;
 import java.text.Collator;
 import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -74,6 +76,7 @@ import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetDeployment;
 import org.wcs.smart.asset.model.AssetDeploymentAttributeValue;
 import org.wcs.smart.asset.model.AssetStationLocation;
+import org.wcs.smart.asset.model.AssetStationLocationHistoryRecord;
 import org.wcs.smart.asset.ui.AssetTypeLabelProvider;
 import org.wcs.smart.asset.ui.handler.OpenAssetHandler;
 import org.wcs.smart.asset.ui.map.StationLocationDrawCommand;
@@ -517,10 +520,10 @@ public class StationLocationCurrentPage {
 			case LOCATION:
 				return element.getStationLocation().getId();
 			case START_DATE:
-				return DateFormat.getDateTimeInstance().format(element.getStartDate());
+				return element.getStartDate().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM));
 			case END_DATE:
 				if (element.getEndDate() == null) return ""; //$NON-NLS-1$
-				return DateFormat.getDateTimeInstance().format(element.getEndDate());
+				return element.getEndDate().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM));
 			case STATION:
 				return element.getStationLocation().getStation().getId();
 				

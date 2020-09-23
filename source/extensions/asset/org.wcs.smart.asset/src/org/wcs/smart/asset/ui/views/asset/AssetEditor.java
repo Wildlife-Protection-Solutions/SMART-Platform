@@ -24,6 +24,8 @@ package org.wcs.smart.asset.ui.views.asset;
 import java.text.Collator;
 import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -569,7 +571,8 @@ public class AssetEditor extends EditorPart implements MapPart {
 		col.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
-				if (element instanceof AssetHistoryRecord) return DateFormat.getDateTimeInstance().format(((AssetHistoryRecord) element).getDate());
+				if (element instanceof AssetHistoryRecord)
+					return ((AssetHistoryRecord)element).getDate().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM));
 				return super.getText(element);
 			}
 		});

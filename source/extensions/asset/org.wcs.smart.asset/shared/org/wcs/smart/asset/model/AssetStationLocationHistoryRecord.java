@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.asset.model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -44,7 +44,7 @@ public class AssetStationLocationHistoryRecord extends UuidItem{
 	private static final long serialVersionUID = 1L;
 	
 	private AssetStationLocation location;
-	private Date date;
+	private LocalDateTime date;
 	private String comment;
 
 	/**
@@ -82,7 +82,7 @@ public class AssetStationLocationHistoryRecord extends UuidItem{
 	 * @return date
 	 */
 	@Column(name="date")
-	public Date getDate() {
+	public LocalDateTime getDate() {
 		return this.date;
 	}
 	
@@ -91,7 +91,7 @@ public class AssetStationLocationHistoryRecord extends UuidItem{
 	 * 
 	 * @param date
 	 */
-	public void setDate(Date date) {
+	public void setDate(LocalDateTime date) {
 		this.date = date;
 	}
 

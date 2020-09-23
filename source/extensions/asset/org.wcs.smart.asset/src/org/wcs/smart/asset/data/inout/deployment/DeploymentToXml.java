@@ -24,8 +24,8 @@ package org.wcs.smart.asset.data.inout.deployment;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.zip.Deflater;
@@ -65,6 +65,7 @@ import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.ZipUtil;
 
 /**
@@ -202,7 +203,7 @@ public class DeploymentToXml {
 			xmlw.setState(aw.getState().name());
 			xmlw.setId(aw.getWaypoint().getId());
 			xmlw.setComment(aw.getWaypoint().getComment());
-			xmlw.setDateTime( convertDateTime(aw.getWaypoint().getDateTime()));
+			xmlw.setDateTime( convertDateTime(SharedUtils.toLocalDateTime( aw.getWaypoint().getDateTime())));
 			xmlw.setLength(aw.getIncidentLength());
 			
 			xmlw.setX(aw.getWaypoint().getRawX());
@@ -252,9 +253,9 @@ public class DeploymentToXml {
 	
 	
 	
-	private XMLGregorianCalendar convertDateTime(Date datetime) throws DatatypeConfigurationException {
+	private XMLGregorianCalendar convertDateTime(LocalDateTime datetime) throws DatatypeConfigurationException {
 		GregorianCalendar cal = (GregorianCalendar) GregorianCalendar.getInstance();
-		cal.setTime(datetime);
+		cal.set(datetime.getYear(),  datetime.getMonthValue()-1, datetime.getDayOfMonth(),  datetime.getHour(), datetime.getMinute(), datetime.getSecond());
 		
 		XMLGregorianCalendar xgc = DatatypeFactory.newInstance().newXMLGregorianCalendar(cal);
 //		xgc.setMillisecond(DatatypeConstants.FIELD_UNDEFINED);
@@ -262,6 +263,7 @@ public class DeploymentToXml {
 //		xgc.setYear(DatatypeConstants.FIELD_UNDEFINED);
 //		xgc.setMonth(DatatypeConstants.FIELD_UNDEFINED);
 //		xgc.setDay(DatatypeConstants.FIELD_UNDEFINED);
+		
 		
 		return xgc;
 	}
