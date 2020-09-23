@@ -22,7 +22,6 @@
 package org.wcs.smart.asset.ui.views.station;
 
 import java.text.Collator;
-import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;

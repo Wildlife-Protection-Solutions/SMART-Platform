@@ -22,7 +22,6 @@
 package org.wcs.smart.asset;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Collections;
 

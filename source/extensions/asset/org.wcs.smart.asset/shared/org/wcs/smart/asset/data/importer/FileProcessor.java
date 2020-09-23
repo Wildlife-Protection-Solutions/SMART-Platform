@@ -22,13 +22,11 @@
 package org.wcs.smart.asset.data.importer;
 
 import java.nio.file.Path;
-import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;

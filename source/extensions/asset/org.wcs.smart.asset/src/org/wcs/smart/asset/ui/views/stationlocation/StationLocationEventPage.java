@@ -22,7 +22,6 @@
 package org.wcs.smart.asset.ui.views.stationlocation;
 
 import java.text.Collator;
-import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -61,7 +60,6 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.AssetSecurityManager;
 import org.wcs.smart.asset.internal.Messages;
-import org.wcs.smart.asset.model.AssetHistoryRecord;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetStationLocationHistoryRecord;
 import org.wcs.smart.asset.ui.CommentDialog;

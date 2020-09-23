@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.asset.ui.views.station;
 
-import java.text.DateFormat;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;

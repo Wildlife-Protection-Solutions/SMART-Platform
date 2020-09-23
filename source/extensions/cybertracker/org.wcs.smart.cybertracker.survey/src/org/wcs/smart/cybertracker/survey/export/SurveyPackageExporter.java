@@ -231,7 +231,9 @@ public enum SurveyPackageExporter {
 		if (file != null) {
 			file.computeFileLocation(session);
 			Path fromPath = file.getAttachmentFile();
-			String fileName = cmObject.getImageFile() == null? cmObject.getDefaultImageFileName() : cmObject.getImageFile().getFileName().toString();			Path toPath = tempDir.resolve(SharedUtils.getFilenameWithoutExtension(fileName) + "." + SharedUtils.getFilenameExtension(fromPath.getFileName().toString())); //$NON-NLS-1$
+			
+			String fileName = cmObject.getImageFile() == null? cmObject.getDefaultImageFileName() : cmObject.getImageFile().getFileName().toString();			
+			Path toPath = tempDir.resolve(SharedUtils.getFilenameWithoutExtension(fileName) + "." + SharedUtils.getFilenameExtension(fromPath.getFileName().toString())); //$NON-NLS-1$
 			Files.copy(fromPath, toPath);
 			if (!toIncludeInZip.contains(toPath)) toIncludeInZip.add(toPath);
 		}
