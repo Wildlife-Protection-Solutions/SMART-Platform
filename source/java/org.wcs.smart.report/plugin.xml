@@ -1002,12 +1002,6 @@
                   style="push">
                <visibleWhen>
                   <and>
-                     <with
-                           variable="activeWorkbenchWindow.activePerspective">
-                        <equals
-                              value="org.wcs.smart.report.ReportViewerPerspective">
-                        </equals>
-                     </with>
                      <or>
                         <test
                               forcePluginActivation="true"
@@ -1025,17 +1019,25 @@
                               value="manager">
                         </test>
                      </or>
+                     <or>
+                        <with
+                              variable="activeWorkbenchWindow.activePerspective">
+                           <equals
+                                 value="org.wcs.smart.report.ReportViewerPerspective">
+                           </equals>
+                        </with>
+                        <with
+                              variable="activeWorkbenchWindow.activePerspective">
+                           <equals
+                                 value="org.wcs.smart.report.ReportPerspective">
+                           </equals>
+                        </with>
+                     </or>
                   </and>
                </visibleWhen>
             </command>
             <visibleWhen>
                <and>
-                  <with
-                        variable="activeWorkbenchWindow.activePerspective">
-                     <equals
-                           value="org.wcs.smart.report.ReportViewerPerspective">
-                     </equals>
-                  </with>
                   <or>
                      <test
                            forcePluginActivation="true"
@@ -1052,6 +1054,20 @@
                            property="org.wcs.smart.smartAdminUser"
                            value="manager">
                      </test>
+                  </or>
+                  <or>
+                     <with
+                           variable="activeWorkbenchWindow.activePerspective">
+                        <equals
+                              value="org.wcs.smart.report.ReportViewerPerspective">
+                        </equals>
+                     </with>
+                     <with
+                           variable="activeWorkbenchWindow.activePerspective">
+                        <equals
+                              value="org.wcs.smart.report.ReportPerspective">
+                        </equals>
+                     </with>
                   </or>
                </and>
             </visibleWhen>
