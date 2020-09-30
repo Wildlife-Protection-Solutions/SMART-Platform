@@ -22,13 +22,19 @@
 package org.wcs.smart.connect.model;
 
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+
+import org.wcs.smart.connect.util.LocalDateTimeDeserializer;
+import org.wcs.smart.connect.util.LocalDateTimeSerializer;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
  * An Shared Link entity
@@ -42,8 +48,8 @@ public class SharedLink extends ConnectUuidItem{
 	private UUID ownerUuid;
 	private UUID permissionUserUuid;
 	private UUID caUuid;
-	private Timestamp expiresAt;
-	private Timestamp dateCreated;
+	private LocalDateTime expiresAt;
+	private LocalDateTime dateCreated;
 	private String url;
 	private boolean isUserToken;
 	private String allowedIp;
@@ -82,10 +88,12 @@ public class SharedLink extends ConnectUuidItem{
 	}
 	
 	@Column(name="expires_at")
-	public Timestamp getExpiresAt() {
+	@JsonDeserialize(using = LocalDateTimeDeserializer.class)  
+	@JsonSerialize(using = LocalDateTimeSerializer.class) 
+	public LocalDateTime getExpiresAt() {
 		return expiresAt;
 	}
-	public void setExpiresAt(Timestamp expiresAt) {
+	public void setExpiresAt(LocalDateTime expiresAt) {
 		this.expiresAt = expiresAt;
 	}
 	
@@ -98,11 +106,13 @@ public class SharedLink extends ConnectUuidItem{
 	}
 	
 	@Column(name="date_created")
-	public Timestamp getDateCreated(){
+	@JsonDeserialize(using = LocalDateTimeDeserializer.class)  
+	@JsonSerialize(using = LocalDateTimeSerializer.class)
+	public LocalDateTime getDateCreated(){
 		return this.dateCreated;
 	}
 
-	public void setDateCreated(Timestamp dateCreated) {
+	public void setDateCreated(LocalDateTime dateCreated) {
 		this.dateCreated = dateCreated;
 	}
 	

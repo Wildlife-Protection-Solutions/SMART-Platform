@@ -22,7 +22,7 @@
 package org.wcs.smart.incident.ui;
 
 import java.text.MessageFormat;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -43,7 +43,7 @@ public class IncidentEditorInput implements IEditorInput {
 
 	private int id;
 	private UUID uuid;
-	private Date dateTime;
+	private LocalDateTime dateTime;
 	private String sourceKey;
 	
 	public IncidentEditorInput(UUID uuid, String sourceKey){
@@ -51,7 +51,7 @@ public class IncidentEditorInput implements IEditorInput {
 		this.sourceKey = sourceKey;
 	}
 	
-	public IncidentEditorInput(UUID uuid, int id, Date dateTime, String sourceKey){
+	public IncidentEditorInput(UUID uuid, int id, LocalDateTime dateTime, String sourceKey){
 		this(uuid, sourceKey);
 		this.id = id;
 		this.dateTime = dateTime;
@@ -76,14 +76,14 @@ public class IncidentEditorInput implements IEditorInput {
 	 * update date time value
 	 * @param dateTime
 	 */
-	public void setDateTime(Date dateTime){
+	public void setDateTime(LocalDateTime dateTime){
 		this.dateTime = dateTime;
 	}
 	/**
 	 * 
 	 * @return datetime of incident
 	 */
-	public Date getDateTime(){
+	public LocalDateTime getDateTime(){
 		return this.dateTime;
 	}
 	/**

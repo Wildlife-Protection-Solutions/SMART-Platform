@@ -36,16 +36,15 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.wcs.smart.ICoreLabelProvider;
-import org.wcs.smart.SmartContext;
-import org.wcs.smart.util.GeometryUtils;
-
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKBReader;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.wcs.smart.ICoreLabelProvider;
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.util.GeometryUtils;
 
 /**
  * Represents an area geometry from one of the conservation

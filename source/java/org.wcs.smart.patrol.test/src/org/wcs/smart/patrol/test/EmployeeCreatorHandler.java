@@ -2,7 +2,6 @@ package org.wcs.smart.patrol.test;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
@@ -148,9 +147,9 @@ public class EmployeeCreatorHandler extends AbstractHandler  {
 				e.setGivenName(name.split(" ")[0]);
 				
 				
-				e.setBirthDate(java.sql.Date.valueOf( LocalDate.of(1920 + r.nextInt(50), r.nextInt(11)+1, r.nextInt(27)+1)));
-				e.setDateCreated(new Date());
-				e.setStartEmploymentDate(new Date());
+				e.setBirthDate(LocalDate.of(1920 + r.nextInt(50), r.nextInt(11)+1, r.nextInt(27)+1));
+				e.setDateCreated(LocalDate.now());
+				e.setStartEmploymentDate(LocalDate.now());
 				e.setGender(r.nextInt(100) < 50 ? 'F' : 'M');
 				e.setId("E00" + i);
 				session.save(e);

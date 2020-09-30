@@ -21,8 +21,7 @@
  */
 package org.wcs.smart.observation.query.report.data;
 
-import java.sql.Date;
-import java.util.Calendar;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
 
@@ -97,17 +96,15 @@ public class ObservationReportQuery extends AbstractSmartQuery {
 	@Override
 	public IResultSet executeQuery(AbstractSmartBirtQuery smartQuery, SmartConnection connection) throws OdaException {
 		//create date filter
-		Date startDate = (Date) smartQuery.getParameters().get(SmartParameterMetaData.Parameter.STARTDATE);
-		Date endDate = (Date) smartQuery.getParameters().get(SmartParameterMetaData.Parameter.ENDDATE);
+		LocalDate startDate = ((java.sql.Date) smartQuery.getParameters().get(SmartParameterMetaData.Parameter.STARTDATE)).toLocalDate();
+		LocalDate endDate = ((java.sql.Date) smartQuery.getParameters().get(SmartParameterMetaData.Parameter.ENDDATE)).toLocalDate();
 		
 		if (startDate == null || endDate == null){
 			if (smartQuery.getQuery().getTypeKey().equals(ObservationSummaryQuery.KEY)){
 				//we choose to run summaries in order to get 
 				//all header information
-				Calendar cal = Calendar.getInstance();
-				cal.set(1900, Calendar.JANUARY, 1);
-				startDate = new Date( cal.getTimeInMillis() );
-				endDate = new Date(startDate.getTime());
+				startDate = LocalDate.of(1900, 1, 1);
+				endDate = LocalDate.from(startDate);
 			}else{
 				//all others will just return an empty
 				return EmptyResultSet.INSTANCE;

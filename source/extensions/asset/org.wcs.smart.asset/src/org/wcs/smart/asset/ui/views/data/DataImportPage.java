@@ -90,7 +90,6 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
-import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -321,7 +320,7 @@ public class DataImportPage {
 							
 							Waypoint wp = new Waypoint();
 							wp.setConservationArea(SmartDB.getCurrentConservationArea());
-							wp.setDateTime(SharedUtils.toDate( p.getImageDate()) );
+							wp.setDateTime(p.getImageDate() );
 							wp.setId(1); //updated below
 							wp.setSourceId(AssetWaypointSource.KEY);
 							wp.setRawX(p.getX());
@@ -357,14 +356,14 @@ public class DataImportPage {
 							assets.put(p.getAsset(), p.getStationLocation());
 							relations.addAll(p.getRelations());
 							if (p.getFixedRelations() != null) relations.addAll(p.getFixedRelations());
-							LocalDateTime minDate = SharedUtils.toLocalDateTime( wp.getDateTime() );
+							LocalDateTime minDate =  wp.getDateTime();
 							LocalDateTime maxDate = minDate;
 							
 							for (FileProxy pp : relations) {
 								if (!items.contains(pp)) items.add(pp);
 								toProcess.remove(pp);
-								if (pp.getImageDate().isBefore(SharedUtils.toLocalDateTime( wp.getDateTime()))) {
-									wp.setDateTime(SharedUtils.toDate( pp.getImageDate()) );
+								if (pp.getImageDate().isBefore( wp.getDateTime())) {
+									wp.setDateTime(pp.getImageDate() );
 								}
 								if (pp.getImageDate().isBefore(minDate)) {
 									minDate = pp.getImageDate();

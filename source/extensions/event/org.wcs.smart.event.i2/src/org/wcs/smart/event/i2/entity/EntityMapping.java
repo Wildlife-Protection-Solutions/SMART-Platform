@@ -21,11 +21,12 @@
  */
 package org.wcs.smart.event.i2.entity;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -132,7 +133,7 @@ public class EntityMapping {
 					break;
 				case DATE:
 					try {
-						Date d = (new SimpleDateFormat(DATE_FORMAT)).parse((String)item.get(JSON_FIXED_KEY));
+						LocalDate d = LocalDate.parse((String)item.get(JSON_FIXED_KEY), DateTimeFormatter.ofPattern(DATE_FORMAT));
 						mapping.setFixedValue(d);
 					}catch (Exception ex) {
 						EventPlugIn.log(ex.getMessage(),  ex);
@@ -178,7 +179,7 @@ public class EntityMapping {
 	private Attribute dataModelAttribute;
 	
 	private String fixedStringValue;
-	private Date fixedDateValue;
+	private LocalDate fixedDateValue;
 	private Boolean fixedBooleanValue;
 	private Double fixedDoubleValue1;
 	private Double fixedDoubleValue2;
@@ -202,7 +203,7 @@ public class EntityMapping {
 			if (fixedBooleanValue) return SmartLabelProvider.BOOLEAN_TRUE_LABEL;
 			return SmartLabelProvider.BOOLEAN_FALSE_LABEL;
 		case DATE:
-			return DateFormat.getDateInstance().format(fixedDateValue);
+			return DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(fixedDateValue);
 		case EMPLOYEE:
 			return SmartLabelProvider.getShortLabel(fixedEmployee);
 		case LIST:
@@ -227,7 +228,7 @@ public class EntityMapping {
 	public Double getFixedDouble2Value() {
 		return this.fixedDoubleValue2;
 	}
-	public Date getFixedDateValue() {
+	public LocalDate getFixedDateValue() {
 		return this.fixedDateValue;
 	}
 	public Boolean getFixedBooleanValue() {
@@ -243,7 +244,7 @@ public class EntityMapping {
 	public void setFixedValue(String value) {
 		this.fixedStringValue = value;
 	}
-	public void setFixedValue(Date date) {
+	public void setFixedValue(LocalDate date) {
 		this.fixedDateValue = date;
 	}
 	public void setFixedValue(Boolean bool) {

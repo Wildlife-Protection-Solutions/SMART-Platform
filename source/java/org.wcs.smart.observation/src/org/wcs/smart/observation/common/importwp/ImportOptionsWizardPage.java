@@ -21,9 +21,10 @@
  */
 package org.wcs.smart.observation.common.importwp;
 
-import java.text.DateFormat;
 import java.text.MessageFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 
 import org.eclipse.jface.wizard.WizardPage;
 import org.wcs.smart.gpx.GPSDataImport.ImportType;
@@ -49,8 +50,8 @@ public abstract class ImportOptionsWizardPage extends WizardPage implements IImp
 		initDefaultOptions(wizard.getDateOption());
 	}
 
-	protected void initDefaultOptions(Date date) {
-		String dateStr = date != null ? DateFormat.getDateInstance(DateFormat.MEDIUM).format(date) : ""; //$NON-NLS-1$
+	protected void initDefaultOptions(LocalDate date) {
+		String dateStr = date != null ?  DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(date) : ""; //$NON-NLS-1$
 		validOptions = new ImportOption[]{ImportOption.ALL, ImportOption.DATE, ImportOption.SELECT};
 		labels = new String[]{Messages.ImportGpxWizardPage_ImportAllOp,
 				MessageFormat.format(Messages.ImportGpxWizardPage_ImportSingleDayOp, new Object[]{getImportType().guiName.toLowerCase(), dateStr}),

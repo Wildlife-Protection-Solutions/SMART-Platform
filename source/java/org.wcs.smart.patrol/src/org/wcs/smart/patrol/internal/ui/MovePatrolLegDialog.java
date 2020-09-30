@@ -22,8 +22,8 @@
 
 package org.wcs.smart.patrol.internal.ui;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
@@ -111,7 +111,7 @@ public class MovePatrolLegDialog extends SmartStyledTitleDialog{
 		newPatrol.setLegs(new ArrayList<PatrolLeg>());
 		newPatrol.setId(txtPatrolId.getText());
 
-		Date[] dates = PatrolUtils.calculateDateRange(legsToMove);
+		LocalDate[] dates = PatrolUtils.calculateDateRange(legsToMove);
 		newPatrol.setStartDate(dates[0]);
 		newPatrol.setEndDate(dates[1]);
 		

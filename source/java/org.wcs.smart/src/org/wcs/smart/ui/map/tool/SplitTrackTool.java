@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.widgets.Control;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.udig.project.ui.commands.AbstractDrawCommand;
 import org.locationtech.udig.project.ui.render.displayAdapter.MapMouseEvent;
 import org.locationtech.udig.project.ui.tool.SimpleTool;
@@ -39,8 +40,6 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
-
-import org.locationtech.jts.geom.Coordinate;
 
 /**
  * A split tool for tracks.  You must set the finishCommand

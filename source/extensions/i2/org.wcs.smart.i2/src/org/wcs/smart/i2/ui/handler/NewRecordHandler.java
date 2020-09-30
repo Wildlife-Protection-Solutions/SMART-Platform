@@ -23,9 +23,9 @@ package org.wcs.smart.i2.ui.handler;
 
 import java.text.Collator;
 import java.text.MessageFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -112,9 +112,9 @@ public class NewRecordHandler {
 		newRecord.setTitle(Messages.NewRecordHandler_DefaultRecordName);
 		newRecord.setStatus(Status.NEW);
 		newRecord.setConservationArea(SmartDB.getCurrentConservationArea());
-		newRecord.setDateCreated(new Date());
+		newRecord.setDateCreated(LocalDateTime.now());
 		newRecord.setEntities(new ArrayList<IntelEntityRecord>());
-		newRecord.setPrimaryDate(new Date());
+		newRecord.setPrimaryDate(LocalDateTime.now());
 		try(Session session = HibernateManager.openSession()){
 			p = session.get(IntelProfile.class, p.getUuid());
 			p.getName();

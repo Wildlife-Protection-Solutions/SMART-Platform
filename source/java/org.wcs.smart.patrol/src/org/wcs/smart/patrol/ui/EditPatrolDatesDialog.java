@@ -23,10 +23,11 @@ package org.wcs.smart.patrol.ui;
 
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -89,7 +90,9 @@ public class EditPatrolDatesDialog extends SmartStyledTitleDialog{
 	protected Control createDialogArea(Composite parent) {
 		Composite composite = (Composite) super.createDialogArea(parent);
 
-		setTitle(MessageFormat.format(Messages.EditPatrolDatesDialog_Title, input.getPatrolId(), DateFormat.getDateInstance().format(input.getStartDate()), DateFormat.getDateInstance().format(input.getEndDate())));
+		setTitle(MessageFormat.format(Messages.EditPatrolDatesDialog_Title, input.getPatrolId(), 
+				DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(input.getStartDate()), 
+				DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(input.getEndDate())));
 		getShell().setText(Messages.EditPatrolDatesDialog_ShellTitle);
 		setMessage(Messages.EditPatrolDatesDialog_Message);
 		
@@ -147,8 +150,8 @@ public class EditPatrolDatesDialog extends SmartStyledTitleDialog{
 	 * </p>
 	 */
 	protected void okPressed() {
-		Date startDate = dateComp.getStartDate();
-		Date endDate = dateComp.getEndDate();
+		LocalDate startDate = dateComp.getStartDate();
+		LocalDate endDate = dateComp.getEndDate();
 		
 		boolean[] cont = new boolean[] {false};
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
@@ -173,7 +176,7 @@ public class EditPatrolDatesDialog extends SmartStyledTitleDialog{
 	 */
 	private int waypointDeleteCnt = 0;
 	
-	private boolean updatePatrol(Date startDate, Date endDate){
+	private boolean updatePatrol(LocalDate startDate, LocalDate endDate){
 		Patrol patrol = null;
 		
 		waypointDeleteCnt = 0;
@@ -204,23 +207,23 @@ public class EditPatrolDatesDialog extends SmartStyledTitleDialog{
 				
 				List<PatrolLeg> legsToDelete = new ArrayList<PatrolLeg>();
 				for (PatrolLeg pl : patrol.getLegs()){
-					if (pl.getEndDate().before(startDate)){
+					if (pl.getEndDate().isBefore(startDate)){
 						//delete me
 						legsToDelete.add(pl);
 						continue;
 					}
-					if (pl.getStartDate().after(endDate)){
+					if (pl.getStartDate().isAfter(endDate)){
 						legsToDelete.add(pl);
 						continue;
 						//delete me
 					}
 					
 					boolean modified = false;
-					if (pl.getStartDate().before(startDate)){
+					if (pl.getStartDate().isBefore(startDate)){
 						pl.setStartDate(startDate);
 						modified = true;
 					}
-					if (pl.getEndDate().after(endDate)){
+					if (pl.getEndDate().isAfter(endDate)){
 						pl.setEndDate(endDate);
 						modified = true;
 					}
@@ -229,7 +232,7 @@ public class EditPatrolDatesDialog extends SmartStyledTitleDialog{
 					//if leg has been modified we need to update the days
 					List<PatrolLegDay> toDelete = new ArrayList<PatrolLegDay>();
 					for (PatrolLegDay pld : pl.getPatrolLegDays()){
-						if (pld.getDate().before(startDate) || pld.getDate().after(endDate)){
+						if (pld.getDate().isBefore(startDate) || pld.getDate().isAfter(endDate)){
 							//delete me
 							toDelete.add(pld);
 						}

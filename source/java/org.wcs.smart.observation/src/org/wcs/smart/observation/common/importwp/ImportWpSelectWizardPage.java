@@ -22,8 +22,9 @@
 package org.wcs.smart.observation.common.importwp;
 
 import java.lang.reflect.InvocationTargetException;
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -93,7 +94,7 @@ public class ImportWpSelectWizardPage extends WizardPage implements IImportWizar
 					value.append(" ["); //$NON-NLS-1$
 					if (wp.getDateTime() != null){
 						value.append(" "); //$NON-NLS-1$
-						String dateFormatted = DateFormat.getDateTimeInstance().format(wp.getDateTime());
+						String dateFormatted =  DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(wp.getDateTime());
 						value.append(dateFormatted); 
 					}
 					value.append("]"); //$NON-NLS-1$

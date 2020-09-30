@@ -23,9 +23,9 @@ package org.wcs.smart.event.i2.entity;
 
 import java.text.Collator;
 import java.text.MessageFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -525,7 +525,7 @@ public class NewMappingDialog extends SmartStyledTitleDialog {
 			IntelEntityAttributeValue temp = new IntelEntityAttributeValue();
 			temp.setAttribute(ea.getAttribute());
 			if (ea.getAttribute().getType() == IntelAttribute.AttributeType.DATE) {
-				temp.setDateValue(new Date());
+				temp.setDateValue(LocalDate.now());
 				fieldEditor.initControl(temp);
 			}else if (ea.getAttribute().getType() == IntelAttribute.AttributeType.BOOLEAN) {
 				temp.setNumberValue(1.0);

@@ -78,8 +78,8 @@ public class DateCommentDialog extends CommentDialog {
 		dtTime = new DateTime(main, SWT.TIME | SWT.DROP_DOWN);
 		if (selectedDateTime == null) selectedDateTime = LocalDateTime.now();
 		
-		SmartUtils.initDateDateTimeWidget(dtDate, selectedDateTime.toLocalDate());
-		SmartUtils.initDateDateTimeWidget(dtTime, selectedDateTime.toLocalTime());
+		SmartUtils.initDateTimeWidget(dtDate, selectedDateTime.toLocalDate());
+		SmartUtils.initDateTimeWidget(dtTime, selectedDateTime.toLocalTime());
 		
 		l = new Label(main, SWT.NONE);
 		l.setText(Messages.DateCommentDialog_CommentLabel);

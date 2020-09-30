@@ -26,10 +26,11 @@ import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -166,14 +167,14 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
     
     private boolean handlingLayerVisibility = false;
     
-    private Date[] refreshMapJobDates = null;
+    private LocalDate[] refreshMapJobDates = null;
     private Job refreshMapJob = new Job(Messages.IntelligenceMapEditor_refreshmapjob){
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			Date[] newDates = refreshMapJobDates;
+			LocalDate[] newDates = refreshMapJobDates;
 			if (newDates != null){
-				Filter udigDateFilter = IntelEntityDataSource.createDateFilter(newDates[0], newDates[1]);
+				Filter udigDateFilter = IntelEntityDataSource.createDateTimeFilter(newDates[0] == null ? null : newDates[0].atStartOfDay(), newDates[1] == null ? null : newDates[1].atTime(LocalTime.MAX));
 				boolean refresh = false;
 				for (Layer l : getMap().getLayersInternal()){
 					Boolean x = (Boolean) l.getBlackboard().get(WorkingSetMapLayersJob.WS_MAP_LAYER_KEY);
@@ -574,7 +575,7 @@ public class IntelligenceMapEditor extends EditorPart implements MapPart, IDropT
 		handler = new EventHandler() {
 			@Override
 			public void handleEvent(Event event) {
-				refreshMapJobDates = (Date[]) event.getProperty(IEventBroker.DATA);
+				refreshMapJobDates = (LocalDate[]) event.getProperty(IEventBroker.DATA);
 				refreshMapJob.cancel();
 				refreshMapJob.schedule(200);
 			}

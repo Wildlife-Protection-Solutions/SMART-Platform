@@ -22,8 +22,8 @@
 package org.wcs.smart.entity;
 
 import java.text.MessageFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -77,7 +77,7 @@ public class EntityTemplateCloner implements IConservationAreaTemplateCloner {
 			
 			clone.setConservationArea(engine.getNewCa());
 			clone.setCreator(engine.getNewCa().getEmployees().get(0));
-			clone.setDateCreated(new Date());
+			clone.setDateCreated(LocalDateTime.now());
 			
 			//remove list items from attribute list; we don't want to
 			//be cloning the actual entity entries

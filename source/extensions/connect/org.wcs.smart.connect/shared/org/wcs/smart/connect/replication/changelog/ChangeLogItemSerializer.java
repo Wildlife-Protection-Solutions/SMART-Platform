@@ -37,7 +37,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
@@ -55,11 +55,12 @@ import org.wcs.smart.util.UuidUtils;
  */
 public abstract class ChangeLogItemSerializer {
 
-	public static final String DATE_FORMAT_STR = "yyyyMMddHHmmssSSS"; //$NON-NLS-1$
+	public static final String DATE_FORMAT_STR = "yyyyMMdd"; //$NON-NLS-1$
 	public static final String TIME_FORMAT_STR = "HHmmssSSS"; //$NON-NLS-1$
 	
-	private SimpleDateFormat dateFormatter = new SimpleDateFormat(DATE_FORMAT_STR); 
-	private SimpleDateFormat timeFormatter = new SimpleDateFormat(TIME_FORMAT_STR);
+	public static DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(ChangeLogItemSerializer.DATE_FORMAT_STR); 
+	public static DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern(ChangeLogItemSerializer.TIME_FORMAT_STR);
+	public static DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(DATE_FORMAT_STR+TIME_FORMAT_STR);
 	
 	public abstract void prepareUuid(PreparedStatement ps, int index, UUID value) throws SQLException;
 	
@@ -193,7 +194,7 @@ public abstract class ChangeLogItemSerializer {
 					if (obj == null){
 						stream.writeObject(null);
 					}else{
-						stream.writeObject(dateFormatter.format(rs.getObject(i)));
+						stream.writeObject(dateFormatter.format( ((java.sql.Date)rs.getObject(i)).toLocalDate() ));
 					}
 				}else if (type == Types.TIME) {
 					//serialization of dates does not include timezone which causes a problem when deserializing as
@@ -203,7 +204,14 @@ public abstract class ChangeLogItemSerializer {
 					if (obj == null){
 						stream.writeObject(null);
 					}else{
-						stream.writeObject(timeFormatter.format(rs.getObject(i)));
+						stream.writeObject(timeFormatter.format( ((java.sql.Time)rs.getObject(i)).toLocalTime() ));
+					}
+				}else if (type == Types.TIMESTAMP) {
+					Object obj = rs.getObject(i);
+					if (obj == null){
+						stream.writeObject(null);
+					}else{
+						stream.writeObject(dateTimeFormatter.format( ((java.sql.Timestamp)rs.getObject(i)).toLocalDateTime() ));
 					}
 				}else{
 					Object x = rs.getObject(i);

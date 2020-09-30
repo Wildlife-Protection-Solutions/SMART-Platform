@@ -22,8 +22,9 @@
 package org.wcs.smart.i2.model;
 
 import java.io.Serializable;
-import java.text.DateFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.Locale;
 
 import javax.persistence.Column;
@@ -180,11 +181,11 @@ public class IntelObservationAttribute {
 	 * @return
 	 */
 	@Transient
-	public Date getDateValue(){
+	public LocalDate getDateValue(){
 		if (getStringValue() == null){
 			return null;
 		}
-		return java.sql.Date.valueOf(getStringValue());
+		return LocalDate.parse(getStringValue(), DateTimeFormatter.ISO_LOCAL_DATE);
 	}
 	
 	/**
@@ -193,13 +194,12 @@ public class IntelObservationAttribute {
 	 * @return
 	 */
 	@Transient
-	public void setDateValue(Date date){
+	public void setDateValue(LocalDate date){
 		if (date == null){
 			setStringValue(null);
 			return;
 		}
-		java.sql.Date tmp = new java.sql.Date(date.getTime());
-		setStringValue(tmp.toString());
+		setStringValue(DateTimeFormatter.ISO_LOCAL_DATE.format(date));
 	}
 	
 	
@@ -226,7 +226,7 @@ public class IntelObservationAttribute {
 			break;
 		case DATE:
 			if (getStringValue() != null){
-				text = DateFormat.getDateInstance(DateFormat.MEDIUM).format(getDateValue());
+				text = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(getDateValue());
 			}
 			break;
 		case NUMERIC:

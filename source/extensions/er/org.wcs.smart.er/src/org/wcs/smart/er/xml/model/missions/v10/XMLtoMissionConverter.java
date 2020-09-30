@@ -24,9 +24,9 @@ package org.wcs.smart.er.xml.model.missions.v10;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.sql.Time;
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -35,7 +35,6 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.hibernate.Session;
 import org.hibernate.query.Query;
@@ -71,6 +70,7 @@ import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Converts an xml mission file to a
@@ -150,15 +150,13 @@ public class XMLtoMissionConverter implements IXmlToMissionConverter{
 
 		mission.setComment(xml.getComment());
 		
-		XMLGregorianCalendar temp = xml.getStartDate();
-		if(temp != null){
-			mission.setStartDate(temp.toGregorianCalendar().getTime());
+		if(xml.getStartDate() != null){
+			mission.setStartDate(SmartUtils.toLocalDate(xml.getStartDate()));
 		}else{
 			mission.setStartDate(null);
 		}
-		temp = xml.getEndDate();
-		if(temp != null){
-			mission.setEndDate(temp.toGregorianCalendar().getTime());
+		if (xml.getEndDate() != null) {
+			mission.setEndDate(SmartUtils.toLocalDate(xml.getEndDate()));
 		}else{
 			mission.setEndDate(null);
 		}
@@ -180,9 +178,9 @@ public class XMLtoMissionConverter implements IXmlToMissionConverter{
 		setMissionPropertyValues(mission, xml);
 		for (MissionDayType mdtxml : xml.getDays()){
 			MissionDay md = new MissionDay();
-			md.setDate(mdtxml.getDate().toGregorianCalendar().getTime());
-			md.setStartTime( new Time(mdtxml.getStartTime().toGregorianCalendar().getTime().getTime()) );
-			md.setEndTime( new Time(mdtxml.getEndTime().toGregorianCalendar().getTime().getTime()) );
+			md.setDate(SmartUtils.toLocalDate(mdtxml.getDate()));
+			md.setStartTime( SmartUtils.toLocalTime(mdtxml.getStartTime()) );
+			md.setEndTime( SmartUtils.toLocalTime(mdtxml.getEndTime()) );
 			md.setRestMinutes(mdtxml.getRestMinutes());
 			md.setMission(mission);
 			
@@ -227,15 +225,14 @@ public class XMLtoMissionConverter implements IXmlToMissionConverter{
 	private void createAndSetSurvey(Mission m, MissionType xml) {
 		Survey survey = new Survey();
 		
-		XMLGregorianCalendar temp = xml.getSurvey().getEndDate();
-		if(temp != null){
-			survey.setEndDate(temp.toGregorianCalendar().getTime());
+		
+		if(xml.getSurvey().getEndDate() != null){
+			survey.setEndDate(SmartUtils.toLocalDate(xml.getSurvey().getEndDate()));
 		}else{
 			survey.setEndDate(null);
 		}
-		temp = xml.getSurvey().getStartDate();
-		if(temp != null){
-			survey.setStartDate(temp.toGregorianCalendar().getTime());
+		if (xml.getSurvey().getStartDate() != null) {
+			survey.setStartDate(SmartUtils.toLocalDate(xml.getSurvey().getStartDate()));
 		}else{
 			survey.setStartDate(null);
 		}
@@ -316,9 +313,8 @@ public class XMLtoMissionConverter implements IXmlToMissionConverter{
 		wp.setConservationArea(SmartDB.getCurrentConservationArea());
 		wp.setSourceId(SurveyWaypointSource.KEY);
 
-		XMLGregorianCalendar temp = xml.getDateTime();
-		if(temp != null){
-			wp.setDateTime(temp.toGregorianCalendar().getTime());
+		if (xml.getDateTime() != null) {
+			wp.setDateTime(SmartUtils.toLocalDateTime(xml.getDateTime()));
 		}else{
 			wp.setDateTime(null);
 		}
@@ -408,7 +404,8 @@ public class XMLtoMissionConverter implements IXmlToMissionConverter{
 		Category cat = findCategory(xml.getCategoryKey());
 		if (cat == null){
 			warnings.add(MessageFormat.format(Messages.XMLtoMissionConverter_2,
-					new Object[]{xml.getCategoryKey(),wp.getId() ,DateFormat.getDateTimeInstance().format(wp.getDateTime())  }) 
+					new Object[]{xml.getCategoryKey(),wp.getId(),
+						DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(wp.getDateTime())  }) 
 					);
 			return null;
 		}else{
@@ -430,13 +427,13 @@ public class XMLtoMissionConverter implements IXmlToMissionConverter{
 					}else{
 						warnings.add(
 								MessageFormat.format(Messages.XMLtoMissionConverter_3,
-										new Object[]{wp.getId(), DateFormat.getDateTimeInstance().format(wp.getDateTime()), attribute.getAttribute().getKeyId()})); 
+										new Object[]{wp.getId(), DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(wp.getDateTime()), attribute.getAttribute().getKeyId()})); 
 										
 					}
 				}else{
 					warnings.add(MessageFormat.format(
 						Messages.XMLtoMissionConverter_4, new Object[]{
-								wp.getId(),DateFormat.getDateTimeInstance().format(wp.getDateTime()) }) 
+								wp.getId(),DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(wp.getDateTime()) }) 
 					);
 					
 				}

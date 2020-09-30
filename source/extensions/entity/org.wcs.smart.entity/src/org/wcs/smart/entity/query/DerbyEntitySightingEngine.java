@@ -25,6 +25,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -600,7 +602,7 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 		it.setWaypointId(rs.getInt(FixedColumns.WAYPOINT_ID.dbColName)); 
 		it.setWaypointX(rs.getDouble(FixedColumns.WAYPOINT_X.dbColName)); 
 		it.setWaypointY(rs.getDouble(FixedColumns.WAYPOINT_Y.dbColName)); 
-		it.setWaypointDateTime(rs.getTimestamp(FixedColumns.WAYPOINT_TIME.dbColName));
+		it.setWaypointDateTime(rs.getTimestamp(FixedColumns.WAYPOINT_TIME.dbColName).toLocalDateTime());
 		it.setWaypointDirection(rs.getFloat(FixedColumns.WAYPOINT_DIRECTION.dbColName)); 
 		it.setWaypointDistance(rs.getFloat(FixedColumns.WAYPOINT_DISTANCE.dbColName)); 
 		it.setWaypointComment(rs.getString(FixedColumns.WAYPOINT_COMMENT.dbColName));
@@ -616,7 +618,7 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 		for (EntityAttribute ea : query.getEntityType().getAttributes()){
 			Object x = rs.getObject("ea_" + ea.getKeyId()); //$NON-NLS-1$
 			if (x != null && ea.getDmAttribute().getType() == AttributeType.DATE){
-				x = java.sql.Date.valueOf((String)x);
+				x = LocalDate.parse((String)x,DateTimeFormatter.ISO_LOCAL_DATE);
 			}
 			it.setEntityAttribute("entity:" + ea.getKeyId(), x); //$NON-NLS-1$
 		}

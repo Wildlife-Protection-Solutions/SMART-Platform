@@ -358,7 +358,7 @@ public class AttributeFieldEditor {
 		}else if (attribute.getType() == AttributeType.DATE){
 			if (((DateTime)dtDateTime).getEnabled()){
 				add = true;
-				value.setDateValue( SmartUtils.getDate((DateTime)dtDateTime));
+				value.setDateValue( SmartUtils.toDate((DateTime)dtDateTime));
 			}
 		}else if (attribute.getType() == AttributeType.LIST){
 			if (isMulti) throw new IllegalStateException(Messages.AttributeFieldEditor_MultiSelectNotSupportedRelationships);
@@ -425,7 +425,7 @@ public class AttributeFieldEditor {
 		}else if (attribute.getType() == AttributeType.DATE){
 			if (((DateTime)dtDateTime).getEnabled()){
 				add = true;
-				value.setDateValue( SmartUtils.getDate((DateTime)dtDateTime));
+				value.setDateValue( SmartUtils.toDate((DateTime)dtDateTime));
 			}
 		}else if (attribute.getType() == AttributeType.LIST){
 			if (value.getAttributeListItems() == null){
@@ -554,7 +554,7 @@ public class AttributeFieldEditor {
 				dtDateTime.setEnabled(false);
 			}else{
 				btnChDateTime.setSelection(true);
-				SmartUtils.initDateDateTimeWidget(dtDateTime, value.getDateValue());
+				SmartUtils.initDateTimeWidget(dtDateTime, value.getDateValue());
 				dtDateTime.setEnabled(true);
 			}
 		}else if (attribute.getType() ==  AttributeType.BOOLEAN){
@@ -591,7 +591,7 @@ public class AttributeFieldEditor {
 		}else if (attribute.getType() == AttributeType.DATE){
 			if (((DateTime)dtDateTime).getEnabled()){
 				add = true;
-				value.setDateValue( SmartUtils.getDate((DateTime)dtDateTime));
+				value.setDateValue( SmartUtils.toDate((DateTime)dtDateTime));
 			}
 		}else if (attribute.getType() == AttributeType.LIST){
 			if (isMulti) throw new IllegalStateException(Messages.AttributeFieldEditor_MultiSelectNotSupportedAttributes);
@@ -663,7 +663,7 @@ public class AttributeFieldEditor {
 				dtDateTime.setEnabled(false);
 			}else{
 				btnChDateTime.setSelection(true);
-				SmartUtils.initDateDateTimeWidget(dtDateTime, value.getDateValue());
+				SmartUtils.initDateTimeWidget(dtDateTime, value.getDateValue());
 				dtDateTime.setEnabled(true);
 			}
 		}else if (attribute.getType() ==  AttributeType.BOOLEAN){
@@ -751,7 +751,7 @@ public class AttributeFieldEditor {
 				dtDateTime.setEnabled(false);
 			}else{
 				btnChDateTime.setSelection(true);
-				SmartUtils.initDateDateTimeWidget(dtDateTime, value.getDateValue());
+				SmartUtils.initDateTimeWidget(dtDateTime, value.getDateValue());
 				dtDateTime.setEnabled(true);
 			}
 		}else if (attribute.getType() ==  AttributeType.BOOLEAN){

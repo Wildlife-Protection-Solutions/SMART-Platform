@@ -3642,8 +3642,8 @@ CREATE TABLE smart.mission (
     uuid uuid NOT NULL,
     survey_uuid uuid NOT NULL,
     id character varying(128) NOT NULL,
-    start_datetime timestamp without time zone NOT NULL,
-    end_datetime timestamp without time zone NOT NULL,
+    start_date date NOT NULL,
+    end_date date NOT NULL,
     comment character varying,
     PRIMARY KEY (uuid)
 );

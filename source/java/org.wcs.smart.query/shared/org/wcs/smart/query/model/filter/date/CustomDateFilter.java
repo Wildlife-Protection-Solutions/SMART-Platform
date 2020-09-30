@@ -22,7 +22,7 @@
 package org.wcs.smart.query.model.filter.date;
 
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.Locale;
 
 import org.wcs.smart.SmartContext;
@@ -36,8 +36,8 @@ public class CustomDateFilter implements IDateFilter {
 
 	public static final String KEY = "custom"; //$NON-NLS-1$
 	
-	private Date startDate = new Date();
-	private Date endDate = new Date();
+	private LocalDate startDate = LocalDate.now();
+	private LocalDate endDate = LocalDate.now();
 	
 	@Override
 	public String getGuiName(Locale l) {
@@ -50,11 +50,11 @@ public class CustomDateFilter implements IDateFilter {
 	}
 
 	@Override
-	public java.sql.Date[] getDates() {
-		return new java.sql.Date[]{new java.sql.Date(startDate.getTime()), new java.sql.Date(endDate.getTime())};
+	public LocalDate[] getDates() {
+		return new LocalDate[] {startDate, endDate};
 	}
 	
-	public void setDates(Date start, Date end){
+	public void setDates(LocalDate start, LocalDate end){
 		this.startDate = start;
 		this.endDate = end;
 	}
@@ -75,7 +75,7 @@ public class CustomDateFilter implements IDateFilter {
 
 	@Override
 	public String validate() {
-		if (startDate.after(endDate)){
+		if (startDate.isAfter(endDate)){
 			return SmartContext.INSTANCE.getClass(IQueryDateLabelProvider.class).
 					getLabel(IQueryDateLabelProvider.START_BEFORE_END_ERR, Locale.getDefault());
 		}

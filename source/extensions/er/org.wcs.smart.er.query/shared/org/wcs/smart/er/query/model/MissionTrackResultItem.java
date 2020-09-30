@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.er.query.model;
 
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -47,16 +48,16 @@ public class MissionTrackResultItem implements IGeometryResultItem{
 	private String caName;
 	
 	private String surveyDesign;
-	private Date surveyDesignStart;
-	private Date surveyDesignEnd;
+	private LocalDate surveyDesignStart;
+	private LocalDate surveyDesignEnd;
 	
 	private String surveyId;
-	private Date surveyStart;
-	private Date surveyEnd;
+	private LocalDate surveyStart;
+	private LocalDate surveyEnd;
 	
 	private String missionId;
-	private Date missionStart;
-	private Date missionEnd;
+	private LocalDateTime missionStart;
+	private LocalDateTime missionEnd;
 	private UUID missionUuid;
 	
 	private UUID samplingUnitUuid;
@@ -64,7 +65,7 @@ public class MissionTrackResultItem implements IGeometryResultItem{
 	private Double smaplingUnitBuffer;
 	
 	private UUID trackUuid;
-	private Date trackDate;
+	private LocalDate trackDate;
 	private MissionTrack.TrackType trackType;
 	private String trackId;
 	private Double trackLength;
@@ -134,7 +135,7 @@ public class MissionTrackResultItem implements IGeometryResultItem{
 	 * 
 	 * @param leader
 	 */
-	public void setTrackDate(Date trackDate){
+	public void setTrackDate(LocalDate trackDate){
 		this.trackDate = trackDate;
 	}
 	
@@ -143,7 +144,7 @@ public class MissionTrackResultItem implements IGeometryResultItem{
 	 * 
 	 * @return
 	 */
-	public Date getTrackDate(){
+	public LocalDate getTrackDate(){
 		return this.trackDate;
 	}
 	
@@ -232,11 +233,11 @@ public class MissionTrackResultItem implements IGeometryResultItem{
 	 * survey design start
 	 * @return
 	 */
-	public Date getSurveyDesignStart() {
+	public LocalDate getSurveyDesignStart() {
 		return surveyDesignStart;
 	}
 
-	public void setSurveyDesignStart(Date surveyDesignStart) {
+	public void setSurveyDesignStart(LocalDate surveyDesignStart) {
 		this.surveyDesignStart = surveyDesignStart;
 	}
 
@@ -244,11 +245,11 @@ public class MissionTrackResultItem implements IGeometryResultItem{
 	 * survey design end
 	 * @return
 	 */
-	public Date getSurveyDesignEnd() {
+	public LocalDate getSurveyDesignEnd() {
 		return surveyDesignEnd;
 	}
 
-	public void setSurveyDesignEnd(Date surveyDesignEnd) {
+	public void setSurveyDesignEnd(LocalDate surveyDesignEnd) {
 		this.surveyDesignEnd = surveyDesignEnd;
 	}
 
@@ -268,11 +269,11 @@ public class MissionTrackResultItem implements IGeometryResultItem{
 	 * survey start
 	 * @return
 	 */
-	public Date getSurveyStart() {
+	public LocalDate getSurveyStart() {
 		return surveyStart;
 	}
 
-	public void setSurveyStart(Date surveyStart) {
+	public void setSurveyStart(LocalDate surveyStart) {
 		this.surveyStart = surveyStart;
 	}
 
@@ -280,11 +281,11 @@ public class MissionTrackResultItem implements IGeometryResultItem{
 	 * survey end
 	 * @return
 	 */
-	public Date getSurveyEnd() {
+	public LocalDate getSurveyEnd() {
 		return surveyEnd;
 	}
 
-	public void setSurveyEnd(Date surveyEnd) {
+	public void setSurveyEnd(LocalDate surveyEnd) {
 		this.surveyEnd = surveyEnd;
 	}
 
@@ -304,11 +305,11 @@ public class MissionTrackResultItem implements IGeometryResultItem{
 	 * mission start
 	 * @return
 	 */
-	public Date getMissionStart() {
+	public LocalDateTime getMissionStart() {
 		return missionStart;
 	}
 
-	public void setMissionStart(Date missionStart) {
+	public void setMissionStart(LocalDateTime missionStart) {
 		this.missionStart = missionStart;
 	}
 
@@ -316,11 +317,11 @@ public class MissionTrackResultItem implements IGeometryResultItem{
 	 * mission end
 	 * @return
 	 */
-	public Date getMissionEnd() {
+	public LocalDateTime getMissionEnd() {
 		return missionEnd;
 	}
 
-	public void setMissionEnd(Date missionEnd) {
+	public void setMissionEnd(LocalDateTime missionEnd) {
 		this.missionEnd = missionEnd;
 	}
 

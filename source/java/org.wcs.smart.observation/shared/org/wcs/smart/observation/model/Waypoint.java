@@ -24,8 +24,8 @@ package org.wcs.smart.observation.model;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
@@ -75,9 +75,9 @@ public class Waypoint extends UuidItem {
 	@Transient
 	private Double prjy;
 	
-	private Date dateTime;
+	private LocalDateTime dateTime;
 	
-	private Date lastModifiedDate;
+	private LocalDateTime lastModifiedDate;
 	private Employee lastModifiedBy;
 	
 	private Float direction;
@@ -167,14 +167,14 @@ public class Waypoint extends UuidItem {
 	
 
 	@Column(name="last_modified")
-	public Date getLastModified() {
+	public LocalDateTime getLastModified() {
 		return lastModifiedDate;
 	}
 
 	/**
 	 * @param the last modified date time
 	 */
-	public void setLastModified(Date modifiedDateTime) {
+	public void setLastModified(LocalDateTime modifiedDateTime) {
 		this.lastModifiedDate = modifiedDateTime;
 	}
 	
@@ -202,14 +202,14 @@ public class Waypoint extends UuidItem {
 	}
 	
 	@Column(name="datetime")
-	public Date getDateTime() {
+	public LocalDateTime getDateTime() {
 		return dateTime;
 	}
 
 	/**
 	 * @param time
 	 */
-	public void setDateTime(Date dateTime) {
+	public void setDateTime(LocalDateTime dateTime) {
 		this.dateTime = dateTime;
 	}
 

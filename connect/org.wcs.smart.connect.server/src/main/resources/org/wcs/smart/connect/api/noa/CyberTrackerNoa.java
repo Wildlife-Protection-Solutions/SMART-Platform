@@ -27,9 +27,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
-import java.text.DateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -404,7 +405,7 @@ public class CyberTrackerNoa {
 		s.beginTransaction();
 		try{		
 			item.setConservationArea(ca);
-			item.setName("CyberTracker " + DateFormat.getDateTimeInstance().format(new Date())); //$NON-NLS-1$
+			item.setName("CyberTracker " + DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(LocalDateTime.now())); //$NON-NLS-1$
 			if (request.getHeader(HttpHeaders.CONTENT_ENCODING) != null && request.getHeader(HttpHeaders.CONTENT_ENCODING).equalsIgnoreCase("deflate")){ //$NON-NLS-1$
 				item.setType("JSON_ZLIB_CT"); //$NON-NLS-1$
 			}else{
@@ -414,7 +415,7 @@ public class CyberTrackerNoa {
 			item.setStatus(Status.UPLOADING);
 			item.setStatusMessage(null);
 			item.setUploadedBy("SMART Mobile"); //$NON-NLS-1$
-			item.setUploadedDate(new Date());
+			item.setUploadedDate(LocalDateTime.now());
 			item.setWorkItem(null);
 		
 			s.save(item);

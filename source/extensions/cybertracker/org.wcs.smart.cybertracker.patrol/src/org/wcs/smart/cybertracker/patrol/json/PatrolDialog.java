@@ -21,11 +21,13 @@
  */
 package org.wcs.smart.cybertracker.patrol.json;
 
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -65,8 +67,6 @@ import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.ui.PatrolFilteredComboViewer;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
-import org.wcs.smart.util.SharedUtils;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * Dialog for linking cybertracker patrols to SMART patrols.
@@ -151,11 +151,11 @@ public class PatrolDialog extends SmartStyledTitleDialog{
 			addToPatrol.getLegs().add(toAdd);
 			toAdd.setPatrol(addToPatrol);
 			
-			if (addToPatrol.getStartDate().after(toAdd.getStartDate())) {
-				addToPatrol.setStartDate(SharedUtils.getDatePart(toAdd.getStartDate(),false));
+			if (addToPatrol.getStartDate().isAfter(toAdd.getStartDate())) {
+				addToPatrol.setStartDate(toAdd.getStartDate());
 			}
-			if (addToPatrol.getEndDate().before(toAdd.getEndDate())) {
-				addToPatrol.setEndDate(SharedUtils.getDatePart(toAdd.getEndDate(),false));
+			if (addToPatrol.getEndDate().isBefore(toAdd.getEndDate())) {
+				addToPatrol.setEndDate(toAdd.getEndDate());
 			}
 		}
 		PatrolHibernateManager.savePatrol(addToPatrol, session, true);
@@ -195,11 +195,11 @@ public class PatrolDialog extends SmartStyledTitleDialog{
 		
 		//this shouldn't be necessary with the CT Mobile, but 
 		//may be required for old CT support
-		Date start = newPatrol.getFirstLeg().getStartDate();
-		Date end = newPatrol.getFirstLeg().getEndDate();
+		LocalDate start = newPatrol.getFirstLeg().getStartDate();
+		LocalDate end = newPatrol.getFirstLeg().getEndDate();
 		for (PatrolLeg pl : newPatrol.getLegs()) {
-			if (pl.getStartDate().before(start)) start = pl.getStartDate();
-			if (pl.getEndDate().after(end)) end = pl.getEndDate();
+			if (pl.getStartDate().isBefore(start)) start = pl.getStartDate();
+			if (pl.getEndDate().isAfter(end)) end = pl.getEndDate();
 		}
 		newPatrol.setStartDate(start);
 		newPatrol.setEndDate(end);
@@ -271,11 +271,11 @@ public class PatrolDialog extends SmartStyledTitleDialog{
 		newPatrols.sort(new Comparator<PatrolLeg>() {
 			@Override
 			public int compare(PatrolLeg l1, PatrolLeg l2) {
-				if (!SharedUtils.isSameDate(l1.getStartDate(), l2.getStartDate())) return l1.getStartDate().compareTo(l2.getStartDate());
+				if (!l1.getStartDate().isEqual(l2.getStartDate())) return l1.getStartDate().compareTo(l2.getStartDate());
 				for (PatrolLegDay day1 : l1.getPatrolLegDays()){
-					if (SharedUtils.isSameDate(day1.getDate(), l1.getStartDate())){
+					if (day1.getDate().isEqual(l1.getStartDate())){
 						for (PatrolLegDay day2 : l2.getPatrolLegDays()){
-							if (SharedUtils.isSameDate(day2.getDate(), l2.getStartDate())){
+							if (day2.getDate().isEqual(l2.getStartDate())){
 								return day1.getStartTime().compareTo(day2.getStartTime());
 							}
 						}
@@ -301,18 +301,18 @@ public class PatrolDialog extends SmartStyledTitleDialog{
 			Label l = new Label(main, SWT.WRAP);
 			StringBuilder lbl = new StringBuilder();
 			Patrol p = e.getValue().getPatrolLeg().getPatrol();
-			Date startDt = SmartUtils.combineDateTime(p.getFirstLeg().getStartDate(), p.getFirstLeg().getPatrolLegDays().get(0).getStartTime());
+			LocalDateTime startDt = p.getFirstLeg().getStartDate().atTime(p.getFirstLeg().getPatrolLegDays().get(0).getStartTime());
 			for (PatrolLeg ppl : p.getLegs()) {
 				for (PatrolLegDay pld : ppl.getPatrolLegDays()) {
-					Date d = SmartUtils.combineDateTime(pld.getDate(), pld.getStartTime());
-					if (d.before(startDt)) startDt = d;
+					LocalDateTime d = pld.getDate().atTime(pld.getStartTime());
+					if (d.isBefore(startDt)) startDt = d;
 				}
 			}
 			
 			lbl.append(p.getId());
 			lbl.append("\n"); //$NON-NLS-1$
 			lbl.append(Messages.PatrolDialog_StartDateLabel);
-			lbl.append(DateFormat.getDateTimeInstance().format(startDt)); 
+			lbl.append(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(startDt)); 
 			lbl.append("\n"); //$NON-NLS-1$
 			lbl.append(Messages.PatrolDialog_TypeLabel);
 			lbl.append(p.getFirstLeg().getType() == null ? "" : p.getFirstLeg().getType().getName()); //$NON-NLS-1$
@@ -417,21 +417,21 @@ public class PatrolDialog extends SmartStyledTitleDialog{
 					if (p.getUuid() == null){
 						//we are selecting an new patrol to add to; we want to make sure
 						//this new patrol starts before the current patrol
-						Date addtoDate = null;
+						LocalDateTime addtoDate = null;
 						for (PatrolLegDay pld : p.getFirstLeg().getPatrolLegDays()){
-							if ( SharedUtils.isSameDate(pld.getDate(), p.getFirstLeg().getStartDate())){
-								addtoDate = SmartUtils.combineDateTime(pld.getDate(), pld.getStartTime());
+							if ( pld.getDate().isEqual(p.getFirstLeg().getStartDate())){
+								addtoDate = pld.getDate().atTime(pld.getStartTime());
 								break;
 							}
 						}
-						Date addfromDate = null;
+						LocalDateTime addfromDate = null;
 						for (PatrolLegDay pld : ctP.getFirstLeg().getPatrolLegDays()){
-							if ( SharedUtils.isSameDate(pld.getDate(), ctP.getFirstLeg().getStartDate())){
-								addfromDate = SmartUtils.combineDateTime(pld.getDate(), pld.getStartTime());
+							if ( pld.getDate().isEqual(ctP.getFirstLeg().getStartDate())){
+								addfromDate = pld.getDate().atTime(pld.getStartTime());
 								break;
 							}
 						}
-						if (addtoDate.after(addfromDate)){
+						if (addtoDate.isAfter(addfromDate)){
 							entry.getValue().errItem.setDescriptionText(Messages.PatrolDialog_InvalidMergeDates);
 							entry.getValue().errItem.show();
 							error = true;

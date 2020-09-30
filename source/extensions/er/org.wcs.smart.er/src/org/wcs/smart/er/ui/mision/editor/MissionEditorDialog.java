@@ -21,12 +21,12 @@
  */
 package org.wcs.smart.er.ui.mision.editor;
 
-import java.sql.Time;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -50,7 +50,6 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
-import org.wcs.smart.util.SharedUtils;
 
 /**
  * Dialog for editing mission properties. 
@@ -119,8 +118,8 @@ public class MissionEditorDialog extends SmartStyledTitleDialog {
 			try{
 				session.saveOrUpdate(toUpdate);
 			
-				Date currentStart = toUpdate.getStartDate();
-				Date currentEnd = toUpdate.getEndDate();
+				LocalDate currentStart = toUpdate.getStartDate();
+				LocalDate currentEnd = toUpdate.getEndDate();
 				
 				composite.updateDesign(toUpdate);
 				
@@ -134,8 +133,7 @@ public class MissionEditorDialog extends SmartStyledTitleDialog {
 					//waypoints
 					List<MissionDay> wpDelete = new ArrayList<MissionDay>();
 					for (MissionDay md : toUpdate.getMissionDays()){
-						if (!isBetweenMissionDates(
-								SharedUtils.getDatePart(md.getDate(), false))){
+						if (!isBetweenMissionDates(md.getDate())){
 							wpDelete.add(md);
 						}
 						
@@ -159,24 +157,20 @@ public class MissionEditorDialog extends SmartStyledTitleDialog {
 					
 					//need to create new mission days as required
 					//create days
-					Calendar calStart = SharedUtils.convertDate(toUpdate.getStartDate());
-					calStart.set(Calendar.HOUR, 0);
-					calStart.set(Calendar.MINUTE, 0);
-					calStart.set(Calendar.SECOND, 0);
-					calStart.set(Calendar.MILLISECOND, 0);
+					LocalDate working = LocalDate.from(toUpdate.getStartDate());
 					
-					Calendar calEnd = SharedUtils.convertDate(toUpdate.getEndDate());
-					while (calStart.before(calEnd) || calStart.equals(calEnd)) {
+					while (working.isBefore(toUpdate.getEndDate()) 
+							|| working.isEqual(toUpdate.getEndDate())) {
 						boolean found = false;
 						for(MissionDay md : toUpdate.getMissionDays()){
-							if (SharedUtils.isSameDate(md.getDate(), calStart.getTime())){
+							if (md.getDate().isEqual(working)){
 								found = true;
 								break;
 							}
 						}
 						if (!found){
 							MissionDay md = new MissionDay();
-							md.setDate(SharedUtils.getDatePart(calStart.getTime(), false));
+							md.setDate(working);
 							md.setStartTime(createTime(0, 0, 0));
 							md.setEndTime(createTime(23, 59, 59));
 							md.setRestMinutes(0);
@@ -185,7 +179,7 @@ public class MissionEditorDialog extends SmartStyledTitleDialog {
 							md.setMission(toUpdate);
 							toUpdate.getMissionDays().add(md);
 						}
-						calStart.add(Calendar.DAY_OF_MONTH, 1);
+						working = ChronoUnit.DAYS.addTo(working, 1);
 					}
 					
 					//ensure these are sorted correctly
@@ -212,21 +206,15 @@ public class MissionEditorDialog extends SmartStyledTitleDialog {
 		return true;
 	}
 	
-	private Time createTime(int hours, int minute, int second){
-		Calendar cForProcessing = Calendar.getInstance();
-		cForProcessing.setTimeInMillis(0);
-		cForProcessing.set(Calendar.HOUR_OF_DAY, hours);
-		cForProcessing.set(Calendar.MINUTE, minute);
-		cForProcessing.set(Calendar.SECOND, second);
-		cForProcessing.set(Calendar.MILLISECOND, 0);
-		return new Time(cForProcessing.getTime().getTime());
+	private LocalTime createTime(int hours, int minute, int second){
+		return LocalTime.of(hours, minute, second);
 	}
 	
-	private boolean isBetweenMissionDates(Date date){
-		return date.equals(toUpdate.getStartDate()) ||
-			   date.equals(toUpdate.getEndDate()) ||
-			   (date.before(toUpdate.getEndDate()) &&
-				date.after(toUpdate.getStartDate()));		
+	private boolean isBetweenMissionDates(LocalDate date){
+		return date.isEqual(toUpdate.getStartDate()) ||
+			   date.isEqual(toUpdate.getEndDate()) ||
+			   (date.isBefore(toUpdate.getEndDate()) &&
+				date.isAfter(toUpdate.getStartDate()));		
 	}
 	protected void okPressed() {
 		if (!saveChanges()){

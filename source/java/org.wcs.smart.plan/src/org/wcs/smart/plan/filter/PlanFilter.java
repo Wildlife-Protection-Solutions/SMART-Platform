@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.plan.filter;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 import org.hibernate.Session;
 import org.hibernate.query.Query;
@@ -54,8 +54,8 @@ public class PlanFilter {
 	private String planIdFilter = null;
 	private StringComparison stringComparator = null;
 	
-	private Date startDate;
-	private Date endDate;
+	private LocalDate startDate;
+	private LocalDate endDate;
 	
 	/**
 	 * 
@@ -89,7 +89,7 @@ public class PlanFilter {
 	 * 
 	 * @return start date for custom date filter
 	 */
-	public Date getStartDate(){
+	public LocalDate getStartDate(){
 		return this.startDate;
 	}
 	
@@ -97,7 +97,7 @@ public class PlanFilter {
 	 * 
 	 * @return end date for custom date filter
 	 */
-	public Date getEndDate(){
+	public LocalDate getEndDate(){
 		return this.endDate;
 	}
 	
@@ -126,7 +126,7 @@ public class PlanFilter {
 	 * @param start the start date for custom filter; null if not custom date filter
 	 * @param end the end date for custom filter; null if not cusom date filter
 	 */
-	public void setDateFilter(DateFilter dFilter, Date start, Date end){
+	public void setDateFilter(DateFilter dFilter, LocalDate start, LocalDate end){
 		this.dateFilter = dFilter;
 		this.startDate = start;
 		this.endDate = end;
@@ -230,11 +230,11 @@ public class PlanFilter {
 			}
 		}
 		if (dateFilter != null) {
-			Date start = dateFilter.getStartDate();
+			LocalDate start = dateFilter.getStartDate();
 			if (start == null){
 				start = startDate;
 			}
-			Date end = dateFilter.getEndDate();
+			LocalDate end = dateFilter.getEndDate();
 			if (end == null){
 				end = endDate;
 			}

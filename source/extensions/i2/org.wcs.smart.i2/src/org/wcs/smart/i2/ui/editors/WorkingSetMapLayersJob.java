@@ -23,9 +23,11 @@ package org.wcs.smart.i2.ui.editors;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -252,15 +254,17 @@ public class WorkingSetMapLayersJob extends Job {
 		
 					
 		//parse date filter
-		Date[] dates = null;
+		LocalDate[] dates = null;
 		String dateFilter = workingset.getEntityDateFilter();
 		try{
 			String[] bits = dateFilter.split(":"); //$NON-NLS-1$
 			DateFilter initFilter = DateFilter.valueOf(bits[0]);
 			if (initFilter == DateFilter.CUSTOM){
-				dates = new Date[]{new Date(Long.valueOf(bits[1])), new Date(Long.valueOf(bits[2]))};
+				dates = new LocalDate[] {
+						LocalDate.parse(bits[1], DateTimeFormatter.ISO_LOCAL_DATE),
+						LocalDate.parse(bits[2], DateTimeFormatter.ISO_LOCAL_DATE)};
 			}else{
-				dates = new Date[]{initFilter.getStartDate(), initFilter.getEndDate()};
+				dates = new LocalDate[]{initFilter.getStartDate(), initFilter.getEndDate()};
 			}
 		}catch (Exception ex){
 			Intelligence2PlugIn.log(Messages.WorkingSetMapLayersJob_ParseError + dateFilter + ". " + ex.getMessage(), ex); //$NON-NLS-1$
@@ -391,7 +395,7 @@ public class WorkingSetMapLayersJob extends Job {
 	}
 	
 	//add layers to map
-	protected void addLayers(List<LayerInfo> toAdd, java.util.Map<ID, StyleBlackboard> layerStyles, Date[] dates){
+	protected void addLayers(List<LayerInfo> toAdd, java.util.Map<ID, StyleBlackboard> layerStyles, LocalDate[] dates){
 		Set<IService> services = new HashSet<IService>();
 		IProgressMonitor m = new NullProgressMonitor();
 		for (LayerInfo r : toAdd){
@@ -427,7 +431,7 @@ public class WorkingSetMapLayersJob extends Job {
 			if (!filterResources.isEmpty()){
 				Filter f = null;
 				if (dates != null) {
-					f = IntelEntityDataSource.createDateFilter(dates[0], dates[1]);
+					f = IntelEntityDataSource.createDateTimeFilter(dates[0] == null ? null : dates[0].atStartOfDay(), dates[1] == null ? null : dates[1].atTime(LocalTime.MAX));
 				}
 				AddContentFilterLayersCommand addCmd = new AddContentFilterLayersCommand(filterResources, 1, f){
 					 public void run( IProgressMonitor monitor ) throws Exception {

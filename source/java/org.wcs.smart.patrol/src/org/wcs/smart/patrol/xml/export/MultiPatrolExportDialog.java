@@ -25,9 +25,10 @@ package org.wcs.smart.patrol.xml.export;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.Timestamp;
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -196,8 +197,15 @@ public class MultiPatrolExportDialog extends XmlMultiExportDialog implements IPa
 						for(Object x : q.list()){
 							Object[] row = (Object[])x;
 							
-							String pname = (String)row[1] + " [" + DateFormat.getDateInstance(DateFormat.SHORT).format((Timestamp)row[3]) + " - " + DateFormat.getDateInstance(DateFormat.SHORT).format( (Timestamp)row[4]) + "]";   //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-							items.add(new RowItem(pname, (UUID)row[0], (String)row[1]));
+							StringBuilder sb = new StringBuilder();
+							sb.append((String)row[1]);
+							sb.append(" ["); //$NON-NLS-1$
+							sb.append(DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).format((LocalDate)row[3]));
+							sb.append(" - "); //$NON-NLS-1$
+							sb.append( DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).format((LocalDate)row[4]));
+							sb.append("]"); //$NON-NLS-1$
+							
+							items.add(new RowItem(sb.toString(), (UUID)row[0], (String)row[1]));
 						}
 					}finally{
 						if (s.getTransaction().isActive()){

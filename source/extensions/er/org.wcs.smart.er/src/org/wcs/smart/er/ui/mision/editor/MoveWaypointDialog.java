@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.er.ui.mision.editor;
 
-import java.text.DateFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -93,7 +94,7 @@ public class MoveWaypointDialog extends SmartStyledTitleDialog {
 		cmbViewer.setContentProvider(ArrayContentProvider.getInstance());
 		cmbViewer.setLabelProvider(new LabelProvider(){
 			public String getText(Object element){
-				return DateFormat.getDateInstance().format(((MissionDay)element).getDate());
+				return DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(((MissionDay)element).getDate());
 			}
 		});
 		List<MissionDay> days = createDates();

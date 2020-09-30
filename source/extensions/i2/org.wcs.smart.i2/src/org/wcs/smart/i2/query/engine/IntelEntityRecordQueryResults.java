@@ -131,7 +131,7 @@ public class IntelEntityRecordQueryResults implements IPagedQueryResultSet {
 		EntityRecordQueryResultItem item = new EntityRecordQueryResultItem();
 		
 		item.setEntityUuid(asUuid(rowData[columnNameToIndex.get("entity_uuid")])); //$NON-NLS-1$
-		item.setEntityLastModified((Timestamp)rowData[columnNameToIndex.get("date_modified")]);  //$NON-NLS-1$
+		item.setEntityLastModified( ((Timestamp)rowData[columnNameToIndex.get("date_modified")]).toLocalDateTime());  //$NON-NLS-1$
 		String entityType = (String) rowData[columnNameToIndex.get("entity_type")]; //$NON-NLS-1$
 		item.setEntityTypeName(entityType);
 

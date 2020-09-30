@@ -21,8 +21,10 @@
  */
 package org.wcs.smart.cybertracker.survey.importer;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -36,47 +38,47 @@ import java.util.List;
 public class TimeDataContainer<T> {
 	
 	private List<T> dataValues;
-	private List<Date> dateCuts;
+	private List<LocalDateTime> dateCuts;
 
 	public TimeDataContainer(T initial) {
-		this(initial, new Date(0L));
+		this(initial, LocalDate.EPOCH.atTime(LocalTime.MIN));
 	}
 
-	private TimeDataContainer(T initial, Date from) {
+	private TimeDataContainer(T initial, LocalDateTime from) {
 		dataValues = new ArrayList<>();
 		dateCuts = new ArrayList<>();
 		dataValues.add(initial);
 		dateCuts.add(from);
 	}
 
-	public void add(T data, Date when) {
+	public void add(T data, LocalDateTime when) {
 		if (when == null) {
 			throw new IllegalArgumentException("Date cannot be null"); //$NON-NLS-1$
 		}
 		int index = dateCuts.size()-1;
-		Date last = dateCuts.get(index);
-		if (last.after(when)) {
+		LocalDateTime last = dateCuts.get(index);
+		if (last.isAfter(when)) {
 			throw new IllegalStateException("New date must be after last in TimeDataContainer"); //$NON-NLS-1$
 		}
 		dataValues.add(data);
 		dateCuts.add(when);
 	}
 	
-	public List<TimeCut<T>> getTimeCuts(Date from, Date to) {
+	public List<TimeCut<T>> getTimeCuts(LocalDateTime from, LocalDateTime to) {
 		List<TimeCut<T>> cuts = new ArrayList<>();
-		if (from == null || to == null || !to.after(from))
+		if (from == null || to == null || !to.isAfter(from))
 			return cuts;
 		
 		int endIndex = dateCuts.size()-1;
-		while (!to.after(dateCuts.get(endIndex)) && endIndex >= 0) {
+		while (!to.isAfter(dateCuts.get(endIndex)) && endIndex >= 0) {
 			endIndex--;
 		} //endIndex will point to a last time point before "to"
 		
-		Date lastEnd = from;
+		LocalDateTime lastEnd = from;
 		T data = null;
 		for (int i = 0; i <= endIndex; i++) {
-			Date time = dateCuts.get(i);
-			if (time.after(from)) {
+			LocalDateTime time = dateCuts.get(i);
+			if (time.isAfter(from)) {
 				cuts.add(new TimeCut<T>(lastEnd, time, data));
 				lastEnd = time;
 			}
@@ -94,22 +96,22 @@ public class TimeDataContainer<T> {
 	 * @param <T>
 	 */
 	public static final class TimeCut<T> {
-		private Date start;
-		private Date end;
+		private LocalDateTime start;
+		private LocalDateTime end;
 		private T data;
 		
-		public TimeCut(Date start, Date end, T data) {
+		public TimeCut(LocalDateTime start, LocalDateTime end, T data) {
 			super();
 			this.start = start;
 			this.end = end;
 			this.data = data;
 		}
 
-		public Date getStart() {
+		public LocalDateTime getStart() {
 			return start;
 		}
 		
-		public Date getEnd() {
+		public LocalDateTime getEnd() {
 			return end;
 		}
 		

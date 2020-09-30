@@ -24,10 +24,10 @@ package org.wcs.smart.cybertracker.ctpackage.ui;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -58,7 +58,7 @@ public enum CtPackageExtensionPointManager {
 	private HashMap<String, ICtPackageManager> managers = null;
 	
 	public Path createPackage(ICtPackage ctpackage, IEclipseContext context) throws IOException {
-		SimpleDateFormat sdf = new SimpleDateFormat(ICtPackage.PACKAGE_DATE_FORMAT);
+		DateTimeFormatter sdf = DateTimeFormatter.ofPattern(ICtPackage.PACKAGE_DATE_FORMAT);
 		
 		Path root = ICyberTrackerConstants.getCyberTrackerPackageFolder(ctpackage.getConservationArea());
 		if (!Files.exists(root)) {
@@ -83,7 +83,7 @@ public enum CtPackageExtensionPointManager {
 		sb.append("."); //$NON-NLS-1$
 		sb.append(UuidUtils.uuidToString(UUID.randomUUID()));
 		sb.append("."); //$NON-NLS-1$
-		sb.append(sdf.format(new Date()));
+		sb.append(sdf.format(LocalDateTime.now()));
 		sb.append(".zip"); //$NON-NLS-1$
 		String fname = sb.toString();
 		

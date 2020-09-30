@@ -63,6 +63,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.udig.internal.ui.IDropTargetProvider;
 import org.locationtech.udig.project.command.CommandManager;
 import org.locationtech.udig.project.internal.Layer;
@@ -93,8 +94,6 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
-
-import org.locationtech.jts.geom.Coordinate;
 
 /**
  * A base class for smart map editors.

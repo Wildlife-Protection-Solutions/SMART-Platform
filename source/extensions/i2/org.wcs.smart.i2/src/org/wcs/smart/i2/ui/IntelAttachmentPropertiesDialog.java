@@ -21,7 +21,9 @@
  */
 package org.wcs.smart.i2.ui;
 
-import java.text.DateFormat;
+
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,7 +49,7 @@ public class IntelAttachmentPropertiesDialog extends AttachmentPropertiesDialog{
 	protected List<Entry> findAdditionalDetails(ISmartAttachment attachment){
 		List<Entry> details = new ArrayList<>();
 		details.add(new Entry(Messages.AttachmentPropertiesDialog_CreatedByLabel, SmartLabelProvider.getShortLabel(((IntelAttachment)attachment).getCreatedBy())));
-		details.add(new Entry(Messages.AttachmentPropertiesDialog_CreatedOnLabel, DateFormat.getDateInstance().format(((IntelAttachment)attachment).getDateCreated())));
+		details.add(new Entry(Messages.AttachmentPropertiesDialog_CreatedOnLabel, DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(((IntelAttachment)attachment).getDateCreated())));
 		return details;
 	}
 

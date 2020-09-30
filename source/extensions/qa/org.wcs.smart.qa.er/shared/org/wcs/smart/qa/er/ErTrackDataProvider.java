@@ -21,10 +21,11 @@
  */
 package org.wcs.smart.qa.er;
 
-import java.text.DateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -41,7 +42,6 @@ import org.wcs.smart.qa.er.ILabelProvider.Key;
 import org.wcs.smart.qa.model.IQaDataProvider;
 import org.wcs.smart.qa.model.IQaRoutineType;
 import org.wcs.smart.qa.routine.LocationRoutineType;
-import org.wcs.smart.util.SharedUtils;
 
 /**
  * Data provider for providing patrol track data.
@@ -64,7 +64,7 @@ public class ErTrackDataProvider extends IQaDataProvider {
 	
 	
 	@Override
-	public Collection<?> getData(Session session, ConservationArea ca, Date startDate, Date endDate) {
+	public Collection<?> getData(Session session, ConservationArea ca, LocalDate startDate, LocalDate endDate) {
 		List<TrackLocationData> tracks = new ArrayList<>();
 		
 		Query<Mission> q = session.createQuery("FROM Mission WHERE survey.surveyDesign.conservationArea = :ca AND startDate between :start and :end", Mission.class); //$NON-NLS-1$
@@ -75,7 +75,8 @@ public class ErTrackDataProvider extends IQaDataProvider {
 		
 		for (Mission m: missions){
 			for (MissionDay md : m.getMissionDays()){
-				if ((SharedUtils.isSameDate(md.getDate(), endDate) || md.getDate().before(endDate)) && (SharedUtils.isSameDate(md.getDate(), startDate)  || md.getDate().after(startDate))){
+				if ((md.getDate().isEqual(endDate) || md.getDate().isBefore(endDate)) && 
+						(md.getDate().isEqual(startDate)  || md.getDate().isAfter(startDate))){
 					for (MissionTrack t : md.getTracks()){
 						try{
 							if (t != null && t.getLineString() != null){
@@ -104,7 +105,7 @@ public class ErTrackDataProvider extends IQaDataProvider {
 		sb.append(" - "); //$NON-NLS-1$
 		sb.append(track.getMissionDay().getMission().getId());
 		sb.append(" ("); //$NON-NLS-1$
-		sb.append(DateFormat.getDateInstance().format(track.getMissionDay().getDate()));
+		sb.append(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(track.getMissionDay().getDate()));
 		sb.append(")"); //$NON-NLS-1$
 		return sb.toString();
 	}

@@ -21,9 +21,10 @@
  */
 package org.wcs.smart.connect.dataqueue.internal.ui;
 
-import java.text.DateFormat;
 import java.text.MessageFormat;
-import java.util.Date;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
@@ -98,7 +99,8 @@ public class StatusLineContribution implements IConnectStatusContribution {
 	
 	private String formatMessage(String message){
 		if (message == null) message = ""; //$NON-NLS-1$
-		return MessageFormat.format( Messages.StatusLineContribution_StatusLineMessageFormat_0date_1message, DateFormat.getTimeInstance().format(new Date()), message);
+		return MessageFormat.format( Messages.StatusLineContribution_StatusLineMessageFormat_0date_1message, 
+				DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM).format(LocalTime.now()), message);
 	}
 	
 }

@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.i2.model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -51,8 +51,8 @@ public class IntelWorkingSet extends NamedItem implements IIntelAuditItem{
 	
 	private ConservationArea ca;
 
-	private Date dateCreated;
-	private Date dateModified;
+	private LocalDateTime dateCreated;
+	private LocalDateTime dateModified;
 
 	private Employee createdBy;
 	private Employee lastModifiedBy;
@@ -96,7 +96,7 @@ public class IntelWorkingSet extends NamedItem implements IIntelAuditItem{
 	 * @return date_created
 	 */
 	@Column(name="date_created")
-	public Date getDateCreated() {
+	public LocalDateTime getDateCreated() {
 		return this.dateCreated;
 	}
 	/**
@@ -105,7 +105,7 @@ public class IntelWorkingSet extends NamedItem implements IIntelAuditItem{
 	 * @param dateCreated
 	 *            date_created
 	 */
-	public void setDateCreated(Date dateCreated) {
+	public void setDateCreated(LocalDateTime dateCreated) {
 		this.dateCreated = dateCreated;
 	}
 
@@ -116,7 +116,7 @@ public class IntelWorkingSet extends NamedItem implements IIntelAuditItem{
 	 *            date_modified
 	 */
 	
-	public void setDateModified(Date dateModified) {
+	public void setDateModified(LocalDateTime dateModified) {
 		this.dateModified = dateModified;
 	}
 
@@ -126,7 +126,7 @@ public class IntelWorkingSet extends NamedItem implements IIntelAuditItem{
 	 * @return date_modified
 	 */
 	@Column(name="last_modified_date")
-	public Date getDateModified() {
+	public LocalDateTime getDateModified() {
 		return this.dateModified;
 	}
 

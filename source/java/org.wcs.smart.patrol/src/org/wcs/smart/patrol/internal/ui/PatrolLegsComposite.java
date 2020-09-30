@@ -21,12 +21,15 @@
  */
 package org.wcs.smart.patrol.internal.ui;
 
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -71,8 +74,6 @@ import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.ui.SmartLabelProvider;
-import org.wcs.smart.util.SharedUtils;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * Patrol item composite that modifies the patrol legs.  Allows users
@@ -85,7 +86,7 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class PatrolLegsComposite extends PatrolItemComposite{
 
-	private DateFormat dateFormatter = DateFormat.getDateInstance(DateFormat.MEDIUM);
+	private DateTimeFormatter dateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM);
 	
 	private static final String START_INFO_LABEL = Messages.PatrolLegsComposite_PatrolStart_Label;
 	private static final String END_INFO_LABEL = Messages.PatrolLegsComposite_PatrolEnd_Label;
@@ -102,8 +103,8 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 	private List<PatrolMandate> mandateOps ; 
 	private List<Employee> allEmployes; 
 	
-	private Date patrolStartDate;
-	private Date patrolEndDate;
+	private LocalDate patrolStartDate;
+	private LocalDate patrolEndDate;
 	private boolean canEditDates = false;
 	
 	private Session session;
@@ -401,7 +402,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 	private void deleteLeg() {
 		if (MessageDialog.openConfirm(getShell(), Messages.PatrolLegsComposite_DeleteLeg_ConfirmDialog_Title, Messages.PatrolLegsComposite_DeleteLeg_ConfirmDialog_Message)){
 			removeLeg();
-			Date[] dates = PatrolUtils.calculateDateRange(legs);
+			LocalDate[] dates = PatrolUtils.calculateDateRange(legs);
 			patrolStartDate = dates[0];
 			patrolEndDate = dates[1];
 			updateDateText();
@@ -458,22 +459,24 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 			PatrolLeg tmpLeg = clonePatrolLeg(leg);
 			
 			//start time
-			Date date = null;
+			LocalDateTime date = null;
 			if (leg.getPatrolLegDays().size() > 0){
-				date = SmartUtils.combineDateTime(leg.getStartDate(), leg.getPatrolLegDays().get(0).getStartTime());	
+				date = LocalDateTime.of(leg.getStartDate(), leg.getPatrolLegDays().get(0).getStartTime());	
 			}else{
-				date = SharedUtils.getDatePart(leg.getStartDate(), false);
+				date = leg.getStartDate().atStartOfDay();
 			}
-			tmpLeg.setStartDate(date);
+			tmpLeg.setStartDate(date.toLocalDate());
+			tmpLeg.getPatrolLegDays().get(0).setStartTime(date.toLocalTime());
 			
 			//end time
-			date = null;
 			if (leg.getPatrolLegDays().size() > 0){
-				date = SmartUtils.combineDateTime(leg.getEndDate(), leg.getPatrolLegDays().get(leg.getPatrolLegDays().size() - 1).getEndTime());	
+				date = LocalDateTime.of(leg.getEndDate(), leg.getPatrolLegDays().get(leg.getPatrolLegDays().size() - 1).getEndTime());
 			}else{
-				date = SharedUtils.getDatePart(leg.getEndDate(), true);
+				date = leg.getStartDate().atTime(LocalTime.MAX);
 			}
-			tmpLeg.setEndDate(date);
+			
+			tmpLeg.setEndDate(date.toLocalDate());
+			leg.getPatrolLegDays().get(leg.getPatrolLegDays().size() - 1).setEndTime(date.toLocalTime());
 			
 			this.legs.add(tmpLeg);
 		}
@@ -490,8 +493,8 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		}
 		patrolLegViewer.setInput(legs);
 		
-		this.patrolStartDate = (Date)patrol.getStartDate().clone();
-		this.patrolEndDate = (Date)patrol.getEndDate().clone();
+		this.patrolStartDate = LocalDate.from(patrol.getStartDate());
+		this.patrolEndDate = LocalDate.from(patrol.getEndDate());
 		updateDateText();
 		
 		patrolLegViewer.showPilotColum(patrol.hasPilot());
@@ -527,23 +530,18 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 			p.setStartDate(patrolStartDate);
 			p.setEndDate(patrolEndDate);
 		}
-		HashSet<PatrolLeg> currentLegs = new HashSet<PatrolLeg>();
-		if (p.getLegs() == null){
-			p.setLegs(new ArrayList<PatrolLeg>());
-		}else{
-			//current legs
-			for (PatrolLeg leg: p.getLegs()){
-				currentLegs.add(leg);
-			}
-		}
 		
-		ArrayList<PatrolLeg> allLegs = new ArrayList<PatrolLeg>();
-		allLegs.addAll(legs);
+		
 		if (session.getTransaction().isActive()) session.flush();
 		
-		//if the user used the "split into a new patrol" option, don't delete the points we are going to move
+		HashSet<PatrolLeg> currentLegs = new HashSet<PatrolLeg>(p.getLegs());
+		ArrayList<PatrolLeg> allLegs = new ArrayList<PatrolLeg>(legs);
+		
+		//if the user used the "split into a new patrol" option, 
+		//don't delete the points we are going to move
 		for(Patrol p2 : newPatrols){
-			//put all the waypoints into our 'moved' hash so they don't get deleted when we delete the leg from the old patrol
+			//put all the waypoints into our 'moved' hash so they don't get 
+			//deleted when we delete the leg from the old patrol
 			for(PatrolLeg pl : p2.getLegs()){
 				for(PatrolLegDay pld : pl.getPatrolLegDays()){
 					if (pld.getWaypoints() != null){
@@ -583,6 +581,8 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 							existing.getMembers().add(m);
 						}
 						
+						existing.getPatrolLegDays().get(0).setStartTime(updatedLeg.getPatrolLegDays().get(0).getStartTime());
+						existing.getPatrolLegDays().get(existing.getPatrolLegDays().size() - 1).setEndTime(updatedLeg.getPatrolLegDays().get(updatedLeg.getPatrolLegDays().size()-1).getEndTime());
 						currentLegs.remove(existing);
 						iterator.remove();
 						break;
@@ -609,7 +609,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 				}
 			}
 		}
-		if (session.getTransaction().isActive()) session.flush();
+		//if (session.getTransaction().isActive()) session.flush();
 		
 		//legs no longer used; these must be removed
 		for (PatrolLeg toRemove: currentLegs){
@@ -632,6 +632,8 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		//create leg days
 		p.createLegDays(session);
 		p.recalculateType();
+		
+		if (session.getTransaction().isActive()) session.flush();
 		
 		if (!isNew){
 			session.update(p);
@@ -697,26 +699,20 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 	public String getErrorMessage(){
 		
 		/* ensure each patrol leg between the patrol start and end */
-		Date pstart = SharedUtils.getDatePart(patrolStartDate, false);
-		Date pend = SharedUtils.getDatePart(patrolEndDate, true);
-		
 		for (Iterator<?> iterator = legs.iterator(); iterator.hasNext();) {
 			PatrolLeg legA = (PatrolLeg) iterator.next();
 			
-			Date legstart = SharedUtils.getDatePart(legA.getStartDate(), false);
-			Date legend = SharedUtils.getDatePart(legA.getEndDate(), true);
-			
-			if (legstart.after(pend)){
+			if (legA.getStartDate().isAfter(patrolEndDate)){
 				return MessageFormat.format(Messages.PatrolLegsComposite_LegError_A, new Object[]{legA.getId()});
 			}
-			if (legstart.before(pstart)){
+			if (legA.getStartDate().isBefore(patrolStartDate)){
 				return MessageFormat.format(Messages.PatrolLegsComposite_LegError_B, new Object[]{legA.getId()});
 			}
 			
-			if (legend.after(pend)){
+			if (legA.getEndDate().isAfter(patrolEndDate)){
 				return MessageFormat.format(Messages.PatrolLegsComposite_LegError_C, new Object[]{legA.getId()});
 			}
-			if (legend.before(pstart)){
+			if (legA.getEndDate().isBefore(patrolStartDate)){
 				return MessageFormat.format(Messages.PatrolLegsComposite_LegError_D, new Object[]{legA.getId()});
 			}
 		}
@@ -729,8 +725,8 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 				PatrolLeg legB = (PatrolLeg) iterator2.next();
 				if (legA.equals(legB)){
 					continue;
-				}else if(! ( (legB.getEndDate().before(legA.getStartDate()) || legB.getEndDate().equals(legA.getStartDate())) ||
-						(legB.getStartDate().after(legA.getEndDate()) ||legB.getStartDate().equals(legA.getEndDate())   ) )){
+				}else if(! ( (legB.getEndDate().isBefore(legA.getStartDate()) || legB.getEndDate().isEqual(legA.getStartDate())) ||
+						(legB.getStartDate().isAfter(legA.getEndDate()) ||legB.getStartDate().isEqual(legA.getEndDate())   ) )){
 					
 					//legs overlap ensure members don't
 					HashSet<Employee> bMembers = new HashSet<Employee>();
@@ -748,32 +744,24 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		}
 		
 		/* ensure there is at least one leg for each day in the patrol */
-		Calendar calStart = SharedUtils.convertDate(patrolStartDate);
-		calStart.set(Calendar.HOUR, 0);
-		calStart.set(Calendar.MINUTE, 0);
-		calStart.set(Calendar.SECOND, 0);
-		calStart.set(Calendar.MILLISECOND, 0);
-				
-		Calendar calEnd = SharedUtils.convertDate(patrolEndDate);
-		
-		while (calStart.before(calEnd) || calStart.equals(calEnd)){
+		LocalDate working = LocalDate.from(patrolStartDate);
+		while (working.isBefore(patrolEndDate)|| working.isEqual(patrolEndDate)){
 			boolean found = false;
 			for (Iterator<?> iterator = legs.iterator(); iterator.hasNext();) {
 				PatrolLeg leg = (PatrolLeg) iterator.next();
-				Date legStart = SharedUtils.getDatePart(leg.getStartDate(), false);
-				Date legEnd = SharedUtils.getDatePart(leg.getEndDate(), true);
 				
-				if ( (calStart.getTime().before(legEnd) || calStart.getTime().equals(legEnd)) && 
-						(calStart.getTime().after(legStart) ||calStart.getTime().equals(legStart)) ){
+				if ( (working.isBefore(leg.getEndDate()) || working.isEqual(leg.getEndDate())) && 
+						(working.isAfter(leg.getStartDate()) ||working.isEqual(leg.getStartDate())) ){
 					found = true;
 					break;
 				}
 				
 			}
 			if (!found){
-				return MessageFormat.format(Messages.PatrolLegsComposite_Error_MissingLegDay, new Object[]{ DateFormat.getDateInstance(DateFormat.MEDIUM).format(calStart.getTime()) });
-			}			
-			calStart.add(Calendar.DAY_OF_MONTH, 1);
+				return MessageFormat.format(Messages.PatrolLegsComposite_Error_MissingLegDay,
+						new Object[]{ DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(working) });
+			}		
+			working = ChronoUnit.DAYS.addTo(working, 1);
 		}		
 		return null;		
 	}

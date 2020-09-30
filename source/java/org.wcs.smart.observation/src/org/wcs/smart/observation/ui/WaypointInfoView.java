@@ -21,8 +21,9 @@
  */
 package org.wcs.smart.observation.ui;
 
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -229,7 +230,7 @@ public class WaypointInfoView {
 						clearContents();
 					}else{
 						lblWaypointId.setText(String.valueOf(lcurrentWp.getId()));
-						lblDateTime.setText(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(lcurrentWp.getDateTime())); 
+						lblDateTime.setText( DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT).format(lcurrentWp.getDateTime())); 
 
 						int widthHint = infoSection.getBody().getBounds().width - 20;		
 						
@@ -430,9 +431,10 @@ public class WaypointInfoView {
 			int width = infoSection.getBounds().width-30;
 			if (wp == null) return;
 			if (wp.getLastModifiedBy() != null) {
-				data = MessageFormat.format(Messages.WaypointInfoView_LastUpdated1, SmartLabelProvider.getShortLabel(wp.getLastModifiedBy()), DateFormat.getDateTimeInstance().format(wp.getLastModified()));
+				data = MessageFormat.format(Messages.WaypointInfoView_LastUpdated1, 
+						SmartLabelProvider.getShortLabel(wp.getLastModifiedBy()),  DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(wp.getLastModified()));
 			}else {
-				data = MessageFormat.format(Messages.WaypointInfoView_LastUpdated2, DateFormat.getDateTimeInstance().format(wp.getLastModified()));
+				data = MessageFormat.format(Messages.WaypointInfoView_LastUpdated2,  DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(wp.getLastModified()));
 			}
 			Label l = toolkit.createLabel(parent, data, SWT.WRAP);
 			l.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, true, false));

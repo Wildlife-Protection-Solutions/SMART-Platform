@@ -22,18 +22,22 @@
 package org.wcs.smart.er.ui.mision.importwp;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.locationtech.jts.geom.Coordinate;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.gpx.GPSDataImport.ImportType;
+import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.observation.common.importwp.GpxImportEngine;
 import org.wcs.smart.observation.common.importwp.ImportOptionsComposite.ImportOption;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.util.SharedUtils;
 
 /**
  * GpxImportEngine for mission
@@ -80,12 +84,14 @@ public class MissionGpxImportEngine extends GpxImportEngine {
 			}else if (option == ImportOption.DATE){
 				List<MissionTrack> track = MissionDataImport.convertToTrack(waypoints, true);
 				for (MissionTrack t : track){
+					convertToDate(t, missionDay);
 					t.setMissionDay(missionDay);
 				}
 				tracks.put(missionDay, track);
 				message = MessageFormat.format(Messages.MissionImportEngine_ImportMultiTrack, new Object[]{track.size()});
 			} else {
 				MissionTrack track = MissionDataImport.convertToTrack(waypoints, false).get(0);
+				convertToDate(track, missionDay);
 				track.setMissionDay(missionDay);
 				tracks.put(missionDay, Collections.singletonList(track));
 				
@@ -96,4 +102,12 @@ public class MissionGpxImportEngine extends GpxImportEngine {
 		return message;
 	}
 	
+	private void convertToDate(MissionTrack track, MissionDay missionDay) throws Exception {
+		List<Coordinate> cs = new ArrayList<>();
+		for (Coordinate c : track.getLineString().getCoordinates()) cs.add(c);
+		cs.forEach(c->{
+			c.setZ(   SharedUtils.toLongTime( missionDay.getDate().atTime(SharedUtils.toLocalDateTime(c).toLocalTime())) );
+		});
+		track.setLineString( GeometryFactoryProvider.getFactory().createLineString(cs.toArray(new Coordinate[cs.size()])) );
+	}
 }

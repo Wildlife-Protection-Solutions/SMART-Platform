@@ -21,7 +21,9 @@
  */
 package org.wcs.smart.patrol.internal.ui;
 
-import java.text.DateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -48,7 +50,7 @@ import org.wcs.smart.ui.SmartLabelProvider;
  * @since 1.0.0
  */
 public class PatrolLegTable {
-	private static final DateFormat DATE_TIME_FORMAT = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM);
+	private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM);
 	
 	private TableViewer patrolLegViewer  = null;
 	private HashMap<TableViewerColumn, LegTableProvider> columns = null;
@@ -213,14 +215,16 @@ public class PatrolLegTable {
 				if (pld.getMandate() == null) return ""; //$NON-NLS-1$
 				return pld.getMandate().getName();
 			}else if (this.column == LegColumn.ENDDATE){
-				return DATE_TIME_FORMAT.format( pld.getEndDate() );
+				LocalDateTime dt = LocalDateTime.of(pld.getEndDate(), pld.getPatrolLegDays().get(pld.getPatrolLegDays().size() - 1).getEndTime());
+				return DATE_TIME_FORMAT.format( dt );
 			}else if (this.column == LegColumn.PILOT){
 				if (pld.getPilot() == null){
 					return ""; //$NON-NLS-1$
 				}
 				return SmartLabelProvider.getFullLabel(pld.getPilot().getMember());
 			}else if (this.column == LegColumn.STARTDATE){
-				return DATE_TIME_FORMAT.format(pld.getStartDate() );
+				LocalDateTime dt = LocalDateTime.of(pld.getStartDate(), pld.getPatrolLegDays().get(0).getStartTime());
+				return DATE_TIME_FORMAT.format( dt );
 			}else if (this.column == LegColumn.TRANSPORTTYPE){
 				return pld.getType().getName();
 			}else if (this.column == LegColumn.MEMBERS){

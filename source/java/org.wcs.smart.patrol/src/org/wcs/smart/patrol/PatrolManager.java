@@ -25,9 +25,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -93,9 +94,7 @@ public class PatrolManager {
 		}else if (patrol.getStartDate() == null){
 			return null;
 		}else if (UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.DATA_ENTRY, UserLevelManager.ANALYST)){				
-			Date d = new Date();
-			d.setTime( d.getTime() - (long)ops.getEditTime() * 24 * 60 * 60 * 1000 );
-			if (patrol.getStartDate().after(d)){
+			if (ChronoUnit.DAYS.between(patrol.getStartDate(), LocalDate.now()) < ops.getEditTime()){
 				return null;
 			}else{
 				return MessageFormat.format(Messages.PatrolEditor_EditError_PatrolToOld, new Object[]{ops.getEditTime() }) ;

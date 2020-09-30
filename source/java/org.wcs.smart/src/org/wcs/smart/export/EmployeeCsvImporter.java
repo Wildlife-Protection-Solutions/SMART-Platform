@@ -27,10 +27,10 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -105,8 +105,7 @@ public class EmployeeCsvImporter implements ICsvDataImporter {
 			}
 			String[] data ;
 			
-			SimpleDateFormat format = new SimpleDateFormat(DATE_FORMAT);
-			format.setLenient(false);
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
 			
 			while( (data = reader.readNext()) != null ){
 				if (monitor.isCanceled()) return false;
@@ -141,9 +140,9 @@ public class EmployeeCsvImporter implements ICsvDataImporter {
 					e.setBirthDate(null);
 				}else {
 					try{
-						Date dt = format.parse(birth);
+						LocalDate dt = LocalDate.parse(birth, formatter);
 						e.setBirthDate(dt);
-					}catch (ParseException ex){
+					}catch (DateTimeParseException ex){
 						throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_BirthDate, new Object[]{line}), ex);
 					}
 				}
@@ -166,12 +165,12 @@ public class EmployeeCsvImporter implements ICsvDataImporter {
 					throw new Exception( MessageFormat.format(Messages.EmployeeCsvImporter_Error_StartDateFormat, new Object[]{ DATE_FORMAT, line }));
 				}
 				try{
-					Date dt = format.parse(start);
+					LocalDate dt = LocalDate.parse(start, formatter);
 					e.setStartEmploymentDate(dt);
-				}catch (ParseException ex){
+				}catch (DateTimeParseException ex){
 					throw new Exception( MessageFormat.format(Messages.EmployeeCsvImporter_Error_StartDateFormat, new Object[]{ DATE_FORMAT, line }));
 				}
-				if (e.getBirthDate() != null && e.getStartEmploymentDate().before(e.getBirthDate())){
+				if (e.getBirthDate() != null && e.getStartEmploymentDate().isBefore(e.getBirthDate())){
 					throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_StartAfterEmployeeBirthDate, new Object[]{line}));
 				}
 					
@@ -184,12 +183,12 @@ public class EmployeeCsvImporter implements ICsvDataImporter {
 						throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_EndEmployementDateFormat, new Object[]{DATE_FORMAT,line}));
 					}
 					try{
-						Date dt = format.parse(end);
+						LocalDate dt = LocalDate.parse(end, formatter);
 						e.setEndEmploymentDate(dt);
-					}catch (ParseException ex){
+					}catch (DateTimeParseException ex){
 						throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_EndEmployementDateFormat, new Object[]{DATE_FORMAT,line}));
 					}
-					if (e.getEndEmploymentDate().before(e.getStartEmploymentDate()) || e.getEndEmploymentDate().before(e.getBirthDate())){
+					if (e.getEndEmploymentDate().isBefore(e.getStartEmploymentDate()) || e.getEndEmploymentDate().isBefore(e.getBirthDate())){
 						throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_EndAfterStartDate, new Object[]{line})); 
 					}
 				}

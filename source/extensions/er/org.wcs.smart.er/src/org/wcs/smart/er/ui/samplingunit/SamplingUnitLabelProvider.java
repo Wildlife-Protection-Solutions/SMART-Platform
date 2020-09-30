@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.er.ui.samplingunit;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
@@ -61,7 +61,7 @@ public class SamplingUnitLabelProvider extends LabelProvider {
 			return su.getId();
 		}else if (element instanceof MissionTrack){
 			MissionTrack t = (MissionTrack)element;
-			return t.getId() + " [" + SimpleDateFormat.getDateInstance(DateFormat.MEDIUM).format(t.getMissionDay().getDate()) + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+			return t.getId() + " [" + DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(t.getMissionDay().getDate()) + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 		}else if (element instanceof SamplingUnitAttribute){
 			if (currentLanguage == null){
 				return ((SamplingUnitAttribute) element).getName();

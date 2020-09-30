@@ -22,8 +22,9 @@
 package org.wcs.smart.i2.query;
 
 import java.text.Collator;
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -424,9 +425,9 @@ public class IntelQueryColumnProvider {
 				break;
 			case DATE:
 				sb.append(" ("); //$NON-NLS-1$
-				sb.append(DateFormat.getDateInstance().format(filter.getDateValues()[0]));
+				sb.append(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(filter.getDateValues()[0]));
 				sb.append(" - "); //$NON-NLS-1$
-				sb.append(DateFormat.getDateInstance().format(filter.getDateValues()[1]));
+				sb.append(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(filter.getDateValues()[1]));
 				sb.append(")"); //$NON-NLS-1$
 				break;
 			case LIST:
@@ -524,9 +525,9 @@ public class IntelQueryColumnProvider {
 				break;
 			case DATE:
 				sb.append(": "); //$NON-NLS-1$
-				sb.append(DateFormat.getDateInstance().format(filter.getDateValues()[0]));
+				sb.append(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(filter.getDateValues()[0]));
 				sb.append(" " + filter.getOperator().getLabel(l) + " "); //$NON-NLS-1$ //$NON-NLS-2$
-				sb.append(DateFormat.getDateInstance().format(filter.getDateValues()[1]));
+				sb.append(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(filter.getDateValues()[1]));
 				break;
 			case LIST:
 				if (filter.getKeyValue().equals(IQueryFilter.ANY_OPTION_KEY)){
@@ -615,9 +616,9 @@ public class IntelQueryColumnProvider {
 					break;
 				case DATE:
 					sb.append(": "); //$NON-NLS-1$
-					sb.append(DateFormat.getDateInstance().format(filter.getDateValues()[0]));
+					sb.append(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(filter.getDateValues()[0]));
 					sb.append(" " + filter.getOperator().getLabel(l) + " "); //$NON-NLS-1$ //$NON-NLS-2$
-					sb.append(DateFormat.getDateInstance().format(filter.getDateValues()[1]));
+					sb.append(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(filter.getDateValues()[1]));
 					break;
 				case LIST:
 					if (filter.getKeyValue().equals(IQueryFilter.ANY_OPTION_KEY)){

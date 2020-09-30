@@ -22,6 +22,8 @@
 package org.wcs.smart.qa.patrol.ui;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
@@ -102,13 +104,11 @@ public class PatrolEditWaypointDialog extends EditWaypointDetailsDialog {
 		double y2 = nextWaypoint.getWaypoint().getY();
 		double y1 = previousWaypoint.getWaypoint().getY();
 		
-		double t2 = nextWaypoint.getWaypoint().getDateTime().getTime();
-		double t1 = previousWaypoint.getWaypoint().getDateTime().getTime();
+		double t2t1diff = ChronoUnit.MILLIS.between(nextWaypoint.getWaypoint().getDateTime(), previousWaypoint.getWaypoint().getDateTime());
+		double t2tndiff = ChronoUnit.MILLIS.between(nextWaypoint.getWaypoint().getDateTime(), waypoint.getDateTime());
 		
-		double tn = waypoint.getDateTime().getTime();
-		
-		double newX =  x2 - ( (t2 - tn) / (t2 - t1) ) * (x2 - x1);
-		double newY =  y2 - ( (t2 - tn) / (t2 - t1) ) * (y2 - y1);
+		double newX =  x2 - ( (t2tndiff) / (t2t1diff) ) * (x2 - x1);
+		double newY =  y2 - ( (t2tndiff) / (t2t1diff) ) * (y2 - y1);
 		
 		if (newX < -180) newX = -180;
 		if (newX > 180) newX = 180;
@@ -181,17 +181,20 @@ public class PatrolEditWaypointDialog extends EditWaypointDetailsDialog {
 			//find previous and next waypoint for interpolation
 			double prevDiff = Double.POSITIVE_INFINITY;
 			double nextDiff = Double.POSITIVE_INFINITY;
-			long wpTime = editWaypoint.getWaypoint().getDateTime().getTime();
+			
+			LocalDateTime wpTime = editWaypoint.getWaypoint().getDateTime();
 			for (PatrolWaypoint ww : waypoints){
 				if (ww.equals(editWaypoint)) continue;
-				long time = ww.getWaypoint().getDateTime().getTime();
-				if (time <= wpTime && (previousWaypoint == null || (wpTime - time) < prevDiff)){
-					prevDiff = wpTime - time;
+				
+				LocalDateTime time = ww.getWaypoint().getDateTime();
+				
+				if (time.isBefore(wpTime) && (previousWaypoint == null || ChronoUnit.MILLIS.between(wpTime,  time) < prevDiff)){
+					prevDiff = ChronoUnit.MILLIS.between(wpTime,  time);
 					previousWaypoint = ww;
 				}
 				
-				if (time >= wpTime && (nextWaypoint == null || (time - wpTime) < nextDiff)){
-					nextDiff = time - wpTime;
+				if (time.isAfter(wpTime)  && (nextWaypoint == null || ChronoUnit.MILLIS.between(time,wpTime) < nextDiff)){
+					nextDiff = ChronoUnit.MILLIS.between(time, wpTime);
 					nextWaypoint = ww;
 				}
 				

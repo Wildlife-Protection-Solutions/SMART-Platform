@@ -1,6 +1,6 @@
 package org.wcs.smart.connect.dataqueue;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -12,6 +12,11 @@ import javax.persistence.Table;
 
 import org.wcs.smart.connect.dataqueue.model.DataQueueItem;
 import org.wcs.smart.connect.i18n.Messages;
+import org.wcs.smart.connect.util.LocalDateTimeDeserializer;
+import org.wcs.smart.connect.util.LocalDateTimeSerializer;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 @Entity
 @Table(name="connect.data_queue")
@@ -37,8 +42,8 @@ public class ServerDataQueueItem extends DataQueueItem{
 		}
 	}
 	
-	private Date uploadedDate;
-	private Date lastModifiedDate;
+	private LocalDateTime uploadedDate;
+	private LocalDateTime lastModifiedDate;
 	private String uploadedBy;
 	
 	private String file;
@@ -47,20 +52,24 @@ public class ServerDataQueueItem extends DataQueueItem{
 	private UUID workItem;
 	
 	@Column(name="uploaded_date")
-	public Date getUploadedDate(){
+	@JsonDeserialize(using = LocalDateTimeDeserializer.class)  
+	@JsonSerialize(using = LocalDateTimeSerializer.class)
+	public LocalDateTime getUploadedDate(){
 		return this.uploadedDate;
 	}
 	
-	public void setUploadedDate(Date date){
+	public void setUploadedDate(LocalDateTime date){
 		this.uploadedDate = date;
 	}
 	
 	@Column(name="lastmodified_date")
-	public Date getLastModified(){
+	@JsonDeserialize(using = LocalDateTimeDeserializer.class)  
+	@JsonSerialize(using = LocalDateTimeSerializer.class)
+	public LocalDateTime getLastModified(){
 		return this.lastModifiedDate;
 	}
 	
-	public void setLastModified(Date date){
+	public void setLastModified(LocalDateTime date){
 		this.lastModifiedDate = date;
 	}
 	

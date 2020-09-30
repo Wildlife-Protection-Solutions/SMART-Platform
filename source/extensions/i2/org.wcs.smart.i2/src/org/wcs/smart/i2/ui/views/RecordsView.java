@@ -25,10 +25,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -847,7 +848,7 @@ public class RecordsView {
 						String name = (String)item[0];
 						UUID uuid = (UUID)item[1];
 						IntelRecordSource rs = item[3] == null ? null : s.get(IntelRecordSource.class,(UUID)item[3]);
-						IntelRecordProxy r = new IntelRecordProxy(name, uuid, rs, ip, (IntelRecord.Status)item[4], (Date)item[2]);
+						IntelRecordProxy r = new IntelRecordProxy(name, uuid, rs, ip, (IntelRecord.Status)item[4], (LocalDateTime)item[2]);
 						allRecords.add(r);
 					}
 					
@@ -883,7 +884,7 @@ public class RecordsView {
 			if (!(element instanceof IntelRecordProxy)) return true;
 			IntelRecordProxy in = (IntelRecordProxy)element;
 			if (pattern.matcher(in.getTitle()).matches()) return true;
-			if (pattern.matcher(DateFormat.getDateInstance().format(in.getDate())).matches()) return true;
+			if (pattern.matcher(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(in.getDate())).matches()) return true;
 			return false;
 		}
 		

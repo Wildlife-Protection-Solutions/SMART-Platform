@@ -30,10 +30,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.DateFormat;
+import java.nio.file.attribute.FileTime;
 import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
@@ -127,14 +131,17 @@ public class AutoBackupEngine {
 			SmartPlugIn.displayLog(Messages.AutoBackupEngine_AutoBackupFailed_Error + ex.getLocalizedMessage(), ex);
 			return false;
 		}
-		properties.setProperty(PROP_LASTBACKUP,String.valueOf((new java.util.Date()).getTime() / 1000)); //use seconds
+		
+		
+		
+		properties.setProperty(PROP_LASTBACKUP,String.valueOf(Instant.now().toEpochMilli() / 1000)); //use seconds
 		setAutoBackupProperties(properties);
 		return true;
 	}
 	
 	private static void performBackup(final Properties properties , final Shell shell, boolean full, IProgressMonitor monitor){
-		DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss"); //$NON-NLS-1$
-		Date date = new Date();
+		DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyyMMddHHmmss"); //$NON-NLS-1$
+		LocalDateTime date = LocalDateTime.now();
 		final Path tmp = Paths.get(properties.getProperty(PROP_BACKUP_LOCATION));
 		
 		if(!Files.exists(tmp)){						
@@ -193,9 +200,8 @@ public class AutoBackupEngine {
 	 * @param properties backup properties file
 	 */
 	private static void deleteOldFiles(Properties properties) {
-		Date cutoffDate = new Date();
-		cutoffDate.setTime(cutoffDate.getTime() - (long)(Double.valueOf(properties.getProperty(PROP_DELETE_TIMER)) * 86400 * 1000)); //1 day in milliseconds 86k*1000
-
+		Long cuttofms =  (long)(Double.valueOf(properties.getProperty(PROP_DELETE_TIMER)) * 86400 * 1000); //1 day in milliseconds 86k*1000
+		
 		try {
 			Path dir = Paths.get(properties.getProperty(PROP_BACKUP_LOCATION));
 			if (Files.list(dir).count() == 0 ){
@@ -205,14 +211,18 @@ public class AutoBackupEngine {
 			
 			List<Path> kids = Files.list(dir).collect(Collectors.toList());
 			for (Path child : kids) {
-			 
-			  if (child.getFileName().toString().equals(".") || //$NON-NLS-1$
-						  child.getFileName().toString().equals("..")){ //$NON-NLS-1$
-			      continue;  // Ignore the self and parent aliases.
-			    }
-			    if(Files.getLastModifiedTime(child).toMillis() < cutoffDate.getTime() && child.getFileName().toString().contains(BACKUP_FILENAME_PREFIX)){
-			    	Files.delete(child);
-			    }
+
+				if (child.getFileName().toString().equals(".") || //$NON-NLS-1$
+						child.getFileName().toString().equals("..")) { //$NON-NLS-1$
+					continue; // Ignore the self and parent aliases.
+				}
+				if (!child.getFileName().toString().contains(BACKUP_FILENAME_PREFIX))
+					continue;
+
+				FileTime ft = Files.getLastModifiedTime(child);
+				if (ChronoUnit.MILLIS.between(ft.toInstant(), Instant.now()) > cuttofms) {
+					Files.delete(child);
+				}
 			}
 		}catch(IOException ex) {
 			SmartPlugIn.log(ex.getMessage(), ex);
@@ -245,10 +255,8 @@ public class AutoBackupEngine {
 	 */
 	private static long daysSinceBackup(Properties properties){
 		long last = Long.valueOf(properties.getProperty(PROP_LASTBACKUP));
-		Date time = new Date();
-		long now = time.getTime() / 1000;  //use seconds
-		long sec_dif = now - last;
-		return sec_dif / 86400; //convert seconds to days
+		LocalDate lastDate = LocalDate.from( Instant.ofEpochMilli(last).atZone(ZoneId.systemDefault()) );
+		return ChronoUnit.DAYS.between(lastDate, LocalDate.now());		
 	}
 	
 	/**

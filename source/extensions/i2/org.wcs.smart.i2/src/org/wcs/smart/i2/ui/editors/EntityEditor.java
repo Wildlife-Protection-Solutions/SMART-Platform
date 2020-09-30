@@ -24,12 +24,13 @@ package org.wcs.smart.i2.ui.editors;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -549,7 +550,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		}
 		
 		lblIdentifier.setText(entity.getIdAttributeAsText());
-		lblModified.setText(DateFormat.getInstance().format(entity.getDateModified()));
+		lblModified.setText(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(entity.getDateModified()));
 		if (txtDmListItem != null) {
 			if (entity.getDmAttributeListItem() != null) {
 				txtDmListItem.setText(MessageFormat.format("{0} [{1}]", entity.getDmAttributeListItem().getName(), entity.getDmAttributeListItem().getKeyId())); //$NON-NLS-1$
@@ -1240,11 +1241,11 @@ public class EntityEditor extends EditorPart implements MapPart{
 		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
 		toolkit.createLabel(c, Messages.EntityEditor_CreatedLabel);
-		lblCreated = toolkit.createLabel(c, DateFormat.getInstance().format(new Date()));
+		lblCreated = toolkit.createLabel(c, DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(LocalDateTime.now()));
 		lblCreated.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		toolkit.createLabel(c, Messages.EntityEditor_ModifiedLabel);
-		lblModified= toolkit.createLabel(c, DateFormat.getInstance().format(new Date()));
+		lblModified= toolkit.createLabel(c, DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(LocalDateTime.now()));
 		lblModified.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 	}
 	
@@ -1816,7 +1817,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 						ia.setConservationArea(SmartDB.getCurrentConservationArea());
 						ia.setCopyFromLocation(Paths.get(dialog.getFilterPath()).resolve(file));
 						ia.setCreatedBy(SmartDB.getCurrentEmployee());
-						ia.setDateCreated(new Date());
+						ia.setDateCreated(LocalDateTime.now());
 						ia.setFilename(Paths.get(dialog.getFilterPath()).resolve(file).getFileName().toString());
 						
 						IntelEntityAttachment iea = new IntelEntityAttachment();
@@ -2003,8 +2004,8 @@ public class EntityEditor extends EditorPart implements MapPart{
 		fieldEditors = new ArrayList<AttributeFieldEditor>();
 		if (lblType.isDisposed()) return;
 		 
-		lblCreated.setText(DateFormat.getInstance().format(entity.getDateCreated()));
-		lblModified.setText(DateFormat.getInstance().format(entity.getDateModified()));
+		lblCreated.setText(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(entity.getDateCreated()));
+		lblModified.setText(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(entity.getDateModified()));
 		
 		lblIdentifier.setText(entity.getIdAttributeAsText());
 		

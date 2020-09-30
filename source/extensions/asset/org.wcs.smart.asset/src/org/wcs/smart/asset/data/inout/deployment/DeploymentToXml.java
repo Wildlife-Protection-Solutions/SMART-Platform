@@ -65,7 +65,7 @@ import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
-import org.wcs.smart.util.SharedUtils;
+import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.ZipUtil;
 
 /**
@@ -203,7 +203,7 @@ public class DeploymentToXml {
 			xmlw.setState(aw.getState().name());
 			xmlw.setId(aw.getWaypoint().getId());
 			xmlw.setComment(aw.getWaypoint().getComment());
-			xmlw.setDateTime( convertDateTime(SharedUtils.toLocalDateTime( aw.getWaypoint().getDateTime())));
+			xmlw.setDateTime( SmartUtils.toXmlDateTime( aw.getWaypoint().getDateTime()));
 			xmlw.setLength(aw.getIncidentLength());
 			
 			xmlw.setX(aw.getWaypoint().getRawX());

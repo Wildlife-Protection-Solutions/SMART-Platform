@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.er.ui.mision.editor;
 
-import java.util.TimeZone;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.jobs.Job;
@@ -59,11 +58,6 @@ public class MissionTrackPointDialog extends TrackPointDialog {
 		editTrack = new MissionTrack();
 		editTrack.setLineString(t.getLineString());
 		editTrack.setUuid(track.getUuid());
-	}
-
-	@Override
-	protected TimeZone getTrackZTimezone() {
-		return MissionTrack.ZTIMEZONE;
 	}
 
 	@Override

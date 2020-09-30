@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.patrol.internal.ui.views;
 
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 import org.hibernate.Session;
 import org.hibernate.query.Query;
@@ -101,8 +102,8 @@ public class PatrolViewFilter {
 	private SortByDir sortByDir = SortByDir.DESC;
 	private SortBy sortBy = SortBy.ID;	
 	
-	private Date startDate;
-	private Date endDate;
+	private LocalDate startDate;
+	private LocalDate endDate;
 	
 	/**
 	 * 
@@ -145,7 +146,7 @@ public class PatrolViewFilter {
 	 * 
 	 * @return start date for custom date filter
 	 */
-	public Date getStartDate(){
+	public LocalDate getStartDate(){
 		return this.startDate;
 	}
 	
@@ -153,7 +154,7 @@ public class PatrolViewFilter {
 	 * 
 	 * @return end date for custom date filter
 	 */
-	public Date getEndDate(){
+	public LocalDate getEndDate(){
 		return this.endDate;
 	}
 	
@@ -185,7 +186,7 @@ public class PatrolViewFilter {
 	 * @param start the start date for custom filter; null if not custom date filter
 	 * @param end the end date for custom filter; null if not cusom date filter
 	 */
-	public void setDateFilter(DateFilter dFilter, Date start, Date end){
+	public void setDateFilter(DateFilter dFilter, LocalDate start, LocalDate end){
 		this.dateFilter = dFilter;
 		this.startDate = start;
 		this.endDate = end;
@@ -289,11 +290,11 @@ public class PatrolViewFilter {
 			}
 		}
 		if (dateFilter != null) {
-			Date start = dateFilter.getStartDate();
+			LocalDate start = dateFilter.getStartDate();
 			if (start == null){
 				start = startDate;
 			}
-			Date end = dateFilter.getEndDate();
+			LocalDate end = dateFilter.getEndDate();
 			if (end == null){
 				end = endDate;
 			}
@@ -314,12 +315,12 @@ public class PatrolViewFilter {
 		sb.append(FIELD_SEP);
 		
 		if (startDate != null){
-			sb.append(startDate.getTime());
+			sb.append(DateTimeFormatter.ISO_LOCAL_DATE.format(startDate));
 		}	
 		sb.append(FIELD_SEP);
 		
 		if (endDate != null){
-			sb.append(endDate.getTime());
+			sb.append(DateTimeFormatter.ISO_LOCAL_DATE.format(endDate));
 		}	
 		sb.append(FIELD_SEP);
 		
@@ -363,12 +364,12 @@ public class PatrolViewFilter {
 			filter.dateFilter = null;
 		}
 		if (!parts[1].isEmpty()){
-			filter.startDate = new Date(Long.valueOf(parts[1]));
+			filter.startDate = LocalDate.parse(parts[1], DateTimeFormatter.ISO_LOCAL_DATE);
 		}else{
 			filter.startDate = null;
 		}
 		if (!parts[2].isEmpty()){
-			filter.endDate = new Date(Long.valueOf(parts[2]));
+			filter.endDate = LocalDate.parse(parts[2], DateTimeFormatter.ISO_LOCAL_DATE);
 		}else{
 			filter.endDate = null;
 		}

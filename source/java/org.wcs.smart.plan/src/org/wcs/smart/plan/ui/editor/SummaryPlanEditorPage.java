@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.plan.ui.editor;
 
-import java.text.DateFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -641,8 +642,8 @@ public class SummaryPlanEditorPage extends EditorPart {
 		if (plan.getDescription() != null) {
 			txtDescription.setText(plan.getDescription());
 		}
-		txtStartDate.setText(DateFormat.getDateInstance(DateFormat.LONG).format(plan.getStartDate()));
-		txtEndDate.setText(DateFormat.getDateInstance(DateFormat.LONG).format(plan.getEndDate()));
+		txtStartDate.setText(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).format(plan.getStartDate()));
+		txtEndDate.setText(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).format(plan.getEndDate()));
 
 		if (plan.getCreator() != null){
 			txtCreator.setText(SmartLabelProvider.getFullLabel(plan.getCreator()));

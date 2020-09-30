@@ -22,15 +22,16 @@
 package org.wcs.smart.er.ui.mision.editor;
 
 import java.lang.reflect.InvocationTargetException;
-import java.sql.Time;
 import java.text.Collator;
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -120,7 +121,6 @@ import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.SmartWizardDialog;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
-import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -239,11 +239,7 @@ public class MissionDayComposite {
 		dtStartTime.addFocusListener(new FocusAdapter() {			
 			@Override
 			public void focusLost(FocusEvent e) {
-				if (timeEqual(SmartUtils.getTime(dtStartTime).getTime(),
-						missionDay.getStartTime().getTime())){
-					//no changes made
-					return;
-				}
+				if (SmartUtils.toTime(dtStartTime).equals(missionDay.getStartTime())) return; //no changes
 				saveChanges();
 			}
 		});
@@ -265,10 +261,7 @@ public class MissionDayComposite {
 		dtEndTime.addFocusListener(new FocusAdapter() {			
 			@Override
 			public void focusLost(FocusEvent e) {
-				if (timeEqual(SmartUtils.getTime(dtEndTime).getTime(), 
-						missionDay.getEndTime().getTime())){
-					return;
-				}
+				if (SmartUtils.toTime(dtEndTime).equals(missionDay.getEndTime())) return; //no changes
 				saveChanges();
 			}
 		});
@@ -463,20 +456,8 @@ public class MissionDayComposite {
 	}
 	
 	private void saveChanges(){
-		Calendar cal = Calendar.getInstance();
-		cal.setTimeInMillis(0);
-		cal.set(Calendar.HOUR_OF_DAY, dtEndTime.getHours());
-		cal.set(Calendar.MINUTE, dtEndTime.getMinutes());
-		cal.set(Calendar.SECOND, dtEndTime.getSeconds());
-		Time t = new Time(cal.getTimeInMillis());
-		missionDay.setEndTime(t);
-		
-		cal.setTimeInMillis(0);
-		cal.set(Calendar.HOUR_OF_DAY, dtStartTime.getHours());
-		cal.set(Calendar.MINUTE, dtStartTime.getMinutes());
-		cal.set(Calendar.SECOND, dtStartTime.getSeconds());
-		t = new Time(cal.getTimeInMillis());
-		missionDay.setStartTime(t);
+		missionDay.setEndTime(SmartUtils.toTime(dtEndTime));
+		missionDay.setStartTime(SmartUtils.toTime(dtStartTime));
 		
 		int rest = 0;
 		try{
@@ -584,7 +565,7 @@ public class MissionDayComposite {
 	
 	private MissionDay findMissionDay(Mission m){
 		for (MissionDay md : m.getMissionDays()){
-			if (SharedUtils.isSameDate(md.getDate(), editor.getDay())){
+			if (md.getDate().isEqual(editor.getDay())){
 				return md;		
 			}
 		}
@@ -603,23 +584,18 @@ public class MissionDayComposite {
 				//find mission day
 				missionDay = findMissionDay(editor.getMissionEditor().getMission());
 				if (missionDay == null){
-					throw new IllegalStateException(MessageFormat.format(Messages.MissionDayComposite_DayNotFound, new Object[]{editor.getDay().toString()}));
+					throw new IllegalStateException(MessageFormat.format(Messages.MissionDayComposite_DayNotFound,
+							new Object[]{editor.getDay().toString()}));
 				}
 	
 				dtStartTime.setTime(0,0,0);
 				if (missionDay.getStartTime() != null){
-					Calendar cal = Calendar.getInstance();
-					cal.setTime(missionDay.getStartTime());
-					dtStartTime.setTime(cal.get(Calendar.HOUR_OF_DAY),
-							cal.get(Calendar.MINUTE), cal.get(Calendar.SECOND));
+					SmartUtils.initDateTimeWidget(dtStartTime, missionDay.getStartTime());
 				}
 				
 				dtEndTime.setTime(23,59,59);
 				if (missionDay.getEndTime() != null){
-					Calendar cal = Calendar.getInstance();
-					cal.setTime(missionDay.getEndTime());
-					dtEndTime.setTime(cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE),
-							cal.get(Calendar.SECOND));
+					SmartUtils.initDateTimeWidget(dtEndTime, missionDay.getEndTime());
 				}
 				if (missionDay.getRestMinutes() == null) {
 					restMinutes.setText("0"); //$NON-NLS-1$
@@ -661,7 +637,7 @@ public class MissionDayComposite {
 							boolean enabled = !((IStructuredSelection)observationTable.getSelection()).isEmpty();
 							btnDeleteWaypoint.setEnabled(enabled);
 							miDelete.setEnabled(enabled);
-							if (!SharedUtils.isSameDate(editor.getMissionEditor().getMission().getStartDate(), 
+							if (!editor.getMissionEditor().getMission().getStartDate().isEqual( 
 									editor.getMissionEditor().getMission().getEndDate())) {
 								btnMoveWaypoint.setEnabled(enabled);
 								miMove.setEnabled(enabled);
@@ -792,7 +768,9 @@ public class MissionDayComposite {
 
 	protected void updateTotalHours() {
 		double d = Double.parseDouble(this.restMinutes.getText());
-		double time = SmartUtils.getTime(dtEndTime).getTime() - SmartUtils.getTime(dtStartTime).getTime() - d * 60 * 1000;
+		
+		double time = ChronoUnit.MILLIS.between(SmartUtils.toTime(dtStartTime), SmartUtils.toTime(dtEndTime)) - d *60*1000;
+		
 		time = time / (1000 * 60 * 60);
 		//lblTotalHours.setText(PatrolEditor.REST_TIME_FORMATTER.format(time));
 		lblTotalHours.setText(MissionEditor.formatTimeRange(time));
@@ -807,21 +785,7 @@ public class MissionDayComposite {
 		}
 	}
 
-	private boolean timeEqual(long t1, long t2){
-		Calendar c1 = Calendar.getInstance();
-		c1.setTimeInMillis(t1);
-		Calendar c2 = Calendar.getInstance();
-		c2.setTimeInMillis(t2);
-		
-		int[] fields = new int[]{Calendar.HOUR_OF_DAY, Calendar.MINUTE, Calendar.SECOND, Calendar.MILLISECOND};
-		
-		for (int i = 0; i < fields.length; i ++){
-			if (c1.get(fields[i]) != c2.get(fields[i])){
-				return false;
-			}
-		}
-		return true;
-	}
+	
 	
 	public void refreshTable() {
 		observationTable.refresh(true);
@@ -832,11 +796,11 @@ public class MissionDayComposite {
 		
 		for (Iterator<SurveyWaypoint> iterator = missionDay.getWaypoints().iterator(); iterator.hasNext();) {
 			SurveyWaypoint e = iterator.next();
-			Date t = (Date)getWaypointValue(e, OtColumn.TIME);
+			LocalDateTime t = missionDay.getDate().atTime(((LocalDateTime)getWaypointValue(e, OtColumn.TIME)).toLocalTime());
 			
 			if(lastWp == null || 
-					t.after((Date)getWaypointValue(lastWp, OtColumn.TIME)) || 
-					t.equals((Date)getWaypointValue(lastWp, OtColumn.TIME))  ){
+					t.isAfter((LocalDateTime)getWaypointValue(lastWp, OtColumn.TIME)) || 
+					t.equals((LocalDateTime)getWaypointValue(lastWp, OtColumn.TIME))  ){
 				lastWp = e;
 			}
 		}
@@ -855,7 +819,7 @@ public class MissionDayComposite {
 			SurveyWaypoint wp = add.getWaypoint();
 			wp.setMissionDay(missionDay);
 			
-			wp.getWaypoint().setDateTime(SharedUtils.getDatePart(missionDay.getDate(), false));
+			wp.getWaypoint().setDateTime(missionDay.getDate().atStartOfDay());
 			
 			missionDay.getWaypoints().add(wp);
 			
@@ -908,7 +872,7 @@ public class MissionDayComposite {
 				SurveyWaypoint w = (SurveyWaypoint) iterator.next();
 				toUpdate.add(w);
 				Waypoint wp = w.getWaypoint();
-				wp.setDateTime(SmartUtils.combineDateTime(moveTo.getDate(), wp.getDateTime()));
+				wp.setDateTime(moveTo.getDate().atTime(wp.getDateTime().toLocalTime()));
 				w.setMissionDay(moveTo);
 			}
 
@@ -931,7 +895,7 @@ public class MissionDayComposite {
 			return p.getX() + ", " + p.getY(); //$NON-NLS-1$
 		} else if (column == OtColumn.TIME) {
 			if (wp.getDateTime() != null) {
-				return DateFormat.getTimeInstance(DateFormat.MEDIUM).format(wp.getDateTime());
+				return DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM).format(wp.getDateTime());
 			}
 			return ""; //$NON-NLS-1$
 		} else if (column == OtColumn.DIRECTION) {
@@ -979,7 +943,8 @@ public class MissionDayComposite {
 			return Messages.MissionDayComposite_None;
 		} else if (column == OtColumn.LAST_MODIFIED) {
 			if (element.getWaypoint().getLastModified() == null) return ""; //$NON-NLS-1$
-			return DateFormat.getDateTimeInstance().format(element.getWaypoint().getLastModified());
+			return DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(element.getWaypoint().getLastModified());
+
 		} else if (column == OtColumn.LAST_MODIFIED_BY) {
 			if (element.getWaypoint().getLastModifiedBy() == null) return ""; //$NON-NLS-1$
 			return SmartLabelProvider.getShortLabel(element.getWaypoint().getLastModifiedBy());
@@ -1043,9 +1008,10 @@ public class MissionDayComposite {
 			waypoint.setRawY((Double)value);
 			needSave = true;
 		} else if (column == OtColumn.TIME) {
-			if (value instanceof Date){
-				if (SharedUtils.isSameDate(waypoint.getDateTime(), ((Date)value))) return; //no change
-				waypoint.setDateTime(SmartUtils.combineDateTime(missionDay.getDate(), new Time(((Date)value).getTime())));
+			if (value instanceof LocalTime){
+				LocalDateTime ndate = missionDay.getDate().atTime((LocalTime)value);
+				if (waypoint.getDateTime().isEqual(ndate)) return; //no change
+				waypoint.setDateTime(ndate);
 				needSave = true;
 			}
 		} else if (column == OtColumn.DIRECTION) {

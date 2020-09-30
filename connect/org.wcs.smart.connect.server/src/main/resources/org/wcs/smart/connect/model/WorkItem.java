@@ -23,7 +23,7 @@ package org.wcs.smart.connect.model;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Locale;
 
 import javax.persistence.Column;
@@ -66,7 +66,7 @@ public class WorkItem extends ConnectUuidItem {
 	}
 	private ConservationAreaInfo caInfo;
 	
-	private Date startTime;
+	private LocalDateTime startTime;
 	private long totalBytes;
 	private String localFile;
 	private Type type;
@@ -91,10 +91,10 @@ public class WorkItem extends ConnectUuidItem {
 	}
 	
 	@Column(name="start_datetime")
-	public Date getStartTime(){
+	public LocalDateTime getStartTime(){
 		return this.startTime;
 	}
-	public void setStartTime(Date startTime){
+	public void setStartTime(LocalDateTime startTime){
 		this.startTime = startTime;
 	}
 	

@@ -29,12 +29,6 @@ import java.util.Map.Entry;
 
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.operation.MathTransform;
-import org.wcs.smart.query.common.model.Grid;
-import org.wcs.smart.query.common.model.Tile;
-import org.wcs.smart.util.GeometryUtils;
-
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
@@ -43,6 +37,11 @@ import org.locationtech.jts.geom.MultiLineString;
 import org.locationtech.jts.geomgraph.Edge;
 import org.locationtech.jts.geomgraph.index.SegmentIntersector;
 import org.locationtech.jts.geomgraph.index.SimpleMCSweepLineIntersector;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.operation.MathTransform;
+import org.wcs.smart.query.common.model.Grid;
+import org.wcs.smart.query.common.model.Tile;
+import org.wcs.smart.util.GeometryUtils;
 
 /**
  * Performs grid analysis on geometries

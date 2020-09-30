@@ -22,7 +22,7 @@
 package org.wcs.smart.i2.udig.entity;
 
 import java.io.IOException;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.geotools.data.DataUtilities;
@@ -96,10 +96,10 @@ public class IntelEntityFeatureSource extends ContentFeatureSource {
 			public Object visit(PropertyIsBetween filter, Object object) {
 				PropertyIsBetween betweenFilter = (PropertyIsBetween) filter;
 				if (betweenFilter.getExpression() instanceof PropertyName && (((PropertyName)betweenFilter.getExpression()).getPropertyName().equalsIgnoreCase("date"))){ //$NON-NLS-1$
-					Date startDate = (Date) betweenFilter.getLowerBoundary().evaluate(null);
-					Date endDate = (Date) betweenFilter.getUpperBoundary().evaluate(null);
+					LocalDateTime startDate = (LocalDateTime) betweenFilter.getLowerBoundary().evaluate(null);
+					LocalDateTime endDate = (LocalDateTime) betweenFilter.getUpperBoundary().evaluate(null);
 					if (startDate != null && endDate != null){
-						reader[0] =  new IntelEntityFeatureReader(entityUuid, getSchema(), new Date[]{startDate, endDate});			
+						reader[0] =  new IntelEntityFeatureReader(entityUuid, getSchema(), new LocalDateTime[]{startDate, endDate});			
 					}
 				}
 				return null;

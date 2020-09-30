@@ -21,8 +21,10 @@
  */
 package org.wcs.smart.i2.ui;
 
-import java.text.DateFormat;
-import java.util.Date;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -127,8 +129,8 @@ public class AttributeValueLabelProvider extends LabelProvider {
 				}
 			}
 			return ((Number)value).toString();
-		}else if (value instanceof Date){
-			return DateFormat.getDateInstance().format((Date)value);
+		}else if (value instanceof LocalDate){
+			return DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format((LocalDate)value);
 		}else if (value instanceof NamedItem){
 			return ((NamedItem) value).getName();
 		}else if (value instanceof Point){

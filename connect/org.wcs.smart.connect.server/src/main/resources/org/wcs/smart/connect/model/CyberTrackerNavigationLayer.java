@@ -22,7 +22,7 @@
 package org.wcs.smart.connect.model;
 
 import java.beans.Transient;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import javax.persistence.Column;
@@ -54,7 +54,7 @@ public class CyberTrackerNavigationLayer {
 	private UUID uuid;
 	
 	private Status status;
-	private Date uploadedDate;
+	private LocalDateTime uploadedDate;
 	private ConservationAreaInfo ca;
 
 	private String name;
@@ -76,11 +76,11 @@ public class CyberTrackerNavigationLayer {
 	}
 	
 	@Column(name="uploaded_date")
-	public Date getUploadedDate() {
+	public LocalDateTime getUploadedDate() {
 		return this.uploadedDate;
 	}
 	
-	public void setUploadedDate(Date date) {
+	public void setUploadedDate(LocalDateTime date) {
 		this.uploadedDate = date;
 	}
 	

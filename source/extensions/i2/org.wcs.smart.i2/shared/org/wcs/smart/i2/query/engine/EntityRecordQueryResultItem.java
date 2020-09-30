@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.i2.query.engine;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -36,7 +36,7 @@ import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 public class EntityRecordQueryResultItem implements IResultItem {
 
 	private UUID entityUuid;
-	private Timestamp entityLastModified;
+	private LocalDateTime entityLastModified;
 	private String entityType;
 	private String entityId;
 	
@@ -87,11 +87,11 @@ public class EntityRecordQueryResultItem implements IResultItem {
 		return this.entityUuid;
 	}
 	
-	public void setEntityLastModified(Timestamp lastModified) {
+	public void setEntityLastModified(LocalDateTime lastModified) {
 		this.entityLastModified = lastModified;
 	}
 	
-	public Timestamp getEntityLastModified() {
+	public LocalDateTime getEntityLastModified() {
 		return this.entityLastModified;
 	}
 	

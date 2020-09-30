@@ -35,13 +35,12 @@ import org.eclipse.emf.ecore.impl.ENotificationImpl;
 import org.eclipse.emf.ecore.impl.EObjectImpl;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.util.InternalEList;
+import org.locationtech.jts.geom.Envelope;
 import org.locationtech.udig.project.internal.ContextModel;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.internal.ProjectPackage;
 import org.opengis.filter.Filter;
-
-import org.locationtech.jts.geom.Envelope;
 
 /**
  * ContextModel responsible for holding on to layers for an BirtMap. No notifications

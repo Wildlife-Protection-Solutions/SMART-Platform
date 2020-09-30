@@ -27,9 +27,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.text.MessageFormat;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 
@@ -69,16 +69,16 @@ import org.wcs.smart.util.UuidUtils;
 public class EntityExportReportJob extends Job {
 
 	private Collection<IntelEntity> entities;
-	private Date[] dFilter;
+	private LocalDate[] dFilter;
 	private EmitterInfo format;
 	
 	private Path outputDir;
 	
-	public EntityExportReportJob(IntelEntity entity, Date[] dFilter, EmitterInfo format) {
+	public EntityExportReportJob(IntelEntity entity, LocalDate[] dFilter, EmitterInfo format) {
 		this(Collections.singleton(entity), dFilter, format, null);
 	}
 
-	public EntityExportReportJob(Collection<IntelEntity> entity, Date[] dFilter, EmitterInfo format, Path outputDir) {
+	public EntityExportReportJob(Collection<IntelEntity> entity,LocalDate[] dFilter, EmitterInfo format, Path outputDir) {
 		super(Messages.EntityExportReportJob_JobName);
 		this.entities = entity;
 		this.dFilter = dFilter;
@@ -111,7 +111,7 @@ public class EntityExportReportJob extends Job {
 
 	
 	@SuppressWarnings("unchecked")
-	protected Path runEntityType(IntelEntity entity, Date[] dateFilter) throws Exception{
+	protected Path runEntityType(IntelEntity entity, LocalDate[] dateFilter) throws Exception{
 		
 		//get the template
 		IntelEntityType type = null;
@@ -167,8 +167,8 @@ public class EntityExportReportJob extends Job {
 			HashMap<String, Object> reportParameters = new HashMap<String, Object>();
 			reportParameters.put(DataSourceParameter.ENTITY_UUID.getName(), UuidUtils.uuidToString(entity.getUuid()));
 			if (dateFilter != null && dateFilter.length == 2){
-				reportParameters.put(DataSourceParameter.START_DATE.getName(), dateFilter[0]);
-				reportParameters.put(DataSourceParameter.END_DATE.getName(), dateFilter[1]);
+				reportParameters.put(DataSourceParameter.START_DATE.getName(), java.sql.Date.valueOf(dateFilter[0]));
+				reportParameters.put(DataSourceParameter.END_DATE.getName(), java.sql.Date.valueOf(dateFilter[1]));
 			}
 			Session session = HibernateManager.openSession();
 			try{

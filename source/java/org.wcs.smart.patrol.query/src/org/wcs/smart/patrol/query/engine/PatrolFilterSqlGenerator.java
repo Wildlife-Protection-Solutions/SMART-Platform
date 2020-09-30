@@ -23,6 +23,7 @@ package org.wcs.smart.patrol.query.engine;
 
 import java.sql.SQLException;
 import java.text.MessageFormat;
+import java.time.LocalDate;
 import java.util.Locale;
 
 import org.wcs.smart.ca.Agency;
@@ -337,7 +338,7 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 		
 		field = table + "." + field; //$NON-NLS-1$
 		
-		java.sql.Date[] bits = filter.getDateFilterOption().getDates(); 
+		LocalDate[] bits = filter.getDateFilterOption().getDates(); 
 		String f = ""; //$NON-NLS-1$
 		if (bits == null){
 			return ""; //$NON-NLS-1$

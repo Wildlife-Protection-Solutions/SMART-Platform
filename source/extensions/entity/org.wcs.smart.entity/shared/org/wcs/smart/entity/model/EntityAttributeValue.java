@@ -22,8 +22,9 @@
 package org.wcs.smart.entity.model;
 
 import java.io.Serializable;
-import java.text.DateFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.Locale;
 
 import javax.persistence.CascadeType;
@@ -155,11 +156,11 @@ public class EntityAttributeValue {
 	 * @return
 	 */
 	@Transient
-	public Date getDateValue(){
+	public LocalDate getDateValue(){
 		if (getStringValue() == null){
 			return null;
 		}
-		return java.sql.Date.valueOf(getStringValue());
+		return LocalDate.parse(getStringValue(), DateTimeFormatter.ISO_LOCAL_DATE);
 	}
 	
 	/**
@@ -168,13 +169,12 @@ public class EntityAttributeValue {
 	 * @return
 	 */
 	@Transient
-	public void setDateValue(Date date){
+	public void setDateValue(LocalDate date){
 		if (date == null){
 			setStringValue(null);
 			return;
 		}
-		java.sql.Date tmp = new java.sql.Date(date.getTime());
-		setStringValue(tmp.toString());
+		setStringValue(DateTimeFormatter.ISO_LOCAL_DATE.format(date));
 	}
 	
 	/**
@@ -191,7 +191,7 @@ public class EntityAttributeValue {
 			break;
 		case DATE:
 			if (getStringValue() != null){
-				text = DateFormat.getDateInstance(DateFormat.MEDIUM).format(java.sql.Date.valueOf(getStringValue()));
+				text = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(getDateValue());
 			}
 		case NUMERIC:
 			if (getNumberValue() != null){
@@ -260,7 +260,7 @@ public class EntityAttributeValue {
 			setStringValue((String)value);
 			break;
 		case DATE:
-			setDateValue((Date)value);
+			setDateValue((LocalDate)value);
 			break;
 		case NUMERIC:
 			setNumberValue((Double)value);

@@ -21,9 +21,9 @@
  */
 package org.wcs.smart.er.ui.mision.editor;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.SWT;
@@ -48,7 +48,7 @@ import org.wcs.smart.er.model.SurveyWaypoint;
 public class MissionDayPage extends EditorPart {
 
 	private MissionEditor editor;
-	private Date date;
+	private LocalDate date;
 	
 	private ScrolledForm frmSummary; 
 	private FormToolkit toolkit;
@@ -99,12 +99,12 @@ public class MissionDayPage extends EditorPart {
 		
 		frmSummary.getBody().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		
-		SimpleDateFormat dayFormat = new SimpleDateFormat("EEEE"); //$NON-NLS-1$
+		DateTimeFormatter dayFormat = DateTimeFormatter.ofPattern("EEEE"); //$NON-NLS-1$
 		StringBuilder text = new StringBuilder(Messages.MissionDayPage_Mission);
 		text.append(" "); //$NON-NLS-1$
 		text.append(dayFormat.format(date));
 		text.append(", "); //$NON-NLS-1$
-		text.append(DateFormat.getDateInstance(DateFormat.MEDIUM).format(date));
+		text.append(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(date));
 		frmSummary.setText(text.toString());
 		frmSummary.getBody().setLayout(new GridLayout(1, false));
 		
@@ -136,7 +136,7 @@ public class MissionDayPage extends EditorPart {
 		return editor;
 	}
 	
-	public Date getDay() {
+	public LocalDate getDay() {
 		return date;
 	}
 }

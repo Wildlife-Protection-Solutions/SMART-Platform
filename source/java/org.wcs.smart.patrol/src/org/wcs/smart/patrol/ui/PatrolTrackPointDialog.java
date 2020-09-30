@@ -23,19 +23,17 @@ package org.wcs.smart.patrol.ui;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TimeZone;
 import java.util.UUID;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
+import org.locationtech.jts.geom.LineString;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.ui.map.TrackPointDialog;
-
-import org.locationtech.jts.geom.LineString;
 
 /**
  * Dialog for display tack points for a patrol track.
@@ -80,11 +78,6 @@ public class PatrolTrackPointDialog extends TrackPointDialog {
 		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CLOSE_LABEL, true);
 		Button btn = createButton(parent, IDialogConstants.OK_ID, Messages.PatrolTrackPointDialog_Button_Apply, true);
 		btn.setEnabled(false);
-	}
-	
-	@Override
-	protected TimeZone getTrackZTimezone() {
-		return Track.ZTIMEZONE;
 	}
 
 	@Override

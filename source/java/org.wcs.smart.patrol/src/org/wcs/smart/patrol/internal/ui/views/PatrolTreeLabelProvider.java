@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.patrol.internal.ui.views;
 
-import java.text.DateFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.Locale;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -96,7 +97,10 @@ public class PatrolTreeLabelProvider extends ColumnLabelProvider {
 	@Override
 	public String getText(Object element) {
 		if (element instanceof PatrolEditorInput){
-			return ((PatrolEditorInput)element).getPatrolId() + "  [" + DateFormat.getDateInstance(DateFormat.SHORT).format( ((PatrolEditorInput)element).getStartDate()) + " - " + DateFormat.getDateInstance(DateFormat.SHORT).format( ((PatrolEditorInput)element).getEndDate()) + " ]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			return ((PatrolEditorInput)element).getPatrolId() 
+					+ "  [" + DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).format( ((PatrolEditorInput)element).getStartDate())  //$NON-NLS-1$
+					+ " - " + DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).format( ((PatrolEditorInput)element).getEndDate())  //$NON-NLS-1$
+					+ " ]"; //$NON-NLS-1$ 
 		}else if (element instanceof NamedItem){
 			return ((NamedItem) element).getName();
 		}else if (element instanceof PatrolType.Type){

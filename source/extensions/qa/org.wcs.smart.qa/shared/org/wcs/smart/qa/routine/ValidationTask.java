@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.qa.routine;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.Locale;
 
 import org.wcs.smart.ca.ConservationArea;
@@ -39,8 +39,8 @@ public class ValidationTask{
 
 	private QaRoutine routine;
 	private IQaDataProvider provider;
-	private Date startDate;
-	private Date endDate;
+	private LocalDate startDate;
+	private LocalDate endDate;
 	private ConservationArea ca;
 	private Locale l;
 	
@@ -52,7 +52,7 @@ public class ValidationTask{
 	 * @param endDate the end date 
 	 * @param ca the conservation area 
 	 */
-	public ValidationTask(QaRoutine routine, IQaDataProvider provider, Date startDate, Date endDate, ConservationArea ca, Locale l){
+	public ValidationTask(QaRoutine routine, IQaDataProvider provider, LocalDate startDate, LocalDate endDate, ConservationArea ca, Locale l){
 		this.routine = routine;
 		this.provider = provider;
 		this.startDate = startDate;
@@ -76,11 +76,11 @@ public class ValidationTask{
 		return provider;
 	}
 
-	public Date getStartDate() {
+	public LocalDate getStartDate() {
 		return startDate;
 	}
 
-	public Date getEndDate() {
+	public LocalDate getEndDate() {
 		return endDate;
 	}
 

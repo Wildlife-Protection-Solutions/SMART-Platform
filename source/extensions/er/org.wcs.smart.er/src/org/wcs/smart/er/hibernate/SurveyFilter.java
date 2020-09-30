@@ -21,13 +21,12 @@
  */
 package org.wcs.smart.er.hibernate;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.common.filter.StringFilterComposite.StringComparison;
-//import org.wcs.smart.common.filter.StringFilterComposite.StringComparison;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.hibernate.SmartDB;
 /**
@@ -42,8 +41,8 @@ public class SurveyFilter {
 	private SurveyDesign.State state = null;
 	
 	private DateFilter dateFilter = null;
-	private Date startDate;
-	private Date endDate;
+	private LocalDate startDate;
+	private LocalDate endDate;
 	
 	private String surveyNameFilter = null;
 	private StringComparison stringComparator = null;
@@ -83,7 +82,7 @@ public class SurveyFilter {
 	 * 
 	 * @return start date for custom start date filter
 	 */
-	public Date getStartDate(){
+	public LocalDate getStartDate(){
 		return this.startDate;
 	}
 	
@@ -91,7 +90,7 @@ public class SurveyFilter {
 	 * 
 	 * @return end date for custom start date filter
 	 */
-	public Date getEndDate(){
+	public LocalDate getEndDate(){
 		return this.endDate;
 	}
 	
@@ -135,7 +134,7 @@ public class SurveyFilter {
 	 * @param start the start date for custom filter; null if not custom date filter
 	 * @param end the end date for custom filter; null if not custom date filter
 	 */
-	public void setDateFilter(DateFilter dFilter, Date start, Date end){
+	public void setDateFilter(DateFilter dFilter, LocalDate start, LocalDate end){
 		this.dateFilter = dFilter;
 		this.startDate = start;
 		this.endDate = end;
@@ -255,11 +254,11 @@ public class SurveyFilter {
 			}
 		}
 		if (dateFilter != null) {
-			Date start = dateFilter.getStartDate();
+			LocalDate start = dateFilter.getStartDate();
 			if (start == null){
 				start = startDate;
 			}
-			Date end = dateFilter.getEndDate();
+			LocalDate end = dateFilter.getEndDate();
 			if (end == null){
 				end = endDate;
 			}

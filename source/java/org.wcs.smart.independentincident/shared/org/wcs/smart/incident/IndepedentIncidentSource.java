@@ -22,7 +22,8 @@
 package org.wcs.smart.incident;
 
 import java.io.File;
-import java.text.DateFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.Locale;
 
 import org.hibernate.Session;
@@ -89,12 +90,13 @@ public class IndepedentIncidentSource implements IWaypointSource {
 	public String getSourceLabel(Object source, Session session, Locale l) {
 		Waypoint ap = (Waypoint) source;
 		
+		
 		StringBuilder sb = new StringBuilder();
 		sb.append(getName(l));
 		sb.append(": "); //$NON-NLS-1$
 		sb.append(ap.getId());
 		sb.append(" ("); //$NON-NLS-1$
-		sb.append(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, l).format(ap.getDateTime()));
+		sb.append( DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).withLocale(l).format(ap.getDateTime()));
 		sb.append(") "); //$NON-NLS-1$
 		return sb.toString();
 	}

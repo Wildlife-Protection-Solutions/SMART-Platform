@@ -21,8 +21,9 @@
  */
 package org.wcs.smart.er.query.model;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -65,23 +66,23 @@ public class SurveyQueryResultItem implements IGeometryResultItem, IAdaptable{
 	private String caName;
 	
 	private String surveyDesign;
-	private Date surveyDesignStart;
-	private Date surveyDesignEnd;
+	private LocalDate surveyDesignStart;
+	private LocalDate surveyDesignEnd;
 	
 	private String surveyId;
-	private Date surveyStart;
-	private Date surveyEnd;
+	private LocalDate surveyStart;
+	private LocalDate surveyEnd;
 	
 	private String missionId;
-	private Date missionStart;
-	private Date missionEnd;
+	private LocalDateTime missionStart;
+	private LocalDateTime missionEnd;
 	private UUID missionUuid;
 	private String missionLeader;
 	
 	private UUID samplingUnitUuid;
 	private String samplingUnitId;
 	
-	private Date wpDateTime;
+	private LocalDateTime wpDateTime;
 	
 	private UUID waypointUuid;
 	private int waypointId;
@@ -99,7 +100,7 @@ public class SurveyQueryResultItem implements IGeometryResultItem, IAdaptable{
 	private HashMap<String, Object> suAttributes = new HashMap<String, Object>();
 	
 	private String lastModifiedBy;
-	private Date lastModified;
+	private LocalDateTime lastModified;
 	
 	private UUID groupUuid;
 	private UUID observationUuid;
@@ -138,14 +139,14 @@ public class SurveyQueryResultItem implements IGeometryResultItem, IAdaptable{
 	 * the waypoint last modified date
 	 * @param lastModified
 	 */
-	public void setLastModifiedDate(Date lastModified) {
+	public void setLastModifiedDate(LocalDateTime lastModified) {
 		this.lastModified = lastModified;
 	}
 	/**
 	 * 
 	 * @return the waypoint last modified date
 	 */
-	public Date getLastModifiedDate() {
+	public LocalDateTime getLastModifiedDate() {
 		return this.lastModified;
 	}
 	
@@ -309,13 +310,13 @@ public class SurveyQueryResultItem implements IGeometryResultItem, IAdaptable{
 	/**
 	 * @return waypoint date 
 	 */
-	public Date getWaypointDateTime() {
+	public LocalDateTime getWaypointDateTime() {
 		return wpDateTime;
 	}
 	/**
 	 * @param wpDateTime waypoint date 
 	 */
-	public void setWaypointDateTime(Date wpDateTime) {
+	public void setWaypointDateTime(LocalDateTime wpDateTime) {
 		this.wpDateTime = wpDateTime;
 	}
 
@@ -491,11 +492,11 @@ public class SurveyQueryResultItem implements IGeometryResultItem, IAdaptable{
 	 * survey design start
 	 * @return
 	 */
-	public Date getSurveyDesignStart() {
+	public LocalDate getSurveyDesignStart() {
 		return surveyDesignStart;
 	}
 
-	public void setSurveyDesignStart(Date surveyDesignStart) {
+	public void setSurveyDesignStart(LocalDate surveyDesignStart) {
 		this.surveyDesignStart = surveyDesignStart;
 	}
 
@@ -503,11 +504,11 @@ public class SurveyQueryResultItem implements IGeometryResultItem, IAdaptable{
 	 * survey design end
 	 * @return
 	 */
-	public Date getSurveyDesignEnd() {
+	public LocalDate getSurveyDesignEnd() {
 		return surveyDesignEnd;
 	}
 
-	public void setSurveyDesignEnd(Date surveyDesignEnd) {
+	public void setSurveyDesignEnd(LocalDate surveyDesignEnd) {
 		this.surveyDesignEnd = surveyDesignEnd;
 	}
 
@@ -527,11 +528,11 @@ public class SurveyQueryResultItem implements IGeometryResultItem, IAdaptable{
 	 * survey start
 	 * @return
 	 */
-	public Date getSurveyStart() {
+	public LocalDate getSurveyStart() {
 		return surveyStart;
 	}
 
-	public void setSurveyStart(Date surveyStart) {
+	public void setSurveyStart(LocalDate surveyStart) {
 		this.surveyStart = surveyStart;
 	}
 
@@ -539,11 +540,11 @@ public class SurveyQueryResultItem implements IGeometryResultItem, IAdaptable{
 	 * survey end
 	 * @return
 	 */
-	public Date getSurveyEnd() {
+	public LocalDate getSurveyEnd() {
 		return surveyEnd;
 	}
 
-	public void setSurveyEnd(Date surveyEnd) {
+	public void setSurveyEnd(LocalDate surveyEnd) {
 		this.surveyEnd = surveyEnd;
 	}
 
@@ -563,11 +564,11 @@ public class SurveyQueryResultItem implements IGeometryResultItem, IAdaptable{
 	 * mission start
 	 * @return
 	 */
-	public Date getMissionStart() {
+	public LocalDateTime getMissionStart() {
 		return missionStart;
 	}
 
-	public void setMissionStart(Date missionStart) {
+	public void setMissionStart(LocalDateTime missionStart) {
 		this.missionStart = missionStart;
 	}
 
@@ -575,11 +576,11 @@ public class SurveyQueryResultItem implements IGeometryResultItem, IAdaptable{
 	 * mission end
 	 * @return
 	 */
-	public Date getMissionEnd() {
+	public LocalDateTime getMissionEnd() {
 		return missionEnd;
 	}
 
-	public void setMissionEnd(Date missionEnd) {
+	public void setMissionEnd(LocalDateTime missionEnd) {
 		this.missionEnd = missionEnd;
 	}
 

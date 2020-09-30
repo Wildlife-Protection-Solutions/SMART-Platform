@@ -1,8 +1,8 @@
 package org.wcs.smart.i2.query.engine;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,7 +48,7 @@ public class RecordFilterProcessor {
 	HashMap<String, Integer> colName2Index = new HashMap<>();
 	
 	public String processFilter(IQueryFilter filter, Set<UUID> profiles, 
-			Date[] dates, Collection<ConservationArea> cas, Session session, IProgressMonitor monitor) throws Exception {
+			LocalDate[] dates, Collection<ConservationArea> cas, Session session, IProgressMonitor monitor) throws Exception {
 		
 		SubMonitor sub = SubMonitor.convert(monitor);
 		sub.beginTask(Messages.RecordFilterProcessor_FilterTask, 3);
@@ -70,7 +70,7 @@ public class RecordFilterProcessor {
 	 * create temporary entity table and populate with all entities
 	 * that match the given conservation area
 	 */
-	private String createTemporaryRecordTable(Session session, Set<UUID> profiles, Date[] dates, Collection<ConservationArea> cas) {
+	private String createTemporaryRecordTable(Session session, Set<UUID> profiles, LocalDate[] dates, Collection<ConservationArea> cas) {
 		String obsTable = SqlGenerator.createTempTableName();
 			
 		//create table

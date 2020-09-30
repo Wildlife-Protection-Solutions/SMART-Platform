@@ -22,8 +22,9 @@
 package org.wcs.smart.asset.ui.views.map.udig;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.geotools.data.store.ContentDataStore;
@@ -36,7 +37,6 @@ import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory;
 import org.wcs.smart.asset.ui.views.map.IOverviewTableColumn;
 import org.wcs.smart.asset.ui.views.map.StationData;
-import org.wcs.smart.util.SharedUtils;
 
 /**
  * Geotools data store for entity locations
@@ -76,9 +76,9 @@ public class AssetStationSummaryDataSource extends ContentDataStore{
 		return new NameImpl("org.wcs.smart.asset.summary", "statistics"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
-	public static Filter createDateFilter(Date startDate, Date endDate){
-		if (startDate == null || endDate == null) return Filter.INCLUDE;
-		FilterFactory ff = CommonFactoryFinder.getFilterFactory();
-		return ff.between(ff.property("date"), ff.literal(startDate), ff.literal(SharedUtils.getDatePart(endDate, true))); //$NON-NLS-1$
-	}
+//	public static Filter createDateFilter(LocalDate startDate, LocalDate endDate){
+//		if (startDate == null || endDate == null) return Filter.INCLUDE;
+//		FilterFactory ff = CommonFactoryFinder.getFilterFactory();
+//		return ff.between(ff.property("date"), ff.literal(startDate.atStartOfDay()), ff.literal(endDate.atTime(LocalTime.MAX))); //$NON-NLS-1$
+//	}
 }

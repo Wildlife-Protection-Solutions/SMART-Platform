@@ -21,10 +21,11 @@
  */
 package org.wcs.smart.cybertracker.survey.json;
 
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -94,7 +95,7 @@ public class MissionJsonTrackProcessor  implements IJsonProcessor {
 			
 			Double x = ((Number) pntArray.get(0)).doubleValue();
 			Double y = ((Number) pntArray.get(1)).doubleValue();
-			Date dt = JsonUtils.parseJsonDateTime((String)properties.get(JsonCtParser.DATETIME_KEY));
+			LocalDateTime dt = JsonUtils.parseJsonDateTime((String)properties.get(JsonCtParser.DATETIME_KEY));
 
 			String deviceId = (String) properties.get(JsonCtParser.DEVICE_ID);
 			
@@ -103,12 +104,12 @@ public class MissionJsonTrackProcessor  implements IJsonProcessor {
 			//we want to find the patrol leg with a day that matches this day and time
 			Set<MissionDay> matches = new HashSet<MissionDay>();
 			for (CtMissionLink link : links){
-				if (JsonCtParser.isDateBetween(dt, link.getMission().getStartDate(), link.getMission().getEndDate())){
+				if (JsonCtParser.isDateBetween(dt.toLocalDate(), link.getMission().getStartDate(), link.getMission().getEndDate())){
 					
 					//lets look for a patrol leg day that matches
 					for (MissionDay pld : link.getMission().getMissionDays()){
-						if (SharedUtils.isSameDate(pld.getDate(), dt) &&
-								JsonCtParser.isTimeBetween(dt, pld.getStartTime(), pld.getEndTime())){
+						if (pld.getDate().isEqual(dt.toLocalDate()) &&
+								JsonCtParser.isTimeBetween(dt.toLocalTime(), pld.getStartTime(), pld.getEndTime())){
 							matches.add(pld);
 						}
 					}
@@ -129,12 +130,12 @@ public class MissionJsonTrackProcessor  implements IJsonProcessor {
 				}else{
 					StringBuilder sb = new StringBuilder();
 					for (MissionDay pld : matches){
-						sb.append(pld.getMission().getId() + "(" + DateFormat.getDateInstance().format(pld.getDate()) + "), "); //$NON-NLS-1$ //$NON-NLS-2$
+						sb.append(pld.getMission().getId() + "(" + DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(pld.getDate()) + "), "); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 					sb.deleteCharAt(sb.length() - 1);
 					sb.deleteCharAt(sb.length() - 1);
 					
-					warnings.add(MessageFormat.format(Messages.MissionJsonTrackProcessor_MultipleMatched, DateFormat.getDateTimeInstance().format(dt), sb.toString()));
+					warnings.add(MessageFormat.format(Messages.MissionJsonTrackProcessor_MultipleMatched, DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(dt), sb.toString()));
 				}
 				
 			}
@@ -157,7 +158,7 @@ public class MissionJsonTrackProcessor  implements IJsonProcessor {
 	}
 	
 	
-	public static void addSuPointToMisisonTracks(MissionDay md, SamplingUnit su, Coordinate c, Date dt) throws Exception{
+	public static void addSuPointToMisisonTracks(MissionDay md, SamplingUnit su, Coordinate c, LocalDateTime dt) throws Exception{
 		if (md.getTracks() == null) md.setTracks(new ArrayList<MissionTrack>());
 		
 		MissionTrack addTo = null;
@@ -215,7 +216,7 @@ public class MissionJsonTrackProcessor  implements IJsonProcessor {
 	 * 3. when sampling unit is changed a "observation" is made 
 	 * 
 	 */
-	public static void addPointToMisisonTracks(MissionDay md, Coordinate c, Date dt) throws Exception{
+	public static void addPointToMisisonTracks(MissionDay md, Coordinate c, LocalDateTime dt) throws Exception{
 		if (md.getTracks() == null) md.setTracks(new ArrayList<MissionTrack>());
 		
 		MissionTrack addTo = null;
@@ -227,7 +228,7 @@ public class MissionJsonTrackProcessor  implements IJsonProcessor {
 			addTo = newTrack;
 			
 		}else{
-			double z = JsonTrackUtils.convertTimeToGMT(dt);
+			double z = SharedUtils.toLongTime(dt);
 			//see if point fits between existing track points
 			for (MissionTrack t : md.getTracks()){
 				double t1 = t.getLineString().getCoordinateN(0).getZ();

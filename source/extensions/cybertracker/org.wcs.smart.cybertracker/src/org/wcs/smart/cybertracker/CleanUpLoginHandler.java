@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.cybertracker;
 
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -56,7 +57,7 @@ public class CleanUpLoginHandler implements ILoginHandler {
 	
 	private void cleanLinksTable() {
 		//delete anything from the ct_incident_link that links to a waypoint that is has a last modified date that is older than one year
-		Date oneYearAgo = new Date( (new Date()).getTime() - 31_536_000_000l);
+		LocalDateTime oneYearAgo = ChronoUnit.YEARS.addTo(LocalDateTime.now(), -1);
 		String hql = "DELETE FROM CtIncidentLink WHERE waypoint IN (FROM Waypoint WHERE lastModified <= :lastModified)"; //$NON-NLS-1$
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();

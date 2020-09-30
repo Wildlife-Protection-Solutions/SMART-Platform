@@ -26,7 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 
@@ -112,7 +112,7 @@ public class EntityExportDialog extends SmartStyledTitleDialog {
 			return;
 		}
 		DateFilter df = dateComp.getDateFilter();
-		EntityExportReportJob job = new EntityExportReportJob(toExport, new Date[]{df.getStartDate(), df.getEndDate()},(EmitterInfo) ((IStructuredSelection)cmbFormat.getSelection()).getFirstElement(),p);
+		EntityExportReportJob job = new EntityExportReportJob(toExport, new LocalDate[]{df.getStartDate(), df.getEndDate()},(EmitterInfo) ((IStructuredSelection)cmbFormat.getSelection()).getFirstElement(),p);
 		job.schedule();
 		
 		Intelligence2PlugIn.getDefault().getDialogSettings().put(DIR_KEY, p.toString());

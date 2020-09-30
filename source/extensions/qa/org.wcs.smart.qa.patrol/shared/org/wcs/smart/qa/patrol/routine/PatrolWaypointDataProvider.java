@@ -21,10 +21,12 @@
  */
 package org.wcs.smart.qa.patrol.routine;
 
-import java.text.DateFormat;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -66,7 +68,7 @@ public class PatrolWaypointDataProvider extends IQaDataProvider {
 	}
 	
 	@Override
-	public Collection<?> getData(Session session, ConservationArea ca, Date startDate, Date endDate) {
+	public Collection<?> getData(Session session, ConservationArea ca, LocalDate startDate, LocalDate endDate) {
 		List<WaypointLocationData> waypoints = new ArrayList<>();
 		
 		CriteriaBuilder cb = session.getCriteriaBuilder();
@@ -75,7 +77,7 @@ public class PatrolWaypointDataProvider extends IQaDataProvider {
 		c.where(cb.and(
 				cb.equal(from.get("conservationArea"), ca), //$NON-NLS-1$
 				cb.equal(from.get("sourceId"), PatrolWaypointSource.PATROL_WP_SOURCE_ID), //$NON-NLS-1$
-				cb.between(from.get("dateTime"), cb.literal(startDate), cb.literal(endDate)) //$NON-NLS-1$
+				cb.between(from.get("dateTime"), cb.literal(startDate.atStartOfDay()), cb.literal(endDate.atTime(LocalTime.MAX))) //$NON-NLS-1$
 				));
 		List<Waypoint> pws = session.createQuery(c).getResultList();
 		
@@ -99,7 +101,7 @@ public class PatrolWaypointDataProvider extends IQaDataProvider {
 		sb.append(ILabelProvider.getLabel(Key.PatrolWaypointDataProvider_WpIdLabel, l));
 		sb.append(pw.getWaypoint().getId());
 		sb.append(" ("); //$NON-NLS-1$
-		sb.append(DateFormat.getDateTimeInstance().format(pw.getWaypoint().getDateTime()));
+		sb.append(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(pw.getWaypoint().getDateTime()));
 		sb.append(")"); //$NON-NLS-1$
 		return sb.toString();
 	}

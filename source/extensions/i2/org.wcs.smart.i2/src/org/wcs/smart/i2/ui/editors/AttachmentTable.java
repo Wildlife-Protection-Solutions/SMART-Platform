@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.i2.ui.editors;
 
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,8 +50,6 @@ import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttachment;
 import org.wcs.smart.i2.ui.I2SwtUtils;
 import org.wcs.smart.ui.Thumbnail;
-
-import com.ibm.icu.text.DateFormat;
 
 /**
  * Table for displaying list of attachments.
@@ -295,7 +295,7 @@ public class AttachmentTable extends Composite implements Listener {
 				this.file = file;
 				tooltip = file.getFilename();
 				if (file instanceof IntelAttachment){
-					tooltip += "\n" + Messages.AttachmentTable_AddedLabel + DateFormat.getDateInstance().format(((IntelAttachment)file).getDateCreated()); //$NON-NLS-1$
+					tooltip += "\n" + Messages.AttachmentTable_AddedLabel + DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(((IntelAttachment)file).getDateCreated()); //$NON-NLS-1$
 				}
 			}
 			

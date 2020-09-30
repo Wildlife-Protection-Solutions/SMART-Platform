@@ -21,9 +21,14 @@
  */
 package org.wcs.smart.connect.filter;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -47,7 +52,8 @@ import org.wcs.smart.connect.security.SecurityManager;
 /*
  * AlertFilter is an object that hold all the filter information for specifying exactly what alerts the user is looking for.
  * 
- * The constructor takes string filters from the HTML form that typically provides them, then converts to proper types for each filter.
+ * The constructor takes string filters from the HTML form that typically provides them, 
+ * then converts to proper types for each filter.
  */
 
 public class AlertFilter {
@@ -55,8 +61,8 @@ public class AlertFilter {
 	private List<UUID> typeUuidFilter;
 	private List<AlertStatusEnum> statusFilter;
 	private List<UUID> caUuidFilter;
-	private Date startDateFilter;
-	private Date endDateFilter;
+	private ZonedDateTime startDateFilter;
+	private ZonedDateTime endDateFilter;
 	
 	private String textSearchFilter;
 	private String sortBy;
@@ -131,11 +137,11 @@ public class AlertFilter {
 		if(startDateFilter != null && !startDateFilter.isEmpty()){ 
 			try {		
 				if(endDateFilter == null || endDateFilter.isEmpty()){
-					this.endDateFilter = new Date((System.currentTimeMillis() + (1000 * 60 * 60 * 24 * 365))); //Add lots of time to now, in case clocks are off etc, really annoying to not see 'future' alerts when you select "all alerts".
+					this.endDateFilter = LocalDateTime.MAX.atZone(ZoneId.systemDefault());
 				}else{
-					this.endDateFilter = new Date(Long.parseLong(endDateFilter));
+					this.endDateFilter = Instant.ofEpochMilli(Long.valueOf(endDateFilter)).atZone(ZoneOffset.UTC);
 				}
-				this.startDateFilter = new Date(Long.parseLong(startDateFilter));
+				this.startDateFilter = Instant.ofEpochMilli(Long.valueOf(startDateFilter)).atZone(ZoneOffset.UTC);
 			
 			} catch (Exception e) {
 				throw new SmartConnectException(Response.Status.BAD_REQUEST + Messages.getString("AlertFilter.InvalidDate",l)); //$NON-NLS-1$

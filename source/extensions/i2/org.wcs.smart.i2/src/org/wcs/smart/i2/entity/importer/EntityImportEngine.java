@@ -25,10 +25,8 @@ import java.io.FileNotFoundException;
 import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -196,7 +194,7 @@ public enum EntityImportEngine {
 						break;
 					case DATE:
 						try{
-							Date d = Date.from(LocalDate.parse(value1, dateFormatter).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+							LocalDate d = LocalDate.parse(value1, dateFormatter);
 							avalue.setDateValue(d);
 							add = true;
 						}catch (Exception ex){

@@ -24,7 +24,6 @@ package org.wcs.smart.patrol.model;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.TimeZone;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -56,9 +55,7 @@ import org.wcs.smart.util.GeometryUtils;
 public class Track extends UuidItem {
 	
 	private static final long serialVersionUID = 1L;
-	
-	public static TimeZone ZTIMEZONE = TimeZone.getTimeZone("GMT"); //$NON-NLS-1$
-	
+		
 	private byte[] geom;
 	private Float distance;
 	private PatrolLegDay patrolLegDay;
@@ -177,5 +174,4 @@ public class Track extends UuidItem {
 		this.geom = writer.write(geometry);
 	}
 
-	
 }

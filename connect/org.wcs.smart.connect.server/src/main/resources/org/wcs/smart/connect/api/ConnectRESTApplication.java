@@ -67,7 +67,6 @@ public class ConnectRESTApplication extends Application {
 		resources.add(ConnectUserAction.class);
 		resources.add(ConservationAreas.class);
 		resources.add(CorsFeature.class);
-		resources.add(CtDataApi.class);
 		resources.add(CyberTracker.class);
 		resources.add(DashboardBetaApi.class);
 		resources.add(DataModelApi.class);

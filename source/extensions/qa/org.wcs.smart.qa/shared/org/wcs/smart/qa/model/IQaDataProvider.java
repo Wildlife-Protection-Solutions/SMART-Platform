@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.qa.model;
 
+import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
@@ -60,7 +60,7 @@ public abstract class IQaDataProvider {
 	 * 
 	 * @return
 	 */
-	public abstract Collection<?> getData(Session session, ConservationArea conservationArea, Date startDate, Date endDate);
+	public abstract Collection<?> getData(Session session, ConservationArea conservationArea, LocalDate startDate, LocalDate endDate);
 	
 	/**
 	 * Determines if a given QA Routine Type supports data

@@ -2,8 +2,8 @@ package org.wcs.smart.entity.xml;
 
 import java.text.MessageFormat;
 import java.text.ParseException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -43,7 +43,7 @@ public class EntityTypeFromXmlConverter {
 		entityType.setAttributes(new ArrayList<EntityAttribute>());
 		entityType.setConservationArea(SmartDB.getCurrentConservationArea());
 		entityType.setCreator(SmartDB.getCurrentEmployee());
-		entityType.setDateCreated(new Date());
+		entityType.setDateCreated(LocalDateTime.now());
 		
 		entityType.setEntities(new ArrayList<Entity>());
 		entityType.setKeyId(xml.getKeyid());

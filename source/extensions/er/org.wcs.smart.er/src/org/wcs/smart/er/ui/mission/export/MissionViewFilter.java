@@ -22,7 +22,8 @@
 
 package org.wcs.smart.er.ui.mission.export;
 
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 import org.hibernate.Session;
 import org.hibernate.query.Query;
@@ -37,14 +38,14 @@ import org.wcs.smart.hibernate.SmartDB;
 public class MissionViewFilter {
 
 	private DateFilter dateFilter = DateFilter.LAST_30_DAYS;
-	private Date startDate;
-	private Date endDate;
+	private LocalDate startDate;
+	private LocalDate endDate;
 	
 	/**
 	 * 
 	 * @return start date for custom date filter
 	 */
-	public Date getStartDate(){
+	public LocalDate getStartDate(){
 		return this.startDate;
 	}
 	
@@ -52,7 +53,7 @@ public class MissionViewFilter {
 	 * 
 	 * @return end date for custom date filter
 	 */
-	public Date getEndDate(){
+	public LocalDate getEndDate(){
 		return this.endDate;
 	}
 	
@@ -63,7 +64,7 @@ public class MissionViewFilter {
 		this.dateFilter = DateFilter.LAST_30_DAYS;
 	}
 	
-	public void setDateFilter(DateFilter dFilter, Date start, Date end){
+	public void setDateFilter(DateFilter dFilter, LocalDate start, LocalDate end){
 		this.dateFilter = dFilter;
 		this.startDate = start;
 		this.endDate = end;
@@ -97,16 +98,16 @@ public class MissionViewFilter {
 	
 		Query<?> query = s.createQuery(str.toString()).setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		if (dateFilter != null) {
-			Date start = dateFilter.getStartDate();
+			LocalDate start = dateFilter.getStartDate();
 			if (start == null){
 				start = startDate;
 			}
-			Date end = dateFilter.getEndDate();
+			LocalDate end = dateFilter.getEndDate();
 			if (end == null){
 				end = endDate;
 			}
-			query.setParameter("date1", start); //$NON-NLS-1$
-			query.setParameter("date2", end); //$NON-NLS-1$
+			query.setParameter("date1", start.atStartOfDay()); //$NON-NLS-1$
+			query.setParameter("date2", end.atTime(LocalTime.MAX)); //$NON-NLS-1$
 		}
 		return query;
 	}

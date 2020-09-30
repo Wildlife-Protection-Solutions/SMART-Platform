@@ -25,9 +25,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -774,7 +774,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 				}else if (field.getAttribute().getType() == AttributeType.NUMERIC){
 					att.setNumberValue((Double)x);
 				}else if (field.getAttribute().getType() == AttributeType.DATE){
-					att.setDateValue((Date)x);
+					att.setDateValue((LocalDate)x);
 				}
 				wo.getAttributes().add(att);
 			}

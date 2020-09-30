@@ -29,16 +29,13 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.Time;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Calendar;
+import java.time.ZoneOffset;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipFile;
@@ -167,22 +164,20 @@ public class SmartUtils {
 		}
 	});
 	
-	public static NullComparator nullDateComparator = new NullComparator(new Comparator<Date>() {
+	public static NullComparator nullDateComparator = new NullComparator(new Comparator<LocalDate>() {
 		@Override
-		public int compare(Date o1, Date o2) {
+		public int compare(LocalDate o1, LocalDate o2) {
 			return o1.compareTo(o2);
 		}
 	});
-	
-	/**
-	 * Converts a datetime widget to a date object only setting year, month and
-	 * day. The hour, minute, second and millisecond are all set to 0;
-	 * 
-	 */
-	public static Date getDate(DateTime dt) {
-		return getCalendar(dt).getTime();
-	}
 
+	/**
+	 * Converts DateTime ui widgets to a LocalDateTime 
+	 * 
+	 * @param date date widget
+	 * @param time time widget
+	 * @return
+	 */
 	public static LocalDateTime toDateTime(DateTime date, DateTime time) {
 		LocalDateTime ldt = LocalDateTime.of(date.getYear(), date.getMonth()+1, date.getDay(), 
 				time.getHours(), time.getMinutes(), time.getSeconds());
@@ -190,127 +185,51 @@ public class SmartUtils {
 		
 	}
 	
-	public static LocalDate toDate(DateTime date) {
-		return LocalDate.of(date.getYear(), date.getMonth()+1, date.getDay());
-		
-	}
 	/**
-	 * Converts a date time widget to a date object only setting year
-	 * month and day.  The hour, minute, second and millisecond are all set to 0
-	 * 
-	 * @param dt
+	 * Converts DateTime widget to LocalDate
+	 * @param date
 	 * @return
 	 */
-	public static Calendar getCalendar(DateTime dt){
-		
-		//DateTime widget seems to always return data in Gregorian calendar
-		Calendar calendar = new GregorianCalendar();
-		
-		calendar.set(Calendar.YEAR, dt.getYear());
-		calendar.set(Calendar.MONTH, dt.getMonth());
-		calendar.set(Calendar.DAY_OF_MONTH, dt.getDay());
-		calendar.set(Calendar.HOUR_OF_DAY, 0);
-		calendar.set(Calendar.MINUTE, 0);
-		calendar.set(Calendar.SECOND, 0);
-		calendar.set(Calendar.MILLISECOND, 0);
-		
-		//return calendar in correct locale
-		Calendar current = Calendar.getInstance();
-		current.setTime(calendar.getTime());
-		return current;
+	public static LocalDate toDate(DateTime date) {
+		return LocalDate.of(date.getYear(), date.getMonth()+1, date.getDay());
 	}
-
+	
 	/**
-	 * initialized the date fields of a datetime widget
+	 * Converts DateTime widget to LocalTime
+	 * @param date
+	 * @return
+	 */
+	public static LocalTime toTime(DateTime date) {
+		return LocalTime.of(date.getHours(), date.getMinutes(), date.getSeconds());
+	}
+	
+	/**
+	 * Initializes DateTime widget with LocalDate and LocalTime
+	 * @param dtWidget
+	 * @param date
+	 * @param time
+	 */
+	public static void initDateTimeWidget(DateTime dtWidget, LocalDate date, LocalTime time){
+		initDateTimeWidget(dtWidget, date);
+		initDateTimeWidget(dtWidget, time);
+	}
+	
+	/**
+	 * Initializes DateTime widget with LocalDate
 	 * @param dtWidget
 	 * @param date
 	 */
-	public static void initDateDateTimeWidget(DateTime dtWidget, Date date){
-		//datetime widget uses gregorian calendar for fields
-		Calendar cal = new GregorianCalendar();
-		cal.setTime(date);
-		
-		dtWidget.setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DATE));
-	}
-	
-	public static void initDateDateTimeWidget(DateTime dtWidget, LocalDate date){
+	public static void initDateTimeWidget(DateTime dtWidget, LocalDate date){
 		dtWidget.setDate(date.getYear(), date.getMonthValue()-1, date.getDayOfMonth());
 	}
 	
-	public static void initDateDateTimeWidget(DateTime dtWidget, LocalTime time){
-		dtWidget.setTime(time.getHour(), time.getMinute(), time.getSecond());
-	}
-	
 	/**
-	 * initialized the time fields of a datetime widget
+	 * Initializes DateTime widget with LocalTime
 	 * @param dtWidget
-	 * @param date
+	 * @param time
 	 */
-	public static void initTimeDateTimeWidget(DateTime dtWidget, Date date){
-		//datetime widget uses gregorian calendar for fields
-		Calendar cal = new GregorianCalendar();
-		cal.setTime(date);
-		dtWidget.setTime(cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), cal.get(Calendar.SECOND));
-	}
-	
-	
-
-	/**
-	 * Gets only the date part of a given date. Sets the time to 0.
-	 * 
-	 * @param dt
-	 * @return date only date
-	 */
-	public static Date combineDateTime(Date date, Date time) {
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(date);
-		Calendar calendar2 = Calendar.getInstance();
-		calendar2.setTime(time);
-
-		calendar.set(Calendar.HOUR_OF_DAY, calendar2.get(Calendar.HOUR_OF_DAY));
-		calendar.set(Calendar.MINUTE, calendar2.get(Calendar.MINUTE));
-		calendar.set(Calendar.SECOND, calendar2.get(Calendar.SECOND));
-		calendar.set(Calendar.MILLISECOND, calendar2.get(Calendar.MILLISECOND));
-
-		return calendar.getTime();
-	}
-
-	
-	/**
-	 * Combines the date and time into a single object
-	 * 
-	 * @param dt
-	 * @return date only date
-	 */
-	public static Date combineDateTime(Date date, Time time) {
-		return combineDateTime(date, new Date(time.getTime()));
-	}
-
-	/**
-	 * Converts a datetime widget to a date object only setting hour, minute,
-	 * seconde
-	 */
-	public static Date getTime(DateTime dt) {
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTimeInMillis(0);
-		calendar.set(Calendar.HOUR_OF_DAY, dt.getHours());
-		calendar.set(Calendar.MINUTE, dt.getMinutes());
-		calendar.set(Calendar.SECOND, dt.getSeconds());
-		return calendar.getTime();
-	}
-
-	/**
-	 * Gets the time midnight
-	 * @return
-	 */
-	public static Date getMidnight() {
-		Calendar cal = Calendar.getInstance();
-		cal.setTimeInMillis(0);
-		cal.set(Calendar.MILLISECOND, 0);
-		cal.set(Calendar.SECOND, 0);
-		cal.set(Calendar.HOUR_OF_DAY, 0);
-		cal.set(Calendar.MINUTE, 0);
-		return cal.getTime();
+	public static void initDateTimeWidget(DateTime dtWidget, LocalTime time){
+		dtWidget.setTime(time.getHour(), time.getMinute(), time.getSecond());
 	}
 
 	public static void deleteDirectory(final Path dir) throws IOException { 
@@ -606,23 +525,71 @@ public class SmartUtils {
 	 * @return
 	 * @throws DatatypeConfigurationException
 	 */
-	public static XMLGregorianCalendar toXmlDate(Date d) throws DatatypeConfigurationException {
-		if (d == null) {
-			return null;
-		}
-		GregorianCalendar cal = new GregorianCalendar();
-		cal.setTime(d);
+	public static XMLGregorianCalendar toXmlDate(LocalDate d) throws DatatypeConfigurationException {
+		if (d == null) return null;
 		
-		XMLGregorianCalendar xgc = DatatypeFactory.newInstance().newXMLGregorianCalendar(cal);
-		xgc.setTimezone(DatatypeConstants.FIELD_UNDEFINED);
-		xgc.setMillisecond(DatatypeConstants.FIELD_UNDEFINED);
-		xgc.setHour(DatatypeConstants.FIELD_UNDEFINED);
-		xgc.setMinute(DatatypeConstants.FIELD_UNDEFINED);
-		xgc.setSecond(DatatypeConstants.FIELD_UNDEFINED);
-		
-		return xgc;
+		return DatatypeFactory.newInstance().newXMLGregorianCalendar(
+				d.getYear(), d.getMonthValue(),d.getDayOfMonth(),
+				0,0,0,
+				DatatypeConstants.FIELD_UNDEFINED, DatatypeConstants.FIELD_UNDEFINED);
 	}
 
+	/**
+	 * Converts localtime to xml time
+	 * @param d
+	 * @return
+	 * @throws DatatypeConfigurationException
+	 */
+	public static XMLGregorianCalendar toXmlTime(LocalTime d) throws DatatypeConfigurationException{
+		
+		return DatatypeFactory.newInstance().newXMLGregorianCalendar(
+				DatatypeConstants.FIELD_UNDEFINED, DatatypeConstants.FIELD_UNDEFINED, DatatypeConstants.FIELD_UNDEFINED,
+				d.getHour(), d.getMinute(), d.getSecond(),
+				DatatypeConstants.FIELD_UNDEFINED, DatatypeConstants.FIELD_UNDEFINED);
+		
+	}
+	
+	/**
+	 * Converts localdatetime to xml date without timezone
+	 * @param d
+	 * @return
+	 * @throws DatatypeConfigurationException
+	 */
+	public static XMLGregorianCalendar toXmlDateTime(LocalDateTime d) throws DatatypeConfigurationException {
+		return DatatypeFactory.newInstance().newXMLGregorianCalendar(
+				d.getYear(), d.getMonthValue(),d.getDayOfMonth(),
+				d.getHour(), d.getMinute(), d.getSecond(),
+				DatatypeConstants.FIELD_UNDEFINED, DatatypeConstants.FIELD_UNDEFINED);
+	}
+	
+	/**
+	 * For exporting to GPX files, coverts the LocalDateTime to a xml time with timezone
+	 * @param d
+	 * @return
+	 * @throws DatatypeConfigurationException
+	 */
+	public static XMLGregorianCalendar toXmlDateTimeUTC(LocalDateTime d) throws DatatypeConfigurationException {
+
+		return DatatypeFactory.newInstance().newXMLGregorianCalendar(
+				d.getYear(), d.getMonthValue(),d.getDayOfMonth(),
+				d.getHour(), d.getMinute(), d.getSecond(),
+				DatatypeConstants.FIELD_UNDEFINED,
+				ZoneOffset.systemDefault().getRules().getOffset(d).getTotalSeconds() / 60);
+		
+	}
+	
+	public static LocalDate toLocalDate(XMLGregorianCalendar d) {
+		return LocalDate.of(d.getYear(),  d.getMonth(), d.getDay());
+	}
+	
+	public static LocalTime toLocalTime(XMLGregorianCalendar d) {
+		return LocalTime.of(d.getHour(), d.getMinute(), d.getSecond());
+	}
+	
+	public static LocalDateTime toLocalDateTime(XMLGregorianCalendar d) {
+		return LocalDateTime.of(d.getYear(),  d.getMonth(), d.getDay(), d.getHour(), d.getMinute(), d.getSecond());
+	}
+	
 	/**
 	 * Determines the output file name for given smart object name by
 	 * removing characters from the name that are not valid for file name

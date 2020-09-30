@@ -21,8 +21,9 @@
  */
 package org.wcs.smart.i2.model;
 
-import java.text.DateFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.List;
 import java.util.Locale;
 
@@ -100,24 +101,19 @@ public class IntelRecordAttributeValue extends UuidItem{
 	}
 	
 	@Transient
-	public Date getDateValue(){
+	public LocalDate getDateValue(){
 		if (getStringValue() == null){
 			return null;
 		}
-		try{
-			return java.sql.Date.valueOf(getStringValue());
-		}catch (Exception ex){
-			return null;
-		}
+		return LocalDate.parse(getStringValue(), DateTimeFormatter.ISO_LOCAL_DATE);
 	}
 	@Transient
-	public void setDateValue(Date date){
+	public void setDateValue(LocalDate date){
 		if (date == null){
 			setStringValue(null);
 			return;
 		}
-		java.sql.Date tmp = new java.sql.Date(date.getTime());
-		setStringValue(tmp.toString());
+		setStringValue(DateTimeFormatter.ISO_LOCAL_DATE.format(date));
 	}
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.value", orphanRemoval=true, cascade={CascadeType.ALL})
@@ -176,7 +172,7 @@ public class IntelRecordAttributeValue extends UuidItem{
 					return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(Boolean.FALSE, l);
 				}
 			case DATE:
-				return DateFormat.getDateInstance().format(getDateValue());
+				return DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(getDateValue());
 			case LIST:
 			case EMPLOYEE:
 				return String.valueOf(listItems.size());

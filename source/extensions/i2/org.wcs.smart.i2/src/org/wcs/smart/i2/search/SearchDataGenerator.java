@@ -23,9 +23,10 @@ package org.wcs.smart.i2.search;
 
 import java.io.InputStream;
 import java.text.DecimalFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -226,7 +227,7 @@ public class SearchDataGenerator {
 		if (a.getAttribute().getType() == AttributeType.BOOLEAN){
 			value.setNumberValue( Math.random() > 0.5 ? 1.0 : 0.0 );
 		}else if (a.getAttribute().getType() == AttributeType.DATE){
-			value.setDateValue(new Date());
+			value.setDateValue(LocalDate.now());
 		}else if (a.getAttribute().getType() == AttributeType.LIST){
 			int index = (int)Math.round((a.getAttribute().getAttributeList().size()-1) * Math.random());
 			value.setAttributeListItem(a.getAttribute().getAttributeList().get(index));
@@ -292,7 +293,7 @@ public class SearchDataGenerator {
 		if (a.getAttribute().getType() == AttributeType.BOOLEAN){
 			value.setNumberValue( Math.random() > 0.5 ? 1.0 : 0.0 );
 		}else if (a.getAttribute().getType() == AttributeType.DATE){
-			value.setDateValue(new Date());
+			value.setDateValue(LocalDate.now());
 		}else if (a.getAttribute().getType() == AttributeType.LIST){
 			List<IntelRecordAttributeValueList> items = new ArrayList<IntelRecordAttributeValueList>();
 			if (a.getIsMultiple()){
@@ -344,7 +345,7 @@ public class SearchDataGenerator {
 		if (a.getType() == Attribute.AttributeType.BOOLEAN){
 			value.setNumberValue( Math.random() > 0.5 ? 1.0 : 0.0 );
 		}else if (a.getType() == Attribute.AttributeType.DATE){
-			value.setDateValue(new Date());
+			value.setDateValue(LocalDate.now());
 		}else if (a.getType() == Attribute.AttributeType.LIST){
 			int index = (int)Math.round((a.getAttributeList().size()-1) * Math.random());
 			value.setAttributeListItem(a.getAttributeList().get(index));
@@ -376,7 +377,7 @@ public class SearchDataGenerator {
 		if (a.getAttribute().getType() == AttributeType.BOOLEAN){
 			value.setNumberValue( Math.random() > 0.5 ? 1.0 : 0.0 );
 		}else if (a.getAttribute().getType() == AttributeType.DATE){
-			value.setDateValue(new Date());
+			value.setDateValue(LocalDate.now());
 		}else if (a.getAttribute().getType() == AttributeType.LIST){
 			int index = (int)Math.round((a.getAttribute().getAttributeList().size()-1) * Math.random());
 			value.setAttributeListItem(a.getAttribute().getAttributeList().get(index));
@@ -585,7 +586,7 @@ public class SearchDataGenerator {
 			record.setConservationArea(SmartDB.getCurrentConservationArea());		
 			record.setEntities(new ArrayList<IntelEntityRecord>());
 			record.setLocations(new ArrayList<IntelLocation>());
-			record.setPrimaryDate(new Date());
+			record.setPrimaryDate(LocalDateTime.now());
 			
 			IntelRecordSource src = sources.get(random.nextInt(sources.size() - 1));
 			record.setRecordSource(src);
@@ -678,7 +679,7 @@ public class SearchDataGenerator {
 				loc.setComment(sb.toString());
 				loc.setId("Location " + (i+1));
 				loc.setConservationArea(SmartDB.getCurrentConservationArea());
-				loc.setDateTime(new Date(Math.round(Math.random() * range)  + start));
+				loc.setDateTime( (new java.sql.Timestamp(Math.round(Math.random() * range)  + start)).toLocalDateTime());
 				
 
 				

@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.qa.model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
@@ -86,7 +86,7 @@ public class QaError extends UuidItem{
 	}
 	
 	private Status status;
-	private Date validateDate;
+	private LocalDateTime validateDate;
 	private String errorId;
 	private String errorDescription;
 	private String fixMessage;
@@ -152,7 +152,7 @@ public class QaError extends UuidItem{
 	 * @return validate_date
 	 */
 	@Column(name="validate_date")
-	public Date getValidateDate() {
+	public LocalDateTime getValidateDate() {
 		return this.validateDate;
 	}
 	
@@ -162,7 +162,7 @@ public class QaError extends UuidItem{
 	 * @param validateDate
 	 */
 	
-	public void setValidateDate(Date validateDate) {
+	public void setValidateDate(LocalDateTime validateDate) {
 		this.validateDate = validateDate;
 	}
 

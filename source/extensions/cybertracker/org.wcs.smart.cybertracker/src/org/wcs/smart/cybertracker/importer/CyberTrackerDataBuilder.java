@@ -21,17 +21,18 @@
  */
 package org.wcs.smart.cybertracker.importer;
 
-import java.sql.Time;
-import java.text.DateFormat;
-import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import org.hibernate.Session;
+import org.locationtech.jts.geom.Coordinate;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.model.CyberTrackerRawData;
@@ -41,8 +42,7 @@ import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
 import org.wcs.smart.cybertracker.util.SightsUtil;
 import org.wcs.smart.hibernate.HibernateManager;
-
-import org.locationtech.jts.geom.Coordinate;
+import org.wcs.smart.util.SharedUtils;
 
 
 /**
@@ -106,21 +106,21 @@ public abstract class CyberTrackerDataBuilder {
 	}
 
 	private Coordinate toCoordinate(S s) {
-		DateFormat formatter = AbstractSmartImporter.createCyberTrackerDateFormatter();
-		Date date = null;
-		Time time = null;
+		DateTimeFormatter formatter = AbstractSmartImporter.CT_DT_FORMATTER;
+		LocalDate date = null;
+		LocalTime time = null;
 		double x = 0;
 		double y = 0;
 		for (S.A a : s.getA()) {
 			String i = a.getI();
 			if (ICyberTrackerConstants.DATE.equals(i)) {
 				try {
-					date = formatter.parse(a.getV());
-				} catch (ParseException e) {
+					date = LocalDate.parse(a.getV(),formatter);
+				} catch (DateTimeParseException e) {
 					CyberTrackerPlugIn.log(e.getMessage(), e);
 				}
 			} else if (ICyberTrackerConstants.TIME.equals(i)) {
-				time = Time.valueOf(a.getV());
+				time = LocalTime.parse(a.getV());
 			} else if (ICyberTrackerConstants.LATITUDE.equals(i)) {
 				y = Double.valueOf(a.getV());
 			} else if (ICyberTrackerConstants.LONGITUDE.equals(i)) {
@@ -131,7 +131,7 @@ public abstract class CyberTrackerDataBuilder {
 		if (date == null || time == null || x == 0 || y == 0)
 			return null;
 		
-		return new Coordinate(x, y, AbstractSmartImporter.combine(date, time).getTime());
+		return new Coordinate(x, y, SharedUtils.toLongTime(date.atTime(time)));
 	}
 	
 }

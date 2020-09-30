@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.i2.query.observation.filter;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.query.Operator;
@@ -66,10 +66,10 @@ public class IntelAttributeFilter implements IQueryFilter, IColumnIdentifierProv
 	}
 		
 	//dates
-	public static IntelAttributeFilter create(String key, Operator operator, Date date1, Date date2){
+	public static IntelAttributeFilter create(String key, Operator operator, LocalDate date1, LocalDate date2){
 		IntelAttributeFilter filter = createCore(key);
 		filter.operator = operator;
-		filter.dateValues = new Date[]{date1, date2};
+		filter.dateValues = new LocalDate[]{date1, date2};
 		return filter;
 	}
 		
@@ -103,7 +103,7 @@ public class IntelAttributeFilter implements IQueryFilter, IColumnIdentifierProv
 	private Double numberValue = null;
 	private String stringValue = null;
 	private String keyValue = null;
-	private Date[] dateValues = null;
+	private LocalDate[] dateValues = null;
 	
 
 	public IntelAttributeFilter(IntelAttribute.AttributeType type, String attributeKey, String entityTypeKey){
@@ -129,7 +129,7 @@ public class IntelAttributeFilter implements IQueryFilter, IColumnIdentifierProv
 		this.keyValue = keyId;
 	}
 	
-	public IntelAttributeFilter(IntelAttribute.AttributeType type, String attributeKey, String entityTypeKey, Operator operator, Date[] dates){
+	public IntelAttributeFilter(IntelAttribute.AttributeType type, String attributeKey, String entityTypeKey, Operator operator, LocalDate[] dates){
 		this(type, attributeKey, entityTypeKey);
 		this.operator = operator;
 		this.dateValues = dates;
@@ -158,9 +158,9 @@ public class IntelAttributeFilter implements IQueryFilter, IColumnIdentifierProv
 		case DATE:
 			sb.append(operator.name());
 			sb.append("_"); //$NON-NLS-1$
-			sb.append(dateValues[0].getTime());
+			sb.append(dateValues[0].toString());
 			sb.append("_"); //$NON-NLS-1$
-			sb.append(dateValues[1].getTime());
+			sb.append(dateValues[1].toString());
 			break;
 		case EMPLOYEE:
 			sb.append(keyValue);
@@ -208,7 +208,7 @@ public class IntelAttributeFilter implements IQueryFilter, IColumnIdentifierProv
 	public String getKeyValue(){
 		return this.keyValue;
 	}
-	public Date[] getDateValues(){
+	public LocalDate[] getDateValues(){
 		return this.dateValues;
 	}
 }

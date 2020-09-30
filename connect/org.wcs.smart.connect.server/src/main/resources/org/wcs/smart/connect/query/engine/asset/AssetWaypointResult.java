@@ -94,7 +94,7 @@ public class AssetWaypointResult extends AbstractDbFeatureResultSet implements I
 
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
-		it.setWaypointDate(rs.getTimestamp("wp_date")); //$NON-NLS-1$		
+		it.setWaypointDate(rs.getTimestamp("wp_date").toLocalDateTime()); //$NON-NLS-1$		
 		it.setWaypointUuid((UUID)rs.getObject("wp_uuid")); //$NON-NLS-1$
 		it.setWaypointId(rs.getInt("wp_id")); //$NON-NLS-1$
 		it.setWaypointX(rs.getDouble("wp_x")); //$NON-NLS-1$

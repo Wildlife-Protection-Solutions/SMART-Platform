@@ -21,16 +21,16 @@
  */
 package org.wcs.smart.patrol.internal.ui.editor;
 
-import java.sql.Time;
 import java.text.Collator;
-import java.text.DateFormat;
 import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -652,10 +652,10 @@ public class PatrolSummaryEditor extends EditorPart {
 				session.update(patrol);
 				for (PatrolLeg leg : patrol.getLegs()) {
 					for (PatrolLegDay pld : leg.getPatrolLegDays()) {
-						Time[] dates = pld.computeMinMaxDate();
+						LocalDateTime[] dates = pld.computeMinMaxDate();
 						if (dates != null) {
-							pld.setStartTime(dates[0]);
-							pld.setEndTime(dates[1]);
+							pld.setStartTime(dates[0].toLocalTime());
+							pld.setEndTime(dates[1].toLocalTime());
 							session.saveOrUpdate(pld);
 							updatedLegDays.add(pld);
 						}
@@ -864,9 +864,9 @@ public class PatrolSummaryEditor extends EditorPart {
 			@Override
 			public void run() {
 				//update dates
-				txtStartDate.setText(DateFormat.getDateInstance(DateFormat.LONG)
+				txtStartDate.setText(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG)
 						.format(patrol.getStartDate()));
-				txtEndDate.setText(DateFormat.getDateInstance(DateFormat.LONG)
+				txtEndDate.setText(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG)
 						.format(patrol.getEndDate()));
 				
 				
@@ -1040,7 +1040,8 @@ class PatrolLegDayLabelProvider extends ColumnLabelProvider{
 	
 	
 	private PatrolLegDayColumn column = null;
-	private SimpleDateFormat dayOfWeekFormatter = new SimpleDateFormat("E"); //$NON-NLS-1$
+	
+	
 	public PatrolLegDayLabelProvider(PatrolLegDayColumn column){
 		this.column = column;
 	}
@@ -1050,8 +1051,8 @@ class PatrolLegDayLabelProvider extends ColumnLabelProvider{
 		if (element instanceof PatrolLegDay){
 			PatrolLegDay legDay = (PatrolLegDay)element;
 			if (column == PatrolLegDayColumn.DAY){
-				Date d = legDay.getDate();
-				return DateFormat.getDateInstance(DateFormat.MEDIUM).format(d) + " " + dayOfWeekFormatter.format(d) ; //$NON-NLS-1$
+				LocalDate d = legDay.getDate();
+				return d.format( DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM) ) + " " + DateTimeFormatter.ofPattern("E").format(d) ; //$NON-NLS-1$ //$NON-NLS-2$
 			}else if (column == PatrolLegDayColumn.MANDATE){
 				if (legDay.getPatrolLeg().getMandate() != null) 
 					return legDay.getPatrolLeg().getMandate().getName();
@@ -1064,13 +1065,13 @@ class PatrolLegDayLabelProvider extends ColumnLabelProvider{
 				}
 			}else if (column == PatrolLegDayColumn.START){
 				if (legDay.getStartTime() != null){
-					return DateFormat.getTimeInstance(DateFormat.MEDIUM).format(legDay.getStartTime() );
+					return legDay.getStartTime().format( DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM) );
 				}else{
 					return ""; //$NON-NLS-1$
 				}
 			}else if (column == PatrolLegDayColumn.END){
 				if (legDay.getEndTime() != null){
-					return DateFormat.getTimeInstance(DateFormat.MEDIUM).format(legDay.getEndTime() );
+					return legDay.getEndTime().format( DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM) );
 				}else{
 					return ""; //$NON-NLS-1$
 				}

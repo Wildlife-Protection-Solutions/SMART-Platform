@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.entity.ui.newwizard;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 
 import org.eclipse.jface.dialogs.IPageChangingListener;
 import org.eclipse.jface.dialogs.PageChangingEvent;
@@ -57,7 +57,7 @@ public class NewEntityTypeWizard extends Wizard implements IPageChangingListener
 		newType = new EntityType();
 		newType.setConservationArea(SmartDB.getCurrentConservationArea());
 		newType.setCreator(SmartDB.getCurrentEmployee());
-		newType.setDateCreated(new Date());
+		newType.setDateCreated(LocalDateTime.now());
 		newType.setStatus(Status.ACTIVE);
 		newType.setAttributes(new ArrayList<EntityAttribute>());
 	}

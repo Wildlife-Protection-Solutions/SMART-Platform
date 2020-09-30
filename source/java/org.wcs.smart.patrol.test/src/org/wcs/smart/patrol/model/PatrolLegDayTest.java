@@ -21,10 +21,9 @@
  */
 package org.wcs.smart.patrol.model;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -57,16 +56,16 @@ public class PatrolLegDayTest {
 		Assert.assertEquals(6, leg2.getPatrolLegDays().size());
 		
 		Assert.assertTrue(dateEquals(leg1.getPatrolLegDays().get(0).getDate(), getDate(2011, 0, 22, 10,0,0)));
-		Assert.assertTrue(timeEquals(leg1.getPatrolLegDays().get(0).getStartTime(), getDate(2011, 0, 22, 10,0,0)));
-		Assert.assertTrue(timeEquals(leg1.getPatrolLegDays().get(0).getEndTime(), getDate(2011, 0, 22, 23,59,59)));
+		Assert.assertTrue(timeEquals(leg1.getPatrolLegDays().get(0).getStartTime(), getTime(2011, 0, 22, 10,0,0)));
+		Assert.assertTrue(timeEquals(leg1.getPatrolLegDays().get(0).getEndTime(), getTime(2011, 0, 22, 23,59,59)));
 		Assert.assertTrue(dateEquals(leg1.getPatrolLegDays().get(1).getDate(), getDate(2011, 0, 23, 0,0,0)));
-		Assert.assertTrue(timeEquals(leg1.getPatrolLegDays().get(1).getStartTime(), getDate(2011, 0, 23, 0,0,0)));
-		Assert.assertTrue(timeEquals(leg1.getPatrolLegDays().get(1).getEndTime(), getDate(2011, 0, 23, 23,59,59)));
+		Assert.assertTrue(timeEquals(leg1.getPatrolLegDays().get(1).getStartTime(), getTime(2011, 0, 23, 0,0,0)));
+		Assert.assertTrue(timeEquals(leg1.getPatrolLegDays().get(1).getEndTime(), getTime(2011, 0, 23, 23,59,59)));
 		
 		for (int i = 24; i <= 29; i ++){
 			Assert.assertTrue(dateEquals(leg2.getPatrolLegDays().get(i-24).getDate(), getDate(2011, 0, i, 0,0,0)));
-			Assert.assertTrue(timeEquals(leg2.getPatrolLegDays().get(i-24).getStartTime(), getDate(2011, 0, i, 0,0,0)));
-			Assert.assertTrue(timeEquals(leg2.getPatrolLegDays().get(i-24).getEndTime(), getDate(2011, 0, i, 23,59,59)));	
+			Assert.assertTrue(timeEquals(leg2.getPatrolLegDays().get(i-24).getStartTime(), getTime(2011, 0, i, 0,0,0)));
+			Assert.assertTrue(timeEquals(leg2.getPatrolLegDays().get(i-24).getEndTime(), getTime(2011, 0, i, 23,59,59)));	
 		}
 	}
 	
@@ -142,132 +141,114 @@ public class PatrolLegDayTest {
 		//leg1 (1 @ 8AM to 3 [end of day]
 		Assert.assertEquals(3, leg1.getPatrolLegDays().size());
 		Assert.assertTrue(dateEquals(leg1.getPatrolLegDays().get(0).getDate(), getDate(2011, 0, 1, 8,0,0)));
-		Assert.assertTrue(timeEquals(leg1.getPatrolLegDays().get(0).getStartTime(), getDate(2011, 0, 1, 8,0,0)));
-		Assert.assertTrue(timeEquals(leg1.getPatrolLegDays().get(0).getEndTime(), getDate(2011, 0, 1, 23,59,59)));
+		Assert.assertTrue(timeEquals(leg1.getPatrolLegDays().get(0).getStartTime(), getTime(2011, 0, 1, 8,0,0)));
+		Assert.assertTrue(timeEquals(leg1.getPatrolLegDays().get(0).getEndTime(), getTime(2011, 0, 1, 23,59,59)));
 		Assert.assertTrue(dateEquals(leg1.getPatrolLegDays().get(1).getDate(), getDate(2011, 0, 2, 0, 0,0)));
-		Assert.assertTrue(timeEquals(leg1.getPatrolLegDays().get(1).getStartTime(), getDate(2011, 0, 2, 0,0,0)));
-		Assert.assertTrue(timeEquals(leg1.getPatrolLegDays().get(1).getEndTime(), getDate(2011, 0, 2, 23,59,59)));
+		Assert.assertTrue(timeEquals(leg1.getPatrolLegDays().get(1).getStartTime(), getTime(2011, 0, 2, 0,0,0)));
+		Assert.assertTrue(timeEquals(leg1.getPatrolLegDays().get(1).getEndTime(), getTime(2011, 0, 2, 23,59,59)));
 		Assert.assertTrue(dateEquals(leg1.getPatrolLegDays().get(2).getDate(), getDate(2011, 0, 3, 0, 0,0)));
-		Assert.assertTrue(timeEquals(leg1.getPatrolLegDays().get(2).getStartTime(), getDate(2011, 0, 3, 0,0,0)));
-		Assert.assertTrue(timeEquals(leg1.getPatrolLegDays().get(2).getEndTime(), getDate(2011, 0, 3, 23,59,59)));
+		Assert.assertTrue(timeEquals(leg1.getPatrolLegDays().get(2).getStartTime(), getTime(2011, 0, 3, 0,0,0)));
+		Assert.assertTrue(timeEquals(leg1.getPatrolLegDays().get(2).getEndTime(), getTime(2011, 0, 3, 23,59,59)));
 		
 		
 		//from 3rd [end of day] to 5th [end of day]		
 		Assert.assertEquals(2, leg2.getPatrolLegDays().size());
 		Assert.assertTrue(dateEquals(leg2.getPatrolLegDays().get(0).getDate(), getDate(2011, 0, 4, 0,0,0)));
-		Assert.assertTrue(timeEquals(leg2.getPatrolLegDays().get(0).getStartTime(), getDate(2011, 0, 4, 0,0,0)));
-		Assert.assertTrue(timeEquals(leg2.getPatrolLegDays().get(0).getEndTime(), getDate(2011, 0, 4, 23,59,59)));
+		Assert.assertTrue(timeEquals(leg2.getPatrolLegDays().get(0).getStartTime(), getTime(2011, 0, 4, 0,0,0)));
+		Assert.assertTrue(timeEquals(leg2.getPatrolLegDays().get(0).getEndTime(), getTime(2011, 0, 4, 23,59,59)));
 		Assert.assertTrue(dateEquals(leg2.getPatrolLegDays().get(1).getDate(), getDate(2011, 0, 5, 0, 0,0)));
-		Assert.assertTrue(timeEquals(leg2.getPatrolLegDays().get(1).getStartTime(), getDate(2011, 0, 5, 0,0,0)));
-		Assert.assertTrue(timeEquals(leg2.getPatrolLegDays().get(1).getEndTime(), getDate(2011, 0, 5, 23,59,59)));
+		Assert.assertTrue(timeEquals(leg2.getPatrolLegDays().get(1).getStartTime(), getTime(2011, 0, 5, 0,0,0)));
+		Assert.assertTrue(timeEquals(leg2.getPatrolLegDays().get(1).getEndTime(), getTime(2011, 0, 5, 23,59,59)));
 		
 		//from 3rd [end of day] to 5th [end of day]
 		Assert.assertEquals(2, leg3.getPatrolLegDays().size());
 		Assert.assertTrue(dateEquals(leg3.getPatrolLegDays().get(0).getDate(), getDate(2011, 0, 4, 0,0,0)));
-		Assert.assertTrue(timeEquals(leg3.getPatrolLegDays().get(0).getStartTime(), getDate(2011, 0, 4, 0,0,0)));
-		Assert.assertTrue(timeEquals(leg3.getPatrolLegDays().get(0).getEndTime(), getDate(2011, 0, 4, 23,59,59)));
+		Assert.assertTrue(timeEquals(leg3.getPatrolLegDays().get(0).getStartTime(), getTime(2011, 0, 4, 0,0,0)));
+		Assert.assertTrue(timeEquals(leg3.getPatrolLegDays().get(0).getEndTime(), getTime(2011, 0, 4, 23,59,59)));
 		Assert.assertTrue(dateEquals(leg3.getPatrolLegDays().get(1).getDate(), getDate(2011, 0, 5, 0, 0,0)));
-		Assert.assertTrue(timeEquals(leg3.getPatrolLegDays().get(1).getStartTime(), getDate(2011, 0, 5, 0,0,0)));
-		Assert.assertTrue(timeEquals(leg3.getPatrolLegDays().get(1).getEndTime(), getDate(2011, 0, 5, 23,59,59)));
+		Assert.assertTrue(timeEquals(leg3.getPatrolLegDays().get(1).getStartTime(), getTime(2011, 0, 5, 0,0,0)));
+		Assert.assertTrue(timeEquals(leg3.getPatrolLegDays().get(1).getEndTime(), getTime(2011, 0, 5, 23,59,59)));
 		
 		//from 6th start of day to 7th start of day
 		Assert.assertEquals(1, leg4.getPatrolLegDays().size());
 		Assert.assertTrue(dateEquals(leg4.getPatrolLegDays().get(0).getDate(), getDate(2011, 0, 6, 0,0,0)));
-		Assert.assertTrue(timeEquals(leg4.getPatrolLegDays().get(0).getStartTime(), getDate(2011, 0, 6, 0,0,0)));
-		Assert.assertTrue(timeEquals(leg4.getPatrolLegDays().get(0).getEndTime(), getDate(2011, 0, 6, 23,59,59)));
+		Assert.assertTrue(timeEquals(leg4.getPatrolLegDays().get(0).getStartTime(), getTime(2011, 0, 6, 0,0,0)));
+		Assert.assertTrue(timeEquals(leg4.getPatrolLegDays().get(0).getEndTime(), getTime(2011, 0, 6, 23,59,59)));
 
 		//from 7th start of day to 8 @ 10aM
 		Assert.assertEquals(2, leg5.getPatrolLegDays().size());
 		Assert.assertTrue(dateEquals(leg5.getPatrolLegDays().get(0).getDate(), getDate(2011, 0, 7, 0,0,0)));
-		Assert.assertTrue(timeEquals(leg5.getPatrolLegDays().get(0).getStartTime(), getDate(2011, 0, 7, 0,0,0)));
-		Assert.assertTrue(timeEquals(leg5.getPatrolLegDays().get(0).getEndTime(), getDate(2011, 0, 7, 23,59,59)));
+		Assert.assertTrue(timeEquals(leg5.getPatrolLegDays().get(0).getStartTime(), getTime(2011, 0, 7, 0,0,0)));
+		Assert.assertTrue(timeEquals(leg5.getPatrolLegDays().get(0).getEndTime(), getTime(2011, 0, 7, 23,59,59)));
 		Assert.assertTrue(dateEquals(leg5.getPatrolLegDays().get(1).getDate(), getDate(2011, 0, 8, 0,0,0)));
-		Assert.assertTrue(timeEquals(leg5.getPatrolLegDays().get(1).getStartTime(), getDate(2011, 0, 8, 0,0,0)));
-		Assert.assertTrue(timeEquals(leg5.getPatrolLegDays().get(1).getEndTime(), getDate(2011, 0, 8, 10,0,0)));
+		Assert.assertTrue(timeEquals(leg5.getPatrolLegDays().get(1).getStartTime(), getTime(2011, 0, 8, 0,0,0)));
+		Assert.assertTrue(timeEquals(leg5.getPatrolLegDays().get(1).getEndTime(), getTime(2011, 0, 8, 10,0,0)));
 		
 		
 		//from 8 @ 10aM to 10th end of day
 		Assert.assertEquals(3, leg6.getPatrolLegDays().size());
 		Assert.assertTrue(dateEquals(leg6.getPatrolLegDays().get(0).getDate(), getDate(2011, 0, 8, 0,0,0)));
-		Assert.assertTrue(timeEquals(leg6.getPatrolLegDays().get(0).getStartTime(), getDate(2011, 0, 8, 10,0,0)));
-		Assert.assertTrue(timeEquals(leg6.getPatrolLegDays().get(0).getEndTime(), getDate(2011, 0, 8, 23,59,59)));
+		Assert.assertTrue(timeEquals(leg6.getPatrolLegDays().get(0).getStartTime(), getTime(2011, 0, 8, 10,0,0)));
+		Assert.assertTrue(timeEquals(leg6.getPatrolLegDays().get(0).getEndTime(), getTime(2011, 0, 8, 23,59,59)));
 		Assert.assertTrue(dateEquals(leg6.getPatrolLegDays().get(1).getDate(), getDate(2011, 0, 9, 0,0,0)));
-		Assert.assertTrue(timeEquals(leg6.getPatrolLegDays().get(1).getStartTime(), getDate(2011, 0, 9, 0,0,0)));
-		Assert.assertTrue(timeEquals(leg6.getPatrolLegDays().get(1).getEndTime(), getDate(2011, 0, 9, 23,59,59)));
+		Assert.assertTrue(timeEquals(leg6.getPatrolLegDays().get(1).getStartTime(), getTime(2011, 0, 9, 0,0,0)));
+		Assert.assertTrue(timeEquals(leg6.getPatrolLegDays().get(1).getEndTime(), getTime(2011, 0, 9, 23,59,59)));
 		Assert.assertTrue(dateEquals(leg6.getPatrolLegDays().get(2).getDate(), getDate(2011, 0, 10, 0,0,0)));
-		Assert.assertTrue(timeEquals(leg6.getPatrolLegDays().get(2).getStartTime(), getDate(2011, 0, 10, 0,0,0)));
-		Assert.assertTrue(timeEquals(leg6.getPatrolLegDays().get(2).getEndTime(), getDate(2011, 0, 10, 23,59,59)));
+		Assert.assertTrue(timeEquals(leg6.getPatrolLegDays().get(2).getStartTime(), getTime(2011, 0, 10, 0,0,0)));
+		Assert.assertTrue(timeEquals(leg6.getPatrolLegDays().get(2).getEndTime(), getTime(2011, 0, 10, 23,59,59)));
 		
 		//from 8 @ 10aM to 10th end of day
 		Assert.assertEquals(3, leg7.getPatrolLegDays().size());
 		Assert.assertTrue(dateEquals(leg7.getPatrolLegDays().get(0).getDate(), getDate(2011, 0, 8, 0,0,0)));
-		Assert.assertTrue(timeEquals(leg7.getPatrolLegDays().get(0).getStartTime(), getDate(2011, 0, 8, 10,0,0)));
-		Assert.assertTrue(timeEquals(leg7.getPatrolLegDays().get(0).getEndTime(), getDate(2011, 0, 8, 23,59,59)));
+		Assert.assertTrue(timeEquals(leg7.getPatrolLegDays().get(0).getStartTime(), getTime(2011, 0, 8, 10,0,0)));
+		Assert.assertTrue(timeEquals(leg7.getPatrolLegDays().get(0).getEndTime(), getTime(2011, 0, 8, 23,59,59)));
 		Assert.assertTrue(dateEquals(leg7.getPatrolLegDays().get(1).getDate(), getDate(2011, 0, 9, 0,0,0)));
-		Assert.assertTrue(timeEquals(leg7.getPatrolLegDays().get(1).getStartTime(), getDate(2011, 0, 9, 0,0,0)));
-		Assert.assertTrue(timeEquals(leg7.getPatrolLegDays().get(1).getEndTime(), getDate(2011, 0, 9, 23,59,59)));
+		Assert.assertTrue(timeEquals(leg7.getPatrolLegDays().get(1).getStartTime(), getTime(2011, 0, 9, 0,0,0)));
+		Assert.assertTrue(timeEquals(leg7.getPatrolLegDays().get(1).getEndTime(), getTime(2011, 0, 9, 23,59,59)));
 		Assert.assertTrue(dateEquals(leg7.getPatrolLegDays().get(2).getDate(), getDate(2011, 0, 10, 0,0,0)));
-		Assert.assertTrue(timeEquals(leg7.getPatrolLegDays().get(2).getStartTime(), getDate(2011, 0, 10, 0,0,0)));
-		Assert.assertTrue(timeEquals(leg7.getPatrolLegDays().get(2).getEndTime(), getDate(2011, 0, 10, 23,59,59)));
+		Assert.assertTrue(timeEquals(leg7.getPatrolLegDays().get(2).getStartTime(), getTime(2011, 0, 10, 0,0,0)));
+		Assert.assertTrue(timeEquals(leg7.getPatrolLegDays().get(2).getEndTime(), getTime(2011, 0, 10, 23,59,59)));
 		
 		//from 7th start of day to 10 end of day
 		Assert.assertEquals(4, leg8.getPatrolLegDays().size());
 		Assert.assertTrue(dateEquals(leg8.getPatrolLegDays().get(0).getDate(), getDate(2011, 0, 7, 0,0,0)));
-		Assert.assertTrue(timeEquals(leg8.getPatrolLegDays().get(0).getStartTime(), getDate(2011, 0, 7, 0,0,0)));
-		Assert.assertTrue(timeEquals(leg8.getPatrolLegDays().get(0).getEndTime(), getDate(2011, 0, 7, 23,59,59)));
+		Assert.assertTrue(timeEquals(leg8.getPatrolLegDays().get(0).getStartTime(), getTime(2011, 0, 7, 0,0,0)));
+		Assert.assertTrue(timeEquals(leg8.getPatrolLegDays().get(0).getEndTime(), getTime(2011, 0, 7, 23,59,59)));
 		Assert.assertTrue(dateEquals(leg8.getPatrolLegDays().get(1).getDate(), getDate(2011, 0, 8, 0,0,0)));
-		Assert.assertTrue(timeEquals(leg8.getPatrolLegDays().get(1).getStartTime(), getDate(2011, 0, 8, 0,0,0)));
-		Assert.assertTrue(timeEquals(leg8.getPatrolLegDays().get(1).getEndTime(), getDate(2011, 0, 8, 23,59,59)));
+		Assert.assertTrue(timeEquals(leg8.getPatrolLegDays().get(1).getStartTime(), getTime(2011, 0, 8, 0,0,0)));
+		Assert.assertTrue(timeEquals(leg8.getPatrolLegDays().get(1).getEndTime(), getTime(2011, 0, 8, 23,59,59)));
 		Assert.assertTrue(dateEquals(leg8.getPatrolLegDays().get(2).getDate(), getDate(2011, 0, 9, 0,0,0)));
-		Assert.assertTrue(timeEquals(leg8.getPatrolLegDays().get(2).getStartTime(), getDate(2011, 0, 9, 0,0,0)));
-		Assert.assertTrue(timeEquals(leg8.getPatrolLegDays().get(2).getEndTime(), getDate(2011, 0, 9, 23,59,59)));
+		Assert.assertTrue(timeEquals(leg8.getPatrolLegDays().get(2).getStartTime(), getTime(2011, 0, 9, 0,0,0)));
+		Assert.assertTrue(timeEquals(leg8.getPatrolLegDays().get(2).getEndTime(), getTime(2011, 0, 9, 23,59,59)));
 		Assert.assertTrue(dateEquals(leg8.getPatrolLegDays().get(3).getDate(), getDate(2011, 0, 10, 0,0,0)));
-		Assert.assertTrue(timeEquals(leg8.getPatrolLegDays().get(3).getStartTime(), getDate(2011, 0, 10, 0,0,0)));
-		Assert.assertTrue(timeEquals(leg8.getPatrolLegDays().get(3).getEndTime(), getDate(2011, 0, 10, 23,59,59)));
+		Assert.assertTrue(timeEquals(leg8.getPatrolLegDays().get(3).getStartTime(), getTime(2011, 0, 10, 0,0,0)));
+		Assert.assertTrue(timeEquals(leg8.getPatrolLegDays().get(3).getEndTime(), getTime(2011, 0, 10, 23,59,59)));
 		
 		//end of day 10 to start of day 31
 		Assert.assertEquals(21, leg9.getPatrolLegDays().size());
 		for (int i = 0; i < 20; i ++){
 			Assert.assertTrue(dateEquals(leg9.getPatrolLegDays().get(i).getDate(), getDate(2011, 0, 11+i, 0,0,0)));
-			Assert.assertTrue(timeEquals(leg9.getPatrolLegDays().get(i).getStartTime(), getDate(2011, 0, 11+i, 0,0,0)));
-			Assert.assertTrue(timeEquals(leg9.getPatrolLegDays().get(i).getEndTime(), getDate(2011, 0, 11+i, 23,59,59)));	
+			Assert.assertTrue(timeEquals(leg9.getPatrolLegDays().get(i).getStartTime(), getTime(2011, 0, 11+i, 0,0,0)));
+			Assert.assertTrue(timeEquals(leg9.getPatrolLegDays().get(i).getEndTime(), getTime(2011, 0, 11+i, 23,59,59)));	
 		}
 		Assert.assertTrue(dateEquals(leg9.getPatrolLegDays().get(20).getDate(), getDate(2011, 0, 31, 0,0,2)));
-		Assert.assertTrue(timeEquals(leg9.getPatrolLegDays().get(20).getStartTime(), getDate(2011, 0, 31, 0,0,0)));
-		Assert.assertTrue(timeEquals(leg9.getPatrolLegDays().get(20).getEndTime(), getDate(2011, 0, 31, 0,0,2)));
+		Assert.assertTrue(timeEquals(leg9.getPatrolLegDays().get(20).getStartTime(), getTime(2011, 0, 31, 0,0,0)));
+		Assert.assertTrue(timeEquals(leg9.getPatrolLegDays().get(20).getEndTime(), getTime(2011, 0, 31, 0,0,2)));
 		 
 		
 	}
 	
-	private boolean timeEquals(Date d1, Date d2){
-		Calendar cal1 = GregorianCalendar.getInstance();
-		cal1.setTime(d1);
-		Calendar cal2 = GregorianCalendar.getInstance();
-		cal2.setTime(d2);
-		
-		return cal1.get(Calendar.HOUR_OF_DAY) == cal2.get(Calendar.HOUR_OF_DAY) &&
-				cal1.get(Calendar.MINUTE) == cal2.get(Calendar.MINUTE) && 
-				cal1.get(Calendar.SECOND) == cal2.get(Calendar.SECOND);
+	private boolean timeEquals(LocalTime d1, LocalTime d2){
+		return d1.equals(d2);
 	}
 	
-	private boolean dateEquals(Date d1, Date d2){
-		Calendar cal1 = GregorianCalendar.getInstance();
-		cal1.setTime(d1);
-		Calendar cal2 = GregorianCalendar.getInstance();
-		cal2.setTime(d2);
-		
-		return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
-				cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH) && 
-				cal1.get(Calendar.DAY_OF_MONTH) == cal2.get(Calendar.DAY_OF_MONTH);
+	private boolean dateEquals(LocalDate d1, LocalDate d2){
+		return d1.isEqual(d2);
 	}
-	private Date getDate(int year, int month, int day, int hour, int minute, int second){
-		Calendar cal = GregorianCalendar.getInstance();
-		cal.set(Calendar.YEAR, year);
-		cal.set(Calendar.MONTH, month);
-		cal.set(Calendar.DAY_OF_MONTH, day);
-		cal.set(Calendar.HOUR_OF_DAY, hour);
-		cal.set(Calendar.MINUTE, minute);
-		cal.set(Calendar.SECOND, second);
-		return cal.getTime();
+	private LocalDate getDate(int year, int month, int day, int hour, int minute, int second){
+		return LocalDate.of(year, month, day);
+	}
+	private LocalTime getTime(int year, int month, int day, int hour, int minute, int second){
+		return LocalTime.of(hour, minute,second);
 	}
 }

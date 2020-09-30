@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.incident.ui.newwizard;
 
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -92,18 +93,17 @@ public class DateTimeComposite extends AbstractIncidentComposite {
 
 	@Override
 	public void updateIncident(Waypoint incident) {
-		Date dt = SmartUtils.combineDateTime(SmartUtils.getDate(date), SmartUtils.getTime(time));
-		incident.setDateTime(dt);
+		incident.setDateTime ( SmartUtils.toDateTime(date, time) );
 	}
 
 	@Override
 	public void initFields(Waypoint incident, Session session) {
 		if (incident.getDateTime() != null){
-			SmartUtils.initDateDateTimeWidget(date, incident.getDateTime());
-			SmartUtils.initTimeDateTimeWidget(time, incident.getDateTime());
+			SmartUtils.initDateTimeWidget(date, incident.getDateTime().toLocalDate());
+			SmartUtils.initDateTimeWidget(time, incident.getDateTime().toLocalTime());
 		}else{
-			SmartUtils.initDateDateTimeWidget(date, new Date());
-			SmartUtils.initTimeDateTimeWidget(time, new Date());
+			SmartUtils.initDateTimeWidget(date, LocalDate.now());
+			SmartUtils.initDateTimeWidget(time, LocalTime.now());
 		}
 	}
 

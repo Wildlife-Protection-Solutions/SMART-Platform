@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.ca.export;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.util.HashMap;
 

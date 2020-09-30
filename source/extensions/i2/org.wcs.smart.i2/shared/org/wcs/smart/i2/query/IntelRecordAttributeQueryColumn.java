@@ -21,8 +21,9 @@
  */
 package org.wcs.smart.i2.query;
 
-import java.text.DateFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.List;
 import java.util.Locale;
 
@@ -97,7 +98,7 @@ public class IntelRecordAttributeQueryColumn extends AbstractQueryColumn {
 					if ((Double)toFormat > 0.5) return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(Boolean.TRUE, l);
 					return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(Boolean.FALSE, l);
 				case DATE:
-					return DateFormat.getDateInstance().format( (Date)toFormat );
+					return DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format( (LocalDate)toFormat );
 				case LIST:
 					List<IntelAttributeListItem> items = (List<IntelAttributeListItem>)toFormat;
 					StringBuilder sb = new StringBuilder();

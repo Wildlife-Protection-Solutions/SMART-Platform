@@ -29,8 +29,8 @@ import java.text.Collator;
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
 import java.text.NumberFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -537,13 +537,12 @@ public class HibernateManager extends SmartHibernateManager{
 	 * @param session the database session
 	 */
 	public static void generateEmployeeId(Employee e, Session session){
-		Calendar c = Calendar.getInstance();
+		int year = LocalDate.now().getYear();
 		if (e.getBirthDate() != null) {
-			c.setTime(e.getBirthDate());
+			year = e.getBirthDate().getYear();
 		}else {
-			c.setTime(e.getStartEmploymentDate());
+			year = e.getStartEmploymentDate().getYear();
 		}
-		int year = c.get(Calendar.YEAR);
 		
 		String query = HibernateUtil.getHibernateCurrentDialect(session).getSequenceNextValString("smart.smart_user_id_seq"); //$NON-NLS-1$
 		List<?> results = session.createNativeQuery(query).list();

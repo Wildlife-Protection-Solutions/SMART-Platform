@@ -24,12 +24,11 @@ package org.wcs.smart.query.common.engine;
 import java.util.HashMap;
 import java.util.List;
 
-import org.wcs.smart.query.common.model.Grid;
-import org.wcs.smart.query.common.model.Tile;
-
 import org.locationtech.jts.algorithm.RobustLineIntersector;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.LineString;
+import org.wcs.smart.query.common.model.Grid;
+import org.wcs.smart.query.common.model.Tile;
 
 /**
  * 

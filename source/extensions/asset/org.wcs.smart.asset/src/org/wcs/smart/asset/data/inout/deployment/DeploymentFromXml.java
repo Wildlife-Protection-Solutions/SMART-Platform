@@ -28,7 +28,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
@@ -142,10 +141,10 @@ public class DeploymentFromXml {
 				return null;
 			}
 			
-			LocalDateTime sDate = SharedUtils.toLocalDateTime(xml.getStartDateTime().toGregorianCalendar().getTime());
+			LocalDateTime sDate = SmartUtils.toLocalDateTime(xml.getStartDateTime());
 			LocalDateTime eDate = null;
 			if (xml.getEndDateTime() != null) {
-				eDate = SharedUtils.toLocalDateTime(xml.getEndDateTime().toGregorianCalendar().getTime());
+				eDate = SmartUtils.toLocalDateTime(xml.getEndDateTime());
 			}
 			
 			deployment.setAssetWaypoints(new ArrayList<>());
@@ -211,8 +210,8 @@ public class DeploymentFromXml {
 			for (XmlAssetDeploymentDisruption xmld : xml.getDisruptions()) {
 				AssetDeploymentDisruption disruption = new AssetDeploymentDisruption();
 				disruption.setComment(xmld.getComment());
-				disruption.setStartDate( SharedUtils.toLocalDateTime(xmld.getStartDateTime().toGregorianCalendar().getTime()));
-				disruption.setEndDate( SharedUtils.toLocalDateTime(xmld.getEndDateTime().toGregorianCalendar().getTime()));
+				disruption.setStartDate( SmartUtils.toLocalDateTime(xmld.getStartDateTime()) );
+				disruption.setEndDate( SmartUtils.toLocalDateTime(xml.getEndDateTime()) );
 				disruption.setAssetDeployment(deployment);
 				deployment.getDisruptions().add(disruption);
 			}
@@ -243,7 +242,7 @@ public class DeploymentFromXml {
 				wp.setRawY(xmlwp.getY());
 				wp.setId(xmlwp.getId());
 				wp.setConservationArea(ca);
-				wp.setDateTime(new Date(xmlwp.getDateTime().toGregorianCalendar().getTime().getTime()));
+				wp.setDateTime(  SmartUtils.toLocalDateTime(xmlwp.getDateTime()) );
 				wp.setObservationGroups(new ArrayList<>());
 				wp.setSourceId(AssetWaypointSource.KEY);
 				wp.setAttachments(new ArrayList<>());
@@ -348,7 +347,7 @@ public class DeploymentFromXml {
 				//find another asset waypoint at the same station with 
 				//the same time and link this asset to that waypoint; adding observations
 				//if necessary
-				Date wpdt = new Date(xmlwp.getDateTime().toGregorianCalendar().getTime().getTime());
+				LocalDateTime wpdt = SmartUtils.toLocalDateTime(xmlwp.getDateTime());
 				List<Waypoint> test = QueryFactory.buildQuery(session, Waypoint.class, 
 						new Object[] {"conservationArea", ca}, //$NON-NLS-1$
 						new Object[] {"sourceId", AssetWaypointSource.KEY}, //$NON-NLS-1$

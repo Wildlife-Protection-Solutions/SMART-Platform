@@ -21,8 +21,10 @@
  */
 package org.wcs.smart.query.model;
 
-import java.text.DateFormat;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.time.temporal.Temporal;
 import java.util.Locale;
 
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -229,11 +231,11 @@ public abstract class QueryColumn implements Cloneable{
 				return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(Boolean.FALSE, Locale.getDefault());
 			}
 		} else if (type == ColumnType.DATE) {
-			return DateFormat.getDateInstance().format((Date) value);
+			return DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format((Temporal) value);
 		} else if (type == ColumnType.DATETIME) {
-			return DateFormat.getDateTimeInstance().format((Date) value);
+			return DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format((LocalDateTime) value);
 		} else if (type == ColumnType.TIME) {
-			return DateFormat.getTimeInstance().format((Date) value);
+			return DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM).format((Temporal) value);
 		} else if (type == ColumnType.STRING ||
 				type == ColumnType.TIME_STR) {
 			return (String) value;

@@ -24,6 +24,8 @@ package org.wcs.smart.er.query.engine;
 
 import java.sql.SQLException;
 import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Locale;
 
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
@@ -426,21 +428,21 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 		
 		field = table + "." + field; //$NON-NLS-1$
 		
-		java.sql.Date[] bits = filter.getDateFilterOption().getDates(); 
+		LocalDate[] bits = filter.getDateFilterOption().getDates(); 
 		String f = ""; //$NON-NLS-1$
 		if (bits == null){
 			return ""; //$NON-NLS-1$
 		}
 		if (bits.length == 1){
-			String p1 = engine.addParameterValue(bits[0].toString());
+			String p1 = engine.addParameterValue(bits[0].atStartOfDay().toString());
 			f = " ( cast(" + field + " as date) >= " + p1 + " ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}else if (bits.length == 2 && filter.getDateFilterOption().isEndDateInclusive()){
-			String p1 = engine.addParameterValue(bits[0].toString());
-			String p2 = engine.addParameterValue(bits[1].toString());
+			String p1 = engine.addParameterValue(bits[0].atStartOfDay().toString());
+			String p2 = engine.addParameterValue(bits[1].atTime(LocalTime.MAX).toString());
 			f = " ( cast(" + field + " as date) >= " + p1 + " and cast(" + field + " as date) <= " + p2 + " ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ 
 		}else if (bits.length == 2){
-			String p1 = engine.addParameterValue(bits[0].toString());
-			String p2 = engine.addParameterValue(bits[1].toString());
+			String p1 = engine.addParameterValue(bits[0].atStartOfDay().toString());
+			String p2 = engine.addParameterValue(bits[1].atStartOfDay().toString());
 			f = " ( cast(" + field + " as date) >= " + p1 + " and cast(" + field + " as date) < " + p2 + " ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ 
 		}
 

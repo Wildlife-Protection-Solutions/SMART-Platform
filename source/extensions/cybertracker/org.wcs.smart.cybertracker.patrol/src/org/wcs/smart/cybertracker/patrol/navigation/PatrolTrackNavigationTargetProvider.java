@@ -21,8 +21,9 @@
  */
 package org.wcs.smart.cybertracker.patrol.navigation;
 
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -76,7 +77,7 @@ public class PatrolTrackNavigationTargetProvider implements INavigationLayerTarg
 				StringBuilder sb = new StringBuilder();
 				sb.append( part.getTrack().getPatrolLegDay().getPatrolLeg().getPatrol().getId() );
 				sb.append( " - "); //$NON-NLS-1$
-				sb.append(  DateFormat.getDateInstance().format(part.getTrack().getPatrolLegDay().getDate()));
+				sb.append(  DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(part.getTrack().getPatrolLegDay().getDate()));
 				try {
 					if (part.getTrack().getTrackParts().size() > 1)
 						sb.append( MessageFormat.format(" ({0}) ", + part.getIndex())); //$NON-NLS-1$

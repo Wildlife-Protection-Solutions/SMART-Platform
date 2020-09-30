@@ -22,15 +22,13 @@
 
 package org.wcs.smart.patrol.internal.ui;
 
-import java.sql.Time;
 import java.text.Collator;
 import java.time.LocalDate;
-import java.time.ZoneId;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -247,14 +245,14 @@ public class MergePatrolLegDialog extends SmartStyledTitleDialog{
 		newLeg.setId(txtLegId.getText());
 		
 		//get date from all legs to be merged
-		Date startDate = null;
-		Date endDate = null;
+		LocalDate startDate = null;
+		LocalDate endDate = null;
 		ArrayList<PatrolLegMember> allMembers = new ArrayList<PatrolLegMember>();
 
 		//gather start date and member type data from list of legs.
 		for(PatrolLeg l : legsToMerge){
-			if(startDate == null || l.getStartDate().before(startDate)) startDate = l.getStartDate();
-			if(endDate == null || l.getEndDate().after(endDate)) endDate = l.getEndDate();
+			if(startDate == null || l.getStartDate().isBefore(startDate)) startDate = l.getStartDate();
+			if(endDate == null || l.getEndDate().isAfter(endDate)) endDate = l.getEndDate();
 
 			for(PatrolLegMember m : l.getMembers()){
 				//check if this employee is already in the list
@@ -309,34 +307,34 @@ public class MergePatrolLegDialog extends SmartStyledTitleDialog{
 			}
 		}
 		// determine the range of days we need to create for the new list
-		Date s = null;
-		Date e = null;		
+		LocalDate s = null;
+		LocalDate e = null;		
 		for(PatrolLegDay  pld : pldsToMerge){
-			if(s == null || pld.getDate().before(s))s = pld.getDate();
-			if(e == null || pld.getDate().after(e))e = pld.getDate();
+			if(s == null || pld.getDate().isBefore(s))s = pld.getDate();
+			if(e == null || pld.getDate().isAfter(e))e = pld.getDate();
 		}
-		LocalDate curDay = LocalDate.ofInstant(s.toInstant(), ZoneId.systemDefault());
-		LocalDate lastDay = LocalDate.ofInstant(e.toInstant(), ZoneId.systemDefault());
+		LocalDate curDay = LocalDate.from(s);
+		LocalDate lastDay = LocalDate.from(e);
 		
 		ArrayList<PatrolLegDay> newDays = new ArrayList<PatrolLegDay>();
 		for(;!curDay.isAfter(lastDay); curDay = curDay.plusDays(1)) {
 			PatrolLegDay newpld = new PatrolLegDay();
 			
-			newpld.setDate(java.sql.Date.valueOf(curDay));
+			newpld.setDate(curDay);
 			newpld.setPatrolLeg(newLeg);
 
-			Time st = null;
-			Time et = null;
+			LocalTime st = null;
+			LocalTime et = null;
 			ArrayList<PatrolLegDay> todaysPlds = new ArrayList<PatrolLegDay>();
 			
 			int totalRestTime = 0;
 			for(PatrolLegDay  pld : pldsToMerge){
 				// check if the pld is on the day we are currently doing
-				LocalDate d = LocalDate.ofInstant(pld.getDate().toInstant(), ZoneId.systemDefault());
-				if(curDay.equals(d)) {
+				
+				if(curDay.equals(pld.getDate())) {
 					todaysPlds.add(pld);
-					if(st == null || pld.getStartTime().before(st)) st = pld.getStartTime();
-					if(et == null || pld.getEndTime().after(et)) et = pld.getEndTime();
+					if(st == null || pld.getStartTime().isBefore(st)) st = pld.getStartTime();
+					if(et == null || pld.getEndTime().isAfter(et)) et = pld.getEndTime();
 					if(pld.getRestMinutes() != null) totalRestTime += pld.getRestMinutes();
 				}
 			}

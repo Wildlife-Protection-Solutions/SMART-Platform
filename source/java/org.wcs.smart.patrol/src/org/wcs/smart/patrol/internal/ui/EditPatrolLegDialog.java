@@ -21,15 +21,16 @@
  */
 package org.wcs.smart.patrol.internal.ui;
 
-import java.sql.Time;
 import java.text.Collator;
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -62,7 +63,6 @@ import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
-import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -74,7 +74,9 @@ import org.wcs.smart.util.SmartUtils;
  * @since 1.0.0
  */
 public class EditPatrolLegDialog extends SmartStyledTitleDialog{
-	private DateFormat dateTimeFormatter = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM);
+	
+	private DateTimeFormatter dateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM);
+	private DateTimeFormatter dateTimeFormatter =DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM);
 	
 	private PatrolLeg editLeg;
 	
@@ -101,8 +103,8 @@ public class EditPatrolLegDialog extends SmartStyledTitleDialog{
 	private List<PatrolTransportType> typeOps;
 	private List<PatrolMandate> mandateOps;
 	
-	private Date patrolEndDate;
-	private Date patrolStartDate;
+	private LocalDate patrolEndDate;
+	private LocalDate patrolStartDate;
 	
 	private Text txtLegId;
 	
@@ -117,7 +119,7 @@ public class EditPatrolLegDialog extends SmartStyledTitleDialog{
 	 * @param patrolEndDate patrol end date
 	 */
 	public EditPatrolLegDialog(Shell parentShell, PatrolLeg patrolLeg,  List<Employee> patrolMembers, 
-			List<PatrolTransportType> typeOps, List<PatrolMandate> mandateOps, Date patrolStartDate, Date patrolEndDate) {
+			List<PatrolTransportType> typeOps, List<PatrolMandate> mandateOps, LocalDate patrolStartDate, LocalDate patrolEndDate) {
 		super(parentShell);
 		this.editLeg = patrolLeg;
 		this.patrolMembers = patrolMembers;
@@ -381,7 +383,7 @@ public class EditPatrolLegDialog extends SmartStyledTitleDialog{
 			}
 			
 		});
-		SmartUtils.initDateDateTimeWidget(startDate, editLeg.getStartDate());
+		SmartUtils.initDateTimeWidget(startDate, editLeg.getStartDate());
 		
 		lbl = new Label(timecomp, SWT.NONE);
 		lbl.setText(Messages.EditPatrolLegDialog_LegStartTime_Label);
@@ -403,9 +405,11 @@ public class EditPatrolLegDialog extends SmartStyledTitleDialog{
 		opCustom.setText(Messages.EditPatrolLegDialog_OpStartTimeCutom);
 		opCustom.addSelectionListener(opAdapter);
 		
+		LocalTime legstartTime = editLeg.getPatrolLegDays().get(0).getStartTime();
+		
 		startTime = new DateTime(opComp, SWT.TIME | SWT.DROP_DOWN | SWT.MEDIUM | SWT.BORDER);
 		startTime.setEnabled(false);
-		SmartUtils.initTimeDateTimeWidget(startTime, editLeg.getStartDate());
+		SmartUtils.initDateTimeWidget(startTime, legstartTime);
 		
 		startTime.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -414,8 +418,7 @@ public class EditPatrolLegDialog extends SmartStyledTitleDialog{
 			}
 		});
 		
-		Calendar ca = SharedUtils.convertDate(editLeg.getStartDate());
-		boolean enabled =ca.get(Calendar.HOUR_OF_DAY) == 0 && ca.get(Calendar.MINUTE) == 0 && ca.get(Calendar.SECOND) == 0;
+		boolean enabled = (legstartTime.getHour() == 0 && legstartTime.getMinute() == 0 && legstartTime.getSecond() == 0);
 		
 		opStart.setSelection(enabled);
 		opCustom.setSelection(!enabled);
@@ -439,7 +442,7 @@ public class EditPatrolLegDialog extends SmartStyledTitleDialog{
 			}
 			
 		});
-		SmartUtils.initDateDateTimeWidget(endDate, editLeg.getEndDate());
+		SmartUtils.initDateTimeWidget(endDate, editLeg.getEndDate());
 		
 		lbl = new Label(timecomp, SWT.NONE);
 		lbl.setText(Messages.EditPatrolLegDialog_LegEndTime_Label);
@@ -461,8 +464,10 @@ public class EditPatrolLegDialog extends SmartStyledTitleDialog{
 		opEndCustom.setText(Messages.EditPatrolLegDialog_OpEndTimeCustom);
 		opEndCustom.addSelectionListener(opAdapter);
 		
+		LocalTime etime = editLeg.getPatrolLegDays().get(editLeg.getPatrolLegDays().size() - 1).getEndTime();
+		
 		endTime = new DateTime(opComp, SWT.TIME | SWT.DROP_DOWN | SWT.MEDIUM | SWT.BORDER);
-		SmartUtils.initTimeDateTimeWidget(endTime, editLeg.getEndDate());
+		SmartUtils.initDateTimeWidget(endTime, etime);
 		
 		endTime.addSelectionListener(new SelectionAdapter() {
 			
@@ -472,8 +477,7 @@ public class EditPatrolLegDialog extends SmartStyledTitleDialog{
 			}
 		});
 		
-		Calendar ca = SharedUtils.convertDate(editLeg.getEndDate());
-		boolean enabled =ca.get(Calendar.HOUR_OF_DAY) == 23 && ca.get(Calendar.MINUTE) == 59 && ca.get(Calendar.SECOND) == 59;
+		boolean enabled = etime.getHour() == 23 && etime.getMinute() == 59 && etime.getSecond() == 59;
 		
 		opEnd.setSelection(enabled);
 		opEndCustom.setSelection(!enabled);
@@ -497,44 +501,45 @@ public class EditPatrolLegDialog extends SmartStyledTitleDialog{
 	 * @return
 	 */
 	private String validateDates(){
-		Date patrolStart = SharedUtils.getDatePart(patrolStartDate, false);
-		Date patrolEnd = SharedUtils.getDatePart(patrolEndDate, true);
-			
-		Date legStart = SmartUtils.getDate(startDate);
+		
+		LocalDate legStartDate = SmartUtils.toDate(startDate);
+		LocalTime legStartTime = LocalTime.MIN;
 		if (opCustom.getSelection()){
-			legStart = SmartUtils.combineDateTime(legStart, new Time(SmartUtils.getTime(startTime).getTime()));
+			legStartTime = SmartUtils.toTime(startTime);
 		}
 		
 		//update end date & Time
 		//long etime = SmartUtils.getDate(endDate).getTime();
-		Date legEnd = SmartUtils.getDate(endDate);
+		LocalDate legEndDate = SmartUtils.toDate(endDate);
+		LocalTime legEndTime = LocalTime.MAX;
 		if (opEndCustom.getSelection()){
-			legEnd = SmartUtils.combineDateTime(legEnd, new Time(SmartUtils.getTime(endTime).getTime()));
-		}else{
-			legEnd = SharedUtils.getDatePart(legEnd, true);
+			legEndTime = SmartUtils.toTime(endTime);
 		}
 		
-		if (legStart.before(patrolStart)){
+		LocalDateTime legStart = LocalDateTime.of(legStartDate,  legStartTime);
+		LocalDateTime legEnd = LocalDateTime.of(legEndDate,  legEndTime);
+		
+		if (legStart.toLocalDate().isBefore(patrolStartDate)){
 			return MessageFormat.format(
 					Messages.EditPatrolLegDialog_Error_StartAfterPStart,
-					new Object[]{ dateTimeFormatter.format(patrolStartDate)});
+					new Object[]{ dateFormatter.format(patrolStartDate)});
 		}
-		if (legStart.after(patrolEnd) ){
+		if (legStart.toLocalDate().isAfter(patrolEndDate) ){
 			return MessageFormat.format(
 					Messages.EditPatrolLegDialog_Error_StartBeforePEnd,
-					new Object[]{ dateTimeFormatter.format(patrolEndDate)});
+					new Object[]{ dateFormatter.format(patrolEndDate)});
 		}
-		if (legEnd.before(patrolStart)){
+		if (legEnd.toLocalDate().isBefore(patrolStartDate)){
 			return MessageFormat.format(
 					Messages.EditPatrolLegDialog_Error_EndAfterPStart,
-					new Object[]{ dateTimeFormatter.format(patrolStartDate)});
+					new Object[]{ dateFormatter.format(patrolStartDate)});
 		}
-		if (legEnd.after(patrolEnd)){
+		if (legEnd.toLocalDate().isAfter(patrolEndDate)){
 			return MessageFormat.format(
 					Messages.EditPatrolLegDialog_Error_EndBeforePStart,
-					new Object[]{ dateTimeFormatter.format(patrolEndDate)});
+					new Object[]{ dateFormatter.format(patrolEndDate)});
 		}
-		if (legEnd.before(legStart)){
+		if (legEnd.isBefore(legStart)){
 			return MessageFormat.format(
 					Messages.EditPatrolLegDialog_Error_StartBeforeEnd,
 					new Object[]{ dateTimeFormatter.format(legStart), dateTimeFormatter.format(legEnd)});
@@ -584,27 +589,25 @@ public class EditPatrolLegDialog extends SmartStyledTitleDialog{
 		
 		//update id
 		editLeg.setId(txtLegId.getText().trim());
-		//update start date & time
 		
-		Date stime = SmartUtils.getDate(startDate);
+		//start
+		LocalDate sdate = SmartUtils.toDate(startDate);
+		LocalTime stime = LocalTime.MIN;
 		if (opCustom.getSelection()){
-			//SmartUtils.getTime(startTime).getTime();
-			//stime += startTime.getHours() * 60 * 60 * 1000 + startTime.getMinutes() * 60 * 1000 + startTime.getSeconds() * 1000;
-			stime = SmartUtils.combineDateTime(stime, new Time(SmartUtils.getTime(startTime).getTime()));
+			stime= SmartUtils.toTime(startTime);
 		}
-		//editLeg.setStartDate(new Date( stime ));
-		editLeg.setStartDate(stime);
+		editLeg.setStartDate(sdate);
+		editLeg.getPatrolLegDays().get(0).setStartTime(stime);
 		
 		
-		//update end date & Time
-		//long etime = SmartUtils.getDate(endDate).getTime();
-		Date etime = SmartUtils.getDate(endDate);
+		//end
+		LocalDate edate = SmartUtils.toDate(endDate);
+		LocalTime etime = LocalTime.MAX;
 		if (opEndCustom.getSelection()){
-			etime = SmartUtils.combineDateTime(etime, new Time(SmartUtils.getTime(endTime).getTime()));
-		}else{
-			etime = SharedUtils.getDatePart(etime, true);
+			etime = SmartUtils.toTime(endTime);
 		}
-		editLeg.setEndDate(etime);
+		editLeg.setEndDate(edate);
+		editLeg.getPatrolLegDays().get(editLeg.getPatrolLegDays().size() - 1).setEndTime(etime);
 		
 		//update transport type
 		editLeg.setType((PatrolTransportType) ((IStructuredSelection)this.cmbTransportTypeA.getSelection()).getFirstElement());

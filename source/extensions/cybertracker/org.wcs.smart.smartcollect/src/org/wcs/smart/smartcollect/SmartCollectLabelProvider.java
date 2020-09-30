@@ -23,9 +23,9 @@ package org.wcs.smart.smartcollect;
 
 import java.util.Locale;
 
-import org.wcs.smart.smartcollect.model.SmartCollectWaypointSource;
 import org.wcs.smart.smartcollect.internal.Messages;
 import org.wcs.smart.smartcollect.model.ISmartCollectLabelProvider;
+import org.wcs.smart.smartcollect.model.SmartCollectWaypointSource;
 
 /**
  * Label provider for SmartCollect incidents

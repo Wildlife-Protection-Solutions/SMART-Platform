@@ -24,7 +24,6 @@ package org.wcs.smart.plan.xml;
 import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -63,6 +62,7 @@ import org.wcs.smart.plan.xml.model.XmlName;
 import org.wcs.smart.plan.xml.model.XmlPlan;
 import org.wcs.smart.plan.xml.model.XmlPlanTarget;
 import org.wcs.smart.plan.xml.model.XmlPlanTargetPoint;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Converts plan from xml file into SMART Plan data model object
@@ -293,9 +293,9 @@ public class PlanFromXml {
 		plan.setDescription(xml.getDescription());
 		plan.setConservationArea(ca);
 		plan.setCreator(SmartDB.getCurrentEmployee());
-		if (xml.getEndDate() != null) plan.setEndDate(new Date(xml.getEndDate().toGregorianCalendar().getTime().getTime()));
+		if (xml.getEndDate() != null) plan.setEndDate(  SmartUtils.toLocalDate(xml.getEndDate()));
 		plan.setId(xml.getId());
-		if (xml.getStartDate() != null) plan.setStartDate(new Date(xml.getStartDate().toGregorianCalendar().getTime().getTime()));
+		if (xml.getStartDate() != null) plan.setStartDate(SmartUtils.toLocalDate(xml.getStartDate()));
 		
 		try {
 			plan.setStation(findStation(xml.getStation(), session));

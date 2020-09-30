@@ -23,7 +23,8 @@ package org.wcs.smart.connect.query.engine.asset;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Map.Entry;
 
@@ -181,17 +182,17 @@ public class AssetDeploymentFilterProcessor implements IFilterProcessor{
 		sql.append(prefix(AssetDeployment.class) + ".uuid, "); //$NON-NLS-1$
 		
 		
-		java.sql.Date[] bits = dateFilter.getDateFilterOption().getDates(); 
+		LocalDate[] bits = dateFilter.getDateFilterOption().getDates(); 
 		
-		Timestamp filterStart = null;
-		Timestamp filterEnd = null;
+		LocalDateTime filterStart = null;
+		LocalDateTime filterEnd = null;
 		
 		if (bits != null){
 			if (bits.length == 1){
-				filterStart = Timestamp.valueOf( bits[0].toLocalDate().atTime(LocalTime.MIDNIGHT) );
+				filterStart = bits[0].atTime( LocalTime.MIDNIGHT );
 			}else if (bits.length == 2){
-				filterStart = Timestamp.valueOf( bits[0].toLocalDate().atTime(LocalTime.MIDNIGHT) );
-				filterEnd = Timestamp.valueOf( bits[1].toLocalDate().atTime(LocalTime.MAX) );
+				filterStart = bits[0].atTime(LocalTime.MIDNIGHT);
+				filterEnd = bits[1].atTime(LocalTime.MAX);
 			}else {
 				throw new IllegalStateException("invalid date filter"); //$NON-NLS-1$
 			}
@@ -293,7 +294,7 @@ public class AssetDeploymentFilterProcessor implements IFilterProcessor{
 
 		if (dateFilter != null) {
 
-			java.sql.Date[] bits = dateFilter.getDateFilterOption().getDates(); 
+			LocalDate[] bits = dateFilter.getDateFilterOption().getDates(); 
 			
 			if (bits != null){
 				StringBuilder df = new StringBuilder();

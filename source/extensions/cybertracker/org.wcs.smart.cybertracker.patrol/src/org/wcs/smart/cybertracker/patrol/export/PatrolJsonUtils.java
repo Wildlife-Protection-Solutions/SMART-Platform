@@ -21,9 +21,8 @@
  */
 package org.wcs.smart.cybertracker.patrol.export;
 
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -58,8 +57,8 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class PatrolJsonUtils {
 	
-	public static DateFormat DATEFORMAT = new SimpleDateFormat("yyyy/MM/dd"); //$NON-NLS-1$
-	public static DateFormat TIMEFORMAT = new SimpleDateFormat("HH:mm:ss"); //$NON-NLS-1$
+	public static DateTimeFormatter DATEFORMAT = DateTimeFormatter.ofPattern("yyyy/MM/dd"); //$NON-NLS-1$
+	public static DateTimeFormatter TIMEFORMAT = DateTimeFormatter.ofPattern("HH:mm:ss"); //$NON-NLS-1$
 	
 	public static final String ATTRIBUTE_PREFIX = "SMART_"; //$NON-NLS-1$
 	

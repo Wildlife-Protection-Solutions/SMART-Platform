@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.i2.model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -63,10 +63,10 @@ public class IntelRecord extends UuidItem implements IIntelAuditItem{
 	
 	private IntelProfile profile;
 
-	private Date dateCreated;
-	private Date dateModified;
-	private Date dateExported;
-	private Date primaryDate;
+	private LocalDateTime dateCreated;
+	private LocalDateTime dateModified;
+	private LocalDateTime dateExported;
+	private LocalDateTime primaryDate;
 
 	private Employee createdBy;
 	private Employee lastModifiedBy;
@@ -136,7 +136,7 @@ public class IntelRecord extends UuidItem implements IIntelAuditItem{
 	 * @return date_created
 	 */
 	@Column(name="date_created")
-	public Date getDateCreated() {
+	public LocalDateTime getDateCreated() {
 		return this.dateCreated;
 	}
 	/**
@@ -145,7 +145,7 @@ public class IntelRecord extends UuidItem implements IIntelAuditItem{
 	 * @param dateCreated
 	 *            date_created
 	 */
-	public void setDateCreated(Date dateCreated) {
+	public void setDateCreated(LocalDateTime dateCreated) {
 		this.dateCreated = dateCreated;
 	}
 
@@ -155,7 +155,7 @@ public class IntelRecord extends UuidItem implements IIntelAuditItem{
 	 * @param dateModified
 	 *            date_modified
 	 */
-	public void setPrimaryDate(Date primaryDate) {
+	public void setPrimaryDate(LocalDateTime primaryDate) {
 		this.primaryDate = primaryDate;
 	}
 
@@ -165,7 +165,7 @@ public class IntelRecord extends UuidItem implements IIntelAuditItem{
 	 * @return date_modified
 	 */
 	@Column(name="primary_date")
-	public Date getPrimaryDate() {
+	public LocalDateTime getPrimaryDate() {
 		return this.primaryDate;
 	}
 	
@@ -176,7 +176,7 @@ public class IntelRecord extends UuidItem implements IIntelAuditItem{
 	 * @param dateModified
 	 *            date_modified
 	 */
-	public void setDateModified(Date dateModified) {
+	public void setDateModified(LocalDateTime dateModified) {
 		this.dateModified = dateModified;
 	}
 
@@ -186,7 +186,7 @@ public class IntelRecord extends UuidItem implements IIntelAuditItem{
 	 * @return date_modified
 	 */
 	@Column(name="last_modified_date")
-	public Date getDateModified() {
+	public LocalDateTime getDateModified() {
 		return this.dateModified;
 	}
 
@@ -196,7 +196,7 @@ public class IntelRecord extends UuidItem implements IIntelAuditItem{
 	 * @return dateExported
 	 */
 	@Column(name="date_exported")
-	public Date getDateExported() {
+	public LocalDateTime getDateExported() {
 		return this.dateExported;
 	}
 	/**
@@ -205,7 +205,7 @@ public class IntelRecord extends UuidItem implements IIntelAuditItem{
 	 * @param dateExported
 	 *            dateExported
 	 */
-	public void setDateExported(Date dateExported) {
+	public void setDateExported(LocalDateTime dateExported) {
 		this.dateExported = dateExported;
 	}
 	

@@ -23,9 +23,10 @@ package org.wcs.smart.i2.ui;
 
 import java.nio.file.Path;
 import java.text.MessageFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -105,8 +106,8 @@ public enum FileLocationParser {
 				progress.split(1);
 				IntelLocation l = new IntelLocation();
 				Point pnt = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(wp.getLon().doubleValue(), wp.getLat().doubleValue()));
-				Date dt = GPSDataImport.findWaypointDate(wp);
-				if (dt == null) dt = new Date();
+				LocalDateTime dt = GPSDataImport.findWaypointDate(wp);
+				if (dt == null) dt = LocalDateTime.now();
 				l.setGeometry(pnt);
 				l.setDateTime(dt);
 				l.setId(wp.getName());
@@ -138,7 +139,7 @@ public enum FileLocationParser {
 			for (Directory directory : metadata.getDirectoriesOfType(GpsDirectory.class)) {
 				GeoLocation geoLocation = ((GpsDirectory)directory).getGeoLocation();
 				if (geoLocation != null){
-					Date dateTime = ((GpsDirectory) directory).getGpsDate();
+					LocalDateTime dateTime = ((GpsDirectory) directory).getGpsDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
 					Point pnt = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(geoLocation.getLongitude(), geoLocation.getLatitude()));
 					
 					IntelLocation l = new IntelLocation();

@@ -22,8 +22,8 @@
 package org.wcs.smart.ca;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -115,10 +115,10 @@ public class Employee implements Serializable {
 	private String givenName;
 	private String familyName;
 	
-	private Date startEmploymentDate;
-	private Date endEmploymentDate;
-	private Date birthDate;
-	private Date dateCreated;
+	private LocalDate startEmploymentDate;
+	private LocalDate endEmploymentDate;
+	private LocalDate birthDate;
+	private LocalDate dateCreated;
 	
 	private char gender;
 	private String smartUserId;
@@ -133,7 +133,7 @@ public class Employee implements Serializable {
 	private Rank rank;
 	
 	public Employee(){
-		this.dateCreated = new Date();
+		this.dateCreated = LocalDate.now();
 	}
 
 	@Id
@@ -155,10 +155,10 @@ public class Employee implements Serializable {
 	}
 	
 	@Column(name = "datecreated")
-	public Date getDateCreated() {
+	public LocalDate getDateCreated() {
 		return dateCreated;
 	}
-	public void setDateCreated(Date dateCreated) {
+	public void setDateCreated(LocalDate dateCreated) {
 		this.dateCreated = dateCreated;
 	}
 	
@@ -190,26 +190,26 @@ public class Employee implements Serializable {
 	}
 	
 	@Column(name="startemploymentdate")
-	public Date getStartEmploymentDate() {
+	public LocalDate getStartEmploymentDate() {
 		return startEmploymentDate;
 	}
-	public void setStartEmploymentDate(Date startEmploymentDate) {
+	public void setStartEmploymentDate(LocalDate startEmploymentDate) {
 		this.startEmploymentDate = startEmploymentDate;
 	}
 	
 	@Column(name="endemploymentdate")
-	public Date getEndEmploymentDate() {
+	public LocalDate getEndEmploymentDate() {
 		return endEmploymentDate;
 	}
-	public void setEndEmploymentDate(Date endEmploymentDate) {
+	public void setEndEmploymentDate(LocalDate endEmploymentDate) {
 		this.endEmploymentDate = endEmploymentDate;
 	}
 	
 	@Column(name="birthdate")
-	public Date getBirthDate() {
+	public LocalDate getBirthDate() {
 		return birthDate;
 	}
-	public void setBirthDate(Date birthDate) {
+	public void setBirthDate(LocalDate birthDate) {
 		this.birthDate = birthDate;
 	}
 	

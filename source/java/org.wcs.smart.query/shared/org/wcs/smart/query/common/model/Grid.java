@@ -25,12 +25,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geomgraph.Edge;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.query.model.IGridQueryColumnLabelProvider;
-
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geomgraph.Edge;
 
 
 /**

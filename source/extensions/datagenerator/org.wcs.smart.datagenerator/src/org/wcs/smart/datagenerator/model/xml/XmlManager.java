@@ -22,8 +22,8 @@
 package org.wcs.smart.datagenerator.model.xml;
 
 import java.nio.file.Path;
-import java.sql.Date;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -144,7 +144,7 @@ public enum XmlManager {
 								 woa.setNumberValue(a.getDoubleValue());
 								 add = true;
 							 }else if (attribute.getType() == Attribute.AttributeType.DATE) {
-								 woa.setDateValue(Date.valueOf(a.getStringValue()));
+								 woa.setDateValue( LocalDate.parse(a.getStringValue(), DateTimeFormatter.ISO_LOCAL_DATE) );
 								 add = true;
 							 }else if (attribute.getType() == Attribute.AttributeType.LIST) {
 								 AttributeListItem item = null;

@@ -23,17 +23,21 @@
 package org.wcs.smart.observation.common.importwp.csv;
 
 import java.io.FileReader;
-import java.sql.Time;
 import java.text.MessageFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Point;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ca.Projection;
@@ -43,11 +47,6 @@ import org.wcs.smart.observation.ObservationPlugIn;
 import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.util.ReprojectUtils;
-import org.wcs.smart.util.SharedUtils;
-import org.wcs.smart.util.SmartUtils;
-
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Point;
 
 import au.com.bytecode.opencsv.CSVReader;
 /**
@@ -107,15 +106,36 @@ public class CSVImportConfiguration {
 	 * @return
 	 * @throws Exception 
 	 */
-	public List<Waypoint> getWaypoints(IProgressMonitor monitor, Date singleDay) throws Exception {
+	public List<Waypoint> getWaypoints(IProgressMonitor monitor, LocalDate singleDay) throws Exception {
 	
 		List<Waypoint> allPoints = new ArrayList<Waypoint>();
-		SimpleDateFormat sdf = new SimpleDateFormat(dateFormat);
+		DateTimeFormatter sdf = DateTimeFormatter.ofPattern(dateFormat);
 		
-		Date day0 = null;
-		if( singleDay != null){
-			day0 = SharedUtils.getDatePart(singleDay, false);
-		}
+		LocalDate day0 = singleDay;
+		
+		
+		List<DateTimeFormatter> timeFormatters = new ArrayList<>();
+		
+		DateTimeFormatterBuilder ff = (new DateTimeFormatterBuilder())
+				.parseCaseInsensitive().appendPattern("h:mm") //$NON-NLS-1$
+				.optionalStart()
+				.appendPattern(":ss") //$NON-NLS-1$
+				.optionalEnd()
+				.optionalStart()
+				.appendPattern(" ") //$NON-NLS-1$
+				.optionalEnd()
+				.appendPattern("a"); //$NON-NLS-1$
+		timeFormatters.add(ff.toFormatter());
+		timeFormatters.add(ff.toFormatter(Locale.ROOT));
+		
+		ff = (new DateTimeFormatterBuilder())
+				.parseCaseInsensitive().appendPattern("H:mm") //$NON-NLS-1$
+				.optionalStart()
+				.appendPattern(":ss") //$NON-NLS-1$
+				.optionalEnd();
+		timeFormatters.add(ff.toFormatter());
+		
+		
 		try(CSVReader reader = new CSVReader(new FileReader(filename), getDelimiter())){
 			int counter = 0;
 			if(skipHeaders){
@@ -126,20 +146,20 @@ public class CSVImportConfiguration {
 			String[] row;
 			while((row = reader.readNext()) != null){
 				counter++;
-				Date ptDate = null; 
+				LocalDate ptDate = null; 
 				if (row.length == 1 && row[0].trim().length() == 0){
 					//this is a blank line; skip it
 					break;
 				}
 
 				try {
-					ptDate = sdf.parse( row[dateColumn].replaceAll("\\s+","") ); //$NON-NLS-1$ //$NON-NLS-2$
-				} catch (ParseException e) {
+					ptDate = LocalDate.parse( row[dateColumn].replaceAll("\\s+",""), sdf ); //$NON-NLS-1$ //$NON-NLS-2$
+				} catch (DateTimeParseException e) {
 					throw new Exception(MessageFormat.format(Messages.CSVImportConfiguration_2, new Object[]{counter, row[dateColumn]}), e); 
 				}
 				
-				Date day1 =SharedUtils.getDatePart(ptDate, false);
-				if(singleDay == null ||  day0.equals(day1)){
+				LocalDate day1 = ptDate;
+				if(singleDay == null ||  day0.isEqual(day1)){
 					Waypoint curWP = new Waypoint();
 					//reproject
 					Point point = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(Double.parseDouble( row[XColumn].replaceAll("\\s+","")), Double.parseDouble( row[YColumn].replaceAll("\\s+","") ))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
@@ -156,31 +176,23 @@ public class CSVImportConfiguration {
 
 				 	try {
 				 		String strTime = row[timeColumn].replaceAll("\\s+",""); //$NON-NLS-1$ //$NON-NLS-2$
-				 		SimpleDateFormat format;
-				 		String seconds;
-				 		int minute_break = strTime.indexOf(":");  //$NON-NLS-1$
-				 		if(strTime.length() > (minute_break + 3)){
-				 			if( strTime.charAt(minute_break + 3) == ':'){
-				 				seconds = ":ss"; //$NON-NLS-1$
-				 			}else{
-				 				seconds = ""; //$NON-NLS-1$
-				 			}
-				 		}else{
-				 			seconds = ""; //$NON-NLS-1$
+				 		
+				 		LocalTime ltime = null;
+				 		DateTimeParseException e = null;
+				 		for (DateTimeFormatter f : timeFormatters) {
+				 			try {
+					 			ltime = LocalTime.parse(strTime,f);
+					 		}catch (DateTimeParseException ex) {
+					 			e = ex;
+					 		}	
+				 			if (ltime != null) break;
 				 		}
-				 		if(strTime.contains("+") || strTime.contains("-")){ //$NON-NLS-1$ //$NON-NLS-2$
-				 			format = new SimpleDateFormat(dateFormat + " HH:mm" + seconds + "z"); //$NON-NLS-1$ //$NON-NLS-2$
-				 		}else if(strTime.contains("AM") || strTime.contains("PM") || strTime.contains("am") || strTime.contains("pm")){ //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-				 			format = new SimpleDateFormat(dateFormat + " hh:mm" + seconds + "a"); //$NON-NLS-1$ //$NON-NLS-2$
-				 		}else{
-				 			format = new SimpleDateFormat(dateFormat + " HH:mm" + seconds); //$NON-NLS-1$
-				 		}
-					 	Date dateTime = new Date(); 
-					 	dateTime.setTime(ptDate.getTime());
-					 	dateTime = format.parse( row[dateColumn].replaceAll("\\s+","") + " " + strTime ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					 	Time time = new Time(dateTime.getTime());
-					 	curWP.setDateTime(SmartUtils.combineDateTime(ptDate, time));
-				 	} catch (ParseException e) {
+				 		if (ltime == null) throw e;
+				 		
+				 		
+				 		
+					 	curWP.setDateTime(ptDate.atTime(ltime));
+				 	} catch (DateTimeParseException e) {
 				 		throw new Exception(MessageFormat.format(Messages.CSVImportConfiguration_9, new Object[]{counter, row[timeColumn]}), e);
 				 	}
 				 
@@ -207,7 +219,6 @@ public class CSVImportConfiguration {
 				 
 				 	allPoints.add(curWP);
 				}
-				counter++;
 			}
 		}catch (Exception e) {
 			throw new Exception(Messages.CSVImportConfiguration_12 + "\n\n" + e.getMessage(), e); //$NON-NLS-1$

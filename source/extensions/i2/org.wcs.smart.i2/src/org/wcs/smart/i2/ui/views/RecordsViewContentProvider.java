@@ -22,10 +22,10 @@
 package org.wcs.smart.i2.ui.views;
 
 import java.text.Collator;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
@@ -142,7 +142,7 @@ public class RecordsViewContentProvider implements ITreeContentProvider {
 		}else {
 			List<Object> x = new ArrayList<>(groups.keySet());
 			if (groupBy == GroupBy.MONTH) {
-				x.sort((a,b)-> -1 * ((Date)a).compareTo((Date)b));
+				x.sort((a,b)-> -1 * ((LocalDate)a).compareTo((LocalDate)b));
 			}else if (groupBy == GroupBy.STATUS) {
 				x.sort((a,b)-> {
 					IntelRecord.Status s1 = (IntelRecord.Status)a;
@@ -214,7 +214,7 @@ public class RecordsViewContentProvider implements ITreeContentProvider {
 	 * @param record 
 	 * @return
 	 */
-	private Date getDate(IntelRecordProxy record) {
+	private LocalDateTime getDate(IntelRecordProxy record) {
 		return record.getDate();
 	}
 	
@@ -293,19 +293,13 @@ public class RecordsViewContentProvider implements ITreeContentProvider {
 					}	
 				}else if (groupBy == GroupBy.MONTH) {
 					for (IntelRecordProxy r : records) {
-						Date d = getDate(r);
-						Calendar c = Calendar.getInstance();
-						c.setTime(d);
-						c.set(Calendar.MILLISECOND, 0);
-						c.set(Calendar.SECOND, 0);
-						c.set(Calendar.MINUTE, 0);
-						c.set(Calendar.HOUR_OF_DAY, 0);
-						c.set(Calendar.DAY_OF_MONTH, 1);
+						LocalDateTime d = getDate(r);
+						LocalDate mon = LocalDate.of(d.getYear(), d.getMonth(), 1);
 						
-						List<IntelRecordProxy> items = groups.get(c.getTime());
+						List<IntelRecordProxy> items = groups.get(mon);
 						if (items == null) {
 							items = new ArrayList<>();
-							groups.put(c.getTime(), items);
+							groups.put(mon, items);
 						}
 						items.add(r);
 					}	

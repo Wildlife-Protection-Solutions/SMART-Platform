@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.entity.query;
 
-import java.sql.Date;
+import java.time.LocalDate;
 import java.util.Locale;
 
 import org.wcs.smart.entity.internal.Messages;
@@ -61,7 +61,7 @@ public class LastSightingDateFilter implements IDateFilter {
 	 * @return null
 	 */
 	@Override
-	public Date[] getDates() {
+	public LocalDate[] getDates() {
 		return null;
 	}
 

@@ -21,9 +21,11 @@
  */
 package org.wcs.smart.common.filter;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.time.temporal.ChronoUnit;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -46,8 +48,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
-
-import com.ibm.icu.text.DateFormat;
 
 /**
  * Composite with required controls for date filtering. Used inside filter dialogs
@@ -92,11 +92,11 @@ public class DateFilterComposite extends Composite {
 				return null;
 			case CURRENT_MONTH:
 			case MONTH_TO_DATE:
-				return (new SimpleDateFormat("MMM yyyy")).format(getEndDate()); //$NON-NLS-1$
+				return DateTimeFormatter.ofPattern("MMM yyyy").format(getEndDate());  //$NON-NLS-1$
 			case CURRENT_YEAR:
 			case LAST_YEAR:
 			case YEAR_TO_DATE:
-				return (new SimpleDateFormat("yyyy")).format(getEndDate()); //$NON-NLS-1$
+				return DateTimeFormatter.ofPattern("yyyy").format(getEndDate());  //$NON-NLS-1$
 			case CUSTOM:
 				return null;
 			case LAST_1_YEARS:
@@ -107,7 +107,7 @@ public class DateFilterComposite extends Composite {
 			case NEXT_60_DAYS:
 			case RANGE_30_DAYS:
 			case RANGE_60_DAYS:
-				return DateFormat.getDateInstance().format(getStartDate()) + "-" + DateFormat.getDateInstance().format(getEndDate()); //$NON-NLS-1$
+				return DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(getStartDate()) + "-" + DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(getEndDate()); //$NON-NLS-1$
 			}
 			return null;
 		}
@@ -117,37 +117,30 @@ public class DateFilterComposite extends Composite {
 		 * <code>null</code> if start date cannot be computed
 		 * for filter value (for custom values).
 		 */
-		public Date getStartDate(){
-			Calendar cal = Calendar.getInstance();
+		public LocalDate getStartDate(){
 			switch(this){
 			case LAST_30_DAYS:
 			case RANGE_30_DAYS:
-				cal.add(Calendar.DAY_OF_MONTH, -30);
-				return cal.getTime(); 	
+				return ChronoUnit.DAYS.addTo(LocalDate.now(), -30);
 			case LAST_60_DAYS:
 			case RANGE_60_DAYS:
-				cal.add(Calendar.DAY_OF_MONTH, -60);
-				return cal.getTime();
+				return ChronoUnit.DAYS.addTo(LocalDate.now(), -60);
 			case NEXT_30_DAYS:
 			case NEXT_60_DAYS:
-				return cal.getTime();
+				return LocalDate.now();
 			case YEAR_TO_DATE:
 			case CURRENT_YEAR:
-				cal.set(cal.get(Calendar.YEAR), 0, 01, 0, 0, 0);
-				return cal.getTime();
+				return LocalDate.of(LocalDate.now().getYear(),1,1);
 			case MONTH_TO_DATE:
 			case CURRENT_MONTH:
-				cal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), 01, 0, 0, 0);
-				return cal.getTime();
+				LocalDate now = LocalDate.now();
+				return LocalDate.of(now.getYear(), now.getMonth(), 1);
 			case LAST_YEAR:
-				cal.set(cal.get(Calendar.YEAR)-1, 0, 01, 0, 0, 0);
-				return cal.getTime();
+				return LocalDate.of(LocalDate.now().getYear()-1,1,1);
 			case LAST_1_YEARS:
-				cal.add(Calendar.YEAR, -1);
-				return cal.getTime();
+				return ChronoUnit.YEARS.addTo(LocalDate.now(), -1);
 			case LAST_5_YEARS:
-				cal.add(Calendar.YEAR, -5);
-				return cal.getTime();
+				return ChronoUnit.YEARS.addTo(LocalDate.now(), -5);
 			case ALL: return null;
 			case CUSTOM: return null;
 			}
@@ -160,8 +153,7 @@ public class DateFilterComposite extends Composite {
 		 * <code>null</code> if end date cannot be computed
 		 * for filter value (for custom values).
 		 */
-		public Date getEndDate(){
-			Calendar cal = Calendar.getInstance();
+		public LocalDate getEndDate(){
 			switch(this){
 				case LAST_30_DAYS:
 				case LAST_60_DAYS: 
@@ -169,24 +161,20 @@ public class DateFilterComposite extends Composite {
 				case MONTH_TO_DATE:
 				case LAST_5_YEARS:
 				case LAST_1_YEARS:
-					return cal.getTime();
+					return LocalDate.now();
 				case LAST_YEAR: 	
-					cal.set(cal.get(Calendar.YEAR)-1, cal.getActualMaximum(Calendar.MONTH), 31, cal.getActualMaximum(Calendar.HOUR_OF_DAY), cal.getActualMaximum(Calendar.MINUTE), cal.getActualMaximum(Calendar.SECOND));
-					return cal.getTime();
+					return LocalDate.of(LocalDate.now().getYear() - 1, 12, 31);
 				case NEXT_30_DAYS:
 				case RANGE_30_DAYS:
-					cal.add(Calendar.DAY_OF_MONTH, 30);
-					return cal.getTime();
+					return ChronoUnit.DAYS.addTo(LocalDate.now(), 30);
 				case NEXT_60_DAYS:
 				case RANGE_60_DAYS:
-					cal.add(Calendar.DAY_OF_MONTH, 60);
-					return cal.getTime();
+					return ChronoUnit.DAYS.addTo(LocalDate.now(), 60);
 				case CURRENT_YEAR:
-					cal.set(cal.get(Calendar.YEAR), cal.getActualMaximum(Calendar.MONTH), 31, cal.getActualMaximum(Calendar.HOUR_OF_DAY), cal.getActualMaximum(Calendar.MINUTE), cal.getActualMaximum(Calendar.SECOND));
-					return cal.getTime();
+					return LocalDate.of(LocalDate.now().getYear(), 12, 31);
 				case CURRENT_MONTH:
-					cal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.getActualMaximum(Calendar.DAY_OF_MONTH), 23, 59, 59);
-					return cal.getTime();
+					LocalDate now = LocalDate.now();
+					return YearMonth.of(now.getYear(), now.getMonth()).atEndOfMonth();
 				case ALL:
 					return null;
 				case CUSTOM:
@@ -329,7 +317,7 @@ public class DateFilterComposite extends Composite {
 				return;
 			}
 			if (dateSelection.getFirstElement().equals(DateFilter.CUSTOM)){
-				if (SmartUtils.getDate(dtStart).after(SmartUtils.getDate(dtEnd))){
+				if (SmartUtils.toDate(dtStart).isAfter(SmartUtils.toDate(dtEnd))){
 					dialog.setErrorMessage(Messages.DateFilterComposite_EndDateRange_Error);
 				}
 			}
@@ -356,13 +344,13 @@ public class DateFilterComposite extends Composite {
 		return null;
 	}
 
-	public void applyState(DateFilter dateFilter, Date startDate, Date endDate) {
+	public void applyState(DateFilter dateFilter, LocalDate startDate, LocalDate endDate) {
 		boolean enabled = dateFilter != null;
 		if (enabled) {
 			dateViewer.setSelection(new StructuredSelection(dateFilter));
 			if (dateFilter == DateFilter.CUSTOM) {
-				SmartUtils.initDateDateTimeWidget(dtStart, startDate);
-				SmartUtils.initDateDateTimeWidget(dtEnd, endDate);
+				SmartUtils.initDateTimeWidget(dtStart, startDate);
+				SmartUtils.initDateTimeWidget(dtEnd, endDate);
 			}
 		} else {
 			dateViewer.setSelection(getDefaultDateViewerSelection());
@@ -392,16 +380,16 @@ public class DateFilterComposite extends Composite {
 		return null;
 	}
 
-	public Date getStartDateForModel() {
+	public LocalDate getStartDateForModel() {
 		if (DateFilter.CUSTOM.equals(getDateFilterForModel())) {
-			return SmartUtils.getDate(dtStart);
+			return SmartUtils.toDate(dtStart);
 		}
 		return null;
 	}
 
-	public Date getEndDateForModel() {
+	public LocalDate getEndDateForModel() {
 		if (DateFilter.CUSTOM.equals(getDateFilterForModel())) {
-			return SmartUtils.getDate(dtEnd);
+			return SmartUtils.toDate(dtEnd);
 		}
 		return null;
 	}

@@ -28,8 +28,9 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
@@ -86,7 +87,7 @@ public enum InactivityTimeoutHandler implements Listener{
 	public static final String PROP_INACTIVITY_ENABLED = "isenabled"; //$NON-NLS-1$
 	public static final String PROP_INACTIVITY_TIMEOUT = "timeout"; //$NON-NLS-1$
 	
-    private long lastTime;
+    private LocalDateTime lastTime;
     
     private long offsetTime;
     
@@ -102,7 +103,7 @@ public enum InactivityTimeoutHandler implements Listener{
     	Display.getDefault().addFilter(SWT.MouseVerticalWheel, this);
     	Display.getDefault().addFilter(SWT.MouseHorizontalWheel, this);
 
-    	lastTime = System.currentTimeMillis();
+    	lastTime = LocalDateTime.now();
     }
 
 	
@@ -155,7 +156,7 @@ public enum InactivityTimeoutHandler implements Listener{
     	}
     	offsetTime = minutes * 60 * 1000;
     	if (Boolean.valueOf(getProperties().getProperty(PROP_INACTIVITY_ENABLED))){
-    		lastTime = System.currentTimeMillis();
+    		lastTime = LocalDateTime.now();
     		checkActivityJob.schedule(60 * 1000);
     	}else {
     		checkActivityJob.cancel();	
@@ -164,15 +165,15 @@ public enum InactivityTimeoutHandler implements Listener{
 
 	@Override
 	public void handleEvent(Event event) {
-		lastTime = System.currentTimeMillis();
+		lastTime = LocalDateTime.now();
 	}
 	
 	private Job checkActivityJob = new Job("check activity") { //$NON-NLS-1$
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			Long now = (new Date()).getTime();
-			Long diff = now - lastTime;
+			
+			Long diff = ChronoUnit.MILLIS.between(lastTime, LocalDateTime.now());
 			if (diff > offsetTime) {				
 				Display.getDefault().syncExec(()->{					
 					List<Shell> temp = new ArrayList<>();

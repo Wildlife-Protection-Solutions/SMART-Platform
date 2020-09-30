@@ -23,9 +23,10 @@ package org.wcs.smart.cybertracker.ctpackage.ui;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.text.DateFormat;
 import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -443,9 +444,9 @@ public class ConfigurePackagesDialog extends SmartStyledTitleDialog {
 					}else {
 						String name = ctPackageFile.getFileName().toString();
 						int index = name.indexOf('.', name.indexOf('.') + 1) + 1;
-						String date = name.substring(index, index + 17);
-						SimpleDateFormat sdf = new SimpleDateFormat(ICtPackage.PACKAGE_DATE_FORMAT);
-						return DateFormat.getDateTimeInstance().format(sdf.parse(date));
+						String date = name.substring(index, index + ICtPackage.PACKAGE_DATE_FORMAT.length());
+						DateTimeFormatter sdf = DateTimeFormatter.ofPattern(ICtPackage.PACKAGE_DATE_FORMAT);
+						return DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(LocalDateTime.parse(date,sdf));
 					}
 				}catch (Exception ex) {
 					CyberTrackerPlugIn.log(ex.getMessage(), ex);

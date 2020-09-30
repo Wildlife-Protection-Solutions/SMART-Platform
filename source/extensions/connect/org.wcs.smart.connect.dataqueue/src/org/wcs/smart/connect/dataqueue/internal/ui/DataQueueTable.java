@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.connect.dataqueue.internal.ui;
 
-import java.text.DateFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -107,7 +108,7 @@ public class DataQueueTable extends Composite{
 				return item.getStatus().getGuiName();
 			}else if (this == DATE){
 				if (item.getDateProcessed() == null) return ""; //$NON-NLS-1$
-				return DateFormat.getDateTimeInstance().format(item.getDateProcessed());
+				return DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(item.getDateProcessed());
 			}else if (this == MESSAGE){
 				return item.getErrorMessage();
 			}

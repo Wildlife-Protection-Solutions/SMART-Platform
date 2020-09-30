@@ -57,8 +57,6 @@ import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 
 import org.apache.commons.logging.LogFactory;
-import org.eclipse.core.runtime.IExtensionPoint;
-import org.eclipse.core.runtime.Platform;
 import org.geotools.data.DataAccessFinder;
 import org.geotools.data.DataStoreFinder;
 import org.geotools.factory.CommonFactoryFinder;

@@ -21,9 +21,10 @@
  */
 package org.wcs.smart.i2.ui.dialogs;
 
-import java.text.DateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -117,10 +118,10 @@ public class WptTypeSelectionDialog extends SmartStyledTitleDialog{
 						value.append (" (" + wp.getCmt() + ") "); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 					
-					Date d = GPSDataImport.findWaypointDate(wp);
+					LocalDateTime d = GPSDataImport.findWaypointDate(wp);
 					if (d != null){
 						value.append( " ["); //$NON-NLS-1$
-						value.append(DateFormat.getInstance().format(GPSDataImport.findWaypointDate(wp)));
+						value.append(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(d));
 						value.append( " ]"); //$NON-NLS-1$
 					}
 					

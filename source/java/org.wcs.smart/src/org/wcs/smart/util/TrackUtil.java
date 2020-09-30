@@ -22,16 +22,13 @@
 package org.wcs.smart.util;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.TimeZone;
-
-import org.wcs.smart.map.GeometryFactoryProvider;
 
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.LineString;
+import org.wcs.smart.map.GeometryFactoryProvider;
 
 /**
  * Util for track calculations.
@@ -43,14 +40,13 @@ public class TrackUtil {
 
 	/**
 	 * Converts a set of coordinate to a line string.  Coordinates are first sorted
-	 * by date/time which should be stored in the z coordinate
-	 * as the the date/time in the current timezone.  This function
-	 * convert the z to GMT time.
+	 * by date/time which should be stored in the z coordinate IN GMT. Use
+	 * SharedUtils.toLongTime to convert from local value to gmt;
 	 * 
 	 * @param coordinates set of coordinates
 	 * @return track
 	 */
-	public static LineString convertToLineString(List<Coordinate> coordinates, TimeZone timezone){
+	public static LineString convertToLineString(List<Coordinate> coordinates){
 		if (coordinates.size() < 2) {
 			return null;
 		}
@@ -68,20 +64,6 @@ public class TrackUtil {
 			}
 		});
 
-		for (Coordinate c : coordinates){
-			//c.z is the date taking into account the current timezone.  We want to compute
-			//the date of GMT timezone and assign that to the point.
-			//we need to take the year,month,date, hour, min, sec and assign it to a date with
-			//a time zone of gmt
-			Calendar c1 = Calendar.getInstance();
-			c1.setTimeInMillis((long)c.getZ());
-			Calendar c2 = Calendar.getInstance();
-			c2.setTimeZone(timezone);
-			c2.setTimeInMillis(0);
-			c2.set(c1.get(Calendar.YEAR), c1.get(Calendar.MONTH), c1.get(Calendar.DATE), c1.get(Calendar.HOUR_OF_DAY), c1.get(Calendar.MINUTE), c1.get(Calendar.SECOND));
-			c.setZ(c2.getTime().getTime());
-
-		}
 		LineString track = GeometryFactoryProvider.getFactory().createLineString(coordinates
 				.toArray(new Coordinate[coordinates.size()]));
 		return track;

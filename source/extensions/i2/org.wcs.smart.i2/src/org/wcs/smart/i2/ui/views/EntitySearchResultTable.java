@@ -21,8 +21,9 @@
  */
 package org.wcs.smart.i2.ui.views;
 
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -804,9 +805,9 @@ public class EntitySearchResultTable extends Composite {
 			((GridData)l.getLayoutData()).widthHint = 100;
 			addListener(l);
 			StringBuilder sb = new StringBuilder();
-			sb.append(MessageFormat.format(Messages.EntitySearchResultTable_DateCreatedLabel, DateFormat.getDateInstance().format(entity.getDateCreated())));
+			sb.append(MessageFormat.format(Messages.EntitySearchResultTable_DateCreatedLabel, DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(entity.getDateCreated())));
 			sb.append("\n"); //$NON-NLS-1$
-			sb.append(MessageFormat.format(Messages.EntitySearchResultTable_DateModifiedLabel, DateFormat.getDateInstance().format(entity.getDateModified())));
+			sb.append(MessageFormat.format(Messages.EntitySearchResultTable_DateModifiedLabel, DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(entity.getDateModified())));
 			l.setToolTipText(sb.toString());
 			
 			Composite entitycomp = toolkit.createComposite(right);

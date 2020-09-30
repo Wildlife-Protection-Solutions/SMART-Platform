@@ -22,7 +22,8 @@
 package org.wcs.smart.query.model.filter;
 
 import java.text.MessageFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 import org.wcs.smart.query.model.filter.date.CustomDateFilter;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
@@ -78,8 +79,8 @@ public class DateFilter implements IFilter {
 		sb.append(getDateFilterOption().getQueryKey());
 		sb.append(","); //$NON-NLS-1$
 		if (getDateFilterOption().getDates() != null){
-			for (Date d : getDateFilterOption().getDates()){
-				sb.append(d.getTime());
+			for (LocalDate d : getDateFilterOption().getDates()){
+				sb.append(DateTimeFormatter.ISO_LOCAL_DATE.format(d));
 				sb.append(",");	 //$NON-NLS-1$
 			}
 		}
@@ -114,7 +115,9 @@ public class DateFilter implements IFilter {
 		}
 		if (filter instanceof CustomDateFilter){
 			filter = new CustomDateFilter();
-			((CustomDateFilter)filter).setDates(new Date(Long.parseLong(bits[2])), new Date(Long.parseLong(bits[3])));
+			LocalDate d1 = LocalDate.parse(bits[2],DateTimeFormatter.ISO_LOCAL_DATE);
+			LocalDate d2 = LocalDate.parse(bits[3],DateTimeFormatter.ISO_LOCAL_DATE);
+			((CustomDateFilter)filter).setDates(d1,d2);
 		}
 
 		

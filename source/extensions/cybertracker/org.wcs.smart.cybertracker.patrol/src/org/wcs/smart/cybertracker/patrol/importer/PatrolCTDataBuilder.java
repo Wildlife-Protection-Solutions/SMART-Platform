@@ -21,12 +21,14 @@
  */
 package org.wcs.smart.cybertracker.patrol.importer;
 
-import java.sql.Time;
-import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -80,11 +82,11 @@ public class PatrolCTDataBuilder extends CyberTrackerDataBuilder {
 		
 		 Map<String, E> eMap = ctPatrol.getElementsMap();
 		S s = patrolData.get(0); //init metadata from the first sight (as all other sighs MUST have the same metadata by design)
-		Date date = null;
-		Time time = null;
-		Date start_date = null;
-		Time start_time = null;
-		DateFormat formatter = AbstractSmartImporter.createCyberTrackerDateFormatter();
+		LocalDate date = null;
+		LocalTime time = null;
+		LocalDate start_date = null;
+		LocalTime start_time = null;
+		DateTimeFormatter formatter = AbstractSmartImporter.CT_DT_FORMATTER;
 		
 		for (S.A a : s.getA()) {
 			String i = a.getI();
@@ -93,22 +95,22 @@ public class PatrolCTDataBuilder extends CyberTrackerDataBuilder {
 			
 			if (ICyberTrackerConstants.DATE.equals(i)) {
 				try {
-					date = formatter.parse(v);
-				} catch (ParseException e) {
+					date = LocalDate.parse(v,formatter);
+				} catch (DateTimeParseException e) {
 					CyberTrackerPlugIn.log(e.getMessage(), e);
 				}
 			} else if (ICyberTrackerConstants.TIME.equals(i)) {
-				time = Time.valueOf(v);
+				time = LocalTime.parse(v);
 			} else if (ScreensUtil.RESULT_ID.equals(n)) {
 				ctPatrol.setId(v);
 			} else if (ScreensUtil.RESULT_START_DATE.equals(n)) {
 				try {
-					start_date = formatter.parse(v);
-				} catch (ParseException e) {
+					start_date = LocalDate.parse(v,formatter);
+				} catch (DateTimeParseException e) {
 					CyberTrackerPlugIn.log(e.getMessage(), e);
 				}
 			} else if (ScreensUtil.RESULT_START_TIME.equals(n)) {
-				start_time = Time.valueOf(v);
+				start_time = LocalTime.parse(v);
 			} else {
 				E ei = eMap.get(i);
 				if (ei != null) {
@@ -119,19 +121,20 @@ public class PatrolCTDataBuilder extends CyberTrackerDataBuilder {
 			}
 		}
 		
-		date = AbstractSmartImporter.combine(date, time);
-		start_date = AbstractSmartImporter.combine(start_date, start_time);
-		if (date != null && start_date != null) {
-			if (start_date.before(date)) {
-				ctPatrol.setStartDate(start_date);
+		LocalDateTime cdate = date == null ? null : date.atTime(time);
+		LocalDateTime cstart_date = start_date == null ? null : start_date.atTime(start_time);
+		
+		if (cdate != null && cstart_date != null) {
+			if (cstart_date.isBefore(cdate)) {
+				ctPatrol.setStartDate(cstart_date);
 			} else {
-				ctPatrol.setStartDate(date);
+				ctPatrol.setStartDate(cdate);
 			}
 		} else {
-			if (date == null) {
-				ctPatrol.setStartDate(start_date);
+			if (cdate == null) {
+				ctPatrol.setStartDate(cstart_date);
 			} else {
-				ctPatrol.setStartDate(date);
+				ctPatrol.setStartDate(cdate);
 			}
 		}
 		
@@ -143,19 +146,19 @@ public class PatrolCTDataBuilder extends CyberTrackerDataBuilder {
 			String i = a.getI();
 			if (ICyberTrackerConstants.DATE.equals(i)) {
 				try {
-					date = formatter.parse(a.getV());
+					date = LocalDate.parse(a.getV(), formatter);
 					if (time != null)
 						break;
-				} catch (ParseException e) {
+				} catch (DateTimeParseException e) {
 					CyberTrackerPlugIn.log(e.getMessage(), e);
 				}
 			} else if (ICyberTrackerConstants.TIME.equals(i)) {
-				time = Time.valueOf(a.getV());
+				time = LocalTime.parse(a.getV());
 				if (date != null)
 					break;
 			}
 		}
-		ctPatrol.setEndDate(AbstractSmartImporter.combine(date, time));
+		ctPatrol.setEndDate(date.atTime(time));
 		
 		//it is possible that pilot is configured as default value, but pilot doesn't make sense for ground patrols
 		if (PatrolType.Type.GROUND.equals(ctPatrol.getPatrolType())) {

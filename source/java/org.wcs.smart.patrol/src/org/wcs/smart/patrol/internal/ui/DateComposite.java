@@ -22,7 +22,8 @@
 package org.wcs.smart.patrol.internal.ui;
 
 import java.text.MessageFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
@@ -105,9 +106,9 @@ public class DateComposite extends PatrolItemComposite implements SelectionListe
 	 * @param startDate the start date
 	 * @param endDate the end date
 	 */
-	public void setValues(Date startDate, Date endDate){
-		SmartUtils.initDateDateTimeWidget(dtStartDate, startDate);
-		SmartUtils.initDateDateTimeWidget(dtEndDate, endDate);
+	public void setValues(LocalDate startDate, LocalDate endDate){
+		SmartUtils.initDateTimeWidget(dtStartDate, startDate);
+		SmartUtils.initDateTimeWidget(dtEndDate, endDate);
 	}
 	
 	/**
@@ -116,15 +117,15 @@ public class DateComposite extends PatrolItemComposite implements SelectionListe
 	 * 
 	 * @return the end date selected by the user.
 	 */
-	public Date getEndDate(){
-		return new Date(SmartUtils.getDate(dtEndDate).getTime() + 24*60*60*1000 - 1);
+	public LocalDate getEndDate(){
+		return SmartUtils.toDate(dtEndDate);
 	}
 	/**
 	 * Gets the start date selected by the user with the time set to 0.
 	 * @return the start date selected by the user.
 	 */
-	public Date getStartDate(){
-		return SmartUtils.getDate(dtStartDate);
+	public LocalDate getStartDate(){
+		return SmartUtils.toDate(dtStartDate);
 	}
 	/**
 	 * 
@@ -132,10 +133,10 @@ public class DateComposite extends PatrolItemComposite implements SelectionListe
 	 */
 	public void setValues(Patrol p, Session session) {
 	    if (p.getStartDate() != null){
-	    	SmartUtils.initDateDateTimeWidget(dtStartDate, p.getStartDate());
+	    	SmartUtils.initDateTimeWidget(dtStartDate, p.getStartDate());
 	    }
 	    if (p.getEndDate() != null){
-	    	SmartUtils.initDateDateTimeWidget(dtEndDate, p.getEndDate());
+	    	SmartUtils.initDateTimeWidget(dtEndDate, p.getEndDate());
 	    }
 	}
 
@@ -147,7 +148,7 @@ public class DateComposite extends PatrolItemComposite implements SelectionListe
 	 */
 	public boolean updatePatrol(Patrol p, Session session) {
 		if (p.getStartDate() != null && p.getEndDate() != null){
-			if (getStartDate().after(p.getStartDate()) || getEndDate().before(p.getEndDate())){
+			if (getStartDate().isAfter(p.getStartDate()) || getEndDate().isBefore(p.getEndDate())){
 				if (!MessageDialog.openQuestion(dtEndDate.getShell(), Messages.DateComposite_WarnTitle, Messages.DateComposite_WarnMessage)){
 					return false;
 				}
@@ -180,17 +181,17 @@ public class DateComposite extends PatrolItemComposite implements SelectionListe
 	public void widgetSelected(SelectionEvent e) {
 		String error = null;
 		cdEndDate.hide();
-		if (SmartUtils.getDate(dtStartDate).after(SmartUtils.getDate(dtEndDate))){
+		if (SmartUtils.toDate(dtStartDate).isAfter(SmartUtils.toDate(dtEndDate))){
 			error = Messages.DateComposite_Error_EndAfterStart;
 		}else{
-			long startD = SmartUtils.getDate(dtStartDate).getTime();
-			long endD = SmartUtils.getDate(dtEndDate).getTime();
 			
-			if (startD + Patrol.MAX_PATROL_LENGTH_DAYS * 24 * 60 * 60 * 1000.0 < endD){
+			long days = ChronoUnit.DAYS.between(SmartUtils.toDate(dtStartDate), SmartUtils.toDate(dtEndDate));
+			
+			if (days > Patrol.MAX_PATROL_LENGTH_DAYS){
 				error = MessageFormat.format(
 							Messages.DateComposite_Error_PatrolToLong,
 							new Object[]{ Patrol.MAX_PATROL_LENGTH_DAYS});
-			}else if(startD + Patrol.WARN_PATROL_LENGTH_DAYS * 24 * 60 * 60 * 1000.0 < endD){
+			}else if(days >= Patrol.WARN_PATROL_LENGTH_DAYS ){
 				cdEndDate.setDescriptionText(
 						MessageFormat.format(
 								Messages.DateComposite_PatrolLengthWarning,

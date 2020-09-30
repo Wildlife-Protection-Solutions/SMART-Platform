@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.i2.ui.views;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -43,11 +43,11 @@ public class IntelRecordProxy implements IAdaptable{
 	private IntelProfile profile;
 	private IntelRecord.Status status;
 	
-	private Date date;
+	private LocalDateTime date;
 	
 	public IntelRecordProxy(String title, UUID uuid, IntelRecordSource source,
 			IntelProfile profile,
-			IntelRecord.Status status, Date date){
+			IntelRecord.Status status, LocalDateTime date){
 		this.title = title;
 		this.uuid = uuid;
 		this.source = source;
@@ -56,7 +56,7 @@ public class IntelRecordProxy implements IAdaptable{
 		this.profile = profile;
 	}
 		
-	public Date getDate() {
+	public LocalDateTime getDate() {
 		return this.date;
 	}
 	

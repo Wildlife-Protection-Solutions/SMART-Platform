@@ -373,8 +373,8 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
 		it.setPatrolUuid(UuidUtils.byteToUUID(rs.getBytes("r_p_uuid"))); //$NON-NLS-1$
 		it.setPatrolId(rs.getString("r_p_id")); //$NON-NLS-1$
-		it.setPatrolStartDate(rs.getDate("r_p_start_date")); //$NON-NLS-1$
-		it.setPatrolEndDate(rs.getDate("r_p_end_date")); //$NON-NLS-1$
+		it.setPatrolStartDate(rs.getDate("r_p_start_date").toLocalDate()); //$NON-NLS-1$
+		it.setPatrolEndDate(rs.getDate("r_p_end_date").toLocalDate()); //$NON-NLS-1$
 		it.setStation(getName(UuidUtils.byteToUUID(rs.getBytes("r_p_station_uuid")), cauuid, session));				 //$NON-NLS-1$
 		it.setTeam(getName(UuidUtils.byteToUUID(rs.getBytes("r_p_team_uuid")), cauuid, session));				 //$NON-NLS-1$
 		it.setObjective(rs.getString("r_p_objective")); //$NON-NLS-1$
@@ -383,8 +383,8 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 		it.setArmed(rs.getBoolean("r_p_is_armed")); //$NON-NLS-1$
 		it.setTransportType(getName(UuidUtils.byteToUUID(rs.getBytes("r_pl_transport_uuid")), cauuid, session)); //$NON-NLS-1$
 		it.setPatrolLegId(rs.getString("r_pl_id")); //$NON-NLS-1$
-		it.setPatrolLegStartDate(rs.getDate("r_pl_start_date")); //$NON-NLS-1$
-		it.setPatrolLegEndDate(rs.getDate("r_pl_end_date")); //$NON-NLS-1$
+		it.setPatrolLegStartDate(rs.getDate("r_pl_start_date").toLocalDate()); //$NON-NLS-1$
+		it.setPatrolLegEndDate(rs.getDate("r_pl_end_date").toLocalDate()); //$NON-NLS-1$
 		it.setLeader(getEmployeeName(UuidUtils.byteToUUID(rs.getBytes("r_plm_leader")), session)); //$NON-NLS-1$
 		it.setPilot(getEmployeeName(UuidUtils.byteToUUID(rs.getBytes("r_plm_pilot")), session)); //$NON-NLS-1$
 		it.addTrack(rs.getBytes("r_track")); //$NON-NLS-1$

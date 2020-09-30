@@ -21,11 +21,12 @@
  */
 package org.wcs.smart.er.ui.mision.editor;
 
-import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -73,7 +74,6 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.ObservationOptions;
-import org.wcs.smart.util.SharedUtils;
 
 /**
  * Mission editor
@@ -91,7 +91,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 	public static final DecimalFormat DISTANCE_FORMATTER = new DecimalFormat("#0.##"); //$NON-NLS-1$
 	
 	private Mission mission = null;
-	private Date[] missionDates = null;
+	private LocalDate[] missionDates = null;
 	
 	private MissionSummaryPage summaryEditor;
 	private MissionMapPage mapPage;
@@ -153,10 +153,11 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 						Job j = new Job(Messages.MissionEditor_reloadJobName) {
 							@Override
 							protected IStatus run(IProgressMonitor monitor) {
-								Date[] lastDates = missionDates;
+								LocalDate[] lastDates = missionDates;
 								mission = null;
 								getMission(); //to avoid nested transactions exception
-								final boolean datesChanged = !SharedUtils.isSameDate(lastDates[0], missionDates[0])|| !SharedUtils.isSameDate(lastDates[1], missionDates[1]);
+								final boolean datesChanged = !lastDates[0].isEqual(missionDates[0]) ||
+											!lastDates[1].isEqual(missionDates[1]);
 								
 								getSite().getShell().getDisplay().syncExec(new Runnable(){
 									@Override
@@ -236,7 +237,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 				session.beginTransaction();
 				try{
 					this.mission = (Mission) session.load(Mission.class, muuid);
-					missionDates = new Date[]{new Date(mission.getStartDate().getTime()), new Date(mission.getEndDate().getTime())};
+					missionDates = new LocalDate[]{mission.getStartDate(), mission.getEndDate()};
 					//load mission items so don't have lazy loading issues later.
 					
 					for (MissionDay md : mission.getMissionDays()){
@@ -385,7 +386,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 				MissionDayPageEditorInput input = new MissionDayPageEditorInput(md.getDate());
 				MissionDayPage editor = new MissionDayPage(this);
 				super.addPage(insertindex, editor, input);
-				super.setPageText(insertindex, DateFormat.getDateInstance(DateFormat.MEDIUM).format(input.getDay()));
+				super.setPageText(insertindex, DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(input.getDay()));
 				insertindex++;
 			}
 
@@ -414,7 +415,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 			IEditorPart part = getEditor(i);
 			if (part instanceof MissionDayPage){
 				final MissionDayPage pde = (MissionDayPage)part;			
-				if ( ((MissionDayPageEditorInput)pde.getEditorInput()).getDay().getTime() == wp.getMissionDay().getDate().getTime()  ){
+				if ( ((MissionDayPageEditorInput)pde.getEditorInput()).getDay().isEqual(wp.getMissionDay().getDate()) ){
 					setActivePage(i);
 						
 					Display.getDefault().asyncExec(new Runnable(){
@@ -437,12 +438,12 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 	 * Finds and highlights the mission day page for the given day 
 	 * @param wp
 	 */
-	public void findAndShow(Date missionDay){
+	public void findAndShow(LocalDate missionDay){
 		for (int i = 0; i < getPageCount(); i++){
 			IEditorPart part = getEditor(i);
 			if (part instanceof MissionDayPage){
 				final MissionDayPage pde = (MissionDayPage)part;			
-				if ( ((MissionDayPageEditorInput)pde.getEditorInput()).getDay().getTime() == missionDay.getTime()  ){
+				if ( ((MissionDayPageEditorInput)pde.getEditorInput()).getDay().isEqual(missionDay)){
 					setActivePage(i);
 					return;
 				}

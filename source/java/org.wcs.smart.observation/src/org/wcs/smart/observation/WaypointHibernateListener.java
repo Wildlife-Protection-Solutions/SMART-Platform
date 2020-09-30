@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.observation;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -57,7 +57,7 @@ public class WaypointHibernateListener implements PreInsertEventListener, PreUpd
 		if (event.getEntity() instanceof Waypoint){
 			wp = (Waypoint)event.getEntity();
 			
-			wp.setLastModified(new Date());
+			wp.setLastModified(LocalDateTime.now());
 			wp.setLastModifiedBy(SmartDB.getCurrentEmployee());
 			setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "lastModified", wp.getLastModified(), wp); //$NON-NLS-1$
 			setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "lastModifiedBy", wp.getLastModifiedBy(), wp); //$NON-NLS-1$
@@ -76,7 +76,7 @@ public class WaypointHibernateListener implements PreInsertEventListener, PreUpd
 		if (wp != null) {
 			//this will fire this event again for the waypoint
 			//updating the session objects as required
-			wp.setLastModified(new Date());
+			wp.setLastModified(LocalDateTime.now());
 		}
 
 		return false;
@@ -88,7 +88,7 @@ public class WaypointHibernateListener implements PreInsertEventListener, PreUpd
 		if (event.getEntity() instanceof Waypoint){
 			wp = (Waypoint)event.getEntity();
 			
-			wp.setLastModified(new Date());
+			wp.setLastModified(LocalDateTime.now());
 			wp.setLastModifiedBy(SmartDB.getCurrentEmployee());
 		
 			setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "lastModified", wp.getLastModified(), wp); //$NON-NLS-1$
@@ -108,7 +108,7 @@ public class WaypointHibernateListener implements PreInsertEventListener, PreUpd
 		if (wp != null) {
 			//this will fire this event again for the waypoint
 			//updating the session objects as required
-			wp.setLastModified(new Date());
+			wp.setLastModified(LocalDateTime.now());
 		}
 
 		return false;

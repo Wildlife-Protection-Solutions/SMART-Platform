@@ -21,9 +21,9 @@
  */
 package org.wcs.smart.i2.model;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
@@ -58,8 +58,8 @@ public abstract class AbstractIntelQuery extends NamedItem implements IIntelAudi
 	protected ConservationArea ca;
 	protected String queryString;
 	
-	protected Date dateCreated;
-	protected Date dateModified;
+	protected LocalDateTime dateCreated;
+	protected LocalDateTime dateModified;
 
 	protected Employee createdBy;
 	protected Employee lastModifiedBy;
@@ -113,7 +113,7 @@ public abstract class AbstractIntelQuery extends NamedItem implements IIntelAudi
 	 * @return date_created
 	 */
 	@Column(name="date_created")
-	public Date getDateCreated() {
+	public LocalDateTime getDateCreated() {
 		return this.dateCreated;
 	}
 	/**
@@ -122,7 +122,7 @@ public abstract class AbstractIntelQuery extends NamedItem implements IIntelAudi
 	 * @param dateCreated
 	 *            date_created
 	 */
-	public void setDateCreated(Date dateCreated) {
+	public void setDateCreated(LocalDateTime dateCreated) {
 		this.dateCreated = dateCreated;
 	}
 
@@ -133,7 +133,7 @@ public abstract class AbstractIntelQuery extends NamedItem implements IIntelAudi
 	 * @return date_modified
 	 */
 	@Column(name="last_modified_date")
-	public Date getDateModified() {
+	public LocalDateTime getDateModified() {
 		return this.dateModified;
 	}
 	
@@ -143,7 +143,7 @@ public abstract class AbstractIntelQuery extends NamedItem implements IIntelAudi
 	 * @param dateModified
 	 *            date_modified
 	 */
-	public void setDateModified(Date dateModified) {
+	public void setDateModified(LocalDateTime dateModified) {
 		this.dateModified = dateModified;
 	}
 

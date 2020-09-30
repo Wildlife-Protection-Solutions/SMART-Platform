@@ -21,9 +21,10 @@
  */
 package org.wcs.smart.patrol.internal.ui.editor;
 
-import java.text.DateFormat;
 import java.text.MessageFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
@@ -38,14 +39,14 @@ import org.wcs.smart.patrol.internal.Messages;
  */
 public class PatrolDayEditorInput  implements IEditorInput {
 
-	private Date patrolDay;
+	private LocalDate patrolDay;
 	
-	public PatrolDayEditorInput(Date patrolDay){
+	public PatrolDayEditorInput(LocalDate patrolDay){
 		this.patrolDay = patrolDay;
 	}
 	
 	
-	public Date getPatrolDay(){
+	public LocalDate getPatrolDay(){
 		return this.patrolDay;
 	}
 	
@@ -79,7 +80,7 @@ public class PatrolDayEditorInput  implements IEditorInput {
 	 */
 	@Override
 	public String getName() {	
-		return Messages.PatrolDayEditorInput_DayEditorName_Prefix + "_" + patrolDay.getTime(); //$NON-NLS-1$
+		return Messages.PatrolDayEditorInput_DayEditorName_Prefix + "_" + patrolDay.toString(); //$NON-NLS-1$
 	}
 
 	/**
@@ -95,7 +96,8 @@ public class PatrolDayEditorInput  implements IEditorInput {
 	 */
 	@Override
 	public String getToolTipText() {
-		return MessageFormat.format(Messages.PatrolDayEditorInput_DayEditor_Tooltip, new Object[]{ DateFormat.getDateInstance(DateFormat.MEDIUM).format( patrolDay.getTime() )});
+		return MessageFormat.format(Messages.PatrolDayEditorInput_DayEditor_Tooltip, 
+				new Object[]{ DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format( patrolDay )});
 	}
 
 	public int hashCode() {

@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.asset.query.engine;
 
-import java.text.DateFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -175,7 +176,7 @@ public class AssetAttachmentTooltipProvider extends Job {
 			l.setBackground(details.getBackground());
 			
 			l = new Label(main, SWT.NONE);
-			l.setText(DateFormat.getDateInstance().format(fwp.getDateTime()));
+			l.setText(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(fwp.getDateTime()));
 			l.setBackground(details.getBackground());
 			
 			if (fo != null) {

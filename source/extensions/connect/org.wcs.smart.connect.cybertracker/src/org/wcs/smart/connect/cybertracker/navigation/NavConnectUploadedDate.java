@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.connect.cybertracker.navigation;
 
-import java.text.DateFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -162,7 +163,7 @@ public class NavConnectUploadedDate implements INavigationLayerProperty {
 			try {
 				List<CyberTrackerNavigationProxy> proxies = simple.getNavigationLayers( SmartDB.getCurrentConservationArea().getUuid().toString() );
 				for (CyberTrackerNavigationProxy p : proxies) {
-					properties.put(p.getUuid(), DateFormat.getDateTimeInstance().format( p.getUploadedDate()) );
+					properties.put(p.getUuid(), DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format( p.getUploadedDate()) );
 				}
 				values = properties;	
 			}catch (Exception ex) {

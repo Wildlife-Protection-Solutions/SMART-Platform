@@ -24,9 +24,8 @@ package org.wcs.smart.query.common.engine;
 import java.util.List;
 
 import org.hibernate.Session;
-import org.wcs.smart.query.model.QueryColumn;
-
 import org.locationtech.jts.geom.Envelope;
+import org.wcs.smart.query.model.QueryColumn;
 
 /**
  * Interface for paging results.  This is currently used

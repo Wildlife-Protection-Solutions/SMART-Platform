@@ -21,11 +21,11 @@
  */
 package org.wcs.smart.query.model.filter.date;
 
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
 
@@ -100,8 +100,9 @@ public class DateGroupByViewer extends AbstractGroupByViewer<DateGroupBy> {
 	public List<ListItem> getDayItems(Session session, IDateFilter dateFilter) {
 
 		ArrayList<ListItem> items = new ArrayList<ListItem>();
-		Date startdate = new Date();
-		Date enddate = new Date();
+		LocalDate startdate = LocalDate.now();
+		LocalDate enddate = LocalDate.now();
+		
 		if (dateFilter == null) {
 			throw new IllegalStateException(Messages.DateGroupBy_InvalidFilter);
 		} else {
@@ -114,10 +115,10 @@ public class DateGroupByViewer extends AbstractGroupByViewer<DateGroupBy> {
 
 				List<?> data = q.list();
 				if (data != null && data.size() >= 1 && data.get(0) != null) {
-					startdate = (java.sql.Timestamp) data.get(0);
+					startdate = ((LocalDateTime) data.get(0)).toLocalDate();
 				}
 			} else {
-				Date[] d = dateFilter.getDates();
+				LocalDate[] d = dateFilter.getDates();
 				if (d.length >= 1) {
 					startdate = d[0];
 				}
@@ -126,18 +127,15 @@ public class DateGroupByViewer extends AbstractGroupByViewer<DateGroupBy> {
 				}
 			}
 		}
-		Calendar cals = Calendar.getInstance();
-		cals.setTime(startdate);
 
-		Calendar cale = Calendar.getInstance();
-		cale.setTime(enddate);
-
-		while (cals.before(cale)
-				|| (dateFilter.isEndDateInclusive() && cals.equals(cale))) {
-			java.sql.Date dd = new java.sql.Date(cals.getTime().getTime());
-			String key = dd.toString();
+		LocalDate working = LocalDate.from(startdate);
+		while (working.isBefore(enddate)
+				|| (dateFilter.isEndDateInclusive() && working.isEqual(enddate))) {
+			
+			String key = DateTimeFormatter.ISO_LOCAL_DATE.format(working);
 			items.add(new ListItem(null, key, key));
-			cals.add(Calendar.DAY_OF_MONTH, 1);
+
+			working = ChronoUnit.DAYS.addTo(working, 1);
 		}
 		return items;
 	}
@@ -145,8 +143,8 @@ public class DateGroupByViewer extends AbstractGroupByViewer<DateGroupBy> {
 	public List<ListItem> getMonthItems(Session session, IDateFilter dateFilter) {
 
 		ArrayList<ListItem> items = new ArrayList<ListItem>();
-		Date startdate = new Date();
-		Date enddate = new Date();
+		LocalDate startdate = LocalDate.now();
+		LocalDate enddate = LocalDate.now();
 		if (dateFilter == null) {
 			throw new IllegalStateException(Messages.DateGroupBy_InvalidFilter);
 		} else {
@@ -159,10 +157,10 @@ public class DateGroupByViewer extends AbstractGroupByViewer<DateGroupBy> {
 
 				List<?> data = q.list();
 				if (data != null && data.size() >= 1 && data.get(0) != null) {
-					startdate = (java.sql.Timestamp) data.get(0);
+					startdate = ((LocalDateTime) data.get(0)).toLocalDate();
 				}
 			} else {
-				Date[] d = dateFilter.getDates();
+				LocalDate[] d = dateFilter.getDates();
 				if (d.length >= 1) {
 					startdate = d[0];
 				}
@@ -171,34 +169,29 @@ public class DateGroupByViewer extends AbstractGroupByViewer<DateGroupBy> {
 				}
 			}
 		}
-		Calendar cals = Calendar.getInstance();
-		cals.setTime(startdate);
-
-		Calendar cale = Calendar.getInstance();
-		cale.setTime(enddate);
 
 		// each month between start and end of
 		// form "m/yyyy"
-		SimpleDateFormat nameFormat = new SimpleDateFormat("MM/yyyy"); //$NON-NLS-1$
-		SimpleDateFormat keyFormat = new SimpleDateFormat("M/yyyy", Locale.ENGLISH); //$NON-NLS-1$
+		DateTimeFormatter nameFormat = DateTimeFormatter.ofPattern("MM/yyyy"); //$NON-NLS-1$
+		DateTimeFormatter keyFormat = DateTimeFormatter.ofPattern("M/yyyy", Locale.ENGLISH); //$NON-NLS-1$
 
-		cals.set(Calendar.DAY_OF_MONTH, 1);
-		cale.set(Calendar.DAY_OF_MONTH,
-				cale.getActualMaximum(Calendar.DAY_OF_MONTH));
-		while (cals.before(cale)) {
-			String key = keyFormat.format(cals.getTime());
-			String name = nameFormat.format(cals.getTime());
+		LocalDate working = LocalDate.of(startdate.getYear(), startdate.getMonth(), 1);
+
+		while (working.isBefore(enddate)) {
+			String key = keyFormat.format(working);
+			String name = nameFormat.format(working);
 			items.add(new ListItem(null, name, key));
-			cals.add(Calendar.MONTH, 1);
+			working = ChronoUnit.MONTHS.addTo(working, 1);
 		}
+		
 		return items;
 	}
 
 	public List<ListItem> getYearItems(Session session, IDateFilter dateFilter) {
 
 		ArrayList<ListItem> items = new ArrayList<ListItem>();
-		Date startdate = new Date();
-		Date enddate = new Date();
+		LocalDate startdate = LocalDate.now();
+		LocalDate enddate = LocalDate.now();
 		if (dateFilter == null) {
 			throw new IllegalStateException(Messages.DateGroupBy_InvalidFilter);
 		} else {
@@ -211,10 +204,10 @@ public class DateGroupByViewer extends AbstractGroupByViewer<DateGroupBy> {
 
 				List<?> data = q.list();
 				if (data != null && data.size() >= 1 && data.get(0) != null) {
-					startdate = (java.sql.Timestamp) data.get(0);
+					startdate = ((LocalDateTime) data.get(0)).toLocalDate();
 				}
 			} else {
-				Date[] d = dateFilter.getDates();
+				LocalDate[] d = dateFilter.getDates();
 				if (d.length >= 1) {
 					startdate = d[0];
 				}
@@ -223,23 +216,13 @@ public class DateGroupByViewer extends AbstractGroupByViewer<DateGroupBy> {
 				}
 			}
 		}
-		Calendar cals = Calendar.getInstance();
-		cals.setTime(startdate);
-
-		Calendar cale = Calendar.getInstance();
-		cale.setTime(enddate);
 
 		// each year in form yyyy
-		int year = cals.get(Calendar.YEAR);
-		int year2 = cale.get(Calendar.YEAR);
-		GregorianCalendar gcal = new GregorianCalendar();
+		int year = startdate.getYear();
+		int year2 = enddate.getYear();
+		
 		while (year <= year2) {
-			Calendar c = Calendar.getInstance();
-			c.set(year, 0, 1);
-			gcal.setTime(c.getTime());
-
-			items.add(new ListItem(null, String.valueOf(year), String
-					.valueOf(gcal.get(Calendar.YEAR))));
+			items.add(new ListItem(null, String.valueOf(year), String.valueOf(year)));
 			year++;
 		}
 		return items;

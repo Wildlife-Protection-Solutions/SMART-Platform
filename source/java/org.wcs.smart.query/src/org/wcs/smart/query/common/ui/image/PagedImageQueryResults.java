@@ -35,8 +35,8 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 import org.wcs.smart.query.common.engine.AttachmentResultItemImpl;
+import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 import org.wcs.smart.util.UuidUtils;
 
 /**

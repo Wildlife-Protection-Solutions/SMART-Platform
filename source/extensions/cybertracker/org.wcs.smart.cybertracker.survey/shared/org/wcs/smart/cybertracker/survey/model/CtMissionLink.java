@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.cybertracker.survey.model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -54,7 +54,7 @@ public class CtMissionLink {
 	private Mission mission;
 	private String deviceId;
 	private Integer lastObservation;
-	private Date groupStartTime;
+	private LocalDateTime groupStartTime;
 	
 	private SurveyDesign surveyDesign;
 	
@@ -121,11 +121,11 @@ public class CtMissionLink {
 	}
 	
 	@Column(name="group_start_time")
-	public Date getGroupStartTime(){
+	public LocalDateTime getGroupStartTime(){
 		return groupStartTime;
 	}
 	
-	public void setGroupStartTime(Date startTime){
+	public void setGroupStartTime(LocalDateTime startTime){
 		this.groupStartTime = startTime;
 	}
 	

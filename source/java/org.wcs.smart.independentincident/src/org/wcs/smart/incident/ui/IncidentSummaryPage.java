@@ -22,8 +22,9 @@
 package org.wcs.smart.incident.ui;
 
 import java.text.Collator;
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -199,15 +200,18 @@ public class IncidentSummaryPage extends EditorPart {
 		
 			StringBuilder sb = new StringBuilder();
 			if (incident.getLastModifiedBy() != null) {
-				sb.append(MessageFormat.format(Messages.IncidentSummaryPage_LastModified1, SmartLabelProvider.getShortLabel(incident.getLastModifiedBy()), DateFormat.getDateTimeInstance().format(incident.getLastModified())));
+				sb.append(MessageFormat.format(Messages.IncidentSummaryPage_LastModified1,
+						SmartLabelProvider.getShortLabel(incident.getLastModifiedBy()), 
+						DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(incident.getLastModified())));
 			}else {
-				sb.append(MessageFormat.format(Messages.IncidentSummaryPage_LastModified2, DateFormat.getDateTimeInstance().format(incident.getLastModified())));
+				sb.append(MessageFormat.format(Messages.IncidentSummaryPage_LastModified2, 
+						DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(incident.getLastModified())));
 			}
 			this.lblLastModified.setText(sb.toString());
 			
 			this.txtIncidentId.setText(String.valueOf(incident.getId()));
-			this.txtDate.setText(DateFormat.getDateInstance().format(incident.getDateTime()));
-			this.txtTime.setText(DateFormat.getTimeInstance().format(incident.getDateTime()));
+			this.txtDate.setText(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(incident.getDateTime()));
+			this.txtTime.setText(DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM).format(incident.getDateTime()));
 			Projection viewProjection = HibernateManager.getCurrentViewProjection(session);
 			CoordinateReferenceSystem crs = null;
 			try{

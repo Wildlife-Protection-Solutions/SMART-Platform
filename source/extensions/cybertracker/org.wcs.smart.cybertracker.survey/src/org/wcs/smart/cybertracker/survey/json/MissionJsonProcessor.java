@@ -22,17 +22,13 @@
 package org.wcs.smart.cybertracker.survey.json;
 
 import java.nio.file.Paths;
-import java.sql.Time;
-import java.text.DateFormat;
 import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -88,7 +84,6 @@ import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.util.SharedUtils;
-import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -99,8 +94,8 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class MissionJsonProcessor implements IJsonProcessor {
 	
-	private DateFormat DATEFORMAT = new SimpleDateFormat("yyyy/MM/dd"); //$NON-NLS-1$
-	private DateFormat TIMEFORMAT = new SimpleDateFormat("HH:mm:ss"); //$NON-NLS-1$
+	private DateTimeFormatter DATEFORMAT = DateTimeFormatter.ofPattern("yyyy/MM/dd"); //$NON-NLS-1$
+	private DateTimeFormatter TIMEFORMAT = DateTimeFormatter.ofPattern("HH:mm:ss"); //$NON-NLS-1$
 	
 	private static final IWaypointSource SURVEY_WP_SRC = SmartContext.INSTANCE.getClass(IWaypointSourceEngine.class)
 			.getSource(SurveyWaypointSource.KEY);
@@ -185,7 +180,7 @@ public class MissionJsonProcessor implements IJsonProcessor {
 					link.setSamplingUnit(su);
 					
 					//add this point to track; this is not an observation
-					Date dt = JsonUtils.parseJsonDateTime((String)properties.get(JsonCtParser.DATETIME_KEY));
+					LocalDateTime dt = JsonUtils.parseJsonDateTime((String)properties.get(JsonCtParser.DATETIME_KEY));
 					addPointToTrack(link.getMission(), su, parser.readXYFromProperties(feature), dt, session);
 					
 					//update last observation count
@@ -208,7 +203,7 @@ public class MissionJsonProcessor implements IJsonProcessor {
 					//we want to find the patrol and update the end date
 					//add the position to the track, but do not create an observation 
 					//for this patrol
-					Date dt = JsonUtils.parseJsonDateTime((String)properties.get(JsonCtParser.DATETIME_KEY));
+					LocalDateTime dt = JsonUtils.parseJsonDateTime((String)properties.get(JsonCtParser.DATETIME_KEY));
 					
 					if (link == null){
 						//create a new patrol object
@@ -216,13 +211,13 @@ public class MissionJsonProcessor implements IJsonProcessor {
 						
 						//update patrol end date/time
 						Mission p = link.getMission();
-						link.getMission().setEndDate(SharedUtils.getDatePart(p.getEndDate(), true));
+						link.getMission().setEndDate(p.getEndDate());
 					}
 					
 					//update patrol end date and end time for last patrol leg day
-					link.getMission().setEndDate(SharedUtils.getDatePart(dt, false));
+					link.getMission().setEndDate(dt.toLocalDate());
 					MissionDay md = findDay(link.getMission(), link.getMission().getEndDate(), true, null, session);
-					md.setEndTime(new Time(dt.getTime()));
+					md.setEndTime(dt.toLocalTime());
 						
 					//add point to track
 					addPointToTrack(md, link.getSamplingUnit(), parser.readXYFromProperties(feature),dt);
@@ -260,14 +255,14 @@ public class MissionJsonProcessor implements IJsonProcessor {
 				if (isResumed) {
 					//compute rest times
 					if (link != null) {
-						Date dt = JsonUtils.parseJsonDateTime((String)properties.get(JsonCtParser.DATETIME_KEY));
+						LocalDateTime dt = JsonUtils.parseJsonDateTime((String)properties.get(JsonCtParser.DATETIME_KEY));
 						
-						MissionDay currentDay = findDay(link.getMission(), dt, true, new Time(SmartUtils.getMidnight().getTime()), session);
+						MissionDay currentDay = findDay(link.getMission(), dt.toLocalDate(), true, LocalTime.MAX, session);
 						//the pause event is recorded as a track point; not a waypoint
 						//so find the previous track point
 						List<MissionDay> sorts = new ArrayList<MissionDay>(currentDay.getMission().getMissionDays());
 						sorts.sort((a,b)->-1*a.getDate().compareTo(b.getDate()));
-						Date pausepoint = null;
+						LocalDateTime pausepoint = null;
 						for (MissionDay d : sorts) {
 							if (d.getTracks() == null) continue;
 							
@@ -276,27 +271,24 @@ public class MissionJsonProcessor implements IJsonProcessor {
 								lastValues.add(t.getLineString().getCoordinateN(t.getLineString().getNumPoints() - 1).getZ());
 							}
 							lastValues.sort((a,b)->-1*a.compareTo(b));
-							pausepoint = new Date(lastValues.get(0).longValue());	
+							pausepoint = SharedUtils.toLocalDateTime(lastValues.get(0).longValue());	
 						}
-						DateFormat dd = DateFormat.getDateTimeInstance();
-						dd.setTimeZone(MissionTrack.ZTIMEZONE);
-						pausepoint = DateFormat.getDateTimeInstance().parse(dd.format(pausepoint));
 						
-						LocalDateTime end = (new java.sql.Timestamp(dt.getTime())).toLocalDateTime();
-						LocalDateTime start = (new java.sql.Timestamp(pausepoint.getTime())).toLocalDateTime();
+						LocalDateTime end = dt;
+						LocalDateTime start = pausepoint;
 						LocalDateTime c = start;
 						LocalDate lde = LocalDate.from(end);
 						while(c.isBefore(end)) {
 							LocalDate ld = LocalDate.from(c);
 							if (ld.isEqual(lde)) {
-								MissionDay cd = findDay(link.getMission(), java.sql.Date.valueOf(ld), true, new Time(SmartUtils.getMidnight().getTime()), session);
+								MissionDay cd = findDay(link.getMission(), ld, true, LocalTime.MAX, session);
 								long resttime = Math.round( ChronoUnit.SECONDS.between(c,end) / 60.0 );
 								resttime += cd.getRestMinutes() == null ? 0 : cd.getRestMinutes();
 								cd.setRestMinutes((int)resttime);
 								//time from ld to end 
 								break;
 							}else {
-								MissionDay cd = findDay(link.getMission(), java.sql.Date.valueOf(ld), true, new Time(SmartUtils.getMidnight().getTime()), session);
+								MissionDay cd = findDay(link.getMission(), ld, true, LocalTime.MAX, session);
 								//time from start to end of day c to end of day
 								LocalDateTime endofday = c.withHour(23).withMinute(59).withSecond(59).withNano(999999);
 								long resttime = Math.round( ChronoUnit.SECONDS.between(c,endofday) / 60.0 );
@@ -360,7 +352,7 @@ public class MissionJsonProcessor implements IJsonProcessor {
 							link = createMissionFromSighting(sighting, deviceId, ctMissionUuid, observationCounter, session);
 						}
 	
-						Date groupStartTime = link.getGroupStartTime();
+						LocalDateTime groupStartTime = link.getGroupStartTime();
 						int groupResult = processGroup(sighting, link.getMission(), wp, link.getSamplingUnit(), parser.getApplyToAdd(), groupStartTime, session);
 						if (groupResult > 0){
 							
@@ -563,7 +555,7 @@ public class MissionJsonProcessor implements IJsonProcessor {
 	 * @return
 	 * @throws Exception 
 	 */
-	private int processGroup(JSONObject sighting, Mission missionToUpdate, Waypoint wp, SamplingUnit su, List<WaypointObservationAttribute> applyAll, Date groupStartTime, Session session) throws Exception{
+	private int processGroup(JSONObject sighting, Mission missionToUpdate, Waypoint wp, SamplingUnit su, List<WaypointObservationAttribute> applyAll, LocalDateTime groupStartTime, Session session) throws Exception{
 		if (!sighting.containsKey(ScreensUtil.RESULT_END_WAYPOINT_GROUP)){
 			//clear observations associated with 
 			wp.getObservationGroups().clear();
@@ -603,7 +595,7 @@ public class MissionJsonProcessor implements IJsonProcessor {
 						for (MissionDay pld : missionToUpdate.getMissionDays()){
 							for (SurveyWaypoint pw : pld.getWaypoints()){
 								if (pw.getWaypoint().getDateTime().equals(groupStartTime) || 
-										pw.getWaypoint().getDateTime().after(groupStartTime)){
+										pw.getWaypoint().getDateTime().isAfter(groupStartTime)){
 									
 									if (!pw.getWaypoint().getObservationGroups().isEmpty()) {
 										addAttributesToObservation(pw.getWaypoint().getObservationGroups().get(0).getObservations(), applyAll);
@@ -649,7 +641,7 @@ public class MissionJsonProcessor implements IJsonProcessor {
 			for (MissionDay md : missionToUpdate.getMissionDays()){
 				for (SurveyWaypoint pw: md.getWaypoints()){
 					if (lastWaypoint == null ||
-							pw.getWaypoint().getDateTime().after(lastWaypoint.getWaypoint().getDateTime())){
+							pw.getWaypoint().getDateTime().isAfter(lastWaypoint.getWaypoint().getDateTime())){
 						lastWaypoint = pw;
 					}
 				}
@@ -737,7 +729,9 @@ public class MissionJsonProcessor implements IJsonProcessor {
 		String startDate = (String)sighting.get(ScreensUtil.RESULT_START_DATE);
 		String startTime = (String)sighting.get(ScreensUtil.RESULT_START_TIME);
 		
-		Date dStartDate = DATEFORMAT.parse(startDate);
+		LocalDate dStartDate = LocalDate.parse(startDate,DATEFORMAT);
+		LocalTime dStartTime = LocalTime.parse(startTime,TIMEFORMAT);
+		
 		mission.setEndDate(dStartDate);
 		mission.setStartDate(dStartDate);
 		mission.setComment(ct.getComment());
@@ -798,10 +792,10 @@ public class MissionJsonProcessor implements IJsonProcessor {
 		
 		//make a single patrol leg day for the start date and time
 		MissionDay md = new MissionDay();
-		md.setDate(SharedUtils.getDatePart(dStartDate, false));
-		md.setStartTime( new Time(TIMEFORMAT.parse(startTime).getTime()));
+		md.setDate(dStartDate );
+		md.setStartTime( dStartTime );
 		md.setRestMinutes(0);
-		md.setEndTime(new Time(SharedUtils.getDatePart(dStartDate, true).getTime()));
+		md.setEndTime( LocalTime.MAX );
 		md.setMission(mission);
 		mission.setMissionDays(new ArrayList<MissionDay>());
 		mission.getMissionDays().add(md);
@@ -837,7 +831,7 @@ public class MissionJsonProcessor implements IJsonProcessor {
 	private void addToExistingMission(Mission addTo, Waypoint wp, SamplingUnit su, Session session)
 			throws Exception {
 		
-		MissionDay addToD = findDay(addTo, wp.getDateTime(), true, null, session);
+		MissionDay addToD = findDay(addTo, wp.getDateTime().toLocalDate(), true, null, session);
 		SurveyWaypoint pw = addWaypointToMissionDay(addToD, wp, su);
 		
 		if (addTo.getUuid() != null){
@@ -896,84 +890,73 @@ public class MissionJsonProcessor implements IJsonProcessor {
 		}
 	}
 		
-	private static final MissionDay findDay(Mission mission, Date day, boolean create, Time startTime, Session session){
+	private static final MissionDay findDay(Mission mission, LocalDate day, boolean create, LocalTime startTime, Session session){
 		for (MissionDay md : mission.getMissionDays()){
-			if (SharedUtils.isSameDate(md.getDate(), day)){
+			if (md.getDate().isEqual(day)){
 				return md;
 			}
 		}
 		if (!create) return null;
 		
 		MissionDay md = new MissionDay();
-		md.setDate(SharedUtils.getDatePart(day, false));
-		
-		Calendar tmp =GregorianCalendar.getInstance();
-		tmp.setTime(day);
-		Calendar time = GregorianCalendar.getInstance();
-		time.setTimeInMillis(0);
-		time.set(Calendar.HOUR_OF_DAY, tmp.get(Calendar.HOUR_OF_DAY));
-		time.set(Calendar.MINUTE, tmp.get(Calendar.MINUTE));
-		time.set(Calendar.SECOND, tmp.get(Calendar.SECOND));
-		time.set(Calendar.MILLISECOND, 0);
-
+		md.setDate(day);
 		md.setRestMinutes(0);
-		
 		md.setWaypoints(new ArrayList<SurveyWaypoint>());
 		mission.getMissionDays().add(md);
 		md.setMission(mission);
 		
 		
 		//update leg and patrol dates as necessary
-		if (mission.getStartDate().after(md.getDate())){
+		if (mission.getStartDate().isAfter(md.getDate())){
 			mission.setStartDate(md.getDate());
 		}
-		if (mission.getEndDate().before(md.getDate())){
-			mission.setEndDate(SharedUtils.getDatePart(md.getDate(), true));
+		if (mission.getEndDate().isBefore(md.getDate())){
+			mission.setEndDate(md.getDate());
 		}
 		
 		//make sure there is at least one legday for each day between the start and end date
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(mission.getStartDate());
 		
+		LocalDate working = mission.getStartDate();
 		//create a day for each mission day
-		while(cal.getTime().before(mission.getEndDate()) || SharedUtils.isSameDate(cal.getTime(), mission.getEndDate())){
+		while(working.isBefore(mission.getEndDate()) || working.isEqual(mission.getEndDate())){
 			boolean found = false;
 			for (MissionDay temp : mission.getMissionDays()){
-				if (SharedUtils.isSameDate(temp.getDate(), day)){
+				if (temp.getDate().isEqual(working)){
 					found = true;
 				}
 			}
 			if (!found){
 				MissionDay newd = new MissionDay();
-				newd.setDate(SharedUtils.getDatePart(cal.getTime(), false));
-				newd.setEndTime(new Time(SharedUtils.getDatePart(cal.getTime(), true).getTime()));
+				newd.setDate(working);
+				newd.setEndTime(LocalTime.MAX);
 				newd.setMission(mission);
 				newd.setRestMinutes(0);
-				newd.setStartTime(new Time(newd.getDate().getTime()));
+				newd.setStartTime(LocalTime.MIN);
 				mission.getMissionDays().add(newd);
 			}
+			working = ChronoUnit.DAYS.addTo(working, 1);
 		}
 		
 		if (startTime == null){
-			md.setStartTime(new Time(time.getTime().getTime()));
+			md.setStartTime(LocalTime.MIN);
 		}else{
 			md.setStartTime(startTime);
 		}
-		md.setEndTime(new Time(SmartUtils.getMidnight().getTime()- 1));
+		md.setEndTime(LocalTime.MAX);
 	
 		return md;
 	}
 	
-	public static final void addPointToTrack(MissionDay missionDay, SamplingUnit su, Coordinate pnt, Date time) throws Exception{
+	public static final void addPointToTrack(MissionDay missionDay, SamplingUnit su, Coordinate pnt, LocalDateTime time) throws Exception{
 		if (pnt == null) return;
 		if (missionDay == null) return;
 		if (missionDay.getTracks() == null) missionDay.setTracks(new ArrayList<MissionTrack>());
 		MissionJsonTrackProcessor.addSuPointToMisisonTracks(missionDay, su, pnt, time);
 	}
 	
-	public static final void addPointToTrack(Mission mission, SamplingUnit su, Coordinate pnt, Date time, Session session) throws Exception{
+	public static final void addPointToTrack(Mission mission, SamplingUnit su, Coordinate pnt, LocalDateTime time, Session session) throws Exception{
 		if (pnt == null) return;
-		MissionDay pld = findDay(mission, time, true, null, session);
+		MissionDay pld = findDay(mission, time.toLocalDate(), true, null, session);
 		addPointToTrack(pld, su, pnt, time);
 	}
 

@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.connect.internal.server.replication;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -69,7 +69,7 @@ public enum SyncHistoryManager {
 	 * @param type
 	 * @param endDate
 	 */
-	public void deleteRecords(Session s, ConservationArea ca, Type type, Date endDate){
+	public void deleteRecords(Session s, ConservationArea ca, Type type, LocalDateTime endDate){
 		Query<?> query = s.createQuery("DELETE FROM ConnectSyncHistoryRecord WHERE type = :type and conservationArea = :ca and datetime <= :datetime"); //$NON-NLS-1$
 		query.setParameter("ca", ca); //$NON-NLS-1$
 		query.setParameter("type", type); //$NON-NLS-1$
@@ -134,7 +134,7 @@ public enum SyncHistoryManager {
 		
 		ConnectSyncHistoryRecord record = new ConnectSyncHistoryRecord();
 		record.setConservationArea(ca);
-		record.setDatetime(new Date());
+		record.setDatetime(LocalDateTime.now());
 		record.setStartRevision(-1l);
 		record.setEndRevision(-1l);
 		record.setServer(server);

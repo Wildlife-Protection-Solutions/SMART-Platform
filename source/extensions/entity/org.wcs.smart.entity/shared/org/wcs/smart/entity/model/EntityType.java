@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.entity.model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Locale;
 
@@ -66,7 +66,7 @@ public class EntityType extends NamedKeyItem{
 	}
 	
 	private ConservationArea ca;
-	private Date dateCreated;
+	private LocalDateTime dateCreated;
 	private Employee creator;
 	private Status status;
 	private Attribute dmAttribute;
@@ -107,11 +107,11 @@ public class EntityType extends NamedKeyItem{
 	 * @return
 	 */
 	@Column(name="date_created")
-	public Date getDateCreated() {
+	public LocalDateTime getDateCreated() {
 		return dateCreated;
 	}
 
-	public void setDateCreated(Date dateCreated) {
+	public void setDateCreated(LocalDateTime dateCreated) {
 		this.dateCreated = dateCreated;
 	}
 

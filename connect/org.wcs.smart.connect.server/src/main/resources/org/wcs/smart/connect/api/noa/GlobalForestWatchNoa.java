@@ -28,9 +28,10 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -87,7 +88,7 @@ public class GlobalForestWatchNoa extends HttpServlet {
 	public static final String LOG_DIRECTORY = "gfw"; //$NON-NLS-1$
 
 	/**
-	 * Dateformat for filenames for logging gfw files
+	 * Date format for filenames for logging gfw files
 	 */
 	public static final String DATE_FORMAT = "yyyyMMdd"; //$NON-NLS-1$
 	/*
@@ -136,7 +137,7 @@ public class GlobalForestWatchNoa extends HttpServlet {
 				throw new SmartConnectException(Status.NOT_FOUND, Messages.getString("GlobalForestWatchNoa.GFWNotFound", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 			}
 			
-			gw.setLastDataDate(new Date());
+			gw.setLastDataDate(LocalDateTime.now());
 			StringBuilder json = new StringBuilder();
 
 			try(BufferedReader reader = request.getReader()){
@@ -260,7 +261,7 @@ public class GlobalForestWatchNoa extends HttpServlet {
 			Double lng = null;
 			String date = null;
 			String time = null;
-			Date datetime = null;
+			LocalDateTime datetime = null;
 			
 			if (alertMap.containsKey(LATITUDE_JSON_KEY)) {
 				lat = (Double)alertMap.get(LATITUDE_JSON_KEY);
@@ -279,9 +280,9 @@ public class GlobalForestWatchNoa extends HttpServlet {
 			}
 			
 			if (date != null && time != null) {
-				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm"); //$NON-NLS-1$
+				DateTimeFormatter sdf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"); //$NON-NLS-1$
 				try {
-					datetime = sdf.parse(date + " " + time); //$NON-NLS-1$
+					datetime = LocalDateTime.parse(date + " " + time, sdf); //$NON-NLS-1$
 				}catch (Exception ex) {
 					logger.log(Level.WARNING, "Unable to parse datetime for alert: " + ex.getMessage(), ex); //$NON-NLS-1$
 				}
@@ -294,7 +295,7 @@ public class GlobalForestWatchNoa extends HttpServlet {
 			alert.setCa(null);
 			alert.setCreatorUuid(gfw.getCreator().getUuid());
 			alert.setSource(Alert.Source.GLOBALFORESTWATCH);
-			alert.setDate(datetime);
+			alert.setDate(datetime.atZone(ZoneId.systemDefault()));
 			alert.setDescription(sbDescription.toString());
 			alert.setLevel(gfw.getLevel());
 			alert.setStatus(AlertStatusEnum.ACTIVE);
@@ -318,8 +319,8 @@ public class GlobalForestWatchNoa extends HttpServlet {
 		Path gfwDir = DataStoreManager.INSTANCE.getRootDirectory().resolve(LOG_DIRECTORY);
 		if (!Files.exists(gfwDir)) Files.createDirectories(gfwDir);
 		
-		SimpleDateFormat df = new SimpleDateFormat(DATE_FORMAT);
-		String fileName = "gfw." + df.format(new Date()); //$NON-NLS-1$
+		DateTimeFormatter df = DateTimeFormatter.ofPattern(DATE_FORMAT);
+		String fileName = "gfw." + df.format(LocalDateTime.now()); //$NON-NLS-1$
 		
 		Path jsonFile = gfwDir.resolve(fileName + ".json"); //$NON-NLS-1$
 		Path extraFile = gfwDir.resolve(fileName + "extra.json"); //$NON-NLS-1$

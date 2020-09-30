@@ -21,11 +21,14 @@
  */
 package org.wcs.smart.entity.ui.importwizard;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.chrono.Chronology;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map.Entry;
 
 import org.eclipse.jface.fieldassist.ControlDecoration;
@@ -92,12 +95,17 @@ public class AttributeMappingWizardPage extends WizardPage {
 		public void selectionChanged(SelectionChangedEvent event) {
 			validate();
 		}
+		
+		
 	};
 	
+	
+	
 	// date formats
-	private final static String[] DATE_FORMATS = new String[]{((SimpleDateFormat) SimpleDateFormat.getDateInstance(DateFormat.SHORT)).toLocalizedPattern(),
-			((SimpleDateFormat) SimpleDateFormat.getDateInstance(DateFormat.MEDIUM)).toLocalizedPattern(),
-			((SimpleDateFormat) SimpleDateFormat.getDateInstance(DateFormat.LONG)).toLocalizedPattern(),
+	private final static String[] DATE_FORMATS = new String[]{
+			DateTimeFormatterBuilder.getLocalizedDateTimePattern(FormatStyle.SHORT, null, Chronology.ofLocale(Locale.getDefault()), Locale.getDefault()),
+			DateTimeFormatterBuilder.getLocalizedDateTimePattern(FormatStyle.MEDIUM, null, Chronology.ofLocale(Locale.getDefault()), Locale.getDefault()),
+			DateTimeFormatterBuilder.getLocalizedDateTimePattern(FormatStyle.LONG, null, Chronology.ofLocale(Locale.getDefault()), Locale.getDefault()),
 			"d/M/y","d-M-y","M/d/y","M-d-y","y/M/d","y-M-d"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 	
 	

@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.query.ui;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -314,9 +314,7 @@ public class QueryDateFilterComposite extends Composite {
 		
 		if (filter instanceof CustomDateFilter){
 			CustomDateFilter clone = new CustomDateFilter();
-			java.sql.Date start = new java.sql.Date(SmartUtils.getDate(dtStart).getTime());
-			java.sql.Date end = new java.sql.Date(SmartUtils.getDate(dtEnd).getTime());
-			clone.setDates(start, end);
+			clone.setDates(SmartUtils.toDate(dtStart), SmartUtils.toDate(dtEnd));
 			return new DateFilter(field, clone);
 		}else{
 			return new DateFilter(field, filter);
@@ -334,10 +332,10 @@ public class QueryDateFilterComposite extends Composite {
 					break;
 				}
 			}
-			Date start = custom.getDates()[0];
-			Date end = custom.getDates()[1];
-			SmartUtils.initDateDateTimeWidget(dtStart, start);
-			SmartUtils.initDateDateTimeWidget(dtEnd, end);
+			LocalDate start = custom.getDates()[0];
+			LocalDate end = custom.getDates()[1];
+			SmartUtils.initDateTimeWidget(dtStart, start);
+			SmartUtils.initDateTimeWidget(dtEnd, end);
 		}else{
 			//this resets the dates associated with the filter so we do it after we get the dates from the filter
 			cmbFilterOptions.setSelection(new StructuredSelection(filter.getDateFilterOption()));			

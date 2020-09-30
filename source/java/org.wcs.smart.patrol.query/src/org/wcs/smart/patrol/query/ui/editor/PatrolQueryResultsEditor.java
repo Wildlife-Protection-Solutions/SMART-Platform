@@ -22,8 +22,9 @@
 package org.wcs.smart.patrol.query.ui.editor;
 
 import java.awt.Point;
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,6 +52,9 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.hibernate.Session;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.operation.distance.DistanceOp;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.internal.command.navigation.SetViewportBBoxCommand;
 import org.locationtech.udig.project.render.IViewportModel;
@@ -98,10 +102,6 @@ import org.wcs.smart.query.ui.editor.QueryEditorInput;
 import org.wcs.smart.ui.map.tool.IInfoToolProvider;
 import org.wcs.smart.user.UserLevelManager;
 import org.wcs.smart.util.ReprojectUtils;
-
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.operation.distance.DistanceOp;
 
 /**
  * Editor for displaying query results.  The editor includes two pages
@@ -711,7 +711,9 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 						sb.append(" ("); //$NON-NLS-1$
 						sb.append(nearest.getPatrolLegId());
 						sb.append(")\n"); //$NON-NLS-1$
-						sb.append(DateFormat.getDateInstance().format(nearest.getPatrolLegStartDate()) + " - " + DateFormat.getDateInstance().format(nearest.getPatrolLegEndDate()) ); //$NON-NLS-1$
+						sb.append(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(nearest.getPatrolLegStartDate()));
+						sb.append( " - "); //$NON-NLS-1$
+						sb.append(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(nearest.getPatrolLegEndDate()) ); 
 							
 						createMenu(page2.getMapViewer().getControl(), nearest);
 						return new InfoPoint(pnt, null, sb.toString());	

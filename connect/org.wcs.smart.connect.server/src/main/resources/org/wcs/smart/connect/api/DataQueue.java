@@ -27,9 +27,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.text.MessageFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -413,12 +413,12 @@ public class DataQueue {
 			item.setStatus(ServerDataQueueItem.Status.UPLOADING);
 			item.setStatusMessage(null);
 			item.setUploadedBy(request.getUserPrincipal().getName());
-			item.setUploadedDate(new Date());
+			item.setUploadedDate(LocalDateTime.now());
 				
 			WorkItem up = new WorkItem();
 			up.setLocale(request.getLocale());
 			up.setConservationAreaInfo(ca);
-			up.setStartTime(new Date());
+			up.setStartTime(LocalDateTime.now());
 			up.setStatus(WorkItem.Status.UPLOADING);
 			up.setType(Type.UP_DATAQUEUE);
 			up.setTotalBytes(totalBytes);

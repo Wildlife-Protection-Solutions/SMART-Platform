@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.entity.query;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -42,7 +42,7 @@ public class SightingResultItem implements IResultItem{
 	private String caName;
 	private String sourceId;
 	
-	private Date wpDateTime;
+	private LocalDateTime wpDateTime;
 	private UUID waypointUuid;
 	private int waypointId;
 	private double waypointX;
@@ -184,13 +184,13 @@ public class SightingResultItem implements IResultItem{
 	/**
 	 * @return waypoint date 
 	 */
-	public Date getWaypointDateTime() {
+	public LocalDateTime getWaypointDateTime() {
 		return wpDateTime;
 	}
 	/**
 	 * @param wpDateTime waypoint date 
 	 */
-	public void setWaypointDateTime(Date wpDateTime) {
+	public void setWaypointDateTime(LocalDateTime wpDateTime) {
 		this.wpDateTime = wpDateTime;
 	}
 	

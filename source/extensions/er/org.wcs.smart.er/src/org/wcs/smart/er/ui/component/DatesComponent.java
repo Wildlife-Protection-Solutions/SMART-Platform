@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.er.ui.component;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
@@ -119,7 +119,7 @@ public class DatesComponent implements SelectionListener{
 	 * 
 	 * @param startDate if null; start date is not enabled 
 	 */
-	public void setStartDate(Date startDate){
+	public void setStartDate(LocalDate startDate){
 		setDate(startDate, btnCheckStart, dtStart);
 	}
 	
@@ -127,11 +127,11 @@ public class DatesComponent implements SelectionListener{
 	 * Initializes the end date field
 	 * @param endDate if null; end date is not enabled
 	 */
-	public void setEndDate(Date endDate){
+	public void setEndDate(LocalDate endDate){
 		setDate(endDate, btnCheckEnd, dtEnd);
 	}
 	
-	private void setDate(Date date, Button ch, DateTime widget){
+	private void setDate(LocalDate date, Button ch, DateTime widget){
 		if (date == null){
 			if (optional){
 				widget.setEnabled(false);
@@ -145,7 +145,7 @@ public class DatesComponent implements SelectionListener{
 				ch.setSelection(true);
 			}
 			
-			SmartUtils.initDateDateTimeWidget(widget, date);
+			SmartUtils.initDateTimeWidget(widget, date);
 		}
 		validate();
 	}
@@ -154,12 +154,12 @@ public class DatesComponent implements SelectionListener{
 		String error = null;
 		if (optional){
 			if (btnCheckEnd.getSelection() && btnCheckStart.getSelection()){
-				if (getEndDate().before(getStartDate())){
+				if (getEndDate().isBefore(getStartDate())){
 					error = Messages.DatesComponent_InvalidDate;
 				}
 			}
 		}else{
-			if (getEndDate().before(getStartDate())){
+			if (getEndDate().isBefore(getStartDate())){
 				error = Messages.DatesComponent_InvalidDate;
 			}
 		}
@@ -194,14 +194,14 @@ public class DatesComponent implements SelectionListener{
 	 * @return the start date selected or null
 	 * if not selected
 	 */
-	public Date getStartDate(){
+	public LocalDate getStartDate(){
 		if (optional){
 			if (btnCheckStart.getSelection()){
-				return SmartUtils.getDate(dtStart);
+				return SmartUtils.toDate(dtStart);
 			}
 			return null;
 		}else{
-			return SmartUtils.getDate(dtStart);
+			return SmartUtils.toDate(dtStart);
 		}
 	}
 	
@@ -210,14 +210,14 @@ public class DatesComponent implements SelectionListener{
 	 * @return the end date selected or null
 	 * if not selected
 	 */
-	public Date getEndDate(){
+	public LocalDate getEndDate(){
 		if (optional){
 			if (btnCheckEnd.getSelection()){
-				return SmartUtils.getDate(dtEnd);
+				return SmartUtils.toDate(dtEnd);
 			}
 			return null;
 		}else{
-			return SmartUtils.getDate(dtEnd);
+			return SmartUtils.toDate(dtEnd);
 		}
 	}
 

@@ -21,8 +21,9 @@
  */
 package org.wcs.smart.er.query.ui.panels.item;
 
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.Locale;
 
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -87,7 +88,7 @@ public class FiltersTreeNode implements IItemTreeNode{
 					if (value == null){
 						value = ""; //$NON-NLS-1$
 					}
-					return MessageFormat.format("{0} [{1}]", new Object[]{value, DateFormat.getDateInstance().format(((MissionTrack)element).getMissionDay().getDate())});  //$NON-NLS-1$
+					return MessageFormat.format("{0} [{1}]", new Object[]{value, DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(((MissionTrack)element).getMissionDay().getDate())});  //$NON-NLS-1$
 				}else if (element instanceof SamplingUnitAttribute){
 					return ((SamplingUnitAttribute) element).getName();
 				}else if (element instanceof MissionTrack.TrackType){

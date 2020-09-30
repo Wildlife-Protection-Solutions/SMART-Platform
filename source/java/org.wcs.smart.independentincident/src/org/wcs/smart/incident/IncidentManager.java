@@ -22,8 +22,9 @@
 package org.wcs.smart.incident;
 
 import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -78,9 +79,8 @@ public class IncidentManager {
 		}else if (UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.ADMIN, UserLevelManager.MANAGER)){
 			return null;
 		}else if (UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.DATA_ENTRY, UserLevelManager.ANALYST)){
-			Date d = new Date();
-			d.setTime( d.getTime() - (long)ops.getEditTime() * 24 * 60 * 60 * 1000 );
-			if (waypoint.getDateTime().after(d)){
+			
+			if (ChronoUnit.DAYS.between(waypoint.getDateTime(), LocalDate.now()) < (long)ops.getEditTime() ){
 				return null;
 			}else{
 				return MessageFormat.format(Messages.IncidentManager_IncidentTooOldToEdit, new Object[]{ops.getEditTime() }) ;

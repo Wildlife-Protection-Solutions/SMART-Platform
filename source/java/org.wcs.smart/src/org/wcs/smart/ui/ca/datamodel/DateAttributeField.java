@@ -1,8 +1,8 @@
 package org.wcs.smart.ui.ca.datamodel;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
@@ -21,11 +21,11 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeValidator;
 import org.wcs.smart.util.SmartUtils;
 
-public class DateAttributeField implements IAttributeField<Date>{
+public class DateAttributeField implements IAttributeField<LocalDate>{
 
 	private Attribute attribute;
 	private boolean isModified = false;
-	private Date originalValue = null;
+	private LocalDate originalValue = null;
 	
 	private Button chSet;
 	private DateTime dtime;
@@ -49,11 +49,11 @@ public class DateAttributeField implements IAttributeField<Date>{
 	 * @return the string value entered or null if value entered
 	 */
 	@Override
-	public Date getValue() {
+	public LocalDate getValue() {
 		if (!chSet.getSelection()){
 			return null;
 		}
-		return SmartUtils.getDate(dtime);
+		return SmartUtils.toDate(dtime);
 	}
 
 	@Override
@@ -89,7 +89,7 @@ public class DateAttributeField implements IAttributeField<Date>{
 				if (!chSet.getSelection() && originalValue == null){
 					isModified = false;
 				}else if (chSet.getSelection() && originalValue != null){
-					Date newValue = SmartUtils.getDate(dtime);
+					LocalDate newValue = SmartUtils.toDate(dtime);
 					isModified = !originalValue.equals(newValue);
 				}else{
 					isModified = true;
@@ -109,7 +109,7 @@ public class DateAttributeField implements IAttributeField<Date>{
 				if (!chSet.getSelection() && originalValue == null){
 					isModified = false;
 				}else if (chSet.getSelection() && originalValue != null){
-					Date newValue = SmartUtils.getDate(dtime);
+					LocalDate newValue = SmartUtils.toDate(dtime);
 					isModified = !originalValue.equals(newValue);
 				}else{
 					isModified = true;
@@ -173,7 +173,7 @@ public class DateAttributeField implements IAttributeField<Date>{
 	public void clear() {
 		chSet.setSelection(false);
 		dtime.setEnabled(false);
-		SmartUtils.initDateDateTimeWidget(dtime, new Date());
+		SmartUtils.initDateTimeWidget(dtime, LocalDate.now());
 		validate();
 		this.isModified = false;
 		this.originalValue = null; 
@@ -193,17 +193,17 @@ public class DateAttributeField implements IAttributeField<Date>{
 	 */
 	@Override
 	public void setValue(Object x){
-		if (x != null & !(x instanceof Date)){
+		if (x != null & !(x instanceof LocalDate)){
 			throw new IllegalStateException("Invalid value"); //$NON-NLS-1$
 		}
-		this.originalValue = (Date)x;
+		this.originalValue = (LocalDate)x;
 		if (originalValue == null){
 			chSet.setSelection(false);
 			dtime.setEnabled(false);
 		}else{
 			chSet.setSelection(true);
 			dtime.setEnabled(true);
-			SmartUtils.initDateDateTimeWidget(dtime, originalValue);
+			SmartUtils.initDateTimeWidget(dtime, originalValue);
 		}
 		validate();
 		this.isModified = false;

@@ -29,7 +29,6 @@ import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -298,11 +297,11 @@ public class DataGeneratorView {
 		ControlDecoration cdDtEnd = createCd(dtEnd);
 		dtEnd.addListener(SWT.Selection, e->{
 			enableGenerateButton(false);
-			if (SmartUtils.getDate(dtEnd).before(SmartUtils.getDate(dtStart))) {
+			if (SmartUtils.toDate(dtEnd).isBefore(SmartUtils.toDate(dtStart))) {
 				cdDtEnd.setDescriptionText(Messages.DataGeneratorView_EndDateError);
 				cdDtEnd.show();
 			}else {
-				dataConfig.setEndDate( (new java.sql.Date(SmartUtils.getDate(dtEnd).getTime())).toLocalDate()  );
+				dataConfig.setEndDate( SmartUtils.toDate(dtEnd) );
 				cdDtEnd.hide();
 				saveConfig();
 				enableGenerateButton(true);
@@ -310,11 +309,11 @@ public class DataGeneratorView {
 		});
 		dtStart.addListener(SWT.Selection, e->{
 			enableGenerateButton(false);
-			if (SmartUtils.getDate(dtEnd).before(SmartUtils.getDate(dtStart))) {
+			if (SmartUtils.toDate(dtEnd).isBefore(SmartUtils.toDate(dtStart))) {
 				cdDtEnd.setDescriptionText(Messages.DataGeneratorView_EndDateError);
 				cdDtEnd.show();
 			}else {
-				dataConfig.setStartDate( (new java.sql.Date(SmartUtils.getDate(dtStart).getTime())).toLocalDate()  );
+				dataConfig.setStartDate( SmartUtils.toDate(dtStart) );
 				cdDtEnd.hide();
 				saveConfig();
 				enableGenerateButton(true);
@@ -835,7 +834,7 @@ public class DataGeneratorView {
 				}else if (field.getAttribute().getType() == AttributeType.NUMERIC){
 					woa.setNumberValue((Double)x);
 				}else if (field.getAttribute().getType() == AttributeType.DATE){
-					woa.setDateValue((Date)x);
+					woa.setDateValue((LocalDate)x);
 				}
 				
 				woa.setObservation(wo);

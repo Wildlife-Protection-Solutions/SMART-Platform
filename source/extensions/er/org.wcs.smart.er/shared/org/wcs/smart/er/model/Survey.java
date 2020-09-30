@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.er.model;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -52,8 +52,8 @@ public class Survey extends UuidItem {
 	public static final int ID_MAX_LENGTH = 128;
 	
 	private String id;
-	private Date startDate;
-	private Date endDate;
+	private LocalDate startDate;
+	private LocalDate endDate;
 	private SurveyDesign design;
 	private List<Mission> missions;
 	
@@ -75,10 +75,10 @@ public class Survey extends UuidItem {
 	 * @return
 	 */
 	@Column(name="start_date")
-	public Date getStartDate() {
+	public LocalDate getStartDate() {
 		return startDate;
 	}
-	public void setStartDate(Date startDate) {
+	public void setStartDate(LocalDate startDate) {
 		this.startDate = startDate;
 	}
 	
@@ -87,10 +87,10 @@ public class Survey extends UuidItem {
 	 * @return
 	 */
 	@Column(name="end_date")
-	public Date getEndDate() {
+	public LocalDate getEndDate() {
 		return endDate;
 	}
-	public void setEndDate(Date endDate) {
+	public void setEndDate(LocalDate endDate) {
 		this.endDate = endDate;
 	}
 	

@@ -22,7 +22,7 @@
 package org.wcs.smart.connect.model;
 
 import java.beans.Transient;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import javax.persistence.Column;
@@ -36,6 +36,11 @@ import javax.persistence.Table;
 
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.connect.cybertracker.model.CyberTrackerPackageProxy;
+import org.wcs.smart.connect.util.LocalDateTimeDeserializer;
+import org.wcs.smart.connect.util.LocalDateTimeSerializer;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
  * Database cybertracker package table
@@ -55,7 +60,7 @@ public class CyberTrackerPackage extends UuidItem{
 	};
 	
 	private Status status;
-	private Date uploadedDate;
+	private LocalDateTime uploadedDate;
 	private ConservationAreaInfo ca;
 	private String filename;
 	private String version;
@@ -65,11 +70,13 @@ public class CyberTrackerPackage extends UuidItem{
 	private String type;
 
 	@Column(name="uploaded_date")
-	public Date getUploadedDate() {
+	@JsonDeserialize(using = LocalDateTimeDeserializer.class)  
+	@JsonSerialize(using = LocalDateTimeSerializer.class)
+	public LocalDateTime getUploadedDate() {
 		return this.uploadedDate;
 	}
 	
-	public void setUploadedDate(Date date) {
+	public void setUploadedDate(LocalDateTime date) {
 		this.uploadedDate = date;
 	}
 	

@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.observation.common.importwp.csv;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -73,7 +73,7 @@ public abstract class CsvImportEngine implements IImportEngine {
 	 */
 	@Override
 	public List<Waypoint> getWaypoints(ImportOption option, ImportType type, 
-			Date currentDate, IProgressMonitor monitor) throws Exception{
+			LocalDate currentDate, IProgressMonitor monitor) throws Exception{
 		if (option == ImportOption.DATE){
 			return getConfiguration().getWaypoints(monitor, currentDate);
 		}else{

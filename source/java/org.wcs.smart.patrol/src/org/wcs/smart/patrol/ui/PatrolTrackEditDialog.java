@@ -21,8 +21,9 @@
  */
 package org.wcs.smart.patrol.ui;
 
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -100,7 +101,8 @@ public class PatrolTrackEditDialog extends SmartStyledTitleDialog {
 		try(Session session = HibernateManager.openSession()){
 			session.beginTransaction();
 			try {
-				String title = MessageFormat.format(Messages.PatrolTrackEditDialog_Title, DateFormat.getDateInstance(DateFormat.MEDIUM).format(patrolLegDay.getDate()));
+				String title = MessageFormat.format(Messages.PatrolTrackEditDialog_Title, 
+						DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(patrolLegDay.getDate()));
 				setTitle(title);
 				getShell().setText(title);
 				setMessage(Messages.PatrolTrackEditDialog_Message);

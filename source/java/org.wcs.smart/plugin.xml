@@ -195,6 +195,7 @@
                closeable="true"
                id="org.wcs.smart.view.browser"
                relationship="stack"
+               relative="*"
                visible="false">
          </view>
       </perspectiveExtension>
@@ -1544,7 +1545,6 @@
             name="Undo"
             onToolbar="false"
             tooltip="undo last edit">
-         <enablement></enablement>
       </actionTool>
       <modalTool
             categoryId="org.wcs.smart.udig.maptools"
@@ -1642,6 +1642,11 @@
             class="org.wcs.smart.ui.internal.preference.InactivityTimeoutPreferencePage"
             id="org.wcs.smart.preference.InactivityTimeout"
             name="Security Timeout">
+      </page>
+      <page
+            class="org.wcs.smart.ui.internal.preference.InactivityTimeoutPreferencePage"
+            id="org.eclipse.ui.preferencePages.Workbench"
+            name="&lt;Hack to Remove Error in Log File org.eclipse.ui.ide&gt;">
       </page>
    </extension>
    <extension

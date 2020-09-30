@@ -24,9 +24,10 @@ package org.wcs.smart.asset.query.engine;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -67,8 +68,6 @@ import org.wcs.smart.query.common.ui.image.PagedImageQueryResults;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
 import org.wcs.smart.ui.SmartLabelProvider;
-import org.wcs.smart.util.SharedUtils;
-import org.wcs.smart.util.SmartUtils;
 
 public class AssetPagedWaypointResult extends AbstractPagedQueryResultSet implements IUpdateableResultSet, IWaypointUpdateableResultSet, ISearchabledResultSet, IDesktopPagedImageResultSet{
 
@@ -264,10 +263,9 @@ public class AssetPagedWaypointResult extends AbstractPagedQueryResultSet implem
 							}
 							break;
 						case WAYPOINT_TIME:
-							if (value instanceof Date) {
-								Date newDate = (Date) value;
-								if (!SharedUtils.isSameTime(newDate,
-										wp.getDateTime())) {
+							if (value instanceof LocalTime) {
+								LocalTime newDate = (LocalTime) value;
+								if (!newDate.equals(wp.getDateTime().toLocalTime())){
 									change = true;
 									updateWaypointTime(wp, newDate, s);
 								}
@@ -382,12 +380,13 @@ public class AssetPagedWaypointResult extends AbstractPagedQueryResultSet implem
 		q.executeUpdate();
 	}
 	
-	private void updateWaypointTime(Waypoint wp, Date newTime, Session session){
-		Date dttime = SmartUtils.combineDateTime(wp.getDateTime(), newTime);
-		wp.setDateTime(dttime);
+	private void updateWaypointTime(Waypoint wp, LocalTime newTime, Session session){
+		
+		LocalDateTime ldt = LocalDateTime.of(wp.getDateTime().toLocalDate(), newTime);
+		wp.setDateTime(ldt);
 		
 		NativeQuery<?> q = session.createNativeQuery("update " + queryTempTable + " SET wp_date = :id WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
-		q.setParameter("id", dttime); //$NON-NLS-1$
+		q.setParameter("id", wp.getDateTime()); //$NON-NLS-1$
 		q.setParameter("uuid", wp.getUuid()); //$NON-NLS-1$
 		q.executeUpdate();
 	}

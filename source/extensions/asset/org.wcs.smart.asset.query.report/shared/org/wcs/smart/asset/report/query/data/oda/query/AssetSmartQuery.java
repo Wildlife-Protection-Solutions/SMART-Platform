@@ -21,8 +21,7 @@
  */
 package org.wcs.smart.asset.report.query.data.oda.query;
 
-import java.sql.Date;
-import java.util.Calendar;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
 
@@ -104,17 +103,15 @@ public class AssetSmartQuery extends AbstractSmartQuery {
 	@Override
 	public IResultSet executeQuery(AbstractSmartBirtQuery query, SmartConnection connection) throws OdaException {
 		//create date filter
-		Date startDate = (Date) query.getParameters().get(SmartParameterMetaData.Parameter.STARTDATE);
-		Date endDate = (Date) query.getParameters().get(SmartParameterMetaData.Parameter.ENDDATE);
+		LocalDate startDate = ((java.sql.Date) query.getParameters().get(SmartParameterMetaData.Parameter.STARTDATE)).toLocalDate();
+		LocalDate endDate = ((java.sql.Date) query.getParameters().get(SmartParameterMetaData.Parameter.ENDDATE)).toLocalDate();
 		
 		if (startDate == null || endDate == null){
 			if (AssetSummaryQuery.isAssetSummary(query.getQuery().getTypeKey())){
 				//we choose to run summaries in order to get 
 				//all header information
-				Calendar cal = Calendar.getInstance();
-				cal.set(1900, Calendar.JANUARY, 1);
-				startDate = new Date( cal.getTimeInMillis() );
-				endDate = new Date(startDate.getTime());
+				startDate = LocalDate.of(1900, 1, 1);
+				endDate = LocalDate.from(startDate);
 			}else{
 				//all others will just return an empty
 				return EmptyResultSet.INSTANCE;

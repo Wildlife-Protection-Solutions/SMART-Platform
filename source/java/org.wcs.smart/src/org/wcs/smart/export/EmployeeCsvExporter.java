@@ -25,8 +25,8 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -64,7 +64,9 @@ public class EmployeeCsvExporter implements ICsvDataExporter {
 			}
 
 			List<Employee> employeeList = getEmployees(ca, session);
-			SimpleDateFormat dateFormat = new SimpleDateFormat(EmployeeCsvImporter.DATE_FORMAT);
+			
+			DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern(EmployeeCsvImporter.DATE_FORMAT);
+			
 			for (Employee employee : employeeList) {
 				if (monitor.isCanceled()) return false;
 				String[] data = new String[9];
@@ -79,7 +81,7 @@ public class EmployeeCsvExporter implements ICsvDataExporter {
 				}
 				data[4] = String.valueOf(employee.getGender());
 				data[5] = dateFormat.format(employee.getStartEmploymentDate());
-				Date endDate = employee.getEndEmploymentDate();
+				LocalDate endDate = employee.getEndEmploymentDate();
 				data[6] = endDate == null ? null : dateFormat.format(endDate);
 				Agency agency = employee.getAgency();
 				if (agency != null){

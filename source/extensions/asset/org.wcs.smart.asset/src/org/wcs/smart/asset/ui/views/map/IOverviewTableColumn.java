@@ -21,9 +21,10 @@
  */
 package org.wcs.smart.asset.ui.views.map;
 
-import java.text.DateFormat;
 import java.text.DecimalFormat;
-import java.util.Date;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.time.temporal.Temporal;
 
 import org.json.simple.JSONObject;
 import org.wcs.smart.ui.SmartLabelProvider;
@@ -76,7 +77,7 @@ public interface IOverviewTableColumn {
 					return SmartLabelProvider.BOOLEAN_FALSE_LABEL;
 				}
 			case DATE:
-				return DateFormat.getDateInstance().format((Date)value);
+				return DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format((Temporal)value);
 			case INTEGER:
 				if (value instanceof Long) {
 					return ((Long)value).toString();
@@ -94,7 +95,7 @@ public interface IOverviewTableColumn {
 			case STRING:
 				return ((String)value);
 			case TIME:
-				return DateFormat.getTimeInstance().format((Date)value);
+				return DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM).format((Temporal)value);
 			}
 			return value.toString();
 		}

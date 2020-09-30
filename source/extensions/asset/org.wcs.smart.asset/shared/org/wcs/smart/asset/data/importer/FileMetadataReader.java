@@ -24,6 +24,8 @@ package org.wcs.smart.asset.data.importer;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -80,7 +82,7 @@ public class FileMetadataReader {
 		for (Directory directory : metadata.getDirectoriesOfType(GpsDirectory.class)) {
 			GeoLocation geoLocation = ((GpsDirectory)directory).getGeoLocation();
 			if (geoLocation != null){
-				gpsDateTime = SharedUtils.toLocalDateTime(  ((GpsDirectory) directory).getGpsDate() );
+				gpsDateTime = toLocalDateTime(  ((GpsDirectory) directory).getGpsDate() );
 				fileInfo.setPosition(geoLocation.getLongitude(), geoLocation.getLatitude());
 			}			
 		}
@@ -89,12 +91,12 @@ public class FileMetadataReader {
 		LocalDateTime dateDigit = null;
 		if (fileInfo.getImageDate() == null) {
 			for (Directory directory : metadata.getDirectoriesOfType(ExifSubIFDDirectory.class)) {
-				LocalDateTime orig = SharedUtils.toLocalDateTime( ((ExifSubIFDDirectory)directory).getDateOriginal(TimeZone.getDefault()) );
+				LocalDateTime orig = toLocalDateTime( ((ExifSubIFDDirectory)directory).getDateOriginal(TimeZone.getDefault()) );
 				if (orig != null) {
 					fileInfo.setImageDate(orig);
 					break;
 				}
-				dateDigit = SharedUtils.toLocalDateTime( ((ExifSubIFDDirectory)directory).getDateDigitized(TimeZone.getDefault()) );
+				dateDigit = toLocalDateTime( ((ExifSubIFDDirectory)directory).getDateDigitized(TimeZone.getDefault()) );
 				
 			}
 		}
@@ -104,7 +106,7 @@ public class FileMetadataReader {
 		
 		if (fileInfo.getImageDate() == null) {
 			for (Directory directory : metadata.getDirectoriesOfType(ExifIFD0Directory.class)) {
-				LocalDateTime date = SharedUtils.toLocalDateTime( directory.getDate(ExifDirectoryBase.TAG_DATETIME, TimeZone.getDefault()) );
+				LocalDateTime date = toLocalDateTime( directory.getDate(ExifDirectoryBase.TAG_DATETIME, TimeZone.getDefault()) );
 				if (date != null) {
 					fileInfo.setImageDate(date);
 				}
@@ -115,6 +117,10 @@ public class FileMetadataReader {
 			//use gps date/time
 			fileInfo.setImageDate(gpsDateTime);
 		}
+	}
+	
+	private static LocalDateTime toLocalDateTime(java.util.Date date) {
+		return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
 	}
 	
 	/**

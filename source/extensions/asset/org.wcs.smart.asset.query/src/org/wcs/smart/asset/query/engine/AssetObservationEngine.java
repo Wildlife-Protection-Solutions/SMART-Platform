@@ -679,7 +679,7 @@ public class AssetObservationEngine extends AssetQueryEngine implements IDerbyWa
 		it.setWaypointId(rs.getInt("wp_id")); //$NON-NLS-1$
 		it.setWaypointX(rs.getDouble("wp_x")); //$NON-NLS-1$
 		it.setWaypointY(rs.getDouble("wp_y")); //$NON-NLS-1$
-		it.setWaypointDate(rs.getTimestamp("wp_date")); //$NON-NLS-1$
+		it.setWaypointDate(rs.getTimestamp("wp_date").toLocalDateTime()); //$NON-NLS-1$
 		it.setWaypointDirection(rs.getObject("wp_direction") == null ? null : rs.getFloat("wp_direction")); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setWaypointDistance(rs.getObject("wp_distance") == null ? null : rs.getFloat("wp_distance")); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setWaypointComment(rs.getString("wp_comment")); //$NON-NLS-1$
@@ -689,7 +689,7 @@ public class AssetObservationEngine extends AssetQueryEngine implements IDerbyWa
 		it.setLocations(rs.getString("asset_location")); //$NON-NLS-1$
 		
 		it.setIncidentLength(rs.getInt("incident_length")); //$NON-NLS-1$
-		it.setLastModifiedDate(rs.getTimestamp("wp_lastmodified")); //$NON-NLS-1$
+		it.setLastModifiedDate(rs.getTimestamp("wp_lastmodified").toLocalDateTime()); //$NON-NLS-1$
 		it.setLastModifiedBy(rs.getString("wp_lastmodifiedbyname")); //$NON-NLS-1$
 		
 		byte[] t = rs.getBytes("ob_uuid"); //$NON-NLS-1$

@@ -23,6 +23,7 @@ package org.wcs.smart.connect.query.engine;
 
 import java.sql.SQLException;
 import java.text.MessageFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -468,7 +469,7 @@ public enum PsqlFilterToSqlGenerator {
 		
 		field = table + "." + field; //$NON-NLS-1$
 		
-		java.sql.Date[] bits = filter.getDateFilterOption().getDates(); 
+		LocalDate[] bits = filter.getDateFilterOption().getDates(); 
 		String f = ""; //$NON-NLS-1$
 		if (bits == null){
 			return ""; //$NON-NLS-1$

@@ -22,8 +22,8 @@
 package org.wcs.smart.i2.udig.entity;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -36,7 +36,6 @@ import org.opengis.feature.type.Name;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory;
 import org.wcs.smart.i2.udig.LocationLayerType;
-import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -74,9 +73,9 @@ public class IntelEntityDataSource extends ContentDataStore{
 		return new NameImpl("org.wcs.smart.i2.entity.location." + UuidUtils.uuidToString(entityUuid), type.name()); //$NON-NLS-1$
 	}
 
-	public static Filter createDateFilter(Date startDate, Date endDate){
+	public static Filter createDateTimeFilter(LocalDateTime startDate, LocalDateTime endDate){
 		if (startDate == null || endDate == null) return Filter.INCLUDE;
 		FilterFactory ff = CommonFactoryFinder.getFilterFactory();
-		return ff.between(ff.property("date"), ff.literal(startDate), ff.literal(SharedUtils.getDatePart(endDate, true))); //$NON-NLS-1$
+		return ff.between(ff.property("date"), ff.literal(startDate), ff.literal(endDate)); //$NON-NLS-1$
 	}
 }

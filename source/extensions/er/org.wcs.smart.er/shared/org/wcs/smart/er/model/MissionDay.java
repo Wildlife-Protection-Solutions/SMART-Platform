@@ -21,10 +21,10 @@
  */
 package org.wcs.smart.er.model;
 
-import java.sql.Time;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -46,21 +46,21 @@ public class MissionDay extends UuidItem{
 
 	private static final long serialVersionUID = 1L;
 	
-	private Date date;
+	private LocalDate date;
 	
 	private Mission mission;
-	private Time startTime;
-	private Time endTime;
+	private LocalTime startTime;
+	private LocalTime endTime;
 	private Integer restMinutes;
 	
 	private List<SurveyWaypoint> waypoints;
 	private List<MissionTrack> tracks;
 	
 	@Column(name="mission_day")
-	public Date getDate() {
+	public LocalDate getDate() {
 		return date;
 	}
-	public void setDate(Date date) {
+	public void setDate(LocalDate date) {
 		this.date = date;
 	}
 	
@@ -73,18 +73,18 @@ public class MissionDay extends UuidItem{
 	}
 	
 	@Column(name="start_time")
-	public Time getStartTime(){
+	public LocalTime getStartTime(){
 		return this.startTime;
 	}
-	public void setStartTime(Time startTime){
+	public void setStartTime(LocalTime startTime){
 		this.startTime = startTime;
 	}
 	
 	@Column(name="end_time")
-	public Time getEndTime(){
+	public LocalTime getEndTime(){
 		return this.endTime;
 	}
-	public void setEndTime(Time endTime){
+	public void setEndTime(LocalTime endTime){
 		this.endTime = endTime;
 	}
 	
@@ -100,13 +100,7 @@ public class MissionDay extends UuidItem{
 	
 	@Transient
 	public double getLengthSeconds(){
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(startTime);
-		long start = cal.get(Calendar.HOUR_OF_DAY) * 60 *60 + cal.get(Calendar.MINUTE) * 60 + cal.get(Calendar.SECOND);   
-		cal.setTime(endTime);
-		long end = cal.get(Calendar.HOUR_OF_DAY) * 60 *60 + cal.get(Calendar.MINUTE) * 60 + cal.get(Calendar.SECOND);
-		
-		return end - start;
+		return ChronoUnit.SECONDS.between(date.atTime(startTime), date.atTime(endTime));
 	}
 	
 	@Transient

@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.er.ui.surveydesign.editor;
 
-import java.text.DateFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -321,10 +322,10 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 		
 		txtName.setText(design.getName());
 		
-		String value = design.getStartDate() != null ? DateFormat.getDateInstance(DateFormat.LONG).format(design.getStartDate()) : ""; //$NON-NLS-1$
+		String value = design.getStartDate() != null ? DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).format(design.getStartDate()) : ""; //$NON-NLS-1$
 		txtStartDate.setText(value);
 
-		value = design.getEndDate() != null ? DateFormat.getDateInstance(DateFormat.LONG).format(design.getEndDate()) : ""; //$NON-NLS-1$
+		value = design.getEndDate() != null ? DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).format(design.getEndDate()) : ""; //$NON-NLS-1$
 		txtEndDate.setText(value);
 
 		txtStatus.setText(design.getState().getGuiName(Locale.getDefault()));

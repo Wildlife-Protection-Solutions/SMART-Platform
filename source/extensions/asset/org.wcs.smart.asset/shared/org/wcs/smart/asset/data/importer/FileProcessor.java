@@ -23,7 +23,9 @@ package org.wcs.smart.asset.data.importer;
 
 import java.nio.file.Path;
 import java.text.MessageFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.time.temporal.ChronoUnit;
@@ -57,7 +59,6 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
-import org.wcs.smart.util.SharedUtils;
 
 import com.drew.lang.Rational;
 import com.drew.metadata.Directory;
@@ -455,19 +456,19 @@ public class FileProcessor {
 					}
 					woa.setNumberValue(value == true ? 1.0 : 0);
 				}else if (mapping.getMappedAttribute().getType() == Attribute.AttributeType.DATE) {
-					LocalDateTime d = null;
+					LocalDate d = null;
 					try {
-						d = LocalDateTime.parse(pathValue, DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM));
+						d = LocalDate.parse(pathValue, DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM));
 					}catch (Exception ex) {
 						d = null;
 					}
 					try {
-						d = LocalDateTime.parse(pathValue, DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG));
+						d = LocalDate.parse(pathValue, DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG));
 					}catch (Exception ex) {
 						d = null;
 					}
 					try {
-						d = LocalDateTime.parse(pathValue, DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT));
+						d = LocalDate.parse(pathValue, DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT));
 					}catch (Exception ex) {
 						d = null;
 					}
@@ -475,7 +476,7 @@ public class FileProcessor {
 						p.addWarning(new ActionableWarning(MessageFormat.format(ErrorMessages.DATE_PARSE_ERROR.getMessage(locale), pathValue, mapping.getMappedAttribute().getName())));
 						return;
 					}
-					woa.setDateValue(SharedUtils.toDate(d));
+					woa.setDateValue(d);
 				}else if (mapping.getMappedAttribute().getType() == Attribute.AttributeType.LIST) {
 					if (mapping.getMappedListItem() != null) {
 						if (pathValue.equalsIgnoreCase(field.getValue())) {
@@ -631,7 +632,7 @@ public class FileProcessor {
 						p.addWarning(new ActionableWarning(MessageFormat.format(ErrorMessages.DATE_TAG_PARSE_ERROR.getMessage(locale), tag.getStringValue(field.getTagType()), mapping.getMappedAttribute().getName())));
 						return;
 					}
-					woa.setDateValue(value);
+					woa.setDateValue(value.toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
 				}else if (mapping.getMappedAttribute().getType() == Attribute.AttributeType.LIST) {
 					String value = tag.getDescription(field.getTagType());
 					if (mapping.getMappedListItem() != null) {
@@ -785,8 +786,8 @@ public class FileProcessor {
 		//1.  Find a deployment for the asset that is between the start and end date of the waypoint
 		String hql = "FROM AssetDeployment WHERE asset = :asset and startDate <= :date1 and (endDate is null or endDate>=:date2)"; //$NON-NLS-1$
 		List<AssetDeployment> matchingDeployment = session.createQuery(hql, AssetDeployment.class)
-			.setParameter("date1", SharedUtils.toLocalDateTime(wp.getDateTime())) //$NON-NLS-1$
-			.setParameter("date2", SharedUtils.toLocalDateTime(wp.getDateTime())) //$NON-NLS-1$
+			.setParameter("date1", wp.getDateTime()) //$NON-NLS-1$
+			.setParameter("date2", wp.getDateTime()) //$NON-NLS-1$
 			.setParameter("asset", asset) //$NON-NLS-1$
 			.list();
 		
@@ -805,16 +806,17 @@ public class FileProcessor {
 				//set the end date to the last waypoint date we have
 				LocalDateTime endDate = null;
 				for (AssetWaypoint aw : matchedDeployment.getAssetWaypoints()) {
-					if (endDate == null || SharedUtils.toLocalDateTime(aw.getWaypoint().getDateTime()).isAfter(endDate)) endDate = SharedUtils.toLocalDateTime( aw.getWaypoint().getDateTime() );
+					if (endDate == null || aw.getWaypoint().getDateTime().isAfter(endDate)) 
+						endDate = aw.getWaypoint().getDateTime();
 				}
 				if (endDate == null) {
 					//deployment had not waypoints the best we can do is take the current time and subtract a minute
-					endDate = SharedUtils.toLocalDateTime(wp.getDateTime()).minus(1, ChronoUnit.MINUTES);
+					endDate = wp.getDateTime().minus(1, ChronoUnit.MINUTES);
 				}
 				matchedDeployment.setEndDate(endDate);
 				
 				//create a new deployment & return it
-				return createNewDeployment(asset, SharedUtils.toLocalDateTime( wp.getDateTime() ), location);
+				return createNewDeployment(asset, wp.getDateTime(), location);
 			
 			}else {
 				throw new IllegalStateException(MessageFormat.format(ErrorMessages.MULTIPLE_DEPLOYMENTS.getMessage(l), asset.getId() ));
@@ -830,14 +832,14 @@ public class FileProcessor {
 			AssetDeployment next = null;
 			
 			for (AssetDeployment d : allDeployments) {
-				if (d.getEndDate() != null && d.getEndDate().isBefore(SharedUtils.toLocalDateTime(wp.getDateTime()))) {
+				if (d.getEndDate() != null && d.getEndDate().isBefore(wp.getDateTime())) {
 					if (prev == null) {
 						prev = d;
 					}else if (d.getEndDate().isAfter(prev.getEndDate())) {
 						prev = d;
 					}
 				}
-				if (d.getStartDate().isAfter(SharedUtils.toLocalDateTime(wp.getDateTime()))) {
+				if (d.getStartDate().isAfter(wp.getDateTime())) {
 					if (next == null) {
 						next = d;
 					}else if (d.getStartDate().isBefore(next.getStartDate())) {
@@ -847,39 +849,40 @@ public class FileProcessor {
 			}
 			
 			if (prev == null && next == null) {
-				return createNewDeployment(asset, SharedUtils.toLocalDateTime( wp.getDateTime()), location);
+				return createNewDeployment(asset, wp.getDateTime(), location);
 			}
 			if (prev != null && prev.getStationLocation().equals(location) && next != null && next.getStationLocation().equals(location)) {
 				//both prev and next are candidates, pick the closer one and extend it
-				if (ChronoUnit.MILLIS.between(SharedUtils.toLocalDateTime(wp.getDateTime()),prev.getEndDate()) > ChronoUnit.MILLIS.between(next.getStartDate(), SharedUtils.toLocalDateTime(wp.getDateTime()))) {
+				if (ChronoUnit.MILLIS.between(wp.getDateTime(),prev.getEndDate()) > 
+					ChronoUnit.MILLIS.between(next.getStartDate(),wp.getDateTime())) {
 				
 					//pick next
-					next.setStartDate(SharedUtils.toLocalDateTime( wp.getDateTime()) );
+					next.setStartDate( wp.getDateTime() );
 					return next;
 				}else {
 					//pick prev
-					prev.setEndDate(SharedUtils.toLocalDateTime( wp.getDateTime()) );
+					prev.setEndDate( wp.getDateTime() );
 					return prev;
 				}
 			}
 			if (prev != null && prev.getStationLocation().equals(location)) {
 				//only previous is a candidate
-				prev.setEndDate(SharedUtils.toLocalDateTime( wp.getDateTime()) );
+				prev.setEndDate( wp.getDateTime() );
 				return prev;
 			}
 			if (next != null && next.getStationLocation().equals(location)) {
 				//only next is candidate
-				next.setStartDate(SharedUtils.toLocalDateTime( wp.getDateTime()) );
+				next.setStartDate(wp.getDateTime() );
 				return next;
 			}
 			if (next != null) {
 				//create a new with an end date of next start time
-				AssetDeployment d = createNewDeployment(asset, SharedUtils.toLocalDateTime( wp.getDateTime()) , location);
+				AssetDeployment d = createNewDeployment(asset, wp.getDateTime() , location);
 				d.setEndDate(next.getStartDate());
 				return d;
 			}else {
 				//create a new one with no end date
-				return createNewDeployment(asset, SharedUtils.toLocalDateTime( wp.getDateTime()) , location);
+				return createNewDeployment(asset, wp.getDateTime() , location);
 			}
 			
 		}

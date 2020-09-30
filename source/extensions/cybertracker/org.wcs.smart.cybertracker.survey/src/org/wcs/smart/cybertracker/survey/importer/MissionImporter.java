@@ -22,13 +22,15 @@
 package org.wcs.smart.cybertracker.survey.importer;
 
 import java.awt.image.BufferedImage;
-import java.sql.Time;
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +42,8 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.LineString;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -82,12 +86,7 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.ui.SmartLabelProvider;
-import org.wcs.smart.util.SharedUtils;
-import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.TrackUtil;
-
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.LineString;
 
 /**
  * Imports from {@link CyberTrackerSurvey} to {@link Mission} object
@@ -205,8 +204,8 @@ public class MissionImporter extends AbstractSmartImporter {
 	private Survey createNewSurvey(CyberTrackerSurvey ctSurvey, String id) {
 		Survey survey = new Survey();
 		survey.setSurveyDesign(ctSurvey.getSurveyDesign());
-		survey.setStartDate(ctSurvey.getStartDate());
-		survey.setEndDate(ctSurvey.getEndDate());
+		survey.setStartDate(ctSurvey.getStartDate().toLocalDate());
+		survey.setEndDate(ctSurvey.getEndDate().toLocalDate());
 		survey.setId(id);
 		return survey;
 	}
@@ -215,8 +214,8 @@ public class MissionImporter extends AbstractSmartImporter {
 		Mission m = new Mission();
 		m.setSurvey(survey);
 		m.setComment(ctSurvey.getComment());
-		m.setStartDate(ctSurvey.getStartDate());
-		m.setEndDate(ctSurvey.getEndDate());
+		m.setStartDate(ctSurvey.getStartDate().toLocalDate());
+		m.setEndDate(ctSurvey.getEndDate().toLocalDate());
 		List<MissionMember> members = new ArrayList<MissionMember>();
 		for (Employee e : ctSurvey.getMembers()) {
 			MissionMember plm = new MissionMember();
@@ -285,17 +284,18 @@ public class MissionImporter extends AbstractSmartImporter {
 	 */
 	private void validateExistingMission(CyberTrackerSurvey ctSurvey, Mission mission, Session session) {
 		boolean daysChanged = false;
-		if (mission.getStartDate().getTime() > ctSurvey.getStartDate().getTime()) {
-			if (!isValidTimeDelta(ctSurvey.getEndDate(), mission.getStartDate()))
-				addWarning(MessageFormat.format(Messages.MissionImporter_Warn_TimeGap_Before, DateFormat.getDateInstance(DateFormat.MEDIUM).format(mission.getStartDate()), DateFormat.getDateInstance(DateFormat.MEDIUM).format(ctSurvey.getEndDate())));
-			mission.setStartDate(ctSurvey.getStartDate());
+		if (mission.getStartDate().isAfter(ctSurvey.getStartDate().toLocalDate())) {
+			if (!isValidTimeDelta(ctSurvey.getEndDate().toLocalDate(), mission.getStartDate()))
+				addWarning(MessageFormat.format(Messages.MissionImporter_Warn_TimeGap_Before, 
+						DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(mission.getStartDate()), DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(ctSurvey.getEndDate())));
+			mission.setStartDate(ctSurvey.getStartDate().toLocalDate());
 			daysChanged = true;
 		}
 
-		if (mission.getEndDate().getTime() < ctSurvey.getEndDate().getTime()) {
-			if (!isValidTimeDelta(mission.getEndDate(), ctSurvey.getStartDate()))
-				addWarning(MessageFormat.format(Messages.MissionImporter_Warn_TimeGap_After, DateFormat.getDateInstance(DateFormat.MEDIUM).format(mission.getEndDate()), DateFormat.getDateInstance(DateFormat.MEDIUM).format(ctSurvey.getStartDate())));
-			mission.setEndDate(ctSurvey.getEndDate());
+		if (mission.getEndDate().isBefore(ctSurvey.getEndDate().toLocalDate())) {
+			if (!isValidTimeDelta(mission.getEndDate(), ctSurvey.getStartDate().toLocalDate()))
+				addWarning(MessageFormat.format(Messages.MissionImporter_Warn_TimeGap_After, DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(mission.getEndDate()), DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(ctSurvey.getStartDate())));
+			mission.setEndDate(ctSurvey.getEndDate().toLocalDate());
 			daysChanged = true;
 		}
 		
@@ -319,40 +319,44 @@ public class MissionImporter extends AbstractSmartImporter {
 
 	//ensures that gap between dates is less than a day
 	//(in this case we will not have a gap after adding ctSurvey to the mission)
-	private boolean isValidTimeDelta(Date from, Date to) {
-		from = SharedUtils.getDatePart(from, false);
-		to = SharedUtils.getDatePart(to, false);
-		long delta = to.getTime() - from.getTime();
-		return delta <= 1000 * 60 * 60 * 24; //more that a day
+	private boolean isValidTimeDelta(LocalDate from, LocalDate to) {
+		long delta = Math.abs(ChronoUnit.DAYS.between(from, to));
+		return delta <= 1;
 	}
 
 	private void createMissingMissionDays(Mission m) {
-		Set<Calendar> existingDays = new HashSet<Calendar>();
-		for (MissionDay md : m.getMissionDays()) {
-			existingDays.add(SharedUtils.convertDate(md.getDate()));
+		
+		LocalTime stime = LocalTime.MIN;
+		LocalTime etime = LocalTime.MAX;
+		if (!m.getMissionDays().isEmpty()) {
+			stime= m.getMissionDays().get(0).getStartTime();
+			etime= m.getMissionDays().get(m.getMissionDays().size() - 1).getEndTime();
 		}
 		
-		Calendar calStart = SharedUtils.convertDate(m.getStartDate());
-		calStart.set(Calendar.HOUR_OF_DAY, 0);
-		calStart.set(Calendar.MINUTE, 0);
-		calStart.set(Calendar.SECOND, 0);
-		calStart.set(Calendar.MILLISECOND, 0);
+		Set<LocalDate> existingDays = new HashSet<LocalDate>();
+		for (MissionDay md : m.getMissionDays()) {
+			existingDays.add(md.getDate());
+		}
 		
-		Calendar calEnd = SharedUtils.convertDate(m.getEndDate());
-		while (calStart.before(calEnd) || calStart.equals(calEnd)) {
-			if (!existingDays.contains(calStart)) {
+		LocalDate working = m.getStartDate();
+		
+		while (working.isBefore(m.getEndDate()) || working.isEqual(m.getEndDate())) {
+			if (!existingDays.contains(working)) {
 				MissionDay md = new MissionDay();
-				md.setDate(SharedUtils.getDatePart(calStart.getTime(), false));
-				md.setStartTime(SharedUtils.isSameDate(m.getStartDate(), calStart.getTime()) ? convertDateToTime(m.getStartDate()) : createTime(0, 0, 0));
-				md.setEndTime(SharedUtils.isSameDate(m.getEndDate(), calStart.getTime()) ? convertDateToTime(m.getEndDate()) : createTime(23, 59, 59));
+				md.setDate(working);
+				md.setStartTime(LocalTime.MIN);
+				md.setEndTime(LocalTime.MAX);
 				md.setRestMinutes(0);
 				md.setTracks(new ArrayList<MissionTrack>());
 				md.setWaypoints(new ArrayList<SurveyWaypoint>());
 				md.setMission(m);
 				m.getMissionDays().add(md);
 			}
-			calStart.add(Calendar.DAY_OF_MONTH, 1);
+			working = ChronoUnit.DAYS.addTo(working, 1);
 		}
+		m.getMissionDays().sort((a,b)->a.getDate().compareTo(b.getDate()));
+		m.getMissionDays().get(0).setStartTime(stime);
+		m.getMissionDays().get(m.getMissionDays().size() - 1).setStartTime(etime);
 	}
 	
 	private boolean checkEmployees(final Mission m, final CyberTrackerSurvey ctSurvey){
@@ -390,7 +394,7 @@ public class MissionImporter extends AbstractSmartImporter {
 
 	private MissionDay findOrAddMissionDay(Mission mission, S s) {
 		//we don't need to check for big gaps as this validation is done by validateExistingMission(...)
-		Date date = null;
+		LocalDate date = null;
 		for (A a : s.getA()) {
 			String i = a.getI();
 			if (ICyberTrackerConstants.DATE.equals(i)) {
@@ -403,17 +407,28 @@ public class MissionImporter extends AbstractSmartImporter {
 			return null;
 		
 		for (MissionDay pld : mission.getMissionDays()) {
-			if (SharedUtils.isSameDate(pld.getDate(), date)) {
+			if (pld.getDate().isEqual(date)) {
 				return pld;
 			}
 		}
-		//NOTE: Ideally this point in code should never be reached because all mission day must already be created. The only possible way is if date is not between mission start and end date
+		
+		
+		//NOTE: Ideally this point in code should never be reached because all mission day must already be created. 
+		//The only possible way is if date is not between mission start and end date
 		addWarning(MessageFormat.format(Messages.MissionImporter_TimeRangeError, date));
+		
+		LocalTime stime = LocalTime.MIN;
+		LocalTime etime = LocalTime.MAX;
+		if (!mission.getMissionDays().isEmpty()) {
+			stime= mission.getMissionDays().get(0).getStartTime();
+			etime= mission.getMissionDays().get(mission.getMissionDays().size() - 1).getEndTime();
+		}
+		
 		MissionDay mday = new MissionDay();
 		mday.setMission(mission);
 		mday.setDate(date);
-		mday.setStartTime(SharedUtils.isSameDate(mission.getStartDate(), date) ? convertDateToTime(mission.getStartDate()) : createTime(0, 0, 0));
-		mday.setEndTime(SharedUtils.isSameDate(mission.getEndDate(), date) ? convertDateToTime(mission.getEndDate()) : createTime(23, 59, 59));
+		mday.setStartTime(stime);
+		mday.setEndTime(etime);
 		mday.setRestMinutes(0);
 		mday.setTracks(new ArrayList<MissionTrack>());
 		mday.setWaypoints(new ArrayList<SurveyWaypoint>());
@@ -438,8 +453,8 @@ public class MissionImporter extends AbstractSmartImporter {
 		for (A a : s.getA()) {
 			String i = a.getI();
 			if (ICyberTrackerConstants.TIME.equals(i)) {
-				Time t = Time.valueOf(a.getV());
-				wp.setDateTime(SmartUtils.combineDateTime(mday.getDate(), t));
+				LocalTime t = LocalTime.parse(a.getV());
+				wp.setDateTime(mday.getDate().atTime(t));
 			} else if (ICyberTrackerConstants.LATITUDE.equals(i)) {
 				wp.setRawY(Double.valueOf(a.getV()));
 			} else if (ICyberTrackerConstants.LONGITUDE.equals(i)) {
@@ -494,7 +509,7 @@ public class MissionImporter extends AbstractSmartImporter {
 			if (lastWp.getWaypoint().getDateTime() == null)
 				lastWp.getWaypoint().setDateTime(wp.getDateTime());
 			
-			long delta = Math.abs(wp.getDateTime().getTime() - lastWp.getWaypoint().getDateTime().getTime());
+			long delta = ChronoUnit.MILLIS.between(wp.getDateTime(), lastWp.getWaypoint().getDateTime());
 			if (delta > WARN_WP_TIME_FRAME * 60 * 1000) {
 				addWarning(MessageFormat.format(Messages.MissionImporter_Warn_WaypointTimeframe, lastWp.getId(), WARN_WP_TIME_FRAME));
 			}
@@ -506,12 +521,12 @@ public class MissionImporter extends AbstractSmartImporter {
 		List<Coordinate> timerTrackList = ctSurvey.getTimerTrackList();
 		if (timerTrackList != null && !timerTrackList.isEmpty()) {
 			for (MissionDay md : mission.getMissionDays()) {
-				Date from = combine(md.getDate(), md.getStartTime());
-				Date to = combine(md.getDate(), md.getEndTime());
+				LocalDateTime from = md.getDate().atTime( md.getStartTime());
+				LocalDateTime to = md.getDate().atTime( md.getEndTime());
 				List<TimeCut<SamplingUnit>> cuts = suTimeDataContainer.getTimeCuts(from, to);
 				for (TimeCut<SamplingUnit> timeCut : cuts) {
 					List<Coordinate> coordinates = listPart(timerTrackList, timeCut.getStart(), timeCut.getEnd());
-					LineString track = TrackUtil.convertToLineString(coordinates, MissionTrack.ZTIMEZONE);
+					LineString track = TrackUtil.convertToLineString(coordinates);
 					if (track != null) {
 						MissionTrack t = new MissionTrack();
 						md.getTracks().add(t);
@@ -526,21 +541,7 @@ public class MissionImporter extends AbstractSmartImporter {
 		}
 	}
 
-	private Time createTime(int hours, int minute, int second){
-		Calendar cForProcessing = Calendar.getInstance();
-		cForProcessing.setTimeInMillis(0);
-		cForProcessing.set(Calendar.HOUR_OF_DAY, hours);
-		cForProcessing.set(Calendar.MINUTE, minute);
-		cForProcessing.set(Calendar.SECOND, second);
-		cForProcessing.set(Calendar.MILLISECOND, 0);
-		return new Time(cForProcessing.getTime().getTime());
-	}
-
-	private Time convertDateToTime(Date d) {
-		Calendar c = Calendar.getInstance();
-		c.setTime(d);		
-		return createTime(c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), c.get(Calendar.SECOND));		
-	}
+	
 	
 	/**
 	 * Displays warnings dialog if warnings present and returns if user choose to proceed with import
@@ -564,7 +565,7 @@ public class MissionImporter extends AbstractSmartImporter {
 	}
 	
 	protected String getMissionIdentifier(CyberTrackerSurvey ctSurvey){
-		return DateFormat.getDateTimeInstance().format(ctSurvey.getStartDate()) + "  [" + ctSurvey.getSurveyDesignKey() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+		return DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(ctSurvey.getStartDate()) + "  [" + ctSurvey.getSurveyDesignKey() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/**

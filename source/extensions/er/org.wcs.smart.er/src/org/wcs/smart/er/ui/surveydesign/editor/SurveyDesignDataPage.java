@@ -23,12 +23,13 @@ package org.wcs.smart.er.ui.surveydesign.editor;
 
 import java.lang.reflect.InvocationTargetException;
 import java.text.Collator;
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -283,12 +284,12 @@ public class SurveyDesignDataPage extends EditorPart {
 				}else if (columnIndex == 1){
 					//start
 					if (element instanceof TreeNode){
-						return DateFormat.getDateInstance(DateFormat.MEDIUM).format( ((TreeNode) element).getStartDate());
+						return DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format( ((TreeNode) element).getStartDate());
 					}
 				}else  if (columnIndex == 2){
 					//end
 					if (element instanceof TreeNode){
-						return DateFormat.getDateInstance(DateFormat.MEDIUM).format( ((TreeNode) element).getEndDate());
+						return DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format( ((TreeNode) element).getEndDate());
 					}
 				}else{
 					
@@ -578,8 +579,8 @@ public class SurveyDesignDataPage extends EditorPart {
 		public static enum Type {SURVEY, MISSION};
 		
 		private String id;
-		private Date startDate;
-		private Date endDate;
+		private LocalDate startDate;
+		private LocalDate endDate;
 
 		private UUID uuid;
 		private Type type;
@@ -587,7 +588,7 @@ public class SurveyDesignDataPage extends EditorPart {
 		private HashMap<String, String> attributeValues;
 		private List<TreeNode> kids;
 		private TreeNode parent;
-		public TreeNode(UUID uuid, String id, Date startDate, Date endDate, Type type){
+		public TreeNode(UUID uuid, String id, LocalDate startDate, LocalDate endDate, Type type){
 			this.uuid = uuid;
 			this.id = id;
 			this.startDate = startDate;
@@ -631,10 +632,10 @@ public class SurveyDesignDataPage extends EditorPart {
 		public UUID getUuid(){
 			return this.uuid;
 		}
-		public Date getStartDate(){
+		public LocalDate getStartDate(){
 			return this.startDate;
 		}
-		public Date getEndDate(){
+		public LocalDate getEndDate(){
 			return this.endDate;
 		}
 		public String getAttributeValue(String key){

@@ -21,16 +21,16 @@
  */
 package org.wcs.smart.incident.xml;
 
-import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.incident.xml.model.v21.EmployeeType;
 import org.wcs.smart.incident.xml.model.v21.WaypointObservationAttributeType;
+import org.wcs.smart.incident.xml.model.v21.WaypointObservationGroupType;
 import org.wcs.smart.incident.xml.model.v21.WaypointObservationType;
 import org.wcs.smart.incident.xml.model.v21.WaypointType;
-import org.wcs.smart.incident.xml.model.v21.WaypointObservationGroupType;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
@@ -50,7 +50,7 @@ public class IncidentToXml {
 	
 	public static WaypointType toXml(Waypoint incident) throws DatatypeConfigurationException{
 		WaypointType wt = new WaypointType();
-		wt.setDateTime(new SimpleDateFormat(DATE_FORMAT_STR).format(incident.getDateTime()));
+		wt.setDateTime(DateTimeFormatter.ofPattern(DATE_FORMAT_STR).format(incident.getDateTime()));
 		wt.setComment(incident.getComment());
 		wt.setDirection(incident.getDirection());
 		wt.setDistance(incident.getDistance());

@@ -30,9 +30,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -88,7 +91,7 @@ public class CleanUpJob implements Runnable {
 	
 	@Override
 	public void run() {
-		logger.log(Level.FINEST, "Running cleanup job: " + (new Date()).toString()); //$NON-NLS-1$
+		logger.log(Level.FINEST, "Running cleanup job: " + (LocalDate.now()).toString()); //$NON-NLS-1$
 		
 		syncDownloadAvailableHrs = getEnvironmentVariable(EnvironmentVariables.Variable.SYNC_DOWNLOAD_AVAILABLE);
 		caExportAvailableDays = getEnvironmentVariable(EnvironmentVariables.Variable.CA_EXPORT_AVAILABLE);
@@ -220,8 +223,7 @@ public class CleanUpJob implements Runnable {
 		try{
 			Query<?> q = s.createQuery("DELETE FROM WorkItem where startTime < :starttime"); //$NON-NLS-1$
 			
-			Date d = new Date((new Date()).getTime() - days * 24l * 60 * 60 *1000);
-			q.setParameter("starttime", d); //$NON-NLS-1$
+			q.setParameter("starttime", LocalDateTime.now().minusDays(days)); //$NON-NLS-1$
 			q.executeUpdate();
 			
 			s.getTransaction().commit();
@@ -298,11 +300,10 @@ public class CleanUpJob implements Runnable {
 	 * @param d
 	 * @return true if file should be deleted; false otherwise
 	 */
-	private boolean checkCaExport(Date d){
+	private boolean checkCaExport(LocalDateTime d){
 		if (caExportAvailableDays == null || caExportAvailableDays <= 0) return false;
 		
-		Date now = new Date();
-		if (now.getTime() - d.getTime() > caExportAvailableDays * 24l * 60 * 60 * 1000){
+		if (ChronoUnit.DAYS.between(d,  LocalDateTime.now()) > caExportAvailableDays){
 			return true;
 		}
 		return false;
@@ -313,10 +314,10 @@ public class CleanUpJob implements Runnable {
 	 * @param d
 	 * @return true if file should be deleted; false otherwise
 	 */
-	private boolean checkSyncDownload(Date d){
+	private boolean checkSyncDownload(LocalDateTime d){
 		if (syncDownloadAvailableHrs == null || syncDownloadAvailableHrs <= 0) return false;
-		Date now = new Date();
-		if (now.getTime() - d.getTime() > syncDownloadAvailableHrs * 60l * 60 * 1000){
+		
+		if (ChronoUnit.HOURS.between(d, LocalDateTime.now()) > syncDownloadAvailableHrs){
 			return true;
 		}
 		return false;
@@ -330,7 +331,7 @@ public class CleanUpJob implements Runnable {
 	private void cleanUpChangeLog(Session session){
 		if (changeLogCleanUpDays == null || changeLogCleanUpDays <= 0) return;
 		
-		Date lastDate = new Date((new Date()).getTime() - changeLogCleanUpDays * 24l * 60 *60 *1000);
+		LocalDateTime lastDate = LocalDateTime.now().minusDays(changeLogCleanUpDays);
 		session.beginTransaction();
 		try{
 			for (ConservationAreaInfo ca : HibernateManager.getConservationAreaInfos(session)){
@@ -354,7 +355,9 @@ public class CleanUpJob implements Runnable {
 		Path gfwPath = DataStoreManager.INSTANCE.getRootDirectory().resolve(GlobalForestWatchNoa.LOG_DIRECTORY);
 		if (!Files.exists(gfwPath)) return;
 		
-		Date lastDate = new Date((new Date()).getTime() - gfwCleanUpDays * 24l * 60 *60 *1000);
+		
+		LocalDateTime lastDate = LocalDateTime.now().minusDays(gfwCleanUpDays);
+		DateTimeFormatter df = DateTimeFormatter.ofPattern(GlobalForestWatchNoa.DATE_FORMAT);
 		try {
 			Files.walkFileTree(gfwPath, new FileVisitor<Path>() {
 					@Override
@@ -366,10 +369,8 @@ public class CleanUpJob implements Runnable {
 						
 						String datetime = fileName.substring(firstIndex+1, lastIndex);
 						try {
-							SimpleDateFormat df = new SimpleDateFormat(GlobalForestWatchNoa.DATE_FORMAT);
-							Date dd = df.parse(datetime);
-							
-							if (dd.before(lastDate)) {
+							LocalDateTime dd = LocalDateTime.parse(datetime, df);
+							if (dd.isBefore(lastDate)) {
 								Files.delete(file);
 							}
 						}catch (Exception ex) {
@@ -408,7 +409,7 @@ public class CleanUpJob implements Runnable {
 		if (days != null && days > 0){
 			//remove all items
 			List<Path> filesToDelete = new ArrayList<>();
-			Date lastDate = new Date((new Date()).getTime() - days * 24l * 60 *60 *1000);
+			LocalDateTime lastDate = LocalDateTime.now().minusDays(days);
 			s.beginTransaction();
 			try{
 				CriteriaBuilder cb = s.getCriteriaBuilder();

@@ -22,8 +22,9 @@
 package org.wcs.smart.i2.ui.editors.record;
 
 import java.text.Collator;
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -212,7 +213,7 @@ public class RecordSummaryPage extends EditorPart{
 		if (recordEditor.getRecord().getDateModified() == null) {
 			lblLastModified.setText(""); //$NON-NLS-1$
 		}else {
-			lblLastModified.setText(DateFormat.getDateInstance().format(recordEditor.getRecord().getDateModified()));
+			lblLastModified.setText(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(recordEditor.getRecord().getDateModified()));
 		}
 		lblLastModifiedBy.setText(recordEditor.getRecord().getLastModifiedBy() == null ? "" : SmartLabelProvider.getFullLabel(recordEditor.getRecord().getLastModifiedBy())); //$NON-NLS-1$
 	}
@@ -453,16 +454,16 @@ public class RecordSummaryPage extends EditorPart{
 		if (recordEditor.getEditMode()){
 			DateTime dtPrimaryDate = new DateTime(leftPart, SWT.BORDER | SWT.DATE | SWT.LONG | SWT.CALENDAR | SWT.DROP_DOWN);
 	
-			SmartUtils.initDateDateTimeWidget(dtPrimaryDate, recordEditor.getRecord().getPrimaryDate());
+			SmartUtils.initDateTimeWidget(dtPrimaryDate, recordEditor.getRecord().getPrimaryDate().toLocalDate());
 			toolkit.adapt(dtPrimaryDate);
 			dtPrimaryDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 			
 			dtPrimaryDate.addListener(SWT.Selection, e->{
-				recordEditor.getRecord().setPrimaryDate( SmartUtils.getDate(dtPrimaryDate) );
+				recordEditor.getRecord().setPrimaryDate( SmartUtils.toDate(dtPrimaryDate).atStartOfDay() );
 				recordEditor.setDirty(true);
 			});
 		}else {
-			toolkit.createLabel(leftPart, DateFormat.getDateInstance().format(recordEditor.getRecord().getPrimaryDate()));
+			toolkit.createLabel(leftPart, DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(recordEditor.getRecord().getPrimaryDate()));
 		}
 
 		toolkit.createLabel(leftPart, Messages.RecordSummaryPage_ProfileLbl);
@@ -604,13 +605,13 @@ public class RecordSummaryPage extends EditorPart{
 		Label l = toolkit.createLabel(infoComp, Messages.RecordSummaryPage_CreateLabel);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
-		l = toolkit.createLabel(infoComp, recordEditor.getRecord().getDateCreated() == null ? "" : DateFormat.getDateInstance().format(recordEditor.getRecord().getDateCreated())); //$NON-NLS-1$
+		l = toolkit.createLabel(infoComp, recordEditor.getRecord().getDateCreated() == null ? "" : DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(recordEditor.getRecord().getDateCreated())); //$NON-NLS-1$
 		l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		l = toolkit.createLabel(infoComp, Messages.RecordSummaryPage_ModifiedLabel);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
-		lblLastModified = toolkit.createLabel(infoComp, recordEditor.getRecord().getDateModified() == null ? "" : DateFormat.getDateInstance().format(recordEditor.getRecord().getDateModified())); //$NON-NLS-1$
+		lblLastModified = toolkit.createLabel(infoComp, recordEditor.getRecord().getDateModified() == null ? "" : DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(recordEditor.getRecord().getDateModified())); //$NON-NLS-1$
 		lblLastModified.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		l = toolkit.createLabel(infoComp, Messages.RecordSummaryPage_CreatedByLabel);

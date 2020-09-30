@@ -29,11 +29,11 @@ import java.math.BigInteger;
 import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -549,7 +549,7 @@ public class ConservationAreas extends HttpServlet{
 		    };
 			String fileName = toReturn.getFileName().toString();
 			if (item.getType() == WorkItem.Type.DOWN_CA) {
-				fileName = wkCa.getId() + ".smart" + (new SimpleDateFormat("yyyyMMdd")).format(item.getStartTime()) + fileName.substring(fileName.lastIndexOf('.'));  //$NON-NLS-1$//$NON-NLS-2$
+				fileName = wkCa.getId() + ".smart" + DateTimeFormatter.ofPattern("yyyyMMdd").format(item.getStartTime()) + fileName.substring(fileName.lastIndexOf('.'));  //$NON-NLS-1$//$NON-NLS-2$
 			}
 			return Response.ok(stream, MediaType.APPLICATION_OCTET_STREAM)
 					.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName+ "\"") //$NON-NLS-1$ //$NON-NLS-2$
@@ -613,7 +613,7 @@ public class ConservationAreas extends HttpServlet{
 			item.setConservationAreaInfo(info);
 			item.setLocalFilename(""); //$NON-NLS-1$
 			item.setMessage(null);
-			item.setStartTime(new Date());
+			item.setStartTime(LocalDateTime.now());
 			item.setStatus(WorkItem.Status.PROCESSING);
 			item.setTotalBytes(-1);
 			item.setType(WorkItem.Type.DOWN_CA);
@@ -697,7 +697,7 @@ public class ConservationAreas extends HttpServlet{
 			item.setConservationAreaInfo(info);
 			item.setLocalFilename(""); //$NON-NLS-1$
 			item.setMessage(null);
-			item.setStartTime(new Date());
+			item.setStartTime(LocalDateTime.now());
 			item.setStatus(WorkItem.Status.PROCESSING);
 			item.setTotalBytes(-1);
 			item.setType(WorkItem.Type.DOWN_SYNC);
@@ -1042,7 +1042,7 @@ public class ConservationAreas extends HttpServlet{
 			WorkItem up = new WorkItem();
 			up.setLocale(request.getLocale());
 			up.setConservationAreaInfo(ca);
-			up.setStartTime(new Date());
+			up.setStartTime(LocalDateTime.now());
 			up.setStatus(WorkItem.Status.UPLOADING);
 			up.setType(Type.UP_CA);
 			up.setTotalBytes(totalBytes);
@@ -1116,7 +1116,7 @@ public class ConservationAreas extends HttpServlet{
 			WorkItem up = new WorkItem();
 			up.setLocale(request.getLocale());
 			up.setConservationAreaInfo(ca);
-			up.setStartTime(new Date());
+			up.setStartTime(LocalDateTime.now());
 			up.setStatus(WorkItem.Status.UPLOADING);
 			up.setType(Type.UP_SYNC);
 			up.setTotalBytes(totalBytes);

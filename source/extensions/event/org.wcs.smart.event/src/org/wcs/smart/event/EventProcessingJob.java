@@ -22,10 +22,10 @@
 package org.wcs.smart.event;
 
 import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Stack;
@@ -54,7 +54,6 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
-import org.wcs.smart.util.SharedUtils;
 
 /**
  * Job for processing observation events. There is a single job
@@ -224,11 +223,11 @@ public class EventProcessingJob extends Job {
 					break;
 					
 				case DATE:
-					SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd"); //$NON-NLS-1$
-					Date date1 = format.parse( afilter.getValue().toString() );
-					Date date2 = format.parse( afilter.getValue2().toString() );
-					Date dvalue = attributeValue.getDateValue();
-					boolean isbetween = ( (SharedUtils.isSameDate(date1, dvalue) || dvalue.after(date1)) && (SharedUtils.isSameDate(date2, dvalue) || dvalue.before(date2)));
+					DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd"); //$NON-NLS-1$
+					LocalDate date1 = LocalDate.parse(afilter.getValue().toString(), format );
+					LocalDate date2 = LocalDate.parse(afilter.getValue2().toString(), format );
+					LocalDate dvalue = attributeValue.getDateValue();
+					boolean isbetween = ( date1.isEqual(dvalue) || dvalue.isAfter(date1)) && (date2.isEqual(dvalue) || dvalue.isBefore(date2));
 					if (afilter.getOperator() == Operator.NOT_BETWEEN) {
 						isbetween = !isbetween;
 					}

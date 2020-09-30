@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.i2.model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -63,7 +63,7 @@ public class IntelLocation extends UuidItem{
 	private ConservationArea ca;
 	private String id;
 	private byte[] geom;
-	private Date dateTime;
+	private LocalDateTime dateTime;
 	private String comment;
 	
 	private List<IntelObservation> observations;
@@ -136,14 +136,14 @@ public class IntelLocation extends UuidItem{
 
 
 	@Column(name="datetime")
-	public Date getDateTime() {
+	public LocalDateTime getDateTime() {
 		return dateTime;
 	}
 
 	/**
 	 * @param time
 	 */
-	public void setDateTime(Date dateTime) {
+	public void setDateTime(LocalDateTime dateTime) {
 		this.dateTime = dateTime;
 	}
 

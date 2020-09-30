@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.i2.query;
 
+import java.time.LocalDate;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -83,8 +83,8 @@ public abstract class RunQueryJob extends Job {
 	
 	protected abstract void onCancel();
 	
-	public void setDateFilter(Date[] dateFilter){
-		parameters.put(Date.class.getName(), dateFilter);
+	public void setDateFilter(LocalDate[] dateFilter){
+		parameters.put(LocalDate.class.getName(), dateFilter);
 	}
 	
 	public void configureParameter(String parameterName, Object value){

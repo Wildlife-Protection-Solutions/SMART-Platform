@@ -21,9 +21,25 @@
  */
 package org.wcs.smart.connect.api;
 
+import static java.time.temporal.ChronoField.DAY_OF_MONTH;
+import static java.time.temporal.ChronoField.DAY_OF_WEEK;
+import static java.time.temporal.ChronoField.HOUR_OF_DAY;
+import static java.time.temporal.ChronoField.MINUTE_OF_HOUR;
+import static java.time.temporal.ChronoField.MONTH_OF_YEAR;
+import static java.time.temporal.ChronoField.SECOND_OF_MINUTE;
+import static java.time.temporal.ChronoField.YEAR;
+
 import java.text.MessageFormat;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.chrono.IsoChronology;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.ResolverStyle;
+import java.time.format.SignStyle;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -108,7 +124,43 @@ public class ConnectAlert extends HttpServlet {
 	@Context private HttpServletResponse response;
 	@Context private HttpServletRequest request;
 
-	
+	 public static final DateTimeFormatter DATE_TIME_FORMAT;
+	    static {
+	        // manually code maps to ensure correct data always used
+	        // (locale data can be changed by application code)
+	        Map<Long, String> moy = new HashMap<>();
+	        moy.put(1L, "Jan");
+	        moy.put(2L, "Feb");
+	        moy.put(3L, "Mar");
+	        moy.put(4L, "Apr");
+	        moy.put(5L, "May");
+	        moy.put(6L, "Jun");
+	        moy.put(7L, "Jul");
+	        moy.put(8L, "Aug");
+	        moy.put(9L, "Sep");
+	        moy.put(10L, "Oct");
+	        moy.put(11L, "Nov");
+	        moy.put(12L, "Dec");
+	        DATE_TIME_FORMAT = new DateTimeFormatterBuilder()
+	                .parseCaseInsensitive()
+	                .parseLenient()
+	                .appendValue(DAY_OF_MONTH, 1, 2, SignStyle.NOT_NEGATIVE)
+	                .appendLiteral(' ')
+	                .appendText(MONTH_OF_YEAR, moy)
+	                .appendLiteral(' ')
+	                .appendValue(YEAR, 4)  // 2 digit year not handled
+	                .appendLiteral(' ')
+	                .appendValue(HOUR_OF_DAY, 2)
+	                .appendLiteral(':')
+	                .appendValue(MINUTE_OF_HOUR, 2)
+	                .optionalStart()
+	                .appendLiteral(':')
+	                .appendValue(SECOND_OF_MINUTE, 2)
+	                .optionalEnd()
+	                .appendLiteral(' ')
+	                .appendOffset("+HHMM", "GMT")
+	                .toFormatter();
+	    }
 	/*
 	 * Validates the current user has the permission to the provided action
 	 * 1 parameter - the action type to test for permission
@@ -818,10 +870,14 @@ public class ConnectAlert extends HttpServlet {
 		return newAlert;
 	}
     
-    //outputs two features, one is used for the JSON information, the other is used as the track, even if it is just one point, to draw on the map.
-    //It was easier to duplicate the data since it is being drawn directly. Otherwise the javascript would have to process the data etc, which didn't work well with leaflet.
+    //outputs two features, one is used for the JSON information, 
+    //the other is used as the track, even if it is just one point, to draw on the map.
+    //It was easier to duplicate the data since it is being drawn directly. 
+    //Otherwise the javascript would have to process the data etc, which didn't work well with leaflet.
     
-    //I also added the timezone offset of server vs GMT, because that is best way I can figure out to deal with annoying timezone issues without converting everything to newer java date objects. 
+    //I also added the timezone offset of server vs GMT, because that is best way 
+    //I can figure out to deal with annoying timezone issues without 
+    //converting everything to newer java date objects. 
     private JSONObject convertToGeoJson(Session s , List<Alert> list) throws HibernateException{
     	 JSONObject featureCollection = new JSONObject();
     	    try {
@@ -846,8 +902,8 @@ public class ConnectAlert extends HttpServlet {
     	            	properties.put("cauuid", (String)null); //$NON-NLS-1$
     	            }
     	            properties.put("creatoruuid", obj.getCreatorUuid()); //$NON-NLS-1$
-    	            String utcDate = obj.getDate().toGMTString();
-    	            properties.put("date", utcDate); //$NON-NLS-1$
+    	            //date is expected to look like: //29 Sep 2020 16:29:54 GMT
+    	            properties.put("date", DATE_TIME_FORMAT.format(obj.getDate())); //$NON-NLS-1$
     	            //properties.put("date", convertTimeToGMT(obj.getDate())); //$NON-NLS-1$
     	            properties.put("desc", obj.getDescription()); //$NON-NLS-1$
     	            properties.put("level", obj.getLevel()); //$NON-NLS-1$
@@ -862,8 +918,7 @@ public class ConnectAlert extends HttpServlet {
     	            properties.put("y", obj.getY()); //$NON-NLS-1$
     	            
     	            //add timezone offset
-    	            TimeZone tz = TimeZone.getDefault();
-    	    		properties.put("timezoneOffset", tz.getOffset(new Date().getTime()) / 1000 / 60); //$NON-NLS-1$
+    	    		properties.put("timezoneOffset", obj.getDate().getOffset().getRules().getOffset(LocalDateTime.now()).getTotalSeconds() / 60); //$NON-NLS-1$
     	    		
     	    		//add ca name/label and type label
     	    		if (obj.getCa() != null) {

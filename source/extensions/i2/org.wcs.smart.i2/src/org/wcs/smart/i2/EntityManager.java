@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.i2;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -179,7 +179,7 @@ public enum EntityManager {
 	 * @param dFilter
 	 * @return
 	 */
-	public List<IntelEntityLocation> getEntityLocations(Session session, UUID entityUuid, Date[] dFilter){
+	public List<IntelEntityLocation> getEntityLocations(Session session, UUID entityUuid, LocalDateTime[] dFilter){
 		List<IntelEntityLocation> alllocations = null;
 		
 		if (dFilter != null && dFilter.length == 2 && dFilter[0] != null && dFilter[1] != null){

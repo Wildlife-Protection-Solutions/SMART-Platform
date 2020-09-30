@@ -21,12 +21,13 @@
  */
 package org.wcs.smart.patrol.internal.ui.importwp;
 
-import java.sql.Time;
 import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -35,6 +36,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.swt.widgets.Display;
+import org.locationtech.jts.geom.LineString;
 import org.wcs.smart.gpx.GPSDataImport.ImportType;
 import org.wcs.smart.observation.common.importwp.ImportOptionsComposite.ImportOption;
 import org.wcs.smart.observation.common.importwp.ObservationGPSDataImport;
@@ -48,10 +50,6 @@ import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.ui.SavePatrolPartJob;
 import org.wcs.smart.patrol.ui.SaveWaypointJob;
-import org.wcs.smart.util.SharedUtils;
-import org.wcs.smart.util.SmartUtils;
-
-import org.locationtech.jts.geom.LineString;
 
 /**
  * Class of utilities that support
@@ -153,11 +151,13 @@ public class PatrolGPSDataImport {
 				currentLeg.getWaypoints().add(pwp);
 				addedWaypoints.add(pwp);
 				if (op == ImportOption.SELECT){
-					Date wpdt = currentLeg.getDate();
+					LocalDate wpd = currentLeg.getDate();
+					LocalTime wpt = LocalTime.MIN;
+					
 					if (pwp.getWaypoint().getDateTime() != null){
-						wpdt = SmartUtils.combineDateTime(wpdt, new Time(pwp.getWaypoint().getDateTime().getTime()));
+						wpt = pwp.getWaypoint().getDateTime().toLocalTime();
 					}
-					pwp.getWaypoint().setDateTime(wpdt);
+					pwp.getWaypoint().setDateTime(LocalDateTime.of(wpd, wpt));
 				}
 			}
 			message = MessageFormat.format(Messages.GPSDataImport_WaypointsImportedCurrentDay, new Object[]{waypoints.size()});
@@ -183,8 +183,12 @@ public class PatrolGPSDataImport {
 	}
 	
 	
-	private static boolean betweenDates(Date date, Date start, Date end){
-		return ( date.equals(start) || date.after(start) ) &&  (date.equals(end) || date.before(end));
+	private static boolean betweenDates(LocalDate date, LocalDate start, LocalDate end){
+		return ( date.isEqual(start) || date.isAfter(start) ) &&  (date.isEqual(end) || date.isBefore(end));
+	}
+	
+	private static boolean betweenDates(LocalDateTime date, LocalDateTime start, LocalDateTime end){
+		return ( date.isEqual(start) || date.isAfter(start) ) &&  (date.isEqual(end) || date.isBefore(end));
 	}
 	
 	/**
@@ -219,12 +223,10 @@ public class PatrolGPSDataImport {
 		}
 		List<Waypoint> coords = new ArrayList<Waypoint>();
 		for (PatrolWaypoint wp : day.getWaypoints()){
-			Date d = wp.getWaypoint().getDateTime();
-			
 			Waypoint tmp = new Waypoint();
 			tmp.setRawX(wp.getWaypoint().getRawX());
 			tmp.setRawY(wp.getWaypoint().getRawY());
-			tmp.setDateTime(d);
+			tmp.setDateTime(wp.getWaypoint().getDateTime());
 			coords.add(tmp);
 		}
 		Track newTrack = convertToTrack(coords);
@@ -250,16 +252,14 @@ public class PatrolGPSDataImport {
 			}
 			
 			boolean found = false;
-			Date wpdt = point.getDateTime();
+			LocalDateTime wpdt = point.getDateTime();
 			for(PatrolLeg leg : patrolLegs){
-				if (betweenDates(SharedUtils.getDatePart(wpdt, false), 
-						SharedUtils.getDatePart(leg.getStartDate(), false),
-						SharedUtils.getDatePart(leg.getEndDate(), false))){
+				if (betweenDates(wpdt.toLocalDate(), leg.getStartDate(), leg.getEndDate())){
 					//find the leg day
 					
 					for (PatrolLegDay legday : leg.getPatrolLegDays()){
-						Date start = SmartUtils.combineDateTime(legday.getDate(), legday.getStartTime());
-						Date end = SmartUtils.combineDateTime(legday.getDate(), legday.getEndTime());
+						LocalDateTime start = LocalDateTime.of(legday.getDate(), legday.getStartTime());
+						LocalDateTime end = LocalDateTime.of(legday.getDate(), legday.getEndTime());
 						if (betweenDates(wpdt, start, end)){
 							found = true;
 							
@@ -287,10 +287,7 @@ public class PatrolGPSDataImport {
 							trackpnts = new ArrayList<Waypoint>();
 							tracks.put(legday, trackpnts);
 						}
-						if (SharedUtils.getDatePart(wpdt, false).equals(
-								SharedUtils.getDatePart(legday.getDate(),
-								false))) {
-							
+						if (wpdt.toLocalDate().isEqual(legday.getDate())) {
 							trackpnts.add(point);
 						}
 						found = true;
@@ -330,19 +327,21 @@ public class PatrolGPSDataImport {
 		for (Waypoint point : waypoints){
 			
 			boolean found = false;
-			Date wpdt = point.getDateTime();
+			LocalDateTime wpdt = point.getDateTime();
 			if (wpdt == null){
 				continue;
 			}
 			//find patrol leg day based on times
 			for (Iterator<PatrolLeg> iterator = patrolLegs.iterator(); iterator.hasNext();) {
-				PatrolLeg leg = (PatrolLeg) iterator.next();				
-				if (betweenDates(SharedUtils.getDatePart(wpdt,false), SharedUtils.getDatePart(leg.getStartDate(), false), SharedUtils.getDatePart(leg.getEndDate(), false))){
+				PatrolLeg leg = (PatrolLeg) iterator.next();		
+				
+				
+				if (betweenDates(wpdt.toLocalDate(), leg.getStartDate(), leg.getEndDate())){
 					//find the leg day
 					for (Iterator<PatrolLegDay> iterator2 = leg.getPatrolLegDays().iterator(); iterator2.hasNext();) {
 						PatrolLegDay legday = (PatrolLegDay) iterator2.next();
-						Date start = SmartUtils.combineDateTime(legday.getDate(), legday.getStartTime());
-						Date end = SmartUtils.combineDateTime(legday.getDate(), legday.getEndTime());
+						LocalDateTime start = LocalDateTime.of(legday.getDate(), legday.getStartTime());
+						LocalDateTime end = LocalDateTime.of(legday.getDate(), legday.getEndTime());
 						if (betweenDates(wpdt, start, end)){
 							
 							PatrolWaypoint pwp = new PatrolWaypoint();
@@ -368,7 +367,7 @@ public class PatrolGPSDataImport {
 					PatrolLeg leg = (PatrolLeg) iterator.next();
 					for (Iterator<PatrolLegDay> iterator2 = leg.getPatrolLegDays().iterator(); iterator2.hasNext();) {
 						PatrolLegDay legday = (PatrolLegDay) iterator2.next();
-						if (SharedUtils.getDatePart(wpdt, false).equals(SharedUtils.getDatePart(legday.getDate(),false))) {
+						if (wpdt.toLocalDate().isEqual(legday.getDate())) {
 							
 							PatrolWaypoint pwp = new PatrolWaypoint();
 							pwp.setPatrolLegDay(legday);
@@ -398,7 +397,7 @@ public class PatrolGPSDataImport {
 	public static Track convertToTrack(List<Waypoint> coordinates){
 		if (coordinates.isEmpty()) return null;
 		if (coordinates.size() == 1) return null; //throw new RuntimeException("Multiple points required to generate a track.  Only a single point found."); 
-		LineString track = ObservationGPSDataImport.convertToLineString(coordinates, Track.ZTIMEZONE);
+		LineString track = ObservationGPSDataImport.convertToLineString(coordinates);
 		Track t = new Track();
 		t.setLineStrings(Arrays.asList(track));
 		return t;

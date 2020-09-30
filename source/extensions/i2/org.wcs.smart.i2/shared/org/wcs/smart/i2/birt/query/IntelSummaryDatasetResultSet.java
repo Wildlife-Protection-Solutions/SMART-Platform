@@ -25,6 +25,7 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -92,14 +93,14 @@ public class IntelSummaryDatasetResultSet implements IResultSet {
 		eparameters.putAll(dataset.getConnection().getAdditionalQueryParameters());
 		eparameters.put(java.util.Date.class.getName(), new Date[] {null, null});
 		if (dataset.getParameterMetaData().getParameterCount() > 0) {
-			Date[] dfilter = new Date[] {null, null};
+			LocalDate[] dfilter = new LocalDate[] {null, null};
 			int sindex = ((IntelSummaryDatasetParameterMetadata)dataset.getParameterMetaData()).findParameterIndex(DataSourceParameter.START_DATE.getName());
 			int eindex = ((IntelSummaryDatasetParameterMetadata)dataset.getParameterMetaData()).findParameterIndex(DataSourceParameter.END_DATE.getName());
 			if (sindex > 0 && eindex > 0 && parameters.get(sindex) != null && parameters.get(eindex) != null) {
-				dfilter[0] = (Date) parameters.get(sindex);
-				dfilter[1] = (Date) parameters.get(eindex);
+				dfilter[0] = ((java.sql.Date) parameters.get(sindex)).toLocalDate();
+				dfilter[1] = ((java.sql.Date) parameters.get(eindex)).toLocalDate();
 			}
-			eparameters.put(java.util.Date.class.getName(), dfilter);
+			eparameters.put(LocalDate.class.getName(), dfilter);
 		}
 		
 		try {

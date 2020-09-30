@@ -22,12 +22,12 @@
 package org.wcs.smart.i2.search;
 
 import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -263,19 +263,12 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 				sb.append(" :date1 and :date2 "); //$NON-NLS-1$ 
 				sb.append(" )" ); //$NON-NLS-1$
 					
-				Date d1 = (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).parse(bits[2]);
-				Date d2 = (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).parse(bits[4]);
-					
-				Calendar cal = Calendar.getInstance();
-				cal.setTimeInMillis(d2.getTime());
-				cal.set(Calendar.SECOND, 59);
-				cal.set(Calendar.MINUTE, 59);
-				cal.set(Calendar.HOUR_OF_DAY, 23);
-					
+				LocalDate d1 = LocalDate.parse(bits[2], DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR));
+				LocalDate d2 = LocalDate.parse(bits[4], DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR));
 				
 				session.createNativeQuery(sb.toString())
-					.setParameter("date1", d1) //$NON-NLS-1$
-					.setParameter("date2", cal.getTime()) //$NON-NLS-1$
+					.setParameter("date1", d1.atStartOfDay()) //$NON-NLS-1$
+					.setParameter("date2", d2.atTime(LocalTime.MAX)) //$NON-NLS-1$
 					.executeUpdate();
 				
 				where.append(" " + columnName +" ");  //$NON-NLS-1$//$NON-NLS-2$
@@ -396,18 +389,12 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 					sb.append(" :date1 and :date2 "); //$NON-NLS-1$ 
 					sb.append(")"); //$NON-NLS-1$
 						
-					Date d1 = (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).parse(qbits[2]);
-					Date d2 = (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).parse(qbits[4]);
-						
-					Calendar cal = Calendar.getInstance();
-					cal.setTimeInMillis(d2.getTime());
-					cal.set(Calendar.SECOND, 59);
-					cal.set(Calendar.MINUTE, 59);
-					cal.set(Calendar.HOUR_OF_DAY, 23);
+					LocalDate d1 = LocalDate.parse(bits[2], DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR));
+					LocalDate d2 = LocalDate.parse(bits[4], DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR));
 						
 					session.createNativeQuery(sb.toString())
-						.setParameter("date1", d1) //$NON-NLS-1$
-						.setParameter("date2", cal.getTime()) //$NON-NLS-1$
+						.setParameter("date1", d1.atStartOfDay()) //$NON-NLS-1$
+						.setParameter("date2", d2.atTime(LocalTime.MAX)) //$NON-NLS-1$
 						.setParameter("attributeKey", attributeKey) //$NON-NLS-1$
 						.executeUpdate();
 				}else if (atype == IntelAttribute.AttributeType.LIST){

@@ -25,12 +25,11 @@ import java.awt.Point;
 import java.awt.Rectangle;
 
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.udig.project.ui.commands.SelectionBoxCommand;
 import org.locationtech.udig.project.ui.render.displayAdapter.MapMouseEvent;
 import org.locationtech.udig.project.ui.tool.ModalTool;
 import org.locationtech.udig.project.ui.tool.SimpleTool;
-
-import org.locationtech.jts.geom.Coordinate;
 
 /**
  * Tool that allows users to select a bounding box on the map.  A

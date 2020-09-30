@@ -21,9 +21,10 @@
  */
 package org.wcs.smart.i2.query;
 
-import java.text.DateFormat;
 import java.text.MessageFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.Locale;
 
 import org.wcs.smart.ICoreLabelProvider;
@@ -103,7 +104,7 @@ public class DataModelColumn extends AbstractQueryColumn{
 				return Boolean.FALSE;
 				
 			case DATE:
-				return (Date)value;
+				return (LocalDate)value;
 			case LIST:
 				return value.toString();
 			case NUMERIC:
@@ -122,7 +123,7 @@ public class DataModelColumn extends AbstractQueryColumn{
 		Object toFormat = getValue(item);
 		if (toFormat == null) return ""; //$NON-NLS-1$
 		if (getDataType() == Type.STRING) return (String)toFormat;
-		if (getDataType() == Type.DATE) return DateFormat.getDateInstance(DateFormat.DEFAULT, l).format((Date)toFormat);
+		if (getDataType() == Type.DATE) return DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(l).format( (LocalDate)toFormat );
 		if (getDataType() == Type.NUMERIC) return ((Number)toFormat).toString();
 		if (getDataType() == Type.BOOLEAN){
 			if ((Boolean)toFormat){

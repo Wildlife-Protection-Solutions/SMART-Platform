@@ -21,8 +21,9 @@
  */
 package org.wcs.smart.i2.ui.views.query.dropitem;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -56,8 +57,8 @@ public class DateDropItem extends DropItem {
 	
 	private ComboViewer operators;
 
-	private Date currentValue1;
-	private Date currentValue2;
+	private LocalDate currentValue1;
+	private LocalDate currentValue2;
 	private Operator currentOperator;
 
 	private boolean canEdit;
@@ -74,8 +75,8 @@ public class DateDropItem extends DropItem {
 	 */
 	@Override
 	public String getText() {
-		String d1 = SmartUtils.getDate(dtime1).toString();
-		String d2 = SmartUtils.getDate(dtime1).toString();
+		String d1 = DateTimeFormatter.ISO_LOCAL_DATE.format(SmartUtils.toDate(dtime1));
+		String d2 = DateTimeFormatter.ISO_LOCAL_DATE.format(SmartUtils.toDate(dtime2));
 		return this.text + " " + getOperatorSelection().getLabel(Locale.getDefault()) + " " + d1 + " " + d2; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		
 		
@@ -92,11 +93,11 @@ public class DateDropItem extends DropItem {
 		querypart.append( " "); //$NON-NLS-1$
 		querypart.append(getOperatorSelection().getKey());
 		querypart.append( " "); //$NON-NLS-1$
-		querypart.append((new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(SmartUtils.getDate(dtime1)));
+		querypart.append((DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(SmartUtils.toDate(dtime1)));
 		querypart.append( " "); //$NON-NLS-1$
 		querypart.append( Operator.AND.getKey() );
 		querypart.append( " "); //$NON-NLS-1$
-		querypart.append((new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(SmartUtils.getDate(dtime2)));
+		querypart.append((DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(SmartUtils.toDate(dtime2)));
 		
 		return querypart.toString();
 	}
@@ -153,7 +154,7 @@ public class DateDropItem extends DropItem {
 		dtime1.addListener(SWT.Selection, new Listener(){
 			@Override
 			public void handleEvent(Event event) {
-				Date newValue = (new java.sql.Date(SmartUtils.getDate(dtime1).getTime()));
+				LocalDate newValue = SmartUtils.toDate(dtime1);
 				if (!newValue.equals(currentValue1)){
 					queryChanged();
 					currentValue1 = newValue;
@@ -164,7 +165,7 @@ public class DateDropItem extends DropItem {
 		dtime2.addListener(SWT.Selection, new Listener(){
 			@Override
 			public void handleEvent(Event event) {
-				Date newValue = (new java.sql.Date(SmartUtils.getDate(dtime2).getTime()));
+				LocalDate newValue = SmartUtils.toDate(dtime2);
 				if (!newValue.equals(currentValue1)){
 					queryChanged();
 					currentValue2 = newValue;
@@ -179,15 +180,15 @@ public class DateDropItem extends DropItem {
 		initDrag(lblAttribute);
 		
 		if (dtime1 != null && currentValue1 != null){
-			SmartUtils.initDateDateTimeWidget(dtime1, currentValue1);	
+			SmartUtils.initDateTimeWidget(dtime1, currentValue1);	
 		}
 		if (dtime2 != null && currentValue2 != null){
-			SmartUtils.initDateDateTimeWidget(dtime2, currentValue2);	
+			SmartUtils.initDateTimeWidget(dtime2, currentValue2);	
 		}
 		
 	}
 
-	public void setInitialValue(Operator op, Date d1, Date d2) {
+	public void setInitialValue(Operator op, LocalDate d1, LocalDate d2) {
 		this.currentOperator = op;
 		this.currentValue1 = d1;
 		this.currentValue2 = d2;

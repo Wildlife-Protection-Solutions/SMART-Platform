@@ -22,7 +22,8 @@
 package org.wcs.smart.asset.model;
 
 import java.io.File;
-import java.text.DateFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.Locale;
 
 import javax.persistence.Query;
@@ -97,7 +98,7 @@ public class AssetWaypointSource implements IWaypointSource{
 		sb.append(" ("); //$NON-NLS-1$
 		sb.append(wp.getId());
 		sb.append(" - "); //$NON-NLS-1$
-		sb.append(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, l).format(wp.getDateTime()));
+		sb.append(DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).format(wp.getDateTime()));
 		sb.append(")"); //$NON-NLS-1$
 		return sb.toString();
 	}

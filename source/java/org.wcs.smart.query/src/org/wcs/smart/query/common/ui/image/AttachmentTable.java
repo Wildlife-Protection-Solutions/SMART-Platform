@@ -42,9 +42,9 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
+import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 import org.wcs.smart.query.common.engine.IDesktopPagedImageResultSet;
 import org.wcs.smart.query.common.engine.IPagedImageResultSet;
-import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 import org.wcs.smart.ui.Thumbnail;
 import org.wcs.smart.util.SmartUtils;
 

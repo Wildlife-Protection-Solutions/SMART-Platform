@@ -23,11 +23,14 @@ package org.wcs.smart.i2.ui.editors;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -119,7 +122,6 @@ import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.udig.AddContentFilterLayersCommand;
 import org.wcs.smart.udig.ContentFilterLayerImpl;
 import org.wcs.smart.ui.properties.DialogConstants;
-import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -150,7 +152,7 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 		}
 		public String getWaypointLabel(Waypoint wo) {
 			if (this == ID) return String.valueOf(wo.getId());
-			if (this == DATETIME) return DateFormat.getDateTimeInstance().format(wo.getDateTime());
+			if (this == DATETIME) return DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(wo.getDateTime());
 			if (this == SOURCE_LINK) return WaypointSourceEngine.INSTANCE.getSource(wo.getSourceId()).getName(Locale.getDefault());
 			if (this == SOURCE) return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(IIntelligenceLabelProvider.DM_SOURCE_LABEL, Locale.getDefault());
 			if (this == OBSERVATION) {
@@ -161,7 +163,7 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 		}
 		public String getLocationLabel(IntelLocation location){
 			if (this == ID) return location.getId();
-			if (this == DATETIME) return DateFormat.getDateTimeInstance().format(location.getDateTime());
+			if (this == DATETIME) return DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(location.getDateTime());
 			if (this == OBSERVATION){
 				int cnt = 0;
 				if (location.getObservations() != null ){
@@ -182,7 +184,7 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 	private MapComposite mapPart;
 	
 	private DateFilterDropDownComposite dateComp;
-	private Date[] dateFilter = null;
+	private LocalDate[] dateFilter = null;
 	
     private List<ContentFilterLayerImpl> locationLayers = null; //record locations layers
 	
@@ -219,7 +221,7 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 
 	private void addLayers(){
 		locationLayers = new ArrayList<ContentFilterLayerImpl>();
-		final Date[] dFilters = new Date[2];
+		final LocalDate[] dFilters = new LocalDate[2];
 		if (dateComp != null){
 			if (dateComp.getDateFilter() == DateFilter.CUSTOM){
 				dFilters[0] = dateComp.getCustomStartDate();
@@ -245,7 +247,7 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 				
 				
 				try {
-					Filter dateFilter = IntelEntityDataSource.createDateFilter(dFilters[0], dFilters[1]);
+					Filter dateFilter = IntelEntityDataSource.createDateTimeFilter(dFilters[0] == null ? null : dFilters[0].atStartOfDay(), dFilters[1] == null ? null : dFilters[1].atTime(LocalTime.MAX));
 					List<? extends IGeoResource> resources = new ArrayList<>(service.resources(monitor));
 					for (Iterator<? extends IGeoResource> iterator = resources.iterator(); iterator.hasNext();) {
 						IGeoResource iGeoResource = (IGeoResource) iterator.next();
@@ -318,7 +320,7 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 					DateFilter.CUSTOM
 		};
 		DateFilterComposite.DateFilter initialDateFilter = DateFilter.ALL;
-		dateFilter = new Date[]{initialDateFilter.getStartDate(), initialDateFilter.getEndDate()};
+		dateFilter = new LocalDate[]{initialDateFilter.getStartDate(), initialDateFilter.getEndDate()};
 		dateComp = new DateFilterDropDownComposite(mapArea, defaultFilters, initialDateFilter);
         dateComp.setBounds(0, 0, dateComp.computeSize(SWT.DEFAULT, SWT.DEFAULT).x, dateComp.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
         dateComp.addChangeListener(new ISelectionChangedListener() {
@@ -343,19 +345,19 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
         parent.setWeights(new int[] {7,3});
 	}
 
-	public Date[] getDateFilter(){
+	public LocalDate[] getDateFilter(){
 		return dateFilter;
 	}
 	private void dateFilterChanged(){
 		if (dateComp.getDateFilter() == DateFilter.CUSTOM){
-			dateFilter = new Date[]{dateComp.getCustomStartDate(), SharedUtils.getDatePart(dateComp.getCustomEndDate(), true)};
+			dateFilter = new LocalDate[]{dateComp.getCustomStartDate(), dateComp.getCustomEndDate()};
 		}else{
-			dateFilter = new Date[]{dateComp.getDateFilter().getStartDate(),dateComp.getDateFilter().getEndDate()};
+			dateFilter = new LocalDate[]{dateComp.getDateFilter().getStartDate(),dateComp.getDateFilter().getEndDate()};
 		}
 		loadLocationsLink.schedule();
 		
 		if (service != null){
-			Filter udigDateFilter = IntelEntityDataSource.createDateFilter(dateFilter[0], dateFilter[1]);
+			Filter udigDateFilter = IntelEntityDataSource.createDateTimeFilter(dateFilter[0] == null ? null : dateFilter[0].atStartOfDay(), dateFilter[1] == null ? null : dateFilter[1].atTime(LocalTime.MAX));
 			 for (ContentFilterLayerImpl layer : locationLayers){
 				 layer.setContentFilter(udigDateFilter);
 			 }
@@ -769,7 +771,13 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 			
 			final List<Object> alllocations  = new ArrayList<>();
 			try(Session s = HibernateManager.openSession()){
-				alllocations.addAll(EntityManager.INSTANCE.getEntityLocations(s, entity.getUuid(), dateFilter));
+				LocalDateTime[] dtfilters = null;
+				if (dateFilter != null) {
+					dtfilters = new LocalDateTime[dateFilter.length];
+					if (dateFilter[0] != null)  dtfilters[0] = dateFilter[0].atStartOfDay();
+					if (dateFilter[1] != null)  dtfilters[1] = dateFilter[1].atTime(LocalTime.MAX);
+				}
+				alllocations.addAll(EntityManager.INSTANCE.getEntityLocations(s, entity.getUuid(), dtfilters));
 				for (Object x : alllocations){
 					if (x instanceof IntelEntityLocation) {
 						IntelEntityLocation l = (IntelEntityLocation)x;
@@ -830,8 +838,8 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 			}
 			Collections.sort(alllocations,
 					(x,y)-> {
-						Date d1 = null;
-						Date d2 = null;
+						LocalDateTime d1 = null;
+						LocalDateTime d2 = null;
 						if (x instanceof IntelEntityLocation) {
 							d1 = ((IntelEntityLocation)x).getLocation().getDateTime();
 						}else if (x instanceof Waypoint) {

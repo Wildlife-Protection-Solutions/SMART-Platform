@@ -42,7 +42,6 @@ import org.wcs.smart.asset.query.parser.internal.summary.AssetGroupBy;
 import org.wcs.smart.asset.query.parser.internal.summary.AssetValueItem;
 import org.wcs.smart.asset.query.ui.AssetOptionData;
 import org.wcs.smart.asset.query.ui.definition.AssetFilterPanel;
-import org.wcs.smart.asset.query.ui.definition.AssetSimpleFilterPanel;
 import org.wcs.smart.asset.query.ui.definition.AssetSummaryGroupByValuePanel;
 import org.wcs.smart.asset.query.ui.definition.dropItems.AssetAttributeDropItem;
 import org.wcs.smart.asset.query.ui.definition.dropItems.AssetAttributeListDropItem;

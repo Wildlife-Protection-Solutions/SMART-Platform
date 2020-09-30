@@ -23,7 +23,7 @@ package org.wcs.smart.connect.dataqueue.model;
 
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import javax.persistence.Column;
@@ -91,14 +91,14 @@ public class LocalDataQueueItem extends DataQueueItem{
 	private UUID serverUuid;
 	private Integer order;
 	private String errorMessage;
-	private Date dateProcessed;
+	private LocalDateTime dateProcessed;
 	private Status checkOutStatus;
 	
 	@Column(name="date_processed")
-	public Date getDateProcessed(){
+	public LocalDateTime getDateProcessed(){
 		return this.dateProcessed;
 	}
-	public void setDateProcessed(Date dateProcessed) {
+	public void setDateProcessed(LocalDateTime dateProcessed) {
 		this.dateProcessed = dateProcessed;
 	}
 	

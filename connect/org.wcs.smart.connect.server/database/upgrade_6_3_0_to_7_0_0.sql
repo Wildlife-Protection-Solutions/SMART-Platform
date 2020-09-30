@@ -803,6 +803,16 @@ UPDATE smart.asset_station_location set buffer = 5 where buffer is null or buffe
 				
 ALTER TABLE smart.asset_station alter column buffer set not null;
 ALTER TABLE smart.asset_station_location alter column buffer set not null;
+
+-------- ER -----------
+alter table smart.mission add column start_date date;
+alter table smart.mission add column end_date date;
+
+update smart.mission set start_date = cast(Start_datetime as date), end_date = cast(end_datetime as date);
+
+alter table smart.mission drop column start_datetime;
+alter table smart.mission drop column end_datetime;
+
 ------------ VERSIONS ------------
 insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.smartcollect', '1.0');
 
@@ -812,7 +822,10 @@ update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org
 update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.cybertracker.patrol';
 update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.cybertracker.survey';
 update connect.connect_plugin_version set version = '7.0' where plugin_id = 'org.wcs.smart.cybertracker';
+update connect.connect_plugin_version set version = '3.0' where plugin_id = 'org.wcs.smart.er';
+
 insert into connect.connect_plugin_version (version, plugin_id) values ('1.0', 'org.wcs.smart.paws');
+
 update connect.connect_plugin_version set version = '7.0.0' where plugin_id = 'org.wcs.smart';
 
 update connect.ca_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.asset';
@@ -821,6 +834,7 @@ update connect.ca_plugin_version set version = '2.0' where plugin_id = 'org.wcs.
 update connect.ca_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.cybertracker.patrol';
 update connect.ca_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.cybertracker.survey';
 update connect.ca_plugin_version set version = '7.0' where plugin_id = 'org.wcs.smart.cybertracker';
+update connect.ca_plugin_version set version = '3.0' where plugin_id = 'org.wcs.smart.er';
 update connect.ca_plugin_version set version = '7.0.0' where plugin_id = 'org.wcs.smart';
 
 update connect.connect_version set version = '7.0.0', last_updated = now();		

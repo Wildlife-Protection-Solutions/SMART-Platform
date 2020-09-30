@@ -24,8 +24,8 @@ package org.wcs.smart.asset.query.engine;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
@@ -68,7 +68,6 @@ import org.wcs.smart.query.model.AttributeQueryColumn;
 import org.wcs.smart.query.model.CategoryQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
-import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
 
 
@@ -445,9 +444,9 @@ public class AssetPagedObservationResult extends AssetPagedWaypointResult implem
 				}
 				break;
 			case DATE:
-				if (newValue instanceof Date){
-					Date newDate = (Date)newValue;
-					if (!SharedUtils.isSameDate(newDate,  toUpdate.getDateValue())){
+				if (newValue instanceof LocalDate){
+					LocalDate newDate = (LocalDate)newValue;
+					if (!newDate.isEqual(toUpdate.getDateValue())){
 						toUpdate.setDateValue(newDate);
 						updated = true;
 					}

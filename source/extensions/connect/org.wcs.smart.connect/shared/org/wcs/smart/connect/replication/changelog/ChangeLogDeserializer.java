@@ -28,7 +28,9 @@ import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -46,10 +48,6 @@ import org.wcs.smart.connect.model.ChangeLogItem.Source;
  *
  */
 public abstract class ChangeLogDeserializer {
-
-	private SimpleDateFormat dateFormatter = new SimpleDateFormat(ChangeLogItemSerializer.DATE_FORMAT_STR); 
-	private SimpleDateFormat timeFormatter = new SimpleDateFormat(ChangeLogItemSerializer.TIME_FORMAT_STR); 
-
 	
 	protected Path changeLogFile;
 	protected Path changeLogFilestoreDir;
@@ -155,7 +153,7 @@ public abstract class ChangeLogDeserializer {
 				if( x == null){
 					data.put(colName, null);	
 				}else{
-					data.put(colName, new java.sql.Date(dateFormatter.parse((String)x).getTime()));
+					data.put(colName, java.sql.Date.valueOf(LocalDate.parse((String)x, ChangeLogItemSerializer.dateFormatter)));
 				}
 			}else if (type == Types.TIME){
 				//serialization of time does not include timezone which causes a problem when deserializing as
@@ -165,7 +163,14 @@ public abstract class ChangeLogDeserializer {
 				if( x == null){
 					data.put(colName, null);	
 				}else{
-					data.put(colName, new java.sql.Time(timeFormatter.parse((String)x).getTime()));
+					data.put(colName, java.sql.Time.valueOf(LocalTime.parse((String)x, ChangeLogItemSerializer.timeFormatter)));
+				}
+			}else if (type == Types.TIMESTAMP) {
+				Object x = is.readObject();
+				if( x == null){
+					data.put(colName, null);	
+				}else{
+					data.put(colName, java.sql.Timestamp.valueOf(LocalDateTime.parse((String)x, ChangeLogItemSerializer.dateTimeFormatter)));
 				}
 			}else if (type == Types.OTHER){
 				//uuid

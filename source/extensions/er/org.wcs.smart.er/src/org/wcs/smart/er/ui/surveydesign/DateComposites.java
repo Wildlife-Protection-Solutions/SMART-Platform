@@ -74,7 +74,7 @@ public class DateComposites extends SurveyDesignComposite {
 	@Override
 	public boolean isValid() {
 		if (dates.getEndDate() != null && dates.getStartDate() != null){
-			return !dates.getEndDate().before(dates.getStartDate());
+			return !dates.getEndDate().isBefore(dates.getStartDate());
 		}
 		return true;
 	}

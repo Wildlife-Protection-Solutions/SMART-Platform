@@ -24,13 +24,15 @@ package org.wcs.smart.patrol.xml.model.v11;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.sql.Time;
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -184,8 +186,8 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 			
 		patrol.setArmed(xml.isIsArmed());
 		patrol.setConservationArea(ca);
-		patrol.setEndDate(xml.getEndDate().toGregorianCalendar().getTime());
-		patrol.setStartDate(xml.getStartDate().toGregorianCalendar().getTime());
+		patrol.setEndDate(SmartUtils.toLocalDate(xml.getEndDate()));
+		patrol.setStartDate(SmartUtils.toLocalDate(xml.getStartDate()));
 		patrol.setComment(xml.getComment());
 		patrol.setId(xml.getId());
 		
@@ -233,10 +235,10 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 	
 	private PatrolLeg convertPatrolLeg(PatrolLegType xml, Patrol parent, PatrolMandate mandate) throws Exception{
 		PatrolLeg leg = new PatrolLeg();
-		leg.setEndDate(xml.getEndDate().toGregorianCalendar().getTime());
+		leg.setEndDate(SmartUtils.toLocalDate(xml.getEndDate()));
 		leg.setId(xml.getId());
 		leg.setPatrol(parent);		
-		leg.setStartDate(xml.getStartDate().toGregorianCalendar().getTime());
+		leg.setStartDate(SmartUtils.toLocalDate(xml.getStartDate()));
 		leg.setMandate(mandate);
 		
 		PatrolTransportType ttype = 
@@ -313,7 +315,7 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 			PatrolLegDay pld = convertPatrolLegDay(type, leg);
 			
 
-			if(!(pld.getDate().before(leg.getStartDate()) || pld.getDate().after(leg.getEndDate()))){
+			if(!(pld.getDate().isBefore(leg.getStartDate()) || pld.getDate().isAfter(leg.getEndDate()))){
 				//ensure leg day is included in leg date range, if not don't include it
 				leg.getPatrolLegDays().add(pld);
 			}else{
@@ -324,14 +326,12 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 		}
 		
 		//verify if a leg day exists for each day
-		Date start = leg.getStartDate();
-		Date end = leg.getEndDate();
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(start);
-		while(!cal.getTime().after(end)){
+		LocalDate end = leg.getEndDate();
+		LocalDate cal = LocalDate.from(leg.getStartDate());
+		while(!cal.isAfter(end)){
 			boolean dayfound = false;
 			for(PatrolLegDay pld : leg.getPatrolLegDays()){
-				if (pld.getDate().equals(cal.getTime())){
+				if (pld.getDate().isEqual(cal)){
 					dayfound = true;
 					break;
 				}
@@ -339,25 +339,25 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 			if (!dayfound){
 				//create a leg for the missing day
 				PatrolLegDay missing = new PatrolLegDay();
-				missing.setDate(cal.getTime());
-				missing.setEndTime(Time.valueOf("00:00:00")); //$NON-NLS-1$
+				missing.setDate(cal);
+				missing.setEndTime(LocalTime.MIN);
 				missing.setStartTime(missing.getEndTime());
 				missing.setPatrolLeg(leg);
 				missing.setRestMinutes(0);
 				leg.getPatrolLegDays().add(missing);
 			}
-			cal.add(Calendar.DAY_OF_MONTH, 1);
+			cal = ChronoUnit.DAYS.addTo(cal, 1);
 		}
 		return leg;
 	}
 	
 	private PatrolLegDay convertPatrolLegDay(PatrolLegDayType xml, PatrolLeg parent) throws Exception{
 		PatrolLegDay legday = new PatrolLegDay();
-		legday.setDate(xml.getDate().toGregorianCalendar().getTime());
-		legday.setEndTime(new Time(xml.getEndTime().toGregorianCalendar().getTime().getTime()));
+		legday.setDate(SmartUtils.toLocalDate(xml.getDate()));
+		legday.setEndTime(SmartUtils.toLocalTime(xml.getEndTime()));
 		legday.setPatrolLeg(parent);
 		legday.setRestMinutes((int) xml.getRestMinutes().doubleValue());
-		legday.setStartTime(new Time(xml.getStartTime().toGregorianCalendar().getTime().getTime()));
+		legday.setStartTime(SmartUtils.toLocalTime(xml.getStartTime()));
 		if (xml.getTrack() != null){
 			TrackType txml = xml.getTrack();
 			Track track = new Track();
@@ -385,7 +385,7 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 		wp.setId(xml.getId());
 		wp.setConservationArea(parent.getPatrolLeg().getPatrol().getConservationArea());
 		wp.setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
-		wp.setDateTime(SmartUtils.combineDateTime(parent.getDate(), xml.getTime().toGregorianCalendar().getTime()));
+		wp.setDateTime(LocalDateTime.of(parent.getDate(), SmartUtils.toLocalTime(xml.getTime())));
 		wp.setRawX(xml.getX());
 		wp.setRawY(xml.getY());
 		if (attachmentLocation != null){
@@ -471,7 +471,8 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 		Category cat = findCategory(xml.getCategoryKey());
 		if (cat == null){
 			warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_Warning_CategoryNotFound,
-					new Object[]{xml.getCategoryKey(),parent.getWaypoint().getId() ,DateFormat.getDateTimeInstance().format(parent.getWaypoint().getDateTime())  }) 
+					new Object[]{xml.getCategoryKey(),parent.getWaypoint().getId(),
+							DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(parent.getWaypoint().getDateTime())  }) 
 					);
 			return null;
 		}else{
@@ -493,13 +494,14 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 					}else{
 						warnings.add(
 								MessageFormat.format(Messages.XmlToPatrolConverter_DuplicateAttributesError,
-										new Object[]{parent.getWaypoint().getId(), DateFormat.getDateTimeInstance().format(parent.getWaypoint().getDateTime()), attribute.getAttribute().getKeyId()})); 
+										new Object[]{parent.getWaypoint().getId(), 
+												DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(parent.getWaypoint().getDateTime()), attribute.getAttribute().getKeyId()})); 
 										
 					}
 				}else{
 					warnings.add(MessageFormat.format(
 						Messages.XmlToPatrolConverter_Warning_NotAllDataImported, new Object[]{
-							parent.getWaypoint().getId(),DateFormat.getDateTimeInstance().format(parent.getWaypoint().getDateTime()) }) 
+							parent.getWaypoint().getId(),DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(parent.getWaypoint().getDateTime()) }) 
 					);
 					
 				}

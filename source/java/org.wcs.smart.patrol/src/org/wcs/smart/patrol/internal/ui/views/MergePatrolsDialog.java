@@ -24,9 +24,9 @@ package org.wcs.smart.patrol.internal.ui.views;
 
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
@@ -215,21 +215,12 @@ public class MergePatrolsDialog extends SmartStyledTitleDialog {
 		}
 		
 		//gather start/end dates
-		Calendar cal = Calendar.getInstance();
-		cal.set(Calendar.YEAR, 2200);
-		cal.set(Calendar.MONTH, Calendar.JANUARY);
-		cal.set(Calendar.DAY_OF_MONTH, 1);
-		Date startDate = cal.getTime(); 
-
-		cal.set(Calendar.YEAR, 1900);
-		cal.set(Calendar.MONTH, Calendar.JANUARY);
-		cal.set(Calendar.DAY_OF_MONTH, 1);
-		Date endDate = cal.getTime();
-		 
+		LocalDate startDate = LocalDate.MAX;
+		LocalDate endDate = LocalDate.MIN;
 		for(Patrol p : patrolsToMerge){
 			for(PatrolLeg l : p.getLegs()){
-				if(l.getStartDate().before(startDate)) startDate = l.getStartDate();
-				if(l.getEndDate().after(endDate)) endDate = l.getEndDate();
+				if(l.getStartDate().isBefore(startDate)) startDate = l.getStartDate();
+				if(l.getEndDate().isAfter(endDate)) endDate = l.getEndDate();
 		  	}
 		}
 		newPatrol.setArmed(isArmed);
@@ -239,8 +230,9 @@ public class MergePatrolsDialog extends SmartStyledTitleDialog {
 		newPatrol.setPatrolType(PatrolType.Type.MIXED);
 		newPatrol.setTeam(stationId.getTeam());
 
-		if (newPatrol.getStartDate().getTime() + Patrol.MAX_PATROL_LENGTH_DAYS * 24 * 60 * 60 * 1000.0 < newPatrol.getEndDate().getTime()){
-			MessageDialog.openError(getShell(), Messages.MergePatrolsDialog_ErrorDialogTitle, MessageFormat.format(Messages.MergePatrolsDialog_PatrolToLong, Patrol.MAX_PATROL_LENGTH_DAYS));
+		if (ChronoUnit.DAYS.between(newPatrol.getStartDate(), newPatrol.getEndDate()) > Patrol.MAX_PATROL_LENGTH_DAYS){
+			MessageDialog.openError(getShell(), Messages.MergePatrolsDialog_ErrorDialogTitle, 
+					MessageFormat.format(Messages.MergePatrolsDialog_PatrolToLong, Patrol.MAX_PATROL_LENGTH_DAYS));
 			return;
 		}
 		

@@ -25,6 +25,7 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -114,7 +115,7 @@ public class PlanTargetResultSet  implements IResultSet {
 		}
 	}
 
-	public PlanTargetResultSet(Date startDate, Date endDate,
+	public PlanTargetResultSet(LocalDate startDate, LocalDate endDate,
 			PlanTargetResultSetMetadata metadata, SmartConnection connection) {
 
 		this.metadata = metadata;
@@ -309,8 +310,6 @@ public class PlanTargetResultSet  implements IResultSet {
 			return (Date) lastObject;
 		} else if (lastObject instanceof Time) {
 			return new Date(((Time) lastObject).getTime());
-		} else if (lastObject instanceof java.util.Date) {
-			return new Date(((java.util.Date) lastObject).getTime());
 		}else if (lastObject == null){
 			return null;
 		}

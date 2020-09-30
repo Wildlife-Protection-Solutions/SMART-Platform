@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.i2.model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import org.wcs.smart.ca.Employee;
 
@@ -40,7 +40,7 @@ public interface IIntelAuditItem {
 	 * 
 	 * @return date_created
 	 */
-	public Date getDateCreated();
+	public LocalDateTime getDateCreated();
 	
 	/**
 	 * Set the date_created.
@@ -48,7 +48,7 @@ public interface IIntelAuditItem {
 	 * @param dateCreated
 	 *            date_created
 	 */
-	public void setDateCreated(Date dateCreated);
+	public void setDateCreated(LocalDateTime dateCreated);
 
 
 	/**
@@ -57,14 +57,14 @@ public interface IIntelAuditItem {
 	 * @param dateModified
 	 *            date_modified
 	 */
-	public void setDateModified(Date dateModified);
+	public void setDateModified(LocalDateTime dateModified);
 
 	/**
 	 * Get the date_modified.
 	 * 
 	 * @return date_modified
 	 */
-	public Date getDateModified();
+	public LocalDateTime getDateModified();
 
 	/**
 	 * Get the created_by.

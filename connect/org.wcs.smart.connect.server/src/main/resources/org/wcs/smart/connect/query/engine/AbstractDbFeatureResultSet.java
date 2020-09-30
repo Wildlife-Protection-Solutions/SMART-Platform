@@ -24,9 +24,10 @@ package org.wcs.smart.connect.query.engine;
 import java.math.BigInteger;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.DateFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.time.temporal.Temporal;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -176,10 +177,10 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 				Class<?> bindingType = ftype.getDescriptor(i).getType().getBinding();
 				i++;
 				if (qc.getType() == QueryColumn.ColumnType.TIME &&  bindingType.equals(String.class)){
-					x = DateFormat.getTimeInstance().format((Date)x);
+					x = DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM).format((Temporal)x);
 				}else if (qc.getType() == QueryColumn.ColumnType.DATETIME && bindingType.equals(String.class)){
 					//this is a datetime object which needs to be converted to a string
-					x = DateFormat.getDateTimeInstance().format((Date)x);
+					x = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format((Temporal)x);
 				}
 				data.add(x);
 			}

@@ -21,9 +21,10 @@
  */
 package org.wcs.smart.er.ui.survey.wizard;
 
-import java.text.DateFormat;
 import java.text.MessageFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -108,26 +109,26 @@ public class SurveyDatePage extends WizardPage implements INewSurveyWizardPage{
 
 	private void validate2(){
 		boolean datewarn = false;
-		Date start = dates.getStartDate();
-		Date end = dates.getEndDate();
+		LocalDate start = dates.getStartDate();
+		LocalDate end = dates.getEndDate();
 		
 		if (survey.getSurveyDesign().getStartDate() != null){
 			//ensure start date is not before design start date
 			//ensure end date is not before design start date
-			if (start.before(survey.getSurveyDesign().getStartDate())){
+			if (start.isBefore(survey.getSurveyDesign().getStartDate())){
 				datewarn = true;
 			}
-			if (end.before(survey.getSurveyDesign().getStartDate())){
+			if (end.isBefore(survey.getSurveyDesign().getStartDate())){
 				datewarn = true;
 			}
 		}
 		if (survey.getSurveyDesign().getEndDate() != null){
 			//ensure start date is not after end date
 			//ensure end date is not after end date
-			if (start.after(survey.getSurveyDesign().getEndDate())){
+			if (start.isAfter(survey.getSurveyDesign().getEndDate())){
 				datewarn = true;
 			}
-			if (end.after(survey.getSurveyDesign().getEndDate())){
+			if (end.isAfter(survey.getSurveyDesign().getEndDate())){
 				datewarn = true;
 			}
 		}
@@ -136,8 +137,8 @@ public class SurveyDatePage extends WizardPage implements INewSurveyWizardPage{
 			dates.setWarning(
 				MessageFormat.format(Messages.SurveyDatePage_DateRangeWarn,
 					new Object[]{
-						survey.getSurveyDesign().getStartDate() == null ? Messages.EditSurveyDialog_UndefinedDate : DateFormat.getDateInstance().format(survey.getSurveyDesign().getStartDate()),
-								survey.getSurveyDesign().getEndDate() == null ? Messages.EditSurveyDialog_UndefinedDate : DateFormat.getDateInstance().format(survey.getSurveyDesign().getEndDate())
+						survey.getSurveyDesign().getStartDate() == null ? Messages.EditSurveyDialog_UndefinedDate : DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(survey.getSurveyDesign().getStartDate()),
+								survey.getSurveyDesign().getEndDate() == null ? Messages.EditSurveyDialog_UndefinedDate : DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(survey.getSurveyDesign().getEndDate())
 						}
 				));
 		}

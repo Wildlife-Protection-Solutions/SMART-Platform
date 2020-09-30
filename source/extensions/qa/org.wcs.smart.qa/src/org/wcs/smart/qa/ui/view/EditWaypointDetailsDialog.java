@@ -21,8 +21,9 @@
  */
 package org.wcs.smart.qa.ui.view;
 
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -255,7 +256,8 @@ public abstract class EditWaypointDetailsDialog extends SmartStyledTitleDialog i
 			txtX.getParent().layout(true);
 		}
 		updateLabels();
-		setTitle(MessageFormat.format(Messages.EditWaypointDetailsDialog_DialogTitle, waypoint.getId(), DateFormat.getDateTimeInstance().format(waypoint.getDateTime())));
+		setTitle(MessageFormat.format(Messages.EditWaypointDetailsDialog_DialogTitle, waypoint.getId(), 
+				DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(waypoint.getDateTime())));
 		initBackgroundLayers();
 	}
 	

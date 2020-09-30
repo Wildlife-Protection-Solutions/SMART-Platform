@@ -49,7 +49,7 @@ public class PatrolJsonPostProcessor implements IJsonPostProcessor {
 		hql.append( "l.patrolLeg.patrol.endDate < :now " ); //$NON-NLS-1$
 					
 		List<CtPatrolLink> links = session.createQuery(hql.toString(), CtPatrolLink.class)
-				.setParameter("now", java.sql.Date.valueOf( LocalDate.now().minusMonths(JsonCtParser.CLEANUP_MONTHS) )) //$NON-NLS-1$
+				.setParameter("now", LocalDate.now().minusMonths(JsonCtParser.CLEANUP_MONTHS) ) //$NON-NLS-1$
 				.list();
 					
 		for (CtPatrolLink l : links) {

@@ -22,11 +22,14 @@
 package org.wcs.smart.cybertracker.patrol.importer;
 
 import java.awt.image.BufferedImage;
-import java.sql.Time;
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -35,6 +38,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
+import org.locationtech.jts.geom.Coordinate;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -70,9 +74,6 @@ import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.PatrolWaypointSource;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.ui.EmployeeSelectorDialog;
-import org.wcs.smart.util.SmartUtils;
-
-import org.locationtech.jts.geom.Coordinate;
 
 /**
  * Common logic for importing patrols and patrol legs.
@@ -110,7 +111,7 @@ public abstract class AbstractPatrolImporter extends AbstractSmartImporter {
 	}
 	
 	protected String getPatrolIdentifier(CyberTrackerPatrol ctPatrol){
-		return DateFormat.getDateTimeInstance().format(ctPatrol.getStartDate()) + "  [" + ctPatrol.getCtTransport() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+		return DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(ctPatrol.getStartDate()) + "  [" + ctPatrol.getCtTransport() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	private boolean checkEmployees(final PatrolLeg leg, final CyberTrackerPatrol ctPatrol){
@@ -168,8 +169,8 @@ public abstract class AbstractPatrolImporter extends AbstractSmartImporter {
 		if (ctPatrol.getPatrolTransportType() != null) {
 			leg.setType(ctPatrol.getPatrolTransportType());
 		}
-		leg.setStartDate(ctPatrol.getStartDate());
-		leg.setEndDate(ctPatrol.getEndDate());
+		leg.setStartDate(ctPatrol.getStartDate().toLocalDate());
+		leg.setEndDate(ctPatrol.getEndDate().toLocalDate());
 		leg.setMandate(ctPatrol.getMandate());
 		List<PatrolLegMember> legMembers = new ArrayList<PatrolLegMember>();
 		for (Employee e : ctPatrol.getMembers()) {
@@ -183,12 +184,15 @@ public abstract class AbstractPatrolImporter extends AbstractSmartImporter {
 		leg.setMembers(legMembers);
 		
 		leg.createLegDays(session);
+		leg.getPatrolLegDays().get(0).setStartTime(ctPatrol.getStartDate().toLocalTime());
+		leg.getPatrolLegDays().get(leg.getPatrolLegDays().size() - 1).setEndTime(ctPatrol.getEndDate().toLocalTime());
 		
 		List<Coordinate> timerTrackList = ctPatrol.getTimerTrackList();
 		if (timerTrackList != null && !timerTrackList.isEmpty()) {
 			for (PatrolLegDay pld : leg.getPatrolLegDays()) {
-				Date from = combine(pld.getDate(), pld.getStartTime());
-				Date to = combine(pld.getDate(), pld.getEndTime());
+				LocalDateTime from = pld.getDate().atTime(pld.getStartTime());
+				LocalDateTime to = pld.getDate().atTime(pld.getEndTime());
+				
 				List<Coordinate> coordinates = listPart(timerTrackList, from, to);
 				Track track = PatrolUtils.convertToTrack(coordinates);
 				if (track != null) {
@@ -215,7 +219,7 @@ public abstract class AbstractPatrolImporter extends AbstractSmartImporter {
 	 * They must be created as part of initLegData(...) logic
 	 */
 	private PatrolLegDay findLegDay(PatrolLeg leg, S s) {
-		Date date = null;
+		LocalDate date = null;
 		for (A a : s.getA()) {
 			String i = a.getI();
 			if (ICyberTrackerConstants.DATE.equals(i)) {
@@ -252,8 +256,8 @@ public abstract class AbstractPatrolImporter extends AbstractSmartImporter {
 		for (A a : s.getA()) {
 			String i = a.getI();
 			if (ICyberTrackerConstants.TIME.equals(i)) {
-				Time t = Time.valueOf(a.getV());
-				wp.setDateTime(SmartUtils.combineDateTime(pld.getDate(), t));
+				LocalTime t = LocalTime.parse(a.getV());
+				wp.setDateTime(pld.getDate().atTime(t));
 			} else if (ICyberTrackerConstants.LATITUDE.equals(i)) {
 				wp.setRawY(Double.valueOf(a.getV()));
 			} else if (ICyberTrackerConstants.LONGITUDE.equals(i)) {
@@ -283,7 +287,7 @@ public abstract class AbstractPatrolImporter extends AbstractSmartImporter {
 			if (lastWp.getWaypoint().getDateTime() == null)
 				lastWp.getWaypoint().setDateTime(wp.getDateTime());
 			
-			long delta = Math.abs(wp.getDateTime().getTime() - lastWp.getWaypoint().getDateTime().getTime());
+			long delta = ChronoUnit.MILLIS.between(wp.getDateTime(), lastWp.getWaypoint().getDateTime());
 			if (delta > WARN_WP_TIME_FRAME * 60 * 1000) {
 				addWarning(MessageFormat.format(Messages.SmartImporter_Warn_AddToWaypointTimeframe, lastWp.getWaypoint().getId(), WARN_WP_TIME_FRAME));
 			}

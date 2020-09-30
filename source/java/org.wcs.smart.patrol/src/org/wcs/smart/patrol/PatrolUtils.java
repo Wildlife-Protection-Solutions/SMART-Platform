@@ -21,11 +21,12 @@
  */
 package org.wcs.smart.patrol;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -38,7 +39,6 @@ import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.ui.properties.DialogConstants;
-import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.TrackUtil;
 
 /**
@@ -94,9 +94,8 @@ public class PatrolUtils {
 	
 	/**
 	 * Converts a set of coordinate to a track.  Coordinates are first sorted
-	 * by date/time which should be stored in the z coordinate
-	 * as the the date/time in the current timezone.  This function
-	 * convert the z to GMT time.
+	 * by date/time which should be stored in the  z coordinate IN GMT. Use
+	 * SharedUtils.toLongTime to convert from local value to gmt;
 	 * 
 	 * @param coordinates set of coordinates
 	 * @return track
@@ -105,7 +104,7 @@ public class PatrolUtils {
 		if (coordinates.size() < 2) {
 			return null;
 		}
-		LineString track = TrackUtil.convertToLineString(coordinates, Track.ZTIMEZONE);
+		LineString track = TrackUtil.convertToLineString(coordinates);
 		Track t = new Track();
 		t.setLineStrings(Arrays.asList(track));
 		return t;
@@ -134,28 +133,25 @@ public class PatrolUtils {
 	 * @param patrol
 	 * @param legs
 	 */
-	public static void createLegDaysForMissingDays(Patrol patrol, Date startDate, Date endDate, List<PatrolLeg> legs){
-		// convert the patrol end date into an easier to deal with Calendar
-		Calendar calEnd= SharedUtils.convertDate( SharedUtils.getDatePart(endDate, false) );
-
+	public static void createLegDaysForMissingDays(Patrol patrol, LocalDate startDate, LocalDate endDate, List<PatrolLeg> legs){
 		// sort patrols by start date
 		Collections.sort(legs, new PatrolLegStartDateComparator());
 		
 		// loop over each leg from the start to the end
 		for(PatrolLeg leg : legs) {
 			// while there is no leg on the day after this leg ends, and it is still within the patrol date range,
-			Calendar cal = SharedUtils.convertDate( SharedUtils.getDatePart(leg.getEndDate(), false));
-			cal.add(Calendar.DAY_OF_MONTH, 1);
-			while(!cal.after(calEnd) && !hasLegOnDate(legs, cal)){
+			LocalDate working = leg.getEndDate().plusDays(1);
+			while(!working.isAfter(endDate) && !hasLegOnDate(legs, working)){
 				// extend this leg by one day
 				PatrolLegDay pld = new PatrolLegDay();
 				pld.setPatrolLeg(leg);
-				pld.setDate(cal.getTime());
-				pld.setStartTime(SharedUtils.convertDateToTime(cal.getTime()));
-				pld.setEndTime(SharedUtils.createPatrolTime(23, 59, 59));
+				pld.setDate(working);
+				pld.setStartTime(LocalTime.MIN);
+				pld.setEndTime(LocalTime.MAX);
 				leg.getPatrolLegDays().add(pld);
-				leg.setEndDate(cal.getTime());
-				cal.add(Calendar.DAY_OF_MONTH, 1);
+				leg.setEndDate(working);
+				
+				working = ChronoUnit.DAYS.addTo(working, 1);
 			}	
 			
 		}
@@ -168,11 +164,10 @@ public class PatrolUtils {
 	 * @param cal the date to search for
 	 * @return true if at least one PatrolLeg in the list is on the given date, false otherwise
 	 */
-	public static boolean hasLegOnDate(List<PatrolLeg> legList, Calendar cal) {
+	public static boolean hasLegOnDate(List<PatrolLeg> legList, LocalDate date) {
 		for (PatrolLeg leg : legList){
-			Calendar legStart = SharedUtils.convertDate( SharedUtils.getDatePart(leg.getStartDate(), false));
-			Calendar legEnd = SharedUtils.convertDate( SharedUtils.getDatePart(leg.getEndDate(), false));
-			if(cal.equals(legStart) || cal.equals(legEnd) ||  (cal.after(legStart) && cal.before(legEnd)) ){
+			if(date.isEqual(leg.getStartDate()) || date.isEqual(leg.getEndDate()) 
+					||  (date.isAfter(leg.getStartDate()) && date.isBefore(leg.getEndDate())) ){
 				return true;
 			}
 		}
@@ -185,13 +180,13 @@ public class PatrolUtils {
 	 * @param legList the list of PatrolLegs to loop through
 	 * @return an array of two Dates, the start and end, in that order
 	 */
-	public static Date[] calculateDateRange(List<PatrolLeg> legList) {
-		Date[] dates = new Date[2];
+	public static LocalDate[] calculateDateRange(List<PatrolLeg> legList) {
+		LocalDate[] dates = new LocalDate[2];
 		for (PatrolLeg leg : legList) {
-			if(dates[0] == null || leg.getStartDate().before(dates[0])) {
+			if(dates[0] == null || leg.getStartDate().isBefore(dates[0])) {
 				dates[0] = leg.getStartDate();
 			}
-			if(dates[1] == null || leg.getEndDate().after(dates[1])) {
+			if(dates[1] == null || leg.getEndDate().isAfter(dates[1])) {
 				dates[1] = leg.getEndDate();
 			}
 		}

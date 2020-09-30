@@ -22,17 +22,13 @@
 package org.wcs.smart.cybertracker.patrol.json;
 
 import java.nio.file.Paths;
-import java.sql.Time;
-import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -84,7 +80,6 @@ import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.PatrolWaypointSource;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.util.SharedUtils;
-import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -181,13 +176,13 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 				
 				if (changeLeg) {
 					//end the current leg and start a new one
-					Date dt = JsonUtils.parseJsonDateTime((String)properties.get(JsonCtParser.DATETIME_KEY));
+					LocalDateTime dt = JsonUtils.parseJsonDateTime((String)properties.get(JsonCtParser.DATETIME_KEY));
 					
 					if (link != null) {					
 						//update the leg end time
-						PatrolLegDay pd = findLegDay(link.getPatrolLeg(), dt, true, new Time(SmartUtils.getMidnight().getTime()), session);
+						PatrolLegDay pd = findLegDay(link.getPatrolLeg(), dt.toLocalDate(), true, LocalTime.MAX, session);
 						//PatrolLegDay pd = findLegDay(link.getPatrolLeg(), dt, true, null, session);
-						pd.setEndTime(new Time(dt.getTime()));
+						pd.setEndTime(dt.toLocalTime());
 						
 						//start a new leg
 						String defaultValues = (String)sighting.get(PatrolScreensUtil.RESULT_DEFAULT_META_VALUES);
@@ -219,23 +214,23 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 					//we want to find the patrol and update the end date
 					//add the position to the track, but do not create an observation 
 					//for this patrol
-					Date dt = JsonUtils.parseJsonDateTime((String)properties.get(JsonCtParser.DATETIME_KEY));
+					LocalDateTime dt = JsonUtils.parseJsonDateTime((String)properties.get(JsonCtParser.DATETIME_KEY));
 					if (link == null){
 						//create a new patrol object
 						link = createPatrolFromSighing(sighting, deviceId, ctPatrolUuid, observationCounter, session);
 						
 						//update patrol end date/time
 						Patrol p = link.getPatrolLeg().getPatrol();
-						p.setEndDate(dt);
-						link.getPatrolLeg().setEndDate(SharedUtils.getDatePart(p.getEndDate(), true));
+						p.setEndDate(dt.toLocalDate());
+						link.getPatrolLeg().setEndDate(p.getEndDate());
 						p.createLegDays(session);
 					}
 					
 					//update patrol end date and end time for last patrol leg day
-					link.getPatrolLeg().getPatrol().setEndDate(SharedUtils.getDatePart(dt, false));
-					link.getPatrolLeg().setEndDate(SharedUtils.getDatePart(dt, true));
-					PatrolLegDay pd = findLegDay(link.getPatrolLeg(), SharedUtils.getDatePart(link.getPatrolLeg().getEndDate(), false), true, null, session);
-					pd.setEndTime(new Time(dt.getTime()));
+					link.getPatrolLeg().getPatrol().setEndDate(dt.toLocalDate());
+					link.getPatrolLeg().setEndDate(dt.toLocalDate());
+					PatrolLegDay pd = findLegDay(link.getPatrolLeg(), link.getPatrolLeg().getEndDate(), true, null, session);
+					pd.setEndTime(dt.toLocalTime());
 						
 					//add point to track
 					addPointToTrack(pd, parser.readXYFromProperties(feature),dt);
@@ -274,14 +269,14 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 				if (isResumed) {
 					//compute rest times
 					if (link != null) {
-						Date dt = JsonUtils.parseJsonDateTime((String)properties.get(JsonCtParser.DATETIME_KEY));
-						PatrolLegDay currentDay = findLegDay(link.getPatrolLeg(), dt, true, new Time(SmartUtils.getMidnight().getTime()), session);
+						LocalDateTime dt = JsonUtils.parseJsonDateTime((String)properties.get(JsonCtParser.DATETIME_KEY));
+						PatrolLegDay currentDay = findLegDay(link.getPatrolLeg(), dt.toLocalDate(), true, LocalTime.MAX, session);
 						//the pause event is recorded as a track point; not a waypoint
 						//so find the previous track point
 						List<PatrolLegDay> sorts = new ArrayList<PatrolLegDay>(currentDay.getPatrolLeg().getPatrolLegDays());
 						sorts.sort((a,b)->-1*a.getDate().compareTo(b.getDate()));
 						
-						Date pausepoint = null;
+						LocalDateTime pausepoint = null;
 						List<Double> lastValues = new ArrayList<>();
 
 						for (PatrolLegDay d : sorts) {
@@ -292,27 +287,24 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 							}
 						}
 						lastValues.sort((a,b)->-1*a.compareTo(b));
-						pausepoint = new Date(lastValues.get(0).longValue());
+						pausepoint = SharedUtils.toLocalDateTime( lastValues.get(0).longValue());
 						
-						DateFormat dd = DateFormat.getDateTimeInstance();
-						dd.setTimeZone(Track.ZTIMEZONE);
-						pausepoint = DateFormat.getDateTimeInstance().parse(dd.format(pausepoint));
 						
-						LocalDateTime end = (new java.sql.Timestamp(dt.getTime())).toLocalDateTime();
-						LocalDateTime start = (new java.sql.Timestamp(pausepoint.getTime())).toLocalDateTime();
+						LocalDateTime end = dt;
+						LocalDateTime start = pausepoint;
 						LocalDateTime c = start;
 						LocalDate lde = LocalDate.from(end);
 						while(c.isBefore(end)) {
 							LocalDate ld = LocalDate.from(c);
 							if (ld.isEqual(lde)) {
-								PatrolLegDay cd = findLegDay(link.getPatrolLeg(), java.sql.Date.valueOf(ld), true, new Time(SmartUtils.getMidnight().getTime()), session);
+								PatrolLegDay cd = findLegDay(link.getPatrolLeg(), ld, true, LocalTime.MAX, session);
 								long resttime = Math.round( ChronoUnit.SECONDS.between(c,end) / 60.0 );
 								resttime += cd.getRestMinutes() == null ? 0 : cd.getRestMinutes();
 								cd.setRestMinutes((int)resttime);
 								//time from ld to end 
 								break;
 							}else {
-								PatrolLegDay cd = findLegDay(link.getPatrolLeg(), java.sql.Date.valueOf(ld), true, new Time(SmartUtils.getMidnight().getTime()), session);
+								PatrolLegDay cd = findLegDay(link.getPatrolLeg(), ld, true, LocalTime.MAX, session);
 								//time from start to end of day c to end of day
 								LocalDateTime endofday = c.withHour(23).withMinute(59).withSecond(59).withNano(999999);
 								long resttime = Math.round( ChronoUnit.SECONDS.between(c,endofday) / 60.0 );
@@ -374,7 +366,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 							link = createPatrolFromSighing(sighting, deviceId, ctPatrolUuid, observationCounter, session);
 						}
 	
-						Date groupStartTime = link.getGroupStartTime();
+						LocalDateTime groupStartTime = link.getGroupStartTime();
 						int groupResult = processGroup(sighting, link.getPatrolLeg(), wp, parser.getApplyToAdd(), groupStartTime, session);
 						if (groupResult > 0){
 							
@@ -609,7 +601,8 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 	 * @return
 	 * @throws Exception 
 	 */
-	private int processGroup(JSONObject sighting, PatrolLeg legToUpdate, Waypoint wp, List<WaypointObservationAttribute> applyAll, Date groupStartTime, Session session) throws Exception{
+	private int processGroup(JSONObject sighting, PatrolLeg legToUpdate, Waypoint wp, 
+			List<WaypointObservationAttribute> applyAll, LocalDateTime groupStartTime, Session session) throws Exception{
 		if (!sighting.containsKey(ScreensUtil.RESULT_END_WAYPOINT_GROUP)){
 			//clear observations associated with 
 			wp.getObservationGroups().clear();
@@ -648,7 +641,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 						for (PatrolLegDay pld : legToUpdate.getPatrolLegDays()){
 							for (PatrolWaypoint pw : pld.getWaypoints()){
 								if (pw.getWaypoint().getDateTime().equals(groupStartTime) || 
-										pw.getWaypoint().getDateTime().after(groupStartTime)){
+										pw.getWaypoint().getDateTime().isAfter(groupStartTime)){
 									
 									if (!pw.getWaypoint().getObservationGroups().isEmpty())
 										addAttributesToObservation(pw.getWaypoint().getObservationGroups().get(0).getObservations(), applyAll);
@@ -692,7 +685,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 			for (PatrolLegDay pld : legToUpdate.getPatrolLegDays()){
 				for (PatrolWaypoint pw: pld.getWaypoints()){
 					if (lastWaypoint == null ||
-							pw.getWaypoint().getDateTime().after(lastWaypoint.getWaypoint().getDateTime())){
+							pw.getWaypoint().getDateTime().isAfter(lastWaypoint.getWaypoint().getDateTime())){
 						lastWaypoint = pw;
 					}
 				}
@@ -775,7 +768,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 		
 		
 		String startDate = (String)sighting.get(ScreensUtil.RESULT_START_DATE);		
-		Date dStartDate = PatrolJsonUtils.DATEFORMAT.parse(startDate);
+		LocalDate dStartDate = LocalDate.parse(startDate, PatrolJsonUtils.DATEFORMAT);
 		p.setEndDate(dStartDate);
 		p.setStartDate(dStartDate);
 		
@@ -794,7 +787,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 		}
 		
 		String startTime = (String)sighting.get(ScreensUtil.RESULT_START_TIME);
-		Date startDateTime = SmartUtils.combineDateTime(dStartDate, PatrolJsonUtils.TIMEFORMAT.parse(startTime));
+		LocalDateTime startDateTime = dStartDate.atTime(LocalTime.parse(startTime, PatrolJsonUtils.TIMEFORMAT));
 		
 		PatrolLeg pl = addLegFromSighting(p, ct, sighting, deviceId, ctUuid, observationCounter, startDateTime, session);
 		
@@ -813,14 +806,14 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 	private PatrolLeg addLegFromSighting(Patrol patrol, CyberTrackerPatrol ct,			
 			JSONObject sighting,
 			String deviceId, UUID ctUuid, int observationCounter,
-			Date startDateTime,
+			LocalDateTime startDateTime,
 			Session session) throws Exception{
 
 		PatrolLeg pl = patrol.addLeg();
 		pl.setMandate(ct.getMandate());
 		pl.setPatrolLegDays(new ArrayList<PatrolLegDay>());
-		pl.setStartDate(startDateTime);
-		pl.setEndDate(SharedUtils.getDatePart(pl.getStartDate(), true));
+		pl.setStartDate(startDateTime.toLocalDate());
+		pl.setEndDate(pl.getStartDate());
 		for (Employee member: ct.getMembers()){
 			PatrolLegMember item = pl.addPatrolLegMember(member);
 			if (ct.getPatrolType().requiresPilot()){
@@ -833,6 +826,10 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 		
 		
 		//make a single patrol leg day for the start date and time
+		PatrolLegDay one = new PatrolLegDay();
+		one.setStartTime(startDateTime.toLocalTime());
+		pl.getPatrolLegDays().add(one);
+		
 		pl.createLegDays(session);	
 		
 		return pl;
@@ -842,7 +839,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 			throws Exception {
 		
 //		PatrolLegDay addToD = findLegDay(addTo, wp.getDateTime(), true, null, session);
-		PatrolLegDay addToD = findLegDay(addTo, wp.getDateTime(), true, new Time(SmartUtils.getMidnight().getTime()), session);
+		PatrolLegDay addToD = findLegDay(addTo, wp.getDateTime().toLocalDate(), true, LocalTime.MAX, session);
 		PatrolWaypoint pw = addWaypointToLegDay(addToD, wp);
 		
 		if (addTo.getUuid() != null){
@@ -903,9 +900,9 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 		}
 	}
 	
-	private static final PatrolLegDay findLegDay(PatrolLeg leg, Date day, boolean create, Time startTime, Session session){
+	private static final PatrolLegDay findLegDay(PatrolLeg leg, LocalDate day, boolean create, LocalTime startTime, Session session){
 		for (PatrolLegDay pld : leg.getPatrolLegDays()){
-			if (SharedUtils.isSameDate(pld.getDate(), day)){
+			if (pld.getDate().isEqual(day)){
 				return pld;
 			}
 		}
@@ -913,43 +910,32 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 		
 		PatrolLegDay start = null;
 		for (PatrolLegDay pld : leg.getPatrolLegDays()) {
-			if (start == null || pld.getDate().before(start.getDate())) {
+			if (start == null || pld.getDate().isBefore(start.getDate())) {
 				start = pld;
 			}
 		}
 		//configure the start time here so legs get created correctly
-		leg.setStartDate(SmartUtils.combineDateTime(leg.getStartDate(), start.getStartTime()));
+//		leg.setStartDate(SmartUtils.combineDateTime(leg.getStartDate(), start.getStartTime()));
 		
 		PatrolLegDay pld = new PatrolLegDay();
-		pld.setDate(SharedUtils.getDatePart(day, false));
-		
-		Calendar tmp =GregorianCalendar.getInstance();
-		tmp.setTime(day);
-		Calendar time = GregorianCalendar.getInstance();
-		time.setTimeInMillis(0);
-		time.set(Calendar.HOUR_OF_DAY, tmp.get(Calendar.HOUR_OF_DAY));
-		time.set(Calendar.MINUTE, tmp.get(Calendar.MINUTE));
-		time.set(Calendar.SECOND, tmp.get(Calendar.SECOND));
-		time.set(Calendar.MILLISECOND, 0);
-
+		pld.setDate(day);
 		pld.setRestMinutes(0);
-		
 		pld.setWaypoints(new ArrayList<PatrolWaypoint>());
 		leg.getPatrolLegDays().add(pld);
 		pld.setPatrolLeg(leg);
 		
 		
 		//update leg and patrol dates as necessary
-		if (leg.getStartDate().after(pld.getDate())){
+		if (leg.getStartDate().isAfter(pld.getDate())){
 			leg.setStartDate(pld.getDate());
 		}
-		if (leg.getEndDate().before(pld.getDate())){
-			leg.setEndDate(SharedUtils.getDatePart(pld.getDate(), true));
+		if (leg.getEndDate().isBefore(pld.getDate())){
+			leg.setEndDate(pld.getDate());
 		}
-		if (leg.getPatrol().getStartDate().after(pld.getDate())){
+		if (leg.getPatrol().getStartDate().isAfter(pld.getDate())){
 			leg.getPatrol().setStartDate(pld.getDate());
 		}
-		if (leg.getPatrol().getEndDate().before(pld.getDate())){
+		if (leg.getPatrol().getEndDate().isBefore(pld.getDate())){
 			leg.getPatrol().setEndDate(pld.getDate());
 		}
 		
@@ -957,22 +943,16 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 		leg.createLegDays(session);
 		
 		if (startTime == null){
-			pld.setStartTime(new Time(time.getTime().getTime()));
+			pld.setStartTime(LocalTime.now());
 		}else{
 			pld.setStartTime(startTime);
 		}
-		pld.setEndTime(new Time(SmartUtils.getMidnight().getTime()- 1));
+		pld.setEndTime(LocalTime.MAX);
 		
-		if (SharedUtils.isSameDate(pld.getDate(), leg.getStartDate())){
-			leg.setStartDate( SmartUtils.combineDateTime(leg.getStartDate(), pld.getStartTime()) );
-		}
-		if (SharedUtils.isSameDate(pld.getDate(), leg.getEndDate())){
-			leg.setEndDate( SmartUtils.combineDateTime(leg.getEndDate(), pld.getEndTime()) );
-		}
 		return pld;
 	}
 	
-	public static final void addPointToTrack(PatrolLegDay pld, Coordinate pnt, Date time) throws Exception{
+	public static final void addPointToTrack(PatrolLegDay pld, Coordinate pnt, LocalDateTime time) throws Exception{
 		if (pnt == null) return;
 		if (pld == null) return;
 		if (pld.getTrack() == null){
@@ -993,9 +973,9 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 		}
 	}
 	
-	public static final void addPointToTrack(PatrolLeg leg, Coordinate pnt, Date time, Session session) throws Exception{
+	public static final void addPointToTrack(PatrolLeg leg, Coordinate pnt, LocalDateTime time, Session session) throws Exception{
 		if (pnt == null) return;
-		PatrolLegDay pld = findLegDay(leg, time, true, null, session);
+		PatrolLegDay pld = findLegDay(leg, time.toLocalDate(), true, null, session);
 		addPointToTrack(pld, pnt, time);
 	}
 

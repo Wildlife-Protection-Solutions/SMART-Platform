@@ -1,6 +1,6 @@
 package org.wcs.smart.connect.model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -21,7 +21,7 @@ public class SmartCollectConnectUser extends UuidItem{
 	private SmartCollectUser.State state;
 	private String source;
 	
-	private Date validationSentDate;
+	private LocalDateTime validationSentDate;
 	private String validationKey;
 
 	@Enumerated(EnumType.STRING)
@@ -42,10 +42,10 @@ public class SmartCollectConnectUser extends UuidItem{
 	}
 	
 	@Column(name="validation_sent_date")
-	public Date getValidateSentDate() {
+	public LocalDateTime getValidateSentDate() {
 		return this.validationSentDate;
 	}
-	public void setValidateSentDate(Date date) {
+	public void setValidateSentDate(LocalDateTime date) {
 		this.validationSentDate = date;
 	}
 

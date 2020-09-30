@@ -21,15 +21,18 @@
  */
 package org.wcs.smart.patrol.internal.ui;
 
-import java.sql.Time;
 import java.text.Collator;
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -59,11 +62,11 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.createpatrol.EmployeeLabelProvider;
 import org.wcs.smart.patrol.model.PatrolLeg;
+import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
-import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -429,7 +432,7 @@ public class PatrolLegSplitDialog extends SmartStyledTitleDialog{
 			}
 			
 		});
-		SmartUtils.initDateDateTimeWidget(startDate, existingLeg.getStartDate());
+		SmartUtils.initDateTimeWidget(startDate, existingLeg.getStartDate());
 		
 		lbl = new Label(timecomp, SWT.NONE);
 		lbl.setText(Messages.PatrolLegSplitDialog_TimeOfSplit_Label);
@@ -455,7 +458,7 @@ public class PatrolLegSplitDialog extends SmartStyledTitleDialog{
 		startTime = new DateTime(opComp, SWT.TIME | SWT.DROP_DOWN | SWT.MEDIUM | SWT.BORDER);
 		startTime.setEnabled(false);
 		
-		SmartUtils.initTimeDateTimeWidget(startTime, existingLeg.getStartDate());
+		SmartUtils.initDateTimeWidget(startTime, existingLeg.getPatrolLegDays().get(0).getStartTime());
 		
 		startTime.addSelectionListener(opAdapter);
 		startTime.addSelectionListener(new SelectionAdapter(){
@@ -487,7 +490,7 @@ public class PatrolLegSplitDialog extends SmartStyledTitleDialog{
 			}
 			
 		});
-		SmartUtils.initDateDateTimeWidget(endDate, existingLeg.getEndDate());
+		SmartUtils.initDateTimeWidget(endDate, existingLeg.getEndDate());
 		
 		lbl = new Label(timecomp, SWT.NONE);
 		lbl.setText(Messages.PatrolLegSplitDialog_TimeGroupsJoined_Label);
@@ -512,7 +515,7 @@ public class PatrolLegSplitDialog extends SmartStyledTitleDialog{
 		endTime = new DateTime(opComp, SWT.TIME | SWT.DROP_DOWN | SWT.MEDIUM | SWT.BORDER);
 		endTime.setEnabled(false);
 		
-		SmartUtils.initTimeDateTimeWidget(endTime, existingLeg.getEndDate());
+		SmartUtils.initDateTimeWidget(endTime, existingLeg.getPatrolLegDays().get(existingLeg.getPatrolLegDays().size() - 1).getEndTime());
 
 		endTime.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e){
@@ -565,41 +568,44 @@ public class PatrolLegSplitDialog extends SmartStyledTitleDialog{
 			return Messages.PatrolLegSplitDialog_Error_GroupBNoTransportType;
 		}
 		
-		Date stime  = SmartUtils.getDate(startDate);
+		LocalDate sdate  = SmartUtils.toDate(startDate);
+		LocalTime stime = LocalTime.MIN;
 		if (opCustom.getSelection()){
-			stime = SmartUtils.combineDateTime(stime, new Time (SmartUtils.getTime(startTime).getTime()));
-//			stime += startTime.getHours() * 60 * 60 * 1000 + startTime.getMinutes() * 60 * 1000 + startTime.getSeconds() * 1000;
+			stime = SmartUtils.toTime(startTime);
 		}
-
-		if (stime.before(existingLeg.getStartDate())){
+		LocalDateTime start = LocalDateTime.of(sdate, stime);
+		
+		LocalDateTime es = LocalDateTime.of(existingLeg.getStartDate(), existingLeg.getPatrolLegDays().get(0).getStartTime());
+		LocalDateTime ee = LocalDateTime.of(existingLeg.getEndDate(), existingLeg.getPatrolLegDays().get(existingLeg.getPatrolLegDays().size() - 1).getEndTime());
+		
+		if (start.isBefore(es)){
 			return MessageFormat.format(Messages.PatrolLegSplitDialog_Error_DateError_1,
-				new Object[]{DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM).format(existingLeg.getStartDate())});
+				new Object[]{DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(es)});
 		}
-		if (stime.after(existingLeg.getEndDate())){
+		if (start.isAfter(ee)){
 			return MessageFormat.format(Messages.PatrolLegSplitDialog_Error_DateError_2,
-					new Object[]{DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM).format(existingLeg.getEndDate())});
+					new Object[]{DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(ee)});
 		}
 		
-		Date etime = SmartUtils.getDate(endDate);
+		LocalDate edate  = SmartUtils.toDate(endDate);
+		LocalTime etime = LocalTime.MAX;
 		if (opEndCustom.getSelection()){
-			etime = SmartUtils.combineDateTime(etime,  new Time (SmartUtils.getTime(endTime).getTime()));
-//			etime += endTime.getHours() * 60 * 60 * 1000 + endTime.getMinutes() * 60 * 1000 + endTime.getSeconds() * 1000;
-		}else{
-			etime = SharedUtils.getDatePart(etime, true);
-//			etime += 24 * 60 * 60 * 1000 - 1000;
+			etime = SmartUtils.toTime(endTime);
 		}
-
-		if (etime.before(existingLeg.getStartDate())){
+		LocalDateTime end = LocalDateTime.of(edate, etime);
+		
+		
+		if (end.isBefore(es)){
 			return MessageFormat.format(
 				Messages.PatrolLegSplitDialog_Error_DateError_3,
-				new Object[]{DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM).format(existingLeg.getStartDate())});
+				new Object[]{DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(es)});
 		}
-		if (etime.after(existingLeg.getEndDate())){
+		if (end.isAfter(ee)){
 			return MessageFormat.format(
 				Messages.PatrolLegSplitDialog_Error_DateError_4,
-				new Object[]{DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM).format(existingLeg.getEndDate())});
+				new Object[]{DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(ee)});
 		}
-		if (etime.before(stime)){
+		if (end.isBefore(start)){
 			return Messages.PatrolLegSplitDialog_Error_DateError_5;
 		}
 		
@@ -620,27 +626,45 @@ public class PatrolLegSplitDialog extends SmartStyledTitleDialog{
 		PatrolLeg legA = new PatrolLeg();
 		PatrolLeg legB = new PatrolLeg();
 		
+		legA.setPatrolLegDays(new ArrayList<>());
+		legB.setPatrolLegDays(new ArrayList<>());
+		
+		PatrolLegDay da = new PatrolLegDay();
+		legA.getPatrolLegDays().add(da);
+		da.setPatrolLeg(legA);
+		
+		PatrolLegDay db = new PatrolLegDay();
+		db.setPatrolLeg(legB);
+		legB.getPatrolLegDays().add(db);
+		
 		legA.setMandate(existingLeg.getMandate());
 		legB.setMandate(existingLeg.getMandate());
 		
 		//dates		
-		Date stime  = SmartUtils.getDate(startDate);
+		LocalDate sdate  = SmartUtils.toDate(startDate);
+		LocalDate edate = SmartUtils.toDate(endDate);
+		LocalTime stime = LocalTime.MIN;
+		LocalTime etime = LocalTime.MAX;
 		if (opCustom.getSelection()){
-			stime = SmartUtils.combineDateTime(stime, new Time (SmartUtils.getTime(startTime).getTime()));
+			stime = SmartUtils.toTime(startTime);
 		}
-
-		Date etime = SmartUtils.getDate(endDate);
 		if (opEndCustom.getSelection()){
-			etime = SmartUtils.combineDateTime(etime,  new Time (SmartUtils.getTime(endTime).getTime()));
-		}else{
-			etime = SharedUtils.getDatePart(etime, true);
+			etime = SmartUtils.toTime(endTime);
 		}
 
-		legA.setStartDate(stime);
-		legB.setStartDate(stime);
+		LocalDateTime start = LocalDateTime.of(sdate, stime);
+		LocalDateTime end = LocalDateTime.of(edate, etime);
+
 		
-		legA.setEndDate(etime);
-		legB.setEndDate(etime);
+		legA.setStartDate(start.toLocalDate());
+		legB.setStartDate(start.toLocalDate());
+		legA.getPatrolLegDays().get(0).setStartTime(start.toLocalTime());
+		legB.getPatrolLegDays().get(0).setStartTime(start.toLocalTime());
+		
+		legA.setEndDate(end.toLocalDate());
+		legB.setEndDate(end.toLocalDate());
+		legA.getPatrolLegDays().get(legA.getPatrolLegDays().size()-1).setEndTime(end.toLocalTime());
+		legB.getPatrolLegDays().get(legB.getPatrolLegDays().size()-1).setEndTime(end.toLocalTime());
 		
 		String legAId = existingLeg.getId() + Messages.PatrolLegSplitDialog_GroupA_LegIs_PostFix;
 		if (legAId.length() > PatrolLeg.ID_MAX_SIZE){
@@ -706,11 +730,12 @@ public class PatrolLegSplitDialog extends SmartStyledTitleDialog{
 		legA.setPatrol(existingLeg.getPatrol());
 		legB.setPatrol(existingLeg.getPatrol());
 		
-		if (! etime.equals( existingLeg.getEndDate() )){
+		LocalDateTime existingEnd = existingLeg.getEndDate().atTime(existingLeg.getPatrolLegDays().get(existingLeg.getPatrolLegDays().size() - 1).getEndTime());
+		if (! end.equals( existingEnd )){
 			
 			//we need to create another leg
 			PatrolLeg legC = new PatrolLeg();
-			legC.setStartDate(etime);
+			legC.setStartDate(end.toLocalDate());
 			legC.setEndDate(existingLeg.getEndDate());
 			legC.setMandate(existingLeg.getMandate());
 			
@@ -729,11 +754,25 @@ public class PatrolLegSplitDialog extends SmartStyledTitleDialog{
 			}
 			legsToUpdate.add(legC);
 			legC.setPatrol(existingLeg.getPatrol());
+			
+			legC.setPatrolLegDays(new ArrayList<>());
+			PatrolLegDay d = new PatrolLegDay();
+			d.setDate(legC.getStartDate());
+			d.setPatrolLeg(legC);
+			d.setRestMinutes(0);
+			d.setWaypoints(new ArrayList<>());
+			d.setStartTime(end.toLocalTime());
+			d.setEndTime(existingLeg.getPatrolLegDays().get(existingLeg.getPatrolLegDays().size() - 1).getEndTime());
+			legC.getPatrolLegDays().add(d);
 		}
 		
-		
-		existingLeg.setEndDate(stime);
-		if (existingLeg.getEndDate().getTime() - existingLeg.getStartDate().getTime() <= 1000){			
+		existingLeg.setEndDate(start.toLocalDate());
+		existingLeg.getPatrolLegDays().get(existingLeg.getPatrolLegDays().size() - 1).setEndTime(start.toLocalTime());
+
+		//remove short legs
+		LocalDateTime es = LocalDateTime.of(existingLeg.getStartDate(), existingLeg.getPatrolLegDays().get(0).getStartTime());
+		LocalDateTime ee = LocalDateTime.of(existingLeg.getEndDate(), existingLeg.getPatrolLegDays().get(existingLeg.getPatrolLegDays().size() - 1).getEndTime());
+		if (ChronoUnit.SECONDS.between(es, ee) <=1){			
 			//1 second
 			legsToUpdate.remove(existingLeg);
 			existingLeg.setPatrol(null);

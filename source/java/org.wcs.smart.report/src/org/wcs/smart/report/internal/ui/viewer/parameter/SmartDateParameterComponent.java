@@ -22,8 +22,10 @@
 package org.wcs.smart.report.internal.ui.viewer.parameter;
 
 import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -176,15 +178,15 @@ public class SmartDateParameterComponent implements IBirtParameterComponent, Lis
 				endPicker.setEnabled(enabled);
 				
 				if (!enabled && filterOp != null){
-					Date[] d = filterOp.getDates();
+					LocalDate[] d = filterOp.getDates();
 					if (d != null){
 						if (d.length >=1){
-							SmartUtils.initDateDateTimeWidget(startPicker, d[0]);
+							SmartUtils.initDateTimeWidget(startPicker, d[0]);
 						}
 						if (d.length == 2){
-							SmartUtils.initDateDateTimeWidget(endPicker, d[1]);
+							SmartUtils.initDateTimeWidget(endPicker, d[1]);
 						}else{
-							SmartUtils.initDateDateTimeWidget(endPicker, new Date());
+							SmartUtils.initDateTimeWidget(endPicker, LocalDate.now());
 						}
 					}
 				}
@@ -202,12 +204,12 @@ public class SmartDateParameterComponent implements IBirtParameterComponent, Lis
 	}
 	
 	private void initDateTime(String parameter, DateTime dtime, IDialogSettings settings) {
-		SimpleDateFormat sdf = new SimpleDateFormat(ReportParameterDialog.SIMPLE_DATE_FORMAT);
+		DateTimeFormatter sdf = DateTimeFormatter.ofPattern(ReportParameterDialog.SIMPLE_DATE_FORMAT);
 		String x = settings.get(parameter);
 		if (x != null){
 			try{
-				Date d = sdf.parse(x);
-				SmartUtils.initDateDateTimeWidget(dtime, d);
+				LocalDateTime d = LocalDateTime.parse(x,sdf);
+				SmartUtils.initDateTimeWidget(dtime, d.toLocalDate(), d.toLocalTime());
 			}catch (Exception ex){
 				//eat me
 			}
@@ -227,16 +229,18 @@ public class SmartDateParameterComponent implements IBirtParameterComponent, Lis
 
 		if (op.getQueryKey().equals(CustomDateFilter.KEY)){
 			//update custom date filter with values from combo boxes
-			((CustomDateFilter) op).setDates(SmartUtils.getDate(startPicker), SmartUtils.getDate(endPicker));
+			((CustomDateFilter) op).setDates(SmartUtils.toDate(startPicker), SmartUtils.toDate(endPicker));
 		}	
 		
-		java.sql.Date dates[] = op.getDates();
+		LocalDate start = null;
+		LocalDate end = null;
+		
+		LocalDate dates[] = op.getDates();
 		if (dates == null) {
 			if (op.getQueryKey().equals(AllDatesFilter.INSTANCE.getQueryKey())) {
-				params.put(startDef, new java.sql.Date(-2208998272375l)); // JAN 01 1900
 				
-				params.put(endDef, new java.sql.Date((new Date()).getTime() + 86400000));  // today plus 1 day
-				
+				start = LocalDate.MIN;
+				end = ChronoUnit.DAYS.addTo(LocalDate.now(), 1); // today plus 1 day
 				try(Session session = HibernateManager.openSession()){
 					try {
 						session.beginTransaction();
@@ -247,15 +251,15 @@ public class SmartDateParameterComponent implements IBirtParameterComponent, Lis
 						List<?> data = q.list();
 						
 						if (data != null && data.size() >= 1) {
-							Date startdate = (Date) ((Object[])data.get(0))[0];
+							LocalDateTime startdate = (LocalDateTime) ((Object[])data.get(0))[0];
 							if (startdate != null) {
-								params.put(startDef, new java.sql.Date(startdate.getTime() - 86400000)); //subtract one day to ensure we get everything
+								start = ChronoUnit.DAYS.addTo(startdate.toLocalDate(), -1); //subtract one day to ensure we get everything
 							}
 							
-							Date enddate = (Date) ((Object[])data.get(0))[1];
+							LocalDateTime enddate = (LocalDateTime) ((Object[])data.get(0))[1];
 							if (enddate != null) {
-								if (enddate.getTime() > ((java.sql.Date)params.get(endDef)).getTime()) {
-									params.put(endDef, new java.sql.Date(enddate.getTime() + 86400000));  // last date plus 1 day to ensure we get everything
+								if (enddate.toLocalDate().isAfter( end )) {
+									end = ChronoUnit.DAYS.addTo(enddate.toLocalDate(),1);  // last date plus 1 day to ensure we get everything
 								}
 							}
 						}
@@ -277,12 +281,18 @@ public class SmartDateParameterComponent implements IBirtParameterComponent, Lis
 										new Object[] { op.getGuiName(Locale.getDefault()) }));
 			}
 		}else if (dates.length == 1){
-			params.put(startDef, dates[0]);
-			params.put(endDef, new java.sql.Date( (new Date()).getTime() + 86400000));  //add one day just to make sure we get everything
+			start = dates[0];
+			end =  ChronoUnit.DAYS.addTo(LocalDate.now(), 1);  //add one day just to make sure we get everything
 		}else if (dates.length == 2){
-			params.put(startDef, dates[0]);
-			params.put(endDef, dates[1]);
+			start = dates[0];
+			end = dates[1];
 		}
+		
+		
+		//need to convert these to java.util.date for BIRT
+		
+		params.put(startDef, java.sql.Date.valueOf(start));
+		params.put(endDef, java.sql.Date.valueOf(end));
 		settings.put(DATE_OP_KEY, op.getQueryKey());
 		return params;
 	}
@@ -293,10 +303,10 @@ public class SmartDateParameterComponent implements IBirtParameterComponent, Lis
 				((IStructuredSelection)cmbDatesOps.getSelection()).getFirstElement();
 
 		if (op.getQueryKey().equals(CustomDateFilter.KEY)){
-			Date start = SmartUtils.getDate(startPicker);
-			Date end = SmartUtils.getDate(endPicker);
+			LocalDate start = SmartUtils.toDate(startPicker);
+			LocalDate end = SmartUtils.toDate(endPicker);
 			
-			if (end.before(start)){
+			if (end.isBefore(start)){
 				//warning
 				cdEnd.setDescriptionText(Messages.SmartDateParameterComponent_DateWarning);
 				cdEnd.show();

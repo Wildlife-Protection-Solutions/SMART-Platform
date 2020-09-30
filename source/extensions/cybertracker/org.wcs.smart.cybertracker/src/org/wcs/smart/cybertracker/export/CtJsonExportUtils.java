@@ -31,9 +31,10 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.Collator;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -277,7 +278,7 @@ public class CtJsonExportUtils {
 		projectJSON.put("definition",cmFile); //$NON-NLS-1$
 		if (metadataFilename != null) projectJSON.put("metadata", metadataFilename.getFileName().toString()); //$NON-NLS-1$
 		if (version != null) projectJSON.put("version",  version); //$NON-NLS-1$ 
-		projectJSON.put("creation_date",new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date())); //$NON-NLS-1$ //$NON-NLS-2$
+		projectJSON.put("creation_date",DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(ZonedDateTime.now())); //$NON-NLS-1$ //$NON-NLS-2$
 		projectJSON.put("logo", (logoFile == null || !Files.exists(logoFile)) ? null : logoFile.getFileName().toString()); //$NON-NLS-1$
 		projectJSON.put(JSON_SMART_VERSION_KEY, SMART_JSON_VERSION);
 		if(projectAdditions != null) {

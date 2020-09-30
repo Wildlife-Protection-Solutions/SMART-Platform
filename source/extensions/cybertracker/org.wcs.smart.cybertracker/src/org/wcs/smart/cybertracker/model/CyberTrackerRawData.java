@@ -21,24 +21,24 @@
  */
 package org.wcs.smart.cybertracker.model;
 
-import java.sql.Time;
-import java.text.DateFormat;
-import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.locationtech.jts.geom.Coordinate;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.importer.AbstractSmartImporter;
 import org.wcs.smart.cybertracker.importer.AbstractSmartImporter.CoordinateZComparator;
 import org.wcs.smart.cybertracker.model.data.Data;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings;
-
-import org.locationtech.jts.geom.Coordinate;
+import org.wcs.smart.util.SharedUtils;
 
 /**
  * Raw data extracted from CyberTracker raw xml file.
@@ -117,22 +117,23 @@ public class CyberTrackerRawData {
 		List<Coordinate> result = new ArrayList<Coordinate>();
 		if (data == null || data.getTimerTracks() == null)
 			return result;
-		DateFormat formatter = AbstractSmartImporter.createCyberTrackerDateFormatter();
+		DateTimeFormatter formatter = AbstractSmartImporter.CT_DT_FORMATTER;
+		
 		for (Data.TimerTracks.T t : data.getTimerTracks().getT()) {
-			Date date = null;
-			Time time = null;
+			LocalDate date = null;
+			LocalTime time = null;
 			double x = 0;
 			double y = 0;
 			for (Data.TimerTracks.T.A a : t.getA()) {
 				String i = a.getI();
 				if (ICyberTrackerConstants.DATE.equals(i)) {
 					try {
-						date = formatter.parse(a.getV());
-					} catch (ParseException e) {
+						date = LocalDate.parse(a.getV(), formatter);
+					} catch (DateTimeParseException e) {
 						CyberTrackerPlugIn.log(e.getMessage(), e);
 					}
 				} else if (ICyberTrackerConstants.TIME.equals(i)) {
-					time = Time.valueOf(a.getV());
+					time = LocalTime.parse(a.getV());
 				} else if (ICyberTrackerConstants.LATITUDE.equals(i)) {
 					y = Double.valueOf(a.getV());
 				} else if (ICyberTrackerConstants.LONGITUDE.equals(i)) {
@@ -143,7 +144,7 @@ public class CyberTrackerRawData {
 			if (date == null || time == null)
 				continue;
 			
-			result.add(new Coordinate(x, y, AbstractSmartImporter.combine(date, time).getTime()));
+			result.add(new Coordinate(x, y, SharedUtils.toLongTime(date.atTime(time))));
 		}
 		//sort by date+time
 		Collections.sort(result, new CoordinateZComparator());

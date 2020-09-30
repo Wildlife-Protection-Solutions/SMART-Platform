@@ -169,7 +169,7 @@ public class IntelObservationQueryResults implements IPagedQueryResultSet {
 		UUID profileUuid = asUuid(rowData[columnNameToIndex.get("profile_uuid")]); //$NON-NLS-1$
 		item.setProfile(profileUuid, session.get(IntelProfile.class, profileUuid).getName());
 		item.setLocationId((String)rowData[columnNameToIndex.get("loc_id")]); //$NON-NLS-1$
-		item.setLocationDate((Timestamp)rowData[columnNameToIndex.get("loc_datetime")]); //$NON-NLS-1$
+		item.setLocationDate(((Timestamp)rowData[columnNameToIndex.get("loc_datetime")]).toLocalDateTime()); //$NON-NLS-1$
 		item.setLocationComment((String)rowData[columnNameToIndex.get("loc_comment")]); //$NON-NLS-1$
 		try{
 			item.setGeometry(asGeometry(rowData[columnNameToIndex.get("loc_geometry")]), null); //$NON-NLS-1$

@@ -25,8 +25,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.text.MessageFormat;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -233,7 +234,8 @@ public class SmartCollectNoa {
 					//already validated
 				}else if (user.getValidateSentDate() != null && user.getValidationKey().equals(validationkey)) {
 					//check timeout
-					if ((new Date()).getTime() - user.getValidateSentDate().getTime() > 72*1000*60*60.0) {
+					
+					if (ChronoUnit.DAYS.between(user.getValidateSentDate(), LocalDateTime.now()) > 72) {
 						throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("SmartCollectNoa.ValidationTimeout", request.getLocale())); //$NON-NLS-1$
 					}
 					user.setState(State.VALIDATED);

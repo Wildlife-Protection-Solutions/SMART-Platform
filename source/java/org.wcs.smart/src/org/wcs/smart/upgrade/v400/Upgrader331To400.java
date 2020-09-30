@@ -26,7 +26,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Properties;
 import java.util.UUID;
@@ -561,7 +561,7 @@ public class Upgrader331To400 implements IDatabaseUpgrader {
 						newe.setSmartUserId(smartUserId);
 						newe.setGivenName(newe.getSmartUserId());
 						newe.setFamilyName(""); //$NON-NLS-1$
-						newe.setStartEmploymentDate(new Date());
+						newe.setStartEmploymentDate(LocalDate.now());
 						newe.setId(newe.getSmartUserId());
 						newe.setSmartUserLevelKeys( UserLevelManager.ADMIN.getKey() );
 						
@@ -579,11 +579,11 @@ public class Upgrader331To400 implements IDatabaseUpgrader {
 							psinsert.setString(3, newe.getId());
 							psinsert.setString(4, newe.getGivenName());
 							psinsert.setString(5, ""); //$NON-NLS-1$
-							psinsert.setDate(6, new java.sql.Date(newe.getStartEmploymentDate().getTime()));
+							psinsert.setDate(6, java.sql.Date.valueOf( newe.getStartEmploymentDate()) );
 							psinsert.setString(7, newe.getSmartUserId());
 							psinsert.setString(8, newe.getSmartPassword());
 							psinsert.setObject(9, userlevel);
-							psinsert.setDate(10, new java.sql.Date((new Date()).getTime()));
+							psinsert.setDate(10, java.sql.Date.valueOf( LocalDate.now()));
 							psinsert.setString(11, String.valueOf(newe.getGender()));
 							
 							psinsert.executeUpdate();

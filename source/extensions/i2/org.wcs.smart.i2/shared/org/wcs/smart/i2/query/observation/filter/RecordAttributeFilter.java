@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.i2.query.observation.filter;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.query.Operator;
@@ -65,10 +65,10 @@ public class RecordAttributeFilter implements IQueryFilter, IColumnIdentifierPro
 	}
 		
 	//dates
-	public static RecordAttributeFilter create(String key, Operator operator, Date date1, Date date2){
+	public static RecordAttributeFilter create(String key, Operator operator, LocalDate date1, LocalDate date2){
 		RecordAttributeFilter filter = createCore(key);
 		filter.operator = operator;
-		filter.dateValues = new Date[]{date1, date2};
+		filter.dateValues = new LocalDate[]{date1, date2};
 		return filter;
 	}
 		
@@ -99,7 +99,7 @@ public class RecordAttributeFilter implements IQueryFilter, IColumnIdentifierPro
 	private Double numberValue = null;
 	private String stringValue = null;
 	private String keyValue = null;
-	private Date[] dateValues = null;
+	private LocalDate[] dateValues = null;
 	
 	public RecordAttributeFilter(IntelAttribute.AttributeType type, String attributeentitykey, String recordsourceKey){
 		this.attributeType = type;
@@ -132,9 +132,9 @@ public class RecordAttributeFilter implements IQueryFilter, IColumnIdentifierPro
 			case DATE:
 				sb.append(operator.name());
 				sb.append("_"); //$NON-NLS-1$
-				sb.append(dateValues[0].getTime());
+				sb.append(dateValues[0].toString());
 				sb.append("_"); //$NON-NLS-1$
-				sb.append(dateValues[1].getTime());
+				sb.append(dateValues[1].toString());
 				break;
 			case EMPLOYEE:
 				sb.append(keyValue);
@@ -186,7 +186,7 @@ public class RecordAttributeFilter implements IQueryFilter, IColumnIdentifierPro
 	public String getKeyValue(){
 		return this.keyValue;
 	}
-	public Date[] getDateValues(){
+	public LocalDate[] getDateValues(){
 		return this.dateValues;
 	}
 }

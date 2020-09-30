@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.common.filter;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.eclipse.jface.fieldassist.ControlDecoration;
@@ -277,19 +277,19 @@ public class DateFilterDropDownComposite extends Composite {
 		return filter;
 	}
 	
-	public Date getCustomStartDate() {
-		return SmartUtils.getDate(dtStart);
+	public LocalDate getCustomStartDate() {
+		return SmartUtils.toDate(dtStart);
 	}
 
-	public Date getCustomEndDate() {
-		return SmartUtils.getDate(dtEnd);
+	public LocalDate getCustomEndDate() {
+		return SmartUtils.toDate(dtEnd);
 	}
 	
-	public void setDateFilter(DateFilterComposite.DateFilter filter, Date[] customDates){
+	public void setDateFilter(DateFilterComposite.DateFilter filter, LocalDate[] customDates){
 		cmbFilter.setSelection(new StructuredSelection(filter));
 		if (filter == DateFilter.CUSTOM){
-			SmartUtils.initDateDateTimeWidget(dtStart, customDates[0]);
-			SmartUtils.initDateDateTimeWidget(dtEnd, customDates[1]);
+			SmartUtils.initDateTimeWidget(dtStart, customDates[0]);
+			SmartUtils.initDateTimeWidget(dtEnd, customDates[1]);
 		}
 	}
 	
@@ -298,7 +298,8 @@ public class DateFilterDropDownComposite extends Composite {
 		String error = null;
 		
 		DateFilterComposite.DateFilter filter = getDateFilter();
-		if (filter.getEndDate() != null && filter.getStartDate() != null && filter.getEndDate().before(filter.getStartDate())){
+		if (filter.getEndDate() != null && filter.getStartDate() != null && 
+				filter.getEndDate().isBefore(filter.getStartDate())){
 			error = Messages.DateFilterDropDownComposite_InvalidDate;
 		}
 		

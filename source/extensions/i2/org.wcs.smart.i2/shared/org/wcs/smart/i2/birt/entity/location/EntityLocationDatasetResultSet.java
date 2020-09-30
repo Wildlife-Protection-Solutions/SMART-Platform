@@ -25,6 +25,8 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map.Entry;
@@ -46,7 +48,6 @@ import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.observation.model.Waypoint;
-import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -108,14 +109,14 @@ public class EntityLocationDatasetResultSet implements IResultSet {
 		
 		if (entityUuid != null) entity = connection.getSession().get(IntelEntity.class, entityUuid);
 
-		java.util.Date startDate = null;
-		java.util.Date endDate = null;
+		LocalDateTime startDate = null;
+		LocalDateTime endDate = null;
 		int index1 = pmetadata.findParameterIndex(DataSourceParameter.START_DATE.getName());
 		int index2 = pmetadata.findParameterIndex(DataSourceParameter.END_DATE.getName());
 		
 		if (index1 > 0 && index2 > 0 && parameters.get(index1) != null && parameters.get(index2) != null){
-			startDate = SharedUtils.getDatePart((Date) parameters.get(index1), false);
-			endDate = SharedUtils.getDatePart((Date) parameters.get(index1), true);
+			startDate = ((java.sql.Date) parameters.get(index1)).toLocalDate().atTime(LocalTime.MIN);
+			endDate = ((java.sql.Date) parameters.get(index2)).toLocalDate().atTime(LocalTime.MAX);
 			
 			q1 += " AND l.id.location.dateTime >= :start and l.id.location.dateTime <= :end "; //$NON-NLS-1$
 			q2 += " AND l.id.location.dateTime >= :start and l.id.location.dateTime <= :end "; //$NON-NLS-1$

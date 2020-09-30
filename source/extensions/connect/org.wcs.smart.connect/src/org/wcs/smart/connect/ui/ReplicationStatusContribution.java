@@ -23,9 +23,10 @@ package org.wcs.smart.connect.ui;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.text.DateFormat;
 import java.text.MessageFormat;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -136,7 +137,9 @@ public class ReplicationStatusContribution implements
 	}
 	
 	private String formatMessage(String message){
-		if (message != null) message = MessageFormat.format( Messages.StatusLineControl_MessageFormatDateString, DateFormat.getTimeInstance().format(new Date()), message);
+		if (message != null) 
+			message = MessageFormat.format( Messages.StatusLineControl_MessageFormatDateString, 
+				DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(LocalDateTime.now()), message);
 		return message;
 	}
 	

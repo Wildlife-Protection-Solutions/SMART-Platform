@@ -27,12 +27,10 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.sql.Date;
-import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -599,7 +597,7 @@ public class PawsDataEngine {
 			select.append(" left join smart.patrol p on p.uuid = pl.patrol_uuid "); //$NON-NLS-1$
 
 			
-			SimpleDateFormat ff = new SimpleDateFormat(DATE_FORMAT);
+			DateTimeFormatter ff = DateTimeFormatter.ofPattern(DATE_FORMAT);
 			try(ScrollableResults results = session.createNativeQuery(select.toString()).scroll()){
 				while(results.next()) {
 					String[] data = new String[headers.size()];
@@ -607,17 +605,17 @@ public class PawsDataEngine {
 					Object[] items = results.get();
 					
 					String pid = (String)items[0];
-					Date pstart = (Date)items[1];
-					Date pend = (Date)items[2];
+					LocalDate pstart = (LocalDate)items[1];
+					LocalDate pend = (LocalDate)items[2];
 					
 					double x = (double)items[5];
 					double y = (double)items[6];
-					Timestamp datetime = (Timestamp)items[7];
+					LocalDateTime datetime = (LocalDateTime)items[7];
 										
 					//Waypoint Date
 					int index = 0;
 					data[index++] = ff.format(datetime);
-					data[index++] = DateFormat.getTimeInstance().format(datetime);
+					data[index++] = DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM).format(datetime.toLocalTime());
 					
 					//Start Date
 					data[index++] = ff.format(pstart);

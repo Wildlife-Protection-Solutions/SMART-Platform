@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.connect.internal.server.replication;
 
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -57,8 +58,8 @@ public class CleanUpReplicationJob extends Job{
 	
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		Date d = new Date();
-		Date lastHour = new Date(d.getTime() - DerbyReplicationManager.REPLICATION_MAXTIME_DAYS * 24 * 60 * 60 * 1000l);
+		
+		LocalDateTime lastHour = ChronoUnit.DAYS.addTo(LocalDateTime.now(), -DerbyReplicationManager.REPLICATION_MAXTIME_DAYS );
 		
 		//download change log
 		ConservationArea ca = SmartDB.getCurrentConservationArea();

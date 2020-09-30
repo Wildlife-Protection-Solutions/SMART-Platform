@@ -30,7 +30,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -200,7 +199,7 @@ public class DataLoader {
 		HashMap<LocalDate, List<Waypoint>> groups = new HashMap<>();
 		
 		for (Waypoint wp : waypoints) {
-			LocalDate day = (new java.sql.Date(wp.getDateTime().getTime())).toLocalDate();
+			LocalDate day = wp.getDateTime().toLocalDate();
 			if (!groups.containsKey(day)) groups.put(day, new ArrayList<>());
 			groups.get(day).add(wp);
 		}
@@ -217,12 +216,9 @@ public class DataLoader {
 		pdates.sort((a,b)->a.compareTo(b));
 		
 		for(LocalDate localdate : pdates) {
-			
-			java.sql.Date d = java.sql.Date.valueOf(localdate);
-			
 			Patrol p = new Patrol();
-			p.setStartDate(d);
-			p.setEndDate(d);
+			p.setStartDate(localdate);
+			p.setEndDate(localdate);
 			p.setConservationArea(SmartDB.getCurrentConservationArea());
 			p.setId(PatrolHibernateManager.generatePatrolId(p, session));
 			p.setLegs(new ArrayList<>());
@@ -238,8 +234,8 @@ public class DataLoader {
 			m.setMember(SmartDB.getCurrentEmployee());
 			m.setPatrolLeg(pl);
 			
-			pl.setStartDate(d);
-			pl.setEndDate(d);
+			pl.setStartDate(localdate);
+			pl.setEndDate(localdate);
 			pl.setId("Leg 1"); //$NON-NLS-1$
 			pl.setLeader(m);
 			pl.setMembers(new ArrayList<>());
@@ -250,13 +246,13 @@ public class DataLoader {
 			PatrolLegDay pld = new PatrolLegDay();
 			pld.setPatrolLeg(pl);
 			pl.getPatrolLegDays().add(pld);
-			pld.setDate(d);
+			pld.setDate(localdate);
 			
 			pld.setWaypoints(new ArrayList<>());
 			
 			List<Waypoint> wps = groups.get(localdate); 
-			Date start = wps.get(0).getDateTime();
-			Date end = wps.get(0).getDateTime();
+			LocalDateTime start = wps.get(0).getDateTime();
+			LocalDateTime end = wps.get(0).getDateTime();
 			
 			session.saveOrUpdate(p);
 			
@@ -274,13 +270,13 @@ public class DataLoader {
 				pld.getWaypoints().add(pw);
 				pw.setPatrolLegDay(pld);
 				
-				if (wp.getDateTime().after(end)) end = wp.getDateTime();
-				if (wp.getDateTime().before(start)) start = wp.getDateTime();
+				if (wp.getDateTime().isAfter(end)) end = wp.getDateTime();
+				if (wp.getDateTime().isBefore(start)) start = wp.getDateTime();
 				
 				session.saveOrUpdate(pw);
 			}
-			pld.setStartTime(new java.sql.Time(start.getTime()));
-			pld.setEndTime(new java.sql.Time(end.getTime()));
+			pld.setStartTime(start.toLocalTime());
+			pld.setEndTime(end.toLocalTime());
 			session.flush();
 			
 			monitor.worked(1);
@@ -385,7 +381,7 @@ public class DataLoader {
 				LocalDateTime dt = d.atTime(lt);
 				Waypoint wp = new Waypoint();
 				wp.setConservationArea(SmartDB.getCurrentConservationArea());
-				wp.setDateTime( java.sql.Timestamp.valueOf(dt) );
+				wp.setDateTime( dt );
 				wp.setRawX(x);
 				wp.setRawY(y);
 				wp.setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
@@ -497,7 +493,7 @@ public class DataLoader {
 				
 				Waypoint wp = new Waypoint();
 				wp.setConservationArea(SmartDB.getCurrentConservationArea());
-				wp.setDateTime(java.sql.Timestamp.valueOf(dt));
+				wp.setDateTime(dt);
 				wp.setRawX(x);
 				wp.setRawY(y);
 				wp.setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
@@ -608,7 +604,7 @@ public class DataLoader {
 				
 				Waypoint wp = new Waypoint();
 				wp.setConservationArea(SmartDB.getCurrentConservationArea());
-				wp.setDateTime(java.sql.Timestamp.valueOf(dt));
+				wp.setDateTime(dt);
 				wp.setRawX(x);
 				wp.setRawY(y);
 				wp.setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
@@ -722,7 +718,7 @@ public class DataLoader {
 				
 				Waypoint wp = new Waypoint();
 				wp.setConservationArea(SmartDB.getCurrentConservationArea());
-				wp.setDateTime(java.sql.Timestamp.valueOf(dt));
+				wp.setDateTime(dt);
 				wp.setRawX(x);
 				wp.setRawY(y);
 				wp.setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
@@ -801,7 +797,7 @@ public class DataLoader {
 				
 				Waypoint wp = new Waypoint();
 				wp.setConservationArea(SmartDB.getCurrentConservationArea());
-				wp.setDateTime(java.sql.Timestamp.valueOf(dt));
+				wp.setDateTime(dt);
 				wp.setRawX(x);
 				wp.setRawY(y);
 				wp.setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);

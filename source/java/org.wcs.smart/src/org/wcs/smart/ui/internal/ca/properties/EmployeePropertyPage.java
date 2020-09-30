@@ -23,8 +23,9 @@ package org.wcs.smart.ui.internal.ca.properties;
 
 import java.lang.reflect.InvocationTargetException;
 import java.text.Collator;
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -176,14 +177,14 @@ public class EmployeePropertyPage extends SmartStyledTitleDialog{
 				}
 				return element.getRank().getName();
 			case GENDER: return String.valueOf(element.getGender());
-			case BIRTHDATE: return element.getBirthDate() == null ? "" : DateFormat.getDateInstance().format(element.getBirthDate()); //$NON-NLS-1$
-			case DATE_CREATED: return DateFormat.getDateInstance().format(element.getDateCreated());
-			case EMPLOYEMENT_DATE: return DateFormat.getDateInstance().format(element.getStartEmploymentDate());
+			case BIRTHDATE: return element.getBirthDate() == null ? "" : DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(element.getBirthDate()); //$NON-NLS-1$
+			case DATE_CREATED: return DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(element.getDateCreated());
+			case EMPLOYEMENT_DATE: return DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(element.getStartEmploymentDate());
 			case EMPLOYEMENT_ENDDATE: 
 				if (element.getEndEmploymentDate() == null){
 					return ""; //$NON-NLS-1$
 				}
-				return DateFormat.getDateInstance().format(element.getEndEmploymentDate());
+				return DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(element.getEndEmploymentDate());
 			case IS_ACTIVE:
 				if (element.getEndEmploymentDate() == null){
 					return Messages.EmployeePropertyPage_ActiveFlag;

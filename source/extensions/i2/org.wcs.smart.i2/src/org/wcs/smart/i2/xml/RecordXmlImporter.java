@@ -27,10 +27,10 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -113,7 +113,7 @@ public class RecordXmlImporter {
 		return o.getValue();
 	}
 
-	private SimpleDateFormat dateFormater = new SimpleDateFormat(RecordXmlExporter.DATE_FORMAT_STR);
+	private DateTimeFormatter dateFormater = DateTimeFormatter.ofPattern(RecordXmlExporter.DATE_FORMAT_STR);
 	
 	private Session session;
 	//records and entity locations to save
@@ -390,9 +390,9 @@ public class RecordXmlImporter {
 			newRecord.setConservationArea(SmartDB.getCurrentConservationArea());
 			newRecord.setTitle(type.getTitle().trim());
 			if (type.getPrimaryDate() != null) {
-				newRecord.setPrimaryDate(type.getPrimaryDate().toGregorianCalendar().getTime());
+				newRecord.setPrimaryDate(SmartUtils.toLocalDateTime(type.getPrimaryDate()));
 			}else {
-				newRecord.setPrimaryDate(new Date());
+				newRecord.setPrimaryDate(LocalDateTime.now());
 			}
 			if (type.getScratchpad() != null) newRecord.setComment(type.getScratchpad());
 			if (type.getNarrative() != null) newRecord.setDescription(type.getNarrative());
@@ -435,7 +435,7 @@ public class RecordXmlImporter {
 						newAttachment.setCopyFromLocation(importFile);
 						newAttachment.setFilename(xmlAttachment.getFilename());
 						newAttachment.setConservationArea(SmartDB.getCurrentConservationArea());
-						newAttachment.setDateCreated(new Date());
+						newAttachment.setDateCreated(LocalDateTime.now());
 						newAttachment.setCreatedBy(SmartDB.getCurrentEmployee());
 						
 						IntelRecordAttachment attach = new IntelRecordAttachment();
@@ -472,7 +472,7 @@ public class RecordXmlImporter {
 					IntelLocation newLocation = new IntelLocation();
 					if (xmlLocation.getComment() != null) newLocation.setComment(xmlLocation.getComment());
 					if (xmlLocation.getId() != null) newLocation.setId(xmlLocation.getId());
-					newLocation.setDateTime(dateFormater.parse(xmlLocation.getDatetime()));
+					newLocation.setDateTime(LocalDateTime.parse(xmlLocation.getDatetime(), dateFormater));
 					newLocation.setConservationArea(SmartDB.getCurrentConservationArea());
 					newLocation.setGeom(xmlLocation.getGeometry());
 					newLocation.setRecord(newRecord);

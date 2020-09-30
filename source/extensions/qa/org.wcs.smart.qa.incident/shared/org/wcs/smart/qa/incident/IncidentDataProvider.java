@@ -21,10 +21,12 @@
  */
 package org.wcs.smart.qa.incident;
 
-import java.text.DateFormat;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -60,14 +62,14 @@ public class IncidentDataProvider extends IQaDataProvider {
 	}
 	
 	@Override
-	public Collection<?> getData(Session session, ConservationArea ca, Date startDate, Date endDate) {
+	public Collection<?> getData(Session session, ConservationArea ca, LocalDate startDate, LocalDate endDate) {
 		List<WaypointLocationData> waypoints = new ArrayList<>();
 		
 		Query<Waypoint> query = session.createQuery("FROM Waypoint WHERE conservationArea = :ca and sourceId = :source and dateTime between :start AND :end", Waypoint.class); //$NON-NLS-1$
 		query.setParameter("ca", ca); //$NON-NLS-1$
 		query.setParameter("source",  IndepedentIncidentSource.KEY); //$NON-NLS-1$
-		query.setParameter("start",  startDate); //$NON-NLS-1$
-		query.setParameter("end", endDate); //$NON-NLS-1$
+		query.setParameter("start",  startDate.atStartOfDay()); //$NON-NLS-1$
+		query.setParameter("end", endDate.atTime(LocalTime.MAX)); //$NON-NLS-1$
 		List<Waypoint> pws = query.list();
 		for (Waypoint wp : pws){
 			waypoints.add(new WaypointLocationData(wp));
@@ -87,7 +89,7 @@ public class IncidentDataProvider extends IQaDataProvider {
 		sb.append(" "); //$NON-NLS-1$
 		sb.append(waypoint.getId());
 		sb.append(" ("); //$NON-NLS-1$
-		sb.append(DateFormat.getDateTimeInstance().format(waypoint.getDateTime()));
+		sb.append(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(waypoint.getDateTime()));
 		sb.append(")"); //$NON-NLS-1$
 		return sb.toString();
 	}

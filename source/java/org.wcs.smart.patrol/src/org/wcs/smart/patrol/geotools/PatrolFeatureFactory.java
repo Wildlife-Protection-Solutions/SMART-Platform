@@ -21,11 +21,12 @@
  */
 package org.wcs.smart.patrol.geotools;
 
-import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 
 import org.geotools.data.DataUtilities;
 import org.geotools.feature.SchemaException;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.locationtech.jts.geom.Coordinate;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.map.GeometryFactoryProvider;
@@ -35,11 +36,9 @@ import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.model.TrackPart;
 import org.wcs.smart.util.UuidUtils;
 
-import org.locationtech.jts.geom.Coordinate;
-
 public class PatrolFeatureFactory {
 	
-	private static final SimpleDateFormat TRACK_DT_FORMAT = new SimpleDateFormat("MMMddyyyy");  //$NON-NLS-1$
+	private static final DateTimeFormatter TRACK_DT_FORMAT = DateTimeFormatter.ofPattern("MMMddyyyy");  //$NON-NLS-1$
 	
 	public static SimpleFeatureType createWaypointPrjSchema() throws SchemaException{
 		String spec = "the_geom:LineString:srid=4326,fid:String,id:Integer,date:Date,time:Date,rawx:Double,rawy:Double,distance:Double,bearing:Double,x:Double,y:Double"; //$NON-NLS-1$

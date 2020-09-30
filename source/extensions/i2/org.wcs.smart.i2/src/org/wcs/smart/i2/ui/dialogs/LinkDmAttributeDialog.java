@@ -22,9 +22,9 @@
 package org.wcs.smart.i2.ui.dialogs;
 
 import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -300,8 +300,8 @@ public class LinkDmAttributeDialog  extends NameKeyDialog<Attribute>{
 					}else if (ia.getType() == IntelAttribute.AttributeType.DATE){
 						String[] queryParts = p.split(" "); //$NON-NLS-1$
 						Operator op = Operator.parse(queryParts[1]);
-						Date d1 = (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR )).parse(queryParts[2]);
-						Date d2 = (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR )).parse(queryParts[4]);
+						LocalDate d1 = LocalDate.parse(queryParts[2], DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR ));
+						LocalDate d2 = LocalDate.parse(queryParts[4], DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR ));
 						((DateDropItem)di).setInitialValue(op, d1, d2);
 					}else if (ia.getType() == IntelAttribute.AttributeType.LIST){
 						String listKey = p.split(" ")[2]; //$NON-NLS-1$

@@ -23,8 +23,8 @@ package org.wcs.smart.connect.uploader.sync;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
@@ -212,7 +212,7 @@ public enum ChangeLogManager {
 	 * @param maxDate
 	 * @return
 	 */
-	public long getLastRevision(Session s, Date maxDate, UUID caUuid){
+	public long getLastRevision(Session s, LocalDateTime maxDate, UUID caUuid){
 		String sql = "SELECT max(revision) FROM " + CHANGE_LOG_TABLE + " WHERE datetime < :maxdate and ca_uuid = :cauuid"; //$NON-NLS-1$ //$NON-NLS-2$
 		NativeQuery<?> q = s.createNativeQuery(sql);
 		q.setParameter("maxdate", maxDate); //$NON-NLS-1$

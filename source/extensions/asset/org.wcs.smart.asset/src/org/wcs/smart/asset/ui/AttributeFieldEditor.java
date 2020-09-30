@@ -384,7 +384,7 @@ public class AttributeFieldEditor {
 				dtDateTime.setEnabled(false);
 			}else{
 				btnChDateTime.setSelection(true);
-				SmartUtils.initDateDateTimeWidget(dtDateTime, value.getDateValue());
+				SmartUtils.initDateTimeWidget(dtDateTime, value.getDateValue());
 				if (isEnabled) dtDateTime.setEnabled(true);
 			}
 		}else if (attribute.getType() ==  AttributeType.BOOLEAN){

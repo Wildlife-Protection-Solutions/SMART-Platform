@@ -22,8 +22,8 @@
 package org.wcs.smart.er.ui;
 
 import java.text.MessageFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -267,7 +267,7 @@ public class SurveyFilteredComboViewer extends FilteredComboViewer<Survey> {
         			Survey temp = new Survey();
         			temp.setUuid((UUID)data[0]);
         			temp.setId((String)data[1]);
-        			temp.setStartDate((Date)data[2]);
+        			temp.setStartDate((LocalDate)data[2]);
 
         			SurveyDesign tmp = new SurveyDesign();
         			tmp.setName((String)data[3]);

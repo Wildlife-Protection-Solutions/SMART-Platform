@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.connect.model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import javax.persistence.Column;
@@ -29,8 +29,13 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.wcs.smart.connect.util.LocalDateTimeDeserializer;
+import org.wcs.smart.connect.util.LocalDateTimeSerializer;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
  * Smart connect user entity.
@@ -53,7 +58,7 @@ public class SmartUser extends ConnectUuidItem {
 	private String password;
 	private String oldpassword;
 	private String resetId;
-	private Date resetDate;
+	private LocalDateTime resetDate;
 	
 	private UUID homeCaUuid;
 	
@@ -107,10 +112,12 @@ public class SmartUser extends ConnectUuidItem {
 	
 	@JsonIgnore
 	@Column(name="resetdatetime")
-	public Date getResetDatetime() {
+	@JsonDeserialize(using = LocalDateTimeDeserializer.class)  
+	@JsonSerialize(using = LocalDateTimeSerializer.class)
+	public LocalDateTime getResetDatetime() {
 		return resetDate;
 	}
-	public void setResetDatetime(Date reset) {
+	public void setResetDatetime(LocalDateTime reset) {
 		this.resetDate = reset;
 	}
 	

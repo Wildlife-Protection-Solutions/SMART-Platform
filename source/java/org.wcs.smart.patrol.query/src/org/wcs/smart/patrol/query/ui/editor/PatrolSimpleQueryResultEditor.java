@@ -22,7 +22,8 @@
 package org.wcs.smart.patrol.query.ui.editor;
 
 import java.awt.Point;
-import java.text.DateFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -39,6 +40,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.udig.project.render.IViewportModel;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
@@ -65,9 +67,6 @@ import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.map.tool.IInfoToolProvider;
 import org.wcs.smart.user.UserLevelManager;
 import org.wcs.smart.util.ReprojectUtils;
-import org.wcs.smart.util.SmartUtils;
-
-import org.locationtech.jts.geom.Coordinate;
 
 /**
  * Editor for displaying query results.  The editor includes two pages
@@ -225,7 +224,7 @@ public class PatrolSimpleQueryResultEditor extends QueryResultsEditor{
 							first = i.iterator().next();
 							sb.append(first.getPatrolId() + " (" + first.getWaypointId() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 							sb.append("\n"); //$NON-NLS-1$
-							sb.append(DateFormat.getDateTimeInstance().format(SmartUtils.combineDateTime(first.getWpDateTime(), first.getWaypointTime())));
+							sb.append(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(first.getWpDateTime().atTime(first.getWaypointTime())));
 							sb.append("\n"); //$NON-NLS-1$
 							for (PatrolQueryResultItem result : i){
 								if (result.getCategories() != null && result.getCategories().length > 0){

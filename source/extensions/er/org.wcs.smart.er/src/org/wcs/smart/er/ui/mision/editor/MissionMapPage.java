@@ -23,8 +23,9 @@ package org.wcs.smart.er.ui.mision.editor;
 
 import java.awt.Point;
 import java.io.IOException;
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -356,7 +357,7 @@ public class MissionMapPage extends SmartMapEditorPart {
 					StringBuilder sb = new StringBuilder();
 					sb.append(MessageFormat.format(Messages.MissionMapPage_WaypointLbl, toEdit.getWaypoint().getId()));
 					sb.append("\n"); //$NON-NLS-1$
-					sb.append(DateFormat.getDateTimeInstance().format(toEdit.getWaypoint().getDateTime()));
+					sb.append(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(toEdit.getWaypoint().getDateTime()));
 					
 					return new EditPoint(exitPnt, toEdit, sb.toString());
 				}catch (Exception ex){

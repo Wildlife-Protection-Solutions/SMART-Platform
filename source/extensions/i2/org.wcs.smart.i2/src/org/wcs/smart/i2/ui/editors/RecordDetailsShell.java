@@ -21,9 +21,10 @@
  */
 package org.wcs.smart.i2.ui.editors;
 
-import java.text.DateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -220,8 +221,8 @@ public class RecordDetailsShell extends SmartShellDialog{
 			final StringBuilder sbEntities = new StringBuilder();
 			String name =""; //$NON-NLS-1$
 			String narr = ""; //$NON-NLS-1$
-			Date dCreated;
-			Date dModified;
+			LocalDateTime dCreated;
+			LocalDateTime dModified;
 			try(Session s = HibernateManager.openSession()){
 				IntelRecord temp = (IntelRecord)s.get(IntelRecord.class, record.getUuid());
 				name = temp.getTitle();
@@ -236,8 +237,8 @@ public class RecordDetailsShell extends SmartShellDialog{
 			}
 			final String name1 = name;
 			final String narr1 = narr == null ? "" : narr; //$NON-NLS-1$
-			final Date dCreated1 = dCreated;
-			final Date dModified1 = dModified;
+			final LocalDateTime dCreated1 = dCreated;
+			final LocalDateTime dModified1 = dModified;
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {	
@@ -245,8 +246,8 @@ public class RecordDetailsShell extends SmartShellDialog{
 					lblName.setText(name1);
 					lblNarrative.setText(narr1);
 					lblEntities.setText(sbEntities.toString());
-					lblDateCreated.setText(DateFormat.getDateInstance().format(dCreated1));
-					lblDateModified.setText(DateFormat.getDateInstance().format(dModified1));
+					lblDateCreated.setText(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(dCreated1));
+					lblDateModified.setText(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(dModified1));
 					owner.layout(true, true);
 					sc.setMinSize(scContent.computeSize(sc.getClientArea().width, SWT.DEFAULT));
 				}

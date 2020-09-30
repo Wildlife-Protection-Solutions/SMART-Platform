@@ -24,9 +24,9 @@ package org.wcs.smart.i2.query.engine;
 import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -88,7 +88,7 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine {
 		IProgressMonitor monitor = (IProgressMonitor) parameters.get(IProgressMonitor.class.getName());
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.IntelObservationQueryEngine_Progress1, 6);
 		//one or both element of array may be null
-		Date[] dfilter = (Date[]) parameters.get(Date.class.getName());
+		LocalDate[] dfilter = (LocalDate[]) parameters.get(LocalDate.class.getName());
 		if (dfilter == null) return null;
 		
 		Locale locale = (Locale) parameters.get(Locale.class.getName());

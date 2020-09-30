@@ -23,9 +23,11 @@ package org.wcs.smart.patrol.query.exportimport;
 
 import java.math.BigDecimal;
 import java.nio.file.Path;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -33,7 +35,6 @@ import java.util.Locale;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -61,6 +62,7 @@ import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.importexport.IQueryExporter;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * GPX Query exporter for patrols.
@@ -159,10 +161,9 @@ public class PatrolGpxQueryExporter extends SimpleQueryExporter implements IQuer
 						wpt.setLat(new BigDecimal(coordinate.y));
 						
 						long timestamp = Double.valueOf(coordinate.getZ()).longValue();
-						GregorianCalendar c = new GregorianCalendar();
-						c.setTimeInMillis(timestamp);
-						wpt.setTime(DatatypeFactory.newInstance().newXMLGregorianCalendar(c));
-
+						LocalDateTime ldt = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault());
+						wpt.setTime(SmartUtils.toXmlDateTimeUTC(ldt));
+						
 						trkseg.getTrkpt().add(wpt);
 					}
 					trk.getTrkseg().add(trkseg);
@@ -191,25 +192,8 @@ public class PatrolGpxQueryExporter extends SimpleQueryExporter implements IQuer
 		}
 	}
 
-	private XMLGregorianCalendar toXmlTime(Date date, Date time) throws DatatypeConfigurationException {
-		if (date == null) {
-			GregorianCalendar tc = new GregorianCalendar();
-			tc.setTime(time);
-			return DatatypeFactory.newInstance().newXMLGregorianCalendar(tc);
-		}
-		if (time == null) {
-			GregorianCalendar dc = new GregorianCalendar();
-			dc.setTime(date);
-			return DatatypeFactory.newInstance().newXMLGregorianCalendar(dc);
-		}
-		GregorianCalendar timeCalendar = new GregorianCalendar();
-		timeCalendar.setTime(time);
-		GregorianCalendar dateCalendar = new GregorianCalendar();
-		dateCalendar.setTime(date);
-		dateCalendar.add(Calendar.HOUR_OF_DAY, timeCalendar.get(Calendar.HOUR_OF_DAY));
-		dateCalendar.add(Calendar.MINUTE, timeCalendar.get(Calendar.MINUTE));
-		dateCalendar.add(Calendar.SECOND, timeCalendar.get(Calendar.SECOND));
-		return DatatypeFactory.newInstance().newXMLGregorianCalendar(dateCalendar);
+	private XMLGregorianCalendar toXmlTime(LocalDate date, LocalTime time) throws DatatypeConfigurationException {
+		return SmartUtils.toXmlDateTime(date.atTime(time));
 	}
 	
 }

@@ -23,7 +23,8 @@ package org.wcs.smart.connect.servlet;
 
 import java.io.IOException;
 import java.text.MessageFormat;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -177,7 +178,7 @@ public class ResetPasswordServlet extends HttpServlet{
 				throw new SmartConnectException(Response.Status.NOT_FOUND,
 						Messages.getString("ResetPasswordServlet.UserNameNotFound", request.getLocale())); //$NON-NLS-1$
 			}
-			su.setResetDatetime(new Date());
+			su.setResetDatetime(LocalDateTime.now());
 
 			su.setResetId(SmartUtils.randomString(RESET_LINK_SIZE));
 			s.getTransaction().commit();
@@ -225,7 +226,7 @@ public class ResetPasswordServlet extends HttpServlet{
 			throw new SmartConnectException(Status.BAD_REQUEST);
 		}
 		SmartUser su = null;
-		Date linkDateTime = null;
+		LocalDateTime linkDateTime = null;
 		Session s = HibernateManager.getSession(request.getServletContext());
 		s.beginTransaction();
 		try {
@@ -252,7 +253,7 @@ public class ResetPasswordServlet extends HttpServlet{
 
 		}
 		// validate reset link time
-		if ((new Date()).getTime() - linkDateTime.getTime() > RESET_VALID_MIN * 60 * 1000) {
+		if (ChronoUnit.MINUTES.between(linkDateTime,  LocalDateTime.now()) > RESET_VALID_MIN) {
 			logger.log(Level.WARNING, Messages.getString("ResetPasswordServlet.LinkExpired", request.getLocale())); //$NON-NLS-1$
 			throw new SmartConnectException(Status.BAD_REQUEST);
 		}

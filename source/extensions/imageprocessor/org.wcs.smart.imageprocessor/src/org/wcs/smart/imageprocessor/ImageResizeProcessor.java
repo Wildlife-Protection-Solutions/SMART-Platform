@@ -123,7 +123,7 @@ public class ImageResizeProcessor extends Job{
 					}
 				}
 				
-				try(ScrollableResults results = session.createQuery("FROM ObservationAttachment WHERE observation.waypoint in (FROM Waypoint WHERE conservationArea = :ca and source in (:srcs))") //$NON-NLS-1$
+				try(ScrollableResults results = session.createQuery("FROM ObservationAttachment WHERE observation.observationGroup.waypoint in (FROM Waypoint WHERE conservationArea = :ca and source in (:srcs))") //$NON-NLS-1$
 						.setParameter("ca",  SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
 						.setParameter("srcs", srcKeys) //$NON-NLS-1$
 						.scroll()){

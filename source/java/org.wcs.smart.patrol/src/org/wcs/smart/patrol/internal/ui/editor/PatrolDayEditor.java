@@ -22,13 +22,13 @@
 package org.wcs.smart.patrol.internal.ui.editor;
 
 import java.text.Collator;
-import java.text.DateFormat;
 import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -57,7 +57,6 @@ import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.ui.PatrolEditor;
-import org.wcs.smart.util.SharedUtils;
 
 /**
  * Patrol Day editor.  This consists of 
@@ -138,12 +137,12 @@ public class PatrolDayEditor extends EditorPart {
 					lblWarning.setText(MessageFormat.format(Messages.PatrolDayEditor_CanNotEditPatrol, new Object[]{canEdit})) ;
 				}
 				
-				SimpleDateFormat dayFormat = new SimpleDateFormat("EEEE"); //$NON-NLS-1$
+				DateTimeFormatter dayFormat = DateTimeFormatter.ofPattern("EEEE"); //$NON-NLS-1$
 				StringBuilder text = new StringBuilder(Messages.PatrolDayEditor_PatrolDayTitle);
 				text.append(" "); //$NON-NLS-1$
 				text.append(dayFormat.format(((PatrolDayEditorInput)getEditorInput()).getPatrolDay()));
 				text.append(", "); //$NON-NLS-1$
-				text.append(DateFormat.getDateInstance(DateFormat.MEDIUM).format(((PatrolDayEditorInput)getEditorInput()).getPatrolDay()));
+				text.append(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(((PatrolDayEditorInput)getEditorInput()).getPatrolDay()));
 				frmSummary.setText(text.toString());
 				frmSummary.getBody().setLayout(new GridLayout(1, false));
 				((GridLayout)frmSummary.getBody().getLayout()).marginWidth = 0;
@@ -154,7 +153,7 @@ public class PatrolDayEditor extends EditorPart {
 	
 				for (PatrolLeg leg: legs){
 					for (PatrolLegDay day : leg.getPatrolLegDays()){
-						if (SharedUtils.getDatePart(day.getDate(), false).equals(  SharedUtils.getDatePart( ((PatrolDayEditorInput)getEditorInput()).getPatrolDay(), false))){
+						if (day.getDate().isEqual( ((PatrolDayEditorInput)getEditorInput()).getPatrolDay())){
 							plds.add(day);
 						}
 						
@@ -189,11 +188,11 @@ public class PatrolDayEditor extends EditorPart {
 	
 						@Override
 						public int compare(PatrolLegDay o1, PatrolLegDay o2) {
-							Date d1 = o1.getStartTime();
-							Date d2 = o2.getStartTime();
-							if (d1.before(d2)){
+							LocalTime d1 = o1.getStartTime();
+							LocalTime d2 = o2.getStartTime();
+							if (d1.isBefore(d2)){
 								return -1;
-							}else if (d2.before(d1)) {
+							}else if (d2.isBefore(d1)) {
 								return 1;
 							}else{
 								return Collator.getInstance().compare(o1.getPatrolLeg().getId(),o2.getPatrolLeg().getId());

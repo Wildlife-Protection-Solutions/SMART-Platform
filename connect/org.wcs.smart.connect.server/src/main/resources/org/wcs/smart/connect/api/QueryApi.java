@@ -28,9 +28,9 @@ import java.nio.file.Files;
 import java.security.Principal;
 import java.sql.SQLException;
 import java.text.MessageFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -207,8 +207,8 @@ public class QueryApi extends HttpServlet{
 				includeUuids = true;
 			}
 		}
-		Date startDate = null;
-		Date endDate = null;
+		LocalDate startDate = null;
+		LocalDate endDate = null;
 		if (start_date != null){
 			try{
 				startDate = SmartUtils.parseDate(start_date);
@@ -238,10 +238,10 @@ public class QueryApi extends HttpServlet{
 				dfilter = AllDatesFilter.INSTANCE; 
 			}else{
 				if (startDate == null){
-					startDate = new Date(0);
+					startDate = LocalDate.now();
 				}
 				if (endDate == null){
-					endDate = new Date();
+					endDate = LocalDate.now();
 				}
 				dfilter = new CustomDateFilter();
 				((CustomDateFilter)dfilter).setDates(startDate, endDate);
@@ -508,11 +508,11 @@ public class QueryApi extends HttpServlet{
 		params.put(AbstractQueryEngine.INCLUDE_UUID_PARAMETER, includeUuids);
 		params.put(Principal.class.getName(), request.getUserPrincipal().getName());
 		
-		Date[] dateFilters = new Date[] {null, null};
+		LocalDate[] dateFilters = new LocalDate[] {null, null};
 		if (df.getDateFilterOption().getDates() != null) {
 			dateFilters = df.getDateFilterOption().getDates();
 		}
-		params.put(Date.class.getName(), dateFilters);
+		params.put(LocalDate.class.getName(), dateFilters);
 		result = engine.executeQuery(query, params);
 			
 		ProjectionProvider prjProvider = null;

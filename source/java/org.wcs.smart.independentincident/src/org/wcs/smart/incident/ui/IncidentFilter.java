@@ -21,7 +21,9 @@
  */
 package org.wcs.smart.incident.ui;
 
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -33,7 +35,6 @@ import org.wcs.smart.common.filter.StringFilterComposite.StringComparison;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.incident.IIncidentProvider;
 import org.wcs.smart.incident.IncidentManager;
-import org.wcs.smart.util.SharedUtils;
 
 /**
  * Filter for the incident view.  Filters
@@ -51,8 +52,8 @@ public class IncidentFilter {
 	
 	private Set<IIncidentProvider> sourceids = null;
 	
-	private Date startDate;
-	private Date endDate;
+	private LocalDate startDate;
+	private LocalDate endDate;
 	
 	public IncidentFilter() {
 		sourceids = new HashSet<>();
@@ -95,7 +96,7 @@ public class IncidentFilter {
 	 * 
 	 * @return start date for custom date filter
 	 */
-	public Date getStartDate(){
+	public LocalDate getStartDate(){
 		return this.startDate;
 	}
 	
@@ -103,7 +104,7 @@ public class IncidentFilter {
 	 * 
 	 * @return end date for custom date filter
 	 */
-	public Date getEndDate(){
+	public LocalDate getEndDate(){
 		return this.endDate;
 	}
 	
@@ -125,7 +126,7 @@ public class IncidentFilter {
 	 * @param start the start date for custom filter; null if not custom date filter
 	 * @param end the end date for custom filter; null if not cusom date filter
 	 */
-	public void setDateFilter(DateFilter dFilter, Date start, Date end){
+	public void setDateFilter(DateFilter dFilter, LocalDate start, LocalDate end){
 		this.dateFilter = dFilter;
 		this.startDate = start;
 		this.endDate = end;
@@ -207,16 +208,10 @@ public class IncidentFilter {
 			}
 		}
 		if (dateFilter != null) {
-			Date start = dateFilter.getStartDate();
-			if (start == null){
-				start = startDate;
-			}
-			Date end = dateFilter.getEndDate();
-			if (end == null){
-				end = endDate;
-			}
-			start = SharedUtils.getDatePart(start, false);
-			end = SharedUtils.getDatePart(end, true);
+			
+			LocalDateTime start = dateFilter.getStartDate() == null ? startDate.atStartOfDay() : dateFilter.getStartDate().atStartOfDay();
+			LocalDateTime end = dateFilter.getEndDate() == null ? endDate.atTime(LocalTime.MAX) : dateFilter.getEndDate().atTime(LocalTime.MAX);
+			
 			query.setParameter("date1", start); //$NON-NLS-1$
 			query.setParameter("date2", end); //$NON-NLS-1$
 		}

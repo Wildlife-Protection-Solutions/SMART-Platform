@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.common.celleditor;
 
-import java.util.Calendar;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
@@ -75,22 +75,19 @@ public class TimeCellEditor extends DateCellEditor{
 	 */
 	@Override
 	protected Object doGetValue() {
-		return SmartUtils.getTime(dt);
+		return SmartUtils.toTime(dt);
 	}
 
 	/**
-	 * Expects a Date or Calendar object.
+	 * Expects a LocatTime or LocalDateTime object
 	 * @see org.eclipse.jface.viewers.CellEditor#doSetValue(java.lang.Object)
 	 */
 	@Override
 	protected void doSetValue(Object value) {
-		if (value instanceof Date){
-			Calendar cal = Calendar.getInstance();
-			cal.setTime((Date)value);
-			dt.setTime(cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), cal.get(Calendar.SECOND));
-		}else if (value instanceof Calendar){
-			Calendar cal = (Calendar)value;
-			dt.setTime(cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), cal.get(Calendar.SECOND));
+		if (value instanceof LocalTime) {
+			SmartUtils.initDateTimeWidget(dt, ((LocalTime)value));	
+		}else if (value instanceof LocalDateTime) {
+			SmartUtils.initDateTimeWidget(dt, ((LocalDateTime)value).toLocalTime());
 		}
 	}
 

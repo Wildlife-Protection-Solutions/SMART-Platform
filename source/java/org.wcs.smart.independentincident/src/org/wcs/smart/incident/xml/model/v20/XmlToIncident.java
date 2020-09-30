@@ -26,7 +26,8 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -52,7 +53,6 @@ import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.incident.xml.IXmlToIncidentConverter;
 import org.wcs.smart.incident.xml.IncidentToXml;
 import org.wcs.smart.incident.xml.IncidentXmlManager;
-import org.wcs.smart.incident.xml.model.v20.WaypointType;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
@@ -140,7 +140,7 @@ public class XmlToIncident implements IXmlToIncidentConverter {
 		incident.setDirection(xml.getDirection());
 		incident.setDistance(xml.getDistance());
 		incident.setId(xml.getId());
-		incident.setDateTime(new SimpleDateFormat(IncidentToXml.DATE_FORMAT_STR).parse(xml.getDateTime()));
+		incident.setDateTime( LocalDateTime.parse(xml.getDateTime(), DateTimeFormatter.ofPattern(IncidentToXml.DATE_FORMAT_STR)));
 		incident.setRawX(xml.getX());
 		incident.setRawY(xml.getY());
 		

@@ -27,7 +27,8 @@ PARSER_BEGIN(Parser)
 package org.wcs.smart.i2.query.observation.parser;
 
 import java.util.*;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import org.wcs.smart.i2.query.observation.filter.*;
 import org.wcs.smart.i2.query.Operator;
 import java.lang.Exception;
@@ -442,8 +443,8 @@ IQueryFilter DataModelAttributeFilter():
 IQueryFilter SystemAttributeFilter():
 {
   String key = null;
-  Date date1 = null;
-  Date date2 = null;
+  LocalDate date1 = null;
+  LocalDate date2 = null;
   Operator op = null;
   String value = null;
 }
@@ -456,7 +457,7 @@ IQueryFilter SystemAttributeFilter():
 			  String datestring = token.image;
 			  try
 			  {
-			    date1 = (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).parse(datestring);
+			    date1 = LocalDate.parse(datestring, DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR));
 			  }catch (Exception ex)
 			  {
 			     throw new ParseException("Unable to parse date string " + datestring + ". Must be in the form yyyy-MM-dd");
@@ -467,7 +468,7 @@ IQueryFilter SystemAttributeFilter():
 			  datestring = token.image;
 			  try
 			  {
-			    date2 = (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).parse(datestring);
+			    date2 = LocalDate.parse(datestring, DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR));
 			  }catch (Exception ex)
 			  {
 			     throw new ParseException("Unable to parse date string " + datestring + ". Must be in the form yyyy-MM-dd");
@@ -494,8 +495,8 @@ IQueryFilter SystemAttributeFilter():
 IQueryFilter DmDateExpression():
 {
   String key = null;
-  Date date1 = null;
-  Date date2 = null;
+  LocalDate date1 = null;
+  LocalDate date2 = null;
   Operator op = null;
 }
 {
@@ -504,7 +505,7 @@ IQueryFilter DmDateExpression():
 		op = DateOp()
 		< DATE_STRING >  {
 		  String datestring = token.image;
-		  try		  {		    date1 = (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).parse(datestring);
+		  try		  {		    date1 = LocalDate.parse(datestring, DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR));
 		  }catch (Exception ex)		  {		     throw new ParseException("Unable to parse date string " + datestring + ". Must be in the form yyyy-MM-dd");
 		  }
 		}
@@ -513,7 +514,7 @@ IQueryFilter DmDateExpression():
 		  datestring = token.image;
 		  try
 		  {
-		    date2 = (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).parse(datestring);
+		    date2 = LocalDate.parse(datestring, DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR));
 		  }catch (Exception ex)
 		  {
 		     throw new ParseException("Unable to parse date string " + datestring + ". Must be in the form yyyy-MM-dd");
@@ -652,8 +653,8 @@ IQueryFilter EntityAttributeFilter():
 IQueryFilter EntityDateExpression():
 {
   String key = null;
-  Date date1 = null;
-  Date date2 = null;
+  LocalDate date1 = null;
+  LocalDate date2 = null;
   Operator op = null;
 }
 {
@@ -664,7 +665,7 @@ IQueryFilter EntityDateExpression():
 		  String datestring = token.image;
 		  try
 		  {
-		    date1 = (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).parse(datestring);
+		    date1 = LocalDate.parse(datestring, DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR));
 		  }catch (Exception ex)
 		  {
 		     throw new ParseException("Unable to parse date string " + datestring + ". Must be in the form yyyy-MM-dd");
@@ -675,7 +676,7 @@ IQueryFilter EntityDateExpression():
 		  datestring = token.image;
 		  try
 		  {
-		    date2 = (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).parse(datestring);
+		    date2 = LocalDate.parse(datestring, DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR));
 		  }catch (Exception ex)
 		  {
 		     throw new ParseException("Unable to parse date string " + datestring + ". Must be in the form yyyy-MM-dd");
@@ -763,8 +764,8 @@ IQueryFilter EntityBooleanExpression():
 IQueryFilter RecordDateExpression():
 {
   String key = null;
-  Date date1 = null;
-  Date date2 = null;
+  LocalDate date1 = null;
+  LocalDate date2 = null;
   Operator op = null;
   String datestring;
 }
@@ -776,7 +777,7 @@ IQueryFilter RecordDateExpression():
 		  datestring = token.image;
 		  try
 		  {
-		    date1 = (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).parse(datestring);
+		    date1 = LocalDate.parse(datestring, DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR));
 		  }catch (Exception ex)
 		  {
 		     throw new ParseException("Unable to parse date string " + datestring + ". Must be in the form yyyy-MM-dd");
@@ -787,7 +788,7 @@ IQueryFilter RecordDateExpression():
 		  datestring = token.image;
 		  try
 		  {
-		    date2 = (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).parse(datestring);
+		    date2 = LocalDate.parse(datestring, DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR));
 		  }catch (Exception ex)
 		  {
 		     throw new ParseException("Unable to parse date string " + datestring + ". Must be in the form yyyy-MM-dd");

@@ -144,7 +144,7 @@ public class IntelRecordQueryResults implements IConnectPagedQueryResultSet {
 		String profileKey = (String)rowData[columnNameToIndex.get("profile_key")]; //$NON-NLS-1$
 		item.setProfile(profileKey, profileUuid, profileName);
 				
-		item.setRecordDate((Date)rowData[columnNameToIndex.get("record_date")]); //$NON-NLS-1$
+		item.setRecordDate( ((Date)rowData[columnNameToIndex.get("record_date")]).toLocalDate() ); //$NON-NLS-1$
 		
 		IntelRecord r = session.get(IntelRecord.class, item.getRecordUuid());
 		for (IntelRecordAttributeValue v : r.getAttributes()) {

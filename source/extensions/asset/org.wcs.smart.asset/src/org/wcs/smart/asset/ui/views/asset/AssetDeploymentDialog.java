@@ -113,7 +113,7 @@ public class AssetDeploymentDialog extends SmartStyledTitleDialog{
 			try(Session s = HibernateManager.openSession()){
 				s.saveOrUpdate(toUpdate);
 				toUpdate.getAssetWaypoints().forEach(w->{
-					LocalDateTime dt = new java.sql.Timestamp(w.getWaypoint().getDateTime().getTime()).toLocalDateTime();
+					LocalDateTime dt = w.getWaypoint().getDateTime();
 					if (minWaypointDate == null || dt.isBefore(minWaypointDate)) minWaypointDate = dt;
 					if (maxWaypointDate == null || dt.isAfter(maxWaypointDate)) maxWaypointDate = dt;
 				});
@@ -201,11 +201,11 @@ public class AssetDeploymentDialog extends SmartStyledTitleDialog{
 		
 		boolean overlaps = false;
 		
-		LocalDateTime start = new java.sql.Timestamp(SmartUtils.combineDateTime(SmartUtils.getDate(dtStartDate), SmartUtils.getTime(dtStartTime)).getTime()).toLocalDateTime();
+		LocalDateTime start = SmartUtils.toDate(dtStartDate).atTime(SmartUtils.toTime(dtStartTime));
 		LocalDateTime end = LocalDateTime.now();
 
 		if (chEndDate.getSelection()) {
-			end = new java.sql.Timestamp(SmartUtils.combineDateTime(SmartUtils.getDate(dtEndDate), SmartUtils.getTime(dtEndTime)).getTime()).toLocalDateTime();
+			end = SmartUtils.toDate(dtEndDate).atTime(SmartUtils.toTime(dtEndTime));
 			if (start.isAfter(end)) {
 				setErrorMessage(Messages.AssetDeploymentDialog_StartBeforeEnd);
 				return;
@@ -316,8 +316,8 @@ public class AssetDeploymentDialog extends SmartStyledTitleDialog{
 		dtStartDate.addListener(SWT.Selection, e->validate());
 		dtStartTime.addListener(SWT.Selection, e->validate());
 		if (toUpdate.getStartDate() != null) {
-			SmartUtils.initDateDateTimeWidget(dtStartDate, toUpdate.getStartDate().toLocalDate());
-			SmartUtils.initDateDateTimeWidget(dtStartTime, toUpdate.getStartDate().toLocalTime());
+			SmartUtils.initDateTimeWidget(dtStartDate, toUpdate.getStartDate().toLocalDate());
+			SmartUtils.initDateTimeWidget(dtStartTime, toUpdate.getStartDate().toLocalTime());
 		}
 		
 		l = new Label(form, SWT.NONE);
@@ -347,8 +347,8 @@ public class AssetDeploymentDialog extends SmartStyledTitleDialog{
 		
 		
 		if (toUpdate.getEndDate() != null) {
-			SmartUtils.initDateDateTimeWidget(dtEndDate, toUpdate.getEndDate().toLocalDate());
-			SmartUtils.initDateDateTimeWidget(dtEndTime, toUpdate.getEndDate().toLocalTime());
+			SmartUtils.initDateTimeWidget(dtEndDate, toUpdate.getEndDate().toLocalDate());
+			SmartUtils.initDateTimeWidget(dtEndTime, toUpdate.getEndDate().toLocalTime());
 
 			dtEndDate.setEnabled(true);
 			dtEndTime.setEnabled(true);

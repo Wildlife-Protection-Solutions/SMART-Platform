@@ -22,10 +22,10 @@
 package org.wcs.smart.event.i2;
 
 import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
@@ -117,7 +117,7 @@ public class CreateRecordActionType implements IActionType {
 		sb.append("\n"); //$NON-NLS-1$
 		sb.append(MessageFormat.format(Messages.AdvIntelLabelProvider_CreateActionTypeMsg2, data.getWaypoint().getSourceId()));
 		sb.append("\n"); //$NON-NLS-1$
-		sb.append(MessageFormat.format(Messages.AdvIntelLabelProvider_CreateActionTypeMsg3, (new SimpleDateFormat("MMM dd, yyyy HH:mm:ss")).format(data.getWaypoint().getDateTime()))); //$NON-NLS-1$
+		sb.append(MessageFormat.format(Messages.AdvIntelLabelProvider_CreateActionTypeMsg3, (DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm:ss")).format(data.getWaypoint().getDateTime()))); //$NON-NLS-1$
 		sb.append("\n"); //$NON-NLS-1$
 		sb.append(MessageFormat.format(Messages.AdvIntelLabelProvider_CreateActionTypeMsg4, data.getWaypoint().getComment() == null ? "" : data.getWaypoint().getComment())); //$NON-NLS-1$
 		sb.append("\n"); //$NON-NLS-1$
@@ -204,7 +204,7 @@ public class CreateRecordActionType implements IActionType {
 					attachment.setConservationArea(newRecord.getConservationArea());
 					attachment.setFilename(a.getFilename());
 					attachment.setCopyFromLocation(a.getAttachmentFile());
-					attachment.setDateCreated(new Date());
+					attachment.setDateCreated(LocalDateTime.now());
 					attachment.setCreatedBy(SmartDB.getCurrentEmployee());
 					
 					IntelRecordAttachment rattachment = new IntelRecordAttachment();
@@ -228,7 +228,7 @@ public class CreateRecordActionType implements IActionType {
 					attachment.setConservationArea(newRecord.getConservationArea());
 					attachment.setFilename(a.getFilename());
 					attachment.setCopyFromLocation(a.getAttachmentFile());
-					attachment.setDateCreated(new Date());
+					attachment.setDateCreated(LocalDateTime.now());
 					attachment.setCreatedBy(SmartDB.getCurrentEmployee());
 					
 					IntelRecordAttachment rattachment = new IntelRecordAttachment();

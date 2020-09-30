@@ -25,12 +25,11 @@ import java.sql.Date;
 import java.util.HashSet;
 import java.util.UUID;
 
+import org.locationtech.jts.geom.LineString;
 import org.wcs.smart.query.common.engine.IValueComputer;
 import org.wcs.smart.query.common.model.Grid;
 import org.wcs.smart.query.common.model.Tile;
 import org.wcs.smart.util.UuidUtils;
-
-import org.locationtech.jts.geom.LineString;
 
 public class PatrolDayCntValueComputer implements IValueComputer<HashSet<Object>> {
 

@@ -21,8 +21,10 @@
  */
 package org.wcs.smart.connect;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Locale;
 import java.util.Random;
 
@@ -38,8 +40,8 @@ import javax.ws.rs.core.HttpHeaders;
 public class SmartUtils {
 
 	private static final char[] ALPHACHARS = "0123456789abcdefghiljklmnopqrstuvwxyz".toCharArray(); //$NON-NLS-1$
-	public static final SimpleDateFormat DT_FORMAT = new SimpleDateFormat("yyyy-MM-dd H:m:s"); //$NON-NLS-1$
-	public static final SimpleDateFormat D_FORMAT = new SimpleDateFormat("yyyy-MM-dd"); //$NON-NLS-1$
+	public static final DateTimeFormatter DT_FORMAT = DateTimeFormatter.ofPattern("yyyy-M-d H:m:s"); //$NON-NLS-1$
+	public static final DateTimeFormatter D_FORMAT = DateTimeFormatter.ofPattern("yyyy-M-d"); //$NON-NLS-1$
 	
 	/**
 	 * Finds the locale provided in the given headers.  Returns
@@ -89,12 +91,20 @@ public class SmartUtils {
 	 * @return
 	 * @throws Exception
 	 */
-	public static Date parseDate(String dateString) throws Exception{
+	public static LocalDate parseDate(String dateString) throws Exception{
 		try{
-			return DT_FORMAT.parse(dateString);
+			return LocalDateTime.parse(dateString, DT_FORMAT).toLocalDate();
+		}catch (DateTimeParseException ex){
+		}
+		return LocalDate.parse(dateString, DT_FORMAT);
+	}
+	
+	public static LocalDateTime parseDateTime(String dateString) throws Exception{
+		try{
+			LocalDateTime.parse(dateString, DT_FORMAT);
 		}catch (Exception ex){
 		}
-		return D_FORMAT.parse(dateString);
+		return null;
 	}
 	
 	/**

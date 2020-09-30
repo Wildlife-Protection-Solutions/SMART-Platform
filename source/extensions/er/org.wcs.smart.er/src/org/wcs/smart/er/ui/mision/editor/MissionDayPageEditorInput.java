@@ -21,9 +21,10 @@
  */
 package org.wcs.smart.er.ui.mision.editor;
 
-import java.text.DateFormat;
 import java.text.MessageFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
@@ -38,13 +39,13 @@ import org.wcs.smart.er.internal.Messages;
  */
 public class MissionDayPageEditorInput implements IEditorInput {
 
-	private Date day;
+	private LocalDate day;
 
-	public MissionDayPageEditorInput(Date day) {
+	public MissionDayPageEditorInput(LocalDate day) {
 		this.day = day;
 	}
 	
-	public Date getDay() {
+	public LocalDate getDay() {
 		return day;
 	}
 	
@@ -65,7 +66,8 @@ public class MissionDayPageEditorInput implements IEditorInput {
 
 	@Override
 	public String getName() {
-		return MessageFormat.format(Messages.MissionDayPageEditorInput_Name, DateFormat.getDateInstance(DateFormat.MEDIUM).format(day.getTime()));
+		return MessageFormat.format(Messages.MissionDayPageEditorInput_Name, 
+				DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(day));
 	}
 
 	@Override
@@ -75,13 +77,14 @@ public class MissionDayPageEditorInput implements IEditorInput {
 
 	@Override
 	public String getToolTipText() {
-		return MessageFormat.format(Messages.MissionDayPageEditorInput_Tooltip, DateFormat.getDateInstance(DateFormat.MEDIUM).format(day.getTime()));
+		return MessageFormat.format(Messages.MissionDayPageEditorInput_Tooltip,
+				DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(day));
 	}
 
 	@Override
 	public boolean equals(Object other){
 		if (other instanceof MissionDayPageEditorInput){
-			return ((MissionDayPageEditorInput) other).day.equals(this.day);
+			return ((MissionDayPageEditorInput) other).day.isEqual(this.day);
 		}
 		return false;
 	}

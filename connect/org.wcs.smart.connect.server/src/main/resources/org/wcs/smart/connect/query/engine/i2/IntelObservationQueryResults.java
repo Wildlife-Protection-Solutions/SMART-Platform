@@ -22,10 +22,10 @@
 package org.wcs.smart.connect.query.engine.i2;
 
 import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.text.DateFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.time.temporal.Temporal;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
@@ -163,7 +163,7 @@ public class IntelObservationQueryResults  implements IQueryResult, IConnectPage
 				if (qc.getDataType() == IQueryColumn.Type.TIME && 
 						ftype.getDescriptor(i++) .getType().getBinding().equals(String.class)
 						){
-					x = DateFormat.getTimeInstance().format((Date)x);
+					x = DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM).format((Temporal)x);
 				}
 				data.add(x);
 			}
@@ -221,7 +221,7 @@ public class IntelObservationQueryResults  implements IQueryResult, IConnectPage
 		item.setProfile(profileUuid, session.get(IntelProfile.class, profileUuid).getName());
 		
 		item.setLocationId((String)rowData[columnNameToIndex.get("loc_id")]); //$NON-NLS-1$
-		item.setLocationDate((Timestamp)rowData[columnNameToIndex.get("loc_datetime")]); //$NON-NLS-1$
+		item.setLocationDate( ((java.sql.Timestamp)rowData[columnNameToIndex.get("loc_datetime")]).toLocalDateTime()); //$NON-NLS-1$
 		item.setLocationComment((String)rowData[columnNameToIndex.get("loc_comment")]); //$NON-NLS-1$
 		try{
 			item.setGeometry(asGeometry(rowData[ columnNameToIndex.get("loc_geometry")]), null); //$NON-NLS-1$

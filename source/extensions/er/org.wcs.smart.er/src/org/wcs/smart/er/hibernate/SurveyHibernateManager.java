@@ -24,8 +24,8 @@ package org.wcs.smart.er.hibernate;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -230,7 +230,7 @@ public class SurveyHibernateManager {
 			List<SurveyProxy> all = new ArrayList<SurveyProxy>();
 			for (Object d : data){
 				Object[] x = (Object[])d;
-				SurveyProxy ii = new SurveyProxy((String)x[1], (UUID)x[0], (Date)x[2], (String)x[3]);
+				SurveyProxy ii = new SurveyProxy((String)x[1], (UUID)x[0], (LocalDate)x[2], (String)x[3]);
 				all.add(ii);
 			}
 			return all;

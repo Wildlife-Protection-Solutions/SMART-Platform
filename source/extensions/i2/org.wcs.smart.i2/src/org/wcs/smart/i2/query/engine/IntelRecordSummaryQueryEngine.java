@@ -24,7 +24,6 @@ package org.wcs.smart.i2.query.engine;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -98,7 +97,7 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 				 throw new Exception(Messages.IntelObservationQueryEngine_InvalidCaParameter);
 			}
 			IQueryItemProvider itemProvider = InternalQueryManager.INSTANCE.getQueryItemProvider();
-			Date[] dates = (Date[]) parameters.get(Date.class.getName());
+			LocalDate[] dates = (LocalDate[]) parameters.get(LocalDate.class.getName());
 			
 			Set<UUID> profiles = new HashSet<>();
 			for (String ip : IntelEntityRecordQuery.convertFromProfileFilter(query.getProfileFilter())) {
@@ -132,8 +131,8 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 			
 			progress.subTask(Messages.IntelEntitySummaryQueryEngine_progressLoadingResults);
 			LocalDate[] ldates = new LocalDate[2];
-			ldates[0] = (new java.sql.Date(dates[0].getTime())).toLocalDate();
-			ldates[1] = (new java.sql.Date(dates[1].getTime())).toLocalDate();
+			ldates[0] = dates[0];
+			ldates[1] = dates[1];
 			SummaryQueryResult results = getResults(dataTable.tableName, parsedQuery, ldates, locale, profiles, itemProvider, session);
 			progress.worked(1);
 			
@@ -211,12 +210,12 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 	 * compute the minimum and maximum date values over all date attributes, so
 	 * we can determine the range for the summary headers
 	 */
-	private Date[] computeDateRange(String queryTable, Session session) {
+	private LocalDate[] computeDateRange(String queryTable, Session session) {
 		String field = SystemAttributeFilter.SystemAttribute.RECORD_DATE.name().toLowerCase(Locale.ROOT);
 		Object[] items = (Object[]) session.createNativeQuery("SELECT min(" +field+ "), max(" +field+ ") FROM " + queryTable).uniqueResult(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		if (items[0] == null) items[0] = new Date();
-		if (items[1] == null) items[1] = new Date();
-		return new Date[] {(Date) items[0], (Date) items[1]};
+		if (items[0] == null) items[0] = LocalDate.now();
+		if (items[1] == null) items[1] = LocalDate.now();
+		return new LocalDate[] {(LocalDate) items[0], (LocalDate) items[1]};
 	}
 	
 	/*

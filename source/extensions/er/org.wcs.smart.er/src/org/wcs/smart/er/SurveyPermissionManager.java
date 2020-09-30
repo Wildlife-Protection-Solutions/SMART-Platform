@@ -22,7 +22,8 @@
 package org.wcs.smart.er;
 
 import java.text.MessageFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
@@ -86,9 +87,7 @@ public class SurveyPermissionManager {
 			}else if (survey.getStartDate() == null){
 				return null;
 			}else {
-				Date d = new Date();
-				d.setTime( d.getTime() - (long)op.getEditTime() * 24 * 60 * 60 * 1000 );
-				if (survey.getStartDate().after(d)){
+				if (ChronoUnit.DAYS.between(survey.getStartDate(), LocalDate.now()) < op.getEditTime()){
 					return null;
 				}else{
 					return MessageFormat.format(Messages.SurveyPermissionManager_SurveyToOld, new Object[]{op.getEditTime()}) ;
@@ -117,9 +116,7 @@ public class SurveyPermissionManager {
 			}else if (mission.getStartDate() == null){
 				return null;
 			}else {
-				Date d = new Date();
-				d.setTime( d.getTime() - (long)op.getEditTime() * 24 * 60 * 60 * 1000 );
-				if (mission.getStartDate().after(d)){
+				if (ChronoUnit.DAYS.between(mission.getStartDate(), LocalDate.now()) < op.getEditTime()){
 					return null;
 				}else{
 					return MessageFormat.format(Messages.SurveyPermissionManager_MissionToOld, new Object[]{op.getEditTime()}) ;

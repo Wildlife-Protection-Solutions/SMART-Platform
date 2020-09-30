@@ -22,15 +22,16 @@
 package org.wcs.smart.patrol.internal.ui.editor;
 
 import java.lang.reflect.InvocationTargetException;
-import java.sql.Time;
 import java.text.Collator;
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -121,7 +122,6 @@ import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.SmartStyledWizardDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.ReprojectUtils;
-import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -266,21 +266,9 @@ public class PatrolLegDayInputComposite {
 	public void setData(PatrolLegDay data) {
 		this.patrolLegDate = data;
 		
-		Calendar cal = Calendar.getInstance();
-		if (data.getStartTime() != null) {
-			cal.setTime(data.getStartTime());
-			dtStartTime.setTime(cal.get(Calendar.HOUR_OF_DAY),
-					cal.get(Calendar.MINUTE), cal.get(Calendar.SECOND));
-		}else{
-			dtStartTime.setTime(0,0,0);
-		}
-		if (data.getEndTime() != null) {
-			cal.setTime(data.getEndTime());
-			dtEndTime.setTime(cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE),
-					cal.get(Calendar.SECOND));
-		}else{
-			dtEndTime.setTime(23,59,59);
-		}
+		SmartUtils.initDateTimeWidget(dtStartTime, data.getStartTime() == null ? LocalTime.MIN : data.getStartTime());
+		SmartUtils.initDateTimeWidget(dtEndTime, data.getEndTime() == null ? LocalTime.MAX : data.getEndTime());
+		
 		if (data.getRestMinutes() == null) {
 			restMinutes.setText("0"); //$NON-NLS-1$
 		} else {
@@ -388,7 +376,7 @@ public class PatrolLegDayInputComposite {
 		dtStartTime.addFocusListener(new FocusAdapter() {			
 			@Override
 			public void focusLost(FocusEvent e) {
-				if (timeEqual(SmartUtils.getTime(dtStartTime).getTime(), patrolLegDate.getStartTime().getTime())){
+				if (timeEqual(SmartUtils.toTime(dtStartTime), patrolLegDate.getStartTime())){
 					//no changes made
 					return;
 				}
@@ -437,7 +425,7 @@ public class PatrolLegDayInputComposite {
 		dtEndTime.addFocusListener(new FocusAdapter() {			
 			@Override
 			public void focusLost(FocusEvent e) {
-				if (timeEqual(SmartUtils.getTime(dtEndTime).getTime(), patrolLegDate.getEndTime().getTime())){
+				if (timeEqual(SmartUtils.toTime(dtEndTime), patrolLegDate.getEndTime())){
 					//no changes made
 					return;
 				}
@@ -635,20 +623,8 @@ public class PatrolLegDayInputComposite {
 		return mainComposite;
 	}
 	
-	private boolean timeEqual(long t1, long t2){
-		Calendar c1 = Calendar.getInstance();
-		c1.setTimeInMillis(t1);
-		Calendar c2 = Calendar.getInstance();
-		c2.setTimeInMillis(t2);
-		
-		int[] fields = new int[]{Calendar.HOUR_OF_DAY, Calendar.MINUTE, Calendar.SECOND, Calendar.MILLISECOND};
-		
-		for (int i = 0; i < fields.length; i ++){
-			if (c1.get(fields[i]) != c2.get(fields[i])){
-				return false;
-			}
-		}
-		return true;
+	private boolean timeEqual(LocalTime t1, LocalTime t2){
+		return t1.equals(t2);
 	}
 	
 	public void dispose(){
@@ -682,11 +658,11 @@ public class PatrolLegDayInputComposite {
 	 * NOTE: Similar logic for all legs is located in {@link PatrolSummaryEditor} page
 	 */
 	protected void updateTimeWithWpData() {
-		Time[] dates = patrolLegDate.computeMinMaxDate();
+		LocalDateTime[] dates = patrolLegDate.computeMinMaxDate();
 		if (dates == null) return;
 		
-		patrolLegDate.setStartTime(dates[0]);
-		patrolLegDate.setEndTime(dates[1]);
+		patrolLegDate.setStartTime(dates[0].toLocalTime());
+		patrolLegDate.setEndTime(dates[1].toLocalTime());
 		setData(patrolLegDate);
 		editor.getPatrolEditor().save(patrolLegDate);
 		PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_DATES_LEG, patrolLegDate);
@@ -789,9 +765,10 @@ public class PatrolLegDayInputComposite {
 	
 	
 	private void updateTotalHours(){
-		double totalTime = SmartUtils.getTime(dtEndTime).getTime() - SmartUtils.getTime(dtStartTime).getTime();
+		double totalTime = ChronoUnit.MILLIS.between(SmartUtils.toTime(dtStartTime), SmartUtils.toTime(dtEndTime));
 		double restMinutes = Double.parseDouble(this.restMinutes.getText());
 		double totalPatrolHoursTime = totalTime / (1000 * 60 * 60);
+		
 		lblTotalPatrolHours.setText(PatrolEditor.formatTimeRange(totalPatrolHoursTime));
 		if (totalPatrolHoursTime < 0){
 			lblTotalPatrolHours.setFont(errorFont);
@@ -970,9 +947,9 @@ public class PatrolLegDayInputComposite {
 			waypoint.setRawY((Double)value);
 			needSave = true;
 		} else if (column == OtColumn.TIME) {
-			if (value instanceof Date){
-				if (SharedUtils.isSameTime(waypoint.getDateTime(), ((Date)value))) return; //no change
-				waypoint.setDateTime(SmartUtils.combineDateTime(patrolLegDate.getDate(), new Time(((Date)value).getTime())));
+			if (value instanceof LocalTime){
+				if (timeEqual(waypoint.getDateTime().toLocalTime(), ((LocalTime)value))) return; //no change
+				waypoint.setDateTime(patrolLegDate.getDate().atTime((LocalTime)value));
 				needSave = true;
 			}
 		} else if (column == OtColumn.DIRECTION) {
@@ -1056,7 +1033,7 @@ public class PatrolLegDayInputComposite {
 		} else if (column == OtColumn.NORTH) {
 			return wp.getRawY();
 		} else if (column == OtColumn.TIME) {
-			return wp.getDateTime();
+			return wp.getDateTime().toLocalTime();
 		} else if (column == OtColumn.DIRECTION) {
 			return wp.getDirection();
 		} else if (column == OtColumn.DISTANCE) {
@@ -1095,7 +1072,7 @@ public class PatrolLegDayInputComposite {
 			return wp.getX() +", " + wp.getY(); //$NON-NLS-1$
 		} else if (column == OtColumn.TIME) {
 			if (wp.getDateTime() != null) {
-				return DateFormat.getTimeInstance(DateFormat.MEDIUM).format(wp.getDateTime());
+				return DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM).format(wp.getDateTime().toLocalTime());
 			}
 			return ""; //$NON-NLS-1$
 		} else if (column == OtColumn.DIRECTION) {
@@ -1132,7 +1109,7 @@ public class PatrolLegDayInputComposite {
 			}
 		} else if (column == OtColumn.LAST_MODIFIED) {
 			if (wp.getLastModified() == null) return ""; //$NON-NLS-1$
-			return DateFormat.getDateTimeInstance().format(wp.getLastModified());
+			return DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(wp.getLastModified());
 		} else if (column == OtColumn.LAST_MODIFIED_BY) {
 			if (wp.getLastModifiedBy() == null) return ""; //$NON-NLS-1$
 			return SmartLabelProvider.getShortLabel(wp.getLastModifiedBy());
@@ -1147,20 +1124,8 @@ public class PatrolLegDayInputComposite {
 	 */
 	public void updateLegDay() {
 		
-		Calendar cal = Calendar.getInstance();
-		cal.setTimeInMillis(0);
-		cal.set(Calendar.HOUR_OF_DAY, dtEndTime.getHours());
-		cal.set(Calendar.MINUTE, dtEndTime.getMinutes());
-		cal.set(Calendar.SECOND, dtEndTime.getSeconds());
-		Time t = new Time(cal.getTimeInMillis());
-		patrolLegDate.setEndTime(t);
-		
-		cal.setTimeInMillis(0);
-		cal.set(Calendar.HOUR_OF_DAY, dtStartTime.getHours());
-		cal.set(Calendar.MINUTE, dtStartTime.getMinutes());
-		cal.set(Calendar.SECOND, dtStartTime.getSeconds());
-		t = new Time(cal.getTimeInMillis());
-		patrolLegDate.setStartTime(t);
+		patrolLegDate.setEndTime(SmartUtils.toTime(dtEndTime));
+		patrolLegDate.setStartTime(SmartUtils.toTime(dtStartTime));
 		
 		int rest = 0;
 		try{
@@ -1174,12 +1139,12 @@ public class PatrolLegDayInputComposite {
 	private void addWaypoint() {
 		double y = 0, x = 0;
 		int id = -1;
-		Date last = null;
+		LocalTime last = null;
 		for (Iterator<PatrolWaypoint> iterator = PatrolLegDayInputComposite.this.patrolLegDate.getWaypoints().iterator(); iterator.hasNext();) {
 			PatrolWaypoint e = (PatrolWaypoint) iterator.next();
-			Date t = (Date)getWaypointValue(e, OtColumn.TIME);
+			LocalTime t = (LocalTime)getWaypointValue(e, OtColumn.TIME);
 			
-			if(last == null || t.after(last) || t.equals(last)  ){
+			if(last == null || t.isAfter(last) || t.equals(last)  ){
 				y = (Double) getWaypointValue(e, OtColumn.NORTH);
 				x = (Double) getWaypointValue(e, OtColumn.EAST);
 				id = (Integer) getWaypointValue(e, OtColumn.ID);
@@ -1197,7 +1162,7 @@ public class PatrolLegDayInputComposite {
 			PatrolWaypoint wp = add.getWaypoint();
 			wp.setPatrolLegDay(patrolLegDate);
 			
-			wp.getWaypoint().setDateTime(SharedUtils.getDatePart(patrolLegDate.getDate(), false));
+			wp.getWaypoint().setDateTime(LocalDateTime.of(patrolLegDate.getDate(), LocalTime.MIN));
 			
 			patrolLegDate.getWaypoints().add(wp);
 			

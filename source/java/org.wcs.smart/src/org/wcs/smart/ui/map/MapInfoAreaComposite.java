@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.internal.commands.ChangeCRSCommand;
 import org.locationtech.udig.project.render.IViewportModelListener;
@@ -44,8 +45,6 @@ import org.locationtech.udig.project.ui.render.displayAdapter.MapMouseMotionList
 import org.locationtech.udig.project.ui.viewers.MapViewer;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.util.ReprojectUtils;
-
-import org.locationtech.jts.geom.Coordinate;
 
 /**
  * MapInfoAreaComposite

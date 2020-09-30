@@ -35,14 +35,13 @@ import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.widgets.Control;
 import org.geotools.geometry.jts.JTS;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.udig.catalog.util.CRSUtil;
 import org.locationtech.udig.project.ui.commands.AbstractDrawCommand;
 import org.locationtech.udig.project.ui.render.displayAdapter.MapMouseEvent;
 import org.locationtech.udig.project.ui.tool.SimpleTool;
 import org.locationtech.udig.ui.graphics.ViewportGraphics;
 import org.opengis.referencing.operation.TransformException;
-
-import org.locationtech.jts.geom.Coordinate;
 
 /**
  * Tool to compute the list between points.

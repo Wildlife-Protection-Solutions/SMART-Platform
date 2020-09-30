@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.plan.ui.panel;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 import org.wcs.smart.plan.model.Plan;
 
@@ -44,14 +44,14 @@ public class PlanUtil {
 			return true;
 		}
 
-		Date start = plan.getStartDate();
+		LocalDate start = plan.getStartDate();
 		if (start == null) {
 			return true; //nothing to validate, data incomplete
 		}
-		Date end = plan.getEndDate() != null ? plan.getEndDate() : start;
+		LocalDate end = plan.getEndDate() != null ? plan.getEndDate() : start;
 		
-		Date parentStart = parent.getStartDate();
-		Date parentEnd = parent.getEndDate() != null ? parent.getEndDate() : parentStart;
+		LocalDate parentStart = parent.getStartDate();
+		LocalDate parentEnd = parent.getEndDate() != null ? parent.getEndDate() : parentStart;
 
 		return start.compareTo(parentStart) >= 0 && end.compareTo(parentEnd) <= 0;
 	}
@@ -66,11 +66,11 @@ public class PlanUtil {
 			return;
 		}
 
-		Date parentStart = parent.getStartDate();
-		Date parentEnd = parent.getEndDate() != null ? parent.getEndDate() : parentStart;
+		LocalDate parentStart = parent.getStartDate();
+		LocalDate parentEnd = parent.getEndDate() != null ? parent.getEndDate() : parentStart;
 
-		Date start = plan.getStartDate();
-		Date end = plan.getEndDate() != null ? plan.getEndDate() : start;
+		LocalDate start = plan.getStartDate();
+		LocalDate end = plan.getEndDate() != null ? plan.getEndDate() : start;
 
 		if (start != null) {
 			//both dates must be not later than parent end date

@@ -25,9 +25,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -329,7 +329,7 @@ public class XmlToEntity {
 				}
 
 				IntelAttachment attachment = new IntelAttachment();
-				attachment.setDateCreated(new Date());
+				attachment.setDateCreated(LocalDateTime.now());
 				attachment.setCreatedBy(SmartDB.getCurrentEmployee());
 				attachment.setConservationArea(ca);
 				attachment.setCopyFromLocation(file);

@@ -21,10 +21,8 @@
  */
 package org.wcs.smart.query.model.filter.date;
 
-import java.sql.Date;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 import org.wcs.smart.SmartContext;
@@ -50,22 +48,16 @@ public enum MonthToDateDateFilter implements IDateFilter {
 	}
 
 	@Override
-	public Date[] getDates() {
-		Calendar cal = Calendar.getInstance();
-		java.sql.Date currentDate = new java.sql.Date(cal.getTimeInMillis());
-
-		cal.set(Calendar.DAY_OF_MONTH, 1);
-		cal.set(Calendar.HOUR_OF_DAY, 0);
-		cal.set(Calendar.MINUTE, 0);
-		cal.set(Calendar.SECOND, 0);
-		java.sql.Date d = new java.sql.Date(cal.getTimeInMillis());
-		return new java.sql.Date[] { d, currentDate };
+	public LocalDate[] getDates() {
+		LocalDate now = LocalDate.now();
+		LocalDate from = LocalDate.of(now.getYear(), now.getMonth(), 1);
+		return new LocalDate[] { from, now };
 	}
 
 	@Override
 	public String getLabel() {
-		Date[] bits = getDates();
-		DateFormat formatter = new SimpleDateFormat("MMM yyyy"); //$NON-NLS-1$
+		LocalDate[] bits = getDates();
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM yyyy"); //$NON-NLS-1$
 		return ( "[" + formatter.format( bits[0] ) + "]"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	

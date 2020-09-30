@@ -21,8 +21,6 @@
  */
 package org.wcs.smart.asset.query.model.observation;
 
-import java.sql.Date;
-import java.sql.Time;
 import java.util.Locale;
 
 import org.wcs.smart.SmartContext;
@@ -128,13 +126,13 @@ public class FixedQueryColumn extends QueryColumn {
 			case WAYPOINT_COMMENT:
 				return item.getWaypointComment();
 			case WAYPOINT_DATE:
-				return new Date(item.getWaypointDate().getTime());
+				return item.getWaypointDate().toLocalDate();
 //			case WAYPOINT_DIRECTION:
 //				return item.getWaypointDirection();
 //			case WAYPOINT_DISTANCE:
 //				return item.getWaypointDistance();
 			case WAYPOINT_TIME:
-				return new Time(item.getWaypointDate().getTime());
+				return item.getWaypointDate().toLocalTime();
 			case WAYPOINT_X:
 				return item.getWaypointX(getProjection());
 			case WAYPOINT_Y:

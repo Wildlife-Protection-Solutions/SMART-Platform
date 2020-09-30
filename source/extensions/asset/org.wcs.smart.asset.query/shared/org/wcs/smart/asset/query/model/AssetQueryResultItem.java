@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.asset.query.model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.UUID;
@@ -68,7 +68,7 @@ public class AssetQueryResultItem implements IGeometryResultItem, IAdaptable{
 	private Float waypointDirection;
 	private String waypointComment;
 	private String waypointObserver;
-	private Date waypointDate;
+	private LocalDateTime waypointDate;
 	
 	private UUID observationGroupUuid;
 	private UUID observationUuid;
@@ -77,7 +77,7 @@ public class AssetQueryResultItem implements IGeometryResultItem, IAdaptable{
 	
 	private int incidentLength;
 	private String lastModifiedBy;
-	private Date lastModified;
+	private LocalDateTime lastModified;
 	
 	public void setAssets(String assets) {
 		this.assets = assets;
@@ -143,14 +143,14 @@ public class AssetQueryResultItem implements IGeometryResultItem, IAdaptable{
 	 * the waypoint last modified date
 	 * @param lastModified
 	 */
-	public void setLastModifiedDate(Date lastModified) {
+	public void setLastModifiedDate(LocalDateTime lastModified) {
 		this.lastModified = lastModified;
 	}
 	/**
 	 * 
 	 * @return the waypoint last modified date
 	 */
-	public Date getLastModifiedDate() {
+	public LocalDateTime getLastModifiedDate() {
 		return this.lastModified;
 	}
 	
@@ -392,11 +392,11 @@ public class AssetQueryResultItem implements IGeometryResultItem, IAdaptable{
 		this.waypointObserver = observer;
 	}
 
-	public void setWaypointDate(Date d) {
+	public void setWaypointDate(LocalDateTime d) {
 		this.waypointDate = d;
 	}
 	
-	public Date getWaypointDate() {
+	public LocalDateTime getWaypointDate() {
 		return this.waypointDate;
 	}
 	

@@ -21,8 +21,9 @@
  */
 package org.wcs.smart.patrol.internal.ui.importwp;
 
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.HashMap;
 import java.util.List;
 
@@ -79,7 +80,7 @@ public class PatrolTrackFromWaypointEngine extends TrackFromWaypointEngine {
 		ImportFromWaypointWizardPage page = new ImportFromWaypointWizardPage(wizard);
 		PatrolImportGpsDataWizard w = (PatrolImportGpsDataWizard) wizard;
 		if (w.getCurrentDay().getPatrolLeg().getPatrol().getLegs().size() > 1) {
-			String op = DateFormat.getDateInstance(DateFormat.MEDIUM).format(w.getCurrentDay().getDate());
+			String op = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(w.getCurrentDay().getDate());
 			op += " (" + Messages.ImportOptionsComposite_LegPrefix + ": " + w.getCurrentDay().getPatrolLeg().getId() + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			String[] lblOptions = new String[] {
 					Messages.ImportFromWaypointWizardPage_OpGenerateAllTracks,

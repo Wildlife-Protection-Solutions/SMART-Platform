@@ -24,8 +24,6 @@ package org.wcs.smart.datagenerator;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -43,6 +41,7 @@ import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
+import org.wcs.smart.util.SharedUtils;
 
 /**
  * Shifts all patrol data in the database
@@ -95,7 +94,8 @@ public class DataTimeShiftEngine implements IDataEngine{
 								List<LineString> current = pld.getTrack().getLineStrings();
 								for (LineString ls : current) {
 									for (Coordinate c : ls.getCoordinates()) {
-										c.setZ(adjustDateTime(new Date( (Double.valueOf(c.getZ())).longValue() )).getTime());
+										long newz = SharedUtils.toLongTime( adjustDateTime (SharedUtils.toLocalDateTime(c)));
+										c.setZ(newz);
 									}
 								}
 								pld.getTrack().setLineStrings(current);
@@ -113,16 +113,12 @@ public class DataTimeShiftEngine implements IDataEngine{
 		//post a general data change event
 		eventBroker.post(SmartPlugIn.E4_DATABASE_CHANGED_EVENT, null);
 	}
-	
-	private Date adjustDateTime(Date datetime) {
-		LocalDateTime ld = new java.sql.Timestamp(datetime.getTime()).toLocalDateTime();
-		ld = ld.plusDays(shiftdays);
-		return Date.from(ld.atZone(ZoneId.systemDefault()).toInstant());
+		
+	private LocalDate adjustDate(LocalDate date) {
+		return date.plusDays(shiftdays);
 	}
 	
-	private Date adjustDate(Date date) {
-		LocalDate ld = new java.sql.Date(date.getTime()).toLocalDate();
-		ld = ld.plusDays(shiftdays);
-		return Date.from( ld.atStartOfDay(ZoneId.systemDefault()).toInstant() );
+	private LocalDateTime adjustDateTime(LocalDateTime date) {
+		return date.plusDays(shiftdays);
 	}
 }

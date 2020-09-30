@@ -431,21 +431,21 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
 		
 		it.setMissionUuid(UuidUtils.byteToUUID(rs.getBytes("mission_uuid"))); //$NON-NLS-1$
-		it.setMissionEnd(rs.getDate("mission_enddate")); //$NON-NLS-1$
+		it.setMissionEnd(rs.getTimestamp("mission_enddate").toLocalDateTime()); //$NON-NLS-1$
 		it.setMissionId(rs.getString("mission_id")); //$NON-NLS-1$
-		it.setMissionStart(rs.getDate("mission_startdate")); //$NON-NLS-1$
+		it.setMissionStart(rs.getTimestamp("mission_startdate").toLocalDateTime()); //$NON-NLS-1$
 		
 		it.setSurveyDesign(rs.getString("surveydesign_name")); //$NON-NLS-1$
-		it.setSurveyDesignEnd(rs.getDate("surveydesign_enddate")); //$NON-NLS-1$
-		it.setSurveyDesignStart(rs.getDate("surveydesign_startdate")); //$NON-NLS-1$
+		it.setSurveyDesignEnd(rs.getDate("surveydesign_enddate") == null ? null : rs.getDate("surveydesign_enddate").toLocalDate());   //$NON-NLS-1$//$NON-NLS-2$
+		it.setSurveyDesignStart(rs.getDate("surveydesign_startdate") == null ? null : rs.getDate("surveydesign_startdate").toLocalDate()); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		it.setSurveyId(rs.getString("survey_id")); //$NON-NLS-1$
-		it.setSurveyEnd(rs.getDate("survey_enddate")); //$NON-NLS-1$
-		it.setSurveyStart(rs.getDate("survey_startdate")); //$NON-NLS-1$
+		it.setSurveyEnd(rs.getDate("survey_enddate").toLocalDate()); //$NON-NLS-1$
+		it.setSurveyStart(rs.getDate("survey_startdate").toLocalDate()); //$NON-NLS-1$
 		
 		it.setTrackUuid(UuidUtils.byteToUUID(rs.getBytes("mission_trackuuid"))); //$NON-NLS-1$
 		it.setTrackType(TrackType.valueOf(rs.getString("mission_tracktype"))); //$NON-NLS-1$
-		it.setTrackDate(rs.getDate("missionday_date")); //$NON-NLS-1$
+		it.setTrackDate(rs.getDate("missionday_date").toLocalDate()); //$NON-NLS-1$
 		it.setTrackId(rs.getString("mission_trackid")); //$NON-NLS-1$
 		it.setTrackLength(rs.getDouble("mission_tracklength")); //$NON-NLS-1$
 		

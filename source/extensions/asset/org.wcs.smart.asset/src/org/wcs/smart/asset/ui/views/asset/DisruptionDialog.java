@@ -22,6 +22,7 @@
 package org.wcs.smart.asset.ui.views.asset;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
@@ -154,10 +155,11 @@ public class DisruptionDialog extends SmartStyledTitleDialog {
 		dtStartTime.addListener(SWT.Selection, e->validate());
 		
 		if (disruption.getStartDate() != null) {
-			SmartUtils.initDateDateTimeWidget(dtStartDate, disruption.getStartDate().toLocalDate());
-			SmartUtils.initDateDateTimeWidget(dtStartTime, disruption.getStartDate().toLocalTime());
+			SmartUtils.initDateTimeWidget(dtStartDate, disruption.getStartDate().toLocalDate());
+			SmartUtils.initDateTimeWidget(dtStartTime, disruption.getStartDate().toLocalTime());
 		}else {
-			SmartUtils.initTimeDateTimeWidget(dtStartTime, SmartUtils.getMidnight());
+			SmartUtils.initDateTimeWidget(dtStartTime, LocalTime.MIN);
+
 		}
 		
 		l = new Label(form, SWT.NONE);
@@ -174,10 +176,10 @@ public class DisruptionDialog extends SmartStyledTitleDialog {
 		dtEndTime.addListener(SWT.Selection, e->validate());
 		
 		if (disruption.getEndDate() != null) {
-			SmartUtils.initDateDateTimeWidget(dtEndDate, disruption.getEndDate().toLocalDate());
-			SmartUtils.initDateDateTimeWidget(dtEndTime, disruption.getEndDate().toLocalTime());
+			SmartUtils.initDateTimeWidget(dtEndDate, disruption.getEndDate().toLocalDate());
+			SmartUtils.initDateTimeWidget(dtEndTime, disruption.getEndDate().toLocalTime());
 		}else {
-			SmartUtils.initTimeDateTimeWidget(dtEndTime, SmartUtils.getMidnight());
+			SmartUtils.initDateTimeWidget(dtEndTime, LocalTime.MIN);
 		}
 		
 		l = new Label(form, SWT.NONE);

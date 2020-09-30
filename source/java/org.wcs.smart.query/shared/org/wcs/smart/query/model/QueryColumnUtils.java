@@ -21,8 +21,10 @@
  */
 package org.wcs.smart.query.model;
 
-import java.text.DateFormat;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.HashSet;
 import java.util.List;
 
@@ -62,11 +64,11 @@ public abstract class QueryColumnUtils implements Cloneable{
 		if (column.getType() == QueryColumn.ColumnType.TIME &&
 				descriptor.getType().getBinding().equals(String.class)){
 				//this is a datetime object which needs to be converted to a string
-				x = DateFormat.getTimeInstance().format((Date)x);
+				x = DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM).format( (LocalTime)x);
 		}else if (column.getType() == QueryColumn.ColumnType.DATETIME &&
 				descriptor.getType().getBinding().equals(String.class)){
 				//this is a datetime object which needs to be converted to a string
-				x = DateFormat.getDateTimeInstance().format((Date)x);
+				x = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format( (LocalDateTime)x);
 		}
 		return x;
 	}

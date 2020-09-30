@@ -24,17 +24,16 @@ package org.wcs.smart.observation.common.importwp;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TimeZone;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.locationtech.jts.geom.Coordinate;
@@ -69,7 +68,8 @@ public class ObservationGPSDataImport extends GPSDataImport{
 	 * @return a map of type of data imported 
 	 * @throws Exception 
 	 */
-	public static Map<ImportType, List<Waypoint>> importGpsData(final String deviceType, final Date day, final Set<ImportType> dataType, IProgressMonitor monitor) throws Exception {
+	public static Map<ImportType, List<Waypoint>> importGpsData(final String deviceType, 
+			final LocalDate day, final Set<ImportType> dataType, IProgressMonitor monitor) throws Exception {
 		
 		final HashMap<ImportType, List<Waypoint>> data = new HashMap<ImportType, List<Waypoint>>();
 
@@ -114,7 +114,7 @@ public class ObservationGPSDataImport extends GPSDataImport{
 	 * @return
 	 */
 	private static Waypoint convertWpt(WptType wptType){
-		Date wpdt = findWaypointDate(wptType);
+		LocalDateTime wpdt = findWaypointDate(wptType);
 		int id = -1;
 		try{
 			id = Integer.parseInt(wptType.getName());
@@ -153,13 +153,11 @@ public class ObservationGPSDataImport extends GPSDataImport{
 	 * @throws Exception 
 	 * 
 	 */
-	public static Map<ImportType, List<Waypoint>> convertGpx(List<String> gpxFiles, Date day, Set<ImportType> dataType, IProgressMonitor monitor) throws Exception{
+	public static Map<ImportType, List<Waypoint>> convertGpx(List<String> gpxFiles, LocalDate day, Set<ImportType> dataType, IProgressMonitor monitor) throws Exception{
 		
 		HashMap<ImportType, List<Waypoint>> data = new HashMap<ImportType, List<Waypoint>>();		
-		Date plddt = null;
-		if (day != null){
-			plddt = SharedUtils.getDatePart(day, false);
-		}
+		LocalDate plddt = day;
+		
 		for (String file : gpxFiles) {
 			Path gpxFile = Paths.get(file);
 
@@ -177,7 +175,7 @@ public class ObservationGPSDataImport extends GPSDataImport{
 					} else  {
 						// only import waypoints whose imported date match the
 						// given date
-						if (newwp.getDateTime() != null && SharedUtils.getDatePart(newwp.getDateTime(), false).equals(plddt)) {
+						if (newwp.getDateTime() != null && newwp.getDateTime().toLocalDate().isEqual(plddt)) {
 							newwaypoints.add(newwp);
 						}
 					}
@@ -201,7 +199,7 @@ public class ObservationGPSDataImport extends GPSDataImport{
 						for (WptType pnt : trkPnt) {
 							double y = pnt.getLat().doubleValue();
 							double x = pnt.getLon().doubleValue();
-							Date datetime = findWaypointDate(pnt);
+							LocalDateTime datetime = findWaypointDate(pnt);
 
 							Waypoint c = new Waypoint();
 							try{
@@ -218,8 +216,7 @@ public class ObservationGPSDataImport extends GPSDataImport{
 							} else if (plddt != null && datetime != null) {
 								// include only waytpoints which match current
 								// date
-								if (SharedUtils.getDatePart(datetime, false)
-										.equals(plddt)) {
+								if (datetime.toLocalDate().equals(plddt)) {
 									trackCoords.add(c);
 								}
 							}
@@ -245,7 +242,7 @@ public class ObservationGPSDataImport extends GPSDataImport{
 	 * @param coordinates set of coordinates
 	 * @return track
 	 */
-	public static LineString convertToLineString(List<Waypoint> coordinates, TimeZone timeZone){
+	public static LineString convertToLineString(List<Waypoint> coordinates){
 		if (coordinates.size() < 2) {
 			return null;
 		}
@@ -262,16 +259,8 @@ public class ObservationGPSDataImport extends GPSDataImport{
 
 		List<Coordinate> cs = new ArrayList<Coordinate>();
 		for (Waypoint w : coordinates) {
-			Calendar c1 = Calendar.getInstance();
-			c1.setTimeInMillis(w.getDateTime().getTime());
-			Calendar c2 = Calendar.getInstance();
-			c2.setTimeZone(timeZone);
-			c2.setTimeInMillis(0);
-			c2.set(c1.get(Calendar.YEAR), c1.get(Calendar.MONTH),
-					c1.get(Calendar.DATE), c1.get(Calendar.HOUR_OF_DAY),
-					c1.get(Calendar.MINUTE), c1.get(Calendar.SECOND));
-
-			Coordinate c = new Coordinate(w.getRawX(), w.getRawY(), c2.getTime().getTime());
+			Long time = SharedUtils.toLongTime(w.getDateTime());
+			Coordinate c = new Coordinate(w.getRawX(), w.getRawY(), time);
 			cs.add(c);
 		}
 

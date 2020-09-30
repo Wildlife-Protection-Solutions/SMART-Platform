@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import org.geotools.data.FeatureReader;
+import org.locationtech.jts.io.ParseException;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
@@ -36,8 +37,6 @@ import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.TrackPart;
-
-import org.locationtech.jts.io.ParseException;
 
 /**
  * Smart area feature reader

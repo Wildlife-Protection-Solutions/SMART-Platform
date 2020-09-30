@@ -21,11 +21,12 @@
  */
 package org.wcs.smart.patrol.model;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -44,8 +45,6 @@ import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.OrderBy;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.UuidItem;
-import org.wcs.smart.util.SharedUtils;
-//import org.wcs.smart.util.SmartUtils;
 
 /**
  * Patrol Leg object
@@ -61,8 +60,8 @@ public class PatrolLeg extends UuidItem {
 	
 	public static final int ID_MAX_SIZE = 50;
 	private Patrol patrol;
-	private Date startDate;
-	private Date endDate;
+	private LocalDate startDate;
+	private LocalDate endDate;
 	private PatrolTransportType type;
 	private PatrolMandate mandate;
 	private String id;
@@ -80,17 +79,17 @@ public class PatrolLeg extends UuidItem {
 	}
 	
 	@Column(name="start_date")
-	public Date getStartDate() {
+	public LocalDate getStartDate() {
 		return startDate;
 	}
-	public void setStartDate(Date startDate) {
+	public void setStartDate(LocalDate startDate) {
 		this.startDate = startDate;
 	}
 	@Column(name="end_date")
-	public Date getEndDate() {
+	public LocalDate getEndDate() {
 		return endDate;
 	}
-	public void setEndDate(Date endDate) {
+	public void setEndDate(LocalDate endDate) {
 		this.endDate = endDate;
 	}
 	
@@ -251,60 +250,34 @@ public class PatrolLeg extends UuidItem {
 			this.days = new ArrayList<PatrolLegDay>();
 		}
 		
-		//lets make a hash set of existing leg days; we try to re-use these so associated data is not lost
-		HashMap<Date, PatrolLegDay> current = new HashMap<Date, PatrolLegDay>();
+		LocalTime startTime = !days.isEmpty() ? days.get(0).getStartTime() : LocalTime.MIN;
+		LocalTime endTime = !days.isEmpty() ? days.get(days.size() - 1).getEndTime() : LocalTime.MAX;
+		
+		//lets make a hash set of existing leg days; 
+		//we try to re-use these so associated data is not lost
+		HashMap<LocalDate, PatrolLegDay> current = new HashMap<LocalDate, PatrolLegDay>();
 		for (PatrolLegDay day : this.days){
-			current.put(SharedUtils.getDatePart(day.getDate(), false), day);
+			current.put(day.getDate(), day);
 		}
-		
-		//determine start & end dates
-		Calendar calStart = SharedUtils.convertDate( SharedUtils.getDatePart(getStartDate(), false) );
-		Calendar calEnd= SharedUtils.convertDate( SharedUtils.getDatePart(getEndDate(), false) );
-		
-		//---- the first patrol leg day
-		
-		PatrolLegDay previousDay;
-		PatrolLegDay existing = current.remove(SharedUtils.getDatePart(calStart.getTime(), false));
-		if (existing != null){
-			//update the start time
-			previousDay = existing;
-			if (existing.getStartTime() == null){
-				existing.setStartTime(SharedUtils.createPatrolTime(0, 0, 0));
-			}
-			if (existing.getEndTime() == null){
-				existing.setEndTime(SharedUtils.createPatrolTime(23, 59, 59));
-			}
-		}else{
-			previousDay = new PatrolLegDay();
-			previousDay.setPatrolLeg(this);
-			previousDay.setDate( calStart.getTime() );
-			previousDay.setStartTime(SharedUtils.convertDateToTime(calStart.getTime()));
-			previousDay.setEndTime(SharedUtils.createPatrolTime(23, 59, 59));
-			this.days.add(previousDay);
-		}
-		
+
 		// -- the remaining days
-		calStart.add(Calendar.DAY_OF_MONTH, 1);		
-		while (calStart.before(calEnd) || calStart.equals(calEnd) ){
-			existing = current.remove(SharedUtils.getDatePart(calStart.getTime(), false));
+		LocalDate working = getStartDate();
+		while (working.isBefore(getEndDate()) || working.isEqual(getEndDate()) ){
+			
+			PatrolLegDay existing = current.remove(working);
 			if (existing != null){
-				previousDay = existing;
-				if (existing.getStartTime() == null){
-					existing.setStartTime(SharedUtils.createPatrolTime(0, 0, 0));
-				}
-				if (existing.getEndTime() == null){
-					existing.setEndTime(SharedUtils.createPatrolTime(23, 59, 59));
-				}
+				if (existing.getStartTime() == null) existing.setStartTime(LocalTime.MIN);
+				if (existing.getEndTime() == null) existing.setEndTime(LocalTime.MAX);
 			}else{
-				previousDay = new PatrolLegDay();
-				previousDay.setDate( SharedUtils.getDatePart(calStart.getTime(), false) );
-				previousDay.setStartTime(SharedUtils.createPatrolTime(0, 0, 0));
-				previousDay.setEndTime(SharedUtils.createPatrolTime(23, 59, 59));
+				PatrolLegDay previousDay = new PatrolLegDay();
+				previousDay.setDate( working );
+				previousDay.setStartTime( LocalTime.MIN );
+				previousDay.setEndTime( LocalTime.MAX );
 				previousDay.setPatrolLeg(this);
 				this.days.add(previousDay);
 				
 			}
-			calStart.add(Calendar.DAY_OF_MONTH, 1);
+			working = ChronoUnit.DAYS.addTo(working, 1);
 		}
 	
 		//remove old legs that weren't used
@@ -314,9 +287,8 @@ public class PatrolLeg extends UuidItem {
 				for (PatrolWaypoint pw : day.getWaypoints()){
 					session.delete(pw.getWaypoint());
 				}
-				session.flush();
+				//session.flush();
 			}
-			//day.setPatrolLeg(null);
 			this.days.remove(day);
 		}
 		
@@ -327,10 +299,6 @@ public class PatrolLeg extends UuidItem {
 				return o1.getDate().compareTo(o2.getDate());
 			}
 		});
-		
-		//update the end time of the last day
-		this.days.get(0).setStartTime(SharedUtils.convertDateToTime(getStartDate()));
-		this.days.get(this.days.size() - 1).setEndTime(SharedUtils.convertDateToTime(getEndDate()));
 
 		//if there is only one leg day we are done.
 		//otherwise if check the first and last patrol days; if they are < 1 second in length than remove the leg day
@@ -340,8 +308,8 @@ public class PatrolLeg extends UuidItem {
 				//remove this day
 				firstDay.setPatrolLeg(null);
 				this.days.remove(firstDay);
-				this.days.get(0).setStartTime(SharedUtils.createPatrolTime(0, 0, 0));
-				setStartDate( SharedUtils.getDatePart(this.days.get(0).getDate(), false) );
+				this.days.get(0).setStartTime(LocalTime.MIN);
+				setStartDate( this.days.get(0).getDate() );
 			}
 		}
 		if (this.days.size() > 1){
@@ -350,12 +318,14 @@ public class PatrolLeg extends UuidItem {
 				//remove this day
 				lastDay.setPatrolLeg(null);
 				this.days.remove(lastDay);
-				this.days.get(this.days.size() - 1).setEndTime(SharedUtils.createPatrolTime(23, 59, 59));
-				setEndDate( SharedUtils.getDatePart(this.days.get(this.days.size() - 1).getDate(), true) );
+				this.days.get(this.days.size() - 1).setEndTime(LocalTime.MAX);
+				setEndDate( this.days.get(this.days.size() - 1).getDate()  );
 				
 			}
 		}
 		
+		days.get(0).setStartTime(startTime);
+		days.get(days.size() - 1).setEndTime(endTime);
 
 	
 	}

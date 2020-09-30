@@ -23,18 +23,17 @@ package org.wcs.smart.ui.map;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.TimeZone;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -87,6 +86,9 @@ import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
 import org.geotools.styling.Style;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.Point;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.project.internal.Layer;
@@ -120,11 +122,8 @@ import org.wcs.smart.ui.map.tool.TrackPointSelectionTool;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
-
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.LineString;
-import org.locationtech.jts.geom.Point;
 
 /**
  * Dialog for display tack points for a track.
@@ -142,8 +141,6 @@ public abstract class TrackPointDialog extends SmartStyledTitleDialog implements
 	private final static String DATETIME_FIELD = "datetime"; //$NON-NLS-1$
 	private final static String GEOM_FIELD = "geom"; //$NON-NLS-1$
 	private final static String INDEX_FIELD = "index"; //$NON-NLS-1$
-
-	private final DateFormat DATEFORMAT = new SimpleDateFormat( ((SimpleDateFormat)DateFormat.getTimeInstance()).toPattern() + "   (" + ((SimpleDateFormat)DateFormat.getDateInstance()).toPattern() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 	
 	private TableViewer trackviewer;
 	private MapViewer mapViewer;
@@ -165,11 +162,10 @@ public abstract class TrackPointDialog extends SmartStyledTitleDialog implements
 	 */
 	public TrackPointDialog(Shell parentShell, boolean canEdit) {
 		super(parentShell);
-		DATEFORMAT.setTimeZone(getTrackZTimezone());
+	
 		this.canEdit = canEdit;
 	}
 
-	protected abstract TimeZone getTrackZTimezone();
 	protected abstract UUID getEditTrackUUid();
 	protected abstract LineString getEditTrackLineString();
 	protected abstract void setEditTrackLineString(LineString ls);
@@ -303,8 +299,7 @@ public abstract class TrackPointDialog extends SmartStyledTitleDialog implements
 		column.setLabelProvider(new ColumnLabelProvider(){
 			public String getText(Object element) {
 				if (element instanceof Coordinate){
-					Date d = new Date( (long) ((Coordinate)element).getZ() );
-					return DATEFORMAT.format(d);
+					return format(SharedUtils.toLocalDateTime(((Coordinate) element)));
 				}else if (element instanceof SimpleFeature){
 					return (String)(((SimpleFeature)element).getAttribute(DATETIME_FIELD));
 				}
@@ -745,7 +740,7 @@ public abstract class TrackPointDialog extends SmartStyledTitleDialog implements
 			data[0] = UuidUtils.uuidToString(getEditTrackUUid()) + "." + i; //$NON-NLS-1$
 			data[1] = c.x;
 			data[2] = c.y;
-			data[3] = DATEFORMAT.format(new Date( (long) ((Coordinate)c).getZ() ));
+			data[3] = format(SharedUtils.toLocalDateTime( c ));
 			data[4] = i;
 			data[5] = false;
 			data[6] = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(c.x, c.y));
@@ -758,6 +753,11 @@ public abstract class TrackPointDialog extends SmartStyledTitleDialog implements
 		pointStore.addFeatures(featureCollection);
 	}
 	
+	private String format(LocalDateTime value) {
+		return value.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)) 
+				+ " (" + value.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM))
+				+ ")";
+	}
 	/*
 	 * Creates the point features layers and initializes the points
 	 */

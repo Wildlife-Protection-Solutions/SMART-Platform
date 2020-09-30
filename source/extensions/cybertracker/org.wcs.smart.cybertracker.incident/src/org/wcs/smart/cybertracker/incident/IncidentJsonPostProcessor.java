@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.cybertracker.incident;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.hibernate.Session;
@@ -49,7 +49,7 @@ public class IncidentJsonPostProcessor implements IJsonPostProcessor {
 		hql.append( "l.waypoint.dateTime < :now " ); //$NON-NLS-1$
 					
 		List<CtIncidentLink> links = session.createQuery(hql.toString(), CtIncidentLink.class)
-				.setParameter("now", java.sql.Date.valueOf( LocalDate.now().minusMonths(JsonCtParser.CLEANUP_MONTHS) )) //$NON-NLS-1$
+				.setParameter("now",  LocalDateTime.now().minusMonths(JsonCtParser.CLEANUP_MONTHS) ) //$NON-NLS-1$
 				.list();
 					
 		for (CtIncidentLink l : links) {

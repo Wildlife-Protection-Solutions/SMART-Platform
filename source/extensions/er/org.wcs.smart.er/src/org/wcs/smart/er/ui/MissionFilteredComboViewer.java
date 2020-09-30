@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.er.ui;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -176,8 +176,8 @@ public class MissionFilteredComboViewer extends FilteredComboViewer<Mission> imp
         			Mission p = new Mission();
         			p.setUuid((UUID)data[0]);
         			p.setId((String)data[1]);
-        			p.setStartDate((Date)data[2]);
-        			p.setEndDate((Date)data[3]);
+        			p.setStartDate((LocalDate)data[2]);
+        			p.setEndDate((LocalDate)data[3]);
         			defaultPresent = defaultPresent || p.equals(preselectedMission);
         			missions.add(p);
         		}

@@ -26,11 +26,11 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.sql.Time;
 import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -73,7 +73,6 @@ import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
-import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -234,44 +233,34 @@ public class JsonCtParser {
 		}
 		return selectAllSize[0];
 	}
-	/**
-	 * Time in seconds
-	 * @param date
-	 * @return
-	 */
-	public static Time getTime(Date d){
-		Calendar c = Calendar.getInstance();
-		c.setTime(d);
-		
-		Calendar c2 = Calendar.getInstance();
-		c2.setTimeInMillis(0);
-		int[] fields = new int[]{Calendar.SECOND, Calendar.MINUTE, Calendar.HOUR_OF_DAY};
-		for (int field : fields){
-			c2.set(field, c.get(field));
-		}
-		return new Time(c2.getTimeInMillis());
-	}
-
-	
+//	/**
+//	 * Time in seconds
+//	 * @param date
+//	 * @return
+//	 */
+//	public static Time getTime(Date d){
+//		Calendar c = Calendar.getInstance();
+//		c.setTime(d);
+//		
+//		Calendar c2 = Calendar.getInstance();
+//		c2.setTimeInMillis(0);
+//		int[] fields = new int[]{Calendar.SECOND, Calendar.MINUTE, Calendar.HOUR_OF_DAY};
+//		for (int field : fields){
+//			c2.set(field, c.get(field));
+//		}
+//		return new Time(c2.getTimeInMillis());
+//	}
+//
+//	
 	/**
 	 * Determines if the time represented by date1 is between the times
 	 * represented by date2 and date3.  Only compares time parts not
 	 * date parts.
 	 * @return
 	 */
-	public static boolean isTimeBetween(Date date1, Date date2, Date date3){
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(date1);
-		Calendar cal2 = Calendar.getInstance();
-		cal2.setTime(date2);
-		Calendar cal3 = Calendar.getInstance();
-		cal3.setTime(date3);
-		
-		int cal1seconds = cal.get(Calendar.SECOND) + cal.get(Calendar.MINUTE) * 60  + cal.get(Calendar.HOUR_OF_DAY) * 60 * 60;
-		int cal2seconds = cal2.get(Calendar.SECOND) + cal2.get(Calendar.MINUTE) * 60  + cal2.get(Calendar.HOUR_OF_DAY) * 60 * 60;
-		int cal3seconds = cal3.get(Calendar.SECOND) + cal3.get(Calendar.MINUTE) * 60  + cal3.get(Calendar.HOUR_OF_DAY) * 60 * 60;
-		
-		return cal1seconds >= cal2seconds && cal1seconds <= cal3seconds;
+	public static boolean isTimeBetween(LocalTime d1, LocalTime d2, LocalTime d3){
+		return ((d1.equals(d2) || d1.isAfter(d2)) && 
+				(d1.equals(d3) || d1.isBefore(d3)));
 	}
 	
 	/**
@@ -280,13 +269,9 @@ public class JsonCtParser {
 	 * 
 	 * @return
 	 */
-	public static boolean isDateBetween(Date date1, Date date2, Date date3){
-		Date d1 = SharedUtils.getDatePart(date1, false);
-		Date d2 = SharedUtils.getDatePart(date2, false);
-		Date d3 = SharedUtils.getDatePart(date3, false);
-		
-		return ((SharedUtils.isSameDate(d1, d2) || d1.after(d2)) && 
-				(SharedUtils.isSameDate(d1, d3) || d1.before(d3)));
+	public static boolean isDateBetween(LocalDate d1, LocalDate d2, LocalDate d3){
+		return ((d1.isEqual(d2) || d1.isAfter(d2)) && 
+				(d1.isEqual(d3) || d1.isBefore(d3)));
 	}
 	
 	private JSONParser parser = new JSONParser();
@@ -379,15 +364,15 @@ public class JsonCtParser {
 		Float direction = null;
 		Float distance = null;
 		if (properties.containsKey(DIRECTION_KEY) && properties.get(DIRECTION_KEY) != null) {
-			direction = ((Double)properties.get(DIRECTION_KEY)).floatValue();
+			direction = ((Number)properties.get(DIRECTION_KEY)).floatValue();
 		}
 		if (properties.containsKey(DISTANCE_KEY) && properties.get(DISTANCE_KEY) != null) {
-			distance = ((Double)properties.get(DISTANCE_KEY)).floatValue();
+			distance = ((Number)properties.get(DISTANCE_KEY)).floatValue();
 		}
 		newWaypoint.setDirection(direction);
 		newWaypoint.setDistance(distance);
 		
-		Date dt = JsonUtils.parseJsonDateTime((String)properties.get(DATETIME_KEY));
+		LocalDateTime dt = JsonUtils.parseJsonDateTime((String)properties.get(DATETIME_KEY));
 		newWaypoint.setDateTime(dt);
 
 		newWaypoint.setObservationGroups(new ArrayList<>());

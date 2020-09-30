@@ -22,7 +22,7 @@
 package org.wcs.smart.i2.model;
 
 import java.io.File;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -49,7 +49,7 @@ public class IntelAttachment extends ISmartAttachment{
 	public static final String INTELLIGENCE_FS_DIR = "intelligence2"; //$NON-NLS-1$
 	
 	private ConservationArea ca;
-	private Date dateCreated;
+	private LocalDateTime dateCreated;
 	private Employee createdBy;
 	private String description;
 	
@@ -87,7 +87,7 @@ public class IntelAttachment extends ISmartAttachment{
 	 * @return date_created
 	 */
 	@Column(name="date_created")
-	public Date getDateCreated() {
+	public LocalDateTime getDateCreated() {
 		return this.dateCreated;
 	}
 
@@ -97,7 +97,7 @@ public class IntelAttachment extends ISmartAttachment{
 	 * @param dateCreated
 	 *            date_created
 	 */
-	public void setDateCreated(Date dateCreated) {
+	public void setDateCreated(LocalDateTime dateCreated) {
 		this.dateCreated = dateCreated;
 	}
 

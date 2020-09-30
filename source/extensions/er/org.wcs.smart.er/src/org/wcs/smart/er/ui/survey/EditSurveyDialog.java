@@ -21,9 +21,10 @@
  */
 package org.wcs.smart.er.ui.survey;
 
-import java.text.DateFormat;
 import java.text.MessageFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.UUID;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -217,8 +218,8 @@ public class EditSurveyDialog extends SmartStyledTitleDialog{
 	}
 	
 	private boolean save(){
-		toEdit.setEndDate(SmartUtils.getDate(endDate));
-		toEdit.setStartDate(SmartUtils.getDate(startDate));
+		toEdit.setEndDate(SmartUtils.toDate(endDate));
+		toEdit.setStartDate(SmartUtils.toDate(startDate));
 		toEdit.setId(txtId.getText());
 		
 		session.beginTransaction();
@@ -258,9 +259,9 @@ public class EditSurveyDialog extends SmartStyledTitleDialog{
 			cdId.hide();
 		}
 		
-		Date start = SmartUtils.getDate(startDate);
-		Date end = SmartUtils.getDate(endDate);
-		if (end.before(start)){
+		LocalDate start = SmartUtils.toDate(startDate);
+		LocalDate end = SmartUtils.toDate(endDate);
+		if (end.isBefore(start)){
 			setIcon(cdEnd, true);
 			cdEnd.setDescriptionText(Messages.EditSurveyDialog_InvalidStart);
 			cdEnd.show();
@@ -276,20 +277,20 @@ public class EditSurveyDialog extends SmartStyledTitleDialog{
 		if (design.getStartDate() != null){
 			//ensure start date is not before design start date
 			//ensure end date is not before design start date
-			if (start.before(design.getStartDate())){
+			if (start.isBefore(design.getStartDate())){
 				datewarn = true;
 			}
-			if (end.before(design.getStartDate())){
+			if (end.isBefore(design.getStartDate())){
 				datewarn = true;
 			}
 		}
 		if (design.getEndDate() != null){
 			//ensure start date is not after end date
 			//ensure end date is not after end date
-			if (start.after(design.getEndDate())){
+			if (start.isAfter(design.getEndDate())){
 				datewarn = true;
 			}
-			if (end.after(design.getEndDate())){
+			if (end.isAfter(design.getEndDate())){
 				datewarn = true;
 			}
 		}
@@ -299,8 +300,8 @@ public class EditSurveyDialog extends SmartStyledTitleDialog{
 			cdEnd.setDescriptionText(
 					MessageFormat.format(Messages.EditSurveyDialog_InvalidRange,
 							new Object[]{
-								design.getStartDate() == null ? Messages.EditSurveyDialog_UndefinedDate : DateFormat.getDateInstance().format(design.getStartDate()),
-										design.getEndDate() == null ? Messages.EditSurveyDialog_UndefinedDate : DateFormat.getDateInstance().format(design.getEndDate())
+								design.getStartDate() == null ? Messages.EditSurveyDialog_UndefinedDate : DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(design.getStartDate()),
+										design.getEndDate() == null ? Messages.EditSurveyDialog_UndefinedDate : DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(design.getEndDate())
 								}
 							));
 			cdEnd.show();
@@ -308,11 +309,11 @@ public class EditSurveyDialog extends SmartStyledTitleDialog{
 		
 		//validate missions; all missions must be within survey dates
 		for (Mission m : toEdit.getMissions()){
-			if (m.getStartDate().before(start) || m.getEndDate().after(end)){
+			if (m.getStartDate().isBefore(start) || m.getEndDate().isAfter(end)){
 				setIcon(cdEnd, true);
 				cdEnd.setDescriptionText(
 					MessageFormat.format(Messages.EditSurveyDialog_MissionDateError,
-							new Object[]{m.getId(), DateFormat.getDateInstance().format(m.getStartDate()), DateFormat.getDateInstance().format(m.getEndDate())}));
+							new Object[]{m.getId(), DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(m.getStartDate()), DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(m.getEndDate())}));
 				
 				cdEnd.show();
 				error = true;
@@ -327,8 +328,8 @@ public class EditSurveyDialog extends SmartStyledTitleDialog{
 		txtDesign.setText(toEdit.getSurveyDesign().getName());
 		txtId.setText(toEdit.getId());
 		
-		SmartUtils.initDateDateTimeWidget(startDate, toEdit.getStartDate());
-		SmartUtils.initDateDateTimeWidget(endDate, toEdit.getEndDate());
+		SmartUtils.initDateTimeWidget(startDate, toEdit.getStartDate());
+		SmartUtils.initDateTimeWidget(endDate, toEdit.getEndDate());
 		
 	}
 	

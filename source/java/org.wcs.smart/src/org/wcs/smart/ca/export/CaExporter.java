@@ -26,11 +26,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -71,8 +71,16 @@ public class CaExporter {
 	 */
 	public static String getDefaultFileName(){
 		String backupDir = SmartProperties.getInstance().getProperty(SmartProperties.PROP_BACKUP_DIR);
-		SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd"); //$NON-NLS-1$
-		return Paths.get(backupDir).resolve("SMART_" + SmartDB.getCurrentConservationArea().getId() + "_" + format.format(new Date()) + ".bak.zip").normalize().toAbsolutePath().toString(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		
+		StringBuilder fname = new StringBuilder();
+		fname.append("SMART_"); //$NON-NLS-1$
+		fname.append(SmartDB.getCurrentConservationArea().getId());
+		fname.append("_"); //$NON-NLS-1$
+		fname.append(DateTimeFormatter.ofPattern("yyyyMMdd").format(LocalDate.now())); //$NON-NLS-1$
+		fname.append(".bak.zip"); //$NON-NLS-1$
+		
+		return Paths.get(backupDir).resolve(fname.toString())
+				.normalize().toAbsolutePath().toString(); 
 	}
 	
 	/**

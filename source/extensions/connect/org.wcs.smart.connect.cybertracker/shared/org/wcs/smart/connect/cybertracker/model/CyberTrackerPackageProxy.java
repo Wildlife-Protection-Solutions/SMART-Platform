@@ -21,10 +21,15 @@
  */
 package org.wcs.smart.connect.cybertracker.model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import org.wcs.smart.connect.util.LocalDateTimeDeserializer;
+import org.wcs.smart.connect.util.LocalDateTimeSerializer;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 
 /**
  * JSON Proxy for cybertracker package proxy
@@ -39,9 +44,9 @@ public class CyberTrackerPackageProxy {
 	private UUID caUuid;
 	private String type;
 	
-	@JsonFormat
-    (shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSX")
-	private Date uploadedDate;
+	@JsonDeserialize(using = LocalDateTimeDeserializer.class)  
+	@JsonSerialize(using = LocalDateTimeSerializer.class)
+	private LocalDateTime uploadedDate;
 	
 	private String revision;
 	
@@ -71,11 +76,11 @@ public class CyberTrackerPackageProxy {
 		this.caUuid = caUuid;
 	}
 
-	public Date getUploadedDate() {
+	public LocalDateTime getUploadedDate() {
 		return uploadedDate;
 	}
 
-	public void setUploadedDate(Date uploadedDate) {
+	public void setUploadedDate(LocalDateTime uploadedDate) {
 		this.uploadedDate = uploadedDate;
 	}
 	

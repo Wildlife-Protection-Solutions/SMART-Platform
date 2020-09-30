@@ -22,9 +22,9 @@
 package org.wcs.smart.patrol.model;
 
 import java.io.File;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -93,8 +93,8 @@ public class Patrol extends UuidItem implements IFolderItem<PatrolFolder> {
 	private String objective;
 	private PatrolType.Type patrolType;
 	private boolean isArmed;
-	private Date startDate;
-	private Date endDate;
+	private LocalDate startDate;
+	private LocalDate endDate;
 	private String comment;
 	private PatrolFolder parentFolder;
 	
@@ -182,20 +182,20 @@ public class Patrol extends UuidItem implements IFolderItem<PatrolFolder> {
 	}
 
 	@Column(name="start_date")
-	public Date getStartDate() {
+	public LocalDate getStartDate() {
 		return startDate;
 	}
 
-	public void setStartDate(Date startDate) {
+	public void setStartDate(LocalDate startDate) {
 		this.startDate = startDate;
 	}
 
 	@Column(name="end_date")
-	public Date getEndDate() {
+	public LocalDate getEndDate() {
 		return endDate;
 	}
 
-	public void setEndDate(Date endDate) {
+	public void setEndDate(LocalDate endDate) {
 		this.endDate = endDate;
 	}
 	
@@ -278,11 +278,10 @@ public class Patrol extends UuidItem implements IFolderItem<PatrolFolder> {
 	 * for the patrol.
 	 */
 	@Transient
-	public Collection<PatrolLegDay> createLegDays(Session session){
+	public void createLegDays(Session session){
 		for (PatrolLeg leg : getLegs()){
 			leg.createLegDays(session);
 		}
-		return null;
 	}
 	
 	/**

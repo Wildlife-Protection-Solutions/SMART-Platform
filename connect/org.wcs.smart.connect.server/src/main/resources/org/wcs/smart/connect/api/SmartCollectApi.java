@@ -23,9 +23,9 @@ package org.wcs.smart.connect.api;
 
 import java.text.Collator;
 import java.text.MessageFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -270,12 +270,12 @@ public class SmartCollectApi {
 				if (SmartCollectUser.isEmailSource(user.getSource())) {
 					user.setState(State.VALIDATION_PENDING);
 					
-					user.setValidateSentDate(new Date());
+					user.setValidateSentDate(LocalDateTime.now());
 					String v1 = UUID.randomUUID().toString().replaceAll("-",""); //$NON-NLS-1$ //$NON-NLS-2$
 					String v2 = UUID.randomUUID().toString().replaceAll("-",""); //$NON-NLS-1$ //$NON-NLS-2$
 					String key = v1 + v2;
 					user.setValidationKey(key);
-					user.setValidateSentDate(new Date());
+					user.setValidateSentDate(LocalDateTime.now());
 
 					// send email
 					try {

@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.patrol.query.engine;
 
-import java.text.DateFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -147,7 +148,7 @@ public class PatrolAttachmentTooltipProvider extends Job {
 			l.setBackground(details.getBackground());
 			
 			l = new Label(main, SWT.NONE);
-			l.setText(DateFormat.getDateInstance().format(fpw.getWaypoint().getDateTime()));
+			l.setText(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(fpw.getWaypoint().getDateTime()));
 			l.setBackground(details.getBackground());
 			
 			if (fo != null) {

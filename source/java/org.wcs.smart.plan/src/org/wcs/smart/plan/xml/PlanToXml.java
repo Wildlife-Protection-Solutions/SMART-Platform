@@ -22,16 +22,13 @@
 package org.wcs.smart.plan.xml;
 
 import java.nio.file.Path;
-import java.util.Date;
-import java.util.GregorianCalendar;
+import java.time.LocalDate;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeConstants;
-import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.wcs.smart.plan.model.AdministrativePlanTarget;
@@ -45,6 +42,7 @@ import org.wcs.smart.plan.xml.model.XmlName;
 import org.wcs.smart.plan.xml.model.XmlPlan;
 import org.wcs.smart.plan.xml.model.XmlPlanTarget;
 import org.wcs.smart.plan.xml.model.XmlPlanTargetPoint;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Converts SMART plan object to xml file.
@@ -159,14 +157,8 @@ public class PlanToXml {
 	}
 	
 	
-	private XMLGregorianCalendar convertDateTime(Date datetime) throws DatatypeConfigurationException {
-		GregorianCalendar cal = (GregorianCalendar) GregorianCalendar.getInstance();
-		cal.setTime(datetime);
-		
-		XMLGregorianCalendar xgc = DatatypeFactory.newInstance().newXMLGregorianCalendar(cal);
-		xgc.setTimezone(DatatypeConstants.FIELD_UNDEFINED);
-		
-		return xgc;
+	private XMLGregorianCalendar convertDateTime(LocalDate datetime) throws DatatypeConfigurationException {
+		return SmartUtils.toXmlDate(datetime);
 	}
 }
 

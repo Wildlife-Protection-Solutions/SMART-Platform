@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.observation.common.importwp;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -53,7 +53,7 @@ public interface IImportEngine {
 	 * @return list of imported waypoints
 	 * @throws Exception
 	 */
-	public List<Waypoint> getWaypoints(ImportOption options, ImportType type, Date currentDate, IProgressMonitor monitor) throws Exception;
+	public List<Waypoint> getWaypoints(ImportOption options, ImportType type, LocalDate currentDate, IProgressMonitor monitor) throws Exception;
 	
 	/**
 	 * Updates the object and saves the results to the database.

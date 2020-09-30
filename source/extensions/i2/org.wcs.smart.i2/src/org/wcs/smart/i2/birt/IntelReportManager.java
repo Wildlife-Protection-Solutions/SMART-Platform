@@ -26,7 +26,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
-import java.util.Date;
+import java.time.LocalDate;
 
 import org.eclipse.birt.report.designer.core.model.SessionHandleAdapter;
 import org.eclipse.birt.report.designer.ui.editors.IReportEditorContants;
@@ -126,7 +126,7 @@ public enum IntelReportManager {
 	 * @param dFilter the date filter to use
 	 * @param format the export format
 	 */
-	public void exportEntity(IntelEntity entity, Date[] dFilter, EmitterInfo format){
+	public void exportEntity(IntelEntity entity, LocalDate[] dFilter, EmitterInfo format){
 		EntityExportReportJob job = new EntityExportReportJob(entity, dFilter, format);
 		job.schedule();
 	}

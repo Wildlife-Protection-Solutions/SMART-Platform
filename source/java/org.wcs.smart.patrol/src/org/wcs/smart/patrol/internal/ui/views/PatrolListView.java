@@ -22,7 +22,7 @@
 package org.wcs.smart.patrol.internal.ui.views;
 
 import java.text.MessageFormat;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -153,7 +153,8 @@ public class PatrolListView implements IPatrolFilteringView {
 					int i = 0;
 					for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
 						Object[] data = (Object[]) iterator.next();					
-						input[i++] = new PatrolEditorInput((UUID)data[0], (String)data[1], (PatrolType.Type)data[2], (Date)data[3], (Date)data[4]);
+						input[i++] = new PatrolEditorInput((UUID)data[0], (String)data[1], 
+								(PatrolType.Type)data[2], (LocalDate)data[3], (LocalDate)data[4]);
 					}
 					
 					monitor.internalWorked(0.5);

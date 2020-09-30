@@ -21,9 +21,10 @@
  */
 package org.wcs.smart.i2.model;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.List;
 import java.util.Locale;
 
@@ -66,8 +67,8 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 
 	private static final long serialVersionUID = 1L;
 	
-	private Date dateCreated;
-	private Date dateModified;
+	private LocalDateTime dateCreated;
+	private LocalDateTime dateModified;
 
 	private IntelProfile profile;
 	
@@ -135,7 +136,7 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 	 * @return date_created
 	 */
 	@Column(name="date_created")
-	public Date getDateCreated() {
+	public LocalDateTime getDateCreated() {
 		return this.dateCreated;
 	}
 	/**
@@ -144,7 +145,7 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 	 * @param dateCreated
 	 *            date_created
 	 */
-	public void setDateCreated(Date dateCreated) {
+	public void setDateCreated(LocalDateTime dateCreated) {
 		this.dateCreated = dateCreated;
 	}
 
@@ -155,7 +156,7 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 	 * @param dateModified
 	 *            date_modified
 	 */
-	public void setDateModified(Date dateModified) {
+	public void setDateModified(LocalDateTime dateModified) {
 		this.dateModified = dateModified;
 	}
 
@@ -165,7 +166,7 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 	 * @return date_modified
 	 */
 	@Column(name="date_modified")
-	public Date getDateModified() {
+	public LocalDateTime getDateModified() {
 		return this.dateModified;
 	}
 
@@ -409,8 +410,8 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 						}
 					}
 					return ((Number)value).toString();
-				}else if (value instanceof Date){
-					return DateFormat.getDateInstance().format((Date)value);
+				}else if (value instanceof LocalDate){
+					return DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format((LocalDate)value);
 				}else if (value instanceof NamedItem){
 					return ((NamedItem) value).getName();
 				}else if (value instanceof Employee) {
@@ -507,11 +508,12 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 						return;
 					}
 					try {
-						Date d1 =(new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).parse(ex[2]);
-						Date d2 =(new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).parse(ex[4]);
-					
-						if (op == Operator.BETWEEN) {
-							match = value.getDateValue().getTime() >= d1.getTime() && value.getDateValue().getTime() < d2.getTime();
+						LocalDate d1 = LocalDate.parse(ex[2], DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR));
+						LocalDate d2 = LocalDate.parse(ex[4], DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR));
+						
+						if (op == Operator.BETWEEN || op == Operator.NOT_BETWEEN) {
+							match = (value.getDateValue().isEqual(d1) || value.getDateValue().isAfter(d1)) &&
+									( value.getDateValue().isEqual(d2) || value.getDateValue().isBefore(d2));
 						}
 						if (op == Operator.NOT_BETWEEN) {
 							match = !match;

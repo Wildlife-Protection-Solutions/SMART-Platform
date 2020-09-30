@@ -23,10 +23,12 @@ package org.wcs.smart.patrol.ui;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -89,7 +91,6 @@ import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.PatrolWaypointSource;
 import org.wcs.smart.patrol.model.WaypointAttachmentInterceptor;
-import org.wcs.smart.util.SharedUtils;
 
 /**
  * The patrol editor.
@@ -330,7 +331,8 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	public void findAndShow(UUID uuid){
 		PatrolWaypoint wp = null;
 		PatrolLegDay pld = null;
-		long time = -1;
+		
+		LocalDate pdate = null;
 		try(Session s = HibernateManager.openSession()){
 			//search waypoints
 			CriteriaBuilder cb = s.getCriteriaBuilder();
@@ -339,12 +341,12 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			c.where(cb.equal(from.get("id").get("waypoint").get("uuid"), uuid)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			wp = s.createQuery(c).uniqueResult();
 			if (wp != null){
-				time = wp.getPatrolLegDay().getDate().getTime();
+				pdate = wp.getPatrolLegDay().getDate();
 			}else{
 				//search patrol leg days
 				pld = (PatrolLegDay)s.get(PatrolLegDay.class, uuid);
 				if (pld != null){
-					time = pld.getDate().getTime();
+					pdate = pld.getDate();
 				}
 			}	
 		}
@@ -354,7 +356,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			IEditorPart part = getEditor(i);
 			if (part instanceof PatrolDayEditor){
 				final PatrolDayEditor pde = (PatrolDayEditor)part;			
-				if ( ((PatrolDayEditorInput)pde.getEditorInput()).getPatrolDay().getTime() == time  ){
+				if ( ((PatrolDayEditorInput)pde.getEditorInput()).getPatrolDay().isEqual(pdate)){
 					setActivePage(i);
 					if (wp2 != null){
 						Display.getDefault().asyncExec(new Runnable(){
@@ -437,7 +439,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 				boolean dayHasData = false;
 				for (PatrolLeg pl : getPatrol().getLegs()) {
 					for (PatrolLegDay pld : pl.getPatrolLegDays()) {
-						if (SharedUtils.isSameDate( pld.getDate(), ((PatrolDayEditorInput)day.getEditorInput()).getPatrolDay() )) {
+						if (pld.getDate().isEqual(((PatrolDayEditorInput)day.getEditorInput()).getPatrolDay() )) {
 							dayHasData = pld.hasData();
 							break;
 						}
@@ -461,6 +463,12 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	
 	public void createDayPages( ) {
 		try {
+			if (noDataFont == null) {
+				FontData fd = getSite().getShell().getFont().getFontData()[0];
+				fd.setStyle(SWT.ITALIC);
+				noDataFont = new Font(getSite().getShell().getDisplay(), fd);
+			}
+			
 			int i = 0;
 			while( i < getPageCount()){
 				if (getEditor(i) instanceof PatrolDayEditor){
@@ -469,30 +477,18 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 					i++;
 				}
 			}
+			LocalDate legdate = LocalDate.from(getPatrol().getStartDate());
 			int insertindex = 1;
-			Calendar calStart = SharedUtils.convertDate(getPatrol().getStartDate());
-			calStart.set(Calendar.HOUR, 0);
-			calStart.set(Calendar.MINUTE, 0);
-			calStart.set(Calendar.SECOND, 0);
-			calStart.set(Calendar.MILLISECOND, 0);
 			
-			Calendar calEnd = SharedUtils.convertDate(getPatrol().getEndDate());
-			
-			if (noDataFont == null) {
-				FontData fd = getSite().getShell().getFont().getFontData()[0];
-				fd.setStyle(SWT.ITALIC);
-				noDataFont = new Font(getSite().getShell().getDisplay(), fd);
-			}
-			
-			while (calStart.before(calEnd) || calStart.equals(calEnd)) {
+			while (legdate.isBefore(getPatrol().getEndDate()) || legdate.isEqual(getPatrol().getEndDate())) {
 				//is there data in any of the legs for this day
-				PatrolDayEditorInput input = new PatrolDayEditorInput(calStart.getTime());
+				PatrolDayEditorInput input = new PatrolDayEditorInput(legdate);
 				PatrolDayEditor editor = new PatrolDayEditor(this);
 				super.addPage(insertindex, editor, input);
-				String text = DateFormat.getDateInstance(DateFormat.MEDIUM).format(input.getPatrolDay());
+				String text = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(input.getPatrolDay());
 				super.setPageText(insertindex, text);
 				insertindex++;
-				calStart.add(Calendar.DAY_OF_MONTH, 1);
+				legdate = ChronoUnit.DAYS.addTo(legdate, 1);
 			}
 			updateTabStyling();
 

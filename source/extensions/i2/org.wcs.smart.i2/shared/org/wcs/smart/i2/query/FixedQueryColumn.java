@@ -21,8 +21,9 @@
  */
 package org.wcs.smart.i2.query;
 
-import java.text.DateFormat;
-import java.util.Date;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.time.temporal.Temporal;
 import java.util.Locale;
 
 import org.locationtech.jts.geom.Geometry;
@@ -154,14 +155,14 @@ public class FixedQueryColumn extends AbstractQueryColumn{
 		switch(column){
 			case LOC_DATE:
 			case RECORD_DATE:
-				return DateFormat.getDateInstance(DateFormat.DEFAULT, l).format((Date)toFormat);
+				return DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(l).format( (Temporal)toFormat );
 			case LOC_GEOMTRY:
 				if (toFormat instanceof Geometry) {
 					return ((Geometry)toFormat).toText();
 				}
 				return toFormat.toString();
 			case LOC_TIME:
-				return DateFormat.getTimeInstance(DateFormat.DEFAULT, l).format((Date)toFormat);
+				return DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM).withLocale(l).format( (Temporal)toFormat );
 			case RECORD_STATUS:
 				return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(toFormat, l);
 			case LOC_COMMENT:

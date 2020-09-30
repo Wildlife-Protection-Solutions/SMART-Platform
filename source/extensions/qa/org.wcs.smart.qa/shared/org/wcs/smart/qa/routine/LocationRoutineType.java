@@ -23,9 +23,9 @@ package org.wcs.smart.qa.routine;
 
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
@@ -228,7 +228,7 @@ public class LocationRoutineType implements IQaRoutineType {
 						error.setSourceId( task.getDataProvider().getFeatureSource(session, x));
 						error.setQaRoutine(routine);
 						error.setStatus(QaError.Status.NEW);
-						error.setValidateDate(new Date());
+						error.setValidateDate(LocalDateTime.now());
 						errors.add(error);
 						error.setGeometryObject(GeometryFactoryProvider.getFactory().createPoint(wp.getPoint()));
 						
@@ -258,7 +258,7 @@ public class LocationRoutineType implements IQaRoutineType {
 							error.setSourceId( task.getDataProvider().getFeatureSource(session, x));
 							error.setQaRoutine(routine);
 							error.setStatus(QaError.Status.NEW);
-							error.setValidateDate(new Date());
+							error.setValidateDate(LocalDateTime.now());
 							errors.add(error);
 							error.setGeometryObject(GeometryFactoryProvider.getFactory().createPoint(wp.getProjectedPoint()));
 							
@@ -307,7 +307,7 @@ public class LocationRoutineType implements IQaRoutineType {
 						error.setSourceId( task.getDataProvider().getFeatureSource(session, x));
 						error.setQaRoutine(routine);
 						error.setStatus(QaError.Status.NEW);
-						error.setValidateDate(new Date());
+						error.setValidateDate(LocalDateTime.now());
 						errors.add(error);
 						error.setGeometryObject(wp.getGeometry());
 					}

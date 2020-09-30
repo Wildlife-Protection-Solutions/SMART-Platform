@@ -22,10 +22,11 @@
 package org.wcs.smart.event.i2.entity;
 
 import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
@@ -186,7 +187,7 @@ public class CreateEntityActionType implements IActionType {
 				ie.setConservationArea(ca);
 				ie.setCopyFromLocation(aa.getAttachmentFile());
 				ie.setFilename(aa.getFilename());
-				ie.setDateCreated(new Date());
+				ie.setDateCreated(LocalDateTime.now());
 				ie.setCreatedBy(SmartDB.getCurrentEmployee());
 				
 				IntelEntityAttachment iea = new IntelEntityAttachment();
@@ -348,7 +349,7 @@ public class CreateEntityActionType implements IActionType {
 					idvalue.setNumberValue(1.0);
 					break;
 				case DATE:
-					idvalue.setDateValue(new Date());
+					idvalue.setDateValue(LocalDate.now());
 					break;
 				case EMPLOYEE:
 					idvalue.setEmployee(SmartDB.getCurrentEmployee());
@@ -431,7 +432,7 @@ public class CreateEntityActionType implements IActionType {
 		sb.append("\n\n"); //$NON-NLS-1$
 		sb.append(MessageFormat.format(Messages.AdvIntelLabelProvider_CreateActionTypeMsg2, data.getWaypoint().getSourceId()));
 		sb.append("\n"); //$NON-NLS-1$
-		sb.append(MessageFormat.format(Messages.AdvIntelLabelProvider_CreateActionTypeMsg3, (new SimpleDateFormat("MMM dd, yyyy HH:mm:ss")).format(data.getWaypoint().getDateTime()))); //$NON-NLS-1$
+		sb.append(MessageFormat.format(Messages.AdvIntelLabelProvider_CreateActionTypeMsg3, (DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm:ss")).format(data.getWaypoint().getDateTime()))); //$NON-NLS-1$
 		sb.append("\n"); //$NON-NLS-1$
 		sb.append(MessageFormat.format(Messages.AdvIntelLabelProvider_CreateActionTypeMsg4, data.getWaypoint().getComment()));
 		sb.append("\n"); //$NON-NLS-1$

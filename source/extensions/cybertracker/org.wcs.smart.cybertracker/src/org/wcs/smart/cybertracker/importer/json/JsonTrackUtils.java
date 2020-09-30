@@ -21,17 +21,15 @@
  */
 package org.wcs.smart.cybertracker.importer.json;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
-
-import org.wcs.smart.map.GeometryFactoryProvider;
 
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.LineString;
+import org.wcs.smart.map.GeometryFactoryProvider;
+import org.wcs.smart.util.SharedUtils;
 
 /**
  * Track utilities.  Inserts a new point into the track sorting by the 
@@ -41,11 +39,10 @@ import org.locationtech.jts.geom.LineString;
  *
  */
 public class JsonTrackUtils {
-	public static TimeZone ZTIMEZONE = TimeZone.getTimeZone("GMT"); //$NON-NLS-1$
-	
-	public static LineString addPointToTrack(LineString track, Coordinate pnt, Date pntTime){
-		long z = convertTimeToGMT(pntTime);
+
+	public static LineString addPointToTrack(LineString track, Coordinate pnt, LocalDateTime pntTime){
 		
+		long z = SharedUtils.toLongTime(pntTime);
 		Coordinate[] c = null;
 		if (track == null){
 			c = new Coordinate[] {new Coordinate(pnt.x, pnt.y, z)};
@@ -80,13 +77,4 @@ public class JsonTrackUtils {
 		return (LineString)GeometryFactoryProvider.getFactory().createLineString(all.toArray(new Coordinate[all.size()]));
 	}
 	
-	public static Long convertTimeToGMT(Date time){
-		Calendar c1 = Calendar.getInstance();
-		c1.setTimeInMillis(time.getTime());
-		Calendar c2 = Calendar.getInstance();
-		c2.setTimeZone(ZTIMEZONE);
-		c2.setTimeInMillis(0);
-		c2.set(c1.get(Calendar.YEAR), c1.get(Calendar.MONTH), c1.get(Calendar.DATE), c1.get(Calendar.HOUR_OF_DAY), c1.get(Calendar.MINUTE), c1.get(Calendar.SECOND));
-		return c2.getTime().getTime();
-	}
 }

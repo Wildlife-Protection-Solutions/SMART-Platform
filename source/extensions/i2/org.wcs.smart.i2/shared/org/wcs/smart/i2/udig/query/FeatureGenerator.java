@@ -21,10 +21,10 @@
  */
 package org.wcs.smart.i2.udig.query;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.time.temporal.Temporal;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -79,7 +79,7 @@ public class FeatureGenerator {
 			StringBuilder sb = new StringBuilder();
 			sb.append(ii.getLocationId());
 			sb.append("."); //$NON-NLS-1$
-			sb.append((new SimpleDateFormat("yyyMMdd")).format(ii.getLocationDate())); //$NON-NLS-1$
+			sb.append(DateTimeFormatter.ofPattern("yyyMMdd").format(ii.getLocationDate())); //$NON-NLS-1$
 			sb.append("."); //$NON-NLS-1$
 			sb.append(ii.getObservationUuid() == null ? UuidUtils.uuidToString(ii.getLocationUuid()) : UuidUtils.uuidToString(ii.getObservationUuid()));
 			data.add(sb.toString()); 
@@ -118,7 +118,7 @@ public class FeatureGenerator {
 		if (column.getDataType() == IQueryColumn.Type.TIME &&
 				descriptor.getType().getBinding().equals(String.class)){
 				//this is a datetime object which needs to be converted to a string
-				x = DateFormat.getTimeInstance().format((Date)x);
+				x = DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM).format((Temporal)x);
 		}
 		return x;
 	}

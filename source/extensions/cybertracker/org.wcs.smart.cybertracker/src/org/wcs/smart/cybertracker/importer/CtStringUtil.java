@@ -21,8 +21,9 @@
  */
 package org.wcs.smart.cybertracker.importer;
 
-import java.text.DateFormat;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.Iterator;
 import java.util.List;
 
@@ -45,11 +46,11 @@ public class CtStringUtil {
 		return result.toString();
 	}
 
-	public static final String dateAsString(Date date) {
+	public static final String dateAsString(LocalDateTime date) {
 		if (date == null) {
 			return ""; //$NON-NLS-1$
 		}
-		return DateFormat.getDateTimeInstance().format(date);
+		return DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(date);
 	}
 	
 }

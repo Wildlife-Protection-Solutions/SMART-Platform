@@ -30,10 +30,7 @@ import java.util.Map;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
-import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.Platform;
-import org.locationtech.udig.core.internal.ExtensionPointProcessor;
-import org.locationtech.udig.core.internal.ExtensionPointUtil;
 
 /**
  * Manager for custom SMART Birt Parameter Extension point.

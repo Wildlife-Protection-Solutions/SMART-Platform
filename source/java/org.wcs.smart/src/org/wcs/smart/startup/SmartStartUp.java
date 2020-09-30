@@ -25,9 +25,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -262,7 +262,7 @@ public class SmartStartUp {
 								ccaaUser.setSmartUserId(users.get(0).getSmartUserId());
 								ccaaUser.setGivenName(ccaaUser.getSmartUserId());
 								ccaaUser.setFamilyName(""); //$NON-NLS-1$
-								ccaaUser.setStartEmploymentDate(new Date());
+								ccaaUser.setStartEmploymentDate(LocalDate.now());
 								ccaaUser.setId(ccaaUser.getSmartUserId());
 								ccaaUser.setConservationArea(ca);
 								session.save(ccaaUser);

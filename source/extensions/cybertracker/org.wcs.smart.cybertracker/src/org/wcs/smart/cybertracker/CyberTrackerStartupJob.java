@@ -24,7 +24,9 @@ package org.wcs.smart.cybertracker;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -107,13 +109,13 @@ public class CyberTrackerStartupJob extends Job {
 	private void cleanStorage(Path folder, long dayLimit) {
 		if (!Files.exists(folder))
 			return;
-		long current = new Date().getTime();
+		
 		long bound = dayLimit * 24 * 60 * 60 * 1000;
 		
 		try {
 			Files.list(folder).forEach(file->{
 				try {
-					if (current - Files.getLastModifiedTime(file).toMillis() > bound) {
+					if (ChronoUnit.MILLIS.between(LocalDateTime.now(), LocalDateTime.ofInstant( Files.getLastModifiedTime(file).toInstant(), ZoneId.systemDefault()) ) > bound) {
 						Files.delete(file);
 					}
 				}catch (Exception ex) {

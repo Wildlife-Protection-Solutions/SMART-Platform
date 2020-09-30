@@ -21,10 +21,11 @@
  */
 package org.wcs.smart.plan.ui.panel;
 
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -57,8 +58,8 @@ public class PlanDatesComposite extends PlanComposite {
 	private DateTime dtEndDate;
 
 	
-	private Date parentStartDate;
-	private Date parentEndDate;
+	private LocalDate parentStartDate;
+	private LocalDate parentEndDate;
 	
 	private ControlDecoration cdEndDate;
 	private ControlDecoration cdStartDate;
@@ -122,8 +123,8 @@ public class PlanDatesComposite extends PlanComposite {
 
 	@Override
 	protected boolean updateModelInternal(Plan plan) {
-		Date start = SmartUtils.getDate(dtStartDate);
-		Date end = SmartUtils.getDate(dtEndDate);
+		LocalDate start = SmartUtils.toDate(dtStartDate);
+		LocalDate end = SmartUtils.toDate(dtEndDate);
 		List<String> kids = PlanHibernateManager.getPlanChildrenOutOfDateRange(plan.getUuid(), start, end);
 		if (!kids.isEmpty()) {
 			MessageDialog.openError(getShell(), Messages.PlanDatesComposite_Title,
@@ -145,8 +146,8 @@ public class PlanDatesComposite extends PlanComposite {
 					thisParentPlan = (Plan) session.load(Plan.class, plan.getParent().getUuid());
 				}
 	
-				SmartUtils.initDateDateTimeWidget(dtStartDate, plan.getStartDate() != null ? plan.getStartDate() : new Date());
-				SmartUtils.initDateDateTimeWidget(dtEndDate, plan.getEndDate() != null ? plan.getEndDate() : new Date());
+				SmartUtils.initDateTimeWidget(dtStartDate, plan.getStartDate() != null ? plan.getStartDate() : LocalDate.now());
+				SmartUtils.initDateTimeWidget(dtEndDate, plan.getEndDate() != null ? plan.getEndDate() : LocalDate.now());
 				
 				if(thisParentPlan != null){
 					parentStartDate = thisParentPlan.getStartDate();
@@ -178,21 +179,21 @@ public class PlanDatesComposite extends PlanComposite {
 			setErrorMessage(Messages.PlanDatesComposite_EndDate_Invalid_Error);
 		}
 
-		if( (SmartUtils.getDate(dtEndDate)).before(SmartUtils.getDate(dtStartDate)) ){
+		if( (SmartUtils.toDate(dtEndDate)).isBefore(SmartUtils.toDate(dtStartDate)) ){
 			cdEndDate.show();
 			cdEndDate.setDescriptionText(Messages.PlanDatesComposite_EndDate_Range_Error);
 			setErrorMessage(Messages.PlanDatesComposite_EndDate_Range_Error);
 		}
 		
-		if(parentEndDate != null && (SmartUtils.getDate(dtEndDate)).after(parentEndDate) ){
+		if(parentEndDate != null && (SmartUtils.toDate(dtEndDate)).isAfter(parentEndDate) ){
 			cdEndDate.show();
-			String errorText = Messages.PlanDatesComposite_EndDate_Range_Parent_Error + " (" + DateFormat.getDateInstance().format(parentEndDate) + ")";  //$NON-NLS-1$ //$NON-NLS-2$
+			String errorText = Messages.PlanDatesComposite_EndDate_Range_Parent_Error + " (" + DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(parentEndDate) + ")";  //$NON-NLS-1$ //$NON-NLS-2$
 			cdEndDate.setDescriptionText(errorText);
 			setErrorMessage(errorText);
 		}
-		if(parentEndDate != null && (SmartUtils.getDate(dtStartDate)).before(parentStartDate) ){
+		if(parentEndDate != null && (SmartUtils.toDate(dtStartDate)).isBefore(parentStartDate) ){
 			cdStartDate.show();
-			String errText = Messages.PlanDatesComposite_StartDate_Range_Parent_Error + " (" + DateFormat.getDateInstance().format(parentStartDate) + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+			String errText = Messages.PlanDatesComposite_StartDate_Range_Parent_Error + " (" + DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(parentStartDate) + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 			cdStartDate.setDescriptionText(errText);
 			setErrorMessage(errText);
 		}

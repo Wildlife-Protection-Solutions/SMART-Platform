@@ -21,12 +21,13 @@
  */
 package org.wcs.smart.cybertracker.patrol.json;
 
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -46,7 +47,6 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.Track;
-import org.wcs.smart.util.SharedUtils;
 
 /**
  * For processing track log points.  This attempts to find a patrol
@@ -95,7 +95,7 @@ public class PatrolJsonTrackProcessor implements IJsonProcessor {
 			
 			Double x = ((Number) pntArray.get(0)).doubleValue();
 			Double y = ((Number) pntArray.get(1)).doubleValue();
-			Date dt = JsonUtils.parseJsonDateTime((String)properties.get(JsonCtParser.DATETIME_KEY));
+			LocalDateTime dt = JsonUtils.parseJsonDateTime((String)properties.get(JsonCtParser.DATETIME_KEY));
 
 			String deviceId = (String) properties.get(JsonCtParser.DEVICE_ID);
 			
@@ -104,12 +104,12 @@ public class PatrolJsonTrackProcessor implements IJsonProcessor {
 			//we want to find the patrol leg with a day that matches this day and time
 			List<PatrolLegDay> matches = new ArrayList<PatrolLegDay>();
 			for (CtPatrolLink link : links){
-				if (JsonCtParser.isDateBetween(dt, link.getPatrolLeg().getStartDate(), link.getPatrolLeg().getEndDate())){
+				if (JsonCtParser.isDateBetween(dt.toLocalDate(), link.getPatrolLeg().getStartDate(), link.getPatrolLeg().getEndDate())){
 					
 					//lets look for a patrol leg day that matches
 					for (PatrolLegDay pld : link.getPatrolLeg().getPatrolLegDays()){
-						if (SharedUtils.isSameDate(pld.getDate(), dt) &&
-								JsonCtParser.isTimeBetween(dt, pld.getStartTime(), pld.getEndTime())){
+						if (pld.getDate().isEqual(dt.toLocalDate()) &&
+								JsonCtParser.isTimeBetween(dt.toLocalTime(), pld.getStartTime(), pld.getEndTime())){
 							matches.add(pld);
 						}
 					}
@@ -121,15 +121,15 @@ public class PatrolJsonTrackProcessor implements IJsonProcessor {
 			if (matches.size() == 2) {
 				//if matches start point of one, and end point of other 
 				//then add to the end point one
-				LocalTime dlt = (new java.sql.Time(dt.getTime())).toLocalTime();
+				LocalTime dlt = dt.toLocalTime();
 				
 				PatrolLegDay first = matches.get(0);
 				PatrolLegDay second = matches.get(1);
 				
-				LocalTime firste = first.getEndTime().toLocalTime();
-				LocalTime firsts = first.getStartTime().toLocalTime();
-				LocalTime seconde = second.getEndTime().toLocalTime();
-				LocalTime seconds = second.getStartTime().toLocalTime();
+				LocalTime firste = first.getEndTime();
+				LocalTime firsts = first.getStartTime();
+				LocalTime seconde = second.getEndTime();
+				LocalTime seconds = second.getStartTime();
 				
 				if (firste.equals(dlt) && seconds.equals(dlt)) {
 					//remove second
@@ -168,12 +168,12 @@ public class PatrolJsonTrackProcessor implements IJsonProcessor {
 			}else{
 				StringBuilder sb = new StringBuilder();
 				for (PatrolLegDay pld : matches){
-					sb.append(pld.getPatrolLeg().getPatrol().getId() + "(" + DateFormat.getDateInstance().format(pld.getDate()) + "), "); //$NON-NLS-1$ //$NON-NLS-2$
+					sb.append(pld.getPatrolLeg().getPatrol().getId() + "(" + DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(pld.getDate()) + "), "); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				sb.deleteCharAt(sb.length() - 1);
 				sb.deleteCharAt(sb.length() - 1);
 				
-				warnings.add(MessageFormat.format(Messages.PatrolJsonTrackProcessor_MultiplePnts, DateFormat.getDateTimeInstance().format(dt), sb.toString()));
+				warnings.add(MessageFormat.format(Messages.PatrolJsonTrackProcessor_MultiplePnts, DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(dt), sb.toString()));
 			}
 				
 			

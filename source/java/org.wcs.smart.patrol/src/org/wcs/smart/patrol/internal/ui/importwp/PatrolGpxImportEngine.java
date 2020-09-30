@@ -75,6 +75,11 @@ public class PatrolGpxImportEngine extends GpxImportEngine {
 					message += "\n" + Messages.PatrolGpxImportEngine_NotracksFound; //$NON-NLS-1$
 				}
 			}else{
+				//make sure the day for the waypoints 
+				//matches the currentLegDay (maybe we import tracks from a different date)
+				for (Waypoint wp : waypoints) {
+					wp.setDateTime(currentLeg.getDate().atTime(wp.getDateTime().toLocalTime()));
+				}
 				Track track = PatrolGPSDataImport.convertToTrack(waypoints);
 				tracks.put(currentLeg, track);
 				message = Messages.GpxImportEngine_ImportSingleTrack;

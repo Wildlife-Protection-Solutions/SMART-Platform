@@ -34,9 +34,9 @@ import org.geotools.feature.SchemaException;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.observation.query.internal.Messages;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumnUtils;
-import org.wcs.smart.observation.query.internal.Messages;
 
 public class QueryFeatureSource  extends ContentFeatureSource {
 

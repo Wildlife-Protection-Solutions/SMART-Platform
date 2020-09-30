@@ -24,13 +24,12 @@ package org.wcs.smart.smartcollect;
 import org.geotools.data.DataUtilities;
 import org.geotools.feature.SchemaException;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.locationtech.jts.geom.Coordinate;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.util.UuidUtils;
-
-import org.locationtech.jts.geom.Coordinate;
 
 /**
  * Utilities for generating feature types and features for SMART Collect incidents

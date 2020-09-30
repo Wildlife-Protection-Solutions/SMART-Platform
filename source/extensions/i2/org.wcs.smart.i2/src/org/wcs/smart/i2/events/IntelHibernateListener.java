@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.i2.events;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -52,7 +52,7 @@ public class IntelHibernateListener implements PreInsertEventListener, PreUpdate
 		if (event.getEntity() instanceof IIntelAuditItem){
 			IIntelAuditItem item = (IIntelAuditItem) event.getEntity();
 			
-			Date now = new Date();
+			LocalDateTime now = LocalDateTime.now();
 			if (item.getCreatedBy() == null){
     			item.setCreatedBy(SmartDB.getCurrentEmployee());
     			item.setDateCreated(now);
@@ -74,8 +74,7 @@ public class IntelHibernateListener implements PreInsertEventListener, PreUpdate
 		if (event.getEntity() instanceof IIntelAuditItem){
 			IIntelAuditItem item = (IIntelAuditItem) event.getEntity();
 			
-			Date now = new Date();
-			
+			LocalDateTime now = LocalDateTime.now();			
 			if (item.getCreatedBy() == null){
     			item.setCreatedBy(SmartDB.getCurrentEmployee());
     			item.setDateCreated(now);

@@ -21,10 +21,8 @@
  */
 package org.wcs.smart.query.model.filter.date;
 
-import java.sql.Date;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 import org.wcs.smart.SmartContext;
@@ -49,36 +47,31 @@ public enum LastMonthFilter implements IDateFilter {
 	}
 
 	@Override
-	public Date[] getDates() {
-		Calendar cal = Calendar.getInstance();
+	public LocalDate[] getDates() {
+		
+		LocalDate now = LocalDate.now();
 	
-		int year = cal.get(Calendar.YEAR);
-		int month = cal.get(Calendar.MONTH);
+		int year = now.getYear();
+		int month = now.getMonthValue();
 		
 		int lastyear = year;
 		int lastmonth = month;
 		lastmonth --;
-		if (lastmonth < 0){
-			lastmonth = 11;
+		if (lastmonth <= 0){
+			lastmonth = 12;
 			lastyear --;
 		}
 		
-		cal.set(Calendar.DAY_OF_MONTH, 1);
-		cal.set(Calendar.HOUR_OF_DAY, 0);
-		cal.set(Calendar.MINUTE, 0);
-		cal.set(Calendar.SECOND, 0);
-		java.sql.Date d1 = new java.sql.Date(cal.getTimeInMillis());
+		LocalDate from = LocalDate.of(lastyear, lastmonth, 1);
+		LocalDate to = LocalDate.of(year, month, 1);
 		
-		cal.set(Calendar.MONTH, lastmonth);
-		cal.set(Calendar.YEAR, lastyear);
-		java.sql.Date d2 = new java.sql.Date(cal.getTimeInMillis());
-		return new java.sql.Date[]{d2, d1};
+		return new LocalDate[] {from,to};
 	}
 
 	@Override
 	public String getLabel() {
-		Date[] bits = getDates();
-		DateFormat formatter = new SimpleDateFormat("MMM yyyy"); //$NON-NLS-1$
+		LocalDate[] bits = getDates();
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM yyyy"); //$NON-NLS-1$
 		return ( "[" + formatter.format( bits[0] ) + "]"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 

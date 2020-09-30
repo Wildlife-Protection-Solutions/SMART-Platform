@@ -21,10 +21,11 @@
  */
 package org.wcs.smart.qa.patrol.routine;
 
-import java.text.DateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -46,7 +47,6 @@ import org.wcs.smart.qa.model.IQaRoutineType;
 import org.wcs.smart.qa.patrol.ILabelProvider;
 import org.wcs.smart.qa.patrol.ILabelProvider.Key;
 import org.wcs.smart.qa.routine.LocationRoutineType;
-import org.wcs.smart.util.SharedUtils;
 
 /**
  * Data provider for providing patrol track data.
@@ -69,7 +69,7 @@ public class PatrolTrackDataProvider extends IQaDataProvider {
 	
 	
 	@Override
-	public Collection<?> getData(Session session, ConservationArea ca, Date startDate, Date endDate) {
+	public Collection<?> getData(Session session, ConservationArea ca, LocalDate startDate, LocalDate endDate) {
 		List<TrackLocationData> tracks = new ArrayList<>();
 		
 		CriteriaBuilder cb = session.getCriteriaBuilder();
@@ -84,7 +84,8 @@ public class PatrolTrackDataProvider extends IQaDataProvider {
 		for (Patrol p : patrols){
 			for (PatrolLeg pl : p.getLegs()){
 				for (PatrolLegDay pld : pl.getPatrolLegDays()){
-					if ((SharedUtils.isSameDate(pld.getDate(),endDate) || pld.getDate().before(endDate)) && (SharedUtils.isSameDate(pld.getDate(), startDate)  || pld.getDate().after(startDate))){
+					if ((pld.getDate().isEqual(endDate) || pld.getDate().isBefore(endDate)) && 
+							(pld.getDate().isEqual(startDate)  || pld.getDate().isAfter(startDate))){
 						Track t = pld.getTrack();
 						try{
 							if (t != null && t.getGeometry() != null){
@@ -116,7 +117,7 @@ public class PatrolTrackDataProvider extends IQaDataProvider {
 			sb.append(track.getPatrolLegDay().getPatrolLeg().getId());
 		}
 		sb.append(" ("); //$NON-NLS-1$
-		sb.append(DateFormat.getDateInstance().format(track.getPatrolLegDay().getDate()));
+		sb.append(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(track.getPatrolLegDay().getDate()));
 		sb.append(")"); //$NON-NLS-1$
 		return sb.toString();
 	}

@@ -24,8 +24,8 @@ package org.wcs.smart.i2.ui.editors.record;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -421,7 +421,7 @@ public class AttachmentListComposite extends Composite{
 				ia.setConservationArea(SmartDB.getCurrentConservationArea());
 				ia.setCopyFromLocation(Paths.get(dialog.getFilterPath()).resolve(file));
 				ia.setCreatedBy(SmartDB.getCurrentEmployee());
-				ia.setDateCreated(new Date());
+				ia.setDateCreated(LocalDateTime.now());
 				ia.setFilename(Paths.get(dialog.getFilterPath()).resolve(file).getFileName().toString());
 				
 				IntelRecordAttachment iea = new IntelRecordAttachment();

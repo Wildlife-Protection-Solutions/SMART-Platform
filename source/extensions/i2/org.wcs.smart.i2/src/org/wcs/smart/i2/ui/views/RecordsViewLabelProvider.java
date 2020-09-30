@@ -21,11 +21,11 @@
  */
 package org.wcs.smart.i2.ui.views;
 
-import java.text.DateFormat;
 import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -236,7 +236,7 @@ public class RecordsViewLabelProvider extends ColumnLabelProvider {
 				//required for down arrow to display if children
 				return NULL_IMAGE;
 			}
-		}else if (element instanceof Date) {
+		}else if (element instanceof LocalDate) {
 			if (sourceImg && profileImg && statusImg) return NULL_IMAGE;
 		}
 		return super.getImage(element);
@@ -245,13 +245,13 @@ public class RecordsViewLabelProvider extends ColumnLabelProvider {
 	@Override
 	public String getText(Object element) {
 		if (element instanceof IntelRecordProxy) {
-			return MessageFormat.format("{0} ({1})",((IntelRecordProxy)element).getTitle(),  DateFormat.getDateInstance().format(((IntelRecordProxy)element).getDate())); //$NON-NLS-1$
+			return MessageFormat.format("{0} ({1})",((IntelRecordProxy)element).getTitle(),  DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(((IntelRecordProxy)element).getDate())); //$NON-NLS-1$
 		}else if (element instanceof IntelRecordSource) {
 			return ((IntelRecordSource)element).getName();
 		}else if (element instanceof IntelRecord.Status) {
 			return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(element, Locale.getDefault());
-		}else if (element instanceof Date) {
-			return  (new SimpleDateFormat("MMMM, yyyy")).format((Date)element); //$NON-NLS-1$
+		}else if (element instanceof LocalDate) {
+			return  (DateTimeFormatter.ofPattern("MMMM, yyyy")).format((LocalDate)element); //$NON-NLS-1$
 		}else if (element instanceof IntelRecordSearchResultItem) {
 			return ((IntelRecordSearchResultItem)element).getTitle();
 		}else if (element instanceof IntelProfile) {

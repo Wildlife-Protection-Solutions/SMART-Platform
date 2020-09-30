@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.plan.model;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -82,8 +82,8 @@ public class Plan extends NamedItem {
 	private Team team;
 	private String id;
 	private String description;
-	private Date startDate;
-	private Date endDate;
+	private LocalDate startDate;
+	private LocalDate endDate;
 	private PlanType type;
 	private List<PlanTarget> targets;
 	private Integer unavailableEmployees;
@@ -158,11 +158,11 @@ public class Plan extends NamedItem {
 	 * @return plan start date
 	 */
 	@Column(name="start_date")
-	public Date getStartDate() {
+	public LocalDate getStartDate() {
 		return startDate;
 	}
 
-	public void setStartDate(Date startDate) {
+	public void setStartDate(LocalDate startDate) {
 		this.startDate = startDate;
 	}
 
@@ -171,11 +171,11 @@ public class Plan extends NamedItem {
 	 * @return plan end date
 	 */
 	@Column(name="end_date")
-	public Date getEndDate() {
+	public LocalDate getEndDate() {
 		return endDate;
 	}
 
-	public void setEndDate(Date endDate) {
+	public void setEndDate(LocalDate endDate) {
 		this.endDate = endDate;
 	}
 	

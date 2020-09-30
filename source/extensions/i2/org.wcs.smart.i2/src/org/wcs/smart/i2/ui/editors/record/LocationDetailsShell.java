@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.i2.ui.editors.record;
 
-import java.text.DateFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -115,7 +116,7 @@ public class LocationDetailsShell extends SmartShellDialog{
 		lblId.addListener(SWT.MouseExit, this);
 		
 		Label lblDate = new Label(owner, SWT.NONE);
-		lblDate.setText(DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM).format(location.getDateTime()));
+		lblDate.setText(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(location.getDateTime()));
 		
 		
 		sc = new ScrolledComposite(owner, SWT.V_SCROLL | SWT.H_SCROLL);

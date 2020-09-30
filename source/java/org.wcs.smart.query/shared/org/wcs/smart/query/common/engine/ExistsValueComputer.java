@@ -21,10 +21,9 @@
  */
 package org.wcs.smart.query.common.engine;
 
+import org.locationtech.jts.geom.LineString;
 import org.wcs.smart.query.common.model.Grid;
 import org.wcs.smart.query.common.model.Tile;
-
-import org.locationtech.jts.geom.LineString;
 
 /**
  * Checks for existance.  This always returns true.

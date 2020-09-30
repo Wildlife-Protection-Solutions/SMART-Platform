@@ -26,7 +26,8 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -140,7 +141,7 @@ public class XmlToIncident {
 		wp.setDirection(xml.getDirection());
 		wp.setDistance(xml.getDistance());
 		wp.setId(xml.getId());
-		wp.setDateTime(new SimpleDateFormat(IncidentToXml.DATE_FORMAT_STR).parse(xml.getDateTime()));
+		wp.setDateTime(LocalDateTime.parse(xml.getDateTime(),DateTimeFormatter.ofPattern(IncidentToXml.DATE_FORMAT_STR)));
 		wp.setRawX(xml.getX());
 		wp.setRawY(xml.getY());
 		

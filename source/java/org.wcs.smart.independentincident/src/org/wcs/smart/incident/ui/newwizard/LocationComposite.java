@@ -44,6 +44,8 @@ import org.eclipse.swt.widgets.Text;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.hibernate.Session;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Point;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.incident.IncidentPlugIn;
@@ -53,9 +55,6 @@ import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
-
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Point;
 
 /**
  * Incident location composite.

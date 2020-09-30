@@ -21,10 +21,10 @@
  */
 package org.wcs.smart.connect.cybertracker.ctpackage;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -207,11 +207,11 @@ public class ConnectCtPackageProperties implements ICtPackagePropertyProvider {
 					String revision = p.getVersion();
 					
 					String r = revision.substring(0, 32);
-					SimpleDateFormat sdf = new SimpleDateFormat(ICtPackage.PACKAGE_DATE_FORMAT);
+					DateTimeFormatter sdf = DateTimeFormatter.ofPattern(ICtPackage.PACKAGE_DATE_FORMAT);
 					String v = Messages.ConnectCtPackageProperties_ErrorLabel;
 					try {
-						Date d = sdf.parse(revision.substring(33));
-						v = DateFormat.getDateTimeInstance().format(d);
+						LocalDateTime d = LocalDateTime.parse(revision.substring(33), sdf);
+						v = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(d);
 					}catch (Exception ex) {
 						ex.printStackTrace();
 					}

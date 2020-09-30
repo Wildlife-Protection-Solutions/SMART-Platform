@@ -22,9 +22,9 @@
 package org.wcs.smart.qa.ui.view;
 
 import java.text.Collator;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -633,8 +633,8 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 			return;
 		}
 		
-		Date startDate = null;
-		Date endDate = null;
+		LocalDate startDate = null;
+		LocalDate endDate = null;
 		if (dateFilter.getDateFilter() == DateFilter.CUSTOM){
 			startDate = dateFilter.getCustomStartDate();
 			endDate = dateFilter.getCustomEndDate();
@@ -643,7 +643,7 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 			endDate = dateFilter.getDateFilter().getEndDate();
 		}
 		
-		if (startDate.after(endDate)){
+		if (startDate.isAfter(endDate)){
 			MessageDialog.openInformation(getSite().getShell(), Messages.ManualResultsEditor_InvalidDatesTitles, Messages.ManualResultsEditor_InvalidDatesMsg);
 			return;
 		}

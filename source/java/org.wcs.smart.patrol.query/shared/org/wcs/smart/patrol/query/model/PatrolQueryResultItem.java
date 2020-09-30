@@ -21,8 +21,10 @@
  */
 package org.wcs.smart.patrol.query.model;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
@@ -31,14 +33,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.core.runtime.IAdaptable;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.wcs.smart.map.GeometryFactoryProvider;
-import org.wcs.smart.observation.model.Waypoint;
-import org.wcs.smart.observation.model.WaypointObservation;
-import org.wcs.smart.patrol.model.PatrolType;
-import org.wcs.smart.query.common.engine.IGeometryResultItem;
-import org.wcs.smart.util.ReprojectUtils;
-
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
@@ -47,6 +41,13 @@ import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.MultiLineString;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKBReader;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.wcs.smart.map.GeometryFactoryProvider;
+import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.patrol.model.PatrolType;
+import org.wcs.smart.query.common.engine.IGeometryResultItem;
+import org.wcs.smart.util.ReprojectUtils;
 
 /**
  * A class to hold the results of a waypoint 
@@ -74,8 +75,8 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IAdaptable{
 	private String caName;
 	
 	private String patrolId;
-	private Date patrolStartDate;
-	private Date patrolEndDate;
+	private LocalDate patrolStartDate;
+	private LocalDate patrolEndDate;
 	private String station;
 	private String team;
 	private String objective;
@@ -86,10 +87,10 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IAdaptable{
 	private String patrolLegId;
 	private UUID patrolLegUuid;
 	private String transportType;
-	private Date plStartDate;
-	private Date plEndDate;
-	private Date wpDateTime;
-	private Date waypointTime;
+	private LocalDate plStartDate;
+	private LocalDate plEndDate;
+	private LocalDate wpDateTime;
+	private LocalTime waypointTime;
 	private String leader;
 	private String pilot;
 	
@@ -106,7 +107,7 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IAdaptable{
 	private HashMap<String, Object> attributes = new HashMap<String, Object>();
 	
 	private String lastModifiedBy;
-	private Date lastModified;
+	private LocalDateTime lastModified;
 	
 	private UUID groupUuid;
 	private UUID observationUuid;
@@ -153,14 +154,14 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IAdaptable{
 	 * the waypoint last modified date
 	 * @param lastModified
 	 */
-	public void setLastModifiedDate(Date lastModified) {
+	public void setLastModifiedDate(LocalDateTime lastModified) {
 		this.lastModified = lastModified;
 	}
 	/**
 	 * 
 	 * @return the waypoint last modified date
 	 */
-	public Date getLastModifiedDate() {
+	public LocalDateTime getLastModifiedDate() {
 		return this.lastModified;
 	}
 	
@@ -270,25 +271,25 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IAdaptable{
 	/**
 	 * @return patrol start date
 	 */
-	public Date getPatrolStartDate() {
+	public LocalDate getPatrolStartDate() {
 		return patrolStartDate;
 	}
 	/**
 	 * @param patrolStartDate  patrol start date 
 	 */
-	public void setPatrolStartDate(Date patrolStartDate) {
+	public void setPatrolStartDate(LocalDate patrolStartDate) {
 		this.patrolStartDate = patrolStartDate;
 	}
 	/**
 	 * @return patrol end date
 	 */
-	public Date getPatrolEndDate() {
+	public LocalDate getPatrolEndDate() {
 		return patrolEndDate;
 	}
 	/**
 	 * @param patrolEndDate patrol end date
 	 */
-	public void setPatrolEndDate(Date patrolEndDate) {
+	public void setPatrolEndDate(LocalDate patrolEndDate) {
 		this.patrolEndDate = patrolEndDate;
 	}
 	
@@ -437,25 +438,25 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IAdaptable{
 	/**
 	 * @return waypoint date 
 	 */
-	public Date getWpDateTime() {
+	public LocalDate getWpDateTime() {
 		return wpDateTime;
 	}
 	/**
 	 * @param wpDateTime waypoint date 
 	 */
-	public void setWpDateTime(Date wpDateTime) {
+	public void setWpDateTime(LocalDate wpDateTime) {
 		this.wpDateTime = wpDateTime;
 	}
 	/**
 	 * @return waypoint time
 	 */
-	public Date getWaypointTime() {
+	public LocalTime getWaypointTime() {
 		return waypointTime;
 	}
 	/**
 	 * @param wpTime waypoint time
 	 */
-	public void setWaypointTime(Date wpTime) {
+	public void setWaypointTime(LocalTime wpTime) {
 		this.waypointTime = wpTime;
 	}
 	/**
@@ -578,17 +579,17 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IAdaptable{
 	public void setWaypointComment(String wpComment) {
 		this.waypointComment = wpComment;
 	}
-	public void setPatrolLegStartDate(Date date){
+	public void setPatrolLegStartDate(LocalDate date){
 		this.plStartDate = date;
 	}
-	public void setPatrolLegEndDate(Date date){
+	public void setPatrolLegEndDate(LocalDate date){
 		this.plEndDate = date;
 	}
 	
-	public Date getPatrolLegStartDate(){
+	public LocalDate getPatrolLegStartDate(){
 		return this.plStartDate;
 	}
-	public Date getPatrolLegEndDate(){
+	public LocalDate getPatrolLegEndDate(){
 		return this.plEndDate;
 	}
 

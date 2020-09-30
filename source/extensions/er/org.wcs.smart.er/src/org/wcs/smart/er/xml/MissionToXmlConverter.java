@@ -21,13 +21,7 @@
  */
 package org.wcs.smart.er.xml;
 	
-import java.util.Date;
-import java.util.GregorianCalendar;
-
 import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeConstants;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.model.Mission;
@@ -146,8 +140,8 @@ public class MissionToXmlConverter {
 	private static MissionDayType convertMissionDay(MissionDay md) throws DatatypeConfigurationException {
 		MissionDayType xml = new MissionDayType ();
 		xml.setDate(SmartUtils.toXmlDate(md.getDate()));
-		xml.setStartTime(toXmlTime(md.getStartTime()));
-		xml.setEndTime(toXmlTime(md.getEndTime()));
+		xml.setStartTime(SmartUtils.toXmlTime(md.getStartTime()));
+		xml.setEndTime(SmartUtils.toXmlTime(md.getEndTime()));
 		xml.setRestMinutes(md.getRestMinutes());
 		return xml;
 		
@@ -197,7 +191,7 @@ public class MissionToXmlConverter {
 		xml.setDirection(wp.getWaypoint().getDirection());
 		xml.setDistance(wp.getWaypoint().getDistance());
 		xml.setId(wp.getWaypoint().getId());
-		xml.setDateTime( toXmlDateTime(wp.getWaypoint().getDateTime()));
+		xml.setDateTime( SmartUtils.toXmlDateTime(wp.getWaypoint().getDateTime()));
 		
 		xml.setX(wp.getWaypoint().getX());
 		xml.setY(wp.getWaypoint().getY());
@@ -274,37 +268,7 @@ public class MissionToXmlConverter {
 		return xml;
 	}
 	
-	/**
-	 * Converts a time to an xml time.  Sets the
-	 * XML timezone field to undefined so timezone information
-	 * is not included in output.
-	 * 
-	 * @param d
-	 * @return
-	 * @throws DatatypeConfigurationException
-	 */
-	private static XMLGregorianCalendar toXmlTime(Date d) throws DatatypeConfigurationException{
-		GregorianCalendar cal = (GregorianCalendar) GregorianCalendar.getInstance();
-		cal.setTime(d);
-		
-		XMLGregorianCalendar xgc = DatatypeFactory.newInstance().newXMLGregorianCalendar(cal);
-		xgc.setMillisecond(DatatypeConstants.FIELD_UNDEFINED);
-		xgc.setTimezone(DatatypeConstants.FIELD_UNDEFINED);
-		xgc.setYear(DatatypeConstants.FIELD_UNDEFINED);
-		xgc.setMonth(DatatypeConstants.FIELD_UNDEFINED);
-		xgc.setDay(DatatypeConstants.FIELD_UNDEFINED);
-		
-		return xgc;
-	}
-	private static XMLGregorianCalendar toXmlDateTime(Date dateTime) throws DatatypeConfigurationException {
-		GregorianCalendar cal = (GregorianCalendar) GregorianCalendar.getInstance();
-		cal.setTime(dateTime);
-		
-		XMLGregorianCalendar xgc = DatatypeFactory.newInstance().newXMLGregorianCalendar(cal);
-		xgc.setTimezone(DatatypeConstants.FIELD_UNDEFINED);
-		
-		return xgc;
-	}	
+	
 }
 
 

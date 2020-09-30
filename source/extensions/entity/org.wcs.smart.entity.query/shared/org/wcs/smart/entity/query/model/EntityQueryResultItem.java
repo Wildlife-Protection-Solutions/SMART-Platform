@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.entity.query.model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -57,7 +57,7 @@ public class EntityQueryResultItem implements IGeometryResultItem, IAdaptable{
 	private String caName;
 	private String sourceId;
 	
-	private Date wpDateTime;
+	private LocalDateTime wpDateTime;
 	private UUID waypointUuid;
 	private int waypointId;
 	private double waypointX;
@@ -75,7 +75,7 @@ public class EntityQueryResultItem implements IGeometryResultItem, IAdaptable{
 	private UUID observationUuid;
 	
 	private String lastModifiedBy;
-	private Date lastModified;
+	private LocalDateTime lastModified;
 
 	/**
 	 * @param observationUuid the observation uuid
@@ -109,7 +109,7 @@ public class EntityQueryResultItem implements IGeometryResultItem, IAdaptable{
 	 * the waypoint last modified date
 	 * @param lastModified
 	 */
-	public void setLastModifiedDate(Date lastModified) {
+	public void setLastModifiedDate(LocalDateTime lastModified) {
 		this.lastModified = lastModified;
 	}
 	
@@ -117,7 +117,7 @@ public class EntityQueryResultItem implements IGeometryResultItem, IAdaptable{
 	 * 
 	 * @return the waypoint last modified date
 	 */
-	public Date getLastModifiedDate() {
+	public LocalDateTime getLastModifiedDate() {
 		return this.lastModified;
 	}
 	
@@ -236,13 +236,13 @@ public class EntityQueryResultItem implements IGeometryResultItem, IAdaptable{
 	/**
 	 * @return waypoint date 
 	 */
-	public Date getWpDateTime() {
+	public LocalDateTime getWpDateTime() {
 		return wpDateTime;
 	}
 	/**
 	 * @param wpDateTime waypoint date 
 	 */
-	public void setWpDateTime(Date wpDateTime) {
+	public void setWpDateTime(LocalDateTime wpDateTime) {
 		this.wpDateTime = wpDateTime;
 	}
 	

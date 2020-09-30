@@ -26,10 +26,12 @@ package org.wcs.smart.er.ui.mission.export;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -168,7 +170,7 @@ public class MultiMissionExportDialog extends XmlMultiExportTreeViewerDialog imp
 	
 							if(prevSurvey != null && surveyName.equals(prevSurvey.getName()) ){
 								MissionTreeItem mti = new MissionTreeItem();
-								mti.setName(createMissionLabel((String)row[1], (Date)row[2], (Date)row[3]));
+								mti.setName(createMissionLabel((String)row[1], ((LocalDateTime)row[2]).toLocalDate(), ((LocalDateTime)row[3]).toLocalDate()));
 								mti.setUuid((UUID) row[0]);
 								mti.setParent(prevSurvey);
 								prevSurvey.getChildren().add(mti);
@@ -179,7 +181,7 @@ public class MultiMissionExportDialog extends XmlMultiExportTreeViewerDialog imp
 								surveyTreeItem.setSurveyDesignName((String)row[6]);
 								
 								MissionTreeItem mti = new MissionTreeItem();
-								mti.setName(createMissionLabel((String)row[1], (Date)row[2], (Date)row[3]));
+								mti.setName(createMissionLabel((String)row[1], ((LocalDateTime)row[2]).toLocalDate(), ((LocalDateTime)row[3]).toLocalDate()));
 								mti.setUuid((UUID) row[0]);
 								mti.setParent(surveyTreeItem);
 								surveyTreeItem.getChildren().add(mti);
@@ -221,8 +223,8 @@ public class MultiMissionExportDialog extends XmlMultiExportTreeViewerDialog imp
 		loadMissions.schedule();	
 	}
 	
-	private String createMissionLabel(String id, Date start, Date end){
-		return id + " [" + DateFormat.getDateInstance().format(start) + " - " + DateFormat.getDateInstance().format(end) + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	private String createMissionLabel(String id, LocalDate start, LocalDate end){
+		return id + " [" + DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(start) + " - " + DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(end) + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 	@Override

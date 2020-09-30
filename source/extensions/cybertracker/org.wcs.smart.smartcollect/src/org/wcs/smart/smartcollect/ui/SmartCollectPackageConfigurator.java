@@ -24,8 +24,10 @@ package org.wcs.smart.smartcollect.ui;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.text.MessageFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -88,8 +90,6 @@ import org.wcs.smart.smartcollect.internal.Messages;
 import org.wcs.smart.smartcollect.model.SmartCollectPackage;
 import org.wcs.smart.smartcollect.pkg.SmartCollectPackageManager;
 import org.wcs.smart.ui.properties.DialogConstants;
-
-import com.ibm.icu.text.DateFormat;
 
 /**
  * Package configurator for SMARTCollect package
@@ -417,7 +417,7 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 					int index = revision.indexOf('.');
 					String date = revision.substring(index+1);
 					revision = revision.substring(0,index);
-					SimpleDateFormat sdf = new SimpleDateFormat(ICtPackage.PACKAGE_DATE_FORMAT);
+					DateTimeFormatter sdf = DateTimeFormatter.ofPattern(ICtPackage.PACKAGE_DATE_FORMAT);
 					
 					Composite temp = new Composite(inner, SWT.NONE);
 					temp.setLayout(new GridLayout(2, false));
@@ -431,7 +431,7 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 					l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 
 					l= new Label(temp, SWT.NONE);
-					l.setText( DateFormat.getDateTimeInstance().format( sdf.parse(date)) );
+					l.setText( DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format( LocalDateTime.parse(date,sdf)));
 					l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 					l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 					
@@ -449,7 +449,7 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 					l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 					l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 				}
-			}catch (IOException | ParseException ex) {
+			}catch (IOException | DateTimeParseException ex) {
 				l= new Label(inner, SWT.NONE);
 				l.setText(Messages.SmartCollectPackageConfigurator_UnknownErrorLabel);
 				l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));

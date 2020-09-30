@@ -305,7 +305,7 @@ public class AssetWaypointEngine extends AssetQueryEngine {
 	protected void setFields(AssetQueryResultItem it, ResultSet rs) throws SQLException{
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
-		it.setWaypointDate(rs.getTimestamp("wp_time")); //$NON-NLS-1$		
+		it.setWaypointDate(rs.getTimestamp("wp_time").toLocalDateTime()); //$NON-NLS-1$		
 		it.setWaypointUuid((UUID)rs.getObject("wp_uuid")); //$NON-NLS-1$
 		it.setWaypointId(rs.getInt("wp_id")); //$NON-NLS-1$
 		it.setWaypointX(rs.getDouble("wp_x")); //$NON-NLS-1$
@@ -317,7 +317,7 @@ public class AssetWaypointEngine extends AssetQueryEngine {
 		it.setStation(rs.getString("asset_station")); //$NON-NLS-1$
 		it.setLocations(rs.getString("asset_location")); //$NON-NLS-1$
 		it.setIncidentLength(rs.getInt("incident_length")); //$NON-NLS-1$
-		it.setLastModifiedDate(rs.getTimestamp("wp_lastmodified")); //$NON-NLS-1$
+		it.setLastModifiedDate(rs.getTimestamp("wp_lastmodified").toLocalDateTime()); //$NON-NLS-1$
 		it.setLastModifiedBy(rs.getString("wp_lastmodifiedbyname")); //$NON-NLS-1$
 	}
 	

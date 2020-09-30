@@ -72,6 +72,10 @@ public class ERDatabaseUpgrader implements IDatabaseUpgrader {
 	public static final void upgrade(String currentVersion, Session session){
 		if (currentVersion.equals(EcologicalRecordsPlugIn.DB_VERSION_1)){
 			upgradeV1ToV2(session);
+			upgradeV2ToV3(session);
+		}
+		if (currentVersion.equals(EcologicalRecordsPlugIn.DB_VERSION_2)){
+			upgradeV2ToV3(session);
 		}
 	}
 	
@@ -153,4 +157,21 @@ public class ERDatabaseUpgrader implements IDatabaseUpgrader {
 		}
 		HibernateManager.setPlugInVersion(EcologicalRecordsPlugIn.PLUGIN_ID, EcologicalRecordsPlugIn.DB_VERSION_2, session);
 	}
+	
+	private static void upgradeV2ToV3(Session session){
+		@SuppressWarnings("nls")
+		String[] sql = new String[]{
+				"alter table smart.mission add column start_date date", 
+				"alter table smart.mission add column end_date date",
+				"update smart.mission set start_date = cast(Start_datetime as date), end_date = cast(end_datetime as date)",
+				"alter table smart.mission drop column start_datetime",
+				"alter table smart.mission drop column end_datetime"
+		};
+		
+		for (String s : sql){
+			session.createNativeQuery(s).executeUpdate();
+		}
+		HibernateManager.setPlugInVersion(EcologicalRecordsPlugIn.PLUGIN_ID, EcologicalRecordsPlugIn.DB_VERSION_3, session);
+	}
+
 }

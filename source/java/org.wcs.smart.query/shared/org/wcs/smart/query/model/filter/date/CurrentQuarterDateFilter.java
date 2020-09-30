@@ -21,9 +21,9 @@
  */
 package org.wcs.smart.query.model.filter.date;
 
-import java.sql.Date;
-import java.text.DateFormat;
-import java.util.Calendar;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.Locale;
 
 import org.wcs.smart.SmartContext;
@@ -49,23 +49,20 @@ public enum CurrentQuarterDateFilter implements IDateFilter {
 	}
 
 	@Override
-	public Date[] getDates() {
-		Calendar cal = Calendar.getInstance();
-
-		int month = ((cal.get(Calendar.MONTH)) / 3) * 3;
-		cal.set(Calendar.MONTH, month);
-		cal.set(Calendar.DAY_OF_MONTH, 1);
-		java.sql.Date d1 = new java.sql.Date(cal.getTimeInMillis());
-			
-		cal.set(Calendar.MONTH, month + 3);
-		java.sql.Date d2 = new java.sql.Date(cal.getTimeInMillis());
-		return new java.sql.Date[]{d1, d2};
+	public LocalDate[] getDates() {
+		
+		LocalDate start = LocalDate.now();
+		int month = ((start.getMonthValue()-1) / 3) * 3 + 1;
+		
+		LocalDate first = LocalDate.of(start.getYear(), month, 1);
+		LocalDate last = LocalDate.of(start.getYear(), month+3, 1);
+		return new LocalDate[]{first, last};
 	}
 
 	@Override
 	public String getLabel() {
-		Date[] bits = getDates();
-		DateFormat formatter = DateFormat.getDateInstance(DateFormat.MEDIUM);
+		LocalDate[] bits = getDates();
+		DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM);
 		return( "[" + formatter.format( bits[0] ) + " - " + formatter.format(bits[1]) +" ]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 	

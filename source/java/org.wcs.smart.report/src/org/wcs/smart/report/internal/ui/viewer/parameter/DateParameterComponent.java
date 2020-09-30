@@ -21,9 +21,11 @@
  */
 package org.wcs.smart.report.internal.ui.viewer.parameter;
 
-import java.sql.Time;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 import org.eclipse.birt.report.engine.api.IParameterDefn;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -69,13 +71,13 @@ public class DateParameterComponent extends AbstractBirtParameter {
 	 */
 	@Override
 	public void createComposite(Composite parent, IDialogSettings settings) {
-		SimpleDateFormat sdf = new SimpleDateFormat(ReportParameterDialog.SIMPLE_DATE_FORMAT);
+		DateTimeFormatter sdf = DateTimeFormatter.ofPattern(ReportParameterDialog.SIMPLE_DATE_FORMAT);
 		Object initValue = super.getInitializeValue(settings);
 		
-		Date initDate = null;
+		LocalDateTime initDate = null;
 		if (initValue != null) {
 			try{
-				initDate = sdf.parse(initValue.toString());
+				initDate = LocalDateTime.parse(initValue.toString(),sdf);
 			}catch (Exception ex){
 				//eat me
 			}
@@ -98,7 +100,7 @@ public class DateParameterComponent extends AbstractBirtParameter {
 			datePicker = new DateTime(param, dFormat);
 			datePicker.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 			if (initDate != null){
-				SmartUtils.initDateDateTimeWidget(datePicker, initDate);
+				SmartUtils.initDateTimeWidget(datePicker, initDate.toLocalDate());
 			}
 			
 		}
@@ -106,7 +108,7 @@ public class DateParameterComponent extends AbstractBirtParameter {
 			timePicker = new DateTime(param, tFormat);
 			timePicker.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 			if (initDate != null){
-				SmartUtils.initTimeDateTimeWidget(timePicker, initDate);
+				SmartUtils.initDateTimeWidget(timePicker, initDate.toLocalTime());
 			}
 		}
 	}
@@ -117,20 +119,20 @@ public class DateParameterComponent extends AbstractBirtParameter {
 	 */
 	@Override
 	public Object getParameterValue() {
-		Date d = null;
-		Date t = null;
+		LocalDate d = null;
+		LocalTime t = null;
 		if (datePicker != null){
-			d = SmartUtils.getDate(datePicker);
+			d = SmartUtils.toDate(datePicker);
 		}
 		if (timePicker != null){
-			t = SmartUtils.getTime(timePicker);
+			t = SmartUtils.toTime(timePicker);
 		}
 		if (d != null && t == null){
-			return new java.sql.Date(d.getTime());	
+			return d;	
 		}else if (d == null && t!= null){
-			return new java.sql.Time(t.getTime());
+			return t;
 		}else{
-			return new java.sql.Date(SmartUtils.combineDateTime(d, new Time( t.getTime()) ).getTime()); 
+			return LocalDateTime.of(d, t); 
 		}
 		
 	}

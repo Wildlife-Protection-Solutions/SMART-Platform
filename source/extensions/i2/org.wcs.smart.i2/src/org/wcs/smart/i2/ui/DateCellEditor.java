@@ -22,7 +22,8 @@
 package org.wcs.smart.i2.ui;
 
 import java.text.MessageFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.viewers.CellEditor;
@@ -42,7 +43,7 @@ import org.eclipse.swt.widgets.DateTime;
 import org.wcs.smart.util.SmartUtils;
 
 /**
- * Table cell editor for modifying date and time values.
+ * Table cell editor for modifying date OR time values.
  * 
  * @author Emily
  *
@@ -58,7 +59,7 @@ public class DateCellEditor extends CellEditor {
 
 
     /**
-     * Creates a new date/time cell editor parented under the given control.
+     * Creates a new date/time cell editor 
      *  
      * Initially, the cell editor has no cell validator.
      *
@@ -104,7 +105,7 @@ public class DateCellEditor extends CellEditor {
         });
         dtControl.setFont(parent.getFont());
         dtControl.setBackground(parent.getBackground());
-        SmartUtils.initDateDateTimeWidget(dtControl, new Date());
+        SmartUtils.initDateTimeWidget(dtControl, LocalDate.now(), LocalTime.now());
         dtControl.addSelectionListener(getSelectionListener());
         return dtControl;
     }
@@ -118,10 +119,10 @@ public class DateCellEditor extends CellEditor {
      */
     @Override
 	protected Object doGetValue() {
-    	if ((getStyle() & SWT.DATE) == SWT.DATE){
-    		return SmartUtils.getDate(dtControl);
-    	}else if ((getStyle() & SWT.TIME) == SWT.TIME){
-    		return SmartUtils.getTime(dtControl);
+    	if (isDate()){
+    		return SmartUtils.toDate(dtControl);
+    	}else if (isTime()){
+    		return SmartUtils.toTime(dtControl);
     	}
     	return null;
     }
@@ -142,16 +143,22 @@ public class DateCellEditor extends CellEditor {
      */
     @Override
 	protected void doSetValue(Object value) {
-        Assert.isTrue(dtControl != null && (value instanceof Date));
+        Assert.isTrue(dtControl != null && (value instanceof LocalDate || value instanceof LocalTime));
         dtControl.removeSelectionListener(getSelectionListener());
-        if ((getStyle() & SWT.DATE) == SWT.DATE){
-        	SmartUtils.initDateDateTimeWidget(dtControl, ((Date)value));
-        }else if ((getStyle() & SWT.TIME) == SWT.TIME){
-        	SmartUtils.initTimeDateTimeWidget(dtControl, ((Date)value));
+        if (isDate()){
+        	SmartUtils.initDateTimeWidget(dtControl, ((LocalDate)value));
+        }else if (isTime()){
+        	SmartUtils.initDateTimeWidget(dtControl, ((LocalTime)value));
         }
         dtControl.addSelectionListener(getSelectionListener());
     }
 
+    private boolean isDate() {
+    	return ((getStyle() & SWT.DATE) == SWT.DATE);
+    }
+    private boolean isTime() {
+    	return ((getStyle() & SWT.TIME) == SWT.TIME);
+    }
     /**
      * Processes a modify event that occurred in this text cell editor.
      * This framework method performs validation and sets the error message
@@ -162,10 +169,13 @@ public class DateCellEditor extends CellEditor {
      * @param e the SWT modify event
      */
     protected void editOccured(SelectionEvent e) {
-        Date value = SmartUtils.getDate(dtControl);
-        if (value == null) {
-			value = new Date();
-		}
+        Object value = null;
+        if (isDate()) {
+        	value = SmartUtils.toDate(dtControl);
+        }else if (isTime()){
+        	value = SmartUtils.toTime(dtControl);
+        	
+        }
         Object typedValue = value;
         boolean oldValidState = isValueValid();
         boolean newValidState = isCorrect(typedValue);

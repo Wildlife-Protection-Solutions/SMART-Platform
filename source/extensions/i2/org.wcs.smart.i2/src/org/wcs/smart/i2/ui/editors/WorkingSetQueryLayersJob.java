@@ -1,7 +1,8 @@
 package org.wcs.smart.i2.ui.editors;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -115,15 +116,17 @@ public class WorkingSetQueryLayersJob extends WorkingSetMapLayersJob {
 		}
 		if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 		if (workingset != null){
-			Date[] dates = null;
+			LocalDate[] dates = null;
 			String dateFilter = workingset.getEntityDateFilter();
 			try{
 				String[] bits = dateFilter.split(":"); //$NON-NLS-1$
 				DateFilter initFilter = DateFilter.valueOf(bits[0]);
 				if (initFilter == DateFilter.CUSTOM){
-					dates = new Date[]{new Date(Long.valueOf(bits[1])), new Date(Long.valueOf(bits[2]))};
+					dates = new LocalDate[] {
+							LocalDate.parse(bits[1], DateTimeFormatter.ISO_LOCAL_DATE),
+							LocalDate.parse(bits[2], DateTimeFormatter.ISO_LOCAL_DATE)};
 				}else{
-					dates = new Date[]{initFilter.getStartDate(), initFilter.getEndDate()};
+					dates = new LocalDate[]{initFilter.getStartDate(), initFilter.getEndDate()};
 				}
 			}catch (Exception ex){
 				Intelligence2PlugIn.log("Unable to parse entity date filter for working set : " + dateFilter + ". " + ex.getMessage(), ex); //$NON-NLS-1$ //$NON-NLS-2$
@@ -272,7 +275,8 @@ public class WorkingSetQueryLayersJob extends WorkingSetMapLayersJob {
 	 * reuse jobs where we can
 	 */
 	private List<RunQueryJob> jobsToRun = new ArrayList<>();
-	public void scheduleJob(RunQueryJob job, Date[] dates){
+	
+	public void scheduleJob(RunQueryJob job, LocalDate[] dates){
 		for (RunQueryJob j : jobsToRun){
 			if (j.getQuery().equals(j.getQuery()) && j.getState() == Job.WAITING){
 				j.setDateFilter(dates);

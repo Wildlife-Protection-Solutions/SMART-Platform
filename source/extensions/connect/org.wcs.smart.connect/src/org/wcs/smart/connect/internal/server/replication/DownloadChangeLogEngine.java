@@ -23,7 +23,8 @@ package org.wcs.smart.connect.internal.server.replication;
 
 import java.nio.file.Path;
 import java.text.MessageFormat;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
@@ -86,7 +87,7 @@ public class DownloadChangeLogEngine {
 			}
 			ConnectSyncHistoryRecord previous = SyncHistoryManager.INSTANCE.getLastNonErrorSyncRecord(ca, ConnectSyncHistoryRecord.Type.DOWNLOAD);
 			if (previous != null && 
-					previous.getDatetime().getTime() < ((new Date()).getTime() - DerbyReplicationManager.REPLICATION_MAXTIME_DAYS * 24 * 60 * 60 *1000l)){
+					ChronoUnit.DAYS.between(previous.getDatetime(), LocalDateTime.now()) > DerbyReplicationManager.REPLICATION_MAXTIME_DAYS ){
 				throw new Exception(MessageFormat.format(Messages.DownloadChangeLogEngine_TooOldError, DerbyReplicationManager.REPLICATION_MAXTIME_DAYS));
 			}
 			

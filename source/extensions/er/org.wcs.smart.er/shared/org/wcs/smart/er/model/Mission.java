@@ -23,8 +23,8 @@ package org.wcs.smart.er.model;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -77,8 +77,8 @@ public class Mission extends UuidItem{
 	
 	private String id;
 	private Survey survey;
-	private Date start;
-	private Date end;
+	private LocalDate start;
+	private LocalDate end;
 	private String comment;
 
 	private List<MissionDay> days;
@@ -109,21 +109,21 @@ public class Mission extends UuidItem{
 		this.survey = survey;
 	}
 
-	@Column(name="start_datetime")
-	public Date getStartDate() {
+	@Column(name="start_date")
+	public LocalDate getStartDate() {
 		return start;
 	}
 
-	public void setStartDate(Date start) {
+	public void setStartDate(LocalDate start) {
 		this.start = start;
 	}
 
-	@Column(name="end_datetime")
-	public Date getEndDate() {
+	@Column(name="end_date")
+	public LocalDate getEndDate() {
 		return end;
 	}
 
-	public void setEndDate(Date end) {
+	public void setEndDate(LocalDate end) {
 		this.end = end;
 	}
 

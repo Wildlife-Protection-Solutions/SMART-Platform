@@ -82,7 +82,7 @@ public class QueryClassEngine {
 		}
 		
 		CustomDateFilter ff = new CustomDateFilter();
-		ff.setDates(java.sql.Date.valueOf(startDate), java.sql.Date.valueOf(endDate));
+		ff.setDates(startDate, endDate);
 		query.setDateFilter(new DateFilter(WaypointDateField.INSTANCE, ff));
 		
 		results = QueryExecutor.INSTANCE.executeQuery(query, session, new NullProgressMonitor());

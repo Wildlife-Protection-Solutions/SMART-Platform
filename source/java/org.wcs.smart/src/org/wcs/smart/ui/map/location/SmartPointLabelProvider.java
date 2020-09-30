@@ -24,6 +24,8 @@ package org.wcs.smart.ui.map.location;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Point;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
@@ -34,9 +36,6 @@ import org.wcs.smart.internal.Messages;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
 import org.wcs.smart.util.GeometryUtils;
-
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Point;
 
 /**
  * LabelProvider for {@link ISmartPoint}

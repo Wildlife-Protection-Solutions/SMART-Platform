@@ -21,11 +21,15 @@
  */
 package org.wcs.smart.patrol.internal.ui;
 
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -47,6 +51,7 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolLeg;
+import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.ui.EmployeeSelectorDialog;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
@@ -62,7 +67,7 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class PatrolTransportChangeDialog extends SmartStyledTitleDialog implements SelectionListener{
 
-	private DateFormat dateTimeFormatter = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM);
+	private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM);
 	
 	private PatrolLeg existingLeg;
 	private PatrolLeg newLeg;
@@ -101,6 +106,10 @@ public class PatrolTransportChangeDialog extends SmartStyledTitleDialog implemen
 		newLeg.setMembers(members);
 		newLeg.setPatrol(existingLeg.getPatrol());
 		newLeg.setType(existingLeg.getType());
+		newLeg.setPatrolLegDays(new ArrayList<>());
+		PatrolLegDay d0 = new PatrolLegDay();
+		d0.setPatrolLeg(newLeg);
+		newLeg.getPatrolLegDays().add(d0);
 		
 		String legId = existingLeg.getId() + Messages.PatrolTransportChangeDialog_TransportChangeLegIdentifier;
 		if (legId.length() > PatrolLeg.ID_MAX_SIZE){
@@ -134,7 +143,7 @@ public class PatrolTransportChangeDialog extends SmartStyledTitleDialog implemen
 		startDate = new DateTime(timecomp, SWT.DATE | SWT.DROP_DOWN | SWT.BORDER | SWT.LONG);
 		startDate.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, false));
 		startDate.addSelectionListener(this);
-		SmartUtils.initDateDateTimeWidget(startDate, existingLeg.getStartDate());
+		SmartUtils.initDateTimeWidget(startDate, existingLeg.getStartDate());
 		
 		//time of change
 		lbl = new Label(timecomp, SWT.NONE);
@@ -193,13 +202,15 @@ public class PatrolTransportChangeDialog extends SmartStyledTitleDialog implemen
 		return parent;
 	}
 	
-	public Date getNewDate(){
-		long time = SmartUtils.getDate(startDate).getTime();
+	public LocalDateTime getNewDate(){
+		
+		LocalDate date = SmartUtils.toDate(startDate);
+		LocalTime time = LocalTime.MIN;
+		
 		if (opCustom.getSelection()){
-			time += startTime.getHours() * 60 * 60 * 1000 + startTime.getMinutes() * 60 * 1000 + startTime.getSeconds();
+			time = SmartUtils.toTime(startTime);
 		}
-		Date newStart = new Date( time );
-		return newStart;
+		return LocalDateTime.of(date, time);
 	}
 	
 	private void validate(){
@@ -212,17 +223,18 @@ public class PatrolTransportChangeDialog extends SmartStyledTitleDialog implemen
 			error = compMandate.getErrorMessage();
 	
 		
-		Date newStart = getNewDate();
-		
-		if (error == null && newStart.before(existingLeg.getStartDate())){
+		LocalDateTime newStart = getNewDate();
+		LocalDateTime existingStart = LocalDateTime.of(existingLeg.getStartDate(), existingLeg.getPatrolLegDays().get(0).getStartTime());
+		LocalDateTime existingEnd = LocalDateTime.of(existingLeg.getEndDate(), existingLeg.getPatrolLegDays().get(existingLeg.getPatrolLegDays().size() - 1).getEndTime());
+		if (error == null && newStart.isBefore(existingStart)) {
 			error = MessageFormat.format(
 							Messages.PatrolTransportChangeDialog_Error_StartDateAfter,
-							new Object[]{dateTimeFormatter.format(existingLeg.getStartDate()) });
+							new Object[]{dateTimeFormatter.format(existingStart) });
 		}
-		if (error == null && newStart.after(existingLeg.getEndDate())){
+		if (error == null && newStart.isAfter(existingEnd)){
 			error = MessageFormat.format(
 							Messages.PatrolTransportChangeDialog_Error_StartDateBefore,
-							new Object[]{null,dateTimeFormatter.format(existingLeg.getEndDate())});
+							new Object[]{null,dateTimeFormatter.format(existingEnd)});
 		}
 		
 		setErrorMessage(error);
@@ -242,10 +254,12 @@ public class PatrolTransportChangeDialog extends SmartStyledTitleDialog implemen
 			return;
 		}
 		
-		Date newStart = getNewDate();
+		LocalDateTime newStart = getNewDate();
 		//update dates, leader, & add leg
 		newLeg.setEndDate(existingLeg.getEndDate());
-		newLeg.setStartDate(newStart);
+		newLeg.setStartDate(newStart.toLocalDate());
+		newLeg.getPatrolLegDays().get(0).setStartTime(newStart.toLocalTime());
+		newLeg.getPatrolLegDays().get(newLeg.getPatrolLegDays().size() - 1).setEndTime(existingLeg.getPatrolLegDays().get(existingLeg.getPatrolLegDays().size() - 1).getEndTime());
 		compTransportType.updatePatrol(newLeg);
 		compMandate.updatePatrol(newLeg);
 		
@@ -270,8 +284,13 @@ public class PatrolTransportChangeDialog extends SmartStyledTitleDialog implemen
 		legsToUpdate.add(newLeg);
 		
 		//update the existing leg
-		existingLeg.setEndDate(newStart);
-		if (existingLeg.getEndDate().getTime() - existingLeg.getStartDate().getTime() < 2){
+		existingLeg.setEndDate(newStart.toLocalDate());
+		existingLeg.getPatrolLegDays().get(existingLeg.getPatrolLegDays().size()-1).setEndTime(newStart.toLocalTime());
+		
+		LocalDateTime es = LocalDateTime.of(existingLeg.getStartDate(), existingLeg.getPatrolLegDays().get(0).getStartTime());
+		LocalDateTime ee = LocalDateTime.of(existingLeg.getEndDate(), existingLeg.getPatrolLegDays().get(existingLeg.getPatrolLegDays().size() - 1).getEndTime());
+		
+		if (ChronoUnit.MILLIS.between(es, ee) < 2){
 			legsToUpdate.remove(existingLeg);
 			existingLeg.setPatrol(null);
 			existingLeg = null;

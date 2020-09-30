@@ -21,8 +21,9 @@
  */
 package org.wcs.smart.patrol.query.ui.editor;
 
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.graphics.Image;
@@ -59,7 +60,9 @@ public class DeletePatrolResultInfoProvider extends IQueryEditCommand {
 	public boolean doWork(IResultItem resultItem, IQueryResult results){
 		PatrolQueryResultItem item = (PatrolQueryResultItem)resultItem;
 		if (!MessageDialog.openQuestion(Display.getDefault().getActiveShell(), Messages.DeletePatrolResultInfoProvider_DeleteTitle,
-				MessageFormat.format(Messages.DeletePatrolResultInfoProvider_ConfirmDelete, item.getPatrolId(), DateFormat.getDateInstance().format(item.getPatrolStartDate()), DateFormat.getDateInstance().format(item.getPatrolEndDate())))){
+				MessageFormat.format(Messages.DeletePatrolResultInfoProvider_ConfirmDelete, 
+						item.getPatrolId(), DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(item.getPatrolStartDate()), 
+						DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(item.getPatrolEndDate())))){
 			return false;
 		}
 		try{

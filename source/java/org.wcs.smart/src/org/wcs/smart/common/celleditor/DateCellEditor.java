@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.common.celleditor;
 
-import java.util.Calendar;
-import java.util.Date;
+
+import java.time.LocalDate;
 
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.swt.SWT;
@@ -88,7 +88,7 @@ public class DateCellEditor extends CellEditor{
 	 */
 	@Override
 	protected Object doGetValue() {
-		return SmartUtils.getDate(dt);
+		return SmartUtils.toDate(dt);
 	}
 
 	/**
@@ -100,21 +100,13 @@ public class DateCellEditor extends CellEditor{
 	}
 
 	/**
-	 * Expects a Date or Calendar object.
+	 * Expects a LocalDate Object
 	 * @see org.eclipse.jface.viewers.CellEditor#doSetValue(java.lang.Object)
 	 */
 	@Override
 	protected void doSetValue(Object value) {
-		Calendar cal = null;
-		if (value instanceof Date){
-			cal = Calendar.getInstance();
-			cal.setTime((Date)value);
-		}else if (value instanceof Calendar){
-			cal = (Calendar)value;
-		}else{
-			return;
-		}
-		dt.setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH));
+		if (!(value instanceof LocalDate)) return;
+		SmartUtils.initDateTimeWidget(dt, (LocalDate)value);
 	}
 
 	/** Re-size so entri cell is displayed

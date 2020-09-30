@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.er.model;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -77,9 +77,9 @@ public class SurveyDesign extends NamedKeyItem {
 	
 	private ConservationArea ca;
 	
-	private Date startDate;
+	private LocalDate startDate;
 	
-	private Date endDate;
+	private LocalDate endDate;
 	
 	private boolean trackDistanceDirection;
 	private boolean trackObserver;
@@ -111,20 +111,20 @@ public class SurveyDesign extends NamedKeyItem {
 	}
 
 	@Column(name="start_date")
-	public Date getStartDate() {
+	public LocalDate getStartDate() {
 		return startDate;
 	}
 
-	public void setStartDate(Date startDate) {
+	public void setStartDate(LocalDate startDate) {
 		this.startDate = startDate;
 	}
 
 	@Column(name="end_date")
-	public Date getEndDate() {
+	public LocalDate getEndDate() {
 		return endDate;
 	}
 
-	public void setEndDate(Date endDate) {
+	public void setEndDate(LocalDate endDate) {
 		this.endDate = endDate;
 	}
 

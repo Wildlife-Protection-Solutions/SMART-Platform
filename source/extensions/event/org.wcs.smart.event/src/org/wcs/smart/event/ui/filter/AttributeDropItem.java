@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.event.ui.filter;
 
-import java.sql.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -163,11 +164,11 @@ public class AttributeDropItem extends DropItem {
 			querypart.append( " "); //$NON-NLS-1$
 			querypart.append(Operator.DATE_OPS[operators.getSelectionIndex()].asSmartValue());
 			querypart.append( " "); //$NON-NLS-1$
-			querypart.append(new Date(SmartUtils.getDate(dtime1).getTime()).toString());
+			querypart.append(DateTimeFormatter.ISO_LOCAL_DATE.format(SmartUtils.toDate(dtime1)));
 			querypart.append( " "); //$NON-NLS-1$
 			querypart.append( Operator.AND.asSmartValue() );
 			querypart.append( " "); //$NON-NLS-1$
-			querypart.append(new Date(SmartUtils.getDate(dtime2).getTime()).toString());
+			querypart.append(DateTimeFormatter.ISO_LOCAL_DATE.format(SmartUtils.toDate(dtime2)));
 		}
 		return querypart.toString();
 	}
@@ -275,7 +276,7 @@ public class AttributeDropItem extends DropItem {
 			dtime1.addListener(SWT.Selection, new Listener(){
 				@Override
 				public void handleEvent(Event event) {
-					String newValue = (new java.sql.Date(SmartUtils.getDate(dtime1).getTime())).toString();
+					String newValue = DateTimeFormatter.ISO_LOCAL_DATE.format(SmartUtils.toDate(dtime1));
 					if (!newValue.equals(currentValue)){
 						queryChanged();
 						currentValue = newValue;
@@ -286,7 +287,7 @@ public class AttributeDropItem extends DropItem {
 			dtime2.addListener(SWT.Selection, new Listener(){
 				@Override
 				public void handleEvent(Event event) {
-					String newValue = (new java.sql.Date(SmartUtils.getDate(dtime2).getTime())).toString();
+					String newValue = DateTimeFormatter.ISO_LOCAL_DATE.format(SmartUtils.toDate(dtime2));
 					if (!newValue.equals(currentValue2)){
 						queryChanged();
 						currentValue2 = newValue;
@@ -314,10 +315,10 @@ public class AttributeDropItem extends DropItem {
 				value.setText(currentValue);
 			}
 			if (dtime1 != null && currentValue != null){
-				SmartUtils.initDateDateTimeWidget(dtime1, java.sql.Date.valueOf(currentValue));	
+				SmartUtils.initDateTimeWidget(dtime1, LocalDate.parse(currentValue, DateTimeFormatter.ISO_LOCAL_DATE));	
 			}
 			if (dtime2 != null && currentValue2 != null){
-				SmartUtils.initDateDateTimeWidget(dtime2, java.sql.Date.valueOf(currentValue2));	
+				SmartUtils.initDateTimeWidget(dtime2, LocalDate.parse(currentValue2, DateTimeFormatter.ISO_LOCAL_DATE));	
 			}
 		}
 	}

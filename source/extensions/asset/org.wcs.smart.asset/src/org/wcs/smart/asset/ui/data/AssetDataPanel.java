@@ -24,9 +24,10 @@ package org.wcs.smart.asset.ui.data;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -111,7 +112,6 @@ import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.ui.AttachmentPropertiesDialog;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
-import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -854,7 +854,7 @@ public abstract class AssetDataPanel {
 	 * @param assetlinks
 	 */
 	private void validateAndExtend(Waypoint wp, Collection<AssetWaypoint> assetlinks, Session session) throws Exception{
-		LocalDateTime wpTime = SharedUtils.toLocalDateTime( wp.getDateTime() );
+		LocalDateTime wpTime = wp.getDateTime();
 		for (AssetWaypoint fromaw : assetlinks) {
 			
 			boolean check = false;
@@ -1374,7 +1374,7 @@ public abstract class AssetDataPanel {
 			if (waypoint.getWaypoint() == null) return ;
 			
 			StringBuilder sb = new StringBuilder();
-			sb.append(DateFormat.getDateTimeInstance().format(waypoint.getWaypoint().getDateTime()));
+			sb.append(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(waypoint.getWaypoint().getDateTime()));
 			sb.append(" ("); //$NON-NLS-1$
 			sb.append(AssetUtils.formatTimeHours(waypoint.getAssetLinks().iterator().next().getIncidentLength()));
 			sb.append(")"); //$NON-NLS-1$
@@ -1539,9 +1539,12 @@ public abstract class AssetDataPanel {
 			
 			String lastModified = null;
 			if (waypoint.getWaypoint().getLastModifiedBy() != null) {
-				lastModified = MessageFormat.format(Messages.AssetDataPanel_LastUpdated1, SmartLabelProvider.getShortLabel(waypoint.getWaypoint().getLastModifiedBy()), DateFormat.getDateTimeInstance().format(waypoint.getWaypoint().getLastModified()));
+				lastModified = MessageFormat.format(Messages.AssetDataPanel_LastUpdated1, 
+						SmartLabelProvider.getShortLabel(waypoint.getWaypoint().getLastModifiedBy()), 
+						DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(waypoint.getWaypoint().getLastModified()));
 			}else {
-				lastModified = MessageFormat.format(Messages.AssetDataPanel_LastUpdated2, DateFormat.getDateTimeInstance().format(waypoint.getWaypoint().getLastModified()));
+				lastModified = MessageFormat.format(Messages.AssetDataPanel_LastUpdated2, 
+						DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(waypoint.getWaypoint().getLastModified()));
 			}
 			Label lastModifiedLabel = toolkit.createLabel(spacer, lastModified);
 			lastModifiedLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.BOTTOM, true, false));

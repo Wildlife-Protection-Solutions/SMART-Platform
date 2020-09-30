@@ -42,7 +42,6 @@ import org.wcs.smart.asset.model.AssetWaypointMapping;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
-import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -105,11 +104,11 @@ public class EditWaypointDialog extends SmartStyledTitleDialog{
 		}
 		
 		LocalDateTime newDateTime =  SmartUtils.toDateTime(dDate, dTime);
-		LocalDateTime wp = SharedUtils.toLocalDateTime( toUpdate.getWaypoint().getDateTime() );
+		LocalDateTime wp = toUpdate.getWaypoint().getDateTime();
 		if (Math.abs(ChronoUnit.MILLIS.between(wp, newDateTime)) > 1000 * 60 * 60 * 24) {
 			if (!MessageDialog.openQuestion(getShell(), Messages.EditWaypointDialog_EditTitle, Messages.EditWaypointDialog_EditMessage)) return;
 		}
-		toUpdate.getWaypoint().setDateTime(SharedUtils.toDate( newDateTime) );
+		toUpdate.getWaypoint().setDateTime( newDateTime );
 		
 		int hours = Integer.parseInt(txtHours.getText().trim());
 		int minutes = Integer.parseInt(txtMins.getText().trim());
@@ -226,11 +225,11 @@ public class EditWaypointDialog extends SmartStyledTitleDialog{
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		dDate = new DateTime(form, SWT.DROP_DOWN | SWT.MEDIUM | SWT.DATE);
-		SmartUtils.initDateDateTimeWidget(dDate, toUpdate.getWaypoint().getDateTime());
+		SmartUtils.initDateTimeWidget(dDate, toUpdate.getWaypoint().getDateTime().toLocalDate());
 		dDate.addListener(SWT.Selection, e->validate());
 		
 		dTime = new DateTime(form, SWT.DROP_DOWN | SWT.TIME);
-		SmartUtils.initTimeDateTimeWidget(dTime, toUpdate.getWaypoint().getDateTime());
+		SmartUtils.initDateTimeWidget(dTime, toUpdate.getWaypoint().getDateTime().toLocalTime());
 		dTime.addListener(SWT.Selection, e->validate());
 		
 		l = new Label(form, SWT.NONE);

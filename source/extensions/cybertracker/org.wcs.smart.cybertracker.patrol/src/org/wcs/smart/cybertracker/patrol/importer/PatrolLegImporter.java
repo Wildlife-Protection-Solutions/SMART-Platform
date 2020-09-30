@@ -21,11 +21,15 @@
  */
 package org.wcs.smart.cybertracker.patrol.importer;
 
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -36,7 +40,6 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
-import org.wcs.smart.cybertracker.importer.AbstractSmartImporter;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
 import org.wcs.smart.cybertracker.patrol.internal.Messages;
 import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol;
@@ -50,7 +53,6 @@ import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.WaypointAttachmentInterceptor;
 import org.wcs.smart.ui.SmartLabelProvider;
-import org.wcs.smart.util.SharedUtils;
 
 /**
  * Imports from {@link CyberTrackerPatrol} to {@link Patrol} object
@@ -96,16 +98,16 @@ public class PatrolLegImporter extends AbstractPatrolImporter {
 				PatrolLeg leg = patrol.addLeg();
 				initLegData(leg, ctPatrol, session);
 			
-				if (patrol.getStartDate().getTime() > leg.getStartDate().getTime()) {
+				if (patrol.getStartDate().isAfter(leg.getStartDate())) {
 					if (!isValidTimeDelta(leg.getEndDate(), patrol.getStartDate()))
-						addWarning(MessageFormat.format(Messages.PatrolLegImporter_Warn_TimeGap_Start, DateFormat.getDateInstance(DateFormat.MEDIUM).format(patrol.getStartDate()), DateFormat.getDateInstance(DateFormat.MEDIUM).format(leg.getEndDate())));
+						addWarning(MessageFormat.format(Messages.PatrolLegImporter_Warn_TimeGap_Start, DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(patrol.getStartDate()), DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(leg.getEndDate())));
 					patrol.setStartDate(leg.getStartDate());
 					
 				}
 	
-				if (patrol.getEndDate().getTime() < leg.getEndDate().getTime()) {
+				if (patrol.getEndDate().isBefore(leg.getEndDate())) {
 					if (!isValidTimeDelta(patrol.getEndDate(), leg.getStartDate()))
-						addWarning(MessageFormat.format(Messages.PatrolLegImporter_Warn_TimeGap_End, DateFormat.getDateInstance(DateFormat.MEDIUM).format(patrol.getEndDate()), DateFormat.getDateInstance(DateFormat.MEDIUM).format(leg.getStartDate())));
+						addWarning(MessageFormat.format(Messages.PatrolLegImporter_Warn_TimeGap_End, DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(patrol.getEndDate()), DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(leg.getStartDate())));
 					patrol.setEndDate(leg.getEndDate());
 				}
 				
@@ -166,19 +168,20 @@ public class PatrolLegImporter extends AbstractPatrolImporter {
 		List<String> errors = new ArrayList<String>();
 		if (patrol.getLegs() == null)
 			return errors;
-		Date ctStart = ctPatrol.getStartDate();
-		Date ctEnd = ctPatrol.getEndDate();
+		LocalDateTime ctStart = ctPatrol.getStartDate();
+		LocalDateTime ctEnd = ctPatrol.getEndDate();
 		for (PatrolLeg leg : patrol.getLegs()) {
 			//ensure that legs overlap in time
-			Date legStart = SharedUtils.getDatePart(leg.getStartDate(), false);
-			Date legEnd = SharedUtils.getDatePart(leg.getEndDate(), false);
+			LocalDateTime legStart = leg.getStartDate().atTime(LocalTime.MIN);
+			LocalDateTime legEnd = leg.getEndDate().atTime(LocalTime.MAX);
+			
 			if (leg.getPatrolLegDays() != null) {
 				for (PatrolLegDay pld : leg.getPatrolLegDays()) {
-					Date date = SharedUtils.getDatePart(pld.getDate(), false);
+					LocalDate date = pld.getDate();
 					if (date.equals(legStart))
-						legStart = AbstractSmartImporter.combine(legStart, pld.getStartTime());
+						legStart = date.atTime(pld.getStartTime());
 					if (date.equals(legEnd))
-						legEnd = AbstractSmartImporter.combine(legEnd, pld.getEndTime());
+						legEnd = date.atTime(pld.getEndTime());
 				}
 			}
 			
@@ -197,10 +200,8 @@ public class PatrolLegImporter extends AbstractPatrolImporter {
 
 	//ensures that gap between dates is less than a day
 	//(in this case we will not have a gap after adding leg to the patrol)
-	private boolean isValidTimeDelta(Date from, Date to) {
-		from = SharedUtils.getDatePart(from, false);
-		to = SharedUtils.getDatePart(to, false);
-		long delta = to.getTime() - from.getTime();
+	private boolean isValidTimeDelta(LocalDate from, LocalDate to) {
+		long delta = ChronoUnit.MILLIS.between(from, to);
 		return delta <= 1000 * 60 * 60 * 24; //more that a day
 	}
 	

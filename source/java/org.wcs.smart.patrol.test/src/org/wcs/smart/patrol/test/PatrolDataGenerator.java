@@ -1,11 +1,12 @@
 package org.wcs.smart.patrol.test;
 
-import java.sql.Time;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
@@ -43,6 +44,7 @@ import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.PatrolWaypointSource;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.model.Track;
+import org.wcs.smart.util.SharedUtils;
 
 public class PatrolDataGenerator {
 
@@ -154,11 +156,8 @@ public class PatrolDataGenerator {
 			pl.setId("Leg 1");
 			pl.setMandate(mandates.get( random.nextInt(mandates.size() - 1) ));
 			
-			Date startDate = new Date(random.nextInt(3) + 2013-1900, random.nextInt(11),  random.nextInt(28), 0, 0, 0);
-			Calendar temp = Calendar.getInstance();
-			temp.setTime(startDate);
-			temp.add(Calendar.DAY_OF_MONTH, daysPerPatrol-1);
-			Date endDate = temp.getTime();
+			LocalDate startDate = LocalDate.of(random.nextInt(3) + 2013-1900, random.nextInt(11),  random.nextInt(28));
+			LocalDate endDate = ChronoUnit.DAYS.addTo(startDate, daysPerPatrol-1);
 			
 			p.setStartDate(startDate);
 			p.setEndDate(endDate);
@@ -188,8 +187,6 @@ public class PatrolDataGenerator {
 				pl.setType(types.get(random.nextInt(types.size() - 1)));
 			}
 			
-			temp.setTime(startDate);
-			
 			session.save(p);
 			session.flush();
 			session.clear();
@@ -197,17 +194,19 @@ public class PatrolDataGenerator {
 			double cx = (random.nextInt(2618) + 347810) / 10000.0;
 			double cy = -1 * ((random.nextInt(2883) + 12360) / 10000.0);
 			
+			LocalDate temp = LocalDate.from(startDate);
 			for (int k = 0; k < daysPerPatrol; k++){
 				System.out.println("patrol day: " + k + "/" + daysPerPatrol);
 				PatrolLegDay pld = new PatrolLegDay();
-				pld.setDate(temp.getTime());
-				temp.add(Calendar.DAY_OF_MONTH, 1);
+				pld.setDate(temp);
+				temp = ChronoUnit.DAYS.addTo(temp, 1);
+				
 				
 				pld.setPatrolLeg(pl);
 				pl.getPatrolLegDays().add(pld);
 				pld.setRestMinutes(random.nextInt(120));
-				pld.setStartTime(new Time(random.nextInt(4) + 7, random.nextInt(59), random.nextInt(59)));
-				pld.setEndTime(new Time(random.nextInt(4) + 15, random.nextInt(59), random.nextInt(59)));
+				pld.setStartTime(LocalTime.of(random.nextInt(4) + 7, random.nextInt(59), random.nextInt(59)));
+				pld.setEndTime(LocalTime.of(random.nextInt(4) + 15, random.nextInt(59), random.nextInt(59)));
 				
 				pld.setWaypoints(new ArrayList<PatrolWaypoint>());
 				
@@ -229,10 +228,11 @@ public class PatrolDataGenerator {
 					
 					wp.setConservationArea(p.getConservationArea());
 					
-					long range = pld.getStartTime().getTime() - pld.getEndTime().getTime()- 10000;
-					long time = (long)((range / (waypoints * 1.0)) * x + pld.getStartTime().getTime()) + pld.getDate().getTime();
+					long range = ChronoUnit.SECONDS.between(pld.getStartTime(), pld.getEndTime());
+					LocalTime newTime = pld.getStartTime().plusSeconds( random.nextInt((int)range) );
 					
-					wp.setDateTime( new Date(time));
+					LocalDateTime wptime = pld.getDate().atTime(newTime);
+					wp.setDateTime( wptime );
 					
 					wp.setId(x+1);
 					wp.setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
@@ -244,17 +244,9 @@ public class PatrolDataGenerator {
 					
 					cx += ((random.nextInt(1000)) / 100000.0) * (random.nextInt(10) <= 5 ? -1 : 1);
 					cy += ((random.nextInt(1000)) / 100000.0) * (random.nextInt(10) <= 5 ? -1 : 1);
+					double cz = SharedUtils.toLongTime(wp.getDateTime());
 					
-					Calendar c1 = Calendar.getInstance();
-					c1.setTimeInMillis(wp.getDateTime().getTime());
-					Calendar c2 = Calendar.getInstance();
-					c2.setTimeZone(Track.ZTIMEZONE);
-					c2.setTimeInMillis(0);
-					c2.set(c1.get(Calendar.YEAR), c1.get(Calendar.MONTH),
-							c1.get(Calendar.DATE), c1.get(Calendar.HOUR_OF_DAY),
-							c1.get(Calendar.MINUTE), c1.get(Calendar.SECOND));
-
-					trackPnts[x] = new Coordinate(cx,cy, c2.getTime().getTime());
+					trackPnts[x] = new Coordinate(cx,cy, cz);
 					
 					wp.setRawX(cx);
 					wp.setRawY(cy);
@@ -290,14 +282,7 @@ public class PatrolDataGenerator {
 					session.clear();
 				}
 				GeometryFactory gf = new GeometryFactory();
-//				Coordinate[] trackPoints = new Coordinate[1200];
-//				for (int z = 0; z<trackPoints.length; z++){
-//					double cx = (random.nextInt(5238) + 112700) / 10000.0;
-//					double cy = -1 * ((random.nextInt(10093) + 350) / 10000.0);
-//					trackPoints[z] = new Coordinate(cx, cy);
-//				}
-//				LineString ls = gf.createLineString(trackPoints);
-				
+
 				LineString ls = gf.createLineString(trackPnts);
 				
 				Track t = new Track();
@@ -337,7 +322,7 @@ public class PatrolDataGenerator {
 		if (a.getType() == Attribute.AttributeType.BOOLEAN){
 			value.setNumberValue( Math.random() > 0.5 ? 1.0 : 0.0 );
 		}else if (a.getType() == Attribute.AttributeType.DATE){
-			value.setDateValue(new Date());
+			value.setDateValue(LocalDate.now());
 		}else if (a.getType() == Attribute.AttributeType.LIST){
 			if (a.getAttributeList().size() == 0) return null;
 			int index = 0;

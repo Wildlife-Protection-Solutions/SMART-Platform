@@ -22,8 +22,8 @@
 package org.wcs.smart.i2.ui;
 
 import java.text.MessageFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -517,7 +517,7 @@ public class ObservationDialog extends SmartStyledDialog {
 					a.setNumberValue((Double)value);
 					break;
 				case DATE:
-					a.setDateValue((Date)value);
+					a.setDateValue((LocalDate)value);
 					break;
 				case LIST:
 					a.setAttributeListItem((AttributeListItem)value);

@@ -21,8 +21,6 @@
  */
 package org.wcs.smart.er.query.model;
 
-import java.sql.Date;
-import java.sql.Time;
 import java.util.Locale;
 
 import org.wcs.smart.SmartContext;
@@ -153,8 +151,8 @@ public class SurveyQueryColumn extends QueryColumn {
 				case MISSION_LEADER: return item.getMissionLeader();
 				case SAMPLING_UNIT: return item.getSamplingUnitId();
 				case WAYPOINT_ID: return item.getWaypointId();
-				case WAYPOINT_DATE: return new Date(item.getWaypointDateTime().getTime());
-				case WAYPOINT_TIME: return new Time(item.getWaypointDateTime().getTime()); 
+				case WAYPOINT_DATE: return item.getWaypointDateTime().toLocalDate();
+				case WAYPOINT_TIME: return item.getWaypointDateTime().toLocalTime(); 
 				case WAYPOINT_X: return item.getWaypointX(getProjection()); 
 				case WAYPOINT_Y: return item.getWaypointY(getProjection());
 				case WAYPOINT_RAWX: return item.getWaypointRawX(getProjection()); 

@@ -22,7 +22,7 @@
 package org.wcs.smart.i2.query.observation.filter;
 
 import java.text.MessageFormat;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.Locale;
 
 import org.wcs.smart.i2.query.Operator;
@@ -92,7 +92,7 @@ public class SystemAttributeFilter implements IQueryFilter, IColumnIdentifierPro
 	 * @param date2
 	 * @return
 	 */
-	public static SystemAttributeFilter create(String key, Operator operator, Date date1, Date date2){
+	public static SystemAttributeFilter create(String key, Operator operator, LocalDate date1, LocalDate date2){
 		
 		String[] parts = key.split(INTERNAL_SEPERATOR);
 		
@@ -107,15 +107,15 @@ public class SystemAttributeFilter implements IQueryFilter, IColumnIdentifierPro
 
 	private SystemAttribute attribute;
 	
-	private Date[] dateValues = null;
+	private LocalDate[] dateValues = null;
 	private String key = null;
 	private Operator op = null;
 	
-	public SystemAttributeFilter(SystemAttribute attribute, Operator op, Date d1, Date d2) {
+	public SystemAttributeFilter(SystemAttribute attribute, Operator op, LocalDate d1, LocalDate d2) {
 		this.attribute = attribute;
 		this.op = op;
 		this.key = null;
-		this.dateValues = new Date[] {d1,d2};
+		this.dateValues = new LocalDate[] {d1,d2};
 	}
 	
 	public SystemAttributeFilter(SystemAttribute attribute, Operator op, String key) {
@@ -130,7 +130,7 @@ public class SystemAttributeFilter implements IQueryFilter, IColumnIdentifierPro
 	public String getStringKey() {
 		return this.key;
 	}
-	public Date[] getDateValues() {
+	public LocalDate[] getDateValues() {
 		return this.dateValues;
 	}
 
@@ -148,9 +148,9 @@ public class SystemAttributeFilter implements IQueryFilter, IColumnIdentifierPro
 		sb.append(op.getKey());
 		if (key == null) {
 			sb.append("_"); //$NON-NLS-1$
-			sb.append(dateValues[0].getTime());
+			sb.append(dateValues[0].toString());
 			sb.append("_"); //$NON-NLS-1$
-			sb.append(dateValues[1].getTime());
+			sb.append(dateValues[1].toString());
 		}else {
 			sb.append(key);
 		}

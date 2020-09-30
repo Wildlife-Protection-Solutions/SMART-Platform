@@ -25,10 +25,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -66,8 +66,7 @@ public class DerbyBackupEngine {
 	 */
 	public static String getDefaultFileName(){
 		String backupDir = SmartProperties.getInstance().getProperty(SmartProperties.PROP_BACKUP_DIR);
-		SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd"); //$NON-NLS-1$
-		return Paths.get(backupDir).resolve("SMART_" + format.format(new Date()) + ".bak.zip").normalize().toAbsolutePath().toString(); //$NON-NLS-1$ //$NON-NLS-2$
+		return Paths.get(backupDir).resolve("SMART_" + DateTimeFormatter.ofPattern("yyyyMMdd").format(LocalDate.now()) + ".bak.zip").normalize().toAbsolutePath().toString(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 	
 	/**

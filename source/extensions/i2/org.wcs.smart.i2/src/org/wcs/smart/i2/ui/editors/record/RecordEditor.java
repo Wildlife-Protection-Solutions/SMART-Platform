@@ -22,10 +22,10 @@
 package org.wcs.smart.i2.ui.editors.record;
 
 import java.text.MessageFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -638,7 +638,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	 * @param p
 	 * @param dateTime
 	 */
-	public void addNewLocation(Geometry p, Date dateTime){
+	public void addNewLocation(Geometry p, LocalDateTime dateTime){
 		if (p == null) return;
 		IntelLocation newLocation = new IntelLocation();
 		newLocation.setComment(null);

@@ -26,6 +26,8 @@ import java.util.List;
 
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Point;
 import org.locationtech.udig.project.internal.render.ViewportModel;
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.render.displayAdapter.MapMouseEvent;
@@ -35,9 +37,6 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.util.GeometryUtils;
-
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Point;
 
 /**
  * Tool used to select points on a map

@@ -21,8 +21,9 @@
  */
 package org.wcs.smart.er.ui.mision.editor;
 
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -76,7 +77,9 @@ public class MissionTrackEditDialog extends SmartStyledTitleDialog {
 			try {
 				this.missionDay = (MissionDay) session.load(MissionDay.class, missionDay.getUuid());
 	
-				String title = MessageFormat.format(Messages.MissionTrackEditDialog_Title, missionDay.getMission().getId(), DateFormat.getDateInstance(DateFormat.MEDIUM).format(missionDay.getDate()));
+				String title = MessageFormat.format(Messages.MissionTrackEditDialog_Title,
+						missionDay.getMission().getId(), 
+						DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(missionDay.getDate()));
 				setTitle(title);
 				getShell().setText(title);
 				setMessage(Messages.MissionTrackEditDialog_Message);

@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.patrol.internal.ui.editpatrol;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
@@ -41,8 +41,8 @@ import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 public class EditPatrolDateLegsDialog extends AbstractPropertyJHeaderDialog{
 
 	private DateComposite item;
-	private Date startDate;
-	private Date endDate;
+	private LocalDate startDate;
+	private LocalDate endDate;
 	
 	private IPatrolItemChangeListener listener = new IPatrolItemChangeListener() {			
 		@Override
@@ -59,7 +59,7 @@ public class EditPatrolDateLegsDialog extends AbstractPropertyJHeaderDialog{
 	 * 
 	 */
 	public EditPatrolDateLegsDialog(Shell parent, 
-			Date startDate, Date endDate){
+			LocalDate startDate, LocalDate endDate){
 		
 		super(parent, Messages.EditPatrolDateLegsDialog_Title);
 		item = new DateComposite();
@@ -111,14 +111,14 @@ public class EditPatrolDateLegsDialog extends AbstractPropertyJHeaderDialog{
 	 * 
 	 * @return selected start date
 	 */
-	public Date getStartDate(){
+	public LocalDate getStartDate(){
 		return this.startDate;
 	}
 	/**
 	 * 
 	 * @return selected end date
 	 */
-	public Date getEndDate(){
+	public LocalDate getEndDate(){
 		return this.endDate;
 	}
 

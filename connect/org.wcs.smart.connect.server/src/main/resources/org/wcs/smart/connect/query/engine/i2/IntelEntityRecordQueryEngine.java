@@ -24,9 +24,9 @@ package org.wcs.smart.connect.query.engine.i2;
 import java.security.Principal;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -251,9 +251,9 @@ public class IntelEntityRecordQueryEngine implements IIntelQueryEngine {
 				}
 				@Override
 				public String getValue(org.wcs.smart.i2.query.IResultItem item, Locale locale) {
-					Date d = (Date) getValue(item);
+					LocalDateTime d = (LocalDateTime) getValue(item);
 					if (d == null) return ""; //$NON-NLS-1$
-					return DateTimeFormatter.ISO_DATE_TIME.format(  (new java.sql.Timestamp(d.getTime())).toLocalDateTime());
+					return DateTimeFormatter.ISO_DATE_TIME.format(d);
 				}
 				
 				@Override

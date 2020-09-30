@@ -29,6 +29,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.locationtech.jts.geom.Geometry;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.internal.command.navigation.SetViewportBBoxCommand;
 import org.locationtech.udig.project.ui.internal.MapPart;
@@ -39,8 +40,6 @@ import org.wcs.smart.query.model.IQueryResultInfoProvider;
 import org.wcs.smart.query.ui.editor.IMapQueryEditor;
 import org.wcs.smart.util.E3Utils;
 import org.wcs.smart.util.GeometryUtils;
-
-import org.locationtech.jts.geom.Geometry;
 
 /**
  * Zoom to map query result command that will zoom the map in the current active

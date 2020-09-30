@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.i2.model;
 
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 import javax.persistence.Column;
 import javax.persistence.FetchType;
@@ -93,24 +94,19 @@ public abstract class IntelValueItem {
 	}
 	
 	@Transient
-	public Date getDateValue(){
+	public LocalDate getDateValue(){
 		if (getStringValue() == null){
 			return null;
 		}
-		try{
-			return java.sql.Date.valueOf(getStringValue());
-		}catch (Exception ex){
-			return null;
-		}
+		return LocalDate.parse(getStringValue(), DateTimeFormatter.ISO_LOCAL_DATE);
 	}
 	@Transient
-	public void setDateValue(Date date){
+	public void setDateValue(LocalDate date){
 		if (date == null){
 			setStringValue(null);
 			return;
 		}
-		java.sql.Date tmp = new java.sql.Date(date.getTime());
-		setStringValue(tmp.toString());
+		setStringValue(DateTimeFormatter.ISO_LOCAL_DATE.format(date));
 	}
 	/**
 	 * 

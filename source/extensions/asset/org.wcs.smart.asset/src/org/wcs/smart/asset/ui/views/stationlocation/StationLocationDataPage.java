@@ -123,8 +123,8 @@ public class StationLocationDataPage {
 	
 	
 	public void reloadData() {
-		final LocalDateTime startDate = dateFilter.getDateFilter().getStartDate() == null ? null : SharedUtils.toLocalDate( dateFilter.getDateFilter().getStartDate() ).atStartOfDay();
-		final LocalDateTime endDate = dateFilter.getDateFilter().getEndDate() == null ? null : SharedUtils.toLocalDate( dateFilter.getDateFilter().getEndDate() ).atTime(LocalTime.MAX);
+		final LocalDateTime startDate = dateFilter.getDateFilter().getStartDate() == null ? null : dateFilter.getDateFilter().getStartDate().atStartOfDay();
+		final LocalDateTime endDate = dateFilter.getDateFilter().getEndDate() == null ? null : dateFilter.getDateFilter().getEndDate().atTime(LocalTime.MAX);
 
 		Job loadData = new Job(Messages.StationLocationDataPage_loadJobName) {
 			@Override
@@ -141,8 +141,8 @@ public class StationLocationDataPage {
 					}
 					query += " ORDER BY id.waypoint.dateTime desc "; //$NON-NLS-1$
 					Query<?> q = session.createQuery(query);
-					if (startDate != null) q.setParameter("startDate",  SharedUtils.toDate(startDate)); //$NON-NLS-1$
-					if (endDate != null) q.setParameter("endDate", SharedUtils.toDate(endDate)); //$NON-NLS-1$
+					if (startDate != null) q.setParameter("startDate",  startDate); //$NON-NLS-1$
+					if (endDate != null) q.setParameter("endDate", endDate); //$NON-NLS-1$
 					q.setParameter("location", parentEditor.getAssetStationLocation()); //$NON-NLS-1$
 					for (Object x : q.list()) {
 						waypointUuids.add( (UUID)((Object[])x)[0]);  

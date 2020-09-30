@@ -21,12 +21,13 @@
  */
 package org.wcs.smart.patrol.internal.ui.editor;
 
-import java.text.DateFormat;
-import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -50,7 +51,6 @@ import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
-import org.wcs.smart.util.SharedUtils;
 
 /**
  * Dialog to select a patrol leg day.
@@ -120,10 +120,10 @@ public class MoveWaypointDialog extends SmartStyledTitleDialog{
 		
 		final Combo dtCombo = new Combo(legtype, SWT.DROP_DOWN | SWT.READ_ONLY);
 
-		final HashMap<Date, List<PatrolLegDay>> sets = new HashMap<Date, List<PatrolLegDay>>();
+		final HashMap<LocalDate, List<PatrolLegDay>> sets = new HashMap<>();
 		for (PatrolLeg leg : this.patrol.getLegs()){
 			for (PatrolLegDay day : leg.getPatrolLegDays()){
-				Date tmp = SharedUtils.getDatePart(day.getDate(), false);
+				LocalDate tmp = day.getDate();
 				List<PatrolLegDay> plds = sets.get(tmp);
 				if (plds == null){
 					plds = new ArrayList<PatrolLegDay>();
@@ -132,22 +132,22 @@ public class MoveWaypointDialog extends SmartStyledTitleDialog{
 				plds.add(day);
 			}
 		}
-		ArrayList<Date> dates = new ArrayList<Date>();
+		ArrayList<LocalDate> dates = new ArrayList<>();
 		dates.addAll(sets.keySet());
-		Collections.sort(dates,new Comparator<Date>() {
+		Collections.sort(dates,new Comparator<LocalDate>() {
 
 			@Override
-			public int compare(Date o1, Date o2) {
-				if (o1.before(o2)){
+			public int compare(LocalDate o1, LocalDate o2) {
+				if (o1.isBefore(o2)){
 					return -1;
-				}else if (o1.after(o2)){
+				}else if (o1.isAfter(o2)){
 					return 1;
 				}
 				return 0;
 			}
 		});
-		for (Date dt : dates){
-			dtCombo.add(DateFormat.getDateInstance(DateFormat.MEDIUM).format(dt));
+		for (LocalDate dt : dates){
+			dtCombo.add(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(dt));
 		}
 		dtCombo.select(0);
 		selectedPatrolLegDays = sets.get(dates.get(0));
@@ -175,10 +175,10 @@ public class MoveWaypointDialog extends SmartStyledTitleDialog{
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				String dt = dtCombo.getItem(dtCombo.getSelectionIndex());
-				Date dd = null;
+				LocalDate dd = null;
 				try{
-					dd=DateFormat.getDateInstance(DateFormat.MEDIUM).parse(dt);
-				}catch(ParseException ex){}
+					dd = LocalDate.parse(dt,DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM));
+				}catch(DateTimeParseException ex){}
 				
 				selectedPatrolLegDays = sets.get(dd);
 				Object[] ll = selectedPatrolLegDays.toArray();

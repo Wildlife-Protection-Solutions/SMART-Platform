@@ -21,13 +21,15 @@
  */
 package org.wcs.smart.cybertracker.survey.json;
 
-import java.sql.Time;
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -69,8 +71,6 @@ import org.wcs.smart.er.ui.MissionFilteredComboViewer;
 import org.wcs.smart.er.ui.SurveyFilteredComboViewer;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
-import org.wcs.smart.util.SharedUtils;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * Dialog for linking cybertracker missions to SMART missions/surveys.
@@ -161,7 +161,7 @@ public class MissionDialog extends SmartStyledTitleDialog {
 		for (MissionDay newMissionDay : newMission.getMissionDays()){
 			MissionDay addToDay = null;	
 			for (MissionDay md : addToMission.getMissionDays()){
-				if (SharedUtils.isSameDate(md.getDate(), newMissionDay.getDate())){
+				if (md.getDate().isEqual(newMissionDay.getDate())){
 					addToDay = md;
 					break;
 				}
@@ -169,50 +169,50 @@ public class MissionDialog extends SmartStyledTitleDialog {
 			
 			if (addToDay == null){
 				//need to add a new day
-				if (newMissionDay.getDate().before(addToMission.getStartDate())){
+				if (newMissionDay.getDate().isBefore(addToMission.getStartDate())){
 					addToMission.getMissionDays().add(newMissionDay);
 					newMissionDay.setMission(addToMission);
 					
-					Calendar cal = Calendar.getInstance();
-					cal.setTime(newMissionDay.getDate());
-					cal.add(Calendar.DAY_OF_MONTH, 1);
-					while(cal.getTime().before(addToMission.getStartDate())){
+					LocalDate working = ChronoUnit.DAYS.addTo(newMissionDay.getDate(), 1);
+					
+					
+					while(working.isBefore(addToMission.getStartDate())){
 						//create a new empty mission day
 						MissionDay md = new MissionDay();
-						md.setDate(cal.getTime());
-						md.setEndTime(new Time(SmartUtils.getMidnight().getTime() - 1));
-						md.setStartTime(new Time(SmartUtils.getMidnight().getTime()));
+						md.setDate(working);
+						md.setEndTime(LocalTime.MAX);
+						md.setStartTime(LocalTime.MIN);
 						md.setRestMinutes(0);
 						md.setMission(addToMission);
 						addToMission.getMissionDays().add(md);
-						cal.add(Calendar.DAY_OF_MONTH, 1);
+						working = ChronoUnit.DAYS.addTo(working, 1);
 					}
 				}else{ //newMissionDay after addToMission; add at end
 					addToMission.getMissionDays().add(newMissionDay);
 					newMissionDay.setMission(addToMission);
 					
-					Calendar cal = Calendar.getInstance();
-					cal.setTime(addToMission.getEndDate());
-					cal.add(Calendar.DAY_OF_MONTH, 1);
-					while(cal.getTime().before(newMissionDay.getDate())){
+					LocalDate working = ChronoUnit.DAYS.addTo(addToMission.getEndDate(), 1);
+					
+					while(working.isBefore(newMissionDay.getDate())){
+
 						//create a new empty mission day
 						MissionDay md = new MissionDay();
-						md.setDate(cal.getTime());
-						md.setEndTime(new Time(SmartUtils.getMidnight().getTime() - 1));
-						md.setStartTime(new Time(SmartUtils.getMidnight().getTime()));
+						md.setDate(working);
+						md.setEndTime(LocalTime.MAX);
+						md.setStartTime(LocalTime.MIN);
 						md.setRestMinutes(0);
 						md.setMission(addToMission);
 						addToMission.getMissionDays().add(md);
-						cal.add(Calendar.DAY_OF_MONTH, 1);
+						working = ChronoUnit.DAYS.addTo(working, 1);
 					}
 				}
 				addToMission.getMissionDays().sort((MissionDay md1, MissionDay md2) -> md1.getDate().compareTo(md2.getDate()));
 			}else{
 				//update time
-				if (newMissionDay.getStartTime().before(addToDay.getStartTime())){
+				if (newMissionDay.getStartTime().isBefore(addToDay.getStartTime())){
 					addToDay.setStartTime(newMissionDay.getStartTime());
 				}
-				if (newMissionDay.getEndTime().after(addToDay.getEndTime())){
+				if (newMissionDay.getEndTime().isAfter(addToDay.getEndTime())){
 					addToDay.setEndTime(newMissionDay.getEndTime());
 				}
 				//merge observations; add all the observations to this date
@@ -233,20 +233,20 @@ public class MissionDialog extends SmartStyledTitleDialog {
 		
 		//update mission start end end days
 		for (MissionDay md : addToMission.getMissionDays()){
-			if (md.getDate().before(addToMission.getStartDate())){
+			if (md.getDate().isBefore(addToMission.getStartDate())){
 				addToMission.setStartDate(md.getDate());
 			}
-			if (md.getDate().after(addToMission.getEndDate())){
+			if (md.getDate().isAfter(addToMission.getEndDate())){
 				addToMission.setEndDate(md.getDate());
 			}
 		}
 		
 		//update survey dates
 		Survey survey = addToMission.getSurvey();
-		if (survey.getStartDate() == null || newMission.getStartDate().before(survey.getStartDate())){
+		if (survey.getStartDate() == null || newMission.getStartDate().isBefore(survey.getStartDate())){
 			survey.setStartDate(newMission.getStartDate());
 		}
-		if (survey.getEndDate() == null || newMission.getEndDate().after(survey.getEndDate())){
+		if (survey.getEndDate() == null || newMission.getEndDate().isAfter(survey.getEndDate())){
 			survey.setEndDate(newMission.getEndDate());
 		}
 				
@@ -273,13 +273,13 @@ public class MissionDialog extends SmartStyledTitleDialog {
 		newMission.setSurvey(survey);
 		survey.getMissions().add(newMission);
 		
-		Date startDate = null;
-		Date endDate = null;
+		LocalDate startDate = null;
+		LocalDate endDate = null;
 		for (MissionDay md : newMission.getMissionDays()){
-			if (startDate == null || md.getDate().before(startDate)){
+			if (startDate == null || md.getDate().isBefore(startDate)){
 				startDate = md.getDate();
 			}
-			if (endDate == null || md.getDate().after(endDate)){
+			if (endDate == null || md.getDate().isAfter(endDate)){
 				endDate = md.getDate();
 			}
 		}
@@ -288,10 +288,10 @@ public class MissionDialog extends SmartStyledTitleDialog {
 		newMission.setId(SurveyHibernateManager.generateMissionId(session));
 		
 		//update survey dates
-		if (survey.getStartDate() == null || newMission.getStartDate().before(survey.getStartDate())){
+		if (survey.getStartDate() == null || newMission.getStartDate().isBefore(survey.getStartDate())){
 			survey.setStartDate(newMission.getStartDate());
 		}
-		if (survey.getEndDate() == null || newMission.getEndDate().after(survey.getEndDate())){
+		if (survey.getEndDate() == null || newMission.getEndDate().isAfter(survey.getEndDate())){
 			survey.setEndDate(newMission.getEndDate());
 		}
 		
@@ -362,12 +362,12 @@ public class MissionDialog extends SmartStyledTitleDialog {
 		moreMissions.sort(new Comparator<Mission>(){
 			@Override
 			public int compare(Mission m1, Mission m2) {
-				if (!SharedUtils.isSameDate(m1.getStartDate(), m2.getStartDate())) return m1.getStartDate().compareTo(m2.getStartDate());
+				if (!m1.getStartDate().isEqual(m2.getStartDate())) return m1.getStartDate().compareTo(m2.getStartDate());
 				
 				for(MissionDay md: m1.getMissionDays()){
-					if (SharedUtils.isSameDate(md.getDate(), m1.getStartDate())){
+					if (md.getDate().isEqual(m1.getStartDate())){
 						for(MissionDay md2: m2.getMissionDays()){
-							if (SharedUtils.isSameDate(md2.getDate(), m2.getStartDate())){
+							if (md2.getDate().isEqual(m2.getStartDate())){
 								return md.getStartTime().compareTo(md2.getStartTime());
 							}
 						}		
@@ -394,10 +394,10 @@ public class MissionDialog extends SmartStyledTitleDialog {
 			Label l = new Label(main, SWT.WRAP);
 			StringBuilder lbl = new StringBuilder();
 			
-			Date startDt= null;
+			LocalDateTime startDt= null;
 			for(MissionDay md: e.getValue().getMission().getMissionDays()){
-				if (SharedUtils.isSameDate(md.getDate(), e.getValue().getMission().getStartDate())){
-					startDt = SmartUtils.combineDateTime(md.getDate(), md.getStartTime());
+				if (md.getDate().isEqual(e.getValue().getMission().getStartDate())){
+					startDt = md.getDate().atTime( md.getStartTime());
 				}
 			}
 				
@@ -405,7 +405,7 @@ public class MissionDialog extends SmartStyledTitleDialog {
 			lbl.append(p.getId()); 
 			lbl.append("\n"); //$NON-NLS-1$
 			lbl.append(Messages.MissionDialog_startdateLabel);
-			lbl.append(DateFormat.getDateTimeInstance().format(startDt));
+			lbl.append(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(startDt));
 			lbl.append("\n"); //$NON-NLS-1$
 			lbl.append(Messages.MissionDialog_surveyDesignLabel);
 			lbl.append(e.getValue().getNewSurveyDesign().getName()); 
@@ -513,10 +513,12 @@ public class MissionDialog extends SmartStyledTitleDialog {
 					Mission p = entry.getValue().cmbMission.getSelection();
 					Mission ctP = missions.get(ctMission).getMission();
 					
-					double diff = (ctP.getStartDate().getTime() - p.getEndDate().getTime());
+					double diff = ChronoUnit.MILLIS.between(ctP.getStartDate(), p.getEndDate());
 					if (diff > 48*60*60*100.0){
 						//TODO: should be a warning not an error
-						entry.getValue().errItem.setDescriptionText(MessageFormat.format(Messages.MissionDialog_DateWarning, DateFormat.getDateInstance().format(ctP.getStartDate()), DateFormat.getDateInstance().format(p.getEndDate())));
+						entry.getValue().errItem.setDescriptionText(MessageFormat.format(Messages.MissionDialog_DateWarning, 
+								DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(ctP.getStartDate()), 
+								DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(p.getEndDate())));
 						entry.getValue().errItem.show();
 //						error = true;
 					}
@@ -527,19 +529,19 @@ public class MissionDialog extends SmartStyledTitleDialog {
 						//p before ctp
 						MissionDay startAddTo = null;
 						for (MissionDay md : p.getMissionDays()){
-							if (startAddTo == null || md.getDate().before(startAddTo.getDate())){
+							if (startAddTo == null || md.getDate().isBefore(startAddTo.getDate())){
 								startAddTo = md;
 							}
 						}
 						MissionDay startAddFrom = null;
 						for (MissionDay md : ctP.getMissionDays()){
-							if (startAddFrom == null || md.getDate().before(startAddFrom.getDate())){
+							if (startAddFrom == null || md.getDate().isBefore(startAddFrom.getDate())){
 								startAddFrom = md;
 							}
 						}
-						Date startAddToDate = SmartUtils.combineDateTime(startAddTo.getDate(), startAddTo.getStartTime());
-						Date startAddToFrom = SmartUtils.combineDateTime(startAddFrom.getDate(), startAddFrom.getStartTime());
-						if (startAddToFrom.before(startAddToDate)){
+						LocalDateTime startAddToDate = startAddTo.getDate().atTime(startAddTo.getStartTime());
+						LocalDateTime startAddToFrom = startAddFrom.getDate().atTime(startAddFrom.getStartTime());
+						if (startAddToFrom.isBefore(startAddToDate)){
 							entry.getValue().errItem.setDescriptionText(Messages.MissionDialog_MergeDateError);
 							entry.getValue().errItem.show();
 							error = true;
@@ -558,8 +560,8 @@ public class MissionDialog extends SmartStyledTitleDialog {
 						Survey selectedSurvey = (Survey) x;
 						if (selectedSurvey.getStartDate() != null && selectedSurvey.getEndDate() != null){
 							Mission ctP = missions.get(ctMission).getMission();
-							if (ctP.getStartDate().before(selectedSurvey.getStartDate()) ||
-									ctP.getEndDate().after(selectedSurvey.getEndDate())){
+							if (ctP.getStartDate().isBefore(selectedSurvey.getStartDate()) ||
+									ctP.getEndDate().isAfter(selectedSurvey.getEndDate())){
 								entry.getValue().errItem.setDescriptionText(Messages.MissionDialog_MissionDatesInvalid);
 								entry.getValue().errItem.show();
 								error = true;			

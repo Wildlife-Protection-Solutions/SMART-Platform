@@ -24,10 +24,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -512,7 +512,7 @@ public class CyberTracker extends HttpServlet{
 		String uuid = proxy.getVersion().substring(0, 32);
 		try {
 			UuidUtils.stringToUuid(uuid);
-			SimpleDateFormat sdf = new SimpleDateFormat(ICtPackage.PACKAGE_DATE_FORMAT);
+			DateTimeFormatter sdf = DateTimeFormatter.ofPattern(ICtPackage.PACKAGE_DATE_FORMAT);
 			sdf.parse(proxy.getVersion().substring(33));
 		}catch (Exception ex) {
 			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid revision value.  Must be of the form <uuid>.<date>"); //$NON-NLS-1$
@@ -574,7 +574,7 @@ public class CyberTracker extends HttpServlet{
 			
 			ctpackage.setStatus(Status.UPLOADING);
 			ctpackage.setName(proxy.getName());
-			ctpackage.setUploadedDate(new Date());
+			ctpackage.setUploadedDate(LocalDateTime.now());
 			ctpackage.setVersion(proxy.getVersion());
 			
 			StringBuilder sb = new StringBuilder();
@@ -588,7 +588,7 @@ public class CyberTracker extends HttpServlet{
 			WorkItem up = new WorkItem();
 			up.setLocale(request.getLocale());
 			up.setConservationAreaInfo(cainfo);
-			up.setStartTime(new Date());
+			up.setStartTime(LocalDateTime.now());
 			up.setStatus(WorkItem.Status.UPLOADING);
 			up.setType(Type.UP_CTPACKAGE);
 			up.setTotalBytes(totalBytes);
@@ -716,7 +716,7 @@ public class CyberTracker extends HttpServlet{
 			
 			ctpackage.setStatus(org.wcs.smart.connect.model.CyberTrackerNavigationLayer.Status.UPLOADING);
 			ctpackage.setName(proxy.getName());
-			ctpackage.setUploadedDate(new Date());
+			ctpackage.setUploadedDate(LocalDateTime.now());
 			
 			StringBuilder sb = new StringBuilder();
 			sb.append(URLUtils.cleanFilename(ctpackage.getName()));
@@ -729,7 +729,7 @@ public class CyberTracker extends HttpServlet{
 			WorkItem up = new WorkItem();
 			up.setLocale(request.getLocale());
 			up.setConservationAreaInfo(cainfo);
-			up.setStartTime(new Date());
+			up.setStartTime(LocalDateTime.now());
 			up.setStatus(WorkItem.Status.UPLOADING);
 			up.setType(Type.UP_NAVIGATION);
 			up.setTotalBytes(totalBytes);

@@ -21,9 +21,10 @@
  */
 package org.wcs.smart.er.ui.mision.wizard;
 
-import java.sql.Time;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
 
@@ -60,7 +61,6 @@ import org.wcs.smart.er.ui.mision.SurveyDesignComposite;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.util.SharedUtils;
 
 /**
  * Wizard for creating a new mission.
@@ -157,18 +157,7 @@ public class NewMissionWizard extends Wizard implements IPageChangingListener{
     		c.addChangeListener(updateButtons);
     	}
 	}
-	
-	
-	private Time createTime(int hours, int minute, int second){
-		Calendar cForProcessing = Calendar.getInstance();
-		cForProcessing.setTimeInMillis(0);
-		cForProcessing.set(Calendar.HOUR_OF_DAY, hours);
-		cForProcessing.set(Calendar.MINUTE, minute);
-		cForProcessing.set(Calendar.SECOND, second);
-		cForProcessing.set(Calendar.MILLISECOND, 0);
-		return new Time(cForProcessing.getTime().getTime());
-	}
-	
+
 	@Override
 	public boolean performFinish() {
 		//update last page
@@ -178,28 +167,22 @@ public class NewMissionWizard extends Wizard implements IPageChangingListener{
 		
 		session.beginTransaction();
 		try{
-			
-			//create days
-			Calendar calStart = SharedUtils.convertDate(newMission.getStartDate());
-			calStart.set(Calendar.HOUR, 0);
-			calStart.set(Calendar.MINUTE, 0);
-			calStart.set(Calendar.SECOND, 0);
-			calStart.set(Calendar.MILLISECOND, 0);
-			
-			Calendar calEnd = SharedUtils.convertDate(newMission.getEndDate());
+			LocalDate working = newMission.getStartDate();
+
 			newMission.setMissionDays(new ArrayList<MissionDay>());
-			while (calStart.before(calEnd) || calStart.equals(calEnd)) {
+			
+			while (working.isBefore(newMission.getEndDate()) || working.isEqual(newMission.getEndDate())) {
 				MissionDay md = new MissionDay();
-				md.setDate(SharedUtils.getDatePart(calStart.getTime(), false));
-				md.setStartTime(createTime(0, 0, 0));
-				md.setEndTime(createTime(23, 59, 59));
+				md.setDate(working);
+				md.setStartTime(LocalTime.MIN);
+				md.setEndTime(LocalTime.MAX);
 				md.setRestMinutes(0);
 				md.setTracks(new ArrayList<MissionTrack>());
 				md.setWaypoints(new ArrayList<SurveyWaypoint>());
 				md.setMission(newMission);
 				newMission.getMissionDays().add(md);
 				
-				calStart.add(Calendar.DAY_OF_MONTH, 1);
+				working = ChronoUnit.DAYS.addTo(working, 1);
 			}
 			
 			session.save(newMission);

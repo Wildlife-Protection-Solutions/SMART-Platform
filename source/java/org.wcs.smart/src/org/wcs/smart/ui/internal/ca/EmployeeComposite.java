@@ -23,8 +23,8 @@ package org.wcs.smart.ui.internal.ca;
 
 import java.text.Collator;
 import java.text.MessageFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -639,13 +639,9 @@ public class EmployeeComposite extends Composite {
 		}
 		
 		// test for birthdate being at least Employee.MIN_EMPLOYEE_AGE years in the past
-		Calendar now = Calendar.getInstance();
-		Calendar min = Calendar.getInstance();
-		min.set(Calendar.YEAR, now.get(Calendar.YEAR)- Employee.MIN_EMPLOYEE_AGE );
-		
-		
-		Calendar calBirthDate = SmartUtils.getCalendar(dtBirthDate);
-		if(min.before(calBirthDate)){
+		LocalDate min = LocalDate.now().plusYears(Employee.MIN_EMPLOYEE_AGE);
+		LocalDate bdate = SmartUtils.toDate(dtBirthDate);
+		if(min.isBefore(bdate)){
 			cdBirthDate.show();
 			cdBirthDate.setDescriptionText(
 					MessageFormat.format(
@@ -657,11 +653,11 @@ public class EmployeeComposite extends Composite {
 		}
 		
 		// test for startdate being at least Employee.MIN_EMPLOYEE_AGE since birthdate
-		min = Calendar.getInstance();
-		min.set(Calendar.YEAR, dtBirthDate.getYear() + Employee.MIN_EMPLOYEE_AGE);
+		min = bdate.plusYears(Employee.MIN_EMPLOYEE_AGE);
 		
-		Calendar calStartDate = SmartUtils.getCalendar(dtEmploymentStart);
-		if(calStartDate.before(min)){
+		LocalDate eStartDate = SmartUtils.toDate(dtEmploymentStart);
+		
+		if(eStartDate.isBefore(min)){
 			cdEmploymentStart.show();
 			cdEmploymentStart.setDescriptionText(
 					MessageFormat.format(
@@ -676,10 +672,7 @@ public class EmployeeComposite extends Composite {
 			boolean hide = true;
 			if(chNotActive.getSelection()){
 				//test for EmploymentEnd being before employment start
-				Calendar start = SmartUtils.getCalendar(dtEmploymentStart);
-				Calendar end = SmartUtils.getCalendar(dtEmploymentEnd);
-				
-				if(end.before(start)){
+				if(SmartUtils.toDate(dtEmploymentEnd).isBefore(SmartUtils.toDate(dtEmploymentStart))){
 					cdEmploymentEnd.show();
 					cdEmploymentEnd.setDescriptionText(Messages.EmployeeComposite_Error_InvalidEndDate);
 					isComplete = false;
@@ -765,20 +758,20 @@ public class EmployeeComposite extends Composite {
 		opMale.setSelection(e.getGender() ==  Employee.DB_MALE);
 		
 		if (e.getBirthDate() != null) {
-			SmartUtils.initDateDateTimeWidget(dtBirthDate, e.getBirthDate());
+			SmartUtils.initDateTimeWidget(dtBirthDate, e.getBirthDate());
 			chBirthDate.setSelection(true);
 			dtBirthDate.setEnabled(true);
 		}else {
 			chBirthDate.setSelection(false);
 			dtBirthDate.setEnabled(false);
 		}
-		SmartUtils.initDateDateTimeWidget(dtEmploymentStart, e.getStartEmploymentDate());
+		SmartUtils.initDateTimeWidget(dtEmploymentStart, e.getStartEmploymentDate());
 		
 		
 		if (e.getEndEmploymentDate() != null){
 			chNotActive.setSelection(true);
 			dtEmploymentEnd.setEnabled(true);
-			SmartUtils.initDateDateTimeWidget(dtEmploymentEnd, e.getEndEmploymentDate());
+			SmartUtils.initDateTimeWidget(dtEmploymentEnd, e.getEndEmploymentDate());
 		}else{
 			chNotActive.setSelection(false);
 			dtEmploymentEnd.setEnabled(false);
@@ -880,14 +873,14 @@ public class EmployeeComposite extends Composite {
 	 */
 	@SuppressWarnings("unchecked")
 	public void updateEmploye(Employee e){
-		e.setStartEmploymentDate(SmartUtils.getDate(dtEmploymentStart));
+		e.setStartEmploymentDate(SmartUtils.toDate(dtEmploymentStart));
 		e.setFamilyName(txtFamilyName.getText().trim());
 		e.setGender(opFemale.getSelection() ? Employee.DB_FEMALE : Employee.DB_MALE);
 		e.setGivenName(txtGivenName.getText().trim());
 		e.setId(txtStaffId.getText().trim());
 		
 		if (chBirthDate.getSelection()) {
-			e.setBirthDate(SmartUtils.getDate(dtBirthDate));
+			e.setBirthDate(SmartUtils.toDate(dtBirthDate));
 		}else {
 			e.setBirthDate(null);
 		}
@@ -896,7 +889,7 @@ public class EmployeeComposite extends Composite {
 			if (!chNotActive.getSelection()){
 				e.setEndEmploymentDate(null);
 			}else{
-				e.setEndEmploymentDate(SmartUtils.getDate(dtEmploymentEnd));
+				e.setEndEmploymentDate(SmartUtils.toDate(dtEmploymentEnd));
 			}
 		}
 		

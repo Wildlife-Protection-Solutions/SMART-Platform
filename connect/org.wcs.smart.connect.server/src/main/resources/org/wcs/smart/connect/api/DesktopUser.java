@@ -23,8 +23,8 @@ package org.wcs.smart.connect.api;
 
 import java.text.Collator;
 import java.text.MessageFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -326,8 +326,8 @@ public class DesktopUser extends HttpServlet {
 			e.setFamilyName(newUser.getFamilyName());
 			e.setGivenName(newUser.getGivenName());
 			e.setGender(newUser.getGender());
-			e.setDateCreated(new Date());
-			e.setStartEmploymentDate(new Date());
+			e.setDateCreated(LocalDate.now());
+			e.setStartEmploymentDate(LocalDate.now());
 			ArrayList<SmartUserLevel> level = new ArrayList<SmartUserLevel>();
 			level.add(new SmartUserLevel(newUser.getUserLevelKey()));
 			e.setSmartUserLevel(level);
@@ -442,8 +442,8 @@ public class DesktopUser extends HttpServlet {
 			toUpdate.setFamilyName(newUser.getFamilyName());
 			toUpdate.setGivenName(newUser.getGivenName());
 			toUpdate.setGender(newUser.getGender());
-			toUpdate.setDateCreated(new Date());
-			toUpdate.setStartEmploymentDate(new Date());
+			toUpdate.setDateCreated(LocalDate.now());
+			toUpdate.setStartEmploymentDate(LocalDate.now());
 			//DO NOT SUPPORT updating user levels
 //			ArrayList<SmartUserLevel> level = new ArrayList<SmartUserLevel>();
 //			level.add(new SmartUserLevel(newUser.getUserLevelKey()));
@@ -510,7 +510,7 @@ public class DesktopUser extends HttpServlet {
 			toDelete.getConservationArea().getId();
 			toDelete.getSmartUserId();
 			
-			toDelete.setEndEmploymentDate(new Date()); //setting an end date deactivates the user.
+			toDelete.setEndEmploymentDate(LocalDate.now()); //setting an end date deactivates the user.
 			s.save(toDelete);
 			s.flush();
 

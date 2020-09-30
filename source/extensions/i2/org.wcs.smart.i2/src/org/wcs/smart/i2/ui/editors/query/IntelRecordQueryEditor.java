@@ -22,8 +22,8 @@
 package org.wcs.smart.i2.ui.editors.query;
 
 import java.text.MessageFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -484,16 +484,16 @@ public class IntelRecordQueryEditor extends EditorPart implements IQueryEditor{
 		((StackLayout)stackPanel.getLayout()).topControl = progressPanel;
 		stackPanel.layout(true);
 		
-		Date[] dateFilter = null;
+		LocalDate[] dateFilter = null;
 		if (datePart.getDateFilter() == DateFilter.CUSTOM){
-			dateFilter = new Date[]{datePart.getCustomStartDate(), datePart.getCustomEndDate()};
+			dateFilter = new LocalDate[]{datePart.getCustomStartDate(), datePart.getCustomEndDate()};
 		}else if (datePart.getDateFilter() == DateFilter.ALL){
-			dateFilter = new Date[]{null, null};
+			dateFilter = new LocalDate[]{null, null};
 		}else{
-			dateFilter = new Date[]{datePart.getDateFilter().getStartDate(), datePart.getDateFilter().getEndDate()};
+			dateFilter = new LocalDate[]{datePart.getDateFilter().getStartDate(), datePart.getDateFilter().getEndDate()};
 		}
 		
-		final Date[] fdateFilter = dateFilter;
+		final LocalDate[] fdateFilter = dateFilter;
 		
 		String queryString = dpanel.getQueryPart();
 		query.setQueryString(queryString);

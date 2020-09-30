@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.smartcollect.xml;
 
-import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 
@@ -55,7 +55,7 @@ public class IncidentToXml {
 		
 		WaypointType wt = new WaypointType();
 		wt.setSource(waypoint.getSource());
-		wt.setDateTime(new SimpleDateFormat(DATE_FORMAT_STR).format(incident.getDateTime()));
+		wt.setDateTime(DateTimeFormatter.ofPattern(DATE_FORMAT_STR).format(incident.getDateTime()));
 		wt.setComment(incident.getComment());
 		wt.setDirection(incident.getDirection());
 		wt.setDistance(incident.getDistance());

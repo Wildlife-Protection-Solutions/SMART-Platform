@@ -21,8 +21,9 @@
  */
 package org.wcs.smart.er.ui.mision.editor;
 
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -377,11 +378,11 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 				public String getText(Object element) {
 					MissionDay md = (MissionDay)element;
 					if (col == 0){
-						return DateFormat.getDateInstance().format(md.getDate());
+						return DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(md.getDate());
 					}else if (col == 1){
-						return DateFormat.getTimeInstance().format(md.getStartTime());
+						return DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM).format(md.getStartTime());
 					}else if (col == 2){
-						return DateFormat.getTimeInstance().format(md.getEndTime());
+						return DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM).format(md.getEndTime());
 					}else if (col == 3){
 						double d = 0;
 						for (MissionTrack mt : md.getTracks()){
@@ -423,8 +424,8 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 				lstMembers.setInput(mission.getMembers());
 				tblProperties.setInput(mission.getMissionPropertyValues());
 				
-				txtStart.setText(DateFormat.getDateInstance().format(mission.getStartDate()));
-				txtEnd.setText(DateFormat.getDateInstance().format(mission.getEndDate()));
+				txtStart.setText(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(mission.getStartDate()));
+				txtEnd.setText(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(mission.getEndDate()));
 				
 				dataTable.setInput(mission.getMissionDays());
 			}catch (Exception ex){

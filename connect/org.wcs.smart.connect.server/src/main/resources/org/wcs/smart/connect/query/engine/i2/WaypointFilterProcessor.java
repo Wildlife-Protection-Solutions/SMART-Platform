@@ -22,9 +22,9 @@
 package org.wcs.smart.connect.query.engine.i2;
 
 import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -69,7 +69,7 @@ import org.wcs.smart.util.UuidUtils;
 public class WaypointFilterProcessor {
 
 	private IQueryFilter filter;
-	private Date[] dFilter;
+	private LocalDate[] dFilter;
 	private Session s;
 	private IQueryItemProvider itemProvider;
 	
@@ -79,7 +79,7 @@ public class WaypointFilterProcessor {
 	private Locale l;
 	private Set<IntelProfile> profiles;
 
-	public WaypointFilterProcessor(IQueryFilter filter, Date[] dFilter, Set<IntelProfile> profiles, IQueryItemProvider itemProvider, Session s, Locale l){
+	public WaypointFilterProcessor(IQueryFilter filter, LocalDate[] dFilter, Set<IntelProfile> profiles, IQueryItemProvider itemProvider, Session s, Locale l){
 		this.filter = filter;
 		this.dFilter = dFilter;
 		this.s = s;
@@ -388,10 +388,10 @@ public class WaypointFilterProcessor {
 		case BOOLEAN:
 			break;
 		case DATE:
-			logString((new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0]));
-			logString((new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1]));
-			query.setParameter("value1", (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0])  ); //$NON-NLS-1$
-			query.setParameter("value2", (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1])  ); //$NON-NLS-1$
+			logString((DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0]));
+			logString((DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1]));
+			query.setParameter("value1", (DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0])  ); //$NON-NLS-1$
+			query.setParameter("value2", (DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1])  ); //$NON-NLS-1$
 			break;
 		case LIST:
 			if (!filter.getKeyValue().equals(IQueryFilter.ANY_OPTION_KEY)){
@@ -636,10 +636,10 @@ public class WaypointFilterProcessor {
 		case BOOLEAN:
 			break;
 		case DATE:
-			logString((new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0]));
-			logString((new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1]));
-			query.setParameter("value1", (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0])  ); //$NON-NLS-1$
-			query.setParameter("value2", (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1])  ); //$NON-NLS-1$
+			logString((DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0]));
+			logString((DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1]));
+			query.setParameter("value1", (DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0])  ); //$NON-NLS-1$
+			query.setParameter("value2", (DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1])  ); //$NON-NLS-1$
 			break;
 		case LIST:
 			if (listItem != null){
@@ -787,10 +787,10 @@ public class WaypointFilterProcessor {
 			sql.append(" cast(:value1 as date) and cast(:value2 as date)"); //$NON-NLS-1$
 		
 			NativeQuery<?> query = s.createNativeQuery(sql.toString());
-			logString((new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0]));
-			logString((new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1]));
-			query.setParameter("value1", (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0])  ); //$NON-NLS-1$
-			query.setParameter("value2", (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1])  ); //$NON-NLS-1$
+			logString((DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0]));
+			logString((DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1]));
+			query.setParameter("value1", (DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0])  ); //$NON-NLS-1$
+			query.setParameter("value2", (DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1])  ); //$NON-NLS-1$
 			
 		
 			logString(sql.toString());
@@ -817,10 +817,10 @@ public class WaypointFilterProcessor {
 			sql.append(" cast(:value1 as date) and cast(:value2 as date)"); //$NON-NLS-1$
 		
 			NativeQuery<?> query = s.createNativeQuery(sql.toString());
-			logString((new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0]));
-			logString((new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1]));
-			query.setParameter("value1", (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0])  ); //$NON-NLS-1$
-			query.setParameter("value2", (new SimpleDateFormat(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1])  ); //$NON-NLS-1$
+			logString((DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0]));
+			logString((DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1]));
+			query.setParameter("value1", (DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0])  ); //$NON-NLS-1$
+			query.setParameter("value2", (DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1])  ); //$NON-NLS-1$
 			
 		
 			logString(sql.toString());

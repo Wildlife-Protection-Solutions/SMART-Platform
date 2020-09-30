@@ -28,6 +28,8 @@ import java.util.logging.Logger;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Point;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
@@ -35,9 +37,6 @@ import org.opengis.referencing.operation.MathTransform;
 //import org.wcs.smart.ui.map.location.GeometryFactoryProvider;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.map.GeometryFactoryProvider;
-
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Point;
 
 /**
  * Database functions for reprojecting waypoints in 4326

@@ -26,8 +26,6 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.datatype.XMLGregorianCalendar;
-
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
@@ -53,6 +51,7 @@ import org.wcs.smart.er.ui.samplingunit.load.ISamplingUnitImporter;
 import org.wcs.smart.er.xml.model.surveydesign.NamesType;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Converts an xml Survey Design schema to an SMART SurveyDesign object.
@@ -69,16 +68,14 @@ public class SurveyDesignFromXmlConverter {
 		 
 		surveyDesign.setConservationArea(SmartDB.getCurrentConservationArea());
 		
-		XMLGregorianCalendar temp = xml.getStartDate();
-		if(temp != null){
-				surveyDesign.setStartDate(temp.toGregorianCalendar().getTime());
+		if(xml.getStartDate() != null){
+			surveyDesign.setStartDate(SmartUtils.toLocalDate(xml.getStartDate()));
 		}else{
 			surveyDesign.setStartDate(null);
 		}
 		
-		temp = xml.getEndDate();
-		if(temp != null){
-				surveyDesign.setEndDate(temp.toGregorianCalendar().getTime());
+		if(xml.getEndDate()!= null){
+			surveyDesign.setEndDate(SmartUtils.toLocalDate(xml.getEndDate()));
 		}else{
 			surveyDesign.setEndDate(null);
 		}

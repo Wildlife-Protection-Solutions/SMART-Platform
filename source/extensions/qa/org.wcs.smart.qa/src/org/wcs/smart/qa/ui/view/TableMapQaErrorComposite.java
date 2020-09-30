@@ -22,8 +22,9 @@
 package org.wcs.smart.qa.ui.view;
 
 import java.text.Collator;
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -146,7 +147,7 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 			}else if (this == FIX){
 				return error.getFixMessage();
 			}else if (this == DATE){
-				return DateFormat.getDateInstance().format(error.getValidateDate());
+				return DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(error.getValidateDate());
 			}
 			return element.toString();
 		}
@@ -290,7 +291,7 @@ public class TableMapQaErrorComposite extends SmartMapEditorPart{
 		labels.add("\n" + Messages.TableMapQaErrorComposite_RoutineLbl + "\n" + r.getQaRoutine().getName()); //$NON-NLS-1$ //$NON-NLS-2$
 		labels.add("\n" + Messages.TableMapQaErrorComposite_RoutineTypeLbl + "\n" + r.getQaRoutine().getRoutineType().getName(Locale.getDefault())); //$NON-NLS-1$ //$NON-NLS-2$
 		labels.add("\n" + Messages.TableMapQaErrorComposite_DataProviderLbl + "\n" + r.getDataProvider().getName(Locale.getDefault())); //$NON-NLS-1$ //$NON-NLS-2$
-		labels.add("\n" + Messages.TableMapQaErrorComposite_DateLbl + "\n" + DateFormat.getDateInstance().format(r.getValidateDate())); //$NON-NLS-1$ //$NON-NLS-2$
+		labels.add("\n" + Messages.TableMapQaErrorComposite_DateLbl + "\n" + DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(r.getValidateDate())); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		for (String label : labels){
 			Label l = toolkit.createLabel(textArea, label, SWT.WRAP);

@@ -21,9 +21,9 @@
  */
 package org.wcs.smart.qa;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -67,7 +67,7 @@ public class SingleItemDataProvider extends IQaDataProvider{
 
 	@Override
 	public Collection<?> getData(Session session,
-			ConservationArea conservationArea, Date startDate, Date endDate) {
+			ConservationArea conservationArea, LocalDate startDate, LocalDate endDate) {
 		return objects;
 	}
 

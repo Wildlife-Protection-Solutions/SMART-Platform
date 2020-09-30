@@ -21,8 +21,9 @@
  */
 package org.wcs.smart.patrol.query.ui.editor;
 
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.graphics.Image;
@@ -65,7 +66,8 @@ public class DeleteObservationResultInfoProvider extends IQueryEditCommand {
 			deleteWp = true;
 			
 			if (!MessageDialog.openQuestion(Display.getDefault().getActiveShell(), Messages.DeleteObservationResultInfoProvider_DeleteWaypointTitle,
-					MessageFormat.format(Messages.DeleteObservationResultInfoProvider_DeleteWaypointMsg, item.getWaypointId(), DateFormat.getDateInstance().format(item.getWpDateTime())))){
+					MessageFormat.format(Messages.DeleteObservationResultInfoProvider_DeleteWaypointMsg,
+							item.getWaypointId(), DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(item.getWpDateTime())))){
 				return false;
 			}
 		}else{

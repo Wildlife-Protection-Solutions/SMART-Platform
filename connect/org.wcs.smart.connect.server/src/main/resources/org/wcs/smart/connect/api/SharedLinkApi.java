@@ -21,10 +21,9 @@
  */
 package org.wcs.smart.connect.api;
 
-import java.sql.Timestamp;
 import java.text.MessageFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -310,17 +309,13 @@ public class SharedLinkApi extends HttpServlet{
 			}
 		    
 			//set expiration date
-			Date created = new Date();
-			newLink.setDateCreated(new Timestamp(created.getTime()));
+			newLink.setDateCreated(LocalDateTime.now());
 			int mins = newLink.getExpiresAfter();
 			if (mins == 0){
 				//never expire
-				newLink.setExpiresAt(new Timestamp(4102444800000l));
+				newLink.setExpiresAt(LocalDateTime.MAX);
 			}else if (mins > 0){
-				//long is important here or else anything over 35790 mins or so breaks the Integer limit when converted to milliseconds
-				long now = created.getTime();
-				long ex = now + ((long)mins*1000*60);
-				newLink.setExpiresAt(new Timestamp(ex));
+				newLink.setExpiresAt(LocalDateTime.now().plusMinutes(mins));
 			}else{
 				throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("SharedLinkApi.InvalidExpiresAfterValue",request.getLocale())); //$NON-NLS-1$
 			}
@@ -396,18 +391,14 @@ public class SharedLinkApi extends HttpServlet{
 		s.beginTransaction();
 		try{
 		    
-			//set expiration date			
-			Date created = new Date();
-			newLink.setDateCreated(new Timestamp(created.getTime()));
+			//set expiration date		
+			newLink.setDateCreated(LocalDateTime.now());
 			int mins = newLink.getExpiresAfter();
 			if (mins == 0){
 				//never expire
-				newLink.setExpiresAt(new Timestamp(4102444800000l));
+				newLink.setExpiresAt(LocalDateTime.MAX);
 			}else if (mins > 0){
-				//long is important here or else anything over 35790 mins or so breaks the Integer limit when converted to milliseconds 
-				long now = created.getTime();
-				long ex = now + ((long)mins*1000*60);
-				newLink.setExpiresAt(new Timestamp(ex));
+				newLink.setExpiresAt(LocalDateTime.now().plusMinutes(mins));
 			}else{
 				throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("SharedLinkApi.InvalidExplireValue",request.getLocale())); //$NON-NLS-1$
 			}

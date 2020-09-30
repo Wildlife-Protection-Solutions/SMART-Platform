@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.connect.model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -41,7 +41,7 @@ import javax.persistence.Table;
 public class GlobalForestWatch extends ConnectUuidItem{
 
 	private AlertType alertType;
-	private Date lastDataDate;
+	private LocalDateTime lastDataDate;
 	private SmartUser creator;
 	private int alertLevel;
 	
@@ -66,11 +66,11 @@ public class GlobalForestWatch extends ConnectUuidItem{
 	}
 	
 	@Column(name="last_data")
-	public Date getLastDataDate() {
+	public LocalDateTime getLastDataDate() {
 		return this.lastDataDate;
 	}
 	
-	public void setLastDataDate(Date date) {
+	public void setLastDataDate(LocalDateTime date) {
 		this.lastDataDate = date;
 	}
 	

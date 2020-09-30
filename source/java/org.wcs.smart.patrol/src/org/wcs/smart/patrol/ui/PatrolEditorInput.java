@@ -22,7 +22,7 @@
 package org.wcs.smart.patrol.ui;
 
 import java.text.MessageFormat;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.UUID;
 
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -50,8 +50,8 @@ public class PatrolEditorInput implements IEditorInput {
 	private UUID patrolUuid;
 	private String id;
 	private PatrolType.Type type;
-	private Date startDate;
-	private Date endDate;
+	private LocalDate startDate;
+	private LocalDate endDate;
 	
 	/**
 	 * Creates a new input from the uuid only.
@@ -69,7 +69,7 @@ public class PatrolEditorInput implements IEditorInput {
 	 * @param type
 	 * @param startDate
 	 */
-	public PatrolEditorInput(UUID uuid, String id, PatrolType.Type type, Date startDate, Date endDate){
+	public PatrolEditorInput(UUID uuid, String id, PatrolType.Type type, LocalDate startDate, LocalDate endDate){
 		this.patrolUuid = uuid;
 		this.id = id;
 		this.type = type;
@@ -87,14 +87,14 @@ public class PatrolEditorInput implements IEditorInput {
 	/**
 	 * @return start date
 	 */ 
-	public Date getStartDate(){
+	public LocalDate getStartDate(){
 		return startDate;
 	}
 	
 	/**
 	 * @return start date
 	 */ 
-	public Date getEndDate(){
+	public LocalDate getEndDate(){
 		return endDate;
 	}
 	

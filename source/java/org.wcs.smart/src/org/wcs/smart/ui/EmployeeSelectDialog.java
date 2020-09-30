@@ -44,9 +44,6 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.ui.CheckboxSelectorKeyAdapter;
-import org.wcs.smart.ui.SmartLabelProvider;
-import org.wcs.smart.ui.SmartStyledDialog;
 
 /**
  * Dialog for selecting employees

@@ -23,12 +23,12 @@ package org.wcs.smart.gpx;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.DateFormat;
 import java.text.MessageFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -46,6 +46,7 @@ import org.wcs.smart.gpx.xml.TrkType;
 import org.wcs.smart.gpx.xml.TrksegType;
 import org.wcs.smart.gpx.xml.WptType;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Class of utilties that support
@@ -216,40 +217,31 @@ public class GPSDataImport {
 	 * @param wptType
 	 * @return date associated with waypoint or null if date cannot be determined
 	 */
-	public static Date findWaypointDate(WptType wptType) {
-		Date wpdt = null;
+	public static LocalDateTime findWaypointDate(WptType wptType) {
+		LocalDateTime wpdt = null;
 		// try to parse date
 		if (wptType.getTime() != null) {
-			wpdt = wptType.getTime().toGregorianCalendar().getTime();
+			wpdt = SmartUtils.toLocalDateTime(wptType.getTime());
 		} else if (wptType.getCmt() != null) {
-			try {
-				// am-pm in system locale
-				SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yy h:mm:ssa"); //$NON-NLS-1$
-				wpdt = sdf.parse(wptType.getCmt());
-			} catch (ParseException e) {
+			String[] formats = new String[] {
+					"dd-MMM-yy h:mm:ssa", 	// am-pm //$NON-NLS-1$
+					"dd-MMM-yy H:mm:ss" //$NON-NLS-1$
+			};
+			for (String f : formats) {
+				try {
+					wpdt = LocalDateTime.parse(wptType.getCmt(),DateTimeFormatter.ofPattern(f));
+				} catch (DateTimeParseException e) {
+				}
+				if (wpdt != null) break;
 			}
 			
-			if (wpdt == null) {
-				try {
-					// 24hr
-					SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yy H:mm:ss"); //$NON-NLS-1$
-					wpdt = sdf.parse(wptType.getCmt());
-				} catch (ParseException e) {
-				}
-			}
-			
-			if (!Locale.getDefault().equals(Locale.ENGLISH)){
-				try {
-					// am-pm in english locale
-					SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yy h:mm:ssa", Locale.ENGLISH); //$NON-NLS-1$
-					wpdt = sdf.parse(wptType.getCmt());
-				} catch (ParseException e) {
-				}
-				try {
-					// 24hr in english locale
-					SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yy H:mm:ss", Locale.ENGLISH); //$NON-NLS-1$
-					wpdt = sdf.parse(wptType.getCmt());
-				} catch (ParseException e) {
+			if (!Locale.getDefault().equals(Locale.ENGLISH) && wpdt == null){
+				for (String f : formats) {
+					try {
+						wpdt = LocalDateTime.parse(wptType.getCmt(),DateTimeFormatter.ofPattern(f, Locale.ENGLISH));
+					} catch (DateTimeParseException e) {
+					}
+					if (wpdt != null) break;
 				}
 			}
 			
@@ -257,34 +249,38 @@ public class GPSDataImport {
 			if (wpdt == null) {
 				try {
 					// short
-					wpdt = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).parse(
-							wptType.getCmt());
-				} catch (ParseException e) {
+					wpdt = LocalDateTime.parse(wptType.getCmt(),DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT));
+				} catch (DateTimeParseException e) {
+				}
+			}
+			if (wpdt == null) {
+				try {
+					try {
+						wpdt = LocalDateTime.parse(wptType.getCmt(),DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT, FormatStyle.MEDIUM));
+					} catch (DateTimeParseException e) {
+					}
+					
+				} catch (DateTimeParseException e) {
 				}
 			}
 			if (wpdt == null) {
 				try {
 					// medium
-					wpdt = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM).parse(
-							wptType.getCmt());
-				} catch (ParseException e) {
-				}
-			}
-			if (wpdt == null) {
-				try {
-					// medium
-					wpdt = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM).parse(
-							wptType.getCmt());
-				} catch (ParseException e) {
+					try {
+						// short
+						wpdt = LocalDateTime.parse(wptType.getCmt(),DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.MEDIUM));
+					} catch (DateTimeParseException e) {
+					}
+
+				} catch (DateTimeParseException e) {
 				}
 			}
 
 			if (wpdt == null) {
 				try {
-					// long
-					wpdt = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).parse(
-							wptType.getCmt());
-				} catch (ParseException e) {
+					// short
+					wpdt = LocalDateTime.parse(wptType.getCmt(),DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG, FormatStyle.LONG));
+				} catch (DateTimeParseException e) {
 				}
 			}
 
@@ -293,25 +289,25 @@ public class GPSDataImport {
 	}
 	
 	
-	/**
-	 * Converts a set of track points to coordinates.
-	 * 
-	 * @param trackpoints
-	 * @return
-	 */
-	public static List<Coordinate> convertPointsToTrack(List<WptType> trackpoints){
-		ArrayList<Coordinate> trackCoords = new ArrayList<Coordinate>();
-		for (WptType pnt : trackpoints){
-			double y = pnt.getLat().doubleValue();
-			double x = pnt.getLon().doubleValue();
-			long time = 0;
-			if (pnt.getTime() != null){
-				time = pnt.getTime().toGregorianCalendar().getTime().getTime();
-			}
-			Coordinate c = new Coordinate(x, y, time);
-			trackCoords.add(c);
-		}
-		return trackCoords;
-	}
+//	/**
+//	 * Converts a set of track points to coordinates.
+//	 * 
+//	 * @param trackpoints
+//	 * @return
+//	 */
+//	public static List<Coordinate> convertPointsToTrack(List<WptType> trackpoints){
+//		ArrayList<Coordinate> trackCoords = new ArrayList<Coordinate>();
+//		for (WptType pnt : trackpoints){
+//			double y = pnt.getLat().doubleValue();
+//			double x = pnt.getLon().doubleValue();
+//			long time = 0;
+//			if (pnt.getTime() != null){
+//				time = pnt.getTime().toGregorianCalendar().getTime().getTime();
+//			}
+//			Coordinate c = new Coordinate(x, y, time);
+//			trackCoords.add(c);
+//		}
+//		return trackCoords;
+//	}
 
 }

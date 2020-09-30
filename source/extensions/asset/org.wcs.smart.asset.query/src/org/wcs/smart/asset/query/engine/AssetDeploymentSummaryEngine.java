@@ -25,8 +25,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -849,16 +850,16 @@ public class AssetDeploymentSummaryEngine extends AssetQueryEngine{
 			sb.append(" )"); //$NON-NLS-1$
 			
 			//need to truncate disruption dates to date filters
-			Timestamp filterStart = null;
-			Timestamp filterEnd = null;
-			java.sql.Date[] bits = this.localDateFilter.getDateFilterOption().getDates(); 
+			LocalDateTime filterStart = null;
+			LocalDateTime filterEnd = null;
+			LocalDate[] bits = this.localDateFilter.getDateFilterOption().getDates(); 
 
 			if (bits != null){
 				if (bits.length == 1){
-					filterStart = Timestamp.valueOf( bits[0].toLocalDate().atTime(LocalTime.MIDNIGHT) );
+					filterStart = bits[0].atTime(LocalTime.MIDNIGHT) ;
 				}else if (bits.length == 2){
-					filterStart = Timestamp.valueOf( bits[0].toLocalDate().atTime(LocalTime.MIDNIGHT) );
-					filterEnd = Timestamp.valueOf( bits[1].toLocalDate().atTime(LocalTime.MAX) );
+					filterStart = bits[0].atTime(LocalTime.MIDNIGHT);
+					filterEnd = bits[1].atTime(LocalTime.MAX);
 				}else {
 					throw new IllegalStateException("Invalid date filter"); //$NON-NLS-1$
 				}

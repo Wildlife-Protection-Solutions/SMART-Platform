@@ -25,10 +25,10 @@ import java.text.Collator;
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
 import java.text.NumberFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -323,7 +323,7 @@ public class PlanHibernateManager{
 
 			PatrolEditorInput pi = new PatrolEditorInput((UUID) data[0],
 					(String) data[1], (PatrolType.Type) data[2],
-					(Date) data[3], (Date) data[4]);
+					(LocalDate) data[3], (LocalDate) data[4]);
 			patrols.add(pi);
 		}
 		return patrols;
@@ -340,7 +340,7 @@ public class PlanHibernateManager{
 	 * @param end - end date
 	 * @return a list of Plan IDs
 	 */
-	public static List<String> getPlanChildrenOutOfDateRange(UUID planUuid, Date start, Date end) {
+	public static List<String> getPlanChildrenOutOfDateRange(UUID planUuid, LocalDate start, LocalDate end) {
 		if (planUuid == null) {
 			return Collections.emptyList();
 		}

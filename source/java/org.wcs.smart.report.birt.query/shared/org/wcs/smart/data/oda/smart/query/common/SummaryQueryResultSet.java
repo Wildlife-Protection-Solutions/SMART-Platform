@@ -33,14 +33,13 @@ import org.eclipse.datatools.connectivity.oda.IClob;
 import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Point;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.query.common.model.GeometrySummaryQueryResult;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.util.UuidUtils;
-
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Point;
 
 /**
  * Result set for a summary SMART query.

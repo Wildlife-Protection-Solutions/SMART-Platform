@@ -21,17 +21,14 @@
  */
 package org.wcs.smart.datagenerator;
 
-import java.sql.Time;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
@@ -207,8 +204,8 @@ public class DataGenerator implements IDataEngine{
 		LocalDate start = config.getStartDate().plusDays(offset);
 		int length = random.nextInt(config.getDaysPerPatrolMax() - config.getDaysPerPatrolMin() + 1) + config.getDaysPerPatrolMin();
 		LocalDate end = start.plusDays(length-1);
-		p.setStartDate(Date.from(start.atStartOfDay(ZoneId.systemDefault()).toInstant()));
-		p.setEndDate( Date.from(end.atStartOfDay(ZoneId.systemDefault()).toInstant()) );
+		p.setStartDate(start );
+		p.setEndDate( end );
 				
 		//leg
 		PatrolLeg pl = new PatrolLeg();
@@ -259,7 +256,7 @@ public class DataGenerator implements IDataEngine{
 			pl.getPatrolLegDays().add(pld);
 			
 			LocalDate date = start.plusDays(day);
-			pld.setDate(  Date.from(date.atStartOfDay(ZoneId.systemDefault()).toInstant()) );
+			pld.setDate(  date );
 			pld.setRestMinutes(random.nextInt(121));
 			
 			//start sometime between 1am and 11am
@@ -270,8 +267,8 @@ public class DataGenerator implements IDataEngine{
 			LocalTime startt = LocalTime.of(startHour, random.nextInt(60), random.nextInt(60));
 			LocalTime endt = LocalTime.of(endHour, random.nextInt(60), random.nextInt(60));
 					
-			pld.setStartTime(Time.valueOf(startt));
-			pld.setEndTime(Time.valueOf(endt));
+			pld.setStartTime(startt);
+			pld.setEndTime(endt);
 
 			pld.setWaypoints(new ArrayList<PatrolWaypoint>());
 			
@@ -308,7 +305,7 @@ public class DataGenerator implements IDataEngine{
 				
 				
 				Waypoint trackPoint = new Waypoint();
-				trackPoint.setDateTime( Date.from(wpDateTime.atZone(ZoneId.systemDefault()).toInstant()));
+				trackPoint.setDateTime( wpDateTime );
 				trackPoint.setRawX(startc.x);
 				trackPoint.setRawY(startc.y);
 				trackpoints.add(trackPoint);
@@ -319,7 +316,7 @@ public class DataGenerator implements IDataEngine{
 				startc = new Coordinate(startc.x + xdir * (maxdegrees * percent1),  startc.y + ydir * (maxdegrees * percent2)  );				
 			}
 			
-			LineString track = ObservationGPSDataImport.convertToLineString(trackpoints, Track.ZTIMEZONE);
+			LineString track = ObservationGPSDataImport.convertToLineString(trackpoints);
 			Track t = new Track();
 			t.setLineStrings(Arrays.asList(track));
 			pld.setTrack(t);
@@ -448,7 +445,7 @@ public class DataGenerator implements IDataEngine{
 			if (random.nextInt(100) < 50) return Boolean.TRUE;
 			return Boolean.FALSE;
 		case DATE:
-			return new Date(  (new Date()).getTime() + (long)(random.nextDouble() * ((long)365 * 24 * 60 *60 *1000)) );
+			return LocalDate.now().plusDays(random.nextInt());
 		case LIST:
 			if (a.getActiveListItems().isEmpty()) return null;
 			return a.getActiveListItems().get(random.nextInt(a.getActiveListItems().size()));

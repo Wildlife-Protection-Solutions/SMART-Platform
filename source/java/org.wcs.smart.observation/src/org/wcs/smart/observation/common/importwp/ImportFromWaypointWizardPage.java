@@ -21,8 +21,9 @@
  */
 package org.wcs.smart.observation.common.importwp;
 
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
@@ -57,7 +58,7 @@ public class ImportFromWaypointWizardPage extends ImportOptionsWizardPage {
 	 */
 	public ImportFromWaypointWizardPage( ImportGpsDataWizard wizard ) {
 		super(PAGE_NAME, wizard);
-		String dateStr = wizard.getDateOption() != null ? DateFormat.getDateInstance(DateFormat.MEDIUM).format(wizard.getDateOption()) : ""; //$NON-NLS-1$
+		String dateStr = wizard.getDateOption() != null ?  DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(wizard.getDateOption()) : ""; //$NON-NLS-1$
 		String[] lblOptions = new String[] {
 				Messages.ImportFromWaypointWizardPage_OpGenerateAllTracks,
 				MessageFormat.format(Messages.ImportFromWaypointWizardPage_OpGenerateDayTracks1, new Object[]{getImportType().guiName.toLowerCase(), dateStr})

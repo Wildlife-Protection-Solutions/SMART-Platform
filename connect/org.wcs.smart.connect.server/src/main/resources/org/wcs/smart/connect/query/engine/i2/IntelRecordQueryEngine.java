@@ -23,8 +23,8 @@ package org.wcs.smart.connect.query.engine.i2;
 
 import java.math.BigInteger;
 import java.security.Principal;
+import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -74,7 +74,7 @@ public class IntelRecordQueryEngine implements IIntelQueryEngine {
 		String username = ((String)parameters.get(Principal.class.getName()));
 		
 		//one or both element of array may be null
-		Date[] dfilter = (Date[]) parameters.get(Date.class.getName());
+		LocalDate[] dfilter = (LocalDate[]) parameters.get(LocalDate.class.getName());
 		if (dfilter == null) return null;
 		
 		Locale locale = (Locale) parameters.get(Locale.class.getName());

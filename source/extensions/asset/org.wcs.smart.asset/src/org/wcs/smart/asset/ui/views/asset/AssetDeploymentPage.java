@@ -25,13 +25,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -683,7 +682,7 @@ public class AssetDeploymentPage {
 		Path outputDirectory  = Paths.get(path);
 		SmartUtils.createDirectory(outputDirectory);
 		
-		SimpleDateFormat dformat = new SimpleDateFormat("yyyyMMdd"); //$NON-NLS-1$
+		DateTimeFormatter dformat = DateTimeFormatter.ofPattern("yyyyMMdd"); //$NON-NLS-1$
 		
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(detailsPane.getShell());
 		try {
@@ -701,8 +700,14 @@ public class AssetDeploymentPage {
 							try {
 								AssetDeployment d = session.get(AssetDeployment.class, deploy.getDeployment().getUuid());
 								
-								String fname = URLUtils.cleanFilename( d.getAsset().getId() + "_" + dformat.format(d.getStartDate()) + "-" + dformat.format(d.getEndDate() == null ? new Date() : d.getEndDate()) ); //$NON-NLS-1$ //$NON-NLS-2$
-								fname += ".zip"; //$NON-NLS-1$
+								StringBuilder sb = new StringBuilder();
+								sb.append(d.getAsset().getId());
+								sb.append("_" ); //$NON-NLS-1$
+								sb.append(dformat.format(d.getStartDate())); 
+								sb.append("-" ); //$NON-NLS-1$
+								sb.append(dformat.format(d.getEndDate() == null ? LocalDate.now() : d.getEndDate()));
+			
+								String fname = URLUtils.cleanFilename( sb.toString() ) + ".zip"; //$NON-NLS-1$
 								
 								Path outFile = outputDirectory.resolve(fname);
 								

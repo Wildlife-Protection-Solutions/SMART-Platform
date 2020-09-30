@@ -21,13 +21,13 @@
  */
 package org.wcs.smart.util;
 
-import java.sql.Time;
-import java.time.LocalDate;
+import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.util.Calendar;
-import java.util.Date;
+import java.time.ZoneOffset;
+
+import javax.persistence.Transient;
+
+import org.locationtech.jts.geom.Coordinate;
 
 /**
  * Collection of utilities shared with Desktop and Connect applications.
@@ -37,6 +37,8 @@ import java.util.Date;
  */
 public class SharedUtils {
 	
+	public static final String LINE_SEPARATOR = System.getProperty("line.separator"); //$NON-NLS-1$
+
 	/**
 	 * <p>
 	 * Strips double quotes off the beginning and end of the string
@@ -56,73 +58,6 @@ public class SharedUtils {
 			return str.substring(1, str.length() - 1);
 		}
 		return str;
-	}
-
-	/**
-	 * Gets only the date part of a given date. Sets the time to 0 is not
-	 * endOfDay; sets the time to 23:59:59 if end of day.
-	 * 
-	 * @param dt
-	 * @return date only date
-	 */
-	public static Date getDatePart(Date date, boolean endOfDay) {
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(date);
-		if (!endOfDay) {
-			calendar.set(Calendar.HOUR_OF_DAY, 0);
-			calendar.set(Calendar.MINUTE, 0);
-			calendar.set(Calendar.SECOND, 0);
-			calendar.set(Calendar.MILLISECOND, 0);
-		} else {
-			calendar.set(Calendar.HOUR_OF_DAY, 23);
-			calendar.set(Calendar.MINUTE, 59);
-			calendar.set(Calendar.SECOND, 59);
-			calendar.set(Calendar.MILLISECOND, 0);
-		}
-
-		return calendar.getTime();
-	}
-	
-
-	/**
-	 * converts a Date to a Calendar object
-	 */
-	public static Calendar convertDate(Date d) {
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(d);
-		return calendar;
-
-	}
-
-	public static boolean isSameDate(Date d1, Date d2) {
-		Calendar c1 = convertDate(d1);
-		Calendar c2 = convertDate(d2);
-		return c1.get(Calendar.DAY_OF_MONTH) == c2.get(Calendar.DAY_OF_MONTH) 
-				&& c1.get(Calendar.MONTH) == c2.get(Calendar.MONTH)
-				&& c1.get(Calendar.YEAR) == c2.get(Calendar.YEAR);
-	}
-
-	public static final String LINE_SEPARATOR = System.getProperty("line.separator"); //$NON-NLS-1$
-
-	/**
-	 * Compares the hour, minute, second and millisecond values of
-	 * the two date objects and returns true if they are the same, 
-	 * false otherwise
-	 * 
-	 * @param dt
-	 * @return date only date
-	 */
-	public static boolean isSameTime(Date date1, Date date2) {
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(date1);
-		Calendar calendar2 = Calendar.getInstance();
-		calendar2.setTime(date2);
-		
-		int[] compare = new int[]{Calendar.HOUR_OF_DAY, Calendar.MINUTE, Calendar.SECOND, Calendar.MILLISECOND};
-		for (int field : compare){
-			if( calendar.get(field) != calendar2.get(field) ) return false;
-		}
-		return true;
 	}
 	
 	/**
@@ -146,34 +81,32 @@ public class SharedUtils {
 		if (index < 0) return ""; //$NON-NLS-1$
 		return part.substring(index+1);
 	}
-	
-	public static Time createPatrolTime(int hours, int minute, int second){
-		Calendar cForProcessing = Calendar.getInstance();
-		cForProcessing.setTimeInMillis(0);
-		
-		cForProcessing.set(Calendar.HOUR_OF_DAY, hours);
-		cForProcessing.set(Calendar.MINUTE, minute);
-		cForProcessing.set(Calendar.SECOND, second);
-		cForProcessing.set(Calendar.MILLISECOND, 0);
-		
-		return new Time(cForProcessing.getTime().getTime());
-	}
-	
-	public static Time convertDateToTime(Date d){
-		Calendar c = Calendar.getInstance();
-		c.setTime(d);		
-		return createPatrolTime(c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), c.get(Calendar.SECOND));		
-	}
-	
-	
-	public static LocalDateTime toLocalDateTime(Date date) {
-		return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-	}
-	public static LocalDate toLocalDate(Date date) {
-		return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-	}
-	public static Date toDate(LocalDateTime date) {
-		return Date.from(date.atZone(ZoneId.systemDefault()).toInstant());
-	}
 
+	
+	/**
+	 * converts the z value from a track coordinate to a local date time
+	 * @param z
+	 * @return
+	 */
+	@Transient
+	public static LocalDateTime toLocalDateTime(long z) {
+		return LocalDateTime.ofInstant(Instant.ofEpochMilli(z), ZoneOffset.UTC);
+	}
+	/**
+	 * converst the z value from a track coordinate to the local date time
+	 * @param c
+	 * @return
+	 */
+	public static LocalDateTime toLocalDateTime(Coordinate c) {
+		return toLocalDateTime((long)c.getZ());
+	}
+	/**
+	 * converts a localdatetime to the z value for track coordinate
+	 * @param z
+	 * @return
+	 */
+	@Transient
+	public static long toLongTime(LocalDateTime datetime) {
+		return datetime.toInstant(ZoneOffset.UTC).toEpochMilli();		
+	}
 }

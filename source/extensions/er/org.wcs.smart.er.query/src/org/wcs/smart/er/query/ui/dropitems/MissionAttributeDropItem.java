@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.er.query.ui.dropitems;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -347,7 +349,7 @@ public class MissionAttributeDropItem extends DropItem implements IFilterDropIte
 			dtime1.addListener(SWT.Selection, new Listener(){
 				@Override
 				public void handleEvent(Event event) {
-					String newValue = (new java.sql.Date(SmartUtils.getDate(dtime1).getTime())).toString();
+					String newValue = DateTimeFormatter.ISO_LOCAL_DATE.format(SmartUtils.toDate(dtime1));
 					if (!newValue.equals(currentValue)){
 						queryChanged();
 						currentValue = newValue;
@@ -358,7 +360,7 @@ public class MissionAttributeDropItem extends DropItem implements IFilterDropIte
 			dtime2.addListener(SWT.Selection, new Listener(){
 				@Override
 				public void handleEvent(Event event) {
-					String newValue = (new java.sql.Date(SmartUtils.getDate(dtime2).getTime())).toString();
+					String newValue = DateTimeFormatter.ISO_LOCAL_DATE.format(SmartUtils.toDate(dtime2));
 					if (!newValue.equals(currentValue2)){
 						queryChanged();
 						currentValue2 = newValue;
@@ -386,10 +388,10 @@ public class MissionAttributeDropItem extends DropItem implements IFilterDropIte
 				value.setText(currentValue);
 			}
 			if (dtime1 != null && currentValue != null){
-				SmartUtils.initDateDateTimeWidget(dtime1, java.sql.Date.valueOf(currentValue));	
+				SmartUtils.initDateTimeWidget(dtime1, LocalDate.parse(currentValue,DateTimeFormatter.ISO_LOCAL_DATE) );	
 			}
 			if (dtime2 != null && currentValue2 != null){
-				SmartUtils.initDateDateTimeWidget(dtime2, java.sql.Date.valueOf(currentValue2));	
+				SmartUtils.initDateTimeWidget(dtime2, LocalDate.parse(currentValue2, DateTimeFormatter.ISO_LOCAL_DATE));	
 			}
 		}
 	}

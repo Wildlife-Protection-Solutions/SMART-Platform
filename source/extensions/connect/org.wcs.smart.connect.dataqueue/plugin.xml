@@ -188,6 +188,7 @@
                minimized="false"
                moveable="true"
                relationship="stack"
+               relative="*"
                showTitle="true"
                visible="false">
          </view>

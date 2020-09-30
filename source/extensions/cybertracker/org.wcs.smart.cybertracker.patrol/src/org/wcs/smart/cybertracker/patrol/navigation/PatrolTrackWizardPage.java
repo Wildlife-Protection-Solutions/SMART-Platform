@@ -21,8 +21,9 @@
  */
 package org.wcs.smart.cybertracker.patrol.navigation;
 
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -160,7 +161,7 @@ public class PatrolTrackWizardPage extends WizardPage {
 				if (element instanceof TrackPart) {
 					TrackPart pt = (TrackPart)element;
 					StringBuilder sb = new StringBuilder();
-					sb.append(  DateFormat.getDateInstance().format(pt.getTrack().getPatrolLegDay().getDate()));
+					sb.append(  DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(pt.getTrack().getPatrolLegDay().getDate()));
 					try {
 						if (pt.getTrack().getTrackParts().size() > 1)
 							sb.append( MessageFormat.format(" ({0}) ", + pt.getIndex())); //$NON-NLS-1$

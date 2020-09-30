@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.observation.common.importwp;
 
+import java.time.LocalDate;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -51,10 +51,10 @@ public abstract class GpxImportEngine implements IImportEngine{
 	}
 
 	@Override
-	public List<Waypoint> getWaypoints(ImportOption options, ImportType type, Date currentDate,
+	public List<Waypoint> getWaypoints(ImportOption options, ImportType type, LocalDate currentDate,
 			IProgressMonitor monitor) throws Exception {
 		
-		Date day = null;
+		LocalDate day = null;
 		if (options == ImportOption.DATE){
 			day = currentDate;
 		}

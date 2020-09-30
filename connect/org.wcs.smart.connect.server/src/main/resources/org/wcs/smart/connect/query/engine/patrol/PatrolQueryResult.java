@@ -121,8 +121,8 @@ public class PatrolQueryResult extends AbstractDbFeatureResultSet {
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
 		it.setPatrolUuid((UUID)rs.getObject("r_p_uuid")); //$NON-NLS-1$
 		it.setPatrolId(rs.getString("r_p_id")); //$NON-NLS-1$
-		it.setPatrolStartDate(rs.getDate("r_p_start_date")); //$NON-NLS-1$
-		it.setPatrolEndDate(rs.getDate("r_p_end_date")); //$NON-NLS-1$
+		it.setPatrolStartDate(rs.getDate("r_p_start_date").toLocalDate()); //$NON-NLS-1$
+		it.setPatrolEndDate(rs.getDate("r_p_end_date").toLocalDate()); //$NON-NLS-1$
 		it.setStation(rs.getString("p_station"));				 //$NON-NLS-1$
 		it.setTeam(rs.getString("p_team"));				 //$NON-NLS-1$
 		it.setObjective(rs.getString("r_p_objective")); //$NON-NLS-1$
@@ -131,8 +131,8 @@ public class PatrolQueryResult extends AbstractDbFeatureResultSet {
 		it.setArmed(rs.getBoolean("r_p_is_armed")); //$NON-NLS-1$
 		it.setTransportType(rs.getString("p_transporttype")); //$NON-NLS-1$
 		it.setPatrolLegId(rs.getString("r_pl_id")); //$NON-NLS-1$
-		it.setPatrolLegStartDate(rs.getDate("r_pl_start_date")); //$NON-NLS-1$
-		it.setPatrolLegEndDate(rs.getDate("r_pl_end_date")); //$NON-NLS-1$
+		it.setPatrolLegStartDate(rs.getDate("r_pl_start_date").toLocalDate()); //$NON-NLS-1$
+		it.setPatrolLegEndDate(rs.getDate("r_pl_end_date").toLocalDate()); //$NON-NLS-1$
 		it.setLeader(engine.getEmployeeName((UUID)rs.getObject("r_plm_leader"), session)); //$NON-NLS-1$
 		it.setPilot(engine.getEmployeeName((UUID)rs.getObject("r_plm_pilot"), session)); //$NON-NLS-1$
 		it.addTrack(rs.getBytes("track")); //$NON-NLS-1$

@@ -24,8 +24,9 @@ package org.wcs.smart.i2.ui.entity.exporter;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -142,9 +143,9 @@ public class RecordCsvExporter implements ICsvDataExporter {
 				headers.clear();
 
 				headers.add(r.getTitle());
-				headers.add(DateFormat.getDateInstance().format(r.getPrimaryDate()));
-				headers.add(DateFormat.getDateInstance().format(r.getDateCreated()));
-				headers.add(DateFormat.getDateInstance().format(r.getDateModified()));
+				headers.add(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(r.getPrimaryDate()));
+				headers.add(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(r.getDateCreated()));
+				headers.add(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(r.getDateModified()));
 				headers.add(ll.getLabel(r.getStatus(), Locale.getDefault()));
 				headers.add(r.getRecordSource() == null ? "" : r.getRecordSource().getName()); //$NON-NLS-1$
 				headers.add(r.getProfile().getName());

@@ -21,8 +21,9 @@
  */
 package org.wcs.smart.query.common.ui.edit;
 
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -229,7 +230,8 @@ public class EditObservationDialog extends SmartStyledTitleDialog{
 		if (toEdit.getObservationGroup() == null){
 			setMessage(Messages.EditObservationDialog_NewMessage);
 		}else{
-			setMessage(MessageFormat.format(Messages.EditObservationDialog_EditMessage, DateFormat.getDateTimeInstance().format(toEdit.getWaypoint().getDateTime()), toEdit.getWaypoint().getId()));
+			setMessage(MessageFormat.format(Messages.EditObservationDialog_EditMessage, 
+					DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(toEdit.getWaypoint().getDateTime()), toEdit.getWaypoint().getId()));
 		}
 		getShell().setText(Messages.EditObservationDialog_ShellTitle);
 		return parent;

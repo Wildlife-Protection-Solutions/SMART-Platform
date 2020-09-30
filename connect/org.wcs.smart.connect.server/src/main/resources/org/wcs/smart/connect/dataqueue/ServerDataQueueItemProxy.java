@@ -21,10 +21,15 @@
  */
 package org.wcs.smart.connect.dataqueue;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.wcs.smart.connect.dataqueue.model.DataQueueItem;
+import org.wcs.smart.connect.util.LocalDateTimeDeserializer;
+import org.wcs.smart.connect.util.LocalDateTimeSerializer;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
  * Proxy item for DataQueues
@@ -37,12 +42,12 @@ public class ServerDataQueueItemProxy extends DataQueueItem implements Comparabl
 	
 	private String caName;
 	private ServerDataQueueItem.Status status;
-	private Date lastModifiedDate;
-	private Date uploadedDate;
+	private LocalDateTime lastModifiedDate;
+	private LocalDateTime uploadedDate;
 	private String uploadedBy;
 	
 	public ServerDataQueueItemProxy(UUID uuid, String name, UUID caUuid, String caName, 
-			String type, ServerDataQueueItem.Status status, Date lastModifiedDate, Date uploadDate, String uploadBy){
+			String type, ServerDataQueueItem.Status status, LocalDateTime lastModifiedDate, LocalDateTime uploadDate, String uploadBy){
 		setUuid(uuid);
 		setName(name);
 		setType(type);
@@ -61,10 +66,16 @@ public class ServerDataQueueItemProxy extends DataQueueItem implements Comparabl
 	public ServerDataQueueItem.Status getStatus(){
 		return this.status;
 	}
-	public Date getUploadedDate(){
+	
+	@JsonDeserialize(using = LocalDateTimeDeserializer.class)  
+	@JsonSerialize(using = LocalDateTimeSerializer.class)
+	public LocalDateTime getUploadedDate(){
 		return this.uploadedDate;
 	}
-	public Date getLastModifiedDate(){
+	
+	@JsonDeserialize(using = LocalDateTimeDeserializer.class)  
+	@JsonSerialize(using = LocalDateTimeSerializer.class)
+	public LocalDateTime getLastModifiedDate(){
 		return this.lastModifiedDate;
 	}
 	public String getUploadedBy(){
@@ -73,7 +84,7 @@ public class ServerDataQueueItemProxy extends DataQueueItem implements Comparabl
 
 	//sort by Date 
 	public int compareTo(ServerDataQueueItemProxy compare) {
-		Date compareDate = ((ServerDataQueueItemProxy) compare).getUploadedDate(); 
+		LocalDateTime compareDate = ((ServerDataQueueItemProxy) compare).getUploadedDate(); 
 		return -this.uploadedDate.compareTo(compareDate);
 	}
 }

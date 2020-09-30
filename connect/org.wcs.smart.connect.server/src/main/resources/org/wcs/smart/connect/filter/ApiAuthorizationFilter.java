@@ -23,7 +23,8 @@ package org.wcs.smart.connect.filter;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -39,7 +40,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.hibernate.Session;
-import org.jboss.resteasy.util.Base64;
 import org.wcs.smart.connect.api.ConnectRESTApplication;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.i18n.Messages;
@@ -121,9 +121,7 @@ public class ApiAuthorizationFilter implements Filter {
 			
 			if (link != null){
 				//check if link is still valid
-				java.util.Date today = new java.util.Date();
-				Timestamp now = new Timestamp(today.getTime());
-				if(link.getExpiresAt().before(now)){
+				if(link.getExpiresAt().isBefore(LocalDateTime.now())){
 					((HttpServletResponse)response).sendError(HttpServletResponse.SC_NOT_FOUND, Messages.getString("SharedLinkServlet.LinkExpired", request.getLocale())); //$NON-NLS-1$
 					return;
 				}else{
@@ -152,7 +150,7 @@ public class ApiAuthorizationFilter implements Filter {
 				String[] bits = auth.split("\\s+"); //$NON-NLS-1$
 						
 				if (bits[0].equalsIgnoreCase("BASIC")){ //$NON-NLS-1$
-					String info = new String(Base64.decode(bits[1]));
+					String info = new String(Base64.getDecoder().decode(bits[1]));
 					int colon = info.indexOf(':');
 					if (colon >= 0){
 						String user = info.substring(0,colon);

@@ -4,7 +4,6 @@ import java.net.URL;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.SystemUtils;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -20,7 +19,6 @@ import org.eclipse.e4.ui.widgets.ImageBasedFrame;
 import org.eclipse.e4.ui.workbench.IPresentationEngine;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.renderers.swt.ToolBarManagerRenderer;
-import org.eclipse.e4.ui.workbench.renderers.swt.TrimBarLayout;
 import org.eclipse.jface.action.IContributionManagerOverrides;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.resource.ImageDescriptor;

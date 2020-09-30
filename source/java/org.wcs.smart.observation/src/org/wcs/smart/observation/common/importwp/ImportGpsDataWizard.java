@@ -22,8 +22,8 @@
 package org.wcs.smart.observation.common.importwp;
 
 import java.text.MessageFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IPageChangingListener;
@@ -52,7 +52,7 @@ public abstract class ImportGpsDataWizard extends Wizard implements IPageChangin
 	
 	private List<Waypoint> importedData = null;
 	
-	private Date date;
+	private LocalDate date;
 	
 	private boolean canFinish = false;
 	/**
@@ -104,10 +104,10 @@ public abstract class ImportGpsDataWizard extends Wizard implements IPageChangin
 		return this.type;
 	}
 	
-	public Date getDateOption() {
+	public LocalDate getDateOption() {
 		return date;
 	}
-	public void setDateOption(Date date) {
+	public void setDateOption(LocalDate date) {
 		this.date = date;
 	}
 	

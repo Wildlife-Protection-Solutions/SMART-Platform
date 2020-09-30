@@ -1,7 +1,7 @@
 package org.wcs.smart.ca.datamodel;
 
 import java.text.MessageFormat;
-import java.util.Date;
+import java.time.LocalDate;
 
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.internal.Messages;
@@ -125,7 +125,7 @@ public class AttributeValidator {
 	}
 	
 	public static String validateDate(Attribute attribute, Object value){
-		if (value != null && !(value instanceof Date)){
+		if (value != null && !(value instanceof LocalDate)){
 			return MessageFormat.format(INVALID_ATT_VALUE_ERROR_MSG, new Object[]{ attribute.getName()});
 		}
 	

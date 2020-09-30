@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.er.ui.handlers;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.Iterator;
 import java.util.UUID;
 
@@ -133,7 +133,7 @@ public class EditSurveyElementHandler {
 	 * @param missionUuid
 	 * @param name
 	 */
-	public static final IEditorPart editMission(Shell parentShell, UUID missionUuid, String name, Date missionDay){
+	public static final IEditorPart editMission(Shell parentShell, UUID missionUuid, String name, LocalDate missionDay){
 		IEditorPart editor = editMission(parentShell, missionUuid, name);
 		if (editor == null || missionDay == null) return editor; 
 		if (editor instanceof MissionEditor ){

@@ -21,18 +21,17 @@
  */
 package org.wcs.smart.query.common.engine;
 
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.wcs.smart.map.GeometryFactoryProvider;
-import org.wcs.smart.query.common.model.Grid;
-import org.wcs.smart.query.common.model.Tile;
-import org.wcs.smart.util.GeometryUtils;
-
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.wcs.smart.map.GeometryFactoryProvider;
+import org.wcs.smart.query.common.model.Grid;
+import org.wcs.smart.query.common.model.Tile;
+import org.wcs.smart.util.GeometryUtils;
 
 /**
  * Value computer that computes

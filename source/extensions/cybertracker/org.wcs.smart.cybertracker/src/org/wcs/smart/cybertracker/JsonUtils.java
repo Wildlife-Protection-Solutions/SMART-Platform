@@ -23,10 +23,12 @@ package org.wcs.smart.cybertracker;
 
 import java.text.MessageFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -59,16 +61,25 @@ public class JsonUtils {
 	 * JSON dates come in the format "yyyy-MM-dd'T'HH:mm:ss.SSSXXX" where
 	 * the time is the local time and the time we want to use.  We want to 
 	 * throw out the timezone information because we don't care about that 
-	 * and it causes issues with conversions if the local compute is in 
+	 * and it causes issues with conversions if the local computer is in 
 	 * a different timezone from other computers.
 	 * @param value
 	 * @throws ParseException 
 	 */
 	//example string: "2019-12-30T22:48:26.0-08:00"
+	private static final String JSON_DATE_FORMAT_STRX = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX"; //$NON-NLS-1$
 	private static final String JSON_DATE_FORMAT_STR = "yyyy-MM-dd'T'HH:mm:ss.SSS"; //$NON-NLS-1$
+	
 
-	public static Date parseJsonDateTime(String value) throws ParseException {
-		return new SimpleDateFormat(JSON_DATE_FORMAT_STR).parse(value);
+	public static LocalDateTime parseJsonDateTime(String value) throws DateTimeParseException {
+		try {
+			//this parses the date/time string throwing out any timezone information
+			return LocalDateTime.parse(value, DateTimeFormatter.ofPattern(JSON_DATE_FORMAT_STRX));
+		}catch (DateTimeParseException ex) {
+			
+		}
+		return LocalDateTime.parse(value, DateTimeFormatter.ofPattern(JSON_DATE_FORMAT_STR));
+
 	}
 		
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -140,17 +151,17 @@ public class JsonUtils {
 				toUpdate.setNumberValue(0.0);
 			}
 		}else if (att.getType() == AttributeType.DATE){
-			Date date = null;
+			LocalDateTime date = null;
 			try {
 				date = parseJsonDateTime((String)value);				
 			}catch (Exception ex) {}
 			try {
-				date = new SimpleDateFormat(JSON_ATTRIBUTE_DATE_FORMAT_STR).parse((String)value);
+				date = LocalDate.parse((String)value, DateTimeFormatter.ofPattern(JSON_ATTRIBUTE_DATE_FORMAT_STR)).atStartOfDay();
 			}catch (Exception ex) {}
 			
 			if (date == null) throw new Exception(MessageFormat.format(Messages.JsonUtils_InvalidDate, value, JSON_DATE_FORMAT_STR, JSON_ATTRIBUTE_DATE_FORMAT_STR));
 
-			toUpdate.setDateValue(date);
+			toUpdate.setDateValue(date.toLocalDate());
 		}else if (att.getType() == AttributeType.LIST){
 			String listElement = (String) value;
 			if (!listElement.startsWith(JsonKey.ATTRIBUTE_LIST.key + CyberTrackerConfExporter.KEY_SEP)) throw new Exception(Messages.JsonUtils_InvalidListAttribute +listElement);

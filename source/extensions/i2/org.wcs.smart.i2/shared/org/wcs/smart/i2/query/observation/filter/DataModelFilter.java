@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.i2.query.observation.filter;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.i2.query.Operator;
@@ -78,10 +78,10 @@ public class DataModelFilter implements IQueryFilter, IColumnIdentifierProvider 
 	}
 	
 	//dates
-	public static DataModelFilter create(String key, Operator operator, Date date1, Date date2){
+	public static DataModelFilter create(String key, Operator operator, LocalDate date1, LocalDate date2){
 		DataModelFilter filter = createCore(key);
 		filter.operator = operator;
-		filter.dateValues = new Date[]{date1, date2};
+		filter.dateValues = new LocalDate[]{date1, date2};
 		return filter;
 	}
 	
@@ -111,7 +111,7 @@ public class DataModelFilter implements IQueryFilter, IColumnIdentifierProvider 
 	private Double numberValue = null;
 	private String stringValue = null;
 	private String keyValue = null;
-	private Date[] dateValues = null;
+	private LocalDate[] dateValues = null;
 	
 	public DataModelFilter(String categoryKey){
 		this.categoryKey = categoryKey;
@@ -140,7 +140,7 @@ public class DataModelFilter implements IQueryFilter, IColumnIdentifierProvider 
 		this.keyValue = keyId;
 	}
 	
-	public DataModelFilter(Attribute.AttributeType type, String attributeKey, String categoryKey, Operator operator, Date[] dates){
+	public DataModelFilter(Attribute.AttributeType type, String attributeKey, String categoryKey, Operator operator, LocalDate[] dates){
 		this(type, attributeKey, categoryKey);
 		this.operator = operator;
 		this.dateValues = dates;
@@ -170,7 +170,7 @@ public class DataModelFilter implements IQueryFilter, IColumnIdentifierProvider 
 	public String getKeyValue(){
 		return this.keyValue;
 	}
-	public Date[] getDateValues(){
+	public LocalDate[] getDateValues(){
 		return this.dateValues;
 	}
 
@@ -190,9 +190,9 @@ public class DataModelFilter implements IQueryFilter, IColumnIdentifierProvider 
 				case DATE:
 					sb.append(operator.name());
 					sb.append("_"); //$NON-NLS-1$
-					sb.append(dateValues[0].getTime());
+					sb.append(dateValues[0].toString());
 					sb.append("_"); //$NON-NLS-1$
-					sb.append(dateValues[1].getTime());
+					sb.append(dateValues[1].toString());
 					break;
 				case LIST:
 				case TREE:

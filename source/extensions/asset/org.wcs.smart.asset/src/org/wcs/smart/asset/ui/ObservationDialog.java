@@ -24,7 +24,6 @@ package org.wcs.smart.asset.ui;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -89,7 +88,6 @@ import org.wcs.smart.ui.ca.datamodel.IAttributeField;
 import org.wcs.smart.ui.properties.DataModelContentProvider;
 import org.wcs.smart.ui.properties.DataModelLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
-import org.wcs.smart.util.SharedUtils;
 
 /**
  * Dialog for editing observation details.
@@ -659,10 +657,8 @@ public class ObservationDialog extends SmartStyledDialog {
 					a.setNumberValue((Double)value);
 					break;
 				case DATE:
-					if (value instanceof Date) {
-						a.setDateValue((Date)value);
-					}else if (value instanceof LocalDate) {
-						a.setDateValue(SharedUtils.toDate( ((LocalDate)value).atStartOfDay() ));
+					if (value instanceof LocalDate) {
+						a.setDateValue( (LocalDate)value );
 					}
 					break;
 				case LIST:

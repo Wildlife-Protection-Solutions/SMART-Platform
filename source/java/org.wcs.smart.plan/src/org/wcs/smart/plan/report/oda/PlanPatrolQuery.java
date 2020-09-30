@@ -21,8 +21,9 @@
  */
 package org.wcs.smart.plan.report.oda;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -114,17 +115,16 @@ public class PlanPatrolQuery extends SmartQuery {
 		org.hibernate.query.Query<?> q = connection.getSession().createQuery(hql);
 		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		List<?> data = q.list();
-		Date startdate = null;
+		LocalDate startdate = null;
 		if (data != null && data.size() >= 1 && data.get(0) != null) {
-			startdate = (java.sql.Timestamp) data.get(0);
-			super.setObject(SmartParameterMetaData.Parameter.STARTDATE.guiName,
-					new java.sql.Date(startdate.getTime()));
+			startdate = (LocalDate) data.get(0);
+			super.setObject(SmartParameterMetaData.Parameter.STARTDATE.guiName, java.sql.Date.valueOf(startdate));
 		}
 	
 		// today + one day
 		// add one day just to make sure we get everything
-		super.setObject(SmartParameterMetaData.Parameter.ENDDATE.guiName, 
-				new java.sql.Date((new Date()).getTime() + (86400000l * 365))); 
+		LocalDate e = ChronoUnit.DAYS.addTo(LocalDate.now(), 1);
+		super.setObject(SmartParameterMetaData.Parameter.ENDDATE.guiName, java.sql.Date.valueOf(e)); 
 		
 		this.wrapperObject.prepare(this, connection);
 		return wrapperObject.executeQuery(this, connection);

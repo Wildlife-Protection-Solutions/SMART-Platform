@@ -21,8 +21,9 @@
  */
 package org.wcs.smart.incident.ui;
 
-import java.text.DateFormat;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -128,7 +129,7 @@ public class IndIncidentListView implements IIncidentFilteringView {
 					int i = 0;
 					for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
 						Object[] data = (Object[]) iterator.next();					
-						input[i++] = new IncidentEditorInput((UUID)data[0], (Integer)data[1], (Date)data[2], (String)data[3]);
+						input[i++] = new IncidentEditorInput((UUID)data[0], (Integer)data[1], (LocalDateTime)data[2], (String)data[3]);
 					}
 					
 					monitor.internalWorked(0.5);
@@ -205,7 +206,12 @@ public class IndIncidentListView implements IIncidentFilteringView {
 			@Override
 			public String getText(Object element) {
 				if (element instanceof IncidentEditorInput){
-					return ((IncidentEditorInput)element).getId() + "  [" + DateFormat.getDateInstance(DateFormat.SHORT).format( ((IncidentEditorInput)element).getDateTime()) + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+					StringBuilder sb = new StringBuilder();
+					sb.append(((IncidentEditorInput)element).getId());
+					sb.append(" ["); //$NON-NLS-1$
+					sb.append(DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).format(((IncidentEditorInput)element).getDateTime()) );
+					sb.append("]"); //$NON-NLS-1$
+					return sb.toString();
 				}
 				return super.getText(element);
 			}

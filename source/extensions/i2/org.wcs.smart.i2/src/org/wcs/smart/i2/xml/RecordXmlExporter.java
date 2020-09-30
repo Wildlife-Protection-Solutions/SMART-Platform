@@ -26,16 +26,14 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.UUID;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-import javax.xml.datatype.DatatypeFactory;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
@@ -209,9 +207,7 @@ public class RecordXmlExporter {
 		xmlRecord.setTitle(record.getTitle());
 		xmlRecord.setStatus(record.getStatus().name());
 		xmlRecord.setProfileKey(record.getProfile().getKeyId());
-		GregorianCalendar cal = new GregorianCalendar();
-		cal.setTime(record.getPrimaryDate());
-		xmlRecord.setPrimaryDate(DatatypeFactory.newInstance().newXMLGregorianCalendar(cal));
+		xmlRecord.setPrimaryDate(SmartUtils.toXmlDateTime(record.getPrimaryDate()));
 		
 		if (record.getDescription() != null) xmlRecord.setNarrative(record.getDescription());
 		if (record.getComment() != null) xmlRecord.setScratchpad(record.getComment());
@@ -316,7 +312,7 @@ public class RecordXmlExporter {
 			}
 		}
 		
-		SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STR);
+		DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern(DATE_FORMAT_STR);
 		if (record.getLocations() != null){
 			for (IntelLocation location : record.getLocations()){
 				LocationType xmlLocation = factory.createLocationType();

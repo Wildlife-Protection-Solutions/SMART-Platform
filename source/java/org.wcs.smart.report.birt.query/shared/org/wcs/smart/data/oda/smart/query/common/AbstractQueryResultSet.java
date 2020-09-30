@@ -25,6 +25,9 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import org.eclipse.datatools.connectivity.oda.IBlob;
 import org.eclipse.datatools.connectivity.oda.IClob;
@@ -227,6 +230,10 @@ public abstract class AbstractQueryResultSet implements IResultSet {
 			return new Date(((java.util.Date) lastObject).getTime());
 		} else if (lastObject == null){
 			return null;
+		} else if (lastObject instanceof LocalDate) {
+			return Date.valueOf( (LocalDate)lastObject );
+		} else if (lastObject instanceof LocalDateTime) {
+			return Date.valueOf( ((LocalDateTime)lastObject).toLocalDate() );
 		}
 		throw new UnsupportedOperationException();
 	}
@@ -253,6 +260,10 @@ public abstract class AbstractQueryResultSet implements IResultSet {
 			return new Time(((java.util.Date)lastObject).getTime());
 		}else if (lastObject == null){
 			return null;
+		} else if (lastObject instanceof LocalTime) {
+			return Time.valueOf( (LocalTime)lastObject );
+		} else if (lastObject instanceof LocalDateTime) {
+			return Time.valueOf( ((LocalDateTime)lastObject).toLocalTime() );
 		}
 		throw new UnsupportedOperationException();
 	}
@@ -273,6 +284,8 @@ public abstract class AbstractQueryResultSet implements IResultSet {
 		lastObject = getCurrentItem(index);
 		if (lastObject instanceof Timestamp) {
 			return (Timestamp) lastObject;
+		}else if (lastObject instanceof LocalDateTime) {
+			return Timestamp.valueOf((LocalDateTime) lastObject);
 		}else if (lastObject == null) {
 			return null;
 		}

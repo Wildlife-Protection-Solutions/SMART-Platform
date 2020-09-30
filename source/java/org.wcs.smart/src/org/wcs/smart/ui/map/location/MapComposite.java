@@ -49,6 +49,7 @@ import org.geotools.data.FeatureStore;
 import org.geotools.data.collection.ListFeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.styling.Style;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.project.ILayer;
@@ -85,8 +86,6 @@ import org.wcs.smart.ui.map.tool.ZoomInTool;
 import org.wcs.smart.ui.map.tool.ZoomOutTool;
 import org.wcs.smart.ui.map.tool.ZoomTool;
 import org.wcs.smart.util.GeometryUtils;
-
-import org.locationtech.jts.geom.Coordinate;
 
 /**
  * Map Composite

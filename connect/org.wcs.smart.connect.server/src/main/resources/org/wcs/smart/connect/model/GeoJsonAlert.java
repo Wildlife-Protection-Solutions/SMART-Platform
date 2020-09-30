@@ -21,10 +21,12 @@
  */
 package org.wcs.smart.connect.model;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.UUID;
 
 import org.wcs.smart.connect.model.Alert.AlertStatusEnum;
@@ -62,15 +64,15 @@ public class GeoJsonAlert{
 		return features.get(0).getProperties().getId();
 	}
 	
-	public Date getDateTime() {
-		Date date = null;
+	public ZonedDateTime getDateTime() {
+		ZonedDateTime date = null;
 		String dateString = features.get(0).getProperties().getDateTime();
 		if (dateString == null || dateString == "") return null; //$NON-NLS-1$
 
 		try {
-			SimpleDateFormat f = new SimpleDateFormat(DATE_FORMAT_STR);
-			date = f.parse(dateString);
-		} catch (ParseException e) {
+			DateTimeFormatter f = DateTimeFormatter.ofPattern(DATE_FORMAT_STR);
+			date = ZonedDateTime.parse(dateString,f);
+		} catch (DateTimeParseException e) {
 			e.printStackTrace();
 		}
 		return date;
@@ -133,7 +135,7 @@ public class GeoJsonAlert{
 
     	//default to now if no date given 
 		if(getDateTime() == null){
-			a.setDate(new Date());
+			a.setDate(LocalDateTime.now().atZone(ZoneId.systemDefault()));
 		}else{
 			a.setDate(getDateTime());
 		}

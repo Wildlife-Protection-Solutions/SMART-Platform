@@ -22,7 +22,8 @@
 package org.wcs.smart.patrol.query.ui.editor;
 
 import java.awt.Point;
-import java.text.DateFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,6 +34,7 @@ import java.util.UUID;
 
 import org.eclipse.swt.widgets.Display;
 import org.geotools.referencing.CRS;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.udig.project.render.IViewportModel;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
@@ -46,9 +48,6 @@ import org.wcs.smart.query.common.model.ISearchabledResultSet;
 import org.wcs.smart.query.common.ui.QueryResultsEditor;
 import org.wcs.smart.udig.IMapEditManager;
 import org.wcs.smart.util.ReprojectUtils;
-import org.wcs.smart.util.SmartUtils;
-
-import org.locationtech.jts.geom.Coordinate;
 
 /**
  * Map edit manager for moving waypoints on a patrol query 
@@ -194,7 +193,7 @@ public class MapWaypointEditManager implements IMapEditManager {
 			
 				sb.append(first.getPatrolId() + " (" + first.getWaypointId() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 				sb.append("\n"); //$NON-NLS-1$
-				sb.append(DateFormat.getDateTimeInstance().format(SmartUtils.combineDateTime(first.getWpDateTime(), first.getWaypointTime())));
+				sb.append(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(first.getWpDateTime().atTime(first.getWaypointTime())));
 				sb.append("\n"); //$NON-NLS-1$
 				
 				for (PatrolQueryResultItem result : item.getValue()){

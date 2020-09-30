@@ -21,8 +21,11 @@
  */
 package org.wcs.smart.er.ui.mision;
 
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.time.temporal.ChronoUnit;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -78,34 +81,34 @@ public class DateComposite extends MissionComposite {
 	@Override
 	public boolean isValid() {
 		if (dates.getEndDate() != null && dates.getStartDate() != null){
-			if (dates.getEndDate().before(dates.getStartDate())){
+			if (dates.getEndDate().isBefore(dates.getStartDate())){
 				return false;
 			}
 		}
 		if (mission.getSurvey().getStartDate() != null && mission.getSurvey().getEndDate() != null){
-			if (dates.getStartDate().before( mission.getSurvey().getStartDate()) ||
-				dates.getEndDate().before(mission.getSurvey().getStartDate()) ||
-				dates.getEndDate().after(mission.getSurvey().getEndDate()) ||
-				dates.getStartDate().after(mission.getSurvey().getEndDate())){
+			if (dates.getStartDate().isBefore( mission.getSurvey().getStartDate()) ||
+				dates.getEndDate().isBefore(mission.getSurvey().getStartDate()) ||
+				dates.getEndDate().isAfter(mission.getSurvey().getEndDate()) ||
+				dates.getStartDate().isAfter(mission.getSurvey().getEndDate())){
 				
 				dates.setError(MessageFormat.format(
 						Messages.DateComposite_DateError,
-						new Object[]{DateFormat.getDateInstance().format(mission.getSurvey().getStartDate()),
-								DateFormat.getDateInstance().format(mission.getSurvey().getEndDate())}));
+						new Object[]{DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(mission.getSurvey().getStartDate()),
+								DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(mission.getSurvey().getEndDate())}));
 						
 				return false;
 			}
 		}
-		long startD = dates.getStartDate().getTime();
-		long endD = dates.getEndDate().getTime();
-		
-		if (startD + Mission.MAX_MISSION_LENGTH_DAYS * 24 * 60 * 60 * 1000.0 < endD){
+		LocalDate startD = dates.getStartDate();
+		LocalDate endD = dates.getEndDate();
+		long diff = ChronoUnit.DAYS.between(startD,  endD); 
+		if ( diff > Mission.MAX_MISSION_LENGTH_DAYS ){
 			String error = MessageFormat.format(
 						Messages.DateComposite_MaxMissionLength,
 						new Object[]{ Mission.MAX_MISSION_LENGTH_DAYS});
 			dates.setError(error);
 			return false;
-		}else if(startD + Mission.WARN_MISSION_LENGTH_DAYS * 24 * 60 * 60 * 1000.0 < endD){
+		}else if(diff > Mission.WARN_MISSION_LENGTH_DAYS ){
 			String warning = 
 					MessageFormat.format(
 							Messages.DateComposite_WarnMissionLength,

@@ -32,6 +32,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.locationtech.udig.project.ui.commands.AbstractDrawCommand;
 import org.locationtech.udig.project.ui.commands.SelectionBoxCommand;
@@ -41,8 +42,6 @@ import org.locationtech.udig.project.ui.tool.SimpleTool;
 import org.locationtech.udig.tool.info.internal.InfoView2;
 import org.locationtech.udig.ui.graphics.ViewportGraphics;
 import org.wcs.smart.ui.map.tool.IInfoToolProvider.InfoPoint;
-
-import org.locationtech.jts.geom.Coordinate;
 
 /**
  * A tool that puts a BBOX Filter on the layer's Filter.  

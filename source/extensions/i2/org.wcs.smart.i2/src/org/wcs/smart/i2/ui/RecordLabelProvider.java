@@ -21,8 +21,9 @@
  */
 package org.wcs.smart.i2.ui;
 
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.Locale;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -53,11 +54,11 @@ public class RecordLabelProvider extends ColumnLabelProvider{
 		public String getLabel(IntelRecord record){
 			switch(this){
 			case DATE_CREATED:
-				return DateFormat.getDateInstance().format(record.getDateCreated());
+				return DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(record.getDateCreated());
 			case LAST_MODIFIED:
-				return DateFormat.getDateInstance().format(record.getDateModified());
+				return DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(record.getDateModified());
 			case PRIMARY_DATE:
-				return DateFormat.getDateInstance().format(record.getPrimaryDate());
+				return DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(record.getPrimaryDate());
 			case STATUS:
 				return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(record.getStatus(), Locale.getDefault());
 			case SOURCE:
@@ -66,7 +67,7 @@ public class RecordLabelProvider extends ColumnLabelProvider{
 			case TITLE:
 				return record.getTitle();
 			case TITLE_CREATED:
-				return MessageFormat.format(Messages.RecordLabelProvider_0Title1DateCreated, record.getTitle(), DateFormat.getDateInstance().format(record.getDateCreated()));
+				return MessageFormat.format(Messages.RecordLabelProvider_0Title1DateCreated, record.getTitle(), DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(record.getDateCreated()));
 			default:
 				break;
 			
@@ -93,7 +94,7 @@ public class RecordLabelProvider extends ColumnLabelProvider{
 		}else if (element instanceof RecordEditorInput && field == RecordField.TITLE){
 			return ((RecordEditorInput) element).getName();
 		}else if (element instanceof RecordEditorInput && field == RecordField.TITLE_CREATED){
-			return MessageFormat.format(Messages.RecordLabelProvider_0Name1DateCreated, ((RecordEditorInput) element).getName(), DateFormat.getDateInstance().format(((RecordEditorInput) element).getDateCreated()));
+			return MessageFormat.format(Messages.RecordLabelProvider_0Name1DateCreated, ((RecordEditorInput) element).getName(), DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(((RecordEditorInput) element).getDateCreated()));
 		}
 		return super.getText(element);
 	}

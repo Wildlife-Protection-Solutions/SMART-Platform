@@ -24,8 +24,9 @@ package org.wcs.smart.asset.query.engine;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Map.Entry;
 
@@ -189,17 +190,17 @@ public class AssetDeploymentFilterProcessor implements IFilterProcessor{
 		sql.append(prefix(AssetDeployment.class) + ".uuid, "); //$NON-NLS-1$
 		
 		
-		java.sql.Date[] bits = dateFilter.getDateFilterOption().getDates(); 
+		LocalDate[] bits = dateFilter.getDateFilterOption().getDates(); 
 		
-		Timestamp filterStart = null;
-		Timestamp filterEnd = null;
+		LocalDateTime filterStart = null;
+		LocalDateTime filterEnd = null;
 		
 		if (bits != null){
 			if (bits.length == 1){
-				filterStart = Timestamp.valueOf( bits[0].toLocalDate().atTime(LocalTime.MIDNIGHT) );
+				filterStart = bits[0].atTime(LocalTime.MIDNIGHT) ;
 			}else if (bits.length == 2){
-				filterStart = Timestamp.valueOf( bits[0].toLocalDate().atTime(LocalTime.MIDNIGHT) );
-				filterEnd = Timestamp.valueOf( bits[1].toLocalDate().atTime(LocalTime.MAX) );
+				filterStart = bits[0].atTime(LocalTime.MIDNIGHT);
+				filterEnd = bits[1].atTime(LocalTime.MAX);
 			}else {
 				throw new IllegalStateException(Messages.AssetDeploymentFilterProcessor_InvalidDateFilter);
 			}
@@ -306,23 +307,23 @@ public class AssetDeploymentFilterProcessor implements IFilterProcessor{
 
 		if (dateFilter != null) {
 
-			java.sql.Date[] bits = dateFilter.getDateFilterOption().getDates(); 
+			LocalDate[] bits = dateFilter.getDateFilterOption().getDates(); 
 			
 			if (bits != null){
 				StringBuilder df = new StringBuilder();
 				String startField = prefix(AssetDeployment.class) + ".start_date"; //$NON-NLS-1$
 				String endField = prefix(AssetDeployment.class) + ".end_date"; //$NON-NLS-1$
 				if (bits.length == 1){
-					String p1 = engine.addParameterValue(bits[0]);
-					String p2 = engine.addParameterValue(bits[0]);
+					String p1 = engine.addParameterValue(bits[0].atStartOfDay());
+					String p2 = engine.addParameterValue(bits[0].atTime(LocalTime.MAX));
 					
 					df.append("( "); //$NON-NLS-1$
 					df.append(" ( cast(" + startField + " as date) >= " + p1 ); //$NON-NLS-1$ //$NON-NLS-2$
 					df.append(" and cast(" + startField + " as date) <= " + p2 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					df.append(")"); //$NON-NLS-1$
 				}else if (bits.length == 2 && dateFilter.getDateFilterOption().isEndDateInclusive()){
-					String p1 = engine.addParameterValue(bits[0]);
-					String p2 = engine.addParameterValue(bits[1]);
+					String p1 = engine.addParameterValue(bits[0].atStartOfDay());
+					String p2 = engine.addParameterValue(bits[1].atTime(LocalTime.MAX));
 					
 					df.append("( "); //$NON-NLS-1$
 					df.append(" ( cast(" + startField + " as date) >= " + p1 ); //$NON-NLS-1$ //$NON-NLS-2$
@@ -336,8 +337,8 @@ public class AssetDeploymentFilterProcessor implements IFilterProcessor{
 					df.append(")"); //$NON-NLS-1$
 					
 				}else if (bits.length == 2){
-					String p1 = engine.addParameterValue(bits[0]);
-					String p2 = engine.addParameterValue(bits[1]);
+					String p1 = engine.addParameterValue(bits[0].atStartOfDay());
+					String p2 = engine.addParameterValue(bits[1].atStartOfDay());
 					
 					df.append("( "); //$NON-NLS-1$
 					df.append(" ( cast(" + startField + " as date) >= " + p1 ); //$NON-NLS-1$ //$NON-NLS-2$

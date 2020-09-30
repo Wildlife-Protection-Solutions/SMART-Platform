@@ -27,7 +27,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
@@ -103,7 +104,7 @@ public class UploadChangeLogEngine {
 				throw nothingtoUpdate;
 			}
 			if (previous != null && 
-					previous.getDatetime().getTime() < ((new Date()).getTime() - DerbyReplicationManager.REPLICATION_MAXTIME_DAYS * 24 * 60 * 60 *1000l)){
+					ChronoUnit.DAYS.between(previous.getDatetime(), LocalDateTime.now()) > DerbyReplicationManager.REPLICATION_MAXTIME_DAYS ){
 				throw new Exception(MessageFormat.format(Messages.UploadChangeLogEngine_TooOld, DerbyReplicationManager.REPLICATION_MAXTIME_DAYS));
 			}
 			record = null;

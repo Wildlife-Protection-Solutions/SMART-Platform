@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.query.model.filter.date;
 
-import java.sql.Date;
+import java.time.LocalDate;
 import java.util.Locale;
 
 /**
@@ -39,7 +39,7 @@ import java.util.Locale;
 public class CachingDateFilter implements IDateFilter {
 
 	private IDateFilter wrapper;
-	private Date[] cachedDates;
+	private LocalDate[] cachedDates;
 	
 	public CachingDateFilter(IDateFilter wrapper){
 		this.wrapper = wrapper;
@@ -56,7 +56,7 @@ public class CachingDateFilter implements IDateFilter {
 	}
 
 	@Override
-	public Date[] getDates() {
+	public LocalDate[] getDates() {
 		if (cachedDates == null){
 			cachedDates = wrapper.getDates();
 		}

@@ -24,8 +24,8 @@ package org.wcs.smart.patrol.query.engine;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
@@ -60,10 +60,10 @@ import org.wcs.smart.patrol.query.model.observation.PatrolAttributeQueryColumn;
 import org.wcs.smart.patrol.query.model.observation.PatrolCategoryQueryColumn;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.common.engine.IPagedImageResultSet;
-import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
 import org.wcs.smart.query.common.engine.AttachmentResultSetIterator;
 import org.wcs.smart.query.common.engine.IAttachmentResultItem;
+import org.wcs.smart.query.common.engine.IPagedImageResultSet;
+import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.IObservationPagedQueryResultSet;
 import org.wcs.smart.query.common.ui.image.PagedImageQueryResults;
@@ -71,7 +71,6 @@ import org.wcs.smart.query.model.AttributeQueryColumn;
 import org.wcs.smart.query.model.CategoryQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
-import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
 
 
@@ -454,9 +453,9 @@ public class DerbyPagedObservationResult extends DerbyPagedWaypointResult implem
 				}
 				break;
 			case DATE:
-				if (newValue instanceof Date){
-					Date newDate = (Date)newValue;
-					if (!SharedUtils.isSameDate(newDate,  toUpdate.getDateValue())){
+				if (newValue instanceof LocalDate){
+					LocalDate newDate = (LocalDate)newValue;
+					if (!newDate.isEqual(toUpdate.getDateValue())){
 						toUpdate.setDateValue(newDate);
 						updated = true;
 					}

@@ -542,18 +542,19 @@ public class DerbyWaypointEngine extends DerbySurveyQueryEngine {
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
 		
-		it.setSurveyDesign(rs.getString("surveydesign_name")); //$NON-NLS-1$
-		it.setSurveyDesignEnd(rs.getDate("surveydesign_enddate")); //$NON-NLS-1$
-		it.setSurveyDesignStart(rs.getDate("surveydesign_startdate")); //$NON-NLS-1$
+		it.setSurveyDesign(rs.getString("surveydesign_name")); //$NON-NLS-1$	
+		it.setSurveyDesignEnd(rs.getDate("surveydesign_enddate") == null ? null : rs.getDate("surveydesign_enddate").toLocalDate());   //$NON-NLS-1$//$NON-NLS-2$
+		it.setSurveyDesignStart(rs.getDate("surveydesign_startdate") == null ? null : rs.getDate("surveydesign_startdate").toLocalDate()); //$NON-NLS-1$ //$NON-NLS-2$
+		
 		
 		it.setSurveyId(rs.getString("survey_id")); //$NON-NLS-1$
-		it.setSurveyStart(rs.getDate("survey_startdate")); //$NON-NLS-1$
-		it.setSurveyEnd(rs.getDate("survey_enddate")); //$NON-NLS-1$
+		it.setSurveyStart(rs.getDate("survey_startdate").toLocalDate()); //$NON-NLS-1$
+		it.setSurveyEnd(rs.getDate("survey_enddate").toLocalDate()); //$NON-NLS-1$
 		
 		it.setMissionUuid(UuidUtils.byteToUUID(rs.getBytes("mission_uuid"))); //$NON-NLS-1$
 		it.setMissionId(rs.getString("mission_id")); //$NON-NLS-1$
-		it.setMissionStart(rs.getDate("mission_startdate")); //$NON-NLS-1$
-		it.setMissionEnd(rs.getDate("mission_enddate")); //$NON-NLS-1$
+		it.setMissionStart(rs.getTimestamp("mission_startdate").toLocalDateTime()); //$NON-NLS-1$
+		it.setMissionEnd(rs.getTimestamp("mission_enddate").toLocalDateTime()); //$NON-NLS-1$
 		it.setMissionLeader(rs.getString("mission_leader")); //$NON-NLS-1$
 		
 		it.setSamplingUnitUuid(UuidUtils.byteToUUID(rs.getBytes("samplingunit_uuid"))); //$NON-NLS-1$
@@ -563,11 +564,11 @@ public class DerbyWaypointEngine extends DerbySurveyQueryEngine {
 		it.setWaypointId(rs.getInt("wp_id")); //$NON-NLS-1$
 		it.setWaypointX(rs.getDouble("wp_x")); //$NON-NLS-1$
 		it.setWaypointY(rs.getDouble("wp_y")); //$NON-NLS-1$
-		it.setWaypointDateTime(rs.getTimestamp("wp_date")); //$NON-NLS-1$
+		it.setWaypointDateTime(rs.getTimestamp("wp_date").toLocalDateTime()); //$NON-NLS-1$
 		it.setWaypointDirection(rs.getObject("wp_direction") == null ? null : rs.getFloat("wp_direction")); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setWaypointDistance(rs.getObject("wp_distance") == null ? null : rs.getFloat("wp_distance")); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setWaypointComment(rs.getString("wp_comment")); //$NON-NLS-1$
-		it.setLastModifiedDate(rs.getTimestamp("wp_lastmodified")); //$NON-NLS-1$
+		it.setLastModifiedDate(rs.getTimestamp("wp_lastmodified").toLocalDateTime()); //$NON-NLS-1$
 		it.setLastModifiedBy(rs.getString("wp_lastmodifiedbyname")); //$NON-NLS-1$
 		
 		return it;

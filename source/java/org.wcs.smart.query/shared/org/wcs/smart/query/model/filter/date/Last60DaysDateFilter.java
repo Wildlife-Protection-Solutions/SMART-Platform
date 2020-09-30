@@ -21,9 +21,10 @@
  */
 package org.wcs.smart.query.model.filter.date;
 
-import java.sql.Date;
-import java.text.DateFormat;
-import java.util.Calendar;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 
 import org.wcs.smart.SmartContext;
@@ -48,19 +49,16 @@ public enum Last60DaysDateFilter implements IDateFilter {
 	}
 
 	@Override
-	public Date[] getDates() {
-		Calendar cal = Calendar.getInstance();
-		java.sql.Date currentDate = new java.sql.Date(cal.getTimeInMillis());
-
-		cal.setTimeInMillis((long) (cal.getTime().getTime() - (60 * 24 * 60 * 60 * 1000.0)));
-		java.sql.Date d = new java.sql.Date(cal.getTimeInMillis());
-		return new java.sql.Date[] { d, currentDate };
+	public LocalDate[] getDates() {
+		LocalDate now = LocalDate.now();
+		LocalDate past = ChronoUnit.DAYS.addTo(now, -60);
+		return new LocalDate[] {past, now};
 	}
-
+	
 	@Override
 	public String getLabel() {
-		Date[] bits = getDates();
-		DateFormat formatter = DateFormat.getDateInstance(DateFormat.MEDIUM);
+		LocalDate[] bits = getDates();
+		DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM);
 		return( "[" + formatter.format( bits[0] ) + " - " + formatter.format(bits[1]) +" ]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 	

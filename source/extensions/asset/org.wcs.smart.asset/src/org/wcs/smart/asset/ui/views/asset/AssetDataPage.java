@@ -21,9 +21,9 @@
  */
 package org.wcs.smart.asset.ui.views.asset;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -124,8 +124,8 @@ public class AssetDataPage {
 	
 	
 	public void reloadData() {
-		final Date startDate = dateFilter.getDateFilter().getStartDate();
-		final Date endDate = dateFilter.getDateFilter().getEndDate();
+		final LocalDate startDate = dateFilter.getDateFilter().getStartDate();
+		final LocalDate endDate = dateFilter.getDateFilter().getEndDate();
 
 		Job loadData = new Job(Messages.AssetDataPage_loadDataJobName) {
 			@Override

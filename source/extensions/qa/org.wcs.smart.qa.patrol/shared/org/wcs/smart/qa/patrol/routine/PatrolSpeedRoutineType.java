@@ -23,10 +23,12 @@ package org.wcs.smart.qa.patrol.routine;
 
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -190,7 +192,11 @@ public class PatrolSpeedRoutineType implements IQaRoutineType {
 		if (index <= 0) return null;
 		Waypoint previous = allWaypoints.get(index-1).getWaypoint();
 		
-		double speed = computeSpeed(new Coordinate(previous.getRawX(), previous.getRawY(), previous.getDateTime().getTime()),  new Coordinate(pw.getWaypoint().getRawX(), pw.getWaypoint().getRawY(), pw.getWaypoint().getDateTime().getTime()), maxSpeed);
+		double speed = computeSpeed(new Coordinate(previous.getRawX(), previous.getRawY()), 
+				new Coordinate(pw.getWaypoint().getRawX(), pw.getWaypoint().getRawY()),
+				previous.getDateTime().toLocalTime(),
+				pw.getWaypoint().getDateTime().toLocalTime(),
+				maxSpeed);
 		if  (speed > maxSpeed){
 			String message = MessageFormat.format(ILabelProvider.getLabel(Key.PatrolSpeedRoutineType_WpSpeedExceeded, task.getLocale()), DISTANCE_FORMATTER.format(speed), maxSpeed);
 			return createError(task, session, wp, GeometryFactoryProvider.getFactory().createPoint(new Coordinate(pw.getWaypoint().getRawX(), pw.getWaypoint().getRawY())), message);
@@ -211,7 +217,7 @@ public class PatrolSpeedRoutineType implements IQaRoutineType {
 				for (int i = 1; i < c.length; i ++){
 					Coordinate previous = c[i-1];
 					Coordinate current = c[i];
-					double speed = computeSpeed(previous,  current, maxSpeed);
+					double speed = computeSpeed(previous, current, maxSpeed);
 					if  (speed > maxSpeed){
 						String message = MessageFormat.format(ILabelProvider.getLabel(Key.PatrolSpeedRoutineType_TrackSpeedExceeded, task.getLocale()), DISTANCE_FORMATTER.format(speed), maxSpeed, current.x, current.y);
 						return createError(task, session, x, ls, message);
@@ -227,6 +233,21 @@ public class PatrolSpeedRoutineType implements IQaRoutineType {
 		
 	}
 	
+	//uses local time
+	private double computeSpeed(Coordinate last, Coordinate current, LocalTime lastTime, LocalTime currentTime, double maxSpeed){
+		
+		GeodeticCalculator cal = new GeodeticCalculator();
+		cal.setStartingGeographicPoint(last.x, last.y);
+		cal.setDestinationGeographicPoint(current.x, current.y);
+				
+		double distance = cal.getOrthodromicDistance(); //meters
+		double time = ChronoUnit.MILLIS.between(lastTime,  currentTime);
+		double speed = distance * 3600 / time ;
+		return speed;
+		
+	}
+	
+	// uses the milli seconds stored in the x,y
 	private double computeSpeed(Coordinate last, Coordinate current, double maxSpeed){
 		
 		GeodeticCalculator cal = new GeodeticCalculator();
@@ -235,7 +256,6 @@ public class PatrolSpeedRoutineType implements IQaRoutineType {
 				
 		double distance = cal.getOrthodromicDistance(); //meters
 		double time = current.getZ() - last.getZ(); //milliseconds
-				
 		double speed = distance * 3600 / time ;
 		return speed;
 		
@@ -252,7 +272,7 @@ public class PatrolSpeedRoutineType implements IQaRoutineType {
 		error.setQaRoutine(task.getRoutine());
 		error.setSourceId(task.getDataProvider().getFeatureSource(session, data));
 		error.setStatus(QaError.Status.NEW);
-		error.setValidateDate(new Date());
+		error.setValidateDate(LocalDateTime.now());
 		return error;
 		
 	}

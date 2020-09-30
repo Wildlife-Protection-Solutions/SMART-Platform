@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.cybertracker.patrol.importer;
 
-import java.sql.Time;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -133,8 +132,8 @@ public class PatrolImporter extends AbstractPatrolImporter {
 		p.setStation(ctPatrol.getStation());
 		p.setObjective(ctPatrol.getObjective());
 		p.setComment(ctPatrol.getComment());
-		p.setStartDate(ctPatrol.getStartDate());
-		p.setEndDate(ctPatrol.getEndDate());
+		p.setStartDate(ctPatrol.getStartDate().toLocalDate());
+		p.setEndDate(ctPatrol.getEndDate().toLocalDate());
 		
 		initLegData(p.getFirstLeg(), ctPatrol, session);
 
@@ -236,18 +235,9 @@ public class PatrolImporter extends AbstractPatrolImporter {
 		for (int i = 0; i < days1.size(); i++) {
 			PatrolLegDay d1 = days1.get(i);
 			PatrolLegDay d2 = days2.get(i);
-			if (!isEqual(d1.getStartTime(), d2.getStartTime()) || !isEqual(d1.getEndTime(), d2.getEndTime()))
+			if (!d1.getStartTime().equals(d2.getStartTime()) || !d1.getEndTime().equals(d2.getEndTime()))
 				return false;
 		}
 		return true;
-	}
-
-	@SuppressWarnings("deprecation")
-	private boolean isEqual(Time t1, Time t2) {
-		if (t1 == null && t2 == null)
-			return true;
-		if (t1 == null || t2 == null)
-			return false;
-		return t1.getHours() == t2.getHours() && t1.getMinutes() == t2.getMinutes() && t1.getSeconds() == t2.getSeconds();
 	}
 }

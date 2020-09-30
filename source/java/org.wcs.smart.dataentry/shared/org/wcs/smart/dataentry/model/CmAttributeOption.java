@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.dataentry.model;
 
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 import javax.persistence.Column;
@@ -111,11 +112,12 @@ public class CmAttributeOption extends UuidItem {
 	 * @return
 	 */
 	@Transient
-	public Date getDateValue(){
+	public LocalDate getDateValue(){
 		if (getStringValue() == null){
 			return null;
 		}
-		return java.sql.Date.valueOf(getStringValue());
+		return LocalDate.parse(getStringValue(), DateTimeFormatter.ISO_LOCAL_DATE);
+		
 	}
 	
 	/**
@@ -124,13 +126,12 @@ public class CmAttributeOption extends UuidItem {
 	 * @return
 	 */
 	@Transient
-	public void setDateValue(Date date){
+	public void setDateValue(LocalDate date){
 		if (date == null){
 			setStringValue(null);
 			return;
 		}
-		java.sql.Date tmp = new java.sql.Date(date.getTime());
-		setStringValue(tmp.toString());
+		setStringValue(DateTimeFormatter.ISO_LOCAL_DATE.format(date));
 	}
 
 	@Transient

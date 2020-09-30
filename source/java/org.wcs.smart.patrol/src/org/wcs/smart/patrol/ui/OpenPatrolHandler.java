@@ -22,6 +22,7 @@
 package org.wcs.smart.patrol.ui;
 
 import java.text.MessageFormat;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -133,9 +134,8 @@ public class OpenPatrolHandler {
 			canEdit = null == PatrolManager.getInstance().canEdit(patrol, ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), s));	
 		}
 		
-		long patrolLengthMills = pi.getEndDate().getTime() - pi.getStartDate().getTime();
-		long patrolLengthDays = (long)Math.ceil(patrolLengthMills / (24 * 60 * 60 * 1000l));
-		if (patrolLengthDays > Patrol.MAX_PATROL_LENGTH_DAYS){
+		long patrolLengthDays = ChronoUnit.DAYS.between(pi.getStartDate(), pi.getEndDate());
+		if ( patrolLengthDays > Patrol.MAX_PATROL_LENGTH_DAYS){
 			//warning with an option to edit dates
 			String[] buttons = new String[]{Messages.OpenPatrolHandler_CancelBtn, Messages.OpenPatrolHandler_ProceedBtn};
 			String message = MessageFormat.format(Messages.OpenPatrolHandler_TooLongProceed, pi.getPatrolId(), patrolLengthDays, Patrol.MAX_PATROL_LENGTH_DAYS);

@@ -21,11 +21,10 @@
  */
 package org.wcs.smart.er.ui.mision.importwp;
 
-import java.sql.Time;
 import java.text.MessageFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -49,7 +48,6 @@ import org.wcs.smart.gpx.GPSDataImport.ImportType;
 import org.wcs.smart.observation.common.importwp.ImportOptionsComposite.ImportOption;
 import org.wcs.smart.observation.common.importwp.ObservationGPSDataImport;
 import org.wcs.smart.observation.model.Waypoint;
-import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.SmartUtils.RegExLevel;
 
@@ -109,9 +107,9 @@ public class MissionDataImport {
 				missionDay.getWaypoints().add(sw);
 				addedWaypoints.add(sw);
 				if (op == ImportOption.SELECT){
-					Date wpdt = missionDay.getDate();
+					LocalDateTime wpdt = missionDay.getDate().atStartOfDay();
 					if (sw.getWaypoint().getDateTime() != null){
-						wpdt = SmartUtils.combineDateTime(wpdt, new Time(sw.getWaypoint().getDateTime().getTime()));
+						wpdt = wpdt.toLocalDate().atTime(sw.getWaypoint().getDateTime().toLocalTime());
 					}
 					sw.getWaypoint().setDateTime(wpdt);
 				}
@@ -152,10 +150,9 @@ public class MissionDataImport {
 			if (point.getDateTime() == null){
 				continue;
 			}
-			Date wpdt = point.getDateTime();
+			LocalDateTime wpdt = point.getDateTime();
 			for (MissionDay mday : missionDays){
-				if (SharedUtils.getDatePart(wpdt, false).equals(
-						SharedUtils.getDatePart(mday.getDate(), false))){
+				if (wpdt.toLocalDate().isEqual(mday.getDate())){
 
 					String key = mday.getDate().toString() + "_" + point.getSourceId(); //$NON-NLS-1$
 					Item trackpnts = tracksPnts.get(key);
@@ -212,7 +209,7 @@ public class MissionDataImport {
 			return Collections.emptyList();
 		}
 		if (!useSource){
-			LineString track = ObservationGPSDataImport.convertToLineString(coordinates, MissionTrack.ZTIMEZONE);
+			LineString track = ObservationGPSDataImport.convertToLineString(coordinates);
 			MissionTrack t = new MissionTrack();
 			t.setLineString(track);
 			t.setId(Messages.MissionDataImport_TrackLabel);
@@ -290,15 +287,14 @@ public class MissionDataImport {
 		Set<MissionDay> modified = new HashSet<MissionDay>();
 		
 		for (Waypoint point : waypoints){
-			Date wpdt = point.getDateTime();
+			LocalDateTime wpdt = point.getDateTime();
 			if (wpdt == null){
 				continue;
 			}
 			//find patrol leg day based on times
 			for (Iterator<MissionDay> iterator = days.iterator(); iterator.hasNext();) {
 				MissionDay mday = (MissionDay) iterator.next();				
-				if (SharedUtils.getDatePart(wpdt, false).equals(
-						SharedUtils.getDatePart(mday.getDate(), false))){
+				if (wpdt.toLocalDate().isEqual(mday.getDate())){
 					
 					SurveyWaypoint se = new SurveyWaypoint();
 					se.setMissionDay(mday);
@@ -326,7 +322,7 @@ public class MissionDataImport {
 	}
 	
 	static class Item{
-		public Date date;
+		public LocalDateTime date;
 		public String id;
 		public MissionDay missionDay;
 		public List<Waypoint> waypoints;

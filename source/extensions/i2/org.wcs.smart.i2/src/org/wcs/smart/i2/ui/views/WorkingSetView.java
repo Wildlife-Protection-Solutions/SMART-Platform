@@ -22,9 +22,10 @@
 package org.wcs.smart.i2.ui.views;
 
 import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -248,11 +249,11 @@ public class WorkingSetView {
 				if (isInitializing) return;
 				if (WorkingSetManager.INSTANCE.getActiveWorkingSet() == null) return;
 				
-				Date[] dFilters = getDateFilters();		
+				LocalDate[] dFilters = getDateFilters();		
 				
 				String dateFilter = dateComp.getDateFilter().name();
 				if (dateComp.getDateFilter() == DateFilter.CUSTOM){
-					dateFilter += ":" + dFilters[0].getTime() + ":" + dFilters[1].getTime(); //$NON-NLS-1$ //$NON-NLS-2$
+					dateFilter += ":" + DateTimeFormatter.ISO_LOCAL_DATE.format(dFilters[0]) + ":" + DateTimeFormatter.ISO_LOCAL_DATE.format(dFilters[1]); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				
 				//save date filter
@@ -457,8 +458,8 @@ public class WorkingSetView {
 	 * filter.  Returns the new dates.
 	 * @return
 	 */
-	private Date[] getDateFilters(){
-		Date[] dFilters = new Date[2];
+	private LocalDate[] getDateFilters(){
+		LocalDate[] dFilters = new LocalDate[2];
 		if (dateComp.getDateFilter() == DateFilter.CUSTOM){
 			dFilters[0] = dateComp.getCustomStartDate();
 			dFilters[1] = dateComp.getCustomEndDate();
@@ -956,14 +957,16 @@ public class WorkingSetView {
 				}
 				
 				DateFilter initFilter = DateFilter.LAST_YEAR;
-				Date[] dates = new Date[]{initFilter.getStartDate(), initFilter.getEndDate()};
+				LocalDate[] dates = new LocalDate[]{initFilter.getStartDate(), initFilter.getEndDate()};
 				if (ws != null){
 					String dateFilter = ws.getEntityDateFilter();
 					try{
 						String[] bits = dateFilter.split(":"); //$NON-NLS-1$
 						initFilter = DateFilter.valueOf(bits[0]);
 						if (initFilter == DateFilter.CUSTOM){
-							dates = new Date[]{new Date(Long.valueOf(bits[1])), new Date(Long.valueOf(bits[2]))};
+							dates = new LocalDate[] {
+									LocalDate.parse(bits[1], DateTimeFormatter.BASIC_ISO_DATE),
+									LocalDate.parse(bits[2], DateTimeFormatter.BASIC_ISO_DATE)};
 						}
 					}catch (Exception ex){
 						Intelligence2PlugIn.log("Unable to parse entity date filter for working set : " + dateFilter + ". " + ex.getMessage(), ex); //$NON-NLS-1$ //$NON-NLS-2$
@@ -971,7 +974,7 @@ public class WorkingSetView {
 					
 				}
 				final DateFilter dfilter = initFilter;
-				final Date[] dates2 = dates;
+				final LocalDate[] dates2 = dates;
 				final IntelWorkingSet wss = ws;
 				
 				String key = LAST_WS_PREFERENCE + UuidUtils.uuidToString(SmartDB.getCurrentConservationArea().getUuid());

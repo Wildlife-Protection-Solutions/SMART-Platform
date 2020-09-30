@@ -26,8 +26,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 
 import org.eclipse.birt.report.engine.api.EmitterInfo;
@@ -113,7 +113,7 @@ public class RecordExportJob extends Job {
 		}
 
 		
-		String fileName = record.getTitle() + "." + (new SimpleDateFormat("MMMddyyyy")).format(new Date()); //$NON-NLS-1$ //$NON-NLS-2$
+		String fileName = record.getTitle() + "." + (DateTimeFormatter.ofPattern("MMMddyyyy")).format(LocalDate.now()); //$NON-NLS-1$ //$NON-NLS-2$
 		fileName = URLUtils.cleanFilename(fileName);
 		Path current = outputFile;
 		outputFile = current.resolve(fileName + "." + format.getFormat()); //$NON-NLS-1$
@@ -130,7 +130,7 @@ public class RecordExportJob extends Job {
 		
 		//if the file name is long or contains funny characters lets just use the uuid
 		if (!Files.isWritable(outputFile)) {
-			fileName = UuidUtils.uuidToString(record.getUuid()) + "." + (new SimpleDateFormat("MMMddyyyy")).format(new Date()); //$NON-NLS-1$ //$NON-NLS-2$
+			fileName = UuidUtils.uuidToString(record.getUuid()) + "." + (DateTimeFormatter.ofPattern("MMMddyyyy")).format(LocalDate.now()); //$NON-NLS-1$ //$NON-NLS-2$
 			outputFile = current.resolve(fileName + "." + format.getFormat()); //$NON-NLS-1$
 			if (Files.exists(outputFile)) {
 				int cnt = 1;

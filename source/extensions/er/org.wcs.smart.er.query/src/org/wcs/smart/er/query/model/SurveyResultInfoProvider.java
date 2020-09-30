@@ -22,7 +22,7 @@
 package org.wcs.smart.er.query.model;
 
 import java.text.MessageFormat;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.UUID;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
@@ -70,7 +70,7 @@ public class SurveyResultInfoProvider implements IQueryResultInfoProvider {
 		UUID missionUuid = null;
 		String missionId = null;
 		UUID waypointUuid = null;
-		Date date = null;
+		LocalDate date = null;
 		
 		if (resultItem instanceof MissionTrackResultItem) {
 			missionUuid = ((MissionTrackResultItem)resultItem).getMissionUuid();

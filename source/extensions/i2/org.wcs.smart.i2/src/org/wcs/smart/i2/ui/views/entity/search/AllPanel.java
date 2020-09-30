@@ -21,12 +21,13 @@
  */
 package org.wcs.smart.i2.ui.views.entity.search;
 
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
@@ -338,7 +339,7 @@ public class AllPanel extends Composite {
 					if (((Double)value) < 0.5) return SmartLabelProvider.BOOLEAN_FALSE_LABEL;
 					return SmartLabelProvider.BOOLEAN_TRUE_LABEL;
 				case DATE:
-					return DateFormat.getDateInstance().format((Date)value);
+					return DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format((LocalDate)value);
 				case EMPLOYEE:
 				case LIST:
 				case NUMERIC:
@@ -404,7 +405,7 @@ public class AllPanel extends Composite {
 						if (((Double)value) < 0.5) return SmartLabelProvider.BOOLEAN_FALSE_LABEL;
 						return SmartLabelProvider.BOOLEAN_TRUE_LABEL;
 					case DATE:
-						return DateFormat.getDateInstance().format((Date)value);
+						return DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format((LocalDate)value);
 					case EMPLOYEE:
 					case LIST:
 					case NUMERIC:

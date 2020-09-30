@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.query.model.filter.date;
 
-import java.sql.Date;
+import java.time.LocalDate;
 import java.util.Locale;
 
 import org.wcs.smart.SmartContext;
@@ -46,7 +46,7 @@ public enum AllDatesFilter implements IDateFilter {
 	}
 
 	@Override
-	public Date[] getDates() {
+	public LocalDate[] getDates() {
 		return null;
 	}
 

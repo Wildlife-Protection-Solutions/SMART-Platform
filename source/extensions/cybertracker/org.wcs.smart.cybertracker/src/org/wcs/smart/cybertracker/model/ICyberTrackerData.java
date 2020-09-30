@@ -21,12 +21,11 @@
  */
 package org.wcs.smart.cybertracker.model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
-import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
-
 import org.locationtech.jts.geom.Coordinate;
+import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
 
 /**
 /**
@@ -37,9 +36,9 @@ import org.locationtech.jts.geom.Coordinate;
  */
 public interface ICyberTrackerData {
 
-	public Date getStartDate();
+	public LocalDateTime getStartDate();
 
-	public Date getEndDate();
+	public LocalDateTime getEndDate();
 
 	public String getType();
 

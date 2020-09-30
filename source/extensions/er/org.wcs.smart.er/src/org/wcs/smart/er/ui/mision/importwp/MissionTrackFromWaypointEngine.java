@@ -21,8 +21,9 @@
  */
 package org.wcs.smart.er.ui.mision.importwp;
 
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -73,7 +74,8 @@ public class MissionTrackFromWaypointEngine extends TrackFromWaypointEngine {
 			if (mt != null){
 				mt.setMissionDay(missionDay);
 				tracks.put(missionDay, Collections.singletonList(mt));
-				message = MessageFormat.format(Messages.MissionTrackFromWaypointEngine_SingleDayMessage, new Object[]{DateFormat.getDateInstance().format(missionDay.getDate())});
+				message = MessageFormat.format(Messages.MissionTrackFromWaypointEngine_SingleDayMessage, 
+						new Object[]{DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(missionDay.getDate())});
 			}else{
 				message = Messages.MissionTrackFromWaypointEngine_TwoPointsRequired;
 			}

@@ -21,9 +21,8 @@
  */
 package org.wcs.smart.patrol.internal.ui.views;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 /**
@@ -35,15 +34,14 @@ public class DateGroupBy{
 	
 	public enum Type{MONTH, YEAR};
 	
-	private final static SimpleDateFormat MONTH_FORMAT = new SimpleDateFormat("MMM, yyyy"); //$NON-NLS-1$
-	private final static SimpleDateFormat YEAR_FORMAT = new SimpleDateFormat("yyyy"); //$NON-NLS-1$
+	private final static DateTimeFormatter MONTH_FORMAT = DateTimeFormatter.ofPattern("MMM, yyyy"); //$NON-NLS-1$
+	private final static DateTimeFormatter YEAR_FORMAT = DateTimeFormatter.ofPattern("yyyy"); //$NON-NLS-1$
 	
-	private Calendar c;
+	private LocalDate c;
 	private Type type;
 	
-	public DateGroupBy(Date date, Type type){
-		c = Calendar.getInstance();
-		c.setTime(date);
+	public DateGroupBy(LocalDate date, Type type){
+		this.c = date;
 		this.type = type;
 	}
 	
@@ -52,20 +50,20 @@ public class DateGroupBy{
 	}
 	
 	public int getYear(){
-		return c.get(Calendar.YEAR);
+		return c.getYear();
 	}
 	
 	public int getMonth(){
-		return c.get(Calendar.MONTH);
+		return c.getMonthValue();
 	}
 	
 	public String getLabel(){
 		if (type == Type.MONTH){
-			return MONTH_FORMAT.format(c.getTime());
+			return c.format(MONTH_FORMAT);
 		}else if (type == Type.YEAR){
-			return YEAR_FORMAT.format(c.getTime());
+			return c.format(YEAR_FORMAT);
 		}
-		return c.getTime().toString();
+		return c.toString();
 	}
 	
 	public int hashCode(){

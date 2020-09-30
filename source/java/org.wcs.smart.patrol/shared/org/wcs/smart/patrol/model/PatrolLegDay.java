@@ -21,16 +21,15 @@
  */
 package org.wcs.smart.patrol.model;
 
-import java.sql.Time;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
-import java.util.stream.Collectors;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -64,13 +63,13 @@ public class PatrolLegDay extends UuidItem {
 	
 	private static final long serialVersionUID = 1L;
 	
-	private Date date;
+	private LocalDate date;
 
 	private List<PatrolWaypoint> waypoints;
 	private PatrolLeg patrolLeg;
 	
-	private Time startTime;
-	private Time endTime;
+	private LocalTime startTime;
+	private LocalTime endTime;
 	
 	private Integer restMinutes;
 	
@@ -82,10 +81,10 @@ public class PatrolLegDay extends UuidItem {
 	private List<Track> tracks; 
 	
 	@Column(name="patrol_day")
-	public Date getDate() {
+	public LocalDate getDate() {
 		return date;
 	}
-	public void setDate(Date date) {
+	public void setDate(LocalDate date) {
 		this.date = date;
 	}
 	
@@ -116,21 +115,18 @@ public class PatrolLegDay extends UuidItem {
 	}
 	
 	@Column(name="start_time")
-	public Time getStartTime(){
+	public LocalTime getStartTime(){
 		return this.startTime;
 	}
-	public void setStartTime(Time startTime){
-		if (startTime.getTime() < 0) {
-			startTime = new Time(startTime.getTime() + 86_400_000);
-		}
+	public void setStartTime(LocalTime startTime){
 		this.startTime = startTime;
 	}
 	
 	@Column(name="end_time")
-	public Time getEndTime(){
+	public LocalTime getEndTime(){
 		return this.endTime;
 	}
-	public void setEndTime(Time endTime){
+	public void setEndTime(LocalTime endTime){
 		this.endTime = endTime;
 	}
 	
@@ -156,13 +152,7 @@ public class PatrolLegDay extends UuidItem {
 	
 	@Transient
 	public double getLengthSeconds(){
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(startTime);
-		long start = cal.get(Calendar.HOUR_OF_DAY) * 60 *60 + cal.get(Calendar.MINUTE) * 60 + cal.get(Calendar.SECOND);   
-		cal.setTime(endTime);
-		long end = cal.get(Calendar.HOUR_OF_DAY) * 60 *60 + cal.get(Calendar.MINUTE) * 60 + cal.get(Calendar.SECOND);
-		
-		return end - start;
+		return ChronoUnit.SECONDS.between(startTime, endTime);
 	}
 	
 	@Transient
@@ -223,30 +213,39 @@ public class PatrolLegDay extends UuidItem {
 	 * @return
 	 */
 	@Transient
-	public Time[] computeMinMaxDate() {
+	public LocalDateTime[] computeMinMaxDate() {
 		List<PatrolWaypoint> wps = getWaypoints();
-		List<Date> dates = new ArrayList<>();
+		
+		LocalDateTime mindate = null;
+		LocalDateTime maxdate = null;
+		
 		if (!wps.isEmpty()) {
-			dates .addAll(wps.stream().map(pwp -> pwp.getWaypoint().getDateTime()).collect(Collectors.toList()));	
+			for (PatrolWaypoint wp : wps) {
+				LocalDateTime thisdt = wp.getWaypoint().getDateTime();
+				if (mindate == null || thisdt.isBefore(mindate)) mindate = thisdt;
+				if (maxdate == null || thisdt.isAfter(maxdate)) maxdate = thisdt;
+			}	
 		}
 		
 		if (getTrack() != null) {
 			try {
 				for (LineString ls : getTrack().getLineStrings()) {
-					DateFormat formatterUTC = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss"); //$NON-NLS-1$
-					formatterUTC.setTimeZone(TimeZone.getTimeZone("UTC")); //$NON-NLS-1$
-					DateFormat parserUTC = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss"); //$NON-NLS-1$
-					dates.add(parserUTC.parse(formatterUTC.format(new Date((long)ls.getCoordinateN(0).getZ()))));
-					dates.add(parserUTC.parse(formatterUTC.format(new Date((long)ls.getCoordinateN(ls.getNumPoints() - 1).getZ()))));
+					
+					long z1 = ((Double)ls.getCoordinateN(0).getZ()).longValue();
+					long z2 = ((Double)ls.getCoordinateN(ls.getNumPoints() - 1).getZ()).longValue();
+					
+					for (long d : new long[] {z1, z2}) {
+						LocalDateTime thisdt = Instant.ofEpochMilli(d).atOffset(ZoneOffset.UTC).toLocalDateTime();
+						if (mindate == null || thisdt.isBefore(mindate)) mindate = thisdt;
+						if (maxdate == null || thisdt.isAfter(maxdate)) maxdate = thisdt;
+					}
 				}
 			}catch (Exception ex) {
 				
 			}
 		}
-		if (dates.isEmpty()) return null;
-		Date minDate = Collections.min(dates);
-		Date maxDate = Collections.max(dates);
-		return new Time[] {new Time(minDate.getTime()),new Time(maxDate.getTime())};
+		if (mindate == null || maxdate == null) return null;
+		return new LocalDateTime[] {mindate, maxdate};
 	}
 	/**
 	 * Clones the patrol leg day 

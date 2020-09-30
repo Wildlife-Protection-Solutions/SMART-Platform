@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.i2.query.engine;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -48,7 +48,7 @@ public class IntelRecordResultItem implements IResultItem {
 	private String recordStatus;
 	
 	
-	private Date primaryDate;
+	private LocalDate primaryDate;
 	
 	
 	
@@ -115,10 +115,10 @@ public class IntelRecordResultItem implements IResultItem {
 	public void setRecordTitle(String title){
 		this.recordTitle = title;
 	}
-	public Date getRecordDate(){
+	public LocalDate getRecordDate(){
 		return this.primaryDate;
 	}
-	public void setRecordDate(Date primaryDate){
+	public void setRecordDate(LocalDate primaryDate){
 		this.primaryDate = primaryDate;
 	}
 	

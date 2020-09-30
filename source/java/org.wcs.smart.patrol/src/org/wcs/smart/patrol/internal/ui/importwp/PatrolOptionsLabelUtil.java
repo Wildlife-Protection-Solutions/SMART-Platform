@@ -21,8 +21,9 @@
  */
 package org.wcs.smart.patrol.internal.ui.importwp;
 
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 
 import org.wcs.smart.observation.common.importwp.ImportOptionsComposite.ImportOption;
 import org.wcs.smart.observation.common.importwp.ImportOptionsWizardPage;
@@ -40,7 +41,7 @@ public class PatrolOptionsLabelUtil {
 		if (w.getCurrentDay().getPatrolLeg().getPatrol().getLegs().size() > 1) {
 			page.setWarningMessage(MessageFormat.format(Messages.ImportOptionsComposite_ImportAllWarning , new Object[]{w.getType().guiName}));
 			ImportOption[] validOptions = new ImportOption[]{ImportOption.ALL, ImportOption.DATE, ImportOption.SELECT};
-			String op = DateFormat.getDateInstance(DateFormat.MEDIUM).format(w.getCurrentDay().getDate());
+			String op = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(w.getCurrentDay().getDate());
 			op += " (" + Messages.ImportOptionsComposite_LegPrefix + ": " + w.getCurrentDay().getPatrolLeg().getId() + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			String[] labels = new String[]{Messages.ImportGpxWizardPage_ImportAllOp + "*", //$NON-NLS-1$
 					MessageFormat.format(Messages.ImportGpxWizardPage_ImportSingleDayOp, new Object[]{w.getType().guiName.toLowerCase(), op}),

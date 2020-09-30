@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.i2.query.engine;
 
+import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -73,7 +73,7 @@ public class IntelRecordQueryEngine implements IIntelQueryEngine {
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.IntelObservationQueryEngine_Progress1, 5);
 		
 		//one or both element of array may be null
-		Date[] dfilter = (Date[]) parameters.get(Date.class.getName());
+		LocalDate[] dfilter = (LocalDate[]) parameters.get(LocalDate.class.getName());
 		if (dfilter == null) return null;
 		
 		Locale locale = (Locale) parameters.get(Locale.class.getName());

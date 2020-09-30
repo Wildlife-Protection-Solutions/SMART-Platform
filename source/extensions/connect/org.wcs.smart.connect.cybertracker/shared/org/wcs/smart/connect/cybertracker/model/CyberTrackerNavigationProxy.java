@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.connect.cybertracker.model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -38,7 +38,7 @@ public class CyberTrackerNavigationProxy {
 	private UUID caUuid;
 	@JsonFormat
     (shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSX")
-	private Date uploadedDate;
+	private LocalDateTime uploadedDate;
 	
 	private String name;
 	
@@ -66,11 +66,11 @@ public class CyberTrackerNavigationProxy {
 		this.caUuid = caUuid;
 	}
 
-	public Date getUploadedDate() {
+	public LocalDateTime getUploadedDate() {
 		return uploadedDate;
 	}
 
-	public void setUploadedDate(Date uploadedDate) {
+	public void setUploadedDate(LocalDateTime uploadedDate) {
 		this.uploadedDate = uploadedDate;
 	}
 

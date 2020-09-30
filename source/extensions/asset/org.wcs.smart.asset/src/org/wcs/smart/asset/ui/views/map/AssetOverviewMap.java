@@ -101,7 +101,6 @@ import org.wcs.smart.ui.SectionHeader;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
 import org.wcs.smart.ui.properties.DialogConstants;
-import org.wcs.smart.util.SharedUtils;
 
 /**
  * Overview map for asset view
@@ -645,11 +644,11 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 			Display.getDefault().syncExec(()->{
 				if (summaryTable.getTable().isDisposed()) return;
 				if (dateFilters.getDateFilter() == DateFilter.CUSTOM) {
-					start[0] = SharedUtils.toLocalDate( dateFilters.getCustomStartDate() );
-					end[0] = SharedUtils.toLocalDate( dateFilters.getCustomEndDate() );
+					start[0] = dateFilters.getCustomStartDate();
+					end[0] = dateFilters.getCustomEndDate();
 				}else {
-					start[0] = dateFilters.getDateFilter().getStartDate() == null ? null : SharedUtils.toLocalDate( dateFilters.getDateFilter().getStartDate() );
-					end[0] = dateFilters.getDateFilter().getEndDate() == null ? null : SharedUtils.toLocalDate( dateFilters.getDateFilter().getEndDate() );	
+					start[0] = dateFilters.getDateFilter().getStartDate() == null ? null : dateFilters.getDateFilter().getStartDate() ;
+					end[0] = dateFilters.getDateFilter().getEndDate() == null ? null : dateFilters.getDateFilter().getEndDate() ;	
 				}
 				summaryTable.setInput(statEngine.getData());
 			});
@@ -704,11 +703,11 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 			Display.getDefault().syncExec(()->{
 				if (canvas.isDisposed()) return;
 				if (dateFilters.getDateFilter() == DateFilter.CUSTOM) {
-					start[0] = SharedUtils.toLocalDate( dateFilters.getCustomStartDate() );
-					end[0] = SharedUtils.toLocalDate( dateFilters.getCustomEndDate() );
+					start[0] = dateFilters.getCustomStartDate();
+					end[0] = dateFilters.getCustomEndDate();
 				}else {
-					start[0] = dateFilters.getDateFilter().getStartDate() == null ? null : SharedUtils.toLocalDate( dateFilters.getDateFilter().getStartDate() );
-					end[0] = dateFilters.getDateFilter().getEndDate() == null ? null : SharedUtils.toLocalDate( dateFilters.getDateFilter().getEndDate() );
+					start[0] = dateFilters.getDateFilter().getStartDate() == null ? null : dateFilters.getDateFilter().getStartDate();
+					end[0] = dateFilters.getDateFilter().getEndDate() == null ? null : dateFilters.getDateFilter().getEndDate();
 				}
 			});
 			if (monitor.isCanceled()) return Status.CANCEL_STATUS;	

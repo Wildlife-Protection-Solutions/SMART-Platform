@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.i2.query.engine;
 
-import java.sql.Date;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -140,7 +139,7 @@ public class IntelRecordQueryResults implements IPagedQueryResultSet {
 		String profileKey = (String)rowData[columnNameToIndex.get("profile_key")]; //$NON-NLS-1$
 		item.setProfile(profileKey, profileUuid, profileName);
 				
-		item.setRecordDate((Date)rowData[columnNameToIndex.get("record_date")]); //$NON-NLS-1$
+		item.setRecordDate( ((java.sql.Date)rowData[columnNameToIndex.get("record_date")]).toLocalDate() ); //$NON-NLS-1$
 		
 		IntelRecord r = session.get(IntelRecord.class, item.getRecordUuid());
 		for (IntelRecordAttributeValue v : r.getAttributes()) {

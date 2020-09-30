@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.dataentry.dialog.composite;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
@@ -140,17 +140,17 @@ public class DateAttributeInfoComposite extends CmAttributeInfoComposite {
 					if (option.getDateValue() == null){
 						chSet.setSelection(false);
 						dtime.setEnabled(false);
-						SmartUtils.initDateDateTimeWidget(dtime, new Date());
+						SmartUtils.initDateTimeWidget(dtime, LocalDate.now());
 					}else{
 						chSet.setSelection(true);
 						dtime.setEnabled(true);
-						SmartUtils.initDateDateTimeWidget(dtime, option.getDateValue());
+						SmartUtils.initDateTimeWidget(dtime, option.getDateValue());
 					}					
 					internalChange[0] = false;
 				}else{
 					chSet.setSelection(false);
 					dtime.setEnabled(false);
-					SmartUtils.initDateDateTimeWidget(dtime, new Date());
+					SmartUtils.initDateTimeWidget(dtime, LocalDate.now());
 				}
 				validationAttribute.setRegex(getSourceObject().getAttribute().getRegex());
 				validationAttribute.setName(getSourceObject().getName());
@@ -159,7 +159,7 @@ public class DateAttributeInfoComposite extends CmAttributeInfoComposite {
 	}
 
 	private void updateValue(boolean showError){
-		Date defaultDate = SmartUtils.getDate(dtime);
+		LocalDate defaultDate = SmartUtils.toDate(dtime);
 		String error = AttributeValidator.validateDate(validationAttribute, defaultDate);
 		if (error != null){
 			//display error
@@ -175,11 +175,11 @@ public class DateAttributeInfoComposite extends CmAttributeInfoComposite {
 				if (op == null){
 					chSet.setSelection(false);
 					dtime.setEnabled(false);
-					SmartUtils.initDateDateTimeWidget(dtime, new Date());
+					SmartUtils.initDateTimeWidget(dtime, LocalDate.now());
 				}else{
 					chSet.setSelection(true);
 					dtime.setEnabled(true);
-					SmartUtils.initDateDateTimeWidget(dtime, op.getDateValue());
+					SmartUtils.initDateTimeWidget(dtime, op.getDateValue());
 				}
 			}
 		}else{

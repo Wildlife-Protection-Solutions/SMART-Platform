@@ -21,12 +21,13 @@
  */
 package org.wcs.smart.cybertracker.survey.importer;
 
-import java.sql.Time;
-import java.text.DateFormat;
 import java.text.MessageFormat;
-import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -82,11 +83,11 @@ public class SurveyCTDataBuilder extends CyberTrackerDataBuilder {
 			return;
 		
 		S s = patrolData.get(0); //init metadata from the first sight (as all other sighs MUST have the same metadata by design)
-		Date date = null;
-		Time time = null;
-		Date start_date = null;
-		Time start_time = null;
-		DateFormat formatter = AbstractSmartImporter.createCyberTrackerDateFormatter();
+		LocalDate date = null;
+		LocalTime time = null;
+		LocalDate start_date = null;
+		LocalTime start_time = null;
+		DateTimeFormatter formatter = AbstractSmartImporter.CT_DT_FORMATTER;
 		
 		for (S.A a : s.getA()) {
 			String i = a.getI();
@@ -95,22 +96,22 @@ public class SurveyCTDataBuilder extends CyberTrackerDataBuilder {
 			
 			if (ICyberTrackerConstants.DATE.equals(i)) {
 				try {
-					date = formatter.parse(v);
-				} catch (ParseException e) {
+					date = LocalDate.parse(v, formatter);
+				} catch (DateTimeParseException e) {
 					CyberTrackerPlugIn.log(e.getMessage(), e);
 				}
 			} else if (ICyberTrackerConstants.TIME.equals(i)) {
-				time = Time.valueOf(v);
+				time = LocalTime.parse(v);
 			} else if (ScreensUtil.RESULT_ID.equals(n)) {
 				ctSurvey.setId(v);
 			} else if (ScreensUtil.RESULT_START_DATE.equals(n)) {
 				try {
-					start_date = formatter.parse(v);
-				} catch (ParseException e) {
+					start_date = LocalDate.parse(v, formatter);
+				} catch (DateTimeParseException e) {
 					CyberTrackerPlugIn.log(e.getMessage(), e);
 				}
 			} else if (ScreensUtil.RESULT_START_TIME.equals(n)) {
-				start_time = Time.valueOf(v);
+				start_time = LocalTime.parse(v);
 			} else {
 				E ei = eMap.get(i);
 				if (ei != null) {
@@ -121,19 +122,19 @@ public class SurveyCTDataBuilder extends CyberTrackerDataBuilder {
 			}
 		}
 		
-		date = AbstractSmartImporter.combine(date, time);
-		start_date = AbstractSmartImporter.combine(start_date, start_time);
-		if (date != null && start_date != null) {
-			if (start_date.before(date)) {
-				ctSurvey.setStartDate(start_date);
+		LocalDateTime cdate = (date == null || time == null) ? null : date.atTime(time);
+		LocalDateTime cstart_date = (start_date == null || start_time == null) ? null : start_date.atTime(start_time);
+		if (cdate != null && cstart_date != null) {
+			if (cstart_date.isBefore(cdate)) {
+				ctSurvey.setStartDate(cstart_date);
 			} else {
-				ctSurvey.setStartDate(date);
+				ctSurvey.setStartDate(cdate);
 			}
 		} else {
-			if (date == null) {
-				ctSurvey.setStartDate(start_date);
+			if (cdate == null) {
+				ctSurvey.setStartDate(cstart_date);
 			} else {
-				ctSurvey.setStartDate(date);
+				ctSurvey.setStartDate(cdate);
 			}
 		}
 		
@@ -145,19 +146,19 @@ public class SurveyCTDataBuilder extends CyberTrackerDataBuilder {
 			String i = a.getI();
 			if (ICyberTrackerConstants.DATE.equals(i)) {
 				try {
-					date = formatter.parse(a.getV());
+					date = LocalDate.parse(a.getV(), formatter);
 					if (time != null)
 						break;
-				} catch (ParseException e) {
+				} catch (DateTimeParseException e) {
 					CyberTrackerPlugIn.log(e.getMessage(), e);
 				}
 			} else if (ICyberTrackerConstants.TIME.equals(i)) {
-				time = Time.valueOf(a.getV());
+				time = LocalTime.parse(a.getV());
 				if (date != null)
 					break;
 			}
 		}
-		ctSurvey.setEndDate(AbstractSmartImporter.combine(date, time));
+		ctSurvey.setEndDate(date.atTime(time));
 	}
 	
 	private void recordSurveyDesign(CyberTrackerSurvey ctSurvey, Map<String, E> eMap, Session session) {

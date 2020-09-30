@@ -8,9 +8,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.DateFormat;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -416,7 +417,7 @@ public class CyberTrackerFileImportDialog extends SmartStyledTitleDialog {
 			if (element instanceof Path) {
 				Path file = (Path) element;
 				try {
-					return DateFormat.getDateTimeInstance().format(new Date(Files.getLastModifiedTime(file).toMillis()));
+					return DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format( Files.getLastModifiedTime(file).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime() );
 				}catch(IOException ex) {
 					return ""; //$NON-NLS-1$
 				}

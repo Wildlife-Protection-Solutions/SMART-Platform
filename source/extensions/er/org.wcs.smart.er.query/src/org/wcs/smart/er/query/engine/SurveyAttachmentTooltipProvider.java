@@ -21,7 +21,8 @@
  */
 package org.wcs.smart.er.query.engine;
 
-import java.text.DateFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -160,7 +161,7 @@ public class SurveyAttachmentTooltipProvider extends Job {
 			l.setBackground(details.getBackground());
 			
 			l = new Label(main, SWT.NONE);
-			l.setText(DateFormat.getDateInstance().format(fwp.getWaypoint().getDateTime()));
+			l.setText(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(fwp.getWaypoint().getDateTime()));
 			l.setBackground(details.getBackground());
 			
 			if (fo != null) {

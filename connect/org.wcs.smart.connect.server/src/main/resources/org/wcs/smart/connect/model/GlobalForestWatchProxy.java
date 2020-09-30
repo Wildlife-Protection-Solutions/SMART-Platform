@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.connect.model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
@@ -43,7 +43,7 @@ public class GlobalForestWatchProxy {
 
 	private UUID uuid = null;
 	private UUID alertUuid = null;
-	private Date lastDataDate = null;
+	private LocalDateTime lastDataDate = null;
 	private String alertName = null;
 	private int level = -1;
 	
@@ -111,10 +111,10 @@ public class GlobalForestWatchProxy {
 		this.alertName = name;
 	}
 	
-	public Date getLastDataDate() {
+	public LocalDateTime getLastDataDate() {
 		return this.lastDataDate;
 	}
-	public void setLastDataDate(Date date) {
+	public void setLastDataDate(LocalDateTime date) {
 		this.lastDataDate = date;
 	}
 	

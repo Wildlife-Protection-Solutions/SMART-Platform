@@ -25,12 +25,12 @@ import java.io.FileNotFoundException;
 import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.time.LocalDate;
-import java.time.ZoneId;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -201,14 +201,14 @@ public enum RecordImportEngine {
 				Integer primaryDateColumn = config.getMappedColumn(Column.PRIMARY_DATE);
 				if (primaryDateColumn != null && !data[primaryDateColumn].trim().isEmpty()){
 					try{
-						record.setPrimaryDate( Date.from(LocalDate.parse(data[primaryDateColumn], dateFormatter).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()));
-					}catch (Exception ex){
+						record.setPrimaryDate( LocalDateTime.parse(data[primaryDateColumn], dateFormatter) );
+					}catch (DateTimeParseException ex){
 						warnings.add(MessageFormat.format(Messages.RecordImportEngine_DateParseError, data[primaryDateColumn], record.getTitle()));
 					}
 					
 				}
 				if (record.getPrimaryDate() == null) {
-					record.setPrimaryDate(new Date());
+					record.setPrimaryDate(LocalDateTime.now());
 				}
 				
 				String profile = data[config.getMappedColumn(Column.PROFILE)].trim();
@@ -430,7 +430,7 @@ public enum RecordImportEngine {
 			}
 		case DATE:
 			try{
-				Date d = Date.from(LocalDate.parse(strvalue, dFormatter).atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+				LocalDate d = LocalDate.parse(strvalue, dFormatter);
 				value.setDateValue(d);
 				return value;
 			}catch (Exception ex){

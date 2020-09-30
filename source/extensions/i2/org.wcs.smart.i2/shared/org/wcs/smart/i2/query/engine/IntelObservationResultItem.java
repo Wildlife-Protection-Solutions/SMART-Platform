@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.i2.query.engine;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -47,7 +47,7 @@ public class IntelObservationResultItem implements IGeometryResultItem {
 	private String recordTitle;
 	
 	private String locationId ;
-	private Date locationTime;
+	private LocalDateTime locationTime;
 	private String locationComment;
 	
 	private Geometry locationGeometry;
@@ -138,10 +138,10 @@ public class IntelObservationResultItem implements IGeometryResultItem {
 	public void setLocationUuid(UUID uuid){
 		this.locationUuid = uuid;
 	}
-	public Date getLocationDate(){
+	public LocalDateTime getLocationDate(){
 		return this.locationTime;
 	}
-	public void setLocationDate(Date date){
+	public void setLocationDate(LocalDateTime date){
 		this.locationTime = date;
 	}
 	public String getLocationId(){

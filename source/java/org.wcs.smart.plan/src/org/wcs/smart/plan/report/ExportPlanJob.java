@@ -88,8 +88,8 @@ public class ExportPlanJob extends Job {
 				reportParameters.put(ReportPlan.PLAN_ID, plan.getId());
 				reportParameters.put(ReportPlan.PLAN_NAME, plan.getName());
 				reportParameters.put(ReportPlan.PLAN_DESCRIPTION, (plan.getDescription()==null?"" : plan.getDescription())); //$NON-NLS-1$
-				reportParameters.put(ReportPlan.PLAN_END_DATE,  new java.sql.Date(plan.getEndDate().getTime()));
-				reportParameters.put(ReportPlan.PLAN_START_DATE, new java.sql.Date(plan.getStartDate().getTime()));
+				reportParameters.put(ReportPlan.PLAN_END_DATE,  java.sql.Date.valueOf(plan.getEndDate()));
+				reportParameters.put(ReportPlan.PLAN_START_DATE, java.sql.Date.valueOf(plan.getStartDate()));
 				reportParameters.put(ReportPlan.PLAN_TYPE, plan.getType().getGuiName(Locale.getDefault()));
 				reportParameters.put(ReportPlan.UNAVAILABLE_EMPLOYEES, plan.getUnavailableEmployees());
 				reportParameters.put(ReportPlan.AVAILABLE_EMPLOYEES, plan.getActiveEmployees());

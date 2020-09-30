@@ -434,8 +434,8 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine implements IDerb
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
 		it.setPatrolUuid(UuidUtils.byteToUUID(rs.getBytes("p_uuid"))); //$NON-NLS-1$
 		it.setPatrolId(rs.getString("p_id")); //$NON-NLS-1$
-		it.setPatrolStartDate(rs.getDate("p_startdate")); //$NON-NLS-1$
-		it.setPatrolEndDate(rs.getDate("p_enddate")); //$NON-NLS-1$
+		it.setPatrolStartDate(rs.getDate("p_startdate").toLocalDate()); //$NON-NLS-1$
+		it.setPatrolEndDate(rs.getDate("p_enddate").toLocalDate()); //$NON-NLS-1$
 		it.setStation(rs.getString("p_station"));				 //$NON-NLS-1$
 		it.setTeam(rs.getString("p_team"));	 //$NON-NLS-1$
 		it.setObjective(rs.getString("p_objective")); //$NON-NLS-1$
@@ -444,7 +444,7 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine implements IDerb
 		it.setArmed(rs.getBoolean("p_armed")); //$NON-NLS-1$
 		it.setTransportType(rs.getString("p_transporttype")); //$NON-NLS-1$
 		it.setPatrolLegId(rs.getString("p_legid")); //$NON-NLS-1$
-		it.setWpDateTime(rs.getDate("wp_date")); //$NON-NLS-1$
+		it.setWpDateTime(rs.getDate("wp_date").toLocalDate()); //$NON-NLS-1$
 		
 		it.setLeader(rs.getString("p_leader")); //$NON-NLS-1$
 		it.setPilot(rs.getString("p_pilot")); //$NON-NLS-1$
@@ -452,11 +452,11 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine implements IDerb
 		it.setWaypointId(rs.getInt("wp_id")); //$NON-NLS-1$
 		it.setWaypointX(rs.getDouble("wp_x")); //$NON-NLS-1$
 		it.setWaypointY(rs.getDouble("wp_y")); //$NON-NLS-1$
-		it.setWaypointTime(rs.getTime("wp_time")); //$NON-NLS-1$
+		it.setWaypointTime(rs.getTime("wp_time").toLocalTime()); //$NON-NLS-1$
 		it.setWaypointDirection(rs.getObject("wp_direction") == null ? null : rs.getFloat("wp_direction")); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setWaypointDistance(rs.getObject("wp_distance") == null ? null : rs.getFloat("wp_distance")); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setWaypointComment(rs.getString("wp_comment")); //$NON-NLS-1$
-		it.setLastModifiedDate(rs.getTimestamp("wp_lastmodified")); //$NON-NLS-1$
+		it.setLastModifiedDate(rs.getTimestamp("wp_lastmodified").toLocalDateTime()); //$NON-NLS-1$
 		it.setLastModifiedBy(rs.getString("wp_lastmodifiedbyname")); //$NON-NLS-1$
 		return it;
 	}

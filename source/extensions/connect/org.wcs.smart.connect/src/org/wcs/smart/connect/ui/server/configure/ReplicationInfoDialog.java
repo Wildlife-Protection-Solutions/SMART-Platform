@@ -22,7 +22,8 @@
 package org.wcs.smart.connect.ui.server.configure;
 
 import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.List;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -89,7 +90,7 @@ public class ReplicationInfoDialog extends SmartStyledTitleDialog {
 		}
 		public String getValue(ConnectSyncHistoryRecord record){
 			if (this == DATETIME){
-				return SimpleDateFormat.getDateTimeInstance().format(record.getDatetime());
+				return DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(record.getDatetime());
 			}else if (this == TYPE){
 				return record.getType().name();
 			}else if (this == STATUS){

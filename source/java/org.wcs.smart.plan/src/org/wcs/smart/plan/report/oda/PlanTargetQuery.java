@@ -25,6 +25,7 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.HashMap;
 
 import org.eclipse.datatools.connectivity.oda.IParameterMetaData;
@@ -124,13 +125,13 @@ public class PlanTargetQuery implements IQuery {
 	 */
 	public IResultSet executeQuery() throws OdaException {
 		if (this.queryText.equals(ALL)){
-			Date start = null;
-			Date end = null;
+			LocalDate start = null;
+			LocalDate end = null;
 			for (int x = 1; x <= getParameterMetaData().getParameterCount(); x ++){
 				if (getParameterMetaData().getParameterName(x).equals(SmartParameterMetaData.Parameter.STARTDATE.guiName)){
-					start = (Date) parameters.get(x);
+					start = ((Date) parameters.get(x)).toLocalDate();
 				}else if (getParameterMetaData().getParameterName(x).equals(SmartParameterMetaData.Parameter.ENDDATE.guiName)){
-					end = (Date) parameters.get(x);
+					end = ((Date) parameters.get(x)).toLocalDate();
 				}
 			}
 			return new PlanTargetResultSet(start, end, (PlanTargetResultSetMetadata)getMetaData(), connection);

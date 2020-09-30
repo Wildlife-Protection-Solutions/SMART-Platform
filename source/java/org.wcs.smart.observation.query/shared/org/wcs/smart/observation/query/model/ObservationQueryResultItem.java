@@ -21,20 +21,19 @@
  */
 package org.wcs.smart.observation.query.model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IAdaptable;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.query.common.engine.IGeometryResultItem;
 import org.wcs.smart.util.ReprojectUtils;
-
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Geometry;
 
 /**
  * A class to hold the results of a waypoint 
@@ -56,7 +55,7 @@ public class ObservationQueryResultItem implements IGeometryResultItem, IAdaptab
 	private String caName;
 	private String sourceId;
 	
-	private Date wpDateTime;
+	private LocalDateTime wpDateTime;
 	private UUID waypointUuid;
 	private int waypointId;
 	private double waypointX;
@@ -70,7 +69,7 @@ public class ObservationQueryResultItem implements IGeometryResultItem, IAdaptab
 	private HashMap<String, Object> attributes = new HashMap<String, Object>();
 	
 	private String lastModifiedBy;
-	private Date lastModified;
+	private LocalDateTime lastModified;
 	
 	private UUID groupUuid;
 	private UUID observationUuid;
@@ -79,10 +78,10 @@ public class ObservationQueryResultItem implements IGeometryResultItem, IAdaptab
 	 * the waypoint last modified date
 	 * @param lastModified
 	 */
-	public void setLastModifiedDate(Date lastModified) {
+	public void setLastModifiedDate(LocalDateTime lastModified) {
 		this.lastModified = lastModified;
 	}
-	public Date getLastModifiedDate() {
+	public LocalDateTime getLastModifiedDate() {
 		return this.lastModified;
 	}
 	
@@ -204,13 +203,13 @@ public class ObservationQueryResultItem implements IGeometryResultItem, IAdaptab
 	/**
 	 * @return waypoint date 
 	 */
-	public Date getWpDateTime() {
+	public LocalDateTime getWpDateTime() {
 		return wpDateTime;
 	}
 	/**
 	 * @param wpDateTime waypoint date 
 	 */
-	public void setWpDateTime(Date wpDateTime) {
+	public void setWpDateTime(LocalDateTime wpDateTime) {
 		this.wpDateTime = wpDateTime;
 	}
 	

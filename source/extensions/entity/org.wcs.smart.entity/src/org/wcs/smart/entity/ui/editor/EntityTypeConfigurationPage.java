@@ -22,8 +22,9 @@
 package org.wcs.smart.entity.ui.editor;
 
 import java.lang.reflect.InvocationTargetException;
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -973,7 +974,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 			txtCreatedBy.setText(SmartLabelProvider.getFullLabel(type.getCreator()));
 		}
 		if (type.getDateCreated() != null){
-			txtDateCreated.setText(DateFormat.getDateInstance().format(type.getDateCreated()));	
+			txtDateCreated.setText(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(type.getDateCreated()));	
 		}
 		
 		

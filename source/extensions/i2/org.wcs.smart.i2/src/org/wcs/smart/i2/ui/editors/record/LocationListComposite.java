@@ -25,11 +25,14 @@ import java.awt.Color;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -93,7 +96,6 @@ import org.wcs.smart.i2.ui.TransparentInfoDialog;
 import org.wcs.smart.i2.ui.WKTGeometryDialog;
 import org.wcs.smart.i2.ui.dialogs.GPSDeviceSelectionDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * Composite for displaying all locations in a list.
@@ -195,7 +197,7 @@ public class LocationListComposite extends Composite{
 			@Override
 			public String getText(Object element) {
 				if (element instanceof IntelLocation){
-					return DateFormat.getDateInstance().format(((IntelLocation) element).getDateTime());
+					return DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(((IntelLocation) element).getDateTime());
 				}
 				return super.getText(element);
 			}
@@ -209,7 +211,7 @@ public class LocationListComposite extends Composite{
 			@Override
 			public String getText(Object element) {
 				if (element instanceof IntelLocation){
-					return DateFormat.getTimeInstance().format(((IntelLocation) element).getDateTime());
+					return DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM).format(((IntelLocation) element).getDateTime());
 				}
 				return super.getText(element);
 			}
@@ -677,13 +679,13 @@ public class LocationListComposite extends Composite{
 						((IntelLocation)element).setComment(((String)value).trim());
 					}
 				}else if (col == Column.DATE){
-					Date time = ((IntelLocation)element).getDateTime();
-					Date date = (Date)value;
-					((IntelLocation)element).setDateTime(SmartUtils.combineDateTime(date, time));
+					LocalDateTime time = ((IntelLocation)element).getDateTime();
+					LocalDate date = (LocalDate)value;
+					((IntelLocation)element).setDateTime(date.atTime(time.toLocalTime()));
 				}else if (col == Column.TIME){
-					Date time = (Date)value;
-					Date date = ((IntelLocation)element).getDateTime();
-					((IntelLocation)element).setDateTime(SmartUtils.combineDateTime(date, time));
+					LocalTime time = (LocalTime)value;
+					LocalDateTime date = ((IntelLocation)element).getDateTime();
+					((IntelLocation)element).setDateTime( date.toLocalDate().atTime(time));
 				}else if (col == Column.OBSERVATION){
 				}
 				//Fire changes

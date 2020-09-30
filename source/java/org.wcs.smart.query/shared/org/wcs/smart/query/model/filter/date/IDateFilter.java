@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.query.model.filter.date;
 
-import java.sql.Date;
+import java.time.LocalDate;
 import java.util.Locale;
 
 /**
@@ -72,7 +72,7 @@ public interface IDateFilter {
 	 * 
 	 * @return the dates associated with the filter
 	 */
-	public Date[] getDates();
+	public LocalDate[] getDates();
 	
 	/**
 	 * 

@@ -27,9 +27,9 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -281,7 +281,7 @@ public enum DataQueueManager {
 				
 				if (item == null) return null;
 				
-				item.setDateProcessed(new Date());
+				item.setDateProcessed(LocalDateTime.now());
 				//check status on server
 				item.setCheckOutStatus(item.getStatus());
 				if (item.getStatus() != LocalDataQueueItem.Status.REQUEUED){
@@ -384,10 +384,8 @@ public enum DataQueueManager {
 		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
 			try {
-				Calendar c = Calendar.getInstance();
-				c.add(Calendar.DATE, -numDays);
-				Date compareDate = c.getTime();
 				
+				LocalDateTime compareDate = ChronoUnit.DAYS.addTo(LocalDateTime.now(), -numDays);
 				
 				CriteriaBuilder cb = s.getCriteriaBuilder();
 				CriteriaQuery<LocalDataQueueItem> cq = cb.createQuery(LocalDataQueueItem.class);

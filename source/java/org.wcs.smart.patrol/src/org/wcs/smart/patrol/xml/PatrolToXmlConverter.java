@@ -22,8 +22,7 @@
 
 package org.wcs.smart.patrol.xml;
 
-import java.util.Date;
-import java.util.GregorianCalendar;
+import java.time.LocalTime;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeConstants;
@@ -50,8 +49,8 @@ import org.wcs.smart.patrol.xml.model.v13.PatrolMemberType;
 import org.wcs.smart.patrol.xml.model.v13.PatrolType;
 import org.wcs.smart.patrol.xml.model.v13.TrackType;
 import org.wcs.smart.patrol.xml.model.v13.WaypointObservationAttributeType;
-import org.wcs.smart.patrol.xml.model.v13.WaypointObservationType;
 import org.wcs.smart.patrol.xml.model.v13.WaypointObservationGroupType;
+import org.wcs.smart.patrol.xml.model.v13.WaypointObservationType;
 import org.wcs.smart.patrol.xml.model.v13.WaypointType;
 import org.wcs.smart.util.SmartUtils;
 
@@ -180,7 +179,7 @@ public class PatrolToXmlConverter {
 		xml.setDirection(wp.getWaypoint().getDirection());
 		xml.setDistance(wp.getWaypoint().getDistance());
 		xml.setId(wp.getWaypoint().getId());
-		xml.setTime( toXmlTime(wp.getWaypoint().getDateTime()));
+		xml.setTime( toXmlTime(wp.getWaypoint().getDateTime().toLocalTime()));
 		xml.setX(wp.getWaypoint().getX());
 		xml.setY(wp.getWaypoint().getY());
 		
@@ -263,16 +262,13 @@ public class PatrolToXmlConverter {
 	 * @return
 	 * @throws DatatypeConfigurationException
 	 */
-	private static XMLGregorianCalendar toXmlTime(Date d) throws DatatypeConfigurationException{
-		GregorianCalendar cal = (GregorianCalendar) GregorianCalendar.getInstance();
-		cal.setTime(d);
-		
-		XMLGregorianCalendar xgc = DatatypeFactory.newInstance().newXMLGregorianCalendar(cal);
-		xgc.setMillisecond(DatatypeConstants.FIELD_UNDEFINED);
-		xgc.setTimezone(DatatypeConstants.FIELD_UNDEFINED);
-		xgc.setYear(DatatypeConstants.FIELD_UNDEFINED);
-		xgc.setMonth(DatatypeConstants.FIELD_UNDEFINED);
-		xgc.setDay(DatatypeConstants.FIELD_UNDEFINED);
+	private static XMLGregorianCalendar toXmlTime(LocalTime d) throws DatatypeConfigurationException{
+
+		XMLGregorianCalendar xgc = DatatypeFactory.newInstance().newXMLGregorianCalendar(
+				DatatypeConstants.FIELD_UNDEFINED,DatatypeConstants.FIELD_UNDEFINED,DatatypeConstants.FIELD_UNDEFINED,
+				d.getHour(), d.getMinute(), d.getSecond(), 
+				DatatypeConstants.FIELD_UNDEFINED, DatatypeConstants.FIELD_UNDEFINED);
+
 		
 		return xgc;
 	}

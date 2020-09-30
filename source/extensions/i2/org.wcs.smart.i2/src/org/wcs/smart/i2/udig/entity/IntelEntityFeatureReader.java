@@ -22,8 +22,8 @@
 package org.wcs.smart.i2.udig.entity;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -67,7 +67,7 @@ public class IntelEntityFeatureReader implements FeatureReader<SimpleFeatureType
 	
 	private Session session;
 	
-	public IntelEntityFeatureReader(UUID entityUuid, SimpleFeatureType ftype, Date[] dFilter) {
+	public IntelEntityFeatureReader(UUID entityUuid, SimpleFeatureType ftype, LocalDateTime[] dFilter) {
 		this.ftype = ftype;
 		geomType = LocationLayerType.valueOf(ftype.getName().getLocalPart());
 		session = HibernateManager.openSession();

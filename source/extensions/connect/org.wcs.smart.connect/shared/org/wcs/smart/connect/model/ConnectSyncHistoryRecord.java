@@ -22,7 +22,7 @@
 package org.wcs.smart.connect.model;
 
 import java.nio.file.FileSystems;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -68,7 +68,7 @@ public class ConnectSyncHistoryRecord extends UuidItem{
 	
 	private ConservationArea ca;
 	private ConnectServer server;
-	private Date datetime;
+	private LocalDateTime datetime;
 	private Type type;
 	private Status status;
 	private String statusUrl;
@@ -97,10 +97,10 @@ public class ConnectSyncHistoryRecord extends UuidItem{
 	}
 	
 	@Column(name="datetime")
-	public Date getDatetime() {
+	public LocalDateTime getDatetime() {
 		return datetime;
 	}
-	public void setDatetime(Date datetime) {
+	public void setDatetime(LocalDateTime datetime) {
 		this.datetime = datetime;
 	}
 	

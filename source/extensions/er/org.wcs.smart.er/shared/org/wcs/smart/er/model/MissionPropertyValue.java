@@ -22,8 +22,9 @@
 package org.wcs.smart.er.model;
 
 import java.io.Serializable;
-import java.text.DateFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.Locale;
 
 import javax.persistence.AssociationOverride;
@@ -161,11 +162,9 @@ public class MissionPropertyValue {
 	 * @return
 	 */
 	@Transient
-	public Date getDateValue() {
-		if (getStringValue() == null) {
-			return null;
-		}
-		return java.sql.Date.valueOf(getStringValue());
+	public LocalDate getDateValue() {
+		if (getStringValue() == null) return null;
+		return LocalDate.parse(getStringValue(), DateTimeFormatter.ISO_LOCAL_DATE);
 	}
 
 	/**
@@ -174,13 +173,12 @@ public class MissionPropertyValue {
 	 * @return
 	 */
 	@Transient
-	public void setDateValue(Date date) {
-		if (date == null) {
+	public void setDateValue(LocalDate date) {
+		if (date == null){
 			setStringValue(null);
 			return;
 		}
-		java.sql.Date tmp = new java.sql.Date(date.getTime());
-		setStringValue(tmp.toString());
+		setStringValue(DateTimeFormatter.ISO_LOCAL_DATE.format(date));
 	}
 
 	/**
@@ -196,8 +194,7 @@ public class MissionPropertyValue {
 			break;
 		case DATE:
 			if (getStringValue() != null) {
-				text = DateFormat.getDateInstance(DateFormat.MEDIUM).format(
-						java.sql.Date.valueOf(getStringValue()));
+				text = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(getDateValue());
 			}
 		case NUMERIC:
 			if (getNumberValue() != null) {
@@ -265,7 +262,7 @@ public class MissionPropertyValue {
 			setStringValue((String) value);
 			break;
 		case DATE:
-			setDateValue((Date) value);
+			setDateValue((LocalDate) value);
 			break;
 		case NUMERIC:
 			setNumberValue((Double) value);

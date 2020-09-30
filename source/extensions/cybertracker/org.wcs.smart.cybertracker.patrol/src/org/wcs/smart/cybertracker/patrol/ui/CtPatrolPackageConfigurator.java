@@ -22,7 +22,7 @@
 package org.wcs.smart.cybertracker.patrol.ui;
 
 import java.nio.file.Path;
-import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -499,7 +499,7 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 					int index = revision.indexOf('.');
 					String date = revision.substring(index+1);
 					revision = revision.substring(0,index);
-					SimpleDateFormat sdf = new SimpleDateFormat(ICtPackage.PACKAGE_DATE_FORMAT);
+					DateTimeFormatter sdf = DateTimeFormatter.ofPattern(ICtPackage.PACKAGE_DATE_FORMAT);
 					
 					Composite temp = new Composite(inner, SWT.NONE);
 					temp.setLayout(new GridLayout(2, false));

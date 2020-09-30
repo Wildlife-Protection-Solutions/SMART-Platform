@@ -22,8 +22,9 @@
 package org.wcs.smart.asset.query.ui.editor;
 
 import java.awt.Point;
-import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -195,7 +196,7 @@ public class AssetSimpleQueryResultEditor extends QueryResultsEditor{
 							AssetQueryResultItem firstItem = wpItems.get(0);
 							sb.append( firstItem.getWaypointId() ); 
 							sb.append("\n"); //$NON-NLS-1$
-							sb.append(DateFormat.getDateTimeInstance().format(firstItem.getWaypointDate()));
+							sb.append(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(firstItem.getWaypointDate()));
 							sb.append("\n"); //$NON-NLS-1$
 							for (AssetQueryResultItem item : wpItems) {
 								if (item.getCategories() != null && item.getCategories().length > 0){

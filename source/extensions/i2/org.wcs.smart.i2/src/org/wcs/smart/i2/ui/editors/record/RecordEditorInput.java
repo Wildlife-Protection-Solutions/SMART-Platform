@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.i2.ui.editors.record;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -39,7 +39,7 @@ public class RecordEditorInput implements IEditorInput{
 
 	private String name;
 	private UUID uuid;
-	private Date date;
+	private LocalDateTime date;
 	private IntelRecord record;
 	private UUID sourceUuid;
 	private UUID profileUuid;
@@ -47,7 +47,7 @@ public class RecordEditorInput implements IEditorInput{
 	
 	private boolean initMode;
 	
-	public RecordEditorInput(String name, UUID uuid, Date date, UUID sourceUuid, UUID profileUuid, IntelRecord.Status status){
+	public RecordEditorInput(String name, UUID uuid, LocalDateTime date, UUID sourceUuid, UUID profileUuid, IntelRecord.Status status){
 		this.name = name;
 		this.uuid = uuid;
 		this.date = date;
@@ -82,7 +82,7 @@ public class RecordEditorInput implements IEditorInput{
 		return this.record;
 	}
 	
-	public Date getDateCreated(){
+	public LocalDateTime getDateCreated(){
 		return this.date;
 	}
 	public UUID getUuid(){

@@ -83,7 +83,6 @@ import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
-import org.wcs.smart.connect.model.ConservationAreaProxy;
 import org.wcs.smart.connect.model.ReportParameter;
 import org.wcs.smart.connect.model.ReportParameter.Type;
 import org.wcs.smart.connect.report.BirtEngine;
@@ -653,7 +652,7 @@ public class ReportApi extends HttpServlet{
 			
 			switch(p.getType()){
 				case DATE:
-					value = new java.sql.Date(SmartUtils.parseDate(items.get(x+1)).getTime());
+					value = java.sql.Date.valueOf( SmartUtils.parseDate(items.get(x+1)) );
 					break;
 				case DATETIME:
 					value = java.sql.Timestamp.valueOf(items.get(x+1));
