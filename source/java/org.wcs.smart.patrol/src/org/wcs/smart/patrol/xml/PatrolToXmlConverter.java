@@ -37,6 +37,7 @@ import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolAttributeValue;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
@@ -93,6 +94,18 @@ public class PatrolToXmlConverter {
 		/* team */
 		xml.setTeam(createLabel(p, p.getTeam()));
 
+		/* custom attributes */
+		for (PatrolAttributeValue av : p.getCustomAttributes()) {
+			
+			org.wcs.smart.patrol.xml.model.v13.AttributeType axml = new org.wcs.smart.patrol.xml.model.v13.AttributeType();
+			axml.setKey(av.getPatrolAttribute().getKeyId());
+			if (av.getStringValue() != null) axml.setStringValue(av.getStringValue());
+			if (av.getNumberValue() != null) axml.setDoubleValue(av.getNumberValue());
+			if (av.getAttributeListItem() != null) axml.setStringValue(av.getAttributeListItem().getKeyId());
+			
+			xml.getAttributes().add(axml);
+		}
+		
 		/* legs */
 		for (PatrolLeg leg: p.getLegs()){
 			xml.getLegs().add(convertPatrolLeg(leg));

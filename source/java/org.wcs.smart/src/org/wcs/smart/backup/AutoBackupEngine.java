@@ -255,7 +255,7 @@ public class AutoBackupEngine {
 	 */
 	private static long daysSinceBackup(Properties properties){
 		long last = Long.valueOf(properties.getProperty(PROP_LASTBACKUP));
-		LocalDate lastDate = LocalDate.from( Instant.ofEpochMilli(last).atZone(ZoneId.systemDefault()) );
+		LocalDate lastDate = LocalDate.from( Instant.ofEpochSecond(last).atZone(ZoneId.systemDefault()) );
 		return ChronoUnit.DAYS.between(lastDate, LocalDate.now());		
 	}
 	

@@ -55,6 +55,7 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
@@ -65,6 +66,9 @@ import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolAttribute;
+import org.wcs.smart.patrol.model.PatrolAttributeListItem;
+import org.wcs.smart.patrol.model.PatrolAttributeValue;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
@@ -213,12 +217,65 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 			}
 		}
 		
+		patrol.setCustomAttributes(new ArrayList<>());
+		for (org.wcs.smart.patrol.xml.model.v13.AttributeType av : xml.getAttributes()) {
+			
+			PatrolAttribute pa = findAttribute(av.getKey());
+			if (pa == null) continue;
+			if (pa.getType() == AttributeType.TREE) {
+				warnings.add(Messages.XmlToPatrolConverter_TreeAttributesNotSupported);
+				continue;
+			}
+			
+			PatrolAttributeValue custom = new PatrolAttributeValue();
+			custom.setPatrol(patrol);
+			custom.setPatrolAttribute(pa);
+			
+			switch(pa.getType()) {
+				case TEXT:
+				case DATE:
+					custom.setStringValue(av.getStringValue());
+					break;
+				case LIST:
+					PatrolAttributeListItem li = findListItem(pa, av.getStringValue());
+					custom.setAttributeListItem(li);
+					break;
+				case BOOLEAN:
+				case NUMERIC:
+					custom.setNumberValue(av.getDoubleValue());
+					break;
+				case TREE:
+					//not supported
+					break;
+			}
+			if (pa.getType() == AttributeType.LIST && custom.getAttributeListItem() == null) continue;
+			
+			patrol.getCustomAttributes().add(custom);
+		}
+		
 		patrol.setLegs(new ArrayList<PatrolLeg>());
 		for (PatrolLegType legxml : xml.getLegs()){
 			patrol.getLegs().add(convertPatrolLeg(legxml, patrol));
 		}		
 	}
 	
+	private PatrolAttributeListItem findListItem(PatrolAttribute pa, String key) {
+		for (PatrolAttributeListItem li : pa.getAttributeList()) {
+			if (li.getKeyId().equalsIgnoreCase(key)) return li;
+		}
+		warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_ListItemNotFound, pa.getName(), key));
+		return null;
+	}
+	
+	private PatrolAttribute findAttribute(String key) {
+		PatrolAttribute a = QueryFactory.buildQuery(session, PatrolAttribute.class, 
+				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+				new Object[] {"keyId", key}).uniqueResult(); //$NON-NLS-1$
+		if (a == null) {
+			warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_AttributeNotFound, key));
+		}
+		return a;
+	}
 	private PatrolLeg convertPatrolLeg(PatrolLegType xml, Patrol parent) throws Exception{
 		PatrolLeg leg = new PatrolLeg();
 		leg.setEndDate(SmartUtils.toLocalDate(xml.getEndDate()));
