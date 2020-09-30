@@ -33,6 +33,7 @@ import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -409,7 +410,7 @@ public class CleanUpJob implements Runnable {
 		if (days != null && days > 0){
 			//remove all items
 			List<Path> filesToDelete = new ArrayList<>();
-			LocalDateTime lastDate = LocalDateTime.now().minusDays(days);
+			ZonedDateTime lastDate = ZonedDateTime.now().minusDays(days);
 			s.beginTransaction();
 			try{
 				CriteriaBuilder cb = s.getCriteriaBuilder();

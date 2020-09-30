@@ -22,7 +22,7 @@
 package org.wcs.smart.connect.model;
 
 import java.beans.Transient;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 import javax.persistence.Column;
@@ -36,8 +36,8 @@ import javax.persistence.Table;
 
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.connect.cybertracker.model.CyberTrackerPackageProxy;
-import org.wcs.smart.connect.util.LocalDateTimeDeserializer;
-import org.wcs.smart.connect.util.LocalDateTimeSerializer;
+import org.wcs.smart.connect.util.ZonedDateTimeDeserializer;
+import org.wcs.smart.connect.util.ZonedDateTimeSerializer;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -60,7 +60,7 @@ public class CyberTrackerPackage extends UuidItem{
 	};
 	
 	private Status status;
-	private LocalDateTime uploadedDate;
+	private ZonedDateTime uploadedDate;
 	private ConservationAreaInfo ca;
 	private String filename;
 	private String version;
@@ -70,13 +70,13 @@ public class CyberTrackerPackage extends UuidItem{
 	private String type;
 
 	@Column(name="uploaded_date")
-	@JsonDeserialize(using = LocalDateTimeDeserializer.class)  
-	@JsonSerialize(using = LocalDateTimeSerializer.class)
-	public LocalDateTime getUploadedDate() {
+	@JsonDeserialize(using = ZonedDateTimeDeserializer.class)  
+	@JsonSerialize(using = ZonedDateTimeSerializer.class)
+	public ZonedDateTime getUploadedDate() {
 		return this.uploadedDate;
 	}
 	
-	public void setUploadedDate(LocalDateTime date) {
+	public void setUploadedDate(ZonedDateTime date) {
 		this.uploadedDate = date;
 	}
 	

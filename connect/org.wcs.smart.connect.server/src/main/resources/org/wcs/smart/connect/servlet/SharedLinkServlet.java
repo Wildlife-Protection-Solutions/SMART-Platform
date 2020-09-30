@@ -23,6 +23,7 @@ package org.wcs.smart.connect.servlet;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 import javax.servlet.RequestDispatcher;
@@ -76,7 +77,7 @@ public class SharedLinkServlet extends HttpServlet {
 				return;
 			}
 			//check if link is still valid
-			if(link.getExpiresAt().isBefore(LocalDateTime.now())){
+			if(link.getExpiresAt().isBefore(ZonedDateTime.now())){
 				response.sendError(HttpServletResponse.SC_NOT_FOUND, Messages.getString("SharedLinkServlet.LinkExpired", request.getLocale())); //$NON-NLS-1$
 				return;
 			}

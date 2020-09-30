@@ -21,12 +21,12 @@
  */
 package org.wcs.smart.connect.dataqueue;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 import org.wcs.smart.connect.dataqueue.model.DataQueueItem;
-import org.wcs.smart.connect.util.LocalDateTimeDeserializer;
-import org.wcs.smart.connect.util.LocalDateTimeSerializer;
+import org.wcs.smart.connect.util.ZonedDateTimeDeserializer;
+import org.wcs.smart.connect.util.ZonedDateTimeSerializer;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -42,12 +42,12 @@ public class ServerDataQueueItemProxy extends DataQueueItem implements Comparabl
 	
 	private String caName;
 	private ServerDataQueueItem.Status status;
-	private LocalDateTime lastModifiedDate;
-	private LocalDateTime uploadedDate;
+	private ZonedDateTime lastModifiedDate;
+	private ZonedDateTime uploadedDate;
 	private String uploadedBy;
 	
 	public ServerDataQueueItemProxy(UUID uuid, String name, UUID caUuid, String caName, 
-			String type, ServerDataQueueItem.Status status, LocalDateTime lastModifiedDate, LocalDateTime uploadDate, String uploadBy){
+			String type, ServerDataQueueItem.Status status, ZonedDateTime lastModifiedDate, ZonedDateTime uploadDate, String uploadBy){
 		setUuid(uuid);
 		setName(name);
 		setType(type);
@@ -67,15 +67,15 @@ public class ServerDataQueueItemProxy extends DataQueueItem implements Comparabl
 		return this.status;
 	}
 	
-	@JsonDeserialize(using = LocalDateTimeDeserializer.class)  
-	@JsonSerialize(using = LocalDateTimeSerializer.class)
-	public LocalDateTime getUploadedDate(){
+	@JsonDeserialize(using = ZonedDateTimeDeserializer.class)  
+	@JsonSerialize(using = ZonedDateTimeSerializer.class)
+	public ZonedDateTime getUploadedDate(){
 		return this.uploadedDate;
 	}
 	
-	@JsonDeserialize(using = LocalDateTimeDeserializer.class)  
-	@JsonSerialize(using = LocalDateTimeSerializer.class)
-	public LocalDateTime getLastModifiedDate(){
+	@JsonDeserialize(using = ZonedDateTimeDeserializer.class)  
+	@JsonSerialize(using = ZonedDateTimeSerializer.class)
+	public ZonedDateTime getLastModifiedDate(){
 		return this.lastModifiedDate;
 	}
 	public String getUploadedBy(){
@@ -84,7 +84,7 @@ public class ServerDataQueueItemProxy extends DataQueueItem implements Comparabl
 
 	//sort by Date 
 	public int compareTo(ServerDataQueueItemProxy compare) {
-		LocalDateTime compareDate = ((ServerDataQueueItemProxy) compare).getUploadedDate(); 
+		ZonedDateTime compareDate = ((ServerDataQueueItemProxy) compare).getUploadedDate(); 
 		return -this.uploadedDate.compareTo(compareDate);
 	}
 }

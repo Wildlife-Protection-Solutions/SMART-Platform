@@ -28,6 +28,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -413,7 +414,7 @@ public class DataQueue {
 			item.setStatus(ServerDataQueueItem.Status.UPLOADING);
 			item.setStatusMessage(null);
 			item.setUploadedBy(request.getUserPrincipal().getName());
-			item.setUploadedDate(LocalDateTime.now());
+			item.setUploadedDate(ZonedDateTime.now());
 				
 			WorkItem up = new WorkItem();
 			up.setLocale(request.getLocale());

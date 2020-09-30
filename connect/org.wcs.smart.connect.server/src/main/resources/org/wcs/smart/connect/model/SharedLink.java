@@ -22,7 +22,7 @@
 package org.wcs.smart.connect.model;
 
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 import javax.persistence.Column;
@@ -30,8 +30,8 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.wcs.smart.connect.util.LocalDateTimeDeserializer;
-import org.wcs.smart.connect.util.LocalDateTimeSerializer;
+import org.wcs.smart.connect.util.ZonedDateTimeDeserializer;
+import org.wcs.smart.connect.util.ZonedDateTimeSerializer;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -48,8 +48,8 @@ public class SharedLink extends ConnectUuidItem{
 	private UUID ownerUuid;
 	private UUID permissionUserUuid;
 	private UUID caUuid;
-	private LocalDateTime expiresAt;
-	private LocalDateTime dateCreated;
+	private ZonedDateTime expiresAt;
+	private ZonedDateTime dateCreated;
 	private String url;
 	private boolean isUserToken;
 	private String allowedIp;
@@ -88,12 +88,12 @@ public class SharedLink extends ConnectUuidItem{
 	}
 	
 	@Column(name="expires_at")
-	@JsonDeserialize(using = LocalDateTimeDeserializer.class)  
-	@JsonSerialize(using = LocalDateTimeSerializer.class) 
-	public LocalDateTime getExpiresAt() {
+	@JsonDeserialize(using = ZonedDateTimeDeserializer.class)  
+	@JsonSerialize(using = ZonedDateTimeSerializer.class) 
+	public ZonedDateTime getExpiresAt() {
 		return expiresAt;
 	}
-	public void setExpiresAt(LocalDateTime expiresAt) {
+	public void setExpiresAt(ZonedDateTime expiresAt) {
 		this.expiresAt = expiresAt;
 	}
 	
@@ -106,13 +106,13 @@ public class SharedLink extends ConnectUuidItem{
 	}
 	
 	@Column(name="date_created")
-	@JsonDeserialize(using = LocalDateTimeDeserializer.class)  
-	@JsonSerialize(using = LocalDateTimeSerializer.class)
-	public LocalDateTime getDateCreated(){
+	@JsonDeserialize(using = ZonedDateTimeDeserializer.class)  
+	@JsonSerialize(using = ZonedDateTimeSerializer.class)
+	public ZonedDateTime getDateCreated(){
 		return this.dateCreated;
 	}
 
-	public void setDateCreated(LocalDateTime dateCreated) {
+	public void setDateCreated(ZonedDateTime dateCreated) {
 		this.dateCreated = dateCreated;
 	}
 	

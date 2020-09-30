@@ -28,6 +28,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
@@ -415,7 +416,7 @@ public class CyberTrackerNoa {
 			item.setStatus(Status.UPLOADING);
 			item.setStatusMessage(null);
 			item.setUploadedBy("SMART Mobile"); //$NON-NLS-1$
-			item.setUploadedDate(LocalDateTime.now());
+			item.setUploadedDate(ZonedDateTime.now());
 			item.setWorkItem(null);
 		
 			s.save(item);

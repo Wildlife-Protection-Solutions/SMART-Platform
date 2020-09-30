@@ -23,6 +23,8 @@ package org.wcs.smart.connect.api;
 
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -309,13 +311,13 @@ public class SharedLinkApi extends HttpServlet{
 			}
 		    
 			//set expiration date
-			newLink.setDateCreated(LocalDateTime.now());
+			newLink.setDateCreated(ZonedDateTime.now());
 			int mins = newLink.getExpiresAfter();
 			if (mins == 0){
 				//never expire
-				newLink.setExpiresAt(LocalDateTime.MAX);
+				newLink.setExpiresAt(LocalDateTime.MAX.atZone(ZoneId.systemDefault()));
 			}else if (mins > 0){
-				newLink.setExpiresAt(LocalDateTime.now().plusMinutes(mins));
+				newLink.setExpiresAt(ZonedDateTime.now().plusMinutes(mins));
 			}else{
 				throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("SharedLinkApi.InvalidExpiresAfterValue",request.getLocale())); //$NON-NLS-1$
 			}
@@ -392,13 +394,13 @@ public class SharedLinkApi extends HttpServlet{
 		try{
 		    
 			//set expiration date		
-			newLink.setDateCreated(LocalDateTime.now());
+			newLink.setDateCreated(ZonedDateTime.now());
 			int mins = newLink.getExpiresAfter();
 			if (mins == 0){
 				//never expire
-				newLink.setExpiresAt(LocalDateTime.MAX);
+				newLink.setExpiresAt(LocalDateTime.MAX.atZone(ZoneId.systemDefault()));
 			}else if (mins > 0){
-				newLink.setExpiresAt(LocalDateTime.now().plusMinutes(mins));
+				newLink.setExpiresAt(ZonedDateTime.now().plusMinutes(mins));
 			}else{
 				throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("SharedLinkApi.InvalidExplireValue",request.getLocale())); //$NON-NLS-1$
 			}

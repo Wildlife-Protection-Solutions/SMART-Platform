@@ -813,6 +813,17 @@ update smart.mission set start_date = cast(Start_datetime as date), end_date = c
 alter table smart.mission drop column start_datetime;
 alter table smart.mission drop column end_datetime;
 
+---------- timezones -------
+-- assumes the timezone of the database server is the same as the web server
+alter table connect.data_queue alter column uploaded_date set data type timestamp with time zone;
+alter table connect.data_queue alter column lastmodified_date set data type timestamp with time zone;
+
+alter table connect.ct_package alter column uploaded_date set data type timestamp with time zone;
+alter table connect.ct_navigation_layer alter column uploaded_date set data type timestamp with time zone;
+
+alter table connect.shared_links alter column expires_at set data type timestamp with time zone;
+alter table connect.shared_links alter column date_created set data type timestamp with time zone;
+
 ------------ VERSIONS ------------
 insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.smartcollect', '1.0');
 

@@ -23,7 +23,7 @@ package org.wcs.smart.connect.filter;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.Base64;
 import java.util.UUID;
 import java.util.logging.Logger;
@@ -121,7 +121,7 @@ public class ApiAuthorizationFilter implements Filter {
 			
 			if (link != null){
 				//check if link is still valid
-				if(link.getExpiresAt().isBefore(LocalDateTime.now())){
+				if(link.getExpiresAt().isBefore(ZonedDateTime.now())){
 					((HttpServletResponse)response).sendError(HttpServletResponse.SC_NOT_FOUND, Messages.getString("SharedLinkServlet.LinkExpired", request.getLocale())); //$NON-NLS-1$
 					return;
 				}else{

@@ -1,6 +1,7 @@
 package org.wcs.smart.connect.dataqueue;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -14,6 +15,8 @@ import org.wcs.smart.connect.dataqueue.model.DataQueueItem;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.util.LocalDateTimeDeserializer;
 import org.wcs.smart.connect.util.LocalDateTimeSerializer;
+import org.wcs.smart.connect.util.ZonedDateTimeDeserializer;
+import org.wcs.smart.connect.util.ZonedDateTimeSerializer;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -42,8 +45,8 @@ public class ServerDataQueueItem extends DataQueueItem{
 		}
 	}
 	
-	private LocalDateTime uploadedDate;
-	private LocalDateTime lastModifiedDate;
+	private ZonedDateTime uploadedDate;
+	private ZonedDateTime lastModifiedDate;
 	private String uploadedBy;
 	
 	private String file;
@@ -52,24 +55,24 @@ public class ServerDataQueueItem extends DataQueueItem{
 	private UUID workItem;
 	
 	@Column(name="uploaded_date")
-	@JsonDeserialize(using = LocalDateTimeDeserializer.class)  
-	@JsonSerialize(using = LocalDateTimeSerializer.class)
-	public LocalDateTime getUploadedDate(){
+	@JsonDeserialize(using = ZonedDateTimeDeserializer.class)  
+	@JsonSerialize(using = ZonedDateTimeSerializer.class)
+	public ZonedDateTime getUploadedDate(){
 		return this.uploadedDate;
 	}
 	
-	public void setUploadedDate(LocalDateTime date){
+	public void setUploadedDate(ZonedDateTime date){
 		this.uploadedDate = date;
 	}
 	
 	@Column(name="lastmodified_date")
-	@JsonDeserialize(using = LocalDateTimeDeserializer.class)  
-	@JsonSerialize(using = LocalDateTimeSerializer.class)
-	public LocalDateTime getLastModified(){
+	@JsonDeserialize(using = ZonedDateTimeDeserializer.class)  
+	@JsonSerialize(using = ZonedDateTimeSerializer.class)
+	public ZonedDateTime getLastModified(){
 		return this.lastModifiedDate;
 	}
 	
-	public void setLastModified(LocalDateTime date){
+	public void setLastModified(ZonedDateTime date){
 		this.lastModifiedDate = date;
 	}
 	

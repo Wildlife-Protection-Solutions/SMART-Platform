@@ -25,6 +25,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -574,7 +575,7 @@ public class CyberTracker extends HttpServlet{
 			
 			ctpackage.setStatus(Status.UPLOADING);
 			ctpackage.setName(proxy.getName());
-			ctpackage.setUploadedDate(LocalDateTime.now());
+			ctpackage.setUploadedDate(ZonedDateTime.now());
 			ctpackage.setVersion(proxy.getVersion());
 			
 			StringBuilder sb = new StringBuilder();
@@ -716,7 +717,7 @@ public class CyberTracker extends HttpServlet{
 			
 			ctpackage.setStatus(org.wcs.smart.connect.model.CyberTrackerNavigationLayer.Status.UPLOADING);
 			ctpackage.setName(proxy.getName());
-			ctpackage.setUploadedDate(LocalDateTime.now());
+			ctpackage.setUploadedDate(ZonedDateTime.now());
 			
 			StringBuilder sb = new StringBuilder();
 			sb.append(URLUtils.cleanFilename(ctpackage.getName()));
