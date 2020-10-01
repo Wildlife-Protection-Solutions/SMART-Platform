@@ -21,10 +21,14 @@
  */
 package org.wcs.smart.connect.cybertracker.model;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import org.wcs.smart.connect.util.ZonedDateTimeDeserializer;
+import org.wcs.smart.connect.util.ZonedDateTimeSerializer;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
  * JSON Proxy for cybertracker navigation proxy
@@ -36,9 +40,10 @@ public class CyberTrackerNavigationProxy {
 	private UUID uuid;
 	private String caLabel;
 	private UUID caUuid;
-	@JsonFormat
-    (shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSX")
-	private LocalDateTime uploadedDate;
+	
+	@JsonDeserialize(using = ZonedDateTimeDeserializer.class)  
+	@JsonSerialize(using = ZonedDateTimeSerializer.class)
+	private ZonedDateTime uploadedDate;
 	
 	private String name;
 	
@@ -66,11 +71,11 @@ public class CyberTrackerNavigationProxy {
 		this.caUuid = caUuid;
 	}
 
-	public LocalDateTime getUploadedDate() {
+	public ZonedDateTime getUploadedDate() {
 		return uploadedDate;
 	}
 
-	public void setUploadedDate(LocalDateTime uploadedDate) {
+	public void setUploadedDate(ZonedDateTime uploadedDate) {
 		this.uploadedDate = uploadedDate;
 	}
 
