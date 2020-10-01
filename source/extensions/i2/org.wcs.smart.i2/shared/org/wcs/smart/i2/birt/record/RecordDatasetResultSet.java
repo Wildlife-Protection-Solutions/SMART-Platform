@@ -25,6 +25,8 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -259,6 +261,10 @@ public class RecordDatasetResultSet implements IResultSet {
 			return new Date(((Time) lastRowItem).getTime());
 		} else if (lastRowItem instanceof java.util.Date) {
 			return new Date(((java.util.Date) lastRowItem).getTime());
+		}else if (lastRowItem instanceof LocalDate) {
+			return java.sql.Date.valueOf( ((LocalDate)lastRowItem));
+		}else if (lastRowItem instanceof LocalDateTime) {
+			return java.sql.Date.valueOf( (((LocalDateTime)lastRowItem)).toLocalDate() );
 		}else if (lastRowItem == null){
 			return null;
 		}

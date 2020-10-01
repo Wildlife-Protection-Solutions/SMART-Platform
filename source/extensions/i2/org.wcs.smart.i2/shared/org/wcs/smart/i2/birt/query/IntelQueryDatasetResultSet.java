@@ -26,6 +26,7 @@ import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -299,6 +300,10 @@ public class IntelQueryDatasetResultSet implements IResultSet {
 			return new java.sql.Date(((Time) lastRowItem).getTime());
 		} else if (lastRowItem instanceof java.util.Date) {
 			return new java.sql.Date(((java.util.Date) lastRowItem).getTime());
+		}else if (lastRowItem instanceof LocalDate) {
+			return java.sql.Date.valueOf( ((LocalDate)lastRowItem));
+		}else if (lastRowItem instanceof LocalDateTime) {
+			return java.sql.Date.valueOf( (((LocalDateTime)lastRowItem)).toLocalDate() );
 		}else if (lastRowItem == null){
 			return null;
 		}

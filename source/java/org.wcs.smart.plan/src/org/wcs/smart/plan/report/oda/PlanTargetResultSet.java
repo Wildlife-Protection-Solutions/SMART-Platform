@@ -26,6 +26,7 @@ import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -310,6 +311,10 @@ public class PlanTargetResultSet  implements IResultSet {
 			return (Date) lastObject;
 		} else if (lastObject instanceof Time) {
 			return new Date(((Time) lastObject).getTime());
+		}else if (lastObject instanceof LocalDate) {
+			return java.sql.Date.valueOf( ((LocalDate)lastObject));
+		}else if (lastObject instanceof LocalDateTime) {
+			return java.sql.Date.valueOf( (((LocalDateTime)lastObject)).toLocalDate() );
 		}else if (lastObject == null){
 			return null;
 		}

@@ -177,7 +177,7 @@ public class DateGroupByViewer extends AbstractGroupByViewer<DateGroupBy> {
 
 		LocalDate working = LocalDate.of(startdate.getYear(), startdate.getMonth(), 1);
 
-		while (working.isBefore(enddate)) {
+		while (working.isBefore(enddate) || (dateFilter.isEndDateInclusive() && working.isEqual(enddate))) {
 			String key = keyFormat.format(working);
 			String name = nameFormat.format(working);
 			items.add(new ListItem(null, name, key));

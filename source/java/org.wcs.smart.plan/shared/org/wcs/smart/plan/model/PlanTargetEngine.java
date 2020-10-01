@@ -23,6 +23,10 @@ package org.wcs.smart.plan.model;
 
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -274,10 +278,9 @@ public class PlanTargetEngine {
 			if(it.hasNext()){
 		        while(it.hasNext()){
 		          Object[] row = (Object[])it.next();
-		          Timestamp t1 = (Timestamp)row[0];
-		          Timestamp t2 = (Timestamp)row[1];
-		          Long milDiff = t1.getTime() - t2.getTime();
-		          targetTotal += (milDiff / 1000 /60 /60 / 24) + 1; 
+		          LocalDate t1 = (LocalDate)row[0];
+		          LocalDate t2 = (LocalDate)row[1];
+		          targetTotal += (ChronoUnit.DAYS.between(t2, t1) + 1); 
 		        }
 		     }
 		}else if (type == TargetType.PATROL_HOURS) {
@@ -297,9 +300,9 @@ public class PlanTargetEngine {
 			if(it.hasNext()){
 		        while(it.hasNext()){
 		          Object[] row = (Object[])it.next();
-		          Time t1 = (Time)row[0];
-		          Time t2 = (Time)row[1];
-		          Long milDiff = (t1.getTime() + 1000)- t2.getTime(); //all our default end times for a whole day are 11:59:59, adding a second here to get 24hours for full days.
+		          LocalTime t1 = (LocalTime)row[0];
+		          LocalTime t2 = (LocalTime)row[1];
+		          Long milDiff = ChronoUnit.MILLIS.between(t2, t1) + 1000; //all our default end times for a whole day are 11:59:59, adding a second here to get 24hours for full days.
 		          targetTotal += (milDiff / 1000 /60 / 60); 
 		        }
 		    }
@@ -322,9 +325,9 @@ public class PlanTargetEngine {
 			if(it.hasNext()){
 		        while(it.hasNext()){
 		          Object[] row = (Object[])it.next();
-		          Time t1 = (Time)row[0];
-		          Time t2 = (Time)row[1];
-		          Long milDiff = (t1.getTime() + 1000)- t2.getTime(); //all our default end times for a whole day are 11:59:59, adding a second here to get 24hours for full days.
+		          LocalTime t1 = (LocalTime)row[0];
+		          LocalTime t2 = (LocalTime)row[1];
+		          Long milDiff = ChronoUnit.MILLIS.between(t2, t1) + 1000; //all our default end times for a whole day are 11:59:59, adding a second here to get 24hours for full days.
 		          targetTotal += (milDiff / 1000 /60 / 60); 
 		        }
 		    }

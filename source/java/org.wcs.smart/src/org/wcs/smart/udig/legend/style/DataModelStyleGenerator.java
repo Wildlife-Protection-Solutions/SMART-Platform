@@ -158,7 +158,7 @@ public class DataModelStyleGenerator {
 			if (category == null || category.getIcon() == null) {
 				ps = buildPointSymbol();
 			}else {
-				ps = buildPointSymbol(category.getIcon());
+				ps = buildPointSymbol(category.getIcon(), session);
 			}
 			
 			Filter filterExp;
@@ -226,7 +226,7 @@ public class DataModelStyleGenerator {
 			if (li == null || li.getIcon() == null) {
 				ps = buildPointSymbol();	
 			}else {
-				ps = buildPointSymbol(li.getIcon());
+				ps = buildPointSymbol(li.getIcon(), session);
 			}
 
 			Filter filterExp;
@@ -298,7 +298,7 @@ public class DataModelStyleGenerator {
 			if (node == null || node.getIcon() == null) {
 				ps = buildPointSymbol();	
 			}else {
-				ps = buildPointSymbol(node.getIcon());
+				ps = buildPointSymbol(node.getIcon(), session);
 			}
 			
 			Filter filterExp;
@@ -379,11 +379,14 @@ public class DataModelStyleGenerator {
 	/*
 	 * Build a point symbolizer from the icon
 	 */ 
-	private PointSymbolizer buildPointSymbol(Icon icon) throws MalformedURLException {
+	private PointSymbolizer buildPointSymbol(Icon icon, Session session) throws MalformedURLException {
 		
 		IconFile selectedFile = icon.getIconFile(iSet);
 		String fname = selectedFile.getFilename();
 
+		try {
+			selectedFile.computeFileLocation(session);
+		}catch (Exception ex) {}
 		if (selectedFile.getUuid() != null && !selectedFile.isSystemIcon()) {
 			fname = "file:" + selectedFile.getAttachmentFile().toString(); //$NON-NLS-1$
 		}else if (selectedFile.getUuid() == null && !selectedFile.isSystemIcon()) {

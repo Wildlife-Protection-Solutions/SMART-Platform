@@ -350,17 +350,23 @@ public class RoutinesListDialog extends SmartStyledTitleDialog {
 
 		
 		Button btnNew = new Button(buttonPnl, SWT.PUSH);
+		btnNew.setBackground(buttonPnl.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnNew.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		btnNew.setText(DialogConstants.ADD_BUTTON_TEXT);
 		btnNew.addListener(SWT.Selection, e->add());
 		btnNew.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Button btnEdit = new Button(buttonPnl, SWT.PUSH);
+		btnEdit.setBackground(buttonPnl.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 		btnEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
 		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnEdit.addListener(SWT.Selection, e->edit());
 		btnEdit.setEnabled(false);
 		
 		Button btnDelete = new Button(buttonPnl, SWT.PUSH);
+		btnDelete.setBackground(buttonPnl.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnDelete.addListener(SWT.Selection, e->delete());
