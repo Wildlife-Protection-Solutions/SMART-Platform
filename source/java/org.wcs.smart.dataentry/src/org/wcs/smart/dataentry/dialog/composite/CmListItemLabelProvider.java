@@ -77,7 +77,7 @@ public class CmListItemLabelProvider extends NamedItemLabelProvider implements I
 		CmAttributeListItem node = getListItem(element);
 		if (node != null){
 			Path f = node.getImageFile();
-			if (!Files.exists(f)) {
+			if (f == null || !Files.exists(f)) {
 				if (node.getListItem().getIcon() == null) return null;
 				IconFile icon = node.getListItem().getIcon().getIconFile(node.getConfig().getModel().getIconSet());
 				if (icon != null) {

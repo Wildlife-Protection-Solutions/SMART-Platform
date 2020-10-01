@@ -176,6 +176,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 				tiExport.setEnabled(!modelListViewer.getSelection().isEmpty());
 			}
 		});
+		modelListViewer.addDoubleClickListener(e->editCm());
 		
 		TableColumnLayout ll = new TableColumnLayout();
 		ll.setColumnData(new TableColumn(modelListViewer.getTable(),SWT.NONE), new ColumnWeightData(100));

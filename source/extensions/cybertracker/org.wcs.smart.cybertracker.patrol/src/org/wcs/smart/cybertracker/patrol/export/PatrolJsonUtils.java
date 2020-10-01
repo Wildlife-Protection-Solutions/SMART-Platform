@@ -22,6 +22,7 @@
 package org.wcs.smart.cybertracker.patrol.export;
 
 import java.text.ParseException;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -208,7 +209,7 @@ public class PatrolJsonUtils {
 				}
 				if (!(value instanceof PatrolAttributeListItem)) value = null;
 			}else if (pa.getType() == Attribute.AttributeType.DATE) {
-				value = DATEFORMAT.parse((String)value);
+				value = LocalDate.parse((String)value, DATEFORMAT);
 			}
 			
 			if (value == null) continue;

@@ -828,6 +828,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 		//make a single patrol leg day for the start date and time
 		PatrolLegDay one = new PatrolLegDay();
 		one.setStartTime(startDateTime.toLocalTime());
+		one.setEndTime(LocalTime.MAX);
 		pl.getPatrolLegDays().add(one);
 		
 		pl.createLegDays(session);	

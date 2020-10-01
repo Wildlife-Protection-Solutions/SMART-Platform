@@ -233,25 +233,7 @@ public class JsonCtParser {
 		}
 		return selectAllSize[0];
 	}
-//	/**
-//	 * Time in seconds
-//	 * @param date
-//	 * @return
-//	 */
-//	public static Time getTime(Date d){
-//		Calendar c = Calendar.getInstance();
-//		c.setTime(d);
-//		
-//		Calendar c2 = Calendar.getInstance();
-//		c2.setTimeInMillis(0);
-//		int[] fields = new int[]{Calendar.SECOND, Calendar.MINUTE, Calendar.HOUR_OF_DAY};
-//		for (int field : fields){
-//			c2.set(field, c.get(field));
-//		}
-//		return new Time(c2.getTimeInMillis());
-//	}
-//
-//	
+	
 	/**
 	 * Determines if the time represented by date1 is between the times
 	 * represented by date2 and date3.  Only compares time parts not
@@ -259,6 +241,7 @@ public class JsonCtParser {
 	 * @return
 	 */
 	public static boolean isTimeBetween(LocalTime d1, LocalTime d2, LocalTime d3){
+		if (d3 == null) d3 = LocalTime.MAX;
 		return ((d1.equals(d2) || d1.isAfter(d2)) && 
 				(d1.equals(d3) || d1.isBefore(d3)));
 	}
