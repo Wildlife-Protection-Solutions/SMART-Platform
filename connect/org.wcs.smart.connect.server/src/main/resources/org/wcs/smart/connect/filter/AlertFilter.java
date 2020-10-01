@@ -22,11 +22,8 @@
 package org.wcs.smart.connect.filter;
 
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -61,8 +58,8 @@ public class AlertFilter {
 	private List<UUID> typeUuidFilter;
 	private List<AlertStatusEnum> statusFilter;
 	private List<UUID> caUuidFilter;
-	private ZonedDateTime startDateFilter;
-	private ZonedDateTime endDateFilter;
+	private LocalDateTime startDateFilter;
+	private LocalDateTime endDateFilter;
 	
 	private String textSearchFilter;
 	private String sortBy;
@@ -137,11 +134,11 @@ public class AlertFilter {
 		if(startDateFilter != null && !startDateFilter.isEmpty()){ 
 			try {		
 				if(endDateFilter == null || endDateFilter.isEmpty()){
-					this.endDateFilter = LocalDateTime.MAX.atZone(ZoneId.systemDefault());
+					this.endDateFilter = LocalDateTime.MAX;
 				}else{
-					this.endDateFilter = Instant.ofEpochMilli(Long.valueOf(endDateFilter)).atZone(ZoneOffset.UTC);
+					this.endDateFilter = Instant.ofEpochMilli(Long.valueOf(endDateFilter)).atZone(ZoneId.systemDefault()).toLocalDateTime();
 				}
-				this.startDateFilter = Instant.ofEpochMilli(Long.valueOf(startDateFilter)).atZone(ZoneOffset.UTC);
+				this.startDateFilter = Instant.ofEpochMilli(Long.valueOf(startDateFilter)).atZone(ZoneId.systemDefault()).toLocalDateTime();
 			
 			} catch (Exception e) {
 				throw new SmartConnectException(Response.Status.BAD_REQUEST + Messages.getString("AlertFilter.InvalidDate",l)); //$NON-NLS-1$

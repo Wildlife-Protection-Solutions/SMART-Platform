@@ -22,7 +22,6 @@
 package org.wcs.smart.connect.model;
 
 import java.beans.Transient;
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 

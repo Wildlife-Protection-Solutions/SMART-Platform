@@ -22,7 +22,6 @@
 package org.wcs.smart.connect.model;
 
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -74,7 +73,7 @@ public class Alert extends ConnectUuidItem{
 	}
 	
 	private String userGeneratedId; 
-	private ZonedDateTime date;
+	private LocalDateTime date;
 	private String description;
 	private Integer level;
 	private AlertStatusEnum status;
@@ -88,10 +87,10 @@ public class Alert extends ConnectUuidItem{
 	private ConservationAreaInfo ca;
 	
 	@Column(name="date")
-	public ZonedDateTime getDate() {
+	public LocalDateTime getDate() {
 		return date;
 	}
-	public void setDate(ZonedDateTime date) {
+	public void setDate(LocalDateTime date) {
 		this.date = date;
 	}
 	

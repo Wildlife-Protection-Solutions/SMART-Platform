@@ -823,6 +823,7 @@ alter table connect.ct_navigation_layer alter column uploaded_date set data type
 
 alter table connect.shared_links alter column expires_at set data type timestamp with time zone;
 alter table connect.shared_links alter column date_created set data type timestamp with time zone;
+alter table connect.alerts alter column date set data type timestamp without time zone;
 
 ------------ VERSIONS ------------
 insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.smartcollect', '1.0');

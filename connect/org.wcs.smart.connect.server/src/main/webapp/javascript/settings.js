@@ -973,13 +973,15 @@ function createDefaultsTable(){
  	
 	var list = JSON.parse(this.responseText);
 	document.getElementById('filterDate').value = list[0].defaultPastHours;
-		
-	var types = list[0].defaultTypeUuids.split(',');
-	for(x=0 ; x < types.length; x++){
-		if (types[x]){
-			var type = document.getElementById(types[x])
-			if(type != null){
-				type.checked = true;
+	
+	if (list[0].defaultTypeUuids){
+		var types = list[0].defaultTypeUuids.split(',');
+		for(x=0 ; x < types.length; x++){
+			if (types[x]){
+				var type = document.getElementById(types[x])
+				if(type != null){
+					type.checked = true;
+				}
 			}
 		}
 	}
@@ -992,12 +994,15 @@ function createDefaultsTable(){
 	document.getElementById('level4').checked = list[0].defaultLevel4;
 	document.getElementById('level5').checked = list[0].defaultLevel5;
 
-	var cas = list[0].defaultCaUuids.split(',');
-	for(x=0 ; x < cas.length; x++){
-		if (cas[x]){
-			var ca = document.getElementById(cas[x])
-			if(ca != null){
-				ca.checked = true;
+	if (list[0].defaultCaUuids){
+
+		var cas = list[0].defaultCaUuids.split(',');
+		for(x=0 ; x < cas.length; x++){
+			if (cas[x]){
+				var ca = document.getElementById(cas[x])
+				if(ca != null){
+					ca.checked = true;
+				}
 			}
 		}
 	}
@@ -1050,7 +1055,7 @@ function getFilterJSON(){
 			"defaultLevel5" : document.getElementById("level5").checked,
 			"defaultCaUuids" : cas,
 			"defaultText" : document.getElementById("filterText").value,
-			"secondsRefresh" : document.getElementById("secondsRefresh").value,
+			"secondsRefresh": document.getElementById("secondsRefresh").value,
 			"startingZoomLevel" : document.getElementById("startingZoom").value,
 			"startingLong" : document.getElementById("startingLong").value,
 			"startingLat" : document.getElementById("startingLat").value

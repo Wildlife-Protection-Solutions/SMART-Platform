@@ -1,6 +1,5 @@
 package org.wcs.smart.connect.dataqueue;
 
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.Locale;
 import java.util.UUID;
@@ -13,8 +12,6 @@ import javax.persistence.Table;
 
 import org.wcs.smart.connect.dataqueue.model.DataQueueItem;
 import org.wcs.smart.connect.i18n.Messages;
-import org.wcs.smart.connect.util.LocalDateTimeDeserializer;
-import org.wcs.smart.connect.util.LocalDateTimeSerializer;
 import org.wcs.smart.connect.util.ZonedDateTimeDeserializer;
 import org.wcs.smart.connect.util.ZonedDateTimeSerializer;
 

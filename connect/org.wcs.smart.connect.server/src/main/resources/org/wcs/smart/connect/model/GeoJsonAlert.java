@@ -22,8 +22,6 @@
 package org.wcs.smart.connect.model;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -64,14 +62,20 @@ public class GeoJsonAlert{
 		return features.get(0).getProperties().getId();
 	}
 	
-	public ZonedDateTime getDateTime() {
-		ZonedDateTime date = null;
+	/**
+	 * Alerts are stored in the time provided (local time); the time
+	 * zone information is dropped
+	 * 
+	 * @return
+	 */
+	public LocalDateTime getDateTime() {
+		LocalDateTime date = null;
 		String dateString = features.get(0).getProperties().getDateTime();
 		if (dateString == null || dateString == "") return null; //$NON-NLS-1$
 
 		try {
 			DateTimeFormatter f = DateTimeFormatter.ofPattern(DATE_FORMAT_STR);
-			date = ZonedDateTime.parse(dateString,f);
+			date = LocalDateTime.parse(dateString,f);
 		} catch (DateTimeParseException e) {
 			e.printStackTrace();
 		}
@@ -135,7 +139,7 @@ public class GeoJsonAlert{
 
     	//default to now if no date given 
 		if(getDateTime() == null){
-			a.setDate(LocalDateTime.now().atZone(ZoneId.systemDefault()));
+			a.setDate(LocalDateTime.now());
 		}else{
 			a.setDate(getDateTime());
 		}

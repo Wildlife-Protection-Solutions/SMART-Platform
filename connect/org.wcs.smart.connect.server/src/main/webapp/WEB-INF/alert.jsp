@@ -115,10 +115,10 @@
 		<div id="control-menu" class="control-menu">
 		<div class="control-item">
         	<div class="control-header">
-            	<div class="control-title"><fmt:message key="alert.queries.title" /></div>
+            	<div class="control-title" style="display: none;"><fmt:message key="alert.queries.title" /></div>
                 <div class="control-item-icon fa fa-search fa-2x" title="<fmt:message key="alert.queries.title" />"></div>
             </div><!-- end control-header -->
-            <div class="control-item-content">
+            <div class="control-item-content" style="display: none;">
 				<fieldset>
 				<legend><fmt:message key="alert.dates" /></legend>
 				<input id="sortBy" type="hidden" name="sortBy" value="date"/>

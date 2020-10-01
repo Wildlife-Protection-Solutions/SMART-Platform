@@ -398,7 +398,7 @@ public enum QueryManager {
 			if (typeKey == null) {
 				//get query type from database
 				querypart = "SELECT q.uuid, q.id, q.isShared, q.conservationArea.uuid, q.folder.uuid, " //$NON-NLS-1$
-						+ "q.conservationArea.id, l.value, z.code, '" + type +"', q.typeKey, q.typeKey || '.png' FROM " + q.getSimpleName()  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+						+ "q.conservationArea.id, l.value, z.code, '" + type +"', q.typeKey, q.typeKey || '.png' FROM " + q.getSimpleName()  //$NON-NLS-1$ //$NON-NLS-2$
 					 	+ " as q JOIN Label as l on l.id.element = q.uuid JOIN l.id.language as z WHERE l.id.element = q.uuid and (z.default = true or " //$NON-NLS-1$
 					 	+ "z.code in (:langs)) "; //$NON-NLS-1$	
 			}

@@ -48,7 +48,7 @@ public class AlertFilterDefault extends ConnectUuidItem{
 	private boolean defaultLevel5;
 	private String defaultCaUuids;
 	private String defaultText;
-	private int secondsRefresh;
+	private Integer secondsRefresh;
 	private int startingZoomLevel;
 	private float startingLat;
 	private float startingLong;

@@ -367,13 +367,6 @@ function addQueryLayer(id) {
  	return color;
 }
 
-// converts from javascript millisecond epoch timestamp to yyyy-MM-dd hh:mm:ss 
-function timestampToDateString(t) {
-	const d = new Date(t);
-	return d.getFullYear() + "-" + ("0"+(d.getMonth()+1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2)  + " " 
-		+ ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2);
-}
-
 function removeQueryLayer(id) {
 	map.removeLayer(queryLayers[id]);
 	queryLayers[id] = null;
@@ -626,7 +619,7 @@ function createAlertTable(){
 		 			continue; //This is a track feature, ignore it for drawing the table of alerts.
 		 		}
  
-		 		date = new Date(Date.parse(alerts[i].properties.date));// converts to local time by parsing into millisecs then loading millisecs into a new Date object.
+		 		date = formatAlertDateTime(alerts[i].properties.date);//new Date(Date.parse(alerts[i].properties.date));// converts to local time by parsing into millisecs then loading millisecs into a new Date object.
 
 		 		var row = tableCreateRowTDs(parent,
 		 				[alerts[i].properties.type, alerts[i].properties.caname, date , alerts[i].properties.desc, alerts[i].properties.level.toString(), alerts[i].properties.status, Math.round(alerts[i].properties.x * 100000)/100000 + " , " + Math.round(alerts[i].properties.y * 100000)/100000, null], 
@@ -855,31 +848,6 @@ function getFilteredUrl(base){
 	
 	filteredUrl += "&textSearchFilter=" +  document.getElementById("filterText").value;
 
-//	var dateSelect = document.getElementById("filterDate").value;
-//	
-//	if(dateSelect == -1){//custom dates
-//		var from = new Date(document.getElementById('datePickerFrom').value.substring(4)).getTime();//substring(4) drops the "Wed " from the field, which isnt' a valid date string.
-//		var to = new Date(document.getElementById('datePickerTo').value.substring(4)).getTime() + 86399999; //use end of the day, since it is the "to" date.
-//
-//		if(isNaN(to) || isNaN(from) || from > to){
-//			displayError(i18n("alert.invalidcustomdates"));
-//		}else{
-//			filteredUrl += "&startDateFilter=" + from;  
-//			filteredUrl += "&endDateFilter=" + to 
-//		}
-//	}else if(dateSelect == -99){//all-time
-//		//do nothing, no filter gives all dates back.
-//	}else if(dateSelect >0){ //number of trailing hours from now
-//		var now = new Date();
-//		now = now.getTime();
-//		
-//		var start = new Date()
-//		var start = start.getTime() - dateSelect*60*60*1000;  
-//		
-//		filteredUrl += "&startDateFilter=" +  start; 
-//		filteredUrl += "&endDateFilter=" + now; //leaving this out for now, we can show things in the future if times are off slightly
-//	}
-
 	var dateRange = getDateRange('filterDate', 'datePickerFrom', 'datePickerTo');
 	if(dateRange && dateRange['start']) {
 		filteredUrl += "&startDateFilter=" + dateRange['start'];
@@ -912,7 +880,7 @@ function getDateRange(dateSelectId, fromDatePickerId, toDatePickerId) {
 		return null;
 	} else if(dateSelect > 0) { //number of trailing hours from now
 		var now = new Date();
-		now = now.getTime();
+		now = (new Date(now.getTime() + 86400000)).getTime(); //add 24 hours to time frame
 		
 		var start = new Date();
 		start = start.getTime() - dateSelect*60*60*1000;  
@@ -972,7 +940,7 @@ function updateRealtimeLayer(updatedUrl) {
                 var feature = e.features[fId];
                 var c = feature.geometry.coordinates;
 
-                d = new Date(Date.parse(feature.properties.date));// converts to local time by parsing into millisecs then loading millisecs into a new Date object.
+                d = formatAlertDateTime(feature.properties.date);
                 
                 if(feature.properties.type == undefined) {
                 	return i18n("alert.trackselected");
@@ -1018,6 +986,11 @@ function updateRealtimeLayer(updatedUrl) {
     realtime.addTo(map);
 }
 
+function formatAlertDateTime(datestr){
+	var d = new Date(datestr);
+	var options = { month: 'short', day: 'numeric', year: 'numeric', hour:'numeric', minute:'numeric', second:'numeric' };
+	return new Intl.DateTimeFormat( navigator.languages, options).format(d);
+}
 
 //styles for points
 function stylePoints(feature, latlng) {

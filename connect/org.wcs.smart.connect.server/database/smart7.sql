@@ -1843,7 +1843,7 @@ CREATE TABLE connect.alert_types (
 CREATE TABLE connect.alerts (
     uuid uuid NOT NULL,
     user_generated_id character varying NOT NULL,
-    date timestamp with time zone NOT NULL,
+    date timestamp without time zone NOT NULL,
     description character varying,
     type_uuid uuid NOT NULL,
     level smallint NOT NULL,

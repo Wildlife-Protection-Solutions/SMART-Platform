@@ -29,7 +29,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -295,7 +294,7 @@ public class GlobalForestWatchNoa extends HttpServlet {
 			alert.setCa(null);
 			alert.setCreatorUuid(gfw.getCreator().getUuid());
 			alert.setSource(Alert.Source.GLOBALFORESTWATCH);
-			alert.setDate(datetime.atZone(ZoneId.systemDefault()));
+			alert.setDate(datetime);
 			alert.setDescription(sbDescription.toString());
 			alert.setLevel(gfw.getLevel());
 			alert.setStatus(AlertStatusEnum.ACTIVE);
