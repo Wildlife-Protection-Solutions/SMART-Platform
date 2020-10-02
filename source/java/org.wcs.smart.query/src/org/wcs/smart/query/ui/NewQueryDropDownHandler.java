@@ -29,13 +29,20 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.ParameterizedCommand;
+import org.eclipse.core.expressions.EvaluationResult;
+import org.eclipse.core.expressions.Expression;
+import org.eclipse.core.expressions.IEvaluationContext;
+import org.eclipse.core.internal.expressions.TestExpression;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.e4.core.commands.ECommandService;
 import org.eclipse.e4.core.commands.EHandlerService;
+import org.eclipse.e4.core.commands.ExpressionContext;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.ui.model.application.commands.MCommand;
 import org.eclipse.e4.ui.model.application.commands.MParameter;
+import org.eclipse.e4.ui.model.application.ui.MCoreExpression;
 import org.eclipse.e4.ui.model.application.ui.MUIElement;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
@@ -61,6 +68,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.PlatformUI;
+import org.wcs.smart.query.QueryPlugIn;
 
 /**
  * Handler specific to the create new query toolbar button. This drop
@@ -144,6 +152,7 @@ public class NewQueryDropDownHandler {
 			mi.setText(e.getLabel());
 			mi.setToolTipText(e.getTooltip());
 		}else if (e instanceof MMenu ) {
+			if (!isVisible(e, context)) return;
 			if (menu.getItemCount() > 0) {
 				new MenuItem(menu, SWT.SEPARATOR);
 			}
@@ -191,7 +200,8 @@ public class NewQueryDropDownHandler {
 		EModelService mService = context.get(EModelService.class);
 		MMenu createMenu = (MMenu) mService.find("org.wcs.smart.menu.query.newquery", context.get(MWindow.class).getMainMenu()); //$NON-NLS-1$
 		for (MMenuElement e : createMenu.getChildren()) {
-			if (e instanceof MMenu) {
+			if (e instanceof MMenu) {			
+				if (!isVisible(e, context)) continue;
 				ToolItem ti = new ToolItem(tb, SWT.RADIO);
 				ti.setText(e.getLabel());
 
@@ -227,6 +237,20 @@ public class NewQueryDropDownHandler {
 		item.setSelection(false);
 	}
 	
+	private boolean isVisible(MMenuElement e, IEclipseContext context) {
+		if (e.getVisibleWhen() == null) return true;
+		
+		try {
+			if (e.getVisibleWhen() instanceof MCoreExpression && ((MCoreExpression)e.getVisibleWhen()).getCoreExpression() instanceof Expression) {
+				Expression te = ((Expression)((MCoreExpression)e.getVisibleWhen()).getCoreExpression());
+				EvaluationResult rr = te.evaluate(new ExpressionContext(context));
+				if (rr != EvaluationResult.TRUE) return false;
+			}
+		} catch (CoreException ex) {
+			QueryPlugIn.log(ex.getMessage(), ex);
+		}
+		return true;
+	}
 	
 	private void showDropDownMenu(int x, int y, Composite parent, ToolItem item, IEclipseContext context) {		
 		Menu mnu = new Menu(parent);

@@ -41,6 +41,7 @@ import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Label;
+import org.wcs.smart.ca.Rank;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -88,6 +89,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		tablePrefix.put(Area.class, "ar"); //$NON-NLS-1$
 		tablePrefix.put(Employee.class, "e"); //$NON-NLS-1$
 		tablePrefix.put(Agency.class, "aa"); //$NON-NLS-1$
+		tablePrefix.put(Rank.class, "ear"); //$NON-NLS-1$
 	}
 
 	
@@ -109,6 +111,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		tableNames.put(Area.class, "smart.area_geometries"); //$NON-NLS-1$
 		tableNames.put(Employee.class, "smart.employee"); //$NON-NLS-1$
 		tableNames.put(Agency.class, "smart.agency"); //$NON-NLS-1$
+		tableNames.put(Rank.class, "smart.rank"); //$NON-NLS-1$
 	}
 		
 	/**

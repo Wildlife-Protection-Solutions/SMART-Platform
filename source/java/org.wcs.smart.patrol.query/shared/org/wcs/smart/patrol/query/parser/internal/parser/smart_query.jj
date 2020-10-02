@@ -139,11 +139,11 @@ TOKEN :
  | <CAT_ATT_LIST_KEY : "category:"<DM_KEY>":attribute:l:"<DM_KEY>>
  | <CAT_ATT_TREE_KEY : "category:"<DM_KEY>":attribute:t:"<DM_KEY>>
  | <CAT_ATT_DATE_KEY : "category:"<DM_KEY>":attribute:d:"<DM_KEY>>
- | < PATROL_BOOL_KEY : "patrol:" ("armed")  >
- | < DATE_STRING : < DIGIT > < DIGIT > < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT >> 
+  | < DATE_STRING : < DIGIT > < DIGIT > < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT >> 
  |  < DM_KEY : (< LETTER >)+(< DIGIT > | < LETTER > | < SPECIAL_CHARS >)* >
  | < #LETTER : [ "a"-"z", "A"-"Z" ] >
  | < #SPECIAL_CHARS : ("." | "_")>
+ | < PATROL_ARMED_KEY : "patrol:armed"  >
  | < PATROL_ID_KEY : "patrol:id" >
  | < PATROL_UUID_KEY : "patrol:uuid" >
  | < PATROL_STATION_KEY : "patrol:station" >
@@ -188,11 +188,17 @@ TOKEN :
   			< PATROL_STATION_KEY > |
 			< PATROL_TEAM_KEY > |
 			< PATROL_TEAM_KEY_KEY > |
+			< PATROL_ARMED_KEY > |
 			< PATROL_MANDATE_KEY > |
 			< PATROL_MANDATE_KEY_KEY > |
 			< PATROLLEG_TRANSPORT_KEY > |
 			< PATROLLEG_TRANSPORT_KEY_KEY > |
+			< PATROLLEG_TRANSPORT_KEY_KEY > |
 			< PATROLLEG_LEADER_KEY > |
+			< PATROLLEG_PILOT_KEY > |
+			< PATROLLEG_AGENCY_KEY > |
+			< PATROLLEG_AGENCY_KEY_KEY > |
+			< PATROLLEG_RANK_KEY > |
 			< PATROL_CA_KEY > |
 			< PATROLLEG_MEMBER_KEY >  ) ":" (< LETTER > | < DIGIT >)* (":" (< LETTER > | < DIGIT >)+ )*  >
 |    < PATROL_CONTRIBUTION_GROUPBY_OPTION: (< PATROL_CONTRIBUTION > ":" < DM_KEY > ":" (< LETTER > | < DIGIT >)* (":" (< LETTER > | < DIGIT >)+ )* ) >
@@ -573,7 +579,7 @@ IFilter BooleanItemExpression():
     		filter = CategoryAttributeFilter.createBooleanFilter(token.image);
   		}
    |
-    	< PATROL_BOOL_KEY >
+    	< PATROL_ARMED_KEY >
     	{
       		filter = PatrolFilter.createBooleanFilter(token.image);
     	}

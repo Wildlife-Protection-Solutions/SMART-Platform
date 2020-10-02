@@ -58,7 +58,7 @@ public class GeneralContentProvider implements ITreeContentProvider{
 		WAYPOINT_SOURCE(Messages.QueryFilterContentProvider_WaypointSourceName,
 				ObservationPlugIn.getDefault().getImageRegistry().get(ObservationPlugIn.WAYPOINT_SOURCE_ICON)),
 		CONSERVATION_AREA(Messages.GeneralContentProvider_ConservationAreaLabel, 
-				SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.CROSSCA_ICON)),
+				SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DATA_MODEL_ICON)),
 		OBSERVER(Messages.GeneralContentProvider_ObserverLabel,
 				SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EMPLOYEE_ICON));
 		

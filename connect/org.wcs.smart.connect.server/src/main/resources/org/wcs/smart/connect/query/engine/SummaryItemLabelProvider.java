@@ -47,6 +47,8 @@ import javax.persistence.criteria.Root;
 
 import org.hibernate.Session;
 import org.hibernate.query.Query;
+import org.wcs.smart.ICoreLabelProvider;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
@@ -969,7 +971,18 @@ public class SummaryItemLabelProvider {
 						results.add(new ListItem(null, PatrolType.Type.valueOf(keys[i]).getGuiName(l), keys[i]));
 					}
 				}
+			}	
+		}else if (type == PatrolQueryOptionType.BOOLEAN){
+			if (keys == null) {
+				results.add(new ListItem(null, SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(Boolean.TRUE, l), Boolean.TRUE.toString()));
+				results.add(new ListItem(null, SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(Boolean.FALSE, l), Boolean.FALSE.toString()));
+			}else {
+				for (String k : keys) {
+					if (k.equalsIgnoreCase(Boolean.TRUE.toString())) results.add(new ListItem(null, SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(Boolean.TRUE, l), Boolean.TRUE.toString()));
+					if (k.equalsIgnoreCase(Boolean.FALSE.toString())) results.add(new ListItem(null, SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(Boolean.FALSE, l), Boolean.FALSE.toString()));
+				}
 			}
+			
 		}
 //		if (sort) sortItems(results);
 		sortItems(results);

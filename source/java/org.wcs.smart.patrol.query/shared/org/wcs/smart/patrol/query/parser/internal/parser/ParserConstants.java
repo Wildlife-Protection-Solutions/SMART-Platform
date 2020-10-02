@@ -93,15 +93,15 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int CAT_ATT_DATE_KEY = 45;
   /** RegularExpression Id. */
-  int PATROL_BOOL_KEY = 46;
+  int DATE_STRING = 46;
   /** RegularExpression Id. */
-  int DATE_STRING = 47;
+  int DM_KEY = 47;
   /** RegularExpression Id. */
-  int DM_KEY = 48;
+  int LETTER = 48;
   /** RegularExpression Id. */
-  int LETTER = 49;
+  int SPECIAL_CHARS = 49;
   /** RegularExpression Id. */
-  int SPECIAL_CHARS = 50;
+  int PATROL_ARMED_KEY = 50;
   /** RegularExpression Id. */
   int PATROL_ID_KEY = 51;
   /** RegularExpression Id. */
@@ -240,11 +240,11 @@ public interface ParserConstants {
     "<CAT_ATT_LIST_KEY>",
     "<CAT_ATT_TREE_KEY>",
     "<CAT_ATT_DATE_KEY>",
-    "<PATROL_BOOL_KEY>",
     "<DATE_STRING>",
     "<DM_KEY>",
     "<LETTER>",
     "<SPECIAL_CHARS>",
+    "\"patrol:armed\"",
     "\"patrol:id\"",
     "\"patrol:uuid\"",
     "\"patrol:station\"",

@@ -38,7 +38,10 @@ import java.util.logging.Logger;
 
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
+import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.Rank;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -1077,6 +1080,9 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 						mins = mins % 60;
 						key += String.format("%d:%02d", hrs, mins); //$NON-NLS-1$
 						break;
+					case BOOLEAN: 
+						key += ((Boolean)rs.getBoolean(rsindex++)).toString();
+						break;
 				}
 				groupby[i] = key;
 			}
@@ -1262,6 +1268,8 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 		boolean waypointAdd = false;
 		boolean trackAdd = false;
 		
+		Set<Class<?>> usedTables = new HashSet<>();
+		
 		for (IGroupBy gb : groupBy.getGroupBys()){
 			if (gb instanceof AreaGroupBy){
 				if (value instanceof CategoryValueItem
@@ -1354,11 +1362,53 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 				groupBySql.append("gp_" + itemcnt); //$NON-NLS-1$
 				
 				if (option == PatrolQueryOption.EMPLOYEE){
-					fromSql.append(" join "); //$NON-NLS-1$
-					fromSql.append(tableNames.get(PatrolLegMember.class));
-					fromSql.append(" "); //$NON-NLS-1$
-					fromSql.append(tablePrefix(PatrolLegMember.class));
-					fromSql.append(" on temp.pl_uuid = " + tablePrefix(PatrolLegMember.class) + ".patrol_leg_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+					if (!usedTables.contains(PatrolLegMember.class)) {
+						fromSql.append(" join "); //$NON-NLS-1$
+						fromSql.append(tableNames.get(PatrolLegMember.class));
+						fromSql.append(" "); //$NON-NLS-1$
+						fromSql.append(tablePrefix(PatrolLegMember.class));
+						fromSql.append(" on temp.pl_uuid = " + tablePrefix(PatrolLegMember.class) + ".patrol_leg_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+					}
+				}else if (option == PatrolQueryOption.AGENCY || option == PatrolQueryOption.AGENCY_KEY || option == PatrolQueryOption.RANK) {
+					if (!usedTables.contains(PatrolLegMember.class)) {
+						fromSql.append(" join "); //$NON-NLS-1$
+						fromSql.append(tableNames.get(PatrolLegMember.class));
+						fromSql.append(" "); //$NON-NLS-1$
+						fromSql.append(tablePrefix(PatrolLegMember.class));
+						fromSql.append(" on temp.pl_uuid = " + tablePrefix(PatrolLegMember.class) + ".patrol_leg_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+						usedTables.add(PatrolLegMember.class);
+					}
+					if (!usedTables.contains(Employee.class)) {
+						fromSql.append(" join "); //$NON-NLS-1$
+						fromSql.append(tableNamePrefix(Employee.class));
+						fromSql.append(" on "); //$NON-NLS-1$
+						fromSql.append(tablePrefix(Employee.class) + ".uuid "); //$NON-NLS-1$
+						fromSql.append(" = "); //$NON-NLS-1$
+						fromSql.append(tablePrefix(PatrolLegMember.class) + ".employee_uuid "); //$NON-NLS-1$
+						usedTables.add(Employee.class);
+					}
+					if ((option == PatrolQueryOption.AGENCY || option == PatrolQueryOption.AGENCY_KEY) &&
+							!usedTables.contains(Agency.class)) {
+						fromSql.append(" join "); //$NON-NLS-1$
+						fromSql.append(tableNamePrefix(Agency.class));
+						fromSql.append(" on "); //$NON-NLS-1$
+						fromSql.append(tablePrefix(Agency.class) + ".uuid "); //$NON-NLS-1$
+						fromSql.append(" = "); //$NON-NLS-1$
+						fromSql.append(tablePrefix(Employee.class) + ".agency_uuid "); //$NON-NLS-1$
+						usedTables.add(Agency.class);
+					}
+					
+					if (option == PatrolQueryOption.RANK) {
+						if (!usedTables.contains(Rank.class)) {
+							fromSql.append(" join "); //$NON-NLS-1$
+							fromSql.append(tableNamePrefix(Rank.class));
+							fromSql.append(" on "); //$NON-NLS-1$
+							fromSql.append(tablePrefix(Rank.class) + ".uuid "); //$NON-NLS-1$
+							fromSql.append(" = "); //$NON-NLS-1$
+							fromSql.append(tablePrefix(Employee.class) + ".rank_uuid "); //$NON-NLS-1$
+							usedTables.add(Rank.class);
+						}
+					}
 				}else if (option.getType() == PatrolQueryOptionType.KEY){
 					PatrolQueryOption op = option;
 					fromSql.append(" join "); //$NON-NLS-1$
@@ -1564,7 +1614,10 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 		case MAN_DAYS:
 		case MAN_DAYS_TOTAL:
 			return "count(pld_patrol_day) "; //$NON-NLS-1$
+		case PATROLHOURS_TRACK:
+			throw new UnsupportedOperationException();
 		}
+		
 		assert false;
 		return ""; //$NON-NLS-1$
 	}
@@ -1685,6 +1738,8 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 			}
 			return "pld_patrol_day, " + //$NON-NLS-1$
 			tablePrefix(PatrolLegMember.class) + ".employee_uuid as pl_member"; //$NON-NLS-1$
+		case PATROLHOURS_TRACK:
+			throw new UnsupportedOperationException();
 		}
 		//should not get here
 		return null;
@@ -1725,6 +1780,10 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 			return "p_type"; //$NON-NLS-1$
 		case PATROL_TRANSPORT_TYPE:
 			return "pl_transport_uuid"; //$NON-NLS-1$
+		case ARMED:
+			return "p_is_armed"; //$NON-NLS-1$
+		case PILOT:
+			return "plm_pilot"; //$NON-NLS-1$
 		case LEADER:
 			return "plm_leader"; //$NON-NLS-1$
 		case EMPLOYEE:
@@ -1737,6 +1796,12 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 			return tablePrefix.get(PatrolMandate.class) + ".keyid"; //$NON-NLS-1$
 		case PATROL_TRANSPORT_TYPE_KEY:
 			return tablePrefix.get(PatrolTransportType.class) + ".keyid"; //$NON-NLS-1$
+		case RANK:
+			return tablePrefix.get(Rank.class) + ".uuid"; //$NON-NLS-1$
+		case AGENCY:
+			return tablePrefix.get(Agency.class) + ".uuid"; //$NON-NLS-1$
+		case AGENCY_KEY:
+			return tablePrefix.get(Agency.class) + ".keyid"; //$NON-NLS-1$
 		default:
 			assert false;
 			return ""; //$NON-NLS-1$

@@ -52,9 +52,13 @@ public class PatrolQueryOptions {
 			PatrolQueryOption.TEAM, 
 			PatrolQueryOption.MANDATE, 
 			PatrolQueryOption.PATROL_TYPE, 
-			PatrolQueryOption.PATROL_TRANSPORT_TYPE, 
-			PatrolQueryOption.LEADER, 
-			PatrolQueryOption.EMPLOYEE
+			PatrolQueryOption.PATROL_TRANSPORT_TYPE,
+			PatrolQueryOption.ARMED,
+			PatrolQueryOption.LEADER,
+			PatrolQueryOption.PILOT,
+			PatrolQueryOption.EMPLOYEE,
+			PatrolQueryOption.AGENCY,
+			PatrolQueryOption.RANK,
 	};
 	
 	/**
@@ -66,6 +70,7 @@ public class PatrolQueryOptions {
 			PatrolQueryOption.MANDATE_KEY,
 			PatrolQueryOption.PATROL_TYPE,
 			PatrolQueryOption.PATROL_TRANSPORT_TYPE_KEY,
+			PatrolQueryOption.ARMED,
 			PatrolQueryOption.CONSERVATION_AREA
 	};
 	

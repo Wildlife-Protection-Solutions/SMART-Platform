@@ -165,6 +165,16 @@ public class PatrolOptionData implements IPatrolOptionData{
 					results.add(new ListItem(null, PatrolType.Type.valueOf(keys[i]).getGuiName(Locale.getDefault()), keys[i]));
 				}
 			}
+		}else if (type == PatrolQueryOptionType.BOOLEAN) {
+			for (int i = 0; i < keys.length; i ++) {
+				if (keys[i].equalsIgnoreCase(Boolean.TRUE.toString())) {
+					results.add(new ListItem(null, SmartLabelProvider.BOOLEAN_TRUE_LABEL, Boolean.TRUE.toString()));		
+				}else if (keys[i].equalsIgnoreCase(Boolean.FALSE.toString())) {
+					results.add(new ListItem(null, SmartLabelProvider.BOOLEAN_FALSE_LABEL, Boolean.FALSE.toString()));		
+				}
+			}
+			
+			
 		}
 		Collections.sort(results);
 		return results;
@@ -227,6 +237,9 @@ public class PatrolOptionData implements IPatrolOptionData{
 					items.add(new ListItem(r.getUuid(), r.getName() + " - " + a.getName())); //$NON-NLS-1$
 				}
 			}
+		}else if (option == PatrolQueryOption.ARMED) {
+			items.add(new ListItem(null, SmartLabelProvider.BOOLEAN_TRUE_LABEL, Boolean.TRUE.toString()));
+			items.add(new ListItem(null, SmartLabelProvider.BOOLEAN_FALSE_LABEL, Boolean.FALSE.toString()));
 		}
 		Collections.sort(items);
 		return items;
@@ -239,6 +252,7 @@ public class PatrolOptionData implements IPatrolOptionData{
 	
 	@Override
 	public boolean isDependOnQueryConfiguration() {
-		return option == PatrolQueryOption.LEADER || option == PatrolQueryOption.PILOT || option == PatrolQueryOption.EMPLOYEE;
+		return option == PatrolQueryOption.LEADER || option == PatrolQueryOption.PILOT ||
+				option == PatrolQueryOption.EMPLOYEE;
 	}
 }

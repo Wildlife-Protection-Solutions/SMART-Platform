@@ -76,7 +76,8 @@ public enum PatrolQueryOption implements IPatrolQueryOption {
 	 * @return <code>true</code> if this option involved employees
 	 */
 	public boolean isEmployeeItem(){
-		return this == EMPLOYEE || this == PILOT || this == LEADER || this == AGENCY || this == AGENCY_KEY || this == RANK;
+		return this == EMPLOYEE || this == PILOT || this == LEADER || 
+				this == AGENCY || this == AGENCY_KEY || this == RANK;
 	}
 	
 	/**

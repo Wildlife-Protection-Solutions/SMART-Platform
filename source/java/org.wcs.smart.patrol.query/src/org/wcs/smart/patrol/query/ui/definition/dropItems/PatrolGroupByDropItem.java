@@ -104,7 +104,8 @@ public class PatrolGroupByDropItem extends DropItem implements IGroupByDropItem{
 			for (int i = 0; i < filteredValues.size(); i ++){
 				if (groupBy.getType() == PatrolQueryOptionType.UUID){
 					queryPart.append(  UuidUtils.uuidToString( filteredValues.get(i).getUuid())  );
-				}else if (groupBy.getType() == PatrolQueryOptionType.KEY){
+				}else if (groupBy.getType() == PatrolQueryOptionType.KEY ||
+						groupBy.getType() ==  PatrolQueryOptionType.BOOLEAN){
 					queryPart.append(  filteredValues.get(i).getKey() );
 				}else{
 					queryPart.append("\""); //$NON-NLS-1$

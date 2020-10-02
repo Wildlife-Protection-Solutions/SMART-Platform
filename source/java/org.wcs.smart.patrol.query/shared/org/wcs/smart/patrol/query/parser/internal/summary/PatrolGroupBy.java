@@ -120,6 +120,8 @@ public class PatrolGroupBy implements IGroupBy {
 			return GroupByType.STRING;
 		}else if (option.getType() == PatrolQueryOptionType.KEY){
 			return GroupByType.KEY;
+		}else if (option.getType() == PatrolQueryOptionType.BOOLEAN){
+			return GroupByType.BOOLEAN;
 		}
 		return GroupByType.STRING;
 	}
