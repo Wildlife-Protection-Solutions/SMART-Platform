@@ -1213,6 +1213,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		txtScratchpad = toolkit.createText(compScratchpad, "", SWT.MULTI | SWT.V_SCROLL | SWT.BORDER | SWT.WRAP); //$NON-NLS-1$
 		txtScratchpad.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		txtScratchpad.addListener(SWT.Modify, e->setDirty(true));
+		txtScratchpad.setTextLimit(IntelEntity.SCRATCH_MAX_LENGTH);
 		
 		Composite compHistory = toolkit.createComposite(tabPart, SWT.NONE);
 		compHistory.setLayout(new GridLayout());
