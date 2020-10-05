@@ -81,7 +81,6 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
-import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.api.ConnectClient;
 import org.wcs.smart.connect.api.io.IOUtils;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Wildlife Conservation Society
+ * Copyright (C) 2012 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,35 +19,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.query;
 
-import java.util.ArrayList;
+package org.wcs.smart.plan.query;
+
 import java.util.List;
 
-import org.wcs.smart.patrol.query.ext.IExtensionFilter;
-import org.wcs.smart.patrol.query.ext.IExtensionGroupBy;
-import org.wcs.smart.patrol.query.ext.IPatrolContributionFinder;
-import org.wcs.smart.plan.query.PlanPatrolGroupBy;
-import org.wcs.smart.plan.query.PlanPatrolQueryFilter;
+import org.hibernate.Session;
+import org.wcs.smart.query.model.summary.AbstractGroupByViewer;
+import org.wcs.smart.query.ui.model.DropItem;
+import org.wcs.smart.query.ui.model.ListItem;
 
 /**
- * Provides query contributions.  This is byproduct of the desktop
- * rcp extension options.
- * 
+ * Group by query item for patrol intelligence group bys
+ * @author Emily
+ *
  */
-public class PatrolContributionFinder implements IPatrolContributionFinder{
+public class PlanIntelligenceGroupByViewer extends AbstractGroupByViewer<PlanPatrolGroupBy>{
 
-	public List<IExtensionFilter> getFilterContributions() {
-		ArrayList<IExtensionFilter> items = new ArrayList<IExtensionFilter>();
-//		items.add(new IntelligencePatrolQueryFilter());
-		items.add(new PlanPatrolQueryFilter());
-		return items;
+	public PlanIntelligenceGroupByViewer(PlanPatrolGroupBy gb) {
+		super(gb);
 	}
-	
-	public List<IExtensionGroupBy> getGroupByContributions() {
-		ArrayList<IExtensionGroupBy> items = new ArrayList<IExtensionGroupBy>();
-//		items.add(new IntelligencePatrolGroupBy());
-		items.add(new PlanPatrolGroupBy());
-		return items;
+
+
+	@Override
+	public List<ListItem> getItems(Session session) {
+		return PlanGroupByDropItem.SUPPORTEDVALUES;
 	}
+
+	@Override
+	public DropItem asDropItem(Session session) throws Exception {
+		return new PlanGroupByDropItem();
+	}
+
+
 }

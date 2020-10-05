@@ -915,6 +915,9 @@ public class PsqlErSummaryEngine extends AbstractQueryEngine implements ISummary
 						mins = mins % 60;
 						key += String.format("%d:%02d", hrs, mins); //$NON-NLS-1$
 						break;
+					case BOOLEAN: 
+						key += ((Boolean)rs.getBoolean(rsindex++)).toString();
+						break;
 				}
 				groupby[i] = key;
 			}

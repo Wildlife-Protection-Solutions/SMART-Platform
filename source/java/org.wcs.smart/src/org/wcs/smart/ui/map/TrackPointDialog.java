@@ -755,8 +755,7 @@ public abstract class TrackPointDialog extends SmartStyledTitleDialog implements
 	
 	private String format(LocalDateTime value) {
 		return value.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)) 
-				+ " (" + value.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM))
-				+ ")";
+				+ " (" + value.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM)) + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	/*
 	 * Creates the point features layers and initializes the points

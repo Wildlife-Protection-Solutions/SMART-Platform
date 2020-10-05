@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 Wildlife Conservation Society
+ * Copyright (C) 2012 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,35 +19,60 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.query;
+package org.wcs.smart.plan.query;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.wcs.smart.patrol.query.ext.IExtensionFilter;
 import org.wcs.smart.patrol.query.ext.IExtensionGroupBy;
-import org.wcs.smart.patrol.query.ext.IPatrolContributionFinder;
-import org.wcs.smart.plan.query.PlanPatrolGroupBy;
-import org.wcs.smart.plan.query.PlanPatrolQueryFilter;
+import org.wcs.smart.query.model.filter.IGroupByVisitor;
 
 /**
- * Provides query contributions.  This is byproduct of the desktop
- * rcp extension options.
+ * Plan group by extension for patrol queries.
  * 
+ * @author Emily
+ *
  */
-public class PatrolContributionFinder implements IPatrolContributionFinder{
+public class PlanPatrolGroupBy implements IExtensionGroupBy {
 
-	public List<IExtensionFilter> getFilterContributions() {
-		ArrayList<IExtensionFilter> items = new ArrayList<IExtensionFilter>();
-//		items.add(new IntelligencePatrolQueryFilter());
-		items.add(new PlanPatrolQueryFilter());
-		return items;
+	public static final String KEY = "patrol:contribution:plan"; //$NON-NLS-1$
+	
+	public enum Options{
+		PARTOF("part"), //$NON-NLS-1$
+		NOT_PARTOF("notpart"); //$NON-NLS-1$
+		
+		private String key;
+		
+		Options(String key){
+			this.key = key;
+		}
+		public String getKey(){
+			return key;
+		}
 	}
 	
-	public List<IExtensionGroupBy> getGroupByContributions() {
-		ArrayList<IExtensionGroupBy> items = new ArrayList<IExtensionGroupBy>();
-//		items.add(new IntelligencePatrolGroupBy());
-		items.add(new PlanPatrolGroupBy());
-		return items;
+	@Override
+	public String asString() {
+		return getKeyPart();
+	}
+
+	@Override
+	public String getKeyPart() {
+		return KEY;
+	}
+
+	@Override
+	public GroupByType getType() {
+		return GroupByType.KEY;
+	}
+
+	@Override
+	public void visit(IGroupByVisitor visitor) {
+		visitor.visit(this);
+	}
+
+	@Override
+	public IExtensionGroupBy createGroupBy(String key) {
+		if (key.equals(KEY + ":")){ //$NON-NLS-1$
+			return new PlanPatrolGroupBy();
+		}
+		return null;
 	}
 }

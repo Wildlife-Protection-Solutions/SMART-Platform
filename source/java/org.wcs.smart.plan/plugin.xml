@@ -1176,6 +1176,10 @@
             filter="org.wcs.smart.plan.query.PlanPatrolQueryFilter"
             viewer="org.wcs.smart.plan.query.PlanPatrolQueryFilterViewer">
       </FilterItem>
+      <GroupByItem
+            groupby="org.wcs.smart.plan.query.PlanPatrolGroupBy"
+            viewer="org.wcs.smart.plan.query.PlanGroupByPatrolContribution">
+      </GroupByItem>
    </extension>
    <extension
          point="org.eclipse.equinox.p2.engine.actions">

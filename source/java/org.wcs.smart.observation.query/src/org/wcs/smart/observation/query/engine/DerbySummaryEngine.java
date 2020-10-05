@@ -709,6 +709,9 @@ public class DerbySummaryEngine extends AbstractDerbyObservationQueryEngine {
 					case TIME:
 						key += DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM).format(rs.getDate(rsindex++).toLocalDate());
 						break;
+					case BOOLEAN: 
+						key += ((Boolean)rs.getBoolean(rsindex++)).toString();
+						break;
 				default:
 					break;
 				}

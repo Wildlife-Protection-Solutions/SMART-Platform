@@ -946,6 +946,9 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 					case KEY:
 						key += ":" + rs.getString(rsindex++); //$NON-NLS-1$
 						break;
+					case BOOLEAN: 
+						key += ((Boolean)rs.getBoolean(rsindex++)).toString();
+						break;
 					case TIME:
 						throw new UnsupportedOperationException("TIME attribute not supports in summary values"); //$NON-NLS-1$
 				

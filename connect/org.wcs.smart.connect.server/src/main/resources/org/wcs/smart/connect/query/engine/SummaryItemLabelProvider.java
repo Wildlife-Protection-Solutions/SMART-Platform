@@ -98,6 +98,7 @@ import org.wcs.smart.patrol.query.model.PatrolQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolQueryOptionType;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolGroupBy;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItem;
+import org.wcs.smart.plan.query.PlanPatrolGroupBy;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.date.DayDateGroupBy;
 import org.wcs.smart.query.model.filter.date.EndHourGroupBy;
@@ -360,8 +361,8 @@ public class SummaryItemLabelProvider {
 			results = getName((SamplingUnitAttributeGroupBy)item);	
 		}else if (item instanceof WaypointSourceGroupBy){
 			results = getName((WaypointSourceGroupBy)item);
-//		}else if (item instanceof IntelligencePatrolGroupBy){
-//			results = getName((IntelligencePatrolGroupBy)item);
+		}else if (item instanceof PlanPatrolGroupBy) {
+			results = getName((PlanPatrolGroupBy)item);
 		}else if (item instanceof MissionIdGroupBy){
 			results = getName((MissionIdGroupBy)item);
 		}else if (item instanceof SurveyIdGroupBy){
@@ -1198,11 +1199,10 @@ public class SummaryItemLabelProvider {
 		return items;
 	}
 	
-	
-//	private List<ListItem> getName(IntelligencePatrolGroupBy item){
-//		ArrayList<ListItem> items = new ArrayList<ListItem>();
-//		items.add(new ListItem(null, Messages.getString("SummaryItemLabelProvider.MotivateIntelOp", l), IntelligencePatrolGroupBy.Options.MOTIVATED.getKey()));  //$NON-NLS-1$
-//		items.add(new ListItem(null, Messages.getString("SummaryItemLabelProvider.NotMotivatedIntlOp", l), IntelligencePatrolGroupBy.Options.NOT_MOTIVATED.getKey())); //$NON-NLS-1$
-//		return items;
-//	}
+	private List<ListItem> getName(PlanPatrolGroupBy item){
+		ArrayList<ListItem> items = new ArrayList<ListItem>();
+		items.add(new ListItem(null, Messages.getString("SummaryItemLabelProvider.PartOfPlanHeader", l), PlanPatrolGroupBy.Options.PARTOF.getKey())); //$NON-NLS-1$
+		items.add(new ListItem(null, Messages.getString("SummaryItemLabelProvider.NotPartOfPlanHeader", l), PlanPatrolGroupBy.Options.NOT_PARTOF.getKey()));  //$NON-NLS-1$
+		return items;
+	}
 }

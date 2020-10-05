@@ -22,7 +22,6 @@
 package org.wcs.smart.cybertracker;
 
 import java.text.MessageFormat;
-import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;

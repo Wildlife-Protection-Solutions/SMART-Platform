@@ -194,6 +194,9 @@ public class Messages extends NLS {
 	public static String PlanFromXml_TeamNameNotFound;
 	public static String PlanFromXml_TeamNotFound;
 	public static String PlanFromXml_WarningsMsg;
+	public static String PlanGroupByDropItem_NotPartOfPlanHeader;
+	public static String PlanGroupByDropItem_PartOfPlanHEader;
+	public static String PlanGroupByDropItem_PartOfPlanName;
 	public static String PlanHibernateManager_DeletePlan_Error;
 	public static String PlanHibernateManager_ErrorMatchingPatrolToPlan;
 	public static String PlanHibernateManager_Plan_NotFound_Error;

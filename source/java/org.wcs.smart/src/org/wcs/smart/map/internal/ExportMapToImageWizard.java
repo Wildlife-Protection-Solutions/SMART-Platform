@@ -348,7 +348,7 @@ public class ExportMapToImageWizard extends Wizard implements IExportWizard {
 	private Path addSuffix(Path file, String name) {
 		String extension = mapSelectorPage.getSelectedFormat().getExtension();
 		if (!name.endsWith(extension)) {
-			return file.resolve(name + "." + extension);
+			return file.resolve(name + "." + extension); //$NON-NLS-1$
 		} else {
 			return file.resolve(name);
 		}

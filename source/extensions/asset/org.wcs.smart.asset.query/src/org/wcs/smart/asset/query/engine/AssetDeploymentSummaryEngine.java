@@ -732,6 +732,9 @@ public class AssetDeploymentSummaryEngine extends AssetQueryEngine{
 					case KEY:
 						key += rs.getString(rsindex++);
 						break;
+					case BOOLEAN: 
+						key += ((Boolean)rs.getBoolean(rsindex++)).toString();
+						break;
 				}
 				groupby[i] = key;
 			}

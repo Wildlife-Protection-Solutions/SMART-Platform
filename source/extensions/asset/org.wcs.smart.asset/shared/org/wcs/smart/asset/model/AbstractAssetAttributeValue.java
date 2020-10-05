@@ -96,8 +96,7 @@ public abstract class AbstractAssetAttributeValue {
 			return null;
 		}
 		try{
-			return LocalDate.parse(getStringValue(), DateTimeFormatter.ofPattern("uuuu-MM-dd"));
-//			return java.sql.Date.valueOf(getStringValue()).toLocalDate();
+			return LocalDate.parse(getStringValue(), DateTimeFormatter.ofPattern("uuuu-MM-dd")); //$NON-NLS-1$
 		}catch (Exception ex){
 			return null;
 		}
@@ -109,7 +108,7 @@ public abstract class AbstractAssetAttributeValue {
 			return;
 		}
 		
-		setStringValue(DateTimeFormatter.ofPattern("uuuu-MM-dd").format(date));
+		setStringValue(DateTimeFormatter.ofPattern("uuuu-MM-dd").format(date)); //$NON-NLS-1$
 		
 	}
 	/**

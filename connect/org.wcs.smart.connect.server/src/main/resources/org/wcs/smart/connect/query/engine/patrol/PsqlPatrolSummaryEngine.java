@@ -73,6 +73,7 @@ import org.wcs.smart.patrol.query.parser.internal.summary.PatrolGroupBy;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItem;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItemAreaBuffer;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItemCustomDates;
+import org.wcs.smart.plan.query.PlanPatrolGroupBy;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.visitors.AreaFilterCollectorVisitor;
 import org.wcs.smart.query.common.engine.visitors.HasObservationFilterVisitor;
@@ -1515,19 +1516,19 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 				fromSql.append(".keyid = " + p1); //$NON-NLS-1$
 				
 			}else if (gb instanceof IExtensionGroupBy){
-//				if (gb instanceof IntelligencePatrolGroupBy){
-//					String intelPrefix = "intel_" + itemcnt; //$NON-NLS-1$
-//					groupBySql.append("i_" + itemcnt); //$NON-NLS-1$
-//					groupByInnerSql.append(" CASE WHEN " + intelPrefix + ".patrol_uuid IS NULL THEN 'nm' else 'm' END as i_" + itemcnt); //$NON-NLS-1$ //$NON-NLS-2$
-//					fromSql.append(" LEFT JOIN "); //$NON-NLS-1$
-//					fromSql.append(" smart.patrol_intelligence " + intelPrefix); //$NON-NLS-1$
-//					fromSql.append(" on "); //$NON-NLS-1$
-//					fromSql.append("temp.p_uuid = " + intelPrefix + ".patrol_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
-//					
-//				}
-//				PatrolContributionFinder.addGroupBySql((IExtensionGroupBy)gb, fromSql, 
-//						groupBySql, groupByInnerSql, 
-//						value, caFilter, itemcnt, this);
+				if (gb instanceof PlanPatrolGroupBy){
+					
+					String planPrefix = "plan_" + itemcnt; //$NON-NLS-1$
+					groupBySql.append("i_" + itemcnt); //$NON-NLS-1$
+					groupByInnerSql.append(" CASE WHEN " + planPrefix + ".patrol_uuid IS NULL "); //$NON-NLS-1$ //$NON-NLS-2$
+					groupByInnerSql.append("THEN '" + PlanPatrolGroupBy.Options.NOT_PARTOF.getKey() + "' "); //$NON-NLS-1$ //$NON-NLS-2$
+					groupByInnerSql.append("else '" + PlanPatrolGroupBy.Options.PARTOF.getKey() + "' "); //$NON-NLS-1$ //$NON-NLS-2$
+					groupByInnerSql.append("END as i_" + itemcnt); //$NON-NLS-1$
+					fromSql.append(" LEFT JOIN "); //$NON-NLS-1$
+					fromSql.append(" smart.patrol_plan " + planPrefix); //$NON-NLS-1$
+					fromSql.append(" on "); //$NON-NLS-1$
+					fromSql.append("temp.p_uuid = " + planPrefix + ".patrol_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+				}
 			}else{
 				//throw new exception; should only be patrol group bys here for now
 			}

@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,7 +34,6 @@ import java.util.logging.Logger;
 
 import org.wcs.smart.asset.model.mapping.XmpMetadataField;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.util.SharedUtils;
 
 import com.adobe.xmp.XMPIterator;
 import com.adobe.xmp.XMPMeta;

@@ -714,6 +714,9 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 					case KEY:
 						key += rs.getString(rsindex++);
 						break;
+					case BOOLEAN: 
+						key += ((Boolean)rs.getBoolean(rsindex++)).toString();
+						break;
 					default:
 						throw new UnsupportedOperationException("group by " + gb.getType() + " not supported"); //$NON-NLS-1$ //$NON-NLS-2$
 				}

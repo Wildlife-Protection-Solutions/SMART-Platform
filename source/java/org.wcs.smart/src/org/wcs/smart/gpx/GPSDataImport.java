@@ -39,7 +39,6 @@ import javax.xml.bind.Unmarshaller;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
-import org.locationtech.jts.geom.Coordinate;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.gpx.xml.GpxType;
 import org.wcs.smart.gpx.xml.TrkType;
