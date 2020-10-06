@@ -48,6 +48,7 @@ public class EntityRecordQueryResultItem implements IResultItem {
 	
 	private String caId;
 	private String caName;
+	private UUID caUuid;
 	
 	public EntityRecordQueryResultItem(){
 		
@@ -63,6 +64,14 @@ public class EntityRecordQueryResultItem implements IResultItem {
 	public UUID getProfileUuid() {
 		return this.profileUuid;
 	}
+	
+	public void setConservationAreaUuid(UUID uuid) {
+		this.caUuid = uuid;
+	}
+	public UUID getConservationAreaUuid() {
+		return this.caUuid;
+	}
+	
 	public void setConservationAreaId(String caId) {
 		this.caId = caId;
 	}

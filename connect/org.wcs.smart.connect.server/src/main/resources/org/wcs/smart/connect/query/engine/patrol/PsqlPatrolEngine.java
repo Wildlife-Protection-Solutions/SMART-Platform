@@ -168,7 +168,7 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 					}
 					c.commit();
 					
-					return new PatrolQueryResult(PsqlPatrolEngine.this, itemcnt);
+					return new PatrolQueryResult(PsqlPatrolEngine.this, getIncludeUuids(parameters), itemcnt);
 				}catch (Exception ex){
 					logger.log(Level.SEVERE, ex.getMessage(), ex);
 					c.rollback();

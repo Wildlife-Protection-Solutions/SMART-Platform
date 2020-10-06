@@ -216,39 +216,8 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine{
 		}
 		
 		if (adduuids) {
-			IQueryColumn recorduuid = new IQueryColumn() {
-
-				@Override
-				public String getColumnName() {
-					return Messages.getString("IntelObservationQueryEngine.RecordUuidColumnName", locale); //$NON-NLS-1$
-				}
-
-				@Override
-				public Type getDataType() {
-					return Type.STRING;
-				}
-
-				@Override
-				public String getKey() {
-					return "record_uuid"; //$NON-NLS-1$
-				}
-
-				@Override
-				public Object getValue(IResultItem item) {
-					if (((IntelObservationResultItem)item).getRecordUuid() == null) return ""; //$NON-NLS-1$
-					return UuidUtils.uuidToString( ((IntelObservationResultItem)item).getRecordUuid());
-				}
-
-				@Override
-				public String getValue(IResultItem item, Locale arg1) {
-					return getValue(item).toString();
-				}
-
-				@Override
-				public boolean isVisible() {
-					return true;
-				}};
-				IQueryColumn obsuuid = new IQueryColumn() {
+			
+			IQueryColumn obsuuid = new IQueryColumn() {
 
 					@Override
 					public String getColumnName() {
@@ -281,9 +250,10 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine{
 						return true;
 					}
 				};
-		
-				columns.add(recorduuid);
+				
+				columns.add(new RecordUuidColumn(locale));
 				columns.add(obsuuid);
+				columns.add(new CaUuidColumn(locale));
 		}
 		
 		queryResults.setQueryColumns(columns);
@@ -302,6 +272,7 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine{
 		String[][] columns = new String[][]{
 			{"observation_uuid", "uuid"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"location_uuid", "uuid"}, //$NON-NLS-1$ //$NON-NLS-2$
+			{"ca_uuid", "uuid"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"ca_id", "varchar(8)"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"ca_name", "varchar(256)"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"record_uuid", "uuid"}, //$NON-NLS-1$ //$NON-NLS-2$
@@ -354,7 +325,7 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine{
 		sb = new StringBuilder();
 		sb.append(" INSERT INTO " + newTable + " "); //$NON-NLS-1$ //$NON-NLS-2$
 		sb.append(" ( " + insert.toString() + ")" ); //$NON-NLS-1$ //$NON-NLS-2$
-		sb.append("SELECT o.uuid, a.location_uuid, a.ca_id, a.ca_name, r.uuid, "); //$NON-NLS-1$
+		sb.append("SELECT o.uuid, a.location_uuid, a.ca_uuid, a.ca_id, a.ca_name, r.uuid, "); //$NON-NLS-1$
 		sb.append(" r.source_uuid, r.status, r.title, r.profile_uuid, "); //$NON-NLS-1$
 		sb.append(" l.id, l.datetime, l.comment, l.geometry, o.category_uuid "); //$NON-NLS-1$
 		sb.append(select);

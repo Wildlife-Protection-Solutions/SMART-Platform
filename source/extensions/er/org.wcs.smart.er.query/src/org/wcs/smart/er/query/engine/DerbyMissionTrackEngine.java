@@ -370,8 +370,8 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 		
 		sql.append(tablePrefix(Mission.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Mission.class) + ".id, "); //$NON-NLS-1$
-		sql.append(tablePrefix(Mission.class) + ".start_datetime, "); //$NON-NLS-1$
-		sql.append(tablePrefix(Mission.class) + ".end_datetime, "); //$NON-NLS-1$
+		sql.append(tablePrefix(Mission.class) + ".start_date, "); //$NON-NLS-1$
+		sql.append(tablePrefix(Mission.class) + ".end_date, "); //$NON-NLS-1$
 		
 		sql.append(tablePrefix(MissionDay.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(MissionDay.class) + ".mission_day, "); //$NON-NLS-1$
@@ -405,8 +405,8 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 		
 		sql.append("mission_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("mission_id varchar(128),"); //$NON-NLS-1$
-		sql.append("mission_startdate timestamp,"); //$NON-NLS-1$
-		sql.append("mission_enddate timestamp,"); //$NON-NLS-1$
+		sql.append("mission_startdate date,"); //$NON-NLS-1$
+		sql.append("mission_enddate date,"); //$NON-NLS-1$
 	
 		sql.append("missionday_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("missionday_date date,"); //$NON-NLS-1$
@@ -429,6 +429,7 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 		MissionTrackResultItem it = new MissionTrackResultItem();
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
+		it.setConservationAreaUuid(UuidUtils.byteToUUID(rs.getBytes("ca_uuid"))); //$NON-NLS-1$
 		
 		it.setMissionUuid(UuidUtils.byteToUUID(rs.getBytes("mission_uuid"))); //$NON-NLS-1$
 		it.setMissionEnd(rs.getTimestamp("mission_enddate").toLocalDateTime()); //$NON-NLS-1$

@@ -330,7 +330,7 @@ public class AssetObservationEngine extends AssetQueryEngine {
 	
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
-		
+		it.setConservationAreaUuid((UUID)rs.getObject("wp_ca_uuid")); //$NON-NLS-1$
 		it.setWaypointUuid((UUID)rs.getObject("wp_uuid")); //$NON-NLS-1$
 		it.setWaypointId(rs.getInt("wp_id")); //$NON-NLS-1$
 		it.setWaypointX(rs.getDouble("wp_x")); //$NON-NLS-1$

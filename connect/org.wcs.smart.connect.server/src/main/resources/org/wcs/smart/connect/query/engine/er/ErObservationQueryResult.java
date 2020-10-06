@@ -93,6 +93,17 @@ public class ErObservationQueryResult extends ErSurveyQueryResultSet implements 
 		cols.add(obsUuidCol);
 		cols.add(wpUuidCol);
 		
+		QueryColumn caUuidCol = new QueryColumn(getConservationAreaColumnName(l), CA_UUID_COL_KEY, QueryColumn.ColumnType.STRING) {
+			@Override
+			public QueryColumn clone() { return this; }
+			@Override
+			public Object getValue(IResultItem item) {
+				if (((SurveyQueryResultItem)item).getConservationAreaUuid() == null) return ""; //$NON-NLS-1$
+				return UuidUtils.uuidToString( ((SurveyQueryResultItem)item).getConservationAreaUuid());
+			}
+		};
+		cols.add(caUuidCol);
+		
 		return cols;
 	}
 	
@@ -179,6 +190,7 @@ public class ErObservationQueryResult extends ErSurveyQueryResultSet implements 
 	protected void setFields(SurveyQueryResultItem it, ResultSet rs) throws SQLException{
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
+		it.setConservationAreaUuid((UUID)rs.getObject("ca_uuid")); //$NON-NLS-1$
 		
 		it.setMissionUuid((UUID)rs.getObject("mission_uuid")); //$NON-NLS-1$
 		it.setMissionEnd(rs.getTimestamp("mission_enddate").toLocalDateTime()); //$NON-NLS-1$

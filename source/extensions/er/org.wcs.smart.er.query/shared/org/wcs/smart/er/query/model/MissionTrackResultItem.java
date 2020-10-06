@@ -46,6 +46,7 @@ public class MissionTrackResultItem implements IGeometryResultItem{
 	
 	private String caId;
 	private String caName;
+	private UUID caUuid;
 	
 	private String surveyDesign;
 	private LocalDate surveyDesignStart;
@@ -181,6 +182,21 @@ public class MissionTrackResultItem implements IGeometryResultItem{
 		return this.samplingUnitUuid;
 	}
 	
+	/**
+	 * Sets the ca uuid
+	 * @param uuid
+	 */
+	public void setConservationAreaUuid(UUID uuid) {
+		this.caUuid = uuid;
+	}
+	
+	/**
+	 * The ca uuid
+	 * @return
+	 */
+	public UUID getConservationAreaUuid() {
+		return this.caUuid;
+	}
 	
 	/**
 	 * Sets the ca id

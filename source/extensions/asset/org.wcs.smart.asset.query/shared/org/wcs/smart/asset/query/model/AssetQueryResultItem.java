@@ -55,6 +55,7 @@ public class AssetQueryResultItem implements IGeometryResultItem, IAdaptable{
 	
 	private String caId;
 	private String caName;
+	private UUID caUuid;
 	
 	private String station;
 	private String assets;
@@ -348,6 +349,21 @@ public class AssetQueryResultItem implements IGeometryResultItem, IAdaptable{
 		this.waypointComment = wpComment;
 	}
 	
+	/**
+	 * Sets the conservation area uuid
+	 * @param uuid
+	 */
+	public void setConservationAreaUuid(UUID uuid) {
+		this.caUuid = uuid;
+	}
+	
+	/**
+	 * Gets the conservation area uuid
+	 * @return
+	 */
+	public UUID getConservationAreaUuid() {
+		return this.caUuid;
+	}
 	
 	/**
 	 * Sets the ca id

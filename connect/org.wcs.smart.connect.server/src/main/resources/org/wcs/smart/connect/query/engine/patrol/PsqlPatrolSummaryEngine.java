@@ -142,6 +142,7 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 	
 	private Set<String> tablesWithNoData = new HashSet<>();
 
+	private boolean includeUuids = false;
 	
 	@Override
 	public boolean canExecute(String querytype) {
@@ -183,6 +184,8 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 			HashMap<String, Object> parameters) throws SQLException{
 
 		tablesWithNoData.clear();
+		this.includeUuids = getIncludeUuids(parameters);
+		
 		
 		query = (PatrolSummaryQuery) lquery;
 		session = (Session) parameters.get(Session.class.getName());
@@ -1835,7 +1838,7 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 			SummaryQueryResult results, Locale l, Session session) throws Exception{
 		
 		parseConservationAreaFilterInternal(query);
-		SummaryItemLabelProvider summary = new SummaryItemLabelProvider(l, session, caFilter); 
+		SummaryItemLabelProvider summary = new SummaryItemLabelProvider(l, session, caFilter, includeUuids); 
 
 		// value headers
 		ValuePart vp = query.getQueryDefinition().getValuePart();
@@ -1853,6 +1856,7 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 			if (item instanceof DateGroupBy){
 				((DateGroupBy) item).setDateFilter(dFilter.getDateFilterOption());
 			}
+			
 			List<ListItem> items = summary.getNames(item);
 			SummaryHeader[] rowHeader = new SummaryHeader[items.size()];
 			for (int i = 0; i < items.size(); i ++){
@@ -1861,8 +1865,7 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 					rowHeader[i] = new SummaryHeader( it.getName(), it.getName(), item.getKeyPart(), UuidUtils.uuidToString( it.getUuid() ), false);
 				}else{
 					rowHeader[i] = new SummaryHeader( it.getName(), it.getName(), item.getKeyPart(), it.getKey(), false);
-				}	
-				
+				}		
 			}
 			results.addRowHeader(rowHeader);
 		}

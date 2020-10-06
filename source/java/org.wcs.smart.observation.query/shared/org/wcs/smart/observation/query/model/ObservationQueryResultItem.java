@@ -53,6 +53,7 @@ public class ObservationQueryResultItem implements IGeometryResultItem, IAdaptab
 		
 	private String caId;
 	private String caName;
+	private UUID caUuid;
 	private String sourceId;
 	
 	private LocalDateTime wpDateTime;
@@ -335,6 +336,22 @@ public class ObservationQueryResultItem implements IGeometryResultItem, IAdaptab
 	 */
 	public void setWaypointComment(String wpComment) {
 		this.waypointComment = wpComment;
+	}
+	
+	/**
+	 * Sets the conservation area uuid
+	 * @param uuid
+	 */
+	public void setConservationAreaUuid(UUID uuid) {
+		this.caUuid = uuid;
+	}
+	
+	/**
+	 * Gets the conservation area uuid
+	 * @return
+	 */
+	public UUID getConservationAreaUuid() {
+		return this.caUuid;
 	}
 	
 	/**

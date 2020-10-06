@@ -64,7 +64,8 @@ public class SurveyQueryResultItem implements IGeometryResultItem, IAdaptable{
 	
 	private String caId;
 	private String caName;
-	
+	private UUID caUuid;
+
 	private String surveyDesign;
 	private LocalDate surveyDesignStart;
 	private LocalDate surveyDesignEnd;
@@ -439,6 +440,22 @@ public class SurveyQueryResultItem implements IGeometryResultItem, IAdaptable{
 	 */
 	public void setWaypointComment(String wpComment) {
 		this.waypointComment = wpComment;
+	}
+	
+	/**
+	 * Sets the conservation area uuid
+	 * @param uuid
+	 */
+	public void setConservationAreaUuid(UUID uuid) {
+		this.caUuid = uuid;
+	}
+	
+	/**
+	 * Gets the conservation area uuid
+	 * @return
+	 */
+	public UUID getConservationAreaUuid() {
+		return this.caUuid;
 	}
 	
 	/**

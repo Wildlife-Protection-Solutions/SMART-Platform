@@ -204,9 +204,9 @@ public class CsvExporter {
 	
 		try (CSVWriter writer = new CSVWriter(new OutputStreamWriter(
 				new FileOutputStream(csvFile.toFile().getAbsolutePath()), StandardCharsets.UTF_8), delimiter)) {
-
+			
 			List<QueryColumn> cols = query.computeQueryColumns(l, session);
-
+			
 			String[] data = new String[cols.size()];
 			for (int i = 0; i < cols.size(); i++) {
 				data[i] = cols.get(i).getName();
@@ -242,8 +242,8 @@ public class CsvExporter {
 				new FileOutputStream(csvFile.toFile().getAbsolutePath()), StandardCharsets.UTF_8), delimiter)) {
 
 			IProjectionProvider prj = ProjectionUtils.INSTANCE.createProjectionProvider(session, query.getConservationArea());
-			List<QueryColumn> cols = query.computeQueryColumns(l, session, prj);
-
+			List<QueryColumn> cols = results.getQueryColumns(query, l, session, prj);
+			
 			String[] data = new String[cols.size()];
 			for (int i = 0; i < cols.size(); i++) {
 				data[i] = cols.get(i).getName();

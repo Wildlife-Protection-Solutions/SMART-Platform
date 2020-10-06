@@ -369,6 +369,7 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 		
 		PatrolQueryResultItem it = new PatrolQueryResultItem();
 		UUID cauuid = UuidUtils.byteToUUID(rs.getBytes("r_p_ca_uuid")); //$NON-NLS-1$
+		it.setConservationAreaUuid(cauuid);
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
 		it.setPatrolUuid(UuidUtils.byteToUUID(rs.getBytes("r_p_uuid"))); //$NON-NLS-1$

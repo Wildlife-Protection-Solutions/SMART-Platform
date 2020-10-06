@@ -264,6 +264,7 @@ public class IntelEntityRecordQueryEngine implements IIntelQueryEngine {
 		columnNameToIndex.put("entity_uuid", columnIndex++); //$NON-NLS-1$
 		columnNameToIndex.put("date_modified", columnIndex++); //$NON-NLS-1$
 		columnNameToIndex.put("entity_type_key", columnIndex++); //$NON-NLS-1$
+		columnNameToIndex.put("ca_uuid", columnIndex++); //$NON-NLS-1$
 		columnNameToIndex.put("ca_id", columnIndex++); //$NON-NLS-1$
 		columnNameToIndex.put("ca_name", columnIndex++); //$NON-NLS-1$
 		columnNameToIndex.put("profile_uuid", columnIndex++); //$NON-NLS-1$

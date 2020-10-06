@@ -675,8 +675,8 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 		sql.append(tablePrefix(Survey.class) + ".end_date, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Mission.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Mission.class) + ".id, "); //$NON-NLS-1$
-		sql.append(tablePrefix(Mission.class) + ".start_datetime, "); //$NON-NLS-1$
-		sql.append(tablePrefix(Mission.class) + ".end_datetime, "); //$NON-NLS-1$
+		sql.append(tablePrefix(Mission.class) + ".start_date, "); //$NON-NLS-1$
+		sql.append(tablePrefix(Mission.class) + ".end_date, "); //$NON-NLS-1$
 		
 		sql.append(tablePrefix(MissionDay.class) + ".uuid, "); //$NON-NLS-1$
 		

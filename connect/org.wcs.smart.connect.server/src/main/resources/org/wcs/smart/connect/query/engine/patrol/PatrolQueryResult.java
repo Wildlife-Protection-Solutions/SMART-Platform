@@ -26,6 +26,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 import org.hibernate.Session;
@@ -33,10 +34,14 @@ import org.hibernate.jdbc.ReturningWork;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
 import org.locationtech.jts.io.WKBReader;
+import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.model.SimpleQuery;
+import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Result set of patrol waypoint queries.
@@ -48,9 +53,11 @@ public class PatrolQueryResult extends AbstractDbFeatureResultSet {
 
 	private PsqlPatrolEngine engine;
 	private WKBReader reader = new WKBReader();
+	private boolean includeUuids;
 	
-	public PatrolQueryResult(PsqlPatrolEngine engine, int itemCnt){
+	public PatrolQueryResult(PsqlPatrolEngine engine, boolean includeUuids, int itemCnt){
 		this.engine = engine;
+		this.includeUuids = includeUuids;
 		setItemCount(itemCnt);
 	}
 
@@ -72,6 +79,24 @@ public class PatrolQueryResult extends AbstractDbFeatureResultSet {
 						ResultSet.CONCUR_READ_ONLY).executeQuery(engine.getDataQuery(null));
 			}
 		});
+	}
+	
+	@Override
+	public List<QueryColumn> getQueryColumns(SimpleQuery query, Locale l, Session session, IProjectionProvider prj){
+		List<QueryColumn> cols = super.getQueryColumns(query, l, session, prj);
+		if (!includeUuids) return cols;
+		
+		QueryColumn caUuidCol = new QueryColumn(getConservationAreaColumnName(l), CA_UUID_COL_KEY, QueryColumn.ColumnType.STRING) {
+			@Override
+			public QueryColumn clone() { return this; }
+			@Override
+			public Object getValue(IResultItem item) {
+				if (((PatrolQueryResultItem)item).getConservationAreaUuid() == null) return ""; //$NON-NLS-1$
+				return UuidUtils.uuidToString( ((PatrolQueryResultItem)item).getConservationAreaUuid());
+			}
+		};
+		cols.add(caUuidCol);
+		return cols;
 	}
 	
 	/**
@@ -116,7 +141,8 @@ public class PatrolQueryResult extends AbstractDbFeatureResultSet {
 	protected PatrolQueryResultItem asQueryResultItem(ResultSet rs, Session session)
 			throws SQLException {
 		PatrolQueryResultItem it = new PatrolQueryResultItem();
-		//UUID cauuid = (UUID)rs.getObject("r_p_ca_uuid"); //$NON-NLS-1$
+		UUID cauuid = (UUID)rs.getObject("r_p_ca_uuid"); //$NON-NLS-1$
+		it.setConservationAreaUuid(cauuid); 
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
 		it.setPatrolUuid((UUID)rs.getObject("r_p_uuid")); //$NON-NLS-1$

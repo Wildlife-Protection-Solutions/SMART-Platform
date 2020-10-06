@@ -64,6 +64,7 @@ public class IntelObservationResultItem implements IGeometryResultItem {
 	
 	private String caId;
 	private String caName;
+	private UUID caUuid;
 	
 	public IntelObservationResultItem(){
 		
@@ -78,6 +79,14 @@ public class IntelObservationResultItem implements IGeometryResultItem {
 		return this.profileName;
 	}
 
+	public void setConservationAreaUuid(UUID uuid) {
+		this.caUuid = uuid;
+	}
+	
+	public UUID getConservationAreaUuid() {
+		return this.caUuid;
+	}
+	
 	public void setConservationAreaId(String caId) {
 		this.caId = caId;
 	}

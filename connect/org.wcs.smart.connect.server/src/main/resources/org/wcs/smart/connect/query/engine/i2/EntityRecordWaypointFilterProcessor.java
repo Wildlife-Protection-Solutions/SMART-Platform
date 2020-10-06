@@ -108,12 +108,13 @@ public class EntityRecordWaypointFilterProcessor {
 					
 			StringBuilder tableColumns = new StringBuilder();
 			tableColumns.append("entity_uuid uuid, date_modified timestamp, entity_type_key varchar(128)"); //$NON-NLS-1$
-			tableColumns.append(",ca_id varchar(8), ca_name varchar(256), profile_uuid uuid"); //$NON-NLS-1$
+			tableColumns.append(",ca_uuid uuid, ca_id varchar(8), ca_name varchar(256), profile_uuid uuid"); //$NON-NLS-1$
 
 			List<String> tableColumnNames = new ArrayList<>();
 			tableColumnNames.add("entity_uuid"); //$NON-NLS-1$
 			tableColumnNames.add("date_modified"); //$NON-NLS-1$
 			tableColumnNames.add("entity_type_key"); //$NON-NLS-1$
+			tableColumnNames.add("ca_uuid"); //$NON-NLS-1$
 			tableColumnNames.add("ca_id"); //$NON-NLS-1$
 			tableColumnNames.add("ca_name"); //$NON-NLS-1$
 			tableColumnNames.add("profile_uuid"); //$NON-NLS-1$

@@ -129,6 +129,7 @@ public class PsqlErSummaryEngine extends AbstractQueryEngine implements ISummary
 	private SurveySummaryQuery query ;
 	
 	private HashSet<Class<?>> usedTables;
+	private boolean includeUuids;
 	
 	@Override
 	public boolean canExecute(String querytype) {
@@ -173,6 +174,7 @@ public class PsqlErSummaryEngine extends AbstractQueryEngine implements ISummary
 		query = (SurveySummaryQuery) lquery;
 		session = (Session) parameters.get(Session.class.getName());
 		locale = (Locale)parameters.get(Locale.class.getName());
+		includeUuids = getIncludeUuids(parameters);
 		
 		valueTable = createTempTableName();
 		rateTable = createTempTableName();
@@ -1463,7 +1465,7 @@ public class PsqlErSummaryEngine extends AbstractQueryEngine implements ISummary
 		parseConservationAreaFilterInternal(query);
 		SurveyDesignFilter sdFilter = SurveyDesignFilter.createStringFilter(((SurveySummaryQuery)query).getSurveyDesign());
 		
-		SummaryItemLabelProvider summary = new SummaryItemLabelProvider(l, session, caFilter, sdFilter); 
+		SummaryItemLabelProvider summary = new SummaryItemLabelProvider(l, session, caFilter, includeUuids, sdFilter); 
 
 		// value headers
 		ValuePart vp = query.getQueryDefinition().getValuePart();
@@ -1528,8 +1530,8 @@ public class PsqlErSummaryEngine extends AbstractQueryEngine implements ISummary
 		sql.append(tablePrefix(Survey.class) + ".end_date, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Mission.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Mission.class) + ".id, "); //$NON-NLS-1$
-		sql.append(tablePrefix(Mission.class) + ".start_datetime, "); //$NON-NLS-1$
-		sql.append(tablePrefix(Mission.class) + ".end_datetime, "); //$NON-NLS-1$
+		sql.append(tablePrefix(Mission.class) + ".start_date, "); //$NON-NLS-1$
+		sql.append(tablePrefix(Mission.class) + ".end_date, "); //$NON-NLS-1$
 		sql.append(tablePrefix(MissionDay.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(MissionDay.class) + ".mission_day, "); //$NON-NLS-1$
 		

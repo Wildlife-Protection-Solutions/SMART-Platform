@@ -79,6 +79,17 @@ public class ErWaypointQueryResult extends ErSurveyQueryResultSet implements IPa
 		};
 		cols.add(wpUuidCol);
 		
+		QueryColumn caUuidCol = new QueryColumn(getConservationAreaColumnName(l), CA_UUID_COL_KEY, QueryColumn.ColumnType.STRING) {
+			@Override
+			public QueryColumn clone() { return this; }
+			@Override
+			public Object getValue(IResultItem item) {
+				if (((SurveyQueryResultItem)item).getConservationAreaUuid() == null) return ""; //$NON-NLS-1$
+				return UuidUtils.uuidToString( ((SurveyQueryResultItem)item).getConservationAreaUuid());
+			}
+		};
+		cols.add(caUuidCol);
+		
 		return cols;
 	}
 
@@ -165,6 +176,7 @@ public class ErWaypointQueryResult extends ErSurveyQueryResultSet implements IPa
 
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
+		it.setConservationAreaUuid((UUID)rs.getObject("ca_uuid")); //$NON-NLS-1$
 		
 		it.setSurveyDesign(rs.getString("surveydesign_name")); //$NON-NLS-1$
 		it.setSurveyDesignEnd(rs.getDate("surveydesign_enddate") == null ? null : rs.getDate("surveydesign_enddate").toLocalDate() ); //$NON-NLS-1$ //$NON-NLS-2$

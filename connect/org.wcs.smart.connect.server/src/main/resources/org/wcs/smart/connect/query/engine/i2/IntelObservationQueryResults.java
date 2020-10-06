@@ -206,6 +206,7 @@ public class IntelObservationQueryResults  implements IQueryResult, IConnectPage
 		
 		item.setConservationAreaId((String)rowData[columnNameToIndex.get("ca_id")]); //$NON-NLS-1$
 		item.setConservationAreaName((String)rowData[columnNameToIndex.get("ca_name")]); //$NON-NLS-1$
+		item.setConservationAreaUuid((UUID)rowData[columnNameToIndex.get("ca_uuid")]); //$NON-NLS-1$
 		
 		item.setObservationUuid(asUuid(rowData[columnNameToIndex.get("observation_uuid")])); //$NON-NLS-1$
 		item.setLocationUuid(asUuid(rowData[columnNameToIndex.get("location_uuid")])); //$NON-NLS-1$

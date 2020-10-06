@@ -575,6 +575,7 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
 		EntityQueryResultItem it = new EntityQueryResultItem();
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
+		it.setConservationAreaUuid(UuidUtils.byteToUUID(rs.getBytes("p_ca_uuid"))); //$NON-NLS-1$
 		it.setSourceId(rs.getString("wp_source")); //$NON-NLS-1$
 		it.setWaypointUuid(UuidUtils.byteToUUID(rs.getBytes("wp_uuid"))); //$NON-NLS-1$
 		it.setWaypointId(rs.getInt("wp_id")); //$NON-NLS-1$

@@ -73,6 +73,7 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IAdaptable{
 	
 	private String caId;
 	private String caName;
+	private UUID caUuid;
 	
 	private String patrolId;
 	private LocalDate patrolStartDate;
@@ -607,6 +608,14 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IAdaptable{
 	}
 	
 	/**
+	 * Sets the ca uuid
+	 * @param caId
+	 */
+	public void setConservationAreaUuid(UUID uuid) {
+		this.caUuid = uuid;
+	}
+	
+	/**
 	 * Sets the ca id
 	 * @param caId
 	 */
@@ -635,6 +644,14 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IAdaptable{
 	 */
 	public String getConservationAreaName(){
 		return this.caName;
+	}
+	
+	/**
+	 * the conservation area uuid
+	 * @return
+	 */
+	public UUID getConservationAreaUuid(){
+		return this.caUuid;
 	}
 	
 	/**

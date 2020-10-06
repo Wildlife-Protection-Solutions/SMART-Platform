@@ -142,6 +142,7 @@ public class IntelEntityRecordQueryResults implements IConnectPagedQueryResultSe
 
 		item.setConservationAreaId((String)rowData[columnNameToIndex.get("ca_id")]); //$NON-NLS-1$
 		item.setConservationAreaName((String)rowData[columnNameToIndex.get("ca_name")]); //$NON-NLS-1$
+		item.setConservationAreaUuid((UUID)rowData[columnNameToIndex.get("ca_uuid")]); //$NON-NLS-1$
 		
 		UUID puuid = asUuid(rowData[columnNameToIndex.get("profile_uuid")]); //$NON-NLS-1$
 		String name = session.get(IntelProfile.class, puuid).getName();

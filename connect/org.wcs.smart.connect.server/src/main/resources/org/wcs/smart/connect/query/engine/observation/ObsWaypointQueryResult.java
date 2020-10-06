@@ -81,6 +81,17 @@ public class ObsWaypointQueryResult extends AbstractDbFeatureResultSet implement
 		};
 		cols.add(wpUuidCol);
 		
+		QueryColumn caUuidCol = new QueryColumn(getConservationAreaColumnName(l), CA_UUID_COL_KEY, QueryColumn.ColumnType.STRING) {
+			@Override
+			public QueryColumn clone() { return this; }
+			@Override
+			public Object getValue(IResultItem item) {
+				if (((ObservationQueryResultItem)item).getConservationAreaUuid() == null) return ""; //$NON-NLS-1$
+				return UuidUtils.uuidToString( ((ObservationQueryResultItem)item).getConservationAreaUuid());
+			}
+		};
+		cols.add(caUuidCol);
+		
 		return cols;
 	}
 	
@@ -157,6 +168,7 @@ public class ObsWaypointQueryResult extends AbstractDbFeatureResultSet implement
 	protected void setFields(ObservationQueryResultItem it, ResultSet rs) throws SQLException{
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
+		it.setConservationAreaUuid((UUID)rs.getObject("p_ca_uuid")); //$NON-NLS-1$
 		it.setSourceId(rs.getString("wp_source")); //$NON-NLS-1$
 		it.setWaypointUuid((UUID)rs.getObject("wp_uuid")); //$NON-NLS-1$
 		it.setWaypointId(rs.getInt("wp_id")); //$NON-NLS-1$

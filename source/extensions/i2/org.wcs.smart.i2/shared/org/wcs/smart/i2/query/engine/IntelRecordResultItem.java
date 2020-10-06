@@ -56,6 +56,7 @@ public class IntelRecordResultItem implements IResultItem {
 	
 	private String caId;
 	private String caName;
+	private UUID caUuid;
 	
 	public IntelRecordResultItem(){
 		
@@ -88,6 +89,13 @@ public class IntelRecordResultItem implements IResultItem {
 	
 	public String getConservationAreaName() {
 		return this.caName;
+	}
+	
+	public UUID getConservationAreaUuid() {
+		return this.caUuid;
+	}
+	public void setConservationAreaUuid(UUID uuid) {
+		this.caUuid = uuid;
 	}
 	
 	public void setRecordSource(UUID uuid, String name) {

@@ -130,6 +130,7 @@ public class IntelRecordQueryResults implements IConnectPagedQueryResultSet {
 		ConservationArea ca = session.get(ConservationArea.class, caUuid);
 		item.setConservationAreaId(ca.getId());
 		item.setConservationAreaName(ca.getName());
+		item.setConservationAreaUuid(caUuid);
 		
 		item.setRecordUuid(asUuid(rowData[columnNameToIndex.get("record_uuid")])); //$NON-NLS-1$
 		item.setRecordStatus((String)rowData[columnNameToIndex.get("record_status")]); //$NON-NLS-1$
@@ -185,7 +186,7 @@ public class IntelRecordQueryResults implements IConnectPagedQueryResultSet {
 					value = v.getStringValue();
 					break;
 				case POSITION:
-					value = new Object[] {v.getNumberValue(), v.getNumberValue2()};
+					value = new Double[] {v.getNumberValue(), v.getNumberValue2()};
 					break;
 				}
 			}else if (v.getAttribute().getEntityType() != null){

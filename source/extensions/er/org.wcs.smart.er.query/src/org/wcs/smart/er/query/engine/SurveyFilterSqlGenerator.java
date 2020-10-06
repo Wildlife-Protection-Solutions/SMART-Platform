@@ -412,10 +412,10 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 		
 		if (filter.getDateFieldOption() == MissionStartDateField.INSTANCE){
 			table = engine.tablePrefix(Mission.class);
-			field = "start_datetime"; //$NON-NLS-1$
+			field = "start_date"; //$NON-NLS-1$
 		}else if (filter.getDateFieldOption() == MissionEndDateField.INSTANCE){
 			table = engine.tablePrefix(Mission.class);
-			field = "end_datetime"; //$NON-NLS-1$
+			field = "end_date"; //$NON-NLS-1$
 		}else if (filter.getDateFieldOption() == WaypointDateField.INSTANCE){
 			table = engine.tablePrefix(MissionDay.class);
 			field = "mission_day"; //$NON-NLS-1$

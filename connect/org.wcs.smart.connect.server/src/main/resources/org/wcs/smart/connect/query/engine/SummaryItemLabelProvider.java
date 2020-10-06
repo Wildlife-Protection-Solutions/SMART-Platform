@@ -24,6 +24,7 @@ package org.wcs.smart.connect.query.engine;
 import java.text.Collator;
 import java.text.MessageFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -137,14 +138,21 @@ public class SummaryItemLabelProvider {
 	private ConservationAreaFilter caFilter;
 	private SurveyDesignFilter sdFilter;
 	
-	public SummaryItemLabelProvider(Locale l ,Session s, ConservationAreaFilter caFilter, SurveyDesignFilter sdFilter){
+	private boolean includeUuids;
+	
+	public SummaryItemLabelProvider(Locale l ,Session s, ConservationAreaFilter caFilter,
+			boolean includeUuids,
+			SurveyDesignFilter sdFilter){
 		this.l = l;
 		this.s = s;
 		this.sdFilter = sdFilter;
 		this.caFilter = caFilter;
+		this.includeUuids = includeUuids;
 	}
-	public SummaryItemLabelProvider(Locale l ,Session s, ConservationAreaFilter caFilter){
-		this(l, s, caFilter, null);
+	
+	public SummaryItemLabelProvider(Locale l ,Session s, ConservationAreaFilter caFilter,
+			boolean includeUuids){
+		this(l, s, caFilter, includeUuids, null);
 	}
 	
 	public String getName(IValueItem item){
@@ -545,7 +553,13 @@ public class SummaryItemLabelProvider {
 		
 		List<ConservationArea> cas = QueryFactory.buildQuery(s, ConservationArea.class).list();
 		for (ConservationArea ca : cas){
-			if (!ca.getIsCcaa()) items.add(new ListItem(ca.getUuid(), ca.getNameLabel()));
+			if (!ca.getIsCcaa()) {
+				if (includeUuids) {
+					items.add(new ListItem(ca.getUuid(), UuidUtils.uuidToString(ca.getUuid())));
+				}else {
+					items.add(new ListItem(ca.getUuid(), ca.getNameLabel()));
+				}
+			}
 		}
 		
 		if (filterHkeys != null){
@@ -595,7 +609,7 @@ public class SummaryItemLabelProvider {
 
 				List<?> data = q.list();
 				if (data != null && data.size() >= 1 && data.get(0) != null) {
-					startdate = ((java.sql.Timestamp) data.get(0)).toLocalDateTime().toLocalDate();
+					startdate = ((LocalDateTime) data.get(0)).toLocalDate();
 				}
 			} else {
 				LocalDate[] d = dateFilter.getDates();
@@ -650,7 +664,7 @@ public class SummaryItemLabelProvider {
 
 				List<?> data = q.list();
 				if (data != null && data.size() >= 1 && data.get(0) != null) {
-					startdate = ((java.sql.Timestamp) data.get(0)).toLocalDateTime().toLocalDate();
+					startdate = ((LocalDateTime) data.get(0)).toLocalDate();
 				}
 			} else {
 				LocalDate[] d = dateFilter.getDates();
@@ -695,7 +709,7 @@ public class SummaryItemLabelProvider {
 
 				List<?> data = q.list();
 				if (data != null && data.size() >= 1 && data.get(0) != null) {
-					startdate = ((java.sql.Timestamp) data.get(0)).toLocalDateTime().toLocalDate();
+					startdate = ((LocalDateTime)data.get(0)).toLocalDate();
 				}
 			} else {
 				LocalDate[] d = dateFilter.getDates();
@@ -890,7 +904,11 @@ public class SummaryItemLabelProvider {
 					}
 				}else if (object instanceof ConservationArea){
 					ConservationArea ca = (ConservationArea)object;
-					results.add(new ListItem(ca.getUuid(), ca.getNameLabel()));
+					if (includeUuids) {
+						results.add(new ListItem(ca.getUuid(), UuidUtils.uuidToString(ca.getUuid())));
+					}else {
+						results.add(new ListItem(ca.getUuid(), ca.getNameLabel()));
+					}
 				}else if (object instanceof ListItem){
 					results.add((ListItem)object);
 				}

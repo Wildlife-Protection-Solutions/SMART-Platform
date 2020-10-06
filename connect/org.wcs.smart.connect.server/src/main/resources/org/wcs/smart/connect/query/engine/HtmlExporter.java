@@ -93,7 +93,7 @@ public class HtmlExporter {
 	 */
 	public void exportResults(SimpleQuery query, AbstractDbFeatureResultSet results, Session session) throws Exception{
 		IProjectionProvider prj = ProjectionUtils.INSTANCE.createProjectionProvider(session, query.getConservationArea());
-		List<QueryColumn> cols = query.computeQueryColumns(l, session, prj);
+		List<QueryColumn> cols = results.getQueryColumns(query, l, session, prj);
 		
 		try{
 			printHeader(query.getName());
@@ -207,7 +207,7 @@ public class HtmlExporter {
 		try {
 
 			IProjectionProvider prj = ProjectionUtils.INSTANCE.createProjectionProvider(session, query.getConservationArea());
-			List<QueryColumn> cols = query.computeQueryColumns(l, session, prj);
+			List<QueryColumn> cols = results.getQueryColumns(query, l, session, prj);
 
 			for (int i = 0; i < cols.size(); i++) {
 				htmlText.append("<th style='border: solid 1px grey;'>" + cols.get(i).getName() + "</th>");

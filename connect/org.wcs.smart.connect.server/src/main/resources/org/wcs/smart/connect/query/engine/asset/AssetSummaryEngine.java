@@ -122,6 +122,8 @@ public class AssetSummaryEngine extends AssetQueryEngine implements ISummaryEngi
 	private Session session;
 	private AssetSummaryQuery query;
 	
+	private boolean includeUuids = false;
+	
 	@Override
 	public boolean canExecute(String querytype) {
 		return AssetSummaryQuery.ASSET_SUMMARY_KEY.equals(querytype);
@@ -165,6 +167,7 @@ public class AssetSummaryEngine extends AssetQueryEngine implements ISummaryEngi
 		query = (AssetSummaryQuery) lquery;
 		session = (Session) parameters.get(Session.class.getName());
 		locale = (Locale)parameters.get(Locale.class.getName());
+		this.includeUuids = getIncludeUuids(parameters);
 		
 		SumQueryDefinition def = null;
 		try{
@@ -947,15 +950,22 @@ public class AssetSummaryEngine extends AssetQueryEngine implements ISummaryEngi
 			}else if (gb instanceof DateGroupBy){
 				IDateGroupBy op = ((DateGroupBy)gb).getOption();
 				if (op.getClass().equals(DayDateGroupBy.class)){
-					groupByInnerSql.append("wp_date as wp_date_" + itemcnt); //$NON-NLS-1$
-					groupBySql.append("wp_date_" + itemcnt); //$NON-NLS-1$
+					groupBySql.append("datePart_" + itemcnt); //$NON-NLS-1$
+					groupByInnerSql.append("wp_date as datePart_" + itemcnt); //$NON-NLS-1$
 				}else if (op.getClass().equals(MonthDateGroupBy.class)){
 					groupBySql.append("datePart_" + itemcnt); //$NON-NLS-1$
-					groupByInnerSql.append("trim(cast(month(wp_date) as char(2))) || '/' || cast(year(wp_date) as char(4)) as datePart_" + itemcnt); //$NON-NLS-1$
+					
+					groupByInnerSql.append("trim(cast(date_part('month', wp_date) as char(2)))"); //$NON-NLS-1$
+					groupByInnerSql.append(" || '/' || "); //$NON-NLS-1$
+					groupByInnerSql.append("trim(cast(date_part('year', wp_date) as char(4)))"); //$NON-NLS-1$
+					groupByInnerSql.append(" as datePart_"); //$NON-NLS-1$
+					groupByInnerSql.append( itemcnt);
 				}else if (op.getClass().equals(YearDateGroupBy.class)){
 					groupBySql.append("datePart_" + itemcnt); //$NON-NLS-1$
-					groupByInnerSql.append("YEAR(wp_date) as datePart_" + itemcnt); //$NON-NLS-1$
+					
+					groupByInnerSql.append("date_part('year', wp_date) as datePart_" + itemcnt); //$NON-NLS-1$
 				}
+				
 			}else if (gb instanceof CategoryGroupBy){
 				CategoryGroupBy op = ((CategoryGroupBy)gb);
 
@@ -1053,7 +1063,7 @@ public class AssetSummaryEngine extends AssetQueryEngine implements ISummaryEngi
 			SummaryQueryResult results, Locale l, Session session) throws Exception{
 		parseConservationAreaFilterInternal(query);
 		// value headers
-		SummaryItemLabelProvider summary = new SummaryItemLabelProvider(l, session, caFilter); 
+		SummaryItemLabelProvider summary = new SummaryItemLabelProvider(l, session, caFilter, includeUuids); 
 
 		ValuePart vp = query.getQueryDefinition().getValuePart();
 		for (IValueItem item : vp.getValueItems()){

@@ -194,7 +194,7 @@ public class QueryApi extends HttpServlet{
 			@Parameter(description="set this to \"descending\" (or \"desc\") to get reverse order, otherwise you will get ascending order by default.  eg: &sortdirection=descending \r\n" + 
 					"	 * 			This parameter will be ignored if provided without a sortcolumn.") @QueryParam("sortdirection") String sortdirection,
 			@Parameter(description="the requested output projection SRID. The default is 4326 (WGS84, standard Lat/long coordinates). This parameter is ignored if the 'format' is not geojson or shp. (Note: for google map's projection you must use the official srid of 3857, 900913 doesn't work.") @QueryParam("srid") String srid,
-			@Parameter(description="optional; if \"true\" then the observation uuid and waypoint uuid are include in the results if appropriate for the query type; otherwise this parameter is ignored") @QueryParam("includeuuids") String includeuuids) throws SQLException{
+			@Parameter(description="optional; if \"true\" then the observation uuid, waypoint uuid and conservation area uuid are include in the results if appropriate for the query type; for summary queries that include a group by Conservation Area column, the value for the Conservation Area will be the uuid instead of the name/id when includeuuids is true") @QueryParam("includeuuids") String includeuuids) throws SQLException{
 
 		UUID uuid = UuidUtils.stringToUuid(queryuuid);
 		QueryApi.Direction sortDirectionInt = QueryApi.Direction.UP;
@@ -313,7 +313,9 @@ public class QueryApi extends HttpServlet{
 		}
 	}
 	
-	private QueryResult executeCoreQuery(Query query, String cafilter, DateFilter df, String srid, String format, String delimiter, String sortColumnName, QueryApi.Direction sortDirectionInt, boolean includeUuids, Session s) throws Exception {
+	private QueryResult executeCoreQuery(Query query, String cafilter, DateFilter df, 
+			String srid, String format, String delimiter, String sortColumnName, 
+			QueryApi.Direction sortDirectionInt, boolean includeUuids, Session s) throws Exception {
 		IQueryResult result = null;
 		if (query == null){
 			//query not found

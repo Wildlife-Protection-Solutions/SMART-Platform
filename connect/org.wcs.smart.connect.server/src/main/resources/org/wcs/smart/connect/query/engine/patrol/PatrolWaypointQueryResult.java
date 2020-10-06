@@ -71,6 +71,7 @@ public class PatrolWaypointQueryResult extends AbstractDbFeatureResultSet implem
 	public List<QueryColumn> getQueryColumns(SimpleQuery query, Locale l, Session session, IProjectionProvider prj){
 		List<QueryColumn> cols = super.getQueryColumns(query, l, session, prj);
 		if (!includeUuids) return cols;
+		
 		QueryColumn wpUuidCol = new QueryColumn(getWaypointColumnName(l), WP_UUID_COL_KEY, QueryColumn.ColumnType.STRING) {
 			@Override
 			public QueryColumn clone() { return this; }
@@ -81,6 +82,17 @@ public class PatrolWaypointQueryResult extends AbstractDbFeatureResultSet implem
 			}
 		};
 		cols.add(wpUuidCol);
+		
+		QueryColumn caUuidCol = new QueryColumn(getConservationAreaColumnName(l), CA_UUID_COL_KEY, QueryColumn.ColumnType.STRING) {
+			@Override
+			public QueryColumn clone() { return this; }
+			@Override
+			public Object getValue(IResultItem item) {
+				if (((PatrolQueryResultItem)item).getConservationAreaUuid() == null) return ""; //$NON-NLS-1$
+				return UuidUtils.uuidToString( ((PatrolQueryResultItem)item).getConservationAreaUuid());
+			}
+		};
+		cols.add(caUuidCol);
 		
 		return cols;
 	}
@@ -147,7 +159,7 @@ public class PatrolWaypointQueryResult extends AbstractDbFeatureResultSet implem
 	}
 	
 	protected void setFields(PatrolQueryResultItem it, ResultSet rs) throws SQLException{
-
+		it.setConservationAreaUuid((UUID)rs.getObject("p_ca_uuid")); //$NON-NLS-1$
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
 		it.setPatrolUuid((UUID)rs.getObject("p_uuid")); //$NON-NLS-1$

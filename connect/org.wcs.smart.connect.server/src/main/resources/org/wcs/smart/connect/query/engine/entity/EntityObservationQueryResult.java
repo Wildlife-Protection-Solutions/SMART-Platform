@@ -89,6 +89,17 @@ public class EntityObservationQueryResult extends AbstractDbFeatureResultSet {
 		cols.add(obsUuidCol);
 		cols.add(wpUuidCol);
 		
+		QueryColumn caUuidCol = new QueryColumn(getConservationAreaColumnName(l), CA_UUID_COL_KEY, QueryColumn.ColumnType.STRING) {
+			@Override
+			public QueryColumn clone() { return this; }
+			@Override
+			public Object getValue(IResultItem item) {
+				if (((EntityQueryResultItem)item).getConservationAreaUuid() == null) return ""; //$NON-NLS-1$
+				return UuidUtils.uuidToString( ((EntityQueryResultItem)item).getConservationAreaUuid());
+			}
+		};
+		cols.add(caUuidCol);
+		
 		return cols;
 	}
 	
@@ -333,6 +344,7 @@ public class EntityObservationQueryResult extends AbstractDbFeatureResultSet {
 	
 	protected EntityQueryResultItem asQueryResultItem(ResultSet rs) throws SQLException{
 		EntityQueryResultItem it = new EntityQueryResultItem();
+		it.setConservationAreaUuid((UUID)rs.getObject("p_ca_uuid")); //$NON-NLS-1$
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
 		it.setSourceId(rs.getString("wp_source")); //$NON-NLS-1$

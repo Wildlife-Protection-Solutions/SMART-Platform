@@ -99,6 +99,16 @@ public class PatrolObservationQueryResult extends AbstractDbFeatureResultSet imp
 		cols.add(obsUuidCol);
 		cols.add(wpUuidCol);
 		
+		QueryColumn caUuidCol = new QueryColumn(getConservationAreaColumnName(l), CA_UUID_COL_KEY, QueryColumn.ColumnType.STRING) {
+			@Override
+			public QueryColumn clone() { return this; }
+			@Override
+			public Object getValue(IResultItem item) {
+				if (((PatrolQueryResultItem)item).getConservationAreaUuid() == null) return ""; //$NON-NLS-1$
+				return UuidUtils.uuidToString( ((PatrolQueryResultItem)item).getConservationAreaUuid());
+			}
+		};
+		cols.add(caUuidCol);
 		return cols;
 	}
 	
@@ -280,7 +290,7 @@ public class PatrolObservationQueryResult extends AbstractDbFeatureResultSet imp
 	}
 	
 	protected void setFields(PatrolQueryResultItem it, ResultSet rs) throws SQLException{
-		
+		it.setConservationAreaUuid((UUID)rs.getObject("p_ca_uuid")); //$NON-NLS-1$
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
 		it.setPatrolUuid((UUID)rs.getObject("p_uuid")); //$NON-NLS-1$

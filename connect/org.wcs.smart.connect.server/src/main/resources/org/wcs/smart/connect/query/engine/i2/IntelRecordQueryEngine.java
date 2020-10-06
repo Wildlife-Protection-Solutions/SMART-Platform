@@ -37,6 +37,7 @@ import org.hibernate.Session;
 import org.hibernate.type.PostgresUUIDType;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.i18n.Messages;
+import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.security.AdvIntelAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.i2.IIntelQueryEngine;
@@ -120,7 +121,18 @@ public class IntelRecordQueryEngine implements IIntelQueryEngine {
 		
 		Integer cnt = ((BigInteger) session.createNativeQuery("SELECT count(*) FROM " + data).uniqueResult()).intValue(); //$NON-NLS-1$
 		
+		boolean adduuids = false;
+		if (parameters.containsKey(AbstractQueryEngine.INCLUDE_UUID_PARAMETER)) {
+			adduuids = (Boolean)parameters.get(AbstractQueryEngine.INCLUDE_UUID_PARAMETER);
+		}
+		
 		List<IQueryColumn> columns = IntelQueryColumnProvider.getInstance().getQueryColumns(query, itemProvider, locale, session);
+		
+		if (adduuids) {
+			columns.add(new CaUuidColumn(locale));
+			columns.add(new RecordUuidColumn(locale));
+			
+		}
 		
 		IntelRecordQueryResults results = new IntelRecordQueryResults(locale);
 		results.setResultCount(cnt);

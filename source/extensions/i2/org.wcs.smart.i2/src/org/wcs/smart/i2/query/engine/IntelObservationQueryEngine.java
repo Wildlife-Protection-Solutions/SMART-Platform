@@ -273,6 +273,7 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine {
 		String[][] columns = new String[][]{
 			{"observation_uuid", "char(16) for bit data"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"location_uuid", "char(16) for bit data"}, //$NON-NLS-1$ //$NON-NLS-2$
+			{"ca_uuid", "char(16) for bit data"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"ca_id", "varchar(8)"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"ca_name", "varchar(256)"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"record_uuid", "char(16) for bit data"}, //$NON-NLS-1$ //$NON-NLS-2$
@@ -326,7 +327,7 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine {
 		sb = new StringBuilder();
 		sb.append(" INSERT INTO " + newTable + " "); //$NON-NLS-1$ //$NON-NLS-2$
 		sb.append(" ( " + insert.toString() + ")" ); //$NON-NLS-1$ //$NON-NLS-2$
-		sb.append("SELECT o.uuid, a.location_uuid, a.ca_id, a.ca_name, "); //$NON-NLS-1$
+		sb.append("SELECT o.uuid, a.location_uuid, a.ca_uuid, a.ca_id, a.ca_name, "); //$NON-NLS-1$
 		sb.append("r.uuid, r.source_uuid, r.status, r.title, r.profile_uuid, "); //$NON-NLS-1$
 		sb.append("l.id, l.datetime, l.comment, l.geometry, o.category_uuid "); //$NON-NLS-1$
 		sb.append(select);

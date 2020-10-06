@@ -23,9 +23,14 @@ package org.wcs.smart.connect.query.engine;
 
 import java.sql.SQLException;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
 
+import org.hibernate.Session;
+import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.QueryColumn;
 
 /**
@@ -40,4 +45,8 @@ public interface IMemoryTableResultSet<T extends IResultItem> extends IQueryResu
 	public Iterator<T> getIterator() throws SQLException;
 		
 	public String getValueAsString(T item, QueryColumn column) throws SQLException;
+	
+	public default List<QueryColumn> getQueryColumns(SimpleQuery query, Locale l, Session session, IProjectionProvider prj){
+		return query.computeQueryColumns(l, session, prj);
+}
 }

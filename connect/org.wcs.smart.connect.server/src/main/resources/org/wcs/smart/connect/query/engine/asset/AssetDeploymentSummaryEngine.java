@@ -114,6 +114,7 @@ public class AssetDeploymentSummaryEngine extends AssetQueryEngine implements IS
 	private SumQueryDefinition def = null;
 	
 	private String filterTable;
+	private boolean includeUuids;
 	
 	@Override
 	public boolean canExecute(String querytype) {
@@ -157,7 +158,7 @@ public class AssetDeploymentSummaryEngine extends AssetQueryEngine implements IS
 
 		query = (AssetSummaryQuery) lquery;
 		session = (Session) parameters.get(Session.class.getName());
-	
+		this.includeUuids = getIncludeUuids(parameters);
 		
 		try{
 			def = query.getQueryDefinition();
@@ -1035,7 +1036,7 @@ public class AssetDeploymentSummaryEngine extends AssetQueryEngine implements IS
 			SummaryQueryResult results, Locale l, Session session) throws Exception{
 		parseConservationAreaFilterInternal(query);
 		// value headers
-		SummaryItemLabelProvider summary = new SummaryItemLabelProvider(l, session, caFilter); 
+		SummaryItemLabelProvider summary = new SummaryItemLabelProvider(l, session, caFilter, includeUuids); 
 
 		ValuePart vp = query.getQueryDefinition().getValuePart();
 		for (IValueItem item : vp.getValueItems()){

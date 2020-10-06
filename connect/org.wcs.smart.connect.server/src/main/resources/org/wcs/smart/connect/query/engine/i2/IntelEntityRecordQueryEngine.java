@@ -224,7 +224,7 @@ public class IntelEntityRecordQueryEngine implements IIntelQueryEngine {
 				}
 				@Override
 				public String getValue(org.wcs.smart.i2.query.IResultItem item, Locale arg1) {
-					return (String)getValue(item);
+					return getValue(item).toString();
 				}
 				@Override
 				public boolean isVisible() {
@@ -264,6 +264,7 @@ public class IntelEntityRecordQueryEngine implements IIntelQueryEngine {
 			
 			columns.add(entityUuid);
 			columns.add(entityLastModified);
+			columns.add(new CaUuidColumn(locale));
 		}
 		queryResults.setQueryColumns(columns);
 	}
@@ -332,6 +333,7 @@ public class IntelEntityRecordQueryEngine implements IIntelQueryEngine {
 		columnNameToIndex.put("entity_uuid", columnIndex++); //$NON-NLS-1$
 		columnNameToIndex.put("date_modified", columnIndex++); //$NON-NLS-1$
 		columnNameToIndex.put("entity_type_key", columnIndex++); //$NON-NLS-1$
+		columnNameToIndex.put("ca_uuid", columnIndex++); //$NON-NLS-1$
 		columnNameToIndex.put("ca_id", columnIndex++); //$NON-NLS-1$
 		columnNameToIndex.put("ca_name", columnIndex++); //$NON-NLS-1$
 		columnNameToIndex.put("profile_uuid", columnIndex++); //$NON-NLS-1$

@@ -76,6 +76,10 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 		
 	public static final String OBS_UUID_COL_KEY = "obsuuid"; //$NON-NLS-1$
 	public static final String WP_UUID_COL_KEY = "wpuuid"; //$NON-NLS-1$
+	public static final String CA_UUID_COL_KEY = "cauuid"; //$NON-NLS-1$
+	public static final String MISSION_UUID_COL_KEY = "missionuuid"; //$NON-NLS-1$
+	public static final String MISSIONTRACK_UUID_COL_KEY = "missiontrackuuid"; //$NON-NLS-1$
+
 	
 	protected GeometryFactory gf = new GeometryFactory();
 	protected boolean isDisposed = false;
@@ -104,6 +108,16 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 	}
 	
 	/**
+	 * Conservation Area UUID column name
+	 * 
+	 * @param l
+	 * @return
+	 */
+	public String getConservationAreaColumnName(Locale l) {
+		return  Messages.getString("AbstractDbFeatureResultSet.CAColumnName", l); //$NON-NLS-1$
+	}
+	
+	/**
 	 * Observation UUID column name
 	 * 
 	 * @param l
@@ -123,8 +137,8 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 	 * @return
 	 */
 	public List<QueryColumn> getQueryColumns(SimpleQuery query, Locale l, Session session, IProjectionProvider prj){
-			List<QueryColumn> cols = query.computeQueryColumns(l, session, prj);
-			return cols;
+		List<QueryColumn> cols = query.computeQueryColumns(l, session, prj);
+		return cols;
 	}
 	
 	/**

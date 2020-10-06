@@ -125,6 +125,7 @@ public class IntelRecordQueryResults implements IPagedQueryResultSet {
 		ConservationArea ca = session.get(ConservationArea.class, caUuid);
 		item.setConservationAreaId(ca.getId());
 		item.setConservationAreaName(ca.getName());
+		item.setConservationAreaUuid(caUuid);
 		
 		item.setRecordUuid(asUuid(rowData[columnNameToIndex.get("record_uuid")])); //$NON-NLS-1$
 		item.setRecordStatus((String)rowData[columnNameToIndex.get("record_status")]); //$NON-NLS-1$

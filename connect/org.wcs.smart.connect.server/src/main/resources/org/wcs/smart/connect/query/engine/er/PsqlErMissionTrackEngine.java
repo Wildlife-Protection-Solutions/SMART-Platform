@@ -127,7 +127,7 @@ public class PsqlErMissionTrackEngine extends PsqlErEngine {
 						rs.next();
 						itemcnt = rs.getInt(1);
 					}
-					return new ErMissionTrackQueryResult(PsqlErMissionTrackEngine.this, itemcnt);
+					return new ErMissionTrackQueryResult(PsqlErMissionTrackEngine.this, itemcnt, getIncludeUuids(parameters));
 				}catch (Exception ex){
 					logger.log(Level.SEVERE, ex.getMessage(), ex);
 					throw new SQLException(ex);
@@ -183,8 +183,8 @@ public class PsqlErMissionTrackEngine extends PsqlErEngine {
 		
 		sql.append(tablePrefix(Mission.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Mission.class) + ".id, "); //$NON-NLS-1$
-		sql.append(tablePrefix(Mission.class) + ".start_datetime, "); //$NON-NLS-1$
-		sql.append(tablePrefix(Mission.class) + ".end_datetime, "); //$NON-NLS-1$
+		sql.append(tablePrefix(Mission.class) + ".start_date, "); //$NON-NLS-1$
+		sql.append(tablePrefix(Mission.class) + ".end_date, "); //$NON-NLS-1$
 		
 		sql.append(tablePrefix(MissionDay.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(MissionDay.class) + ".mission_day, "); //$NON-NLS-1$

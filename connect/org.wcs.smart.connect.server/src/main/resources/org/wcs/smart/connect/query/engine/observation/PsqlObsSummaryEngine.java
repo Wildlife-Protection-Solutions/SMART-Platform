@@ -110,6 +110,8 @@ public class PsqlObsSummaryEngine extends AbstractQueryEngine implements ISummar
 	private GroupByPart allGroupByParts;
 	private ValuePart valuePart;
 	
+	private boolean includeUuids = false;
+	
 	@Override
 	public boolean canExecute(String querytype) {
 		return ObservationSummaryQuery.KEY.equals(querytype);
@@ -153,6 +155,7 @@ public class PsqlObsSummaryEngine extends AbstractQueryEngine implements ISummar
 		query = (ObservationSummaryQuery) lquery;
 		session = (Session) parameters.get(Session.class.getName());
 		locale = (Locale)parameters.get(Locale.class.getName());
+		includeUuids = getIncludeUuids(parameters);
 		
 		SumQueryDefinition def = null;
 		try{
@@ -990,7 +993,7 @@ public class PsqlObsSummaryEngine extends AbstractQueryEngine implements ISummar
 			Session session) throws Exception{
 
 		parseConservationAreaFilterInternal(query);
-		SummaryItemLabelProvider summary = new SummaryItemLabelProvider(l, session, caFilter); 
+		SummaryItemLabelProvider summary = new SummaryItemLabelProvider(l, session, caFilter, includeUuids); 
 
 		// value headers
 		ValuePart vp = query.getQueryDefinition().getValuePart();

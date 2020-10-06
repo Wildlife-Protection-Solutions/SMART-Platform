@@ -429,7 +429,7 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine implements IDerb
 			it = new PatrolQueryResultItem();	
 		}
 		
-
+		it.setConservationAreaUuid(UuidUtils.byteToUUID(rs.getBytes("p_ca_uuid"))); //$NON-NLS-1$
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
 		it.setPatrolUuid(UuidUtils.byteToUUID(rs.getBytes("p_uuid"))); //$NON-NLS-1$

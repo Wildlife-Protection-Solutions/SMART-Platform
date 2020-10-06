@@ -26,6 +26,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 import org.hibernate.Session;
@@ -34,10 +35,15 @@ import org.hibernate.jdbc.Work;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
 import org.locationtech.jts.io.WKBReader;
+import org.wcs.smart.IProjectionProvider;
+import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.model.SimpleQuery;
+import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Survey Mission Query Results
@@ -47,13 +53,45 @@ import org.wcs.smart.query.common.engine.IResultItem;
 public class ErMissionQueryResult extends ErSurveyQueryResultSet {
 
 	private WKBReader reader = new WKBReader();
+	private boolean includeUuids = false;
 	
-	public ErMissionQueryResult(PsqlErMissionEngine engine, int itemcnt){
+	public ErMissionQueryResult(PsqlErMissionEngine engine, int itemcnt, boolean includeUuids){
 		super(engine);
 		setItemCount(itemcnt);
+		this.includeUuids = includeUuids;
 	}
 	
 
+	@Override
+	public List<QueryColumn> getQueryColumns(SimpleQuery query, Locale l, Session session, IProjectionProvider prj){
+		List<QueryColumn> cols = super.getQueryColumns(query, l, session, prj);
+		if (!includeUuids) return cols;
+		
+		QueryColumn missionUuidCol = new QueryColumn(Messages.getString("ErMissionQueryResult.MissionUuidColumnName", l), MISSION_UUID_COL_KEY, QueryColumn.ColumnType.STRING) { //$NON-NLS-1$
+			@Override
+			public QueryColumn clone() { return this; }
+			@Override
+			public Object getValue(IResultItem item) {
+				if (((SurveyQueryResultItem)item).getMissionUuid() == null) return ""; //$NON-NLS-1$
+				return UuidUtils.uuidToString( ((SurveyQueryResultItem)item).getMissionUuid());
+			}
+		};
+		cols.add(missionUuidCol);
+		
+		QueryColumn caUuidCol = new QueryColumn(getConservationAreaColumnName(l), CA_UUID_COL_KEY, QueryColumn.ColumnType.STRING) {
+			@Override
+			public QueryColumn clone() { return this; }
+			@Override
+			public Object getValue(IResultItem item) {
+				if (((SurveyQueryResultItem)item).getConservationAreaUuid() == null) return ""; //$NON-NLS-1$
+				return UuidUtils.uuidToString( ((SurveyQueryResultItem)item).getConservationAreaUuid());
+			}
+		};
+		cols.add(caUuidCol);
+		
+		return cols;
+	}
+	
 	/**
 	 * Gets results from the given result set.
 	 * 
@@ -148,6 +186,7 @@ public class ErMissionQueryResult extends ErSurveyQueryResultSet {
 		GeomSurveyQueryResultItem it = new GeomSurveyQueryResultItem();
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
+		it.setConservationAreaUuid((UUID)rs.getObject("ca_uuid")); //$NON-NLS-1$
 		
 		it.setMissionUuid((UUID)rs.getObject("mission_uuid")); //$NON-NLS-1$
 		it.setMissionEnd(rs.getTimestamp("mission_enddate").toLocalDateTime()); //$NON-NLS-1$

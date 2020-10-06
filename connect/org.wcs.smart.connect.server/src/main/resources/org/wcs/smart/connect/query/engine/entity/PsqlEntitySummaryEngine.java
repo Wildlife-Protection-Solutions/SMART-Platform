@@ -106,6 +106,8 @@ public class PsqlEntitySummaryEngine extends AbstractQueryEngine implements ISum
 	private EntitySummaryQuery query;
 	private String valueWaypointTable;
 	
+	private boolean includeUuids = false;
+	
 	
 	@Override
 	public boolean canExecute(String querytype) {
@@ -149,7 +151,8 @@ public class PsqlEntitySummaryEngine extends AbstractQueryEngine implements ISum
 		query = (EntitySummaryQuery) lquery;
 		session = (Session) parameters.get(Session.class.getName());
 		locale = (Locale)parameters.get(Locale.class.getName());
-
+		this.includeUuids = getIncludeUuids(parameters);
+		
 		SumQueryDefinition def = null;
 		try{
 			def = query.getQueryDefinition();
@@ -1078,7 +1081,7 @@ public class PsqlEntitySummaryEngine extends AbstractQueryEngine implements ISum
 	 */
 	public void getHeaderInfo(SummaryQuery query, SummaryQueryResult results,Locale l, Session session) throws Exception{
 		parseConservationAreaFilterInternal(query);
-		SummaryItemLabelProvider summary = new SummaryItemLabelProvider(l, session, caFilter); 
+		SummaryItemLabelProvider summary = new SummaryItemLabelProvider(l, session, caFilter, includeUuids); 
 
 		// value headers
 		ValuePart vp = query.getQueryDefinition().getValuePart();

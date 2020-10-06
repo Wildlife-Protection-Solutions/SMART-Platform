@@ -106,7 +106,7 @@ public class ObservationFilterProcessor {
 				
 		StringBuilder tableColumns = new StringBuilder();
 		tableColumns.append("location_uuid uuid, observation_uuid uuid"); //$NON-NLS-1$
-		tableColumns.append(", ca_id varchar(8), ca_name varchar(256) "); //$NON-NLS-1$
+		tableColumns.append(", ca_uuid uuid, ca_id varchar(8), ca_name varchar(256) "); //$NON-NLS-1$
 
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE "); //$NON-NLS-1$
@@ -119,7 +119,7 @@ public class ObservationFilterProcessor {
 				
 		sql = new StringBuilder();
 		sql.append("INSERT INTO " + obsTable); //$NON-NLS-1$
-		sql.append(" SELECT l.uuid, o.uuid, ca.id, ca.name  FROM smart.i_location l "); //$NON-NLS-1$
+		sql.append(" SELECT l.uuid, o.uuid, ca.uuid, ca.id, ca.name  FROM smart.i_location l "); //$NON-NLS-1$
 		sql.append(" JOIN smart.conservation_area ca on l.ca_uuid = ca.uuid "); //$NON-NLS-1$
 		sql.append(" JOIN smart.i_record r on r.uuid = l.record_uuid "); //$NON-NLS-1$
 		sql.append(" LEFT JOIN smart.i_observation o on l.uuid = o.location_uuid "); //$NON-NLS-1$
