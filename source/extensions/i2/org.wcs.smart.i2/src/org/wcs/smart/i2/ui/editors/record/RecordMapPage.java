@@ -314,6 +314,10 @@ public class RecordMapPage extends SmartMapEditorPart {
 		}
 		Menu dd = new Menu(bar);
 		
+		MenuItem miManual = new MenuItem(dd, SWT.PUSH);
+		miManual.setText(Messages.RecordMapPage_EnterValuesLabel);
+		miManual.addListener(SWT.Selection, e->locationPanel.manuallyAddLocation());
+		
 		MenuItem fromFile = new MenuItem(dd, SWT.PUSH);
 		fromFile.setText(Messages.RecordMapPage_ImportFileMenuItem);
 		fromFile.addListener(SWT.Selection, e->locationPanel.importLocationsFromFile());

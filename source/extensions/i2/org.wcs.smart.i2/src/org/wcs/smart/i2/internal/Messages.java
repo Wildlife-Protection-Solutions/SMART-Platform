@@ -1046,6 +1046,7 @@ public class Messages extends NLS {
 	public static String LocationListComposite_DropNoOptions;
 	public static String LocationListComposite_EditGeomMnuItem;
 	public static String LocationListComposite_EditObsMenuItem;
+	public static String LocationListComposite_EnterValuesLabel;
 	public static String LocationListComposite_EntitiesColumn;
 	public static String LocationListComposite_ErrorTitle;
 	public static String LocationListComposite_GPSError;
@@ -1062,6 +1063,7 @@ public class Messages extends NLS {
 	public static String LocationListComposite_ObsColumn;
 	public static String LocationListComposite_ObsLabel;
 	public static String LocationListComposite_TimeColumn;
+	public static String LocationListComposite_WaypointId;
 	public static String MenuHandler_QueryMenuPostfix;
 	public static String NewEntityDialog_DuplicateIdMsg;
 	public static String NewEntityDialog_EntityTypeLabel;
@@ -1130,6 +1132,16 @@ public class Messages extends NLS {
 	public static String OptionDialog_NoItems;
 	public static String OptionDialog_Title;
 	public static String OtherAttributeGroup_GroupName;
+	public static String PointGeometryDialog_Message;
+	public static String PointGeometryDialog_ParseError;
+	public static String PointGeometryDialog_ParseError1;
+	public static String PointGeometryDialog_ParseErrorInvalidNumbers;
+	public static String PointGeometryDialog_ParseErrorReprojectErr;
+	public static String PointGeometryDialog_ParseErrorX;
+	public static String PointGeometryDialog_ParseErrorY;
+	public static String PointGeometryDialog_ProjectionLabel;
+	public static String PointGeometryDialog_ProjectionRequired;
+	public static String PointGeometryDialog_Title;
 	public static String ProfileDialog_AddEmployeeBtn;
 	public static String ProfileDialog_AllField;
 	public static String ProfileDialog_alltooltip;
@@ -1349,6 +1361,7 @@ public class Messages extends NLS {
 	public static String RecordManager_ErrorTitle;
 	public static String RecordManager_InsufficientPrivileges2;
 	public static String RecordManager_Progress1;
+	public static String RecordMapPage_EnterValuesLabel;
 	public static String RecordMapPage_ImportFileMenuItem;
 	public static String RecordMapPage_ImportGpsMenuItem;
 	public static String RecordMapPage_ImportMenuItem;

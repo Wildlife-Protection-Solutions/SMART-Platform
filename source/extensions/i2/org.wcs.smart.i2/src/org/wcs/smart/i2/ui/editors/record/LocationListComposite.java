@@ -77,6 +77,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.geotools.map.legend.Glyph;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.udig.ui.graphics.AWTSWTImageUtils;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.gpx.GPSBabel;
@@ -91,10 +92,12 @@ import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.DateCellEditor;
 import org.wcs.smart.i2.ui.FileLocationParser;
 import org.wcs.smart.i2.ui.ObservationDialog;
+import org.wcs.smart.i2.ui.PointGeometryDialog;
 import org.wcs.smart.i2.ui.Resources;
 import org.wcs.smart.i2.ui.TransparentInfoDialog;
 import org.wcs.smart.i2.ui.WKTGeometryDialog;
 import org.wcs.smart.i2.ui.dialogs.GPSDeviceSelectionDialog;
+import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -479,20 +482,19 @@ public class LocationListComposite extends Composite{
 					
 				Menu importOp = new Menu(importItem);
 				importItem.setMenu(importOp);
-						
+					
+				MenuItem importManual = new MenuItem(importOp, SWT.PUSH);
+				importManual.setText(Messages.LocationListComposite_EnterValuesLabel);
+				importManual.addListener(SWT.Selection, evt->manuallyAddLocation());
+				
 				MenuItem importFile = new MenuItem(importOp, SWT.PUSH);
 				importFile.setText(Messages.LocationListComposite_ImportFromFileMenu);
-				importFile.addListener(SWT.Selection, evt->{
-					importLocationsFromFile();
-				});
+				importFile.addListener(SWT.Selection, evt->importLocationsFromFile());
+				
 				MenuItem importGps = new MenuItem(importOp, SWT.PUSH);
 				importGps.setText(Messages.LocationListComposite_ImportFromGpsOp);
-				importGps.addListener(SWT.Selection, evt->{
-					importLocationsFromGps();
-				});
-				
+				importGps.addListener(SWT.Selection, evt->importLocationsFromGps());				
 			}
-			
 			
 			@Override
 			public void menuHidden(MenuEvent e) {
@@ -610,6 +612,30 @@ public class LocationListComposite extends Composite{
 			Intelligence2PlugIn.displayLog(ex.getMessage(), ex);
 		}
 		displayInfo(locations[0]);
+	}
+	
+	/**
+	 * manually add enter coordinates for new locations
+	 */
+	public List<IntelLocation> manuallyAddLocation(){
+		
+		List<IntelLocation> locations = new ArrayList<>();
+		PointGeometryDialog dialog = new PointGeometryDialog(getShell());
+		
+		if (dialog.open() != Window.OK) return null;
+		
+		List<Coordinate> points = dialog.getCoordinates();
+		int cnt = editor.getRecord().getLocations().size() + 1;
+		for (Coordinate c : points) {
+			IntelLocation l = new IntelLocation();
+			l.setGeometry(GeometryFactoryProvider.getFactory().createPoint(c));
+			l.setDateTime(editor.getRecord().getPrimaryDate());
+			l.setId(MessageFormat.format(Messages.LocationListComposite_WaypointId, cnt++));
+			locations.add(l);
+		}
+		editor.addNewLocations(locations);
+		displayInfo(locations);
+		return locations;	
 	}
 	
 	private void displayInfo(List<?> items){
