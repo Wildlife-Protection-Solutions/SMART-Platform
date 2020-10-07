@@ -56,9 +56,10 @@
 		<p id="addfromadmin" style="display:none"><select id="admin-selectlist" name="admin-selectlist" class="uielement"></select> <button onClick="addFromAdminList(); return false;" class="button" > <fmt:message key="quicklinks.addtolist"/></button></p>
 		</form>
 		
-		<p id="managemylinks" style="font-size: 0.9em"><br><a class="button" href="javascript:manageMylinks();"><fmt:message key="quicklinks.managemylinks"/></a></p><p><br></p>
-		<p id="manageall" style="display:none; padding-top:10px" ><a class="button" href="javascript:manageQuicklinks();"><fmt:message key="quicklinks.managealllinks"/></a></p>
-	
+		<div id="managemylinks" style="padding-top:20px;">
+		<a class="button" href="javascript:manageMylinks();"><fmt:message key="quicklinks.managemylinks"/></a>
+		<a class="button" href="javascript:manageQuicklinks();"><fmt:message key="quicklinks.managealllinks"/></a>
+		</div>
 	</div>
 <%@include file="footer.jsp" %>
 

@@ -183,6 +183,12 @@ th {
 	font-weight: bold;
 	font-size:1.1em;
 	padding-bottom: 2px;
+	
+    padding: 40px;
+    border: 1px solid #CCCCCC;
+    margin: 2px;
+    display: inline-block;
+    border-radius: 15px;
 }
 
 .label-header{
