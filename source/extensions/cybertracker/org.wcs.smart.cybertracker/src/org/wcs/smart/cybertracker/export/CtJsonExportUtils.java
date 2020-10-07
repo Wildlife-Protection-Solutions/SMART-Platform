@@ -350,6 +350,7 @@ public class CtJsonExportUtils {
 		case ALLOW_SKIP_MANUAL_GPS:
 		case LOCK100:
 		case RESIZE_IMAGE:
+		case INCIDENT_GROUP_UI:
 			return true;
 			
 		case APP_NAME:

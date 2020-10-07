@@ -45,8 +45,16 @@ public class Messages extends NLS {
 	public static String IncidentPackageContribution_NoneOption;
 	public static String IncidentPackageContribution_OriginalDmLabel;
 	public static String IncidentPackageContribution_TaskName;
+	public static String IncidentPackageExporter_TaskName;
+	public static String IncidentPackageManager_CancelMessage;
+	public static String IncidentPackageManager_CancelTitle;
+	public static String IncidentPackageManager_ExportTask;
+	public static String IncidentPackageManager_IncidentPackageDefaultName;
+	public static String IncidentPackageManager_IncidentPackageName;
+	public static String IncidentPackageManager_Progress;
 	public static String IncidentPackageUiContribution_cmRequired;
 	public static String IncidentPackageUiContribution_CmRequired;
+	public static String RemoveCtIncidentJob_UninstallJobName;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

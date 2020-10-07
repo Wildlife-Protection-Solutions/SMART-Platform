@@ -100,7 +100,9 @@ public class CyberTrackerPropertiesProfileOption extends UuidItem {
 		
 		RESIZE_IMAGE,
 		IMAGE_WIDTH,
-		IMAGE_HEIGHT;
+		IMAGE_HEIGHT,
+		
+		INCIDENT_GROUP_UI,
 	}
 
 	public enum TrackTimerOp{

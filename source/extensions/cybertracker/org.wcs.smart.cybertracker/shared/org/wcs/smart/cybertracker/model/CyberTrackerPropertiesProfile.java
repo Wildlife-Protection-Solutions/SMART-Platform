@@ -257,6 +257,14 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	}
 
 	@Transient
+	public boolean getUseIncidentGroupUi() {
+		return getBooleanValue(ProfileOptionID.INCIDENT_GROUP_UI);
+	}
+	public void setUserIncidentGroupUi(boolean useGroupUi) {
+		getOption(ProfileOptionID.INCIDENT_GROUP_UI).setBooleanValue(useGroupUi);
+	}
+	
+	@Transient
 	public boolean isSimpleCamera() {
 		return getBooleanValue(ProfileOptionID.SIMPLE_CAMERA);
 	}
@@ -560,6 +568,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	
 	public Object getDefaultValue(ProfileOptionID option) {
 		switch(option) {
+		case INCIDENT_GROUP_UI: return true;
 		case ALLOW_SKIP_MANUAL_GPS: return allowSkipManualGps;
 		case APP_NAME: return "SMART Mobile Application";  //$NON-NLS-1$
 		case AUTO_NEXT: return autoNext;

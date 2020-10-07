@@ -44,8 +44,6 @@ import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.CtJsonExportUtils;
 import org.wcs.smart.cybertracker.export.IPackageContribution;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
-import org.wcs.smart.cybertracker.model.ICtPackage;
-import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
@@ -127,16 +125,7 @@ public enum SmartCollectPackageExporter {
 					}
 				}
 				
-				
-				for ( MetadataFieldValue fv : localpackage.getMetadataValues()) {
-					if (fv.getMetadataKey().equals(ICtPackage.COLLECT_GROUPS_FIELDKEY)) {
-						ctprofileAdditions.put(SmartCollectPackageManager.INCIDENT_GROUPUI_KEY, fv.getBooleanValue());
-						break;
-					}
-				}
-				
 				Path cmFile = tempDir.resolve(CM_MODEL_FILE);
-				
 				
 				//convert to xml
 				org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xmlModel = CmSmartToXmlConverter.convert(modelToExport, true, sub.split(1));

@@ -60,6 +60,8 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
@@ -120,6 +122,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 	private Button btnShowEdit;
 	private Button btnShowGPS;
 	private Button btnKioskMode;
+	private Button btnUseIncidentGroup;
 	private Button btnSimpleCamera;
 	private Button btnCanPause;
 	private Text txtExitPin;
@@ -155,7 +158,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
     private ControlDecoration exitPinDecoration;
     
     private ControlDecoration sightingAccuracyDecoration;
-    private ControlDecoration TrackAccuracyDecoration;
+    private ControlDecoration trackAccuracyDecoration;
     private ControlDecoration sightingFixCountDecoration;
     private ControlDecoration trackTimerDecoration;
     private ControlDecoration skipButtonTimeoutDecoration;
@@ -201,14 +204,17 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		CTabItem gpsTab = new CTabItem (tabFolder, SWT.NONE);
 		gpsTab.setText (Messages.CyberTrackerPropertiesDialog_1);
 		
-		CTabItem fieldmapTab = new CTabItem (tabFolder, SWT.NONE);
-		fieldmapTab.setText (Messages.CyberTrackerPropertiesDialog_2);
-		
+//		CTabItem fieldmapTab = new CTabItem (tabFolder, SWT.NONE);
+//		fieldmapTab.setText (Messages.CyberTrackerPropertiesDialog_2);
+//		
 		CTabItem themeTab = new CTabItem (tabFolder, SWT.NONE);
 		themeTab.setText (Messages.CyberTrackerPropertiesComposite_ThemeTabName);
 		
 		CTabItem cameraTab = new CTabItem (tabFolder, SWT.NONE);
 		cameraTab.setText (Messages.CyberTrackerPropertiesComposite_PhotoTab);
+		
+		CTabItem classicTab = new CTabItem (tabFolder, SWT.NONE);
+		classicTab.setText (Messages.CyberTrackerPropertiesComposite_ClassicSettings);
 		
 		ScrolledComposite generalScroll = new ScrolledComposite(tabFolder, SWT.V_SCROLL | SWT.H_SCROLL );
 		generalScroll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -219,7 +225,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		Composite generalContainer = new Composite(generalScroll, SWT.None);
 		generalContainer.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true,1,1));
 		generalContainer.setLayout(new GridLayout(2, false));
-		
+		((GridLayout)generalContainer.getLayout()).verticalSpacing = 10;
 		generalScroll.setContent(generalContainer);
 		
 		
@@ -232,20 +238,8 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		Composite gpsContainer = new Composite(gpsScroll, SWT.None);
 		gpsContainer.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true,1,1));
 		gpsContainer.setLayout(new GridLayout(2, false));
+		((GridLayout)gpsContainer.getLayout()).verticalSpacing = 10;
 		gpsScroll.setContent(gpsContainer);
-		
-		
-		ScrolledComposite mapScroll = new ScrolledComposite(tabFolder, SWT.V_SCROLL | SWT.H_SCROLL );
-		mapScroll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		mapScroll.setShowFocusedControl(true);
-		mapScroll.setExpandHorizontal(true);
-		mapScroll.setExpandVertical(true);
-		
-		Composite fieldmapContainer = new Composite(mapScroll, SWT.None);
-		fieldmapContainer.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true,1,1));
-		fieldmapContainer.setLayout(new GridLayout(2, false));
-		mapScroll.setContent(fieldmapContainer);
-		
 		
 		ScrolledComposite themeScroll = new ScrolledComposite(tabFolder, SWT.V_SCROLL | SWT.H_SCROLL );
 		themeScroll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -256,6 +250,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		Composite themeContainer = new Composite(themeScroll, SWT.None);
 		themeContainer.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true,1,1));
 		themeContainer.setLayout(new GridLayout());
+		((GridLayout)themeContainer.getLayout()).verticalSpacing = 10;
 		themeScroll.setContent(themeContainer);
 		
 		ScrolledComposite cameraScroll = new ScrolledComposite(tabFolder, SWT.V_SCROLL | SWT.H_SCROLL );
@@ -266,27 +261,42 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		
 		Composite cameraContainer = new Composite(cameraScroll, SWT.None);
 		cameraContainer.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true,1,1));
-		cameraContainer.setLayout(new GridLayout());
+		cameraContainer.setLayout(new GridLayout(2, false));
+		((GridLayout)cameraContainer.getLayout()).verticalSpacing = 10;
 		cameraScroll.setContent(cameraContainer);
 		
+		ScrolledComposite classicScroll = new ScrolledComposite(tabFolder, SWT.V_SCROLL | SWT.H_SCROLL );
+		classicScroll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		classicScroll.setShowFocusedControl(true);
+		classicScroll.setExpandHorizontal(true);
+		classicScroll.setExpandVertical(true);
+		
+		Composite classicContainer = new Composite(classicScroll, SWT.None);
+		classicContainer.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,true,1,1));
+		classicContainer.setLayout(new GridLayout(2, false));
+		((GridLayout)classicContainer.getLayout()).verticalSpacing = 10;
+		classicScroll.setContent(classicContainer);
 		
 		generalTab.setControl(generalScroll);
 		gpsTab.setControl(gpsScroll);
-		fieldmapTab.setControl(mapScroll);
+//		fieldmapTab.setControl(mapScroll);
 		themeTab.setControl(themeScroll);
 		cameraTab.setControl(cameraScroll);
+		classicTab.setControl(classicScroll);
 		
 		createThemeTab(themeContainer);
 		createCameraTab(cameraContainer);
 		
-		Label lblUseTitleBar = new Label(generalContainer, SWT.NONE);
-		lblUseTitleBar.setText(Messages.CyberTrackerPropertiesDialog_3);
-		lblUseTitleBar.setToolTipText(Messages.CyberTrackerPropertiesDialog_4);
+		Composite llGeneral = SmartUiUtils.createSubHeaderLabel(generalContainer, Messages.CyberTrackerPropertiesComposite_GeneralHeader);
+		llGeneral.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
+		Label lblIncidentGroup = new Label(generalContainer, SWT.NONE);
+		lblIncidentGroup.setText(Messages.CyberTrackerPropertiesComposite_IncidentGroupOp);
+		lblIncidentGroup.setToolTipText(Messages.CyberTrackerPropertiesComposite_IncidentGroupTooltip);
 
-		btnUseTitleBar = new Button(generalContainer, SWT.CHECK);
-		btnUseTitleBar.setToolTipText(Messages.CyberTrackerPropertiesDialog_4);
-		btnUseTitleBar.addSelectionListener(new SelectionListener() {
+		btnUseIncidentGroup = new Button(generalContainer, SWT.CHECK);
+		btnUseIncidentGroup.setToolTipText(lblIncidentGroup.getToolTipText());
+		btnUseIncidentGroup.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				changesMade();
@@ -296,116 +306,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 				// nothing
 			}
 		});
-		controls.add(btnUseTitleBar);
-		
-		Label lblLargeTitles = new Label(generalContainer, SWT.NONE);
-		lblLargeTitles.setText(Messages.CyberTrackerPropertiesDialog_6);
-		lblLargeTitles.setToolTipText(Messages.CyberTrackerPropertiesDialog_7);
-
-		btnLargeTitles = new Button(generalContainer, SWT.CHECK);
-		btnLargeTitles.setToolTipText(Messages.CyberTrackerPropertiesDialog_7);
-		btnLargeTitles.addSelectionListener(new SelectionListener() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				changesMade();
-			}
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// nothing
-			}
-		});
-		controls.add(btnLargeTitles);
-		
-		Label lblLargeScrollBars = new Label(generalContainer, SWT.NONE);
-		lblLargeScrollBars.setText(Messages.CyberTrackerPropertiesDialog_LargeScrollBars);
-		lblLargeScrollBars.setToolTipText(Messages.CyberTrackerPropertiesDialog_LargeScrollBars_Tooltip);
-
-		btnLargeScrollBars = new Button(generalContainer, SWT.CHECK);
-		btnLargeScrollBars.setToolTipText(Messages.CyberTrackerPropertiesDialog_LargeScrollBars_Tooltip);
-		btnLargeScrollBars.addSelectionListener(new SelectionListener() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				changesMade();
-			}
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// nothing
-			}
-		});
-		controls.add(btnLargeScrollBars);
-		
-		Label lblLargeTabs = new Label(generalContainer, SWT.NONE);
-		lblLargeTabs.setText(Messages.CyberTrackerPropertiesDialog_9);
-		lblLargeTabs.setToolTipText(Messages.CyberTrackerPropertiesDialog_10);
-
-		btnLargeTabs = new Button(generalContainer, SWT.CHECK);
-		btnLargeTabs.setToolTipText(Messages.CyberTrackerPropertiesDialog_10);
-		btnLargeTabs.addSelectionListener(new SelectionListener() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				changesMade();
-			}
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// nothing
-			}
-		});
-		controls.add(btnLargeTabs);
-
-
-		Label lblAutoNext = new Label(generalContainer, SWT.NONE);
-		lblAutoNext.setText(Messages.CyberTrackerPropertiesDialog_AutoNext);
-		lblAutoNext.setToolTipText(Messages.CyberTrackerPropertiesDialog_AutoNext_Tooltip);
-
-		btnAutoNext = new Button(generalContainer, SWT.CHECK);
-		btnAutoNext.setToolTipText(Messages.CyberTrackerPropertiesDialog_AutoNext_Tooltip);
-		btnAutoNext.addSelectionListener(new SelectionListener() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				changesMade();
-			}
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// nothing
-			}
-		});
-		controls.add(btnAutoNext);
-		
-		Label lblShowEdit = new Label(generalContainer, SWT.NONE);
-		lblShowEdit.setText(Messages.CyberTrackerPropertiesDialog_ShowEdit1);
-		lblShowEdit.setToolTipText(Messages.CyberTrackerPropertiesDialog_ShowEdit_Tooltip);
-
-		btnShowEdit = new Button(generalContainer, SWT.CHECK);
-		btnShowEdit.setToolTipText(Messages.CyberTrackerPropertiesDialog_ShowEdit_Tooltip);
-		btnShowEdit.addSelectionListener(new SelectionListener() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				changesMade();
-			}
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// nothing
-			}
-		});
-		controls.add(btnShowEdit);
-		
-		Label lblShowGPS = new Label(generalContainer, SWT.NONE);
-		lblShowGPS.setText(Messages.CyberTrackerPropertiesDialog_ShowGPS);
-		lblShowGPS.setToolTipText(Messages.CyberTrackerPropertiesDialog_ShowGPS_Tooltip);
-
-		btnShowGPS = new Button(generalContainer, SWT.CHECK);
-		btnShowGPS.setToolTipText(Messages.CyberTrackerPropertiesDialog_ShowGPS_Tooltip);
-		btnShowGPS.addSelectionListener(new SelectionListener() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				changesMade();
-			}
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// nothing
-			}
-		});
-		controls.add(btnShowGPS);
+		controls.add(btnUseIncidentGroup);
 		
 		Label lblKioskMode = new Label(generalContainer, SWT.NONE);
 		lblKioskMode.setText(Messages.CyberTrackerPropertiesDialog_KioskMode);
@@ -425,23 +326,32 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		});
 		controls.add(btnKioskMode);
 		
-		Label lblSimpleCamera = new Label(generalContainer, SWT.NONE);
-		lblSimpleCamera.setText(Messages.CyberTrackerPropertiesDialog_SimpleCamera);
-		lblSimpleCamera.setToolTipText(Messages.CyberTrackerPropertiesDialog_SimpleCamera_Tooltip);
+		Label lblExitPin = new Label(generalContainer, SWT.NONE);
+		lblExitPin.setText(Messages.CyberTrackerPropertiesDialog_ExitPin);
+		lblExitPin.setToolTipText(Messages.CyberTrackerPropertiesDialog_ExitPin_Tooltip);
 
-		btnSimpleCamera = new Button(generalContainer, SWT.CHECK);
-		btnSimpleCamera.setToolTipText(Messages.CyberTrackerPropertiesDialog_SimpleCamera_Tooltip);
-		btnSimpleCamera.addSelectionListener(new SelectionListener() {
+		txtExitPin = new Text(generalContainer, SWT.BORDER);
+		txtExitPin.setToolTipText(Messages.CyberTrackerPropertiesDialog_ExitPin_Tooltip);
+		txtExitPin.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		txtExitPin.addModifyListener(new ModifyListener() {
 			@Override
-			public void widgetSelected(SelectionEvent e) {
+			public void modifyText(ModifyEvent e) {
+				if (isExitPinValid()) {
+					exitPinDecoration.hide();
+				} else {
+					exitPinDecoration.show();
+				}
 				changesMade();
 			}
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// nothing
-			}
 		});
-		controls.add(btnSimpleCamera);
+		controls.add(txtExitPin);
+		
+		exitPinDecoration = new ControlDecoration(txtExitPin, SWT.LEFT);
+		exitPinDecoration.setImage(FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+		exitPinDecoration.setShowHover(true);
+		exitPinDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesDialog_ExitPinInvalid, CyberTrackerPropertiesProfile.EXIT_PIN_MIN_VALUE, CyberTrackerPropertiesProfile.EXIT_PIN_MAX_VALUE));
+		exitPinDecoration.hide();
 		
 		Label lblCanPause = new Label(generalContainer, SWT.NONE);
 		lblCanPause.setText(Messages.CyberTrackerPropertiesDialog_CanPause);
@@ -479,24 +389,6 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		});
 		controls.add(btnDisableEditing);
 
-		Label lblSdCard= new Label(generalContainer, SWT.NONE);
-		lblSdCard.setText(Messages.CyberTrackerPropertiesDialog_15);
-		lblSdCard.setToolTipText(Messages.CyberTrackerPropertiesDialog_16);
-
-		btnSdCard = new Button(generalContainer, SWT.CHECK);
-		btnSdCard.setToolTipText(Messages.CyberTrackerPropertiesDialog_16);
-		btnSdCard.addSelectionListener(new SelectionListener() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				changesMade();
-			}
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// nothing
-			}
-		});
-		controls.add(btnSdCard);
-		
 		Label lblTestTime= new Label(generalContainer, SWT.NONE);
 		lblTestTime.setText(Messages.CyberTrackerPropertiesDialog_18);
 		lblTestTime.setToolTipText(Messages.CyberTrackerPropertiesDialog_19);
@@ -514,147 +406,9 @@ public class CyberTrackerPropertiesComposite extends Composite {
 			}
 		});
 		controls.add(btnTestTime);
-		
-		Label lblResetOnSync= new Label(generalContainer, SWT.NONE);
-		lblResetOnSync.setText(Messages.CyberTrackerPropertiesDialog_21);
-		lblResetOnSync.setToolTipText(Messages.CyberTrackerPropertiesDialog_22);
 
-		btnResetOnSync = new Button(generalContainer, SWT.CHECK);
-		btnResetOnSync.setToolTipText(Messages.CyberTrackerPropertiesDialog_22);
-		btnResetOnSync.addSelectionListener(new SelectionListener() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				changesMade();
-			}
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// nothing
-			}
-		});
-		controls.add(btnResetOnSync);
-		
-		Label lblResetOnNext= new Label(generalContainer, SWT.NONE);
-		lblResetOnNext.setText(Messages.CyberTrackerPropertiesDialog_24);
-		lblResetOnNext.setToolTipText(Messages.CyberTrackerPropertiesDialog_25);
-
-		btnResetOnNext = new Button(generalContainer, SWT.CHECK);
-		btnResetOnNext.setToolTipText(Messages.CyberTrackerPropertiesDialog_25);
-		btnResetOnNext.addSelectionListener(new SelectionListener() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				changesMade();
-			}
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// nothing
-			}
-		});
-		controls.add(btnResetOnNext);
-		
-		Label lblExitPin = new Label(generalContainer, SWT.NONE);
-		lblExitPin.setText(Messages.CyberTrackerPropertiesDialog_ExitPin);
-		lblExitPin.setToolTipText(Messages.CyberTrackerPropertiesDialog_ExitPin_Tooltip);
-
-		txtExitPin = new Text(generalContainer, SWT.BORDER);
-		txtExitPin.setToolTipText(Messages.CyberTrackerPropertiesDialog_ExitPin_Tooltip);
-		txtExitPin.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		txtExitPin.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				if (isExitPinValid()) {
-					exitPinDecoration.hide();
-				} else {
-					exitPinDecoration.show();
-				}
-				changesMade();
-			}
-		});
-		controls.add(txtExitPin);
-		
-		exitPinDecoration = new ControlDecoration(txtExitPin, SWT.LEFT);
-		exitPinDecoration.setImage(FieldDecorationRegistry.getDefault()
-				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
-		exitPinDecoration.setShowHover(true);
-		exitPinDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesDialog_ExitPinInvalid, CyberTrackerPropertiesProfile.EXIT_PIN_MIN_VALUE, CyberTrackerPropertiesProfile.EXIT_PIN_MAX_VALUE));
-		exitPinDecoration.hide();
-		
-		
-
-		Label lblMaxPhotoCount = new Label(generalContainer, SWT.NONE);
-		lblMaxPhotoCount.setText(Messages.CyberTrackerPropertiesDialog_MaxPhotoCount);
-		lblMaxPhotoCount.setToolTipText(Messages.CyberTrackerPropertiesDialog_MaxPhotoCount_Tooltip);
-
-		txtMaxPhotoCount = new Text(generalContainer, SWT.BORDER);
-		txtMaxPhotoCount.setToolTipText(Messages.CyberTrackerPropertiesDialog_MaxPhotoCount_Tooltip);
-		txtMaxPhotoCount.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		txtMaxPhotoCount.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				if (isMaxPhotoCountValid()) {
-					maxPhotoCountDecoration.hide();
-				} else {
-					maxPhotoCountDecoration.show();
-				}
-				changesMade();
-			}
-
-		});
-		controls.add(txtMaxPhotoCount);
-		
-		maxPhotoCountDecoration = new ControlDecoration(txtMaxPhotoCount, SWT.LEFT);
-		maxPhotoCountDecoration.setImage(FieldDecorationRegistry.getDefault()
-				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
-		maxPhotoCountDecoration.setShowHover(true);
-		maxPhotoCountDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesDialog_MaxPhotoCountInvalid, CyberTrackerPropertiesProfile.MAX_PHOTO_COUNT_MIN_VALUE, CyberTrackerPropertiesProfile.MAX_PHOTO_COUNT_MAX_VALUE));
-		maxPhotoCountDecoration.hide();
-		
-		Label lblDataFormat = new Label(generalContainer, SWT.NONE);
-		lblDataFormat.setText(Messages.CyberTrackerPropertiesComposite_CtDataFormatLbl);
-		lblDataFormat.setToolTipText(Messages.CyberTrackerPropertiesComposite_CtDataFormatTp);
-		
-		cmbDataFormat = new ComboViewer(generalContainer, SWT.READ_ONLY | SWT.DROP_DOWN);
-		cmbDataFormat.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		cmbDataFormat.setContentProvider(ArrayContentProvider.getInstance());
-		cmbDataFormat.setInput(CyberTrackerPropertiesOption.Protocol.values());
-		cmbDataFormat.setLabelProvider(new LabelProvider() {
-			@Override
-			public String getText(Object element) {
-				if (element instanceof CyberTrackerPropertiesOption.Protocol) {
-					return ((CyberTrackerPropertiesOption.Protocol) element).name();
-				}
-				return super.getText(element);
-			}
-		});
-		cmbDataFormat.addSelectionChangedListener(e->changesMade());
-		controls.add(cmbDataFormat.getControl());
-		
-		Label lblSigtingAccuracy = new Label(gpsContainer, SWT.NONE);
-		lblSigtingAccuracy.setText(Messages.CyberTrackerPropertiesDialog_SightingAccuracy);
-		lblSigtingAccuracy.setToolTipText(Messages.CyberTrackerPropertiesDialog_SightingAccuracy_Tooltip);
-
-		txtSightingAccuracy = new Text(gpsContainer, SWT.BORDER);
-		txtSightingAccuracy.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		txtSightingAccuracy.setToolTipText(Messages.CyberTrackerPropertiesDialog_SightingAccuracy_Tooltip);
-		txtSightingAccuracy.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				if (isSigtingAccuracyValid()) {
-					sightingAccuracyDecoration.hide();
-				} else {
-					sightingAccuracyDecoration.show();
-				}
-				changesMade();
-			}
-		});
-		controls.add(txtSightingAccuracy);
-		
-		sightingAccuracyDecoration = new ControlDecoration(txtSightingAccuracy, SWT.LEFT);
-		sightingAccuracyDecoration.setImage(FieldDecorationRegistry.getDefault()
-				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
-		sightingAccuracyDecoration.setShowHover(true);
-		sightingAccuracyDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesDialog_SightingAccuracyIvalid, CyberTrackerPropertiesProfile.SIGHTING_ACCURACY_MIN_VALUE, CyberTrackerPropertiesProfile.SIGHTING_ACCURACY_MAX_VALUE));
-		sightingAccuracyDecoration.hide();
-		
+		llGeneral = SmartUiUtils.createSubHeaderLabel(gpsContainer, Messages.CyberTrackerPropertiesComposite_GPSSettingsHeader);
+		llGeneral.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 
 		Label lblSightingFixCount = new Label(gpsContainer, SWT.NONE);
 		lblSightingFixCount.setText(Messages.CyberTrackerPropertiesDialog_SightingFixCount);
@@ -675,41 +429,16 @@ public class CyberTrackerPropertiesComposite extends Composite {
 			}
 		});
 		controls.add(txtSightingFixCount);
-		
-		Label lblTrackAccuracy = new Label(gpsContainer, SWT.NONE);
-		lblTrackAccuracy.setText(Messages.CyberTrackerPropertiesDialog_27);
-		lblTrackAccuracy.setToolTipText(Messages.CyberTrackerPropertiesDialog_28);
-
-		txtTrackAccuracy = new Text(gpsContainer, SWT.BORDER);
-		txtTrackAccuracy.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		txtTrackAccuracy.setToolTipText(Messages.CyberTrackerPropertiesDialog_28);
-		txtTrackAccuracy.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				if (isTrackAccuracyValid()) {
-					TrackAccuracyDecoration.hide();
-				} else {
-					TrackAccuracyDecoration.show();
-				}
-				changesMade();
-			}
-		});
-		controls.add(txtTrackAccuracy);
-		
-		TrackAccuracyDecoration = new ControlDecoration(txtTrackAccuracy, SWT.LEFT);
-		TrackAccuracyDecoration.setImage(FieldDecorationRegistry.getDefault()
-				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
-		TrackAccuracyDecoration.setShowHover(true);
-		TrackAccuracyDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesDialog_30, CyberTrackerPropertiesProfile.TRACK_ACCURACY_MIN_VALUE, CyberTrackerPropertiesProfile.TRACK_ACCURACY_MAX_VALUE));
-		TrackAccuracyDecoration.hide();
-		
-
 		sightingFixCountDecoration = new ControlDecoration(txtSightingFixCount, SWT.LEFT);
 		sightingFixCountDecoration.setImage(FieldDecorationRegistry.getDefault()
 				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
 		sightingFixCountDecoration.setShowHover(true);
 		sightingFixCountDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesDialog_SightingFixCountInvalid, CyberTrackerPropertiesProfile.SIGHTING_FIX_COUNT_MIN_VALUE, CyberTrackerPropertiesProfile.SIGHTING_FIX_COUNT_MAX_VALUE));
 		sightingFixCountDecoration.hide();
+		
+	
+
+
 		
 		
 		Label lblTrackTimer = new Label(gpsContainer, SWT.NONE);
@@ -790,23 +519,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		
 		
 		
-		Label lblTimeOffset = new Label(gpsContainer, SWT.NONE);
-		lblTimeOffset.setText(Messages.CyberTrackerPropertiesDialog_TimeOffset);
-		lblTimeOffset.setToolTipText(Messages.CyberTrackerPropertiesDialog_TimeOffset_Tooltip);
-
-		timeOffset = new ComboViewer(gpsContainer, SWT.READ_ONLY);
-		timeOffset.getControl().setToolTipText(Messages.CyberTrackerPropertiesDialog_TimeOffset_Tooltip);
-		timeOffset.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		timeOffset.setContentProvider(ArrayContentProvider.getInstance());
-		timeOffset.setLabelProvider(new CyberTrackerGMTLabelProvider());
- 		timeOffset.setInput(CyberTrackerPropertiesProfile.GMT_VALUES);
-		timeOffset.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				changesMade();
-			}
-		});
-		controls.add(timeOffset.getControl());
+		
 		
 		
 		
@@ -829,33 +542,6 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		controls.add(cbProjection.getControl());
 		
 		
-		Label lblUtmZome = new Label(gpsContainer, SWT.NONE);
-		lblUtmZome.setText(Messages.CyberTrackerPropertiesDialog_UtmZone);
-		lblUtmZome.setToolTipText(Messages.CyberTrackerPropertiesDialog_UtmZone_Tooltip);
-
-		txtUtmZome = new Text(gpsContainer, SWT.BORDER);
-		controls.add(txtUtmZome);
-		txtUtmZome.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		txtUtmZome.setToolTipText(Messages.CyberTrackerPropertiesDialog_UtmZone_Tooltip);
-		txtUtmZome.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				if (isUtmZoneValid()) {
-					utmZoneDecoration.hide();
-				} else {
-					utmZoneDecoration.show();
-				}
-				changesMade();
-			}
-		});
-
-		utmZoneDecoration = new ControlDecoration(txtUtmZome, SWT.LEFT);
-		utmZoneDecoration.setImage(FieldDecorationRegistry.getDefault()
-				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
-		utmZoneDecoration.setShowHover(true);
-		utmZoneDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesDialog_UtmZoneInvalid, CyberTrackerPropertiesProfile.UTM_ZONE_MIN_VALUE, CyberTrackerPropertiesProfile.UTM_ZONE_MAX_VALUE));
-		utmZoneDecoration.hide();
-
 		
 
 
@@ -943,14 +629,362 @@ public class CyberTrackerPropertiesComposite extends Composite {
 			}
 		});
 
+
+		createClassicTab(classicContainer);
 		
+		
+		generalScroll.setMinSize(generalContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		classicScroll.setMinSize(classicContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		gpsScroll.setMinSize(gpsContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		themeScroll.setMinSize(themeContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		cameraScroll.setMinSize(cameraContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		
+		tabFolder.setSelection(0);
+	}
+
+	private void createClassicTab(Composite classicContainer) {
+		
+		Composite warn = new Composite(classicContainer, SWT.NONE);
+		warn.setLayout(new GridLayout(2, false));
+		warn.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+
+		Label warnimg = new Label(warn, SWT.NONE);
+		warnimg.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.WARN_ICON));
+		
+		Label txtwarn = new Label(warn, SWT.WRAP);
+		txtwarn.setText(Messages.CyberTrackerPropertiesComposite_ClassicMessage);
+		txtwarn.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)txtwarn.getLayoutData()).widthHint = 150;
+		
+		Composite llGeneral = SmartUiUtils.createSubHeaderLabel(classicContainer, Messages.CyberTrackerPropertiesComposite_ClassicGeneral);
+		llGeneral.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		
+		Label lblUseTitleBar = new Label(classicContainer, SWT.NONE);
+		lblUseTitleBar.setText(Messages.CyberTrackerPropertiesDialog_3);
+		lblUseTitleBar.setToolTipText(Messages.CyberTrackerPropertiesDialog_4);
+	
+		btnUseTitleBar = new Button(classicContainer, SWT.CHECK);
+		btnUseTitleBar.setToolTipText(Messages.CyberTrackerPropertiesDialog_4);
+		btnUseTitleBar.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				changesMade();
+			}
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// nothing
+			}
+		});
+		controls.add(btnUseTitleBar);
+		
+		Label lblLargeTitles = new Label(classicContainer, SWT.NONE);
+		lblLargeTitles.setText(Messages.CyberTrackerPropertiesDialog_6);
+		lblLargeTitles.setToolTipText(Messages.CyberTrackerPropertiesDialog_7);
+
+		btnLargeTitles = new Button(classicContainer, SWT.CHECK);
+		btnLargeTitles.setToolTipText(Messages.CyberTrackerPropertiesDialog_7);
+		btnLargeTitles.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				changesMade();
+			}
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// nothing
+			}
+		});
+		controls.add(btnLargeTitles);
+		
+		Label lblLargeScrollBars = new Label(classicContainer, SWT.NONE);
+		lblLargeScrollBars.setText(Messages.CyberTrackerPropertiesDialog_LargeScrollBars);
+		lblLargeScrollBars.setToolTipText(Messages.CyberTrackerPropertiesDialog_LargeScrollBars_Tooltip);
+
+		btnLargeScrollBars = new Button(classicContainer, SWT.CHECK);
+		btnLargeScrollBars.setToolTipText(Messages.CyberTrackerPropertiesDialog_LargeScrollBars_Tooltip);
+		btnLargeScrollBars.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				changesMade();
+			}
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// nothing
+			}
+		});
+		controls.add(btnLargeScrollBars);
+		
+		Label lblLargeTabs = new Label(classicContainer, SWT.NONE);
+		lblLargeTabs.setText(Messages.CyberTrackerPropertiesDialog_9);
+		lblLargeTabs.setToolTipText(Messages.CyberTrackerPropertiesDialog_10);
+
+		btnLargeTabs = new Button(classicContainer, SWT.CHECK);
+		btnLargeTabs.setToolTipText(Messages.CyberTrackerPropertiesDialog_10);
+		btnLargeTabs.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				changesMade();
+			}
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// nothing
+			}
+		});
+		controls.add(btnLargeTabs);
 
 
-		Label lblDilutionOfPrecision = new Label(gpsContainer, SWT.NONE);
+		Label lblAutoNext = new Label(classicContainer, SWT.NONE);
+		lblAutoNext.setText(Messages.CyberTrackerPropertiesDialog_AutoNext);
+		lblAutoNext.setToolTipText(Messages.CyberTrackerPropertiesDialog_AutoNext_Tooltip);
+
+		btnAutoNext = new Button(classicContainer, SWT.CHECK);
+		btnAutoNext.setToolTipText(Messages.CyberTrackerPropertiesDialog_AutoNext_Tooltip);
+		btnAutoNext.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				changesMade();
+			}
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// nothing
+			}
+		});
+		controls.add(btnAutoNext);
+		
+		Label lblShowEdit = new Label(classicContainer, SWT.NONE);
+		lblShowEdit.setText(Messages.CyberTrackerPropertiesDialog_ShowEdit1);
+		lblShowEdit.setToolTipText(Messages.CyberTrackerPropertiesDialog_ShowEdit_Tooltip);
+
+		btnShowEdit = new Button(classicContainer, SWT.CHECK);
+		btnShowEdit.setToolTipText(Messages.CyberTrackerPropertiesDialog_ShowEdit_Tooltip);
+		btnShowEdit.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				changesMade();
+			}
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// nothing
+			}
+		});
+		controls.add(btnShowEdit);
+		
+		Label lblShowGPS = new Label(classicContainer, SWT.NONE);
+		lblShowGPS.setText(Messages.CyberTrackerPropertiesDialog_ShowGPS);
+		lblShowGPS.setToolTipText(Messages.CyberTrackerPropertiesDialog_ShowGPS_Tooltip);
+
+		btnShowGPS = new Button(classicContainer, SWT.CHECK);
+		btnShowGPS.setToolTipText(Messages.CyberTrackerPropertiesDialog_ShowGPS_Tooltip);
+		btnShowGPS.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				changesMade();
+			}
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// nothing
+			}
+		});
+		controls.add(btnShowGPS);
+		
+		Label lblSimpleCamera = new Label(classicContainer, SWT.NONE);
+		lblSimpleCamera.setText(Messages.CyberTrackerPropertiesDialog_SimpleCamera);
+		lblSimpleCamera.setToolTipText(Messages.CyberTrackerPropertiesDialog_SimpleCamera_Tooltip);
+
+		btnSimpleCamera = new Button(classicContainer, SWT.CHECK);
+		btnSimpleCamera.setToolTipText(Messages.CyberTrackerPropertiesDialog_SimpleCamera_Tooltip);
+		btnSimpleCamera.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				changesMade();
+			}
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// nothing
+			}
+		});
+		controls.add(btnSimpleCamera);
+		
+		Label lblSdCard= new Label(classicContainer, SWT.NONE);
+		lblSdCard.setText(Messages.CyberTrackerPropertiesDialog_15);
+		lblSdCard.setToolTipText(Messages.CyberTrackerPropertiesDialog_16);
+
+		btnSdCard = new Button(classicContainer, SWT.CHECK);
+		btnSdCard.setToolTipText(Messages.CyberTrackerPropertiesDialog_16);
+		btnSdCard.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				changesMade();
+			}
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// nothing
+			}
+		});
+		controls.add(btnSdCard);
+		
+		Label lblResetOnSync= new Label(classicContainer, SWT.NONE);
+		lblResetOnSync.setText(Messages.CyberTrackerPropertiesDialog_21);
+		lblResetOnSync.setToolTipText(Messages.CyberTrackerPropertiesDialog_22);
+
+		btnResetOnSync = new Button(classicContainer, SWT.CHECK);
+		btnResetOnSync.setToolTipText(Messages.CyberTrackerPropertiesDialog_22);
+		btnResetOnSync.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				changesMade();
+			}
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// nothing
+			}
+		});
+		controls.add(btnResetOnSync);
+		
+		Label lblResetOnNext= new Label(classicContainer, SWT.NONE);
+		lblResetOnNext.setText(Messages.CyberTrackerPropertiesDialog_24);
+		lblResetOnNext.setToolTipText(Messages.CyberTrackerPropertiesDialog_25);
+
+		btnResetOnNext = new Button(classicContainer, SWT.CHECK);
+		btnResetOnNext.setToolTipText(Messages.CyberTrackerPropertiesDialog_25);
+		btnResetOnNext.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				changesMade();
+			}
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// nothing
+			}
+		});
+		controls.add(btnResetOnNext);
+		
+		Label lblDataFormat = new Label(classicContainer, SWT.NONE);
+		lblDataFormat.setText(Messages.CyberTrackerPropertiesComposite_CtDataFormatLbl);
+		lblDataFormat.setToolTipText(Messages.CyberTrackerPropertiesComposite_CtDataFormatTp);
+		
+		cmbDataFormat = new ComboViewer(classicContainer, SWT.READ_ONLY | SWT.DROP_DOWN);
+		cmbDataFormat.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		cmbDataFormat.setContentProvider(ArrayContentProvider.getInstance());
+		cmbDataFormat.setInput(CyberTrackerPropertiesOption.Protocol.values());
+		cmbDataFormat.setLabelProvider(new LabelProvider() {
+			@Override
+			public String getText(Object element) {
+				if (element instanceof CyberTrackerPropertiesOption.Protocol) {
+					return ((CyberTrackerPropertiesOption.Protocol) element).name();
+				}
+				return super.getText(element);
+			}
+		});
+		cmbDataFormat.addSelectionChangedListener(e->changesMade());
+		controls.add(cmbDataFormat.getControl());
+		
+		
+		Composite llGps = SmartUiUtils.createSubHeaderLabel(classicContainer, Messages.CyberTrackerPropertiesComposite_ClassicGPS);
+		llGps.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		
+		Label lblSigtingAccuracy = new Label(classicContainer, SWT.NONE);
+		lblSigtingAccuracy.setText(Messages.CyberTrackerPropertiesDialog_SightingAccuracy);
+		lblSigtingAccuracy.setToolTipText(Messages.CyberTrackerPropertiesDialog_SightingAccuracy_Tooltip);
+
+		txtSightingAccuracy = new Text(classicContainer, SWT.BORDER);
+		txtSightingAccuracy.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		txtSightingAccuracy.setToolTipText(Messages.CyberTrackerPropertiesDialog_SightingAccuracy_Tooltip);
+		txtSightingAccuracy.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				if (isSigtingAccuracyValid()) {
+					sightingAccuracyDecoration.hide();
+				} else {
+					sightingAccuracyDecoration.show();
+				}
+				changesMade();
+			}
+		});
+		controls.add(txtSightingAccuracy);
+		sightingAccuracyDecoration = new ControlDecoration(txtSightingAccuracy, SWT.LEFT);
+		sightingAccuracyDecoration.setImage(FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+		sightingAccuracyDecoration.setShowHover(true);
+		sightingAccuracyDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesDialog_SightingAccuracyIvalid, CyberTrackerPropertiesProfile.SIGHTING_ACCURACY_MIN_VALUE, CyberTrackerPropertiesProfile.SIGHTING_ACCURACY_MAX_VALUE));
+		sightingAccuracyDecoration.hide();
+		
+		Label lblTrackAccuracy = new Label(classicContainer, SWT.NONE);
+		lblTrackAccuracy.setText(Messages.CyberTrackerPropertiesDialog_27);
+		lblTrackAccuracy.setToolTipText(Messages.CyberTrackerPropertiesDialog_28);
+
+		txtTrackAccuracy = new Text(classicContainer, SWT.BORDER);
+		txtTrackAccuracy.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		txtTrackAccuracy.setToolTipText(Messages.CyberTrackerPropertiesDialog_28);
+		txtTrackAccuracy.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				if (isTrackAccuracyValid()) {
+					trackAccuracyDecoration.hide();
+				} else {
+					trackAccuracyDecoration.show();
+				}
+				changesMade();
+			}
+		});
+		controls.add(txtTrackAccuracy);
+		
+		trackAccuracyDecoration = new ControlDecoration(txtTrackAccuracy, SWT.LEFT);
+		trackAccuracyDecoration.setImage(FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+		trackAccuracyDecoration.setShowHover(true);
+		trackAccuracyDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesDialog_30, CyberTrackerPropertiesProfile.TRACK_ACCURACY_MIN_VALUE, CyberTrackerPropertiesProfile.TRACK_ACCURACY_MAX_VALUE));
+		trackAccuracyDecoration.hide();
+		
+		Label lblTimeOffset = new Label(classicContainer, SWT.NONE);
+		lblTimeOffset.setText(Messages.CyberTrackerPropertiesDialog_TimeOffset);
+		lblTimeOffset.setToolTipText(Messages.CyberTrackerPropertiesDialog_TimeOffset_Tooltip);
+
+		timeOffset = new ComboViewer(classicContainer, SWT.READ_ONLY);
+		timeOffset.getControl().setToolTipText(Messages.CyberTrackerPropertiesDialog_TimeOffset_Tooltip);
+		timeOffset.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		timeOffset.setContentProvider(ArrayContentProvider.getInstance());
+		timeOffset.setLabelProvider(new CyberTrackerGMTLabelProvider());
+ 		timeOffset.setInput(CyberTrackerPropertiesProfile.GMT_VALUES);
+		timeOffset.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				changesMade();
+			}
+		});
+		controls.add(timeOffset.getControl());
+		
+		Label lblUtmZome = new Label(classicContainer, SWT.NONE);
+		lblUtmZome.setText(Messages.CyberTrackerPropertiesDialog_UtmZone);
+		lblUtmZome.setToolTipText(Messages.CyberTrackerPropertiesDialog_UtmZone_Tooltip);
+
+		txtUtmZome = new Text(classicContainer, SWT.BORDER);
+		controls.add(txtUtmZome);
+		txtUtmZome.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		txtUtmZome.setToolTipText(Messages.CyberTrackerPropertiesDialog_UtmZone_Tooltip);
+		txtUtmZome.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				if (isUtmZoneValid()) {
+					utmZoneDecoration.hide();
+				} else {
+					utmZoneDecoration.show();
+				}
+				changesMade();
+			}
+		});
+
+		utmZoneDecoration = new ControlDecoration(txtUtmZome, SWT.LEFT);
+		utmZoneDecoration.setImage(FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+		utmZoneDecoration.setShowHover(true);
+		utmZoneDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesDialog_UtmZoneInvalid, CyberTrackerPropertiesProfile.UTM_ZONE_MIN_VALUE, CyberTrackerPropertiesProfile.UTM_ZONE_MAX_VALUE));
+		utmZoneDecoration.hide();
+
+		Label lblDilutionOfPrecision = new Label(classicContainer, SWT.NONE);
 		lblDilutionOfPrecision.setText(Messages.CyberTrackerPropertiesComposite_DilutionOfPrecision);
 		lblDilutionOfPrecision.setToolTipText(Messages.CyberTrackerPropertiesComposite_DilutionOfPrecision_Tooltip);
 
-		txtDilutionOfPrecision = new Text(gpsContainer, SWT.BORDER);
+		txtDilutionOfPrecision = new Text(classicContainer, SWT.BORDER);
 		txtDilutionOfPrecision.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		txtDilutionOfPrecision.setToolTipText(Messages.CyberTrackerPropertiesComposite_DilutionOfPrecision_Tooltip);
 		txtDilutionOfPrecision.addModifyListener(new ModifyListener() {
@@ -973,14 +1007,14 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		dilutionOfPrecisionDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesComposite_DilutionOfPrecision_Invalid, CyberTrackerPropertiesProfile.DILUTION_OF_PRECISION_MIN_VALUE, CyberTrackerPropertiesProfile.DILUTION_OF_PRECISION_MAX_VALUE));
 		dilutionOfPrecisionDecoration.hide();
 
-
-
-
-		Label lblMapFilename = new Label(fieldmapContainer, SWT.NONE);
+		Composite llMap = SmartUiUtils.createSubHeaderLabel(classicContainer, Messages.CyberTrackerPropertiesComposite_ClassicMap);
+		llMap.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		
+		Label lblMapFilename = new Label(classicContainer, SWT.NONE);
 		lblMapFilename.setText(Messages.CyberTrackerPropertiesDialog_40);
 		lblMapFilename.setToolTipText(Messages.CyberTrackerPropertiesDialog_41);
 		
-	    Composite fileContainer = new Composite(fieldmapContainer, SWT.NONE);
+	    Composite fileContainer = new Composite(classicContainer, SWT.NONE);
 	    fileContainer.setLayoutData(new GridData(SWT.FILL,SWT.FILL,true,false));
 	    fileContainer.setLayout(new GridLayout(2, false));
 	    		    
@@ -1030,11 +1064,11 @@ public class CyberTrackerPropertiesComposite extends Composite {
 	    });
 		controls.add(btnOpen);
 		
-		Label lblLock100= new Label(fieldmapContainer, SWT.NONE);
+		Label lblLock100= new Label(classicContainer, SWT.NONE);
 		lblLock100.setText(Messages.CyberTrackerPropertiesDialog_45);
 		lblLock100.setToolTipText(Messages.CyberTrackerPropertiesDialog_46);
 
-		btnLock100 = new Button(fieldmapContainer, SWT.CHECK);
+		btnLock100 = new Button(classicContainer, SWT.CHECK);
 		btnLock100.setToolTipText(Messages.CyberTrackerPropertiesDialog_46);
 		btnLock100.addSelectionListener(new SelectionListener() {
 			@Override
@@ -1047,16 +1081,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 			}
 		});	
 		controls.add(btnLock100);
-		
-		
-		generalScroll.setMinSize(generalContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-		mapScroll.setMinSize(fieldmapContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-		gpsScroll.setMinSize(gpsContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-		themeScroll.setMinSize(themeContainer.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-		
-		tabFolder.setSelection(0);
 	}
-
 	private void disposeColor(Label label) {
 		Color c = (Color) label.getData(COLOR_KEY);
 		if (c != null) {
@@ -1093,22 +1118,63 @@ public class CyberTrackerPropertiesComposite extends Composite {
 
 	
 	private void createCameraTab(Composite parent) {
+		
+		Composite llGeneral = SmartUiUtils.createSubHeaderLabel(parent, Messages.CyberTrackerPropertiesComposite_PhotoSettingsHeader);
+		llGeneral.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		
+		Label lblMaxPhotoCount = new Label(parent, SWT.NONE);
+		lblMaxPhotoCount.setText(Messages.CyberTrackerPropertiesDialog_MaxPhotoCount);
+		lblMaxPhotoCount.setToolTipText(Messages.CyberTrackerPropertiesDialog_MaxPhotoCount_Tooltip);
+
+		txtMaxPhotoCount = new Text(parent, SWT.BORDER);
+		txtMaxPhotoCount.setToolTipText(Messages.CyberTrackerPropertiesDialog_MaxPhotoCount_Tooltip);
+		txtMaxPhotoCount.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		txtMaxPhotoCount.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				if (isMaxPhotoCountValid()) {
+					maxPhotoCountDecoration.hide();
+				} else {
+					maxPhotoCountDecoration.show();
+				}
+				changesMade();
+			}
+
+		});
+		controls.add(txtMaxPhotoCount);
+		maxPhotoCountDecoration = new ControlDecoration(txtMaxPhotoCount, SWT.LEFT);
+		maxPhotoCountDecoration.setImage(FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+		maxPhotoCountDecoration.setShowHover(true);
+		maxPhotoCountDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesDialog_MaxPhotoCountInvalid, CyberTrackerPropertiesProfile.MAX_PHOTO_COUNT_MIN_VALUE, CyberTrackerPropertiesProfile.MAX_PHOTO_COUNT_MAX_VALUE));
+		maxPhotoCountDecoration.hide();
+		
+		Label lblResize = new Label(parent, SWT.NONE);
+		lblResize.setText(Messages.CyberTrackerPropertiesComposite_ResizeOp);
+		lblResize.setLayoutData(new GridData(SWT.TOP, SWT.LEFT, false, false));
+
+		Composite temp = new Composite(parent, SWT.NONE);
+		temp.setLayout(new GridLayout(2, false));
+		temp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		btnOpResize = new Button(temp, SWT.CHECK );
+		btnOpResize.setLayoutData(new GridData(SWT.TOP, SWT.LEFT, false, false));
+		
+		Label info = new Label(temp, SWT.WRAP);
+		info.setText(Messages.CyberTrackerPropertiesComposite_ResizeMsg);
+		info.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)info.getLayoutData()).widthHint = 150;
+		
+		//spacer
+		new Label(parent, SWT.NONE);
+
 		Composite part = new Composite(parent, SWT.NONE);
 		part.setLayout(new GridLayout());
 		part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
-		btnOpResize = new Button(part, SWT.CHECK);
-		btnOpResize.setText(Messages.CyberTrackerPropertiesComposite_ResizeOp);
-		
-		Label info = new Label(part, SWT.WRAP);
-		info.setText(Messages.CyberTrackerPropertiesComposite_ResizeMsg);
-		info.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		((GridData)info.getLayoutData()).widthHint = 200;
-		((GridData)info.getLayoutData()).horizontalIndent = 20;
 
 		cmbSizes = new ComboViewer(part, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbSizes.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		((GridData)cmbSizes.getControl().getLayoutData()).horizontalIndent = 20;
+		((GridData)cmbSizes.getControl().getLayoutData()).widthHint = 50;
 		cmbSizes.getControl().setEnabled(false);
 		cmbSizes.setContentProvider(ArrayContentProvider.getInstance());
 		cmbSizes.setLabelProvider(new LabelProvider() {
@@ -1125,7 +1191,6 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		Composite custom = new Composite(part, SWT.NONE);
 		custom.setLayout(new GridLayout(6, false));
 		custom.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		((GridData)custom.getLayoutData()).horizontalIndent = 20;
 		
 		Label l1 = new Label(custom, SWT.NONE);
 		l1.setText(Messages.CyberTrackerPropertiesComposite_WidthOp);
@@ -1180,14 +1245,14 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		});
 		btnOpResize.addListener(SWT.Selection, e->{
 			cmbSizes.getControl().setEnabled(btnOpResize.getSelection());
-			
+			info.setEnabled(btnOpResize.getSelection());
+
 			boolean iscustom = false;
 			if (btnOpResize.getSelection()) {
 				PhotoSize s = (PhotoSize) cmbSizes.getStructuredSelection().getFirstElement();
 				if (s == PhotoSize.CUSTOM) iscustom = true;
 			}
 			for (Control kid : custom.getChildren()) kid.setEnabled(iscustom);
-			
 			validateCamera();
 			changesMade();
 		});
@@ -1201,6 +1266,9 @@ public class CyberTrackerPropertiesComposite extends Composite {
 	
 	
 	private void createThemeTab(Composite parent) {
+		Composite llGeneral = SmartUiUtils.createSubHeaderLabel(parent, Messages.CyberTrackerPropertiesComposite_ThemeHeader);
+		llGeneral.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		
 		Composite part = new Composite(parent, SWT.NONE);
 		part.setLayout(new GridLayout(4, false));
 		part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
@@ -1209,7 +1277,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		ltrack.setText(Messages.CyberTrackerPropertiesComposite_TrackColorOp);
 	
 		btnTrackColor = new Label(part, SWT.NONE);
-		btnTrackColor.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		btnTrackColor.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		((GridData)btnTrackColor.getLayoutData()).widthHint = 30;
 		btnTrackColor.addListener(SWT.Dispose, e->disposeColor(btnTrackColor));		
 		
@@ -1259,15 +1327,15 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		for (ProfileOptionID op : colorops) {
 			Label l = new Label(part, SWT.NONE);
 			switch(op) {
-			case THEME_COLOR_1:l.setText(Messages.CyberTrackerPropertiesComposite_PrimaryColor); break;
-			case THEME_COLOR_2:l.setText(Messages.CyberTrackerPropertiesComposite_AccentColor); break;
-			case THEME_COLOR_3:l.setText(Messages.CyberTrackerPropertiesComposite_ForegroundColor); break;
-			case THEME_COLOR_4:l.setText(Messages.CyberTrackerPropertiesComposite_BackgroundCoor);	break;
+			case THEME_COLOR_1:l.setText(Messages.CyberTrackerPropertiesComposite_PrimaryColor + ":"); break; //$NON-NLS-1$
+			case THEME_COLOR_2:l.setText(Messages.CyberTrackerPropertiesComposite_AccentColor + ":"); break; //$NON-NLS-1$
+			case THEME_COLOR_3:l.setText(Messages.CyberTrackerPropertiesComposite_ForegroundColor + ":"); break; //$NON-NLS-1$
+			case THEME_COLOR_4:l.setText(Messages.CyberTrackerPropertiesComposite_BackgroundCoor + ":");	break; //$NON-NLS-1$
 			default: l.setText(""); //$NON-NLS-1$
 			}
 			
 			Label colorLabel = new Label(part, SWT.NONE);
-			colorLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			colorLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 			((GridData)colorLabel.getLayoutData()).widthHint = 30;
 			colorLabel.addListener(SWT.Dispose, e->disposeColor(colorLabel));		
 			WidgetElement.setCSSClass(colorLabel, "customcolor"); //$NON-NLS-1$
@@ -1338,6 +1406,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		btnShowEdit.setSelection(ctProperties.isShowEdit());
 		btnShowGPS.setSelection(ctProperties.isShowGPS());
 		btnKioskMode.setSelection(ctProperties.isKioskMode());
+		btnUseIncidentGroup.setSelection(ctProperties.getUseIncidentGroupUi());
 		btnSimpleCamera.setSelection(ctProperties.isSimpleCamera());
 		btnCanPause.setSelection(ctProperties.isCanPause());
 		btnDisableEditing.setSelection(ctProperties.isDisableEditing());
@@ -1419,7 +1488,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 			return false;
 		}
 		ctProperties.setAutoNext(btnAutoNext.getSelection());
-		
+		ctProperties.setUserIncidentGroupUi(btnUseIncidentGroup.getSelection());
 		ctProperties.setLargeScrollBars(btnLargeScrollBars.getSelection());
 		ctProperties.setKioskMode(btnKioskMode.getSelection());
 		ctProperties.setSimpleCamera(btnSimpleCamera.getSelection());

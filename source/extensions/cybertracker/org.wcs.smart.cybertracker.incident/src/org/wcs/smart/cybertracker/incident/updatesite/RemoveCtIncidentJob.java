@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.cybertracker.incident.CtIncidentPlugIn;
+import org.wcs.smart.cybertracker.incident.internal.Messages;
 import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
 
@@ -43,7 +44,7 @@ public class RemoveCtIncidentJob extends Job {
 	};
 	
 	public RemoveCtIncidentJob() {
-		super("Uninstalling CT Incident PlugIn");
+		super(Messages.RemoveCtIncidentJob_UninstallJobName);
 	}
 
 	@Override
@@ -70,7 +71,7 @@ public class RemoveCtIncidentJob extends Job {
 				Display.getDefault().syncExec(new Runnable(){
 					@Override
 					public void run() {
-						SmartPlugIn.displayLog("Error uninstalling CT Incident PlugIn " + e.getMessage(), e);
+						SmartPlugIn.displayLog("Error uninstalling CT Incident PlugIn " + e.getMessage(), e); //$NON-NLS-1$
 					}
 				});
 				return new Status(IStatus.ERROR, CtIncidentPlugIn.PLUGIN_ID, 1, "Error uninstalling SMART Collect Plugin" + e.getLocalizedMessage(), e);  //$NON-NLS-1$

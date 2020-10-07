@@ -22,6 +22,7 @@ import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackageManager;
 import org.wcs.smart.cybertracker.export.IPackageContribution;
 import org.wcs.smart.cybertracker.export.PackageContributionManager;
 import org.wcs.smart.cybertracker.export.data.DataModelWrapper;
+import org.wcs.smart.cybertracker.incident.internal.Messages;
 import org.wcs.smart.cybertracker.incident.model.IncidentCtPackage;
 import org.wcs.smart.cybertracker.incident.pkg.ui.CtIncidentPackageConfigurator;
 import org.wcs.smart.cybertracker.model.ICtPackage;
@@ -43,7 +44,7 @@ public class IncidentPackageManager implements ICtPackageManager {
 
 	@Override
 	public String getTypeName() {
-		return "Independent Incident Package";
+		return Messages.IncidentPackageManager_IncidentPackageName;
 	}
 
 	@Override
@@ -62,7 +63,7 @@ public class IncidentPackageManager implements ICtPackageManager {
 	public ICtPackage createPackage() {
 		IncidentCtPackage ctpackage = new IncidentCtPackage();
 		ctpackage.setConservationArea(SmartDB.getCurrentConservationArea());
-		ctpackage.setName("Independent Incident Package");
+		ctpackage.setName(Messages.IncidentPackageManager_IncidentPackageDefaultName);
 		return ctpackage;
 	}
 
@@ -90,7 +91,7 @@ public class IncidentPackageManager implements ICtPackageManager {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					try {
-						SubMonitor progress = SubMonitor.convert(monitor, "Export Independent Incident Package", ppackage.getConfigurableModel() == null ? 2 : 3);
+						SubMonitor progress = SubMonitor.convert(monitor, Messages.IncidentPackageManager_ExportTask, ppackage.getConfigurableModel() == null ? 2 : 3);
 						List<IPackageContribution> contributions = PackageContributionManager.INSTANCE.getContributionItems();
 				
 						//process contributions
@@ -107,7 +108,7 @@ public class IncidentPackageManager implements ICtPackageManager {
 						ConfigurableModel toExport = null;
 						if (ppackage.getConfigurableModel() == null) {
 							//convert data model to configurable model
-							monitor.subTask("Converting data model model");
+							monitor.subTask(Messages.IncidentPackageManager_Progress);
 							try(Session session = HibernateManager.openSession()){
 								toExport = (new DataModelWrapper()).buildConfigurableModel(session, progress.split(1));
 								toExport.setConservationArea(SmartDB.getCurrentConservationArea());
@@ -120,7 +121,7 @@ public class IncidentPackageManager implements ICtPackageManager {
 						IncidentPackageExporter.INSTANCE.exportPackage(ppackage, updates, output, context, progress.split(1));
 					}catch(OperationCanceledException e) {
 						Display.getDefault().syncExec(()->{
-							MessageDialog.openError(Display.getCurrent().getActiveShell(), "Cancelled", "Export cancelled by user.");	
+							MessageDialog.openError(Display.getCurrent().getActiveShell(), Messages.IncidentPackageManager_CancelTitle, Messages.IncidentPackageManager_CancelMessage);	
 						});
 						
 					} catch (Exception e) {

@@ -23,7 +23,6 @@ package org.wcs.smart.smartcollect.ui;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -56,7 +55,6 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
@@ -78,7 +76,6 @@ import org.wcs.smart.cybertracker.export.data.DataModelWrapper;
 import org.wcs.smart.cybertracker.model.ConfigurableModelCtPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.ICtPackage;
-import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.cybertracker.properties.CtProfileLabelProvider;
 import org.wcs.smart.cybertracker.properties.CyberTrackerPropertiesDialog;
 import org.wcs.smart.dataentry.DataentryHibernateManager;
@@ -88,7 +85,6 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.smartcollect.connect.SmartCollectConnectDataContribution;
 import org.wcs.smart.smartcollect.internal.Messages;
 import org.wcs.smart.smartcollect.model.SmartCollectPackage;
-import org.wcs.smart.smartcollect.pkg.SmartCollectPackageManager;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -104,7 +100,6 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 	private ComboViewer modelViewer;
 	private ComboViewer profileViewer;
 	private Text txtName;
-	private Button btnCollectGroups;
 	
 	private List<IPackageUiContribution> contributions = null;
 	private ConfigurableModel selectedModel = null;
@@ -257,11 +252,6 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 			dialog.open();
 		});
 		
-		Label lblGroups = new Label(g, SWT.NONE);
-		lblGroups.setText(Messages.SmartCollectPackageConfigurator_UserGroupOpLabel);
-		lblGroups.setToolTipText(MessageFormat.format("{0}\n{1}",Messages.SmartCollectPackageConfigurator_UserGroupOpTooltip1, Messages.SmartCollectPackageConfigurator_UserGroupOpTooltip2)); //$NON-NLS-1$
-		btnCollectGroups = new Button(g, SWT.CHECK);
-		btnCollectGroups.addListener(SWT.Selection, e->{if (!isInit) validate();});
 		
 		//main page contributions
 		if (contributions != null) {
@@ -508,23 +498,6 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 				ctpackage.setCtProfile((CyberTrackerPropertiesProfile) profileViewer.getStructuredSelection().getFirstElement());
 				ctpackage.setName(txtName.getText());
 				
-				MetadataFieldValue fv = null;
-				for (MetadataFieldValue v : ctpackage.getMetadataValues()) {
-					if (v.getMetadataKey().equals(ICtPackage.COLLECT_GROUPS_FIELDKEY)) {
-						fv = v;
-						break;
-					}
-				}
-				if (fv == null) {
-					fv = new MetadataFieldValue();
-					fv.setMetadataKey(ICtPackage.COLLECT_GROUPS_FIELDKEY);
-					fv.setCtPackage(ctpackage);
-					fv.setConservationArea(ctpackage.getConservationArea());
-					if (ctpackage.getMetadataValues() == null) ctpackage.setMetadataValues(new ArrayList<>());
-					ctpackage.getMetadataValues().add(fv);
-				}
-				fv.setBooleanValue(btnCollectGroups.getSelection());
-				
 				session.saveOrUpdate(ctpackage);
 				session.flush();
 				for (IPackageUiContribution cc : contributions) {
@@ -586,14 +559,7 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 				Display.getDefault().syncExec(()->{
 					try {
 						isInit = true;
-						
-						for (MetadataFieldValue v : finit.getMetadataValues()) {
-							if (v.getMetadataKey().equals(ICtPackage.COLLECT_GROUPS_FIELDKEY)) {
-								btnCollectGroups.setSelection(v.getBooleanValue());
-								break;
-							}
-						}
-						
+				
 						profileViewer.setInput(profiles);
 						modelViewer.setInput(modelList);
 						

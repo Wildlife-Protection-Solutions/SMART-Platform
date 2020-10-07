@@ -48,12 +48,12 @@ public interface ICtPackage {
 
 	public static final String PACKAGE_DATE_FORMAT = "yyyyMMddHHmmss"; //$NON-NLS-1$
 	
-	/**
-	 * SMART Metadata package field value for option to collect incidents
-	 * by group 
-	 */
-	public static final String COLLECT_GROUPS_FIELDKEY = "CollectGroupsKey"; //$NON-NLS-1$
-	
+//	/**
+//	 * SMART Metadata package field value for option to collect incidents
+//	 * by group 
+//	 */
+//	public static final String COLLECT_GROUPS_FIELDKEY = "CollectGroupsKey"; //$NON-NLS-1$
+//	
 	/**
 	 * Unique identifier
 	 * @return

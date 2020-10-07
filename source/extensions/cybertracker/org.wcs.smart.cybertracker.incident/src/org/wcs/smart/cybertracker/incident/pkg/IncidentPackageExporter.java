@@ -44,10 +44,9 @@ import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.CtJsonExportUtils;
 import org.wcs.smart.cybertracker.export.IPackageContribution;
 import org.wcs.smart.cybertracker.incident.IncidentPackageContribution;
+import org.wcs.smart.cybertracker.incident.internal.Messages;
 import org.wcs.smart.cybertracker.incident.model.IncidentCtPackage;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
-import org.wcs.smart.cybertracker.model.ICtPackage;
-import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
@@ -86,7 +85,7 @@ public enum IncidentPackageExporter {
 	 * @throws Exception
 	 */
 	public void exportPackage(IncidentCtPackage ctPackage, List<IPackageContribution.PackageContribution> updates, Path exportFile, IEclipseContext context, IProgressMonitor monitor) throws Exception{
-		SubMonitor sub = SubMonitor.convert(monitor, "Creating Incident Package", 8);
+		SubMonitor sub = SubMonitor.convert(monitor, Messages.IncidentPackageExporter_TaskName, 8);
 		Path tempDir = Files.createTempDirectory("smart"); //$NON-NLS-1$
 		try {
 			try(Session session = HibernateManager.openSession()){
@@ -127,16 +126,7 @@ public enum IncidentPackageExporter {
 					}
 				}
 				
-				
-				for ( MetadataFieldValue fv : localpackage.getMetadataValues()) {
-					if (fv.getMetadataKey().equals(ICtPackage.COLLECT_GROUPS_FIELDKEY)) {
-						ctprofileAdditions.put(IncidentPackageManager.INCIDENT_GROUPUI_KEY, fv.getBooleanValue());
-						break;
-					}
-				}
-				
 				Path cmFile = tempDir.resolve(CM_MODEL_FILE);
-				
 				
 				//convert to xml
 				org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xmlModel = CmSmartToXmlConverter.convert(modelToExport, true, sub.split(1));

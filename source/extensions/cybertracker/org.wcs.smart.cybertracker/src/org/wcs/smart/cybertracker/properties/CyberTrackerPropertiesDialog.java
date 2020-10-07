@@ -37,10 +37,12 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -53,8 +55,8 @@ import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.properties.CyberTrackerPropertiesComposite.IPropsChangeListener;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
-import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 
 /**
  * The CyberTracker property dialog for managing 
@@ -63,7 +65,7 @@ import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
  * @author elitvin
  * @since 1.0.0
  */
-public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog {
+public class CyberTrackerPropertiesDialog extends SmartStyledTitleDialog {
 
 	private CyberTrackerPropertiesProfile ctProperties;
 	
@@ -71,9 +73,10 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 	private ControlDecoration profileNameDecoration;
 	
 	private CyberTrackerPropertiesComposite tabs;
+	private boolean changesMade = false;
 	
 	public CyberTrackerPropertiesDialog(Shell shell, final CyberTrackerPropertiesProfile profile) {
-		super(shell, Messages.CyberTrackerPropertiesDialog_Title);
+		super(shell);
 		if (profile.getUuid() == null) {
 			//this is a newly created profile
 			ctProperties = profile;
@@ -106,7 +109,16 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 	}
 
 	@Override
-	protected Composite createContent(Composite parent) {
+	protected Point getInitialSize() {
+		Point p = super.getInitialSize();
+		if (p.y > 600) p.y = 600;
+		return p;
+	}
+	
+	@Override
+	protected Control createDialogArea(Composite parent) {
+		parent = (Composite) super.createDialogArea(parent);
+		
 		setChangesMade(ctProperties.getUuid() == null);
 		
 		Composite main = new Composite(parent, SWT.NONE);
@@ -175,14 +187,24 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 				setChangesMade(true);
 			}
 		});
-		
+
 		setTitle(Messages.CyberTrackerPropertiesDialog_Title);
 		setMessage(Messages.CyberTrackerPropertiesDialog_Message);
-		super.setTitleImage(CyberTrackerPlugIn.getDefault().getImageRegistry().get(CyberTrackerPlugIn.CT_WIZARD_BANNER));
+		getShell().setText(ctProperties.getName());
+		super.setTitleImage(CyberTrackerPlugIn.getDefault().getImageRegistry().get(CyberTrackerPlugIn.SM_WIZARD_BANNER));
 		
-		return main;
+		return parent;
 	}
 
+	
+	private void setChangesMade(boolean ischanged) {
+		this.changesMade = ischanged;
+		Button btn = getButton(IDialogConstants.OK_ID);
+		if (btn != null){
+			btn.setEnabled(ischanged);
+		}
+	}
+	
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		super.createButtonsForButtonBar(parent);
@@ -200,6 +222,13 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 	}
 	
 	@Override
+	protected void okPressed() {
+		if (performSave()) {
+			super.okPressed();
+		}
+	}
+	
+	
 	protected boolean performSave() {
 		if (!isProfileNameValid() || !tabs.recordValuesToObj(ctProperties)) {
 			MessageDialog.openError(getShell(), Messages.CyberTrackerPropertiesDialog_Error, Messages.CyberTrackerPropertiesDialog_DataNotValid);

@@ -174,7 +174,7 @@ public class ManageProfilesDialog extends AbstractPropertyJHeaderDialog {
 		updateState();
 		setTitle(Messages.ManageProfilesDialog_Title);
 		setMessage(Messages.ManageProfilesDialog_Message);
-		super.setTitleImage(CyberTrackerPlugIn.getDefault().getImageRegistry().get(CyberTrackerPlugIn.CT_WIZARD_BANNER));
+		super.setTitleImage(CyberTrackerPlugIn.getDefault().getImageRegistry().get(CyberTrackerPlugIn.SM_WIZARD_BANNER));
 		
 		return main;
 	}
