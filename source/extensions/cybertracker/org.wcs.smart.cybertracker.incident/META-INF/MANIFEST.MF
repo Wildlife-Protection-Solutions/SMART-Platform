@@ -11,3 +11,4 @@ Bundle-ActivationPolicy: lazy
 Import-Package: org.eclipse.ui.plugin,
  org.osgi.framework;version="1.8.0"
 Automatic-Module-Name: org.wcs.smart.cybertracker.incident
+Export-Package: org.wcs.smart.cybertracker.incident.model

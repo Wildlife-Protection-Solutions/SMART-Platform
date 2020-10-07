@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Wildlife Conservation Society
+ * Copyright (C) 2020 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.cybertracker.patrol.ui;
+package org.wcs.smart.cybertracker.incident.pkg.ui;
 
 import java.nio.file.Path;
 import java.time.LocalDate;
@@ -70,11 +70,11 @@ import org.wcs.smart.cybertracker.export.IPackageContribution;
 import org.wcs.smart.cybertracker.export.IPackageUiContribution;
 import org.wcs.smart.cybertracker.export.PackageContributionManager;
 import org.wcs.smart.cybertracker.export.data.DataModelWrapper;
+import org.wcs.smart.cybertracker.incident.internal.Messages;
+import org.wcs.smart.cybertracker.incident.model.IncidentCtPackage;
 import org.wcs.smart.cybertracker.model.ConfigurableModelCtPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.ICtPackage;
-import org.wcs.smart.cybertracker.patrol.internal.Messages;
-import org.wcs.smart.cybertracker.patrol.model.PatrolCtPackage;
 import org.wcs.smart.cybertracker.properties.CtProfileLabelProvider;
 import org.wcs.smart.cybertracker.properties.CyberTrackerPropertiesDialog;
 import org.wcs.smart.dataentry.DataentryHibernateManager;
@@ -83,16 +83,15 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.ui.properties.DialogConstants;
 
-
 /**
  * Patrol cybertracker UI configuration 
  * 
  * @author Emily
  *
  */
-public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
+public class CtIncidentPackageConfigurator implements ICtPackageConfigurator {
 	
-	private PatrolCtPackage ctpackage;
+	private IncidentCtPackage ctpackage;
 	
 	private ComboViewer modelViewer;
 	private ComboViewer profileViewer;
@@ -109,9 +108,8 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 	@Inject
 	private IEclipseContext context;
 	
-	public CtPatrolPackageConfigurator() {
+	public CtIncidentPackageConfigurator() {
 		contributions = new ArrayList<>();
-		contributions.add(new PatrolMetadataPackageContribution());
 		for ( IPackageContribution c : PackageContributionManager.INSTANCE.getContributionItems()) {
 			if (c.getUiController() != null) contributions.add(c.getUiController());
 		}
@@ -122,8 +120,8 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 		contributions.forEach(e->ContextInjectionFactory.inject(e, context));
 		
 		this.onValidate = onValidate;
-		if (!(ctitem instanceof PatrolCtPackage)) throw new IllegalStateException(Messages.CtPatrolPackageConfigurator_InvalidPackageType);
-		this.ctpackage = (PatrolCtPackage) ctitem;
+		if (!(ctitem instanceof IncidentCtPackage)) throw new IllegalStateException(Messages.CtIncidentPackageConfigurator_InvalidType);
+		this.ctpackage = (IncidentCtPackage) ctitem;
 	
 		
 		CTabFolder tabs = new CTabFolder(parent, SWT.NONE);
@@ -131,7 +129,7 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 		tabs.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		CTabItem mainTab = new CTabItem(tabs, SWT.NONE);
-		mainTab.setText(Messages.CtPatrolPackageConfigurator_SettingsLabel);
+		mainTab.setText(Messages.CtIncidentPackageConfigurator_SettingsTabName);
 		
 		ScrolledComposite scroll = new ScrolledComposite(tabs,  SWT.V_SCROLL);
 		scroll.setExpandHorizontal(true);
@@ -154,7 +152,7 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 		header.setLayout(new GridLayout());
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		Label headerLabel = new Label(header, SWT.NONE);
-		headerLabel.setText(Messages.PatrolCTPackageDialog_PatrolConfigurationLabel);
+		headerLabel.setText(Messages.CtIncidentPackageConfigurator_ConfigurationSectionHeader);
 		WidgetElement.setCSSClass(header, SmartUiUtils.HEADER_CLASS);
 		
 		g = new Composite(g, SWT.NONE);
@@ -162,15 +160,15 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label nameLabel = new Label(g, SWT.NONE);
-		nameLabel.setText(Messages.CtPatrolPackageConfigurator_NameLabel);
+		nameLabel.setText(Messages.CtIncidentPackageConfigurator_NameLabel);
 		
 		txtName = new Text(g, SWT.BORDER);
-		txtName.setText(ctitem.getName() == null ? (ctitem.getTypeIdentifier() + Messages.CtPatrolPackageConfigurator_DefaultName) : ctitem.getName());
+		txtName.setText(ctitem.getName() == null ? (ctitem.getTypeIdentifier() + Messages.CtIncidentPackageConfigurator_DefaultName) : ctitem.getName());
 		txtName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtName.addListener(SWT.Modify, e->{ if (!isInit) validate();});
 		
 		Label modelLabel = new Label(g, SWT.NONE);
-		modelLabel.setText(Messages.PatrolCTPackageDialog_CmLbl);
+		modelLabel.setText(Messages.CtIncidentPackageConfigurator_ConfigLabel);
 		
 		modelViewer = new ComboViewer(g, SWT.READ_ONLY);
 		modelViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -180,7 +178,7 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 			@Override
 			public String getText(Object element) {
 				if (element instanceof DataModelWrapper) {
-					return Messages.PatrolCTPackageDialog_DmLbl;
+					return Messages.CtIncidentPackageConfigurator_OriginalDmOption;
 				}
 				return super.getText(element);
 			}
@@ -210,7 +208,7 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 
 		
 		Label lblProfile = new Label(g, SWT.NONE);
-		lblProfile.setText(Messages.PatrolCTPackageDialog_CtProfileLbl);
+		lblProfile.setText(Messages.CtIncidentPackageConfigurator_SettingLabel);
 
 		Composite c = new Composite(g, SWT.NONE);
 		c.setLayout(new GridLayout(2, false));
@@ -233,7 +231,7 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 		
 		ToolBar tb = new ToolBar(c, SWT.FLAT);
 		ToolItem tiEdit = new ToolItem(tb,SWT.PUSH);
-		tiEdit.setToolTipText(Messages.CtPatrolPackageConfigurator_viewedittooltip);
+		tiEdit.setToolTipText(Messages.CtIncidentPackageConfigurator_Settingstooltip);
 		tiEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 		tiEdit.addListener(SWT.Selection, e->{
 			Object x = profileViewer.getStructuredSelection().getFirstElement();
@@ -305,15 +303,15 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 		
 		try {
 			if (txtName.getText().isBlank()) {
-				throw new Exception(Messages.CtPatrolPackageConfigurator_NameRequired);
+				throw new Exception(Messages.CtIncidentPackageConfigurator_PackageRequired);
 			}
 		
 			if (modelViewer.getSelection().isEmpty()) {
-				throw new Exception(Messages.CtPatrolPackageConfigurator_CmRequired);
+				throw new Exception(Messages.CtIncidentPackageConfigurator_ModelRequired);
 			}
 		
 			if (profileViewer.getSelection().isEmpty()) {
-				throw new Exception(Messages.CtPatrolPackageConfigurator_ProfileRequired);
+				throw new Exception(Messages.CtIncidentPackageConfigurator_SettingsRequired);
 			}
 			for (IPackageUiContribution cc : contributions) {
 				String x = cc.isValid();
@@ -340,7 +338,7 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 				return profile;
 			}
 		} catch (Exception ex) {
-			SmartPlugIn.displayLog(Messages.PatrolCTPackageDialog_ProfileLoadError, ex);
+			SmartPlugIn.displayLog(Messages.CtIncidentPackageConfigurator_ErrorLoadingSettings, ex);
 			return null;
 		}
 	}
@@ -355,7 +353,7 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 				List<CyberTrackerPropertiesProfile>  profiles = new ArrayList<>();
 				DataModelWrapper dm = new DataModelWrapper();
 				
-				PatrolCtPackage init = null;
+				IncidentCtPackage init = null;
 				try(Session session = HibernateManager.openSession()){
 					modelList.addAll(DataentryHibernateManager.getConfigurableModels(session));
 					modelList.add(dm);
@@ -363,10 +361,9 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 					profiles.addAll(CyberTrackerHibernateManager.getPropertiesProfiles(session));
 					
 					if (ctpackage != null && ctpackage.getUuid() != null) {
-						init = session.get(PatrolCtPackage.class, ctpackage.getUuid());
+						init = session.get(IncidentCtPackage.class, ctpackage.getUuid());
 						if (init.getConfigurableModel() != null) init.getConfigurableModel().getUuid();
 						if (init.getCtProfile() != null) init.getCtProfile().getUuid();
-						if (init.getIncidentModel() != null) init.getIncidentModel().getUuid();
 					}else if (ctpackage != null) {
 						init = ctpackage;
 						if (init.getConfigurableModel() != null) {
@@ -377,10 +374,6 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 							init.setCtProfile(session.get(CyberTrackerPropertiesProfile.class, init.getCtProfile().getUuid()));
 							init.getCtProfile().getUuid();
 						}
-						if (ctpackage.getIncidentModel() != null) {
-							init.setIncidentModel(session.get(ConfigurableModel.class, init.getIncidentModel().getUuid()));
-							init.getIncidentModel().getUuid();
-						}
 					}
 				}
 				if (init.isDataModel()) {
@@ -388,7 +381,7 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 				}else {
 					context.set(ConfigurableModel.class, init.getConfigurableModel());
 				}
-				PatrolCtPackage finit = init;
+				IncidentCtPackage finit = init;
 				
 				Display.getDefault().syncExec(()->{
 					try {
@@ -432,7 +425,7 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 		
 		
 		try(Session session = HibernateManager.openSession()){
-			PatrolCtPackage local = session.get(PatrolCtPackage.class, ((PatrolCtPackage)ctpackage).getUuid());
+			IncidentCtPackage local = session.get(IncidentCtPackage.class, ((IncidentCtPackage)ctpackage).getUuid());
 			if (local == null) return all;
 			
 			Label header = new Label(all, SWT.NONE);
@@ -459,7 +452,7 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 			((GridLayout)inner.getLayout()).marginHeight = 0;
 			
 			Label l= new Label(inner, SWT.NONE);
-			l.setText(Messages.CtPatrolPackageConfigurator_CmLabel);
+			l.setText(Messages.CtIncidentPackageConfigurator_ConfigurableModelLabel);
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)l.getLayoutData()).verticalIndent = 5;
 			
@@ -468,12 +461,12 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 			if (local.getConfigurableModel() != null) {
 				l.setText(local.getConfigurableModel().getName());
 			}else {
-				l.setText( Messages.PatrolCTPackageDialog_DmLbl );
+				l.setText( Messages.CtIncidentPackageConfigurator_OriginalDmOption );
 			}
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			
 			l= new Label(inner, SWT.NONE);
-			l.setText(Messages.CtPatrolPackageConfigurator_ProfileLabel);
+			l.setText(Messages.CtIncidentPackageConfigurator_DeviceSettingsLabel);
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)l.getLayoutData()).verticalIndent = 5;
 			
@@ -487,7 +480,7 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 			}
 			
 			l= new Label(inner, SWT.NONE);
-			l.setText(Messages.CtPatrolPackageConfigurator_DetailsLabel);
+			l.setText(Messages.CtIncidentPackageConfigurator_DetailsLabel);
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)l.getLayoutData()).verticalIndent = 5;
 			
@@ -510,7 +503,7 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 					temp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 					
 					l = new Label(temp, SWT.NONE);
-					l.setText(Messages.CtPatrolPackageConfigurator_DateProperty);
+					l.setText(Messages.CtIncidentPackageConfigurator_DateLabel);
 					l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 
 					l= new Label(temp, SWT.NONE);
@@ -519,7 +512,7 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 					l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 					
 					l = new Label(temp, SWT.NONE);
-					l.setText(Messages.CtPatrolPackageConfigurator_VersionProperty);
+					l.setText(Messages.CtIncidentPackageConfigurator_VersionLabel);
 					l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 
 					l= new Label(temp, SWT.NONE);
@@ -528,13 +521,13 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 					l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 				}else{
 					l= new Label(inner, SWT.NONE);
-					l.setText(Messages.CtPatrolPackageConfigurator_NoPackageMsg);
+					l.setText(Messages.CtIncidentPackageConfigurator_NoPackageOp);
 					l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 					l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 				}
 			}catch (Exception ex) {
 				l= new Label(inner, SWT.NONE);
-				l.setText(Messages.CtPatrolPackageConfigurator_Unknown);
+				l.setText(Messages.CtIncidentPackageConfigurator_UnknownOp);
 				l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 			}

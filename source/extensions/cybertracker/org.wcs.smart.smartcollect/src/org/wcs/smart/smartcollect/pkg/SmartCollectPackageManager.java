@@ -73,21 +73,13 @@ public class SmartCollectPackageManager implements ICtPackageManager {
 	 */
 	public static final String SMARTCOLLECT_RESOURCE_ID = "smartcollect"; //$NON-NLS-1$
 	
-	/**
-	 * Mobile device setting key for option to collect incidents by group
-	 */
-	public static final String INCIDENT_GROUPUI_KEY = "INCIDENT_GROUP_UI"; //$NON-NLS-1$
 	
 	/**
 	 * SMARTCollect package metadata key for username field
 	 */
 	public static final String USERNAMEMETADATA_KEY = "SMART_CollectUser"; //$NON-NLS-1$
 
-	/**
-	 * SMART Metadata package field value for option to collect incidents
-	 * by group 
-	 */
-	public static final String COLLECT_GROUPS_FIELDKEY = "CollectGroupsKey"; //$NON-NLS-1$
+
 
 	
 	@Override

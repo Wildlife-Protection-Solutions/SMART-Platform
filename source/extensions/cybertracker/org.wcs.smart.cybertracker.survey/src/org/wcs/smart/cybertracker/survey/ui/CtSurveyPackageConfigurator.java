@@ -22,7 +22,9 @@
 package org.wcs.smart.cybertracker.survey.ui;
 
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -82,8 +84,6 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.DialogConstants;
-
-import com.ibm.icu.text.DateFormat;
 
 /**
  * Patrol cybertracker UI configuration 
@@ -504,7 +504,7 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 					l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 
 					l= new Label(temp, SWT.NONE);
-					l.setText( DateFormat.getDateTimeInstance().format( sdf.parse(date)) );
+					l.setText( DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(LocalDate.parse(date,sdf)) );
 					l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 					l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 					

@@ -59,64 +59,6 @@
       </JsonProcessor>
    </extension>
    <extension
-         point="org.eclipse.ui.menus">
-      <menuContribution
-            allPopups="false"
-            locationURI="toolbar:org.eclipse.ui.main.toolbar?after=vertical.org.wcs.smart.incident.toolbar2">
-         <toolbar
-               id="vertical.org.wcs.smartcollect.toolbar">
-            <command
-                  commandId="org.wcs.smart.cybertracker.packages.show"
-                  icon="platform:/plugin/org.wcs.smart.cybertracker/images/etool16/smartmobileexport.png"
-                  label="Export"
-                  mode="FORCE_TEXT"
-                  style="push"
-                  tooltip="Export SMARTCollect packages">
-               <visibleWhen>
-                  <and>
-                     <test
-                           forcePluginActivation="true"
-                           property="org.wcs.smart.caSingle">
-                     </test>
-                     <with
-                           variable="activeWorkbenchWindow.activePerspective">
-                        <equals
-                              value="org.wcs.smart.observation.FieldDataPerspective">
-                        </equals>
-                     </with>
-                     <test
-                           property="org.wcs.smart.fielddata.focusview"
-                           value="org.wcs.smart.observation.ui.incidientView">
-                     </test>
-                     <or>
-                        <test
-                              forcePluginActivation="true"
-                              property="org.wcs.smart.smartAdminUser"
-                              value="admin">
-                        </test>
-                        <test
-                              forcePluginActivation="true"
-                              property="org.wcs.smart.smartAdminUser"
-                              value="dataentry">
-                        </test>
-                        <test
-                              forcePluginActivation="true"
-                              property="org.wcs.smart.smartAdminUser"
-                              value="analyst">
-                        </test>
-                        <test
-                              forcePluginActivation="true"
-                              property="org.wcs.smart.smartAdminUser"
-                              value="manager">
-                        </test>
-                     </or>
-                  </and>
-               </visibleWhen>
-            </command>
-         </toolbar>
-      </menuContribution>
-   </extension>
-   <extension
          point="org.wcs.smart.caFilestoreDir">
       <FilestoreDirectory
             directory="smartcollect">

@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.smartcollect.pkg;
+package org.wcs.smart.cybertracker.incident.pkg;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -43,6 +43,8 @@ import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.CtJsonExportUtils;
 import org.wcs.smart.cybertracker.export.IPackageContribution;
+import org.wcs.smart.cybertracker.incident.IncidentPackageContribution;
+import org.wcs.smart.cybertracker.incident.model.IncidentCtPackage;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 import org.wcs.smart.cybertracker.model.MetadataFieldValue;
@@ -58,8 +60,6 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.ObservationOptions;
-import org.wcs.smart.smartcollect.internal.Messages;
-import org.wcs.smart.smartcollect.model.SmartCollectPackage;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
@@ -68,13 +68,13 @@ import org.wcs.smart.util.ZipUtil;
 /**
  * SMART Collect Cybertracker package exporter.
  */
-public enum SmartCollectPackageExporter {
+public enum IncidentPackageExporter {
 
 	INSTANCE;
 	
 	private static final String CM_MODEL_FILE = "cm_model.xml"; //$NON-NLS-1$
 	private static final String CT_PROFILE_FILE = "ct_profile.json"; //$NON-NLS-1$
-	private static final String SMARTCOLLECT_METADATA_FILE = "smartcollect_metadata.json"; //$NON-NLS-1$
+	private static final String SMARTCOLLECT_METADATA_FILE = "incident_metadata.json"; //$NON-NLS-1$
 
 	/**
 	 * Exports patrol cybertracker package.
@@ -85,8 +85,8 @@ public enum SmartCollectPackageExporter {
 	 * @param monitor
 	 * @throws Exception
 	 */
-	public void exportPackage(SmartCollectPackage ctPackage, List<IPackageContribution.PackageContribution> updates, Path exportFile, IEclipseContext context, IProgressMonitor monitor) throws Exception{
-		SubMonitor sub = SubMonitor.convert(monitor, Messages.SmartCollectPackageExporter_TaskName, 8);
+	public void exportPackage(IncidentCtPackage ctPackage, List<IPackageContribution.PackageContribution> updates, Path exportFile, IEclipseContext context, IProgressMonitor monitor) throws Exception{
+		SubMonitor sub = SubMonitor.convert(monitor, "Creating Incident Package", 8);
 		Path tempDir = Files.createTempDirectory("smart"); //$NON-NLS-1$
 		try {
 			try(Session session = HibernateManager.openSession()){
@@ -98,7 +98,7 @@ public enum SmartCollectPackageExporter {
 				}
 				
 				//reload package so we don't have hiberante issues
-				SmartCollectPackage localpackage = session.get(SmartCollectPackage.class, ctPackage.getUuid());
+				IncidentCtPackage localpackage = session.get(IncidentCtPackage.class, ctPackage.getUuid());
 				
 				
 				Set<Path> toIncludeInZip = new HashSet<>();
@@ -130,7 +130,7 @@ public enum SmartCollectPackageExporter {
 				
 				for ( MetadataFieldValue fv : localpackage.getMetadataValues()) {
 					if (fv.getMetadataKey().equals(ICtPackage.COLLECT_GROUPS_FIELDKEY)) {
-						ctprofileAdditions.put(SmartCollectPackageManager.INCIDENT_GROUPUI_KEY, fv.getBooleanValue());
+						ctprofileAdditions.put(IncidentPackageManager.INCIDENT_GROUPUI_KEY, fv.getBooleanValue());
 						break;
 					}
 				}
@@ -212,7 +212,7 @@ public enum SmartCollectPackageExporter {
 	@SuppressWarnings("unchecked")
 	private void createMetadata(Path incidentJson) throws IOException {
 		JSONArray metadataScreens = new JSONArray();
-		metadataScreens.add(CtJsonExportUtils.createDataType(SmartCollectPackageManager.SMARTCOLLECT_RESOURCE_ID));
+		metadataScreens.add(CtJsonExportUtils.createDataType(IncidentPackageContribution.INCIDENT_RESOURCE_ID));
 		
 		
 		JSONObject dataType = new JSONObject();
@@ -220,9 +220,6 @@ public enum SmartCollectPackageExporter {
 		dataType.put(CtJsonExportUtils.JSON_ISVISIBILE_PROP_KEY, false);
 		dataType.put(CtJsonExportUtils.JSON_OPTION_GENERATED_KEY, true);
 		dataType.put(CtJsonExportUtils.JSON_REQUIRED_PROP_KEY, true);
-		JSONObject typeOp = new JSONObject();
-		typeOp.put(SmartCollectPackageManager.USERNAMEMETADATA_KEY, dataType);
-		metadataScreens.add(typeOp);
 		
 		try(BufferedWriter fw = Files.newBufferedWriter(incidentJson)){
 			fw.write(metadataScreens.toJSONString());

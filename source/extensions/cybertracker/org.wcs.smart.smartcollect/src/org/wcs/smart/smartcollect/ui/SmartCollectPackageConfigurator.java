@@ -510,14 +510,14 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 				
 				MetadataFieldValue fv = null;
 				for (MetadataFieldValue v : ctpackage.getMetadataValues()) {
-					if (v.getMetadataKey().equals(SmartCollectPackageManager.COLLECT_GROUPS_FIELDKEY)) {
+					if (v.getMetadataKey().equals(ICtPackage.COLLECT_GROUPS_FIELDKEY)) {
 						fv = v;
 						break;
 					}
 				}
 				if (fv == null) {
 					fv = new MetadataFieldValue();
-					fv.setMetadataKey(SmartCollectPackageManager.COLLECT_GROUPS_FIELDKEY);
+					fv.setMetadataKey(ICtPackage.COLLECT_GROUPS_FIELDKEY);
 					fv.setCtPackage(ctpackage);
 					fv.setConservationArea(ctpackage.getConservationArea());
 					if (ctpackage.getMetadataValues() == null) ctpackage.setMetadataValues(new ArrayList<>());
@@ -588,7 +588,7 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 						isInit = true;
 						
 						for (MetadataFieldValue v : finit.getMetadataValues()) {
-							if (v.getMetadataKey().equals(SmartCollectPackageManager.COLLECT_GROUPS_FIELDKEY)) {
+							if (v.getMetadataKey().equals(ICtPackage.COLLECT_GROUPS_FIELDKEY)) {
 								btnCollectGroups.setSelection(v.getBooleanValue());
 								break;
 							}

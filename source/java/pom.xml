@@ -450,6 +450,7 @@
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.plan</module>
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.plan.feature</module>
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.incident</module>
+				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.incident.core.feature</module>
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.incident.feature</module>
 			</modules>
 		</profile>
@@ -598,6 +599,7 @@
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.plan.feature</module>
 				
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.incident</module>
+				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.incident.core.feature</module>
 				<module>../extensions/cybertracker/org.wcs.smart.cybertracker.incident.feature</module>
 				
 				<module>../extensions/cybertracker/org.wcs.smart.smartcollect</module>

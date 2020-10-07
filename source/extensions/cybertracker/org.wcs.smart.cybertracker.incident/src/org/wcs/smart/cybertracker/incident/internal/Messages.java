@@ -4,6 +4,31 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.cybertracker.incident.internal.messages"; //$NON-NLS-1$
+	public static String AddCtIncidentJob_AddJobName;
+	public static String AddCtIncidentJob_ErrorMessage;
+	public static String AddCtIncidentJob_ErrorTitle;
+	public static String AddCtIncidentJob_Progress;
+	public static String CtIncidentDatabaseUpgrader_Progress;
+	public static String CtIncidentPackageConfigurator_ConfigLabel;
+	public static String CtIncidentPackageConfigurator_ConfigurableModelLabel;
+	public static String CtIncidentPackageConfigurator_ConfigurationSectionHeader;
+	public static String CtIncidentPackageConfigurator_DateLabel;
+	public static String CtIncidentPackageConfigurator_DefaultName;
+	public static String CtIncidentPackageConfigurator_DetailsLabel;
+	public static String CtIncidentPackageConfigurator_DeviceSettingsLabel;
+	public static String CtIncidentPackageConfigurator_ErrorLoadingSettings;
+	public static String CtIncidentPackageConfigurator_InvalidType;
+	public static String CtIncidentPackageConfigurator_ModelRequired;
+	public static String CtIncidentPackageConfigurator_NameLabel;
+	public static String CtIncidentPackageConfigurator_NoPackageOp;
+	public static String CtIncidentPackageConfigurator_OriginalDmOption;
+	public static String CtIncidentPackageConfigurator_PackageRequired;
+	public static String CtIncidentPackageConfigurator_SettingLabel;
+	public static String CtIncidentPackageConfigurator_SettingsRequired;
+	public static String CtIncidentPackageConfigurator_SettingsTabName;
+	public static String CtIncidentPackageConfigurator_Settingstooltip;
+	public static String CtIncidentPackageConfigurator_UnknownOp;
+	public static String CtIncidentPackageConfigurator_VersionLabel;
 	public static String IncidentJsonProcessor_CanceledMsg;
 	public static String IncidentJsonProcessor_CreatedLabel;
 	public static String IncidentJsonProcessor_ModifiedLabel;

@@ -44,6 +44,12 @@ public interface ICtPackageManager {
 	public static final String EXT_NAME_ID = "ctpackagemanager"; //$NON-NLS-1$
 	
 	/**
+	 * Mobile device setting key for option to collect incidents by group
+	 */
+	public static final String INCIDENT_GROUPUI_KEY = "INCIDENT_GROUP_UI"; //$NON-NLS-1$
+	
+	
+	/**
 	 * The package type identifier
 	 * 
 	 * @return
