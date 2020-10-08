@@ -86,7 +86,6 @@ public class RestoreHandler {
 			SmartPlugIn.log(ex.getMessage(), ex);
 		}
 		
-		if (true) return false;
 		if (!MessageDialog.openConfirm(shell, Messages.RestoreHandler_ConfirmRestore_DialogTitle,
 				Messages.RestoreHandler_ConfirmRestore_DialogMessage )){
 			return false;
