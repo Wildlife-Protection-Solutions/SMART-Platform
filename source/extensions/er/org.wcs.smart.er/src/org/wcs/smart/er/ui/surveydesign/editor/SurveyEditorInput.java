@@ -22,7 +22,6 @@
 package org.wcs.smart.er.ui.surveydesign.editor;
 
 import java.text.MessageFormat;
-import java.time.LocalDate;
 import java.util.UUID;
 
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -41,19 +40,17 @@ public class SurveyEditorInput implements IEditorInput {
 
 	private UUID uuid;
 	private String id;
-	private LocalDate startDate;
 	private String designName;
 	
 	public SurveyEditorInput(SurveyProxy proxy){
-		this(proxy.getId(), proxy.getUuid(), proxy.getStartDate(), proxy.getDesignName());
+		this(proxy.getId(), proxy.getUuid(), proxy.getDesignName());
 	}
 	/**
 	 * Constructor
 	 */
-	public SurveyEditorInput(String id, UUID uuid, LocalDate startDate, String designName) {
+	public SurveyEditorInput(String id, UUID uuid, String designName) {
 		this.uuid = uuid;
 		this.id = id;
-		this.startDate = startDate;
 		this.designName = designName;
 	}
 	
@@ -63,10 +60,6 @@ public class SurveyEditorInput implements IEditorInput {
 	
 	public UUID getUuid() {
 		return uuid;
-	}
-	
-	public LocalDate getStartDate(){
-		return this.startDate;
 	}
 	
 	public String getSurveyId(){

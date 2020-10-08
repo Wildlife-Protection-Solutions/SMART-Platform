@@ -21,8 +21,6 @@
  */
 package org.wcs.smart.er.ui.surveydesign.editor;
 
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -154,23 +152,11 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 		txtStatus.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		createEditLink(content, PanelType.STATUS); 
 
-		toolkit.createLabel(content, Messages.SurveyDesignSummaryEditorPage_StartDate);
-		txtStartDate = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
-		txtStartDate.setEditable(false);
-		txtStartDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		toolkit.createLabel(content, ""); //$NON-NLS-1$
-
 		toolkit.createLabel(content, Messages.SurveyDesignSummaryEditorPage_Key);
 		txtKey = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
 		txtKey.setEditable(false);
 		txtKey.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		createEditLink(content, PanelType.NAME);
-
-		toolkit.createLabel(content, Messages.SurveyDesignSummaryEditorPage_EndDate);
-		txtEndDate = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
-		txtEndDate.setEditable(false);
-		txtEndDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		createEditLink(content, PanelType.DATES); 
 
 		Label emptySpace = toolkit.createLabel(content, ""); //$NON-NLS-1$
 		emptySpace.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
@@ -321,12 +307,6 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 		form.setText(design.getName() + ": " + Messages.SurveyDesignSummaryEditorPage_SummaryPageLabel); //$NON-NLS-1$
 		
 		txtName.setText(design.getName());
-		
-		String value = design.getStartDate() != null ? DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).format(design.getStartDate()) : ""; //$NON-NLS-1$
-		txtStartDate.setText(value);
-
-		value = design.getEndDate() != null ? DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).format(design.getEndDate()) : ""; //$NON-NLS-1$
-		txtEndDate.setText(value);
 
 		txtStatus.setText(design.getState().getGuiName(Locale.getDefault()));
 		txtKey.setText(design.getKeyId());

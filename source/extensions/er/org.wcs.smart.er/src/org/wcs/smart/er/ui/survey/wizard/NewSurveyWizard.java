@@ -56,7 +56,6 @@ public class NewSurveyWizard extends Wizard implements IPageChangingListener{
 	
 	private SurveyDesignPage sdPage;
 	private SurveyIdPage idPage;
-	private SurveyDatePage datePage;
 	
 	private StartPage startPage = null;
 	/**
@@ -111,15 +110,14 @@ public class NewSurveyWizard extends Wizard implements IPageChangingListener{
 
 	
 	@Override
-	public boolean performFinish() {
-		datePage.updateSurvey(newSurvey, session);
-		
+	public boolean performFinish() {		
 		if (newSurvey.getSurveyDesign() == null){
 			return false; 
 		}
 		
 		session.beginTransaction();
 		try{
+			idPage.updateSurvey(newSurvey, session);
 			session.saveOrUpdate(newSurvey);
 			session.getTransaction().commit();
 		}catch (Exception ex){
@@ -145,11 +143,9 @@ public class NewSurveyWizard extends Wizard implements IPageChangingListener{
     	
     	sdPage = new SurveyDesignPage();
     	idPage = new SurveyIdPage();
-    	datePage = new SurveyDatePage();
     	
     	super.addPage(sdPage);
     	super.addPage(idPage);
-    	super.addPage(datePage);
 
     	((WizardDialog) getContainer()).addPageChangingListener(this);
     }
@@ -161,12 +157,14 @@ public class NewSurveyWizard extends Wizard implements IPageChangingListener{
 			if (startPage == StartPage.DESIGN){
 				return super.getStartingPage();
 			}else if (startPage == StartPage.SURVEY && newSurvey.getSurveyDesign() != null){
+				canFinish = true;
 				return idPage;
 			}
 		}
 		if (newSurvey.getSurveyDesign() == null){
 			return super.getStartingPage();
 		}
+		canFinish = true;
 		return idPage;
 	}
 	
@@ -191,7 +189,7 @@ public class NewSurveyWizard extends Wizard implements IPageChangingListener{
 
 		((INewSurveyWizardPage)event.getTargetPage()).initControls(newSurvey, session);
 		
-		if (event.getTargetPage() == datePage){
+		if (event.getTargetPage() == idPage){
 			canFinish = true;
 		}else{
 			canFinish = false;

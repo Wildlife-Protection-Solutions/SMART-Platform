@@ -143,9 +143,7 @@ public class CaTemplateCloner implements IConservationAreaTemplateCloner {
 			clone.setConfigurableModel( (ConfigurableModel) engine.getNewConservationItem(design.getConfigurableModel()));
 			
 			clone.setDescription(design.getDescription());
-			clone.setEndDate(design.getEndDate());
 			clone.setKeyId(design.getKeyId());
-			clone.setStartDate(design.getStartDate());
 			clone.setState(design.getState());
 			clone.setTrackDistanceDirection(design.getTrackDistanceDirection());
 			clone.setTrackDistanceDirection(design.getTrackObserver());

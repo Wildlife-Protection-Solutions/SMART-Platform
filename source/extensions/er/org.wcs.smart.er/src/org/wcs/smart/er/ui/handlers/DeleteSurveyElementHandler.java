@@ -281,13 +281,7 @@ public class DeleteSurveyElementHandler {
 				return false;
 			}
 			id = survey.getId();
-			
-			ObservationOptions ops = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), session);
-			String error = SurveyPermissionManager.INSTANCE.canEditSurvey(survey, ops);
-			if (error != null){
-				throw new Exception(error);
-			}
-			
+						
 			if (DeleteManager.canDelete(survey, session)){
 				List<Path> dirsToDelete = new ArrayList<>();
 				//delete all waypoints

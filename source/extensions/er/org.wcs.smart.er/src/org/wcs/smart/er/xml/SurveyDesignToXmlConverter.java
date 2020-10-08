@@ -43,7 +43,6 @@ import org.wcs.smart.er.model.SurveyDesignProperty;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.util.SmartUtils;
 
 
 /**
@@ -78,10 +77,6 @@ public class SurveyDesignToXmlConverter {
 			xml.getNames().add(xmlpair);
 		}
 
-		//start & end dates
-		xml.setStartDate(SmartUtils.toXmlDate(surveyDesign.getStartDate()));
-		xml.setEndDate(SmartUtils.toXmlDate(surveyDesign.getEndDate()));
-		
 		//use distance and direction
 		xml.setTrackDistanceDirection(surveyDesign.getTrackDistanceDirection());
 		xml.setTrackObserver(surveyDesign.getTrackObserver());

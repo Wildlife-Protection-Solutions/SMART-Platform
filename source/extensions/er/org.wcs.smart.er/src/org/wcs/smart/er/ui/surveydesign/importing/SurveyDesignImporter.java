@@ -61,8 +61,6 @@ public class SurveyDesignImporter {
 		SurveyDesign design = new SurveyDesign();
 		
 		//copy of design elements
-		design.setStartDate(copy.getStartDate());
-		design.setEndDate(copy.getEndDate());
 		design.setDescription(copy.getDescription());
 		design.setTrackDistanceDirection(copy.getTrackDistanceDirection());
 		design.setTrackObserver(copy.getTrackObserver());
@@ -391,8 +389,6 @@ public class SurveyDesignImporter {
 	public static void copyDesign(SurveyDesign toUpdate, SurveyDesign toCopy, Session session){
 		//copy of design elements
 		SurveyDesign clone = toUpdate;
-		clone.setStartDate(toCopy.getStartDate());
-		clone.setEndDate(toCopy.getEndDate());
 		clone.setDescription(toCopy.getDescription());
 		clone.setTrackDistanceDirection(toCopy.getTrackDistanceDirection());
 		clone.setTrackObserver(toCopy.getTrackObserver());

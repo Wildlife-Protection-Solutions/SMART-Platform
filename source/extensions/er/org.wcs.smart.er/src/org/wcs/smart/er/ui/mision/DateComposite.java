@@ -23,8 +23,6 @@ package org.wcs.smart.er.ui.mision;
 
 import java.text.MessageFormat;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.time.temporal.ChronoUnit;
 
 import org.eclipse.swt.SWT;
@@ -46,7 +44,6 @@ import org.wcs.smart.er.ui.component.DatesComponent;
 public class DateComposite extends MissionComposite {
 
 	private DatesComponent dates;
-	private Mission mission;
 	
 	@Override
 	public Control createControl(Composite parent) {
@@ -66,7 +63,6 @@ public class DateComposite extends MissionComposite {
 
 	@Override
 	public void init(Mission mission, Session session) {
-		this.mission = mission;
 		dates.setStartDate(mission.getStartDate());
 		dates.setEndDate(mission.getEndDate());
 	}
@@ -85,20 +81,7 @@ public class DateComposite extends MissionComposite {
 				return false;
 			}
 		}
-		if (mission.getSurvey().getStartDate() != null && mission.getSurvey().getEndDate() != null){
-			if (dates.getStartDate().isBefore( mission.getSurvey().getStartDate()) ||
-				dates.getEndDate().isBefore(mission.getSurvey().getStartDate()) ||
-				dates.getEndDate().isAfter(mission.getSurvey().getEndDate()) ||
-				dates.getStartDate().isAfter(mission.getSurvey().getEndDate())){
-				
-				dates.setError(MessageFormat.format(
-						Messages.DateComposite_DateError,
-						new Object[]{DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(mission.getSurvey().getStartDate()),
-								DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(mission.getSurvey().getEndDate())}));
-						
-				return false;
-			}
-		}
+		
 		LocalDate startD = dates.getStartDate();
 		LocalDate endD = dates.getEndDate();
 		long diff = ChronoUnit.DAYS.between(startD,  endD); 

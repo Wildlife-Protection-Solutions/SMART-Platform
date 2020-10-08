@@ -86,10 +86,13 @@ public class MissionXmlManager {
 				ns = ":" + nodeName.substring(0, nodeName.indexOf(':')); //$NON-NLS-1$
 			}
 			String version = doc.getFirstChild().getAttributes().getNamedItem("xmlns" + ns).getTextContent(); //$NON-NLS-1$
-			if (version.equals(org.wcs.smart.er.xml.model.missions.v11.ObjectFactory._Mission_QNAME.getNamespaceURI())){
+			if (version.equals(org.wcs.smart.er.xml.model.missions.v12.ObjectFactory._Mission_QNAME.getNamespaceURI())){
+				return new org.wcs.smart.er.xml.model.missions.v12.XMLtoMissionConverter();
+			}else if (version.equals(org.wcs.smart.er.xml.model.missions.v11.ObjectFactory._Mission_QNAME.getNamespaceURI())){
 				return new org.wcs.smart.er.xml.model.missions.v11.XMLtoMissionConverter();
 			}else if (version.equals(org.wcs.smart.er.xml.model.missions.v10.ObjectFactory._Mission_QNAME.getNamespaceURI())){
 				return new org.wcs.smart.er.xml.model.missions.v10.XMLtoMissionConverter();
+				
 			}
 		}catch (Exception ex){
 			//invalid xml file

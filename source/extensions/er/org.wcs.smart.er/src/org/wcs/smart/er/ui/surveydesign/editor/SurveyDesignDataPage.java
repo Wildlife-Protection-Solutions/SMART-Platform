@@ -107,7 +107,7 @@ public class SurveyDesignDataPage extends EditorPart {
 	private static Comparator<TreeNode> treeNodeComparator = new Comparator<TreeNode>() {
 		@Override
 		public int compare(TreeNode o1, TreeNode o2) {
-			if (o1.getStartDate().equals(o2.getStartDate())){
+			if (o1.getStartDate() == null || o2.getStartDate() == null || o1.getStartDate().equals(o2.getStartDate())){
 				return Collator.getInstance().compare(o1.getId(), o2.getId());
 			}
 			return -o1.getStartDate().compareTo(o2.getStartDate());
@@ -284,11 +284,13 @@ public class SurveyDesignDataPage extends EditorPart {
 				}else if (columnIndex == 1){
 					//start
 					if (element instanceof TreeNode){
+						if (((TreeNode)element).getStartDate() == null) return ""; //$NON-NLS-1$
 						return DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format( ((TreeNode) element).getStartDate());
 					}
 				}else  if (columnIndex == 2){
 					//end
 					if (element instanceof TreeNode){
+						if (((TreeNode)element).getEndDate() == null) return ""; //$NON-NLS-1$
 						return DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format( ((TreeNode) element).getEndDate());
 					}
 				}else{
@@ -530,14 +532,13 @@ public class SurveyDesignDataPage extends EditorPart {
 				s.beginTransaction();
 				try{
 					SurveyFilter sf = new SurveyFilter();
-					sf.setDateFilter(null, null, null);
 					sf.setSurveyState(null);
 					sf.setSurveyDesignKeyFilters(new String[]{parentEditor.getSurveyDesign().getKeyId()});
 	
 					List<SurveyProxy> surveys = SurveyHibernateManager.getSurveys(s, sf);
 					for(SurveyProxy in : surveys){
 						Survey ss = (Survey) s.load(Survey.class, in.getUuid());
-						TreeNode node = new TreeNode(ss.getUuid(), ss.getId(), ss.getStartDate(), ss.getEndDate(), TreeNode.Type.SURVEY);					
+						TreeNode node = new TreeNode(ss.getUuid(), ss.getId(), null, null, TreeNode.Type.SURVEY);					
 						for (Mission m : ss.getMissions()){
 							TreeNode kid = new TreeNode(m.getUuid(), m.getId(), m.getStartDate(), m.getEndDate(), TreeNode.Type.MISSION);
 							node.addKid(kid);

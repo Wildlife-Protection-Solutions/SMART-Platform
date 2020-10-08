@@ -55,12 +55,8 @@ public class SurveyQueryColumn extends QueryColumn {
 		CA_ID( ColumnType.STRING,"ca:id"),  //$NON-NLS-1$
 		CA_NAME(ColumnType.STRING,"ca:name"),  //$NON-NLS-1$
 		SURVEY_DESIGN(ColumnType.STRING, "surveydesign:name"),  //$NON-NLS-1$
-		SURVEY_DESIGN_START( ColumnType.DATE, "surveydesign:startdate"),  //$NON-NLS-1$
-		SURVEY_DESIGN_END( ColumnType.DATE, "surveydesign:enddate"),  //$NON-NLS-1$
 		
 		SURVEY( ColumnType.STRING, "survey:id"),  //$NON-NLS-1$
-		SURVEY_START( ColumnType.DATE, "survey:startdate"),  //$NON-NLS-1$
-		SURVEY_END( ColumnType.DATE, "survey:enddate"),  //$NON-NLS-1$
 		
 		MISSION( ColumnType.STRING, "mission:id"),  //$NON-NLS-1$
 		MISSION_START( ColumnType.DATE, "mission:startdate"),  //$NON-NLS-1$
@@ -140,11 +136,7 @@ public class SurveyQueryColumn extends QueryColumn {
 				case CA_ID: return item.getConservationAreaId();
 				case CA_NAME: return item.getConservationAreaName();
 				case SURVEY_DESIGN: return item.getSurveyDesign();
-				case SURVEY_DESIGN_START: return item.getSurveyDesignStart();
-				case SURVEY_DESIGN_END: return item.getSurveyDesignEnd();
 				case SURVEY: return item.getSurveyId();
-				case SURVEY_START: return item.getSurveyStart();
-				case SURVEY_END: return item.getSurveyEnd();
 				case MISSION: return item.getMissionId();
 				case MISSION_START: return item.getMissionStart();
 				case MISSION_END: return item.getMissionEnd();
@@ -172,11 +164,7 @@ public class SurveyQueryColumn extends QueryColumn {
 				case CA_ID: return item.getConservationAreaId();
 				case CA_NAME: return item.getConservationAreaName();
 				case SURVEY_DESIGN: return item.getSurveyDesign();
-				case SURVEY_DESIGN_START: return item.getSurveyDesignStart();
-				case SURVEY_DESIGN_END: return item.getSurveyDesignEnd();
 				case SURVEY: return item.getSurveyId();
-				case SURVEY_START: return item.getSurveyStart();
-				case SURVEY_END: return item.getSurveyEnd();
 				case MISSION: return item.getMissionId();
 				case MISSION_START: return item.getMissionStart();
 				case MISSION_END: return item.getMissionEnd();

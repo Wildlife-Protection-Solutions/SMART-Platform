@@ -443,13 +443,9 @@ public class DerbyWaypointEngine extends DerbySurveyQueryEngine {
 		sql.append(" SELECT DISTINCT "); //$NON-NLS-1$
 		sql.append(tablePrefix(SurveyDesign.class) + ".ca_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(SurveyDesign.class) + ".uuid, "); //$NON-NLS-1$
-		sql.append(tablePrefix(SurveyDesign.class) + ".start_date, "); //$NON-NLS-1$
-		sql.append(tablePrefix(SurveyDesign.class) + ".end_date, "); //$NON-NLS-1$
 		
 		sql.append(tablePrefix(Survey.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Survey.class) + ".id, "); //$NON-NLS-1$
-		sql.append(tablePrefix(Survey.class) + ".start_date, "); //$NON-NLS-1$
-		sql.append(tablePrefix(Survey.class) + ".end_date, "); //$NON-NLS-1$
 		
 		sql.append(tablePrefix(Mission.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Mission.class) + ".id, "); //$NON-NLS-1$
@@ -479,13 +475,9 @@ public class DerbyWaypointEngine extends DerbySurveyQueryEngine {
 		sql.append("ca_uuid char(16) for bit data,"); //$NON-NLS-1$
 		
 		sql.append("surveydesign_uuid char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("surveydesign_startdate date,"); //$NON-NLS-1$
-		sql.append("surveydesign_enddate date,"); //$NON-NLS-1$
 		
 		sql.append("survey_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("survey_id varchar(128),"); //$NON-NLS-1$
-		sql.append("survey_startdate date,"); //$NON-NLS-1$
-		sql.append("survey_enddate date,"); //$NON-NLS-1$
 		
 		sql.append("mission_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("mission_id varchar(128),"); //$NON-NLS-1$
@@ -544,12 +536,8 @@ public class DerbyWaypointEngine extends DerbySurveyQueryEngine {
 		it.setConservationAreaUuid(UuidUtils.byteToUUID(rs.getBytes("ca_uuid"))); //$NON-NLS-1$
 		
 		it.setSurveyDesign(rs.getString("surveydesign_name")); //$NON-NLS-1$	
-		it.setSurveyDesignEnd(rs.getDate("surveydesign_enddate") == null ? null : rs.getDate("surveydesign_enddate").toLocalDate());   //$NON-NLS-1$//$NON-NLS-2$
-		it.setSurveyDesignStart(rs.getDate("surveydesign_startdate") == null ? null : rs.getDate("surveydesign_startdate").toLocalDate()); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		it.setSurveyId(rs.getString("survey_id")); //$NON-NLS-1$
-		it.setSurveyStart(rs.getDate("survey_startdate").toLocalDate()); //$NON-NLS-1$
-		it.setSurveyEnd(rs.getDate("survey_enddate").toLocalDate()); //$NON-NLS-1$
 		
 		it.setMissionUuid(UuidUtils.byteToUUID(rs.getBytes("mission_uuid"))); //$NON-NLS-1$
 		it.setMissionId(rs.getString("mission_id")); //$NON-NLS-1$

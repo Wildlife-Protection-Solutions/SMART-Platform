@@ -204,8 +204,6 @@ public class TemplateWizardPage extends WizardPage implements SelectionListener 
 
 		}else{
 			//clear
-			design.setStartDate(null);
-			design.setEndDate(null);
 			design.setDescription(null);
 			design.setConfigurableModel(null);
 			design.setTrackDistanceDirection(false);

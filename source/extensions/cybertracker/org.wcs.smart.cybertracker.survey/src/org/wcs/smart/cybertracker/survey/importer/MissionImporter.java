@@ -204,8 +204,6 @@ public class MissionImporter extends AbstractSmartImporter {
 	private Survey createNewSurvey(CyberTrackerSurvey ctSurvey, String id) {
 		Survey survey = new Survey();
 		survey.setSurveyDesign(ctSurvey.getSurveyDesign());
-		survey.setStartDate(ctSurvey.getStartDate().toLocalDate());
-		survey.setEndDate(ctSurvey.getEndDate().toLocalDate());
 		survey.setId(id);
 		return survey;
 	}

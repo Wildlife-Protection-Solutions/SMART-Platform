@@ -677,12 +677,8 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 		sql.append(" SELECT DISTINCT "); //$NON-NLS-1$
 		sql.append(tablePrefix(SurveyDesign.class) + ".ca_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(SurveyDesign.class) + ".uuid, "); //$NON-NLS-1$
-		sql.append(tablePrefix(SurveyDesign.class) + ".start_date, "); //$NON-NLS-1$
-		sql.append(tablePrefix(SurveyDesign.class) + ".end_date, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Survey.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Survey.class) + ".id, "); //$NON-NLS-1$
-		sql.append(tablePrefix(Survey.class) + ".start_date, "); //$NON-NLS-1$
-		sql.append(tablePrefix(Survey.class) + ".end_date, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Mission.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Mission.class) + ".id, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Mission.class) + ".start_date, "); //$NON-NLS-1$
@@ -719,20 +715,14 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		sql.append("ca_uuid char(16) for bit data,"); //$NON-NLS-1$
-		
 		sql.append("survey_design_uuid char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("survey_design_start date,"); //$NON-NLS-1$
-		sql.append("survey_design_end date,"); //$NON-NLS-1$
-		
 		sql.append("survey_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("survey_id varchar(128),"); //$NON-NLS-1$
-		sql.append("survey_start date,"); //$NON-NLS-1$
-		sql.append("survey_end date,"); //$NON-NLS-1$
 		
 		sql.append("mission_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("mission_id varchar(128),"); //$NON-NLS-1$
-		sql.append("mission_start timestamp,"); //$NON-NLS-1$
-		sql.append("mission_end timestamp,"); //$NON-NLS-1$
+		sql.append("mission_start date,"); //$NON-NLS-1$
+		sql.append("mission_end date,"); //$NON-NLS-1$
 		
 		sql.append("mission_day_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("mission_track_uuid char(16) for bit data,"); //$NON-NLS-1$

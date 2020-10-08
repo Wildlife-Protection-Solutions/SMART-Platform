@@ -22,7 +22,6 @@
 package org.wcs.smart.er.ui;
 
 import java.text.MessageFormat;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -46,7 +45,6 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
-import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.er.hibernate.SurveyFilter;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
@@ -89,7 +87,6 @@ public class SurveyFilteredComboViewer extends FilteredComboViewer<Survey> {
 		this.createNew = createNew;
 		this.createdSurveys = new ArrayList<Survey>();
 
-		getFilter().setDateFilter(DateFilter.LAST_60_DAYS, null, null);
 		getFilter().setSurveyState(null);
 		getFilter().setSurveyDesignKeyFilters(new String[]{sd.getKeyId()});
 		
@@ -267,11 +264,10 @@ public class SurveyFilteredComboViewer extends FilteredComboViewer<Survey> {
         			Survey temp = new Survey();
         			temp.setUuid((UUID)data[0]);
         			temp.setId((String)data[1]);
-        			temp.setStartDate((LocalDate)data[2]);
 
         			SurveyDesign tmp = new SurveyDesign();
-        			tmp.setName((String)data[3]);
-        			tmp.setUuid((UUID)data[4]);
+        			tmp.setName((String)data[2]);
+        			tmp.setUuid((UUID)data[3]);
         			temp.setSurveyDesign(tmp);
         			
         			defaultPresent = defaultPresent || temp.equals(preselectedSurvey);

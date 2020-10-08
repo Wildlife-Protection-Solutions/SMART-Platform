@@ -27,7 +27,6 @@ import java.time.temporal.ChronoUnit;
 
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
-import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.user.UserLevelManager;
@@ -68,35 +67,6 @@ public class SurveyPermissionManager {
 		return Messages.SurveyPermissionManager_InsufficientPrivileges;
 	}
 	
-	/**
-	 * Determines if the given survey and be modified or deleted.  Returns
-	 * null if can be deleted or modified otherwise it returns a string
-	 * describing why it cannot be deleted.
-	 * 
-	 * @param survey
-	 * @param op
-	 * @return
-	 */
-	public String canEditSurvey(Survey survey, ObservationOptions op){
-		if (UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.ADMIN, UserLevelManager.MANAGER)){
-			return null;
-		}
-		if (UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.DATA_ENTRY, UserLevelManager.ANALYST)){
-			if (op.getEditTime() == null || op.getEditTime() < 0){
-				return null;
-			}else if (survey.getStartDate() == null){
-				return null;
-			}else {
-				if (ChronoUnit.DAYS.between(survey.getStartDate(), LocalDate.now()) < op.getEditTime()){
-					return null;
-				}else{
-					return MessageFormat.format(Messages.SurveyPermissionManager_SurveyToOld, new Object[]{op.getEditTime()}) ;
-				}
-			}
-		}
-		return Messages.SurveyPermissionManager_InvalidUserType;
-	}
-
 	/**
 	 * Determines if the current user can edit the given mission.  Will
 	 * return null if can edit otherwise it will return a string

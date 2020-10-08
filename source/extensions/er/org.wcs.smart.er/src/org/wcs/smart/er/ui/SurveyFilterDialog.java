@@ -42,10 +42,9 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
-import org.wcs.smart.common.filter.DateFilterComposite;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.common.filter.IUpdatableView;
 import org.wcs.smart.common.filter.SmartFilterDialog;
 import org.wcs.smart.common.filter.StringFilterComposite;
@@ -77,7 +76,7 @@ public class SurveyFilterDialog extends SmartFilterDialog  {
 	private CheckboxTableViewer lstDesigns ;
 	
 	private StringFilterComposite nameFilter ;
-	private DateFilterComposite dateComp ;
+	
 	/**
 	 * Create the dialog.
 	 * @param parent parent shell
@@ -121,7 +120,6 @@ public class SurveyFilterDialog extends SmartFilterDialog  {
 			}
 		}
 		
-		filter.setDateFilter(dateComp.getDateFilterForModel(), dateComp.getStartDateForModel(), dateComp.getEndDateForModel());
 		filter.setSurveyNameFilter(nameFilter.getComparisonForModel(), nameFilter.getFilterValueForModel());
 	}
 
@@ -151,7 +149,6 @@ public class SurveyFilterDialog extends SmartFilterDialog  {
 			}
 		}
 		
-		dateComp.applyState(filter.getDateFilter(), filter.getStartDate(), filter.getEndDate());
 		nameFilter.applyState(filter.getSurveyNameComparator(), filter.getSurveyNameFilter(), surveyField);
 		updateDesignEnabled();
 	}
@@ -187,22 +184,10 @@ public class SurveyFilterDialog extends SmartFilterDialog  {
 		main.setLayout(new GridLayout(1, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Group g = new Group(main, SWT.NONE);
-		g.setText(Messages.SurveyFilterDialog_DatesGroup);
-		g.setLayout(new GridLayout());
-		((GridLayout)g.getLayout()).marginWidth = 0;
-		((GridLayout)g.getLayout()).marginHeight = 0;
-		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		dateComp = new DateFilterComposite(g, SWT.NONE, this);
 		
+		SmartUiUtils.createHeaderLabel(main, Messages.SurveyFilterDialog_IdGroup);
 		
-		g = new Group(main, SWT.NONE);
-		g.setText(Messages.SurveyFilterDialog_IdGroup);
-		g.setLayout(new GridLayout());
-		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		((GridLayout)g.getLayout()).marginWidth = 0;
-		((GridLayout)g.getLayout()).marginHeight = 0;
-		nameFilter = new StringFilterComposite(g, SWT.NONE, new StringFilterComposite.TextField[]{surveyField});
+		nameFilter = new StringFilterComposite(main, SWT.NONE, new StringFilterComposite.TextField[]{surveyField});
 		
 		
 		SelectionListener listener = new SelectionAdapter() {
@@ -211,13 +196,10 @@ public class SurveyFilterDialog extends SmartFilterDialog  {
 				updateDesignEnabled();	
 			}
 		};
-		g = new Group(main, SWT.NONE);
-		g.setText(Messages.SurveyFilterDialog_DesignGroup);
-		g.setLayout(new GridLayout());
-		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
+		SmartUiUtils.createHeaderLabel(main, Messages.SurveyFilterDialog_DesignGroup);
 
-		Composite tmp = new Composite(g, SWT.NONE);
+		Composite tmp = new Composite(main, SWT.NONE);
 		tmp.setLayout(new GridLayout());
 		tmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		

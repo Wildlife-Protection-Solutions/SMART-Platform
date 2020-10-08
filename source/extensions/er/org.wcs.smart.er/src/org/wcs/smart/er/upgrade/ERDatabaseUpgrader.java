@@ -165,7 +165,12 @@ public class ERDatabaseUpgrader implements IDatabaseUpgrader {
 				"alter table smart.mission add column end_date date",
 				"update smart.mission set start_date = cast(Start_datetime as date), end_date = cast(end_datetime as date)",
 				"alter table smart.mission drop column start_datetime",
-				"alter table smart.mission drop column end_datetime"
+				"alter table smart.mission drop column end_datetime",
+				
+				"alter table smart.survey drop column start_date",
+				"alter table smart.survey drop column end_date",
+				"alter table smart.survey_design drop column start_date",
+				"alter table smart.survey_design drop column end_date",
 		};
 		
 		for (String s : sql){

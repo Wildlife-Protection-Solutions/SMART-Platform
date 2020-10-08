@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.er.ui.mision;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -161,8 +162,8 @@ public class SurveyComposite extends MissionComposite{
 		if (first instanceof Survey){
 			Survey survey = (Survey)first;
 			mission.setSurvey(survey);
-			mission.setStartDate(survey.getStartDate());
-			mission.setEndDate(survey.getEndDate());
+			mission.setStartDate(LocalDate.now());
+			mission.setEndDate(LocalDate.now());
 		}else{
 			mission.setSurvey(null);
 			mission.setStartDate(null);

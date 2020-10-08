@@ -21,22 +21,19 @@
  */
 package org.wcs.smart.er.hibernate;
 
-import java.time.LocalDate;
 import java.util.UUID;
 
 public class SurveyProxy {
 	
 	private UUID uuid;
 	private String id;
-	private LocalDate startDate;
 	private String designName;
 	/**
 	 * Constructor
 	 */
-	public SurveyProxy(String id, UUID uuid, LocalDate startDate, String designName) {
+	public SurveyProxy(String id, UUID uuid, String designName) {
 		this.uuid = uuid;
 		this.id = id;
-		this.startDate = startDate;
 		this.designName = designName;
 	}
 	public UUID getUuid() {
@@ -44,9 +41,6 @@ public class SurveyProxy {
 	}
 	public String getId() {
 		return id;
-	}
-	public LocalDate getStartDate() {
-		return startDate;
 	}
 	public String getDesignName() {
 		return designName;

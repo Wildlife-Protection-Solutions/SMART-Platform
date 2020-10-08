@@ -240,16 +240,7 @@ public class MissionDialog extends SmartStyledTitleDialog {
 				addToMission.setEndDate(md.getDate());
 			}
 		}
-		
-		//update survey dates
-		Survey survey = addToMission.getSurvey();
-		if (survey.getStartDate() == null || newMission.getStartDate().isBefore(survey.getStartDate())){
-			survey.setStartDate(newMission.getStartDate());
-		}
-		if (survey.getEndDate() == null || newMission.getEndDate().isAfter(survey.getEndDate())){
-			survey.setEndDate(newMission.getEndDate());
-		}
-				
+	
 		SurveyHibernateManager.saveMission(addToMission, session, true);
 		
 		CtMissionLink link = new CtMissionLink();
@@ -286,14 +277,6 @@ public class MissionDialog extends SmartStyledTitleDialog {
 		newMission.setStartDate(startDate);
 		newMission.setEndDate(endDate);
 		newMission.setId(SurveyHibernateManager.generateMissionId(session));
-		
-		//update survey dates
-		if (survey.getStartDate() == null || newMission.getStartDate().isBefore(survey.getStartDate())){
-			survey.setStartDate(newMission.getStartDate());
-		}
-		if (survey.getEndDate() == null || newMission.getEndDate().isAfter(survey.getEndDate())){
-			survey.setEndDate(newMission.getEndDate());
-		}
 		
 		session.saveOrUpdate(newMission.getSurvey());
 		SurveyHibernateManager.saveMission(newMission, session, true);
@@ -558,15 +541,7 @@ public class MissionDialog extends SmartStyledTitleDialog {
 					Object x = entry.getValue().cmbSurvey.getSelection();
 					if (x instanceof Survey){
 						Survey selectedSurvey = (Survey) x;
-						if (selectedSurvey.getStartDate() != null && selectedSurvey.getEndDate() != null){
-							Mission ctP = missions.get(ctMission).getMission();
-							if (ctP.getStartDate().isBefore(selectedSurvey.getStartDate()) ||
-									ctP.getEndDate().isAfter(selectedSurvey.getEndDate())){
-								entry.getValue().errItem.setDescriptionText(Messages.MissionDialog_MissionDatesInvalid);
-								entry.getValue().errItem.show();
-								error = true;			
-							}
-						}
+						
 						if (!missions.get(ctMission).getNewSurveyDesign().getUuid().equals(selectedSurvey.getSurveyDesign().getUuid())){
 							entry.getValue().errItem.setDescriptionText(MessageFormat.format(Messages.MissionDialog_DifferentSurveyDesign, missions.get(ctMission).getNewSurveyDesign().getName(), selectedSurvey.getSurveyDesign().getName()));
 							entry.getValue().errItem.show();

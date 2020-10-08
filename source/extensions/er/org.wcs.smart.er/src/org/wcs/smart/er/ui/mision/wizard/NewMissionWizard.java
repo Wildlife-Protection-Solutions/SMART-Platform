@@ -101,8 +101,8 @@ public class NewMissionWizard extends Wizard implements IPageChangingListener{
 			parentSurvey = (Survey) session.get(Survey.class, parentSurveyUuid);
 			parentDesign = parentSurvey.getSurveyDesign();
 			newMission.setSurvey(parentSurvey);
-			newMission.setStartDate(parentSurvey.getStartDate());
-			newMission.setEndDate(parentSurvey.getEndDate());
+			newMission.setStartDate(LocalDate.now());
+			newMission.setEndDate(LocalDate.now());
 		}
 	}
 	

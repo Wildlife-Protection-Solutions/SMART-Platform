@@ -67,12 +67,8 @@ public class SurveyQueryResultItem implements IGeometryResultItem, IAdaptable{
 	private UUID caUuid;
 
 	private String surveyDesign;
-	private LocalDate surveyDesignStart;
-	private LocalDate surveyDesignEnd;
 	
 	private String surveyId;
-	private LocalDate surveyStart;
-	private LocalDate surveyEnd;
 	
 	private String missionId;
 	private LocalDateTime missionStart;
@@ -506,30 +502,6 @@ public class SurveyQueryResultItem implements IGeometryResultItem, IAdaptable{
 	}
 
 	/**
-	 * survey design start
-	 * @return
-	 */
-	public LocalDate getSurveyDesignStart() {
-		return surveyDesignStart;
-	}
-
-	public void setSurveyDesignStart(LocalDate surveyDesignStart) {
-		this.surveyDesignStart = surveyDesignStart;
-	}
-
-	/**
-	 * survey design end
-	 * @return
-	 */
-	public LocalDate getSurveyDesignEnd() {
-		return surveyDesignEnd;
-	}
-
-	public void setSurveyDesignEnd(LocalDate surveyDesignEnd) {
-		this.surveyDesignEnd = surveyDesignEnd;
-	}
-
-	/**
 	 * survey id
 	 * @return
 	 */
@@ -539,30 +511,6 @@ public class SurveyQueryResultItem implements IGeometryResultItem, IAdaptable{
 
 	public void setSurveyId(String surveyId) {
 		this.surveyId = surveyId;
-	}
-
-	/**
-	 * survey start
-	 * @return
-	 */
-	public LocalDate getSurveyStart() {
-		return surveyStart;
-	}
-
-	public void setSurveyStart(LocalDate surveyStart) {
-		this.surveyStart = surveyStart;
-	}
-
-	/**
-	 * survey end
-	 * @return
-	 */
-	public LocalDate getSurveyEnd() {
-		return surveyEnd;
-	}
-
-	public void setSurveyEnd(LocalDate surveyEnd) {
-		this.surveyEnd = surveyEnd;
 	}
 
 	/**

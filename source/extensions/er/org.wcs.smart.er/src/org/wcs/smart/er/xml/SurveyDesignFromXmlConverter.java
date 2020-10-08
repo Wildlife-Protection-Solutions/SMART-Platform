@@ -51,7 +51,6 @@ import org.wcs.smart.er.ui.samplingunit.load.ISamplingUnitImporter;
 import org.wcs.smart.er.xml.model.surveydesign.NamesType;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * Converts an xml Survey Design schema to an SMART SurveyDesign object.
@@ -67,18 +66,6 @@ public class SurveyDesignFromXmlConverter {
 		SurveyDesign surveyDesign = new SurveyDesign();
 		 
 		surveyDesign.setConservationArea(SmartDB.getCurrentConservationArea());
-		
-		if(xml.getStartDate() != null){
-			surveyDesign.setStartDate(SmartUtils.toLocalDate(xml.getStartDate()));
-		}else{
-			surveyDesign.setStartDate(null);
-		}
-		
-		if(xml.getEndDate()!= null){
-			surveyDesign.setEndDate(SmartUtils.toLocalDate(xml.getEndDate()));
-		}else{
-			surveyDesign.setEndDate(null);
-		}
 		surveyDesign.setTrackDistanceDirection(xml.isTrackDistanceDirection());
 		surveyDesign.setTrackObserver(xml.isTrackObserver());
 		surveyDesign.setDescription(xml.getDescription());

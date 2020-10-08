@@ -91,8 +91,6 @@ public class ErLabelProvider implements IErLabelProvider{
 		}
 		
 		if (item.equals(SD_DESCRIPTION_COL_KEY)) return Messages.ErLabelProvider_DescriptionColumn;
-		if (item.equals(SD_ENDDATE_COL_KEY)) return Messages.ErLabelProvider_EndDateColumn;
-		if (item.equals(SD_STARTDATE_COL_KEY)) return Messages.ErLabelProvider_StartDateColumn;
 		if (item.equals(SD_STATUS_COL_KEY)) return Messages.ErLabelProvider_StatusColumn;
 		if (item.equals(SD_KEY_COL_KEY)) return Messages.ErLabelProvider_KeyColumn;
 		if (item.equals(SD_NAME_COL_KEY)) return Messages.ErLabelProvider_NameColumn;

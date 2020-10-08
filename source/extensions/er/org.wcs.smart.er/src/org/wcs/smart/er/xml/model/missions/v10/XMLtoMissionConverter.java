@@ -225,18 +225,6 @@ public class XMLtoMissionConverter implements IXmlToMissionConverter{
 	private void createAndSetSurvey(Mission m, MissionType xml) {
 		Survey survey = new Survey();
 		
-		
-		if(xml.getSurvey().getEndDate() != null){
-			survey.setEndDate(SmartUtils.toLocalDate(xml.getSurvey().getEndDate()));
-		}else{
-			survey.setEndDate(null);
-		}
-		if (xml.getSurvey().getStartDate() != null) {
-			survey.setStartDate(SmartUtils.toLocalDate(xml.getSurvey().getStartDate()));
-		}else{
-			survey.setStartDate(null);
-		}
-		
 		survey.setId(xml.getSurvey().getId());
 		
 		ArrayList<Mission> missionList = new ArrayList<Mission>();

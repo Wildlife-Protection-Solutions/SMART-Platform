@@ -27,7 +27,6 @@ import org.hibernate.Session;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.surveydesign.ConfigurableModelComposite;
-import org.wcs.smart.er.ui.surveydesign.DateComposites;
 import org.wcs.smart.er.ui.surveydesign.DescriptionComposite;
 import org.wcs.smart.er.ui.surveydesign.DistanceDirectionComposite;
 import org.wcs.smart.er.ui.surveydesign.MissionPropertiesComposite;
@@ -65,7 +64,6 @@ public class SurveyDesignCompositeFactory {
 			try(Session s = HibernateManager.openSession()){
 				return new NameIdComposite(getSurveyDesigns(s));
 			}
-		case DATES:					return new DateComposites();
 		case MODEL:
 			try(Session s = HibernateManager.openSession()){
 				return new ConfigurableModelComposite(getConfigurableModels(s));
@@ -93,7 +91,6 @@ public class SurveyDesignCompositeFactory {
 	 */
 	public enum PanelType {
 		NAME,
-		DATES,
 		MODEL,
 		STATUS,
 		MISSION_PROPERTIES,

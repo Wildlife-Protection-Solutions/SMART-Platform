@@ -22,9 +22,6 @@
 package org.wcs.smart.er.ui.survey;
 
 import java.text.MessageFormat;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.util.UUID;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -33,15 +30,11 @@ import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
@@ -50,14 +43,9 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
-import org.wcs.smart.er.SurveyPermissionManager;
 import org.wcs.smart.er.internal.Messages;
-import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.Survey;
-import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
@@ -74,10 +62,6 @@ public class EditSurveyDialog extends SmartStyledTitleDialog{
 	private Text txtDesign;
 	private Text txtId;
 	private ControlDecoration cdId;
-	private DateTime startDate;
-	private ControlDecoration cdStart;
-	private DateTime endDate;
-	private ControlDecoration cdEnd;
 	private String canEdit;
 	private Session session;
 	
@@ -88,8 +72,6 @@ public class EditSurveyDialog extends SmartStyledTitleDialog{
 		super(parentShell);
 		this.session = HibernateManager.openSession();
 		this.toEdit = (Survey) session.load(Survey.class, toEdit);
-		this.canEdit = SurveyPermissionManager.INSTANCE.canEditSurvey(this.toEdit,
-				ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), session));
 	}
 	
 	@Override
@@ -166,29 +148,6 @@ public class EditSurveyDialog extends SmartStyledTitleDialog{
 		});
 		cdId = createDecoration(txtId);
 		
-		l = new Label(part, SWT.NONE);
-		l.setText(Messages.EditSurveyDialog_StartLabel);
-		
-		SelectionListener listener = new SelectionAdapter() {
-			
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				validate();
-			}
-		};
-		startDate = new DateTime(part, SWT.DATE | SWT.LONG | SWT.DROP_DOWN);
-		startDate.addSelectionListener(listener);
-		startDate.setEnabled(canEdit == null);
-		cdStart = createDecoration(startDate);
-		
-		l = new Label(part, SWT.NONE);
-		l.setText(Messages.EditSurveyDialog_EndLabel);
-		
-		endDate = new DateTime(part, SWT.DATE | SWT.LONG | SWT.DROP_DOWN);
-		endDate.addSelectionListener(listener);
-		endDate.setEnabled(canEdit == null);
-		cdEnd = createDecoration(endDate);
-		
 		setTitle(toEdit.getId());
 		getShell().setText(Messages.EditSurveyDialog_ShellTitle);
 		setMessage(Messages.EditSurveyDialog_Message);
@@ -207,19 +166,10 @@ public class EditSurveyDialog extends SmartStyledTitleDialog{
 		return cd;
 	}
 	
-	private void setIcon(ControlDecoration cd, boolean error){
-		if (error){
-			cd.setImage(FieldDecorationRegistry.getDefault()
-					.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
-		}else{
-			cd.setImage(FieldDecorationRegistry.getDefault()
-					.getFieldDecoration(FieldDecorationRegistry.DEC_WARNING).getImage());
-		}
-	}
+
 	
 	private boolean save(){
-		toEdit.setEndDate(SmartUtils.toDate(endDate));
-		toEdit.setStartDate(SmartUtils.toDate(startDate));
+
 		toEdit.setId(txtId.getText());
 		
 		session.beginTransaction();
@@ -259,66 +209,7 @@ public class EditSurveyDialog extends SmartStyledTitleDialog{
 			cdId.hide();
 		}
 		
-		LocalDate start = SmartUtils.toDate(startDate);
-		LocalDate end = SmartUtils.toDate(endDate);
-		if (end.isBefore(start)){
-			setIcon(cdEnd, true);
-			cdEnd.setDescriptionText(Messages.EditSurveyDialog_InvalidStart);
-			cdEnd.show();
-			error = true;
-		}else{
-			cdEnd.hide();
-		}
-		
-		cdStart.hide();
-		
-		SurveyDesign design = (SurveyDesign) toEdit.getSurveyDesign();
-		boolean datewarn = false;
-		if (design.getStartDate() != null){
-			//ensure start date is not before design start date
-			//ensure end date is not before design start date
-			if (start.isBefore(design.getStartDate())){
-				datewarn = true;
-			}
-			if (end.isBefore(design.getStartDate())){
-				datewarn = true;
-			}
-		}
-		if (design.getEndDate() != null){
-			//ensure start date is not after end date
-			//ensure end date is not after end date
-			if (start.isAfter(design.getEndDate())){
-				datewarn = true;
-			}
-			if (end.isAfter(design.getEndDate())){
-				datewarn = true;
-			}
-		}
-			
-		if (datewarn){
-			setIcon(cdEnd, false);
-			cdEnd.setDescriptionText(
-					MessageFormat.format(Messages.EditSurveyDialog_InvalidRange,
-							new Object[]{
-								design.getStartDate() == null ? Messages.EditSurveyDialog_UndefinedDate : DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(design.getStartDate()),
-										design.getEndDate() == null ? Messages.EditSurveyDialog_UndefinedDate : DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(design.getEndDate())
-								}
-							));
-			cdEnd.show();
-		}
-		
-		//validate missions; all missions must be within survey dates
-		for (Mission m : toEdit.getMissions()){
-			if (m.getStartDate().isBefore(start) || m.getEndDate().isAfter(end)){
-				setIcon(cdEnd, true);
-				cdEnd.setDescriptionText(
-					MessageFormat.format(Messages.EditSurveyDialog_MissionDateError,
-							new Object[]{m.getId(), DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(m.getStartDate()), DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(m.getEndDate())}));
-				
-				cdEnd.show();
-				error = true;
-			}
-		}
+	
 		if (getButton(OK) != null){
 			getButton(OK).setEnabled(!error);
 		}
@@ -326,11 +217,7 @@ public class EditSurveyDialog extends SmartStyledTitleDialog{
 	
 	private void initControls(){
 		txtDesign.setText(toEdit.getSurveyDesign().getName());
-		txtId.setText(toEdit.getId());
-		
-		SmartUtils.initDateTimeWidget(startDate, toEdit.getStartDate());
-		SmartUtils.initDateTimeWidget(endDate, toEdit.getEndDate());
-		
+		txtId.setText(toEdit.getId());		
 	}
 	
 	@Override

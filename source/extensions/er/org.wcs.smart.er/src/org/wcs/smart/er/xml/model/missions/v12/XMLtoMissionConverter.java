@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.er.xml.model.missions.v11;
+package org.wcs.smart.er.xml.model.missions.v12;
 
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -111,7 +111,7 @@ public class XMLtoMissionConverter implements IXmlToMissionConverter{
 	}
 	
 	private MissionType readDataModel(InputStream file) throws JAXBException{
-		JAXBContext context = JAXBContext.newInstance("org.wcs.smart.er.xml.model.missions.v11"); //$NON-NLS-1$
+		JAXBContext context = JAXBContext.newInstance("org.wcs.smart.er.xml.model.missions.v12"); //$NON-NLS-1$
 		Unmarshaller un = context.createUnmarshaller();	
 		@SuppressWarnings("unchecked")
 		JAXBElement<MissionType> o = (JAXBElement<MissionType>) un.unmarshal(file);

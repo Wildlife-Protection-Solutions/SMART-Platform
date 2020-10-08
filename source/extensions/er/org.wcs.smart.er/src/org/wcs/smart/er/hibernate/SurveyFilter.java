@@ -21,11 +21,8 @@
  */
 package org.wcs.smart.er.hibernate;
 
-import java.time.LocalDate;
-
 import org.hibernate.Session;
 import org.hibernate.query.Query;
-import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.common.filter.StringFilterComposite.StringComparison;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.hibernate.SmartDB;
@@ -40,10 +37,6 @@ public class SurveyFilter {
 
 	private SurveyDesign.State state = null;
 	
-	private DateFilter dateFilter = null;
-	private LocalDate startDate;
-	private LocalDate endDate;
-	
 	private String surveyNameFilter = null;
 	private StringComparison stringComparator = null;
 	
@@ -54,14 +47,6 @@ public class SurveyFilter {
 	 */
 	public SurveyFilter(){
 		setDefaults();
-	}
-	
-	/**
-	 * 
-	 * @return the start date filter
-	 */
-	public DateFilter getDateFilter(){
-		return this.dateFilter;
 	}
 	
 	/**
@@ -78,23 +63,6 @@ public class SurveyFilter {
 		return this.surveyNameFilter;
 	}
 	
-	/**
-	 * 
-	 * @return start date for custom start date filter
-	 */
-	public LocalDate getStartDate(){
-		return this.startDate;
-	}
-	
-	/**
-	 * 
-	 * @return end date for custom start date filter
-	 */
-	public LocalDate getEndDate(){
-		return this.endDate;
-	}
-	
-
 	/**
 	 * 
 	 * @return survey state filter or null if all or custom list selected
@@ -115,31 +83,10 @@ public class SurveyFilter {
 	 * Resets all values to the default
 	 */
 	public void setDefaults(){
-		this.dateFilter = null;
-		this.endDate = null;
-		this.startDate = null;
-		
 		this.state = SurveyDesign.State.ACTIVE;
-		
 		this.surveyNameFilter = null;
 		this.stringComparator = null;
 	}
-	
-	
-	/**
-	 * Sets the start date filter.  
-	 * Set to null to include all dates;
-	 * 
-	 * @param dFilter date filter
-	 * @param start the start date for custom filter; null if not custom date filter
-	 * @param end the end date for custom filter; null if not custom date filter
-	 */
-	public void setDateFilter(DateFilter dFilter, LocalDate start, LocalDate end){
-		this.dateFilter = dFilter;
-		this.startDate = start;
-		this.endDate = end;
-	}
-	
 	
 	/**
 	 * Sets the survey states in include.  Set to null
@@ -182,7 +129,7 @@ public class SurveyFilter {
 	public Query<?> buildQuery(Session s){ 
 		StringBuilder str = new StringBuilder();
 		
-		str.append("SELECT s.uuid, s.id, s.startDate, sd.name, sd.uuid "); //$NON-NLS-1$
+		str.append("SELECT s.uuid, s.id, sd.name, sd.uuid "); //$NON-NLS-1$
 		str.append("FROM Survey s JOIN s.surveyDesign sd "); //$NON-NLS-1$
 		str.append("WHERE sd.conservationArea = :ca " ); //$NON-NLS-1$
 
@@ -220,22 +167,11 @@ public class SurveyFilter {
 			str.append(" lower(s.id) like lower(:name) "); //$NON-NLS-1$
 			
 		}
-		if (dateFilter != null){
-			if (and){
-				str.append(" AND ("); //$NON-NLS-1$
-				and = false;
-			}
-			if (or){
-				str.append(" AND "); //$NON-NLS-1$
-			}
-			or = true;
-			str.append(" ( (s.startDate >= :date1 and s.endDate <= :date2) or s.startDate is null or s.endDate is null ) "); //$NON-NLS-1$
-		}
 		if (!and){
 			str.append(")"); //$NON-NLS-1$
 		}
 		
-		str.append("ORDER BY s.startDate desc, s.id asc "); //$NON-NLS-1$
+		str.append("ORDER BY  s.id asc "); //$NON-NLS-1$
 		
 		Query<?> query = s.createQuery(str.toString())
 				.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
@@ -252,20 +188,7 @@ public class SurveyFilter {
 			}else{
 				query.setParameter("name", this.surveyNameFilter); //$NON-NLS-1$
 			}
-		}
-		if (dateFilter != null) {
-			LocalDate start = dateFilter.getStartDate();
-			if (start == null){
-				start = startDate;
-			}
-			LocalDate end = dateFilter.getEndDate();
-			if (end == null){
-				end = endDate;
-			}
-			query.setParameter("date1", start); //$NON-NLS-1$
-			query.setParameter("date2", end); //$NON-NLS-1$
-		}
-		
+		}		
 		return query;
 	}
 

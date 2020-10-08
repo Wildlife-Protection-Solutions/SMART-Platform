@@ -113,14 +113,8 @@ public class MissionToXmlConverter {
 	
 	private static SurveyType convertSurvey(Survey survey) throws DatatypeConfigurationException {
 		SurveyType xmlSurvey = new SurveyType();
-		
-		xmlSurvey.setEndDate(SmartUtils.toXmlDate(survey.getEndDate()));
-		xmlSurvey.setStartDate(SmartUtils.toXmlDate(survey.getStartDate()) );
 		xmlSurvey.setId(survey.getId());
-		
 		xmlSurvey.setSurveyDesignKeyId(survey.getSurveyDesign().getKeyId());
-
-		
 		return xmlSurvey;
 	}
 

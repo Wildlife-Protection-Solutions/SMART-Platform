@@ -45,11 +45,7 @@ public class SurveyQueryLabelProvider implements ISurveyQueryLabelProvider {
 		if (item == SurveyQueryColumn.FixedColumns.CA_ID){ return Messages.SurveyQueryColumn_CaIdLabel;}
 		if (item == SurveyQueryColumn.FixedColumns.CA_NAME){ return Messages.SurveyQueryColumn_CaNameLabel;}
 		if (item == SurveyQueryColumn.FixedColumns.SURVEY_DESIGN){ return Messages.SurveyQueryColumn_SurveyDesignLabel;}
-		if (item == SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_START){ return Messages.SurveyQueryColumn_SurveyDesignStartdateLabel;}
-		if (item == SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_END){ return Messages.SurveyQueryColumn_SurveyDesignEnddateLabel;}
 		if (item == SurveyQueryColumn.FixedColumns.SURVEY){ return Messages.SurveyQueryColumn_SurveyIdLabel;}
-		if (item == SurveyQueryColumn.FixedColumns.SURVEY_START){ return Messages.SurveyQueryColumn_SurveyStartLabel;}
-		if (item == SurveyQueryColumn.FixedColumns.SURVEY_END){ return Messages.SurveyQueryColumn_SurveyEndLabel;}
 		if (item == SurveyQueryColumn.FixedColumns.MISSION){ return Messages.SurveyQueryColumn_MissionIdLabel;}
 		if (item == SurveyQueryColumn.FixedColumns.MISSION_START){ return Messages.SurveyQueryColumn_MissionStartLabel;}
 		if (item == SurveyQueryColumn.FixedColumns.MISSION_END){ return Messages.SurveyQueryColumn_MissionEndLabel;}

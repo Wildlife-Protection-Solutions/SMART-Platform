@@ -55,10 +55,8 @@ public class SurveyDesignPropertyTable extends SmartBirtTable {
 		String[] names = new String[sd.getProperties().size() + 6];
 		names[0] = "sd:name"; //$NON-NLS-1$
 		names[1] = "sd:status"; //$NON-NLS-1$
-		names[2] = "sd:startdate"; //$NON-NLS-1$
-		names[3] = "sd:enddate"; //$NON-NLS-1$
-		names[4] = "sd:key"; //$NON-NLS-1$
-		names[5] = "sd:description"; //$NON-NLS-1$
+		names[2] = "sd:key"; //$NON-NLS-1$
+		names[3] = "sd:description"; //$NON-NLS-1$
 		
 		int i = 6;
 		for (SurveyDesignProperty p : sd.getProperties()){
@@ -75,10 +73,8 @@ public class SurveyDesignPropertyTable extends SmartBirtTable {
 		
 		names[0] = lblProvider.getLabel(IErLabelProvider.SD_NAME_COL_KEY, connection.getCurrentLocale());
 		names[1] = lblProvider.getLabel(IErLabelProvider.SD_STATUS_COL_KEY, connection.getCurrentLocale());
-		names[2] = lblProvider.getLabel(IErLabelProvider.SD_STARTDATE_COL_KEY, connection.getCurrentLocale());
-		names[3] = lblProvider.getLabel(IErLabelProvider.SD_ENDDATE_COL_KEY, connection.getCurrentLocale());
-		names[4] = lblProvider.getLabel(IErLabelProvider.SD_KEY_COL_KEY, connection.getCurrentLocale());
-		names[5] = lblProvider.getLabel(IErLabelProvider.SD_DESCRIPTION_COL_KEY, connection.getCurrentLocale());
+		names[2] = lblProvider.getLabel(IErLabelProvider.SD_KEY_COL_KEY, connection.getCurrentLocale());
+		names[3] = lblProvider.getLabel(IErLabelProvider.SD_DESCRIPTION_COL_KEY, connection.getCurrentLocale());
 		
 		int i = 6;
 		for (SurveyDesignProperty p : sd.getProperties()){
@@ -119,14 +115,10 @@ public class SurveyDesignPropertyTable extends SmartBirtTable {
 		}else if (index == 1){
 			return e.getState().getGuiName(Locale.getDefault());
 		}else if (index == 2){
-			return e.getStartDate();
-		}else if (index == 3){
-			return e.getEndDate();
-		}else if (index == 4){
 			return e.getKeyId();
-		}else if (index == 5){
+		}else if (index == 3){
 			return e.getDescription();
-		}else if (index >= 6){
+		}else if (index >= 4){
 			return sd.getProperties().get(index - 6).getValue();
 		}
 		return ""; //$NON-NLS-1$
