@@ -21,8 +21,12 @@
  */
 package org.wcs.smart.ui.internal.backup;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.MessageFormat;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -33,6 +37,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.application.DisplayAccess;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.SmartProperties;
 import org.wcs.smart.backup.DerbyRestoreEngine;
 import org.wcs.smart.internal.Messages;
 
@@ -43,6 +48,18 @@ import org.wcs.smart.internal.Messages;
  */
 public class RestoreHandler {
 
+	private long fileSize(Path p) throws IOException{
+		return Files.walk(p).mapToLong(f->{
+				try {
+					return Files.size(f);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				return 0;
+			}).sum();
+		
+	}
 	/**
 	 * Runs the handler
 	 * @param shell the current shell
@@ -50,6 +67,26 @@ public class RestoreHandler {
 	 */
 	public boolean execute(final Shell shell) {
 
+		
+		//#2727 check disk space
+		try {
+			Path filestore = Paths.get(SmartProperties.getInstance().getProperty(SmartProperties.PROP_FILESTORE));
+			Path database = Paths.get(SmartProperties.getInstance().getProperty(SmartProperties.PROP_SMART_DB));
+			
+			long size = fileSize(filestore)  + fileSize(database);
+			long remaining = Files.getFileStore(filestore).getUsableSpace();
+			if (remaining <= size * 1.01) {
+				//warning not enough space
+				if (!MessageDialog.openQuestion(shell, Messages.RestoreHandler_DiskSpaceTitle, 
+						MessageFormat.format(Messages.RestoreHandler_DiskSpaceMessage, size/Math.pow(10, 9), remaining/Math.pow(10, 9)))){
+					return false;
+				}
+			}
+		}catch (IOException ex) {
+			SmartPlugIn.log(ex.getMessage(), ex);
+		}
+		
+		if (true) return false;
 		if (!MessageDialog.openConfirm(shell, Messages.RestoreHandler_ConfirmRestore_DialogTitle,
 				Messages.RestoreHandler_ConfirmRestore_DialogMessage )){
 			return false;

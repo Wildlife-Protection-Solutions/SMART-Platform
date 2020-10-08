@@ -1153,6 +1153,8 @@ public class Messages extends NLS {
 	public static String RestoreHandler_DialogMessage;
 	public static String RestoreHandler_DialogShellTitle;
 	public static String RestoreHandler_DialogTitle;
+	public static String RestoreHandler_DiskSpaceMessage;
+	public static String RestoreHandler_DiskSpaceTitle;
 	public static String RestoreHandler_Error_DialogTitle;
 	public static String RestoreHandler_Error_Message;
 	public static String RestoreHandler_ReportComplete_DialogMessage3;
