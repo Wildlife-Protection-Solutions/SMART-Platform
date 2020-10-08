@@ -55,8 +55,6 @@ public class ErLabelProvider implements IErLabelProvider{
 		if (item.equals(SU_TABLE_LONGNAME_KEY)) return Messages.getString("ErLabelProvider.SuTableLogName", l); //$NON-NLS-1$
 		if (item.equals(SD_TABLE_LONGNAME_KEY)) return Messages.getString("ErLabelProvider.SuveyDesignTableName", l); //$NON-NLS-1$
 		if (item.equals(SD_DESCRIPTION_COL_KEY)) return Messages.getString("ErLabelProvider.DescriptionColumn", l); //$NON-NLS-1$
-		if (item.equals(SD_ENDDATE_COL_KEY)) return Messages.getString("ErLabelProvider.EndDateColumn", l); //$NON-NLS-1$
-		if (item.equals(SD_STARTDATE_COL_KEY)) return Messages.getString("ErLabelProvider.StartDateColumn", l); //$NON-NLS-1$
 		if (item.equals(SD_STATUS_COL_KEY)) return Messages.getString("ErLabelProvider.StatusColumn", l); //$NON-NLS-1$
 		if (item.equals(SD_KEY_COL_KEY)) return Messages.getString("ErLabelProvider.KeyColumn", l); //$NON-NLS-1$
 		if (item.equals(SD_NAME_COL_KEY)) return Messages.getString("ErLabelProvider.NameColumn", l); //$NON-NLS-1$

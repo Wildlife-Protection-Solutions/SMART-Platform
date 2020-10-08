@@ -4204,8 +4204,6 @@ CREATE TABLE smart.survey (
     uuid uuid NOT NULL,
     survey_design_uuid uuid NOT NULL,
     id character varying(128) NOT NULL,
-    start_date date,
-    end_date date,
     PRIMARY KEY (uuid)
 );
 
@@ -4215,8 +4213,6 @@ CREATE TABLE smart.survey_design (
     ca_uuid uuid NOT NULL,
     keyid character varying(128) NOT NULL,
     state character varying(16) NOT NULL,
-    start_date date,
-    end_date date,
     distance_direction boolean DEFAULT false NOT NULL,
     description character varying,
     configurable_model_uuid uuid,

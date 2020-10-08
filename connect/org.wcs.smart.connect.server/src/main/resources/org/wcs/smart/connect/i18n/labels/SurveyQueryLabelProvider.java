@@ -45,11 +45,7 @@ public class SurveyQueryLabelProvider implements ISurveyQueryLabelProvider {
 		if (item == SurveyQueryColumn.FixedColumns.CA_ID){ return Messages.getString("SurveyQueryLabelProvider.CaId", l);} //$NON-NLS-1$
 		if (item == SurveyQueryColumn.FixedColumns.CA_NAME){ return Messages.getString("SurveyQueryLabelProvider.CaNameLabel", l);} //$NON-NLS-1$
 		if (item == SurveyQueryColumn.FixedColumns.SURVEY_DESIGN){ return Messages.getString("SurveyQueryLabelProvider.SdLabel", l);} //$NON-NLS-1$
-		if (item == SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_START){ return Messages.getString("SurveyQueryLabelProvider.SdStartDateLabel", l);} //$NON-NLS-1$
-		if (item == SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_END){ return Messages.getString("SurveyQueryLabelProvider.SdEndDateLabel", l);} //$NON-NLS-1$
 		if (item == SurveyQueryColumn.FixedColumns.SURVEY){ return Messages.getString("SurveyQueryLabelProvider.SurveyIdLabel", l);} //$NON-NLS-1$
-		if (item == SurveyQueryColumn.FixedColumns.SURVEY_START){ return Messages.getString("SurveyQueryLabelProvider.SurveyStartDateLabel", l);} //$NON-NLS-1$
-		if (item == SurveyQueryColumn.FixedColumns.SURVEY_END){ return Messages.getString("SurveyQueryLabelProvider.SurveyEndDateLabel", l);} //$NON-NLS-1$
 		if (item == SurveyQueryColumn.FixedColumns.MISSION){ return Messages.getString("SurveyQueryLabelProvider.MissionIdLabel", l);} //$NON-NLS-1$
 		if (item == SurveyQueryColumn.FixedColumns.MISSION_START){ return Messages.getString("SurveyQueryLabelProvider.MissionStartDateLabel", l);} //$NON-NLS-1$
 		if (item == SurveyQueryColumn.FixedColumns.MISSION_END){ return Messages.getString("SurveyQueryLabelProvider.MissionEndDateLabel", l);} //$NON-NLS-1$

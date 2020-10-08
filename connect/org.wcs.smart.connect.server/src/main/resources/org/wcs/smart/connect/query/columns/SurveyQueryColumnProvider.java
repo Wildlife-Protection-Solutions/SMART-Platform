@@ -163,14 +163,8 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 		
 		//mission property columns
 		cols.addAll(getMissionPropertyColumns(session, l, caFilter, sd));
-		
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN, l));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_START, l));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_END, l));
-		
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY, l));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_START, l));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_END, l));
 	
 		
 		return cols;
@@ -206,11 +200,6 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 		cols.addAll(getSamplingUnitAttributeColumns(session, l, caFilter, sd));
 				
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN, l));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_START, l));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_END, l));
-		
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_START, l));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_END, l));
 		
 		return cols;
 	}
@@ -226,11 +215,7 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.CA_NAME, l));
 		}
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN, l));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_START, l));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_END, l));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY, l));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_START, l));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_END, l));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION, l));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_START, l));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_END, l));
@@ -277,11 +262,7 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.CA_NAME, l));
 		}
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN, l));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_START, l));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_END, l));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY, l));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_START, l));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_END, l));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION, l));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_START, l));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_END, l));

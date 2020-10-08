@@ -191,13 +191,9 @@ public class PsqlErWaypointEngine extends PsqlErEngine {
 		sql.append(" SELECT DISTINCT "); //$NON-NLS-1$
 		sql.append(tablePrefix(SurveyDesign.class) + ".ca_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(SurveyDesign.class) + ".uuid, "); //$NON-NLS-1$
-		sql.append(tablePrefix(SurveyDesign.class) + ".start_date, "); //$NON-NLS-1$
-		sql.append(tablePrefix(SurveyDesign.class) + ".end_date, "); //$NON-NLS-1$
 		
 		sql.append(tablePrefix(Survey.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Survey.class) + ".id, "); //$NON-NLS-1$
-		sql.append(tablePrefix(Survey.class) + ".start_date, "); //$NON-NLS-1$
-		sql.append(tablePrefix(Survey.class) + ".end_date, "); //$NON-NLS-1$
 		
 		sql.append(tablePrefix(Mission.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Mission.class) + ".id, "); //$NON-NLS-1$
@@ -228,18 +224,14 @@ public class PsqlErWaypointEngine extends PsqlErEngine {
 		sql.append("ca_uuid UUID,"); //$NON-NLS-1$
 		
 		sql.append("surveydesign_uuid UUID,"); //$NON-NLS-1$
-		sql.append("surveydesign_startdate date,"); //$NON-NLS-1$
-		sql.append("surveydesign_enddate date,"); //$NON-NLS-1$
-		
+
 		sql.append("survey_uuid UUID,"); //$NON-NLS-1$
 		sql.append("survey_id varchar(128),"); //$NON-NLS-1$
-		sql.append("survey_startdate date,"); //$NON-NLS-1$
-		sql.append("survey_enddate date,"); //$NON-NLS-1$
 		
 		sql.append("mission_uuid UUID,"); //$NON-NLS-1$
 		sql.append("mission_id varchar(128),"); //$NON-NLS-1$
-		sql.append("mission_startdate timestamp,"); //$NON-NLS-1$
-		sql.append("mission_enddate timestamp,"); //$NON-NLS-1$
+		sql.append("mission_startdate date,"); //$NON-NLS-1$
+		sql.append("mission_enddate date,"); //$NON-NLS-1$
 		
 		sql.append("samplingunit_uuid UUID,"); //$NON-NLS-1$
 		sql.append("samplingunit_id varchar(128),"); //$NON-NLS-1$

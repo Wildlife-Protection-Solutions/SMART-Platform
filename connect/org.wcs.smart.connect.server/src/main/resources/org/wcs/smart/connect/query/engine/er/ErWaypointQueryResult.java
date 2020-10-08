@@ -179,13 +179,8 @@ public class ErWaypointQueryResult extends ErSurveyQueryResultSet implements IPa
 		it.setConservationAreaUuid((UUID)rs.getObject("ca_uuid")); //$NON-NLS-1$
 		
 		it.setSurveyDesign(rs.getString("surveydesign_name")); //$NON-NLS-1$
-		it.setSurveyDesignEnd(rs.getDate("surveydesign_enddate") == null ? null : rs.getDate("surveydesign_enddate").toLocalDate() ); //$NON-NLS-1$ //$NON-NLS-2$
-		it.setSurveyDesignStart(rs.getDate("surveydesign_startdate") == null ? null : rs.getDate("surveydesign_startdate").toLocalDate()); //$NON-NLS-1$ //$NON-NLS-2$
-		
 		it.setSurveyId(rs.getString("survey_id")); //$NON-NLS-1$
-		it.setSurveyStart(rs.getDate("survey_startdate").toLocalDate()); //$NON-NLS-1$
-		it.setSurveyEnd(rs.getDate("survey_enddate").toLocalDate()); //$NON-NLS-1$
-		
+
 		it.setMissionUuid((UUID)rs.getObject("mission_uuid")); //$NON-NLS-1$
 		it.setMissionId(rs.getString("mission_id")); //$NON-NLS-1$
 		it.setMissionStart(rs.getTimestamp("mission_startdate").toLocalDateTime()); //$NON-NLS-1$

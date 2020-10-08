@@ -813,6 +813,11 @@ update smart.mission set start_date = cast(Start_datetime as date), end_date = c
 alter table smart.mission drop column start_datetime;
 alter table smart.mission drop column end_datetime;
 
+alter table smart.survey drop column start_date;
+alter table smart.survey drop column end_date;
+alter table smart.survey_design drop column start_date;
+alter table smart.survey_design drop column end_date;
+
 ---------- timezones -------
 -- assumes the timezone of the database server is the same as the web server
 alter table connect.data_queue alter column uploaded_date set data type timestamp with time zone;
