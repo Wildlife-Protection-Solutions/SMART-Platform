@@ -45,6 +45,7 @@ import org.geotools.referencing.CRS;
 import org.geotools.styling.Style;
 import org.hibernate.Session;
 import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Envelope;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.project.internal.Layer;
@@ -71,12 +72,15 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.ui.WaypointInfoShellProvider;
 import org.wcs.smart.udig.EditPointTool;
 import org.wcs.smart.udig.IMapEditManager;
 import org.wcs.smart.udig.UndoTool;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
+import org.wcs.smart.ui.map.tool.IInfoToolProvider;
+import org.wcs.smart.ui.map.tool.IInfoToolShellProvider;
 import org.wcs.smart.util.JobUtil;
 import org.wcs.smart.util.ReprojectUtils;
 
@@ -233,6 +237,9 @@ public class MissionMapPage extends SmartMapEditorPart {
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
         addLayers();
+        
+        getMap().getBlackboard().put(IInfoToolProvider.BLACKBOARD_KEY, getMapInfoProvider());
+        getMap().getBlackboard().put(IInfoToolShellProvider.BLACKBOARD_KEY, getInfoShellProvider());
         
         if (SurveyPermissionManager.INSTANCE.canEditWaypointLocations() == null){
         	getMap().getBlackboard().put(IMapEditManager.BLACKBOARD_KEY, getEditManager());
@@ -425,4 +432,48 @@ public class MissionMapPage extends SmartMapEditorPart {
 			}
 		};
     }
+	
+	 private IInfoToolShellProvider getInfoShellProvider() {
+	    	return new WaypointInfoShellProvider(getSite().getShell(), super.mapViewer.getControl());
+	    }
+	    
+	    private IInfoToolProvider getMapInfoProvider(){
+			return new IInfoToolProvider(){
+				@Override
+				public InfoPoint findFeature(int x, int y, IViewportModel vm) {
+					try{
+						int xll = x - 5;
+						int yll = y - 5;
+						int xur = x + 5;
+						int yur = y + 5;
+						
+						Coordinate worldll = vm.pixelToWorld(xll, yll);
+						Coordinate worldur = vm.pixelToWorld(xur, yur);
+						
+						Coordinate dbll = ReprojectUtils.reproject(worldll.x, worldll.y, vm.getCRS(), SmartDB.DATABASE_CRS);
+						Coordinate dbur = ReprojectUtils.reproject(worldur.x, worldur.y, vm.getCRS(), SmartDB.DATABASE_CRS);
+						
+						Envelope env = new Envelope(dbll,  dbur);
+
+						//find all waypoints in bounding box
+						List<Waypoint> waypoints = new ArrayList<>();
+						for(MissionDay md : parentEditor.getMission().getMissionDays()) {
+							for (SurveyWaypoint pw : md.getWaypoints()) {
+								if (env.contains(pw.getWaypoint().getX(), pw.getWaypoint().getY())) {
+									waypoints.add(pw.getWaypoint());
+								}
+							}
+						}
+						
+						if (waypoints.isEmpty()) return null;
+						Coordinate px = ReprojectUtils.reproject(waypoints.get(0).getX(), waypoints.get(0).getY(), SmartDB.DATABASE_CRS, vm.getCRS());
+						return new InfoPoint(vm.worldToPixel(px), waypoints, null);	
+					}catch (Exception ex) {
+						EcologicalRecordsPlugIn.log(ex.getMessage(), ex);					
+					}
+					return null;
+				}
+				
+			};	
+		}
 }

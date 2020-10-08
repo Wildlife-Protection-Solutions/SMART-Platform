@@ -45,6 +45,8 @@ public class Messages extends NLS {
 	public static String CmAttributeOption_EnterOnceType_NONE;
 	public static String CmAttributeOption_EnterOnceType_START;
 	public static String CmNodeInfoComposite_Category;
+	public static String CmNodeInfoComposite_ClassicOptionsLbl;
+	public static String CmNodeInfoComposite_ClassicOptionsTooltip;
 	public static String CmNodeInfoComposite_CollectMultiplObservations;
 	public static String CmNodeInfoComposite_CollectMultiplObservationsTooltip;
 	public static String CmNodeInfoComposite_DeleteConfirmation;

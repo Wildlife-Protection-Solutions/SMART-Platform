@@ -22,6 +22,7 @@
 package org.wcs.smart.asset.ui.views.asset;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -146,8 +147,8 @@ public class AssetDataPage {
 					}
 					query += " ORDER BY id.waypoint.dateTime desc "; //$NON-NLS-1$
 					Query<?> q = session.createQuery(query);
-					if (startDate != null) q.setParameter("startDate",  startDate); //$NON-NLS-1$
-					if (endDate != null) q.setParameter("endDate", endDate); //$NON-NLS-1$
+					if (startDate != null) q.setParameter("startDate",  startDate.atStartOfDay()); //$NON-NLS-1$
+					if (endDate != null) q.setParameter("endDate", endDate.atTime(LocalTime.MAX)); //$NON-NLS-1$
 					q.setParameter("asset", parentEditor.getAsset()); //$NON-NLS-1$
 					for (Object x : q.list()) {
 						waypointUuids.add( (UUID)((Object[])x)[0]);  

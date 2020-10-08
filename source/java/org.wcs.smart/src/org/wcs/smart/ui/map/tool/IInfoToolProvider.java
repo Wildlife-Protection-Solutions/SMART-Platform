@@ -22,6 +22,8 @@
 package org.wcs.smart.ui.map.tool;
 
 import java.awt.Point;
+import java.util.Collections;
+import java.util.List;
 
 import org.locationtech.udig.project.render.IViewportModel;
 
@@ -51,7 +53,7 @@ public interface IInfoToolProvider {
 	 */
 	public InfoPoint findFeature(int x, int y, IViewportModel vm);
 	
-	
+		
 	/**
 	 * Class used by edit manager to determine details about the feature object
 	 * being editted.
@@ -61,7 +63,7 @@ public interface IInfoToolProvider {
 	 */
 	public class InfoPoint{
 		
-		private Object feature;
+		private List<Object> features;
 		private Point mapPoint;
 		private String infoString;
 		
@@ -71,8 +73,19 @@ public interface IInfoToolProvider {
 		 * @param feature the feature to edit
 		 * @param infoString an info to string to display on hover (for multi-line use \n seperator)
 		 */
+		@SuppressWarnings("unchecked")
 		public InfoPoint(Point mapPoint, Object feature, String infoString){
-			this.feature = feature;
+			this(mapPoint, (feature instanceof List) ? (List<Object>)feature : Collections.singletonList(feature), infoString);
+		}
+		
+		/**
+		 * 
+		 * @param mapPoint the geometry of the point in map coordinate
+		 * @param features list of features near the point
+		 * @param infoString info string ot display on hover or null
+		 */
+		public InfoPoint(Point mapPoint, List<Object> features, String infoString){
+			this.features = features;
 			this.mapPoint = mapPoint;
 			this.infoString = infoString;
 		}
@@ -80,8 +93,8 @@ public interface IInfoToolProvider {
 		public String getInfoString(){
 			return infoString;
 		}
-		public Object getFeature(){
-			return this.feature;
+		public List<Object> getFeatures(){
+			return this.features;
 		}
 		
 		public Point getMapPoint(){

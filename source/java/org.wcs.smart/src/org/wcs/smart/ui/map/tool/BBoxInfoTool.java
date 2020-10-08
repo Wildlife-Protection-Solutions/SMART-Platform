@@ -130,6 +130,14 @@ public class BBoxInfoTool extends SimpleTool implements ModalTool {
 		IInfoToolProvider provider = (IInfoToolProvider) getContext().getMap().getBlackboard().get(IInfoToolProvider.BLACKBOARD_KEY);
 		return provider;
 	}
+	/*
+	 * Find the shell provider for mousing over
+	 */
+	private IInfoToolShellProvider getInfoShellProvider(){
+		IInfoToolShellProvider provider = (IInfoToolShellProvider) getContext().getMap().getBlackboard().get(IInfoToolShellProvider.BLACKBOARD_KEY);
+		return provider;
+	}
+	
 	
 	/**
 	 * @see org.locationtech.udig.project.ui.tool.SimpleTool#onMouseDragged(org.locationtech.udig.project.render.displayAdapter.MapMouseEvent)
@@ -184,6 +192,7 @@ public class BBoxInfoTool extends SimpleTool implements ModalTool {
 		}
 	}
     
+	@SuppressWarnings("restriction")
 	private void performInfo(ReferencedEnvelope bbox){
 		final InfoView2.InfoRequest request = new InfoView2.InfoRequest();
         request.bbox = bbox;
@@ -218,17 +227,29 @@ public class BBoxInfoTool extends SimpleTool implements ModalTool {
      * 
      * @see org.locationtech.udig.project.ui.render.displayAdapter.MapMouseMotionListener#mouseHovered(MapMouseEvent)
      */
-    protected void onMouseHovered( MapMouseEvent e ) { 
+    protected void onMouseHovered( MapMouseEvent e ) {
     	IInfoToolProvider manager = getInfoProvider();
     	if (manager == null) return;
-
+    	
     	infoPoint = manager.findFeature(e.x, e.y, getContext().getViewportModel());
+    	
     	if (infoPoint == null) return;
+    	
+    	//see if a shell provider exsits; if so use it
+    	IInfoToolShellProvider shellprovider = getInfoShellProvider();
+    	if (shellprovider != null) {
+    		shellprovider.showShell(e.x, e.y, infoPoint);
+    		return;
+    	}
+    	
+    	//display hover command
     	if (hoverCommand == null){
     		hoverCommand = new HoverPointCommand();
     		getContext().getViewportPane().addDrawCommand(hoverCommand);
     		getContext().getViewportPane().repaint();
     	}
+    	
+    	return;
     }
  
     /**

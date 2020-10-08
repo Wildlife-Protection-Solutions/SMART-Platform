@@ -208,6 +208,8 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 		btnPhotoRequired = new Button(container, SWT.CHECK);
 		btnPhotoRequired.setText(Messages.CmNodeInfoComposite_PhotoRequired);
 		btnPhotoRequired.setToolTipText(Messages.CmNodeInfoComposite_photoRequiredTooltip);
+		btnPhotoRequired.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)btnPhotoRequired.getLayoutData()).horizontalIndent = 15;
 		btnPhotoRequired.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -217,7 +219,9 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 		});
 		
 		label = new Label(container, SWT.NONE);
-
+		label.setText(Messages.CmNodeInfoComposite_ClassicOptionsLbl);
+		label.setToolTipText(Messages.CmNodeInfoComposite_ClassicOptionsTooltip);
+		
 		btnCollectMultiple = new Button(container, SWT.CHECK);
 		btnCollectMultiple.setText(Messages.CmNodeInfoComposite_CollectMultiplObservations);
 		btnCollectMultiple.setToolTipText(Messages.CmNodeInfoComposite_CollectMultiplObservationsTooltip);
@@ -250,6 +254,8 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 		btnSingleGpsPoint = new Button(container, SWT.CHECK);
 		btnSingleGpsPoint.setText(Messages.CmNodeInfoComposite_RecordSingleGpsPoint);
 		btnSingleGpsPoint.setToolTipText(Messages.CmNodeInfoComposite_RecordSingleGpsPointTooltip);
+		btnSingleGpsPoint.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)btnSingleGpsPoint.getLayoutData()).horizontalIndent = 15;
 		btnSingleGpsPoint.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
