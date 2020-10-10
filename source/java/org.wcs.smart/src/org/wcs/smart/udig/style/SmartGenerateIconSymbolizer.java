@@ -24,7 +24,6 @@ package org.wcs.smart.udig.style;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
 import org.geotools.styling.Style;
 import org.locationtech.udig.style.advanced.common.styleattributeclasses.PointSymbolizerWrapper;
 import org.locationtech.udig.style.advanced.common.styleattributeclasses.RuleWrapper;
@@ -66,10 +65,6 @@ public class SmartGenerateIconSymbolizer implements IPointSymbolizerComposite {
 		
 		composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(new GridLayout());
-
-		Label l = new Label(composite, SWT.NONE);
-		l.setText(Messages.SmartGenerateIconSymbolizer_CCAANotSupported);
-
 	}
 
 	@Override
