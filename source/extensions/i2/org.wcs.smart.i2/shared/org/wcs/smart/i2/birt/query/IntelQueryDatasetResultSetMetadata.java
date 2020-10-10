@@ -65,7 +65,7 @@ public class IntelQueryDatasetResultSetMetadata implements IResultSetMetaData {
 			if (!query.getConservationArea().getIsCcaa()) {
 				itemProvider = new CaQueryItemProvider(dataset.getConnection().getConservationAreas().iterator().next(), query.getConservationArea());
 			}else {
-				itemProvider = new CcaaQueryItemProvider(dataset.connection.hasPermission(Permission.QUERY), query.getConservationArea());
+				itemProvider = new CcaaQueryItemProvider(dataset.connection.hasPermission(Permission.QUERY), query.getConservationArea(), dataset.connection.getDataModel());
 			}			
 			columns = IntelQueryColumnProvider.getInstance().getQueryColumns(query, itemProvider, dataset.getConnection().getCurrentLocale(), dataset.getConnection().getSession());
 			names = new ArrayList<>(columns.size());

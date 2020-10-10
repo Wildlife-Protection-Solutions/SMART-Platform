@@ -52,6 +52,7 @@ import org.wcs.smart.SmartContext;
 import org.wcs.smart.birt.BirtConstants;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Projection;
+import org.wcs.smart.ca.datamodel.CcaaDataModel;
 import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.i2.birt.entity.EntityDataset;
@@ -120,6 +121,7 @@ public abstract class AbstractIntelBirtConnection implements IConnection {
 		}
 	};
 	
+	public abstract CcaaDataModel getDataModel() ;
 	/**
 	 * Decrypt attachment to a file uri which is returned.  The uri will
 	 * be absolute if the file is located within the SMART filestore or the

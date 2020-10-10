@@ -64,6 +64,8 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.ca.datamodel.CcaaDataModel;
+import org.wcs.smart.ca.datamodel.CcaaDataModelDesktop;
 import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.ca.icon.IconSet;
@@ -90,7 +92,9 @@ public class DataModelStyleGenerator {
 	
 	private ColourScheme colorPalette;
 	private int colorIndex = 0;
-	   
+	
+	private CcaaDataModel ccaaModel;
+	
 	/**
 	 * 
 	 * @param fsource the feature source
@@ -109,18 +113,21 @@ public class DataModelStyleGenerator {
 		this.fsource = fsource;
 		
 		colorPalette = colorscheme;
+		ccaaModel = CcaaDataModelDesktop.getInstance();
 	}
 	
 	public Style generateThemesCategory(AttributeDescriptor fattribute, int level, Session session) throws IOException {
-
-		//TODO: Support CrossConservationAnalysis tools for theme generation
-		//get all values for a given category
-		String query = "FROM Category WHERE conservationArea = :ca and smart.hkeyLength(hkey) = :length"; //$NON-NLS-1$
-		List<Category> categories = session.createQuery(query, Category.class)
+//get all values for a given category
+		List<Category> categories = null;
+		if (SmartDB.isMultipleAnalysis()) {
+			categories = ccaaModel.getCategories(session, level);
+		}else {
+			String query = "FROM Category WHERE conservationArea = :ca and smart.hkeyLength(hkey) = :length"; //$NON-NLS-1$
+			categories = session.createQuery(query, Category.class)
 				.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
 				.setParameter("length", level) //$NON-NLS-1$
 				.list();
-		
+		}
 		
 		Set<String> values = getAttributeValues(fsource, fattribute);
 		boolean hasnone = values.contains(null);
@@ -188,8 +195,13 @@ public class DataModelStyleGenerator {
 	}
 	
 	private Style generateThemesAttributeList(SimpleFeatureSource fsource, AttributeDescriptor fattribute, Attribute dmAttribute, Session session) throws IOException {
-		//TODO: Support CrossConservationAnalysis tools for theme generation
-		dmAttribute = session.get(Attribute.class, dmAttribute.getUuid());
+		List<AttributeListItem> items = new ArrayList<>();
+		if (SmartDB.isMultipleAnalysis()) {
+			items = ccaaModel.getAttributeListItems(dmAttribute, session);
+		}else {
+			dmAttribute = session.get(Attribute.class, dmAttribute.getUuid());
+			items = dmAttribute.getAttributeList();
+		}
 		Set<String> values = getAttributeValues(fsource, fattribute);
 		
 		boolean hasnone = values.contains(null);
@@ -197,7 +209,7 @@ public class DataModelStyleGenerator {
 		
 		HashMap<String, AttributeListItem> map = new HashMap<>();
 		for (String value : values) {
-			for (AttributeListItem ali : dmAttribute.getAttributeList()) {
+			for (AttributeListItem ali : items) {
 				if (ali.getName().equalsIgnoreCase(value)) {
 					map.put(value,  ali);
 					break;
@@ -207,7 +219,7 @@ public class DataModelStyleGenerator {
 		
 		List<String> sortedValues = new ArrayList<>(values);
 		if (includeAll) {
-			for (AttributeListItem ali : dmAttribute.getAttributeList()) {
+			for (AttributeListItem ali : items) {
 				if (!map.values().contains(ali)) {
 					sortedValues.add(ali.getName());
 					map.put(ali.getName(), ali);
@@ -248,8 +260,13 @@ public class DataModelStyleGenerator {
 	}
 	
 	private Style generateThemesAttributeTree(SimpleFeatureSource fsource, AttributeDescriptor fattribute, Attribute dmAttribute, Session session) throws IOException {
-		//TODO: Support CrossConservationAnalysis tools for theme generation
-		dmAttribute = session.get(Attribute.class, dmAttribute.getUuid());
+		List<AttributeTreeNode> toVisit = new ArrayList<>();
+		if (SmartDB.isMultipleAnalysis()) {
+			toVisit.addAll(ccaaModel.getAttributeTreeNodes(dmAttribute, session));
+		}else {
+			dmAttribute = session.get(Attribute.class, dmAttribute.getUuid());
+			toVisit.addAll(dmAttribute.getActiveTreeNodes());
+		}
 		
 		Set<String> values = getAttributeValues(fsource, fattribute);
 		boolean hasnone = values.contains(null);
@@ -257,8 +274,6 @@ public class DataModelStyleGenerator {
 		
 		HashMap<String, AttributeTreeNode> map = new HashMap<>();
 		
-		List<AttributeTreeNode> toVisit = new ArrayList<>();
-		toVisit.addAll(dmAttribute.getActiveTreeNodes());
 		
 		while(!toVisit.isEmpty()) {
 			AttributeTreeNode n = toVisit.remove(0);
@@ -274,7 +289,11 @@ public class DataModelStyleGenerator {
 		
 		List<String> sortedValues = new ArrayList<>(values);
 		if (includeAll) {
-			toVisit.addAll(dmAttribute.getActiveTreeNodes());
+			if (SmartDB.isMultipleAnalysis()) {
+				toVisit.addAll(ccaaModel.getAttributeTreeNodes(dmAttribute, session));	
+			}else {
+				toVisit.addAll(dmAttribute.getActiveTreeNodes());
+			}
 			
 			while(!toVisit.isEmpty()) {
 				AttributeTreeNode n = toVisit.remove(0);
@@ -380,6 +399,7 @@ public class DataModelStyleGenerator {
 	 * Build a point symbolizer from the icon
 	 */ 
 	private PointSymbolizer buildPointSymbol(Icon icon, Session session) throws MalformedURLException {
+		icon = session.get(Icon.class, icon.getUuid());
 		
 		IconFile selectedFile = icon.getIconFile(iSet);
 		String fname = selectedFile.getFilename();
@@ -446,11 +466,20 @@ public class DataModelStyleGenerator {
 	 */
 	private Filter generateFilter(AttributeDescriptor fattribute, NamedItem item) {
 		List<Filter> items = new ArrayList<>();
+		
+		items.add( filterFactory.equals(
+				filterFactory.property(fattribute.getName()), 
+				filterFactory.literal(item.getName())) );
+		
 		for (Label l : item.getNames()) {
+			if (l.getValue().equals(item.getName())) continue;
 			items.add( filterFactory.equals(
 					filterFactory.property(fattribute.getName()), 
 					filterFactory.literal(l.getValue())) );
 		}
+		
+		if (items.size() == 1) return items.get(0);
+		
 		return filterFactory.or(items);
 	}
 	

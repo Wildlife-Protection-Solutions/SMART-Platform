@@ -28,6 +28,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -262,6 +264,7 @@ public class Upgrader630To700 implements IDatabaseUpgrader {
 		}
 
 		updateIcons(c);
+		createCcaaIconSets(c);
 		
 		c.commit();
 	}
@@ -385,6 +388,113 @@ public class Upgrader630To700 implements IDatabaseUpgrader {
 			}
 		}
 
+	}
+	
+	private void createCcaaIconSets(Connection c) throws SQLException {
+		PreparedStatement psiconset = c
+				.prepareStatement("INSERT INTO smart.iconset (uuid, keyid, ca_uuid, is_default) VALUES (?, ?, ?, ?)"); //$NON-NLS-1$
+		PreparedStatement pslabel = c
+				.prepareStatement("INSERT INTO smart.i18n_label(language_uuid, element_uuid, value) VALUES(?, ?, ?)"); //$NON-NLS-1$
+		PreparedStatement psicon = c.prepareStatement("INSERT INTO smart.icon(uuid, keyid, ca_uuid) VALUES(?, ?, ?)"); //$NON-NLS-1$
+		PreparedStatement psiconfile = c.prepareStatement(
+				"INSERT INTO smart.iconfile(uuid, icon_uuid, iconset_uuid, filename) VALUES(?, ?, ?, ?)"); //$NON-NLS-1$
+
+		byte[] cuuid = UuidUtils.uuidToByte(ConservationArea.MULTIPLE_CA);
+
+		byte[] lineuuid = DerbyUtils.createUuid();
+		byte[] blackuuid = DerbyUtils.createUuid();
+		byte[] coloruuid = DerbyUtils.createUuid();
+
+		PreparedStatement ps = c.prepareStatement("SELECT uuid FROM smart.language WHERE ca_uuid = ?"); //$NON-NLS-1$
+		ps.setBytes(1, cuuid);
+
+		psiconset.setBytes(1, lineuuid);
+		psiconset.setString(2, IconUtils.FixedIconSet.LINE.key);
+		psiconset.setBytes(3, cuuid);
+		psiconset.setBoolean(4, false);
+		psiconset.addBatch();
+
+		psiconset.setBytes(1, blackuuid);
+		psiconset.setString(2, IconUtils.FixedIconSet.BLACK.key);
+		psiconset.setBytes(3, cuuid);
+		psiconset.setBoolean(4, false);
+		psiconset.addBatch();
+
+		psiconset.setBytes(1, coloruuid);
+		psiconset.setString(2, IconUtils.FixedIconSet.COLOR.key);
+		psiconset.setBytes(3, cuuid);
+		psiconset.setBoolean(4, true);
+		psiconset.addBatch();
+
+		List<byte[]> langs = new ArrayList<>();
+		try (ResultSet rs2 = ps.executeQuery()) {
+			while (rs2.next()) {
+				byte[] language = rs2.getBytes(1);
+				langs.add(language);
+
+				pslabel.setBytes(1, language);
+				pslabel.setBytes(2, lineuuid);
+				pslabel.setString(3, IconUtils.FixedIconSet.LINE.name);
+				pslabel.addBatch();
+
+				pslabel.setBytes(1, language);
+				pslabel.setBytes(2, blackuuid);
+				pslabel.setString(3, IconUtils.FixedIconSet.BLACK.name);
+				pslabel.addBatch();
+
+				pslabel.setBytes(1, language);
+				pslabel.setBytes(2, coloruuid);
+				pslabel.setString(3, IconUtils.FixedIconSet.COLOR.name);
+				pslabel.addBatch();
+			}
+
+		}
+
+		psiconset.executeBatch();
+		pslabel.executeBatch();
+
+		for (String[] icon : IconUtils.SMART_ICON_MAPPING) {
+
+			byte[] iconuuid = DerbyUtils.createUuid();
+
+			psicon.setBytes(1, iconuuid);
+			psicon.setString(2, icon[0]);
+			psicon.setBytes(3, cuuid);
+			psicon.addBatch();
+
+			for (byte[] luuid : langs) {
+				pslabel.setBytes(1, luuid);
+				pslabel.setBytes(2, iconuuid);
+				pslabel.setString(3, icon[1]);
+				pslabel.addBatch();
+			}
+
+			byte[] fileuuid = DerbyUtils.createUuid();
+			psiconfile.setBytes(1, fileuuid);
+			psiconfile.setBytes(2, iconuuid);
+			psiconfile.setBytes(3, blackuuid);
+			psiconfile.setString(4, icon[2]);
+			psiconfile.addBatch();
+
+			fileuuid = DerbyUtils.createUuid();
+			psiconfile.setBytes(1, fileuuid);
+			psiconfile.setBytes(2, iconuuid);
+			psiconfile.setBytes(3, lineuuid);
+			psiconfile.setString(4, icon[3]);
+			psiconfile.addBatch();
+
+			fileuuid = DerbyUtils.createUuid();
+			psiconfile.setBytes(1, fileuuid);
+			psiconfile.setBytes(2, iconuuid);
+			psiconfile.setBytes(3, coloruuid);
+			psiconfile.setString(4, icon[4]);
+			psiconfile.addBatch();
+
+			psicon.executeBatch();
+			pslabel.executeBatch();
+			psiconfile.executeBatch();
+
+		}
 	}
 
 }

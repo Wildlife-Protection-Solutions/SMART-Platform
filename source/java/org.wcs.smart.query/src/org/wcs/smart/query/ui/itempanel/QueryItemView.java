@@ -70,7 +70,6 @@ public class QueryItemView implements ISourceProviderListener {
 	private Composite main;
 	private Label defaultFilter;
 	
-	private QueryDataModelModifiedListener dmListener;
 	
 	@Inject private QuerySourceProvider srcProvider;
 	@Inject private MPart part;
@@ -159,9 +158,6 @@ public class QueryItemView implements ISourceProviderListener {
 	
 	@PreDestroy
 	public void dispose(){
-		if (dmListener != null){
-			dmListener.dispose();
-		}
 		srcProvider.removeSourceProviderListener(this);
 	}
 	

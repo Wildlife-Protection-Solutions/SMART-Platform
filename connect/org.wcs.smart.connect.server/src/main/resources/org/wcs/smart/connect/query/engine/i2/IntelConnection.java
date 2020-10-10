@@ -38,8 +38,10 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.birt.BirtConstants;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.datamodel.CcaaDataModel;
 import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.common.attachment.ISmartAttachment;
+import org.wcs.smart.connect.model.CcaaDataModelConnect;
 import org.wcs.smart.connect.report.query.ServerSmartConnection;
 import org.wcs.smart.connect.security.AdvIntelAction;
 import org.wcs.smart.connect.security.SecurityManager;
@@ -191,6 +193,11 @@ public class IntelConnection extends AbstractIntelBirtConnection {
 			return canaccess;
 		}
 		return Collections.emptySet();
+	}
+
+	@Override
+	public CcaaDataModel getDataModel() {
+		return new CcaaDataModelConnect(getConservationAreas(), localSession);
 	}
 
 }

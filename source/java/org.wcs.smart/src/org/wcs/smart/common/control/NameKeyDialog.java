@@ -97,7 +97,7 @@ public class NameKeyDialog<T extends NamedKeyItem> extends SmartStyledDialog{
 				modified();
 			}
 		});
-		keyComp.initFields(item, siblings, SmartDB.getCurrentConservationArea().getDefaultLanguage());		
+		keyComp.initFields(item, siblings, SmartDB.getCurrentConservationArea().getDefaultLanguage() == null ? SmartDB.getCurrentLanguage() : SmartDB.getCurrentConservationArea().getDefaultLanguage());		
 		
 		getShell().setText(getTitle());
 		

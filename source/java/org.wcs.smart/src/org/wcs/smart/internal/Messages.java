@@ -1119,6 +1119,16 @@ public class Messages extends NLS {
 	public static String NameKeyComposite_LanguageLabel;
 	public static String NameKeyComposite_Name_Label;
 	public static String NameKeyDialog_DialogTitle;
+	public static String NewIconSetDialog_CustomOp;
+	public static String NewIconSetDialog_CustomTooltip;
+	public static String NewIconSetDialog_DefaultOp;
+	public static String NewIconSetDialog_DefaultOpTooltip;
+	public static String NewIconSetDialog_ErrorTitle;
+	public static String NewIconSetDialog_IconSetExists;
+	public static String NewIconSetDialog_IconsetREquired;
+	public static String NewIconSetDialog_Message;
+	public static String NewIconSetDialog_SystemSet;
+	public static String NewIconSetDialog_Title;
 	public static String PlugInConfigurationExporter_ExportingVersions;
 	public static String ProgressAreaComposite_CancelledMessage;
 	public static String ProgressAreaComposite_StoppingMessage;

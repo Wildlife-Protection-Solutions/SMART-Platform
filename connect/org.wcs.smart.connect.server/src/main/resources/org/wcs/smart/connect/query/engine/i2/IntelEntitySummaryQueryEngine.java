@@ -40,6 +40,7 @@ import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.i18n.Messages;
+import org.wcs.smart.connect.model.CcaaDataModelConnect;
 import org.wcs.smart.connect.security.AdvIntelAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.i2.IIntelQueryEngine;
@@ -81,7 +82,7 @@ import org.wcs.smart.util.UuidUtils;
 public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 	
 	private DataTable dataTable;
-	
+	private boolean includeUuids;
 	
 	/**
 	 * Parameters required are session, monitor, and date filter object
@@ -95,7 +96,8 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		
 		Session session = (Session) parameters.get(Session.class.getName());
 		String username = ((String)parameters.get(Principal.class.getName()));
-
+		includeUuids = IntelRecordSummaryQueryEngine.getIncludeUuids(parameters);
+		
 		//Locale
 		Locale locale = (Locale) parameters.get(Locale.class.getName());
 		if (locale == null){
@@ -128,12 +130,13 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 		if (!query.getConservationArea().getIsCcaa()) {
 			itemProvider = new CaQueryItemProvider(cas.iterator().next(), query.getConservationArea());
 		}else {
-			itemProvider = new CcaaQueryItemProvider(profiles, query.getConservationArea());
+			itemProvider = new CcaaQueryItemProvider(profiles, query.getConservationArea(), new CcaaDataModelConnect(cas, session));
 		}
 		
 		//parse query
 		SumQueryDefinition parsedQuery = IntelEntitySummaryQuery.parseQuery(query.getQueryString());
-	
+		if (includeUuids) CaUuidGroupByItem.replaceCaGroupBy(parsedQuery);
+				
 		//parse query
 		createTemporaryEntityTable(session, profiles, cas);
 		

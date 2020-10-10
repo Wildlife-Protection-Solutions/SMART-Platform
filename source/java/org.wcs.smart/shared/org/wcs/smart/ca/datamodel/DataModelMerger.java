@@ -32,11 +32,15 @@ import org.hibernate.query.Query;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.icon.Icon;
+import org.wcs.smart.hibernate.QueryFactory;
 
 
 /**
- * Merges two datamodels, returning a data model that only
- * includes items that exist in all datamodels.
+ * Merges multiple datamodels, returning a data model that only
+ * includes items that exist in all datamodels.  Generally this should
+ * not be used by other plugins.  IF you want to access the merged data model 
+ * use the CcaaDataModel class.
  *  
  * @author Emily
  *
@@ -50,9 +54,11 @@ public class DataModelMerger {
 		MERGINGCATEGORIES
 	}
 	
+	
 	public DataModelMerger(){
 		
 	}
+	
 	
 	/**
 	 * Merges the data models associated with the provided conservation areas.
@@ -85,6 +91,7 @@ public class DataModelMerger {
 		}
 		monitor.worked(1);
 		
+		
 		SimpleDataModel newDataModel = new SimpleDataModel(defaultCa, new ArrayList<Category>(), new ArrayList<Attribute>());
 						
 		// ATTRIBUTES
@@ -101,6 +108,8 @@ public class DataModelMerger {
 				copy.setName(a.getName());
 				copy.setRegex(a.getRegex());
 				copy.setType(a.getType());
+				
+				copy.setIcon(findIcon(session, findIconKey(a, cas, session)));
 				
 				newDataModel.getAttributes().add(copy);
 				mergeAttributeAggregations(copy,cas, session);
@@ -121,6 +130,21 @@ public class DataModelMerger {
 		return newDataModel;
 	}
 	
+	/**
+	 * Finds the icon for a given icon key
+	 * 
+	 * @param session
+	 * @param iconKey
+	 * @return
+	 */
+	public static Icon findIcon(Session session, String iconKey) {
+		if (iconKey == null) return null;
+		Icon icon = QueryFactory.buildQuery(session, Icon.class, 
+				new Object[] {"conservationArea.uuid", ConservationArea.MULTIPLE_CA}, //$NON-NLS-1$
+				new Object[] {"keyId", iconKey}).uniqueResult(); //$NON-NLS-1$
+		return icon;
+		
+	}
 
 	private Category cloneCategory(Category toClone, 
 			Category parent, List<Attribute> clonedAttributes, 
@@ -132,6 +156,7 @@ public class DataModelMerger {
 		clone.setCategoryOrder(toClone.getCategoryOrder());
 		clone.setParent(parent);
 		clone.setIsActive(true);
+		clone.setIcon(findIcon(session,findIconKey(toClone, cas, session)));
 		
 		//clone the labels
 		clone.setName(toClone.getName());
@@ -241,6 +266,28 @@ public class DataModelMerger {
 			return true;
 		}
 		return false;
+	}
+	
+	private String findIconKey (Category c, ConservationArea[] ca, Session session){
+		if (c.getIcon() != null) return c.getIcon().getKeyId();
+		
+		String hql = "SELECT distinct icon.keyId FROM Category WHERE hkey = :key AND conservationArea in (:ca) AND icon is not null";//$NON-NLS-1$
+		Query<?> q = session.createQuery(hql);
+		q.setParameter("key", c.getHkey());//$NON-NLS-1$
+		q.setParameterList("ca", ca);//$NON-NLS-1$
+
+		return (String)q.uniqueResult();
+	}
+	
+	private String findIconKey (Attribute a, ConservationArea[] ca, Session session){
+		if (a.getIcon() != null) return a.getIcon().getKeyId();
+		
+		String hql = "SELECT distinct icon.keyId FROM Attribute WHERE keyId = :key AND conservationArea in (:ca) AND icon is not null";//$NON-NLS-1$
+		Query<?> q = session.createQuery(hql);
+		q.setParameter("key", a.getKeyId());//$NON-NLS-1$
+		q.setParameterList("ca", ca);//$NON-NLS-1$
+		
+		return (String)q.uniqueResult();
 	}
 	
 	/**

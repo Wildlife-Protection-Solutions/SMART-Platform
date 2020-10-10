@@ -213,9 +213,12 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 	private LocalDate[] computeDateRange(String queryTable, Session session) {
 		String field = SystemAttributeFilter.SystemAttribute.RECORD_DATE.name().toLowerCase(Locale.ROOT);
 		Object[] items = (Object[]) session.createNativeQuery("SELECT min(" +field+ "), max(" +field+ ") FROM " + queryTable).uniqueResult(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		if (items[0] == null) items[0] = LocalDate.now();
-		if (items[1] == null) items[1] = LocalDate.now();
-		return new LocalDate[] {(LocalDate) items[0], (LocalDate) items[1]};
+		
+		LocalDate l1 = LocalDate.now();
+		LocalDate l2 = LocalDate.now();
+		if (items[0] != null) l1 = ((java.sql.Date)items[0]).toLocalDate();
+		if (items[1] != null) l1 = ((java.sql.Date)items[1]).toLocalDate();
+		return new LocalDate[] {l1, l2};
 	}
 	
 	/*

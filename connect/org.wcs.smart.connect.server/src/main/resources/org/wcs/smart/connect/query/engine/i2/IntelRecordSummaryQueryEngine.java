@@ -23,7 +23,6 @@ package org.wcs.smart.connect.query.engine.i2;
 
 import java.security.Principal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -40,6 +39,8 @@ import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.i18n.Messages;
+import org.wcs.smart.connect.model.CcaaDataModelConnect;
+import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.security.AdvIntelAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.i2.IIntelQueryEngine;
@@ -71,7 +72,14 @@ import org.wcs.smart.util.UuidUtils;
 public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 	
 	private DataTable dataTable;
+	private boolean includeUuids;
 	
+	public static boolean getIncludeUuids(HashMap<String,Object> params) { 
+		if (params.containsKey(AbstractQueryEngine.INCLUDE_UUID_PARAMETER)) {
+			return (boolean) params.get(AbstractQueryEngine.INCLUDE_UUID_PARAMETER);
+		}
+		return false;
+	}
 	
 	/**
 	 * Parameters required are session, monitor, and date filter object
@@ -80,12 +88,11 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 	 * @return
 	 */
 	@Override
-	
-	
 	public IQueryResult executeQuery(AbstractIntelQuery query,  HashMap<String, Object> parameters) throws Exception{
 		
 		Session session = (Session) parameters.get(Session.class.getName());
 		String username = ((String)parameters.get(Principal.class.getName()));
+		this.includeUuids = getIncludeUuids(parameters);
 		
 		try {
 			//Locale
@@ -122,7 +129,7 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 			if (!query.getConservationArea().getIsCcaa()) {
 				itemProvider = new CaQueryItemProvider(cas.iterator().next(), query.getConservationArea());
 			}else {
-				itemProvider = new CcaaQueryItemProvider(profiles, query.getConservationArea());
+				itemProvider = new CcaaQueryItemProvider(profiles, query.getConservationArea(), new CcaaDataModelConnect(cas, session));
 			}
 			
 			LocalDate[] dates = (LocalDate[]) parameters.get(LocalDate.class.getName());
@@ -130,6 +137,8 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 			
 			//parse query
 			SumQueryDefinition parsedQuery = IntelRecordSummaryQuery.parseQuery(query.getQueryString());
+			if (includeUuids) CaUuidGroupByItem.replaceCaGroupBy(parsedQuery);
+			
 			RecordFilterProcessor p = new RecordFilterProcessor();
 			String fdataTable = p.processFilter(parsedQuery.getFilter(), puuids, dates, cas, session);
 			dataTable = new DataTable(fdataTable);
@@ -219,9 +228,14 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 	private LocalDate[] computeDateRange(String queryTable, Session session) {
 		String field = SystemAttributeFilter.SystemAttribute.RECORD_DATE.name().toLowerCase(Locale.ROOT);
 		Object[] items = (Object[]) session.createNativeQuery("SELECT min(" +field+ "), max(" +field+ ") FROM " + queryTable).uniqueResult(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		if (items[0] == null) items[0] = LocalDate.now();
-		if (items[1] == null) items[1] = LocalDate.now();
-		return new LocalDate[] {((LocalDateTime) items[0]).toLocalDate(), ((LocalDateTime) items[1]).toLocalDate()};
+		
+		LocalDate l1 = LocalDate.now();
+		LocalDate l2 = LocalDate.now();
+		
+		if (items[0] != null) l1 = ((java.sql.Date)items[0]).toLocalDate();
+		if (items[1] != null) l2 = ((java.sql.Date)items[1]).toLocalDate();
+		
+		return new LocalDate[] {l1, l2};
 	}
 	
 	/*
@@ -247,7 +261,7 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 			cnt++;
 			
 			if (groupBy.getGroupByType() == GroupByType.CA) {
-				selectSql.append("ca_uuid as c_" + cnt); //$NON-NLS-1$
+				selectSql.append("cast(ca_uuid as varchar ) as c_" + cnt); //$NON-NLS-1$
 				groupBySql.append("ca_uuid "); //$NON-NLS-1$
 			}else if (groupBy.getGroupByType() == GroupByType.RECORDSOURCE) {
 				selectSql.append("record_source_key as c_" + cnt); //$NON-NLS-1$
@@ -335,6 +349,7 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 		logme(sb);
 		
 		SummaryQueryResult results = new SummaryQueryResult();
+		
 		EntitySummaryQueryHeaderEngine.INSTANCE.getHeaderInfo(definition, results, dateRange, profiles, itemProvider, l, session);
 		
 		HashMap<SummaryResultKey, Double> data = new HashMap<>();
@@ -360,7 +375,7 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 					value = UuidUtils.uuidToString( UuidUtils.byteToUUID((byte[])value) );
 				}
 				if (groupBy.getGroupByType() == GroupByType.CA) {
-					value = UuidUtils.uuidToString( UuidUtils.byteToUUID((byte[])value) );
+					value = UuidUtils.uuidToString( UuidUtils.stringToUuid( (String)value ) );
 				}
 				
 				if (value == null) {

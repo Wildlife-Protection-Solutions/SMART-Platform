@@ -22,6 +22,7 @@
 
 package org.wcs.smart.query;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -32,6 +33,7 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.query.internal.DataModelManagerUtil;
 
 /**
  * Interface for a query data model manager. The data model manager is
@@ -205,21 +207,15 @@ public interface IDataModelManager {
 	 * @return
 	 */
 	public String getAttributeTreeNodeLabel(Session session, UUID cauuid, UUID keyuuid);
-	
+
 	/**
-	 * Returns a modifiable list of all the active attributes
-	 * in the given data model. An attribute is active if it has
-	 * at least one active category association.
+	 * Computes the depth of the active
+	 * data model category tree.
 	 * 
-	 * Note: the data model only has active categories loaded
-	 * so getActiveCategories will work but getCategories will fail
-	 * if hibernate session not active.
-	 * @param dm
 	 * @return
 	 */
-	public List<Attribute> getActiveAttributes(DataModel dm);
+	public int getActiveDepth();
 	
-
 	/**
 	 * Returns a modifiable list of all the attributes
 	 * in the given data model. An attribute is active if it has
@@ -229,13 +225,13 @@ public interface IDataModelManager {
 	 * @param onlyActive
 	 * @return
 	 */
-	public List<Attribute> getAttributes(DataModel dm, boolean onlyActive);
-	
-	/**
-	 * Computes the depth of the active
-	 * data model category tree.
-	 * 
-	 * @return
-	 */
-	public int getActiveDepth();
+	public static List<Attribute> getAttributes(DataModel dm, boolean onlyActive) {
+		List<Attribute> result = new ArrayList<>(dm.getAttributes().size());
+		for (Attribute a : dm.getAttributes()) {
+			if (!onlyActive || DataModelManagerUtil.isActive(a, dm)) {
+				result.add(a);
+			}
+		}
+		return result;
+	}
 }

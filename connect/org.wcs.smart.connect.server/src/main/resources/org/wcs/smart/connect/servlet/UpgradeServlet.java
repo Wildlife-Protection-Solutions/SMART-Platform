@@ -255,6 +255,8 @@ public class UpgradeServlet extends HttpServlet {
 					//upgrade icons
 					upgradeIcons(c, "agouti_paca", "xanthopsar_flavus");  //$NON-NLS-1$//$NON-NLS-2$
 					
+					//create ccaa icon sets
+					createCcaaIconSets(c);
 				}catch (Exception ex) {
 					throw new SQLException (ex);
 				}
@@ -964,5 +966,113 @@ public class UpgradeServlet extends HttpServlet {
 			}
 		}
 
+	}
+	
+	
+	private void createCcaaIconSets(Connection c) throws SQLException {
+		PreparedStatement psiconset = c
+				.prepareStatement("INSERT INTO smart.iconset (uuid, keyid, ca_uuid, is_default) VALUES (?, ?, ?, ?)"); //$NON-NLS-1$
+		PreparedStatement pslabel = c
+				.prepareStatement("INSERT INTO smart.i18n_label(language_uuid, element_uuid, value) VALUES(?, ?, ?)"); //$NON-NLS-1$
+		PreparedStatement psicon = c.prepareStatement("INSERT INTO smart.icon(uuid, keyid, ca_uuid) VALUES(?, ?, ?)"); //$NON-NLS-1$
+		PreparedStatement psiconfile = c.prepareStatement(
+				"INSERT INTO smart.iconfile(uuid, icon_uuid, iconset_uuid, filename) VALUES(?, ?, ?, ?)"); //$NON-NLS-1$
+
+		UUID cuuid = ConservationArea.MULTIPLE_CA;
+
+		UUID lineuuid = createUuid(c);
+		UUID blackuuid = createUuid(c);
+		UUID coloruuid = createUuid(c);
+
+		PreparedStatement ps = c.prepareStatement("SELECT uuid FROM smart.language WHERE ca_uuid = ?"); //$NON-NLS-1$
+		ps.setObject(1, cuuid);
+
+		psiconset.setObject(1, lineuuid);
+		psiconset.setString(2, IconUtils.FixedIconSet.LINE.key);
+		psiconset.setObject(3, cuuid);
+		psiconset.setBoolean(4, false);
+		psiconset.addBatch();
+
+		psiconset.setObject(1, blackuuid);
+		psiconset.setString(2, IconUtils.FixedIconSet.BLACK.key);
+		psiconset.setObject(3, cuuid);
+		psiconset.setBoolean(4, false);
+		psiconset.addBatch();
+
+		psiconset.setObject(1, coloruuid);
+		psiconset.setString(2, IconUtils.FixedIconSet.COLOR.key);
+		psiconset.setObject(3, cuuid);
+		psiconset.setBoolean(4, true);
+		psiconset.addBatch();
+
+		List<UUID> langs = new ArrayList<>();
+		try (ResultSet rs2 = ps.executeQuery()) {
+			while (rs2.next()) {
+				UUID language = (UUID) rs2.getObject(1);
+				langs.add(language);
+
+				pslabel.setObject(1, language);
+				pslabel.setObject(2, lineuuid);
+				pslabel.setString(3, IconUtils.FixedIconSet.LINE.name);
+				pslabel.addBatch();
+
+				pslabel.setObject(1, language);
+				pslabel.setObject(2, blackuuid);
+				pslabel.setString(3, IconUtils.FixedIconSet.BLACK.name);
+				pslabel.addBatch();
+
+				pslabel.setObject(1, language);
+				pslabel.setObject(2, coloruuid);
+				pslabel.setString(3, IconUtils.FixedIconSet.COLOR.name);
+				pslabel.addBatch();
+			}
+
+		}
+
+		psiconset.executeBatch();
+		pslabel.executeBatch();
+
+		for (String[] icon : IconUtils.SMART_ICON_MAPPING) {
+
+			UUID iconuuid = createUuid(c);
+
+			psicon.setObject(1, iconuuid);
+			psicon.setString(2, icon[0]);
+			psicon.setObject(3, cuuid);
+			psicon.addBatch();
+
+			for (UUID luuid : langs) {
+				pslabel.setObject(1, luuid);
+				pslabel.setObject(2, iconuuid);
+				pslabel.setString(3, icon[1]);
+				pslabel.addBatch();
+			}
+
+			UUID fileuuid = createUuid(c);
+			psiconfile.setObject(1, fileuuid);
+			psiconfile.setObject(2, iconuuid);
+			psiconfile.setObject(3, blackuuid);
+			psiconfile.setString(4, icon[2]);
+			psiconfile.addBatch();
+
+			fileuuid = createUuid(c);
+			psiconfile.setObject(1, fileuuid);
+			psiconfile.setObject(2, iconuuid);
+			psiconfile.setObject(3, lineuuid);
+			psiconfile.setString(4, icon[3]);
+			psiconfile.addBatch();
+
+			fileuuid = createUuid(c);
+			psiconfile.setObject(1, fileuuid);
+			psiconfile.setObject(2, iconuuid);
+			psiconfile.setObject(3, coloruuid);
+			psiconfile.setString(4, icon[4]);
+			psiconfile.addBatch();
+
+			psicon.executeBatch();
+			pslabel.executeBatch();
+			psiconfile.executeBatch();
+
+		}
 	}
 }

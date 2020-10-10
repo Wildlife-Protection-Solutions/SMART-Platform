@@ -76,7 +76,7 @@ public class IntelSummaryDatasetResultSetMetadata implements IResultSetMetaData 
 			if (!query.getConservationArea().getIsCcaa()) {
 				itemProvider = new CaQueryItemProvider(dataset.getConnection().getConservationAreas().iterator().next(), query.getConservationArea());
 			}else {
-				itemProvider = new CcaaQueryItemProvider(dataset.connection.hasPermission(Permission.QUERY), query.getConservationArea());
+				itemProvider = new CcaaQueryItemProvider(dataset.connection.hasPermission(Permission.QUERY), query.getConservationArea(), dataset.connection.getDataModel());
 			}
 			
 			results = new SummaryQueryResult();

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Wildlife Conservation Society
+ * Copyright (C) 2020 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,18 +19,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.query;
+package org.wcs.smart.connect.model;
 
-import java.util.Set;
+import java.util.Collection;
+import java.util.Locale;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.datamodel.CcaaDataModelDesktop;
-import org.wcs.smart.i2.model.IntelProfile;
+import org.wcs.smart.ca.datamodel.CcaaDataModel;
+import org.wcs.smart.ca.datamodel.DataModelMerger;
+import org.wcs.smart.ca.datamodel.SimpleDataModel;
 
-public class DesktopCcaaQueryItemProvider extends CcaaQueryItemProvider {
+/**
+ * Ccaa data mode for connnect
+ * 
+ * @author Emily
+ *
+ */
+public class CcaaDataModelConnect extends CcaaDataModel{
+	
 
-	public DesktopCcaaQueryItemProvider(Set<IntelProfile> profiles, ConservationArea queryCa) {
-		super(profiles, queryCa, CcaaDataModelDesktop.getInstance());
+	private Session session;
+	
+	public CcaaDataModelConnect(Collection<ConservationArea> cas, Session session) {
+		super(cas.iterator().next(), cas);
+		this.session = session;
 	}
+	
+	
+	protected void getDataModelInternal() {
+		DataModelMerger merger = new DataModelMerger();
+		
+		SimpleDataModel simple = merger.mergeDataModels(cas, core, session,
+				 Locale.getDefault(), new NullProgressMonitor());
+		dm = simple;
+	}
+	
 
 }

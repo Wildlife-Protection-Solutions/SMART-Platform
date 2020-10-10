@@ -260,7 +260,7 @@ public class IntelQueryColumnProvider {
 		Set<String> attributeKeys = new HashSet<>();
 		q.forEach(e->attributeKeys.add((String)e));
 			
-		List<Attribute> attributes = itemProvider.getDmAttributes(session);
+		List<Attribute> attributes = new ArrayList<>(itemProvider.getDmAttributes(session));
 		for (Iterator<Attribute> iterator = attributes.iterator(); iterator.hasNext();) {
 			Attribute attribute = (Attribute) iterator.next();
 			if (!attributeKeys.contains(attribute.getKeyId())) iterator.remove();

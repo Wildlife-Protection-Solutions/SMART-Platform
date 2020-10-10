@@ -29,6 +29,8 @@ import java.util.Set;
 import org.hibernate.Session;
 import org.wcs.smart.birt.BirtConstants;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.datamodel.CcaaDataModel;
+import org.wcs.smart.ca.datamodel.CcaaDataModelDesktop;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.ProfilesManager;
@@ -54,6 +56,11 @@ public class DesktopIntelBirtConnection extends AbstractIntelBirtConnection {
 			localSession = HibernateManager.openSession();
 			localSession.beginTransaction();
 		}
+	}
+	
+	@Override
+	public  CcaaDataModel getDataModel() {
+		return CcaaDataModelDesktop.getInstance();
 	}
 	
 	public void closeSession(){

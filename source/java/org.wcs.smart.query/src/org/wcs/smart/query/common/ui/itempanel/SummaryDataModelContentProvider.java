@@ -55,6 +55,7 @@ import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.query.IDataModelManager;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryFilterConfigManager;
 import org.wcs.smart.query.QueryFilterConfigManager.IConfigurationChangeListener;
@@ -201,7 +202,7 @@ public class SummaryDataModelContentProvider implements ITreeContentProvider{
 			}else if (parentElement == DataModelItem.ATTRIBUTES_GROUPBY){
 				//get all active attributes
 				boolean showInactive = QueryFilterConfigManager.getInstance().isShowInactiveItems();				
-				List<Attribute> atts = QueryDataModelManager.getInstance().getAttributes(dataModel, !showInactive);
+				List<Attribute> atts = IDataModelManager.getAttributes(dataModel, !showInactive);
 				
 				//filter out numeric only
 				for (Iterator<Attribute> iterator = atts.iterator(); iterator.hasNext();) {
@@ -227,7 +228,7 @@ public class SummaryDataModelContentProvider implements ITreeContentProvider{
 				return Arrays.copyOf(results, cnt);			
 			}else if (parentElement == DataModelItem.ATTRIBUTES_VALUE){	
 				boolean showInactive = QueryFilterConfigManager.getInstance().isShowInactiveItems();				
-				List<Attribute> atts = QueryDataModelManager.getInstance().getAttributes(dataModel, !showInactive);
+				List<Attribute> atts = IDataModelManager.getAttributes(dataModel, !showInactive);
 				
 				//filter out numeric only
 				for (Iterator<Attribute> iterator = atts.iterator(); iterator.hasNext();) {

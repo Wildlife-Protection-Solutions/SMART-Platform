@@ -397,19 +397,6 @@ public class CaDataModelManagerImpl extends AbstractDataModelManager {
 		return Label.getDescription(uuid, session);
 	}
 	
-	/**
-	 * @see org.wcs.smart.query.datamodel.IDataModelManager#getActiveAttributes(org.wcs.smart.ca.datamodel.DataModel)
-	 */
-	public List<Attribute> getActiveAttributes(DataModel dm){
-		List<Attribute> active = new ArrayList<Attribute>();
-		for (Attribute a : dm.getAttributes()){
-			if (DataModelManagerUtil.isActive(a, dm)){
-				active.add(a);
-			}
-		}
-		return active;
-		
-	}
 
 	@Override
 	public int getActiveDepth(){

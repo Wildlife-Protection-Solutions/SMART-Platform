@@ -23,7 +23,6 @@ package org.wcs.smart.udig.style;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.geotools.styling.Style;
@@ -31,7 +30,6 @@ import org.locationtech.udig.style.advanced.common.styleattributeclasses.PointSy
 import org.locationtech.udig.style.advanced.common.styleattributeclasses.RuleWrapper;
 import org.locationtech.udig.style.advanced.points.PointPropertiesEditor;
 import org.locationtech.udig.style.advanced.points.widgets.IPointSymbolizerComposite;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 
 /**
@@ -68,29 +66,15 @@ public class SmartGenerateIconSymbolizer implements IPointSymbolizerComposite {
 		
 		composite = new Composite(parent, SWT.NONE);
 		composite.setLayout(new GridLayout());
-		
-		
-		if (!SmartDB.isMultipleAnalysis()) {
-			Button btnGenerate = new Button(composite, SWT.NONE);
-			btnGenerate.setText(Messages.SmartIconSymbolizer_GenerateButton);
-			btnGenerate.setToolTipText(Messages.SmartIconSymbolizer_GenerateButtonTooltip );
-			btnGenerate.setBackground(composite.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-			btnGenerate.addListener(SWT.Selection, e->{
-				generateIconStyles();
-			});
-		}else {
-			Label l = new Label(composite, SWT.NONE);
-			l.setText(Messages.SmartGenerateIconSymbolizer_CCAANotSupported);
-		}
+
+		Label l = new Label(composite, SWT.NONE);
+		l.setText(Messages.SmartGenerateIconSymbolizer_CCAANotSupported);
 
 	}
 
 	@Override
 	public void update(RuleWrapper ruleWrapper) {
-		if (!SmartDB.isMultipleAnalysis()) {
-			generateIconStyles();
-		}
-
+		generateIconStyles();
 	}
 
 	private void generateIconStyles() {

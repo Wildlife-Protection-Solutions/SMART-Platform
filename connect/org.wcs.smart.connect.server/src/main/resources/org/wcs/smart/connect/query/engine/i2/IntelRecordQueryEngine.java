@@ -37,6 +37,7 @@ import org.hibernate.Session;
 import org.hibernate.type.PostgresUUIDType;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.i18n.Messages;
+import org.wcs.smart.connect.model.CcaaDataModelConnect;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.security.AdvIntelAction;
 import org.wcs.smart.connect.security.SecurityManager;
@@ -109,7 +110,7 @@ public class IntelRecordQueryEngine implements IIntelQueryEngine {
 		if (!query.getConservationArea().getIsCcaa()) {
 			itemProvider = new CaQueryItemProvider(cas.iterator().next(), query.getConservationArea());
 		}else {
-			itemProvider = new CcaaQueryItemProvider(profiles, query.getConservationArea());
+			itemProvider = new CcaaQueryItemProvider(profiles, query.getConservationArea(), new CcaaDataModelConnect(cas, session));
 		}		
 		IQueryFilter filter = IntelRecordQuery.parseQuery(query.getQueryString());
 		RecordFilterProcessor p = new RecordFilterProcessor();

@@ -39,6 +39,7 @@ import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.query.IDataModelManager;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryFilterConfigManager;
 import org.wcs.smart.query.QueryFilterConfigManager.IConfigurationChangeListener;
@@ -157,7 +158,7 @@ public class FiltersDataModelContentProvider implements ITreeContentProvider{
 					return provider.getChildren(provider.getElements(null)[0]);	
 			}else if (parentElement == DataModelItem.ATTRIBUTES){
 				boolean showInactive = QueryFilterConfigManager.getInstance().isShowInactiveItems();
-				List<Attribute> atts = QueryDataModelManager.getInstance().getAttributes(this.dataModel, !showInactive);
+				List<Attribute> atts = IDataModelManager.getAttributes(this.dataModel, !showInactive);
 				
 				Collections.sort(atts, new Comparator<Attribute>() {
 					@Override

@@ -58,6 +58,9 @@ import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.feature.type.PropertyType;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.ca.datamodel.CcaaDataModel;
+import org.wcs.smart.ca.datamodel.CcaaDataModelDesktop;
 import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -72,7 +75,6 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  *
  */
-//TODO: support ccaa with data model merging
 public class GenerateSmartThemeDialog extends SmartStyledDialog {
 
 	//observation category label
@@ -285,14 +287,16 @@ public class GenerateSmartThemeDialog extends SmartStyledDialog {
 				
 				String part = a.getName().replaceAll("[^\\p{L}\\p{N}0-9]", "").toLowerCase(Locale.ROOT); //$NON-NLS-1$ //$NON-NLS-2$
 				if (part.equals(value)) {
-					found = x;break;
+					found = x;
+					break;
 				}
 				
 			}else if (x instanceof Integer) {
 				String part = OBS_CAT_LABEL.replaceAll("[^\\p{L}\\p{N}0-9]", "") + ((Integer)x); //$NON-NLS-1$ //$NON-NLS-2$
 				part = part.toLowerCase();
 				if (part.equals(value)) {
-					found = x;break;
+					found = x;
+					break;
 				}
 			}
 		}
@@ -308,36 +312,49 @@ public class GenerateSmartThemeDialog extends SmartStyledDialog {
 			List<IconSet> iset = new ArrayList<>();
 			List<Object> dmItems = new ArrayList<>();
 			
+			CcaaDataModel ccaaModel = CcaaDataModelDesktop.getInstance();
+			
 			try(Session session = HibernateManager.openSession()){
-				//TODO: Support CrossConservationAnalysis tools for theme generation
-				//max category depth
-				String query = "SELECT cast(max(smart.hkeyLength(hkey)) as int) FROM Category WHERE conservationArea = :ca "; //$NON-NLS-1$
-				Query<?> q = session.createQuery(query)
+				if (SmartDB.isMultipleAnalysis()) {
+					for (Attribute a : ccaaModel.getAttributes()) {
+						if (a.getType() == AttributeType.TREE || a.getType() == AttributeType.LIST) {
+							dmItems.add(a);
+						}
+					}
+					dmItems.sort((a,b)->Collator.getInstance().compare(((Attribute)a).getName(), ((Attribute)b).getName()));
+					
+					for (int i = 0; i <= ccaaModel.getCategoryDepth(); i ++) {
+						dmItems.add(i, i);
+					}				
+				}else {
+					
+					//load all list and tree attributes and category levels
+					List<Attribute.AttributeType> types = new ArrayList<>();
+					types.add(Attribute.AttributeType.LIST);
+					types.add(Attribute.AttributeType.TREE);
+					dmItems.addAll(session.createQuery("FROM Attribute WHERE conservationArea = :ca AND type IN (:types)", Attribute.class) //$NON-NLS-1$
+						.setParameter("ca",  SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
+						.setParameterList("types", types) //$NON-NLS-1$
+						.list());
+					
+					dmItems.sort((a,b)->Collator.getInstance().compare(((Attribute)a).getName(), ((Attribute)b).getName()));
+
+					String query = "SELECT cast(max(smart.hkeyLength(hkey)) as int) FROM Category WHERE conservationArea = :ca "; //$NON-NLS-1$
+					Query<?> q = session.createQuery(query)
 						.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 
-						
-				
-				//load all list and tree attributes and category levels
-				List<Attribute.AttributeType> types = new ArrayList<>();
-				types.add(Attribute.AttributeType.LIST);
-				types.add(Attribute.AttributeType.TREE);
-				dmItems.addAll(session.createQuery("FROM Attribute WHERE conservationArea = :ca AND type IN (:types)", Attribute.class) //$NON-NLS-1$
-					.setParameter("ca",  SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
-					.setParameterList("types", types) //$NON-NLS-1$
-					.list());
-				
-				dmItems.sort((a,b)->Collator.getInstance().compare(((Attribute)a).getName(), ((Attribute)b).getName()));
-				
-				Integer maxInt = (Integer) q.uniqueResult();
-				if (maxInt != null) {
-					for (int i = 0; i <= maxInt; i ++) {
-						dmItems.add(i, i);
-					}
-				}		
+					Integer maxInt = (Integer) q.uniqueResult();
+					if (maxInt != null) {
+						for (int i = 0; i <= maxInt; i ++) {
+							dmItems.add(i, i);
+						}
+					}		
+				}
 				
 				iset.addAll(session.createQuery("FROM IconSet WHERE conservationArea =: ca", IconSet.class) //$NON-NLS-1$
 						.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
 						.list());				
+				
 			}
 			
 			Display.getDefault().syncExec(()->{

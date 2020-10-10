@@ -390,6 +390,10 @@
                   visible="true">
             </separator>
             <command
+                  commandId="org.wcs.smart.command.ca.iconset.show"
+                  style="push">
+            </command>
+            <command
                   commandId="org.wcs.smart.command.ca.basemaps.show"
                   label="%basemaps.command.label"
                   style="push">
@@ -1190,12 +1194,6 @@
       <handler
             class="org.wcs.smart.ui.internal.ca.properties.handlers.ShowIconsetPropertyPageHandler$ShowIconsetPropertyPageHandlerWrapper"
             commandId="org.wcs.smart.command.ca.iconset.show">
-         <activeWhen>
-            <test
-                  forcePluginActivation="true"
-                  property="org.wcs.smart.caSingle">
-            </test>
-         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.ui.ViewErrorLogHandler$ViewErrorLogHandlerWrapper"
@@ -1340,15 +1338,15 @@
       <class
             ca_property=".iconSet.conservationArea"
             class="org.wcs.smart.ca.icon.IconFile"
-            supportsCcaa="false">
+            supportsCcaa="true">
       </class>
       <class
             class="org.wcs.smart.ca.icon.IconSet"
-            supportsCcaa="false">
+            supportsCcaa="true">
       </class>
       <class
             class="org.wcs.smart.ca.icon.Icon"
-            supportsCcaa="false">
+            supportsCcaa="true">
       </class>
       <class
             class="org.wcs.smart.ca.EmployeeTeam"

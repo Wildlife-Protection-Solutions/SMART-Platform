@@ -21,8 +21,6 @@
  */
 package org.wcs.smart.ui.internal.ca.properties;
 
-import java.io.OutputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -38,7 +36,6 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ILazyContentProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -106,9 +103,6 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 	
 	private List<IconSet> sets = null;
 	private List<Icon> icons = null;
-	
-	//for creating new icon set from template
-	private Object templateIconSet;
 	
 	private Session session;
 	private boolean isDirty = false;
@@ -520,8 +514,11 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 	
 	private void selectIconSet(boolean refresh) {
 		Object item = lstIconsets.getStructuredSelection().getFirstElement();
-		if (item == null) return;
-		if (!(item instanceof IconSet)) return;
+		if (item == null || !(item instanceof IconSet)) {
+			imageTable.setAttachments(Collections.emptyList());
+			return;
+		}
+		
 		
 		if (!refresh && item.equals(lstIconsets.getData(CURRENT_SET_KEY))) return;
 		lstIconsets.setData(CURRENT_SET_KEY, item);
@@ -539,90 +536,15 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 		if (sets == null) return;
 		
 		IconSet newIconSet = new IconSet();
-		newIconSet.setConservationArea(SmartDB.getCurrentConservationArea());;
+		newIconSet.setConservationArea(SmartDB.getCurrentConservationArea());
 		newIconSet.setIsDefault(false);
 		
-		NameKeyDialog<IconSet> dialog = new NameKeyDialog<IconSet>(getShell(), newIconSet, sets){
-			@Override
-			protected String getTitle(){
-				return Messages.IconPreferencePage_NewIconDialogTitle;
-			}
-			
-			public Point getInitialSize(){
-				return new Point(400, 250);
-			}
-			
-			@Override
-			protected Control createDialogArea(Composite parent) {
-				Composite u = (Composite)super.createDialogArea(parent);
-				
-				Composite addTo = (Composite) u.getChildren()[0];
-				
-				Label l = new Label(addTo, SWT.NONE);
-				l.setText(Messages.IconPreferencePage_TemplateIconLabel);
-				
-				ComboViewer cmbViewer = new ComboViewer(addTo, SWT.DROP_DOWN | SWT.READ_ONLY);
-				cmbViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-				cmbViewer.setContentProvider(ArrayContentProvider.getInstance());
-				cmbViewer.setLabelProvider(new LabelProvider() {
-					public String getText(Object element) {
-						if (element instanceof IconSet) return ((IconSet) element).getName();
-						return super.getText(element);
-					}
-				});
-				List<Object> ins = new ArrayList<>();
-				ins.add(""); //$NON-NLS-1$
-				ins.addAll(sets);
-				cmbViewer.setInput(ins);
-				
-				templateIconSet = null;
-				cmbViewer.addSelectionChangedListener(e->templateIconSet=cmbViewer.getStructuredSelection().getFirstElement());
-				return u;
-			}
-		};
-		
+		NewIconSetDialog dialog = new NewIconSetDialog(getShell(),newIconSet, sets, icons, session);
 		if (dialog.open() != Window.OK) return;
 		
-		session.saveOrUpdate(newIconSet);
+		toDeleteFiles.addAll(dialog.getDeleteFiles());
 		setDirty(true);
-		if (templateIconSet != null && templateIconSet instanceof IconSet) {
-			for (Icon icon : icons) {
-				IconFile copyIcon = icon.getIconFile((IconSet) templateIconSet);
-				if (copyIcon != null) {
-					IconFile newfile = new IconFile();
-					newfile.setIcon(icon);
-					newfile.setIconSet(newIconSet);
-					try {
-						if (copyIcon.isSystemIcon()) {
-							newfile.setFilename(copyIcon.getFilename());
-						}else {
-							Path temp = Files.createTempFile("smart", "icon"); //$NON-NLS-1$ //$NON-NLS-2$
-							Path inputFile = null;
-							if (copyIcon.getCopyFromLocation() != null) {
-								inputFile = copyIcon.getCopyFromLocation();
-							}else {
-								inputFile = copyIcon.getAttachmentFile();
-							}
-							try(OutputStream out = Files.newOutputStream(temp)){
-								Files.copy(inputFile, out);
-							}
-							newfile.setCopyFromLocation(temp);
-							newfile.setFilename(copyIcon.getFilename());
-							
-							toDeleteFiles.add(temp);
-						}
-						icon.getFiles().add(newfile);
-					}catch (Exception ex) {
-						SmartPlugIn.displayLog(MessageFormat.format(Messages.IconPreferencePage_CopyError,  icon.getName()), ex);
-					}
-					session.saveOrUpdate(icon);
-					setDirty(true);
-				}
-			}
-		}
-		if (sets.isEmpty()) {
-			newIconSet.setIsDefault(true);
-		}
+		if (sets.isEmpty()) newIconSet.setIsDefault(true);
 		sets.add(newIconSet);
 		lstIconsets.refresh();
 		createIconTable(sets, icons);
@@ -655,6 +577,7 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 		
 		lstIconsets.refresh();
 		createIconTable(sets, icons);
+		selectIconSet(true);
 	}
 	
 

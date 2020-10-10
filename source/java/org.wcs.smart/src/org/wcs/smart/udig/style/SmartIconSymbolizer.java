@@ -32,7 +32,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.geotools.filter.text.ecql.ECQL;
@@ -46,7 +45,6 @@ import org.locationtech.udig.style.advanced.points.widgets.PointGeneralParameter
 import org.opengis.filter.Filter;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.icon.IconFile;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.internal.ca.properties.IconSelectionDialog;
 import org.wcs.smart.ui.internal.ca.properties.IconSelectionDialog.Type;
@@ -149,14 +147,6 @@ public class SmartIconSymbolizer implements IPointSymbolizerComposite, IStyleCha
 		((GridLayout)composite.getLayout()).marginHeight = 0;
 		((GridLayout)composite.getLayout()).marginWidth = 0;
 		
-		
-		
-		if (SmartDB.isMultipleAnalysis()) {
-			Label l = new Label(composite, SWT.NONE);
-			l.setText(Messages.SmartIconSymbolizer_NotSupported);
-			return;
-		}
-		
 		Composite iconbit = new Composite(composite, SWT.NONE);
 		iconbit.setLayout(new GridLayout(2, false));
 		((GridLayout)iconbit.getLayout()).marginHeight = 0;
@@ -217,9 +207,7 @@ public class SmartIconSymbolizer implements IPointSymbolizerComposite, IStyleCha
 	@Override
 	public void update(RuleWrapper ruleWrapper) {
 		this.ruleWrapper = ruleWrapper;
-		
-		if (SmartDB.isMultipleAnalysis()) return;
-		
+			
 		generalParametersComposite.update(ruleWrapper);
 		fontFiltersComposite.update(ruleWrapper);
 		
@@ -239,7 +227,6 @@ public class SmartIconSymbolizer implements IPointSymbolizerComposite, IStyleCha
 	
 	
 	public void onStyleChanged( Object source, String[] values, boolean fromField, STYLEEVENTTYPE styleEventType ) {
-		if (SmartDB.isMultipleAnalysis()) return;
 		
 		String value = values[0];
 

@@ -21,11 +21,6 @@
  */
 package org.wcs.smart.query.internal;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.query.IDataModelManager;
 
 /**
@@ -36,15 +31,5 @@ import org.wcs.smart.query.IDataModelManager;
  */
 public abstract class AbstractDataModelManager implements IDataModelManager {
 
-	@Override
-	public List<Attribute> getAttributes(DataModel dm, boolean onlyActive) {
-		List<Attribute> result = new ArrayList<>(dm.getAttributes().size());
-		for (Attribute a : dm.getAttributes()) {
-			if (!onlyActive || DataModelManagerUtil.isActive(a, dm)) {
-				result.add(a);
-			}
-		}
-		return result;
-	}
 	
 }

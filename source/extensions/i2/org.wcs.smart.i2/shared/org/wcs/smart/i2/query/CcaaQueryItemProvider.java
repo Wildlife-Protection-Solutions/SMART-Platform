@@ -32,9 +32,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -42,8 +40,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.ca.datamodel.DataModelMerger;
-import org.wcs.smart.ca.datamodel.SimpleDataModel;
+import org.wcs.smart.ca.datamodel.CcaaDataModel;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
@@ -69,7 +66,7 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 	private Set<ConservationArea> areas = null;
 	private ConservationArea queryCa = null;
 		
-	protected volatile SimpleDataModel mergedDataModel = null;
+	protected CcaaDataModel ccaaModel = null;
 	
 	protected Set<IntelRecordSource> recordSources = null;
 	
@@ -78,7 +75,8 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 	 * @param profiles set of profiles this user has query permission for 
 	 * @param queryCa
 	 */
-	public CcaaQueryItemProvider(Set<IntelProfile> profiles, ConservationArea queryCa) {
+	public CcaaQueryItemProvider(Set<IntelProfile> profiles, ConservationArea queryCa, CcaaDataModel ccaaModel) {
+		this.ccaaModel = ccaaModel;
 		this.profiles = profiles;
 		this.queryCa = queryCa;
 		this.areas = profiles.stream().map(a->a.getConservationArea()).collect(Collectors.toSet());
@@ -371,12 +369,12 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 	
 	@Override
 	public List<Category> getRootCategories(Session session){
-		return getDataModel(session).getCategories();
+		return ccaaModel.getCategories();
 	}
 	
 	@Override
 	public List<Attribute> getDmAttributes(Session session){
-		return getDataModel(session).getAttributes();
+		return ccaaModel.getAttributes();
 	}
 	
 	@Override
@@ -387,7 +385,7 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 	@Override
 	public Category getCategory(String categoryHkey, Session session){
 		List<Category> toSearch = new ArrayList<>();
-		toSearch.addAll(getDataModel(session).getCategories());
+		toSearch.addAll(ccaaModel.getCategories());
 		while(!toSearch.isEmpty()) {
 			Category temp = toSearch.remove(0);
 			if (temp.getHkey().equals(categoryHkey)) {
@@ -408,53 +406,16 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 		return null;
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<AttributeListItem> getDmAttributeListItem(Attribute attribute, Session session){
-		//we need to only include items that are shared across all conservation areas
-		String query = "SELECT a.keyId FROM AttributeListItem a join a.attribute b WHERE b.keyId = :attributeKey AND b.conservationArea IN (:cas) group by a.keyId having count(*) = :cnt"; //$NON-NLS-1$
-		Query<?> q = session.createQuery(query);
-		q.setParameterList("cas", getConservationAreas()); //$NON-NLS-1$
-		q.setParameter("attributeKey", attribute.getKeyId()); //$NON-NLS-1$
-		q.setParameter("cnt", Long.valueOf(getConservationAreas().size())); //$NON-NLS-1$
-				
-		List<?> keys = q.list();
-		if (keys.size() == 0){
-			//return empty list
-			return new ArrayList<AttributeListItem>();
-		}
-		query = "FROM AttributeListItem a WHERE a.attribute.keyId = :attributeKey AND a.attribute.conservationArea = :ca AND a.keyId IN (:keys)"; //$NON-NLS-1$
-		q = session.createQuery(query);
-		q.setParameter("ca", getMainConservationArea()); //$NON-NLS-1$
-		q.setParameterList("keys", keys); //$NON-NLS-1$
-		q.setParameter("attributeKey", attribute.getKeyId()); //$NON-NLS-1$
-				
-		List<AttributeListItem> items = (List<AttributeListItem>) q.list();
-		return items;	
+		return ccaaModel.getAttributeListItems(attribute, session);
+	
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<AttributeTreeNode> getDmAttributeTreeNodes(Attribute attribute, Session session){
-		//we need to only include items that are shared across all conservation areas
-		String query = "SELECT a.hkey FROM AttributeTreeNode a join a.attribute b WHERE b.keyId = :attributeKey AND b.conservationArea in (:cas) group by a.hkey having count(*) = :cnt"; //$NON-NLS-1$
-		Query<?> q = session.createQuery(query);
-		q.setParameterList("cas", getConservationAreas()); //$NON-NLS-1$
-		q.setParameter("attributeKey", attribute.getKeyId()); //$NON-NLS-1$
-		q.setParameter("cnt", Long.valueOf(getConservationAreas().size())); //$NON-NLS-1$
+		return ccaaModel.getAttributeTreeNodes(attribute, session);
 		
-		List<String> hkeys = (List<String>) q.list();
-		if (hkeys.size() == 0){
-			return new ArrayList<AttributeTreeNode>();
-		}
-		query = "FROM AttributeTreeNode a WHERE a.attribute.keyId = :attributeKey AND a.attribute.conservationArea = :ca and a.hkey IN (:keys) and parent is null"; //$NON-NLS-1$
-		q = session.createQuery(query);
-		q.setParameter("ca", getMainConservationArea()); //$NON-NLS-1$
-		q.setParameterList("keys", hkeys); //$NON-NLS-1$
-		q.setParameter("attributeKey", attribute.getKeyId()); //$NON-NLS-1$
-		
-		List<AttributeTreeNode> roots = (List<AttributeTreeNode>) q.list();			
-		return roots;		
 	}
 	
 	@Override
@@ -464,18 +425,6 @@ public class CcaaQueryItemProvider implements IQueryItemProvider {
 		return cnt.intValue();
 	}
 	
-	protected SimpleDataModel getDataModel(final Session session) {
-		if (mergedDataModel == null) {
-			synchronized (this) {
-				if (mergedDataModel != null) return mergedDataModel;
-				DataModelMerger merger = new DataModelMerger();
-				final ConservationArea[] cas =getConservationAreas().toArray(new ConservationArea[getConservationAreas().size()]);
-				final ConservationArea defaultCa = getMainConservationArea();
-				mergedDataModel = merger.mergeDataModels(cas, defaultCa, session, null, new NullProgressMonitor());
-			}
-		}
-		return mergedDataModel;
-	}
 
 	@Override
 	public List<IntelRecordSource> getRecordSources(Set<UUID> profiles, Session session) {
