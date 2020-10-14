@@ -27,6 +27,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.UUID;
 
+import org.geotools.geometry.jts.WKBReader;
 import org.wcs.smart.asset.query.parser.internal.filter.AssetAttributeFilter;
 import org.wcs.smart.asset.query.parser.internal.filter.AssetFilter;
 import org.wcs.smart.ca.Agency;
@@ -245,37 +246,76 @@ public enum PsqlFilterToSqlGenerator {
 	 */
 	protected String asSql(AreaFilter filter, IQueryEngine engine){
 		StringBuilder sb = new StringBuilder();
-		if (filter.getGeometryType() == AreaFilterGeometryType.WAYPOINT){
-			sb.append("smart.pointinpolygon(" );  //$NON-NLS-1$
-			sb.append(engine.tablePrefix(Waypoint.class) + ".x, ");  //$NON-NLS-1$
-			sb.append(engine.tablePrefix(Waypoint.class) + ".y, ");  //$NON-NLS-1$
-			sb.append(engine.tablePrefix(Waypoint.class) + ".distance, ");  //$NON-NLS-1$
-			sb.append(engine.tablePrefix(Waypoint.class) + ".direction, ");  //$NON-NLS-1$
-			sb.append( filter.getType().name() + "_" + filter.getKey() + ".geom");  //$NON-NLS-1$ //$NON-NLS-2$
-			sb.append(")");  //$NON-NLS-1$
-		}else if (filter.getGeometryType() == AreaFilterGeometryType.TRACK){
-			if (engine.canExecute(PatrolObservationQuery.KEY) ||
-					engine.canExecute(PatrolGriddedQuery.KEY) ||
-					engine.canExecute(PatrolQuery.KEY) ||
-					engine.canExecute(PatrolSummaryQuery.KEY) ||
-					engine.canExecute(PatrolWaypointQuery.KEY)){
-				//For Patrol Queries use track
-				//user track table
-				sb.append("smart.trackIntersects(");  //$NON-NLS-1$
-				sb.append(engine.tablePrefix(Track.class) + ".geometry, ");  //$NON-NLS-1$
-				sb.append(filter.getType().name() + "_" + filter.getKey() + ".geom");  //$NON-NLS-1$ //$NON-NLS-2$
+		if (filter.getType() != null) {
+			if (filter.getGeometryType() == AreaFilterGeometryType.WAYPOINT){
+				sb.append("smart.pointinpolygon(" );  //$NON-NLS-1$
+				sb.append(engine.tablePrefix(Waypoint.class) + ".x, ");  //$NON-NLS-1$
+				sb.append(engine.tablePrefix(Waypoint.class) + ".y, ");  //$NON-NLS-1$
+				sb.append(engine.tablePrefix(Waypoint.class) + ".distance, ");  //$NON-NLS-1$
+				sb.append(engine.tablePrefix(Waypoint.class) + ".direction, ");  //$NON-NLS-1$
+				sb.append( filter.getType().name() + "_" + filter.getKey() + ".geom");  //$NON-NLS-1$ //$NON-NLS-2$
 				sb.append(")");  //$NON-NLS-1$
-			}else if (engine.canExecute(SurveyObservationQuery.KEY) ||
-					engine.canExecute(SurveyGriddedQuery.KEY) ||
-					engine.canExecute(MissionQuery.KEY) ||
-					engine.canExecute(MissionTrackQuery.KEY) ||
-					engine.canExecute(SurveySummaryQuery.KEY) ||
-					engine.canExecute(SurveyWaypointQuery.KEY)){
-				//survey queries use mission track table
-				sb.append("smart.trackIntersects(");  //$NON-NLS-1$
-				sb.append(engine.tablePrefix(MissionTrack.class) + ".geometry, ");  //$NON-NLS-1$
-				sb.append(filter.getType().name() + "_" + filter.getKey() + ".geom");  //$NON-NLS-1$ //$NON-NLS-2$
+			}else if (filter.getGeometryType() == AreaFilterGeometryType.TRACK){
+				if (engine.canExecute(PatrolObservationQuery.KEY) ||
+						engine.canExecute(PatrolGriddedQuery.KEY) ||
+						engine.canExecute(PatrolQuery.KEY) ||
+						engine.canExecute(PatrolSummaryQuery.KEY) ||
+						engine.canExecute(PatrolWaypointQuery.KEY)){
+					//For Patrol Queries use track
+					//user track table
+					sb.append("smart.trackIntersects(");  //$NON-NLS-1$
+					sb.append(engine.tablePrefix(Track.class) + ".geometry, ");  //$NON-NLS-1$
+					sb.append(filter.getType().name() + "_" + filter.getKey() + ".geom");  //$NON-NLS-1$ //$NON-NLS-2$
+					sb.append(")");  //$NON-NLS-1$
+				}else if (engine.canExecute(SurveyObservationQuery.KEY) ||
+						engine.canExecute(SurveyGriddedQuery.KEY) ||
+						engine.canExecute(MissionQuery.KEY) ||
+						engine.canExecute(MissionTrackQuery.KEY) ||
+						engine.canExecute(SurveySummaryQuery.KEY) ||
+						engine.canExecute(SurveyWaypointQuery.KEY)){
+					//survey queries use mission track table
+					sb.append("smart.trackIntersects(");  //$NON-NLS-1$
+					sb.append(engine.tablePrefix(MissionTrack.class) + ".geometry, ");  //$NON-NLS-1$
+					sb.append(filter.getType().name() + "_" + filter.getKey() + ".geom");  //$NON-NLS-1$ //$NON-NLS-2$
+					sb.append(")");  //$NON-NLS-1$
+				}
+			}
+		}else {
+			if (filter.getGeometryType() == AreaFilterGeometryType.WAYPOINT){
+				sb.append("smart.pointinpolygon(" );  //$NON-NLS-1$
+				sb.append(engine.tablePrefix(Waypoint.class) + ".x, ");  //$NON-NLS-1$
+				sb.append(engine.tablePrefix(Waypoint.class) + ".y, ");  //$NON-NLS-1$
+				sb.append(engine.tablePrefix(Waypoint.class) + ".distance, ");  //$NON-NLS-1$
+				sb.append(engine.tablePrefix(Waypoint.class) + ".direction, ");  //$NON-NLS-1$
+				String param = engine.addParameterValue(WKBReader.hexToBytes(filter.getCustomArea()));
+				sb.append( param );
 				sb.append(")");  //$NON-NLS-1$
+			}else if (filter.getGeometryType() == AreaFilterGeometryType.TRACK){
+				if (engine.canExecute(PatrolObservationQuery.KEY) ||
+						engine.canExecute(PatrolGriddedQuery.KEY) ||
+						engine.canExecute(PatrolQuery.KEY) ||
+						engine.canExecute(PatrolSummaryQuery.KEY) ||
+						engine.canExecute(PatrolWaypointQuery.KEY)){
+					//For Patrol Queries use track
+					//user track table
+					sb.append("smart.trackIntersects(" );  //$NON-NLS-1$
+					sb.append(engine.tablePrefix(Track.class) + ".geometry, ");  //$NON-NLS-1$
+					String param = engine.addParameterValue(WKBReader.hexToBytes(filter.getCustomArea()));
+					sb.append( param );
+					sb.append(")");  //$NON-NLS-1$
+				}else if (engine.canExecute(SurveyObservationQuery.KEY) ||
+						engine.canExecute(SurveyGriddedQuery.KEY) ||
+						engine.canExecute(MissionQuery.KEY) ||
+						engine.canExecute(MissionTrackQuery.KEY) ||
+						engine.canExecute(SurveySummaryQuery.KEY) ||
+						engine.canExecute(SurveyWaypointQuery.KEY)){
+					//survey queries use mission track table
+					sb.append("smart.trackIntersects(" );  //$NON-NLS-1$
+					sb.append(engine.tablePrefix(MissionTrack.class) + ".geometry, ");  //$NON-NLS-1$
+					String param = engine.addParameterValue(WKBReader.hexToBytes(filter.getCustomArea()));
+					sb.append( param );
+					sb.append(")");  //$NON-NLS-1$
+				}
 			}
 		}
 		
