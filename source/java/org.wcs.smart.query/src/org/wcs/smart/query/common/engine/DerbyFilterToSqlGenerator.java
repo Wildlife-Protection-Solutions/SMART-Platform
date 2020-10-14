@@ -27,6 +27,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.UUID;
 
+import org.locationtech.jts.io.WKBReader;
+import org.locationtech.jts.io.WKBWriter;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
@@ -116,17 +118,32 @@ public class DerbyFilterToSqlGenerator {
 	 */
 	protected String asSql(AreaFilter filter, IQueryEngine engine){
 		StringBuilder sb = new StringBuilder();
-		if (filter.getGeometryType() == AreaFilterGeometryType.WAYPOINT){
-			sb.append("smart.pointinpolygon(" );  //$NON-NLS-1$
-			sb.append(engine.tablePrefix(Waypoint.class) + ".x, ");  //$NON-NLS-1$
-			sb.append(engine.tablePrefix(Waypoint.class) + ".y, ");  //$NON-NLS-1$
-			sb.append(engine.tablePrefix(Waypoint.class) + ".distance, ");  //$NON-NLS-1$
-			sb.append(engine.tablePrefix(Waypoint.class) + ".direction, ");  //$NON-NLS-1$			
-			sb.append( filter.getType().name() + "_" + filter.getKey() + ".geom");  //$NON-NLS-1$ //$NON-NLS-2$
-			sb.append(")");  //$NON-NLS-1$
+		if (filter.getType() != null) {
+			if (filter.getGeometryType() == AreaFilterGeometryType.WAYPOINT){
+				sb.append("smart.pointinpolygon(" );  //$NON-NLS-1$
+				sb.append(engine.tablePrefix(Waypoint.class) + ".x, ");  //$NON-NLS-1$
+				sb.append(engine.tablePrefix(Waypoint.class) + ".y, ");  //$NON-NLS-1$
+				sb.append(engine.tablePrefix(Waypoint.class) + ".distance, ");  //$NON-NLS-1$
+				sb.append(engine.tablePrefix(Waypoint.class) + ".direction, ");  //$NON-NLS-1$			
+				sb.append( filter.getType().name() + "_" + filter.getKey() + ".geom");  //$NON-NLS-1$ //$NON-NLS-2$
+				sb.append(")");  //$NON-NLS-1$
+			}
+			
+		}else {
+			if (filter.getGeometryType() == AreaFilterGeometryType.WAYPOINT) {
+				sb.append("smart.pointinpolygon(" );  //$NON-NLS-1$
+				sb.append(engine.tablePrefix(Waypoint.class) + ".x, ");  //$NON-NLS-1$
+				sb.append(engine.tablePrefix(Waypoint.class) + ".y, ");  //$NON-NLS-1$
+				sb.append(engine.tablePrefix(Waypoint.class) + ".distance, ");  //$NON-NLS-1$
+				sb.append(engine.tablePrefix(Waypoint.class) + ".direction, ");  //$NON-NLS-1$
+				String param = engine.addParameterValue(WKBReader.hexToBytes(filter.getCustomArea()));
+				sb.append( param );
+				sb.append(")");  //$NON-NLS-1$
+			}
 		}
 		return sb.toString();
 	}
+	
 	
 	/*
 	 * Attribute filter

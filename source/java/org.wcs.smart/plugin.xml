@@ -1559,6 +1559,16 @@
                image="images/pointers/split_pointer.png">
          </cursor>
       </modalTool>
+      <modalTool
+            categoryId="org.wcs.smart.ui.map.tool"
+            class="org.wcs.smart.ui.map.tool.DrawPolygonTool"
+            icon="images/icons/obj16/polygon_add.png"
+            id="org.wcs.smart.polygon.draw"
+            name="Draw Area"
+            onToolbar="false"
+            toolCursorId="org.wcs.smart.cross"
+            tooltip="%DrawAreaTooltip">
+      </modalTool>
    </extension>
    <extension
          point="org.wcs.smart.caExport">

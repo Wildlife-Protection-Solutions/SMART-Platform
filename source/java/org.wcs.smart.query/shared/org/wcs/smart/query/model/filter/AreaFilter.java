@@ -22,6 +22,7 @@
 package org.wcs.smart.query.model.filter;
 
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.query.model.CustomArea;
 
 
 /**
@@ -51,7 +52,8 @@ public class AreaFilter implements IFilter {
 	/**
 	 * Creates a new area filter.
 	 * 
-	 * @param key the filter key in the form area:<geomtype{wp | t}>:<type>:key
+	 * @param key the filter key in the form "area:<geomtype{wp | t}>:<type>:<key>"
+	 * OR "area:<geomtype{wp | t}:<custom>:<area>"
 	 * where type is from Area.AreaType
 	 * @return
 	 */
@@ -63,14 +65,20 @@ public class AreaFilter implements IFilter {
 		}else if (bits[1].equalsIgnoreCase(AreaFilterGeometryType.TRACK.key)){
 			geomType = AreaFilterGeometryType.TRACK;
 		}
-		Area.AreaType type = Area.AreaType.valueOf(bits[2]);
-		return new AreaFilter(type, bits[3], geomType);
+		if (bits[2].equalsIgnoreCase(CustomArea.AREA_KEY)) {
+			return new AreaFilter(bits[3], geomType);
+		}else {
+			Area.AreaType type = Area.AreaType.valueOf(bits[2]);
+			return new AreaFilter(type, bits[3], geomType);
+		}
 	}
 	
 	
 	private Area.AreaType type;
 	private String key;
 	private AreaFilterGeometryType geomType;
+	
+	private String customArea;
 	
 	/**
 	 * Creates a new area filter
@@ -81,15 +89,29 @@ public class AreaFilter implements IFilter {
 		this.type = type;
 		this.key = key;
 		this.geomType = geomType;
+		this.customArea = null;
+	}
+	
+	public AreaFilter(String customArea, AreaFilterGeometryType geomType) {
+		this.geomType = null;
+		this.key = null;
+		this.customArea = customArea;
+		this.geomType = geomType;
 	}
 	/**
 	 * @see org.wcs.smart.query.parser.filter.IFilter#asString()
 	 */
 	@Override
 	public String asString() {
+		if (customArea != null) {
+			return "area:" +geomType.key + ":" + CustomArea.AREA_KEY + ":" + customArea;  //$NON-NLS-1$  //$NON-NLS-2$  //$NON-NLS-3$	
+		}
 		return "area:" +geomType.key + ":" + type + ":" + key;  //$NON-NLS-1$  //$NON-NLS-2$  //$NON-NLS-3$
 	}
 
+	public String getCustomArea() {
+		return this.customArea;
+	}
 	/**
 	 * @return the area filter key
 	 */

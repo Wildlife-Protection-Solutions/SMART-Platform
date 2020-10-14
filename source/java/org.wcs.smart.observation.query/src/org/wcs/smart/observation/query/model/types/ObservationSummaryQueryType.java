@@ -41,6 +41,7 @@ import org.wcs.smart.observation.query.ui.definition.ObservationValueRateFilterP
 import org.wcs.smart.observation.query.ui.itempanel.SummaryFilterPanel;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.SummaryQuery;
+import org.wcs.smart.query.model.CustomArea;
 import org.wcs.smart.query.model.IQueryResultInfoProvider;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
@@ -134,6 +135,8 @@ public class ObservationSummaryQueryType implements IQueryType {
 						}else {
 							items = new DropItem[]{ createAreaDropItem((Area)source, AreaFilter.AreaFilterGeometryType.WAYPOINT) };
 						}
+					}else if (source instanceof CustomArea) {
+						items = new DropItem[]{ createCustomAreaDropItem(null, AreaFilter.AreaFilterGeometryType.WAYPOINT) };
 					}
 					return items;					
 				}

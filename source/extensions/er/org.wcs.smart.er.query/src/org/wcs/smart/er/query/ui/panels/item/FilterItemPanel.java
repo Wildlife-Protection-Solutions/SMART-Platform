@@ -170,7 +170,7 @@ public class FilterItemPanel extends AbstractQueryItemPanel implements ISurveyPa
 		}
 		
 		
-		areaNode = new AreaTreeNode(Messages.SurveyFilterItemPanel_AreaFilterTreeNode);
+		areaNode = new AreaTreeNode(Messages.SurveyFilterItemPanel_AreaFilterTreeNode, true);
 		nodes.add(areaNode);
 		
 		nodes.add(new OperatorsTreeNode());

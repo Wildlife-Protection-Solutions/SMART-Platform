@@ -67,23 +67,39 @@ public class AreaFilterVisitor implements IFilterVisitor{
 	public void visit(IFilter filter) {
 		if (filter instanceof AreaFilter){
 			AreaFilter ff = (AreaFilter)filter;
-			String areaTableName = ff.getType().name() + "_" + ff.getKey(); //$NON-NLS-1$
-			if (!addedTableNames.contains(areaTableName)) {
-				addedTableNames.add(areaTableName);
-				String p1 = engine.addParameterValue(ff.getType().name());
-				String p2 = engine.addParameterValue(ff.getKey());
-				String p3 = engine.addParameterValue(queryCa.getUuid());
-				
-				sql.append(" left join "); //$NON-NLS-1$
-				sql.append(engine.tableName(Area.class));
-				sql.append(" as "); //$NON-NLS-1$
-				sql.append( areaTableName);
-				sql.append(" on "); //$NON-NLS-1$
-				sql.append( areaTableName +".ca_uuid = " + p3 + " and "); //$NON-NLS-1$ //$NON-NLS-2$
-				sql.append( areaTableName +".area_type = " + p1 + " and "); //$NON-NLS-1$ //$NON-NLS-2$
-				sql.append(areaTableName + ".keyid = " + p2 + " "); //$NON-NLS-1$ //$NON-NLS-2$
-				
-				//NOTE: we do not join
+			if (ff.getType() != null) {
+				String areaTableName = ff.getType().name() + "_" + ff.getKey(); //$NON-NLS-1$
+				if (!addedTableNames.contains(areaTableName)) {
+					addedTableNames.add(areaTableName);
+					String p1 = engine.addParameterValue(ff.getType().name());
+					String p2 = engine.addParameterValue(ff.getKey());
+					String p3 = engine.addParameterValue(queryCa.getUuid());
+					
+					sql.append(" left join "); //$NON-NLS-1$
+					sql.append(engine.tableName(Area.class));
+					sql.append(" as "); //$NON-NLS-1$
+					sql.append( areaTableName);
+					sql.append(" on "); //$NON-NLS-1$
+					sql.append( areaTableName +".ca_uuid = " + p3 + " and "); //$NON-NLS-1$ //$NON-NLS-2$
+					sql.append( areaTableName +".area_type = " + p1 + " and "); //$NON-NLS-1$ //$NON-NLS-2$
+					sql.append(areaTableName + ".keyid = " + p2 + " "); //$NON-NLS-1$ //$NON-NLS-2$
+					
+					//NOTE: we do not join
+					if (ff.getGeometryType() == AreaFilter.AreaFilterGeometryType.TRACK && 
+							!usedTables.contains(MissionTrack.class)){
+	
+						//add join to track geom
+						sql.append(" left join "); //$NON-NLS-1$ 
+						sql.append(engine.tableNamePrefix(MissionTrack.class));
+						sql.append(" ON "); //$NON-NLS-1$ 
+						sql.append(engine.tablePrefix(MissionTrack.class));
+						sql.append(".mission_uuid = "); //$NON-NLS-1$ 
+						sql.append(engine.tablePrefix(Mission.class));
+						sql.append(".uuid" ); //$NON-NLS-1$ 
+						usedTables.add(MissionTrack.class);
+					}
+				}
+			}else {
 				if (ff.getGeometryType() == AreaFilter.AreaFilterGeometryType.TRACK && 
 						!usedTables.contains(MissionTrack.class)){
 

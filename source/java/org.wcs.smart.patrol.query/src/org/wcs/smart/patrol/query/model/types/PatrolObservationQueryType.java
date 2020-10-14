@@ -45,6 +45,7 @@ import org.wcs.smart.patrol.query.ui.editor.PatrolSimpleQueryResultEditor;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.model.udig.IQueryService;
+import org.wcs.smart.query.model.CustomArea;
 import org.wcs.smart.query.model.IMappableQueryType;
 import org.wcs.smart.query.model.IQueryResultInfoProvider;
 import org.wcs.smart.query.model.Query;
@@ -142,6 +143,8 @@ public class PatrolObservationQueryType implements IMappableQueryType {
 					}
 					if (source instanceof Area){
 						items = new DropItem[]{ createAreaDropItem((Area)source, AreaFilter.AreaFilterGeometryType.WAYPOINT) };
+					}else if (source instanceof CustomArea) {
+						items = new DropItem[]{ createCustomAreaDropItem(null, AreaFilter.AreaFilterGeometryType.WAYPOINT) };
 					}
 					return items;
 					

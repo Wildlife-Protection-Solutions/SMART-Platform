@@ -116,7 +116,6 @@ public class Messages extends NLS {
 	public static String IncidentSummaryPage_IdLabel;
 	public static String IncidentSummaryPage_LastModified1;
 	public static String IncidentSummaryPage_LastModified2;
-	public static String IncidentSummaryPage_LoadingLabel;
 	public static String IncidentSummaryPage_LocationLabel;
 	public static String IncidentSummaryPage_LocationSeparator;
 	public static String IncidentSummaryPage_ObservationAttachmentsLabel;

@@ -50,6 +50,7 @@ import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolDropItems;
 import org.wcs.smart.patrol.query.ui.editor.PatrolSummaryEditor;
 import org.wcs.smart.patrol.query.ui.itempanel.SummaryFilterPanel;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.model.CustomArea;
 import org.wcs.smart.query.model.IQueryResultInfoProvider;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
@@ -149,6 +150,8 @@ public class PatrolSummaryQueryType implements IQueryType {
 						}else {
 							items = new DropItem[]{ createAreaDropItem((Area)source, AreaFilter.AreaFilterGeometryType.TRACK) };
 						}
+					}else if (source instanceof CustomArea) {
+						items = new DropItem[]{ createCustomAreaDropItem(null, AreaFilter.AreaFilterGeometryType.WAYPOINT) };
 					}
 
 					if (items != null){

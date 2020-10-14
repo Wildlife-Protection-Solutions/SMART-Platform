@@ -40,7 +40,6 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.query.IDataModelManager;
-import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryFilterConfigManager;
 import org.wcs.smart.query.QueryFilterConfigManager.IConfigurationChangeListener;
 import org.wcs.smart.query.common.model.QueryFilterConfiguration;

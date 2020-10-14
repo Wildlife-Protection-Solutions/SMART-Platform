@@ -107,7 +107,7 @@ public class SummaryDeploymentItemPanel extends AbstractQueryItemPanel{
 		List<IItemTreeNode> groupbynodes = new ArrayList<IItemTreeNode>();
 		groupbynodes.add(new AssetGroupByTreeItem());
 		
-		areaTreeNode = new AreaTreeNode(Messages.SummaryFilterPanel_TreeNodeLabel);
+		areaTreeNode = new AreaTreeNode(Messages.SummaryFilterPanel_TreeNodeLabel, false);
 		groupbynodes.add(areaTreeNode);
 		
 		List<IItemTreeNode> valuenodes = new ArrayList<IItemTreeNode>();

@@ -102,6 +102,7 @@ import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.ui.itempanel.SummaryDataModelContentProvider;
 import org.wcs.smart.query.common.ui.itempanel.SummaryDmObject;
+import org.wcs.smart.query.model.CustomArea;
 import org.wcs.smart.query.model.QueryProxy;
 import org.wcs.smart.query.model.filter.AreaFilter;
 import org.wcs.smart.query.model.filter.AttributeFilter;
@@ -199,6 +200,13 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 		}else if (source instanceof AreaType){
 			if (queryItemPanelId.equals(GroupByValueItemPanel.ID)){
 				items = new DropItem[]{createAreaGroupByDropItem((AreaType)source)};
+			}
+		}else if (source instanceof CustomArea) {
+			if (queryItemPanelId.equals(FilterItemPanel.ID) ||
+					queryItemPanelId.equals(TrackObservationFilterItemPanel.ID)){
+				items = new DropItem[]{ createCustomAreaDropItem(null, AreaFilter.AreaFilterGeometryType.WAYPOINT) };
+			}else if (queryItemPanelId.equals(MissionTrackFilterItemPanel.ID) ){
+				items = new DropItem[]{ createCustomAreaDropItem(null, AreaFilter.AreaFilterGeometryType.TRACK) };
 			}
 		}else if (source == SummaryDataModelContentProvider.DataModelItem.CATEGORIES_VALUE){
 			if (queryItemPanelId.equals(GroupByValueItemPanel.ID) ||

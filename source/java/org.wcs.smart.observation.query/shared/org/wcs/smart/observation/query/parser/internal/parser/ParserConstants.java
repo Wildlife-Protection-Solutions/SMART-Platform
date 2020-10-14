@@ -93,53 +93,55 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int DM_KEY = 45;
   /** RegularExpression Id. */
-  int DATE_STRING = 46;
+  int BYTE_STRING = 46;
   /** RegularExpression Id. */
-  int LETTER = 47;
+  int DATE_STRING = 47;
   /** RegularExpression Id. */
-  int SPECIAL_CHARS = 48;
+  int LETTER = 48;
   /** RegularExpression Id. */
-  int AREA_TYPE_KEY = 49;
+  int SPECIAL_CHARS = 49;
   /** RegularExpression Id. */
-  int AREA_KEY = 50;
+  int AREA_TYPE_KEY = 50;
   /** RegularExpression Id. */
-  int OBSERVATION_FILTER_TYPE_KEY = 51;
+  int AREA_KEY = 51;
   /** RegularExpression Id. */
-  int WAYPOINT_FILTER_TYPE_KEY = 52;
+  int OBSERVATION_FILTER_TYPE_KEY = 52;
   /** RegularExpression Id. */
-  int WAYPOINT_SOURCE_KEY = 53;
+  int WAYPOINT_FILTER_TYPE_KEY = 53;
   /** RegularExpression Id. */
-  int WAYPOINT_OBSERVER_KEY = 54;
+  int WAYPOINT_SOURCE_KEY = 54;
   /** RegularExpression Id. */
-  int SUM_CAT_VALUE_KEY = 55;
+  int WAYPOINT_OBSERVER_KEY = 55;
   /** RegularExpression Id. */
-  int SUM_ATTRIBUTE_VALUE_KEY = 56;
+  int SUM_CAT_VALUE_KEY = 56;
   /** RegularExpression Id. */
-  int SUM_CAT_ATT_VALUE_KEY = 57;
+  int SUM_ATTRIBUTE_VALUE_KEY = 57;
   /** RegularExpression Id. */
-  int SUM_ATTRIBUTE_VALUE_LISTTREE_KEY = 58;
+  int SUM_CAT_ATT_VALUE_KEY = 58;
   /** RegularExpression Id. */
-  int SUM_CAT_ATT_VALUE_LISTTREE_KEY = 59;
+  int SUM_ATTRIBUTE_VALUE_LISTTREE_KEY = 59;
   /** RegularExpression Id. */
-  int AGG = 60;
+  int SUM_CAT_ATT_VALUE_LISTTREE_KEY = 60;
   /** RegularExpression Id. */
-  int DATE_GROUPBY_ITEM = 61;
+  int AGG = 61;
   /** RegularExpression Id. */
-  int QUERY_SPLITTER = 62;
+  int DATE_GROUPBY_ITEM = 62;
   /** RegularExpression Id. */
-  int CATEGORY_GROUPBY_ITEM = 63;
+  int QUERY_SPLITTER = 63;
   /** RegularExpression Id. */
-  int AREA_GROUPBY_ITEM = 64;
+  int CATEGORY_GROUPBY_ITEM = 64;
   /** RegularExpression Id. */
-  int ATTRIBUTE_GROUPBY_ITEM = 65;
+  int AREA_GROUPBY_ITEM = 65;
   /** RegularExpression Id. */
-  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 66;
+  int ATTRIBUTE_GROUPBY_ITEM = 66;
   /** RegularExpression Id. */
-  int WAYPOINT_SOURCE_GROUP_BY = 67;
+  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 67;
   /** RegularExpression Id. */
-  int CA_GROUP_BY = 68;
+  int WAYPOINT_SOURCE_GROUP_BY = 68;
   /** RegularExpression Id. */
-  int QUOTED_STRING = 69;
+  int CA_GROUP_BY = 69;
+  /** RegularExpression Id. */
+  int QUOTED_STRING = 70;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -192,6 +194,7 @@ public interface ParserConstants {
     "<CAT_ATT_TREE_KEY>",
     "<CAT_ATT_DATE_KEY>",
     "<DM_KEY>",
+    "<BYTE_STRING>",
     "<DATE_STRING>",
     "<LETTER>",
     "<SPECIAL_CHARS>",

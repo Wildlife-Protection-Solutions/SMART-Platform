@@ -119,7 +119,7 @@ public class GroupByValueItemPanel extends AbstractQueryItemPanel implements ISu
 		groupbynodes.add(surveyNode);
 		groupbynodes.add(new DateTreeNode());
 		
-		areaTreeNode = new AreaTreeNode(Messages.GroupByValueItemPanel_AreaGroupByNode);
+		areaTreeNode = new AreaTreeNode(Messages.GroupByValueItemPanel_AreaGroupByNode, false);
 		groupbynodes.add(areaTreeNode);
 		
 		groupbynodes.add(new DataModelTreeNode(DataModelTreeNode.Type.GROUPBY));

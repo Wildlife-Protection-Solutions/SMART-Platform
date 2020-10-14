@@ -672,6 +672,7 @@ public class Messages extends NLS {
 	public static String DialogConstants_ImportButton_Label;
 	public static String DialogConstants_LoadingText;
 	public static String DialogConstants_SaveButton_Label;
+	public static String DrawPolygonTool_InvalidPolygon;
 	public static String EditProjectionDialog_Dialog_Message;
 	public static String EditProjectionDialog_Dialog_Title;
 	public static String EditProjectionDialog_Error_DefLength;

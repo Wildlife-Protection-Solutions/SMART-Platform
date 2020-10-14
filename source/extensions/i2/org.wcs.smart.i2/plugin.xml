@@ -1585,16 +1585,6 @@
          point="org.locationtech.udig.project.ui.tool">
       <modalTool
             categoryId="org.wcs.smart.ui.map.tool"
-            class="org.wcs.smart.i2.ui.editors.record.DrawPolygonTool"
-            icon="images/icons/obj16/polygon_add.png"
-            id="org.wcs.smart.i2.record.polygon.draw"
-            name="%DrawAreaTool"
-            onToolbar="false"
-            toolCursorId="org.wcs.smart.cross"
-            tooltip="%DrawAreaTooltip">
-      </modalTool>
-      <modalTool
-            categoryId="org.wcs.smart.ui.map.tool"
             class="org.wcs.smart.i2.ui.editors.record.DrawPointTool"
             icon="images/icons/obj16/point_add.png"
             id="org.wcs.smart.i2.record.point.draw"

@@ -57,6 +57,7 @@ import org.eclipse.ui.part.MultiPageEditorPart;
 import org.geotools.data.DataUtilities;
 import org.geotools.data.FeatureStore;
 import org.geotools.factory.CommonFactoryFinder;
+import org.locationtech.jts.geom.Polygon;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.core.internal.FeatureUtils;
@@ -81,6 +82,8 @@ import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
 import org.wcs.smart.ui.map.tool.ClearSelectionTool;
+import org.wcs.smart.ui.map.tool.DrawPolygonTool;
+import org.wcs.smart.ui.map.tool.DrawPolygonTool.INewPolygonEvent;
 import org.wcs.smart.util.JobUtil;
 import org.wcs.smart.util.UuidUtils;
 
@@ -347,6 +350,10 @@ public class RecordMapPage extends SmartMapEditorPart {
         
         super.tools.getTool(DrawPolygonTool.ID).setEnabled(recordEditor.getEditMode());
         super.tools.getTool(DrawPointTool.ID).setEnabled(recordEditor.getEditMode());
+        
+
+		INewPolygonEvent event = polygon -> recordEditor.addNewLocation(polygon, null);
+        getMap().getBlackboard().put(DrawPolygonTool.INewPolygonEvent.class.getName(),event);
 	}
 
 	//udig does not support selection from multiple layers 

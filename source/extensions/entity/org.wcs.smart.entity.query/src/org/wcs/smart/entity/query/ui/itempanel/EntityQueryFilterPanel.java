@@ -135,7 +135,7 @@ public class EntityQueryFilterPanel extends AbstractQueryItemPanel {
 		nodes.add(new GeneralTreeNode(Messages.EntityQueryFilterPanel_GeneralItemsLabel, generalItems));
 		nodes.add(new DataModelTreeNode(DataModelTreeNode.Type.FILTER));
 		if (!SmartDB.isMultipleAnalysis()){
-			areaTreeNode = new AreaTreeNode(Messages.QueryFilterPanel_AreaFilters);
+			areaTreeNode = new AreaTreeNode(Messages.QueryFilterPanel_AreaFilters, false);
 			nodes.add(areaTreeNode);
 		}
 		entityNode = new EntityTypeTreeNode(EntityTypeTreeNode.Type.FILTER);

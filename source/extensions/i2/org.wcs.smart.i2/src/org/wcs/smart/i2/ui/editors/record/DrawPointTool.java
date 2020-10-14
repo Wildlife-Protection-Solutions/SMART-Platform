@@ -33,6 +33,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.map.GeometryFactoryProvider;
+import org.wcs.smart.ui.MessageBubble;
 
 /**
  * uDig tool for creating location polygons

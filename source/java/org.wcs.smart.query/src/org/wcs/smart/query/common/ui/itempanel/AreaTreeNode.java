@@ -22,6 +22,7 @@
 package org.wcs.smart.query.common.ui.itempanel;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -42,6 +43,7 @@ import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.model.CustomArea;
 import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
@@ -56,6 +58,7 @@ public class AreaTreeNode implements IItemTreeNode{
 
 	private String name;
 	private AreaContentProvider provider;
+	private boolean includeCustom;
 	
 	private final static LabelProvider lblProvider =  new LabelProvider(){
 		
@@ -63,6 +66,8 @@ public class AreaTreeNode implements IItemTreeNode{
 		public Image getImage(Object element) {
 			if (element instanceof Area.AreaType || element instanceof Area){
 				return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.AREA_POLYGON_FILTER_ICON);
+			}else if (element instanceof CustomArea) {
+				return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.CUSTOM_AREA_POLYGON_FILTER_ICON);
 			}
 			return null;
 		}
@@ -73,14 +78,17 @@ public class AreaTreeNode implements IItemTreeNode{
 				return SmartLabelProvider.getAreaTypeName((AreaType) element);				
 			} else if (element instanceof Area) {
 				return ((Area) element).getName();
+			} else if (element instanceof CustomArea) {
+				return Messages.AreaTreeNode_CustomAreaTreeNode;
 			}
 			return super.getText(element);
 			
 		}
 	};
 	
-	public AreaTreeNode(String name){
+	public AreaTreeNode(String name, boolean includeCustom){
 		this.name = name;
+		this.includeCustom = includeCustom;
 	}
 
 	@Override
@@ -133,7 +141,10 @@ public class AreaTreeNode implements IItemTreeNode{
 
 		@Override
 		public Object[] getElements(Object inputElement) {
-			return Area.AreaType.values();
+			List<Object> items = new ArrayList<>();
+			for (Area.AreaType tt : Area.AreaType.values()) items.add(tt);
+			if (includeCustom) items.add(CustomArea.INSTANCE);
+			return items.toArray();
 		}
 		
 		public void clearAreas(){
@@ -142,7 +153,7 @@ public class AreaTreeNode implements IItemTreeNode{
 
 		@Override
 		public Object[] getChildren(Object parentElement) {
-			 if (parentElement instanceof Area.AreaType){
+			if (parentElement instanceof Area.AreaType) {
 				final Area.AreaType at = (Area.AreaType) parentElement;
 				if (areas.get(at) != null) {
 					return areas.get(at);
@@ -150,7 +161,7 @@ public class AreaTreeNode implements IItemTreeNode{
 					loadAreas(at);
 					return new String[] { Messages.AreaTreeNode_LoadingTest };
 				}
-			 }
+			}
 			return null;
 		}
 

@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.ui.editors.record;
+package org.wcs.smart.ui.map.tool;
 
 import java.awt.Color;
 import java.awt.Point;
@@ -41,10 +41,11 @@ import org.locationtech.udig.project.ui.commands.AbstractDrawCommand;
 import org.locationtech.udig.project.ui.render.displayAdapter.MapMouseEvent;
 import org.locationtech.udig.project.ui.render.displayAdapter.MapMouseWheelEvent;
 import org.locationtech.udig.project.ui.tool.SimpleTool;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.i2.Intelligence2PlugIn;
-import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.map.GeometryFactoryProvider;
+import org.wcs.smart.ui.MessageBubble;
 
 /**
  * uDig tool for creating location polygons
@@ -54,7 +55,7 @@ import org.wcs.smart.map.GeometryFactoryProvider;
  */
 public class DrawPolygonTool extends SimpleTool {
 
-	public static final String ID = "org.wcs.smart.i2.record.polygon.draw"; //$NON-NLS-1$
+	public static final String ID = "org.wcs.smart.polygon.draw"; //$NON-NLS-1$
 	
 	private Color LINE_COLOR = new Color(51,68,107);
 	private Color FILL_COLOR = new Color(51,68,107,10);
@@ -191,7 +192,7 @@ public class DrawPolygonTool extends SimpleTool {
 	}
 	
 	private void finish(){
-		RecordEditor editor = (RecordEditor) getContext().getMap().getBlackboard().get(RecordEditor.class.getName());
+		INewPolygonEvent editor = (INewPolygonEvent) getContext().getMap().getBlackboard().get(INewPolygonEvent.class.getName());
 		if (editor == null) return;
 		
 		Coordinate[] c = new Coordinate[coordinates.size()];
@@ -206,10 +207,10 @@ public class DrawPolygonTool extends SimpleTool {
 			p = GeometryFactoryProvider.getFactory().createPolygon(c);
 			p = (Polygon) JTS.transform(p, CRS.findMathTransform(getContext().getViewportModel().getCRS(), SmartDB.DATABASE_CRS));
 			if (p.isEmpty() || !p.isSimple() || !p.isValid()){
-				error = Messages.DrawPolygonTool_InvalidPolygonMsg;
+				error = Messages.DrawPolygonTool_InvalidPolygon;
 			}
 		} catch (Exception e) {
-			Intelligence2PlugIn.log(e.getMessage(), e);
+			SmartPlugIn.log(e.getMessage(), e);
 			error = e.getMessage();
 		}
 		if (error != null){
@@ -221,7 +222,7 @@ public class DrawPolygonTool extends SimpleTool {
 			bubble.setVerticalBorder(15);
 			getContext().getViewportPane().addDrawCommand(bubble);
 		}else{
-			editor.addNewLocation(p, null);
+			editor.doAction(p);
 		}
 		
 	}
@@ -328,5 +329,10 @@ public class DrawPolygonTool extends SimpleTool {
      * @param e the mouse event
      */
     protected void onMouseDragged( MapMouseEvent e ) {
+    }
+    
+    @FunctionalInterface
+    public interface INewPolygonEvent {
+    	public void doAction(Polygon polygon);
     }
 }

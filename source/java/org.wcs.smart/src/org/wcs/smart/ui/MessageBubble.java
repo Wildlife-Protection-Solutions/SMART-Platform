@@ -7,7 +7,7 @@
  * (http://www.eclipse.org/legal/epl-v10.html), and the Refractions BSD
  * License v1.0 (http://udig.refractions.net/files/bsd3-v10.html).
  */
-package org.wcs.smart.i2.ui.editors.record;
+package org.wcs.smart.ui;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -27,11 +27,10 @@ import org.locationtech.udig.project.ui.render.displayAdapter.ViewportPane;
 import org.locationtech.udig.ui.graphics.ViewportGraphics;
 
 /**
- * Creates a semi transparent bubble (OSX like) that show a message to the user and disappears after
- * a few seconds.
+ * Creates a semi transparent bubble (OSX like) that shows a 
+ * message to the user and disappears after
+ * a few seconds.  Modified from uDig source code.
  * 
- * @author Jesse
- * @since 1.1.0
  */
 public class MessageBubble extends AbstractDrawCommand implements IAnimation {
 

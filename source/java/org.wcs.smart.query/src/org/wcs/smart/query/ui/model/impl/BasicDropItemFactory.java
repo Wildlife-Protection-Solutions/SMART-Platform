@@ -24,7 +24,11 @@ package org.wcs.smart.query.ui.model.impl;
 import java.text.MessageFormat;
 import java.util.List;
 
+import org.eclipse.jface.window.Window;
+import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
+import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.io.WKBWriter;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.Employee;
@@ -162,6 +166,19 @@ public class BasicDropItemFactory implements IDropItemFactory{
 			return new AttributeTreeDropItem(attribute);
 		}
 		return null;
+	}
+	
+	public DropItem createCustomAreaDropItem(String area, AreaFilter.AreaFilterGeometryType type) {
+		if (area == null) {
+			//show dialog to get area
+			DrawAreaMapDialog dialog = new DrawAreaMapDialog(Display.getDefault().getActiveShell());
+			if (dialog.open() != Window.OK) return null;
+			Polygon p = dialog.getPolygon();
+			if (p == null) return null;
+			
+			area = WKBWriter.toHex(((new WKBWriter()).write(p)));
+		}
+		return new CustomAreaDropItem(area, type);
 	}
 	
 	public DropItem createAreaDropItem(Area source, AreaFilter.AreaFilterGeometryType type){
@@ -374,11 +391,14 @@ public class BasicDropItemFactory implements IDropItemFactory{
 	
 	public DropItem[] createDropItems(AreaFilter af, Session session) throws Exception{
 		try{
-			return new DropItem[]{ new AreaDropItem(loadArea(af, session), af.getGeometryType())};
+			if (af.getType() != null) {
+				return new DropItem[]{ new AreaDropItem(loadArea(af, session), af.getGeometryType())};
+			}else {
+				return new DropItem[] {new CustomAreaDropItem(af.getCustomArea(), af.getGeometryType())};
+			}
 		}catch(Exception ex){
 			return new DropItem[]{new ErrorDropItem(ex.getMessage())};
 		}
-		
 	}
 	
 	/*

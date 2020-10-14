@@ -25,6 +25,7 @@ public class Messages extends NLS {
 	public static String AreaGroupBy_AreaGroupByNotFound;
 	public static String AreaGroupByItem_LoadError;
 	public static String AreaGroupByItem_LoadingAreaJobName;
+	public static String AreaTreeNode_CustomAreaTreeNode;
 	public static String AreaTreeNode_jobname;
 	public static String AreaTreeNode_LoadingTest;
 	public static String AttributeFilter_AnyListItemOption;
@@ -122,6 +123,9 @@ public class Messages extends NLS {
 	public static String DeleteItemHandler_ErrorDeleteFolder;
 	public static String DeleteItemHandler_ErrorDeletingQueryB;
 	public static String DeleteItemHandler_ErrorQueryNotFound;
+	public static String DrawAreaMapDialog_DialogTitle;
+	public static String DrawAreaMapDialog_MapName;
+	public static String DrawAreaMapDialog_refreshJobName;
 	public static String DropItem_deleteitemTooltip;
 	public static String EditObservationDialog_EditMessage;
 	public static String EditObservationDialog_ErrorDialogTitle;
@@ -550,6 +554,8 @@ public class Messages extends NLS {
 	public static String CsvSimpleQueryExporter_CSV_ExpoterName;
 	public static String CsvSummaryExporter_CSV_ExporterName;
 	public static String CsvSummaryExporter_QueryNotRun;
+	public static String CustomAreaDropItem_CustomAreaLabel;
+	public static String CustomAreaDropItem_EditLink;
 	public static String DefinitionQueryExporter_ExporterName;
 	public static String GridArcImageExporter_ExporterName;
 	public static String GridArcImageExporter_ExportError;

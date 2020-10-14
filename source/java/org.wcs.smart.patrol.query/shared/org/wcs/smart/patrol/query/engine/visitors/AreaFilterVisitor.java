@@ -65,25 +65,42 @@ public class AreaFilterVisitor implements IFilterVisitor{
 	
 	@Override
 	public void visit(IFilter filter) {
-		if (filter instanceof AreaFilter){
+		if (filter instanceof AreaFilter) {
 			AreaFilter ff = (AreaFilter)filter;
-			String areaTableName = ff.getType().name() + "_" + ff.getKey(); //$NON-NLS-1$
-			if (!addedTableNames.contains(areaTableName)) {
-				addedTableNames.add(areaTableName);
-				
-				String p1 = engine.addParameterValue(ff.getType().name());
-				String p2 = engine.addParameterValue(ff.getKey());
-				String p3 = engine.addParameterValue(queryCa.getUuid());
-				
-				sql.append(" left join "); //$NON-NLS-1$
-				sql.append(engine.tableName(Area.class));
-				sql.append(" as "); //$NON-NLS-1$
-				sql.append( areaTableName);
-				sql.append(" on "); //$NON-NLS-1$				
-				sql.append( areaTableName +".ca_uuid = " + p3 + " and "); //$NON-NLS-1$ //$NON-NLS-2$
-				sql.append( areaTableName +".area_type = " + p1 + " and "); //$NON-NLS-1$ //$NON-NLS-2$ 
-				sql.append(areaTableName + ".keyid = " + p2 + " "); //$NON-NLS-1$ //$NON-NLS-2$ 
-				
+
+			if (((AreaFilter)filter).getType() != null){
+				String areaTableName = ff.getType().name() + "_" + ff.getKey(); //$NON-NLS-1$
+				if (!addedTableNames.contains(areaTableName)) {
+					addedTableNames.add(areaTableName);
+					
+					String p1 = engine.addParameterValue(ff.getType().name());
+					String p2 = engine.addParameterValue(ff.getKey());
+					String p3 = engine.addParameterValue(queryCa.getUuid());
+					
+					sql.append(" left join "); //$NON-NLS-1$
+					sql.append(engine.tableName(Area.class));
+					sql.append(" as "); //$NON-NLS-1$
+					sql.append( areaTableName);
+					sql.append(" on "); //$NON-NLS-1$				
+					sql.append( areaTableName +".ca_uuid = " + p3 + " and "); //$NON-NLS-1$ //$NON-NLS-2$
+					sql.append( areaTableName +".area_type = " + p1 + " and "); //$NON-NLS-1$ //$NON-NLS-2$ 
+					sql.append(areaTableName + ".keyid = " + p2 + " "); //$NON-NLS-1$ //$NON-NLS-2$ 
+					
+					if (ff.getGeometryType() == AreaFilter.AreaFilterGeometryType.TRACK && 
+							!usedTables.contains(Track.class)){
+	
+						//add join to track geom
+						sql.append(" left join "); //$NON-NLS-1$ 
+						sql.append(engine.tableNamePrefix(Track.class));
+						sql.append(" ON "); //$NON-NLS-1$ 
+						sql.append(engine.tablePrefix(Track.class));
+						sql.append(".patrol_leg_day_uuid = "); //$NON-NLS-1$ 
+						sql.append(engine.tablePrefix(PatrolLegDay.class));
+						sql.append(".uuid" ); //$NON-NLS-1$ 
+						usedTables.add(Track.class);
+					}
+				}
+			}else {
 				if (ff.getGeometryType() == AreaFilter.AreaFilterGeometryType.TRACK && 
 						!usedTables.contains(Track.class)){
 

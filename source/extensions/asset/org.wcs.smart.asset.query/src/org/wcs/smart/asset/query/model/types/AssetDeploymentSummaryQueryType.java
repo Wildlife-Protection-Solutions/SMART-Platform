@@ -49,6 +49,7 @@ import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.udig.IQueryService;
+import org.wcs.smart.query.model.CustomArea;
 import org.wcs.smart.query.model.IMappableQueryType;
 import org.wcs.smart.query.model.IQueryResultInfoProvider;
 import org.wcs.smart.query.model.Query;
@@ -142,8 +143,7 @@ public class AssetDeploymentSummaryQueryType implements IMappableQueryType {
 						if (queryItemPanelId.equals(SummaryDeploymentItemPanel.ID)){
 							items = new DropItem[]{ createAreaGroupByDropItem((Area)source) };
 						}
-					}
-					if (source instanceof AreaType) {
+					}else if (source instanceof AreaType) {
 						if (queryItemPanelId.equals(SummaryDeploymentItemPanel.ID)){
 							items = new DropItem[]{ createAreaGroupByDropItem((AreaType)source) };
 						}

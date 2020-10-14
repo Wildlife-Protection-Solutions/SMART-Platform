@@ -127,7 +127,7 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 				new GeneralItem[]{GeneralItem.WAYPOINT_SOURCE, GeneralItem.OBSERVER}));
 		nodes.add(new DataModelTreeNode(DataModelTreeNode.Type.FILTER));
 
-		areaTreeNode = new AreaTreeNode(Messages.QueryFilterPanel_AreaFilters);
+		areaTreeNode = new AreaTreeNode(Messages.QueryFilterPanel_AreaFilters, true);
 		nodes.add(areaTreeNode);
 		
 		nodes.add(new OperatorsTreeNode());

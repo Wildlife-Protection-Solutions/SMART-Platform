@@ -178,6 +178,8 @@ public class QueryPlugIn extends AbstractUIPlugin {
 	 * Area Polygon Filter Icon
 	 */
 	public static final String AREA_POLYGON_FILTER_ICON = "org.wcs.smart.query.areapolyfilter"; //$NON-NLS-1$
+	
+	public static final String CUSTOM_AREA_POLYGON_FILTER_ICON = "org.wcs.smart.query.customareapolyfilter"; //$NON-NLS-1$
 
 	/**
 	 * Grid ICon
@@ -292,6 +294,7 @@ public class QueryPlugIn extends AbstractUIPlugin {
 		reg.put(COLUMN_HEADER_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/column_header.png"));//$NON-NLS-1$
 		reg.put(AREA_FILTER_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/area_filter.png"));//$NON-NLS-1$
 		reg.put(AREA_POLYGON_FILTER_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/area_polygon.png"));//$NON-NLS-1$
+		reg.put(CUSTOM_AREA_POLYGON_FILTER_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/custom_area_polygon.png"));//$NON-NLS-1$
 		reg.put(START_HOUR_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/starthour.png"));//$NON-NLS-1$
 		reg.put(END_HOUR_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/endhour.png"));//$NON-NLS-1$
 		reg.put(TABLE_ICON,imageDescriptorFromPlugin(PLUGIN_ID,"images/icons/obj16/table_icon.png"));//$NON-NLS-1$)

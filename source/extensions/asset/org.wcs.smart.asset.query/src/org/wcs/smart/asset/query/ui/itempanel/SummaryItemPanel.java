@@ -114,7 +114,7 @@ public class SummaryItemPanel extends AbstractQueryItemPanel{
 		groupbynodes.add(new AssetGroupByTreeItem());
 		groupbynodes.add(new DateTreeNode());
 		
-		areaTreeNode = new AreaTreeNode(Messages.SummaryFilterPanel_TreeNodeLabel);
+		areaTreeNode = new AreaTreeNode(Messages.SummaryFilterPanel_TreeNodeLabel, false);
 		groupbynodes.add(areaTreeNode);
 		
 		groupbynodes.add(new DataModelTreeNode(DataModelTreeNode.Type.GROUPBY));

@@ -123,7 +123,7 @@ public class QueryItemPanel extends AbstractQueryItemPanel {
 		nodes.add(new AssetFilterTreeItem());
 		nodes.add(new DataModelTreeNode(DataModelTreeNode.Type.FILTER));
 		
-		areaNode = new AreaTreeNode(Messages.QueryFilterPanel_TreeNodeLabel);
+		areaNode = new AreaTreeNode(Messages.QueryFilterPanel_TreeNodeLabel, true);
 		nodes.add(areaNode);
 		
 		nodes.add(new OperatorsTreeNode());
