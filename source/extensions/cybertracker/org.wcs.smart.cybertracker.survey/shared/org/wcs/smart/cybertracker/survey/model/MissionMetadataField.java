@@ -31,7 +31,7 @@ public enum MissionMetadataField {
 	COMMENT("SMART_Comments", false), //$NON-NLS-1$
 	MEMBERS("SMART_Members", true), //$NON-NLS-1$
 	LEADER("SMART_Leader", true), //$NON-NLS-1$
-	SAMPING_UNIT("SMART_SampingUnit", true); //$NON-NLS-1$
+	SAMPING_UNIT("SMART_SamplingUnit", true); //$NON-NLS-1$
 	
 	private String jsonKey;
 	private boolean isRequired;
