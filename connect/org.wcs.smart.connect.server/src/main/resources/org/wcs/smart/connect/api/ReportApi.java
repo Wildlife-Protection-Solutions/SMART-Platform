@@ -32,13 +32,18 @@ import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
@@ -85,6 +90,7 @@ import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.ReportParameter;
 import org.wcs.smart.connect.model.ReportParameter.Type;
+import org.wcs.smart.connect.query.FolderProxy;
 import org.wcs.smart.connect.report.BirtEngine;
 import org.wcs.smart.connect.report.ReportFormat;
 import org.wcs.smart.connect.report.ReportProxy;
@@ -97,6 +103,7 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.report.execute.ParameterFinder;
 import org.wcs.smart.report.model.Report;
+import org.wcs.smart.report.model.ReportFolder;
 import org.wcs.smart.util.UuidUtils;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -147,7 +154,7 @@ public class ReportApi extends HttpServlet{
 	 */
 	@SuppressWarnings("unchecked")
 	@GET
-    @Path("/{reportuuid}")
+    @Path("/{reportuuid: [a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}}")
 	@Operation(description="Runs a report and returns the results.")
 	public Response exectueReport(@Parameter(description="The report UUID") @PathParam("reportuuid") String reportUuid,
 			@Parameter(description="only run against CAs listed in this parameter, comma separated list of UUIDs.") @QueryParam("cafilter") String cafilter,
@@ -335,6 +342,81 @@ public class ReportApi extends HttpServlet{
 	}
 	
 	/**
+	 * <p>Returns all queries the current user is able to view/run, in a nested folder structure</p> 
+	 * <p>
+	 * URL: ../server/api/report/tree<br>
+	 * Call Type: GET
+	 * </p>
+	 *  
+	 * @return A JSON list of root QueryFolderProxy objects, with nested QueryFolderProxy and QueryProxy objects. (<a href="https://www.assembla.com/spaces/smart-cs/subversion-2/source/HEAD/trunk/connect/org.wcs.smart.connect.server/src/main/resources/org/wcs/smart/connect/query/QueryFolderProxy.java">Query Folder Proxy</a>)
+	 */
+	@GET
+    @Path("/tree")
+	@Produces({ MediaType.APPLICATION_JSON })
+    public List<FolderProxy<ReportProxy>> getReportTreeForUser(){
+		Session s = HibernateManager.getSession(request.getServletContext(), request.getLocale());
+		s.beginTransaction();
+		
+		try {
+			// build the query folder tree
+			List<FolderProxy<ReportProxy>> rootFolders = new ArrayList<>();
+			Map<UUID, FolderProxy<ReportProxy>> foldersByUuid = new HashMap<>();
+			
+			// get all the queries we have access to 
+			List<ReportProxy> allowed = getReports(s);
+			if (allowed.isEmpty()) return Collections.emptyList();
+			
+			Set<UUID> caUuids = allowed.stream().map(e->e.getCaUuid()).collect(Collectors.toSet());
+			
+			// CAs are the root folders
+			for(UUID caUuid : caUuids) {
+				ConservationArea ca = s.get(ConservationArea.class, caUuid);
+				FolderProxy<ReportProxy> caFolder = new FolderProxy<ReportProxy>(ca.getName() + " [" + ca.getId() + "]", ca.getUuid()); //$NON-NLS-1$ //$NON-NLS-2$
+				foldersByUuid.put(ca.getUuid(), caFolder);
+				rootFolders.add(caFolder);
+			}
+			
+			List<ReportFolder> folders = s.createQuery("FROM ReportFolder WHERE conservationArea.uuid in (:cas) AND parentFolder is null and employee is null", ReportFolder.class) //$NON-NLS-1$
+					.setParameterList("cas", caUuids).list(); //$NON-NLS-1$
+	
+			Deque<ReportFolder> remainingFolders = new LinkedList<ReportFolder>(folders);
+	
+			while(!remainingFolders.isEmpty()) {
+				ReportFolder f = remainingFolders.removeFirst();
+				FolderProxy<ReportProxy> fp = new FolderProxy<ReportProxy>(f.getName(), f.getConservationArea().getUuid());
+				foldersByUuid.put(f.getUuid(), fp);
+				
+				if(f.getParentFolder() == null) {
+					// this is a root folder
+					// but the CA is the real root folder
+					foldersByUuid.get(f.getConservationArea().getUuid()).addSubFolder(fp);
+				} else {
+					FolderProxy<ReportProxy> parentFolder = foldersByUuid.get(f.getParentFolder().getUuid());
+					parentFolder.addSubFolder(fp);
+					
+				}
+				remainingFolders.addAll(f.getChildren());
+			}
+			
+
+					
+			// add the queries into the folder tree
+			for(ReportProxy q: allowed) {
+				if(q.getFolderUuid() != null) {
+					foldersByUuid.get(q.getFolderUuid()).addItem(q);
+				} else {
+					foldersByUuid.get(q.getCaUuid()).addItem(q);
+				}
+			}
+			return rootFolders;
+		}finally {
+			s.getTransaction().commit();
+		}
+		
+		
+	}
+	
+	/**
 	 * <p>Returns all report objects the current user is able to view</p>
 	 *<p>
 	 * URL: ../server/api/report<br>
@@ -348,39 +430,44 @@ public class ReportApi extends HttpServlet{
 	@Produces({ MediaType.APPLICATION_JSON })
 	@Operation(description="Returns all report objects the current user is able to view")
     public List<ReportProxy> getAllReportForUser(){
-		List<ReportProxy> allowed = new ArrayList<ReportProxy>();
 
 		Session s = HibernateManager.getSession(request.getServletContext(), request.getLocale());
 		s.beginTransaction();
 		try{
-			//Check if they access to All Reports, if so it's simple, return them all
-			if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), ReportAction.RUNREPORT_KEY, null)){
-				 return getReports(s, request.getLocale(), false);
-			}
-			
-			//short circuit check for access to > 0 reports, if not, return nothing. 
-			if (!SecurityManager.INSTANCE.canAccessAtLeastOneResouce(s, request.getUserPrincipal().getName(), ReportAction.RUNREPORT_KEY)){
-				 return allowed;
-			}
-			
-			//Get all Queries and check each one for specific permission to this user.
-			List<ReportProxy> all = getReports(s, request.getLocale(), false);
-			for (ReportProxy q : all){
-				//Do they have access to all reports from this CA? if yes then add it.
-				if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), ReportAction.RUNREPORT_KEY, q.getCaUuid())){
-					allowed.add(q);
-				}else{
-					//Do they have specific permission to this report? if yes then add it.
-					if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), ReportAction.RUNREPORT_KEY, q.getUuid())){
-						allowed.add(q);
-					}
-				}
-			}
+			return getReports(s);
 		}finally{
 			s.getTransaction().commit();
 		}
 		
-		return allowed; 
+	}
+	
+	private List<ReportProxy> getReports(Session s){
+		List<ReportProxy> allowed = new ArrayList<ReportProxy>();
+
+		//Check if they access to All Reports, if so it's simple, return them all
+		if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), ReportAction.RUNREPORT_KEY, null)){
+			 return getReports(s, request.getLocale(), false);
+		}
+		
+		//short circuit check for access to > 0 reports, if not, return nothing. 
+		if (!SecurityManager.INSTANCE.canAccessAtLeastOneResouce(s, request.getUserPrincipal().getName(), ReportAction.RUNREPORT_KEY)){
+			 return allowed;
+		}
+		
+		//Get all Queries and check each one for specific permission to this user.
+		List<ReportProxy> all = getReports(s, request.getLocale(), false);
+		for (ReportProxy q : all){
+			//Do they have access to all reports from this CA? if yes then add it.
+			if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), ReportAction.RUNREPORT_KEY, q.getCaUuid())){
+				allowed.add(q);
+			}else{
+				//Do they have specific permission to this report? if yes then add it.
+				if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), ReportAction.RUNREPORT_KEY, q.getUuid())){
+					allowed.add(q);
+				}
+			}
+		}
+		return allowed;
 	}
 	
 	private List<ReportProxy> getReports(Session session, final Locale l, Boolean includeMyQueries){
@@ -393,7 +480,7 @@ public class ReportApi extends HttpServlet{
 		
 		HashMap<ReportProxy, String> query2names = new HashMap<>();
 		
-		String querypart = "SELECT r.uuid, r.id, r.shared, r.conservationArea.uuid, r.conservationArea.id, l.value, z.code " //$NON-NLS-1$
+		String querypart = "SELECT r.uuid, r.id, r.shared, r.conservationArea.uuid, r.conservationArea.id, l.value, z.code, r.folder.uuid " //$NON-NLS-1$
 				+ " FROM Report as r JOIN Label as l on l.id.element = r.uuid JOIN l.id.language as z " //$NON-NLS-1$
 				+ " WHERE l.id.element = r.uuid and (z.default = true or z.code in (:langs)) "; //$NON-NLS-1$
 		
@@ -413,9 +500,10 @@ public class ReportApi extends HttpServlet{
 			
 			String value = (String)data[5];
 			String code = (String)data[6];
-			
+			UUID folderuuid = (UUID)data[7];
+
 			if (isShared || includeMyQueries) {
-				ReportProxy rp = new ReportProxy(ruuid, value, caid, rid, isShared, cauuid, cauuid.equals(ConservationArea.MULTIPLE_CA));
+				ReportProxy rp = new ReportProxy(ruuid, value, caid, rid, isShared, cauuid, cauuid.equals(ConservationArea.MULTIPLE_CA), folderuuid);
 					
 				if (!query2names.containsKey(rp)) {
 					query2names.put(rp, code);
@@ -460,7 +548,8 @@ public class ReportApi extends HttpServlet{
 				proxy = new ReportProxy(r.getUuid(), r.getName(),  
 						r.getConservationArea().getId(), r.getId(), r.getShared(), 
 						r.getConservationArea().getUuid(),
-						r.getConservationArea().getIsCcaa());
+						r.getConservationArea().getIsCcaa(),
+						r.getFolder() == null ? null : r.getFolder().getUuid());
 			}
 		}finally{
 			s.getTransaction().rollback();
@@ -480,7 +569,7 @@ public class ReportApi extends HttpServlet{
 	 * @return a JSON list of ReportParameter objects 
 	 */
 	@GET
-    @Path("/{reportuuid}/params")
+    @Path("/{reportuuid: [a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}}/params")
 	@Produces({ MediaType.APPLICATION_JSON })
 	@Operation(description="Returns all of the parameters of the given report")
 	public List<ReportParameter> getReportsParameters(@Parameter(description="the report uuid") @PathParam("reportuuid") String reportUuid) throws SmartConnectException{

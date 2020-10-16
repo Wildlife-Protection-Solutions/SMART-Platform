@@ -318,13 +318,18 @@ public enum QueryManager {
 		return null;
 	}
 	
-	public List<QueryFolder> getQueryFolders(Session session) {
+	public List<QueryFolder> getQueryFolders(Session session, Set<UUID> caUuids) {
+		if (caUuids.isEmpty()) return Collections.emptyList();
+				
 		CriteriaBuilder cb = session.getCriteriaBuilder();
 		CriteriaQuery<QueryFolder> c = cb.createQuery(QueryFolder.class);
 		Root<QueryFolder> from = c.from(QueryFolder.class);
-		c.where(cb.isNull(from.get("employee"))); //$NON-NLS-1$
-		List<QueryFolder> folders = session.createQuery(c).getResultList();
-		return folders;
+		c.where(
+			cb.and(
+					from.get("conservationArea").get("uuid").in(caUuids), //$NON-NLS-1$ //$NON-NLS-2$
+					cb.isNull(from.get("employee")))); //$NON-NLS-1$
+		
+		return session.createQuery(c).getResultList();
 	}
 
 	public List<ConservationArea> getConservationAreas(Session session) {

@@ -293,9 +293,10 @@ function getUserDetails(){
 function userCallback(){
 	var admin = JSON.parse(this.responseText);
 	if(admin){
-		document.getElementById('addToAllButton').style.display = "inline-block";
-		document.getElementById('manageall').style.display = "block";
+		document.getElementById('addToAllButton').style.display = "inline";
+		document.getElementById('manageall').style.display = "inline";
 	}else{
+		document.getElementById('manageall').style.display = "none";
 		document.getElementById('addfromadmin').style.display = "inline-block";
 		
 		var oReq = new XMLHttpRequest();

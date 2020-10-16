@@ -1,13 +1,17 @@
 var SHARED_LINK_URL = "../api/sharedlink/";
 var USER_URL = "../api/connectuser/getCurrent";
+const QUERY_URL = "../api/query/"
 
 var queries;
+var selectedFolder = -1;
 var lastSorted;
 var to; //timeout to slow auto-search a bit. It is cleared each time another character/change is typed so we don't fire too many updates too fast.
 
 var startDatePicker, endDatePicker;
 
 var isDateChanging = false;
+
+var folderId;
 
 /* configure events on html elements */
 window.onload = function(){
@@ -100,10 +104,104 @@ window.onload = function(){
 	//populate predefined dates
 	var dateSelect = document.getElementById("defineddates");
 	populateQueryDates(dateSelect);
-	var dateUpdateHandler = buildUpdateDateHandler(dateSelect, startDatePicker, endDatePicker);
+	
+	//TODO: I commented this out; not sure why it's here
+	var dateUpdateHandler = buildUpdateDateHandler(dateSelect, startDatePicker, endDatePicker, null);
 	dateSelect.addEventListener("change", dateUpdateHandler);
 	dateUpdateHandler();
 	
+	
+	// we are catching events at the query-list level
+	// in case we add or remove folders/items dynamically
+	const queryList = document.getElementById('foldertable');
+	queryList.addEventListener('click', function(evt) {
+		var element = evt.target;
+		
+		var openonly = false;
+		if (!element.classList.contains('folder-icon')){
+			//select folder
+			if(!element.classList.contains('folder-name')) {
+				element = element.parentNode;
+			}
+			if(!element.classList.contains('folder-name')) return;
+
+			selectFolder(element);
+			updateQueryTable();
+			
+			//if it's not open then open it
+			openonly = true;
+		}
+		// bubble up events to the parent folder or folder-item
+		if(!element.classList.contains('folder-name')) {
+			element = element.parentNode;
+		}
+		if(element.classList.contains('folder-name')) {
+			// clicking on the folder toggles the folder icon
+			// as well as toggling the display of the folder contents
+			const folderIcon = element.getElementsByClassName('folder-icon')[0];
+			
+			if (openonly){
+				if(!folderIcon.classList.contains('fa-folder-open-o')) {
+					folderIcon.classList.remove('fa-folder-o');
+					folderIcon.classList.add('fa-folder-open-o')
+					toggleDisplay(element.nextElementSibling);
+				}
+			}else{
+			
+				if(folderIcon.classList.contains('fa-folder-open-o')) {
+					folderIcon.classList.remove('fa-folder-open-o');
+					folderIcon.classList.add('fa-folder-o');
+				} else {
+					folderIcon.classList.remove('fa-folder-o');
+					folderIcon.classList.add('fa-folder-open-o')
+				}
+				toggleDisplay(element.nextElementSibling);
+
+			}
+		} 
+	});
+	
+}
+
+//element is the folder-name dive
+function selectFolder(element){
+	const queryList = document.getElementById('foldertable');
+
+	selectedFolder = element.getAttribute("data-folderid");
+
+	element.classList.add('folder-selected');
+	var path = element.getAttribute("data-path");
+	if (path != null){
+		document.getElementById('querypath').innerHTML = path;
+	}else{
+		document.getElementById('querypath').innerHTML = i18n("query.allqueries");
+	}
+	
+	Array.from(queryList.getElementsByClassName("folder-selected")).forEach(ele=>{
+		ele.classList.remove("folder-selected");
+		ele.parentElement.dataset.selected = "false";
+	});
+
+	selectedFolder = element.getAttribute("data-folderid");
+	var path = element.getAttribute("data-path");
+	
+	updateQueryTable();
+	element.parentElement.dataset.selected="true";
+	element.classList.add('folder-selected');
+	if (path != null){
+		document.getElementById('querypath').innerHTML = path;
+	}else{
+		document.getElementById('querypath').innerHTML = i18n("query.allqueries");
+	}
+	document.getElementById('querytable').scrollTop = 0;
+}
+
+function toggleDisplay(element) {
+    if(element.style.display == "none") {
+      element.style.display = "";
+    } else {
+    	element.style.display = "none";
+    }
 }
 
 function updateSRIDVisibility(){
@@ -135,48 +233,6 @@ function selectCustom(){
 	}
 }
 
-function getQueryList(){
-	//clear current table
-	var objects = document.querySelectorAll("div.queryrow");
-	
-	for (var i = 0; i < objects.length; i++){
-		var ele = objects[i];
-		ele.parentElement.removeChild(ele);
-	}
-
-	var parent = document.getElementById('querytable');
-	
-	var row = document.createElement("div");
-	row.className="queryrow";
-	row.innerHTML=i18n("query.refreshingqueries");
-	parent.appendChild(row);
-		
- 	var oReq = new XMLHttpRequest();
- 	oReq.onload = queryCallback;
- 	oReq.open("Get", QUERYURL, true);
- 	oReq.send();
-}
-
-function queryCallback(){
-	if (this.status != 200) {
-		var msg = "Error: ";
-		if (this.status == 401){
-			msg += "Unauthorized";
-		}
-		try {
-			msg = JSON.parse(this.responseText).error
-		} catch (err) {
-		}
-		displayError(msg);
-		return;
-	}
-	
- 	queries = JSON.parse(this.responseText);
- 	
- 	sortTable("name");
- 	createQueryTable();
-}
-
 function sortTable(sortColumn){
 	if(lastSorted == sortColumn){
 		sortColumn = "-" + sortColumn;
@@ -188,61 +244,6 @@ function sortTable(sortColumn){
  	createQueryTable();
 }
 
-function createQueryTable(){ 
-	var parent = document.getElementById('querytable');
-
- 	//clear current table
-	var objects = document.querySelectorAll("div.queryrow");
-	for (var i = 0; i < objects.length; i++){
-		var ele = objects[i];
-		ele.parentElement.removeChild(ele);
-	}
-	var drawnRowCount = 0;
-	var selectedCa = document.getElementById('caselect').value;
-	
-	var hide = document.getElementById('qhideexe').checked;
- 	for (var i = 0; i < queries.length; i ++){
- 		if(selectedCa == 'allcas' || selectedCa == queries[i].caUuid){
- 			if(search == "" || isFoundInRow(queries[i]) ){
- 				if (!hide || canExecute(queries[i].typeKey)){
- 			 
- 					drawnRowCount++;
- 					var row = tableCreateRow(parent, 
- 							[queries[i].conservationArea, "<img src='../css/images/query_icons/" + queries[i].iconName +"' title='" + queries[i].type + "'>" ,  "<span title='" + queries[i].id + "'> " + queries[i].name , null], 
- 							"queryrow " + (drawnRowCount % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
-
- 					
- 					row.dataset.queryuuid = queries[i].uuid;
- 					row.dataset.queryname = queries[i].name;
- 					row.dataset.querytype = queries[i].typeKey;
- 					row.dataset.isccaa = queries[i].isCcaa;
-	 		
- 					if (canExecute(queries[i].typeKey)){
- 						var runicon = document.createElement("a");
- 						runicon.className="run-icon";
- 						runicon.title= i18n("query.runquery");
- 						runicon.onclick = showQueryOptions;
- 						row.childNodes[3].appendChild(runicon);
- 					}
-	 		
-//	 		var filter = qdatefilter[queries[i].typeKey][0];
-//	 		var csvlink = document.createElement("a");
-//	 		csvlink.href="../api/query/" + queries[i].uuid + "?format=csv&date_filter=" + filter;
-//	 		csvlink.innerHTML = "csv";
-//	 		row.childNodes[5].appendChild(csvlink);
- 				}
- 			}
- 		}
- 	}
- 	
- 	if(queries.length == 0 || drawnRowCount == 0){ //no results or they were all filtered out
- 		var row = document.createElement("div");
- 		row.className = "queryrow errorsection";
- 	    row.innerHTML = i18n("query.noqueriesfound");
- 	    row.style.display = "block";
- 		parent.appendChild(row);
- 	}
-}
 
 function showQueryOptions(){
 	var uuid = this.parentElement.parentElement.getAttribute('data-queryuuid');
@@ -260,7 +261,7 @@ function showQueryOptions(){
 		document.getElementById("cafilter").style.display="none";
 	}
 	
-	var poselement = document.querySelector("#querytable");
+	var poselement = document.querySelector("#foldertable");
 	var pos = getPosition(poselement);
 	
 	//update output format options
@@ -339,7 +340,8 @@ function showQueryOptions(){
 }
 
 function isFoundInRow(row){
-	if(isIn(row.conservationArea)|| isIn(row.name)|| isIn(row.type)|| isIn(row.id)){
+	if (search == null || search=="") return true;
+	if(isIn(row.dataset.queryname)){
 		return true;
 	}
 	return false;
@@ -373,7 +375,9 @@ function searchChanged(){
 	setTimeout(function(){
 		search = document.getElementById('textsearch').value;
 		search = search.toLowerCase();
-		createQueryTable();	
+		
+		updateFolderTable();
+		updateQueryTable();
 	}, 600);
 	
 
@@ -425,8 +429,6 @@ function generateRelativeUrl(root){
 function generateUrl(root){
 	return resolve(generateRelativeUrl(root));
 }
-
-
 
 
 function getCaList(){
@@ -512,7 +514,7 @@ function setHomeCa(){
 		}
 		if (found) parent.value = users.homeCaUuid;
 	}
-	getQueryList();
+	loadQueries();
 }
 
 function selectAll(parent){
@@ -533,3 +535,209 @@ function selectNone(parent){
 	}
 }
 
+
+function loadQueries() {
+	var oReq = new XMLHttpRequest();
+ 	oReq.onload = handleQueries;
+ 	oReq.open("Get", QUERY_URL + "tree/", true);
+ 	oReq.send();
+}
+
+
+
+function handleQueries() {
+
+	const data = JSON.parse(this.responseText);
+	var parent = document.getElementById('foldertable');
+	
+	Array.from(parent.children).forEach(c=>parent.removeChild(c));
+	
+	queries = [];
+	var objects = document.querySelectorAll("div.queryrow");
+	for (var i = 0; i < objects.length; i++){
+		var ele = objects[i];
+		ele.parentElement.removeChild(ele);
+	}
+	folderId = 0;
+	for(var i=0; i < data.length; i++) {
+		folderId++;
+		addFolder(data[i], parent, "", 0);
+	}
+	
+	//add an all queries item
+	var folderDiv = document.createElement('div');
+	folderDiv.classList.add('folder');
+	folderDiv.dataset.selected=true;
+	parent.appendChild(folderDiv);
+	folderDiv.innerHTML = "<div class=\"folder-name folder-selected\" data-folderid=\"-1\" style=\"white-space:nowrap; padding-top:5px; padding-bottom:5px;\"><i style=\"padding-right: 5px\" class=\"folder-icon fa fa-folder-open-o fa-lg\" ></i><span class=\"folder-label\">" + i18n("query.allqueries")  + "</span></div>";
+	var folderContentsDiv = document.createElement('div');
+	folderContentsDiv.classList.add('folder-contents');
+	folderDiv.appendChild(folderContentsDiv);
+	
+	//create query table
+	createQueryTable();
+	
+	updateFolderTable();
+}
+
+// recursively adds nested folders and queries
+function addFolder(data, parent, path, level) {
+	
+	var folderDiv = document.createElement('div');
+	folderDiv.classList.add('folder');
+	folderDiv.dataset.cauuid = data['caUuid'];
+	parent.appendChild(folderDiv);
+	if (path != ""){
+		path += " > "; 
+	}
+	path += data['name'];
+
+	var icon = "fa-folder-open-o";
+	var display = "";
+	if (level > 0){
+		//hide this folder
+		icon = "fa-folder-o";
+		display = "none";
+	}
+	
+	var foldernamediv = document.createElement('div');
+	foldernamediv.classList.add("folder-name");
+	foldernamediv.dataset.path = path;
+	foldernamediv.dataset.folderid = folderId;
+	foldernamediv.style.paddingTop = "5px";
+	foldernamediv.style.paddingBottom = "5px";
+	
+	folderDiv.appendChild(foldernamediv);
+	
+	foldernamediv.innerHTML = "<i style=\"padding-right: 5px\" class=\"folder-icon fa " + icon + " fa-lg\" ></i><span class=\"folder-label\">" + data['name'] + "</span>";
+	
+	var folderContentsDiv = document.createElement('div');
+	folderContentsDiv.classList.add('folder-contents');
+	folderContentsDiv.style.display=display;
+	folderDiv.appendChild(folderContentsDiv);
+	
+	
+	var queryfolderid = folderId;
+	
+	for(var i = 0; i < data['subFolders'].length; i++) {
+		folderId++;
+		addFolder(data['subFolders'][i], folderContentsDiv, path, level + 1);
+	}
+	
+	for(var i = 0; i < data['items'].length; i++) {
+		var query = data['items'][i];
+		query.folderid = queryfolderid;
+		queries.push(query);	
+	}
+	
+}
+
+function createQueryTable(){
+	var querylist = document.getElementById('querytable');
+	var hide = document.getElementById('qhideexe').checked;
+
+ 	//clear current table
+	document.querySelectorAll("div.queryrow").forEach(element=>element.parentElement.removeChild(element));
+	
+	
+	var drawnRowCount = 1;
+	queries.forEach(query=>{
+		var row = tableCreateRow(querylist, 
+				[query.conservationArea, "<img src='../css/images/query_icons/" + query.iconName +"' title='" + query.type + "'>" ,  "<span title='" + query.id + " - " + query.name + "'> " + query.name , null], 
+				"queryrow " + (drawnRowCount % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
+
+		var canexe = canExecute(query.typeKey);
+		
+		row.dataset.queryuuid = query.uuid;
+		row.dataset.queryname = query.name;
+		row.dataset.querytype = query.typeKey;
+		row.dataset.folderid = query.folderid;
+		row.dataset.isccaa = query.isCcaa;
+		row.dataset.canexe = canexe;
+		
+		
+		if( hide && !canexe){
+			row.style.display="none";
+		}else if (selectedFolder == -1 || query.folderid == selectedFolder){
+			row.style.display="";
+			drawnRowCount++;
+		}else{
+			row.style.display="none";
+		}
+		if (canExecute(query.typeKey)){
+			var runicon = document.createElement("a");
+			runicon.className="run-icon";
+			runicon.title= i18n("query.runquery");
+			runicon.onclick = showQueryOptions;
+			row.childNodes[3].appendChild(runicon);
+		}
+		
+	});
+}
+
+function updateFolderTable(){
+	//filter folders on ca uuid	
+	var foldertable = document.getElementById('foldertable');
+
+	var selectedCa = document.getElementById('caselect').value;
+	
+	if (selectedCa == "allcas"){
+		Array.from(foldertable.getElementsByClassName("folder")).forEach(element => element.style.display="");
+	}else{
+		
+		var clearquery = false;
+		var visible = null;
+		Array.from(foldertable.getElementsByClassName("folder")).forEach(element => {
+			if (element.getAttribute("data-cauuid") == selectedCa){
+				element.style.display="";
+				if (visible == null) visible = element;
+			}else{
+				element.style.display="none";
+				if (element.getAttribute("data-selected")=="true"){
+					clearquery = true;
+				}
+			}
+		});
+		
+		if (clearquery && visible != null){
+			if (visible != null) selectFolder(visible.children[0]);
+		}
+	}
+	
+}
+
+
+function updateQueryTable(){
+	
+	var hide = document.getElementById('qhideexe').checked;
+	var querytable = document.getElementById('querytable');
+	var elementArray;
+	
+	if (selectedFolder == -1){
+		elementArray = Array.from(querytable.getElementsByClassName("queryrow"))
+	}else{
+		//hide all
+		Array.from(querytable.getElementsByClassName("queryrow")).forEach(element => element.style.display="none");
+		//show folder
+		elementArray = Array.from(querytable.querySelectorAll("[data-folderid='" + selectedFolder + "']"));
+	}
+	
+	var rowcnt = 1;
+	elementArray.forEach(element => {
+		if (!hide || element.getAttribute("data-canexe") == "true"){
+			if (isFoundInRow(element)){
+				element.style.display="";
+				element.classList.remove("smart-table-rowon");
+				element.classList.remove("smart-table-rowoff");
+				element.classList.add(rowcnt % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff")
+				rowcnt++;
+			}else{
+				element.style.display="none";
+			}
+		}else{
+			element.style.display="none";
+		}
+	});
+	
+	
+}

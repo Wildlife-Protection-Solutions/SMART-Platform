@@ -3,6 +3,7 @@ var lastSorted;
 var to; //timeout to slow auto-search a bit. It is cleared each time another character/change is typed so we don't fire too many updates too fast.
 var SHARED_LINK_URL = "../api/sharedlink/";
 var USER_URL = "../api/connectuser/getCurrent";
+const REPORT_URL = "../api/report/"
 
 var definedDates = ["report.last30days","report.last60days","report.monthtodate","report.lastmonth","report.yeartodate","report.lastyear","report.alldates","report.custom"];
 var definedDateKeys = ["last30days", "last60days", "monthtodate", "lastmonth", "yeartodate", "lastyear", "alldates", "custom"];
@@ -12,6 +13,9 @@ var startDatePicker, endDatePicker;
 var isDateChanging = false;
 
 var parameterNames = new Array();
+
+var selectedFolder = -1;
+var folderId;
 
 /* configure events on html elements */
 window.onload = function(){
@@ -34,7 +38,7 @@ window.onload = function(){
 				}
 			}
 			if (valid == 0){
-				window.alert("You must select at least one CA");
+				window.alert(i18n("report.carequired"));
 				return false;
 			}
 		}
@@ -42,7 +46,7 @@ window.onload = function(){
 		for(x=0; x < parameterNames.length; x++){
 			name = parameterNames[x];
 			if(document.getElementById(name).dataset.isRequired === 'true' && document.getElementById(name).value == ""){
-				window.alert("Missing Parameter Valid for: " + name);
+				window.alert(i18n("report.missingparam") + name);
 				return false;
 			}
 		}
@@ -116,7 +120,98 @@ window.onload = function(){
 		}
 	}
 	
+	
+	// we are catching events at the query-list level
+	// in case we add or remove folders/items dynamically
+	const reportFolderList = document.getElementById('foldertable');
+	reportFolderList.addEventListener('click', function(evt) {
+		var element = evt.target;
+		var openonly = false;
+
+		if (!element.classList.contains('folder-icon')){
+			//select folder
+			if(!element.classList.contains('folder-name')) {
+				element = element.parentNode;
+			}
+			if(!element.classList.contains('folder-name')) return;
+
+			selectFolder(element);
+			updateReportTable();
+			//if it's not open then open it
+			openonly = true;
+		}
+		// bubble up events to the parent folder or folder-item
+		if(!element.classList.contains('folder-name')) {
+			element = element.parentNode;
+		}
+		if(element.classList.contains('folder-name')) {
+			// clicking on the folder toggles the folder icon
+			// as well as toggling the display of the folder contents
+			const folderIcon = element.getElementsByClassName('folder-icon')[0];
+			if (openonly){
+				if(!folderIcon.classList.contains('fa-folder-open-o')) {
+					folderIcon.classList.remove('fa-folder-o');
+					folderIcon.classList.add('fa-folder-open-o')
+					toggleDisplay(element.nextElementSibling);
+				}
+			}else{
+			
+				if(folderIcon.classList.contains('fa-folder-open-o')) {
+					folderIcon.classList.remove('fa-folder-open-o');
+					folderIcon.classList.add('fa-folder-o');
+				} else {
+					folderIcon.classList.remove('fa-folder-o');
+					folderIcon.classList.add('fa-folder-open-o')
+				}
+				toggleDisplay(element.nextElementSibling);
+
+			}
+		} 
+	});
+	
 }
+
+//element is the folder-name dive
+function selectFolder(element){
+	const folderTable = document.getElementById('foldertable');
+
+	selectedFolder = element.getAttribute("data-folderid");
+
+	element.classList.add('folder-selected');
+	var path = element.getAttribute("data-path");
+	if (path != null){
+		document.getElementById('reportpath').innerHTML = path;
+	}else{
+		document.getElementById('reportpath').innerHTML = "All Reports";
+	}
+	
+	Array.from(folderTable.getElementsByClassName("folder-selected")).forEach(ele=>{
+		ele.classList.remove("folder-selected");
+		ele.parentElement.dataset.selected = "false";
+	});
+
+	selectedFolder = element.getAttribute("data-folderid");
+	var path = element.getAttribute("data-path");
+	
+	updateReportTable();
+	element.parentElement.dataset.selected="true";
+	element.classList.add('folder-selected');
+	if (path != null){
+		document.getElementById('reportpath').innerHTML = path;
+	}else{
+		document.getElementById('reportpath').innerHTML = i18n("report.allreports");
+	}
+	document.getElementById('reporttable').scrollTop = 0;
+}
+
+function toggleDisplay(element) {
+    if(element.style.display == "none") {
+      element.style.display = "";
+    } else {
+    	element.style.display = "none";
+    }
+}
+
 
 function selectCustom(){
 	if (isDateChanging) return;
@@ -187,47 +282,7 @@ function updateDates(){
 		isDateChanging = false;
 
 }
-function getReportList(){
-	//clear current table
-	var objects = document.querySelectorAll("div.reportrow");
-	
-	for (var i = 0; i < objects.length; i++){
-		var ele = objects[i];
-		ele.parentElement.removeChild(ele);
-	}
 
-	var parent = document.getElementById('reporttable');
-	
-	var row = document.createElement("div");
-	row.className="reportrow";
-	row.innerHTML=i18n("report.refreshingreports");
-	parent.appendChild(row);
-		
- 	var oReq = new XMLHttpRequest();
- 	oReq.onload = queryCallback;
- 	oReq.open("Get", REPORTURL, true);
- 	oReq.send();
-}
-
-function queryCallback(){
-	if (this.status != 200) {
-		var msg = "Error: ";
-		if (this.status == 401){
-			msg += "Unauthorized";
-		}
-		try {
-			msg = JSON.parse(this.responseText).error
-		} catch (err) {
-		}
-		displayError(msg);
-		return;
-	}
-	
- 	reports = JSON.parse(this.responseText);
- 	
- 	sortTable("name");
- 	createReportTable();
-}
 
 function sortTable(sortColumn){
 	if(lastSorted == sortColumn){
@@ -238,49 +293,6 @@ function sortTable(sortColumn){
 	}
 	reports.sort(dynamicSort(sortColumn));
  	createReportTable();
-}
-
-function createReportTable(){ 
-	var parent = document.getElementById('reporttable');
-	
-
- 	//clear current table
-	var objects = document.querySelectorAll("div.reportrow");
-	for (var i = 0; i < objects.length; i++){
-		var ele = objects[i];
-		ele.parentElement.removeChild(ele);
-	}
-	var drawnRowCount = 0;
-	var selectedCa = document.getElementById('caselect').value; 
- 	for (var i = 0; i < reports.length; i ++){
- 		if(selectedCa == 'allcas' || selectedCa == reports[i].caUuid){
- 		 if(search == "" || isFoundInRow(reports[i]) ){
- 			drawnRowCount++;
-	 		var row = tableCreateRow(parent, 
-	 				[reports[i].conservationArea, "<span title='" + reports[i].id + "'> " + reports[i].name , null], 
-	 				"reportrow " + (drawnRowCount % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
-	 		
-	 		row.dataset.reportuuid = reports[i].uuid;
-	 		row.dataset.reportname = reports[i].name;
-	 		row.dataset.isccaa = reports[i].isCcaa;
-	 		
-	 		var runicon = document.createElement("a");
-	 		runicon.className="run-icon";
-	 		runicon.title= i18n("reports.runreport");
-	 		runicon.onclick = showReportOptions;
-	 		row.childNodes[2].appendChild(runicon);
-	 		
- 		 }
- 		}
- 	}
- 	
- 	if(reports.length == 0 || drawnRowCount == 0){ //no results or they were all filtered out
- 		var row = document.createElement("div");
- 		row.className = "reportrow errorsection";
- 	    row.innerHTML = i18n("report.noreportsfound");
- 	    row.style.display = "block";
- 		parent.appendChild(row);
- 	}
 }
 
 function showReportOptions(){
@@ -307,7 +319,7 @@ function showReportOptions(){
 	while (parent.firstChild) {
 		parent.removeChild(parent.firstChild);
 	}
-	parent.innerHTML = "<font style='color:red'>Loading custom parameters...</font>";
+	parent.innerHTML = "<font style='color:red'>" + i18n("report.loadcustomparams") + "</font>";
 
 	//update report parameters required
 	var oReq = new XMLHttpRequest();
@@ -327,7 +339,7 @@ function showReportOptions(){
 // error handler for getting parameters
 function parameterError() {
 	var parent = document.getElementById("customParameters");
-	parent.innerHTML = "<font style='color:red'>Error loading custom parameters; please cancel and try again.</font>";	
+	parent.innerHTML = "<font style='color:red'>" + i18n("report.paramerror") + "</font>";	
 }
 
 //callback from getting parameters
@@ -398,7 +410,8 @@ function showParameterSelection(){
  }
 
 function isFoundInRow(row){
-	if(isIn(row.conservationArea)|| isIn(row.name)|| isIn(row.id)){
+	if (search == null || search=="") return true;
+	if(isIn(row.dataset.reportname)){
 		return true;
 	}
 	return false;
@@ -434,7 +447,8 @@ function searchChanged(){
 	setTimeout(function(){
 		search = document.getElementById('textsearch').value;
 		search = search.toLowerCase();
-		createReportTable();	
+		updateFolderTable();
+		updateReportTable();
 	}, 600);
 	
 
@@ -576,7 +590,7 @@ function setHomeCa(){
 		if (found) parent.value = users.homeCaUuid;
 	}
 	
-	getReportList();
+	loadReports();
 }
 
 
@@ -697,9 +711,9 @@ function linkCreated(){
 	var status = this.status;
 	if(status != 200){
 		if(status == 401){
-			document.getElementById("createdlink").value = "Session has timed out / Unauthorized" + link.error;
+			document.getElementById("createdlink").value = i18n("report.linktimeout") + link.error;
 		}else{
-			document.getElementById("createdlink").value = "There was an error creating the link: " + link.error;
+			document.getElementById("createdlink").value = i18n("report.linkerror") + link.error;
 		}
 	}else{
 		document.getElementById("createdlink").value = resolve(SHAREDLINKSERVLETURL) + "?uuid=" + link.uuid;
@@ -727,4 +741,192 @@ function selectNone(parent){
 	   var child = children[i].children[0];
 	   child.checked = false;
 	}
+}
+
+
+
+function loadReports() {
+	var oReq = new XMLHttpRequest();
+ 	oReq.onload = handleReports;
+ 	oReq.open("Get", REPORT_URL + "tree/", true);
+ 	oReq.send();
+}
+
+
+
+function handleReports() {
+	const data = JSON.parse(this.responseText);
+	var parent = document.getElementById('foldertable');
+	Array.from(parent.children).forEach(c=>parent.removeChild(c));
+	
+	reports = [];
+	var objects = document.querySelectorAll("div.reportrow");
+	for (var i = 0; i < objects.length; i++){
+		var ele = objects[i];
+		ele.parentElement.removeChild(ele);
+	}
+	folderId = 0;
+	for(var i=0; i < data.length; i++) {
+		folderId++;
+		addFolder(data[i], parent, "", 0);
+	}
+	
+	//add an all reports item
+	var folderDiv = document.createElement('div');
+	folderDiv.classList.add('folder');
+	folderDiv.dataset.selected=true;
+	parent.appendChild(folderDiv);
+	folderDiv.innerHTML = "<div class=\"folder-name folder-selected\" data-folderid=\"-1\" style=\"white-space:nowrap; padding-top:5px; padding-bottom:5px;\"><i style=\"padding-right: 5px\" class=\"folder-icon fa fa-folder-open-o fa-lg\" ></i><span class=\"folder-label\">" + i18n("report.allreports") + "</span></div>";
+	var folderContentsDiv = document.createElement('div');
+	folderContentsDiv.classList.add('folder-contents');
+	folderDiv.appendChild(folderContentsDiv);
+	
+	//create query table
+	createReportTable();
+	
+	updateFolderTable();
+}
+
+// recursively adds nested folders and reports
+function addFolder(data, parent, path, level) {
+	
+	var folderDiv = document.createElement('div');
+	folderDiv.classList.add('folder');
+	folderDiv.dataset.cauuid = data['caUuid'];
+	parent.appendChild(folderDiv);
+	if (path != ""){
+		path += " > "; 
+	}
+	path += data['name'];
+	
+	var icon = "fa-folder-open-o";
+	var display = "";
+	if (level > 0){
+		//hide this folder
+		icon = "fa-folder-o";
+		display = "none";
+	}
+	
+	var foldernamediv = document.createElement('div');
+	foldernamediv.classList.add("folder-name");
+	foldernamediv.dataset.path = path;
+	foldernamediv.dataset.folderid = folderId;
+	foldernamediv.style.paddingTop = "5px";
+	foldernamediv.style.paddingBottom = "5px";
+	
+	folderDiv.appendChild(foldernamediv);
+	
+	foldernamediv.innerHTML = "<i style=\"padding-right: 5px\" class=\"folder-icon fa " + icon + " fa-lg\" ></i><span class=\"folder-label\">" + data['name'] + "</span>";
+	
+	var folderContentsDiv = document.createElement('div');
+	folderContentsDiv.classList.add('folder-contents');
+	folderContentsDiv.style.display=display;
+	folderDiv.appendChild(folderContentsDiv);
+	
+	var reportfolderid = folderId;
+	
+	for(var i = 0; i < data['subFolders'].length; i++) {
+		folderId++;
+		addFolder(data['subFolders'][i], folderContentsDiv, path, level+1);
+	}
+	
+	for(var i = 0; i < data['items'].length; i++) {
+		var report = data['items'][i];
+		report.folderid = reportfolderid;
+		reports.push(report);	
+	}
+	
+}
+
+function createReportTable(){
+	var reportlist = document.getElementById('reporttable');
+	
+ 	//clear current table
+	document.querySelectorAll("div.reportrow").forEach(element=>element.parentElement.removeChild(element));
+	
+	
+	var drawnRowCount = 1;
+	reports.forEach(report=>{
+		
+		var row = tableCreateRow(reportlist, 
+ 				[report.conservationArea, "<span title='" + report.id + "'> " + report.name , null], 
+ 				"reportrow " + (drawnRowCount % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
+ 		
+ 		row.dataset.reportuuid = report.uuid;
+ 		row.dataset.reportname = report.name;
+ 		row.dataset.isccaa = report.isCcaa;
+ 		row.dataset.folderid = report.folderid;
+
+ 		var runicon = document.createElement("a");
+ 		runicon.className="run-icon";
+ 		runicon.title= i18n("reports.runreport");
+ 		runicon.onclick = showReportOptions;
+ 		row.childNodes[2].appendChild(runicon);
+				
+		
+		if (selectedFolder == -1 || report.folderid == selectedFolder){
+			row.style.display="";
+			drawnRowCount++;
+		}else{
+			row.style.display="none";
+		}
+		
+	});
+}
+
+function updateFolderTable(){
+	//filter folders on ca uuid	
+	var foldertable = document.getElementById('foldertable');
+	var selectedCa = document.getElementById('caselect').value;
+	
+	if (selectedCa == "allcas"){
+		Array.from(foldertable.getElementsByClassName("folder")).forEach(element => element.style.display="");
+	}else{		
+		var clearreport = false;
+		var visible = null;
+		Array.from(foldertable.getElementsByClassName("folder")).forEach(element => {
+			if (element.getAttribute("data-cauuid") == selectedCa){
+				element.style.display="";
+				if (visible == null) visible = element;
+			}else{
+				element.style.display="none";
+				if (element.getAttribute("data-selected")=="true"){
+					clearreport = true;
+				}
+			}
+		});
+		
+		if (clearreport && visible != null){
+			if (visible != null) selectFolder(visible.children[0]);
+		}
+	}
+	
+}
+
+
+function updateReportTable(){
+	
+	var reporttable = document.getElementById('reporttable');
+	var elementArray = null;
+	if (selectedFolder == -1){
+		elementArray = Array.from(reporttable.getElementsByClassName("reportrow"));
+	}else{
+		//hide all
+		Array.from(reporttable.getElementsByClassName("reportrow")).forEach(element => element.style.display="none");
+		elementArray = Array.from(reporttable.querySelectorAll("[data-folderid='" + selectedFolder + "']"));
+	}
+	
+	var rowcnt = 1;
+	elementArray.forEach(element => {
+		if (isFoundInRow(element)){
+			element.style.display="";
+			element.classList.remove("smart-table-rowon");
+			element.classList.remove("smart-table-rowoff");
+			element.classList.add(rowcnt % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff")
+			rowcnt++;
+		}else{
+			element.style.display="none";
+		}
+	});
+	
 }

@@ -38,9 +38,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
@@ -73,7 +75,7 @@ import org.wcs.smart.connect.model.AbstractSmartAction;
 import org.wcs.smart.connect.model.SmartRoleAction;
 import org.wcs.smart.connect.model.SmartUserAction;
 import org.wcs.smart.connect.model.SmartUserRole;
-import org.wcs.smart.connect.query.QueryFolderProxy;
+import org.wcs.smart.connect.query.FolderProxy;
 import org.wcs.smart.connect.query.QueryManager;
 import org.wcs.smart.connect.query.QueryProxy;
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
@@ -679,74 +681,83 @@ public class QueryApi extends HttpServlet{
 	@GET
     @Path("/tree")
 	@Produces({ MediaType.APPLICATION_JSON })
-    public List<QueryFolderProxy> getQueryTreeForUser(@QueryParam("type") String typeFilter,
+    public List<FolderProxy<QueryProxy>> getQueryTreeForUser(@QueryParam("type") String typeFilter,
 			@QueryParam("ca") String caFilter,
 			@QueryParam("isccaa") Boolean isCcaaFilter){
+		
+		List<QueryProxy> allowed = new ArrayList<QueryProxy>();
+		// build the query folder tree
+		List<FolderProxy<QueryProxy>> rootFolders = new ArrayList<>();
+		Map<UUID, FolderProxy<QueryProxy>> foldersByUuid = new HashMap<>();
+	
 		Session s = HibernateManager.getSession(request.getServletContext(), request.getLocale());
 		s.beginTransaction();
 		
-		// build the query folder tree
-		List<QueryFolderProxy> rootFolders = new ArrayList<QueryFolderProxy>();
-		Map<UUID, QueryFolderProxy> foldersByUuid = new HashMap<UUID, QueryFolderProxy>();
-		
-		// CAs are the root folders
-		List<ConservationArea> cas = QueryManager.INSTANCE.getConservationAreas(s);
-		for(ConservationArea ca  :cas) {
-			QueryFolderProxy caFolder = new QueryFolderProxy(ca.getName() + " [" + ca.getId() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
-			foldersByUuid.put(ca.getUuid(), caFolder);
-			rootFolders.add(caFolder);
-		}
-		
-		List<QueryFolder> folders = QueryManager.INSTANCE.getQueryFolders(s);
-		Deque<QueryFolder> remainingFolders = new LinkedList<QueryFolder>(folders);
-		int loopCount = 0;
-		int maxLoops =  folders.size() * folders.size();
-		while(!remainingFolders.isEmpty()) {
-			loopCount++;
-			// just to prevent weird infinite loop failures
-			if(loopCount > maxLoops) {
-				break;
+		try {
+			// get all the queries we have access to 
+			allowed.addAll(getQueries(s, request.getLocale()));
+			allowed.addAll(getAdvancedIntelQueries(s, request.getLocale()));
+			
+			if (allowed.isEmpty()) return Collections.emptyList();
+	
+			// filter the queries
+			allowed = filteredQueries(typeFilter, caFilter, isCcaaFilter, allowed);
+			
+			//get cas associated with queries
+			Set<UUID> cauuids = allowed.stream().map(e->e.getCaUuid()).collect(Collectors.toSet());
+			// CAs are the root folders
+			for (UUID cauuid : cauuids) {
+				ConservationArea ca = s.get(ConservationArea.class, cauuid);
+				FolderProxy<QueryProxy> caFolder = new FolderProxy<QueryProxy>(ca.getName() + " [" + ca.getId() + "]", ca.getUuid()); //$NON-NLS-1$ //$NON-NLS-2$
+				foldersByUuid.put(ca.getUuid(), caFolder);
+				rootFolders.add(caFolder);
 			}
-			QueryFolder f = remainingFolders.removeFirst();
-			if(f.getParentFolder() == null) {
-				// this is a root folder
-				QueryFolderProxy fp = new QueryFolderProxy(f.getName());
-				foldersByUuid.put(f.getUuid(), fp);
-				// but the CA is the real root folder
-				foldersByUuid.get(f.getConservationArea().getUuid()).addSubFolder(fp);
-			} else {
-				QueryFolderProxy parentFolder = foldersByUuid.get(f.getParentFolder().getUuid());
-				if(parentFolder != null) {
-					QueryFolderProxy fp = new QueryFolderProxy(f.getName());
+			
+			List<QueryFolder> folders = QueryManager.INSTANCE.getQueryFolders(s, cauuids);
+			Deque<QueryFolder> remainingFolders = new LinkedList<QueryFolder>(folders);
+			int loopCount = 0;
+			int maxLoops =  folders.size() * folders.size();
+			while(!remainingFolders.isEmpty()) {
+				loopCount++;
+				// just to prevent weird infinite loop failures
+				if(loopCount > maxLoops) {
+					break;
+				}
+				QueryFolder f = remainingFolders.removeFirst();
+				if(f.getParentFolder() == null) {
+					// this is a root folder
+					FolderProxy<QueryProxy> fp = new FolderProxy<QueryProxy>(f.getName(), f.getConservationArea().getUuid());
 					foldersByUuid.put(f.getUuid(), fp);
-					parentFolder.addSubFolder(fp);
+					// but the CA is the real root folder
+					foldersByUuid.get(f.getConservationArea().getUuid()).addSubFolder(fp);
 				} else {
-					// we haven't yet processed this folder's parent, put it back in the queue for later
-					remainingFolders.addLast(f);
+					FolderProxy<QueryProxy> parentFolder = foldersByUuid.get(f.getParentFolder().getUuid());
+					if(parentFolder != null) {
+						FolderProxy<QueryProxy> fp = new FolderProxy<QueryProxy>(f.getName(), f.getConservationArea().getUuid());
+						foldersByUuid.put(f.getUuid(), fp);
+						parentFolder.addSubFolder(fp);
+					} else {
+						// we haven't yet processed this folder's parent, put it back in the queue for later
+						remainingFolders.addLast(f);
+					}
 				}
 			}
-		}
-		
-		// get all the queries we have access to 
-		List<QueryProxy> allowed = new ArrayList<QueryProxy>();
-		try {
-			allowed.addAll(getQueries(s, request.getLocale()));
-			allowed.addAll(getAdvancedIntelQueries(s, request.getLocale()));			
-		} catch(Exception ex) {
-			ex.printStackTrace();
+			
+		}catch (Exception ex) {
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
+			throw new SmartConnectException(Status.INTERNAL_SERVER_ERROR, ex);
 		} finally {
 			s.getTransaction().commit();
 		}
 
-		// filter the queries
-		List<QueryProxy> filtered = filteredQueries(typeFilter, caFilter, isCcaaFilter, allowed);
+		
 		
 		// add the queries into the folder tree
-		for(QueryProxy q: filtered) {
+		for(QueryProxy q: allowed) {
 			if(q.getFolderUuid() != null) {
-				foldersByUuid.get(q.getFolderUuid()).addQuery(q);
+				foldersByUuid.get(q.getFolderUuid()).addItem(q);
 			} else {
-				foldersByUuid.get(q.getCaUuid()).addQuery(q);
+				foldersByUuid.get(q.getCaUuid()).addItem(q);
 			}
 		}
 		
@@ -781,7 +792,8 @@ public class QueryApi extends HttpServlet{
 			allowed.addAll(getQueries(s, request.getLocale()));
 			allowed.addAll(getAdvancedIntelQueries(s, request.getLocale()));			
 		} catch(Exception ex) {
-			ex.printStackTrace();
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
+			throw new SmartConnectException(Status.INTERNAL_SERVER_ERROR, ex);
 		} finally {
 			s.getTransaction().commit();
 		}

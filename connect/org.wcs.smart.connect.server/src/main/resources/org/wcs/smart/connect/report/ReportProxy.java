@@ -34,16 +34,22 @@ public class ReportProxy {
 	private Boolean isShared;
 	private Boolean isCcaa;
 	
+	private UUID folderUuid;
+	
 	public ReportProxy(UUID uuid, String name, String caName, String id, 
-			Boolean isShared, UUID caUuid, Boolean isCcaa){
+			Boolean isShared, UUID caUuid, Boolean isCcaa, UUID folderUuid){
 		this.uuid = uuid;
 		this.name = name;
 		this.conservationAreaName = caName;
 		this.id = id;
+		this.folderUuid = folderUuid;
 		this.setCaUuid(caUuid);
 		setIsCcaa(isCcaa);
 	}
 	
+	public UUID getFolderUuid() {
+		return folderUuid;
+	}
 	
 	public UUID getUuid() {
 		return uuid;

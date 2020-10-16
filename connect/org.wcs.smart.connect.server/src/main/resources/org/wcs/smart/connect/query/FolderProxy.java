@@ -23,6 +23,7 @@ package org.wcs.smart.connect.query;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * 
@@ -31,21 +32,27 @@ import java.util.List;
  * @author Chris
  *
  */
-public class QueryFolderProxy {
+public class FolderProxy<T> {
 	
 	private final String name;
-	private List<QueryFolderProxy> subFolders = new ArrayList<QueryFolderProxy>();
-	private List<QueryProxy> queries = new ArrayList<QueryProxy>();
+	private final UUID caUuid;
+	private List<FolderProxy<T>> subFolders = new ArrayList<>();
+	private List<T> queries = new ArrayList<>();
 
-	public QueryFolderProxy(final String name) {
+	public FolderProxy(final String name, UUID caUuid) {
 		this.name = name;
+		this.caUuid = caUuid;
 	}
 	
-	public void addSubFolder(QueryFolderProxy folder) {
+	public UUID getCaUuid() {
+		return this.caUuid;
+	}
+	
+	public void addSubFolder(FolderProxy<T> folder) {
 		subFolders.add(folder);
 	}
 	
-	public void addQuery(QueryProxy query) {
+	public void addItem(T query) {
 		queries.add(query);
 	}
 
@@ -53,11 +60,11 @@ public class QueryFolderProxy {
 		return name;
 	}
 
-	public List<QueryFolderProxy> getSubFolders() {
+	public List<FolderProxy<T>> getSubFolders() {
 		return subFolders;
 	}
 
-	public List<QueryProxy> getQueries() {
+	public List<T> getItems() {
 		return queries;
 	}
 	

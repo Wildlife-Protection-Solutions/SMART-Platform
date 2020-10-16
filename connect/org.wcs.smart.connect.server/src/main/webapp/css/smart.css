@@ -580,7 +580,18 @@ th {
 	vertical-align: middle;
 }
 .folder-name {
+	cursor: pointer; 
 }
+
+.folder-name:hover{
+	border-radius: 3px;
+	background-color: #EEEEEE;
+}
+.folder-selected{
+	border-radius: 3px;
+	background-color: #EEEEAA !important;
+}
+
 .folder-contents {
 	margin-left: 24px;
 }

@@ -124,7 +124,8 @@ function populateQueryDates(selectElement) {
 function buildUpdateDateHandler(selectElement, startDatePicker, endDatePicker, callback) {
 	return function(event) {
 		updateDates(selectElement, startDatePicker, endDatePicker);
-		return callback(event);
+		if (callback != null) return callback(event);
+		return true;
 	}
 }
 

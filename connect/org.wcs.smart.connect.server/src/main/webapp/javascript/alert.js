@@ -233,7 +233,7 @@ function toggleDisplay(element) {
 function loadQueries() {
 	var oReq = new XMLHttpRequest();
  	oReq.onload = handleQueries;
- 	oReq.open("Get", QUERY_URL + "tree/?type=" + shpValues.join(','), true);
+ 	oReq.open("Get", QUERY_URL + "tree/?isccaa=false&type=" + shpValues.join(','), true);
  	oReq.send();
 }
 
@@ -251,15 +251,15 @@ function addFolder(data, parent, parentName) {
 	folderDiv.classList.add('folder');
 	parent.appendChild(folderDiv);
 	folderDiv.innerHTML = "<div class=\"folder-name\"><i class=\"folder-icon fa fa-folder-open-o fa-lg\"></i>" + data['name'] + "</div>";
-	folderContentsDiv = document.createElement('div');
+	var folderContentsDiv = document.createElement('div');
 	folderContentsDiv.classList.add('folder-contents');
 	folderDiv.appendChild(folderContentsDiv);
 	var thisParentName = (parentName == "" ? "CA: " : parentName + "Folder: ") + data['name'] + "<br/>";
 	for(var i = 0; i < data['subFolders'].length; i++) {
 		addFolder(data['subFolders'][i], folderContentsDiv, thisParentName);
 	}
-	for(var i = 0; i < data['queries'].length; i++) {
-		var query = data['queries'][i];
+	for(var i = 0; i < data['items'].length; i++) {
+		var query = data['items'][i];
 		folderItemDiv = document.createElement('div');
 		folderItemDiv.classList.add('folder-item');
 		queryTypeKeys[query.uuid] = query.typeKey;

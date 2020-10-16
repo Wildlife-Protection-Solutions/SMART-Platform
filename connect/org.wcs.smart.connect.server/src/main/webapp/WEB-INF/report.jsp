@@ -9,6 +9,7 @@
 	<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/infoerror.js"></script>
 	<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/dialog.js"></script>
 	<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/pickaday.js"></script>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" />
 	<link rel="stylesheet" href="${pageContext.request.contextPath}/css/pikaday.css" />
 	
 	<script type="text/javascript" >
@@ -42,20 +43,29 @@
 	</select>
 </div>
 
-<div class="top-spacer" style="flex: 1 1 auto; height: 0;">
-  <div style="height: 100%; overflow: auto; display: inline-block;">
-  <div id="reporttable" class="catable table-cell smart-table">
-  	<div class="table-row smart-table-header">
-		<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('conservationArea')"><fmt:message key="report.conservationarea" /></a></div>
-		<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('name')"><fmt:message key="report.name" /></a></div>
-		
+<div class="top-spacer" style="flex: 1 1 auto; height: 0; display:flex;">  
+  <div style="width: 25%">
+    <div class="smart-table-header" style="border-bottom:1px solid #CCCCCC"><fmt:message key="report.folders"/></div>
+  	<div id="foldertable" style="height: 100%; overflow: auto;">
+  		<div><fmt:message key="report.loading"/></div>
+  	</div>  
+  </div>
+  
+  <div style="margin-left:30px">
+  	<div class="smart-table-header" style="border-bottom:1px solid #CCCCCC" id="reportpath"><fmt:message key="report.allreports"/></div>
+  	<div id="reporttable" style="height: 100%; overflow-x: auto;overflow-y:scroll;">
+  		<div class="table-row smart-table-header">
+			<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('conservationArea')"><fmt:message key="report.conservationarea" /></a></div>
+			<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('name')"><fmt:message key="report.name" /></a></div>
+			<div class="table-cell smart-table-cell"></div>
+		</div>
+		<div class="table-row reportrow">
+			<div class="table-cell smart-table-cell"><fmt:message key="report.loading"/></div>	
+		</div>
+  	</div>
+  </div>
 
-		<div class="table-cell smart-table-cell"></div>
-	</div>
-  </div>
-  </div>
 </div>
-
 </div>
 
 <%@include file="footer.jsp" %>
@@ -97,8 +107,8 @@
 	     		<div style="font-size:0.9em; margin-bottom:3px">
 	     			<div class="warn-icon" style="display:inline-block; float:left"></div>
 	     			<div style="width: 450px"><fmt:message key="report.ccaabindingwarn"/></div>
-	     			<p><a href="javascript:selectAll();">select all</a>
-					<a href="javascript:selectNone();">select none</a>
+	     			<p><a href="javascript:selectAll();"><fmt:message key="report.selectall"/></a>
+					<a href="javascript:selectNone();"><fmt:message key="report.selectnone"/></a>
 	     		</div>
 	     		
 	     		<div id="cafilteroptions"></div>

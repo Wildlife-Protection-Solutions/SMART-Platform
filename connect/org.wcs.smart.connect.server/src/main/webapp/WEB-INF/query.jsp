@@ -10,6 +10,7 @@
 	<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/sharedlinkfunctions.js"></script>
 	<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/dialog.js"></script>
 	<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/pickaday.js"></script>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" />
 	<link rel="stylesheet" href="${pageContext.request.contextPath}/css/pikaday.css" />
 	
 	<script type="text/javascript" >
@@ -66,20 +67,33 @@
 	</select>
 </div>
 <div>
-<input type="checkbox" id="qhideexe" checked onchange="searchChanged()"><fmt:message key="query.hidenonexecutable"/>
+<input type="checkbox" id="qhideexe" checked onchange="updateQueryTable()"><fmt:message key="query.hidenonexecutable"/>
 </div>
 
-<div class="top-spacer" style="flex: 1 1 auto; height: 0;">
-  <div style="height: 100%; overflow: auto; display: inline-block;">
-  <div id="querytable" class="catable table-cell smart-table">
-  	<div class="table-row smart-table-header">
-		<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('conservationArea')"><fmt:message key="query.conservationarea" /></a></div>
-		<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('type')"><fmt:message key="query.type" /></a></div>
-		<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('name')"><fmt:message key="query.name" /></a></div>
-		<div class="table-cell smart-table-cell"></div>
-	</div>
-  </div>  
+<div class="top-spacer" style="flex: 1 1 auto; display:flex; height:0">
+
+  <div style="width: 25%">
+    <div class="smart-table-header" style="border-bottom:1px solid #CCCCCC"><fmt:message key="query.folders"/></div>
+  	<div id="foldertable" style="height: 100%; overflow: auto;">
+  	<div><fmt:message key="query.loading"/></div>
+  	</div>  
   </div>
+  
+  <div style="margin-left:30px">
+  	<div class="smart-table-header" style="border-bottom:1px solid #CCCCCC" id="querypath"><fmt:message key="query.allqueries"/></div>
+  	<div id="querytable" style="height: 100%; overflow-x: auto;overflow-y:scroll;">
+  		<div class="table-row smart-table-header">
+			<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('conservationArea')"><fmt:message key="query.conservationarea" /></a></div>
+			<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('type')"><fmt:message key="query.type" /></a></div>
+			<div class="table-cell smart-table-cell"><a class="smart-table-header" href="javascript:sortTable('name')"><fmt:message key="query.name" /></a></div>
+			<div class="table-cell smart-table-cell"></div>
+		</div>
+		<div class="table-row queryrow">
+			<div class="table-cell smart-table-cell"><fmt:message key="query.loading"/></div>	
+		</div>
+  	</div>
+  </div>
+  
 </div>
 
 </div>
