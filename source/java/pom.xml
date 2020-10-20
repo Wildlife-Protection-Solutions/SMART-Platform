@@ -670,11 +670,9 @@
 				<module>../translations/org.wcs.smart.nl</module>
 				<module>../translations/org.wcs.smart.observation.nl</module>
 				<module>../translations/org.wcs.smart.observation.query.nl</module>
-				<module>../translations/org.wcs.smart.observation.query.report.nl</module>
 				<module>../translations/org.wcs.smart.p2.nl</module>
 				<module>../translations/org.wcs.smart.patrol.nl</module>
 				<module>../translations/org.wcs.smart.patrol.query.nl</module>
-				<module>../translations/org.wcs.smart.patrol.query.report.nl</module>
 				<module>../translations/org.wcs.smart.query.nl</module>
 				<module>../translations/org.wcs.smart.report.birt.query.nl</module>
 				<module>../translations/org.wcs.smart.report.nl</module>
@@ -710,8 +708,14 @@
 				<module>../extensions/connect/translations/org.wcs.smart.connect.nl</module>
 				
 				<module>../extensions/cybertracker/translations/org.wcs.smart.cybertracker.nl</module>
+				<module>../extensions/cybertracker/translations/org.wcs.smart.cybertracker.incident.feature.nl</module>
+				<module>../extensions/cybertracker/translations/org.wcs.smart.cybertracker.incident.nl</module>
 				<module>../extensions/cybertracker/translations/org.wcs.smart.cybertracker.patrol.feature.nl</module>
 				<module>../extensions/cybertracker/translations/org.wcs.smart.cybertracker.patrol.nl</module>
+				<module>../extensions/cybertracker/translations/org.wcs.smart.cybertracker.plan.feature.nl</module>
+				<module>../extensions/cybertracker/translations/org.wcs.smart.cybertracker.plan.nl</module>
+				<module>../extensions/cybertracker/translations/org.wcs.smart.smartcollect.feature.nl</module>
+				<module>../extensions/cybertracker/translations/org.wcs.smart.smartcollect.nl</module>
 				<module>../extensions/cybertracker/translations/org.wcs.smart.cybertracker.survey.feature.nl</module>
 				<module>../extensions/cybertracker/translations/org.wcs.smart.cybertracker.survey.nl</module>				
 				

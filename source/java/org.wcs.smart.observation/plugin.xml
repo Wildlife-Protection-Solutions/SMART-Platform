@@ -220,9 +220,9 @@
          <command
                commandId="org.wcs.smart.observation.waypointinfoview.refresh"
                icon="platform:/plugin/org.wcs.smart/images/icons/shared16/refresh.png"
-               label="Refresh"
+               label="%refresh.command.label"
                style="push"
-               tooltip="refresh waypoint details">
+               tooltip="%refresh.command.tooltip">
          </command>
       </menuContribution>
    </extension>
@@ -277,7 +277,7 @@
       </command>
             <command
                   id="org.wcs.smart.observation.waypointinfoview.refresh"
-                  name="Refresh">
+                  name="%refresh.command.name">
             </command>
    </extension>
    <extension

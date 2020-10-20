@@ -166,7 +166,7 @@
       <page
             class="org.wcs.smart.paws.ui.SettingsPreferencePage"
             id="org.wcs.smart.paws.preference.settings"
-            name="PAWS Server Settings">
+            name="%pawssettings.page.name">
       </page>
    </extension>
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.wcs.smart.r.feature.nl"
+      id="org.wcs.smart.paws.feature.nl"
       label="SMART PAWS Language Pack"
       version="7.0.0"
       provider-name="org.wcs.smart"
@@ -22,4 +22,5 @@
          version="0.0.0"
          fragment="true"
          unpack="false"/>
+
 </feature>

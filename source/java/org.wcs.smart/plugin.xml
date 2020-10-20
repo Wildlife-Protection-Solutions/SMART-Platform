@@ -1011,7 +1011,7 @@
       </command>
       <command
             id="org.wcs.smart.command.errorlog.email"
-            name="Send Error Log">
+            name="%senderrorlog.command.name">
       </command>
    </extension>
    <extension
@@ -1564,7 +1564,7 @@
             class="org.wcs.smart.ui.map.tool.DrawPolygonTool"
             icon="images/icons/obj16/polygon_add.png"
             id="org.wcs.smart.polygon.draw"
-            name="Draw Area"
+            name="%drawarea.udig.tool.name"
             onToolbar="false"
             toolCursorId="org.wcs.smart.cross"
             tooltip="%DrawAreaTooltip">
@@ -1649,7 +1649,7 @@
       <page
             class="org.wcs.smart.ui.internal.preference.InactivityTimeoutPreferencePage"
             id="org.wcs.smart.preference.InactivityTimeout"
-            name="Security Timeout">
+            name="%timeout.page.name">
       </page>
       <page
             class="org.wcs.smart.ui.internal.preference.InactivityTimeoutPreferencePage"
@@ -1711,7 +1711,7 @@
       <style
             class="org.wcs.smart.udig.legend.style.LegendLayerStyleContent"
             id="org.locationtech.udig.legend.layer.style"
-            name="Legend Properties">
+            name="%legendproperties.style.name">
       </style>
    </extension>
    <extension
@@ -1719,28 +1719,28 @@
       <styleConfigurator
             class="org.wcs.smart.udig.legend.style.LegendLayerStyleConfigurator"
             id="org.locationtech.udig.legend.layer.style.gridcoverage"
-            label="Legend Properties"
+            label="%legendproperties.label"
             requires="org.opengis.coverage.grid.GridCoverage"
             styleId="org.locationtech.udig.legend.layer.style">
       </styleConfigurator>
       <styleConfigurator
             class="org.wcs.smart.udig.legend.style.LegendLayerStyleConfigurator"
             id="org.locationtech.udig.legend.layer.style.featuresource"
-            label="Legend Properties"
+            label="%legendproperties.label1"
             requires="org.geotools.data.FeatureSource"
             styleId="org.locationtech.udig.legend.layer.style">
       </styleConfigurator>
       <styleConfigurator
             class="org.wcs.smart.udig.legend.style.LegendLayerStyleConfigurator"
             id="org.locationtech.udig.legend.layer.style.legend"
-            label="Layer Properties"
+            label="%layerproperties.label"
             requires="org.locationtech.udig.legend.ui.LegendGraphic"
             styleId="org.locationtech.udig.legend.layer.style">
       </styleConfigurator>
       <styleConfigurator
             class="org.wcs.smart.udig.legend.style.LegendLayerStyleConfigurator"
             id="org.locationtech.udig.legend.layer.style.wms"
-            label="Legend Properties"
+            label="%layerproperties.label.2"
             requires="org.geotools.ows.wms.WebMapServer"
             styleId="org.locationtech.udig.legend.layer.style">
       </styleConfigurator>

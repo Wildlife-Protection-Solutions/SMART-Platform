@@ -29,7 +29,7 @@
             <command
                   commandId="org.wcs.smart.cybertracker.packages.show"
                   icon="platform:/plugin/org.wcs.smart.cybertracker/images/etool16/smartmobileexport.png"
-                  label="Export Mobile Package"
+                  label="%exportpackage.command.label"
                   mode="FORCE_TEXT"
                   style="push"
                   tooltip="%command.export.tooltip">
@@ -77,10 +77,10 @@
             <command
                   commandId="org.wcs.smart.cybertracker.navigation.show"
                   icon="platform:/plugin/org.wcs.smart.cybertracker/images/etool16/navigation_export.png"
-                  label="Export Mobile Route"
+                  label="%exportroute.command.label"
                   mode="FORCE_TEXT"
                   style="push"
-                  tooltip="export SMART Mobile navigation layers">
+                  tooltip="%exportroute.command.tooltip">
                <visibleWhen>
                   <and>
                      <test
@@ -132,7 +132,7 @@
             <command
                   commandId="org.wcs.smart.cybertracker.json.import"
                   icon="platform:/plugin/org.wcs.smart.cybertracker/images/etool16/smartmobileimport.png"
-                  label="Import Mobile Data"
+                  label="%import.command.label"
                   mode="FORCE_TEXT"
                   style="push"
                   tooltip="%command.import.tooltip">

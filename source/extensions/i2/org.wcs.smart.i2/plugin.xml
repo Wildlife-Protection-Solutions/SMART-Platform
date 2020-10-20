@@ -380,7 +380,7 @@
                <command
                      commandId="org.wcs.smart.i2.command.query.record.new"
                      icon="images/icons/obj16/record_summary.png"
-                     label="New Record Summay Query"
+                     label="%newrcordsummary.command.label"
                      style="push">
                   <parameter
                         name="org.wcs.smart.i2.query.new.type"
@@ -397,7 +397,7 @@
                <command
                      commandId="org.wcs.smart.i2.command.query.record.new"
                      icon="images/icons/obj16/record_query.png"
-                     label="New Record Query"
+                     label="%newrcord.command.label"
                      style="push">
                   <parameter
                         name="org.wcs.smart.i2.query.new.type"
@@ -419,7 +419,7 @@
             <command
                   commandId="org.wcs.smart.i2.command.profiles.show"
                   icon="images/icons/obj16/configure.png"
-                  label="Configurations..."
+                  label="%configurations.command.label"
                   style="push">
                <visibleWhen
                      checkEnabled="false">
@@ -660,7 +660,7 @@
                <command
                      commandId="org.wcs.smart.i2.command.query.record.new"
                      icon="images/icons/obj16/record_summary.png"
-                     label="New Record Summay Query"
+                     label="%newrcordsummaryquery.command.label"
                      style="push">
                   <parameter
                         name="org.wcs.smart.i2.query.new.type"
@@ -677,7 +677,7 @@
                <command
                      commandId="org.wcs.smart.i2.command.query.record.new"
                      icon="images/icons/obj16/record_query.png"
-                     label="New Record Query"
+                     label="%newrecordquery.command.label"
                      style="push">
                   <parameter
                         name="org.wcs.smart.i2.query.new.type"
@@ -920,7 +920,7 @@
             <command
                   commandId="org.wcs.smart.i2.command.query.record.new"
                   icon="images/icons/obj16/record_summary.png"
-                  label="New Record Summary Query"
+                  label="%newrecordsummaryquery.command.label.1"
                   style="push">
                <parameter
                      name="org.wcs.smart.i2.query.new.type"
@@ -937,7 +937,7 @@
             <command
                   commandId="org.wcs.smart.i2.command.query.record.new"
                   icon="images/icons/obj16/record_query.png"
-                  label="New Record Query"
+                  label="%newrecordquery.command.label.1"
                   style="push">
                <parameter
                      name="org.wcs.smart.i2.query.new.type"
@@ -1135,7 +1135,7 @@
                   commandId="org.wcs.smart.i2.query.menu.new.dropdown"
                   icon="platform:/plugin/org.wcs.smart/images/icons/shared16/add.png"
                   id="org.wcs.smart.i2.query.menu.main.toolbar.new"
-                  label="New Query"
+                  label="%newquery.command.label"
                   mode="FORCE_TEXT"
                   style="radio">
                <parameter
@@ -1259,7 +1259,7 @@
                   commandId="org.wcs.smart.i2.command.profile.filter"
                   icon="platform:/plugin/org.wcs.smart/images/icons/shared16/filter.png"
                   id="org.wcs.smart.i2.menu.profile.filter"
-                  label="Profiles"
+                  label="%profiles.command.label"
                   mode="FORCE_TEXT"
                   style="radio">
                <visibleWhen>
@@ -1407,7 +1407,7 @@
             default="false"
             icon="images/icons/obj16/query_record_obs.png"
             id="org.wcs.smart.i2.editor.query.record"
-            name="Intel Record Query">
+            name="%queryeditor.name">
       </editor>
    </extension>
    <extension
@@ -1473,15 +1473,15 @@
       </command>
       <command
             id="org.wcs.smart.i2.command.profiles.show"
-            name="Configurations...">
+            name="%configs.command.name">
       </command>
       <command
             id="org.wcs.smart.i2.command.profile.filter"
-            name="Profile Filter">
+            name="%profilefilter.command.name">
       </command>
       <command
             id="org.wcs.smart.i2.query.menu.new.dropdown"
-            name="New Query">
+            name="%newquery.command.name">
          <commandParameter
                id="org.wcs.smart.i2.query.source"
                name="Source Menu Item"

@@ -4,6 +4,6 @@ Bundle-Name: SMART Intelligence Query Fragment
 Bundle-SymbolicName: org.wcs.smart.intelligence.query.nl
 Bundle-Version: 7.0.0
 Fragment-Host: org.wcs.smart.intelligence.query;bundle-version="7.0.0"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.11
 Bundle-Vendor: org.wcs.smart
 Bundle-Localization: OSGI-INF/l10n/bundle

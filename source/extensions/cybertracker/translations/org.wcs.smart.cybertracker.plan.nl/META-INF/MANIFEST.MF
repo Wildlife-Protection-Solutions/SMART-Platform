@@ -4,5 +4,6 @@ Bundle-Name: SMART Cybertracker Plan Fragment
 Bundle-SymbolicName: org.wcs.smart.cybertracker.plan.nl
 Bundle-Version: 7.0.0
 Fragment-Host: org.wcs.smart.cybertracker.plan;bundle-version="7.0.0"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-Vendor: org.wcs.smart
+Automatic-Module-Name: org.wcs.smart.cybertracker.plan.nl

@@ -51,10 +51,10 @@
             <command
                   commandId="org.wcs.smart.cybertracker.packages.show"
                   icon="platform:/plugin/org.wcs.smart.cybertracker/images/etool16/smartmobileexport.png"
-                  label="Export"
+                  label="%export.command.label"
                   mode="FORCE_TEXT"
                   style="push"
-                  tooltip="export mobile packages">
+                  tooltip="%export.command.tooltip">
                <visibleWhen>
                   <and>
                      <test
@@ -99,10 +99,10 @@
             <command
                   commandId="org.wcs.smart.cybertracker.json.import"
                   icon="platform:/plugin/org.wcs.smart.cybertracker/images/etool16/smartmobileimport.png"
-                  label="Import"
+                  label="%import.command.label"
                   mode="FORCE_TEXT"
                   style="push"
-                  tooltip="import mobile data">
+                  tooltip="%import.command.tooltip">
                <visibleWhen>
                   <and>
                      <test

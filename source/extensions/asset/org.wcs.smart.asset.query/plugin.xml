@@ -205,9 +205,9 @@
             <command
                   commandId="org.wcs.smart.query.create.unknown"
                   icon="images/icons/obj16/summary_query.png"
-                  label="New Field Sensor Deployment Summary Query..."
+                  label="%newdeploymentsummary.command.label"
                   style="push"
-                  tooltip="create a new deployment summary query">
+                  tooltip="%newdeploymentsummary.tooltip">
                <parameter
                      name="org.wcs.smart.query.type"
                      value="assetdeploymentsummary">
@@ -254,9 +254,9 @@
          <command
                commandId="org.wcs.smart.query.create.unknown"
                icon="images/icons/obj16/summary_query.png"
-               label="New Field Sensor Deployment Summary Query..."
+               label="%newdeploymentsummary.label"
                style="push"
-               tooltip="create a new deployment summary query">
+               tooltip="%newdeploymentsummary.command.tooltip">
             <parameter
                   name="org.wcs.smart.query.type"
                   value="assetdeploymentsummary">

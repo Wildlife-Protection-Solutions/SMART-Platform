@@ -285,7 +285,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.plan.import"
-                  label="Import"
+                  label="%import.command.label"
                   mode="FORCE_TEXT"
                   style="push">
                <visibleWhen>
@@ -368,10 +368,10 @@
             </command>
             <command
                   commandId="org.wcs.smart.plan.editor.export"
-                  label="Export"
+                  label="%export.command.label"
                   mode="FORCE_TEXT"
                   style="push"
-                  tooltip="exports the plan to xml format">
+                  tooltip="%export.command.tooltip">
                <parameter
                      name="org.wcs.smart.plan.export.editor"
                      value="true">
@@ -816,7 +816,7 @@
       </command>
       <command
             id="org.wcs.smart.plan.export"
-            name="Export Plan...">
+            name="%export.command.name">
          <commandParameter
                id="org.wcs.smart.plan.export.editor"
                name="Editor Export"
@@ -825,7 +825,7 @@
       </command>
       <command
             id="org.wcs.smart.plan.editor.export"
-            name="Export Plan...">
+            name="%exportplan.command.name">
          <commandParameter
                id="org.wcs.smart.plan.export.editor"
                name="Editor Export"
@@ -834,7 +834,7 @@
       </command>
       <command
             id="org.wcs.smart.plan.import"
-            name="Import Plan...">
+            name="%import.command.name">
       </command>
    </extension>
    <extension

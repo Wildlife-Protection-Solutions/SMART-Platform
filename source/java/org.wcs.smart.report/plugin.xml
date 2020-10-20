@@ -33,7 +33,7 @@
             name="%exportreport.command.name">
          <commandParameter
                id="org.wcs.smart.report.export.parameter.isMultiple"
-               name="MultipleReports"
+               name="%commandParameter.name"
                optional="true">
          </commandParameter>
       </command>
@@ -63,11 +63,11 @@
       </command>
       <command
             id="org.wcs.smart.report.birt.query.newsmartparameter"
-            name="New SMART Parameter">
+            name="%newsmartparam.command.name">
       </command>
       <command
             id="org.wcs.smart.report.print"
-            name="Save Output As...">
+            name="%saveas.command.name.1">
       </command>
    </extension>
    <extension
@@ -567,7 +567,7 @@
             <command
                   commandId="org.wcs.smart.command.showperspective"
                   icon="platform:/plugin/org.wcs.smart/images/icons/shared16/edit.png"
-                  label="Edit Report"
+                  label="%edit.command.label"
                   mnemonic="e"
                   style="push">
                <visibleWhen

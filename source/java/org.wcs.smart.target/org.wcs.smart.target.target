@@ -94,38 +94,6 @@
 <unit id="org.eclipse.xsd.sdk.feature.group" version="2.16.0.v20181127-0852"/>
 <repository location="http://download.eclipse.org/releases/2018-12"/>
 </location>
-<!--
-<location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.babel.nls_eclipse_es.feature.group" version="4.10.0.v20190126060001"/>
-<unit id="org.eclipse.babel.nls_eclipse_fr.feature.group" version="4.10.0.v20190126060001"/>
-<unit id="org.eclipse.babel.nls_eclipse_hi.feature.group" version="4.10.0.v20190126060001"/>
-<unit id="org.eclipse.babel.nls_eclipse_id.feature.group" version="4.10.0.v20190126060001"/>
-<unit id="org.eclipse.babel.nls_eclipse_mn.feature.group" version="4.10.0.v20190126060001"/>
-<unit id="org.eclipse.babel.nls_eclipse_ru.feature.group" version="4.10.0.v20190126060001"/>
-<unit id="org.eclipse.babel.nls_eclipse_th.feature.group" version="4.10.0.v20190126060001"/>
-<unit id="org.eclipse.babel.nls_eclipse_vi.feature.group" version="4.10.0.v20190126060001"/>
-<unit id="org.eclipse.babel.nls_eclipse_zh.feature.group" version="4.10.0.v20190126060001"/>
-<unit id="org.eclipse.babel.nls_eclipse_pt.feature.group" version="4.10.0.v20190126060001"/>
-<unit id="org.eclipse.babel.nls_eclipse_pt_BR.feature.group" version="4.10.0.v20190126060001"/>
-<unit id="org.eclipse.babel.nls_eclipse_ar.feature.group" version="4.10.0.v20190126060001"/>
-<repository location="https://download.eclipse.org/technology/babel/update-site/R0.16.1/2018-12/"/>
-</location>
-<location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.babel.nls_birt_es.feature.group" version="4.5.0.v20171231064042"/>
-<unit id="org.eclipse.babel.nls_birt_fr.feature.group" version="4.5.0.v20171231064042"/>
-<unit id="org.eclipse.babel.nls_birt_hi.feature.group" version="4.5.0.v20171231064042"/>
-<unit id="org.eclipse.babel.nls_birt_id.feature.group" version="4.5.0.v20171231064042"/>
-<unit id="org.eclipse.babel.nls_birt_mn.feature.group" version="4.5.0.v20171231064042"/>
-<unit id="org.eclipse.babel.nls_birt_ru.feature.group" version="4.5.0.v20171231064042"/>
-<unit id="org.eclipse.babel.nls_birt_th.feature.group" version="4.5.0.v20171231064042"/>
-<unit id="org.eclipse.babel.nls_birt_vi.feature.group" version="4.5.0.v20171231064042"/>
-<unit id="org.eclipse.babel.nls_birt_zh.feature.group" version="4.5.0.v20171231064042"/>
-<unit id="org.eclipse.babel.nls_birt_pt.feature.group" version="4.5.0.v20171231064042"/>
-<unit id="org.eclipse.babel.nls_birt_pt_BR.feature.group" version="4.5.0.v20171231064042"/>
-<unit id="org.eclipse.babel.nls_birt_ar.feature.group" version="4.5.0.v20171231064042"/>
-<repository location="https://archive.eclipse.org/technology/babel/update-site/R0.15.1/mars"/>
-</location>
--->
 	<location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="slicer" includeSource="true" type="InstallableUnit">
 		<unit id="openjfx.standard.feature.feature.group" version="11.0.0.201901231300"/>
 		<unit id="openjfx.swt.feature.feature.group" version="11.0.0.201901231300"/>
@@ -139,6 +107,40 @@
 		<repository location="jar:file:/C:/data/SMART/Source/Trunk/svn/source/java/org.wcs.smart.target/birt-source-4.9.0-20190523.zip!/"/>
 		<unit id="org.eclipse.birt.rcp.feature.group" version="4.9.0.v201905231911"/>
 		<unit id="org.eclipse.birt.feature.group" version="4.9.0.v201905231911"/>
+	</location>
+	<location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="slicer" includeSource="true" type="InstallableUnit">
+		<unit id="org.eclipse.babel.nls_eclipse_ar.feature.group" version="4.10.0.v20200113113258"/>
+		<unit id="org.eclipse.babel.nls_eclipse_es.feature.group" version="4.10.0.v20200113113258"/>
+		<unit id="org.eclipse.babel.nls_eclipse_fr.feature.group" version="4.10.0.v20200113113258"/>
+		<unit id="org.eclipse.babel.nls_eclipse_hi.feature.group" version="4.10.0.v20200113113258"/>
+		<unit id="org.eclipse.babel.nls_eclipse_id.feature.group" version="4.10.0.v20200113113258"/>
+		<unit id="org.eclipse.babel.nls_eclipse_mn.feature.group" version="4.10.0.v20200113113258"/>
+		<unit id="org.eclipse.babel.nls_eclipse_pt.feature.group" version="4.10.0.v20200113113258"/>
+		<unit id="org.eclipse.babel.nls_eclipse_pt_BR.feature.group" version="4.10.0.v20200113113258"/>
+		<unit id="org.eclipse.babel.nls_eclipse_ru.feature.group" version="4.10.0.v20200113113258"/>
+		<unit id="org.eclipse.babel.nls_eclipse_th.feature.group" version="4.10.0.v20200113113258"/>
+		<unit id="org.eclipse.babel.nls_eclipse_vi.feature.group" version="4.10.0.v20200113113258"/>
+		<unit id="org.eclipse.babel.nls_eclipse_zh.feature.group" version="4.10.0.v20200113113258"/>
+		<!--<repository location="https://archive.eclipse.org/technology/babel/update-site/R0.17.1/2018-12/"/>-->
+		<repository location="jar:file:/C:/data/SMART/Source/Trunk/svn/source/java/org.wcs.smart.target/babel-R0.17.1-2018-12.zip!/"/>
+		
+	</location>
+	<location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="slicer" includeSource="true" type="InstallableUnit">
+		<unit id="org.eclipse.babel.nls_birt_ar.feature.group" version="4.5.0.v20171231064042"/>
+		<unit id="org.eclipse.babel.nls_birt_es.feature.group" version="4.5.0.v20171231064042"/>
+		<unit id="org.eclipse.babel.nls_birt_fr.feature.group" version="4.5.0.v20171231064042"/>
+		<unit id="org.eclipse.babel.nls_birt_hi.feature.group" version="4.5.0.v20171231064042"/>
+		<unit id="org.eclipse.babel.nls_birt_id.feature.group" version="4.5.0.v20171231064042"/>
+		<unit id="org.eclipse.babel.nls_birt_mn.feature.group" version="4.5.0.v20171231064042"/>
+		<unit id="org.eclipse.babel.nls_birt_pt.feature.group" version="4.5.0.v20171231064042"/>
+		<unit id="org.eclipse.babel.nls_birt_pt_BR.feature.group" version="4.5.0.v20171231064042"/>
+		<unit id="org.eclipse.babel.nls_birt_ru.feature.group" version="4.5.0.v20171231064042"/>
+		<unit id="org.eclipse.babel.nls_birt_th.feature.group" version="4.5.0.v20171231064042"/>
+		<unit id="org.eclipse.babel.nls_birt_vi.feature.group" version="4.5.0.v20171231064042"/>
+		<unit id="org.eclipse.babel.nls_birt_zh.feature.group" version="4.5.0.v20171231064042"/>
+		<!--<repository location="http://archive.eclipse.org/technology/babel/update-site/R0.15.1/mars"/>-->
+		<repository location="jar:file:/C:/data/SMART/Source/Trunk/svn/source/java/org.wcs.smart.target/babel-R0.15.1-mars.zip!/"/>
+		
 	</location>
 </locations>
 	

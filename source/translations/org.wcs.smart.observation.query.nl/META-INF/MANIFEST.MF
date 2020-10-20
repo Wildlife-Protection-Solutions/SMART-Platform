@@ -4,5 +4,6 @@ Bundle-Name: SMART Observation Query Fragment
 Bundle-SymbolicName: org.wcs.smart.observation.query.nl
 Bundle-Version: 7.0.0
 Fragment-Host: org.wcs.smart.observation.query;bundle-version="7.0.0"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-Vendor: org.wcs.smart
+Automatic-Module-Name: org.wcs.smart.observation.query.nl

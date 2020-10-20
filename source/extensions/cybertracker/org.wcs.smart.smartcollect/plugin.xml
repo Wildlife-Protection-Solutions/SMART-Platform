@@ -33,7 +33,7 @@
             default="false"
             icon="images/icons/smartcollect.16.png"
             id="org.wcs.smart.smartcollect.ui.IncidentEditor"
-            name="SMART Collect Editor">
+            name="%editor.name">
       </editor>
    </extension>
    <extension

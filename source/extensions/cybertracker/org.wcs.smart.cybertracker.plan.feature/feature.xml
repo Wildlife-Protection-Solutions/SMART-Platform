@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.wcs.smart.cybertracker.plan.feature"
-      label="Core SMART CyberTracker Plan Module"
+      label="SMART Mobile Plan Module"
       version="7.0.0.qualifier"
       provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.license.feature"
