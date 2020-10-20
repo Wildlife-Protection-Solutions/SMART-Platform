@@ -16,15 +16,12 @@ devices.
       Copyright (c): 2012, 2013 Wildlife Conservation Society
    </copyright>
 
+   <includes
+         id="org.wcs.smart.cybertracker.incident.core.feature"
+         version="0.0.0"/>
+
    <requires>
       <import feature="org.wcs.smart.cybertracker.feature" version="7.0.0" match="compatible"/>
    </requires>
-
-   <plugin
-         id="org.wcs.smart.cybertracker.incident"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
 
 </feature>
