@@ -728,7 +728,6 @@ ALTER TABLE smart.smartcollect_package ADD FOREIGN KEY (CA_UUID) REFERENCES smar
 ALTER TABLE smart.smartcollect_package ADD FOREIGN KEY (CM_UUID) REFERENCES smart.configurable_model(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE smart.smartcollect_package ADD FOREIGN KEY (ctprofile_uuid) REFERENCES smart.ct_properties_profile(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 
---TODO: triggers & plugin version
 CREATE TRIGGER trg_smartcollect_package AFTER INSERT OR UPDATE OR DELETE ON 
 smart.smartcollect_package FOR EACH ROW execute procedure connect.trg_changelog_common();
 
@@ -742,13 +741,7 @@ RETURN ROW; END$$ LANGUAGE 'plpgsql';
 CREATE TRIGGER trg_smartcollect_waypoint AFTER INSERT OR UPDATE OR DELETE ON smart.smartcollect_waypoint FOR EACH ROW execute procedure connect.smartcollect_waypoint();
 
 
----- change ca version so users cannot sync with this and cause problems ---- 
-update connect.ca_info SET version = uuid_generate_v4();
-delete from connect.change_log;
-delete from connect.change_log_history;
-
 --- remove orphaned patrol waypoints ---
-
 DELETE FROM smart.waypoint WHERE SOURCE = 'PATROL' 
 AND uuid NOT IN (SELECT wp_uuid FROM smart.PATROL_WAYPOINT);
 					
@@ -818,6 +811,15 @@ alter table smart.survey drop column end_date;
 alter table smart.survey_design drop column start_date;
 alter table smart.survey_design drop column end_date;
 
+--- Incident Packages ------
+CREATE TABLE smart.ct_incident_package(uuid uuid not null, name varchar(512), ca_uuid uuid not null,cm_uuid uuid, ctprofile_uuid uuid, basemapdef varchar(32672), primary key (uuid));
+ALTER TABLE SMART.ct_incident_package ADD CONSTRAINT ct_incident_package_ca_uuid_fk FOREIGN KEY (CA_UUID) REFERENCES smart.conservation_area(UUID) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE SMART.ct_incident_package ADD CONSTRAINT ct_incident_package_cm_uuid_fk FOREIGN KEY (CM_UUID) REFERENCES smart.configurable_model(UUID) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE SMART.ct_incident_package ADD CONSTRAINT ct_incident_package_ctprofile_uuid_fk FOREIGN KEY (ctprofile_uuid) REFERENCES smart.ct_properties_profile(UUID) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+
+CREATE TRIGGER ct_incident_package AFTER INSERT OR UPDATE OR DELETE ON  smart.ct_incident_package FOR EACH ROW execute procedure connect.trg_changelog_common();
+
+
 ---------- timezones -------
 -- assumes the timezone of the database server is the same as the web server
 alter table connect.data_queue alter column uploaded_date set data type timestamp with time zone;
@@ -831,8 +833,6 @@ alter table connect.shared_links alter column date_created set data type timesta
 alter table connect.alerts alter column date set data type timestamp without time zone;
 
 ------------ VERSIONS ------------
-insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.smartcollect', '1.0');
-
 update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.asset';
 update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.asset.query';
 update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.event';
@@ -842,6 +842,8 @@ update connect.connect_plugin_version set version = '7.0' where plugin_id = 'org
 update connect.connect_plugin_version set version = '3.0' where plugin_id = 'org.wcs.smart.er';
 
 insert into connect.connect_plugin_version (version, plugin_id) values ('1.0', 'org.wcs.smart.paws');
+insert into connect.connect_plugin_version (version, plugin_id) values ('2.0', 'org.wcs.smart.cybertracker.incident');
+insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.smartcollect', '1.0');
 
 update connect.connect_plugin_version set version = '7.0.0' where plugin_id = 'org.wcs.smart';
 
@@ -856,3 +858,9 @@ update connect.ca_plugin_version set version = '7.0.0' where plugin_id = 'org.wc
 
 update connect.connect_version set version = '7.0.0', last_updated = now();		
 --update connect.connect_version set filestore_version = '7.0.0';
+
+
+---- change ca version so users cannot sync with this and cause problems ---- 
+update connect.ca_info SET version = uuid_generate_v4();
+delete from connect.change_log;
+delete from connect.change_log_history;
