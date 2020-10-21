@@ -127,7 +127,7 @@ public class EntityTypeAttribute {
      *     
      */
     public Boolean isDuplicateCheck() {
-        return isDuplicateCheck();
+        return isDuplicateCheck;
     }
 
     /**

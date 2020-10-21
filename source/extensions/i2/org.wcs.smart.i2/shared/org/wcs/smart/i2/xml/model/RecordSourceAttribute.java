@@ -173,7 +173,7 @@ public class RecordSourceAttribute {
      *     
      */
     public Boolean isDuplicateCheck() {
-        return isDuplicateCheck();
+        return isDuplicateCheck;
     }
 
     /**
