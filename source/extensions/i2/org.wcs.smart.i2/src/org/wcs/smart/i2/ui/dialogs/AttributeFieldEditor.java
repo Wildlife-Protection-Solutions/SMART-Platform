@@ -100,6 +100,7 @@ import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.SmartUtils;
 
+
 /**
  * Attribute field editor 
  * 
@@ -132,6 +133,8 @@ public class AttributeFieldEditor {
 	private String name = null;
 	private CoordinateReferenceSystem crs = GeometryUtils.SMART_CRS;
 	private String crsLabel = null;
+	
+	private Label attributeLabel = null;
 	
 	private List<SelectionListener> listeners = new ArrayList<SelectionListener>();
 	
@@ -311,6 +314,15 @@ public class AttributeFieldEditor {
 		validate();
 	}
 	
+	/**
+	 * Gets the label attribute or null if label attribute
+	 * was not created
+	 * 
+	 * @return
+	 */
+	public Label getAttributeLabel() {
+		return this.attributeLabel;
+	}
 	public IntelAttribute getAttribute(){
 		return this.attribute;
 	}
@@ -832,10 +844,13 @@ public class AttributeFieldEditor {
 	
 	private void createControl(){
 		if (createLabel) {
-			Label l = new Label(parent, SWT.NONE);
-			l.setText(this.name + ":"); //$NON-NLS-1$
-			l.setLayoutData(new GridData(SWT.RIGHT, attribute.getType() == AttributeType.TEXT ? SWT.TOP : SWT.CENTER, false, false));
-			l.setBackground(l.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+			attributeLabel = new Label(parent, SWT.NONE);
+			attributeLabel.setText(this.name + ":"); //$NON-NLS-1$
+			attributeLabel.setLayoutData(new GridData(SWT.RIGHT, attribute.getType() == AttributeType.TEXT ? SWT.TOP : SWT.CENTER, false, false));
+			attributeLabel.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+			if (attribute.getType() == AttributeType.TEXT) {
+				((GridData)attributeLabel.getLayoutData()).verticalIndent = 3;
+			}
 
 		}
 		

@@ -409,6 +409,10 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 				"GRANT ALL PRIVILEGES ON smart.i_permission to data_entry", //$NON-NLS-1$
 				"GRANT ALL PRIVILEGES ON smart.i_permission to manager", //$NON-NLS-1$
 				"GRANT ALL PRIVILEGES ON smart.i_permission to analyst", //$NON-NLS-1$
+				
+				"ALTER TABLE smart.i_entity_type_attribute add column is_duplicate_check boolean",
+				"UPDATE smart.I_ENTITY_TYPE_ATTRIBUTE set IS_DUPLICATE_CHECK = (select true from smart.I_ENTITY_TYPE t where smart.I_ENTITY_TYPE_ATTRIBUTE.entity_type_uuid = t.uuid and t.id_attribute_uuid = smart.I_ENTITY_TYPE_ATTRIBUTE.attribute_uuid)",
+				"UPDATE smart.I_ENTITY_TYPE_ATTRIBUTE set IS_DUPLICATE_CHECK = false where IS_DUPLICATE_CHECK is null",
 		};
 		for (String s : sql) session.createNativeQuery(s).executeUpdate();
 		

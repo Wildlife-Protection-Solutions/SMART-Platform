@@ -63,8 +63,10 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerDropAdapter;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DragSourceEvent;
 import org.eclipse.swt.dnd.DragSourceListener;
@@ -83,6 +85,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
@@ -120,6 +123,8 @@ import org.wcs.smart.i2.model.OtherAttributeGroup;
 import org.wcs.smart.i2.ui.AttributeLabelProvider;
 import org.wcs.smart.i2.ui.ProfileLabelProvider;
 import org.wcs.smart.i2.ui.Resources;
+import org.wcs.smart.ui.CheckboxSelectorKeyAdapter;
+import org.wcs.smart.ui.SectionHeader;
 import org.wcs.smart.ui.SmartStyledInputDialog;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
@@ -135,7 +140,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  */
 public class EntityTypeDialog extends SmartStyledTitleDialog {
 
-	IntelEntityType type;
+	private IntelEntityType type;
 	private NameKeyComposite nameKeyInfo;
 	private IconComposite icon;
 	private List<IntelEntityType> entityTypeSiblings;
@@ -159,9 +164,16 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 	private ControlDecoration cdList;
 	private ControlDecoration cdId;
 	
-	private Composite dmAttComp;
+	private SectionHeader sections;
+	private Composite nameComp;
+	private Composite dataModelComp;
+	private Composite profilesComp;
+	private Composite attributesComp;
+	private Composite stackPanel;
 	
-	List<IntelEntityTypeAttribute> attributeList = new ArrayList<IntelEntityTypeAttribute>();
+	private CheckboxTableViewer chDup;
+	
+	private List<IntelEntityTypeAttribute> attributeList = new ArrayList<IntelEntityTypeAttribute>();
 	private List<IntelEntityTypeAttributeGroup> groups = new ArrayList<IntelEntityTypeAttributeGroup>();
 	
 	@Inject
@@ -223,6 +235,10 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 		
 		List<IntelProfile> profiles = (List<IntelProfile>) tblProfiles.getInput();
 
+		for(IntelEntityTypeAttribute a : attributeList) {
+			a.setDuplicateCheck(chDup.getChecked(a));
+		}
+		
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		
 		try {
@@ -503,16 +519,48 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 		getButton(IDialogConstants.OK_ID).setEnabled(!isError);
 	}
 	
+	private boolean canDuplicate(IntelAttribute.AttributeType type) {
+		return type == IntelAttribute.AttributeType.TEXT ||
+				type == IntelAttribute.AttributeType.NUMERIC ||
+				type == IntelAttribute.AttributeType.DATE; 
+	}
 	
+	private void selectTab(Composite top) {
+		((StackLayout)stackPanel.getLayout()).topControl = top;
+		stackPanel.layout(true);
+	}
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		parent = (Composite) super.createDialogArea(parent);
-		parent = new Composite(parent, SWT.NONE);
-		parent.setLayout(new GridLayout(3, false));
-		parent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		sections = new SectionHeader(parent, SWT.NONE, 
+				new String[] {Messages.EntityTypeDialog_NameTab, Messages.EntityTypeDialog_ProfilesTab, Messages.EntityTypeDialog_DataModelTab, Messages.EntityTypeDialog_AttributesTab},
+				new Listener[] {
+						e->selectTab(nameComp),
+						e->selectTab(profilesComp),
+						e->selectTab(dataModelComp),
+						e->selectTab(attributesComp),
+				});
+		sections.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		stackPanel = new Composite(parent, SWT.NONE);
+
+		StackLayout layout = new StackLayout();
+		layout.marginHeight = 2;
+		stackPanel.setLayout(layout);
+		stackPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		nameComp = new Composite(stackPanel, SWT.NONE);
+		profilesComp = new Composite(stackPanel, SWT.NONE);
+		dataModelComp = new Composite(stackPanel, SWT.NONE);
+		attributesComp = new Composite(stackPanel, SWT.NONE);
+		
+		
+		nameComp.setLayout(new GridLayout(3, false));
+		nameComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		nameKeyInfo = new NameKeyComposite();
-		nameKeyInfo.createControls(parent, true, type.getUuid() == null, new IChangeListener() {
+		nameKeyInfo.createControls(nameComp, true, type.getUuid() == null, new IChangeListener() {
 			@Override
 			public void itemModified() {
 				if (!nameKeyInfo.validate()){
@@ -522,11 +570,11 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 			}
 		});
 		
-		Label l = new Label(parent, SWT.NONE);
+		Label l = new Label(nameComp, SWT.NONE);
 		l.setText(Messages.EntityTypeDialog_IconLabel);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
-		icon = new IconComposite(parent);
+		icon = new IconComposite(nameComp);
 		icon.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
 		icon.addModifyListener(new ModifyListener() {
 			@Override
@@ -536,15 +584,15 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 			}
 		});
 		
-		l = new Label(parent, SWT.NONE);
+		l = new Label(nameComp, SWT.NONE);
 		l.setText(Messages.EntityTypeDialog_BirtLabel);
 		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
-		l = new Label(parent, SWT.NONE);
+		l = new Label(nameComp, SWT.NONE);
 		l.setText(type.getBirtTemplate() == null ? Messages.EntityTypeDialog_NotConfiguredLabel : type.getBirtTemplate());
 		l.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 		
-		btnEditTemplate = new Button(parent, SWT.PUSH);
+		btnEditTemplate = new Button(nameComp, SWT.PUSH);
 		btnEditTemplate.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnEditTemplate.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 		btnEditTemplate.setText(DialogConstants.EDIT_BUTTON_TEXT);
@@ -562,25 +610,14 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 			l.setToolTipText(Messages.EntityTypeDialog_SaveRequired);
 		}
 		
-		l = new Label(parent, SWT.NONE);
-		l.setText(Messages.EntityTypeDialog_DmAttributeLabel);
-		l.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
-		((GridData)l.getLayoutData()).verticalIndent = 5;
 		
-		dmAttComp = new Composite(parent, SWT.NONE);
-		dmAttComp.setLayout(new GridLayout(3, false));
-		((GridLayout)dmAttComp.getLayout()).marginWidth = 0;
-		((GridLayout)dmAttComp.getLayout()).marginHeight = 0;
-		((GridLayout)dmAttComp.getLayout()).verticalSpacing = 1;
-		dmAttComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-
+		dataModelComp.setLayout(new GridLayout(3, false));
 		createDataModelAttributeComposite();
 		
-		l = new Label(parent, SWT.NONE);
-		l.setText(Messages.EntityTypeDialog_ProfilesLabel);
-		l.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
 		
-		tblProfiles = CheckboxTableViewer.newCheckList(parent, SWT.BORDER);
+		profilesComp.setLayout(new GridLayout());
+		
+		tblProfiles = CheckboxTableViewer.newCheckList(profilesComp, SWT.BORDER);
 		tblProfiles.setContentProvider(ArrayContentProvider.getInstance());
 		tblProfiles.setLabelProvider(new ProfileLabelProvider());
 		tblProfiles.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
@@ -590,11 +627,13 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 		});
 		
 		
-		l = new Label(parent, SWT.NONE);
-		l.setText(Messages.EntityTypeDialog_IdAttLabel);
-		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		attributesComp.setLayout(new GridLayout(3, false));
 		
-		idAttribute = new ComboViewer(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
+		l = new Label(attributesComp, SWT.NONE);
+		l.setText(Messages.EntityTypeDialog_IdAttLabel);
+		l.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+		
+		idAttribute = new ComboViewer(attributesComp, SWT.DROP_DOWN | SWT.READ_ONLY);
 		idAttribute.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		idAttribute.setContentProvider(ArrayContentProvider.getInstance());
 		idAttribute.setLabelProvider(new AttributeLabelProvider());
@@ -608,25 +647,22 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 				}else if (x instanceof IntelAttribute){
 					type.setIdAttribute(((IntelAttribute) x));
 				}
+				
+				
+				attributeList.forEach(e->{
+					if (canDuplicate(e.getAttribute().getType()) && e.getAttribute().equals(x)) chDup.setChecked(e, true);
+				});
+
 				modified();
 			}
 		});
 		cdId= createDecoration(idAttribute.getControl());
 		
-		
-		
-		
-		
-		l = new Label(parent, SWT.NONE);
+		l = new Label(attributesComp, SWT.NONE);
 		l.setText(Messages.EntityTypeDialog_AttributesLabel);
-		l.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
+		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 		
-		
-		Composite attributeComp = new Composite(parent, SWT.NONE);
-		attributeComp.setLayout(new GridLayout(2, false));
-		attributeComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
-				
-		treeAttributes = new TreeViewer(attributeComp, SWT.BORDER | SWT.MULTI);
+		treeAttributes = new TreeViewer(attributesComp, SWT.BORDER | SWT.MULTI);
 		treeAttributes.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		treeAttributes.setContentProvider(new AttributeTreeContentProvider());
 		treeAttributes.setLabelProvider(new LabelProvider(){
@@ -822,7 +858,7 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 		});
 		
 		
-		Composite buttonComp = new Composite(attributeComp, SWT.NONE);
+		Composite buttonComp = new Composite(attributesComp, SWT.NONE);
 		buttonComp.setLayout(new GridLayout());
 		((GridLayout)buttonComp.getLayout()).marginWidth = 0;
 		((GridLayout)buttonComp.getLayout()).marginHeight = 0;
@@ -905,6 +941,37 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 			}
 		});
 		
+		
+		l = new Label(attributesComp, SWT.NONE);
+		l.setText(Messages.EntityTypeDialog_DuplicatecheckLabel);
+		l.setToolTipText(Messages.EntityTypeDialog_DuplicatecheckTooltip);
+		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+		
+		chDup = CheckboxTableViewer.newCheckList(attributesComp, SWT.BORDER | SWT.MULTI);
+		chDup.setContentProvider(ArrayContentProvider.getInstance());
+		chDup.getControl().addKeyListener(new CheckboxSelectorKeyAdapter(chDup));
+
+		chDup.setFilters(new ViewerFilter() {
+			
+			@Override
+			public boolean select(Viewer viewer, Object parentElement, Object element) {
+				if (element instanceof IntelEntityTypeAttribute) {
+					IntelAttribute.AttributeType type = ((IntelEntityTypeAttribute)element).getAttribute().getType();
+					return canDuplicate(type);
+				}
+				return false;
+			}
+		});
+		chDup.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		chDup.setLabelProvider(treeAttributes.getLabelProvider());
+		chDup.addCheckStateListener(e->modified());
+		
+		new Label(attributesComp, SWT.NONE); //spacer
+		
+		selectTab(nameComp);
+		sections.selectPanel(0);
+
+		
 		setTitle(Messages.EntityTypeDialog_Title);
 		getShell().setText(Messages.EntityTypeDialog_Title);
 		setMessage(Messages.EntityTypeDialog_Message);
@@ -913,9 +980,9 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 	}
 	
 	private void createDataModelAttributeComposite() {
-		for (Control c : dmAttComp.getChildren()) c.dispose();
+		for (Control c : dataModelComp.getChildren()) c.dispose();
 		if (type.getDmAttribute() == null) {
-			Button btnLink = new Button(dmAttComp, SWT.PUSH);
+			Button btnLink = new Button(dataModelComp, SWT.PUSH);
 			btnLink.setText(Messages.EntityTypeDialog_LinkToDmAttribute);
 			btnLink.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 			btnLink.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false, 3, 1));
@@ -923,38 +990,39 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 			
 			btnLink.addListener(SWT.Selection, e->addDataModelAttribute());
 		}else {
-			Label l = new Label(dmAttComp, SWT.NONE);
+			Label l = new Label(dataModelComp, SWT.NONE);
 			l.setText(Messages.EntityTypeDialog_AttributeLabel);
 			
-			Text txtDmAttribute = new Text(dmAttComp, SWT.DEFAULT);
+			Text txtDmAttribute = new Text(dataModelComp, SWT.DEFAULT);
 			txtDmAttribute.setText(MessageFormat.format("{0} ({1})", type.getDmAttribute().getName(), type.getDmAttribute().getKeyId() )); //$NON-NLS-1$
 			txtDmAttribute.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 			
-			Button btnClear = new Button(dmAttComp, SWT.PUSH);
+			Button btnClear = new Button(dataModelComp, SWT.PUSH);
 			btnClear.setText(Messages.EntityTypeDialog_RemoveBtn);
 			btnClear.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 			btnClear.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 			btnClear.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 			btnClear.addListener(SWT.Selection, e->deleteDataModelAttribute());
 			
-			l = new Label(dmAttComp, SWT.NONE);
+			l = new Label(dataModelComp, SWT.NONE);
 			l.setText(Messages.EntityTypeDialog_ActiveFilterLabel);
 			
-			Text txtDmFilter = new Text(dmAttComp, SWT.DEFAULT);
+			Text txtDmFilter = new Text(dataModelComp, SWT.DEFAULT);
 			txtDmFilter.setText(type.getActiveFilter() == null ? "" : type.getActiveFilter() ); //$NON-NLS-1$
 			txtDmFilter.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
-			Button btnEdit = new Button(dmAttComp, SWT.PUSH);
+			Button btnEdit = new Button(dataModelComp, SWT.PUSH);
 			btnEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
 			btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 			btnEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 			btnEdit.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 			btnEdit.addListener(SWT.Selection, e->editDataModelAttribute());
 		}
-		dmAttComp.getParent().layout();
-		dmAttComp.layout();
-		SmartUiUtils.makeTransparent(dmAttComp);
+		dataModelComp.getParent().layout();
+		dataModelComp.layout();
+		SmartUiUtils.makeTransparent(dataModelComp);
 	}
+	
 	private void moveAttribute(int direction){
 		for (Iterator<?> iterator = ((IStructuredSelection) treeAttributes.getSelection()).iterator(); iterator.hasNext();) {
 			Object toMove = iterator.next();
@@ -994,6 +1062,7 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 		}
 		modified();
 		treeAttributes.refresh();
+		chDup.refresh();
 	}
 	
 	private void addGroup(){
@@ -1009,6 +1078,7 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 		
 			groups.add(newGroup);
 			treeAttributes.refresh();
+			chDup.refresh();
 		}
 	}
 	
@@ -1037,6 +1107,7 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 			
 			
 			treeAttributes.refresh();
+			chDup.refresh();
 			if (type.getIdAttribute() == null && !attributeList.isEmpty()){
 				type.setIdAttribute(attributeList.get(0).getAttribute());
 			}
@@ -1052,6 +1123,7 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 			AttributeDialog.showAttributeDialog(getShell(), attribute.getAttribute(), context); 
 			//refresh
 			treeAttributes.refresh();
+			chDup.refresh();
 			refreshAttributeList();
 		}
 		if (x instanceof IntelEntityTypeAttributeGroup){
@@ -1059,6 +1131,7 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 			TranslateSimpleListItemDialog dialog = new TranslateSimpleListItemDialog(getShell(), toRename);
 			if (dialog.open() == Window.OK){
 				treeAttributes.refresh();
+				chDup.refresh();
 				modified();
 			}
 		}
@@ -1148,6 +1221,7 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 		}
 		
 		treeAttributes.refresh();
+		chDup.refresh();
 		refreshAttributeList();
 	}
 	
@@ -1292,6 +1366,7 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 						tblProfiles.setInput(profiles);
 						attributeList.addAll(type.getAttributes());
 						treeAttributes.setInput(attributeList);
+						chDup.setInput(attributeList);
 						for (IntelProfileEntityType c : type.getProfiles()) {
 							tblProfiles.setChecked(c.getProfile(), true);
 						}
@@ -1301,6 +1376,12 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 						getButton(IDialogConstants.OK_ID).setEnabled(type.getUuid() == null);
 						
 						treeAttributes.refresh();
+						chDup.refresh();
+						
+						chDup.setAllChecked(false);
+						for (IntelEntityTypeAttribute a : attributeList) {
+							if (a.getDuplicateCheck()) chDup.setChecked(a, true);
+						}
 						treeAttributes.expandAll();
 					}
 				});

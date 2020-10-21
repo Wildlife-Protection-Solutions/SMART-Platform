@@ -481,8 +481,14 @@ public class NewEntityDialog extends SmartStyledTitleDialog{
 		};
 		AttributeFieldEditor editor = new AttributeFieldEditor(attributePanel, type.getIdAttribute());
 		editor.addSelectionListener(listener);
-		addDuplicateIdChecker(editor);
 		attributeControls.add(editor);
+		for (IntelEntityTypeAttribute a : type.getAttributes()) {
+			if (a.getAttribute().equals(type.getIdAttribute()) && a.getDuplicateCheck()) {
+				addDuplicateIdChecker(editor);
+				break;
+			}
+		}
+		
 		
 		Label ll = new Label(attributePanel, SWT.SEPARATOR | SWT.HORIZONTAL);
 		ll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
@@ -526,6 +532,7 @@ public class NewEntityDialog extends SmartStyledTitleDialog{
 						if (leditor.getTextAttributeControl() != null) {
 							leditor.getTextAttributeControl().addListener(SWT.Resize, e-> sc.setMinSize(content.computeSize(SWT.DEFAULT, SWT.DEFAULT)));
 						}
+						if (attribute.getDuplicateCheck()) addDuplicateIdChecker(leditor);
 					}
 				});
 			}
@@ -553,6 +560,7 @@ public class NewEntityDialog extends SmartStyledTitleDialog{
 				if (leditor.getTextAttributeControl() != null) {
 					leditor.getTextAttributeControl().addListener(SWT.Resize, e-> sc.setMinSize(content.computeSize(SWT.DEFAULT, SWT.DEFAULT)));
 				}
+				if (attribute.getDuplicateCheck()) addDuplicateIdChecker(leditor);
 			}
 		});
 		
@@ -579,10 +587,10 @@ public class NewEntityDialog extends SmartStyledTitleDialog{
 				try(Session session = HibernateManager.openSession()){
 					IntelEntityType etype = (IntelEntityType)session.get(IntelEntityType.class, ((IntelEntityType)type).getUuid());
 					IntelEntityAttributeValue tmp = new IntelEntityAttributeValue();
-					tmp.setAttribute(etype.getIdAttribute());
+					tmp.setAttribute(editor.getAttribute());
 					editor.updateValue(tmp);
 					if (EntityManager.INSTANCE.isDuplicateId(tmp.getAttributeValue(), etype, SmartDB.getCurrentConservationArea(), session, null)){
-						String warnMessage = Messages.NewEntityDialog_DuplicateIdMsg; 
+						String warnMessage = Messages.NewEntityDialog_DuplicateIdMsg2; 
 						setMessage(warnMessage, IMessageProvider.WARNING);
 						editor.setWarningMessage(warnMessage);
 					}else{

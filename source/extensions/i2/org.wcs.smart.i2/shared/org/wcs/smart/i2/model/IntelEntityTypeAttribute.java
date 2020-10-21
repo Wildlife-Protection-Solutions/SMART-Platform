@@ -45,6 +45,7 @@ public class IntelEntityTypeAttribute {
 	private IEntityTypeAttributePk id = new IEntityTypeAttributePk();	
 	
 	private int order;
+	private boolean duplicateCheck;
 	
 	private IntelEntityTypeAttributeGroup group;
 	
@@ -77,6 +78,14 @@ public class IntelEntityTypeAttribute {
 		id.setAttribute(attribute);
 	}
 	
+	@Column(name="is_duplicate_check")
+	public boolean getDuplicateCheck(){
+		return this.duplicateCheck;
+	}
+	
+	public void setDuplicateCheck(boolean duplicateCheck){
+		this.duplicateCheck = duplicateCheck;
+	}
 
 	@Column(name="seq_order")
 	public int getOrder(){

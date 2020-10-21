@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -167,6 +168,7 @@ import org.wcs.smart.i2.model.IntelRelationshipGroup;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
 import org.wcs.smart.i2.model.OtherAttributeGroup;
+import org.wcs.smart.i2.search.AdvancedEntitySearch;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.AttributeValueLabelProvider;
 import org.wcs.smart.i2.ui.EntityPerspective;
@@ -186,6 +188,7 @@ import org.wcs.smart.i2.ui.entity.exporter.EntityRelationshipExportDialog;
 import org.wcs.smart.i2.ui.handler.NewRecordHandler;
 import org.wcs.smart.i2.ui.handler.OpenEntityHandler;
 import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
+import org.wcs.smart.i2.ui.views.EntitySearchView;
 import org.wcs.smart.i2.ui.views.FileSearchView;
 import org.wcs.smart.i2.ui.views.IntelEntitySelectionTransfer;
 import org.wcs.smart.ui.SmartLabelProvider;
@@ -2154,9 +2157,8 @@ public class EntityEditor extends EditorPart implements MapPart{
 							EntityEditor.this.setDirty(true);
 						}
 					});
-					if (a.getAttribute().equals(entity.getEntityType().getIdAttribute())){
-						addDuplicateIdChecker(e);
-					}
+					if (a.getDuplicateCheck()) addDuplicateIdChecker(e);
+
 					if (e.getAttribute().getType() == IntelAttribute.AttributeType.POSITION){
 						//modify position attributes we need to update map
 						e.addSelectionListener(new SelectionAdapter() {	
@@ -2171,11 +2173,6 @@ public class EntityEditor extends EditorPart implements MapPart{
 					}
 					fieldEditors.add(e);
 					
-//					if (e.getTextAttributeControl() != null) {
-//						e.getTextAttributeControl().addListener(SWT.Resize, ex->{
-//							attributelist.reflow(true);
-//						});
-//					}
 				}else{
 					Label key = toolkit.createLabel(part, a.getAttribute().getName() + ":"); //$NON-NLS-1$
 					key.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
@@ -2191,10 +2188,9 @@ public class EntityEditor extends EditorPart implements MapPart{
 					Text tmp = toolkit.createText(part, text, SWT.BORDER);
 					tmp.setEditable(false);
 					tmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-				}
-				
+				}	
 			}
-//			attributelist.reflow(true);
+			
 			attributelist.layout(true);
 			part.setVisible(true);
 		}
@@ -2245,21 +2241,77 @@ public class EntityEditor extends EditorPart implements MapPart{
 			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				try(Session session = HibernateManager.openSession()){
-					IntelEntityType etype = (IntelEntityType)session.get(IntelEntityType.class, entity.getEntityType().getUuid());
-					IntelEntityAttributeValue tmp = new IntelEntityAttributeValue();
-					tmp.setAttribute(etype.getIdAttribute());
-					editor.updateValue(tmp);
-					if (EntityManager.INSTANCE.isDuplicateId(tmp.getAttributeValue(), etype, SmartDB.getCurrentConservationArea(), session, entity.getUuid())){
-						String warnMessage = Messages.EntityEditor_DuplciateIdWarning; 
-						editor.setWarningMessage(warnMessage);
-					}else{
-						editor.setWarningMessage(null);
-					}
-				}
+				checkDuplicate(editor);
 			}
 		});
-		
+		checkDuplicate(editor);
+	}
+	
+	private void checkDuplicate(AttributeFieldEditor editor) {
+		try(Session session = HibernateManager.openSession()){
+			IntelEntityType etype = (IntelEntityType)session.get(IntelEntityType.class, entity.getEntityType().getUuid());
+			IntelEntityAttributeValue tmp = new IntelEntityAttributeValue();
+			tmp.setAttribute(editor.getAttribute());
+			editor.updateValue(tmp);
+			if (EntityManager.INSTANCE.isDuplicateId(tmp.getAttributeValue(), etype, SmartDB.getCurrentConservationArea(), session, entity.getUuid())){
+				String warnMessage = Messages.EntityEditor_DuplciateIdWarning2; 
+				editor.setWarningMessage(warnMessage);
+				
+				if (editor.getAttributeLabel() != null) {
+					if (editor.getAttributeLabel().getMenu() == null) {
+						Menu mnu = new Menu(editor.getAttributeLabel());
+						MenuItem mi = new MenuItem(mnu, SWT.DEFAULT);
+						mi.setText(Messages.EntityEditor_DuplicatesMenuItem);
+						mi.addListener(SWT.Selection, e->{
+
+							StringBuilder sb = new StringBuilder();
+							sb.append(AdvancedEntitySearch.ENTITYTYPE_KEY );
+							sb.append(" = "); //$NON-NLS-1$
+							sb.append(etype.getKeyId());
+							sb.append("|and|"); //$NON-NLS-1$
+							sb.append("a:"); //$NON-NLS-1$
+							sb.append(editor.getAttribute().getType().key );
+							sb.append(":"); //$NON-NLS-1$
+							sb.append(editor.getAttribute().getKeyId());
+							sb.append(" " ); //$NON-NLS-1$
+							if (editor.getAttribute().getType() == IntelAttribute.AttributeType.TEXT) {
+								sb.append("equals \""); //$NON-NLS-1$
+								sb.append(tmp.getStringValue());
+								sb.append("\""); //$NON-NLS-1$
+							}else if (editor.getAttribute().getType() == IntelAttribute.AttributeType.NUMERIC) {
+								sb.append("= "); //$NON-NLS-1$
+								sb.append(tmp.getNumberValue());
+								sb.append(""); //$NON-NLS-1$
+							}else if (editor.getAttribute().getType() == IntelAttribute.AttributeType.DATE) {
+								sb.append("between "); //$NON-NLS-1$
+								sb.append(tmp.getStringValue());
+								sb.append(" and "); //$NON-NLS-1$
+								sb.append(tmp.getStringValue());
+							}else {
+								throw new IllegalStateException(MessageFormat.format(Messages.EntityEditor_duplicatecheckingnotsupported, editor.getAttribute().getType().getGuiName(Locale.getDefault())));
+							}
+							
+							AdvancedEntitySearch search = new AdvancedEntitySearch(SmartDB.getCurrentConservationArea());
+							search.setSearchString(sb.toString());
+							MPart part = context.get(EPartService.class).findPart(EntitySearchView.ID);
+							if (part != null) {
+								((EntitySearchView)E3Utils.getSourceObject(part)).setSearch(search);
+							}
+							
+						});
+						editor.getAttributeLabel().setMenu(mnu);
+					}
+				}
+			}else{
+				editor.setWarningMessage(null);
+				
+				if (editor.getAttributeLabel() != null && editor.getAttributeLabel().getMenu() != null) {
+					editor.getAttributeLabel().getMenu().dispose();
+					editor.getAttributeLabel().setMenu(null);
+				}
+			}
+			
+		}
 	}
 	
 	private GridLayout createGridLayoutNoMargin(int col){

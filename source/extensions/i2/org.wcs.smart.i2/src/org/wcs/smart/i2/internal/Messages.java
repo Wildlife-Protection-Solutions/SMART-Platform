@@ -232,9 +232,11 @@ public class Messages extends NLS {
 	public static String EntityEditor_DeleteError;
 	public static String EntityEditor_DeleteTaskName;
 	public static String EntityEditor_DmAttribute;
-	public static String EntityEditor_DuplciateIdWarning;
+	public static String EntityEditor_DuplciateIdWarning2;
+	public static String EntityEditor_DuplicatesMenuItem;
 	public static String EntityEditor_deleteRelationshiptooltip;
 	public static String EntityEditor_deleteTooltip;
+	public static String EntityEditor_duplicatecheckingnotsupported;
 	public static String EntityEditor_EditAttributeMneuLabel;
 	public static String EntityEditor_EntitySrcLabel;
 	public static String EntityEditor_EntitySrcLabel2;
@@ -514,15 +516,19 @@ public class Messages extends NLS {
 	public static String EntityTypeDialog_AttributeRequired;
 	public static String EntityTypeDialog_AttributesLabel;
 	public static String EntityTypeDialog_AttributesSubTask;
+	public static String EntityTypeDialog_AttributesTab;
 	public static String EntityTypeDialog_AttributeSubTask2;
 	public static String EntityTypeDialog_AttributeWarning;
 	public static String EntityTypeDialog_BirtLabel;
 	public static String EntityTypeDialog_CannotDeleteProfile;
 	public static String EntityTypeDialog_CloseConfirmMsg;
 	public static String EntityTypeDialog_CloseConfirmTitle;
+	public static String EntityTypeDialog_DataModelTab;
 	public static String EntityTypeDialog_DialogFilter;
 	public static String EntityTypeDialog_DmAttributeLabel;
 	public static String EntityTypeDialog_DmAttributeTitle;
+	public static String EntityTypeDialog_DuplicatecheckLabel;
+	public static String EntityTypeDialog_DuplicatecheckTooltip;
 	public static String EntityTypeDialog_EntityLoadError;
 	public static String EntityTypeDialog_EntityTypeSubTask;
 	public static String EntityTypeDialog_GroupWarning;
@@ -536,6 +542,7 @@ public class Messages extends NLS {
 	public static String EntityTypeDialog_MoveDownBtn;
 	public static String EntityTypeDialog_MoveUpBtn;
 	public static String EntityTypeDialog_NameRequired;
+	public static String EntityTypeDialog_NameTab;
 	public static String EntityTypeDialog_NewGroupBtn;
 	public static String EntityTypeDialog_NewGroupDefault;
 	public static String EntityTypeDialog_NewGroupMnu;
@@ -543,6 +550,7 @@ public class Messages extends NLS {
 	public static String EntityTypeDialog_NewGroupTitle;
 	public static String EntityTypeDialog_NotConfiguredLabel;
 	public static String EntityTypeDialog_ProfilesLabel;
+	public static String EntityTypeDialog_ProfilesTab;
 	public static String EntityTypeDialog_RemoveBtn;
 	public static String EntityTypeDialog_RemoveDialogMsg;
 	public static String EntityTypeDialog_RemoveDialogTitle;
@@ -1065,7 +1073,7 @@ public class Messages extends NLS {
 	public static String LocationListComposite_TimeColumn;
 	public static String LocationListComposite_WaypointId;
 	public static String MenuHandler_QueryMenuPostfix;
-	public static String NewEntityDialog_DuplicateIdMsg;
+	public static String NewEntityDialog_DuplicateIdMsg2;
 	public static String NewEntityDialog_EntityTypeLabel;
 	public static String NewEntityDialog_ErrorDialogTitle;
 	public static String NewEntityDialog_InvalidType;

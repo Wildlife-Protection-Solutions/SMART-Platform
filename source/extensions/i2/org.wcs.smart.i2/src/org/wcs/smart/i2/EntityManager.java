@@ -35,6 +35,7 @@ import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityAttachment;
 import org.wcs.smart.i2.model.IntelEntityLocation;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 
 /**
  * Entity manager
@@ -59,57 +60,62 @@ public enum EntityManager {
 	public boolean isDuplicateId(Object newId, IntelEntityType type, ConservationArea ca, Session session, UUID currentEntity){
 		if (newId == null) return false;
 		
-		IntelAttribute attribute = type.getIdAttribute();
-		String query = "SELECT count(*) FROM IntelEntity e join e.attributes as v where e.conservationArea = :ca and e.entityType = :type and v.id.attribute = :attribute "; //$NON-NLS-1$
-		switch(attribute.getType()){
-			case BOOLEAN:
-			case POSITION:
-				return false;	//don't both checking we will always have duplicates
-			case DATE:
-				query += " and v.stringValue = :test"; //$NON-NLS-1$
-				break;
-			case LIST:
-				query += " and v.attributeListItem = :test"; //$NON-NLS-1$
-				break;
-			case EMPLOYEE:
-				query += " and v.employee = :test"; //$NON-NLS-1$
-				break;
-			case NUMERIC:
-				query += " and v.numberValue = :test"; //$NON-NLS-1$
-				break;
-			case TEXT:
-				query += " and v.stringValue = :test ";  //$NON-NLS-1$
-				break;
+		for(IntelEntityTypeAttribute eattribute: type.getAttributes()) {
+			if (!eattribute.getDuplicateCheck()) continue;
+			
+			IntelAttribute attribute = eattribute.getAttribute();
+			
+			String query = "SELECT count(*) FROM IntelEntity e join e.attributes as v where e.conservationArea = :ca and e.entityType = :type and v.id.attribute = :attribute "; //$NON-NLS-1$
+			switch(attribute.getType()){
+				case BOOLEAN:
+				case POSITION:
+					return false;	//don't both checking we will always have duplicates
+				case DATE:
+					query += " and v.stringValue = :test"; //$NON-NLS-1$
+					break;
+				case LIST:
+					query += " and v.attributeListItem = :test"; //$NON-NLS-1$
+					break;
+				case EMPLOYEE:
+					query += " and v.employee = :test"; //$NON-NLS-1$
+					break;
+				case NUMERIC:
+					query += " and v.numberValue = :test"; //$NON-NLS-1$
+					break;
+				case TEXT:
+					query += " and v.stringValue = :test ";  //$NON-NLS-1$
+					break;
+			}
+			
+			if (currentEntity != null){
+				query += " AND e.uuid != :entity "; //$NON-NLS-1$
+			}
+			Query<?> hql = session.createQuery(query);
+			hql.setParameter("attribute", attribute); //$NON-NLS-1$
+			hql.setParameter("ca", ca); //$NON-NLS-1$
+			hql.setParameter("type", type); //$NON-NLS-1$
+			switch(attribute.getType()){
+				case BOOLEAN: 
+				case POSITION:
+					return false; // not supported
+				case DATE:
+					hql.setParameter("test", ((java.sql.Date)newId).toString()); //$NON-NLS-1$
+					break;
+				case LIST:
+				case NUMERIC:
+				case TEXT:
+				case EMPLOYEE:
+					hql.setParameter("test", newId); //$NON-NLS-1$
+					break;
+					
+			}
+			if (currentEntity != null){
+				hql.setParameter("entity",  currentEntity); //$NON-NLS-1$
+			}
+	
+			long cnt = (Long) hql.uniqueResult();
+			if (cnt > 0) return true;
 		}
-		
-		if (currentEntity != null){
-			query += " AND e.uuid != :entity "; //$NON-NLS-1$
-		}
-		Query<?> hql = session.createQuery(query);
-		hql.setParameter("attribute", type.getIdAttribute()); //$NON-NLS-1$
-		hql.setParameter("ca", ca); //$NON-NLS-1$
-		hql.setParameter("type", type); //$NON-NLS-1$
-		switch(attribute.getType()){
-			case BOOLEAN: 
-			case POSITION:
-				return false; // not supported
-			case DATE:
-				hql.setParameter("test", ((java.sql.Date)newId).toString()); //$NON-NLS-1$
-				break;
-			case LIST:
-			case NUMERIC:
-			case TEXT:
-			case EMPLOYEE:
-				hql.setParameter("test", newId); //$NON-NLS-1$
-				break;
-				
-		}
-		if (currentEntity != null){
-			hql.setParameter("entity",  currentEntity); //$NON-NLS-1$
-		}
-
-		long cnt = (Long) hql.uniqueResult();
-		if (cnt > 0) return true;
 		return false;
 		
 	}
