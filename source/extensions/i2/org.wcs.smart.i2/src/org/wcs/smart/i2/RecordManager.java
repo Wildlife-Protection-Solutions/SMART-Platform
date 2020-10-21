@@ -26,6 +26,12 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
+
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -36,17 +42,20 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityRecord;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
 import org.wcs.smart.i2.model.IntelRecordSource;
+import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
 
@@ -152,4 +161,107 @@ public enum RecordManager {
 		if (!entities.isEmpty()) broker.send(IntelEvents.ENTITY_MODIFIED, entities);
 	}
 
+	/**
+	 * Checks for another record of the same type in the same conservation area with
+	 * the same source that has a matching attribute
+	 * 
+	 * @param newId new value
+	 * @param iattribute attribute to check
+	 * @param type source to check
+	 * @param ca
+	 * @param session
+	 * @return
+	 */
+	public boolean isDuplicateId(Object newId, IntelAttribute iattribute, IntelRecordSource type,
+			ConservationArea ca, Session session, UUID currentRecord){
+		
+		if (newId == null) return false;
+		
+		//search attributes
+		for(IntelRecordSourceAttribute eattribute: type.getAttributes()) {
+			if (!iattribute.equals(eattribute.getAttribute()))continue;
+			if (!eattribute.getDuplicateCheck()) continue;
+			
+			IntelAttribute attribute = eattribute.getAttribute();
+			
+			String query = "SELECT count(*) FROM IntelRecord e join e.attributes as v where e.conservationArea = :ca and e.recordSource = :type and v.attribute.attribute = :attribute "; //$NON-NLS-1$
+			switch(attribute.getType()){
+				case BOOLEAN:
+				case POSITION:
+					return false;	//don't both checking we will always have duplicates
+				case DATE:
+					query += " and v.stringValue = :test"; //$NON-NLS-1$
+					break;
+				case LIST:
+					query += " and v.attributeListItem = :test"; //$NON-NLS-1$
+					break;
+				case EMPLOYEE:
+					query += " and v.employee = :test"; //$NON-NLS-1$
+					break;
+				case NUMERIC:
+					query += " and v.numberValue = :test"; //$NON-NLS-1$
+					break;
+				case TEXT:
+					query += " and v.stringValue = :test ";  //$NON-NLS-1$
+					break;
+			}
+			
+			if (currentRecord != null){
+				query += " AND e.uuid != :entity "; //$NON-NLS-1$
+			}
+			Query<?> hql = session.createQuery(query);
+			hql.setParameter("attribute", attribute); //$NON-NLS-1$
+			hql.setParameter("ca", ca); //$NON-NLS-1$
+			hql.setParameter("type", type); //$NON-NLS-1$
+			switch(attribute.getType()){
+				case BOOLEAN: 
+				case POSITION:
+					return false; // not supported
+				case DATE:
+					hql.setParameter("test", ((java.sql.Date)newId).toString()); //$NON-NLS-1$
+					break;
+				case LIST:
+				case NUMERIC:
+				case TEXT:
+				case EMPLOYEE:
+					hql.setParameter("test", newId); //$NON-NLS-1$
+					break;
+					
+			}
+			if (currentRecord != null){
+				hql.setParameter("entity",  currentRecord); //$NON-NLS-1$
+			}
+	
+			long cnt = (Long) hql.uniqueResult();
+			if (cnt > 0) return true;
+		}
+		return false;
+		
+	}
+	
+	/**
+	 * Checks for another record of the same name 
+	 * 
+	 * @return
+	 */
+	public boolean isDuplicateName(String name, ConservationArea ca, Session session, UUID currentRecord){
+		
+		boolean isnew = currentRecord == null;
+		
+		CriteriaBuilder cb = session.getCriteriaBuilder();
+		CriteriaQuery<Long> c = cb.createQuery(Long.class);
+		Root<IntelRecord> from = c.from(IntelRecord.class);
+		c.select(cb.count(from));
+		Predicate[] p = new Predicate[isnew?2:3];
+		p[0] = cb.equal(from.get("conservationArea"), ca); //$NON-NLS-1$
+		p[1] = cb.equal(from.get("title"), name); //$NON-NLS-1$
+		if (!isnew) {
+			p[2] =cb.notEqual(from.get("uuid"), currentRecord); //$NON-NLS-1$
+		} 
+		c.where(cb.and(p));
+		Long dupCnt = session.createQuery(c).uniqueResult();
+		
+		return dupCnt > 0;
+				
+	}
 }

@@ -851,7 +851,6 @@ public class AttributeFieldEditor {
 			if (attribute.getType() == AttributeType.TEXT) {
 				((GridData)attributeLabel.getLayoutData()).verticalIndent = 3;
 			}
-
 		}
 		
 		if (attribute.getType() == AttributeType.TEXT){

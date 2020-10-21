@@ -33,15 +33,12 @@ import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -72,6 +69,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
@@ -90,8 +89,10 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.RecordManager;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
@@ -108,6 +109,8 @@ import org.wcs.smart.i2.model.IntelRecordAttributeValue;
 import org.wcs.smart.i2.model.IntelRecordAttributeValueList;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
+import org.wcs.smart.i2.search.AttributeRecordSearch;
+import org.wcs.smart.i2.search.BasicRecordSearch;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.RecordLabelProvider;
 import org.wcs.smart.i2.ui.RecordSourceLabelProvider;
@@ -116,13 +119,16 @@ import org.wcs.smart.i2.ui.SectionTabHeader;
 import org.wcs.smart.i2.ui.SmartSection;
 import org.wcs.smart.i2.ui.dialogs.AttributeFieldEditor;
 import org.wcs.smart.i2.ui.views.RecordNarrativeView.FieldType;
+import org.wcs.smart.i2.ui.views.RecordsView;
 import org.wcs.smart.observation.WaypointSourceEngine;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.E3Utils;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
+
 
 /**
  * Summary Page for record editor.
@@ -139,6 +145,7 @@ public class RecordSummaryPage extends EditorPart{
 
 	private Composite summaryPart;
 	private Composite historyPart;
+	private ScrolledComposite summaryScroll;
 	
 	private Label headerLabel;
 	
@@ -150,6 +157,7 @@ public class RecordSummaryPage extends EditorPart{
 	
 	private SmartSection detailSection;
 	
+	private Label lblShortName;
 	private Text txtShortName;
 	private ControlDecoration decShortName;
 	private Label lblLastModified;
@@ -273,10 +281,7 @@ public class RecordSummaryPage extends EditorPart{
 		
 		detailSection = createSectionHeader(sashForm, toolkit, Messages.RecordSummaryPage_DetailsSection);
 		
-//		Color c = toolkit.getColors().getColor(IFormColors.TB_BG);
-//		Color e2 = new Color(getSite().getShell().getDisplay(), ColorUtil.blend(c.getRGB(), new RGB(255,255,255),50));
 		SectionTabHeader tabList = new SectionTabHeader(new String[]{Messages.RecordSummaryPage_SummarySection, Messages.RecordSummaryPage_HistorySection}, detailSection, toolkit);
-//		tabList.addDisposeListener(e->e2.dispose());
 		tabList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
 		
 		Composite tabPart = toolkit.createComposite(detailSection, SWT.NONE);
@@ -421,16 +426,29 @@ public class RecordSummaryPage extends EditorPart{
 		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Composite leftPart = new Composite(header, SWT.NONE);
-		leftPart.setLayout(new GridLayout(2, false));
+		leftPart.setLayout(new GridLayout());
 		leftPart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		toolkit.createLabel(leftPart, Messages.RecordSummaryPage_TitleLabel);
+		summaryScroll = new ScrolledComposite(leftPart, SWT.V_SCROLL);
+		summaryScroll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		summaryScroll.setExpandHorizontal(true);
+		summaryScroll.setExpandVertical(true);
+		
+		Composite summaryContent = toolkit.createComposite(summaryScroll);
+		summaryScroll.setContent(summaryContent);
+		summaryContent.setLayout(new GridLayout(2, false));
+		((GridLayout)summaryContent.getLayout()).marginWidth = 5;
+		((GridLayout)summaryContent.getLayout()).marginHeight = 0;
+		((GridLayout)summaryContent.getLayout()).horizontalSpacing = 7; 
+
+		
+		lblShortName = toolkit.createLabel(summaryContent, Messages.RecordSummaryPage_TitleLabel);
 		int style = SWT.BORDER;
 		if (!recordEditor.getEditMode()){
 			style = SWT.NONE;
 		}
 	
-		txtShortName = toolkit.createText(leftPart, recordEditor.getRecord().getTitle(), style);
+		txtShortName = toolkit.createText(summaryContent, recordEditor.getRecord().getTitle(), style);
 		txtShortName.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
@@ -450,9 +468,9 @@ public class RecordSummaryPage extends EditorPart{
 		checkDuplicateName.schedule(250);
 		
 		
-		toolkit.createLabel(leftPart, Messages.RecordSummaryPage_PrimaryDateLabel);
+		toolkit.createLabel(summaryContent, Messages.RecordSummaryPage_PrimaryDateLabel);
 		if (recordEditor.getEditMode()){
-			DateTime dtPrimaryDate = new DateTime(leftPart, SWT.BORDER | SWT.DATE | SWT.LONG | SWT.CALENDAR | SWT.DROP_DOWN);
+			DateTime dtPrimaryDate = new DateTime(summaryContent, SWT.BORDER | SWT.DATE | SWT.LONG | SWT.CALENDAR | SWT.DROP_DOWN);
 	
 			SmartUtils.initDateTimeWidget(dtPrimaryDate, recordEditor.getRecord().getPrimaryDate().toLocalDate());
 			toolkit.adapt(dtPrimaryDate);
@@ -463,11 +481,11 @@ public class RecordSummaryPage extends EditorPart{
 				recordEditor.setDirty(true);
 			});
 		}else {
-			toolkit.createLabel(leftPart, DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(recordEditor.getRecord().getPrimaryDate()));
+			toolkit.createLabel(summaryContent, DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(recordEditor.getRecord().getPrimaryDate()));
 		}
 
-		toolkit.createLabel(leftPart, Messages.RecordSummaryPage_ProfileLbl);
-		Composite pcomp = toolkit.createComposite(leftPart);
+		toolkit.createLabel(summaryContent, Messages.RecordSummaryPage_ProfileLbl);
+		Composite pcomp = toolkit.createComposite(summaryContent);
 		pcomp.setLayout(new GridLayout(2, false));
 		((GridLayout)pcomp.getLayout()).marginWidth = 0;
 		((GridLayout)pcomp.getLayout()).marginHeight = 0;
@@ -480,10 +498,10 @@ public class RecordSummaryPage extends EditorPart{
 		ll.setText(recordEditor.getRecord().getProfile().getName());
 		ll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		toolkit.createLabel(leftPart, Messages.RecordSummaryPage_StatusLabel);
+		toolkit.createLabel(summaryContent, Messages.RecordSummaryPage_StatusLabel);
 		
 		if (recordEditor.getEditMode() && IntelSecurityManager.INSTANCE.canEditRecordStatus(recordEditor.getRecord().getProfile())){
-			TableComboViewer cmbStatus = new TableComboViewer(leftPart, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.BORDER);
+			TableComboViewer cmbStatus = new TableComboViewer(summaryContent, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.BORDER);
 			toolkit.adapt(cmbStatus.getControl(), true, true);
 			cmbStatus.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			SmartUiUtils.configure(cmbStatus);
@@ -516,7 +534,7 @@ public class RecordSummaryPage extends EditorPart{
 				}
 			});
 		}else{
-			Composite temp = toolkit.createComposite(leftPart);
+			Composite temp = toolkit.createComposite(summaryContent);
 			temp.setLayout(new GridLayout(2, false));
 			temp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridLayout)temp.getLayout()).marginWidth = 0;
@@ -527,9 +545,9 @@ public class RecordSummaryPage extends EditorPart{
 			l.setText(RecordLabelProvider.getRecordStatusLabel(recordEditor.getRecord().getStatus()));
 		}
 
-		toolkit.createLabel(leftPart, Messages.RecordSummaryPage_SourceLabel);
+		toolkit.createLabel(summaryContent, Messages.RecordSummaryPage_SourceLabel);
 		if (recordEditor.getEditMode()){
-			TableComboViewer cmbSource = new TableComboViewer(leftPart, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.BORDER);
+			TableComboViewer cmbSource = new TableComboViewer(summaryContent, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.BORDER);
 			toolkit.adapt(cmbSource.getControl(), true, true);
 			cmbSource.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			SmartUiUtils.configure(cmbSource);
@@ -538,7 +556,7 @@ public class RecordSummaryPage extends EditorPart{
 			cmbSource.setInput(new String[]{DialogConstants.LOADING_TEXT});
 			loadRecordSources(cmbSource);
 		}else{
-			Composite temp = toolkit.createComposite(leftPart);
+			Composite temp = toolkit.createComposite(summaryContent);
 			temp.setLayout(new GridLayout(2, false));
 			temp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridLayout)temp.getLayout()).marginWidth = 0;
@@ -580,13 +598,15 @@ public class RecordSummaryPage extends EditorPart{
 			}
 		});
 		
-		srcAttributePanel = toolkit.createComposite(leftPart);
+		srcAttributePanel = toolkit.createComposite(summaryContent);
 		srcAttributePanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		srcAttributePanel.setLayout(new GridLayout());
 		((GridLayout)srcAttributePanel.getLayout()).marginWidth = 0;
 		((GridLayout)srcAttributePanel.getLayout()).marginHeight = 0;
 		configureAttributePanel( recordEditor.getRecord().getRecordSource() );
 		
+		summaryScroll.setMinSize(summaryContent.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+
 		summaryPart.layout();
 		
 		entityPanel.init();
@@ -698,18 +718,10 @@ public class RecordSummaryPage extends EditorPart{
 		Label sepl = toolkit.createLabel(srcAttributePanel, "", SWT.SEPARATOR | SWT.HORIZONTAL); //$NON-NLS-1$
 		sepl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		
-		
-		ScrolledComposite sc = new ScrolledComposite(srcAttributePanel, SWT.V_SCROLL);
-		sc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		sc.setExpandHorizontal(true);
-		sc.setExpandVertical(true);
-		
-		Composite content = toolkit.createComposite(sc);
-		sc.setContent(content);
+		Composite content = toolkit.createComposite(srcAttributePanel);
 		content.setLayout(new GridLayout(2, false));
-		((GridLayout)content.getLayout()).marginWidth = 5;
-		((GridLayout)content.getLayout()).marginHeight = 0;
+		content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridLayout)content.getLayout()).horizontalSpacing = 7; 
 		
 		createDataSourceLabel(content);
 		
@@ -746,9 +758,11 @@ public class RecordSummaryPage extends EditorPart{
 						
 						if (af.getTextAttributeControl() != null) {
 							af.getTextAttributeControl().addListener(SWT.Resize, e->{
-								sc.setMinSize(content.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+								summaryScroll.setMinSize(summaryScroll.getContent().computeSize(SWT.DEFAULT, SWT.DEFAULT));
 							});
 						}
+						
+						if (a.getDuplicateCheck()) addDuplicateIdChecker(af);
 					}else{
 						Label l = toolkit.createLabel(content, name + ":"); //$NON-NLS-1$
 						l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
@@ -805,7 +819,6 @@ public class RecordSummaryPage extends EditorPart{
 			}
 		}
 
-		sc.setMinSize(content.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		srcAttributePanel.layout(true, true);
 	}
 	
@@ -1025,6 +1038,7 @@ public class RecordSummaryPage extends EditorPart{
 							recordEditor.setDirty(true);
 							
 							configureAttributePanel( recordEditor.getRecord().getRecordSource() );
+							summaryScroll.setMinSize(summaryScroll.getContent().computeSize(SWT.DEFAULT, SWT.DEFAULT));
 						}
 					});
 				});
@@ -1036,6 +1050,68 @@ public class RecordSummaryPage extends EditorPart{
 		srcLoader.schedule();
 	}
 	
+	
+	private void addDuplicateIdChecker(AttributeFieldEditor editor){
+		//check for duplicate identifiers
+		editor.addSelectionListener(new SelectionAdapter() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				checkDuplicate(editor);
+			}
+		});
+		checkDuplicate(editor);
+	}
+	
+	private void checkDuplicate(AttributeFieldEditor editor) {
+		if (editor.getAttributeLabel() != null && editor.getAttributeLabel().getMenu() != null) {
+			editor.getAttributeLabel().getMenu().dispose();
+			editor.getAttributeLabel().setMenu(null);
+		}
+		
+		try(Session session = HibernateManager.openSession()){
+			IntelRecordSource s = recordEditor.getRecord().getRecordSource();
+			
+			IntelRecordSourceAttribute a = null;
+			for (IntelRecordSourceAttribute t : s.getAttributes()) {
+				if (t.getAttribute() != null && t.getAttribute().equals(editor.getAttribute())) {
+					a = t;
+					break;
+				}
+			}
+			
+			IntelRecordAttributeValue tmp = new IntelRecordAttributeValue();
+			tmp.setAttribute(a);
+			editor.updateValue(tmp);
+			if (RecordManager.INSTANCE.isDuplicateId(tmp.getAttributeValue(), editor.getAttribute(), s, SmartDB.getCurrentConservationArea(), session, recordEditor.getRecord().getUuid())){
+				
+				String warnMessage = MessageFormat.format(Messages.RecordSummaryPage_recordDuplicateAttribute,s.getName());  
+				editor.setWarningMessage(warnMessage);
+				
+				if (editor.getAttributeLabel() != null) {
+					Menu mnu = new Menu(editor.getAttributeLabel());
+					MenuItem mi = new MenuItem(mnu, SWT.DEFAULT);
+					mi.setText(Messages.RecordSummaryPage_FindDuplicates);
+					mi.addListener(SWT.Selection, e->{
+						AttributeRecordSearch search = new AttributeRecordSearch(s, tmp);
+
+						MPart mpart = recordEditor.getContext().get(EPartService.class).findPart(RecordsView.ID);
+						if (mpart != null) {
+							((RecordsView)E3Utils.getSourceObject(mpart)).setBasicSearch(search);
+						}
+						
+					});
+					editor.getAttributeLabel().setMenu(mnu);
+					
+				}
+			}else{
+				editor.setWarningMessage(null);
+				
+				
+			}
+			
+		}
+	}
 	/*
 	 * job to check for duplicate names
 	 */
@@ -1057,35 +1133,46 @@ public class RecordSummaryPage extends EditorPart{
 			if (title[0] == null) return org.eclipse.core.runtime.Status.OK_STATUS;
 			IntelRecord record = recordEditor.getRecord();
 			if (record == null) return org.eclipse.core.runtime.Status.OK_STATUS;
+			
+			boolean isDuplicate = false;
 			try(Session s = HibernateManager.openSession()){
-				boolean isnew = record.getUuid() == null;
-				CriteriaBuilder cb = s.getCriteriaBuilder();
-				CriteriaQuery<Long> c = cb.createQuery(Long.class);
-				Root<IntelRecord> from = c.from(IntelRecord.class);
-				c.select(cb.count(from));
-				Predicate[] p = new Predicate[isnew?2:3];
-				p[0] = cb.equal(from.get("conservationArea"), record.getConservationArea()); //$NON-NLS-1$
-				p[1] = cb.equal(from.get("title"), record.getTitle()); //$NON-NLS-1$
-				if (!isnew) {
-					p[2] =cb.notEqual(from.get("uuid"), record.getUuid()); //$NON-NLS-1$
-				} 
-				c.where(cb.and(p));
-				Long dupCnt = s.createQuery(c).uniqueResult();
-				
-				if (dupCnt > 0) {
-					Display.getDefault().syncExec(new Runnable() {
-
-						@Override
-						public void run() {
-							if (txtShortName == null || txtShortName.isDisposed()) return;
-							decShortName.setDescriptionText(MessageFormat.format(Messages.RecordSummaryPage_DuplicateTitleWarning, dupCnt));
-							decShortName.show();					
-						}
-						
-					});
-					
-				}
+				isDuplicate = RecordManager.INSTANCE.isDuplicateName(title[0], record.getConservationArea(), s, record.getUuid());
 			}
+			final boolean fisDuplicate = isDuplicate;
+			
+			Display.getDefault().syncExec(new Runnable() {
+				@Override
+				public void run() {
+					if (txtShortName == null || txtShortName.isDisposed()) return;
+					if (fisDuplicate) {
+						decShortName.setDescriptionText(Messages.RecordSummaryPage_recordDuplicateName);
+						decShortName.show();
+						if(lblShortName.getMenu() == null) {
+							Menu m = new Menu(lblShortName);
+							MenuItem mi = new MenuItem(m, SWT.DEFAULT);
+							mi.setText(Messages.RecordSummaryPage_FindDuplicates);
+							mi.addListener(SWT.Selection, e->{
+								String search = txtShortName.getText();
+								MPart mpart = recordEditor.getContext().get(EPartService.class).findPart(RecordsView.ID);
+								if (mpart != null) {
+									BasicRecordSearch bsearch = new BasicRecordSearch(record.getRecordSource(), null, search);
+									bsearch.setTitleExact(true);
+									((RecordsView)E3Utils.getSourceObject(mpart)).setBasicSearch(bsearch);
+								}
+								
+							});
+							lblShortName.setMenu(m);
+						}
+					}else {
+						if(lblShortName.getMenu() != null) {
+							lblShortName.getMenu().dispose();
+							lblShortName.setMenu(null);
+						}
+					}
+				}
+						
+			});
+					
 			return org.eclipse.core.runtime.Status.OK_STATUS;
 		}
 		

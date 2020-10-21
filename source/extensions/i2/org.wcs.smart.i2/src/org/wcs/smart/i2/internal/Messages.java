@@ -1438,6 +1438,7 @@ public class Messages extends NLS {
 	public static String RecordSummaryPage_EntityListLink;
 	public static String RecordSummaryPage_ErrorDialogMessage;
 	public static String RecordSummaryPage_ErrorDialogTitle;
+	public static String RecordSummaryPage_FindDuplicates;
 	public static String RecordSummaryPage_HistorySection;
 	public static String RecordSummaryPage_linkentitesLabel;
 	public static String RecordSummaryPage_linkentitiestooltip;
@@ -1450,6 +1451,8 @@ public class Messages extends NLS {
 	public static String RecordSummaryPage_ObservationsTabName;
 	public static String RecordSummaryPage_PrimaryDateLabel;
 	public static String RecordSummaryPage_ProfileLbl;
+	public static String RecordSummaryPage_recordDuplicateAttribute;
+	public static String RecordSummaryPage_recordDuplicateName;
 	public static String RecordSummaryPage_ScratchpadLink;
 	public static String RecordSummaryPage_SmartSourceLabel;
 	public static String RecordSummaryPage_scratchpadtooltip;

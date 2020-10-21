@@ -57,7 +57,6 @@ import org.eclipse.ui.part.MultiPageEditorPart;
 import org.geotools.data.DataUtilities;
 import org.geotools.data.FeatureStore;
 import org.geotools.factory.CommonFactoryFinder;
-import org.locationtech.jts.geom.Polygon;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.core.internal.FeatureUtils;

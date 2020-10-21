@@ -365,6 +365,13 @@ public class BasicRecordSearchPanel extends Composite {
 		
 	}
 	
+	public void setSearch(BasicRecordSearch search) {
+		cmbSource.setSelection(new StructuredSelection(search.getSource()));
+		txtNarrative.setText(search.getNarrative() == null ? "" : search.getNarrative()); //$NON-NLS-1$
+		txtSearch.setText(search.getTitle() == null ? "" : search.getTitle()); //$NON-NLS-1$
+		doSearch(search);
+	}
+	
 	private void addToWorkingset(){
 		List<RecordEditorInput> toAdd = new ArrayList<RecordEditorInput>();
 		for (Iterator<?> iterator = ((IStructuredSelection)tblResults.getSelection()).iterator(); iterator.hasNext();) {
@@ -419,10 +426,13 @@ public class BasicRecordSearchPanel extends Composite {
 		if (selection instanceof IntelRecordSource) source = (IntelRecordSource)selection;
 		
 		final BasicRecordSearch search = new BasicRecordSearch(source, narrative, title);
-		
+		doSearch(search);
+	}
+	
+	private void doSearch(BasicRecordSearch search) {
 		narrativePattern = null;
-		if (narrative != null && !narrative.isEmpty()){
-			narrativePattern = Pattern.compile(narrative, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+		if (search.getNarrative() != null && !search.getNarrative().isEmpty()){
+			narrativePattern = Pattern.compile(search.getNarrative(), Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
 		}
 		
 		Job searchJob = new Job(Messages.BasicRecordSearchPanel_SearchJobName){

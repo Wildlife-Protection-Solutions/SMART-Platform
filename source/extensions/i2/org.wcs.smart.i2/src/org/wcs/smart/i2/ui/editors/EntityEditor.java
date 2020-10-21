@@ -2253,62 +2253,63 @@ public class EntityEditor extends EditorPart implements MapPart{
 			IntelEntityAttributeValue tmp = new IntelEntityAttributeValue();
 			tmp.setAttribute(editor.getAttribute());
 			editor.updateValue(tmp);
-			if (EntityManager.INSTANCE.isDuplicateId(tmp.getAttributeValue(), etype, SmartDB.getCurrentConservationArea(), session, entity.getUuid())){
+			
+			if (editor.getAttributeLabel() != null && editor.getAttributeLabel().getMenu() != null) {
+				editor.getAttributeLabel().getMenu().dispose();
+				editor.getAttributeLabel().setMenu(null);
+			}
+			
+			if (EntityManager.INSTANCE.isDuplicateId(tmp.getAttributeValue(), editor.getAttribute(), etype, SmartDB.getCurrentConservationArea(), session, entity.getUuid())){
 				String warnMessage = Messages.EntityEditor_DuplciateIdWarning2; 
 				editor.setWarningMessage(warnMessage);
 				
+				
 				if (editor.getAttributeLabel() != null) {
-					if (editor.getAttributeLabel().getMenu() == null) {
-						Menu mnu = new Menu(editor.getAttributeLabel());
-						MenuItem mi = new MenuItem(mnu, SWT.DEFAULT);
-						mi.setText(Messages.EntityEditor_DuplicatesMenuItem);
-						mi.addListener(SWT.Selection, e->{
+					Menu mnu = new Menu(editor.getAttributeLabel());
+					MenuItem mi = new MenuItem(mnu, SWT.DEFAULT);
+					mi.setText(Messages.EntityEditor_DuplicatesMenuItem);
+					mi.addListener(SWT.Selection, e->{
 
-							StringBuilder sb = new StringBuilder();
-							sb.append(AdvancedEntitySearch.ENTITYTYPE_KEY );
-							sb.append(" = "); //$NON-NLS-1$
-							sb.append(etype.getKeyId());
-							sb.append("|and|"); //$NON-NLS-1$
-							sb.append("a:"); //$NON-NLS-1$
-							sb.append(editor.getAttribute().getType().key );
-							sb.append(":"); //$NON-NLS-1$
-							sb.append(editor.getAttribute().getKeyId());
-							sb.append(" " ); //$NON-NLS-1$
-							if (editor.getAttribute().getType() == IntelAttribute.AttributeType.TEXT) {
-								sb.append("equals \""); //$NON-NLS-1$
-								sb.append(tmp.getStringValue());
-								sb.append("\""); //$NON-NLS-1$
-							}else if (editor.getAttribute().getType() == IntelAttribute.AttributeType.NUMERIC) {
-								sb.append("= "); //$NON-NLS-1$
-								sb.append(tmp.getNumberValue());
-								sb.append(""); //$NON-NLS-1$
-							}else if (editor.getAttribute().getType() == IntelAttribute.AttributeType.DATE) {
-								sb.append("between "); //$NON-NLS-1$
-								sb.append(tmp.getStringValue());
-								sb.append(" and "); //$NON-NLS-1$
-								sb.append(tmp.getStringValue());
-							}else {
-								throw new IllegalStateException(MessageFormat.format(Messages.EntityEditor_duplicatecheckingnotsupported, editor.getAttribute().getType().getGuiName(Locale.getDefault())));
-							}
+						StringBuilder sb = new StringBuilder();
+						sb.append(AdvancedEntitySearch.ENTITYTYPE_KEY );
+						sb.append(" = "); //$NON-NLS-1$
+						sb.append(etype.getKeyId());
+						sb.append("|and|"); //$NON-NLS-1$
+						sb.append("a:"); //$NON-NLS-1$
+						sb.append(editor.getAttribute().getType().key );
+						sb.append(":"); //$NON-NLS-1$
+						sb.append(editor.getAttribute().getKeyId());
+						sb.append(" " ); //$NON-NLS-1$
+						if (editor.getAttribute().getType() == IntelAttribute.AttributeType.TEXT) {
+							sb.append("equals \""); //$NON-NLS-1$
+							sb.append(tmp.getStringValue());
+							sb.append("\""); //$NON-NLS-1$
+						}else if (editor.getAttribute().getType() == IntelAttribute.AttributeType.NUMERIC) {
+							sb.append("= "); //$NON-NLS-1$
+							sb.append(tmp.getNumberValue());
+							sb.append(""); //$NON-NLS-1$
+						}else if (editor.getAttribute().getType() == IntelAttribute.AttributeType.DATE) {
+							sb.append("between "); //$NON-NLS-1$
+							sb.append(tmp.getStringValue());
+							sb.append(" and "); //$NON-NLS-1$
+							sb.append(tmp.getStringValue());
+						}else {
+							throw new IllegalStateException(MessageFormat.format(Messages.EntityEditor_duplicatecheckingnotsupported, editor.getAttribute().getType().getGuiName(Locale.getDefault())));
+						}
 							
-							AdvancedEntitySearch search = new AdvancedEntitySearch(SmartDB.getCurrentConservationArea());
-							search.setSearchString(sb.toString());
-							MPart part = context.get(EPartService.class).findPart(EntitySearchView.ID);
-							if (part != null) {
-								((EntitySearchView)E3Utils.getSourceObject(part)).setSearch(search);
-							}
+						AdvancedEntitySearch search = new AdvancedEntitySearch(SmartDB.getCurrentConservationArea());
+						search.setSearchString(sb.toString());
+						MPart part = context.get(EPartService.class).findPart(EntitySearchView.ID);
+						if (part != null) {
+							((EntitySearchView)E3Utils.getSourceObject(part)).setSearch(search);
+						}
 							
-						});
-						editor.getAttributeLabel().setMenu(mnu);
-					}
+					});
+					editor.getAttributeLabel().setMenu(mnu);
+					
 				}
 			}else{
 				editor.setWarningMessage(null);
-				
-				if (editor.getAttributeLabel() != null && editor.getAttributeLabel().getMenu() != null) {
-					editor.getAttributeLabel().getMenu().dispose();
-					editor.getAttributeLabel().setMenu(null);
-				}
 			}
 			
 		}

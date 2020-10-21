@@ -589,7 +589,7 @@ public class NewEntityDialog extends SmartStyledTitleDialog{
 					IntelEntityAttributeValue tmp = new IntelEntityAttributeValue();
 					tmp.setAttribute(editor.getAttribute());
 					editor.updateValue(tmp);
-					if (EntityManager.INSTANCE.isDuplicateId(tmp.getAttributeValue(), etype, SmartDB.getCurrentConservationArea(), session, null)){
+					if (EntityManager.INSTANCE.isDuplicateId(tmp.getAttributeValue(), editor.getAttribute(), etype, SmartDB.getCurrentConservationArea(), session, null)){
 						String warnMessage = Messages.NewEntityDialog_DuplicateIdMsg2; 
 						setMessage(warnMessage, IMessageProvider.WARNING);
 						editor.setWarningMessage(warnMessage);

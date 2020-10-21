@@ -57,11 +57,12 @@ public enum EntityManager {
 	 * @param session
 	 * @return
 	 */
-	public boolean isDuplicateId(Object newId, IntelEntityType type, ConservationArea ca, Session session, UUID currentEntity){
+	public boolean isDuplicateId(Object newId, IntelAttribute iattribute, IntelEntityType type, ConservationArea ca, Session session, UUID currentEntity){
 		if (newId == null) return false;
 		
 		for(IntelEntityTypeAttribute eattribute: type.getAttributes()) {
 			if (!eattribute.getDuplicateCheck()) continue;
+			if (!eattribute.getAttribute().equals(iattribute)) continue;
 			
 			IntelAttribute attribute = eattribute.getAttribute();
 			

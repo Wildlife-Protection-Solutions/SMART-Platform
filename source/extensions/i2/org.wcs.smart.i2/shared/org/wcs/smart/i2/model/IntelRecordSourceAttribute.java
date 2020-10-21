@@ -49,7 +49,8 @@ public class IntelRecordSourceAttribute extends NamedKeyItem{
 	private IntelEntityType type;
 	private int seqOrder;
 	private Boolean isMultiple;
-	
+	private boolean duplicateCheck;
+
 	public IntelRecordSourceAttribute() {
 	}
 	
@@ -59,6 +60,15 @@ public class IntelRecordSourceAttribute extends NamedKeyItem{
 	}
 	public void setOrder(int order){
 		this.seqOrder = order;
+	}
+	
+	@Column(name="is_duplicate_check")
+	public boolean getDuplicateCheck(){
+		return this.duplicateCheck;
+	}
+	
+	public void setDuplicateCheck(boolean duplicateCheck){
+		this.duplicateCheck = duplicateCheck;
 	}
 	
 	@ManyToOne

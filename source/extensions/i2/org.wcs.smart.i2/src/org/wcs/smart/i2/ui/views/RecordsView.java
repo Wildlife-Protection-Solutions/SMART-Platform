@@ -108,6 +108,7 @@ import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordSource;
+import org.wcs.smart.i2.search.BasicRecordSearch;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.DeleteRecordHandler;
 import org.wcs.smart.i2.ui.RecordLabelProvider;
@@ -146,6 +147,8 @@ public class RecordsView {
 		super();
 	}
 
+	private SectionTabHeader tabList;
+	
 	private TableViewer lstInProgress;
 	private TableViewer lstNewRecords;
 	private TreeViewer lstAllRecords;
@@ -206,7 +209,7 @@ public class RecordsView {
 		((GridLayout)headerMain.getLayout()).marginHeight = 0;
 		((GridLayout)headerMain.getLayout()).horizontalSpacing = 0;
 		
-		SectionTabHeader tabList = new SectionTabHeader(
+		tabList = new SectionTabHeader(
 				new String[]{Messages.RecordsView_unprocessedSection, Messages.RecordsView_inprogressSection, Messages.RecordsView_allSection, Messages.RecordsView_basicSection}, 
 				headerMain, toolkit);
 		tabList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -767,6 +770,11 @@ public class RecordsView {
 	public void dispose() {
 		LIST_HIGHLIGHT_COLOR.dispose();
 		LIST_SELECTION_COLOR.dispose();
+	}
+	
+	public void setBasicSearch(BasicRecordSearch search) {
+		tabList.selectTab(3);
+		basicSearchPnl.setSearch(search);
 	}
 	
 	public static class RecordsViewWrapper extends DIViewPart<RecordsView>{

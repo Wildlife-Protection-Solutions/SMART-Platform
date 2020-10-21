@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Wildlife Conservation Society
+ * Copyright (C) 2020 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -24,6 +24,7 @@ package org.wcs.smart.i2.search;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -33,67 +34,61 @@ import org.hibernate.query.Query;
 import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecord;
+import org.wcs.smart.i2.model.IntelRecordAttributeValue;
 import org.wcs.smart.i2.model.IntelRecordSource;
+import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 
+import com.ibm.icu.text.MessageFormat;
+
 /**
- * Basic record search
+ * Searches record attribute; used for searching for duplicate records
  * 
  * @author Emily
  *
  */
-public class BasicRecordSearch implements IRecordSearch{
+public class AttributeRecordSearch extends BasicRecordSearch {
 
-	protected IntelRecordSource source;
-	protected String narrativeSearch;
-	protected String titleSearch;
+	protected IntelRecordAttributeValue attributeValue;
 	
-	protected boolean titleLike;
 	
-	public BasicRecordSearch(IntelRecordSource source, String narrativeSearch, String titleSearch){
-		this.source = source;
-		this.narrativeSearch = narrativeSearch;
-		this.titleSearch = titleSearch;
-		titleLike = true;
+	public AttributeRecordSearch(IntelRecordSource source, IntelRecordAttributeValue attributeValue) {
+		super(source, null,null);
+		this.attributeValue = attributeValue;
 	}
-	
-	/**
-	 * Set to true if the title must be the case insenstivity equals.  If set to false
-	 * then the titles are similar (like is used)
-	 * 
-	 * @param exact
-	 */
-	public void setTitleExact(boolean exact) {
-		titleLike = !exact;
-	}
-	
-	public IntelRecordSource getSource() {
-		return this.source;
-	}
-	
-	public String getTitle() {
-		return this.titleSearch;
-	}
-	
-	public String getNarrative() {
-		return this.narrativeSearch;
-	}
+
 	
 	@Override
 	public IntelRecordResult doSearch(Session session, IProgressMonitor monitor) {
 		Long startTime = System.nanoTime();
-		String hql = " FROM IntelRecord WHERE profile in (:profiles) "; //$NON-NLS-1$
+		
+		//IntelRecordAttributeValue
+		String hql = " FROM IntelRecord r join r.attributes a WHERE r.profile in (:profiles) "; //$NON-NLS-1$
+		
+		hql += " AND a.attribute.attribute = :attribute "; //$NON-NLS-1$
+		
+		if (attributeValue.getAttribute().getAttribute().getType() == AttributeType.TEXT) {
+			hql += " AND a.stringValue = :value1 "; //$NON-NLS-1$
+		}else if (attributeValue.getAttribute().getAttribute().getType() == AttributeType.NUMERIC) {
+			hql += " AND a.numberValue = :value1 "; //$NON-NLS-1$
+		}else if (attributeValue.getAttribute().getAttribute().getType() == AttributeType.DATE) {
+			hql += " AND a.stringValue = :value1 "; //$NON-NLS-1$
+		}else {
+			throw new IllegalStateException(MessageFormat.format("The attribute type {0} not supported for attribute searches", attributeValue.getAttribute().getAttribute().getType().getGuiName(Locale.getDefault()))); //$NON-NLS-1$
+		}
+				
 		if (source != null){
-			hql += " AND recordSource = :source "; //$NON-NLS-1$
+			hql += " AND r.recordSource = :source "; //$NON-NLS-1$
 		}
 		if (narrativeSearch != null){
-			hql += " AND lower(description) like lower(:narrative) "; //$NON-NLS-1$
+			hql += " AND lower(r.description) like lower(:narrative) "; //$NON-NLS-1$
 		}
 		if (titleSearch != null && titleLike){
-			hql += " AND lower(title) like lower(:title) "; //$NON-NLS-1$
+			hql += " AND lower(r.title) like lower(:title) "; //$NON-NLS-1$
 		}else if (titleSearch != null) {
-			hql += " AND lower(title) = lower(:title) "; //$NON-NLS-1$
+			hql += " AND lower(r.title) = lower(:title) "; //$NON-NLS-1$
 		}
+		
 		
 		List<IntelProfile> profiles = new ArrayList<>(ProfilesManager.INSTANCE.getActiveProfiles());
 		profiles = profiles.stream().filter(e->IntelSecurityManager.INSTANCE.canViewRecords(e)).collect(Collectors.toList());
@@ -102,25 +97,7 @@ public class BasicRecordSearch implements IRecordSearch{
 		}
 		Query<?> query = session.createQuery("SELECT count(*) " + hql); //$NON-NLS-1$
 		query.setParameter("profiles", profiles); //$NON-NLS-1$
-		if (source != null){
-			query.setParameter("source", source); //$NON-NLS-1$
-		}
-		if (narrativeSearch != null){
-			query.setParameter("narrative", "%" + narrativeSearch + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		}
-		if (titleSearch != null){
-			if (titleLike) {
-				query.setParameter("title", "%" + titleSearch + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			}else {
-				query.setParameter("title", titleSearch); //$NON-NLS-1$
-			}
-		}
-		
-		long cnt = (long) query.uniqueResult();
-		
-		query = session.createQuery("SELECT uuid, title, recordSource.uuid, status, description, profile.uuid " + hql); //$NON-NLS-1$
-		query.setMaxResults(IRecordSearch.MAX_RESULT_CNT);
-		query.setParameter("profiles", profiles); //$NON-NLS-1$
+		query.setParameter("attribute", attributeValue.getAttribute().getAttribute()); //$NON-NLS-1$
 		if (source != null){
 			query.setParameter("source", source); //$NON-NLS-1$
 		}
@@ -133,6 +110,44 @@ public class BasicRecordSearch implements IRecordSearch{
 			}else {
 				query.setParameter("title", titleSearch); //$NON-NLS-1$ 
 			}
+		}
+		if (attributeValue.getAttribute().getAttribute().getType() == AttributeType.TEXT) {
+			query.setParameter("value1", attributeValue.getStringValue()); //$NON-NLS-1$
+		}else if (attributeValue.getAttribute().getAttribute().getType() == AttributeType.NUMERIC) {
+			query.setParameter("value1", attributeValue.getNumberValue()); //$NON-NLS-1$
+		}else if (attributeValue.getAttribute().getAttribute().getType() == AttributeType.DATE) {
+			query.setParameter("value1", attributeValue.getStringValue()); //$NON-NLS-1$
+		}else {
+			throw new IllegalStateException(MessageFormat.format("The attribute type {0} not supported for attribute searches", attributeValue.getAttribute().getAttribute().getType().getGuiName(Locale.getDefault()))); //$NON-NLS-1$
+		}
+		
+		long cnt = (long) query.uniqueResult();
+		
+		query = session.createQuery("SELECT r.uuid, r.title, r.recordSource.uuid, r.status, r.description, r.profile.uuid " + hql); //$NON-NLS-1$
+		query.setMaxResults(IRecordSearch.MAX_RESULT_CNT);
+		query.setParameter("profiles", profiles); //$NON-NLS-1$
+		query.setParameter("attribute", attributeValue.getAttribute().getAttribute()); //$NON-NLS-1$
+		if (source != null){
+			query.setParameter("source", source); //$NON-NLS-1$
+		}
+		if (narrativeSearch != null){
+			query.setParameter("narrative", "%" + narrativeSearch + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		}
+		if (titleSearch != null){
+			if (titleLike) {
+				query.setParameter("title", "%" + titleSearch + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			}else {
+				query.setParameter("title", titleSearch); //$NON-NLS-1$ 
+			}
+		}
+		if (attributeValue.getAttribute().getAttribute().getType() == AttributeType.TEXT) {
+			query.setParameter("value1", attributeValue.getStringValue()); //$NON-NLS-1$
+		}else if (attributeValue.getAttribute().getAttribute().getType() == AttributeType.NUMERIC) {
+			query.setParameter("value1", attributeValue.getNumberValue()); //$NON-NLS-1$
+		}else if (attributeValue.getAttribute().getAttribute().getType() == AttributeType.DATE) {
+			query.setParameter("value1", attributeValue.getStringValue()); //$NON-NLS-1$
+		}else {
+			throw new IllegalStateException(MessageFormat.format("The attribute type {0} not supported for attribute searches", attributeValue.getAttribute().getAttribute().getType().getGuiName(Locale.getDefault()))); //$NON-NLS-1$
 		}
 		List<?> items = query.list();
 		List<IntelRecordSearchResultItem> resultItems = new ArrayList<>();
