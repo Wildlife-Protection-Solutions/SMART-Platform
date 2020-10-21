@@ -690,6 +690,15 @@ $$LANGUAGE plpgsql;
 
 
 
+ALTER TABLE smart.i_entity_type_attribute add column is_duplicate_check boolean;
+UPDATE smart.I_ENTITY_TYPE_ATTRIBUTE set IS_DUPLICATE_CHECK = (select true from smart.I_ENTITY_TYPE t where smart.I_ENTITY_TYPE_ATTRIBUTE.entity_type_uuid = t.uuid and t.id_attribute_uuid = smart.I_ENTITY_TYPE_ATTRIBUTE.attribute_uuid);
+UPDATE smart.I_ENTITY_TYPE_ATTRIBUTE set IS_DUPLICATE_CHECK = false where IS_DUPLICATE_CHECK is null;
+alter table smart.i_entity_type_attribute alter column is_duplicate_check set not null;
+
+ALTER TABLE smart.i_recordsource_attribute add column is_duplicate_check boolean;
+UPDATE smart.i_recordsource_attribute set IS_DUPLICATE_CHECK = false;
+alter table smart.i_recordsource_attribute alter column is_duplicate_check set not null;
+
 -- profile for event parameters
 insert into smart.e_action_parameter_value(action_uuid, parameter_key, parameter_value)
 select uuid, 'org.wcs.smart.profile.common.profile', 'profile1'
