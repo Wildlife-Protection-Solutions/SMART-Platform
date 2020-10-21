@@ -26,6 +26,7 @@ import javax.xml.bind.annotation.XmlType;
  *       &lt;attribute name="groupKey" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="attributeKey" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="order" type="{http://www.w3.org/2001/XMLSchema}int" />
+ *       &lt;attribute name="isDuplicateCheck" type="{http://www.w3.org/2001/XMLSchema}boolean" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -43,7 +44,8 @@ public class EntityTypeAttribute {
     protected String attributeKey;
     @XmlAttribute(name = "order")
     protected Integer order;
-
+    @XmlAttribute(name = "isDuplicateCheck")
+    protected boolean isDuplicateCheck;
     /**
      * Gets the value of the groupKey property.
      * 
@@ -116,4 +118,27 @@ public class EntityTypeAttribute {
         this.order = value;
     }
 
+    /**
+     * Gets the value of the isDuplicateCheck property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Boolean }
+     *     
+     */
+    public Boolean isDuplicateCheck() {
+        return isDuplicateCheck();
+    }
+
+    /**
+     * Sets the value of the isDuplicateCheck property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Boolean }
+     *     
+     */
+    public void setIsDuplicateCheck(Boolean value) {
+        this.isDuplicateCheck = value;
+    }
 }

@@ -253,6 +253,7 @@ public class ProfileToXml {
 			if (a.getAttributes() != null) {
 				for (IntelRecordSourceAttribute srcAttribute : a.getAttributes()) {
 					RecordSourceAttribute xmlAttribute = new RecordSourceAttribute();
+					xmlAttribute.setIsDuplicateCheck(srcAttribute.getDuplicateCheck());
 					xmlAttribute.setKey(srcAttribute.getKeyId());
 					xmlAttribute.setIsMulit(srcAttribute.getIsMultiple());
 					xmlAttribute.setOrder(srcAttribute.getOrder());
@@ -341,6 +342,7 @@ public class ProfileToXml {
 					if (a.getAttributeGroup() != null) groups.add(a.getAttributeGroup());
 					
 					EntityTypeAttribute xmlAttribute = new EntityTypeAttribute();
+					xmlAttribute.setIsDuplicateCheck(a.getDuplicateCheck());
 					xmlAttribute.setAttributeKey(a.getAttribute().getKeyId());
 					xmlAttribute.setOrder(a.getOrder());
 					if (a.getAttributeGroup() != null) xmlAttribute.setGroupKey(UuidUtils.uuidToString(a.getAttributeGroup().getUuid()));

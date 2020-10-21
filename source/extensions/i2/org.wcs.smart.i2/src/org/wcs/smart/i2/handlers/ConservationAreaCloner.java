@@ -203,7 +203,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 				for (IntelEntityTypeAttribute i : ia.getAttributes()){
 					IntelEntityTypeAttribute iclone = new IntelEntityTypeAttribute();
 					iclone.setAttribute((IntelAttribute)engine.getNewConservationItem(i.getAttribute()));
-					
+					iclone.setDuplicateCheck(i.getDuplicateCheck());
 					if (i.getAttributeGroup() != null){
 						IntelEntityTypeAttributeGroup group = groups.get(i.getAttributeGroup().getUuid());
 						if (group == null){
@@ -316,6 +316,7 @@ public class ConservationAreaCloner implements IConservationAreaTemplateCloner{
 			clone.setProfiles(new HashSet<>());
 			for (IntelRecordSourceAttribute attribute : source.getAttributes()){
 				IntelRecordSourceAttribute aclone = new IntelRecordSourceAttribute();
+				aclone.setDuplicateCheck(attribute.getDuplicateCheck());
 				if (attribute.getAttribute() != null){
 					aclone.setAttribute( (IntelAttribute)engine.getNewConservationItem(attribute.getAttribute()) );
 				}

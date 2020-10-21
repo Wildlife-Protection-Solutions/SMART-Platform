@@ -723,6 +723,7 @@ public class RecordSourceDialog extends SmartStyledTitleDialog{
 		if (dialog.open() == Window.OK){
 			for (NamedItem ia : dialog.getSelectedAttributes()){
 				IntelRecordSourceAttribute attribute = new IntelRecordSourceAttribute();
+				attribute.setDuplicateCheck(false);
 				attribute.setIsMultiple(null);
 				String keyid = ""; //$NON-NLS-1$
 				if (ia instanceof IntelAttribute){

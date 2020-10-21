@@ -1099,6 +1099,7 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 			
 			for (IntelAttribute ia : dialog.getSelectedAttributes()){
 				IntelEntityTypeAttribute a  = new IntelEntityTypeAttribute();
+				a.setDuplicateCheck(false);
 				a.setAttribute((IntelAttribute) ia);
 				a.setEntityType(type);
 				a.setAttributeGroup(parent);

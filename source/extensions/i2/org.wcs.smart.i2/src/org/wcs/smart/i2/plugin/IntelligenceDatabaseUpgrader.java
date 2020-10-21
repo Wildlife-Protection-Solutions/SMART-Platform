@@ -413,9 +413,11 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 				"ALTER TABLE smart.i_entity_type_attribute add column is_duplicate_check boolean", //$NON-NLS-1$
 				"UPDATE smart.I_ENTITY_TYPE_ATTRIBUTE set IS_DUPLICATE_CHECK = (select true from smart.I_ENTITY_TYPE t where smart.I_ENTITY_TYPE_ATTRIBUTE.entity_type_uuid = t.uuid and t.id_attribute_uuid = smart.I_ENTITY_TYPE_ATTRIBUTE.attribute_uuid)", //$NON-NLS-1$
 				"UPDATE smart.I_ENTITY_TYPE_ATTRIBUTE set IS_DUPLICATE_CHECK = false where IS_DUPLICATE_CHECK is null", //$NON-NLS-1$
+				"alter table smart.I_ENTITY_TYPE_ATTRIBUTE alter column is_duplicate_check set not null", //$NON-NLS-1$
 				
 				"ALTER TABLE smart.i_recordsource_attribute add column is_duplicate_check boolean", //$NON-NLS-1$
 				"UPDATE smart.i_recordsource_attribute set IS_DUPLICATE_CHECK = false", //$NON-NLS-1$
+				"alter table smart.i_recordsource_attribute alter column is_duplicate_check set not null", //$NON-NLS-1$
 		};
 		for (String s : sql) session.createNativeQuery(s).executeUpdate();
 		

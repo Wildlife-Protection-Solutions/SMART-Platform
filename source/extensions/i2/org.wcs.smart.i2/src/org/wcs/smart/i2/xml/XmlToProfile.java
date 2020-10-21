@@ -581,6 +581,11 @@ public class XmlToProfile {
 					warnings.add(MessageFormat.format(Messages.XmlToIntelData_EntityTypeAttributeNotFound, xmlSource.getIdAttribute(), src.getName(), src.getKeyId()));
 					continue;
 				}
+				if (xmlAttribute.isDuplicateCheck() == null) {
+					newAttribute.setDuplicateCheck(false);
+				}else {
+					newAttribute.setDuplicateCheck(xmlAttribute.isDuplicateCheck());
+				}
 				newAttribute.setAttribute(attribute);
 				newAttribute.setEntityType(src);
 				newAttribute.setOrder(xmlAttribute.getOrder());
@@ -632,6 +637,7 @@ public class XmlToProfile {
 				src.setAttributes(new ArrayList<>());
 				for (RecordSourceAttribute xmlSrcAttribute : xmlSource.getAttributes()) {
 					IntelRecordSourceAttribute attribute = new IntelRecordSourceAttribute();
+					
 					attribute.setKeyId(xmlSrcAttribute.getKey());
 					if (xmlSrcAttribute.getAttributeKey() != null) {
 						IntelAttribute srcAttribute = attributes.get(xmlSrcAttribute.getAttributeKey());
@@ -659,6 +665,11 @@ public class XmlToProfile {
 								xmlSrcAttribute.getAttributeKey() == null ? xmlSrcAttribute.getAttributeKey() : xmlSrcAttribute.getEntityTypeKey()
 								));
 						continue;
+					}
+					if (xmlSrcAttribute.isDuplicateCheck() == null) {
+						attribute.setDuplicateCheck(false);
+					}else {
+						attribute.setDuplicateCheck(xmlSrcAttribute.isDuplicateCheck());
 					}
 					attribute.setIsMultiple(xmlSrcAttribute.isIsMulit());
 					attribute.setOrder(xmlSrcAttribute.getOrder());
