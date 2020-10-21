@@ -190,12 +190,23 @@ public enum RecordImportEngine {
 				//narrative
 				Integer narrativeColumn = config.getMappedColumn(Column.NARRATIVE);
 				if (narrativeColumn != null && !data[narrativeColumn].trim().isEmpty()){
-					record.setDescription(data[narrativeColumn].trim());
+					String sp = data[narrativeColumn].trim();
+					if (sp.length() > IntelRecord.SCRATCH_MAX_LENGTH) {
+						warnings.add(MessageFormat.format(Messages.RecordImportEngine_narrativeMaxLength, record.getTitle()));
+						sp = sp.substring(0,IntelRecord.SCRATCH_MAX_LENGTH);
+					}
+					record.setDescription(sp);
+					
 				}
 				//scratchpad
 				Integer scratchColumn = config.getMappedColumn(Column.SCRATCHPAD);
 				if (scratchColumn != null && !data[scratchColumn].trim().isEmpty()){
-					record.setComment(data[scratchColumn].trim());
+					String sp = data[scratchColumn].trim();
+					if (sp.length() > IntelRecord.SCRATCH_MAX_LENGTH) {
+						warnings.add(MessageFormat.format(Messages.RecordImportEngine_scratchpadMaxLength, record.getTitle()));
+						sp = sp.substring(0,IntelRecord.SCRATCH_MAX_LENGTH);
+					}
+					record.setComment(sp);
 				}
 				//record date
 				Integer primaryDateColumn = config.getMappedColumn(Column.PRIMARY_DATE);

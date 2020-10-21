@@ -394,8 +394,22 @@ public class RecordXmlImporter {
 			}else {
 				newRecord.setPrimaryDate(LocalDateTime.now());
 			}
-			if (type.getScratchpad() != null) newRecord.setComment(type.getScratchpad());
-			if (type.getNarrative() != null) newRecord.setDescription(type.getNarrative());
+			if (type.getScratchpad() != null) {
+				String sp = type.getScratchpad().trim();
+				if (sp.length() > IntelRecord.SCRATCH_MAX_LENGTH) {
+					warnings.add(MessageFormat.format(Messages.RecordXmlImporter_scratchpadToLong, newRecord.getTitle()));
+					sp = sp.substring(0,IntelRecord.SCRATCH_MAX_LENGTH);
+				}				
+				newRecord.setComment(sp);
+			}
+			if (type.getNarrative() != null) {
+				String sp = type.getNarrative().trim();
+				if (sp.length() > IntelRecord.SCRATCH_MAX_LENGTH) {
+					warnings.add(MessageFormat.format(Messages.RecordXmlImporter_NarrativeToLong, newRecord.getTitle()));
+					sp = sp.substring(0,IntelRecord.SCRATCH_MAX_LENGTH);
+				}				
+				newRecord.setDescription(sp);
+			}
 
 			try {
 				newRecord.setStatus(IntelRecord.Status.valueOf(type.getStatus()));

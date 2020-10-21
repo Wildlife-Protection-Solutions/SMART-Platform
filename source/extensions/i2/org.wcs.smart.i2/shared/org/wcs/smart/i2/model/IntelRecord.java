@@ -52,7 +52,8 @@ public class IntelRecord extends UuidItem implements IIntelAuditItem{
 	private static final long serialVersionUID = 1L;
 	
 	public static final int MAX_TITLE_LENGTH = 1024;
-	
+	public static final int SCRATCH_MAX_LENGTH = 32_700;
+
 	public enum Status{
 			NEW,
 			PROCESSING,

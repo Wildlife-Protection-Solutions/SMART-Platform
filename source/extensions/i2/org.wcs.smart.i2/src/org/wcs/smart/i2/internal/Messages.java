@@ -1349,11 +1349,13 @@ public class Messages extends NLS {
 	public static String RecordImportEngine_MissingYValue;
 	public static String RecordImportEngine_MultipleEntitiesFound;
 	public static String RecordImportEngine_MultiRecordsExist;
+	public static String RecordImportEngine_narrativeMaxLength;
 	public static String RecordImportEngine_NoEntitiesFound;
 	public static String RecordImportEngine_NoProfileFound;
 	public static String RecordImportEngine_OverwriteBtn;
 	public static String RecordImportEngine_ReadingSubTask;
 	public static String RecordImportEngine_SaveError;
+	public static String RecordImportEngine_scratchpadMaxLength;
 	public static String RecordImportEngine_SingleRecordExists;
 	public static String RecordImportEngine_SkipBtn;
 	public static String RecordImportEngine_TaskName;
@@ -1524,6 +1526,7 @@ public class Messages extends NLS {
 	public static String RecordXmlImporter_ImportFinishedError;
 	public static String RecordXmlImporter_InvalidStatus;
 	public static String RecordXmlImporter_MultiEntitiesFound;
+	public static String RecordXmlImporter_NarrativeToLong;
 	public static String RecordXmlImporter_NoPermission;
 	public static String RecordXmlImporter_NoXmlFileFound;
 	public static String RecordXmlImporter_ParseError;
@@ -1534,6 +1537,7 @@ public class Messages extends NLS {
 	public static String RecordXmlImporter_ProcessingError2;
 	public static String RecordXmlImporter_ProfileFound;
 	public static String RecordXmlImporter_SaveError;
+	public static String RecordXmlImporter_scratchpadToLong;
 	public static String RecordXmlImporter_SourceAttributeListItemNotFound;
 	public static String RecordXmlImporter_SourceAttributenotFound;
 	public static String RecordXmlImporter_SourceNotFound;

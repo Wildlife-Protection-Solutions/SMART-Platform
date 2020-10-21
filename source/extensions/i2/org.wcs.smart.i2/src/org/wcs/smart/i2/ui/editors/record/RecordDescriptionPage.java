@@ -59,6 +59,7 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.SmartSection;
 import org.wcs.smart.i2.ui.dialogs.NewEntityDialog;
@@ -205,6 +206,7 @@ public class RecordDescriptionPage extends EditorPart{
 		headerLabel.setText(recordEditor.getRecord().getTitle() == null ? "" : recordEditor.getRecord().getTitle()); //$NON-NLS-1$
 
 		txtDescription = toolkit.createText(narrativePart, recordEditor.getRecord().getDescription(), SWT.MULTI | SWT.WRAP | SWT.V_SCROLL);
+		txtDescription.setTextLimit(IntelRecord.SCRATCH_MAX_LENGTH);
 		txtDescription.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		if (recordEditor.getEditMode()){
 			txtDescription.addModifyListener(new ModifyListener() {
@@ -223,6 +225,7 @@ public class RecordDescriptionPage extends EditorPart{
 		
 		txtScratchpad = toolkit.createText(scratchpadPart, recordEditor.getRecord().getComment(), SWT.MULTI | SWT.WRAP | SWT.V_SCROLL);
 		txtScratchpad.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		txtScratchpad.setTextLimit(IntelRecord.SCRATCH_MAX_LENGTH);
 		if (recordEditor.getEditMode()){
 			txtScratchpad.addModifyListener(new ModifyListener() {
 				@Override

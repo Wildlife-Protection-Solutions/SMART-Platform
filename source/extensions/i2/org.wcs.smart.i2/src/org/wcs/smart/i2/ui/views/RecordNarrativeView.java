@@ -187,6 +187,7 @@ public class RecordNarrativeView {
 		
 		txt = new Text(parent, SWT.MULTI | SWT.WRAP | SWT.V_SCROLL | SWT.BORDER);
 		txt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		txt.setTextLimit(IntelRecord.SCRATCH_MAX_LENGTH);
 		if (type == FieldType.NARRATIVE){
 			if (recordEditor.getRecord().getDescription() == null){
 				txt.setText(""); //$NON-NLS-1$
