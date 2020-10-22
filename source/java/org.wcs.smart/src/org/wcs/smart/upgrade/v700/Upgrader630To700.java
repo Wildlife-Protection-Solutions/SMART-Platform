@@ -30,6 +30,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -431,23 +432,40 @@ public class Upgrader630To700 implements IDatabaseUpgrader {
 			while (rs2.next()) {
 				byte[] language = rs2.getBytes(1);
 				langs.add(language);
-
-				pslabel.setBytes(1, language);
-				pslabel.setBytes(2, lineuuid);
-				pslabel.setString(3, IconUtils.FixedIconSet.LINE.name);
-				pslabel.addBatch();
-
-				pslabel.setBytes(1, language);
-				pslabel.setBytes(2, blackuuid);
-				pslabel.setString(3, IconUtils.FixedIconSet.BLACK.name);
-				pslabel.addBatch();
-
-				pslabel.setBytes(1, language);
-				pslabel.setBytes(2, coloruuid);
-				pslabel.setString(3, IconUtils.FixedIconSet.COLOR.name);
-				pslabel.addBatch();
 			}
+		}
+		
+		if (langs.isEmpty()) { 
+			//make a default language
+			byte[] languageuuid = DerbyUtils.createUuid();
+			
+			PreparedStatement l = c.prepareStatement("INSERT INTO smart.language (uuid, ca_uuid, isdefault, code) VALUES (?,?,?,?)"); //$NON-NLS-1$
+			l.setBytes(1, languageuuid);
+			l.setBytes(2, cuuid);
+			l.setBoolean(3, true);
+			l.setString(4, Locale.getDefault().getLanguage());
+			
+			l.execute();
 
+			langs.add(languageuuid);
+			
+		}
+		
+		for (byte[] language : langs) {
+			pslabel.setBytes(1, language);
+			pslabel.setBytes(2, lineuuid);
+			pslabel.setString(3, IconUtils.FixedIconSet.LINE.name);
+			pslabel.addBatch();
+
+			pslabel.setBytes(1, language);
+			pslabel.setBytes(2, blackuuid);
+			pslabel.setString(3, IconUtils.FixedIconSet.BLACK.name);
+			pslabel.addBatch();
+
+			pslabel.setBytes(1, language);
+			pslabel.setBytes(2, coloruuid);
+			pslabel.setString(3, IconUtils.FixedIconSet.COLOR.name);
+			pslabel.addBatch();
 		}
 
 		psiconset.executeBatch();
