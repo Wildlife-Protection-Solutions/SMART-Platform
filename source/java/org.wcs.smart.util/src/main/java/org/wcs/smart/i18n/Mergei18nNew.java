@@ -1,26 +1,23 @@
 package org.wcs.smart.i18n;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.DirectoryFileFilter;
-import org.apache.commons.io.filefilter.IOFileFilter;
 /**
  * Matches i18n resource property files in fragments with the
  * default property file and removes any no longer used key/value pairs.  It
@@ -35,39 +32,43 @@ import org.apache.commons.io.filefilter.IOFileFilter;
  */
 @SuppressWarnings("nls")
 public class Mergei18nNew {
+	
+	private static final String ROOT = "C:\\data\\SMART\\Source\\Trunk\\";
 
     public static final String IN_DIR[] = {
-    	"C:\\data\\SMART\\Source\\Version6.2.x\\svn\\source\\java",
-    	"C:\\data\\SMART\\Source\\Version6.2.x\\svn\\source\\extensions\\asset",
-		"C:\\data\\SMART\\Source\\Version6.2.x\\svn\\source\\extensions\\connect",
-		"C:\\data\\SMART\\Source\\Version6.2.x\\svn\\source\\extensions\\cybertracker",
-		"C:\\data\\SMART\\Source\\Version6.2.x\\svn\\source\\extensions\\entity",
-		"C:\\data\\SMART\\Source\\Version6.2.x\\svn\\source\\extensions\\er",
-		"C:\\data\\SMART\\Source\\Version6.2.x\\svn\\source\\extensions\\i2",
-		"C:\\data\\SMART\\Source\\Version6.2.x\\svn\\source\\extensions\\event",
-		"C:\\data\\SMART\\Source\\Version6.2.x\\svn\\source\\extensions\\qa",
-		"C:\\data\\SMART\\Source\\Version6.2.x\\svn\\source\\extensions\\r",
+    	ROOT + "svn\\source\\java",
+    	ROOT + "svn\\source\\extensions\\asset",
+		ROOT + "svn\\source\\extensions\\connect",
+		ROOT + "svn\\source\\extensions\\cybertracker",
+		ROOT + "svn\\source\\extensions\\entity",
+		ROOT + "svn\\source\\extensions\\er",
+		ROOT + "svn\\source\\extensions\\event",
+		ROOT + "svn\\source\\extensions\\i2",
+		ROOT + "svn\\source\\extensions\\paws",
+		ROOT + "svn\\source\\extensions\\qa",
+		ROOT + "svn\\source\\extensions\\r",
     };
     
     public static final String TRANS_DIR[] = {
-    	"C:\\data\\SMART\\Source\\Version6.2.x\\svn\\source\\translations\\",
-		"C:\\data\\SMART\\Source\\Version6.2.x\\svn\\source\\extensions\\asset\\translations",
-		"C:\\data\\SMART\\Source\\Version6.2.x\\svn\\source\\extensions\\connect\\translations",
-		"C:\\data\\SMART\\Source\\Version6.2.x\\svn\\source\\extensions\\cybertracker\\translations",
-		"C:\\data\\SMART\\Source\\Version6.2.x\\svn\\source\\extensions\\entity\\translations",
-		"C:\\data\\SMART\\Source\\Version6.2.x\\svn\\source\\extensions\\er\\translations",
-		"C:\\data\\SMART\\Source\\Version6.2.x\\svn\\source\\extensions\\i2\\translations",
-		"C:\\data\\SMART\\Source\\Version6.2.x\\svn\\source\\extensions\\event\\translations",
-		"C:\\data\\SMART\\Source\\Version6.2.x\\svn\\source\\extensions\\qa\\translations",
-		"C:\\data\\SMART\\Source\\Version6.2.x\\svn\\source\\extensions\\r\\translations",
+   		ROOT + "svn\\source\\translations\\",
+   		ROOT + "svn\\source\\extensions\\asset\\translations",
+   		ROOT + "svn\\source\\extensions\\connect\\translations",
+   		ROOT + "svn\\source\\extensions\\cybertracker\\translations",
+   		ROOT + "svn\\source\\extensions\\entity\\translations",
+   		ROOT + "svn\\source\\extensions\\er\\translations",
+   		ROOT + "svn\\source\\extensions\\event\\translations",
+   		ROOT + "svn\\source\\extensions\\i2\\translations",
+   		ROOT + "svn\\source\\extensions\\paws\\translations",
+   		ROOT + "svn\\source\\extensions\\qa\\translations",
+   		ROOT + "svn\\source\\extensions\\r\\translations",
     };
 	
 //    public static final String[] LANGUAGES =  new String[] {"ar", "es","fr", "hi","in","ka","kar","km","lo","mn","ms","ru","sw","th","vi","zh","pt"};
-    public static final String[] LANGUAGES =  new String[] {"pt"};
+    public static final String[] LANGUAGES =  new String[] {"es", "pt"};
     
     public static final String LINE_SEP = "\n";
 
-    public static final String NATIVE2ASCII = "C:\\Java\\jdk1.6.0_38\\bin\\native2ascii.exe";
+    public static final String NATIVE2ASCII = "C:\\Java\\jdk1.8.0_201\\bin\\native2ascii.exe";
 
     /**
      * find all plugin.properties, messages.properties or bundle.properties
@@ -77,69 +78,70 @@ public class Mergei18nNew {
      * @return
      * @throws Exception
      */
-    public File[] findFiles(String srcDir, String transDir) throws Exception {
-        File src = new File(srcDir);
+    public List<Path> findFiles(String srcDir, String transDir) throws Exception {
+    	
+    	Path start = Paths.get(srcDir);
+    	
+    	List<Path> files = new ArrayList<>();
+    	
+    	Files.walkFileTree(start, new FileVisitor<Path>() {
 
-        IOFileFilter filter = new IOFileFilter() {
+			@Override
+			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+				if (dir.getFileName().toString().equals("bin")) return FileVisitResult.SKIP_SUBTREE;
+				if (dir.getFileName().toString().equals("target")) return FileVisitResult.SKIP_SUBTREE;
+				return FileVisitResult.CONTINUE;
+			}
 
-            @Override
-            public boolean accept(File dir, String name) {
-                return accept(new File(dir, name));
-            }
+			@Override
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+				String name = file.getFileName().toString();
+				if (name.equals("plugin.properties") || name.equals("messages.properties") || 
+						name.equals("bundle.properties")) {
+					files.add(file);
+				}
+				
+				return FileVisitResult.CONTINUE;
+			}
 
-            @Override
-            public boolean accept(File file) {
-                /* exclude bin dir */
-                if (checkBin(file)){
-                    return false;
-                }
+			@Override
+			public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+				return FileVisitResult.TERMINATE;
+			}
 
-                return (file.getName().equals("plugin.properties")
-                        || file.getName().equals("messages.properties") || file
-                        .getName().equals("bundle.properties"));
-
-            }
-
-            private boolean checkBin(File f){
-                if (f == null){
-                    return false;
-                }
-                if (f.getName().equals("bin") || f.getName().equals("target")){
-                    return true;
-                }
-                return checkBin(f.getParentFile());
-            }
-        };
-
-        Collection<File> files = FileUtils.listFiles(src, filter,
-                DirectoryFileFilter.DIRECTORY);
+			@Override
+			public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+				return FileVisitResult.CONTINUE;
+			}
+		});
+    	
         int i = 1;
-        for (File f : files) {
-            System.out.println("Processing: " +f.getAbsolutePath() + "  " + (i++) + "/" + files.size() );
+        for (Path f : files) {
+            System.out.println("Processing: " +f.toString() + "  " + (i++) + "/" + files.size() );
             processFile(f, transDir);
         }
 
-        return files.toArray(new File[files.size()]);
+        return files;
     }
 
     /*
      * Processes a base file, looking for matching i18n files
      * and merging matched files.
      */
-    private void processFile(File enFile, String stransDir) throws Exception {
+    private void processFile(Path enFile, String stransDir) throws Exception {
        
-        int index = enFile.getCanonicalPath().indexOf("org.wcs.smart");
-        String pluginName = enFile.getCanonicalPath().substring(index);
+        int index = enFile.toString().indexOf("org.wcs.smart");
+        String pluginName = enFile.toString().substring(index);
         index = pluginName.indexOf(File.separator);
         pluginName = pluginName.substring(0, index);
-        String pathName = enFile.getCanonicalPath().substring(enFile.getCanonicalPath().indexOf(pluginName) + pluginName.length());
+        String pathName = enFile.toString().substring(enFile.toString().indexOf(pluginName) + pluginName.length());
         
         Path transFile = Paths.get(pathName);
 
         final String matchDir = pluginName + ".nl";
         
         
-        Path translationsPath = Paths.get(stransDir + File.separator + matchDir + File.separator + pathName).getParent();
+        Path translationsPath = Paths.get(stransDir).resolve(matchDir).resolve(pathName.substring(1)).getParent();
         
         int index2 = transFile.getFileName().toString().lastIndexOf('.');
         final String prefix = transFile.getFileName().toString().substring(0, index2);
@@ -148,10 +150,10 @@ public class Mergei18nNew {
         for (String langCode : LANGUAGES) {
         	Path toMerge = translationsPath.resolve(prefix + "_" + langCode + "." + postfix);
 
-        	if (!enFile.exists() || !Files.exists(toMerge)){
+        	if (!Files.exists(enFile) || !Files.exists(toMerge)){
            		System.err.println("Error either source or target file does not exists. " + enFile.toString() + "  |  " + toMerge.toString());
            	}else{
-           		mergeFile(enFile, toMerge.toFile());
+           		mergeFile(enFile, toMerge);
            	}
         }
     }
@@ -159,7 +161,7 @@ public class Mergei18nNew {
     /*
      * Processes a file and its matched i18n files
      */
-    private void mergeFile(File sourceFile, File targetFile) throws Exception {
+    private void mergeFile(Path sourceFile, Path targetFile) throws Exception {
         boolean changes = false;
 
         HashMap<String, String> source = readFile(sourceFile);
@@ -167,10 +169,10 @@ public class Mergei18nNew {
 
         for (Entry<String, String> e : source.entrySet()){
             if (!target.containsKey(e.getKey())){
-                //System.out.println("add: " + e.getKey());
+//                System.out.println("add: " + e.getKey());
 //                target.put(e.getKey(), e.getValue());
-//                target.put(e.getKey(), "**NEW**" + e.getValue());
-//                changes = true;
+                target.put(e.getKey(), "**NEW**" + e.getValue());
+                changes = true;
             }
         }
 
@@ -197,9 +199,9 @@ public class Mergei18nNew {
     /*
      * reads i18n properties file
      */
-    private HashMap<String, String> readFile(File f) throws Exception {
+    private HashMap<String, String> readFile(Path f) throws Exception {
         Properties prop = new Properties();
-        try(FileReader fr = new FileReader(f)){
+        try(InputStream fr = Files.newInputStream(f)){
         	prop.load(fr);
         }
 
@@ -214,18 +216,22 @@ public class Mergei18nNew {
     /*
      * reads i18n properties file
      */
-    private void writeFile(File f, HashMap<String, String> values) throws Exception {
-        System.out.println("Writing " + f.getPath() );
+    private void writeFile(Path f, HashMap<String, String> values) throws Exception {
+        System.out.println("Writing " + f.toString() );
+        
         SortedProperties properties = new SortedProperties();
         for(String key : values.keySet()){
             properties.put(key, values.get(key));
         }
 
-        try(OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(f.toString() + ".temp"), StandardCharsets.UTF_8)){
+
+        Path tempFile = f.getParent().resolve(f.getFileName().toString() + ".temp");
+        
+        try(OutputStreamWriter writer = new OutputStreamWriter(Files.newOutputStream(tempFile), StandardCharsets.UTF_8)){
         	properties.store(writer, "Auto generated from conversion file on " + DateFormat.getDateTimeInstance().format(new Date()));
         }
 
-        String cmd = "\"" + NATIVE2ASCII + "\" -encoding utf8 \"" + f.toString() + ".temp\" " + f.toString();
+        String cmd = "\"" + NATIVE2ASCII + "\" -encoding utf8 \"" + tempFile.toString() + "\" " + f.toString() + "";
         System.out.println(cmd);
         Process pr = Runtime.getRuntime().exec(cmd);
         InputStream is = pr.getInputStream();
@@ -233,8 +239,7 @@ public class Mergei18nNew {
         is = pr.getErrorStream();
         while(is.read() != -1){}
 
-        ((new File(f.toString() + ".temp"))).delete();
-
+        Files.delete(tempFile);
     }
 
     public static void main(String args[]) {

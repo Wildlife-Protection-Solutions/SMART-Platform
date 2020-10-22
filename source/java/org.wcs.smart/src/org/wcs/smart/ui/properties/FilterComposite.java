@@ -233,6 +233,7 @@ public class FilterComposite extends Composite {
 	 */
 	public void setText(String text){
 		txtFilter.setText(text);
+		setPattern(text);
 	}
 	
 	/**

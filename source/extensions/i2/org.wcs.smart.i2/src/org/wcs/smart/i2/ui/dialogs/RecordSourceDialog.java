@@ -88,7 +88,6 @@ import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelEntityType;
-import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelProfileRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSource;
@@ -218,7 +217,7 @@ public class RecordSourceDialog extends SmartStyledTitleDialog{
 		parent = (Composite)super.createDialogArea(parent);
 		
 		sections = new SectionHeader(parent, SWT.NONE, 
-				new String[] {"Name","Profiles","Attributes"},
+				new String[] {Messages.RecordSourceDialog_NameSection,Messages.RecordSourceDialog_ProfilesSection,Messages.RecordSourceDialog_AttributesSection},
 				new Listener[] {
 						e->selectTab(nameComp),
 						e->selectTab(profilesComp),

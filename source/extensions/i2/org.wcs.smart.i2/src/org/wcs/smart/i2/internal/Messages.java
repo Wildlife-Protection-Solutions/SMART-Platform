@@ -1420,14 +1420,17 @@ public class Messages extends NLS {
 	public static String RecordSourceAttributeDialog_WarningDialogTitle;
 	public static String RecordSourceAttributeLabelProvider_NoLabel;
 	public static String RecordSourceAttributeLabelProvider_YesLabel;
+	public static String RecordSourceDialog_AttributesSection;
 	public static String RecordSourceDialog_ErrorTitle;
 	public static String RecordSourceDialog_InvalidTitle;
 	public static String RecordSourceDialog_jobname;
 	public static String RecordSourceDialog_KeyColumn;
 	public static String RecordSourceDialog_NameAndKeyRequired;
+	public static String RecordSourceDialog_NameSection;
 	public static String RecordSourceDialog_NewRecordSource;
 	public static String RecordSourceDialog_ProfileError;
 	public static String RecordSourceDialog_ProfilesLabel;
+	public static String RecordSourceDialog_ProfilesSection;
 	public static String RecordSourceGroupByDropItem_AllOption;
 	public static String RecordStatusGroupByDropItem_AllOption;
 	public static String RecordSummaryPage_AttachmentsSection;
