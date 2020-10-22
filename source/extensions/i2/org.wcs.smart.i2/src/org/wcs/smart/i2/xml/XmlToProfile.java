@@ -173,7 +173,9 @@ public class XmlToProfile {
 
 		IntelProfile profile = new IntelProfile();
 		profile.setKeyId(data.getKey());
-		profile.setColorObj(Color.decode("#"+data.getColor())); //$NON-NLS-1$
+		if (data.getColor() != null) {
+			profile.setColorObj(Color.decode("#"+data.getColor())); //$NON-NLS-1$
+		}
 		profile.setConservationArea(ca);
 		profile.setRecordSources(new HashSet<>());
 		profile.setEntityTypes(new HashSet<>());
@@ -257,21 +259,31 @@ public class XmlToProfile {
 		//save changes
 		progress.split(1);
 		progress.subTask(Messages.XmlToIntelData_SaveTask);
+		
+		
 		session.beginTransaction();
 		try {
 			
 			List<IntelProfileEntityType> types = new ArrayList<>(profile.getEntityTypes());
+			List<IntelProfileRecordSource> sources = new ArrayList<>(profile.getRecordSources());
+			
 			profile.getEntityTypes().clear();
+			profile.getRecordSources().clear();
 			session.save(profile);
-			for (IntelProfileEntityType ipe : types) {
-				for (IntelEntityTypeAttribute att: ipe.getEntityType().getAttributes()) {
-					session.saveOrUpdate(att.getAttribute());
-				}
-			}
-			for (IntelProfileEntityType ipe : types) {
-				session.saveOrUpdate(ipe.getEntityType());
-			}
+			
+			
+			types.forEach(ipe->ipe.getEntityType().getAttributes().forEach(att->session.saveOrUpdate(att.getAttribute())));
+			types.forEach(ipe->session.saveOrUpdate(ipe.getEntityType()));
+			
 			profile.getEntityTypes().addAll(types);
+			
+			session.flush();	
+			sources.forEach(src->src.getRecordSource().getAttributes().forEach(att->{
+				if (att.getAttribute() != null) session.saveOrUpdate(att.getAttribute());
+			}));
+			
+			sources.forEach(s->session.saveOrUpdate(s.getRecordSource()));
+			profile.getRecordSources().addAll(sources);
 			session.flush();		
 			
 			IntelPermission ip = new IntelPermission();

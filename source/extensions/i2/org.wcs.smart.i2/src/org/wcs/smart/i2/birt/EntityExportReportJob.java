@@ -166,7 +166,7 @@ public class EntityExportReportJob extends Job {
 			
 			HashMap<String, Object> reportParameters = new HashMap<String, Object>();
 			reportParameters.put(DataSourceParameter.ENTITY_UUID.getName(), UuidUtils.uuidToString(entity.getUuid()));
-			if (dateFilter != null && dateFilter.length == 2){
+			if (dateFilter != null && dateFilter.length == 2 && dateFilter[0] != null && dateFilter[1] != null){
 				reportParameters.put(DataSourceParameter.START_DATE.getName(), java.sql.Date.valueOf(dateFilter[0]));
 				reportParameters.put(DataSourceParameter.END_DATE.getName(), java.sql.Date.valueOf(dateFilter[1]));
 			}

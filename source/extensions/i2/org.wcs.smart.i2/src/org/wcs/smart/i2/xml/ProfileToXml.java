@@ -172,7 +172,9 @@ public class ProfileToXml {
 		progress.subTask(Messages.IntelDataToXml_conversionTask);
 		Profile data = new Profile();
 		data.setKey(profile.getKeyId());
-		data.setColor(Integer.toHexString(profile.getColor()).substring(2));
+		if (profile.getColor() != null) {
+			data.setColor(Integer.toHexString(profile.getColor()).substring(2));
+		}
 		data.getNames().addAll(convertNamedItem(profile));
 
 		
