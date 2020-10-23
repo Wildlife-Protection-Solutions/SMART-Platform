@@ -1010,23 +1010,36 @@ public class UpgradeServlet extends HttpServlet {
 			while (rs2.next()) {
 				UUID language = (UUID) rs2.getObject(1);
 				langs.add(language);
-
-				pslabel.setObject(1, language);
-				pslabel.setObject(2, lineuuid);
-				pslabel.setString(3, IconUtils.FixedIconSet.LINE.name);
-				pslabel.addBatch();
-
-				pslabel.setObject(1, language);
-				pslabel.setObject(2, blackuuid);
-				pslabel.setString(3, IconUtils.FixedIconSet.BLACK.name);
-				pslabel.addBatch();
-
-				pslabel.setObject(1, language);
-				pslabel.setObject(2, coloruuid);
-				pslabel.setString(3, IconUtils.FixedIconSet.COLOR.name);
-				pslabel.addBatch();
 			}
+		}
+		if (langs.isEmpty()) {
+			UUID luuid = createUuid(c);
+			langs.add(luuid);
+			
+			PreparedStatement l = c.prepareStatement("INSERT INTO smart.language (uuid, ca_uuid, isdefault, code) VALUES (?,?,?,?)"); //$NON-NLS-1$
+			l.setObject(1, luuid);
+			l.setObject(2, cuuid);
+			l.setBoolean(3, true);
+			l.setString(4, Locale.getDefault().getLanguage());
+			
+			l.execute();
+		}
+		
+		for (UUID language : langs) {
+			pslabel.setObject(1, language);
+			pslabel.setObject(2, lineuuid);
+			pslabel.setString(3, IconUtils.FixedIconSet.LINE.name);
+			pslabel.addBatch();
 
+			pslabel.setObject(1, language);
+			pslabel.setObject(2, blackuuid);
+			pslabel.setString(3, IconUtils.FixedIconSet.BLACK.name);
+			pslabel.addBatch();
+
+			pslabel.setObject(1, language);
+			pslabel.setObject(2, coloruuid);
+			pslabel.setString(3, IconUtils.FixedIconSet.COLOR.name);
+			pslabel.addBatch();
 		}
 
 		psiconset.executeBatch();
