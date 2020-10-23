@@ -340,7 +340,6 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine implements IDerb
 		sql.append(tablePrefix(PatrolLeg.class) + ".id, "); //$NON-NLS-1$
 		sql.append(tablePrefix(PatrolLeg.class) + ".transport_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(PatrolLegDay.class) + ".uuid, "); //$NON-NLS-1$
-		sql.append(tablePrefix(PatrolLegDay.class) + ".patrol_day, "); //$NON-NLS-1$
 
 		sql.append(tablePrefix(Waypoint.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".id, "); //$NON-NLS-1$
@@ -379,10 +378,9 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine implements IDerb
 		sql.append("p_legid varchar(50),"); //$NON-NLS-1$
 		sql.append("pl_transport_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("pld_uuid char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("wp_date date,"); //$NON-NLS-1$ //sql.append("pld_patrol_day date,");
-		sql.append("wp_uuid char(16) for bit data,"); //$NON-NLS-1$
 
-		sql.append("wp_id integer,"); //$NON-NLS-1$
+		sql.append("wp_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("wp_id varchar(32),"); //$NON-NLS-1$
 		sql.append("wp_x double,"); //$NON-NLS-1$
 		sql.append("wp_y double,"); //$NON-NLS-1$
 		sql.append("wp_direction real,"); //$NON-NLS-1$
@@ -444,15 +442,14 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine implements IDerb
 		it.setArmed(rs.getBoolean("p_armed")); //$NON-NLS-1$
 		it.setTransportType(rs.getString("p_transporttype")); //$NON-NLS-1$
 		it.setPatrolLegId(rs.getString("p_legid")); //$NON-NLS-1$
-		it.setWpDateTime(rs.getDate("wp_date").toLocalDate()); //$NON-NLS-1$
 		
 		it.setLeader(rs.getString("p_leader")); //$NON-NLS-1$
 		it.setPilot(rs.getString("p_pilot")); //$NON-NLS-1$
 		it.setWaypointUuid(UuidUtils.byteToUUID(rs.getBytes("wp_uuid"))); //$NON-NLS-1$
-		it.setWaypointId(rs.getInt("wp_id")); //$NON-NLS-1$
+		it.setWaypointId(rs.getString("wp_id")); //$NON-NLS-1$
 		it.setWaypointX(rs.getDouble("wp_x")); //$NON-NLS-1$
 		it.setWaypointY(rs.getDouble("wp_y")); //$NON-NLS-1$
-		it.setWaypointTime(rs.getTime("wp_time").toLocalTime()); //$NON-NLS-1$
+		it.setWaypointDateTime(rs.getTimestamp("wp_time").toLocalDateTime()); //$NON-NLS-1$
 		it.setWaypointDirection(rs.getObject("wp_direction") == null ? null : rs.getFloat("wp_direction")); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setWaypointDistance(rs.getObject("wp_distance") == null ? null : rs.getFloat("wp_distance")); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setWaypointComment(rs.getString("wp_comment")); //$NON-NLS-1$

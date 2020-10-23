@@ -66,6 +66,7 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.ui.WaypointInfoShellProvider;
 import org.wcs.smart.smartcollect.SmartCollectIncidentFeatureFactory;
 import org.wcs.smart.smartcollect.internal.Messages;
+import org.wcs.smart.smartcollect.model.SmartCollectWaypoint;
 import org.wcs.smart.udig.EditPointTool;
 import org.wcs.smart.udig.IMapEditManager;
 import org.wcs.smart.udig.UndoTool;
@@ -118,8 +119,6 @@ public class IncidentMapPage extends SmartMapEditorPart {
 			
 		}
 		this.mapTools = tools.toArray(new String[tools.size()]);
-		
-		
 	}
 	
 	@Override
@@ -332,9 +331,9 @@ public class IncidentMapPage extends SmartMapEditorPart {
     		}
     		@Override
 			public synchronized void moveFeature(Object feature, int x, int y, IViewportModel vm) {
-				if (!(feature instanceof Waypoint)) return ;
+				if (!(feature instanceof SmartCollectWaypoint)) return ;
 				
-				Waypoint pw = (Waypoint) feature;
+				Waypoint pw = ((SmartCollectWaypoint) feature).getWaypoint();
 				Coordinate crspx = vm.pixelToWorld(x, y);
 				//convert to lat/long
 				if (!CRS.equalsIgnoreMetadata(vm.getCRS(), SmartDB.DATABASE_CRS)){

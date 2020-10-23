@@ -443,7 +443,7 @@ public class MissionImporter extends AbstractSmartImporter {
 		SurveyWaypoint swp = new SurveyWaypoint();
 		Waypoint wp = new Waypoint();
 		wp.setObservationGroups(new ArrayList<>());
-		wp.setId(mday.getWaypoints().size()+1);
+		wp.setId(String.valueOf(mday.getWaypoints().size()+1));
 		wp.setSourceId(SurveyWaypointSource.KEY);
 		wp.setConservationArea(SmartDB.getCurrentConservationArea());
 		wp.setRawX(0);

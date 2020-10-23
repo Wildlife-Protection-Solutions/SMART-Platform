@@ -39,7 +39,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.incident.IIncidentXmlExporter;
 import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.internal.Messages;
-import org.wcs.smart.incident.xml.model.v21.WaypointType;
+import org.wcs.smart.incident.xml.model.v22.WaypointType;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;

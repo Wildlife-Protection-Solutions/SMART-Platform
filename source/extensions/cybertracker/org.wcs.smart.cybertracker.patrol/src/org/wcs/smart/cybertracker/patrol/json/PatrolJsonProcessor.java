@@ -245,7 +245,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 				//Parse the waypoint information 				
 				Waypoint wp = parser.createWaypoint(feature, ca, session);
 				warnings.addAll(parser.getWarnings());
-				wp.setId(observationCounter);
+				wp.setId(String.valueOf(observationCounter));
 				wp.setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
 				wp.setConservationArea(SmartDB.getCurrentConservationArea());
 				allSize = JsonCtParser.processImages(wp, allSize, session);

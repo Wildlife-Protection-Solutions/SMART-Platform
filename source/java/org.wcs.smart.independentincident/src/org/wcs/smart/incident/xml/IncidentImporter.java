@@ -112,6 +112,7 @@ public class IncidentImporter implements IIncidentXmlImporter{
 		if (ns == null) return false;
 		if (ns.equals(org.wcs.smart.incident.xml.model.v20.ObjectFactory._Waypoint_QNAME.getNamespaceURI())) return true;
 		if (ns.equals(org.wcs.smart.incident.xml.model.v21.ObjectFactory._Waypoint_QNAME.getNamespaceURI())) return true;
+		if (ns.equals(org.wcs.smart.incident.xml.model.v22.ObjectFactory._Waypoint_QNAME.getNamespaceURI())) return true;
 		return false;
 	}
 	/**
@@ -243,7 +244,7 @@ public class IncidentImporter implements IIncidentXmlImporter{
 					new Object[] {"sourceId", IndepedentIncidentSource.KEY}); //$NON-NLS-1$
 			if (cnt > 0){
 				final boolean[] cont = new boolean[]{true};
-				final int  pid = wp.getId();
+				final String  pid = wp.getId();
 				Display.getDefault().syncExec(new Runnable(){
 
 						@Override
@@ -251,7 +252,7 @@ public class IncidentImporter implements IIncidentXmlImporter{
 							MessageDialog dialog = new MessageDialog(Display.getDefault().getActiveShell(), Messages.IncidentImporter_ImportDialogTitle, 
 									null,
 									MessageFormat.format(
-											Messages.IncidentImporter_IdDuplicated,new Object[]{String.valueOf(pid)}),
+											Messages.IncidentImporter_IdDuplicated,new Object[]{pid}),
 									MessageDialog.QUESTION, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 1);
 							int ret = dialog.open();
 							if (ret == 1){

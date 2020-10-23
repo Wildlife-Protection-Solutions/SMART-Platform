@@ -33,8 +33,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.w3c.dom.Document;
-import org.wcs.smart.er.xml.model.missions.v11.MissionType;
-import org.wcs.smart.er.xml.model.missions.v11.ObjectFactory;
+import org.wcs.smart.er.xml.model.missions.v12.MissionType;
+import org.wcs.smart.er.xml.model.missions.v12.ObjectFactory;
 
 
 /**
@@ -44,7 +44,7 @@ import org.wcs.smart.er.xml.model.missions.v11.ObjectFactory;
  */
 public class MissionXmlManager {
 	
-	private static final String METADATA_CLASSES_PACKAGE = "org.wcs.smart.er.xml.model.missions.v11"; //$NON-NLS-1$
+	private static final String METADATA_CLASSES_PACKAGE = "org.wcs.smart.er.xml.model.missions.v12"; //$NON-NLS-1$
 	
 	public static final String ATTACHMENT_DIR_NAME = "attachments"; //$NON-NLS-1$
 	

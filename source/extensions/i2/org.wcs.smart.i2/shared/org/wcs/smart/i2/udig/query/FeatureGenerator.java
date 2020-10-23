@@ -21,9 +21,8 @@
  */
 package org.wcs.smart.i2.udig.query;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
-import java.time.temporal.Temporal;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -37,6 +36,7 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.feature.type.Name;
+import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.query.IGeometryResultItem;
 import org.wcs.smart.i2.query.IQueryColumn;
 import org.wcs.smart.i2.query.IQueryColumn.Type;
@@ -114,11 +114,16 @@ public class FeatureGenerator {
 			}else{
 				x = 0;
 			}
+		}else if (x instanceof IntelRecordSource) {
+			x = ((IntelRecordSource) x).getName();
 		}
-		if (column.getDataType() == IQueryColumn.Type.TIME &&
-				descriptor.getType().getBinding().equals(String.class)){
-				//this is a datetime object which needs to be converted to a string
-				x = DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM).format((Temporal)x);
+		
+		if (column.getDataType() == IQueryColumn.Type.TIME ){
+			if (x instanceof LocalDateTime) {
+				x = ((LocalDateTime)x).toLocalTime();
+			}
+		}else if (column.getDataType() == IQueryColumn.Type.DATE) {
+			if (x instanceof LocalDateTime) x= ((LocalDateTime)x).toLocalDate();
 		}
 		return x;
 	}

@@ -111,7 +111,7 @@ public class Messages extends NLS {
 	public static String DataModelTreeNode_DmGroupByLabel;
 	public static String DataModelTreeNode_DmValuesLabel;
 	public static String DateGroupBy_InvalidFilter;
-	public static String DateTreeNode_TreeNodeLabel;
+	public static String DateTreeNode_TreeNodeLabel1;
 	public static String DayDateGroupBy_GroupByDayName;
 	public static String DefinitionPanelManager_QueryEditingPanelError;
 	public static String DefinitionPanelManager_QueryItemPanelError;

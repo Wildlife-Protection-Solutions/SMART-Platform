@@ -53,9 +53,9 @@ public abstract class QueryColumn implements Cloneable{
 		NUMBER("Double", java.sql.Types.DOUBLE), //$NON-NLS-1$
 		STRING("String", java.sql.Types.VARCHAR), //$NON-NLS-1$
 		BOOLEAN("Integer", java.sql.Types.BOOLEAN), //$NON-NLS-1$
-		DATE("Date", java.sql.Types.DATE), //$NON-NLS-1$
-		DATETIME("Date", java.sql.Types.TIMESTAMP), //$NON-NLS-1$ 
-		TIME("Date", java.sql.Types.TIME), //$NON-NLS-1$
+		DATE("java.time.LocalDate", java.sql.Types.DATE), //$NON-NLS-1$
+		DATETIME("java.time.LocalDateTime", java.sql.Types.TIMESTAMP), //$NON-NLS-1$ 
+		TIME("java.time.LocalTime", java.sql.Types.TIME), //$NON-NLS-1$
 		TIME_STR("String", java.sql.Types.VARCHAR), //$NON-NLS-1$
 		BLOB("Blob", java.sql.Types.BLOB); //$NON-NLS-1$
 		

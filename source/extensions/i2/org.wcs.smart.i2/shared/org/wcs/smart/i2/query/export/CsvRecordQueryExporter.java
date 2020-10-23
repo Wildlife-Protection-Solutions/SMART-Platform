@@ -26,6 +26,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -71,7 +73,7 @@ public class CsvRecordQueryExporter implements IQueryExporter{
 	}
 	
 	@Override
-	public void exportQuery(Session session, IQueryResult result, Path destination,
+	public Collection<Path> exportQuery(Session session, IQueryResult result, Path destination,
 			HashMap<ExportOption, Object> exportOptions) throws Exception {
 		
 		IPagedQueryResultSet results = (IPagedQueryResultSet) result;
@@ -159,11 +161,10 @@ public class CsvRecordQueryExporter implements IQueryExporter{
 						data.add(results.getQueryColumns().get(i).getValue(item,l));
 					}
 				}
-				writer.writeNext(data.toArray(new String[data.size()]));
-				
-			}
-				
+				writer.writeNext(data.toArray(new String[data.size()]));	
+			}		
 		}
+		return Collections.singletonList(destination);
 	}
 
 	

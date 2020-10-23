@@ -301,12 +301,12 @@ public class AssetObservationEngine extends AssetQueryEngine {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
 		sql.append("wp_uuid uuid,"); //$NON-NLS-1$
-		sql.append("wp_id integer,"); //$NON-NLS-1$
+		sql.append("wp_id varchar(32),"); //$NON-NLS-1$
 		sql.append("wp_x double precision,"); //$NON-NLS-1$
 		sql.append("wp_y double precision,"); //$NON-NLS-1$
 		sql.append("wp_direction double precision,"); //$NON-NLS-1$
 		sql.append("wp_distance double precision,"); //$NON-NLS-1$
-		sql.append("wp_time timestamp,"); //$NON-NLS-1$
+		sql.append("wp_date timestamp,"); //$NON-NLS-1$
 		sql.append("wp_comment varchar(4096),"); //$NON-NLS-1$
 		sql.append("wp_lastmodified timestamp,"); //$NON-NLS-1$
 		sql.append("wp_lastmodifiedby uuid,"); //$NON-NLS-1$
@@ -332,10 +332,10 @@ public class AssetObservationEngine extends AssetQueryEngine {
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
 		it.setConservationAreaUuid((UUID)rs.getObject("wp_ca_uuid")); //$NON-NLS-1$
 		it.setWaypointUuid((UUID)rs.getObject("wp_uuid")); //$NON-NLS-1$
-		it.setWaypointId(rs.getInt("wp_id")); //$NON-NLS-1$
+		it.setWaypointId(rs.getString("wp_id")); //$NON-NLS-1$
 		it.setWaypointX(rs.getDouble("wp_x")); //$NON-NLS-1$
 		it.setWaypointY(rs.getDouble("wp_y")); //$NON-NLS-1$
-		it.setWaypointDate(rs.getTimestamp("wp_time").toLocalDateTime()); //$NON-NLS-1$
+		it.setWaypointDate(rs.getTimestamp("wp_date").toLocalDateTime()); //$NON-NLS-1$
 		it.setWaypointDirection(rs.getObject("wp_direction") == null ? null : rs.getFloat("wp_direction")); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setWaypointDistance(rs.getObject("wp_distance") == null ? null : rs.getFloat("wp_distance")); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setWaypointComment(rs.getString("wp_comment")); //$NON-NLS-1$

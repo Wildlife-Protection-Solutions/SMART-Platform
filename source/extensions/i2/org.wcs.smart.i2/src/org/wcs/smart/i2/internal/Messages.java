@@ -616,6 +616,7 @@ public class Messages extends NLS {
 	public static String ExportEntityXmlDialog_Title;
 	public static String ExportEntityXmlDialog_XMLFormat;
 	public static String ExportEntityXmlDialog_ZipFiles;
+	public static String ExportQueryWizard_And;
 	public static String ExportQueryWizard_CreateDialogMessage;
 	public static String ExportQueryWizard_CreateDialogTitle;
 	public static String ExportQueryWizard_ExportDone;

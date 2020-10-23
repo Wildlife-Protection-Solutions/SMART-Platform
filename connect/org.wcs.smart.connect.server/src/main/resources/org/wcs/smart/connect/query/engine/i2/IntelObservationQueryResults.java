@@ -269,7 +269,7 @@ public class IntelObservationQueryResults  implements IQueryResult, IConnectPage
 	
 	@SuppressWarnings("unchecked")
 	public String configureSort(Session session){
-		if (sortColumn == null || sortDirection == null) return ""; //$NON-NLS-1$
+		if (sortColumn == null || sortDirection == null) return " ORDER BY loc_datetime DESC "; //$NON-NLS-1$
 		
 		String sql = " order by "; //$NON-NLS-1$
 		
@@ -454,7 +454,6 @@ public class IntelObservationQueryResults  implements IQueryResult, IConnectPage
 
 	@Override
 	public String getSelectQuery(Session session){
-		if (sortColumn == null || sortDirection == null) return "SELECT * FROM " + resultsTable; //$NON-NLS-1$
 		String sortSql = configureSort(session);
 		String sql = "SELECT * FROM " + resultsTable + sortSql; //$NON-NLS-1$
 		return sql;

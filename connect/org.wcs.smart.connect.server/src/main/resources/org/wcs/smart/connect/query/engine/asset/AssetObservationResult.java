@@ -39,6 +39,7 @@ import org.locationtech.jts.geom.Geometry;
 import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.asset.query.model.AssetQueryAttachmentResultItem;
 import org.wcs.smart.asset.query.model.AssetQueryResultItem;
+import org.wcs.smart.asset.query.model.observation.FixedQueryColumn;
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
 import org.wcs.smart.query.common.engine.AttachmentResultSetIterator;
 import org.wcs.smart.query.common.engine.IAttachmentResultItem;
@@ -215,8 +216,20 @@ public class AssetObservationResult extends AbstractDbFeatureResultSet implement
 					return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
 							ResultSet.CONCUR_READ_ONLY).executeQuery("SELECT * FROM " + engine.getQueryDataTable() + " ORDER BY sortkeydbl " +direction.sql+ ", sortkeytxt " + direction.sql); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
+				
+				StringBuilder sb = new StringBuilder();
+				sb.append("SELECT * FROM "); //$NON-NLS-1$
+				sb.append(engine.getQueryDataTable());
+				sb.append(" ORDER BY "); //$NON-NLS-1$
+				sb.append(FixedQueryColumn.getDbColumnName(FixedQueryColumn.FixedColumns.WAYPOINT_DATE.getKey()));
+				sb.append(" DESC, "); //$NON-NLS-1$
+				sb.append(FixedQueryColumn.getDbColumnName(FixedQueryColumn.FixedColumns.LOCATION.getKey()));
+				sb.append(","); //$NON-NLS-1$
+				sb.append(FixedQueryColumn.getDbColumnName(FixedQueryColumn.FixedColumns.STATION.getKey()));
+				sb.append(" DESC "); //$NON-NLS-1$
+				
 				return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
-						ResultSet.CONCUR_READ_ONLY).executeQuery("SELECT * FROM " + engine.getQueryDataTable()); //$NON-NLS-1$
+						ResultSet.CONCUR_READ_ONLY).executeQuery(sb.toString());
 			}
 		});
 	}
@@ -338,7 +351,7 @@ public class AssetObservationResult extends AbstractDbFeatureResultSet implement
 
 		String[] selectFields = new String[] {
 				"ca_id","ca_name","wp_uuid", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				"wp_id","wp_x","wp_y","wp_time", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				"wp_id","wp_x","wp_y","wp_date", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 				"wp_direction","wp_distance", //$NON-NLS-1$ //$NON-NLS-2$
 				"wp_comment","asset_asset","asset_station", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				"asset_location","incident_length", //$NON-NLS-1$ //$NON-NLS-2$

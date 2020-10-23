@@ -148,8 +148,18 @@ public class AssetPagedWaypointResult extends AbstractPagedQueryResultSet implem
 	}
 	
 	protected String buildSortSql() {
-		if (sortColumn == null || direction == SWT.NONE)
-			return ""; //$NON-NLS-1$
+		if (sortColumn == null || direction == SWT.NONE) {
+			//default to waypoint date/time, location, station
+			StringBuilder sb = new StringBuilder();
+			sb.append("ORDER BY "); //$NON-NLS-1$
+			sb.append(FixedQueryColumn.getDbColumnName(FixedQueryColumn.FixedColumns.WAYPOINT_DATE.getKey()));
+			sb.append(" DESC, "); //$NON-NLS-1$
+			sb.append(FixedQueryColumn.getDbColumnName(FixedQueryColumn.FixedColumns.LOCATION.getKey()));
+			sb.append(","); //$NON-NLS-1$
+			sb.append(FixedQueryColumn.getDbColumnName(FixedQueryColumn.FixedColumns.STATION.getKey()));
+			sb.append(" DESC "); //$NON-NLS-1$
+			return sb.toString();				
+		}
 		
 		String result = ""; //$NON-NLS-1$
 		if (sortColumn instanceof FixedQueryColumn) {
@@ -284,10 +294,10 @@ public class AssetPagedWaypointResult extends AbstractPagedQueryResultSet implem
 //							updateWaypointDistance(wp, value == null ? null : ((Double)value).floatValue(), s);
 //							break;
 						case WAYPOINT_ID:
-							if (value instanceof Integer) {
+							if (value instanceof String) {
 								if (!value.equals(wp.getId())) {
 									change = true;
-									updateWaypointId(wp, (Integer) value, s);
+									updateWaypointId(wp, (String) value, s);
 								}
 							}
 							break;
@@ -371,7 +381,7 @@ public class AssetPagedWaypointResult extends AbstractPagedQueryResultSet implem
 //		q.executeUpdate();	
 //	}
 	
-	private void updateWaypointId(Waypoint wp, int newId, Session session){
+	private void updateWaypointId(Waypoint wp, String newId, Session session){
 		wp.setId(newId);
 		
 		NativeQuery<?> q = session.createNativeQuery("update " + queryTempTable + " SET wp_id = :id WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$

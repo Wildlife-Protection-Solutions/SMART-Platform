@@ -67,7 +67,7 @@ public class DeleteObservationResultInfoProvider extends IQueryEditCommand {
 			
 			if (!MessageDialog.openQuestion(Display.getDefault().getActiveShell(), Messages.DeleteObservationResultInfoProvider_DeleteWaypointTitle,
 					MessageFormat.format(Messages.DeleteObservationResultInfoProvider_DeleteWaypointMsg,
-							item.getWaypointId(), DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(item.getWpDateTime())))){
+							item.getWaypointId(), DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(item.getWaypointDate())))){
 				return false;
 			}
 		}else{

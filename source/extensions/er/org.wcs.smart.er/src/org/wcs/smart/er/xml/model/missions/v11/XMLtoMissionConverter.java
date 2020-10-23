@@ -296,7 +296,7 @@ public class XMLtoMissionConverter implements IXmlToMissionConverter{
 		wp.setComment(xml.getComment());
 		wp.setDirection(xml.getDirection());
 		wp.setDistance(xml.getDistance());
-		wp.setId(xml.getId());
+		wp.setId(String.valueOf(xml.getId()));
 		wp.setConservationArea(SmartDB.getCurrentConservationArea());
 		wp.setSourceId(SurveyWaypointSource.KEY);
 

@@ -114,6 +114,7 @@ public class AdvancedLabelProviderImpl implements
 		if (item == FixedQueryColumn.Column.RECORD_STATUS) return Messages.getString("AdvancedLabelProviderImpl.QueryColRecordStatus", l); //$NON-NLS-1$
 		if (item == FixedQueryColumn.Column.RECORD_TITLE) return Messages.getString("AdvancedLabelProviderImpl.QueryColRecordTital", l); //$NON-NLS-1$
 		if (item == FixedQueryColumn.Column.RECORD_SOURCE) return Messages.getString("AdvancedLabelProviderImpl.QueryColRecordSource", l); //$NON-NLS-1$
+		if (item == FixedQueryColumn.Column.RECORD_DATE) return Messages.getString("AdvancedLabelProviderImpl.RecordDateColName", l); //$NON-NLS-1$
 
 		if (item == FixedQueryColumn.Column.ENTITY_ID) return Messages.getString("AdvancedLabelProviderImpl.QueryColEntityId", l); //$NON-NLS-1$
 		if (item == FixedQueryColumn.Column.ENTITY_TYPE) return Messages.getString("AdvancedLabelProviderImpl.QueryColEntityTable", l); //$NON-NLS-1$

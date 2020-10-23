@@ -117,7 +117,7 @@ public class AddWaypointDialog extends SmartStyledTitleDialog{
 		}
 		newWaypoint = new SurveyWaypoint();
 		Waypoint wp = new Waypoint();
-		wp.setId(Integer.parseInt(txtWaypointId.getText()));
+		wp.setId(txtWaypointId.getText());
 		wp.setSourceId(SurveyWaypointSource.KEY);
 		wp.setConservationArea(SmartDB.getCurrentConservationArea());
 	
@@ -228,7 +228,7 @@ public class AddWaypointDialog extends SmartStyledTitleDialog{
 		}
 		Double x = 0.0;
 		Double y = 0.0;
-		int id = 0;
+		String id = "0"; //$NON-NLS-1$
 		if (lastWp != null){
 			x = lastWp.getWaypoint().getX();
 			y = lastWp.getWaypoint().getY();
@@ -266,7 +266,7 @@ public class AddWaypointDialog extends SmartStyledTitleDialog{
 		
 		txtWaypointId = new Text(waypointComp, SWT.BORDER);
 
-		txtWaypointId.setText(String.valueOf(id));
+		txtWaypointId.setText(id);
 		txtWaypointId.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtWaypointId.addModifyListener(validation);
 		txtWaypointId.addFocusListener(new FocusListener() {

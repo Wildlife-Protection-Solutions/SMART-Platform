@@ -237,7 +237,7 @@ public class IncidentImporter implements IIncidentXmlImporter{
 					new Object[] {"sourceId", SmartCollectWaypointSource.KEY}); //$NON-NLS-1$
 			if (cnt > 0){
 				final boolean[] cont = new boolean[]{true};
-				final int  pid = wp.getWaypoint().getId();
+				final String  pid = wp.getWaypoint().getId();
 				Display.getDefault().syncExec(new Runnable(){
 
 						@Override
@@ -246,7 +246,7 @@ public class IncidentImporter implements IIncidentXmlImporter{
 									Messages.IncidentImporter_WarnTitle, 
 									null,
 									MessageFormat.format(
-										Messages.IncidentImporter_WarnMsg,new Object[]{String.valueOf(pid)}),
+										Messages.IncidentImporter_WarnMsg,pid),
 									MessageDialog.QUESTION, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 1);
 							int ret = dialog.open();
 							if (ret == 1){

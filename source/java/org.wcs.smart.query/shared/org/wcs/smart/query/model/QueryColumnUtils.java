@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.model;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -64,11 +65,40 @@ public abstract class QueryColumnUtils implements Cloneable{
 		if (column.getType() == QueryColumn.ColumnType.TIME &&
 				descriptor.getType().getBinding().equals(String.class)){
 				//this is a datetime object which needs to be converted to a string
-				x = DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM).format( (LocalTime)x);
+			LocalTime time = null;
+			if (x instanceof LocalTime) {
+				time = (LocalTime) x;
+			}else if (x instanceof LocalDateTime) {
+				time = ((LocalDateTime) x).toLocalTime();
+			}
+			if (time != null) {
+				x = DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM).format( (LocalTime)time);
+			}
 		}else if (column.getType() == QueryColumn.ColumnType.DATETIME &&
-				descriptor.getType().getBinding().equals(String.class)){
-				//this is a datetime object which needs to be converted to a string
+			descriptor.getType().getBinding().equals(String.class)){
+			//this is a datetime object which needs to be converted to a string
+			if (x instanceof LocalDateTime) {
 				x = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format( (LocalDateTime)x);
+			}
+		}else if (column.getType() == QueryColumn.ColumnType.DATE) {
+			
+			if (descriptor.getType().getBinding().equals(String.class)){
+				LocalDate date = null;
+				if (x instanceof LocalDate) {
+					date = (LocalDate) x;
+				}else if (x instanceof LocalDateTime) {
+					date = ((LocalDateTime) x).toLocalDate();
+				}
+				if (date != null) {
+					x = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(date);
+				}
+			}else if (descriptor.getType().getBinding().equals(LocalDate.class)) {
+				if (x instanceof LocalDateTime) {
+					x = ((LocalDateTime) x).toLocalDate();
+				}
+			}
+			
+			
 		}
 		return x;
 	}

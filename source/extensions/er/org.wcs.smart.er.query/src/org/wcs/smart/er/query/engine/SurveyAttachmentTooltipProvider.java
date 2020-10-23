@@ -153,7 +153,7 @@ public class SurveyAttachmentTooltipProvider extends Job {
 			l.setBackground(details.getBackground());
 			
 			l = new Label(main, SWT.NONE);
-			l.setText(String.valueOf(fwp.getWaypoint().getId()));
+			l.setText(fwp.getWaypoint().getId());
 			l.setBackground(details.getBackground());
 			
 			l = new Label(main, SWT.NONE);

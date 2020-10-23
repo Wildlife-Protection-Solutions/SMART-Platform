@@ -384,7 +384,7 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 		wp.setComment(xml.getComment());
 		wp.setDirection(xml.getDirection());
 		wp.setDistance(xml.getDistance());
-		wp.setId(xml.getId());
+		wp.setId(String.valueOf(xml.getId()));
 		wp.setConservationArea(parent.getPatrolLeg().getPatrol().getConservationArea());
 		wp.setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
 		wp.setDateTime(LocalDateTime.of(parent.getDate(), SmartUtils.toLocalTime(xml.getTime())));

@@ -224,7 +224,7 @@ public class PatrolSimpleQueryResultEditor extends QueryResultsEditor{
 							first = i.iterator().next();
 							sb.append(first.getPatrolId() + " (" + first.getWaypointId() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 							sb.append("\n"); //$NON-NLS-1$
-							sb.append(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(first.getWpDateTime().atTime(first.getWaypointTime())));
+							sb.append(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(first.getWaypointDate().atTime(first.getWaypointTime())));
 							sb.append("\n"); //$NON-NLS-1$
 							for (PatrolQueryResultItem result : i){
 								if (result.getCategories() != null && result.getCategories().length > 0){

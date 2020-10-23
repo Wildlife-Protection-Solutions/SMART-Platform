@@ -57,7 +57,7 @@ public class SightingQueryColumn extends QueryColumn{
 		CA_ID(Messages.SightingQueryColumn_CaIdColumnName, ColumnType.STRING,"ca:id", "ca_id"), //$NON-NLS-1$ //$NON-NLS-2$
 		CA_NAME(Messages.SightingQueryColumn_CaNameColumnName, ColumnType.STRING,"ca:name", "ca_name"), //$NON-NLS-1$ //$NON-NLS-2$
 		WAYPOINT_SOURCE(Messages.SightingQueryColumn_WpSourceColumnName, ColumnType.STRING,"wp:source", "wp_source"),  //$NON-NLS-1$ //$NON-NLS-2$
-		WAYPOINT_ID(Messages.SightingQueryColumn_WaypointIdColumnName, ColumnType.INTEGER,"waypoint:id", "wp_id"), //$NON-NLS-1$ //$NON-NLS-2$
+		WAYPOINT_ID(Messages.SightingQueryColumn_WaypointIdColumnName, ColumnType.STRING,"waypoint:id", "wp_id"), //$NON-NLS-1$ //$NON-NLS-2$
 		WAYPOINT_DATE(Messages.SightingQueryColumn_WaypointDateColumnName, ColumnType.DATE,"waypoint:date", "wp_time"), //$NON-NLS-1$ //$NON-NLS-2$
 		WAYPOINT_TIME(Messages.SightingQueryColumn_WaypointTimeColumnName, ColumnType.TIME,"waypoint:time", "wp_time"), //$NON-NLS-1$ //$NON-NLS-2$
 		WAYPOINT_X(Messages.SightingQueryColumn_xColumnName, ColumnType.NUMBER,"waypoint:x", "wp_x"), //$NON-NLS-1$ //$NON-NLS-2$

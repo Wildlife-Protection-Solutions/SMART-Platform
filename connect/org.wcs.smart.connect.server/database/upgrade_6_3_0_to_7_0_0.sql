@@ -841,6 +841,9 @@ alter table connect.shared_links alter column expires_at set data type timestamp
 alter table connect.shared_links alter column date_created set data type timestamp with time zone;
 alter table connect.alerts alter column date set data type timestamp without time zone;
 
+-- WAYPOINT ID to string ---
+alter table smart.waypoint alter column id type varchar(32);
+
 ------------ VERSIONS ------------
 update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.asset';
 update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.asset.query';

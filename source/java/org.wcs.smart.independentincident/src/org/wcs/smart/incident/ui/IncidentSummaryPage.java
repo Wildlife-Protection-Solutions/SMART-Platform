@@ -209,7 +209,7 @@ public class IncidentSummaryPage extends EditorPart {
 			}
 			this.lblLastModified.setText(sb.toString());
 			
-			this.txtIncidentId.setText(String.valueOf(incident.getId()));
+			this.txtIncidentId.setText(incident.getId());
 			this.txtDate.setText(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(incident.getDateTime()));
 			this.txtTime.setText(DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM).format(incident.getDateTime()));
 			Projection viewProjection = HibernateManager.getCurrentViewProjection(session);

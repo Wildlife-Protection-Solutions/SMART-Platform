@@ -40,6 +40,7 @@ import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.MissionTrack.TrackType;
 import org.wcs.smart.er.query.model.MissionTrackResultItem;
+import org.wcs.smart.er.query.model.SurveyQueryColumn;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.QueryColumn;
@@ -179,19 +180,34 @@ public class ErMissionTrackQueryResult extends ErSurveyQueryResultSet {
 					}
 				}
 				//TODO: figure out 3d geometries
-				String sql = "SELECT " + sb.toString() //$NON-NLS-1$
-						+ "st_asbinary(st_force2d(st_collect(st_geomfromwkb(bar.geometry)))) as trackgeom FROM "  //$NON-NLS-1$
-						+ engine.getQueryDataTable()
-						+ " foo left join " + engine.tableName(MissionTrack.class) + " bar " //$NON-NLS-1$ //$NON-NLS-2$
-						+ " on bar.mission_day_uuid = foo.missionday_uuid  " //$NON-NLS-1$
-						+ " GROUP BY " //$NON-NLS-1$
-						+ sb.toString().substring(0, sb.length() - 1);
+				StringBuilder sql = new StringBuilder();
+				sql.append( "SELECT "); //$NON-NLS-1$
+				sql.append(sb);
+				sql.append("st_asbinary(st_force2d(st_collect(st_geomfromwkb(bar.geometry)))) as trackgeom "); //$NON-NLS-1$
+				sql.append(" FROM ");  //$NON-NLS-1$
+				sql.append(engine.getQueryDataTable());
+				sql.append(" foo left join "); //$NON-NLS-1$
+				sql.append( engine.tableName(MissionTrack.class) );
+				sql.append( " bar  on bar.mission_day_uuid = foo.missionday_uuid  "); //$NON-NLS-1$
+				sql.append(" GROUP BY " ); //$NON-NLS-1$
+				sql.append(sb.toString().substring(0, sb.length() - 1));
 				
 				if(sortColumn != null){
-					sql += " ORDER BY sortkeydbl " +direction.sql+ ", sortkeytxt " + direction.sql;//$NON-NLS-1$ //$NON-NLS-2$
+					sql.append(" ORDER BY sortkeydbl "); //$NON-NLS-1$
+					sql.append( direction.sql );
+					sql.append(", sortkeytxt "); //$NON-NLS-1$
+					sql.append( direction.sql);
+				}else {
+					sql.append(" ORDER BY "); //$NON-NLS-1$
+					sql.append(SurveyQueryColumn.getDbColumnName(SurveyQueryColumn.FixedColumns.MISSION_TRACKDATE.getKey()));
+					sql.append(" DESC, "); //$NON-NLS-1$
+					sql.append(SurveyQueryColumn.getDbColumnName(SurveyQueryColumn.FixedColumns.MISSION_START.getKey()));
+					sql.append(" DESC, "); //$NON-NLS-1$
+					sql.append(SurveyQueryColumn.getDbColumnName(SurveyQueryColumn.FixedColumns.MISSION.getKey()));
 				}
+				
 				return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
-						ResultSet.CONCUR_READ_ONLY).executeQuery(sql); 
+						ResultSet.CONCUR_READ_ONLY).executeQuery(sql.toString()); 
 			}
 		});
 	}

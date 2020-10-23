@@ -170,7 +170,7 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 		sql.append(buildSelectClause());
 		sql.append(" FROM "); //$NON-NLS-1$
 		sql.append(buildFromClause());
-		sql.append(" ORDER BY p_id, pl_uuid, pld_uuid "); //$NON-NLS-1$
+		sql.append(" ORDER BY p_start_date desc, p_id, pl_uuid, pld_uuid "); //$NON-NLS-1$
 		QueryPlugIn.logSql(sql.toString());
 		
 

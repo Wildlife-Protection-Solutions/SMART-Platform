@@ -145,8 +145,20 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 	}
 	
 	protected String buildSortSql() {
-		if (sortColumn == null || direction == SWT.NONE)
-			return ""; //$NON-NLS-1$
+		if (sortColumn == null || direction == SWT.NONE) {
+			//default sort by patrol state date, patrol id, waypoint datetime
+			
+			StringBuilder sb = new StringBuilder();
+			sb.append("ORDER BY "); //$NON-NLS-1$
+			sb.append(FixedQueryColumn.getDbColumnName(FixedQueryColumn.FixedColumns.PATROL_START_DATE.getKey()));
+			sb.append(" DESC, " ); //$NON-NLS-1$
+			sb.append(FixedQueryColumn.getDbColumnName(FixedQueryColumn.FixedColumns.PATROL_ID.getKey()));
+			sb.append(","); //$NON-NLS-1$
+			sb.append(FixedQueryColumn.getDbColumnName(FixedQueryColumn.FixedColumns.WAYPOINT_DATE.getKey()));
+			sb.append(" DESC " ); //$NON-NLS-1$
+			return sb.toString();
+		}
+			
 		
 		String result = ""; //$NON-NLS-1$
 		if (sortColumn instanceof FixedQueryColumn) {
@@ -208,7 +220,7 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 	@Override
 	public ResultSet getResultSet(Session session) {
 		final String dataSql = "SELECT r.* FROM " + queryTempTable + " r "+ buildSortSql();  //$NON-NLS-1$ //$NON-NLS-2$
-		
+		System.out.println(dataSql);
 		return session.doReturningWork(new ReturningWork<ResultSet>() {
 			@Override
 			public ResultSet execute(Connection c) throws SQLException {
@@ -286,10 +298,10 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 							updateWaypointDistance(wp, value == null ? null : ((Double)value).floatValue(), s);
 							break;
 						case WAYPOINT_ID:
-							if (value instanceof Integer) {
+							if (value instanceof String) {
 								if (!value.equals(wp.getId())) {
 									change = true;
-									updateWaypointId(wp, (Integer) value, s);
+									updateWaypointId(wp, (String) value, s);
 								}
 							}
 							break;
@@ -393,7 +405,7 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 		q.executeUpdate();	
 	}
 	
-	private void updateWaypointId(Waypoint wp, int newId, Session session){
+	private void updateWaypointId(Waypoint wp, String newId, Session session){
 		wp.setId(newId);
 		
 		NativeQuery<?> q = session.createNativeQuery("update " + queryTempTable + " SET wp_id = :id WHERE wp_uuid = :uuid"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -590,7 +602,7 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 				sb.append(imageTempTable + " (attach_uuid, wp_uuid) "); //$NON-NLS-1$
 				sb.append(" SELECT z.uuid, z.wp_uuid "); //$NON-NLS-1$
 				sb.append("FROM "); //$NON-NLS-1$
-				sb.append(" (SELECT distinct e.uuid, a.wp_date, a.wp_id, a.wp_uuid FROM "); //$NON-NLS-1$
+				sb.append(" (SELECT distinct e.uuid, a.wp_time, a.wp_id, a.wp_uuid FROM "); //$NON-NLS-1$
 				sb.append(queryTempTable);
 				sb.append(" a join "); //$NON-NLS-1$
 				sb.append("(SELECT uuid, wp_uuid as wp_uuid FROM smart.wp_attachments "); //$NON-NLS-1$
@@ -599,7 +611,7 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 				sb.append(" smart.wp_observation_group g join smart.wp_observation c on c.wp_group_uuid = g.uuid "); //$NON-NLS-1$
 				sb.append(" join smart.observation_attachment b on c.uuid = b.obs_uuid) e "); //$NON-NLS-1$
 				sb.append("on a.wp_uuid = e.wp_uuid"); //$NON-NLS-1$
-				sb.append(" ORDER BY a.wp_date desc, a.wp_id ) z "); //$NON-NLS-1$
+				sb.append(" ORDER BY a.wp_time desc, a.wp_id ) z "); //$NON-NLS-1$
 
 				s.createNativeQuery(sb.toString()).executeUpdate();
 				

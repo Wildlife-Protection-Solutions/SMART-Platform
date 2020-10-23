@@ -265,8 +265,18 @@ public class DerbyPagedObservationResult extends DerbyPagedWaypointResult implem
 	
 	@Override
 	protected String buildSortSql() {
-		if (sortColumn == null || direction == SWT.NONE)
-			return ""; //$NON-NLS-1$
+		if (sortColumn == null || direction == SWT.NONE) {
+			//default sort by patrol start date, patrol id, waypoint date/time
+			StringBuilder sb = new StringBuilder();
+			sb.append("ORDER BY "); //$NON-NLS-1$
+			sb.append(FixedQueryColumn.getDbColumnName(FixedQueryColumn.FixedColumns.PATROL_START_DATE.getKey()));
+			sb.append(" DESC, " ); //$NON-NLS-1$
+			sb.append(FixedQueryColumn.getDbColumnName(FixedQueryColumn.FixedColumns.PATROL_ID.getKey()));
+			sb.append(","); //$NON-NLS-1$
+			sb.append(FixedQueryColumn.getDbColumnName(FixedQueryColumn.FixedColumns.WAYPOINT_DATE.getKey()));
+			sb.append(" DESC " ); //$NON-NLS-1$
+			return sb.toString();
+		}
 		
 		String result = ""; //$NON-NLS-1$
 		if (sortColumn instanceof FixedQueryColumn) {
@@ -838,18 +848,18 @@ public class DerbyPagedObservationResult extends DerbyPagedWaypointResult implem
 				sb.append(" INSERT INTO "); //$NON-NLS-1$
 				sb.append(imageTempTable + "(attach_uuid, wp_uuid, ob_uuid) "); //$NON-NLS-1$
 				sb.append(" SELECT z.attach_uuid, z.wp_uuid, z.ob_uuid FROM ( "); //$NON-NLS-1$
-				sb.append("SELECT c.uuid as attach_uuid, a.wp_date, a.wp_id, a.wp_uuid as wp_uuid, a.ob_uuid as ob_uuid" ); //$NON-NLS-1$
+				sb.append("SELECT c.uuid as attach_uuid, a.wp_time, a.wp_id, a.wp_uuid as wp_uuid, a.ob_uuid as ob_uuid" ); //$NON-NLS-1$
 				sb.append(" FROM "); //$NON-NLS-1$
 				sb.append( queryTempTable + " a "); //$NON-NLS-1$
 				sb.append(" JOIN "); //$NON-NLS-1$
 				sb.append(" smart.observation_attachment c on a.ob_uuid = c.obs_uuid "); //$NON-NLS-1$
 				sb.append( " UNION "); //$NON-NLS-1$
-				sb.append("SELECT c.uuid as attach_uuid, a.wp_date, a.wp_id, a.wp_uuid as wp_uuid, cast(null as char(16) for bit data) as ob_uuid" ); //$NON-NLS-1$
+				sb.append("SELECT c.uuid as attach_uuid, a.wp_time, a.wp_id, a.wp_uuid as wp_uuid, cast(null as char(16) for bit data) as ob_uuid" ); //$NON-NLS-1$
 				sb.append(" FROM "); //$NON-NLS-1$
 				sb.append( queryTempTable + " a "); //$NON-NLS-1$
 				sb.append(" JOIN "); //$NON-NLS-1$
 				sb.append(" smart.wp_attachments c on c.wp_uuid = a.wp_uuid "); //$NON-NLS-1$
-				sb.append(" ) z ORDER BY z.wp_date desc, z.wp_id "); //$NON-NLS-1$
+				sb.append(" ) z ORDER BY z.wp_time desc, z.wp_id "); //$NON-NLS-1$
 
 				s.createNativeQuery(sb.toString()).executeUpdate();
 				

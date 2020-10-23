@@ -229,7 +229,7 @@ public class WaypointInfoView {
 					if (lcurrentWp == null){
 						clearContents();
 					}else{
-						lblWaypointId.setText(String.valueOf(lcurrentWp.getId()));
+						lblWaypointId.setText(lcurrentWp.getId());
 						lblDateTime.setText( DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT).format(lcurrentWp.getDateTime())); 
 
 						int widthHint = infoSection.getBody().getBounds().width - 20;		

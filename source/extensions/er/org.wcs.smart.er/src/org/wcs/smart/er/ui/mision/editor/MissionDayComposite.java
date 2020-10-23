@@ -80,6 +80,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
@@ -96,7 +97,6 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.common.celleditor.DoubleCellEditor;
-import org.wcs.smart.common.celleditor.IntegerCellEditor;
 import org.wcs.smart.common.celleditor.TimeCellEditor;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
@@ -159,7 +159,7 @@ public class MissionDayComposite {
 
 	private DoubleCellEditor doubleCellEditor;
 	private DoubleCellEditor nullableDoubleCellEditor;
-	private IntegerCellEditor integerCellEditor;
+	private TextCellEditor idCellEditor;
 	private TimeCellEditor timeEditor;
 	private AttachmentCellEditor attachmentEditor;
 	private TextCellEditor commentEditor;
@@ -502,7 +502,15 @@ public class MissionDayComposite {
 
 		doubleCellEditor = new DoubleCellEditor(observationTable.getTable(), false);
 		nullableDoubleCellEditor = new DoubleCellEditor(observationTable.getTable(), true);
-		integerCellEditor = new IntegerCellEditor(observationTable.getTable());
+		idCellEditor = new TextCellEditor(observationTable.getTable()) {
+		    @Override
+			protected Control createControl(Composite parent) {
+		    	Control c = super.createControl(parent);
+		    	text.setTextLimit(Waypoint.ID_MAX_LENGTH);
+		    	return c;
+		    }
+		};
+		
 		timeEditor = new TimeCellEditor(observationTable.getTable());
 		attachmentEditor = new AttachmentCellEditor(observationTable.getTable());
 		commentEditor = new TextCellEditor(observationTable.getTable(), SWT.MULTI | SWT.WRAP);
@@ -885,7 +893,7 @@ public class MissionDayComposite {
 
 		Waypoint wp = element.getWaypoint();
 		if (column == OtColumn.ID) {
-			return String.valueOf(wp.getId());
+			return wp.getId();
 		} else if (column == OtColumn.EAST) {
 			return String.valueOf(ReprojectUtils.transform(wp.getRawX(), wp.getRawY(), lcrs).getX());
 		} else if (column == OtColumn.NORTH) {
@@ -996,8 +1004,8 @@ public class MissionDayComposite {
 		Waypoint waypoint = element.getWaypoint();
 		boolean needSave = false;
 		if (column == OtColumn.ID) {
-			if (waypoint.getId() == ((Integer)value).intValue()) return; //no change
-			waypoint.setId((Integer)value);
+			if (waypoint.getId().equals( ((String)value).strip())) return; //no change
+			waypoint.setId( ((String)value).strip() );
 			needSave = true;
 		} else if (column == OtColumn.EAST) {
 			if (waypoint.getRawX() == ((Double)value).doubleValue()) return; //no change
@@ -1079,14 +1087,14 @@ public class MissionDayComposite {
 	public void dispose(){
 		doubleCellEditor.dispose();
 		nullableDoubleCellEditor.dispose();
-		integerCellEditor.dispose();
+		idCellEditor.dispose();
 		timeEditor.dispose();
 		attachmentEditor.dispose();
 		commentEditor.dispose();
 		observationEditor.dispose();
 		doubleCellEditor = null;
 		nullableDoubleCellEditor = null;
-		integerCellEditor = null;
+		idCellEditor = null;
 		timeEditor = null;
 		attachmentEditor = null;
 		commentEditor = null;
@@ -1143,7 +1151,7 @@ public class MissionDayComposite {
 			case EAST:			return doubleCellEditor;
 			case DIRECTION:		return nullableDoubleCellEditor;
 			case DISTANCE:		return nullableDoubleCellEditor;
-			case ID: 			return integerCellEditor;
+			case ID: 			return idCellEditor;
 			case TIME: 			return timeEditor;
 			case ATTACHMENTS:	return attachmentEditor;
 			case COMMENT:		return commentEditor;

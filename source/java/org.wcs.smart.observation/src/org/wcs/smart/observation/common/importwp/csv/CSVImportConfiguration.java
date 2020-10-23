@@ -198,19 +198,12 @@ public class CSVImportConfiguration {
 				 
 				 
 				 	if(idColumn != -1){
-					 	try {
-						 	curWP.setId(Integer.parseInt( (row[idColumn].replaceAll("\\s+","")) )); //$NON-NLS-1$ //$NON-NLS-2$
-					 	} catch (NumberFormatException e) {
-					 		ObservationPlugIn.displayLog(MessageFormat.format(Messages.CSVImportConfiguration_11, new Object[]{counter, row[idColumn]}), e );   
-					 		//curWP.setId(maxId + 1);
-					 		//maxId++;
-					 		curWP.setId(-1);
-					 	}
+					 	curWP.setId(row[idColumn].strip());
 				 	}else{
 				 		//could put this back if we want to show ID's 1 through # of points in the select your points screen.				 		
 				 		//curWP.setId(maxId + 1);
 				 		//maxId++;
-				 		curWP.setId(-1);
+				 		curWP.setId("-1");
 				 	}
 				 	
 				 	if(commentColumn != -1){

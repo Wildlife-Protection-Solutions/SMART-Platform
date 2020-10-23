@@ -101,7 +101,7 @@ public class ExportIncidentHandler {
 					for (int i = 0; i < incidents.size(); i++) {
 						if (monitor.isCanceled()) break;
 						UUID puuid = incidents.get(i);
-						Integer id = null;
+						String id = null;
 						
 						try {
 							monitor.subTask(MessageFormat.format(Messages.ExportIncidentHandler_IncidentProgress,new Object[]{ UuidUtils.uuidToString(puuid)}));
@@ -123,7 +123,7 @@ public class ExportIncidentHandler {
 							monitor.subTask(MessageFormat.format(Messages.ExportIncidentHandler_ExportingIncidentProgress,new Object[]{ String.valueOf(id) }));
 
 							IIncidentProvider provider = IncidentManager.getInstance().getIncidentProvider(wp.getSourceId());
-							Path outFile = IIncidentXmlExporter.getOutputFile(dir, String.valueOf(wp.getId()), includeAtt);
+							Path outFile = IIncidentXmlExporter.getOutputFile(dir, wp.getId(), includeAtt);
 							provider.getXmlExporter().exportIncident(wp, outFile, includeAtt, new NullProgressMonitor());
 							exportCnt++;
 						} catch (Exception ex) {

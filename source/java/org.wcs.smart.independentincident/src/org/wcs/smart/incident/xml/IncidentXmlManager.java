@@ -33,7 +33,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.w3c.dom.Document;
-import org.wcs.smart.incident.xml.model.v21.WaypointType;
+import org.wcs.smart.incident.xml.model.v22.WaypointType;
 
 /**
  * Manager for reading and writing patrol xml files.
@@ -62,7 +62,7 @@ public class IncidentXmlManager {
 		Marshaller marshaller = context.createMarshaller();
 		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
 		
-		org.wcs.smart.incident.xml.model.v21.ObjectFactory objFactor = new org.wcs.smart.incident.xml.model.v21.ObjectFactory();
+		org.wcs.smart.incident.xml.model.v22.ObjectFactory objFactor = new org.wcs.smart.incident.xml.model.v22.ObjectFactory();
 		
 		JAXBElement<WaypointType> element = objFactor.createWaypoint(type);
 		marshaller.marshal(element, file);

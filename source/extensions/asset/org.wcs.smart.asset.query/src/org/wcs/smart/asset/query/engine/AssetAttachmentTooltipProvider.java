@@ -168,7 +168,7 @@ public class AssetAttachmentTooltipProvider extends Job {
 			l.setBackground(details.getBackground());
 			
 			l = new Label(main, SWT.NONE);
-			l.setText(String.valueOf(fwp.getId()));
+			l.setText(fwp.getId());
 			l.setBackground(details.getBackground());
 			
 			l = new Label(main, SWT.NONE);

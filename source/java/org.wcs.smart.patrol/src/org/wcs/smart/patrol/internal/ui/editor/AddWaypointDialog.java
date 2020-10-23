@@ -73,7 +73,7 @@ public class AddWaypointDialog extends SmartStyledTitleDialog{
 	private ComboViewer lstProjections;
 	private double y;
 	private double x;
-	private int waypointId;
+	private String waypointId;
 	private Projection[] projections;
 	private Projection currentProjection;
 	
@@ -83,11 +83,11 @@ public class AddWaypointDialog extends SmartStyledTitleDialog{
 		super(parentShell);
 		x = 0;
 		y = 0;
-		waypointId = 0;
+		waypointId = "0"; //$NON-NLS-1$
 		this.projections = projections;
 	}
 	
-	public AddWaypointDialog(Shell parentShell, double y, double x, int waypointId, Projection[] projections) {
+	public AddWaypointDialog(Shell parentShell, double y, double x, String waypointId, Projection[] projections) {
 		this(parentShell, projections);
 		
 		this.x = x;
@@ -107,7 +107,7 @@ public class AddWaypointDialog extends SmartStyledTitleDialog{
 		wp.setConservationArea(SmartDB.getCurrentConservationArea());
 		newWaypoint.setWaypoint(wp);
 		
-		newWaypoint.getWaypoint().setId(Integer.parseInt(txtWaypointId.getText()));
+		newWaypoint.getWaypoint().setId(txtWaypointId.getText());
 		newWaypoint.getWaypoint().setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
 		newWaypoint.getWaypoint().setConservationArea(SmartDB.getCurrentConservationArea());
 		try{
@@ -192,7 +192,7 @@ public class AddWaypointDialog extends SmartStyledTitleDialog{
 		};
 		
 		txtWaypointId = new Text(waypointComp, SWT.BORDER);
-		txtWaypointId.setText(String.valueOf(waypointId));
+		txtWaypointId.setText(waypointId);
 		txtWaypointId.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtWaypointId.addModifyListener(validation);
 		txtWaypointId.addFocusListener(new FocusListener() {

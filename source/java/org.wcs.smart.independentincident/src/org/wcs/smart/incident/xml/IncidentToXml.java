@@ -26,11 +26,11 @@ import java.time.format.DateTimeFormatter;
 import javax.xml.datatype.DatatypeConfigurationException;
 
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
-import org.wcs.smart.incident.xml.model.v21.EmployeeType;
-import org.wcs.smart.incident.xml.model.v21.WaypointObservationAttributeType;
-import org.wcs.smart.incident.xml.model.v21.WaypointObservationGroupType;
-import org.wcs.smart.incident.xml.model.v21.WaypointObservationType;
-import org.wcs.smart.incident.xml.model.v21.WaypointType;
+import org.wcs.smart.incident.xml.model.v22.EmployeeType;
+import org.wcs.smart.incident.xml.model.v22.WaypointObservationAttributeType;
+import org.wcs.smart.incident.xml.model.v22.WaypointObservationGroupType;
+import org.wcs.smart.incident.xml.model.v22.WaypointObservationType;
+import org.wcs.smart.incident.xml.model.v22.WaypointType;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;

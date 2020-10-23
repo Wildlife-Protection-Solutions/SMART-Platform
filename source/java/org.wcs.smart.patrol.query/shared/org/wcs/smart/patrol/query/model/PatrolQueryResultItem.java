@@ -90,13 +90,13 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IAdaptable{
 	private String transportType;
 	private LocalDate plStartDate;
 	private LocalDate plEndDate;
-	private LocalDate wpDateTime;
-	private LocalTime waypointTime;
+	private LocalDateTime waypointDateTime;
+	
 	private String leader;
 	private String pilot;
 	
 	private UUID waypointUuid;
-	private int waypointId;
+	private String waypointId;
 	private double waypointX;
 	private double waypointY;
 	private Float waypointDistance;
@@ -439,37 +439,33 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IAdaptable{
 	/**
 	 * @return waypoint date 
 	 */
-	public LocalDate getWpDateTime() {
-		return wpDateTime;
-	}
-	/**
-	 * @param wpDateTime waypoint date 
-	 */
-	public void setWpDateTime(LocalDate wpDateTime) {
-		this.wpDateTime = wpDateTime;
+	public LocalDate getWaypointDate() {
+		return waypointDateTime.toLocalDate();
 	}
 	/**
 	 * @return waypoint time
 	 */
 	public LocalTime getWaypointTime() {
-		return waypointTime;
+		return waypointDateTime.toLocalTime();
 	}
 	/**
-	 * @param wpTime waypoint time
+	 * @param wpDateTime waypoint date 
 	 */
-	public void setWaypointTime(LocalTime wpTime) {
-		this.waypointTime = wpTime;
+	public void setWaypointDateTime(LocalDateTime wpDateTime) {
+		this.waypointDateTime = wpDateTime;
 	}
+	
+	
 	/**
 	 * @return waypoint id
 	 */
-	public int getWaypointId() {
+	public String getWaypointId() {
 		return waypointId;
 	}
 	/**
 	 * @param waypointId waypoint id
 	 */
-	public void setWaypointId(int waypointId) {
+	public void setWaypointId(String waypointId) {
 		this.waypointId = waypointId;
 	}
 

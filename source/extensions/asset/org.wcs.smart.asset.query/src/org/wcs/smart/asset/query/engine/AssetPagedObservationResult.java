@@ -256,8 +256,18 @@ public class AssetPagedObservationResult extends AssetPagedWaypointResult implem
 	
 	@Override
 	protected String buildSortSql() {
-		if (sortColumn == null || direction == SWT.NONE)
-			return ""; //$NON-NLS-1$
+		if (sortColumn == null || direction == SWT.NONE) {
+			//default to waypoint date/time, location, station
+			StringBuilder sb = new StringBuilder();
+			sb.append("ORDER BY "); //$NON-NLS-1$
+			sb.append(FixedQueryColumn.getDbColumnName(FixedQueryColumn.FixedColumns.WAYPOINT_DATE.getKey()));
+			sb.append(" DESC, "); //$NON-NLS-1$
+			sb.append(FixedQueryColumn.getDbColumnName(FixedQueryColumn.FixedColumns.LOCATION.getKey()));
+			sb.append(","); //$NON-NLS-1$
+			sb.append(FixedQueryColumn.getDbColumnName(FixedQueryColumn.FixedColumns.STATION.getKey()));
+			sb.append(" DESC "); //$NON-NLS-1$
+			return sb.toString();				
+		}
 		
 		String result = ""; //$NON-NLS-1$
 		if (sortColumn instanceof FixedQueryColumn) {

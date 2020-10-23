@@ -67,14 +67,9 @@ public class MissionCsvImportEngine extends CsvImportEngine {
 			//if no ID was given, get the largest ID from the patrol 
 			//so far and reset the id's of the points about to be saved. 
 			if (getConfiguration().getIdColumn() == -1) {
-				int max = 0;
-				for(SurveyWaypoint wp : missionDay.getWaypoints()) {
-					if (wp.getWaypoint().getId() > max){
-						max = wp.getWaypoint().getId();
-					}
-				}
+				int max = missionDay.getWaypoints().size()+1;
 				for(Waypoint wp : waypoints) {
-					wp.setId(max + 1);
+					wp.setId(String.valueOf(max + 1));
 					max++;
 				}
 			}

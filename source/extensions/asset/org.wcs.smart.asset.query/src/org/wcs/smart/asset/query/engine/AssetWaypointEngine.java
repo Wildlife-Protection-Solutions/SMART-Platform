@@ -364,7 +364,7 @@ public class AssetWaypointEngine extends AssetQueryEngine implements IDerbyWaypo
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
 		sql.append("wp_uuid char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("wp_id integer,"); //$NON-NLS-1$
+		sql.append("wp_id varchar(32),"); //$NON-NLS-1$
 		sql.append("wp_x double,"); //$NON-NLS-1$
 		sql.append("wp_y double,"); //$NON-NLS-1$
 		sql.append("wp_direction real,"); //$NON-NLS-1$
@@ -414,7 +414,7 @@ public class AssetWaypointEngine extends AssetQueryEngine implements IDerbyWaypo
 		it.setConservationAreaUuid(UuidUtils.byteToUUID(rs.getBytes("wp_ca_uuid"))); //$NON-NLS-1$
 		it.setWaypointDate(rs.getTimestamp("wp_date").toLocalDateTime()); //$NON-NLS-1$		
 		it.setWaypointUuid(UuidUtils.byteToUUID(rs.getBytes("wp_uuid"))); //$NON-NLS-1$
-		it.setWaypointId(rs.getInt("wp_id")); //$NON-NLS-1$
+		it.setWaypointId(rs.getString("wp_id")); //$NON-NLS-1$
 		it.setWaypointX(rs.getDouble("wp_x")); //$NON-NLS-1$
 		it.setWaypointY(rs.getDouble("wp_y")); //$NON-NLS-1$
 		it.setWaypointDirection(rs.getObject("wp_direction") == null ? null : rs.getFloat("wp_direction")); //$NON-NLS-1$ //$NON-NLS-2$

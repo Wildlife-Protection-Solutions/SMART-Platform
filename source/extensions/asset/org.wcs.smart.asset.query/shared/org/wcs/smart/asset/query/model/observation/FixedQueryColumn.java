@@ -53,7 +53,7 @@ public class FixedQueryColumn extends QueryColumn {
 		LOCATION(ColumnType.STRING, "asset:location"), //$NON-NLS-1$
 		ASSET(ColumnType.STRING, "asset:asset"), //$NON-NLS-1$
 
-		WAYPOINT_ID( ColumnType.INTEGER,"waypoint:id"), //$NON-NLS-1$
+		WAYPOINT_ID( ColumnType.STRING,"waypoint:id"), //$NON-NLS-1$
 		WAYPOINT_DATE(ColumnType.DATE,"waypoint:date"), //$NON-NLS-1$
 		WAYPOINT_TIME(ColumnType.TIME,"waypoint:time"), //$NON-NLS-1$
 		INCIDENT_LENGTH(ColumnType.INTEGER,"waypoint:length"), //$NON-NLS-1$

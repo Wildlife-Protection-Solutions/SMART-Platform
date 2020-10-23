@@ -126,7 +126,7 @@ public class ObservationGPSDataImport extends GPSDataImport{
 		}
 		waypoint.setRawX(wptType.getLon().doubleValue());
 		waypoint.setRawY(wptType.getLat().doubleValue());
-		waypoint.setId(id);
+		waypoint.setId(String.valueOf(id));
 		waypoint.setComment(wptType.getCmt());
 		return waypoint;
 	}
@@ -203,7 +203,7 @@ public class ObservationGPSDataImport extends GPSDataImport{
 
 							Waypoint c = new Waypoint();
 							try{
-								c.setId( Integer.parseInt(pnt.getName()) );
+								c.setId( pnt.getName() );
 							}catch (Exception ex){}
 							c.setRawX(x);
 							c.setRawY(y);

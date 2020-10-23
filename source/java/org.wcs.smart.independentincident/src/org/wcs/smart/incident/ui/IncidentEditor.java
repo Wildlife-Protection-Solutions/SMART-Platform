@@ -156,7 +156,7 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 		summaryEditor.initData(incident);
 		mapPage.updatePointsLayer();
 		
-		super.setPartName(MessageFormat.format(Messages.IncidentEditorInput_EditorName, new Object[]{String.valueOf(getIncident().getId())}));
+		super.setPartName(getIncident().getId());
 	}
 	/**
 	 * 
@@ -212,7 +212,7 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 	 */
 	public void updatePartName(){
 		IncidentEditorInput input = ((IncidentEditorInput) getEditorInput());
-		super.setPartName(MessageFormat.format(Messages.IncidentEditor_EditorPartName, input.getId()));
+		super.setPartName(getIncident().getId());
 	}
 	
 	
@@ -221,7 +221,7 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 	 */
 	@Override
 	protected void createPages() {
-		super.setPartName(MessageFormat.format(Messages.IncidentEditorInput_EditorName, new Object[]{String.valueOf(getIncident().getId())}));
+		super.setPartName(getIncident().getId());
 		showBusy(true);
 		try {
 			

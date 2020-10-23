@@ -533,7 +533,6 @@ public class QueryApi extends HttpServlet{
 		 
 		if (result instanceof IntelObservationQueryResults){
 			((IntelObservationQueryResults)result).setSorting(sortColumnName, sortDirectionInt);
-			((IntelObservationQueryResults)result).configureSort(s);
 			
 			if (format.equalsIgnoreCase(GeoJsonExporter.FORMAT_KEY)){
 				GeoJsonExporter exporter = new GeoJsonExporter(request.getLocale(), prjProvider);

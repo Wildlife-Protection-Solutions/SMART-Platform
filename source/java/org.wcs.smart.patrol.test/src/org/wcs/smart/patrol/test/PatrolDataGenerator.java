@@ -234,7 +234,7 @@ public class PatrolDataGenerator {
 					LocalDateTime wptime = pld.getDate().atTime(newTime);
 					wp.setDateTime( wptime );
 					
-					wp.setId(x+1);
+					wp.setId(String.valueOf(x+1));
 					wp.setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
 					wp.setObservationGroups(new ArrayList<>());
 					

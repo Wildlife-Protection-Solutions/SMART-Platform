@@ -34,8 +34,8 @@ public interface IQueryColumn {
 
 	public enum Type {
 		STRING("String"), //$NON-NLS-1$
-		DATE("Date"), //$NON-NLS-1$
-		TIME("String"), //$NON-NLS-1$
+		DATE("java.time.LocalDate"), //$NON-NLS-1$
+		TIME("java.time.LocalTime"), //$NON-NLS-1$
 		NUMERIC("Double"), //$NON-NLS-1$
 		BOOLEAN("Integer"), //$NON-NLS-1$
 		GEOMETRY("Geometry"); //$NON-NLS-1$

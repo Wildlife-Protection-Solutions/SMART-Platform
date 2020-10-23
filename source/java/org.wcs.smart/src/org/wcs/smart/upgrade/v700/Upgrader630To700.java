@@ -214,6 +214,15 @@ public class Upgrader630To700 implements IDatabaseUpgrader {
 				
 				"CREATE DERBY AGGREGATE smart.unionarea FOR blob RETURNS double precision EXTERNAL NAME 'org.wcs.smart.util.AreaUnionAggregate'", //$NON-NLS-1$
 				"CREATE FUNCTION smart.buffer(geom blob, buffer double precision) returns blob LANGUAGE JAVA NOT deterministic external name 'org.wcs.smart.util.GeometryUtils.buffer' PARAMETER STYLE JAVA NO SQL RETURNS NULL ON NULL INPUT", //$NON-NLS-1$
+				
+				//id integer to string
+				"ALTER TABLE smart.WAYPOINT add column id_str varchar(32)", //$NON-NLS-1$
+				"UPDATE smart.waypoint set id_str = trim(cast(id as char(32)))", //$NON-NLS-1$
+				"ALTER TABLE smart.waypoint drop column id", //$NON-NLS-1$
+				"RENAME column smart.waypoint.id_str to id", //$NON-NLS-1$
+				"ALTER TABLE smart.waypoint alter column id set not null", //$NON-NLS-1$
+				
+
 		};
 
 		for (String s : sql) {

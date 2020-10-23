@@ -71,7 +71,7 @@ public class FixedQueryColumn extends QueryColumn {
 		PATROL_LEG_START_DATE(ColumnType.DATE, "patrolleg:startdate"), //$NON-NLS-1$
 		PATROL_LEG_END_DATE(ColumnType.DATE, "patrolleg:enddate"), //$NON-NLS-1$
 		TRANSPORT_TYPE( ColumnType.STRING,"patrol:transporttype"), //$NON-NLS-1$
-		WAYPOINT_ID( ColumnType.INTEGER,"waypoint:id"), //$NON-NLS-1$
+		WAYPOINT_ID( ColumnType.STRING,"waypoint:id"), //$NON-NLS-1$
 		WAYPOINT_DATE(ColumnType.DATE,"waypoint:date"), //$NON-NLS-1$
 		WAYPOINT_TIME(ColumnType.TIME,"waypoint:time"), //$NON-NLS-1$
 		WAYPOINT_X(ColumnType.NUMBER,"waypoint:x"), //$NON-NLS-1$
@@ -174,7 +174,7 @@ public class FixedQueryColumn extends QueryColumn {
 			case WAYPOINT_COMMENT:
 				return item.getWaypointComment();
 			case WAYPOINT_DATE:
-				return item.getWpDateTime();
+				return item.getWaypointDate();
 			case WAYPOINT_DIRECTION:
 				return item.getWaypointDirection();
 			case WAYPOINT_DISTANCE:
@@ -227,6 +227,8 @@ public class FixedQueryColumn extends QueryColumn {
 			key = "wp:x"; //$NON-NLS-1$
 		}else if (key.equals(FixedQueryColumn.FixedColumns.WAYPOINT_RAWY.getKey() )){
 			key = "wp:y"; //$NON-NLS-1$
+		}else if (key.equals(FixedQueryColumn.FixedColumns.WAYPOINT_DATE.getKey() )){
+			key = FixedQueryColumn.FixedColumns.WAYPOINT_TIME.getKey();
 		}
 		
 		key = key.replace(":", "_"); //$NON-NLS-1$ //$NON-NLS-2$

@@ -36,6 +36,7 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.er.query.model.SurveyQueryAttachmentResultItem;
+import org.wcs.smart.er.query.model.SurveyQueryColumn;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.query.common.engine.AttachmentResultSetIterator;
 import org.wcs.smart.query.common.engine.IAttachmentResultItem;
@@ -168,8 +169,20 @@ public class ErObservationQueryResult extends ErSurveyQueryResultSet implements 
 					return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
 							ResultSet.CONCUR_READ_ONLY).executeQuery("SELECT * FROM " + engine.getQueryDataTable() + " ORDER BY sortkeydbl " +direction.sql+ ", sortkeytxt " + direction.sql);//$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
+				
+				StringBuilder sb = new StringBuilder();
+				sb.append("SELECT * FROM "); //$NON-NLS-1$
+				sb.append(engine.getQueryDataTable());
+				sb.append(" ORDER BY "); //$NON-NLS-1$
+				sb.append(SurveyQueryColumn.getDbColumnName(SurveyQueryColumn.FixedColumns.MISSION_START.getKey()));
+				sb.append(" DESC, "); //$NON-NLS-1$
+				sb.append(SurveyQueryColumn.getDbColumnName(SurveyQueryColumn.FixedColumns.MISSION.getKey()));
+				sb.append(","); //$NON-NLS-1$
+				sb.append(SurveyQueryColumn.getDbColumnName(SurveyQueryColumn.FixedColumns.WAYPOINT_DATE.getKey()));
+				sb.append(" DESC "); //$NON-NLS-1$
+				
 				return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
-						ResultSet.CONCUR_READ_ONLY).executeQuery("SELECT * FROM " + engine.getQueryDataTable()); //$NON-NLS-1$
+						ResultSet.CONCUR_READ_ONLY).executeQuery(sb.toString());
 			}
 		});
 	}
@@ -205,10 +218,10 @@ public class ErObservationQueryResult extends ErSurveyQueryResultSet implements 
 		it.setSamplingUnitId(rs.getString("samplingunit_id")); //$NON-NLS-1$
 		
 		it.setWaypointUuid((UUID)rs.getObject("wp_uuid")); //$NON-NLS-1$
-		it.setWaypointId(rs.getInt("wp_id")); //$NON-NLS-1$
+		it.setWaypointId(rs.getString("wp_id")); //$NON-NLS-1$
 		it.setWaypointX(rs.getDouble("wp_x")); //$NON-NLS-1$
 		it.setWaypointY(rs.getDouble("wp_y")); //$NON-NLS-1$
-		it.setWaypointDateTime(rs.getTimestamp("wp_time").toLocalDateTime()); //$NON-NLS-1$
+		it.setWaypointDateTime(rs.getTimestamp("wp_date").toLocalDateTime()); //$NON-NLS-1$
 		it.setWaypointDirection(rs.getObject("wp_direction") == null ? null : rs.getFloat("wp_direction")); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setWaypointDistance(rs.getObject("wp_distance") == null ? null : rs.getFloat("wp_distance")); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setWaypointComment(rs.getString("wp_comment")); //$NON-NLS-1$
@@ -280,7 +293,7 @@ public class ErObservationQueryResult extends ErSurveyQueryResultSet implements 
 				"surveydesign_name","surveydesign_enddate", //$NON-NLS-1$ //$NON-NLS-2$
 				"surveydesign_startdate","survey_id","survey_enddate", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				"survey_startdate","samplingunit_uuid","samplingunit_id",  //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
-				"wp_uuid","wp_id","wp_x","wp_y","wp_time","wp_direction", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+				"wp_uuid","wp_id","wp_x","wp_y","wp_date","wp_direction", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 				"wp_distance","wp_comment","wp_lastmodified","wp_lastmodifiedbyname" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		};
 		for (String s : selectFields) {

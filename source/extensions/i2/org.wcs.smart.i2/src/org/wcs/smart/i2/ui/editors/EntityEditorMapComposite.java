@@ -151,7 +151,7 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 			
 		}
 		public String getWaypointLabel(Waypoint wo) {
-			if (this == ID) return String.valueOf(wo.getId());
+			if (this == ID) return wo.getId();
 			if (this == DATETIME) return DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(wo.getDateTime());
 			if (this == SOURCE_LINK) return WaypointSourceEngine.INSTANCE.getSource(wo.getSourceId()).getName(Locale.getDefault());
 			if (this == SOURCE) return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(IIntelligenceLabelProvider.DM_SOURCE_LABEL, Locale.getDefault());

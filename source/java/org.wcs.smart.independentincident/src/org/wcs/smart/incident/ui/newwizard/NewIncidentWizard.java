@@ -63,14 +63,10 @@ public class NewIncidentWizard extends Wizard implements IPageChangingListener {
 		newIncident.setConservationArea(SmartDB.getCurrentConservationArea());
 		newIncident.setSourceId(IndepedentIncidentSource.KEY);
 		newIncident.setAttachments(new ArrayList<WaypointAttachment>());
-		
+
 		session = HibernateManager.openSession();
-		
-		int id = IncidentManager.getInstance().getNextIncidentId(session);
-		newIncident.setId(id);
-		
+		newIncident.setId(IncidentManager.getInstance().getNextIncidentId(session));
 		ops = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
-		
 	}
 
 	public Waypoint getNewIncident(){

@@ -79,7 +79,7 @@ public class ObservationDetailsShell extends SmartShellDialog{
 		owner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		lblId = new Label(owner, SWT.NONE);
-		lblId.setText(location == null ? String.valueOf(waypoint.getId()) : location.getId());
+		lblId.setText(location == null ? waypoint.getId() : location.getId());
 		FontData fd = lblId.getFont().getFontData()[0];
 		fd.setStyle(SWT.BOLD);
 		fd.height = fd.height + 1;

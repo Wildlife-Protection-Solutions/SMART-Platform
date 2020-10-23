@@ -129,7 +129,7 @@ public class IndIncidentListView implements IIncidentFilteringView {
 					int i = 0;
 					for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
 						Object[] data = (Object[]) iterator.next();					
-						input[i++] = new IncidentEditorInput((UUID)data[0], (Integer)data[1], (LocalDateTime)data[2], (String)data[3]);
+						input[i++] = new IncidentEditorInput((UUID)data[0], (String)data[1], (LocalDateTime)data[2], (String)data[3]);
 					}
 					
 					monitor.internalWorked(0.5);

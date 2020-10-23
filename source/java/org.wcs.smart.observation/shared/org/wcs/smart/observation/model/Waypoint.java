@@ -61,12 +61,13 @@ public class Waypoint extends UuidItem {
 	private static final long serialVersionUID = 1L;
 
 	public static final int COMMENT_MAX_LENGTH = 4096;
+	public static final int ID_MAX_LENGTH = 32;
 	
 	private ConservationArea ca;
 
 	private String sourceId;
 	
-	private int id;
+	private String id;
 	private Double x;
 	private Double y;
 	
@@ -111,11 +112,11 @@ public class Waypoint extends UuidItem {
 	}
 	
 	@Column(name="id")
-	public int getId() {
+	public String getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 
@@ -127,7 +128,6 @@ public class Waypoint extends UuidItem {
 	public void setRawX(double x) {
 		this.x = x;
 		computePrj();
-//		System.out.println("x:" + this.x + " : " + x);
 	}
 
 	@Column(name="y")

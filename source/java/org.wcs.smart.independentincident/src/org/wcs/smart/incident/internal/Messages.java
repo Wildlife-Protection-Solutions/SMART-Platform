@@ -38,7 +38,7 @@ public class Messages extends NLS {
 	public static String ExportIncidentHandler_ExportingProgress;
 	public static String ExportIncidentHandler_IncidentNotFound;
 	public static String ExportIncidentHandler_IncidentProgress;
-	public static String IdComposite_Description;
+	public static String IdComposite_Description1;
 	public static String IdComposite_IdRequired;
 	public static String IdComposite_IntegerRequired;
 	public static String IdComposite_Label;

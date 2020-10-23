@@ -701,6 +701,7 @@ public class Messages extends NLS {
 	public static String EditWaypointDialog_SecondsLabel;
 	public static String EditWaypointDialog_SecondsPositive;
 	public static String EditWaypointDialog_Title;
+	public static String EditWaypointDialog_waypointidrequired;
 	public static String ExifTagSelector_Tag;
 	public static String ExifTagSelector_Value;
 	public static String ExportLocationWizardPage_CaOption;

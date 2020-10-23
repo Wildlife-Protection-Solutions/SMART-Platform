@@ -41,19 +41,19 @@ public class PatrolFeatureFactory {
 	private static final DateTimeFormatter TRACK_DT_FORMAT = DateTimeFormatter.ofPattern("MMMddyyyy");  //$NON-NLS-1$
 	
 	public static SimpleFeatureType createWaypointPrjSchema() throws SchemaException{
-		String spec = "the_geom:LineString:srid=4326,fid:String,id:Integer,date:Date,time:Date,rawx:Double,rawy:Double,distance:Double,bearing:Double,x:Double,y:Double"; //$NON-NLS-1$
+		String spec = "the_geom:LineString:srid=4326,fid:String,id:String,date:java.time.LocalDate,time:java.time.LocalTime,rawx:Double,rawy:Double,distance:Double,bearing:Double,x:Double,y:Double"; //$NON-NLS-1$
 		SimpleFeatureType type =  DataUtilities.createType(PatrolDataSource.WAYPOINT_PRJ_TYPE, spec);
 		return type;
 	}
 	
 	public static SimpleFeatureType createWaypointSchema() throws SchemaException{
-		String spec = "the_geom:Point:srid=4326,fid:String,id:Integer,date:Date,time:Date,observation:String,comment:String"; //$NON-NLS-1$
+		String spec = "the_geom:Point:srid=4326,fid:String,id:String,date:java.time.LocalDate,time:java.time.LocalTime,obs:String,comment:String"; //$NON-NLS-1$
 		SimpleFeatureType type =  DataUtilities.createType(PatrolDataSource.WAYPOINT_TYPE, spec);
 		return type;
 	}
 	
 	public static SimpleFeatureType createTrackPartSchema() throws SchemaException{
-		String spec = "the_geom:LineString:srid=4326,fid:String,distance:Double,day:Date,leg:String,uid:String"; //$NON-NLS-1$
+		String spec = "the_geom:LineString:srid=4326,fid:String,distance:Double,day:java.time.LocalDate,leg:String,uid:String"; //$NON-NLS-1$
 		SimpleFeatureType type =  DataUtilities.createType(PatrolDataSource.TRACK_PART_TYPE, spec);
 		return type;
 	}
@@ -64,8 +64,8 @@ public class PatrolFeatureFactory {
 		data[0] = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(waypoint.getWaypoint().getX(), waypoint.getWaypoint().getY()));
 		data[1] = ftype.getName() + "." + waypoint.getWaypoint().getId() + "." + UuidUtils.uuidToString(waypoint.getWaypoint().getUuid()); //$NON-NLS-1$ //$NON-NLS-2$
 		data[2] = waypoint.getWaypoint().getId();
-		data[3] = waypoint.getPatrolLegDay() == null ? null : waypoint.getPatrolLegDay().getDate();
-		data[4] = waypoint.getWaypoint().getDateTime();
+		data[3] = waypoint.getWaypoint().getDateTime().toLocalDate();
+		data[4] = waypoint.getWaypoint().getDateTime().toLocalTime();
 		String obs = waypoint.getWaypoint().getObservationsAsString();
 		if (obs == null) obs = ""; //$NON-NLS-1$
 		data[5] = obs;
@@ -84,8 +84,8 @@ public class PatrolFeatureFactory {
 		});
 		data[1] = ftype.getName() + "." + waypoint.getWaypoint().getId() + "." + UuidUtils.uuidToString(waypoint.getWaypoint().getUuid()); //$NON-NLS-1$ //$NON-NLS-2$
 		data[2] = waypoint.getWaypoint().getId();
-		data[3] = waypoint.getPatrolLegDay() == null ? null : waypoint.getPatrolLegDay().getDate();
-		data[4] = waypoint.getWaypoint().getDateTime();
+		data[3] = waypoint.getWaypoint().getDateTime().toLocalDate();
+		data[4] = waypoint.getWaypoint().getDateTime().toLocalTime();
 		
 		data[5] = waypoint.getWaypoint().getRawX();
 		data[6] = waypoint.getWaypoint().getRawY();

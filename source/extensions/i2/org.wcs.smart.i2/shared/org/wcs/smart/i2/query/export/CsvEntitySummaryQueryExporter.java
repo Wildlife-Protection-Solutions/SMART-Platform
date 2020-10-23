@@ -25,6 +25,8 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 
@@ -54,7 +56,7 @@ public class CsvEntitySummaryQueryExporter implements IQueryExporter{
 	}
 	
 	@Override
-	public void exportQuery(Session session, IQueryResult result, Path destination,
+	public Collection<Path> exportQuery(Session session, IQueryResult result, Path destination,
 			HashMap<ExportOption, Object> exportOptions) throws Exception {
 		
 		SummaryQueryResult results = (SummaryQueryResult) result;
@@ -101,6 +103,7 @@ public class CsvEntitySummaryQueryExporter implements IQueryExporter{
 				writer.writeNext(data);
 			}
 		}
+		return Collections.singletonList(destination);
 	}
 
 	

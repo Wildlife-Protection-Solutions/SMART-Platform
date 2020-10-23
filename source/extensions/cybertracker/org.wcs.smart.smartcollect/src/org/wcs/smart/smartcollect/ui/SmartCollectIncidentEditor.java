@@ -159,7 +159,7 @@ public class SmartCollectIncidentEditor extends MultiPageEditorPart implements M
 		summaryEditor.initData(incident);
 		mapPage.updatePointsLayer();
 		
-		super.setPartName(MessageFormat.format(Messages.SmartCollectIncidentEditor_PartName, new Object[]{String.valueOf(getIncident().getWaypoint().getId())}));
+		super.setPartName(getIncident().getWaypoint().getId());
 	}
 	/**
 	 * 
@@ -215,7 +215,7 @@ public class SmartCollectIncidentEditor extends MultiPageEditorPart implements M
 	 */
 	public void updatePartName(){
 		IncidentEditorInput input = ((IncidentEditorInput) getEditorInput());
-		super.setPartName(MessageFormat.format(Messages.SmartCollectIncidentEditor_PartName, input.getId()));
+		super.setPartName(input.getId());
 	}
 	
 	
@@ -224,7 +224,7 @@ public class SmartCollectIncidentEditor extends MultiPageEditorPart implements M
 	 */
 	@Override
 	protected void createPages() {
-		super.setPartName(MessageFormat.format(Messages.SmartCollectIncidentEditor_PartName, new Object[]{String.valueOf(getIncident().getWaypoint().getId())}));
+		super.setPartName(getIncident().getWaypoint().getId());
 		showBusy(true);
 		try {
 			

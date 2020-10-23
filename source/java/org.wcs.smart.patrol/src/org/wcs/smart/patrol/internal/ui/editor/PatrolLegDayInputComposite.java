@@ -96,7 +96,6 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.celleditor.DoubleCellEditor;
-import org.wcs.smart.common.celleditor.IntegerCellEditor;
 import org.wcs.smart.common.celleditor.TimeCellEditor;
 import org.wcs.smart.gpx.GPSDataImport;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -159,10 +158,10 @@ public class PatrolLegDayInputComposite {
 	
 	private DoubleCellEditor doubleCellEditor;
 	private DoubleCellEditor nullableDoubleCellEditor;
-	private IntegerCellEditor integerCellEditor;
 	private TimeCellEditor timeEditor;
 	private AttachmentCellEditor attachmentEditor;
 	private TextCellEditor commentEditor;
+	private TextCellEditor idEditor;
 	private ObservationCellEditor observationEditor;
 	
 	private WaypointSorter waypointSorter;
@@ -634,14 +633,14 @@ public class PatrolLegDayInputComposite {
 		
 		doubleCellEditor.dispose();
 		nullableDoubleCellEditor.dispose();
-		integerCellEditor.dispose();
+		idEditor.dispose();
 		timeEditor.dispose();
 		attachmentEditor.dispose();
 		commentEditor.dispose();
 		observationEditor.dispose();
 		doubleCellEditor = null;
 		nullableDoubleCellEditor = null;
-		integerCellEditor = null;
+		idEditor = null;
 		timeEditor = null;
 		attachmentEditor = null;
 		commentEditor = null;
@@ -826,7 +825,15 @@ public class PatrolLegDayInputComposite {
 
 		doubleCellEditor = new DoubleCellEditor(observationTable.getTable(), false);
 		nullableDoubleCellEditor = new DoubleCellEditor(observationTable.getTable(), true);
-		integerCellEditor = new IntegerCellEditor(observationTable.getTable());
+		idEditor = new TextCellEditor(observationTable.getTable(), SWT.SINGLE){
+		    @Override
+			protected Control createControl(Composite parent) {
+		    	Control c = super.createControl(parent);
+		    	text.setTextLimit(Waypoint.ID_MAX_LENGTH);
+		    	return c;
+		    }
+		};
+		
 		timeEditor = new TimeCellEditor(observationTable.getTable());
 		attachmentEditor = new AttachmentCellEditor(observationTable.getTable());
 		commentEditor = new TextCellEditor(observationTable.getTable(), SWT.MULTI | SWT.WRAP);
@@ -935,8 +942,8 @@ public class PatrolLegDayInputComposite {
 		Waypoint waypoint = ((PatrolWaypoint)element).getWaypoint();
 		boolean needSave = false;
 		if (column == OtColumn.ID) {
-			if (waypoint.getId() == ((Integer)value).intValue()) return; //no change
-			waypoint.setId((Integer)value);
+			if (waypoint.getId().equals(((String)value).strip())) return; //no change
+			waypoint.setId((String)value);
 			needSave = true;
 		} else if (column == OtColumn.EAST) {
 			if (waypoint.getRawX() == ((Double)value).doubleValue()) return; // no change
@@ -1063,7 +1070,7 @@ public class PatrolLegDayInputComposite {
 
 		Waypoint wp = ((PatrolWaypoint) element).getWaypoint();
 		if (column == OtColumn.ID) {
-			return String.valueOf(wp.getId());
+			return wp.getId();
 		} else if (column == OtColumn.EAST) {
 			return String.valueOf(ReprojectUtils.transform(wp.getRawX(), wp.getRawY(), prj.getParsedCoordinateReferenceSystem()).getX());
 		} else if (column == OtColumn.NORTH) {
@@ -1138,7 +1145,7 @@ public class PatrolLegDayInputComposite {
 	
 	private void addWaypoint() {
 		double y = 0, x = 0;
-		int id = -1;
+		String id = "-1";
 		LocalTime last = null;
 		for (Iterator<PatrolWaypoint> iterator = PatrolLegDayInputComposite.this.patrolLegDate.getWaypoints().iterator(); iterator.hasNext();) {
 			PatrolWaypoint e = (PatrolWaypoint) iterator.next();
@@ -1147,7 +1154,7 @@ public class PatrolLegDayInputComposite {
 			if(last == null || t.isAfter(last) || t.equals(last)  ){
 				y = (Double) getWaypointValue(e, OtColumn.NORTH);
 				x = (Double) getWaypointValue(e, OtColumn.EAST);
-				id = (Integer) getWaypointValue(e, OtColumn.ID);
+				id = (String)getWaypointValue(e, OtColumn.ID);
 				last = t;
 			}
 		}
@@ -1156,7 +1163,12 @@ public class PatrolLegDayInputComposite {
 		if(x == 0 && y == 0){
 			add = new AddWaypointDialog(mainComposite.getShell(), editor.getPatrolEditor().getAvailableProjections());
 		}else{
-			add = new AddWaypointDialog(mainComposite.getShell(), y, x, id+1, editor.getPatrolEditor().getAvailableProjections());
+			String nextid = String.valueOf(PatrolLegDayInputComposite.this.patrolLegDate.getWaypoints().size() + 1);
+			try {
+				nextid = String.valueOf(Integer.parseInt(id) + 1);
+			}catch (Exception ex) {}
+			
+			add = new AddWaypointDialog(mainComposite.getShell(), y, x, nextid, editor.getPatrolEditor().getAvailableProjections());
 		}
 		if (add.open() == Window.OK){
 			PatrolWaypoint wp = add.getWaypoint();
@@ -1245,7 +1257,7 @@ public class PatrolLegDayInputComposite {
 			}else if (column == OtColumn.DIRECTION || column == OtColumn.DISTANCE ){
 				return nullableDoubleCellEditor;
 			}else if (column == OtColumn.ID){
-				return integerCellEditor;
+				return idEditor;
 			}else if (column == OtColumn.TIME){
 				return timeEditor;
 			}else if (column == OtColumn.ATTACHMENTS){

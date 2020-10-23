@@ -120,8 +120,7 @@ public class EditWaypointDialog extends SmartStyledTitleDialog{
 		}
 		
 		if (showId) {
-			Integer id = Integer.parseInt(txtId.getText().trim());
-			toUpdate.getWaypoint().setId(id);
+			toUpdate.getWaypoint().setId(txtId.getText().strip());
 		}
 		
 		if (showComment) {
@@ -142,14 +141,8 @@ public class EditWaypointDialog extends SmartStyledTitleDialog{
 		setErrorMessage(null);
 		
 		if (showId) {
-			try {
-				int wpid = Integer.parseInt(txtId.getText().trim());
-				if (wpid < 0) {
-					setErrorMessage(Messages.EditWaypointDialog_InvalidWpId);
-					return false;
-				}
-			}catch (Exception ex) {
-				setErrorMessage(Messages.EditWaypointDialog_InvalidWpId);
+			if (txtId.getText().strip().isEmpty()) {
+				setErrorMessage(Messages.EditWaypointDialog_waypointidrequired);
 				return false;
 			}
 		}
@@ -215,7 +208,8 @@ public class EditWaypointDialog extends SmartStyledTitleDialog{
 			
 			txtId = new Text(form, SWT.BORDER);
 			
-			txtId.setText(String.valueOf(toUpdate.getWaypoint().getId()));
+			txtId.setText(toUpdate.getWaypoint().getId());
+			txtId.setTextLimit(Waypoint.ID_MAX_LENGTH);
 			txtId.addListener(SWT.Modify, e->validate());
 			txtId.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		}

@@ -40,6 +40,7 @@ import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
 import org.wcs.smart.observation.query.model.ObservationAttachmentQueryResultItem;
 import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
+import org.wcs.smart.observation.query.model.columns.FixedQueryColumn;
 import org.wcs.smart.query.common.engine.AttachmentResultSetIterator;
 import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 import org.wcs.smart.query.common.engine.IPagedImageResultSet;
@@ -268,8 +269,16 @@ public class ObsObservationQueryResult extends AbstractDbFeatureResultSet implem
 					return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
 						ResultSet.CONCUR_READ_ONLY).executeQuery("SELECT * FROM " + engine.getQueryDataTable() + " ORDER BY sortkeydbl " + direction.sql + ", sortkeytxt " + direction.sql); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
+				//default sort by waypoint date/time
+				StringBuilder sql = new StringBuilder();
+				sql.append("SELECT * FROM "); //$NON-NLS-1$
+				sql.append(engine.getQueryDataTable());
+				sql.append(" ORDER BY "); //$NON-NLS-1$
+				sql.append(FixedQueryColumn.getDbColumnName(FixedQueryColumn.FixedColumns.WAYPOINT_DATE.getKey()));
+				sql.append(" DESC"); //$NON-NLS-1$
+				
 				return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
-						ResultSet.CONCUR_READ_ONLY).executeQuery("SELECT * FROM " + engine.getQueryDataTable()); //$NON-NLS-1$
+						ResultSet.CONCUR_READ_ONLY).executeQuery(sql.toString());
 			}
 		});
 	}
@@ -293,7 +302,7 @@ public class ObsObservationQueryResult extends AbstractDbFeatureResultSet implem
 		it.setConservationAreaUuid((UUID)rs.getObject("p_ca_uuid")); //$NON-NLS-1$
 		it.setSourceId(rs.getString("wp_source")); //$NON-NLS-1$
 		it.setWaypointUuid((UUID)rs.getObject("wp_uuid")); //$NON-NLS-1$
-		it.setWaypointId(rs.getInt("wp_id")); //$NON-NLS-1$
+		it.setWaypointId(rs.getString("wp_id")); //$NON-NLS-1$
 		it.setWaypointX(rs.getDouble("wp_x")); //$NON-NLS-1$
 		it.setWaypointY(rs.getDouble("wp_y")); //$NON-NLS-1$
 		it.setWpDateTime(rs.getTimestamp("wp_time").toLocalDateTime()); //$NON-NLS-1$

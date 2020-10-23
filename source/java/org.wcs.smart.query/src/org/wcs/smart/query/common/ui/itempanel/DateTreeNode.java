@@ -68,7 +68,7 @@ public class DateTreeNode implements IItemTreeNode {
 	
 	@Override
 	public String getName() {
-		return Messages.DateTreeNode_TreeNodeLabel;
+		return Messages.DateTreeNode_TreeNodeLabel1;
 	}
 
 	@Override

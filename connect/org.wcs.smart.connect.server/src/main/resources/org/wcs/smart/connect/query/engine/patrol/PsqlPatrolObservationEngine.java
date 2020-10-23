@@ -269,7 +269,6 @@ public class PsqlPatrolObservationEngine extends AbstractQueryEngine {
 		sql.append(tablePrefix(PatrolLeg.class) + ".id, "); //$NON-NLS-1$
 		sql.append(tablePrefix(PatrolLeg.class) + ".transport_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(PatrolLegDay.class) + ".uuid, "); //$NON-NLS-1$
-		sql.append(tablePrefix(PatrolLegDay.class) + ".patrol_day, "); //$NON-NLS-1$
 
 		sql.append(tablePrefix(Waypoint.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".id, "); //$NON-NLS-1$
@@ -310,10 +309,9 @@ public class PsqlPatrolObservationEngine extends AbstractQueryEngine {
 		sql.append("p_legid varchar(50),"); //$NON-NLS-1$
 		sql.append("pl_transport_uuid uuid,"); //$NON-NLS-1$
 		sql.append("pld_uuid uuid,"); //$NON-NLS-1$
-		sql.append("wp_date date,"); //$NON-NLS-1$ //sql.append("pld_patrol_day date,");
+		
 		sql.append("wp_uuid uuid,"); //$NON-NLS-1$
-
-		sql.append("wp_id integer,"); //$NON-NLS-1$
+		sql.append("wp_id varchar(32),"); //$NON-NLS-1$
 		sql.append("wp_x double precision,"); //$NON-NLS-1$
 		sql.append("wp_y double precision,"); //$NON-NLS-1$
 		sql.append("wp_direction real,"); //$NON-NLS-1$

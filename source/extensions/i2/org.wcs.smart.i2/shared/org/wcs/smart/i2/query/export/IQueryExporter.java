@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.query.export;
 
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Locale;
 
@@ -56,9 +57,10 @@ public interface IQueryExporter {
 	 * @param results
 	 * @param destination
 	 * @param exportOptions
+	 * @return list of files created
 	 * @throws Exception
 	 */
-	public void exportQuery(Session session, IQueryResult results, Path destination, HashMap<ExportOption,Object> exportOptions) throws Exception;
+	public Collection<Path> exportQuery(Session session, IQueryResult results, Path destination, HashMap<ExportOption,Object> exportOptions) throws Exception;
 	
 	/**
 	 * 

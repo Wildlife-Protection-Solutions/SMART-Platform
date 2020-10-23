@@ -154,7 +154,7 @@ public class CreateRecordActionType implements IActionType {
 		location.setConservationArea(newRecord.getConservationArea());
 		location.setComment(data.getWaypoint().getComment());
 		location.setDateTime(data.getWaypoint().getDateTime());
-		location.setId(String.valueOf( data.getWaypoint().getId()));
+		location.setId( data.getWaypoint().getId() );
 		location.setRecord(newRecord);
 		location.setGeometry(GeometryFactoryProvider.getFactory().createPoint(new Coordinate(data.getWaypoint().getX(),data.getWaypoint().getY())));
 		newRecord.getLocations().add(location);

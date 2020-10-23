@@ -91,8 +91,7 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 	}
 	
 	protected String buildSortSql() {
-		if (sortColumn == null || direction == SWT.NONE)
-			return ""; //$NON-NLS-1$
+		if (sortColumn == null || direction == SWT.NONE) return "";			 //$NON-NLS-1$
 		
 		String result = ""; //$NON-NLS-1$
 		if (sortColumn instanceof SurveyQueryColumn) {

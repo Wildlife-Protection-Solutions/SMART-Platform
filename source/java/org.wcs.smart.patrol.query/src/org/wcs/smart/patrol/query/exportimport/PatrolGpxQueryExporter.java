@@ -174,7 +174,7 @@ public class PatrolGpxQueryExporter extends SimpleQueryExporter implements IQuer
 	}
 
 	private boolean hasWaypoint(PatrolQueryResultItem item) {
-		return item.getWpDateTime() != null && item.getWaypointTime() != null;
+		return item.getWaypointDate() != null && item.getWaypointTime() != null;
 	}
 	
 	private void recordWaypoint(PatrolQueryResultItem item) throws DatatypeConfigurationException {
@@ -185,7 +185,7 @@ public class PatrolGpxQueryExporter extends SimpleQueryExporter implements IQuer
 			w.setLon(new BigDecimal(x));
 			w.setLat(new BigDecimal(y));
 			
-			w.setTime(toXmlTime(item.getWpDateTime(), item.getWaypointTime()));
+			w.setTime(toXmlTime(item.getWaypointDate(), item.getWaypointTime()));
 			w.setCmt(item.getWaypointComment());
 
 			gpx.getWpt().add(w);

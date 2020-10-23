@@ -115,8 +115,11 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet implem
 	}
 
 	private String buildSortSql() {
-		if (sortColumn == null || direction == SWT.NONE)
-			return ""; //$NON-NLS-1$
+		if (sortColumn == null || direction == SWT.NONE) {
+			//lets default sort by waypoint date/time
+			return "order by " + FixedQueryColumn.getDbColumnName(FixedQueryColumn.FixedColumns.WAYPOINT_DATE.getKey()) + " DESC"; //$NON-NLS-1$ //$NON-NLS-2$
+		}
+			
 		
 		String result = ""; //$NON-NLS-1$
 		if (sortColumn instanceof FixedQueryColumn) {

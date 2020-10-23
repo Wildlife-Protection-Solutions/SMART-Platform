@@ -102,7 +102,7 @@ elementFormDefault="qualified">
     			type="tns:WaypointObservationGroupType" maxOccurs="unbounded" minOccurs="0">
     		</element>
     	</sequence>
-    	<attribute name="id" type="int"></attribute>
+    	<attribute name="id" type="string"></attribute>
     	<attribute name="x" type="double"></attribute>
     	<attribute name="y" type="double"></attribute>
     	<attribute name="time" type="time"></attribute>

@@ -1,33 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schema xmlns="http://www.w3.org/2001/XMLSchema" 
-targetNamespace="http://www.smartconservationsoftware.org/xml/1.0/smartcollectincident" 
-xmlns:tns="http://www.smartconservationsoftware.org/xml/1.0/smartcollectincident"
+targetNamespace="http://www.smartconservationsoftware.org/xml/2.2/independentincident" 
+xmlns:tns="http://www.smartconservationsoftware.org/xml/2.2/independentincident"
 elementFormDefault="qualified">
 
  <complexType name="WaypointType">
- 	<sequence>
- 		<element name="direction" type="float" maxOccurs="1"
- 			minOccurs="0">
- 		</element>
- 		<element name="distance" type="float" maxOccurs="1"
- 			minOccurs="0">
- 		</element>
- 		<element name="comment" type="string" maxOccurs="1"
- 			minOccurs="0">
- 		</element>
- 		<element name="attachments" type="string" maxOccurs="unbounded"
- 			minOccurs="0">
- 		</element>
- 		<element name="groups" type="tns:WaypointObservationGroupType"
- 			maxOccurs="unbounded" minOccurs="0">
- 		</element>
- 	</sequence>
- 	<attribute name="id" type="string"></attribute>
- 	<attribute name="x" type="double"></attribute>
- 	<attribute name="y" type="double"></attribute>
- 	<attribute name="dateTime" type="string"></attribute>
- 	<attribute name="source" type="string"></attribute>
- </complexType>
+    	<sequence>
+    		<element name="direction" type="float" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="distance" type="float" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="comment" type="string" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="attachments" type="string"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    		<element name="groups"
+    			type="tns:WaypointObservationGroupType" maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    	</sequence>
+    	<attribute name="id" type="string"></attribute>
+    	<attribute name="x" type="double"></attribute>
+    	<attribute name="y" type="double"></attribute>
+    	<attribute name="dateTime" type="string"></attribute>
+    </complexType>
 
 
  <complexType name="WaypointObservationType">

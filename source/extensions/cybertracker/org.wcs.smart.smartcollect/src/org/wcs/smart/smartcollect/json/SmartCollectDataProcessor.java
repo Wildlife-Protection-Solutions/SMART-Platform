@@ -253,8 +253,7 @@ public class SmartCollectDataProcessor implements IJsonProcessor {
 					parsedWp.setConservationArea(SmartDB.getCurrentConservationArea());
 					parsedWp.setSourceId(SmartCollectWaypointSource.KEY);
 					
-					int id = IncidentManager.getInstance().getNextIncidentId(session);
-					currentWaypoint.getWaypoint().setId(id);
+					currentWaypoint.getWaypoint().setId(IncidentManager.getInstance().getNextIncidentId(session));
 					
 					obsgroupmapping = new HashMap<>();
 					obsgroupmapping.put(strGroupId, currentWaypoint.getWaypoint().getObservationGroups().get(0));

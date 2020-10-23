@@ -60,7 +60,7 @@ public class EntityQueryResultItem implements IGeometryResultItem, IAdaptable{
 	
 	private LocalDateTime wpDateTime;
 	private UUID waypointUuid;
-	private int waypointId;
+	private String waypointId;
 	private double waypointX;
 	private double waypointY;
 	private Float waypointDistance;
@@ -250,13 +250,13 @@ public class EntityQueryResultItem implements IGeometryResultItem, IAdaptable{
 	/**
 	 * @return waypoint id
 	 */
-	public int getWaypointId() {
+	public String getWaypointId() {
 		return waypointId;
 	}
 	/**
 	 * @param waypointId waypoint id
 	 */
-	public void setWaypointId(int waypointId) {
+	public void setWaypointId(String waypointId) {
 		this.waypointId = waypointId;
 	}
 	

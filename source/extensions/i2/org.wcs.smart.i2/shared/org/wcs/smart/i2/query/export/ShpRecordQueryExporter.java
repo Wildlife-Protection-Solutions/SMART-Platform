@@ -26,6 +26,7 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -76,7 +77,7 @@ public class ShpRecordQueryExporter implements IQueryExporter {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public void exportQuery(Session session, IQueryResult result, Path destination,
+	public Collection<Path> exportQuery(Session session, IQueryResult result, Path destination,
 			HashMap<ExportOption, Object> exportOptions) throws Exception {
 		
 		IPagedQueryResultSet results = (IPagedQueryResultSet) result;
@@ -125,9 +126,11 @@ public class ShpRecordQueryExporter implements IQueryExporter {
 			polygonFile = polygonFile.substring(0, ext) + "_polygon" + polygonFile.substring(ext); //$NON-NLS-1$
 		}
 		
+		Path pointPath = destination.getParent().resolve(pointFile);
+		Path polygonPath = destination.getParent().resolve(pointFile);
 		
-		URL shpPointFile = URLUtils.fileToURL(destination.getParent().resolve(pointFile).toFile());
-		URL shpPolygonFile = URLUtils.fileToURL(destination.getParent().resolve(polygonFile).toFile());
+		URL shpPointFile = URLUtils.fileToURL(pointPath.toFile());
+		URL shpPolygonFile = URLUtils.fileToURL(polygonPath.toFile());
 		
 		Object[][] items = {{shpPointFile, pointType, pointFeatures}, {shpPolygonFile, polygonType, polygonFeatures}};
 		
@@ -164,6 +167,9 @@ public class ShpRecordQueryExporter implements IQueryExporter {
 			
 			shapefile.dispose();
 		}
+		
+		
+		return List.of(pointPath, polygonPath);
 	}
 
 	@Override

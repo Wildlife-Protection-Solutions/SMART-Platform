@@ -335,7 +335,7 @@ public class DataGenerator implements IDataEngine{
 				wp.setAttachments(new ArrayList<>());
 				wp.setComment(""); //$NON-NLS-1$
 				wp.setConservationArea(p.getConservationArea());
-				wp.setId(i+1);
+				wp.setId(String.valueOf(i+1));
 				wp.setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
 				wp.setObservationGroups(new ArrayList<>());
 				session.save(wp);

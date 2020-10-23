@@ -25,6 +25,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -133,7 +135,7 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 	public boolean performFinish() {
 		page1.performFinish();
 		
-		final boolean[] runOk = {false};
+		List<Path> exportFiles = new ArrayList<>();
 		try {
 			final IQueryExporter exporter = getQueryExporter();
 			if (exporter == null){
@@ -156,17 +158,26 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 				@Override
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
-					runOk[0] =  exportQuery(monitor, output, exporter, options);
+					Collection<Path> results = exportQuery(monitor, output, exporter, options);
+					if (results != null) exportFiles.addAll(results);
 				}
 			});
 		} catch (Exception ex) {
 			displayError(ex);
 			return false;
 		}
-		if (runOk[0]) {
-			MessageDialog.openInformation(getShell(), Messages.ExportQueryWizard_ExportDone, MessageFormat.format(Messages.ExportQueryWizard_ExportDoneMsg, page2.getFile().toString()));
+		if (!exportFiles.isEmpty()) {
+			StringBuilder message = new StringBuilder();
+			for (Path p : exportFiles) {
+				if (message.length() != 0) {
+					message.append(Messages.ExportQueryWizard_And);
+				}
+				message.append(p.toString());
+			}
+			MessageDialog.openInformation(getShell(), Messages.ExportQueryWizard_ExportDone, MessageFormat.format(Messages.ExportQueryWizard_ExportDoneMsg, message));
+			return true;
 		}					
-		return runOk[0];
+		return false;
 	}
 	
 	private void displayError(Exception ex){
@@ -175,16 +186,15 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 	/**
 	 * Exports a single query to the selected format/file.
 	 */
-	private boolean exportQuery(IProgressMonitor monitor, Path output,
+	private Collection<Path> exportQuery(IProgressMonitor monitor, Path output,
 			IQueryExporter exporter, HashMap<IQueryExporter.ExportOption, Object> options){
 
 		try(Session s = HibernateManager.openSession()){
-			exporter.exportQuery(s, queryResults, output, options);
+			return exporter.exportQuery(s, queryResults, output, options);
 		}catch (Exception ex){
 			displayError(ex);
-			return false;
+			return null;
 		}
-		return true;
 	}
 	
 	

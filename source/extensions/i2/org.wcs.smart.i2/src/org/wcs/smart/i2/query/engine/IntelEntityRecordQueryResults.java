@@ -185,7 +185,9 @@ public class IntelEntityRecordQueryResults implements IPagedQueryResultSet {
 	
 	@SuppressWarnings("unchecked")
 	private String configureSort(Session session){
-		if (sortColumn == null || sortDirection == null) return ""; //$NON-NLS-1$
+		if (sortColumn == null || sortDirection == null) {
+			return " "; //$NON-NLS-1$
+		}
 		
 		String sql = " order by "; //$NON-NLS-1$
 		

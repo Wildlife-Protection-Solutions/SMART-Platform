@@ -239,7 +239,7 @@ public class PsqlObsObservationEngine extends AbstractQueryEngine {
 		sql.append("p_ca_uuid uuid,"); //$NON-NLS-1$
 		sql.append("wp_uuid uuid,"); //$NON-NLS-1$ 
 		sql.append("wp_source varchar(16),"); //$NON-NLS-1$
-		sql.append("wp_id integer,"); //$NON-NLS-1$
+		sql.append("wp_id varchar(32),"); //$NON-NLS-1$
 		sql.append("wp_x double precision,"); //$NON-NLS-1$
 		sql.append("wp_y double precision,"); //$NON-NLS-1$
 		sql.append("wp_direction real,"); //$NON-NLS-1$

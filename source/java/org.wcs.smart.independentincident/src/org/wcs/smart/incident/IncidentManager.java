@@ -124,15 +124,16 @@ public class IncidentManager {
 	 * @param session
 	 * @return
 	 */
-	public Integer getNextIncidentId(Session session) {
+	public String getNextIncidentId(Session session) {
 		Set<String> incidentsources = getIncidentProviders().stream()
 				.map(e->e.getWaypointSourceKey()).collect(Collectors.toSet());
 		
-		Query<?> q = session.createQuery("SELECT max(id) + 1 FROM Waypoint WHERE sourceId IN (:source) AND conservationArea = :ca"); //$NON-NLS-1$
+		Query<?> q = session.createQuery("SELECT count(*) FROM Waypoint WHERE sourceId IN (:source) AND conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameterList("source", incidentsources); //$NON-NLS-1$
 		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		List<?> maxIs = q.list();
-		if (maxIs.size() > 0 && maxIs.get(0) != null ) return (Integer) maxIs.get(0);
-		return 1;
+		long id = 1;
+		if (maxIs.size() > 0 && maxIs.get(0) != null ) id = (Long) maxIs.get(0);
+		return String.valueOf(id);
 	}
 }

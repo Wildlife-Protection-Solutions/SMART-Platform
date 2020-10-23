@@ -215,7 +215,13 @@ public class IntelRecordQueryResults implements IConnectPagedQueryResultSet {
 	@SuppressWarnings("unchecked")
 	@Override
 	public String getSelectQuery(Session session){
-		if (sortColumn == null || sortDirection == null) return "SELECT * FROM " + resultsTable; //$NON-NLS-1$
+		if (sortColumn == null || sortDirection == null) {
+			StringBuilder sb = new StringBuilder();
+			sb.append("SELECT * FROM "); //$NON-NLS-1$
+			sb.append(resultsTable);
+			sb.append(" ORDER BY record_date DESC"); //$NON-NLS-1$
+			return sb.toString();
+		}
 		
 		if (sortColumn instanceof FixedQueryColumn){
 			String sql = "SELECT * FROM " + resultsTable + " order by "; //$NON-NLS-1$ //$NON-NLS-2$

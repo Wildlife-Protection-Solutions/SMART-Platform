@@ -128,7 +128,7 @@ public class IncidentFilterDialog extends SmartFilterDialog {
 				incidentIdComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				incidentIdFilterCmp = new StringFilterComposite(incidentIdComp, SWT.NONE,
 						new StringFilterComposite.TextField[]{new StringFilterComposite.TextField(Messages.IncidentFilterDialog_IdOptionLabel, "id")}, //$NON-NLS-1$
-						new StringFilterComposite.StringComparison[]{StringFilterComposite.StringComparison.EQUALS}); 
+						new StringFilterComposite.StringComparison[]{StringFilterComposite.StringComparison.CONTAINS, StringFilterComposite.StringComparison.EQUALS}); 
 				incidentIdFilterCmp.setIncludeAllRadioLabel(Messages.IncidentFilterDialog_IncludeAllOption);
 				incidentIdFilterCmp.setFilterRadioLabel(Messages.IncidentFilterDialog_FilterOptions);
 				

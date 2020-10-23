@@ -36,7 +36,6 @@ import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
-import org.wcs.smart.patrol.model.PatrolWaypoint;
 
 /**
  * Import engine for importing waypoints from a CSV File.
@@ -58,20 +57,16 @@ public class PatrolCsvImportEngine extends CsvImportEngine {
 			//if no ID was given, get the largest ID from the patrol 
 			//so far and reset the id's of the points about to be saved. 
 			if (getConfiguration().getIdColumn() == -1){
-				int max = 0;
+				int cnt = 0;
 				Patrol p = currentLeg.getPatrolLeg().getPatrol();
 				for( PatrolLeg pl : p.getLegs() ){
 					for(PatrolLegDay pld : pl.getPatrolLegDays()){
-						for(PatrolWaypoint wp : pld.getWaypoints()){
-							if (wp.getWaypoint().getId() > max){
-								max = wp.getWaypoint().getId();
-							}
-						}
+						cnt += pld.getWaypoints().size();
 					}
 				}
 				for(Waypoint wp : waypoints){
-					wp.setId(max + 1);
-					max++;
+					wp.setId(String.valueOf(cnt+ 1));
+					cnt++;
 				}
 			}
 			monitor.setTaskName(MessageFormat.format(Messages.CsvImportEngine_SaveProgressMessage, new Object[]{waypoints.size()}));

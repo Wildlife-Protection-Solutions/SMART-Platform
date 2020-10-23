@@ -41,7 +41,7 @@ import org.wcs.smart.incident.internal.Messages;
  */
 public class IncidentEditorInput implements IEditorInput {
 
-	private int id;
+	private String id;
 	private UUID uuid;
 	private LocalDateTime dateTime;
 	private String sourceKey;
@@ -51,7 +51,7 @@ public class IncidentEditorInput implements IEditorInput {
 		this.sourceKey = sourceKey;
 	}
 	
-	public IncidentEditorInput(UUID uuid, int id, LocalDateTime dateTime, String sourceKey){
+	public IncidentEditorInput(UUID uuid, String id, LocalDateTime dateTime, String sourceKey){
 		this(uuid, sourceKey);
 		this.id = id;
 		this.dateTime = dateTime;
@@ -68,7 +68,7 @@ public class IncidentEditorInput implements IEditorInput {
 	 * update id value
 	 * @param id
 	 */
-	public void setId(int id){
+	public void setId(String id){
 		this.id = id;
 	}
 	
@@ -96,7 +96,7 @@ public class IncidentEditorInput implements IEditorInput {
 	/**
 	 * @return the incident id
 	 */
-	public int getId(){
+	public String getId(){
 		return this.id;
 	}
 	

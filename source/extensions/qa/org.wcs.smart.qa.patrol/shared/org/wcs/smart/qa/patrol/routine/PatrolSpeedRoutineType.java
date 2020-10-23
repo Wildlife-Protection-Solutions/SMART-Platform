@@ -184,7 +184,7 @@ public class PatrolSpeedRoutineType implements IQaRoutineType {
 		List<PatrolWaypoint> allWaypoints = pw.getPatrolLegDay().getWaypoints();
 		Collections.sort(allWaypoints, (a,b)->{
 			if (a.getWaypoint().getDateTime().equals(b.getWaypoint().getDateTime())){
-				return Integer.compare(a.getWaypoint().getId(), b.getWaypoint().getId());
+				return a.getWaypoint().getId().compareTo(b.getWaypoint().getId());
 			}
 			return a.getWaypoint().getDateTime().compareTo(b.getWaypoint().getDateTime());
 		});

@@ -90,7 +90,7 @@ public class WaypointSorter extends ViewerComparator{
 	
 	private int compareValue(Waypoint wp1, Waypoint wp2){
 		if (sortColumn == OtColumn.ID){
-			return ((Integer)wp1.getId()).compareTo(((Integer)wp2.getId()));
+			return wp1.getId().compareTo(wp2.getId());
 		}else if (sortColumn == OtColumn.TIME){
 			return wp1.getDateTime().compareTo(wp2.getDateTime());
 			//return ((Integer)wp1.getTime()).compareTo(((Integer)wp2.getTime()));

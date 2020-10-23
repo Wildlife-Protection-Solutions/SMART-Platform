@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.incident.ui;
 
+import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -174,6 +175,8 @@ public class IncidentFilter {
 			or = true;
 			if (stringComparator == StringComparison.EQUALS){
 				str.append(" i.id = :pid "); //$NON-NLS-1$
+			}else if (stringComparator == StringComparison.CONTAINS) {
+				str.append(" i.id like :pid "); //$NON-NLS-1$
 			}
 			
 		}
@@ -200,11 +203,11 @@ public class IncidentFilter {
 		query.setParameterList("source", sourcestrings); //$NON-NLS-1$
 		if (stringComparator != null && incidentIdFilter != null){
 			if (stringComparator == StringComparison.EQUALS){
-				try{
-					query.setParameter("pid", Integer.valueOf(this.incidentIdFilter.toLowerCase())); //$NON-NLS-1$
-				}catch (Exception ex){
-					query.setParameter("pid", null); //$NON-NLS-1$
-				}
+				query.setParameter("pid", this.incidentIdFilter); //$NON-NLS-1$				
+			}else if (stringComparator == StringComparison.CONTAINS) {
+				query.setParameter("pid", "%" + this.incidentIdFilter + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			}else {
+				throw new IllegalStateException(MessageFormat.format("String operator {0} not supported.", stringComparator.getGuiName()));
 			}
 		}
 		if (dateFilter != null) {

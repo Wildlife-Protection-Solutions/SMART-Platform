@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import org.eclipse.swt.SWT;
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
@@ -35,6 +36,7 @@ import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.io.WKBReader;
 import org.wcs.smart.er.query.ERQueryPlugIn;
+import org.wcs.smart.er.query.model.SurveyQueryColumn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.common.engine.IResultItem;
 
@@ -112,6 +114,32 @@ public class DerbyPagedMissionResult extends AbstractSurveyPagedResult {
 		return items;
 	}
 
+	@Override
+	protected String buildSortSql() {
+		if (sortColumn == null || direction == SWT.NONE) {
+			if (engine instanceof DerbyMissionTrackEngine) {
+				//default sort by track time, mission start time, missiongid 
+				StringBuilder sb = new StringBuilder();
+				sb.append("ORDER BY "); //$NON-NLS-1$
+				sb.append(SurveyQueryColumn.getDbColumnName(SurveyQueryColumn.FixedColumns.MISSION_TRACKDATE.getKey()));
+				sb.append(" DESC, "); //$NON-NLS-1$
+				sb.append(SurveyQueryColumn.getDbColumnName(SurveyQueryColumn.FixedColumns.MISSION_START.getKey()));
+				sb.append(" DESC, "); //$NON-NLS-1$
+				sb.append(SurveyQueryColumn.getDbColumnName(SurveyQueryColumn.FixedColumns.MISSION.getKey()));
+				return sb.toString();				
+			}else if (engine instanceof DerbyMissionEngine) {
+				//default sort by mission start time
+				StringBuilder sb = new StringBuilder();
+				sb.append("ORDER BY "); //$NON-NLS-1$
+				sb.append(SurveyQueryColumn.getDbColumnName(SurveyQueryColumn.FixedColumns.MISSION_START.getKey()));
+				sb.append(" DESC, "); //$NON-NLS-1$
+				sb.append(SurveyQueryColumn.getDbColumnName(SurveyQueryColumn.FixedColumns.MISSION.getKey()));
+				return sb.toString();
+			}
+		}
+		return super.buildSortSql();
+	}
+	
 	/**
 	 * Opens a result set in the given session that accessed the query results
 	 */

@@ -47,7 +47,7 @@ xmlns:tns="http://www.smartconservationsoftware.org/xml/1.0/assetdeployment" ele
             <element name="observations" type="tns:XmlWaypointObservationGroup" maxOccurs="unbounded" minOccurs="0">
     		</element>
         </sequence>
-    	<attribute name="id" type="int"></attribute>
+    	<attribute name="id" type="string"></attribute>
     	<attribute name="dateTime" type="dateTime"></attribute>
     	<attribute name="x" type="double"></attribute>
     	<attribute name="y" type="double"></attribute>

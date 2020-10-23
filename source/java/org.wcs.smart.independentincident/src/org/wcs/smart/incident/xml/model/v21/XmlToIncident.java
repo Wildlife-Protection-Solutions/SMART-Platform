@@ -140,7 +140,7 @@ public class XmlToIncident implements IXmlToIncidentConverter{
 		incident.setComment(xml.getComment());
 		incident.setDirection(xml.getDirection());
 		incident.setDistance(xml.getDistance());
-		incident.setId(xml.getId());
+		incident.setId(String.valueOf(xml.getId()));
 		incident.setDateTime( LocalDateTime.parse(xml.getDateTime(), DateTimeFormatter.ofPattern(IncidentToXml.DATE_FORMAT_STR)));
 		incident.setRawX(xml.getX());
 		incident.setRawY(xml.getY());

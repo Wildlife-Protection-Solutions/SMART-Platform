@@ -48,7 +48,7 @@ public class WaypointColumnEditor extends AbstractQueryColumnEditor {
 //		case WAYPOINT_DISTANCE:
 //			return getDoubleCellEditor(true);
 		case WAYPOINT_ID:
-			return getIntegerCellEditor();
+			return getTextCellEditor();
 		case WAYPOINT_TIME:
 			return getTimeCellEditor();
 		case WAYPOINT_X:

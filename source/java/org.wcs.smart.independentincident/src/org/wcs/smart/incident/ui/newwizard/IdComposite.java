@@ -56,13 +56,8 @@ public class IdComposite extends AbstractIncidentComposite {
 	
 	@Override
 	public String validate() {
-		if (txtId.getText().trim().isEmpty()){
+		if (txtId.getText().strip().isEmpty()){
 			return Messages.IdComposite_IdRequired;
-		}
-		try{
-			Integer.parseInt(txtId.getText());
-		}catch (Exception ex){
-			return Messages.IdComposite_IntegerRequired;
 		}
 		return null;
 	}
@@ -93,6 +88,7 @@ public class IdComposite extends AbstractIncidentComposite {
 		l.setText(Messages.IdComposite_Label);
 		
 		txtId = new Text(item, SWT.BORDER);
+		txtId.setTextLimit(Waypoint.ID_MAX_LENGTH);
 		txtId.addListener(SWT.Modify, new Listener() {
 			@Override
 			public void handleEvent(Event event) {
@@ -108,9 +104,7 @@ public class IdComposite extends AbstractIncidentComposite {
 
 	@Override
 	public void updateIncident(Waypoint incident) {
-		int id = Integer.parseInt(txtId.getText());
-		incident.setId(id);
-		
+		incident.setId(txtId.getText().strip());
 		if (cmbType == null) {
 			incident.setSourceId(IndepedentIncidentSource.KEY);
 		}else {
@@ -121,7 +115,7 @@ public class IdComposite extends AbstractIncidentComposite {
 
 	@Override
 	public void initFields(Waypoint incident, Session session) {
-		txtId.setText(String.valueOf(incident.getId()));
+		txtId.setText(incident.getId());
 	}
 	
 	@Override
@@ -131,7 +125,7 @@ public class IdComposite extends AbstractIncidentComposite {
 
 	@Override
 	public String getDescription() {
-		return Messages.IdComposite_Description;
+		return Messages.IdComposite_Description1;
 	}
 
 }

@@ -41,6 +41,7 @@ import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.query.model.PatrolQueryAttachmentResultItem;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
+import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
 import org.wcs.smart.query.common.engine.AttachmentResultSetIterator;
 import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 import org.wcs.smart.query.common.engine.IPagedImageResultSet;
@@ -122,8 +123,19 @@ public class PatrolObservationQueryResult extends AbstractDbFeatureResultSet imp
 					return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
 							ResultSet.CONCUR_READ_ONLY).executeQuery("SELECT * FROM " + engine.getQueryDataTable() + " ORDER BY sortkeydbl " +direction.sql+ ", sortkeytxt " + direction.sql); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
+				
+				//default sort by patrol start date, patrol id, waypoint datetime
+				StringBuilder sb = new StringBuilder();
+				sb.append("ORDER BY "); //$NON-NLS-1$
+				sb.append(FixedQueryColumn.getDbColumnName(FixedQueryColumn.FixedColumns.PATROL_START_DATE.getKey()));
+				sb.append(" DESC, " ); //$NON-NLS-1$
+				sb.append(FixedQueryColumn.getDbColumnName(FixedQueryColumn.FixedColumns.PATROL_ID.getKey()));
+				sb.append(","); //$NON-NLS-1$
+				sb.append(FixedQueryColumn.getDbColumnName(FixedQueryColumn.FixedColumns.WAYPOINT_DATE.getKey()));
+				sb.append(" DESC " ); //$NON-NLS-1$
+				
 				return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
-						ResultSet.CONCUR_READ_ONLY).executeQuery("SELECT * FROM " + engine.getQueryDataTable()); //$NON-NLS-1$
+						ResultSet.CONCUR_READ_ONLY).executeQuery("SELECT * FROM " + engine.getQueryDataTable() + " " + sb.toString()); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		});
 	}
@@ -305,15 +317,14 @@ public class PatrolObservationQueryResult extends AbstractDbFeatureResultSet imp
 		it.setArmed(rs.getBoolean("p_armed")); //$NON-NLS-1$
 		it.setTransportType(rs.getString("p_transporttype")); //$NON-NLS-1$
 		it.setPatrolLegId(rs.getString("p_legid")); //$NON-NLS-1$
-		it.setWpDateTime(rs.getDate("wp_date").toLocalDate()); //$NON-NLS-1$
 		
 		it.setLeader(rs.getString("p_leader")); //$NON-NLS-1$
 		it.setPilot(rs.getString("p_pilot")); //$NON-NLS-1$
 		it.setWaypointUuid((UUID)rs.getObject("wp_uuid")); //$NON-NLS-1$
-		it.setWaypointId(rs.getInt("wp_id")); //$NON-NLS-1$
+		it.setWaypointId(rs.getString("wp_id")); //$NON-NLS-1$
 		it.setWaypointX(rs.getDouble("wp_x")); //$NON-NLS-1$
 		it.setWaypointY(rs.getDouble("wp_y")); //$NON-NLS-1$
-		it.setWaypointTime(rs.getTime("wp_time").toLocalTime()); //$NON-NLS-1$
+		it.setWaypointDateTime(rs.getTimestamp("wp_time").toLocalDateTime()); //$NON-NLS-1$
 		it.setWaypointDirection(rs.getObject("wp_direction") == null ? null : rs.getFloat("wp_direction")); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setWaypointDistance(rs.getObject("wp_distance") == null ? null : rs.getFloat("wp_distance")); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setWaypointComment(rs.getString("wp_comment")); //$NON-NLS-1$
@@ -392,7 +403,7 @@ public class PatrolObservationQueryResult extends AbstractDbFeatureResultSet imp
 				"p_startdate","p_enddate","p_station", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				"p_team","p_objective","pl_mandate", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				"p_type","p_armed","p_transporttype", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				"p_legid","wp_date","p_leader", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				"p_legid","p_leader", //$NON-NLS-1$ //$NON-NLS-2$
 				"p_pilot","wp_uuid","wp_id", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				"wp_x","wp_y","wp_time", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				"wp_lastmodified","wp_lastmodifiedbyname", //$NON-NLS-1$ //$NON-NLS-2$

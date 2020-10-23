@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.incident.xml.model.v20;
+package org.wcs.smart.incident.xml.model.v22;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -67,7 +67,7 @@ import org.wcs.smart.observation.model.WaypointObservationGroup;
  * @author Emily
  * @since 1.0.0
  */
-public class XmlToIncident implements IXmlToIncidentConverter {
+public class XmlToIncident implements IXmlToIncidentConverter{
 	
 	private Session session;
 	private ConservationArea ca;
@@ -84,7 +84,7 @@ public class XmlToIncident implements IXmlToIncidentConverter {
 	
 	private WaypointType readIncident(Path file) throws JAXBException, IOException{
 		try(InputStream is = Files.newInputStream(file)){
-			JAXBContext context = JAXBContext.newInstance("org.wcs.smart.incident.xml.model.v20"); //$NON-NLS-1$
+			JAXBContext context = JAXBContext.newInstance("org.wcs.smart.incident.xml.model.v22"); //$NON-NLS-1$
 			Unmarshaller un = context.createUnmarshaller();	
 			@SuppressWarnings("unchecked")
 			JAXBElement<WaypointType> o = (JAXBElement<WaypointType>) un.unmarshal(is);
@@ -92,7 +92,7 @@ public class XmlToIncident implements IXmlToIncidentConverter {
 			return x;
 		}
 	}
-	
+
 	/**
 	 * @return any warnings generated during the import process
 	 */
@@ -127,6 +127,7 @@ public class XmlToIncident implements IXmlToIncidentConverter {
 	public void fromXml(Path file, 
 			Session session, ConservationArea ca, 
 			Path attachmentLocation) throws Exception {
+		
 		WaypointType xml = readIncident(file);
 		
 		this.session = session;
@@ -139,7 +140,7 @@ public class XmlToIncident implements IXmlToIncidentConverter {
 		incident.setComment(xml.getComment());
 		incident.setDirection(xml.getDirection());
 		incident.setDistance(xml.getDistance());
-		incident.setId(String.valueOf(xml.getId()));
+		incident.setId(xml.getId());
 		incident.setDateTime( LocalDateTime.parse(xml.getDateTime(), DateTimeFormatter.ofPattern(IncidentToXml.DATE_FORMAT_STR)));
 		incident.setRawX(xml.getX());
 		incident.setRawY(xml.getY());
@@ -149,7 +150,6 @@ public class XmlToIncident implements IXmlToIncidentConverter {
 				incident.setAttachments(new ArrayList<WaypointAttachment>());
 				for ( String filename : xml.getAttachments()){
 					WaypointAttachment att = new WaypointAttachment();
-					
 					Path f = attachmentLocation.toAbsolutePath()
 							.resolve(IncidentXmlManager.ATTACHMENT_DIR_NAME)
 							.resolve(filename);
@@ -170,14 +170,16 @@ public class XmlToIncident implements IXmlToIncidentConverter {
 		}
 		
 		incident.setObservationGroups(new ArrayList<>());
-		if (xml.getObservations().size () > 0){
-			WaypointObservationGroup g = new WaypointObservationGroup();
-			incident.getObservationGroups().add(g);
-			g.setWaypoint(incident);
-			g.setObservations(new ArrayList<WaypointObservation>());
-			for (WaypointObservationType type : xml.getObservations()){
-				WaypointObservation ob = convertWaypointObservation(type, g);
-				if (ob != null) g.getObservations().add(ob);
+		for(WaypointObservationGroupType xmlgroup : xml.getGroups()) {
+			WaypointObservationGroup group = new WaypointObservationGroup();
+			group.setWaypoint(incident);
+			incident.getObservationGroups().add(group);
+			group.setObservations(new ArrayList<>());
+			for (WaypointObservationType type : xmlgroup.getObservations()){
+				WaypointObservation ob = convertWaypointObservation(type, group);
+				if (ob != null){
+					group.getObservations().add(ob);
+				}
 			}
 		}
 	}

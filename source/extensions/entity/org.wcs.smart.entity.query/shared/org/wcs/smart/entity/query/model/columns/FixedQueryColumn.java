@@ -52,7 +52,7 @@ public class FixedQueryColumn extends QueryColumn {
 		CA_ID(ColumnType.STRING,"ca:id"), //$NON-NLS-1$
 		CA_NAME(ColumnType.STRING,"ca:name"), //$NON-NLS-1$
 		WAYPOINT_SOURCE(ColumnType.STRING,"wp:source"),  //$NON-NLS-1$
-		WAYPOINT_ID( ColumnType.INTEGER,"waypoint:id"), //$NON-NLS-1$
+		WAYPOINT_ID( ColumnType.STRING,"waypoint:id"), //$NON-NLS-1$
 		WAYPOINT_DATE(ColumnType.DATE,"waypoint:date"), //$NON-NLS-1$
 		WAYPOINT_TIME(ColumnType.TIME,"waypoint:time"), //$NON-NLS-1$
 		WAYPOINT_X (ColumnType.NUMBER,"waypoint:x"), //$NON-NLS-1$

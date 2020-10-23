@@ -71,7 +71,7 @@ public class SurveyQueryColumn extends QueryColumn {
 		
 		SAMPLING_UNIT(ColumnType.STRING, "su:id"),  //$NON-NLS-1$
 		
-		WAYPOINT_ID( ColumnType.INTEGER,"waypoint:id"), //$NON-NLS-1$
+		WAYPOINT_ID( ColumnType.STRING,"waypoint:id"), //$NON-NLS-1$
 		WAYPOINT_DATE( ColumnType.DATE,"waypoint:date"), //$NON-NLS-1$
 		WAYPOINT_TIME( ColumnType.TIME,"waypoint:time"),  //$NON-NLS-1$
 		WAYPOINT_X( ColumnType.NUMBER,"waypoint:x"),  //$NON-NLS-1$
@@ -203,6 +203,8 @@ public class SurveyQueryColumn extends QueryColumn {
 			key = "wp:x"; //$NON-NLS-1$
 		}else if (key.equals(FixedColumns.WAYPOINT_RAWY.getKey() )){
 			key = "wp:y"; //$NON-NLS-1$
+		}else if (key.equals(FixedColumns.MISSION_TRACKDATE.getKey() )){
+			key = "missionday:date"; //$NON-NLS-1$
 		}
 		key = key.replace(":", "_"); //$NON-NLS-1$ //$NON-NLS-2$ 
 		for (String[] data : FIXED_COLUMN_KEY_TO_ROW) {
