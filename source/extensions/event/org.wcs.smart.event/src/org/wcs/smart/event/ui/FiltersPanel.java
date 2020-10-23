@@ -404,6 +404,7 @@ public class FiltersPanel extends Composite {
 			try(Session session = HibernateManager.openSession()){
 				filters.addAll(QueryFactory.buildQuery(session, EFilter.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list()); //$NON-NLS-1$
 			}
+			filters.sort((a,b)->a.getId().compareTo(b.getId()));
 			Display.getDefault().syncExec(()->{
 				if (lstFilters.getControl().isDisposed()) return;
 				lstFilters.setInput(filters);

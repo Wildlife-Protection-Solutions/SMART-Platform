@@ -472,10 +472,18 @@ public class EventsPanel extends Composite {
 					e.getAction().getParameters().forEach(p->p.getId().getParameterKey());
 				});
 			}
-			
+			events.sort((a,b)->{
+				if (a.isEnabled() && !b.isEnabled()) return -1;
+				if (!a.isEnabled() && b.isEnabled()) return 1;
+				
+				if (a.getAction().getId().equals(b.getAction().getId())) {
+					return a.getFilter().getId().compareTo(b.getFilter().getId());
+				}
+				return a.getAction().getId().compareTo(b.getAction().getId());
+			});
 			Display.getDefault().syncExec(()->{
 				if(tblEvents == null || tblEvents.getControl().isDisposed()) return;
-				tblEvents.setInput(events);;
+				tblEvents.setInput(events);
 			});
 			return Status.OK_STATUS;
 		}

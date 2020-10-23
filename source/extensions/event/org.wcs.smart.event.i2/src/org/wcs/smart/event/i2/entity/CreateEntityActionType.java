@@ -35,6 +35,7 @@ import org.eclipse.e4.core.contexts.EclipseContextFactory;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.event.EventPlugIn;
@@ -290,7 +291,14 @@ public class CreateEntityActionType implements IActionType {
 								add = false;
 								break;
 							case LIST:
-								String dmKey = wo.getAttributeListItem().getKeyId();
+								String dmKey = null;
+								if (wo.getAttribute().getType() == Attribute.AttributeType.LIST) {
+									dmKey = wo.getAttributeListItem().getKeyId();
+								}else if (wo.getAttribute().getType() == Attribute.AttributeType.TREE) {
+									dmKey = wo.getAttributeTreeNode().getHkey();
+								}
+								if (dmKey == null) break;
+								
 								String iKey = null;
 								for (Entry<String,String> listmappings : em.getListItemMappings().entrySet()) {
 									if (listmappings.getValue().equalsIgnoreCase(dmKey)) {

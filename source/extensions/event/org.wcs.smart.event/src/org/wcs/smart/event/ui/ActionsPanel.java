@@ -408,6 +408,7 @@ public class ActionsPanel extends Composite {
 				actions.addAll(QueryFactory.buildQuery(session, EAction.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list()); //$NON-NLS-1$
 				actions.forEach(e->e.getParameters().forEach(pp->pp.getParameterValue()));
 			}
+			actions.sort((a,b)->a.getId().compareTo(b.getId()));
 			Display.getDefault().syncExec(()->{
 				if (lstActions.getControl().isDisposed()) return;
 				lstActions.setInput(actions);

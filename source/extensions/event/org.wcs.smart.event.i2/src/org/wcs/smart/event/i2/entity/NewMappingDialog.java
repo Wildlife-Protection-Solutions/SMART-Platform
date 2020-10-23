@@ -24,6 +24,7 @@ package org.wcs.smart.event.i2.entity;
 import java.text.Collator;
 import java.text.MessageFormat;
 import java.time.LocalDate;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -53,9 +54,11 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
+import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.event.i2.entity.EntityMapping.Type;
 import org.wcs.smart.event.i2.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
@@ -189,8 +192,12 @@ public class NewMappingDialog extends SmartStyledTitleDialog {
 			if (dmAttribute.getType() == Attribute.AttributeType.LIST) {
 				List<ListItemMapping> mappings = (List<ListItemMapping>) tblList.getInput();
 				for (ListItemMapping m : mappings) {
-					if (m.dmItem == null) continue;
-					mapping.addListItemMapping(m.iItem, m.dmItem);
+					if (m.dmList != null) mapping.addListItemMapping(m.iItem, m.dmList);
+				}
+			}else if (dmAttribute.getType() == Attribute.AttributeType.TREE) {
+				List<ListItemMapping> mappings = (List<ListItemMapping>) tblList.getInput();
+				for (ListItemMapping m : mappings) {
+					if (m.dmNode != null) mapping.addTreeNodeMapping(m.iItem, m.dmNode);
 				}
 			}
 		}
@@ -321,24 +328,50 @@ public class NewMappingDialog extends SmartStyledTitleDialog {
 			List<ListItemMapping> itemMappings = (List<ListItemMapping>) tblList.getInput();
 			Attribute existingAttribute = null;
 			for (ListItemMapping m : itemMappings) {
-				if (m.dmItem != null) {
-					existingAttribute = m.dmItem.getAttribute();
+				if (m.dmList != null) {
+					existingAttribute = m.dmList.getAttribute();
+					break;
+				}else if (m.dmNode != null) {
+					existingAttribute = m.dmNode.getAttribute();
 					break;
 				}
 			}
 			if (!dAttribute.equals(existingAttribute)) {
-				itemMappings.forEach(z->z.dmItem = null);
+				itemMappings.forEach(z->{
+					z.dmList= null;
+					z.dmNode = null;
+							
+				});
 				tblList.refresh();	
 			}
 			
-			if (dAttribute.getType() != Attribute.AttributeType.LIST) {
+			if (dAttribute.getType() == Attribute.AttributeType.LIST) {
+				List<Object> items = new ArrayList<>();
+				items.add(""); //$NON-NLS-1$
+				items.addAll(dAttribute.getAttributeList());
+				cellEditor.setInput(items);
+			}else if (dAttribute.getType() == Attribute.AttributeType.TREE) {
+				List<Object> items = new ArrayList<>();
+				items.add(""); //$NON-NLS-1$
+				try(Session session = HibernateManager.openSession()){
+					
+					ArrayDeque<AttributeTreeNode> nodes = new ArrayDeque<>(session.get(Attribute.class,  dAttribute.getUuid()).getActiveTreeNodes());
+					while(!nodes.isEmpty()) {
+						AttributeTreeNode node = nodes.remove();
+						items.add(node);
+						for(int i = node.getActiveChildren().size() - 1; i >= 0; i --) {
+							nodes.addFirst(node.getActiveChildren().get(i));
+						}
+					}
+				}
+				
+				cellEditor.setInput(items);
+			}else {
 				cellEditor.setInput(Collections.emptyList());
-				return;
+			
+			
 			}
-			List<Object> items = new ArrayList<>();
-			items.add(""); //$NON-NLS-1$
-			items.addAll(dAttribute.getAttributeList());
-			cellEditor.setInput(items);
+			return;
 			
 		});
 		
@@ -366,8 +399,9 @@ public class NewMappingDialog extends SmartStyledTitleDialog {
 			@Override
 			public String getText(Object element) {
 				ListItemMapping m = (ListItemMapping)element;
-				if (m.dmItem == null) return ""; //$NON-NLS-1$
-				return m.dmItem.getName() + " (" + m.dmItem.getKeyId() +")"; //$NON-NLS-1$ //$NON-NLS-2$
+				if (m.dmList != null)  return m.dmList.getName() + " (" + m.dmList.getKeyId() +")"; //$NON-NLS-1$ //$NON-NLS-2$
+				if (m.dmNode != null)  return m.dmNode.getName() + " (" + m.dmNode.getHkey() +")"; //$NON-NLS-1$ //$NON-NLS-2$
+				return ""; //$NON-NLS-1$
 			}
 		});
 		dmItemColumn.getColumn().pack();
@@ -377,16 +411,23 @@ public class NewMappingDialog extends SmartStyledTitleDialog {
 			@Override
 			protected void setValue(Object element, Object value) {
 				if (value instanceof AttributeListItem) {
-					((ListItemMapping)element).dmItem = (AttributeListItem) value;
+					((ListItemMapping)element).dmList = (AttributeListItem) value;
+					((ListItemMapping)element).dmNode = null;
+				}else if (value instanceof AttributeTreeNode) {
+					((ListItemMapping)element).dmNode = (AttributeTreeNode) value;
+					((ListItemMapping)element).dmList = null;
 				}else {
-					((ListItemMapping)element).dmItem = null;
+					((ListItemMapping)element).dmList = null;
+					((ListItemMapping)element).dmNode= null;
 				}
 				tblList.refresh();
 			}
 			
 			@Override
 			protected Object getValue(Object element) {
-				return ((ListItemMapping)element).dmItem;
+				if (((ListItemMapping)element).dmList != null) return ((ListItemMapping)element).dmList;
+				if (((ListItemMapping)element).dmNode!= null) return ((ListItemMapping)element).dmNode;
+				return null;
 			}
 			
 			@Override
@@ -400,11 +441,23 @@ public class NewMappingDialog extends SmartStyledTitleDialog {
 			}
 		});
 		
-		cellEditor = new ComboBoxViewerCellEditor(tblList.getTable(), SWT.DROP_DOWN | SWT.READ_ONLY);
+		cellEditor = new ComboBoxViewerCellEditor(tblList.getTable(), SWT.DROP_DOWN | SWT.READ_ONLY | SWT.H_SCROLL | SWT.V_SCROLL);
 		cellEditor.setLabelProvider(new LabelProvider() {
 			public String getText(Object element) {
 				if (element instanceof AttributeListItem) {
 					return ((AttributeListItem)element).getName() + " (" + ((AttributeListItem)element).getKeyId() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+				}else if (element instanceof AttributeTreeNode) {
+					StringBuilder sb = new StringBuilder();
+					AttributeTreeNode parent = ((AttributeTreeNode) element).getParent();
+					while(parent != null) {
+						sb.append("    "); //$NON-NLS-1$
+						parent = parent.getParent();
+					}
+					sb.append(((AttributeTreeNode)element).getName());
+					sb.append(" ("); //$NON-NLS-1$
+					sb.append( ((AttributeTreeNode)element).getHkey() );
+					sb.append( ")" ); //$NON-NLS-1$
+					return sb.toString();
 				}
 				return super.getText(element);
 			}
@@ -454,15 +507,26 @@ public class NewMappingDialog extends SmartStyledTitleDialog {
 					try(Session s = HibernateManager.openSession()){
 						dAttribute = s.get(Attribute.class, dAttribute.getUuid());
 						dAttribute.getAttributeList().forEach(a->a.getName());
-					}	
-				}
 				
-				for (ListItemMapping mi : mappings) {
-					String diKey = mapping.getListItemMappings().get(mi.iItem.getKeyId());
-					for (AttributeListItem ii : dAttribute.getAttributeList()) {
-						if (ii.getKeyId().equals(diKey)) {
-							mi.dmItem = ii;
-							break;
+						for (ListItemMapping mi : mappings) {
+							mi.dmNode = null;
+							mi.dmList = null;
+							
+							String diKey = mapping.getListItemMappings().get(mi.iItem.getKeyId());
+							if (dAttribute.getType() == Attribute.AttributeType.LIST) {
+								for (AttributeListItem ii : dAttribute.getAttributeList()) {
+									if (ii.getKeyId().equals(diKey)) {
+										mi.dmList = ii;			
+										break;
+									}
+								}
+							}else if (dAttribute.getType() == Attribute.AttributeType.TREE) {
+								AttributeTreeNode node = QueryFactory.buildQuery(s, 
+										AttributeTreeNode.class,
+										new Object[] {"hkey", diKey}, //$NON-NLS-1$
+										new Object[] {"attribute", dAttribute}).uniqueResult(); //$NON-NLS-1$
+								mi.dmNode = node;
+							}
 						}
 					}
 				}
@@ -604,7 +668,8 @@ public class NewMappingDialog extends SmartStyledTitleDialog {
 				if (dAttribute != null) {
 					for (AttributeListItem i : dAttribute.getAttributeList()) {
 						if (i.getKeyId().equals(dmKey)) {
-							mp.dmItem = i;
+							mp.dmList = i;
+							mp.dmNode = null;
 							break;
 						}
 					}
@@ -635,7 +700,9 @@ public class NewMappingDialog extends SmartStyledTitleDialog {
 	}
 	
 	private class ListItemMapping{
-		AttributeListItem dmItem;
+		AttributeListItem dmList;
+		AttributeTreeNode dmNode;
+		
 		IntelAttributeListItem iItem;
 	}
 }

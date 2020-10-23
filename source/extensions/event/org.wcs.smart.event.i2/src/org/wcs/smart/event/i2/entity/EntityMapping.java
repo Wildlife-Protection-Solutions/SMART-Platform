@@ -41,6 +41,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
+import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.event.EventPlugIn;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.model.IntelAttribute;
@@ -289,6 +290,10 @@ public class EntityMapping {
 	
 	public void addListItemMapping(IntelAttributeListItem iitem, AttributeListItem dmItem) {
 		addListItemMapping(iitem.getKeyId(), dmItem.getKeyId());
+	}
+	
+	public void addTreeNodeMapping(IntelAttributeListItem iitem, AttributeTreeNode dmItem) {
+		addListItemMapping(iitem.getKeyId(), dmItem.getHkey());
 	}
 	
 	public Map<String,String> getListItemMappings(){
