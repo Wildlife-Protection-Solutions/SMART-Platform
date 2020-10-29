@@ -317,7 +317,7 @@ public class GenerateSmartThemeDialog extends SmartStyledDialog {
 			try(Session session = HibernateManager.openSession()){
 				if (SmartDB.isMultipleAnalysis()) {
 					for (Attribute a : ccaaModel.getAttributes()) {
-						if (a.getType() == AttributeType.TREE || a.getType() == AttributeType.LIST) {
+						if (a.getType() == AttributeType.TREE || a.getType().isList()) {
 							dmItems.add(a);
 						}
 					}

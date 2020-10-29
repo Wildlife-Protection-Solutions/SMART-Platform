@@ -6,7 +6,8 @@ import org.wcs.smart.observation.query.parser.internal.*;
 import org.wcs.smart.observation.query.model.filter.*;import org.wcs.smart.query.model.filter.*;
 import org.wcs.smart.query.model.summary.*;
 
-public class Parser{}PARSER_END(Parser)SKIP :{  " "| "\t"| "\r"| "\n"}/*--------- Comments  -----------------*/SPECIAL_TOKEN :{  < LINE_COMMENT : "//" (~[ "\r", "\n" ])* >| < MULTI_LINE_COMMENT :    "/*" (~[ "*" ])* "*"    (      "*"    |      (        ~[ "*", "/" ] (~[ "*" ])* "*"      )    )*    "/" >}/*--------- Keywords  -----------------*/TOKEN [ IGNORE_CASE ] :{  < K_AND : "and" >| < K_NOT : "not" >| < K_OR : "or" >}
+public class Parser{}PARSER_END(Parser)SKIP :{  " "| "\t"| "\r"| "\n"}/*--------- Comments  -----------------*/SPECIAL_TOKEN :{  < LINE_COMMENT : "//" (~[ "\r", "\n" ])* >| < MULTI_LINE_COMMENT :    "/*" (~[ "*" ])* "*"    (      "*"    |      (        ~[ "*", "/" ] (~[ "*" ])* "*"      )    )*    "/" >}/*--------- Keywords  -----------------*/TOKEN [ IGNORE_CASE ] :{  < K_AND : "and" >| < K_NOT : "not" >| < K_OR : "or" >
+| < K_EXACT : "exact" >}
 
 
 TOKEN :
@@ -38,12 +39,14 @@ TOKEN :
  | < ATT_VALUE_KEY : "attribute:n:"< DM_KEY > >
  | < ATT_BOOL_KEY : "attribute:b:"< DM_KEY > >
  | < ATT_LIST_KEY : "attribute:l:"< DM_KEY > >
+ | < ATT_MLIST_KEY : "attribute:m:"< DM_KEY > >
  | < ATT_TREE_KEY : "attribute:t:"< DM_KEY > >
  | < ATT_DATE_KEY : "attribute:d:"< DM_KEY > >
  | <CAT_ATT_STR_KEY : "category:"<DM_KEY>":attribute:s:"<DM_KEY>>
  | <CAT_ATT_VALUE_KEY : "category:"<DM_KEY>":attribute:n:"<DM_KEY>>
  | <CAT_ATT_BOOL_KEY : "category:"<DM_KEY>":attribute:b:"<DM_KEY>>
  | <CAT_ATT_LIST_KEY : "category:"<DM_KEY>":attribute:l:"<DM_KEY>>
+ | <CAT_ATT_MLIST_KEY : "category:"<DM_KEY>":attribute:m:"<DM_KEY>>
  | <CAT_ATT_TREE_KEY : "category:"<DM_KEY>":attribute:t:"<DM_KEY>>
  | <CAT_ATT_DATE_KEY : "category:"<DM_KEY>":attribute:d:"<DM_KEY>>
  | < DM_KEY : (< LETTER >)+(< DIGIT > | < LETTER > | < SPECIAL_CHARS >)* >
@@ -427,6 +430,16 @@ IFilter AttributeExpression():
 	{
 		filter = AttributeFilter.createListItemFilter(key,op,value);
 	}
+	|	
+	/* multi attribute list items */
+	(
+		< ATT_MLIST_KEY > {key = token.image;}		    
+		(<  K_OR > | < K_AND > | < K_EXACT >) {op = Operator.parseOperator(token.image);}
+		value = MultiList()
+	)
+	{
+		filter = AttributeFilter.createListItemFilter(key,op,value);
+	}
 	| 
 	/* category-attribute list items */
 	(
@@ -437,7 +450,16 @@ IFilter AttributeExpression():
 	{
 		filter = CategoryAttributeFilter.createListItemFilter(key,op,value);
 	}
-	
+	| 
+	/* category-attribute multi list items */
+	(
+		< CAT_ATT_MLIST_KEY > {key = token.image;}
+		(<  K_OR > | < K_AND > | < K_EXACT >) {op = Operator.parseOperator(token.image);}
+		value = MultiList()
+	)
+	{
+		filter = CategoryAttributeFilter.createListItemFilter(key,op,value);
+	}
 	
 	| 
 	/* attribute tree items */
@@ -557,7 +579,16 @@ AreaFilter AreaFilter():
   < AREA_KEY >
   {
     return AreaFilter.createFilter(token.image);  }  }
-
+String MultiList() :
+{
+  String list = "";
+} {
+  (( < DM_KEY > { list=token.image; })(  ","  < DM_KEY > { list += "," + token.image; })*)
+  {
+    return list;
+  }
+}
+  
 Operator NumberOp() :
 {}
 {

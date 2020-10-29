@@ -29,6 +29,7 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationAttributeList;
 
 /**
  * Advisor for deleting list items
@@ -57,13 +58,20 @@ public class AttributeListItemDMAdvisor implements IDeleteAdvisor {
 		if (item.getUuid() == null) return null;
 		
 		long cnt = QueryFactory.buildCountQuery(session, WaypointObservationAttribute.class,  new Object[] {"attributeListItem", item}); //$NON-NLS-1$
-		if (cnt == 0){
-	     	return null;
-		 }
-		return MessageFormat.format(
+		if (cnt != 0){
+	     	return MessageFormat.format(
 				Messages.AttributeListItemDMAdvisor_DeleteError,
 				new Object[]{ cnt });
-
+		}
+		
+		//mutli-select attributes
+		cnt = QueryFactory.buildCountQuery(session, WaypointObservationAttributeList.class,  new Object[] {"id.attributeListItem", item}); //$NON-NLS-1$
+		if (cnt != 0){
+	     	return MessageFormat.format(
+				Messages.AttributeListItemDMAdvisor_DeleteError,
+				new Object[]{ cnt });
+		}
+		return null;
 	}
 
 }

@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.asset.data.inout.deployment;
+package org.wcs.smart.asset.data.inout.deployment.xml.v10;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -45,14 +45,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.AssetPlugIn;
-import org.wcs.smart.asset.data.inout.deployment.xml.ObjectFactory;
-import org.wcs.smart.asset.data.inout.deployment.xml.XmlAssetDeployment;
-import org.wcs.smart.asset.data.inout.deployment.xml.XmlAssetDeploymentAttribute;
-import org.wcs.smart.asset.data.inout.deployment.xml.XmlAssetDeploymentDisruption;
-import org.wcs.smart.asset.data.inout.deployment.xml.XmlWaypoint;
-import org.wcs.smart.asset.data.inout.deployment.xml.XmlWaypointObservation;
-import org.wcs.smart.asset.data.inout.deployment.xml.XmlWaypointObservationAttribute;
-import org.wcs.smart.asset.data.inout.deployment.xml.XmlWaypointObservationGroup;
+import org.wcs.smart.asset.data.inout.deployment.DeploymentToXml;
 import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetAttribute;
@@ -81,8 +74,8 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationAttributeList;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
-import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.ZipUtil;
 
@@ -320,15 +313,36 @@ public class DeploymentFromXml {
 									 break;
 								case DATE:
 								case TEXT:
-									woa.setStringValue(xmla.getStringValue());
+									if (xmla.getStringValue().size() == 1)
+										woa.setStringValue(xmla.getStringValue().get(0));
 									break;
 								case LIST:
-									woa.setAttributeListItem(findDmAttributeListItem(woa.getAttribute(), xmla.getStringValue()));
+									if (xmla.getStringValue().size() == 1)
+										woa.setAttributeListItem(findDmAttributeListItem(woa.getAttribute(), xmla.getStringValue().get(0)));
 									break;
 								case TREE:
-									woa.setAttributeTreeNode(findDmAttributeTreeNode(woa.getAttribute(), xmla.getStringValue(), session));
+									if (xmla.getStringValue() != null && xmla.getStringValue().size() == 1)
+										woa.setAttributeTreeNode(findDmAttributeTreeNode(woa.getAttribute(), xmla.getStringValue().get(0), session));
 									break;
-								
+								case MLIST:
+									List<WaypointObservationAttributeList> items = new ArrayList<>();
+									
+									for (String x : xmla.getStringValue()) {
+										try {
+											AttributeListItem li = findDmAttributeListItem(woa.getAttribute(), x);
+											if (li != null) {
+												WaypointObservationAttributeList item = new WaypointObservationAttributeList();
+												item.setAttributeLisItem(li);
+												item.setObservationAttribute(woa);
+												items.add(item);
+											}
+										}catch (Exception ex) {
+											warnings.add(ex.getMessage());
+										}
+									}
+									if (items.isEmpty()) throw new Exception(MessageFormat.format(Messages.DeploymentFromXml_NoListItemsFound, woa.getAttribute().getName()));
+									woa.setAttributeListItems(items);
+									
 								}
 							}catch (Exception ex) {
 								warnings.add(Messages.DeploymentFromXml_AttributeNotImported + ex.getMessage());
@@ -565,7 +579,7 @@ public class DeploymentFromXml {
 	}
 	
 	private AttributeTreeNode findDmAttributeTreeNode(Attribute attribute, String hkey, Session session) throws Exception {
-		
+		if (hkey == null) return null;
 		AttributeTreeNode treenode = QueryFactory.buildQuery(session, AttributeTreeNode.class, 
 				new Object[] {"attribute", attribute}, //$NON-NLS-1$
 				new Object[] {"hkey", hkey}) //$NON-NLS-1$
@@ -576,6 +590,7 @@ public class DeploymentFromXml {
 	}
 	
 	private AttributeListItem findDmAttributeListItem(Attribute attribute, String keyId) throws Exception {
+		if (keyId == null) return null;
 		for (AttributeListItem li : attribute.getAttributeList()) {
 			if (li.getKeyId().equalsIgnoreCase(keyId)) return li;
 		}

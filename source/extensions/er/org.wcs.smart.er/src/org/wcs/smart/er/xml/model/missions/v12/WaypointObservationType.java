@@ -27,9 +27,9 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="attributes" type="{http://www.smartconservationsoftware.org/xml/1.1/mission}WaypointObservationAttributeType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="attributes" type="{http://www.smartconservationsoftware.org/xml/1.2/mission}WaypointObservationAttributeType" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="attachments" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="observer" type="{http://www.smartconservationsoftware.org/xml/1.1/mission}MembersType" minOccurs="0"/>
+ *         &lt;element name="observer" type="{http://www.smartconservationsoftware.org/xml/1.2/mission}MembersType" minOccurs="0"/>
  *       &lt;/sequence>
  *       &lt;attribute name="categoryKey" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/restriction>

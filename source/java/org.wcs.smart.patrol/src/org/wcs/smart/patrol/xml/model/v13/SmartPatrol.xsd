@@ -137,7 +137,7 @@ elementFormDefault="qualified">
     	<sequence>
     		<element name="sValue" type="string" maxOccurs="1" minOccurs="0"></element>
     		<element name="dValue" type="double" maxOccurs="1" minOccurs="0"></element>
-    		<element name="itemKey" type="string" maxOccurs="1" minOccurs="0"></element>
+    		<element name="itemKey" type="string" maxOccurs="unbounded" minOccurs="0"></element>
     		<element name="bValue" type="boolean" maxOccurs="1" minOccurs="0"></element>
     	</sequence>
     	<attribute name="attributeKey" type="string"></attribute>

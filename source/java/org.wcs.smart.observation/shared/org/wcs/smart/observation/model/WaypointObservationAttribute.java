@@ -21,26 +21,32 @@
  */
 package org.wcs.smart.observation.model;
 
-import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-import javax.persistence.AssociationOverride;
-import javax.persistence.AssociationOverrides;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -54,47 +60,44 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
  */
 @Entity
 @Table(name="smart.wp_observation_attributes")
-@AssociationOverrides({
-	@AssociationOverride(name = "id.observation", 
-		joinColumns = @JoinColumn(name = "observation_uuid")),
-	@AssociationOverride(name = "id.attribute", 
-		joinColumns = @JoinColumn(name = "attribute_uuid")) })
-public class WaypointObservationAttribute {
 
-	private WaypointObservationAttributePk id = new WaypointObservationAttributePk();
+public class WaypointObservationAttribute extends UuidItem{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
+	private WaypointObservation observation;
+	private Attribute attribute;
+	
 	private AttributeListItem listItem;
 	private AttributeTreeNode nodeItem;
 	private String sValue;
 	private Double dValue;
 	
+	private Collection<WaypointObservationAttributeList> listItems;
+	
 	public WaypointObservationAttribute(){
 		
 	}
 	
-	@EmbeddedId
-	public WaypointObservationAttributePk getId(){
-		return this.id;
-	}
-	public void setId(WaypointObservationAttributePk id){
-		this.id = id;
-	}
-	
-	@Transient
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="observation_uuid")
 	public WaypointObservation getObservation(){
-		return id.getObservation();
+		return this.observation;
 	}
 	public void setObservation(WaypointObservation observation){
-		id.setObservation(observation);
+		this.observation = observation;
 	}
 	
-	@Transient
+	@ManyToOne(fetch =FetchType.LAZY)
+	@JoinColumn(name="attribute_uuid", referencedColumnName="uuid")
 	public Attribute getAttribute(){
-		return id.getAttribute();
+		return this.attribute;
 	}
-	
 	public void setAttribute(Attribute attribute){
-		id.setAttribute(attribute);
+		this.attribute = attribute;
 	}
 	
 	@ManyToOne(fetch =FetchType.LAZY)
@@ -105,6 +108,15 @@ public class WaypointObservationAttribute {
 	public void setAttributeListItem(AttributeListItem item){
 		this.listItem = item;
 	}
+	
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "id.observationAttribute", cascade=CascadeType.ALL, orphanRemoval = true)
+	public Collection<WaypointObservationAttributeList> getAttributeListItems(){
+		return this.listItems;
+	}
+	public void setAttributeListItems(Collection<WaypointObservationAttributeList> items){
+		this.listItems = items;
+	}
+	
 	@ManyToOne(fetch =FetchType.LAZY)
 	@JoinColumn(name="tree_node_uuid", referencedColumnName="uuid")
 	public AttributeTreeNode getAttributeTreeNode(){
@@ -134,25 +146,6 @@ public class WaypointObservationAttribute {
 		return this.dValue != null || this.listItem != null || this.nodeItem != null || this.sValue != null;
 	}
 	
-	@Override
-	public int hashCode(){
-		if (id == null){
-			return super.hashCode();
-		}
-		return id.hashCode();
-	}
-	
-	@Override
-	public boolean equals(Object other){
-		
-		if (other instanceof WaypointObservationAttribute){
-			if (id == null){
-				return super.equals(other);
-			}
-			return id.equals(( (WaypointObservationAttribute)other).id);
-		}
-		return false;
-	}
 	
 	/**
 	 * Clones the observation attribute.  Does
@@ -161,9 +154,10 @@ public class WaypointObservationAttribute {
 	 */
 	public WaypointObservationAttribute clone(){
 		WaypointObservationAttribute clone = new WaypointObservationAttribute();
-		clone.id = new WaypointObservationAttributePk();
-		clone.id.attribute = id.attribute;
-		clone.id.attribute.getType(); /*ensure attribute has been loaded*/
+
+		clone.attribute = attribute;
+		clone.attribute.getType(); /*ensure attribute has been loaded*/
+		
 		clone.listItem = listItem;
 		if (dValue != null){
 			clone.dValue = Double.valueOf(dValue);
@@ -171,6 +165,16 @@ public class WaypointObservationAttribute {
 		clone.nodeItem = nodeItem;
 		if (sValue != null){
 			clone.sValue = new String(sValue);
+		}
+		
+		if (listItems != null) {
+			clone.setAttributeListItems(new ArrayList<>());
+			for (WaypointObservationAttributeList li : listItems) {
+				WaypointObservationAttributeList nli = new WaypointObservationAttributeList();
+				nli.setObservationAttribute(clone);
+				nli.setAttributeLisItem(li.getAttributeListItem());
+				clone.getAttributeListItems().add(nli);
+			}
 		}
 		return clone;
 	}
@@ -183,18 +187,19 @@ public class WaypointObservationAttribute {
 	@Transient
 	public Object getAttributeValue(){
 		AttributeType type = getAttribute().getType();
-		if (type == AttributeType.BOOLEAN ||
-				type == AttributeType.NUMERIC){
-			return getNumberValue();
-		}else if (type == AttributeType.TEXT){
-			return getStringValue();
-		}else if (type == AttributeType.LIST){
-			return getAttributeListItem();
-		}else if (type == AttributeType.TREE){
-			return getAttributeTreeNode();
-		}else if (type == AttributeType.DATE){
-			return getDateValue();
+		switch(type) {
+			case BOOLEAN:
+			case NUMERIC:return getNumberValue();
+			case DATE: return getDateValue();
+			case LIST: return getAttributeListItem();
+			case MLIST: {
+				if (getAttributeListItems() == null) return Collections.emptySet();
+				return getAttributeListItems().stream().map(m->m.getAttributeListItem()).collect(Collectors.toSet());
+			}
+			case TEXT: return getStringValue();
+			case TREE: return getAttributeTreeNode();
 		}
+		
 		throw new IllegalStateException("Invalid attribute type"); //$NON-NLS-1$
 	}
 	
@@ -276,6 +281,42 @@ public class WaypointObservationAttribute {
 				throw new IllegalArgumentException(newValue.getClass() + " not a valid type for tree attribute"); //$NON-NLS-1$
 			}
 			break;		
+		case MLIST:
+			if (newValue == null) {
+				if (getAttributeListItems() != null) getAttributeListItems().clear();
+			}else if (newValue instanceof Collection<?>) {
+				if (getAttributeListItems() == null) setAttributeListItems(new ArrayList<>());
+
+				Collection<?> newItems = (Collection<?>)newValue;
+				Set<AttributeListItem> addItems = new HashSet<>();				
+				for (Object x : newItems) {
+					AttributeListItem li = null;
+					if (x instanceof AttributeListItem) li = (AttributeListItem)x;
+					if (x instanceof WaypointObservationAttributeList) li = ((WaypointObservationAttributeList)x).getAttributeListItem();
+					if (li == null) continue;
+					addItems.add(li);
+				}
+				
+				List<WaypointObservationAttributeList> toRemove = new ArrayList<>();
+				for (Iterator<WaypointObservationAttributeList> iterator = getAttributeListItems().iterator(); iterator.hasNext();) {
+					WaypointObservationAttributeList item = (WaypointObservationAttributeList) iterator.next();
+					if (!addItems.contains(item.getAttributeListItem())) {
+						toRemove.add(item);
+					}else {
+						addItems.remove(item.getAttributeListItem());
+					}
+				}
+				getAttributeListItems().removeAll(toRemove);
+				
+				for (AttributeListItem li : addItems) {
+					WaypointObservationAttributeList newitem = new WaypointObservationAttributeList();
+					newitem.setObservationAttribute(this);
+					newitem.setAttributeLisItem(li);
+					getAttributeListItems().add(newitem);
+				}
+				
+			}
+			break;
 		default:
 			throw new IllegalStateException("Invalid attribute type"); //$NON-NLS-1$
 		}
@@ -359,6 +400,16 @@ public class WaypointObservationAttribute {
 				text = getAttributeListItem().getName();
 			}
 			break;
+		case MLIST:
+			if (getAttributeListItems() != null && !getAttributeListItems().isEmpty()) {
+				
+				StringBuilder sb = new StringBuilder() ;
+				for (WaypointObservationAttributeList li : getAttributeListItems()) {
+					sb.append(li.getAttributeListItem().getName());
+					sb.append(", "); //$NON-NLS-1$
+				}
+				text = sb.substring(0,  sb.length() - 2);
+			}
 		case TREE:
 			if (getAttributeTreeNode() != null){
 				text = getAttributeTreeNode().getName();
@@ -368,52 +419,5 @@ public class WaypointObservationAttribute {
 		return text;
 	}
 	
-	@Embeddable
-	private static class WaypointObservationAttributePk implements Serializable{
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
-		private WaypointObservation observation;
-		private Attribute attribute;
-		
-		public WaypointObservationAttributePk(){
-		}
-		
-		@ManyToOne(fetch = FetchType.LAZY)
-		@JoinColumn(name="observation_uuid")
-		public WaypointObservation getObservation(){
-			return this.observation;
-		}
-		public void setObservation(WaypointObservation observation){
-			this.observation = observation;
-		}
-		
-		@ManyToOne(fetch =FetchType.LAZY)
-		@JoinColumn(name="attribute_uuid", referencedColumnName="uuid")
-		public Attribute getAttribute(){
-			return this.attribute;
-		}
-		public void setAttribute(Attribute attribute){
-			this.attribute = attribute;
-		}
-		
-		public int hashCode(){
-			if (observation == null || attribute == null){
-				return super.hashCode();
-			}
-			return  observation.hashCode() * 31 + attribute.hashCode();
-			
-		}
-		public boolean equals(Object other){			
-			if (other instanceof WaypointObservationAttributePk){
-				if (observation == null || attribute == null){
-					return super.equals(other);
-				}
-				return observation.equals( ((WaypointObservationAttributePk)other).observation) && attribute.equals( ((WaypointObservationAttributePk)other).attribute); 
-			}
-			return false;
-		}
-		
-	}
+	
 }

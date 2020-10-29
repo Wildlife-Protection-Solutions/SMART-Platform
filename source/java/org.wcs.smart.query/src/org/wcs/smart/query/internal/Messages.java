@@ -307,6 +307,7 @@ public class Messages extends NLS {
 	public static String Operator_StrContains;
 	public static String Operator_StrEquals;
 	public static String Operator_StrNotContains;
+	public static String OperatorLabelProvider_ExactOperator;
 	public static String OperatorsTreeNode_OperatorsLabel;
 	public static String PatrolQueryOptions_DateOp_Last30;
 	public static String PatrolQueryOptions_DateOpAll;

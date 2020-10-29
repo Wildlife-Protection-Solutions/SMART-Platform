@@ -84,6 +84,7 @@ public class Messages extends NLS {
 	public static String IncidentImporter_IdDuplicated;
 	public static String IncidentImporter_ImportDialogTitle;
 	public static String IncidentImporter_ImportingTaskName;
+	public static String IncidentImporter_InvalidVersion;
 	public static String IncidentImporter_OkDialogTitle;
 	public static String IncidentImporter_ProcessingzipFile;
 	public static String IncidentImporter_ReadingXmlProgress;
@@ -162,6 +163,7 @@ public class Messages extends NLS {
 	public static String XmlToIncident_InvalidDateString;
 	public static String XmlToIncident_ListValueNotFound;
 	public static String XmlToIncident_MultpleAttributeValues;
+	public static String XmlToIncident_NoValidItemsForMultiList;
 	public static String XmlToIncident_NoValueFound;
 	public static String XmlToIncident_ObserverNotFound;
 	public static String XmlToIncident_StringValueNotFound;

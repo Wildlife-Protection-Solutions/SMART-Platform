@@ -25,7 +25,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -65,8 +64,6 @@ import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
-import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.common.attachment.AttachmentUtil;
@@ -757,25 +754,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 				WaypointObservationAttribute att = new WaypointObservationAttribute();
 				att.setAttribute(field.getAttribute());
 				att.setObservation(wo);
-				
-				Object x = field.getValue();
-				if (field.getAttribute().getType() == AttributeType.BOOLEAN){
-					if ((Boolean)x){
-						att.setNumberValue(1d);
-					}else{
-						att.setNumberValue(0d);
-					}
-				}else if (field.getAttribute().getType() == AttributeType.LIST){
-					att.setAttributeListItem((AttributeListItem)x);
-				}else if (field.getAttribute().getType() == AttributeType.TREE){
-					att.setAttributeTreeNode((AttributeTreeNode)x);
-				}else if (field.getAttribute().getType() == AttributeType.TEXT){
-					att.setStringValue((String)x);
-				}else if (field.getAttribute().getType() == AttributeType.NUMERIC){
-					att.setNumberValue((Double)x);
-				}else if (field.getAttribute().getType() == AttributeType.DATE){
-					att.setDateValue((LocalDate)x);
-				}
+				att.setAttributeValue(field.getValue());
 				wo.getAttributes().add(att);
 			}
 		}

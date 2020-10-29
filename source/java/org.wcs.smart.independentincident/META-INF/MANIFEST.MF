@@ -17,5 +17,6 @@ Export-Package: org.wcs.smart.incident,
  org.wcs.smart.incident.ui.newwizard,
  org.wcs.smart.incident.xml,
  org.wcs.smart.incident.xml.model.v20,
- org.wcs.smart.incident.xml.model.v21
+ org.wcs.smart.incident.xml.model.v21,
+ org.wcs.smart.incident.xml.model.v22
 Automatic-Module-Name: org.wcs.smart.independentincident

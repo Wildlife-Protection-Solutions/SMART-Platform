@@ -43,15 +43,20 @@ xmlns:tns="http://www.smartconservationsoftware.org/xml/1.0/assetdeployment" ele
     <complexType name="XmlWaypoint">
     	<sequence>
     		<element name="comment" type="string"></element>
-    		<element name="attachments" type="string" maxOccurs="unbounded" minOccurs="0"></element>
-            <element name="observations" type="tns:XmlWaypointObservationGroup" maxOccurs="unbounded" minOccurs="0">
+    		<element name="attachments" type="string"
+    			maxOccurs="unbounded" minOccurs="0">
     		</element>
-        </sequence>
+    		<element name="observations"
+    			type="tns:XmlWaypointObservationGroup" maxOccurs="unbounded"
+    			minOccurs="0">
+    		</element>
+    	</sequence>
     	<attribute name="id" type="string"></attribute>
     	<attribute name="dateTime" type="dateTime"></attribute>
     	<attribute name="x" type="double"></attribute>
     	<attribute name="y" type="double"></attribute>
     	<attribute name="length" type="int"></attribute>
+    	<attribute name="state" type="string"></attribute>
     </complexType>
 
     <complexType name="XmlWaypointObservationGroup">
@@ -76,8 +81,8 @@ xmlns:tns="http://www.smartconservationsoftware.org/xml/1.0/assetdeployment" ele
 
     <complexType name="XmlWaypointObservationAttribute">
     	<sequence>
-    		<element name="doubleValue" type="double"></element>
-    		<element name="stringValue" type="string"></element>
+    		<element name="doubleValue" type="double" maxOccurs="1" minOccurs="0"></element>
+    		<element name="stringValue" type="string" maxOccurs="unbounded" minOccurs="0"></element>
     	</sequence>
     	<attribute name="attributeKey" type="string"></attribute>
     	<attribute name="attributeType" type="string"></attribute>

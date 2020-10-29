@@ -29,14 +29,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
 import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
@@ -206,7 +204,7 @@ public class SurveyHibernateManager {
 	 * @param filter filter or null if not filter should be applied
 	 * @return
 	 */
-	public static List<SurveyProxy> getSurveys(Session s, SurveyFilter filter){
+	public static List<SurveyMissionProxy> getSurveys(Session s, SurveyFilter filter){
 		if (filter == null){
 			//get all
 			CriteriaBuilder cb = s.getCriteriaBuilder();
@@ -215,24 +213,16 @@ public class SurveyHibernateManager {
 			c.where(cb.equal(from.get("surveyDesign").get("conservationArea"), SmartDB.getCurrentConservationArea())); //$NON-NLS-1$ //$NON-NLS-2$
 			List<Survey> ds = s.createQuery(c).getResultList();
 			
-			List<SurveyProxy> all = new ArrayList<SurveyProxy>();
+			List<SurveyMissionProxy> all = new ArrayList<SurveyMissionProxy>();
 			
 			for (Survey d : ds){
-				SurveyProxy ii = new SurveyProxy(d.getId(), d.getUuid(), d.getSurveyDesign().getName());
+				SurveyMissionProxy ii = new SurveyMissionProxy(d.getId(), d.getUuid(), d.getSurveyDesign().getName(), d.getSurveyDesign().getUuid());
 				all.add(ii);
 			}
 			return all;
 				
 		}else{
-			Query<?> q = filter.buildQuery(s);
-			List<?> data = q.list();
-			List<SurveyProxy> all = new ArrayList<SurveyProxy>();
-			for (Object d : data){
-				Object[] x = (Object[])d;
-				SurveyProxy ii = new SurveyProxy((String)x[1], (UUID)x[0],  (String)x[2]);
-				all.add(ii);
-			}
-			return all;
+			return filter.executeQuery(s);
 		}
 	}
 }

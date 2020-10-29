@@ -98,7 +98,7 @@ public class WaypointObservation extends UuidItem {
 		this.category = category;
 	}
 	
-	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.observation", orphanRemoval = true, cascade={CascadeType.ALL})
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="observation", orphanRemoval = true, cascade={CascadeType.ALL})
 	public List<WaypointObservationAttribute> getAttributes(){
 		return this.attributes;
 	}

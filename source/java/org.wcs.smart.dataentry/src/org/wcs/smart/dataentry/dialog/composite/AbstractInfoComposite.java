@@ -324,7 +324,7 @@ public abstract class AbstractInfoComposite extends Composite {
 				ensureDefaultTreeExists(a);
 				cma.setConfig(getModel().getDefaultConfigs().get(a));
 			}
-			if (AttributeType.LIST.equals(a.getType())) {
+			if (a.getType().isList()) {
 				ensureDefaultListExists(a);
 				cma.setConfig(getModel().getDefaultConfigs().get(a));
 			}

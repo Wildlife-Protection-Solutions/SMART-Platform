@@ -137,23 +137,27 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	/**
 	 * Image descriptor for attribute number icon
 	 */
-	public static final String ATTRIBUTE_NUMBER_ICON= "org.wsc.smart.datamodel.ATTRIBUTE_NUMBER_ICON"; //$NON-NLS-1$
+	public static final String ATTRIBUTE_NUMBER_ICON = "org.wsc.smart.datamodel.ATTRIBUTE_NUMBER_ICON"; //$NON-NLS-1$
 	/**
 	 * Image descriptor for attribute list icon
 	 */
-	public static final String ATTRIBUTE_LIST_ICON= "org.wsc.smart.datamodel.ATTRIBUTE_LIST_ICON"; //$NON-NLS-1$
+	public static final String ATTRIBUTE_LIST_ICON = "org.wsc.smart.datamodel.ATTRIBUTE_LIST_ICON"; //$NON-NLS-1$
+	/**
+	 * Image descriptor for attribute multi-list icon
+	 */
+	public static final String ATTRIBUTE_MULTI_LIST_ICON = "org.wsc.smart.datamodel.ATTRIBUTE_MULTI_LIST_ICON"; //$NON-NLS-1$
 	/**
 	 * Image descriptor for attribute tree icon
 	 */
-	public static final String ATTRIBUTE_TREE_ICON= "org.wsc.smart.datamodel.ATTRIBUTE_TREE_ICON"; //$NON-NLS-1$	
+	public static final String ATTRIBUTE_TREE_ICON = "org.wsc.smart.datamodel.ATTRIBUTE_TREE_ICON"; //$NON-NLS-1$	
 	/**
 	 * Image descriptor for attribute date icon
 	 */
-	public static final String ATTRIBUTE_DATE_ICON= "org.wsc.smart.datamodel.ATTRIBUTE_DATE_ICON"; //$NON-NLS-1$
+	public static final String ATTRIBUTE_DATE_ICON = "org.wsc.smart.datamodel.ATTRIBUTE_DATE_ICON"; //$NON-NLS-1$
 	/**
 	 * Image descriptor for data model icon
 	 */
-	public static final String DATA_MODEL_ICON= "org.wsc.smart.datamodel.DATAMODEL_ICON"; //$NON-NLS-1$
+	public static final String DATA_MODEL_ICON = "org.wsc.smart.datamodel.DATAMODEL_ICON"; //$NON-NLS-1$
 	
 	/**
 	 * Image descriptor for warning icon
@@ -430,6 +434,7 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	     reg.put(ATTRIBUTE_NUMBER_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/attribute_number.png")); //$NON-NLS-1$
 	     reg.put(ATTRIBUTE_BOOLEAN_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/attribute_boolean.png")); //$NON-NLS-1$
 	     reg.put(ATTRIBUTE_LIST_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/attribute_list.png")); //$NON-NLS-1$
+	     reg.put(ATTRIBUTE_MULTI_LIST_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/attribute_multi_list.png")); //$NON-NLS-1$
 	     reg.put(ATTRIBUTE_TREE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/attribute_tree.png")); //$NON-NLS-1$
 	     reg.put(ATTRIBUTE_DATE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/attribute_date.png")); //$NON-NLS-1$
 	     reg.put(DATA_MODEL_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/smart16.gif")); //$NON-NLS-1$

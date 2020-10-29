@@ -255,7 +255,7 @@ public class CmAttribute extends NamedItem implements IImageAssociatedObject{
 	 */
 	@Transient
 	public List<CmAttributeListItem> getCurrentList() {
-		return AttributeType.LIST.equals(attribute.getType()) ? getConfig().getList() : Collections.emptyList();
+		return attribute.getType().isList() ? getConfig().getList() : Collections.emptyList();
 	}
 	
 	@Transient

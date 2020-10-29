@@ -22,7 +22,6 @@
 package org.wcs.smart.asset.ui;
 
 import java.text.MessageFormat;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -72,7 +71,6 @@ import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
-import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
@@ -123,39 +121,12 @@ public class ObservationDialog extends SmartStyledDialog {
 	public ObservationDialog(Shell parentShell, Waypoint waypoint) {
 		super(parentShell);
 		this.waypoint = waypoint;
-		if (waypoint.getObservationGroups() == null) waypoint.setObservationGroups(new ArrayList<>());
-		
-		//clone observations for editing so we can cancel this dialog
-		groups = new ArrayList<>();
-		
-		for (WaypointObservationGroup g : waypoint.getObservationGroups()) {
-			WaypointObservationGroup clone = new WaypointObservationGroup();
-			clone.setUuid(g.getUuid());
-			clone.setObservations(new ArrayList<>());
-			clone.setWaypoint(waypoint);
-			
-			for (WaypointObservation o : g.getObservations()) {
-				if (toEdit != null && o.getUuid().equals(toEdit.getUuid())) toEdit = o;
-				WaypointObservation copy = new WaypointObservation();
-				copy.setCategory(o.getCategory());
-				copy.setObservationGroup(clone);
-				copy.setUuid(o.getUuid());
-				copy.setAttributes(new ArrayList<WaypointObservationAttribute>());
-				if (o.getAttributes() != null){
-					for (WaypointObservationAttribute a : o.getAttributes()){
-						WaypointObservationAttribute acopy = new WaypointObservationAttribute();
-						acopy.setAttribute(a.getAttribute());
-						acopy.setAttributeListItem(a.getAttributeListItem());
-						acopy.setAttributeTreeNode(a.getAttributeTreeNode());
-						acopy.setNumberValue(a.getNumberValue());
-						acopy.setObservation(copy);
-						acopy.setStringValue(a.getStringValue());
-						copy.getAttributes().add(acopy);
-					}
-				}
-				clone.getObservations().add(copy);
-			}
-			groups.add(clone);
+		try(Session session = HibernateManager.openSession()){
+			//clone waypoint for editing so we can cancel this dialog
+			this.waypoint = session.get(Waypoint.class, waypoint.getUuid());
+					
+			if (waypoint.getObservationGroups() == null) waypoint.setObservationGroups(new ArrayList<>());
+			groups = new ArrayList<>(waypoint.getObservationGroups());
 		}
 	}
 
@@ -629,7 +600,9 @@ public class ObservationDialog extends SmartStyledDialog {
 			groups.add(g);
 		}
 		oo.setObservationGroup(groups.get(0));
-		oo.setAttributes(new ArrayList<WaypointObservationAttribute>());
+		
+		if (oo.getAttributes() == null) oo.setAttributes(new ArrayList<WaypointObservationAttribute>());
+		
 		List<IAttributeField<?>> fields = (List<IAttributeField<?>>) attributeComposite.getData(IAttributeField.class.getName());
 		for (IAttributeField<?> f : fields){
 			String err = f.validate();
@@ -640,41 +613,28 @@ public class ObservationDialog extends SmartStyledDialog {
 		}
 		for (IAttributeField<?> f : fields){	
 			Object value = f.getValue();
-			if (value != null){
-				WaypointObservationAttribute a = new WaypointObservationAttribute();
-				a.setAttribute(f.getAttribute());
-				a.setObservation(oo);
-				switch(a.getAttribute().getType()){
-				case BOOLEAN:
-					Boolean x = (Boolean)value;
-					if (x){
-						a.setNumberValue(1d);
-					}else{
-						a.setNumberValue(0d);
-					}
+			
+			WaypointObservationAttribute toUpdate = null;
+			for (WaypointObservationAttribute a : oo.getAttributes()) {
+				if (a.getAttribute().equals(f.getAttribute())) {
+					toUpdate = a;
 					break;
-				case NUMERIC:
-					a.setNumberValue((Double)value);
-					break;
-				case DATE:
-					if (value instanceof LocalDate) {
-						a.setDateValue( (LocalDate)value );
-					}
-					break;
-				case LIST:
-					a.setAttributeListItem((AttributeListItem)value);
-					break;
-				case TEXT:
-					a.setStringValue((String)value);
-					break;
-				case TREE:
-					a.setAttributeTreeNode((AttributeTreeNode)value);
-					break;
-				default:
-					break;
-				
 				}
-				oo.getAttributes().add(a);
+			}
+			
+			if (value != null){
+				//find the attribute to update
+				if (toUpdate == null) {
+					toUpdate = new WaypointObservationAttribute();
+					toUpdate.setAttribute(f.getAttribute());
+					toUpdate.setObservation(oo);
+					oo.getAttributes().add(toUpdate);
+				}
+				toUpdate.setAttributeValue(f.getValue());
+			}else {
+				if (toUpdate != null) {
+					oo.getAttributes().remove(toUpdate);
+				}
 			}
 			f.clear();
 		}

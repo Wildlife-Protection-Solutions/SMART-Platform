@@ -51,6 +51,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationAttributeList;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
@@ -82,6 +83,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		tablePrefix.put(WaypointObservation.class, "wpo"); //$NON-NLS-1$
 		tablePrefix.put(WaypointObservationGroup.class, "wpg"); //$NON-NLS-1$
 		tablePrefix.put(WaypointObservationAttribute.class, "wpoa"); //$NON-NLS-1$
+		tablePrefix.put(WaypointObservationAttributeList.class, "wpoal"); //$NON-NLS-1$
 		tablePrefix.put(Attribute.class, "a"); //$NON-NLS-1$
 		tablePrefix.put(Category.class, "c"); //$NON-NLS-1$
 		tablePrefix.put(AttributeTreeNode.class, "atn"); //$NON-NLS-1$
@@ -104,6 +106,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		tableNames.put(WaypointObservation.class, "smart.wp_observation"); //$NON-NLS-1$
 		tableNames.put(WaypointObservationGroup.class, "smart.wp_observation_group"); //$NON-NLS-1$
 		tableNames.put(WaypointObservationAttribute.class, "smart.wp_observation_attributes"); //$NON-NLS-1$
+		tableNames.put(WaypointObservationAttributeList.class, "smart.wp_observation_attributes_list"); //$NON-NLS-1$
 		tableNames.put(Attribute.class, "smart.dm_attribute"); //$NON-NLS-1$
 		tableNames.put(Category.class, "smart.dm_category"); //$NON-NLS-1$
 		tableNames.put(AttributeTreeNode.class, "smart.dm_attribute_tree"); //$NON-NLS-1$

@@ -21,15 +21,19 @@
  */
 package org.wcs.smart.er.ui;
 
+import java.text.MessageFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.hibernate.SurveyDesignProxy;
+import org.wcs.smart.er.hibernate.SurveyMissionProxy;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesign.State;
-import org.wcs.smart.er.ui.SurveyListTreeNode.Type;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 
 /**
@@ -58,9 +62,7 @@ public class SurveyDesignLabelProvider extends LabelProvider {
 	}
 	@Override
 	public String getText(Object element){
-		if (element instanceof SurveyListTreeNode){
-			return ((SurveyListTreeNode)element).getLabel();
-		}
+
 		if (element instanceof Mission ){
 			return ((Mission) element).getId();
 		}
@@ -76,18 +78,22 @@ public class SurveyDesignLabelProvider extends LabelProvider {
 		if (element instanceof SurveyDesignProxy){
 			return ((SurveyDesignProxy)element).getName();
 		}
+		if (element instanceof SurveyMissionProxy) {
+			SurveyMissionProxy p = (SurveyMissionProxy) element;
+			if (p.getType() == SurveyMissionProxy.Type.MISSION) {
+				return MessageFormat.format("{0} [{1}]", p.getId(), DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).format(p.getStartDate())); //$NON-NLS-1$
+			}else {
+				return MessageFormat.format("{0} [{1}]", p.getId(), p.getDesignName()); //$NON-NLS-1$
+			}
+		}
 		return super.getText(element);
 	}
 	
 	public Image getImage(Object element) {
-		if (element instanceof Survey || 
-			((element instanceof SurveyListTreeNode) &&
-				((SurveyListTreeNode)element).getType() == Type.SURVEY)){
+		if (element instanceof Survey) {
 			return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SURVEY_ICON);
 		}
-		if (element instanceof Mission ||
-				((element instanceof SurveyListTreeNode) &&
-					((SurveyListTreeNode)element).getType() == Type.MISSION)){
+		if (element instanceof Mission){
 			return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.MISSION_ICON);
 		}
 		
@@ -103,7 +109,12 @@ public class SurveyDesignLabelProvider extends LabelProvider {
 			return ((SurveyDesignEditorInput) element).getImageDescriptor().createImage();
 			
 		}
-			
+		if (element instanceof SurveyMissionProxy) {
+			switch(((SurveyMissionProxy) element).getType()) {
+				case MISSION:return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.MISSION_ICON);
+				case SURVEY: return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SURVEY_ICON);
+			}
+		}
 		return null;
 	}
 }

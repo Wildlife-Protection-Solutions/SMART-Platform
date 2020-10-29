@@ -107,7 +107,6 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
-import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.common.celleditor.IntegerCellEditor;
@@ -619,7 +618,7 @@ public class DataGeneratorView {
 				for (Attribute a : allatts) {
 					if (a.getType() == AttributeType.TREE) {
 						nodes.addAll(a.getActiveTreeNodes());
-					}else if (a.getType() == AttributeType.LIST) {
+					}else if (a.getType().isList()) {
 						a.getActiveListItems().forEach(li->li.getName());
 					}
 				}
@@ -817,26 +816,7 @@ public class DataGeneratorView {
 			if (type == ObservationConfiguration.Type.FIXED) {
 				WaypointObservationAttribute woa = new WaypointObservationAttribute();
 				woa.setAttribute(field.getAttribute());
-				
-				Object x = field.getValue();
-				if (field.getAttribute().getType() == AttributeType.BOOLEAN){
-					if ((Boolean)x){
-						woa.setNumberValue(1d);
-					}else{
-						woa.setNumberValue(0d);
-					}
-				}else if (field.getAttribute().getType() == AttributeType.LIST){
-					woa.setAttributeListItem((AttributeListItem)x);
-				}else if (field.getAttribute().getType() == AttributeType.TREE){
-					woa.setAttributeTreeNode((AttributeTreeNode)x);
-				}else if (field.getAttribute().getType() == AttributeType.TEXT){
-					woa.setStringValue((String)x);
-				}else if (field.getAttribute().getType() == AttributeType.NUMERIC){
-					woa.setNumberValue((Double)x);
-				}else if (field.getAttribute().getType() == AttributeType.DATE){
-					woa.setDateValue((LocalDate)x);
-				}
-				
+				woa.setAttributeValue(field.getValue());
 				woa.setObservation(wo);
 				wo.getAttributes().add(woa);
 			}
@@ -910,6 +890,7 @@ public class DataGeneratorView {
 		switch(aType) {
 		case BOOLEAN:
 		case LIST:
+		case MLIST:
 		case TREE:
 			v.setSelection(new StructuredSelection(ObservationConfiguration.Type.RANDOM));	
 			break;
@@ -917,10 +898,7 @@ public class DataGeneratorView {
 		case NUMERIC:
 		case TEXT:
 			v.setSelection(new StructuredSelection(ObservationConfiguration.Type.EMPTY));
-			break;
-		default:
-			break;
-		
+			break;		
 		}
 		
 		return v;

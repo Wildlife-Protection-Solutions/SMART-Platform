@@ -23,13 +23,11 @@ package org.wcs.smart.er.ui;
 
 import java.util.List;
 
-import org.eclipse.core.runtime.jobs.IJobChangeListener;
-import org.eclipse.jface.viewers.AbstractTreeViewer;
+import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.ui.model.BaseWorkbenchContentProvider;
-import org.eclipse.ui.progress.DeferredTreeContentManager;
+import org.wcs.smart.er.hibernate.SurveyMissionProxy;
+import org.wcs.smart.er.hibernate.SurveyMissionProxy.Type;
 import org.wcs.smart.er.internal.Messages;
-import org.wcs.smart.er.ui.SurveyListTreeNode.Type;
 
 /**
  * Lazy tree content provider for survey list view.  The roots
@@ -38,42 +36,24 @@ import org.wcs.smart.er.ui.SurveyListTreeNode.Type;
  * @author Emily
  *
  */
-public class LazySurveyDesignTreeContentProvider extends
-		BaseWorkbenchContentProvider {
-
-	private DeferredTreeContentManager manager;
+public class SurveyDesignTreeContentProvider implements ITreeContentProvider {
 	
-	private List<SurveyListTreeNode> designs;
+	private List<SurveyMissionProxy> surveys;
 
 	
-	public LazySurveyDesignTreeContentProvider() {
+	public SurveyDesignTreeContentProvider() {
 	}
 
-	/**
-	 * @see DeferredTreeContentManager#addUpdateCompleteListener(IJobChangeListener)
-	 * @param listsner
-	 */
-	public void addUpdateCompleteListener(IJobChangeListener listsner) {
-		manager.addUpdateCompleteListener(listsner);
-	}
-
-	/**
-	 * @see DeferredTreeContentManager#removeUpdateCompleteListener(IJobChangeListener)
-	 * @param listsner
-	 */
-	public void removeUpdateCompleteListener(IJobChangeListener listsner) {
-		manager.removeUpdateCompleteListener(listsner);
-	}
-
+	
 	/**
 	 * @see org.eclipse.jface.viewers.ITreeContentProvider#getElements(java.lang.Object)
 	 */
 	@Override
 	public Object[] getElements(Object inputElement) {
-		if (designs == null){
+		if (surveys == null){
 			return new Object[]{Messages.LazySurveyDesignTreeContentProvider_LoadingLabel};
 		}
-		return designs.toArray();
+		return surveys.toArray();
 	}
 
 	/**
@@ -83,15 +63,10 @@ public class LazySurveyDesignTreeContentProvider extends
 	@SuppressWarnings("unchecked")
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		this.designs = null;
+		this.surveys = null;
 		if (newInput instanceof List<?>){
-			this.designs = (List<SurveyListTreeNode>) newInput;
+			this.surveys = (List<SurveyMissionProxy>) newInput;
 		}
-		if (viewer instanceof AbstractTreeViewer) {
-			manager = new DeferredTreeContentManager(
-					(AbstractTreeViewer) viewer);
-		}
-		super.inputChanged(viewer, oldInput, newInput);
 	}
 
 	/**
@@ -99,14 +74,10 @@ public class LazySurveyDesignTreeContentProvider extends
 	 */
 	@Override
 	public boolean hasChildren(Object element) {
-		if (element instanceof SurveyListTreeNode 
-				&& ((SurveyListTreeNode) element).getType() == Type.MISSION) {
-			return false;
-		}else if (element instanceof String){
-			return false;
-		}else{
-			return true;
-		}
+		if (element instanceof SurveyMissionProxy) 
+			return !((SurveyMissionProxy)element).getMissions().isEmpty();
+		return false;
+	
 	}
 
 	/*
@@ -114,8 +85,10 @@ public class LazySurveyDesignTreeContentProvider extends
 	 */
 	@Override
 	public Object getParent(Object element) {
-		if (element instanceof SurveyListTreeNode) {
-			return ((SurveyListTreeNode)element).getParent();
+		if (element instanceof SurveyMissionProxy){
+			SurveyMissionProxy p = (SurveyMissionProxy) element;
+			if (p.getType() == Type.SURVEY) return false;
+			return p.getParent();
 		}
 		return null;
 	}
@@ -125,15 +98,8 @@ public class LazySurveyDesignTreeContentProvider extends
 	 */
 	@Override
 	public Object[] getChildren(Object parent) {
-		if (parent instanceof SurveyListTreeNode){
-			if (manager != null) {
-				Object[] kids = manager.getChildren(parent);
-				if (kids != null) {
-					return kids;
-				}
-			}
-			Object[] kids = super.getChildren(parent);
-			return kids;
+		if (parent instanceof SurveyMissionProxy){
+			return ((SurveyMissionProxy)parent).getMissions().toArray();
 		}
 		return null;
 	}

@@ -65,7 +65,7 @@ public class CmDefaultListsUtil {
 			CmNode node = toCheck.remove();
 			if (node.getCmAttributes() != null) {
 				for (final CmAttribute a : node.getCmAttributes()) {
-					if (AttributeType.LIST.equals(a.getAttribute().getType())) {
+					if (a.getAttribute().getType().isList()) {
 						result.add(a.getAttribute());
 					}
 				}

@@ -31,8 +31,8 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.common.filter.IUpdatableView;
 import org.wcs.smart.common.filter.SmartFilterDialog;
 import org.wcs.smart.er.hibernate.SurveyDesignFilter;
@@ -109,15 +109,15 @@ public class SurveyDesignFilterDialog extends SmartFilterDialog {
 		
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayout(new GridLayout(1, false));
-		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		Group g = new Group(main, SWT.NONE);
-		g.setText(Messages.SurveyDesignFilterDialog_StateLabel);
-		g.setLayout(new GridLayout());
-		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		chActive = new Button(g, SWT.CHECK);
+		SmartUiUtils.createHeaderLabel(main, Messages.SurveyDesignFilterDialog_StateLabel);
+
+
+		chActive = new Button(main, SWT.CHECK);
 		chActive.setText(State.ACTIVE.getGuiName(Locale.getDefault()));
-		chInactive = new Button(g, SWT.CHECK);
+		
+		chInactive = new Button(main, SWT.CHECK);
 		chInactive.setText(State.INACTIVE.getGuiName(Locale.getDefault()));
 		
 		

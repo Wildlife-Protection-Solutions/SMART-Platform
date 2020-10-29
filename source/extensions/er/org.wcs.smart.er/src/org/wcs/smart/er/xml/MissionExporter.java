@@ -115,7 +115,7 @@ public class MissionExporter {
 	private static Path exportMissionWithoutAttachments(MissionType xml, Path file, IProgressMonitor monitor) throws Exception {
 		monitor.subTask(Messages.MissionExporter_2);
 		try(BufferedOutputStream out = new BufferedOutputStream(Files.newOutputStream(file))) {
-			MissionXmlManager.writeDataModel(xml, out);
+			MissionXmlManager.writeMission(xml, out);
 		}
 		monitor.worked(1);
 		return file;

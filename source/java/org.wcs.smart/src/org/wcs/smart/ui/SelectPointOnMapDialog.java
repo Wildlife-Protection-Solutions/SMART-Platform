@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-package org.wcs.smart.incident.ui.newwizard;
+package org.wcs.smart.ui;
 
 import java.util.Collections;
 import java.util.List;
@@ -31,27 +31,32 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.ca.ISmartPoint;
-import org.wcs.smart.incident.internal.Messages;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.SmartStyledDialog;
 import org.wcs.smart.ui.map.location.LocationSelectComposite;
 
 /**
- * Map dialog for selecting incident location.
+ * Map dialog for selecting points on map
  * 
  * @author Emily
  *
  */
-public class MapDialog extends SmartStyledDialog{
+public class SelectPointOnMapDialog extends SmartStyledDialog{
 
 	private TmpPoint point;
 	private LocationSelectComposite<TmpPoint> locationComp;
 	private TmpPoint initPoint = null;
 	
-	protected MapDialog(Shell parentShell) {
+	public SelectPointOnMapDialog(Shell parentShell) {
 		super(parentShell);
 	}
 	
 
+	/**
+	 * Sets the initial location in lat/long
+	 * @param x
+	 * @param y
+	 */
 	public void setInitPoint(double x, double y){
 		initPoint = new TmpPoint();
 		initPoint.setX(x);
@@ -68,9 +73,10 @@ public class MapDialog extends SmartStyledDialog{
 		super.okPressed();
 	}
 	
-	public TmpPoint getPoint(){
+	public ISmartPoint getPoint(){
 		return point;
 	}
+	
 	@Override
 	protected Point getInitialSize() {
 		return new Point(450, 400);
@@ -90,7 +96,7 @@ public class MapDialog extends SmartStyledDialog{
 		if (initPoint != null){
 			locationComp.setPoints(Collections.singletonList(initPoint));
 		}
-		getShell().setText(Messages.MapDialog_Title);
+		getShell().setText(Messages.SelectPointOnMapDialog_SelectMapPointdialogTitle);
 		return parent;
 	}
 	

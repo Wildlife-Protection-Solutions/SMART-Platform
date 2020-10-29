@@ -24,6 +24,7 @@ package org.wcs.smart;
 import java.util.Locale;
 
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.datamodel.Attribute;
 
 
 /**
@@ -79,4 +80,6 @@ public interface ICoreLabelProvider extends ISharedLabelProvider {
 	public static final String AREATABLE_GEOMETRY_KEY = "areatablegeomkey"; //$NON-NLS-1$
 	
 	public String getEmployeeShortLabel(Employee e, Locale l);
+	
+	public String getAttributeTypeLabel(Attribute.AttributeType type, Locale l);
 }

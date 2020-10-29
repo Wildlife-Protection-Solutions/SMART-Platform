@@ -2,6 +2,7 @@ package org.wcs.smart.ca.datamodel;
 
 import java.text.MessageFormat;
 import java.time.LocalDate;
+import java.util.Collection;
 
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.internal.Messages;
@@ -28,6 +29,8 @@ public class AttributeValidator {
 			return validateString(attribute, value);
 		}else if (attribute.getType() == AttributeType.LIST){
 			return validateList(attribute, value);
+		}else if (attribute.getType() == AttributeType.MLIST){
+			return validateMultiList(attribute, value);
 		}else if (attribute.getType() == AttributeType.TREE){
 			return validateTree(attribute, value);
 		}else if (attribute.getType() == AttributeType.DATE){
@@ -109,6 +112,30 @@ public class AttributeValidator {
 	
 		if (attribute.getIsRequired() && value == null){
 			return MessageFormat.format(REQUIRED_ERROR_MSG, new Object[]{ attribute.getName() });
+		}
+		return null;
+	}
+	
+	public static String validateMultiList(Attribute attribute, Object value){
+		if (value != null && !(value instanceof Collection)){
+			return MessageFormat.format(INVALID_ATT_VALUE_ERROR_MSG, new Object[]{ attribute.getName()});
+		}
+		
+		if (attribute.getIsRequired() && value == null){
+			return MessageFormat.format(REQUIRED_ERROR_MSG, new Object[]{ attribute.getName() });
+		}
+		
+		if (value == null) return null;
+		
+		Collection<?> items = (Collection<?>) value;
+		if (attribute.getIsRequired() && items.isEmpty()) {
+			return MessageFormat.format(REQUIRED_ERROR_MSG, new Object[]{ attribute.getName() });
+		}
+		
+		for (Object x : items) {
+			if (!(x instanceof AttributeListItem)) {
+				return MessageFormat.format(INVALID_ATT_VALUE_ERROR_MSG, new Object[]{ attribute.getName()});
+			}
 		}
 		return null;
 	}

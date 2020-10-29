@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -37,6 +36,7 @@ import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ICheckStateProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
@@ -57,7 +57,11 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.common.filter.IUpdatableView;
+import org.wcs.smart.er.hibernate.SurveyMissionProxy;
+import org.wcs.smart.er.hibernate.SurveyMissionProxy.Type;
 import org.wcs.smart.er.internal.Messages;
+import org.wcs.smart.er.ui.SurveyDesignLabelProvider;
+import org.wcs.smart.er.ui.SurveyDesignTreeContentProvider;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
@@ -93,23 +97,31 @@ public abstract class XmlMultiExportTreeViewerDialog extends SmartStyledTitleDia
 	@Override
 	protected void okPressed() {
 		this.objUuids = new ArrayList<UUID>();
+		
 		Object[] checked = chReports.getCheckedElements();
-
-		Map<String, String> file2Obj = new HashMap<String, String>();
-		for (int i = 0; i < checked.length; i ++){
-			TreeItem ti = (TreeItem) checked[i];
-			if(ti instanceof MissionTreeItem){
-				String objName = String.valueOf(ti.getName() );
-				String fileName = SmartUtils.getFileName(objName);
-				if (file2Obj.containsKey(fileName)) {
-					//output file name conflict error (two exported items will try to write data in a same file)
-					MessageDialog.openWarning(getShell(), Messages.XmlMultiExportTreeViewerDialog_InvalidNamesDialog, MessageFormat.format(Messages.XmlMultiExportTreeViewerDialog_ItemOverwriteWarning, file2Obj.get(fileName), objName, fileName));
-					return;
-				}
-				file2Obj.put(fileName, objName);
-				objUuids.add( ti.getUuid() );
+		HashMap<String, SurveyMissionProxy> filenames = new HashMap<>();
+		
+		for (Object x : checked) {
+			if (!(x instanceof SurveyMissionProxy)) continue;
+			
+			SurveyMissionProxy proxy = (SurveyMissionProxy) x;
+			if (proxy.getType() != Type.MISSION) continue;
+			
+			String objName = proxy.getId();
+			String fileName = SmartUtils.getFileName(objName);
+			
+			if (filenames.containsKey(fileName)) {
+				//output file name conflict error (two exported items will try to write data in a same file)
+				MessageDialog.openWarning(getShell(), 
+						Messages.XmlMultiExportTreeViewerDialog_InvalidNamesDialog, 
+						MessageFormat.format(Messages.XmlMultiExportTreeViewerDialog_ItemOverwriteWarning, 
+								filenames.get(fileName).getId(), objName, fileName));
+				return;
 			}
+			filenames.put(fileName, proxy);
+			objUuids.add( proxy.getUuid() );
 		}
+		
 		super.okPressed();
 	}
 	/**
@@ -235,12 +247,10 @@ public abstract class XmlMultiExportTreeViewerDialog extends SmartStyledTitleDia
 		gd.heightHint = 250;
 		treeContainer.setLayoutData(gd);
 		
-		
-		
 		chReports = new CheckboxTreeViewer(treeContainer, SWT.MULTI | SWT.BORDER);
-		chReports.setLabelProvider(new CheckBoxTreeLabelProvider());
 		chReports.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		chReports.setContentProvider(new CheckBoxTreeContentProvider());
+		chReports.setLabelProvider(SurveyDesignLabelProvider.getInstance());
+		chReports.setContentProvider(new SurveyDesignTreeContentProvider());
 		chReports.setAutoExpandLevel(CheckboxTreeViewer.ALL_LEVELS);
 		
 		
@@ -251,7 +261,7 @@ public abstract class XmlMultiExportTreeViewerDialog extends SmartStyledTitleDia
 			
 			@Override
 			public boolean isChecked(Object element) {
-				Object parent = ((CheckBoxTreeContentProvider)chReports.getContentProvider()).getParent(element);
+				Object parent = ((ITreeContentProvider)chReports.getContentProvider()).getParent(element);
 				if (parent == null){
 					return false;
 				}else{
@@ -285,39 +295,34 @@ public abstract class XmlMultiExportTreeViewerDialog extends SmartStyledTitleDia
 			@Override
 			public void checkStateChanged(CheckStateChangedEvent event) {
 
-				if (event.getElement() instanceof SurveyTreeItem ){
+				if (!(event.getElement() instanceof SurveyMissionProxy)) return;
+				
+				SurveyMissionProxy proxy = (SurveyMissionProxy)event.getElement();
+				
+				if (proxy.getType() == Type.SURVEY) {
 					boolean newState = event.getChecked();
 					//check or uncheck all sub Missions
-					List<Object> objects = new ArrayList<Object>();
-					objects.add(event.getElement());
-					while(objects.size() > 0){
-						Object o = objects.remove(0);
-						chReports.setChecked(o, newState);
-						if (o instanceof SurveyTreeItem ){
-							Object[] kids = ((CheckBoxTreeContentProvider)chReports.getContentProvider()).getChildren(o);
-							for (Object kid : kids){
-								objects.add(kid);
-							}
-						}
-					}	
-					chReports.setGrayed(event.getElement(), false);
+					for (SurveyMissionProxy child : proxy.getMissions()) {
+						chReports.setChecked(child, newState);
+					}
 				}
+				
 				//if checked then we want to check all parent elements
 				if (event.getChecked()){
 					
-					Object parent = ((CheckBoxTreeContentProvider)chReports.getContentProvider()).getParent(event.getElement());
+					Object parent = ((ITreeContentProvider)chReports.getContentProvider()).getParent(event.getElement());
 					while(parent != null){
 						chReports.setGrayChecked(parent, true);
-						parent = ((CheckBoxTreeContentProvider)chReports.getContentProvider()).getParent(parent);
+						parent = ((ITreeContentProvider)chReports.getContentProvider()).getParent(parent);
 					}
 				}else{
 					//we want de-select parent if appropriate 
-					Object parent = ((CheckBoxTreeContentProvider)chReports.getContentProvider()).getParent(event.getElement());
+					Object parent = ((ITreeContentProvider)chReports.getContentProvider()).getParent(event.getElement());
 					while(parent != null){
 						//if any of the children are checked then
 						//we need to unselect 
 						boolean checked = false;
-						Object[] kids = ((CheckBoxTreeContentProvider)chReports.getContentProvider()).getChildren(parent);
+						Object[] kids = ((ITreeContentProvider)chReports.getContentProvider()).getChildren(parent);
 						for (Object k : kids){
 							if (chReports.getChecked(k)){
 								checked = true;
@@ -326,7 +331,7 @@ public abstract class XmlMultiExportTreeViewerDialog extends SmartStyledTitleDia
 						}
 						chReports.setGrayChecked(parent, checked);
 						
-						parent = ((CheckBoxTreeContentProvider)chReports.getContentProvider()).getParent(parent);
+						parent = ((ITreeContentProvider)chReports.getContentProvider()).getParent(parent);
 					}
 				}
 				

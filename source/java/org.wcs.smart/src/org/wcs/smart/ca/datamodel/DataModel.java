@@ -494,6 +494,8 @@ public class DataModel extends SimpleDataModel{
 			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_TEXT_ICON);
 		}else if (type == Attribute.AttributeType.LIST){
 			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_LIST_ICON);
+		}else if (type == Attribute.AttributeType.MLIST){
+			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_MULTI_LIST_ICON);
 		}else if (type == Attribute.AttributeType.NUMERIC){
 			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_NUMBER_ICON);
 		}else if (type == Attribute.AttributeType.TREE){

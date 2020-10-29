@@ -30,10 +30,10 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="Members" type="{http://www.smartconservationsoftware.org/xml/1.1/mission}MembersType" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="Survey" type="{http://www.smartconservationsoftware.org/xml/1.1/mission}SurveyType"/>
- *         &lt;element name="MissionPropertyValues" type="{http://www.smartconservationsoftware.org/xml/1.1/mission}MissionPropertyValuesType" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="Days" type="{http://www.smartconservationsoftware.org/xml/1.1/mission}MissionDayType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="Members" type="{http://www.smartconservationsoftware.org/xml/1.2/mission}MembersType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="Survey" type="{http://www.smartconservationsoftware.org/xml/1.2/mission}SurveyType"/>
+ *         &lt;element name="MissionPropertyValues" type="{http://www.smartconservationsoftware.org/xml/1.2/mission}MissionPropertyValuesType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="Days" type="{http://www.smartconservationsoftware.org/xml/1.2/mission}MissionDayType" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *       &lt;attribute name="id" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="startDate" type="{http://www.w3.org/2001/XMLSchema}date" />

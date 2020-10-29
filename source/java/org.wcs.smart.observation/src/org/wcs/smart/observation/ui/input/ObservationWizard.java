@@ -467,6 +467,7 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 		try(Session session = HibernateManager.openSession(new AttachmentInterceptor())){
 			session.beginTransaction();
 			try {
+				
 				for (WaypointObservationGroup g : wp.getObservationGroups()) {
 					g.getObservations().removeAll(deletedObservations);
 				}
@@ -476,6 +477,9 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 				for (ObservationAttachment a : deletedAttachments) {
 					session.delete(a);
 				}
+				
+				session.saveOrUpdate(wp);
+				session.flush();
 				
 				List<WaypointObservationGroup> gdelete = new ArrayList<>();
 				for (WaypointObservationGroup g : wp.getObservationGroups()) {

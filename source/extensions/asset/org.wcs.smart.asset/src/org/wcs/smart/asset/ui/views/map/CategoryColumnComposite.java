@@ -228,7 +228,7 @@ public class CategoryColumnComposite extends Composite {
 			@Override
 			public Object[] getChildren(Object parentElement) {
 				if (parentElement instanceof Attribute) {
-					if (((Attribute) parentElement).getType() == AttributeType.LIST) {
+					if (((Attribute) parentElement).getType().isList()) {
 						return ((Attribute) parentElement).getActiveListItems().toArray(); 
 					}else if (((Attribute) parentElement).getType() == AttributeType.TREE) {
 						return ((Attribute) parentElement).getActiveTreeNodes().toArray();
@@ -255,7 +255,7 @@ public class CategoryColumnComposite extends Composite {
 				if (element instanceof AttributeTreeNode) return !((AttributeTreeNode) element).getActiveChildren().isEmpty();
 				if (element instanceof Attribute) {
 					Attribute a = (Attribute) element;
-					return a.getType() == AttributeType.LIST || a.getType() == AttributeType.TREE;
+					return a.getType().isList() || a.getType() == AttributeType.TREE;
 				}
 				return false;
 			}
@@ -315,7 +315,9 @@ public class CategoryColumnComposite extends Composite {
 		}else if (option instanceof Attribute) {
 			Attribute a = (Attribute)option;
 			if (a.getType() == AttributeType.LIST) return;
+			if (a.getType() == AttributeType.MLIST) return;
 			if (a.getType() == AttributeType.TREE) return;
+			
 			
 			if (a.getType() == AttributeType.BOOLEAN) {
 				part = "[" + a.getKeyId() + " = <TRUE|FALSE>]"; //$NON-NLS-1$ //$NON-NLS-2$

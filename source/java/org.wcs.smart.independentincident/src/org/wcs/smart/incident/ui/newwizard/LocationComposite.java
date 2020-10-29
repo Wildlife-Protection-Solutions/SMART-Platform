@@ -53,6 +53,7 @@ import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.ui.SelectPointOnMapDialog;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
 
@@ -255,7 +256,7 @@ public class LocationComposite extends AbstractIncidentComposite {
 
 	
 	private void selectOnMap(){
-		MapDialog md = new MapDialog(txtX.getShell());
+		SelectPointOnMapDialog md = new SelectPointOnMapDialog(txtX.getShell());
 		
 		try{
 			Coordinate z = getPoint();
@@ -264,7 +265,7 @@ public class LocationComposite extends AbstractIncidentComposite {
 			}
 		}catch (Exception ex){}
 		
-		if (md.open() == MapDialog.OK){
+		if (md.open() == SelectPointOnMapDialog.OK){
 			if (md.getPoint() != null){
 				txtX.setText(String.valueOf(md.getPoint().getX()));
 				txtY.setText(String.valueOf(md.getPoint().getY()));

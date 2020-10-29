@@ -34,6 +34,12 @@ import org.wcs.smart.SmartContext;
  */
 public enum Operator {
 
+
+	/**
+	 * Exact (=) operator for multi-select list operations 
+	 */
+	EXACT("exact"), //$NON-NLS-1$
+	
 	/**
 	 * Equals (=) operator 
 	 */
@@ -143,6 +149,9 @@ public enum Operator {
 				return DATE_OPS[i];
 			}
 		}
+		
+		if (EXACT.asSmartValue().equalsIgnoreCase(value)) return EXACT;
+		
 		return null;
 	}
 	

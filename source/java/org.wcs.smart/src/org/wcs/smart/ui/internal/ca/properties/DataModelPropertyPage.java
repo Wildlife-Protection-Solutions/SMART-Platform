@@ -894,6 +894,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 									canDeleteAttribute = true;
 								}
 							}catch (Exception ex){
+								ex.printStackTrace();
 								//something is using this attribute therefore
 								//it cannot be deleted
 								//ex.printStackTrace();

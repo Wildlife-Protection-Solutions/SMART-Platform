@@ -37,6 +37,7 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationAttributeList;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.observation.query.engine.visitor.AreaFilterVisitor;
 import org.wcs.smart.observation.query.internal.Messages;
@@ -447,6 +448,9 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 					sql.append(prefix(WaypointObservationAttribute.class) + ".tree_node_uuid = "); //$NON-NLS-1$
 					sql.append(prefix(AttributeTreeNode.class) + ".uuid"); //$NON-NLS-1$
 				}
+				if (attfilter.getAttributeType().equals(AttributeType.MLIST)) {
+					processMultiSelectAttributeFilter(sql, attfilter);
+				}
 			}
 			sql.append(" WHERE "); //$NON-NLS-1$
 			if (catfilter != null){
@@ -460,10 +464,13 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 				sql.append(".hkey < " + p2 + " )"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			if (attfilter != null){
-				if (catfilter != null){
+				if (catfilter != null ){
 					sql.append(" AND "); //$NON-NLS-1$
 				}
-				sql.append(prefix(Attribute.class) + ".keyid='" + attfilter.getAttributeKey() + "' AND "); //$NON-NLS-1$  //$NON-NLS-2$
+				sql.append(prefix(Attribute.class) + ".keyid='" + attfilter.getAttributeKey() + "' "); //$NON-NLS-1$  //$NON-NLS-2$
+				if (attfilter.getAttributeType() != AttributeType.MLIST) {
+					sql.append(" AND "); //$NON-NLS-1$
+				}
 				if (attfilter.getAttributeType() == AttributeType.NUMERIC){
 					sql.append("("); //$NON-NLS-1$
 					sql.append(prefix(WaypointObservationAttribute.class));
@@ -524,6 +531,8 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 					sql.append(ObservationFilterToSqlGenerator.asSql(Operator.AND));
 					sql.append(" cast(" + p2 + " as date)"); //$NON-NLS-1$ //$NON-NLS-2$
 					sql.append(") "); //$NON-NLS-1$
+				}else if (attfilter.getAttributeType() == AttributeType.MLIST) {
+					//nothing to do; dealt with as join above
 				}
 			}
 			
@@ -531,6 +540,69 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 			try(PreparedStatement ps = engine.parseQueryString(c, sql.toString())){
 				ps.executeUpdate();
 			}
+		}
+	}
+
+	private void processMultiSelectAttributeFilter(StringBuilder sql, AttributeFilter attfilter) {
+		String[] keys = ((String) attfilter.getValue()).split(AttributeFilter.MLIST_SEPERATOR);
+		Operator op = attfilter.getOperator();
+
+		if (op == Operator.OR) {
+			sql.append(" JOIN ("); //$NON-NLS-1$
+			sql.append("SELECT "); //$NON-NLS-1$
+			sql.append(prefix(WaypointObservationAttributeList.class) + ".observation_attribute_uuid FROM "); //$NON-NLS-1$
+			sql.append(namePrefix(WaypointObservationAttributeList.class));
+			sql.append(" JOIN "); //$NON-NLS-1$
+			sql.append(namePrefix(AttributeListItem.class));
+			sql.append(" ON "); //$NON-NLS-1$
+			sql.append(prefix(WaypointObservationAttributeList.class) + ".list_element_uuid = "); //$NON-NLS-1$
+			sql.append(prefix(AttributeListItem.class) + ".uuid "); //$NON-NLS-1$
+			sql.append(" AND "); //$NON-NLS-1$
+			sql.append(prefix(AttributeListItem.class) +".keyid in ("); //$NON-NLS-1$
+			for (String key : keys) {
+				String px = engine.addParameterValue(key);
+				sql.append(px);
+				sql.append(","); //$NON-NLS-1$
+			}
+			sql.deleteCharAt(sql.length() - 1);
+			sql.append(")) foo"); //$NON-NLS-1$
+			sql.append(" ON foo.observation_attribute_uuid = "); //$NON-NLS-1$
+			sql.append(prefix(WaypointObservationAttribute.class) + ".uuid"); //$NON-NLS-1$
+				
+			
+		}
+		if (op == Operator.AND || op == Operator.EXACT) {
+			sql.append(" JOIN ("); //$NON-NLS-1$
+			
+			int cnt = 0;
+			for (String key : keys) {
+				String px = engine.addParameterValue(key);
+				if (cnt != 0) sql.append(" INTERSECT "); //$NON-NLS-1$
+				cnt++;
+				sql.append("SELECT "); //$NON-NLS-1$
+				sql.append(prefix(WaypointObservationAttributeList.class) + ".observation_attribute_uuid FROM "); //$NON-NLS-1$
+				sql.append(namePrefix(WaypointObservationAttributeList.class));
+				sql.append(" JOIN "); //$NON-NLS-1$
+				sql.append(namePrefix(AttributeListItem.class));
+				sql.append(" ON "); //$NON-NLS-1$
+				sql.append(prefix(WaypointObservationAttributeList.class) + ".list_element_uuid = "); //$NON-NLS-1$
+				sql.append(prefix(AttributeListItem.class) + ".uuid "); //$NON-NLS-1$
+				sql.append(" AND "); //$NON-NLS-1$
+				sql.append(prefix(AttributeListItem.class) +".keyid =" + px );	 //$NON-NLS-1$
+			}
+			
+			if (op == Operator.EXACT) {
+				String px = engine.addParameterValue(keys.length);
+				sql.append(" INTERSECT "); //$NON-NLS-1$
+				sql.append("SELECT "); //$NON-NLS-1$
+				sql.append(prefix(WaypointObservationAttributeList.class) + ".observation_attribute_uuid FROM "); //$NON-NLS-1$
+				sql.append(namePrefix(WaypointObservationAttributeList.class));
+				sql.append(" GROUP BY observation_attribute_uuid HAVING count(*) = " + px); //$NON-NLS-1$
+			}
+			sql.append(" ) k"); //$NON-NLS-1$
+			
+			sql.append(" ON k.observation_attribute_uuid = "); //$NON-NLS-1$
+			sql.append(prefix(WaypointObservationAttribute.class) + ".uuid"); //$NON-NLS-1$
 		}
 	}
 }

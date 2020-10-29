@@ -45,14 +45,14 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.asset.AssetPlugIn;
-import org.wcs.smart.asset.data.inout.deployment.xml.ObjectFactory;
-import org.wcs.smart.asset.data.inout.deployment.xml.XmlAssetDeployment;
-import org.wcs.smart.asset.data.inout.deployment.xml.XmlAssetDeploymentAttribute;
-import org.wcs.smart.asset.data.inout.deployment.xml.XmlAssetDeploymentDisruption;
-import org.wcs.smart.asset.data.inout.deployment.xml.XmlWaypoint;
-import org.wcs.smart.asset.data.inout.deployment.xml.XmlWaypointObservation;
-import org.wcs.smart.asset.data.inout.deployment.xml.XmlWaypointObservationAttribute;
-import org.wcs.smart.asset.data.inout.deployment.xml.XmlWaypointObservationGroup;
+import org.wcs.smart.asset.data.inout.deployment.xml.v10.ObjectFactory;
+import org.wcs.smart.asset.data.inout.deployment.xml.v10.XmlAssetDeployment;
+import org.wcs.smart.asset.data.inout.deployment.xml.v10.XmlAssetDeploymentAttribute;
+import org.wcs.smart.asset.data.inout.deployment.xml.v10.XmlAssetDeploymentDisruption;
+import org.wcs.smart.asset.data.inout.deployment.xml.v10.XmlWaypoint;
+import org.wcs.smart.asset.data.inout.deployment.xml.v10.XmlWaypointObservation;
+import org.wcs.smart.asset.data.inout.deployment.xml.v10.XmlWaypointObservationAttribute;
+import org.wcs.smart.asset.data.inout.deployment.xml.v10.XmlWaypointObservationGroup;
 import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.AssetDeployment;
 import org.wcs.smart.asset.model.AssetDeploymentAttributeValue;
@@ -229,10 +229,27 @@ public class DeploymentToXml {
 						XmlWaypointObservationAttribute xmlaa = new XmlWaypointObservationAttribute();
 						xmlaa.setAttributeKey(woa.getAttribute().getKeyId());
 						xmlaa.setAttributeType(woa.getAttribute().getType().name());
-						if (woa.getNumberValue() != null) xmlaa.setDoubleValue(woa.getNumberValue());
-						if (woa.getStringValue() != null) xmlaa.setStringValue(woa.getStringValue());
-						if (woa.getAttributeListItem() != null) xmlaa.setStringValue(woa.getAttributeListItem().getKeyId());
-						if (woa.getAttributeTreeNode() != null) xmlaa.setStringValue(woa.getAttributeTreeNode().getHkey());
+						
+						switch(woa.getAttribute().getType()) {
+						case BOOLEAN:
+						case NUMERIC:
+							xmlaa.setDoubleValue(woa.getNumberValue());
+							break;
+						case DATE:
+						case TEXT:
+							xmlaa.getStringValue().add(woa.getStringValue());
+							break;
+						case LIST:
+							if (woa.getAttributeListItem() != null) xmlaa.getStringValue().add(woa.getAttributeListItem().getKeyId());
+							break;
+						case MLIST:
+							if (woa.getAttributeListItems() != null) woa.getAttributeListItems().forEach(e->xmlaa.getStringValue().add(e.getAttributeListItem().getKeyId()));
+							break;
+						case TREE:
+							if (woa.getAttributeTreeNode() != null) xmlaa.getStringValue().add(woa.getAttributeTreeNode().getHkey());
+							break;
+						}
+						
 					
 						xmlwo.getAttributes().add(xmlaa);
 					}

@@ -102,6 +102,14 @@ public class CheckBoxDropDown extends Composite implements Listener {
 		if (labelProvider != null) labelProvider.dispose();
 	}
 	
+	/**
+	 * 
+	 * @return the text displays in the text box
+	 */
+	public String getText() {
+		return txtInfo.getText();
+	}
+	
 	private void createControl(){
 		setLayout(new GridLayout(2, false));
 		setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -116,6 +124,7 @@ public class CheckBoxDropDown extends Composite implements Listener {
 		txtInfo.addListener(SWT.MouseDown, event->dropDown(true));
 		txtInfo.setBackground(getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
+
 		defaultBgColor = txtInfo.getBackground();
 		
 		btnDown = new Button(this, SWT.DOWN | SWT.ARROW | SWT.FLAT);
@@ -173,6 +182,9 @@ public class CheckBoxDropDown extends Composite implements Listener {
 		}	
 	}
 	
+	public ILabelProvider getLabelProvider() {
+		return labelProvider;
+	}
 	
 	public void setLabelProvider(ILabelProvider provider){
 		labelProvider = provider;
@@ -293,6 +305,7 @@ public class CheckBoxDropDown extends Composite implements Listener {
 	 * handle DropDown request
 	 * @param drop
 	 */
+	@SuppressWarnings("unchecked")
 	protected void dropDown (boolean drop) {
 		
 		// if already dropped then return
@@ -348,6 +361,8 @@ public class CheckBoxDropDown extends Composite implements Listener {
 		Collection<Object> items = (Collection<Object>) txtInfo.getData();
 		if (items != null && !items.isEmpty()){
 			setCheckedElements(items.toArray(new Object[items.size()]));
+		}else {
+			setCheckedElements(new Object[0]);
 		}
 	}	
 	

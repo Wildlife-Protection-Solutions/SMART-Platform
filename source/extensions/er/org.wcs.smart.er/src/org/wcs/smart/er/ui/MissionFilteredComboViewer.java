@@ -21,11 +21,8 @@
  */
 package org.wcs.smart.er.ui;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -36,12 +33,10 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
-import org.hibernate.query.Query;
+import org.wcs.smart.er.hibernate.SurveyFilter;
+import org.wcs.smart.er.hibernate.SurveyMissionProxy;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
-import org.wcs.smart.er.ui.mission.export.IMissionFilteringView;
-import org.wcs.smart.er.ui.mission.export.MissionFilterDialog;
-import org.wcs.smart.er.ui.mission.export.MissionViewFilter;
 import org.wcs.smart.hibernate.HibernateManager;
 
 /**
@@ -51,9 +46,9 @@ import org.wcs.smart.hibernate.HibernateManager;
  * @author egouge
  * @since 4.0.1
  */
-public class MissionFilteredComboViewer extends FilteredComboViewer<Mission> implements IMissionFilteringView {
+public class MissionFilteredComboViewer extends FilteredComboViewer<Mission> {
 
-    private MissionViewFilter filter;
+    private SurveyFilter filter;
 	private LoadMissionIdJob loadMissionJob;
 
 	private LabelProvider missionLblProvider;
@@ -88,9 +83,9 @@ public class MissionFilteredComboViewer extends FilteredComboViewer<Mission> imp
 		job.schedule();		
 	}
 
-	public synchronized MissionViewFilter getFilter() {
+	public synchronized SurveyFilter getFilter() {
 		if (filter == null){
-			filter = new MissionViewFilter();
+			filter = new SurveyFilter();
 		}
 		return filter;
 	}
@@ -119,7 +114,7 @@ public class MissionFilteredComboViewer extends FilteredComboViewer<Mission> imp
 
 	@Override
 	protected void showFilterDialog() {
-		MissionFilterDialog dialog = new MissionFilterDialog(getShell(), this);
+		SurveyFilterDialog dialog = new SurveyFilterDialog(getShell(), this, filter);
 		dialog.open();
 	}
 
@@ -167,19 +162,22 @@ public class MissionFilteredComboViewer extends FilteredComboViewer<Mission> imp
  
         private List<Mission> loadMissionIds() {
         	try(Session s = HibernateManager.openSession()){
-        		Query<?> query = getFilter().buildQuery(s);
-        		List<?> results = query.list(); // mission uuid, mission id, mission start date, mission end date, survey id, survey uuid, survey design name
-        		List<Mission> missions = new ArrayList<Mission>(results.size()+1);
+        		List<SurveyMissionProxy> items = getFilter().executeQuery(s);
+        		
+        		List<Mission> missions = new ArrayList<Mission>();
         		boolean defaultPresent = preselectedMission == null; //indicated if default patrol id is in filtered list
-        		for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
-        			Object[] data = (Object[]) iterator.next();
-        			Mission p = new Mission();
-        			p.setUuid((UUID)data[0]);
-        			p.setId((String)data[1]);
-        			p.setStartDate((LocalDate)data[2]);
-        			p.setEndDate((LocalDate)data[3]);
-        			defaultPresent = defaultPresent || p.equals(preselectedMission);
-        			missions.add(p);
+        		for (SurveyMissionProxy survey : items) {
+        			for (SurveyMissionProxy mission : survey.getMissions()) {
+        			
+	        			Mission p = new Mission();
+	        			p.setUuid(mission.getUuid());
+	        			p.setId(mission.getId());
+	        			p.setStartDate(mission.getStartDate());
+	        			p.setEndDate(mission.getEndDate());
+	        			
+	        			defaultPresent = defaultPresent || p.equals(preselectedMission);
+	        			missions.add(p);
+        			}
         		}
         		if (additionalMissions != null){
         			for (Mission m : additionalMissions){

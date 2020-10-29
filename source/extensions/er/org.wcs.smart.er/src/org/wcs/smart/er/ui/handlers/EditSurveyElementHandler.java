@@ -37,10 +37,9 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.hibernate.SurveyMissionProxy;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Survey;
-import org.wcs.smart.er.ui.SurveyListTreeNode;
-import org.wcs.smart.er.ui.SurveyListTreeNode.Type;
 import org.wcs.smart.er.ui.mision.editor.MissionEditor;
 import org.wcs.smart.er.ui.mision.editor.MissionEditorInput;
 import org.wcs.smart.er.ui.survey.EditSurveyDialog;
@@ -62,11 +61,11 @@ public class EditSurveyElementHandler {
 			
 		for (Iterator<?> iterator = ((StructuredSelection)selection).iterator(); iterator.hasNext();) {
 			Object node = (Object) iterator.next();
-			if (node instanceof SurveyListTreeNode){
-				SurveyListTreeNode treeNode = (SurveyListTreeNode) node;
-				if (treeNode.getType() == Type.MISSION){
-					editMission(parent, treeNode.getUuid(), treeNode.getLabel());
-				}else if (treeNode.getType() == Type.SURVEY){
+			if (node instanceof SurveyMissionProxy){
+				SurveyMissionProxy treeNode = (SurveyMissionProxy) node;
+				if (treeNode.getType() == SurveyMissionProxy.Type.MISSION){
+					editMission(parent, treeNode.getUuid(), treeNode.getId());
+				}else if (treeNode.getType() == SurveyMissionProxy.Type.SURVEY){
 					editSurvey(parent, treeNode.getUuid());
 				}				
 			}else if (node instanceof SurveyDesignEditorInput){

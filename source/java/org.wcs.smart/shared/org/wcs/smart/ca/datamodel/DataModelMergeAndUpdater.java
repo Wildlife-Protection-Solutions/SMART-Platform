@@ -292,7 +292,7 @@ public class DataModelMergeAndUpdater {
 				source.setRegex(target.getRegex());
 			}
 			
-		}else if (source.getType() == AttributeType.LIST){
+		}else if (source.getType().isList()) {
 			mergeListItems(source, target);
 			
 		}else if (source.getType() == AttributeType.TREE){

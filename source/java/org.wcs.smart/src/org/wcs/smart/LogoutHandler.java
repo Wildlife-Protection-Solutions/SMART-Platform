@@ -47,6 +47,15 @@ public class LogoutHandler {
 //		try(Session session = HibernateManager.openSession()){
 //			session.beginTransaction();
 //			
+//			ChangeLogInstaller.INSTANCE.uninstallChangeLogTracking(session);
+//			session.getTransaction().commit();
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		try(Session session = HibernateManager.openSession()){
+//			session.beginTransaction();
+//			
 //			ChangeLogInstaller.INSTANCE.installChangeLogTracking(session);
 //			session.getTransaction().commit();
 //		} catch (Exception e) {
@@ -54,13 +63,6 @@ public class LogoutHandler {
 //			e.printStackTrace();
 //		}
 		PlatformUI.getWorkbench().restart();
-//		
-//		try {
-//			Class<?> x = Class.forName("java.time.LocalDate");
-//		} catch (ClassNotFoundException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
 	}
 	
 	// E3

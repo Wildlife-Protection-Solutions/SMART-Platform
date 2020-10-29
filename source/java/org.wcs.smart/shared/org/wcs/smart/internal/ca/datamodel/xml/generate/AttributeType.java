@@ -44,6 +44,7 @@ import javax.xml.bind.annotation.XmlType;
  *             &lt;enumeration value="TEXT"/>
  *             &lt;enumeration value="BOOLEAN"/>
  *             &lt;enumeration value="LIST"/>
+ *             &lt;enumeration value="MLIST"/>
  *             &lt;enumeration value="TREE"/>
  *             &lt;enumeration value="DATE"/>
  *           &lt;/restriction>

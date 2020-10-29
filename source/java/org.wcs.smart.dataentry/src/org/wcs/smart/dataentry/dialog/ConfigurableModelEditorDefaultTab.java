@@ -62,6 +62,7 @@ import org.wcs.smart.dataentry.dialog.composite.CmNodeInfoComposite;
 import org.wcs.smart.dataentry.dialog.composite.CmRootNodeInfoComposite;
 import org.wcs.smart.dataentry.dialog.composite.DateAttributeInfoComposite;
 import org.wcs.smart.dataentry.dialog.composite.ListAttributeInfoComposite;
+import org.wcs.smart.dataentry.dialog.composite.MListAttributeInfoComposite;
 import org.wcs.smart.dataentry.dialog.composite.NumericAttributeInfoComposite;
 import org.wcs.smart.dataentry.dialog.composite.TextAttributeInfoComposite;
 import org.wcs.smart.dataentry.dialog.composite.TreeAttributeInfoComposite;
@@ -307,6 +308,10 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 		attrComposite.addModelChangedListener(modelChangeListener);
 		attributeComposites.put(AttributeType.LIST, attrComposite);
 
+		attrComposite = new MListAttributeInfoComposite(infoInnerPanel, dialog, deletedConfigs, addedConfigs);
+		attrComposite.addModelChangedListener(modelChangeListener);
+		attributeComposites.put(AttributeType.MLIST, attrComposite);
+		
 		attrComposite = new TreeAttributeInfoComposite(infoInnerPanel, dialog, deletedConfigs, addedConfigs);
 		attrComposite.addModelChangedListener(modelChangeListener);
 		attributeComposites.put(AttributeType.TREE, attrComposite);

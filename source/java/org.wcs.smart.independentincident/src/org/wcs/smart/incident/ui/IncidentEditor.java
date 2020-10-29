@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.incident.ui;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;

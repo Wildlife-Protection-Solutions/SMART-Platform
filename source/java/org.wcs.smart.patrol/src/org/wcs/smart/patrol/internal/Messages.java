@@ -17,6 +17,7 @@ public class Messages extends NLS {
 	public static String AddWaypointDialog_Error_NoYValue;
 	public static String AddWaypointDialog_Error_SavingWaypoint;
 	public static String AddWaypointDialog_Projection_Label;
+	public static String AddWaypointDialog_SelectOnMap;
 	public static String AddWaypointDialog_WaypointId_Label;
 	public static String AddWaypointDialog_X_Label;
 	public static String AddWaypointDialog_Y_Label;
@@ -804,6 +805,7 @@ public static String PatrolFeatureSource_ProjectedWaypointLayerName;
 	public static String XmlToPatrolConverter_InvalidDateString;
 	public static String XmlToPatrolConverter_InvalidPatrolId;
 	public static String XmlToPatrolConverter_ListItemNotFound;
+	public static String XmlToPatrolConverter_NoValidListItemsFound;
 	public static String XmlToPatrolConverter_ObserverNotFound;
 	public static String XmlToPatrolConverter_ReadError;
 	public static String XmlToPatrolConverter_TreeAttributesNotSupported;

@@ -225,7 +225,9 @@ public class IncidentImporter implements IIncidentXmlImporter{
 	private static Waypoint convertAndSave(Path incidentFile, Path attachmentDirectory, IProgressMonitor monitor) throws Exception {
 		SubMonitor progress = SubMonitor.convert(monitor, IMPORTING_INCIDENT_TASKNAME, 2);
 		IXmlToIncidentConverter converter = IncidentXmlManager.findVersion(incidentFile);
-		
+		if (converter == null) {
+			throw new Exception(Messages.IncidentImporter_InvalidVersion);
+		}
 		try (Session session = HibernateManager.openSession(new AttachmentInterceptor())){
 			progress.split(1);
 			progress.subTask(Messages.IncidentImporter_ConvertingProgress);

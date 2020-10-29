@@ -35,6 +35,9 @@ public class AttributeFilter implements IFilter {
 
 	public static final String ANY_OPTION_KEY = "list.any"; //$NON-NLS-1$
 
+	public static final Operator[] MULTI_LIST_OPERATORS = {Operator.OR, Operator.AND, Operator.EXACT};
+	public static final String MLIST_SEPERATOR = ","; //$NON-NLS-1$
+	
 	/**
 	 * Creates a new boolean attribute filter
 	 * @param attributeIdentifier the attribute identifier in the form "attribute:b:<key>"
@@ -182,7 +185,7 @@ public class AttributeFilter implements IFilter {
 			return fullIdentifier + " " + op.asSmartValue() + " " + ((Double)value1).toString();  //$NON-NLS-1$  //$NON-NLS-2$
 		}else if (attributeType == AttributeType.TEXT){
 			return fullIdentifier + " " + op.asSmartValue() + " \"" + ((String)value1) + "\"";  //$NON-NLS-1$  //$NON-NLS-2$  //$NON-NLS-3$ 
-		}else if (attributeType == AttributeType.TREE || attributeType == AttributeType.LIST){
+		}else if (attributeType == AttributeType.TREE || attributeType == AttributeType.LIST || attributeType == AttributeType.MLIST){
 			return fullIdentifier + " " + op.asSmartValue() + " " + ((String)value1);  //$NON-NLS-1$  //$NON-NLS-2$  
 		}else if (attributeType == AttributeType.DATE){
 			return fullIdentifier + " " + op.asSmartValue() + " " + (String)value1 + " " + Operator.AND.asSmartValue() + " " + ((String)value2); //$NON-NLS-1$ //$NON-NLS-2$  //$NON-NLS-3$ //$NON-NLS-4$ 

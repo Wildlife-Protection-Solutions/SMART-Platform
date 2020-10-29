@@ -23,6 +23,7 @@ package org.wcs.smart.query.common.ui;
 
 import java.util.Locale;
 
+import org.eclipse.jface.viewers.LabelProvider;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.filter.IOperatorLabelProvider;
 import org.wcs.smart.query.model.filter.Operator;
@@ -32,7 +33,7 @@ import org.wcs.smart.query.model.filter.Operator;
  * @author Emily
  *
  */
-public class OperatorLabelProvider implements IOperatorLabelProvider {
+public class OperatorLabelProvider extends LabelProvider implements IOperatorLabelProvider {
 
 	@Override
 	public String getLabel(Object item, Locale l) {
@@ -53,9 +54,18 @@ public class OperatorLabelProvider implements IOperatorLabelProvider {
 				case OR:{ return Messages.Operator_OR;}
 				case NOT:{ return Messages.Operator_NOT;}
 				case BRACKETS:{ return "( )"; } //$NON-NLS-1$
+				case EXACT: return Messages.OperatorLabelProvider_ExactOperator;
+				
 			}
 		}
 		return null;
+	}
+
+	
+
+	@Override
+	public String getText(Object element) {
+		return getLabel(element, Locale.getDefault());
 	}
 
 }

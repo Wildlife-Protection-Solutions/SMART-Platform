@@ -22,6 +22,7 @@
 package org.wcs.smart.query.ui.model.impl;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jface.window.Window;
@@ -148,6 +149,8 @@ public class BasicDropItemFactory implements IDropItemFactory{
 			return new AttributeDropItem(ca);
 		}else if (ca.getAttribute().getType() == AttributeType.LIST ){
 			return new AttributeListDropItem(ca);
+		}else if (ca.getAttribute().getType() == AttributeType.MLIST ){
+			return new AttributeMListDropItem(ca);
 		}else if (ca.getAttribute().getType() == AttributeType.TREE ){
 			return new AttributeTreeDropItem(ca);
 		}
@@ -162,6 +165,8 @@ public class BasicDropItemFactory implements IDropItemFactory{
 			return new AttributeDropItem(attribute);
 		}else if (attribute.getType() == AttributeType.LIST ){
 			return new AttributeListDropItem(attribute);
+		}else if (attribute.getType() == AttributeType.MLIST ){
+			return new AttributeMListDropItem(attribute);
 		}else if (attribute.getType() == AttributeType.TREE ){
 			return new AttributeTreeDropItem(attribute);
 		}
@@ -465,6 +470,18 @@ public class BasicDropItemFactory implements IDropItemFactory{
 			it.initializeData(ali);
 		}else if (attributeType == AttributeType.DATE){
 			it.initializeData(new String[]{(String)value1, (String)filter.getValue2(), filter.getOperator().getGuiValue()});
+		}else if (attributeType == AttributeType.MLIST) {
+			List<ListItem> init = new ArrayList<>();
+			String[] items = filter.getValue().toString().split(AttributeFilter.MLIST_SEPERATOR);
+			for (String item : items) {
+				AttributeListItem ali = QueryDataModelManager.getInstance().getAttributeListItem(session, attributeKey, item);
+				if (ali == null){
+					throw new IllegalStateException(MessageFormat.format(Messages.AttributeFilter_ListItemNotFound, new Object[]{item, attributeKey}));
+				}
+				ListItem li = new ListItem(ali.getUuid(), ali.getName(), ali.getKeyId());
+				init.add(li);
+			}
+			it.initializeData(new Object[] {filter.getOperator(), init});
 		}
 	}
 	

@@ -81,7 +81,7 @@ import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.SurveyPermissionManager;
 import org.wcs.smart.er.hibernate.SurveyFilter;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
-import org.wcs.smart.er.hibernate.SurveyProxy;
+import org.wcs.smart.er.hibernate.SurveyMissionProxy;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionProperty;
@@ -535,8 +535,8 @@ public class SurveyDesignDataPage extends EditorPart {
 					sf.setSurveyState(null);
 					sf.setSurveyDesignKeyFilters(new String[]{parentEditor.getSurveyDesign().getKeyId()});
 	
-					List<SurveyProxy> surveys = SurveyHibernateManager.getSurveys(s, sf);
-					for(SurveyProxy in : surveys){
+					List<SurveyMissionProxy> surveys = SurveyHibernateManager.getSurveys(s, sf);
+					for(SurveyMissionProxy in : surveys){
 						Survey ss = (Survey) s.load(Survey.class, in.getUuid());
 						TreeNode node = new TreeNode(ss.getUuid(), ss.getId(), null, null, TreeNode.Type.SURVEY);					
 						for (Mission m : ss.getMissions()){

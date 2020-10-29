@@ -196,12 +196,23 @@ public class Upgrader630To700 implements IDatabaseUpgrader {
 				"alter table smart.dm_category add constraint dm_category_ca_uuid_fk foreign key (ca_uuid) references smart.CONSERVATION_AREA(uuid) ON UPDATE NO ACTION ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 				"alter table smart.DM_ATTRIBUTE add constraint dm_attribute_ca_uuid_fk foreign key (ca_uuid) references smart.CONSERVATION_AREA(uuid) ON UPDATE NO ACTION ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 
+				//multi-select attributes
+				"alter table smart.wp_observation_attributes add column uuid char(16) for bit data", //$NON-NLS-1$
+				"update  smart.wp_observation_attributes set uuid = smart.tempuuid()", //$NON-NLS-1$
+				"alter table smart.wp_observation_attributes alter column uuid not null", //$NON-NLS-1$
+				"alter table smart.wp_observation_attributes drop primary key", //$NON-NLS-1$
+				"alter table smart.wp_observation_attributes add primary key (uuid)", //$NON-NLS-1$
+				"alter table smart.wp_observation_attributes add unique(observation_uuid, attribute_uuid)", //$NON-NLS-1$
 
+				"create table smart.wp_observation_attributes_list (list_element_uuid char(16) for bit data not null,observation_attribute_uuid char(16) for bit data not null,primary key (list_element_uuid, observation_attribute_uuid))", //$NON-NLS-1$
+				"alter table smart.wp_observation_attributes_list ADD FOREIGN KEY (observation_attribute_uuid) REFERENCES smart.wp_observation_attributes(uuid) on DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",  //$NON-NLS-1$
+				"alter table smart.wp_observation_attributes_list ADD FOREIGN KEY (list_element_uuid) REFERENCES smart.dm_attribute_list(uuid) ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				
+				//add back constraints
 				"ALTER TABLE smart.dm_attribute ADD CONSTRAINT dmatt_iconuuid_fk FOREIGN KEY (icon_uuid) REFERENCES smart.icon(uuid) ON DELETE SET NULL ON UPDATE RESTRICT  DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 				"ALTER TABLE smart.dm_attribute_list ADD CONSTRAINT dmattlist_iconuuid_fk FOREIGN KEY (icon_uuid) REFERENCES smart.icon(uuid) ON DELETE SET NULL ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 				"ALTER TABLE smart.dm_attribute_tree ADD CONSTRAINT dmatttree_iconuuid_fk FOREIGN KEY (icon_uuid) REFERENCES smart.icon(uuid) ON DELETE SET NULL ON UPDATE RESTRICT  DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 				"ALTER TABLE smart.dm_category ADD CONSTRAINT dmcat_iconuuid_fk FOREIGN KEY (icon_uuid) REFERENCES smart.icon(uuid) ON DELETE SET NULL ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
-								
 
 				"ALTER TABLE smart.configurable_model ADD CONSTRAINT cm_iconset_uuid_fk FOREIGN KEY (iconset_uuid) REFERENCES smart.iconset(uuid) ON DELETE SET NULL ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 								
@@ -210,7 +221,6 @@ public class Upgrader630To700 implements IDatabaseUpgrader {
 				"ALTER TABLE smart.iconfile ADD CONSTRAINT iconfile_iconuuid_fk FOREIGN KEY (icon_uuid) REFERENCES smart.icon(uuid) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 				"ALTER TABLE smart.iconfile ADD CONSTRAINT iconfile_iconsetuuid_fk FOREIGN KEY (iconset_uuid) REFERENCES smart.iconset(uuid) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 
-				"DROP FUNCTION smart.tempuuid", //$NON-NLS-1$
 				
 				"CREATE DERBY AGGREGATE smart.unionarea FOR blob RETURNS double precision EXTERNAL NAME 'org.wcs.smart.util.AreaUnionAggregate'", //$NON-NLS-1$
 				"CREATE FUNCTION smart.buffer(geom blob, buffer double precision) returns blob LANGUAGE JAVA NOT deterministic external name 'org.wcs.smart.util.GeometryUtils.buffer' PARAMETER STYLE JAVA NO SQL RETURNS NULL ON NULL INPUT", //$NON-NLS-1$
@@ -222,7 +232,9 @@ public class Upgrader630To700 implements IDatabaseUpgrader {
 				"RENAME column smart.waypoint.id_str to id", //$NON-NLS-1$
 				"ALTER TABLE smart.waypoint alter column id set not null", //$NON-NLS-1$
 				
-
+				
+				"DROP FUNCTION smart.tempuuid", //$NON-NLS-1$
+				
 		};
 
 		for (String s : sql) {
