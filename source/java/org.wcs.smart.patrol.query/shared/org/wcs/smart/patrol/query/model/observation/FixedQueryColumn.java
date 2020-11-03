@@ -25,9 +25,13 @@ import java.util.Locale;
 
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.patrol.model.IPatrolLabelProvider;
+import org.wcs.smart.patrol.query.model.IPatrolQueryResultItem;
+import org.wcs.smart.patrol.query.model.PatrolObservationResultItem;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
+import org.wcs.smart.patrol.query.model.PatrolWaypointResultItem;
 import org.wcs.smart.patrol.ui.IQueryPatrolLabelProvider;
 import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.engine.test.WaypointQueryResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.util.UuidUtils;
 
@@ -125,11 +129,11 @@ public class FixedQueryColumn extends QueryColumn {
 		return this.column;
 	}
 	/**
-	 * @see org.wcs.smart.patrol.query.model.observation.QueryColumn#getValue(org.wcs.smart.patrol.query.model.PatrolQueryResultItem)
+	 * 
 	 */
 	public Object getValue(IResultItem queryResultItem) {
-		if (queryResultItem instanceof PatrolQueryResultItem) {
-			PatrolQueryResultItem item = (PatrolQueryResultItem) queryResultItem;
+		if (queryResultItem instanceof IPatrolQueryResultItem) {
+			IPatrolQueryResultItem item = (IPatrolQueryResultItem) queryResultItem;
 
 			switch (column) {
 			case PATROL_ARMED:
@@ -164,23 +168,31 @@ public class FixedQueryColumn extends QueryColumn {
 				return item.getTeam();
 			case PATROL_TYPE:
 				return  SmartContext.INSTANCE.getClass(IPatrolLabelProvider.class).getLabel(item.getPatrolType(), l);
-			case WAYPOINT_ID:
-				return item.getWaypointId();
-			case OBS_GROUP_ID:
-				if (item.getObservationGroupUuid() == null) return ""; //$NON-NLS-1$
-				return UuidUtils.uuidToString(item.getObservationGroupUuid());
 			case TRANSPORT_TYPE:
 				return item.getTransportType();
+			case CA_ID:
+				return item.getConservationAreaId();
+			case CA_NAME:
+				return item.getConservationAreaName();
+				default:
+					break;
+			}
+		}
+		if (queryResultItem instanceof WaypointQueryResultItem) {
+			WaypointQueryResultItem item = (WaypointQueryResultItem)queryResultItem;
+			switch(column) {
+			case WAYPOINT_ID:
+				return item.getWaypointId();
 			case WAYPOINT_COMMENT:
 				return item.getWaypointComment();
 			case WAYPOINT_DATE:
-				return item.getWaypointDate();
+				return item.getWaypointDateTime().toLocalDate();
 			case WAYPOINT_DIRECTION:
 				return item.getWaypointDirection();
 			case WAYPOINT_DISTANCE:
 				return item.getWaypointDistance();
 			case WAYPOINT_TIME:
-				return item.getWaypointTime();
+				return item.getWaypointDateTime().toLocalTime();
 			case WAYPOINT_X:
 				return item.getWaypointX(getProjection());
 			case WAYPOINT_Y:
@@ -189,10 +201,7 @@ public class FixedQueryColumn extends QueryColumn {
 				return item.getWaypointRawX(getProjection());
 			case WAYPOINT_RAWY:
 				return item.getWaypointRawY(getProjection());
-			case CA_ID:
-				return item.getConservationAreaId();
-			case CA_NAME:
-				return item.getConservationAreaName();
+			
 			case WAYPOINT_OBSERVER:
 				return item.getWaypointObserver();
 			case WAYPOINT_LASTMODIFIED:
@@ -201,6 +210,13 @@ public class FixedQueryColumn extends QueryColumn {
 				return item.getLastModifiedBy();
 			default:
 				break;
+			}
+		}
+		if (queryResultItem instanceof PatrolObservationResultItem) {
+			PatrolObservationResultItem item = (PatrolObservationResultItem)queryResultItem;
+			if (column == FixedQueryColumn.FixedColumns.OBS_GROUP_ID) {
+				if (item.getObservationGroupUuid() == null) return ""; //$NON-NLS-1$
+				return UuidUtils.uuidToString(item.getObservationGroupUuid());
 			}
 		}
 		return ""; //$NON-NLS-1$

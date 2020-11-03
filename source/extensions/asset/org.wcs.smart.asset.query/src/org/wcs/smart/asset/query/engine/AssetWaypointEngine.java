@@ -44,9 +44,9 @@ import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetWaypoint;
 import org.wcs.smart.asset.query.AssetQueryPlugIn;
 import org.wcs.smart.asset.query.internal.Messages;
-import org.wcs.smart.asset.query.model.AssetQueryAttachmentResultItem;
-import org.wcs.smart.asset.query.model.AssetQueryResultItem;
+import org.wcs.smart.asset.query.model.AssetWaypointAttachmentResultItem;
 import org.wcs.smart.asset.query.model.AssetWaypointQuery;
+import org.wcs.smart.asset.query.model.AssetWaypointResultItem;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.SmartDB;
@@ -56,6 +56,7 @@ import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.common.engine.test.WaypointQueryEngine;
 import org.wcs.smart.query.common.model.IUpdateableResultSet;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.Query;
@@ -71,7 +72,7 @@ import org.wcs.smart.util.UuidUtils;
  * responsible for all other operations (fetching/sorting/deleting tables)
  * 
  */
-public class AssetWaypointEngine extends AssetQueryEngine implements IDerbyWaypointEngine {
+public class AssetWaypointEngine extends AssetQueryEngine implements WaypointQueryEngine<AssetWaypointResultItem>, IDerbyWaypointEngine {
 
 	private String queryDataTable;
 	private Session session;
@@ -109,7 +110,7 @@ public class AssetWaypointEngine extends AssetQueryEngine implements IDerbyWaypo
 		}
 		
 		queryDataTable = createTempTableName();
-		final AssetPagedWaypointResult result = new AssetPagedWaypointResult(queryDataTable, this);
+		final AssetPagedWaypointResult result = new AssetPagedWaypointResult(this);
 		
 		session.doWork(new Work() {
 			@Override
@@ -290,7 +291,7 @@ public class AssetWaypointEngine extends AssetQueryEngine implements IDerbyWaypo
 			sql.append(queryDataTable);
 			sql.append(" SET ca_id = (select id FROM "); //$NON-NLS-1$
 			sql.append(AssetQueryEngine.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
-			sql.append("WHERE a.uuid = " + queryDataTable + ".p_ca_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append("WHERE a.uuid = " + queryDataTable + ".ca_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
 			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().executeUpdate(sql.toString());
 			
@@ -299,7 +300,7 @@ public class AssetWaypointEngine extends AssetQueryEngine implements IDerbyWaypo
 			sql.append(queryDataTable);
 			sql.append(" SET ca_name = (select name FROM "); //$NON-NLS-1$
 			sql.append(AssetQueryEngine.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
-			sql.append("WHERE a.uuid = " + queryDataTable + ".wp_ca_uuid)");  //$NON-NLS-1$//$NON-NLS-2$
+			sql.append("WHERE a.uuid = " + queryDataTable + ".ca_uuid)");  //$NON-NLS-1$//$NON-NLS-2$
 			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().executeUpdate(sql.toString());
 		}
@@ -342,7 +343,7 @@ public class AssetWaypointEngine extends AssetQueryEngine implements IDerbyWaypo
 	}
 
 	@Override
-	protected String getTemporaryTableSelectClause(boolean includeObservations) {
+	public String getTemporaryTableSelectClause(boolean includeObservations) {
 		StringBuilder sql = new StringBuilder();
 		sql.append(" SELECT DISTINCT "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".uuid, "); //$NON-NLS-1$
@@ -360,7 +361,7 @@ public class AssetWaypointEngine extends AssetQueryEngine implements IDerbyWaypo
 	}
 
 	@Override
-	protected String getTemporaryTableCreateClause(String tableName) {
+	public String getTemporaryTableCreateClause(String tableName) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
 		sql.append("wp_uuid char(16) for bit data,"); //$NON-NLS-1$
@@ -369,18 +370,18 @@ public class AssetWaypointEngine extends AssetQueryEngine implements IDerbyWaypo
 		sql.append("wp_y double,"); //$NON-NLS-1$
 		sql.append("wp_direction real,"); //$NON-NLS-1$
 		sql.append("wp_distance real,"); //$NON-NLS-1$
-		sql.append("wp_date timestamp,"); //$NON-NLS-1$
+		sql.append("wp_time timestamp,"); //$NON-NLS-1$
 		sql.append("wp_comment varchar(4096),"); //$NON-NLS-1$
 		sql.append("wp_lastmodified timestamp,"); //$NON-NLS-1$
 		sql.append("wp_lastmodifiedby char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("wp_ca_uuid char(16) for bit data "); //$NON-NLS-1$
+		sql.append("ca_uuid char(16) for bit data "); //$NON-NLS-1$
 		sql.append(")"); //$NON-NLS-1$
 		return sql.toString();
 	}
 
-	@Override
-	protected AssetQueryAttachmentResultItem asQueryAttachmentResultItem(ResultSet rs, Session session) throws SQLException{
-		AssetQueryAttachmentResultItem item = (AssetQueryAttachmentResultItem)asQueryResultItemInternal(true, rs, session);
+	
+	public AssetWaypointAttachmentResultItem asQueryAttachmentResultItem(ResultSet rs, Session session) throws SQLException{
+		AssetWaypointAttachmentResultItem item = (AssetWaypointAttachmentResultItem)asQueryResultItemInternal(true, rs, session);
 		
 		UUID auuid = UuidUtils.byteToUUID(rs.getBytes("attach_uuid")); //$NON-NLS-1$
 		ISmartAttachment a = session.get(ObservationAttachment.class, auuid);
@@ -397,22 +398,22 @@ public class AssetWaypointEngine extends AssetQueryEngine implements IDerbyWaypo
 		return item;
 	}
 	
-	protected AssetQueryResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException{
+	public AssetWaypointResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException{
 		return asQueryResultItemInternal(false, rs, session);
 	}
 	
-	protected AssetQueryResultItem asQueryResultItemInternal(boolean isAttachment, ResultSet rs, Session session) throws SQLException{
-		AssetQueryResultItem it = null;
+	protected AssetWaypointResultItem asQueryResultItemInternal(boolean isAttachment, ResultSet rs, Session session) throws SQLException{
+		AssetWaypointResultItem it = null;
 		if (isAttachment) {
-			it = new AssetQueryAttachmentResultItem();
+			it = new AssetWaypointAttachmentResultItem();
 		}else{
-			it = new AssetQueryResultItem();
+			it = new AssetWaypointResultItem();
 		}
 
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
-		it.setConservationAreaUuid(UuidUtils.byteToUUID(rs.getBytes("wp_ca_uuid"))); //$NON-NLS-1$
-		it.setWaypointDate(rs.getTimestamp("wp_date").toLocalDateTime()); //$NON-NLS-1$		
+		it.setConservationAreaUuid(UuidUtils.byteToUUID(rs.getBytes("ca_uuid"))); //$NON-NLS-1$
+		it.setWaypointDateTime(rs.getTimestamp("wp_time").toLocalDateTime()); //$NON-NLS-1$		
 		it.setWaypointUuid(UuidUtils.byteToUUID(rs.getBytes("wp_uuid"))); //$NON-NLS-1$
 		it.setWaypointId(rs.getString("wp_id")); //$NON-NLS-1$
 		it.setWaypointX(rs.getDouble("wp_x")); //$NON-NLS-1$
@@ -430,7 +431,12 @@ public class AssetWaypointEngine extends AssetQueryEngine implements IDerbyWaypo
 	}
 	
 	@Override
-	protected void buildTemporaryTableIndexes(Connection c, String tableName)
+	public void buildTemporaryTableIndexes(Connection c, String tableName)
 			throws SQLException {
+	}
+
+	@Override
+	public String getQueryDataTable() {
+		return queryDataTable;
 	}
 }

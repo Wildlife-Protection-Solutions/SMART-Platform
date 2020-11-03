@@ -34,12 +34,12 @@ import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.entity.query.model.EntityObservationQuery;
 import org.wcs.smart.entity.query.model.EntityQueryFactory;
 import org.wcs.smart.entity.query.model.columns.EntityAttributeQueryColumn;
-import org.wcs.smart.entity.query.model.columns.EtAttributeQueryColumn;
-import org.wcs.smart.entity.query.model.columns.EtCategoryQueryColumn;
 import org.wcs.smart.entity.query.model.columns.FixedQueryColumn;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.ui.QueryColumnLabelProvider;
 import org.wcs.smart.query.common.ui.QueryResultsEditor;
+import org.wcs.smart.query.model.AttributeQueryColumn;
+import org.wcs.smart.query.model.CategoryQueryColumn;
 import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
@@ -62,9 +62,9 @@ public class SimpleQueryEditor extends QueryResultsEditor {
 	protected CellLabelProvider getColumnLabelProvider(QueryColumn column, List<QueryColumn> allColumns) {
 		if (column instanceof FixedQueryColumn){
 			return new QueryColumnLabelProvider(column);
-		}else if (column instanceof EtAttributeQueryColumn){
+		}else if (column instanceof AttributeQueryColumn){
 			return new AttributeColumnLabelProvider(column);
-		}else if (column instanceof EtCategoryQueryColumn){
+		}else if (column instanceof CategoryQueryColumn){
 			return new CategoryColumnLabelProvider(column);
 		}else if (column instanceof GridQueryColumn){
 			return new QueryColumnLabelProvider(column);

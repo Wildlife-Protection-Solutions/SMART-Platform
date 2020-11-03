@@ -26,6 +26,8 @@ import java.util.Locale;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.er.query.ISurveyQueryLabelProvider;
 import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.engine.test.ObservationQueryResultItem;
+import org.wcs.smart.query.common.engine.test.WaypointQueryResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.util.UuidUtils;
 
@@ -45,7 +47,7 @@ public class SurveyQueryColumn extends QueryColumn {
 		{"waypoint", "wp"}, //$NON-NLS-1$ //$NON-NLS-2$
 		{"su_id", "samplingunit_id"}, //$NON-NLS-1$ //$NON-NLS-2$
 		{"su_buffer", "samplingunit_buffer"}, //$NON-NLS-1$ //$NON-NLS-2$
-		{"wp_time", "wp_date"} //$NON-NLS-1$ //$NON-NLS-2$
+		{"wp_date", "wp_time"} //$NON-NLS-1$ //$NON-NLS-2$
 	};
 		
 	/**
@@ -130,8 +132,8 @@ public class SurveyQueryColumn extends QueryColumn {
 	 * @see org.wcs.smart.patrol.query.model.observation.QueryColumn#getValue(org.wcs.smart.patrol.query.model.PatrolQueryResultItem)
 	 */
 	public Object getValue(IResultItem queryResultItem) {
-		if (queryResultItem instanceof SurveyQueryResultItem){
-			SurveyQueryResultItem item = (SurveyQueryResultItem)queryResultItem;
+		if (queryResultItem instanceof ISurveyQueryResultItem){
+			ISurveyQueryResultItem item = (ISurveyQueryResultItem)queryResultItem;
 			switch(column){
 				case CA_ID: return item.getConservationAreaId();
 				case CA_NAME: return item.getConservationAreaName();
@@ -141,7 +143,13 @@ public class SurveyQueryColumn extends QueryColumn {
 				case MISSION_START: return item.getMissionStart();
 				case MISSION_END: return item.getMissionEnd();
 				case MISSION_LEADER: return item.getMissionLeader();
-				case SAMPLING_UNIT: return item.getSamplingUnitId();
+				default: break;
+			}
+		}
+		if (queryResultItem instanceof WaypointQueryResultItem) {
+			WaypointQueryResultItem item = (WaypointQueryResultItem)queryResultItem;
+			
+			switch(column){
 				case WAYPOINT_ID: return item.getWaypointId();
 				case WAYPOINT_DATE: return item.getWaypointDateTime().toLocalDate();
 				case WAYPOINT_TIME: return item.getWaypointDateTime().toLocalTime(); 
@@ -155,10 +163,22 @@ public class SurveyQueryColumn extends QueryColumn {
 				case WAYPOINT_OBSERVER: return item.getWaypointObserver();
 				case WAYPOINT_LAST_MODIFIED: return item.getLastModifiedDate();
 				case WAYPOINT_LAST_MODIFIED_BY: return item.getLastModifiedBy();
-				case OBS_GROUP_ID: return item.getObservationGroupUuid() == null ? "" : UuidUtils.uuidToString(item.getObservationGroupUuid()); //$NON-NLS-1$
-				default: return null;
+				default: break;
 			}
-		}else if (queryResultItem instanceof MissionTrackResultItem){
+		}
+		if (queryResultItem instanceof ObservationQueryResultItem) {
+			ObservationQueryResultItem item = (ObservationQueryResultItem)queryResultItem;
+			if (column == FixedColumns.OBS_GROUP_ID) 
+				return item.getObservationGroupUuid() == null ? "" : UuidUtils.uuidToString(item.getObservationGroupUuid()); //$NON-NLS-1$
+			
+		}
+		if (queryResultItem instanceof SurveyObservationResultItem) {
+			if (column == FixedColumns.SAMPLING_UNIT) return ((SurveyObservationResultItem) queryResultItem).getSamplingUnitId();
+		}
+		if (queryResultItem instanceof SurveyWaypointResultItem) {
+			if (column == FixedColumns.SAMPLING_UNIT) return ((SurveyWaypointResultItem) queryResultItem).getSamplingUnitId();
+		}
+		if (queryResultItem instanceof MissionTrackResultItem){
 			MissionTrackResultItem item = (MissionTrackResultItem)queryResultItem;
 			switch(column){
 				case CA_ID: return item.getConservationAreaId();
@@ -173,7 +193,7 @@ public class SurveyQueryColumn extends QueryColumn {
 				case MISSION_TRACKID: return item.getTrackId();
 				case SAMPLING_UNIT: return item.getSamplingUnitId();
 				case MISSION_TRACKLENGTH: return item.getTrackLength();
-				default: return null;
+				default: break;
 			}
 		}
 		return null;

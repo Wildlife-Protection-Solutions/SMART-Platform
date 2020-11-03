@@ -21,16 +21,6 @@
  */
 package org.wcs.smart.observation.query.engine;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.HashSet;
-
-import org.hibernate.Session;
-import org.wcs.smart.observation.query.model.ObservationAttachmentQueryResultItem;
-import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
-import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.AbstractQueryEngine;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.model.Query;
@@ -43,89 +33,10 @@ import org.wcs.smart.query.model.filter.IFilter;
  * @author Emily
  * @since 1.0.0
  */
-public abstract class AbstractDerbyObservationQueryEngine extends AbstractQueryEngine{
+public abstract class AbstractDerbyObservationQueryEngine extends AbstractQueryEngine {
 
-	protected HashMap<IFilter, FilterTable> filterTables = new HashMap<IFilter, FilterTable>();
-
-	/**
-	 * Create the select statement to populate the temporary table
-	 * containing observation data for the query engine.
-	 * 
-	 * @param includeObservations if observation information should be included
-	 * in the output table (ob_uuid).
-	 * 
-	 * @return
-	 */
-	protected abstract String getTemporaryTableSelectClause(boolean includeObservations);
-	
-	/**
-	 * Converts the a row in the temporary table select clause to
-	 * a result item
-	 * @param rs result set item to convert to the queryresultitem
-	 * @param session current database connection
-	 * @return
-	 * @throws SQLException
-	 */
-	protected abstract ObservationQueryResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException;
-	/**
-	 * Converts the a row in the temporary table select clause to
-	 * a result item that includes the row attachment.   Only implement
-	 * for queries where it makes sense to add attachments
-	 * 
-	 * @param rs result set item to convert to the queryresultitem
-	 * @param session current database connection
-	 * @return
-	 * @throws SQLException
-	 */
-	protected ObservationAttachmentQueryResultItem asQueryAttachmentResultItem(ResultSet rs, Session session) throws SQLException{
-		return null;
-	}
-	
-	/**
-	 * Create the temporary table for hold observation data
-	 * for querying
-	 * 
-	 * @param tableName temporary table name
-	 * @return 
-	 */
-	protected abstract String getTemporaryTableCreateClause(String tableName);
-	
-	/**
-	 * A string to append to the from clause of the select
-	 * statement to create the temporary table.
-	 * <p>Depending on the select clause additional tables may
-	 * be required.  See {@link AbstractDerbyObservationQueryEngine#getTemporaryTableCreateClause(String)}. </p> 
-	 * @param tables List of tables already included in the from clause
-	 * @return
-	 */
-	protected String appendFromClause(HashSet<Class<?>> tables){
-		return ""; //$NON-NLS-1$
-	}
-	
-	
-	/**
-	 * By default creates an index on the ob_uuid field.  This method can be overwritten to 
-	 * create additional indexes.
-	 * 
-	 * @param c database connection
-	 * @param tableName temporary table to create indexes on
-	 * @throws SQLException
-	 */
-	protected void buildTemporaryTableIndexes(Connection c, String tableName) throws SQLException{
-		StringBuilder sql = new StringBuilder();
-		sql.append("CREATE INDEX " + tableName + "_ob_uuid_idx on " +  tableName + "(ob_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		QueryPlugIn.logSql(sql.toString());
-		c.createStatement().execute(sql.toString());
-	}
-	
-	/**
-	 * Creates the filter processor based on the query filter type
-	 * 
-	 * @param filterType
-	 * @param queryDataTable
-	 * @return
-	 */
-	protected IFilterProcessor getFilterProcessor(IFilter.FilterType filterType, String queryDataTable, Query query){
+	@Override
+	public IFilterProcessor getFilterProcessor(IFilter.FilterType filterType, String queryDataTable, Query query) {
 		if (filterType == IFilter.FilterType.OBSERVATION){
 			return new FilterProcessor(queryDataTable, this, query);
 		}else if (filterType == IFilter.FilterType.GROUP){
@@ -133,13 +44,7 @@ public abstract class AbstractDerbyObservationQueryEngine extends AbstractQueryE
 		}else{
 			return new WaypointFilterProcessor(queryDataTable, this, query);
 		}
+
 	}
-	
-	/**
-	 * Drop all temporary tables used to support query results
-	 * @param c
-	 * @throws SQLException
-	 */
-	public abstract void dropTables(Connection c) throws SQLException;
 
 }

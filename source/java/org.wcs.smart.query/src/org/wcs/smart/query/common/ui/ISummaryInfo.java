@@ -44,5 +44,5 @@ public interface ISummaryInfo {
 	 * Updates the control values based on the result set
 	 * @param resultSet
 	 */
-	public void updateControls(IPagedQueryResultSet resultSet);
+	public void updateControls(IPagedQueryResultSet<?> resultSet);
 }

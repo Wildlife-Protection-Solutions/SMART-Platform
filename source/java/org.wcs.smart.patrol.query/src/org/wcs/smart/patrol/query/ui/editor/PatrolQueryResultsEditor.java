@@ -72,6 +72,7 @@ import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.map.udig.QueryService;
+import org.wcs.smart.patrol.query.model.IPatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.PatrolQuery;
 import org.wcs.smart.patrol.query.model.PatrolQueryFactory;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
@@ -372,13 +373,8 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 			showBusy(false);
 		}
 		
-//		if (((QueryEditorInput)getEditorInput()).getType().getKey().equals(PatrolQuery.KEY)){
-			page2.getMap().getBlackboard().put(IInfoToolProvider.BLACKBOARD_KEY, getPatrolInfoProvider());
-//		}
-//		
-//		if (canEditResults()){
-//			page2.getMap().getBlackboard().put(IMapEditManager.BLACKBOARD_KEY, new MapWaypointEditManager(this));
-//		}
+		page2.getMap().getBlackboard().put(IInfoToolProvider.BLACKBOARD_KEY, getPatrolInfoProvider());
+
 	}
 
 	
@@ -682,12 +678,13 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 					Coordinate db = ReprojectUtils.reproject(world.x, world.y, vm.getCRS(), SmartDB.DATABASE_CRS);
 					
 					if (r instanceof MemoryQueryResult){
-						MemoryQueryResult<PatrolQueryResultItem> results = (MemoryQueryResult<PatrolQueryResultItem>)r;
+						MemoryQueryResult<IPatrolQueryResultItem> results = (MemoryQueryResult<IPatrolQueryResultItem>)r;
 						double distance = Double.POSITIVE_INFINITY;
-						PatrolQueryResultItem nearest = null;
+						IPatrolQueryResultItem nearest = null;
 						org.locationtech.jts.geom.Point toTest = GeometryFactoryProvider.getFactory().createPoint(db);
-						for (PatrolQueryResultItem ri : results.getData()){
-							Geometry g = ri.asGeometry(PatrolQueryResultItem.TRACK_GEOMCOLUMN_KEY);
+						for (IPatrolQueryResultItem ri : results.getData()){
+							if (!(ri instanceof PatrolQueryResultItem)) continue;
+							Geometry g = ((PatrolQueryResultItem)ri).asGeometry(PatrolQueryResultItem.TRACK_GEOMCOLUMN_KEY);
 							if (g.getEnvelopeInternal().contains(db)){
 								double d = g.distance(toTest);
 								if (d < distance){
@@ -698,7 +695,7 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 						}
 
 						if (nearest == null) return null;
-						Geometry g = nearest.asGeometry(PatrolQueryResultItem.TRACK_GEOMCOLUMN_KEY);
+						Geometry g = ((PatrolQueryResultItem)nearest).asGeometry(PatrolQueryResultItem.TRACK_GEOMCOLUMN_KEY);
 						Coordinate[] c = DistanceOp.nearestPoints(g, toTest);
 						if (c.length == 0) return null;
 		
@@ -725,7 +722,7 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 				return null;
 			}
 			
-			private void createMenu(Control control, PatrolQueryResultItem toUpdate){
+			private void createMenu(Control control, IPatrolQueryResultItem toUpdate){
 				
 				Menu existingMenu = control.getMenu();
 				if(existingMenu != null && !existingMenu.isDisposed()){

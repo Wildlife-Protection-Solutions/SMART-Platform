@@ -45,13 +45,14 @@ import org.wcs.smart.asset.query.AssetQueryPlugIn;
 import org.wcs.smart.asset.query.internal.Messages;
 import org.wcs.smart.asset.query.model.AssetObservationQuery;
 import org.wcs.smart.asset.query.model.AssetQueryFactory;
-import org.wcs.smart.asset.query.model.AssetQueryResultItem;
 import org.wcs.smart.asset.query.model.AssetWaypointQuery;
 import org.wcs.smart.asset.query.ui.querytable.AssetTableColumn;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.engine.test.ObservationQueryResultItem;
+import org.wcs.smart.query.common.engine.test.WaypointQueryResultItem;
 import org.wcs.smart.query.common.model.ISearchabledResultSet;
 import org.wcs.smart.query.common.ui.QueryResultsEditor;
 import org.wcs.smart.query.model.IQueryEditCommand;
@@ -157,10 +158,10 @@ public class AssetSimpleQueryResultEditor extends QueryResultsEditor{
 						
 						List<IResultItem> searchResults = ((ISearchabledResultSet)r).search(dbll.x, dbll.y, dbur.x,  dbur.y);
 						
-						List<AssetQueryResultItem> items = new ArrayList<>();
+						List<WaypointQueryResultItem> items = new ArrayList<>();
 						double distance = Double.POSITIVE_INFINITY;
 						for (IResultItem ri : searchResults){
-							AssetQueryResultItem i = (AssetQueryResultItem)ri;
+							WaypointQueryResultItem i = (WaypointQueryResultItem)ri;
 							Coordinate c = new Coordinate(i.getWaypointX(null), i.getWaypointY(null));
 							double d = c.distance(db);
 							
@@ -175,10 +176,10 @@ public class AssetSimpleQueryResultEditor extends QueryResultsEditor{
 
 						if (items.isEmpty()) return null;
 					
-						AssetQueryResultItem first = items.get(0);
-						HashMap<UUID, List<AssetQueryResultItem>> mergedByWp = new HashMap<>();
-						for (AssetQueryResultItem i : items) {
-							List<AssetQueryResultItem> list = mergedByWp.get(i.getWaypointUuid());
+						WaypointQueryResultItem first = items.get(0);
+						HashMap<UUID, List<WaypointQueryResultItem>> mergedByWp = new HashMap<>();
+						for (WaypointQueryResultItem i : items) {
+							List<WaypointQueryResultItem> list = mergedByWp.get(i.getWaypointUuid());
 							if (list == null) {
 								list = new ArrayList<>();
 								mergedByWp.put(i.getWaypointUuid(), list);
@@ -191,17 +192,21 @@ public class AssetSimpleQueryResultEditor extends QueryResultsEditor{
 						if (pnt.distance(x, y) > 5) return null;
 						StringBuilder sb = new StringBuilder();
 						int i = 0;
-						for (List<AssetQueryResultItem> wpItems: mergedByWp.values()) {
+						for (List<WaypointQueryResultItem> wpItems: mergedByWp.values()) {
 							if (sb.length() != 0) sb.append("\n"); //$NON-NLS-1$
-							AssetQueryResultItem firstItem = wpItems.get(0);
+							WaypointQueryResultItem firstItem = wpItems.get(0);
 							sb.append( firstItem.getWaypointId() ); 
 							sb.append("\n"); //$NON-NLS-1$
-							sb.append(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(firstItem.getWaypointDate()));
+							sb.append(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(firstItem.getWaypointDateTime()));
 							sb.append("\n"); //$NON-NLS-1$
-							for (AssetQueryResultItem item : wpItems) {
-								if (item.getCategories() != null && item.getCategories().length > 0){
-									sb.append(item.getCategories()[item.getCategories().length-1]);
-									sb.append("\n"); //$NON-NLS-1$
+							for (WaypointQueryResultItem item : wpItems) {
+								if (item instanceof ObservationQueryResultItem) {
+									ObservationQueryResultItem obitem = (ObservationQueryResultItem)item;
+								
+									if (obitem.getCategories() != null && obitem.getCategories().length > 0){
+										sb.append(obitem.getCategories()[obitem.getCategories().length-1]);
+										sb.append("\n"); //$NON-NLS-1$
+									}
 								}
 							}
 						
@@ -222,7 +227,7 @@ public class AssetSimpleQueryResultEditor extends QueryResultsEditor{
 				return null;
 			}
 			
-			private void createMenu(Control control, AssetQueryResultItem toUpdate){
+			private void createMenu(Control control, WaypointQueryResultItem toUpdate){
 				
 				Menu existingMenu = control.getMenu();
 				if(existingMenu != null && !existingMenu.isDisposed()){

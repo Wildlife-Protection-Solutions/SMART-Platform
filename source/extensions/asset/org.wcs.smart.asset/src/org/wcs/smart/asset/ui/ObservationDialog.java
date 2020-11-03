@@ -121,12 +121,20 @@ public class ObservationDialog extends SmartStyledDialog {
 	public ObservationDialog(Shell parentShell, Waypoint waypoint) {
 		super(parentShell);
 		this.waypoint = waypoint;
+		if (waypoint.getObservationGroups() == null) waypoint.setObservationGroups(new ArrayList<>());
+		
 		try(Session session = HibernateManager.openSession()){
 			//clone waypoint for editing so we can cancel this dialog
-			this.waypoint = session.get(Waypoint.class, waypoint.getUuid());
-					
-			if (waypoint.getObservationGroups() == null) waypoint.setObservationGroups(new ArrayList<>());
-			groups = new ArrayList<>(waypoint.getObservationGroups());
+			Waypoint wptemp = session.get(Waypoint.class, waypoint.getUuid());
+			groups = new ArrayList<>(wptemp.getObservationGroups());
+			groups.forEach(g->g.getObservations().forEach(o->{
+				o.getCategory().getName();
+				o.getAttributes().forEach(a->{
+					a.getStringValue();
+					a.getAttribute().getName();
+					if (a.getAttributeListItems() != null) a.getAttributeListItems().forEach(ai->ai.getAttributeListItem().getName());
+				});
+			}));
 		}
 	}
 

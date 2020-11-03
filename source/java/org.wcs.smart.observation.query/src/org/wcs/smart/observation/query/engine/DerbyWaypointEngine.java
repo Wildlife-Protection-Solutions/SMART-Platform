@@ -41,12 +41,15 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.query.ObservationQueryPlugIn;
 import org.wcs.smart.observation.query.internal.Messages;
-import org.wcs.smart.observation.query.model.ObservationAttachmentQueryResultItem;
-import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
 import org.wcs.smart.observation.query.model.ObservationWaypointQuery;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.common.engine.test.IDesktopWOEngine;
+import org.wcs.smart.query.common.engine.test.ObservationAttachmentQueryResultItem;
+import org.wcs.smart.query.common.engine.test.ObservationQueryResultItem;
+import org.wcs.smart.query.common.engine.test.WaypointAttachmentQueryResultItem;
+import org.wcs.smart.query.common.engine.test.WaypointQueryResultItem;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
@@ -63,13 +66,18 @@ import org.wcs.smart.util.UuidUtils;
  * @author elitvin
  * @since 1.0.0
  */
-public class DerbyWaypointEngine extends AbstractDerbyObservationQueryEngine {
+public class DerbyWaypointEngine extends AbstractDerbyObservationQueryEngine implements IDesktopWOEngine<WaypointQueryResultItem> {
 
 	private String queryDataTable;
 	
 	@Override
 	public boolean canExecute(String querytype) {
 		return ObservationWaypointQuery.KEY.equals(querytype);
+	}
+	
+	@Override
+	public String getQueryDataTable() {
+		return queryDataTable;
 	}
 	
 	/**
@@ -95,7 +103,7 @@ public class DerbyWaypointEngine extends AbstractDerbyObservationQueryEngine {
 		}
 		
 		queryDataTable = createTempTableName();
-		final DerbyPagedWaypointResult result = new DerbyPagedWaypointResult(queryDataTable, this);
+		final DerbyPagedWaypointResult result = new DerbyPagedWaypointResult(this);
 		
 		session.doWork(new Work() {
 			@Override
@@ -180,7 +188,7 @@ public class DerbyWaypointEngine extends AbstractDerbyObservationQueryEngine {
 			sql.append(queryDataTable);
 			sql.append(" SET ca_id = (select id FROM "); //$NON-NLS-1$
 			sql.append(AbstractDerbyObservationQueryEngine.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
-			sql.append("WHERE a.uuid = " + queryDataTable + ".p_ca_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append("WHERE a.uuid = " + queryDataTable + ".ca_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
 			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().executeUpdate(sql.toString());
 			
@@ -189,7 +197,7 @@ public class DerbyWaypointEngine extends AbstractDerbyObservationQueryEngine {
 			sql.append(queryDataTable);
 			sql.append(" SET ca_name = (select name FROM "); //$NON-NLS-1$
 			sql.append(AbstractDerbyObservationQueryEngine.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
-			sql.append("WHERE a.uuid = " + queryDataTable + ".p_ca_uuid)");  //$NON-NLS-1$//$NON-NLS-2$
+			sql.append("WHERE a.uuid = " + queryDataTable + ".ca_uuid)");  //$NON-NLS-1$//$NON-NLS-2$
 			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().executeUpdate(sql.toString());
 		}
@@ -233,7 +241,7 @@ public class DerbyWaypointEngine extends AbstractDerbyObservationQueryEngine {
 	}
 
 	@Override
-	protected String getTemporaryTableSelectClause(boolean includeObservations) {
+	public String getTemporaryTableSelectClause(boolean includeObservations) {
 		StringBuilder sql = new StringBuilder();
 		sql.append(" SELECT DISTINCT "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".ca_uuid, "); //$NON-NLS-1$
@@ -253,10 +261,10 @@ public class DerbyWaypointEngine extends AbstractDerbyObservationQueryEngine {
 	}
 
 	@Override
-	protected String getTemporaryTableCreateClause(String tableName) {
+	public String getTemporaryTableCreateClause(String tableName) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
-		sql.append("p_ca_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("ca_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("wp_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("wp_source varchar(16),"); //$NON-NLS-1$
 		sql.append("wp_id varchar(32),"); //$NON-NLS-1$
@@ -272,9 +280,9 @@ public class DerbyWaypointEngine extends AbstractDerbyObservationQueryEngine {
 		return sql.toString();
 	}
 
-	protected ObservationAttachmentQueryResultItem asQueryAttachmentResultItem(ResultSet rs, Session session) throws SQLException{
+	public WaypointAttachmentQueryResultItem asQueryAttachmentResultItem(ResultSet rs, Session session) throws SQLException{
 		
-		ObservationAttachmentQueryResultItem item = (ObservationAttachmentQueryResultItem) asQueryResultItemInternal(true,  rs, session);
+		WaypointAttachmentQueryResultItem item = (WaypointAttachmentQueryResultItem) asQueryResultItemInternal(true,  rs, session);
 		
 		UUID auuid = UuidUtils.byteToUUID(rs.getBytes("attach_uuid")); //$NON-NLS-1$
 		ISmartAttachment a = session.get(ObservationAttachment.class, auuid);
@@ -290,18 +298,18 @@ public class DerbyWaypointEngine extends AbstractDerbyObservationQueryEngine {
 		return item;
 	}
 	
-	protected ObservationQueryResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException{
+	public WaypointQueryResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException{
 		return asQueryResultItemInternal(false, rs, session);
 	}
 	
-	protected ObservationQueryResultItem asQueryResultItemInternal(boolean includeAttachment,
+	protected WaypointQueryResultItem asQueryResultItemInternal(boolean includeAttachment,
 			ResultSet rs, Session session) throws SQLException{
 		
-		ObservationQueryResultItem it = null;
+		WaypointQueryResultItem it = null;
 		if (includeAttachment) {
-			it = new ObservationAttachmentQueryResultItem();
+			it = new WaypointAttachmentQueryResultItem();
 		}else {
-			it = new ObservationQueryResultItem();
+			it = new WaypointQueryResultItem();
 		}
 		
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
@@ -311,7 +319,7 @@ public class DerbyWaypointEngine extends AbstractDerbyObservationQueryEngine {
 		it.setWaypointId(rs.getString("wp_id")); //$NON-NLS-1$
 		it.setWaypointX(rs.getDouble("wp_x")); //$NON-NLS-1$
 		it.setWaypointY(rs.getDouble("wp_y")); //$NON-NLS-1$
-		it.setWpDateTime(rs.getTimestamp("wp_time").toLocalDateTime()); //$NON-NLS-1$
+		it.setWaypointDateTime(rs.getTimestamp("wp_time").toLocalDateTime()); //$NON-NLS-1$
 		it.setWaypointDirection(rs.getObject("wp_direction") == null ? null : rs.getFloat("wp_direction")); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setWaypointDistance(rs.getObject("wp_distance") == null ? null : rs.getFloat("wp_distance")); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setWaypointComment(rs.getString("wp_comment")); //$NON-NLS-1$
@@ -322,7 +330,7 @@ public class DerbyWaypointEngine extends AbstractDerbyObservationQueryEngine {
 	}
 	
 	@Override
-	protected void buildTemporaryTableIndexes(Connection c, String tableName)
+	public void buildTemporaryTableIndexes(Connection c, String tableName)
 			throws SQLException {
 	}
 }

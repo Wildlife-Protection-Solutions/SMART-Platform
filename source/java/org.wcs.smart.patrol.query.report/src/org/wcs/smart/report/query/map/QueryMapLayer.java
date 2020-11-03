@@ -30,6 +30,7 @@ import org.wcs.smart.patrol.query.model.PatrolQuery;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
 import org.wcs.smart.query.QueryTypeManager;
+import org.wcs.smart.query.common.engine.test.WaypointQueryResultItem;
 import org.wcs.smart.report.birt.map.MapLayerInfo;
 import org.wcs.smart.report.birt.map.MapLayerInfo.LayerType;
 import org.wcs.smart.report.birt.query.AbstractQueryMapLayer;
@@ -62,7 +63,7 @@ public class QueryMapLayer extends AbstractQueryMapLayer {
 		queryTypeKey = QueryTypeManager.INSTANCE.findDeprecatedQueryTypeString(queryTypeKey);
 		if (queryTypeKey.equals(PatrolWaypointQuery.KEY) ||
 				queryTypeKey.equals(PatrolObservationQuery.KEY)){
-			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.POINT, PatrolQueryResultItem.WAYPOINT_GEOMCOLUMN_KEY);
+			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.POINT, WaypointQueryResultItem.GEOMCOLUMN_KEY);
 			return Collections.singletonList(def);
 		}else if (queryTypeKey.equals(PatrolQuery.KEY)){
 			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.MULTILINE, PatrolQueryResultItem.TRACK_GEOMCOLUMN_KEY);

@@ -24,29 +24,30 @@ package org.wcs.smart.er.query.engine;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.text.MessageFormat;
 import java.util.List;
-import java.util.Objects;
-import java.util.Set;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
-import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
+import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.er.model.MissionAttribute;
+import org.wcs.smart.er.model.MissionPropertyValue;
+import org.wcs.smart.er.model.SamplingUnitAttribute;
+import org.wcs.smart.er.model.SamplingUnitAttributeValue;
+import org.wcs.smart.er.query.internal.Messages;
+import org.wcs.smart.er.query.model.SurveyObservationResultItem;
 import org.wcs.smart.er.query.model.SurveyQueryColumn;
 import org.wcs.smart.er.query.model.column.MissionPropertyQueryColumn;
 import org.wcs.smart.er.query.model.column.SamplingUnitAttributeQueryColumn;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.common.engine.AttachmentResultSetIterator;
+import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.common.engine.IAttachmentResultItem;
-import org.wcs.smart.query.common.engine.IDesktopPagedImageResultSet;
-import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
-import org.wcs.smart.query.common.engine.IResultItem;
-import org.wcs.smart.query.common.model.IObservationPagedQueryResultSet;
-import org.wcs.smart.query.common.ui.image.PagedImageQueryResults;
+import org.wcs.smart.query.common.engine.test.ObservationQueryResult;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.model.QueryColumn.ColumnType;
 
 
 /**
@@ -56,39 +57,11 @@ import org.wcs.smart.query.model.QueryColumn;
  * @author elitvin
  * @since 1.0.0
  */
-public class DerbyPagedObservationResult extends AbstractSurveyPagedResult implements IObservationPagedQueryResultSet, ISurveyQueryMissionResult, IDesktopPagedImageResultSet{
+public class DerbyPagedObservationResult extends ObservationQueryResult<SurveyObservationResultItem> implements ISurveyQueryMissionResult {
 
-	private int wpCount = 0;
-
-	private Set<String> dataColumns = null;
 	
-	private PagedImageQueryResults imageResults = new PagedImageQueryResults() {
-		
-		@Override
-		protected void initImageData() {
-			DerbyPagedObservationResult.this.initImageData();
-		}
-	};
-	
-	public DerbyPagedObservationResult(String queryTempTable, DerbySurveyQueryEngine engine) {
-		this.queryTempTable = queryTempTable;
-		this.engine = engine;
-	}
-
-	public DerbyPagedObservationResult(String queryTempTable, int itemCount, int wpCount, DerbySurveyQueryEngine engine) {
-		this.queryTempTable = queryTempTable;
-		this.itemCount = itemCount;
-		this.wpCount = wpCount;
-		this.engine = engine;
-	}
-	
-	public DerbySurveyQueryEngine getEngine() {
-		return this.engine;
-	}
-	
-	@Override
-	public String getResultsTable() {
-		return queryTempTable;
+	public DerbyPagedObservationResult(DerbyObservationEngine engine) {
+		super(engine, -1, -1);
 	}
 	
 	@Override
@@ -105,78 +78,77 @@ public class DerbyPagedObservationResult extends AbstractSurveyPagedResult imple
 			sb.append(" DESC "); //$NON-NLS-1$
 			return sb.toString();				
 		}
-		return super.buildSortSql();
-	}
-	
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) return true;
-		if (obj == null) return false;
-		if (getClass() != obj.getClass()) return false;
-		DerbyPagedObservationResult o = (DerbyPagedObservationResult)obj;
-		return Objects.equals(queryTempTable, o.queryTempTable);
-	}
-	
-	@Override
-	public int hashCode(){
-		return Objects.hash(queryTempTable);
-	}
-	
-	@Override
-	public List<IResultItem> getResults(final Session session, ResultSet rs, int from, int pageSize) throws SQLException {
-		final List<IResultItem> items = new ArrayList<IResultItem>();
-		rs.absolute(from);
-		int to = from + pageSize;
-		if (to >= itemCount) {
-			to = itemCount;
+		String result = ""; //$NON-NLS-1$
+		if (sortColumn instanceof SurveyQueryColumn) {
+			String key = sortColumn.getKey();
+			key = SurveyQueryColumn.getDbColumnName(key);
+			if (sortColumn.getKey().equals(SurveyQueryColumn.FixedColumns.WAYPOINT_TIME.getKey())){
+				result = "order by CAST(r." + key + " as TIME)"; //$NON-NLS-1$ //$NON-NLS-2$
+			}else if (((SurveyQueryColumn)sortColumn).getKey().equals(SurveyQueryColumn.FixedColumns.OBS_GROUP_ID.getKey())) {
+				result = "order by r."+key; //$NON-NLS-1$
+			}else if (sortColumn.getType() == ColumnType.STRING){
+				result = "order by UPPER(r."+key + ")"; //$NON-NLS-1$ //$NON-NLS-2$	
+			}else{
+				result = "order by r."+key; //$NON-NLS-1$
+			}
+		
+		}else if (sortColumn instanceof MissionPropertyQueryColumn ||
+				sortColumn instanceof SamplingUnitAttributeQueryColumn) {
+			
+			switch (sortColumn.getType()) {
+				case BOOLEAN:
+				case NUMBER:
+				case INTEGER:
+					result = "order by sortKeyDbl"; //$NON-NLS-1$
+					break;
+				case DATE:
+					result = "order by DATE(sortKeyTxt)"; //$NON-NLS-1$
+					break;
+				default:
+					result = "order by UPPER(sortKeyTxt)"; //$NON-NLS-1$
+					break;
+			}
+		}else {
+			result = super.getSortColumnString(sortColumn);
 		}
-		for(int x = from; x < to; x++) {
-			rs.next();
-			IResultItem it = engine.asQueryResultItem(rs, session);
-			items.add(it);
+		
+		if (!result.isEmpty()) {
+			result += direction == SWT.UP ? " asc" : " desc"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
+		return result;
+	}
+	
+	@Override
+	protected void updateSortColumn(Session session, Connection c) throws SQLException{
+		if (sortColumn instanceof MissionPropertyQueryColumn ||
+			sortColumn instanceof SamplingUnitAttributeQueryColumn) {
+			
+			SurveyPagedResultUtils.processSortColumn(engine.getQueryDataTable(), 
+					((DerbyObservationEngine)engine).getObservationLabelTable(),
+					((DerbyObservationEngine)engine), hasSortColumns, sortColumn, c, session);
+			hasSortColumns = true;
+		}else {
+			super.updateSortColumn(session,c);
+		}
+		
+		c.commit();
+	}
+
+	@Override
+	public List<SurveyObservationResultItem> getResults(final Session session, ResultSet rs, int from, int pageSize) throws SQLException {
+		final List<SurveyObservationResultItem> items = super.getResults(session, rs, from, pageSize);
+		
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
-				attachObservations(items, c, session);
-				attachMissionProperties(items, c, session);
-				attachSamplingUnitAttributes(items, c, session);
+				SurveyPagedResultUtils.attachMissionProperties(items, c, session);
+				SurveyPagedResultUtils.attachSamplingUnitAttributes(items, c, session);
 			}
 		});
 		return items;
 	}
 		
-	/**
-	 * Opens a result set in the given session that accessed the query results
-	 */
-	@Override
-	public ResultSet getResultSet(final Session session) {
-		final String dataSql = "SELECT r.* FROM " + queryTempTable + " r " + buildSortSql(); //$NON-NLS-1$ //$NON-NLS-2$
 
-		return session.doReturningWork(new ReturningWork<ResultSet>() {
-
-			@Override
-			public ResultSet execute(Connection c) throws SQLException {
-				if ((lastSortColumn == null && sortColumn != null)
-						|| (lastSortColumn != null && sortColumn != null && !lastSortColumn
-								.equals(sortColumn))) {
-					updateSortColumn(sortColumn, session, c);
-				}
-				return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
-						ResultSet.CONCUR_READ_ONLY).executeQuery(dataSql);
-			}
-		});
-	}
-
-	
-	@Override
-	public int getWpCount() {
-		return wpCount;
-	}
-
-	protected void setWpCount(int wpCount) {
-		this.wpCount = wpCount;
-	}
 
 	@Override
 	public boolean isDataColumn(QueryColumn column) {
@@ -186,55 +158,6 @@ public class DerbyPagedObservationResult extends AbstractSurveyPagedResult imple
 		return dataColumns.contains(column.getKey());
 	}
 	
-	public void setDataColumns(Set<String> dataColumns) {
-		this.dataColumns = dataColumns;
-	}
-
-	@Override
-	public void dispose(Session session) throws SQLException {
-		super.dispose(session);
-		session.doWork(new Work() {
-			@Override
-			public void execute(Connection c) throws SQLException {
-				if (imageResults.getResultsTable() != null) engine.dropTable(c, imageResults.getResultsTable());
-
-			}
-		});
-	}
-
-	@Override
-	public List<IAttachmentResultItem> getImageData(int offset, int pageSize) {
-		return imageResults.getImageData(offset, pageSize);
-	}
-
-	@Override
-	public IQueryResultSetIterator<? extends IAttachmentResultItem> getImageIterator(Session session) throws SQLException{
-		initImageData();
-
-		StringBuilder sb = new StringBuilder();
-		String part = ((DerbyObservationEngine)engine).getDistinctWaypointQuery("r.", true); //$NON-NLS-1$
-		
-		//join together attachments specifically associated with an observation
-		//or attachments associated with a waypoint that has an observation
-		//in the result set
-		sb.append("SELECT " + part + ", b.attach_uuid as attach_uuid FROM " ); //$NON-NLS-1$ //$NON-NLS-2$
-		sb.append(queryTempTable + " r "); //$NON-NLS-1$
-		sb.append(" join " + imageResults.getResultsTable() + " b "); //$NON-NLS-1$ //$NON-NLS-2$
-		sb.append("on ( b.ob_uuid is not null and r.ob_uuid = b.ob_uuid ) "); //$NON-NLS-1$
-		
-		sb.append(" UNION "); //$NON-NLS-1$
-		
-		part = ((DerbyObservationEngine)engine).getDistinctWaypointQuery("r.", false); //$NON-NLS-1$
-		
-		sb.append("SELECT foo.*, b.attach_uuid as attach_uuid FROM "); //$NON-NLS-1$
-		sb.append("(SELECT DISTINCT " + part + " FROM " + queryTempTable + " r ) foo"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		sb.append(" join " + imageResults.getResultsTable() + " b "); //$NON-NLS-1$ //$NON-NLS-2$
-		sb.append(" ON b.wp_uuid = foo.wp_uuid and b.ob_uuid is null"); //$NON-NLS-1$
-		
-		return new AttachmentResultSetIterator(session, 
-				e->engine.asQueryAttachmentResultItem(e, session),
-				()->sb.toString());
-	}
 	@Override
 	public void createTooltip(IAttachmentResultItem data, final Composite parent) {
 		SurveyAttachmentTooltipProvider job = new SurveyAttachmentTooltipProvider(data, parent);
@@ -242,54 +165,14 @@ public class DerbyPagedObservationResult extends AbstractSurveyPagedResult imple
 	}
 
 	@Override
-	public int getImageCount() {
-		return imageResults.getImageCount();
+	public List<byte[]> getMissionUuids() {
+		return SurveyPagedResultUtils.getMissionUuids(engine.getQueryDataTable());
 	}
 
-	private synchronized void initImageData() {
-		try(Session s = HibernateManager.openSession()){
-			s.beginTransaction();
-			try {
-				String imageTempTable = engine.createTempTableName();
-				
-				StringBuilder sb = new StringBuilder();
-				sb.append("CREATE TABLE "); //$NON-NLS-1$
-				sb.append(imageTempTable);
-				sb.append("(attach_uuid char(16) for bit data, wp_uuid char(16) for bit data, ob_uuid char(16) for bit data, seq_order integer GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1))"); //$NON-NLS-1$
-				s.createNativeQuery(sb.toString()).executeUpdate();
-				
-				sb = new StringBuilder();
-				sb.append(" INSERT INTO "); //$NON-NLS-1$
-				sb.append(imageTempTable + "(attach_uuid, wp_uuid, ob_uuid) "); //$NON-NLS-1$
-				sb.append(" SELECT z.attach_uuid, z.wp_uuid, z.ob_uuid FROM ( "); //$NON-NLS-1$
-				sb.append("SELECT c.uuid as attach_uuid, a.wp_date, a.wp_id, a.wp_uuid, a.ob_uuid " ); //$NON-NLS-1$
-				sb.append(" FROM "); //$NON-NLS-1$
-				sb.append( queryTempTable + " a "); //$NON-NLS-1$
-				sb.append(" JOIN "); //$NON-NLS-1$
-				sb.append(" smart.observation_attachment c on a.ob_uuid = c.obs_uuid "); //$NON-NLS-1$
-				sb.append( " UNION "); //$NON-NLS-1$
-				sb.append("SELECT c.uuid as attach_uuid, a.wp_date, a.wp_id, a.wp_uuid, cast(null as char(16) for bit data) as ob_uuid" ); //$NON-NLS-1$
-				sb.append(" FROM "); //$NON-NLS-1$
-				sb.append( queryTempTable + " a "); //$NON-NLS-1$
-				sb.append(" JOIN "); //$NON-NLS-1$
-				sb.append(" smart.wp_attachments c on c.wp_uuid = a.wp_uuid "); //$NON-NLS-1$
-				sb.append(" ) z ORDER BY z.wp_date desc, z.wp_id "); //$NON-NLS-1$
-				
-				s.createNativeQuery(sb.toString()).executeUpdate();
-				
-				sb = new StringBuilder();
-				sb.append("SELECT count(*) FROM "); //$NON-NLS-1$
-				sb.append(imageTempTable);
-				
-				int imageDataCnt = (int) s.createNativeQuery(sb.toString()).uniqueResult();
-				
-				imageResults.setResults(imageTempTable, imageDataCnt);
-				s.getTransaction().commit();
-			}catch (Exception ex) {
-				imageResults.setResults(null, -1);
-				s.getTransaction().rollback();
-				QueryPlugIn.log("Error computing attachment details: " + ex.getMessage(), ex); //$NON-NLS-1$
-			}
-		}
+	@Override
+	protected String getDistinctWaypointQuery(String prefix, boolean includeObservation) {
+		return null;
 	}
+
+	
 }

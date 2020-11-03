@@ -21,41 +21,14 @@
  */
 package org.wcs.smart.observation.query.engine;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
-import org.hibernate.Session;
-import org.hibernate.jdbc.ReturningWork;
-import org.hibernate.jdbc.Work;
-import org.locationtech.jts.geom.Envelope;
-import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
 import org.wcs.smart.observation.query.model.columns.FixedQueryColumn;
-import org.wcs.smart.observation.query.model.columns.ObservationAttributeQueryColumn;
-import org.wcs.smart.observation.query.model.columns.ObservationCategoryQueryColumn;
-import org.wcs.smart.query.QueryDataModelManager;
-import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.common.engine.AttachmentResultSetIterator;
 import org.wcs.smart.query.common.engine.IAttachmentResultItem;
-import org.wcs.smart.query.common.engine.IDesktopPagedImageResultSet;
-import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
-import org.wcs.smart.query.common.engine.IResultItem;
-import org.wcs.smart.query.common.model.AbstractPagedQueryResultSet;
-import org.wcs.smart.query.common.model.IObservationPagedQueryResultSet;
-import org.wcs.smart.query.common.ui.image.PagedImageQueryResults;
-import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.common.engine.test.ObservationQueryEngine;
+import org.wcs.smart.query.common.engine.test.ObservationQueryResult;
+import org.wcs.smart.query.common.engine.test.ObservationQueryResultItem;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
-import org.wcs.smart.util.UuidUtils;
 
 
 /**
@@ -65,264 +38,21 @@ import org.wcs.smart.util.UuidUtils;
  * @author elitvin
  * @since 1.0.0
  */
-public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet implements IObservationPagedQueryResultSet, IDesktopPagedImageResultSet{
-	
-	private String queryTempTable;
+public class DerbyPagedObservationResult extends ObservationQueryResult<ObservationQueryResultItem> {
 
-	private int wpCount = 0;
+	public DerbyPagedObservationResult(ObservationQueryEngine<ObservationQueryResultItem> engine) {
+		this(engine, -1, -1);
 
-	private Set<String> dataColumns = null;
-	
-	private Envelope bounds = null;
-
-	//next sort column
-	private QueryColumn sortColumn = null;
-	//last sort column
-	private QueryColumn lastSortColumn = null;
-	//current direction
-	private int direction = SWT.UP;
-	private boolean hasSortColumns = false;
-	private AbstractDerbyObservationQueryEngine engine;
-
-	private PagedImageQueryResults imageResults = new PagedImageQueryResults() {		
-		@Override
-		protected void initImageData() {
-			DerbyPagedObservationResult.this.initImageData();			
-		}
-	};
-	
-	public DerbyPagedObservationResult(String queryTempTable, AbstractDerbyObservationQueryEngine engine) {
-		this.queryTempTable = queryTempTable;
-		this.engine = engine;
-	}
-
-	public DerbyPagedObservationResult(String queryTempTable, int itemCount, int wpCount, AbstractDerbyObservationQueryEngine engine) {
-		this.queryTempTable = queryTempTable;
-		this.itemCount = itemCount;
-		this.wpCount = wpCount;
-		this.engine = engine;
 	}
 	
+	public DerbyPagedObservationResult(ObservationQueryEngine<ObservationQueryResultItem> engine,
+			int itemCount, int wpCount) {
+		super(engine, itemCount, wpCount);
+
+	}
+
 	@Override
-	public String getResultsTable() {
-		return queryTempTable;
-	}
-	
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) return true;
-		if (obj == null ) return false;
-		if (getClass() != obj.getClass()) return false;
-		DerbyPagedObservationResult o = (DerbyPagedObservationResult)obj;
-		return Objects.equals(queryTempTable, o.queryTempTable);
-	}
-	
-	@Override
-	public int hashCode(){
-		return Objects.hash(queryTempTable);
-	}
-
-	
-	@Override
-	public Envelope getEnvelope(){
-		if (this.bounds == null){
-			try(Session s = HibernateManager.openSession()){
-				final String sql = "SELECT min(wp_x), max(wp_x), min(wp_y), max(wp_y) FROM " + queryTempTable; //$NON-NLS-1$
-				s.doWork(new Work(){
-					@Override
-					public void execute(Connection c) throws SQLException {
-						try(ResultSet q = c.createStatement().executeQuery(sql)){
-							q.next();
-							double minx = q.getDouble(1);
-							double maxx = q.getDouble(2);
-							double miny = q.getDouble(3);
-							double maxy = q.getDouble(4);
-						
-							bounds = new Envelope(minx, maxx, miny, maxy);
-						}
-					}	
-				});
-			}
-		}
-		return bounds;
-		
-	}
-	
-	private void updateSortColumn(QueryColumn sortColumn, Session session, Connection c) throws SQLException{
-		if (sortColumn instanceof ObservationAttributeQueryColumn){
-			if (!hasSortColumns){
-				//add the sort columns
-				c.createStatement().execute("ALTER TABLE " + queryTempTable + " add column sortKeyDbl double"); //$NON-NLS-1$ //$NON-NLS-2$
-				c.createStatement().execute("ALTER TABLE " + queryTempTable + " add column sortKeyTxt varchar(1024)"); //$NON-NLS-1$ //$NON-NLS-2$
-				c.commit();
-				hasSortColumns = true;
-			}
-			String key = sortColumn.getKey();
-			key = key.split(":")[1]; //$NON-NLS-1$
-			Attribute attribute = null;
-			
-			session.beginTransaction();
-			try{
-				attribute = QueryDataModelManager.getInstance().getAttribute(session, key); //session will not be closed on purpose
-			}finally{
-				session.getTransaction().rollback();
-			}
-			
-			switch (attribute.getType()) {
-			case BOOLEAN:
-			case NUMERIC:
-				// nullify first
-				StringBuilder sql = new StringBuilder();
-				sql.append("UPDATE "); //$NON-NLS-1$
-				sql.append(queryTempTable);
-				sql.append(" SET sortKeyDbl = null "); //$NON-NLS-1$
-				c.createStatement().execute(sql.toString());
-				break;
-			case TEXT:
-			case LIST:
-			case TREE:
-			case DATE:
-				sql = new StringBuilder();
-				sql.append("UPDATE "); //$NON-NLS-1$
-				sql.append(queryTempTable);
-				sql.append(" SET sortKeyTxt = null"); //$NON-NLS-1$
-				c.createStatement().execute(sql.toString());
-				break;
-			}
-			
-			switch (attribute.getType()) {
-			case BOOLEAN:
-			case NUMERIC:
-				StringBuilder sql = new StringBuilder();
-				sql.append("UPDATE "); //$NON-NLS-1$
-				sql.append(queryTempTable);
-				sql.append(" SET sortKeyDbl = "); //$NON-NLS-1$
-				sql.append("(SELECT wpoa.NUMBER_VALUE FROM "); //$NON-NLS-1$
-				sql.append("smart.WP_OBSERVATION_ATTRIBUTES wpoa join smart.DM_ATTRIBUTE a on a.uuid = wpoa.attribute_uuid "); //$NON-NLS-1$
-				sql.append("and a.keyid = '"); //$NON-NLS-1$
-				sql.append(key);
-				sql.append("'"); //$NON-NLS-1$
-				sql.append(" WHERE wpoa.observation_uuid = "); //$NON-NLS-1$
-				sql.append( queryTempTable );
-				sql.append(".ob_uuid)"); //$NON-NLS-1$
-				c.createStatement().execute(sql.toString());
-				break;
-			case TEXT:
-			case DATE:
-				sql = new StringBuilder();
-				sql.append("UPDATE "); //$NON-NLS-1$
-				sql.append(queryTempTable);
-				sql.append(" SET sortKeyTxt = "); //$NON-NLS-1$
-				sql.append("(SELECT wpoa.STRING_VALUE FROM "); //$NON-NLS-1$
-				sql.append("smart.WP_OBSERVATION_ATTRIBUTES wpoa join smart.DM_ATTRIBUTE a on a.uuid = wpoa.attribute_uuid "); //$NON-NLS-1$
-				sql.append("and a.keyid = '"); //$NON-NLS-1$
-				sql.append( key );
-				sql.append("'"); //$NON-NLS-1$
-				sql.append(" WHERE wpoa.observation_uuid = "); //$NON-NLS-1$
-				sql.append( queryTempTable );
-				sql.append(".ob_uuid)"); //$NON-NLS-1$
-				c.createStatement().execute(sql.toString());
-				break;
-			case LIST:
-				sql = new StringBuilder();
-				sql.append("UPDATE "); //$NON-NLS-1$
-				sql.append(queryTempTable);
-				sql.append(" SET sortKeyTxt = "); //$NON-NLS-1$
-				sql.append("(SELECT rl.value FROM "); //$NON-NLS-1$
-				sql.append("smart.WP_OBSERVATION_ATTRIBUTES wpoa join "); //$NON-NLS-1$
-				sql.append( queryTempTable );
-				sql.append( "_LIST rl on rl.uuid = wpoa.list_element_uuid "); //$NON-NLS-1$
-				sql.append("join smart.DM_ATTRIBUTE a on a.uuid = wpoa.attribute_uuid and a.keyid = '"); //$NON-NLS-1$
-				sql.append( key );
-				sql.append("'"); //$NON-NLS-1$
-				sql.append(" WHERE wpoa.observation_uuid = "); //$NON-NLS-1$
-				sql.append( queryTempTable); 
-				sql.append(".ob_uuid)"); //$NON-NLS-1$
-				c.createStatement().execute(sql.toString());
-				
-				break;
-			case TREE:
-				sql = new StringBuilder();
-				sql.append("UPDATE ");//$NON-NLS-1$
-				sql.append(queryTempTable);
-				sql.append(" SET sortKeyTxt = ");//$NON-NLS-1$
-				sql.append("(SELECT rl.value FROM smart.WP_OBSERVATION_ATTRIBUTES wpoa join "); //$NON-NLS-1$
-				sql.append( queryTempTable );
-				sql.append("_TREE rl on rl.uuid = wpoa.tree_node_uuid "); //$NON-NLS-1$
-				sql.append("join smart.DM_ATTRIBUTE a on a.uuid = wpoa.attribute_uuid and a.keyid = '"); //$NON-NLS-1$
-				sql.append( key );
-				sql.append("'"); //$NON-NLS-1$
-				sql.append(" WHERE wpoa.observation_uuid = "); //$NON-NLS-1$
-				sql.append( queryTempTable );
-				sql.append( ".ob_uuid)"); //$NON-NLS-1$
-				c.createStatement().execute(sql.toString());
-				
-				break;
-			}
-		}
-		c.commit();
-	}
-		
-	/**
-	 *Opens a result set in the given session that accessed the query results
-	 */
-	@Override
-	public ResultSet getResultSet(Session session) {
-		final String dataSql = "SELECT r.* FROM " + queryTempTable + " r "+ buildSortSql();  //$NON-NLS-1$ //$NON-NLS-2$
-		
-		return session.doReturningWork(new ReturningWork<ResultSet>() {
-			@Override
-			public ResultSet execute(Connection c) throws SQLException {
-				if ((lastSortColumn == null && sortColumn != null) || (lastSortColumn != null && sortColumn != null && !lastSortColumn.equals(sortColumn)) ){
-					updateSortColumn(sortColumn, session, c);
-				}
-				return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY).executeQuery(dataSql);
-			}
-		});
-	}
-
-	private void attachObservations(List<IResultItem> result, Connection c, Session session) throws SQLException {
-		boolean hasObservations = false;
-		StringBuilder attrSql = new StringBuilder();
-		attrSql.append("SELECT r.ob_uuid, a.keyid, wpoa.number_value, wpoa.string_value, rl.value as list_value, rt.value as tree_value, r.p_ca_uuid FROM "); //$NON-NLS-1$
-		attrSql.append(queryTempTable);
-		attrSql.append(" r left join smart.wp_observation_attributes wpoa on r.ob_uuid = wpoa.observation_uuid left join smart.dm_attribute a on a.uuid = wpoa.attribute_uuid left join "); //$NON-NLS-1$
-		attrSql.append(queryTempTable).append("_list rl on wpoa.list_element_uuid = rl.uuid left join "); //$NON-NLS-1$
-		attrSql.append(queryTempTable).append("_tree rt on wpoa.tree_node_uuid = rt.UUID WHERE r.ob_uuid in ("); //$NON-NLS-1$
-		for (IResultItem iri : result){
-			ObservationQueryResultItem it  = (ObservationQueryResultItem) iri;
-			if (it.getObservationUuid() != null) {
-				if (hasObservations) {
-					attrSql.append(',');
-				}
-				hasObservations = true;
-				attrSql.append("x'").append(UuidUtils.uuidToString(it.getObservationUuid())).append('\''); //$NON-NLS-1$
-			}
-		}
-		
-		
-		if (!hasObservations) {
-			//no observations in current data fragment, so no need to select attributes as they will be empty
-			return;
-		}
-		attrSql.append(')');
-
-		
-		try(ResultSet rs = c.createStatement().executeQuery(attrSql.toString())) {
-			HashMap<UUID, HashMap<String, Object>> attrMap = getResultsAttributes(rs, session);
-			for (IResultItem iri : result){
-				ObservationQueryResultItem it  = (ObservationQueryResultItem) iri;
-				if (it.getObservationUuid() != null) {
-					HashMap<String, Object> attributes = attrMap.get(it.getObservationUuid());
-					if (attributes != null) {
-						it.setAttributes(attributes);
-					}
-				}
-			}
-		}
-	}
-	
-	private String buildSortSql() {
+	public String buildSortSql() {
 		if (sortColumn == null || direction == SWT.NONE) {
 			//default sort by waypoint date/time
 			return "order by " + FixedQueryColumn.getDbColumnName(FixedQueryColumn.FixedColumns.WAYPOINT_DATE.getKey()) + " DESC"; //$NON-NLS-1$ //$NON-NLS-2$
@@ -343,213 +73,13 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 				result = "order by r."+key; //$NON-NLS-1$
 			}
 		}
-		if (sortColumn instanceof ObservationCategoryQueryColumn) {
-			String key = sortColumn.getKey();
-			key = ObservationCategoryQueryColumn.getDbColumnName(key);
-			result = "order by UPPER(r."+key + ")"; //$NON-NLS-1$ //$NON-NLS-2$
-		}
-		if (sortColumn instanceof ObservationAttributeQueryColumn) {
-			String key = sortColumn.getKey();
-			key = key.split(":")[1]; //$NON-NLS-1$
-			switch (sortColumn.getType()) {
-				case BOOLEAN:
-				case NUMBER:
-				case INTEGER:
-					result = "order by sortKeyDbl"; //$NON-NLS-1$
-					break;
-				case DATE:
-					result = "order by DATE(sortKeyTxt)"; //$NON-NLS-1$
-					break;
-				default:
-					result = "order by UPPER(sortKeyTxt)"; //$NON-NLS-1$
-					break;
-			}
-		}
+		
+		result = super.getSortColumnString(sortColumn);
+		
 		if (!result.isEmpty()) {
 			result += direction == SWT.UP ? " asc" : " desc"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return result;
-	}
-	
-	
-	/* (non-Javadoc)
-	 * @see org.wcs.smart.query.model.IPagedQueryResultSet#setSorting(org.wcs.smart.query.model.observation.QueryColumn, int)
-	 */
-	public void setSorting(final QueryColumn sortColumn, int direction) {
-		this.lastSortColumn = this.sortColumn;
-		this.sortColumn = sortColumn;
-		this.direction = direction;
-	}
-
-	/**
-	 * Gets results from the given result set.
-	 * 
-	 * @param rs
-	 * @param from
-	 * @param pageSize
-	 * @return
-	 * @throws SQLException
-	 */
-	@Override
-	public List<IResultItem> getResults(Session session, ResultSet rs, int from, int pageSize) throws SQLException {
-		List<IResultItem> items = new ArrayList<IResultItem>();
-		rs.absolute(from);
-		int to = from + pageSize;
-		if (to >= itemCount) {
-			to = itemCount;
-		}
-		for(int x = from; x < to; x++) {
-			rs.next();
-			ObservationQueryResultItem it = engine.asQueryResultItem(rs, null);
-			items.add(it);
-		}
-		session.doWork(new Work(){
-			@Override
-			public void execute(Connection c) throws SQLException {
-				attachObservations(items, c, session);		
-			}
-			
-		});
-		return items;
-	}
-
-	protected HashMap<UUID, HashMap<String, Object>> getResultsAttributes(ResultSet rs, Session s) throws SQLException {
-		HashMap<UUID, HashMap<String, Object>> attrMap = new HashMap<UUID, HashMap<String, Object>>();
-		/*
-		1	OB_UUID
-		2	KEYID
-		3	NUMBER_VALUE
-		4	STRING_VALUE
-		5	LIST_VALUE
-		6	TREE_VALUE
-		7	P_CA_UUID
-		*/
-		while (rs.next()) {
-			UUID obUuid = UuidUtils.byteToUUID(rs.getBytes(1));
-			
-			if (obUuid == null)
-				continue;
-			HashMap<String, Object> attributes = attrMap.get(obUuid);
-			if (attributes == null) {
-				attributes = new HashMap<String, Object>();
-				attrMap.put(obUuid, attributes);
-			}
-			String key = rs.getString(2);
-			if (key != null) {
-				Object value = getAttributeValue(rs, s);
-				attributes.put(key, value);
-			}
-		}
-		return attrMap;
-	}
-
-	/**
-	 * Gets the attribute value from the result set for the given attribute.
-	 * 
-	 * @param att
-	 * @param rs
-	 * @param session
-	 * @return
-	 * @throws SQLException
-	 */
-	protected Object getAttributeValue(ResultSet rs, Session session) throws SQLException {
-		/*
-		1	OB_UUID
-		2	KEYID
-		3	NUMBER_VALUE
-		4	STRING_VALUE
-		5	LIST_VALUE
-		6	TREE_VALUE
-		7	P_CA_UUID
-		*/
-		if (rs.getObject(3) != null) {
-			return rs.getDouble(3);
-		}
-		String result = rs.getString(4); //string
-		if (result != null) {
-			return result;
-		}
-		result = rs.getString(5); //list
-		if (result != null) {
-			return result;
-		}
-		result = rs.getString(6); //tree
-		if (result != null) {
-			return result;
-		}
-		return null;
-	}
-
-	@Override
-	public int getWpCount() {
-		return wpCount;
-	}
-
-	protected void setWpCount(int wpCount) {
-		this.wpCount = wpCount;
-	}
-
-	@Override
-	public boolean isDataColumn(QueryColumn column) {
-		return dataColumns != null && dataColumns.contains(column.getKey());
-	}
-	
-	public void setDataColumns(Set<String> dataColumns) {
-		this.dataColumns = dataColumns;
-	}
-
-	public String[] getTemporaryTableNames(){
-		return new String[]{ queryTempTable,
-				queryTempTable + "_LIST", //$NON-NLS-1$
-				queryTempTable + "_TREE"}; //$NON-NLS-1$
-	}
-
-	@Override
-	public void dispose(Session session) throws SQLException{
-		super.dispose(session);
-		session.doWork(new Work() {
-			@Override
-			public void execute(Connection c) throws SQLException {
-				engine.dropTables(c);
-				if (imageResults.getResultsTable() != null) engine.dropTable(c, imageResults.getResultsTable());
-
-			}
-		});
-	}
-	
-	
-	@Override
-	public IQueryResultSetIterator<? extends IAttachmentResultItem> getImageIterator(Session session) throws SQLException{
-		initImageData();
-
-		StringBuilder sb = new StringBuilder();
-		String part = ((DerbyObservationEngine)engine).getDistinctWaypointQuery("r.", true); //$NON-NLS-1$
-		
-		//join together attachments specifically associated with an observation
-		//or attachments associated with a waypoint that has an observation
-		//in the result set
-		sb.append("SELECT " + part + ", b.attach_uuid as attach_uuid FROM " ); //$NON-NLS-1$ //$NON-NLS-2$
-		sb.append(queryTempTable + " r "); //$NON-NLS-1$
-		sb.append(" join " + imageResults.getResultsTable() + " b "); //$NON-NLS-1$ //$NON-NLS-2$
-		sb.append("on ( b.ob_uuid is not null and r.ob_uuid = b.ob_uuid ) "); //$NON-NLS-1$
-		
-		sb.append(" UNION "); //$NON-NLS-1$
-		
-		part = ((DerbyObservationEngine)engine).getDistinctWaypointQuery("r.", false); //$NON-NLS-1$
-		
-		sb.append("SELECT foo.*, b.attach_uuid as attach_uuid FROM "); //$NON-NLS-1$
-		sb.append("(SELECT DISTINCT " + part + " FROM " + queryTempTable + " r ) foo"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		sb.append(" join " + imageResults.getResultsTable() + " b "); //$NON-NLS-1$ //$NON-NLS-2$
-		sb.append(" ON b.wp_uuid = foo.wp_uuid and b.ob_uuid is null"); //$NON-NLS-1$
-		
-		return new AttachmentResultSetIterator(session, 
-				e->engine.asQueryAttachmentResultItem(e, session),
-				()->sb.toString());
-	}
-	
-	@Override
-	public List<IAttachmentResultItem> getImageData(int offset, int pageSize) {
-		return imageResults.getImageData(offset, pageSize);
 	}
 
 	@Override
@@ -559,53 +89,9 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 	}
 
 	@Override
-	public int getImageCount() {
-		return imageResults.getImageCount();
+	protected String getDistinctWaypointQuery(String prefix, boolean includeObservation) {
+		return ((DerbyObservationEngine)engine).getDistinctWaypointQuery(prefix, includeObservation);
 	}
+
 	
-	private synchronized void initImageData() {
-		try(Session s = HibernateManager.openSession()){
-			s.beginTransaction();
-			try {
-				String imageTempTable = engine.createTempTableName();
-				
-				StringBuilder sb = new StringBuilder();
-				sb.append("CREATE TABLE "); //$NON-NLS-1$
-				sb.append(imageTempTable);
-				sb.append("(attach_uuid char(16) for bit data, wp_uuid char(16) for bit data, ob_uuid char(16) for bit data, seq_order integer GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1))"); //$NON-NLS-1$
-				s.createNativeQuery(sb.toString()).executeUpdate();
-				
-				sb = new StringBuilder();
-				sb.append(" INSERT INTO "); //$NON-NLS-1$
-				sb.append(imageTempTable + "(attach_uuid, wp_uuid, ob_uuid) "); //$NON-NLS-1$
-				sb.append(" SELECT z.attach_uuid, z.wp_uuid, z.ob_uuid FROM ( "); //$NON-NLS-1$
-				sb.append("SELECT c.uuid as attach_uuid, a.wp_time, a.wp_id, a.wp_uuid as wp_uuid, a.ob_uuid as ob_uuid" ); //$NON-NLS-1$
-				sb.append(" FROM "); //$NON-NLS-1$
-				sb.append( queryTempTable + " a "); //$NON-NLS-1$
-				sb.append(" JOIN "); //$NON-NLS-1$
-				sb.append(" smart.observation_attachment c on a.ob_uuid = c.obs_uuid "); //$NON-NLS-1$
-				sb.append( " UNION "); //$NON-NLS-1$
-				sb.append("SELECT c.uuid as attach_uuid, a.wp_time, a.wp_id, a.wp_uuid as wp_uuid, cast(null as char(16) for bit data) as ob_uuid " ); //$NON-NLS-1$
-				sb.append(" FROM "); //$NON-NLS-1$
-				sb.append( queryTempTable + " a "); //$NON-NLS-1$
-				sb.append(" JOIN "); //$NON-NLS-1$
-				sb.append(" smart.wp_attachments c on c.wp_uuid = a.wp_uuid "); //$NON-NLS-1$
-				sb.append(" ) z ORDER BY z.wp_time desc, z.wp_id "); //$NON-NLS-1$
-				s.createNativeQuery(sb.toString()).executeUpdate();
-				
-				sb = new StringBuilder();
-				sb.append("SELECT count(*) FROM "); //$NON-NLS-1$
-				sb.append(imageTempTable);
-				
-				int imageDataCnt = (int) s.createNativeQuery(sb.toString()).uniqueResult();
-				
-				imageResults.setResults(imageTempTable, imageDataCnt);
-				s.getTransaction().commit();
-			}catch (Exception ex) {
-				imageResults.setResults(null, -1);
-				s.getTransaction().rollback();
-				QueryPlugIn.log("Error computing attachment details: " + ex.getMessage(), ex); //$NON-NLS-1$
-			}
-		}
-	}
 }

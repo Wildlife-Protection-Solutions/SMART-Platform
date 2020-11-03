@@ -22,7 +22,7 @@
 package org.wcs.smart.entity.query.model.columns;
 
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
-import org.wcs.smart.entity.query.model.EntityQueryResultItem;
+import org.wcs.smart.entity.query.model.EntityObservationResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 
@@ -96,8 +96,8 @@ public class EntityAttributeQueryColumn extends QueryColumn {
 	 */
 	@Override
 	public Object getValue(IResultItem queryResultItem) {
-		if (queryResultItem instanceof EntityQueryResultItem) {
-			EntityQueryResultItem item = (EntityQueryResultItem) queryResultItem;
+		if (queryResultItem instanceof EntityObservationResultItem) {
+			EntityObservationResultItem item = (EntityObservationResultItem) queryResultItem;
 			Object x = item.getEntityAttributeValue(getKey());
 			if (x != null && getType() == QueryColumn.ColumnType.BOOLEAN){
 				return Boolean.valueOf((Double)x >= 0.5);

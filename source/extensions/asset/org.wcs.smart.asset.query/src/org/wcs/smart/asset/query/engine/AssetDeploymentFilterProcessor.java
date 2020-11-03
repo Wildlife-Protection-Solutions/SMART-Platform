@@ -567,7 +567,7 @@ public class AssetDeploymentFilterProcessor implements IFilterProcessor{
 		key = engine.addParameterValue(assetFilter.getAttributeKey());
 		where.append(prefix(AssetAttribute.class) + ".keyid = " + key); //$NON-NLS-1$
 			
-		String q = AssetFilterSqlGenerator.INSTANCE.asSql(assetFilter, tprefix, engine);
+		String q = AssetFilterSqlGenerator.INSTANCE.toSql(assetFilter, tprefix, engine);
 		where.append(" AND "); //$NON-NLS-1$
 		where.append(q);
 		

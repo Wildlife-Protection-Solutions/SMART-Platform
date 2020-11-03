@@ -43,19 +43,20 @@ import org.wcs.smart.entity.model.EntityAttributeValue;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.entity.query.model.EntityObservationQuery;
-import org.wcs.smart.entity.query.model.EntityQueryResultItem;
+import org.wcs.smart.entity.query.model.EntityObservationResultItem;
 import org.wcs.smart.entity.query.model.columns.FixedQueryColumn;
 import org.wcs.smart.entity.query.parser.internal.EntityAttributeFilter;
 import org.wcs.smart.entity.query.parser.internal.EntityTypeFilter;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
-import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.common.engine.test.ObservationQueryEngine;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.AttributeQueryColumn;
 import org.wcs.smart.query.model.CategoryQueryColumn;
@@ -76,7 +77,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author elitvin
  * @since 1.0.0
  */
-public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
+public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine implements ObservationQueryEngine<EntityObservationResultItem>  {
 
 	private String queryDataTable;
 	private int categoryCount;
@@ -112,7 +113,7 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
 		
 		queryDataTable = createTempTableName();
 		try{
-			result = new DerbyPagedObservationResult(queryDataTable, this, query);
+			result = new DerbyPagedObservationResult(this, query);
 		}catch (Exception ex){
 			throw new SQLException(ex);
 		}
@@ -208,8 +209,7 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
 	@Override
 	public void dropTables (Connection c) throws SQLException {
 		dropTable(c, queryDataTable);
-		dropTable(c, queryDataTable + "_LIST"); //$NON-NLS-1$
-		dropTable(c, queryDataTable + "_TREE"); //$NON-NLS-1$
+		dropTable(c, getObservationLabelTable());
 	}
 
 
@@ -295,7 +295,7 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
 			sql.append(queryDataTable);
 			sql.append(" SET ca_id = (select id FROM "); //$NON-NLS-1$
 			sql.append(DerbyEntityQueryEngine.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
-			sql.append("WHERE a.uuid = " + queryDataTable + ".p_ca_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append("WHERE a.uuid = " + queryDataTable + ".ca_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
 			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().executeUpdate(sql.toString());
 			
@@ -304,7 +304,7 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
 			sql.append(queryDataTable);
 			sql.append(" SET ca_name = (select name FROM "); //$NON-NLS-1$
 			sql.append(DerbyEntityQueryEngine.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
-			sql.append("WHERE a.uuid = " + queryDataTable + ".p_ca_uuid)");  //$NON-NLS-1$//$NON-NLS-2$
+			sql.append("WHERE a.uuid = " + queryDataTable + ".ca_uuid)");  //$NON-NLS-1$//$NON-NLS-2$
 			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().executeUpdate(sql.toString());
 		}
@@ -360,65 +360,14 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
 		
 		progress.split(13);
 		progress.subTask(Messages.DerbyObservationEngine_Progress_ListAttributesData);
-		WpoaLinkedData listData = new WpoaLinkedData("_list", "list_element_uuid") { //$NON-NLS-1$ //$NON-NLS-2$
-			@Override
-			public String getLabel(Session session, UUID cauuid, UUID uuid) {
-				return QueryDataModelManager.getInstance().getAttributeListItemLabel(session, cauuid, uuid);
-			}
-		};
-		populateAdditionalWpoaTable(c, session, listData);
-		
-		progress.split(3);
-		progress.subTask(Messages.DerbyObservationEngine_Progress_TreeAttributesData);
-		WpoaLinkedData treeData = new WpoaLinkedData("_tree", "tree_node_uuid") { //$NON-NLS-1$ //$NON-NLS-2$
-			@Override
-			public String getLabel(Session session, UUID cauuid, UUID uuid) {
-				return QueryDataModelManager.getInstance().getAttributeTreeNodeLabel(session, cauuid, uuid);
-			}
-		};
-		progress.split(3);
-		populateAdditionalWpoaTable(c, session, treeData);
+		populateListTreeDataTable(c, session);
+		addEntityAttributeLabels(c, session);
 		
 		progress.setWorkRemaining(0);
 	}
 
-	private void populateAdditionalWpoaTable(Connection c, Session session, WpoaLinkedData linkedData) throws Exception {
-		String sql = "CREATE TABLE " + queryDataTable + linkedData.getPostfix() + " (uuid char(16) for bit data, value varchar(1024))"; //$NON-NLS-1$ //$NON-NLS-2$
-		QueryPlugIn.logSql(sql.toString());
-		c.createStatement().execute(sql);
-
-		sql = "SELECT DISTINCT wpoa."+linkedData.getUuidColumn() //$NON-NLS-1$
-				+", r.P_CA_UUID FROM "  //$NON-NLS-1$
-				+ tableNamePrefix(WaypointObservationAttribute.class) + " inner join " //$NON-NLS-1$
-				+ queryDataTable + " r on " //$NON-NLS-1$
-				+ tablePrefix(WaypointObservationAttribute.class) + ".OBSERVATION_UUID = r.OB_UUID"; //$NON-NLS-1$
+	private void addEntityAttributeLabels(Connection c, Session session) throws Exception {
 		
-		QueryPlugIn.logSql(sql.toString());
-		
-		
-		String sql2 = "INSERT INTO "+queryDataTable+linkedData.getPostfix()+" VALUES (?, ?)"; //$NON-NLS-1$ //$NON-NLS-2$
-		QueryPlugIn.logSql(sql2.toString());
-		PreparedStatement statement = c.prepareStatement(sql2);
-		int count = 0;
-		try(ResultSet rs = c.createStatement().executeQuery(sql)) {
-			while (rs.next()) {
-				byte[] uuid = rs.getBytes(1);
-				if (uuid != null) {
-					byte[] cauuid = rs.getBytes(2);
-					String value = linkedData.getLabel(session, UuidUtils.byteToUUID(cauuid), UuidUtils.byteToUUID(uuid));
-					statement.setBytes(1, uuid);
-					statement.setString(2, value);
-					statement.addBatch();
-					count++;
-					if (count >= 100){
-						statement.executeBatch();
-						count = 0;
-					}
-				}
-			}
-			statement.executeBatch();
-		}
-	
 		//do the same thing for entity list and tree attributes
 		final List<String> entityTypes = new ArrayList<String>();
 		query.getFilter().getFilter().accept(new IFilterVisitor() {			
@@ -437,9 +386,11 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
 		
 		StringBuilder s = new StringBuilder();
 		clearParameters();
-		s.append("SELECT DISTINCT "); //$NON-NLS-1$
-		s.append(tablePrefix(EntityAttributeValue.class) + "." + linkedData.getUuidColumn()); //$NON-NLS-1$
-		s.append(", "); //$NON-NLS-1$
+		s.append(" select distinct "); //$NON-NLS-1$
+		s.append( "case when list_element_uuid is not null then list_element_uuid "); //$NON-NLS-1$
+		s.append(" when tree_node_uuid is not null then tree_node_uuid else null end, "); //$NON-NLS-1$
+		s.append( "case when list_element_uuid is not null then 'l' "); //$NON-NLS-1$
+		s.append(" when tree_node_uuid is not null then 't' else null end, "); //$NON-NLS-1$
 		s.append(tablePrefix(EntityType.class) + ".ca_uuid "); //$NON-NLS-1$
 		s.append(" FROM "); //$NON-NLS-1$
 		s.append(tableNamePrefix(EntityAttributeValue.class ));
@@ -474,15 +425,32 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
 		}
 		s.append(")"); //$NON-NLS-1$
 		
-		QueryPlugIn.logSql(s.toString());
-		try(ResultSet rs = parseQueryString(c, s.toString()).executeQuery()) {
-			while (rs.next()) {
-				byte[] uuid = rs.getBytes(1);
-				if (uuid != null) {
-					byte[] cauuid = rs.getBytes(2);
-					String value = linkedData.getLabel(session, UuidUtils.byteToUUID(cauuid), UuidUtils.byteToUUID(uuid));
-					statement.setBytes(1, uuid);
-					statement.setString(2, value);
+		String sql2 = "INSERT INTO " + getObservationLabelTable() + " VALUES (?, ?)"; //$NON-NLS-1$ //$NON-NLS-2$
+		QueryPlugIn.logSql(sql2.toString());
+		PreparedStatement statement = c.prepareStatement(sql2);
+		int count = 0;
+		try(PreparedStatement ps  = parseQueryString(c, s.toString())){
+			try(ResultSet rs = ps.executeQuery()) {
+				while (rs.next()) {
+					byte[] t = rs.getBytes(1);
+					if (t == null) continue;
+					
+					UUID uuid = UuidUtils.byteToUUID(rs.getBytes(1));
+					if (uuid == null) continue;
+					
+					String type = rs.getString(2);
+					UUID cauuid = UuidUtils.byteToUUID(rs.getBytes(3));
+					
+					String label = null;
+					if (type.equals("l")) { //$NON-NLS-1$
+						label = QueryDataModelManager.getInstance().getAttributeListItemLabel(session, cauuid, uuid);
+					}else if (type.equals("t")) { //$NON-NLS-1$
+						label = QueryDataModelManager.getInstance().getAttributeTreeNodeLabel(session, cauuid, uuid);
+					}
+					if (label == null) continue;
+					
+					statement.setBytes(1,  UuidUtils.uuidToByte((UUID)uuid));
+					statement.setString(2, label);
 					statement.addBatch();
 					count++;
 					if (count >= 100){
@@ -490,40 +458,15 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
 						count = 0;
 					}
 				}
+				statement.executeBatch();
 			}
-			statement.executeBatch();
-		}		
+		}	
 	}
 	
-	/**
-	 * Wrapper class for populating linked data (additional columns)
-	 * 
-	 * @author elitvin
-	 * @since 1.0.0
-	 */
-	private abstract class WpoaLinkedData {
-		private String postfix;
-		private String uuidColumn;
-
-		public WpoaLinkedData(String postfix, String uuidColumn) {
-			super();
-			this.postfix = postfix;
-			this.uuidColumn = uuidColumn;
-		}
-
-		public String getPostfix() {
-			return postfix;
-		}
-
-		public String getUuidColumn() {
-			return uuidColumn;
-		}
-		
-		public abstract String getLabel(Session session, UUID cauuid, UUID keyuuid);
-	}
+	
 
 	@Override
-	protected String getTemporaryTableSelectClause(boolean includeObservations) {
+	public String getTemporaryTableSelectClause(boolean includeObservations) {
 		StringBuilder sql = new StringBuilder();
 		sql.append(" SELECT DISTINCT "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".ca_uuid, "); //$NON-NLS-1$
@@ -547,10 +490,10 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
 	}
 
 	@Override
-	protected String getTemporaryTableCreateClause(String tableName) {
+	public String getTemporaryTableCreateClause(String tableName) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
-		sql.append("p_ca_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("ca_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("wp_uuid char(16) for bit data,"); //$NON-NLS-1$ 
 		sql.append("wp_source varchar(16),"); //$NON-NLS-1$
 		sql.append("wp_id varchar(32),"); //$NON-NLS-1$
@@ -571,17 +514,17 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
 	}
 	
 	@Override
-	protected EntityQueryResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException{
-		EntityQueryResultItem it = new EntityQueryResultItem();
+	public EntityObservationResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException{
+		EntityObservationResultItem it = new EntityObservationResultItem();
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
-		it.setConservationAreaUuid(UuidUtils.byteToUUID(rs.getBytes("p_ca_uuid"))); //$NON-NLS-1$
+		it.setConservationAreaUuid(UuidUtils.byteToUUID(rs.getBytes("ca_uuid"))); //$NON-NLS-1$
 		it.setSourceId(rs.getString("wp_source")); //$NON-NLS-1$
 		it.setWaypointUuid(UuidUtils.byteToUUID(rs.getBytes("wp_uuid"))); //$NON-NLS-1$
 		it.setWaypointId(rs.getString("wp_id")); //$NON-NLS-1$
 		it.setWaypointX(rs.getDouble("wp_x")); //$NON-NLS-1$
 		it.setWaypointY(rs.getDouble("wp_y")); //$NON-NLS-1$
-		it.setWpDateTime(rs.getTimestamp("wp_time").toLocalDateTime()); //$NON-NLS-1$
+		it.setWaypointDateTime(rs.getTimestamp("wp_time").toLocalDateTime()); //$NON-NLS-1$
 		it.setWaypointDirection(rs.getObject("wp_direction") == null ? null : rs.getFloat("wp_direction")); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setWaypointDistance(rs.getObject("wp_distance") == null ? null : rs.getFloat("wp_distance")); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setWaypointComment(rs.getString("wp_comment")); //$NON-NLS-1$
@@ -606,7 +549,7 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
 	}
 
 	@Override
-	protected void buildTemporaryTableIndexes(Connection c, String tableName)
+	public void buildTemporaryTableIndexes(Connection c, String tableName)
 			throws SQLException {
 		super.buildTemporaryTableIndexes(c, tableName);
 		
@@ -619,5 +562,21 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
 		QueryPlugIn.logSql(sql.toString());
 		c.createStatement().execute(sql.toString());
 		
+	}
+
+	@Override
+	public String getQueryDataTable() {
+		return queryDataTable;
+	}
+
+
+	@Override
+	public IAttachmentResultItem asQueryAttachmentResultItem(ResultSet rs, Session session) throws SQLException {
+		return null;
+	}
+
+	@Override
+	public String getObservationLabelTable() {
+		return queryDataTable + "_labels"; //$NON-NLS-1$
 	}
 }

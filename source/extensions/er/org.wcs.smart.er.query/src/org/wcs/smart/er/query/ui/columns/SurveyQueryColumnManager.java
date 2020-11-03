@@ -49,13 +49,13 @@ import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.SurveyQueryColumn;
 import org.wcs.smart.er.query.model.column.MissionPropertyQueryColumn;
 import org.wcs.smart.er.query.model.column.SamplingUnitAttributeQueryColumn;
-import org.wcs.smart.er.query.model.column.SurveyAttributeQueryColumn;
-import org.wcs.smart.er.query.model.column.SurveyCategoryQueryColumn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.ui.QueryColumnLabelProvider;
+import org.wcs.smart.query.model.AttributeQueryColumn;
+import org.wcs.smart.query.model.CategoryQueryColumn;
 import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
 
@@ -254,7 +254,7 @@ public class SurveyQueryColumnManager {
 						
 						int numCategory = QueryDataModelManager.getInstance().getActiveDepth();
 						for (int i = 0; i < numCategory; i++) {
-							cols.add(new SurveyCategoryQueryColumn(MessageFormat.format(Messages.SurveyQueryColumnManager_CategoryColumnLabel, new Object[]{i}), i));
+							cols.add(new CategoryQueryColumn(MessageFormat.format(Messages.SurveyQueryColumnManager_CategoryColumnLabel, new Object[]{i}), i));
 						}
 							
 						//sort attributes alphabetically
@@ -268,7 +268,7 @@ public class SurveyQueryColumnManager {
 							
 						for (Attribute att : atts) {
 							String name = att.getName();
-							cols.add(new SurveyAttributeQueryColumn(name, att.getKeyId(), att.getType()));
+							cols.add(new AttributeQueryColumn(name, att.getKeyId(), att.getType()));
 						}
 						dataModelColumns = cols.toArray(new QueryColumn[cols.size()]);
 						

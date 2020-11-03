@@ -45,7 +45,6 @@ import org.wcs.smart.asset.query.internal.AssetValueItemLabelProvider;
 import org.wcs.smart.asset.query.internal.Messages;
 import org.wcs.smart.asset.query.model.AssetDropItemFactory;
 import org.wcs.smart.asset.query.model.AssetFilterOption;
-import org.wcs.smart.asset.query.model.AssetQueryResultItem;
 import org.wcs.smart.asset.query.model.AssetSummaryQuery;
 import org.wcs.smart.asset.query.parser.internal.summary.AssetGroupBy;
 import org.wcs.smart.ca.Area;
@@ -1150,7 +1149,7 @@ public class AssetSummaryEngine extends AssetQueryEngine{
 	
 	
 	@Override
-	protected String getTemporaryTableSelectClause(boolean includeObservations) {
+	public String getTemporaryTableSelectClause(boolean includeObservations) {
 		StringBuilder sql = new StringBuilder();
 		sql.append(" SELECT DISTINCT "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".uuid, "); //$NON-NLS-1$
@@ -1164,7 +1163,7 @@ public class AssetSummaryEngine extends AssetQueryEngine{
 	}
 
 	@Override
-	protected String getTemporaryTableCreateClause(String tableName) {
+	public String getTemporaryTableCreateClause(String tableName) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
 		sql.append("wp_uuid char(16) for bit data,"); //$NON-NLS-1$
@@ -1175,19 +1174,13 @@ public class AssetSummaryEngine extends AssetQueryEngine{
 	}
 
 	@Override
-	protected void buildTemporaryTableIndexes(Connection c, String tableName)
+	public void buildTemporaryTableIndexes(Connection c, String tableName)
 			throws SQLException {
 		super.buildTemporaryTableIndexes(c, tableName);
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE INDEX " + tableName + "_wp_uuid_idx on " +  tableName + "(wp_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		QueryPlugIn.logSql(sql.toString());
 		c.createStatement().execute(sql.toString());
-	}
-
-	@Override
-	protected AssetQueryResultItem asQueryResultItem(ResultSet rs, Session session)
-			throws SQLException {
-		return null;
 	}
 
 }

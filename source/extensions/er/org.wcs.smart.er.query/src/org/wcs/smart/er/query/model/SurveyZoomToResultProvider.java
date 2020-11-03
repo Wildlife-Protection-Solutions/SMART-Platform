@@ -21,17 +21,7 @@
  */
 package org.wcs.smart.er.query.model;
 
-import java.text.MessageFormat;
-
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.widgets.Display;
-import org.hibernate.Session;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.observation.model.ObservationAttachment;
-import org.wcs.smart.observation.model.Waypoint;
-import org.wcs.smart.observation.model.WaypointAttachment;
-import org.wcs.smart.observation.query.model.types.AbstractZoomToInfoProvider;
-import org.wcs.smart.query.common.engine.IAttachmentResultItem;
+import org.wcs.smart.observation.query.model.types.ZoomToInfoProvider;
 import org.wcs.smart.query.common.engine.IResultItem;
 
 /**
@@ -40,49 +30,15 @@ import org.wcs.smart.query.common.engine.IResultItem;
  * @author Emily
  *
  */
-public class SurveyZoomToResultProvider extends AbstractZoomToInfoProvider {
+public class SurveyZoomToResultProvider extends ZoomToInfoProvider {
 
 	@Override
 	public void doWork(IResultItem resultItem) {
-		if (resultItem instanceof SurveyQueryResultItem) {
-			SurveyQueryResultItem item = (SurveyQueryResultItem) resultItem;
-			
-			if (item.getWaypointUuid() != null){
-				zoomTo(item.getWaypointX(null), item.getWaypointY(null));
-			}else{
-				zoomTo(item.asGeometry(SurveyQueryResultItem.TRACK_GEOMCOLUMN_KEY));
-			}
-			return;
-		} 
+		
 		if (resultItem instanceof MissionTrackResultItem){
 			zoomTo(((MissionTrackResultItem) resultItem).asGeometry(MissionTrackResultItem.TRACK_GEOMCOLUMN_KEY));
 			return;
 		}
-		
-		if (resultItem instanceof IAttachmentResultItem) {
-			Waypoint wp = null;
-			IAttachmentResultItem data = (IAttachmentResultItem)resultItem;
-			try(Session s = HibernateManager.openSession()){
-				ObservationAttachment a = s.get(ObservationAttachment.class, data.getAttachment().getUuid());
-				if (a != null) {
-					wp = a.getObservation().getWaypoint();
-				}else {
-					WaypointAttachment w = s.get(WaypointAttachment.class, data.getAttachment().getUuid());
-					if (w != null) wp = w.getWaypoint();
-				}
-				if (wp != null) {
-					wp.getX(); wp.getY();
-				}
-			}
-			if (wp != null) {
-				zoomTo(wp.getX(), wp.getY());
-				return;
-			}
-		} 
-	
-		MessageDialog.openError(
-				Display.getDefault().getActiveShell(),
-				ERROR_STR,
-				MessageFormat.format(OP_NOT_SUPPORTED_STR,resultItem.getClass().getName()));
+		super.doWork(resultItem);
 	}
 }

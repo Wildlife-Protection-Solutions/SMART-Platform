@@ -25,7 +25,7 @@ package org.wcs.smart.patrol.query.engine;
 import org.hibernate.Session;
 import org.wcs.smart.query.common.engine.IQueryEngine;
 
-public interface IPatrolQueryEngine extends IQueryEngine {
+public interface IPatrolQueryEngine extends IQueryEngine  {
 	
 	public Session getCurrentConnection();
 	

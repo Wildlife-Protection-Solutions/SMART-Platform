@@ -223,6 +223,8 @@ public class Upgrader630To700 implements IDatabaseUpgrader {
 
 				
 				"CREATE DERBY AGGREGATE smart.unionarea FOR blob RETURNS double precision EXTERNAL NAME 'org.wcs.smart.util.AreaUnionAggregate'", //$NON-NLS-1$
+				"CREATE DERBY AGGREGATE smart.concatagg FOR long varchar RETURNS long varchar EXTERNAL NAME 'org.wcs.smart.util.StringConcatAggregate'", //$NON-NLS-1$
+
 				"CREATE FUNCTION smart.buffer(geom blob, buffer double precision) returns blob LANGUAGE JAVA NOT deterministic external name 'org.wcs.smart.util.GeometryUtils.buffer' PARAMETER STYLE JAVA NO SQL RETURNS NULL ON NULL INPUT", //$NON-NLS-1$
 				
 				//id integer to string

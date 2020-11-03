@@ -157,6 +157,7 @@ public class Messages extends NLS {
 	public static String AttributeInfoPanel_MoveUpBtn;
 	public static String AttributeInfoPanel_Regex_Label;
 	public static String AttributeInfoPanel_Required_Label;
+	public static String AttributeInfoPanel_SaveError;
 	public static String AttributeInfoPanel_SaveErrorMessage;
 	public static String AttributeInfoPanel_SavingProgressMessage;
 	public static String AttributeInfoPanel_SortButton;

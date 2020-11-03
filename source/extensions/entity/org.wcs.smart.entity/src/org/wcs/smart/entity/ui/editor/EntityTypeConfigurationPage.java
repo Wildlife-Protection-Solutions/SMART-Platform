@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -84,9 +85,9 @@ import org.hibernate.query.Query;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DataModelManager;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.entity.EntityPermissionManager;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.event.EntityEventManager;
@@ -709,9 +710,12 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 							monitor.beginTask(Messages.EntityTypeConfigurationPage_LoadAttributeProgressName, 1);
 							//we do this to ensure the local is setup propery as this thread is not
 							//the same thread as the sesssion <s> was opened in.
+							
 							HibernateManager.initContext();
-							List<Attribute> atts = QueryFactory.buildQuery(s, Attribute.class,"conservationArea", SmartDB.getCurrentConservationArea()).getResultList(); //$NON-NLS-1$
-							dmAttributes.addAll(atts);
+							
+							dmAttributes.addAll(QueryFactory.buildQuery(s, Attribute.class, 
+									new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list()); //$NON-NLS-1$
+							
 						}
 					});
 				}catch (Exception ex){
@@ -720,7 +724,9 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 				}
 				
 				//display add attribute dialog 1
-				DataModel tmpDm = new DataModel(SmartDB.getCurrentConservationArea(), Collections.<Category>emptyList(), dmAttributes);
+				List<Attribute> validAttribute = dmAttributes.stream().filter(e->e.getType() != AttributeType.MLIST).collect(Collectors.toList());
+				DataModel tmpDm = new DataModel(SmartDB.getCurrentConservationArea(), 
+						Collections.emptyList(), validAttribute);
 				AddAttributeDialog1 d1 = new AddAttributeDialog1(parentEditor.getSite().getShell(), 
 					null, tmpDm, SmartDB.getCurrentLanguage(), s){
 				
@@ -752,13 +758,18 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 					att.setConservationArea(SmartDB.getCurrentConservationArea());
 				
 					AddAttributeDialog2 d2 = new AddAttributeDialog2(getSite().getShell(), att,
-							tmpDm.getAttributes(),
+							dmAttributes,
 							SmartDB.getCurrentConservationArea().getDefaultLanguage(), s);
 				
 					//show new attribute dialog
 					ret = d2.open();
 					if (ret == Window.CANCEL){
 						return;
+					}
+					if (att.getType() == AttributeType.MLIST) {
+						Exception ex = new Exception("Mutli select list attributes are not supported for Entities."); //$NON-NLS-1$
+						EntityPlugIn.displayLog(ex.getMessage(), ex);
+						return ;
 					}
 					attributeToAdd.add(att);	
 					DataModelManager.INSTANCE.fireAddListener(s, att);

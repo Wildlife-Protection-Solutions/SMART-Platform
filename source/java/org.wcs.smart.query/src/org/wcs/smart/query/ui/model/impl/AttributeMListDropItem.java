@@ -259,7 +259,10 @@ public class AttributeMListDropItem extends DropItem implements IFilterDropItem{
 		if (currentOp != null) {
 			opViewer.setSelection(new StructuredSelection(currentOp));
 		}
-		opViewer.addSelectionChangedListener(e->queryChanged());
+		opViewer.addSelectionChangedListener(e->{
+			currentOp = (Operator) opViewer.getStructuredSelection().getFirstElement();
+			queryChanged();	
+		});
 
 		Composite color = new Composite(main, SWT.NONE);
 		color.setLayout(new GridLayout());

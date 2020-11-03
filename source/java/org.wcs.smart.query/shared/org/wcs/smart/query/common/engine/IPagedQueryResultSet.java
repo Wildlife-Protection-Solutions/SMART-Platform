@@ -35,7 +35,7 @@ import org.wcs.smart.query.model.QueryColumn;
  * @author Emily
  *
  */
-public interface IPagedQueryResultSet extends IQueryResult {
+public interface IPagedQueryResultSet<T extends IResultItem> extends IQueryResult {
 	/**
 	 * Reasonable page size for ui tables
 	 */
@@ -55,7 +55,7 @@ public interface IPagedQueryResultSet extends IQueryResult {
 	 * @param pageSize
 	 * @return
 	 */
-	public List<? extends IResultItem> getData(int offset, int pageSize);
+	public List<T> getData(int offset, int pageSize);
 	
 	/**
 	 * This is only applicable to result sets that
@@ -75,7 +75,7 @@ public interface IPagedQueryResultSet extends IQueryResult {
 	 * @param pageSize
 	 * @return
 	 */
-	public IQueryResultSetIterator<? extends IResultItem> iterator(int pageSize);
+	public IQueryResultSetIterator<T> iterator(int pageSize);
 
 	/**
 	 * Creates an iterator that will iterator over all 
@@ -85,7 +85,7 @@ public interface IPagedQueryResultSet extends IQueryResult {
 	 * @param pageSize
 	 * @return
 	 */
-	public IQueryResultSetIterator<? extends IResultItem> iterator(int pageSize, Session session);
+	public IQueryResultSetIterator<T> iterator(int pageSize, Session session);
 	
 	/**
 	 * Sets the current sorting column.

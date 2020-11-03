@@ -24,7 +24,8 @@ package org.wcs.smart.er.query.model.column;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.er.query.model.MissionTrackResultItem;
-import org.wcs.smart.er.query.model.SurveyQueryResultItem;
+import org.wcs.smart.er.query.model.SurveyObservationResultItem;
+import org.wcs.smart.er.query.model.SurveyWaypointResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 
@@ -67,8 +68,12 @@ public class SamplingUnitAttributeQueryColumn  extends QueryColumn {
 	
 	@Override
 	public Object getValue(IResultItem item) {
-		if (item instanceof SurveyQueryResultItem){
-			SurveyQueryResultItem i = (SurveyQueryResultItem) item;			
+		if (item instanceof SurveyWaypointResultItem){
+			SurveyWaypointResultItem i = (SurveyWaypointResultItem) item;			
+			String attributeKey = getKey().split(":")[1]; //$NON-NLS-1$
+			return i.getSamplingUnitAttributeValue(attributeKey);
+		}else if (item instanceof SurveyObservationResultItem){
+			SurveyObservationResultItem i = (SurveyObservationResultItem) item;			
 			String attributeKey = getKey().split(":")[1]; //$NON-NLS-1$
 			return i.getSamplingUnitAttributeValue(attributeKey);
 		}else if (item instanceof MissionTrackResultItem){

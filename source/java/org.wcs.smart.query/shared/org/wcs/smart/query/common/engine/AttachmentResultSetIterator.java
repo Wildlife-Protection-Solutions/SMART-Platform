@@ -67,7 +67,7 @@ public class AttachmentResultSetIterator implements IQueryResultSetIterator<IAtt
 	}
 
 	@Override
-	public IResultItem next() {		
+	public IAttachmentResultItem next() {		
 		try {
 			return resultItemGenerator.apply(rs);
 		}catch (Exception ex) {

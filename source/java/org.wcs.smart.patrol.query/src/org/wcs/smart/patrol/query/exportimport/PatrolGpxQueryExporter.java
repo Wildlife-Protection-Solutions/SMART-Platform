@@ -48,6 +48,7 @@ import org.wcs.smart.gpx.xml.TrkType;
 import org.wcs.smart.gpx.xml.TrksegType;
 import org.wcs.smart.gpx.xml.WptType;
 import org.wcs.smart.patrol.query.internal.Messages;
+import org.wcs.smart.patrol.query.model.IPatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
 import org.wcs.smart.patrol.query.model.PatrolQuery;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
@@ -56,6 +57,7 @@ import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.engine.MemoryQueryResult;
+import org.wcs.smart.query.common.engine.test.WaypointQueryResultItem;
 import org.wcs.smart.query.common.importexport.SimpleQueryExporter;
 import org.wcs.smart.query.common.model.GridQueryResult;
 import org.wcs.smart.query.common.model.SimpleQuery;
@@ -128,10 +130,11 @@ public class PatrolGpxQueryExporter extends SimpleQueryExporter implements IQuer
 
 	@Override
 	protected void writeRow(IResultItem row) throws Exception {
+		if (row instanceof IPatrolQueryResultItem) {
+			recordWaypoint((IPatrolQueryResultItem)row);
+		}
 		if (row instanceof PatrolQueryResultItem) {
-			PatrolQueryResultItem item = (PatrolQueryResultItem) row;
-			recordWaypoint(item);
-			recordTrack(item);
+			recordTrack((PatrolQueryResultItem)row);
 		}
 	}
 
@@ -173,20 +176,20 @@ public class PatrolGpxQueryExporter extends SimpleQueryExporter implements IQuer
 		}
 	}
 
-	private boolean hasWaypoint(PatrolQueryResultItem item) {
-		return item.getWaypointDate() != null && item.getWaypointTime() != null;
-	}
 	
-	private void recordWaypoint(PatrolQueryResultItem item) throws DatatypeConfigurationException {
-		if (hasWaypoint(item)) {
+	
+	private void recordWaypoint(IPatrolQueryResultItem item) throws DatatypeConfigurationException {
+		if (item instanceof WaypointQueryResultItem) {
+			WaypointQueryResultItem it = (WaypointQueryResultItem)item;
+			
 			WptType w = new WptType();
-			double x = item.getWaypointX(null);
-			double y = item.getWaypointY(null);
+			double x = it.getWaypointX(null);
+			double y = it.getWaypointY(null);
 			w.setLon(new BigDecimal(x));
 			w.setLat(new BigDecimal(y));
 			
-			w.setTime(toXmlTime(item.getWaypointDate(), item.getWaypointTime()));
-			w.setCmt(item.getWaypointComment());
+			w.setTime(toXmlTime(it.getWaypointDateTime().toLocalDate(), it.getWaypointDateTime().toLocalTime()));
+			w.setCmt(it.getWaypointComment());
 
 			gpx.getWpt().add(w);
 		}

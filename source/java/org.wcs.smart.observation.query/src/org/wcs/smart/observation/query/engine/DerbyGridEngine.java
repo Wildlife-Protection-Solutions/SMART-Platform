@@ -47,7 +47,6 @@ import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.query.internal.Messages;
 import org.wcs.smart.observation.query.model.ObservationGriddedQuery;
-import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.common.engine.IQueryResult;
@@ -464,7 +463,7 @@ public class DerbyGridEngine extends AbstractDerbyObservationQueryEngine{
 	}
 
 	@Override
-	protected String getTemporaryTableSelectClause(boolean includeObservations) {
+	public String getTemporaryTableSelectClause(boolean includeObservations) {
 		StringBuilder sql = new StringBuilder();
 		sql.append(" SELECT DISTINCT "); //$NON-NLS-1$
 		
@@ -479,7 +478,7 @@ public class DerbyGridEngine extends AbstractDerbyObservationQueryEngine{
 	}
 
 	@Override
-	protected String getTemporaryTableCreateClause(String tableName) {
+	public String getTemporaryTableCreateClause(String tableName) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
 		sql.append("wp_uuid char(16) for bit data,"); //$NON-NLS-1$
@@ -489,7 +488,7 @@ public class DerbyGridEngine extends AbstractDerbyObservationQueryEngine{
 	}
 
 	@Override
-	protected void buildTemporaryTableIndexes(Connection c, String tableName)
+	public void buildTemporaryTableIndexes(Connection c, String tableName)
 			throws SQLException {
 		super.buildTemporaryTableIndexes(c, tableName);
 		
@@ -498,12 +497,5 @@ public class DerbyGridEngine extends AbstractDerbyObservationQueryEngine{
 		QueryPlugIn.logSql(sql.toString());
 		c.createStatement().execute(sql.toString());
 	}
-
-	@Override
-	protected ObservationQueryResultItem asQueryResultItem(ResultSet rs,
-			Session session) throws SQLException {
-		return null;
-	}
-
 	
 }

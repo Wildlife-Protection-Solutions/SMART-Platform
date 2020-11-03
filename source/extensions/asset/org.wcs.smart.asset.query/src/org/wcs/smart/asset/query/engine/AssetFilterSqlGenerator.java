@@ -37,8 +37,6 @@ import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.model.filter.AreaFilter;
 import org.wcs.smart.query.model.filter.AreaFilter.AreaFilterGeometryType;
 import org.wcs.smart.query.model.filter.AttributeFilter;
-import org.wcs.smart.query.model.filter.CategoryAttributeFilter;
-import org.wcs.smart.query.model.filter.CategoryFilter;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.IFilter;
@@ -71,13 +69,12 @@ public class AssetFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	@Override
 	public String toSql(IFilter filter, IQueryEngine engine) throws SQLException{
 		if (filter instanceof AssetFilter){
-			return asSql((AssetFilter)filter, engine);
+			return toSql((AssetFilter)filter, engine);
 		}else if (filter instanceof ConservationAreaFilter){
 			return asSql((ConservationAreaFilter)filter, engine.tablePrefix(Waypoint.class), engine);
 		}else{
 			return super.toSql(filter, engine); 
 		}
-		
 	}
 	
 	
@@ -85,7 +82,7 @@ public class AssetFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	 * Area filter
 	 */
 	@Override
-	protected String asSql(AreaFilter filter, IQueryEngine engine){
+	protected String toSql(AreaFilter filter, IQueryEngine engine){
 		StringBuilder sb = new StringBuilder();
 		if (filter.getType() != null) {
 			if (filter.getGeometryType() == AreaFilterGeometryType.WAYPOINT){
@@ -112,42 +109,11 @@ public class AssetFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 		return sb.toString();
 	}
 	
-	/*
-	 * Attribute filter
-	 */
-	@Override
-	protected String asSql(AttributeFilter filter, IQueryEngine engine) throws SQLException{
-		FilterTable t = ((AssetQueryEngine)engine).filterTables.get(filter);
-		if (t != null) return t.tablename + "." + t.columnname + " is not null";  //$NON-NLS-1$//$NON-NLS-2$
-		
-		return super.asSql(filter, engine);
-	}
-	
-	
-	/*
-	 * Category filter
-	 */
-	@Override
-	protected String asSql(CategoryFilter filter, IQueryEngine engine) throws SQLException{
-		FilterTable t = ((AssetQueryEngine)engine).filterTables.get(filter);
-		if (t != null) return t.tablename + "." + t.columnname + " is not null";  //$NON-NLS-1$//$NON-NLS-2$\
-		return super.asSql(filter, engine);
-	}
-	
-	/*
-	 * Category attribute filter
-	 */
-	@Override
-	protected String asSql(CategoryAttributeFilter filter, IQueryEngine engine) throws SQLException{
-		FilterTable t = ((AssetQueryEngine)engine).filterTables.get(filter);
-		if (t != null) return t.tablename + "." + t.columnname + " is not null";  //$NON-NLS-1$//$NON-NLS-2$\
-		return super.asSql(filter, engine);	
-	}
-		
+
 	/*
 	 * Asset Filter
 	 */
-	protected String asSql(AssetFilter filter, IQueryEngine engine) throws SQLException{
+	protected String toSql(AssetFilter filter, IQueryEngine engine) throws SQLException{
 		FilterTable t = ((AssetQueryEngine)engine).filterTables.get(filter);
 		if (t != null) return t.tablename + "." + t.columnname + " is not null";  //$NON-NLS-1$//$NON-NLS-2$
 		
@@ -159,7 +125,7 @@ public class AssetFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	 * Date Filter
 	 */
 	@Override
-	protected String asSql(DateFilter filter, IQueryEngine engine) throws SQLException{
+	protected String toSql(DateFilter filter, IQueryEngine engine) throws SQLException{
 		String table = engine.tablePrefix(Waypoint.class);
 		String field = "datetime"; //$NON-NLS-1$
 		
@@ -190,7 +156,7 @@ public class AssetFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	/*
 	 * Asset Attribute filter
 	 */
-	public String asSql(AssetAttributeFilter filter, String valuePrefix, IQueryEngine engine) throws SQLException{
+	public String toSql(AssetAttributeFilter filter, String valuePrefix, IQueryEngine engine) throws SQLException{
 		
 		if (filter.getAttributeType() == AttributeType.BOOLEAN){
 			return " (" + valuePrefix + ".double_value1 > 0.5 ) ";			//$NON-NLS-1$ //$NON-NLS-2$

@@ -27,7 +27,7 @@ import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.patrol.query.engine.DerbyPagedObservationResult;
 import org.wcs.smart.patrol.query.internal.Messages;
-import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
+import org.wcs.smart.patrol.query.model.PatrolObservationResultItem;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.IResultItem;
@@ -54,7 +54,7 @@ public class EditObservationResultInfoProvider extends IQueryEditCommand {
 
 	@Override
 	public boolean doWork(IResultItem resultItem, IQueryResult result) {
-		PatrolQueryResultItem item = (PatrolQueryResultItem)resultItem;
+		PatrolObservationResultItem item = (PatrolObservationResultItem)resultItem;
 		EditObservationDialog dialog = new EditObservationDialog(Display.getDefault().getActiveShell(), item.getObservationUuid());
 		if (dialog.open() == Window.OK){
 			try{

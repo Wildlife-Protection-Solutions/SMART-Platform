@@ -73,8 +73,6 @@ import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.filter.summary.MissionValueItem;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.SurveyGriddedQuery;
-import org.wcs.smart.er.query.model.SurveyQueryAttachmentResultItem;
-import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.map.raster.GridMetadata;
 import org.wcs.smart.observation.model.Waypoint;
@@ -109,6 +107,7 @@ import org.wcs.smart.query.model.summary.IValueItem;
 import org.wcs.smart.query.model.summary.IValueItem.ValueType;
 
 public class DerbyGridEngine extends DerbySurveyQueryEngine{
+	
 	private GridQueryResult myResults;
 	
 	private SurveyGriddedQuery query;
@@ -151,9 +150,9 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 			public void execute(Connection c) throws SQLException {
 				SubMonitor progress = SubMonitor.convert(monitor, Messages.DerbyGridEngine_RunQueryProgress, 100);
 
-				SurveyDesignFilter dsFilter = null;
+				designFilter = null;
 				if (query.getSurveyDesign() != null){
-					dsFilter = SurveyDesignFilter.createStringFilter(query.getSurveyDesign());
+					designFilter = SurveyDesignFilter.createStringFilter(query.getSurveyDesign());
 				}
 				
 				ConservationAreaFilter caFilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
@@ -179,7 +178,7 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 					//get numerator results
 					Collection<QueryGridResultItem> numeratorResults = getItems(
 							gridDef, numerator, query.getQueryDefinition().getValueFilter(), 
-							dsFilter, caFilter, c, session, progress.split(30), true);
+							caFilter, c, session, progress.split(30), true);
 					
 					//apply denominator results
 					if (denominator != null){
@@ -191,7 +190,9 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 						}
 						//computer denominator results
 						//only recompute filter if filter is different
-						Collection<QueryGridResultItem> denominatorResults = getItems(gridDef, denominator, query.getQueryDefinition().getRateFilter(), dsFilter, caFilter, c, session, progress.split(30), !isSame);
+						Collection<QueryGridResultItem> denominatorResults = getItems(gridDef, denominator, 
+								query.getQueryDefinition().getRateFilter(), caFilter, c, session, 
+								progress.split(30), !isSame);
 						HashMap<String, Double> items = new HashMap<String, Double>();
 						for (QueryGridResultItem it : denominatorResults){
 							items.put(it.getTileId(), it.getValue());
@@ -219,7 +220,7 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 						items.put(it.getTileId(), it);
 					}
 
-					List<QueryGridResultItem> missionLocations = computeMissionExistance(c, gridDef, dsFilter, caFilter);
+					List<QueryGridResultItem> missionLocations = computeMissionExistance(c, gridDef, designFilter, caFilter);
 					for (QueryGridResultItem it : missionLocations){
 						if (items.get(it.getTileId()) == null){ 
 							QueryGridResultItem newitem = new QueryGridResultItem();
@@ -255,8 +256,7 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 	 * 
 	 */
 	private Collection<QueryGridResultItem> getItems(Grid gridDef, IValueItem value, 
-			QueryFilter filter, SurveyDesignFilter sdFilter, 
-			ConservationAreaFilter caFilter, Connection c, Session session, 
+			QueryFilter filter, ConservationAreaFilter caFilter, Connection c, Session session, 
 			IProgressMonitor monitor, boolean needsFilter) throws Exception{
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.DerbyGridEngine_CreateObsTableProgress, 100);
 		
@@ -302,7 +302,7 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 				hasTrackFilter = needstracks[0];
 			}
 			
-			IFilterProcessor filterer = super.getFilterProcessor(filter.getFilterType(), dataTable, sdFilter, query);
+			IFilterProcessor filterer = super.getFilterProcessor(filter.getFilterType(), dataTable, query);
 			try{
 				filterer.processFilter(c, filter.getFilter(), dateFilter, caFilter, 
 					needsObservation, false, progress.split(90));
@@ -672,7 +672,7 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 	}
 
 	@Override
-	protected String getTemporaryTableSelectClause(boolean includeObservations) {
+	public String getTemporaryTableSelectClause(boolean includeObservations) {
 		StringBuilder sql = new StringBuilder();
 		sql.append(" SELECT DISTINCT "); //$NON-NLS-1$
 		sql.append(tablePrefix(SurveyDesign.class) + ".ca_uuid, "); //$NON-NLS-1$
@@ -710,7 +710,7 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 	}
 
 	@Override
-	protected String getTemporaryTableCreateClause(String tableName) {
+	public String getTemporaryTableCreateClause(String tableName) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
 		
@@ -738,7 +738,7 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 	}
 
 	@Override
-	protected void buildTemporaryTableIndexes(Connection c, String tableName)
+	public void buildTemporaryTableIndexes(Connection c, String tableName)
 			throws SQLException {
 		super.buildTemporaryTableIndexes(c, tableName);
 		
@@ -748,17 +748,6 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 		c.createStatement().execute(sql.toString());
 	}
 
-	@Override
-	protected SurveyQueryResultItem asQueryResultItem(ResultSet rs, Session session)
-			throws SQLException {
-		return null;
-	}
-
-	@Override
-	protected SurveyQueryAttachmentResultItem asQueryAttachmentResultItem(ResultSet rs, Session session)
-			throws SQLException {
-		return null;
-	}
 	
 	private Collection<QueryGridResultItem> computeSurveyValue(Connection c,
 			MissionValueItem item, 

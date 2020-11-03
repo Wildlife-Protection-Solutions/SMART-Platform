@@ -26,7 +26,7 @@ import java.util.List;
 
 import org.wcs.smart.entity.query.model.EntityGriddedQuery;
 import org.wcs.smart.entity.query.model.EntityObservationQuery;
-import org.wcs.smart.entity.query.model.EntityQueryResultItem;
+import org.wcs.smart.entity.query.model.EntityObservationResultItem;
 import org.wcs.smart.entity.query.model.EntityWaypointQuery;
 import org.wcs.smart.report.birt.map.MapLayerInfo;
 import org.wcs.smart.report.birt.map.MapLayerInfo.LayerType;
@@ -54,7 +54,7 @@ public class QueryMapLayer extends AbstractQueryMapLayer{
 	public List<MapLayerInfo> getGeometryOptions(String queryTypeKey){
 		if (queryTypeKey.equals(EntityObservationQuery.KEY) ||
 				queryTypeKey.equals(EntityWaypointQuery.KEY)){
-			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.POINT, EntityQueryResultItem.WAYPOINT_GEOM_COLUMNKEY);
+			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.POINT, EntityObservationResultItem.GEOMCOLUMN_KEY);
 			return Collections.singletonList(def);
 		}else if (queryTypeKey.equals(EntityGriddedQuery.KEY)){
 			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.RASTER, null);

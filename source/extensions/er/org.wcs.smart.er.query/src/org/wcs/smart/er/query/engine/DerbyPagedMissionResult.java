@@ -36,9 +36,13 @@ import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.io.WKBReader;
 import org.wcs.smart.er.query.ERQueryPlugIn;
+import org.wcs.smart.er.query.model.ISurveyQueryResultItem;
 import org.wcs.smart.er.query.model.SurveyQueryColumn;
+import org.wcs.smart.er.query.model.column.MissionPropertyQueryColumn;
+import org.wcs.smart.er.query.model.column.SamplingUnitAttributeQueryColumn;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.model.AbstractPagedQueryResultSet;
+import org.wcs.smart.query.model.QueryColumn;
 
 /**
  * Paged result set for mission queries. 
@@ -46,19 +50,29 @@ import org.wcs.smart.query.common.engine.IResultItem;
  * @author Emily
  *
  */
-public class DerbyPagedMissionResult extends AbstractSurveyPagedResult {
+public class DerbyPagedMissionResult extends AbstractPagedQueryResultSet<ISurveyQueryResultItem> {
 
 	private int missionCnt;
+	private int itemCnt;
 	
-	public DerbyPagedMissionResult(String queryTempTable, DerbySurveyQueryEngine engine) {
-		this.queryTempTable = queryTempTable;
+	private DerbyMissionEngine engine;
+	private DerbyMissionTrackEngine engine2;
+	protected boolean hasSortColumns = false;
+
+	
+	private Envelope bounds;
+	
+	protected  QueryColumn sortColumn = null;
+	protected  QueryColumn lastSortColumn = null;
+	protected int direction = SWT.UP;
+	
+	
+	public DerbyPagedMissionResult(DerbyMissionEngine engine) {
 		this.engine = engine;
 	}
 
-	public DerbyPagedMissionResult(String queryTempTable, int itemCount, DerbySurveyQueryEngine engine) {
-		this.queryTempTable = queryTempTable;
-		this.itemCount = itemCount;
-		this.engine = engine;
+	public DerbyPagedMissionResult(DerbyMissionTrackEngine engine) {
+		this.engine2 = engine;
 	}
 	
 	/**
@@ -69,6 +83,10 @@ public class DerbyPagedMissionResult extends AbstractSurveyPagedResult {
 		this.missionCnt = cnt;
 	}
 	
+	public void setItemCnt(int cnt) {
+		this.itemCnt = cnt;
+	}
+	
 	/**
 	 * 
 	 * @return the unique mission cnt
@@ -77,23 +95,32 @@ public class DerbyPagedMissionResult extends AbstractSurveyPagedResult {
 		return this.missionCnt;
 	}
 	
+	public int getItemCnt() {
+		return this.itemCnt;
+	}
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) return true;
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
 		DerbyPagedMissionResult o = (DerbyPagedMissionResult)obj;
-		return Objects.equals(queryTempTable, o.queryTempTable);
+		if (engine != null) {
+			return Objects.equals(engine2.getQueryDataTable(), o.engine2.getQueryDataTable());
+		}
+		return Objects.equals(engine.getQueryDataTable(), o.engine.getQueryDataTable());
 	}
 	
 	@Override
 	public int hashCode(){
-		return Objects.hash(queryTempTable);
+		if (engine2 != null) return Objects.hash(engine2.getQueryDataTable()); 
+		return Objects.hash(engine.getQueryDataTable());
 	}
 	
+	
 	@Override
-	public List<IResultItem> getResults(final Session session, ResultSet rs, int from, int pageSize) throws SQLException {
-		final List<IResultItem> items = new ArrayList<IResultItem>();
+	public List<ISurveyQueryResultItem> getResults(final Session session, ResultSet rs, int from, int pageSize) throws SQLException {
+		final List<ISurveyQueryResultItem> items = new ArrayList<>();
 		rs.absolute(from);
 		int to = from + pageSize;
 		if (to >= itemCount) {
@@ -101,43 +128,32 @@ public class DerbyPagedMissionResult extends AbstractSurveyPagedResult {
 		}
 		for(int x = from; x < to; x++) {
 			rs.next();
-			IResultItem it = engine.asQueryResultItem(rs, session);
+			ISurveyQueryResultItem it = engine == null ? engine2.asQueryResultItem(rs, session) : engine.asQueryResultItem(rs, session);
 			items.add(it);
 		}
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
-				attachMissionProperties(items, c, session);
-				attachSamplingUnitAttributes(items, c, session);
+				SurveyPagedResultUtils.attachMissionProperties( items, c, session);
+				SurveyPagedResultUtils.attachSamplingUnitAttributes(items, c, session);
 			}
 		});
 		return items;
 	}
 
-	@Override
+	
 	protected String buildSortSql() {
 		if (sortColumn == null || direction == SWT.NONE) {
-			if (engine instanceof DerbyMissionTrackEngine) {
-				//default sort by track time, mission start time, missiongid 
-				StringBuilder sb = new StringBuilder();
-				sb.append("ORDER BY "); //$NON-NLS-1$
-				sb.append(SurveyQueryColumn.getDbColumnName(SurveyQueryColumn.FixedColumns.MISSION_TRACKDATE.getKey()));
-				sb.append(" DESC, "); //$NON-NLS-1$
-				sb.append(SurveyQueryColumn.getDbColumnName(SurveyQueryColumn.FixedColumns.MISSION_START.getKey()));
-				sb.append(" DESC, "); //$NON-NLS-1$
-				sb.append(SurveyQueryColumn.getDbColumnName(SurveyQueryColumn.FixedColumns.MISSION.getKey()));
-				return sb.toString();				
-			}else if (engine instanceof DerbyMissionEngine) {
-				//default sort by mission start time
-				StringBuilder sb = new StringBuilder();
-				sb.append("ORDER BY "); //$NON-NLS-1$
-				sb.append(SurveyQueryColumn.getDbColumnName(SurveyQueryColumn.FixedColumns.MISSION_START.getKey()));
-				sb.append(" DESC, "); //$NON-NLS-1$
-				sb.append(SurveyQueryColumn.getDbColumnName(SurveyQueryColumn.FixedColumns.MISSION.getKey()));
-				return sb.toString();
-			}
+			//default sort by mission start time
+			StringBuilder sb = new StringBuilder();
+			sb.append("ORDER BY "); //$NON-NLS-1$
+			sb.append(SurveyQueryColumn.getDbColumnName(SurveyQueryColumn.FixedColumns.MISSION_START.getKey()));
+			sb.append(" DESC, "); //$NON-NLS-1$
+			sb.append(SurveyQueryColumn.getDbColumnName(SurveyQueryColumn.FixedColumns.MISSION.getKey()));
+			return sb.toString();
+			
 		}
-		return super.buildSortSql();
+		return SurveyPagedResultUtils.buildSortSql(sortColumn, direction);
 	}
 	
 	/**
@@ -145,7 +161,9 @@ public class DerbyPagedMissionResult extends AbstractSurveyPagedResult {
 	 */
 	@Override
 	public ResultSet getResultSet(final Session session) {
-		final String dataSql = "SELECT r.* FROM " + queryTempTable + " r " + buildSortSql(); //$NON-NLS-1$ //$NON-NLS-2$
+		String dataTable = engine != null ? engine.getQueryDataTable() : engine2.getQueryDataTable();
+		
+		final String dataSql = "SELECT r.* FROM " + dataTable + " r " + buildSortSql(); //$NON-NLS-1$ //$NON-NLS-2$
 
 		return session.doReturningWork(new ReturningWork<ResultSet>() {
 
@@ -163,18 +181,45 @@ public class DerbyPagedMissionResult extends AbstractSurveyPagedResult {
 	}
 
 	
+	private void updateSortColumn(QueryColumn sortColumn, Session session, Connection c) throws SQLException{
+		if (sortColumn instanceof MissionPropertyQueryColumn ||
+			sortColumn instanceof SamplingUnitAttributeQueryColumn) {
+			
+			if (engine != null) {
+				SurveyPagedResultUtils.processSortColumn(engine.getQueryDataTable(), 
+					engine.getQueryLabelTable(), engine, hasSortColumns, sortColumn, c, session);
+				hasSortColumns = true;
+			}else if (engine2 != null) {
+				SurveyPagedResultUtils.processSortColumn(engine2.getQueryDataTable(), 
+						engine2.getQueryLabelTable(), engine2, hasSortColumns, sortColumn, c, session);
+				hasSortColumns = true;
+			}
+		}
+		c.commit();
+		lastSortColumn = sortColumn;
+	}
+	
 	@Override
 	public Envelope getEnvelope(){
 		if (this.bounds == null){
 			try(Session s = HibernateManager.openSession()){
-				final String sql = "SELECT geometry FROM smart.mission_track where mission_day_uuid in (SELECT mission_day_uuid FROM " + queryTempTable + " )"; //$NON-NLS-1$ //$NON-NLS-2$
+				StringBuilder sb = new StringBuilder();
+				sb.append("SELECT geometry FROM smart.mission_track "); //$NON-NLS-1$
+				sb.append("where mission_day_uuid in (SELECT mission_day_uuid FROM "); //$NON-NLS-1$
+				if (engine != null) {
+					sb.append(engine.getQueryDataTable());
+				}else{
+					sb.append( engine2.getQueryDataTable());
+				}
+				sb.append(" )"); //$NON-NLS-1$
+				
 				s.doWork(new Work(){
 	
 					@Override
 					public void execute(Connection c) throws SQLException {
 						WKBReader reader = new WKBReader();
 						Envelope results = null;
-						try(ResultSet q = c.createStatement().executeQuery(sql)){
+						try(ResultSet q = c.createStatement().executeQuery(sb.toString())){
 							while(q.next()){
 								byte[] ob = q.getBytes(1);
 								if (ob != null && ob.length > 0){
@@ -195,5 +240,12 @@ public class DerbyPagedMissionResult extends AbstractSurveyPagedResult {
 			}
 		}
 		return bounds;	
+	}
+
+	@Override
+	public void setSorting(QueryColumn sortColumn, int direction) {
+		this.lastSortColumn = this.sortColumn;
+		this.sortColumn = sortColumn;
+		this.direction = direction;		
 	}
 }

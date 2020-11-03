@@ -51,7 +51,7 @@ public class WaypointQuerySummaryInfo implements ISummaryInfo {
 	}
 
 	@Override
-	public void updateControls(IPagedQueryResultSet resultSet) {
+	public void updateControls(IPagedQueryResultSet<?> resultSet) {
 		if (resultSet == null ){
 			lblNumResults.setText(Messages.WaypointQuerySummaryInfo_UnknownNumberOfIncidents);
 		}else{

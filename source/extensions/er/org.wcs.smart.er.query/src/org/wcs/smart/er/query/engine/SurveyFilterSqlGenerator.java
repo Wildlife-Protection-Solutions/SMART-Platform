@@ -104,7 +104,7 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 		}else if (filter instanceof MissionPropertyFilter){
 			return asSql((MissionPropertyFilter)filter, engine);
 		}else if (filter instanceof ConservationAreaFilter){
-			return asSql((ConservationAreaFilter)filter, engine.tablePrefix(SurveyDesign.class), engine);
+			return asSql((ConservationAreaFilter)filter, engine.tablePrefix(Waypoint.class), engine);
 		}else if (filter instanceof SamplingUnitFilter){
 			return asSql((SamplingUnitFilter)filter, engine);
 		}else if (filter instanceof SamplingUnitAttributeFilter){
@@ -129,7 +129,7 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	 * Area filter
 	 */
 	@Override
-	protected String asSql(AreaFilter filter, IQueryEngine engine){
+	protected String toSql(AreaFilter filter, IQueryEngine engine){
 		StringBuilder sb = new StringBuilder();
 		if (filter.getType() != null) {
 			if (filter.getGeometryType() == AreaFilterGeometryType.WAYPOINT){
@@ -426,7 +426,7 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	 * Date Filter
 	 */
 	@Override
-	protected String asSql(DateFilter filter, IQueryEngine engine) throws SQLException{
+	protected String toSql(DateFilter filter, IQueryEngine engine) throws SQLException{
 		String table = ""; //$NON-NLS-1$
 		String field = ""; //$NON-NLS-1$
 		

@@ -24,7 +24,7 @@ package org.wcs.smart.asset.query.ui.editor;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.swt.widgets.Composite;
-import org.wcs.smart.asset.query.model.AssetQueryResultItem;
+import org.wcs.smart.query.common.engine.test.ObservationQueryResultItem;
 import org.wcs.smart.query.common.ui.edit.AbstractQueryColumnEditor;
 import org.wcs.smart.query.common.ui.edit.CellEditorFactory;
 import org.wcs.smart.query.model.CategoryQueryColumn;
@@ -47,8 +47,8 @@ public class CategoryColumnEditor extends AbstractQueryColumnEditor {
 	
 	@Override
 	protected Object getValue(Object element) {
-		if (element instanceof AssetQueryResultItem) {
-			return ((AssetQueryResultItem) element).getObservationUuid();
+		if (element instanceof ObservationQueryResultItem) {
+			return ((ObservationQueryResultItem) element).getObservationUuid();
 		}
 		return null;
 	}

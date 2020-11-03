@@ -67,8 +67,6 @@ import org.wcs.smart.er.query.filter.summary.SamplingUnitGroupBy;
 import org.wcs.smart.er.query.filter.summary.SurveyIdGroupBy;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.internal.SurveyValueItemLabelProvider;
-import org.wcs.smart.er.query.model.SurveyQueryAttachmentResultItem;
-import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.er.query.model.SurveySummaryQuery;
 import org.wcs.smart.er.query.ui.dropitems.SurveyDropItemFactory;
 import org.wcs.smart.er.query.ui.filter.summary.ISurveyGroupByViewer;
@@ -187,15 +185,15 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 				try {
 					SubMonitor progress = SubMonitor.convert(monitor, Messages.DerbySummaryEngine_ProcessingQueryProgress, query.getQueryDefinition().getValuePart().getValueItems().size()*10 + 40);
 					
-					SurveyDesignFilter surveyFilter = null;
+					designFilter = null;
 					if (query.getSurveyDesign() != null){
-						surveyFilter = SurveyDesignFilter.createStringFilter(query.getSurveyDesign());
+						designFilter = SurveyDesignFilter.createStringFilter(query.getSurveyDesign());
 					}
 
 					//https://app.assembla.com/spaces/smart-cs/tickets/2858-cannot-run-patrol-summary-query-with-patrol-sector-area-filter/details?comment=1671823408#
 					//#2858
 					progress.subTask(Messages.DerbySummaryEngine_LoadingTableProgress);
-					getHeaderInfo(query, sumResults, surveyFilter, session);
+					getHeaderInfo(query, sumResults, designFilter, session);
 					progress.worked(10);
 					progress.checkCanceled();
 					
@@ -257,7 +255,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 						DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
 						
 						ConservationAreaFilter caFilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
-						IFilterProcessor filterer = DerbySummaryEngine.this.getFilterProcessor(valueFilter.getFilterType(), valueTable, surveyFilter, query);
+						IFilterProcessor filterer = DerbySummaryEngine.this.getFilterProcessor(valueFilter.getFilterType(), valueTable, query);
 						try{
 							filterer.processFilter(c, valueFilter.getFilter(), dFilter, caFilter, needsObservationValue, false, progress.split(10));
 						}finally{
@@ -279,7 +277,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 							rateTable = valueTable;
 						}else{
 							rateTable = createTempTableName();
-							IFilterProcessor rfilterer = DerbySummaryEngine.this.getFilterProcessor(rateFilter.getFilterType(), rateTable, surveyFilter, query);
+							IFilterProcessor rfilterer = DerbySummaryEngine.this.getFilterProcessor(rateFilter.getFilterType(), rateTable, query);
 							try{
 								rfilterer.processFilter(c, rateFilter.getFilter(), dFilter, caFilter, needsObservationRate, false, progress.split(10));
 							}finally{
@@ -1547,7 +1545,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 	}
 	
 	@Override
-	protected String getTemporaryTableSelectClause(boolean includeObservations) {
+	public String getTemporaryTableSelectClause(boolean includeObservations) {
 		StringBuilder sql = new StringBuilder();
 		sql.append(" SELECT DISTINCT "); //$NON-NLS-1$
 		sql.append(tablePrefix(SurveyDesign.class) + ".ca_uuid, "); //$NON-NLS-1$
@@ -1584,7 +1582,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 	}
 
 	@Override
-	protected String getTemporaryTableCreateClause(String tableName) {
+	public String getTemporaryTableCreateClause(String tableName) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
 		
@@ -1615,7 +1613,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 	}
 
 	@Override
-	protected void buildTemporaryTableIndexes(Connection c, String tableName)
+	public void buildTemporaryTableIndexes(Connection c, String tableName)
 			throws SQLException {
 		super.buildTemporaryTableIndexes(c, tableName);
 		StringBuilder sql = new StringBuilder();
@@ -1624,17 +1622,5 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 		c.createStatement().execute(sql.toString());
 	}
 
-	@Override
-	protected SurveyQueryResultItem asQueryResultItem(ResultSet rs, Session session)
-			throws SQLException {
-		return null;
-	}
-	
-	@Override
-	protected SurveyQueryAttachmentResultItem asQueryAttachmentResultItem(ResultSet rs, Session session)
-			throws SQLException {
-		
-		return null;
-	}
 
 }

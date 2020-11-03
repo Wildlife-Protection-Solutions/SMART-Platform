@@ -27,6 +27,8 @@ import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.query.internal.Messages;
 import org.wcs.smart.query.QueryDataModelManager;
+import org.wcs.smart.query.model.AttributeQueryColumn;
+import org.wcs.smart.query.model.CategoryQueryColumn;
 import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
 
@@ -132,7 +134,7 @@ public class ObservationQueryColumnCache {
 				// add data model category columns
 				int numCategory = QueryDataModelManager.getInstance().getActiveDepth();
 				for (int i = 0; i < numCategory; i++) {
-					cols.add(new ObservationCategoryQueryColumn(MessageFormat.format(Messages.QueryColumn_ObservationCategoryTableHeader, i),i));
+					cols.add(new CategoryQueryColumn(MessageFormat.format(Messages.QueryColumn_ObservationCategoryTableHeader, i),i));
 				}
 					
 				//sort attributes alphabetically
@@ -146,7 +148,7 @@ public class ObservationQueryColumnCache {
 					
 				for (Attribute att : atts) {
 					String name = att.getName();
-					cols.add(new ObservationAttributeQueryColumn(name, att.getKeyId(), att.getType()));
+					cols.add(new AttributeQueryColumn(name, att.getKeyId(), att.getType()));
 				}
 				
 				cols.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.OBS_GROUP_ID, Locale.getDefault()));

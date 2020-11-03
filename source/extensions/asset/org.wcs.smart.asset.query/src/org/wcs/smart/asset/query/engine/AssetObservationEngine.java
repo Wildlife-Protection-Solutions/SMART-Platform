@@ -48,13 +48,14 @@ import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetWaypoint;
 import org.wcs.smart.asset.query.AssetQueryPlugIn;
 import org.wcs.smart.asset.query.internal.Messages;
+import org.wcs.smart.asset.query.model.AssetObservationAttachmentResultItem;
 import org.wcs.smart.asset.query.model.AssetObservationQuery;
-import org.wcs.smart.asset.query.model.AssetQueryAttachmentResultItem;
-import org.wcs.smart.asset.query.model.AssetQueryResultItem;
+import org.wcs.smart.asset.query.model.AssetObservationResultItem;
 import org.wcs.smart.asset.query.model.observation.FixedQueryColumn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
+import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.ObservationAttachment;
@@ -66,6 +67,7 @@ import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.common.engine.test.ObservationQueryEngine;
 import org.wcs.smart.query.common.model.IUpdateableResultSet;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.AttributeQueryColumn;
@@ -84,7 +86,7 @@ import org.wcs.smart.util.UuidUtils;
  * 
  * @since 1.0.0
  */
-public class AssetObservationEngine extends AssetQueryEngine implements IDerbyWaypointEngine {
+public class AssetObservationEngine extends AssetQueryEngine implements ObservationQueryEngine<AssetObservationResultItem>, IDerbyWaypointEngine {
 
 	private String queryDataTable;
 	private int categoryCount;
@@ -118,7 +120,7 @@ public class AssetObservationEngine extends AssetQueryEngine implements IDerbyWa
 		}
 		
 		queryDataTable = createTempTableName();
-		final AssetPagedObservationResult result = new AssetPagedObservationResult(queryDataTable, this);
+		final AssetPagedObservationResult result = new AssetPagedObservationResult(this);
 		
 
 		session.doWork(new Work() {
@@ -220,9 +222,8 @@ public class AssetObservationEngine extends AssetQueryEngine implements IDerbyWa
 	 */
 	public void dropTables(Connection c) throws SQLException {
 		//original table
-		dropTable(c, queryDataTable);
-		dropTable(c, queryDataTable + "_LIST"); //$NON-NLS-1$
-		dropTable(c, queryDataTable + "_TREE"); //$NON-NLS-1$
+		dropTable(c, getQueryDataTable());
+		dropTable(c, getObservationLabelTable());
 	}
 
 	
@@ -390,7 +391,7 @@ public class AssetObservationEngine extends AssetQueryEngine implements IDerbyWa
 			sql.append(queryDataTable);
 			sql.append(" SET ca_id = (select id FROM "); //$NON-NLS-1$
 			sql.append(AssetQueryEngine.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
-			sql.append("WHERE a.uuid = " + queryDataTable + ".wp_ca_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append("WHERE a.uuid = " + queryDataTable + ".ca_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
 			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().executeUpdate(sql.toString());
 			
@@ -399,7 +400,7 @@ public class AssetObservationEngine extends AssetQueryEngine implements IDerbyWa
 			sql.append(queryDataTable);
 			sql.append(" SET ca_name = (select name FROM "); //$NON-NLS-1$
 			sql.append(AssetQueryEngine.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
-			sql.append("WHERE a.uuid = " + queryDataTable + ".wp_ca_uuid)");  //$NON-NLS-1$//$NON-NLS-2$
+			sql.append("WHERE a.uuid = " + queryDataTable + ".ca_uuid)");  //$NON-NLS-1$//$NON-NLS-2$
 			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().executeUpdate(sql.toString());
 		}
@@ -447,57 +448,10 @@ public class AssetObservationEngine extends AssetQueryEngine implements IDerbyWa
 		
 		progress.subTask(Messages.DerbyObservationEngine_Progress_ListAttributesData);
 		progress.split(4);
-		WpoaLinkedData listData = new WpoaLinkedData("_list", "list_element_uuid") { //$NON-NLS-1$ //$NON-NLS-2$
-			@Override
-			public String getLabel(Session session, UUID cauuid, UUID uuid) {
-				return QueryDataModelManager.getInstance().getAttributeListItemLabel(session, cauuid, uuid);
-			}
-		};
-		populateAdditionalWpoaTable(c, session, listData);
-		
-		
-		progress.subTask(Messages.DerbyObservationEngine_Progress_TreeAttributesData);
-		progress.split(4);
-		WpoaLinkedData treeData = new WpoaLinkedData("_tree", "tree_node_uuid") { //$NON-NLS-1$ //$NON-NLS-2$
-			@Override
-			public String getLabel(Session session, UUID cauuid, UUID uuid) {
-				return QueryDataModelManager.getInstance().getAttributeTreeNodeLabel(session, cauuid, uuid);
-			}
-		};
-		populateAdditionalWpoaTable(c, session, treeData);
+		populateListTreeDataTable(c, session);
 	}
 
-	private void populateAdditionalWpoaTable(Connection c, Session session, WpoaLinkedData linkedData) throws SQLException {
-		String sql = "CREATE TABLE " + queryDataTable + linkedData.getPostfix() + " (uuid char(16) for bit data, value varchar(1024))"; //$NON-NLS-1$ //$NON-NLS-2$
-		QueryPlugIn.logSql(sql.toString());
-		c.createStatement().execute(sql);
-
-		String sql2 = "SELECT DISTINCT wpoa."+linkedData.getUuidColumn()+", r.wp_ca_uuid FROM smart.wp_observation_attributes wpoa inner join "+queryDataTable+" r on wpoa.OBSERVATION_UUID = r.OB_UUID"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		QueryPlugIn.logSql(sql.toString());
-		
-		sql = "INSERT INTO "+queryDataTable+linkedData.getPostfix()+" VALUES (?, ?)"; //$NON-NLS-1$ //$NON-NLS-2$
-		QueryPlugIn.logSql(sql.toString());
-		PreparedStatement statement = c.prepareStatement(sql);
-		int count = 0;
-		try(ResultSet rs = c.createStatement().executeQuery(sql2)){
-			while (rs.next()) {
-				byte[] uuid = rs.getBytes(1);
-				if (uuid != null) {
-					byte[] cauuid = rs.getBytes(2);
-					String value = linkedData.getLabel(session, UuidUtils.byteToUUID(cauuid), UuidUtils.byteToUUID(uuid));
-					statement.setBytes(1, uuid);
-					statement.setString(2, value);
-					statement.addBatch();
-					count++;
-					if (count >= 100){
-						statement.executeBatch();
-						count = 0;
-					}
-				}
-			}
-			statement.executeBatch();
-		}
-	}
+	
 
 	/**
 	 * Add a label to the temporary attribute list label table
@@ -505,12 +459,17 @@ public class AssetObservationEngine extends AssetQueryEngine implements IDerbyWa
 	 * @param item
 	 */
 	public void addListLabel(Session s, AttributeListItem item){
+		addLabelInternal(s, item);
+	}
+	
+	private void addLabelInternal(Session s, DmObject item){
+			
 		if (item == null) return;
-		String sql = "SELECT count(*) FROM " + queryDataTable + "_list WHERE uuid = :uuid "; //$NON-NLS-1$ //$NON-NLS-2$
+		String sql = "SELECT count(*) FROM " + getObservationLabelTable() + " WHERE uuid = :uuid "; //$NON-NLS-1$ //$NON-NLS-2$
 		NativeQuery<?> q = s.createNativeQuery(sql);
 		q.setParameter("uuid", item.getUuid()); //$NON-NLS-1$
 		if ((Integer)q.uniqueResult() == 0){
-			sql = " INSERT INTO " + queryDataTable + "_list (uuid, value) values (:uuid, :label)"; //$NON-NLS-1$ //$NON-NLS-2$
+			sql = " INSERT INTO " + getObservationLabelTable() + " (uuid, value) values (:uuid, :label)"; //$NON-NLS-1$ //$NON-NLS-2$
 			q = s.createNativeQuery(sql);
 			q.setParameter("uuid", item.getUuid()); //$NON-NLS-1$
 			q.setParameter("label",  item.getName()); //$NON-NLS-1$
@@ -524,46 +483,11 @@ public class AssetObservationEngine extends AssetQueryEngine implements IDerbyWa
 	 * @param item
 	 */
 	public void addTreeLabel(Session s, AttributeTreeNode item){
-		if (item == null) return;
-		String sql = "SELECT count(*) FROM " + queryDataTable + "_tree WHERE uuid = :uuid "; //$NON-NLS-1$ //$NON-NLS-2$
-		NativeQuery<?> q = s.createNativeQuery(sql);
-		q.setParameter("uuid", item.getUuid()); //$NON-NLS-1$
-		if ((Integer)q.uniqueResult() == 0){
-			sql = " INSERT INTO " + queryDataTable + "_tree (uuid, value) values (:uuid, :label)"; //$NON-NLS-1$ //$NON-NLS-2$
-			q = s.createNativeQuery(sql);
-			q.setParameter("uuid", item.getUuid()); //$NON-NLS-1$
-			q.setParameter("label",  item.getName()); //$NON-NLS-1$
-			q.executeUpdate();
-		}
-	}
-	
-	/**
-	 * Wrapper class for populating linked data (additional columns)
-	 * 
-	 */
-	private abstract class WpoaLinkedData {
-		private String postfix;
-		private String uuidColumn;
-
-		public WpoaLinkedData(String postfix, String uuidColumn) {
-			super();
-			this.postfix = postfix;
-			this.uuidColumn = uuidColumn;
-		}
-
-		public String getPostfix() {
-			return postfix;
-		}
-
-		public String getUuidColumn() {
-			return uuidColumn;
-		}
-		
-		public abstract String getLabel(Session session, UUID cauuid, UUID keyuuid);
+		addLabelInternal(s, item);
 	}
 
 	@Override
-	protected String getTemporaryTableSelectClause(boolean includeObservations) {
+	public String getTemporaryTableSelectClause(boolean includeObservations) {
 		StringBuilder sql = new StringBuilder();
 		sql.append(" SELECT DISTINCT "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".uuid, "); //$NON-NLS-1$
@@ -584,7 +508,7 @@ public class AssetObservationEngine extends AssetQueryEngine implements IDerbyWa
 	}
 
 	@Override
-	protected String getTemporaryTableCreateClause(String tableName) {
+	public String getTemporaryTableCreateClause(String tableName) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
 		sql.append("wp_uuid char(16) for bit data,"); //$NON-NLS-1$
@@ -593,11 +517,11 @@ public class AssetObservationEngine extends AssetQueryEngine implements IDerbyWa
 		sql.append("wp_y double,"); //$NON-NLS-1$
 		sql.append("wp_direction real,"); //$NON-NLS-1$
 		sql.append("wp_distance real,"); //$NON-NLS-1$
-		sql.append("wp_date timestamp,"); //$NON-NLS-1$
+		sql.append("wp_time timestamp,"); //$NON-NLS-1$
 		sql.append("wp_comment varchar(4096),"); //$NON-NLS-1$
 		sql.append("wp_lastmodified timestamp,"); //$NON-NLS-1$
 		sql.append("wp_lastmodifiedby char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("wp_ca_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("ca_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("wp_group_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("ob_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("ob_category_uuid char(16) for bit data"); //$NON-NLS-1$
@@ -605,9 +529,8 @@ public class AssetObservationEngine extends AssetQueryEngine implements IDerbyWa
 		return sql.toString();
 	}
 	
-	@Override
-	protected AssetQueryAttachmentResultItem asQueryAttachmentResultItem(ResultSet rs, Session session) throws SQLException{
-		AssetQueryAttachmentResultItem item = (AssetQueryAttachmentResultItem)asQueryResultItemInternal(true, rs, session);
+	public AssetObservationAttachmentResultItem asQueryAttachmentResultItem(ResultSet rs, Session session) throws SQLException{
+		AssetObservationAttachmentResultItem item = (AssetObservationAttachmentResultItem)asQueryResultItemInternal(true, rs, session);
 		
 		UUID auuid = UuidUtils.byteToUUID(rs.getBytes("attach_uuid")); //$NON-NLS-1$
 		ISmartAttachment a = session.get(ObservationAttachment.class, auuid);
@@ -624,7 +547,7 @@ public class AssetObservationEngine extends AssetQueryEngine implements IDerbyWa
 		return item;
 	}
 	
-	protected AssetQueryResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException{
+	public AssetObservationResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException{
 		return asQueryResultItemInternal(false, rs, session);
 	}
 	
@@ -633,7 +556,7 @@ public class AssetObservationEngine extends AssetQueryEngine implements IDerbyWa
 
 		String[] selectFields = new String[] {
 			"ca_id","ca_name","wp_uuid", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			"wp_id","wp_x","wp_y","wp_date", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			"wp_id","wp_x","wp_y","wp_time", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			"wp_direction","wp_distance","wp_comment","asset_asset", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			"asset_station","asset_location","incident_length", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			"wp_lastmodified","wp_lastmodifiedbyname" //$NON-NLS-1$ //$NON-NLS-2$
@@ -665,21 +588,21 @@ public class AssetObservationEngine extends AssetQueryEngine implements IDerbyWa
 		return sb.toString();
 	}
 	
-	private AssetQueryResultItem asQueryResultItemInternal(boolean isAttachment, ResultSet rs, Session session) throws SQLException{
-		AssetQueryResultItem it = null;
+	private AssetObservationResultItem asQueryResultItemInternal(boolean isAttachment, ResultSet rs, Session session) throws SQLException{
+		AssetObservationResultItem it = null;
 		if (isAttachment) {
-			it = new AssetQueryAttachmentResultItem();
+			it = new AssetObservationAttachmentResultItem();
 		}else {
-			it= new AssetQueryResultItem();
+			it= new AssetObservationResultItem();
 		}
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
-		it.setConservationAreaUuid(UuidUtils.byteToUUID(rs.getBytes("wp_ca_uuid"))); //$NON-NLS-1$
+		it.setConservationAreaUuid(UuidUtils.byteToUUID(rs.getBytes("ca_uuid"))); //$NON-NLS-1$
 		it.setWaypointUuid(UuidUtils.byteToUUID(rs.getBytes("wp_uuid"))); //$NON-NLS-1$
 		it.setWaypointId(rs.getString("wp_id")); //$NON-NLS-1$
 		it.setWaypointX(rs.getDouble("wp_x")); //$NON-NLS-1$
 		it.setWaypointY(rs.getDouble("wp_y")); //$NON-NLS-1$
-		it.setWaypointDate(rs.getTimestamp("wp_date").toLocalDateTime()); //$NON-NLS-1$
+		it.setWaypointDateTime(rs.getTimestamp("wp_time").toLocalDateTime()); //$NON-NLS-1$
 		it.setWaypointDirection(rs.getObject("wp_direction") == null ? null : rs.getFloat("wp_direction")); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setWaypointDistance(rs.getObject("wp_distance") == null ? null : rs.getFloat("wp_distance")); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setWaypointComment(rs.getString("wp_comment")); //$NON-NLS-1$
@@ -725,7 +648,7 @@ public class AssetObservationEngine extends AssetQueryEngine implements IDerbyWa
 	}
 	
 	@Override
-	protected void buildTemporaryTableIndexes(Connection c, String tableName)
+	public void buildTemporaryTableIndexes(Connection c, String tableName)
 			throws SQLException {
 		super.buildTemporaryTableIndexes(c, tableName);
 		
@@ -743,5 +666,15 @@ public class AssetObservationEngine extends AssetQueryEngine implements IDerbyWa
 	@Override
 	public Session getCurrentConnection() {
 		return session;
+	}
+
+	@Override
+	public String getQueryDataTable() {
+		return queryDataTable;
+	}
+
+	@Override
+	public String getObservationLabelTable() {
+		return queryDataTable +"_labels";
 	}
 }

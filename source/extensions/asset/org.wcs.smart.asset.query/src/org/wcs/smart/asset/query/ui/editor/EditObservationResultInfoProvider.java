@@ -27,10 +27,10 @@ import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.query.engine.AssetPagedObservationResult;
 import org.wcs.smart.asset.query.internal.Messages;
-import org.wcs.smart.asset.query.model.AssetQueryResultItem;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.engine.test.ObservationQueryResultItem;
 import org.wcs.smart.query.common.ui.edit.EditObservationDialog;
 import org.wcs.smart.query.model.IQueryEditCommand;
 
@@ -54,8 +54,9 @@ public class EditObservationResultInfoProvider extends IQueryEditCommand {
 
 	@Override
 	public boolean doWork(IResultItem resultItem, IQueryResult result) {
-		AssetQueryResultItem item = (AssetQueryResultItem)resultItem;
-		EditObservationDialog dialog = new EditObservationDialog(Display.getDefault().getActiveShell(), item.getObservationUuid());
+		ObservationQueryResultItem item = (ObservationQueryResultItem)resultItem;
+		EditObservationDialog dialog = new EditObservationDialog(Display.getDefault().getActiveShell(), 
+				item.getObservationUuid());
 		if (dialog.open() == Window.OK){
 			try{
 				return (((AssetPagedObservationResult)result).updateObservation(item, dialog.getUpdatedObservation()));

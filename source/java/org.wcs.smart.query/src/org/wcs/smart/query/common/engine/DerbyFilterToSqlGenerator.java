@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 import org.locationtech.jts.io.WKBReader;
-import org.locationtech.jts.io.WKBWriter;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
@@ -37,6 +36,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.query.common.engine.AbstractQueryEngine.FilterTable;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.filter.AreaFilter;
 import org.wcs.smart.query.model.filter.AreaFilter.AreaFilterGeometryType;
@@ -73,7 +73,7 @@ public class DerbyFilterToSqlGenerator {
 	 */
 	public String toSql(IFilter filter, IQueryEngine engine) throws SQLException{
 		if (filter instanceof AreaFilter){
-			return asSql((AreaFilter)filter, engine);
+			return toSql((AreaFilter)filter, engine);
 		}else if (filter instanceof AttributeFilter){
 			return asSql((AttributeFilter)filter, engine);
 		}else if (filter instanceof BooleanExpression){
@@ -89,7 +89,7 @@ public class DerbyFilterToSqlGenerator {
 		}else if (filter instanceof NotExpression){
 			return asSql((NotExpression)filter, engine);
 		}else if (filter instanceof DateFilter){
-			return asSql((DateFilter)filter, engine);
+			return toSql((DateFilter)filter, engine);
 		}else if (filter instanceof ObserverFilter){
 			return asSql((ObserverFilter)filter, engine);
 		}
@@ -116,7 +116,7 @@ public class DerbyFilterToSqlGenerator {
 	/*
 	 * Area filter
 	 */
-	protected String asSql(AreaFilter filter, IQueryEngine engine){
+	protected String toSql(AreaFilter filter, IQueryEngine engine){
 		StringBuilder sb = new StringBuilder();
 		if (filter.getType() != null) {
 			if (filter.getGeometryType() == AreaFilterGeometryType.WAYPOINT){
@@ -149,6 +149,10 @@ public class DerbyFilterToSqlGenerator {
 	 * Attribute filter
 	 */
 	protected String asSql(AttributeFilter filter, IQueryEngine engine) throws SQLException{
+		FilterTable t = ((AbstractQueryEngine)engine).filterTables.get(filter);
+		if (t != null) return t.tablename + "." + t.columnname + " is not null";  //$NON-NLS-1$//$NON-NLS-2$
+		
+		
 		String attprefix = engine.tablePrefix(Attribute.class);
 		if (attprefix == null){
 			throw new IllegalStateException(Messages.AttributeFilter_InvalidAttributePrefix);
@@ -216,6 +220,10 @@ public class DerbyFilterToSqlGenerator {
 	 * Category filter
 	 */
 	protected String asSql(CategoryFilter filter, IQueryEngine engine) throws SQLException{
+		
+		FilterTable t = ((AbstractQueryEngine)engine).filterTables.get(filter);
+		if (t != null) return t.tablename + "." + t.columnname + " is not null";  //$NON-NLS-1$//$NON-NLS-2$\
+		
 		String keyPart = filter.getCategoryKey();
 		String prefix = engine.tablePrefix(Category.class);
 		if (prefix == null){
@@ -231,6 +239,9 @@ public class DerbyFilterToSqlGenerator {
 	 * Category attribute filter
 	 */
 	protected String asSql(CategoryAttributeFilter filter, IQueryEngine engine) throws SQLException{
+		FilterTable t = ((AbstractQueryEngine)engine).filterTables.get(filter);
+		if (t != null) return t.tablename + "." + t.columnname + " is not null";  //$NON-NLS-1$//$NON-NLS-2$\
+		
 		return "( " + toSql(filter.getCategoryFilter(), engine) + " " + asSql(Operator.AND) + " " + toSql(filter.getAttributeFilter(), engine) + " )"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$	
 	}
 	
@@ -287,7 +298,7 @@ public class DerbyFilterToSqlGenerator {
 	/*
 	 * Date Filter
 	 */
-	protected String asSql(DateFilter filter, IQueryEngine engine) throws SQLException{
+	protected String toSql(DateFilter filter, IQueryEngine engine) throws SQLException{
 		String table = ""; //$NON-NLS-1$
 		String field = ""; //$NON-NLS-1$
 		
@@ -327,7 +338,7 @@ public class DerbyFilterToSqlGenerator {
 	 * @return
 	 * @throws SQLException
 	 */
-	public static String asSql(Operator op) throws SQLException{
+	public String asSql(Operator op) throws SQLException{
 		if (op == Operator.EQUALS){
 			return "="; //$NON-NLS-1$
 		}else if (op == Operator.LESSTHAN){

@@ -33,10 +33,10 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.query.engine.AssetPagedObservationResult;
 import org.wcs.smart.asset.query.engine.IWaypointUpdateableResultSet;
 import org.wcs.smart.asset.query.internal.Messages;
-import org.wcs.smart.asset.query.model.AssetQueryResultItem;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.engine.test.ObservationQueryResultItem;
 import org.wcs.smart.query.model.IQueryEditCommand;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -60,7 +60,9 @@ public class DeleteObservationResultInfoProvider extends IQueryEditCommand {
 
 	@Override
 	public boolean doWork(IResultItem resultItem, IQueryResult results){
-		AssetQueryResultItem item = (AssetQueryResultItem)resultItem;
+		if (!(resultItem instanceof ObservationQueryResultItem)) return false;
+		
+		ObservationQueryResultItem item = (ObservationQueryResultItem)resultItem;
 		
 		boolean deleteWp = false;
 		if (item.getCategories() == null || item.getCategories().length == 0){
@@ -68,7 +70,7 @@ public class DeleteObservationResultInfoProvider extends IQueryEditCommand {
 			
 			if (!MessageDialog.openQuestion(Display.getDefault().getActiveShell(), Messages.DeleteObservationResultInfoProvider_DeleteWaypointTitle,
 					MessageFormat.format(Messages.DeleteObservationResultInfoProvider_DeleteWaypointMsg, 
-							item.getWaypointId(), DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(item.getWaypointDate())))){
+							item.getWaypointId(), DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(item.getWaypointDateTime())))){
 				return false;
 			}
 		}else{

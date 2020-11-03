@@ -39,7 +39,7 @@ import org.wcs.smart.query.internal.Messages;
  * @author Emily
  *
  */
-public abstract class AbstractPagedQueryResultSet implements ITablePagedQueryResultSet {
+public abstract class AbstractPagedQueryResultSet<T extends IResultItem> implements ITablePagedQueryResultSet<T> {
 
 	protected int itemCount = 0;
 
@@ -50,8 +50,8 @@ public abstract class AbstractPagedQueryResultSet implements ITablePagedQueryRes
 	 * the given offset, pagesize.
 	 */
 	@Override
-	public List<IResultItem> getData(final int offset, final int pageSize) {
-		List<IResultItem> result = null;
+	public List<T> getData(final int offset, final int pageSize) {
+		List<T> result = null;
 		
 		try(Session session = HibernateManager.openSession()){
 			try(ResultSet rs = getResultSet(session)){
@@ -83,25 +83,12 @@ public abstract class AbstractPagedQueryResultSet implements ITablePagedQueryRes
 	 * @return
 	 * @throws SQLException
 	 */
-	public abstract List<IResultItem> getResults(Session session, ResultSet rs, int from, int pageSize) throws SQLException;
+	public abstract List<T> getResults(Session session, ResultSet rs, int from, int pageSize) throws SQLException;
 	
 	/**
 	 * Opens a result set in the given session that accessed the query results
 	 */
 	public abstract ResultSet getResultSet(Session session);
-
-//	/**
-//	 * destroys the result set and removes any temporary tables
-//	 */
-//	@Override
-//	public void dispose(Session session){
-//		// simply closing result set and deleting temporary table
-//		Job cleanUpJob = new CleanUpJob();
-//				
-//		// we don't want this job to be displayed to user
-//		cleanUpJob.setSystem(true); 
-//		cleanUpJob.schedule();
-//	}
 
 	/**
 	 * Creates a new feature iterator that iterates over all
@@ -109,8 +96,8 @@ public abstract class AbstractPagedQueryResultSet implements ITablePagedQueryRes
 	 * iterator MUST BE CLOSED when you are done with it to properly
 	 * close the session.
 	 */
-	public IQueryResultSetIterator<IResultItem> iterator(int pageSize) {
-		return new QueryResultSetIterator<IResultItem>(this, pageSize);
+	public IQueryResultSetIterator<T> iterator(int pageSize) {
+		return new QueryResultSetIterator<T>(this, pageSize);
 	}
 	
 	/**
@@ -118,8 +105,8 @@ public abstract class AbstractPagedQueryResultSet implements ITablePagedQueryRes
 	 * features in the result set using the given page size and session.  The
 	 * session is not closed - the client is responsible for closing it.
 	 */
-	public IQueryResultSetIterator<IResultItem> iterator(int pageSize, Session session) {
-		return new QueryResultSetIterator<IResultItem>(this, pageSize, session);
+	public IQueryResultSetIterator<T> iterator(int pageSize, Session session) {
+		return new QueryResultSetIterator<T>(this, pageSize, session);
 	}
 
 	public int getItemCount() {

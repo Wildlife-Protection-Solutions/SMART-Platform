@@ -41,9 +41,11 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.query.engine.IWaypointUpdateableResultSet;
 import org.wcs.smart.patrol.query.internal.Messages;
-import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
+import org.wcs.smart.patrol.query.model.IPatrolQueryResultItem;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.engine.test.ObservationQueryResultItem;
+import org.wcs.smart.query.common.engine.test.WaypointQueryResultItem;
 import org.wcs.smart.query.common.model.ISearchabledResultSet;
 import org.wcs.smart.query.common.ui.QueryResultsEditor;
 import org.wcs.smart.udig.IMapEditManager;
@@ -68,10 +70,10 @@ public class MapWaypointEditManager implements IMapEditManager {
 	
 	@Override
 	public synchronized void moveFeature(Object feature, int x, int y, IViewportModel vm) {
-		if (!(feature instanceof PatrolQueryResultItem))
+		if (!(feature instanceof IPatrolQueryResultItem))
 			return;
 
-		PatrolQueryResultItem pw = (PatrolQueryResultItem) feature;
+		IPatrolQueryResultItem pw = (IPatrolQueryResultItem) feature;
 		Coordinate crspx = vm.pixelToWorld(x, y);
 		// convert to lat/long
 		if (!CRS.equalsIgnoreMetadata(vm.getCRS(), SmartDB.DATABASE_CRS)) {
@@ -86,7 +88,7 @@ public class MapWaypointEditManager implements IMapEditManager {
 		doMove(pw, crspx.x, crspx.y);
 	}
 
-	private void revert(PatrolQueryResultItem pw, double x, double y, Float distance, Float direction){
+	private void revert(IPatrolQueryResultItem pw, double x, double y, Float distance, Float direction){
 		IQueryResult result = editor.getQuery().getCachedResults(); 
 		if (!(result instanceof IWaypointUpdateableResultSet)) return;
 		try {
@@ -99,9 +101,11 @@ public class MapWaypointEditManager implements IMapEditManager {
 		}
 	
 	}
-	private void doMove(PatrolQueryResultItem pw, double x, double y){
+	private void doMove(IPatrolQueryResultItem item, double x, double y){
 		IQueryResult result = editor.getQuery().getCachedResults(); 
 		if (!(result instanceof IWaypointUpdateableResultSet)) return;
+		
+		WaypointQueryResultItem pw = (WaypointQueryResultItem)item;
 		try {
 			double x1 = pw.getWaypointRawX(null);
 			double y1 = pw.getWaypointRawY(null);
@@ -123,8 +127,8 @@ public class MapWaypointEditManager implements IMapEditManager {
 				yn = y;
 			}
 				
-			if (((IWaypointUpdateableResultSet)result).updateWaypointPosition(pw, xn, yn, distancen, directionn)){
-				addUndo(pw, x1, y1, distance1, direction1);
+			if (((IWaypointUpdateableResultSet)result).updateWaypointPosition(item, xn, yn, distancen, directionn)){
+				addUndo(item, x1, y1, distance1, direction1);
 				editor.refreshResults();
 			}
 		} catch (Exception e) {
@@ -149,19 +153,20 @@ public class MapWaypointEditManager implements IMapEditManager {
 				Coordinate dbll = ReprojectUtils.reproject(worldll.x, worldll.y, vm.getCRS(), SmartDB.DATABASE_CRS);
 				Coordinate dbur = ReprojectUtils.reproject(worldur.x, worldur.y, vm.getCRS(), SmartDB.DATABASE_CRS);
 				
-				HashMap<UUID, Set<PatrolQueryResultItem>> items = new HashMap<>();
+				HashMap<UUID, Set<WaypointQueryResultItem>> items = new HashMap<>();
 				List<IResultItem> searchResults = ((ISearchabledResultSet)editor.getQuery().getCachedResults()).search(dbll.x, dbll.y, dbur.x, dbur.y);
 				
 				double distance = Double.POSITIVE_INFINITY;
 				
 				for (IResultItem pi : searchResults){
-					PatrolQueryResultItem i = (PatrolQueryResultItem)pi;
+//					IPatrolQueryResultItem i = (IPatrolQueryResultItem)pi;
+					WaypointQueryResultItem i = (WaypointQueryResultItem)pi;
 					Coordinate c = new Coordinate(i.getWaypointX(null), i.getWaypointY(null));
 					double d = c.distance(db);
 					
 					if (d < distance){
 						items.clear();
-						HashSet<PatrolQueryResultItem> set = (HashSet<PatrolQueryResultItem>) items.get(i.getWaypointUuid());
+						HashSet<WaypointQueryResultItem> set = (HashSet<WaypointQueryResultItem>) items.get(i.getWaypointUuid());
 						if (set == null){
 							set = new HashSet<>();
 							items.put(i.getWaypointUuid(), set);
@@ -170,7 +175,7 @@ public class MapWaypointEditManager implements IMapEditManager {
 						
 						distance = d;
 					}else if (d == distance){
-						HashSet<PatrolQueryResultItem> set = (HashSet<PatrolQueryResultItem>) items.get(i.getWaypointUuid());
+						HashSet<WaypointQueryResultItem> set = (HashSet<WaypointQueryResultItem>) items.get(i.getWaypointUuid());
 						if (set == null){
 							set = new HashSet<>();
 							items.put(i.getWaypointUuid(), set);
@@ -181,9 +186,9 @@ public class MapWaypointEditManager implements IMapEditManager {
 				
 				if (items.isEmpty()) return null;
 				
-				Entry<UUID, Set<PatrolQueryResultItem>> item = items.entrySet().iterator().next();
+				Entry<UUID, Set<WaypointQueryResultItem>> item = items.entrySet().iterator().next();
 				
-				PatrolQueryResultItem first = item.getValue().iterator().next();
+				WaypointQueryResultItem first = item.getValue().iterator().next();
 				
 				Coordinate px = ReprojectUtils.reproject(first.getWaypointX(null), first.getWaypointY(null), SmartDB.DATABASE_CRS, vm.getCRS());
 				Point pnt = vm.worldToPixel(px);
@@ -191,15 +196,18 @@ public class MapWaypointEditManager implements IMapEditManager {
 				StringBuilder sb = new StringBuilder();
 				
 			
-				sb.append(first.getPatrolId() + " (" + first.getWaypointId() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+				sb.append(((IPatrolQueryResultItem)first).getPatrolId() + " (" + first.getWaypointId() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 				sb.append("\n"); //$NON-NLS-1$
-				sb.append(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(first.getWaypointDate().atTime(first.getWaypointTime())));
+				sb.append(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(first.getWaypointDateTime()));
 				sb.append("\n"); //$NON-NLS-1$
 				
-				for (PatrolQueryResultItem result : item.getValue()){
-					if (result.getCategories() != null && result.getCategories().length > 0){
-						sb.append(result.getCategories()[result.getCategories().length-1]);
-						sb.append("\n"); //$NON-NLS-1$
+				for (WaypointQueryResultItem result : item.getValue()){
+					if (result instanceof ObservationQueryResultItem) {
+						ObservationQueryResultItem oi = (ObservationQueryResultItem)result;
+						if (oi.getCategories() != null && oi.getCategories().length > 0){
+							sb.append(oi.getCategories()[oi.getCategories().length-1]);
+							sb.append("\n"); //$NON-NLS-1$
+						}
 					}
 				}
 				
@@ -212,7 +220,7 @@ public class MapWaypointEditManager implements IMapEditManager {
 		
 	}
 
-	private void addUndo(PatrolQueryResultItem wp, double x, double y, Float distance, Float direction) {
+	private void addUndo(IPatrolQueryResultItem wp, double x, double y, Float distance, Float direction) {
 		undoCommands.add(0, new Object[] { wp, x, y, distance, direction });
 		if (undoCommands.size() > 100) {
 			undoCommands.remove(undoCommands.size() - 1);
@@ -227,7 +235,7 @@ public class MapWaypointEditManager implements IMapEditManager {
 		Object c = undoCommands.remove(0);
 		Object[] data = (Object[]) c;
 
-		PatrolQueryResultItem pw = (PatrolQueryResultItem) data[0];
+		IPatrolQueryResultItem pw = (IPatrolQueryResultItem) data[0];
 		double x = (double) data[1];
 		double y = (double) data[2];
 		Float distance = (Float) data[3];

@@ -25,9 +25,11 @@ import java.util.List;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
-import org.wcs.smart.patrol.query.model.observation.PatrolAttributeQueryColumn;
-import org.wcs.smart.patrol.query.model.observation.PatrolCategoryQueryColumn;
+import org.wcs.smart.query.common.ui.AttributeColumnLabelProvider;
+import org.wcs.smart.query.common.ui.CategoryColumnLabelProvider;
 import org.wcs.smart.query.common.ui.QueryColumnLabelProvider;
+import org.wcs.smart.query.model.AttributeQueryColumn;
+import org.wcs.smart.query.model.CategoryQueryColumn;
 import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
 
@@ -41,9 +43,9 @@ public class PatrolTableColumn {
 	public static ColumnLabelProvider getLabelProvider(QueryColumn column, List<QueryColumn> allColumns){
 		if (column instanceof FixedQueryColumn){
 			return new QueryColumnLabelProvider(column);
-		}else if (column instanceof PatrolAttributeQueryColumn){
+		}else if (column instanceof AttributeQueryColumn){
 			return new AttributeColumnLabelProvider(column);
-		}else if (column instanceof PatrolCategoryQueryColumn){
+		}else if (column instanceof CategoryQueryColumn){
 			return new CategoryColumnLabelProvider(column);
 		}else if (column instanceof GridQueryColumn){
 			return new QueryColumnLabelProvider(column);

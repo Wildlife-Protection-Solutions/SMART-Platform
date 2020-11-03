@@ -31,7 +31,7 @@ import java.util.Iterator;
  *
  * @param <T>
  */
-public interface IQueryResultSetIterator<T extends IResultItem> extends Iterator<IResultItem>, Closeable {
+public interface IQueryResultSetIterator<T extends IResultItem> extends Iterator<T>, Closeable {
 
 	
 }

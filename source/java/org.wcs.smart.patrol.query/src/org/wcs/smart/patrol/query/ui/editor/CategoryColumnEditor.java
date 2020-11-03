@@ -24,6 +24,7 @@ package org.wcs.smart.patrol.query.ui.editor;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.swt.widgets.Composite;
+import org.wcs.smart.patrol.query.model.PatrolObservationResultItem;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.query.common.ui.edit.AbstractQueryColumnEditor;
 import org.wcs.smart.query.common.ui.edit.CellEditorFactory;
@@ -47,8 +48,8 @@ public class CategoryColumnEditor extends AbstractQueryColumnEditor {
 	
 	@Override
 	protected Object getValue(Object element) {
-		if (element instanceof PatrolQueryResultItem) {
-			return ((PatrolQueryResultItem) element).getObservationUuid();
+		if (element instanceof PatrolObservationResultItem) {
+			return ((PatrolObservationResultItem) element).getObservationUuid();
 		}
 		return null;
 	}

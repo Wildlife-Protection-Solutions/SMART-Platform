@@ -48,6 +48,7 @@ import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.Team;
+import org.wcs.smart.patrol.query.model.IPatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
 import org.wcs.smart.query.common.ui.edit.AbstractQueryColumnEditor;
@@ -104,16 +105,16 @@ public class PatrolColumnEditor extends AbstractQueryColumnEditor {
 			return getTextCellEditor();
 			
 		case PATROL_LEG_PILOT:
-			if (!(element instanceof PatrolQueryResultItem)) return null;
-			PatrolQueryResultItem pitem = (PatrolQueryResultItem)element;
+			if (!(element instanceof IPatrolQueryResultItem)) return null;
+			IPatrolQueryResultItem pitem = (IPatrolQueryResultItem)element;
 			if (!pitem.getPatrolType().requiresPilot()) return null; // pilot not valid for type
 		case PATROL_LEG_LEADER:
-			if (!(element instanceof PatrolQueryResultItem)) return null;
+			if (!(element instanceof IPatrolQueryResultItem)) return null;
 			if (employeeCellEditor == null){
 				employeeCellEditor = getDropDownEditor();
 			}
 			employeeCellEditor.setInput(new String[]{DialogConstants.LOADING_TEXT});
-			PatrolQueryResultItem item = (PatrolQueryResultItem)element;
+			IPatrolQueryResultItem item = (IPatrolQueryResultItem)element;
 			Job j = new Job("load employees"){ //$NON-NLS-1$
 
 				@Override

@@ -28,39 +28,32 @@ import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.observation.query.model.types.ShowItemInfoProvider;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
-import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
+import org.wcs.smart.patrol.query.model.IPatrolQueryResultItem;
 import org.wcs.smart.patrol.ui.OpenPatrolHandler;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
 import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
-import org.wcs.smart.query.model.IQueryResultInfoProvider;
+import org.wcs.smart.query.common.engine.test.WaypointQueryResultItem;
 
 /**
- * Intel info provider than opens up the intelligence record associated with the
- * result item.
+ * Patrol info provider for opening up original patrol
  * 
  * @author Emily
  *
  */
-public class PatrolResultInfoProvider implements IQueryResultInfoProvider {
-
+public class PatrolResultInfoProvider extends ShowItemInfoProvider{
+	
 	@Override
-	public String getName() {
-		return GOTO_SOURCE_STR;
-	}
-
-	@Override
-	public boolean supportsCcaa() {
-		return false;
+	public boolean supportsMap(){
+		return true;
 	}
 	
 	private void showItem(PatrolEditorInput in, UUID waypointUuid) {
@@ -75,10 +68,14 @@ public class PatrolResultInfoProvider implements IQueryResultInfoProvider {
 	
 	@Override
 	public void doWork(IResultItem resultItem) {
-		if (resultItem instanceof PatrolQueryResultItem) {
-			PatrolQueryResultItem it = (PatrolQueryResultItem)resultItem;
+		if (resultItem instanceof IPatrolQueryResultItem) {
+			IPatrolQueryResultItem it = (IPatrolQueryResultItem)resultItem;
 			PatrolEditorInput in = new PatrolEditorInput(it.getPatrolUuid(), it.getPatrolId(), it.getPatrolType(), it.getPatrolStartDate(), it.getPatrolEndDate());
-			showItem(in, ((PatrolQueryResultItem)resultItem).getWaypointUuid());
+			UUID wpUuid = null;
+			if (resultItem instanceof WaypointQueryResultItem) {
+				wpUuid =((WaypointQueryResultItem) resultItem).getWaypointUuid();
+			}
+			showItem(in, wpUuid);
 			return;
 		}else if (resultItem instanceof IAttachmentResultItem) {
 			PatrolEditorInput input = null;
@@ -100,14 +97,5 @@ public class PatrolResultInfoProvider implements IQueryResultInfoProvider {
 						MessageFormat .format(OP_NOT_SUPPORTED_STR, resultItem.getClass().getName()));
 	}
 
-	@Override
-	public Image getImage() {
-		return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.GOTO_ICON);
-	}
-	
-	@Override
-	public boolean supportsMap(){
-		return true;
-	}
 
 }

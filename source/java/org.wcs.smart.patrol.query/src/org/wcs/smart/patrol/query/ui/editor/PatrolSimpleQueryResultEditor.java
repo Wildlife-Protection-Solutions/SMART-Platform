@@ -44,14 +44,16 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.udig.project.render.IViewportModel;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.patrol.query.model.IPatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
 import org.wcs.smart.patrol.query.model.PatrolQueryFactory;
-import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
 import org.wcs.smart.patrol.query.ui.querytable.PatrolTableColumn;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.engine.test.ObservationQueryResultItem;
+import org.wcs.smart.query.common.engine.test.WaypointQueryResultItem;
 import org.wcs.smart.query.common.model.ISearchabledResultSet;
 import org.wcs.smart.query.common.ui.QueryResultsEditor;
 import org.wcs.smart.query.model.IQueryEditCommand;
@@ -183,16 +185,20 @@ public class PatrolSimpleQueryResultEditor extends QueryResultsEditor{
 						
 						List<IResultItem> searchResults = ((ISearchabledResultSet)r).search(dbll.x, dbll.y, dbur.x,  dbur.y);
 						
-						HashMap<UUID, Set<PatrolQueryResultItem>> items = new HashMap<>();
+						HashMap<UUID, Set<WaypointQueryResultItem>> items = new HashMap<>();
 						double distance = Double.POSITIVE_INFINITY;
 						for (IResultItem ri : searchResults){
-							PatrolQueryResultItem i = (PatrolQueryResultItem)ri;
+							IPatrolQueryResultItem pi = (IPatrolQueryResultItem)ri;
+							if (!(pi instanceof WaypointQueryResultItem)) continue;
+							
+							WaypointQueryResultItem i = (WaypointQueryResultItem)pi;
+							
 							Coordinate c = new Coordinate(i.getWaypointX(null), i.getWaypointY(null));
 							double d = c.distance(db);
 							
 							if (d < distance){
 								items.clear();
-								HashSet<PatrolQueryResultItem> set = (HashSet<PatrolQueryResultItem>) items.get(i.getWaypointUuid());
+								HashSet<WaypointQueryResultItem> set = (HashSet<WaypointQueryResultItem>) items.get(i.getWaypointUuid());
 								if (set == null){
 									set = new HashSet<>();
 									items.put(i.getWaypointUuid(), set);
@@ -201,7 +207,7 @@ public class PatrolSimpleQueryResultEditor extends QueryResultsEditor{
 								
 								distance = d;
 							}else if (d == distance){
-								HashSet<PatrolQueryResultItem> set = (HashSet<PatrolQueryResultItem>) items.get(i.getWaypointUuid());
+								HashSet<WaypointQueryResultItem> set = (HashSet<WaypointQueryResultItem>) items.get(i.getWaypointUuid());
 								if (set == null){
 									set = new HashSet<>();
 									items.put(i.getWaypointUuid(), set);
@@ -212,29 +218,32 @@ public class PatrolSimpleQueryResultEditor extends QueryResultsEditor{
 
 						if (items.isEmpty()) return null;
 					
-						PatrolQueryResultItem first = items.values().iterator().next().iterator().next();
+						WaypointQueryResultItem first = items.values().iterator().next().iterator().next();
 						
 						Coordinate px = ReprojectUtils.reproject(first.getWaypointX(null), first.getWaypointY(null), SmartDB.DATABASE_CRS, vm.getCRS());
 						Point pnt = vm.worldToPixel(px);
 						if (pnt.distance(x, y) > 5) return null;
 						StringBuilder sb = new StringBuilder();
 						
-						for (Set<PatrolQueryResultItem> i : items.values()){
+						for (Set<WaypointQueryResultItem> i : items.values()){
 							if (sb.length() != 0) sb.append("\n"); //$NON-NLS-1$
 							first = i.iterator().next();
-							sb.append(first.getPatrolId() + " (" + first.getWaypointId() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+							sb.append(((IPatrolQueryResultItem)first).getPatrolId() + " (" + first.getWaypointId() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 							sb.append("\n"); //$NON-NLS-1$
-							sb.append(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(first.getWaypointDate().atTime(first.getWaypointTime())));
+							sb.append(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(first.getWaypointDateTime()));
 							sb.append("\n"); //$NON-NLS-1$
-							for (PatrolQueryResultItem result : i){
-								if (result.getCategories() != null && result.getCategories().length > 0){
-									sb.append(result.getCategories()[result.getCategories().length-1]);
-									sb.append("\n"); //$NON-NLS-1$
+							for (WaypointQueryResultItem result : i){
+								if (result instanceof ObservationQueryResultItem) {
+									ObservationQueryResultItem oo = (ObservationQueryResultItem)result;
+									if (oo.getCategories() != null && oo.getCategories().length > 0){
+										sb.append(oo.getCategories()[oo.getCategories().length-1]);
+										sb.append("\n"); //$NON-NLS-1$
+									}
 								}
 							}
 						}
 						
-						createMenu(page2.getMapViewer().getControl(), first);
+						createMenu(page2.getMapViewer().getControl(), (IPatrolQueryResultItem)first);
 						return new InfoPoint(vm.worldToPixel(px), null, sb.toString());	
 					}
 				}catch (Exception ex){
@@ -244,7 +253,7 @@ public class PatrolSimpleQueryResultEditor extends QueryResultsEditor{
 				return null;
 			}
 			
-			private void createMenu(Control control, PatrolQueryResultItem toUpdate){
+			private void createMenu(Control control, IPatrolQueryResultItem toUpdate){
 				
 				Menu existingMenu = control.getMenu();
 				if(existingMenu != null && !existingMenu.isDisposed()){

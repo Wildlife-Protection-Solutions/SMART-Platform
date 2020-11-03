@@ -21,189 +21,195 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int K_OR = 9;
   /** RegularExpression Id. */
-  int COMMA = 10;
+  int K_EXACT = 10;
   /** RegularExpression Id. */
-  int LESS = 11;
+  int COMMA = 11;
   /** RegularExpression Id. */
-  int LESSEQUAL = 12;
+  int LESS = 12;
   /** RegularExpression Id. */
-  int GREATER = 13;
+  int LESSEQUAL = 13;
   /** RegularExpression Id. */
-  int GREATEREQUAL = 14;
+  int GREATER = 14;
   /** RegularExpression Id. */
-  int EQUAL = 15;
+  int GREATEREQUAL = 15;
   /** RegularExpression Id. */
-  int NOTEQUAL = 16;
+  int EQUAL = 16;
   /** RegularExpression Id. */
-  int NOTEQUAL2 = 17;
+  int NOTEQUAL = 17;
   /** RegularExpression Id. */
-  int OPENPAREN = 18;
+  int NOTEQUAL2 = 18;
   /** RegularExpression Id. */
-  int CLOSEPAREN = 19;
+  int OPENPAREN = 19;
   /** RegularExpression Id. */
-  int SLASH = 20;
+  int CLOSEPAREN = 20;
   /** RegularExpression Id. */
-  int PLUS = 21;
+  int SLASH = 21;
   /** RegularExpression Id. */
-  int MINUS = 22;
+  int PLUS = 22;
   /** RegularExpression Id. */
-  int CONTAINS = 23;
+  int MINUS = 23;
   /** RegularExpression Id. */
-  int NOT_CONTAINS = 24;
+  int CONTAINS = 24;
   /** RegularExpression Id. */
-  int STREQUALS = 25;
+  int NOT_CONTAINS = 25;
   /** RegularExpression Id. */
-  int BETWEEN = 26;
+  int STREQUALS = 26;
   /** RegularExpression Id. */
-  int QUERY_SPLITTER = 27;
+  int BETWEEN = 27;
   /** RegularExpression Id. */
-  int NUMBER = 28;
+  int QUERY_SPLITTER = 28;
   /** RegularExpression Id. */
-  int FLOAT = 29;
+  int NUMBER = 29;
   /** RegularExpression Id. */
-  int INTEGER = 30;
+  int FLOAT = 30;
   /** RegularExpression Id. */
-  int DIGIT = 31;
+  int INTEGER = 31;
   /** RegularExpression Id. */
-  int S_CONST_LITERAL = 32;
+  int DIGIT = 32;
   /** RegularExpression Id. */
-  int CATEGORY_KEY = 33;
+  int S_CONST_LITERAL = 33;
   /** RegularExpression Id. */
-  int ATT_STR_KEY = 34;
+  int CATEGORY_KEY = 34;
   /** RegularExpression Id. */
-  int ATT_VALUE_KEY = 35;
+  int ATT_STR_KEY = 35;
   /** RegularExpression Id. */
-  int ATT_BOOL_KEY = 36;
+  int ATT_VALUE_KEY = 36;
   /** RegularExpression Id. */
-  int ATT_LIST_KEY = 37;
+  int ATT_BOOL_KEY = 37;
   /** RegularExpression Id. */
-  int ATT_TREE_KEY = 38;
+  int ATT_LIST_KEY = 38;
   /** RegularExpression Id. */
-  int ATT_DATE_KEY = 39;
+  int ATT_MLIST_KEY = 39;
   /** RegularExpression Id. */
-  int CAT_ATT_STR_KEY = 40;
+  int ATT_TREE_KEY = 40;
   /** RegularExpression Id. */
-  int CAT_ATT_VALUE_KEY = 41;
+  int ATT_DATE_KEY = 41;
   /** RegularExpression Id. */
-  int CAT_ATT_BOOL_KEY = 42;
+  int CAT_ATT_STR_KEY = 42;
   /** RegularExpression Id. */
-  int CAT_ATT_LIST_KEY = 43;
+  int CAT_ATT_VALUE_KEY = 43;
   /** RegularExpression Id. */
-  int CM_CAT_ATT_LIST_KEY = 44;
+  int CAT_ATT_BOOL_KEY = 44;
   /** RegularExpression Id. */
-  int CM_CAT_ATT_TREE_KEY = 45;
+  int CAT_ATT_LIST_KEY = 45;
   /** RegularExpression Id. */
-  int CAT_ATT_TREE_KEY = 46;
+  int CAT_ATT_MLIST_KEY = 46;
   /** RegularExpression Id. */
-  int CAT_ATT_DATE_KEY = 47;
+  int CM_CAT_ATT_LIST_KEY = 47;
   /** RegularExpression Id. */
-  int DATE_STRING = 48;
+  int CM_CAT_ATT_TREE_KEY = 48;
   /** RegularExpression Id. */
-  int DM_KEY = 49;
+  int CAT_ATT_TREE_KEY = 49;
   /** RegularExpression Id. */
-  int HEX_STRING = 50;
+  int CAT_ATT_DATE_KEY = 50;
   /** RegularExpression Id. */
-  int UUID = 51;
+  int DATE_STRING = 51;
   /** RegularExpression Id. */
-  int LETTER = 52;
+  int DM_KEY = 52;
   /** RegularExpression Id. */
-  int SPECIAL_CHARS = 53;
+  int HEX_STRING = 53;
   /** RegularExpression Id. */
-  int SURVEY_ID_KEY = 54;
+  int UUID = 54;
   /** RegularExpression Id. */
-  int SURVEY_UUID_KEY = 55;
+  int LETTER = 55;
   /** RegularExpression Id. */
-  int MISSION_ID_KEY = 56;
+  int SPECIAL_CHARS = 56;
   /** RegularExpression Id. */
-  int MISSION_UUID_KEY = 57;
+  int SURVEY_ID_KEY = 57;
   /** RegularExpression Id. */
-  int MISSION_PROPERTY_STR_KEY = 58;
+  int SURVEY_UUID_KEY = 58;
   /** RegularExpression Id. */
-  int MISSION_PROPERTY_VALUE_KEY = 59;
+  int MISSION_ID_KEY = 59;
   /** RegularExpression Id. */
-  int MISSION_MEMBER = 60;
+  int MISSION_UUID_KEY = 60;
   /** RegularExpression Id. */
-  int MISSION_LEADER = 61;
+  int MISSION_PROPERTY_STR_KEY = 61;
   /** RegularExpression Id. */
-  int MISSION_PROPERTY_LIST_KEY = 62;
+  int MISSION_PROPERTY_VALUE_KEY = 62;
   /** RegularExpression Id. */
-  int MISSION_TRACK_TYPE = 63;
+  int MISSION_MEMBER = 63;
   /** RegularExpression Id. */
-  int SAMPLING_UNIT_SOURCE = 64;
+  int MISSION_LEADER = 64;
   /** RegularExpression Id. */
-  int SAMPLING_UNIT_KEY = 65;
+  int MISSION_PROPERTY_LIST_KEY = 65;
   /** RegularExpression Id. */
-  int SAMPLING_UNIT_ATTRIBUTE_STR_KEY = 66;
+  int MISSION_TRACK_TYPE = 66;
   /** RegularExpression Id. */
-  int SAMPLING_UNIT_ATTRIBUTE_VALUE_KEY = 67;
+  int SAMPLING_UNIT_SOURCE = 67;
   /** RegularExpression Id. */
-  int SAMPLING_UNIT_ATTRIBUTE_LIST_KEY = 68;
+  int SAMPLING_UNIT_KEY = 68;
   /** RegularExpression Id. */
-  int SAMPLING_UNIT_TRACK_KEY = 69;
+  int SAMPLING_UNIT_ATTRIBUTE_STR_KEY = 69;
   /** RegularExpression Id. */
-  int AREA_TYPE_KEY = 70;
+  int SAMPLING_UNIT_ATTRIBUTE_VALUE_KEY = 70;
   /** RegularExpression Id. */
-  int AREA_KEY = 71;
+  int SAMPLING_UNIT_ATTRIBUTE_LIST_KEY = 71;
   /** RegularExpression Id. */
-  int OBSERVATION_FILTER_TYPE_KEY = 72;
+  int SAMPLING_UNIT_TRACK_KEY = 72;
   /** RegularExpression Id. */
-  int WAYPOINT_FILTER_TYPE_KEY = 73;
+  int AREA_TYPE_KEY = 73;
   /** RegularExpression Id. */
-  int WAYPOINT_OBSERVER_KEY = 74;
+  int AREA_KEY = 74;
   /** RegularExpression Id. */
-  int SUM_CAT_VALUE_KEY = 75;
+  int OBSERVATION_FILTER_TYPE_KEY = 75;
   /** RegularExpression Id. */
-  int SUM_ATTRIBUTE_VALUE_KEY = 76;
+  int WAYPOINT_FILTER_TYPE_KEY = 76;
   /** RegularExpression Id. */
-  int SUM_CAT_ATT_VALUE_KEY = 77;
+  int WAYPOINT_OBSERVER_KEY = 77;
   /** RegularExpression Id. */
-  int SUM_ATTRIBUTE_VALUE_LISTTREE_KEY = 78;
+  int SUM_CAT_VALUE_KEY = 78;
   /** RegularExpression Id. */
-  int SUM_CAT_ATT_VALUE_LISTTREE_KEY = 79;
+  int SUM_ATTRIBUTE_VALUE_KEY = 79;
   /** RegularExpression Id. */
-  int AGG = 80;
+  int SUM_CAT_ATT_VALUE_KEY = 80;
   /** RegularExpression Id. */
-  int DATE_GROUPBY_ITEM = 81;
+  int SUM_ATTRIBUTE_VALUE_LISTTREE_KEY = 81;
   /** RegularExpression Id. */
-  int CATEGORY_GROUPBY_ITEM = 82;
+  int SUM_CAT_ATT_VALUE_LISTTREE_KEY = 82;
   /** RegularExpression Id. */
-  int AREA_GROUPBY_ITEM = 83;
+  int AGG = 83;
   /** RegularExpression Id. */
-  int ATTRIBUTE_GROUPBY_ITEM = 84;
+  int DATE_GROUPBY_ITEM = 84;
   /** RegularExpression Id. */
-  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 85;
+  int CATEGORY_GROUPBY_ITEM = 85;
   /** RegularExpression Id. */
-  int SURVEY_ID_GROUPBY_ITEM = 86;
+  int AREA_GROUPBY_ITEM = 86;
   /** RegularExpression Id. */
-  int MISSION_ID_GROUPBY_ITEM = 87;
+  int ATTRIBUTE_GROUPBY_ITEM = 87;
   /** RegularExpression Id. */
-  int MISSION_PROPERTY_GROUPBY_ITEM = 88;
+  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 88;
   /** RegularExpression Id. */
-  int SAMPLINGUNIT_PROPERTY_GROUPBY_ITEM = 89;
+  int SURVEY_ID_GROUPBY_ITEM = 89;
   /** RegularExpression Id. */
-  int SAMPLINGUNIT_GROUPBY_ITEM = 90;
+  int MISSION_ID_GROUPBY_ITEM = 90;
   /** RegularExpression Id. */
-  int WAYPOINT_OBSERVER_GROUPBY_ITEM = 91;
+  int MISSION_PROPERTY_GROUPBY_ITEM = 91;
   /** RegularExpression Id. */
-  int MISSION_TRACK_LENGTH = 92;
+  int SAMPLINGUNIT_PROPERTY_GROUPBY_ITEM = 92;
   /** RegularExpression Id. */
-  int MISSION_TRACK_TOTAL_LENGTH = 93;
+  int SAMPLINGUNIT_GROUPBY_ITEM = 93;
   /** RegularExpression Id. */
-  int MISSION_COUNT = 94;
+  int WAYPOINT_OBSERVER_GROUPBY_ITEM = 94;
   /** RegularExpression Id. */
-  int MISSION_TOTAL_COUNT = 95;
+  int MISSION_TRACK_LENGTH = 95;
   /** RegularExpression Id. */
-  int MISSION_DAY_COUNT = 96;
+  int MISSION_TRACK_TOTAL_LENGTH = 96;
   /** RegularExpression Id. */
-  int MISSION_HOUR_COUNT = 97;
+  int MISSION_COUNT = 97;
   /** RegularExpression Id. */
-  int MISSION_PERSONHOUR_COUNT = 98;
+  int MISSION_TOTAL_COUNT = 98;
   /** RegularExpression Id. */
-  int SURVEY_COUNT = 99;
+  int MISSION_DAY_COUNT = 99;
   /** RegularExpression Id. */
-  int SURVEY_TOTAL_COUNT = 100;
+  int MISSION_HOUR_COUNT = 100;
   /** RegularExpression Id. */
-  int QUOTED_STRING = 101;
+  int MISSION_PERSONHOUR_COUNT = 101;
+  /** RegularExpression Id. */
+  int SURVEY_COUNT = 102;
+  /** RegularExpression Id. */
+  int SURVEY_TOTAL_COUNT = 103;
+  /** RegularExpression Id. */
+  int QUOTED_STRING = 104;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -220,6 +226,7 @@ public interface ParserConstants {
     "\"and\"",
     "\"not\"",
     "\"or\"",
+    "\"exact\"",
     "\",\"",
     "\"<\"",
     "\"<=\"",
@@ -248,12 +255,14 @@ public interface ParserConstants {
     "<ATT_VALUE_KEY>",
     "<ATT_BOOL_KEY>",
     "<ATT_LIST_KEY>",
+    "<ATT_MLIST_KEY>",
     "<ATT_TREE_KEY>",
     "<ATT_DATE_KEY>",
     "<CAT_ATT_STR_KEY>",
     "<CAT_ATT_VALUE_KEY>",
     "<CAT_ATT_BOOL_KEY>",
     "<CAT_ATT_LIST_KEY>",
+    "<CAT_ATT_MLIST_KEY>",
     "<CM_CAT_ATT_LIST_KEY>",
     "<CM_CAT_ATT_TREE_KEY>",
     "<CAT_ATT_TREE_KEY>",

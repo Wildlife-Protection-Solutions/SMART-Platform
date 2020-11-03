@@ -28,10 +28,12 @@ import org.wcs.smart.observation.query.model.ObsObservationQuery;
 import org.wcs.smart.observation.query.model.ObservationQueryFactory;
 import org.wcs.smart.observation.query.model.ObservationWaypointQuery;
 import org.wcs.smart.observation.query.model.columns.FixedQueryColumn;
-import org.wcs.smart.observation.query.model.columns.ObservationAttributeQueryColumn;
-import org.wcs.smart.observation.query.model.columns.ObservationCategoryQueryColumn;
+import org.wcs.smart.query.common.ui.AttributeColumnLabelProvider;
+import org.wcs.smart.query.common.ui.CategoryColumnLabelProvider;
 import org.wcs.smart.query.common.ui.QueryColumnLabelProvider;
 import org.wcs.smart.query.common.ui.QueryResultsEditor;
+import org.wcs.smart.query.model.AttributeQueryColumn;
+import org.wcs.smart.query.model.CategoryQueryColumn;
 import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
@@ -56,9 +58,9 @@ public class SimpleQueryEditor extends QueryResultsEditor {
 	protected CellLabelProvider getColumnLabelProvider(QueryColumn column, List<QueryColumn> allColumns) {
 		if (column instanceof FixedQueryColumn){
 			return new QueryColumnLabelProvider(column);
-		}else if (column instanceof ObservationAttributeQueryColumn){
+		}else if (column instanceof AttributeQueryColumn){
 			return new AttributeColumnLabelProvider(column);
-		}else if (column instanceof ObservationCategoryQueryColumn){
+		}else if (column instanceof CategoryQueryColumn){
 			return new CategoryColumnLabelProvider(column);
 		}else if (column instanceof GridQueryColumn){
 			return new QueryColumnLabelProvider(column);

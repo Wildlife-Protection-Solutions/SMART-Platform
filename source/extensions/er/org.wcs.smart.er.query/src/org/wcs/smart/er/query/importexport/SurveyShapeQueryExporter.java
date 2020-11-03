@@ -34,6 +34,7 @@ import org.wcs.smart.er.query.model.SurveyObservationQuery;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.er.query.model.SurveyWaypointQuery;
 import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.engine.test.WaypointQueryResultItem;
 import org.wcs.smart.query.common.importexport.ShapeQueryExporter;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
@@ -67,7 +68,7 @@ public class SurveyShapeQueryExporter extends ShapeQueryExporter{
 			return SurveyResultItemFeature.createTrackFeature((SurveyQueryResultItem)it,  queryColumns, type);
 		}else if ( query.getTypeKey().equals(SurveyObservationQuery.KEY) ||
 				    query.getTypeKey().equals(SurveyWaypointQuery.KEY)){
-			return SurveyResultItemFeature.createObservationFeature((SurveyQueryResultItem)it, queryColumns, type);
+			return SurveyResultItemFeature.createObservationFeature((WaypointQueryResultItem)it, queryColumns, type);
 		}else if (query.getTypeKey().equals(MissionTrackQuery.KEY)){
 			return SurveyResultItemFeature.createTrackFeature((MissionTrackResultItem)it, queryColumns, type);
 		}

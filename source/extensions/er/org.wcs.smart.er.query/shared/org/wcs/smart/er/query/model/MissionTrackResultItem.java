@@ -40,7 +40,7 @@ import org.wcs.smart.query.common.engine.IGeometryResultItem;
  * @author Emily
  * @since 1.0.0
  */
-public class MissionTrackResultItem implements IGeometryResultItem{
+public class MissionTrackResultItem implements IGeometryResultItem, ISurveyQueryResultItem, ISamplingUnitResultItem{
 
 	public static final String TRACK_GEOMCOLUMN_KEY = "TrackGeomtry"; //$NON-NLS-1$
 	
@@ -356,5 +356,10 @@ public class MissionTrackResultItem implements IGeometryResultItem{
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public String getMissionLeader() {
+		throw new UnsupportedOperationException();
 	}
 }

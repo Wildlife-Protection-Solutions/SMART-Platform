@@ -277,17 +277,20 @@ public class AddWaypointDialog extends SmartStyledTitleDialog{
 		try{
 			CoordinateReferenceSystem target = ReprojectUtils.stringToCrs(currentProjection.getDefinition());
 		
-			Double x = Double.parseDouble(txtX.getText());
-			Double y = Double.parseDouble(txtY.getText());
-			
-			Coordinate c2 = ReprojectUtils.reproject(x, y, target, SmartDB.DATABASE_CRS);
-			if (c2 != null){
-				md.setInitPoint(c2.x,c2.y);
+			try {
+				Double x = Double.parseDouble(txtX.getText());
+				Double y = Double.parseDouble(txtY.getText());
+				
+				Coordinate c2 = ReprojectUtils.reproject(x, y, target, SmartDB.DATABASE_CRS);
+				if (c2 != null){
+					md.setInitPoint(c2.x,c2.y);
+				}
+			}catch (Exception ex) {
+				//eatme
 			}
-		
 			if (md.open() == SelectPointOnMapDialog.OK){
 				if (md.getPoint() != null){
-					c2 = ReprojectUtils.reproject(md.getPoint().getX(), md.getPoint().getY(), SmartDB.DATABASE_CRS, target);
+					Coordinate c2 = ReprojectUtils.reproject(md.getPoint().getX(), md.getPoint().getY(), SmartDB.DATABASE_CRS, target);
 					txtX.setText(String.valueOf(c2.getX()));
 					txtY.setText(String.valueOf(c2.getY()));
 					

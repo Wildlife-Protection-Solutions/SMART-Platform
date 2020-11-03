@@ -25,15 +25,11 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.ui.PlatformUI;
-import org.hibernate.Session;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.observation.model.WaypointObservation;
-import org.wcs.smart.patrol.model.PatrolWaypoint;
-import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
-import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
-import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
+import org.wcs.smart.patrol.query.model.PatrolObservationAttachmentResultItem;
+import org.wcs.smart.patrol.query.model.PatrolObservationResultItem;
+import org.wcs.smart.patrol.query.model.PatrolWaypointAttachmentResultItem;
+import org.wcs.smart.patrol.query.model.PatrolWaypointResultItem;
 import org.wcs.smart.patrol.query.ui.editor.PatrolQueryResultsEditor;
-import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.ui.QueryResultsEditor;
 import org.wcs.smart.query.common.ui.ShowInTableInfoProvider;
@@ -46,27 +42,24 @@ public class PatrolQueryShowInTableResultProvider extends ShowInTableInfoProvide
 	 */
 	@Override
 	public void doWork(IResultItem resultItem) {
-		if (resultItem instanceof IAttachmentResultItem) {
-			try(Session s = HibernateManager.openSession()){
-				PatrolWaypoint pw = PatrolQueryPlugIn.findWaypoint(s, (IAttachmentResultItem)resultItem);
-				if (pw == null) return;
-				
-				WaypointObservation wo = PatrolQueryPlugIn.findObservation(s, (IAttachmentResultItem)resultItem);
-				PatrolQueryResultItem tmp = new PatrolQueryResultItem();
-				tmp.setPatrolUuid(pw.getPatrolLegDay().getPatrolLeg().getPatrol().getUuid());
-				//tmp.setPatrolLegUuid(pw.getPatrolLegDay().getPatrolLeg().getUuid());
-				tmp.setWaypointUuid(pw.getWaypoint().getUuid());
-
-				//this is only applicable for observation queries
-				if (wo != null) {
-					tmp.setObservationUuid(wo.getUuid());
-				}else if (!pw.getWaypoint().getAllObservations().isEmpty()) {
-					//this attachment is associated with a waypoint so pick any random observation to zoom to
-					tmp.setObservationUuid(pw.getWaypoint().getAllObservations().get(0).getUuid());
-				}
-				resultItem = tmp;
-			}
+		
+		if (resultItem instanceof PatrolObservationAttachmentResultItem) {
+			PatrolObservationAttachmentResultItem a = (PatrolObservationAttachmentResultItem)resultItem;
+			
+			PatrolObservationResultItem oi = new PatrolObservationResultItem();
+			oi.setPatrolUuid(a.getPatrolUuid());
+			oi.setWaypointUuid(a.getWaypointUuid());
+			oi.setObservationUuid(a.getObservationUuid());
+			resultItem = oi;
+		}else if (resultItem instanceof PatrolWaypointAttachmentResultItem) {
+			PatrolWaypointAttachmentResultItem a = (PatrolWaypointAttachmentResultItem)resultItem;
+			
+			PatrolWaypointResultItem oi = new PatrolWaypointResultItem();
+			oi.setPatrolUuid(a.getPatrolUuid());
+			oi.setWaypointUuid(a.getWaypointUuid());
+			resultItem = oi;
 		}
+
 		IEclipseContext ctx = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
 		EPartService service = ctx.get(EPartService.class);
 		for (MPart p : service.getParts()){
@@ -84,7 +77,6 @@ public class PatrolQueryShowInTableResultProvider extends ShowInTableInfoProvide
 				}
 				if (src instanceof QueryResultsEditor){
 					QueryResultsEditor e = (QueryResultsEditor) src;
-					if (e.getQuery().getTypeKey().equals(PatrolWaypointQuery.KEY)) ((PatrolQueryResultItem)resultItem).setObservationUuid(null);
 					e.showTablePage();
 					e.getQueryResultsTable().revealSelection(resultItem);	
 				}

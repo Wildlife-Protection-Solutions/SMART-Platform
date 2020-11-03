@@ -34,11 +34,13 @@ import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.query.ERQueryPlugIn;
+import org.wcs.smart.er.query.model.ISurveyQueryResultItem;
 import org.wcs.smart.er.query.model.MissionTrackResultItem;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.observation.udig.WaypointSimpleFeature;
 import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.engine.test.WaypointQueryResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumnUtils;
 import org.wcs.smart.util.UuidUtils;
@@ -71,11 +73,15 @@ public class SurveyResultItemFeature {
 	 * @param ftype the feature type 
 	 * @return created feature 
 	 */
-	public static SimpleFeature createObservationFeature(SurveyQueryResultItem it, List<QueryColumn> columns, SimpleFeatureType  ftype){
+	public static SimpleFeature createObservationFeature(WaypointQueryResultItem it, List<QueryColumn> columns, SimpleFeatureType  ftype){
 		List<Object> data = new ArrayList<Object>();
 		
-		data.add(it.asGeometry(SurveyQueryResultItem.WAYPOINT_GEOMCOLUMN_KEY));
-		data.add(it.getMissionId() + "." + it.getWaypointId() + "." + System.nanoTime()); //$NON-NLS-1$ //$NON-NLS-2$
+		String mid = "";
+		if (it instanceof ISurveyQueryResultItem) {
+			mid = ((ISurveyQueryResultItem) it).getMissionId();
+		}
+		data.add(it.asGeometry(WaypointQueryResultItem.GEOMCOLUMN_KEY));
+		data.add(mid + "." + it.getWaypointId() + "." + System.nanoTime()); //$NON-NLS-1$ //$NON-NLS-2$
 		addQueryColumnData(it, ftype, columns, data);
 		return new WaypointSimpleFeature(SimpleFeatureBuilder.build(ftype, data, (String)data.get(1)), it.getWaypointUuid());
 	}
@@ -94,7 +100,7 @@ public class SurveyResultItemFeature {
 		List<Object> data = new ArrayList<Object>();
 		
 		data.add(it.asGeometry(SurveyQueryResultItem.TRACK_GEOMCOLUMN_KEY));
-		data.add(it.getMissionId() + "." + it.getWaypointId() + "." + System.nanoTime()); //$NON-NLS-1$ //$NON-NLS-2$
+		data.add(it.getMissionId() + "." + System.nanoTime()); //$NON-NLS-1$ //$NON-NLS-2$
 		addQueryColumnData(it, ftype, columns, data);
 		
 		return SimpleFeatureBuilder.build(ftype, data, (String)data.get(1));

@@ -1249,7 +1249,7 @@ public class AttributeInfoPanel extends Composite {
 			}
 			session.flush();
 		}catch (Exception ex) {
-			SmartPlugIn.displayLog("Error saving attribute changes.  Please close the data model editor and reopen it.", ex);
+			SmartPlugIn.displayLog(Messages.AttributeInfoPanel_SaveError, ex);
 
 		}
 	}

@@ -48,7 +48,9 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationAttributeList;
@@ -56,6 +58,7 @@ import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.UuidUtils;
 
@@ -67,6 +70,8 @@ import org.wcs.smart.util.UuidUtils;
  *
  */
 public abstract class AbstractQueryEngine implements IQueryEngine {
+
+	public HashMap<IFilter, FilterTable> filterTables = new HashMap<IFilter, FilterTable>();
 
 	protected Map<String, Object> currentParameters = new HashMap<String, Object>();
 
@@ -92,6 +97,8 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		tablePrefix.put(Employee.class, "e"); //$NON-NLS-1$
 		tablePrefix.put(Agency.class, "aa"); //$NON-NLS-1$
 		tablePrefix.put(Rank.class, "ear"); //$NON-NLS-1$
+		tablePrefix.put(WaypointAttachment.class, "wpa"); //$NON-NLS-1$
+		tablePrefix.put(ObservationAttachment.class, "wooa"); //$NON-NLS-1$
 	}
 
 	
@@ -115,6 +122,8 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		tableNames.put(Employee.class, "smart.employee"); //$NON-NLS-1$
 		tableNames.put(Agency.class, "smart.agency"); //$NON-NLS-1$
 		tableNames.put(Rank.class, "smart.rank"); //$NON-NLS-1$
+		tableNames.put(WaypointAttachment.class, "smart.wp_attachments"); //$NON-NLS-1$
+		tableNames.put(ObservationAttachment.class, "smart.observation_attachment"); //$NON-NLS-1$
 	}
 		
 	/**
@@ -138,8 +147,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	 * @param c
 	 * @throws SQLException
 	 */
-	public void dropTables(Connection c) throws SQLException {
-	}
+	public abstract void dropTables(Connection c) throws SQLException ;
 	
 	/**
 	 * Creates a temporary query table 
@@ -255,7 +263,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	 * @param tables List of tables already included in the from clause
 	 * @return
 	 */
-	protected String appendFromClause(HashSet<Class<?>> tables){
+	public String appendFromClause(HashSet<Class<?>> tables){
 		return ""; //$NON-NLS-1$
 	}
 	
@@ -268,7 +276,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	 * @param tableName temporary table to create indexes on
 	 * @throws SQLException
 	 */
-	protected void buildTemporaryTableIndexes(Connection c, String tableName) throws SQLException{
+	public void buildTemporaryTableIndexes(Connection c, String tableName) throws SQLException{
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE INDEX " + tableName + "_ob_uuid_idx on " +  tableName + "(ob_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		QueryPlugIn.logSql(sql.toString());
@@ -362,5 +370,39 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 			this.columnname = columnname;
 		}
 	}
+	
+	
+	/**
+	 * Create the select statement to populate the temporary table
+	 * containing observation data for the query engine.
+	 * 
+	 * @param includeObservations if observation information should be included
+	 * in the output table (ob_uuid).
+	 * 
+	 * @return
+	 */
+	public abstract String getTemporaryTableSelectClause(boolean includeObservations);
+	
+	
+	/**
+	 * Create the temporary table for hold observation data
+	 * for querying
+	 * 
+	 * @param tableName temporary table name
+	 * @return 
+	 */
+	public abstract String getTemporaryTableCreateClause(String tableName);
+
+	
+
+	
+	/**
+	 * Creates the filter processor based on the query filter type
+	 * 
+	 * @param filterType
+	 * @param queryDataTable
+	 * @return
+	 */
+	public abstract IFilterProcessor getFilterProcessor(IFilter.FilterType filterType, String queryDataTable, Query query);
 	
 }

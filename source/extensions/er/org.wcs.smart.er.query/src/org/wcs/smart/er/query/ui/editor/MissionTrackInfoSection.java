@@ -63,7 +63,7 @@ public class MissionTrackInfoSection implements ISummaryInfo {
 	}
 
 	@Override
-	public void updateControls(IPagedQueryResultSet resultSet) {
+	public void updateControls(IPagedQueryResultSet<?> resultSet) {
 		lblNumResults.setText(Messages.MissionTrackInfoSection_NA);
 		if (resultSet != null ){
 			lblNumResults.setText(String.valueOf(resultSet.getItemCount()));
