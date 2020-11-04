@@ -21,27 +21,16 @@
  */
 package org.wcs.smart.asset.query.engine;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.UUID;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
-import org.hibernate.Session;
-import org.hibernate.jdbc.Work;
-import org.wcs.smart.asset.query.AssetQueryPlugIn;
 import org.wcs.smart.asset.query.model.AssetWaypointResultItem;
 import org.wcs.smart.asset.query.model.observation.FixedQueryColumn;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
-import org.wcs.smart.query.common.engine.test.WaypointQueryResult;
-import org.wcs.smart.query.common.engine.test.WaypointQueryResultItem;
-import org.wcs.smart.query.common.model.ISearchabledResultSet;
+import org.wcs.smart.query.common.engine.WaypointQueryResult;
+import org.wcs.smart.query.common.engine.WaypointQueryResultItem;
 import org.wcs.smart.query.common.model.IUpdateableResultSet;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
@@ -52,6 +41,8 @@ public class AssetPagedWaypointResult extends WaypointQueryResult<AssetWaypointR
 
 	public AssetPagedWaypointResult(AssetWaypointEngine engine) {
 		super(engine, -1);
+		updater = new UpdateableResultSet(engine);
+
 	}
 	
 	

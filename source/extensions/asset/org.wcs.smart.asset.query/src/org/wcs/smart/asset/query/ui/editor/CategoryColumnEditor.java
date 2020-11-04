@@ -24,7 +24,7 @@ package org.wcs.smart.asset.query.ui.editor;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.swt.widgets.Composite;
-import org.wcs.smart.query.common.engine.test.ObservationQueryResultItem;
+import org.wcs.smart.query.common.engine.ObservationQueryResultItem;
 import org.wcs.smart.query.common.ui.edit.AbstractQueryColumnEditor;
 import org.wcs.smart.query.common.ui.edit.CellEditorFactory;
 import org.wcs.smart.query.model.CategoryQueryColumn;

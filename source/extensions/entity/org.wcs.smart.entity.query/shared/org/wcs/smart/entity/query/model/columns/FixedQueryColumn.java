@@ -26,7 +26,7 @@ import java.util.Locale;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.entity.query.IEntityQueryLabelProvider;
 import org.wcs.smart.query.common.engine.IResultItem;
-import org.wcs.smart.query.common.engine.test.WaypointQueryResultItem;
+import org.wcs.smart.query.common.engine.WaypointQueryResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 
 /**

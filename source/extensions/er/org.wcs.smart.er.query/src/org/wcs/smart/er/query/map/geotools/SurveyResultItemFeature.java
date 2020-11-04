@@ -40,7 +40,7 @@ import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.observation.udig.WaypointSimpleFeature;
 import org.wcs.smart.query.common.engine.IResultItem;
-import org.wcs.smart.query.common.engine.test.WaypointQueryResultItem;
+import org.wcs.smart.query.common.engine.WaypointQueryResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumnUtils;
 import org.wcs.smart.util.UuidUtils;

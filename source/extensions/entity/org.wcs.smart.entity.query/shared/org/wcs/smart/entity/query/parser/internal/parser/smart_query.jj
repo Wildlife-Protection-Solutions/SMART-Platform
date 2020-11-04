@@ -74,7 +74,7 @@ TOKEN :
 |    < SUM_ATTRIBUTE_VALUE_KEY : "attribute:n:" < AGG > ":" < DM_KEY > >
 //    < SUM_ENTITYATTRIBUTE_VALUE_KEY :  < EA_PREFIX > < SUM_ATTRIBUTE_VALUE_KEY > >
 |    < SUM_CAT_ATT_VALUE_KEY : "category:" < DM_KEY > ":" < SUM_ATTRIBUTE_VALUE_KEY > > 
-|     < SUM_ATTRIBUTE_VALUE_LISTTREE_KEY : "attribute:" ("t" | "l") ":sum:" ("obs" | "wp") ":" < DM_KEY > >
+|     < SUM_ATTRIBUTE_VALUE_LISTTREE_KEY : "attribute:" ("t" | "l" | "m") ":sum:" ("obs" | "wp") ":" < DM_KEY > >
 //   < SUM_ENTITYATTRIBUTE_VALUE_LISTTREE_KEY :  < EA_PREFIX > < SUM_ATTRIBUTE_VALUE_LISTTREE_KEY > >
 |    < SUM_CAT_ATT_VALUE_LISTTREE_KEY : "category:" < DM_KEY > ":" < SUM_ATTRIBUTE_VALUE_LISTTREE_KEY > >
 |    < AGG  : ("sum" | "avg" | "min" | "max" | "var_samp" | "stddev_samp") >
@@ -84,9 +84,11 @@ TOKEN :
 | 	<  AREA_GROUPBY_ITEM : "area:" < AREA_TYPE_KEY > ":" ( < DM_KEY > )? (":" < DM_KEY > )* >
 | 	<  ATTRIBUTE_GROUPBY_ITEM :
 			( < ATT_LIST_KEY > ":" ( < DM_KEY > )? (":" < DM_KEY > )* ) |
+			( < ATT_MLIST_KEY > ":" ( < DM_KEY > )? (":" < DM_KEY > )* ) |
 			( < ATT_TREE_KEY > ":" < NUMBER > ":" ( < DM_KEY > )? (":" < DM_KEY > )*) >
 | 	<  CATEGORY_ATTRIBUTE_GROUPBY_ITEM :
 			( "category:" < DM_KEY > ":" < ATT_LIST_KEY > ":" ( < DM_KEY > )? (":" < DM_KEY > )* ) |
+			( "category:" < DM_KEY > ":" < ATT_MLIST_KEY > ":" ( < DM_KEY > )? (":" < DM_KEY > )* ) |
 			( "category:" < DM_KEY > ":" < ATT_TREE_KEY > ":" < NUMBER > ":" ( < DM_KEY > )? (":" < DM_KEY > )* ) >
 | 	<  ENTITYATTRIBUTE_GROUPBY_ITEM :  < EA_PREFIX > < ATTRIBUTE_GROUPBY_ITEM > >
 |   <  CA_GROUPBY_ITEM : "ca:" (< LETTER > | < DIGIT >)* (":" (< LETTER > | < DIGIT >)+ )*  >

@@ -76,7 +76,7 @@ public class AttributeListGroupByDropItem extends DropItem implements
 	 * @param attribute
 	 */
 	public AttributeListGroupByDropItem(Attribute attribute){
-		if (attribute.getType() != AttributeType.LIST){
+		if (!attribute.getType().isList()){
 			throw new IllegalStateException("Cannot create an attribute list drop item for a non-list attribute"); //$NON-NLS-1$
 		}
 		this.attribute = attribute;

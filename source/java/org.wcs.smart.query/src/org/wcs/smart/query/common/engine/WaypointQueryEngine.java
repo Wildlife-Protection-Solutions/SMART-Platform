@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Wildlife Conservation Society
+ * Copyright (C) 2012 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,31 +19,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.common.engine.test;
-
-import org.wcs.smart.common.attachment.ISmartAttachment;
-import org.wcs.smart.query.common.engine.IAttachmentResultItem;
+package org.wcs.smart.query.common.engine;
 
 /**
- * Query result attachment item
+ * Interface for queries which return waypoints
  * 
  * @author Emily
- * @since 7.0.0
  *
+ * @param <T>
  */
-public class ObservationAttachmentQueryResultItem extends ObservationQueryResultItem implements IAttachmentResultItem{
+public interface WaypointQueryEngine<T extends IWaypointQueryResultItem> extends IDesktopWOEngine<T>  {
 
-	private ISmartAttachment attachment;
-	
-	@Override
-	public ISmartAttachment getAttachment() {
-		return attachment;
-	}
-	
-	@Override
-	public void setAttachment(ISmartAttachment filename) {
-		this.attachment = filename;
-	}
-	
 	
 }

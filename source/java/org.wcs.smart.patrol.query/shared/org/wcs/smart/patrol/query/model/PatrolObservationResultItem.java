@@ -26,7 +26,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import org.wcs.smart.patrol.model.PatrolType;
-import org.wcs.smart.query.common.engine.test.ObservationQueryResultItem;
+import org.wcs.smart.query.common.engine.ObservationQueryResultItem;
 
 /**
  * A class to hold the results of a waypoint 

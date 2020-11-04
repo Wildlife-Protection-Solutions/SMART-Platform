@@ -70,7 +70,6 @@ import org.eclipse.ui.menus.IMenuService;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.osgi.service.event.Event;
-import org.wcs.smart.SmartContext;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.incident.IIncidentProvider;

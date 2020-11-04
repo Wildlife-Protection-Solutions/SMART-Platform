@@ -25,7 +25,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.UUID;
 
-import org.wcs.smart.query.common.engine.test.WaypointQueryResultItem;
+import org.wcs.smart.query.common.engine.WaypointQueryResultItem;
 
 /**
  * A class to hold the results of a survey waypoint 

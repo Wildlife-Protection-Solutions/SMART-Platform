@@ -25,7 +25,6 @@ import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.patrol.query.model.PatrolObservationResultItem;
-import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.query.common.ui.edit.AbstractQueryColumnEditor;
 import org.wcs.smart.query.common.ui.edit.CellEditorFactory;
 import org.wcs.smart.query.model.CategoryQueryColumn;

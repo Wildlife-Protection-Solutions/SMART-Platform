@@ -103,7 +103,7 @@ public class IntelObservation extends UuidItem{
 	 * 
 	 * @return The set of i_observation_attribute
 	 */
-	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.observation", orphanRemoval = true, cascade={CascadeType.ALL})
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="observation", orphanRemoval = true, cascade={CascadeType.ALL})
 	public List<IntelObservationAttribute> getObservationAttributes() {
 		return this.attributes;
 	}

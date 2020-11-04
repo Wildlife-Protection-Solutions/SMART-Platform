@@ -45,6 +45,7 @@ import org.wcs.smart.map.raster.GridMetadata;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationAttributeList;
 import org.wcs.smart.observation.query.internal.Messages;
 import org.wcs.smart.observation.query.model.ObservationGriddedQuery;
 import org.wcs.smart.query.QueryPlugIn;
@@ -222,7 +223,9 @@ public class DerbyGridEngine extends AbstractDerbyObservationQueryEngine{
 				
 				String strAggValue = "number_value"; //$NON-NLS-1$
 				strAgg = tmp.getAggregationKey();
-				if (tmp.getAttributeType() == AttributeType.LIST || tmp.getAttributeType() == AttributeType.TREE){
+				if (tmp.getAttributeType() == AttributeType.LIST || 
+						tmp.getAttributeType() == AttributeType.MLIST ||
+						tmp.getAttributeType() == AttributeType.TREE){
 					strAgg="count";  //$NON-NLS-1$
 					strAggValue = "value";  //$NON-NLS-1$
 					
@@ -238,7 +241,9 @@ public class DerbyGridEngine extends AbstractDerbyObservationQueryEngine{
 				
 				if (tmp.getAttributeType() == AttributeType.NUMERIC){
 					sql.append("SELECT number_value  "); //$NON-NLS-1$
-				}else if (tmp.getAttributeType() == AttributeType.TREE || tmp.getAttributeType() == AttributeType.LIST){
+				}else if (tmp.getAttributeType() == AttributeType.TREE || 
+						tmp.getAttributeType() == AttributeType.LIST ||
+						tmp.getAttributeType() == AttributeType.MLIST){
 					sql.append("SELECT distinct "); //$NON-NLS-1$
 					if (tmp.getValueType() == ValueType.OBSERVATION){
 						sql.append(dataTable);
@@ -337,6 +342,28 @@ public class DerbyGridEngine extends AbstractDerbyObservationQueryEngine{
 					sql.append( tablePrefix.get(AttributeListItem.class));
 					p1 = addParameterValue(tmp.getItemKey());
 					sql.append(".keyid = " + p1); //$NON-NLS-1$ 
+				}else if (tmp.getAttributeType() == AttributeType.MLIST){
+					
+					sql.append(" JOIN " ); //$NON-NLS-1$
+					sql.append(tableNamePrefix(WaypointObservationAttributeList.class));
+					sql.append(" on "); //$NON-NLS-1$
+					sql.append( tablePrefix.get(WaypointObservationAttribute.class));
+					sql.append(".uuid = "); //$NON-NLS-1$
+					sql.append( tablePrefix.get(WaypointObservationAttributeList.class));
+					sql.append(".observation_attribute_uuid "); //$NON-NLS-1$
+					
+					sql.append(" JOIN " + tableNames.get(AttributeListItem.class) ); //$NON-NLS-1$
+					sql.append(" as "); //$NON-NLS-1$
+					sql.append( tablePrefix.get(AttributeListItem.class));
+					sql.append(" on "); //$NON-NLS-1$
+					sql.append( tablePrefix.get(AttributeListItem.class));
+					sql.append(".uuid = "); //$NON-NLS-1$
+					sql.append( tablePrefix.get(WaypointObservationAttributeList.class));
+					sql.append(".list_element_uuid and "); //$NON-NLS-1$
+					sql.append( tablePrefix.get(AttributeListItem.class));
+					p1 = addParameterValue(tmp.getItemKey());
+					sql.append(".keyid = " + p1); //$NON-NLS-1$ 
+					
 				}else if (tmp.getAttributeType() == AttributeType.TREE){
 					sql.append(" join "); //$NON-NLS-1$
 					sql.append(tableNames.get(AttributeTreeNode.class));
@@ -487,15 +514,11 @@ public class DerbyGridEngine extends AbstractDerbyObservationQueryEngine{
 		return sql.toString();
 	}
 
+	
 	@Override
-	public void buildTemporaryTableIndexes(Connection c, String tableName)
-			throws SQLException {
-		super.buildTemporaryTableIndexes(c, tableName);
-		
-		StringBuilder sql = new StringBuilder();
-		sql.append("CREATE INDEX " + tableName + "_wp_uuid_idx on " +  tableName + "(wp_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		QueryPlugIn.logSql(sql.toString());
-		c.createStatement().execute(sql.toString());
+	public void createTemporaryTableIndexes(Connection c, String tableName) throws SQLException {
+		super.createObsIndex(c, tableName);
+		super.createWpIndex(c, tableName);
 	}
 	
 }

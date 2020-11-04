@@ -70,6 +70,7 @@ TOKEN [ IGNORE_CASE ] :
   < K_AND : "and" >
 | < K_NOT : "not" >
 | < K_OR : "or" >
+| < K_EXACT : "exact" >
 }
 
 
@@ -138,6 +139,7 @@ TOKEN :
  | < ATTRIBUTE_KEY_BOOLEAN : "dm_attribute:b:"(< DM_KEY >)?":"< DM_KEY >>
  | < ATTRIBUTE_KEY_DATE: "dm_attribute:d:"(< DM_KEY >)?":"< DM_KEY >>
  | < ATTRIBUTE_KEY_LIST: "dm_attribute:l:"(< DM_KEY >)?":"< DM_KEY >>
+ | < ATTRIBUTE_KEY_MLIST: "dm_attribute:m:"(< DM_KEY >)?":"< DM_KEY >>
  | < ATTRIBUTE_KEY_TREE: "dm_attribute:t:"(< DM_KEY >)?":"< DM_KEY >>
 
 
@@ -563,21 +565,36 @@ IQueryFilter DmNumberExpression():
 
 IQueryFilter DmKeyExpression():
 {
-  String op = null;
+  Operator op = null;
   String key = null;
   String value = null;
 }
 {
+
+
+	/* multi attribute list items */
+	(
+		< ATTRIBUTE_KEY_MLIST > {key = token.image;}		    
+		(<  K_OR > | < K_AND > | < K_EXACT >) {op = Operator.parse(token.image);}
+		value = MultiList()
+	)
+	{
+  		return DataModelFilter.create(key, op, value);
+	}
+	| 
 	( 
-		(		  <ATTRIBUTE_KEY_LIST> | < ATTRIBUTE_KEY_TREE >
+		(
+		  <ATTRIBUTE_KEY_LIST> | < ATTRIBUTE_KEY_TREE >
 		)
 		{key = token.image;}
-		<  EQUAL > {op = token.image;}
+		<  EQUAL > {op = Operator.parse(token.image);}
 		< DM_KEY >  {value = token.image;}
 	)
 	{
   		return DataModelFilter.create(key, value);
 	}
+	
+	
 }
 
 IQueryFilter DmBooleanExpression():{}
@@ -1021,3 +1038,12 @@ Operator BooleanOp() :
   }
 }
 
+String MultiList() :
+{
+  String list = "";
+} {
+  (( < DM_KEY > { list=token.image; })(  ","  < DM_KEY > { list += "," + token.image; })*)
+  {
+    return list;
+  }
+}

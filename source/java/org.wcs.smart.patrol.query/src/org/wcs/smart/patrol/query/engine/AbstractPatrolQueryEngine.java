@@ -21,8 +21,6 @@
  */
 package org.wcs.smart.patrol.query.engine;
 
-import java.util.HashMap;
-
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;

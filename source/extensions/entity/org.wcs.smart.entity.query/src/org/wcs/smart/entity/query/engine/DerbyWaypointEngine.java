@@ -43,7 +43,7 @@ import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.common.engine.IQueryResult;
-import org.wcs.smart.query.common.engine.test.WaypointQueryEngine;
+import org.wcs.smart.query.common.engine.WaypointQueryEngine;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
@@ -289,7 +289,7 @@ public class DerbyWaypointEngine extends DerbyEntityQueryEngine implements Waypo
 	
 	
 	@Override
-	public void buildTemporaryTableIndexes(Connection c, String tableName)
+	public void createObsIndex(Connection c, String tableName)
 			throws SQLException {
 	}
 
@@ -301,5 +301,10 @@ public class DerbyWaypointEngine extends DerbyEntityQueryEngine implements Waypo
 	@Override
 	public IAttachmentResultItem asQueryAttachmentResultItem(ResultSet rs, Session session) throws SQLException {
 		return null;
+	}
+	
+	@Override
+	public void createTemporaryTableIndexes(Connection c, String tableName) throws SQLException {
+		super.createWpIndex(c, tableName);
 	}
 }

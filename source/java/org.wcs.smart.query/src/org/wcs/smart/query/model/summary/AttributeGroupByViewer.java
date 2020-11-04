@@ -65,7 +65,7 @@ public class AttributeGroupByViewer extends AbstractGroupByViewer<AttributeGroup
 			throw new RuntimeException(MessageFormat.format(Messages.AttributeGroupBy_AttributeNotFound, new Object[]{groupBy.getAttributeKey()}));
 		}
 		List<ListItem> items = new ArrayList<ListItem>();
-		if (att.getType() == AttributeType.LIST){
+		if (att.getType().isList()){
 			if (filterHkeys != null) {
 				for (AttributeListItem it : QueryDataModelManager.getInstance().getAttributeListItems(att, session, true)) {
 					for (String key : filterHkeys){
@@ -123,13 +123,13 @@ public class AttributeGroupByViewer extends AbstractGroupByViewer<AttributeGroup
 					throw new Exception(MessageFormat.format(Messages.AttributeGroupBy_CategoryNotFoundError,new Object[] { categoryHkey }));
 				}
 				category.getFullCategoryName();
-				if (attributeType == AttributeType.LIST) {
+				if (attributeType.isList()) {
 					it = BasicDropItemFactory.INSTANCE.createAttributeListGroupByDropItem(new CategoryAttribute(category, attribute));
 				} else if (attributeType == AttributeType.TREE ){
 					it = BasicDropItemFactory.INSTANCE.createAttributeTreeNodeGroupByDropItem(attribute,groupBy.getTreeLevel(), category);
 				}
 			} else {
-				if (attributeType == AttributeType.LIST) {
+				if (attributeType.isList()) {
 					it = BasicDropItemFactory.INSTANCE.createAttributeListGroupByDropItem(attribute);
 				} else if (attributeType == AttributeType.TREE ) {
 					it = BasicDropItemFactory.INSTANCE.createAttributeTreeNodeGroupByDropItem(attribute,groupBy.getTreeLevel());

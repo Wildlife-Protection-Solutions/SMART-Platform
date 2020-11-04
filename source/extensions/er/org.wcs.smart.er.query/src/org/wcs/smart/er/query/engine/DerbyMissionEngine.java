@@ -78,7 +78,7 @@ public class DerbyMissionEngine extends DerbySurveyQueryEngine {
 	}
 	
 	public String getQueryLabelTable() {
-		return this.queryDataTable + "_labels";
+		return this.queryDataTable + "_labels"; //$NON-NLS-1$
 	}
 	
 	/**
@@ -172,7 +172,7 @@ public class DerbyMissionEngine extends DerbySurveyQueryEngine {
 	@Override
 	public void dropTables(Connection c) throws SQLException {
 		dropTable(c, getQueryDataTable());
-		dropTable(c, getQueryLabelTable()); //$NON-NLS-1$
+		dropTable(c, getQueryLabelTable());
 	}
 
 	private void populateTemporaryTableNameObjExtra(String uuidColumn, String nameColumn, Connection c, Session session) throws SQLException {
@@ -382,7 +382,6 @@ public class DerbyMissionEngine extends DerbySurveyQueryEngine {
 	}
 	
 	@Override
-	public void buildTemporaryTableIndexes(Connection c, String tableName)
-			throws SQLException {
+	public void createTemporaryTableIndexes(Connection c, String tableName) throws SQLException {
 	}
 }

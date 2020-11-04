@@ -551,6 +551,27 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 			
 		}
 		
+		
+		//multi-select attributes
+		sql = new String[] {
+			"CREATE FUNCTION smart.tempuuid() returns char(16) for bit data LANGUAGE JAVA NOT deterministic external name 'org.wcs.smart.util.DerbyUtils.createUuid' PARAMETER STYLE JAVA NO SQL RETURNS NULL ON NULL INPUT", //$NON-NLS-1$
+
+			"alter table smart.i_observation_attribute add column uuid char(16) for bit data", //$NON-NLS-1$
+			"update  smart.i_observation_attribute set uuid = smart.tempuuid()", //$NON-NLS-1$
+			"alter table smart.i_observation_attribute alter column uuid not null", //$NON-NLS-1$
+			"alter table smart.i_observation_attribute drop primary key", //$NON-NLS-1$
+			"alter table smart.i_observation_attribute add primary key (uuid)", //$NON-NLS-1$
+			"alter table smart.i_observation_attribute add unique(observation_uuid, attribute_uuid)", //$NON-NLS-1$
+
+			"create table smart.i_observation_attribute_list (list_element_uuid char(16) for bit data not null,observation_attribute_uuid char(16) for bit data not null,primary key (list_element_uuid, observation_attribute_uuid))", //$NON-NLS-1$
+			"alter table smart.i_observation_attribute_list ADD FOREIGN KEY (observation_attribute_uuid) REFERENCES smart.i_observation_attribute(uuid) on DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",  //$NON-NLS-1$
+			"alter table smart.i_observation_attribute_list ADD FOREIGN KEY (list_element_uuid) REFERENCES smart.dm_attribute_list(uuid) ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+			
+			"DROP FUNCTION smart.tempuuid" //$NON-NLS-1$
+		};
+		for (String s : sql) session.createNativeQuery(s).executeUpdate();
+
+		
 		HibernateManager.setPlugInVersion(Intelligence2PlugIn.PLUGIN_ID, Intelligence2PlugIn.DB_VERSION_5, session);
 
 	}

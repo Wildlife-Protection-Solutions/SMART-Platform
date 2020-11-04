@@ -44,7 +44,7 @@ import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.query.internal.Messages;
 import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
-import org.wcs.smart.query.common.engine.test.WaypointQueryResultItem;
+import org.wcs.smart.query.common.engine.WaypointQueryResultItem;
 import org.wcs.smart.query.model.IQueryResultInfoProvider;
 import org.wcs.smart.query.ui.editor.IMapQueryEditor;
 import org.wcs.smart.util.E3Utils;

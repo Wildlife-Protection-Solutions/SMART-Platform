@@ -27,8 +27,8 @@ import org.wcs.smart.SmartContext;
 import org.wcs.smart.asset.query.model.IAssetResultItem;
 import org.wcs.smart.asset.ui.IQueryAssetLabelProvider;
 import org.wcs.smart.query.common.engine.IResultItem;
-import org.wcs.smart.query.common.engine.test.ObservationQueryResultItem;
-import org.wcs.smart.query.common.engine.test.WaypointQueryResultItem;
+import org.wcs.smart.query.common.engine.ObservationQueryResultItem;
+import org.wcs.smart.query.common.engine.WaypointQueryResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.util.UuidUtils;
 

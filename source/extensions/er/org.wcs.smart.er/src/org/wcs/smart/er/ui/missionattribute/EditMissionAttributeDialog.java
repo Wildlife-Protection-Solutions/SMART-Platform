@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -188,7 +189,7 @@ public class EditMissionAttributeDialog extends SmartStyledTitleDialog implement
 		cmbType.setLabelProvider(new LabelProvider(){
 			@Override
 			public String getText(Object element) {
-				return ((Attribute.AttributeType)element).name();
+				return ((Attribute.AttributeType)element).getName(Locale.getDefault());
 			}
 		});
 		cmbType.setInput(new Object[]{

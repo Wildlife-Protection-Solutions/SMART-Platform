@@ -49,7 +49,6 @@ import org.wcs.smart.asset.ui.data.AssetDataPanel;
 import org.wcs.smart.common.filter.DateFilterComposite;
 import org.wcs.smart.common.filter.DateFilterDropDownComposite;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.util.SharedUtils;
 
 /**
  * Station editor data page

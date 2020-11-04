@@ -24,7 +24,7 @@ package org.wcs.smart.entity.query.model;
 import java.util.HashMap;
 
 import org.wcs.smart.entity.query.model.columns.EntityAttributeQueryColumn;
-import org.wcs.smart.query.common.engine.test.ObservationQueryResultItem;
+import org.wcs.smart.query.common.engine.ObservationQueryResultItem;
 
 /**
  * A class to hold the results of a waypoint 

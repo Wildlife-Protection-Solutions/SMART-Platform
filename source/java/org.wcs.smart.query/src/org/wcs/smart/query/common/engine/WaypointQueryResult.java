@@ -1,4 +1,25 @@
-package org.wcs.smart.query.common.engine.test;
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.query.common.engine;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -15,21 +36,25 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
 import org.locationtech.jts.geom.Envelope;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.common.engine.AttachmentResultSetIterator;
-import org.wcs.smart.query.common.engine.IAttachmentResultItem;
-import org.wcs.smart.query.common.engine.IDesktopPagedImageResultSet;
-import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
-import org.wcs.smart.query.common.engine.IWaypointQueryResultItem;
 import org.wcs.smart.query.common.model.AbstractPagedQueryResultSet;
 import org.wcs.smart.query.common.model.ISearchabledResultSet;
 import org.wcs.smart.query.common.ui.image.PagedImageQueryResults;
+import org.wcs.smart.query.model.AttributeQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
 
+/**
+ * Abstract class for query results which represent waypoints
+ * 
+ * @author Emily
+ *
+ * @param <T>
+ */
 //wp_x, wp_y
 public abstract class WaypointQueryResult<T extends IWaypointQueryResultItem> extends AbstractPagedQueryResultSet<T> implements IDesktopPagedImageResultSet, ISearchabledResultSet<T>{
 	
@@ -60,6 +85,21 @@ public abstract class WaypointQueryResult<T extends IWaypointQueryResultItem> ex
 
 	}
 
+
+	@Override
+	public abstract void createTooltip(IAttachmentResultItem data, final Composite parent);
+	
+	protected abstract String buildSortSql() ;
+	
+	/**
+	 * sort columns may be added to the table 
+	 * for attribute types etc.
+	 */
+	protected void updateSortColumn(Session session, Connection c) throws SQLException{
+		
+	}
+	
+	
 	public IDesktopWOEngine<T> getEngine(){
 		return this.engine;
 	}
@@ -130,13 +170,7 @@ public abstract class WaypointQueryResult<T extends IWaypointQueryResultItem> ex
 		
 	}
 	
-	/**
-	 * sort columns may be added to the table 
-	 * for attribute types etc.
-	 */
-	protected void updateSortColumn(Session session, Connection c) throws SQLException{
-		
-	}
+
 		
 	/**
 	 *Opens a result set in the given session that accessed the query results
@@ -156,15 +190,15 @@ public abstract class WaypointQueryResult<T extends IWaypointQueryResultItem> ex
 		});
 	}
 
-	
-	
-	protected abstract String buildSortSql() ;
-		
-	
 	/* (non-Javadoc)
 	 * @see org.wcs.smart.query.model.IPagedQueryResultSet#setSorting(org.wcs.smart.query.model.observation.QueryColumn, int)
 	 */
 	public void setSorting(final QueryColumn sortColumn, int direction) {
+		if (sortColumn instanceof AttributeQueryColumn) {
+			if (((AttributeQueryColumn)sortColumn).getAttributeType() == AttributeType.MLIST){
+				return;
+			}
+		}
 		this.lastSortColumn = this.sortColumn;
 		this.sortColumn = sortColumn;
 		this.direction = direction;
@@ -238,8 +272,6 @@ public abstract class WaypointQueryResult<T extends IWaypointQueryResultItem> ex
 		return imageResults.getImageData(offset, pageSize);
 	}
 
-	@Override
-	public abstract void createTooltip(IAttachmentResultItem data, final Composite parent);
 	
 
 	@Override
@@ -263,23 +295,23 @@ public abstract class WaypointQueryResult<T extends IWaypointQueryResultItem> ex
 				sb.append(" INSERT INTO "); //$NON-NLS-1$
 				sb.append(imageTempTable + "(attach_uuid, wp_uuid, ob_uuid) "); //$NON-NLS-1$
 				sb.append(" SELECT z.attach_uuid, z.wp_uuid, z.ob_uuid FROM ( "); //$NON-NLS-1$
-				sb.append("SELECT ");
-				sb.append(engine.tablePrefix(ObservationAttachment.class) + ".uuid as attach_uuid, ");
-				sb.append("a.wp_time, a.wp_id, a.wp_uuid as wp_uuid, ");
-				sb.append(engine.tablePrefix(WaypointObservation.class) + ".uuid as ob_uuid");
+				sb.append("SELECT "); //$NON-NLS-1$
+				sb.append(engine.tablePrefix(ObservationAttachment.class) + ".uuid as attach_uuid, "); //$NON-NLS-1$
+				sb.append("a.wp_time, a.wp_id, a.wp_uuid as wp_uuid, "); //$NON-NLS-1$
+				sb.append(engine.tablePrefix(WaypointObservation.class) + ".uuid as ob_uuid"); //$NON-NLS-1$
 				sb.append(" FROM "); //$NON-NLS-1$
 				sb.append( getResultsTable() + " a "); //$NON-NLS-1$
 				sb.append(" JOIN "); //$NON-NLS-1$
 				sb.append(engine.tableNamePrefix(WaypointObservationGroup.class ));
-				sb.append(" ON " + engine.tablePrefix(WaypointObservationGroup.class) + ".wp_uuid = a.wp_uuid ");
+				sb.append(" ON " + engine.tablePrefix(WaypointObservationGroup.class) + ".wp_uuid = a.wp_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
 				sb.append(" JOIN "); //$NON-NLS-1$
 				sb.append(engine.tableNamePrefix(WaypointObservation.class ));
-				sb.append(" ON " + engine.tablePrefix(WaypointObservationGroup.class) + ".uuid = ");
-				sb.append( engine.tablePrefix(WaypointObservation.class) + ".wp_group_uuid ");
-				sb.append(" JOIN ");
+				sb.append(" ON " + engine.tablePrefix(WaypointObservationGroup.class) + ".uuid = "); //$NON-NLS-1$ //$NON-NLS-2$
+				sb.append( engine.tablePrefix(WaypointObservation.class) + ".wp_group_uuid "); //$NON-NLS-1$
+				sb.append(" JOIN "); //$NON-NLS-1$
 				sb.append(engine.tableNamePrefix(ObservationAttachment.class ));
-				sb.append(" ON ");
-				sb.append( engine.tablePrefix(WaypointObservation.class) + ".uuid = " + engine.tablePrefix(ObservationAttachment.class) + ".obs_uuid "); //$NON-NLS-1$
+				sb.append(" ON "); //$NON-NLS-1$
+				sb.append( engine.tablePrefix(WaypointObservation.class) + ".uuid = " + engine.tablePrefix(ObservationAttachment.class) + ".obs_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
 				sb.append( " UNION "); //$NON-NLS-1$
 				sb.append("SELECT c.uuid as attach_uuid, a.wp_time, a.wp_id, a.wp_uuid as wp_uuid, cast(null as char(16) for bit data) as ob_uuid " ); //$NON-NLS-1$
 				sb.append(" FROM "); //$NON-NLS-1$

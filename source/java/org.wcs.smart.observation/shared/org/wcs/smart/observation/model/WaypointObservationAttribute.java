@@ -143,7 +143,8 @@ public class WaypointObservationAttribute extends UuidItem{
 	}
 	
 	public boolean hasValue(){
-		return this.dValue != null || this.listItem != null || this.nodeItem != null || this.sValue != null;
+		return this.dValue != null || this.listItem != null || this.nodeItem != null || this.sValue != null
+				|| (this.listItems != null && !this.listItems.isEmpty());
 	}
 	
 	

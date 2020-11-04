@@ -52,7 +52,6 @@ import org.wcs.smart.common.control.ProgressAreaComposite;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.IPatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.PatrolQuery;
-import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.query.ui.querytable.PatrolTableColumn;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.ui.QueryResultsTable;

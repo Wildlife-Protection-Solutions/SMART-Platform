@@ -231,6 +231,7 @@ public class RecordEditor extends MultiPageEditorPart implements MapPart, IAdapt
 											a.getAttribute().getName();
 											if (a.getAttributeListItem() != null) a.getAttributeListItem().getName();
 											if (a.getAttributeTreeNode() != null) a.getAttributeTreeNode().getName();
+											if (a.getAttributeListItems() != null) a.getAttributeListItems().forEach(li->li.getAttributeListItem().getName());
 										}
 									}
 								}

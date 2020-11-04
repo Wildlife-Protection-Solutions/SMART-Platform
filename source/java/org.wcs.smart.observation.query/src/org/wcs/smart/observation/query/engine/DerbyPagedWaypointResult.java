@@ -25,8 +25,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.observation.query.model.columns.FixedQueryColumn;
 import org.wcs.smart.query.common.engine.IAttachmentResultItem;
-import org.wcs.smart.query.common.engine.test.WaypointQueryResult;
-import org.wcs.smart.query.common.engine.test.WaypointQueryResultItem;
+import org.wcs.smart.query.common.engine.WaypointQueryResult;
+import org.wcs.smart.query.common.engine.WaypointQueryResultItem;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
 
 public class DerbyPagedWaypointResult extends WaypointQueryResult<WaypointQueryResultItem> {

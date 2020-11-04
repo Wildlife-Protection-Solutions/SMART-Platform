@@ -226,7 +226,7 @@ public class EntityDropItemFactory extends BasicDropItemFactory implements IDrop
 			if (object.getObject() instanceof Category) {
 				return createCategoryGroupByDropItem((Category) object.getObject());
 			} else if (object.getObject() instanceof Attribute) {
-				if (((Attribute)object.getObject()).getType() == AttributeType.LIST ){
+				if (((Attribute)object.getObject()).getType().isList() ){
 					return createAttributeListGroupByDropItem((Attribute) object.getObject());
 				}
 			}else if (object.getObject() instanceof EntityAttribute){
@@ -234,7 +234,7 @@ public class EntityDropItemFactory extends BasicDropItemFactory implements IDrop
 					return createEntityAttributeListGroupByDropItem((EntityAttribute) object.getObject());
 				}
 			} else if (object.getObject() instanceof CategoryAttribute) {
-				if ( ((CategoryAttribute)object.getObject()).getAttribute().getType() == AttributeType.LIST ){
+				if ( ((CategoryAttribute)object.getObject()).getAttribute().getType().isList() ){
 					return createAttributeListGroupByDropItem((CategoryAttribute) object.getObject());
 				}
 			} else if (object.getObject() instanceof AttributeTreeNode) {

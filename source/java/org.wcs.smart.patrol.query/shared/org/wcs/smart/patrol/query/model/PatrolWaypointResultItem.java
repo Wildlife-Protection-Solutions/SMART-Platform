@@ -22,33 +22,11 @@
 package org.wcs.smart.patrol.query.model;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import org.eclipse.core.runtime.IAdaptable;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryCollection;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.LineString;
-import org.locationtech.jts.geom.MultiLineString;
-import org.locationtech.jts.io.ParseException;
-import org.locationtech.jts.io.WKBReader;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.wcs.smart.map.GeometryFactoryProvider;
-import org.wcs.smart.observation.model.Waypoint;
-import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.patrol.model.PatrolType;
-import org.wcs.smart.query.common.engine.IGeometryResultItem;
-import org.wcs.smart.query.common.engine.test.WaypointQueryResultItem;
-import org.wcs.smart.util.ReprojectUtils;
+import org.wcs.smart.query.common.engine.WaypointQueryResultItem;
 
 /**
  * A class to hold the results of a waypoint 

@@ -19,26 +19,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.common.engine.test;
+package org.wcs.smart.query.common.engine;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.UUID;
 
-import org.eclipse.core.runtime.IAdaptable;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Geometry;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
-import org.wcs.smart.query.common.engine.IGeometryResultItem;
-import org.wcs.smart.query.common.engine.IObservationQueryResultItem;
-import org.wcs.smart.util.ReprojectUtils;
 
 /**
- * A class to hold the results of a waypoint 
+ * A class to hold the results of a observation 
  * query.  Each class contains the results for
  * a single observation.  The observation contains
  * a single category and all attributes.

@@ -348,8 +348,7 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 	
 
 	@Override
-	public void buildTemporaryTableIndexes(Connection c, String tableName)
-			throws SQLException {
+	public void createTemporaryTableIndexes(Connection c, String tableName) throws SQLException {
 	}
 	
 }

@@ -87,6 +87,10 @@ public enum Operator {
 	 */
 	AND("and"), //$NON-NLS-1$
 	/**
+	 * Exact operator
+	 */
+	EXACT("exact"), //$NON-NLS-1$
+	/**
 	 * Boolean or operator
 	 */
 	OR("or"), //$NON-NLS-1$
@@ -125,6 +129,12 @@ public enum Operator {
 	 * Valid boolean operators
 	 */
 	public static Operator[] BOOLEANS_OPS = {AND, OR, NOT};
+	
+	/**
+	 * Valid multi-select operators
+	 */
+	public static Operator[] MULTI_LIST_OPERATORS = {OR, AND, EXACT};
+	
 	
 	private String key;
 	

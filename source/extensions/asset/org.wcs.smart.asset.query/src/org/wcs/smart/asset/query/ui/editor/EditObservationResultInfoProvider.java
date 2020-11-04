@@ -30,7 +30,7 @@ import org.wcs.smart.asset.query.internal.Messages;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.IResultItem;
-import org.wcs.smart.query.common.engine.test.ObservationQueryResultItem;
+import org.wcs.smart.query.common.engine.ObservationQueryResultItem;
 import org.wcs.smart.query.common.ui.edit.EditObservationDialog;
 import org.wcs.smart.query.model.IQueryEditCommand;
 

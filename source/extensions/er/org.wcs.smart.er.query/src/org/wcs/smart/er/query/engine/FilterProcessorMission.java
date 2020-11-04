@@ -170,7 +170,7 @@ public class FilterProcessorMission implements IFilterProcessor {
 		QueryPlugIn.logSql(createTableStatement);
 		c.createStatement().execute(createTableStatement);
 		
-		engine.buildTemporaryTableIndexes(c, tableName);
+		engine.createTemporaryTableIndexes(c, tableName);
 	}
 	
 	
@@ -254,7 +254,7 @@ public class FilterProcessorMission implements IFilterProcessor {
 		}
 		
 		if (caFilter != null) {
-			String filter = SurveyFilterSqlGenerator.INSTANCE.toSql(caFilter, engine);
+			String filter = SurveyFilterSqlGenerator.INSTANCE.asSql(caFilter, prefix(SurveyDesign.class),  engine);
 			if (filter.length() > 0) {
 				sql.append(" AND "); //$NON-NLS-1$
 				sql.append("(" + filter + ")"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -413,7 +413,7 @@ public class FilterProcessorMission implements IFilterProcessor {
 				sql.append(" ON " + prefix(SurveyDesign.class) + ".uuid = " + prefix(Survey.class) + ".survey_design_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				
 				if (caFilter != null) {
-					String cfilter = SurveyFilterSqlGenerator.INSTANCE.toSql(caFilter, engine);
+					String cfilter = SurveyFilterSqlGenerator.INSTANCE.asSql(caFilter, prefix(SurveyDesign.class), engine);
 					if (cfilter.length() > 0) {
 						sql.append(" and "); //$NON-NLS-1$
 						sql.append(cfilter);

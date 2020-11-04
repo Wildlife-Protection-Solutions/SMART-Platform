@@ -126,6 +126,54 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		tableNames.put(ObservationAttachment.class, "smart.observation_attachment"); //$NON-NLS-1$
 	}
 		
+	
+	@Override
+	public abstract IQueryResult executeQuery(Query query, HashMap<String, Object> parameters) throws SQLException;
+
+	@Override
+	public abstract boolean canExecute(String querytype);
+	
+	
+	/**
+	 * Create the select statement to populate the temporary table
+	 * containing observation data for the query engine.
+	 * 
+	 * @param includeObservations if observation information should be included
+	 * in the output table (ob_uuid).
+	 * 
+	 * @return
+	 */
+	public abstract String getTemporaryTableSelectClause(boolean includeObservations);
+	
+	
+	/**
+	 * Create the temporary table for hold observation data
+	 * for querying
+	 * 
+	 * @param tableName temporary table name
+	 * @return 
+	 */
+	public abstract String getTemporaryTableCreateClause(String tableName);
+	
+	/**
+	 * Create index on the temporary data table
+	 * @param tableName
+	 * @return
+	 */
+	public abstract void createTemporaryTableIndexes(Connection c, String tableName) throws SQLException;
+
+	
+	/**
+	 * Creates the filter processor based on the query filter type
+	 * 
+	 * @param filterType
+	 * @param queryDataTable
+	 * @return
+	 */
+	public abstract IFilterProcessor getFilterProcessor(IFilter.FilterType filterType, String queryDataTable, Query query);
+	
+	
+	
 	/**
 	 * Drop the created temporary tables.
 	 * 
@@ -223,6 +271,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 			return "varchar(1024)"; //$NON-NLS-1$
 		case DATE:
 			return "varchar(10)"; //$NON-NLS-1$
+		case MLIST: throw new UnsupportedOperationException("Multi-List attribute type not support for column type"); //$NON-NLS-1$
 		}
 		return ""; //$NON-NLS-1$
 
@@ -269,16 +318,29 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	
 	
 	/**
-	 * By default creates an index on the ob_uuid field.  This method can be overwritten to 
-	 * create additional indexes.
+	 * Creates an index on the ob_uuid in the given table.
 	 * 
 	 * @param c database connection
 	 * @param tableName temporary table to create indexes on
 	 * @throws SQLException
 	 */
-	public void buildTemporaryTableIndexes(Connection c, String tableName) throws SQLException{
+	public void createObsIndex(Connection c, String tableName) throws SQLException{
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE INDEX " + tableName + "_ob_uuid_idx on " +  tableName + "(ob_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		QueryPlugIn.logSql(sql.toString());
+		c.createStatement().execute(sql.toString());
+	}
+	
+	/**
+	 * Creates an index on the wp_uuid in the given table
+	 * @param c
+	 * @param tableName
+	 * @throws SQLException
+	 */
+	public void createWpIndex(Connection c, String tableName) throws SQLException {
+		
+		StringBuilder sql = new StringBuilder();
+		sql.append("CREATE INDEX " + tableName + "_wp_uuid_idx on " +  tableName + "(wp_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		QueryPlugIn.logSql(sql.toString());
 		c.createStatement().execute(sql.toString());
 	}
@@ -320,12 +382,16 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		return pp.getStatement();
 	}
 
-	@Override
-	public abstract IQueryResult executeQuery(Query query, HashMap<String, Object> parameters) throws SQLException;
-
-	@Override
-	public abstract boolean canExecute(String querytype);
 	
+	/**
+	 * Determine if the given column for the given table exists and if
+	 * it exists returns true if there are values in the color otherwise false.
+	 *  
+	 * @param c
+	 * @param tableName
+	 * @param columnName
+	 * @return
+	 */
 	protected boolean checkColumnHasValues(Connection c, String tableName, String columnName) {
 		
 		//see if column exists
@@ -361,6 +427,16 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		return true; //it is safer to assume that column that we were unable to find may have values and display it to user
 	}
 	
+	
+	
+
+	/**
+	 * Simple class for tracking temporary filter tables 
+	 * and columns
+	 * 
+	 * @author Emily
+	 *
+	 */
 	public static class FilterTable{
 		public String tablename;
 		public String columnname;
@@ -370,39 +446,4 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 			this.columnname = columnname;
 		}
 	}
-	
-	
-	/**
-	 * Create the select statement to populate the temporary table
-	 * containing observation data for the query engine.
-	 * 
-	 * @param includeObservations if observation information should be included
-	 * in the output table (ob_uuid).
-	 * 
-	 * @return
-	 */
-	public abstract String getTemporaryTableSelectClause(boolean includeObservations);
-	
-	
-	/**
-	 * Create the temporary table for hold observation data
-	 * for querying
-	 * 
-	 * @param tableName temporary table name
-	 * @return 
-	 */
-	public abstract String getTemporaryTableCreateClause(String tableName);
-
-	
-
-	
-	/**
-	 * Creates the filter processor based on the query filter type
-	 * 
-	 * @param filterType
-	 * @param queryDataTable
-	 * @return
-	 */
-	public abstract IFilterProcessor getFilterProcessor(IFilter.FilterType filterType, String queryDataTable, Query query);
-	
 }

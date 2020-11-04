@@ -840,6 +840,7 @@ public class Messages extends NLS {
 	public static String IntelligenceLabelProviderImpl_EntityRsLastModifiedByColumn;
 	public static String IntelligenceLabelProviderImpl_EntityRsPrimaryKeyColumn;
 	public static String IntelligenceLabelProviderImpl_EntityTypeColumnName;
+	public static String IntelligenceLabelProviderImpl_ExactOp;
 	public static String IntelligenceLabelProviderImpl_GeomColumnLabel;
 	public static String IntelligenceLabelProviderImpl_IDColumnLabel;
 	public static String IntelligenceLabelProviderImpl_ListAttributeName;

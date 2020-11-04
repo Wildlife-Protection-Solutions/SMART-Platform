@@ -162,7 +162,7 @@ public class FilterProcessor implements IFilterProcessor {
 		QueryPlugIn.logSql(createTableStatement);
 		c.createStatement().execute(createTableStatement);
 		
-		engine.buildTemporaryTableIndexes(c, tableName);
+		engine.createTemporaryTableIndexes(c, tableName);
 	}
 	
 	

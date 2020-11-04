@@ -611,7 +611,7 @@ public class DropItemFactory {
 		}else if (filter.getAttributeType() == Attribute.AttributeType.BOOLEAN){
 			TextDropItem item = new TextDropItem(name, queryKeyPart);
 			return Collections.singletonList(item);
-		}else if (filter.getAttributeType() == Attribute.AttributeType.LIST){
+		}else if (filter.getAttributeType().isList()){
 			final List<String> labels = new ArrayList<String>();
 			final List<String> keys = new ArrayList<String>();
 			labels.add(ANY_LABEL);
@@ -623,9 +623,15 @@ public class DropItemFactory {
 					keys.add(i.getKeyId());
 				}
 			}
-			OptionDropItem item = new OptionDropItem(name, queryKeyPart, labels.toArray(new String[labels.size()]), keys.toArray(new String[keys.size()]), canEdit());
-			item.setInitialValue(filter.getKeyValue());
-			return Collections.singletonList(item);
+			if (filter.getAttributeType() == Attribute.AttributeType.LIST) {
+				OptionDropItem item = new OptionDropItem(name, queryKeyPart, labels.toArray(new String[labels.size()]), keys.toArray(new String[keys.size()]), canEdit());
+				item.setInitialValue(filter.getKeyValue());
+				return Collections.singletonList(item);
+			}else if (filter.getAttributeType() == Attribute.AttributeType.MLIST) {
+				MultiOptionDropItem item = new MultiOptionDropItem(name, queryKeyPart, labels.toArray(new String[labels.size()]), keys.toArray(new String[keys.size()]), canEdit());
+				item.setInitialValue(filter.getKeyValues());
+				return Collections.singletonList(item);
+			}
 		}else if (filter.getAttributeType() == Attribute.AttributeType.TREE){
 			List<AttributeTreeNode> toSearch = new ArrayList<>();
 			toSearch.addAll(attribute.getTree());
@@ -669,6 +675,7 @@ public class DropItemFactory {
 			}
 			di = new OptionDropItem(a.getName(), key, names, keys, true);
 			break;
+		
 		case NUMERIC:
 			di = new TextBoxDropItem(a.getName(), key, InputType.NUMERIC, true);
 			break;

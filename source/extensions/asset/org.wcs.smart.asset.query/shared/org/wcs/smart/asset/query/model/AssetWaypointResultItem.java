@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.asset.query.model;
 
-import org.wcs.smart.query.common.engine.test.WaypointQueryResultItem;
+import org.wcs.smart.query.common.engine.WaypointQueryResultItem;
 
 /**
  * A class to hold the results of a waypoint 

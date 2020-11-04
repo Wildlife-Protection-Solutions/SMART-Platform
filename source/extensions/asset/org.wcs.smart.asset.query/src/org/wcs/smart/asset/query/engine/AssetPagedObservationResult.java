@@ -31,9 +31,9 @@ import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 import org.wcs.smart.query.common.engine.IPagedImageResultSet;
 import org.wcs.smart.query.common.engine.IResultItem;
-import org.wcs.smart.query.common.engine.test.ObservationQueryResult;
-import org.wcs.smart.query.common.engine.test.ObservationQueryResultItem;
-import org.wcs.smart.query.common.engine.test.WaypointQueryResultItem;
+import org.wcs.smart.query.common.engine.ObservationQueryResult;
+import org.wcs.smart.query.common.engine.ObservationQueryResultItem;
+import org.wcs.smart.query.common.engine.WaypointQueryResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
 
@@ -49,6 +49,7 @@ public class AssetPagedObservationResult extends ObservationQueryResult<AssetObs
 	
 	public AssetPagedObservationResult(AssetObservationEngine engine) {
 		super(engine, -1, -1);
+		updater = new UpdateableResultSet(engine);
 	}
 	
 	

@@ -124,14 +124,13 @@ public class EntityAttributeFilterVisitor  implements IFilterVisitor{
 				DerbyEntityQueryEngine tempEngine = new DerbyEntityQueryEngine() {
 					
 					@Override
-					public String getTemporaryTableSelectClause(boolean includeObservations) {
-						return null;
-					}
+					public String getTemporaryTableSelectClause(boolean includeObservations) { return null; }
 					
 					@Override
-					public String getTemporaryTableCreateClause(String tableName) {
-						return null;
-					}
+					public String getTemporaryTableCreateClause(String tableName) {return null; }
+					
+					@Override
+					public void createTemporaryTableIndexes(Connection c, String tableName) throws SQLException {}
 					
 					@Override
 					public IQueryResult executeQuery(Query query,

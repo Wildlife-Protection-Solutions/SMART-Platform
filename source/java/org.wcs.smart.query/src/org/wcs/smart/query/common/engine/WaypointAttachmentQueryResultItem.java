@@ -19,13 +19,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.common.engine.test;
+package org.wcs.smart.query.common.engine;
 
 import org.wcs.smart.common.attachment.ISmartAttachment;
-import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 
 /**
- * Query result attachment item
+ * Query result attachment item for waypoint row
  * 
  * @author Emily
  * @since 7.0.0

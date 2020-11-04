@@ -354,13 +354,9 @@ public class DerbyPatrolEngine extends AbstractPatrolQueryEngine{
 	}
 	
 	@Override
-	public void  buildTemporaryTableIndexes(Connection c, String tableName) throws SQLException{
-		super.buildTemporaryTableIndexes(c, tableName);
-		
-		StringBuilder sql = new StringBuilder();
-		sql.append("CREATE INDEX " + tableName + "_wp_uuid_idx on " +  tableName + "(wp_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		QueryPlugIn.logSql(sql.toString());
-		c.createStatement().execute(sql.toString());
+	public void createTemporaryTableIndexes(Connection c, String tableName) throws SQLException {
+		super.createObsIndex(c, tableName);
+		super.createWpIndex(c, tableName);
 	}
 
 	protected PatrolQueryResultItem asQueryResultItem(ResultSet rs, Session session)

@@ -102,16 +102,14 @@ public class DataModelColumn extends AbstractQueryColumn{
 			case BOOLEAN:
 				if ((Double)value > 0.5) return Boolean.TRUE;
 				return Boolean.FALSE;
-				
 			case DATE:
 				return (LocalDate)value;
-			case LIST:
-				return value.toString();
 			case NUMERIC:
 				return ((Double)value);
+			case LIST:
 			case TEXT:
-				return value.toString();
 			case TREE:
+			case MLIST:			
 				return value.toString();
 			}
 		}
@@ -148,6 +146,7 @@ public class DataModelColumn extends AbstractQueryColumn{
 			case TEXT:
 			case TREE:
 			case LIST:
+			case MLIST:
 				return Type.STRING;
 		}
 		return Type.STRING;

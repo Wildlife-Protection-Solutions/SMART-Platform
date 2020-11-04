@@ -56,7 +56,7 @@ import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.common.engine.IQueryResult;
-import org.wcs.smart.query.common.engine.test.ObservationQueryEngine;
+import org.wcs.smart.query.common.engine.ObservationQueryEngine;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.AttributeQueryColumn;
 import org.wcs.smart.query.model.CategoryQueryColumn;
@@ -549,9 +549,8 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine impleme
 	}
 
 	@Override
-	public void buildTemporaryTableIndexes(Connection c, String tableName)
-			throws SQLException {
-		super.buildTemporaryTableIndexes(c, tableName);
+	public void createTemporaryTableIndexes(Connection c, String tableName) throws SQLException {
+		super.createObsIndex(c, tableName);
 		
 		StringBuilder sql = new StringBuilder();
 		sql.append("create index "); //$NON-NLS-1$

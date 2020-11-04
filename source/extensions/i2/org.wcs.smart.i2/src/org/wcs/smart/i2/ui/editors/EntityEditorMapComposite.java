@@ -791,8 +791,9 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 								if (o.getObservationAttributes() != null){
 									for (IntelObservationAttribute a : o.getObservationAttributes()){
 										a.getAttribute().getName();
-										if (a.getAttributeListItem() != null)a.getAttributeListItem().getName();
-										if (a.getAttributeTreeNode() != null)a.getAttributeTreeNode().getName();
+										if (a.getAttributeListItem() != null) a.getAttributeListItem().getName();
+										if (a.getAttributeTreeNode() != null) a.getAttributeTreeNode().getName();
+										if (a.getAttributeListItems() != null) a.getAttributeListItems().forEach(li->li.getAttributeListItem().getName());
 									}
 								}
 							}
@@ -830,6 +831,7 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 								a.getAttribute().getName();
 								if (a.getAttributeListItem() != null) a.getAttributeListItem().getName();
 								if (a.getAttributeTreeNode() != null) a.getAttributeTreeNode().getName();
+								if (a.getAttributeListItems() != null) a.getAttributeListItems().forEach(li->li.getAttributeListItem().getName());
 							}
 						}
 					}					

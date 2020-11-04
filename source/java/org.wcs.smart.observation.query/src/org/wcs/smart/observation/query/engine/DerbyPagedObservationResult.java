@@ -25,9 +25,9 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.observation.query.model.columns.FixedQueryColumn;
 import org.wcs.smart.query.common.engine.IAttachmentResultItem;
-import org.wcs.smart.query.common.engine.test.ObservationQueryEngine;
-import org.wcs.smart.query.common.engine.test.ObservationQueryResult;
-import org.wcs.smart.query.common.engine.test.ObservationQueryResultItem;
+import org.wcs.smart.query.common.engine.ObservationQueryEngine;
+import org.wcs.smart.query.common.engine.ObservationQueryResult;
+import org.wcs.smart.query.common.engine.ObservationQueryResultItem;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
 
 

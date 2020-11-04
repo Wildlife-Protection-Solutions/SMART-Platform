@@ -52,7 +52,7 @@ import org.wcs.smart.patrol.query.model.PatrolWaypointResultItem;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.common.engine.IQueryResult;
-import org.wcs.smart.query.common.engine.test.WaypointQueryEngine;
+import org.wcs.smart.query.common.engine.WaypointQueryEngine;
 import org.wcs.smart.query.common.model.IUpdateableResultSet;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.Query;
@@ -459,10 +459,8 @@ public class DerbyWaypointEngine extends AbstractPatrolQueryEngine implements Wa
 		return it;
 	}
 	
-	
 	@Override
-	public void buildTemporaryTableIndexes(Connection c, String tableName)
-			throws SQLException {
+	public void createTemporaryTableIndexes(Connection c, String tableName) throws SQLException {
 	}
 
 	@Override

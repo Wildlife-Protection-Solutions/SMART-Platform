@@ -54,9 +54,9 @@ import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.common.engine.IQueryResult;
-import org.wcs.smart.query.common.engine.test.ObservationAttachmentQueryResultItem;
-import org.wcs.smart.query.common.engine.test.ObservationQueryEngine;
-import org.wcs.smart.query.common.engine.test.ObservationQueryResultItem;
+import org.wcs.smart.query.common.engine.ObservationAttachmentQueryResultItem;
+import org.wcs.smart.query.common.engine.ObservationQueryEngine;
+import org.wcs.smart.query.common.engine.ObservationQueryResultItem;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.AttributeQueryColumn;
 import org.wcs.smart.query.model.CategoryQueryColumn;
@@ -571,11 +571,11 @@ public class DerbyObservationEngine extends AbstractDerbyObservationQueryEngine 
 		}
 		return sb.toString();
 	}
+	
 	@Override
-	public void buildTemporaryTableIndexes(Connection c, String tableName)
-			throws SQLException {
-		super.buildTemporaryTableIndexes(c, tableName);
-		
+	public void createTemporaryTableIndexes(Connection c, String tableName) throws SQLException {
+		super.createObsIndex(c, tableName);
+	
 		StringBuilder sql = new StringBuilder();
 		sql.append("create index "); //$NON-NLS-1$
 		sql.append(tableName);
@@ -586,10 +586,12 @@ public class DerbyObservationEngine extends AbstractDerbyObservationQueryEngine 
 		c.createStatement().execute(sql.toString());
 		
 	}
+	
+	
 
 	@Override
 	public String getObservationLabelTable() {
-		return queryDataTable + "_labels";
+		return queryDataTable + "_labels"; //$NON-NLS-1$
 	}
 
 	@Override

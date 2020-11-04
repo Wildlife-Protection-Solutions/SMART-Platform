@@ -32,7 +32,7 @@ import org.hibernate.jdbc.ReturningWork;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IAttachmentResultItem;
-import org.wcs.smart.query.common.engine.test.IDesktopWOEngine;
+import org.wcs.smart.query.common.engine.IDesktopWOEngine;
 
 /**
  * Abstract class for iterating over a list of attachments represented by 

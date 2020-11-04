@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2020 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -21,13 +21,28 @@
  */
 package org.wcs.smart.query.common.engine;
 
+import org.wcs.smart.common.attachment.ISmartAttachment;
+
 /**
- * A query result item that includes at least one geometry column.
+ * Query result attachment item for observation row
  * 
  * @author Emily
+ * @since 7.0.0
  *
  */
-public interface IWaypointQueryResultItem extends IResultItem {
+public class ObservationAttachmentQueryResultItem extends ObservationQueryResultItem implements IAttachmentResultItem{
 
-
+	private ISmartAttachment attachment;
+	
+	@Override
+	public ISmartAttachment getAttachment() {
+		return attachment;
+	}
+	
+	@Override
+	public void setAttachment(ISmartAttachment filename) {
+		this.attachment = filename;
+	}
+	
+	
 }

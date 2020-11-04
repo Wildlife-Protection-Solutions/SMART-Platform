@@ -22,6 +22,9 @@
 package org.wcs.smart.i2.query.observation.filter;
 
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.i2.query.Operator;
@@ -34,6 +37,8 @@ import org.wcs.smart.util.SharedUtils;
  *
  */
 public class DataModelFilter implements IQueryFilter, IColumnIdentifierProvider  {
+
+	public static final String MLIST_SEPERATOR = ","; //$NON-NLS-1$
 
 	//category
 	public static DataModelFilter createCategory(String key){
@@ -66,7 +71,11 @@ public class DataModelFilter implements IQueryFilter, IColumnIdentifierProvider 
 	public static DataModelFilter create(String key, Operator operator, String value){
 		DataModelFilter filter = createCore(key);
 		filter.operator = operator;
-		filter.stringValue = SharedUtils.stripQuotes(value);;
+		if (filter.attributeType == Attribute.AttributeType.MLIST) {
+			filter.keyValues = Arrays.asList( value.split(MLIST_SEPERATOR) );
+		}else {
+			filter.stringValue = SharedUtils.stripQuotes(value);
+		}
 		return filter;
 	}
 	
@@ -111,6 +120,7 @@ public class DataModelFilter implements IQueryFilter, IColumnIdentifierProvider 
 	private Double numberValue = null;
 	private String stringValue = null;
 	private String keyValue = null;
+	private List<String> keyValues = null;
 	private LocalDate[] dateValues = null;
 	
 	public DataModelFilter(String categoryKey){
@@ -138,6 +148,11 @@ public class DataModelFilter implements IQueryFilter, IColumnIdentifierProvider 
 	public DataModelFilter(Attribute.AttributeType type, String attributeKey, String categoryKey, String keyId){
 		this(type, attributeKey, categoryKey);
 		this.keyValue = keyId;
+	}
+	
+	public DataModelFilter(Attribute.AttributeType type, String attributeKey, String categoryKey, List<String> keyIds){
+		this(type, attributeKey, categoryKey);
+		this.keyValues = keyIds;
 	}
 	
 	public DataModelFilter(Attribute.AttributeType type, String attributeKey, String categoryKey, Operator operator, LocalDate[] dates){
@@ -170,6 +185,9 @@ public class DataModelFilter implements IQueryFilter, IColumnIdentifierProvider 
 	public String getKeyValue(){
 		return this.keyValue;
 	}
+	public Collection<String> getKeyValues(){
+		return this.keyValues;
+	}
 	public LocalDate[] getDateValues(){
 		return this.dateValues;
 	}
@@ -194,6 +212,10 @@ public class DataModelFilter implements IQueryFilter, IColumnIdentifierProvider 
 					sb.append("_"); //$NON-NLS-1$
 					sb.append(dateValues[1].toString());
 					break;
+				case MLIST:
+					for (String x : keyValues) {
+						sb.append(x);
+					}
 				case LIST:
 				case TREE:
 					sb.append(keyValue);

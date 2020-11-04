@@ -43,7 +43,7 @@ import org.wcs.smart.observation.query.model.types.ShowItemInfoProvider;
 import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
 import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
-import org.wcs.smart.query.common.engine.test.WaypointQueryResultItem;
+import org.wcs.smart.query.common.engine.WaypointQueryResultItem;
 
 /**
  * Intel info provider than opens up the intelligence record associated with the

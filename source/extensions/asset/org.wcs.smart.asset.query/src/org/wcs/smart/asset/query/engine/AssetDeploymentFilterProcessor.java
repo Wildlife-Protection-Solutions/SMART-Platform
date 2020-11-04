@@ -177,7 +177,7 @@ public class AssetDeploymentFilterProcessor implements IFilterProcessor{
 		QueryPlugIn.logSql(sql.toString());
 		c.createStatement().execute(sql.toString());
 		
-		engine.buildTemporaryTableIndexes(c, tableName);
+		engine.createTemporaryTableIndexes(c, tableName);
 		
 		
 		sql = new StringBuilder();

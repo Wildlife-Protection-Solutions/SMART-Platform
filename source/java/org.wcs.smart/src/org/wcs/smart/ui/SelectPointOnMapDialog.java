@@ -32,7 +32,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.ca.ISmartPoint;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.ui.SmartStyledDialog;
 import org.wcs.smart.ui.map.location.LocationSelectComposite;
 
 /**

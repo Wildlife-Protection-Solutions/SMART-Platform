@@ -21,29 +21,16 @@
  */
 package org.wcs.smart.patrol.query.engine;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.UUID;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
-import org.hibernate.Session;
-import org.hibernate.jdbc.Work;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
 import org.wcs.smart.patrol.query.model.IPatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.PatrolObservationResultItem;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
 import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
-import org.wcs.smart.query.common.engine.test.ObservationQueryResult;
-import org.wcs.smart.query.common.model.ISearchabledResultSet;
-import org.wcs.smart.query.model.AttributeQueryColumn;
-import org.wcs.smart.query.model.CategoryQueryColumn;
+import org.wcs.smart.query.common.engine.ObservationQueryResult;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
 

@@ -23,7 +23,7 @@ package org.wcs.smart.asset.query.engine;
 
 import java.util.UUID;
 
-import org.wcs.smart.query.common.engine.test.WaypointQueryResultItem;
+import org.wcs.smart.query.common.engine.WaypointQueryResultItem;
 import org.wcs.smart.query.common.model.IUpdateableResultSet;
 
 /**

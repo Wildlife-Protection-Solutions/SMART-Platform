@@ -22,7 +22,7 @@
 package org.wcs.smart.query.common.ui;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.wcs.smart.query.common.engine.test.ObservationQueryResultItem;
+import org.wcs.smart.query.common.engine.ObservationQueryResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 
 /**

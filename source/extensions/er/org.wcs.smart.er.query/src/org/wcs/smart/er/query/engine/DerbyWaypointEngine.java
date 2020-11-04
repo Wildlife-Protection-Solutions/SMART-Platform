@@ -53,7 +53,7 @@ import org.wcs.smart.observation.query.ObservationQueryPlugIn;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.common.engine.IQueryResult;
-import org.wcs.smart.query.common.engine.test.WaypointQueryEngine;
+import org.wcs.smart.query.common.engine.WaypointQueryEngine;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
@@ -458,10 +458,10 @@ public class DerbyWaypointEngine extends DerbySurveyQueryEngine implements Waypo
 	}
 	
 	@Override
-	public void buildTemporaryTableIndexes(Connection c, String tableName)
-			throws SQLException {
+	public void createTemporaryTableIndexes(Connection c, String tableName) throws SQLException {
+		super.createWpIndex(c, tableName);
 	}
-
+	
 	@Override
 	public String getQueryDataTable() {
 		return queryDataTable;

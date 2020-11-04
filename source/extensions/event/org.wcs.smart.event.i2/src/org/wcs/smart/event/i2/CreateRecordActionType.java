@@ -51,6 +51,7 @@ import org.wcs.smart.i2.model.IntelAttachment;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.model.IntelObservation;
 import org.wcs.smart.i2.model.IntelObservationAttribute;
+import org.wcs.smart.i2.model.IntelObservationAttributeList;
 import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelProfileRecordSource;
 import org.wcs.smart.i2.model.IntelRecord;
@@ -62,6 +63,7 @@ import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationAttributeList;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -173,6 +175,16 @@ public class CreateRecordActionType implements IActionType {
 			cloneAttribute.setNumberValue(aa.getNumberValue());
 			cloneAttribute.setStringValue(aa.getStringValue());
 			cloneAttribute.setObservation(io);
+			
+			if (aa.getAttributeListItems() != null) {
+				cloneAttribute.setAttributeListItems(new ArrayList<>());
+				for (WaypointObservationAttributeList al : aa.getAttributeListItems()) {
+					IntelObservationAttributeList il = new IntelObservationAttributeList();
+					il.setAttributeLisItem(al.getAttributeListItem());
+					il.setObservationAttribute(cloneAttribute);
+					cloneAttribute.getAttributeListItems().add(il);
+				}
+			}
 			io.getObservationAttributes().add(cloneAttribute);
 		}
 		location.getObservations().add(io);

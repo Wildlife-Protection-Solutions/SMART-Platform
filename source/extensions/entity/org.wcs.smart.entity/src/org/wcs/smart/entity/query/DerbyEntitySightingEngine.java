@@ -713,4 +713,7 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	@Override
+	public void createTemporaryTableIndexes(Connection c, String tableName) throws SQLException {
+	}
 }

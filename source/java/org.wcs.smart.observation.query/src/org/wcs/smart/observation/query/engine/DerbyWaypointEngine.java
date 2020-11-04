@@ -43,13 +43,11 @@ import org.wcs.smart.observation.query.ObservationQueryPlugIn;
 import org.wcs.smart.observation.query.internal.Messages;
 import org.wcs.smart.observation.query.model.ObservationWaypointQuery;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.engine.IDesktopWOEngine;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.common.engine.IQueryResult;
-import org.wcs.smart.query.common.engine.test.IDesktopWOEngine;
-import org.wcs.smart.query.common.engine.test.ObservationAttachmentQueryResultItem;
-import org.wcs.smart.query.common.engine.test.ObservationQueryResultItem;
-import org.wcs.smart.query.common.engine.test.WaypointAttachmentQueryResultItem;
-import org.wcs.smart.query.common.engine.test.WaypointQueryResultItem;
+import org.wcs.smart.query.common.engine.WaypointAttachmentQueryResultItem;
+import org.wcs.smart.query.common.engine.WaypointQueryResultItem;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
@@ -330,7 +328,6 @@ public class DerbyWaypointEngine extends AbstractDerbyObservationQueryEngine imp
 	}
 	
 	@Override
-	public void buildTemporaryTableIndexes(Connection c, String tableName)
-			throws SQLException {
+	public void createTemporaryTableIndexes(Connection c, String tableName) throws SQLException {
 	}
 }
