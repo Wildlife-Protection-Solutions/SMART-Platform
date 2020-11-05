@@ -393,7 +393,7 @@ public class DistanceQueryExporter implements ICsvQueryExporter {
 		init(file, columns);
 		
 		//export results to file
-		try(IQueryResultSetIterator<IResultItem> it = qresults.iterator(IPagedQueryResultSet.MAP_PAGE_SIZE)){
+		try(IQueryResultSetIterator<?> it = qresults.iterator(IPagedQueryResultSet.MAP_PAGE_SIZE)){
 			while(it.hasNext()){
 				IResultItem ri = (IResultItem)it.next();
 				

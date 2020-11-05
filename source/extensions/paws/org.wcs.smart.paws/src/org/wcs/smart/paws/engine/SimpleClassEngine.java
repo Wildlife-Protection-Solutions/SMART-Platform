@@ -74,8 +74,10 @@ public class SimpleClassEngine {
 				if (pc.getAttributeListItemKey() != null || pc.getAttributeTreeNodeHkey() != null) {
 					sb.append(" JOIN smart.wp_observation_attributes oba ON obs.uuid = oba.observation_uuid " ); //$NON-NLS-1$
 					sb.append(" JOIN smart.dm_attribute a on oba.attribute_uuid = a.uuid and a.keyid = ? "); //$NON-NLS-1$
+					
 					if (pc.getAttributeListItemKey() != null){
-						sb.append(" JOIN smart.dm_attribute_list al on al.uuid = oba.list_element_uuid and al.keyid = ? "); //$NON-NLS-1$
+						sb.append( " LEFT JOIN smart.wp_observation_attributes_list obal on obal.observation_attribute_uuid = oba.uuid "); //$NON-NLS-1$
+						sb.append(" JOIN smart.dm_attribute_list al on al.uuid = case when obal.list_element_uuid is not null then obal.list_element_uuid else oba.list_element_uuid end and al.keyid = ? "); //$NON-NLS-1$
 					}
 					if (pc.getAttributeTreeNodeHkey() != null){
 						sb.append(" JOIN smart.dm_attribute_tree att on att.uuid = oba.tree_node_uuid and ( att.hkey >= ? and att.hkey < ? )" ); //$NON-NLS-1$

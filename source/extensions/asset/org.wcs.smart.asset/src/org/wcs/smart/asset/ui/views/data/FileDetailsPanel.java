@@ -490,16 +490,16 @@ public class FileDetailsPanel {
 		obsSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		l = toolkit.createLabel(obsSection, Messages.FileDetailsPanel_ObsLabel);
-		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
 		l.setFont(boldFont);
 		
 		for (WaypointObservation wo : proxy.getObservations()) {
 			l = toolkit.createLabel(obsSection, wo.getCategory().getFullCategoryName());
-			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
 			
 			for (WaypointObservationAttribute a : wo.getAttributes()) {
 				l = toolkit.createLabel(obsSection, a.getAttribute().getName() + ":"); //$NON-NLS-1$
-				l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 				((GridData)l.getLayoutData()).horizontalIndent = 10;
 				
 				l = toolkit.createLabel(obsSection, a.getAttributeValueAsString(Locale.getDefault()));

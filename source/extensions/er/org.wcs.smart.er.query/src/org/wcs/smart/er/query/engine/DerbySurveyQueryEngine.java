@@ -21,9 +21,6 @@
  */
 package org.wcs.smart.er.query.engine;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
@@ -117,12 +114,5 @@ public abstract class DerbySurveyQueryEngine extends AbstractQueryEngine {
 			return new WaypointFilterProcessor(queryDataTable, this, designFilter, query);
 		}
 	}
-	
-	/**
-	 * Drops all tables generated to support result set
-	 * @param c
-	 * @throws SQLException
-	 */
-	public abstract void dropTables(Connection c) throws SQLException;
 	
 }

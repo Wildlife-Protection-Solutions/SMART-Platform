@@ -49,6 +49,13 @@ public class Messages extends NLS {
 	public static String AddAttributeDialog2_Edit_DialogMessage2;
 	public static String AddAttributeDialog2_EditAttribute_DialogTitle;
 	public static String AddAttributeDialog2_New_DialogMessage;
+	public static String AddAttributeDialog2_NewBooleanMsg;
+	public static String AddAttributeDialog2_NewDateMsg;
+	public static String AddAttributeDialog2_NewListMsg;
+	public static String AddAttributeDialog2_NewMultiListMsg;
+	public static String AddAttributeDialog2_NewNumberMsg;
+	public static String AddAttributeDialog2_NewTextMsg;
+	public static String AddAttributeDialog2_NewTreeMsg;
 	public static String Agency_AgencyName;
 	public static String AgencyCsvImporter_Error_IncorrectFieldsNumber;
 	public static String AgencyCsvImporter_LanguageDialog_Message;

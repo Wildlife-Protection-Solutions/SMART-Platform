@@ -56,15 +56,20 @@ public class RecordFilterProcessor {
 		sub.subTask(Messages.RecordFilterProcessor_TableTask);
 		String tempTable = createTemporaryRecordTable(session, profiles, dates, cas);
 		sub.worked(1);
-		
-		sub.subTask(Messages.RecordFilterProcessor_Filter2Task);
-		Map<IQueryFilter,String> filterColumns = addAttributeColumns(filter, tempTable, session, sub.newChild(1));
-		
-		sub.subTask(Messages.RecordFilterProcessor_RunningFilterTask);
-		tempTable = filterDataTable(session, tempTable, filter,filterColumns);
-		sub.worked(1);
-		
-		return tempTable;
+		try {
+			sub.subTask(Messages.RecordFilterProcessor_Filter2Task);
+			Map<IQueryFilter,String> filterColumns = addAttributeColumns(filter, tempTable, session, sub.newChild(1));
+			
+			sub.subTask(Messages.RecordFilterProcessor_RunningFilterTask);
+			String dataTable = filterDataTable(session, tempTable, filter,filterColumns);
+			sub.worked(1);
+			
+			return dataTable;
+		}finally {
+			String sql = "DROP TABLE " + tempTable; //$NON-NLS-1$
+			SqlGenerator.logString(sql);
+			session.createNativeQuery(sql).executeUpdate();
+		}
 	}
 	/*
 	 * create temporary entity table and populate with all entities

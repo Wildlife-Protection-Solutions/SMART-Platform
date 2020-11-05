@@ -77,7 +77,7 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 	}
 	
 	public String getQueryLabelTable() {
-		return this.queryDataTable + "_labels";
+		return this.queryDataTable + "_labels"; //$NON-NLS-1$
 	}
 	
 	/**
@@ -325,9 +325,9 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 		it.setConservationAreaUuid(UuidUtils.byteToUUID(rs.getBytes("ca_uuid"))); //$NON-NLS-1$
 		
 		it.setMissionUuid(UuidUtils.byteToUUID(rs.getBytes("mission_uuid"))); //$NON-NLS-1$
-		it.setMissionEnd(rs.getTimestamp("mission_enddate").toLocalDateTime()); //$NON-NLS-1$
+		it.setMissionEnd(rs.getDate("mission_enddate").toLocalDate()); //$NON-NLS-1$
 		it.setMissionId(rs.getString("mission_id")); //$NON-NLS-1$
-		it.setMissionStart(rs.getTimestamp("mission_startdate").toLocalDateTime()); //$NON-NLS-1$
+		it.setMissionStart(rs.getDate("mission_startdate").toLocalDate()); //$NON-NLS-1$
 		
 		it.setSurveyDesign(rs.getString("surveydesign_name")); //$NON-NLS-1$
 		it.setSurveyId(rs.getString("survey_id")); //$NON-NLS-1$

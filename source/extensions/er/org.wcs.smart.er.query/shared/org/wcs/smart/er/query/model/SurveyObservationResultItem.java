@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.er.query.model;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.UUID;
@@ -45,8 +46,8 @@ public class SurveyObservationResultItem extends ObservationQueryResultItem impl
 	private String surveyId;
 	
 	private String missionId;
-	private LocalDateTime missionStart;
-	private LocalDateTime missionEnd;
+	private LocalDate missionStart;
+	private LocalDate missionEnd;
 	private UUID missionUuid;
 	private String missionLeader;
 	
@@ -192,11 +193,11 @@ public class SurveyObservationResultItem extends ObservationQueryResultItem impl
 	 * mission start
 	 * @return
 	 */
-	public LocalDateTime getMissionStart() {
+	public LocalDate getMissionStart() {
 		return missionStart;
 	}
 
-	public void setMissionStart(LocalDateTime missionStart) {
+	public void setMissionStart(LocalDate missionStart) {
 		this.missionStart = missionStart;
 	}
 
@@ -204,11 +205,11 @@ public class SurveyObservationResultItem extends ObservationQueryResultItem impl
 	 * mission end
 	 * @return
 	 */
-	public LocalDateTime getMissionEnd() {
+	public LocalDate getMissionEnd() {
 		return missionEnd;
 	}
 
-	public void setMissionEnd(LocalDateTime missionEnd) {
+	public void setMissionEnd(LocalDate missionEnd) {
 		this.missionEnd = missionEnd;
 	}
 

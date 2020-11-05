@@ -771,6 +771,9 @@ public class AttributeInfoPanel extends Composite {
 		}
 	}
 	
+	public Attribute.AttributeType getSelectedType(){
+		return (AttributeType) cmbType.getStructuredSelection().getFirstElement();
+	}
 	/**
 	 * Validates attribute input
 	 * @return <code>true</code> if all fields validate correctly, <code>false</code> if error exists

@@ -51,6 +51,7 @@ import org.wcs.smart.asset.model.mapping.XmpMetadataField;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
@@ -59,6 +60,7 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationAttributeList;
 
 import com.drew.lang.Rational;
 import com.drew.metadata.Directory;
@@ -438,12 +440,29 @@ public class FileProcessor {
 				
 			}else if (mapping.getMappedAttribute() != null) {
 				//mapping an attribute and maybe a value
-				WaypointObservation wo = new WaypointObservation();
-				if (mapping.getMappedCategory() != null) wo.setCategory(mapping.getMappedCategory());
-				WaypointObservationAttribute woa = new WaypointObservationAttribute();
-				woa.setAttribute(mapping.getMappedAttribute());
-				wo.setAttributes(new ArrayList<>());
-				wo.getAttributes().add(woa);
+				WaypointObservation wo = null;
+				WaypointObservationAttribute woa = null;
+				if (mapping.getMappedAttribute().getType() == AttributeType.MLIST) {
+					for (WaypointObservation raw : p.getRawObservations()) {
+						if (raw.getCategory().equals(mapping.getMappedCategory())) {
+							for (WaypointObservationAttribute rawa : raw.getAttributes()) {
+								if (rawa.getAttribute().equals(mapping.getMappedAttribute())) {
+									wo = raw;
+									woa = rawa;
+									break;
+								}
+							}
+						}
+					}
+				}
+				if (wo == null) {
+					wo = new WaypointObservation();
+					if (mapping.getMappedCategory() != null) wo.setCategory(mapping.getMappedCategory());
+					woa = new WaypointObservationAttribute();
+					woa.setAttribute(mapping.getMappedAttribute());
+					wo.setAttributes(new ArrayList<>());
+					wo.getAttributes().add(woa);
+				}
 				
 				//the tag value identifies the item to map to
 				if (mapping.getMappedAttribute().getType() == Attribute.AttributeType.BOOLEAN) {
@@ -505,7 +524,43 @@ public class FileProcessor {
 						}
 						woa.setAttributeListItem(item);
 					}
-					
+				}else if (mapping.getMappedAttribute().getType() == Attribute.AttributeType.MLIST) {
+					if (mapping.getMappedListItem() != null) {
+						if (pathValue.equalsIgnoreCase(field.getValue())) {
+							WaypointObservationAttributeList li = new WaypointObservationAttributeList();
+							li.setAttributeLisItem(mapping.getMappedListItem());
+							li.setObservationAttribute(woa);
+							if (woa.getAttributeListItems() == null) woa.setAttributeListItems(new ArrayList<>());
+							woa.getAttributeListItems().add(li);
+						}else {
+							return;
+						}
+					}else {
+						AttributeListItem item = null;
+						for (AttributeListItem i : mapping.getMappedAttribute().getAttributeList()) {
+							if (i.getKeyId().equalsIgnoreCase(pathValue)) {
+								item = i;
+								break;
+							}
+							for (Label l : i.getNames()) {
+								if (l.getValue().equalsIgnoreCase(pathValue)) {
+									item = i;
+									break;
+								}
+							}
+							if (item != null) break;
+						}
+						if (item == null) {
+							p.addWarning(new ActionableWarning(MessageFormat.format(ErrorMessages.LIST_ITEM_PARSE_ERROR.getMessage(locale), pathValue, mapping.getMappedAttribute().getName())));
+							return;
+						}else {
+							WaypointObservationAttributeList li = new WaypointObservationAttributeList();
+							li.setAttributeLisItem(item);
+							li.setObservationAttribute(woa);
+							if (woa.getAttributeListItems() == null) woa.setAttributeListItems(new ArrayList<>());
+							woa.getAttributeListItems().add(li);
+						}
+					}
 				}else if (mapping.getMappedAttribute().getType() == Attribute.AttributeType.TREE) {
 					if (mapping.getMappedTreeNode() != null) {
 						if (pathValue.equalsIgnoreCase(field.getValue())) {
@@ -552,7 +607,7 @@ public class FileProcessor {
 					woa.setStringValue(pathValue);
 				}
 				
-				p.addRawObservation(wo);
+				if (!p.getRawObservations().contains(wo)) p.addRawObservation(wo);
 			}
 		}
 	}
@@ -610,12 +665,30 @@ public class FileProcessor {
 				
 			}else if (mapping.getMappedAttribute() != null) {
 				//mapping an attribute and maybe a value
-				WaypointObservation wo = new WaypointObservation();
-				if (mapping.getMappedCategory() != null) wo.setCategory(mapping.getMappedCategory());
-				WaypointObservationAttribute woa = new WaypointObservationAttribute();
-				woa.setAttribute(mapping.getMappedAttribute());
-				wo.setAttributes(new ArrayList<>());
-				wo.getAttributes().add(woa);
+				
+				WaypointObservation wo = null;
+				WaypointObservationAttribute woa = null;
+				if (mapping.getMappedAttribute().getType() == AttributeType.MLIST) {
+					for (WaypointObservation raw : p.getRawObservations()) {
+						if (raw.getCategory().equals(mapping.getMappedCategory())) {
+							for (WaypointObservationAttribute rawa : raw.getAttributes()) {
+								if (rawa.getAttribute().equals(mapping.getMappedAttribute())) {
+									wo = raw;
+									woa = rawa;
+									break;
+								}
+							}
+						}
+					}
+				}
+				if (wo == null) {
+					wo = new WaypointObservation();
+					if (mapping.getMappedCategory() != null) wo.setCategory(mapping.getMappedCategory());
+					woa = new WaypointObservationAttribute();
+					woa.setAttribute(mapping.getMappedAttribute());
+					wo.setAttributes(new ArrayList<>());
+					wo.getAttributes().add(woa);
+				}
 				
 				
 				//the tag value identifies the item to map to
@@ -661,6 +734,44 @@ public class FileProcessor {
 							return;
 						}
 						woa.setAttributeListItem(item);
+					}
+				}else if (mapping.getMappedAttribute().getType() == Attribute.AttributeType.MLIST) {
+					String value = tag.getDescription(field.getTagType());
+					if (mapping.getMappedListItem() != null) {
+						if (value.equalsIgnoreCase(field.getTagValue())) {
+							WaypointObservationAttributeList li = new WaypointObservationAttributeList();
+							li.setAttributeLisItem(mapping.getMappedListItem());
+							li.setObservationAttribute(woa);
+							if (woa.getAttributeListItems() == null) woa.setAttributeListItems(new ArrayList<>());
+							woa.getAttributeListItems().add(li);
+						}else {
+							return;
+						}
+					}else {
+						AttributeListItem item = null;
+						for (AttributeListItem i : mapping.getMappedAttribute().getAttributeList()) {
+							if (i.getKeyId().equalsIgnoreCase(value)) {
+								item = i;
+								break;
+							}
+							for (Label l : i.getNames()) {
+								if (l.getValue().equalsIgnoreCase(value)) {
+									item = i;
+									break;
+								}
+							}
+							if (item != null) break;
+						}
+						if (item == null) {
+							p.addWarning(new ActionableWarning(MessageFormat.format(ErrorMessages.LIST_ITEM_PARSE_ERROR.getMessage(locale), value, mapping.getMappedAttribute().getName())));
+							return;
+						}else {
+							WaypointObservationAttributeList li = new WaypointObservationAttributeList();
+							li.setAttributeLisItem(item);
+							li.setObservationAttribute(woa);
+							if (woa.getAttributeListItems() == null) woa.setAttributeListItems(new ArrayList<>());
+							woa.getAttributeListItems().add(li);
+						}
 					}
 					
 				}else if (mapping.getMappedAttribute().getType() == Attribute.AttributeType.TREE) {
@@ -720,7 +831,7 @@ public class FileProcessor {
 					woa.setStringValue(value);
 				}
 				
-				p.addRawObservation(wo);
+				if (!p.getRawObservations().contains(wo)) p.addRawObservation(wo);
 			}
 		}
 	}

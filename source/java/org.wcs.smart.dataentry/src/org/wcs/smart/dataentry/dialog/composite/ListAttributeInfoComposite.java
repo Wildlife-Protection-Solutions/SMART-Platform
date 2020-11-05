@@ -125,8 +125,8 @@ public class ListAttributeInfoComposite extends CmAttributeConfInfoComposite {
 
 	private void createMultiselectControl(Composite parent) {
 		lblMulti = new Label(parent, SWT.NONE);
-		lblMulti.setText(Messages.CmAttributeInfoComposite_Option_Multiselect);
-		lblMulti.setToolTipText(Messages.ListAttributeInfoComposite_multiSelectTooltip);
+		lblMulti.setText(Messages.CmAttributeInfoComposite_Option_Multiselect1);
+		lblMulti.setToolTipText(Messages.ListAttributeInfoComposite_multiSelectTooltip1);
 		btnMulti = new Button(parent, SWT.CHECK);
 		btnMulti.addSelectionListener(new SelectionAdapter() {
 			@Override

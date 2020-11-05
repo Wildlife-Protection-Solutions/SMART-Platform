@@ -100,6 +100,19 @@ public class DerbyPagedMissionResult extends AbstractPagedQueryResultSet<ISurvey
 	}
 	
 	@Override
+	public void dispose(Session session) throws SQLException{
+		super.dispose(session);
+		session.doWork(new Work() {
+			@Override
+			public void execute(Connection c) throws SQLException {
+				if (engine != null) engine.dropTables(c);
+				if (engine2 != null) engine2.dropTables(c);
+
+			}
+		});
+	}
+	
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) return true;
 		if (obj == null) return false;

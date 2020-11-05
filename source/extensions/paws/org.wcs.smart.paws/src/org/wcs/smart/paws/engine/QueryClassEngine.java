@@ -90,7 +90,7 @@ public class QueryClassEngine {
 			throwException(query);
 		}
 
-		temptable = ((IObservationPagedQueryResultSet)results).getResultsTable();
-		obcol = ((IObservationPagedQueryResultSet)results).getObservationColumn();
+		temptable = ((IObservationPagedQueryResultSet<?>)results).getResultsTable();
+		obcol = ((IObservationPagedQueryResultSet<?>)results).getObservationColumn();
 	}
 }

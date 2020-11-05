@@ -52,47 +52,12 @@ public class DistanceExportHelper {
 	
 	public DerbyPagedObservationResult createResultSet(boolean orderbystratum) {
 		return new DerbyPagedObservationResult(engine) {
-//			@Override
-//			protected void attachObservations(List<IResultItem> result, Connection c, Session session) throws SQLException {
-//				boolean hasObservations = false;
-//				StringBuilder attrSql = new StringBuilder();
-//				attrSql.append("SELECT r.ob_uuid, a.keyid, wpoa.number_value, wpoa.string_value, rl.value as list_value, rt.value as tree_value, r.ca_uuid FROM "); //$NON-NLS-1$
-//				attrSql.append(getDataTable());
-//				attrSql.append(" r left join smart.wp_observation_attributes wpoa on r.ob_uuid = wpoa.observation_uuid ");
-//				attrSql.append("left join smart.dm_attribute a on a.uuid = wpoa.attribute_uuid left join "); //$NON-NLS-1$
-//				attrSql.append(getSrcDataTable()).append("_list rl on wpoa.list_element_uuid = rl.uuid left join "); //$NON-NLS-1$
-//				attrSql.append(getSrcDataTable()).append("_tree rt on wpoa.tree_node_uuid = rt.UUID WHERE r.ob_uuid in ("); //$NON-NLS-1$
-//				for (IResultItem irt : result) {
-//					SurveyObservationResultItem it = (SurveyObservationResultItem)irt;
-//					if (it.getObservationUuid() != null) {
-//						if (hasObservations) {
-//							attrSql.append(',');
-//						}
-//						hasObservations = true;
-//						attrSql.append("x'").append(UuidUtils.uuidToString(it.getObservationUuid())).append('\''); //$NON-NLS-1$
-//					}
-//				}
-//				
-//				
-//				if (!hasObservations) {
-//					//no observations in current data fragment, so no need to select attributes as they will be empty
-//					return;
-//				}
-//				attrSql.append(')');
-//
-//				try(ResultSet rs = c.createStatement().executeQuery(attrSql.toString())) {
-//					HashMap<UUID, HashMap<String, Object>> attrMap = getResultsAttributes(rs, session);
-//					for (IResultItem irt : result) {
-//						SurveyObservationResultItem it = (SurveyObservationResultItem)irt;
-//						if (it.getObservationUuid() != null) {
-//							HashMap<String, Object> attributes = attrMap.get(it.getObservationUuid());
-//							if (attributes != null) {
-//								it.setAttributes(attributes);
-//							}
-//						}
-//					}
-//				}	
-//			}
+			
+			@Override
+			public String getResultsTable() {
+				return DistanceExportHelper.this.getDataTable();
+			}
+			
 			protected String buildSortSql() {
 				//always sort by stratum, and sampling unit id
 				StringBuilder sb = new StringBuilder();

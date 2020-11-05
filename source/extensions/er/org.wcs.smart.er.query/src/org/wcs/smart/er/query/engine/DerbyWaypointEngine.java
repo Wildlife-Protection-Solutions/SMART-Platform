@@ -162,7 +162,7 @@ public class DerbyWaypointEngine extends DerbySurveyQueryEngine implements Waypo
 	 */
 	@Override
 	public void dropTables(Connection c) throws SQLException {
-		dropTable(c, getLabelDataTable());
+		dropTable(c, getQueryDataTable());
 		dropTable(c, getLabelDataTable());
 		
 	}
@@ -436,8 +436,8 @@ public class DerbyWaypointEngine extends DerbySurveyQueryEngine implements Waypo
 		
 		it.setMissionUuid(UuidUtils.byteToUUID(rs.getBytes("mission_uuid"))); //$NON-NLS-1$
 		it.setMissionId(rs.getString("mission_id")); //$NON-NLS-1$
-		it.setMissionStart(rs.getTimestamp("mission_startdate").toLocalDateTime()); //$NON-NLS-1$
-		it.setMissionEnd(rs.getTimestamp("mission_enddate").toLocalDateTime()); //$NON-NLS-1$
+		it.setMissionStart(rs.getDate("mission_startdate").toLocalDate()); //$NON-NLS-1$
+		it.setMissionEnd(rs.getDate("mission_enddate").toLocalDate()); //$NON-NLS-1$
 		it.setMissionLeader(rs.getString("mission_leader")); //$NON-NLS-1$
 		
 		it.setSamplingUnitUuid(UuidUtils.byteToUUID(rs.getBytes("samplingunit_uuid"))); //$NON-NLS-1$

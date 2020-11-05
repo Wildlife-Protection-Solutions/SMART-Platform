@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.er.query.model;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.UUID;
 
 import org.wcs.smart.query.common.engine.IResultItem;
@@ -60,9 +60,9 @@ public interface ISurveyQueryResultItem extends IResultItem{
 
 	public String getMissionId();
 
-	public LocalDateTime getMissionStart();
+	public LocalDate getMissionStart();
 
-	public LocalDateTime getMissionEnd();
+	public LocalDate getMissionEnd();
 
 
 }

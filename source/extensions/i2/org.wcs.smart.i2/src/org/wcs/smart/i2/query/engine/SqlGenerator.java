@@ -47,7 +47,9 @@ public class SqlGenerator {
 	 * @return
 	 */
 	public static synchronized String createTempTableName(){
-		return "query_temp_i2_" + tableCnter.incrementAndGet();//$NON-NLS-1$ 
+		String tname = "query_temp_i2_" + tableCnter.incrementAndGet();//$NON-NLS-1$
+		logString("CREATE TABLE: " + tname); //$NON-NLS-1$
+		return tname;
 	}
 	
 	/**
@@ -142,6 +144,6 @@ public class SqlGenerator {
 	
 	
 	public static void logString(String string){
-		//System.out.println(string);
+		System.out.println(string);
 	}
 }

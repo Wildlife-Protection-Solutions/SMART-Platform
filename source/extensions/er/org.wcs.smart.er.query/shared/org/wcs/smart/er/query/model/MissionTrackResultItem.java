@@ -22,7 +22,6 @@
 package org.wcs.smart.er.query.model;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -53,8 +52,8 @@ public class MissionTrackResultItem implements IGeometryResultItem, ISurveyQuery
 	private String surveyId;
 	
 	private String missionId;
-	private LocalDateTime missionStart;
-	private LocalDateTime missionEnd;
+	private LocalDate missionStart;
+	private LocalDate missionEnd;
 	private UUID missionUuid;
 	
 	private UUID samplingUnitUuid;
@@ -269,11 +268,11 @@ public class MissionTrackResultItem implements IGeometryResultItem, ISurveyQuery
 	 * mission start
 	 * @return
 	 */
-	public LocalDateTime getMissionStart() {
+	public LocalDate getMissionStart() {
 		return missionStart;
 	}
 
-	public void setMissionStart(LocalDateTime missionStart) {
+	public void setMissionStart(LocalDate missionStart) {
 		this.missionStart = missionStart;
 	}
 
@@ -281,11 +280,11 @@ public class MissionTrackResultItem implements IGeometryResultItem, ISurveyQuery
 	 * mission end
 	 * @return
 	 */
-	public LocalDateTime getMissionEnd() {
+	public LocalDate getMissionEnd() {
 		return missionEnd;
 	}
 
-	public void setMissionEnd(LocalDateTime missionEnd) {
+	public void setMissionEnd(LocalDate missionEnd) {
 		this.missionEnd = missionEnd;
 	}
 

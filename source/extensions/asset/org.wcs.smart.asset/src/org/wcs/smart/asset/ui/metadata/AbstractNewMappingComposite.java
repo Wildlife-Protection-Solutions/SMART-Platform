@@ -213,9 +213,11 @@ public abstract class AbstractNewMappingComposite {
 			@Override
 			protected Object getValue(Object element) {
 				if (element instanceof MetadataValueMapping) {
-					return ((MetadataValueMapping) element).tagValue;
+					String x = ((MetadataValueMapping) element).tagValue;
+					if (x == null) return ""; //$NON-NLS-1$
+					return x;
 				}
-				return null;
+				return ""; //$NON-NLS-1$
 			}
 			
 			@Override
