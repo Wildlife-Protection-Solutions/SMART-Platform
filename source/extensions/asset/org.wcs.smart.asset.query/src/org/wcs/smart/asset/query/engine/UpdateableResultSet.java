@@ -1,10 +1,33 @@
+/*
+ * Copyright (C) 2020 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.asset.query.engine;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.UUID;
@@ -34,6 +57,7 @@ import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationAttributeList;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.query.common.engine.IDesktopWOEngine;
 import org.wcs.smart.query.common.engine.IResultItem;
@@ -45,6 +69,12 @@ import org.wcs.smart.query.model.CategoryQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.ui.SmartLabelProvider;
 
+/**
+ * Tools for updating asset query result sets
+ * 
+ * @author Emily
+ *
+ */
 public class UpdateableResultSet {
 	
 	private final static NullComparator NULL_COMPARATOR = new NullComparator(false);
@@ -115,6 +145,40 @@ public class UpdateableResultSet {
 						if (engine instanceof AssetObservationEngine){
 							((AssetObservationEngine)engine).addListLabel(session, newItem);
 						}
+					}
+				}
+				break;
+			case MLIST:
+				if (newValue instanceof Collection<?>) {
+					if (toUpdate.getAttributeListItems() == null) toUpdate.setAttributeListItems(new ArrayList<>());
+					
+					List<AttributeListItem> newItems = new ArrayList<>();
+					
+					for (Object l : ((Collection<?>)newValue)) {
+						if (l instanceof AttributeListItem) {
+							AttributeListItem li = (AttributeListItem) l;
+							newItems.add(li);
+							if (engine instanceof AssetObservationEngine){
+								((AssetObservationEngine)engine).addListLabel(session, li);
+							}
+						}
+					}
+					
+					for (Iterator<WaypointObservationAttributeList> iterator = toUpdate.getAttributeListItems().iterator(); iterator.hasNext();) {
+						WaypointObservationAttributeList attributeListItem = (WaypointObservationAttributeList) iterator.next();
+						if (!newItems.contains(attributeListItem.getAttributeListItem())) {
+							iterator.remove();
+							updated = true;
+						}else {
+							newItems.remove(attributeListItem.getAttributeListItem());
+						}
+					}
+					for (AttributeListItem ni:newItems) {
+						WaypointObservationAttributeList w = new WaypointObservationAttributeList();
+						w.setAttributeLisItem(ni);
+						w.setObservationAttribute(toUpdate);
+						toUpdate.getAttributeListItems().add(w);
+						updated = true;
 					}
 				}
 				break;
@@ -338,6 +402,7 @@ public class UpdateableResultSet {
 	private boolean updateAttributeColumn(AttributeQueryColumn column, ObservationQueryResultItem item, Object value) throws Exception{
 		boolean change = false;
 		WaypointObservation wpo = null;
+		if (item.getObservationUuid() == null) return false;
 		try(Session s = HibernateManager.openSession()){
 			s.getTransaction().begin();
 			try {
@@ -362,10 +427,6 @@ public class UpdateableResultSet {
 		return false;
 	}
 	
-	
-	
-
-
 	private boolean updateWaypointDetails(FixedQueryColumn column, WaypointQueryResultItem item, Object value) throws Exception{
 		Waypoint wp = null;
 		boolean change = false;

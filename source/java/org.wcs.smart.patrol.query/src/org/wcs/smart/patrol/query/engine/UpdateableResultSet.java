@@ -3,7 +3,9 @@ package org.wcs.smart.patrol.query.engine;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.UUID;
@@ -23,6 +25,7 @@ import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationAttributeList;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
@@ -621,6 +624,40 @@ public class UpdateableResultSet implements IWaypointUpdateableResultSet{
 					}
 				}
 				break;
+			case MLIST:
+				if (newValue instanceof Collection<?>) {
+					if (toUpdate.getAttributeListItems() == null) toUpdate.setAttributeListItems(new ArrayList<>());
+					
+					List<AttributeListItem> newItems = new ArrayList<>();
+					
+					for (Object l : ((Collection<?>)newValue)) {
+						if (l instanceof AttributeListItem) {
+							AttributeListItem li = (AttributeListItem) l;
+							newItems.add(li);
+							if (engine instanceof DerbyObservationEngine){
+								((DerbyObservationEngine)engine).addListLabel(session, li);
+							}
+						}
+					}
+					
+					for (Iterator<WaypointObservationAttributeList> iterator = toUpdate.getAttributeListItems().iterator(); iterator.hasNext();) {
+						WaypointObservationAttributeList attributeListItem = (WaypointObservationAttributeList) iterator.next();
+						if (!newItems.contains(attributeListItem.getAttributeListItem())) {
+							iterator.remove();
+							updated = true;
+						}else {
+							newItems.remove(attributeListItem.getAttributeListItem());
+						}
+					}
+					for (AttributeListItem ni:newItems) {
+						WaypointObservationAttributeList w = new WaypointObservationAttributeList();
+						w.setAttributeLisItem(ni);
+						w.setObservationAttribute(toUpdate);
+						toUpdate.getAttributeListItems().add(w);
+						updated = true;
+					}
+				}
+				break;
 			case NUMERIC:
 				if (newValue == null && toUpdate.getNumberValue() == null) break;
 				if (newValue == null) {
@@ -656,8 +693,7 @@ public class UpdateableResultSet implements IWaypointUpdateableResultSet{
 						}
 					}
 				}
-				break;
-				//TODO MULTI LIST
+				break;	
 		}
 		return updated;
 	}

@@ -36,6 +36,9 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
@@ -86,6 +89,12 @@ public class CheckBoxDropDown extends Composite implements Listener {
 		listeners = new ArrayList<>();
 	}
 
+	@Override
+	public void addTraverseListener(TraverseListener listener) {
+		super.addTraverseListener(listener);
+		txtInfo.addTraverseListener(listener);
+	}
+	
 	public void addSelectionChangedListener(ISelectionChangedListener listener){
 		listeners.add(listener);
 	}
@@ -196,7 +205,10 @@ public class CheckBoxDropDown extends Composite implements Listener {
 	}
 	public void setInput(Collection<?> input){
 		this.input = input;
-		if (table != null && !table.getControl().isDisposed()) table.setInput(input);
+		if (table != null && !table.getControl().isDisposed()) {
+			table.setInput(input);
+			initItems();
+		}
 	}
 	
 	public Collection<?> getInput(){
@@ -235,6 +247,11 @@ public class CheckBoxDropDown extends Composite implements Listener {
 		}
 		return sb.toString();
 	}
+	
+	protected void cancelEdit() {
+		
+	}
+	
 	/**
 	 * If overwritten Must populate the table value
 	 * @return
@@ -266,6 +283,17 @@ public class CheckBoxDropDown extends Composite implements Listener {
 			@Override
 			public void checkStateChanged(CheckStateChangedEvent event) {
 				checkChanged = true;				
+			}
+		});
+		
+		table.getControl().addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent e) {
+				if (e.character == '\u001b') { // Escape character
+					checkChanged = false;
+					dropDown(false);
+					cancelEdit();
+				}
 			}
 		});
 		
@@ -305,7 +333,6 @@ public class CheckBoxDropDown extends Composite implements Listener {
 	 * handle DropDown request
 	 * @param drop
 	 */
-	@SuppressWarnings("unchecked")
 	protected void dropDown (boolean drop) {
 		
 		// if already dropped then return
@@ -323,6 +350,8 @@ public class CheckBoxDropDown extends Composite implements Listener {
 	    		setValue(elements);
 	    		fireChangeListener();
 	    		checkChanged = false;
+	    	}else {
+	    		cancelEdit();
 	    	}
 	    	
 	        popup.setVisible (false);
@@ -358,13 +387,21 @@ public class CheckBoxDropDown extends Composite implements Listener {
 			popup.setBounds(pnt.x, pnt.y + l.height , l.width, i);	
 	    }
 		
+		initItems();
+	}	
+	
+	/**
+	 * initializes items in checkbox drop down with selection
+	 */
+	@SuppressWarnings("unchecked")
+	protected void initItems() {
 		Collection<Object> items = (Collection<Object>) txtInfo.getData();
 		if (items != null && !items.isEmpty()){
 			setCheckedElements(items.toArray(new Object[items.size()]));
 		}else {
 			setCheckedElements(new Object[0]);
 		}
-	}	
+	}
 	
 	/**
 	 * Called before the popup is made visible

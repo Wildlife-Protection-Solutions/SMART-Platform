@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.query.common.ui;
 
-import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.wcs.smart.query.common.engine.ObservationQueryResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 
@@ -34,12 +33,10 @@ import org.wcs.smart.query.model.QueryColumn;
  * @author Emily
  * @since 1.0.0
  */
-public class AttributeColumnLabelProvider extends ColumnLabelProvider {
-
-	private QueryColumn column;
+public class AttributeColumnLabelProvider extends QueryColumnLabelProvider {
 
 	public AttributeColumnLabelProvider(QueryColumn column) {
-		this.column = column;
+		super(column);
 	}
 
 	/*
