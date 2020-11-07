@@ -42,7 +42,6 @@ import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetWaypoint;
 import org.wcs.smart.asset.query.model.AssetFilterOption;
-import org.wcs.smart.asset.query.model.AssetQueryResultItem;
 import org.wcs.smart.asset.query.model.AssetSummaryQuery;
 import org.wcs.smart.asset.query.parser.internal.summary.AssetGroupBy;
 import org.wcs.smart.ca.Area;
@@ -1148,12 +1147,6 @@ public class AssetSummaryEngine extends AssetQueryEngine implements ISummaryEngi
 
 	@Override
 	public String getSurveySamplingUnitJoinFieldName() {
-		return null;
-	}
-
-
-	@Override
-	protected AssetQueryResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException {
 		return null;
 	}
 

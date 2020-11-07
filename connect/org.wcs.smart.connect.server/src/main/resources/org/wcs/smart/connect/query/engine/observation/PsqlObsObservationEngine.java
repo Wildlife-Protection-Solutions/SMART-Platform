@@ -35,12 +35,13 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
+import org.wcs.smart.connect.query.engine.IWOEngine;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
-import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.observation.query.model.ObsObservationQuery;
 import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.common.engine.ObservationQueryResultItem;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
@@ -58,7 +59,7 @@ import org.wcs.smart.query.model.filter.date.CachingDateFilter;
  * @author elitvin
  * @since 1.0.0
  */
-public class PsqlObsObservationEngine extends AbstractQueryEngine {
+public class PsqlObsObservationEngine extends AbstractQueryEngine implements IWOEngine<ObservationQueryResultItem> {
 
 	private final Logger logger = Logger.getLogger(PsqlObsObservationEngine.class.getName());
 	
@@ -148,7 +149,7 @@ public class PsqlObsObservationEngine extends AbstractQueryEngine {
 			c.createStatement().execute(sql);
 		}
 		//ca details
-		populateCaDetails(c, queryDataTable, "p_ca_uuid",query); //$NON-NLS-1$
+		populateCaDetails(c, queryDataTable, "ca_uuid",query); //$NON-NLS-1$
 		
 		//last modified
 		populatedLastModifiedName(c, session, queryDataTable);
@@ -186,25 +187,8 @@ public class PsqlObsObservationEngine extends AbstractQueryEngine {
 		}
 
 		populateTemporaryTableCategory(c, session, caFilter, queryDataTable);
-		populateAdditionalWpoaTable(c, queryDataTable + "_list", "list_element_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
-		populateAdditionalWpoaTable(c, queryDataTable + "_tree", "tree_node_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
-
-	}
-
-	private void populateAdditionalWpoaTable(Connection c, String tableName, String obsAttUuidColumn) throws SQLException {
-		String sql = "CREATE TABLE " + tableName + " (uuid uuid, value varchar(1024))"; //$NON-NLS-1$ //$NON-NLS-2$
-		logger.finest(sql.toString());
-		c.createStatement().execute(sql);
-
-		sql = "INSERT INTO " + tableName + " (uuid) SELECT DISTINCT wpoa." + obsAttUuidColumn //$NON-NLS-1$ //$NON-NLS-2$
-				+" FROM "  //$NON-NLS-1$
-				+ tableNamePrefix(WaypointObservationAttribute.class) + " inner join " //$NON-NLS-1$
-				+ queryDataTable + " r on " //$NON-NLS-1$
-				+ tablePrefix(WaypointObservationAttribute.class) + ".OBSERVATION_UUID = r.OB_UUID"; //$NON-NLS-1$
-		logger.finest(sql.toString());
-		c.createStatement().execute(sql);
-		
-		updateLabel(c, tableName, "uuid", "value"); //$NON-NLS-1$ //$NON-NLS-2$
+		createLabelTable(session, getObservationLabelTable());
+		populateListTreeDataTable(session, getQueryDataTable(), getObservationLabelTable());
 	}
 	
 
@@ -236,7 +220,7 @@ public class PsqlObsObservationEngine extends AbstractQueryEngine {
 	public String getTemporaryTableCreateClause(String tableName) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
-		sql.append("p_ca_uuid uuid,"); //$NON-NLS-1$
+		sql.append("ca_uuid uuid,"); //$NON-NLS-1$
 		sql.append("wp_uuid uuid,"); //$NON-NLS-1$ 
 		sql.append("wp_source varchar(16),"); //$NON-NLS-1$
 		sql.append("wp_id varchar(32),"); //$NON-NLS-1$
@@ -275,8 +259,7 @@ public class PsqlObsObservationEngine extends AbstractQueryEngine {
 	@Override
 	public void cleanUp(Session session) throws SQLException {
 		dropTable(session, queryDataTable);
-		dropTable(session, queryDataTable + "_LIST"); //$NON-NLS-1$
-		dropTable(session, queryDataTable + "_TREE"); //$NON-NLS-1$
+		dropTable(session, getObservationLabelTable());
 	}
 
 	@Override
@@ -293,6 +276,11 @@ public class PsqlObsObservationEngine extends AbstractQueryEngine {
 		}else{
 			return new ObsWaypointFilterProcessor(queryDataTable, this);
 		}
+	}
+
+	@Override
+	public String getObservationLabelTable() {
+		return queryDataTable + "_labels"; //$NON-NLS-1$
 	}
 
 }

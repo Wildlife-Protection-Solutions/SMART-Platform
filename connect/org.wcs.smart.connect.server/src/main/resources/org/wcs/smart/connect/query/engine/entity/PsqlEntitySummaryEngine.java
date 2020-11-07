@@ -1053,7 +1053,7 @@ public class PsqlEntitySummaryEngine extends AbstractQueryEngine implements ISum
 	public String getTemporaryTableCreateClause(String tableName) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
-		sql.append("p_ca_uuid UUID,"); //$NON-NLS-1$
+		sql.append("ca_uuid UUID,"); //$NON-NLS-1$
 		sql.append("wp_uuid UUID,"); //$NON-NLS-1$
 		sql.append("ob_uuid UUID"); //$NON-NLS-1$
 		sql.append(")"); //$NON-NLS-1$

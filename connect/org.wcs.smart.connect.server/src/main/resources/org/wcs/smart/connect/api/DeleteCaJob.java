@@ -120,7 +120,10 @@ public class DeleteCaJob implements Runnable {
 					}catch (Exception ex){
 						logger.severe(Messages.getString("ConservationAreas.CouldNotDeleteFilestore", l)); //$NON-NLS-1$
 					}
-				}catch (Exception ex) {
+				}catch (Throwable ex) {
+					if (session.getTransaction().isActive()) session.getTransaction().rollback();
+
+					ex.printStackTrace();
 					logger.log(Level.SEVERE, "Error occurred while deleting Conservation Area: " + serverDelete.getLabel() + "; " + ex.getMessage(), ex); //$NON-NLS-1$ //$NON-NLS-2$
 					try {
 						session.beginTransaction();

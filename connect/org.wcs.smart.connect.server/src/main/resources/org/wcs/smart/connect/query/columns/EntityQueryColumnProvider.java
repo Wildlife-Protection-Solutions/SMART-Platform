@@ -158,8 +158,16 @@ public class EntityQueryColumnProvider implements IEntityQueryColumnProvider{
 							cb.equal(from.get("keyId"), attributeKey), //$NON-NLS-1$
 							cb.equal(from.join("entityType").get("keyId"), entityType) //$NON-NLS-1$ //$NON-NLS-2$
 							));
-					EntityAttribute ea = s.createQuery(c).uniqueResult();
-					entityAttributeColumns.add(new EntityAttributeQueryColumn("[" + ea.getEntityType().getName() + "]" + ea.getName(), entityType, attributeKey, type)); //$NON-NLS-1$ //$NON-NLS-2$
+					EntityAttribute ea = null;
+					for (EntityAttribute t : s.createQuery(c).getResultList()) {
+						if (caFilter.getConservationAreaFilterIds().contains( t.getEntityType().getConservationArea().getUuid())){
+							ea = t;
+							break;
+						}
+					}
+					if (ea != null) {
+						entityAttributeColumns.add(new EntityAttributeQueryColumn("[" + ea.getEntityType().getName() + "]" + ea.getName(), entityType, attributeKey, type)); //$NON-NLS-1$ //$NON-NLS-2$
+					}
 				}
 				QueryColumnUtils.sortByName(entityAttributeColumns, l);
 				

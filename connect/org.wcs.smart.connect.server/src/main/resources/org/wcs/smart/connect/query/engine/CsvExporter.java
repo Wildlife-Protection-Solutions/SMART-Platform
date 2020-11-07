@@ -85,11 +85,10 @@ public class CsvExporter {
 	 * @param results
 	 * @param session
 	 */
-	public void exportResults(SimpleQuery query, AbstractDbFeatureResultSet results, Session session) throws Exception{
+	public void exportResults(SimpleQuery query, AbstractDbFeatureResultSet<IResultItem> results, Session session) throws Exception{
 		try (CSVWriter writer = new CSVWriter(
 				new OutputStreamWriter(
-	              new FileOutputStream(csvFile.toFile().getAbsolutePath()), StandardCharsets.UTF_8)
-				,delimiter)) {
+	              new FileOutputStream(csvFile.toFile().getAbsolutePath()), StandardCharsets.UTF_8) ,delimiter)) {
 				
 				IProjectionProvider prj = ProjectionUtils.INSTANCE.createProjectionProvider(session, query.getConservationArea());
 				List<QueryColumn> cols = results.getQueryColumns(query, l, session, prj);
@@ -102,7 +101,7 @@ public class CsvExporter {
 				writer.writeNext(data);
 				
 				//get data and write
-				IQueryResultSetIterator<? extends IResultItem> itemiterator = results.iterator(500, session);
+				IQueryResultSetIterator<IResultItem> itemiterator = results.iterator(500, session);
 				
 				for (Iterator<IResultItem> iterator = itemiterator; iterator.hasNext();) {
 					IResultItem resultItem = (IResultItem) iterator.next();

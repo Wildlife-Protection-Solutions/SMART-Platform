@@ -43,11 +43,11 @@ import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetWaypoint;
 import org.wcs.smart.asset.query.model.AssetObservationQuery;
-import org.wcs.smart.asset.query.model.AssetQueryResultItem;
+import org.wcs.smart.asset.query.model.AssetObservationResultItem;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
+import org.wcs.smart.connect.query.engine.IWOEngine;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
-import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.SimpleQuery;
@@ -63,7 +63,7 @@ import org.wcs.smart.query.model.filter.date.CachingDateFilter;
  * 
  * @since 1.0.0
  */
-public class AssetObservationEngine extends AssetQueryEngine {
+public class AssetObservationEngine extends AssetQueryEngine  implements IWOEngine<AssetObservationResultItem> {
 
 	private final Logger logger = Logger.getLogger(AssetObservationEngine.class.getName());
 	
@@ -156,6 +156,11 @@ public class AssetObservationEngine extends AssetQueryEngine {
 	public String getQueryDataTable() {
 		return queryDataTable;
 	}
+	
+	@Override
+	public String getObservationLabelTable() {
+		return getQueryDataTable() + "_labels"; //$NON-NLS-1$
+	}
 		
 	private void populateTemporaryTableExtra(Connection c, Session session) throws SQLException {
 		
@@ -168,6 +173,7 @@ public class AssetObservationEngine extends AssetQueryEngine {
 				{"ca_id","varchar(8)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"ca_name","varchar(256)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"wp_lastmodifiedbyname","varchar(512)"}, //$NON-NLS-1$ //$NON-NLS-2$
+				{"ob_observer","varchar(512)"}, //$NON-NLS-1$ //$NON-NLS-2$
 		};
 		
 		for (int i = 0; i < columnsToAdd.length; i ++){
@@ -247,34 +253,48 @@ public class AssetObservationEngine extends AssetQueryEngine {
 			updatePs.executeBatch();
 		}
 		
+		//observer details
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT DISTINCT ob_observer_uuid FROM "); //$NON-NLS-1$
+		sql.append(queryDataTable);
+		logger.finest(sql.toString());
+
+		String updateSql = "UPDATE "+queryDataTable+" SET "; //$NON-NLS-1$ //$NON-NLS-2$
+		String q1 = updateSql + "ob_observer = ? where ob_observer_uuid = ?"; //$NON-NLS-1$
+		logger.finest(q1);
+		PreparedStatement observerSt = c.prepareStatement(q1);
+		int cnt = 0;
+		try(ResultSet rs = c.createStatement().executeQuery(sql.toString())){
+			while (rs.next()) {
+				UUID uuid = (UUID) rs.getObject(1);
+				if (uuid == null) continue;
+				String name = getEmployeeName(uuid, session);
+						
+				if (name != null) {
+					observerSt.setString(1, name);
+					observerSt.setObject(2, uuid);
+					observerSt.addBatch();
+					cnt++;
+					if (cnt >= 100){
+						observerSt.executeBatch();
+						cnt = 0;
+					}
+				}
+			}
+			observerSt.executeBatch();
+		}
+
 		
 		//ca information
-		populateCaDetails(c, queryDataTable,"wp_ca_uuid", query); //$NON-NLS-1$
+		populateCaDetails(c, queryDataTable,"ca_uuid", query); //$NON-NLS-1$
 		populatedLastModifiedName(c, session, queryDataTable);
 		
 		populateTemporaryTableCategory(c, session, caFilter, queryDataTable);
-		populateAdditionalWpoaTable(c, queryDataTable + "_list", "list_element_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
-		populateAdditionalWpoaTable(c, queryDataTable + "_tree", "tree_node_uuid");		 //$NON-NLS-1$ //$NON-NLS-2$
+		createLabelTable(session, getObservationLabelTable());
+		populateListTreeDataTable(session, getQueryDataTable(), getObservationLabelTable());
 		
 	}
-	
-	private void populateAdditionalWpoaTable(Connection c, String tableName, String obsAttUuidColumn) throws SQLException {
-		String sql = "CREATE TABLE " + tableName + " (uuid uuid, value varchar(1024))"; //$NON-NLS-1$ //$NON-NLS-2$
-		logger.finest(sql.toString());
-		c.createStatement().execute(sql);
-
-		sql = "INSERT INTO " + tableName + " (uuid) SELECT DISTINCT wpoa." + obsAttUuidColumn //$NON-NLS-1$ //$NON-NLS-2$
-				+" FROM "  //$NON-NLS-1$
-				+ tableNamePrefix(WaypointObservationAttribute.class) + " inner join " //$NON-NLS-1$
-				+ queryDataTable + " r on " //$NON-NLS-1$
-				+ tablePrefix(WaypointObservationAttribute.class) + ".OBSERVATION_UUID = r.OB_UUID"; //$NON-NLS-1$
-		logger.finest(sql.toString());
-		c.createStatement().execute(sql);
 		
-		updateLabel(c, tableName, "uuid", "value"); //$NON-NLS-1$ //$NON-NLS-2$
-	}
-
-	
 	@Override
 	public String getTemporaryTableSelectClause(boolean includeObservations) {
 		StringBuilder sql = new StringBuilder();
@@ -292,6 +312,7 @@ public class AssetObservationEngine extends AssetQueryEngine {
 		sql.append(tablePrefix(Waypoint.class) + ".ca_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(WaypointObservationGroup.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(WaypointObservation.class) + ".uuid, "); //$NON-NLS-1$
+		sql.append(tablePrefix(WaypointObservation.class) + ".employee_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(WaypointObservation.class) + ".category_uuid "); //$NON-NLS-1$
 		return sql.toString();
 	}
@@ -306,66 +327,19 @@ public class AssetObservationEngine extends AssetQueryEngine {
 		sql.append("wp_y double precision,"); //$NON-NLS-1$
 		sql.append("wp_direction double precision,"); //$NON-NLS-1$
 		sql.append("wp_distance double precision,"); //$NON-NLS-1$
-		sql.append("wp_date timestamp,"); //$NON-NLS-1$
+		sql.append("wp_time timestamp,"); //$NON-NLS-1$
 		sql.append("wp_comment varchar(4096),"); //$NON-NLS-1$
 		sql.append("wp_lastmodified timestamp,"); //$NON-NLS-1$
 		sql.append("wp_lastmodifiedby uuid,"); //$NON-NLS-1$
-		sql.append("wp_ca_uuid uuid,"); //$NON-NLS-1$
+		sql.append("ca_uuid uuid,"); //$NON-NLS-1$
 		sql.append("wp_group_uuid uuid,"); //$NON-NLS-1$
 		sql.append("ob_uuid uuid,"); //$NON-NLS-1$
+		sql.append("ob_observer_uuid uuid,"); //$NON-NLS-1$
 		sql.append("ob_category_uuid uuid"); //$NON-NLS-1$
 		sql.append(")"); //$NON-NLS-1$
 		return sql.toString();
 	}
 	
-
-	@Override
-	protected AssetQueryResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException{
-		AssetQueryResultItem item = new AssetQueryResultItem();
-		setFields(item, rs);
-		return item;
-	}
-	
-	protected void setFields(AssetQueryResultItem it, ResultSet rs) throws SQLException{
-	
-		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
-		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
-		it.setConservationAreaUuid((UUID)rs.getObject("wp_ca_uuid")); //$NON-NLS-1$
-		it.setWaypointUuid((UUID)rs.getObject("wp_uuid")); //$NON-NLS-1$
-		it.setWaypointId(rs.getString("wp_id")); //$NON-NLS-1$
-		it.setWaypointX(rs.getDouble("wp_x")); //$NON-NLS-1$
-		it.setWaypointY(rs.getDouble("wp_y")); //$NON-NLS-1$
-		it.setWaypointDate(rs.getTimestamp("wp_date").toLocalDateTime()); //$NON-NLS-1$
-		it.setWaypointDirection(rs.getObject("wp_direction") == null ? null : rs.getFloat("wp_direction")); //$NON-NLS-1$ //$NON-NLS-2$
-		it.setWaypointDistance(rs.getObject("wp_distance") == null ? null : rs.getFloat("wp_distance")); //$NON-NLS-1$ //$NON-NLS-2$
-		it.setWaypointComment(rs.getString("wp_comment")); //$NON-NLS-1$
-		
-		it.setAssets(rs.getString("asset_asset")); //$NON-NLS-1$
-		it.setStation(rs.getString("asset_station")); //$NON-NLS-1$
-		it.setLocations(rs.getString("asset_location")); //$NON-NLS-1$
-		it.setIncidentLength(rs.getInt("incident_length")); //$NON-NLS-1$
-		
-		it.setLastModifiedDate(rs.getTimestamp("wp_lastmodified").toLocalDateTime()); //$NON-NLS-1$
-		it.setLastModifiedBy(rs.getString("wp_lastmodifiedbyname")); //$NON-NLS-1$
-		
-		UUID t = (UUID)rs.getObject("ob_uuid"); //$NON-NLS-1$
-		it.setObservationUuid(t); 
-		
-		t = (UUID) rs.getObject("wp_group_uuid"); //$NON-NLS-1$
-		it.setObservationGroupUuid(t); 
-		
-		//build categories
-		List<String> categories = new ArrayList<String>();
-		for (int i = 0; i < categoryCount; i ++){
-			String category = rs.getString("category_"+i); //$NON-NLS-1$
-			if (category == null){
-				break;
-			}
-			categories.add(category);
-		}
-		
-		it.setCategory(categories.toArray(new String[categories.size()]));
-	}
 
 	public int getCategoryCount(){
 		return this.categoryCount;
@@ -389,9 +363,8 @@ public class AssetObservationEngine extends AssetQueryEngine {
 	
 	@Override
 	public void cleanUp(Session session) throws SQLException {
-		dropTable(session, queryDataTable);
-		dropTable(session, queryDataTable + "_LIST"); //$NON-NLS-1$
-		dropTable(session, queryDataTable + "_TREE"); //$NON-NLS-1$
+		dropTable(session, getQueryDataTable());
+		dropTable(session, getObservationLabelTable());
 		
 	}
 

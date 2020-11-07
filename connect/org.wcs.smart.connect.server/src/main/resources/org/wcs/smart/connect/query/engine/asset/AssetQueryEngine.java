@@ -22,14 +22,12 @@
 package org.wcs.smart.connect.query.engine.asset;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Set;
 
-import org.hibernate.Session;
 import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetAttributeListItem;
@@ -42,7 +40,6 @@ import org.wcs.smart.asset.model.AssetStationAttributeValue;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetStationLocationAttributeValue;
 import org.wcs.smart.asset.model.AssetWaypoint;
-import org.wcs.smart.asset.query.model.AssetQueryResultItem;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
 import org.wcs.smart.query.model.Query;
@@ -117,16 +114,7 @@ public abstract class AssetQueryEngine extends AbstractQueryEngine {
 	 */
 	public abstract String getTemporaryTableSelectClause(boolean includeObservations);
 	
-	/**
-	 * Converts a row in the temporary table to a result item
-	 * @param rs result set item to convert to the queryresultitem
-	 * @param session current database connection
-	 * @return
-	 * @throws SQLException
-	 */
-	protected abstract AssetQueryResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException;
-	
-	/**
+		/**
 	 * Create the temporary table to hold observation data
 	 * for querying
 	 * 

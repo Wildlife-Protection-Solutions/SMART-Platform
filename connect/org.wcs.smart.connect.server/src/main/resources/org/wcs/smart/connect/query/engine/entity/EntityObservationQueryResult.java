@@ -26,372 +26,129 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.UUID;
 
 import org.hibernate.Session;
-import org.hibernate.jdbc.ReturningWork;
-import org.hibernate.jdbc.Work;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Geometry;
-import org.wcs.smart.IProjectionProvider;
-import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
-import org.wcs.smart.entity.query.model.EntityQueryResultItem;
-import org.wcs.smart.entity.query.model.columns.FixedQueryColumn;
+import org.wcs.smart.connect.query.engine.ObservationQueryResult;
+import org.wcs.smart.entity.query.model.EntityObservationResultItem;
+import org.wcs.smart.query.common.engine.IAttachmentResultItem;
+import org.wcs.smart.query.common.engine.IPagedImageResultSet;
 import org.wcs.smart.query.common.engine.IResultItem;
-import org.wcs.smart.query.common.model.SimpleQuery;
-import org.wcs.smart.query.model.QueryColumn;
-import org.wcs.smart.util.UuidUtils;
+import org.wcs.smart.query.common.engine.ObservationQueryResultItem;
 /**
  * Result set of observation (all data) queries.
  * 
  * @author Emily
  *
  */
-public class EntityObservationQueryResult extends AbstractDbFeatureResultSet {
+public class EntityObservationQueryResult extends ObservationQueryResult<EntityObservationResultItem> implements IPagedImageResultSet {
 
-	private PsqlEntityObservationEngine engine;
-	private boolean includeUuids;
 	
 	public EntityObservationQueryResult(PsqlEntityObservationEngine engine, int itemCnt, boolean includeUuids){
-		this.engine = engine;
-		this.includeUuids = includeUuids;
-		setItemCount(itemCnt);
+		super(engine, itemCnt, includeUuids);
 	}
 	
 	@Override
-	public List<QueryColumn> getQueryColumns(SimpleQuery query, Locale l, Session session, IProjectionProvider prj){
-		List<QueryColumn> cols = super.getQueryColumns(query, l, session, prj);
-		if (!includeUuids) return cols;
+	protected void attachObservations(List<EntityObservationResultItem> result, Connection c, Session session) throws SQLException {
+		super.attachObservations(result, c, session);
+		attachEntityAttributes(result, c, session);
 		
-		QueryColumn obsUuidCol = new QueryColumn(getObservationColumnName(l), OBS_UUID_COL_KEY, QueryColumn.ColumnType.STRING) {
-			@Override
-			public QueryColumn clone() { return this; }
-			@Override
-			public Object getValue(IResultItem item) {
-				if (((EntityQueryResultItem)item).getObservationUuid() == null) return ""; //$NON-NLS-1$
-				return UuidUtils.uuidToString( ((EntityQueryResultItem)item).getObservationUuid());
-			}
-			
-		};
-		QueryColumn wpUuidCol = new QueryColumn(getWaypointColumnName(l), WP_UUID_COL_KEY, QueryColumn.ColumnType.STRING) {
-			@Override
-			public QueryColumn clone() { return this; }
-			@Override
-			public Object getValue(IResultItem item) {
-				if (((EntityQueryResultItem)item).getWaypointUuid() == null) return ""; //$NON-NLS-1$
-				return UuidUtils.uuidToString( ((EntityQueryResultItem)item).getWaypointUuid());
-			}
-			
-		};
-		
-		cols.add(obsUuidCol);
-		cols.add(wpUuidCol);
-		
-		QueryColumn caUuidCol = new QueryColumn(getConservationAreaColumnName(l), CA_UUID_COL_KEY, QueryColumn.ColumnType.STRING) {
-			@Override
-			public QueryColumn clone() { return this; }
-			@Override
-			public Object getValue(IResultItem item) {
-				if (((EntityQueryResultItem)item).getConservationAreaUuid() == null) return ""; //$NON-NLS-1$
-				return UuidUtils.uuidToString( ((EntityQueryResultItem)item).getConservationAreaUuid());
-			}
-		};
-		cols.add(caUuidCol);
-		
-		return cols;
 	}
 	
-	/**
-	 * Gets results from the given result set.
-	 * 
-	 * @param rs
-	 * @param from
-	 * @param pageSize
-	 * @return
-	 * @throws SQLException
-	 */
-	@Override
-	public List<IResultItem> getResults(Session session, ResultSet rs, int from, int pageSize) throws SQLException {
-		List<IResultItem> items = new ArrayList<IResultItem>();
-		rs.absolute(from);
-		int to = from + pageSize;
-		if (to >= itemCount) {
-			to = itemCount;
-		}
-		for(int x = from; x < to; x++) {
-			rs.next();
-			EntityQueryResultItem it = asQueryResultItem(rs);
-			items.add(it);
-		}
-		session.doWork(new Work(){
-			@Override
-			public void execute(Connection c) throws SQLException {
-				attachObservations(items, c, session);
-				attachEntityAttributes(items, c, session);
-			}
-			
-		});
-		return items;
-	}
-	
-	
-	private void attachEntityAttributes(List<IResultItem> result, Connection c, Session session) throws SQLException {
-		if (engine.getEntityTypes().size() > 0){
-			
-			//attach entities
-				StringBuilder sql = new StringBuilder();
-				sql.append("SELECT r.ob_uuid, a.keyid as entitykey, ea.keyid as entityattributekey, eav.number_value, eav.string_value, rl.value as list_value, rt.value as tree_value "); //$NON-NLS-1$
-				sql.append(" FROM "); //$NON-NLS-1$
-				sql.append(engine.getQueryDataTable());
-				sql.append(" r join smart.wp_observation_attributes wpoa on r.ob_uuid = wpoa.observation_uuid join smart.entity_type a on a.dm_attribute_uuid = wpoa.attribute_uuid "); //$NON-NLS-1$
-				sql.append(" join smart.entity e on e.attribute_list_item_uuid = wpoa.list_element_uuid "); //$NON-NLS-1$
-				sql.append(" join smart.entity_attribute_value eav on eav.entity_uuid = e.uuid "); //$NON-NLS-1$
-				sql.append(" join smart.entity_attribute ea on ea.uuid = eav.entity_attribute_uuid left join "); //$NON-NLS-1$
-				sql.append(engine.getQueryDataTable());
-				sql.append("_list rl on eav.list_element_uuid = rl.uuid left join "); //$NON-NLS-1$
-				sql.append(engine.getQueryDataTable());
-				sql.append("_tree rt on eav.tree_node_uuid = rt.UUID "); //$NON-NLS-1$	
-				sql.append("WHERE r.ob_uuid IN (  "); //$NON-NLS-1$
-				
-				List<UUID> uuids = new ArrayList<UUID>();
-				for (IResultItem rii : result) {
-					EntityQueryResultItem it = (EntityQueryResultItem) rii;
-					if (it.getObservationUuid() != null) {
-						uuids.add(it.getObservationUuid());
-						sql.append("?,"); //$NON-NLS-1$
-					}
-				}
-				sql.deleteCharAt(sql.length() - 1);
-				
-				sql.append(") AND "); //$NON-NLS-1$
-				sql.append("a.keyid in ("); //$NON-NLS-1$
-				for (String et : engine.getEntityTypes()){
-					sql.append("'" + et + "',");  //$NON-NLS-1$//$NON-NLS-2$
-				}
-				sql.deleteCharAt(sql.length() - 1);
-				sql.append(")"); //$NON-NLS-1$
-				
-				PreparedStatement ps = c.prepareStatement(sql.toString());
-				for (int i = 0; i < uuids.size(); i ++){
-					ps.setObject(i+1, uuids.get(i));
-				}
-				
-				try(ResultSet rs = ps.executeQuery()){
-					while(rs.next()){
-						UUID obuuid = (UUID) rs.getObject(1);
-						String entityKey = rs.getString(2);
-						String entityAttributeKey = rs.getString(3);
-						Object value = null;
-						if (rs.getObject(4) != null){
-							//number value
-							value = rs.getDouble(4);
-						}else if (rs.getObject(5) != null){
-							//string
-							value = rs.getString(5);
-						}else if (rs.getObject(6) != null){
-							//list string
-							value = rs.getString(6);
-						}else if (rs.getObject(7) != null){
-							//tree string
-							value = rs.getString(7);
-						}
-						
-						for (IResultItem rii : result) {
-							EntityQueryResultItem it = (EntityQueryResultItem) rii;
-							if (it.getObservationUuid() != null
-									&& it.getObservationUuid().equals(obuuid)) {
-								it.addEntityAttribute(entityKey,
-										entityAttributeKey, value);
-							}
-						}
-					}
-				}
-				
-			}
-	}
-	
-	private void attachObservations(List<IResultItem> result, Connection c, Session session) throws SQLException {
-		StringBuilder attrSql = new StringBuilder();
-		attrSql.append("SELECT r.ob_uuid, a.keyid, wpoa.number_value, wpoa.string_value, rl.value as list_value, rt.value as tree_value, r.p_ca_uuid FROM "); //$NON-NLS-1$
-		attrSql.append(engine.getQueryDataTable());
-		attrSql.append(" r left join smart.wp_observation_attributes wpoa on r.ob_uuid = wpoa.observation_uuid left join smart.dm_attribute a on a.uuid = wpoa.attribute_uuid left join "); //$NON-NLS-1$
-		attrSql.append(engine.getQueryDataTable()).append("_list rl on wpoa.list_element_uuid = rl.uuid left join "); //$NON-NLS-1$
-		attrSql.append(engine.getQueryDataTable()).append("_tree rt on wpoa.tree_node_uuid = rt.UUID WHERE r.ob_uuid IN ( "); //$NON-NLS-1$
-		boolean hasObservations = false;
+	private void attachEntityAttributes(List<EntityObservationResultItem> result, Connection c, Session session) throws SQLException {
+		if (((PsqlEntityObservationEngine)engine).getEntityTypes().isEmpty()) return;
+		
+		// attach entities
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT r.ob_uuid, a.keyid as entitykey, ea.keyid as entityattributekey, "); //$NON-NLS-1$
+		sql.append("eav.number_value, eav.string_value, rl.value as list_value, rt.value as tree_value "); //$NON-NLS-1$
+		sql.append(" FROM "); //$NON-NLS-1$
+		sql.append(engine.getQueryDataTable());
+		sql.append(" r join smart.wp_observation_attributes wpoa on r.ob_uuid = wpoa.observation_uuid "); //$NON-NLS-1$
+		sql.append(" join smart.entity_type a on a.dm_attribute_uuid = wpoa.attribute_uuid "); //$NON-NLS-1$
+		sql.append(" join smart.entity e on e.attribute_list_item_uuid = wpoa.list_element_uuid "); //$NON-NLS-1$
+		sql.append(" join smart.entity_attribute_value eav on eav.entity_uuid = e.uuid "); //$NON-NLS-1$
+		sql.append(" join smart.entity_attribute ea on ea.uuid = eav.entity_attribute_uuid left join "); //$NON-NLS-1$
+		sql.append(engine.getObservationLabelTable());
+		sql.append(" rl on eav.list_element_uuid = rl.uuid left join "); //$NON-NLS-1$
+		sql.append(engine.getObservationLabelTable());
+		sql.append(" rt on eav.tree_node_uuid = rt.UUID "); //$NON-NLS-1$
+		sql.append("WHERE r.ob_uuid IN (  "); //$NON-NLS-1$
+
 		List<UUID> uuids = new ArrayList<UUID>();
-		for (IResultItem iri : result){
-			EntityQueryResultItem it  = (EntityQueryResultItem) iri;
+		for (EntityObservationResultItem it : result) {
 			if (it.getObservationUuid() != null) {
-				if (hasObservations) {
-					attrSql.append(',');
-				}
-				hasObservations = true;
 				uuids.add(it.getObservationUuid());
-				attrSql.append("?"); //$NON-NLS-1$
+				sql.append("?,"); //$NON-NLS-1$
 			}
 		}
-		if (!hasObservations) return;
-		attrSql.append(')');
-		
-		PreparedStatement ps = c.prepareStatement(attrSql.toString());
-		for (int i = 0; i < uuids.size(); i ++){
-			ps.setObject(i+1, uuids.get(i));
+		sql.deleteCharAt(sql.length() - 1);
+
+		sql.append(") AND "); //$NON-NLS-1$
+		sql.append("a.keyid in ("); //$NON-NLS-1$
+		for (String et : ((PsqlEntityObservationEngine)engine).getEntityTypes()) {
+			sql.append("'" + et + "',"); //$NON-NLS-1$//$NON-NLS-2$
 		}
-		try(ResultSet rs = ps.executeQuery()) {
-			HashMap<UUID, HashMap<String, Object>> attrMap = getResultsAttributes(rs, session);
-			for (IResultItem iri : result){
-				EntityQueryResultItem it  = (EntityQueryResultItem) iri;
-				if (it.getObservationUuid() != null) {
-					HashMap<String, Object> attributes = attrMap.get(it.getObservationUuid());
-					if (attributes != null) {
-						it.setAttributes(attributes);
+		sql.deleteCharAt(sql.length() - 1);
+		sql.append(")"); //$NON-NLS-1$
+
+		PreparedStatement ps = c.prepareStatement(sql.toString());
+		for (int i = 0; i < uuids.size(); i++) {
+			ps.setObject(i + 1, uuids.get(i));
+		}
+
+		try (ResultSet rs = ps.executeQuery()) {
+			while (rs.next()) {
+				UUID obuuid = (UUID) rs.getObject(1);
+				String entityKey = rs.getString(2);
+				String entityAttributeKey = rs.getString(3);
+				Object value = null;
+				if (rs.getObject(4) != null) {
+					// number value
+					value = rs.getDouble(4);
+				} else if (rs.getObject(5) != null) {
+					// string
+					value = rs.getString(5);
+				} else if (rs.getObject(6) != null) {
+					// list string
+					value = rs.getString(6);
+				} else if (rs.getObject(7) != null) {
+					// tree string
+					value = rs.getString(7);
+				}
+
+				for (IResultItem rii : result) {
+					EntityObservationResultItem it = (EntityObservationResultItem) rii;
+					if (it.getObservationUuid() != null && it.getObservationUuid().equals(obuuid)) {
+						it.addEntityAttribute(entityKey, entityAttributeKey, value);
 					}
 				}
 			}
 		}
+
 	}
 	
-	protected HashMap<UUID, HashMap<String, Object>> getResultsAttributes(ResultSet rs, Session s) throws SQLException {
-		HashMap<UUID, HashMap<String, Object>> attrMap = new HashMap<UUID, HashMap<String, Object>>();
-		/*
-		1	OB_UUID
-		2	KEYID
-		3	NUMBER_VALUE
-		4	STRING_VALUE
-		5	LIST_VALUE
-		6	TREE_VALUE
-		7	P_CA_UUID
-		*/
-		while (rs.next()) {
-			UUID obUuid = (UUID)rs.getObject(1);
-			
-			if (obUuid == null)
-				continue;
-			HashMap<String, Object> attributes = attrMap.get(obUuid);
-			if (attributes == null) {
-				attributes = new HashMap<String, Object>();
-				attrMap.put(obUuid, attributes);
-			}
-			String key = rs.getString(2);
-			if (key != null) {
-				Object value = getAttributeValue(rs, s);
-				attributes.put(key, value);
-			}
-		}
-		return attrMap;
-	}
-	protected Object getAttributeValue(ResultSet rs, Session session) throws SQLException {
-		/*
-		1	OB_UUID
-		2	KEYID
-		3	NUMBER_VALUE
-		4	STRING_VALUE
-		5	LIST_VALUE
-		6	TREE_VALUE
-		7	P_CA_UUID
-		*/
-		if (rs.getObject(3) != null) {
-			return rs.getDouble(3);
-		}
-		String result = rs.getString(4); //string
-		if (result != null) {
-			return result;
-		}
-		result = rs.getString(5); //list
-		if (result != null) {
-			return result;
-		}
-		result = rs.getString(6); //tree
-		if (result != null) {
-			return result;
-		}
-		return null;
-	}
-
 	@Override
-	public String getGeometryType() {
-		return POINT_GEOM_TYPE;
-	}
-
-	@Override
-	public Geometry createGeometry(IResultItem rs) throws Exception {
-		EntityQueryResultItem i = ((EntityQueryResultItem)rs);
-		return gf.createPoint(new Coordinate(i.getWaypointX(null), i.getWaypointY(null))); 
-	}
-
-	@Override
-	public String createId(IResultItem rs) throws Exception {
-		return ((EntityQueryResultItem)rs).getWaypointId() + "." + System.nanoTime(); //$NON-NLS-1$
-	}
-
-
-	@Override
-	public ResultSet getResultSet(final Session session) {
-		return session.doReturningWork(new ReturningWork<ResultSet>() {
-			@Override
-			public ResultSet execute(Connection c) throws SQLException {
-				if(sortColumn != null){
-					return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
-							ResultSet.CONCUR_READ_ONLY).executeQuery("SELECT * FROM " + engine.getQueryDataTable() + " ORDER BY sortkeydbl " +direction.sql+ ", sortkeytxt " + direction.sql);//$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				StringBuilder sb = new StringBuilder();
-				sb.append("SELECT * FROM "); //$NON-NLS-1$
-				sb.append(engine.getQueryDataTable());
-				sb.append(" ORDER BY "); //$NON-NLS-1$
-				sb.append(FixedQueryColumn.getDbColumnName(FixedQueryColumn.FixedColumns.WAYPOINT_DATE.getKey()));
-				sb.append(" DESC "); //$NON-NLS-1$
-								
-				return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
-						ResultSet.CONCUR_READ_ONLY).executeQuery(sb.toString());
-			}
-		});
-	}
-	
-	protected EntityQueryResultItem asQueryResultItem(ResultSet rs) throws SQLException{
-		EntityQueryResultItem it = new EntityQueryResultItem();
-		it.setConservationAreaUuid((UUID)rs.getObject("p_ca_uuid")); //$NON-NLS-1$
-		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
-		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
+	protected EntityObservationResultItem asQueryResultItem(ResultSet rs) throws SQLException{
+		EntityObservationResultItem it = new EntityObservationResultItem();
+		super.setFields(it, rs);
 		it.setSourceId(rs.getString("wp_source")); //$NON-NLS-1$
-		it.setWaypointUuid((UUID)rs.getObject("wp_uuid")); //$NON-NLS-1$
-		it.setWaypointId(rs.getString("wp_id")); //$NON-NLS-1$
-		it.setWaypointX(rs.getDouble("wp_x")); //$NON-NLS-1$
-		it.setWaypointY(rs.getDouble("wp_y")); //$NON-NLS-1$
-		it.setWpDateTime(rs.getTimestamp("wp_time").toLocalDateTime()); //$NON-NLS-1$
-		it.setWaypointDirection(rs.getObject("wp_direction") == null ? null : rs.getFloat("wp_direction")); //$NON-NLS-1$ //$NON-NLS-2$
-		it.setWaypointDistance(rs.getObject("wp_distance") == null ? null : rs.getFloat("wp_distance")); //$NON-NLS-1$ //$NON-NLS-2$
-		it.setWaypointComment(rs.getString("wp_comment")); //$NON-NLS-1$
-		it.setWaypointObserver(rs.getString("ob_observer")); //$NON-NLS-1$
-		it.setObservationUuid((UUID)rs.getObject("ob_uuid")); //$NON-NLS-1$
-		it.setLastModifiedDate(rs.getTimestamp("wp_lastmodified").toLocalDateTime()); //$NON-NLS-1$
-		it.setLastModifiedBy(rs.getString("wp_lastmodifiedbyname")); //$NON-NLS-1$
-		
-		//build categories
-		List<String> categories = new ArrayList<String>();
-		for (int i = 0; i < engine.getCategoryCnt(); i ++){
-			String category = rs.getString("category_"+i); //$NON-NLS-1$
-			if (category == null){
-				break;
-			}
-			categories.add(category);
-		}
-		
-		it.setCategory(categories.toArray(new String[categories.size()]));
 		return it;
 	}
 
-	@Override
-	public void dispose(Session session) throws SQLException{
-		super.dispose(session);
-		engine.cleanUp(session);		
-	}
+
 
 	@Override
-	public void updateSortColumn(Session session) throws SQLException {
-		updateSortColumnGeneral(session, engine.getQueryDataTable(), engine.getCaFilter(), "value", ".ob_", "_LIST", "_TREE", "uuid");		 //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+	protected String getDistinctWaypointQuery(String prefix, boolean includeObservation) {
+		throw new UnsupportedOperationException("Attachment queries not supported for entity query types."); //$NON-NLS-1$
+	}
+
+
+
+	@Override
+	protected IAttachmentResultItem asAttachmentQueryResultItem(ResultSet rs, Session session) throws SQLException {
+		throw new UnsupportedOperationException("Attachment queries not supported for entity query types."); //$NON-NLS-1$
 	}
 
 }

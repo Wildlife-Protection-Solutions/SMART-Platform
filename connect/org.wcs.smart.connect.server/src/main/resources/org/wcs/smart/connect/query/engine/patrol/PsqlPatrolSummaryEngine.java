@@ -1793,7 +1793,7 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 		case EMPLOYEE:
 			return "employee_uuid"; //$NON-NLS-1$
 		case CONSERVATION_AREA:
-			return "p_ca_uuid"; //$NON-NLS-1$
+			return "ca_uuid"; //$NON-NLS-1$
 		case TEAM_KEY:
 			return tablePrefix.get(Team.class) + ".keyid"; //$NON-NLS-1$
 		case MANDATE_KEY:
@@ -1932,7 +1932,7 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 	public String getTemporaryTableCreateClause(String tableName) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
-		sql.append("p_ca_uuid UUID,"); //$NON-NLS-1$
+		sql.append("ca_uuid UUID,"); //$NON-NLS-1$
 		sql.append("p_uuid UUID,"); //$NON-NLS-1$
 		sql.append("p_id varchar(32),"); //$NON-NLS-1$
 		sql.append("p_station_uuid UUID,"); //$NON-NLS-1$

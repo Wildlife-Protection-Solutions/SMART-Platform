@@ -171,7 +171,7 @@ public class WaypointGroupFilterProcessor extends org.wcs.smart.observation.quer
 			}
 		}
 		if (caFilter != null) {
-			String filter = getSqlGenerator().toSql(caFilter, engine);
+			String filter = getSqlGenerator().asSql(caFilter, prefix(SurveyDesign.class), engine);
 			if (filter.length() > 0) {
 				sql.append(" AND "); //$NON-NLS-1$
 				sql.append("(" + filter + ")"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -331,7 +331,7 @@ public class WaypointGroupFilterProcessor extends org.wcs.smart.observation.quer
 		sql.append( prefix(Survey.class)); 
 		sql.append(" ON " + prefix(SurveyDesign.class) + ".uuid = " + prefix(Survey.class) + ".survey_design_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		if (caFilter != null) {
-			String cfilter = getSqlGenerator().toSql(caFilter, engine);
+			String cfilter = getSqlGenerator().asSql(caFilter, prefix(SurveyDesign.class), engine);
 			if (cfilter.length() > 0) {
 				sql.append(" and "); //$NON-NLS-1$
 				sql.append(cfilter);

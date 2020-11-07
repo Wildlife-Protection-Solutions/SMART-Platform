@@ -33,18 +33,14 @@ import java.util.List;
 import java.util.Locale;
 
 import org.hibernate.Session;
-import org.wcs.smart.asset.query.model.AssetQueryResultItem;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.QueryManager;
-import org.wcs.smart.entity.query.model.EntityQueryResultItem;
-import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.i2.query.IQueryColumn;
 import org.wcs.smart.observation.model.ObservationOptions;
-import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
-import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.engine.ObservationQueryResultItem;
 import org.wcs.smart.query.common.model.IColumnAutoConfigQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.AttributeQueryColumn;
@@ -148,22 +144,6 @@ public class QueryColumnUtils {
 						if (((ObservationQueryResultItem) item).getCategories().length > level){
 							return ((ObservationQueryResultItem) item).getCategories()[level];
 						}
-					}else if (item instanceof EntityQueryResultItem ){
-						if (((EntityQueryResultItem) item).getCategories().length > level){
-							return ((EntityQueryResultItem) item).getCategories()[level];
-						}
-					}else if (item instanceof PatrolQueryResultItem ){
-						if (((PatrolQueryResultItem) item).getCategories().length > level){
-							return ((PatrolQueryResultItem) item).getCategories()[level];
-						}
-					}else if (item instanceof SurveyQueryResultItem ){
-						if (((SurveyQueryResultItem) item).getCategories().length > level){
-							return ((SurveyQueryResultItem) item).getCategories()[level];
-						}
-					}else if (item instanceof AssetQueryResultItem) {
-						if (((AssetQueryResultItem) item).getCategories().length > level){
-							return ((AssetQueryResultItem) item).getCategories()[level];
-						}
 					}
 					return null;
 				}
@@ -206,14 +186,6 @@ public class QueryColumnUtils {
 				public Object getValue(IResultItem item) {
 					if (item instanceof ObservationQueryResultItem){
 						return ((ObservationQueryResultItem) item).getAttributeValue(keyid);
-					}else if (item instanceof EntityQueryResultItem ){
-						return ((EntityQueryResultItem) item).getAttributeValue(keyid);
-					}else if (item instanceof PatrolQueryResultItem ){
-						return ((PatrolQueryResultItem) item).getAttributeValue(keyid);
-					}else if (item instanceof SurveyQueryResultItem ){
-						return ((SurveyQueryResultItem) item).getAttributeValue(keyid);
-					}else if (item instanceof AssetQueryResultItem ){
-						return ((AssetQueryResultItem) item).getAttributeValue(keyid);
 					}
 					return null;
 				}

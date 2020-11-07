@@ -73,6 +73,10 @@ public class PsqlErMissionTrackEngine extends PsqlErEngine {
 		return this.queryDataTable;
 	}
 	
+	public String getLabelTable() {
+		return getQueryDataTable() + "_labels"; //$NON-NLS-1$
+	}
+	
 	/**
 	 * Runs the given patrol query and retrieves the results from the database.
 	 * 
@@ -161,10 +165,11 @@ public class PsqlErMissionTrackEngine extends PsqlErEngine {
 		populateCaDetails(c, queryDataTable, "ca_uuid", query); //$NON-NLS-1$
 		
 		//mission attributes
-		populateAdditionalMissionTable(c,session, sdFilter, caFilter, queryDataTable, queryDataTable +"_mlist", "list_element_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+		createLabelTable(session, getLabelTable());
+		populateAdditionalMissionTable(c,session, sdFilter, caFilter, queryDataTable, getLabelTable());
 		
 		//sampling unit attributes
-		populateAdditionalSuTable(c, session, sdFilter, caFilter, queryDataTable, queryDataTable + "_sulist", "list_element_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+		populateAdditionalSuTable(c, session, sdFilter, caFilter, queryDataTable, getLabelTable());
 	}
 
 	@Override
@@ -235,8 +240,7 @@ public class PsqlErMissionTrackEngine extends PsqlErEngine {
 	@Override
 	public void cleanUp(Session session) throws SQLException{
 		dropTable(session, queryDataTable);
-		dropTable(session, queryDataTable + "_mlist"); //$NON-NLS-1$
-		dropTable(session, queryDataTable + "_sulist"); //$NON-NLS-1$
+		dropTable(session, getLabelTable());
 	}
 
 	@Override

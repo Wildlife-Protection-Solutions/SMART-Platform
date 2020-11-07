@@ -141,7 +141,7 @@ public class PatrolQueryResult extends AbstractDbFeatureResultSet {
 	protected PatrolQueryResultItem asQueryResultItem(ResultSet rs, Session session)
 			throws SQLException {
 		PatrolQueryResultItem it = new PatrolQueryResultItem();
-		UUID cauuid = (UUID)rs.getObject("r_p_ca_uuid"); //$NON-NLS-1$
+		UUID cauuid = (UUID)rs.getObject("ca_uuid"); //$NON-NLS-1$
 		it.setConservationAreaUuid(cauuid); 
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$

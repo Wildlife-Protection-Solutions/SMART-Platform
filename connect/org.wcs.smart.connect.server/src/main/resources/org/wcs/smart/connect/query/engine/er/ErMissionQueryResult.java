@@ -37,6 +37,7 @@ import org.locationtech.jts.geom.GeometryCollection;
 import org.locationtech.jts.io.WKBReader;
 import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.connect.i18n.Messages;
+import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
 import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.query.model.SurveyQueryColumn;
@@ -51,18 +52,19 @@ import org.wcs.smart.util.UuidUtils;
  * @author Emily
  *
  */
-public class ErMissionQueryResult extends ErSurveyQueryResultSet {
+public class ErMissionQueryResult extends AbstractDbFeatureResultSet<SurveyQueryResultItem>{
 
 	private WKBReader reader = new WKBReader();
 	private boolean includeUuids = false;
 	
+	private PsqlErMissionEngine engine;
+	
 	public ErMissionQueryResult(PsqlErMissionEngine engine, int itemcnt, boolean includeUuids){
-		super(engine);
+		this.engine = engine;
 		setItemCount(itemcnt);
 		this.includeUuids = includeUuids;
 	}
 	
-
 	@Override
 	public List<QueryColumn> getQueryColumns(SimpleQuery query, Locale l, Session session, IProjectionProvider prj){
 		List<QueryColumn> cols = super.getQueryColumns(query, l, session, prj);
@@ -103,8 +105,8 @@ public class ErMissionQueryResult extends ErSurveyQueryResultSet {
 	 * @throws SQLException
 	 */
 	@Override
-	public List<IResultItem> getResults(Session session, ResultSet rs, int from, int pageSize) throws SQLException {
-		List<IResultItem> items = new ArrayList<IResultItem>();
+	public List<SurveyQueryResultItem> getResults(Session session, ResultSet rs, int from, int pageSize) throws SQLException {
+		List<SurveyQueryResultItem> items = new ArrayList<>();
 		rs.absolute(from);
 		int to = from + pageSize;
 		if (to >= itemCount) {
@@ -118,7 +120,7 @@ public class ErMissionQueryResult extends ErSurveyQueryResultSet {
 		session.doWork(new Work(){
 			@Override
 			public void execute(Connection c) throws SQLException {
-				attachMissionProperties(items, c, session);
+				ErSurveyQueryResultSet.attachMissionProperties(items, c, session);
 			}
 			
 		});
@@ -132,7 +134,7 @@ public class ErMissionQueryResult extends ErSurveyQueryResultSet {
 	}
 
 	@Override
-	public Geometry createGeometry(IResultItem item) throws Exception {
+	public Geometry createGeometry(SurveyQueryResultItem item) throws Exception {
 		byte[] b = ((GeomSurveyQueryResultItem)item).getGeometry();
 		if (b == null){
 			return new GeometryCollection(new Geometry[]{}, gf);	
@@ -141,7 +143,7 @@ public class ErMissionQueryResult extends ErSurveyQueryResultSet {
 	}
 
 	@Override
-	public String createId(IResultItem rs) throws Exception {
+	public String createId(SurveyQueryResultItem rs) throws Exception {
 		return ((SurveyQueryResultItem)rs).getMissionId() + "." + System.nanoTime(); //$NON-NLS-1$
 	}
 
@@ -207,9 +209,9 @@ public class ErMissionQueryResult extends ErSurveyQueryResultSet {
 		it.setConservationAreaUuid((UUID)rs.getObject("ca_uuid")); //$NON-NLS-1$
 		
 		it.setMissionUuid((UUID)rs.getObject("mission_uuid")); //$NON-NLS-1$
-		it.setMissionEnd(rs.getTimestamp("mission_enddate").toLocalDateTime()); //$NON-NLS-1$
+		it.setMissionEnd(rs.getDate("mission_enddate").toLocalDate()); //$NON-NLS-1$
 		it.setMissionId(rs.getString("mission_id")); //$NON-NLS-1$
-		it.setMissionStart(rs.getTimestamp("mission_startdate").toLocalDateTime()); //$NON-NLS-1$
+		it.setMissionStart(rs.getDate("mission_startdate").toLocalDate()); //$NON-NLS-1$
 		
 		it.setSurveyDesign(rs.getString("surveydesign_name")); //$NON-NLS-1$
 		it.setSurveyId(rs.getString("survey_id")); //$NON-NLS-1$

@@ -33,6 +33,7 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
+import org.wcs.smart.connect.query.engine.IWOEngine;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.SamplingUnit;
@@ -40,7 +41,9 @@ import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.model.SurveyWaypointQuery;
+import org.wcs.smart.er.query.model.SurveyWaypointResultItem;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.patrol.query.model.PatrolWaypointResultItem;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
@@ -58,7 +61,7 @@ import org.wcs.smart.query.model.filter.date.CachingDateFilter;
  * @author elitvin
  * @since 1.0.0
  */
-public class PsqlErWaypointEngine extends PsqlErEngine {
+public class PsqlErWaypointEngine extends PsqlErEngine implements IWOEngine<SurveyWaypointResultItem>{
 
 	private String queryDataTable;
 	private SurveyWaypointQuery query;
@@ -71,6 +74,11 @@ public class PsqlErWaypointEngine extends PsqlErEngine {
 	@Override
 	public String getQueryDataTable(){
 		return this.queryDataTable;
+	}
+	
+	@Override
+	public String getObservationLabelTable() {
+		return getQueryDataTable() + "_labels"; //$NON-NLS-1$
 	}
 
 	/**
@@ -177,11 +185,12 @@ public class PsqlErWaypointEngine extends PsqlErEngine {
 		populateMissionLeader(c, session, queryDataTable);
 
 		//mission attributes
-		populateAdditionalMissionTable(c, session, sdFilter, caFilter, queryDataTable, queryDataTable + "_mlist", "list_element_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+		createLabelTable(session, getObservationLabelTable());
+		populateAdditionalMissionTable(c, session, sdFilter, caFilter, getQueryDataTable(), getObservationLabelTable());
 		
 		//sampling unit attributes
-		populateAdditionalSuTable(c, session, sdFilter, caFilter, queryDataTable, queryDataTable + "_sulist", "list_element_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
-
+		populateAdditionalSuTable(c, session, sdFilter, caFilter, getQueryDataTable(), getObservationLabelTable());
+		updateLabel(c, getObservationLabelTable(), "uuid", "value"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	@Override
@@ -242,7 +251,7 @@ public class PsqlErWaypointEngine extends PsqlErEngine {
 		sql.append("wp_y double precision,"); //$NON-NLS-1$
 		sql.append("wp_direction real,"); //$NON-NLS-1$
 		sql.append("wp_distance real,"); //$NON-NLS-1$
-		sql.append("wp_date timestamp,"); //$NON-NLS-1$ 
+		sql.append("wp_time timestamp,"); //$NON-NLS-1$ 
 		sql.append("wp_comment varchar(4096),"); //$NON-NLS-1$
 		sql.append("wp_lastmodified timestamp,"); //$NON-NLS-1$
 		sql.append("wp_lastmodifiedby uuid"); //$NON-NLS-1$
@@ -256,9 +265,8 @@ public class PsqlErWaypointEngine extends PsqlErEngine {
 	
 	@Override
 	public void cleanUp(Session session) throws SQLException{
-		dropTable(session, queryDataTable);
-		dropTable(session, queryDataTable + "_mlist"); //$NON-NLS-1$
-		dropTable(session, queryDataTable + "_sulist"); //$NON-NLS-1$
+		dropTable(session, getQueryDataTable());
+		dropTable(session, getObservationLabelTable());
 	}
 
 	@Override

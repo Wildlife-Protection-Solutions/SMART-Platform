@@ -1064,7 +1064,7 @@ public class PsqlObsSummaryEngine extends AbstractQueryEngine implements ISummar
 	public String getTemporaryTableCreateClause(String tableName) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
-		sql.append("p_ca_uuid uuid,"); //$NON-NLS-1$
+		sql.append("ca_uuid uuid,"); //$NON-NLS-1$
 		sql.append("wp_uuid uuid,"); //$NON-NLS-1$
 		sql.append("ob_uuid uuid"); //$NON-NLS-1$
 		sql.append(")"); //$NON-NLS-1$

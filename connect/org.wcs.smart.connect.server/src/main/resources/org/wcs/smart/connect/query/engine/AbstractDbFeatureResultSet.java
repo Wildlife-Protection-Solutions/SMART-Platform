@@ -64,7 +64,7 @@ import org.wcs.smart.query.model.filter.ConservationAreaFilter;
  * @author Emily
  *
  */
-public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResultSet {
+public abstract class AbstractDbFeatureResultSet<T extends IResultItem> implements ITablePagedQueryResultSet<T> {
 	
 	public static final String POINT_GEOM_TYPE = "Point"; //$NON-NLS-1$
 	
@@ -95,7 +95,7 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 	 * @return
 	 * @throws Exception
 	 */
-	public abstract Geometry createGeometry(IResultItem item) throws Exception;
+	public abstract Geometry createGeometry(T item) throws Exception;
 	
 	/**
 	 * Waypoint UUID  column name
@@ -147,7 +147,7 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 	 * @return
 	 * @throws Exception
 	 */
-	public abstract String createId(IResultItem item) throws Exception; 
+	public abstract String createId(T item) throws Exception; 
 	
 	/**
 	 * 
@@ -155,11 +155,11 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 	 */
 	public abstract String getGeometryType();
 
-	public String getValueAsString(IResultItem item, QueryColumn qc, Session session){
+	public String getValueAsString(T item, QueryColumn qc, Session session){
 		return qc.getValueAsString(getValue(item, qc, session));
 	}
 	
-	public Object getValue(IResultItem item, QueryColumn column, Session session){
+	public Object getValue(T item, QueryColumn column, Session session){
 		return column.getValue(item);
 	}
 	
@@ -172,7 +172,7 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 	 * @return
 	 * @throws Exception
 	 */
-	public SimpleFeature toFeature(IResultItem item, List<QueryColumn> columns, Session session, SimpleFeatureType ftype)  throws Exception {
+	public SimpleFeature toFeature(T item, List<QueryColumn> columns, Session session, SimpleFeatureType ftype)  throws Exception {
 		List<Object> data = new ArrayList<Object>();
 		data.add(createGeometry(item));
 		data.add(createId(item));  
@@ -223,14 +223,14 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 	}
 
 	@Override
-	public List<? extends IResultItem> getData(int offset, int pagesize) {
+	public List<T> getData(int offset, int pagesize) {
 		throw new UnsupportedOperationException("Can not load all results into memory in this environment"); //$NON-NLS-1$
 	}
 	
 
 	public abstract void updateSortColumn(Session session) throws SQLException;
 	
-	public abstract List<IResultItem> getResults(Session session, ResultSet rs, int from, int pageSize) throws SQLException;
+	public abstract List<T> getResults(Session session, ResultSet rs, int from, int pageSize) throws SQLException;
 	
 
 	public int getItemCount() {
@@ -242,14 +242,14 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 	}
 
 	@Override
-	public IQueryResultSetIterator<? extends IResultItem> iterator(int pagesize) {
+	public IQueryResultSetIterator<T> iterator(int pagesize) {
 		throw new UnsupportedOperationException("Can not create a result set without a session in this environment"); //$NON-NLS-1$
 	}
 
 	@Override
-	public IQueryResultSetIterator<? extends IResultItem> iterator(int pagesize,
+	public IQueryResultSetIterator<T> iterator(int pagesize,
 			Session session) {
-		return new QueryResultSetIterator<IResultItem>(this, pagesize, session);
+		return new QueryResultSetIterator<T>(this, pagesize, session);
 	}
 
 	public void setSorting(final String sortColumn, QueryApi.Direction direction) {

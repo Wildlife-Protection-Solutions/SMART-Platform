@@ -37,6 +37,7 @@ import org.locationtech.jts.geom.GeometryCollection;
 import org.locationtech.jts.io.WKBReader;
 import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.connect.i18n.Messages;
+import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.MissionTrack.TrackType;
 import org.wcs.smart.er.query.model.MissionTrackResultItem;
@@ -52,15 +53,17 @@ import org.wcs.smart.util.UuidUtils;
  * @author Emily
  *
  */
-public class ErMissionTrackQueryResult extends ErSurveyQueryResultSet {
+public class ErMissionTrackQueryResult extends AbstractDbFeatureResultSet<MissionTrackResultItem>{
 
 	private static final String TRACK_PROP_KEY = "org.wcs.smart.track"; //$NON-NLS-1$
 	
 	private WKBReader reader = new WKBReader();
 	private boolean includeUuids = false;
 	
+	private PsqlErMissionTrackEngine engine;
+
 	public ErMissionTrackQueryResult(PsqlErMissionTrackEngine engine, int itemcnt, boolean includeUuids){
-		super(engine);
+		this.engine = engine;
 		setItemCount(itemcnt);
 		this.includeUuids = includeUuids;
 	}
@@ -115,8 +118,8 @@ public class ErMissionTrackQueryResult extends ErSurveyQueryResultSet {
 	 * @throws SQLException
 	 */
 	@Override
-	public List<IResultItem> getResults(Session session, ResultSet rs, int from, int pageSize) throws SQLException {
-		List<IResultItem> items = new ArrayList<IResultItem>();
+	public List<MissionTrackResultItem> getResults(Session session, ResultSet rs, int from, int pageSize) throws SQLException {
+		List<MissionTrackResultItem> items = new ArrayList<>();
 		rs.absolute(from);
 		int to = from + pageSize;
 		if (to >= itemCount) {
@@ -130,8 +133,8 @@ public class ErMissionTrackQueryResult extends ErSurveyQueryResultSet {
 		session.doWork(new Work(){
 			@Override
 			public void execute(Connection c) throws SQLException {
-				attachMissionProperties(items, c, session);
-				attachSamplingUnitAttributes(items, c, session);
+				ErSurveyQueryResultSet.attachMissionProperties(items, c, session);
+				ErSurveyQueryResultSet.attachSamplingUnitAttributes(items, c, session);
 			}
 			
 		});
@@ -145,8 +148,8 @@ public class ErMissionTrackQueryResult extends ErSurveyQueryResultSet {
 	}
 
 	@Override
-	public Geometry createGeometry(IResultItem item) throws Exception {
-		byte[] b = (byte[]) ((MissionTrackResultItem)item).getMissionPropertyValue(TRACK_PROP_KEY);
+	public Geometry createGeometry(MissionTrackResultItem item) throws Exception {
+		byte[] b = (byte[]) item.getMissionPropertyValue(TRACK_PROP_KEY);
 		if (b == null){
 			return new GeometryCollection(new Geometry[]{}, gf);	
 		}
@@ -154,8 +157,8 @@ public class ErMissionTrackQueryResult extends ErSurveyQueryResultSet {
 	}
 
 	@Override
-	public String createId(IResultItem rs) throws Exception {
-		return ((MissionTrackResultItem)rs).getTrackId() + "." + System.nanoTime(); //$NON-NLS-1$
+	public String createId(MissionTrackResultItem rs) throws Exception {
+		return rs.getTrackId() + "." + System.nanoTime(); //$NON-NLS-1$
 	}
 
 
@@ -219,9 +222,9 @@ public class ErMissionTrackQueryResult extends ErSurveyQueryResultSet {
 		it.setConservationAreaUuid((UUID)rs.getObject("ca_uuid")); //$NON-NLS-1$
 		
 		it.setMissionUuid((UUID)rs.getObject("mission_uuid")); //$NON-NLS-1$
-		it.setMissionEnd(rs.getTimestamp("mission_enddate").toLocalDateTime()); //$NON-NLS-1$
+		it.setMissionEnd(rs.getDate("mission_enddate").toLocalDate()); //$NON-NLS-1$
 		it.setMissionId(rs.getString("mission_id")); //$NON-NLS-1$
-		it.setMissionStart(rs.getTimestamp("mission_startdate").toLocalDateTime()); //$NON-NLS-1$
+		it.setMissionStart(rs.getDate("mission_startdate").toLocalDate()); //$NON-NLS-1$
 		
 		it.setSurveyDesign(rs.getString("surveydesign_name")); //$NON-NLS-1$
 		it.setSurveyId(rs.getString("survey_id")); //$NON-NLS-1$

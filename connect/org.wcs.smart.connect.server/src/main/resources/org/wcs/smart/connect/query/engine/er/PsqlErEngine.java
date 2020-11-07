@@ -137,21 +137,14 @@ public abstract class PsqlErEngine extends AbstractQueryEngine{
 			SurveyDesignFilter sdFilter,
 			ConservationAreaFilter caFilter,
 			String queryDataTable,
-			String tableName, String obsAttUuidColumn) throws SQLException {
+			String labelTable) throws SQLException {
 		missionColumnMap = new HashMap<String, String>();
 		
 		StringBuilder sql = new StringBuilder();
-		sql.append("CREATE TABLE "); //$NON-NLS-1$
-		sql.append(tableName);
-		sql.append(" (uuid UUID, value varchar(1024))"); //$NON-NLS-1$ 
-		logger.finest(sql.toString());
-		c.createStatement().execute(sql.toString());
-
-		sql = new StringBuilder();
-		sql.append("INSERT INTO " + tableName + " SELECT DISTINCT "); //$NON-NLS-1$ //$NON-NLS-2$
+		sql.append("INSERT INTO " + labelTable + " SELECT DISTINCT "); //$NON-NLS-1$ //$NON-NLS-2$
 		sql.append(tablePrefix(MissionPropertyValue.class));
-		sql.append("." + obsAttUuidColumn); //$NON-NLS-1$
-		sql.append(", r.ca_uuid FROM "); //$NON-NLS-1$
+		sql.append(".list_element_uuid FROM "); //$NON-NLS-1$
+		
 		sql.append(tableNamePrefix(MissionPropertyValue.class));
 		sql.append(" inner join "); //$NON-NLS-1$
 		sql.append(queryDataTable);
@@ -159,220 +152,197 @@ public abstract class PsqlErEngine extends AbstractQueryEngine{
 		sql.append(tablePrefix(MissionPropertyValue.class));
 		sql.append(".mission_uuid WHERE "); //$NON-NLS-1$
 		sql.append(tablePrefix(MissionPropertyValue.class));
-		sql.append("." + obsAttUuidColumn); //$NON-NLS-1$
-		sql.append(" is not null "); //$NON-NLS-1$
-
+		sql.append(".list_element_uuid is not null "); //$NON-NLS-1$
+		
 		logger.finest(sql.toString());
 		c.createStatement().execute(sql.toString());
-		updateLabel(c, tableName, "uuid", "value"); //$NON-NLS-1$ //$NON-NLS-2$
 		
-		//TODO: add support of CCAA queries
-		List<MissionAttribute> attributes = new ArrayList<MissionAttribute>();
-		if (sdFilter == null || sdFilter.getKey() == null){
-			//get all mission properties
-			CriteriaBuilder cb = session.getCriteriaBuilder();
-			CriteriaQuery<MissionAttribute> query = cb.createQuery(MissionAttribute.class);
-			Root<MissionAttribute> from = query.from(MissionAttribute.class);
-			query.where(from.get("conservationArea").get("uuid").in(caFilter.getConservationAreaFilterIds())); //$NON-NLS-1$ //$NON-NLS-2$
-			attributes = session.createQuery(query).list();
-			
-		}else{
-			//get mission properties for survey design only
-			SurveyDesign sd = SurveyQueryColumnProvider.getSurveyDesign(sdFilter.getKey(), session, caFilter);
-			if (sd == null) throw new SQLException(MessageFormat.format(Messages.getString("PsqlErEngine.SdNotFound", locale), sdFilter.getKey())); //$NON-NLS-1$
-			for (MissionProperty mp : sd.getMissionProperties()){
-				attributes.add(mp.getAttribute());
-			}
-		}
-
-		int cnt = 0;
-		for (MissionAttribute ma : attributes){
-			cnt++;
-			String columnName = "ma_" + cnt; //$NON-NLS-1$
-			missionColumnMap.put(ma.getKeyId(), columnName);
-			
-			sql = new StringBuilder();
-			sql.append("ALTER TABLE "); //$NON-NLS-1$
-			sql.append(queryDataTable);
-			sql.append(" ADD " + columnName); //$NON-NLS-1$
-			if (ma.getType() == AttributeType.NUMERIC){
-				sql.append(" double precision"); //$NON-NLS-1$
-			}else{
-				sql.append(" varchar "); //$NON-NLS-1$
-			}
-			logger.finest(sql.toString());
-			c.createStatement().execute(sql.toString());
-			
-			if (ma.getType() == AttributeType.TEXT ||
-					ma.getType() == AttributeType.NUMERIC){
-				StringBuilder attrSql = new StringBuilder();
-				attrSql.append("UPDATE "); //$NON-NLS-1$
-				attrSql.append(queryDataTable);
-				attrSql.append(" SET " + columnName ); //$NON-NLS-1$
-				attrSql.append(" = "); //$NON-NLS-1$
-				if (ma.getType() == AttributeType.TEXT){
-					attrSql.append(" mpv.string_value ");	 //$NON-NLS-1$
-				}else if (ma.getType() == AttributeType.NUMERIC){
-					attrSql.append(" mpv.number_value"); //$NON-NLS-1$
-				}
-				attrSql.append(" FROM " + tableNamePrefix(MissionPropertyValue.class)); //$NON-NLS-1$
-				attrSql.append(" WHERE "); //$NON-NLS-1$
-				attrSql.append(tablePrefix(MissionPropertyValue.class) + ".mission_attribute_uuid = '" + ma.getUuid().toString() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
-				attrSql.append(" AND "); //$NON-NLS-1$
-				attrSql.append(tablePrefix(MissionPropertyValue.class) + ".mission_uuid = "); //$NON-NLS-1$
-				attrSql.append(queryDataTable + ".mission_uuid"); //$NON-NLS-1$
-				logger.finest(attrSql.toString());
-				c.createStatement().execute(attrSql.toString());
-				
-			}else if (ma.getType() == AttributeType.LIST){
-				StringBuilder attrSql = new StringBuilder();
-				attrSql.append("UPDATE "); //$NON-NLS-1$
-				attrSql.append(queryDataTable);
-				attrSql.append(" SET  " + columnName ); //$NON-NLS-1$
-				attrSql.append(" = tmp.value"); //$NON-NLS-1$
-				attrSql.append(" FROM " + tableNamePrefix(MissionPropertyValue.class)); //$NON-NLS-1$
-				attrSql.append(", " + tableName + " tmp "); //$NON-NLS-1$ //$NON-NLS-2$
-				attrSql.append(" WHERE "); //$NON-NLS-1$
-				attrSql.append(tablePrefix(MissionPropertyValue.class) + ".mission_attribute_uuid = '" + ma.getUuid().toString() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
-				attrSql.append(" AND "); //$NON-NLS-1$
-				attrSql.append(tablePrefix(MissionPropertyValue.class) + ".mission_uuid = "); //$NON-NLS-1$
-				attrSql.append(queryDataTable + ".mission_uuid"); //$NON-NLS-1$
-				attrSql.append(" AND "); //$NON-NLS-1$
-				attrSql.append(tablePrefix(MissionPropertyValue.class) + "." + obsAttUuidColumn + " = "); //$NON-NLS-1$ //$NON-NLS-2$
-				attrSql.append(" tmp.uuid"); //$NON-NLS-1$
-				
-				logger.finest(attrSql.toString());
-				c.createStatement().execute(attrSql.toString());
-			}
-		}
+		
+//		//TODO: add support of CCAA queries
+//		List<MissionAttribute> attributes = new ArrayList<MissionAttribute>();
+//		if (sdFilter == null || sdFilter.getKey() == null){
+//			//get all mission properties
+//			CriteriaBuilder cb = session.getCriteriaBuilder();
+//			CriteriaQuery<MissionAttribute> query = cb.createQuery(MissionAttribute.class);
+//			Root<MissionAttribute> from = query.from(MissionAttribute.class);
+//			query.where(from.get("conservationArea").get("uuid").in(caFilter.getConservationAreaFilterIds())); //$NON-NLS-1$ //$NON-NLS-2$
+//			attributes = session.createQuery(query).list();
+//			
+//		}else{
+//			//get mission properties for survey design only
+//			SurveyDesign sd = SurveyQueryColumnProvider.getSurveyDesign(sdFilter.getKey(), session, caFilter);
+//			if (sd == null) throw new SQLException(MessageFormat.format(Messages.getString("PsqlErEngine.SdNotFound", locale), sdFilter.getKey())); //$NON-NLS-1$
+//			for (MissionProperty mp : sd.getMissionProperties()){
+//				attributes.add(mp.getAttribute());
+//			}
+//		}
+//
+//		int cnt = 0;
+//		for (MissionAttribute ma : attributes){
+//			cnt++;
+//			String columnName = "ma_" + cnt; //$NON-NLS-1$
+//			missionColumnMap.put(ma.getKeyId(), columnName);
+//			
+//			sql = new StringBuilder();
+//			sql.append("ALTER TABLE "); //$NON-NLS-1$
+//			sql.append(queryDataTable);
+//			sql.append(" ADD " + columnName); //$NON-NLS-1$
+//			if (ma.getType() == AttributeType.NUMERIC){
+//				sql.append(" double precision"); //$NON-NLS-1$
+//			}else{
+//				sql.append(" varchar "); //$NON-NLS-1$
+//			}
+//			logger.finest(sql.toString());
+//			c.createStatement().execute(sql.toString());
+//			
+//			if (ma.getType() == AttributeType.TEXT ||
+//					ma.getType() == AttributeType.NUMERIC){
+//				StringBuilder attrSql = new StringBuilder();
+//				attrSql.append("UPDATE "); //$NON-NLS-1$
+//				attrSql.append(queryDataTable);
+//				attrSql.append(" SET " + columnName ); //$NON-NLS-1$
+//				attrSql.append(" = "); //$NON-NLS-1$
+//				if (ma.getType() == AttributeType.TEXT){
+//					attrSql.append(" mpv.string_value ");	 //$NON-NLS-1$
+//				}else if (ma.getType() == AttributeType.NUMERIC){
+//					attrSql.append(" mpv.number_value"); //$NON-NLS-1$
+//				}
+//				attrSql.append(" FROM " + tableNamePrefix(MissionPropertyValue.class)); //$NON-NLS-1$
+//				attrSql.append(" WHERE "); //$NON-NLS-1$
+//				attrSql.append(tablePrefix(MissionPropertyValue.class) + ".mission_attribute_uuid = '" + ma.getUuid().toString() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+//				attrSql.append(" AND "); //$NON-NLS-1$
+//				attrSql.append(tablePrefix(MissionPropertyValue.class) + ".mission_uuid = "); //$NON-NLS-1$
+//				attrSql.append(queryDataTable + ".mission_uuid"); //$NON-NLS-1$
+//				logger.finest(attrSql.toString());
+//				c.createStatement().execute(attrSql.toString());
+//				
+//			}else if (ma.getType() == AttributeType.LIST){
+//				StringBuilder attrSql = new StringBuilder();
+//				attrSql.append("UPDATE "); //$NON-NLS-1$
+//				attrSql.append(queryDataTable);
+//				attrSql.append(" SET  " + columnName ); //$NON-NLS-1$
+//				attrSql.append(" = tmp.value"); //$NON-NLS-1$
+//				attrSql.append(" FROM " + tableNamePrefix(MissionPropertyValue.class)); //$NON-NLS-1$
+//				attrSql.append(", " + tableName + " tmp "); //$NON-NLS-1$ //$NON-NLS-2$
+//				attrSql.append(" WHERE "); //$NON-NLS-1$
+//				attrSql.append(tablePrefix(MissionPropertyValue.class) + ".mission_attribute_uuid = '" + ma.getUuid().toString() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+//				attrSql.append(" AND "); //$NON-NLS-1$
+//				attrSql.append(tablePrefix(MissionPropertyValue.class) + ".mission_uuid = "); //$NON-NLS-1$
+//				attrSql.append(queryDataTable + ".mission_uuid"); //$NON-NLS-1$
+//				attrSql.append(" AND "); //$NON-NLS-1$
+//				attrSql.append(tablePrefix(MissionPropertyValue.class) + "." + obsAttUuidColumn + " = "); //$NON-NLS-1$ //$NON-NLS-2$
+//				attrSql.append(" tmp.uuid"); //$NON-NLS-1$
+//				
+//				logger.finest(attrSql.toString());
+//				c.createStatement().execute(attrSql.toString());
+//			}
+//		}
+//		
+//		updateLabel(c, queryDataTable, "uuid", "value"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	protected void populateAdditionalSuTable(Connection c, Session session,
 			SurveyDesignFilter sdFilter,
 			ConservationAreaFilter caFilter,
-			String queryDataTable,
-			String tableName, String obsAttUuidColumn) throws SQLException {
+			String dataTable, String labelTable) throws SQLException {
 		suColumnMap = new HashMap<String, String>();
-		
-		StringBuilder sql = new StringBuilder();
-		sql.append("CREATE TABLE "); //$NON-NLS-1$
-		sql.append(tableName);
-		sql.append(" (uuid UUID, value varchar(1024))"); //$NON-NLS-1$ 
-		logger.finest(sql.toString());
-		c.createStatement().execute(sql.toString());
 
-		sql = new StringBuilder();
-		sql.append("INSERT INTO " + tableName + "(uuid) SELECT DISTINCT "); //$NON-NLS-1$ //$NON-NLS-2$
+		StringBuilder sql = new StringBuilder();
+		sql.append("INSERT INTO " + labelTable + "(uuid) SELECT DISTINCT "); //$NON-NLS-1$ //$NON-NLS-2$
 		sql.append(tablePrefix(SamplingUnitAttributeValue.class));
-		sql.append("." + obsAttUuidColumn); //$NON-NLS-1$
-		sql.append(" FROM "); //$NON-NLS-1$
+		sql.append(".list_element_uuid FROM ");
 		sql.append(tableNamePrefix(SamplingUnitAttributeValue.class));
 		sql.append(" inner join "); //$NON-NLS-1$
-		sql.append(queryDataTable);
+		sql.append(dataTable);
 		sql.append(" r on r.samplingunit_uuid = "); //$NON-NLS-1$
 		sql.append(tablePrefix(SamplingUnitAttributeValue.class));
 		sql.append(".su_uuid WHERE "); //$NON-NLS-1$
 		sql.append(tablePrefix(SamplingUnitAttributeValue.class));
-		sql.append("." + obsAttUuidColumn); //$NON-NLS-1$
-		sql.append(" is not null "); //$NON-NLS-1$
+		sql.append(".list_element_uuid is not null "); //$NON-NLS-1$
 		
 		logger.finest(sql.toString());
 		c.createStatement().execute(sql.toString());
-		updateLabel(c, tableName, "uuid", "value"); //$NON-NLS-1$ //$NON-NLS-2$
 		
-		//TODO: add support of CCAA queries
-		List<SamplingUnitAttribute> attributes = new ArrayList<SamplingUnitAttribute>();
-		if (sdFilter == null || sdFilter.getKey() == null){
-			CriteriaBuilder cb = session.getCriteriaBuilder();
-			CriteriaQuery<SamplingUnitAttribute> query = cb.createQuery(SamplingUnitAttribute.class);
-			Root<SamplingUnitAttribute> from = query.from(SamplingUnitAttribute.class);
-			query.where(from.get("conservationArea").get("uuid").in(caFilter.getConservationAreaFilterIds())); //$NON-NLS-1$ //$NON-NLS-2$
-			attributes = session.createQuery(query).list();
-		}else{
-			SurveyDesign sd = SurveyQueryColumnProvider.getSurveyDesign(sdFilter.getKey(), session, caFilter);
-			for (SurveyDesignSamplingUnitAttribute susd : sd.getSamplingUnitAttributes()){
-				attributes.add(susd.getSamplingUnitAttribute());
-			}
-		}
-		int cnt = 0;
-		for (SamplingUnitAttribute su : attributes){
-			cnt++;
-			String columnName = "su_" + cnt; //$NON-NLS-1$
-			suColumnMap.put(su.getKeyId(), columnName);
-			
-			sql = new StringBuilder();
-			sql.append("ALTER TABLE "); //$NON-NLS-1$
-			sql.append(queryDataTable);
-			sql.append(" ADD " + columnName ); //$NON-NLS-1$
-			if (su.getType() == AttributeType.NUMERIC){
-				sql.append(" double precision"); //$NON-NLS-1$
-			}else{
-				sql.append(" varchar "); //$NON-NLS-1$
-			}
-			logger.finest(sql.toString());
-			c.createStatement().execute(sql.toString());
-			
-			if (su.getType() == AttributeType.TEXT ||
-					su.getType() == AttributeType.NUMERIC){
-				StringBuilder attrSql = new StringBuilder();
-				attrSql.append("UPDATE "); //$NON-NLS-1$
-				attrSql.append(queryDataTable);
-				attrSql.append(" SET " + columnName ); //$NON-NLS-1$
-				attrSql.append(" = "); //$NON-NLS-1$
-				if (su.getType() == AttributeType.TEXT){
-					attrSql.append(" suav.string_value ");	 //$NON-NLS-1$
-				}else if (su.getType() == AttributeType.NUMERIC){
-					attrSql.append(" suav.number_value"); //$NON-NLS-1$
-				}
-				attrSql.append(" FROM " + tableNamePrefix(SamplingUnitAttributeValue.class)); //$NON-NLS-1$
-				attrSql.append(" WHERE "); //$NON-NLS-1$
-				attrSql.append(tablePrefix(SamplingUnitAttributeValue.class) + ".su_attribute_uuid = '" + su.getUuid().toString() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
-				attrSql.append(" AND "); //$NON-NLS-1$
-				attrSql.append(tablePrefix(SamplingUnitAttributeValue.class) + ".su_uuid = "); //$NON-NLS-1$
-				attrSql.append(queryDataTable + ".samplingunit_uuid"); //$NON-NLS-1$
-				logger.finest(attrSql.toString());
-				c.createStatement().execute(attrSql.toString());
-				
-			}else if (su.getType() == AttributeType.LIST){
-				StringBuilder attrSql = new StringBuilder();
-				attrSql.append("UPDATE "); //$NON-NLS-1$
-				attrSql.append(queryDataTable);
-				attrSql.append(" SET " + columnName ); //$NON-NLS-1$
-				attrSql.append(" = tmp.value"); //$NON-NLS-1$
-				attrSql.append(" FROM " + tableNamePrefix(SamplingUnitAttributeValue.class)); //$NON-NLS-1$
-				attrSql.append(", " + tableName + " tmp "); //$NON-NLS-1$ //$NON-NLS-2$
-				attrSql.append(" WHERE "); //$NON-NLS-1$
-				attrSql.append(tablePrefix(SamplingUnitAttributeValue.class) + ".su_attribute_uuid = '" + su.getUuid().toString() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
-				attrSql.append(" AND "); //$NON-NLS-1$
-				attrSql.append(tablePrefix(SamplingUnitAttributeValue.class) + ".su_uuid = "); //$NON-NLS-1$
-				attrSql.append(queryDataTable + ".samplingunit_uuid"); //$NON-NLS-1$
-				attrSql.append(" AND "); //$NON-NLS-1$
-				attrSql.append(tablePrefix(SamplingUnitAttributeValue.class) + "." + obsAttUuidColumn + " = "); //$NON-NLS-1$ //$NON-NLS-2$
-				attrSql.append(" tmp.uuid"); //$NON-NLS-1$
-				
-				logger.finest(attrSql.toString());
-				c.createStatement().execute(attrSql.toString());
-			}
-		}
-	}
-	
-	protected void populateAdditionalWpoaTable(Connection c, Session session,
-			String queryDataTable,
-			String tableName, String obsAttUuidColumn) throws SQLException {
-	
-		String sql = "CREATE TABLE " + tableName + " (uuid UUID, value varchar(1024))"; //$NON-NLS-1$ //$NON-NLS-2$
-		logger.finest(sql.toString());
-		c.createStatement().execute(sql);
+//		//TODO: add support of CCAA queries
+//		List<SamplingUnitAttribute> attributes = new ArrayList<SamplingUnitAttribute>();
+//		if (sdFilter == null || sdFilter.getKey() == null){
+//			CriteriaBuilder cb = session.getCriteriaBuilder();
+//			CriteriaQuery<SamplingUnitAttribute> query = cb.createQuery(SamplingUnitAttribute.class);
+//			Root<SamplingUnitAttribute> from = query.from(SamplingUnitAttribute.class);
+//			query.where(from.get("conservationArea").get("uuid").in(caFilter.getConservationAreaFilterIds())); //$NON-NLS-1$ //$NON-NLS-2$
+//			attributes = session.createQuery(query).list();
+//		}else{
+//			SurveyDesign sd = SurveyQueryColumnProvider.getSurveyDesign(sdFilter.getKey(), session, caFilter);
+//			for (SurveyDesignSamplingUnitAttribute susd : sd.getSamplingUnitAttributes()){
+//				attributes.add(susd.getSamplingUnitAttribute());
+//			}
+//		}
+//		int cnt = 0;
+//		for (SamplingUnitAttribute su : attributes){
+//			cnt++;
+//			String columnName = "su_" + cnt; //$NON-NLS-1$
+//			suColumnMap.put(su.getKeyId(), columnName);
+//			
+//			sql = new StringBuilder();
+//			sql.append("ALTER TABLE "); //$NON-NLS-1$
+//			sql.append(queryDataTable);
+//			sql.append(" ADD " + columnName ); //$NON-NLS-1$
+//			if (su.getType() == AttributeType.NUMERIC){
+//				sql.append(" double precision"); //$NON-NLS-1$
+//			}else{
+//				sql.append(" varchar "); //$NON-NLS-1$
+//			}
+//			logger.finest(sql.toString());
+//			c.createStatement().execute(sql.toString());
+//			
+//			if (su.getType() == AttributeType.TEXT ||
+//					su.getType() == AttributeType.NUMERIC){
+//				StringBuilder attrSql = new StringBuilder();
+//				attrSql.append("UPDATE "); //$NON-NLS-1$
+//				attrSql.append(queryDataTable);
+//				attrSql.append(" SET " + columnName ); //$NON-NLS-1$
+//				attrSql.append(" = "); //$NON-NLS-1$
+//				if (su.getType() == AttributeType.TEXT){
+//					attrSql.append(" suav.string_value ");	 //$NON-NLS-1$
+//				}else if (su.getType() == AttributeType.NUMERIC){
+//					attrSql.append(" suav.number_value"); //$NON-NLS-1$
+//				}
+//				attrSql.append(" FROM " + tableNamePrefix(SamplingUnitAttributeValue.class)); //$NON-NLS-1$
+//				attrSql.append(" WHERE "); //$NON-NLS-1$
+//				attrSql.append(tablePrefix(SamplingUnitAttributeValue.class) + ".su_attribute_uuid = '" + su.getUuid().toString() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+//				attrSql.append(" AND "); //$NON-NLS-1$
+//				attrSql.append(tablePrefix(SamplingUnitAttributeValue.class) + ".su_uuid = "); //$NON-NLS-1$
+//				attrSql.append(queryDataTable + ".samplingunit_uuid"); //$NON-NLS-1$
+//				logger.finest(attrSql.toString());
+//				c.createStatement().execute(attrSql.toString());
+//				
+//			}else if (su.getType() == AttributeType.LIST){
+//				StringBuilder attrSql = new StringBuilder();
+//				attrSql.append("UPDATE "); //$NON-NLS-1$
+//				attrSql.append(queryDataTable);
+//				attrSql.append(" SET " + columnName ); //$NON-NLS-1$
+//				attrSql.append(" = tmp.value"); //$NON-NLS-1$
+//				attrSql.append(" FROM " + tableNamePrefix(SamplingUnitAttributeValue.class)); //$NON-NLS-1$
+//				attrSql.append(", " + tableName + " tmp "); //$NON-NLS-1$ //$NON-NLS-2$
+//				attrSql.append(" WHERE "); //$NON-NLS-1$
+//				attrSql.append(tablePrefix(SamplingUnitAttributeValue.class) + ".su_attribute_uuid = '" + su.getUuid().toString() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+//				attrSql.append(" AND "); //$NON-NLS-1$
+//				attrSql.append(tablePrefix(SamplingUnitAttributeValue.class) + ".su_uuid = "); //$NON-NLS-1$
+//				attrSql.append(queryDataTable + ".samplingunit_uuid"); //$NON-NLS-1$
+//				attrSql.append(" AND "); //$NON-NLS-1$
+//				attrSql.append(tablePrefix(SamplingUnitAttributeValue.class) + "." + obsAttUuidColumn + " = "); //$NON-NLS-1$ //$NON-NLS-2$
+//				attrSql.append(" tmp.uuid"); //$NON-NLS-1$
+//				
+//				logger.finest(attrSql.toString());
+//				c.createStatement().execute(attrSql.toString());
+//			}
+//		}
+//		
+		
 
-		sql = "INSERT INTO " + tableName + "(uuid) SELECT DISTINCT wpoa."+obsAttUuidColumn //$NON-NLS-1$ //$NON-NLS-2$
-				+" FROM smart.wp_observation_attributes wpoa inner join " //$NON-NLS-1$
-				+queryDataTable+" r on wpoa.OBSERVATION_UUID = r.OB_UUID"; //$NON-NLS-1$
-		
-		logger.finest(sql.toString());
-		c.createStatement().execute(sql);
-		updateLabel(c, tableName, "uuid", "value"); //$NON-NLS-1$ //$NON-NLS-2$
-		
 	}
+	
+
 	
 	@Override
 	public String getDateFilterTable() throws SQLException{

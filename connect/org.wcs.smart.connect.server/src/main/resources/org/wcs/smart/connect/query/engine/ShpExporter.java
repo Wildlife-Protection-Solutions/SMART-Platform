@@ -106,7 +106,7 @@ public class ShpExporter {
 	 * @param session
 	 * @throws IOException 
 	 */
-	public void exportResults(SimpleQuery query, AbstractDbFeatureResultSet results, Session session) throws IOException{
+	public void exportResults(SimpleQuery query, AbstractDbFeatureResultSet<IResultItem> results, Session session) throws IOException{
 		//remove extension and add .shp to filename
 		final String newName = FilenameUtils.removeExtension(zipFile.getFileName().toString()) ;
 		final Path outDirectory = zipFile.getParent().resolve(String.valueOf(System.nanoTime()));
@@ -123,7 +123,7 @@ public class ShpExporter {
 					List<QueryColumn> columns = results.getQueryColumns(query, l, session, prj);
 					SimpleFeatureType type = DataUtilities.createType("smartqueryresults", results.getFeatureSchemaDef(columns, false, true)); //$NON-NLS-1$
 					ArrayList<SimpleFeature> features = new ArrayList<SimpleFeature>();
-					IQueryResultSetIterator<? extends IResultItem> itemiterator = results.iterator(500, session);
+					IQueryResultSetIterator<IResultItem> itemiterator = results.iterator(500, session);
 					for (Iterator<IResultItem> iterator = itemiterator; iterator.hasNext();) {
 						IResultItem resultItem = (IResultItem) iterator.next();	
 						SimpleFeature sf = results.toFeature(resultItem, columns, session, type);

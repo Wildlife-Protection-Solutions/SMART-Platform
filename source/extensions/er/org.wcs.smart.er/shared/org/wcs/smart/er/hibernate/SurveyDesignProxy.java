@@ -25,11 +25,17 @@ import java.util.UUID;
 
 import org.wcs.smart.er.model.SurveyDesign;
 
+/**
+ * Proxy for survey designs
+ * 
+ * @author Emily
+ *
+ */
 public class SurveyDesignProxy {
 	
 	private UUID uuid;
 	private String name;
-		private SurveyDesign.State state;
+	private SurveyDesign.State state;
 	private String key;
 	
 	public SurveyDesignProxy(String name, UUID uuid, String key, SurveyDesign.State state) {

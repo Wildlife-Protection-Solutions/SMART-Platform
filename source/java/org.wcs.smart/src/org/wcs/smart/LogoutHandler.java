@@ -24,6 +24,9 @@ package org.wcs.smart;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.ui.PlatformUI;
+import org.hibernate.Session;
+import org.wcs.smart.changetracking.ChangeLogInstaller;
+import org.wcs.smart.hibernate.HibernateManager;
 
 /**
  * 

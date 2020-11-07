@@ -35,12 +35,14 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
+import org.wcs.smart.connect.query.engine.IWOEngine;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
+import org.wcs.smart.patrol.query.model.PatrolWaypointResultItem;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.Query;
@@ -50,7 +52,8 @@ import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 /**
  * Patorl waypoint query engine.
  */
-public class PsqlPatrolWaypointEngine extends AbstractQueryEngine {
+public class PsqlPatrolWaypointEngine extends AbstractQueryEngine implements IWOEngine<PatrolWaypointResultItem>{
+	
 	private final Logger logger = Logger.getLogger(PsqlPatrolWaypointEngine.class.getName());
 	
 	private String queryDataTable;
@@ -209,7 +212,7 @@ public class PsqlPatrolWaypointEngine extends AbstractQueryEngine {
 			leaderSt.executeBatch();
 		}
 
-		populateCaDetails(c, queryDataTable, "p_ca_uuid",query); //$NON-NLS-1$
+		populateCaDetails(c, queryDataTable, "ca_uuid",query); //$NON-NLS-1$
 	
 		
 		//last modified
@@ -255,7 +258,7 @@ public class PsqlPatrolWaypointEngine extends AbstractQueryEngine {
 	public String getTemporaryTableCreateClause(String tableName) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
-		sql.append("p_ca_uuid uuid,"); //$NON-NLS-1$
+		sql.append("ca_uuid uuid,"); //$NON-NLS-1$
 		sql.append("p_uuid uuid,"); //$NON-NLS-1$
 		sql.append("p_id varchar(32),"); //$NON-NLS-1$
 		sql.append("p_station_uuid uuid,"); //$NON-NLS-1$
@@ -305,6 +308,7 @@ public class PsqlPatrolWaypointEngine extends AbstractQueryEngine {
 	@Override
 	public void cleanUp(Session session) throws SQLException {
 		dropTable(session, queryDataTable);
+		dropTable(session, getObservationLabelTable());
 	}
 	
 	@Override
@@ -315,5 +319,10 @@ public class PsqlPatrolWaypointEngine extends AbstractQueryEngine {
 	@Override
 	public String getDateFilterField() throws SQLException{
 		return "patrol_day"; //$NON-NLS-1$
+	}
+
+	@Override
+	public String getObservationLabelTable() {
+		return getQueryDataTable() + "_labels"; //$NON-NLS-1$
 	}
 }

@@ -58,7 +58,12 @@ public enum DerbyTriggerManager {
 	 */
 	public boolean createTriggerIfNotExists(String name, String sql, Session s){
 		if (triggerExists(name, s)) return false;
-		s.createNativeQuery(sql).executeUpdate();
+		try {
+			s.createNativeQuery(sql).executeUpdate();
+		}catch (Throwable t) {
+			t.printStackTrace();
+			throw t;
+		}
 		return true;
 	}
 	
