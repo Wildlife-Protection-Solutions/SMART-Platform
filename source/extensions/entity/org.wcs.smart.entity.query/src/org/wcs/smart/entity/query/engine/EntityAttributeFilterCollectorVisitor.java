@@ -22,15 +22,13 @@
 package org.wcs.smart.entity.query.engine;
 
 import java.sql.Connection;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.entity.query.parser.internal.EntityAttributeFilter;
+import org.wcs.smart.query.common.engine.visitors.AttributeFilterCollectorVisitor;
 import org.wcs.smart.query.model.filter.AttributeFilter;
 import org.wcs.smart.query.model.filter.AttributeInfo;
 import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.IFilterVisitor;
 
 /**
  * Attribute Filter collector. This visitor collects
@@ -39,13 +37,13 @@ import org.wcs.smart.query.model.filter.IFilterVisitor;
  * @author Emily
  *
  */
-public class AttributeFilterCollectorVisitor implements IFilterVisitor{
-
-	private HashSet<AttributeInfo> filters = new HashSet<AttributeInfo>();
+public class EntityAttributeFilterCollectorVisitor extends AttributeFilterCollectorVisitor{
 
 	private Connection c;
 	private DerbyEntityQueryEngine engine;
-	public AttributeFilterCollectorVisitor(Connection c, DerbyEntityQueryEngine engine){
+	
+	public EntityAttributeFilterCollectorVisitor(Connection c, DerbyEntityQueryEngine engine){
+		super();
 		this.c = c;
 		this.engine = engine;
 	}
@@ -70,12 +68,5 @@ public class AttributeFilterCollectorVisitor implements IFilterVisitor{
 		}
 	}
 	
-	/**
-	 * 
-	 * @return list of attribute filters found
-	 */
-	public Set<AttributeInfo> getAttributeInfo(){
-		return this.filters;
-	}
 }
 

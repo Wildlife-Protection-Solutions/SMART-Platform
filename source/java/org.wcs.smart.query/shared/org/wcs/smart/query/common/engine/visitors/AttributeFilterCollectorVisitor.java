@@ -38,7 +38,7 @@ import org.wcs.smart.query.model.filter.IFilterVisitor;
  */
 public class AttributeFilterCollectorVisitor implements IFilterVisitor{
 
-	private HashSet<AttributeInfo> filters = new HashSet<AttributeInfo>();
+	protected HashSet<AttributeInfo> filters = new HashSet<AttributeInfo>();
 
 	@Override
 	public void visit(IFilter filter) {

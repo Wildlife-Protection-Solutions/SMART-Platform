@@ -358,6 +358,9 @@ public class FilterProcessor implements IFilterProcessor {
 	}
 	
 
+	protected AttributeFilterCollectorVisitor getAttributeCollector(Connection c) {
+		return new AttributeFilterCollectorVisitor();
+	}
 	
 	protected void createObservationTable(Connection c, IFilter filter, 
 			DateFilter dateFilter, ConservationAreaFilter caFilter, IProgressMonitor monitor)
@@ -365,7 +368,7 @@ public class FilterProcessor implements IFilterProcessor {
 		SubMonitor progress = SubMonitor.convert(monitor, 1);
 		progress.subTask(Messages.DerbyQueryEngine2_Progress_ProcessingAttributes);
 		
-		AttributeFilterCollectorVisitor collector = new AttributeFilterCollectorVisitor();
+		AttributeFilterCollectorVisitor collector = getAttributeCollector(c);
 		filter.accept(collector);
 		//filter out mlist attributes
 		Collection<AttributeInfo> keys = collector.getAttributeInfo().stream().filter(e->e.getType() != AttributeType.MLIST).collect(Collectors.toSet());
@@ -587,11 +590,9 @@ public class FilterProcessor implements IFilterProcessor {
 				sql = new StringBuilder();
 				sql.append("INSERT INTO "); //$NON-NLS-1$
 				sql.append(attributeTempTable);
-				sql.append(" SELECT "); //$NON-NLS-1$
+				sql.append(" SELECT distinct "); //$NON-NLS-1$
 				sql.append(prefix(WaypointObservationAttribute.class));
 				sql.append(".observation_uuid, "); //$NON-NLS-1$
-	
-				
 				sql.append(" true "); //$NON-NLS-1$
 	
 				sql.append("FROM "); //$NON-NLS-1$

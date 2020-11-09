@@ -29,7 +29,6 @@ import org.wcs.smart.connect.query.engine.ObservationQueryResult;
 import org.wcs.smart.query.common.engine.IPagedImageResultSet;
 import org.wcs.smart.query.common.engine.ObservationAttachmentQueryResultItem;
 import org.wcs.smart.query.common.engine.ObservationQueryResultItem;
-import org.wcs.smart.query.common.engine.WaypointQueryResultItem;
 /**
  * Result set of observation (all data) queries.
  * 

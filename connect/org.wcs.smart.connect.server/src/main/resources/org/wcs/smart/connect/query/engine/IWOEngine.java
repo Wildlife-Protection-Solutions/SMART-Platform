@@ -21,17 +21,9 @@
  */
 package org.wcs.smart.connect.query.engine;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.UUID;
 
 import org.hibernate.Session;
-import org.hibernate.jdbc.Work;
-import org.wcs.smart.observation.model.WaypointObservationAttribute;
-import org.wcs.smart.observation.model.WaypointObservationAttributeList;
-import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;

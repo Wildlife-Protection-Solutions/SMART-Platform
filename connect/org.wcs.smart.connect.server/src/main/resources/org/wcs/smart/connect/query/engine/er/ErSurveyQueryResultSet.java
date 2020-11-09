@@ -5,29 +5,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.hibernate.Session;
-import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
-import org.wcs.smart.connect.query.QueryManager;
-import org.wcs.smart.connect.query.engine.AbstractDbFeatureResultSet;
-import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
-import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
 import org.wcs.smart.er.query.model.ISamplingUnitResultItem;
 import org.wcs.smart.er.query.model.ISurveyQueryResultItem;
-import org.wcs.smart.er.query.model.MissionTrackResultItem;
-import org.wcs.smart.er.query.model.SurveyObservationResultItem;
-import org.wcs.smart.er.query.model.SurveyQueryResultItem;
-import org.wcs.smart.query.common.engine.IResultItem;
-import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 
 public class ErSurveyQueryResultSet  {
 

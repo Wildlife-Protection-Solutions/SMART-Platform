@@ -33,6 +33,7 @@ import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.DerbyFilterToSqlGenerator;
+import org.wcs.smart.query.common.engine.visitors.AttributeFilterCollectorVisitor;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
@@ -62,6 +63,11 @@ public class FilterProcessor extends org.wcs.smart.observation.query.engine.Filt
 	
 	protected DerbyFilterToSqlGenerator getSqlGenerator() {
 		return EntityFilterToSqlGenerator.INSTANCE;
+	}
+	
+	@Override
+	protected AttributeFilterCollectorVisitor getAttributeCollector(Connection c) {
+		return new EntityAttributeFilterCollectorVisitor(c, (DerbyEntityQueryEngine)engine);
 	}
 	
 	/**
