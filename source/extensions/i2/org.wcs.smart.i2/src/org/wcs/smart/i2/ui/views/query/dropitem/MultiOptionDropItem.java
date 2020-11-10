@@ -123,7 +123,8 @@ public class MultiOptionDropItem extends DropItem {
 		return sb.substring(0, sb.length() - 1);
 	}
 
-	public void setInitialValue(Collection<String> key) {
+	public void setInitialValue(Operator op, Collection<String> key) {
+		this.currentOp = op;
 		this.currentOptions = new ArrayList<>();
 		for (String k : key) {
 			for (Option o : options){
@@ -188,6 +189,7 @@ public class MultiOptionDropItem extends DropItem {
 		}
 		});
 		
+		if (currentOptions != null) listViewer.setValue(currentOptions);
 		listViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {

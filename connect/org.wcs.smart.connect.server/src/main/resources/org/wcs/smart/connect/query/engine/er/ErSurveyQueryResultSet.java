@@ -16,65 +16,12 @@ import org.wcs.smart.er.query.model.ISurveyQueryResultItem;
 
 public class ErSurveyQueryResultSet  {
 
-
-//	
-//
-//	protected HashMap<UUID, HashMap<String, Object>> getResultsAttributes(
-//			ResultSet rs, Session s) throws SQLException {
-//		HashMap<UUID, HashMap<String, Object>> attrMap = new HashMap<UUID, HashMap<String, Object>>();
-//		/*
-//		 * 1 OB_UUID 2 KEYID 3 NUMBER_VALUE 4 STRING_VALUE 5 LIST_VALUE 6
-//		 * TREE_VALUE 7 P_CA_UUID
-//		 */
-//		while (rs.next()) {
-//			UUID obUuid = (UUID) rs.getObject(1);
-//
-//			if (obUuid == null)
-//				continue;
-//			HashMap<String, Object> attributes = attrMap.get(obUuid);
-//			if (attributes == null) {
-//				attributes = new HashMap<String, Object>();
-//				attrMap.put(obUuid, attributes);
-//			}
-//			String key = rs.getString(2);
-//			if (key != null) {
-//				Object value = getAttributeValue(rs, s);
-//				attributes.put(key, value);
-//			}
-//		}
-//		return attrMap;
-//	}
-//
-//	protected Object getAttributeValue(ResultSet rs, Session session)
-//			throws SQLException {
-//		/*
-//		 * 1 OB_UUID 2 KEYID 3 NUMBER_VALUE 4 STRING_VALUE 5 LIST_VALUE 6
-//		 * TREE_VALUE 7 P_CA_UUID
-//		 */
-//		if (rs.getObject(3) != null) {
-//			return rs.getDouble(3);
-//		}
-//		String result = rs.getString(4); // string
-//		if (result != null) {
-//			return result;
-//		}
-//		result = rs.getString(5); // list
-//		if (result != null) {
-//			return result;
-//		}
-//		result = rs.getString(6); // tree
-//		if (result != null) {
-//			return result;
-//		}
-//		return null;
-//	}
-
 	public static void attachMissionProperties(List<? extends ISurveyQueryResultItem> result, Connection c, Session session) throws SQLException {
 
 		StringBuilder attrSql = new StringBuilder();
-		attrSql.append("SELECT mpv.mission_uuid, ma.keyid, mpv.number_value,  ");
+		attrSql.append("SELECT mpv.mission_uuid, ma.keyid, mpv.number_value,  "); //$NON-NLS-1$
 		attrSql.append(" mpv.string_value, mpv.list_element_uuid FROM "); //$NON-NLS-1$
-		attrSql.append("smart.mission_attribute ma ");
+		attrSql.append("smart.mission_attribute ma "); //$NON-NLS-1$
 		attrSql.append(" join smart.mission_property_value mpv on mpv.mission_attribute_uuid = ma.uuid "); //$NON-NLS-1$
 		attrSql.append(" WHERE mpv.mission_uuid IN ("); //$NON-NLS-1$
 

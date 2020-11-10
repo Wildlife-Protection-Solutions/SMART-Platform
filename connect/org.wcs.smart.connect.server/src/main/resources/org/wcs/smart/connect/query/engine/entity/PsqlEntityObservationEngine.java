@@ -83,7 +83,7 @@ public class PsqlEntityObservationEngine extends AbstractQueryEngine implements 
 	}
 
 	public String getObservationLabelTable() {
-		return getQueryDataTable() + "_labels";
+		return getQueryDataTable() + "_labels"; //$NON-NLS-1$
 	}
 	
 	public Collection<String> getEntityTypes(){

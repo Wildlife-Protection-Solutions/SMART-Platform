@@ -235,7 +235,7 @@ public abstract class PsqlErEngine extends AbstractQueryEngine{
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO " + labelTable + "(uuid) SELECT DISTINCT "); //$NON-NLS-1$ //$NON-NLS-2$
 		sql.append(tablePrefix(SamplingUnitAttributeValue.class));
-		sql.append(".list_element_uuid FROM ");
+		sql.append(".list_element_uuid FROM "); //$NON-NLS-1$
 		sql.append(tableNamePrefix(SamplingUnitAttributeValue.class));
 		sql.append(" inner join "); //$NON-NLS-1$
 		sql.append(dataTable);

@@ -70,7 +70,7 @@ public class PsqlErMissionEngine extends PsqlErEngine {
 	}
 	
 	public String getLabelTable(){
-		return getQueryDataTable() + "_labels";
+		return getQueryDataTable() + "_labels"; //$NON-NLS-1$
 	}
 	
 	@Override

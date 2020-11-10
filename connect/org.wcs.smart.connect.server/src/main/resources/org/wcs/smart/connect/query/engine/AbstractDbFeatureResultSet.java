@@ -24,6 +24,7 @@ package org.wcs.smart.connect.query.engine;
 import java.math.BigInteger;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.time.temporal.Temporal;
@@ -272,17 +273,14 @@ public abstract class AbstractDbFeatureResultSet<T extends IResultItem> implemen
 	public boolean isDisposed(){
 		return this.isDisposed;
 	}
-		
-	public void updateSortColumnGeneral(Session session, String queryDataTable, ConservationAreaFilter caFilter, String value, String typePrefix, String tableListSuffix, String tableTreeSuffix, String uuidColumn) throws SQLException {
-		updateSortColumnGeneral(session, queryDataTable, caFilter, value, typePrefix, tableListSuffix, tableTreeSuffix, uuidColumn, true);
-	}
 	
-	public void updateSortColumnGeneral(Session session, String queryDataTable, ConservationAreaFilter caFilter, String value, String typePrefix, 
-			String tableListSuffix, String tableTreeSuffix, String uuidColumn, boolean hasExtraTables) throws SQLException {
-		if(!hasExtraTables){
-			//I don't know how to sort these query types, they don't use temp tables so we can't use the same method as the rest.
-			throw new UnsupportedOperationException("Sorting not suppported for this Query Type"); //$NON-NLS-1$
-		}
+	public void updateSortColumnGeneral(Session session, String queryDataTable, String labelTable, 
+			ConservationAreaFilter caFilter, String typePrefix) throws SQLException {
+		
+//		if(!hasExtraTables){
+//			//I don't know how to sort these query types, they don't use temp tables so we can't use the same method as the rest.
+//			throw new UnsupportedOperationException("Sorting not suppported for this Query Type"); //$NON-NLS-1$
+//		}
 		if (!hasSortColumns) {
 			// add the sort columns
 			session.createNativeQuery("ALTER TABLE " + queryDataTable + " add column sortKeyDbl float").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
@@ -340,14 +338,15 @@ public abstract class AbstractDbFeatureResultSet<T extends IResultItem> implemen
 				session.createNativeQuery(sql.toString()).executeUpdate();
 				break;
 			case LIST:
+				if (labelTable == null) throw new UnsupportedOperationException(MessageFormat.format("Cannot sort by column with key {0} for this query type.", key)); //$NON-NLS-1$
 				sql = new StringBuilder();
 				sql.append("UPDATE "); //$NON-NLS-1$
 				sql.append(queryDataTable);
 				sql.append(" SET sortKeyTxt = "); //$NON-NLS-1$
-				sql.append("(SELECT rl." + value + " FROM "); //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append("(SELECT rl.value FROM "); //$NON-NLS-1$ 
 				sql.append("smart.WP_OBSERVATION_ATTRIBUTES wpoa join "); //$NON-NLS-1$
-				sql.append(queryDataTable);
-				sql.append(tableListSuffix + " rl on rl." + uuidColumn + " = wpoa.list_element_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append(labelTable);
+				sql.append(" rl on rl.uuid = wpoa.list_element_uuid "); //$NON-NLS-1$ 
 				sql.append("join smart.DM_ATTRIBUTE a on a.uuid = wpoa.attribute_uuid and a.keyid = '"); //$NON-NLS-1$
 				sql.append(key);
 				sql.append("'"); //$NON-NLS-1$
@@ -357,13 +356,13 @@ public abstract class AbstractDbFeatureResultSet<T extends IResultItem> implemen
 				session.createNativeQuery(sql.toString()).executeUpdate();
 				break;
 			case TREE:
+				if (labelTable == null) throw new UnsupportedOperationException(MessageFormat.format("Cannot sort by column with key {0} for this query type.", key)); //$NON-NLS-1$
 				sql = new StringBuilder();
 				sql.append("UPDATE ");//$NON-NLS-1$
 				sql.append(queryDataTable);
 				sql.append(" SET sortKeyTxt = ");//$NON-NLS-1$
-				sql.append("(SELECT rl." + value + " FROM smart.WP_OBSERVATION_ATTRIBUTES wpoa join "); //$NON-NLS-1$ //$NON-NLS-2$
-				sql.append(queryDataTable);
-				sql.append(tableTreeSuffix + " rl on rl." + uuidColumn + " = wpoa.tree_node_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append("(SELECT rl.value FROM smart.WP_OBSERVATION_ATTRIBUTES wpoa join "); //$NON-NLS-1$ 
+				sql.append(labelTable + " rl on rl.uuid = wpoa.tree_node_uuid "); //$NON-NLS-1$ 
 				sql.append("join smart.DM_ATTRIBUTE a on a.uuid = wpoa.attribute_uuid and a.keyid = '"); //$NON-NLS-1$
 				sql.append(key);
 				sql.append("'"); //$NON-NLS-1$
@@ -372,6 +371,8 @@ public abstract class AbstractDbFeatureResultSet<T extends IResultItem> implemen
 				sql.append(typePrefix + "uuid)"); //$NON-NLS-1$
 				session.createNativeQuery(sql.toString()).executeUpdate();
 				break;
+			case MLIST:
+				throw new UnsupportedOperationException("Sorting by MULIT LIST attributes is not supported."); //$NON-NLS-1$
 			}
 		}
 		

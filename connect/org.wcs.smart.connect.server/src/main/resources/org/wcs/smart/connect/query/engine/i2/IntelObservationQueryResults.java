@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.hibernate.Session;
@@ -242,10 +243,14 @@ public class IntelObservationQueryResults  implements IQueryResult, IConnectPage
 		//add attachments
 		if (item.getObservationUuid() != null){
 			List<IntelObservationAttribute> attributes = 
-					QueryFactory.buildQuery(session, IntelObservationAttribute.class, "id.observation.uuid", item.getObservationUuid()).getResultList(); //$NON-NLS-1$
+					QueryFactory.buildQuery(session, IntelObservationAttribute.class, "observation.uuid", item.getObservationUuid()).getResultList(); //$NON-NLS-1$
 			for (IntelObservationAttribute a : attributes){
 				if (a.getAttribute().getType() == AttributeType.LIST){
-					item.addAttribute(a.getAttribute().getKeyId(), a.getAttributeListItem().getName());	
+					item.addAttribute(a.getAttribute().getKeyId(), a.getAttributeListItem().getName());
+				}else if (a.getAttribute().getType() == AttributeType.MLIST) {
+					if (a.getAttributeListItems() != null) {
+						item.addAttribute(a.getAttribute().getKeyId(), a.getAttributeListItems().stream().map(e->e.getAttributeListItem().getName()).collect(Collectors.joining(", "))); //$NON-NLS-1$
+					}
 				}else if (a.getAttribute().getType() == AttributeType.TREE){
 					item.addAttribute(a.getAttribute().getKeyId(), a.getAttributeTreeNode().getName());
 				}else{

@@ -629,7 +629,7 @@ public class DropItemFactory {
 				return Collections.singletonList(item);
 			}else if (filter.getAttributeType() == Attribute.AttributeType.MLIST) {
 				MultiOptionDropItem item = new MultiOptionDropItem(name, queryKeyPart, labels.toArray(new String[labels.size()]), keys.toArray(new String[keys.size()]), canEdit());
-				item.setInitialValue(filter.getKeyValues());
+				item.setInitialValue(filter.getOperator(), filter.getKeyValues());
 				return Collections.singletonList(item);
 			}
 		}else if (filter.getAttributeType() == Attribute.AttributeType.TREE){

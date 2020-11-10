@@ -250,8 +250,9 @@ public class ErMissionTrackQueryResult extends AbstractDbFeatureResultSet<Missio
 	
 	@Override
 	public void updateSortColumn(Session session) throws SQLException {
-		updateSortColumnGeneral(session, engine.getQueryDataTable(), engine.getCaFilter(), "value", ".ob_", "_LIST", "_TREE", "uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-		
+		updateSortColumnGeneral(session, engine.getQueryDataTable(),
+				null, engine.getCaFilter(),".ob_");  //$NON-NLS-1$
 	}
+	
 }
 

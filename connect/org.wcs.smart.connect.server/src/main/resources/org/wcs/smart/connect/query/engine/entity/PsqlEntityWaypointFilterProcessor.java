@@ -143,14 +143,6 @@ public class PsqlEntityWaypointFilterProcessor implements IFilterProcessor{
 		engine.buildTemporaryTableIndexes(c, tableName);
 	}
 	
-	
-	/*
-	 * return the table name for the associate object 
-	 */
-	private String name(Class<?> clazz){
-		return engine.tableName(clazz);
-	}
-	
 	/*
 	 * return the sql prefix for the given class
 	 */

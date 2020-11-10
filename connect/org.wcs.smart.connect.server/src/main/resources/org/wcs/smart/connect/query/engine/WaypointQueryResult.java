@@ -208,8 +208,8 @@ public abstract class WaypointQueryResult<T extends WaypointQueryResultItem> ext
 
 	@Override
 	public void updateSortColumn(Session session) throws SQLException {
-		//this is a weird one, it doesn't create any *_list or *_tree tables at all, not sure why yet... the last false just triggers an unsupported exception 
-		updateSortColumnGeneral(session, engine.getQueryDataTable(), engine.getCaFilter(), "value", ".ob_", "", "", "uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-		
+		updateSortColumnGeneral(session, engine.getQueryDataTable(),
+				engine.getObservationLabelTable(),
+				engine.getCaFilter(), ".ob_"); //$NON-NLS-1$
 	}
 }

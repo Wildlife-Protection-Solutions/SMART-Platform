@@ -386,6 +386,8 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 			return "varchar(1024)"; //$NON-NLS-1$
 		case DATE:
 			return "varchar(10)"; //$NON-NLS-1$
+		case MLIST:
+			throw new IllegalArgumentException();
 		}
 		return ""; //$NON-NLS-1$
 
@@ -669,7 +671,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 
 			@Override
 			public void execute(Connection c) throws SQLException {
-				updateLabel(c, labelTable, "uuid", "value");
+				updateLabel(c, labelTable, "uuid", "value"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			
 		});
@@ -1042,7 +1044,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		}else if (lfilter instanceof CategoryFilter){
 			catfilter = (CategoryFilter) lfilter;
 		}else {
-			throw new UnsupportedOperationException("this processor only supports data model filter");
+			throw new UnsupportedOperationException("this processor only supports data model filter"); //$NON-NLS-1$
 		}
 		
 		sql.append(" FROM ");  //$NON-NLS-1$
@@ -1120,7 +1122,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 			}
 			sql.append(tablePrefix(Attribute.class) + ".keyid='" + attfilter.getAttributeKey() + "' "); //$NON-NLS-1$  //$NON-NLS-2$
 			if (attfilter.getAttributeType() != AttributeType.MLIST) {
-				sql.append(" AND ");
+				sql.append(" AND "); //$NON-NLS-1$
 			}
 			if (attfilter.getAttributeType() == AttributeType.NUMERIC){
 				sql.append("("); //$NON-NLS-1$

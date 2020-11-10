@@ -22,7 +22,6 @@
 package org.wcs.smart.connect.query.engine.entity;
 
 import java.sql.Connection;
-import java.util.Set;
 
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;

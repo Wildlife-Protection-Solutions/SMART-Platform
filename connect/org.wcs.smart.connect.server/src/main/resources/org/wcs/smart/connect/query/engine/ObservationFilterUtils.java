@@ -60,8 +60,18 @@ public class ObservationFilterUtils {
 
 	private final static Logger logger = Logger.getLogger(ObservationFilterUtils.class.getName());
 
-	
-	
+	/**
+	 * Creates a table of observations with columns for data
+	 * model filters
+	 * @param observationTable
+	 * @param c
+	 * @param filter
+	 * @param engine
+	 * @param dateFilter
+	 * @param caFilter
+	 * @param sources
+	 * @throws SQLException
+	 */
 	public static void createObservationTable(String observationTable, 
 			Connection c, IFilter filter,
 			AbstractQueryEngine engine,
@@ -205,22 +215,19 @@ public class ObservationFilterUtils {
 				sql.append("WHERE "); //$NON-NLS-1$
 				String p = engine.addParameterValue(key.getKey());
 				sql.append(" " + engine.tablePrefix(Attribute.class) + ".keyid = " + p ); //$NON-NLS-1$ //$NON-NLS-2$
-				sql.append(" AND ");
-				sql.append(engine.tablePrefix(Waypoint.class) + ".source in (");
+				sql.append(" AND "); //$NON-NLS-1$
+				sql.append(engine.tablePrefix(Waypoint.class) + ".source in ("); //$NON-NLS-1$
 				for(IWaypointSource src : sources) {
-					sql.append("'" + src.getKey() + "',");
+					sql.append("'" + src.getKey() + "',"); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				sql.deleteCharAt(sql.length() - 1);
-				sql.append(")");
-				
-				
+				sql.append(")"); //$NON-NLS-1$
 				
 				logger.finest(sql.toString());
 				
 				try(NamedPreparedStatement ps = engine.parseQueryString(c, sql.toString())){
 					ps.executeUpdate();
 				}
-				
 				
 				// - create index
 				sql = new StringBuilder();

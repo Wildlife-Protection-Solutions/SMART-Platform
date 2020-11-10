@@ -122,8 +122,8 @@ public class ErWaypointQueryResult extends WaypointQueryResult<SurveyWaypointRes
 	
 	@Override
 	public void updateSortColumn(Session session) throws SQLException {
-		//pass in the specific column name prefixes and suffixes to customize the SQL to this type of Query
-		updateSortColumnGeneral(session, engine.getQueryDataTable(), engine.getCaFilter(), "value", ".wp_", "_mLIST", "_TREE", "uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+		updateSortColumnGeneral(session, engine.getQueryDataTable(),
+				engine.getObservationLabelTable(), engine.getCaFilter(), ".wp_");  //$NON-NLS-1$
 	}
 
 }
