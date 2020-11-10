@@ -38,6 +38,7 @@ import org.wcs.smart.connect.query.WaypointSourceEngine;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
 import org.wcs.smart.connect.query.engine.ObservationFilterUtils;
+import org.wcs.smart.connect.query.engine.ObservationFilterUtils.IDateFilterProcessor;
 import org.wcs.smart.connect.query.engine.PsqlFilterToSqlGenerator;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionAttribute;
@@ -151,8 +152,42 @@ public class ErFilterProcessor implements IFilterProcessor {
 		//observation filter
 		qFilter.accept(observationFilterVisitor);		
 		if (observationFilterVisitor.hasAttributeFilter()){
+			
+			IDateFilterProcessor dateProcessor = (engine, sb)->{
+				
+				sb.append (" JOIN "); //$NON-NLS-1$
+				sb.append(namePrefix(SurveyWaypoint.class));
+				sb.append(" ON "); //$NON-NLS-1$
+				sb.append(prefix(SurveyWaypoint.class));
+				sb.append(".wp_uuid = "); //$NON-NLS-1$
+				sb.append(prefix(Waypoint.class));
+				sb.append(".uuid "); //$NON-NLS-1$
+				
+				sb.append (" JOIN "); //$NON-NLS-1$
+				sb.append(namePrefix(MissionDay.class));
+				sb.append(" ON "); //$NON-NLS-1$
+				sb.append(prefix(SurveyWaypoint.class));
+				sb.append(".mission_day_uuid = "); //$NON-NLS-1$
+				sb.append(prefix(MissionDay.class));
+				sb.append(".uuid "); //$NON-NLS-1$
+				
+				sb.append (" JOIN "); //$NON-NLS-1$
+				sb.append(namePrefix(Mission.class));
+				sb.append(" ON "); //$NON-NLS-1$
+				sb.append(prefix(Mission.class));
+				sb.append(".uuid = "); //$NON-NLS-1$
+				sb.append(prefix(MissionDay.class));
+				sb.append(".mission_uuid "); //$NON-NLS-1$
+				
+				String dfilter = PsqlFilterToSqlGenerator.INSTANCE.toSql(dateFilter, engine);
+				if ( !dfilter.isEmpty() ) {
+					sb.append(" AND "); //$NON-NLS-1$
+					sb.append(dfilter);
+				}
+			};
+			
 			ObservationFilterUtils.createObservationTable(observationTable, c, queryFilter, 
-					engine, dateFilter, caFilter, 
+					engine, dateProcessor, caFilter, 
 					Collections.singleton(WaypointSourceEngine.INSTANCE.getSource(SurveyWaypointSource.KEY)));
 		}
 		//mission filters

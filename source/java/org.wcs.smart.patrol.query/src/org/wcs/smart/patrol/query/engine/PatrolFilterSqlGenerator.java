@@ -298,6 +298,10 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	 */
 	@Override
 	protected String toSql(DateFilter filter, IQueryEngine engine) throws SQLException{
+		if (filter.getDateFieldOption() == WaypointDateField.INSTANCE) {
+			return super.toSql(filter, engine);
+		}
+		
 		String table = ""; //$NON-NLS-1$
 		String field = ""; //$NON-NLS-1$
 		
@@ -307,9 +311,6 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 		}else if (filter.getDateFieldOption() == PatrolStartDateField.INSTANCE){
 			table = engine.tablePrefix(Patrol.class);
 			field = "start_date"; //$NON-NLS-1$
-		}else if (filter.getDateFieldOption() == WaypointDateField.INSTANCE){
-			table = engine.tablePrefix(PatrolLegDay.class);
-			field = "patrol_day"; //$NON-NLS-1$
 		}else{
 			throw new SQLException(MessageFormat.format(Messages.DerbyFilterToSqlGenerator_DateFilteNotSupported, new Object[]{filter.getDateFieldOption().getGuiName(Locale.getDefault())}));
 		}

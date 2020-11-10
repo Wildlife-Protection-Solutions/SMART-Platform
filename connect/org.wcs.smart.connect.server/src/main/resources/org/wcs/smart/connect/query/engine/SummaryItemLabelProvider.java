@@ -459,7 +459,7 @@ public class SummaryItemLabelProvider {
 		String[]  filterHkeys = item.getFilterKeys();
 		
 		List<ListItem> items = new ArrayList<ListItem>();
-		if (item.getAttributeType() == AttributeType.LIST){
+		if (item.getAttributeType().isList()){
 			if (filterHkeys != null) {
 				for (String key : filterHkeys){
 					AttributeListItem it = getAttributeListIem(key, item.getAttributeKey());

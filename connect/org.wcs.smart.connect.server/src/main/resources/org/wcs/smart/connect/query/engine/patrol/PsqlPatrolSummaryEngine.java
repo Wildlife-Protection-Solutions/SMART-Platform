@@ -25,6 +25,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -38,6 +39,7 @@ import java.util.logging.Logger;
 
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
+import org.wcs.smart.NamedPreparedStatement;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.Employee;
@@ -51,16 +53,21 @@ import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
 import org.wcs.smart.connect.query.engine.ISummaryEngine;
 import org.wcs.smart.connect.query.engine.ListItem;
+import org.wcs.smart.connect.query.engine.PsqlFilterToSqlGenerator;
 import org.wcs.smart.connect.query.engine.SummaryItemLabelProvider;
+import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationAttributeList;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
+import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.query.ext.IExtensionGroupBy;
@@ -867,7 +874,7 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 			try(ResultSet rs = parseQueryString(c, sql.toString()).executeQuery()){
 				return createValueResults(rs, groupBy, attributeItem.asString());
 			}
-		} else if (attributeItem.getAttributeType() == AttributeType.LIST) {
+		} else if (attributeItem.getAttributeType().isList()) {
 			StringBuilder fromSql = new StringBuilder();
 			
 			fromSql.append(dataTableName + " temp "); //$NON-NLS-1$
@@ -917,6 +924,16 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 			sql.append(".attribute_uuid = "); //$NON-NLS-1$
 			sql.append(tablePrefix(Attribute.class));
 			sql.append(".uuid "); //$NON-NLS-1$
+			if (attributeItem.getAttributeType() == Attribute.AttributeType.MLIST) {
+				sql.append(" join "); //$NON-NLS-1$
+				sql.append(tableNamePrefix(WaypointObservationAttributeList.class));
+				sql.append(" on "); //$NON-NLS-1$
+				sql.append(tablePrefix(WaypointObservationAttribute.class));
+				sql.append(".uuid = "); //$NON-NLS-1$
+				sql.append(tablePrefix(WaypointObservationAttributeList.class));
+				sql.append(".observation_attribute_uuid "); //$NON-NLS-1$
+			}
+			
 			sql.append(" join "); //$NON-NLS-1$
 			sql.append(tableNamePrefix(AttributeListItem.class));
 			sql.append(" on "); //$NON-NLS-1$
@@ -926,10 +943,18 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 			sql.append(".uuid "); //$NON-NLS-1$
 
 			sql.append(" WHERE "); //$NON-NLS-1$
-			sql.append(tablePrefix(WaypointObservationAttribute.class));
-			sql.append(".list_element_uuid =  "); //$NON-NLS-1$
-			sql.append(tablePrefix(AttributeListItem.class));
-			sql.append(".uuid and "); //$NON-NLS-1$
+			if (attributeItem.getAttributeType() == Attribute.AttributeType.MLIST) {
+				sql.append(tablePrefix(WaypointObservationAttributeList.class));
+				sql.append(".list_element_uuid =  "); //$NON-NLS-1$
+				sql.append(tablePrefix(AttributeListItem.class));
+				sql.append(".uuid "); //$NON-NLS-1$
+			}else {
+				sql.append(tablePrefix(WaypointObservationAttribute.class));
+				sql.append(".list_element_uuid =  "); //$NON-NLS-1$
+				sql.append(tablePrefix(AttributeListItem.class));
+				sql.append(".uuid "); //$NON-NLS-1$
+			}
+			sql.append(" and "); //$NON-NLS-1$
 			sql.append(tablePrefix(AttributeListItem.class));
 			String p1 = addParameterValue(attributeItem.getItemKey());
 			String p2 = addParameterValue(attributeItem.getAttributeKey());
@@ -1460,7 +1485,7 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 			}else if (gb instanceof AttributeGroupBy){
 			
 				groupBySql.append("attribute_" + itemcnt); //$NON-NLS-1$
-				if (((AttributeGroupBy)gb).getAttributeType() == AttributeType.LIST){
+				if (((AttributeGroupBy)gb).getAttributeType().isList()){
 					groupByInnerSql.append(tablePrefix(AttributeListItem.class) + "_" + itemcnt); //$NON-NLS-1$
 					groupByInnerSql.append(".keyid as  attribute_" + itemcnt); //$NON-NLS-1$
 				}else if (((AttributeGroupBy)gb).getAttributeType() == AttributeType.TREE){
@@ -1486,7 +1511,25 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 				}
 				
 				fromSql.append(" JOIN "); //$NON-NLS-1$
-				if (((AttributeGroupBy)gb).getAttributeType() == AttributeType.LIST){
+				if (((AttributeGroupBy)gb).getAttributeType() == AttributeType.MLIST){
+					fromSql.append(tableNames.get(WaypointObservationAttributeList.class));
+					fromSql.append(" "); //$NON-NLS-1$
+					fromSql.append(tablePrefix(WaypointObservationAttributeList.class) + "_" + itemcnt); //$NON-NLS-1$
+					fromSql.append(" on "); //$NON-NLS-1$
+					fromSql.append(tablePrefix(WaypointObservationAttribute.class) + "_" + itemcnt); //$NON-NLS-1$
+					fromSql.append(".uuid =  "); //$NON-NLS-1$
+					fromSql.append(tablePrefix(WaypointObservationAttributeList.class) + "_" + itemcnt); //$NON-NLS-1$
+					fromSql.append(".observation_attribute_uuid "); //$NON-NLS-1$
+					fromSql.append(" JOIN "); //$NON-NLS-1$
+					fromSql.append(tableNames.get(AttributeListItem.class));
+					fromSql.append(" "); //$NON-NLS-1$
+					fromSql.append(tablePrefix(AttributeListItem.class) + "_" + itemcnt); //$NON-NLS-1$
+					fromSql.append(" on "); //$NON-NLS-1$
+					fromSql.append(tablePrefix(AttributeListItem.class) + "_" + itemcnt); //$NON-NLS-1$
+					fromSql.append(".uuid ="); //$NON-NLS-1$
+					fromSql.append(tablePrefix(WaypointObservationAttributeList.class) + "_" + itemcnt); //$NON-NLS-1$
+					fromSql.append(".list_element_uuid "); //$NON-NLS-1$
+				}else if (((AttributeGroupBy)gb).getAttributeType() == AttributeType.LIST){
 					fromSql.append(tableNames.get(AttributeListItem.class));
 					fromSql.append(" "); //$NON-NLS-1$
 					fromSql.append(tablePrefix(AttributeListItem.class) + "_" + itemcnt); //$NON-NLS-1$
@@ -2031,5 +2074,196 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 		logger.finest(sql.toString());
 		c.createStatement().executeUpdate(sql.toString());
 		
+	}
+	
+	@Override
+	public void createWaypointTable(Connection c, String waypointTable, Collection<IWaypointSource> sources, ConservationAreaFilter caFilter, DateFilter dateFilter) throws SQLException {
+		// -- build temporary table
+		StringBuilder sql = new StringBuilder();
+		sql.append("CREATE TABLE " + waypointTable + " (wp_uuid uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
+		logger.finest(sql.toString());
+		c.createStatement().execute(sql.toString());
+
+		// -- create index
+		sql = new StringBuilder();
+		sql.append("CREATE INDEX " + getIndexName(waypointTable) + "_wpuuid_idx on " + waypointTable + " (wp_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		logger.finest(sql.toString());
+		c.createStatement().execute(sql.toString());
+
+		// -- populate table
+		clearParameters();
+		sql = new StringBuilder();
+		sql.append("INSERT INTO "); //$NON-NLS-1$
+		sql.append(waypointTable);
+		sql.append("(wp_uuid) SELECT "); //$NON-NLS-1$
+		sql.append(tablePrefix(Waypoint.class));
+		sql.append(".uuid "); //$NON-NLS-1$
+		sql.append("FROM "); //$NON-NLS-1$
+
+		sql.append(tableName(Waypoint.class));
+		sql.append(" as ");//$NON-NLS-1$
+		sql.append(tablePrefix(Waypoint.class));
+
+		sql.append (" JOIN "); //$NON-NLS-1$
+		sql.append(tableNamePrefix(PatrolWaypoint.class));
+		sql.append(" ON "); //$NON-NLS-1$
+		sql.append(tablePrefix(PatrolWaypoint.class));
+		sql.append(".wp_uuid = "); //$NON-NLS-1$
+		sql.append(tablePrefix(Waypoint.class));
+		sql.append(".uuid "); //$NON-NLS-1$
+		
+		sql.append (" JOIN "); //$NON-NLS-1$
+		sql.append(tableNamePrefix(PatrolLegDay.class));
+		sql.append(" ON "); //$NON-NLS-1$
+		sql.append(tablePrefix(PatrolWaypoint.class));
+		sql.append(".leg_day_uuid = "); //$NON-NLS-1$
+		sql.append(tablePrefix(PatrolLegDay.class));
+		sql.append(".uuid "); //$NON-NLS-1$
+		
+		sql.append (" JOIN "); //$NON-NLS-1$
+		sql.append(tableNamePrefix(PatrolLeg.class));
+		sql.append(" ON "); //$NON-NLS-1$
+		sql.append(tablePrefix(PatrolLeg.class));
+		sql.append(".uuid = "); //$NON-NLS-1$
+		sql.append(tablePrefix(PatrolLegDay.class));
+		sql.append(".patrol_leg_uuid "); //$NON-NLS-1$
+		
+		sql.append (" JOIN "); //$NON-NLS-1$
+		sql.append(tableNamePrefix(Patrol.class));
+		sql.append(" ON "); //$NON-NLS-1$
+		sql.append(tablePrefix(Patrol.class));
+		sql.append(".uuid = "); //$NON-NLS-1$
+		sql.append(tablePrefix(PatrolLeg.class));
+		sql.append(".patrol_uuid "); //$NON-NLS-1$
+		
+		sql.append(" WHERE "); //$NON-NLS-1$
+
+		sql.append("source in ("); //$NON-NLS-1$
+		for (IWaypointSource src : sources) {
+			sql.append("'" + src.getKey() + "',"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		sql.deleteCharAt(sql.length() - 1);
+		sql.append(") "); //$NON-NLS-1$
+		
+		if (caFilter != null) {
+			String cfilter = PsqlFilterToSqlGenerator.INSTANCE.asSql(caFilter, tablePrefix(Waypoint.class), this);
+			if (cfilter.length() > 0) {
+				sql.append(" and "); //$NON-NLS-1$
+				sql.append(" ( "); //$NON-NLS-1$
+				sql.append(cfilter);
+				sql.append(" ) "); //$NON-NLS-1$
+			}
+		}
+
+		if (dateFilter != null) {
+			String dfilter = PsqlFilterToSqlGenerator.INSTANCE.toSql(dateFilter, this);
+			if (dfilter.length() > 0) {
+				sql.append(" and "); //$NON-NLS-1$
+				sql.append(" ( "); //$NON-NLS-1$
+				sql.append(dfilter);
+				sql.append(" ) "); //$NON-NLS-1$
+			}
+		}
+
+		logger.finest(sql.toString());
+		try (NamedPreparedStatement ps = parseQueryString(c, sql.toString())) {
+			ps.executeUpdate();
+		}
+	}
+	
+	@Override
+	public void createWaypointGroupTable(Connection c, String waypointTable, Collection<IWaypointSource> sources, ConservationAreaFilter caFilter, DateFilter dateFilter) throws SQLException {
+		// -- build temporary table
+		StringBuilder sql = new StringBuilder();
+		sql.append("CREATE TABLE " + waypointTable + " (wp_group_uuid uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
+		logger.finest(sql.toString());
+		c.createStatement().execute(sql.toString());
+
+		// -- create index
+		sql = new StringBuilder();
+		sql.append("CREATE INDEX " + getIndexName(waypointTable) + "_wpuuid_idx on " + waypointTable + " (wp_group_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		logger.finest(sql.toString());
+		c.createStatement().execute(sql.toString());
+
+		// -- populate table
+		clearParameters();
+		sql = new StringBuilder();
+		sql = new StringBuilder();
+		sql.append("INSERT INTO "); //$NON-NLS-1$
+		sql.append(waypointTable);
+		sql.append("(wp_group_uuid) SELECT DISTINCT "); //$NON-NLS-1$
+		sql.append(tablePrefix(WaypointObservationGroup.class));
+		sql.append(".uuid "); //$NON-NLS-1$
+		sql.append("FROM "); //$NON-NLS-1$
+
+		sql.append(tableNamePrefix(Waypoint.class));
+
+		sql.append(" join "); //$NON-NLS-1$
+		sql.append(tableNamePrefix(WaypointObservationGroup.class));
+		sql.append(" on " + tablePrefix(Waypoint.class) + ".uuid = " + tablePrefix(WaypointObservationGroup.class) + ".wp_uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sql.append (" JOIN "); //$NON-NLS-1$
+		sql.append(tableNamePrefix(PatrolWaypoint.class));
+		sql.append(" ON "); //$NON-NLS-1$
+		sql.append(tablePrefix(PatrolWaypoint.class));
+		sql.append(".wp_uuid = "); //$NON-NLS-1$
+		sql.append(tablePrefix(Waypoint.class));
+		sql.append(".uuid "); //$NON-NLS-1$
+		
+		sql.append (" JOIN "); //$NON-NLS-1$
+		sql.append(tableNamePrefix(PatrolLegDay.class));
+		sql.append(" ON "); //$NON-NLS-1$
+		sql.append(tablePrefix(PatrolWaypoint.class));
+		sql.append(".leg_day_uuid = "); //$NON-NLS-1$
+		sql.append(tablePrefix(PatrolLegDay.class));
+		sql.append(".uuid "); //$NON-NLS-1$
+		
+		sql.append (" JOIN "); //$NON-NLS-1$
+		sql.append(tableNamePrefix(PatrolLeg.class));
+		sql.append(" ON "); //$NON-NLS-1$
+		sql.append(tablePrefix(PatrolLeg.class));
+		sql.append(".uuid = "); //$NON-NLS-1$
+		sql.append(tablePrefix(PatrolLegDay.class));
+		sql.append(".patrol_leg_uuid "); //$NON-NLS-1$
+		
+		sql.append (" JOIN "); //$NON-NLS-1$
+		sql.append(tableNamePrefix(Patrol.class));
+		sql.append(" ON "); //$NON-NLS-1$
+		sql.append(tablePrefix(Patrol.class));
+		sql.append(".uuid = "); //$NON-NLS-1$
+		sql.append(tablePrefix(PatrolLeg.class));
+		sql.append(".patrol_uuid "); //$NON-NLS-1$
+
+		sql.append(" WHERE "); //$NON-NLS-1$
+
+		sql.append("source in ("); //$NON-NLS-1$
+		for (IWaypointSource src : sources) {
+			sql.append("'" + src.getKey() + "',"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		sql.deleteCharAt(sql.length() - 1);
+		sql.append(")"); //$NON-NLS-1$
+		if (caFilter != null) {
+			String cfilter = PsqlFilterToSqlGenerator.INSTANCE.asSql(caFilter, tablePrefix(Waypoint.class), this);
+			if (cfilter.length() > 0) {
+				sql.append(" and "); //$NON-NLS-1$
+				sql.append(" ( "); //$NON-NLS-1$
+				sql.append(cfilter);
+				sql.append(" ) "); //$NON-NLS-1$
+			}
+		}
+
+		if (dateFilter != null) {
+			String dfilter = PsqlFilterToSqlGenerator.INSTANCE.toSql(dateFilter, this);
+			if (dfilter.length() > 0) {
+				sql.append(" and "); //$NON-NLS-1$
+				sql.append(" ( "); //$NON-NLS-1$
+				sql.append(dfilter);
+				sql.append(" ) "); //$NON-NLS-1$
+			}
+		}
+
+		logger.finest(sql.toString());
+		try (NamedPreparedStatement ps = parseQueryString(c, sql.toString())) {
+			ps.executeUpdate();
+		}
 	}
 }

@@ -600,7 +600,7 @@ public class DerbyObservationEngine extends AbstractPatrolQueryEngine implements
 		StringBuilder sb = new StringBuilder();
 
 		String[] selectFields = new String[] {
-				"ca_id","ca_name","p_uuid","p_id", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				"ca_uuid", "ca_id","ca_name","p_uuid","p_id", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 				"p_startdate","p_enddate","p_station", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				"p_team","p_objective","p_mandate", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				"p_type","p_armed","p_transporttype", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$

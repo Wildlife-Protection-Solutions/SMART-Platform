@@ -290,6 +290,7 @@ public class AssetWaypointFilterProcessor implements IFilterProcessor{
 	
 	private void processAssetFilter(AssetFilter assetFilter, FilterTable t, Connection c) throws SQLException {
 		//create temporary table for attribute observations
+		engine.clearParameters();
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO  "); //$NON-NLS-1$
 		sql.append(t.tablename + " (" + t.columnname + ")"); //$NON-NLS-1$ //$NON-NLS-2$	
@@ -347,6 +348,7 @@ public class AssetWaypointFilterProcessor implements IFilterProcessor{
 		
 	private void processAssetAttributeFilter(AssetAttributeFilter assetFilter, FilterTable t, Connection c) throws SQLException {
 		//create temporary table for attribute observations
+		engine.clearParameters();
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO "); //$NON-NLS-1$
 		sql.append(t.tablename + " (" + t.columnname + ")"); //$NON-NLS-1$ //$NON-NLS-2$	

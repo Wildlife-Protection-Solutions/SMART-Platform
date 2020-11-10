@@ -48,6 +48,7 @@ import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.IFilter;
+import org.wcs.smart.query.model.filter.date.WaypointDateField;
 
 /**
  * Processes an query filter creating a temporary table
@@ -74,7 +75,54 @@ public class FilterProcessor extends org.wcs.smart.observation.query.engine.Filt
 		return PatrolFilterSqlGenerator.INSTANCE;
 	}
 
-
+	@Override
+	protected void processDatFilter(DateFilter dateFilter, StringBuilder fromSql) throws SQLException {
+		if (dateFilter == null) return;
+		if (dateFilter.getDateFieldOption() == WaypointDateField.INSTANCE) {
+			super.processDatFilter(dateFilter, fromSql);
+			return;
+		}
+		
+		fromSql.append(" JOIN "); //$NON-NLS-1$
+		fromSql.append(namePrefix(PatrolWaypoint.class));
+		fromSql.append(" on "); //$NON-NLS-1$
+		fromSql.append(prefix(PatrolWaypoint.class));
+		fromSql.append(".wp_uuid = "); //$NON-NLS-1$
+		fromSql.append(prefix(Waypoint.class));
+		fromSql.append(".uuid "); //$NON-NLS-1$
+		
+		fromSql.append(" JOIN "); //$NON-NLS-1$
+		fromSql.append(namePrefix(PatrolLegDay.class));
+		fromSql.append(" on "); //$NON-NLS-1$
+		fromSql.append(prefix(PatrolWaypoint.class));
+		fromSql.append(".leg_day_uuid = "); //$NON-NLS-1$
+		fromSql.append(prefix(PatrolLegDay.class));
+		fromSql.append(".uuid "); //$NON-NLS-1$
+		
+		fromSql.append(" JOIN "); //$NON-NLS-1$
+		fromSql.append(namePrefix(PatrolLeg.class));
+		fromSql.append(" on "); //$NON-NLS-1$
+		fromSql.append(prefix(PatrolLeg.class));
+		fromSql.append(".uuid = "); //$NON-NLS-1$
+		fromSql.append(prefix(PatrolLegDay.class));
+		fromSql.append(".patrol_leg_uuid "); //$NON-NLS-1$
+		
+		fromSql.append(" JOIN "); //$NON-NLS-1$
+		fromSql.append(namePrefix(Patrol.class));
+		fromSql.append(" on "); //$NON-NLS-1$
+		fromSql.append(prefix(Patrol.class));
+		fromSql.append(".uuid = "); //$NON-NLS-1$
+		fromSql.append(prefix(PatrolLeg.class));
+		fromSql.append(".patrol_uuid "); //$NON-NLS-1$
+		
+		String filter = getSqlGenerator().toSql(dateFilter, engine);
+		if (filter.length() > 0) {
+			fromSql.append(" and "); //$NON-NLS-1$
+			fromSql.append(filter);
+		}
+		
+	}
+	
 	/**
 	 * Populates the query temporary table.
 	 * 
@@ -138,14 +186,6 @@ public class FilterProcessor extends org.wcs.smart.observation.query.engine.Filt
 		sql.append(".uuid = "); //$NON-NLS-1$
 		sql.append(prefix(PatrolLegDay.class));
 		sql.append(".patrol_leg_uuid "); //$NON-NLS-1$
-		
-		if (dateFilter != null) {
-			String filter = getSqlGenerator().toSql(dateFilter, engine);
-			if (filter.length() > 0) {
-				sql.append(" and "); //$NON-NLS-1$
-				sql.append(filter);
-			}
-		}
 				
 		sql.append(" left join "); //$NON-NLS-1$
 		sql.append(name(PatrolLegMember.class));
@@ -189,6 +229,14 @@ public class FilterProcessor extends org.wcs.smart.observation.query.engine.Filt
 		sql.append(".wp_uuid = "); //$NON-NLS-1$
 		sql.append(prefix(Waypoint.class));
 		sql.append(".uuid "); //$NON-NLS-1$
+		
+		if (dateFilter != null) {
+			String filter = getSqlGenerator().toSql(dateFilter, engine);
+			if (filter.length() > 0) {
+				sql.append(" and "); //$NON-NLS-1$
+				sql.append(filter);
+			}
+		}
 		
 		if (populateObservation || 
 				observationFilterVisitor.hasAttributeFilter() || 

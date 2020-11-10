@@ -33,6 +33,7 @@ import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
 import org.wcs.smart.connect.query.engine.ObservationFilterUtils;
 import org.wcs.smart.connect.query.engine.PsqlFilterToSqlGenerator;
+import org.wcs.smart.connect.query.engine.ObservationFilterUtils.IDateFilterProcessor;
 import org.wcs.smart.entity.query.engine.visitor.AreaFilterVisitor;
 import org.wcs.smart.entity.query.engine.visitor.HasObservationFilterVisitor;
 import org.wcs.smart.observation.model.Waypoint;
@@ -111,8 +112,15 @@ public class PsqlEntityFilterProcessor implements IFilterProcessor {
 		}
 		qFilter.accept(observationFilterVisitor);		
 		if (observationFilterVisitor.hasAttributeFilter()){
+			IDateFilterProcessor dateProcessor = (engine, sb)->{
+				String dfilter = PsqlFilterToSqlGenerator.INSTANCE.toSql(dateFilter, engine);
+				if ( !dfilter.isEmpty() ) {
+					sb.append(" AND "); //$NON-NLS-1$
+					sb.append(dfilter);
+				}
+			};
 			ObservationFilterUtils.createObservationTable(observationTable, c, queryFilter, 
-					engine, dateFilter, caFilter, 
+					engine, dateProcessor, caFilter, 
 					WaypointSourceEngine.INSTANCE.getSupportedSources(),
 					new EntityAttributeFilterCollectorVisitor(c, caFilter, engine));
 		}

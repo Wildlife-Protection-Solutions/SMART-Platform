@@ -22,8 +22,6 @@
 package org.wcs.smart.asset.query.engine;
 
 import java.sql.SQLException;
-import java.time.LocalDate;
-import java.time.LocalTime;
 
 import org.locationtech.jts.io.WKBReader;
 import org.wcs.smart.asset.query.internal.Messages;
@@ -38,7 +36,6 @@ import org.wcs.smart.query.model.filter.AreaFilter;
 import org.wcs.smart.query.model.filter.AreaFilter.AreaFilterGeometryType;
 import org.wcs.smart.query.model.filter.AttributeFilter;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
-import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.Operator;
 
@@ -118,38 +115,6 @@ public class AssetFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 		if (t != null) return t.tablename + "." + t.columnname + " is not null";  //$NON-NLS-1$//$NON-NLS-2$
 		
 		throw new SQLException(Messages.AssetFilterSqlGenerator_AssetFilterError);	
-	}
-	
-	
-	/*
-	 * Date Filter
-	 */
-	@Override
-	protected String toSql(DateFilter filter, IQueryEngine engine) throws SQLException{
-		String table = engine.tablePrefix(Waypoint.class);
-		String field = "datetime"; //$NON-NLS-1$
-		
-		field = table + "." + field; //$NON-NLS-1$
-		
-		LocalDate[] bits = filter.getDateFilterOption().getDates(); 
-		String f = ""; //$NON-NLS-1$
-		if (bits == null){
-			return ""; //$NON-NLS-1$
-		}
-		if (bits.length == 1){
-			String p1 = engine.addParameterValue(bits[0].toString());
-			f = " ( " +field + " >= " + p1 + " ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		}else if (bits.length == 2 && filter.getDateFilterOption().isEndDateInclusive()){
-			String p1 = engine.addParameterValue(bits[0].atStartOfDay().toString());
-			String p2 = engine.addParameterValue(bits[1].atTime(LocalTime.MAX).toString());
-			f = " ( cast( " + field + " as date ) >= " + p1 + " and cast( " + field  + " as date) <= " + p2 + " ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-		}else if (bits.length == 2){
-			String p1 = engine.addParameterValue(bits[0].atStartOfDay().toString());
-			String p2 = engine.addParameterValue(bits[1].atStartOfDay().toString());
-			f = " ( cast ( " + field + " as date ) >= " + p1 + " and cast( " + field  + " as date ) < " + p2 + " ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-		}
-
-		return f;
 	}
 	
 	

@@ -51,6 +51,7 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.connect.query.WaypointSourceEngine;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine.FilterTable;
+import org.wcs.smart.connect.query.engine.ObservationFilterUtils.IDateFilterProcessor;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
 import org.wcs.smart.connect.query.engine.ObservationFilterUtils;
 import org.wcs.smart.connect.query.engine.PsqlFilterToSqlGenerator;
@@ -138,8 +139,15 @@ public class AssetFilterProcessor implements IFilterProcessor {
 		Map<IFilter, FilterTable> assetFilterToTableName = processAssetTables(c, queryFilter, dateFilter, caFilter);
 		
 		if (observationFilterVisitor.hasAttributeFilter()){
+			IDateFilterProcessor dateProcessor = (engine, sb)->{
+				String dfilter = PsqlFilterToSqlGenerator.INSTANCE.toSql(dateFilter, engine);
+				if ( !dfilter.isEmpty() ) {
+					sb.append(" AND "); //$NON-NLS-1$
+					sb.append(dfilter);
+				}
+			};
 			ObservationFilterUtils.createObservationTable(observationTable, c, queryFilter, 
-					engine, dateFilter, caFilter, 
+					engine, dateProcessor, caFilter, 
 					Collections.singleton(WaypointSourceEngine.INSTANCE.getSource(AssetWaypointSource.KEY)));
 		}
 

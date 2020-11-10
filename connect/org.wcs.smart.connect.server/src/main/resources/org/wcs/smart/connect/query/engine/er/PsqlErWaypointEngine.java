@@ -295,4 +295,6 @@ public class PsqlErWaypointEngine extends PsqlErEngine implements IWOEngine<Surv
 	public String getDateFilterField() throws SQLException{
 		return "mission_day"; //$NON-NLS-1$
 	}
+	
+	
 }

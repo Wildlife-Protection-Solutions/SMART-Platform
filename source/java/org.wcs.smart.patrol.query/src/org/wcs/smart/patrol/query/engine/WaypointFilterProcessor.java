@@ -141,15 +141,7 @@ public class WaypointFilterProcessor extends org.wcs.smart.observation.query.eng
 		sql.append(".uuid = "); //$NON-NLS-1$
 		sql.append(prefix(PatrolLegDay.class));
 		sql.append(".patrol_leg_uuid "); //$NON-NLS-1$
-		
-		if (dateFilter != null) {
-			String filter = getSqlGenerator().toSql(dateFilter, engine);
-			if (filter.length() > 0) {
-				sql.append(" and "); //$NON-NLS-1$
-				sql.append(filter);
-			}
-		}
-		
+
 		sql.append(" left join "); //$NON-NLS-1$
 		sql.append(name(PatrolLegMember.class));
 		usedTables.add(PatrolLegMember.class);
@@ -186,6 +178,13 @@ public class WaypointFilterProcessor extends org.wcs.smart.observation.query.eng
 		sql.append(prefix(Waypoint.class) + ".uuid = "); //$NON-NLS-1$
 		sql.append(prefix(PatrolWaypoint.class) + ".wp_uuid"); //$NON-NLS-1$
 
+		if (dateFilter != null) {
+			String filter = getSqlGenerator().toSql(dateFilter, engine);
+			if (filter.length() > 0) {
+				sql.append(" and "); //$NON-NLS-1$
+				sql.append(filter);
+			}
+		}
 		sql.append(" left join "); //$NON-NLS-1$
 		sql.append(waypointTable + " as waypointTable "); //$NON-NLS-1$
 		sql.append(" on "); //$NON-NLS-1$

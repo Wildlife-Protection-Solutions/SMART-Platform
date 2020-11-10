@@ -97,7 +97,7 @@ public class PatrolObservationQueryResult extends ObservationQueryResult<PatrolO
 		StringBuilder sb = new StringBuilder();
 
 		String[] selectFields = new String[] {
-				"ca_id","ca_name","p_uuid","p_id", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				"ca_uuid", "ca_id","ca_name","p_uuid","p_id", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 				"p_startdate","p_enddate","p_station", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				"p_team","p_objective","pl_mandate", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				"p_type","p_armed","p_transporttype", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$

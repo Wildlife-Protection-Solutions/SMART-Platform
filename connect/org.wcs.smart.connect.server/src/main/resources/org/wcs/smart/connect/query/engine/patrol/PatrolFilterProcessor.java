@@ -33,6 +33,7 @@ import org.wcs.smart.connect.query.WaypointSourceEngine;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
 import org.wcs.smart.connect.query.engine.ObservationFilterUtils;
+import org.wcs.smart.connect.query.engine.ObservationFilterUtils.IDateFilterProcessor;
 import org.wcs.smart.connect.query.engine.PsqlFilterToSqlGenerator;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -118,8 +119,49 @@ public class PatrolFilterProcessor implements IFilterProcessor {
 		qFilter.accept(observationFilterVisitor);		
 
 		if (observationFilterVisitor.hasAttributeFilter()){
+			
+			IDateFilterProcessor p = (engine, sb)->{
+				
+				sb.append (" JOIN "); //$NON-NLS-1$
+				sb.append(namePrefix(PatrolWaypoint.class));
+				sb.append(" ON "); //$NON-NLS-1$
+				sb.append(prefix(PatrolWaypoint.class));
+				sb.append(".wp_uuid = "); //$NON-NLS-1$
+				sb.append(prefix(Waypoint.class));
+				sb.append(".uuid "); //$NON-NLS-1$
+				
+				sb.append (" JOIN "); //$NON-NLS-1$
+				sb.append(namePrefix(PatrolLegDay.class));
+				sb.append(" ON "); //$NON-NLS-1$
+				sb.append(prefix(PatrolWaypoint.class));
+				sb.append(".leg_day_uuid = "); //$NON-NLS-1$
+				sb.append(prefix(PatrolLegDay.class));
+				sb.append(".uuid "); //$NON-NLS-1$
+				
+				sb.append (" JOIN "); //$NON-NLS-1$
+				sb.append(namePrefix(PatrolLeg.class));
+				sb.append(" ON "); //$NON-NLS-1$
+				sb.append(prefix(PatrolLeg.class));
+				sb.append(".uuid = "); //$NON-NLS-1$
+				sb.append(prefix(PatrolLegDay.class));
+				sb.append(".patrol_leg_uuid "); //$NON-NLS-1$
+				
+				sb.append (" JOIN "); //$NON-NLS-1$
+				sb.append(namePrefix(Patrol.class));
+				sb.append(" ON "); //$NON-NLS-1$
+				sb.append(prefix(Patrol.class));
+				sb.append(".uuid = "); //$NON-NLS-1$
+				sb.append(prefix(PatrolLeg.class));
+				sb.append(".patrol_uuid "); //$NON-NLS-1$
+				
+				String dfilter = PsqlFilterToSqlGenerator.INSTANCE.toSql(dateFilter, engine);
+				if ( !dfilter.isEmpty() ) {
+					sb.append(" AND "); //$NON-NLS-1$
+					sb.append(dfilter);
+				}
+			};
 			ObservationFilterUtils.createObservationTable(observationTable, c, queryFilter, 
-					engine, dateFilter, caFilter, 
+					engine, p, caFilter, 
 					Collections.singleton(WaypointSourceEngine.INSTANCE.getSource(PatrolWaypointSource.PATROL_WP_SOURCE_ID)));
 		}
 
