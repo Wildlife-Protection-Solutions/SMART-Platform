@@ -80,6 +80,7 @@ public class SurveyFilterDialog extends SmartFilterDialog  {
 	
 	private DateFilterComposite dateFilterCmp;
 	
+	private boolean includeMissionDateFilter = true;
 	
 	/**
 	 * Create the dialog.
@@ -87,8 +88,13 @@ public class SurveyFilterDialog extends SmartFilterDialog  {
 	 * @param filter the filter to update
 	 */
 	public SurveyFilterDialog(Shell parent, IUpdatableView view, SurveyFilter current) {
+		this(parent, view, current, true);
+	}
+	
+	public SurveyFilterDialog(Shell parent, IUpdatableView view, SurveyFilter current, boolean includeMissionDateFilter) {
 		super(parent, view);
 		this.filter = current;
+		this.includeMissionDateFilter = includeMissionDateFilter;
 	}
 
 	
@@ -123,7 +129,9 @@ public class SurveyFilterDialog extends SmartFilterDialog  {
 				MessageDialog.openWarning(getParentShell(), Messages.SurveyFilterDialog_WarnTitle, Messages.SurveyFilterDialog_WarnInfo); 
 			}
 		}
-		filter.setMissionDateFilter(dateFilterCmp.getDateFilterForModel(), dateFilterCmp.getStartDateForModel(), dateFilterCmp.getEndDateForModel());
+		if (dateFilterCmp != null) {
+			filter.setMissionDateFilter(dateFilterCmp.getDateFilterForModel(), dateFilterCmp.getStartDateForModel(), dateFilterCmp.getEndDateForModel());
+		}
 
 		filter.setSurveyNameFilter(nameFilter.getComparisonForModel(), nameFilter.getFilterValueForModel());
 	}
@@ -153,7 +161,7 @@ public class SurveyFilterDialog extends SmartFilterDialog  {
 				initDesignSelection();
 			}
 		}
-		dateFilterCmp.applyState(filter.getMissionDateFilter(), filter.getMissionStartDate(), filter.getMissionEndDate());
+		if (dateFilterCmp != null) dateFilterCmp.applyState(filter.getMissionDateFilter(), filter.getMissionStartDate(), filter.getMissionEndDate());
 		nameFilter.applyState(filter.getSurveyNameComparator(), filter.getSurveyNameFilter(), surveyField);
 		updateDesignEnabled();
 	}
@@ -189,8 +197,10 @@ public class SurveyFilterDialog extends SmartFilterDialog  {
 		main.setLayout(new GridLayout(1, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		SmartUiUtils.createHeaderLabel(main, Messages.SurveyFilterDialog_MissionDatesFilter);
-		dateFilterCmp = new DateFilterComposite(main, SWT.NONE, this);
+		if (includeMissionDateFilter) {
+			SmartUiUtils.createHeaderLabel(main, Messages.SurveyFilterDialog_MissionDatesFilter);
+			dateFilterCmp = new DateFilterComposite(main, SWT.NONE, this);
+		}
 		
 		
 		SmartUiUtils.createHeaderLabel(main, Messages.SurveyFilterDialog_IdGroup);

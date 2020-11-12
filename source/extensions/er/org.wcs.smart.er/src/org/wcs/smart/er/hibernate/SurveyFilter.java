@@ -174,7 +174,7 @@ public class SurveyFilter {
 		str.append("FROM Mission m JOIN m.survey s JOIN s.surveyDesign sd "); //$NON-NLS-1$
 		str.append("WHERE sd.conservationArea = :ca " ); //$NON-NLS-1$
 	
-		if (missionDateFilter != null){
+		if (missionDateFilter != null && missionDateFilter != DateFilter.ALL){
 			str.append(" AND "); //$NON-NLS-1$
 			str.append(" ( m.endDate >= :date1 and m.startDate <= :date2 ) "); //$NON-NLS-1$
 		}
@@ -235,7 +235,7 @@ public class SurveyFilter {
 				query.setParameter("name", this.surveyNameFilter); //$NON-NLS-1$
 			}
 		}		
-		if (missionDateFilter != null) {
+		if (missionDateFilter != null && missionDateFilter != DateFilter.ALL) {
 			LocalDate start = missionDateFilter.getStartDate();
 			if (start == null){
 				start = missionStartDate;

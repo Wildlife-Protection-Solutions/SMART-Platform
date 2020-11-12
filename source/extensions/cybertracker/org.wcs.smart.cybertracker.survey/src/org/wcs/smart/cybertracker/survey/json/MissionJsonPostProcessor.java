@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.cybertracker.survey.json;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.hibernate.Session;
@@ -49,7 +49,7 @@ public class MissionJsonPostProcessor implements IJsonPostProcessor {
 		hql.append( "l.mission.endDate < :now " ); //$NON-NLS-1$
 					
 		List<CtMissionLink> links = session.createQuery(hql.toString(), CtMissionLink.class)
-				.setParameter("now", LocalDateTime.now().minusMonths(JsonCtParser.CLEANUP_MONTHS) ) //$NON-NLS-1$
+				.setParameter("now", LocalDate.now().minusMonths(JsonCtParser.CLEANUP_MONTHS) ) //$NON-NLS-1$
 				.list();
 					
 		for (CtMissionLink l : links) {

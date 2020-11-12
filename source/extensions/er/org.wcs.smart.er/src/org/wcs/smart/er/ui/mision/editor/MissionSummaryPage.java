@@ -38,6 +38,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
@@ -94,6 +95,8 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 	private TableViewer dataTable;
 	private Form form;
 	
+	private SashForm sashForm;
+	
 	public MissionSummaryPage(MissionEditor missionEditor){
 		this.missionEditor = missionEditor;
 	}
@@ -142,7 +145,12 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 			missionEditor.createEditWarning(errorMsg, form.getBody(), toolkit);
 		}
 		
-		Section section = toolkit.createSection(form.getBody(), Section.TITLE_BAR);
+
+		sashForm = new SashForm(form.getBody(), SWT.VERTICAL);
+		sashForm.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		toolkit.adapt(sashForm);
+		
+		Section section = toolkit.createSection(sashForm, Section.TITLE_BAR);
 		section.setText(Messages.MissionSummaryPage_SummaryLabel);
 		section.setLayout(new GridLayout());
 		section.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -217,6 +225,7 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 		});
 		lstMembers.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)lstMembers.getControl().getLayoutData()).widthHint = 100;
+		((GridData)lstMembers.getControl().getLayoutData()).heightHint = 100;
 		
 		if (canEdit){
 			Hyperlink edit = toolkit.createHyperlink(left, DialogConstants.EDIT_LINK_TEXT, SWT.NONE);
@@ -306,7 +315,7 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 		}
 	
 		//data section
-		Section dataSection = toolkit.createSection(form.getBody(), Section.TITLE_BAR);
+		Section dataSection = toolkit.createSection(sashForm, Section.TITLE_BAR);
 		dataSection.setText(Messages.MissionSummaryPage_MissionDataLabel);
 		dataSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 				
@@ -405,7 +414,7 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 		
 		Point p = comp.computeSize(SWT.DEFAULT, SWT.DEFAULT);
 		scrolltop.setMinSize(p.x, p.y+20);
-		
+		sashForm.setWeights(new int[]{70,30});
 		initControls();
 	}
 	

@@ -104,6 +104,12 @@ public class SurveyHibernateManager {
 			mission.setId(id);
 		}
 		
+		//without this for code the saveorupdate causes some
+		//waypoints to get deleted.  Not sure exactly why
+		for (MissionDay md : mission.getMissionDays()){
+			md.getWaypoints().forEach(wp->wp.getWaypoint().getId());
+		}
+		
 		session.saveOrUpdate(mission);
 		
 		IWaypointSource src = SmartContext.INSTANCE.getClass(IWaypointSourceEngine.class).getSource(SurveyWaypointSource.KEY);
@@ -112,33 +118,34 @@ public class SurveyHibernateManager {
 		
 			//save all the waypoints as well
 			for (MissionDay md : mission.getMissionDays()){
-				if (md.getWaypoints() != null) {
-					for (SurveyWaypoint wp: md.getWaypoints()){
-						if (wp.getWaypoint().getAttachments() != null){
-							//update all the waypoint attachments directory
-							for (WaypointAttachment wa : wp.getWaypoint().getAttachments()){
-								wa.computeFileLocation(Paths.get(SmartDB.getCurrentConservationArea().getFileDataStoreLocation())
-										.resolve(src.getDatastoreFileLocation(mission, session))
-										.resolve(wa.getFilename()));
-							}
+				if (md.getWaypoints() == null) continue;
+				
+				for (SurveyWaypoint wp: md.getWaypoints()){
+					if (wp.getWaypoint().getAttachments() != null){
+						//update all the waypoint attachments directory
+						for (WaypointAttachment wa : wp.getWaypoint().getAttachments()){
+							wa.computeFileLocation(Paths.get(SmartDB.getCurrentConservationArea().getFileDataStoreLocation())
+									.resolve(src.getDatastoreFileLocation(mission, session))
+									.resolve(wa.getFilename()));
 						}
-						if (wp.getWaypoint().getObservationGroups() != null){
-							for (WaypointObservationGroup grp : wp.getWaypoint().getObservationGroups()){
-								for (WaypointObservation wo : grp.getObservations()){
-									if (wo.getAttachments() != null){
-										for (ObservationAttachment wa : wo.getAttachments()){
-											wa.computeFileLocation(Paths.get(SmartDB.getCurrentConservationArea().getFileDataStoreLocation())
-													.resolve(src.getDatastoreFileLocation(mission, session))
-													.resolve(wa.getFilename()));
-										}
+					}
+					if (wp.getWaypoint().getObservationGroups() != null){
+						for (WaypointObservationGroup grp : wp.getWaypoint().getObservationGroups()){
+							for (WaypointObservation wo : grp.getObservations()){
+								if (wo.getAttachments() != null){
+									for (ObservationAttachment wa : wo.getAttachments()){
+										wa.computeFileLocation(Paths.get(SmartDB.getCurrentConservationArea().getFileDataStoreLocation())
+												.resolve(src.getDatastoreFileLocation(mission, session))
+												.resolve(wa.getFilename()));
 									}
 								}
 							}
 						}
-						session.saveOrUpdate(wp.getWaypoint());
-						session.saveOrUpdate(wp);
 					}
+					session.saveOrUpdate(wp.getWaypoint());
+					session.saveOrUpdate(wp);
 				}
+				
 			}
 		}
 	}

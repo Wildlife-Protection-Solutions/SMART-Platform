@@ -34,6 +34,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.hibernate.Session;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
@@ -43,6 +44,7 @@ import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter;
 import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter.JsonKey;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationAttributeList;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -171,6 +173,33 @@ public class JsonUtils {
 				return false;
 			}
 			toUpdate.setAttributeListItem(li);
+		}else if (att.getType() == AttributeType.MLIST) {
+			JSONArray items = (JSONArray)value;
+			
+			List<WaypointObservationAttributeList> listitems = new ArrayList<>();
+			for (int i = 0; i < items.size(); i ++) {
+				String listElement = items.get(i).toString();
+				
+				if (!listElement.startsWith(JsonKey.ATTRIBUTE_LIST.key + CyberTrackerConfExporter.KEY_SEP)) throw new Exception(MessageFormat.format(Messages.JsonUtils_InvalidMultiSelectListValue, listElement));
+				
+				AttributeListItem li = findAttributeListItem(listElement.substring(2), session);	
+				if (li == null){
+					warnings.add(MessageFormat.format(Messages.JsonUtils_ListItemNotFound, listElement, toUpdate.getAttribute().getName()));
+					continue;
+				}
+				
+				WaypointObservationAttributeList woli = new WaypointObservationAttributeList();
+				woli.setAttributeLisItem(li);
+				woli.setObservationAttribute(toUpdate);
+				listitems.add(woli);
+				
+				toUpdate.setAttributeListItem(li);
+			}
+			//nothing to add
+			if (listitems.isEmpty()) return false;
+			
+			toUpdate.setAttributeListItems(listitems);
+			
 		}else if (att.getType() == AttributeType.NUMERIC){
 			Double value2 = null;
 			if (value instanceof Number){
