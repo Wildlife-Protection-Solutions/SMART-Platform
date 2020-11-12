@@ -47,7 +47,6 @@ import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.query.engine.visitor.HasObservationFilterVisitor;
 import org.wcs.smart.entity.query.engine.visitor.HasObservationGroupByVisitor;
 import org.wcs.smart.entity.query.internal.Messages;
-import org.wcs.smart.entity.query.model.EntityQueryResultItem;
 import org.wcs.smart.entity.query.model.EntitySummaryQuery;
 import org.wcs.smart.entity.query.parser.internal.EntityAttributeGroupBy;
 import org.wcs.smart.entity.query.ui.definition.EntityDropItemFactory;
@@ -55,6 +54,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationAttributeList;
 import org.wcs.smart.observation.query.model.filter.WaypointSourceGroupBy;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
@@ -584,6 +584,103 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 			ResultSet rs = parseQueryString(c, sql.toString()).executeQuery();
 
 			return createValueResults(rs, groupBy, attributeItem.asString());
+		} else if (attributeItem.getAttributeType() == AttributeType.MLIST) {
+			StringBuilder fromSql = new StringBuilder();
+			
+			fromSql.append(dataTableName + " temp "); //$NON-NLS-1$
+			StringBuilder groupBySql = new StringBuilder();
+			StringBuilder groupByInnerSql = new StringBuilder();
+
+			createGroupBySql(groupBy, fromSql, groupBySql, groupByInnerSql, attributeItem, query);
+			
+			String valueSql = ""; //$NON-NLS-1$
+			
+			StringBuilder valueAggSql = new StringBuilder();
+			
+			if (attributeItem.getValueType() == IValueItem.ValueType.OBSERVATION){
+				valueSql = "temp.ob_uuid"; //$NON-NLS-1$
+				valueAggSql.append("count(ob_uuid)"); //$NON-NLS-1$
+			}else{
+				valueSql = "temp.wp_uuid"; //$NON-NLS-1$
+				valueAggSql.append("count(wp_uuid)"); //$NON-NLS-1$
+			}
+			
+			StringBuilder sql = new StringBuilder();
+			sql.append("SELECT "); //$NON-NLS-1$
+			sql.append(groupBySql);
+			if (groupBySql.length() > 0){
+				sql.append(","); //$NON-NLS-1$
+			}
+			sql.append(valueAggSql);
+			sql.append(" FROM ( SELECT distinct "); //$NON-NLS-1$
+			sql.append(groupByInnerSql);
+			if (groupByInnerSql.length() > 0){
+				sql.append(","); //$NON-NLS-1$
+			}
+			sql.append(valueSql);
+			sql.append(" FROM "); //$NON-NLS-1$
+			sql.append(fromSql);
+			
+			
+			sql.append(" join "); //$NON-NLS-1$
+			sql.append(tableNamePrefix(WaypointObservationAttribute.class));
+			sql.append(" on temp.ob_uuid = "); //$NON-NLS-1$
+			sql.append(tablePrefix(WaypointObservationAttribute.class));
+			sql.append(".observation_uuid "); //$NON-NLS-1$
+			sql.append(" join "); //$NON-NLS-1$
+			sql.append(tableNamePrefix(Attribute.class));
+			sql.append(" on "); //$NON-NLS-1$
+			sql.append(tablePrefix(WaypointObservationAttribute.class));
+			sql.append(".attribute_uuid = "); //$NON-NLS-1$
+			sql.append(tablePrefix(Attribute.class));
+			sql.append(".uuid "); //$NON-NLS-1$
+			
+			sql.append(" join "); //$NON-NLS-1$
+			sql.append(tableNamePrefix(WaypointObservationAttributeList.class));
+			sql.append(" on "); //$NON-NLS-1$
+			sql.append(tablePrefix(WaypointObservationAttribute.class));
+			sql.append(".uuid = "); //$NON-NLS-1$
+			sql.append(tablePrefix(WaypointObservationAttributeList.class));
+			sql.append(".observation_attribute_uuid "); //$NON-NLS-1$
+			
+			sql.append(" join "); //$NON-NLS-1$
+			sql.append(tableNamePrefix(AttributeListItem.class));
+			sql.append(" on "); //$NON-NLS-1$
+			sql.append(tablePrefix(AttributeListItem.class));
+			sql.append(".attribute_uuid = "); //$NON-NLS-1$
+			sql.append(tablePrefix(Attribute.class));
+			sql.append(".uuid "); //$NON-NLS-1$
+			sql.append(" and "); //$NON-NLS-1$
+			sql.append(tablePrefix(AttributeListItem.class));
+			sql.append(".uuid = "); //$NON-NLS-1$
+			sql.append(tablePrefix(WaypointObservationAttributeList.class));
+			sql.append(".list_element_uuid "); //$NON-NLS-1$
+			
+			sql.append(" WHERE "); //$NON-NLS-1$
+			sql.append(tablePrefix(AttributeListItem.class));
+			sql.append(".keyid = '"); //$NON-NLS-1$
+			sql.append(attributeItem.getItemKey());
+			sql.append("' and "); //$NON-NLS-1$
+		
+			sql.append(tablePrefix(Attribute.class));
+			sql.append(".keyid = '"); //$NON-NLS-1$
+			sql.append(attributeItem.getAttributeKey() + "'"); //$NON-NLS-1$
+			if (attributeItem.getCategoryKey() != null){	
+				String p1 = addParameterValue(attributeItem.getCategoryKey());
+				String p2 = addParameterValue(attributeItem.getCategoryKey().substring(0, attributeItem.getCategoryKey().length()-1) + "/"); //$NON-NLS-1$
+				sql.append("AND ( temp.cat_hkey >= " + p1 + " and temp.cat_hkey < " + p2 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			}
+			sql.append(") as foo "); //$NON-NLS-1$
+			if (groupBySql.length() > 0){
+				sql.append(" GROUP BY " ); //$NON-NLS-1$
+				sql.append(groupBySql);
+			}
+			
+			//do something here with sql
+			QueryPlugIn.logSql(sql.toString());
+			ResultSet rs = parseQueryString(c, sql.toString()).executeQuery();
+
+			return createValueResults(rs, groupBy, attributeItem.asString());
 		} else if (attributeItem.getAttributeType() == AttributeType.TREE) {
 			StringBuilder fromSql = new StringBuilder();
 			
@@ -926,6 +1023,9 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 				if (((AttributeGroupBy)gb).getAttributeType() == AttributeType.LIST){
 					groupByInnerSql.append(tablePrefix(AttributeListItem.class) + "_" + itemcnt); //$NON-NLS-1$
 					groupByInnerSql.append(".keyid as  attribute_" + itemcnt); //$NON-NLS-1$
+				}else if (((AttributeGroupBy)gb).getAttributeType() == AttributeType.MLIST){
+					groupByInnerSql.append(tablePrefix(AttributeListItem.class) + "_" + itemcnt); //$NON-NLS-1$
+					groupByInnerSql.append(".keyid as  attribute_" + itemcnt); //$NON-NLS-1$
 				}else if (((AttributeGroupBy)gb).getAttributeType() == AttributeType.TREE){
 					groupByInnerSql.append("smart.trimHkeyToLevel("); //$NON-NLS-1$
 					groupByInnerSql.append(((AttributeGroupBy)gb).getTreeLevel().intValue() + ","); //$NON-NLS-1$
@@ -957,6 +1057,28 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 					fromSql.append(tablePrefix(AttributeListItem.class) + "_" + itemcnt); //$NON-NLS-1$
 					fromSql.append(".uuid ="); //$NON-NLS-1$
 					fromSql.append(tablePrefix(WaypointObservationAttribute.class) + "_" + itemcnt); //$NON-NLS-1$
+					fromSql.append(".list_element_uuid "); //$NON-NLS-1$
+				
+				}else if (((AttributeGroupBy)gb).getAttributeType() == AttributeType.MLIST){
+					
+					fromSql.append(tableNames.get(WaypointObservationAttributeList.class));
+					fromSql.append(" "); //$NON-NLS-1$
+					fromSql.append(tablePrefix(WaypointObservationAttributeList.class) + "_" + itemcnt); //$NON-NLS-1$
+					fromSql.append(" on "); //$NON-NLS-1$
+					fromSql.append(tablePrefix(WaypointObservationAttribute.class) + "_" + itemcnt); //$NON-NLS-1$
+					fromSql.append(".uuid = "); //$NON-NLS-1$
+					fromSql.append(tablePrefix(WaypointObservationAttributeList.class) + "_" + itemcnt); //$NON-NLS-1$
+					fromSql.append(".observation_attribute_uuid"); //$NON-NLS-1$
+					
+					fromSql.append(" JOIN "); //$NON-NLS-1$
+					
+					fromSql.append(tableNames.get(AttributeListItem.class));
+					fromSql.append(" "); //$NON-NLS-1$
+					fromSql.append(tablePrefix(AttributeListItem.class) + "_" + itemcnt); //$NON-NLS-1$
+					fromSql.append(" on "); //$NON-NLS-1$
+					fromSql.append(tablePrefix(AttributeListItem.class) + "_" + itemcnt); //$NON-NLS-1$
+					fromSql.append(".uuid ="); //$NON-NLS-1$
+					fromSql.append(tablePrefix(WaypointObservationAttributeList.class) + "_" + itemcnt); //$NON-NLS-1$
 					fromSql.append(".list_element_uuid "); //$NON-NLS-1$
 				}else if (((AttributeGroupBy)gb).getAttributeType() == AttributeType.TREE){
 					fromSql.append(tableNames.get(AttributeTreeNode.class));
@@ -1145,7 +1267,7 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 	
 	
 	@Override
-	protected String getTemporaryTableSelectClause(boolean includeObservations) {
+	public String getTemporaryTableSelectClause(boolean includeObservations) {
 		StringBuilder sql = new StringBuilder();
 		sql.append(" SELECT DISTINCT "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".ca_uuid, "); //$NON-NLS-1$
@@ -1161,10 +1283,10 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 	}
 
 	@Override
-	protected String getTemporaryTableCreateClause(String tableName) {
+	public String getTemporaryTableCreateClause(String tableName) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
-		sql.append("p_ca_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("ca_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("wp_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("ob_uuid char(16) for bit data"); //$NON-NLS-1$
 		sql.append(")"); //$NON-NLS-1$
@@ -1172,19 +1294,8 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 	}
 
 	@Override
-	protected void buildTemporaryTableIndexes(Connection c, String tableName)
-			throws SQLException {
-		super.buildTemporaryTableIndexes(c, tableName);
-		StringBuilder sql = new StringBuilder();
-		sql.append("CREATE INDEX " + tableName + "_wp_uuid_idx on " +  tableName + "(wp_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		QueryPlugIn.logSql(sql.toString());
-		c.createStatement().execute(sql.toString());
+	public void createTemporaryTableIndexes(Connection c, String tableName) throws SQLException {
+		super.createObsIndex(c, tableName);
+		super.createWpIndex(c, tableName);
 	}
-
-	@Override
-	protected EntityQueryResultItem asQueryResultItem(ResultSet rs, Session session)
-			throws SQLException {
-		return null;
-	}
-
 }

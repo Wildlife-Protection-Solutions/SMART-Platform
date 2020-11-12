@@ -39,12 +39,11 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
+import org.wcs.smart.er.hibernate.SurveyMissionProxy;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.SurveyDesignListView;
-import org.wcs.smart.er.ui.SurveyListTreeNode;
-import org.wcs.smart.er.ui.SurveyListTreeNode.Type;
 import org.wcs.smart.er.ui.mision.wizard.NewMissionWizard;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
@@ -81,13 +80,13 @@ public class NewMissionHandler {
 					break;
 				}else if (item instanceof Survey){
 					parentSurvey = ((Survey) item).getUuid();
-				}else if (item instanceof SurveyListTreeNode &&
-						((SurveyListTreeNode)item).getType() == Type.SURVEY){
-					parentSurvey = ((SurveyListTreeNode)item).getUuid();
+				}else if (item instanceof SurveyMissionProxy &&
+						((SurveyMissionProxy)item).getType() == SurveyMissionProxy.Type.SURVEY){
+					parentSurvey = ((SurveyMissionProxy)item).getUuid();
 					break;
-				}else if (item instanceof SurveyListTreeNode && 
-					((SurveyListTreeNode)item).getType() == Type.MISSION){
-					parentSurvey = ((SurveyListTreeNode)item).getParent().getUuid();
+				}else if (item instanceof SurveyMissionProxy && 
+					((SurveyMissionProxy)item).getType() == SurveyMissionProxy.Type.MISSION){
+					parentSurvey = ((SurveyMissionProxy)item).getParent().getUuid();
 				}else if (item instanceof SurveyDesignEditorInput){
 					parentDesign = ((SurveyDesignEditorInput) item).getUuid();
 				}

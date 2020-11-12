@@ -29,14 +29,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 
 import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
@@ -106,6 +104,12 @@ public class SurveyHibernateManager {
 			mission.setId(id);
 		}
 		
+		//without this for code the saveorupdate causes some
+		//waypoints to get deleted.  Not sure exactly why
+		for (MissionDay md : mission.getMissionDays()){
+			md.getWaypoints().forEach(wp->wp.getWaypoint().getId());
+		}
+		
 		session.saveOrUpdate(mission);
 		
 		IWaypointSource src = SmartContext.INSTANCE.getClass(IWaypointSourceEngine.class).getSource(SurveyWaypointSource.KEY);
@@ -114,33 +118,34 @@ public class SurveyHibernateManager {
 		
 			//save all the waypoints as well
 			for (MissionDay md : mission.getMissionDays()){
-				if (md.getWaypoints() != null) {
-					for (SurveyWaypoint wp: md.getWaypoints()){
-						if (wp.getWaypoint().getAttachments() != null){
-							//update all the waypoint attachments directory
-							for (WaypointAttachment wa : wp.getWaypoint().getAttachments()){
-								wa.computeFileLocation(Paths.get(SmartDB.getCurrentConservationArea().getFileDataStoreLocation())
-										.resolve(src.getDatastoreFileLocation(mission, session))
-										.resolve(wa.getFilename()));
-							}
+				if (md.getWaypoints() == null) continue;
+				
+				for (SurveyWaypoint wp: md.getWaypoints()){
+					if (wp.getWaypoint().getAttachments() != null){
+						//update all the waypoint attachments directory
+						for (WaypointAttachment wa : wp.getWaypoint().getAttachments()){
+							wa.computeFileLocation(Paths.get(SmartDB.getCurrentConservationArea().getFileDataStoreLocation())
+									.resolve(src.getDatastoreFileLocation(mission, session))
+									.resolve(wa.getFilename()));
 						}
-						if (wp.getWaypoint().getObservationGroups() != null){
-							for (WaypointObservationGroup grp : wp.getWaypoint().getObservationGroups()){
-								for (WaypointObservation wo : grp.getObservations()){
-									if (wo.getAttachments() != null){
-										for (ObservationAttachment wa : wo.getAttachments()){
-											wa.computeFileLocation(Paths.get(SmartDB.getCurrentConservationArea().getFileDataStoreLocation())
-													.resolve(src.getDatastoreFileLocation(mission, session))
-													.resolve(wa.getFilename()));
-										}
+					}
+					if (wp.getWaypoint().getObservationGroups() != null){
+						for (WaypointObservationGroup grp : wp.getWaypoint().getObservationGroups()){
+							for (WaypointObservation wo : grp.getObservations()){
+								if (wo.getAttachments() != null){
+									for (ObservationAttachment wa : wo.getAttachments()){
+										wa.computeFileLocation(Paths.get(SmartDB.getCurrentConservationArea().getFileDataStoreLocation())
+												.resolve(src.getDatastoreFileLocation(mission, session))
+												.resolve(wa.getFilename()));
 									}
 								}
 							}
 						}
-						session.saveOrUpdate(wp.getWaypoint());
-						session.saveOrUpdate(wp);
 					}
+					session.saveOrUpdate(wp.getWaypoint());
+					session.saveOrUpdate(wp);
 				}
+				
 			}
 		}
 	}
@@ -206,7 +211,7 @@ public class SurveyHibernateManager {
 	 * @param filter filter or null if not filter should be applied
 	 * @return
 	 */
-	public static List<SurveyProxy> getSurveys(Session s, SurveyFilter filter){
+	public static List<SurveyMissionProxy> getSurveys(Session s, SurveyFilter filter){
 		if (filter == null){
 			//get all
 			CriteriaBuilder cb = s.getCriteriaBuilder();
@@ -215,24 +220,16 @@ public class SurveyHibernateManager {
 			c.where(cb.equal(from.get("surveyDesign").get("conservationArea"), SmartDB.getCurrentConservationArea())); //$NON-NLS-1$ //$NON-NLS-2$
 			List<Survey> ds = s.createQuery(c).getResultList();
 			
-			List<SurveyProxy> all = new ArrayList<SurveyProxy>();
+			List<SurveyMissionProxy> all = new ArrayList<SurveyMissionProxy>();
 			
 			for (Survey d : ds){
-				SurveyProxy ii = new SurveyProxy(d.getId(), d.getUuid(), d.getSurveyDesign().getName());
+				SurveyMissionProxy ii = new SurveyMissionProxy(d.getId(), d.getUuid(), d.getSurveyDesign().getName(), d.getSurveyDesign().getUuid());
 				all.add(ii);
 			}
 			return all;
 				
 		}else{
-			Query<?> q = filter.buildQuery(s);
-			List<?> data = q.list();
-			List<SurveyProxy> all = new ArrayList<SurveyProxy>();
-			for (Object d : data){
-				Object[] x = (Object[])d;
-				SurveyProxy ii = new SurveyProxy((String)x[1], (UUID)x[0],  (String)x[2]);
-				all.add(ii);
-			}
-			return all;
+			return filter.executeQuery(s);
 		}
 	}
 }

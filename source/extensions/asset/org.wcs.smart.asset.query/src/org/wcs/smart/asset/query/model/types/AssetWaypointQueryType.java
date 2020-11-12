@@ -39,6 +39,7 @@ import org.wcs.smart.asset.query.parser.internal.parser.Parser;
 import org.wcs.smart.asset.query.ui.editor.AssetSimpleQueryResultEditor;
 import org.wcs.smart.asset.query.ui.editor.DeleteObservationResultInfoProvider;
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.observation.query.model.types.ZoomToInfoProvider;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.model.udig.IQueryService;
@@ -211,7 +212,7 @@ public class AssetWaypointQueryType implements IMappableQueryType {
 	public IQueryResultInfoProvider[] getResultProviders(){
 		return new IQueryResultInfoProvider[]{
 				new AssetResultInfoProvider(),
-				new AssetZoomToResultProvider(),
+				new ZoomToInfoProvider(),
 				new AssetQueryShowInTableResultProvider(),
 				new DeleteObservationResultInfoProvider()
 		};

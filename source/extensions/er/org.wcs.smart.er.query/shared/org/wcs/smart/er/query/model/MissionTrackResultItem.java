@@ -22,7 +22,6 @@
 package org.wcs.smart.er.query.model;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -40,7 +39,7 @@ import org.wcs.smart.query.common.engine.IGeometryResultItem;
  * @author Emily
  * @since 1.0.0
  */
-public class MissionTrackResultItem implements IGeometryResultItem{
+public class MissionTrackResultItem implements IGeometryResultItem, ISurveyQueryResultItem, ISamplingUnitResultItem{
 
 	public static final String TRACK_GEOMCOLUMN_KEY = "TrackGeomtry"; //$NON-NLS-1$
 	
@@ -53,8 +52,8 @@ public class MissionTrackResultItem implements IGeometryResultItem{
 	private String surveyId;
 	
 	private String missionId;
-	private LocalDateTime missionStart;
-	private LocalDateTime missionEnd;
+	private LocalDate missionStart;
+	private LocalDate missionEnd;
 	private UUID missionUuid;
 	
 	private UUID samplingUnitUuid;
@@ -269,11 +268,11 @@ public class MissionTrackResultItem implements IGeometryResultItem{
 	 * mission start
 	 * @return
 	 */
-	public LocalDateTime getMissionStart() {
+	public LocalDate getMissionStart() {
 		return missionStart;
 	}
 
-	public void setMissionStart(LocalDateTime missionStart) {
+	public void setMissionStart(LocalDate missionStart) {
 		this.missionStart = missionStart;
 	}
 
@@ -281,11 +280,11 @@ public class MissionTrackResultItem implements IGeometryResultItem{
 	 * mission end
 	 * @return
 	 */
-	public LocalDateTime getMissionEnd() {
+	public LocalDate getMissionEnd() {
 		return missionEnd;
 	}
 
-	public void setMissionEnd(LocalDateTime missionEnd) {
+	public void setMissionEnd(LocalDate missionEnd) {
 		this.missionEnd = missionEnd;
 	}
 
@@ -356,5 +355,10 @@ public class MissionTrackResultItem implements IGeometryResultItem{
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public String getMissionLeader() {
+		throw new UnsupportedOperationException();
 	}
 }

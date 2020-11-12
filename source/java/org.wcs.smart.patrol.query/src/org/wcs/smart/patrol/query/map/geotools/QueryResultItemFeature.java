@@ -28,7 +28,10 @@ import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.observation.udig.WaypointSimpleFeature;
+import org.wcs.smart.patrol.query.model.IPatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
+import org.wcs.smart.query.common.engine.ObservationQueryResultItem;
+import org.wcs.smart.query.common.engine.WaypointQueryResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumnUtils;
 
@@ -51,17 +54,20 @@ public class QueryResultItemFeature {
 	 * @param ftype the feature type 
 	 * @return created feature 
 	 */
-	public static SimpleFeature createObservationFeature(PatrolQueryResultItem it, List<QueryColumn> columns, SimpleFeatureType ftype){
+	public static SimpleFeature createObservationFeature(IPatrolQueryResultItem it, List<QueryColumn> columns, SimpleFeatureType ftype){
+		if (!(it instanceof WaypointQueryResultItem)) throw new UnsupportedOperationException();
+		
+		WaypointQueryResultItem ii = (WaypointQueryResultItem)it;
 		List<Object> data = new ArrayList<Object>();
-		data.add(it.asGeometry(PatrolQueryResultItem.WAYPOINT_GEOMCOLUMN_KEY));
-		data.add(it.getPatrolId() + "." + it.getWaypointId() + "." + System.nanoTime()); //$NON-NLS-1$ //$NON-NLS-2$
+		data.add(ii.asGeometry(ObservationQueryResultItem.GEOMCOLUMN_KEY));
+		data.add(it.getPatrolId() + "." + ii.getWaypointId() + "." + System.nanoTime()); //$NON-NLS-1$ //$NON-NLS-2$
 		int i = 2;
 		for (QueryColumn c : columns){
 			if (c.isVisible()){
 				data.add(QueryColumnUtils.getValue(it, c, ftype.getDescriptor(i++)));
 			}
 		}
-		return new WaypointSimpleFeature(SimpleFeatureBuilder.build(ftype, data, (String)data.get(1)), it.getWaypointUuid());
+		return new WaypointSimpleFeature(SimpleFeatureBuilder.build(ftype, data, (String)data.get(1)), ii.getWaypointUuid());
 	}
 	
 	

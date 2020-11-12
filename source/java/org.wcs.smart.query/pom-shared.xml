@@ -16,9 +16,14 @@
 	
 	<dependencies>
 		<dependency>
-    			<groupId>org.wcs.smart.core</groupId>
-    			<artifactId>org.wcs.smart.core.core</artifactId>
-    			<version>${smart.version}</version>
+    		<groupId>org.wcs.smart.core</groupId>
+    		<artifactId>org.wcs.smart.core.core</artifactId>
+    		<version>${smart.version}</version>
+		</dependency>
+		<dependency>
+    		<groupId>org.wcs.smart.core</groupId>
+    		<artifactId>org.wcs.smart.core.observation</artifactId>
+    		<version>${smart.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.locationtech.udig</groupId>

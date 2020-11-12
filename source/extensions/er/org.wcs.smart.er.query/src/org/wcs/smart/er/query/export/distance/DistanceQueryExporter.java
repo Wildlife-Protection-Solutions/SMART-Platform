@@ -51,10 +51,10 @@ import org.wcs.smart.er.query.engine.DerbyPagedObservationResult;
 import org.wcs.smart.er.query.filter.MissionEndDateField;
 import org.wcs.smart.er.query.filter.MissionStartDateField;
 import org.wcs.smart.er.query.internal.Messages;
+import org.wcs.smart.er.query.model.ISamplingUnitResultItem;
 import org.wcs.smart.er.query.model.SurveyObservationQuery;
 import org.wcs.smart.er.query.model.SurveyQueryColumn;
 import org.wcs.smart.er.query.model.SurveyQueryColumn.FixedColumns;
-import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.common.engine.IColumnInfoProvider;
@@ -62,6 +62,7 @@ import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
 import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.engine.WaypointQueryResultItem;
 import org.wcs.smart.query.common.model.IColumnAutoConfigQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.importexport.ICsvQueryExporter;
@@ -343,8 +344,8 @@ public class DistanceQueryExporter implements ICsvQueryExporter {
 				QueryColumn lengthcolumns = new QueryColumn(Messages.DistanceQueryExporter_LengthColumnName, "su:length", ColumnType.NUMBER) { //$NON-NLS-1$
 					@Override
 					public Object getValue(IResultItem item) {
-						if (item instanceof SurveyQueryResultItem) {
-							SurveyQueryResultItem ii = (SurveyQueryResultItem)item;
+						if (item instanceof ISamplingUnitResultItem) {
+							ISamplingUnitResultItem ii = (ISamplingUnitResultItem)item;
 							SamplingUnit u  = units.get(ii.getSamplingUnitUuid());
 							if (u != null && u.getType() == GeometryType.TRANSECT) {
 								try {
@@ -369,8 +370,8 @@ public class DistanceQueryExporter implements ICsvQueryExporter {
 				QueryColumn effortcolumn = new QueryColumn(Messages.DistanceQueryExporter_EffortColumnName, "su:effort", ColumnType.NUMBER) { //$NON-NLS-1$
 					@Override
 					public Object getValue(IResultItem item) {
-						if (item instanceof SurveyQueryResultItem) {
-							SurveyQueryResultItem ii = (SurveyQueryResultItem)item;
+						if (item instanceof ISamplingUnitResultItem) {
+							ISamplingUnitResultItem ii = (ISamplingUnitResultItem)item;
 							SamplingUnit u  = units.get(ii.getSamplingUnitUuid());
 							if (u != null && efforts.containsKey(u.getUuid())) return efforts.get(u.getUuid());
 						}
@@ -392,19 +393,24 @@ public class DistanceQueryExporter implements ICsvQueryExporter {
 		init(file, columns);
 		
 		//export results to file
-		try(IQueryResultSetIterator<IResultItem> it = qresults.iterator(IPagedQueryResultSet.MAP_PAGE_SIZE)){
+		try(IQueryResultSetIterator<?> it = qresults.iterator(IPagedQueryResultSet.MAP_PAGE_SIZE)){
 			while(it.hasNext()){
-				SurveyQueryResultItem ri = (SurveyQueryResultItem)it.next();
+				IResultItem ri = (IResultItem)it.next();
+				
+				UUID wpuuid = null;
+				if (ri instanceof WaypointQueryResultItem) {
+					wpuuid = ((WaypointQueryResultItem) ri).getWaypointUuid();
+				}
 				
 				String data[] = new String[columns.size()];
 				
-				if (ri.getWaypointUuid() == null) {
+				if (wpuuid == null) {
 					for (int i = 0; i < data.length; i ++){
 						QueryColumn qc = columns.get(i);
 						
 						data[i] = "";  //$NON-NLS-1$
 						if (qc.getKey().startsWith(SU_COLUMN_KEY_PREFIX + ":")) { //$NON-NLS-1$
-							SamplingUnit su = units.get(ri.getSamplingUnitUuid());
+							SamplingUnit su = units.get(((ISamplingUnitResultItem)ri).getSamplingUnitUuid());
 							if (su != null) {
 								for (SamplingUnitAttributeValue v : su.getAttributes()) {
 									if (v.getSamplingUnitAttribute().getKeyId().equals(qc.getKey().split(":")[1])) { //$NON-NLS-1$

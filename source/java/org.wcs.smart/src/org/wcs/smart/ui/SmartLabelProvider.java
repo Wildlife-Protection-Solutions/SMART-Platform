@@ -35,6 +35,7 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.DataModelMergeAndUpdater;
 import org.wcs.smart.ca.datamodel.DataModelMerger;
 import org.wcs.smart.ca.datamodel.SimpleDataModel;
@@ -262,4 +263,16 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 		return SmartLabelProvider.formatName(e.getGivenName(), e.getFamilyName(), e.getId());
 	}
 
+	public String getAttributeTypeLabel(Attribute.AttributeType type, Locale l) {
+		switch(type) {
+			case BOOLEAN: return Messages.SmartLabelProvider_BooleanAttributeType;
+			case DATE: return Messages.SmartLabelProvider_DateAttributeType;
+			case LIST: return Messages.SmartLabelProvider_ListAttributeType;
+			case MLIST: return Messages.SmartLabelProvider_MultiListAttributeType;
+			case NUMERIC: return Messages.SmartLabelProvider_NumericAttributeType;
+			case TEXT: return Messages.SmartLabelProvider_TextAttributeType;
+			case TREE: return Messages.SmartLabelProvider_TreeAttributeType;
+		}
+		return ""; //$NON-NLS-1$
+	}
 }

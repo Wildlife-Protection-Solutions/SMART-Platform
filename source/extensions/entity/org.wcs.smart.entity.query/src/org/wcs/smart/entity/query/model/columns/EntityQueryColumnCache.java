@@ -48,6 +48,8 @@ import org.wcs.smart.observation.events.WaypointEventManager.EventType;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.query.QueryDataModelManager;
+import org.wcs.smart.query.model.AttributeQueryColumn;
+import org.wcs.smart.query.model.CategoryQueryColumn;
 import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
 
@@ -154,7 +156,7 @@ public class EntityQueryColumnCache {
 					int numCategory = QueryDataModelManager.getInstance()
 							.getActiveDepth();
 					for (int i = 0; i < numCategory; i++) {
-						cols.add(new EtCategoryQueryColumn(MessageFormat.format(Messages.QueryColumn_ObservationCategoryTableHeader, i), i));
+						cols.add(new CategoryQueryColumn(MessageFormat.format(Messages.QueryColumn_ObservationCategoryTableHeader, i), i));
 					}
 
 					// sort attributes alphabetically
@@ -170,7 +172,7 @@ public class EntityQueryColumnCache {
 
 					for (Attribute att : atts) {
 						String name = att.getName();
-						cols.add(new EtAttributeQueryColumn(name, att.getKeyId(), att.getType()));
+						cols.add(new AttributeQueryColumn(name, att.getKeyId(), att.getType()));
 					}
 					queryColumns = cols.toArray(new QueryColumn[cols.size()]);
 

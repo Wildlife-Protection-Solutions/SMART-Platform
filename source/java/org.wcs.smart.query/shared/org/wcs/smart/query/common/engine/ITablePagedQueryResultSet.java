@@ -33,7 +33,7 @@ import org.hibernate.Session;
  * @author Emily
  *
  */
-public interface ITablePagedQueryResultSet extends IPagedQueryResultSet{
+public interface ITablePagedQueryResultSet<T extends IResultItem> extends IPagedQueryResultSet<T>{
 	
 	/**
 	 * Gets results from the given result get.
@@ -44,7 +44,7 @@ public interface ITablePagedQueryResultSet extends IPagedQueryResultSet{
 	 * @return
 	 * @throws SQLException
 	 */
-	public List<IResultItem> getResults(Session session, ResultSet rs, int from, int pageSize) throws SQLException;
+	public List<T> getResults(Session session, ResultSet rs, int from, int pageSize) throws SQLException;
 	
 	/**
 	 * Opens a result set in the given session that accessed the query results

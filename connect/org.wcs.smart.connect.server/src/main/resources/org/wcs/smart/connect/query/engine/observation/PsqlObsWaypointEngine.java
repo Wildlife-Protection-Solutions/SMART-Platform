@@ -32,9 +32,11 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
+import org.wcs.smart.connect.query.engine.IWOEngine;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.query.model.ObservationWaypointQuery;
 import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.common.engine.WaypointQueryResultItem;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.DateFilter;
@@ -51,7 +53,7 @@ import org.wcs.smart.query.model.filter.date.CachingDateFilter;
  * @author elitvin
  * @since 1.0.0
  */
-public class PsqlObsWaypointEngine extends AbstractQueryEngine {
+public class PsqlObsWaypointEngine extends AbstractQueryEngine implements IWOEngine<WaypointQueryResultItem> {
 
 	private final Logger logger = Logger.getLogger(PsqlObsWaypointEngine.class.getName());
 	
@@ -143,7 +145,7 @@ public class PsqlObsWaypointEngine extends AbstractQueryEngine {
 			c.createStatement().execute(sql);
 		}
 		//ca information
-		populateCaDetails(c, queryDataTable, "p_ca_uuid",query); //$NON-NLS-1$
+		populateCaDetails(c, queryDataTable, "ca_uuid",query); //$NON-NLS-1$
 		
 		//last modified
 		populatedLastModifiedName(c, session, queryDataTable);
@@ -172,7 +174,7 @@ public class PsqlObsWaypointEngine extends AbstractQueryEngine {
 	public String getTemporaryTableCreateClause(String tableName) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
-		sql.append("p_ca_uuid uuid,"); //$NON-NLS-1$
+		sql.append("ca_uuid uuid,"); //$NON-NLS-1$
 		sql.append("wp_uuid uuid,"); //$NON-NLS-1$
 		sql.append("wp_source varchar(16),"); //$NON-NLS-1$
 		sql.append("wp_id varchar(32),"); //$NON-NLS-1$
@@ -215,5 +217,10 @@ public class PsqlObsWaypointEngine extends AbstractQueryEngine {
 		}else{
 			return new ObsWaypointFilterProcessor(queryDataTable, this);
 		}
+	}
+
+	@Override
+	public String getObservationLabelTable() {
+		return null;
 	}
 }

@@ -811,7 +811,7 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 	public String getTemporaryTableCreateClause(String tableName) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
-		sql.append("p_ca_uuid uuid,"); //$NON-NLS-1$
+		sql.append("ca_uuid uuid,"); //$NON-NLS-1$
 		sql.append("p_uuid uuid,"); //$NON-NLS-1$
 		sql.append("p_id varchar(32),"); //$NON-NLS-1$
 		sql.append("p_station_uuid uuid,"); //$NON-NLS-1$

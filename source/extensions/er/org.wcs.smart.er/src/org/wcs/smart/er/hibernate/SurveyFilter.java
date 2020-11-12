@@ -21,8 +21,15 @@
  */
 package org.wcs.smart.er.hibernate;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
+
 import org.hibernate.Session;
 import org.hibernate.query.Query;
+import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.common.filter.StringFilterComposite.StringComparison;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.hibernate.SmartDB;
@@ -42,11 +49,42 @@ public class SurveyFilter {
 	
 	private String[] surveyDesignKeys = null;
 	
+	
+	private DateFilter missionDateFilter = DateFilter.LAST_30_DAYS;
+	private LocalDate missionStartDate;
+	private LocalDate missionEndDate;
+	
 	/**
 	 * Creates a new filter with the default values.
 	 */
 	public SurveyFilter(){
 		setDefaults();
+	}
+	
+	public void setMissionDateFilter(DateFilter dFilter, LocalDate start, LocalDate end){
+		this.missionDateFilter = dFilter;
+		this.missionStartDate = start;
+		this.missionEndDate = end;
+	}
+	
+	public DateFilter getMissionDateFilter(){
+		return missionDateFilter;
+	}
+	
+	/**
+	 * 
+	 * @return start date for custom date filter
+	 */
+	public LocalDate getMissionStartDate(){
+		return this.missionStartDate;
+	}
+	
+	/**
+	 * 
+	 * @return end date for custom date filter
+	 */
+	public LocalDate getMissionEndDate(){
+		return this.missionEndDate;
 	}
 	
 	/**
@@ -86,6 +124,7 @@ public class SurveyFilter {
 		this.state = SurveyDesign.State.ACTIVE;
 		this.surveyNameFilter = null;
 		this.stringComparator = null;
+		this.setMissionDateFilter(DateFilter.LAST_60_DAYS, null, null);
 	}
 	
 	/**
@@ -126,13 +165,20 @@ public class SurveyFilter {
 	 * @param s
 	 * @return
 	 */
-	public Query<?> buildQuery(Session s){ 
-		StringBuilder str = new StringBuilder();
+	public List<SurveyMissionProxy> executeQuery(Session s){ 
 		
-		str.append("SELECT s.uuid, s.id, sd.name, sd.uuid "); //$NON-NLS-1$
-		str.append("FROM Survey s JOIN s.surveyDesign sd "); //$NON-NLS-1$
-		str.append("WHERE sd.conservationArea = :ca " ); //$NON-NLS-1$
+		
+		StringBuilder str = new StringBuilder();
 
+		str.append("SELECT m.uuid, m.id, m.startDate, m.endDate, s.id, s.uuid, sd.name, sd.uuid "); //$NON-NLS-1$
+		str.append("FROM Mission m JOIN m.survey s JOIN s.surveyDesign sd "); //$NON-NLS-1$
+		str.append("WHERE sd.conservationArea = :ca " ); //$NON-NLS-1$
+	
+		if (missionDateFilter != null && missionDateFilter != DateFilter.ALL){
+			str.append(" AND "); //$NON-NLS-1$
+			str.append(" ( m.endDate >= :date1 and m.startDate <= :date2 ) "); //$NON-NLS-1$
+		}
+		
 		boolean and = true;
 		boolean or = false;
 		if (state != null ){
@@ -171,7 +217,7 @@ public class SurveyFilter {
 			str.append(")"); //$NON-NLS-1$
 		}
 		
-		str.append("ORDER BY  s.id asc "); //$NON-NLS-1$
+		str.append("ORDER BY  m.startDate desc, s.id asc "); //$NON-NLS-1$
 		
 		Query<?> query = s.createQuery(str.toString())
 				.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
@@ -189,7 +235,71 @@ public class SurveyFilter {
 				query.setParameter("name", this.surveyNameFilter); //$NON-NLS-1$
 			}
 		}		
-		return query;
+		if (missionDateFilter != null && missionDateFilter != DateFilter.ALL) {
+			LocalDate start = missionDateFilter.getStartDate();
+			if (start == null){
+				start = missionStartDate;
+			}
+			LocalDate end = missionDateFilter.getEndDate();
+			if (end == null){
+				end = missionEndDate;
+			}
+			query.setParameter("date1", start); //$NON-NLS-1$
+			query.setParameter("date2", end); //$NON-NLS-1$
+		}
+		
+		HashMap<UUID, SurveyMissionProxy> results = new HashMap<>();
+		List<SurveyMissionProxy> toReturn = new ArrayList<>();
+		
+		for (Object result : query.list()) {
+			Object[] data = (Object[])result;
+			UUID missionUuid = (UUID) data[0];
+			String missionId = (String) data[1];
+			LocalDate missionStart = (LocalDate) data[2];
+			LocalDate missionEnd = (LocalDate) data[3];
+			String surveyId = (String) data[4];
+			UUID surveyUuid = (UUID) data[5];
+			String designId = (String) data[6];
+			UUID designUuid = (UUID) data[7];
+			
+			SurveyMissionProxy pp = results.get(surveyUuid);
+			if (pp == null) {
+				pp = new SurveyMissionProxy(surveyId, surveyUuid, designId, designUuid);
+				results.put(surveyUuid, pp);
+				toReturn.add(pp);
+			}
+			
+			pp.addMission(missionId, missionUuid, missionStart, missionEnd);
+			
+		}
+		return toReturn;
+		
+//StringBuilder str = new StringBuilder();
+//		
+//		str.append("SELECT m.uuid, m.id, m.startDate, m.endDate, s.id, s.uuid, sd.name "); //$NON-NLS-1$
+//		str.append("FROM Mission m JOIN m.survey s JOIN s.surveyDesign sd "); //$NON-NLS-1$
+//		str.append("WHERE sd.conservationArea = :ca " ); //$NON-NLS-1$
+//	
+//		if (dateFilter != null){
+//			str.append(" AND "); //$NON-NLS-1$
+//			str.append(" ( m.endDate >= :date1 and m.startDate <= :date2 ) "); //$NON-NLS-1$
+//		}
+//		str.append("ORDER BY m.startDate desc, m.id, s.id"); //$NON-NLS-1$
+//	
+//		Query<?> query = s.createQuery(str.toString()).setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+//		if (dateFilter != null) {
+//			LocalDate start = dateFilter.getStartDate();
+//			if (start == null){
+//				start = startDate;
+//			}
+//			LocalDate end = dateFilter.getEndDate();
+//			if (end == null){
+//				end = endDate;
+//			}
+//			query.setParameter("date1", start); //$NON-NLS-1$
+//			query.setParameter("date2", end); //$NON-NLS-1$
+//		}
+//		return query;
 	}
 
 	

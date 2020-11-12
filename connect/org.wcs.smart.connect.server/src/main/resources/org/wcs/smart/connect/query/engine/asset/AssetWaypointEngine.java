@@ -40,9 +40,10 @@ import org.wcs.smart.asset.model.AssetDeployment;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetWaypoint;
-import org.wcs.smart.asset.query.model.AssetQueryResultItem;
 import org.wcs.smart.asset.query.model.AssetWaypointQuery;
+import org.wcs.smart.asset.query.model.AssetWaypointResultItem;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
+import org.wcs.smart.connect.query.engine.IWOEngine;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.SimpleQuery;
@@ -57,7 +58,7 @@ import org.wcs.smart.query.model.filter.date.CachingDateFilter;
  * responsible for all other operations (fetching/sorting/deleting tables)
  * 
  */
-public class AssetWaypointEngine extends AssetQueryEngine {
+public class AssetWaypointEngine extends AssetQueryEngine implements IWOEngine<AssetWaypointResultItem>{
 
 	private final Logger logger = Logger.getLogger(AssetWaypointEngine.class.getName());
 
@@ -74,6 +75,11 @@ public class AssetWaypointEngine extends AssetQueryEngine {
 	public String getQueryDataTable(){
 		return this.queryDataTable;
 	}
+	
+	@Override
+	public String getObservationLabelTable(){
+		return this.queryDataTable + "_labels"; //$NON-NLS-1$
+	}
 
 	@Override
 	public String getSurveySamplingUnitJoinFieldName() {
@@ -82,7 +88,8 @@ public class AssetWaypointEngine extends AssetQueryEngine {
 
 	@Override
 	public void cleanUp(Session session) throws SQLException {
-		dropTable(session, queryDataTable);
+		dropTable(session, getQueryDataTable());
+		dropTable(session, getObservationLabelTable());
 	}
 	
 	/**
@@ -252,7 +259,7 @@ public class AssetWaypointEngine extends AssetQueryEngine {
 		}
 		
 		//ca information
-		populateCaDetails(c, queryDataTable, "wp_ca_uuid",query); //$NON-NLS-1$
+		populateCaDetails(c, queryDataTable, "ca_uuid",query); //$NON-NLS-1$
 		populatedLastModifiedName(c, session, queryDataTable);
 	}
 
@@ -284,29 +291,22 @@ public class AssetWaypointEngine extends AssetQueryEngine {
 		sql.append("wp_y double precision,"); //$NON-NLS-1$
 		sql.append("wp_direction double precision,"); //$NON-NLS-1$
 		sql.append("wp_distance double precision,"); //$NON-NLS-1$
-		sql.append("wp_date timestamp,"); //$NON-NLS-1$
+		sql.append("wp_time timestamp,"); //$NON-NLS-1$
 		sql.append("wp_comment varchar(4096),"); //$NON-NLS-1$
 		sql.append("wp_lastmodified timestamp,"); //$NON-NLS-1$
 		sql.append("wp_lastmodifiedby uuid,"); //$NON-NLS-1$
-		sql.append("wp_ca_uuid uuid "); //$NON-NLS-1$
+		sql.append("ca_uuid uuid "); //$NON-NLS-1$
 
 		sql.append(")"); //$NON-NLS-1$
 		return sql.toString();
 	}
 
 	
-	@Override
-	protected AssetQueryResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException{
-		AssetQueryResultItem item = new AssetQueryResultItem();
-		setFields(item, rs);
-		return item;
-	}
-	
-	protected void setFields(AssetQueryResultItem it, ResultSet rs) throws SQLException{
+	protected void setFields(AssetWaypointResultItem it, ResultSet rs) throws SQLException{
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
-		it.setConservationAreaUuid((UUID)rs.getObject("wp_ca_uuid")); //$NON-NLS-1$
-		it.setWaypointDate(rs.getTimestamp("wp_date").toLocalDateTime()); //$NON-NLS-1$		
+		it.setConservationAreaUuid((UUID)rs.getObject("ca_uuid")); //$NON-NLS-1$
+		it.setWaypointDateTime(rs.getTimestamp("wp_time").toLocalDateTime()); //$NON-NLS-1$		
 		it.setWaypointUuid((UUID)rs.getObject("wp_uuid")); //$NON-NLS-1$
 		it.setWaypointId(rs.getString("wp_id")); //$NON-NLS-1$
 		it.setWaypointX(rs.getDouble("wp_x")); //$NON-NLS-1$

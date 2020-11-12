@@ -35,18 +35,15 @@ import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
-import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.MissionTrack.TrackType;
 import org.wcs.smart.er.model.SamplingUnit;
-import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.MissionTrackQuery;
 import org.wcs.smart.er.query.model.MissionTrackResultItem;
-import org.wcs.smart.er.query.model.SurveyQueryAttachmentResultItem;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
@@ -55,7 +52,6 @@ import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
-import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -74,6 +70,14 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 	@Override
 	public boolean canExecute(String querytype) {
 		return MissionTrackQuery.KEY.equals(querytype);
+	}
+	
+	public String getQueryDataTable() {
+		return this.queryDataTable;
+	}
+	
+	public String getQueryLabelTable() {
+		return this.queryDataTable + "_labels"; //$NON-NLS-1$
 	}
 	
 	/**
@@ -98,7 +102,7 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 			return null;
 		}
 		queryDataTable = createTempTableName();
-		final DerbyPagedMissionResult result = new DerbyPagedMissionResult(queryDataTable, this);	
+		final DerbyPagedMissionResult result = new DerbyPagedMissionResult(this);	
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
@@ -163,9 +167,8 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 	@Override
 	public void dropTables(Connection c) throws SQLException {
 		//original table
-		dropTable(c, queryDataTable);
-		dropTable(c, queryDataTable + "_mlist"); //$NON-NLS-1$
-		dropTable(c, queryDataTable + "_sulist"); //$NON-NLS-1$
+		dropTable(c, getQueryLabelTable());
+		dropTable(c, getQueryDataTable());
 	}
 
 	private void populateTemporaryTableNameObjExtra(String uuidColumn, String nameColumn, Connection c, Session session) throws SQLException {
@@ -230,7 +233,7 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 			sql.append(queryDataTable);
 			sql.append(" SET ca_id = (select id FROM "); //$NON-NLS-1$
 			sql.append(DerbySurveyQueryEngine.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
-			sql.append("WHERE a.uuid = " + queryDataTable + ".p_ca_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append("WHERE a.uuid = " + queryDataTable + ".ca_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
 			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().executeUpdate(sql.toString());
 			
@@ -239,123 +242,21 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 			sql.append(queryDataTable);
 			sql.append(" SET ca_name = (select name FROM "); //$NON-NLS-1$
 			sql.append(DerbySurveyQueryEngine.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
-			sql.append("WHERE a.uuid = " + queryDataTable + ".p_ca_uuid)");  //$NON-NLS-1$//$NON-NLS-2$
+			sql.append("WHERE a.uuid = " + queryDataTable + ".ca_uuid)");  //$NON-NLS-1$//$NON-NLS-2$
 			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().executeUpdate(sql.toString());
 		}
 		progress.split(1);
 			
 		monitor.subTask(Messages.DerbyMissionEngine_ProgressMissionProperties);
-		populateAdditionalMissionTable(c,session);
-		populateAdditionalSuTable(c,session);
+		SurveyPagedResultUtils.populateAdditionalAttributeTable(true, true, true, getQueryDataTable(), getQueryLabelTable(), this, c, session);
 		progress.split(1);
 
 	}
 
-	private void populateAdditionalMissionTable(Connection c, Session session) throws SQLException {
-		StringBuilder sql = new StringBuilder();
-		sql.append("CREATE TABLE "); //$NON-NLS-1$
-		sql.append(queryDataTable + "_mlist"); //$NON-NLS-1$
-		sql.append(" (uuid char(16) for bit data, value varchar(1024))"); //$NON-NLS-1$ 
-		QueryPlugIn.logSql(sql.toString());
-		c.createStatement().execute(sql.toString());
-
-		sql = new StringBuilder();
-		sql.append("SELECT DISTINCT "); //$NON-NLS-1$
-		sql.append(tablePrefix(MissionPropertyValue.class));
-		sql.append(".list_element_uuid"); //$NON-NLS-1$
-		sql.append(", r.ca_uuid FROM "); //$NON-NLS-1$
-		sql.append(tableNamePrefix(MissionPropertyValue.class));
-		sql.append(" inner join "); //$NON-NLS-1$
-		sql.append(queryDataTable);
-		sql.append(" r on r.mission_uuid = "); //$NON-NLS-1$
-		sql.append(tablePrefix(MissionPropertyValue.class));
-		sql.append(".mission_uuid WHERE "); //$NON-NLS-1$
-		sql.append(tablePrefix(MissionPropertyValue.class));
-		sql.append(".list_element_uuid"); //$NON-NLS-1$
-		sql.append(" is not null "); //$NON-NLS-1$
-		
-		StringBuilder sql2 = new StringBuilder();
-		sql2.append("INSERT INTO "); //$NON-NLS-1$
-		sql2.append( queryDataTable + "_mlist"); //$NON-NLS-1$
-		sql2.append(" VALUES (?, ?)"); //$NON-NLS-1$ 
-		QueryPlugIn.logSql(sql2.toString());
-		PreparedStatement statement = c.prepareStatement(sql2.toString());
-		int count = 0;
-		QueryPlugIn.logSql(sql.toString());
-		try(ResultSet rs = c.createStatement().executeQuery(sql.toString())) {
-			while (rs.next()) {
-				byte[] uuid = rs.getBytes(1);
-				if (uuid != null) {
-					byte[] cauuid = rs.getBytes(2);
-					String value = SmartLabelProvider.getDescription(UuidUtils.byteToUUID(uuid), UuidUtils.byteToUUID(cauuid), session);
-					statement.setBytes(1, uuid);
-					statement.setString(2, value);
-					statement.addBatch();
-					count++;
-					if (count >= 100){
-						statement.executeBatch();
-						count = 0;
-					}
-				}
-			}
-			statement.executeBatch();
-		}
-	}
-
-	private void populateAdditionalSuTable(Connection c, Session session) throws SQLException {
-		StringBuilder sql = new StringBuilder();
-		sql.append("CREATE TABLE "); //$NON-NLS-1$
-		sql.append(queryDataTable + "_sulist"); //$NON-NLS-1$
-		sql.append(" (uuid char(16) for bit data, value varchar(1024))"); //$NON-NLS-1$ 
-		QueryPlugIn.logSql(sql.toString());
-		c.createStatement().execute(sql.toString());
-
-		sql = new StringBuilder();
-		sql.append("SELECT DISTINCT "); //$NON-NLS-1$
-		sql.append(tablePrefix(SamplingUnitAttributeValue.class));
-		sql.append(".list_element_uuid"); //$NON-NLS-1$
-		sql.append(", r.ca_uuid FROM "); //$NON-NLS-1$
-		sql.append(tableNamePrefix(SamplingUnitAttributeValue.class));
-		sql.append(" inner join "); //$NON-NLS-1$
-		sql.append(queryDataTable);
-		sql.append(" r on r.samplingunit_uuid = "); //$NON-NLS-1$
-		sql.append(tablePrefix(SamplingUnitAttributeValue.class));
-		sql.append(".su_attribute_uuid WHERE "); //$NON-NLS-1$
-		sql.append(tablePrefix(SamplingUnitAttributeValue.class));
-		sql.append(".list_element_uuid"); //$NON-NLS-1$
-		sql.append(" is not null "); //$NON-NLS-1$
-		
-		StringBuilder sql2 = new StringBuilder();
-		sql2.append("INSERT INTO "); //$NON-NLS-1$
-		sql2.append( queryDataTable + "_sulist"); //$NON-NLS-1$
-		sql2.append(" VALUES (?, ?)"); //$NON-NLS-1$ 
-		QueryPlugIn.logSql(sql2.toString());
-		PreparedStatement statement = c.prepareStatement(sql2.toString());
-		int count = 0;
-		QueryPlugIn.logSql(sql.toString());
-		try(ResultSet rs = c.createStatement().executeQuery(sql.toString())) {
-			while (rs.next()) {
-				byte[] uuid = rs.getBytes(1);
-				if (uuid != null) {
-					byte[] cauuid = rs.getBytes(2);
-					String value = SmartLabelProvider.getDescription(UuidUtils.byteToUUID(uuid), UuidUtils.byteToUUID(cauuid), session);
-					statement.setBytes(1, uuid);
-					statement.setString(2, value);
-					statement.addBatch();
-					count++;
-					if (count >= 100){
-						statement.executeBatch();
-						count = 0;
-					}
-				}
-			}
-			statement.executeBatch();
-		}
-	}
 	
 	@Override
-	protected String getTemporaryTableSelectClause(boolean includeObservations) {
+	public String getTemporaryTableSelectClause(boolean includeObservations) {
 		StringBuilder sql = new StringBuilder();
 		sql.append(" SELECT "); //$NON-NLS-1$
 		sql.append(tablePrefix(SurveyDesign.class) + ".ca_uuid, "); //$NON-NLS-1$
@@ -384,7 +285,7 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 	}
 
 	@Override
-	protected String getTemporaryTableCreateClause(String tableName) {
+	public String getTemporaryTableCreateClause(String tableName) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
 		
@@ -416,7 +317,7 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 		return sql.toString();
 	}
 	
-	@Override
+	
 	protected MissionTrackResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException{
 		MissionTrackResultItem it = new MissionTrackResultItem();
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
@@ -424,9 +325,9 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 		it.setConservationAreaUuid(UuidUtils.byteToUUID(rs.getBytes("ca_uuid"))); //$NON-NLS-1$
 		
 		it.setMissionUuid(UuidUtils.byteToUUID(rs.getBytes("mission_uuid"))); //$NON-NLS-1$
-		it.setMissionEnd(rs.getTimestamp("mission_enddate").toLocalDateTime()); //$NON-NLS-1$
+		it.setMissionEnd(rs.getDate("mission_enddate").toLocalDate()); //$NON-NLS-1$
 		it.setMissionId(rs.getString("mission_id")); //$NON-NLS-1$
-		it.setMissionStart(rs.getTimestamp("mission_startdate").toLocalDateTime()); //$NON-NLS-1$
+		it.setMissionStart(rs.getDate("mission_startdate").toLocalDate()); //$NON-NLS-1$
 		
 		it.setSurveyDesign(rs.getString("surveydesign_name")); //$NON-NLS-1$
 		it.setSurveyId(rs.getString("survey_id")); //$NON-NLS-1$
@@ -445,17 +346,9 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 		return it;
 	}
 	
-	@Override
-	protected SurveyQueryAttachmentResultItem asQueryAttachmentResultItem(ResultSet rs, Session session)
-			throws SQLException {
-		
-		return null;
-	}
 
 	@Override
-	protected void buildTemporaryTableIndexes(Connection c, String tableName)
-			throws SQLException {
-		super.buildTemporaryTableIndexes(c, tableName);	
+	public void createTemporaryTableIndexes(Connection c, String tableName) throws SQLException {
 	}
 	
 }

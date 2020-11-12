@@ -23,6 +23,7 @@ package org.wcs.smart.query.common.ui.edit;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -50,6 +51,7 @@ import org.wcs.smart.common.celleditor.TreeViewerCellEditor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.CheckBoxDropDownCellEditor;
 import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -197,6 +199,56 @@ public class CellEditorFactory {
 		return listCellEditor;
 	}
 
+	/**
+	 * Creates a list drop down editor for attributes of list types
+	 * 
+	 * @param parent
+	 * @param attributeKey
+	 * @return
+	 */
+	public static CheckBoxDropDownCellEditor newAttributeMultiListCellEditor(Composite parent, 
+			String attributeKey){
+		
+		CheckBoxDropDownCellEditor listCellEditor = new CheckBoxDropDownCellEditor(parent);
+		listCellEditor.setContentProvider(ArrayContentProvider.getInstance());
+		listCellEditor.setLabelProvider(new LabelProvider(){
+			public String getText(Object element){
+				if (element instanceof AttributeListItem){
+					return ((AttributeListItem)element).getName();
+				}
+				return super.getText(element);
+			}
+		});
+		listCellEditor.setInput(Collections.singletonList(DialogConstants.LOADING_TEXT));
+			
+		Job j = new Job("load list items"){ //$NON-NLS-1$
+
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				final List<AttributeListItem> items = new ArrayList<>();
+				try(Session s = HibernateManager.openSession()){
+					
+					final Attribute dmAttribute = QueryFactory.buildQuery(s, Attribute.class, 
+							new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+							new Object[] {"keyId", attributeKey}).uniqueResult(); //$NON-NLS-1$
+					
+					if (dmAttribute == null) return Status.OK_STATUS;
+					if (!dmAttribute.getType().isList()) return Status.OK_STATUS;
+					
+					items.addAll(dmAttribute.getActiveListItems());
+				}
+				Display.getDefault().syncExec(()->{
+					if (!listCellEditor.getControl().isDisposed()){
+						listCellEditor.setInput(items);
+					}
+				});
+				return Status.OK_STATUS;
+			}
+		};
+		j.schedule();
+		
+		return listCellEditor;
+	}
 	
 	/**
 	 * Creates a tree drop down editor for attributes of tree types

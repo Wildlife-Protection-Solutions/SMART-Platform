@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schema xmlns="http://www.w3.org/2001/XMLSchema" 
-xmlns:tns="http://www.smartconservationsoftware.org/xml/1.1/mission" 
-targetNamespace="http://www.smartconservationsoftware.org/xml/1.1/mission">
+xmlns:tns="http://www.smartconservationsoftware.org/xml/1.2/mission" 
+targetNamespace="http://www.smartconservationsoftware.org/xml/1.2/mission">
     <element name="Mission" type="tns:MissionType"></element>
     
     <complexType name="MissionType">
@@ -88,7 +88,7 @@ targetNamespace="http://www.smartconservationsoftware.org/xml/1.1/mission">
     	<sequence>
     		<element name="sValue" type="string" maxOccurs="1" minOccurs="0"></element>
     		<element name="dValue" type="double" maxOccurs="1" minOccurs="0"></element>
-    		<element name="itemKey" type="string" maxOccurs="1" minOccurs="0"></element>
+    		<element name="itemKey" type="string" maxOccurs="unbounded" minOccurs="0"></element>
     		<element name="bValue" type="boolean" maxOccurs="1" minOccurs="0"></element>
     	</sequence>
     	<attribute name="attributeKey" type="string"></attribute>

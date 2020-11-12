@@ -41,7 +41,7 @@ import org.wcs.smart.incident.xml.model.v22.WaypointType;
  * @since 1.0.0
  */
 public class IncidentXmlManager {
-	private static final String METADATA_CLASSES_PACKAGE = "org.wcs.smart.incident.xml.model.v21"; //$NON-NLS-1$
+	private static final String METADATA_CLASSES_PACKAGE = "org.wcs.smart.incident.xml.model.v22"; //$NON-NLS-1$
 	
 	public static final String ATTACHMENT_DIR_NAME = "attachments"; //$NON-NLS-1$
 	public static final String OBSERVATION_ATTACHMENT_DIR_NAME = "attachments/observations"; //$NON-NLS-1$
@@ -90,6 +90,8 @@ public class IncidentXmlManager {
 				return new org.wcs.smart.incident.xml.model.v20.XmlToIncident();
 			}else if (version.equals(org.wcs.smart.incident.xml.model.v21.ObjectFactory._Waypoint_QNAME.getNamespaceURI())){
 				return new org.wcs.smart.incident.xml.model.v21.XmlToIncident();
+			}else if (version.equals(org.wcs.smart.incident.xml.model.v22.ObjectFactory._Waypoint_QNAME.getNamespaceURI())){
+				return new org.wcs.smart.incident.xml.model.v22.XmlToIncident();
 			}
 		}catch (Exception ex){
 			//invalid xml file

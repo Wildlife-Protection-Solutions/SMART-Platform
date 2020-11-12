@@ -29,7 +29,7 @@ import org.wcs.smart.query.common.engine.IResultItem;
  * A result set that can be searched.
  * 
  */
-public interface ISearchabledResultSet {
+public interface ISearchabledResultSet<T extends IResultItem> {
 
 	/**
 	 * Returns a list of features in the provided bounding box.
@@ -38,5 +38,5 @@ public interface ISearchabledResultSet {
 	 * @param pageSize
 	 * @return
 	 */
-	public List<IResultItem> search(double x1, double y1, double x2, double y2);
+	public List<T> search(double x1, double y1, double x2, double y2);
 }

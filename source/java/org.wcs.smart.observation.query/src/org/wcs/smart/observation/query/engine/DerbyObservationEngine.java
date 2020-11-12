@@ -45,18 +45,18 @@ import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
-import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.observation.query.ObservationQueryPlugIn;
 import org.wcs.smart.observation.query.internal.Messages;
 import org.wcs.smart.observation.query.model.ObsObservationQuery;
-import org.wcs.smart.observation.query.model.ObservationAttachmentQueryResultItem;
-import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
 import org.wcs.smart.observation.query.model.columns.FixedQueryColumn;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.common.engine.ObservationAttachmentQueryResultItem;
+import org.wcs.smart.query.common.engine.ObservationQueryEngine;
+import org.wcs.smart.query.common.engine.ObservationQueryResultItem;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.AttributeQueryColumn;
 import org.wcs.smart.query.model.CategoryQueryColumn;
@@ -76,7 +76,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author elitvin
  * @since 1.0.0
  */
-public class DerbyObservationEngine extends AbstractDerbyObservationQueryEngine {
+public class DerbyObservationEngine extends AbstractDerbyObservationQueryEngine implements ObservationQueryEngine<ObservationQueryResultItem>{
 
 	private String queryDataTable;
 	private int categoryCount;
@@ -108,7 +108,7 @@ public class DerbyObservationEngine extends AbstractDerbyObservationQueryEngine 
 			return null;
 		}
 		queryDataTable = createTempTableName();
-		final DerbyPagedObservationResult result = new DerbyPagedObservationResult(queryDataTable, this);
+		final DerbyPagedObservationResult result = new DerbyPagedObservationResult(this);
 		
 		session.doWork(new Work() {
 			@Override
@@ -201,8 +201,7 @@ public class DerbyObservationEngine extends AbstractDerbyObservationQueryEngine 
 	@Override
 	public void dropTables(Connection c) throws SQLException {
 		dropTable(c, queryDataTable);
-		dropTable(c, queryDataTable + "_LIST"); //$NON-NLS-1$
-		dropTable(c, queryDataTable + "_TREE"); //$NON-NLS-1$
+		dropTable(c, getObservationLabelTable());
 	}
 
 
@@ -307,7 +306,7 @@ public class DerbyObservationEngine extends AbstractDerbyObservationQueryEngine 
 			sql.append(queryDataTable);
 			sql.append(" SET ca_id = (select id FROM "); //$NON-NLS-1$
 			sql.append(AbstractDerbyObservationQueryEngine.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
-			sql.append("WHERE a.uuid = " + queryDataTable + ".p_ca_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append("WHERE a.uuid = " + queryDataTable + ".ca_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
 			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().executeUpdate(sql.toString());
 			
@@ -316,7 +315,7 @@ public class DerbyObservationEngine extends AbstractDerbyObservationQueryEngine 
 			sql.append(queryDataTable);
 			sql.append(" SET ca_name = (select name FROM "); //$NON-NLS-1$
 			sql.append(AbstractDerbyObservationQueryEngine.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
-			sql.append("WHERE a.uuid = " + queryDataTable + ".p_ca_uuid)");  //$NON-NLS-1$//$NON-NLS-2$
+			sql.append("WHERE a.uuid = " + queryDataTable + ".ca_uuid)");  //$NON-NLS-1$//$NON-NLS-2$
 			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().executeUpdate(sql.toString());
 		}
@@ -401,97 +400,16 @@ public class DerbyObservationEngine extends AbstractDerbyObservationQueryEngine 
 		
 		progress.subTask(Messages.DerbyObservationEngine_Progress_ListAttributesData);
 		progress.split(5);
-		WpoaLinkedData listData = new WpoaLinkedData("_list", "list_element_uuid") { //$NON-NLS-1$ //$NON-NLS-2$
-			@Override
-			public String getLabel(Session session, UUID cauuid, UUID uuid) {
-				return QueryDataModelManager.getInstance().getAttributeListItemLabel(session, cauuid, uuid);
-			}
-		};
-		populateAdditionalWpoaTable(c, session, listData);
+		
+		populateListTreeDataTable(c, session);
+		
+	}
+
 	
-		
-		progress.subTask(Messages.DerbyObservationEngine_Progress_TreeAttributesData);
-		progress.split(5);
-		WpoaLinkedData treeData = new WpoaLinkedData("_tree", "tree_node_uuid") { //$NON-NLS-1$ //$NON-NLS-2$
-			@Override
-			public String getLabel(Session session, UUID cauuid, UUID uuid) {
-				return QueryDataModelManager.getInstance().getAttributeTreeNodeLabel(session, cauuid, uuid);
-			}
-		};
-		populateAdditionalWpoaTable(c, session, treeData);
-		
-	}
-
-	private void populateAdditionalWpoaTable(Connection c, Session session, WpoaLinkedData linkedData) throws SQLException {
-		String sql = "CREATE TABLE " + queryDataTable + linkedData.getPostfix() + " (uuid char(16) for bit data, value varchar(1024))"; //$NON-NLS-1$ //$NON-NLS-2$
-		QueryPlugIn.logSql(sql.toString());
-		c.createStatement().execute(sql);
-
-		sql = "SELECT DISTINCT wpoa."+linkedData.getUuidColumn() //$NON-NLS-1$
-				+", r.P_CA_UUID FROM "  //$NON-NLS-1$
-				+ tableNamePrefix(WaypointObservationAttribute.class) + " inner join " //$NON-NLS-1$
-				+ queryDataTable + " r on " //$NON-NLS-1$
-				+ tablePrefix(WaypointObservationAttribute.class) + ".OBSERVATION_UUID = r.OB_UUID"; //$NON-NLS-1$
-		
-		QueryPlugIn.logSql(sql.toString());
-		
-		
-		String sql2 = "INSERT INTO "+queryDataTable+linkedData.getPostfix()+" VALUES (?, ?)"; //$NON-NLS-1$ //$NON-NLS-2$
-		QueryPlugIn.logSql(sql2.toString());
-		PreparedStatement statement = c.prepareStatement(sql2);
-		int count = 0;
-		try(ResultSet rs = c.createStatement().executeQuery(sql)) {
-			while (rs.next()) {
-				byte[] t = rs.getBytes(1);
-				if (t == null) continue;
-				
-				UUID uuid = UuidUtils.byteToUUID(rs.getBytes(1));
-				if (uuid == null) continue;
-				
-				UUID cauuid = UuidUtils.byteToUUID(rs.getBytes(2));
-				String value = linkedData.getLabel(session, cauuid, uuid);
-				statement.setBytes(1,  UuidUtils.uuidToByte((UUID)uuid));
-				statement.setString(2, value);
-				statement.addBatch();
-				count++;
-				if (count >= 100){
-					statement.executeBatch();
-					count = 0;
-				}
-			}
-			statement.executeBatch();
-		}
-	}
 	
-	/**
-	 * Wrapper class for populating linked data (additional columns)
-	 * 
-	 * @author elitvin
-	 * @since 1.0.0
-	 */
-	private abstract class WpoaLinkedData {
-		private String postfix;
-		private String uuidColumn;
-
-		public WpoaLinkedData(String postfix, String uuidColumn) {
-			super();
-			this.postfix = postfix;
-			this.uuidColumn = uuidColumn;
-		}
-
-		public String getPostfix() {
-			return postfix;
-		}
-
-		public String getUuidColumn() {
-			return uuidColumn;
-		}
-		
-		public abstract String getLabel(Session session, UUID cauuid, UUID keyuuid);
-	}
-
+	
 	@Override
-	protected String getTemporaryTableSelectClause(boolean includeObservations) {
+	public String getTemporaryTableSelectClause(boolean includeObservations) {
 		StringBuilder sql = new StringBuilder();
 		sql.append(" SELECT DISTINCT "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".ca_uuid, "); //$NON-NLS-1$
@@ -515,10 +433,10 @@ public class DerbyObservationEngine extends AbstractDerbyObservationQueryEngine 
 	}
 
 	@Override
-	protected String getTemporaryTableCreateClause(String tableName) {
+	public String getTemporaryTableCreateClause(String tableName) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
-		sql.append("p_ca_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("ca_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("wp_uuid char(16) for bit data,"); //$NON-NLS-1$ 
 		sql.append("wp_source varchar(16),"); //$NON-NLS-1$
 		sql.append("wp_id varchar(32),"); //$NON-NLS-1$
@@ -539,7 +457,7 @@ public class DerbyObservationEngine extends AbstractDerbyObservationQueryEngine 
 	}
 	
 	@Override
-	protected ObservationAttachmentQueryResultItem asQueryAttachmentResultItem(ResultSet rs, Session session) throws SQLException{
+	public ObservationAttachmentQueryResultItem asQueryAttachmentResultItem(ResultSet rs, Session session) throws SQLException{
 		
 		ObservationAttachmentQueryResultItem item = (ObservationAttachmentQueryResultItem) asQueryResultItemInternal(true,  rs, session);
 		
@@ -558,7 +476,7 @@ public class DerbyObservationEngine extends AbstractDerbyObservationQueryEngine 
 	}
 	
 	@Override
-	protected ObservationQueryResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException{
+	public ObservationQueryResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException{
 		return asQueryResultItemInternal(false, rs, session);
 	}
 	
@@ -575,13 +493,13 @@ public class DerbyObservationEngine extends AbstractDerbyObservationQueryEngine 
 		
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
-		it.setConservationAreaUuid(UuidUtils.byteToUUID(rs.getBytes("p_ca_uuid"))); //$NON-NLS-1$
+		it.setConservationAreaUuid(UuidUtils.byteToUUID(rs.getBytes("ca_uuid"))); //$NON-NLS-1$
 		it.setSourceId(rs.getString("wp_source")); //$NON-NLS-1$
 		it.setWaypointUuid(UuidUtils.byteToUUID(rs.getBytes("wp_uuid"))); //$NON-NLS-1$
 		it.setWaypointId(rs.getString("wp_id")); //$NON-NLS-1$
 		it.setWaypointX(rs.getDouble("wp_x")); //$NON-NLS-1$
 		it.setWaypointY(rs.getDouble("wp_y")); //$NON-NLS-1$
-		it.setWpDateTime(rs.getTimestamp("wp_time").toLocalDateTime()); //$NON-NLS-1$
+		it.setWaypointDateTime(rs.getTimestamp("wp_time").toLocalDateTime()); //$NON-NLS-1$
 		it.setLastModifiedDate(rs.getTimestamp("wp_lastmodified").toLocalDateTime()); //$NON-NLS-1$
 		it.setLastModifiedBy(rs.getString("wp_lastmodifiedbyname")); //$NON-NLS-1$
 		it.setWaypointDirection(rs.getObject("wp_direction") == null ? null : rs.getFloat("wp_direction")); //$NON-NLS-1$ //$NON-NLS-2$
@@ -653,11 +571,11 @@ public class DerbyObservationEngine extends AbstractDerbyObservationQueryEngine 
 		}
 		return sb.toString();
 	}
+	
 	@Override
-	protected void buildTemporaryTableIndexes(Connection c, String tableName)
-			throws SQLException {
-		super.buildTemporaryTableIndexes(c, tableName);
-		
+	public void createTemporaryTableIndexes(Connection c, String tableName) throws SQLException {
+		super.createObsIndex(c, tableName);
+	
 		StringBuilder sql = new StringBuilder();
 		sql.append("create index "); //$NON-NLS-1$
 		sql.append(tableName);
@@ -667,5 +585,17 @@ public class DerbyObservationEngine extends AbstractDerbyObservationQueryEngine 
 		QueryPlugIn.logSql(sql.toString());
 		c.createStatement().execute(sql.toString());
 		
+	}
+	
+	
+
+	@Override
+	public String getObservationLabelTable() {
+		return queryDataTable + "_labels"; //$NON-NLS-1$
+	}
+
+	@Override
+	public String getQueryDataTable() {
+		return queryDataTable;
 	}
 }

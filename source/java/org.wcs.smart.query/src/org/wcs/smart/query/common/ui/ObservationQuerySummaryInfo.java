@@ -63,7 +63,7 @@ public class ObservationQuerySummaryInfo implements ISummaryInfo {
 	}
 
 	@Override
-	public void updateControls(IPagedQueryResultSet resultSet) {
+	public void updateControls(IPagedQueryResultSet<?> resultSet) {
 		lblNumResults.setText(Messages.ObservationQuerySummaryInfo_NAValueLabel);
 		lblIncidentCnt.setText(Messages.ObservationQuerySummaryInfo_NAValueLabel);
 		
@@ -71,7 +71,7 @@ public class ObservationQuerySummaryInfo implements ISummaryInfo {
 			lblNumResults.setText(String.valueOf(resultSet.getItemCount()));
 		}
 		if (resultSet != null && resultSet instanceof IObservationPagedQueryResultSet ){
-			lblIncidentCnt.setText(String.valueOf(((IObservationPagedQueryResultSet)resultSet).getWpCount()));
+			lblIncidentCnt.setText(String.valueOf(((IObservationPagedQueryResultSet<?>)resultSet).getWpCount()));
 		}
 		lblNumResults.getParent().layout(true);
 	}

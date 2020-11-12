@@ -22,6 +22,8 @@
 package org.wcs.smart.query.model;
 
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.engine.ObservationQueryResultItem;
 
 
 /**
@@ -32,12 +34,13 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
  * @author Emily
  * @since 1.0.0
  */
-public abstract class AttributeQueryColumn extends QueryColumn {
+public class AttributeQueryColumn extends QueryColumn {
 	
 	public static final String KEY_PREFIX = "attribute:"; //$NON-NLS-1$
 
 	protected String attributeKey = null;
 	protected AttributeType attributeType;
+	
 	/**
 	 * Creates a new attribute column.
 	 * 
@@ -68,5 +71,28 @@ public abstract class AttributeQueryColumn extends QueryColumn {
 		return getKey().substring(KEY_PREFIX.length());
 	}
 	
+	@Override
+	public Object getValue(IResultItem queryResultItem) {
+		if (queryResultItem instanceof ObservationQueryResultItem) {
+			ObservationQueryResultItem item = (ObservationQueryResultItem) queryResultItem;
+			Object x = item.getAttributeValue(attributeKey);
+			if (x != null && getType() == QueryColumn.ColumnType.BOOLEAN){
+				return Boolean.valueOf((Double)x >= 0.5);
+			}
+			return x;
+		}
+		return ""; //$NON-NLS-1$
+	}
+
+
+	/**
+	 * @see org.wcs.smart.asset.query.model.observation.QueryColumn#clone()
+	 */
+	@Override
+	public QueryColumn clone() {
+		QueryColumn newColumn = new AttributeQueryColumn(getName(), getAttributeId(), getAttributeType());
+		newColumn.setEdit(canEdit());
+		return newColumn;
+	}
 	
 }

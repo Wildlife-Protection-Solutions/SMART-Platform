@@ -26,8 +26,8 @@ import java.util.List;
 
 import org.wcs.smart.observation.query.model.ObsObservationQuery;
 import org.wcs.smart.observation.query.model.ObservationGriddedQuery;
-import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
 import org.wcs.smart.observation.query.model.ObservationWaypointQuery;
+import org.wcs.smart.query.common.engine.ObservationQueryResultItem;
 import org.wcs.smart.report.birt.map.MapLayerInfo;
 import org.wcs.smart.report.birt.map.MapLayerInfo.LayerType;
 import org.wcs.smart.report.birt.query.AbstractQueryMapLayer;

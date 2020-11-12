@@ -28,8 +28,8 @@ import org.wcs.smart.asset.query.map.geotools.QueryDataSource;
 import org.wcs.smart.asset.query.map.geotools.QueryFeatureSource;
 import org.wcs.smart.asset.query.map.geotools.QueryResultItemFeature;
 import org.wcs.smart.asset.query.model.AssetObservationQuery;
-import org.wcs.smart.asset.query.model.AssetQueryResultItem;
 import org.wcs.smart.asset.query.model.AssetWaypointQuery;
+import org.wcs.smart.asset.query.model.AssetWaypointResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.importexport.ShapeQueryExporter;
 import org.wcs.smart.query.model.IQueryType;
@@ -58,7 +58,7 @@ public class AssetShapeQueryExporter extends ShapeQueryExporter{
 
 	@Override
 	protected SimpleFeature createFeature(IResultItem it, IQueryType queryType, SimpleFeatureType type) throws Exception{
-		return QueryResultItemFeature.createObservationFeature((AssetQueryResultItem)it,  queryColumns, type);
+		return QueryResultItemFeature.createObservationFeature((AssetWaypointResultItem)it,  queryColumns, type);
 		
 	}
 	

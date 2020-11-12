@@ -61,6 +61,7 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationAttributeList;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
@@ -245,8 +246,10 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 					custom.setNumberValue(av.getDoubleValue());
 					break;
 				case TREE:
+				case MLIST:
 					//not supported
 					break;
+					
 			}
 			if (pa.getType() == AttributeType.LIST && custom.getAttributeListItem() == null) continue;
 			
@@ -614,27 +617,50 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 				}
 				attribute.setStringValue(type.getSValue());
 			}else if (dmAttribute.getType() == AttributeType.LIST){
-				if (type.getItemKey() == null){
+				if (type.getItemKey() == null || type.getItemKey().size() != 1){
 					warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_Warning_NoListValue, new Object[]{type.getAttributeKey()}));
 					return null;
 				}	
-				AttributeListItem item = findAttributeListItem(type.getItemKey(), dmAttribute);
+				AttributeListItem item = findAttributeListItem(type.getItemKey().get(0), dmAttribute);
 				if (item == null){
 					warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_Warning_ListItemNotFound, new Object[]{type.getItemKey(),type.getAttributeKey()}));
 					return null;
 				}	
 				attribute.setAttributeListItem(item);
 			}else if (dmAttribute.getType() == AttributeType.TREE){
-				if (type.getItemKey() == null){
+				if (type.getItemKey() == null || type.getItemKey().size() != 1){
 					warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_Warning_NoTreeItem, new Object[]{type.getAttributeKey()}));
 					return null;
 				}	
-				AttributeTreeNode item = findAttributeTreeItem(type.getItemKey(), dmAttribute);
+				AttributeTreeNode item = findAttributeTreeItem(type.getItemKey().get(0), dmAttribute);
 				if (item == null){
 					warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_Warning_TreeItemNotFound, new Object[]{type.getItemKey(),type.getAttributeKey()}));
 					return null;
 				}
 				attribute.setAttributeTreeNode(item);
+			}else if (dmAttribute.getType() == AttributeType.MLIST){
+				if (type.getItemKey() == null || type.getItemKey().isEmpty()){
+					warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_Warning_NoListValue, new Object[]{type.getAttributeKey()}));
+					return null;
+				}
+				List<WaypointObservationAttributeList> items = new ArrayList<>();
+				for (String s : type.getItemKey()) {
+					AttributeListItem li = findAttributeListItem(s, dmAttribute);
+					if (li == null){
+						warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_Warning_ListItemNotFound, new Object[]{s,type.getAttributeKey()}));
+					} else {
+						WaypointObservationAttributeList item = new WaypointObservationAttributeList();
+						item.setAttributeLisItem(li);
+						item.setObservationAttribute(attribute);
+						items.add(item);
+					}
+				}
+				if (items.isEmpty()) {
+					warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_NoValidListItemsFound, type.getAttributeKey()));
+					return null;
+				}else {
+					attribute.setAttributeListItems(items);
+				}
 			}
 			
 		}

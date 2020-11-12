@@ -24,9 +24,11 @@ package org.wcs.smart.asset.query.model.observation;
 import java.util.Locale;
 
 import org.wcs.smart.SmartContext;
-import org.wcs.smart.asset.query.model.AssetQueryResultItem;
+import org.wcs.smart.asset.query.model.IAssetResultItem;
 import org.wcs.smart.asset.ui.IQueryAssetLabelProvider;
 import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.engine.ObservationQueryResultItem;
+import org.wcs.smart.query.common.engine.WaypointQueryResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.util.UuidUtils;
 
@@ -59,9 +61,6 @@ public class FixedQueryColumn extends QueryColumn {
 		INCIDENT_LENGTH(ColumnType.INTEGER,"waypoint:length"), //$NON-NLS-1$
 		WAYPOINT_X(ColumnType.NUMBER,"waypoint:x"), //$NON-NLS-1$
 		WAYPOINT_Y(ColumnType.NUMBER, "waypoint:y"), //$NON-NLS-1$
-//		WAYPOINT_DIRECTION(ColumnType.NUMBER,"waypoint:direction"), //$NON-NLS-1$
-//		WAYPOINT_DISTANCE( ColumnType.NUMBER,"waypoint:distance"), //$NON-NLS-1$
-
 		WAYPOINT_COMMENT(ColumnType.STRING,"waypoint:comment"), //$NON-NLS-1$
 		
 		WAYPOINT_LASTMODIFIED( ColumnType.DATETIME,"waypoint:modified"),   //$NON-NLS-1$
@@ -108,12 +107,12 @@ public class FixedQueryColumn extends QueryColumn {
 	}
 	
 	/**
-	 * @see org.wcs.smart.asset.query.model.observation.QueryColumn#getValue(org.wcs.smart.asset.query.model.AssetQueryResultItem)
+	 * @see org.wcs.smart.asset.query.model.observation.QueryColumn#getValue(org.wcs.smart.asset.query.model.AssetWaypointResultItem)
 	 */
 	public Object getValue(IResultItem queryResultItem) {
-		if (queryResultItem instanceof AssetQueryResultItem) {
-			AssetQueryResultItem item = (AssetQueryResultItem) queryResultItem;
-
+		if (queryResultItem instanceof IAssetResultItem) {
+			IAssetResultItem item = (IAssetResultItem) queryResultItem;
+			
 			switch (column) {
 			case ASSET:
 				return item.getAssets();
@@ -121,18 +120,23 @@ public class FixedQueryColumn extends QueryColumn {
 				return item.getStation();
 			case LOCATION:
 				return item.getLocations();
+			case INCIDENT_LENGTH:
+				return item.getIncidentLength();
+				default: break;
+			}
+		}
+		if (queryResultItem instanceof WaypointQueryResultItem) {
+			WaypointQueryResultItem item = (WaypointQueryResultItem) queryResultItem;
+
+			switch (column) {
 			case WAYPOINT_ID:
 				return item.getWaypointId();
 			case WAYPOINT_COMMENT:
 				return item.getWaypointComment();
 			case WAYPOINT_DATE:
-				return item.getWaypointDate().toLocalDate();
-//			case WAYPOINT_DIRECTION:
-//				return item.getWaypointDirection();
-//			case WAYPOINT_DISTANCE:
-//				return item.getWaypointDistance();
+				return item.getWaypointDateTime().toLocalDate();
 			case WAYPOINT_TIME:
-				return item.getWaypointDate().toLocalTime();
+				return item.getWaypointDateTime().toLocalTime();
 			case WAYPOINT_X:
 				return item.getWaypointX(getProjection());
 			case WAYPOINT_Y:
@@ -141,13 +145,17 @@ public class FixedQueryColumn extends QueryColumn {
 				return item.getConservationAreaId();
 			case CA_NAME:
 				return item.getConservationAreaName();
-			case INCIDENT_LENGTH:
-				return item.getIncidentLength();
+			
 			case WAYPOINT_LASTMODIFIED:
 				return item.getLastModifiedDate();
 			case WAYPOINT_LASTMODIFIEDBY:
 				return item.getLastModifiedBy();
-			case OBS_GROUP_ID:
+				default: break;
+			}
+		}
+		if (queryResultItem instanceof ObservationQueryResultItem) {
+			ObservationQueryResultItem item = (ObservationQueryResultItem) queryResultItem;
+			if (column == FixedColumns.OBS_GROUP_ID) {
 				if (item.getObservationGroupUuid() == null) return ""; //$NON-NLS-1$
 				return UuidUtils.uuidToString(item.getObservationGroupUuid());
 			}
@@ -186,7 +194,8 @@ public class FixedQueryColumn extends QueryColumn {
 	}
 	
 	private static String[][] FIXED_COLUMN_KEY_TO_ROW  = {
-			{"waypoint_time", "waypoint_date"}, //$NON-NLS-1$ //$NON-NLS-2$
+			{"waypoint_time", "wp_time"}, //$NON-NLS-1$ //$NON-NLS-2$
+			{"waypoint_date", "wp_time"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"waypoint", "wp"} //$NON-NLS-1$ //$NON-NLS-2$
 		};
 }

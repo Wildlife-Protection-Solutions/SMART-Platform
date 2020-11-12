@@ -47,7 +47,6 @@ import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolQuery;
-import org.wcs.smart.patrol.query.model.PatrolQueryAttachmentResultItem;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
@@ -66,7 +65,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author egouge
  * @since 1.0.0
  */
-public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
+public class DerbyPatrolEngine extends AbstractPatrolQueryEngine{
 
 	private PatrolQueryMemoryResult myResults;
 	private String queryDataTable;
@@ -207,7 +206,7 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 	private String buildSelectClause() {
 		String[] ca = {"id", "name"}; //$NON-NLS-1$ //$NON-NLS-2$
 		
-		String[] results = {"p_ca_uuid", "p_uuid", "p_id", "p_start_date", "p_end_date", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+		String[] results = {"ca_uuid", "p_uuid", "p_id", "p_start_date", "p_end_date", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 				"p_station_uuid", "p_team_uuid",  //$NON-NLS-1$ //$NON-NLS-2$
 				"p_objective", "pl_mandate_uuid", "p_type", "p_is_armed", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 				"pl_transport_uuid", "pl_id", //$NON-NLS-1$ //$NON-NLS-2$
@@ -248,7 +247,7 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 		sql.append(" "); //$NON-NLS-1$
 		sql.append(tablePrefix.get(ConservationArea.class));
 		sql.append(" on " + tablePrefix.get(ConservationArea.class) //$NON-NLS-1$
-				+ ".uuid = r.p_ca_uuid "); //$NON-NLS-1$
+				+ ".uuid = r.ca_uuid "); //$NON-NLS-1$
 
 		sql.append("LEFT JOIN "); //$NON-NLS-1$
 		sql.append(tableNamePrefix(Track.class));
@@ -264,11 +263,11 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 	 * @throws SQLException
 	 */
 	@Override
-	protected String getTemporaryTableCreateClause(String tableName) {
+	public String getTemporaryTableCreateClause(String tableName) {
 
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
-		sql.append("p_ca_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("ca_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("p_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("p_id varchar(32),"); //$NON-NLS-1$
 		sql.append("p_station_uuid char(16) for bit data,"); //$NON-NLS-1$
@@ -303,7 +302,7 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 	 * these fields will be left blank.
 	 */
 	@Override
-	protected String getTemporaryTableSelectClause(boolean includeObservations) {
+	public String getTemporaryTableSelectClause(boolean includeObservations) {
 		StringBuilder sql = new StringBuilder();
 		sql.append(" SELECT DISTINCT "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".ca_uuid, "); //$NON-NLS-1$
@@ -338,7 +337,7 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 		return sql.toString();
 	}
 	
-	protected String appendFromClause(HashSet<Class<?>> tables){
+	public String appendFromClause(HashSet<Class<?>> tables){
 		if (!tables.contains(Track.class)){
 			StringBuilder sb = new StringBuilder();
 			sb.append(" left join "); //$NON-NLS-1$
@@ -354,21 +353,17 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 		return ""; //$NON-NLS-1$
 	}
 	
-	protected void  buildTemporaryTableIndexes(Connection c, String tableName) throws SQLException{
-		super.buildTemporaryTableIndexes(c, tableName);
-		
-		StringBuilder sql = new StringBuilder();
-		sql.append("CREATE INDEX " + tableName + "_wp_uuid_idx on " +  tableName + "(wp_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		QueryPlugIn.logSql(sql.toString());
-		c.createStatement().execute(sql.toString());
+	@Override
+	public void createTemporaryTableIndexes(Connection c, String tableName) throws SQLException {
+		super.createObsIndex(c, tableName);
+		super.createWpIndex(c, tableName);
 	}
 
-	@Override
 	protected PatrolQueryResultItem asQueryResultItem(ResultSet rs, Session session)
 			throws SQLException {
 		
 		PatrolQueryResultItem it = new PatrolQueryResultItem();
-		UUID cauuid = UuidUtils.byteToUUID(rs.getBytes("r_p_ca_uuid")); //$NON-NLS-1$
+		UUID cauuid = UuidUtils.byteToUUID(rs.getBytes("r_ca_uuid")); //$NON-NLS-1$
 		it.setConservationAreaUuid(cauuid);
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
@@ -394,11 +389,7 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 		return it;
 	}
 	
-	@Override
-	protected PatrolQueryAttachmentResultItem asQueryAttachmentResultItem(ResultSet rs, Session session) throws SQLException{
-		throw new UnsupportedOperationException();
-	}
-
+	
 	@Override
 	public Session getCurrentConnection() {
 		return session;

@@ -40,24 +40,24 @@ import org.wcs.smart.query.common.engine.ITablePagedQueryResultSet;
  *
  * @param <T>
  */
-public class QueryResultSetIterator<T extends IResultItem> implements IQueryResultSetIterator<IResultItem>{
+public class QueryResultSetIterator<T extends IResultItem> implements IQueryResultSetIterator<T>{
 
 	private int itOffset = -1; // offset of element at which list begins
 	private int itIndex = 0;
-	private List<IResultItem> data;
+	private List<T> data;
 	private int pageSize = 0;
-	private ITablePagedQueryResultSet rs;
+	private ITablePagedQueryResultSet<T> rs;
 	private ResultSet queryResults;
 	
 	private boolean sessionProvided;
 	private Session session = null;
 	
-	public QueryResultSetIterator(ITablePagedQueryResultSet rs, int pageSize) {
+	public QueryResultSetIterator(ITablePagedQueryResultSet<T> rs, int pageSize) {
 		this(rs, pageSize, null);
 		
 	}
 
-	public QueryResultSetIterator(ITablePagedQueryResultSet rs, int pageSize, Session session) {
+	public QueryResultSetIterator(ITablePagedQueryResultSet<T> rs, int pageSize, Session session) {
 		this.pageSize = pageSize;
 		this.rs = rs;
 		this.session = session;
@@ -79,7 +79,7 @@ public class QueryResultSetIterator<T extends IResultItem> implements IQueryResu
 	}
 
 	@Override
-	public IResultItem next() {
+	public T next() {
 		init();
 		if (!hasNext())
 			throw new NoSuchElementException();

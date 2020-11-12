@@ -197,7 +197,7 @@ public class AttributeInfoPanel extends Composite {
 		cmbType.setLabelProvider(new LabelProvider(){
 			@Override
 			public String getText(Object element) {
-				return ((Attribute.AttributeType)element).name();
+				return ((Attribute.AttributeType)element).getName(Locale.getDefault());
 			}
 		});
 		cmbType.setInput(Attribute.AttributeType.values());
@@ -451,22 +451,16 @@ public class AttributeInfoPanel extends Composite {
 				}
 			});
 			
+			lstAttributeList.addDoubleClickListener(e->editListItem());
+				
+				
 			final Button btnEditList = createButton(buttonPanel, DialogConstants.EDIT_BUTTON_TEXT, 
 					SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 			btnEditList.setEnabled(false);
 			btnEditList.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					AttributeListItem it = (AttributeListItem)((IStructuredSelection)lstAttributeList.getSelection()).getFirstElement();
-					if (it == null) return;
-					AttributeItemDialog dd = new AttributeItemDialog(getShell(), it, attributeList,   nameKeyValues.langViewer.getCurrentSelection());
-					int ret = dd.open();
-					if (ret == Window.CANCEL){
-						return;
-					}
-					lstAttributeList.refresh();
-					packColumns();
-					validate();
+					editListItem();
 				}
 			});
 			
@@ -733,6 +727,19 @@ public class AttributeInfoPanel extends Composite {
 		});
 	}
 
+	private void editListItem() {
+		AttributeListItem it = (AttributeListItem)((IStructuredSelection)lstAttributeList.getSelection()).getFirstElement();
+		if (it == null) return;
+		AttributeItemDialog dd = new AttributeItemDialog(getShell(), it, attributeList,   nameKeyValues.langViewer.getCurrentSelection());
+		int ret = dd.open();
+		if (ret == Window.CANCEL){
+			return;
+		}
+		lstAttributeList.refresh();
+		packColumns();
+		validate();
+	}
+	
 	private Button createButton(Composite parent, String text, Image icon) {
 		Button btnMoveDown = new Button(parent, SWT.NONE);
 		btnMoveDown.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
@@ -764,6 +771,9 @@ public class AttributeInfoPanel extends Composite {
 		}
 	}
 	
+	public Attribute.AttributeType getSelectedType(){
+		return (AttributeType) cmbType.getStructuredSelection().getFirstElement();
+	}
 	/**
 	 * Validates attribute input
 	 * @return <code>true</code> if all fields validate correctly, <code>false</code> if error exists
@@ -823,7 +833,7 @@ public class AttributeInfoPanel extends Composite {
 				cdAttTree.hide();
 			}
 			cdAttList.hide();
-		}else if (type.equals(AttributeType.LIST)){
+		}else if (type.isList()){
 			if (cdAttTree != null){
 				cdAttTree.hide();
 			}
@@ -884,7 +894,7 @@ public class AttributeInfoPanel extends Composite {
 			((StackLayout)optionComposite.getLayout()).topControl = numericComposite;
 		}else if (type.equals(AttributeType.TEXT)){
 			((StackLayout)optionComposite.getLayout()).topControl = textComposite;
-		}else if (type.equals(AttributeType.LIST)){
+		}else if (type.isList()){
 			((StackLayout)optionComposite.getLayout()).topControl = listComposite;
 		}else if (type.equals(AttributeType.TREE)){
 			((StackLayout)optionComposite.getLayout()).topControl = treeComposite;
@@ -947,7 +957,7 @@ public class AttributeInfoPanel extends Composite {
 				if (att.getRegex() != null) {
 					txtRegex.setText(att.getRegex());
 				}
-			} else if (att.getType().equals(Attribute.AttributeType.LIST)) {
+			} else if (att.getType().isList()) {
 				listComposite.setVisible(true);
 				Collections.sort(att.getAttributeList(),
 						new Comparator<AttributeListItem>() {
@@ -1051,195 +1061,200 @@ public class AttributeInfoPanel extends Composite {
 	 * @param att attribute to update
 	 */
 	public <T> void updateAttribute(Attribute att, final Session session){
-		nameKeyValues.updateFields(att);
-		att.setType(  (Attribute.AttributeType)((IStructuredSelection)cmbType.getSelection()).getFirstElement() );
-		att.setIsRequired(chRequired.getSelection());
-		iconPanel.updateDmObject(att);
-		
-		if (att.getUuid() == null){
-			session.saveOrUpdate(att);
-		}
-		if (att.getIcon() != null) {
-			if (att.getIcon().getUuid() == null) {
-				session.save(att.getIcon());
-			}else {
-				att.setIcon((Icon)session.merge(att.getIcon()));
-			}
-		}
-		
-		session.flush();
-		
-		if (att.getType().equals(Attribute.AttributeType.NUMERIC)){
-			att.setMaxValue(null);
-			att.setMinValue(null);
-			att.setRegex(null);
-			clearAttributeTree(att);
-			clearAttributeList(att);
+		try {
+			nameKeyValues.updateFields(att);
+			att.setType(  (Attribute.AttributeType)((IStructuredSelection)cmbType.getSelection()).getFirstElement() );
+			att.setIsRequired(chRequired.getSelection());
+			iconPanel.updateDmObject(att);
 			
-			if (att.getAggregations() == null){
-				att.setAggregations(new ArrayList<Aggregation>());
+			if (att.getUuid() == null){
+				session.saveOrUpdate(att);
 			}
-			for (Button btnAgg: btnAggs){
-				Aggregation ag = (Aggregation)btnAgg.getData();
-				if (btnAgg.getSelection()){
-					if (!att.getAggregations().contains(ag)){
-						att.getAggregations().add(ag);
-					}
-				}else{
-					if (att.getAggregations().contains(ag)){
-						att.getAggregations().remove(ag);
-					}
+			if (att.getIcon() != null) {
+				if (att.getIcon().getUuid() == null) {
+					session.save(att.getIcon());
+				}else {
+					att.setIcon((Icon)session.merge(att.getIcon()));
 				}
 			}
-			
-			if (txtMaxValue.getText().length() > 0){
-				att.setMaxValue(Double.valueOf(txtMaxValue.getText()));
-			}
-			if (txtMinValue.getText().length() > 0){
-				att.setMinValue(Double.valueOf(txtMinValue.getText()));
-			}
-		}else if (att.getType().equals(Attribute.AttributeType.BOOLEAN)){
-			att.setAggregations(null);
-			att.setMaxValue(null);
-			att.setMinValue(null);
-			att.setRegex(null);
-			clearAttributeTree(att);
-			clearAttributeList(att);
-		}else if (att.getType().equals(Attribute.AttributeType.TEXT)){
-			att.setAggregations(null);
-			att.setMaxValue(null);
-			att.setMinValue(null);
-			att.setRegex(null);
-			clearAttributeTree(att);
-			clearAttributeList(att);
-			att.setRegex(txtRegex.getText());
-		}else if (att.getType().equals(Attribute.AttributeType.LIST)){
-			att.setAggregations(null);
-			att.setMaxValue(null);
-			att.setMinValue(null);
-			att.setRegex(null);
-			clearAttributeTree(att);
-			
-			if (att.getAttributeList() == null){
-				att.setAttributeList(new ArrayList<AttributeListItem>());
-			}else{
-				for (Iterator<AttributeListItem> iterator = att.getAttributeList().iterator(); iterator.hasNext();) {
-					AttributeListItem oldItem = (AttributeListItem) iterator.next();
-					
-					if (!attributeList.contains(oldItem)){
-						
-						//item deleted
-						try{
-							DataModelManager.INSTANCE.fireDeleteListener(session, oldItem);
-						}catch (Exception ex){
-							SmartPlugIn.displayLog(Messages.AttributeInfoPanel_ListModificationError + ex.getMessage(), ex); 
-							return;
-						}
-						oldItem.setAttribute(null);
-						iterator.remove();
-					}
-				}
-				
-				
-			}
-			for (int i = 0; i < attributeList.size(); i ++){
-				AttributeListItem item = (AttributeListItem) attributeList.get(i);
-				
-				if (item.getIcon() != null) {
-					if (item.getIcon().getUuid() == null) {
-						session.save(item.getIcon());
-					}else {
-						item.setIcon((Icon)session.merge(item.getIcon()));
-					}
-				}
-				item.setListOrder(i);
-				item.setAttribute(att);
-				
-				if (item.getUuid() != null){
-					item = (AttributeListItem) session.merge(item);	
-				}else{
-					//new item
-					session.saveOrUpdate(item);
-					DataModelManager.INSTANCE.fireAddListener(session, item);
-					att.getAttributeList().add(item);
-				}
-				for ( org.wcs.smart.ca.Label l : item.getNames()){
-					l.setElement(item);
-				}
-			}
-			Collections.sort(att.getAttributeList(), new Comparator<AttributeListItem>() {
-
-				@Override
-				public int compare(AttributeListItem o1, AttributeListItem o2) {
-					return ((Integer)o1.getListOrder()).compareTo(o2.getListOrder());
-				}
-			});
 			
 			session.flush();
-		}else if (att.getType().equals(Attribute.AttributeType.TREE)){
-			att.setAggregations(null);
-			att.setMaxValue(null);
-			att.setMinValue(null);
-			att.setRegex(null);
-			clearAttributeList(att);
-			if(attTree != null){
-				final Attribute thisAttribute = att;
-				ProgressMonitorDialog pmd = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
-				try {
-					pmd.run(true, false, new IRunnableWithProgress() {
-						
-						@Override
-						public void run(IProgressMonitor monitor) throws InvocationTargetException,
-								InterruptedException {
-							monitor.setTaskName(Messages.AttributeInfoPanel_SavingProgressMessage);
-							
-							for(AttributeTreeNode toDelete : attTree.getDeletedNodes()){
-								try{
-									if (toDelete.getUuid() != null){
-										DataModelManager.INSTANCE.fireDeleteListener(currentSession, toDelete);
-									}
-								}catch (Exception ex){
-									throw new InvocationTargetException(ex);
-								}
-							}
-							attTree.clearDeletedNodes();
-							
-							if (thisAttribute.getTree() == null){
-								thisAttribute.setTree(new ArrayList<AttributeTreeNode>());
-							}else{
-								thisAttribute.getTree().clear();
-							}
-							List<AttributeTreeNode> root = attTree.getRootNodes();
-							if (root != null){
-								for (AttributeTreeNode n : root){
-									AttributeTreeNode mergedNode = updateAttributeTreeNode(thisAttribute, n, session);
-									thisAttribute.getTree().add(mergedNode);
-								}
-							}
-							session.flush();
-							//icons
-							ITreeNodeVisitor v = node-> {
-								if (node.getIcon() != null) {
-									if (node.getIcon().getUuid() != null) {
-										Icon merged = (Icon) session.merge(node.getIcon());
-										node.setIcon(merged);
-									}
-								}
-								return true;
-							};
-							thisAttribute.getTree().forEach(n->n.accept(v));
-						
-							
-							session.flush();
+			
+			if (att.getType().equals(Attribute.AttributeType.NUMERIC)){
+				att.setMaxValue(null);
+				att.setMinValue(null);
+				att.setRegex(null);
+				clearAttributeTree(att);
+				clearAttributeList(att);
+				
+				if (att.getAggregations() == null){
+					att.setAggregations(new ArrayList<Aggregation>());
+				}
+				for (Button btnAgg: btnAggs){
+					Aggregation ag = (Aggregation)btnAgg.getData();
+					if (btnAgg.getSelection()){
+						if (!att.getAggregations().contains(ag)){
+							att.getAggregations().add(ag);
 						}
-					});
-				} catch (Exception ex) {
-					SmartPlugIn.displayLog(Messages.AttributeInfoPanel_SaveErrorMessage, ex);
+					}else{
+						if (att.getAggregations().contains(ag)){
+							att.getAggregations().remove(ag);
+						}
+					}
 				}
 				
+				if (txtMaxValue.getText().length() > 0){
+					att.setMaxValue(Double.valueOf(txtMaxValue.getText()));
+				}
+				if (txtMinValue.getText().length() > 0){
+					att.setMinValue(Double.valueOf(txtMinValue.getText()));
+				}
+			}else if (att.getType().equals(Attribute.AttributeType.BOOLEAN)){
+				att.setAggregations(null);
+				att.setMaxValue(null);
+				att.setMinValue(null);
+				att.setRegex(null);
+				clearAttributeTree(att);
+				clearAttributeList(att);
+			}else if (att.getType().equals(Attribute.AttributeType.TEXT)){
+				att.setAggregations(null);
+				att.setMaxValue(null);
+				att.setMinValue(null);
+				att.setRegex(null);
+				clearAttributeTree(att);
+				clearAttributeList(att);
+				att.setRegex(txtRegex.getText());
+			}else if (att.getType().isList()){
+				att.setAggregations(null);
+				att.setMaxValue(null);
+				att.setMinValue(null);
+				att.setRegex(null);
+				clearAttributeTree(att);
+				
+				if (att.getAttributeList() == null){
+					att.setAttributeList(new ArrayList<AttributeListItem>());
+				}else{
+					for (Iterator<AttributeListItem> iterator = att.getAttributeList().iterator(); iterator.hasNext();) {
+						AttributeListItem oldItem = (AttributeListItem) iterator.next();
+						
+						if (!attributeList.contains(oldItem)){
+							
+							//item deleted
+							try{
+								DataModelManager.INSTANCE.fireDeleteListener(session, oldItem);
+							}catch (Exception ex){
+								SmartPlugIn.displayLog(Messages.AttributeInfoPanel_ListModificationError + ex.getMessage(), ex); 
+								return;
+							}
+							oldItem.setAttribute(null);
+							iterator.remove();
+						}
+					}
+					
+					
+				}
+				for (int i = 0; i < attributeList.size(); i ++){
+					AttributeListItem item = (AttributeListItem) attributeList.get(i);
+					
+					if (item.getIcon() != null) {
+						if (item.getIcon().getUuid() == null) {
+							session.save(item.getIcon());
+						}else {
+							item.setIcon((Icon)session.merge(item.getIcon()));
+						}
+					}
+					item.setListOrder(i);
+					item.setAttribute(att);
+					
+					if (item.getUuid() != null){
+						item = (AttributeListItem) session.merge(item);	
+					}else{
+						//new item
+						session.saveOrUpdate(item);
+						DataModelManager.INSTANCE.fireAddListener(session, item);
+						att.getAttributeList().add(item);
+					}
+					for ( org.wcs.smart.ca.Label l : item.getNames()){
+						l.setElement(item);
+					}
+				}
+				Collections.sort(att.getAttributeList(), new Comparator<AttributeListItem>() {
+	
+					@Override
+					public int compare(AttributeListItem o1, AttributeListItem o2) {
+						return ((Integer)o1.getListOrder()).compareTo(o2.getListOrder());
+					}
+				});
+				
+				session.flush();
+			}else if (att.getType().equals(Attribute.AttributeType.TREE)){
+				att.setAggregations(null);
+				att.setMaxValue(null);
+				att.setMinValue(null);
+				att.setRegex(null);
+				clearAttributeList(att);
+				if(attTree != null){
+					final Attribute thisAttribute = att;
+					ProgressMonitorDialog pmd = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
+					try {
+						pmd.run(true, false, new IRunnableWithProgress() {
+							
+							@Override
+							public void run(IProgressMonitor monitor) throws InvocationTargetException,
+									InterruptedException {
+								monitor.setTaskName(Messages.AttributeInfoPanel_SavingProgressMessage);
+								
+								for(AttributeTreeNode toDelete : attTree.getDeletedNodes()){
+									try{
+										if (toDelete.getUuid() != null){
+											DataModelManager.INSTANCE.fireDeleteListener(currentSession, toDelete);
+										}
+									}catch (Exception ex){
+										throw new InvocationTargetException(ex);
+									}
+								}
+								attTree.clearDeletedNodes();
+								
+								if (thisAttribute.getTree() == null){
+									thisAttribute.setTree(new ArrayList<AttributeTreeNode>());
+								}else{
+									thisAttribute.getTree().clear();
+								}
+								List<AttributeTreeNode> root = attTree.getRootNodes();
+								if (root != null){
+									for (AttributeTreeNode n : root){
+										AttributeTreeNode mergedNode = updateAttributeTreeNode(thisAttribute, n, session);
+										thisAttribute.getTree().add(mergedNode);
+									}
+								}
+								session.flush();
+								//icons
+								ITreeNodeVisitor v = node-> {
+									if (node.getIcon() != null) {
+										if (node.getIcon().getUuid() != null) {
+											Icon merged = (Icon) session.merge(node.getIcon());
+											node.setIcon(merged);
+										}
+									}
+									return true;
+								};
+								thisAttribute.getTree().forEach(n->n.accept(v));
+							
+								
+								session.flush();
+							}
+						});
+					} catch (Exception ex) {
+						SmartPlugIn.displayLog(Messages.AttributeInfoPanel_SaveErrorMessage, ex);
+					}
+					
+				}
 			}
+			session.flush();
+		}catch (Exception ex) {
+			SmartPlugIn.displayLog(Messages.AttributeInfoPanel_SaveError, ex);
+
 		}
-		session.flush();
 	}
 	
 

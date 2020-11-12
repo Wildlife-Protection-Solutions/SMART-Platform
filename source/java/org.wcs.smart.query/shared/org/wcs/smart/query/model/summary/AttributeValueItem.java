@@ -86,6 +86,7 @@ public class AttributeValueItem implements IValueItem {
 		this.attributeType = Attribute.decodeAttributeTypeKey(attTypeKey);
 		if(attributeType != Attribute.AttributeType.NUMERIC && 
 		   attributeType != Attribute.AttributeType.LIST &&
+		   attributeType != Attribute.AttributeType.MLIST &&
 		   attributeType != Attribute.AttributeType.TREE){ 
 			throw new IllegalStateException("Non numeric attribute type not valid."); //$NON-NLS-1$
 		}
@@ -101,7 +102,8 @@ public class AttributeValueItem implements IValueItem {
 				this.attributeKey = bits[3];
 				this.aggregationKey = bits[2];
 			}
-		}else if (attributeType == AttributeType.LIST || 
+		}else if (attributeType == AttributeType.LIST ||
+				attributeType == AttributeType.MLIST || 
 				attributeType == AttributeType.TREE ){
 				//< SUM_ATTRIBUTE_VALUE_LISTTREE_KEY : "attribute:" ("t" | "l") ":sum:" ("obs" | "wp") ":" < DM_KEY > >
 				//< SUM_CAT_ATT_VALUE_LISTTREE_KEY : "category:" < DM_KEY > ":" < SUM_ATTRIBUTE_VALUE_LISTTREE_KEY >

@@ -85,7 +85,7 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 
 	private String getDataQuery(boolean includetrack, String[] sortFields){
 		StringBuilder fields = new StringBuilder();
-		fields.append("ca_id,ca_name, r_p_ca_uuid, r_p_uuid,"); //$NON-NLS-1$
+		fields.append("ca_id,ca_name, ca_uuid, r_p_uuid,"); //$NON-NLS-1$
 		fields.append("r_p_id,r_p_start_date,r_p_end_date,r_p_station_uuid,"); //$NON-NLS-1$
 		fields.append("r_p_team_uuid,r_p_objective,r_pl_mandate_uuid,r_p_type,"); //$NON-NLS-1$
 		fields.append("r_p_is_armed,r_pl_transport_uuid,r_pl_id,r_pl_start_date,"); //$NON-NLS-1$
@@ -292,7 +292,7 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 	private String buildSelectClause() {
 		String[] ca = {"id", "name"}; //$NON-NLS-1$ //$NON-NLS-2$
 		
-		String[] results = {"p_ca_uuid", "p_uuid", "p_id", "p_start_date", "p_end_date", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+		String[] results = {"ca_uuid", "p_uuid", "p_id", "p_start_date", "p_end_date", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 				"p_station_uuid", "p_team_uuid",  //$NON-NLS-1$ //$NON-NLS-2$
 				"p_objective", "pl_mandate_uuid", "p_type", "p_is_armed", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 				"pl_transport_uuid", "pl_id", //$NON-NLS-1$ //$NON-NLS-2$
@@ -332,7 +332,7 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 		sql.append(" "); //$NON-NLS-1$
 		sql.append(tablePrefix.get(ConservationArea.class));
 		sql.append(" on " + tablePrefix.get(ConservationArea.class) //$NON-NLS-1$
-				+ ".uuid = r.p_ca_uuid "); //$NON-NLS-1$
+				+ ".uuid = r.ca_uuid "); //$NON-NLS-1$
 		
 		sql.append("LEFT JOIN "); //$NON-NLS-1$
 		sql.append(tableNamePrefix(Track.class));
@@ -352,7 +352,7 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
-		sql.append("p_ca_uuid uuid,"); //$NON-NLS-1$
+		sql.append("ca_uuid uuid,"); //$NON-NLS-1$
 		sql.append("p_uuid uuid,"); //$NON-NLS-1$
 		sql.append("p_id varchar(32),"); //$NON-NLS-1$
 		sql.append("p_station_uuid uuid,"); //$NON-NLS-1$

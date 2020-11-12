@@ -45,6 +45,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.common.control.SmartUiUtils;
+import org.wcs.smart.common.filter.DateFilterComposite;
 import org.wcs.smart.common.filter.IUpdatableView;
 import org.wcs.smart.common.filter.SmartFilterDialog;
 import org.wcs.smart.common.filter.StringFilterComposite;
@@ -57,7 +58,7 @@ import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
 
 /**
- * Dialog for managing survey filter.
+ * Dialog for managing survey/mission filter.
  * @author Emily
  *
  */
@@ -77,14 +78,23 @@ public class SurveyFilterDialog extends SmartFilterDialog  {
 	
 	private StringFilterComposite nameFilter ;
 	
+	private DateFilterComposite dateFilterCmp;
+	
+	private boolean includeMissionDateFilter = true;
+	
 	/**
 	 * Create the dialog.
 	 * @param parent parent shell
 	 * @param filter the filter to update
 	 */
 	public SurveyFilterDialog(Shell parent, IUpdatableView view, SurveyFilter current) {
+		this(parent, view, current, true);
+	}
+	
+	public SurveyFilterDialog(Shell parent, IUpdatableView view, SurveyFilter current, boolean includeMissionDateFilter) {
 		super(parent, view);
 		this.filter = current;
+		this.includeMissionDateFilter = includeMissionDateFilter;
 	}
 
 	
@@ -119,7 +129,10 @@ public class SurveyFilterDialog extends SmartFilterDialog  {
 				MessageDialog.openWarning(getParentShell(), Messages.SurveyFilterDialog_WarnTitle, Messages.SurveyFilterDialog_WarnInfo); 
 			}
 		}
-		
+		if (dateFilterCmp != null) {
+			filter.setMissionDateFilter(dateFilterCmp.getDateFilterForModel(), dateFilterCmp.getStartDateForModel(), dateFilterCmp.getEndDateForModel());
+		}
+
 		filter.setSurveyNameFilter(nameFilter.getComparisonForModel(), nameFilter.getFilterValueForModel());
 	}
 
@@ -148,7 +161,7 @@ public class SurveyFilterDialog extends SmartFilterDialog  {
 				initDesignSelection();
 			}
 		}
-		
+		if (dateFilterCmp != null) dateFilterCmp.applyState(filter.getMissionDateFilter(), filter.getMissionStartDate(), filter.getMissionEndDate());
 		nameFilter.applyState(filter.getSurveyNameComparator(), filter.getSurveyNameFilter(), surveyField);
 		updateDesignEnabled();
 	}
@@ -184,9 +197,13 @@ public class SurveyFilterDialog extends SmartFilterDialog  {
 		main.setLayout(new GridLayout(1, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
+		if (includeMissionDateFilter) {
+			SmartUiUtils.createHeaderLabel(main, Messages.SurveyFilterDialog_MissionDatesFilter);
+			dateFilterCmp = new DateFilterComposite(main, SWT.NONE, this);
+		}
+		
 		
 		SmartUiUtils.createHeaderLabel(main, Messages.SurveyFilterDialog_IdGroup);
-		
 		nameFilter = new StringFilterComposite(main, SWT.NONE, new StringFilterComposite.TextField[]{surveyField});
 		
 		
@@ -246,9 +263,6 @@ public class SurveyFilterDialog extends SmartFilterDialog  {
 	}
 
 	private void updateDesignEnabled(){
-//		DesignOps op = (DesignOps) ((StructuredSelection)lstDesignOps.getSelection()).getFirstElement();
-//		lstDesigns.getControl().setEnabled(op == DesignOps.SELECTED);
-		
 		lstDesigns.getControl().setEnabled(opSelected.getSelection());
 	}
 	

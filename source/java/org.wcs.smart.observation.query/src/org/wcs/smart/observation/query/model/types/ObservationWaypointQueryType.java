@@ -212,8 +212,8 @@ public class ObservationWaypointQueryType implements IMappableQueryType {
 	@Override
 	public IQueryResultInfoProvider[] getResultProviders(){
 		return new IQueryResultInfoProvider[]{
-				new ObservationResultInfoProvider(),
-				new ObservationZoomToResultProvider()
+				new ShowItemInfoProvider(),
+				new ZoomToInfoProvider()
 		};
 	}
 	

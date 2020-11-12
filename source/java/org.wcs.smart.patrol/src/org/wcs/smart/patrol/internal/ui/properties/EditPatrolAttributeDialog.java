@@ -25,6 +25,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -170,7 +171,7 @@ public class EditPatrolAttributeDialog extends SmartStyledTitleDialog implements
 		cmbType.setLabelProvider(new LabelProvider(){
 			@Override
 			public String getText(Object element) {
-				return ((Attribute.AttributeType)element).name();
+				return ((Attribute.AttributeType)element).getName(Locale.getDefault());
 			}
 		});
 		cmbType.setInput(new Object[]{

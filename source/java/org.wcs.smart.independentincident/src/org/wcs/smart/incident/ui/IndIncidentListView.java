@@ -65,12 +65,15 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.menus.IMenuService;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.osgi.service.event.Event;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.incident.IIncidentProvider;
+import org.wcs.smart.incident.IncidentManager;
 import org.wcs.smart.incident.event.IIncidentListener;
 import org.wcs.smart.incident.event.IncidentEventManager;
 import org.wcs.smart.incident.internal.Messages;
@@ -161,9 +164,17 @@ public class IndIncidentListView implements IIncidentFilteringView {
 		if (partEvent == null) return;
 		MPart activePart = (MPart) partEvent.getProperty(UIEvents.EventTags.ELEMENT);
 		Object lpart = E3Utils.getSourceObject(activePart);
-		if (lpart instanceof IncidentEditor){
-			incidentListViewer.setSelection(new StructuredSelection(((IncidentEditor)lpart).getEditorInput()));
-			pService.bringToTop(localPart);
+		
+		if (lpart instanceof IEditorPart){
+			String id = ((IEditorPart)lpart).getEditorSite().getId();
+			for (IIncidentProvider p : IncidentManager.getInstance().getIncidentProviders()) {
+				if (p.getEditorID().equals(id)) {
+					incidentListViewer.setSelection(new StructuredSelection(((IEditorPart)lpart).getEditorInput()));
+					pService.bringToTop(localPart);
+					return;
+				}
+			}
+			
 		}
 	}
 	

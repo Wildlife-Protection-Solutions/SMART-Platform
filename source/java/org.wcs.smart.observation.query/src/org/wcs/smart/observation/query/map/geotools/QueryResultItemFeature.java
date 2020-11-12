@@ -27,8 +27,8 @@ import java.util.List;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
 import org.wcs.smart.observation.udig.WaypointSimpleFeature;
+import org.wcs.smart.query.common.engine.WaypointQueryResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumnUtils;
 
@@ -52,9 +52,9 @@ public class QueryResultItemFeature {
 	 * @param ftype the feature type 
 	 * @return created feature 
 	 */
-	public static SimpleFeature createObservationFeature(ObservationQueryResultItem it, List<QueryColumn> columns, SimpleFeatureType  ftype){
+	public static SimpleFeature createObservationFeature(WaypointQueryResultItem it, List<QueryColumn> columns, SimpleFeatureType  ftype){
 		List<Object> data = new ArrayList<Object>();
-		data.add(it.asGeometry(ObservationQueryResultItem.GEOMCOLUMN_KEY));
+		data.add(it.asGeometry(WaypointQueryResultItem.GEOMCOLUMN_KEY));
 		data.add(it.getWaypointId() + "." + System.nanoTime()); //$NON-NLS-1$ 
 		int i = 2;
 		for (QueryColumn c : columns){

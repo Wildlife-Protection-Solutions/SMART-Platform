@@ -8,6 +8,9 @@
 
 package org.wcs.smart.patrol.xml.model.v13;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -26,7 +29,7 @@ import javax.xml.bind.annotation.XmlType;
  *       &lt;sequence>
  *         &lt;element name="sValue" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="dValue" type="{http://www.w3.org/2001/XMLSchema}double" minOccurs="0"/>
- *         &lt;element name="itemKey" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="itemKey" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="bValue" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *       &lt;/sequence>
  *       &lt;attribute name="attributeKey" type="{http://www.w3.org/2001/XMLSchema}string" />
@@ -48,7 +51,7 @@ public class WaypointObservationAttributeType {
 
     protected String sValue;
     protected Double dValue;
-    protected String itemKey;
+    protected List<String> itemKey;
     protected Boolean bValue;
     @XmlAttribute(name = "attributeKey")
     protected String attributeKey;
@@ -104,25 +107,30 @@ public class WaypointObservationAttributeType {
     /**
      * Gets the value of the itemKey property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getItemKey() {
-        return itemKey;
-    }
-
-    /**
-     * Sets the value of the itemKey property.
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the itemKey property.
      * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getItemKey().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link String }
+     * 
+     * 
      */
-    public void setItemKey(String value) {
-        this.itemKey = value;
+    public List<String> getItemKey() {
+        if (itemKey == null) {
+            itemKey = new ArrayList<String>();
+        }
+        return this.itemKey;
     }
 
     /**

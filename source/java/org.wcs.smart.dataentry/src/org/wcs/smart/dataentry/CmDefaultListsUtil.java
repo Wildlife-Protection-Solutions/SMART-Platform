@@ -30,7 +30,6 @@ import java.util.Queue;
 import java.util.Set;
 
 import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeConfig;
@@ -65,7 +64,7 @@ public class CmDefaultListsUtil {
 			CmNode node = toCheck.remove();
 			if (node.getCmAttributes() != null) {
 				for (final CmAttribute a : node.getCmAttributes()) {
-					if (AttributeType.LIST.equals(a.getAttribute().getType())) {
+					if (a.getAttribute().getType().isList()) {
 						result.add(a.getAttribute());
 					}
 				}

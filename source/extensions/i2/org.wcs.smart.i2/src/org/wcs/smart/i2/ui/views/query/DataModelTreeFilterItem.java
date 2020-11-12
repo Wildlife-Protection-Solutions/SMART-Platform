@@ -45,6 +45,7 @@ import org.wcs.smart.i2.ui.views.query.dropitem.AttributeTreeDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DateDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.DropItemFactory;
+import org.wcs.smart.i2.ui.views.query.dropitem.MultiOptionDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.OptionDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.TextBoxDropItem;
 import org.wcs.smart.i2.ui.views.query.dropitem.TextDropItem;
@@ -151,10 +152,13 @@ public class DataModelTreeFilterItem extends DeferredTreeFilterItem{
 		case DATE:
 			return new DropItem[]{new DateDropItem(dropItemName, queryKey, canEdit)};
 		case LIST:
+		case MLIST:
 			final List<String> labels = new ArrayList<String>();
 			final List<String> keys = new ArrayList<String>();
-			labels.add(DropItemFactory.ANY_LABEL);
-			keys.add(IQueryFilter.ANY_OPTION_KEY);
+			if (type == Attribute.AttributeType.LIST) {
+				labels.add(DropItemFactory.ANY_LABEL);
+				keys.add(IQueryFilter.ANY_OPTION_KEY);
+			}
 			Job j = new Job("creating attribute drop item"){ //$NON-NLS-1$
 
 				@Override
@@ -180,7 +184,13 @@ public class DataModelTreeFilterItem extends DeferredTreeFilterItem{
 				Intelligence2PlugIn.displayLog(Messages.DataModelTreeFilterItem_ErrorMsg, e);
 			}
 			
-			return new DropItem[]{new OptionDropItem(dropItemName, queryKey, labels.toArray(new String[labels.size()]), keys.toArray(new String[keys.size()]), canEdit)};
+			if (type == Attribute.AttributeType.LIST) {
+				return new DropItem[]{new OptionDropItem(dropItemName, queryKey, labels.toArray(new String[labels.size()]), keys.toArray(new String[keys.size()]), canEdit)};
+			}else if (type == Attribute.AttributeType.MLIST) {
+				return new DropItem[]{new MultiOptionDropItem(dropItemName, queryKey, labels.toArray(new String[labels.size()]), keys.toArray(new String[keys.size()]), canEdit)};
+			}else {
+				return new DropItem[] {};
+			}
 			
 		case NUMERIC:
 			return new DropItem[]{new TextBoxDropItem(dropItemName, queryKey, TextBoxDropItem.InputType.NUMERIC, canEdit)};

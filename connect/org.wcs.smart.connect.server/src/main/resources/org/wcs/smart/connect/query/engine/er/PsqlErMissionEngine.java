@@ -69,6 +69,10 @@ public class PsqlErMissionEngine extends PsqlErEngine {
 		return queryDataTable;
 	}
 	
+	public String getLabelTable(){
+		return getQueryDataTable() + "_labels"; //$NON-NLS-1$
+	}
+	
 	@Override
 	public boolean canExecute(String  querytype) {
 		return MissionQuery.KEY.equals(querytype);
@@ -179,7 +183,8 @@ public class PsqlErMissionEngine extends PsqlErEngine {
 		populateMissionLeader(c, session, queryDataTable);
 		
 		//mission attributes
-		populateAdditionalMissionTable(c,session, sdFilter, caFilter, queryDataTable, queryDataTable+ "_mlist", "list_element_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+		createLabelTable(session, getLabelTable());
+		populateAdditionalMissionTable(c,session, sdFilter, caFilter, getQueryDataTable(), getLabelTable()); 
 	}
 
 	
@@ -229,7 +234,7 @@ public class PsqlErMissionEngine extends PsqlErEngine {
 	@Override
 	public void cleanUp(Session session) throws SQLException{
 		dropTable(session, queryDataTable);
-		dropTable(session, queryDataTable + "_mlist"); //$NON-NLS-1$
+		dropTable(session, getLabelTable());
 	}
 
 	@Override

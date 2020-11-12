@@ -42,6 +42,7 @@ import org.wcs.smart.patrol.query.model.PatrolQuery;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
 import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
+import org.wcs.smart.query.common.engine.WaypointQueryResultItem;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.CustomDateFilter;
@@ -138,7 +139,7 @@ public class PatrolSmartQuery extends AbstractSmartQuery {
 				queryTypeKey.equals(PatrolWaypointQuery.KEY)){		
 			return new GeometryColumn[]{
 					new GeometryColumn(SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(ICoreLabelProvider.GEOMETRY_LABEL, l),
-							PatrolQueryResultItem.WAYPOINT_GEOMCOLUMN_KEY)};
+							WaypointQueryResultItem.GEOMCOLUMN_KEY)};
 		}else if (queryTypeKey.equals(PatrolQuery.KEY)){
 			return new GeometryColumn[]{
 					new GeometryColumn(SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(ICoreLabelProvider.GEOMETRY_LABEL, l),

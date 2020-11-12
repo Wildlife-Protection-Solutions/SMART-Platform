@@ -504,14 +504,14 @@ CREATE FUNCTION connect.trg_ct_mission_link() RETURNS trigger
 RETURN ROW; END$$;
 
 
-CREATE FUNCTION connect.trg_ct_mission_wplink() RETURNS trigger
-    LANGUAGE plpgsql
+CREATE OR REPLACE FUNCTION connect.trg_ct_mission_wplink() RETURNS trigger
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
   INSERT INTO connect.change_log
  (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
  SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, sd.CA_UUID
-   FROM smart.mission mm, smart.survey s, smart.survey_design sd, smart.ct_mission_wplink l WHERE mm.survey_uuid = s.uuid and s.survey_design_uuid = sd.uuid and mm.uuid = l.mission_uuid and l.ct_uuid = row.ct_mission_link.uuid;
-RETURN ROW; END$$;
+   FROM smart.mission mm, smart.survey s, smart.survey_design sd, smart.ct_mission_link l
+   WHERE mm.survey_uuid = s.uuid and s.survey_design_uuid = sd.uuid and mm.uuid = l.mission_uuid and l.ct_uuid = row.ct_mission_link_uuid;
+RETURN ROW; END$$ LANGUAGE 'plpgsql';
 
 
 CREATE FUNCTION connect.trg_ct_patrol_link() RETURNS trigger
@@ -861,15 +861,23 @@ CREATE FUNCTION connect.trg_i_observation() RETURNS trigger
 RETURN ROW; END$$;
 
 
-CREATE FUNCTION connect.trg_i_observation_attribute() RETURNS trigger
+CREATE OR REPLACE FUNCTION connect.trg_i_observation_attribute() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
      INSERT INTO connect.change_log
          (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
-         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'observation_uuid', ROW.observation_uuid, 'attribute_uuid', ROW.attribute_uuid, null, i.CA_UUID
-         from smart.dm_attribute i where i.uuid = ROW.attribute_uuid;
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, a.CA_UUID
+         FROM smart.dm_attribute a WHERE a.uuid = ROW.attribute_uuid;
 RETURN ROW; END$$;
 
+CREATE OR REPLACE FUNCTION connect.trg_i_observation_attribute_list() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'list_element_uuid', ROW.list_element_uuid, 'observation_attribute_uuid', ROW.observation_attribute_uuid, null, a.CA_UUID
+         FROM smart.i_observation_attribute b join smart.dm_attribute a ON a.uuid = b.attribute_uuid WHERE a.uuid = ROW.observation_attribute_uuid; 
+RETURN ROW; END$$;
 
 CREATE FUNCTION connect.trg_i_permission() RETURNS trigger
     LANGUAGE plpgsql
@@ -1530,10 +1538,18 @@ CREATE FUNCTION connect.trg_wp_observation_attributes() RETURNS trigger
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
      INSERT INTO connect.change_log
          (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
-         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'attribute_uuid', ROW.attribute_uuid, null, null, null, a.CA_UUID
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'uuid', ROW.uuid, null, null, null, a.CA_UUID
          FROM smart.dm_attribute a WHERE a.uuid = ROW.attribute_uuid;
 RETURN ROW; END$$;
 
+CREATE OR REPLACE FUNCTION connect.trg_wp_observation_attributes_list() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
+     INSERT INTO connect.change_log
+         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
+         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'list_element_uuid', ROW.list_element_uuid, 'observation_attribute_uuid', ROW.observation_attribute_uuid, null, a.CA_UUID
+         FROM smart.wp_observation_attributes b join smart.dm_attribute a ON a.uuid = b.attribute_uuid WHERE a.uuid = ROW.observation_attribute_uuid; 
+RETURN ROW; END$$;
 
 
 CREATE FUNCTION connect.utmarea(geom public.geometry) RETURNS double precision
@@ -1982,6 +1998,7 @@ CREATE TABLE connect.ct_package (
     UNIQUE(package_uuid),
     primary key(uuid)
 );
+
 
 CREATE TABLE connect.dashboards (
     uuid uuid NOT NULL,
@@ -2667,6 +2684,7 @@ CREATE TABLE smart.conservation_area (
     PRIMARY KEY (uuid)
 );
 
+
 CREATE TABLE smart.ct_incident_link (
     uuid uuid NOT NULL,
     ct_group_id uuid,
@@ -2675,6 +2693,16 @@ CREATE TABLE smart.ct_incident_link (
     obs_group_uuid uuid,
     PRIMARY KEY (uuid)
 );
+
+CREATE TABLE smart.ct_incident_package(
+	uuid uuid not null, name varchar(512), 
+	ca_uuid uuid not null,
+	cm_uuid uuid, 
+	ctprofile_uuid uuid, 
+	basemapdef varchar(32672), 
+	primary key (uuid)
+);
+
 
 CREATE TABLE smart.ct_metadata_value (
     uuid uuid NOT NULL,
@@ -3308,15 +3336,22 @@ CREATE TABLE smart.i_observation (
 
 
 CREATE TABLE smart.i_observation_attribute (
+	uuid uuid not null,
     observation_uuid uuid NOT NULL,
     attribute_uuid uuid NOT NULL,
     list_element_uuid uuid,
     tree_node_uuid uuid,
     string_value character varying(1024),
     double_value double precision,
-    PRIMARY KEY (observation_uuid, attribute_uuid)
+    PRIMARY KEY (uuid),
+    UNIQUE (observation_uuid, attribute_uuid)
 );
 
+CREATE TABLE smart.i_observation_attribute_list (
+	list_element_uuid uuid not null,
+	observation_attribute_uuid uuid not null,
+	primary key (list_element_uuid, observation_attribute_uuid)
+);
 
 CREATE TABLE smart.i_permission (
     employee_uuid uuid NOT NULL,
@@ -4366,7 +4401,7 @@ CREATE TABLE smart.waypoint (
     uuid uuid NOT NULL,
     ca_uuid uuid NOT NULL,
     source character varying(16) NOT NULL,
-    id integer NOT NULL,
+    id varchar(32) NOT NULL,
     x double precision NOT NULL,
     y double precision NOT NULL,
     datetime timestamp without time zone NOT NULL,
@@ -4409,15 +4444,22 @@ CREATE TABLE smart.wp_observation (
 );
 
 CREATE TABLE smart.wp_observation_attributes (
+	uuid uuid not null,
     observation_uuid uuid NOT NULL,
     attribute_uuid uuid NOT NULL,
     list_element_uuid uuid,
     tree_node_uuid uuid,
     number_value double precision,
     string_value character varying(1024),
-    PRIMARY KEY (observation_uuid, attribute_uuid)
+    PRIMARY KEY (uuid),
+    unique(observation_uuid, attribute_uuid)
 );
 
+CREATE TABLE smart.wp_observation_attributes_list (
+	list_element_uuid uuid not null, 
+	observation_attribute_uuid uuid not null,
+	primary key (list_element_uuid, observation_attribute_uuid)
+);
 
 CREATE TABLE smart.wp_observation_group (
     uuid uuid NOT NULL,
@@ -4589,6 +4631,8 @@ CREATE TRIGGER trg_i_entity_type_attribute_group AFTER INSERT OR DELETE OR UPDAT
 CREATE TRIGGER trg_i_location AFTER INSERT OR DELETE OR UPDATE ON smart.i_location FOR EACH ROW EXECUTE PROCEDURE connect.trg_changelog_common();
 CREATE TRIGGER trg_i_observation AFTER INSERT OR DELETE OR UPDATE ON smart.i_observation FOR EACH ROW EXECUTE PROCEDURE connect.trg_i_observation();
 CREATE TRIGGER trg_i_observation_attribute AFTER INSERT OR DELETE OR UPDATE ON smart.i_observation_attribute FOR EACH ROW EXECUTE PROCEDURE connect.trg_i_observation_attribute();
+CREATE TRIGGER trg_i_observation_attribute_list AFTER INSERT OR DELETE OR UPDATE ON smart.i_observation_attribute_list FOR EACH ROW EXECUTE PROCEDURE connect.trg_i_observation_attribute_list();
+
 CREATE TRIGGER trg_i_permission AFTER INSERT OR DELETE OR UPDATE ON smart.i_permission FOR EACH ROW EXECUTE PROCEDURE connect.trg_i_permission();
 CREATE TRIGGER trg_i_profile_config AFTER INSERT OR DELETE OR UPDATE ON smart.i_profile_config FOR EACH ROW EXECUTE PROCEDURE connect.trg_changelog_common();
 CREATE TRIGGER trg_i_profile_entity_type AFTER INSERT OR DELETE OR UPDATE ON smart.i_profile_entity_type FOR EACH ROW EXECUTE PROCEDURE connect.i_profile_entity_type();
@@ -4692,6 +4736,8 @@ CREATE TRIGGER trg_wp_attachments AFTER INSERT OR DELETE OR UPDATE ON smart.wp_a
 CREATE TRIGGER trg_wp_group_observation AFTER INSERT OR DELETE OR UPDATE ON smart.wp_observation_group FOR EACH ROW EXECUTE PROCEDURE connect.trg_wp_group_observation();
 CREATE TRIGGER trg_wp_observation AFTER INSERT OR DELETE OR UPDATE ON smart.wp_observation FOR EACH ROW EXECUTE PROCEDURE connect.trg_wp_observation();
 CREATE TRIGGER trg_wp_observation_attributes AFTER INSERT OR DELETE OR UPDATE ON smart.wp_observation_attributes FOR EACH ROW EXECUTE PROCEDURE connect.trg_wp_observation_attributes();
+CREATE TRIGGER trg_wp_observation_attributes_list AFTER INSERT OR DELETE OR UPDATE ON smart.wp_observation_attributes_list FOR EACH ROW EXECUTE PROCEDURE connect.trg_wp_observation_attributes_list();
+CREATE TRIGGER ct_incident_package AFTER INSERT OR UPDATE OR DELETE ON  smart.ct_incident_package FOR EACH ROW execute procedure connect.trg_changelog_common();
 
 
 ALTER TABLE ONLY connect.alerts ADD CONSTRAINT alerts_ca_uuid_fkey FOREIGN KEY (ca_uuid) REFERENCES connect.ca_info(ca_uuid) ON UPDATE RESTRICT ON DELETE CASCADE;
@@ -4966,6 +5012,9 @@ ALTER TABLE ONLY smart.i_observation_attribute ADD CONSTRAINT iobservationattrib
 ALTER TABLE ONLY smart.i_observation_attribute ADD CONSTRAINT iobservationattribute_list_fk FOREIGN KEY (list_element_uuid) REFERENCES smart.dm_attribute_list(uuid) ON DELETE CASCADE DEFERRABLE;
 ALTER TABLE ONLY smart.i_observation_attribute ADD CONSTRAINT iobservationattribute_observation_fk FOREIGN KEY (observation_uuid) REFERENCES smart.i_observation(uuid) ON DELETE CASCADE DEFERRABLE;
 ALTER TABLE ONLY smart.i_observation_attribute ADD CONSTRAINT iobservationattribute_tree_fk FOREIGN KEY (tree_node_uuid) REFERENCES smart.dm_attribute_tree(uuid) ON DELETE CASCADE DEFERRABLE;
+alter table smart.i_observation_attribute_list ADD FOREIGN KEY (observation_attribute_uuid) REFERENCES smart.i_observation_attribute(uuid) on DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY DEFERRED;
+alter table smart.i_observation_attribute_list ADD FOREIGN KEY (list_element_uuid) REFERENCES smart.dm_attribute_list(uuid) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY DEFERRED;
+	
 ALTER TABLE ONLY smart.i_record ADD CONSTRAINT irecord_cauuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON DELETE CASCADE DEFERRABLE;
 ALTER TABLE ONLY smart.i_record ADD CONSTRAINT irecord_createdby_fk FOREIGN KEY (created_by) REFERENCES smart.employee(uuid) ON DELETE CASCADE DEFERRABLE;
 ALTER TABLE ONLY smart.i_record ADD CONSTRAINT irecord_modifiedby_fk FOREIGN KEY (last_modified_by) REFERENCES smart.employee(uuid) ON DELETE CASCADE DEFERRABLE;
@@ -5030,6 +5079,8 @@ ALTER TABLE ONLY smart.observation_attachment ADD CONSTRAINT observation_attachm
 ALTER TABLE ONLY smart.wp_observation_attributes ADD CONSTRAINT observation_attribute_att_list_uuid_fk FOREIGN KEY (list_element_uuid) REFERENCES smart.dm_attribute_list(uuid) ON DELETE CASCADE DEFERRABLE;
 ALTER TABLE ONLY smart.wp_observation_attributes ADD CONSTRAINT observation_attribute_att_tree_uuid_fk FOREIGN KEY (tree_node_uuid) REFERENCES smart.dm_attribute_tree(uuid) ON DELETE CASCADE DEFERRABLE;
 ALTER TABLE ONLY smart.wp_observation_attributes ADD CONSTRAINT observation_attribute_att_uuid_fk FOREIGN KEY (attribute_uuid) REFERENCES smart.dm_attribute(uuid) ON DELETE CASCADE DEFERRABLE;
+alter table smart.wp_observation_attributes_list ADD FOREIGN KEY (observation_attribute_uuid) REFERENCES smart.wp_observation_attributes(uuid) on DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY DEFERRED;
+alter table smart.wp_observation_attributes_list ADD FOREIGN KEY (list_element_uuid) REFERENCES smart.dm_attribute_list(uuid) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE ONLY smart.wp_observation ADD CONSTRAINT observation_category_uuid_fk FOREIGN KEY (category_uuid) REFERENCES smart.dm_category(uuid) ON DELETE CASCADE DEFERRABLE;
 ALTER TABLE ONLY smart.observation_query ADD CONSTRAINT observation_query_ca_uuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON DELETE CASCADE DEFERRABLE;
 ALTER TABLE ONLY smart.observation_query ADD CONSTRAINT observation_query_creator_uuid_fk FOREIGN KEY (creator_uuid) REFERENCES smart.employee(uuid) ON DELETE CASCADE DEFERRABLE;
@@ -5145,6 +5196,11 @@ ALTER TABLE smart.smartcollect_waypoint ADD FOREIGN KEY (wp_uuid) REFERENCES sma
 ALTER TABLE smart.smartcollect_package ADD FOREIGN KEY (CA_UUID) REFERENCES smart.conservation_area(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE smart.smartcollect_package ADD FOREIGN KEY (CM_UUID) REFERENCES smart.configurable_model(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE smart.smartcollect_package ADD FOREIGN KEY (ctprofile_uuid) REFERENCES smart.ct_properties_profile(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+
+ALTER TABLE SMART.ct_incident_package ADD CONSTRAINT ct_incident_package_ca_uuid_fk FOREIGN KEY (CA_UUID) REFERENCES smart.conservation_area(UUID) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE SMART.ct_incident_package ADD CONSTRAINT ct_incident_package_cm_uuid_fk FOREIGN KEY (CM_UUID) REFERENCES smart.configurable_model(UUID) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE SMART.ct_incident_package ADD CONSTRAINT ct_incident_package_ctprofile_uuid_fk FOREIGN KEY (ctprofile_uuid) REFERENCES smart.ct_properties_profile(UUID) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+
 
 CREATE TRIGGER trg_smartcollect_package AFTER INSERT OR UPDATE OR DELETE ON smart.smartcollect_package FOR EACH ROW execute procedure connect.trg_changelog_common();
 CREATE OR REPLACE FUNCTION connect.smartcollect_waypoint() RETURNS trigger AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
@@ -5264,4 +5320,5 @@ INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs
 INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.cybertracker','7.0');
 INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.i2','5.0');
 insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.smartcollect', '1.0');
+insert into connect.connect_plugin_version (version, plugin_id) values ('2.0', 'org.wcs.smart.cybertracker.incident');
 

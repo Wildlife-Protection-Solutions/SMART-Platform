@@ -29,6 +29,7 @@ import org.wcs.smart.patrol.query.map.geotools.PatrolQueryFeatureSource;
 import org.wcs.smart.patrol.query.map.geotools.QueryDataSource;
 import org.wcs.smart.patrol.query.map.geotools.QueryFeatureSource;
 import org.wcs.smart.patrol.query.map.geotools.QueryResultItemFeature;
+import org.wcs.smart.patrol.query.model.IPatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
 import org.wcs.smart.patrol.query.model.PatrolQuery;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
@@ -65,7 +66,7 @@ public class PatrolShapeQueryExporter extends ShapeQueryExporter{
 		if (queryType.getKey().equals(PatrolQuery.KEY)){
 			return QueryResultItemFeature.createTrackFeature((PatrolQueryResultItem)it,  queryColumns, type);
 		}else{
-			return QueryResultItemFeature.createObservationFeature((PatrolQueryResultItem)it,  queryColumns, type);
+			return QueryResultItemFeature.createObservationFeature((IPatrolQueryResultItem)it,  queryColumns, type);
 		}
 	}
 	

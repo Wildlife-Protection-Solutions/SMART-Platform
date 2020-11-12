@@ -31,6 +31,7 @@ import org.wcs.smart.er.query.model.SurveyGriddedQuery;
 import org.wcs.smart.er.query.model.SurveyObservationQuery;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.er.query.model.SurveyWaypointQuery;
+import org.wcs.smart.query.common.engine.WaypointQueryResultItem;
 import org.wcs.smart.report.birt.map.MapLayerInfo;
 import org.wcs.smart.report.birt.map.MapLayerInfo.LayerType;
 import org.wcs.smart.report.birt.query.AbstractQueryMapLayer;
@@ -59,7 +60,7 @@ public class QueryMapLayer extends AbstractQueryMapLayer{
 	public List<MapLayerInfo> getGeometryOptions(String queryTypeKey) {		
 		if (queryTypeKey.equals(SurveyObservationQuery.KEY) ||
 				queryTypeKey.equals(SurveyWaypointQuery.KEY)){			
-			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.POINT, SurveyQueryResultItem.WAYPOINT_GEOMCOLUMN_KEY);
+			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.POINT, WaypointQueryResultItem.GEOMCOLUMN_KEY);
 			return Collections.singletonList(def);
 		}else if (queryTypeKey.equals(MissionQuery.KEY)){
 			MapLayerInfo def = new MapLayerInfo(null, null, LayerType.MULTILINE, SurveyQueryResultItem.TRACK_GEOMCOLUMN_KEY);

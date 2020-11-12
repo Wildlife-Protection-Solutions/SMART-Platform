@@ -91,7 +91,7 @@ public class HtmlExporter {
 	 * @param results
 	 * @param session
 	 */
-	public void exportResults(SimpleQuery query, AbstractDbFeatureResultSet results, Session session) throws Exception{
+	public void exportResults(SimpleQuery query, AbstractDbFeatureResultSet<IResultItem> results, Session session) throws Exception{
 		IProjectionProvider prj = ProjectionUtils.INSTANCE.createProjectionProvider(session, query.getConservationArea());
 		List<QueryColumn> cols = results.getQueryColumns(query, l, session, prj);
 		
@@ -106,7 +106,7 @@ public class HtmlExporter {
 			htmlText.append("</tr>");
 			
 			//get data and write
-			IQueryResultSetIterator<? extends IResultItem> itemiterator = results.iterator(500, session);
+			IQueryResultSetIterator<IResultItem> itemiterator = results.iterator(500, session);
 			
 			for (Iterator<IResultItem> iterator = itemiterator; iterator.hasNext();) {
 				IResultItem resultItem = (IResultItem) iterator.next();

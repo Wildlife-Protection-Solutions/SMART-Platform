@@ -21,8 +21,7 @@
  */
 package org.wcs.smart.query.common.model;
 
-import org.wcs.smart.query.common.engine.IColumnInfoProvider;
-import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
+import org.wcs.smart.query.common.engine.IResultItem;
 
 /**
  * Interface for observation query paging results.
@@ -30,7 +29,7 @@ import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
  * @author Emily
  *
  */
-public interface IObservationPagedQueryResultSet extends IPagedQueryResultSet, IColumnInfoProvider {
+public interface IObservationPagedQueryResultSet<T extends IResultItem> {
 
 	/**
 	 * 

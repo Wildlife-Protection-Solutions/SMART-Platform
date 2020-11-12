@@ -25,8 +25,8 @@ import java.util.Locale;
 
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.entity.query.IEntityQueryLabelProvider;
-import org.wcs.smart.entity.query.model.EntityQueryResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.engine.WaypointQueryResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 
 /**
@@ -109,8 +109,8 @@ public class FixedQueryColumn extends QueryColumn {
 	 * @see org.wcs.smart.patrol.query.model.observation.QueryColumn#getValue(org.wcs.smart.patrol.query.model.PatrolQueryResultItem)
 	 */
 	public Object getValue(IResultItem queryResultItem) {
-		if (queryResultItem instanceof EntityQueryResultItem) {
-			EntityQueryResultItem item = (EntityQueryResultItem) queryResultItem;
+		if (queryResultItem instanceof WaypointQueryResultItem) {
+			WaypointQueryResultItem item = (WaypointQueryResultItem) queryResultItem;
 
 			switch (column) {
 			
@@ -121,13 +121,13 @@ public class FixedQueryColumn extends QueryColumn {
 			case WAYPOINT_COMMENT:
 				return item.getWaypointComment();
 			case WAYPOINT_DATE:
-				return item.getWpDateTime().toLocalDate();
+				return item.getWaypointDateTime().toLocalDate();
 			case WAYPOINT_DIRECTION:
 				return item.getWaypointDirection();
 			case WAYPOINT_DISTANCE:
 				return item.getWaypointDistance();
 			case WAYPOINT_TIME:
-				return item.getWpDateTime().toLocalTime();
+				return item.getWaypointDateTime().toLocalTime();
 			case WAYPOINT_X:
 				return item.getWaypointX(getProjection());
 			case WAYPOINT_Y:

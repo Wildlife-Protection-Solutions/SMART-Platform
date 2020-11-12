@@ -580,7 +580,7 @@
                               operator="or">
                            <or>
                               <instanceof
-                                    value="org.wcs.smart.er.ui.SurveyListTreeNode">
+                                    value="org.wcs.smart.er.hibernate.SurveyMissionProxy">
                               </instanceof>
                            </or>
                         </iterate>
@@ -708,7 +708,7 @@
                               operator="or">
                            <or>
                               <instanceof
-                                    value="org.wcs.smart.er.ui.SurveyListTreeNode">
+                                    value="org.wcs.smart.er.hibernate.SurveyMissionProxy">
                               </instanceof>
                            </or>
                         </iterate>
@@ -847,16 +847,7 @@
             name="%mission.screenconfig.command.name">
       </command>
    </extension>
-   <extension
-         point="org.eclipse.core.runtime.adapters">
-      <factory
-            adaptableType="org.wcs.smart.er.ui.SurveyListTreeNode"
-            class="org.wcs.smart.er.ui.AdapterFactory">
-         <adapter
-               type="org.eclipse.ui.progress.IDeferredWorkbenchAdapter">
-         </adapter>
-      </factory>
-   </extension>
+   
    <extension
          point="org.eclipse.ui.commandImages">
       <image

@@ -22,7 +22,7 @@
 package org.wcs.smart.entity.query.ui;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.wcs.smart.entity.query.model.EntityQueryResultItem;
+import org.wcs.smart.entity.query.model.EntityObservationResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 
 /**
@@ -46,8 +46,8 @@ public class AttributeColumnLabelProvider extends ColumnLabelProvider {
 	 * @see org.eclipse.jface.viewers.ILabelProvider#getText(java.lang.Object)
 	 */
 	public String getText(Object element) {
-		if (element instanceof EntityQueryResultItem) {
-			Object value = column.getValue((EntityQueryResultItem) element);
+		if (element instanceof EntityObservationResultItem) {
+			Object value = column.getValue((EntityObservationResultItem) element);
 			if (value == null) {
 				return ""; //$NON-NLS-1$
 			} else {

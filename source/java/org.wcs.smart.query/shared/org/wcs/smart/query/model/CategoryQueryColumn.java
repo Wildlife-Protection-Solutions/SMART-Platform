@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.query.model;
 
+import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.engine.ObservationQueryResultItem;
 
 /**
  * 
@@ -33,7 +35,7 @@ package org.wcs.smart.query.model;
  * @author Emily
  * @since 1.0.0
  */
-public abstract class CategoryQueryColumn extends QueryColumn{
+public class CategoryQueryColumn extends QueryColumn{
 	
 	public static final String KEY_PREFIX = "category:"; //$NON-NLS-1$
 
@@ -50,9 +52,43 @@ public abstract class CategoryQueryColumn extends QueryColumn{
 		this.level = level;
 	}
 
+	/**
+	 * @see org.wcs.smart.patrol.query.model.observation.QueryColumn#getValue(org.wcs.smart.patrol.query.model.PatrolQueryResultItem)
+	 */
+	@Override
+	public Object getValue(IResultItem queryResultItem) {
+		if (queryResultItem instanceof ObservationQueryResultItem) {
+			ObservationQueryResultItem item = (ObservationQueryResultItem) queryResultItem;
+			return getItemValue(item, level);
+		}
+		return ""; //$NON-NLS-1$
+	}
+	
+	private static String getItemValue(ObservationQueryResultItem item, int level) {
+		String[] items = item.getCategories();
+		if (items == null){
+			return ""; //$NON-NLS-1$
+		}
+		if (level < items.length){
+			return items[level];
+		}else{
+			return ""; //$NON-NLS-1$
+		}
+	}
+	
 	public static String getDbColumnName(String key) {
 		key = key.replace(":", "_"); //$NON-NLS-1$ //$NON-NLS-2$ 
 		return key;
+	}
+	
+	/**
+	 * @see org.wcs.smart.patrol.query.model.observation.QueryColumn#clone()
+	 */
+	@Override
+	public QueryColumn clone() {
+		CategoryQueryColumn newColumn = new CategoryQueryColumn(getName(), level);
+		newColumn.setEdit(canEdit());
+		return newColumn;
 	}
 	
 }

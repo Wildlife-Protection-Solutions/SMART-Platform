@@ -25,7 +25,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="Waypoints" type="{http://www.smartconservationsoftware.org/xml/1.1/mission}WaypointType"/>
+ *         &lt;element name="Waypoints" type="{http://www.smartconservationsoftware.org/xml/1.2/mission}WaypointType"/>
  *       &lt;/sequence>
  *       &lt;attribute name="samplingUnitId" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="missionTrackId" type="{http://www.w3.org/2001/XMLSchema}string" />

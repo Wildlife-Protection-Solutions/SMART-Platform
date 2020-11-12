@@ -28,8 +28,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -370,6 +372,9 @@ public class ObservationFilterProcessor {
 			return;
 			
 		}
+		Map<String,Object> params = new HashMap<>();
+
+		
 		//category and perhaps an attribute filter		
 		sql = new StringBuilder();
 		sql.append("INSERT INTO " + t2 ); //$NON-NLS-1$
@@ -388,11 +393,15 @@ public class ObservationFilterProcessor {
 		if (filter.getAttributeType() == Attribute.AttributeType.LIST ){
 			sql.append(" JOIN smart.dm_attribute_list tl ON ia.list_element_uuid = tl.uuid "); //$NON-NLS-1$
 		}
+		if (filter.getAttributeType() == Attribute.AttributeType.MLIST) {
+			params.putAll( WaypointFilterProcessor.processMultiSelectAttributeFilter(sql, filter) );
+		}
 		sql.append(" WHERE dma.keyId = :attributeKey "); //$NON-NLS-1$
 		if (filter.getCategoryKey() != null){
 			sql.append(" AND (c.hkey >= :hkey1 and c.hkey < :hkey2) "); //$NON-NLS-1$
 		}
-		sql.append(" AND "); //$NON-NLS-1$
+		if (filter.getAttributeType() != Attribute.AttributeType.MLIST)
+			sql.append(" AND "); //$NON-NLS-1$
 		
 		switch(filter.getAttributeType()){
 		case BOOLEAN:
@@ -400,22 +409,33 @@ public class ObservationFilterProcessor {
 			break;
 		case DATE:
 			sql.append(" cast(ia.string_value as date) " + SqlGenerator.operatorToSql(filter.getOperator()) + " cast(:value1 as date) and cast(:value2 as date)"); //$NON-NLS-1$ //$NON-NLS-2$
+			
+			params.put("value1", (DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0])  ); //$NON-NLS-1$
+			params.put("value2", (DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1])  ); //$NON-NLS-1$
+			
 			break;
 		case LIST:
 			if (filter.getKeyValue().equals(IQueryFilter.ANY_OPTION_KEY)){
 				sql.append(" ia.list_element_uuid is not null "); //$NON-NLS-1$
 			}else{
 				sql.append(" tl.keyid " + SqlGenerator.operatorToSql(Operator.EQUALS) + " :value"); //$NON-NLS-1$ //$NON-NLS-2$
+				params.put("value",  filter.getKeyValue()); //$NON-NLS-1$
 			}
 			break;
 		case NUMERIC:
 			sql.append(" ia.double_value " + SqlGenerator.operatorToSql(filter.getOperator()) + " :value"); //$NON-NLS-1$ //$NON-NLS-2$
+			params.put("value", filter.getNumberValue()); //$NON-NLS-1$
 			break;
 		case TEXT:
 			sql.append(" ia.string_value " + SqlGenerator.operatorToSql(filter.getOperator()) + " :value"); //$NON-NLS-1$ //$NON-NLS-2$
+			params.put("value", filter.getStringValue()); //$NON-NLS-1$
 			break;
 		case TREE:
 			sql.append( " ( ta.hkey >= :tree1 and ta.hkey < :tree2 ) "); //$NON-NLS-1$
+			String tree1 = filter.getKeyValue();
+			String tree2 = tree1.substring(0, tree1.length() - 1) + "/"; //$NON-NLS-1$
+			params.put("tree1", tree1); //$NON-NLS-1$
+			params.put("tree2", tree2); //$NON-NLS-1$
 			break;
 		default:
 			break;
@@ -433,39 +453,9 @@ public class ObservationFilterProcessor {
 			query.setParameter("hkey1", hkey1); //$NON-NLS-1$
 			query.setParameter("hkey2", hkey2); //$NON-NLS-1$
 		}
-		switch(filter.getAttributeType()){
-		case BOOLEAN:
-			break;
-		case DATE:
-			logString((DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0]));
-			logString((DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1]));
-			query.setParameter("value1", (DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0])  ); //$NON-NLS-1$
-			query.setParameter("value2", (DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1])  ); //$NON-NLS-1$
-			break;
-		case LIST:
-			if (!filter.getKeyValue().equals(IQueryFilter.ANY_OPTION_KEY)){
-				logString(filter.getKeyValue());
-				query.setParameter("value",  filter.getKeyValue()); //$NON-NLS-1$
-			}
-			break;
-		case TREE:
-			String tree1 = filter.getKeyValue();
-			String tree2 = tree1.substring(0, tree1.length() - 1) + "/"; //$NON-NLS-1$
-			logString(tree1);
-			logString(tree2);
-			query.setParameter("tree1", tree1); //$NON-NLS-1$
-			query.setParameter("tree2", tree2); //$NON-NLS-1$
-			break;
-		case NUMERIC:
-			logString(filter.getNumberValue().toString());
-			query.setParameter("value", filter.getNumberValue()); //$NON-NLS-1$
-			break;
-		case TEXT:
-			logString(filter.getStringValue());
-			query.setParameter("value", filter.getStringValue()); //$NON-NLS-1$
-			break;
-		default:
-			break;
+		for (Entry<String,Object> p : params.entrySet()) {
+			logString(p.getKey() + " - " + p.getValue().toString()); //$NON-NLS-1$
+			query.setParameter(p.getKey(),p.getValue());
 		}
 		
 		logString(sql.toString());

@@ -35,6 +35,7 @@ import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationAttributeList;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolAttributeValue;
@@ -239,7 +240,7 @@ public class PatrolToXmlConverter {
 				}
 			}else if (att.getAttribute().getType().equals(AttributeType.LIST)){
 				if (att.getAttributeListItem() != null){
-					xml2.setItemKey(att.getAttributeListItem().getKeyId());
+					xml2.getItemKey().add(att.getAttributeListItem().getKeyId());
 					add = true;
 				}
 			}else if (att.getAttribute().getType().equals(AttributeType.NUMERIC)){
@@ -255,8 +256,15 @@ public class PatrolToXmlConverter {
 				}
 			}else if (att.getAttribute().getType().equals(AttributeType.TREE)){
 				if (att.getAttributeTreeNode() != null){
-					xml2.setItemKey(att.getAttributeTreeNode().getHkey());
+					xml2.getItemKey().add(att.getAttributeTreeNode().getHkey());
 					add = true;
+				}
+			}else if (att.getAttribute().getType().equals(AttributeType.MLIST)) {
+				if (att.getAttributeListItems() != null && !att.getAttributeListItems().isEmpty()) {
+					add = true;
+					for (WaypointObservationAttributeList li : att.getAttributeListItems()) {
+						xml2.getItemKey().add(li.getAttributeListItem().getKeyId());
+					}
 				}
 			}
 			if (add){

@@ -25,17 +25,13 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
-import java.util.HashMap;
-import java.util.HashSet;
 
-import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.entity.model.Entity;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityAttributeValue;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.query.internal.Messages;
-import org.wcs.smart.entity.query.model.EntityQueryResultItem;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.AbstractQueryEngine;
@@ -52,8 +48,6 @@ import org.wcs.smart.util.UuidUtils;
  * @since 1.0.0
  */
 public abstract class DerbyEntityQueryEngine extends AbstractQueryEngine{
-
-	protected HashMap<IFilter, FilterTable> filterTables = new HashMap<>();
 
 	static {
 		tablePrefix.put(Entity.class, "e"); //$NON-NLS-1$
@@ -73,63 +67,7 @@ public abstract class DerbyEntityQueryEngine extends AbstractQueryEngine{
 		tableNames.put(EntityAttributeValue.class, "smart.entity_attribute_value"); //$NON-NLS-1$
 	}
 	
-	/**
-	 * Create the select statement to populate the temporary table
-	 * containing observation data for the query engine.
-	 * 
-	 * @param includeObservations if observation information should be included
-	 * in the output table (ob_uuid).
-	 * 
-	 * @return
-	 */
-	protected abstract String getTemporaryTableSelectClause(boolean includeObservations);
 	
-	/**
-	 * Converts the a row in the temporary table select clause to
-	 * a result item
-	 * @param rs result set item to convert to the queryresultitem
-	 * @param session current database connection
-	 * @return
-	 * @throws SQLException
-	 */
-	protected abstract EntityQueryResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException;
-	
-	/**
-	 * Create the temporary table for hold observation data
-	 * for querying
-	 * 
-	 * @param tableName temporary table name
-	 * @return 
-	 */
-	protected abstract String getTemporaryTableCreateClause(String tableName);
-	
-	/**
-	 * A string to append to the from clause of the select
-	 * statement to create the temporary table.
-	 * <p>Depending on the select clause additional tables may
-	 * be required.  See {@link DerbyEntityQueryEngine#getTemporaryTableCreateClause(String)}. </p> 
-	 * @param tables List of tables already included in the from clause
-	 * @return
-	 */
-	protected String appendFromClause(HashSet<Class<?>> tables){
-		return ""; //$NON-NLS-1$
-	}
-	
-	
-	/**
-	 * By default creates an index on the ob_uuid field.  This method can be overwritten to 
-	 * create additional indexes.
-	 * 
-	 * @param c database connection
-	 * @param tableName temporary table to create indexes on
-	 * @throws SQLException
-	 */
-	protected void buildTemporaryTableIndexes(Connection c, String tableName) throws SQLException{
-		StringBuilder sql = new StringBuilder();
-		sql.append("CREATE INDEX " + tableName + "_ob_uuid_idx on " +  tableName + "(ob_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		QueryPlugIn.logSql(sql.toString());
-		c.createStatement().execute(sql.toString());
-	}
 	
 	/**
 	 * Creates the filter processor based on the query filter type
@@ -138,7 +76,7 @@ public abstract class DerbyEntityQueryEngine extends AbstractQueryEngine{
 	 * @param queryDataTable
 	 * @return
 	 */
-	protected IFilterProcessor getFilterProcessor(IFilter.FilterType filterType, String queryDataTable, Query query){
+	public IFilterProcessor getFilterProcessor(IFilter.FilterType filterType, String queryDataTable, Query query){
 		if (filterType == IFilter.FilterType.OBSERVATION){
 			return new FilterProcessor(queryDataTable, this, query);
 		}else if (filterType == IFilter.FilterType.GROUP) {

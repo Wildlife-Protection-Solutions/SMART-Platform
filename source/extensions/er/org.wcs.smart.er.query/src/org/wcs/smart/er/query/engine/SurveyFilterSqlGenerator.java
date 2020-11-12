@@ -104,7 +104,7 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 		}else if (filter instanceof MissionPropertyFilter){
 			return asSql((MissionPropertyFilter)filter, engine);
 		}else if (filter instanceof ConservationAreaFilter){
-			return asSql((ConservationAreaFilter)filter, engine.tablePrefix(SurveyDesign.class), engine);
+			return asSql((ConservationAreaFilter)filter, engine.tablePrefix(Waypoint.class), engine);
 		}else if (filter instanceof SamplingUnitFilter){
 			return asSql((SamplingUnitFilter)filter, engine);
 		}else if (filter instanceof SamplingUnitAttributeFilter){
@@ -129,7 +129,7 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	 * Area filter
 	 */
 	@Override
-	protected String asSql(AreaFilter filter, IQueryEngine engine){
+	protected String toSql(AreaFilter filter, IQueryEngine engine){
 		StringBuilder sb = new StringBuilder();
 		if (filter.getType() != null) {
 			if (filter.getGeometryType() == AreaFilterGeometryType.WAYPOINT){
@@ -426,7 +426,10 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	 * Date Filter
 	 */
 	@Override
-	protected String asSql(DateFilter filter, IQueryEngine engine) throws SQLException{
+	protected String toSql(DateFilter filter, IQueryEngine engine) throws SQLException{
+		if (filter.getDateFieldOption() == WaypointDateField.INSTANCE) {
+			return super.toSql(filter, engine);
+		}
 		String table = ""; //$NON-NLS-1$
 		String field = ""; //$NON-NLS-1$
 		
@@ -436,9 +439,6 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 		}else if (filter.getDateFieldOption() == MissionEndDateField.INSTANCE){
 			table = engine.tablePrefix(Mission.class);
 			field = "end_date"; //$NON-NLS-1$
-		}else if (filter.getDateFieldOption() == WaypointDateField.INSTANCE){
-			table = engine.tablePrefix(MissionDay.class);
-			field = "mission_day"; //$NON-NLS-1$
 		}else if (filter.getDateFieldOption() == MissionTrackDateField.INSTANCE){
 			table = engine.tablePrefix(MissionDay.class);
 			field = "mission_day"; //$NON-NLS-1$
@@ -457,12 +457,12 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			String p1 = engine.addParameterValue(bits[0].atStartOfDay().toString());
 			f = " ( cast(" + field + " as date) >= " + p1 + " ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}else if (bits.length == 2 && filter.getDateFilterOption().isEndDateInclusive()){
-			String p1 = engine.addParameterValue(bits[0].atStartOfDay().toString());
-			String p2 = engine.addParameterValue(bits[1].atTime(LocalTime.MAX).toString());
+			String p1 = engine.addParameterValue(bits[0].toString());
+			String p2 = engine.addParameterValue(bits[1].toString());
 			f = " ( cast(" + field + " as date) >= " + p1 + " and cast(" + field + " as date) <= " + p2 + " ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ 
 		}else if (bits.length == 2){
-			String p1 = engine.addParameterValue(bits[0].atStartOfDay().toString());
-			String p2 = engine.addParameterValue(bits[1].atStartOfDay().toString());
+			String p1 = engine.addParameterValue(bits[0].toString());
+			String p2 = engine.addParameterValue(bits[1].toString());
 			f = " ( cast(" + field + " as date) >= " + p1 + " and cast(" + field + " as date) < " + p2 + " ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ 
 		}
 

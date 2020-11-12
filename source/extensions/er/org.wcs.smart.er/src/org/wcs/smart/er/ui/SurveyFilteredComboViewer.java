@@ -23,9 +23,7 @@ package org.wcs.smart.er.ui;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -44,8 +42,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.hibernate.Session;
-import org.hibernate.query.Query;
+import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.er.hibernate.SurveyFilter;
+import org.wcs.smart.er.hibernate.SurveyMissionProxy;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.Survey;
@@ -75,6 +74,7 @@ public class SurveyFilteredComboViewer extends FilteredComboViewer<Survey> {
 	private List<Survey> createdSurveys;
 	private List<Survey> additionalSurveys;
 	
+	private boolean includeMissionDateFilter;
 	/**
 	 * 
 	 * @param parent
@@ -82,7 +82,8 @@ public class SurveyFilteredComboViewer extends FilteredComboViewer<Survey> {
 	 * @param createNew if users can create new surveys;  a single
 	 * new survey listener can be added to detect these new surveys
 	 */
-	public SurveyFilteredComboViewer(Composite parent, final SurveyDesign sd, boolean createNew) {
+	public SurveyFilteredComboViewer(Composite parent, final SurveyDesign sd, boolean createNew,
+			boolean includeMissionDateFilter) {
 		super(parent);
 		this.createNew = createNew;
 		this.createdSurveys = new ArrayList<Survey>();
@@ -106,18 +107,19 @@ public class SurveyFilteredComboViewer extends FilteredComboViewer<Survey> {
 								return null;
 							}
 						});
-						if (id.open() == InputDialog.OK){
-							Survey s = new Survey();
-							s.setMissions(new ArrayList<Mission>());
-							s.setId(id.getValue());
-							s.setSurveyDesign(sd);
-							createdSurveys.add(s);
-							getJob().setPreselectedSurvey(s);
+						if (id.open() != InputDialog.OK) return;
+						
+						Survey s = new Survey();
+						s.setMissions(new ArrayList<Mission>());
+						s.setId(id.getValue());
+						s.setSurveyDesign(sd);
+						createdSurveys.add(s);
+						getJob().setPreselectedSurvey(s);
 							
-							Event evt =  new Event();
-							evt.widget = SurveyFilteredComboViewer.this;
-							addSurveyListener.handleEvent(evt);
-						}
+						Event evt =  new Event();
+						evt.widget = SurveyFilteredComboViewer.this;
+						addSurveyListener.handleEvent(evt);
+						
 						updateContent();
 					}
 				}
@@ -173,6 +175,7 @@ public class SurveyFilteredComboViewer extends FilteredComboViewer<Survey> {
 	public synchronized SurveyFilter getFilter() {
 		if (filter == null){
 			filter = new SurveyFilter();
+			filter.setMissionDateFilter(DateFilter.ALL,null,null);
 		}
 		return filter;
 	}
@@ -200,7 +203,7 @@ public class SurveyFilteredComboViewer extends FilteredComboViewer<Survey> {
 
 	@Override
 	protected void showFilterDialog() {
-		SurveyFilterDialog dialog = new SurveyFilterDialog(getShell(), this, getFilter());
+		SurveyFilterDialog dialog = new SurveyFilterDialog(getShell(), this, getFilter(), includeMissionDateFilter);
 		dialog.open();
 	}
 
@@ -243,7 +246,8 @@ public class SurveyFilteredComboViewer extends FilteredComboViewer<Survey> {
                         return ;
                     }
                     viewer.setInput(input);
-                    if (preselectedSurvey != null) {
+                    
+                    if (preselectedSurvey != null && input.contains(preselectedSurvey)) {
                     	viewer.setSelection(new StructuredSelection(preselectedSurvey));
                     }
                     SurveyFilteredComboViewer.this.getParent().getParent().layout(true);
@@ -254,39 +258,26 @@ public class SurveyFilteredComboViewer extends FilteredComboViewer<Survey> {
         private List<Survey> loadSurveyIds() {
         		//{survey uuid, survey id, start date, survey design name, sd uuid}
         	try(Session session = HibernateManager.openSession()){
-        		Query<?> query = getFilter().buildQuery(session);
-        		List<?> results = query.list();
-        		List<Survey> surveys = new ArrayList<Survey>(results.size()+1);
-        		boolean defaultPresent = preselectedSurvey == null; //indicated if default patrol id is in filtered list
-        		for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
-        			Object[] data = (Object[]) iterator.next();
-        			
+        		List<SurveyMissionProxy> pp = getFilter().executeQuery(session);
+        		
+        		List<Survey> surveys = new ArrayList<Survey>(pp.size()+1);
+        		
+        		for (SurveyMissionProxy p  : pp) {
+        		
         			Survey temp = new Survey();
-        			temp.setUuid((UUID)data[0]);
-        			temp.setId((String)data[1]);
+        			temp.setUuid(p.getUuid());
+        			temp.setId(p.getId());
 
         			SurveyDesign tmp = new SurveyDesign();
-        			tmp.setName((String)data[2]);
-        			tmp.setUuid((UUID)data[3]);
+        			tmp.setName(p.getDesignName());
+        			tmp.setUuid(p.getDesignUuid());
+
         			temp.setSurveyDesign(tmp);
         			
-        			defaultPresent = defaultPresent || temp.equals(preselectedSurvey);
         			surveys.add(temp);
         		}
         		if (additionalSurveys != null){
-        			for (Survey s : additionalSurveys){
-        				if (s == preselectedSurvey){
-        					defaultPresent = true;
-        					break;
-        				}
-        			}
         			surveys.addAll(additionalSurveys);
-        		}
-        		
-        		if (!defaultPresent) {
-        			//we don't want to reset selection to null if previously selected patrol is not in filtered list
-        			//this is why we add it to result list
-        			surveys.add(preselectedSurvey);
         		}
         		
         		return surveys;

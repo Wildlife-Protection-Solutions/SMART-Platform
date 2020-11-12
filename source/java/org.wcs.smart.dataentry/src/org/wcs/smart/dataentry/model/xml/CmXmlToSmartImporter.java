@@ -312,11 +312,12 @@ public class CmXmlToSmartImporter {
 			Attribute dmAttr = cmAttr.getAttribute();
 			switch (dmAttr.getType()) {
 			case LIST:
+			case MLIST:
 			case TREE: {
 				ConfigurableModel cm = cmNode.getModel();
 				if (cm.getDefaultConfigs().get(dmAttr) == null) {
 					warnings.add(MessageFormat.format(Messages.CmXmlToSmartImporter_Warn_DefaultConfigMissing, dmAttr.getName()));
-					CmAttributeConfig config = dmAttr.getType().equals(org.wcs.smart.ca.datamodel.Attribute.AttributeType.LIST) ? CmDefaultListsUtil.buildDefaultListConfig(cm, dmAttr) : CmDefaultTreesUtil.buildDefaultTreeConfig(cm, dmAttr);
+					CmAttributeConfig config = dmAttr.getType().isList() ? CmDefaultListsUtil.buildDefaultListConfig(cm, dmAttr) : CmDefaultTreesUtil.buildDefaultTreeConfig(cm, dmAttr);
 					cm.getDefaultConfigs().put(dmAttr, config);
 				}
 				if (cmAttr.getConfig() == null) {
@@ -332,7 +333,7 @@ public class CmXmlToSmartImporter {
 		
 		if (cmNode.getCmAttributes() != null) {
 			for (CmAttribute a : cmNode.getCmAttributes()) {
-				if (a.getAttribute().getType() == org.wcs.smart.ca.datamodel.Attribute.AttributeType.LIST) {
+				if (a.getAttribute().getType().isList()) {
 					//validate that all list items are part of the configuration
 					List<AttributeListItem> allitems = new ArrayList<>(a.getAttribute().getAttributeList());
 					
@@ -379,7 +380,7 @@ public class CmXmlToSmartImporter {
 					for (Language l : langLookup.values()) defaultc.updateName(l, Messages.CmXmlToSmartImporter_DefaultConfigName);
 					defaultc.setModel(cmNode.getModel());
 					cmNode.getModel().getDefaultConfigs().put(a,  defaultc);
-					if (a.getType() == org.wcs.smart.ca.datamodel.Attribute.AttributeType.LIST) {
+					if (a.getType().isList()) {
 						validateListConfig(defaultc, a);
 					}else if (a.getType() == org.wcs.smart.ca.datamodel.Attribute.AttributeType.TREE) {
 						validateTreeConfig(defaultc, a);
@@ -470,7 +471,7 @@ public class CmXmlToSmartImporter {
 			if (dmAttribute != null) {
 				config.setAttribute(dmAttribute);
 				
-				if (dmAttribute.getType() == org.wcs.smart.ca.datamodel.Attribute.AttributeType.LIST) {
+				if (dmAttribute.getType().isList()) {
 					config.setList(processCmListItems(config, dmAttribute, xmlConfig.getListItem(), monitor));
 					validateListConfig(config, dmAttribute);
 				}else if (dmAttribute.getType() == org.wcs.smart.ca.datamodel.Attribute.AttributeType.TREE) {
@@ -606,6 +607,7 @@ public class CmXmlToSmartImporter {
 			} else {
 				switch (dmAttribute.getType()) {
 				case LIST:
+				case MLIST:
 				case TREE: {
 					//looks like we are importing model exported in SMART version lower than 6.0.0
 					CmAttributeOption optionCC = cmAttr.getCmAttributeOptions().get("CUSTOM_CONFIG"); //$NON-NLS-1$
@@ -654,6 +656,9 @@ public class CmXmlToSmartImporter {
 					}
 					break;
 				}
+				case MLIST:
+					cmOption.setStringValue(xmlOption.getStringValue());
+					break;
 				case TREE:
 				{
 					AttributeTreeNode item = fetchAttributeTreeNode(xmlOption.getKeyRef(), xmlOption.getHkeyRef(), parent.getAttribute());

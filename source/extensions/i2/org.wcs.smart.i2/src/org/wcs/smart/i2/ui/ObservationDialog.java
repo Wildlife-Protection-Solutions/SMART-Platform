@@ -22,7 +22,6 @@
 package org.wcs.smart.i2.ui;
 
 import java.text.MessageFormat;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -66,7 +65,6 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
-import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
@@ -77,6 +75,7 @@ import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.model.IntelObservation;
 import org.wcs.smart.i2.model.IntelObservationAttribute;
+import org.wcs.smart.i2.model.IntelObservationAttributeList;
 import org.wcs.smart.ui.SmartStyledDialog;
 import org.wcs.smart.ui.ca.datamodel.AttributeFieldFactory;
 import org.wcs.smart.ui.ca.datamodel.IAttributeField;
@@ -111,28 +110,59 @@ public class ObservationDialog extends SmartStyledDialog {
 			location.setObservations(new ArrayList<IntelObservation>());
 		}
 		
-		//clone observations for editing so we can cancel this dialog
 		observations = new ArrayList<IntelObservation>();
-		for (IntelObservation o : location.getObservations()){
-			IntelObservation copy = new IntelObservation();
-			copy.setCategory(o.getCategory());
-			copy.setLocation(o.getLocation());
-			copy.setUuid(o.getUuid());
-			copy.setObservationAttributes(new ArrayList<IntelObservationAttribute>());
-			if (o.getObservationAttributes() != null){
-				for (IntelObservationAttribute a : o.getObservationAttributes()){
-					IntelObservationAttribute acopy = new IntelObservationAttribute();
-					acopy.setAttribute(a.getAttribute());
-					acopy.setAttributeListItem(a.getAttributeListItem());
-					acopy.setAttributeTreeNode(a.getAttributeTreeNode());
-					acopy.setNumberValue(a.getNumberValue());
-					acopy.setObservation(copy);
-					acopy.setStringValue(a.getStringValue());
-					copy.getObservationAttributes().add(acopy);
+
+		if (location.getUuid() == null) {
+			//clone observations for editing so we can cancel this dialog
+			for (IntelObservation o : location.getObservations()){
+				IntelObservation copy = new IntelObservation();
+				copy.setCategory(o.getCategory());
+				copy.setLocation(o.getLocation());
+				copy.setUuid(o.getUuid());
+				copy.setObservationAttributes(new ArrayList<IntelObservationAttribute>());
+				if (o.getObservationAttributes() != null){
+					for (IntelObservationAttribute a : o.getObservationAttributes()){
+						IntelObservationAttribute acopy = new IntelObservationAttribute();
+						acopy.setAttribute(a.getAttribute());
+						acopy.setUuid(a.getUuid());
+						acopy.setAttributeListItem(a.getAttributeListItem());
+						acopy.setAttributeTreeNode(a.getAttributeTreeNode());
+						acopy.setNumberValue(a.getNumberValue());
+						acopy.setObservation(copy);
+						acopy.setStringValue(a.getStringValue());
+						
+						if (a.getAttributeListItems() != null) {
+							acopy.setAttributeListItems(new ArrayList<>());
+							for (IntelObservationAttributeList ll : a.getAttributeListItems()) {
+								IntelObservationAttributeList llcopy = new IntelObservationAttributeList();
+								llcopy.setAttributeLisItem(ll.getAttributeListItem());
+								llcopy.setObservationAttribute(acopy);
+								acopy.getAttributeListItems().add(llcopy);
+							}
+						}
+						copy.getObservationAttributes().add(acopy);
+					}
 				}
+				observations.add(copy);
 			}
-			observations.add(copy);
+		}else {
+			try(Session session = HibernateManager.openSession()){
+				//clone waypoint for editing so we can cancel this dialog
+				IntelLocation tmp = session.get(IntelLocation.class, location.getUuid());
+				observations = new ArrayList<>(tmp.getObservations());
+				observations.forEach(o->{
+					o.getCategory().getName();
+					o.getObservationAttributes().forEach(a->{
+						a.getStringValue();
+						a.getAttribute().getName();
+						a.getAttributeValueAsString(Locale.getDefault());
+						if (a.getAttributeListItems() != null) a.getAttributeListItems().forEach(ai->ai.getAttributeListItem().getName());
+					});
+				});
+			}
 		}
+		
+		
 	}
 
 	public ObservationDialog(Shell parentShell, IntelObservation observation) {
@@ -307,9 +337,11 @@ public class ObservationDialog extends SmartStyledDialog {
 		buttonPanel.setLayout(new GridLayout());
 		buttonPanel.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		((GridLayout)buttonPanel.getLayout()).marginHeight = 0;
+		
 		Button btnEdit = new Button(buttonPanel, SWT.PUSH);
 		btnEdit.setToolTipText(Messages.ObservationDialog_editTooltip);
 		btnEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		btnEdit.setBackground(btnEdit.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnEdit.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e){
@@ -319,6 +351,7 @@ public class ObservationDialog extends SmartStyledDialog {
 		
 		Button btnDelete = new Button(buttonPanel, SWT.PUSH);
 		btnDelete.setToolTipText(Messages.ObservationDialog_deleteTooltip);
+		btnDelete.setBackground(btnDelete.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		btnDelete.addSelectionListener(new SelectionAdapter(){
 			@Override
@@ -351,6 +384,7 @@ public class ObservationDialog extends SmartStyledDialog {
 			 }
 			 
 			 btnAdd.setText(Messages.ObservationDialog_UpdateButtonText);
+			 btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 			 observationTable.refresh();
 		 }
 	}
@@ -469,8 +503,10 @@ public class ObservationDialog extends SmartStyledDialog {
 		}
 		
 		btnAdd = new Button(attributeComposite, SWT.NONE);
+		btnAdd.setBackground(btnAdd.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnAdd.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
 		btnAdd.setText(Messages.ObservationDialog_CreateButtonText);
+		btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		btnAdd.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -489,7 +525,8 @@ public class ObservationDialog extends SmartStyledDialog {
 		
 		oo.setCategory((Category)attributeComposite.getData(Category.class.getName()));
 		oo.setLocation(location);
-		oo.setObservationAttributes(new ArrayList<IntelObservationAttribute>());
+		if (oo.getObservationAttributes() == null) oo.setObservationAttributes(new ArrayList<IntelObservationAttribute>());
+		
 		List<IAttributeField<?>> fields = (List<IAttributeField<?>>) attributeComposite.getData(IAttributeField.class.getName());
 		for (IAttributeField<?> f : fields){
 			String err = f.validate();
@@ -498,50 +535,44 @@ public class ObservationDialog extends SmartStyledDialog {
 				return;
 			}
 		}
+		
 		for (IAttributeField<?> f : fields){	
 			Object value = f.getValue();
-			if (value != null){
-				IntelObservationAttribute a = new IntelObservationAttribute();
-				a.setAttribute(f.getAttribute());
-				a.setObservation(oo);
-				switch(a.getAttribute().getType()){
-				case BOOLEAN:
-					Boolean x = (Boolean)value;
-					if (x){
-						a.setNumberValue(1d);
-					}else{
-						a.setNumberValue(0d);
-					}
+			
+			IntelObservationAttribute toUpdate = null;
+			for (IntelObservationAttribute a : oo.getObservationAttributes()) {
+				if (a.getAttribute().equals(f.getAttribute())) {
+					toUpdate = a;
 					break;
-				case NUMERIC:
-					a.setNumberValue((Double)value);
-					break;
-				case DATE:
-					a.setDateValue((LocalDate)value);
-					break;
-				case LIST:
-					a.setAttributeListItem((AttributeListItem)value);
-					break;
-				case TEXT:
-					a.setStringValue((String)value);
-					break;
-				case TREE:
-					a.setAttributeTreeNode((AttributeTreeNode)value);
-					break;
-				default:
-					break;
-				
 				}
-				oo.getObservationAttributes().add(a);
+			}
+			
+			if (value != null){
+				//find the attribute to update
+				if (toUpdate == null) {
+					toUpdate = new IntelObservationAttribute();
+					toUpdate.setAttribute(f.getAttribute());
+					toUpdate.setObservation(oo);
+					oo.getObservationAttributes().add(toUpdate);
+				}
+				toUpdate.setAttributeValue(f.getValue());
+			}else {
+				if (toUpdate != null) {
+					oo.getObservationAttributes().remove(toUpdate);
+				}
 			}
 			f.clear();
 		}
+		
 		if (editObs == null){
 			observations.add(oo);
 		}
 		editObs = null;
 		observationTable.refresh(); 
 		hasChanges = true;
+
+		btnAdd.setText(Messages.ObservationDialog_CreateButtonText);
+		btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 	}
 	
 	@Override
@@ -558,7 +589,9 @@ public class ObservationDialog extends SmartStyledDialog {
 	
 	@Override
 	public void okPressed(){
-		location.setObservations(observations);
+		location.getObservations().clear();
+		location.getObservations().addAll(observations);
+
 		super.okPressed();
 	}
 }

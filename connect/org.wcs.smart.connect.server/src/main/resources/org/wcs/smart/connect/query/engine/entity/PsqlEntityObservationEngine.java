@@ -38,14 +38,16 @@ import org.hibernate.jdbc.ReturningWork;
 import org.wcs.smart.NamedPreparedStatement;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
+import org.wcs.smart.connect.query.engine.IWOEngine;
 import org.wcs.smart.entity.model.Entity;
 import org.wcs.smart.entity.model.EntityAttributeValue;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.query.model.EntityObservationQuery;
+import org.wcs.smart.entity.query.model.EntityObservationResultItem;
 import org.wcs.smart.entity.query.parser.internal.EntityAttributeFilter;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
-import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.Query;
@@ -65,7 +67,7 @@ import org.wcs.smart.query.model.filter.date.CachingDateFilter;
  * @author elitvin
  * @since 1.0.0
  */
-public class PsqlEntityObservationEngine extends AbstractQueryEngine {
+public class PsqlEntityObservationEngine extends AbstractQueryEngine implements IWOEngine<EntityObservationResultItem> {
 
 	private final Logger logger = Logger.getLogger(PsqlEntityObservationEngine.class.getName());
 	
@@ -80,6 +82,10 @@ public class PsqlEntityObservationEngine extends AbstractQueryEngine {
 		return this.queryDataTable;
 	}
 
+	public String getObservationLabelTable() {
+		return getQueryDataTable() + "_labels"; //$NON-NLS-1$
+	}
+	
 	public Collection<String> getEntityTypes(){
 		return this.entityTypes;
 	}
@@ -171,9 +177,8 @@ public class PsqlEntityObservationEngine extends AbstractQueryEngine {
 	@Override
 	public void cleanUp(Session s) throws SQLException {
 		//original table
-		dropTable(s, queryDataTable);
-		dropTable(s, queryDataTable + "_LIST"); //$NON-NLS-1$
-		dropTable(s, queryDataTable + "_TREE"); //$NON-NLS-1$
+		dropTable(s, getQueryDataTable());
+		dropTable(s, getObservationLabelTable());
 	}
 
 	private void populateTemporaryTableExtra(Connection c, ConservationAreaFilter caFilter, Session session) throws Exception {
@@ -192,7 +197,7 @@ public class PsqlEntityObservationEngine extends AbstractQueryEngine {
 			c.createStatement().execute(sql);
 		}
 		//ca information
-		populateCaDetails(c, queryDataTable, "p_ca_uuid", query); //$NON-NLS-1$
+		populateCaDetails(c, queryDataTable, "ca_uuid", query); //$NON-NLS-1$
 		
 		// add observers
 		StringBuilder sql = new StringBuilder();
@@ -229,66 +234,58 @@ public class PsqlEntityObservationEngine extends AbstractQueryEngine {
 
 		populateTemporaryTableCategory(c, session, caFilter, queryDataTable);
 		populatedLastModifiedName(c, session, queryDataTable);
-
-		populateAdditionalWpoaTable(c, queryDataTable + "_list", "list_element_uuid", caFilter); //$NON-NLS-1$ //$NON-NLS-2$
-		populateAdditionalWpoaTable(c, queryDataTable + "_tree", "tree_node_uuid", caFilter); //$NON-NLS-1$ //$NON-NLS-2$	
+		createLabelTable(session, getObservationLabelTable());
+		populateListTreeDataTable(session, getQueryDataTable(), getObservationLabelTable());
+		populateEntityAttributeLabels(c, caFilter);
 	}
 
-	private void populateAdditionalWpoaTable(Connection c, String tableName, String obsAttUuidColumn, ConservationAreaFilter caFilter) throws Exception {
-		String sql = "CREATE TABLE " + tableName + " (uuid uuid, value varchar(1024))"; //$NON-NLS-1$ //$NON-NLS-2$
-		logger.finest(sql.toString());
-		c.createStatement().execute(sql);
-	
-		sql = "INSERT INTO " + tableName + " (uuid) SELECT DISTINCT wpoa." + obsAttUuidColumn //$NON-NLS-1$ //$NON-NLS-2$
-				+" FROM "  //$NON-NLS-1$
-				+ tableNamePrefix(WaypointObservationAttribute.class) + " inner join " //$NON-NLS-1$
-				+ queryDataTable + " r on " //$NON-NLS-1$
-				+ tablePrefix(WaypointObservationAttribute.class) + ".OBSERVATION_UUID = r.OB_UUID"; //$NON-NLS-1$
-		logger.finest(sql.toString());
-		c.createStatement().execute(sql);
-		
+	private void populateEntityAttributeLabels(Connection c, ConservationAreaFilter caFilter) throws Exception {
+		if (entityTypes.isEmpty()) return;
 		//add entity attributes
-		if (entityTypes.size() > 0){
-    		StringBuilder s = new StringBuilder();
-	        clearParameters();
-	        s.append("INSERT INTO " + tableName + "(uuid) SELECT DISTINCT "); //$NON-NLS-1$ //$NON-NLS-2$
-	        s.append(tablePrefix(EntityAttributeValue.class) + "." + obsAttUuidColumn); //$NON-NLS-1$
-	        s.append(" FROM "); //$NON-NLS-1$
-	        s.append(tableNamePrefix(EntityAttributeValue.class ));
-	        s.append(" join "); //$NON-NLS-1$
-	        s.append(tableNamePrefix(Entity.class ));
-	        s.append(" on "); //$NON-NLS-1$
-	        s.append(tablePrefix(EntityAttributeValue.class ) + ".entity_uuid = "); //$NON-NLS-1$
-	        s.append(tablePrefix(Entity.class ) + ".uuid "); //$NON-NLS-1$
-	        s.append(" join "); //$NON-NLS-1$
-	        s.append(tableNamePrefix(EntityType.class ));
-	        s.append(" on "); //$NON-NLS-1$
-	        s.append(tablePrefix(EntityType.class ) + ".uuid = "); //$NON-NLS-1$
-	        s.append(tablePrefix(Entity.class ) + ".entity_type_uuid "); //$NON-NLS-1$
-	        s.append(" WHERE "); //$NON-NLS-1$
-	        s.append(tablePrefix(EntityAttributeValue.class) + "." + obsAttUuidColumn + " is not null and "); //$NON-NLS-1$ //$NON-NLS-2$
-	        s.append("keyid IN ("); //$NON-NLS-1$
-	        for (String et : entityTypes){
-	            String p1 = addParameterValue(et);
-	            s.append(p1 + ","); //$NON-NLS-1$
-	        }
-	        s.deleteCharAt(s.length()-1);
-	        s.append(")"); //$NON-NLS-1$
-	        s.append(" AND ca_uuid IN ("); //$NON-NLS-1$
-            for (UUID cauuid : caFilter.getConservationAreaFilterIds()){
-                String p1 = addParameterValue(cauuid);
-                s.append(p1 + ",");     //$NON-NLS-1$
-            }
-            s.deleteCharAt(s.length()-1);
-            s.append(")"); //$NON-NLS-1$
-        
-            String query = s.toString();
-            logger.finest(query);
-            try(NamedPreparedStatement ps = parseQueryString(c, query)){
-				ps.executeUpdate();
-			}
+		
+		StringBuilder s = new StringBuilder();
+		clearParameters();
+		s.append("INSERT INTO " + getObservationLabelTable() + "(uuid) SELECT DISTINCT CASE WHEN "); //$NON-NLS-1$ //$NON-NLS-2$
+		s.append(tablePrefix(EntityAttributeValue.class) + ".list_element_uuid IS NOT NULL THEN "); //$NON-NLS-1$
+		s.append(tablePrefix(EntityAttributeValue.class) + ".list_element_uuid ELSE "); //$NON-NLS-1$
+		s.append(tablePrefix(EntityAttributeValue.class) + ".tree_node_uuid END "); //$NON-NLS-1$
+		s.append(" FROM "); //$NON-NLS-1$
+		s.append(tableNamePrefix(EntityAttributeValue.class));
+		s.append(" join "); //$NON-NLS-1$
+		s.append(tableNamePrefix(Entity.class));
+		s.append(" on "); //$NON-NLS-1$
+		s.append(tablePrefix(EntityAttributeValue.class) + ".entity_uuid = "); //$NON-NLS-1$
+		s.append(tablePrefix(Entity.class) + ".uuid "); //$NON-NLS-1$
+		s.append(" join "); //$NON-NLS-1$
+		s.append(tableNamePrefix(EntityType.class));
+		s.append(" on "); //$NON-NLS-1$
+		s.append(tablePrefix(EntityType.class) + ".uuid = "); //$NON-NLS-1$
+		s.append(tablePrefix(Entity.class) + ".entity_type_uuid "); //$NON-NLS-1$
+		s.append(" WHERE "); //$NON-NLS-1$
+		s.append("(" + tablePrefix(EntityAttributeValue.class) + ".list_element_uuid is not null "); //$NON-NLS-1$ //$NON-NLS-2$
+		s.append(" OR " + tablePrefix(EntityAttributeValue.class) + ".tree_node_uuid is not null ) AND "); //$NON-NLS-1$ //$NON-NLS-2$
+		s.append("keyid IN ("); //$NON-NLS-1$
+		for (String et : entityTypes) {
+			String p1 = addParameterValue(et);
+			s.append(p1 + ","); //$NON-NLS-1$
 		}
-		updateLabel(c, tableName, "uuid", "value"); //$NON-NLS-1$ //$NON-NLS-2$
+		s.deleteCharAt(s.length() - 1);
+		s.append(")"); //$NON-NLS-1$
+		s.append(" AND ca_uuid IN ("); //$NON-NLS-1$
+		for (UUID cauuid : caFilter.getConservationAreaFilterIds()) {
+			String p1 = addParameterValue(cauuid);
+			s.append(p1 + ","); //$NON-NLS-1$
+		}
+		s.deleteCharAt(s.length() - 1);
+		s.append(")"); //$NON-NLS-1$
+
+		String query = s.toString();
+		logger.finest(query);
+		try (NamedPreparedStatement ps = parseQueryString(c, query)) {
+			ps.executeUpdate();
+		}
+
+		updateLabel(c, getObservationLabelTable(), "uuid", "value"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 
@@ -308,6 +305,7 @@ public class PsqlEntityObservationEngine extends AbstractQueryEngine {
 		sql.append(tablePrefix(Waypoint.class) + ".wp_comment, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".last_modified, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".last_modified_by, "); //$NON-NLS-1$
+		sql.append(tablePrefix(WaypointObservationGroup.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(WaypointObservation.class) + ".employee_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(WaypointObservation.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(WaypointObservation.class) + ".category_uuid "); //$NON-NLS-1$
@@ -319,7 +317,7 @@ public class PsqlEntityObservationEngine extends AbstractQueryEngine {
 	public String getTemporaryTableCreateClause(String tableName) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
-		sql.append("p_ca_uuid UUID,"); //$NON-NLS-1$
+		sql.append("ca_uuid UUID,"); //$NON-NLS-1$
 		sql.append("wp_uuid UUID,"); //$NON-NLS-1$ 
 		sql.append("wp_source varchar(16),"); //$NON-NLS-1$
 		sql.append("wp_id varchar(32),"); //$NON-NLS-1$
@@ -331,6 +329,7 @@ public class PsqlEntityObservationEngine extends AbstractQueryEngine {
 		sql.append("wp_comment varchar(4096),"); //$NON-NLS-1$
 		sql.append("wp_lastmodified timestamp,"); //$NON-NLS-1$
 		sql.append("wp_lastmodifiedby uuid,"); //$NON-NLS-1$
+		sql.append("wp_group_uuid uuid,"); //$NON-NLS-1$
 		sql.append("ob_observer_uuid UUID,"); //$NON-NLS-1$
 		sql.append("ob_uuid UUID,"); //$NON-NLS-1$
 		sql.append("ob_category_uuid UUID"); //$NON-NLS-1$

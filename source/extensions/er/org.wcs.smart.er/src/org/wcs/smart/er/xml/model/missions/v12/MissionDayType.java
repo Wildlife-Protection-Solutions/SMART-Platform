@@ -30,8 +30,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="Tracks" type="{http://www.smartconservationsoftware.org/xml/1.1/mission}TracksType" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="SurveyWaypoints" type="{http://www.smartconservationsoftware.org/xml/1.1/mission}SurveyWaypointsType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="Tracks" type="{http://www.smartconservationsoftware.org/xml/1.2/mission}TracksType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="SurveyWaypoints" type="{http://www.smartconservationsoftware.org/xml/1.2/mission}SurveyWaypointsType" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *       &lt;attribute name="date" type="{http://www.w3.org/2001/XMLSchema}date" />
  *       &lt;attribute name="startTime" type="{http://www.w3.org/2001/XMLSchema}time" />

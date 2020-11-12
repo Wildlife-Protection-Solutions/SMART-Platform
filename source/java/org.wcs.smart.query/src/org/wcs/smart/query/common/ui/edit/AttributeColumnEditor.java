@@ -21,14 +21,24 @@
  */
 package org.wcs.smart.query.common.ui.edit;
 
+import java.util.Collection;
+import java.util.stream.Collectors;
+
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.swt.widgets.Composite;
+import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.common.celleditor.ComboBoxViewerCellEditor;
 import org.wcs.smart.common.celleditor.TreeViewerCellEditor;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.query.common.engine.ObservationQueryResultItem;
 import org.wcs.smart.query.model.AttributeQueryColumn;
 import org.wcs.smart.query.ui.editor.IQueryEditor;
+import org.wcs.smart.ui.CheckBoxDropDownCellEditor;
 
 /**
  * Cell editor for editing attribute query column results.
@@ -41,6 +51,8 @@ public class AttributeColumnEditor extends AbstractQueryColumnEditor {
 	private ComboBoxViewerCellEditor listCellEditor;
 	private TreeViewerCellEditor treeCellEditor;
 	
+	private CheckBoxDropDownCellEditor multiListCellEditor;
+	
 	public AttributeColumnEditor (ColumnViewer viewer, AttributeQueryColumn queryColumn, IQueryEditor editor ){
 		super(viewer, queryColumn, editor);
 	}
@@ -48,7 +60,31 @@ public class AttributeColumnEditor extends AbstractQueryColumnEditor {
 	@Override
 	protected Object getValue(Object element) {
 		Object value = super.getValue(element);
-		if (((AttributeQueryColumn)queryColumn).getAttributeType() == Attribute.AttributeType.TEXT && value == null) return ""; //$NON-NLS-1$
+		if (((AttributeQueryColumn)queryColumn).getAttributeType() == Attribute.AttributeType.TEXT 
+				&& value == null) return ""; //$NON-NLS-1$
+		
+		if (((AttributeQueryColumn)queryColumn).getAttributeType() == Attribute.AttributeType.MLIST) {
+			//we need to map these to attribute list items associated with the attribute
+			//to work properly with 
+			
+			if (element instanceof ObservationQueryResultItem) {
+				ObservationQueryResultItem i = (ObservationQueryResultItem)element;
+				if (i.getObservationUuid() != null) {
+					try(Session session = HibernateManager.openSession()){
+						WaypointObservation wo = session.get(WaypointObservation.class, i.getObservationUuid());
+						for (WaypointObservationAttribute a : wo.getAttributes()) {
+							if (a.getAttribute().getKeyId().equalsIgnoreCase(   ((AttributeQueryColumn)queryColumn).getAttributeId() )) {
+								Collection<AttributeListItem> items =a.getAttributeListItems().stream().map(e->e.getAttributeListItem()).collect(Collectors.toList());
+								items.forEach(e->e.getName());
+								value = items;
+								break;
+							}
+						}
+					}
+				}
+			}
+			
+		}
 		return value;
 	}
 
@@ -61,6 +97,8 @@ public class AttributeColumnEditor extends AbstractQueryColumnEditor {
 			return getDateCellEditor();
 		case LIST:
 			return getListCellEditor();
+		case MLIST:
+			return getMultiListCellEditor();
 		case NUMERIC:
 			return getDoubleCellEditor(true);
 		case TEXT:
@@ -91,6 +129,13 @@ public class AttributeColumnEditor extends AbstractQueryColumnEditor {
 		return listCellEditor;
 	}
 
+	private CellEditor getMultiListCellEditor(){
+		if (multiListCellEditor == null){
+			multiListCellEditor = CellEditorFactory.newAttributeMultiListCellEditor((Composite) getViewer().getControl(), ((AttributeQueryColumn)queryColumn).getAttributeId());
+		}
+		return multiListCellEditor;
+	}
+	
 	private CellEditor getTreeCellEditor(){
 		if (treeCellEditor == null){
 			treeCellEditor = CellEditorFactory.newAttributeTreeCellEditor((Composite) getViewer().getControl(), ((AttributeQueryColumn)queryColumn).getAttributeId());

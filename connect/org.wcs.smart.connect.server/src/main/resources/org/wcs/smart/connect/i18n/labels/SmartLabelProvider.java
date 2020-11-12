@@ -27,6 +27,7 @@ import java.util.Locale;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.DataModelMergeAndUpdater;
 import org.wcs.smart.ca.datamodel.SimpleDataModel;
 import org.wcs.smart.connect.i18n.Messages;
@@ -140,5 +141,19 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 	@Override
 	public String getEmployeeShortLabel(Employee e, Locale l) {
 		return getFullName(e, l);
+	}
+
+	@Override
+	public String getAttributeTypeLabel(AttributeType type, Locale l) {
+		switch(type) {
+			case BOOLEAN: return Messages.getString("SmartLabelProvider.BooleanAttType",l); //$NON-NLS-1$
+			case DATE: return Messages.getString("SmartLabelProvider.DateAttType",l); //$NON-NLS-1$
+			case LIST: return Messages.getString("SmartLabelProvider.ListAttType",l); //$NON-NLS-1$
+			case MLIST: return Messages.getString("SmartLabelProvider.MultiListAttType",l); //$NON-NLS-1$
+			case NUMERIC: return Messages.getString("SmartLabelProvider.NumericAttType",l); //$NON-NLS-1$
+			case TEXT: return Messages.getString("SmartLabelProvider.TextAttType",l); //$NON-NLS-1$
+			case TREE: return Messages.getString("SmartLabelProvider.TreeAttType",l);		 //$NON-NLS-1$
+		}
+		return ""; //$NON-NLS-1$
 	}
 }

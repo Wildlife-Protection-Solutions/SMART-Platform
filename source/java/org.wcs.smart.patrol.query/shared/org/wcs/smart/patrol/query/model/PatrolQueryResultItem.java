@@ -22,18 +22,13 @@
 package org.wcs.smart.patrol.query.model;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.eclipse.core.runtime.IAdaptable;
-import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -41,13 +36,9 @@ import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.MultiLineString;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKBReader;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.map.GeometryFactoryProvider;
-import org.wcs.smart.observation.model.Waypoint;
-import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.query.common.engine.IGeometryResultItem;
-import org.wcs.smart.util.ReprojectUtils;
 
 /**
  * A class to hold the results of a waypoint 
@@ -59,12 +50,8 @@ import org.wcs.smart.util.ReprojectUtils;
  * @author Emily
  * @since 1.0.0
  */
-public class PatrolQueryResultItem implements IGeometryResultItem, IAdaptable{
+public class PatrolQueryResultItem implements IGeometryResultItem, IPatrolQueryResultItem {
 
-	/**
-	 * Waypoint geometry field name
-	 */
-	public static final String WAYPOINT_GEOMCOLUMN_KEY = "wp:geometry"; //$NON-NLS-1$
 	
 	/**
 	 * Track geometry field name
@@ -90,28 +77,9 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IAdaptable{
 	private String transportType;
 	private LocalDate plStartDate;
 	private LocalDate plEndDate;
-	private LocalDateTime waypointDateTime;
 	
 	private String leader;
 	private String pilot;
-	
-	private UUID waypointUuid;
-	private String waypointId;
-	private double waypointX;
-	private double waypointY;
-	private Float waypointDistance;
-	private Float waypointDirection;
-	private String waypointComment;
-	private String waypointObserver;
-	
-	private String[] observationCategory;
-	private HashMap<String, Object> attributes = new HashMap<String, Object>();
-	
-	private String lastModifiedBy;
-	private LocalDateTime lastModified;
-	
-	private UUID groupUuid;
-	private UUID observationUuid;
 	
 	private List<byte[]> tracks = null;
 	
@@ -121,63 +89,6 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IAdaptable{
 	 */
 	public String getPatrolId() {
 		return patrolId;
-	}
-	
-	/**
-	 * @param observationUuid the observation uuid
-	 */
-	public void setObservationGroupUuid(UUID groupUuid){
-		this.groupUuid = groupUuid;
-	}
-	
-	/**
-	 * @return the observation uuid
-	 */
-	public UUID getObservationGroupUuid(){
-		return this.groupUuid;
-	}
-	
-	/**
-	 * @param observationUuid the observation uuid
-	 */
-	public void setObservationUuid(UUID observationUuid){
-		this.observationUuid = observationUuid;
-	}
-	
-	/**
-	 * @return the observation uuid
-	 */
-	public UUID getObservationUuid(){
-		return this.observationUuid;
-	}
-	
-	/**
-	 * the waypoint last modified date
-	 * @param lastModified
-	 */
-	public void setLastModifiedDate(LocalDateTime lastModified) {
-		this.lastModified = lastModified;
-	}
-	/**
-	 * 
-	 * @return the waypoint last modified date
-	 */
-	public LocalDateTime getLastModifiedDate() {
-		return this.lastModified;
-	}
-	
-	/**
-	 * @param lastmodified employee uuid or null
-	 */
-	public void setLastModifiedBy(String lastModifiedBy){
-		this.lastModifiedBy = lastModifiedBy;
-	}
-	
-	/**
-	 * @return the last modified employee uuid or null
-	 */
-	public String getLastModifiedBy(){
-		return this.lastModifiedBy;
 	}
 	
 	/**
@@ -205,63 +116,6 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IAdaptable{
 		this.pilot = pilot;
 	}
 	
-	/**
-	 * Each item is associated with a single category.  This
-	 * returns an array of the names of the category and
-	 * all the parent categories:
-	 *   - {parent1, parent2, category}
-	 * 
-	 * @return an array of the category names of the category & parent categories
-	 */
-	public String[] getCategories(){
-		return this.observationCategory;
-	}
-	
-	/**
-	 * @param cat sets the category
-	 */
-	public void setCategory(String[] categoryLabels){
-		this.observationCategory = categoryLabels;
-	}
-	
-	public void setAttributes(HashMap<String, Object> attributes) {
-		this.attributes = attributes;
-	}
-	
-	/**
-	 * Finds the attribute value of the associated attribute
-	 * key.
-	 * 
-	 * @param attributeKey the attribute key
-	 * @return the value associated with the attribute given key
-	 */
-	public Object getAttributeValue(String attributeKey){
-		return attributes.get(attributeKey);
-	}
-	
-	/**
-	 * Adds an attribute to the observation results 
-	 * @param key the attribute key
-	 * @param value the attribute value
-	 */
-	public void addAttribute(String key, Object value){
-		attributes.put(key, value);
-	}
-		
-	/**
-	 * sets the waypoint uuid
-	 * @param uuid
-	 */
-	public void setWaypointUuid(UUID uuid){
-		this.waypointUuid = uuid;
-	}
-	/**
-	 * 
-	 * @return the waypoint uuid
-	 */
-	public UUID getWaypointUuid(){
-		return this.waypointUuid;
-	}
 	
 	/**
 	 * @param patrolId patrol id
@@ -436,146 +290,8 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IAdaptable{
 	public void setTransportType(String transportType) {
 		this.transportType = transportType;
 	}
-	/**
-	 * @return waypoint date 
-	 */
-	public LocalDate getWaypointDate() {
-		return waypointDateTime.toLocalDate();
-	}
-	/**
-	 * @return waypoint time
-	 */
-	public LocalTime getWaypointTime() {
-		return waypointDateTime.toLocalTime();
-	}
-	/**
-	 * @param wpDateTime waypoint date 
-	 */
-	public void setWaypointDateTime(LocalDateTime wpDateTime) {
-		this.waypointDateTime = wpDateTime;
-	}
 	
 	
-	/**
-	 * @return waypoint id
-	 */
-	public String getWaypointId() {
-		return waypointId;
-	}
-	/**
-	 * @param waypointId waypoint id
-	 */
-	public void setWaypointId(String waypointId) {
-		this.waypointId = waypointId;
-	}
-
-	/**
-	 * Return the raw x location associated with the waypoint in the 
-	 * provided projection. 
-	 * @param crs optional if null the lat/long value will be returned
-	 * @return
-	 */
-	public double getWaypointRawX(CoordinateReferenceSystem crs) {
-		if (crs == null) return waypointX;
-		return ReprojectUtils.transform(waypointX, waypointY, crs).getX();
-	}
-	
-	/**
-	 * Return the raw y location associated with the waypoint in the 
-	 * provided projection. 
-	 * @param crs optional if null the lat/long value will be returned
-	 * @return
-	 */
-	public double getWaypointRawY(CoordinateReferenceSystem crs) {
-		if (crs == null) return waypointY;
-		return ReprojectUtils.transform(waypointX, waypointY, crs).getY();
-	}
-	
-	
-	/**
-	 * @param crs options - if null the lat/long value will be returned.
-	 * 
-	 * @return waypoint x (longitude) position  If a distance/direction value is
-	 * associated with this waypoint then this returns the projected value otherwise
-	 * it will return the original value.
-	 * 
-	 */
-	public double getWaypointX(CoordinateReferenceSystem crs) {
-		if (waypointDistance == null || waypointDirection == null) return getWaypointRawX(crs);
-		
-		Coordinate prj = Waypoint.projectPoint(new Coordinate(waypointX, waypointY), waypointDistance, waypointDirection); 		
-		if (crs == null) return prj.x;
-		return ReprojectUtils.transform(prj.x, prj.y, crs).getX();
-	}
-	
-	/**
-	 * @param crs options - if null the lat/long value will be returned.
-	 * 
-	 * @return waypoint y (latitude) position  If a distance/direction value is
-	 * associated with this waypoint then this returns the projected value otherwise
-	 * it will return the original value.
-	 * 
-	 */
-	public double getWaypointY(CoordinateReferenceSystem crs) {
-		if (waypointDistance == null || waypointDirection == null) return getWaypointRawY(crs);
-		
-		Coordinate prj = Waypoint.projectPoint(new Coordinate(waypointX, waypointY), waypointDistance, waypointDirection); 		
-		if (crs == null) return prj.y;
-		return ReprojectUtils.transform(prj.x, prj.y, crs).getY();
-	}
-	
-	/**
-	 * @param waypointX waypoint y (longitude)
-	 */
-	public void setWaypointX(double waypointX) {
-		this.waypointX = waypointX;
-	}
-	
-	/**
-	 * @param waypointY the waypoint y (latitude)
-	 */
-	public void setWaypointY(double waypointY) {
-		this.waypointY = waypointY;
-	}
-	
-	/**
-	 * @return waypoint distance observation
-	 */
-	public Float getWaypointDistance() {
-		return waypointDistance;
-	}
-	/**
-	 * @param waypointDistance
-	 */
-	public void setWaypointDistance(Float waypointDistance) {
-		this.waypointDistance = waypointDistance;
-	}
-	
-	/**
-	 * @return the waypoint direction of observation
-	 */
-	public Float getWaypointDirection() {
-		return waypointDirection;
-	}
-	/**
-	 * @param waypointDirection direction of observation
-	 */
-	public void setWaypointDirection(Float waypointDirection) {
-		this.waypointDirection = waypointDirection;
-	}
-	
-	/**
-	 * @return waypoint comment
-	 */
-	public String getWaypointComment() {
-		return waypointComment;
-	}
-	/**
-	 * @param wpComment wyapoint comment
-	 */
-	public void setWaypointComment(String wpComment) {
-		this.waypointComment = wpComment;
-	}
 	public void setPatrolLegStartDate(LocalDate date){
 		this.plStartDate = date;
 	}
@@ -650,18 +366,6 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IAdaptable{
 		return this.caUuid;
 	}
 	
-	/**
-	 * the waypoint observer
-	 * @return
-	 */
-	public String getWaypointObserver(){
-		return this.waypointObserver;
-	}
-	
-	public void setWaypointObserver(String observer){
-		this.waypointObserver = observer;
-	}
-
 	
 	/**
 	 * Converts the result item to a geometry in the database projection (4326)
@@ -669,9 +373,7 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IAdaptable{
 	@Override
 	public Geometry asGeometry(String columnName) {
 		GeometryFactory gf = GeometryFactoryProvider.getFactory();
-		if (columnName.equalsIgnoreCase(WAYPOINT_GEOMCOLUMN_KEY)){
-			return gf.createPoint(new Coordinate(getWaypointX(null), getWaypointY(null)));
-		}else if (columnName.equalsIgnoreCase(TRACK_GEOMCOLUMN_KEY)){
+		if (columnName.equalsIgnoreCase(TRACK_GEOMCOLUMN_KEY)){
 			if (getTrack() == null || getTrack().isEmpty()){
 				return gf.createMultiLineString(new LineString[]{});
 			}else {
@@ -713,25 +415,10 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IAdaptable{
 		return null;
 	}
 	
-	@SuppressWarnings("unchecked")
-	@Override
-	public <T> T getAdapter(Class<T> adapter) {
-		if (adapter.equals(Waypoint.class) && getWaypointUuid() != null){
-			Waypoint wp = new Waypoint();
-			wp.setUuid(getWaypointUuid());
-			return (T)wp;
-		}
-		if (adapter.equals(WaypointObservation.class) && getObservationUuid() != null){
-			WaypointObservation wo = new WaypointObservation();
-			wo.setUuid(getObservationUuid());
-			return (T)wo;
-		}
-		return null;
-	}
 	
 	@Override
 	public int hashCode(){
-		return Objects.hash(patrolUuid, patrolLegUuid, waypointUuid, observationUuid);
+		return Objects.hash(patrolUuid, patrolLegUuid);
 		
 	}
 	
@@ -743,8 +430,6 @@ public class PatrolQueryResultItem implements IGeometryResultItem, IAdaptable{
 		PatrolQueryResultItem o = (PatrolQueryResultItem) other;
 		
 		return Objects.equals(patrolLegUuid, o.patrolLegUuid) &&
-				Objects.equals(patrolUuid, o.patrolUuid) &&
-				Objects.equals(waypointUuid, o.waypointUuid) && 
-				Objects.equals(observationUuid, o.observationUuid);
+				Objects.equals(patrolUuid, o.patrolUuid);
 	}
 }

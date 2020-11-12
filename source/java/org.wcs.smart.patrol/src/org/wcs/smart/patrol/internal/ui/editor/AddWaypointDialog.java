@@ -32,11 +32,14 @@ import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.geotools.geometry.jts.JTS;
@@ -55,6 +58,7 @@ import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.PatrolWaypointSource;
 import org.wcs.smart.ui.ProjectionLabelProvider;
+import org.wcs.smart.ui.SelectPointOnMapDialog;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.util.ReprojectUtils;
 
@@ -237,6 +241,16 @@ public class AddWaypointDialog extends SmartStyledTitleDialog{
 			}
 		});
 		
+		Link lnkMap  = new Link(waypointComp, SWT.NONE);
+		lnkMap.setText("<a>" + Messages.AddWaypointDialog_SelectOnMap + "</a>");  //$NON-NLS-1$ //$NON-NLS-2$
+		lnkMap.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				selectOnMap();
+			}
+		});
+		lnkMap.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false,2,1));
+		
 		setMessage(Messages.AddWaypointDialog_DialogMessage);
 		setTitle(Messages.AddWaypointDialog_DialogTitle);
 		super.getShell().setText(Messages.AddWaypointDialog_DialogTitle);
@@ -257,6 +271,36 @@ public class AddWaypointDialog extends SmartStyledTitleDialog{
 		}
 	}
 
+	private void selectOnMap(){
+		SelectPointOnMapDialog md = new SelectPointOnMapDialog(txtX.getShell());
+		
+		try{
+			CoordinateReferenceSystem target = ReprojectUtils.stringToCrs(currentProjection.getDefinition());
+		
+			try {
+				Double x = Double.parseDouble(txtX.getText());
+				Double y = Double.parseDouble(txtY.getText());
+				
+				Coordinate c2 = ReprojectUtils.reproject(x, y, target, SmartDB.DATABASE_CRS);
+				if (c2 != null){
+					md.setInitPoint(c2.x,c2.y);
+				}
+			}catch (Exception ex) {
+				//eatme
+			}
+			if (md.open() == SelectPointOnMapDialog.OK){
+				if (md.getPoint() != null){
+					Coordinate c2 = ReprojectUtils.reproject(md.getPoint().getX(), md.getPoint().getY(), SmartDB.DATABASE_CRS, target);
+					txtX.setText(String.valueOf(c2.getX()));
+					txtY.setText(String.valueOf(c2.getY()));
+					
+				}
+			}
+		}catch (Exception ex) {
+			SmartPatrolPlugIn.displayLog(ex.getMessage(),  ex);
+		}
+	}
+	
 	@Override
 	protected Control createContents(Composite parent) {
 		Control ctr = super.createContents(parent);

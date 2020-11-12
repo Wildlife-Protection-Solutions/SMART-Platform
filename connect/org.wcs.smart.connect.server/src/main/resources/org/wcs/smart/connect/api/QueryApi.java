@@ -100,6 +100,7 @@ import org.wcs.smart.i2.query.export.CsvEntitySummaryQueryExporter;
 import org.wcs.smart.i2.query.export.IQueryExporter.ExportOption;
 import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.model.QueryGridResultItem;
 import org.wcs.smart.query.common.model.SimpleQuery;
@@ -315,6 +316,7 @@ public class QueryApi extends HttpServlet{
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	private QueryResult executeCoreQuery(Query query, String cafilter, DateFilter df, 
 			String srid, String format, String delimiter, String sortColumnName, 
 			QueryApi.Direction sortDirectionInt, boolean includeUuids, Session s) throws Exception {
@@ -384,11 +386,11 @@ public class QueryApi extends HttpServlet{
 				&& query instanceof SimpleQuery){
 
 				if(sortColumnName != null){
-					((AbstractDbFeatureResultSet)result).setSorting(sortColumnName, sortDirectionInt);
-					((AbstractDbFeatureResultSet)result).updateSortColumn(s);
+					((AbstractDbFeatureResultSet<?>)result).setSorting(sortColumnName, sortDirectionInt);
+					((AbstractDbFeatureResultSet<?>)result).updateSortColumn(s);
 				}
 				
-				exporter.exportResults((SimpleQuery)query, (AbstractDbFeatureResultSet)result, s);
+				exporter.exportResults((SimpleQuery)query, (AbstractDbFeatureResultSet<IResultItem>)result, s);
 			}else if (result instanceof IMemoryTableResultSet
 				&& query instanceof GriddedQuery){
 				exporter.exportResults((GriddedQuery)query, (IMemoryTableResultSet<QueryGridResultItem>)result, s);
@@ -408,7 +410,7 @@ public class QueryApi extends HttpServlet{
 			
 			if (result instanceof AbstractDbFeatureResultSet &&
 					query instanceof SimpleQuery){
-				exporter.exportResults((SimpleQuery)query, (AbstractDbFeatureResultSet)result, s);
+				exporter.exportResults((SimpleQuery)query, (AbstractDbFeatureResultSet<IResultItem>)result, s);
 			}else{
 				return new QueryResult(createErrorResponse(Status.NOT_IMPLEMENTED, Messages.getString("QueryApi.ExportFormatNotSupported", SmartUtils.getRequestLocale(request))), result); //$NON-NLS-1$	
 			}
@@ -430,7 +432,7 @@ public class QueryApi extends HttpServlet{
 			GeoJsonExporter exporter = new GeoJsonExporter(request.getLocale(), prjProvider);
 			
 			if (result instanceof AbstractDbFeatureResultSet && query instanceof SimpleQuery){
-				exporter.exportResults((SimpleQuery)query, (AbstractDbFeatureResultSet)result, s);
+				exporter.exportResults((SimpleQuery)query, (AbstractDbFeatureResultSet<IResultItem>)result, s);
 			}else{
 				return new QueryResult(createErrorResponse(Status.NOT_IMPLEMENTED, Messages.getString("QueryApi.ExportFormatNotSupported", SmartUtils.getRequestLocale(request))), result); //$NON-NLS-1$	
 			}
@@ -445,11 +447,11 @@ public class QueryApi extends HttpServlet{
 			if (result instanceof AbstractDbFeatureResultSet
 					&& query instanceof SimpleQuery){
 						if(sortColumnName != null){
-						((AbstractDbFeatureResultSet)result).setSorting(sortColumnName, sortDirectionInt);
-						((AbstractDbFeatureResultSet)result).updateSortColumn(s);
+						((AbstractDbFeatureResultSet<IResultItem>)result).setSorting(sortColumnName, sortDirectionInt);
+						((AbstractDbFeatureResultSet<IResultItem>)result).updateSortColumn(s);
 					}
 					
-					exporter.exportResults((SimpleQuery)query, (AbstractDbFeatureResultSet)result, s);
+					exporter.exportResults((SimpleQuery)query, (AbstractDbFeatureResultSet<IResultItem>)result, s);
 				}else if (result instanceof IMemoryTableResultSet
 					&& query instanceof GriddedQuery){
 					exporter.exportResults((GriddedQuery)query, (IMemoryTableResultSet<QueryGridResultItem>)result, s);
@@ -630,7 +632,7 @@ public class QueryApi extends HttpServlet{
 		for (String cafilter : bits){
 			try{
 				UUID cauuid = UuidUtils.stringToUuid(cafilter);
-				ConservationArea ca = (ConservationArea) session.get(ConservationArea.class, cauuid);
+				ConservationArea ca = session.get(ConservationArea.class, cauuid);
 				if (ca != null && !ca.getIsCcaa()){
 					cas.add(ca);
 				}
@@ -649,7 +651,7 @@ public class QueryApi extends HttpServlet{
 		for (String cafilter : bits){
 			try{
 				UUID cauuid = UuidUtils.stringToUuid(cafilter);
-				ConservationArea ca = (ConservationArea) session.get(ConservationArea.class, cauuid);
+				ConservationArea ca = session.get(ConservationArea.class, cauuid);
 				if (ca != null && !ca.getIsCcaa()){
 					validCas.append(","); //$NON-NLS-1$
 					validCas.append(ca.getUuid().toString());

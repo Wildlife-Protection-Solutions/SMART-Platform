@@ -78,15 +78,13 @@ import org.wcs.smart.er.hibernate.SurveyDesignFilter;
 import org.wcs.smart.er.hibernate.SurveyDesignProxy;
 import org.wcs.smart.er.hibernate.SurveyFilter;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
-import org.wcs.smart.er.hibernate.SurveyProxy;
+import org.wcs.smart.er.hibernate.SurveyMissionProxy;
 import org.wcs.smart.er.internal.Messages;
-import org.wcs.smart.er.ui.SurveyListTreeNode.Type;
 import org.wcs.smart.er.ui.handlers.EditSurveyElementHandler;
 import org.wcs.smart.er.ui.mision.editor.MissionEditor;
 import org.wcs.smart.er.ui.mision.editor.MissionEditorInput;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditor;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
-import org.wcs.smart.er.ui.surveydesign.editor.SurveyEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
@@ -160,10 +158,16 @@ public class SurveyDesignListView implements IDoubleClickListener, IUpdatableVie
 			pService.bringToTop(localPart);
 		}else if (src instanceof MissionEditor){
 			UUID missionUuid = ((MissionEditorInput)((MissionEditor)src).getEditorInput()).getUuid();
-			lstViewer.setSelection(new StructuredSelection(new SurveyListTreeNode(null, missionUuid, Type.MISSION)));
+			
+			SurveyMissionProxy proxy = new SurveyMissionProxy(null, missionUuid, null, null);
+			lstViewer.setSelection(new StructuredSelection(proxy));
 			bar.setSelection(0);
 			pService.bringToTop(localPart);
 		}
+	}
+	
+	public SurveyFilter getSurveyMissionFilter() {
+		return this.filter;
 	}
 	
 	@PostConstruct
@@ -172,19 +176,23 @@ public class SurveyDesignListView implements IDoubleClickListener, IUpdatableVie
 		((FillLayout)parent.getLayout()).marginWidth = 0;
 		
 		filter = new SurveyFilter();
+		context.set(SurveyFilter.class, filter);
+		
 		designFilter = new SurveyDesignFilter(SmartDB.getCurrentConservationArea());
 		
 		bar = new CTabFolder(parent, SWT.NONE);
 
 		lstViewer = new TreeViewer(bar, SWT.NONE);
 		lstViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
 		lstViewer.setLabelProvider(SurveyDesignLabelProvider.getInstance());
-		lstViewer.setContentProvider(new LazySurveyDesignTreeContentProvider());
+		lstViewer.setContentProvider(new SurveyDesignTreeContentProvider());
+		
 		lstViewer.setInput(null);
 		lstViewer.addDoubleClickListener(this);
 		
 		CTabItem titem = new CTabItem(bar, SWT.NONE);
-		titem.setText(Messages.SurveyDesignListView_SurveysTabName);
+		titem.setText(Messages.SurveyDesignListView_SurveyMissionTabName);
 		titem.setControl(lstViewer.getControl());
 		
 		designViewer = new TableViewer(bar, SWT.MULTI);
@@ -239,6 +247,7 @@ public class SurveyDesignListView implements IDoubleClickListener, IUpdatableVie
 		bar.setSelection(0);
 	}
 
+	
 	@Focus
 	public void setFocus() {
 		lstViewer.getControl().setFocus();
@@ -252,19 +261,15 @@ public class SurveyDesignListView implements IDoubleClickListener, IUpdatableVie
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			final List<SurveyListTreeNode> ins = new ArrayList<SurveyListTreeNode>();
+			final List<SurveyMissionProxy> ins = new ArrayList<SurveyMissionProxy>();
 			final List<SurveyDesignEditorInput> designs = new ArrayList<SurveyDesignEditorInput>();
 			
 			try(Session s = HibernateManager.openSession()){
 				s.beginTransaction();
 				try{
 					//surveys
-					List<SurveyProxy> items = SurveyHibernateManager.getSurveys(s, filter);
+					ins.addAll( SurveyHibernateManager.getSurveys(s, filter) );
 					
-					for (SurveyProxy sp : items){
-						SurveyEditorInput sv = new SurveyEditorInput(sp);
-						ins.add(new SurveyListTreeNode(sv.getName(), sv.getUuid(), Type.SURVEY)); 
-					}
 					
 					//designs
 					List<SurveyDesignProxy> objects =SurveyHibernateManager.getInstance().getSurveyDesignEditorInputs(s, designFilter);
@@ -290,11 +295,14 @@ public class SurveyDesignListView implements IDoubleClickListener, IUpdatableVie
 
 				@Override
 				public void run() {
-					Object[] path = lstViewer.getExpandedElements();
+//					Object[] path = lstViewer.getExpandedElements();
 					lstViewer.setInput(ins);
 					lstViewer.refresh();
-					
-					lstViewer.setExpandedElements(path);
+//					if (path != null) {
+//						lstViewer.setExpandedElements(path);
+//					}else {
+						lstViewer.expandToLevel(2);
+//					}
 					
 					designViewer.setInput(designs);
 				}});
@@ -308,14 +316,14 @@ public class SurveyDesignListView implements IDoubleClickListener, IUpdatableVie
 	public void doubleClick(DoubleClickEvent event) {
 		Object selection = ((IStructuredSelection)event.getSelection()).getFirstElement();
 		if (selection != null) {
-			if (selection instanceof SurveyListTreeNode){
-				SurveyListTreeNode node = (SurveyListTreeNode)selection;
+			if (selection instanceof SurveyMissionProxy){
+				SurveyMissionProxy node = (SurveyMissionProxy)selection;
 				switch (node.getType()) {
 					case SURVEY:
 						EditSurveyElementHandler.editSurvey(getShell(), node.getUuid());
 						break;
 					case MISSION:
-						EditSurveyElementHandler.editMission(getShell(), node.getUuid(), node.getLabel());
+						EditSurveyElementHandler.editMission(getShell(), node.getUuid(), node.getId());
 						break;
 				}
 			}else if (selection instanceof SurveyDesignEditorInput){

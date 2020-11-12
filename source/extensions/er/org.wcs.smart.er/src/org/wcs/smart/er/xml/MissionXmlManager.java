@@ -49,7 +49,7 @@ public class MissionXmlManager {
 	public static final String ATTACHMENT_DIR_NAME = "attachments"; //$NON-NLS-1$
 	
 	/**
-	 * Writes a xml patrol object to a file.
+	 * Writes a xml mission object to a file.
 	 * <p>
 	 * User is required to close output stream.
 	 * </p>
@@ -58,7 +58,7 @@ public class MissionXmlManager {
 	 * @throws JAXBException
 	 * @throws IOException
 	 */
-	public static void writeDataModel(MissionType mission, OutputStream file) throws JAXBException, IOException{
+	public static void writeMission(MissionType mission, OutputStream file) throws JAXBException, IOException{
 		JAXBContext context = JAXBContext.newInstance(METADATA_CLASSES_PACKAGE);
 		Marshaller marshaller = context.createMarshaller();
 		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);

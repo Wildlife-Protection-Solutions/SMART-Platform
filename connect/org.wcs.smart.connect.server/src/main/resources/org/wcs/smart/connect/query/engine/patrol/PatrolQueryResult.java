@@ -49,7 +49,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author Emily
  *
  */
-public class PatrolQueryResult extends AbstractDbFeatureResultSet {
+public class PatrolQueryResult extends AbstractDbFeatureResultSet<PatrolQueryResultItem> {
 
 	private PsqlPatrolEngine engine;
 	private WKBReader reader = new WKBReader();
@@ -109,8 +109,8 @@ public class PatrolQueryResult extends AbstractDbFeatureResultSet {
 	 * @throws SQLException
 	 */
 	@Override
-	public List<IResultItem> getResults(Session session, ResultSet rs, int from, int pageSize) throws SQLException {
-		List<IResultItem> items = new ArrayList<IResultItem>();
+	public List<PatrolQueryResultItem> getResults(Session session, ResultSet rs, int from, int pageSize) throws SQLException {
+		List<PatrolQueryResultItem> items = new ArrayList<>();
 		rs.absolute(from);
 		int to = from + pageSize;
 		if (to >= itemCount) {
@@ -125,7 +125,7 @@ public class PatrolQueryResult extends AbstractDbFeatureResultSet {
 	}
 	
 	@Override
-	public Geometry createGeometry(IResultItem rs) throws Exception {
+	public Geometry createGeometry(PatrolQueryResultItem rs) throws Exception {
 		List<byte[]> tracks = ((PatrolQueryResultItem)rs).getTrack();
 		if (tracks == null || tracks.size() <= 0){
 			return new GeometryCollection(new Geometry[]{}, gf);	
@@ -134,14 +134,14 @@ public class PatrolQueryResult extends AbstractDbFeatureResultSet {
 	}
 
 	@Override
-	public String createId(IResultItem rs) throws Exception {
-		return ((PatrolQueryResultItem)rs).getPatrolId() + "." + System.nanoTime(); //$NON-NLS-1$
+	public String createId(PatrolQueryResultItem rs) throws Exception {
+		return rs.getPatrolId() + "." + System.nanoTime(); //$NON-NLS-1$
 	}
 	
 	protected PatrolQueryResultItem asQueryResultItem(ResultSet rs, Session session)
 			throws SQLException {
 		PatrolQueryResultItem it = new PatrolQueryResultItem();
-		UUID cauuid = (UUID)rs.getObject("r_p_ca_uuid"); //$NON-NLS-1$
+		UUID cauuid = (UUID)rs.getObject("ca_uuid"); //$NON-NLS-1$
 		it.setConservationAreaUuid(cauuid); 
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
@@ -172,10 +172,9 @@ public class PatrolQueryResult extends AbstractDbFeatureResultSet {
 		engine.cleanUp(session);
 	}
 
-
 	@Override
 	public void updateSortColumn(Session session) throws SQLException {
-		updateSortColumnGeneral(session, engine.getQueryDataTable(),engine.getCaFilter(), "value", ".ob_", "_LIST", "_TREE", "uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-		
+		updateSortColumnGeneral(session, engine.getQueryDataTable(),
+				null, engine.getCaFilter(), ".ob_"); //$NON-NLS-1$ 
 	}
 }

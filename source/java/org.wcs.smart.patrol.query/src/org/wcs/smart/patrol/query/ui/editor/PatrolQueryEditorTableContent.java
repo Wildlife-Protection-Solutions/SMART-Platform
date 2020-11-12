@@ -50,8 +50,8 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.control.ProgressAreaComposite;
 import org.wcs.smart.patrol.query.internal.Messages;
+import org.wcs.smart.patrol.query.model.IPatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.PatrolQuery;
-import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.query.ui.querytable.PatrolTableColumn;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.ui.QueryResultsTable;
@@ -138,7 +138,7 @@ public class PatrolQueryEditorTableContent {
 	 * 
 	 * @param items new results
 	 */
-	public void setTableData(final Collection<PatrolQueryResultItem> items) {
+	public void setTableData(final Collection<? extends IPatrolQueryResultItem> items) {
 		
 		Display.getDefault().asyncExec(new Runnable() {
 			@Override
@@ -179,10 +179,10 @@ public class PatrolQueryEditorTableContent {
 			}
 		});
 	}
-	private int computeNumberOfPatrols(Collection<PatrolQueryResultItem> items){
+	private int computeNumberOfPatrols(Collection<? extends IPatrolQueryResultItem> items){
 		HashSet<Integer> keys = new HashSet<Integer>();
 		int cnt = 0;
-		for (PatrolQueryResultItem it : items){
+		for (IPatrolQueryResultItem it : items){
 			int key = it.getPatrolUuid().hashCode();
 			if (!keys.contains(key)){
 				cnt++;

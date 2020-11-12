@@ -21,19 +21,14 @@
  */
 package org.wcs.smart.asset.query.model.types;
 
-import java.util.UUID;
-
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.ui.PlatformUI;
-import org.hibernate.Session;
-import org.wcs.smart.asset.query.model.AssetQueryResultItem;
-import org.wcs.smart.asset.query.model.AssetWaypointQuery;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.observation.model.ObservationAttachment;
-import org.wcs.smart.observation.model.WaypointAttachment;
-import org.wcs.smart.query.common.engine.IAttachmentResultItem;
+import org.wcs.smart.asset.query.model.AssetObservationAttachmentResultItem;
+import org.wcs.smart.asset.query.model.AssetObservationResultItem;
+import org.wcs.smart.asset.query.model.AssetWaypointAttachmentResultItem;
+import org.wcs.smart.asset.query.model.AssetWaypointResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.ui.QueryResultsEditor;
 import org.wcs.smart.query.common.ui.ShowInTableInfoProvider;
@@ -46,29 +41,18 @@ public class AssetQueryShowInTableResultProvider extends ShowInTableInfoProvider
 	 */
 	@Override
 	public void doWork(IResultItem resultItem) {
-		if (resultItem instanceof IAttachmentResultItem) {
-			UUID wpUuid = null;
-			UUID obsUuid = null;
-			try(Session s = HibernateManager.openSession()){
-				ObservationAttachment a = s.get(ObservationAttachment.class, ((IAttachmentResultItem)resultItem).getAttachment().getUuid());
-				if (a == null) {
-					//waypoint attachment
-					WaypointAttachment wa = s.get(WaypointAttachment.class, ((IAttachmentResultItem)resultItem).getAttachment().getUuid());
-					wpUuid = wa.getWaypoint().getUuid();
-					//pick a random observation to zoom to
-					if (!wa.getWaypoint().getObservationGroups().isEmpty() && !wa.getWaypoint().getObservationGroups().get(0).getObservations().isEmpty()) {
-						obsUuid = wa.getWaypoint().getObservationGroups().get(0).getObservations().get(0).getUuid();
-					}
-				}else {
-					obsUuid = a.getObservation().getUuid();
-					wpUuid = a.getObservation().getWaypoint().getUuid();
-				}
-
-			}
-			AssetQueryResultItem tmp = new AssetQueryResultItem();
-			tmp.setObservationUuid(obsUuid);
-			tmp.setWaypointUuid(wpUuid);
-			resultItem = tmp;
+		
+		if (resultItem instanceof AssetObservationAttachmentResultItem) {
+			AssetObservationAttachmentResultItem a = (AssetObservationAttachmentResultItem)resultItem;
+			AssetObservationResultItem oi = new AssetObservationResultItem();
+			oi.setWaypointUuid(a.getWaypointUuid());
+			oi.setObservationUuid(a.getObservationUuid());
+			resultItem = oi;
+		}else if (resultItem instanceof AssetWaypointAttachmentResultItem) {
+			AssetWaypointAttachmentResultItem a = (AssetWaypointAttachmentResultItem)resultItem;
+			AssetWaypointResultItem oi = new AssetWaypointResultItem();
+			oi.setWaypointUuid(a.getWaypointUuid());
+			resultItem = oi;
 		}
 		
 		IEclipseContext ctx = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
@@ -83,7 +67,6 @@ public class AssetQueryShowInTableResultProvider extends ShowInTableInfoProvider
 				}
 				if (src instanceof QueryResultsEditor){
 					QueryResultsEditor e = (QueryResultsEditor) src;
-					if (e.getQuery().getTypeKey().equals(AssetWaypointQuery.KEY)) ((AssetQueryResultItem)resultItem).setObservationUuid(null);
 					e.showTablePage();
 					e.getQueryResultsTable().revealSelection(resultItem);	
 				}

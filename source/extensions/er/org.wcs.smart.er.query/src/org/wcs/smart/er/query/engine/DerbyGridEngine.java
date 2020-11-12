@@ -73,13 +73,12 @@ import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.filter.summary.MissionValueItem;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.SurveyGriddedQuery;
-import org.wcs.smart.er.query.model.SurveyQueryAttachmentResultItem;
-import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.map.raster.GridMetadata;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationAttributeList;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.AddCellMerger;
 import org.wcs.smart.query.common.engine.DistanceValueComputer;
@@ -109,6 +108,7 @@ import org.wcs.smart.query.model.summary.IValueItem;
 import org.wcs.smart.query.model.summary.IValueItem.ValueType;
 
 public class DerbyGridEngine extends DerbySurveyQueryEngine{
+	
 	private GridQueryResult myResults;
 	
 	private SurveyGriddedQuery query;
@@ -151,9 +151,9 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 			public void execute(Connection c) throws SQLException {
 				SubMonitor progress = SubMonitor.convert(monitor, Messages.DerbyGridEngine_RunQueryProgress, 100);
 
-				SurveyDesignFilter dsFilter = null;
+				designFilter = null;
 				if (query.getSurveyDesign() != null){
-					dsFilter = SurveyDesignFilter.createStringFilter(query.getSurveyDesign());
+					designFilter = SurveyDesignFilter.createStringFilter(query.getSurveyDesign());
 				}
 				
 				ConservationAreaFilter caFilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
@@ -179,7 +179,7 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 					//get numerator results
 					Collection<QueryGridResultItem> numeratorResults = getItems(
 							gridDef, numerator, query.getQueryDefinition().getValueFilter(), 
-							dsFilter, caFilter, c, session, progress.split(30), true);
+							caFilter, c, session, progress.split(30), true);
 					
 					//apply denominator results
 					if (denominator != null){
@@ -191,7 +191,9 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 						}
 						//computer denominator results
 						//only recompute filter if filter is different
-						Collection<QueryGridResultItem> denominatorResults = getItems(gridDef, denominator, query.getQueryDefinition().getRateFilter(), dsFilter, caFilter, c, session, progress.split(30), !isSame);
+						Collection<QueryGridResultItem> denominatorResults = getItems(gridDef, denominator, 
+								query.getQueryDefinition().getRateFilter(), caFilter, c, session, 
+								progress.split(30), !isSame);
 						HashMap<String, Double> items = new HashMap<String, Double>();
 						for (QueryGridResultItem it : denominatorResults){
 							items.put(it.getTileId(), it.getValue());
@@ -219,7 +221,7 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 						items.put(it.getTileId(), it);
 					}
 
-					List<QueryGridResultItem> missionLocations = computeMissionExistance(c, gridDef, dsFilter, caFilter);
+					List<QueryGridResultItem> missionLocations = computeMissionExistance(c, gridDef, designFilter, caFilter);
 					for (QueryGridResultItem it : missionLocations){
 						if (items.get(it.getTileId()) == null){ 
 							QueryGridResultItem newitem = new QueryGridResultItem();
@@ -255,8 +257,7 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 	 * 
 	 */
 	private Collection<QueryGridResultItem> getItems(Grid gridDef, IValueItem value, 
-			QueryFilter filter, SurveyDesignFilter sdFilter, 
-			ConservationAreaFilter caFilter, Connection c, Session session, 
+			QueryFilter filter, ConservationAreaFilter caFilter, Connection c, Session session, 
 			IProgressMonitor monitor, boolean needsFilter) throws Exception{
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.DerbyGridEngine_CreateObsTableProgress, 100);
 		
@@ -302,7 +303,7 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 				hasTrackFilter = needstracks[0];
 			}
 			
-			IFilterProcessor filterer = super.getFilterProcessor(filter.getFilterType(), dataTable, sdFilter, query);
+			IFilterProcessor filterer = super.getFilterProcessor(filter.getFilterType(), dataTable, query);
 			try{
 				filterer.processFilter(c, filter.getFilter(), dateFilter, caFilter, 
 					needsObservation, false, progress.split(90));
@@ -343,7 +344,9 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 				
 			String strAggValue = "number_value"; //$NON-NLS-1$
 			strAgg = tmp.getAggregationKey();
-			if (tmp.getAttributeType() == AttributeType.LIST || tmp.getAttributeType() == AttributeType.TREE){
+			if (tmp.getAttributeType() == AttributeType.LIST ||
+				tmp.getAttributeType() == AttributeType.MLIST || 
+					tmp.getAttributeType() == AttributeType.TREE){
 				strAgg="count";  //$NON-NLS-1$
 				strAggValue = "value";  //$NON-NLS-1$
 			}
@@ -360,7 +363,9 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 				
 			if (tmp.getAttributeType() == AttributeType.NUMERIC){
 				sql.append("SELECT number_value  "); //$NON-NLS-1$
-			}else if (tmp.getAttributeType() == AttributeType.TREE || tmp.getAttributeType() == AttributeType.LIST){
+			}else if (tmp.getAttributeType() == AttributeType.TREE ||
+					tmp.getAttributeType() == AttributeType.MLIST ||
+					tmp.getAttributeType() == AttributeType.LIST){
 				sql.append("SELECT distinct "); //$NON-NLS-1$
 				if (tmp.getValueType() == ValueType.OBSERVATION){
 					sql.append(dataTable);
@@ -457,7 +462,27 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 				sql.append( tablePrefix.get(AttributeListItem.class));
 				p1 = addParameterValue(tmp.getItemKey());
 				sql.append(".keyid = " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$
-						
+			}else if (tmp.getAttributeType() == AttributeType.MLIST){
+				
+				sql.append(" JOIN " ); //$NON-NLS-1$
+				sql.append(tableNamePrefix(WaypointObservationAttributeList.class));
+				sql.append(" on "); //$NON-NLS-1$
+				sql.append( tablePrefix.get(WaypointObservationAttribute.class));
+				sql.append(".uuid = "); //$NON-NLS-1$
+				sql.append( tablePrefix.get(WaypointObservationAttributeList.class));
+				sql.append(".observation_attribute_uuid "); //$NON-NLS-1$
+				
+				sql.append(" JOIN " + tableNames.get(AttributeListItem.class) ); //$NON-NLS-1$
+				sql.append(" as "); //$NON-NLS-1$
+				sql.append( tablePrefix.get(AttributeListItem.class));
+				sql.append(" on "); //$NON-NLS-1$
+				sql.append( tablePrefix.get(AttributeListItem.class));
+				sql.append(".uuid = "); //$NON-NLS-1$
+				sql.append( tablePrefix.get(WaypointObservationAttributeList.class));
+				sql.append(".list_element_uuid and "); //$NON-NLS-1$
+				sql.append( tablePrefix.get(AttributeListItem.class));
+				p1 = addParameterValue(tmp.getItemKey());
+				sql.append(".keyid = " + p1); //$NON-NLS-1$ 
 			}else if (tmp.getAttributeType() == AttributeType.TREE){
 				sql.append(" join "); //$NON-NLS-1$
 				sql.append(tableNames.get(AttributeTreeNode.class));
@@ -617,7 +642,7 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 			}
 		}
 		sql.append( " and "); //$NON-NLS-1$
-		sql.append(SurveyFilterSqlGenerator.INSTANCE.toSql(caFilter, this));
+		sql.append(SurveyFilterSqlGenerator.INSTANCE.asSql(caFilter, tablePrefix(SurveyDesign.class), this));
 		
 		if (dsFilter != null){
 			sql.append( " and "); //$NON-NLS-1$
@@ -672,7 +697,7 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 	}
 
 	@Override
-	protected String getTemporaryTableSelectClause(boolean includeObservations) {
+	public String getTemporaryTableSelectClause(boolean includeObservations) {
 		StringBuilder sql = new StringBuilder();
 		sql.append(" SELECT DISTINCT "); //$NON-NLS-1$
 		sql.append(tablePrefix(SurveyDesign.class) + ".ca_uuid, "); //$NON-NLS-1$
@@ -710,7 +735,7 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 	}
 
 	@Override
-	protected String getTemporaryTableCreateClause(String tableName) {
+	public String getTemporaryTableCreateClause(String tableName) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
 		
@@ -738,27 +763,11 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 	}
 
 	@Override
-	protected void buildTemporaryTableIndexes(Connection c, String tableName)
-			throws SQLException {
-		super.buildTemporaryTableIndexes(c, tableName);
-		
-		StringBuilder sql = new StringBuilder();
-		sql.append("CREATE INDEX " + tableName + "_wp_uuid_idx on " +  tableName + "(wp_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		QueryPlugIn.logSql(sql.toString());
-		c.createStatement().execute(sql.toString());
+	public void createTemporaryTableIndexes(Connection c, String tableName) throws SQLException {
+		super.createObsIndex(c, tableName);
+		super.createWpIndex(c, tableName);
 	}
 
-	@Override
-	protected SurveyQueryResultItem asQueryResultItem(ResultSet rs, Session session)
-			throws SQLException {
-		return null;
-	}
-
-	@Override
-	protected SurveyQueryAttachmentResultItem asQueryAttachmentResultItem(ResultSet rs, Session session)
-			throws SQLException {
-		return null;
-	}
 	
 	private Collection<QueryGridResultItem> computeSurveyValue(Connection c,
 			MissionValueItem item, 

@@ -64,6 +64,7 @@ import org.wcs.smart.util.SmartUtils;
 
 /**
  * Survey Design Summary Editor Page
+ * 
  * @author elitvin
  * @since 3.0.0
  */
@@ -71,8 +72,6 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 
 	private Form form;
 	private Text txtName;
-	private Text txtStartDate;
-	private Text txtEndDate;
 	private Text txtStatus;
 	private Text txtKey;
 	private Text txtDescription;

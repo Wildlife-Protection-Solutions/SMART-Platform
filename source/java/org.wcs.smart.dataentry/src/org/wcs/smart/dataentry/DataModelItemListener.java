@@ -305,13 +305,13 @@ public enum DataModelItemListener implements IDataModelItemListener {
 				newAttribute.setCmAttributeOptions(CmAttributeOptionFactory.buildDefaultOptions(newAttribute, attribute.getType()));
 				
 				ConfigurableModel cm = node.getModel();
-				if (AttributeType.TREE.equals(attribute.getType()) || AttributeType.LIST.equals(attribute.getType())) {				
+				if (AttributeType.TREE.equals(attribute.getType()) || attribute.getType().isList()) {				
 					//we want to reuse the default configuration here; don't want to create a new one
 					//unless the user specifically requests it
 					CmAttributeConfig config = null;
 					if (AttributeType.TREE.equals(attribute.getType())) {
 						config = ensureDefaultTreeExists(currentSession, cm, attribute);
-					} else if (AttributeType.LIST.equals(attribute.getType())) {
+					} else if (attribute.getType().isList()) {
 						config = ensureDefaultListExists(currentSession, cm, attribute);
 					}
 					newAttribute.setConfig(config);

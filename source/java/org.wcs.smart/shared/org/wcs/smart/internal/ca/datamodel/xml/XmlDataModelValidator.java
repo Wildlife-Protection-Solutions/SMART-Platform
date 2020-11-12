@@ -80,7 +80,7 @@ public class XmlDataModelValidator {
 			for (AttributeType attribute : dm.getAttributes().getAttributes()) {
 				validate(attribute.getKey(), attribute.getNames(), attributes);
 			
-				if (Attribute.decodeAttributeType(attribute.getType()) == Attribute.AttributeType.LIST){
+				if (Attribute.decodeAttributeType(attribute.getType()).isList()){
 					List<DmObjectWrapper> list = new ArrayList<DmObjectWrapper>();
 					for (ListNode li : attribute.getValues()){
 						DmObjectWrapper wrap = new DmObjectWrapper();

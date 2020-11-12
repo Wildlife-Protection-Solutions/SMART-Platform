@@ -32,8 +32,6 @@ import org.wcs.smart.query.common.engine.AbstractQueryEngine.FilterTable;
 import org.wcs.smart.query.common.engine.DerbyFilterToSqlGenerator;
 import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.model.filter.AttributeFilter;
-import org.wcs.smart.query.model.filter.CategoryAttributeFilter;
-import org.wcs.smart.query.model.filter.CategoryFilter;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.Operator;
@@ -132,36 +130,5 @@ public class EntityFilterToSqlGenerator extends DerbyFilterToSqlGenerator  {
 		}
 		return "";  //$NON-NLS-1$
 	}
-	
-	
-	/*
-	 * Attribute filter
-	 */
-	@Override
-	protected String asSql(AttributeFilter filter, IQueryEngine engine) throws SQLException{
-		FilterTable t = ((DerbyEntityQueryEngine)engine).filterTables.get(filter);
-		if (t != null) return t.tablename + "." + t.columnname + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
-		return super.asSql(filter, engine);
-	}
-	
-	
-	/*
-	 * Category filter
-	 */
-	@Override
-	protected String asSql(CategoryFilter filter, IQueryEngine engine) throws SQLException{
-		FilterTable t = ((DerbyEntityQueryEngine)engine).filterTables.get(filter);
-		if (t != null) return t.tablename + "." + t.columnname + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
-		return super.asSql(filter, engine);
-	}
-	
-	/*
-	 * Category attribute filter
-	 */
-	@Override
-	protected String asSql(CategoryAttributeFilter filter, IQueryEngine engine) throws SQLException{
-		FilterTable t = ((DerbyEntityQueryEngine)engine).filterTables.get(filter);
-		if (t != null) return t.tablename + "." + t.columnname + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
-		return super.asSql(filter, engine);	
-	}
+
 }

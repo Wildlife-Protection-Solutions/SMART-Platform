@@ -39,7 +39,7 @@ public class Messages extends NLS {
 	public static String CmAttributeInfoComposite_Option_EnableOnce;
 	public static String CmAttributeInfoComposite_Option_FlattenTree;
 	public static String CmAttributeInfoComposite_Option_IsVisible;
-	public static String CmAttributeInfoComposite_Option_Multiselect;
+	public static String CmAttributeInfoComposite_Option_Multiselect1;
 	public static String CmAttributeInfoComposite_Option_Numeric;
 	public static String CmAttributeOption_EnterOnceType_END;
 	public static String CmAttributeOption_EnterOnceType_NONE;
@@ -231,7 +231,7 @@ public class Messages extends NLS {
 	public static String ListAttributeInfoComposite_ConfirmRevert_Title;
 	public static String ListAttributeInfoComposite_defaultTooltip;
 	public static String ListAttributeInfoComposite_MultiselectHint;
-	public static String ListAttributeInfoComposite_multiSelectTooltip;
+	public static String ListAttributeInfoComposite_multiSelectTooltip1;
 	public static String MetaConfigDialog_MetadataPages;
 	public static String MetaConfigDialog_SaveError;
 	public static String NumericAttributeInfoComposite_defaultTooltip;

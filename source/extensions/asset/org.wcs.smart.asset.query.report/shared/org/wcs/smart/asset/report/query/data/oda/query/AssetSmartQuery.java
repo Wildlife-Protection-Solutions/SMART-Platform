@@ -31,7 +31,6 @@ import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.asset.query.model.AssetObservationQuery;
-import org.wcs.smart.asset.query.model.AssetQueryResultItem;
 import org.wcs.smart.asset.query.model.AssetSummaryQuery;
 import org.wcs.smart.asset.query.model.AssetWaypointQuery;
 import org.wcs.smart.asset.query.parser.internal.filter.AssetDeploymentDateField;
@@ -41,6 +40,7 @@ import org.wcs.smart.data.oda.smart.impl.GeometryColumn;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.data.oda.smart.impl.SmartParameterMetaData;
 import org.wcs.smart.data.oda.smart.query.common.EmptyResultSet;
+import org.wcs.smart.query.common.engine.WaypointQueryResultItem;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.CustomDateFilter;
@@ -141,7 +141,7 @@ public class AssetSmartQuery extends AbstractSmartQuery {
 				queryTypeKey.equals(AssetWaypointQuery.KEY)){		
 			return new GeometryColumn[]{
 					new GeometryColumn(SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(ICoreLabelProvider.GEOMETRY_LABEL, l),
-							AssetQueryResultItem.WAYPOINT_GEOMCOLUMN_KEY)};
+							WaypointQueryResultItem.GEOMCOLUMN_KEY)};
 		}
 		return null;
 	}

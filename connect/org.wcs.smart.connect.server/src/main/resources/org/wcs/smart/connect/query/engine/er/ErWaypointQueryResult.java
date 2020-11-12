@@ -24,28 +24,16 @@ package org.wcs.smart.connect.query.engine.er;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.UUID;
 
 import org.hibernate.Session;
-import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Geometry;
-import org.wcs.smart.IProjectionProvider;
-import org.wcs.smart.er.query.model.SurveyQueryAttachmentResultItem;
+import org.wcs.smart.connect.query.engine.WaypointQueryResult;
 import org.wcs.smart.er.query.model.SurveyQueryColumn;
-import org.wcs.smart.er.query.model.SurveyQueryResultItem;
-import org.wcs.smart.query.common.engine.AttachmentResultSetIterator;
-import org.wcs.smart.query.common.engine.IAttachmentResultItem;
+import org.wcs.smart.er.query.model.SurveyWaypointAttachmentResultItem;
+import org.wcs.smart.er.query.model.SurveyWaypointResultItem;
 import org.wcs.smart.query.common.engine.IPagedImageResultSet;
-import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
-import org.wcs.smart.query.common.engine.IResultItem;
-import org.wcs.smart.query.common.model.SimpleQuery;
-import org.wcs.smart.query.model.QueryColumn;
-import org.wcs.smart.util.UuidUtils;
 
 /**
  * Survey waypoint query results.
@@ -53,46 +41,13 @@ import org.wcs.smart.util.UuidUtils;
  * @author Emily
  *
  */
-public class ErWaypointQueryResult extends ErSurveyQueryResultSet implements IPagedImageResultSet {
+public class ErWaypointQueryResult extends WaypointQueryResult<SurveyWaypointResultItem> implements IPagedImageResultSet {
 
-	private boolean includeUuids;
-	private String imageDataTable;
-	private int imageCount;
-	
 	public ErWaypointQueryResult(PsqlErWaypointEngine engine, int itemcnt, boolean includeUuids){
-		super(engine);
-		this.includeUuids = includeUuids;
-		setItemCount(itemcnt);
+		super(engine, itemcnt, includeUuids);
 	}
 	
-	@Override
-	public List<QueryColumn> getQueryColumns(SimpleQuery query, Locale l, Session session, IProjectionProvider prj){
-		List<QueryColumn> cols = super.getQueryColumns(query, l, session, prj);
-		if (!includeUuids) return cols;
-		QueryColumn wpUuidCol = new QueryColumn(getWaypointColumnName(l), WP_UUID_COL_KEY, QueryColumn.ColumnType.STRING) {
-			@Override
-			public QueryColumn clone() { return this; }
-			@Override
-			public Object getValue(IResultItem item) {
-				if (((SurveyQueryResultItem)item).getWaypointUuid() == null) return ""; //$NON-NLS-1$
-				return UuidUtils.uuidToString( ((SurveyQueryResultItem)item).getWaypointUuid());
-			}
-		};
-		cols.add(wpUuidCol);
-		
-		QueryColumn caUuidCol = new QueryColumn(getConservationAreaColumnName(l), CA_UUID_COL_KEY, QueryColumn.ColumnType.STRING) {
-			@Override
-			public QueryColumn clone() { return this; }
-			@Override
-			public Object getValue(IResultItem item) {
-				if (((SurveyQueryResultItem)item).getConservationAreaUuid() == null) return ""; //$NON-NLS-1$
-				return UuidUtils.uuidToString( ((SurveyQueryResultItem)item).getConservationAreaUuid());
-			}
-		};
-		cols.add(caUuidCol);
-		
-		return cols;
-	}
+	
 
 	/**
 	 * Gets results from the given result set.
@@ -104,153 +59,71 @@ public class ErWaypointQueryResult extends ErSurveyQueryResultSet implements IPa
 	 * @throws SQLException
 	 */
 	@Override
-	public List<IResultItem> getResults(Session session, ResultSet rs, int from, int pageSize) throws SQLException {
-		List<IResultItem> items = new ArrayList<IResultItem>();
-		rs.absolute(from);
-		int to = from + pageSize;
-		if (to >= itemCount) {
-			to = itemCount;
-		}
-		for(int x = from; x < to; x++) {
-			rs.next();
-			SurveyQueryResultItem it = asQueryResultItem(rs);
-			items.add(it);
-		}
+	public List<SurveyWaypointResultItem> getResults(Session session, ResultSet rs, int from, int pageSize) throws SQLException {
+		List<SurveyWaypointResultItem> items = super.getResults(session, rs, from, pageSize);
+		
 		session.doWork(new Work(){
 			@Override
 			public void execute(Connection c) throws SQLException {
-				attachMissionProperties(items, c, session);
-				attachSamplingUnitAttributes(items, c, session);
+				ErSurveyQueryResultSet.attachMissionProperties(items, c, session);
+				ErSurveyQueryResultSet.attachSamplingUnitAttributes(items, c, session);
 			}
-			
 		});
+		
 		return items;
 	}
 	
 
 	@Override
-	public String getGeometryType() {
-		return POINT_GEOM_TYPE;
-	}
+	public String getDefaultSortBy() {
+		StringBuilder sb = new StringBuilder();
 
-	@Override
-	public Geometry createGeometry(IResultItem rs) throws Exception {
-		SurveyQueryResultItem i = ((SurveyQueryResultItem)rs);
-		return gf.createPoint(new Coordinate(i.getWaypointX(null), i.getWaypointY(null))); 
-	}
-
-	@Override
-	public String createId(IResultItem rs) throws Exception {
-		return ((SurveyQueryResultItem)rs).getWaypointId() + "." + System.nanoTime(); //$NON-NLS-1$
-	}
-
-
-	@Override
-	public ResultSet getResultSet(final Session session) {
-		return session.doReturningWork(new ReturningWork<ResultSet>() {
-			@Override
-			public ResultSet execute(Connection c) throws SQLException {
-				if(sortColumn != null){
-					return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
-							ResultSet.CONCUR_READ_ONLY).executeQuery("SELECT * FROM " + engine.getQueryDataTable() + " ORDER BY sortkeydbl " +direction.sql+ ", sortkeytxt " + direction.sql);//$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				StringBuilder sb = new StringBuilder();
-				sb.append("SELECT * FROM "); //$NON-NLS-1$
-				sb.append(engine.getQueryDataTable());
-				sb.append(" ORDER BY "); //$NON-NLS-1$
-				sb.append(SurveyQueryColumn.getDbColumnName(SurveyQueryColumn.FixedColumns.MISSION_START.getKey()));
-				sb.append(" DESC, "); //$NON-NLS-1$
-				sb.append(SurveyQueryColumn.getDbColumnName(SurveyQueryColumn.FixedColumns.MISSION.getKey()));
-				sb.append(","); //$NON-NLS-1$
-				sb.append(SurveyQueryColumn.getDbColumnName(SurveyQueryColumn.FixedColumns.WAYPOINT_DATE.getKey()));
-				sb.append(" DESC "); //$NON-NLS-1$
-				
-				return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
-						ResultSet.CONCUR_READ_ONLY).executeQuery(sb.toString());
-			}
-		});
+		sb.append(SurveyQueryColumn.getDbColumnName(SurveyQueryColumn.FixedColumns.MISSION_START.getKey()));
+		sb.append(" DESC, "); //$NON-NLS-1$
+		sb.append(SurveyQueryColumn.getDbColumnName(SurveyQueryColumn.FixedColumns.MISSION.getKey()));
+		sb.append(","); //$NON-NLS-1$
+		sb.append(SurveyQueryColumn.getDbColumnName(SurveyQueryColumn.FixedColumns.WAYPOINT_DATE.getKey()));
+		sb.append(" DESC "); //$NON-NLS-1$
+		return sb.toString();
 	}
 	
-	protected SurveyQueryAttachmentResultItem asAttachmentQueryResultItem(ResultSet rs, Session session) throws SQLException{
-		SurveyQueryAttachmentResultItem item = new SurveyQueryAttachmentResultItem();
+	@Override
+	protected SurveyWaypointAttachmentResultItem asAttachmentQueryResultItem(ResultSet rs, Session session) throws SQLException{
+		SurveyWaypointAttachmentResultItem item = new SurveyWaypointAttachmentResultItem();
 		setFields(item, rs);
 		setAttachmentField(session, rs, item);
 		return item;
 	}
 	
-	protected SurveyQueryResultItem asQueryResultItem(ResultSet rs) throws SQLException{
-		SurveyQueryResultItem item = new SurveyQueryResultItem();
+	@Override
+	protected SurveyWaypointResultItem asQueryResultItem(ResultSet rs) throws SQLException{
+		SurveyWaypointResultItem item = new SurveyWaypointResultItem();
 		setFields(item, rs);
 		return item;
 	}
 	
-	protected void setFields(SurveyQueryResultItem it, ResultSet rs) throws SQLException{
-
-		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
-		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
-		it.setConservationAreaUuid((UUID)rs.getObject("ca_uuid")); //$NON-NLS-1$
+	@Override
+	protected void setFields(SurveyWaypointResultItem it, ResultSet rs) throws SQLException{
+		super.setFields(it, rs);
 		
 		it.setSurveyDesign(rs.getString("surveydesign_name")); //$NON-NLS-1$
 		it.setSurveyId(rs.getString("survey_id")); //$NON-NLS-1$
 
 		it.setMissionUuid((UUID)rs.getObject("mission_uuid")); //$NON-NLS-1$
 		it.setMissionId(rs.getString("mission_id")); //$NON-NLS-1$
-		it.setMissionStart(rs.getTimestamp("mission_startdate").toLocalDateTime()); //$NON-NLS-1$
-		it.setMissionEnd(rs.getTimestamp("mission_enddate").toLocalDateTime()); //$NON-NLS-1$
+		it.setMissionStart(rs.getDate("mission_startdate").toLocalDate()); //$NON-NLS-1$
+		it.setMissionEnd(rs.getDate("mission_enddate").toLocalDate()); //$NON-NLS-1$
 		it.setMissionLeader(rs.getString("mission_leader")); //$NON-NLS-1$
 		
 		it.setSamplingUnitUuid((UUID)rs.getObject("samplingunit_uuid")); //$NON-NLS-1$
-		it.setSamplingUnitId(rs.getString("samplingunit_id")); //$NON-NLS-1$
-		
-		it.setWaypointUuid((UUID)rs.getObject("wp_uuid")); //$NON-NLS-1$
-		it.setWaypointId(rs.getString("wp_id")); //$NON-NLS-1$
-		it.setWaypointX(rs.getDouble("wp_x")); //$NON-NLS-1$
-		it.setWaypointY(rs.getDouble("wp_y")); //$NON-NLS-1$
-		it.setWaypointDateTime(rs.getTimestamp("wp_date").toLocalDateTime()); //$NON-NLS-1$
-		it.setWaypointDirection(rs.getObject("wp_direction") == null ? null : rs.getFloat("wp_direction")); //$NON-NLS-1$ //$NON-NLS-2$
-		it.setWaypointDistance(rs.getObject("wp_distance") == null ? null : rs.getFloat("wp_distance")); //$NON-NLS-1$ //$NON-NLS-2$
-		it.setWaypointComment(rs.getString("wp_comment")); //$NON-NLS-1$
-		it.setLastModifiedDate(rs.getTimestamp("wp_lastmodified").toLocalDateTime()); //$NON-NLS-1$
-		it.setLastModifiedBy(rs.getString("wp_lastmodifiedbyname")); //$NON-NLS-1$
-		
-	}
-	
-	@Override
-	public List<IAttachmentResultItem> getImageData(int offset, int pageSize){
-		throw new UnsupportedOperationException("use getImageIterator"); //$NON-NLS-1$
-	}
-	
-	@Override
-	public int getImageCount() {
-		return imageCount;
-	}
-
-	@Override
-	public IQueryResultSetIterator<? extends IAttachmentResultItem> getImageIterator(Session session) throws SQLException{
-		
-		imageDataTable = engine.createTempTableName();
-		imageCount = createImageDataWaypoint(session, engine.getQueryDataTable(), imageDataTable);
-		
-		String query = getImageQueryWaypoint(engine.getQueryDataTable(), imageDataTable);
-		return new AttachmentResultSetIterator(session, 
-				e->asAttachmentQueryResultItem(e, session),
-				()->query);
-	}
-	
-	@Override
-	public void dispose(Session session) throws SQLException {
-		super.dispose(session);
-		if (imageDataTable != null) {
-			engine.dropTable(session, imageDataTable);
-		}
-		engine.cleanUp(session);
+		it.setSamplingUnitId(rs.getString("samplingunit_id")); //$NON-NLS-1$		
 	}
 	
 	
 	@Override
 	public void updateSortColumn(Session session) throws SQLException {
-		//pass in the specific column name prefixes and suffixes to customize the SQL to this type of Query
-		updateSortColumnGeneral(session, engine.getQueryDataTable(), engine.getCaFilter(), "value", ".wp_", "_mLIST", "_TREE", "uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+		updateSortColumnGeneral(session, engine.getQueryDataTable(),
+				engine.getObservationLabelTable(), engine.getCaFilter(), ".wp_");  //$NON-NLS-1$
 	}
 
 }

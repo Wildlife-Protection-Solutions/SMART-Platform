@@ -94,6 +94,7 @@ public class ConvertedPlanExtraData implements IConvertedExtraData {
 	public boolean saveInTransaction(Session session, Patrol patrol) {
 		
 		//check plan file
+		if (tempDir == null) return true; //no file
 		Path planFile = tempDir.resolve(PatrolPlanXmlExtraDataContribution.PLAN_FILENAME);
 		Plan plan = null;
 		if (Files.exists(planFile)) {

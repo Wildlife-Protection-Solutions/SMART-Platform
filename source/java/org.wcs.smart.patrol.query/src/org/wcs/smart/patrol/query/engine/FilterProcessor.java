@@ -25,36 +25,30 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubMonitor;
-import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
-import org.wcs.smart.ca.datamodel.AttributeListItem;
-import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.observation.WaypointSourceEngine;
+import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
-import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
+import org.wcs.smart.patrol.model.PatrolWaypointSource;
 import org.wcs.smart.patrol.query.engine.visitors.AreaFilterVisitor;
-import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.common.engine.IFilterProcessor;
-import org.wcs.smart.query.common.engine.visitors.AttributeFilterCollectorVisitor;
-import org.wcs.smart.query.common.engine.visitors.HasObservationFilterVisitor;
+import org.wcs.smart.query.common.engine.DerbyFilterToSqlGenerator;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.filter.AttributeInfo;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.IFilter;
+import org.wcs.smart.query.model.filter.date.WaypointDateField;
 
 /**
  * Processes an query filter creating a temporary table
@@ -63,15 +57,8 @@ import org.wcs.smart.query.model.filter.IFilter;
  * @author Emily
  *
  */
-public class FilterProcessor implements IFilterProcessor {
+public class FilterProcessor extends org.wcs.smart.observation.query.engine.FilterProcessor{
 
-	private String tableName;
-	private String observationTable;
-	
-	private DerbyPatrolQueryEngine engine;
-	private Query query;
-	
-	private HasObservationFilterVisitor observationFilterVisitor = new HasObservationFilterVisitor();
 	
 	/**
 	 * Creates a new process filter
@@ -79,98 +66,61 @@ public class FilterProcessor implements IFilterProcessor {
 	 * @param tableName the output temporary table name
 	 * @param engine query engine
 	 */
-	public FilterProcessor(String tableName, DerbyPatrolQueryEngine engine, Query query){
-		this.tableName = tableName;
-		this.engine = engine;
-		this.observationTable = engine.createTempTableName();
-		this.query = query;
+	public FilterProcessor(String tableName, AbstractPatrolQueryEngine engine, Query query){
+		super(tableName, engine, query);
 	}
-	
-	/**
-	 * 
-	 * drops temporary tables created during process of creating the main data table.
-	 * Does not drop the main table.
-	 */
+
 	@Override
-	public void dropTemporaryTables(Connection c){
-		engine.dropTable(c, observationTable);
+	protected DerbyFilterToSqlGenerator getSqlGenerator() {
+		return PatrolFilterSqlGenerator.INSTANCE;
 	}
 
-	/**
-	 * 
-	 * @param c database connection
-	 * @param queryFilter query filter
-	 * @param dateFilter date filter
-	 * @param caFilter conservation area filter
-	 * @param populateObservation if observation fields (wp_uuid, wp_ob_uuid) are to be populated
-	 * @param includeEmptyObservations if waypoints with no observations should be included
-	 * @param monitor
-	 * @throws SQLException
-	 */
 	@Override
-	public void processFilter(Connection c, IFilter queryFilter, 
-			DateFilter dateFilter, ConservationAreaFilter caFilter, 
-			boolean populateObservation,
-			boolean includeEmptyObservations,
-			IProgressMonitor monitor) throws SQLException{
-		SubMonitor progress = SubMonitor.convert(monitor, 3);
-		progress.subTask(Messages.DerbySummaryEngine_Progress_CreatingObservationTable);
-		
-		IFilter qFilter = queryFilter;
-		if (qFilter == null){
-			qFilter = EmptyFilter.INSTANCE;
+	protected void processDatFilter(DateFilter dateFilter, StringBuilder fromSql) throws SQLException {
+		if (dateFilter == null) return;
+		if (dateFilter.getDateFieldOption() == WaypointDateField.INSTANCE) {
+			super.processDatFilter(dateFilter, fromSql);
+			return;
 		}
-		qFilter.accept(observationFilterVisitor);	
-		SubMonitor sub = progress.split(1);
-		if (observationFilterVisitor.hasAttributeFilter()){
-			createObservationTable(c, qFilter, dateFilter, caFilter, sub);
+		
+		fromSql.append(" JOIN "); //$NON-NLS-1$
+		fromSql.append(namePrefix(PatrolWaypoint.class));
+		fromSql.append(" on "); //$NON-NLS-1$
+		fromSql.append(prefix(PatrolWaypoint.class));
+		fromSql.append(".wp_uuid = "); //$NON-NLS-1$
+		fromSql.append(prefix(Waypoint.class));
+		fromSql.append(".uuid "); //$NON-NLS-1$
+		
+		fromSql.append(" JOIN "); //$NON-NLS-1$
+		fromSql.append(namePrefix(PatrolLegDay.class));
+		fromSql.append(" on "); //$NON-NLS-1$
+		fromSql.append(prefix(PatrolWaypoint.class));
+		fromSql.append(".leg_day_uuid = "); //$NON-NLS-1$
+		fromSql.append(prefix(PatrolLegDay.class));
+		fromSql.append(".uuid "); //$NON-NLS-1$
+		
+		fromSql.append(" JOIN "); //$NON-NLS-1$
+		fromSql.append(namePrefix(PatrolLeg.class));
+		fromSql.append(" on "); //$NON-NLS-1$
+		fromSql.append(prefix(PatrolLeg.class));
+		fromSql.append(".uuid = "); //$NON-NLS-1$
+		fromSql.append(prefix(PatrolLegDay.class));
+		fromSql.append(".patrol_leg_uuid "); //$NON-NLS-1$
+		
+		fromSql.append(" JOIN "); //$NON-NLS-1$
+		fromSql.append(namePrefix(Patrol.class));
+		fromSql.append(" on "); //$NON-NLS-1$
+		fromSql.append(prefix(Patrol.class));
+		fromSql.append(".uuid = "); //$NON-NLS-1$
+		fromSql.append(prefix(PatrolLeg.class));
+		fromSql.append(".patrol_uuid "); //$NON-NLS-1$
+		
+		String filter = getSqlGenerator().toSql(dateFilter, engine);
+		if (filter.length() > 0) {
+			fromSql.append(" and "); //$NON-NLS-1$
+			fromSql.append(filter);
 		}
-
-		progress.subTask(Messages.DerbySummaryEngine_Progress_CreatingTempTable);
-		progress.split(1);
-		createTemporaryTable(c);
 		
-		progress.split(1);
-		populateTemporaryTable(qFilter, dateFilter, caFilter, 
-				includeEmptyObservations, c, populateObservation);
-
-	}
-	
-	
-	/*
-	 * creates the query observation flattened table
-	 */
-	private void createTemporaryTable(Connection c) throws SQLException {
-
-		String createTableStatement = engine.getTemporaryTableCreateClause(tableName);
-		QueryPlugIn.logSql(createTableStatement);
-		c.createStatement().execute(createTableStatement);
-		
-		engine.buildTemporaryTableIndexes(c, tableName);
-	}
-	
-	
-	/*
-	 * return the table name for the associate object 
-	 */
-	private String name(Class<?> clazz){
-		return engine.tableName(clazz);
-	}
-	
-	/*
-	 * return the sql prefix for the given class
-	 */
-	private String prefix(Class<?> clazz){
-		return engine.tablePrefix(clazz);
-	}
-	
-	/*
-	 * combine the table name with the table prefix for
-	 * the given class
-	 * Patrol.cass = "smart.patrol p"
-	 */
-	private String namePrefix(Class<?> clazz){
-		return engine.tableNamePrefix(clazz);
 	}
 	
 	/**
@@ -191,7 +141,7 @@ public class FilterProcessor implements IFilterProcessor {
 	 * 
 	 * @throws Exception
 	 */
-	private void populateTemporaryTable(IFilter queryFilter,
+	protected void populateTemporaryTable(IFilter queryFilter,
 			DateFilter dateFilter, 
 			ConservationAreaFilter caFilter,
 			boolean onlyObservations,
@@ -222,7 +172,7 @@ public class FilterProcessor implements IFilterProcessor {
 		sql.append(".patrol_uuid "); //$NON-NLS-1$
 		
 		if (caFilter != null) {
-			String filter = PatrolFilterSqlGenerator.INSTANCE.toSql(caFilter, engine);
+			String filter = ((PatrolFilterSqlGenerator)getSqlGenerator()).asSql(caFilter, engine.tablePrefix(Patrol.class), engine);
 			if (filter.length() > 0) {
 				sql.append(" AND "); //$NON-NLS-1$
 				sql.append("(" + filter + ")"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -236,14 +186,6 @@ public class FilterProcessor implements IFilterProcessor {
 		sql.append(".uuid = "); //$NON-NLS-1$
 		sql.append(prefix(PatrolLegDay.class));
 		sql.append(".patrol_leg_uuid "); //$NON-NLS-1$
-		
-		if (dateFilter != null) {
-			String filter = PatrolFilterSqlGenerator.INSTANCE.toSql(dateFilter, engine);
-			if (filter.length() > 0) {
-				sql.append(" and "); //$NON-NLS-1$
-				sql.append(filter);
-			}
-		}
 				
 		sql.append(" left join "); //$NON-NLS-1$
 		sql.append(name(PatrolLegMember.class));
@@ -287,6 +229,14 @@ public class FilterProcessor implements IFilterProcessor {
 		sql.append(".wp_uuid = "); //$NON-NLS-1$
 		sql.append(prefix(Waypoint.class));
 		sql.append(".uuid "); //$NON-NLS-1$
+		
+		if (dateFilter != null) {
+			String filter = getSqlGenerator().toSql(dateFilter, engine);
+			if (filter.length() > 0) {
+				sql.append(" and "); //$NON-NLS-1$
+				sql.append(filter);
+			}
+		}
 		
 		if (populateObservation || 
 				observationFilterVisitor.hasAttributeFilter() || 
@@ -339,7 +289,7 @@ public class FilterProcessor implements IFilterProcessor {
 		
 		// ---- WHERE CLAUSE -----
 		if (queryFilter != EmptyFilter.INSTANCE) {
-			String filter = PatrolFilterSqlGenerator.INSTANCE.toSql(queryFilter, engine);
+			String filter = getSqlGenerator().toSql(queryFilter, engine);
 			if (filter != null && filter.length() > 0) {
 				sql.append(" WHERE "); //$NON-NLS-1$
 			    sql.append(filter);
@@ -351,204 +301,9 @@ public class FilterProcessor implements IFilterProcessor {
 		}
 	}
 	
-	
-	private void createObservationTable(Connection c, IFilter filter, 
-			DateFilter dateFilter, ConservationAreaFilter caFilter, IProgressMonitor monitor)
-			throws SQLException {
-		SubMonitor progress = SubMonitor.convert(monitor, 1);
-		progress.subTask(Messages.DerbyQueryEngine2_Progress_ProcessingAttributes);
-		
-		AttributeFilterCollectorVisitor collector = new AttributeFilterCollectorVisitor();
-		filter.accept(collector);
-		Collection<AttributeInfo> keys = collector.getAttributeInfo();
-		
-		// -- build temporary table
-		StringBuilder sql = new StringBuilder();
-		sql.append("CREATE TABLE " + observationTable + " (observation_uuid char(16) for bit data"); //$NON-NLS-1$ //$NON-NLS-2$
-		for (AttributeInfo key : keys) {
-			sql.append(", \"" + key.getKey() + "\" " //$NON-NLS-1$ //$NON-NLS-2$
-					+ engine.getDataType(key.getType()));
-		}
-		sql.append(")"); //$NON-NLS-1$
-		
-		QueryPlugIn.logSql(sql.toString());
-		c.createStatement().execute(sql.toString());
-
-		// -- create index
-		sql = new StringBuilder();
-		sql.append("CREATE INDEX " + observationTable + "_obuuid_idx on " + observationTable + " (observation_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		QueryPlugIn.logSql(sql.toString());
-		c.createStatement().execute(sql.toString());
-		
-		String attributeTempTable = engine.createTempTableName();
-		progress.setWorkRemaining(keys.size());
-		for (AttributeInfo key : keys){
-			progress.split(1);
-			progress.subTask(Messages.DerbyQueryEngine2_Progress_ProcessingAttribute + key.getKey());
-			
-			//create temporary table for attribute observations
-			sql = new StringBuilder();
-			sql.append("CREATE TABLE "); //$NON-NLS-1$
-			sql.append(attributeTempTable); 
-			sql.append("(observation_uuid char(16) for bit data, value "); //$NON-NLS-1$
-			sql.append( engine.getDataType(key.getType()) );
-			sql.append( ")"); //$NON-NLS-1$
-			QueryPlugIn.logSql(sql.toString());
-			c.createStatement().execute(sql.toString());
-			try {
-				engine.clearParameters();
-				// -- populate table
-				sql = new StringBuilder();
-				sql.append("INSERT INTO "); //$NON-NLS-1$
-				sql.append(attributeTempTable);
-				sql.append(" SELECT "); //$NON-NLS-1$
-				sql.append(prefix(WaypointObservationAttribute.class));
-				sql.append(".observation_uuid, "); //$NON-NLS-1$
-
-				if (key.getType() == AttributeType.LIST) {
-					sql.append("l.keyid "); //$NON-NLS-1$
-				} else if (key.getType() == AttributeType.TREE) {
-					sql.append("t.hkey "); //$NON-NLS-1$
-				} else {
-					sql.append(prefix(WaypointObservationAttribute.class)
-							+ "." + key.getColumn()); //$NON-NLS-1$						
-				}
-				sql.append(" as "); //$NON-NLS-1$
-				sql.append("\"" + key.getKey() + "\"");  //$NON-NLS-1$//$NON-NLS-2$
-				sql.append(" "); //$NON-NLS-1$
-
-				sql.append("FROM "); //$NON-NLS-1$
-
-				sql.append(name(Patrol.class));
-				sql.append(" as "); //$NON-NLS-1$
-				sql.append(prefix(Patrol.class)); 
-				sql.append(" join "); //$NON-NLS-1$
-				sql.append(name(PatrolLeg.class));
-				sql.append( " as " ); //$NON-NLS-1$
-				sql.append( prefix(PatrolLeg.class)); 
-				sql.append(" ON " + prefix(Patrol.class) + ".uuid = " + prefix(PatrolLeg.class) + ".patrol_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				if (caFilter != null) {
-					String cfilter = PatrolFilterSqlGenerator.INSTANCE.toSql(caFilter, engine);
-					if (cfilter.length() > 0) {
-						sql.append(" and "); //$NON-NLS-1$
-						sql.append(cfilter);
-					}
-				}
-				sql.append(" join "); //$NON-NLS-1$
-
-				sql.append(name(PatrolLegDay.class));
-				sql.append(" as ");//$NON-NLS-1$
-				sql.append(prefix(PatrolLegDay.class)); 
-				sql.append(" ON " + prefix(PatrolLegDay.class) + ".patrol_leg_uuid = " + prefix(PatrolLeg.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				sql.append(" join "); //$NON-NLS-1$
-				
-				sql.append(name(PatrolWaypoint.class));
-				sql.append(" as ");//$NON-NLS-1$
-				sql.append(prefix(PatrolWaypoint.class)); 
-				sql.append(" on " + prefix(PatrolLegDay.class) + ".uuid = " + prefix(PatrolWaypoint.class) + ".leg_day_uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				
-				sql.append(" join "); //$NON-NLS-1$
-				sql.append(name(Waypoint.class));
-				sql.append(" as ");//$NON-NLS-1$
-				sql.append(prefix(Waypoint.class)); 
-				sql.append(" on " + prefix(PatrolWaypoint.class) + ".wp_uuid = " + prefix(Waypoint.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-
-				if (dateFilter != null) {
-					String dfilter = PatrolFilterSqlGenerator.INSTANCE.toSql(dateFilter, engine);
-					if (dfilter.length() > 0) {
-						sql.append(" and "); //$NON-NLS-1$
-						sql.append(dfilter);
-					}
-				}
-
-				sql.append(" join "); //$NON-NLS-1$
-				sql.append(name(WaypointObservationGroup.class)
-						+ " as " + prefix(WaypointObservationGroup.class)); //$NON-NLS-1$
-				sql.append(" on " + prefix(Waypoint.class) + ".uuid = " + prefix(WaypointObservationGroup.class) + ".wp_uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-
-				
-				sql.append(" join "); //$NON-NLS-1$
-				sql.append(name(WaypointObservation.class)
-						+ " as " + prefix(WaypointObservation.class)); //$NON-NLS-1$
-				sql.append(" on " + prefix(WaypointObservationGroup.class) + ".uuid = " + prefix(WaypointObservation.class) + ".wp_group_uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-
-				sql.append(" join "); //$NON-NLS-1$
-				sql.append(name(WaypointObservationAttribute.class)
-						+ " as " + prefix(WaypointObservationAttribute.class)); //$NON-NLS-1$
-				sql.append(" on " + prefix(WaypointObservation.class) + ".uuid = " + prefix(WaypointObservationAttribute.class) + ".observation_uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				sql.append(" join "); //$NON-NLS-1$
-				sql.append(name(Attribute.class)
-						+ " as " + prefix(Attribute.class)); //$NON-NLS-1$
-				sql.append(" on " + prefix(Attribute.class) + ".uuid = " + prefix(WaypointObservationAttribute.class) + ".attribute_uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-
-				if (key.getType() == AttributeType.LIST) {
-					sql.append(" JOIN "); //$NON-NLS-1$
-					sql.append(name(AttributeListItem.class));
-					sql.append(" l on l.uuid = " + prefix(WaypointObservationAttribute.class) + ".list_element_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
-				} else if (key.getType() == AttributeType.TREE) {
-					sql.append(" JOIN "); //$NON-NLS-1$
-					sql.append(name(AttributeTreeNode.class));
-					sql.append(" t on t.uuid = " + prefix(WaypointObservationAttribute.class) + ".tree_node_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
-				}
-				sql.append("WHERE "); //$NON-NLS-1$
-				String p = engine.addParameterValue(key.getKey());
-				sql.append(" " + prefix(Attribute.class) + ".keyid = " + p ); //$NON-NLS-1$ //$NON-NLS-2$
-				
-				QueryPlugIn.logSql(sql.toString());
-				try(PreparedStatement ps = engine.parseQueryString(c, sql.toString())){
-					ps.executeUpdate();
-				}
-
-				// - create index
-				sql = new StringBuilder();
-				sql.append("create index "); //$NON-NLS-1$
-				sql.append(attributeTempTable);
-				sql.append("__observation_uuid_idx on "); //$NON-NLS-1$
-				sql.append(attributeTempTable);
-				sql.append("(observation_uuid)"); //$NON-NLS-1$
-				QueryPlugIn.logSql(sql.toString());
-				c.createStatement().execute(sql.toString());
-
-				// - add observation to main table
-				// join existing readings
-				sql = new StringBuilder();
-				sql.append("UPDATE "); //$NON-NLS-1$
-				sql.append(observationTable);
-				sql.append(" set "); //$NON-NLS-1$
-				sql.append("\"" + key.getKey() + "\"");  //$NON-NLS-1$//$NON-NLS-2$
-				sql.append(" = "); //$NON-NLS-1$
-				sql.append("(SELECT a.value FROM "); //$NON-NLS-1$
-				sql.append(attributeTempTable);
-				sql.append(" a WHERE a.observation_uuid = "); //$NON-NLS-1$
-				sql.append(observationTable);
-				sql.append(".observation_uuid)"); //$NON-NLS-1$
-				QueryPlugIn.logSql(sql.toString());
-				c.createStatement().execute(sql.toString());
-				
-				// add missing observations
-				sql = new StringBuilder();
-				sql.append("INSERT INTO "); //$NON-NLS-1$
-				sql.append(observationTable);
-				sql.append("(observation_uuid, "); //$NON-NLS-1$
-				sql.append("\"" + key.getKey() + "\"");  //$NON-NLS-1$//$NON-NLS-2$
-				sql.append(")"); //$NON-NLS-1$
-				sql.append("(SELECT  observation_uuid, value FROM "); //$NON-NLS-1$
-				sql.append(attributeTempTable);
-				sql.append(" a WHERE NOT EXISTS (SELECT observation_uuid FROM "); //$NON-NLS-1$
-				sql.append(observationTable);
-				sql.append(" b WHERE b.observation_uuid = a.observation_uuid))"); //$NON-NLS-1$
-				QueryPlugIn.logSql(sql.toString());
-				c.createStatement().execute(sql.toString());
-
-			} finally {
-				// -- drop attribute table
-				sql = new StringBuilder();
-				sql.append("DROP TABLE " + attributeTempTable); //$NON-NLS-1$
-				QueryPlugIn.logSql(sql.toString());
-				c.createStatement().execute(sql.toString());
-			}
-		}
-		
-		
+	@Override
+	protected Collection<IWaypointSource> getWaypointSources(){
+		return Collections.singletonList( WaypointSourceEngine.INSTANCE.getSource(PatrolWaypointSource.PATROL_WP_SOURCE_ID) );
 	}
+	
 }

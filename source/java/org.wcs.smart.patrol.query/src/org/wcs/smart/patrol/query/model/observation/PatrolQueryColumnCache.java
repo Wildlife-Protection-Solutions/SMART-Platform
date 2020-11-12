@@ -28,6 +28,8 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn.FixedColumns;
 import org.wcs.smart.query.QueryDataModelManager;
+import org.wcs.smart.query.model.AttributeQueryColumn;
+import org.wcs.smart.query.model.CategoryQueryColumn;
 import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
 
@@ -167,7 +169,7 @@ public class PatrolQueryColumnCache {
 				// add data model category columns
 				int numCategory = QueryDataModelManager.getInstance().getActiveDepth();
 				for (int i = 0; i < numCategory; i++) {
-					QueryColumn toAdd = new PatrolCategoryQueryColumn(MessageFormat.format(Messages.QueryColumn_ObservationCategoryTableHeader1, i), i);
+					QueryColumn toAdd = new CategoryQueryColumn(MessageFormat.format(Messages.QueryColumn_ObservationCategoryTableHeader1, i), i);
 					toAdd.setEdit(true);
 					cols.add(toAdd);
 				}
@@ -183,7 +185,7 @@ public class PatrolQueryColumnCache {
 					
 				for (Attribute att : atts) {
 					String name = att.getName();
-					QueryColumn toAdd = new PatrolAttributeQueryColumn(name, att.getKeyId(), att.getType());
+					QueryColumn toAdd = new AttributeQueryColumn(name, att.getKeyId(), att.getType());
 					toAdd.setEdit(true);
 					cols.add(toAdd);
 				}

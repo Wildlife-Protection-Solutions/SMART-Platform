@@ -26,6 +26,8 @@ public class Messages extends NLS {
 
 	public static String AddWaypointDialog_SaveError;
 
+	public static String AddWaypointDialog_SelectOnMap;
+
 	public static String AddWaypointDialog_SuCoordinateError;
 	public static String AddWaypointDialog_Title;
 	public static String AddWaypointDialog_WaypointID;
@@ -717,7 +719,7 @@ public class Messages extends NLS {
 	public static String SurveyDesignListView_DesignsTabName;
 	public static String SurveyDesignListView_LoadError;
 	public static String SurveyDesignListView_LoadingJobName;
-	public static String SurveyDesignListView_SurveysTabName;
+	public static String SurveyDesignListView_SurveyMissionTabName;
 	public static String SurveyDesignPage_Label;
 	public static String SurveyDesignPage_Message;
 	public static String SurveyDesignPage_NeedsSurveyDesign;
@@ -762,6 +764,8 @@ public class Messages extends NLS {
 	public static String SurveyFilterDialog_LoadingLabel;
 	public static String SurveyFilterDialog_LoadJobName;
 	public static String SurveyFilterDialog_Message;
+
+	public static String SurveyFilterDialog_MissionDatesFilter;
 	public static String SurveyFilterDialog_SelectedLabel;
 	public static String SurveyFilterDialog_StateOnlyLabel;
 	public static String SurveyFilterDialog_SurveyIdFieldLabel;
@@ -859,6 +863,8 @@ public class Messages extends NLS {
 	public static String XMLtoMissionConverter_9;
 
 	public static String XMLtoMissionConverter_AttachmentError;
+
+	public static String XMLtoMissionConverter_NoListItemsFound;
 
 	public static String XMLtoMissionConverter_ObserverNotFound;
 	

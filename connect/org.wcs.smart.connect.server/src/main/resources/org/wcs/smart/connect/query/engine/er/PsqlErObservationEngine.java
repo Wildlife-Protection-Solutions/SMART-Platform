@@ -36,6 +36,7 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
+import org.wcs.smart.connect.query.engine.IWOEngine;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.SamplingUnit;
@@ -43,6 +44,7 @@ import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.model.SurveyObservationQuery;
+import org.wcs.smart.er.query.model.SurveyObservationResultItem;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
@@ -63,7 +65,7 @@ import org.wcs.smart.query.model.filter.date.CachingDateFilter;
  * @author elitvin
  * @since 1.0.0
  */
-public class PsqlErObservationEngine extends PsqlErEngine {
+public class PsqlErObservationEngine extends PsqlErEngine implements IWOEngine<SurveyObservationResultItem> {
 
 	private final Logger logger = Logger.getLogger(PsqlErObservationEngine.class.getName());
 	
@@ -79,6 +81,12 @@ public class PsqlErObservationEngine extends PsqlErEngine {
 	public boolean canExecute(String querytype) {
 		return SurveyObservationQuery.KEY.equals(querytype);
 	}
+	
+	@Override
+	public String getObservationLabelTable() {
+		return getQueryDataTable() + "_labels"; //$NON-NLS-1$
+	}
+
 	
 	/**
 	 * Runs the given patrol query and retrieves the results from the database.
@@ -215,16 +223,14 @@ public class PsqlErObservationEngine extends PsqlErEngine {
 		populateTemporaryTableCategory(c, session, caFilter, queryDataTable);
 
 		//waypoint observation list attributes
-		populateAdditionalWpoaTable(c, session, queryDataTable, queryDataTable +"_list", "list_element_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+		createLabelTable(session, getObservationLabelTable());
+		populateListTreeDataTable(session, getQueryDataTable(), getObservationLabelTable());
 
-		//waypoint observation tree attributes
-		populateAdditionalWpoaTable(c, session, queryDataTable, queryDataTable+ "_tree", "tree_node_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
-
-		//mission attributes
-		populateAdditionalMissionTable(c, session, sdFilter, caFilter, queryDataTable, queryDataTable + "_mlist", "list_element_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+		//mission su
+		populateAdditionalMissionTable(c, session, sdFilter, caFilter, getQueryDataTable(), getObservationLabelTable());		
+		populateAdditionalSuTable(c, session, sdFilter, caFilter, getQueryDataTable(), getObservationLabelTable());
+		updateLabel(c, getObservationLabelTable(), "uuid", "value"); //$NON-NLS-1$ //$NON-NLS-2$
 		
-		//sampling unit attributes
-		populateAdditionalSuTable(c, session, sdFilter, caFilter, queryDataTable, queryDataTable + "_sulist", "list_element_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 
@@ -290,7 +296,7 @@ public class PsqlErObservationEngine extends PsqlErEngine {
 		sql.append("wp_y double precision,"); //$NON-NLS-1$
 		sql.append("wp_direction real,"); //$NON-NLS-1$
 		sql.append("wp_distance real,"); //$NON-NLS-1$
-		sql.append("wp_date timestamp,"); //$NON-NLS-1$
+		sql.append("wp_time timestamp,"); //$NON-NLS-1$
 		sql.append("wp_comment varchar(4096),"); //$NON-NLS-1$
 		sql.append("wp_lastmodified timestamp,"); //$NON-NLS-1$
 		sql.append("wp_lastmodifiedby uuid,"); //$NON-NLS-1$
@@ -323,11 +329,8 @@ public class PsqlErObservationEngine extends PsqlErEngine {
 	@Override
 	public void cleanUp(Session session) throws SQLException{
 		//original table
-		dropTable(session, queryDataTable);
-		dropTable(session, queryDataTable + "_LIST"); //$NON-NLS-1$
-		dropTable(session, queryDataTable + "_TREE"); //$NON-NLS-1$
-		dropTable(session, queryDataTable + "_SULIST"); //$NON-NLS-1$
-		dropTable(session, queryDataTable + "_MLIST"); //$NON-NLS-1$
+		dropTable(session, getQueryDataTable());
+		dropTable(session, getObservationLabelTable());
 	}
 
 	@Override
@@ -357,4 +360,6 @@ public class PsqlErObservationEngine extends PsqlErEngine {
 	public String getDateFilterField() throws SQLException{
 		return "mission_day"; //$NON-NLS-1$
 	}
+	
+	
 }

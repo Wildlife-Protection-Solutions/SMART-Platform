@@ -42,7 +42,6 @@ import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetWaypoint;
 import org.wcs.smart.asset.query.model.AssetFilterOption;
-import org.wcs.smart.asset.query.model.AssetQueryResultItem;
 import org.wcs.smart.asset.query.model.AssetSummaryQuery;
 import org.wcs.smart.asset.query.parser.internal.summary.AssetGroupBy;
 import org.wcs.smart.ca.Area;
@@ -58,6 +57,7 @@ import org.wcs.smart.connect.query.engine.SummaryItemLabelProvider;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationAttributeList;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.visitors.AreaFilterCollectorVisitor;
 import org.wcs.smart.query.common.engine.visitors.HasObservationFilterVisitor;
@@ -541,7 +541,7 @@ public class AssetSummaryEngine extends AssetQueryEngine implements ISummaryEngi
 			logger.finest(sql.toString());
 			ResultSet rs = parseQueryString(c, sql.toString()).executeQuery();
 			return createValueResults(rs, groupBy, attributeItem.asString());
-		} else if (attributeItem.getAttributeType() == AttributeType.LIST) {
+		} else if (attributeItem.getAttributeType().isList()) {
 			StringBuilder fromSql = new StringBuilder();
 			
 			fromSql.append(dataTableName + " temp "); //$NON-NLS-1$
@@ -591,6 +591,16 @@ public class AssetSummaryEngine extends AssetQueryEngine implements ISummaryEngi
 			sql.append(".attribute_uuid = "); //$NON-NLS-1$
 			sql.append(tablePrefix(Attribute.class));
 			sql.append(".uuid "); //$NON-NLS-1$
+			if (attributeItem.getAttributeType() == Attribute.AttributeType.MLIST) {
+				sql.append(" join "); //$NON-NLS-1$
+				sql.append(tableNamePrefix(WaypointObservationAttributeList.class));
+				sql.append(" on "); //$NON-NLS-1$
+				sql.append(tablePrefix(WaypointObservationAttribute.class));
+				sql.append(".uuid = "); //$NON-NLS-1$
+				sql.append(tablePrefix(WaypointObservationAttributeList.class));
+				sql.append(".observation_attribute_uuid "); //$NON-NLS-1$
+			}
+			
 			sql.append(" join "); //$NON-NLS-1$
 			sql.append(tableNamePrefix(AttributeListItem.class));
 			sql.append(" on "); //$NON-NLS-1$
@@ -600,10 +610,18 @@ public class AssetSummaryEngine extends AssetQueryEngine implements ISummaryEngi
 			sql.append(".uuid "); //$NON-NLS-1$
 
 			sql.append(" WHERE "); //$NON-NLS-1$
-			sql.append(tablePrefix(WaypointObservationAttribute.class));
-			sql.append(".list_element_uuid =  "); //$NON-NLS-1$
-			sql.append(tablePrefix(AttributeListItem.class));
-			sql.append(".uuid and "); //$NON-NLS-1$
+			if (attributeItem.getAttributeType() == Attribute.AttributeType.MLIST) {
+				sql.append(tablePrefix(WaypointObservationAttributeList.class));
+				sql.append(".list_element_uuid =  "); //$NON-NLS-1$
+				sql.append(tablePrefix(AttributeListItem.class));
+				sql.append(".uuid "); //$NON-NLS-1$
+			}else {
+				sql.append(tablePrefix(WaypointObservationAttribute.class));
+				sql.append(".list_element_uuid =  "); //$NON-NLS-1$
+				sql.append(tablePrefix(AttributeListItem.class));
+				sql.append(".uuid "); //$NON-NLS-1$
+			}
+			sql.append(" and "); //$NON-NLS-1$
 			sql.append(tablePrefix(AttributeListItem.class));
 			String p1 = addParameterValue(attributeItem.getItemKey());
 			String p2 = addParameterValue(attributeItem.getAttributeKey());
@@ -978,7 +996,7 @@ public class AssetSummaryEngine extends AssetQueryEngine implements ISummaryEngi
 			}else if (gb instanceof AttributeGroupBy){
 			
 				groupBySql.append("attribute_" + itemcnt); //$NON-NLS-1$
-				if (((AttributeGroupBy)gb).getAttributeType() == AttributeType.LIST){
+				if (((AttributeGroupBy)gb).getAttributeType().isList()){
 					groupByInnerSql.append(tablePrefix(AttributeListItem.class) + "_" + itemcnt); //$NON-NLS-1$
 					groupByInnerSql.append(".keyid as  attribute_" + itemcnt); //$NON-NLS-1$
 				}else if (((AttributeGroupBy)gb).getAttributeType() == AttributeType.TREE){
@@ -998,12 +1016,30 @@ public class AssetSummaryEngine extends AssetQueryEngine implements ISummaryEngi
 			
 				String catkey = ((AttributeGroupBy)gb).getCategoryHkey();
 				if (catkey != null){
-					String p1 = addParameterValue(catkey) + "%"; //$NON-NLS-1$
+					String p1 = addParameterValue(catkey + "%"); //$NON-NLS-1$
 					fromSql.append(" and (temp.cat_hkey like " + p1 + ") "); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				
 				fromSql.append(" JOIN "); //$NON-NLS-1$
-				if (((AttributeGroupBy)gb).getAttributeType() == AttributeType.LIST){
+				if (((AttributeGroupBy)gb).getAttributeType() == AttributeType.MLIST){
+					fromSql.append(tableNames.get(WaypointObservationAttributeList.class));
+					fromSql.append(" "); //$NON-NLS-1$
+					fromSql.append(tablePrefix(WaypointObservationAttributeList.class) + "_" + itemcnt); //$NON-NLS-1$
+					fromSql.append(" on "); //$NON-NLS-1$
+					fromSql.append(tablePrefix(WaypointObservationAttribute.class) + "_" + itemcnt); //$NON-NLS-1$
+					fromSql.append(".uuid =  "); //$NON-NLS-1$
+					fromSql.append(tablePrefix(WaypointObservationAttributeList.class) + "_" + itemcnt); //$NON-NLS-1$
+					fromSql.append(".observation_attribute_uuid "); //$NON-NLS-1$
+					fromSql.append(" JOIN "); //$NON-NLS-1$
+					fromSql.append(tableNames.get(AttributeListItem.class));
+					fromSql.append(" "); //$NON-NLS-1$
+					fromSql.append(tablePrefix(AttributeListItem.class) + "_" + itemcnt); //$NON-NLS-1$
+					fromSql.append(" on "); //$NON-NLS-1$
+					fromSql.append(tablePrefix(AttributeListItem.class) + "_" + itemcnt); //$NON-NLS-1$
+					fromSql.append(".uuid ="); //$NON-NLS-1$
+					fromSql.append(tablePrefix(WaypointObservationAttributeList.class) + "_" + itemcnt); //$NON-NLS-1$
+					fromSql.append(".list_element_uuid "); //$NON-NLS-1$
+				}else if (((AttributeGroupBy)gb).getAttributeType() == AttributeType.LIST){
 					fromSql.append(tableNames.get(AttributeListItem.class));
 					fromSql.append(" "); //$NON-NLS-1$
 					fromSql.append(tablePrefix(AttributeListItem.class) + "_" + itemcnt); //$NON-NLS-1$
@@ -1148,12 +1184,6 @@ public class AssetSummaryEngine extends AssetQueryEngine implements ISummaryEngi
 
 	@Override
 	public String getSurveySamplingUnitJoinFieldName() {
-		return null;
-	}
-
-
-	@Override
-	protected AssetQueryResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException {
 		return null;
 	}
 

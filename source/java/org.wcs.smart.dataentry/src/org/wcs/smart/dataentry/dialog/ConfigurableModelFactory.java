@@ -275,6 +275,7 @@ public class ConfigurableModelFactory {
 	private static void addAttributeDefaultValues(ConfigurableModel model, Attribute a) {
 		switch(a.getType()) {
 		case LIST:
+		case MLIST:
 			addDefaultListItems(a, model);
 			break;
 		case TREE:

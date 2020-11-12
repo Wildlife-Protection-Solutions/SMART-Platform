@@ -132,7 +132,7 @@ public class ObjectFactory {
      * Create an instance of {@link JAXBElement }{@code <}{@link MissionType }{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "http://www.smartconservationsoftware.org/xml/1.1/mission", name = "Mission")
+    @XmlElementDecl(namespace = "http://www.smartconservationsoftware.org/xml/1.2/mission", name = "Mission")
     public JAXBElement<MissionType> createMission(MissionType value) {
         return new JAXBElement<MissionType>(_Mission_QNAME, MissionType.class, null, value);
     }

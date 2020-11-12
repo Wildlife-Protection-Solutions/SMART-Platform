@@ -40,6 +40,7 @@ import org.wcs.smart.asset.query.ui.editor.AssetSimpleQueryResultEditor;
 import org.wcs.smart.asset.query.ui.editor.DeleteObservationResultInfoProvider;
 import org.wcs.smart.asset.query.ui.editor.EditObservationResultInfoProvider;
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.observation.query.model.types.ZoomToInfoProvider;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.model.udig.IQueryService;
@@ -48,7 +49,6 @@ import org.wcs.smart.query.model.IMappableQueryType;
 import org.wcs.smart.query.model.IQueryResultInfoProvider;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.AreaFilter;
-import org.wcs.smart.query.model.filter.AreaFilter.AreaFilterGeometryType;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
 import org.wcs.smart.query.ui.definition.BasicFilterDefintionPanel;
@@ -213,7 +213,7 @@ public class AssetObservationQueryType implements IMappableQueryType {
 	public IQueryResultInfoProvider[] getResultProviders(){
 		return new IQueryResultInfoProvider[]{
 				new AssetResultInfoProvider(),
-				new AssetZoomToResultProvider(),
+				new ZoomToInfoProvider(),
 				new AssetQueryShowInTableResultProvider(),
 				new EditObservationResultInfoProvider(),
 				new DeleteObservationResultInfoProvider()

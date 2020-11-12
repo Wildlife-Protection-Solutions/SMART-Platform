@@ -21,21 +21,12 @@
  */
 package org.wcs.smart.patrol.query.model.types;
 
-import java.text.MessageFormat;
-
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
-import org.hibernate.Session;
 import org.locationtech.jts.geom.Geometry;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.observation.query.model.types.AbstractZoomToInfoProvider;
-import org.wcs.smart.patrol.model.Patrol;
-import org.wcs.smart.patrol.model.PatrolWaypoint;
-import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
+import org.wcs.smart.observation.query.model.types.ZoomToInfoProvider;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
-import org.wcs.smart.patrol.ui.PatrolEditorInput;
-import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
 
 /**
@@ -44,50 +35,24 @@ import org.wcs.smart.query.common.engine.IResultItem;
  * @author Emily
  *
  */
-public class PatrolZoomToResultProvider extends AbstractZoomToInfoProvider {
+public class PatrolZoomToResultProvider extends ZoomToInfoProvider {
 
 	@Override
 	public void doWork(IResultItem resultItem) {
 		if (resultItem instanceof PatrolQueryResultItem) {
-			PatrolQueryResultItem item = (PatrolQueryResultItem) resultItem;
-			if (item.getWaypointUuid() != null){
-				zoomTo(item.getWaypointX(null), item.getWaypointY(null));
+			Geometry g = ((PatrolQueryResultItem)resultItem).asGeometry(PatrolQueryResultItem.TRACK_GEOMCOLUMN_KEY);
+			if (g != null){
+				zoomTo(g);
 				return;
 			}else{
-				Geometry g = item.asGeometry(PatrolQueryResultItem.TRACK_GEOMCOLUMN_KEY);
-				if (g != null){
-					zoomTo(g);
-					return;
-				}else{
-					MessageDialog.openError(
-						Display.getDefault().getActiveShell(),
-						ERROR_STR,
-						Messages.PatrolZoomToResultProvider_TrackGeomNotFound);
-					return;
-				}
-			}
-			
-		}
-		if (resultItem instanceof IAttachmentResultItem) {
-			PatrolEditorInput input = null;
-			PatrolWaypoint pw = null;
-			try(Session s = HibernateManager.openSession()){
-				pw = PatrolQueryPlugIn.findWaypoint(s, (IAttachmentResultItem)resultItem);
-				if (pw != null) {
-					Patrol p = pw.getPatrolLegDay().getPatrolLeg().getPatrol();
-					input = new PatrolEditorInput(p);
-				}
-			}
-			if (input != null) {
-				zoomTo(pw.getWaypoint().getX(), pw.getWaypoint().getY());
+				MessageDialog.openError(
+					Display.getDefault().getActiveShell(),
+					ERROR_STR,
+					Messages.PatrolZoomToResultProvider_TrackGeomNotFound);
 				return;
 			}
 		}
-		
-		MessageDialog.openError(
-				Display.getDefault().getActiveShell(),
-				ERROR_STR,
-				MessageFormat.format(OP_NOT_SUPPORTED_STR,resultItem.getClass().getName()));
+		super.doWork(resultItem);
 		
 	}
 }

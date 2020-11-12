@@ -24,7 +24,7 @@ package org.wcs.smart.entity.query.internal;
 import java.util.Locale;
 
 import org.wcs.smart.entity.query.IEntityQueryLabelProvider;
-import org.wcs.smart.entity.query.model.EntityQueryResultItem;
+import org.wcs.smart.entity.query.model.EntityObservationResultItem;
 import org.wcs.smart.entity.query.model.columns.FixedQueryColumn;
 
 /**
@@ -53,7 +53,7 @@ public class EntityQueryLabelProvider implements IEntityQueryLabelProvider {
 		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER) return Messages.FixedQueryColumn_ObserverColumnName;
 		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_LASTMODIFIED) return Messages.EntityQueryLabelProvider_LastModifiedColumnName;
 		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_LASTMODIFIEDBY) return Messages.EntityQueryLabelProvider_LastModifiedByColumnName;
-		if (item == EntityQueryResultItem.WAYPOINT_GEOM_COLUMNKEY) return Messages.EntityQueryLabelProvider_GeometryFieldName;
+		if (item == EntityObservationResultItem.GEOMCOLUMN_KEY) return Messages.EntityQueryLabelProvider_GeometryFieldName;
 		
 		return null;
 	}

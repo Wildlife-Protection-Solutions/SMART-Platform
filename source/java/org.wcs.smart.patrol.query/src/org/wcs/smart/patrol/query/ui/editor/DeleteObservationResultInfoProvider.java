@@ -32,7 +32,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.patrol.query.engine.DerbyPagedObservationResult;
 import org.wcs.smart.patrol.query.engine.IWaypointUpdateableResultSet;
 import org.wcs.smart.patrol.query.internal.Messages;
-import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
+import org.wcs.smart.patrol.query.model.PatrolObservationResultItem;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.IResultItem;
@@ -59,7 +59,7 @@ public class DeleteObservationResultInfoProvider extends IQueryEditCommand {
 
 	@Override
 	public boolean doWork(IResultItem resultItem, IQueryResult results){
-		PatrolQueryResultItem item = (PatrolQueryResultItem)resultItem;
+		PatrolObservationResultItem item = (PatrolObservationResultItem)resultItem;
 		
 		boolean deleteWp = false;
 		if (item.getCategories() == null || item.getCategories().length == 0){
@@ -67,7 +67,7 @@ public class DeleteObservationResultInfoProvider extends IQueryEditCommand {
 			
 			if (!MessageDialog.openQuestion(Display.getDefault().getActiveShell(), Messages.DeleteObservationResultInfoProvider_DeleteWaypointTitle,
 					MessageFormat.format(Messages.DeleteObservationResultInfoProvider_DeleteWaypointMsg,
-							item.getWaypointId(), DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(item.getWaypointDate())))){
+							item.getWaypointId(), DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(item.getWaypointDateTime())))){
 				return false;
 			}
 		}else{

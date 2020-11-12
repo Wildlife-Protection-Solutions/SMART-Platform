@@ -55,10 +55,12 @@ import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.AbstractQueryEngine;
 import org.wcs.smart.query.common.engine.DerbyFilterToSqlGenerator;
+import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
+import org.wcs.smart.query.model.filter.IFilter.FilterType;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
 import org.wcs.smart.util.UuidUtils;
@@ -692,5 +694,26 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 				statement.executeUpdate();
 			}
 		}
+	}
+
+	@Override
+	public String getTemporaryTableSelectClause(boolean includeObservations) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getTemporaryTableCreateClause(String tableName) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public IFilterProcessor getFilterProcessor(FilterType filterType, String queryDataTable, Query query) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public void createTemporaryTableIndexes(Connection c, String tableName) throws SQLException {
 	}
 }

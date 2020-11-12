@@ -24,6 +24,7 @@ package org.wcs.smart.connect.query.engine;
 import java.math.BigInteger;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.time.temporal.Temporal;
@@ -64,7 +65,7 @@ import org.wcs.smart.query.model.filter.ConservationAreaFilter;
  * @author Emily
  *
  */
-public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResultSet {
+public abstract class AbstractDbFeatureResultSet<T extends IResultItem> implements ITablePagedQueryResultSet<T> {
 	
 	public static final String POINT_GEOM_TYPE = "Point"; //$NON-NLS-1$
 	
@@ -95,7 +96,7 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 	 * @return
 	 * @throws Exception
 	 */
-	public abstract Geometry createGeometry(IResultItem item) throws Exception;
+	public abstract Geometry createGeometry(T item) throws Exception;
 	
 	/**
 	 * Waypoint UUID  column name
@@ -147,7 +148,7 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 	 * @return
 	 * @throws Exception
 	 */
-	public abstract String createId(IResultItem item) throws Exception; 
+	public abstract String createId(T item) throws Exception; 
 	
 	/**
 	 * 
@@ -155,11 +156,11 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 	 */
 	public abstract String getGeometryType();
 
-	public String getValueAsString(IResultItem item, QueryColumn qc, Session session){
+	public String getValueAsString(T item, QueryColumn qc, Session session){
 		return qc.getValueAsString(getValue(item, qc, session));
 	}
 	
-	public Object getValue(IResultItem item, QueryColumn column, Session session){
+	public Object getValue(T item, QueryColumn column, Session session){
 		return column.getValue(item);
 	}
 	
@@ -172,7 +173,7 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 	 * @return
 	 * @throws Exception
 	 */
-	public SimpleFeature toFeature(IResultItem item, List<QueryColumn> columns, Session session, SimpleFeatureType ftype)  throws Exception {
+	public SimpleFeature toFeature(T item, List<QueryColumn> columns, Session session, SimpleFeatureType ftype)  throws Exception {
 		List<Object> data = new ArrayList<Object>();
 		data.add(createGeometry(item));
 		data.add(createId(item));  
@@ -223,14 +224,14 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 	}
 
 	@Override
-	public List<? extends IResultItem> getData(int offset, int pagesize) {
+	public List<T> getData(int offset, int pagesize) {
 		throw new UnsupportedOperationException("Can not load all results into memory in this environment"); //$NON-NLS-1$
 	}
 	
 
 	public abstract void updateSortColumn(Session session) throws SQLException;
 	
-	public abstract List<IResultItem> getResults(Session session, ResultSet rs, int from, int pageSize) throws SQLException;
+	public abstract List<T> getResults(Session session, ResultSet rs, int from, int pageSize) throws SQLException;
 	
 
 	public int getItemCount() {
@@ -242,14 +243,14 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 	}
 
 	@Override
-	public IQueryResultSetIterator<? extends IResultItem> iterator(int pagesize) {
+	public IQueryResultSetIterator<T> iterator(int pagesize) {
 		throw new UnsupportedOperationException("Can not create a result set without a session in this environment"); //$NON-NLS-1$
 	}
 
 	@Override
-	public IQueryResultSetIterator<? extends IResultItem> iterator(int pagesize,
+	public IQueryResultSetIterator<T> iterator(int pagesize,
 			Session session) {
-		return new QueryResultSetIterator<IResultItem>(this, pagesize, session);
+		return new QueryResultSetIterator<T>(this, pagesize, session);
 	}
 
 	public void setSorting(final String sortColumn, QueryApi.Direction direction) {
@@ -272,17 +273,14 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 	public boolean isDisposed(){
 		return this.isDisposed;
 	}
-		
-	public void updateSortColumnGeneral(Session session, String queryDataTable, ConservationAreaFilter caFilter, String value, String typePrefix, String tableListSuffix, String tableTreeSuffix, String uuidColumn) throws SQLException {
-		updateSortColumnGeneral(session, queryDataTable, caFilter, value, typePrefix, tableListSuffix, tableTreeSuffix, uuidColumn, true);
-	}
 	
-	public void updateSortColumnGeneral(Session session, String queryDataTable, ConservationAreaFilter caFilter, String value, String typePrefix, 
-			String tableListSuffix, String tableTreeSuffix, String uuidColumn, boolean hasExtraTables) throws SQLException {
-		if(!hasExtraTables){
-			//I don't know how to sort these query types, they don't use temp tables so we can't use the same method as the rest.
-			throw new UnsupportedOperationException("Sorting not suppported for this Query Type"); //$NON-NLS-1$
-		}
+	public void updateSortColumnGeneral(Session session, String queryDataTable, String labelTable, 
+			ConservationAreaFilter caFilter, String typePrefix) throws SQLException {
+		
+//		if(!hasExtraTables){
+//			//I don't know how to sort these query types, they don't use temp tables so we can't use the same method as the rest.
+//			throw new UnsupportedOperationException("Sorting not suppported for this Query Type"); //$NON-NLS-1$
+//		}
 		if (!hasSortColumns) {
 			// add the sort columns
 			session.createNativeQuery("ALTER TABLE " + queryDataTable + " add column sortKeyDbl float").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
@@ -340,14 +338,15 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 				session.createNativeQuery(sql.toString()).executeUpdate();
 				break;
 			case LIST:
+				if (labelTable == null) throw new UnsupportedOperationException(MessageFormat.format("Cannot sort by column with key {0} for this query type.", key)); //$NON-NLS-1$
 				sql = new StringBuilder();
 				sql.append("UPDATE "); //$NON-NLS-1$
 				sql.append(queryDataTable);
 				sql.append(" SET sortKeyTxt = "); //$NON-NLS-1$
-				sql.append("(SELECT rl." + value + " FROM "); //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append("(SELECT rl.value FROM "); //$NON-NLS-1$ 
 				sql.append("smart.WP_OBSERVATION_ATTRIBUTES wpoa join "); //$NON-NLS-1$
-				sql.append(queryDataTable);
-				sql.append(tableListSuffix + " rl on rl." + uuidColumn + " = wpoa.list_element_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append(labelTable);
+				sql.append(" rl on rl.uuid = wpoa.list_element_uuid "); //$NON-NLS-1$ 
 				sql.append("join smart.DM_ATTRIBUTE a on a.uuid = wpoa.attribute_uuid and a.keyid = '"); //$NON-NLS-1$
 				sql.append(key);
 				sql.append("'"); //$NON-NLS-1$
@@ -357,13 +356,13 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 				session.createNativeQuery(sql.toString()).executeUpdate();
 				break;
 			case TREE:
+				if (labelTable == null) throw new UnsupportedOperationException(MessageFormat.format("Cannot sort by column with key {0} for this query type.", key)); //$NON-NLS-1$
 				sql = new StringBuilder();
 				sql.append("UPDATE ");//$NON-NLS-1$
 				sql.append(queryDataTable);
 				sql.append(" SET sortKeyTxt = ");//$NON-NLS-1$
-				sql.append("(SELECT rl." + value + " FROM smart.WP_OBSERVATION_ATTRIBUTES wpoa join "); //$NON-NLS-1$ //$NON-NLS-2$
-				sql.append(queryDataTable);
-				sql.append(tableTreeSuffix + " rl on rl." + uuidColumn + " = wpoa.tree_node_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append("(SELECT rl.value FROM smart.WP_OBSERVATION_ATTRIBUTES wpoa join "); //$NON-NLS-1$ 
+				sql.append(labelTable + " rl on rl.uuid = wpoa.tree_node_uuid "); //$NON-NLS-1$ 
 				sql.append("join smart.DM_ATTRIBUTE a on a.uuid = wpoa.attribute_uuid and a.keyid = '"); //$NON-NLS-1$
 				sql.append(key);
 				sql.append("'"); //$NON-NLS-1$
@@ -372,6 +371,8 @@ public abstract class AbstractDbFeatureResultSet implements ITablePagedQueryResu
 				sql.append(typePrefix + "uuid)"); //$NON-NLS-1$
 				session.createNativeQuery(sql.toString()).executeUpdate();
 				break;
+			case MLIST:
+				throw new UnsupportedOperationException("Sorting by MULIT LIST attributes is not supported."); //$NON-NLS-1$
 			}
 		}
 		

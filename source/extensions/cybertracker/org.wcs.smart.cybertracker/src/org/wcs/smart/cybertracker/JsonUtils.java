@@ -34,6 +34,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.hibernate.Session;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
@@ -43,6 +44,7 @@ import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter;
 import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter.JsonKey;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationAttributeList;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -171,6 +173,21 @@ public class JsonUtils {
 				return false;
 			}
 			toUpdate.setAttributeListItem(li);
+		}else if (att.getType() == AttributeType.MLIST) {
+			List<AttributeListItem> items = (List<AttributeListItem>)value;
+			
+			List<WaypointObservationAttributeList> listitems = new ArrayList<>();
+			for (AttributeListItem li : items) {
+				WaypointObservationAttributeList woli = new WaypointObservationAttributeList();
+				woli.setAttributeLisItem(li);
+				woli.setObservationAttribute(toUpdate);
+				listitems.add(woli);
+			}
+			//nothing to add
+			if (listitems.isEmpty()) return false;
+			
+			toUpdate.setAttributeListItems(listitems);
+			
 		}else if (att.getType() == AttributeType.NUMERIC){
 			Double value2 = null;
 			if (value instanceof Number){

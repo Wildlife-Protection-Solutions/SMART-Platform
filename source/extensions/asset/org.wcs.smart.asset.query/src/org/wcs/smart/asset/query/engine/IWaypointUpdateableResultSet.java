@@ -23,7 +23,7 @@ package org.wcs.smart.asset.query.engine;
 
 import java.util.UUID;
 
-import org.wcs.smart.asset.query.model.AssetQueryResultItem;
+import org.wcs.smart.query.common.engine.WaypointQueryResultItem;
 import org.wcs.smart.query.common.model.IUpdateableResultSet;
 
 /**
@@ -50,6 +50,6 @@ public interface IWaypointUpdateableResultSet extends IUpdateableResultSet{
 	 * @return
 	 * @throws Exception
 	 */
-	boolean updateWaypointPosition(AssetQueryResultItem  pw, Double x, Double y) throws Exception;
+	boolean updateWaypointPosition(WaypointQueryResultItem pw, Double x, Double y) throws Exception;
 
 }

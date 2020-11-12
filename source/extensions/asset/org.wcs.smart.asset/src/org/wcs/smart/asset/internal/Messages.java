@@ -361,6 +361,7 @@ public class Messages extends NLS {
 	public static String AssetOverviewMap_loadingstyleJobName;
 	public static String AssetOverviewMap_ManageStyle;
 	public static String AssetOverviewMap_RefreshJob;
+	public static String AssetOverviewMap_RefreshLabel;
 	public static String AssetOverviewMap_SaveStyle;
 	public static String AssetOverviewMap_SensorTable;
 	public static String AssetOverviewMap_StatTableSectionName;
@@ -656,6 +657,7 @@ public class Messages extends NLS {
 	public static String DeploymentFromXml_ListItemNotFound;
 	public static String DeploymentFromXml_LoadAssetTask;
 	public static String DeploymentFromXml_LocationNotFound;
+	public static String DeploymentFromXml_NoListItemsFound;
 	public static String DeploymentFromXml_NotImportedError;
 	public static String DeploymentFromXml_ObservationNotImported;
 	public static String DeploymentFromXml_ObserverNotSet;

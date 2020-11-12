@@ -163,7 +163,8 @@ public class MissionJsonProcessor implements IJsonProcessor {
 					if (link.getLastObservationCnt()  + 1 != observationCounter) continue;					
 				}
 				
-				if (sighting.containsKey(SurveyScreensUtil.RESULT_MISSION_SAMPLING_UNIT)){
+				if (sighting.containsKey(SurveyScreensUtil.RESULT_MISSION_SAMPLING_UNIT) &&
+						link != null){
 					//sampling unit changed
 					//we have a new sampling unit
 					SamplingUnit su = null;
@@ -177,16 +178,21 @@ public class MissionJsonProcessor implements IJsonProcessor {
 							}
 						}
 					}
-					link.setSamplingUnit(su);
-					
-					//add this point to track; this is not an observation
-					LocalDateTime dt = JsonUtils.parseJsonDateTime((String)properties.get(JsonCtParser.DATETIME_KEY));
-					addPointToTrack(link.getMission(), su, parser.readXYFromProperties(feature), dt, session);
-					
-					//update last observation count
-					link.setLastObservationCnt(observationCounter);
-					processedFeatures.add(feature);
-					continue;
+					if ((su != null && !su.equals(link.getSamplingUnit())) ||
+							(su == null && link.getSamplingUnit() != null)) {
+						//sampling unit changed
+						link.setSamplingUnit(su);
+						
+						//add this point to track; this is not an observation
+						LocalDateTime dt = JsonUtils.parseJsonDateTime((String)properties.get(JsonCtParser.DATETIME_KEY));
+						addPointToTrack(link.getMission(), su, parser.readXYFromProperties(feature), dt, session);
+						
+						//update last observation count
+						link.setLastObservationCnt(observationCounter);
+						processedFeatures.add(feature);
+											
+						continue;
+					}
 				}
 				
 				//is this the end of the mission
@@ -493,6 +499,7 @@ public class MissionJsonProcessor implements IJsonProcessor {
 				
 				//update last observation count
 				link.setLastObservationCnt(observationCounter);
+				
 				processedFeatures.add(feature);
 				
 			}catch (Exception ex){
@@ -508,10 +515,12 @@ public class MissionJsonProcessor implements IJsonProcessor {
 		final boolean[] cancel = new boolean[]{false};
 		if (!newMissionLinks.isEmpty()){
 			//we need to ask the user if they want to create a new patrol or add to an existing patrol
+			
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
-					MissionDialog pd = new MissionDialog(Display.getDefault().getActiveShell(), newMissionLinks, session);
+					MissionDialog pd = new MissionDialog(Display.getDefault().getActiveShell(),
+							newMissionLinks, session);
 					if (pd.open() == Window.CANCEL){
 						cancel[0] = true;
 					}else{
@@ -802,15 +811,18 @@ public class MissionJsonProcessor implements IJsonProcessor {
 		
 		//find the initial sampling unit
 		SamplingUnit su = null;
+		String suKey = null;
 		if (sighting.containsKey(SurveyScreensUtil.RESULT_MISSION_START_SAMPLING_UNIT)){
-			String suKey = (String) sighting.get(SurveyScreensUtil.RESULT_MISSION_START_SAMPLING_UNIT);
-			if (suKey != null && suKey.startsWith(JsonSurveyKey.SAMPLING_UNIT.key + CyberTrackerConfExporter.KEY_SEP)){
-				suKey = suKey.substring(JsonSurveyKey.SAMPLING_UNIT.key.length() + 1);
-				if (!suKey.equals(CyberTrackerConfExporter.NULL_KEY)){
-					su = (SamplingUnit) session.get(SamplingUnit.class, UuidUtils.stringToUuid(suKey));
-					if (su == null){
-						warnings.add(MessageFormat.format(Messages.MissionJsonProcessor_SuNotFound, suKey));
-					}
+			suKey = (String) sighting.get(SurveyScreensUtil.RESULT_MISSION_START_SAMPLING_UNIT);
+		}else if (sighting.containsKey(SurveyScreensUtil.RESULT_MISSION_SAMPLING_UNIT)) {
+			suKey = (String) sighting.get(SurveyScreensUtil.RESULT_MISSION_SAMPLING_UNIT);
+		}
+		if (suKey != null && suKey.startsWith(JsonSurveyKey.SAMPLING_UNIT.key + CyberTrackerConfExporter.KEY_SEP)){
+			suKey = suKey.substring(JsonSurveyKey.SAMPLING_UNIT.key.length() + 1);
+			if (!suKey.equals(CyberTrackerConfExporter.NULL_KEY)){
+				su = (SamplingUnit) session.get(SamplingUnit.class, UuidUtils.stringToUuid(suKey));
+				if (su == null){
+					warnings.add(MessageFormat.format(Messages.MissionJsonProcessor_SuNotFound, suKey));
 				}
 			}
 		}

@@ -207,7 +207,7 @@ public class IncidentFilter {
 			}else if (stringComparator == StringComparison.CONTAINS) {
 				query.setParameter("pid", "%" + this.incidentIdFilter + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}else {
-				throw new IllegalStateException(MessageFormat.format("String operator {0} not supported.", stringComparator.getGuiName()));
+				throw new IllegalStateException(MessageFormat.format("String operator {0} not supported.", stringComparator.getGuiName())); //$NON-NLS-1$
 			}
 		}
 		if (dateFilter != null) {

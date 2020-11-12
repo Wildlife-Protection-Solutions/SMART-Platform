@@ -62,7 +62,7 @@ public class AttributeDMAdvisor implements IDeleteAdvisor {
 		CriteriaQuery<Long> query = cb.createQuery(Long.class);
 		Root<WaypointObservationAttribute> from = query.from(WaypointObservationAttribute.class);
 		query.select(cb.count(from));
-		query.where(cb.equal(from.get("id").get("attribute"), attribute)); //$NON-NLS-1$ //$NON-NLS-2$
+		query.where(cb.equal(from.get("attribute"), attribute)); //$NON-NLS-1$
 		long cnt = session.createQuery(query).uniqueResult();
 		
 		if (cnt == 0){

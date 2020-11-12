@@ -28,7 +28,7 @@ import org.wcs.smart.entity.query.map.geotools.QueryDataSource;
 import org.wcs.smart.entity.query.map.geotools.QueryFeatureSource;
 import org.wcs.smart.entity.query.map.geotools.QueryResultItemFeature;
 import org.wcs.smart.entity.query.model.EntityObservationQuery;
-import org.wcs.smart.entity.query.model.EntityQueryResultItem;
+import org.wcs.smart.entity.query.model.EntityObservationResultItem;
 import org.wcs.smart.entity.query.model.EntityWaypointQuery;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.importexport.ShapeQueryExporter;
@@ -58,7 +58,7 @@ public class EntityShapeQueryExporter extends ShapeQueryExporter{
 
 	@Override
 	protected SimpleFeature createFeature(IResultItem it, IQueryType queryType, SimpleFeatureType type) throws Exception{
-		return QueryResultItemFeature.createObservationFeature((EntityQueryResultItem) it, queryColumns, type);
+		return QueryResultItemFeature.createObservationFeature((EntityObservationResultItem) it, queryColumns, type);
 	}
 	@Override
 	protected SimpleFeatureType createSchema(IQueryType queryType) throws Exception{

@@ -33,7 +33,9 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
+import org.wcs.smart.connect.query.engine.IWOEngine;
 import org.wcs.smart.entity.query.model.EntityWaypointQuery;
+import org.wcs.smart.entity.query.model.EntityWaypointResultItem;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.SimpleQuery;
@@ -52,7 +54,7 @@ import org.wcs.smart.query.model.filter.date.CachingDateFilter;
  * @author elitvin
  * @since 1.0.0
  */
-public class PsqlEntityWaypointEngine extends AbstractQueryEngine {
+public class PsqlEntityWaypointEngine extends AbstractQueryEngine implements IWOEngine<EntityWaypointResultItem> {
 	
 	private final Logger logger = Logger.getLogger(PsqlEntityWaypointEngine.class.getName());
 	
@@ -63,6 +65,10 @@ public class PsqlEntityWaypointEngine extends AbstractQueryEngine {
 		return this.queryDataTable;
 	}
 
+	public String getObservationLabelTable(){
+		return this.getQueryDataTable() + "_labels"; //$NON-NLS-1$
+	}
+	
 	@Override
 	public boolean canExecute(String querytype) {
 		return EntityWaypointQuery.KEY.equals(querytype);
@@ -143,7 +149,7 @@ public class PsqlEntityWaypointEngine extends AbstractQueryEngine {
 			c.createStatement().execute(sql);
 		}
 
-		populateCaDetails(c, queryDataTable,"p_ca_uuid", query); //$NON-NLS-1$
+		populateCaDetails(c, queryDataTable,"ca_uuid", query); //$NON-NLS-1$
 		populatedLastModifiedName(c, session, queryDataTable);
 	}
 
@@ -170,7 +176,7 @@ public class PsqlEntityWaypointEngine extends AbstractQueryEngine {
 	public String getTemporaryTableCreateClause(String tableName) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
-		sql.append("p_ca_uuid UUID,"); //$NON-NLS-1$
+		sql.append("ca_uuid UUID,"); //$NON-NLS-1$
 		sql.append("wp_uuid UUID,"); //$NON-NLS-1$
 		sql.append("wp_source varchar(16),"); //$NON-NLS-1$
 		sql.append("wp_id varchar(32),"); //$NON-NLS-1$
@@ -188,7 +194,8 @@ public class PsqlEntityWaypointEngine extends AbstractQueryEngine {
 
 	@Override
 	public void cleanUp(Session session) throws SQLException{
-		dropTable(session, queryDataTable);	
+		dropTable(session, getQueryDataTable());	
+		dropTable(session, getObservationLabelTable());
 	}
 
 	@Override

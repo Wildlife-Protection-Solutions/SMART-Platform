@@ -45,14 +45,10 @@ import org.wcs.smart.patrol.query.model.PatrolQueryOptionType;
 import org.wcs.smart.patrol.query.model.PatrolStartDateField;
 import org.wcs.smart.patrol.query.parser.internal.filter.PatrolFilter;
 import org.wcs.smart.patrol.query.parser.internal.filter.PatrolUuidFilter;
-import org.wcs.smart.query.common.engine.AbstractQueryEngine.FilterTable;
 import org.wcs.smart.query.common.engine.DerbyFilterToSqlGenerator;
 import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.model.filter.AreaFilter;
 import org.wcs.smart.query.model.filter.AreaFilter.AreaFilterGeometryType;
-import org.wcs.smart.query.model.filter.AttributeFilter;
-import org.wcs.smart.query.model.filter.CategoryAttributeFilter;
-import org.wcs.smart.query.model.filter.CategoryFilter;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.IFilter;
@@ -94,19 +90,18 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 		}else if (filter instanceof IExtensionFilter){
 			return asSql((IExtensionFilter)filter, engine);
 		}else if (filter instanceof ConservationAreaFilter){
-			return asSql((ConservationAreaFilter)filter, engine.tablePrefix(Patrol.class), engine);
+			return asSql((ConservationAreaFilter)filter, engine.tablePrefix(Waypoint.class), engine);
 		}else{
 			return super.toSql(filter, engine); 
 		}
 		
 	}
 	
-	
 	/*
 	 * Area filter
 	 */
 	@Override
-	protected String asSql(AreaFilter filter, IQueryEngine engine){
+	protected String toSql(AreaFilter filter, IQueryEngine engine){
 		StringBuilder sb = new StringBuilder();
 		if (filter.getType() != null) {
 			if (filter.getGeometryType() == AreaFilterGeometryType.WAYPOINT){
@@ -144,43 +139,6 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 		return sb.toString();
 	}
 	
-	/*
-	 * Attribute filter
-	 */
-	@Override
-	protected String asSql(AttributeFilter filter, IQueryEngine engine) throws SQLException{
-		FilterTable col = ((DerbyPatrolQueryEngine)engine).filterTables.get(filter);
-		if (col != null){
-			return col.tablename + "." + col.columnname + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
-		}
-		return super.asSql(filter, engine);
-	}
-	
-	
-	/*
-	 * Category filter
-	 */
-	@Override
-	protected String asSql(CategoryFilter filter, IQueryEngine engine) throws SQLException{
-		FilterTable col = ((DerbyPatrolQueryEngine)engine).filterTables.get(filter);
-		if (col != null){
-			return col.tablename + "." + col.columnname + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
-		}
-		return super.asSql(filter, engine);
-	}
-	
-	/*
-	 * Category attribute filter
-	 */
-	@Override
-	protected String asSql(CategoryAttributeFilter filter, IQueryEngine engine) throws SQLException{
-		FilterTable col = ((DerbyPatrolQueryEngine)engine).filterTables.get(filter);
-		if (col != null){
-			return col.tablename + "." + col.columnname + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
-		}
-		return super.asSql(filter, engine);	
-	}
-		
 	/*
 	 * not expression
 	 */
@@ -339,7 +297,11 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	 * Date Filter
 	 */
 	@Override
-	protected String asSql(DateFilter filter, IQueryEngine engine) throws SQLException{
+	protected String toSql(DateFilter filter, IQueryEngine engine) throws SQLException{
+		if (filter.getDateFieldOption() == WaypointDateField.INSTANCE) {
+			return super.toSql(filter, engine);
+		}
+		
 		String table = ""; //$NON-NLS-1$
 		String field = ""; //$NON-NLS-1$
 		
@@ -349,9 +311,6 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 		}else if (filter.getDateFieldOption() == PatrolStartDateField.INSTANCE){
 			table = engine.tablePrefix(Patrol.class);
 			field = "start_date"; //$NON-NLS-1$
-		}else if (filter.getDateFieldOption() == WaypointDateField.INSTANCE){
-			table = engine.tablePrefix(PatrolLegDay.class);
-			field = "patrol_day"; //$NON-NLS-1$
 		}else{
 			throw new SQLException(MessageFormat.format(Messages.DerbyFilterToSqlGenerator_DateFilteNotSupported, new Object[]{filter.getDateFieldOption().getGuiName(Locale.getDefault())}));
 		}

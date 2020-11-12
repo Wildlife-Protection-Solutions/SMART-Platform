@@ -182,6 +182,7 @@ public class IntelligenceLabelProviderImpl implements
 			switch((Operator)item){
 				case AND: return Messages.IntelligenceLabelProviderImpl_AndLabel;
 				case BETWEEN: return Messages.IntelligenceLabelProviderImpl_BetweenLabel;
+				case EXACT: return Messages.IntelligenceLabelProviderImpl_ExactOp;
 				case BRACKETS: return "( )"; //$NON-NLS-1$
 				case BRACKET_CLOSE: return ")"; //$NON-NLS-1$
 				case BRACKET_OPEN: return "("; //$NON-NLS-1$

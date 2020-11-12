@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -43,6 +44,8 @@ import javax.persistence.Transient;
 
 import org.hibernate.annotations.OrderBy;
 import org.hibernate.annotations.Where;
+import org.wcs.smart.ICoreLabelProvider;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.icon.Icon;
 
@@ -97,6 +100,7 @@ public class Attribute extends DmObject{
 		NUMERIC("n"), //$NON-NLS-1$
 		TEXT("s"), //$NON-NLS-1$
 		LIST("l"), //$NON-NLS-1$
+		MLIST("m"), //$NON-NLS-1$
 		TREE("t"), //$NON-NLS-1$
 		BOOLEAN("b"), //$NON-NLS-1$
 		DATE("d"); //$NON-NLS-1$
@@ -108,6 +112,14 @@ public class Attribute extends DmObject{
 	
 		private AttributeType(String typeKey){
 			this.typeKey = typeKey;
+		}
+		
+		public boolean isList() {
+			return this == LIST || this == MLIST;
+		}
+		
+		public String getName(Locale locale) {
+			return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getAttributeTypeLabel(this, locale);
 		}
 	}
 	

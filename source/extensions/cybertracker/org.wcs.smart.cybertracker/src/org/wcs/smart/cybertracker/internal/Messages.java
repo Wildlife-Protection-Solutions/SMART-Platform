@@ -514,6 +514,7 @@ public class Messages extends NLS {
 	public static String JsonUtils_CouldNotParseValue;
 	public static String JsonUtils_InvalidDate;
 	public static String JsonUtils_InvalidListAttribute;
+	public static String JsonUtils_InvalidMultiSelectListValue;
 	public static String JsonUtils_InvalidTreeAttribute;
 	public static String JsonUtils_ListItemNotFound;
 	public static String JsonUtils_TreeNodeNotFound;

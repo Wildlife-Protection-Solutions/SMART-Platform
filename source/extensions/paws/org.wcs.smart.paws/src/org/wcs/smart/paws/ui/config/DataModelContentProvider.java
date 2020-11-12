@@ -91,7 +91,7 @@ public class DataModelContentProvider implements ITreeContentProvider {
 		
 		if (parentElement instanceof CategoryAttribute) {
 			CategoryAttribute ca = (CategoryAttribute)parentElement;
-			if (ca.getAttribute().getType() == Attribute.AttributeType.LIST) {
+			if (ca.getAttribute().getType().isList()) {
 				List<CategoryItemWrapper> kids = new ArrayList<>();
 				List<AttributeListItem> children = null;
 				try(Session session = HibernateManager.openSession()){
@@ -145,7 +145,8 @@ public class DataModelContentProvider implements ITreeContentProvider {
 			List<CategoryAttribute> all = new ArrayList<>();
 			category.getAllCategoryAttribute(all, onlyActive);
 			for (CategoryAttribute ca : all) {
-				if (ca.getAttribute().getType() == Attribute.AttributeType.LIST || ca.getAttribute().getType() == Attribute.AttributeType.TREE) {
+				if (ca.getAttribute().getType().isList() 
+						|| ca.getAttribute().getType() == Attribute.AttributeType.TREE) {
 					children.add(ca);
 				}
 			}
@@ -194,7 +195,7 @@ public class DataModelContentProvider implements ITreeContentProvider {
 			
 		}else if (element instanceof CategoryAttribute) {
 			Attribute.AttributeType t = ((CategoryAttribute)element).getAttribute().getType();
-			return t == Attribute.AttributeType.LIST || t == Attribute.AttributeType.TREE;
+			return t.isList() || t == Attribute.AttributeType.TREE;
 			
 		}else if (element instanceof Category){
 			Category category = (Category)element;

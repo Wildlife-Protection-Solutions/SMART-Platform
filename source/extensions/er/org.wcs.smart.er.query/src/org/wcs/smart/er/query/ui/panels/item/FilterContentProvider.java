@@ -129,7 +129,7 @@ public class FilterContentProvider implements ITreeContentProvider{
 					CriteriaQuery<Survey> c = cb.createQuery(Survey.class);
 					Root<Survey> from = c.from(Survey.class);
 					c.where(cb.equal(from.get("surveyDesign"),design)); //$NON-NLS-1$
-					c.orderBy(cb.desc(from.get("startDate")), cb.asc(from.get("id"))); //$NON-NLS-1$ //$NON-NLS-2$
+					c.orderBy(cb.asc(from.get("id"))); //$NON-NLS-1$
 					allSurveys = s.createQuery(c).getResultList();
 					for (Survey survey : allSurveys){
 						for (Mission m : survey.getMissions()){

@@ -23,13 +23,11 @@ package org.wcs.smart.entity.query.engine;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.HashSet;
 
-import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
@@ -38,7 +36,6 @@ import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityAttributeValue;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.query.internal.Messages;
-import org.wcs.smart.entity.query.model.EntityQueryResultItem;
 import org.wcs.smart.entity.query.parser.internal.EntityAttributeFilter;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IQueryResult;
@@ -127,21 +124,14 @@ public class EntityAttributeFilterVisitor  implements IFilterVisitor{
 				DerbyEntityQueryEngine tempEngine = new DerbyEntityQueryEngine() {
 					
 					@Override
-					protected String getTemporaryTableSelectClause(boolean includeObservations) {
-						return null;
-					}
+					public String getTemporaryTableSelectClause(boolean includeObservations) { return null; }
 					
 					@Override
-					protected String getTemporaryTableCreateClause(String tableName) {
-						return null;
-					}
+					public String getTemporaryTableCreateClause(String tableName) {return null; }
 					
 					@Override
-					protected EntityQueryResultItem asQueryResultItem(ResultSet rs,
-							Session session) throws SQLException {
-						return null;
-					}
-
+					public void createTemporaryTableIndexes(Connection c, String tableName) throws SQLException {}
+					
 					@Override
 					public IQueryResult executeQuery(Query query,
 							HashMap<String, Object> parameters)

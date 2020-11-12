@@ -91,8 +91,10 @@ public class MissionDialog extends SmartStyledTitleDialog {
 	
 	private List<Survey> addedSurveys = new ArrayList<>();
 	
-	public MissionDialog(Shell parentShell, HashMap<UUID, CtMissionLink> missions, Session session) {
+	public MissionDialog(Shell parentShell, HashMap<UUID, CtMissionLink> missions, 
+			Session session) {
 		super(parentShell);
+		
 		this.missions = missions;
 		this.session = session;
 	}
@@ -217,8 +219,8 @@ public class MissionDialog extends SmartStyledTitleDialog {
 				}
 				//merge observations; add all the observations to this date
 				for (SurveyWaypoint sw : newMissionDay.getWaypoints()){
-					addToDay.getWaypoints().add(sw);
 					sw.setMissionDay(addToDay);
+					addToDay.getWaypoints().add(sw);
 				}
 				
 				//add tracks; we don't do any merging; we assume each track is unique as
@@ -228,7 +230,7 @@ public class MissionDialog extends SmartStyledTitleDialog {
 					mr.setMissionDay(addToDay);
 				}
 			}
-			
+		
 		}
 		
 		//update mission start end end days
@@ -240,7 +242,7 @@ public class MissionDialog extends SmartStyledTitleDialog {
 				addToMission.setEndDate(md.getDate());
 			}
 		}
-	
+		
 		SurveyHibernateManager.saveMission(addToMission, session, true);
 		
 		CtMissionLink link = new CtMissionLink();
@@ -418,7 +420,7 @@ public class MissionDialog extends SmartStyledTitleDialog {
 			sl.setText(Messages.MissionDialog_SurveyLabel);
 			sl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 			
-			SurveyFilteredComboViewer surveyViewer = new SurveyFilteredComboViewer(op, e.getValue().getNewSurveyDesign(), true);
+			SurveyFilteredComboViewer surveyViewer = new SurveyFilteredComboViewer(op, e.getValue().getNewSurveyDesign(), true, false);
 			surveyViewer.setEnabled(true);
 			surveyViewer.addSelectionChangedListener(listener);
 			surveyViewer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -433,6 +435,11 @@ public class MissionDialog extends SmartStyledTitleDialog {
 			ArrayList<Mission> mm = new ArrayList<>(moreMissions);
 			mm.remove(e.getValue().getMission());
 			MissionFilteredComboViewer viewer = new MissionFilteredComboViewer(op, mm);
+			
+			String[] dkeys = missions.values().stream().map(item->item.getNewSurveyDesign()).distinct().map(item->item.getKeyId()).toArray(String[]::new);
+			viewer.getFilter().setSurveyState(null);
+			viewer.getFilter().setSurveyDesignKeyFilters(dkeys);
+			
 			viewer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 			viewer.setEnabled(false);
 			viewer.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -496,8 +503,8 @@ public class MissionDialog extends SmartStyledTitleDialog {
 					Mission p = entry.getValue().cmbMission.getSelection();
 					Mission ctP = missions.get(ctMission).getMission();
 					
-					double diff = ChronoUnit.MILLIS.between(ctP.getStartDate(), p.getEndDate());
-					if (diff > 48*60*60*100.0){
+					double diff = Math.abs( ChronoUnit.DAYS.between(ctP.getStartDate(), p.getEndDate()) );
+					if (diff > 2){
 						//TODO: should be a warning not an error
 						entry.getValue().errItem.setDescriptionText(MessageFormat.format(Messages.MissionDialog_DateWarning, 
 								DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(ctP.getStartDate()), 

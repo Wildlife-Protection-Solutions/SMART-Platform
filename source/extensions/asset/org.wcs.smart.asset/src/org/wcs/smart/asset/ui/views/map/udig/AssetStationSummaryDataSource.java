@@ -22,19 +22,14 @@
 package org.wcs.smart.asset.ui.views.map.udig;
 
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.geotools.data.store.ContentDataStore;
 import org.geotools.data.store.ContentEntry;
 import org.geotools.data.store.ContentFeatureSource;
-import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.NameImpl;
 import org.opengis.feature.type.Name;
-import org.opengis.filter.Filter;
-import org.opengis.filter.FilterFactory;
 import org.wcs.smart.asset.ui.views.map.IOverviewTableColumn;
 import org.wcs.smart.asset.ui.views.map.StationData;
 

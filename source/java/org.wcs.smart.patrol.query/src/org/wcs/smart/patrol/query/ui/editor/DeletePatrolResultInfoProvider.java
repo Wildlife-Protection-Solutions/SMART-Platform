@@ -31,7 +31,7 @@ import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.patrol.query.engine.PatrolQueryMemoryResult;
 import org.wcs.smart.patrol.query.internal.Messages;
-import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
+import org.wcs.smart.patrol.query.model.IPatrolQueryResultItem;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.IResultItem;
@@ -58,7 +58,7 @@ public class DeletePatrolResultInfoProvider extends IQueryEditCommand {
 
 	@Override
 	public boolean doWork(IResultItem resultItem, IQueryResult results){
-		PatrolQueryResultItem item = (PatrolQueryResultItem)resultItem;
+		IPatrolQueryResultItem item = (IPatrolQueryResultItem)resultItem;
 		if (!MessageDialog.openQuestion(Display.getDefault().getActiveShell(), Messages.DeletePatrolResultInfoProvider_DeleteTitle,
 				MessageFormat.format(Messages.DeletePatrolResultInfoProvider_ConfirmDelete, 
 						item.getPatrolId(), DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(item.getPatrolStartDate()), 

@@ -190,12 +190,12 @@ public class TimeShiftComposite extends Composite{
 					.uniqueResult();
 				
 				if (data[0] != null) {
-					minDate = ((java.sql.Timestamp) data[0]).toLocalDateTime().toLocalDate();
+					minDate = (LocalDate)data[0];
 				}else {
 					minDate = LocalDate.now();
 				}
 				if (data[1] != null) {
-					maxDate = ((java.sql.Timestamp) data[1]).toLocalDateTime().toLocalDate();
+					maxDate = (LocalDate)data[1];
 				}else {
 					maxDate = LocalDate.now();
 				}

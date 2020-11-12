@@ -605,12 +605,12 @@ public class PawsDataEngine {
 					Object[] items = results.get();
 					
 					String pid = (String)items[0];
-					LocalDate pstart = (LocalDate)items[1];
-					LocalDate pend = (LocalDate)items[2];
+					LocalDate pstart = ((java.sql.Date)items[1]).toLocalDate();
+					LocalDate pend = ((java.sql.Date)items[2]).toLocalDate();
 					
 					double x = (double)items[5];
 					double y = (double)items[6];
-					LocalDateTime datetime = (LocalDateTime)items[7];
+					LocalDateTime datetime = ((java.sql.Timestamp)items[7]).toLocalDateTime();
 										
 					//Waypoint Date
 					int index = 0;

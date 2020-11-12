@@ -27,41 +27,28 @@ import java.util.UUID;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.asset.model.AssetWaypoint;
-import org.wcs.smart.asset.query.model.AssetQueryResultItem;
 import org.wcs.smart.asset.ui.handler.OpenStationHandler;
 import org.wcs.smart.asset.ui.views.station.StationEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.WaypointAttachment;
+import org.wcs.smart.observation.query.model.types.ShowItemInfoProvider;
 import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
-import org.wcs.smart.query.model.IQueryResultInfoProvider;
+import org.wcs.smart.query.common.engine.WaypointQueryResultItem;
 
 /**
- * Intel info provider than opens up the intelligence record associated with the
- * result item.
+ * Info provider for field sensor query results.
  * 
  * @author Emily
  *
  */
-public class AssetResultInfoProvider implements IQueryResultInfoProvider {
+public class AssetResultInfoProvider extends ShowItemInfoProvider  {
 
-	@Override
-	public String getName() {
-		return GOTO_SOURCE_STR;
-	}
-
-	@Override
-	public boolean supportsCcaa() {
-		return false;
-	}
-	
 	private void showItem(StationEditorInput in, UUID waypointUuid) {
 		IEclipseContext ctx = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
 		ctx.set(OpenStationHandler.STATION_PARAM, in);
@@ -73,14 +60,19 @@ public class AssetResultInfoProvider implements IQueryResultInfoProvider {
 	}
 	
 	@Override
+	public boolean supportsMap(){
+		return true;
+	}
+	
+	@Override
 	public void doWork(IResultItem resultItem) {
 		UUID stationUuid = null;
 		String stationId = null;
 		UUID wpUuid = null;
 		
 		try(Session s = HibernateManager.openSession()){
-			if (resultItem instanceof AssetQueryResultItem) {
-				wpUuid = ((AssetQueryResultItem)resultItem).getWaypointUuid();
+			if (resultItem instanceof WaypointQueryResultItem) {
+				wpUuid = ((WaypointQueryResultItem)resultItem).getWaypointUuid();
 			}else if (resultItem instanceof IAttachmentResultItem) {
 				ObservationAttachment a = s.get(ObservationAttachment.class, ((IAttachmentResultItem)resultItem).getAttachment().getUuid());
 				if (a != null) {
@@ -100,14 +92,7 @@ public class AssetResultInfoProvider implements IQueryResultInfoProvider {
 		showItem(new StationEditorInput(stationUuid, stationId), wpUuid);
 	}
 
-	@Override
-	public Image getImage() {
-		return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.GOTO_ICON);
-	}
 	
-	@Override
-	public boolean supportsMap(){
-		return true;
-	}
+
 
 }

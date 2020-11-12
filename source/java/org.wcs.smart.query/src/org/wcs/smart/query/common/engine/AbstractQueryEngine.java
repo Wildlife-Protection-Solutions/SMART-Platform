@@ -48,13 +48,17 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationAttributeList;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.UuidUtils;
 
@@ -66,6 +70,8 @@ import org.wcs.smart.util.UuidUtils;
  *
  */
 public abstract class AbstractQueryEngine implements IQueryEngine {
+
+	public HashMap<IFilter, FilterTable> filterTables = new HashMap<IFilter, FilterTable>();
 
 	protected Map<String, Object> currentParameters = new HashMap<String, Object>();
 
@@ -82,6 +88,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		tablePrefix.put(WaypointObservation.class, "wpo"); //$NON-NLS-1$
 		tablePrefix.put(WaypointObservationGroup.class, "wpg"); //$NON-NLS-1$
 		tablePrefix.put(WaypointObservationAttribute.class, "wpoa"); //$NON-NLS-1$
+		tablePrefix.put(WaypointObservationAttributeList.class, "wpoal"); //$NON-NLS-1$
 		tablePrefix.put(Attribute.class, "a"); //$NON-NLS-1$
 		tablePrefix.put(Category.class, "c"); //$NON-NLS-1$
 		tablePrefix.put(AttributeTreeNode.class, "atn"); //$NON-NLS-1$
@@ -90,6 +97,8 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		tablePrefix.put(Employee.class, "e"); //$NON-NLS-1$
 		tablePrefix.put(Agency.class, "aa"); //$NON-NLS-1$
 		tablePrefix.put(Rank.class, "ear"); //$NON-NLS-1$
+		tablePrefix.put(WaypointAttachment.class, "wpa"); //$NON-NLS-1$
+		tablePrefix.put(ObservationAttachment.class, "wooa"); //$NON-NLS-1$
 	}
 
 	
@@ -104,6 +113,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		tableNames.put(WaypointObservation.class, "smart.wp_observation"); //$NON-NLS-1$
 		tableNames.put(WaypointObservationGroup.class, "smart.wp_observation_group"); //$NON-NLS-1$
 		tableNames.put(WaypointObservationAttribute.class, "smart.wp_observation_attributes"); //$NON-NLS-1$
+		tableNames.put(WaypointObservationAttributeList.class, "smart.wp_observation_attributes_list"); //$NON-NLS-1$
 		tableNames.put(Attribute.class, "smart.dm_attribute"); //$NON-NLS-1$
 		tableNames.put(Category.class, "smart.dm_category"); //$NON-NLS-1$
 		tableNames.put(AttributeTreeNode.class, "smart.dm_attribute_tree"); //$NON-NLS-1$
@@ -112,8 +122,58 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		tableNames.put(Employee.class, "smart.employee"); //$NON-NLS-1$
 		tableNames.put(Agency.class, "smart.agency"); //$NON-NLS-1$
 		tableNames.put(Rank.class, "smart.rank"); //$NON-NLS-1$
+		tableNames.put(WaypointAttachment.class, "smart.wp_attachments"); //$NON-NLS-1$
+		tableNames.put(ObservationAttachment.class, "smart.observation_attachment"); //$NON-NLS-1$
 	}
 		
+	
+	@Override
+	public abstract IQueryResult executeQuery(Query query, HashMap<String, Object> parameters) throws SQLException;
+
+	@Override
+	public abstract boolean canExecute(String querytype);
+	
+	
+	/**
+	 * Create the select statement to populate the temporary table
+	 * containing observation data for the query engine.
+	 * 
+	 * @param includeObservations if observation information should be included
+	 * in the output table (ob_uuid).
+	 * 
+	 * @return
+	 */
+	public abstract String getTemporaryTableSelectClause(boolean includeObservations);
+	
+	
+	/**
+	 * Create the temporary table for hold observation data
+	 * for querying
+	 * 
+	 * @param tableName temporary table name
+	 * @return 
+	 */
+	public abstract String getTemporaryTableCreateClause(String tableName);
+	
+	/**
+	 * Create index on the temporary data table
+	 * @param tableName
+	 * @return
+	 */
+	public abstract void createTemporaryTableIndexes(Connection c, String tableName) throws SQLException;
+
+	
+	/**
+	 * Creates the filter processor based on the query filter type
+	 * 
+	 * @param filterType
+	 * @param queryDataTable
+	 * @return
+	 */
+	public abstract IFilterProcessor getFilterProcessor(IFilter.FilterType filterType, String queryDataTable, Query query);
+	
+	
+	
 	/**
 	 * Drop the created temporary tables.
 	 * 
@@ -135,8 +195,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	 * @param c
 	 * @throws SQLException
 	 */
-	public void dropTables(Connection c) throws SQLException {
-	}
+	public abstract void dropTables(Connection c) throws SQLException ;
 	
 	/**
 	 * Creates a temporary query table 
@@ -212,6 +271,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 			return "varchar(1024)"; //$NON-NLS-1$
 		case DATE:
 			return "varchar(10)"; //$NON-NLS-1$
+		case MLIST: throw new UnsupportedOperationException("Multi-List attribute type not support for column type"); //$NON-NLS-1$
 		}
 		return ""; //$NON-NLS-1$
 
@@ -252,22 +312,35 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	 * @param tables List of tables already included in the from clause
 	 * @return
 	 */
-	protected String appendFromClause(HashSet<Class<?>> tables){
+	public String appendFromClause(HashSet<Class<?>> tables){
 		return ""; //$NON-NLS-1$
 	}
 	
 	
 	/**
-	 * By default creates an index on the ob_uuid field.  This method can be overwritten to 
-	 * create additional indexes.
+	 * Creates an index on the ob_uuid in the given table.
 	 * 
 	 * @param c database connection
 	 * @param tableName temporary table to create indexes on
 	 * @throws SQLException
 	 */
-	protected void buildTemporaryTableIndexes(Connection c, String tableName) throws SQLException{
+	public void createObsIndex(Connection c, String tableName) throws SQLException{
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE INDEX " + tableName + "_ob_uuid_idx on " +  tableName + "(ob_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		QueryPlugIn.logSql(sql.toString());
+		c.createStatement().execute(sql.toString());
+	}
+	
+	/**
+	 * Creates an index on the wp_uuid in the given table
+	 * @param c
+	 * @param tableName
+	 * @throws SQLException
+	 */
+	public void createWpIndex(Connection c, String tableName) throws SQLException {
+		
+		StringBuilder sql = new StringBuilder();
+		sql.append("CREATE INDEX " + tableName + "_wp_uuid_idx on " +  tableName + "(wp_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		QueryPlugIn.logSql(sql.toString());
 		c.createStatement().execute(sql.toString());
 	}
@@ -309,12 +382,16 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		return pp.getStatement();
 	}
 
-	@Override
-	public abstract IQueryResult executeQuery(Query query, HashMap<String, Object> parameters) throws SQLException;
-
-	@Override
-	public abstract boolean canExecute(String querytype);
 	
+	/**
+	 * Determine if the given column for the given table exists and if
+	 * it exists returns true if there are values in the color otherwise false.
+	 *  
+	 * @param c
+	 * @param tableName
+	 * @param columnName
+	 * @return
+	 */
 	protected boolean checkColumnHasValues(Connection c, String tableName, String columnName) {
 		
 		//see if column exists
@@ -350,6 +427,16 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		return true; //it is safer to assume that column that we were unable to find may have values and display it to user
 	}
 	
+	
+	
+
+	/**
+	 * Simple class for tracking temporary filter tables 
+	 * and columns
+	 * 
+	 * @author Emily
+	 *
+	 */
 	public static class FilterTable{
 		public String tablename;
 		public String columnname;
@@ -359,5 +446,4 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 			this.columnname = columnname;
 		}
 	}
-	
 }

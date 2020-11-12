@@ -33,6 +33,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -40,11 +42,14 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.hibernate.SurveyFilter;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.ui.SurveyDesignListView;
 import org.wcs.smart.er.ui.mission.export.MultiMissionExportDialog;
 import org.wcs.smart.er.xml.MissionExporter;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.util.E3Utils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -56,9 +61,19 @@ import org.wcs.smart.util.UuidUtils;
 public class MissionExportHandler{
 	
 	@Execute
-	public void execute(final Shell shell){
+	public void execute(final Shell shell, EPartService partService){
 		
-		MultiMissionExportDialog dialog = new MultiMissionExportDialog(shell);
+		SurveyFilter filter = null;
+		try {
+			MPart pp = partService.findPart(SurveyDesignListView.ID);
+			if (pp != null) {
+				filter = ((SurveyDesignListView)E3Utils.getSourceObject(pp)).getSurveyMissionFilter();
+			}
+		}catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		
+		MultiMissionExportDialog dialog = new MultiMissionExportDialog(shell, filter);
 		if (dialog.open() != IDialogConstants.OK_ID) return;
 
 		final List<UUID> missions = dialog.getObjectUuids();	

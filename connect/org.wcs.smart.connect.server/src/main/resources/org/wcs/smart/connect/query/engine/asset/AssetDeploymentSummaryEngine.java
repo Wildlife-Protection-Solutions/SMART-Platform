@@ -49,7 +49,6 @@ import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetWaypoint;
 import org.wcs.smart.asset.query.model.AssetFilterOption;
-import org.wcs.smart.asset.query.model.AssetQueryResultItem;
 import org.wcs.smart.asset.query.model.AssetSummaryQuery;
 import org.wcs.smart.asset.query.model.AssetValueOption;
 import org.wcs.smart.asset.query.parser.internal.summary.AssetGroupBy;
@@ -1130,12 +1129,6 @@ public class AssetDeploymentSummaryEngine extends AssetQueryEngine implements IS
 		sql.append(tableName + "(deployment_uuid)"); //$NON-NLS-1$
 		c.createStatement().execute(sql.toString());
 	}
-
-	@Override
-	protected AssetQueryResultItem asQueryResultItem(ResultSet rs, Session session)
-			throws SQLException {
-		return null;
-	}
 	
 	@Override
 	public String getQueryDataTable() {
@@ -1147,4 +1140,5 @@ public class AssetDeploymentSummaryEngine extends AssetQueryEngine implements IS
 	public String getSurveySamplingUnitJoinFieldName() {
 		return null;
 	}
+
 }

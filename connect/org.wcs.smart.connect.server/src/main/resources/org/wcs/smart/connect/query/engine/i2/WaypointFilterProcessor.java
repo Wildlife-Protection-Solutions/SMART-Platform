@@ -29,8 +29,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.hibernate.Session;
@@ -322,6 +324,7 @@ public class WaypointFilterProcessor {
 			
 		}
 		//category and perhaps an attribute filter
+		Map<String,Object> params = new HashMap<>();
 		sql = new StringBuilder();
 		sql.append("INSERT INTO " + t2 ); //$NON-NLS-1$
 		sql.append(" SELECT distinct o.location_uuid "); //$NON-NLS-1$
@@ -338,82 +341,64 @@ public class WaypointFilterProcessor {
 		if (filter.getAttributeType() == Attribute.AttributeType.LIST){
 			sql.append(" JOIN smart.dm_attribute_list tl ON ia.list_element_uuid = tl.uuid "); //$NON-NLS-1$
 		}
+		if (filter.getAttributeType() == Attribute.AttributeType.MLIST) {
+			params.putAll(WaypointFilterProcessor.processMultiSelectAttributeFilter(sql, filter));
+		}
 		//EG: this case statement forces the database to filter on the attribute key first.  If we don't do then 
 		//then in the case of date filters it filters on the date before the attribute and fails because
 		//some of the string values cannot be cast to date
+		if (filter.getAttributeType() != Attribute.AttributeType.MLIST) {
+			sql.append(" WHERE "); //$NON-NLS-1$
+			sql.append(" CASE WHEN dma.keyId = :attributeKey "); //$NON-NLS-1$
+			params.put("attributeKey", filter.getAttributeKey()); //$NON-NLS-1$
+			if (filter.getCategoryKey() != null){
+				sql.append(" AND (c.hkey like :hkey1 ) "); //$NON-NLS-1$
+				params.put("hkey1", filter.getCategoryKey() + "%"); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+			sql.append(" THEN "); //$NON-NLS-1$
+			
+			switch(filter.getAttributeType()){
+			case BOOLEAN:
+				sql.append(" ia.double_value " + SqlGenerator.operatorToSql(Operator.GREATERTHAN) + " 0.5"); //$NON-NLS-1$ //$NON-NLS-2$
+				break;
+			case DATE:
+				sql.append(" cast(ia.string_value as date) " + SqlGenerator.operatorToSql(filter.getOperator()) + " cast(:value1 as date) and cast(:value2 as date)"); //$NON-NLS-1$ //$NON-NLS-2$
+				params.put("value1", (DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0])  ); //$NON-NLS-1$
+				params.put("value2", (DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1])  ); //$NON-NLS-1$
+				break;
+			case LIST:
+				if (filter.getKeyValue().equals(IQueryFilter.ANY_OPTION_KEY)){
+					sql.append(" ia.list_element_uuid is not null "); //$NON-NLS-1$
+				}else{
+					sql.append(" tl.keyid " + SqlGenerator.operatorToSql(Operator.EQUALS) + " :value"); //$NON-NLS-1$ //$NON-NLS-2$
+					params.put("value",  filter.getKeyValue()); //$NON-NLS-1$
+				}
+				break;
+			case NUMERIC:
+				sql.append(" ia.double_value " + SqlGenerator.operatorToSql(filter.getOperator()) + " :value"); //$NON-NLS-1$ //$NON-NLS-2$
+				params.put("value", filter.getNumberValue()); //$NON-NLS-1$
 
-		sql.append(" WHERE CASE WHEN dma.keyId = :attributeKey "); //$NON-NLS-1$
-		if (filter.getCategoryKey() != null){
-			sql.append(" AND (c.hkey like :hkey1 ) "); //$NON-NLS-1$
-		}
-		sql.append(" THEN "); //$NON-NLS-1$
-		
-		switch(filter.getAttributeType()){
-		case BOOLEAN:
-			sql.append(" ia.double_value " + SqlGenerator.operatorToSql(Operator.GREATERTHAN) + " 0.5"); //$NON-NLS-1$ //$NON-NLS-2$
-			break;
-		case DATE:
-			sql.append(" cast(ia.string_value as date) " + SqlGenerator.operatorToSql(filter.getOperator()) + " cast(:value1 as date) and cast(:value2 as date)"); //$NON-NLS-1$ //$NON-NLS-2$
-			break;
-		case LIST:
-			if (filter.getKeyValue().equals(IQueryFilter.ANY_OPTION_KEY)){
-				sql.append(" ia.list_element_uuid is not null "); //$NON-NLS-1$
-			}else{
-				sql.append(" tl.keyid " + SqlGenerator.operatorToSql(Operator.EQUALS) + " :value"); //$NON-NLS-1$ //$NON-NLS-2$
+				break;
+			case TEXT:
+				sql.append(" ia.string_value " + SqlGenerator.operatorToSql(filter.getOperator()) + " :value"); //$NON-NLS-1$ //$NON-NLS-2$
+				params.put("value", filter.getStringValue()); //$NON-NLS-1$
+				break;
+			case TREE:
+				String tree1 = filter.getKeyValue() + "%"; //$NON-NLS-1$
+				params.put("tree1", tree1); //$NON-NLS-1$
+				sql.append( " ( ta.hkey like :tree1 ) "); //$NON-NLS-1$
+				break;
+			default:
+				break;
 			}
-			break;
-		case NUMERIC:
-			sql.append(" ia.double_value " + SqlGenerator.operatorToSql(filter.getOperator()) + " :value"); //$NON-NLS-1$ //$NON-NLS-2$
-			break;
-		case TEXT:
-			sql.append(" ia.string_value " + SqlGenerator.operatorToSql(filter.getOperator()) + " :value"); //$NON-NLS-1$ //$NON-NLS-2$
-			break;
-		case TREE:
-			sql.append( " ( ta.hkey like :tree1 ) "); //$NON-NLS-1$
-			break;
-		default:
-			break;
+			sql.append(" ELSE FALSE END "); //$NON-NLS-1$
 		}
-		sql.append(" ELSE FALSE END "); //$NON-NLS-1$
+		
 		NativeQuery<?> query = s.createNativeQuery(sql.toString());
-		query.setParameter("attributeKey", filter.getAttributeKey()); //$NON-NLS-1$
-		logString(filter.getAttributeKey());
 		
-		if (filter.getCategoryKey() != null){
-			String hkey1 = filter.getCategoryKey() + "%"; //$NON-NLS-1$
-			logString(hkey1);
-			query.setParameter("hkey1", hkey1); //$NON-NLS-1$
-		}
-		switch(filter.getAttributeType()){
-		case BOOLEAN:
-			break;
-		case DATE:
-			logString((DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0]));
-			logString((DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1]));
-			query.setParameter("value1", (DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[0])  ); //$NON-NLS-1$
-			query.setParameter("value2", (DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR)).format(filter.getDateValues()[1])  ); //$NON-NLS-1$
-			break;
-		case LIST:
-			if (!filter.getKeyValue().equals(IQueryFilter.ANY_OPTION_KEY)){
-				logString(filter.getKeyValue());
-				query.setParameter("value",  filter.getKeyValue()); //$NON-NLS-1$
-			}
-			break;
-		case TREE:
-			String tree1 = filter.getKeyValue() + "%"; //$NON-NLS-1$
-			logString(tree1);
-			query.setParameter("tree1", tree1); //$NON-NLS-1$
-			break;
-		case NUMERIC:
-			logString(filter.getNumberValue().toString());
-			query.setParameter("value", filter.getNumberValue()); //$NON-NLS-1$
-			break;
-		case TEXT:
-			logString(filter.getStringValue());
-			query.setParameter("value", filter.getStringValue()); //$NON-NLS-1$
-			break;
-		default:
-			break;
+		for (Entry<String,Object> p : params.entrySet()) {
+			logString(p.getKey() + " - " + p.getValue().toString()); //$NON-NLS-1$
+			query.setParameter(p.getKey(),p.getValue());
 		}
 		
 		logString(sql.toString());
@@ -845,5 +830,66 @@ public class WaypointFilterProcessor {
 		sql.append(" DROP TABLE " + t2); //$NON-NLS-1$
 		logString(sql.toString());
 		s.createNativeQuery(sql.toString()).executeUpdate();
+	}
+	
+	
+	public static Map<String, Object> processMultiSelectAttributeFilter(StringBuilder sql, DataModelFilter attfilter) {
+		
+		Map<String, Object> params = new HashMap<>();
+		
+		Collection<String> keys = attfilter.getKeyValues();
+		
+		Operator op = attfilter.getOperator();
+		int param = 0;
+		
+		if (op == Operator.OR) {
+			sql.append(" JOIN ("); //$NON-NLS-1$
+			sql.append("SELECT ll.observation_attribute_uuid FROM "); //$NON-NLS-1$
+			sql.append(" smart.i_observation_attribute_list ll JOIN "); //$NON-NLS-1$
+			sql.append(" smart.dm_attribute_list al ON al.uuid = ll.list_element_uuid "); //$NON-NLS-1$
+			sql.append(" and al.keyid in ("); //$NON-NLS-1$
+			for (String key : keys) {
+				String p = ":param_" + (param++); //$NON-NLS-1$
+				params.put(p.substring(1), key);
+				sql.append(p);
+				sql.append(","); //$NON-NLS-1$
+			}
+			sql.deleteCharAt(sql.length() - 1);
+			sql.append(")) foo"); //$NON-NLS-1$
+			sql.append(" ON foo.observation_attribute_uuid = ia.uuid"); //$NON-NLS-1$
+		}
+		
+		if (op == Operator.AND || op == Operator.EXACT) {
+			sql.append(" JOIN ("); //$NON-NLS-1$
+			
+			int cnt = 0;
+			for (String key : keys) {
+				
+				String px = ":param_" + (param++); //$NON-NLS-1$
+				params.put(px.substring(1), key);
+				
+				if (cnt != 0) sql.append(" INTERSECT "); //$NON-NLS-1$
+				cnt++;
+				sql.append("SELECT ll.observation_attribute_uuid FROM "); //$NON-NLS-1$
+				sql.append(" smart.i_observation_attribute_list ll "); //$NON-NLS-1$
+				sql.append(" JOIN "); //$NON-NLS-1$
+				sql.append(" smart.dm_attribute_list al ON al.uuid = ll.list_element_uuid "); //$NON-NLS-1$
+				sql.append(" AND al.keyid = " + px); //$NON-NLS-1$
+			}
+			
+			if (op == Operator.EXACT) {
+				String px = ":param_" + (param++); //$NON-NLS-1$
+				params.put(px.substring(1), keys.size());
+				
+				sql.append(" INTERSECT "); //$NON-NLS-1$
+				sql.append("SELECT ll.observation_attribute_uuid FROM "); //$NON-NLS-1$
+				sql.append(" smart.i_observation_attribute_list ll "); //$NON-NLS-1$
+				sql.append(" GROUP BY observation_attribute_uuid HAVING count(*) = " + px); //$NON-NLS-1$
+			}
+			sql.append(" ) k"); //$NON-NLS-1$
+			
+			sql.append(" ON k.observation_attribute_uuid = ia.uuid"); //$NON-NLS-1$
+		}
+		return params;
 	}
 }

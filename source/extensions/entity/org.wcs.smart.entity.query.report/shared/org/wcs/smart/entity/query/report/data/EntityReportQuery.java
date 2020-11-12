@@ -38,7 +38,7 @@ import org.wcs.smart.data.oda.smart.impl.SmartParameterMetaData;
 import org.wcs.smart.data.oda.smart.query.common.EmptyResultSet;
 import org.wcs.smart.entity.query.model.EntityGriddedQuery;
 import org.wcs.smart.entity.query.model.EntityObservationQuery;
-import org.wcs.smart.entity.query.model.EntityQueryResultItem;
+import org.wcs.smart.entity.query.model.EntityObservationResultItem;
 import org.wcs.smart.entity.query.model.EntitySummaryQuery;
 import org.wcs.smart.entity.query.model.EntityWaypointQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
@@ -129,7 +129,7 @@ public class EntityReportQuery extends AbstractSmartQuery {
 				queryTypeKey.equals(EntityObservationQuery.KEY)){		
 			return new GeometryColumn[]{
 					new GeometryColumn(SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(ICoreLabelProvider.GEOMETRY_LABEL, l),
-							EntityQueryResultItem.WAYPOINT_GEOM_COLUMNKEY)};
+							EntityObservationResultItem.GEOMCOLUMN_KEY)};
 		}
 		return null;
 	}

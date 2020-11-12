@@ -46,12 +46,13 @@ import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
 import org.wcs.smart.patrol.query.internal.Messages;
-import org.wcs.smart.patrol.query.model.PatrolQueryAttachmentResultItem;
-import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
+import org.wcs.smart.patrol.query.model.PatrolWaypointAttachmentResultItem;
 import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
+import org.wcs.smart.patrol.query.model.PatrolWaypointResultItem;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.common.engine.WaypointQueryEngine;
 import org.wcs.smart.query.common.model.IUpdateableResultSet;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.Query;
@@ -69,7 +70,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author elitvin
  * @since 1.0.0
  */
-public class DerbyWaypointEngine extends DerbyPatrolQueryEngine implements IDerbyWaypointEngine {
+public class DerbyWaypointEngine extends AbstractPatrolQueryEngine implements WaypointQueryEngine<PatrolWaypointResultItem>, IDerbyWaypointEngine {
 
 	private String queryDataTable;
 	private Session session;
@@ -107,7 +108,7 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine implements IDerb
 		}
 		
 		queryDataTable = createTempTableName();
-		final DerbyPagedWaypointResult result = new DerbyPagedWaypointResult(queryDataTable, this);
+		final DerbyPagedWaypointResult result = new DerbyPagedWaypointResult(this);
 		
 		session.doWork(new Work() {
 			@Override
@@ -177,7 +178,7 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine implements IDerb
 	}
 
 	private void populateTemporaryTableNameObjExtra(String uuidColumn, String nameColumn, Connection c, Session session) throws SQLException {
-		String sql = "SELECT DISTINCT p_ca_uuid, "+uuidColumn+" FROM "+queryDataTable;  //$NON-NLS-1$//$NON-NLS-2$
+		String sql = "SELECT DISTINCT ca_uuid, "+uuidColumn+" FROM "+queryDataTable;  //$NON-NLS-1$//$NON-NLS-2$
 		QueryPlugIn.logSql(sql);
 		
 		try(ResultSet rs = c.createStatement().executeQuery(sql)) {
@@ -304,8 +305,8 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine implements IDerb
 			sql.append("UPDATE "); //$NON-NLS-1$
 			sql.append(queryDataTable);
 			sql.append(" SET ca_id = (select id FROM "); //$NON-NLS-1$
-			sql.append(DerbyPatrolQueryEngine.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
-			sql.append("WHERE a.uuid = " + queryDataTable + ".p_ca_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append(AbstractPatrolQueryEngine.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
+			sql.append("WHERE a.uuid = " + queryDataTable + ".ca_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
 			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().executeUpdate(sql.toString());
 			
@@ -313,8 +314,8 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine implements IDerb
 			sql.append("UPDATE "); //$NON-NLS-1$
 			sql.append(queryDataTable);
 			sql.append(" SET ca_name = (select name FROM "); //$NON-NLS-1$
-			sql.append(DerbyPatrolQueryEngine.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
-			sql.append("WHERE a.uuid = " + queryDataTable + ".p_ca_uuid)");  //$NON-NLS-1$//$NON-NLS-2$
+			sql.append(AbstractPatrolQueryEngine.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
+			sql.append("WHERE a.uuid = " + queryDataTable + ".ca_uuid)");  //$NON-NLS-1$//$NON-NLS-2$
 			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().executeUpdate(sql.toString());
 		}
@@ -322,7 +323,7 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine implements IDerb
 	}
 
 	@Override
-	protected String getTemporaryTableSelectClause(boolean includeObservations) {
+	public String getTemporaryTableSelectClause(boolean includeObservations) {
 		StringBuilder sql = new StringBuilder();
 		sql.append(" SELECT DISTINCT "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".ca_uuid, "); //$NON-NLS-1$
@@ -360,10 +361,10 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine implements IDerb
 	}
 
 	@Override
-	protected String getTemporaryTableCreateClause(String tableName) {
+	public String getTemporaryTableCreateClause(String tableName) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
-		sql.append("p_ca_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("ca_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("p_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("p_id varchar(32),"); //$NON-NLS-1$
 		sql.append("p_station_uuid char(16) for bit data,"); //$NON-NLS-1$
@@ -397,8 +398,8 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine implements IDerb
 	}
 
 	@Override
-	protected PatrolQueryAttachmentResultItem asQueryAttachmentResultItem(ResultSet rs, Session session) throws SQLException{
-		PatrolQueryAttachmentResultItem item = (PatrolQueryAttachmentResultItem) asQueryResultItemInternal(true,  rs, session);
+	public PatrolWaypointAttachmentResultItem asQueryAttachmentResultItem(ResultSet rs, Session session) throws SQLException{
+		PatrolWaypointAttachmentResultItem item = (PatrolWaypointAttachmentResultItem) asQueryResultItemInternal(true,  rs, session);
 		
 		UUID auuid = UuidUtils.byteToUUID(rs.getBytes("attach_uuid")); //$NON-NLS-1$
 		ISmartAttachment a = session.get(ObservationAttachment.class, auuid);
@@ -414,20 +415,20 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine implements IDerb
 		return item;
 	}
 
-	protected PatrolQueryResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException{
+	public PatrolWaypointResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException{
 		return asQueryResultItemInternal(false,  rs, session);
 	}
 	
-	protected PatrolQueryResultItem asQueryResultItemInternal(boolean isAttachment, ResultSet rs, Session session) throws SQLException{
+	protected PatrolWaypointResultItem asQueryResultItemInternal(boolean isAttachment, ResultSet rs, Session session) throws SQLException{
 		
-		PatrolQueryResultItem it;
+		PatrolWaypointResultItem it;
 		if (isAttachment) {
-			it = new PatrolQueryAttachmentResultItem();
+			it = new PatrolWaypointAttachmentResultItem();
 		}else {
-			it = new PatrolQueryResultItem();	
+			it = new PatrolWaypointResultItem();	
 		}
 		
-		it.setConservationAreaUuid(UuidUtils.byteToUUID(rs.getBytes("p_ca_uuid"))); //$NON-NLS-1$
+		it.setConservationAreaUuid(UuidUtils.byteToUUID(rs.getBytes("ca_uuid"))); //$NON-NLS-1$
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
 		it.setPatrolUuid(UuidUtils.byteToUUID(rs.getBytes("p_uuid"))); //$NON-NLS-1$
@@ -458,9 +459,14 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine implements IDerb
 		return it;
 	}
 	
-	
 	@Override
-	protected void buildTemporaryTableIndexes(Connection c, String tableName)
-			throws SQLException {
+	public void createTemporaryTableIndexes(Connection c, String tableName) throws SQLException {
 	}
+
+	@Override
+	public String getQueryDataTable() {
+		return queryDataTable;
+	}
+	
+	
 }

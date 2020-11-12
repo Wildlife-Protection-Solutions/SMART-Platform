@@ -52,7 +52,6 @@ import org.wcs.smart.asset.query.internal.AssetValueItemLabelProvider;
 import org.wcs.smart.asset.query.internal.Messages;
 import org.wcs.smart.asset.query.model.AssetDropItemFactory;
 import org.wcs.smart.asset.query.model.AssetFilterOption;
-import org.wcs.smart.asset.query.model.AssetQueryResultItem;
 import org.wcs.smart.asset.query.model.AssetSummaryQuery;
 import org.wcs.smart.asset.query.model.AssetValueOption;
 import org.wcs.smart.asset.query.parser.internal.summary.AssetGroupBy;
@@ -69,6 +68,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationAttributeList;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IQueryResult;
@@ -600,7 +600,9 @@ public class AssetDeploymentSummaryEngine extends AssetQueryEngine{
 		
 		createGroupBySql(groupBy, sb, gbsql, joinSql);
 		
-		if (attributeItem.getAttributeType() == AttributeType.TREE || attributeItem.getAttributeType() == AttributeType.LIST) {
+		if (attributeItem.getAttributeType() == AttributeType.TREE ||
+				attributeItem.getAttributeType() == AttributeType.LIST ||
+				attributeItem.getAttributeType() == AttributeType.MLIST ) {
 			
 			if (attributeItem.getValueType() == ValueType.WAYPOINT) {
 				sb.append(" COUNT(distinct "); //$NON-NLS-1$
@@ -658,6 +660,33 @@ public class AssetDeploymentSummaryEngine extends AssetQueryEngine{
 			where.append(" AND "); //$NON-NLS-1$
 			where.append(tablePrefix(AttributeListItem.class) + ".keyid = " + p1); //$NON-NLS-1$
 			
+		}
+		
+		if (attributeItem.getAttributeType() == AttributeType.MLIST){
+			sb.append(" JOIN "); //$NON-NLS-1$
+			sb.append(tableNames.get(WaypointObservationAttributeList.class));
+			sb.append(" "); //$NON-NLS-1$
+			sb.append(tablePrefix(WaypointObservationAttributeList.class)); 
+			sb.append(" on "); //$NON-NLS-1$
+			sb.append(tablePrefix(WaypointObservationAttribute.class) ); 
+			sb.append(".uuid = "); //$NON-NLS-1$
+			sb.append(tablePrefix(WaypointObservationAttributeList.class) ); 
+			sb.append(".observation_attribute_uuid"); //$NON-NLS-1$
+			
+			sb.append(" JOIN "); //$NON-NLS-1$
+			
+			sb.append(tableNames.get(AttributeListItem.class));
+			sb.append(" "); //$NON-NLS-1$
+			sb.append(tablePrefix(AttributeListItem.class) ); 
+			sb.append(" on "); //$NON-NLS-1$
+			sb.append(tablePrefix(AttributeListItem.class) ); 
+			sb.append(".uuid ="); //$NON-NLS-1$
+			sb.append(tablePrefix(WaypointObservationAttributeList.class) ); 
+			sb.append(".list_element_uuid "); //$NON-NLS-1$
+			
+			String p1 = addParameterValue(attributeItem.getItemKey());
+			where.append(" AND "); //$NON-NLS-1$
+			where.append(tablePrefix(AttributeListItem.class) + ".keyid = " + p1); //$NON-NLS-1$
 		}
 		if (attributeItem.getAttributeType() == AttributeType.TREE) {
 			sb.append(" JOIN "); //$NON-NLS-1$
@@ -1107,7 +1136,7 @@ public class AssetDeploymentSummaryEngine extends AssetQueryEngine{
 	
 	
 	@Override
-	protected String getTemporaryTableSelectClause(boolean includeObservations) {
+	public String getTemporaryTableSelectClause(boolean includeObservations) {
 		StringBuilder sql = new StringBuilder();
 		sql.append(" SELECT DISTINCT "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".uuid, "); //$NON-NLS-1$
@@ -1121,7 +1150,7 @@ public class AssetDeploymentSummaryEngine extends AssetQueryEngine{
 	}
 
 	@Override
-	protected String getTemporaryTableCreateClause(String tableName) {
+	public String getTemporaryTableCreateClause(String tableName) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
 		sql.append("deployment_uuid char(16) for bit data,"); //$NON-NLS-1$
@@ -1134,18 +1163,11 @@ public class AssetDeploymentSummaryEngine extends AssetQueryEngine{
 	}
 
 	@Override
-	protected void buildTemporaryTableIndexes(Connection c, String tableName)
-			throws SQLException {
-		
+	public void createTemporaryTableIndexes(Connection c, String tableName) throws SQLException {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE INDEX " + tableName + "_deployment_uuid_idx on " +  tableName + "(deployment_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		QueryPlugIn.logSql(sql.toString());
 		c.createStatement().execute(sql.toString());
 	}
 
-	@Override
-	protected AssetQueryResultItem asQueryResultItem(ResultSet rs, Session session)
-			throws SQLException {
-		return null;
-	}
 }

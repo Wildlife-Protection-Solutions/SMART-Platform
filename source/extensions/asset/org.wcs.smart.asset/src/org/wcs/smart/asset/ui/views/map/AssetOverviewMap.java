@@ -60,6 +60,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
@@ -435,6 +437,15 @@ public class AssetOverviewMap extends SmartMapEditorPart implements IEditorPart{
 		summaryTable.getTable().setLinesVisible(true);
 		summaryTable.setContentProvider(ArrayContentProvider.getInstance());
 		summaryTable.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		Menu mnu = new Menu(summaryTable.getControl());
+		
+		MenuItem miRefresh = new MenuItem(mnu, SWT.PUSH);
+		miRefresh.setText(Messages.AssetOverviewMap_RefreshLabel);
+		miRefresh.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
+		miRefresh.addListener(SWT.Selection, e->refresh());
+		
+		summaryTable.getControl().setMenu(mnu);
 		
 		ColumnViewerToolTipSupport.enableFor(summaryTable);
 		

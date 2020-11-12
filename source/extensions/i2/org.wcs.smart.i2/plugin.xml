@@ -75,7 +75,7 @@
             supportsCcaa="false">
       </class>
       <class
-            ca_property=".id.attribute.conservationArea"
+            ca_property=".attribute.conservationArea"
             class="org.wcs.smart.i2.model.IntelObservationAttribute"
             supportsCcaa="false">
       </class>
@@ -205,6 +205,11 @@
             ca_property=".id.profile.conservationArea"
             class="org.wcs.smart.i2.model.IntelProfileRecordSource"
             supportsCcaa="false">
+      </class>
+      <class
+            ca_property=".id.observationAttribute.attribute.conservationArea"
+            class="org.wcs.smart.i2.model.IntelObservationAttributeList"
+            supportsCcaa="true">
       </class>
    </extension>
    <extension

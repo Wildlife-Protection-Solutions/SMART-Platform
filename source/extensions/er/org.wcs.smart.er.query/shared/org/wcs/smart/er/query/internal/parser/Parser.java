@@ -30,12 +30,14 @@ public class Parser implements ParserConstants {
     case ATT_VALUE_KEY:
     case ATT_BOOL_KEY:
     case ATT_LIST_KEY:
+    case ATT_MLIST_KEY:
     case ATT_TREE_KEY:
     case ATT_DATE_KEY:
     case CAT_ATT_STR_KEY:
     case CAT_ATT_VALUE_KEY:
     case CAT_ATT_BOOL_KEY:
     case CAT_ATT_LIST_KEY:
+    case CAT_ATT_MLIST_KEY:
     case CM_CAT_ATT_LIST_KEY:
     case CM_CAT_ATT_TREE_KEY:
     case CAT_ATT_TREE_KEY:
@@ -75,12 +77,14 @@ public class Parser implements ParserConstants {
       case ATT_VALUE_KEY:
       case ATT_BOOL_KEY:
       case ATT_LIST_KEY:
+      case ATT_MLIST_KEY:
       case ATT_TREE_KEY:
       case ATT_DATE_KEY:
       case CAT_ATT_STR_KEY:
       case CAT_ATT_VALUE_KEY:
       case CAT_ATT_BOOL_KEY:
       case CAT_ATT_LIST_KEY:
+      case CAT_ATT_MLIST_KEY:
       case CM_CAT_ATT_LIST_KEY:
       case CM_CAT_ATT_TREE_KEY:
       case CAT_ATT_TREE_KEY:
@@ -137,12 +141,14 @@ public class Parser implements ParserConstants {
     case ATT_VALUE_KEY:
     case ATT_BOOL_KEY:
     case ATT_LIST_KEY:
+    case ATT_MLIST_KEY:
     case ATT_TREE_KEY:
     case ATT_DATE_KEY:
     case CAT_ATT_STR_KEY:
     case CAT_ATT_VALUE_KEY:
     case CAT_ATT_BOOL_KEY:
     case CAT_ATT_LIST_KEY:
+    case CAT_ATT_MLIST_KEY:
     case CM_CAT_ATT_LIST_KEY:
     case CM_CAT_ATT_TREE_KEY:
     case CAT_ATT_TREE_KEY:
@@ -180,12 +186,14 @@ public class Parser implements ParserConstants {
     case ATT_VALUE_KEY:
     case ATT_BOOL_KEY:
     case ATT_LIST_KEY:
+    case ATT_MLIST_KEY:
     case ATT_TREE_KEY:
     case ATT_DATE_KEY:
     case CAT_ATT_STR_KEY:
     case CAT_ATT_VALUE_KEY:
     case CAT_ATT_BOOL_KEY:
     case CAT_ATT_LIST_KEY:
+    case CAT_ATT_MLIST_KEY:
     case CM_CAT_ATT_LIST_KEY:
     case CM_CAT_ATT_TREE_KEY:
     case CAT_ATT_TREE_KEY:
@@ -518,12 +526,14 @@ public class Parser implements ParserConstants {
     case ATT_VALUE_KEY:
     case ATT_BOOL_KEY:
     case ATT_LIST_KEY:
+    case ATT_MLIST_KEY:
     case ATT_TREE_KEY:
     case ATT_DATE_KEY:
     case CAT_ATT_STR_KEY:
     case CAT_ATT_VALUE_KEY:
     case CAT_ATT_BOOL_KEY:
     case CAT_ATT_LIST_KEY:
+    case CAT_ATT_MLIST_KEY:
     case CM_CAT_ATT_LIST_KEY:
     case CM_CAT_ATT_TREE_KEY:
     case CAT_ATT_TREE_KEY:
@@ -681,6 +691,50 @@ public class Parser implements ParserConstants {
                              value = token.image;
                 filter = AttributeFilter.createListItemFilter(key,op,value);
       break;
+    case ATT_MLIST_KEY:
+      jj_consume_token(ATT_MLIST_KEY);
+                                   key = token.image;
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case K_OR:
+        jj_consume_token(K_OR);
+        break;
+      case K_AND:
+        jj_consume_token(K_AND);
+        break;
+      case K_EXACT:
+        jj_consume_token(K_EXACT);
+        break;
+      default:
+        jj_la1[18] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
+      }
+                                                       op = Operator.parseOperator(token.image);
+      value = MultiList();
+                filter = AttributeFilter.createListItemFilter(key,op,value);
+      break;
+    case CAT_ATT_MLIST_KEY:
+      jj_consume_token(CAT_ATT_MLIST_KEY);
+                                       key = token.image;
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case K_OR:
+        jj_consume_token(K_OR);
+        break;
+      case K_AND:
+        jj_consume_token(K_AND);
+        break;
+      case K_EXACT:
+        jj_consume_token(K_EXACT);
+        break;
+      default:
+        jj_la1[19] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
+      }
+                                                       op = Operator.parseOperator(token.image);
+      value = MultiList();
+                filter = CategoryAttributeFilter.createListItemFilter(key,op,value);
+      break;
     case CAT_ATT_LIST_KEY:
       jj_consume_token(CAT_ATT_LIST_KEY);
                                       key = token.image;
@@ -753,7 +807,7 @@ public class Parser implements ParserConstants {
                                      filter = MissionMemberFilter.createFilter(token.image);
       break;
     default:
-      jj_la1[18] = jj_gen;
+      jj_la1[20] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -791,7 +845,7 @@ public class Parser implements ParserConstants {
                         filter = CategoryAttributeFilter.createDateFilter(key, date1, date2, op);
       break;
     default:
-      jj_la1[19] = jj_gen;
+      jj_la1[21] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -881,7 +935,7 @@ public class Parser implements ParserConstants {
                   filter = ObserverFilter.createFilter(value);
       break;
     default:
-      jj_la1[20] = jj_gen;
+      jj_la1[22] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -925,7 +979,7 @@ public class Parser implements ParserConstants {
       jj_consume_token(LESSEQUAL);
       break;
     default:
-      jj_la1[21] = jj_gen;
+      jj_la1[23] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -945,7 +999,7 @@ public class Parser implements ParserConstants {
       jj_consume_token(NOT_CONTAINS);
       break;
     default:
-      jj_la1[22] = jj_gen;
+      jj_la1[24] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -967,11 +1021,33 @@ public class Parser implements ParserConstants {
                      fulltoken = fulltoken + " " + token.image;
       break;
     default:
-      jj_la1[23] = jj_gen;
+      jj_la1[25] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
     {if (true) return Operator.parseOperator(fulltoken);}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public String MultiList() throws ParseException {
+  String list = "";
+    jj_consume_token(DM_KEY);
+                  list=token.image;
+    label_4:
+    while (true) {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case COMMA:
+        ;
+        break;
+      default:
+        jj_la1[26] = jj_gen;
+        break label_4;
+      }
+      jj_consume_token(COMMA);
+      jj_consume_token(DM_KEY);
+                                                           list += "," + token.image;
+    }
+    {if (true) return list;}
     throw new Error("Missing return statement in function");
   }
 
@@ -984,7 +1060,7 @@ public class Parser implements ParserConstants {
       jj_consume_token(K_OR);
       break;
     default:
-      jj_la1[24] = jj_gen;
+      jj_la1[27] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -1001,7 +1077,7 @@ public class Parser implements ParserConstants {
   public Token jj_nt;
   private int jj_ntk;
   private int jj_gen;
-  final private int[] jj_la1 = new int[25];
+  final private int[] jj_la1 = new int[28];
   static private int[] jj_la1_0;
   static private int[] jj_la1_1;
   static private int[] jj_la1_2;
@@ -1013,16 +1089,16 @@ public class Parser implements ParserConstants {
       jj_la1_init_3();
    }
    private static void jj_la1_init_0() {
-      jj_la1_0 = new int[] {0x40100,0x40100,0x8000000,0x40100,0x40100,0x0,0x0,0x400,0x100000,0x0,0x0,0x400,0x0,0x280,0x100,0x40000,0x0,0x0,0x0,0x0,0x0,0x3f800,0x3800000,0x4000100,0x280,};
+      jj_la1_0 = new int[] {0x80100,0x80100,0x10000000,0x80100,0x80100,0x0,0x0,0x800,0x200000,0x0,0x0,0x800,0x0,0x280,0x100,0x80000,0x0,0x0,0x680,0x680,0x0,0x0,0x0,0x7f000,0x7000000,0x8000100,0x800,0x280,};
    }
    private static void jj_la1_init_1() {
-      jj_la1_1 = new int[] {0xffc2fffe,0xffc2fffe,0x0,0xffc2fffe,0xffc2fffe,0x20000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xffc0fffe,0x410,0x8000208,0xffc0fffc,0x8080,0x87c00104,0x0,0x0,0x0,0x0,};
+      jj_la1_1 = new int[] {0xfe17fffc,0xfe17fffc,0x0,0xfe17fffc,0xfe17fffc,0x100000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xfe07fffc,0x1020,0x40000810,0x0,0x0,0xfe07fff8,0x40200,0x3e000408,0x0,0x0,0x0,0x0,0x0,};
    }
    private static void jj_la1_init_2() {
-      jj_la1_2 = new int[] {0x4be,0x4be,0x0,0x4be,0x4be,0x0,0xf000f800,0x0,0x0,0xf000f800,0xffe0000,0x0,0xffe0000,0x0,0x0,0x4be,0x0,0x8,0x43e,0x0,0x426,0x0,0x0,0x0,0x0,};
+      jj_la1_2 = new int[] {0x25f7,0x25f7,0x0,0x25f7,0x25f7,0x0,0x8007c000,0x0,0x0,0x8007c000,0x7ff00000,0x0,0x7ff00000,0x0,0x0,0x25f7,0x0,0x40,0x0,0x0,0x21f7,0x0,0x2134,0x0,0x0,0x0,0x0,0x0,};
    }
    private static void jj_la1_init_3() {
-      jj_la1_3 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0x1f,0x0,0x0,0x1f,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
+      jj_la1_3 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0xff,0x0,0x0,0xff,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
    }
 
   /** Constructor with InputStream. */
@@ -1036,7 +1112,7 @@ public class Parser implements ParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 25; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 28; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -1050,7 +1126,7 @@ public class Parser implements ParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 25; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 28; i++) jj_la1[i] = -1;
   }
 
   /** Constructor. */
@@ -1060,7 +1136,7 @@ public class Parser implements ParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 25; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 28; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -1070,7 +1146,7 @@ public class Parser implements ParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 25; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 28; i++) jj_la1[i] = -1;
   }
 
   /** Constructor with generated Token Manager. */
@@ -1079,7 +1155,7 @@ public class Parser implements ParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 25; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 28; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -1088,7 +1164,7 @@ public class Parser implements ParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 25; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 28; i++) jj_la1[i] = -1;
   }
 
   private Token jj_consume_token(int kind) throws ParseException {
@@ -1139,12 +1215,12 @@ public class Parser implements ParserConstants {
   /** Generate ParseException. */
   public ParseException generateParseException() {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[102];
+    boolean[] la1tokens = new boolean[105];
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
     }
-    for (int i = 0; i < 25; i++) {
+    for (int i = 0; i < 28; i++) {
       if (jj_la1[i] == jj_gen) {
         for (int j = 0; j < 32; j++) {
           if ((jj_la1_0[i] & (1<<j)) != 0) {
@@ -1162,7 +1238,7 @@ public class Parser implements ParserConstants {
         }
       }
     }
-    for (int i = 0; i < 102; i++) {
+    for (int i = 0; i < 105; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;

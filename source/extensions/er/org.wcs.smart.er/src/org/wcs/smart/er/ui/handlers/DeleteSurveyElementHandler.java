@@ -46,6 +46,7 @@ import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.SurveyPermissionManager;
+import org.wcs.smart.er.hibernate.SurveyMissionProxy;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
@@ -53,8 +54,6 @@ import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyWaypoint;
-import org.wcs.smart.er.ui.SurveyListTreeNode;
-import org.wcs.smart.er.ui.SurveyListTreeNode.Type;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -83,12 +82,13 @@ public class DeleteSurveyElementHandler {
 		Object selection = selectionService.getSelection();
 		if (selection == null || !(selection instanceof StructuredSelection)) return;
 		
-		final List<SurveyListTreeNode> nodes = new ArrayList<SurveyListTreeNode>();
+		final List<SurveyMissionProxy> nodes = new ArrayList<SurveyMissionProxy>();
 		final List<SurveyDesignEditorInput> designs = new ArrayList<SurveyDesignEditorInput>();
 		for (Iterator<?> iterator = ((IStructuredSelection)selection).iterator(); iterator.hasNext();) {
 			Object delete = (Object) iterator.next();
-			if (delete instanceof SurveyListTreeNode){
-				nodes.add((SurveyListTreeNode)delete);
+			
+			if (delete instanceof SurveyMissionProxy){
+				nodes.add((SurveyMissionProxy)delete);
 			}else if (delete instanceof SurveyDesignEditorInput){
 				designs.add((SurveyDesignEditorInput) delete);
 			}
@@ -117,8 +117,8 @@ public class DeleteSurveyElementHandler {
 					
 						monitor.beginTask(Messages.DeleteSurveyElementHandler_ProgressTaskName, nodes.size());
 						try(Session s = HibernateManager.openSession()){
-							for (SurveyListTreeNode node : nodes){
-								monitor.subTask(MessageFormat.format(Messages.DeleteSurveyElementHandler_ProgressItem, new Object[]{node.getLabel()}));
+							for (SurveyMissionProxy node : nodes){
+								monitor.subTask(MessageFormat.format(Messages.DeleteSurveyElementHandler_ProgressItem, new Object[]{node.getId()}));
 								deleteItem(node,s);
 								monitor.worked(1);
 							}
@@ -165,10 +165,10 @@ public class DeleteSurveyElementHandler {
 		}
 	}
 	
-	private void deleteItem(SurveyListTreeNode element, Session session){
-		if (element.getType() == Type.SURVEY){
+	private void deleteItem(SurveyMissionProxy element, Session session){
+		if (element.getType() == SurveyMissionProxy.Type.SURVEY){
 			deleteSurvey(element.getUuid(), session);
-		}else if (element.getType() == Type.MISSION){
+		}else if (element.getType() == SurveyMissionProxy.Type.MISSION){
 			deleteMission(element.getUuid(), session);
 			
 		}

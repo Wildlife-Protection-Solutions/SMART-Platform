@@ -25,11 +25,13 @@ import java.util.List;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.wcs.smart.asset.AssetUtils;
-import org.wcs.smart.asset.query.model.observation.AssetAttributeQueryColumn;
-import org.wcs.smart.asset.query.model.observation.AssetCategoryQueryColumn;
 import org.wcs.smart.asset.query.model.observation.FixedQueryColumn;
 import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.ui.AttributeColumnLabelProvider;
+import org.wcs.smart.query.common.ui.CategoryColumnLabelProvider;
 import org.wcs.smart.query.common.ui.QueryColumnLabelProvider;
+import org.wcs.smart.query.model.AttributeQueryColumn;
+import org.wcs.smart.query.model.CategoryQueryColumn;
 import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
 
@@ -57,9 +59,9 @@ public class AssetTableColumn {
 			}
 			return new QueryColumnLabelProvider(column);
 			
-		}else if (column instanceof AssetAttributeQueryColumn){
+		}else if (column instanceof AttributeQueryColumn){
 			return new AttributeColumnLabelProvider(column);
-		}else if (column instanceof AssetCategoryQueryColumn){
+		}else if (column instanceof CategoryQueryColumn){
 			return new CategoryColumnLabelProvider(column);
 		}else if (column instanceof GridQueryColumn){
 			return new QueryColumnLabelProvider(column);

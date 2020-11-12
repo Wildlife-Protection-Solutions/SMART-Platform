@@ -51,6 +51,7 @@ import org.wcs.smart.asset.ui.views.map.IOverviewTableColumn;
 import org.wcs.smart.asset.ui.views.map.IOverviewTableColumn.GroupByOption;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.util.UuidUtils;
@@ -184,7 +185,7 @@ public class CategoryColumnEngine implements IColumnEngine {
 						attributeKeyToAttribute.put(attribute.getKeyId(), attribute);
 					}
 					try {
-						String where = asSql(attributeFilter, namesToValues);
+						String where = asSql(attributeFilter, namesToValues, connection);
 						sb.append(" AND ( "); //$NON-NLS-1$
 						sb.append(where);
 						sb.append(" ) "); //$NON-NLS-1$
@@ -232,6 +233,7 @@ public class CategoryColumnEngine implements IColumnEngine {
 	}
 		
 	private synchronized void addAttributeColumn(Attribute attribute, Connection connection) throws SQLException {
+		if (attribute.getType() == AttributeType.MLIST) return; //must be treated differently
 		if(attributeToColumn.containsKey(attribute.getKeyId())) return; //already exists
 		
 		String column = "attribute_" + attributeToColumn.keySet().size(); //$NON-NLS-1$
@@ -252,6 +254,8 @@ public class CategoryColumnEngine implements IColumnEngine {
 			case TREE:
 				sb.append(" varchar(32672) "); //$NON-NLS-1$
 				break;
+			case MLIST:
+				return; //not supported here
 		}
 		log(sb.toString());
 		connection.createStatement().executeUpdate(sb.toString());
@@ -288,6 +292,8 @@ public class CategoryColumnEngine implements IColumnEngine {
 			sb.append(waypointFilterTable);
 			sb.append(".ob_uuid"); //$NON-NLS-1$
 			break;
+		case MLIST:
+			return; //not supported here
 		}
 		sb.append(")"); //$NON-NLS-1$
 		
@@ -301,6 +307,52 @@ public class CategoryColumnEngine implements IColumnEngine {
 		attributeToColumn.put(attribute.getKeyId(), column);
 	}
 	
+	private synchronized String addMultiSelectAttributeListFilter(AttributeExpression filter, Connection connection) throws SQLException {
+		Attribute attribute = findAttribute(filter.getAttributeKey());
+		if (attribute.getType() != AttributeType.MLIST) return null;
+		
+		
+		String column = "mattribute_" + attributeToColumn.keySet().size(); //$NON-NLS-1$
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append("ALTER TABLE "); //$NON-NLS-1$
+		sb.append(waypointFilterTable);
+		sb.append(" ADD COLUMN "); //$NON-NLS-1$
+		sb.append(column);
+		sb.append(" varchar(32672) "); //$NON-NLS-1$
+		log(sb.toString());
+		connection.createStatement().executeUpdate(sb.toString());
+		
+		
+		sb = new StringBuilder();
+		sb.append("UPDATE "); //$NON-NLS-1$
+		sb.append(waypointFilterTable);
+		sb.append(" SET "); //$NON-NLS-1$
+		sb.append(column);
+		sb.append(" = "); //$NON-NLS-1$
+		
+		
+		sb.append(" (SELECT c.keyid FROM smart.dm_attribute_list c join "); //$NON-NLS-1$
+		sb.append(" smart.wp_observation_attributes_list d on c.uuid = d.list_element_uuid "); //$NON-NLS-1$
+		sb.append(" join smart.wp_observation_attributes a on a.attribute_uuid = ? and "); //$NON-NLS-1$
+		sb.append(" a.uuid = d.observation_attribute_uuid WHERE a.observation_uuid = "); //$NON-NLS-1$
+		sb.append(waypointFilterTable);
+		sb.append(".ob_uuid "); //$NON-NLS-1$
+		sb.append("AND c.keyid = ? "); //$NON-NLS-1$
+		sb.append(")"); //$NON-NLS-1$
+		
+		log(sb.toString());
+		log(attribute.getUuid().toString());
+		
+		PreparedStatement ps = connection.prepareStatement(sb.toString());
+		ps.setBytes(1, UuidUtils.uuidToByte(attribute.getUuid()));
+		ps.setString(2, filter.getStringValue());
+		ps.executeUpdate();
+		
+		attributeToColumn.put(filter.toString(), column);
+		
+		return column;
+	}
 	
 	private synchronized void createWaypointTable(Connection connection) throws SQLException{
 		if (waypointFilterTable != null) return;
@@ -356,18 +408,18 @@ public class CategoryColumnEngine implements IColumnEngine {
 //		System.out.println(message);
 	}
 	
-	private String asSql(BracketExpression filter, HashMap<String, Object> namesToValues) throws Exception{
-		String part1 = asSql(filter.getFilter(), namesToValues);
+	private String asSql(BracketExpression filter, HashMap<String, Object> namesToValues, Connection connection) throws Exception{
+		String part1 = asSql(filter.getFilter(), namesToValues, connection);
 		return "( " + part1 + " )"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
-	private String asSql(BooleanExpression filter, HashMap<String, Object> namesToValues) throws Exception{
-		String part1 = asSql(filter.getFilter1(), namesToValues);
-		String part2 = asSql(filter.getFilter2(), namesToValues);
+	private String asSql(BooleanExpression filter, HashMap<String, Object> namesToValues, Connection connection) throws Exception{
+		String part1 = asSql(filter.getFilter1(), namesToValues, connection);
+		String part2 = asSql(filter.getFilter2(), namesToValues, connection);
 		return part1 + " " + filter.getOperator().operator.sql + " " + part2; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
-	private String asSql(AttributeExpression filter, HashMap<String, Object> namesToValues) throws Exception{
+	private String asSql(AttributeExpression filter, HashMap<String, Object> namesToValues, Connection connection) throws Exception{
 		String columnName = attributeToColumn.get( filter.getAttributeKey() );
 		Attribute attribute = attributeKeyToAttribute.get( filter.getAttributeKey() );
 		
@@ -476,20 +528,24 @@ public class CategoryColumnEngine implements IColumnEngine {
 			namesToValues.put(key1, c1);
 			namesToValues.put(key2, c2);
 			break;
-		
+		case MLIST:
+			String column = addMultiSelectAttributeListFilter(filter, connection);
+			sb.append( " "); //$NON-NLS-1$
+			sb.append(column);
+			sb.append( " is not null "); //$NON-NLS-1$
 		}
 		
 		sb.append(" ) "); //$NON-NLS-1$
 		return sb.toString();
 	}
 	
-	public String asSql(IExpression filter, HashMap<String, Object> namesToValues) throws Exception{
+	public String asSql(IExpression filter, HashMap<String, Object> namesToValues, Connection connection) throws Exception{
 		if (filter instanceof AttributeExpression) {
-			return asSql((AttributeExpression)filter, namesToValues);
+			return asSql((AttributeExpression)filter, namesToValues, connection);
 		}else if (filter instanceof BracketExpression) {
-			return asSql((BracketExpression)filter, namesToValues);
+			return asSql((BracketExpression)filter, namesToValues, connection);
 		}else if (filter instanceof BooleanExpression) {
-			return asSql((BooleanExpression)filter, namesToValues);
+			return asSql((BooleanExpression)filter, namesToValues, connection);
 		}
 		return ""; //$NON-NLS-1$
 	}

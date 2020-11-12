@@ -94,7 +94,7 @@ public class GeoJsonExporter {
 	 * @param session
 	 * @throws IOException 
 	 */
-	public void exportResults(SimpleQuery query, AbstractDbFeatureResultSet results, Session session) throws IOException{
+	public void exportResults(SimpleQuery query, AbstractDbFeatureResultSet<IResultItem> results, Session session) throws IOException{
 		geoJsonOutput = new String();
 
 		session.doWork(new Work(){
@@ -109,7 +109,7 @@ public class GeoJsonExporter {
 					SimpleFeatureType type = DataUtilities.createType("smartqueryresults", results.getFeatureSchemaDef(columns, false, false)); //$NON-NLS-1$
 					ArrayList<SimpleFeature> features = new ArrayList<SimpleFeature>();
 					
-					IQueryResultSetIterator<? extends IResultItem> itemiterator = results.iterator(500, session);
+					IQueryResultSetIterator<IResultItem> itemiterator = results.iterator(500, session);
 					for (Iterator<IResultItem> iterator = itemiterator; iterator.hasNext();) {
 						IResultItem resultItem = (IResultItem) iterator.next();	
 						SimpleFeature sf = results.toFeature(resultItem, columns, session, type);

@@ -28,11 +28,11 @@ import java.util.NoSuchElementException;
 import org.geotools.data.FeatureReader;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
 import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.engine.WaypointQueryResultItem;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.IPagedQuery;
 import org.wcs.smart.query.model.QueryColumn;
@@ -108,7 +108,7 @@ public class SurveyFeatureReader implements FeatureReader<SimpleFeatureType, Sim
 	 */
 	@Override
 	public SimpleFeature next() throws IOException, IllegalArgumentException, NoSuchElementException {
-		SurveyQueryResultItem next = (SurveyQueryResultItem) this.fIterator.next();
+		WaypointQueryResultItem next = (WaypointQueryResultItem) this.fIterator.next();
 		SimpleFeature f = SurveyResultItemFeature.createObservationFeature(next, columns, ftype);
 		return f;
 	}

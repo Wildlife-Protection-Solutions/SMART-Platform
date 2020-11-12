@@ -50,12 +50,14 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.TableColumn;
 import org.wcs.smart.IProjectionProvider;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.model.AttributeQueryColumn;
 import org.wcs.smart.query.model.IQueryEditCommand;
 import org.wcs.smart.query.model.IQueryResultInfoProvider;
 import org.wcs.smart.query.model.IQueryType;
@@ -334,7 +336,17 @@ public abstract class QueryResultsTable {
 	private QueryTableViewerColumn[] createColumns(TableViewer viewer, List<QueryColumn> columns) {
 		QueryTableViewerColumn[] viewers = new QueryTableViewerColumn[columns.size()];
 		for (int i = 0; i < columns.size(); i++) {
-			viewers[i] = new QueryTableViewerColumn(viewer,columns.get(i), getColumnSorter(), getLabelProvider(columns.get(i), columns));
+		
+			IQueryColumnSorter sorter = getColumnSorter();
+		
+			QueryColumn c = columns.get(i);
+			if (c instanceof AttributeQueryColumn 
+					&& ((AttributeQueryColumn)c).getAttributeType() == AttributeType.MLIST) {
+				//no sorting on multi-list query columns
+				sorter = null;
+			}
+			
+			viewers[i] = new QueryTableViewerColumn(viewer,c, sorter, getLabelProvider(c, columns));
 		}
 		return viewers;
 	}

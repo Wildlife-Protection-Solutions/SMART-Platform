@@ -101,26 +101,49 @@ public class AddAttributeDialog2 extends SmartStyledTitleDialog {
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true,true);
 		gd.widthHint = 200;
 		attributePanel.setLayoutData(gd);
+		final boolean isadd = toUpdate.getKeyId() == null;
+		
 		attributePanel.addValidationListener(new AttributeInfoPanel.IValidationListener() {
 			@Override
 			public void validated(boolean hasError) {
-						Button x = getButton(IDialogConstants.OK_ID);
-						if (x != null) {
-							if (hasError) {
-								getButton(IDialogConstants.OK_ID).setEnabled(
-										false);
-							} else {
-								getButton(IDialogConstants.OK_ID).setEnabled(
-										true);
-							}
-						}
+				Button x = getButton(IDialogConstants.OK_ID);
+				if (x != null) {
+					getButton(IDialogConstants.OK_ID).setEnabled(!hasError);
+				}
+				if (isadd) {
+					switch(attributePanel.getSelectedType()) {
+					case BOOLEAN:
+						setMessage(Messages.AddAttributeDialog2_NewBooleanMsg);
+						break;
+					case DATE:
+						setMessage(Messages.AddAttributeDialog2_NewDateMsg);
+						break;
+					case LIST:
+						setMessage(Messages.AddAttributeDialog2_NewListMsg);
+						break;
+					case MLIST:
+						setMessage(Messages.AddAttributeDialog2_NewMultiListMsg);
+						break;
+					case NUMERIC:
+						setMessage(Messages.AddAttributeDialog2_NewNumberMsg);
+						break;
+					case TEXT:
+						setMessage(Messages.AddAttributeDialog2_NewTextMsg);
+						break;
+					case TREE:
+						setMessage(Messages.AddAttributeDialog2_NewTreeMsg);
+						break;
+					default:
+						break;
+					}
+				}
 				
 			}
 		});
 		
 		attributePanel.setAttribute(toUpdate, siblings, defaultLang);
 		
-		if (toUpdate.getKeyId() == null){
+		if (isadd){
 			getShell().setText(Messages.AddAttributeDialog2_DialogTitle);
 			setMessage(Messages.AddAttributeDialog2_New_DialogMessage);
 			setTitle(Messages.AddAttributeDialog2_DialogTitle);

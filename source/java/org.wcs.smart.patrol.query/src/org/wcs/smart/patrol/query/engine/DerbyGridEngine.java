@@ -60,6 +60,7 @@ import org.wcs.smart.map.raster.GridMetadata;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationAttributeList;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
@@ -73,8 +74,6 @@ import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolGridQueryDefinition;
 import org.wcs.smart.patrol.query.model.PatrolGridQueryDefinition.ZeroFilterOption;
 import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
-import org.wcs.smart.patrol.query.model.PatrolQueryAttachmentResultItem;
-import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.PatrolValueOption;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItem;
 import org.wcs.smart.query.QueryPlugIn;
@@ -104,7 +103,7 @@ import org.wcs.smart.query.model.summary.CombinedValueItem;
 import org.wcs.smart.query.model.summary.IValueItem;
 import org.wcs.smart.query.model.summary.IValueItem.ValueType;
 
-public class DerbyGridEngine extends DerbyPatrolQueryEngine{
+public class DerbyGridEngine extends AbstractPatrolQueryEngine{
 	private GridQueryResult myResults;
 	
 	private PatrolGriddedQuery query;
@@ -323,7 +322,9 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 				
 				String strAggValue = "number_value"; //$NON-NLS-1$
 				strAgg = tmp.getAggregationKey();
-				if (tmp.getAttributeType() == AttributeType.LIST || tmp.getAttributeType() == AttributeType.TREE){
+				if (tmp.getAttributeType() == AttributeType.LIST || 
+						tmp.getAttributeType() == AttributeType.MLIST ||
+						tmp.getAttributeType() == AttributeType.TREE){
 					strAgg="count";  //$NON-NLS-1$
 					strAggValue = "value";  //$NON-NLS-1$
 					
@@ -339,7 +340,9 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 				
 				if (tmp.getAttributeType() == AttributeType.NUMERIC){
 					sql.append("SELECT number_value  "); //$NON-NLS-1$
-				}else if (tmp.getAttributeType() == AttributeType.TREE || tmp.getAttributeType() == AttributeType.LIST){
+				}else if (tmp.getAttributeType() == AttributeType.TREE ||
+						tmp.getAttributeType() == AttributeType.MLIST ||
+						tmp.getAttributeType() == AttributeType.LIST){
 					sql.append("SELECT distinct "); //$NON-NLS-1$
 					if (tmp.getValueType() == ValueType.OBSERVATION){
 						sql.append(dataTable);
@@ -438,7 +441,27 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 					sql.append( tablePrefix.get(AttributeListItem.class));
 					p1 = addParameterValue(tmp.getItemKey());
 					sql.append(".keyid = " + p1); //$NON-NLS-1$
+				}else if (tmp.getAttributeType() == AttributeType.MLIST){
 					
+					sql.append(" JOIN " ); //$NON-NLS-1$
+					sql.append(tableNamePrefix(WaypointObservationAttributeList.class));
+					sql.append(" on "); //$NON-NLS-1$
+					sql.append( tablePrefix.get(WaypointObservationAttribute.class));
+					sql.append(".uuid = "); //$NON-NLS-1$
+					sql.append( tablePrefix.get(WaypointObservationAttributeList.class));
+					sql.append(".observation_attribute_uuid "); //$NON-NLS-1$
+					
+					sql.append(" JOIN " + tableNames.get(AttributeListItem.class) ); //$NON-NLS-1$
+					sql.append(" as "); //$NON-NLS-1$
+					sql.append( tablePrefix.get(AttributeListItem.class));
+					sql.append(" on "); //$NON-NLS-1$
+					sql.append( tablePrefix.get(AttributeListItem.class));
+					sql.append(".uuid = "); //$NON-NLS-1$
+					sql.append( tablePrefix.get(WaypointObservationAttributeList.class));
+					sql.append(".list_element_uuid and "); //$NON-NLS-1$
+					sql.append( tablePrefix.get(AttributeListItem.class));
+					p1 = addParameterValue(tmp.getItemKey());
+					sql.append(".keyid = " + p1); //$NON-NLS-1$ 
 				}else if (tmp.getAttributeType() == AttributeType.TREE){
 					sql.append(" join "); //$NON-NLS-1$
 					sql.append(tableNames.get(AttributeTreeNode.class));
@@ -736,7 +759,7 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 			}
 		}
 		sql.append( " and "); //$NON-NLS-1$
-		sql.append(PatrolFilterSqlGenerator.INSTANCE.toSql(caFilter, this));
+		sql.append(PatrolFilterSqlGenerator.INSTANCE.asSql(caFilter, tablePrefix(Patrol.class), this));
 		
 		QueryPlugIn.logSql(sql.toString());		
 		try(ResultSet rs = parseQueryString(c, sql.toString()).executeQuery();){
@@ -780,7 +803,7 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 	}
 
 	@Override
-	protected String getTemporaryTableSelectClause(boolean includeObservations) {
+	public String getTemporaryTableSelectClause(boolean includeObservations) {
 		StringBuilder sql = new StringBuilder();
 		sql.append(" SELECT DISTINCT "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".ca_uuid, "); //$NON-NLS-1$
@@ -815,10 +838,10 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 	}
 
 	@Override
-	protected String getTemporaryTableCreateClause(String tableName) {
+	public String getTemporaryTableCreateClause(String tableName) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
-		sql.append("p_ca_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("ca_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("p_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("p_id varchar(32),"); //$NON-NLS-1$
 		sql.append("p_station_uuid char(16) for bit data,"); //$NON-NLS-1$
@@ -844,28 +867,6 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 		return sql.toString();
 	}
 
-	@Override
-	protected void buildTemporaryTableIndexes(Connection c, String tableName)
-			throws SQLException {
-		super.buildTemporaryTableIndexes(c, tableName);
-		
-		StringBuilder sql = new StringBuilder();
-		sql.append("CREATE INDEX " + tableName + "_wp_uuid_idx on " +  tableName + "(wp_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		QueryPlugIn.logSql(sql.toString());
-		c.createStatement().execute(sql.toString());
-	}
-
-	@Override
-	protected PatrolQueryResultItem asQueryResultItem(ResultSet rs, Session session)
-			throws SQLException {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	protected PatrolQueryAttachmentResultItem asQueryAttachmentResultItem(ResultSet rs, Session session) throws SQLException{
-		throw new UnsupportedOperationException();
-	}
-
 
 	@Override
 	public Session getCurrentConnection() {
@@ -874,5 +875,10 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 
 	@Override
 	public void dropTables(Connection c) throws SQLException {
+	}
+	
+	@Override
+	public void createTemporaryTableIndexes(Connection c, String tableName) throws SQLException {
+
 	}
 }

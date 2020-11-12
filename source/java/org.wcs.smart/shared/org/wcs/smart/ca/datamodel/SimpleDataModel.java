@@ -1,5 +1,6 @@
 package org.wcs.smart.ca.datamodel;
 
+import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -41,9 +42,11 @@ public class SimpleDataModel {
 		this.ca = ca;
 		this.categories = new ArrayList<Category>();
 		this.categories.addAll(rootCategories);
+		this.categories.sort((a,b) -> Integer.compare(a.getCategoryOrder(), b.getCategoryOrder()));
 		
 		this.attributes = new ArrayList<Attribute>();
 		this.attributes.addAll(attributes);
+		this.attributes.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
 		
 	}
 	

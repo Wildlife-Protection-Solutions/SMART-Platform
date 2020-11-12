@@ -27,13 +27,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -47,10 +42,11 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
-import org.hibernate.query.Query;
-import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.hibernate.SurveyFilter;
+import org.wcs.smart.er.hibernate.SurveyMissionProxy;
 import org.wcs.smart.er.internal.Messages;
+import org.wcs.smart.er.ui.SurveyFilterDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.util.SmartUtils;
 
@@ -64,7 +60,7 @@ import org.wcs.smart.util.SmartUtils;
  *
  */
 
-public class MultiMissionExportDialog extends XmlMultiExportTreeViewerDialog implements IMissionFilteringView{
+public class MultiMissionExportDialog extends XmlMultiExportTreeViewerDialog {
 
 	private static final String OUTPUT_DIR = "outputDir"; //$NON-NLS-1$
 	private static final String INCLUDE_ATTACHMENT = "attachements"; //$NON-NLS-1$
@@ -75,16 +71,21 @@ public class MultiMissionExportDialog extends XmlMultiExportTreeViewerDialog imp
 		dialogSettings.put(INCLUDE_ATTACHMENT, true);
 	}
 
-	private MissionViewFilter currentFilter = new MissionViewFilter();
+	private SurveyFilter currentFilter;
+	
 	
 	/**
 	 * Creates a new dialog.
 	 * 
 	 * @param parentShell parent shell
 	 */
-	public MultiMissionExportDialog(Shell parentShell) {
+	public MultiMissionExportDialog(Shell parentShell, SurveyFilter defaultFilter) {
 		super(parentShell, Messages.MultiMissionExportDialog_FilterLabel);
-		this.currentFilter.setDateFilter(DateFilter.LAST_30_DAYS, null, null);
+		if (defaultFilter != null) {
+			currentFilter = defaultFilter;
+		}else {
+			currentFilter = new SurveyFilter();
+		}	
 	}
 
 	@Override
@@ -144,7 +145,7 @@ public class MultiMissionExportDialog extends XmlMultiExportTreeViewerDialog imp
 	
 	@Override
 	protected void handleFilterLinkClicked() {
-		MissionFilterDialog pfd = new MissionFilterDialog(getShell(), MultiMissionExportDialog.this);
+		SurveyFilterDialog pfd = new SurveyFilterDialog(getShell(), this, currentFilter);
 		pfd.open();
 	}
 
@@ -153,66 +154,26 @@ public class MultiMissionExportDialog extends XmlMultiExportTreeViewerDialog imp
 		Job loadMissions = new Job(Messages.MultiMissionExportDialog_LoadingListJobName){
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				List<SurveyTreeItem> dataList = new ArrayList<SurveyTreeItem>();
+				List<SurveyMissionProxy> dataList = new ArrayList<>();
 				
 				try(Session s = HibernateManager.openSession()){
 					s.beginTransaction();
 					try{
-						Query<?> q = currentFilter.buildQuery(s); 
-						List<?> results = q.list();
-						
-						
-						SurveyTreeItem prevSurvey = null;
-						
-						for(Object x : results){
-							Object[] row = (Object[])x;
-							String surveyName = (String) row[4];
-	
-							if(prevSurvey != null && surveyName.equals(prevSurvey.getName()) ){
-								MissionTreeItem mti = new MissionTreeItem();
-								mti.setName(createMissionLabel((String)row[1], ((LocalDateTime)row[2]).toLocalDate(), ((LocalDateTime)row[3]).toLocalDate()));
-								mti.setUuid((UUID) row[0]);
-								mti.setParent(prevSurvey);
-								prevSurvey.getChildren().add(mti);
-							}else{
-								SurveyTreeItem surveyTreeItem = new SurveyTreeItem();
-								surveyTreeItem.setName(surveyName);
-								surveyTreeItem.setUuid((UUID) row[5]);
-								surveyTreeItem.setSurveyDesignName((String)row[6]);
-								
-								MissionTreeItem mti = new MissionTreeItem();
-								mti.setName(createMissionLabel((String)row[1], ((LocalDateTime)row[2]).toLocalDate(), ((LocalDateTime)row[3]).toLocalDate()));
-								mti.setUuid((UUID) row[0]);
-								mti.setParent(surveyTreeItem);
-								surveyTreeItem.getChildren().add(mti);
-								
-								prevSurvey = surveyTreeItem;
-								dataList.add(surveyTreeItem);
-	
-							}
-						}
-						
+						dataList.addAll(currentFilter.executeQuery(s));
 					}finally{
 						if (s.getTransaction().isActive()){
 							s.getTransaction().commit();
 						}
 					}
 				}
-				
-				final Object[] data = new Object[dataList.size()];
-				
-				int counter = 0;
-				for(SurveyTreeItem si : dataList){
-					data[counter] = si;
-					counter++;
-				}
+		
 				if (getShell() == null || getShell().isDisposed()) return Status.OK_STATUS;
 				
 				getShell().getDisplay().asyncExec(new Runnable(){
 					@Override
 					public void run() {
 						if (getTreeViewer().getTree().isDisposed()) return;
-						getTreeViewer().setInput(data);
+						getTreeViewer().setInput(dataList);
 						getTreeViewer().refresh();
 					}
 				});
@@ -221,10 +182,6 @@ public class MultiMissionExportDialog extends XmlMultiExportTreeViewerDialog imp
 			
 		};
 		loadMissions.schedule();	
-	}
-	
-	private String createMissionLabel(String id, LocalDate start, LocalDate end){
-		return id + " [" + DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(start) + " - " + DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(end) + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 	@Override
@@ -237,7 +194,7 @@ public class MultiMissionExportDialog extends XmlMultiExportTreeViewerDialog imp
 		loadObjectData();
 	}
 
-	public MissionViewFilter getFilter() {
+	public SurveyFilter getFilter() {
 		return currentFilter;
 	}
 

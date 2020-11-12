@@ -157,6 +157,7 @@ import org.wcs.smart.i2.model.IntelEntityTypeAttributeGroup;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.model.IntelObservation;
 import org.wcs.smart.i2.model.IntelObservationAttribute;
+import org.wcs.smart.i2.model.IntelObservationAttributeList;
 import org.wcs.smart.i2.model.IntelPermission;
 import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelProfileEntityType;
@@ -186,6 +187,7 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationAttributeList;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.observation.query.model.ObsObservationQuery;
 import org.wcs.smart.observation.query.model.ObservationGriddedQuery;
@@ -375,7 +377,8 @@ public enum SmartTable {
 	WAYPOINTATTACHMENT(WaypointAttachment.class,".waypoint.conservationArea"),
 	WAYPOINTOBSERVATION(WaypointObservation.class,".observationGroup.waypoint.conservationArea"),
 	WAYPOINTOBSERVATIONGROUP(WaypointObservationGroup.class,".waypoint.conservationArea"),
-	WAYPOINTOBSERVATIONATTRIBUTE(WaypointObservationAttribute.class,".id.observation.observationGroup.waypoint.conservationArea"),
+	WAYPOINTOBSERVATIONATTRIBUTE(WaypointObservationAttribute.class,".attribute.conservationArea"),
+	WAYPOINTOBSERVATIONATTRIBUTELIST(WaypointObservationAttributeList.class,".observationAttribute.attribute.conservationArea"),
 	
 	I2_ATTACHMENT(IntelAttachment.class, null),
 	I2_ATTRIBUTE(IntelAttribute.class, null),
@@ -392,7 +395,8 @@ public enum SmartTable {
 	I2_ENTITYTYPE_ATTRIBUTE(IntelEntityTypeAttribute.class, ".id.entityType.conservationArea"),
 	I2_LOCATION(IntelLocation.class, null),
 	I2_OBSERVATION(IntelObservation.class, ".location.conservationArea"),
-	I2_OBSERVATION_ATTRIBUTE(IntelObservationAttribute.class,".id.attribute.conservationArea"),
+	I2_OBSERVATION_ATTRIBUTE(IntelObservationAttribute.class,".attribute.conservationArea"),
+	I2_OBSERVATION_ATTRIBUTE_LIST(IntelObservationAttributeList.class,".observationAttribute.attribute.conservationArea"),
 	I2_RECORD(IntelRecord.class, null),
 	I2_RECORD_ATTACHMENT(IntelRecordAttachment.class,".id.record.conservationArea"),
 	I2_RECORD_OBS_QUERY(IntelRecordObservationQuery.class, null),

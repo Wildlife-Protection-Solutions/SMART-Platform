@@ -207,7 +207,9 @@ public class SummaryDataModelContentProvider implements ITreeContentProvider{
 				//filter out numeric only
 				for (Iterator<Attribute> iterator = atts.iterator(); iterator.hasNext();) {
 					Attribute attribute = (Attribute) iterator.next();
-					if (attribute.getType() != AttributeType.LIST && attribute.getType() != AttributeType.TREE){
+					if (attribute.getType() != AttributeType.LIST && 
+							attribute.getType() != AttributeType.TREE &&
+							attribute.getType() != AttributeType.MLIST){
 						iterator.remove();
 					}
 					
@@ -230,11 +232,12 @@ public class SummaryDataModelContentProvider implements ITreeContentProvider{
 				boolean showInactive = QueryFilterConfigManager.getInstance().isShowInactiveItems();				
 				List<Attribute> atts = IDataModelManager.getAttributes(dataModel, !showInactive);
 				
-				//filter out numeric only
+				//filter out numeric/tree/list
 				for (Iterator<Attribute> iterator = atts.iterator(); iterator.hasNext();) {
 					Attribute attribute = (Attribute) iterator.next();
 					if (attribute.getType() != AttributeType.NUMERIC && 
 							attribute.getType() != AttributeType.LIST &&
+							attribute.getType() != AttributeType.MLIST &&
 							attribute.getType() != AttributeType.TREE){
 						iterator.remove();
 					}
@@ -325,9 +328,9 @@ public class SummaryDataModelContentProvider implements ITreeContentProvider{
 			return getAttributeTreeChildren(parent);
 		}else if (parent.getObject() instanceof AttributeTreeNode){
 			return getAttributeTreeChildren(parent);
-		}else if (parent.getObject() instanceof Attribute && ((Attribute)parent.getObject()).getType() == AttributeType.LIST){
+		}else if (parent.getObject() instanceof Attribute && ((Attribute)parent.getObject()).getType().isList()){
 			return getAttributeListChildren(parent);
-		}else if (parent.getObject() instanceof CategoryAttribute && ((CategoryAttribute)parent.getObject()).getAttribute().getType() == AttributeType.LIST){
+		}else if (parent.getObject() instanceof CategoryAttribute && ((CategoryAttribute)parent.getObject()).getAttribute().getType().isList()){
 			return getAttributeListChildren(parent);
 		}
 		
@@ -345,13 +348,13 @@ public class SummaryDataModelContentProvider implements ITreeContentProvider{
 				if (kids[i] instanceof Attribute){
 					if (((Attribute)kids[i]).getType() == AttributeType.NUMERIC ||
 						((Attribute)kids[i]).getType() == AttributeType.TREE ||
-						((Attribute)kids[i]).getType() == AttributeType.LIST){
+						((Attribute)kids[i]).getType().isList()) {
 						add = true;
 					}
 				}else if (kids[i] instanceof CategoryAttribute){
 					if (((CategoryAttribute)kids[i]).getAttribute().getType() == AttributeType.NUMERIC ||
 							((CategoryAttribute)kids[i]).getAttribute().getType() == AttributeType.TREE ||
-							((CategoryAttribute)kids[i]).getAttribute().getType() == AttributeType.LIST){
+							((CategoryAttribute)kids[i]).getAttribute().getType().isList()){
 						add = true;
 					}
 				}else if (kids[i] instanceof Category){
@@ -360,12 +363,14 @@ public class SummaryDataModelContentProvider implements ITreeContentProvider{
 			}else{
 				if (kids[i] instanceof Attribute){
 					if (( (Attribute)kids[i]).getType() == AttributeType.LIST ||
-							( (Attribute)kids[i]).getType() == AttributeType.TREE){
+							( (Attribute)kids[i]).getType() == AttributeType.TREE || 
+							( (Attribute)kids[i]).getType() == AttributeType.MLIST ){
 						add = true;
 					}
 				}else if (kids[i] instanceof CategoryAttribute){
 					if (( (CategoryAttribute)kids[i]).getAttribute().getType() == AttributeType.LIST ||
-							( (CategoryAttribute)kids[i]).getAttribute().getType() == AttributeType.TREE){
+							( (CategoryAttribute)kids[i]).getAttribute().getType() == AttributeType.TREE ||
+							( (CategoryAttribute)kids[i]).getAttribute().getType() == AttributeType.MLIST ){
 						add = true;
 					}
 				}else if (kids[i] instanceof Category){

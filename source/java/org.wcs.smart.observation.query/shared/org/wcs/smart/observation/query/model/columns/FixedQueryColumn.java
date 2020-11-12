@@ -25,9 +25,10 @@ import java.util.Locale;
 
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.observation.model.IWaypointSourceEngine;
-import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
 import org.wcs.smart.observation.query.view.IObservationQueryLabelProvider;
 import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.engine.ObservationQueryResultItem;
+import org.wcs.smart.query.common.engine.WaypointQueryResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.util.UuidUtils;
 
@@ -109,15 +110,11 @@ public class FixedQueryColumn extends QueryColumn {
 	 * @see org.wcs.smart.patrol.query.model.observation.QueryColumn#getValue(org.wcs.smart.patrol.query.model.PatrolQueryResultItem)
 	 */
 	public Object getValue(IResultItem queryResultItem) {
-		if (queryResultItem instanceof ObservationQueryResultItem) {
-			ObservationQueryResultItem item = (ObservationQueryResultItem) queryResultItem;
+		if (queryResultItem instanceof WaypointQueryResultItem) {
+			WaypointQueryResultItem item = (WaypointQueryResultItem) queryResultItem;
 			switch (column) {
-			
 			case WAYPOINT_ID:
 				return item.getWaypointId();
-			case OBS_GROUP_ID:
-				if (item.getObservationGroupUuid() == null) return ""; //$NON-NLS-1$
-				return UuidUtils.uuidToString(item.getObservationGroupUuid());
 			case WAYPOINT_SOURCE:
 				return SmartContext.INSTANCE.getClass(IWaypointSourceEngine.class).getSource(item.getSourceId()).getName(l);
 			case WAYPOINT_COMMENT:
@@ -125,13 +122,13 @@ public class FixedQueryColumn extends QueryColumn {
 			case WAYPOINT_OBSERVER:
 				return item.getWaypointObserver();
 			case WAYPOINT_DATE:
-				return item.getWpDateTime();
+				return item.getWaypointDateTime();
 			case WAYPOINT_DIRECTION:
 				return item.getWaypointDirection();
 			case WAYPOINT_DISTANCE:
 				return item.getWaypointDistance();
 			case WAYPOINT_TIME:
-				return item.getWpDateTime();
+				return item.getWaypointDateTime();
 			case WAYPOINT_X:
 				return item.getWaypointX(getProjection());
 			case WAYPOINT_Y:
@@ -148,6 +145,15 @@ public class FixedQueryColumn extends QueryColumn {
 				return item.getLastModifiedDate();
 			case WAYPOINT_LAST_MODIFIED_BY:
 				return item.getLastModifiedBy();
+			default:
+				break;
+			}
+		}
+		if (queryResultItem instanceof ObservationQueryResultItem) {
+			ObservationQueryResultItem item = (ObservationQueryResultItem)queryResultItem;
+			if (column == FixedColumns.OBS_GROUP_ID) {
+				if (item.getObservationGroupUuid() == null) return ""; //$NON-NLS-1$
+				return UuidUtils.uuidToString(item.getObservationGroupUuid());
 			}
 		}
 		return null;

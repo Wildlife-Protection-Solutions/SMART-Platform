@@ -48,6 +48,8 @@ public class AttributeFieldFactory {
 			return new NumericAttributeField(attribute);
 		}else if (attribute.getType() == AttributeType.LIST){
 			return new ListAttributeField(attribute);
+		}else if (attribute.getType() == AttributeType.MLIST){
+			return new MultiListAttributeField(attribute);
 		}else if (attribute.getType() == AttributeType.TREE){
 			return new TreeAttributeField(attribute);
 		}else if (attribute.getType() == AttributeType.DATE){

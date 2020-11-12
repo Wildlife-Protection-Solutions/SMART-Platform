@@ -38,6 +38,8 @@ import org.wcs.smart.entity.query.model.EntityObservationQuery;
 import org.wcs.smart.entity.query.parser.internal.parser.Parser;
 import org.wcs.smart.entity.query.ui.SimpleQueryEditor;
 import org.wcs.smart.entity.query.ui.definition.EntityDropItemFactory;
+import org.wcs.smart.observation.query.model.types.ShowItemInfoProvider;
+import org.wcs.smart.observation.query.model.types.ZoomToInfoProvider;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.ObservationQuery;
 import org.wcs.smart.query.common.model.udig.IQueryService;
@@ -196,8 +198,8 @@ public class EntityObservationQueryType implements IMappableQueryType {
 	@Override
 	public IQueryResultInfoProvider[] getResultProviders(){
 		return new IQueryResultInfoProvider[]{
-			new EntityResultItemProvider(),
-			new EntityZoomToResultProvider()
+			new ShowItemInfoProvider(),
+			new ZoomToInfoProvider(),
 		};
 	}
 	

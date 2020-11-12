@@ -213,9 +213,11 @@ public abstract class AbstractNewMappingComposite {
 			@Override
 			protected Object getValue(Object element) {
 				if (element instanceof MetadataValueMapping) {
-					return ((MetadataValueMapping) element).tagValue;
+					String x = ((MetadataValueMapping) element).tagValue;
+					if (x == null) return ""; //$NON-NLS-1$
+					return x;
 				}
-				return null;
+				return ""; //$NON-NLS-1$
 			}
 			
 			@Override
@@ -538,7 +540,7 @@ public abstract class AbstractNewMappingComposite {
 			if (parentElement instanceof CategoryAttribute) {
 				AttributeType type = ((CategoryAttribute)parentElement).getAttribute().getType(); 
 				Category category = ((CategoryAttribute)parentElement).getCategory();
-				if (type == AttributeType.LIST) {
+				if (type.isList()) {
 					List<AttributeListItem> items = ((CategoryAttribute) parentElement).getAttribute().getAttributeList();
 					Object[] data = new Object[items.size()];
 					int j = 0;
@@ -557,9 +559,9 @@ public abstract class AbstractNewMappingComposite {
 				}
 			}else if (parentElement instanceof Attribute) {
 				AttributeType type = ((Attribute)parentElement).getType();
-				if (type == AttributeType.LIST) {
+				if (type.isList()) {
 					return ((Attribute)parentElement).getAttributeList().toArray();
-				}else if (type == AttributeType.LIST) {
+				}else if (type == AttributeType.TREE) {
 					return ((Attribute)parentElement).getTree().toArray();
 				}
 			}else if (parentElement instanceof AttributeTreeNode) {
@@ -603,7 +605,7 @@ public abstract class AbstractNewMappingComposite {
 				type = ((Attribute)element).getType();
 			}
 			if (type != null) {
-				return type == AttributeType.LIST || type == AttributeType.TREE;
+				return type.isList() || type == AttributeType.TREE;
 			}
 			if (element instanceof AttributeTreeNode) {
 				return !((AttributeTreeNode) element).getChildren().isEmpty();

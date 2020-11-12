@@ -633,6 +633,8 @@ public class JsonCtParser {
 			}
 		}
 		if (values == null) return results;
+				
+		HashMap<Attribute, ObservationInfo> mitems = new HashMap<>();
 		
 		for (ObservationInfo obj : values){
 			if (obj.keyType.equals(JsonKey.ATTRIBUTE_LIST.key)){
@@ -641,11 +643,24 @@ public class JsonCtParser {
 				if (li == null){
 					warnings.add(MessageFormat.format(Messages.JsonCtParser_ListAttributeNotFound, obj.uuid));
 				}else{
-					obj.keyType = JsonKey.ATTRIBUTE.key;
-					obj.uuid = UuidUtils.uuidToString( li.getAttribute().getUuid() );
+					if (li.getAttribute().getType() == AttributeType.MLIST) {
+						ObservationInfo info = mitems.get(li.getAttribute());
+						if (info == null) {
+							info = new ObservationInfo(JsonKey.ATTRIBUTE.key, UuidUtils.uuidToString(li.getAttribute().getUuid()), new ArrayList<>());
+							mitems.put(li.getAttribute(), info);
+						}
+						((ArrayList<AttributeListItem>)info.value).add(li);
+					}else {
+						obj.keyType = JsonKey.ATTRIBUTE.key;
+						obj.uuid = UuidUtils.uuidToString( li.getAttribute().getUuid() );
+					}
 				}
 			}
-			
+		}
+		values.addAll(mitems.values());
+		
+		for (ObservationInfo obj : values){
+			if (obj.keyType.equals(JsonKey.ATTRIBUTE_LIST.key))continue; //processed above
 			if (obj.keyType.equals(JsonKey.ATTRIBUTE.key)){
 				Attribute att = findAttribute( obj.uuid, session);
 				if (att == null){

@@ -28,11 +28,9 @@ import java.util.UUID;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.ui.SurveyDesignListView;
 import org.wcs.smart.er.ui.handlers.EditSurveyElementHandler;
@@ -41,10 +39,11 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
+import org.wcs.smart.observation.query.model.types.ShowItemInfoProvider;
 import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
 import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
-import org.wcs.smart.query.model.IQueryResultInfoProvider;
+import org.wcs.smart.query.common.engine.WaypointQueryResultItem;
 
 /**
  * Intel info provider than opens up the intelligence record associated with the
@@ -53,17 +52,8 @@ import org.wcs.smart.query.model.IQueryResultInfoProvider;
  * @author Emily
  *
  */
-public class SurveyResultInfoProvider implements IQueryResultInfoProvider {
+public class SurveyResultInfoProvider extends ShowItemInfoProvider  {
 
-	@Override
-	public String getName() {
-		return GOTO_SOURCE_STR;
-	}
-
-	@Override
-	public boolean supportsCcaa() {
-		return false;
-	}
 	
 	@Override
 	public void doWork(IResultItem resultItem) {
@@ -78,10 +68,12 @@ public class SurveyResultInfoProvider implements IQueryResultInfoProvider {
 			date = ((MissionTrackResultItem)resultItem).getTrackDate();
 		}
 		
-		if (resultItem instanceof SurveyQueryResultItem){
-			missionUuid = ((SurveyQueryResultItem)resultItem).getMissionUuid();
-			missionId= ((SurveyQueryResultItem)resultItem).getMissionId();
-			waypointUuid = ((SurveyQueryResultItem)resultItem).getWaypointUuid();
+		if (resultItem instanceof ISurveyQueryResultItem){
+			missionUuid = ((ISurveyQueryResultItem)resultItem).getMissionUuid();
+			missionId= ((ISurveyQueryResultItem)resultItem).getMissionId();
+		}
+		if (resultItem instanceof WaypointQueryResultItem) {
+			waypointUuid = ((WaypointQueryResultItem)resultItem).getWaypointUuid();
 		}
 		
 		if (resultItem instanceof IAttachmentResultItem) {
@@ -126,11 +118,6 @@ public class SurveyResultInfoProvider implements IQueryResultInfoProvider {
 					ERROR_STR,
 					MessageFormat.format(OP_NOT_SUPPORTED_STR, resultItem.getClass().getName()));
 
-	}
-
-	@Override
-	public Image getImage() {
-		return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.GOTO_ICON);
 	}
 
 }

@@ -41,6 +41,7 @@ import org.hibernate.query.NativeQuery;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
+import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.ObservationAttachment;
@@ -55,14 +56,15 @@ import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
 import org.wcs.smart.patrol.query.internal.Messages;
+import org.wcs.smart.patrol.query.model.PatrolObservationAttachmentResultItem;
 import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
-import org.wcs.smart.patrol.query.model.PatrolQueryAttachmentResultItem;
-import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
+import org.wcs.smart.patrol.query.model.PatrolObservationResultItem;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.common.engine.ObservationQueryEngine;
 import org.wcs.smart.query.common.model.IUpdateableResultSet;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.AttributeQueryColumn;
@@ -82,11 +84,12 @@ import org.wcs.smart.util.UuidUtils;
  * @author elitvin
  * @since 1.0.0
  */
-public class DerbyObservationEngine extends DerbyPatrolQueryEngine implements IDerbyWaypointEngine {
+public class DerbyObservationEngine extends AbstractPatrolQueryEngine implements ObservationQueryEngine<PatrolObservationResultItem>, IDerbyWaypointEngine {
 
 	private String queryDataTable;
 	private int categoryCount;
 	private Session session;
+	
 	
 	@Override
 	public boolean canExecute(String querytype) {
@@ -116,7 +119,7 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine implements ID
 		}
 		
 		queryDataTable = createTempTableName();
-		final DerbyPagedObservationResult result = new DerbyPagedObservationResult(queryDataTable, this);
+		final DerbyPagedObservationResult result = new DerbyPagedObservationResult(this);
 		
 
 		session.doWork(new Work() {
@@ -219,12 +222,11 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine implements ID
 	public void dropTables(Connection c) throws SQLException {
 		//original table
 		dropTable(c, queryDataTable);
-		dropTable(c, queryDataTable + "_LIST"); //$NON-NLS-1$
-		dropTable(c, queryDataTable + "_TREE"); //$NON-NLS-1$
+		dropTable(c, getObservationLabelTable());
 	}
 
 	private void populateTemporaryTableNameObjExtra(String uuidColumn, String nameColumn, Connection c, Session session) throws SQLException {
-		String sql = "SELECT DISTINCT p_ca_uuid, "+uuidColumn+" FROM "+queryDataTable;  //$NON-NLS-1$//$NON-NLS-2$
+		String sql = "SELECT DISTINCT ca_uuid, "+uuidColumn+" FROM "+queryDataTable;  //$NON-NLS-1$//$NON-NLS-2$
 		QueryPlugIn.logSql(sql);
 		
 		try(ResultSet rs = c.createStatement().executeQuery(sql)) {
@@ -428,8 +430,8 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine implements ID
 			sql.append("UPDATE "); //$NON-NLS-1$
 			sql.append(queryDataTable);
 			sql.append(" SET ca_id = (select id FROM "); //$NON-NLS-1$
-			sql.append(DerbyPatrolQueryEngine.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
-			sql.append("WHERE a.uuid = " + queryDataTable + ".p_ca_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append(AbstractPatrolQueryEngine.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
+			sql.append("WHERE a.uuid = " + queryDataTable + ".ca_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
 			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().executeUpdate(sql.toString());
 			
@@ -437,8 +439,8 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine implements ID
 			sql.append("UPDATE "); //$NON-NLS-1$
 			sql.append(queryDataTable);
 			sql.append(" SET ca_name = (select name FROM "); //$NON-NLS-1$
-			sql.append(DerbyPatrolQueryEngine.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
-			sql.append("WHERE a.uuid = " + queryDataTable + ".p_ca_uuid)");  //$NON-NLS-1$//$NON-NLS-2$
+			sql.append(AbstractPatrolQueryEngine.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
+			sql.append("WHERE a.uuid = " + queryDataTable + ".ca_uuid)");  //$NON-NLS-1$//$NON-NLS-2$
 			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().executeUpdate(sql.toString());
 		}
@@ -448,58 +450,11 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine implements ID
 		progress.split(6);
 		populateTemporaryTableCategory(c, session);
 		
+		//list and tree labels
 		progress.subTask(Messages.DerbyObservationEngine_Progress_ListAttributesData);
 		progress.split(4);
-		WpoaLinkedData listData = new WpoaLinkedData("_list", "list_element_uuid") { //$NON-NLS-1$ //$NON-NLS-2$
-			@Override
-			public String getLabel(Session session, UUID cauuid, UUID uuid) {
-				return QueryDataModelManager.getInstance().getAttributeListItemLabel(session, cauuid, uuid);
-			}
-		};
-		populateAdditionalWpoaTable(c, session, listData);
-		
-		
-		progress.subTask(Messages.DerbyObservationEngine_Progress_TreeAttributesData);
-		progress.split(4);
-		WpoaLinkedData treeData = new WpoaLinkedData("_tree", "tree_node_uuid") { //$NON-NLS-1$ //$NON-NLS-2$
-			@Override
-			public String getLabel(Session session, UUID cauuid, UUID uuid) {
-				return QueryDataModelManager.getInstance().getAttributeTreeNodeLabel(session, cauuid, uuid);
-			}
-		};
-		populateAdditionalWpoaTable(c, session, treeData);
-	}
+		populateListTreeDataTable(c, session);
 
-	private void populateAdditionalWpoaTable(Connection c, Session session, WpoaLinkedData linkedData) throws SQLException {
-		String sql = "CREATE TABLE " + queryDataTable + linkedData.getPostfix() + " (uuid char(16) for bit data, value varchar(1024))"; //$NON-NLS-1$ //$NON-NLS-2$
-		QueryPlugIn.logSql(sql.toString());
-		c.createStatement().execute(sql);
-
-		String sql2 = "SELECT DISTINCT wpoa."+linkedData.getUuidColumn()+", r.P_CA_UUID FROM smart.wp_observation_attributes wpoa inner join "+queryDataTable+" r on wpoa.OBSERVATION_UUID = r.OB_UUID"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		QueryPlugIn.logSql(sql.toString());
-		
-		sql = "INSERT INTO "+queryDataTable+linkedData.getPostfix()+" VALUES (?, ?)"; //$NON-NLS-1$ //$NON-NLS-2$
-		QueryPlugIn.logSql(sql.toString());
-		PreparedStatement statement = c.prepareStatement(sql);
-		int count = 0;
-		try(ResultSet rs = c.createStatement().executeQuery(sql2)){
-			while (rs.next()) {
-				byte[] uuid = rs.getBytes(1);
-				if (uuid != null) {
-					byte[] cauuid = rs.getBytes(2);
-					String value = linkedData.getLabel(session, UuidUtils.byteToUUID(cauuid), UuidUtils.byteToUUID(uuid));
-					statement.setBytes(1, uuid);
-					statement.setString(2, value);
-					statement.addBatch();
-					count++;
-					if (count >= 100){
-						statement.executeBatch();
-						count = 0;
-					}
-				}
-			}
-			statement.executeBatch();
-		}
 	}
 
 	/**
@@ -508,12 +463,15 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine implements ID
 	 * @param item
 	 */
 	public void addListLabel(Session s, AttributeListItem item){
+		addLabel(s, item);
+	}
+	private void addLabel(Session s, DmObject item) {
 		if (item == null) return;
-		String sql = "SELECT count(*) FROM " + queryDataTable + "_list WHERE uuid = :uuid "; //$NON-NLS-1$ //$NON-NLS-2$
+		String sql = "SELECT count(*) FROM " + getObservationLabelTable() + " WHERE uuid = :uuid "; //$NON-NLS-1$ //$NON-NLS-2$
 		NativeQuery<?> q = s.createNativeQuery(sql);
 		q.setParameter("uuid", item.getUuid()); //$NON-NLS-1$
 		if ((Integer)q.uniqueResult() == 0){
-			sql = " INSERT INTO " + queryDataTable + "_list (uuid, value) values (:uuid, :label)"; //$NON-NLS-1$ //$NON-NLS-2$
+			sql = " INSERT INTO " + getObservationLabelTable() + " (uuid, value) values (:uuid, :label)"; //$NON-NLS-1$ //$NON-NLS-2$
 			q = s.createNativeQuery(sql);
 			q.setParameter("uuid", item.getUuid()); //$NON-NLS-1$
 			q.setParameter("label",  item.getName()); //$NON-NLS-1$
@@ -527,48 +485,11 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine implements ID
 	 * @param item
 	 */
 	public void addTreeLabel(Session s, AttributeTreeNode item){
-		if (item == null) return;
-		String sql = "SELECT count(*) FROM " + queryDataTable + "_tree WHERE uuid = :uuid "; //$NON-NLS-1$ //$NON-NLS-2$
-		NativeQuery<?> q = s.createNativeQuery(sql);
-		q.setParameter("uuid", item.getUuid()); //$NON-NLS-1$
-		if ((Integer)q.uniqueResult() == 0){
-			sql = " INSERT INTO " + queryDataTable + "_tree (uuid, value) values (:uuid, :label)"; //$NON-NLS-1$ //$NON-NLS-2$
-			q = s.createNativeQuery(sql);
-			q.setParameter("uuid", item.getUuid()); //$NON-NLS-1$
-			q.setParameter("label",  item.getName()); //$NON-NLS-1$
-			q.executeUpdate();
-		}
-	}
-	
-	/**
-	 * Wrapper class for populating linked data (additional columns)
-	 * 
-	 * @author elitvin
-	 * @since 1.0.0
-	 */
-	private abstract class WpoaLinkedData {
-		private String postfix;
-		private String uuidColumn;
-
-		public WpoaLinkedData(String postfix, String uuidColumn) {
-			super();
-			this.postfix = postfix;
-			this.uuidColumn = uuidColumn;
-		}
-
-		public String getPostfix() {
-			return postfix;
-		}
-
-		public String getUuidColumn() {
-			return uuidColumn;
-		}
-		
-		public abstract String getLabel(Session session, UUID cauuid, UUID keyuuid);
+		addLabel(s, item);
 	}
 
 	@Override
-	protected String getTemporaryTableSelectClause(boolean includeObservations) {
+	public String getTemporaryTableSelectClause(boolean includeObservations) {
 		StringBuilder sql = new StringBuilder();
 		sql.append(" SELECT DISTINCT "); //$NON-NLS-1$
 		sql.append(tablePrefix(Patrol.class) + ".ca_uuid, "); //$NON-NLS-1$
@@ -609,10 +530,10 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine implements ID
 	}
 
 	@Override
-	protected String getTemporaryTableCreateClause(String tableName) {
+	public String getTemporaryTableCreateClause(String tableName) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
-		sql.append("p_ca_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("ca_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("p_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("p_id varchar(32),"); //$NON-NLS-1$
 		sql.append("p_station_uuid char(16) for bit data,"); //$NON-NLS-1$
@@ -653,13 +574,13 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine implements ID
 	}
 	
 	@Override
-	protected PatrolQueryResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException{
+	public PatrolObservationResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException{
 		return asQueryResultItemInternal(false, rs, session);
 	}
 
 	@Override
-	protected PatrolQueryAttachmentResultItem asQueryAttachmentResultItem(ResultSet rs, Session session) throws SQLException{
-		PatrolQueryAttachmentResultItem item = (PatrolQueryAttachmentResultItem) asQueryResultItemInternal(true,  rs, session);
+	public PatrolObservationAttachmentResultItem asQueryAttachmentResultItem(ResultSet rs, Session session) throws SQLException{
+		PatrolObservationAttachmentResultItem item = (PatrolObservationAttachmentResultItem) asQueryResultItemInternal(true,  rs, session);
 		
 		UUID auuid = UuidUtils.byteToUUID(rs.getBytes("attach_uuid")); //$NON-NLS-1$
 		ISmartAttachment a = session.get(ObservationAttachment.class, auuid);
@@ -679,7 +600,7 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine implements ID
 		StringBuilder sb = new StringBuilder();
 
 		String[] selectFields = new String[] {
-				"ca_id","ca_name","p_uuid","p_id", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				"ca_uuid", "ca_id","ca_name","p_uuid","p_id", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 				"p_startdate","p_enddate","p_station", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				"p_team","p_objective","p_mandate", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				"p_type","p_armed","p_transporttype", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -719,14 +640,14 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine implements ID
 		return sb.toString();
 	}
 	
-	private PatrolQueryResultItem asQueryResultItemInternal(boolean isAttachment, ResultSet rs, Session session) throws SQLException{
-		PatrolQueryResultItem it = null;
+	private PatrolObservationResultItem asQueryResultItemInternal(boolean isAttachment, ResultSet rs, Session session) throws SQLException{
+		PatrolObservationResultItem it = null;
 		if (isAttachment) {
-			it = new PatrolQueryAttachmentResultItem();
+			it = new PatrolObservationAttachmentResultItem();
 		}else {
-			it = new PatrolQueryResultItem();
+			it = new PatrolObservationResultItem();
 		}
-		it.setConservationAreaUuid(UuidUtils.byteToUUID(rs.getBytes("p_ca_uuid"))); //$NON-NLS-1$
+		it.setConservationAreaUuid(UuidUtils.byteToUUID(rs.getBytes("ca_uuid"))); //$NON-NLS-1$
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
 		it.setPatrolUuid(UuidUtils.byteToUUID(rs.getBytes("p_uuid"))); //$NON-NLS-1$
@@ -790,9 +711,8 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine implements ID
 	}
 	
 	@Override
-	protected void buildTemporaryTableIndexes(Connection c, String tableName)
-			throws SQLException {
-		super.buildTemporaryTableIndexes(c, tableName);
+	public void createTemporaryTableIndexes(Connection c, String tableName) throws SQLException {
+		super.createObsIndex(c, tableName);
 		
 		StringBuilder sql = new StringBuilder();
 		sql.append("create index "); //$NON-NLS-1$
@@ -808,5 +728,15 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine implements ID
 	@Override
 	public Session getCurrentConnection() {
 		return session;
+	}
+
+	@Override
+	public String getQueryDataTable() {
+		return queryDataTable;
+	}
+
+	@Override
+	public String getObservationLabelTable() {
+		return queryDataTable + "_labels"; //$NON-NLS-1$
 	}
 }

@@ -78,7 +78,7 @@ public class WaypointDetailsShell extends SmartShellDialog{
 	
 	private void createInfo(Composite parent, String field, String value) {
 		Label l = new Label(parent, SWT.NONE);
-		l.setText(field);
+		l.setText(MessageFormat.format("{0}:", field)); //$NON-NLS-1$
 		
 		l = new Label(parent, SWT.NONE);
 		l.setText(value == null ? "" : value); //$NON-NLS-1$

@@ -116,6 +116,10 @@ public class IdComposite extends AbstractIncidentComposite {
 	@Override
 	public void initFields(Waypoint incident, Session session) {
 		txtId.setText(incident.getId());
+		
+		
+		cmbType.setSelection(new StructuredSelection(IncidentManager.getInstance().getIncidentProvider(incident.getSourceId())));
+		cmbType.getControl().setEnabled(incident.getUuid() == null);
 	}
 	
 	@Override

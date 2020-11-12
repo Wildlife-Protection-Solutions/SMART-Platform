@@ -49,6 +49,7 @@ import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.datagenerator.internal.Messages;
 import org.wcs.smart.datagenerator.model.ObservationConfiguration;
@@ -60,6 +61,7 @@ import org.wcs.smart.observation.common.importwp.ObservationGPSDataImport;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationAttributeList;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
@@ -383,6 +385,16 @@ public class DataGenerator implements IDataEngine{
 								woa.setNumberValue(mapping.getNumberValue());
 								woa.setStringValue(mapping.getStringValue());
 								
+								if (mapping.getAttributeListItems() != null) {
+									woa.setAttributeListItems(new ArrayList<>());
+									for (WaypointObservationAttributeList li : mapping.getAttributeListItems()) {
+										WaypointObservationAttributeList liob = new WaypointObservationAttributeList();
+										liob.setObservationAttribute(woa);
+										liob.setAttributeLisItem(li.getAttributeListItem());
+										woa.getAttributeListItems().add(liob);
+									}
+								}
+								
 								woa.setObservation(wo);
 								wo.getAttributes().add(woa);
 							}
@@ -449,6 +461,16 @@ public class DataGenerator implements IDataEngine{
 		case LIST:
 			if (a.getActiveListItems().isEmpty()) return null;
 			return a.getActiveListItems().get(random.nextInt(a.getActiveListItems().size()));
+		case MLIST:
+			int number = random.nextInt(a.getActiveListItems().size()+1);
+			if (number == a.getActiveListItems().size()) return null;
+			
+			List<AttributeListItem> options = new ArrayList<>(a.getActiveListItems());
+			for (int i = 0; i < number; i ++) {
+				options.remove( random.nextInt(options.size()) );
+			}
+			return options;
+			
 		case NUMERIC:
 			if (a.getMinValue() != null && a.getMaxValue() != null) {
 				if (a.getMaxValue() - a.getMinValue() > 5) {

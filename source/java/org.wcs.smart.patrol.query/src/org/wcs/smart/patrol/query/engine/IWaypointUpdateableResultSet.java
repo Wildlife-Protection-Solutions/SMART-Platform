@@ -23,7 +23,7 @@ package org.wcs.smart.patrol.query.engine;
 
 import java.util.UUID;
 
-import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
+import org.wcs.smart.patrol.query.model.IPatrolQueryResultItem;
 import org.wcs.smart.query.common.model.IUpdateableResultSet;
 
 /**
@@ -39,7 +39,7 @@ public interface IWaypointUpdateableResultSet extends IUpdateableResultSet{
 	 * @return
 	 * @throws Exception
 	 */
-	boolean deleteWaypoint(UUID WaypointUuid) throws Exception;
+	boolean deleteWaypoint(UUID waypointUuid) throws Exception;
 	
 	/**
 	 * Update the waypoint position from the result set
@@ -49,6 +49,6 @@ public interface IWaypointUpdateableResultSet extends IUpdateableResultSet{
 	 * @return
 	 * @throws Exception
 	 */
-	boolean updateWaypointPosition(PatrolQueryResultItem  pw, Double x, Double y, Float distance, Float direction) throws Exception;
+	boolean updateWaypointPosition(IPatrolQueryResultItem  pw, Double x, Double y, Float distance, Float direction) throws Exception;
 
 }
