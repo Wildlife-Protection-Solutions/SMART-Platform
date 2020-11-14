@@ -212,4 +212,19 @@ public class AttributeValueItem implements IValueItem {
 		visitor.visit(this);
 	}
 
+	/**
+	 * Sets the filter values; this is used for updating
+	 * filers when data model attributes change
+	 * @param attributeKey
+	 * @param type
+	 * @param op
+	 * @param value1
+	 * @param value2
+	 */
+	public void updateValues(String attributeKey, Attribute.AttributeType type) {
+		this.attributeKey = attributeKey;
+		this.attributeType = type;
+	
+	}
+	
 }

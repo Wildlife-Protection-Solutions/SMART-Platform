@@ -35,8 +35,10 @@ public interface IDataModelListener {
 	/**
 	 * This method is called when the
 	 * data model is saved to the database.
-	 * <p>it is called after the the data model as been saved and the current 
-	 * transaction committed.</p>
+	 * 
+	 * It is called after the the data model as 
+	 * been saved and the current 
+	 * transaction committed.
 	 */
 	void modified();
 }

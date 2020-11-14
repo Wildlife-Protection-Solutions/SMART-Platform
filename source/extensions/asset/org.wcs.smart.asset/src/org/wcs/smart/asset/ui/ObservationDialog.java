@@ -129,8 +129,9 @@ public class ObservationDialog extends SmartStyledDialog {
 			groups = new ArrayList<>(wptemp.getObservationGroups());
 			groups.forEach(g->g.getObservations().forEach(o->{
 				o.getCategory().getName();
+				o.getCategory().getFullCategoryName();
 				o.getAttributes().forEach(a->{
-					a.getStringValue();
+					a.getAttributeValueAsString(Locale.getDefault());
 					a.getAttribute().getName();
 					if (a.getAttributeListItems() != null) a.getAttributeListItems().forEach(ai->ai.getAttributeListItem().getName());
 				});

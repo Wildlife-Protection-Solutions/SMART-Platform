@@ -1,5 +1,7 @@
 package org.wcs.smart.ca.datamodel;
 
+import java.sql.SQLException;
+
 import org.hibernate.Session;
 
 public interface IDataModelItemListener {
@@ -39,4 +41,6 @@ public interface IDataModelItemListener {
 	 * @param itemToAdd
 	 */
 	public void itemEnabledStateChanged(Session currentSession, Object itemToAdd);
+	
+	public default void singleToMulti(Session currentSession, Attribute attribute) throws SQLException{}
 }

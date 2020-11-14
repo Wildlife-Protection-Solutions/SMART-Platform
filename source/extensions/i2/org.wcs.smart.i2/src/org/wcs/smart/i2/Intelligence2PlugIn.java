@@ -30,6 +30,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationAreaManager;
+import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.i2.birt.datasource.DesktopConnectionFactory;
 import org.wcs.smart.i2.birt.datasource.IConnectionFactory;
 import org.wcs.smart.i2.handlers.DeleteCaHandler;
@@ -176,6 +177,8 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 		SmartContext.INSTANCE.setClass(IQueryEngineFactory.class, new QueryEngineFactory());
 		
 		ConservationAreaManager.getInstance().addDeleteHandler(new DeleteCaHandler(), DeleteCaHandler.EXECUTE_ORDER);
+		
+		DataModelManager.INSTANCE.addItemChangeListener(ProfileDataModelItemListener.INSTANCE);
 	}
 
 	/*

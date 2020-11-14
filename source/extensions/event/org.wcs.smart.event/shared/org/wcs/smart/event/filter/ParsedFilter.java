@@ -105,4 +105,23 @@ public class ParsedFilter {
 	public IFilter getFilter() {
 		return this.waypointFilter;
 	}
+	
+	/**
+	 * converts the parsed filter to the string representation
+	 * stored in the database
+	 * 
+	 * @return
+	 */
+	public String asString() {
+		StringBuilder sb = new StringBuilder();
+		if (getSources() != null) {
+			for (IWaypointSource src : getSources()) {
+				sb.append(src.getKey());
+				sb.append(SOURCE_SPACER);
+			}
+		}
+		sb.append(ParsedFilter.SECTION_SPACER);
+		sb.append(waypointFilter.asString());
+		return sb.toString();
+	}
 }

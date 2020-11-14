@@ -23,6 +23,7 @@ package org.wcs.smart.ui.ca.properties;
 
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
+import java.sql.SQLException;
 import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -148,6 +149,8 @@ public class AttributeInfoPanel extends Composite {
 	private Button btnMoveDown;
 	private Button btnSort;
 	
+	private Button btnConvert;
+	
 	private List<NamedKeyItem> attributeList = new ArrayList<NamedKeyItem>();
 	
 	private AttributeTree attTree = null;
@@ -192,7 +195,33 @@ public class AttributeInfoPanel extends Composite {
 		lblNewLabel_2.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblNewLabel_2.setText(Messages.AttributeInfoPanel_Type_Label);
 		
-		cmbType = new ComboViewer(main, SWT.SIMPLE | SWT.DROP_DOWN | SWT.READ_ONLY);
+		
+		
+		if (!canEdit){
+			cmbType = new ComboViewer(main, SWT.SIMPLE | SWT.DROP_DOWN | SWT.READ_ONLY);
+			cmbType.getControl().setEnabled(false);
+			cmbType.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		}else {
+			Composite tt = new Composite(main, SWT.NONE);
+			tt.setLayout(new GridLayout(2, false));
+			((GridLayout)tt.getLayout()).marginWidth = 0;
+			((GridLayout)tt.getLayout()).marginHeight = 0;
+			tt.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+
+			cmbType = new ComboViewer(tt, SWT.SIMPLE | SWT.DROP_DOWN | SWT.READ_ONLY);
+			cmbType.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+			
+			btnConvert = new Button(tt, SWT.PUSH);
+			btnConvert.setText("Convert To Multi List");
+			btnConvert.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+			btnConvert.setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+			btnConvert.addListener(SWT.Selection, e->{
+				cmbType.setSelection(new StructuredSelection(Attribute.AttributeType.MLIST));
+				btnConvert.setEnabled(false);
+			});
+			
+			
+		}
 		cmbType.setContentProvider(ArrayContentProvider.getInstance());
 		cmbType.setLabelProvider(new LabelProvider(){
 			@Override
@@ -201,13 +230,9 @@ public class AttributeInfoPanel extends Composite {
 			}
 		});
 		cmbType.setInput(Attribute.AttributeType.values());
-		Combo combo = cmbType.getCombo();
-		combo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-		if (!canEdit){
-			combo.setEnabled(false);
-		}
-		combo.select(0);
-		combo.addSelectionListener(new SelectionAdapter() {	
+		
+		cmbType.setSelection(new StructuredSelection(Attribute.AttributeType.TEXT));
+		cmbType.getCombo().addSelectionListener(new SelectionAdapter() {	
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				selectOption();
@@ -925,10 +950,25 @@ public class AttributeInfoPanel extends Composite {
 		this.currentDisplayLang = language;
 		
 		chRequired.setSelection(att.getIsRequired());
+		
+		boolean canconvert = false;
+		
 		if (att.getUuid() != null){
 			cmbType.getControl().setEnabled(false);
+			if (att.getType() == Attribute.AttributeType.LIST) canconvert = true;
 		}
-		
+		if (btnConvert != null) {
+			if (canconvert) {
+				btnConvert.setVisible(true);
+				((GridData)btnConvert.getLayoutData()).widthHint = btnConvert.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
+				btnConvert.getParent().layout(true,true);
+			}else {
+				btnConvert.setVisible(false);
+				((GridData)btnConvert.getLayoutData()).widthHint = 0;
+				btnConvert.getParent().layout(true,true);
+			}
+		}
+			
 		if (att.getType() != null) {
 			cmbType.setSelection(new StructuredSelection(att.getType()));
 
@@ -1062,7 +1102,14 @@ public class AttributeInfoPanel extends Composite {
 	 */
 	public <T> void updateAttribute(Attribute att, final Session session){
 		try {
+			boolean convert = false;
 			nameKeyValues.updateFields(att);
+			
+			if (att.getType() == Attribute.AttributeType.LIST &&
+				((Attribute.AttributeType)cmbType.getStructuredSelection().getFirstElement() == Attribute.AttributeType.MLIST)){
+				convert = true;
+			}
+			
 			att.setType(  (Attribute.AttributeType)((IStructuredSelection)cmbType.getSelection()).getFirstElement() );
 			att.setIsRequired(chRequired.getSelection());
 			iconPanel.updateDmObject(att);
@@ -1079,6 +1126,7 @@ public class AttributeInfoPanel extends Composite {
 			}
 			
 			session.flush();
+			
 			
 			if (att.getType().equals(Attribute.AttributeType.NUMERIC)){
 				att.setMaxValue(null);
@@ -1251,6 +1299,15 @@ public class AttributeInfoPanel extends Composite {
 				}
 			}
 			session.flush();
+			
+			if (convert) {
+				try {
+					DataModelManager.INSTANCE.fireSingleToMulti(session, att);
+				}catch (Exception ex) {
+					att.setType(Attribute.AttributeType.LIST);
+					throw ex;
+				}
+			}
 		}catch (Exception ex) {
 			SmartPlugIn.displayLog(Messages.AttributeInfoPanel_SaveError, ex);
 

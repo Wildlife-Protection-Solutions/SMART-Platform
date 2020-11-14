@@ -23,6 +23,8 @@ package org.wcs.smart.observation.model;
 
 import java.io.Serializable;
 
+import javax.persistence.AssociationOverride;
+import javax.persistence.AssociationOverrides;
 import javax.persistence.Embeddable;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -42,7 +44,6 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
  */
 @Entity
 @Table(name="smart.wp_observation_attributes_list")
-
 public class WaypointObservationAttributeList {
 
 	private WaypointObservationAttributeListPk id = new WaypointObservationAttributeListPk();

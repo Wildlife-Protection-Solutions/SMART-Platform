@@ -68,7 +68,7 @@ public enum QueryTypeManager {
 	 */
 	public IQueryType findQueryType(String typeKey){
 		for (IQueryType type : getAllQueryTypes()){
-			if (type.getKey().equals(typeKey)){
+			if (type.getKey().equalsIgnoreCase(typeKey)){
 				return type;
 			}
 		}

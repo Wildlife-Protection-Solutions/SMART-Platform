@@ -26,10 +26,13 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.Stack;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -242,7 +245,45 @@ public class EventProcessingJob extends Job {
 						equation.add(Boolean.FALSE);
 					}
 					break;
+				case MLIST:
+					String[] listItemKeys = afilter.getValue().toString().split(AttributeFilter.MLIST_SEPERATOR);
+					Set<String> keys = new HashSet<>();
+					for(String s : listItemKeys) keys.add(s);
 					
+					Set<String> values = attributeValue.getAttributeListItems().stream().map(e->e.getAttributeListItem().getKeyId()).collect(Collectors.toSet());
+					
+					boolean lvalue = false;
+					if (afilter.getOperator() == Operator.OR) {
+						//must find one of listitemkeys
+						for (String k : values) {
+							if (keys.contains(k)) {
+								lvalue = true;
+								break;
+							}
+						}
+					}else if (afilter.getOperator() == Operator.EXACT) {
+						if (keys.size() == values.size()) {
+							lvalue = true;
+							for (String x : values) {
+								if (!keys.contains(x)) {
+									lvalue = false;
+									break;
+								}
+							}
+						}
+					}else if (afilter.getOperator() == Operator.AND) {
+						//every key must be in value but we don't care if we have more 
+						//values
+						lvalue = true;
+						for (String x : keys) {
+							if (!values.contains(x)) {
+								lvalue = false;
+								break;
+							}
+						}
+					}
+					equation.add(lvalue);
+					break;
 				case NUMERIC:
 					boolean nvalue = false;
 					double filterValue = (Double) afilter.getValue();

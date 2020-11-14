@@ -333,27 +333,27 @@ IValueItem SingleValueItem() :
 	| 
 		< SUM_CAT_VALUE_KEY >
 		{
-			item = AssetCategoryValueItem.createItem( token.image );
+			item = CategoryValueItem.createItem( token.image );
 		}
 	| 
 		< SUM_ATTRIBUTE_VALUE_KEY >
 		{
-			item = AssetAttributeValueItem.createAttributeItem( token.image );
+			item = AttributeValueItem.createAttributeItem( token.image );
 		}
 	| 
 		< SUM_CAT_ATT_VALUE_KEY >
 		{
-			item = AssetAttributeValueItem.createCategoryAttributeItem( token.image );
+			item = AttributeValueItem.createCategoryAttributeItem( token.image );
 		}
 	| 
 		< SUM_ATTRIBUTE_VALUE_LISTTREE_KEY >
 		{
-			item = AssetAttributeValueItem.createAttributeItem( token.image );
+			item = AttributeValueItem.createAttributeItem( token.image );
 		}
 	| 
 		< SUM_CAT_ATT_VALUE_LISTTREE_KEY >
 		{
-			item = AssetAttributeValueItem.createCategoryAttributeItem( token.image );
+			item = AttributeValueItem.createCategoryAttributeItem( token.image );
 		} 
 	)
 	{

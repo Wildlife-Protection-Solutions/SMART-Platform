@@ -46,4 +46,8 @@ public class ParsedObservationQuery {
 	public IQueryFilter getFilter(){
 		return this.filter;
 	}
+	
+	public String asString() {
+		return type.key + "|" + (filter == null ? "" : filter.asString()); //$NON-NLS-1$ //$NON-NLS-2$
+	}
 }

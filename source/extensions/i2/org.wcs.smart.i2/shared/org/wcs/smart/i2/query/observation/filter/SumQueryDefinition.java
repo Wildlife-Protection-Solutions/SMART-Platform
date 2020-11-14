@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2.query.observation.filter;
 
+import org.wcs.smart.i2.model.IntelEntitySummaryQuery;
 
 /**
  * A representation of a summary query parsed into the various
@@ -93,18 +94,19 @@ public class SumQueryDefinition {
 		return this.filter;
 	}
 	
-//	/**
-//	 * @return the string representation of the query
-//	 */
-//	public String asQuery(){
-//		StringBuilder sb = new StringBuilder();
-//		sb.append(valuePart.asString());
-//		sb.append("|"); //$NON-NLS-1$
-//		sb.append(rowGroupBy.asString());
-//		sb.append( "|" ); //$NON-NLS-1$
-//		sb.append( colGroupBy.asString() );
-//		sb.append( "|" ); //$NON-NLS-1$
-//		sb.append( filter == null ? "" : filter.asString());
-//		return sb.toString();
-//	}
-}
+	/**
+	 * @return the string representation of the query
+	 */
+	public String asQuery(){
+		StringBuilder sb = new StringBuilder();
+		sb.append(rowGroupBy.asString());
+		sb.append(IntelEntitySummaryQuery.PART_SEPERATOR);
+		sb.append(colGroupBy.asString());
+		sb.append(IntelEntitySummaryQuery.PART_SEPERATOR);
+		sb.append(valuePart.asString());
+		sb.append(IntelEntitySummaryQuery.PART_SEPERATOR);
+		sb.append(filter == null ? "" : filter.asString());
+		return sb.toString();
+	}
+	
+	}

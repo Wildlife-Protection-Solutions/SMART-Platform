@@ -31,6 +31,8 @@ import org.wcs.smart.util.UuidUtils;
  * @author Emily
  *
  */
+// | < ENTITY_KEY : "entity:" (< DIGIT> | < UUIDLETTER >)+>
+
 public class EntityFilter implements IQueryFilter, IColumnIdentifierProvider {
 
 	public static EntityFilter create(String key){
@@ -52,6 +54,14 @@ public class EntityFilter implements IQueryFilter, IColumnIdentifierProvider {
 		StringBuilder sb = new StringBuilder();
 		sb.append("ie_"); //$NON-NLS-1$
 		sb.append(UuidUtils.uuidToString(uuid));
+		return sb.toString();
+	}
+	
+	@Override
+	public String asString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("entity:"); //$NON-NLS-1$
+		sb.append(UuidUtils.uuidToString(getEntityUuid()));
 		return sb.toString();
 	}
 }

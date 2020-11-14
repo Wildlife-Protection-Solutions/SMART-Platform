@@ -34,7 +34,7 @@ import org.wcs.smart.util.SharedUtils;
 public class AttributeFilter implements IFilter {
 
 	public static final String ANY_OPTION_KEY = "list.any"; //$NON-NLS-1$
-
+	public static final String MLIST_SEPERATOR = ","; //$NON-NLS-1$
 	/**
 	 * Creates a new boolean attribute filter
 	 * @param attributeIdentifier the attribute identifier in the form "attribute:b:<key>"
@@ -144,6 +144,25 @@ public class AttributeFilter implements IFilter {
 		this.value2 = value2;
 	}
 	
+	/**
+	 * Sets the filter values; this is used for updating
+	 * filers when data model attributes change
+	 * @param attributeKey
+	 * @param type
+	 * @param op
+	 * @param value1
+	 * @param value2
+	 */
+	public void updateValues(String attributeKey, Attribute.AttributeType type,
+			Operator op, Object value1, Object value2) {
+		this.attributeKey = attributeKey;
+		this.attributeType = type;
+		this.op = op;
+		this.value1 = value1;
+		this.value2 = value2;
+		this.fullIdentifier = "attribute:" + attributeType.typeKey + ":" + attributeKey; //$NON-NLS-1$ //$NON-NLS-2$
+	}
+	
 	public Operator getOperator(){
 		return this.op;
 	}
@@ -182,7 +201,9 @@ public class AttributeFilter implements IFilter {
 			return fullIdentifier + " " + op.asSmartValue() + " " + ((Double)value1).toString();  //$NON-NLS-1$  //$NON-NLS-2$
 		}else if (attributeType == AttributeType.TEXT){
 			return fullIdentifier + " " + op.asSmartValue() + " \"" + ((String)value1) + "\"";  //$NON-NLS-1$  //$NON-NLS-2$  //$NON-NLS-3$ 
-		}else if (attributeType == AttributeType.TREE || attributeType == AttributeType.LIST){
+		}else if (attributeType == AttributeType.TREE || 
+				attributeType == AttributeType.LIST || 
+				attributeType == AttributeType.MLIST){
 			return fullIdentifier + " " + op.asSmartValue() + " " + ((String)value1);  //$NON-NLS-1$  //$NON-NLS-2$  
 		}else if (attributeType == AttributeType.DATE){
 			return fullIdentifier + " " + op.asSmartValue() + " " + (String)value1 + " " + Operator.AND.asSmartValue() + " " + ((String)value2); //$NON-NLS-1$ //$NON-NLS-2$  //$NON-NLS-3$ //$NON-NLS-4$ 

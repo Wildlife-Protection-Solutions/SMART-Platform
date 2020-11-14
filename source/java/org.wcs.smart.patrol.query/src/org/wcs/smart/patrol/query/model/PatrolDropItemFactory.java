@@ -50,8 +50,6 @@ import org.wcs.smart.patrol.query.hibernate.PatrolQueryHibernateManager;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.parser.internal.filter.PatrolFilter;
 import org.wcs.smart.patrol.query.parser.internal.filter.PatrolUuidFilter;
-import org.wcs.smart.patrol.query.parser.internal.summary.PatrolAttributeValueItem;
-import org.wcs.smart.patrol.query.parser.internal.summary.PatrolCategoryValueItem;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolGroupBy;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItem;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItemAreaBuffer;
@@ -71,7 +69,6 @@ import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolListDropItem;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolValueDropItem;
 import org.wcs.smart.patrol.query.ui.itempanel.GriddedFilterPanel;
 import org.wcs.smart.patrol.query.ui.itempanel.SummaryFilterPanel;
-import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.ui.itempanel.SummaryDataModelContentProvider;
@@ -97,7 +94,6 @@ import org.wcs.smart.query.ui.model.impl.AttributeListValueDropItem;
 import org.wcs.smart.query.ui.model.impl.AttributeTreeValueDropItem;
 import org.wcs.smart.query.ui.model.impl.AttributeValueDropItem;
 import org.wcs.smart.query.ui.model.impl.BasicDropItemFactory;
-import org.wcs.smart.query.ui.model.impl.CategoryValueDropItem;
 import org.wcs.smart.query.ui.model.impl.ErrorDropItem;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
@@ -382,18 +378,6 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 		return new AttributeTreeValueDropItem(true, item,cat);
 	}
 	
-	/**
-	 * Creates a category value drop item
-	 * @param cat
-	 * @return
-	 */
-	@Override
-	public DropItem createCategoryValueDropItem(Category cat){
-		if (cat == null){
-			return new CategoryValueDropItem(true);
-		}
-		return new CategoryValueDropItem(true, cat);
-	}
 	
 	/**
 	 * Generates drop items for the given query proxy.
@@ -537,11 +521,7 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 	}
 	@Override
 	public DropItem valueItemToDropItem(IValueItem item, Session session) throws Exception{
-		if (item instanceof PatrolAttributeValueItem){
-			return asDropItem((PatrolAttributeValueItem) item, session);
-		}else if (item instanceof PatrolCategoryValueItem){
-			return asDropItem((PatrolCategoryValueItem) item, session);
-		}else if (item instanceof PatrolValueItem){
+		if (item instanceof PatrolValueItem){
 			return asDropItem((PatrolValueItem) item, session);
 		}
 		return super.valueItemToDropItem(item, session);
@@ -551,87 +531,6 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 	public DropItem asDropItem(PatrolValueItem item, Session session) throws Exception{
 		return createPatrolValueDropItem(item);
 	}
-	
-	public DropItem asDropItem(PatrolCategoryValueItem item, Session session) throws Exception{
-		try{
-			String categoryHkey = item.getCategoryHKey();
-			DropItem di = null;
-			if (categoryHkey == null){
-				di = PatrolDropItemFactory.INSTANCE.createCategoryValueDropItem(null);
-			}else{
-				Category category = QueryDataModelManager.getInstance().getCategory(session, categoryHkey);
-				if (category == null){
-					throw new Exception(MessageFormat.format(Messages.PatrolCategoryValueItem_CategoryNotFound, new Object[]{categoryHkey}));
-				}
-				category.getFullCategoryName();		//cache this
-				di = PatrolDropItemFactory.INSTANCE.createCategoryValueDropItem(category);
-			}
-			
-			di.initializeData(new Object[]{getInitializeData(item), null});
-			return di;
-		} catch (Exception ex) {
-			return new ErrorDropItem(ex.getMessage());
-		}
-		
-	}
-	public DropItem asDropItem(PatrolAttributeValueItem item, Session session) throws Exception{
-		String attributeKey = item.getAttributeKey();
-		String categoryKey = item.getCategoryKey();
-		String itemKey = item.getItemKey();
-		
-		Attribute.AttributeType attributeType = item.getAttributeType();
-		
-		try{
-			Attribute att = QueryDataModelManager.getInstance().getAttribute(session,attributeKey);
-			if (att == null){
-				throw new Exception(MessageFormat.format(Messages.PatrolAttributeValueItem_AttributeNotFound, new Object[]{attributeKey}));
-			}
-			DropItem di = null;
-			Category cat = null;
-			if (categoryKey != null){
-				cat = QueryDataModelManager.getInstance().getCategory(session, categoryKey);
-				if (cat == null){
-					throw new Exception(MessageFormat.format(Messages.PatrolAttributeValueItem_CategoryNotFound, new Object[]{categoryKey}));
-				}
-				cat.getFullCategoryName();			
-			}
-			if (attributeType == AttributeType.NUMERIC){
-				if (cat == null){
-					di = PatrolDropItemFactory.INSTANCE.createAttributeValueDropItem(att);
-				}else{
-					di = PatrolDropItemFactory.INSTANCE.createAttributeValueDropItem(new CategoryAttribute(cat, att));
-				}
-			}else if (attributeType == AttributeType.LIST){
-				AttributeListItem ali = QueryDataModelManager.getInstance().getAttributeListItem(session, attributeKey, itemKey);
-				if (ali == null){
-					throw new Exception(MessageFormat.format(Messages.PatrolAttributeValueItem_ListItemNotFound, new Object[]{attributeKey, itemKey}));		
-				}
-				if (cat == null){
-					di = PatrolDropItemFactory.INSTANCE.createAttributeListItemValueDropItem(ali);
-				}else{
-					di = PatrolDropItemFactory.INSTANCE.createAttributeListItemValueDropItem(ali,cat);
-				}
-			
-			}else if (attributeType == AttributeType.TREE){
-				AttributeTreeNode atn = QueryDataModelManager.getInstance().getAttributeTreeNode(session, attributeKey, itemKey);
-				if (atn == null){
-					throw new Exception(MessageFormat.format(Messages.PatrolAttributeValueItem_TreeNodeNotFound, new Object[]{attributeKey, itemKey}));		
-				}
-				if (cat == null){
-					di = PatrolDropItemFactory.INSTANCE.createAttributeTreeNodeValueDropItem(atn);
-				}else{
-					di = PatrolDropItemFactory.INSTANCE.createAttributeTreeNodeValueDropItem(atn,cat);
-				}
-			}
-			if (di != null){
-				di.initializeData(new Object[]{getInitializeData(item), null});
-			}
-			return di;
-		} catch (Exception ex) {
-			return new ErrorDropItem(ex.getMessage());
-		}
-	}
-	
 	
 	private DropItem[] createDropItems(PatrolUuidFilter f, Session session) throws Exception {
 		return null;

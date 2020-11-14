@@ -703,7 +703,8 @@ public class BasicDropItemFactory implements IDropItemFactory{
 				}else{
 					di = BasicDropItemFactory.INSTANCE.createAttributeValueDropItem(new CategoryAttribute(cat, att));
 				}
-			}else if (attributeType == AttributeType.LIST){
+			}else if (attributeType == AttributeType.LIST ||
+					attributeType == AttributeType.MLIST){
 				AttributeListItem ali = QueryDataModelManager.getInstance().getAttributeListItem(session, attributeKey, itemKey);
 				if (ali == null){
 					throw new Exception(MessageFormat.format(Messages.AttributeValueItem_listitemnotfound, new Object[]{attributeKey, itemKey}));		

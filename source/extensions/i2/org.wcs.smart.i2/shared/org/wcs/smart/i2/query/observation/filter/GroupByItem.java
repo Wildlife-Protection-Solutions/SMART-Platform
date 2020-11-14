@@ -125,7 +125,7 @@ public class GroupByItem {
 			//remaining bits are keys
 			List<String> ops = new ArrayList<>();
 			for (int i = 1; i < bits.length; i ++) {
-				String keyId = bits[i].substring(1);
+				String keyId = bits[i];
 				ops.add(keyId);
 			}
 			return new GroupByItem(GroupByType.CA, ops);
@@ -269,6 +269,80 @@ public class GroupByItem {
 		this(type, attributeKey, attributeType, otherTypeKey);
 		this.areaKey = areaType;
 		this.optionKeys = options;
+	}
+	
+	
+	public String asString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(type.getKey());
+		sb.append(INTERNAL_SEPERATOR);
+		if (type == GroupByType.ENTITYTYPE ||
+				type == GroupByType.RECORDSOURCE ||
+				type == GroupByType.RECORDSTATUS ||
+				type == GroupByType.CA) {
+				
+			for (String o : optionKeys) {
+				sb.append(o);
+				sb.append(INTERNAL_SEPERATOR);
+			}
+			sb.deleteCharAt(sb.length() - 1);
+		}else if (type == GroupByType.SYSTEM) {
+			sb.append(systemAttribute.getKey());
+			sb.append(INTERNAL_SEPERATOR);
+			sb.append(dateOption.key);
+		}else if (type == GroupByType.ENTITY_ATTRIBUTE) {
+			sb.append(attributeType.key);
+			sb.append(INTERNAL_SEPERATOR);
+			sb.append(attributeKey);
+			sb.append(INTERNAL_SEPERATOR);
+			if (this.otherTypeKey != null) {
+				sb.append(otherTypeKey);
+			}
+			
+			if (attributeType == AttributeType.LIST || attributeType == AttributeType.EMPLOYEE) {
+				for (String o : optionKeys) {
+					sb.append(INTERNAL_SEPERATOR);
+					sb.append(o);	
+				}
+			}else if (attributeType == AttributeType.POSITION) {
+				sb.append(INTERNAL_SEPERATOR);
+				sb.append(areaKey.name());
+				for (String o : optionKeys) {
+					sb.append(INTERNAL_SEPERATOR);
+					sb.append(o);	
+				}
+			}else if (attributeType == AttributeType.DATE) {
+				sb.append(INTERNAL_SEPERATOR);
+				sb.append(dateOption.key);
+			}
+			
+			
+		}else if (type == GroupByType.RECORD_ATTRIBUTE) {
+			sb.append(attributeType.key);
+			sb.append(INTERNAL_SEPERATOR);
+			sb.append(attributeKey);
+			sb.append(INTERNAL_SEPERATOR);
+			sb.append(otherTypeKey);
+			
+			if (attributeType == AttributeType.LIST || attributeType == AttributeType.EMPLOYEE) {
+				for (String o : optionKeys) {
+					sb.append(INTERNAL_SEPERATOR);
+					sb.append(o);	
+				}
+			}else if (attributeType == AttributeType.POSITION) {
+				sb.append(INTERNAL_SEPERATOR);
+				sb.append(areaKey.name());
+				for (String o : optionKeys) {
+					sb.append(INTERNAL_SEPERATOR);
+					sb.append(o);	
+				}
+			}else if (attributeType == AttributeType.DATE) {
+				sb.append(INTERNAL_SEPERATOR);
+				sb.append(dateOption.key);
+			}
+			
+		}
+		return sb.toString();
 	}
 	
 	/**

@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.model.summary;
 
+import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.QueryFilter;
 
 
@@ -47,10 +48,10 @@ public class GridQueryDefinition {
 	}
 	
 	
-	private IValueItem valueItem;
-	private QueryFilter queryFilter;
-	private QueryFilter rateFilter;
-	private Double gridSize;
+	protected IValueItem valueItem;
+	protected QueryFilter queryFilter;
+	protected QueryFilter rateFilter;
+	protected Double gridSize;
 	
 	/**
 	 * Creates a new summary query definition
@@ -102,4 +103,11 @@ public class GridQueryDefinition {
 		return valueItem.asString() + "|" + gridSize.toString() + "|" + (queryFilter == null ? "" : queryFilter.asString()) + "|" + (rateFilter == null ? "" : rateFilter.asString()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 	}
 
+	/**
+	 * 
+	 * @return all filters used by the query
+	 */
+	public QueryFilter[] getAllFilters(){
+		return new QueryFilter[] {rateFilter, queryFilter};
+	}
 }

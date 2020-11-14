@@ -91,6 +91,10 @@ public enum Operator {
 	 */
 	OR("or"), //$NON-NLS-1$
 	/**
+	 * Boolean or operator
+	 */
+	EXACT("exact"), //$NON-NLS-1$
+	/**
 	 * Boolean not operator
 	 */
 	NOT("not"), //$NON-NLS-1$
@@ -133,6 +137,9 @@ public enum Operator {
 		}
 		if (value.equalsIgnoreCase("<>")){ //$NON-NLS-1$
 			return NOTEQUALS;
+		}
+		if (value.equalsIgnoreCase(EXACT.asSmartValue())) {
+			return EXACT;
 		}
 		for (int i = 0; i < BOOLEANS_OPS.length; i ++){
 			if (BOOLEANS_OPS[i].asSmartValue().equalsIgnoreCase(value)){

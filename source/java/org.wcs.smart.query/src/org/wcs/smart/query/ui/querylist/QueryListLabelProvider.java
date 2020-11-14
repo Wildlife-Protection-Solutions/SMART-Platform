@@ -56,6 +56,7 @@ public class QueryListLabelProvider extends OwnerDrawLabelProvider {
 		if (element instanceof QueryFolder){
 			return  QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.FOLDER_ICON);
 		}else if (element instanceof QueryEditorInput){
+			if (((QueryEditorInput)element).getType() == null) return null;
 			return ((QueryEditorInput)element).getType().getImage();
 		}else if (element instanceof Query){
 			return QueryTypeManager.INSTANCE.findQueryType(((Query)element).getTypeKey()).getImage();

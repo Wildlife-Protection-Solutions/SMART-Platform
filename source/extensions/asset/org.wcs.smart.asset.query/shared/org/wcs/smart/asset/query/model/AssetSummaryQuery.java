@@ -100,7 +100,7 @@ public class AssetSummaryQuery extends SummaryQuery implements IStyledQuery {
 	}
 	
 	public void setTypeKey(String querytype) {
-		this.querytype = querytype;
+		this.querytype = querytype.toUpperCase();
 	}
 	
 	/**

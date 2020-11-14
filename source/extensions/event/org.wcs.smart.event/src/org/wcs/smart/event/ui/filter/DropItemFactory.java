@@ -22,6 +22,7 @@
 package org.wcs.smart.event.ui.filter;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.Session;
@@ -104,6 +105,26 @@ public enum DropItemFactory {
 					throw new Exception(MessageFormat.format(Messages.DropItemFactory_ListItemNotFound, ff.getValue().toString(), aa.getName())) ;
 				}
 				di.initializeData(found);
+			}else if (aa.getType() == AttributeType.MLIST) {
+				
+				List<AttributeListItem> aitems = new ArrayList<>();
+				
+				String[] attributeKey = ff.getValue().toString().split(AttributeFilter.MLIST_SEPERATOR);
+				for (String liKey : attributeKey) {
+					AttributeListItem found = null;
+					for (AttributeListItem ii : aa.getAttributeList()) {
+						if (ii.getKeyId().equalsIgnoreCase(liKey)) {
+							found = ii;
+							break;
+						}
+					}
+					if (found == null) {
+						throw new Exception(MessageFormat.format(Messages.DropItemFactory_ListItemNotFound, ff.getValue().toString(), aa.getName())) ;	
+					}else {
+						aitems.add(found);
+					}
+				}
+				di.initializeData(new Object[] {ff.getOperator(), aitems});
 			}else if (aa.getType() == AttributeType.TREE) {
 				AttributeTreeNode treenode = QueryFactory.buildQuery(session,  AttributeTreeNode.class, 
 						new Object[] {"hkey", ff.getValue().toString()}, //$NON-NLS-1$
@@ -172,6 +193,26 @@ public enum DropItemFactory {
 					throw new Exception(MessageFormat.format(Messages.DropItemFactory_AttributeListItemNotFound, ff.getAttributeFilter().getAttributeKey(), aa.getName())) ;
 				}
 				di.initializeData(found);
+			}else if (aa.getType() == AttributeType.MLIST) {
+				
+				List<AttributeListItem> aitems = new ArrayList<>();
+				
+				String[] attributeKey = ff.getAttributeFilter().getValue().toString().split(AttributeFilter.MLIST_SEPERATOR);
+				for (String liKey : attributeKey) {
+					AttributeListItem found = null;
+					for (AttributeListItem ii : aa.getAttributeList()) {
+						if (ii.getKeyId().equalsIgnoreCase(liKey)) {
+							found = ii;
+							break;
+						}
+					}
+					if (found == null) {
+						throw new Exception(MessageFormat.format(Messages.DropItemFactory_ListItemNotFound, ff.getAttributeFilter().getValue().toString(), aa.getName())) ;	
+					}else {
+						aitems.add(found);
+					}
+				}
+				di.initializeData(new Object[] {ff.getAttributeFilter().getOperator(), aitems});
 			}else if (aa.getType() == AttributeType.TREE) {
 				AttributeTreeNode treenode = QueryFactory.buildQuery(session,  AttributeTreeNode.class, 
 						new Object[] {"hkey", ff.getAttributeFilter().getValue().toString()}, //$NON-NLS-1$
@@ -218,6 +259,8 @@ public enum DropItemFactory {
 			Attribute a = (Attribute)element;
 			if (a.getType() == Attribute.AttributeType.LIST) {
 				return new DropItem[] {new AttributeListDropItem((Attribute)element) };
+			}else if (a.getType() == Attribute.AttributeType.MLIST) {
+				return new DropItem[] {new AttributeMListDropItem((Attribute)element) };
 			}else if (a.getType() == Attribute.AttributeType.TREE) {
 				return new DropItem[] {new AttributeTreeDropItem((Attribute)element) };
 			}else {
@@ -228,6 +271,8 @@ public enum DropItemFactory {
 			CategoryAttribute a = (CategoryAttribute)element;
 			if (a.getAttribute().getType() == Attribute.AttributeType.LIST) {
 				return new DropItem[] {new AttributeListDropItem((CategoryAttribute)element) };
+			}else if (a.getAttribute().getType() == Attribute.AttributeType.MLIST) {
+				return new DropItem[] {new AttributeMListDropItem((CategoryAttribute)element) };
 			}else if (a.getAttribute().getType() == Attribute.AttributeType.TREE) {
 				return new DropItem[] {new AttributeTreeDropItem((CategoryAttribute)element) };
 			}else {

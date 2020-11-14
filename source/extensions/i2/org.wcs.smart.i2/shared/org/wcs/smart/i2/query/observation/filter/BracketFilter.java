@@ -39,6 +39,14 @@ public class BracketFilter implements IQueryFilter {
 		this.filter = filter;
 	}
 	
+	/**
+	 * @see org.wcs.smart.query.parser.filter.IFilter#asString()
+	 */
+	@Override
+	public String asString(){
+		return "( " + filter.asString() + " )"; //$NON-NLS-1$ //$NON-NLS-2$
+	}
+	
 	public IQueryFilter getFilter(){
 		return this.filter;
 	}

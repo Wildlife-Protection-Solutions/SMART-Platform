@@ -24,6 +24,7 @@ package org.wcs.smart.query.model.filter.date;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 
 import org.wcs.smart.SmartContext;
@@ -55,7 +56,8 @@ public enum CurrentQuarterDateFilter implements IDateFilter {
 		int month = ((start.getMonthValue()-1) / 3) * 3 + 1;
 		
 		LocalDate first = LocalDate.of(start.getYear(), month, 1);
-		LocalDate last = LocalDate.of(start.getYear(), month+3, 1);
+		LocalDate last = ChronoUnit.MONTHS.addTo(first, 3);
+		
 		return new LocalDate[]{first, last};
 	}
 

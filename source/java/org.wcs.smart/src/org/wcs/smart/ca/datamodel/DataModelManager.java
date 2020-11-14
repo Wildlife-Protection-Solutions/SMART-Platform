@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.ca.datamodel;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -114,6 +115,18 @@ public enum DataModelManager {
 	public void fireEnabledStateListener(Session currentSession, Object enabledItem){
 		for (IDataModelItemListener listener : itemChangeListeners){
 			listener.itemEnabledStateChanged(currentSession, enabledItem);
+		}
+	}
+	
+	/**
+	 * Fires then enabled state changed listeners 
+	 * @param currentSession
+	 * @param enabledItem
+	 * @throws SQLException 
+	 */
+	public void fireSingleToMulti(Session currentSession, Attribute attribute) throws SQLException{
+		for (IDataModelItemListener listener : itemChangeListeners){
+			listener.singleToMulti(currentSession, attribute);
 		}
 	}
 	

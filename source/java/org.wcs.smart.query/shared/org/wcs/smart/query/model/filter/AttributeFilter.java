@@ -198,5 +198,24 @@ public class AttributeFilter implements IFilter {
 	public void accept(IFilterVisitor visitor){
 		visitor.visit(this);
 	}
+	
+	/**
+	 * Sets the filter values; this is used for updating
+	 * filers when data model attributes change
+	 * @param attributeKey
+	 * @param type
+	 * @param op
+	 * @param value1
+	 * @param value2
+	 */
+	public void updateValues(String attributeKey, Attribute.AttributeType type,
+			Operator op, Object value1, Object value2) {
+		this.attributeKey = attributeKey;
+		this.attributeType = type;
+		this.op = op;
+		this.value1 = value1;
+		this.value2 = value2;
+		this.fullIdentifier = "attribute:" + attributeType.typeKey + ":" + attributeKey; //$NON-NLS-1$ //$NON-NLS-2$
+	}
 }
 

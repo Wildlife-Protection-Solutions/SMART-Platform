@@ -27,6 +27,7 @@ import org.wcs.smart.ca.Area;
  * @author Emily
  *
  */
+// | < AREA_KEY : "area:" < AREA_TYPE_KEY > ":" < DM_KEY > >
 public class AreaFilter implements IQueryFilter {
 
 	public static AreaFilter create(String key){
@@ -48,6 +49,16 @@ public class AreaFilter implements IQueryFilter {
 	
 	public String getKey(){
 		return this.areaKey;
+	}
+
+	@Override
+	public String asString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("area:"); //$NON-NLS-1$
+		sb.append(areaType.name());
+		sb.append(":"); //$NON-NLS-1$
+		sb.append(areaKey);
+		return sb.toString();
 	}
 	
 	

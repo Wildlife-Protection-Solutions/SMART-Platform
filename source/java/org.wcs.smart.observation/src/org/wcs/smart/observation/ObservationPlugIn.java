@@ -30,6 +30,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationAreaManager;
+import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.model.IWaypointSourceEngine;
 
@@ -66,6 +67,9 @@ public class ObservationPlugIn extends AbstractUIPlugin {
 		plugin = this;
 		SmartContext.INSTANCE.setClass(IWaypointSourceEngine.class, WaypointSourceEngine.INSTANCE);
 		ConservationAreaManager.getInstance().addDeleteHandler(deleteCa, CaDeleteHandler.DELETE_ORDER);
+		
+		DataModelManager.INSTANCE.addItemChangeListener(DataModelItemListener.INSTANCE);
+
 	}
 
 	/*

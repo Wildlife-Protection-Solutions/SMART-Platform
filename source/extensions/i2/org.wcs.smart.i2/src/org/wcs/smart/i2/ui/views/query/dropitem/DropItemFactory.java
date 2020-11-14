@@ -614,8 +614,7 @@ public class DropItemFactory {
 		}else if (filter.getAttributeType().isList()){
 			final List<String> labels = new ArrayList<String>();
 			final List<String> keys = new ArrayList<String>();
-			labels.add(ANY_LABEL);
-			keys.add(IQueryFilter.ANY_OPTION_KEY);
+			
 			if (attribute.getAttributeList() != null){
 				List<AttributeListItem> items = attribute.getAttributeList();
 				for (AttributeListItem i : items){
@@ -624,6 +623,9 @@ public class DropItemFactory {
 				}
 			}
 			if (filter.getAttributeType() == Attribute.AttributeType.LIST) {
+				labels.add(0, ANY_LABEL);
+				keys.add(0, IQueryFilter.ANY_OPTION_KEY);
+				
 				OptionDropItem item = new OptionDropItem(name, queryKeyPart, labels.toArray(new String[labels.size()]), keys.toArray(new String[keys.size()]), canEdit());
 				item.setInitialValue(filter.getKeyValue());
 				return Collections.singletonList(item);

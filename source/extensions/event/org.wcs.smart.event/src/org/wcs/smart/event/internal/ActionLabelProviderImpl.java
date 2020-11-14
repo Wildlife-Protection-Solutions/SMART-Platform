@@ -51,6 +51,7 @@ public class ActionLabelProviderImpl implements IActionLabelProvider {
 		if (item == Operator.STR_CONTAINS) return Messages.ActionLabelProviderImpl_StrContainsOperator;
 		if (item == Operator.STR_EQUALS) return Messages.ActionLabelProviderImpl_StrEqualsOperator;
 		if (item == Operator.STR_NOTCONTAINS) return Messages.ActionLabelProviderImpl_StrNotContainsOperator;	
+		if (item == Operator.EXACT) return Messages.ActionLabelProviderImpl_ExactOperator;	
 		return null;
 	}
 }

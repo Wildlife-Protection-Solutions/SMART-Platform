@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.query.observation.filter;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -231,6 +232,73 @@ public class DataModelFilter implements IQueryFilter, IColumnIdentifierProvider 
 					sb.append(stringValue);
 					break;
 			}
+		}
+		return sb.toString();
+	}
+	
+	public void convertToMultiList(List<String> keyValues) {
+		this.operator = Operator.OR;
+		this.keyValues = keyValues;
+		this.keyValue = null;
+		this.attributeType = Attribute.AttributeType.MLIST;
+	}
+	
+	@Override
+	public String asString() {
+		//  | < ATTRIBUTE_KEY_MLIST: "dm_attribute:m:"(< DM_KEY >)?":"< DM_KEY >>
+
+		StringBuilder sb = new StringBuilder();
+		
+		if (attributeKey == null) {
+			sb.append("dm_category:");
+			sb.append(categoryKey);
+			return sb.toString();
+		}
+		
+		sb.append("dm_attribute:"); //$NON-NLS-1$
+		sb.append(attributeType.typeKey);
+		sb.append(":"); //$NON-NLS-1$
+		sb.append(categoryKey == null ? "" : categoryKey); //$NON-NLS-1$
+		sb.append(":"); //$NON-NLS-1$
+		sb.append(attributeKey);
+		
+		if (attributeType == Attribute.AttributeType.BOOLEAN) {
+			// nothing
+		} else if (attributeType == Attribute.AttributeType.NUMERIC) {
+			sb.append(" "); //$NON-NLS-1$
+			sb.append(operator.getKey());
+			sb.append(" "); //$NON-NLS-1$
+			sb.append(numberValue);
+		} else if (attributeType == Attribute.AttributeType.TEXT) {
+			sb.append(" "); //$NON-NLS-1$
+			sb.append(operator.getKey());
+			sb.append(" "); //$NON-NLS-1$
+			sb.append("\"" + stringValue + "\""); //$NON-NLS-1$ //$NON-NLS-2$
+		} else if (attributeType == Attribute.AttributeType.LIST || 
+				attributeType == Attribute.AttributeType.TREE) {
+			sb.append(" "); //$NON-NLS-1$
+			sb.append(Operator.EQUALS.getKey());
+			sb.append(" "); //$NON-NLS-1$
+			sb.append(keyValue);
+		} else if (attributeType == Attribute.AttributeType.MLIST) {
+			sb.append(" "); //$NON-NLS-1$
+			sb.append(operator.getKey());
+			sb.append(" "); //$NON-NLS-1$
+			for (String x : keyValues) {
+				sb.append(x);
+				sb.append(MLIST_SEPERATOR);
+			}
+			sb.deleteCharAt(sb.length() - 1);
+
+		} else if (attributeType == Attribute.AttributeType.DATE) {
+			sb.append(" "); //$NON-NLS-1$
+			sb.append(operator.getKey());
+			sb.append(" "); //$NON-NLS-1$
+			sb.append(DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR).format(dateValues[0]));
+			sb.append(" "); //$NON-NLS-1$
+			sb.append(Operator.AND.getKey());
+			sb.append(" "); //$NON-NLS-1$
+			sb.append(DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR).format(dateValues[1]));
 		}
 		return sb.toString();
 	}

@@ -36,8 +36,6 @@ import org.wcs.smart.asset.query.AssetQueryPlugIn;
 import org.wcs.smart.asset.query.internal.Messages;
 import org.wcs.smart.asset.query.parser.internal.filter.AssetAttributeFilter;
 import org.wcs.smart.asset.query.parser.internal.filter.AssetFilter;
-import org.wcs.smart.asset.query.parser.internal.summary.AssetAttributeValueItem;
-import org.wcs.smart.asset.query.parser.internal.summary.AssetCategoryValueItem;
 import org.wcs.smart.asset.query.parser.internal.summary.AssetGroupBy;
 import org.wcs.smart.asset.query.parser.internal.summary.AssetValueItem;
 import org.wcs.smart.asset.query.ui.AssetOptionData;
@@ -58,7 +56,6 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.ui.itempanel.SummaryDataModelContentProvider;
@@ -80,7 +77,6 @@ import org.wcs.smart.query.ui.model.impl.AttributeListValueDropItem;
 import org.wcs.smart.query.ui.model.impl.AttributeTreeValueDropItem;
 import org.wcs.smart.query.ui.model.impl.AttributeValueDropItem;
 import org.wcs.smart.query.ui.model.impl.BasicDropItemFactory;
-import org.wcs.smart.query.ui.model.impl.CategoryValueDropItem;
 import org.wcs.smart.query.ui.model.impl.ErrorDropItem;
 
 /**
@@ -316,19 +312,6 @@ public class AssetDropItemFactory extends BasicDropItemFactory implements IDropI
 	}
 	
 	/**
-	 * Creates a category value drop item
-	 * @param cat
-	 * @return
-	 */
-	@Override
-	public DropItem createCategoryValueDropItem(Category cat){
-		if (cat == null){
-			return new CategoryValueDropItem(false);
-		}
-		return new CategoryValueDropItem(false, cat);
-	}
-	
-	/**
 	 * Generates drop items for the given query proxy.
 	 * 
 	 * @see org.wcs.smart.query.ui.model.impl.BasicDropItemFactory#generateDropItems(org.wcs.smart.query.model.QueryProxy, org.hibernate.Session)
@@ -470,11 +453,7 @@ public class AssetDropItemFactory extends BasicDropItemFactory implements IDropI
 	}
 	@Override
 	public DropItem valueItemToDropItem(IValueItem item, Session session) throws Exception{
-		if (item instanceof AssetAttributeValueItem){
-			return asDropItem((AssetAttributeValueItem) item, session);
-		}else if (item instanceof AssetCategoryValueItem){
-			return asDropItem((AssetCategoryValueItem) item, session);
-		}else if (item instanceof AssetValueItem) {
+		if (item instanceof AssetValueItem) {
 			return asDropItem ((AssetValueItem)item);
 		}
 		return super.valueItemToDropItem(item, session);
@@ -483,86 +462,6 @@ public class AssetDropItemFactory extends BasicDropItemFactory implements IDropI
 	
 	public DropItem asDropItem(AssetValueItem item) {
 		return createAssetValueDropItem(item.getAssetValueOption(), item.getAssetFormatOption());
-	}
-	
-	public DropItem asDropItem(AssetCategoryValueItem item, Session session) throws Exception{
-		try{
-			String categoryHkey = item.getCategoryHKey();
-			DropItem di = null;
-			if (categoryHkey == null){
-				di = AssetDropItemFactory.INSTANCE.createCategoryValueDropItem(null);
-			}else{
-				Category category = QueryDataModelManager.getInstance().getCategory(session, categoryHkey);
-				if (category == null){
-					throw new Exception(MessageFormat.format(Messages.AssetCategoryValueItem_CategoryNotFound, new Object[]{categoryHkey}));
-				}
-				category.getFullCategoryName();		//cache this
-				di = AssetDropItemFactory.INSTANCE.createCategoryValueDropItem(category);
-			}
-			
-			di.initializeData(new Object[]{getInitializeData(item), null});
-			return di;
-		} catch (Exception ex) {
-			return new ErrorDropItem(ex.getMessage());
-		}
-		
-	}
-	public DropItem asDropItem(AssetAttributeValueItem item, Session session) throws Exception{
-		String attributeKey = item.getAttributeKey();
-		String categoryKey = item.getCategoryKey();
-		String itemKey = item.getItemKey();
-		
-		Attribute.AttributeType attributeType = item.getAttributeType();
-		
-		try{
-			Attribute att = QueryDataModelManager.getInstance().getAttribute(session,attributeKey);
-			if (att == null){
-				throw new Exception(MessageFormat.format(Messages.AssetAttributeValueItem_AttributeNotFound, new Object[]{attributeKey}));
-			}
-			DropItem di = null;
-			Category cat = null;
-			if (categoryKey != null){
-				cat = QueryDataModelManager.getInstance().getCategory(session, categoryKey);
-				if (cat == null){
-					throw new Exception(MessageFormat.format(Messages.AssetAttributeValueItem_CategoryNotFound, new Object[]{categoryKey}));
-				}
-				cat.getFullCategoryName();			
-			}
-			if (attributeType == AttributeType.NUMERIC){
-				if (cat == null){
-					di = AssetDropItemFactory.INSTANCE.createAttributeValueDropItem(att);
-				}else{
-					di = AssetDropItemFactory.INSTANCE.createAttributeValueDropItem(new CategoryAttribute(cat, att));
-				}
-			}else if (attributeType == AttributeType.LIST){
-				AttributeListItem ali = QueryDataModelManager.getInstance().getAttributeListItem(session, attributeKey, itemKey);
-				if (ali == null){
-					throw new Exception(MessageFormat.format(Messages.AssetAttributeValueItem_ListItemNotFound, new Object[]{attributeKey, itemKey}));		
-				}
-				if (cat == null){
-					di = AssetDropItemFactory.INSTANCE.createAttributeListItemValueDropItem(ali);
-				}else{
-					di = AssetDropItemFactory.INSTANCE.createAttributeListItemValueDropItem(ali,cat);
-				}
-			
-			}else if (attributeType == AttributeType.TREE){
-				AttributeTreeNode atn = QueryDataModelManager.getInstance().getAttributeTreeNode(session, attributeKey, itemKey);
-				if (atn == null){
-					throw new Exception(MessageFormat.format(Messages.AssetAttributeValueItem_TreeNodeNotFound, new Object[]{attributeKey, itemKey}));		
-				}
-				if (cat == null){
-					di = AssetDropItemFactory.INSTANCE.createAttributeTreeNodeValueDropItem(atn);
-				}else{
-					di = AssetDropItemFactory.INSTANCE.createAttributeTreeNodeValueDropItem(atn,cat);
-				}
-			}
-			if (di != null){
-				di.initializeData(new Object[]{getInitializeData(item), null});
-			}
-			return di;
-		} catch (Exception ex) {
-			return new ErrorDropItem(ex.getMessage());
-		}
 	}
 	
 

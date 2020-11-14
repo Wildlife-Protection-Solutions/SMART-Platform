@@ -21,12 +21,16 @@
  */
 package org.wcs.smart.i2.query.observation.filter;
 
+import org.wcs.smart.util.UuidUtils;
+
 /**
  * Filter for an entity type by key
  * 
  * @author Emily
  *
  */
+// | < ENTITY_TYPE_KEY : "entitytype:" <DM_KEY> >
+
 public class EntityTypeFilter implements IQueryFilter, IColumnIdentifierProvider {
 
 	public static EntityTypeFilter create(String key){
@@ -47,6 +51,14 @@ public class EntityTypeFilter implements IQueryFilter, IColumnIdentifierProvider
 	public String getUniqueColumnIdentifier(){
 		StringBuilder sb = new StringBuilder();
 		sb.append("et_"); //$NON-NLS-1$
+		sb.append(typeKey);
+		return sb.toString();
+	}
+	
+	@Override
+	public String asString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("entitytype:"); //$NON-NLS-1$
 		sb.append(typeKey);
 		return sb.toString();
 	}

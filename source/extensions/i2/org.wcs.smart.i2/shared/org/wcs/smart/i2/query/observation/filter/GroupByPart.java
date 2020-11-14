@@ -22,7 +22,9 @@
 package org.wcs.smart.i2.query.observation.filter;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+
 
 /**
  * Group by part which contains a list of group by items
@@ -50,5 +52,17 @@ public class GroupByPart {
 	
 	public void addItem(GroupByItem item) {
 		this.items.add(item);
+	}
+	
+	public String asString() {
+		StringBuilder sb = new StringBuilder();
+		for (Iterator<GroupByItem> iterator = items.iterator(); iterator.hasNext();) {
+			GroupByItem it = iterator.next();
+			sb.append(it.asString());
+			if (iterator.hasNext()) {
+				sb.append(","); //$NON-NLS-1$
+			}
+		}
+		return sb.toString();
 	}
 }

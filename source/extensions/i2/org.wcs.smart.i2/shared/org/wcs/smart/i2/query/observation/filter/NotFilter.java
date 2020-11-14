@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.i2.query.observation.filter;
 
+import org.wcs.smart.i2.query.Operator;
+
 /**
  * NOT Filter
  * @author Emily
@@ -46,5 +48,13 @@ public class NotFilter implements IQueryFilter {
 	public void accept(IFilterVisitor visitor){
 		visitor.visitElement(this);
 		filter.accept(visitor);
+	}
+	
+	/**
+	 * @see org.wcs.smart.query.parser.filter.IFilter#asString()
+	 */
+	@Override
+	public String asString() {
+		return Operator.NOT.getKey() + " " + filter.asString(); //$NON-NLS-1$
 	}
 }

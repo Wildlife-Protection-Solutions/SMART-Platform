@@ -136,7 +136,7 @@ public class AttributeGroupByViewer extends AbstractGroupByViewer<AttributeGroup
 				}
 			}
 			String[] filterHkeys = groupBy.getFilterKeys();
-			if (attributeType == AttributeType.LIST) {
+			if (attributeType.isList()) {
 				if (filterHkeys != null) {
 					ArrayList<ListItem> items = new ArrayList<ListItem>();
 					for (int i = 0; i < filterHkeys.length; i++) {

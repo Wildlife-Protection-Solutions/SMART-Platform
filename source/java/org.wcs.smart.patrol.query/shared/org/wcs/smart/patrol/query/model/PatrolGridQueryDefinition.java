@@ -120,4 +120,8 @@ public class PatrolGridQueryDefinition extends GridQueryDefinition {
 		return query;
 	}
 
+	@Override
+	public QueryFilter[] getAllFilters(){
+		return new QueryFilter[] {rateFilter, queryFilter, zeroFilter};
+	}
 }

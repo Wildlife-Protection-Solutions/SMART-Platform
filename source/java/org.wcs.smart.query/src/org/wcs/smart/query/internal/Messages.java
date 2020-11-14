@@ -323,6 +323,7 @@ public class Messages extends NLS {
 	public static String ProgressAreaComposite_QueryCancelledStatus;
 	public static String QueryCaDeleteHandler_DeleteProgressMessage;
 	public static String QueryCaDeleteHandler_Progress_DeletingQueryFolders;
+	public static String QueryDataModelItemListener_ConvertError;
 	public static String QueryDateFilterComposite_AndLabel;
 	public static String QueryDateFilterComposite_BetweenLabel;
 	public static String QueryDateFilterComposite_BetweenLabel2;

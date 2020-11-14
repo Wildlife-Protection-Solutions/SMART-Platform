@@ -56,7 +56,7 @@ public class CategoryAttributeDMAdvisor implements IDeleteAdvisor{
 		}
 		Query<?> query = session.createQuery(
 				"SELECT count(*) FROM IntelObservation wo join wo.observationAttributes woa join wo.category as cat " + //$NON-NLS-1$
-				"WHERE cat.hkey like :categoryhkey and woa.id.attribute = :attribute"); //$NON-NLS-1$
+				"WHERE cat.hkey like :categoryhkey and woa.attribute = :attribute"); //$NON-NLS-1$
 		query.setParameter("categoryhkey", categoryAttribute.getCategory().getHkey() + "%"); //$NON-NLS-1$ //$NON-NLS-2$
 		query.setParameter("attribute", categoryAttribute.getAttribute()); //$NON-NLS-1$
 		long cnt = ((Long)query.list().get(0));

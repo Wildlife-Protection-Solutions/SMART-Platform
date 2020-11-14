@@ -387,23 +387,23 @@ public class Parser implements ParserConstants {
       break;
     case SUM_CAT_VALUE_KEY:
       jj_consume_token(SUM_CAT_VALUE_KEY);
-                        item = PatrolCategoryValueItem.createItem( token.image );
+                        item = CategoryValueItem.createItem( token.image );
       break;
     case SUM_ATTRIBUTE_VALUE_KEY:
       jj_consume_token(SUM_ATTRIBUTE_VALUE_KEY);
-                        item = PatrolAttributeValueItem.createAttributeItem( token.image );
+                        item = AttributeValueItem.createAttributeItem( token.image );
       break;
     case SUM_CAT_ATT_VALUE_KEY:
       jj_consume_token(SUM_CAT_ATT_VALUE_KEY);
-                        item = PatrolAttributeValueItem.createCategoryAttributeItem( token.image );
+                        item = AttributeValueItem.createCategoryAttributeItem( token.image );
       break;
     case SUM_ATTRIBUTE_VALUE_LISTTREE_KEY:
       jj_consume_token(SUM_ATTRIBUTE_VALUE_LISTTREE_KEY);
-                        item = PatrolAttributeValueItem.createAttributeItem( token.image );
+                        item = AttributeValueItem.createAttributeItem( token.image );
       break;
     case SUM_CAT_ATT_VALUE_LISTTREE_KEY:
       jj_consume_token(SUM_CAT_ATT_VALUE_LISTTREE_KEY);
-                        item = PatrolAttributeValueItem.createCategoryAttributeItem( token.image );
+                        item = AttributeValueItem.createCategoryAttributeItem( token.image );
       break;
     default:
       jj_la1[11] = jj_gen;

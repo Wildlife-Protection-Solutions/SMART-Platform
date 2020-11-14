@@ -30,6 +30,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationAreaManager;
+import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.event.internal.ActionLabelProviderImpl;
 
 /**
@@ -69,6 +70,7 @@ public class EventPlugIn extends AbstractUIPlugin {
 		
 		ConservationAreaManager.getInstance().addDeleteHandler(new ConservationAreaDeleteHandler(), ConservationAreaDeleteHandler.EXECUTE_ORDER);
 		SmartContext.INSTANCE.setClass(IActionLabelProvider.class, new ActionLabelProviderImpl());
+		DataModelManager.INSTANCE.addItemChangeListener(EventDataModelItemListener.INSTANCE);
 	}
 
 	/*

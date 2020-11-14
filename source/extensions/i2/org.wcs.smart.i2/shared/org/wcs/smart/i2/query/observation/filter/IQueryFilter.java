@@ -54,6 +54,13 @@ public interface IQueryFilter {
 		}
 	}
 	
+	/**
+	 * converts the filter to string representation
+	 * @return
+	 */
+	public String asString();
+	
+	
 	default public void accept(IFilterVisitor visitor){
 		visitor.visitElement(this);
 	}

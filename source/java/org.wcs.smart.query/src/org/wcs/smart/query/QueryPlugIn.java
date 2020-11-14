@@ -42,6 +42,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationAreaManager;
+import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.common.ui.GridQueryColumnLabelProvider;
 import org.wcs.smart.query.common.ui.OperatorLabelProvider;
@@ -249,6 +250,7 @@ public class QueryPlugIn extends AbstractUIPlugin {
 		SmartContext.INSTANCE.setClass(IGridQueryColumnLabelProvider.class, new GridQueryColumnLabelProvider());
 		SmartContext.INSTANCE.setClass(IQueryDateLabelProvider.class, new QueryDateLabelProvider());
 		
+		DataModelManager.INSTANCE.addItemChangeListener(QueryDataModelItemListener.INSTANCE);
 	}
 
 	

@@ -61,6 +61,11 @@ public class BooleanFilter implements IQueryFilter {
 		this.e2 = e2;
 	}
 
+	@Override
+	public String asString(){
+		return e1.asString() + " " + op.getKey() + " " +e2.asString() ; //$NON-NLS-1$ //$NON-NLS-2$
+	}
+	
 	public IQueryFilter getFilter1(){
 		return this.e1;
 	}

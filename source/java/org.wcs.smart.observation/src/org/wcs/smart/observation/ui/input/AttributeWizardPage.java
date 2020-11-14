@@ -540,6 +540,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 			for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
 				WaypointObservation type = (WaypointObservation) iterator.next();
 				getWizardInternal().removeObservation(type);
+				((List<WaypointObservation>)attributeTable.getInput()).remove(type);
 			}
 			attributeTable.refresh();
 			clearEditObservation();

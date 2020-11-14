@@ -23,6 +23,7 @@ package org.wcs.smart.i2.query.observation.filter;
 
 import java.text.MessageFormat;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 import org.wcs.smart.i2.query.Operator;
@@ -156,5 +157,28 @@ public class SystemAttributeFilter implements IQueryFilter, IColumnIdentifierPro
 		}
 		
 		return sb.toString();
+	}
+	
+	@Override
+	public String asString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(SA_KEY);
+		sb.append(":"); //$NON-NLS-1$
+		sb.append(attribute.getKey());
+		sb.append(" "); //$NON-NLS-1$
+		sb.append(op.getKey());
+		sb.append(" "); //$NON-NLS-1$
+		if (key == null) {
+			sb.append(DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR).format(dateValues[0]));
+			sb.append(" "); //$NON-NLS-1$
+			sb.append(Operator.AND.getKey());
+			sb.append(DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR).format(dateValues[1]));
+		}else {
+			sb.append(Operator.EQUALS.getKey());
+			sb.append(" "); //$NON-NLS-1$
+			sb.append(key);
+		}
+		return sb.toString();
+		
 	}
 }

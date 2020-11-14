@@ -6,6 +6,7 @@ public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.event.internal.messages"; //$NON-NLS-1$
 	public static String ActionLabelProviderImpl_AndOperator;
 	public static String ActionLabelProviderImpl_BetweenOperator;
+	public static String ActionLabelProviderImpl_ExactOperator;
 	public static String ActionLabelProviderImpl_NotBetweenOperator;
 	public static String ActionLabelProviderImpl_NotOperator;
 	public static String ActionLabelProviderImpl_OrOperator;

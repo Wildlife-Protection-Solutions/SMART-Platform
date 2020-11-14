@@ -21,87 +21,93 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int K_OR = 9;
   /** RegularExpression Id. */
-  int COMMA = 10;
+  int K_EXACT = 10;
   /** RegularExpression Id. */
-  int LESS = 11;
+  int COMMA = 11;
   /** RegularExpression Id. */
-  int LESSEQUAL = 12;
+  int LESS = 12;
   /** RegularExpression Id. */
-  int GREATER = 13;
+  int LESSEQUAL = 13;
   /** RegularExpression Id. */
-  int GREATEREQUAL = 14;
+  int GREATER = 14;
   /** RegularExpression Id. */
-  int EQUAL = 15;
+  int GREATEREQUAL = 15;
   /** RegularExpression Id. */
-  int NOTEQUAL = 16;
+  int EQUAL = 16;
   /** RegularExpression Id. */
-  int NOTEQUAL2 = 17;
+  int NOTEQUAL = 17;
   /** RegularExpression Id. */
-  int OPENPAREN = 18;
+  int NOTEQUAL2 = 18;
   /** RegularExpression Id. */
-  int CLOSEPAREN = 19;
+  int OPENPAREN = 19;
   /** RegularExpression Id. */
-  int SLASH = 20;
+  int CLOSEPAREN = 20;
   /** RegularExpression Id. */
-  int PLUS = 21;
+  int SLASH = 21;
   /** RegularExpression Id. */
-  int MINUS = 22;
+  int PLUS = 22;
   /** RegularExpression Id. */
-  int CONTAINS = 23;
+  int MINUS = 23;
   /** RegularExpression Id. */
-  int NOT_CONTAINS = 24;
+  int CONTAINS = 24;
   /** RegularExpression Id. */
-  int STREQUALS = 25;
+  int NOT_CONTAINS = 25;
   /** RegularExpression Id. */
-  int BETWEEN = 26;
+  int STREQUALS = 26;
   /** RegularExpression Id. */
-  int COLON = 27;
+  int BETWEEN = 27;
   /** RegularExpression Id. */
-  int NUMBER = 28;
+  int COLON = 28;
   /** RegularExpression Id. */
-  int FLOAT = 29;
+  int NUMBER = 29;
   /** RegularExpression Id. */
-  int INTEGER = 30;
+  int FLOAT = 30;
   /** RegularExpression Id. */
-  int DIGIT = 31;
+  int INTEGER = 31;
   /** RegularExpression Id. */
-  int S_CONST_LITERAL = 32;
+  int DIGIT = 32;
   /** RegularExpression Id. */
-  int CATEGORY_KEY = 33;
+  int S_CONST_LITERAL = 33;
   /** RegularExpression Id. */
-  int ATT_STR_KEY = 34;
+  int CATEGORY_KEY = 34;
   /** RegularExpression Id. */
-  int ATT_VALUE_KEY = 35;
+  int ATT_STR_KEY = 35;
   /** RegularExpression Id. */
-  int ATT_BOOL_KEY = 36;
+  int ATT_VALUE_KEY = 36;
   /** RegularExpression Id. */
-  int ATT_LIST_KEY = 37;
+  int ATT_BOOL_KEY = 37;
   /** RegularExpression Id. */
-  int ATT_TREE_KEY = 38;
+  int ATT_LIST_KEY = 38;
   /** RegularExpression Id. */
-  int ATT_DATE_KEY = 39;
+  int ATT_MLIST_KEY = 39;
   /** RegularExpression Id. */
-  int CAT_ATT_STR_KEY = 40;
+  int ATT_TREE_KEY = 40;
   /** RegularExpression Id. */
-  int CAT_ATT_VALUE_KEY = 41;
+  int ATT_DATE_KEY = 41;
   /** RegularExpression Id. */
-  int CAT_ATT_BOOL_KEY = 42;
+  int CAT_ATT_STR_KEY = 42;
   /** RegularExpression Id. */
-  int CAT_ATT_LIST_KEY = 43;
+  int CAT_ATT_VALUE_KEY = 43;
   /** RegularExpression Id. */
-  int CAT_ATT_TREE_KEY = 44;
+  int CAT_ATT_BOOL_KEY = 44;
   /** RegularExpression Id. */
-  int CAT_ATT_DATE_KEY = 45;
+  int CAT_ATT_LIST_KEY = 45;
   /** RegularExpression Id. */
-  int DATE_STRING = 46;
+  int CAT_ATT_MLIST_KEY = 46;
   /** RegularExpression Id. */
-  int DM_KEY = 47;
+  int CAT_ATT_TREE_KEY = 47;
   /** RegularExpression Id. */
-  int LETTER = 48;
+  int CAT_ATT_DATE_KEY = 48;
   /** RegularExpression Id. */
-  int SPECIAL_CHARS = 49;
+  int DATE_STRING = 49;
   /** RegularExpression Id. */
-  int QUOTED_STRING = 50;
+  int DM_KEY = 50;
+  /** RegularExpression Id. */
+  int LETTER = 51;
+  /** RegularExpression Id. */
+  int SPECIAL_CHARS = 52;
+  /** RegularExpression Id. */
+  int QUOTED_STRING = 53;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -118,6 +124,7 @@ public interface ParserConstants {
     "\"and\"",
     "\"not\"",
     "\"or\"",
+    "\"exact\"",
     "\",\"",
     "\"<\"",
     "\"<=\"",
@@ -146,12 +153,14 @@ public interface ParserConstants {
     "<ATT_VALUE_KEY>",
     "<ATT_BOOL_KEY>",
     "<ATT_LIST_KEY>",
+    "<ATT_MLIST_KEY>",
     "<ATT_TREE_KEY>",
     "<ATT_DATE_KEY>",
     "<CAT_ATT_STR_KEY>",
     "<CAT_ATT_VALUE_KEY>",
     "<CAT_ATT_BOOL_KEY>",
     "<CAT_ATT_LIST_KEY>",
+    "<CAT_ATT_MLIST_KEY>",
     "<CAT_ATT_TREE_KEY>",
     "<CAT_ATT_DATE_KEY>",
     "<DATE_STRING>",

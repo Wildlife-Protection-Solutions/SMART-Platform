@@ -67,6 +67,7 @@ TOKEN [ IGNORE_CASE ] :
   < K_AND : "and" >
 | < K_NOT : "not" >
 | < K_OR : "or" >
+| < K_EXACT : "exact" >
 }
 
 
@@ -126,12 +127,14 @@ TOKEN :
  | < ATT_VALUE_KEY : "attribute:n:"< DM_KEY > >
  | < ATT_BOOL_KEY : "attribute:b:"< DM_KEY > >
  | < ATT_LIST_KEY : "attribute:l:"< DM_KEY > >
+ | < ATT_MLIST_KEY : "attribute:m:"< DM_KEY > >
  | < ATT_TREE_KEY : "attribute:t:"< DM_KEY > >
  | < ATT_DATE_KEY : "attribute:d:"< DM_KEY > >
  | < CAT_ATT_STR_KEY : "category:"<DM_KEY>":attribute:s:"<DM_KEY>>
  | < CAT_ATT_VALUE_KEY : "category:"<DM_KEY>":attribute:n:"<DM_KEY>>
  | < CAT_ATT_BOOL_KEY : "category:"<DM_KEY>":attribute:b:"<DM_KEY>>
  | < CAT_ATT_LIST_KEY : "category:"<DM_KEY>":attribute:l:"<DM_KEY>>
+ | < CAT_ATT_MLIST_KEY : "category:"<DM_KEY>":attribute:m:"<DM_KEY>>
  | < CAT_ATT_TREE_KEY : "category:"<DM_KEY>":attribute:t:"<DM_KEY>>
  | < CAT_ATT_DATE_KEY : "category:"<DM_KEY>":attribute:d:"<DM_KEY>>
  | < DATE_STRING : < DIGIT > < DIGIT > < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT >> 
@@ -314,7 +317,26 @@ IFilter AttributeExpression():
 	{
 		filter = CategoryAttributeFilter.createListItemFilter(key,op,value);
 	}
-	
+	| 
+	/* attribute mulit list items */
+	(
+		< ATT_MLIST_KEY > {key = token.image;}		    
+		(<  K_OR > | < K_AND > | < K_EXACT >) {op = Operator.parseOperator(token.image);}
+		value = MultiList()
+	)
+	{
+		filter = AttributeFilter.createListItemFilter(key,op,value);
+	}
+	| 
+	/* category-attribute multi list items */
+	(
+		< CAT_ATT_MLIST_KEY > {key = token.image;}		    
+		(<  K_OR > | < K_AND > | < K_EXACT >) {op = Operator.parseOperator(token.image);}
+		value = MultiList()
+	)
+	{
+		filter = CategoryAttributeFilter.createListItemFilter(key,op,value);
+	}
 	
 	| 
 	/* attribute tree items */
@@ -483,3 +505,14 @@ Operator BooleanOp() :
     return Operator.parseOperator(token.image);
   }
 }
+
+String MultiList() :
+{
+  String list = "";
+} {
+  (( < DM_KEY > { list=token.image; })(  ","  < DM_KEY > { list += "," + token.image; })*)
+  {
+    return list;
+  }
+}
+
