@@ -3302,6 +3302,7 @@ CREATE TABLE smart.i_entity_type_attribute (
     entity_type_uuid uuid NOT NULL,
     attribute_uuid uuid NOT NULL,
     attribute_group_uuid uuid,
+    is_duplicate_check boolean not null,
     seq_order integer NOT NULL,
     PRIMARY KEY (entity_type_uuid, attribute_uuid)
 );
@@ -3483,6 +3484,7 @@ CREATE TABLE smart.i_recordsource_attribute (
     entity_type_uuid uuid,
     seq_order integer,
     is_multi boolean,
+    is_duplicate_check boolean not null,
     keyid character varying(128) NOT NULL,
     PRIMARY KEY (uuid)
 );
@@ -5302,7 +5304,7 @@ INSERT INTO connect.connect_version (version, last_updated, filestore_version) V
 --INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.intelligence.query','2.0');
 INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.plan','4.0');
 INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.entity','2.0');
-INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.er','2.0');
+INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.er','3.0');
 INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.connect','1.0');
 INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.connect.cybertracker','2.0');
 INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.entity.query','4.0');
