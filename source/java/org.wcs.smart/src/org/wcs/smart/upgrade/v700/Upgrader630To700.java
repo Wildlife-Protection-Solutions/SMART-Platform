@@ -186,16 +186,7 @@ public class Upgrader630To700 implements IDatabaseUpgrader {
 				"alter table smart.iconfile drop constraint iconfile_iconuuid_fk", //$NON-NLS-1$
 				"alter table smart.iconfile drop constraint iconfile_iconsetuuid_fk", //$NON-NLS-1$
 
-				"ALTER table smart.wp_observation ADD CONSTRAINT wo_ob_group_uuid_fk FOREIGN KEY (wp_group_uuid) REFERENCES smart.wp_observation_group (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
-				"ALTER table smart.wp_observation_group ADD CONSTRAINT wo_obs_grp_wp_uuid_fk FOREIGN KEY (wp_uuid) REFERENCES smart.waypoint (uuid) ON UPDATE RESTRICT ON DELETE CASCADE  DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
-				"alter table smart.wp_observation add constraint obs_employee_uuid_fk foreign key (employee_uuid) REFERENCES smart.employee (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT  DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
-				"alter table smart.wp_observation add constraint observation_category_uuid_fk foreign key (category_uuid) REFERENCES smart.dm_category (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT  DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
-				"ALTER TABLE SMART.OBSERVATION_ATTACHMENT ADD CONSTRAINT OBSERVATION_ATTACHMENT_OBS_UUID_FK FOREIGN KEY (OBS_UUID) REFERENCES SMART.WP_OBSERVATION(UUID)  ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
-				"ALTER TABLE SMART.WP_OBSERVATION_ATTRIBUTES ADD CONSTRAINT OBS_ATTRIBUTE_OBS_UUID_FK FOREIGN KEY (OBSERVATION_UUID) REFERENCES SMART.WP_OBSERVATION(UUID)  ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 				
-				"alter table smart.dm_category add constraint dm_category_ca_uuid_fk foreign key (ca_uuid) references smart.CONSERVATION_AREA(uuid) ON UPDATE NO ACTION ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
-				"alter table smart.DM_ATTRIBUTE add constraint dm_attribute_ca_uuid_fk foreign key (ca_uuid) references smart.CONSERVATION_AREA(uuid) ON UPDATE NO ACTION ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
-
 				//multi-select attributes
 				"alter table smart.wp_observation_attributes add column uuid char(16) for bit data", //$NON-NLS-1$
 				"update  smart.wp_observation_attributes set uuid = smart.tempuuid()", //$NON-NLS-1$
@@ -205,10 +196,22 @@ public class Upgrader630To700 implements IDatabaseUpgrader {
 				"alter table smart.wp_observation_attributes add unique(observation_uuid, attribute_uuid)", //$NON-NLS-1$
 
 				"create table smart.wp_observation_attributes_list (list_element_uuid char(16) for bit data not null,observation_attribute_uuid char(16) for bit data not null,primary key (list_element_uuid, observation_attribute_uuid))", //$NON-NLS-1$
-				"alter table smart.wp_observation_attributes_list ADD FOREIGN KEY (observation_attribute_uuid) REFERENCES smart.wp_observation_attributes(uuid) on DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",  //$NON-NLS-1$
-				"alter table smart.wp_observation_attributes_list ADD FOREIGN KEY (list_element_uuid) REFERENCES smart.dm_attribute_list(uuid) ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 				
 				//add back constraints
+				"ALTER table smart.wp_observation ADD CONSTRAINT wo_ob_group_uuid_fk FOREIGN KEY (wp_group_uuid) REFERENCES smart.wp_observation_group (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"ALTER table smart.wp_observation_group ADD CONSTRAINT wo_obs_grp_wp_uuid_fk FOREIGN KEY (wp_uuid) REFERENCES smart.waypoint (uuid) ON UPDATE RESTRICT ON DELETE CASCADE  DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"alter table smart.wp_observation add constraint obs_employee_uuid_fk foreign key (employee_uuid) REFERENCES smart.employee (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT  DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"alter table smart.wp_observation add constraint observation_category_uuid_fk foreign key (category_uuid) REFERENCES smart.dm_category (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT  DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"ALTER TABLE SMART.OBSERVATION_ATTACHMENT ADD CONSTRAINT OBSERVATION_ATTACHMENT_OBS_UUID_FK FOREIGN KEY (OBS_UUID) REFERENCES SMART.WP_OBSERVATION(UUID)  ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"ALTER TABLE SMART.WP_OBSERVATION_ATTRIBUTES ADD CONSTRAINT OBS_ATTRIBUTE_OBS_UUID_FK FOREIGN KEY (OBSERVATION_UUID) REFERENCES SMART.WP_OBSERVATION(UUID)  ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				
+				"alter table smart.wp_observation_attributes_list ADD FOREIGN KEY (observation_attribute_uuid) REFERENCES smart.wp_observation_attributes(uuid) on DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",  //$NON-NLS-1$
+				"alter table smart.wp_observation_attributes_list ADD FOREIGN KEY (list_element_uuid) REFERENCES smart.dm_attribute_list(uuid) ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+			
+				"alter table smart.dm_category add constraint dm_category_ca_uuid_fk foreign key (ca_uuid) references smart.CONSERVATION_AREA(uuid) ON UPDATE NO ACTION ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"alter table smart.DM_ATTRIBUTE add constraint dm_attribute_ca_uuid_fk foreign key (ca_uuid) references smart.CONSERVATION_AREA(uuid) ON UPDATE NO ACTION ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+
+				
 				"ALTER TABLE smart.dm_attribute ADD CONSTRAINT dmatt_iconuuid_fk FOREIGN KEY (icon_uuid) REFERENCES smart.icon(uuid) ON DELETE SET NULL ON UPDATE RESTRICT  DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 				"ALTER TABLE smart.dm_attribute_list ADD CONSTRAINT dmattlist_iconuuid_fk FOREIGN KEY (icon_uuid) REFERENCES smart.icon(uuid) ON DELETE SET NULL ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 				"ALTER TABLE smart.dm_attribute_tree ADD CONSTRAINT dmatttree_iconuuid_fk FOREIGN KEY (icon_uuid) REFERENCES smart.icon(uuid) ON DELETE SET NULL ON UPDATE RESTRICT  DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
@@ -241,6 +244,7 @@ public class Upgrader630To700 implements IDatabaseUpgrader {
 
 		for (String s : sql) {
 			SmartPlugIn.logInfo(s);
+			System.out.println(s);
 			c.createStatement().execute(s);
 		}
 		

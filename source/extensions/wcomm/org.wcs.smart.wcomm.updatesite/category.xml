@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/org.wcs.smart.wcomm.feature_1.0.0.qualifier.jar" id="org.wcs.smart.wcomm.feature" version="1.0.0.qualifier">
+   <feature url="features/org.wcs.smart.wcomm.feature_7.0.0.qualifier.jar" id="org.wcs.smart.wcomm.feature" version="7.0.0.qualifier">
       <category name="wcomm"/>
    </feature>
    <category-def name="wcomm" label="WCoMM"/>
