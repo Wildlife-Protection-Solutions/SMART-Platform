@@ -390,17 +390,19 @@ public enum QueryManager {
 			
 			String type = q.getSimpleName();
 			String typeKey = c.getTypeKey();
-			String icon = c.getIconName();
+			
 			
 			if (!query.isEmpty()) query += " UNION "; //$NON-NLS-1$
 
+			String querypart  = null;
 			
-			String querypart = "SELECT q.uuid, q.id, q.isShared, q.conservationArea.uuid, q.folder.uuid, " //$NON-NLS-1$
-					+ "q.conservationArea.id, l.value, z.code, '" + type +"', '" + typeKey + "', '" + icon + "' FROM " + q.getSimpleName()  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-				 	+ " as q JOIN Label as l on l.id.element = q.uuid JOIN l.id.language as z WHERE l.id.element = q.uuid and (z.default = true or " //$NON-NLS-1$
-				 	+ "z.code in (:langs)) "; //$NON-NLS-1$
-			
-			if (typeKey == null) {
+			if (typeKey != null) {
+				String icon = c.getIconName();
+				querypart = "SELECT q.uuid, q.id, q.isShared, q.conservationArea.uuid, q.folder.uuid, " //$NON-NLS-1$
+						+ "q.conservationArea.id, l.value, z.code, '" + type +"', '" + typeKey + "', '" + icon + "' FROM " + q.getSimpleName()  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+						+ " as q JOIN Label as l on l.id.element = q.uuid JOIN l.id.language as z WHERE l.id.element = q.uuid and (z.default = true or " //$NON-NLS-1$
+						+ "z.code in (:langs)) "; //$NON-NLS-1$
+			}else {
 				//get query type from database
 				querypart = "SELECT q.uuid, q.id, q.isShared, q.conservationArea.uuid, q.folder.uuid, " //$NON-NLS-1$
 						+ "q.conservationArea.id, l.value, z.code, '" + type +"', q.typeKey, q.typeKey || '.png' FROM " + q.getSimpleName()  //$NON-NLS-1$ //$NON-NLS-2$

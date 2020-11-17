@@ -23,6 +23,7 @@ package org.wcs.smart.asset.query.model;
 
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.Locale;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -100,7 +101,7 @@ public class AssetSummaryQuery extends SummaryQuery implements IStyledQuery {
 	}
 	
 	public void setTypeKey(String querytype) {
-		this.querytype = querytype.toUpperCase();
+		this.querytype = querytype.toLowerCase(Locale.ROOT);
 	}
 	
 	/**

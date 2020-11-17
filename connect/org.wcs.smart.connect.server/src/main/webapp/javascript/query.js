@@ -4,7 +4,7 @@ const QUERY_URL = "../api/query/"
 
 var queries;
 var selectedFolder = -1;
-var lastSorted;
+var lastSorted = "name";
 var to; //timeout to slow auto-search a bit. It is cleared each time another character/change is typed so we don't fire too many updates too fast.
 
 var startDatePicker, endDatePicker;
@@ -573,6 +573,11 @@ function handleQueries() {
 	var folderContentsDiv = document.createElement('div');
 	folderContentsDiv.classList.add('folder-contents');
 	folderDiv.appendChild(folderContentsDiv);
+	
+	//sort
+	if (lastSorted != ""){
+		queries.sort(dynamicSort(lastSorted));
+	}
 	
 	//create query table
 	createQueryTable();

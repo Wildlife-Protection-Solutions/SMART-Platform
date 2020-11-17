@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.query.model;
 
+import java.util.Locale;
+
 import javax.persistence.Column;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
