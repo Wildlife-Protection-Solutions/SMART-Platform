@@ -91,6 +91,8 @@ public class CtJsonExportUtils {
 	 */
 	private static final String DISTANCE_DIRECTION_OP = "RECORD_DISTANCE_BEARING"; //$NON-NLS-1$
 
+	private static final String OBSERVER_OP = "RECORD_OBSERVER"; //$NON-NLS-1$
+
 	/**
 	 * JSON is required property key
 	 */
@@ -222,7 +224,10 @@ public class CtJsonExportUtils {
 	 * @param profile
 	 * @return
 	 */
-	public static String toJson(CyberTrackerPropertiesProfile profile, boolean distanceDirection, HashMap<String, Object> additions, IEclipseContext context, Session session) {
+	public static String toJson(CyberTrackerPropertiesProfile profile, boolean distanceDirection,
+			boolean collectObserver, HashMap<String, Object> additions, 
+			IEclipseContext context, Session session) {
+		
 		JSONObject profileObj = new JSONObject();
 		
 		for (ProfileOptionID option : ProfileOptionID.values()) {
@@ -246,7 +251,8 @@ public class CtJsonExportUtils {
 				}
 			}
 		}
-		profileObj.put(DISTANCE_DIRECTION_OP, distanceDirection); 
+		profileObj.put(DISTANCE_DIRECTION_OP, distanceDirection);
+		profileObj.put(OBSERVER_OP, collectObserver); 
 		 
 		if(additions != null) {
 			for (Entry<String, Object> e : additions.entrySet()) {

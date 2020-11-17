@@ -299,7 +299,7 @@ public enum SmartCollectPackageExporter {
 
 	private void profileToJson(CyberTrackerPropertiesProfile profile, boolean distanceDirection, Session session, IEclipseContext context, Path outputFile, HashMap<String, Object> additions ) throws IOException {
 		try(BufferedWriter fw = Files.newBufferedWriter(outputFile)){
-			fw.write(CtJsonExportUtils.toJson(profile, distanceDirection, additions, context, session));
+			fw.write(CtJsonExportUtils.toJson(profile, distanceDirection, false, additions, context, session));
 		}
 	}
 

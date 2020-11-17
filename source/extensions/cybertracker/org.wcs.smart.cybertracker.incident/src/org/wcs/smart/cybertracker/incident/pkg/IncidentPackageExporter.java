@@ -160,7 +160,10 @@ public enum IncidentPackageExporter {
 				sub.split(1);
 				Path profileFile = tempDir.resolve(CT_PROFILE_FILE);
 				ObservationOptions ops = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
-				profileToJson(session.get(CyberTrackerPropertiesProfile.class, localpackage.getCtProfile().getUuid()), ops.getTrackDistanceDirection(), session, context, profileFile, ctprofileAdditions);
+				profileToJson(session.get(CyberTrackerPropertiesProfile.class, localpackage.getCtProfile().getUuid()), 
+						ops.getTrackDistanceDirection(), ops.getTrackObserver(),
+						session, context, profileFile, ctprofileAdditions);
+				
 				toIncludeInZip.add(profileFile);
 				
 				
@@ -295,9 +298,9 @@ public enum IncidentPackageExporter {
 		CtJsonExportUtils.writeProjectJson(name, version, CM_MODEL_FILE, logoFile, outputFile, metadataFile, projectAdditions);
 	}
 
-	private void profileToJson(CyberTrackerPropertiesProfile profile, boolean distanceDirection, Session session, IEclipseContext context, Path outputFile, HashMap<String, Object> additions ) throws IOException {
+	private void profileToJson(CyberTrackerPropertiesProfile profile, boolean distanceDirection, boolean collectObserver, Session session, IEclipseContext context, Path outputFile, HashMap<String, Object> additions ) throws IOException {
 		try(BufferedWriter fw = Files.newBufferedWriter(outputFile)){
-			fw.write(CtJsonExportUtils.toJson(profile, distanceDirection, additions, context, session));
+			fw.write(CtJsonExportUtils.toJson(profile, distanceDirection, collectObserver, additions, context, session));
 		}
 	}
 
