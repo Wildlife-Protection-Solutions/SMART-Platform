@@ -441,7 +441,10 @@ public class JsonCtParser {
 		if (categoryUuid != null ){
 			category = (Category) session.get(Category.class, UuidUtils.stringToUuid(categoryUuid));
 			if (category == null || !category.getConservationArea().equals(ca)){
-				throw new Exception(MessageFormat.format(Messages.JsonCtParser_NoCateogyr, categoryUuid));
+				//category not found, lets return the waypoint without observations so we can
+				//still load the rest of the data if desired
+				warnings.add(MessageFormat.format(Messages.JsonCtParser_NoCateogyr, categoryUuid));
+				return newWaypoint;
 			}
 		}else{
 			//no category found, so lets assume no observations

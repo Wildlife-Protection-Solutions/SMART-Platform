@@ -187,6 +187,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 						//start a new leg
 						String defaultValues = (String)sighting.get(PatrolScreensUtil.RESULT_DEFAULT_META_VALUES);
 						CyberTrackerPatrol ct = PatrolJsonUtils.parsePatrolMetadata((JSONObject) (new JSONParser()).parse(defaultValues), sighting, ca, session);
+						warnings.addAll(ct.getErrors());
 						
 						PatrolLeg newLeg = addLegFromSighting(link.getPatrolLeg().getPatrol(), ct, sighting, deviceId, ctPatrolUuid, observationCounter, dt, session);
 
@@ -520,14 +521,15 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 						wplink.setCtGroupId(ctObsGroup);
 						wplink.setCtRootId(ctRootId);
 						wplink.setWaypointUuid(wp.getUuid());
-						wplink.setObservationGroupUuid(wp.getObservationGroups().get(0).getUuid());
+						if (wp.getObservationGroups() != null && !wp.getObservationGroups().isEmpty()) {
+							wplink.setObservationGroupUuid(wp.getObservationGroups().get(0).getUuid());
+						}else {
+							wplink.setObservationGroupUuid(null);
+						}
 						link.getWaypointLinks().add(wplink);
 					}
 				}
-				
-				
 
-				
 				if (link.getPatrolLeg().getPatrol().getUuid() != null) modifiedPatrols.add(link.getPatrolLeg().getPatrol());
 				
 				//add position to track log
@@ -549,6 +551,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 		
 		final boolean[] cancel = new boolean[]{false};
 		if (!newPatrolLinks.isEmpty()){
+			
 			//we need to ask the user if they want to create a new patrol or add to an existing patrol
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
@@ -765,7 +768,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 		p.setConservationArea(ca);
 		String defaultValues = (String)sighting.get(PatrolScreensUtil.RESULT_DEFAULT_META_VALUES);
 		CyberTrackerPatrol ct = PatrolJsonUtils.parsePatrolMetadata((JSONObject) (new JSONParser()).parse(defaultValues), sighting, ca, session);
-		
+		warnings.addAll(ct.getErrors());
 		
 		String startDate = (String)sighting.get(ScreensUtil.RESULT_START_DATE);		
 		LocalDate dStartDate = LocalDate.parse(startDate, PatrolJsonUtils.DATEFORMAT);
@@ -816,7 +819,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 		pl.setEndDate(pl.getStartDate());
 		for (Employee member: ct.getMembers()){
 			PatrolLegMember item = pl.addPatrolLegMember(member);
-			if (ct.getPatrolType().requiresPilot()){
+			if (ct.getPatrolType() != null && ct.getPatrolType().requiresPilot()){
 				if (member.equals(ct.getPilot())) item.setIsPilot(true);
 			}
 			if (member.equals(ct.getLeader())) item.setIsLeader(true);
