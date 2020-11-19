@@ -479,7 +479,11 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 				if (element == BoundsOption.CUSTOM) return Messages.SmartLayersPage_CustomBoundsLabel;	
 				if (element == BoundsOption.MAP_EXTENTS) return Messages.SmartLayersPage_MapExtentBoundsLabel;
 				if (element == BoundsOption.ALL_QUERY_LAYERS) return Messages.SmartLayersPage_AllQueriesBoundsLabel;
-				if (element instanceof LayerItem) return ((LayerItem) element).getHandle().getDataSet().getElement().getDisplayName();
+				if (element instanceof LayerItem) {
+					LayerItem li = (LayerItem)element;
+					if (li.getHandle().getDataBindingReference() == null) return "[ERROR] [Query Not Found]";
+					return ((LayerItem) element).getHandle().getDataSet().getElement().getDisplayName();
+				}
 				
 				return super.getText(element);
 			}

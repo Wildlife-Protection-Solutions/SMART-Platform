@@ -25,6 +25,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -99,17 +100,18 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 		//see ticket #1535 for more info
 		HashSet<String> names = new HashSet<String>();
 		for (QueryColumn qc : queryColumns){
-			if (names.contains(qc.getName())){
+			if (names.contains(qc.getName().strip().toUpperCase(Locale.ROOT))){
 				//need to update the name
 				int counter = 1;
-				String name = qc.getName();
-				while(names.contains(name)){
-					name = name + "_" + counter; //$NON-NLS-1$
+				String raw_name = qc.getName().strip();
+				String name = raw_name;
+				while(names.contains(name.toUpperCase(Locale.ROOT))){
+					name = raw_name + "_" + counter; //$NON-NLS-1$
 					counter++;
 				}
 				qc.setName(name);
 			}
-			names.add(qc.getName());
+			names.add(qc.getName().toUpperCase(Locale.ROOT));
 		}
 	}
 	
