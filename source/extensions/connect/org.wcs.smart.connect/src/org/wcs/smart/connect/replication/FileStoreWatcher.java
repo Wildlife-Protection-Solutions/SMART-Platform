@@ -145,7 +145,7 @@ public class FileStoreWatcher implements Runnable, IFileStoreWatcher{
     
     private void processEvent(Path p, Kind<?> kind){
     	if (LOGME) SmartPlugIn.logInfo("FileStoreWatcher: Process Event: file: '" + p.toString() + "', Kind: '" + kind.name() + "'"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-    	if ((Files.isDirectory(p) && ignorePaths.contains(p)) ||
+    	if (ignorePaths.contains(p) ||
     			(Files.isRegularFile(p) && ignorePaths.contains(p.getParent()))) {
     		if (LOGME) SmartPlugIn.logInfo("FileStoreWatcher: Process Event: IGNORED: in ignore path"); //$NON-NLS-1$
     		return;
