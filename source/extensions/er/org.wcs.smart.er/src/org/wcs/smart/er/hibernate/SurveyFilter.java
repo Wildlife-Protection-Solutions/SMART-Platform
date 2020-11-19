@@ -179,21 +179,11 @@ public class SurveyFilter {
 			str.append(" ( m.endDate >= :date1 and m.startDate <= :date2 ) "); //$NON-NLS-1$
 		}
 		
-		boolean and = true;
-		boolean or = false;
 		if (state != null ){
-			if (and ){
-				str.append(" AND ("); //$NON-NLS-1$
-				and = false;
-			}
-			or = true;
+			str.append(" AND "); //$NON-NLS-1$
 			str.append(" sd.state = :states "); //$NON-NLS-1$
 		}else if (state == null && surveyDesignKeys != null){
-			if (and){
-				str.append(" AND ("); //$NON-NLS-1$
-				and = false;
-			}
-			or = true;
+			str.append(" AND "); //$NON-NLS-1$
 			if ( surveyDesignKeys.length == 0){
 				str.append(" sd.keyId = ''  "); //$NON-NLS-1$
 			}else{
@@ -202,21 +192,10 @@ public class SurveyFilter {
 		}
 		
 		if (stringComparator != null && surveyNameFilter != null){
-			if (and){
-				str.append(" AND ("); //$NON-NLS-1$
-				and = false;
-			}
-			if (or){
-				str.append(" AND "); //$NON-NLS-1$
-			}
-			or = true;
+			str.append(" AND "); //$NON-NLS-1$
 			str.append(" lower(s.id) like lower(:name) "); //$NON-NLS-1$
 			
 		}
-		if (!and){
-			str.append(")"); //$NON-NLS-1$
-		}
-		
 		str.append("ORDER BY  m.startDate desc, s.id asc "); //$NON-NLS-1$
 		
 		Query<?> query = s.createQuery(str.toString())
@@ -272,6 +251,62 @@ public class SurveyFilter {
 			pp.addMission(missionId, missionUuid, missionStart, missionEnd);
 			
 		}
+		
+		//include any survey without missions
+		str = new StringBuilder();
+
+		str.append("SELECT s.id, s.uuid, sd.name, sd.uuid "); //$NON-NLS-1$
+		str.append("FROM Survey s JOIN s.surveyDesign sd "); //$NON-NLS-1$
+		str.append("WHERE sd.conservationArea = :ca " ); //$NON-NLS-1$
+		str.append("AND s.uuid NOT IN (SELECT survey.uuid FROM Mission) " ); //$NON-NLS-1$
+	
+		if (state != null ){
+			str.append(" AND "); //$NON-NLS-1$
+			str.append(" sd.state = :states "); //$NON-NLS-1$
+		}else if (state == null && surveyDesignKeys != null){
+			str.append(" AND "); //$NON-NLS-1$
+			if ( surveyDesignKeys.length == 0){
+				str.append(" sd.keyId = ''  "); //$NON-NLS-1$
+			}else{
+				str.append( " sd.keyId in (:keys) "); //$NON-NLS-1$
+			}
+		}
+		
+		if (stringComparator != null && surveyNameFilter != null){
+			str.append(" AND "); //$NON-NLS-1$
+			str.append(" lower(s.id) like lower(:name) "); //$NON-NLS-1$
+		}
+		str.append("ORDER BY  s.id asc "); //$NON-NLS-1$
+		
+		query = s.createQuery(str.toString()).setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+		if (state != null ){
+			query.setParameter("states", this.state); //$NON-NLS-1$
+		}else if (state == null && surveyDesignKeys != null && surveyDesignKeys.length > 0){
+			query.setParameterList("keys", surveyDesignKeys); //$NON-NLS-1$
+		}
+		if (stringComparator != null && surveyNameFilter != null){
+			if (stringComparator == StringComparison.CONTAINS){
+				query.setParameter("name", "%" + this.surveyNameFilter + "%"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			}else{
+				query.setParameter("name", this.surveyNameFilter); //$NON-NLS-1$
+			}
+		}		
+		
+		for (Object result : query.list()) {
+			Object[] data = (Object[])result;
+			String surveyId = (String) data[0];
+			UUID surveyUuid = (UUID) data[1];
+			String designId = (String) data[2];
+			UUID designUuid = (UUID) data[3];
+			
+			SurveyMissionProxy pp = results.get(surveyUuid);
+			if (pp == null) {
+				pp = new SurveyMissionProxy(surveyId, surveyUuid, designId, designUuid);
+				results.put(surveyUuid, pp);
+				toReturn.add(pp);
+			}		
+		}
+		
 		return toReturn;
 		
 //StringBuilder str = new StringBuilder();
