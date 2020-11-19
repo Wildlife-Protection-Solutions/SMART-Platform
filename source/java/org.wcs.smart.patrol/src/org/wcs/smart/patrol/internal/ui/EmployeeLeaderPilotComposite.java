@@ -55,6 +55,7 @@ public class EmployeeLeaderPilotComposite extends PatrolItemComposite{
 	private EmployeeSelectComposite empListComposite = null;
 	private LeaderPilotComposite leaderPilotComp;
 	
+	private Patrol patrol;
 	
 	private  IPatrolItemChangeListener listener = new IPatrolItemChangeListener() {
 		@Override
@@ -88,6 +89,14 @@ public class EmployeeLeaderPilotComposite extends PatrolItemComposite{
 					setErrorMessage(null);
 				}
 				fireChangeListeners();
+				Employee leader = leaderPilotComp.getSelectedLeader();
+				Employee pilot = leaderPilotComp.getSelectedPilot();
+				if (!newEmployees.contains(leader)) leader = null;
+				if (!newEmployees.contains(pilot)) pilot = null;
+				
+				leaderPilotComp.setEmployeeList(newEmployees, patrol);
+				leaderPilotComp.setSelection(leader, pilot);
+				
 			}
 		});
 		leaderPilotComp = new LeaderPilotComposite();
@@ -101,7 +110,7 @@ public class EmployeeLeaderPilotComposite extends PatrolItemComposite{
 	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#setValues(org.wcs.smart.patrol.model.Patrol, org.hibernate.Session)
 	 */
 	public void setValues(Patrol p, Session session) {
-		
+		this.patrol = p;
 		ArrayList<Employee> current = new ArrayList<Employee>();
     	if (p.getFirstLeg().getMembers() != null){
     		for (Iterator<PatrolLegMember> iterator = p.getFirstLeg().getMembers().iterator(); iterator.hasNext();) {

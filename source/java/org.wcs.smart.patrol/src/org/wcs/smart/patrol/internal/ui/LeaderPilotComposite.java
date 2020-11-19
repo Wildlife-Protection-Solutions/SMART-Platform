@@ -208,7 +208,19 @@ public class LeaderPilotComposite extends PatrolLegItemComposite{
 		}
 		validate();
 	}
-	
+
+	public void setSelection(Employee leader, Employee pilot) {
+		if (leader != null) {
+			patrolLeaderViewer.setSelection(new StructuredSelection(leader));
+		}else {
+			patrolLeaderViewer.setSelection(null);	
+		}
+		if (pilot != null) {
+			patrolPilotViewer.setSelection(new StructuredSelection(pilot));
+		}else {
+			patrolPilotViewer.setSelection(null);
+		}
+	}
 	/**
 	 * 
 	 * @return the selected leader
