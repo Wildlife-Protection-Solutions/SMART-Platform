@@ -86,7 +86,6 @@
                         				<classname>org.wcs.smart.connect.api.ConnectUserAction</classname>
                         				<classname>org.wcs.smart.connect.api.ConservationAreas</classname>
                         				<classname>org.wcs.smart.connect.api.CorsFeature</classname>
-                        				<classname>org.wcs.smart.connect.api.CtDataApi</classname>
                         				<classname>org.wcs.smart.connect.api.DashboardBetaApi</classname>
                         				<classname>org.wcs.smart.connect.api.DataModelApi</classname>
                         				<classname>org.wcs.smart.connect.api.DataQueue</classname>
