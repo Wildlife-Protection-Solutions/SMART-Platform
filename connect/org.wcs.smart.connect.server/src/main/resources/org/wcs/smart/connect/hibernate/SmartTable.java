@@ -378,7 +378,7 @@ public enum SmartTable {
 	WAYPOINTOBSERVATION(WaypointObservation.class,".observationGroup.waypoint.conservationArea"),
 	WAYPOINTOBSERVATIONGROUP(WaypointObservationGroup.class,".waypoint.conservationArea"),
 	WAYPOINTOBSERVATIONATTRIBUTE(WaypointObservationAttribute.class,".attribute.conservationArea"),
-	WAYPOINTOBSERVATIONATTRIBUTELIST(WaypointObservationAttributeList.class,".observationAttribute.attribute.conservationArea"),
+	WAYPOINTOBSERVATIONATTRIBUTELIST(WaypointObservationAttributeList.class,".id.observationAttribute.observation.observationGroup.waypoint.conservationArea"),
 	
 	I2_ATTACHMENT(IntelAttachment.class, null),
 	I2_ATTRIBUTE(IntelAttribute.class, null),
@@ -396,7 +396,7 @@ public enum SmartTable {
 	I2_LOCATION(IntelLocation.class, null),
 	I2_OBSERVATION(IntelObservation.class, ".location.conservationArea"),
 	I2_OBSERVATION_ATTRIBUTE(IntelObservationAttribute.class,".attribute.conservationArea"),
-	I2_OBSERVATION_ATTRIBUTE_LIST(IntelObservationAttributeList.class,".observationAttribute.attribute.conservationArea"),
+	I2_OBSERVATION_ATTRIBUTE_LIST(IntelObservationAttributeList.class,".id.observationAttribute.attribute.conservationArea"),
 	I2_RECORD(IntelRecord.class, null),
 	I2_RECORD_ATTACHMENT(IntelRecordAttachment.class,".id.record.conservationArea"),
 	I2_RECORD_OBS_QUERY(IntelRecordObservationQuery.class, null),
