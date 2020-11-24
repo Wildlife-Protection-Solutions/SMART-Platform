@@ -426,22 +426,20 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 					Waypoint mwp = null;
 					WaypointObservationGroup mwpg = null;
 					if(link != null && link.getWaypointLinks() != null) {
-						UUID tomerge = null;
-						UUID obsmerge = null;
 						for (CtPatrolWpLink l : link.getWaypointLinks()) {
 							if (l.getCtRootId().equals(ctRootId)) {
-								tomerge = l.getWaypointUuid();
+								mwp = l.getWaypoint();
 								if (l.getCtGroupId().equals(ctObsGroup)) {
-									obsmerge = l.getObservationGroupUuid();
+									mwpg = l.getObservationGroup();
 								}
 							}
 						}
 						
-						if (tomerge != null) {
-							mwp = session.get(Waypoint.class, tomerge);
-							if (obsmerge != null) {
+						if (mwp != null && mwp.getUuid() != null) {
+							mwp = session.get(Waypoint.class, mwp.getUuid());
+							if (mwpg != null) {
 								for (WaypointObservationGroup g : mwp.getObservationGroups()) {
-									if (g.getUuid().equals(obsmerge)) {
+									if (mwpg == g || g.equals(mwpg)) {
 										mwpg = g;
 										break;
 									}
@@ -502,8 +500,9 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 						wplink.setLink(link);
 						wplink.setCtGroupId(ctObsGroup);
 						wplink.setCtRootId(ctRootId);
-						wplink.setWaypointUuid(mwp.getUuid());
-						wplink.setObservationGroupUuid(newGroup.getUuid());
+						wplink.setWaypoint(mwp);
+						wplink.setObservationGroup(newGroup);
+						link.getWaypointLinks().add(wplink);
 						
 					}else {
 						//We want to create a new waypoint and add it to the patrol
@@ -520,11 +519,11 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 						wplink.setLink(link);
 						wplink.setCtGroupId(ctObsGroup);
 						wplink.setCtRootId(ctRootId);
-						wplink.setWaypointUuid(wp.getUuid());
+						wplink.setWaypoint(wp);
 						if (wp.getObservationGroups() != null && !wp.getObservationGroups().isEmpty()) {
-							wplink.setObservationGroupUuid(wp.getObservationGroups().get(0).getUuid());
+							wplink.setObservationGroup(wp.getObservationGroups().get(0));
 						}else {
-							wplink.setObservationGroupUuid(null);
+							wplink.setObservationGroup(null);
 						}
 						link.getWaypointLinks().add(wplink);
 					}

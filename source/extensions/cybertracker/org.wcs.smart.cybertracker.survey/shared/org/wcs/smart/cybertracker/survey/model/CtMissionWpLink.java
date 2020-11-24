@@ -29,8 +29,11 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 
 /**
  * Link between CyberTracker observation groups and
@@ -53,6 +56,11 @@ public class CtMissionWpLink extends UuidItem{
 	
 	private UUID waypointUuid;
 	private UUID obsGroupUuid;
+	
+	@Transient
+	private Waypoint wp;
+	@Transient
+	private WaypointObservationGroup group;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="ct_mission_link_uuid", referencedColumnName="ct_uuid")
@@ -79,20 +87,68 @@ public class CtMissionWpLink extends UuidItem{
 		this.ctGroupId = ctGroupId;
 	}
 	
+	/**
+	 * Should not be used directly; use getWaypoint instead
+	 * @return
+	 */
 	@Column(name="wp_uuid")
 	public UUID getWaypointUuid() {
 		return waypointUuid;
 	}
+	
+	/**
+	 * Should not be used directly; call setWaypoint instead
+	 * @return
+	 */	
 	public void setWaypointUuid(UUID waypointUuid) {
 		this.waypointUuid = waypointUuid;
 	}
 	
+	/**
+	 * Should not be used directly; call getObservationGroup instead
+	 * @return
+	 */	
 	@Column(name="obs_group_uuid")
 	public UUID getObservationGroupUuid() {
 		return obsGroupUuid;
 	}
+	
+	/**
+	 * Should not be used directly; call setObservationGroup instead
+	 * @return
+	 */	
 	public void setObservationGroupUuid(UUID obsGroupUuid) {
 		this.obsGroupUuid = obsGroupUuid;
+	}
+	
+	/**
+	 * Sets the waypoint to link to
+	 * @param wp
+	 */
+	public void setWaypoint(Waypoint wp) {
+		this.wp = wp;
+		setWaypointUuid(wp.getUuid());
+	}
+	
+	@Transient
+	public Waypoint getWaypoint() {
+		if (this.wp != null) return this.wp;
+		Waypoint tmp = new Waypoint();
+		tmp.setUuid(getWaypointUuid());
+		return tmp;
+	}
+	
+	public void setObservationGroup(WaypointObservationGroup group) {
+		this.group = group;
+		setObservationGroupUuid(group.getUuid());
+	}
+	
+	@Transient
+	public WaypointObservationGroup getObservationGroup() {
+		if (this.group != null) return this.group;
+		WaypointObservationGroup tmp = new WaypointObservationGroup();
+		tmp.setUuid(getObservationGroupUuid());
+		return tmp;
 	}
 	
 	

@@ -416,22 +416,20 @@ public class MissionJsonProcessor implements IJsonProcessor {
 					Waypoint mwp = null;
 					WaypointObservationGroup mwpg = null;
 					if(link != null && link.getWaypointLinks() != null) {
-						UUID tomerge = null;
-						UUID obsmerge = null;
 						for (CtMissionWpLink l : link.getWaypointLinks()) {
 							if (l.getCtRootId().equals(ctRootId)) {
-								tomerge = l.getWaypointUuid();
+								mwp = l.getWaypoint();
 								if (l.getCtGroupId().equals(ctObsGroup)) {
-									obsmerge = l.getObservationGroupUuid();
+									mwpg = l.getObservationGroup();
 								}
 							}
 						}
 						
-						if (tomerge != null) {
-							mwp = session.get(Waypoint.class, tomerge);
-							if (obsmerge != null) {
+						if (mwp != null && mwp.getUuid() != null) {
+							mwp = session.get(Waypoint.class, mwp.getUuid());
+							if (mwpg != null) {
 								for (WaypointObservationGroup g : mwp.getObservationGroups()) {
-									if (g.getUuid().equals(obsmerge)) {
+									if (mwpg == g || g.equals(mwpg)) {
 										mwpg = g;
 										break;
 									}
@@ -466,8 +464,8 @@ public class MissionJsonProcessor implements IJsonProcessor {
 						wplink.setLink(link);
 						wplink.setCtGroupId(ctObsGroup);
 						wplink.setCtRootId(ctRootId);
-						wplink.setWaypointUuid(mwp.getUuid());
-						wplink.setObservationGroupUuid(newGroup.getUuid());
+						wplink.setWaypoint(mwp);
+						wplink.setObservationGroup(newGroup);
 						link.getWaypointLinks().add(wplink);
 
 						
@@ -485,8 +483,8 @@ public class MissionJsonProcessor implements IJsonProcessor {
 						wplink.setLink(link);
 						wplink.setCtGroupId(ctObsGroup);
 						wplink.setCtRootId(ctRootId);
-						wplink.setWaypointUuid(wp.getUuid());
-						wplink.setObservationGroupUuid(wp.getObservationGroups().get(0).getUuid());
+						wplink.setWaypoint(wp);
+						wplink.setObservationGroup(wp.getObservationGroups().get(0));
 						link.getWaypointLinks().add(wplink);
 					}
 				}
