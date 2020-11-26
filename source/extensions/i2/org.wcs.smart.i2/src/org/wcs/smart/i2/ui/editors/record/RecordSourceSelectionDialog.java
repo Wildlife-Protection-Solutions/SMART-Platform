@@ -297,7 +297,7 @@ public class RecordSourceSelectionDialog extends SmartStyledTitleDialog{
 		owner.setBackground(waypointDetailsComp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		scroll.setContent(owner);
 		
-		SmartUiUtils.createHeaderLabel(owner, MessageFormat.format("Waypoint {0} - {1}", wp.getId(), DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(wp.getDateTime())));
+		SmartUiUtils.createHeaderLabel(owner, MessageFormat.format(Messages.RecordSourceSelectionDialog_WaypointId, wp.getId(), DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(wp.getDateTime())));
 
 		Composite obsinfo = new Composite(owner, SWT.NONE);
 		obsinfo.setLayout(new GridLayout(2, false));
@@ -306,7 +306,7 @@ public class RecordSourceSelectionDialog extends SmartStyledTitleDialog{
 		
 		for (WaypointObservationGroup group : wp.getObservationGroups()) {
 			if (wp.getObservationGroups().size() > 1) {
-				Composite t = SmartUiUtils.createSubHeaderLabel(obsinfo, "Observation Group");
+				Composite t = SmartUiUtils.createSubHeaderLabel(obsinfo, Messages.RecordSourceSelectionDialog_GroupLabel);
 				((GridData)t.getLayoutData()).horizontalSpan = 2;
 			}
 						

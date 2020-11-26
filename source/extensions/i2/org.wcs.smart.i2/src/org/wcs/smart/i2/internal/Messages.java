@@ -1438,6 +1438,7 @@ public class Messages extends NLS {
 	public static String RecordSourceSelectionDialog_DateTimeColumnName;
 	public static String RecordSourceSelectionDialog_DetailsColumnName;
 	public static String RecordSourceSelectionDialog_FiltersSectionTitle;
+	public static String RecordSourceSelectionDialog_GroupLabel;
 	public static String RecordSourceSelectionDialog_Message;
 	public static String RecordSourceSelectionDialog_ResultsSection;
 	public static String RecordSourceSelectionDialog_SearchButton;
@@ -1446,6 +1447,7 @@ public class Messages extends NLS {
 	public static String RecordSourceSelectionDialog_SourceRequired;
 	public static String RecordSourceSelectionDialog_Title;
 	public static String RecordSourceSelectionDialog_TooManyResults;
+	public static String RecordSourceSelectionDialog_WaypointId;
 	public static String RecordStatusGroupByDropItem_AllOption;
 	public static String RecordSummaryPage_AttachmentsSection;
 	public static String RecordSummaryPage_CreatedByLabel;
