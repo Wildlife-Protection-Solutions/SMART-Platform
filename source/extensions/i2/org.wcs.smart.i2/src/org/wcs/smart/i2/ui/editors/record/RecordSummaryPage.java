@@ -48,6 +48,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.window.Window;
 import org.eclipse.nebula.jface.tablecomboviewer.TableComboViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -121,6 +122,7 @@ import org.wcs.smart.i2.ui.dialogs.AttributeFieldEditor;
 import org.wcs.smart.i2.ui.views.RecordNarrativeView.FieldType;
 import org.wcs.smart.i2.ui.views.RecordsView;
 import org.wcs.smart.observation.WaypointSourceEngine;
+import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.E3Utils;
@@ -168,6 +170,8 @@ public class RecordSummaryPage extends EditorPart{
 
 	//attribute panel
 	private Composite srcAttributePanel;
+	private Composite dataSourceComposite;
+	
 	private HashMap<IntelRecordSourceAttribute, Object> editorFields;
 	private SelectionAdapter dirtyListener = new SelectionAdapter(){
 		@Override
@@ -651,37 +655,86 @@ public class RecordSummaryPage extends EditorPart{
 
 	}
 	
-	private void createDataSourceLabel(Composite parent) {
-		if (recordEditor.getRecord().getSmartSource() != null) {
+	private void createDataSourceLabel() {
+		for (Control c : dataSourceComposite.getChildren()) c.dispose();
+		
+		if (recordEditor.getRecord().getSmartSource() == null) {
+			if (IntelSecurityManager.INSTANCE.canAccessFieldData()) {
+				if (recordEditor.getEditMode()) {
+					Hyperlink lnkSetSource = toolkit.createHyperlink(dataSourceComposite, Messages.RecordSummaryPage_SetLink, SWT.NONE);
+					lnkSetSource.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+					((GridData)lnkSetSource.getLayoutData()).widthHint = 100;				
+					lnkSetSource.addHyperlinkListener(new HyperlinkAdapter() {
+						@Override
+						public void linkActivated(HyperlinkEvent e) {
+							setRecordSource();
+						}
+					});
+				}
+			}
 			
-			String key = recordEditor.getRecord().getSmartSource();
-			int first = key.indexOf(':');
-			int second = key.indexOf(':', first+1);
-			
-			try {
-				String type = key.substring(0, first);
-				String wpuuid = key.substring(first + 1, second);
-				String name = key.substring(second + 1);
-				if (name.length() == 0) name = "link"; //$NON-NLS-1$
+		}else {
+			String[] key = recordEditor.getRecord().getSmartSource().split(IntelRecord.SRC_KEY_DELIMITER);
+
+			try {				
+				String type = key[0];
+				String wpuuid = key[1];
 				
-				UUID wpUuid = UuidUtils.stringToUuid(wpuuid);
-				
-				toolkit.createLabel(parent, Messages.RecordSummaryPage_SmartSourceLabel);
+				String name = null;
+				UUID wpUuid = null;
+				try {
+					wpUuid = UuidUtils.stringToUuid(wpuuid);
+					
+					try(Session session = HibernateManager.openSession()){
+						Waypoint wp = session.get(Waypoint.class, wpUuid);
+						name = WaypointSourceEngine.INSTANCE.getSource(type).getSourceLabel(wp, session, Locale.getDefault());
+					}
+				}catch (Exception ex) {
+					//some problem occured while trying to 
+					//find smart source				
+				}
 				
 				if (IntelSecurityManager.INSTANCE.canAccessFieldData()) {
 				
-					Hyperlink lnkSmartSource = toolkit.createHyperlink(parent, name, SWT.NONE);
-					lnkSmartSource.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-					((GridData)lnkSmartSource.getLayoutData()).widthHint = 100;
+					Composite temp = toolkit.createComposite(dataSourceComposite);
+					temp.setLayout(new GridLayout());
+					temp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+					if (name == null || wpUuid == null) {
+						//error source has been deleted from SMART
+						Label l = toolkit.createLabel(temp, Messages.RecordSummaryPage_RecordSourceLinkNotFound);
+						l.setToolTipText(Messages.RecordSummaryPage_RecordSourceLinkNotFoundTooltip);
+						l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+					}else {
+						Hyperlink lnkSmartSource = toolkit.createHyperlink(temp, name, SWT.NONE);
+						lnkSmartSource.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+						((GridData)lnkSmartSource.getLayoutData()).widthHint = 100;
+						
+						final UUID uuid = wpUuid;
+						lnkSmartSource .addHyperlinkListener(new HyperlinkAdapter() {
+							@Override
+							public void linkActivated(HyperlinkEvent e) {
+								WaypointSourceEngine.INSTANCE.findUiProvider(type).findAndShow(uuid);
+							}
+						});
+					}
 					
-					lnkSmartSource .addHyperlinkListener(new HyperlinkAdapter() {
-						@Override
-						public void linkActivated(HyperlinkEvent e) {
-							WaypointSourceEngine.INSTANCE.findUiProvider(type).findAndShow(wpUuid);
-						}
-					});
+					if (recordEditor.getEditMode()) {
+						temp.setLayout(new GridLayout(2, false));
+						Hyperlink lnkSetSource = toolkit.createHyperlink(temp, DialogConstants.EDIT_LINK_TEXT, SWT.NONE);
+						lnkSetSource.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+						lnkSetSource.addHyperlinkListener(new HyperlinkAdapter() {
+							@Override
+							public void linkActivated(HyperlinkEvent e) {
+								setRecordSource();
+							}
+						});
+					}
+					((GridLayout)temp.getLayout()).marginWidth = 0;
+					((GridLayout)temp.getLayout()).marginHeight = 0;
+					
 				}else {
-					Label ll = toolkit.createLabel(parent, name);
+					Label ll = toolkit.createLabel(dataSourceComposite, name);
 					ll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 					((GridData)ll.getLayoutData()).widthHint = 100;
 				}
@@ -689,8 +742,17 @@ public class RecordSummaryPage extends EditorPart{
 				
 			}
 		}
+		dataSourceComposite.getParent().layout(true, true);
 	}
 	
+	private void setRecordSource() {
+		RecordSourceSelectionDialog dialog = new RecordSourceSelectionDialog(getSite().getShell(), recordEditor.getRecord().getPrimaryDate().toLocalDate());
+		if (dialog.open() != Window.OK) return;
+		
+		recordEditor.getRecord().setSmartSource(dialog.getWaypoint());
+		recordEditor.setDirty(true);
+		createDataSourceLabel();
+	}
 	/*
 	 * configures controls for record attributes
 	 */
@@ -722,8 +784,18 @@ public class RecordSummaryPage extends EditorPart{
 		content.setLayout(new GridLayout(2, false));
 		content.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridLayout)content.getLayout()).horizontalSpacing = 7; 
+		((GridLayout)content.getLayout()).marginWidth = 0;
+		((GridLayout)content.getLayout()).marginHeight = 0;
 		
-		createDataSourceLabel(content);
+		Label l = toolkit.createLabel(content, Messages.RecordSummaryPage_SmartSourceLabel);
+		l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+
+		dataSourceComposite = toolkit.createComposite(content);
+		dataSourceComposite.setLayout(new GridLayout());
+		dataSourceComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridLayout)dataSourceComposite.getLayout()).marginWidth = 0;
+		((GridLayout)dataSourceComposite.getLayout()).marginHeight = 0;
+		createDataSourceLabel();
 		
 		
 		HashMap<IntelRecordAttributeValue, Label> readOnlyLabels = new HashMap<>();
@@ -764,7 +836,7 @@ public class RecordSummaryPage extends EditorPart{
 						
 						if (a.getDuplicateCheck()) addDuplicateIdChecker(af);
 					}else{
-						Label l = toolkit.createLabel(content, name + ":"); //$NON-NLS-1$
+						l = toolkit.createLabel(content, name + ":"); //$NON-NLS-1$
 						l.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 	
 						Composite tmp  = toolkit.createComposite(content, SWT.NONE);
@@ -802,7 +874,7 @@ public class RecordSummaryPage extends EditorPart{
 						value = v.getAttributeValueAsString(Locale.getDefault(), crs);
 					}
 					
-					Label l = toolkit.createLabel(content, name + ":"); //$NON-NLS-1$
+					l = toolkit.createLabel(content, name + ":"); //$NON-NLS-1$
 					l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 					
 					l = toolkit.createLabel(content,value);

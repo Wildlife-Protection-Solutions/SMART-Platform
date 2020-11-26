@@ -58,7 +58,6 @@ import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.map.GeometryFactoryProvider;
-import org.wcs.smart.observation.WaypointSourceEngine;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -199,9 +198,7 @@ public class CreateRecordActionType implements IActionType {
 			if (ip == null) throw new RuntimeException(Messages.CreateRecordActionType_ProfileNotFound);
 			
 			newRecord.setProfile(ip);
-			
-			String srcLabel = WaypointSourceEngine.INSTANCE.getSource(data.getWaypoint().getSourceId()).getSourceLabel(data.getWaypoint(), session, l);
-			newRecord.setSmartSource(data.getWaypoint().getSourceId() + ":" + UuidUtils.uuidToString( data.getWaypoint().getUuid()) + ":" + srcLabel); //$NON-NLS-1$ //$NON-NLS-2$
+			newRecord.setSmartSource(data.getWaypoint());
 			
 			if(data.getAttachments() != null) {
 				for (ObservationAttachment a : data.getAttachments()) {

@@ -74,6 +74,7 @@ public class DateFilterDropDownComposite extends Composite {
 	private DateFilterComposite.DateFilter[] filters;
 	private DateFilter defaultValue;
 	private boolean showDateRangeLabel;
+
 	private Composite customComp;
 	
 	/**
@@ -144,6 +145,17 @@ public class DateFilterDropDownComposite extends Composite {
 		toolkit.adapt(this, false, true);
 	}
 	
+	@Override
+	public void setEnabled(boolean enabled) {
+		super.setEnabled(enabled);
+		cmbFilter.getControl().setEnabled(enabled);
+		
+		if (dtEnd != null) dtEnd.setEnabled(enabled);
+		if (dtStart != null) dtStart.setEnabled(enabled);
+		if (lbl1 != null) lbl1.setEnabled(enabled);
+		if (lbl2 != null) lbl2.setEnabled(enabled);
+	}
+	
 	public void setBackgroundColor(Color color){
 		cmbFilter.getControl().setBackground(color);
 	}
@@ -187,8 +199,6 @@ public class DateFilterDropDownComposite extends Composite {
 		((GridLayout)customComp.getLayout()).marginHeight = 0;
 		customComp.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		
-		
-		
 		dtStart = new DateTime(customComp, SWT.MEDIUM | SWT.DROP_DOWN | SWT.DATE);
 		dtStart.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		Listener validateListener = new Listener(){
@@ -211,8 +221,7 @@ public class DateFilterDropDownComposite extends Composite {
 				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
 		cdEndDate.setShowHover(true);
 		cdEndDate.hide();
-		
-		
+				
 		cmbFilter.setInput(filters);
 		cmbFilter.addSelectionChangedListener(new ISelectionChangedListener() {
 			

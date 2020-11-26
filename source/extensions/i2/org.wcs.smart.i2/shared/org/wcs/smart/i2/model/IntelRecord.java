@@ -34,10 +34,13 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Model class of i_record.
@@ -48,6 +51,8 @@ import org.wcs.smart.ca.UuidItem;
 @Entity
 @Table(name="smart.i_record")
 public class IntelRecord extends UuidItem implements IIntelAuditItem{
+
+	public static final String SRC_KEY_DELIMITER = ":"; //$NON-NLS-1$
 
 	private static final long serialVersionUID = 1L;
 	
@@ -354,10 +359,21 @@ public class IntelRecord extends UuidItem implements IIntelAuditItem{
 	public String getSmartSource() {
 		return this.smartSouce;
 	}
-	
+	/**
+	 * SMART Source  provides a link to the waypoint
+	 * that "created" this record.  This should be of the 
+	 * form <wpsourcekey>:<wpuuid>.  Consider using
+	 * setSmartSource(Waypoint) instead of this function.
+	 * 
+	 * @param smartSource
+	 */
 	public void setSmartSource(String smartSource) {
 		this.smartSouce = smartSource;
 	}
 	
+	@Transient
+	public void setSmartSource(Waypoint waypoint) {
+		setSmartSource(waypoint.getSourceId() + SRC_KEY_DELIMITER + UuidUtils.uuidToString( waypoint.getUuid()) );
+	}
 	
 }
