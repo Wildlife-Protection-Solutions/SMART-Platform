@@ -60,7 +60,8 @@ public class DrawPolygonTool extends SimpleTool {
 	private Color LINE_COLOR = new Color(51,68,107);
 	private Color FILL_COLOR = new Color(51,68,107,10);
 	
-	private List<Point> coordinates = new ArrayList<Point>();
+	private List<Coordinate> coordinates = new ArrayList<>();
+	
 	private Point last;
 	private AbstractDrawCommand drawCommand = null;
 	
@@ -83,11 +84,11 @@ public class DrawPolygonTool extends SimpleTool {
 		public void run(IProgressMonitor monitor) throws Exception {
 			if (coordinates.size() > 1){
 				Path p = new Path(Display.getCurrent());
-				Point c = coordinates.get(0);
+				Point c = mapToScreen( coordinates.get(0) );
 				p.moveTo(c.x,c.y);
 				
 				for (int i = 1; i < coordinates.size(); i ++){
-					c = coordinates.get(i);
+					c = mapToScreen ( coordinates.get(i) );
 					p.lineTo(c.x,  c.y);
 				}
 				if (last != null){
@@ -100,18 +101,18 @@ public class DrawPolygonTool extends SimpleTool {
 			
 			graphics.setColor( new Color(51,68,107));
 			for (int i = 1; i < coordinates.size(); i ++){
-				Point c = coordinates.get(i - 1);
-				Point c2 = coordinates.get(i);
+				Point c = mapToScreen( coordinates.get(i - 1) );
+				Point c2 = mapToScreen( coordinates.get(i) );
 				graphics.drawLine(c.x, c.y, c2.x, c2.y);
 				
 			}
 			if (last != null && coordinates.size() > 0){
-				Point c = coordinates.get(coordinates.size() - 1);
+				Point c = mapToScreen( coordinates.get(coordinates.size() - 1) );
 				graphics.drawLine(c.x, c.y, last.x, last.y);
 			}			
 			int radius = 6;
 			for (int i = 0; i < coordinates.size(); i ++){
-				Point c = coordinates.get(i);
+				Point c = mapToScreen( coordinates.get(i) );
 				graphics.setColor(FILL_COLOR);
 				graphics.fillOval(c.x - radius/2, c.y -radius/2, radius, radius);
 				graphics.setColor(LINE_COLOR);
@@ -132,7 +133,8 @@ public class DrawPolygonTool extends SimpleTool {
 			
 			Point min = null;
 			Point max = null;
-			for (Point c : coordinates){
+			for (Coordinate ct : coordinates){
+				Point c = mapToScreen(ct);
 				if (min == null){
 					min = new Point(c);
 				}else{
@@ -174,6 +176,16 @@ public class DrawPolygonTool extends SimpleTool {
 		super(MOUSE|MOTION);
 	}
 	
+	private Coordinate screenToMap(Point p) {
+		return getContext().getViewportModel().pixelToWorld(p.x, p.y);
+	}
+	
+	private Point mapToScreen(Coordinate c) {
+		return getContext().getViewportModel().worldToPixel(c);
+	}
+	
+	
+	
 	public void setActive( boolean active ) {
 		super.setActive(active);
 		coordinates.clear();
@@ -196,10 +208,13 @@ public class DrawPolygonTool extends SimpleTool {
 		if (editor == null) return;
 		
 		Coordinate[] c = new Coordinate[coordinates.size()];
+		
 		for (int i = 0; i < coordinates.size(); i ++){
-			Point temp = coordinates.get(i);
-			c[i] = getContext().getViewportModel().pixelToWorld(temp.x, temp.y);
+			c[i] = coordinates.get(i);
 		}
+//			Point temp = coordinates.get(i);
+//			c[i] = getContext().getViewportModel().pixelToWorld(temp.x, temp.y);
+//		}
 		
 		Polygon p = null;
 		String error = null;
@@ -214,7 +229,9 @@ public class DrawPolygonTool extends SimpleTool {
 			error = e.getMessage();
 		}
 		if (error != null){
-			MessageBubble bubble = new MessageBubble(coordinates.get(coordinates.size() - 2).x, coordinates.get(coordinates.size() - 2).y, error, (short)5);
+			//TODO: test
+			Point loc = mapToScreen(coordinates.get(coordinates.size() - 2));
+			MessageBubble bubble = new MessageBubble((int)loc.getX(), (int)loc.getY(), error, (short)5);
 			bubble.setHorizontalCornerArc(5);
 			bubble.setBubbleColor(new Color(255, 225,225));
 			bubble.setTextColor(new Color(120,0,0));
@@ -232,7 +249,7 @@ public class DrawPolygonTool extends SimpleTool {
      * @param e the mouse event
      */
     protected void onMouseDoubleClicked( MapMouseEvent e ) {
-    	coordinates.add(new Point(e.x, e.y));
+    	coordinates.add(screenToMap(new Point(e.x, e.y)));
     	coordinates.add(coordinates.get(0));
     	finish();
     	coordinates.clear();
@@ -272,7 +289,7 @@ public class DrawPolygonTool extends SimpleTool {
     		getContext().getViewportPane().addDrawCommand(drawCommand);
     	}
     	if (coordinates.isEmpty()){
-    		coordinates.add(new Point(e.x, e.y));
+    		coordinates.add(screenToMap( new Point(e.x, e.y)) );
     	}
     	redraw(new Point(e.x, e.y));
     }
@@ -282,7 +299,7 @@ public class DrawPolygonTool extends SimpleTool {
      * @param e the mouse event
      */
     protected void onMouseReleased( MapMouseEvent e ) {
-        coordinates.add(new Point(e.x,e.y));
+        coordinates.add(screenToMap (new Point(e.x,e.y)));
         redraw(null);
     }
 
