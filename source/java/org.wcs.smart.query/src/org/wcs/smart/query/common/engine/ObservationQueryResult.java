@@ -126,7 +126,7 @@ public abstract class ObservationQueryResult<T extends IObservationQueryResultIt
 			
 			switch (attribute.getType()) {
 			case MLIST: 
-				throw new UnsupportedOperationException("Sorting not supported on multi-list attribute");
+				throw new UnsupportedOperationException("Sorting not supported on multi-list attribute"); //$NON-NLS-1$
 			case BOOLEAN:
 			case NUMERIC:
 				// nullify first
@@ -154,7 +154,7 @@ public abstract class ObservationQueryResult<T extends IObservationQueryResultIt
 			
 			switch (attribute.getType()) {
 			case MLIST: 
-				throw new UnsupportedOperationException("Sorting not supported on multi-list attribute");
+				throw new UnsupportedOperationException("Sorting not supported on multi-list attribute"); //$NON-NLS-1$
 			case BOOLEAN:
 			case NUMERIC:
 				StringBuilder sql = new StringBuilder();

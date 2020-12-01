@@ -85,7 +85,7 @@ public class AssetPagedObservationResult extends ObservationQueryResult<AssetObs
 			result = super.getSortColumnString(sortColumn);
 		}
 		
-		if (!result.isEmpty()) {
+		if (result != null && !result.isEmpty()) {
 			result += direction == SWT.UP ? " asc" : " desc"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return result;
