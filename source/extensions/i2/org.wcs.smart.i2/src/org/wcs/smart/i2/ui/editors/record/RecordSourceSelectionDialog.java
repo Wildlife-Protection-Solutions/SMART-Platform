@@ -58,6 +58,7 @@ import org.wcs.smart.common.filter.DateFilterComposite;
 import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.common.filter.DateFilterDropDownComposite;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.observation.ObservationPlugIn;
 import org.wcs.smart.observation.WaypointSourceEngine;
@@ -184,14 +185,15 @@ public class RecordSourceSelectionDialog extends SmartStyledTitleDialog{
 		dFilter.setDateFilter(defaultFilter, dates);
 		dFilter.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
+		new Label(filterComp, SWT.NONE);
 		
-		
-		Button btnSearch = new Button(main, SWT.PUSH);
+		Button btnSearch = new Button(filterComp, SWT.PUSH);
 		btnSearch.setText(Messages.RecordSourceSelectionDialog_SearchButton);
 		btnSearch.addListener(SWT.Selection, e->searchWaypoints());
-		btnSearch.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		btnSearch.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false));
 		btnSearch.setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-		btnSearch.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
+		btnSearch.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RUN));
+		((GridData)btnSearch.getLayoutData()).widthHint = (int)(btnSearch.computeSize(SWT.DEFAULT,  SWT.DEFAULT).x * 1.2);
 		
 		SmartUiUtils.createHeaderLabel(main, Messages.RecordSourceSelectionDialog_ResultsSection);
 		
