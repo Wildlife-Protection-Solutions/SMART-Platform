@@ -40,6 +40,7 @@ import org.wcs.smart.patrol.query.ext.IExtensionFilterViewer;
 import org.wcs.smart.patrol.query.ext.PatrolContributionFinder;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolEndDateField;
+import org.wcs.smart.patrol.query.model.PatrolLegDateField;
 import org.wcs.smart.patrol.query.model.PatrolQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolQueryOptionType;
 import org.wcs.smart.patrol.query.model.PatrolStartDateField;
@@ -311,6 +312,9 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 		}else if (filter.getDateFieldOption() == PatrolStartDateField.INSTANCE){
 			table = engine.tablePrefix(Patrol.class);
 			field = "start_date"; //$NON-NLS-1$
+		}else if (filter.getDateFieldOption() == PatrolLegDateField.INSTANCE) {
+			table = engine.tablePrefix(PatrolLegDay.class);
+			field = "patrol_day"; //$NON-NLS-1$
 		}else{
 			throw new SQLException(MessageFormat.format(Messages.DerbyFilterToSqlGenerator_DateFilteNotSupported, new Object[]{filter.getDateFieldOption().getGuiName(Locale.getDefault())}));
 		}

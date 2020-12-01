@@ -74,6 +74,7 @@ import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolGridQueryDefinition;
 import org.wcs.smart.patrol.query.model.PatrolGridQueryDefinition.ZeroFilterOption;
 import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
+import org.wcs.smart.patrol.query.model.PatrolLegDateField;
 import org.wcs.smart.patrol.query.model.PatrolValueOption;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItem;
 import org.wcs.smart.query.QueryPlugIn;
@@ -97,6 +98,7 @@ import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.QueryFilter;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
+import org.wcs.smart.query.model.filter.date.WaypointDateField;
 import org.wcs.smart.query.model.summary.AttributeValueItem;
 import org.wcs.smart.query.model.summary.CategoryValueItem;
 import org.wcs.smart.query.model.summary.CombinedValueItem;
@@ -752,6 +754,13 @@ public class DerbyGridEngine extends AbstractPatrolQueryEngine{
 		sql.append(" on " + tablePrefix.get(Patrol.class) + ".uuid = " + tablePrefix.get(PatrolLeg.class) + ".patrol_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		
 		if (dateFilter != null ){
+
+			if (dateFilter.getDateFieldOption() == WaypointDateField.INSTANCE) {
+				//we don't have the waypoint table in this query; so we can't filter
+				//using the waypoint table; instead convert the filter to the patrol leg day
+				//filter
+				dateFilter = new DateFilter(PatrolLegDateField.INSTANCE, dateFilter.getDateFilterOption());
+			}
 			String dfilter = PatrolFilterSqlGenerator.INSTANCE.toSql(dateFilter, this);
 			if (dfilter.length() > 0) {
 				sql.append(" and "); //$NON-NLS-1$

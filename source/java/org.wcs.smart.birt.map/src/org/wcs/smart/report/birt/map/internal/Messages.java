@@ -38,6 +38,7 @@ public class Messages extends NLS {
 	public static String SmartLayersPage_MoveUpButton;
 	public static String SmartLayersPage_NoBasemapLabel;
 	public static String SmartLayersPage_PasteBounds;
+	public static String SmartLayersPage_QueryNotFound;
 	public static String SmartLayersPage_removetooltip;
 	public static String SmartLayersPage_ReportDataset_ColumnName;
 	public static String SmartLayersPage_Style_ColumnHeader;

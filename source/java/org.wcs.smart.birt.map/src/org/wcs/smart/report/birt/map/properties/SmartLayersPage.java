@@ -481,7 +481,7 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 				if (element == BoundsOption.ALL_QUERY_LAYERS) return Messages.SmartLayersPage_AllQueriesBoundsLabel;
 				if (element instanceof LayerItem) {
 					LayerItem li = (LayerItem)element;
-					if (li.getHandle().getDataBindingReference() == null) return "[ERROR] [Query Not Found]";
+					if (li.getHandle().getDataSet() == null) return Messages.SmartLayersPage_QueryNotFound;
 					return ((LayerItem) element).getHandle().getDataSet().getElement().getDisplayName();
 				}
 				
@@ -547,11 +547,11 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		});
 		
 		l.setMenu(mnu);
-//		cmbBounds.getControl().setMenu(mnu);
 	
 		txtCustom = new Label(bm, SWT.NONE);
 		txtCustom.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		((GridData)txtCustom.getLayoutData()).minimumWidth = 40;
+		((GridData)txtCustom.getLayoutData()).widthHint = 100;
 		
 		FontData fd = txtCustom.getFont().getFontData()[0];
 		fd.setHeight( fd.getHeight() - 2);
