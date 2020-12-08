@@ -24,6 +24,7 @@ package org.wcs.smart.cybertracker.export.mbtile;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.MessageFormat;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -104,6 +105,16 @@ public class MapPackageContribution implements IPackageContribution{
 				CyberTrackerPlugIn.log(ex.getMessage(), ex);
 				l.setText(Messages.MapPackageContribution_UnknownLabel);
 			}
+		}
+		
+		try {
+			if (pp.getMapLayers().size() > 0) {
+				l = new Label(parent, SWT.NONE);
+				l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+				l.setText(MessageFormat.format(Messages.MapPackageContribution_nOtherLayers, pp.getMapLayers().size()));
+			}
+		}catch (Exception ex) {
+			CyberTrackerPlugIn.log(ex.getMessage(), ex);
 		}
 	}
 	

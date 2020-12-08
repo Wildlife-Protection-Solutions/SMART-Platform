@@ -541,6 +541,7 @@ public class Messages extends NLS {
 	public static String MapPackageContribution_MinLabel;
 	public static String MapPackageContribution_NoBasemap;
 	public static String MapPackageContribution_NoneLabel;
+	public static String MapPackageContribution_nOtherLayers;
 	public static String MapPackageContribution_TilesCnt;
 	public static String MapPackageContribution_TilesWarnCnt;
 	public static String MapPackageContribution_UnknownLabel;
