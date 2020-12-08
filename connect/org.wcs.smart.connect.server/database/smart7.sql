@@ -2700,6 +2700,7 @@ CREATE TABLE smart.ct_incident_package(
 	cm_uuid uuid, 
 	ctprofile_uuid uuid, 
 	basemapdef varchar(32672), 
+	maplayersdef varchar(32672),
 	primary key (uuid)
 );
 
@@ -2773,6 +2774,7 @@ CREATE TABLE smart.ct_patrol_package (
     has_incident boolean DEFAULT false,
     incident_uuid uuid,
     basemapdef character varying(32672),
+    maplayersdef varchar(32672),
     PRIMARY KEY (uuid)
 );
 
@@ -2824,6 +2826,7 @@ CREATE TABLE smart.ct_survey_package (
     has_incident boolean DEFAULT false,
     incident_uuid uuid,
     basemapdef character varying(32672),
+    maplayersdef varchar(32672),
     PRIMARY KEY (uuid)
 );
 
@@ -4482,7 +4485,9 @@ CREATE TABLE smart.smartcollect_package(
   ca_uuid uuid not null, 
   cm_uuid uuid, 
   ctprofile_uuid uuid,
-  basemapdef varchar(32672), primary key (uuid));
+  basemapdef varchar(32672), 
+  maplayersdef varchar(32672),
+  primary key (uuid));
 
 ALTER TABLE ONLY smart.asset_attribute_list_item ADD CONSTRAINT asset_li_keyid_attribute_uuid_unq UNIQUE (keyid, attribute_uuid);
 ALTER TABLE ONLY smart.asset_module_settings ADD CONSTRAINT asset_module_key_ca_unq UNIQUE (keyid, ca_uuid);

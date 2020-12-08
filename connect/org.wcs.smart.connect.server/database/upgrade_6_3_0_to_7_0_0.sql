@@ -190,6 +190,7 @@ create table smart.ct_patrol_package(
  has_incident boolean default false,
  incident_uuid uuid,
  basemapdef varchar(32672),
+ maplayersdef varchar(32672),
  primary key (uuid)
 );
 
@@ -209,6 +210,7 @@ create table smart.ct_survey_package(
  has_incident boolean default false,
  incident_uuid uuid,
  basemapdef varchar(32672),
+ maplayersdef varchar(32672),
  primary key (uuid)
 );
 
@@ -803,7 +805,9 @@ CREATE TABLE smart.smartcollect_package(
   ca_uuid uuid not null, 
   cm_uuid uuid, 
   ctprofile_uuid uuid,
-  basemapdef varchar(32672), primary key (uuid));
+  basemapdef varchar(32672), 
+  maplayersdef varchar(32672),
+  primary key (uuid));
 
 ALTER TABLE smart.smartcollect_package ADD FOREIGN KEY (CA_UUID) REFERENCES smart.conservation_area(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE smart.smartcollect_package ADD FOREIGN KEY (CM_UUID) REFERENCES smart.configurable_model(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
@@ -893,7 +897,7 @@ alter table smart.survey_design drop column start_date;
 alter table smart.survey_design drop column end_date;
 
 --- Incident Packages ------
-CREATE TABLE smart.ct_incident_package(uuid uuid not null, name varchar(512), ca_uuid uuid not null,cm_uuid uuid, ctprofile_uuid uuid, basemapdef varchar(32672), primary key (uuid));
+CREATE TABLE smart.ct_incident_package(uuid uuid not null, name varchar(512), ca_uuid uuid not null,cm_uuid uuid, ctprofile_uuid uuid, basemapdef varchar(32672), maplayersdef varchar(32672), primary key (uuid));
 ALTER TABLE SMART.ct_incident_package ADD CONSTRAINT ct_incident_package_ca_uuid_fk FOREIGN KEY (CA_UUID) REFERENCES smart.conservation_area(UUID) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE SMART.ct_incident_package ADD CONSTRAINT ct_incident_package_cm_uuid_fk FOREIGN KEY (CM_UUID) REFERENCES smart.configurable_model(UUID) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE SMART.ct_incident_package ADD CONSTRAINT ct_incident_package_ctprofile_uuid_fk FOREIGN KEY (ctprofile_uuid) REFERENCES smart.ct_properties_profile(UUID) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
