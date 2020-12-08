@@ -104,6 +104,7 @@ import org.wcs.smart.cybertracker.model.AbstractCtPackage.BaseMapKeys;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.PackageMapLayer;
+import org.wcs.smart.cybertracker.model.PackageMapLayerManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -715,7 +716,7 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 
 						for (IGeoResource r : resourceList) {
 							try {
-								PackageMapLayer newlayer = PackageMapLayer.toMapLayer(r);
+								PackageMapLayer newlayer = PackageMapLayerManager.INSTANCE.toMapLayer(r);
 								layers.add(newlayer);
 							} catch (Exception ex) {
 								CyberTrackerPlugIn.displayError(Messages.MapPackageUiContribution_ErrorTitle,

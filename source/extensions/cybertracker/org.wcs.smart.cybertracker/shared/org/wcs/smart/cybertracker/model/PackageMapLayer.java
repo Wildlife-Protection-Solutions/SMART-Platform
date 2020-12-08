@@ -21,21 +21,16 @@
  */
 package org.wcs.smart.cybertracker.model;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.locationtech.udig.catalog.IGeoResource;
-import org.locationtech.udig.catalog.IService;
-import org.locationtech.udig.catalog.internal.wms.WMSGeoResourceImpl;
 
 /**
  * For managing other map layers in SMART Mobile package
@@ -79,24 +74,7 @@ public class PackageMapLayer {
 		return this.properties;
 	}
 	
-	public static PackageMapLayer toMapLayer(IGeoResource resource) throws Exception{
-		
-		if (resource.canResolve(WMSGeoResourceImpl.class)) {
-			
-			WMSGeoResourceImpl wms = resource.resolve(WMSGeoResourceImpl.class, new NullProgressMonitor());
-			
-			IService service = wms.resolve(IService.class, new NullProgressMonitor());
-			org.geotools.ows.wms.Layer layer = wms.resolve(org.geotools.ows.wms.Layer.class, new NullProgressMonitor());
-			
-			PackageMapLayer mlayer = new PackageMapLayer("wms"); //$NON-NLS-1$
-			mlayer.addProperty("service", service.getIdentifier().toExternalForm()); //$NON-NLS-1$
-			mlayer.addProperty("layers", layer.getName()); //$NON-NLS-1$
-			
-			return mlayer;
-		}
-		throw new Exception(MessageFormat.format("The resource type {0} is not supported for package map layers", resource.getTitle())); //$NON-NLS-1$
-
-	}
+	
 	
 	/**
 	 * Converts a list of map layers to JSON representation stored in 
