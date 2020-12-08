@@ -147,6 +147,7 @@ public class Messages extends NLS {
 	public static String AttributeDMAdvisor_Error_NotAttribute;
 	public static String AttributeInfoPanel_Aggregations_Label;
 	public static String AttributeInfoPanel_Aggregations_ToolTip;
+	public static String AttributeInfoPanel_ConvertToMultiList;
 	public static String AttributeInfoPanel_Delete_DialogMessage;
 	public static String AttributeInfoPanel_Delete_DialogTitle;
 	public static String AttributeInfoPanel_DeleteErrorDialogTitle;

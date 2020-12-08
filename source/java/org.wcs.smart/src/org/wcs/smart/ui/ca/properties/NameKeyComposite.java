@@ -110,7 +110,7 @@ public class NameKeyComposite {
 		for (Iterator<Entry<Language,String>> iterator = values.entrySet().iterator(); iterator.hasNext();) {
 			Entry<Language, String> type = iterator.next();
 			if (type.getValue() != null && type.getValue().trim().length() > 0){
-				item.updateName(type.getKey(), type.getValue());
+				item.updateName(type.getKey(), type.getValue().strip());
 			}else{
 				//we want to remove this label as long as it's not default
 				if (!type.getKey().isDefault()){
@@ -130,9 +130,9 @@ public class NameKeyComposite {
 			}
 		}
 		//update name field
-		String name = item.findNameNull(SmartDB.getCurrentLanguage());
+		String name = item.findNameNull(SmartDB.getCurrentLanguage()).strip();
 		if (name == null){
-			item.setName(item.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage()));
+			item.setName(item.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage()).strip());
 		}else{
 			item.setName(name);
 		}

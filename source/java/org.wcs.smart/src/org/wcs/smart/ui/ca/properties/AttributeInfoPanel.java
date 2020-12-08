@@ -23,7 +23,6 @@ package org.wcs.smart.ui.ca.properties;
 
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
-import java.sql.SQLException;
 import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -69,7 +68,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -212,7 +210,7 @@ public class AttributeInfoPanel extends Composite {
 			cmbType.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 			
 			btnConvert = new Button(tt, SWT.PUSH);
-			btnConvert.setText("Convert To Multi List");
+			btnConvert.setText(Messages.AttributeInfoPanel_ConvertToMultiList);
 			btnConvert.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 			btnConvert.setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 			btnConvert.addListener(SWT.Selection, e->{
