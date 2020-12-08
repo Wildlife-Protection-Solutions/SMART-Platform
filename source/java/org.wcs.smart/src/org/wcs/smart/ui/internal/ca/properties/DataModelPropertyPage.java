@@ -566,16 +566,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 					SubMonitor progress = SubMonitor.convert(monitor, Messages.DataModelPropertyPage_TaskName, 2);
 					try{
 						
-						List<Icon> icons = new ArrayList<>();
 						
-						icons.addAll(QueryFactory.buildQuery(session, Icon.class,
-								new Object[] {"conservationArea", currentCa}).list()); //$NON-NLS-1$
-						
-						
-						progress.subTask(Messages.DataModelPropertyPage_Progress1);
-						DataModelXmlToSmartConverter converter = new DataModelXmlToSmartConverter();
-						DataModel targetDm = converter.convert(f, currentCa, icons, false);
-						progress.worked(1);
 						
 						List<String> warnings = new ArrayList<>();
 						progress.setWorkRemaining(conservationAreas.size());
@@ -589,7 +580,13 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 							}else {
 								sourceDm = HibernateManager.loadDataModel(ca, session);
 							}
-						
+
+							//get icons and create target dm with these icons
+							List<Icon> icons = QueryFactory.buildQuery(session, Icon.class,
+									new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
+							DataModelXmlToSmartConverter converter = new DataModelXmlToSmartConverter();
+							DataModel targetDm = converter.convert(f, ca, icons, false);
+							
 							DataModelMergeAndUpdater updater = new DataModelMergeAndUpdater(sourceDm, targetDm, SmartDB.getCurrentLanguage());					
 							warnings.addAll(updater.merge(progress.split(1)));
 							
