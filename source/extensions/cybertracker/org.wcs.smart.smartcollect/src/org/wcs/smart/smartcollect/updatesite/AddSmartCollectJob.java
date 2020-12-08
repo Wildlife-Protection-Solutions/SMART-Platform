@@ -104,7 +104,7 @@ public class AddSmartCollectJob extends Job {
 				"CREATE TABLE smart.smartcollect_waypoint(wp_uuid char(16) for bit data not null,  source varchar(32000), primary key(wp_uuid))", //$NON-NLS-1$
 				"ALTER TABLE smart.smartcollect_waypoint ADD CONSTRAINT smartcollect_wp_uuid_fk FOREIGN KEY (wp_uuid) REFERENCES smart.waypoint(uuid) ON UPDATE RESTRICT ON DELETE CASCADE", //$NON-NLS-1$
 
-				"CREATE TABLE smart.smartcollect_package(uuid char(16) for bit data not null, name varchar(512), ca_uuid char(16) for bit data not null,cm_uuid char(16) for bit data, ctprofile_uuid char(16) for bit data, basemapdef varchar(32672), primary key (uuid))", //$NON-NLS-1$
+				"CREATE TABLE smart.smartcollect_package(uuid char(16) for bit data not null, name varchar(512), ca_uuid char(16) for bit data not null,cm_uuid char(16) for bit data, ctprofile_uuid char(16) for bit data, basemapdef varchar(32672), maplayersdef varchar(32672), primary key (uuid))", //$NON-NLS-1$
 
 				"ALTER TABLE SMART.smartcollect_package ADD CONSTRAINT ct_community_package_ca_uuid_fk FOREIGN KEY (CA_UUID) REFERENCES smart.conservation_area(UUID) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 				"ALTER TABLE SMART.smartcollect_package ADD CONSTRAINT ct_community_package_cm_uuid_fk FOREIGN KEY (CM_UUID) REFERENCES smart.configurable_model(UUID) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$

@@ -28,8 +28,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -47,6 +50,7 @@ import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
@@ -61,6 +65,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
@@ -71,8 +77,21 @@ import org.hibernate.Session;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.locationtech.udig.project.internal.Map;
+import org.locationtech.udig.catalog.IGeoResource;
+import org.locationtech.udig.catalog.IService;
+import org.locationtech.udig.catalog.internal.wms.ui.WMSConnectionFactory;
+import org.locationtech.udig.catalog.ui.ConnectionFactoryManager;
+import org.locationtech.udig.catalog.ui.DataSourceSelectionPage;
+import org.locationtech.udig.catalog.ui.UDIGConnectionFactoryDescriptor;
+import org.locationtech.udig.catalog.ui.workflow.DataSourceSelectionState;
+import org.locationtech.udig.catalog.ui.workflow.ResourceSelectionState;
+import org.locationtech.udig.catalog.ui.workflow.State;
+import org.locationtech.udig.catalog.ui.workflow.Workflow;
+import org.locationtech.udig.catalog.ui.workflow.WorkflowWizard;
+import org.locationtech.udig.catalog.ui.workflow.WorkflowWizardPageProvider;
 import org.locationtech.udig.project.internal.ProjectFactory;
+import org.locationtech.udig.project.ui.internal.wizard.MapImport;
+import org.locationtech.udig.project.ui.internal.wizard.MapImportWizard;
 import org.opengis.referencing.operation.MathTransform;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.BasemapDefinition;
@@ -84,6 +103,7 @@ import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.AbstractCtPackage.BaseMapKeys;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
+import org.wcs.smart.cybertracker.model.PackageMapLayer;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -111,6 +131,8 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 	private MbTileGenerator generator;
 	private Composite mapComposite;
 	
+	private TableViewer lstOther;
+	
 	private final static Integer[] validZooms = new Integer[] {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21};
 	
 	private List<Control> enableControls = new ArrayList<>();
@@ -125,6 +147,9 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 	private List<Path> deletedfiles;
 
 	private AbstractCtPackage ctpackage; 
+	private List<PackageMapLayer> layers = null;
+	private Listener onValidate;
+	
 	private boolean isInit = false;
 	
 	@Override
@@ -217,6 +242,8 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 				pp.setBasemapToFiles();
 			}
 		}
+		
+		pp.setMapLayers(layers);
 		lstMapFiles.refresh();
 	}
 	
@@ -229,12 +256,22 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 	@Override
 	public Composite createUi(Composite parent, ICtPackage ctpackage, Listener onValidate) {
 		this.ctpackage = (AbstractCtPackage) ctpackage;
+		this.onValidate = onValidate;
 		
+		try {
+			this.layers = new ArrayList<>(this.ctpackage.getMapLayers());
+		}catch (ParseException ex) {
+			CyberTrackerPlugIn.displayError(Messages.MapPackageUiContribution_ErrorTitle, Messages.MapPackageUiContribution_MapLayerParseError, ex);
+			this.layers = new ArrayList<>();
+		}
+				
 		generator = new MbTileGenerator();
 		
 		Composite g = new Composite(parent, SWT.NONE);
 		g.setLayout(new GridLayout());
-		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridLayout)g.getLayout()).marginWidth = 0;
+		((GridLayout)g.getLayout()).marginHeight = 0;
 		
 		Composite header = new Composite(g, SWT.NONE);
 		header.setLayout(new GridLayout());
@@ -245,7 +282,8 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 		
 		mapComposite = new Composite(g, SWT.NONE);
 		mapComposite.setLayout(new GridLayout());
-		
+		mapComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
 		Composite top = new Composite(mapComposite, SWT.NONE);
 		top.setLayout(new GridLayout(2, false));
 		((GridLayout)top.getLayout()).marginWidth = 0;
@@ -268,12 +306,11 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 		
 		stackComposite = new Composite(mapComposite, SWT.NONE);
 		stackComposite.setLayout(new StackLayout());
-		stackComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		stackComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		mapDirComp = new Composite(stackComposite, SWT.NONE);
 		mapDirComp.setLayout(new GridLayout(3, false));
 		((GridLayout)mapDirComp.getLayout()).marginWidth = 0;
-		((GridLayout)mapDirComp.getLayout()).marginHeight = 0;
 		
 		Label l = new Label(mapDirComp, SWT.NONE);
 		l.setText(Messages.MapPackageUiContribution_MapFilesLabel);
@@ -437,6 +474,9 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 		((GridLayout)zoomComp.getLayout()).marginHeight = 0;
 		zoomComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
+		//spacer
+		new Label(smartComp, SWT.NONE);
+		
 		Composite left = new Composite(zoomComp, SWT.NONE);
 		left.setLayout(new GridLayout(4, false));
 		((GridLayout)left.getLayout()).marginWidth = 0;
@@ -510,9 +550,204 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 		
 		loadBm.schedule();
 		
-		return mapComposite;
+		createOptionLayers(g);
+		
+		return g;
 	}
 
+	private void createOptionLayers(Composite parent) {
+		Composite header = new Composite(parent, SWT.NONE);
+		header.setLayout(new GridLayout());
+		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		Label headerLabel = new Label(header, SWT.NONE);
+		headerLabel.setText(Messages.MapPackageUiContribution_OtherSection);
+		WidgetElement.setCSSClass(header, SmartUiUtils.HEADER_CLASS);
+		
+		Composite otherComposite = new Composite(parent, SWT.NONE);
+		otherComposite.setLayout(new GridLayout(2, false));
+		otherComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridLayout)otherComposite.getLayout()).marginWidth = 0;
+		((GridLayout)otherComposite.getLayout()).marginHeight = 0;
+		
+		lstOther = new TableViewer(otherComposite, SWT.BORDER);
+		lstOther.setContentProvider(ArrayContentProvider.getInstance());
+		lstOther.setLabelProvider(new LabelProvider() {
+			public String getText(Object element) {
+				PackageMapLayer layer = (PackageMapLayer)element;
+				StringBuilder sb = new StringBuilder(layer.getType());
+				sb.append(" - "); //$NON-NLS-1$
+				for (Entry<String,String> part : layer.getProperties().entrySet()) {
+					sb.append("  "); //$NON-NLS-1$
+					sb.append(part.getKey());
+					sb.append(": "); //$NON-NLS-1$
+					sb.append(part.getValue());
+				}
+				return sb.toString();
+			}
+		});
+		lstOther.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridData)lstOther.getControl().getLayoutData()).widthHint = 100;
+		lstOther.setInput(this.layers);
+		
+		
+		ToolBar tbButtons = new ToolBar(otherComposite, SWT.VERTICAL);
+		tbButtons.setLayout(new GridLayout());
+		tbButtons.setLayoutData(new GridData(SWT.CENTER, SWT.TOP,false, false));
+		((GridLayout)tbButtons.getLayout()).marginWidth = 0;
+		((GridLayout)tbButtons.getLayout()).marginHeight = 0;
+		
+		ToolItem btnAdd = new ToolItem(tbButtons, SWT.PUSH);
+		btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		btnAdd.addListener(SWT.Selection, e->addOtherLayer());
+		
+		ToolItem btnDelete = new ToolItem(tbButtons, SWT.PUSH);
+		btnDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		btnDelete.addListener(SWT.Selection, e->deleteOtherLayer());
+		btnDelete.setEnabled(false);
+
+		ToolItem btnMoveUp = new ToolItem(tbButtons, SWT.PUSH);
+		btnMoveUp.setImage(CyberTrackerPlugIn.getDefault().getImageRegistry().get(CyberTrackerPlugIn.ICON_UP));
+		btnMoveUp.setToolTipText(Messages.MapPackageUiContribution_moveuptooltip);
+		btnMoveUp.setEnabled(false);
+		btnMoveUp.addListener(SWT.Selection, e->moveLayer(-1));
+		
+		ToolItem btnMoveDown = new ToolItem(tbButtons, SWT.PUSH);
+		btnMoveDown.setImage(CyberTrackerPlugIn.getDefault().getImageRegistry().get(CyberTrackerPlugIn.ICON_DOWN));
+		btnMoveDown.setToolTipText(Messages.MapPackageUiContribution_movedowntooltip);
+		btnMoveDown.setEnabled(false);
+		btnMoveDown.addListener(SWT.Selection, e->moveLayer(1));
+		
+		
+		
+		Menu mnu = new Menu(lstOther.getControl());
+		MenuItem miadd = new MenuItem(mnu, SWT.PUSH);
+		miadd.setText(DialogConstants.ADD_BUTTON_TEXT);
+		miadd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		miadd.addListener(SWT.Selection, e->addOtherLayer());
+		MenuItem midelete = new MenuItem(mnu, SWT.PUSH);
+		midelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		midelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		midelete.addListener(SWT.Selection, e->deleteOtherLayer());
+		midelete.setEnabled(false);
+		lstOther.getControl().setMenu(mnu);
+		
+		lstOther.addSelectionChangedListener(e->{
+			btnDelete.setEnabled(!lstOther.getSelection().isEmpty());
+			midelete.setEnabled(!lstOther.getSelection().isEmpty());
+			btnMoveUp.setEnabled(!lstOther.getSelection().isEmpty());
+			btnMoveDown.setEnabled(!lstOther.getSelection().isEmpty());
+		});
+		
+	}
+	
+	private void moveLayer(int amount) {
+		Object item = lstOther.getStructuredSelection().getFirstElement();
+		int index = layers.indexOf(item);
+		index += amount;
+		
+		layers.remove(item);
+		
+		if (index < 0) index = 0;
+		if (index > layers.size()) index = layers.size();
+		
+		layers.add(index, (PackageMapLayer)item);
+		
+		lstOther.refresh();
+		onValidate.handleEvent(null);
+	}
+	
+	
+	private void addOtherLayer() {
+		
+		//reuse map import dialog
+		MapImport mi = new MapImport() {
+			private DataSourceSelectionState dsState;
+
+			@Override
+			protected Workflow createWorkflow() {
+				dsState = new DataSourceSelectionState(true) {
+					// list options to wms only
+					@Override
+					public List<UDIGConnectionFactoryDescriptor> getShortlist() {
+						List<UDIGConnectionFactoryDescriptor> shortlist = new ArrayList<>();
+						Collection<UDIGConnectionFactoryDescriptor> descriptors = ConnectionFactoryManager.instance()
+								.getConnectionFactoryDescriptors();
+						for (UDIGConnectionFactoryDescriptor item : descriptors) {
+							if (item.getConnectionFactory().getClass() == WMSConnectionFactory.class) {
+								shortlist.add(item);
+							}
+						}
+						return shortlist;
+					}
+				};
+
+				ResourceSelectionState rsState = new ResourceSelectionState();
+
+				Workflow workflow = new Workflow(new State[] { dsState, rsState });
+				return workflow;
+			}
+
+			protected Map<Class<? extends State>, WorkflowWizardPageProvider> createPageMapping() {
+				Map<Class<? extends State>, WorkflowWizardPageProvider> map = super.createPageMapping();
+				addToMap(map, dsState.getClass(), DataSourceSelectionPage.class);
+				return map;
+			}
+
+			@Override
+			protected WorkflowWizard createWorkflowWizard(Workflow workflow,
+					java.util.Map<Class<? extends State>, WorkflowWizardPageProvider> map) {
+
+				return new MapImportWizard(workflow, map) {
+					@Override
+					protected boolean performFinish(IProgressMonitor monitor) {
+
+						List<IGeoResource> resourceList = new ArrayList<IGeoResource>();
+						ResourceSelectionState state = getWorkflow().getState(ResourceSelectionState.class);
+						if (state != null) {
+							java.util.Map<IGeoResource, IService> resourceMap = state.getResources();
+							if (resourceMap != null && !resourceMap.isEmpty()) {
+								resourceList.addAll(resourceMap.keySet());
+							}
+						}
+
+						if (resourceList.isEmpty())
+							return false;
+
+						for (IGeoResource r : resourceList) {
+							try {
+								PackageMapLayer newlayer = PackageMapLayer.toMapLayer(r);
+								layers.add(newlayer);
+							} catch (Exception ex) {
+								CyberTrackerPlugIn.displayError(Messages.MapPackageUiContribution_ErrorTitle,
+										Messages.MapPackageUiContribution_AddError + ex.getMessage(), ex);
+							}
+						}
+						Display.getDefault().asyncExec(() -> {
+							lstOther.refresh();
+							onValidate.handleEvent(null);
+
+						});
+						return true;
+					}
+				};
+			}
+
+		};
+		
+		mi.getDialog().open();
+	}
+	
+	private void deleteOtherLayer() {
+		for (Iterator<?> iterator = lstOther.getStructuredSelection().iterator(); iterator.hasNext();) {
+			Object item = (Object) iterator.next();
+			layers.remove(item);
+		}
+		lstOther.refresh();
+		if (!isInit) onValidate.handleEvent(null);
+
+		
+	}
+	
 	private ReferencedEnvelope getBounds() {
 		return (ReferencedEnvelope) txtBounds.getData(RE_KEY);
 	}
@@ -545,7 +780,7 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					try {
 						MapSettings settings = MapSettings.getInstance(bm);
-						Map thisMap = ProjectFactory.eINSTANCE.createMap();
+						org.locationtech.udig.project.internal.Map thisMap = ProjectFactory.eINSTANCE.createMap();
 						settings.applyTo(thisMap);
 						
 						ReferencedEnvelope re = thisMap.getBounds(new NullProgressMonitor());
@@ -694,7 +929,15 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 		}
 	}
 	
-	
+	@Override
+	public boolean isTab() { 
+		return true; 
+	}
+
+	@Override
+	public String getTabName() {
+		return Messages.MapPackageUiContribution_BasemapSection;
+	}
 	
 	private Job loadBm = new Job(Messages.MapPackageContribution_loadingJobname) {
 

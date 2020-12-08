@@ -161,9 +161,19 @@ public class CtJsonExportUtils {
 	public static final String JSON_EMPLOYEE_METADATA_KEY = ScreensUtil.COMMON_PREFIX + "Employees"; //$NON-NLS-1$
 	
 	/**
-	 * JSON options property key that identifies the type
+	 * JSON options property key for map definition
 	 */
-	public static final String MAP_FILE_DIRECTORY_NAME = "map"; //$NON-NLS-1$
+	public static final String MAP_KEY = "map"; //$NON-NLS-1$
+	
+	/**
+	 * JSON options property key for basemap definition
+	 */
+	public static final String BASEMAP_KEY = "basemap"; //$NON-NLS-1$
+	/**
+	 * JSON options property key for map layers 
+	 */
+	public static final String MAPLAYERS_KEY = "layers"; //$NON-NLS-1$
+	
 	
 	/**
 	 * Option field types

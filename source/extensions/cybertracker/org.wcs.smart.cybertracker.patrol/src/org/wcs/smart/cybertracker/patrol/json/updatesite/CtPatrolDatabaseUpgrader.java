@@ -78,7 +78,7 @@ public class CtPatrolDatabaseUpgrader implements IDatabaseUpgrader {
 	
 	private static void update10to20(Session session) {
 		String[] sql = new String[] {
-				"create table smart.ct_patrol_package(uuid char(16) for bit data not null, name varchar(512), ca_uuid char(16) for bit data not null, cm_uuid char(16) for bit data, ctprofile_uuid char(16) for bit data, has_incident boolean default false, incident_uuid char(16) for bit data, basemapdef varchar(32672), primary key (uuid))", //$NON-NLS-1$
+				"create table smart.ct_patrol_package(uuid char(16) for bit data not null, name varchar(512), ca_uuid char(16) for bit data not null, cm_uuid char(16) for bit data, ctprofile_uuid char(16) for bit data, has_incident boolean default false, incident_uuid char(16) for bit data, basemapdef varchar(32672), maplayersdef varchar(32672), primary key (uuid))", //$NON-NLS-1$
 
 				"ALTER TABLE SMART.ct_patrol_package ADD CONSTRAINT ct_patrol_package_ca_uuid_fk FOREIGN KEY (CA_UUID) REFERENCES smart.conservation_area(UUID) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 				"ALTER TABLE SMART.ct_patrol_package ADD CONSTRAINT ct_patrol_package_cm_uuid_fk FOREIGN KEY (CM_UUID) REFERENCES smart.configurable_model(UUID) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$

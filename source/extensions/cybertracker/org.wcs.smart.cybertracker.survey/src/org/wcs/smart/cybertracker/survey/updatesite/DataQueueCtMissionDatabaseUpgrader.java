@@ -85,7 +85,7 @@ public class DataQueueCtMissionDatabaseUpgrader implements IDatabaseUpgrader {
 	
 	private static final void upgradeV1ToV2(Session session) {
 		String[] sql = new String[] {
-				"create table smart.ct_survey_package(uuid char(16) for bit data not null, name varchar(512), ca_uuid char(16) for bit data not null, sd_uuid char(16) for bit data, ctprofile_uuid char(16) for bit data, has_incident boolean default false, incident_uuid char(16) for bit data, basemapdef varchar(32672), primary key (uuid))", //$NON-NLS-1$
+				"create table smart.ct_survey_package(uuid char(16) for bit data not null, name varchar(512), ca_uuid char(16) for bit data not null, sd_uuid char(16) for bit data, ctprofile_uuid char(16) for bit data, has_incident boolean default false, incident_uuid char(16) for bit data, basemapdef varchar(32672), maplayersdef varchar(32672), primary key (uuid))", //$NON-NLS-1$
 				"ALTER TABLE SMART.ct_survey_package ADD CONSTRAINT ct_survey_package_ca_uuid_fk FOREIGN KEY (CA_UUID) REFERENCES smart.conservation_area(UUID)  ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 				"ALTER TABLE SMART.ct_survey_package ADD CONSTRAINT ct_survey_package_sd_uuid_fk FOREIGN KEY (SD_UUID) REFERENCES smart.survey_design (UUID) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 				"ALTER TABLE SMART.ct_survey_package ADD CONSTRAINT ct_survey_package_incident_uuid_fk FOREIGN KEY (incident_uuid) REFERENCES smart.configurable_model(UUID) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$

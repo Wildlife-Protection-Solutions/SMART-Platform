@@ -108,6 +108,7 @@ public class MapPackageContribution implements IPackageContribution{
 	}
 	
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public PackageContribution packageFiles(ICtPackage ctpackage, IEclipseContext context, IProgressMonitor monitor) throws IOException {
 		if (!(ctpackage instanceof AbstractCtPackage)) return new PackageContribution();
@@ -127,6 +128,8 @@ public class MapPackageContribution implements IPackageContribution{
 	
 		Path tempDir = Files.createTempDirectory("smartmap"); //$NON-NLS-1$
 		Path mapFile = tempDir.resolve(MAPFILE);
+		
+		JSONObject mapDefObject = new JSONObject();
 		
 		PackageContribution updates = new PackageContribution() {
 			@Override
@@ -149,7 +152,7 @@ public class MapPackageContribution implements IPackageContribution{
 			}
 
 			MbTileGenerator generator = new MbTileGenerator();
-			updates.setProjectMetadata(CtJsonExportUtils.MAP_FILE_DIRECTORY_NAME, MAPFILE);
+			mapDefObject.put(CtJsonExportUtils.BASEMAP_KEY, MAPFILE);
 			int minZoom = ((Long)obj.get(BaseMapKeys.MINZOOM.jsonkey)).intValue();
 			int maxZoom = ((Long)obj.get(BaseMapKeys.MINZOOM.jsonkey)).intValue();
 			
@@ -169,9 +172,22 @@ public class MapPackageContribution implements IPackageContribution{
 			Path dir = ICyberTrackerConstants.getBasemapFileStore(ctpackage);
 			if (Files.exists(dir)) {
 				updates.addFile(dir);
-				updates.setProjectMetadata(CtJsonExportUtils.MAP_FILE_DIRECTORY_NAME, dir.getFileName().toString());
+				mapDefObject.put(CtJsonExportUtils.BASEMAP_KEY, dir.getFileName().toString());
+
 			}
 		}
+		
+		
+		//add other layer information
+		if (pp.getMapLayersDef() != null) {
+			try {
+				mapDefObject.put(CtJsonExportUtils.MAPLAYERS_KEY, parser.parse(pp.getMapLayersDef()));
+			}catch (Exception ex) {
+				CyberTrackerPlugIn.log(ex.getMessage(), ex);
+			} 
+		}
+		
+		updates.addProjectMetadata(CtJsonExportUtils.MAP_KEY, mapDefObject);
 		
 		if (monitor.isCanceled()) return null;
 		return updates;

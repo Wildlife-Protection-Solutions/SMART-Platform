@@ -7,7 +7,9 @@ Bundle-Activator: org.wcs.smart.cybertracker.CyberTrackerPlugIn
 Require-Bundle: org.eclipse.ui.forms,
  org.wcs.smart.dataentry;bundle-version="[7.0.0,8.0.0)";visibility:=reexport,
  org.wcs.smart.p2;bundle-version="[7.0.0,8.0.0)";visibility:=reexport,
- org.wcs.smart.observation;bundle-version="[7.0.0,8.0.0)";visibility:=reexport
+ org.wcs.smart.observation;bundle-version="[7.0.0,8.0.0)";visibility:=reexport,
+ org.locationtech.udig.catalog.ui,
+ org.locationtech.udig.catalog.wms
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: org.wcs.smart.cybertracker,

@@ -39,6 +39,7 @@ import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.ParseException;
 import org.locationtech.jts.geom.Envelope;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ca.ConservationArea;
@@ -76,9 +77,15 @@ public abstract class AbstractCtPackage extends UuidItem implements ICtPackage {
 	protected CyberTrackerPropertiesProfile ctprofile;
 	//basemap definition
 	protected String basemapdef;
+	//other map layers - stored as json string
+	protected String maplayersdef;
 	//package metadata values
 	protected List<MetadataFieldValue> metadataValues;
 
+	//cached parsed map layers
+	@Transient
+	protected List<PackageMapLayer> maplayers;
+	
 	@OneToMany(fetch = FetchType.LAZY, cascade= {CascadeType.ALL}, orphanRemoval = true, mappedBy="ctPackage")
 	public List<MetadataFieldValue> getMetadataValues(){
 		return this.metadataValues;
@@ -120,11 +127,21 @@ public abstract class AbstractCtPackage extends UuidItem implements ICtPackage {
 	}
 
 	@Column(name = "basemapdef")
-	public String  getBasemapDef() {
+	public String getBasemapDef() {
 		return this.basemapdef;
 	}
 	public void setBasemapDef(String basemapdef) {
 		this.basemapdef = basemapdef;
+	}
+	
+	@Column(name = "maplayersdef")
+	public String getMapLayersDef() {
+		return this.maplayersdef;
+	}
+	
+	public void setMapLayersDef(String maplayersdef) {
+		this.maplayers = null;
+		this.maplayersdef = maplayersdef;
 	}
 	
 	/**
@@ -138,6 +155,21 @@ public abstract class AbstractCtPackage extends UuidItem implements ICtPackage {
 		obj.put(BaseMapKeys.FILE.jsonkey, ICyberTrackerConstants.STR_TRUE);
 		setBasemapDef(obj.toJSONString());
 	}
+	
+	@Transient
+	public List<PackageMapLayer> getMapLayers() throws ParseException{
+		if (maplayers != null) return maplayers;
+		
+		maplayers = PackageMapLayer.fromJSON(getMapLayersDef());
+		return maplayers;
+	}
+	
+	@Transient
+	public void setMapLayers(List<PackageMapLayer> layers) throws ParseException{
+		setMapLayersDef(PackageMapLayer.toJson(layers));
+		this.maplayers = layers;
+	}
+	
 	
 	/**
 	 * Sets the basemap definition to smart basemap with various

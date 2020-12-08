@@ -57,6 +57,9 @@ public class CyberTrackerPlugIn extends AbstractUIPlugin {
 	public static final String ICON_DEVICE32 = "org.wcs.smart.cybertracker.icon.device32"; //$NON-NLS-1$
 	public static final String ICON_FILE32 = "org.wcs.smart.cybertracker.icon.file32"; //$NON-NLS-1$
 	public static final String ICON_NAVIGATION = "org.wcs.smart.cybertracker.icon.navigation"; //$NON-NLS-1$
+	
+	public static final String ICON_UP = "org.wcs.smart.cybertracker.icon.up"; //$NON-NLS-1$
+	public static final String ICON_DOWN = "org.wcs.smart.cybertracker.icon.down"; //$NON-NLS-1$
 
 	/**
 	 * Extension id
@@ -133,6 +136,10 @@ public class CyberTrackerPlugIn extends AbstractUIPlugin {
 	     reg.put(ICON_DEVICE32, imageDescriptorFromPlugin(PLUGIN_ID, "images/etool32/device32.png")); //$NON-NLS-1$
 	     reg.put(ICON_FILE32, imageDescriptorFromPlugin(PLUGIN_ID, "images/etool32/file32.png")); //$NON-NLS-1$
 	     reg.put(ICON_NAVIGATION, imageDescriptorFromPlugin(PLUGIN_ID, "images/etool16/navigation.png")); //$NON-NLS-1$
+	     
+	     reg.put(ICON_UP, imageDescriptorFromPlugin(PLUGIN_ID, "images/etool16/up.png")); //$NON-NLS-1$
+	     reg.put(ICON_DOWN, imageDescriptorFromPlugin(PLUGIN_ID, "images/etool16/down.png")); //$NON-NLS-1$
+
 	}
 	
 	public static void displayInfo(final String title, final String message) {

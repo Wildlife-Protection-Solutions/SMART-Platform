@@ -60,11 +60,12 @@ import org.apache.derby.iapi.services.io.FileUtil;
 public class Packagei18nNew {
 
 	public static final String SOURCE_DIR = "C:\\data\\SMART\\Source\\Trunk\\svn\\source\\";
+//	public static final String SOURCE_DIR = "C:\\data\\SMART\\Source\\Trunk\\udig\\udig-platform\\plugins";
 	
 	public static final String OUT_DIR = "C:\\temp\\smarti18n\\";
 	
 //    public static final String[] LANGUAGES =  new String[] {"ar", "es","fr", "hi","in","ka","kar","km","lo","mn","ms","ru","sw","th","vi","zh","pt"};
-	public static final String[] LANGUAGES =  new String[] {"es","pt"};
+	public static final String[] LANGUAGES =  new String[] {"th","pt"};
 
 //	public static final String[] LANGUAGES = {"ar"};
 	
@@ -90,6 +91,7 @@ public class Packagei18nNew {
 		int index = 0;
 		for (int i = 0; i < root.getNameCount(); i ++) {
 			if (root.getName(i).toString().startsWith("org.wcs.smart")) {
+//			if (root.getName(i).toString().startsWith("org.locationtech.udig")) {
 				index = i;
 				break;
 			}

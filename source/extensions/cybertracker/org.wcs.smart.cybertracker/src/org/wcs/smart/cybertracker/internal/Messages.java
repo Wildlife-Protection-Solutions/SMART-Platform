@@ -545,7 +545,9 @@ public class Messages extends NLS {
 	public static String MapPackageContribution_TilesWarnCnt;
 	public static String MapPackageContribution_UnknownLabel;
 	public static String MapPackageContribution_ZoomLabel;
+	public static String MapPackageUiContribution_AddError;
 	public static String MapPackageUiContribution_addtooltip;
+	public static String MapPackageUiContribution_BasemapSection;
 	public static String MapPackageUiContribution_CreateDirFail;
 	public static String MapPackageUiContribution_DeleteDirFail;
 	public static String MapPackageUiContribution_DeleteFail;
@@ -559,6 +561,10 @@ public class Messages extends NLS {
 	public static String MapPackageUiContribution_FileExists;
 	public static String MapPackageUiContribution_ImportError;
 	public static String MapPackageUiContribution_MapFilesLabel;
+	public static String MapPackageUiContribution_MapLayerParseError;
+	public static String MapPackageUiContribution_movedowntooltip;
+	public static String MapPackageUiContribution_moveuptooltip;
+	public static String MapPackageUiContribution_OtherSection;
 	public static String MapPackageUiContribution_removetooltip;
 	public static String MbTileGenerator_LayerName;
 	public static String MbTileGenerator_SubTask1;
