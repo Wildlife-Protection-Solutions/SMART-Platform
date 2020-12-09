@@ -24,12 +24,15 @@ package org.wcs.smart.asset;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.asset.internal.Messages;
+import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -159,7 +162,22 @@ public class AssetUtils {
 						break;
 					case TREE:
 						ok = Objects.equals(a.getAttributeTreeNode(), matching.getAttributeTreeNode());
-						break;				
+						break;	
+					case MLIST:
+						if (a.getAttributeListItems() != null && matching.getAttributeListItems() != null) {
+							if (a.getAttributeListItems().size() == matching.getAttributeListItems().size()) {
+								Set<AttributeListItem> items1 = a.getAttributeListItems().stream().map(c->c.getAttributeListItem()).collect(Collectors.toSet());
+								Set<AttributeListItem> items2 = matching.getAttributeListItems().stream().map(c->c.getAttributeListItem()).collect(Collectors.toSet());
+								ok = items1.equals(items2);
+							}else {
+								ok = false;
+							}
+							
+						}else {
+							ok = false;
+						}
+						break;
+						
 				}
 				if (!ok) break;
 			}

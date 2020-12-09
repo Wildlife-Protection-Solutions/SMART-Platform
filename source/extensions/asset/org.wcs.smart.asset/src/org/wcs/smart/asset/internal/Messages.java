@@ -623,6 +623,7 @@ public class Messages extends NLS {
 	public static String DateCommentDialog_DateLabel;
 	public static String DeleteAssetAttributeAdvisor_DeploymentRef;
 	public static String DeleteAssetAttributeAdvisor_InvalidObject;
+	public static String DeleteAssetAttributeAdvisor_ReferencedByLocation;
 	public static String DeleteAssetAttributeAdvisor_StationRef;
 	public static String DeleteAssetAttributeAdvisor_TypeRef;
 	public static String DeleteAssetHandler_ConfirmPasswordMsg;

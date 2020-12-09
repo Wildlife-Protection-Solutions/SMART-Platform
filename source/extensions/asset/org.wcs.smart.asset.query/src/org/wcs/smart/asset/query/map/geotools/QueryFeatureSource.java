@@ -56,7 +56,7 @@ public class QueryFeatureSource extends ContentFeatureSource {
 		if (dataSource.getQuery() instanceof IPagedQuery){
 			IQueryResult cachedResults = dataSource.getQuery().getCachedResults();
 			if (cachedResults instanceof IPagedQueryResultSet) {
-				return ((IPagedQueryResultSet)cachedResults).getItemCount(); 
+				return ((IPagedQueryResultSet<?>)cachedResults).getItemCount(); 
 			}
 		}
 		return -1;

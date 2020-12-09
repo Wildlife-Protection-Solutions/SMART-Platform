@@ -90,7 +90,7 @@ public class DeleteAssetAttributeAdvisor implements IDeleteAdvisor {
 		List<AssetStationLocationAttribute> locations = QueryFactory.buildQuery(session, AssetStationLocationAttribute.class, "attribute", attribute).list(); //$NON-NLS-1$
 		if (!locations.isEmpty()){
 			StringBuilder sb = new StringBuilder();
-			sb.append("This field sensor is referenced by sensor locations and must be removed from the location attribute list before the attribute can be deleted.");
+			sb.append(Messages.DeleteAssetAttributeAdvisor_ReferencedByLocation);
 			return sb.toString();
 		}
 		

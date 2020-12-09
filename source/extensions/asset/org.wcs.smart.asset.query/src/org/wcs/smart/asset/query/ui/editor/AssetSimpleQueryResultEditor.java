@@ -156,7 +156,7 @@ public class AssetSimpleQueryResultEditor extends QueryResultsEditor{
 					
 					if (r instanceof ISearchabledResultSet){
 						
-						List<IResultItem> searchResults = ((ISearchabledResultSet)r).search(dbll.x, dbll.y, dbur.x,  dbur.y);
+						List<IResultItem> searchResults = ((ISearchabledResultSet<IResultItem>)r).search(dbll.x, dbll.y, dbur.x,  dbur.y);
 						
 						List<WaypointQueryResultItem> items = new ArrayList<>();
 						double distance = Double.POSITIVE_INFINITY;

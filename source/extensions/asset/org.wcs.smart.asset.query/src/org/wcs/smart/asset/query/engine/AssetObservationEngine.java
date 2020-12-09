@@ -675,6 +675,6 @@ public class AssetObservationEngine extends AssetQueryEngine implements Observat
 
 	@Override
 	public String getObservationLabelTable() {
-		return queryDataTable +"_labels";
+		return queryDataTable +"_labels"; //$NON-NLS-1$
 	}
 }

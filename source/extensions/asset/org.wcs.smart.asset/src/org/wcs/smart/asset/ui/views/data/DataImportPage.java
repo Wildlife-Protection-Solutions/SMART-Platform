@@ -321,7 +321,7 @@ public class DataImportPage {
 							Waypoint wp = new Waypoint();
 							wp.setConservationArea(SmartDB.getCurrentConservationArea());
 							wp.setDateTime(p.getImageDate() );
-							wp.setId("1"); //updated below
+							wp.setId("1"); //updated below //$NON-NLS-1$
 							wp.setSourceId(AssetWaypointSource.KEY);
 							wp.setRawX(p.getX());
 							wp.setRawY(p.getY());
@@ -336,7 +336,6 @@ public class DataImportPage {
 							wa.setFilename(p.getFile().getFileName().toString());
 							wp.getAttachments().add(wa);
 							wp.setObservationGroups(new ArrayList<>());
-							wp.setId("0");
 							
 							assetAttachmentLink.put(p.getAsset(), new ArrayList<>(Collections.singleton(wa)));
 							
