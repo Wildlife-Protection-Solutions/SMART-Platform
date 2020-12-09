@@ -189,10 +189,10 @@ public class SamplingUnitService extends IService {
 	public void dispose( IProgressMonitor monitor ) {
         if (members == null)
             return;
+        
+        if (monitor == null) monitor = new NullProgressMonitor();
         SubMonitor progress = SubMonitor.convert(monitor);
-        if (monitor == null){
-        	monitor = new NullProgressMonitor();
-        }
+        
         int steps = (int) ((double) 99 / (double) members.size());
         for( SamplingUnitGeoResource resolve : members ) {
             try {

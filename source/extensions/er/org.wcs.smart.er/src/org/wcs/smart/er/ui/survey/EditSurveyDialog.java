@@ -62,7 +62,6 @@ public class EditSurveyDialog extends SmartStyledTitleDialog{
 	private Text txtDesign;
 	private Text txtId;
 	private ControlDecoration cdId;
-	private String canEdit;
 	private Session session;
 	
 	private Survey toEdit;
@@ -90,22 +89,14 @@ public class EditSurveyDialog extends SmartStyledTitleDialog{
 	 */
 	@Override
 	protected void okPressed() {
-		if (canEdit == null){
-			if (save()){
-				super.okPressed();
-			}
-		}else{
+		if (save()){
 			super.okPressed();
 		}
 	}
 	
 	protected void createButtonsForButtonBar(Composite parent){
-		if (canEdit == null){
-			super.createButtonsForButtonBar(parent);
-			getButton(IDialogConstants.OK_ID).setText(DialogConstants.SAVE_TEXT);	
-		}else{
-			super.createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
-		}
+		super.createButtonsForButtonBar(parent);
+		getButton(IDialogConstants.OK_ID).setText(DialogConstants.SAVE_TEXT);	
 		validate();
 	}
 	
@@ -115,17 +106,6 @@ public class EditSurveyDialog extends SmartStyledTitleDialog{
 		Composite part = new Composite(parent, SWT.NONE);
 		part.setLayout(new GridLayout(2, false));
 		part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
-		if (canEdit != null){
-			Composite warning = new Composite(part, SWT.NONE);
-			warning.setLayout(new GridLayout(2, false));
-			warning.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-			Label lblImage = new Label(warning, SWT.NONE);
-			Image x = SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.WARN_ICON);
-			lblImage.setImage(x);
-			Label lblWarning = new Label(warning, SWT.NONE);
-			lblWarning.setText(MessageFormat.format(Messages.EditSurveyDialog_CannotEdit, new Object[]{canEdit})) ;
-		}
 		
 		Label l = new Label(part, SWT.NONE);
 		l.setText(Messages.EditSurveyDialog_DesignLabel);
@@ -139,7 +119,6 @@ public class EditSurveyDialog extends SmartStyledTitleDialog{
 		
 		txtId = new Text(part, SWT.BORDER);
 		txtId.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		txtId.setEditable(canEdit == null);
 		txtId.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {

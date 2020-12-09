@@ -118,7 +118,7 @@ public class DerbyPagedMissionResult extends AbstractPagedQueryResultSet<ISurvey
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
 		DerbyPagedMissionResult o = (DerbyPagedMissionResult)obj;
-		if (engine != null) {
+		if (engine2 != null) {
 			return Objects.equals(engine2.getQueryDataTable(), o.engine2.getQueryDataTable());
 		}
 		return Objects.equals(engine.getQueryDataTable(), o.engine.getQueryDataTable());

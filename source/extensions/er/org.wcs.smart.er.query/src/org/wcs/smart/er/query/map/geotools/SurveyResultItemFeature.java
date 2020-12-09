@@ -76,7 +76,7 @@ public class SurveyResultItemFeature {
 	public static SimpleFeature createObservationFeature(WaypointQueryResultItem it, List<QueryColumn> columns, SimpleFeatureType  ftype){
 		List<Object> data = new ArrayList<Object>();
 		
-		String mid = "";
+		String mid = ""; //$NON-NLS-1$
 		if (it instanceof ISurveyQueryResultItem) {
 			mid = ((ISurveyQueryResultItem) it).getMissionId();
 		}
@@ -100,7 +100,7 @@ public class SurveyResultItemFeature {
 		List<Object> data = new ArrayList<Object>();
 		
 		data.add(it.asGeometry(SurveyQueryResultItem.TRACK_GEOMCOLUMN_KEY));
-		data.add(it.getMissionId() + "." + System.nanoTime()); //$NON-NLS-1$ //$NON-NLS-2$
+		data.add(it.getMissionId() + "." + System.nanoTime()); //$NON-NLS-1$
 		addQueryColumnData(it, ftype, columns, data);
 		
 		return SimpleFeatureBuilder.build(ftype, data, (String)data.get(1));

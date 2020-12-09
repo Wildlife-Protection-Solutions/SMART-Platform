@@ -156,7 +156,7 @@ public class FilterProcessor extends org.wcs.smart.observation.query.engine.Filt
 		//mission filters
 		progress.subTask(Messages.FilterProcessor_ProgressMissionFilters);
 		SubMonitor sub = progress.split(1);
-		queryFilter.accept(mpcollector);
+		qFilter.accept(mpcollector);
 		if (mpcollector.getAttributeInfo().size() > 0){
 			this.missionTable = engine.createTempTableName();
 			createMissionTable(c, qFilter, caFilter, dateFilter, sub);
@@ -165,14 +165,14 @@ public class FilterProcessor extends org.wcs.smart.observation.query.engine.Filt
 		
 		progress.subTask(Messages.FilterProcessor_ProgressSuFilters);
 		sub = progress.split(1);
-		queryFilter.accept(sucollector);
+		qFilter.accept(sucollector);
 		if (sucollector.getAttributeInfo().size() > 0){
 			this.suAttributeTable = engine.createTempTableName();
 			createSamplingUnitAttributeTable(c, qFilter, caFilter, dateFilter, sub);
 		}
 		
 
-		super.processFilter(c, queryFilter, dateFilter, caFilter, populateObservation, includeEmptyObservations, monitor);
+		super.processFilter(c, qFilter, dateFilter, caFilter, populateObservation, includeEmptyObservations, monitor);
 	}
 	
 	@Override

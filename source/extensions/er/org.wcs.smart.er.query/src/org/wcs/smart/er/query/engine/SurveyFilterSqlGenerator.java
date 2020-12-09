@@ -25,7 +25,6 @@ package org.wcs.smart.er.query.engine;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.Locale;
 
 import org.locationtech.jts.io.WKBReader;

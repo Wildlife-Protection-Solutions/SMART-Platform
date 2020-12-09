@@ -1023,20 +1023,25 @@ public class MissionDayComposite {
 				needSave = true;
 			}
 		} else if (column == OtColumn.DIRECTION) {
-			if (waypoint.getDirection() == value) return; //no change
-			needSave = true;
 			if (value == null){
+				if (waypoint.getDirection() == null) return; //no change
+				
 				waypoint.setDirection(null);
+				needSave = true;
 			}else{
+				if (waypoint.getDirection() != null && (waypoint.getDirection().floatValue() == ((Double)value).floatValue())) return; //no change
 				float f = ((Double)value).floatValue();
 				if (f < 0 || f >= 360) return ; // invalid
 				waypoint.setDirection( f );
 			}
 		} else if (column == OtColumn.DISTANCE) {
-			if (waypoint.getDistance() == value) return; //no change
+			
 			if (value == null){
+				if (waypoint.getDirection() == null) return; //no change
 				waypoint.setDistance(null);
+				needSave = true;
 			}else{
+				if (waypoint.getDistance() != null && waypoint.getDistance().floatValue() == ((Double)value).floatValue()) return; //no change
 				float f = ((Double)value).floatValue();
 				if (f < 0 ) return ; // invalid
 				waypoint.setDistance( f );
