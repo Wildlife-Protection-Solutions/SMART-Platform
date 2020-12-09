@@ -534,7 +534,7 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 					Double d = Double.parseDouble(ex[2]);
 					
 					if (op == Operator.EQUALS) {
-						match = value.getNumberValue() == d; 
+						match = value.getNumberValue().doubleValue() == d; 
 					}else if (op == Operator.LESSTHAN) {
 						match = value.getNumberValue() < d;
 					}else if (op == Operator.LESSTHANEQUALS) {
@@ -544,7 +544,7 @@ public class IntelEntity extends UuidItem implements IIntelAuditItem{
 					}else if (op == Operator.GREATERTHANEQUALS) {
 						match = value.getNumberValue() >= d;
 					}else if (op == Operator.NOTEQUALS) {
-						match = value.getNumberValue() != d;
+						match = value.getNumberValue().doubleValue() != d;
 					}else {
 						getDmAttributeListItem().setIsActive(defaultActive);
 						return;

@@ -263,7 +263,7 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 	 * @param sortColumn
 	 */
 	public void setSortColumn(String sortColumn) {
-		if (this.sortColumn == sortColumn) {
+		if (this.sortColumn.equalsIgnoreCase(sortColumn)) {
 			if (sortDirection == SWT.UP) {
 				sortDirection = SWT.DOWN;
 			}else if (sortDirection == SWT.DOWN) {

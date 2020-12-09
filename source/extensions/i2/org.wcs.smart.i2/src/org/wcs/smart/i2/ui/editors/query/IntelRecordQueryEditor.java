@@ -413,7 +413,7 @@ public class IntelRecordQueryEditor extends EditorPart implements IQueryEditor{
 		
 		dpanel = new FilterDefinitionPanel(false, false){
 			public void runQuery(){
-				runQuery();
+				IntelRecordQueryEditor.this.runQuery();
 			}
 			public void saveQuery(){
 				getSite().getPage().saveEditor(IntelRecordQueryEditor.this, false);

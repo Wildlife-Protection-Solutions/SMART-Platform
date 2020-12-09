@@ -452,7 +452,7 @@ public class IntelRecordObservationQueryEditor extends EditorPart implements Map
 		
 		dpanel = new FilterDefinitionPanel(false, true){
 			public void runQuery(){
-				runQuery();
+				IntelRecordObservationQueryEditor.this.runQuery();
 			}
 			public void saveQuery(){
 				getSite().getPage().saveEditor(IntelRecordObservationQueryEditor.this, false);

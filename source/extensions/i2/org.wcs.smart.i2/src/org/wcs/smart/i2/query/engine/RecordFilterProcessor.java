@@ -122,7 +122,7 @@ public class RecordFilterProcessor {
 		NativeQuery<?> q = session.createNativeQuery(sb.toString())
 			.setParameterList("cauuids",  cauuids) //$NON-NLS-1$
 			.setParameterList("profiles",  profiles); //$NON-NLS-1$
-		if (dates[0] != null) {
+		if (dates != null && dates[0] != null) {
 			q.setParameter("startd",dates[0]) //$NON-NLS-1$
 			.setParameter("endd",dates[1]); //$NON-NLS-1$
 		}
