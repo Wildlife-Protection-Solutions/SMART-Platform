@@ -550,6 +550,9 @@ public abstract class AbstractSmartImporter {
 			}
 			break;
 		}
+		case MLIST:
+			throw new IllegalArgumentException("Multi-list is not supported for CyberTracker Classic applications."); //$NON-NLS-1$
+			
 		}
 		return wpoa;
 	}

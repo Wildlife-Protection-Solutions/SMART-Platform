@@ -34,7 +34,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.hibernate.Session;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;

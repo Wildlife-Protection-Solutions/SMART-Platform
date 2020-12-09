@@ -178,9 +178,9 @@ public class PatrolLegImporter extends AbstractPatrolImporter {
 			if (leg.getPatrolLegDays() != null) {
 				for (PatrolLegDay pld : leg.getPatrolLegDays()) {
 					LocalDate date = pld.getDate();
-					if (date.equals(legStart))
+					if (date.equals(legStart.toLocalDate()))
 						legStart = date.atTime(pld.getStartTime());
-					if (date.equals(legEnd))
+					if (date.equals(legEnd.toLocalDate()))
 						legEnd = date.atTime(pld.getEndTime());
 				}
 			}
