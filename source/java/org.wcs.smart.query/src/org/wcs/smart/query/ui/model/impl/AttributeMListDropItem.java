@@ -174,6 +174,7 @@ public class AttributeMListDropItem extends DropItem implements IFilterDropItem{
 	 * 
 	 * @param data - a listItem 
 	 */
+	@SuppressWarnings("unchecked")
 	public void initializeData(Object data){
 		Object[] datas = (Object[])data;
 	

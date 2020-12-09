@@ -534,6 +534,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 		});
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void deleteObservationBtn() {
 		IStructuredSelection sel = attributeTable.getStructuredSelection();
 		if (!sel.isEmpty()){

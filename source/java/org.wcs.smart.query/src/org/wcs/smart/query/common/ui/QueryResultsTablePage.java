@@ -163,7 +163,7 @@ public class QueryResultsTablePage  extends EditorPart  {
 	 * 
 	 * @param results
 	 */
-	public void updateAndShowTable(IPagedQueryResultSet results){
+	public void updateAndShowTable(IPagedQueryResultSet<?> results){
 		content.setTableData(results);
 	}
 	

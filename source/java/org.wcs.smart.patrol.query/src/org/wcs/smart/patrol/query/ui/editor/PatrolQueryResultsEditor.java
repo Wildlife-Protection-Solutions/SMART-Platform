@@ -126,6 +126,7 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 	private boolean editMode = false;
 	private List<Listener> editModeModified = new ArrayList<>();
 	
+	@SuppressWarnings("unchecked")
 	Job runQueryJob = new Job(Messages.PatrolQueryResultsEditor_RunQueryJobName) {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -660,7 +661,7 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 	}
 	
 	
-	
+	@SuppressWarnings("unchecked")
 	private IInfoToolProvider getPatrolInfoProvider(){
 		return new IInfoToolProvider(){
 			@Override

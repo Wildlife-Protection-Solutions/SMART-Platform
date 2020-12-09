@@ -960,21 +960,27 @@ public class PatrolLegDayInputComposite {
 				needSave = true;
 			}
 		} else if (column == OtColumn.DIRECTION) {
-			if (waypoint.getDirection() == value) return; //no change
-			needSave = true;
 			if (value == null){
-				
-				waypoint.setDirection(null);
+				if (waypoint.getDirection() != null) {
+					waypoint.setDirection(null);
+					needSave = true;
+				}
 			}else{
+				if (waypoint.getDirection() != null && waypoint.getDirection().doubleValue() == ((Double)value).doubleValue()) return; //no change
+				needSave = true;
 				Double d = (Double)value;
 				if (d < 0 || d >= 360) return;	//invalid value
 				waypoint.setDirection(d.floatValue());
 			}
 		} else if (column == OtColumn.DISTANCE) {
-			if (waypoint.getDistance() == value) return; //no change
 			if (value == null){
-				waypoint.setDistance(null);
+				if (waypoint.getDistance() != null) {
+					waypoint.setDistance(null);
+					needSave = true;
+				}
 			}else{
+				if (waypoint.getDistance() != null && waypoint.getDistance().doubleValue() == ((Double)value).doubleValue()) return; //no change
+				needSave = true;
 				Double d = (Double)value;
 				if (d < 0) return;	//invalid value
 				waypoint.setDistance( d.floatValue());
@@ -1145,7 +1151,7 @@ public class PatrolLegDayInputComposite {
 	
 	private void addWaypoint() {
 		double y = 0, x = 0;
-		String id = "-1";
+		String id = "-1"; //$NON-NLS-1$
 		LocalTime last = null;
 		for (Iterator<PatrolWaypoint> iterator = PatrolLegDayInputComposite.this.patrolLegDate.getWaypoints().iterator(); iterator.hasNext();) {
 			PatrolWaypoint e = (PatrolWaypoint) iterator.next();

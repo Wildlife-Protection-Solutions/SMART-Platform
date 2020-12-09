@@ -171,7 +171,7 @@ public class SmartDateParameterComponent implements IBirtParameterComponent, Lis
 			@Override
 			public void handleEvent(Event event) {
 				IDateFilter filterOp = (IDateFilter) ((IStructuredSelection)cmbDatesOps.getSelection()).getFirstElement(); 
-				boolean enabled = (filterOp.getQueryKey().equals(CustomDateFilter.KEY));
+				boolean enabled = filterOp != null && (filterOp.getQueryKey().equals(CustomDateFilter.KEY));
 				lblStart.setEnabled(enabled);
 				lblEnd.setEnabled(enabled);
 				startPicker.setEnabled(enabled);

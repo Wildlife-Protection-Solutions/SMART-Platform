@@ -23,8 +23,6 @@ package org.wcs.smart.observation.model;
 
 import java.io.Serializable;
 
-import javax.persistence.AssociationOverride;
-import javax.persistence.AssociationOverrides;
 import javax.persistence.Embeddable;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;

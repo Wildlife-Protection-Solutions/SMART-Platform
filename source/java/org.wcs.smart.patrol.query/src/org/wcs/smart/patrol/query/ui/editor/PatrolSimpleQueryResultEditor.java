@@ -155,7 +155,8 @@ public class PatrolSimpleQueryResultEditor extends QueryResultsEditor{
 		}
 		return false;
 	}
-			
+	
+	@SuppressWarnings("unchecked")
 	private IInfoToolProvider getObservationQueryInfoProvider(){
 		return new IInfoToolProvider(){
 			@Override
@@ -183,7 +184,7 @@ public class PatrolSimpleQueryResultEditor extends QueryResultsEditor{
 					
 					if (r instanceof ISearchabledResultSet){
 						
-						List<IResultItem> searchResults = ((ISearchabledResultSet)r).search(dbll.x, dbll.y, dbur.x,  dbur.y);
+						List<IResultItem> searchResults = ((ISearchabledResultSet<IResultItem>)r).search(dbll.x, dbll.y, dbur.x,  dbur.y);
 						
 						HashMap<UUID, Set<WaypointQueryResultItem>> items = new HashMap<>();
 						double distance = Double.POSITIVE_INFINITY;

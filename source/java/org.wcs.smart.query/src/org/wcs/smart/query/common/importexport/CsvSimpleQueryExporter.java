@@ -190,7 +190,7 @@ public class CsvSimpleQueryExporter extends SimpleQueryExporter implements ICsvQ
 		
 		//set data
 		if (result instanceof IPagedQueryResultSet){
-			super.setData((IPagedQueryResultSet)result, columns, file);
+			super.setData((IPagedQueryResultSet<?>)result, columns, file);
 		}else if (result instanceof MemoryQueryResult){
 			super.setData( ((MemoryQueryResult<IResultItem>)result).getData(), columns, file);
 		}else if (result instanceof GridQueryResult){

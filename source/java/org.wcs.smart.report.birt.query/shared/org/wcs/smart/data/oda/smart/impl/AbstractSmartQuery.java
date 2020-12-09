@@ -151,7 +151,7 @@ public abstract class AbstractSmartQuery {
 					(SimpleQueryResultSetMetadata) getMetaDataInternal(query,connection),
 					connection);
 		} else if (result instanceof IPagedQueryResultSet) {
-			return new PagedQueryResultSet((IPagedQueryResultSet) result,
+			return new PagedQueryResultSet((IPagedQueryResultSet<?>) result,
 					(SimpleQueryResultSetMetadata) getMetaDataInternal(query,connection),
 					connection);
 		} else if (result instanceof GridQueryResult) {

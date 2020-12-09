@@ -39,7 +39,6 @@ import org.eclipse.swt.widgets.ToolTip;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;

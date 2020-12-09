@@ -126,7 +126,7 @@ public class RunCompoundQueryLayerJob extends Job{
 				((CompoundMapQueryResults)mapEditor.getQueryProxy().getQuery().getCachedResults()).addResults(item.getQuery().getUuid(), results);
 				
 				if (results instanceof IPagedQueryResultSet){
-					item.setTotalCount(((IPagedQueryResultSet) results).getItemCount());
+					item.setTotalCount(((IPagedQueryResultSet<?>) results).getItemCount());
 				}else if (results instanceof MemoryQueryResult<?>){
 					item.setTotalCount(((MemoryQueryResult<?>)results).getData().size());
 				}else{

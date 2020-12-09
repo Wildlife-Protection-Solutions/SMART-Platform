@@ -232,7 +232,7 @@ public abstract class ShapeQueryExporter extends SimpleQueryExporter implements 
 		}
 		//get all data in default projection and reproject when we write out features
 		if (results instanceof IPagedQueryResultSet){
-			super.setData((IPagedQueryResultSet)results, columns, file);
+			super.setData((IPagedQueryResultSet<?>)results, columns, file);
 		}else if (results instanceof MemoryQueryResult){
 			super.setData(((MemoryQueryResult<?>)results).getData(), columns, file);
 		}else if (results instanceof GridQueryResult){

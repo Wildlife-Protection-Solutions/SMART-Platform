@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.query.model.summary;
 
-import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.QueryFilter;
 
 

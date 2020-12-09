@@ -557,9 +557,11 @@ public class UpdateableResultSet implements IWaypointUpdateableResultSet{
 						//update attribute value
 						change = updateAttribute(wpo, column.getAttributeId(), value, s);
 					}
+					
+					s.flush();
+					updateLastModified(wpo.getWaypoint(), s);
 				}
-				s.flush();
-				updateLastModified(wpo.getWaypoint(), s);
+				
 				s.getTransaction().commit();
 			} catch (Exception ex) {
 				s.getTransaction().rollback();
@@ -665,7 +667,7 @@ public class UpdateableResultSet implements IWaypointUpdateableResultSet{
 					updated = true;
 				}else if (newValue instanceof Double){
 					Double newDouble = (Double)newValue;
-					if (toUpdate.getNumberValue() != newDouble){
+					if (toUpdate.getNumberValue() == null || toUpdate.getNumberValue().doubleValue() != newDouble){
 						toUpdate.setNumberValue(newDouble);
 						updated = true;
 					}

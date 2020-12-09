@@ -210,7 +210,6 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 	 * Updates the incident editor part name 
 	 */
 	public void updatePartName(){
-		IncidentEditorInput input = ((IncidentEditorInput) getEditorInput());
 		super.setPartName(getIncident().getId());
 	}
 	

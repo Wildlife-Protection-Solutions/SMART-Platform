@@ -127,7 +127,7 @@ public class QueryEditorTableContent {
 	 * 
 	 * @param items new results; null if query cancelled and nothing to display
 	 */
-	public void setTableData(final IPagedQueryResultSet items) {
+	public void setTableData(final IPagedQueryResultSet<?> items) {
 		if (tableComp.isDisposed()) return;
 		tableComp.getDisplay().asyncExec(new Runnable() {
 			@Override
@@ -154,7 +154,7 @@ public class QueryEditorTableContent {
 		if (tableComp.isDisposed()) return;
 		if (infoSection == null) return;
 		if (resultsTable.getTable().getInput() instanceof IPagedQueryResultSet){
-			infoSection.updateControls((IPagedQueryResultSet)resultsTable.getTable().getInput());
+			infoSection.updateControls((IPagedQueryResultSet<?>)resultsTable.getTable().getInput());
 		}
 	}
 	
@@ -162,7 +162,7 @@ public class QueryEditorTableContent {
 	 * Sets table input and info section to null 
 	 */
 	public void clear(){
-		resultsTable.setInput((IPagedQueryResultSet)null);
+		resultsTable.setInput((IPagedQueryResultSet<?>)null);
 		infoSection.updateControls(null);
 	}
 	

@@ -78,6 +78,7 @@ public class DateGroupBy{
 	
 	public boolean equals(Object other){
 		if (this == other) return true;
+		if (other == null) return false;
 		if (!getClass().equals(other.getClass())) return false;
 		DateGroupBy g = (DateGroupBy) other;
 		if (!getType().equals(g.getType())) return false;

@@ -65,11 +65,9 @@ public class WaypointDetailsShell extends SmartShellDialog{
 	private List<Waypoint> waypoints;
 	
 	private Color bgColor = null;
-	private Font boldFont = null;
 	
 	private boolean blnMouseDown;
 	private int xPos, yPos;
-	private Label lblId;
 
 	public WaypointDetailsShell(Shell ownerShell, List<Waypoint> waypoint){
 		super(ownerShell, SWT.RESIZE );
@@ -106,8 +104,21 @@ public class WaypointDetailsShell extends SmartShellDialog{
 			for (Waypoint wp : waypoints) {
 				wp = session.get(Waypoint.class, wp.getUuid());
 				
-				SmartUiUtils.createHeaderLabel(owner, MessageFormat.format(Messages.WaypointDetailsShell_WaypointHeader, wp.getId(), DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(wp.getDateTime())));
-
+				Composite lblId = SmartUiUtils.createHeaderLabel(owner, MessageFormat.format(Messages.WaypointDetailsShell_WaypointHeader, wp.getId(), DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(wp.getDateTime())));
+				lblId.addListener(SWT.MouseDown, this);
+				lblId.addListener(SWT.MouseMove, this);
+				lblId.addListener(SWT.MouseUp, this);
+				lblId.addListener(SWT.MouseEnter, this);
+				lblId.addListener(SWT.MouseExit, this);
+				for (Control c : lblId.getChildren()) {
+					c.addListener(SWT.MouseDown, this);
+					c.addListener(SWT.MouseMove, this);
+					c.addListener(SWT.MouseUp, this);
+					c.addListener(SWT.MouseEnter, this);
+					c.addListener(SWT.MouseExit, this);
+				}
+				
+				
 				Composite obsinfo = new Composite(owner, SWT.NONE);
 				obsinfo.setLayout(new GridLayout(2, false));
 				obsinfo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -188,33 +199,24 @@ public class WaypointDetailsShell extends SmartShellDialog{
 				bgColor.dispose();
 				bgColor = null;
 			}
-			if (boldFont != null){
-				boldFont.dispose();
-				boldFont = null;
-			}
 			return;
 		}else if (event.type == SWT.Deactivate){
 			close();
 			return;
 		}else if (event.type == SWT.MouseDown){
-			if (event.widget != lblId) return;
 			blnMouseDown = true;
 			xPos = event.x;
 			yPos = event.y;
 		} else if (event.type == SWT.MouseUp) {
-			if (event.widget != lblId) return;
 			blnMouseDown = false;
 		} else if (event.type == SWT.MouseMove) {
-			if (event.widget != lblId) return;
 			if (blnMouseDown) {
 				shell.setLocation(shell.getLocation().x + (event.x - xPos),
 						shell.getLocation().y + (event.y - yPos));
 			}
 		} else if (event.type == SWT.MouseEnter) {
-			if (event.widget != lblId) return;
 			shell.setCursor(shell.getDisplay().getSystemCursor(SWT.CURSOR_SIZEALL));
 		} else if (event.type == SWT.MouseExit) {
-			if (event.widget != lblId) return;
 			shell.setCursor(null);
 		}
 	}

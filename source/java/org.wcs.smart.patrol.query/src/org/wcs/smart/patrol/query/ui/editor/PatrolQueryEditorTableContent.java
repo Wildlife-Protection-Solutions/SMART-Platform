@@ -160,6 +160,7 @@ public class PatrolQueryEditorTableContent {
 		});
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void refreshCount(){
 		Display.getDefault().asyncExec(new Runnable() {
 			@Override
@@ -170,7 +171,7 @@ public class PatrolQueryEditorTableContent {
 				}
 				Object obj = resultsTable.getTable().getInput();
 				if (obj instanceof List){
-					List l = (List)obj;
+					List<? extends IPatrolQueryResultItem> l = (List<? extends IPatrolQueryResultItem>)obj;
 					lblNumResults.setText(String.valueOf(l.size()));
 					lblNumPatrols.setText(String.valueOf(computeNumberOfPatrols(l)));
 					lblNumResults.getParent().getParent().layout();

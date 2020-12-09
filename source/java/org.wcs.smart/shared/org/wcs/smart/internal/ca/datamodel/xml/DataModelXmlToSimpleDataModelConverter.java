@@ -87,7 +87,7 @@ public class DataModelXmlToSimpleDataModelConverter {
 	public SimpleDataModel convert(InputStream is, Collection<Icon> icons, Locale l) throws JAXBException, ParseException {
 		this.l = l;
 		this.icons = icons;
-		if (icons == null) icons = Collections.emptySet();
+		if (this.icons == null) this.icons = Collections.emptySet();
 		langLookup = new HashMap<String, Language>();	
 		aggs = new ArrayList<Aggregation>();
 

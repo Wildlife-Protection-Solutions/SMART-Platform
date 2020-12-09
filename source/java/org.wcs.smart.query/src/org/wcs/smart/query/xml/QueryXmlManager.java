@@ -53,6 +53,7 @@ public class QueryXmlManager {
 	 * @return
 	 * @throws JAXBException
 	 */
+	@SuppressWarnings("unchecked")
 	public static Query readQueryFile(InputStream file) throws JAXBException{
 		JAXBContext context = JAXBContext.newInstance(METADATA_CLASSES_PACKAGE);
 		Unmarshaller un = context.createUnmarshaller();	

@@ -133,7 +133,7 @@ public abstract class SimpleQueryExporter {
 	 * @param queryColumns the columns to export
 	 * @param outputFile the file to export to
 	 */
-	protected void setData(IPagedQueryResultSet derbyResult, List<QueryColumn> queryColumns, Path outputFile ) {
+	protected void setData(IPagedQueryResultSet<?> derbyResult, List<QueryColumn> queryColumns, Path outputFile ) {
 		this.data = derbyResult != null ? derbyResult.iterator(IPagedQueryResultSet.MAP_PAGE_SIZE) : null;
 		this.dataSize = derbyResult != null ? derbyResult.getItemCount() : 0;
 		this.queryColumns = queryColumns;

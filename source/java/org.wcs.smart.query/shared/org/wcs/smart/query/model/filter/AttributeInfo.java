@@ -77,6 +77,8 @@ public class AttributeInfo {
 			return "string_value"; //$NON-NLS-1$
 		case DATE:
 			return "string_value"; //$NON-NLS-1$
+		case MLIST:
+			throw new IllegalStateException("multi list attributes not supported."); //$NON-NLS-1$
 		}
 		return ""; //$NON-NLS-1$
 	}

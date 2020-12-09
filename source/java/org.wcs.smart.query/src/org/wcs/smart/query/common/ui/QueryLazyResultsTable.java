@@ -61,7 +61,7 @@ public abstract class QueryLazyResultsTable extends QueryResultsTable {
 		return table;
 	}
 
-	public void setInput(IPagedQueryResultSet result) {
+	public void setInput(IPagedQueryResultSet<?> result) {
 		if (!table.getTable().isDisposed()){
 			if (result == null){
 				table.setItemCount(0);

@@ -65,7 +65,7 @@ public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 			try {
 				IQueryResult cachedResults = query.getCachedResults();
 				if (cachedResults != null){
-					fIterator = ((IPagedQueryResultSet)cachedResults).iterator(IPagedQueryResultSet.MAP_PAGE_SIZE);
+					fIterator = ((IPagedQueryResultSet<?>)cachedResults).iterator(IPagedQueryResultSet.MAP_PAGE_SIZE);
 				}
 			} catch (Exception e) {
 				QueryPlugIn.log(e.getMessage(), e);

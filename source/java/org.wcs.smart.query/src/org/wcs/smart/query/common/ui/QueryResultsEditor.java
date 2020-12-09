@@ -133,7 +133,7 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 //					if (page3 != null) page3.setResult(null);
 					return Status.CANCEL_STATUS;
 				}
-				page1.updateAndShowTable((IPagedQueryResultSet)results);
+				page1.updateAndShowTable((IPagedQueryResultSet<?>)results);
 				if (page3 != null) {
 					if (results instanceof IPagedImageResultSet) {
 						page3.setResult((IPagedImageResultSet)results);
@@ -445,7 +445,7 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 		}
 		
 		//clear existing results
-		page1.getQueryResultsTable().setInput((IPagedQueryResultSet)null);	
+		page1.getQueryResultsTable().setInput((IPagedQueryResultSet<?>)null);	
 		//show progress area
 		page1.showProgressArea();
 	

@@ -45,7 +45,7 @@ public class PagedQueryResultSet extends AbstractQueryResultSet {
 	 * @param metadata
 	 *            query metadata
 	 */
-	public PagedQueryResultSet(IPagedQueryResultSet results,
+	public PagedQueryResultSet(IPagedQueryResultSet<?> results,
 			SimpleQueryResultSetMetadata metadata,
 			SmartConnection connection) {
 		super(metadata);

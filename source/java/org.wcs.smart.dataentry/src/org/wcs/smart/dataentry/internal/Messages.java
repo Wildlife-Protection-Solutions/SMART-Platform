@@ -234,6 +234,10 @@ public class Messages extends NLS {
 	public static String ListAttributeInfoComposite_multiSelectTooltip1;
 	public static String MetaConfigDialog_MetadataPages;
 	public static String MetaConfigDialog_SaveError;
+	public static String MListAttributeInfoComposite_DefaultValueLabel;
+	public static String MListAttributeInfoComposite_DefaultValueTooltip;
+	public static String MListAttributeInfoComposite_RevertMsg;
+	public static String MListAttributeInfoComposite_RevertTitle;
 	public static String NumericAttributeInfoComposite_defaultTooltip;
 	public static String NumericAttributeInfoComposite_ErrorDialogTitle;
 	public static String NumericAttributeInfoComposite_numericOpTooltip;

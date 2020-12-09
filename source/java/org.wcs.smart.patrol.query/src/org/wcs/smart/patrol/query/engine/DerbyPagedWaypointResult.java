@@ -103,7 +103,7 @@ public class DerbyPagedWaypointResult extends WaypointQueryResult<PatrolWaypoint
 	@Override
 	public boolean updateWaypointPosition(IPatrolQueryResultItem pw, Double x, Double y, Float distance,
 			Float direction) throws Exception {
-		return updateWaypointPosition(pw, x, y, distance, direction);
+		return updater.updateWaypointPosition(pw, x, y, distance, direction);
 	}
 
 	

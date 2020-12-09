@@ -202,7 +202,7 @@ public class CSVImportConfiguration {
 				 		//could put this back if we want to show ID's 1 through # of points in the select your points screen.				 		
 				 		//curWP.setId(maxId + 1);
 				 		//maxId++;
-				 		curWP.setId("-1");
+				 		curWP.setId("-1"); //$NON-NLS-1$
 				 	}
 				 	
 				 	if(commentColumn != -1){

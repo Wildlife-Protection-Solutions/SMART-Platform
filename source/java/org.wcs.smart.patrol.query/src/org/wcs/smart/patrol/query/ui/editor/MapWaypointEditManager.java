@@ -136,6 +136,7 @@ public class MapWaypointEditManager implements IMapEditManager {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public EditPoint findFeature(int x, int y, IViewportModel vm) {
 		try{
@@ -154,7 +155,7 @@ public class MapWaypointEditManager implements IMapEditManager {
 				Coordinate dbur = ReprojectUtils.reproject(worldur.x, worldur.y, vm.getCRS(), SmartDB.DATABASE_CRS);
 				
 				HashMap<UUID, Set<WaypointQueryResultItem>> items = new HashMap<>();
-				List<IResultItem> searchResults = ((ISearchabledResultSet)editor.getQuery().getCachedResults()).search(dbll.x, dbll.y, dbur.x, dbur.y);
+				List<IResultItem> searchResults = ((ISearchabledResultSet<IResultItem>)editor.getQuery().getCachedResults()).search(dbll.x, dbll.y, dbur.x, dbur.y);
 				
 				double distance = Double.POSITIVE_INFINITY;
 				

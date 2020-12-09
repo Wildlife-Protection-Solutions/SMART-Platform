@@ -46,6 +46,7 @@ import org.wcs.smart.dataentry.CmDefaultListsUtil;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditDialog;
 import org.wcs.smart.dataentry.dialog.EditListDialog;
 import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
+import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeConfig;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
@@ -61,6 +62,8 @@ import org.wcs.smart.util.UuidUtils;
  * @since 2.0.0
  */
 public class MListAttributeInfoComposite extends CmAttributeConfInfoComposite {
+
+	private static final String SPACER = ","; //$NON-NLS-1$
 
 	private CheckBoxDropDown defaultViewer;
 	
@@ -117,8 +120,8 @@ public class MListAttributeInfoComposite extends CmAttributeConfInfoComposite {
 	
 	private void createDefaultControl(Composite parent) {
 		Label label = new Label(parent, SWT.NONE);
-		label.setText("Default Value:");
-		label.setToolTipText("the default value for this attribute");
+		label.setText(Messages.MListAttributeInfoComposite_DefaultValueLabel);
+		label.setToolTipText(Messages.MListAttributeInfoComposite_DefaultValueTooltip);
 		
 		defaultViewer = new CheckBoxDropDown(parent);
 		defaultViewer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -133,7 +136,7 @@ public class MListAttributeInfoComposite extends CmAttributeConfInfoComposite {
 				StringBuilder sb = new StringBuilder();
 				for (Object x : defaultViewer.getCheckObjects()) {
 					sb.append( UuidUtils.uuidToString(((AttributeListItem)x).getUuid() ));
-					sb.append(",");
+					sb.append(SPACER);
 				}
 				sb.deleteCharAt(sb.length()- 1);
 				
@@ -170,7 +173,7 @@ public class MListAttributeInfoComposite extends CmAttributeConfInfoComposite {
 			if (option != null && option.getStringValue() != null) {
 				
 				Set<UUID> uuids = new HashSet<>();
-				for (String uuid : option.getStringValue().split(",")) {
+				for (String uuid : option.getStringValue().split(SPACER)) {
 					uuids.add(UuidUtils.stringToUuid(uuid));
 				}
 				List<AttributeListItem> values = new ArrayList<>();
@@ -236,7 +239,7 @@ public class MListAttributeInfoComposite extends CmAttributeConfInfoComposite {
 	@Override
 	protected void revertConfiguration() {
 		CmAttribute cmAttr = getSourceObject();
-		if (MessageDialog.openConfirm(getShell(), "Revert to data model version of attribute", "You are about to revert the default mapping for the list associated with current datamodel list attribute. Reverting this list attribute will erase all the configuration made for any item in this list. Reverting this list attribute will effect all places where this list attribute is used in the configured data model. If you wish to only revert the list for this category cancel this dialog and add new configuration instead.")) {
+		if (MessageDialog.openConfirm(getShell(), Messages.MListAttributeInfoComposite_RevertTitle, Messages.MListAttributeInfoComposite_RevertMsg)) {
 			CmAttributeConfig cfg = cmAttr.getConfig();
 			List<CmAttributeListItem> newList = cfg.isDefault() ? CmDefaultListsUtil.buildDefaultList(cfg, cmAttr.getAttribute()) : CmCustomListsUtil.buildCustomList(cfg, cmAttr.getAttribute());
 			cfg.getList().clear();

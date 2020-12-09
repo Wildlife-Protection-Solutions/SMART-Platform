@@ -35,14 +35,14 @@ import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -59,6 +59,7 @@ public class ImportQueryFilePage extends WizardPage {
 	public static final String PAGENAME = "QueryFiles"; //$NON-NLS-1$
 	
 	private List<Path> files = null;
+	private ListViewer lstFiles;
 	
 	/**
 	 * Creates a new query wizard page.
@@ -80,7 +81,7 @@ public class ImportQueryFilePage extends WizardPage {
 		lbl.setText(Messages.ImportQueryFilePage_FileLabel1);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
-		final ListViewer lstFiles = new ListViewer(main, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
+		lstFiles = new ListViewer(main, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
 		lstFiles.setContentProvider(ArrayContentProvider.getInstance());
 		lstFiles.setLabelProvider(new LabelProvider(){
 			@Override
@@ -106,51 +107,34 @@ public class ImportQueryFilePage extends WizardPage {
 		btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		btnAdd.setBackground(buttons.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		btnAdd.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				FileDialog fd = new FileDialog(ImportQueryFilePage.this.getShell(), 
-						SWT.OPEN | SWT.MULTI);
-				
-				String[] extensions = new String[]{"*.xml;*.zip", "*.*"}; //$NON-NLS-1$ //$NON-NLS-2$
-				String[] names = new String[]{Messages.ImportQueryFilePage_xmlFilterName + ": ZIP (*.zip)", Messages.ImportQueryFilePage_AllFilesFilterName}; //$NON-NLS-1$
-				
-				fd.setFilterExtensions(extensions);
-				fd.setFilterNames(names);
-				
-				String f = fd.open();
-				
-				if (f != null) {
-					Path root = Paths.get(fd.getFilterPath());
-					for (String f2 : fd.getFileNames()){
-						Path newF = root.resolve(f2);
-						if (!files.contains(newF)){
-							files.add(newF);
-							lstFiles.refresh();	
-						}	
-					}	
-				}
-				setPageComplete(files.size() > 0);
-			}
-		});
+		btnAdd.addListener(SWT.Selection,e->addFile());
 		
 		Button btnRemove = new Button(buttons, SWT.NONE);
 		btnRemove.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		btnRemove.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnRemove.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		btnRemove.setBackground(buttons.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-		btnRemove.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				IStructuredSelection sel = (IStructuredSelection) lstFiles.getSelection();
-				for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
-					Object file = (Object) iterator.next();
-					if (file instanceof File){
-						files.remove(file);
-					}
-				}
-				lstFiles.refresh();
-			}
+		btnRemove.addListener(SWT.Selection, e->deleteFile());
+		btnRemove.setEnabled(false);
+		
+		Menu mnu = new Menu(lstFiles.getControl());
+		
+		MenuItem miAdd = new MenuItem(mnu, SWT.PUSH);
+		miAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
+		miAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		miAdd.addListener(SWT.Selection, e->addFile());
+		
+		MenuItem miDelete = new MenuItem(mnu, SWT.PUSH);
+		miDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		miDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		miDelete.addListener(SWT.Selection, e->deleteFile());
+		miDelete.setEnabled(false);
+		
+		lstFiles.getControl().setMenu(mnu);
+		
+		lstFiles.addSelectionChangedListener(e->{
+			miDelete.setEnabled(!lstFiles.getStructuredSelection().isEmpty());
+			btnRemove.setEnabled(!lstFiles.getStructuredSelection().isEmpty());
 		});
 		
 		
@@ -160,6 +144,38 @@ public class ImportQueryFilePage extends WizardPage {
 		setControl(main);
 	}
 
+	private void addFile() {
+		FileDialog fd = new FileDialog(ImportQueryFilePage.this.getShell(), 
+				SWT.OPEN | SWT.MULTI);
+		
+		String[] extensions = new String[]{"*.xml;*.zip", "*.*"}; //$NON-NLS-1$ //$NON-NLS-2$
+		String[] names = new String[]{Messages.ImportQueryFilePage_xmlFilterName + ": ZIP (*.zip)", Messages.ImportQueryFilePage_AllFilesFilterName}; //$NON-NLS-1$
+		
+		fd.setFilterExtensions(extensions);
+		fd.setFilterNames(names);
+		
+		String f = fd.open();
+		
+		if (f != null) {
+			Path root = Paths.get(fd.getFilterPath());
+			for (String f2 : fd.getFileNames()){
+				Path newF = root.resolve(f2);
+				if (!files.contains(newF)){
+					files.add(newF);
+					lstFiles.refresh();	
+				}	
+			}	
+		}
+		setPageComplete(files.size() > 0);
+	}
+	private void deleteFile() {
+		IStructuredSelection sel = (IStructuredSelection) lstFiles.getSelection();
+		for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
+			Object file = (Object) iterator.next();
+			files.remove(file);
+		}
+		lstFiles.refresh();
+	}
 	/**
 	 * @return the selected file
 	 */

@@ -262,7 +262,7 @@ public class LegendGraphicWriter  {
 			numCols = 1;
 		}
 		int entriesPerCol = (int)Math.ceil( numberOfEntries / (float)numCols );
-		numCols = (int)Math.ceil(numberOfEntries / entriesPerCol);
+		numCols = (int)Math.ceil(numberOfEntries / (double)entriesPerCol);
 		
 		//for each column get the layer and maxwidth
 		List<LegendColumn> columns = new ArrayList<>();
@@ -415,7 +415,7 @@ public class LegendGraphicWriter  {
 	private void drawRow(ViewportGraphics graphics, int x, int y,
 			RenderedImage icon, String[] text, boolean indent, int position) {
 
-		if (text.length == 0){
+		if (text == null || text.length == 0){
 			return;
 		}
 
@@ -450,7 +450,7 @@ public class LegendGraphicWriter  {
 			x += imageWidth;
 		}
 
-		if (text != null && text[0] != null && text[0].length() != 0) {
+		if (text[0] != null && text[0].length() != 0) {
 			String label = text[0];
 			graphics.drawString(
 					label,

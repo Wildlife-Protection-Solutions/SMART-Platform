@@ -338,6 +338,7 @@ public abstract class WaypointQueryResult<T extends IWaypointQueryResultItem> ex
 	}
 	
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) return true;

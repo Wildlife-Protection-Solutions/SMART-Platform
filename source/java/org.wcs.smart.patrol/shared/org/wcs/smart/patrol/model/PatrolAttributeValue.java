@@ -307,6 +307,10 @@ public class PatrolAttributeValue {
 				text = getAttributeListItem().getName();
 			}
 			break;
+		case MLIST:
+			throw new IllegalStateException("multi list attributes not supported for patrol attributes"); //$NON-NLS-1$
+		case TREE:
+			throw new IllegalStateException("tree attributes not supported for patrol attributes"); //$NON-NLS-1$
 		}
 		return text;
 	}

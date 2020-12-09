@@ -54,6 +54,7 @@ public class PatrolQueryFeatureReader implements FeatureReader<SimpleFeatureType
 	 * @param query the query
 	 * @param ftype the feature type
 	 */
+	@SuppressWarnings("unchecked")
 	public PatrolQueryFeatureReader(PatrolQuery query,
 			SimpleFeatureType ftype, List<QueryColumn> columns) {
 		

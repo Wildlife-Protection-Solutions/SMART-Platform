@@ -55,7 +55,7 @@ public class QueryLazyResultsContentProvider implements ILazyContentProvider, IQ
 	private static final ISchedulingRule CELL_JOB_MUTEX = new LoadCellDataMutex();
 	
 	private TableViewer viewer;
-	private IPagedQueryResultSet input;
+	private IPagedQueryResultSet<?> input;
 	private int pageSize = IPagedQueryResultSet.TABLE_DEFAULT_PAGE_SIZE;
 	
 	private QueryTableViewerColumn sortColumn = null;
@@ -89,7 +89,7 @@ public class QueryLazyResultsContentProvider implements ILazyContentProvider, IQ
 				loadingIndexes.clear();
 				CleanUpQueryJob.schedule(input);
 			}
-			input = (IPagedQueryResultSet) newInput;
+			input = (IPagedQueryResultSet<?>) newInput;
 		}
 	}
 

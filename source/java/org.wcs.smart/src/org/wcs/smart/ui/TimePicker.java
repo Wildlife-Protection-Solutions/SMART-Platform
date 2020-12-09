@@ -235,7 +235,6 @@ public class TimePicker extends Composite {
 		}
 		Point p = cHour.getParent().toDisplay(cHour.getLocation());
 		p.y = p.y + cHour.getBounds().height + 2;
-		p.x = p.x;
 		
 		hourShell.setLocation(p);
 		hourShell.setVisible(true);
@@ -278,7 +277,6 @@ public class TimePicker extends Composite {
 		}
 		Point p = cMin.getParent().toDisplay(cMin.getLocation());
 		p.y = p.y + cMin.getBounds().height + 2;
-		p.x = p.x;
 		
 		minShell.setLocation(p);
 		minShell.setVisible(true);
