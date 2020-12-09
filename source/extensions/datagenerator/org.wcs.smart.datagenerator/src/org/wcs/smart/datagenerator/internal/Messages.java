@@ -120,6 +120,7 @@ public class Messages extends NLS {
 	public static String SpatialShiftComposite_xLabel;
 	public static String SpatialShiftComposite_yLabel;
 	public static String TimeShiftComposite_refreshlink;
+	public static String XmlManager_categorynotfound;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

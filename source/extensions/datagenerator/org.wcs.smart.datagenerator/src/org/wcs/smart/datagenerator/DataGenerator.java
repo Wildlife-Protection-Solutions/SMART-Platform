@@ -364,6 +364,7 @@ public class DataGenerator implements IDataEngine{
 								break;
 							}
 						}
+						if (m == null) continue;
 						
 						//create an observation that matches the observation mapping
 						WaypointObservation wo = new WaypointObservation();

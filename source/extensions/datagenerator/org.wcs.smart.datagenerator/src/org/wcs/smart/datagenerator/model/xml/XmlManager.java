@@ -22,12 +22,14 @@
 package org.wcs.smart.datagenerator.model.xml;
 
 import java.nio.file.Path;
+import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -42,10 +44,13 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.datagenerator.DataGeneratorPlugIn;
+import org.wcs.smart.datagenerator.internal.Messages;
 import org.wcs.smart.datagenerator.model.ObservationConfiguration;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationAttributeList;
 
 /**
  * Tools for reading and writing xml files to/from patrol configurations.  Warnings
@@ -119,6 +124,7 @@ public enum XmlManager {
 					 .setParameter("hkey", ckey) //$NON-NLS-1$
 					 .uniqueResult();
 			 if (category == null) {
+				 DataGeneratorPlugIn.displayLog(MessageFormat.format(Messages.XmlManager_categorynotfound, ckey), null);
 				 //TODO: warning message
 				 continue;
 			 }
@@ -180,6 +186,25 @@ public enum XmlManager {
 								 if (item != null) {
 									 add = true;
 									 woa.setAttributeTreeNode(item);
+								 }
+							 }else if (attribute.getType() == Attribute.AttributeType.MLIST) {
+								 String[] keys = a.getStringValue().split(","); //$NON-NLS-1$
+								 woa.setAttributeListItems(new ArrayList<>());
+								 for (String key : keys) {
+									 AttributeListItem item = null;
+									 for (AttributeListItem i : attribute.getAttributeList()) {
+										 if (i.getKeyId().equals(key)) {
+											 item = i;
+											 break;
+										 }
+									 }
+									 if (item != null) {
+										 add = true;
+										 WaypointObservationAttributeList li = new WaypointObservationAttributeList();
+										 li.setAttributeLisItem(item);
+										 li.setObservationAttribute(woa);
+										 woa.getAttributeListItems().add(li);
+									 }
 								 }
 							 }
 							 
@@ -273,6 +298,8 @@ public enum XmlManager {
 					case TREE:
 						xmlAttribute.setStringValue(woa.getAttributeTreeNode().getHkey());
 						break;
+					case MLIST:
+						xmlAttribute.setStringValue( woa.getAttributeListItems().stream().map(e->e.getAttributeListItem().getKeyId()).collect(Collectors.joining(",")) ); //$NON-NLS-1$
 					}
 				}
 			}
