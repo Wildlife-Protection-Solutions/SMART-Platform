@@ -188,10 +188,11 @@ public class QueryService extends IService implements IQueryService {
 	public void dispose( IProgressMonitor monitor ) {
         if (members == null)
             return;
-        SubMonitor progress = SubMonitor.convert(monitor);
         if (monitor == null){
         	monitor = new NullProgressMonitor();
         }
+        SubMonitor progress = SubMonitor.convert(monitor);
+
         int steps = (int) ((double) 99 / (double) members.size());
         for( QueryGeoResource resolve : members ) {
             try {

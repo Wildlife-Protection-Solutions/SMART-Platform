@@ -62,7 +62,7 @@ public class EntityTypeCcaaManager {
 	private final static Object LOCK = new Object();
 	private static volatile EntityTypeCcaaManager instance;
 	
-	private List<EntityType> mergedTypes;
+	private volatile List<EntityType> mergedTypes;
 	
 	/*
 	 * Updates UI components when ca configuration is changed
