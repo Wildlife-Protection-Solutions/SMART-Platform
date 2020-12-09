@@ -84,12 +84,20 @@ public class WarningDialog extends MessageDialog {
 	public void setImage(Image img) {
 		this.img = img;
 	}
+
 	@Override
 	public Image getImage() {
 		if (img != null) return img;
 		return super.getImage();
 	}
 	
+	protected Control createMessageArea(Composite composite) {
+		Control cc = super.createMessageArea(composite);
+		SmartUiUtils.colorDialog(composite.getShell());
+		SmartUiUtils.makeTransparent(composite);
+		return cc;
+	}
+		
 	@Override
     protected Control createCustomArea(Composite parent) {
     	Text txtWarnings = new Text(parent, SWT.MULTI | SWT.V_SCROLL | SWT.BORDER | SWT.H_SCROLL);
@@ -106,6 +114,7 @@ public class WarningDialog extends MessageDialog {
     		sb.append("\n"); //$NON-NLS-1$
     	}
     	txtWarnings.setText(sb.toString());
+
         return txtWarnings;
     }
 
