@@ -52,6 +52,7 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
@@ -153,11 +154,15 @@ public class ImportRecordXmlDialog extends SmartStyledTitleDialog {
 		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		btnAdd.addListener(SWT.Selection,  e-> addFile());
+		btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		btnAdd.setBackground(btnComposite.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		Button btnDelete = new Button(btnComposite, SWT.NONE);
 		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		btnDelete.addListener(SWT.Selection,  e-> removeFiles());
+		btnDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		btnDelete.setBackground(btnComposite.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
 		setTitle(Messages.ImportRecordXmlDialog_Title);
 		setMessage(Messages.ImportRecordXmlDialog_Message);

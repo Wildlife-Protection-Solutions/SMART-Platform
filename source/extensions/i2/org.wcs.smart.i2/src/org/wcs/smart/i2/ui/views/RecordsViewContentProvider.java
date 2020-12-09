@@ -228,19 +228,28 @@ public class RecordsViewContentProvider implements ITreeContentProvider {
 		if (sortBy == SortBy.NAME) {
 			Collections.sort(tosort, (a,b) -> Collator.getInstance().compare(a.getTitle(), b.getTitle()));
 		}else if (sortBy == SortBy.DATE) {
-			Collections.sort(tosort, (a,b) -> -1* getDate(a).compareTo(getDate(b)));
+			Collections.sort(tosort, (a,b) ->{
+				LocalDate d1 = getDate(a).toLocalDate();
+				LocalDate d2 = getDate(b).toLocalDate();
+				if (d1.equals(d2)) return Collator.getInstance().compare(a.getTitle(), b.getTitle());
+				return -1 * d1.compareTo(d2);	
+			});
 		}else if (sortBy == SortBy.SOURCE){
 			Collections.sort(tosort, (a,b)->{
 				if ((a.getRecordSource() == null && b.getRecordSource() == null) || (a.getRecordSource() != null && a.getRecordSource().equals(b.getRecordSource()))) {
-					return a.getTitle().compareTo(b.getTitle());
+					return Collator.getInstance().compare(a.getTitle(), b.getTitle());
 				}else {
 					if (a.getRecordSource() == null) return 1;
 					if (b.getRecordSource() == null) return -1;
+					if (a.getRecordSource().equals(b.getRecordSource())) {
+						return Collator.getInstance().compare(a.getTitle(), b.getTitle());	
+					}
 					return a.getRecordSource().getName().compareTo(b.getRecordSource().getName());
 				}
 			});
 		}else if (sortBy == SortBy.PROFILE) {
 			Collections.sort(tosort, (a,b)->{
+				if (a.getProfile().equals(b.getProfile())) return Collator.getInstance().compare(a.getTitle(), b.getTitle());
 				return Collator.getInstance().compare(a.getProfile().getName(), b.getProfile().getName());
 			});
 		}

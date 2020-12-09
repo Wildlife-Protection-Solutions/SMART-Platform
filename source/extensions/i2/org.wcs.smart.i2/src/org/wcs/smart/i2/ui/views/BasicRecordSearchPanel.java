@@ -366,7 +366,11 @@ public class BasicRecordSearchPanel extends Composite {
 	}
 	
 	public void setSearch(BasicRecordSearch search) {
-		cmbSource.setSelection(new StructuredSelection(search.getSource()));
+		if (search.getSource() != null) {
+			cmbSource.setSelection(new StructuredSelection(search.getSource()));
+		}else {
+			cmbSource.setSelection(null);
+		}
 		txtNarrative.setText(search.getNarrative() == null ? "" : search.getNarrative()); //$NON-NLS-1$
 		txtSearch.setText(search.getTitle() == null ? "" : search.getTitle()); //$NON-NLS-1$
 		doSearch(search);

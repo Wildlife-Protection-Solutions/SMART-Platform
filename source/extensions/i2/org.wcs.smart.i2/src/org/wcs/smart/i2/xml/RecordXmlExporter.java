@@ -28,6 +28,7 @@ import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -57,6 +58,7 @@ import org.wcs.smart.i2.model.IntelEntityRecord;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.model.IntelObservation;
 import org.wcs.smart.i2.model.IntelObservationAttribute;
+import org.wcs.smart.i2.model.IntelObservationAttributeList;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
 import org.wcs.smart.i2.model.IntelRecordAttributeValue;
@@ -357,7 +359,15 @@ public class RecordXmlExporter {
 								LabelUuid xmlList = factory.createLabelUuid();
 								xmlList.setUuid(UuidUtils.uuidToString(attribute.getAttributeListItem().getUuid()));
 								xmlList.setName(attribute.getAttributeListItem().getKeyId());
-								xmlObsAttribute.setListValue(xmlList);
+								xmlObsAttribute.getListValue().add(xmlList);
+							}
+							if (attribute.getAttributeListItems() != null) {
+								for (IntelObservationAttributeList item : attribute.getAttributeListItems()) {
+									LabelUuid xmlList = factory.createLabelUuid();
+									xmlList.setUuid(UuidUtils.uuidToString(item.getAttributeListItem().getUuid()));
+									xmlList.setName(item.getAttributeListItem().getKeyId());
+									xmlObsAttribute.getListValue().add(xmlList);
+								}
 							}
 							if (attribute.getAttributeTreeNode() != null){
 								LabelUuid xmlTree = factory.createLabelUuid();

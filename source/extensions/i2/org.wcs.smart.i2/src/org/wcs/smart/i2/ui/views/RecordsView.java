@@ -810,7 +810,7 @@ public class RecordsView {
 			profiles = profiles.stream().filter(e->IntelSecurityManager.INSTANCE.canViewRecords(e)).collect(Collectors.toList());
 			if (!profiles.isEmpty()) {
 				try(Session s = HibernateManager.openSession()){
-					String hql = " FROM IntelRecord WHERE conservationArea = :ca AND status in (:items) AND profile IN (:profiles) ORDER BY dateCreated"; //$NON-NLS-1$
+					String hql = " FROM IntelRecord WHERE conservationArea = :ca AND status in (:items) AND profile IN (:profiles)"; //$NON-NLS-1$
 					
 					List<IntelRecord> records = s.createQuery(hql, IntelRecord.class)
 							.setParameter("ca",  SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
@@ -846,7 +846,7 @@ public class RecordsView {
 			final List<IntelRecordProxy> allRecords = new ArrayList<IntelRecordProxy>();
 			if (!profiles.isEmpty()) {
 				try(Session s = HibernateManager.openSession()){
-					Query<?> q = s.createQuery("SELECT title, uuid, primaryDate, recordSource.uuid, status, profile.uuid FROM IntelRecord WHERE conservationArea = :ca AND profile IN (:profiles) ORDER BY dateModified desc"); //$NON-NLS-1$
+					Query<?> q = s.createQuery("SELECT title, uuid, primaryDate, recordSource.uuid, status, profile.uuid FROM IntelRecord WHERE conservationArea = :ca AND profile IN (:profiles) ORDER BY dateModified desc, title"); //$NON-NLS-1$
 					q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 					q.setParameter("profiles", profiles); //$NON-NLS-1$
 					List<?> items = q.list();

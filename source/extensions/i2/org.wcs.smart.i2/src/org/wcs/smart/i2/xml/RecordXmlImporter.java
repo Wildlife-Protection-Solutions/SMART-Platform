@@ -75,6 +75,7 @@ import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.model.IntelObservation;
 import org.wcs.smart.i2.model.IntelObservationAttribute;
+import org.wcs.smart.i2.model.IntelObservationAttributeList;
 import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
@@ -390,7 +391,17 @@ public class RecordXmlImporter {
 			newRecord.setConservationArea(SmartDB.getCurrentConservationArea());
 			newRecord.setTitle(type.getTitle().trim());
 			if (type.getPrimaryDate() != null) {
-				newRecord.setPrimaryDate(SmartUtils.toLocalDateTime(type.getPrimaryDate()));
+				try {
+					newRecord.setPrimaryDate(SmartUtils.toLocalDateTime(type.getPrimaryDate()));
+				}catch (Exception ex) {
+					//try just date
+					try {
+						newRecord.setPrimaryDate(SmartUtils.toLocalDate(type.getPrimaryDate()).atStartOfDay());
+					}catch (Exception ex2) {
+						throw new Exception(MessageFormat.format(Messages.RecordXmlImporter_DateParseError, type.getPrimaryDate().toString()), ex2);
+					}
+					
+				}
 			}else {
 				newRecord.setPrimaryDate(LocalDateTime.now());
 			}
@@ -877,10 +888,11 @@ public class RecordXmlImporter {
 					newValue.setStringValue(recordAttribute.getStringValue());
 					break;
 				case LIST:
-					if (recordAttribute.getListValue() == null) continue;
+					if (recordAttribute.getListValue().isEmpty()) continue;
 					
+					LabelUuid uuiditem = recordAttribute.getListValue().get(0);
 					//search uuid
-					UUID listUuid = UuidUtils.stringToUuid(recordAttribute.getListValue().getUuid());
+					UUID listUuid = UuidUtils.stringToUuid(uuiditem.getUuid());
 					for (AttributeListItem listItem : srcAttribute.getAttributeList()){
 						if (listItem.getUuid().equals(listUuid)){
 							newValue.setAttributeListItem(listItem);
@@ -890,17 +902,53 @@ public class RecordXmlImporter {
 					if (newValue.getAttributeListItem() == null){
 						//search key
 						for (AttributeListItem listItem : srcAttribute.getAttributeList()){
-							if (listItem.getKeyId().equals(recordAttribute.getListValue().getName())){
+							if (listItem.getKeyId().equals(uuiditem.getName())){
 								newValue.setAttributeListItem(listItem);
 								break;
 							}
 						}
 					}
 					if (newValue.getAttributeListItem() == null){
-						warnings.add(MessageFormat.format(Messages.RecordXmlImporter_AttributeListNotFound, srcAttribute.getName(), recordAttribute.getListValue().getName()));
+						warnings.add(MessageFormat.format(Messages.RecordXmlImporter_AttributeListNotFound, srcAttribute.getName(), uuiditem.getName()));
 						continue;
 					}
 					
+					break;
+				case MLIST:
+					newValue.setAttributeListItems(new ArrayList<>());
+					
+					for(LabelUuid luuiditem : recordAttribute.getListValue()) {
+						
+						AttributeListItem match = null;
+						
+						//search uuid
+						UUID listItemUuid = UuidUtils.stringToUuid(luuiditem.getUuid());
+						for (AttributeListItem listItem : srcAttribute.getAttributeList()){
+							if (listItem.getUuid().equals(listItemUuid)){
+								match = listItem;
+								break;
+							}
+						}
+						if (match == null){
+							//search key
+							for (AttributeListItem listItem : srcAttribute.getAttributeList()){
+								if (listItem.getKeyId().equals(luuiditem.getName())){
+									match = listItem;
+									break;
+								}
+							}
+						}
+						
+						if (match == null){
+							warnings.add(MessageFormat.format(Messages.RecordXmlImporter_AttributeListNotFound, srcAttribute.getName(), luuiditem.getName()));
+							continue;
+						}else {
+							IntelObservationAttributeList al = new IntelObservationAttributeList();
+							al.setAttributeLisItem(match);
+							al.setObservationAttribute(newValue);
+							newValue.getAttributeListItems().add(al);
+						}
+					}
 					break;
 				case TREE:
 					if (recordAttribute.getTreeValue() == null) continue;
@@ -920,6 +968,7 @@ public class RecordXmlImporter {
 					}
 					newValue.setAttributeTreeNode(treeNode);					
 					break;
+					
 			}
 			
 			newValues.add(newValue);

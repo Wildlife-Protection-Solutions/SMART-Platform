@@ -22,7 +22,6 @@
 package org.wcs.smart.i2;
 
 import java.sql.SQLException;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,7 +36,6 @@ import org.wcs.smart.i2.query.observation.filter.DataModelFilter;
 import org.wcs.smart.i2.query.observation.filter.IFilterVisitor;
 import org.wcs.smart.i2.query.observation.filter.IQueryFilter;
 import org.wcs.smart.i2.query.observation.filter.ParsedObservationQuery;
-import org.wcs.smart.i2.query.observation.filter.SumQueryDefinition;
 
 
 /**

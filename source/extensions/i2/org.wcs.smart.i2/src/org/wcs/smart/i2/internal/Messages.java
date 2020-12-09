@@ -1540,6 +1540,7 @@ public class Messages extends NLS {
 	public static String RecordXmlImporter_AttributeListNotFound;
 	public static String RecordXmlImporter_CategoryAttributeNotFound;
 	public static String RecordXmlImporter_CategoryNotFound;
+	public static String RecordXmlImporter_DateParseError;
 	public static String RecordXmlImporter_EmployeeNotFound;
 	public static String RecordXmlImporter_EntityOfTypeNotFound;
 	public static String RecordXmlImporter_EventError;
