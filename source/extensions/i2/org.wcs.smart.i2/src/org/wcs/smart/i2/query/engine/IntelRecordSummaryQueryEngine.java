@@ -152,59 +152,59 @@ public class IntelRecordSummaryQueryEngine implements IIntelQueryEngine{
 		}	
 	}
 	
-	/*
-	 * create the necessary area group by tables.  For area group by attributes we create
-	 * a separate table as it is possible for a single position attribute to be in multiple
-	 * areas and we want to count each one
-	 */
-	private Map<GroupByItem, String> processAreaGroupBys(String queryTable, SumQueryDefinition definition, Collection<ConservationArea> cas, Session session) {
-		List<GroupByItem> groupByItems = new ArrayList<>();
-		groupByItems.addAll(definition.getRowGroupByPart().getItems());
-		groupByItems.addAll(definition.getColumnGroupByPart().getItems());
-		
-		HashMap<GroupByItem, String> areaToTables = new HashMap<>();
-		for (GroupByItem groupBy : groupByItems) {
-			if (groupBy.getAttributeKey() == null || groupBy.getAttributeType() != AttributeType.POSITION) continue;
-		
-			String tableName = SqlGenerator.createTempTableName();
-			StringBuilder sb = new StringBuilder();
-			sb.append(" CREATE TABLE "); //$NON-NLS-1$
-			sb.append(tableName);
-			sb.append(" (entity_uuid char(16) for bit data, keyid varchar(128)) "); //$NON-NLS-1$
-			
-			logme(sb);
-			session.createNativeQuery(sb.toString()).executeUpdate();
-
-			sb = new StringBuilder();
-			sb.append(" INSERT INTO "); //$NON-NLS-1$
-			sb.append(tableName);
-			sb.append(" (entity_uuid, keyid) "); //$NON-NLS-1$
-			sb.append("SELECT a.entity_uuid, '" + groupBy.getAreaType().name() + "_' || b.keyid "); //$NON-NLS-1$ //$NON-NLS-2$
-			sb.append(" FROM "); //$NON-NLS-1$
-			sb.append(queryTable + " a "); //$NON-NLS-1$
-			sb.append(" JOIN smart.i_entity_attribute_value v ON a.entity_uuid = v.entity_uuid "); //$NON-NLS-1$
-			sb.append(" JOIN smart.i_attribute aa on aa.uuid = v.attribute_uuid and aa.keyid = :attributeKey "); //$NON-NLS-1$
-			sb.append(", "); //$NON-NLS-1$
-			sb.append(" smart.area_geometries b"); //$NON-NLS-1$
-			sb.append(" WHERE "); //$NON-NLS-1$
-			sb.append(" b.area_type = :areaType "); //$NON-NLS-1$
-			sb.append(" AND "); //$NON-NLS-1$
-			sb.append(" smart.pointinpolygon(v.double_value, v.double_value2, null, null, b.geom)"); //$NON-NLS-1$
-			sb.append(" AND b.ca_uuid in (:cas)"); //$NON-NLS-1$
-			
-			logme(sb);
-			session.createNativeQuery(sb.toString())
-				.setParameter("attributeKey",  groupBy.getAttributeKey()) //$NON-NLS-1$
-				.setParameter("areaType",  groupBy.getAreaType().name()) //$NON-NLS-1$
-				.setParameterList("cas", cas) //$NON-NLS-1$
-				.executeUpdate();
-			
-			areaToTables.put(groupBy,  tableName);
-			
-		}
-		
-		return areaToTables;
-	}
+//	/*
+//	 * create the necessary area group by tables.  For area group by attributes we create
+//	 * a separate table as it is possible for a single position attribute to be in multiple
+//	 * areas and we want to count each one
+//	 */
+//	private Map<GroupByItem, String> processAreaGroupBys(String queryTable, SumQueryDefinition definition, Collection<ConservationArea> cas, Session session) {
+//		List<GroupByItem> groupByItems = new ArrayList<>();
+//		groupByItems.addAll(definition.getRowGroupByPart().getItems());
+//		groupByItems.addAll(definition.getColumnGroupByPart().getItems());
+//		
+//		HashMap<GroupByItem, String> areaToTables = new HashMap<>();
+//		for (GroupByItem groupBy : groupByItems) {
+//			if (groupBy.getAttributeKey() == null || groupBy.getAttributeType() != AttributeType.POSITION) continue;
+//		
+//			String tableName = SqlGenerator.createTempTableName();
+//			StringBuilder sb = new StringBuilder();
+//			sb.append(" CREATE TABLE "); //$NON-NLS-1$
+//			sb.append(tableName);
+//			sb.append(" (entity_uuid char(16) for bit data, keyid varchar(128)) "); //$NON-NLS-1$
+//			
+//			logme(sb);
+//			session.createNativeQuery(sb.toString()).executeUpdate();
+//
+//			sb = new StringBuilder();
+//			sb.append(" INSERT INTO "); //$NON-NLS-1$
+//			sb.append(tableName);
+//			sb.append(" (entity_uuid, keyid) "); //$NON-NLS-1$
+//			sb.append("SELECT a.entity_uuid, '" + groupBy.getAreaType().name() + "_' || b.keyid "); //$NON-NLS-1$ //$NON-NLS-2$
+//			sb.append(" FROM "); //$NON-NLS-1$
+//			sb.append(queryTable + " a "); //$NON-NLS-1$
+//			sb.append(" JOIN smart.i_entity_attribute_value v ON a.entity_uuid = v.entity_uuid "); //$NON-NLS-1$
+//			sb.append(" JOIN smart.i_attribute aa on aa.uuid = v.attribute_uuid and aa.keyid = :attributeKey "); //$NON-NLS-1$
+//			sb.append(", "); //$NON-NLS-1$
+//			sb.append(" smart.area_geometries b"); //$NON-NLS-1$
+//			sb.append(" WHERE "); //$NON-NLS-1$
+//			sb.append(" b.area_type = :areaType "); //$NON-NLS-1$
+//			sb.append(" AND "); //$NON-NLS-1$
+//			sb.append(" smart.pointinpolygon(v.double_value, v.double_value2, null, null, b.geom)"); //$NON-NLS-1$
+//			sb.append(" AND b.ca_uuid in (:cas)"); //$NON-NLS-1$
+//			
+//			logme(sb);
+//			session.createNativeQuery(sb.toString())
+//				.setParameter("attributeKey",  groupBy.getAttributeKey()) //$NON-NLS-1$
+//				.setParameter("areaType",  groupBy.getAreaType().name()) //$NON-NLS-1$
+//				.setParameterList("cas", cas) //$NON-NLS-1$
+//				.executeUpdate();
+//			
+//			areaToTables.put(groupBy,  tableName);
+//			
+//		}
+//		
+//		return areaToTables;
+//	}
 	
 	/*
 	 * compute the minimum and maximum date values over all date attributes, so

@@ -21,8 +21,6 @@
  */
 package org.wcs.smart.i2.query.observation.filter;
 
-import org.wcs.smart.util.UuidUtils;
-
 /**
  * Filter for an entity type by key
  * 

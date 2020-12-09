@@ -250,7 +250,7 @@ public class DataModelFilter implements IQueryFilter, IColumnIdentifierProvider 
 		StringBuilder sb = new StringBuilder();
 		
 		if (attributeKey == null) {
-			sb.append("dm_category:");
+			sb.append("dm_category:"); //$NON-NLS-1$
 			sb.append(categoryKey);
 			return sb.toString();
 		}

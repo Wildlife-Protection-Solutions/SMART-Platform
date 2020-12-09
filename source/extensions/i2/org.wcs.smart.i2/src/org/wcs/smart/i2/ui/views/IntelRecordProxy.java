@@ -108,6 +108,7 @@ public class IntelRecordProxy implements IAdaptable{
 		return super.hashCode();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getAdapter(Class<T> adapter) {
 		if (adapter.equals(IntelRecord.class)) {

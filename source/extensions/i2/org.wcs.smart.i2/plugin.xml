@@ -290,7 +290,6 @@
                id="org.wcs.smart.i2.ui.view.filesearch"
                minimized="false"
                relationship="bottom"
-               relative="org.wcs.smart.i2.assessment.right"
                visible="false">
          </view>
       </perspectiveExtension>
@@ -1535,16 +1534,6 @@
       <handler
             class="org.wcs.smart.i2.ui.handler.NewQueryHandler$NewQueryHandlerWrapper"
             commandId="org.wcs.smart.i2.command.query.record.new">
-      </handler>
-      <handler
-            class="org.wcs.smart.i2.ui.handler.ConfigureRecordAttributesHandler$ConfigureRecordAttributesHandlerWrapper"
-            commandId="org.wcs.smart.i2.command.record.configuration">
-         <enabledWhen>
-            <test
-                  property="org.wcs.smart.i2.permission"
-                  value="intel_admin">
-            </test>
-         </enabledWhen>
       </handler>
       <handler
             class="org.wcs.smart.i2.ui.record.importer.ImportRecordCsvHandler$ImportRecordCsvHandlerWrapper"

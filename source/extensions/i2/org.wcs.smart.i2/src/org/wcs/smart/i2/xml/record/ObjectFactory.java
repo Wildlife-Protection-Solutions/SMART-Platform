@@ -31,7 +31,7 @@ import javax.xml.namespace.QName;
 @XmlRegistry
 public class ObjectFactory {
 
-    private final static QName _IntelRecord_QNAME = new QName("http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.record", "IntelRecord");
+    private final static QName _IntelRecord_QNAME = new QName("http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.record", "IntelRecord"); //$NON-NLS-1$ //$NON-NLS-2$
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: org.wcs.smart.i2.xml.record

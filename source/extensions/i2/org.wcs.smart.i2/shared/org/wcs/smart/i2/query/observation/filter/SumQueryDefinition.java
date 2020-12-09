@@ -105,7 +105,7 @@ public class SumQueryDefinition {
 		sb.append(IntelEntitySummaryQuery.PART_SEPERATOR);
 		sb.append(valuePart.asString());
 		sb.append(IntelEntitySummaryQuery.PART_SEPERATOR);
-		sb.append(filter == null ? "" : filter.asString());
+		sb.append(filter == null ? "" : filter.asString()); //$NON-NLS-1$
 		return sb.toString();
 	}
 	
