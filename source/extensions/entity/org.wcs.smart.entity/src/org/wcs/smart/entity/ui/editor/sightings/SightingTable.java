@@ -80,7 +80,7 @@ public class SightingTable {
 	 * Update the table contents 
 	 * @param results
 	 */
-	public void setInput(IPagedQueryResultSet results){
+	public void setInput(IPagedQueryResultSet<?> results){
 		if (sightingsTable.getTable().isDisposed()){
 			return;
 		}

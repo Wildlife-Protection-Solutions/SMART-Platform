@@ -344,6 +344,8 @@ public class EntityListTable extends Composite {
 								return -1;
 							};
 							break;
+						case MLIST:
+							throw new IllegalArgumentException();
 					}
 					col.getColumn().setData(SORTERKEY, comp);
 					
@@ -472,6 +474,7 @@ public class EntityListTable extends Composite {
 		    }
 		  }
 
+		  @SuppressWarnings("unchecked")
 		  @Override
 		  public int compare(Viewer viewer, Object e1, Object e2) {
 			  if (sortColumn == null ||sortColumn.getColumn().isDisposed()) return 0;

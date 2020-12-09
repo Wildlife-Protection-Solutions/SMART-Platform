@@ -95,7 +95,7 @@ public class SightingQueryShpExporter extends ShapeQueryExporter {
 			}
 		}
 		
-		super.setData((IPagedQueryResultSet)results, cols2, file);
+		super.setData((IPagedQueryResultSet<?>)results, cols2, file);
 		super.export(monitor);
 		
 	}

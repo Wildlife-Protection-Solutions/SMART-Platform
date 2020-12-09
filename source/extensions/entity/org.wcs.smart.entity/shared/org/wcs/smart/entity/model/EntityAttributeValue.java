@@ -217,6 +217,9 @@ public class EntityAttributeValue {
 				text = getAttributeTreeNode().getName();
 			}
 			break;
+		case MLIST:
+			//multi-list attributes not supported
+			throw new IllegalArgumentException();
 		}
 		if (text == null){
 			text = ""; //$NON-NLS-1$
@@ -244,6 +247,9 @@ public class EntityAttributeValue {
 			return getAttributeTreeNode();
 		case DATE:
 			return getDateValue();
+		case MLIST:
+			//multi-list attributes not supported
+			throw new IllegalArgumentException();
 		}
 		return null;
 	}
@@ -280,6 +286,9 @@ public class EntityAttributeValue {
 		case TREE:
 			setAttributeTreeNode((AttributeTreeNode) value);
 			break;
+		case MLIST:
+			//multi-list attributes not supported
+			throw new IllegalArgumentException();
 		}
 	}
 	

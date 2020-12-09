@@ -33,7 +33,6 @@ import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
 import org.locationtech.jts.geom.Envelope;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.AbstractPagedQueryResultSet;
 import org.wcs.smart.query.model.QueryColumn;
 /**
@@ -41,7 +40,7 @@ import org.wcs.smart.query.model.QueryColumn;
  * @author Emily
  *
  */
-public class SightingPagedResults extends AbstractPagedQueryResultSet {
+public class SightingPagedResults extends AbstractPagedQueryResultSet<SightingResultItem> {
 	
 	private String queryTempTable;
 	private Envelope bounds = null;
@@ -173,8 +172,8 @@ public class SightingPagedResults extends AbstractPagedQueryResultSet {
 	 * @throws SQLException
 	 */
 	 @Override
-	 public List<IResultItem> getResults(Session session, ResultSet rs, int from, int pageSize) throws SQLException {
-		List<IResultItem> items = new ArrayList<IResultItem>();
+	 public List<SightingResultItem> getResults(Session session, ResultSet rs, int from, int pageSize) throws SQLException {
+		List<SightingResultItem> items = new ArrayList<>();
 		rs.absolute(from);
 		int to = from + pageSize;
 		if (to >= itemCount) {
