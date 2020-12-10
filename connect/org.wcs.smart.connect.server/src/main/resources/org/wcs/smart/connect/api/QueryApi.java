@@ -610,9 +610,7 @@ public class QueryApi extends HttpServlet{
 		      @Override
 		      public void write(OutputStream output) throws IOException {
 		        try {
-		        	if (thisfile != null){
-		        		FileUtils.copyFile(thisfile.toFile(), output);
-		        	}
+	        		FileUtils.copyFile(thisfile.toFile(), output);
 		        } catch (Exception e) {
 		           e.printStackTrace();
 		        }finally{

@@ -46,7 +46,7 @@ public enum DataQueueManager {
 	
 	private final Logger logger = Logger.getLogger(DataQueueManager.class.getName());
 	
-	private List<String> datatypes;
+	private volatile List<String> datatypes;
 	
 	
 	public List<String> getDataTypes(){

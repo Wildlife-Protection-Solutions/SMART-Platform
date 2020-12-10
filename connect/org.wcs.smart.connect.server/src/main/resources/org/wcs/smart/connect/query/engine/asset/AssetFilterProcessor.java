@@ -136,7 +136,7 @@ public class AssetFilterProcessor implements IFilterProcessor {
 		}
 		qFilter.accept(observationFilterVisitor);	
 		
-		Map<IFilter, FilterTable> assetFilterToTableName = processAssetTables(c, queryFilter, dateFilter, caFilter);
+		Map<IFilter, FilterTable> assetFilterToTableName = processAssetTables(c, qFilter, dateFilter, caFilter);
 		
 		if (observationFilterVisitor.hasAttributeFilter()){
 			IDateFilterProcessor dateProcessor = (engine, sb)->{
@@ -146,7 +146,7 @@ public class AssetFilterProcessor implements IFilterProcessor {
 					sb.append(dfilter);
 				}
 			};
-			ObservationFilterUtils.createObservationTable(observationTable, c, queryFilter, 
+			ObservationFilterUtils.createObservationTable(observationTable, c, qFilter, 
 					engine, dateProcessor, caFilter, 
 					Collections.singleton(WaypointSourceEngine.INSTANCE.getSource(AssetWaypointSource.KEY)));
 		}

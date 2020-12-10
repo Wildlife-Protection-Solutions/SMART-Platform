@@ -129,7 +129,9 @@ public class GeoJsonExporter {
 						}
 						
 					}
-					fjson.writeCRS(prjProvider.getProjection().getParsedCoordinateReferenceSystem(), crsWriter); //write the new projection into JSON
+					if (prjProvider != null)
+						fjson.writeCRS(prjProvider.getProjection().getParsedCoordinateReferenceSystem(), crsWriter); //write the new projection into JSON
+					
 					SimpleFeatureCollection collection = DataUtilities.collection(reprojected);
 					if(collection != null && collection.getSchema() != null){
 						fjson.writeFeatureCollection(collection, writer);
@@ -188,7 +190,8 @@ public class GeoJsonExporter {
 						}
 						
 					}
-					fjson.writeCRS(prjProvider.getProjection().getParsedCoordinateReferenceSystem(), crsWriter); //write the new projection into JSON
+					if (prjProvider != null)
+						fjson.writeCRS(prjProvider.getProjection().getParsedCoordinateReferenceSystem(), crsWriter); //write the new projection into JSON
 					SimpleFeatureCollection collection = DataUtilities.collection(reprojected);
 					if(collection != null && collection.getSchema() != null){
 						fjson.writeFeatureCollection(collection, writer);

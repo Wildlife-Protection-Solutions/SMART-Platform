@@ -186,18 +186,18 @@ public class ErFilterProcessor implements IFilterProcessor {
 				}
 			};
 			
-			ObservationFilterUtils.createObservationTable(observationTable, c, queryFilter, 
+			ObservationFilterUtils.createObservationTable(observationTable, c, qFilter, 
 					engine, dateProcessor, caFilter, 
 					Collections.singleton(WaypointSourceEngine.INSTANCE.getSource(SurveyWaypointSource.KEY)));
 		}
 		//mission filters
-		queryFilter.accept(mpcollector);
+		qFilter.accept(mpcollector);
 		if (mpcollector.getAttributeInfo().size() > 0){
 			this.missionTable = engine.createTempTableName();
 			createMissionTable(c, qFilter, caFilter, dateFilter);
 		}
 
-		queryFilter.accept(sucollector);
+		qFilter.accept(sucollector);
 		if (sucollector.getAttributeInfo().size() > 0){
 			this.suAttributeTable = engine.createTempTableName();
 			createSamplingUnitAttributeTable(c, qFilter, caFilter, dateFilter);
@@ -735,7 +735,7 @@ public class ErFilterProcessor implements IFilterProcessor {
 				
 				if (dateFilter != null &&
 						(dateFilter.getDateFieldOption() instanceof MissionStartDateField ||
-								dateFilter.getDateFieldOption() instanceof MissionStartDateField)){
+								dateFilter.getDateFieldOption() instanceof MissionEndDateField)){
 					sql.append(" join "); //$NON-NLS-1$
 					sql.append(namePrefix(Mission.class));
 					sql.append(" on " + prefix(MissionDay.class) + ".mission_uuid = " + prefix(Mission.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$

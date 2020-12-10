@@ -34,13 +34,24 @@ public class GeoJsonFeature{
 		return type;
 	}
 	
+	public void setType(String type) {
+		this.type = type;
+	}
+	
 	public GeoJsonGeometry getGeometry() {
 		return geometry;
+	}
+	
+	public void setGeometry(GeoJsonGeometry geometry) {
+		this.geometry = geometry;
 	}
 	
 	public GeoJsonProperties getProperties() {
 		return properties;
 	}
 	
+	public void setProperties(GeoJsonProperties properties) {
+		this.properties = properties;
+	}
 	
 }

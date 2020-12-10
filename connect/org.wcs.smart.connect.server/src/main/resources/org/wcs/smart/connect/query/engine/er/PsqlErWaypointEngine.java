@@ -145,7 +145,7 @@ public class PsqlErWaypointEngine extends PsqlErEngine implements IWOEngine<Surv
 					logger.log(Level.SEVERE, ex.getMessage(), ex);
 					throw new SQLException(ex);
 				} finally {
-					filterer.dropTemporaryTables(c);
+					if (filterer != null) filterer.dropTemporaryTables(c);
 				}
 				
 			}

@@ -254,58 +254,60 @@ public class GlobalForestWatchNoa extends HttpServlet {
 			}
 		}
 		
-		for (Map<String, Object> alertMap: alerts) {
-			
-			Double lat = null;
-			Double lng = null;
-			String date = null;
-			String time = null;
-			LocalDateTime datetime = null;
-			
-			if (alertMap.containsKey(LATITUDE_JSON_KEY)) {
-				lat = (Double)alertMap.get(LATITUDE_JSON_KEY);
-			}
-			
-			if (alertMap.containsKey(LONGITUDE_JSON_KEY)) {
-				lng = (Double)alertMap.get(LONGITUDE_JSON_KEY);
-			}
-			
-			if (alertMap.containsKey(ACQ_DATE_JSON_KEY)) {
-				date = (String)alertMap.get(ACQ_DATE_JSON_KEY);
-			}
-			
-			if (alertMap.containsKey(ACQ_TIME_JSON_KEY)) {
-				time = (String)alertMap.get(ACQ_TIME_JSON_KEY);
-			}
-			
-			if (date != null && time != null) {
-				DateTimeFormatter sdf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"); //$NON-NLS-1$
-				try {
-					datetime = LocalDateTime.parse(date + " " + time, sdf); //$NON-NLS-1$
-				}catch (Exception ex) {
-					logger.log(Level.WARNING, "Unable to parse datetime for alert: " + ex.getMessage(), ex); //$NON-NLS-1$
+		if (alerts != null) {
+			for (Map<String, Object> alertMap: alerts) {
+				
+				Double lat = null;
+				Double lng = null;
+				String date = null;
+				String time = null;
+				LocalDateTime datetime = null;
+				
+				if (alertMap.containsKey(LATITUDE_JSON_KEY)) {
+					lat = (Double)alertMap.get(LATITUDE_JSON_KEY);
 				}
+				
+				if (alertMap.containsKey(LONGITUDE_JSON_KEY)) {
+					lng = (Double)alertMap.get(LONGITUDE_JSON_KEY);
+				}
+				
+				if (alertMap.containsKey(ACQ_DATE_JSON_KEY)) {
+					date = (String)alertMap.get(ACQ_DATE_JSON_KEY);
+				}
+				
+				if (alertMap.containsKey(ACQ_TIME_JSON_KEY)) {
+					time = (String)alertMap.get(ACQ_TIME_JSON_KEY);
+				}
+				
+				if (date != null && time != null) {
+					DateTimeFormatter sdf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"); //$NON-NLS-1$
+					try {
+						datetime = LocalDateTime.parse(date + " " + time, sdf); //$NON-NLS-1$
+					}catch (Exception ex) {
+						logger.log(Level.WARNING, "Unable to parse datetime for alert: " + ex.getMessage(), ex); //$NON-NLS-1$
+					}
+				}
+				
+				if (datetime == null || lat == null || lng == null) continue;
+				
+				//create a new alert here; check for duplicates later
+				Alert alert = new Alert();
+				alert.setCa(null);
+				alert.setCreatorUuid(gfw.getCreator().getUuid());
+				alert.setSource(Alert.Source.GLOBALFORESTWATCH);
+				alert.setDate(datetime);
+				alert.setDescription(sbDescription.toString());
+				alert.setLevel(gfw.getLevel());
+				alert.setStatus(AlertStatusEnum.ACTIVE);
+				alert.setTrack(null);
+				alert.setTypeUuid(gfw.getAlertType().getUuid());
+				alert.setX(lng);
+				alert.setY(lat);
+				alert.setUserGeneratedId((UUID.randomUUID().toString()));
+				
+				
+				createdAlerts.add(alert);
 			}
-			
-			if (datetime == null || lat == null || lng == null) continue;
-			
-			//create a new alert here; check for duplicates later
-			Alert alert = new Alert();
-			alert.setCa(null);
-			alert.setCreatorUuid(gfw.getCreator().getUuid());
-			alert.setSource(Alert.Source.GLOBALFORESTWATCH);
-			alert.setDate(datetime);
-			alert.setDescription(sbDescription.toString());
-			alert.setLevel(gfw.getLevel());
-			alert.setStatus(AlertStatusEnum.ACTIVE);
-			alert.setTrack(null);
-			alert.setTypeUuid(gfw.getAlertType().getUuid());
-			alert.setX(lng);
-			alert.setY(lat);
-			alert.setUserGeneratedId((UUID.randomUUID().toString()));
-			
-			
-			createdAlerts.add(alert);
 		}
 		return createdAlerts;
 	}

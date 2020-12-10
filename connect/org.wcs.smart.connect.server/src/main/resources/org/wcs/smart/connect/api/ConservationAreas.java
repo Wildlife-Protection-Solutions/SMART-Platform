@@ -870,10 +870,10 @@ public class ConservationAreas extends HttpServlet{
 				if (serverDelete == null){
 					throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("ConservationAreas.DoesNotExist", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 				}
-				if((version.equals(null) || version.equals("")) && serverDelete.getVersion()==null){ //$NON-NLS-1$
+				if((version == null || version.equals("")) && serverDelete.getVersion()==null){ //$NON-NLS-1$
 					//no problem, you can delete unversioned CAs without a version paramater.
 				}else if((version == null || version.equals("")) || !(serverDelete.getVersion().equals(UUID.fromString(version))) ){ //null version no longer acceptable at this point, or it doens't match the version //$NON-NLS-1$
-					throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("ConservationAreas.VersionDoesNotExist" + serverDelete.getVersion() + "  -- " + UUID.fromString(version), SmartUtils.getRequestLocale(request))); //$NON-NLS-1$ //$NON-NLS-2$
+					throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("ConservationAreas.VersionDoesNotExist" + serverDelete.getVersion() + "  -- " + UUID.fromString(version == null ? "" : version), SmartUtils.getRequestLocale(request))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
 				validateDelete(serverDelete.getUuid(), s);
 			

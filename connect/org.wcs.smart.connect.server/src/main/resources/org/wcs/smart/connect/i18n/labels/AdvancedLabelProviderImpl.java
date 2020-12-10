@@ -131,6 +131,7 @@ public class AdvancedLabelProviderImpl implements
 		
 		if (item instanceof Operator){
 			switch((Operator)item){
+				case EXACT: return Messages.getString("AdvancedLabelProviderImpl.ExactOp", l); //$NON-NLS-1$
 				case AND: return Messages.getString("AdvancedLabelProviderImpl.AndOp", l); //$NON-NLS-1$
 				case BETWEEN: return Messages.getString("AdvancedLabelProviderImpl.BetweenOp", l); //$NON-NLS-1$
 				case BRACKETS: return "( )"; //$NON-NLS-1$

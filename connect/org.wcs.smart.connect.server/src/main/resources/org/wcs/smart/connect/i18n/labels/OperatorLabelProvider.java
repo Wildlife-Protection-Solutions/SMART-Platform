@@ -53,6 +53,7 @@ public class OperatorLabelProvider implements IOperatorLabelProvider {
 				case OR:{ return Messages.getString("OperatorLabelProvider.OrLabel", l);} //$NON-NLS-1$
 				case NOT:{ return Messages.getString("OperatorLabelProvider.NotLabel", l);} //$NON-NLS-1$
 				case BRACKETS:{ return "( )"; } //$NON-NLS-1$
+				case EXACT: return Messages.getString("OperatorLabelProvider.ExactOperator", l); //$NON-NLS-1$
 			}
 		}
 		return null;

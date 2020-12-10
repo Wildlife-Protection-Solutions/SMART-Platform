@@ -24,7 +24,7 @@ package org.wcs.smart.connect.model;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import org.wcs.smart.connect.model.Alert.AlertStatusEnum;
@@ -44,14 +44,24 @@ public class GeoJsonAlert{
 	private static final String DATE_FORMAT_STR = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX"; //$NON-NLS-1$
 	
 	private String type;
-	private ArrayList<GeoJsonFeature> features ;
+	private List<GeoJsonFeature> features ;
 	
 	public String getType() {
 		return type;
 	}
-	public ArrayList<GeoJsonFeature> getFeatures() {
+
+	public void setType(String type) {
+		this.type = type;
+	}
+	
+	public List<GeoJsonFeature> getFeatures() {
 		return features;
 	} 
+	
+	
+	public void setFeature(List<GeoJsonFeature> features) {
+		this.features = features;
+	}
 	
 	//direct Getters for properties
 	public String getDeviceId() {
@@ -71,7 +81,7 @@ public class GeoJsonAlert{
 	public LocalDateTime getDateTime() {
 		LocalDateTime date = null;
 		String dateString = features.get(0).getProperties().getDateTime();
-		if (dateString == null || dateString == "") return null; //$NON-NLS-1$
+		if (dateString == null || dateString.isBlank()) return null;
 
 		try {
 			DateTimeFormatter f = DateTimeFormatter.ofPattern(DATE_FORMAT_STR);

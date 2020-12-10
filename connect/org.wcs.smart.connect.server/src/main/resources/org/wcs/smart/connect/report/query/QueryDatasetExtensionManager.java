@@ -37,7 +37,7 @@ import org.wcs.smart.data.oda.smart.impl.AbstractSmartQuery;
  */
 public class QueryDatasetExtensionManager {
 
-	private static QueryDatasetExtensionManager instance = null;
+	private static volatile QueryDatasetExtensionManager instance = null;
 	private static final Object LOCK = new Object();
 	/**
 	 * Mapping from query type key to smart dataset

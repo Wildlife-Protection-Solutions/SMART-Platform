@@ -41,9 +41,10 @@ import org.wcs.smart.util.UuidUtils;
  *
  */
 public enum DataStoreManager {
+	
 	INSTANCE;
 	
-	private static String datastoreLocation;
+	private String datastoreLocation;
 	
 	public static final String CA_EXPORT_LOCATION = "caexport"; //$NON-NLS-1$
 	
