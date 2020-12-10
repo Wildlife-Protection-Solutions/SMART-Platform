@@ -63,13 +63,15 @@ public class QueryTableViewerColumn {
 		if (column.getTooltip() != null){
 			tcolumn.getColumn().setToolTipText(column.getTooltip());
 		}
-		tcolumn.getColumn().addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e){
-				sorter.setSortColumn(QueryTableViewerColumn.this);
-			}
-			
-		});
+		
+		if (sorter != null) {
+			tcolumn.getColumn().addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e){
+					sorter.setSortColumn(QueryTableViewerColumn.this);
+				}	
+			});
+		}
 	}
 	
 	public CellLabelProvider getLabelProvider(){
