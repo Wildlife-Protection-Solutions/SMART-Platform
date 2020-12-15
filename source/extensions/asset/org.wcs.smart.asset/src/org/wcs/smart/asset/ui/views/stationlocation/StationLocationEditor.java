@@ -133,8 +133,10 @@ public class StationLocationEditor extends EditorPart implements MapPart {
 	private IPartListener2 partlistener = new IPartListener2(){
         public void partActivated( IWorkbenchPartReference partRef ) {
             if (partRef.getPart(false) == StationLocationEditor.this && getMap() != ApplicationGIS.NO_MAP) {
-                IToolManager toolManager = ApplicationGIS.getToolManager();
-                toolManager.setCurrentEditor( StationLocationEditor.this );
+            	if (!currentPage.getMapViewer().getControl().isDisposed()) {
+            		IToolManager toolManager = ApplicationGIS.getToolManager();
+            		toolManager.setCurrentEditor( StationLocationEditor.this );
+            	}
             }
         }
         public void partBroughtToTop( IWorkbenchPartReference partRef ) { }

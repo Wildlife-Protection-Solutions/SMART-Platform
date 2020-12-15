@@ -81,6 +81,7 @@ import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.internal.Messages;
 import org.wcs.smart.asset.model.Asset;
+import org.wcs.smart.asset.model.AssetDeployment;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.ui.IdFieldHeader;
@@ -136,8 +137,10 @@ public class StationEditor extends EditorPart implements MapPart {
 	private IPartListener2 partlistener = new IPartListener2(){
         public void partActivated( IWorkbenchPartReference partRef ) {
             if (partRef.getPart(false) == StationEditor.this && getMap() != ApplicationGIS.NO_MAP) {
-                IToolManager toolManager = ApplicationGIS.getToolManager();
-                toolManager.setCurrentEditor( StationEditor.this );
+            	if (!currentPage.getMapViewer().getControl().isDisposed()) {
+            		IToolManager toolManager = ApplicationGIS.getToolManager();
+            		toolManager.setCurrentEditor( StationEditor.this );
+            	}
             }
         }
         public void partBroughtToTop( IWorkbenchPartReference partRef ) { }
@@ -284,6 +287,21 @@ public class StationEditor extends EditorPart implements MapPart {
 	private void createEventHandlers() {
 		//on delete close editor
 		handlers = new ArrayList<>();
+		
+		subscribeToEvent(AssetEvents.ASSETDEPLOYMENT_ALL, (event)->{
+			Object data = event.getProperty(IEventBroker.DATA);
+			if (data != null){
+				boolean refresh = false;
+				Collection<AssetDeployment> items = (Collection<AssetDeployment>)data;
+				for (AssetDeployment loc : items){
+					if (loc.getStationLocation().getStation().equals(station)) {
+						refresh = true;
+						break;
+					}
+				}
+				if (refresh) validateAndRefresh();
+			}
+		});
 		
 		subscribeToEvent(AssetEvents.ASSETSTATIONLOCATION_ALL, (event)->{
 			Object data = event.getProperty(IEventBroker.DATA);
@@ -466,7 +484,7 @@ public class StationEditor extends EditorPart implements MapPart {
 				if (currentPanel == null) currentPanel = createCurrentSection(sectionBody);
 				((StackLayout)sectionBody.getLayout()).topControl = currentPanel;
 				lastMapPage = currentPanel;
-				if (currentPage.getMapViewer() == null) {
+				if (currentPage.getMapViewer() == null || currentPage.getMapViewer().getControl().isDisposed()) {
 					ApplicationGIS.getToolManager().setCurrentEditor(null);
 				}else {
 					//force refresh of map editor so tools work
