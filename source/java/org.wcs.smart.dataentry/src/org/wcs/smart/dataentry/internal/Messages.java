@@ -44,6 +44,8 @@ public class Messages extends NLS {
 	public static String CmAttributeOption_EnterOnceType_END;
 	public static String CmAttributeOption_EnterOnceType_NONE;
 	public static String CmAttributeOption_EnterOnceType_START;
+	public static String CmNodeInfoComposite_AttachmentsAllowed;
+	public static String CmNodeInfoComposite_AttachmentsAllowedTooltip;
 	public static String CmNodeInfoComposite_Category;
 	public static String CmNodeInfoComposite_ClassicOptionsLbl;
 	public static String CmNodeInfoComposite_ClassicOptionsTooltip;
@@ -57,6 +59,7 @@ public class Messages extends NLS {
 	public static String CmNodeInfoComposite_photoOptionTooltip;
 	public static String CmNodeInfoComposite_photoRequiredTooltip;
 	public static String CmNodeInfoComposite_PhotoRequired;
+	public static String CmNodeInfoComposite_PhotoRequiredTooltip;
 	public static String CmNodeInfoComposite_RecordSingleGpsPoint;
 	public static String CmNodeInfoComposite_RecordSingleGpsPointTooltip;
 	public static String CmRootNodeInfoComposite_IconSetOption;

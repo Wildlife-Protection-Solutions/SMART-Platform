@@ -191,8 +191,8 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 		label.setText(Messages.CmNodeInfoComposite_OptionsSection);
 		
 		btnPhoto = new Button(container, SWT.CHECK);
-		btnPhoto.setText(Messages.CmNodeInfoComposite_PhotoAllowed);
-		btnPhoto.setToolTipText(Messages.CmNodeInfoComposite_photoOptionTooltip);
+		btnPhoto.setText(Messages.CmNodeInfoComposite_AttachmentsAllowed);
+		btnPhoto.setToolTipText(Messages.CmNodeInfoComposite_AttachmentsAllowedTooltip);
 		btnPhoto.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -207,7 +207,7 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 		
 		btnPhotoRequired = new Button(container, SWT.CHECK);
 		btnPhotoRequired.setText(Messages.CmNodeInfoComposite_PhotoRequired);
-		btnPhotoRequired.setToolTipText(Messages.CmNodeInfoComposite_photoRequiredTooltip);
+		btnPhotoRequired.setToolTipText(Messages.CmNodeInfoComposite_PhotoRequiredTooltip);
 		btnPhotoRequired.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)btnPhotoRequired.getLayoutData()).horizontalIndent = 15;
 		btnPhotoRequired.addSelectionListener(new SelectionAdapter() {
