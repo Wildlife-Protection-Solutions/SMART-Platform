@@ -262,6 +262,7 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	public static final String IMPORT_ICON = "org.wcs.smart.import"; //$NON-NLS-1$
 	public static final String PDF_ICON = "org.wcs.smart.pdf"; //$NON-NLS-1$
 	
+	public static final String AUDIO_CLIP_IMG = "images/audio_clip.svg"; //$NON-NLS-1$
 	/**
 	 * Mutex to ensure that jobs will not be conflicting as simultaneous jobs execution
 	 * might result in SQLException. This will ensure that jobs are running one by one.

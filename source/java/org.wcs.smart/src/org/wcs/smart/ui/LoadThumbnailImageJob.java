@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.ui;
 
+import java.io.InputStream;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -32,10 +34,15 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.SWTException;
+import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Display;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -108,11 +115,50 @@ public class LoadThumbnailImageJob extends Job {
 						
 					}
 					
-					if (file == null || file.toAbsolutePath().normalize().toFile().length() > 200 * Math.pow(10, 6)) {
-						// skip images > 200MB
-						return;
+					try {
+						if (Files.probeContentType(file).startsWith("audio")){ //$NON-NLS-1$
+							URL url = SmartPlugIn.getDefault().getBundle().getResource(SmartPlugIn.AUDIO_CLIP_IMG);
+							
+							Image imgAudio = null;
+							try{
+								try(InputStream reader = url.openStream()){
+									imgAudio = SmartUtils.readSvg(Display.getDefault(), reader, thumbnailSize/4);
+								}catch (Exception ex) {
+									ex.printStackTrace();
+									throw ex;
+								}
+								
+								//display audio icon
+								Image image2 = new Image(Display.getDefault(),thumbnailSize,thumbnailSize );
+								
+								GC gc = new GC(image2);
+								try{
+									int x = thumbnailSize / 2 - thumbnailSize / 8;
+									int y = thumbnailSize / 2 - thumbnailSize / 8-10;
+									gc.drawImage(imgAudio, 0, 0, imgAudio.getBounds().width, imgAudio.getBounds().height, x, y, imgAudio.getBounds().width, imgAudio.getBounds().height);
+									
+									String text = SharedUtils.getFilenameExtension(file.getFileName().toString());
+									Point et = gc.textExtent(text);
+									gc.drawText(text, thumbnailSize / 2 - et.x / 2, y + thumbnailSize / 4);
+								}finally {
+									gc.dispose();
+								}
+								image = image2;
+							}finally {
+								if (imgAudio != null) imgAudio.dispose();
+							}
+						}
+					}catch (Exception ex) {
+						
 					}
-					image = SmartUtils.getImage(file, thumbnailSize);
+					
+					if (image == null) {
+						if (file == null || file.toAbsolutePath().normalize().toFile().length() > 200 * Math.pow(10, 6)) {
+							// skip images > 200MB
+							return;
+						}
+						image = SmartUtils.getImage(file, thumbnailSize);
+					}
 				}finally {
 					if (deleteMe && file != null) {
 						try {
