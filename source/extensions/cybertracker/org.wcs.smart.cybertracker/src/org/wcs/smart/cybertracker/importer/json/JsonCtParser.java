@@ -26,6 +26,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -101,6 +102,9 @@ public class JsonCtParser {
 	
 	private static final String JPEG_EXT = "jpeg"; //$NON-NLS-1$
 	private static final String PHOTO_KEY = "ct_photo"; //$NON-NLS-1$
+	
+	private static final String WAVE_EXT = "wav"; //$NON-NLS-1$
+	private static final String AUDIO_KEY = "ct_audio"; //$NON-NLS-1$
 	
 	/*
 	 * These are keys for the new BETA CT Json format
@@ -369,8 +373,8 @@ public class JsonCtParser {
 		int catLevel = -1;
 		
 		//attribute information
-		HashMap<Integer, List<ObservationInfo>> attributes = new HashMap<Integer, List<ObservationInfo>>();
-		List<String> waypointAttachments = new ArrayList<String>();
+		HashMap<Integer, List<ObservationInfo>> attributes = new HashMap<>();
+		List<AttachmentInfo> waypointAttachments = new ArrayList<>();
 		//default values
 		JSONObject defaultValues = null;
 		
@@ -424,9 +428,11 @@ public class JsonCtParser {
 				}
 			}
 			if (key.startsWith(ScreensUtil.RESULT_PHOTO)){
-				waypointAttachments.add((String)e.getValue());
+				waypointAttachments.add(new AttachmentInfo(AttachmentInfo.AttachmentType.PHOTO, (String)e.getValue()));
 			}
-			
+			if (key.startsWith(ScreensUtil.RESULT_AUDIO)) {
+				waypointAttachments.add(new AttachmentInfo(AttachmentInfo.AttachmentType.AUDIO, (String)e.getValue()));
+			}
 			//default values
 			if (key.equalsIgnoreCase(ScreensUtil.RESULT_DEFAULT_ATTRIBUTE_VALUES) ){
 				String jsonDefaults = (String) e.getValue();
@@ -581,28 +587,43 @@ public class JsonCtParser {
 //	private AttributeTreeNode findAttributeTreeNode(String uuid, Session session) throws Exception{
 //		return JsonUtils.findAttributeTreeNode(uuid, session);
 //	}	
-	private List<WaypointAttachment> parseAttachments(List<String> values) throws Exception{
+	private List<WaypointAttachment> parseAttachments(List<AttachmentInfo> values) throws Exception{
 		int imagecnt = 0;
-		List<WaypointAttachment> attachments = new ArrayList<WaypointAttachment>();
+		List<WaypointAttachment> attachments = new ArrayList<>();
 		
-		for (String value : values){
+		for (AttachmentInfo value : values){
 			
-			//picture object; create a temporary file add it to waypoint observation
-			String fileName = PHOTO_KEY + "_" + imagecnt + "." + JPEG_EXT;   //$NON-NLS-1$//$NON-NLS-2$
-				
-			Path temp = Files.createTempFile("SMART_" + System.nanoTime(), "." + JPEG_EXT);   //$NON-NLS-1$//$NON-NLS-2$
-			BufferedImage image = null;
-			try(InputStream in = new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(value))){
-				image = ImageIO.read(in);					
-			}
-			if (image == null){
-				warnings.add(MessageFormat.format(Messages.JsonCtParser_CouldNotImportPhoto, value));
-			}else{
-				ImageIO.write(image, JPEG_EXT.toUpperCase(Locale.ROOT), temp.toAbsolutePath().toFile());	
+			if (value.getType() == AttachmentInfo.AttachmentType.PHOTO) {
+				//picture object; create a temporary file add it to waypoint observation
+				String fileName = PHOTO_KEY + "_" + imagecnt + "." + JPEG_EXT;   //$NON-NLS-1$//$NON-NLS-2$
+					
+				Path temp = Files.createTempFile("SMART_" + System.nanoTime(), "." + JPEG_EXT);   //$NON-NLS-1$//$NON-NLS-2$
+				BufferedImage image = null;
+				try(InputStream in = new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(value.getData()))){
+					image = ImageIO.read(in);					
+				}
+				if (image == null){
+					warnings.add(MessageFormat.format(Messages.JsonCtParser_CouldNotImportPhoto, value));
+				}else{
+					ImageIO.write(image, JPEG_EXT.toUpperCase(Locale.ROOT), temp.toAbsolutePath().toFile());	
+					WaypointAttachment attachment = new WaypointAttachment();
+					attachment.setCopyFromLocation(temp);
+					attachment.setFilename(fileName);
+					attachments.add(attachment);
+				}
+			}else if (value.getType() == AttachmentInfo.AttachmentType.AUDIO) {
+				String fileName = AUDIO_KEY + "_" + imagecnt + "." + WAVE_EXT;   //$NON-NLS-1$//$NON-NLS-2$
+				Path temp = Files.createTempFile("SMART_" + System.nanoTime(), "." + WAVE_EXT);   //$NON-NLS-1$//$NON-NLS-2$
+				try(InputStream in = new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(value.getData()))){
+					Files.copy(in, temp, StandardCopyOption.REPLACE_EXISTING);
+				}
 				WaypointAttachment attachment = new WaypointAttachment();
 				attachment.setCopyFromLocation(temp);
 				attachment.setFilename(fileName);
-				attachments.add(attachment);
+				attachments.add(attachment);	
+				
+			}else {
+				throw new IllegalStateException(MessageFormat.format("Attachment type {0} not supported.", value.getType().name() )); //$NON-NLS-1$
 			}
 		}
 		return attachments;
@@ -720,7 +741,23 @@ public class JsonCtParser {
 	}
 	
 	
-	
+	private static class AttachmentInfo{
+		enum AttachmentType {PHOTO, AUDIO};
+		
+		private AttachmentType type;
+		private String data;
+		
+		public AttachmentInfo(AttachmentType type, String data) {
+			this.data = data;
+			this.type = type;
+		}
+		public String getData() {
+			return this.data;
+		}
+		public AttachmentType getType() {
+			return this.type;
+		}
+	}
 	private class ObservationInfo{
 		public String keyType;
 		public String uuid;

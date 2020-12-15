@@ -73,6 +73,7 @@ public class ScreensUtil {
 	public static final String RESULT_OBSERVER = COMMON_PREFIX + "Observer"; //$NON-NLS-1$
 
 	public static final String RESULT_PHOTO = COMMON_PREFIX + "Photo"; //$NON-NLS-1$
+	public static final String RESULT_AUDIO = COMMON_PREFIX + "Audio"; //$NON-NLS-1$
 	
 	public static final String RESULT_DATATYPE = COMMON_PREFIX + "DataType"; //$NON-NLS-1$
 
