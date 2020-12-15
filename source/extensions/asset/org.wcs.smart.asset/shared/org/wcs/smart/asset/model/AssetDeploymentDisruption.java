@@ -150,6 +150,6 @@ public class AssetDeploymentDisruption extends UuidItem{
 		if (getEndDate() != null && getEndDate().isBefore(now)) {
 			end = getEndDate();
 		}
-		return ChronoUnit.MILLIS.between(end, getStartDate()) / 1000.0;
+		return ChronoUnit.MILLIS.between(getStartDate(), end) / 1000.0;
 	}
 }

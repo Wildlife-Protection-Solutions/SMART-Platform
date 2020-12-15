@@ -204,7 +204,7 @@ public class AttributeFieldEditor {
 					Double.parseDouble(txtValue.getText());
 				}
 			}catch(Exception ex){
-				msg = Messages.AttributeFieldEditor_InvalidNumberValue;
+				msg = Messages.AttributeFieldEditor_InvalidNumberAttribute;
 			}
 		}
 		if (attribute.getType() == AttributeType.POSITION){
@@ -218,7 +218,7 @@ public class AttributeFieldEditor {
 					y = Double.parseDouble(txtValue2.getText());
 				}
 			}catch(Exception ex){
-				msg =Messages.AttributeFieldEditor_InvalidNumberValue;
+				msg = Messages.AttributeFieldEditor_InvalidPositionAttribute;
 			}
 			//try to reproject to database crs
 			if (x != null && y != null){

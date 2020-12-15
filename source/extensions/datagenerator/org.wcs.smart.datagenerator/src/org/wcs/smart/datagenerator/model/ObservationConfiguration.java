@@ -96,7 +96,6 @@ public class ObservationConfiguration {
 			}
 			sb.append(" | "); //$NON-NLS-1$
 		}
-		System.out.println(sb.toString());
 		return sb.toString();
 	}
 }

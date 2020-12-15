@@ -515,7 +515,9 @@ public class Messages extends NLS {
 	public static String AttributeDialog_Title;
 	public static String AttributeDialog_TypeLabel;
 	public static String AttributeFieldEditor_InvalidCoordinate;
+	public static String AttributeFieldEditor_InvalidNumberAttribute;
 	public static String AttributeFieldEditor_InvalidNumberValue;
+	public static String AttributeFieldEditor_InvalidPositionAttribute;
 	public static String AttributeFieldEditor_OpenMap;
 	public static String AttributeFieldEditor_ReprojectionError;
 	public static String AttributeListDialog_DeleteError;

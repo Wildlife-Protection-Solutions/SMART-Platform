@@ -397,7 +397,7 @@ public class DataImportPage {
 								wp.getObservationGroups().add(g);
 							}
 							
-							int incidentLength =  (int) Math.ceil( ChronoUnit.MILLIS.between( maxDate, minDate) / 1000.0);
+							int incidentLength =  (int) Math.ceil( ChronoUnit.MILLIS.between( minDate, maxDate) / 1000.0);
 							
 							session.save(wp);
 							session.flush();
