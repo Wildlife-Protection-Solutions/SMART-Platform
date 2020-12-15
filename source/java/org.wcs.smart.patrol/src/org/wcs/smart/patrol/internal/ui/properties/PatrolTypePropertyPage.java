@@ -395,9 +395,11 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 				PatrolType pt = (PatrolType)((IStructuredSelection)patrolTypeTblViewer.getSelection()).getFirstElement();
 				if (pt.getIsActive()){
 					btnDisableType.setToolTipText(DialogConstants.DISABLE_BUTTON_TEXT);
+					btnDisableType.setText(DialogConstants.DISABLE_BUTTON_TEXT);
 					btnDisableType.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DISABLE_ICON));
 				}else{
 					btnDisableType.setToolTipText(DialogConstants.ENABLE_BUTTON_TEXT);
+					btnDisableType.setText(DialogConstants.ENABLE_BUTTON_TEXT);
 					btnDisableType.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ENABLE_ICON));
 				}
 				btnDisableType.setEnabled(true);
