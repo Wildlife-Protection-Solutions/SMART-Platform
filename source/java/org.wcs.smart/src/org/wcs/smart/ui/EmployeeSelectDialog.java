@@ -57,6 +57,8 @@ public class EmployeeSelectDialog extends SmartStyledDialog{
 	private CheckboxTableViewer tblViewer;
 	private List<Employee> initEmployees;
 	
+	private String title = Messages.EmployeePropertyPage_shelltext;
+	
 	/**
 	 * Creates a new dialog where employee can be any
 	 * active employee for the Conservation Area.
@@ -73,10 +75,20 @@ public class EmployeeSelectDialog extends SmartStyledDialog{
 	 * @param employees
 	 */
 	public EmployeeSelectDialog(Shell parent, List<Employee> employees) {
-		super(parent);
+		this(parent);
 		this.initEmployees = employees;
 	}
 	
+	/**
+	 * Creates a new dialog with the given title, where employees are selected
+	 * from the list of employees.
+	 * @param parent
+	 * @param employees
+	 */
+	public EmployeeSelectDialog(Shell parent, String title, List<Employee> employees) {
+		this(parent, employees);
+		this.title = title;
+	}
 	
 	/**
 	 * 
@@ -137,7 +149,7 @@ public class EmployeeSelectDialog extends SmartStyledDialog{
 		}else {
 			tblViewer.setInput(initEmployees);
 		}
-		getShell().setText(Messages.EmployeePropertyPage_shelltext);
+		getShell().setText(title);
 		return main;
 	}
 	
