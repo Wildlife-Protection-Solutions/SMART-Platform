@@ -398,29 +398,9 @@
                 <names language_code="en" value="Unknown"/>
             </values>
         </attribute>
-        <attribute key="partremoved2" isrequired="false" type="LIST">
-            <names language_code="en" value="Part Missing 2"/>
-            <values key="skin" isactive="true" iconkey="skin">
-                <names language_code="en" value="Skin"/>
-            </values>
-            <values key="meat" isactive="true" iconkey="fresh">
-                <names language_code="en" value="Meat"/>
-            </values>
-            <values key="tusk" isactive="true" iconkey="tusks">
-                <names language_code="en" value="Tusk"/>
-            </values>
-            <values key="hornorantler" isactive="true" iconkey="horns">
-                <names language_code="en" value="Horn or Antler"/>
-            </values>
-            <values key="fin" isactive="true">
-                <names language_code="en" value="Fin"/>
-            </values>
-            <values key="other" isactive="true" iconkey="other">
-                <names language_code="en" value="Other"/>
-            </values>
-        </attribute>
-        <attribute key="partremoved1" isrequired="false" type="LIST">
-            <names language_code="en" value="Part Missing 1"/>
+        
+        <attribute key="partremoved" isrequired="false" type="MLIST">
+            <names language_code="en" value="Part Missing"/>
             <values key="skin" isactive="true" iconkey="skin">
                 <names language_code="en" value="Skin"/>
             </values>
@@ -459,27 +439,6 @@
             </values>
             <values key="extractiveindustrybasecamp" isactive="true" iconkey="extractive_industry_basecamp">
                 <names language_code="en" value="Extractive Industry Basecamp"/>
-            </values>
-            <values key="other" isactive="true" iconkey="other">
-                <names language_code="en" value="Other"/>
-            </values>
-        </attribute>
-        <attribute key="partremoved3" isrequired="false" type="LIST">
-            <names language_code="en" value="Part Missing 3"/>
-            <values key="skin" isactive="true" iconkey="skin">
-                <names language_code="en" value="Skin"/>
-            </values>
-            <values key="meat" isactive="true" iconkey="fresh">
-                <names language_code="en" value="Meat"/>
-            </values>
-            <values key="tusk" isactive="true" iconkey="tusks">
-                <names language_code="en" value="Tusk"/>
-            </values>
-            <values key="hornorantler" isactive="true" iconkey="horns">
-                <names language_code="en" value="Horn or Antler"/>
-            </values>
-            <values key="fin" isactive="true">
-                <names language_code="en" value="Fin"/>
             </values>
             <values key="other" isactive="true" iconkey="other">
                 <names language_code="en" value="Other"/>
@@ -1519,9 +1478,7 @@
                 <attribute isactive="true" attributekey="sex"/>
                 <attribute isactive="true" attributekey="issecured"/>
                 <attribute isactive="true" attributekey="actiontakenrcass"/>
-                <attribute isactive="true" attributekey="partremoved1"/>
-                <attribute isactive="true" attributekey="partremoved2"/>
-                <attribute isactive="true" attributekey="partremoved3"/>
+                <attribute isactive="true" attributekey="partremoved"/>
             </category>
             <category key="animalpartsandbushmeat" ismultiple="true" isactive="true" iconkey="bushmeat">
                 <names language_code="en" value="Animal Parts and Bushmeat"/>
