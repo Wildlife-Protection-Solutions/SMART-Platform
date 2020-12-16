@@ -74,7 +74,7 @@ public class TreeEditorField<T>  {
 	private Button btnDownArrow;
 	private Display focusDisplay = null;
 	private Collection<Listener> listeners = null; 
-	
+		
 	private Listener focusListener = new Listener() {
 		@Override
 		public void handleEvent(Event event) {
@@ -207,6 +207,13 @@ public class TreeEditorField<T>  {
 			}
 		});
 		
+		//added this so the drop down show when click on field
+		//this makes it more similar to list drop down behaviour
+		txtText.addListener(SWT.MouseUp, e->{
+			//if visible but text is selected ignore
+			if (tree.isVisible() && txtText.getSelectionCount() > 0) return;
+			showTree(false);
+		});
 		
 		txtText.addFocusListener(new FocusListener() {
 			@Override

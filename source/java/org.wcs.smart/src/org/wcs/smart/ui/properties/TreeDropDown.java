@@ -80,7 +80,7 @@ public class TreeDropDown{
 	 * @param parent outer shell
 	 */
 	public TreeDropDown(Shell parent){
-		main = new Shell(parent, SWT.SINGLE | SWT.BORDER | SWT.NO_FOCUS | SWT.NO_TRIM);
+		main = new Shell(parent, SWT.NO_TRIM | SWT.SINGLE);
 
 		main.addTraverseListener(new TraverseListener() {
 			@Override
@@ -161,7 +161,7 @@ public class TreeDropDown{
 			}
 		};
 
-		treeViewer = new TreeViewer(parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.SINGLE);
+		treeViewer = new TreeViewer(parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.SINGLE | SWT.BORDER);
 		treeViewer.setFilters(new ViewerFilter[]{patternFilter});
 		
 		treeViewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
