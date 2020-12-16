@@ -371,7 +371,7 @@ public class IntelSummaryQueryEditor extends EditorPart implements IQueryEditor{
 		exportItem.setToolTipText(Messages.IntelQueryEditor_ExportTooltip);
 		
 		ToolItem runItem2 = new ToolItem(headerToolbar, SWT.PUSH);
-		runItem2.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RUN));
+		runItem2.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.RUN_ICON));
 		runItem2.addListener(SWT.Selection, (event)->runQuery());
 		runItem2.setToolTipText(Messages.IntelQueryEditor_RunTooltip);
 		runItem[0] = runItem2;
@@ -498,7 +498,7 @@ public class IntelSummaryQueryEditor extends EditorPart implements IQueryEditor{
 		ToolBar headerToolbar = new ToolBar(main, SWT.FLAT);
 		runItem[1] = new ToolItem(headerToolbar, SWT.PUSH);
 		runItem[1].setToolTipText(Messages.IntelQueryEditor_runTooltip);
-		runItem[1].setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RUN));
+		runItem[1].setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.RUN_ICON));
 		runItem[1].addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {

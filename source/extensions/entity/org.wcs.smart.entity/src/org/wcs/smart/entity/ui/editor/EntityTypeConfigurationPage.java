@@ -82,6 +82,7 @@ import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -616,6 +617,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 			buttonTableComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false,2,1));
 		
 			Button btnAdd = toolkit.createButton(buttonTableComp, DialogConstants.ADD_BUTTON_TEXT, SWT.PUSH);
+			btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 			btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 			((GridData)btnAdd.getLayoutData()).widthHint = 100;
 			btnAdd.addSelectionListener(new SelectionAdapter() {
@@ -626,6 +628,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 			});
 		
 			final Button btnEdit = toolkit.createButton(buttonTableComp, DialogConstants.EDIT_BUTTON_TEXT, SWT.PUSH);
+			btnEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 			btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 			((GridData)btnEdit.getLayoutData()).widthHint = 100;
 			btnEdit.addSelectionListener(new SelectionAdapter() {
@@ -637,6 +640,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 			btnEdit.setEnabled(false);
 			
 			final Button btnDelete = toolkit.createButton(buttonTableComp, DialogConstants.DELETE_BUTTON_TEXT, SWT.PUSH);
+			btnDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 			btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 			((GridData)btnDelete.getLayoutData()).widthHint = 100;
 			btnDelete.addSelectionListener(new SelectionAdapter() {

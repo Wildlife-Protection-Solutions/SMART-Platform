@@ -223,7 +223,7 @@ public class SummaryDefinitionPanel implements IDefinitionPanel {
 		
 		runItem = new ToolItem(toolbar, SWT.PUSH);
 		runItem.setToolTipText(Messages.FilterDefinitionPanel_runtooltip);
-		runItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RUN));
+		runItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.RUN_ICON));
 		runItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {

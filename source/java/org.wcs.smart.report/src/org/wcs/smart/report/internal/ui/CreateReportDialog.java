@@ -56,6 +56,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.query.ui.querylist.MultiFocusCellOwnerDrawHighlighter;
 import org.wcs.smart.report.IReportListener;
 import org.wcs.smart.report.ReportEventManager;
@@ -233,6 +234,8 @@ public class CreateReportDialog extends SmartStyledTitleDialog {
 		TreeViewerEditor.create(reportList, actSupport, ColumnViewerEditor.DEFAULT);
 		
 		btnNewFolder = new Button(main, SWT.PUSH);
+		btnNewFolder.setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnNewFolder.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		btnNewFolder.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false, 2, 1));
 		btnNewFolder.setText(Messages.CreateReportDialog_NewFolderButton);
 		btnNewFolder.setEnabled(false);

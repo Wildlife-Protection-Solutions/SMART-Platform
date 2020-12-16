@@ -346,7 +346,7 @@ public class IntelEntityRecordQueryEditor extends EditorPart implements IQueryEd
 		exportItem.setToolTipText(Messages.IntelQueryEditor_ExportTooltip);
 		
 		runItem[0] = new ToolItem(headerToolbar, SWT.PUSH);
-		runItem[0].setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RUN));
+		runItem[0].setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.RUN_ICON));
 		runItem[0].addListener(SWT.Selection, (event)->runQuery());
 		runItem[0].setToolTipText(Messages.IntelQueryEditor_RunTooltip);
 		
@@ -481,7 +481,7 @@ public class IntelEntityRecordQueryEditor extends EditorPart implements IQueryEd
 		
 		ToolItem runItem = new ToolItem(toolbar, SWT.PUSH);
 		runItem.setToolTipText(Messages.FilterDefinitionPanel_runtooltip);
-		runItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RUN));
+		runItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.RUN_ICON));
 		runItem.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {

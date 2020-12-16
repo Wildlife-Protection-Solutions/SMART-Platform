@@ -299,8 +299,8 @@ public class PlanTargetEngine {
 		          Object[] row = (Object[])it.next();
 		          LocalTime t1 = (LocalTime)row[0];
 		          LocalTime t2 = (LocalTime)row[1];
-		          Long milDiff = ChronoUnit.MILLIS.between(t2, t1) + 1000; //all our default end times for a whole day are 11:59:59, adding a second here to get 24hours for full days.
-		          targetTotal += (milDiff / 1000 /60 / 60); 
+		          Long milDiff = ChronoUnit.MILLIS.between(t2, t1); 
+		          targetTotal += (milDiff / 3_600_000.0); 
 		        }
 		    }
 
@@ -324,8 +324,9 @@ public class PlanTargetEngine {
 		          Object[] row = (Object[])it.next();
 		          LocalTime t1 = (LocalTime)row[0];
 		          LocalTime t2 = (LocalTime)row[1];
-		          Long milDiff = ChronoUnit.MILLIS.between(t2, t1) + 1000; //all our default end times for a whole day are 11:59:59, adding a second here to get 24hours for full days.
-		          targetTotal += (milDiff / 1000 /60 / 60); 
+		          
+		          Long milDiff = ChronoUnit.MILLIS.between(t2, t1);
+		          targetTotal += (milDiff / 3_600_000.0); 
 		        }
 		    }
 

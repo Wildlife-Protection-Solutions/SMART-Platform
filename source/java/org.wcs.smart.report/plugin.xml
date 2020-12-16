@@ -1177,7 +1177,7 @@
          point="org.eclipse.ui.commandImages">
       <image
             commandId="org.wcs.smart.report.runReport"
-            icon="images/icons/etool16/report_run.png">
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/run.png">
       </image>
       <image
             commandId="org.wcs.smart.report.exportReport"

@@ -43,6 +43,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryPlugIn;
@@ -231,7 +232,7 @@ public class RScriptEditor extends MultiPageEditorPart {
 			page1 = new RunPage(this);
 			int i = addPage(page1, getEditorInput());
 			setPageText(i, Messages.RScriptEditor_RunPageName);
-			setPageImage(i, QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.RUN_ICON));
+			setPageImage(i, SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.RUN_ICON));
 			
 			page2 = new ResultsPage(this);
 			i = addPage(page2, getEditorInput());

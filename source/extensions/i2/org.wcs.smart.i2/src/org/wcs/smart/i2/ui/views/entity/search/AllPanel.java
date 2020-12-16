@@ -232,7 +232,7 @@ public class AllPanel extends Composite {
 		searchPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		ToolItem refreshItem = new ToolItem(searchPanel.getToolbar(), SWT.PUSH);
 		refreshItem.addListener(SWT.Selection, e->searchPanel.doSearch());
-		refreshItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RUN));
+		refreshItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.RUN_ICON));
 		refreshItem.setToolTipText(Messages.AllPanel_loadresultstooltip);
 		
 		ToolItem configureItem = new ToolItem(searchPanel.getToolbar(), SWT.PUSH);

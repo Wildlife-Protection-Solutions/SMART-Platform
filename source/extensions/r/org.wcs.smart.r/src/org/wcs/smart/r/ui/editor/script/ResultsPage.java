@@ -44,6 +44,7 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.EditorPart;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.r.internal.Messages;
 
@@ -108,7 +109,7 @@ public class ResultsPage extends EditorPart {
 		ToolBar tb = new ToolBar(main, SWT.FLAT);
 		
 		ToolItem btnRun = new ToolItem(tb, SWT.PUSH);
-		btnRun.setImage(QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.RUN_ICON));
+		btnRun.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.RUN_ICON));
 		btnRun.setToolTipText(Messages.ResultsPage_rereuntooltip);
 		btnRun.addListener(SWT.Selection, e-> ResultsPage.this.parent.executeScript());
 			

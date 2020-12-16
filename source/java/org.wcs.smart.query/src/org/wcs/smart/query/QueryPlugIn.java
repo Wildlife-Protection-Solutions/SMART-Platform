@@ -213,7 +213,6 @@ public class QueryPlugIn extends AbstractUIPlugin {
 	public static final String CLEAR_STYLE = "org.wcs.smart.query.clearstyle"; //$NON-NLS-1$
 	
 	public static final String CLEAR_ICON = "org.wcs.smart.query.clear"; //$NON-NLS-1$
-	public static final String RUN_ICON = "org.wcs.smart.query.run"; //$NON-NLS-1$
 	public static final String SETTINGS_ICON = "org.wcs.smart.query.settings"; //$NON-NLS-1$
 	
 	
@@ -306,7 +305,6 @@ public class QueryPlugIn extends AbstractUIPlugin {
 		reg.put(CLEAR_STYLE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/clearstyle.png")); //$NON-NLS-1$
 		
 		reg.put(CLEAR_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/etool16/clear.png")); //$NON-NLS-1$
-		reg.put(RUN_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/etool16/run.png")); //$NON-NLS-1$
 		reg.put(SETTINGS_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/etool16/cog.png")); //$NON-NLS-1$
 
 		super.initializeImageRegistry(reg);

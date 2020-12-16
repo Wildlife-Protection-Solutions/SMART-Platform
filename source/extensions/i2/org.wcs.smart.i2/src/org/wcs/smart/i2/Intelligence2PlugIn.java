@@ -68,7 +68,6 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 	public static final String ICON_WORKINGSET_COPY = "org.wcs.smart.i2.icon.workingset.copy"; //$NON-NLS-1$
 	public static final String ICON_RELATIONSHIP = "org.wcs.smart.i2.icon.relationship"; //$NON-NLS-1$
 	public static final String ICON_SECTION_EXPAND = "org.wcs.smart.i2.icon.section.expand"; //$NON-NLS-1$
-	public static final String ICON_RUN = "org.wcs.smart.i2.icon.query.run"; //$NON-NLS-1$
 	public static final String ICON_EXPORT_QUERY = "org.wcs.smart.i2.icon.query.export"; //$NON-NLS-1$
 	public static final String ICON_AREA = "org.wcs.smart.i2.icon.query.area"; //$NON-NLS-1$
 	public static final String ICON_DELETE_SMALL = "org.wcs.smart.i2.icon.delete.small"; //$NON-NLS-1$
@@ -125,7 +124,6 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 		reg.put(ICON_SECTION_EXPAND, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj12/section_expand.png")); //$NON-NLS-1$);
 		reg.put(ICON_ATTRIBUTE_GROUP, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/attribute_group.png")); //$NON-NLS-1$);
 		reg.put(ICON_ATTRIBUTE_GROUP_NEW, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/attribute_group_new.png")); //$NON-NLS-1$);
-		reg.put(ICON_RUN, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/run_query.png")); //$NON-NLS-1$);
 		reg.put(ICON_QUERY, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/query.png")); //$NON-NLS-1$);
 		reg.put(ICON_AREA, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/area_polygon.png")); //$NON-NLS-1$);
 		reg.put(ICON_DELETE_SMALL, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/delete_small.png")); //$NON-NLS-1$);

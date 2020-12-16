@@ -101,7 +101,6 @@ import org.wcs.smart.paws.ui.ErrorText;
 import org.wcs.smart.paws.ui.HeaderComposite;
 import org.wcs.smart.paws.ui.HidePartsPartListener;
 import org.wcs.smart.paws.ui.NewPawsRunHandler;
-import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.ui.SmartStyledInputDialog;
 import org.wcs.smart.util.SharedUtils;
 
@@ -452,7 +451,7 @@ public class ConfigurationEditor extends EditorPart {
 		Button btnRun = new Button(main.getBody(), SWT.PUSH);
 		btnRun.setText(Messages.ConfigurationEditor_RunBtn);
 		btnRun.setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-		btnRun.setImage(QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.RUN_ICON));
+		btnRun.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.RUN_ICON));
 		btnRun.addListener(SWT.Selection,e->{
 			
 			if (isDirty) {

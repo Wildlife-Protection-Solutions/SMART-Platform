@@ -90,7 +90,6 @@ import org.wcs.smart.paws.ui.config.ConfigurationEditor;
 import org.wcs.smart.paws.ui.config.EditConfigHandler;
 import org.wcs.smart.paws.ui.run.RunEditor;
 import org.wcs.smart.paws.ui.run.RunEditorInput;
-import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.E3Utils;
 
@@ -228,7 +227,7 @@ public class PawsView {
 		tiRefresh.addListener(SWT.Selection, e->refresh());
 		
 		ToolItem tiAdd = new ToolItem(tbResults, SWT.PUSH);
-		tiAdd.setImage(QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.RUN_ICON));
+		tiAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.RUN_ICON));
 		tiAdd.setToolTipText(Messages.PawsView_Rerunotoltip);
 		tiAdd.addListener(SWT.Selection, e->{
 			Object x = tblResults.getStructuredSelection().getFirstElement();
@@ -280,7 +279,7 @@ public class PawsView {
 		
 		MenuItem mnuAdd = new MenuItem(mnu, SWT.PUSH);
 		mnuAdd.setText(Messages.PawsView_ReRun);
-		mnuAdd.setImage(QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.RUN_ICON));
+		mnuAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.RUN_ICON));
 		mnuAdd.addListener(SWT.Selection, e->{
 			Object x = tblResults.getStructuredSelection().getFirstElement();
 			if (x instanceof PawsRun) {
@@ -371,7 +370,7 @@ public class PawsView {
 		tiAdd.addListener(SWT.Selection, e->newConfiguration());
 		
 		ToolItem tiRun = new ToolItem(tbConfig, SWT.PUSH);
-		tiRun.setImage(QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.RUN_ICON));
+		tiRun.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.RUN_ICON));
 		tiRun.addListener(SWT.Selection, e->newRun(tblConfigs.getStructuredSelection().getFirstElement()));
 		
 		Composite tpart = toolkit.createComposite(part);
@@ -405,7 +404,7 @@ public class PawsView {
 		
 		MenuItem mnuRun = new MenuItem(mnu, SWT.PUSH);
 		mnuRun.setText(Messages.PawsView_Run);
-		mnuRun.setImage(QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.RUN_ICON));
+		mnuRun.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.RUN_ICON));
 		mnuRun.addListener(SWT.Selection, e->newRun(tblConfigs.getStructuredSelection().getFirstElement()));
 		
 		new MenuItem(mnu, SWT.SEPARATOR);

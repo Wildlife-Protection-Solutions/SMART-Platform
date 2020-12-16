@@ -57,6 +57,7 @@ import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
 import org.locationtech.udig.project.ui.ApplicationGIS;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.DataModelManager;
@@ -176,6 +177,7 @@ public class EntitiesPage extends EditorPart implements IEntityTypeEditorPage {
 			
 		
 			Button btnAdd = toolkit.createButton(buttonTableComp, DialogConstants.ADD_BUTTON_TEXT, SWT.PUSH);
+			btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 			btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 			((GridData)btnAdd.getLayoutData()).widthHint = buttonSize;
 			btnAdd.addSelectionListener(new SelectionAdapter() {
@@ -186,6 +188,7 @@ public class EntitiesPage extends EditorPart implements IEntityTypeEditorPage {
 			});
 		
 			btnEdit = toolkit.createButton(buttonTableComp, DialogConstants.EDIT_BUTTON_TEXT, SWT.PUSH);
+			btnEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 			btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 			((GridData)btnEdit.getLayoutData()).widthHint = buttonSize;
 			btnEdit.addSelectionListener(new SelectionAdapter() {
@@ -196,6 +199,7 @@ public class EntitiesPage extends EditorPart implements IEntityTypeEditorPage {
 			});
 		
 			btnDelete = toolkit.createButton(buttonTableComp, DialogConstants.DELETE_BUTTON_TEXT, SWT.PUSH);
+			btnDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 			btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 			((GridData)btnDelete.getLayoutData()).widthHint = buttonSize;
 			btnDelete.addSelectionListener(new SelectionAdapter() {
@@ -211,6 +215,7 @@ public class EntitiesPage extends EditorPart implements IEntityTypeEditorPage {
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 						
 			Button btnImport = toolkit.createButton(buttonTableComp, DialogConstants.IMPORT_BUTTON_TEXT, SWT.PUSH);
+			btnImport.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.IMPORT_ICON));
 			btnImport.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 			((GridData)btnImport.getLayoutData()).widthHint = buttonSize;
 			btnImport.addSelectionListener(new SelectionAdapter() {
@@ -221,6 +226,7 @@ public class EntitiesPage extends EditorPart implements IEntityTypeEditorPage {
 			});
 
 			btnExport = toolkit.createButton(buttonTableComp, DialogConstants.EXPORT_BUTTON_TEXT, SWT.PUSH);
+			btnExport.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EXPORT_ICON));
 			btnExport.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 			((GridData)btnExport.getLayoutData()).widthHint = buttonSize;
 			btnExport.addSelectionListener(new SelectionAdapter() {

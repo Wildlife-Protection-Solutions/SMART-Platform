@@ -430,6 +430,7 @@ public class ManualResultsEditor extends TableMapQaErrorComposite {
 		((GridLayout)panel.getLayout()).marginHeight = 0;
 		
 		Button btnExecute = toolkit.createButton(panel, Messages.ManualResultsEditor_ValidateButton, SWT.PUSH);
+		btnExecute.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.RUN_ICON));
 		btnExecute.addListener(SWT.Selection, e->validate());
 		
 		Composite dFilter = toolkit.createComposite(panel);

@@ -62,6 +62,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.advisors.DeleteManager;
@@ -324,16 +325,22 @@ public class EditSamplingUnitAttributeDialog extends SmartStyledTitleDialog impl
 		buttonPnl.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		
 		btnAdd = new Button(buttonPnl, SWT.PUSH);
+		btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+		btnAdd.setBackground(buttonPnl.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnAdd.addSelectionListener(this);
 		
 		btnEdit = new Button(buttonPnl, SWT.PUSH);
+		btnEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		btnEdit.setBackground(buttonPnl.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
 		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnEdit.addSelectionListener(this);
 		
 		btnDelete = new Button(buttonPnl, SWT.PUSH);
+		btnDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+		btnDelete.setBackground(buttonPnl.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnDelete.addSelectionListener(this);
@@ -342,11 +349,13 @@ public class EditSamplingUnitAttributeDialog extends SmartStyledTitleDialog impl
 		ll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		btnUp = new Button(buttonPnl, SWT.PUSH);
+		btnUp.setBackground(buttonPnl.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnUp.setText(Messages.EditMissionAttributeDialog_MoveUpLabel);
 		btnUp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnUp.addSelectionListener(this);
 		
 		btnDown = new Button(buttonPnl, SWT.PUSH);
+		btnDown.setBackground(buttonPnl.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnDown.setText(Messages.EditMissionAttributeDialog_MoveDownLabel);
 		btnDown.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnDown.addSelectionListener(this);

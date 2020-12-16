@@ -51,6 +51,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.common.filter.DateFilterComposite;
@@ -191,7 +192,7 @@ public class RecordSourceSelectionDialog extends SmartStyledTitleDialog{
 		btnSearch.addListener(SWT.Selection, e->searchWaypoints());
 		btnSearch.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false));
 		btnSearch.setBackground(main.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-		btnSearch.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_RUN));
+		btnSearch.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.RUN_ICON));
 		((GridData)btnSearch.getLayoutData()).widthHint = (int)(btnSearch.computeSize(SWT.DEFAULT,  SWT.DEFAULT).x * 1.2);
 		
 		SmartUiUtils.createHeaderLabel(main, Messages.RecordSourceSelectionDialog_ResultsSection);

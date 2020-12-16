@@ -51,6 +51,7 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.query.DerbyEntitySightingEngine;
@@ -168,6 +169,7 @@ public class SightingPage extends EditorPart implements IEntityTypeEditorPage {
 		
 		
 		Button btnRefresh = toolkit.createButton(g, Messages.SightingPage_ReloadButtonLabel, SWT.PUSH);
+		btnRefresh.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.RUN_ICON));
 		btnRefresh.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {

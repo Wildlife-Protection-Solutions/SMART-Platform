@@ -261,6 +261,7 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	public static final String EXPORT_ICON = "org.wcs.smart.export"; //$NON-NLS-1$
 	public static final String IMPORT_ICON = "org.wcs.smart.import"; //$NON-NLS-1$
 	public static final String PDF_ICON = "org.wcs.smart.pdf"; //$NON-NLS-1$
+	public static final String RUN_ICON = "org.wcs.smart.run"; //$NON-NLS-1$
 	
 	public static final String AUDIO_CLIP_IMG = "images/audio_clip.svg"; //$NON-NLS-1$
 	/**
@@ -504,6 +505,8 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	     reg.put(SAVEALL_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/saveall.png")); //$NON-NLS-1$
 	     
 	     reg.put(AREA_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/etool16/area_polygon.png")); //$NON-NLS-1$
+	     
+	     reg.put(RUN_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/run.png")); //$NON-NLS-1$
 
 	}
 	
