@@ -133,7 +133,7 @@ public class AutomatedResultsEditor extends TableMapQaErrorComposite {
 		
 		@Override
 		public void partClosed(IWorkbenchPartReference partRef) {
-			if (isModified){
+            if (isModified && partRef.getPart(false) == AutomatedResultsEditor.this) {
 				if (MessageDialog.openQuestion(getSite().getShell(), Messages.AutomatedResultsEditor_CleanTitle, MessageFormat.format(Messages.AutomatedResultsEditor_CleanMsg, QaError.Status.NEW.getGuiName(Locale.getDefault())))){
 					InternalExtensionManager.INSTANCE.cleanAutoResults();
 				}
@@ -190,7 +190,7 @@ public class AutomatedResultsEditor extends TableMapQaErrorComposite {
 		ToolBar tb = new ToolBar(parent,  SWT.NONE);
 		
 		ToolItem btnClean = new ToolItem(tb, SWT.PUSH);
-		btnClean.setToolTipText(Messages.AutomatedResultsEditor_RemoveTooltip);
+		btnClean.setToolTipText(Messages.AutomatedResultsEditor_RemoveTooltip1);
 		btnClean.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		btnClean.addListener(SWT.Selection, e->{
 			if (MessageDialog.openQuestion(getSite().getShell(), Messages.AutomatedResultsEditor_ConfirmDelete, MessageFormat.format(Messages.AutomatedResultsEditor_DeleteMessage,QaError.Status.NEW.getGuiName(Locale.getDefault())))){

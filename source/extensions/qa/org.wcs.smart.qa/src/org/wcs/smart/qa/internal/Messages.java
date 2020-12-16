@@ -12,7 +12,7 @@ public class Messages extends NLS {
 	public static String AutomatedResultsEditor_FormTitle;
 	public static String AutomatedResultsEditor_LoadResultsJobName;
 	public static String AutomatedResultsEditor_RelaodTooltip;
-	public static String AutomatedResultsEditor_RemoveTooltip;
+	public static String AutomatedResultsEditor_RemoveTooltip1;
 	public static String AutomatedResultsEditor_SaveError;
 	public static String AutoValidateJob_DataError;
 	public static String AutoValidateJob_JobName;
