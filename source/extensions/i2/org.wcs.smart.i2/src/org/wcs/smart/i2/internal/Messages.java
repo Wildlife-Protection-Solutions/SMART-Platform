@@ -1195,6 +1195,7 @@ public class Messages extends NLS {
 	public static String ProfileDialog_SaveError;
 	public static String ProfileDialog_SaveMsg;
 	public static String ProfileDialog_SaveTitle;
+	public static String ProfileDialog_ShellTitle;
 	public static String ProfileDialog_SourcePage;
 	public static String ProfileDialog_TranslateField;
 	public static String ProfileDialog_vewitooltip;

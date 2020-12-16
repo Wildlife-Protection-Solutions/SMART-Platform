@@ -557,7 +557,7 @@ public class ProfileDialog extends SmartStyledDialog {
 			List<Employee> toSelect = new ArrayList<>(smartUsers);
 			toSelect.removeAll(permissions.keySet());
 			
-			EmployeeSelectDialog dialog = new EmployeeSelectDialog(getShell(), toSelect);
+			EmployeeSelectDialog dialog = new EmployeeSelectDialog(getShell(), Messages.ProfileDialog_ShellTitle, toSelect);
 			if (dialog.open() != Window.OK) return;
 			for (Employee emp : dialog.getSelectedEmployees()) {
 				
