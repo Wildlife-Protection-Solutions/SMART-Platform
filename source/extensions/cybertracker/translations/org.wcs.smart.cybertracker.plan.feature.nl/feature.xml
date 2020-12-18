@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.wcs.smart.cybertracker.plan.feature.nl"
-      label="SMART Plan CyberTracker Language Pack"
+      label="SMART Mobile Plan Language Pack"
       version="7.0.0"
       provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.license.feature"

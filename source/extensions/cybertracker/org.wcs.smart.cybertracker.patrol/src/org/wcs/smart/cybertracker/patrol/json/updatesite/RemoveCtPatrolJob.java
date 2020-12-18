@@ -42,7 +42,9 @@ import org.wcs.smart.hibernate.HibernateManager;
 public class RemoveCtPatrolJob extends Job {
 	
 	private static String[] TABLES = new String[]{
+		"ct_patrol_wplink", //$NON-NLS-1$
 		"ct_patrol_link", //$NON-NLS-1$
+		"ct_patrol_package" //$NON-NLS-1$
 	};
 	
 	public RemoveCtPatrolJob() {
@@ -55,6 +57,7 @@ public class RemoveCtPatrolJob extends Job {
 	}
 
 	private IStatus dropTables(){
+		
 		try(Session session = HibernateManager.openSession()){
 		
 			session.beginTransaction();

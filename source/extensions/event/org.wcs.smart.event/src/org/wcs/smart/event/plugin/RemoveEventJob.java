@@ -65,10 +65,10 @@ public class RemoveEventJob extends Job {
 	private void uninstall(Session session){
 		
 		String[] TABLES = new String[]{
-				"smart.e_event_action", //$NON-NLS-1$
-				"smart.e_action_parameter_value", //$NON-NLS-1$
-				"smart.e_action", //$NON-NLS-1$
-				"smart.e_event_filter" //$NON-NLS-1$
+				"e_event_action", //$NON-NLS-1$
+				"e_action_parameter_value", //$NON-NLS-1$
+				"e_action", //$NON-NLS-1$
+				"e_event_filter" //$NON-NLS-1$
 		};
 		
 		String[] LABELTABLES = new String[]{

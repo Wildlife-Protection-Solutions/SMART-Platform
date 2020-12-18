@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.wcs.smart.connect.dataqueue.er.feature.nl"
-      label="SMART Connect Data Queue Mission Processor Module Language Pack"
+      label="SMART Connect DataQueue - Ecological Records Processor Language Pack"
       version="7.0.0"
       provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.license.feature"

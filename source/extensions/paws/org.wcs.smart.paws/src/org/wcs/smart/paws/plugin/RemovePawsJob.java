@@ -89,18 +89,15 @@ public class RemovePawsJob extends Job {
 	private void uninstall(Session session){
 		//to drop and the label tables (objects that extend NamedItem or NamedKeyItem)
 		String[] TABLES = new String[]{	
-			"paws_configuration", //$NON-NLS-1$
 			"paws_parameter", //$NON-NLS-1$
 			"paws_query_class", //$NON-NLS-1$
+			"paws_simple_class", //$NON-NLS-1$
 			"paws_run", //$NON-NLS-1$
 			"paws_service", //$NON-NLS-1$
-			"paws_classification", //$NON-NLS-1$
-			"paws_workspace" //$NON-NLS-1$
+			"paws_configuration", //$NON-NLS-1$
 		};
 		
 		String[] LABELTABLES = new String[]{
-//			"r_script", //$NON-NLS-1$
-//			"r_query" //$NON-NLS-1$
 		};
 		
 		//drop labels

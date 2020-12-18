@@ -23,6 +23,8 @@ package org.wcs.smart.connect.internal;
 
 import java.util.List;
 
+import javax.persistence.PersistenceException;
+
 import org.hibernate.Session;
 import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -54,11 +56,17 @@ public class PluginAdvisor implements IPluginAdvisor {
 			//if there is any conservation area with a active connect instance then we cannot uninstall plugins
 			//if connect is installed but no plugins are replicating to connect then it's ok to uninstall
 			String sql = "FROM ConnectServerStatus WHERE status in (:status) "; //$NON-NLS-1$
-			
-			List<ConnectServerStatus> cas = session.createQuery(sql, ConnectServerStatus.class)
+			List<ConnectServerStatus> cas = null;
+			try {
+				cas = session.createQuery(sql, ConnectServerStatus.class)
 					.setParameterList("status", new ConnectServerStatus.Status[] {ConnectServerStatus.Status.DONE, ConnectServerStatus.Status.UPLOAD}) //$NON-NLS-1$
 					.list();
-			if (cas.size() == 0) return null;
+				if (cas.size() == 0) return null;
+			}catch (PersistenceException ex) {
+				//assume table not found because it was
+				//already remove 
+				return null;
+			}
 			
 			
 			StringBuilder sb = new StringBuilder();

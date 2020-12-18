@@ -42,7 +42,9 @@ import org.wcs.smart.hibernate.HibernateManager;
 public class DataQueueCtMissionJob extends Job {
 	
 	private static String[] TABLES = new String[]{
+		"ct_mission_wplink", //$NON-NLS-1$
 		"ct_mission_link", //$NON-NLS-1$
+		"ct_survey_package" //$NON-NLS-1$
 	};
 	
 	public DataQueueCtMissionJob() {
@@ -59,7 +61,7 @@ public class DataQueueCtMissionJob extends Job {
 			session.beginTransaction();
 			try {
 				//drop all tables
-				for (int i = 0; i < TABLES.length; i ++){
+				for (int i = 0; i < TABLES.length; i ++){					
 					if (DerbyHibernateExtensions.tableExists(session, TABLES[i])){
 						session.createNativeQuery("DROP TABLE SMART."+ TABLES[i]).executeUpdate(); //$NON-NLS-1$
 					}

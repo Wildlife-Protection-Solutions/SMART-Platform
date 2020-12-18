@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.wcs.smart.connect.dataqueue.independentincident.feature.nl"
-      label="SMART Connect Data Queue Independent Incident Processor Module Language Pack"
+      label="SMART Connect DataQueue - Incident Processor Language Pack"
       version="7.0.0"
       provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.license.feature"

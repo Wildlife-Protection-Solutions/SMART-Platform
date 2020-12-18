@@ -50,7 +50,7 @@ public class RemoveConnectDataQueueJob extends Job {
 	
 	private static String[] TABLES = new String[]{
 		"connect_data_queue", //$NON-NLS-1$
-		"data_queue_processing_op", //$NON-NLS-1$
+		"connect_data_queue_option", //$NON-NLS-1$
 	};
 	
 	public RemoveConnectDataQueueJob() {

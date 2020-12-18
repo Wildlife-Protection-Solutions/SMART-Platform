@@ -1,27 +1,17 @@
 metaRequirements.0.namespace=org.wcs.smart.cybertracker
 metaRequirements.0.name=onInstall
 
-metaRequirements.1.namespace=org.wcs.smart.cybertracker
-metaRequirements.1.name=onUninstall
+metaRequirements.1.namespace=org.wcs.smart.connect
+metaRequirements.1.name=onInstall
 
-metaRequirements.2.namespace=org.wcs.smart.connect
+metaRequirements.2.namespace=org.wcs.smart.connect.cybertracker
 metaRequirements.2.name=onInstall
 
-metaRequirements.3.namespace=org.wcs.smart.connect
-metaRequirements.3.name=onUninstall
+metaRequirements.3.namespace=org.wcs.smart.smartcollect
+metaRequirements.3.name=onInstall
 
-metaRequirements.4.namespace=org.wcs.smart.connect.cybertracker
-metaRequirements.4.name=onInstall
-
-metaRequirements.5.namespace=org.wcs.smart.connect.cybertracker
-metaRequirements.5.name=onUninstall
-
-metaRequirements.6.namespace=org.wcs.smart.smartcollect
-metaRequirements.6.name=onInstall
-
-metaRequirements.7.namespace=org.wcs.smart.smartcollect
-metaRequirements.7.name=onUninstall
-
+metaRequirements.4.namespace=org.wcs.smart.smartcollect
+metaRequirements.4.name=onUninstall
 
 instructions.install=org.wcs.smart.cybertracker.onInstall();org.wcs.smart.connect.onInstall();org.wcs.smart.connect.cybertracker.onInstall();org.wcs.smart.smartcollect.onInstall();
-instructions.uninstall=org.wcs.smart.smartcollect.onUninstall();org.wcs.smart.connect.cybertracker.onUninstall();org.wcs.smart.connect.onUninstall();org.wcs.smart.cybertracker.onUninstall();
+instructions.uninstall=org.wcs.smart.smartcollect.onUninstall();

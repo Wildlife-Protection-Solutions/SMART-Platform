@@ -104,9 +104,6 @@ public class RemoveIntelligenceJob extends Job {
 	private void uninstall(Session s){
 		String[] sql = new String[]{
 				"DROP TABLE smart.i_entity_location",
-				"DROP TABLE smart.i_observation_attribute",
-				"DROP TABLE smart.i_observation",
-				"DROP TABLE smart.i_location",
 				"DROP TABLE smart.i_entity_search",
 				"DROP TABLE smart.i_entity_attribute_value",
 				"DROP TABLE smart.i_entity_relationship_attribute_value",
@@ -118,7 +115,6 @@ public class RemoveIntelligenceJob extends Job {
 				"DROP TABLE smart.i_record_attachment",
 				"DROP TABLE smart.I_record_attribute_value_list",
 				"DROP TABLE smart.i_record_attribute_value",
-				"DROP TABLE smart.i_record",
 				"DROP TABLE smart.i_entity_relationship",
 				"DROP TABLE smart.i_working_set_query",
 				"DROP TABLE smart.i_working_set_entity",
@@ -127,14 +123,27 @@ public class RemoveIntelligenceJob extends Job {
 				"DROP TABLE smart.i_entity",
 				"DROP TABLE smart.i_entity_type_attribute_group",
 				"DROP TABLE smart.i_record_obs_query",
-				"DROP TABLE smart.i_relationship_type",
 				"DROP TABLE smart.i_attachment",
-				"DROP TABLE smart.i_relationship_group",
 				"DROP TABLE smart.i_recordsource_attribute",
+				"DROP TABLE smart.i_observation_attribute_list",
+				"DROP TABLE smart.i_observation_attribute",
+				"DROP TABLE smart.i_observation",
+				"DROP TABLE smart.i_location",
+				"DROP TABLE smart.i_record",
+				"DROP TABLE smart.I_PROFILE_ENTITY_TYPE",
+				"DROP TABLE smart.I_PROFILE_RECORD_SOURCE",
+				"DROP TABLE smart.i_recordsource",
+				"drop table smart.I_DIAGRAM_ENTITY_TYPE_STYLE",
+				"drop table smart.I_DIAGRAM_RELATIONSHIP_TYPE_STYLE",
+				"drop table smart.I_DIAGRAM_STYLE",
+				"DROP TABLE smart.i_relationship_type",
+				"DROP TABLE smart.i_relationship_group",
 				"DROP TABLE smart.i_entity_type",
 				"DROP TABLE smart.i_attribute",
-				"DROP TABLE smart.i_recordsource",
-				
+				"drop table smart.I_RECORD_QUERY",
+				"drop table smart.I_RECORD_SUMMARY_QUERY",
+				"drop table smart.I_PERMISSION",
+				"drop table smart.I_PROFILE_CONFIG",
 				"DROP TABLE smart.i_config_option",
 				"DROP TABLE smart.i_entity_summary_query",
 				"DROP TABLE smart.i_entity_record_query",
@@ -143,17 +152,27 @@ public class RemoveIntelligenceJob extends Job {
 		};
 		
 		String[] namedClasses = new String[] {
+			
+			"smart.i_entity_type",
+			"smart.i_entity_type_attribute_group",
+			"smart.i_working_set",
+
 			"smart.i_attribute",
 			"smart.i_attribute_list_item",
 			"smart.i_entity_search",
-			"smart.i_entity_type",
-			"smart.i_entity_type_attribute_group",
-			"smart.i_record_obs_query",
+			"smart.i_profile_config",
+			
 			"smart.i_recordsource",
 			"smart.i_recordsource_attribute",
 			"smart.i_relationship_group",
 			"smart.i_relationship_type",
-			"smart.i_working_set"};
+			
+			"smart.i_entity_record_query",
+			"smart.i_entity_summary_query",
+			"smart.i_record_obs_query",
+			"smart.i_record_query",
+			"smart.i_record_summary_query"
+		};
 		
 		s.doWork(new Work(){
 

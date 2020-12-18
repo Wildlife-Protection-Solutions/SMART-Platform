@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.wcs.smart.connect.dataqueue.feature"
-      label="SMART Connect Data Queue Module"
+      label="SMART Connect DataQueue Module"
       version="7.0.0.qualifier"
       provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.license.feature"

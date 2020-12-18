@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.wcs.smart.cybertracker.incident.feature.nl"
-      label="SMART Cybertracker Independent Incident Language Pack"
+      label="SMART Mobile Independent Incident Language Pack"
       version="7.0.0"
       provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.license.feature"

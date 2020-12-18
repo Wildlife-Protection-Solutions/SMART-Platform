@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.wcs.smart.connect.dataqueue.er.feature"
-      label="SMART Mobile Ecological Records (Survey) Processor"
+      label="SMART Connect DataQueue - Ecological Records Processor"
       version="7.0.0.qualifier"
       provider-name="org.wcs.smart.connect.dataqueue.er"
       plugin="org.wcs.smart"

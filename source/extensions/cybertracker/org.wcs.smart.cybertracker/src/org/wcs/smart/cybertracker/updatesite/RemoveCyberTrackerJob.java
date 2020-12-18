@@ -51,6 +51,7 @@ public class RemoveCyberTrackerJob extends Job {
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
+	
 		String[] tables = new String[] {
 			"CM_CT_PROPERTIES_PROFILE",  //$NON-NLS-1$
 			"CT_PROPERTIES_OPTION",  //$NON-NLS-1$
@@ -85,7 +86,7 @@ public class RemoveCyberTrackerJob extends Job {
 				session.getTransaction().commit();
 				
 			} catch (Exception e) {
-				SmartPlugIn.log(Messages.RemoveCyberTrackerTablesJob_Error, e);
+				SmartPlugIn.displayLog(Messages.RemoveCyberTrackerTablesJob_Error, e);
 			}
 		}
 		return Status.OK_STATUS;

@@ -203,11 +203,10 @@ public class ExportReportEngine {
 								dpi, s);
 					}finally {
 						s.getTransaction().rollback();
-					}
-					
-				}			
-				MessageDialog.openInformation(Display.getDefault().getActiveShell(), Messages.ExportReportEngine_CompleteTitle, MessageFormat.format(Messages.ExportReportEngine_SaveCompleteMsg, outputFile.toString()));
+					}	
+				}
 			}
+			MessageDialog.openInformation(Display.getDefault().getActiveShell(), Messages.ExportReportEngine_CompleteTitle, MessageFormat.format(Messages.ExportReportEngine_SaveCompleteMsg, outputFile.toString()));
 			return true;
 		}catch (Throwable ex) {
 			ReportPlugIn.displayLog(MessageFormat.format(Messages.ExportReportEngine_SaveErrorMsg, ex.getMessage()),ex);
