@@ -476,7 +476,7 @@ public class MissionJsonProcessor implements IJsonProcessor {
 						//add these observation to the selected patrol leg
 						addToExistingMission(link.getMission(), wp, link.getSamplingUnit(), session);
 						
-						session.saveOrUpdate(wp);
+						if (link.getMission().getUuid() != null) session.saveOrUpdate(wp);
 						
 						//update patrol links
 						CtMissionWpLink wplink = new CtMissionWpLink();
