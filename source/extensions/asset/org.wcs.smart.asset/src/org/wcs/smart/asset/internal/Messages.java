@@ -981,6 +981,9 @@ public class Messages extends NLS {
 	public static String StationCurrentPage_NumUntaggedIncidentsLbl;
 	public static String StationCurrentPage_statsJobName;
 	public static String StationCurrentPage_SummaryLabel;
+	public static String StationCurrentPage_totalincidenttooltip;
+	public static String StationCurrentPage_totalsensortooltip;
+	public static String StationCurrentPage_totaluntaggedtooltip;
 	public static String StationCurrentPage_TypeColumName;
 	public static String StationDataPage_DateFilter;
 	public static String StationDataPage_loadJobName;
@@ -1046,6 +1049,9 @@ public class Messages extends NLS {
 	public static String StationLocationCurrentPage_StationColumn;
 	public static String StationLocationCurrentPage_StatsJobName;
 	public static String StationLocationCurrentPage_SummaryLabel;
+	public static String StationLocationCurrentPage_totalincidenttooltip;
+	public static String StationLocationCurrentPage_totalsensortooltip;
+	public static String StationLocationCurrentPage_totaluntaggedtooltip;
 	public static String StationLocationCurrentPage_TypeColumn;
 	public static String StationLocationDataPage_FilterLabel;
 	public static String StationLocationDataPage_loadJobName;

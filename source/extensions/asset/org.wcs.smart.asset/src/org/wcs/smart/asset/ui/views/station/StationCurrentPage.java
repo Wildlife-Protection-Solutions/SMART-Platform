@@ -195,15 +195,15 @@ public class StationCurrentPage {
 		
 		l = toolkit.createLabel(topLeft, MessageFormat.format(Messages.StationCurrentPage_NumAssetsLabel, currentDeployments.size()));
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		l.setToolTipText("total number of sensors currently deployed at this station");
+		l.setToolTipText(Messages.StationCurrentPage_totalsensortooltip);
 
 		lblNumIncidents = toolkit.createLabel(topLeft, DialogConstants.LOADING_TEXT);
 		lblNumIncidents.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		lblNumIncidents.setToolTipText("total number of incidents recorded at this station for the active sensor deployments");
+		lblNumIncidents.setToolTipText(Messages.StationCurrentPage_totalincidenttooltip);
 
 		lblNumUnTagged = toolkit.createLabel(topLeft, DialogConstants.LOADING_TEXT);
 		lblNumUnTagged.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		lblNumUnTagged.setToolTipText("total number of incidents with no observations recorded at this station for the active sensor deployments");
+		lblNumUnTagged.setToolTipText(Messages.StationCurrentPage_totaluntaggedtooltip);
 		
 		l = toolkit.createLabel(topLeft, "", SWT.SEPARATOR | SWT.HORIZONTAL); //$NON-NLS-1$
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));

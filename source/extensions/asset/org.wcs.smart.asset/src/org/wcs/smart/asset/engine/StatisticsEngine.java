@@ -39,7 +39,6 @@ import org.wcs.smart.asset.model.AssetStationLocation;
 import org.wcs.smart.asset.model.AssetWaypoint;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -122,18 +121,23 @@ public enum StatisticsEngine {
 	}
 	
 	private Long computeNumberOfIncidents(Session session, AssetDeployment deployment) {
-		return QueryFactory.buildCountQuery(session, AssetWaypoint.class, new Object[] {"assetDeployment", deployment}); //$NON-NLS-1$
+		String hql = "SELECT count(distinct aw.id.waypoint) FROM AssetWaypoint aw WHERE assetDeployment = :deployment"; //$NON-NLS-1$
+		Query<?> query = session.createQuery(hql).setParameter("deployment", deployment); //$NON-NLS-1$
+		Long cnt = (Long) query.uniqueResult();
+		return cnt;
 	}
 	
 	private Long computeNumberNotValidated(Session session, AssetDeployment deployment) {
-		String hql = "SELECT count(distinct aw) FROM AssetWaypoint aw WHERE state = :state"; //$NON-NLS-1$
-		Query<?> query = session.createQuery(hql).setParameter("state",  AssetWaypoint.State.DIRTY); //$NON-NLS-1$
+		String hql = "SELECT count(distinct aw.id.waypoint) FROM AssetWaypoint aw WHERE state = :state and aw.assetDeployment = :deployment"; //$NON-NLS-1$
+		Query<?> query = session.createQuery(hql)
+				.setParameter("state",  AssetWaypoint.State.DIRTY) //$NON-NLS-1$
+				.setParameter("deployment", deployment); //$NON-NLS-1$
 		Long cnt = (Long) query.uniqueResult();
 		return cnt;
 	}
 	
 	private Long computeNumberOfUnTagged(Session session, AssetDeployment deployment) {
-		String hql = "SELECT count(*) FROM AssetWaypoint aw JOIN aw.id.waypoint w WHERE aw.assetDeployment=:deployment AND w.uuid NOT IN (SELECT waypoint.uuid FROM WaypointObservationGroup)"; //$NON-NLS-1$
+		String hql = "SELECT count(distinct aw.id.waypoint) FROM AssetWaypoint aw JOIN aw.id.waypoint w WHERE aw.assetDeployment=:deployment AND w.uuid NOT IN (SELECT waypoint.uuid FROM WaypointObservationGroup)"; //$NON-NLS-1$
 		Query<?> query = session.createQuery(hql).setParameter("deployment",  deployment); //$NON-NLS-1$
 		Long cnt = (Long) query.uniqueResult();
 		return cnt;
