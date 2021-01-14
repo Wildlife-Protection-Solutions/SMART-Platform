@@ -29,7 +29,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.model.IWaypointSourceEngine;
-import org.wcs.smart.observation.model.IWaypointSourceUiProvider;
+import org.wcs.smart.observation.model.IWaypointSourceProvider;
 /**
  * Manager for dealing with waypoint
  * sources.
@@ -50,7 +50,7 @@ public enum WaypointSourceEngine implements IWaypointSourceEngine{
 	/**
 	 * Cached sources
 	 */
-	private Map<String,IWaypointSourceUiProvider> supportedUiSources = null;
+	private Map<String,IWaypointSourceProvider> supportedUiSources = null;
 	
 	/**
 	 * private constructor
@@ -87,7 +87,7 @@ public enum WaypointSourceEngine implements IWaypointSourceEngine{
 	 * @param sourceKey
 	 * @return
 	 */
-	public IWaypointSourceUiProvider findUiProvider(String sourceKey){
+	public IWaypointSourceProvider findUiProvider(String sourceKey){
 		IWaypointSource source = getSource(sourceKey);
 		if (source == null) return null;
 		String key = getSource(sourceKey).getKey();
@@ -100,7 +100,7 @@ public enum WaypointSourceEngine implements IWaypointSourceEngine{
 	 */
 	private void loadWaypointSources() {
 		supportedSources = new HashMap<String, IWaypointSource>();
-		supportedUiSources = new HashMap<String, IWaypointSourceUiProvider>();
+		supportedUiSources = new HashMap<String, IWaypointSourceProvider>();
 		IConfigurationElement[] elements = Platform.getExtensionRegistry().getConfigurationElementsFor(SOURCE_EXTENSION_ID);
 		for (IConfigurationElement element : elements){
 			try{
@@ -108,7 +108,7 @@ public enum WaypointSourceEngine implements IWaypointSourceEngine{
 				supportedSources.put(source.getKey(), source);
 				
 				if (element.getAttribute("ui_provider") != null){ //$NON-NLS-1$
-					supportedUiSources.put(source.getKey(), (IWaypointSourceUiProvider)element.createExecutableExtension("ui_provider")); //$NON-NLS-1$
+					supportedUiSources.put(source.getKey(), (IWaypointSourceProvider)element.createExecutableExtension("ui_provider")); //$NON-NLS-1$
 				}
 			}catch (Exception ex){
 				ObservationPlugIn.log("Error loading all waypoint sources", ex); //$NON-NLS-1$

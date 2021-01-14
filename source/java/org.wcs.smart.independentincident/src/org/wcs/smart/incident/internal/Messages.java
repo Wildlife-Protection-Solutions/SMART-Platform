@@ -93,6 +93,9 @@ public class Messages extends NLS {
 	public static String IncidentImporter_SavingProgress;
 	public static String IncidentImporter_ValidatingProgress;
 	public static String IncidentImporter_XmlNotFound;
+	public static String IncidentLabelProvider_invaliddatatype;
+	public static String IncidentLabelProvider_invalidfeaturetype;
+	public static String IncidentLabelProvider_jsonloaded;
 	public static String IncidentManager_IncidentTooOldToEdit;
 	public static String IncidentManager_Insufficientprivleges;
 	public static String IncidentMapPage_EditWarningMsg;

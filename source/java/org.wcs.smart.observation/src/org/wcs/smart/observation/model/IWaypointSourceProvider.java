@@ -19,30 +19,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.incident;
+package org.wcs.smart.observation.model;
 
-import java.util.Locale;
+import java.util.UUID;
 
-import org.wcs.smart.incident.internal.Messages;
-import org.wcs.smart.incident.json.IncidentJsonFeatureProcessor;
+import org.wcs.smart.observation.internal.Messages;
+import org.wcs.smart.observation.json.IJsonFeatureProcessor;
+
 /**
- * Label provider for independent incidents
+ * A source provider that performs desktop specific processes associated with
+ * a waypoint source. 
+ * 
+ * Each waypoint source type should have it's own source provider.
  * 
  * @author Emily
  *
  */
-public class IncidentLabelProvider implements IIncidentLabelProvider {
+public interface IWaypointSourceProvider {
+
+	/**
+	 * Error string
+	 */
+	public static final String ERROR_STR = Messages.IWaypointSourceUiProvider_ErrorString;
 	
-	@Override
-	public String getLabel(Object item, Locale l) {
-		if (item instanceof IndepedentIncidentSource){
-			 return Messages.IndepedentIncidentSource_IndIncidentWaypointsourceName;
-		}
-		
-		if (item == IncidentJsonFeatureProcessor.Messages.COMPLETE_MSG) return Messages.IncidentLabelProvider_jsonloaded;
-		if (item == IncidentJsonFeatureProcessor.Messages.INVALID_DATA_TYPE) return Messages.IncidentLabelProvider_invaliddatatype;
-		if (item == IncidentJsonFeatureProcessor.Messages.INVALID_FEATURE_TYPE) return Messages.IncidentLabelProvider_invalidfeaturetype;
-		
-		return null;
-	}
+	/**
+	 * Finds and displays the UI editor associated with the 
+	 * provided waypoint.
+	 *  
+	 * @param waypointUuid
+	 */
+	public default void findAndShow(UUID waypointUuid) {}
+	
+	/**
+	 * Post processes data JSON data processed by the given
+	 * feature processor.  Users should check the type of
+	 * processor to ensure it is valid.  Should be used
+	 * to fire events or other Desktop specific actions to
+	 * be performed after json data is loaded.
+	 * 
+	 * @param processor
+	 */
+	public default void postProcessJsonData(IJsonFeatureProcessor processor) {}
 }

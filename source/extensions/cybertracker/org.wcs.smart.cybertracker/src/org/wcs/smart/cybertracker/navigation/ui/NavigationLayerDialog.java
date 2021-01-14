@@ -1104,12 +1104,11 @@ public class NavigationLayerDialog extends SmartStyledDialog implements MapPart,
 				 Display.getDefault().asyncExec(()->{
 					 targetLayer.getStyleBlackboard().put(SLDContent.ID, getTargetStyle());	 
 				 });
-				 
-				 
 			 }
 			
 		};
 		getMap().sendCommandASync(cmd);
+
 	}
 	
 	
@@ -1142,14 +1141,16 @@ public class NavigationLayerDialog extends SmartStyledDialog implements MapPart,
 		Color c = (Color) lineColorLabel.getData(COLOR_KEY);
 		Stroke linestroke = sb.createStroke(
 				new java.awt.Color(c.getRed(),c.getGreen(),c.getBlue()),
-				txtLineWidth.getSelection(),
-				ll.getDashArray());
+				txtLineWidth.getSelection());
+		if (ll.getDashArray() != null) linestroke.setDashArray(	ll.getDashArray() );
+		
 		LineSymbolizer lines = sb.createLineSymbolizer(linestroke);
 		
 		rr = sb.createRule(new Symbolizer[] {lines});
 		rr.setFilter(ff.and(fnotselected, fls));
 		fts = sf.createFeatureTypeStyle();
     	fts.setName("Line Target Style"); //$NON-NLS-1$
+    	rr.setName(Messages.NavigationLayerDialog_LineTargetLayerName); 
     	fts.rules().add(rr);
     	style.featureTypeStyles().add(fts);
 
@@ -1167,6 +1168,7 @@ public class NavigationLayerDialog extends SmartStyledDialog implements MapPart,
 		rr.setFilter(ff.and(fnotselected, fpoint));
 		fts = sf.createFeatureTypeStyle();
     	fts.setName("Point Target Style"); //$NON-NLS-1$
+    	rr.setName(Messages.NavigationLayerDialog_PointTargetLayerName);
     	fts.rules().add(rr);
     	style.featureTypeStyles().add(fts);
     	
@@ -1180,6 +1182,7 @@ public class NavigationLayerDialog extends SmartStyledDialog implements MapPart,
 		rr.setFilter(ff.and(fselected, fpoint));
 		fts = sf.createFeatureTypeStyle();
     	fts.setName("Selected Point Target Style"); //$NON-NLS-1$
+    	rr.setName(Messages.NavigationLayerDialog_SelectedPointTargetLayerName);
     	fts.rules().add(rr);
 		style.featureTypeStyles().add(fts);
 		
@@ -1190,10 +1193,10 @@ public class NavigationLayerDialog extends SmartStyledDialog implements MapPart,
 		rr.setFilter(ff.and(fselected, fls));
 		fts = sf.createFeatureTypeStyle();
     	fts.setName("Selected Line Target Style"); //$NON-NLS-1$
+    	rr.setName(Messages.NavigationLayerDialog_SelectedLineTargetLayerName);
     	fts.rules().add(rr);
     	style.featureTypeStyles().add(fts);
-		
-		
+
 		return style;
 		
 	}

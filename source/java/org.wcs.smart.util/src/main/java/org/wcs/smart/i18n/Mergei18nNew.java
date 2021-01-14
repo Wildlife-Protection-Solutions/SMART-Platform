@@ -64,7 +64,8 @@ public class Mergei18nNew {
     };
 	
 //    public static final String[] LANGUAGES =  new String[] {"ar", "es","fr", "hi","in","ka","kar","km","lo","mn","ms","ru","sw","th","vi","zh","pt"};
-    public static final String[] LANGUAGES =  new String[] {"es", "pt"};
+//    public static final String[] LANGUAGES =  new String[] {"ar", "fr", "hi","in","ka","kar","km","lo","mn","ms","ru","sw","th","vi","zh"};
+    public static final String[] LANGUAGES =  new String[] {"sw"};
     
     public static final String LINE_SEP = "\n";
 
@@ -169,7 +170,7 @@ public class Mergei18nNew {
 
         for (Entry<String, String> e : source.entrySet()){
             if (!target.containsKey(e.getKey())){
-//                System.out.println("add: " + e.getKey());
+                System.out.println("add: " + e.getKey());
 //                target.put(e.getKey(), e.getValue());
                 target.put(e.getKey(), "**NEW**" + e.getValue());
                 changes = true;

@@ -296,7 +296,7 @@ public class ImportDialog extends SmartStyledTitleDialog{
 				Path f = ICyberTrackerConstants.getStorageFolder(SmartDB.getCurrentConservationArea());
 				//if the folder doesn't exists then opening fails, so make sure the directory exists
 				if (!Files.exists(f)) Files.createDirectories(f);
-				diapi.open(f.toFile());
+				diapi.open(f.toAbsolutePath().toFile());
 			} catch (IOException e1) {
 				CyberTrackerPlugIn.log(e1.getMessage(),  e1);
 			}

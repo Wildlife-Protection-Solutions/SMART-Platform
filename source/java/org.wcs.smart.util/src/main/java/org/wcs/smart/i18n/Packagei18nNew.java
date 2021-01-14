@@ -65,9 +65,10 @@ public class Packagei18nNew {
 	public static final String OUT_DIR = "C:\\temp\\smarti18n\\";
 	
 //    public static final String[] LANGUAGES =  new String[] {"ar", "es","fr", "hi","in","ka","kar","km","lo","mn","ms","ru","sw","th","vi","zh","pt"};
-	public static final String[] LANGUAGES =  new String[] {"th","pt"};
+//	public static final String[] LANGUAGES =  new String[] {"ar", "fr", "hi","in","ka","kar","km","lo","mn","ms","ru","sw","th","vi","zh"};
+//	public static final String[] LANGUAGES =  new String[] {"es","pt"};
 
-//	public static final String[] LANGUAGES = {"ar"};
+	public static final String[] LANGUAGES = {"sw"};
 	
 	public void doWork() throws Exception {
 		Path path = Paths.get(OUT_DIR);
@@ -143,11 +144,13 @@ public class Packagei18nNew {
 						fileName.equals("bundle_" + lang + ".properties") ||
 						fileName.endsWith("_" + lang + ".html")) {
 					
+					
 					Path toFile = getToPath(sourceDir,  file, outputPath);
 					
 					Files.createDirectories(toFile.getParent());
 					System.out.println(file.toString() + " to " + toFile.toString());
 					Files.copy(file, toFile);
+					
 				}
 						
 				return FileVisitResult.CONTINUE;
@@ -181,4 +184,6 @@ public class Packagei18nNew {
 			ex.printStackTrace();
 		}
 	}
+	
+	
 }

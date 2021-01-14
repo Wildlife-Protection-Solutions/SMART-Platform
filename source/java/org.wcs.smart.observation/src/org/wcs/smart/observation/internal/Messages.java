@@ -132,6 +132,18 @@ public class Messages extends NLS {
 	public static String ImportGPSWizardPage_PageName;
 	public static String ImportGPSWizardPage_PageTitle;
 	
+	public static String ImportJsonDataHandler_CompleteMessage;
+
+	public static String ImportJsonDataHandler_CompleteTitle;
+
+	public static String ImportJsonDataHandler_ContinueButton;
+
+	public static String ImportJsonDataHandler_TaskName;
+
+	public static String ImportJsonDataHandler_WarningMessage;
+
+	public static String ImportJsonDataHandler_WarningTitle;
+
 	public static String ImportWpSelectWizardPage_DeSelectAll;
 	public static String ImportWpSelectWizardPage_PageName;
 	public static String ImportWpSelectWizardPage_PageTitle;
@@ -173,6 +185,40 @@ public class Messages extends NLS {
 	public static String ObservationItemList_ObsGroupHeader;
 
 	public static String ObservationItemList_ShowDetails;
+
+	public static String ObservationLabelProvider_attributenotfound;
+
+	public static String ObservationLabelProvider_categorynotfound;
+
+	public static String ObservationLabelProvider_employeenotfound;
+
+	public static String ObservationLabelProvider_invaldjson;
+
+	public static String ObservationLabelProvider_invalidbooleanvalue;
+
+	public static String ObservationLabelProvider_invalidlistitem;
+
+	public static String ObservationLabelProvider_invalidmultilist1;
+
+	public static String ObservationLabelProvider_invalidmultilist2;
+
+	public static String ObservationLabelProvider_invalidnumbervalue;
+
+	public static String ObservationLabelProvider_invalidtreeitem;
+
+	public static String ObservationLabelProvider_invalidtypeattribute;
+
+	public static String ObservationLabelProvider_invaluddatevalue;
+
+	public static String ObservationLabelProvider_missingproperties;
+
+	public static String ObservationLabelProvider_missingproperty2;
+
+	public static String ObservationLabelProvider_mssingproperty1;
+
+	public static String ObservationLabelProvider_noprocessor;
+
+	public static String ObservationLabelProvider_typemissing;
 
 	public static String ObservationOptionsPropertyPage_ComputationDetails;
 

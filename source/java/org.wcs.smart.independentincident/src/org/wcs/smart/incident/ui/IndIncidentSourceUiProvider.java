@@ -32,8 +32,11 @@ import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.incident.IndepedentIncidentSource;
+import org.wcs.smart.incident.event.IncidentEventManager;
 import org.wcs.smart.incident.internal.Messages;
-import org.wcs.smart.observation.model.IWaypointSourceUiProvider;
+import org.wcs.smart.incident.json.IncidentJsonFeatureProcessor;
+import org.wcs.smart.observation.json.IJsonFeatureProcessor;
+import org.wcs.smart.observation.model.IWaypointSourceProvider;
 import org.wcs.smart.observation.model.Waypoint;
 
 /**
@@ -44,7 +47,7 @@ import org.wcs.smart.observation.model.Waypoint;
  *
  */
 public class IndIncidentSourceUiProvider implements
-		IWaypointSourceUiProvider {
+		IWaypointSourceProvider {
 
 	@Override
 	public void findAndShow(UUID waypointUuid) {
@@ -65,6 +68,15 @@ public class IndIncidentSourceUiProvider implements
 		ContextInjectionFactory.invoke(new OpenIncidentHandler(),
 					Execute.class, ctx.getActiveLeaf());
 
+	}
+
+	@Override
+	public void postProcessJsonData(IJsonFeatureProcessor processor) {
+		if (!(processor instanceof IncidentJsonFeatureProcessor)) return;
+
+		//fire event for new features
+		IncidentJsonFeatureProcessor pp = (IncidentJsonFeatureProcessor) processor;
+		IncidentEventManager.getInstance().fireEvent(IncidentEventManager.INCIDENT_ADDED, pp.getCreatedFeatures());
 	}
 
 }

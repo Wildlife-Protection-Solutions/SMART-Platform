@@ -31,7 +31,7 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.WaypointSourceEngine;
-import org.wcs.smart.observation.model.IWaypointSourceUiProvider;
+import org.wcs.smart.observation.model.IWaypointSourceProvider;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
@@ -109,7 +109,7 @@ public class ShowItemInfoProvider implements IQueryResultInfoProvider {
 			return ;
 		}
 		
-		IWaypointSourceUiProvider provider = WaypointSourceEngine.INSTANCE.findUiProvider(waypointSourceKey);
+		IWaypointSourceProvider provider = WaypointSourceEngine.INSTANCE.findUiProvider(waypointSourceKey);
 		if (provider == null){
 			displayError(
 					MessageFormat.format(Messages.AbstractObservationInfoProvider_ProviderNotFound,

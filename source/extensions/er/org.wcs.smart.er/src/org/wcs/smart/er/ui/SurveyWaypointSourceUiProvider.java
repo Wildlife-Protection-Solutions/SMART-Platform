@@ -35,7 +35,7 @@ import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.ui.handlers.EditSurveyElementHandler;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
-import org.wcs.smart.observation.model.IWaypointSourceUiProvider;
+import org.wcs.smart.observation.model.IWaypointSourceProvider;
 import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
 
 /**
@@ -45,7 +45,7 @@ import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
  *
  */
 public class SurveyWaypointSourceUiProvider implements
-		IWaypointSourceUiProvider {
+		IWaypointSourceProvider {
 
 	@Override
 	public void findAndShow(UUID waypointUuid) {

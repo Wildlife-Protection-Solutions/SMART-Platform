@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2021 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,32 +19,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.observation.model;
+package org.wcs.smart.observation;
 
-import java.util.UUID;
-
-import org.wcs.smart.observation.internal.Messages;
+import org.wcs.smart.ISharedLabelProvider;
 
 /**
- * A source provider that opens the source editor for a
- * given waypoint.  Each waypoint source type should have
- * it's own source provider.
+ * Shared label provider interface for the observation plugin.
  * 
  * @author Emily
  *
  */
-public interface IWaypointSourceUiProvider {
+public interface IObservationLabelProvider extends ISharedLabelProvider {
 
-	/**
-	 * Error string
-	 */
-	public static final String ERROR_STR = Messages.IWaypointSourceUiProvider_ErrorString;
-	
-	/**
-	 * Finds and displays the UI editor associated with the 
-	 * provided waypoint.
-	 *  
-	 * @param waypointUuid
-	 */
-	public void findAndShow(UUID waypointUuid);
 }

@@ -111,6 +111,11 @@
                   </test>
                </visibleWhen>
             </command>
+            <command
+                  commandId="org.wcs.smart.observation.import.json"
+                  label="Import JSON Data..."
+                  style="push">
+            </command>
             <separator
                   name="org.wcs.smart.fielddata.dataseparater4"
                   visible="true">
@@ -284,6 +289,10 @@
                   id="org.wcs.smart.observation.waypointinfoview.refresh"
                   name="%refresh.command.name">
             </command>
+            <command
+                  id="org.wcs.smart.observation.import.json"
+                  name="Import JSON Data">
+            </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -318,6 +327,10 @@
       <handler
             class="org.wcs.smart.observation.ui.WpInfoViewRefreshHandler$WpInfoViewRefreshHandlerWrapper"
             commandId="org.wcs.smart.observation.waypointinfoview.refresh">
+      </handler>
+      <handler
+            class="org.wcs.smart.observation.ui.ImportJsonDataHandler$ImportJsonDataHandlerWrapper"
+            commandId="org.wcs.smart.observation.import.json">
       </handler>
    </extension>
    <extension

@@ -36,6 +36,7 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationAttributeList;
 
 /**
  * Hibernate listener for audit items to update
@@ -70,6 +71,8 @@ public class WaypointHibernateListener implements PreInsertEventListener, PreUpd
 			wp = ((WaypointObservation)event.getEntity()).getWaypoint();
 		}else if (event.getEntity() instanceof WaypointObservationAttribute) {
 			wp = ((WaypointObservationAttribute)event.getEntity()).getObservation().getWaypoint();
+		}else if (event.getEntity() instanceof WaypointObservationAttributeList) {
+			wp = ((WaypointObservationAttributeList)event.getEntity()).getObservationAttribute().getObservation().getWaypoint();
 		}else if (event.getEntity() instanceof ObservationAttachment) {
 			wp = ((ObservationAttachment)event.getEntity()).getObservation().getWaypoint();
 		}

@@ -66,6 +66,7 @@ public class ObservationPlugIn extends AbstractUIPlugin {
 		super.start(context);
 		plugin = this;
 		SmartContext.INSTANCE.setClass(IWaypointSourceEngine.class, WaypointSourceEngine.INSTANCE);
+		SmartContext.INSTANCE.setClass(IObservationLabelProvider.class, new ObservationLabelProvider());
 		ConservationAreaManager.getInstance().addDeleteHandler(deleteCa, CaDeleteHandler.DELETE_ORDER);
 		
 		DataModelManager.INSTANCE.addItemChangeListener(DataModelItemListener.INSTANCE);

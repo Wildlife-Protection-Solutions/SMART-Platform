@@ -32,7 +32,7 @@ import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.incident.ui.OpenIncidentHandler;
-import org.wcs.smart.observation.model.IWaypointSourceUiProvider;
+import org.wcs.smart.observation.model.IWaypointSourceProvider;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.smartcollect.internal.Messages;
 import org.wcs.smart.smartcollect.model.SmartCollectWaypointSource;
@@ -42,7 +42,7 @@ import org.wcs.smart.smartcollect.model.SmartCollectWaypointSource;
  * @author Emily
  *
  */
-public class SmartCollectWaypointSourceProvider implements IWaypointSourceUiProvider {
+public class SmartCollectWaypointSourceProvider implements IWaypointSourceProvider {
 
 	public SmartCollectWaypointSourceProvider() {
 	}

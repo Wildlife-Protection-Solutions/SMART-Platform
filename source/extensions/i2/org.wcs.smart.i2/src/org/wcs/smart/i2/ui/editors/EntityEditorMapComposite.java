@@ -115,7 +115,7 @@ import org.wcs.smart.i2.udig.entity.IntelEntityService;
 import org.wcs.smart.i2.udig.entity.IntelEntityServiceExtension;
 import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
 import org.wcs.smart.observation.WaypointSourceEngine;
-import org.wcs.smart.observation.model.IWaypointSourceUiProvider;
+import org.wcs.smart.observation.model.IWaypointSourceProvider;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
@@ -567,7 +567,7 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 					(new OpenRecordHandler()).openRecord(((IntelEntityLocation) selection).getLocation().getRecord(),false);
 				}else if (selection instanceof Waypoint) {
 					Waypoint wp = (Waypoint)selection;
-					IWaypointSourceUiProvider srcProvider = WaypointSourceEngine.INSTANCE.findUiProvider(wp.getSourceId());
+					IWaypointSourceProvider srcProvider = WaypointSourceEngine.INSTANCE.findUiProvider(wp.getSourceId());
 					if (srcProvider == null) return;
 					srcProvider.findAndShow(wp.getUuid());
 				}

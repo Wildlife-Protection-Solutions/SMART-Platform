@@ -28,6 +28,8 @@ import java.util.Locale;
 
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.incident.json.IncidentJsonFeatureProcessor;
+import org.wcs.smart.observation.json.IJsonFeatureProcessor;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.util.UuidUtils;
@@ -49,6 +51,7 @@ public class IndepedentIncidentSource implements IWaypointSource {
 	 * Source Key
 	 */
 	public static final String KEY = "INDINC"; //$NON-NLS-1$
+	
 	
 	public IndepedentIncidentSource() {
 	}
@@ -100,5 +103,7 @@ public class IndepedentIncidentSource implements IWaypointSource {
 		sb.append(") "); //$NON-NLS-1$
 		return sb.toString();
 	}
+	
+	public Class<? extends IJsonFeatureProcessor> getJsonFeatureProcessor() { return IncidentJsonFeatureProcessor.class; }
 
 }

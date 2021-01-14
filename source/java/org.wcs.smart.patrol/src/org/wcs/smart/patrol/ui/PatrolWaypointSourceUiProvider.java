@@ -35,7 +35,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.observation.model.IWaypointSourceUiProvider;
+import org.wcs.smart.observation.model.IWaypointSourceProvider;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
@@ -49,7 +49,7 @@ import org.wcs.smart.patrol.model.PatrolWaypoint;
  *
  */
 public class PatrolWaypointSourceUiProvider implements
-		IWaypointSourceUiProvider {
+		IWaypointSourceProvider {
 
 	@Override
 	public void findAndShow(UUID waypointUuid) {

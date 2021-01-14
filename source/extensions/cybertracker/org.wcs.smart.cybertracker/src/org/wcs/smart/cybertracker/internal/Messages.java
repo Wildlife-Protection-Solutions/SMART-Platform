@@ -593,6 +593,7 @@ public class Messages extends NLS {
 	public static String NavigationLayerDialog_dotstyle;
 	public static String NavigationLayerDialog_ErrorTitle;
 	public static String NavigationLayerDialog_LinesHeader;
+	public static String NavigationLayerDialog_LineTargetLayerName;
 	public static String NavigationLayerDialog_MapName;
 	public static String NavigationLayerDialog_ModifiedByField;
 	public static String NavigationLayerDialog_ModifiedDateField;
@@ -601,9 +602,12 @@ public class Messages extends NLS {
 	public static String NavigationLayerDialog_NameField;
 	public static String NavigationLayerDialog_NavLayerHeader;
 	public static String NavigationLayerDialog_PointHeader;
+	public static String NavigationLayerDialog_PointTargetLayerName;
 	public static String NavigationLayerDialog_refreshmapjob;
 	public static String NavigationLayerDialog_RemoveVertexActionName;
 	public static String NavigationLayerDialog_SaveError;
+	public static String NavigationLayerDialog_SelectedLineTargetLayerName;
+	public static String NavigationLayerDialog_SelectedPointTargetLayerName;
 	public static String NavigationLayerDialog_ShellTitle;
 	public static String NavigationLayerDialog_StylesHeader;
 	public static String NavigationLayerDialog_sizelabel;

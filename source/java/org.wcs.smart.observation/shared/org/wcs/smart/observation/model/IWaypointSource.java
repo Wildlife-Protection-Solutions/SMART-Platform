@@ -24,6 +24,7 @@ package org.wcs.smart.observation.model;
 import java.util.Locale;
 
 import org.hibernate.Session;
+import org.wcs.smart.observation.json.IJsonFeatureProcessor;
 
 /**
  * Interface representing a waypoint source.
@@ -64,4 +65,10 @@ public interface IWaypointSource {
 	 */
 	public String getSourceLabel(Object source, Session session, Locale l);
 
+	/**
+	 * Returns the processor used for processing json feature data.  Can be null if 
+	 * json feature data not supported
+	 * @return
+	 */
+	public default Class<? extends IJsonFeatureProcessor> getJsonFeatureProcessor() { return null; }
 }

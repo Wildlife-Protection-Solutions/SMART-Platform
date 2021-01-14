@@ -38,7 +38,7 @@ import org.wcs.smart.asset.ui.handler.OpenStationHandler;
 import org.wcs.smart.asset.ui.views.station.StationEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
-import org.wcs.smart.observation.model.IWaypointSourceUiProvider;
+import org.wcs.smart.observation.model.IWaypointSourceProvider;
 
 /**
  * Source provider for survey waypoints.
@@ -47,7 +47,7 @@ import org.wcs.smart.observation.model.IWaypointSourceUiProvider;
  *
  */
 public class AssetWaypointSourceUiProvider implements
-		IWaypointSourceUiProvider {
+		IWaypointSourceProvider {
 
 	@Override
 	public void findAndShow(UUID waypointUuid) {
