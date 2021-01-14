@@ -70,6 +70,7 @@ public class ConnectRESTApplication extends Application {
 		resources.add(CyberTracker.class);
 		resources.add(DashboardBetaApi.class);
 		resources.add(DataModelApi.class);
+		resources.add(DataApi.class);
 		resources.add(DataQueue.class);
 		resources.add(DesktopUser.class);
 		resources.add(GlobalForestWatchApi.class);

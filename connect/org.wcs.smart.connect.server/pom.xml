@@ -217,10 +217,14 @@
 		</dependency>
 		<dependency>
 			<groupId>org.hibernate</groupId>
-            		<artifactId>hibernate-ehcache</artifactId>
+            <artifactId>hibernate-jcache</artifactId>
 			<version>${hibernate.version}</version>
-        	</dependency>
-		
+        </dependency>
+		<dependency>
+    		<groupId>org.ehcache</groupId>
+   			<artifactId>ehcache</artifactId>
+			<version>${ehcache.version}</version>
+        </dependency>	
 		<!-- tomcat provided dependencies -->
 		<dependency>
 			<groupId>javax.servlet</groupId>

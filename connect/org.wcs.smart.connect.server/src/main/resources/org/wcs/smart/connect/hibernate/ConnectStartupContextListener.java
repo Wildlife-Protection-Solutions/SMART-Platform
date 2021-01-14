@@ -68,6 +68,7 @@ import org.geotools.referencing.operation.DefaultMathTransformFactory;
 import org.geotools.util.WeakCollectionCleaner;
 import org.geotools.util.factory.Hints;
 import org.hibernate.SessionFactory;
+import org.hibernate.boot.registry.BootstrapServiceRegistryBuilder;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
@@ -91,6 +92,7 @@ import org.wcs.smart.connect.i18n.labels.EntityQueryLabelProvider;
 import org.wcs.smart.connect.i18n.labels.ErLabelProvider;
 import org.wcs.smart.connect.i18n.labels.GridQueryColumnLabelProvider;
 import org.wcs.smart.connect.i18n.labels.IncidentLabelProvider;
+import org.wcs.smart.connect.i18n.labels.ObservationLabelProvider;
 import org.wcs.smart.connect.i18n.labels.ObservationQueryLabelProvider;
 import org.wcs.smart.connect.i18n.labels.OperatorLabelProvider;
 import org.wcs.smart.connect.i18n.labels.PatrolLabelProvider;
@@ -447,7 +449,12 @@ public class ConnectStartupContextListener implements ServletContextListener{
 			throw new RuntimeException("Could not read hibernate class files.", ex); //$NON-NLS-1$
 		}
 
-		ServiceRegistry service = new StandardServiceRegistryBuilder().applySettings(config.getProperties()).build();
+		BootstrapServiceRegistryBuilder bootstrapRegistryBuilder = new BootstrapServiceRegistryBuilder();
+		bootstrapRegistryBuilder.applyIntegrator(new SmartHibernateIntegrator());
+
+		ServiceRegistry service = new StandardServiceRegistryBuilder(bootstrapRegistryBuilder.build())
+				.applySettings(config.getProperties()).build();
+		
 		SessionFactory sf = config.buildSessionFactory(service);
 		sce.getServletContext().setAttribute(HibernateManager.CONTEXT_KEY, sf);
 		
@@ -534,7 +541,9 @@ public class ConnectStartupContextListener implements ServletContextListener{
 		
 		SmartContext.INSTANCE.setClass(org.wcs.smart.asset.ui.IQueryAssetLabelProvider.class, new AssetQueryLabelProvider());
 		SmartContext.INSTANCE.setClass(org.wcs.smart.asset.IAssetLabelProvider.class, new AssetLabelProvider());
+		SmartContext.INSTANCE.setClass(org.wcs.smart.observation.IObservationLabelProvider.class, new ObservationLabelProvider());
 		SmartContext.INSTANCE.setClass(IAssetQueryColumnProvider.class, new AssetQueryColumnProvider());
+		
 		
 		SmartContext.INSTANCE.setClass(IConnectionFactory.class, new IntelConnectionFactory());
 		

@@ -509,7 +509,7 @@ CREATE OR REPLACE FUNCTION connect.trg_wp_observation_attributes_list() RETURNS 
      INSERT INTO connect.change_log
          (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
          SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'list_element_uuid', ROW.list_element_uuid, 'observation_attribute_uuid', ROW.observation_attribute_uuid, null, a.CA_UUID
-         FROM smart.wp_observation_attributes b join smart.dm_attribute a ON a.uuid = b.attribute_uuid WHERE a.uuid = ROW.observation_attribute_uuid; 
+         FROM smart.wp_observation_attributes b join smart.dm_attribute a ON a.uuid = b.attribute_uuid WHERE b.uuid = ROW.observation_attribute_uuid; 
 RETURN ROW; END$$;
 
 CREATE TRIGGER trg_wp_observation_attributes_list AFTER INSERT OR DELETE OR UPDATE ON smart.wp_observation_attributes_list FOR EACH ROW EXECUTE PROCEDURE connect.trg_wp_observation_attributes_list();

@@ -22,7 +22,9 @@
 package org.wcs.smart.connect.api;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -41,13 +43,18 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.StreamingOutput;
+import javax.xml.bind.JAXBException;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -64,25 +71,30 @@ import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.i18n.Messages;
+import org.wcs.smart.connect.security.CaAction;
+import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.internal.ca.datamodel.xml.DataModelToXmlConverter;
 import org.wcs.smart.internal.ca.datamodel.xml.DataModelXmlToSimpleDataModelConverter;
+import org.wcs.smart.internal.ca.datamodel.xml.XmlSmartDataModelManager;
 import org.wcs.smart.util.UuidUtils;
 
-@Path(ConnectRESTApplication.PATH_SEPERATOR + DataModelApi.PATH)
-@Consumes({ MediaType.APPLICATION_JSON})
-@Produces({ MediaType.APPLICATION_JSON })
+import io.swagger.v3.oas.annotations.Parameter;
+
+
 /**
- * Data model maintenance API.  Currently provides the ability
+ * Data model API.  Currently provides the ability
  * to merge new items from a datamodel xml file into one
- * or more Conservation Area datamodels.
+ * or more Conservation Area datamodels and viewing data model xml.
  * 
  * @author Emily
  *
  */
+@Path(ConnectRESTApplication.PATH_SEPERATOR )
+@Consumes({ MediaType.APPLICATION_JSON})
+@Produces({ MediaType.APPLICATION_JSON })
 public class DataModelApi extends HttpServlet{
 
-	public static final String PATH = "ca/datamodel"; //$NON-NLS-1$
-	
 	private static final long serialVersionUID = 1L;
 	private final Logger logger = Logger.getLogger(DataModelApi.class.getName());
 	
@@ -92,10 +104,81 @@ public class DataModelApi extends HttpServlet{
 	@Context private HttpServletRequest request;
 	
 	
+	@GET
+	@Path("/metadata/datamodel/{cauuid}")
+	@Produces({ MediaType.APPLICATION_XML })
+	public Response getDataModel(
+			@Parameter(description="uuid of the conservation area to get the data model for") @PathParam("cauuid") String uuid) {
+		
+		UUID caUuid = parseUuid(uuid);
+		
+		try(Session s = HibernateManager.getSession(context)){
+			s.beginTransaction();
+			try {
+				if (!SecurityManager.INSTANCE.canAccess(s, 
+						request.getUserPrincipal().getName(), 
+						CaAction.VIEWCA_KEY,
+						caUuid)){
+					logger.info("User " + request.getUserPrincipal().getName() + " does not have permission to view ca."); //$NON-NLS-1$ //$NON-NLS-2$
+					throw new SmartConnectException(Response.Status.UNAUTHORIZED);
+				}
+				
+				
+				ConservationArea ca = s.get(ConservationArea.class, caUuid);
+				if (ca == null) throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("DataModelApi.CaNotFound", request.getLocale())); //$NON-NLS-1$
+					
+				
+				List<Attribute> attributes = QueryFactory.buildQuery(s, Attribute.class, 
+						new Object[] {"conservationArea",ca}).list(); //$NON-NLS-1$
+				
+				List<Category> roots = QueryFactory.buildQuery(s, Category.class, 
+						new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+						new Object[] {"parent", null}).list(); //$NON-NLS-1$
+						
+				SimpleDataModel caDataModel = new SimpleDataModel(ca, roots, attributes);
+				
+				DataModelToXmlConverter converter = new DataModelToXmlConverter();
+				org.wcs.smart.internal.ca.datamodel.xml.generate.DataModel xml = converter.convert(caDataModel);
+				
+				StreamingOutput stream = new StreamingOutput() {
+					@Override
+					public void write(OutputStream output) throws IOException {
+						try {
+							XmlSmartDataModelManager.writeDataModel(xml, output);
+						} catch (JAXBException e) {
+							throw new IOException(e);
+						}
+					}
+			    };
+				
+			    String filename = "datamodel." + uuid + ".xml"; //$NON-NLS-1$ //$NON-NLS-2$
+			    
+				return Response.status(Response.Status.PARTIAL_CONTENT)
+						.entity(stream)
+						.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM)
+						.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"") //$NON-NLS-1$ //$NON-NLS-2$
+						.build();
+			}finally {
+				s.getTransaction().commit();
+			}
+		}
+		
+	}
+	
+	private UUID parseUuid(String uuid) throws SmartConnectException{
+		UUID itemUuid = null;
+		try{
+			itemUuid= UuidUtils.stringToUuid(uuid);
+		}catch (Exception ex){
+			logger.log(Level.SEVERE, "Invalid uuid: " + uuid + ". " + ex.getMessage(), ex); //$NON-NLS-1$ //$NON-NLS-2$
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid Conservation Area UUID", ex); //$NON-NLS-1$
+		}
+		return itemUuid;
+	}
 	/**
 	 * <p>Uploads data to server</p>
 	 * <p>
-	 * URL: .../server/uploader/{uploaduuid}<br>
+	 * URL: .../server/api/ca/datamodel<br>
 	 * Call Type: POST<br>
 	 * 
 	 * @param input	MultipartFormDataInput containing a "dm_file" component which is
@@ -106,7 +189,7 @@ public class DataModelApi extends HttpServlet{
 	 * @throws Exception FileNotFound is possible if the upload fails for some reason.
 	 */
 	@POST
-	@Path("/")
+	@Path("/ca/datamodel")
 	@Consumes("multipart/form-data")
 	@Produces({ MediaType.APPLICATION_JSON })
 	public List<String> updateFilePost(MultipartFormDataInput input) throws Exception{

@@ -26,6 +26,7 @@ import java.util.Locale;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.incident.IIncidentLabelProvider;
 import org.wcs.smart.incident.IndepedentIncidentSource;
+import org.wcs.smart.incident.json.IncidentJsonFeatureProcessor;
 
 /**
  * Label provider for incident plugin.
@@ -36,9 +37,12 @@ public class IncidentLabelProvider implements IIncidentLabelProvider {
 
 	@Override
 	public String getLabel(Object item, Locale l) {
-		if (item instanceof IndepedentIncidentSource){
-			return Messages.getString("IncidentLabelProvider.IncidentLabel", l); //$NON-NLS-1$
-		}
+		if (item instanceof IndepedentIncidentSource) return Messages.getString("IncidentLabelProvider.IncidentLabel", l); //$NON-NLS-1$
+		
+		if (item == IncidentJsonFeatureProcessor.Messages.COMPLETE_MSG) return Messages.getString("IncidentLabelProvider.createIncidentMsg",l); //$NON-NLS-1$
+		if (item == IncidentJsonFeatureProcessor.Messages.INVALID_DATA_TYPE) return Messages.getString("IncidentLabelProvider.invalidSmartDataTypeJson",l); //$NON-NLS-1$
+		if (item == IncidentJsonFeatureProcessor.Messages.INVALID_FEATURE_TYPE) return Messages.getString("IncidentLabelProvider.invalidSmartFeatureTypeJson",l); //$NON-NLS-1$
+		
 		return null;
 	}
 

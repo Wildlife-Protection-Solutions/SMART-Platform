@@ -32,6 +32,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.servlet.ServletContext;
 
+import org.hibernate.Interceptor;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.wcs.smart.ca.ConservationArea;
@@ -67,7 +68,7 @@ public class HibernateManager {
 	 * Creates a new session from the given context.  If you are
 	 * accessing SMART Objects (data model etc.) you should use the
 	 * getSession(ServletContext, Locale) function to ensure the
-	 * names are displayed in the corret locale.
+	 * names are displayed in the correct locale.
 	 * 
 	 * @param context
 	 * @return
@@ -79,6 +80,16 @@ public class HibernateManager {
 	public static Session openNewSession(ServletContext context, Locale l){
 		I18nUtil.setLocale(l);
 		return getSessionFactory(context).openSession();
+	}
+	
+	public static Session getSession(ServletContext context, Locale l, Interceptor interceptor){
+		I18nUtil.setLocale(l);
+		Session session = getSessionFactory(context).withOptions().interceptor(interceptor).openSession();
+		
+		if (interceptor instanceof AttachmentInterceptor) {
+			((AttachmentInterceptor)interceptor).setSession(session, l);
+		}
+		return session;
 	}
 	
 	/**
