@@ -229,21 +229,20 @@ public enum StatisticsEngine {
 	}
 	
 	private Long computeNumberOfIncidents(Session session, AssetStation station) {
-		String hql = "SELECT count(a) FROM AssetWaypoint a join a.id.assetDeployment b WHERE b.stationLocation.station = :station"; //$NON-NLS-1$
+		String hql = "SELECT count(distinct a.id.waypoint.uuid) FROM AssetWaypoint a join a.id.assetDeployment b WHERE b.stationLocation.station = :station"; //$NON-NLS-1$
 		return (Long)session.createQuery(hql).setParameter("station", station).uniqueResult(); //$NON-NLS-1$
 		
 	}
 	
 	private Long computeNumberNotValidated(Session session, AssetStation station) {
-		String hql = "SELECT count(distinct a) FROM AssetWaypoint a join a.id.assetDeployment b WHERE a.state = :state and b.stationLocation.station = :station"; //$NON-NLS-1$
+		String hql = "SELECT count(distinct a.id.waypoint.uuid) FROM AssetWaypoint a join a.id.assetDeployment b WHERE a.state = :state and b.stationLocation.station = :station"; //$NON-NLS-1$
 		Query<?> query = session.createQuery(hql).setParameter("state",  AssetWaypoint.State.DIRTY).setParameter("station", station); //$NON-NLS-1$ //$NON-NLS-2$
 		Long cnt = (Long) query.uniqueResult();
 		return cnt;
 	}
 	
-	
 	private Long computeNumberOfUnTagged(Session session, AssetStation station) {
-		String hql = "SELECT count(*) FROM AssetWaypoint aw JOIN aw.id.assetDeployment d JOIN aw.id.waypoint w WHERE d.stationLocation.station=:station AND w.uuid NOT IN (SELECT waypoint.uuid FROM WaypointObservationGroup)"; //$NON-NLS-1$
+		String hql = "SELECT count(distinct aw.id.waypoint.uuid) FROM AssetWaypoint aw JOIN aw.id.assetDeployment d JOIN aw.id.waypoint w WHERE d.stationLocation.station=:station AND w.uuid NOT IN (SELECT waypoint.uuid FROM WaypointObservationGroup)"; //$NON-NLS-1$
 		Query<?> query = session.createQuery(hql).setParameter("station",  station); //$NON-NLS-1$
 		Long cnt = (Long) query.uniqueResult();
 		return cnt;
@@ -344,19 +343,19 @@ public enum StatisticsEngine {
 	}
 	
 	private Long computeNumberOfIncidents(Session session, AssetStationLocation location) {
-		String hql = "SELECT count(a) FROM AssetWaypoint a join a.id.assetDeployment b WHERE b.stationLocation = :location"; //$NON-NLS-1$
+		String hql = "SELECT count(distinct a.id.waypoint.uuid) FROM AssetWaypoint a join a.id.assetDeployment b WHERE b.stationLocation = :location"; //$NON-NLS-1$
 		return (Long)session.createQuery(hql).setParameter("location", location).uniqueResult(); //$NON-NLS-1$
 		
 	}
 	private Long computeNumberNotValidated(Session session, AssetStationLocation location) {
-		String hql = "SELECT count(distinct a) FROM AssetWaypoint a join a.id.assetDeployment b WHERE a.state = :state and b.stationLocation = :location"; //$NON-NLS-1$
+		String hql = "SELECT count(distinct a.id.waypoint.uuid) FROM AssetWaypoint a join a.id.assetDeployment b WHERE a.state = :state and b.stationLocation = :location"; //$NON-NLS-1$
 		Query<?> query = session.createQuery(hql).setParameter("state",  AssetWaypoint.State.DIRTY).setParameter("location", location); //$NON-NLS-1$ //$NON-NLS-2$
 		Long cnt = (Long) query.uniqueResult();
 		return cnt;
 	}
 	
 	private Long computeNumberOfUnTagged(Session session, AssetStationLocation location) {
-		String hql = "SELECT count(*) FROM AssetWaypoint aw JOIN aw.id.assetDeployment d JOIN aw.id.waypoint w WHERE d.stationLocation=:location AND w.uuid NOT IN (SELECT waypoint.uuid FROM WaypointObservationGroup)"; //$NON-NLS-1$
+		String hql = "SELECT count(distinct aw.id.waypoint.uuid) FROM AssetWaypoint aw JOIN aw.id.assetDeployment d JOIN aw.id.waypoint w WHERE d.stationLocation=:location AND w.uuid NOT IN (SELECT waypoint.uuid FROM WaypointObservationGroup)"; //$NON-NLS-1$
 		Query<?> query = session.createQuery(hql).setParameter("location",  location); //$NON-NLS-1$
 		Long cnt = (Long) query.uniqueResult();
 		return cnt;
@@ -370,7 +369,7 @@ public enum StatisticsEngine {
 		sb.append(" FROM smart.asset_waypoint aw join smart.ASSET_DEPLOYMENT d on aw.asset_deployment_uuid = d.uuid ");  //$NON-NLS-1$
 		sb.append(" AND d.station_location_uuid = :location ");  //$NON-NLS-1$
 		sb.append(" join smart.waypoint a on aw.wp_uuid = a.uuid "); //$NON-NLS-1$
-		sb.append(" join smart.wp_observation_group g on g.uuid = a.uuid " ); //$NON-NLS-1$
+		sb.append(" join smart.wp_observation_group g on g.wp_uuid = a.uuid "); //$NON-NLS-1$
 		sb.append(" join smart.WP_OBSERVATION c on g.uuid = c.wp_group_uuid ) c group by c.category_uuid"); //$NON-NLS-1$
 		
 		List<Object> data = session.createNativeQuery(sb.toString()).setParameter("location", location.getUuid()).list(); //$NON-NLS-1$

@@ -1040,7 +1040,7 @@ public class Messages extends NLS {
 	public static String StationLocationCurrentPage_intiJobName;
 	public static String StationLocationCurrentPage_LocationColumn;
 	public static String StationLocationCurrentPage_NoActiveAssets;
-	public static String StationLocationCurrentPage_NumAssetsLbl;
+	public static String StationLocationCurrentPage_NumAssetsLbl1;
 	public static String StationLocationCurrentPage_NumIncidentsLabel;
 	public static String StationLocationCurrentPage_NumUntaggedLabel;
 	public static String StationLocationCurrentPage_StationColumn;
