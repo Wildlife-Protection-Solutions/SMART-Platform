@@ -1374,6 +1374,14 @@ public abstract class AssetDataPanel {
 			if (waypoint.getWaypoint() == null) return ;
 			
 			StringBuilder sb = new StringBuilder();
+			StringBuilder tooltip = new StringBuilder();
+			
+			tooltip.append(Messages.AssetDataPanel_datetooltippart );
+			tooltip.append(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(waypoint.getWaypoint().getDateTime()));
+			tooltip.append("\n"); //$NON-NLS-1$
+			tooltip.append(Messages.AssetDataPanel_lengthtooltippart );
+			tooltip.append(AssetUtils.formatTimeHours(waypoint.getAssetLinks().iterator().next().getIncidentLength()));
+			
 			sb.append(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(waypoint.getWaypoint().getDateTime()));
 			sb.append(" ("); //$NON-NLS-1$
 			sb.append(AssetUtils.formatTimeHours(waypoint.getAssetLinks().iterator().next().getIncidentLength()));
@@ -1383,26 +1391,48 @@ public abstract class AssetDataPanel {
 			if (station.isPresent()) {
 				sb.append("      "); //$NON-NLS-1$
 				sb.append(station.get().getId());
+				
+				tooltip.append("\n"); //$NON-NLS-1$
+				tooltip.append(Messages.AssetDataPanel_stationtooltippart + station.get().getId());
+				
 			}
 			
 			Set<AssetStationLocation> locations= waypoint.getAssetLinks().stream().map(e->e.getAssetDeployment().getStationLocation()).collect(Collectors.toSet());
 			sb.append("      "); //$NON-NLS-1$
+			tooltip.append("\n"); //$NON-NLS-1$
+			tooltip.append(Messages.AssetDataPanel_locationtooltippart );
 			for (AssetStationLocation l : locations) {
 				sb.append(l.getId());
 				sb.append(", "); //$NON-NLS-1$
+				
+				tooltip.append(l.getId());
+				tooltip.append(", "); //$NON-NLS-1$
 			}
 			sb.deleteCharAt(sb.length() - 1);
 			sb.deleteCharAt(sb.length() - 1);
 			
+			tooltip.deleteCharAt(tooltip.length() - 1);
+			tooltip.deleteCharAt(tooltip.length() - 1);
+			
 			Set<Asset> assets = waypoint.getAssetLinks().stream().map(e->e.getAssetDeployment().getAsset()).collect(Collectors.toSet());
 			sb.append("      "); //$NON-NLS-1$
+			tooltip.append("\n"); //$NON-NLS-1$
+			tooltip.append(Messages.AssetDataPanel_assettooltippart );
 			for (Asset a : assets) {
 				sb.append(a.getId());
 				sb.append(", "); //$NON-NLS-1$
+				
+				tooltip.append(a.getId());
+				tooltip.append(", "); //$NON-NLS-1$
 			}
 			sb.deleteCharAt(sb.length() - 1);
 			sb.deleteCharAt(sb.length() - 1);
+			
+			tooltip.deleteCharAt(tooltip.length() - 1);
+			tooltip.deleteCharAt(tooltip.length() - 1);
+			
 			headerLabel.setText(sb.toString());
+			headerLabel.setToolTipText(tooltip.toString());
 			headerLabel.getParent().layout();
 		}
 		public Control createControl(Composite parent) {

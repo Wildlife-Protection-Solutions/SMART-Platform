@@ -142,12 +142,14 @@ public class Messages extends NLS {
 	public static String AssetDataPage_loadDataJobName;
 	public static String AssetDataPanel_28;
 	public static String AssetDataPanel_AssetsOption;
+	public static String AssetDataPanel_assettooltippart;
 	public static String AssetDataPanel_configuretooltip;
 	public static String AssetDataPanel_DeletedLabel;
 	public static String AssetDataPanel_DeleteMnu;
 	public static String AssetDataPanel_DeleteMsg1;
 	public static String AssetDataPanel_DeleteMsg2;
 	public static String AssetDataPanel_DeleteTitle;
+	public static String AssetDataPanel_datetooltippart;
 	public static String AssetDataPanel_deletewptooltip;
 	public static String AssetDataPanel_DisplayingLabel;
 	public static String AssetDataPanel_editmodetooltip;
@@ -161,7 +163,9 @@ public class Messages extends NLS {
 	public static String AssetDataPanel_LastUpdated1;
 	public static String AssetDataPanel_LastUpdated2;
 	public static String AssetDataPanel_LocationsOption;
+	public static String AssetDataPanel_lengthtooltippart;
 	public static String AssetDataPanel_loadwpJobName;
+	public static String AssetDataPanel_locationtooltippart;
 	public static String AssetDataPanel_MergeConfigrm;
 	public static String AssetDataPanel_MergeError;
 	public static String AssetDataPanel_MergeMnu;
@@ -181,6 +185,7 @@ public class Messages extends NLS {
 	public static String AssetDataPanel_RemoveAttachmentsMessage;
 	public static String AssetDataPanel_RemoveAttachmentsTitle;
 	public static String AssetDataPanel_saveerror;
+	public static String AssetDataPanel_stationtooltippart;
 	public static String AssetDataPanel_SaveError;
 	public static String AssetDataPanel_ShowOtherImages;
 	public static String AssetDataPanel_StationsOption;
