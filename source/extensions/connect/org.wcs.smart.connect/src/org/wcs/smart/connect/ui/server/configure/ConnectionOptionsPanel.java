@@ -49,7 +49,7 @@ import org.wcs.smart.connect.model.ConnectServerOption;
  * @author Emily
  *
  */
-public class ServerOptionsPanel implements IServerOptionsPanel {
+public class ConnectionOptionsPanel implements IServerOptionsPanel  {
 
 	private static ConnectServerOption.ConnectionOption[] OPTION_KEYS = new ConnectServerOption.ConnectionOption[]{
 		ConnectServerOption.ConnectionOption.MAX_PROCESSING_WAIT_TIME,
@@ -64,7 +64,7 @@ public class ServerOptionsPanel implements IServerOptionsPanel {
 	private HashMap<ConnectServerOption.ConnectionOption, Text> optionCntrls;
 	private Collection<ModifyListener> listeners;
 	
-	public ServerOptionsPanel() {
+	public ConnectionOptionsPanel() {
 	}
 	
 	@Override
@@ -82,10 +82,12 @@ public class ServerOptionsPanel implements IServerOptionsPanel {
 		listeners = new ArrayList<ModifyListener>();
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayout(new GridLayout(2, false));
-
+		
 		Composite warn = new Composite(main, SWT.NONE);
 		warn.setLayout(new GridLayout(2, false));
 		warn.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		((GridLayout)warn.getLayout()).marginWidth = 0;
+		((GridLayout)warn.getLayout()).marginHeight = 0;
 		
 		Label lwarn = new Label(warn, SWT.NONE);
 		lwarn.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.WARN_ICON));
@@ -101,14 +103,15 @@ public class ServerOptionsPanel implements IServerOptionsPanel {
 			public void modifyText(ModifyEvent e) {
 				Text txt = (Text)e.getSource();
 				try{
-					Long.parseLong( txt.getText());
+					Long value = Long.parseLong( txt.getText());
+					if (value < 0) throw new Exception();
 					txt.setData(VALID_KEY, true);
 					((ControlDecoration)txt.getData(CD_KEY)).hide();
 				}catch (Exception ex){
 					//invalid number
 					txt.setData(VALID_KEY, false);
 					((ControlDecoration)txt.getData(CD_KEY)).show();
-					((ControlDecoration)txt.getData(CD_KEY)).setDescriptionText(Messages.ServerOptionsPanel_InvalidNumber);
+					((ControlDecoration)txt.getData(CD_KEY)).setDescriptionText(Messages.ServerOptionsPanel_InvalidNumber1);
 				}
 				fireChange(e);
 			}
@@ -200,4 +203,7 @@ public class ServerOptionsPanel implements IServerOptionsPanel {
 	public boolean isSupported(ConservationArea ca) {
 		return true;
 	}
+	
+	@Override
+	public boolean includeInWizard() { return false; }
 }

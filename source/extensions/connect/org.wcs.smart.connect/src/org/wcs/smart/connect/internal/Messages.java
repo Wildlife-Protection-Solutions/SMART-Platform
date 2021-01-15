@@ -336,7 +336,7 @@ public class Messages extends NLS {
 	public static String ServerOptionLabelProvider_WaitTimeTooltip;
 	public static String ServerOptionsPanel_ConnectOpPanelName;
 	public static String ServerOptionsPanel_Description;
-	public static String ServerOptionsPanel_InvalidNumber;
+	public static String ServerOptionsPanel_InvalidNumber1;
 	public static String ServerOptionsPanel_NotApplicable;
 	public static String ServerOptionsWizardPage_Title;
 	public static String ServerPanel_AdvancedOptionsLbl;
@@ -344,6 +344,8 @@ public class Messages extends NLS {
 	public static String ServerPanel_CertificateFilterName;
 	public static String ServerPanel_CertificateLabel;
 	public static String ServerPanel_CertificateMessage;
+	public static String ServerPanel_CertificateSettings;
+	public static String ServerPanel_ConnectionSettings;
 	public static String ServerPanel_InvalidCertificate;
 	public static String ServerPanel_InvalidServerURL;
 	public static String ServerPanel_ServerRequired;

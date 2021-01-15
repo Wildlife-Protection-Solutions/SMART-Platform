@@ -43,6 +43,8 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
+import org.hibernate.Session;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
@@ -65,9 +67,16 @@ public class ServerPanel extends Composite implements ModifyListener {
 	private List<ModifyListener> listeners;
 	private boolean updatePref;
 	
+	private boolean includeServerOptions;
+	private ConnectionOptionsPanel serverOptions = null;
+	
 	public ServerPanel(Composite parent) {
+		this(parent, false);
+	}
+	
+	public ServerPanel(Composite parent, boolean includeServerOptions) {
 		super(parent, SWT.NONE);
-		
+		this.includeServerOptions = includeServerOptions;
 		listeners = new ArrayList<ModifyListener>();
 		createControl();
 	}
@@ -89,14 +98,25 @@ public class ServerPanel extends Composite implements ModifyListener {
 		lnkAdvanced.setText("<a>" + Messages.ServerPanel_AdvancedOptionsLbl + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 		lnkAdvanced.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
 
-		Composite temp = new Composite(this, SWT.BORDER);
+		Composite advanced = new Composite(this, SWT.NONE);
+		advanced.setLayout(new GridLayout());
+		advanced.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
+		advanced.setVisible(false);
+		((GridLayout)advanced.getLayout()).marginWidth = 0;
+		((GridLayout)advanced.getLayout()).marginHeight = 0;
+		
+		Composite temp = new Composite(advanced, SWT.NONE);
 		temp.setLayout(new GridLayout(3, false));
-		temp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
-		temp.setVisible(false);
+		temp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridLayout)temp.getLayout()).marginWidth = 0;
+		((GridLayout)temp.getLayout()).marginHeight = 0;
 		
 		lnkAdvanced.addListener(SWT.Selection, e->{
-			temp.setVisible(!temp.isVisible());
+			advanced.setVisible(!advanced.isVisible());
 		});
+		
+		Composite p = SmartUiUtils.createSubHeaderLabel(temp, Messages.ServerPanel_CertificateSettings);
+		p.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
 		
 		l = new Label(temp, SWT.NONE);
 		l.setText(Messages.ServerPanel_CertificateLabel);
@@ -126,11 +146,26 @@ public class ServerPanel extends Composite implements ModifyListener {
 			}
 		});
 		
+		if (includeServerOptions) {
+			addAdvancedOptions(advanced);
+		}
+		
 		l = new Label(temp, SWT.WRAP);
 		l.setText(Messages.ServerPanel_CertificateMessage);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
 		((GridData)l.getLayoutData()).widthHint = 300;
 		
+	}
+	
+	protected void addAdvancedOptions(Composite parent) {
+		
+		SmartUiUtils.createSubHeaderLabel(parent, Messages.ServerPanel_ConnectionSettings);
+		
+		serverOptions = new ConnectionOptionsPanel();
+		Composite part = serverOptions.createComposite(parent, true);
+		part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		serverOptions.addChangeListener(e->fireChange(e));
 	}
 	
 	protected ControlDecoration createControlDecoration(Control widget){
@@ -145,6 +180,7 @@ public class ServerPanel extends Composite implements ModifyListener {
 	public boolean isValid(){
 		if (! (boolean)txtServer.getData(VALID_KEY)) return false;
 		if (! (boolean)txtCertificate.getData(VALID_KEY)) return false;
+		if (serverOptions != null && !serverOptions.isValid()) return false;
 		return true;
 	}
 	
@@ -205,7 +241,7 @@ public class ServerPanel extends Composite implements ModifyListener {
 		listeners.add(listener);
 	}
 	
-	public void initValues(ConnectServer server){
+	public void initValues(ConnectServer server, Session session){
 		if (server.getServerUrl() != null){
 			txtServer.setText(server.getServerUrl());
 		}else{
@@ -221,6 +257,9 @@ public class ServerPanel extends Composite implements ModifyListener {
 		}else{
 			txtCertificate.setText(""); //$NON-NLS-1$
 		}
+		
+		if (serverOptions != null) serverOptions.initValues(server, session);
+
 	}
 	
 	public String getServerUrl(){
@@ -239,5 +278,9 @@ public class ServerPanel extends Composite implements ModifyListener {
 		}
 		return txtCertificate.getText();
 	}
-
+	
+	public void updateServer(ConnectServer server, Session session) {
+		if (serverOptions != null) serverOptions.updateServer(server, session);
+	}
+	
 }

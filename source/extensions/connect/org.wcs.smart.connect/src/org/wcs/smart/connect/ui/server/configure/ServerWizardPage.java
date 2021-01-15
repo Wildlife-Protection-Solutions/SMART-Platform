@@ -28,8 +28,10 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.hibernate.Session;
 import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
+import org.wcs.smart.hibernate.HibernateManager;
 
 /**
  * Wizard page to enter SMART Connect server name.
@@ -52,11 +54,13 @@ public class ServerWizardPage extends WizardPage implements ModifyListener {
 		outer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		outer.setLayout(new GridLayout());
 		
-		panel = new ServerPanel(outer);
+		//TODO: fix this
+		panel = new ServerPanel(outer, true);
 		panel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 		panel.addChangeListener(this);
-		panel.initValues(new ConnectServer());
-		
+		try(Session session = HibernateManager.openSession()){
+			panel.initValues(new ConnectServer(), session);
+		}
 		setTitle(Messages.ServerWizardPage_Title);
 		setMessage(Messages.ServerWizardPage_Message1);
 		
@@ -86,5 +90,11 @@ public class ServerWizardPage extends WizardPage implements ModifyListener {
 			getWizard().getContainer().updateButtons();
 		}
 	}
+
+	public void updateServer(ConnectServer server, Session session) {
+		panel.updateServer(server, session);
+		
+	}
+	
 
 }

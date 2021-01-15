@@ -103,7 +103,7 @@ public class AutoOptionsPanel implements IServerOptionsPanel {
 		
 		Label l = new Label(warn, SWT.WRAP);
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
-		gd.widthHint = 100;
+		gd.widthHint = 200;
 		l.setLayoutData(gd);
 		l.setText(IServerOptionsPanel.DESKTOP_ONLY_MESSAGE);
 		

@@ -23,7 +23,9 @@ package org.wcs.smart.connect.ui.server.configure;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.Wizard;
@@ -61,15 +63,15 @@ public class ConnectServerWizard extends Wizard {
 		
 		addPage(page1 = new ServerWizardPage());
 		
-		IServerOptionsPanel[] panels = null;
+		List<IServerOptionsPanel> panels = new ArrayList<>();
 		if (includeOptionalConfigurations){
-			panels = OptionPanelManager.createOptionPanels(SmartDB.getCurrentConservationArea());
-		}else{
-			panels = new IServerOptionsPanel[]{new ServerOptionsPanel()};
+			for (IServerOptionsPanel panel : OptionPanelManager.createOptionPanels(SmartDB.getCurrentConservationArea())) {
+				if (panel.includeInWizard()) panels.add(panel);
+			}
 		}
-		opPages = new ServerOptionsWizardPage[panels.length];
-		for (int i = 0; i < panels.length; i ++){
-			opPages[i] = new ServerOptionsWizardPage(panels[i]);
+		opPages = new ServerOptionsWizardPage[panels.size()];
+		for (int i = 0; i < panels.size(); i ++){
+			opPages[i] = new ServerOptionsWizardPage(panels.get(i));
 			addPage(opPages[i]);
 		}
 		
@@ -94,6 +96,7 @@ public class ConnectServerWizard extends Wizard {
 		try(Session s = HibernateManager.openSession()){
 			s.beginTransaction();
 			try{
+				page1.updateServer(server, s);
 				for (ServerOptionsWizardPage p : opPages){
 					p.updateServer(server, s);
 				}

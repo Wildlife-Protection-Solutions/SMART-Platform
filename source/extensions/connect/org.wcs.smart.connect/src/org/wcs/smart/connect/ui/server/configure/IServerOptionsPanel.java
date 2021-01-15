@@ -103,4 +103,11 @@ public interface IServerOptionsPanel {
 	 * @param listener
 	 */
 	public void addChangeListener(ModifyListener listener);
+	
+	/**
+	 * Determines if panel should be included in the wizard configuration
+	 * 
+	 * @return
+	 */
+	public default boolean includeInWizard() { return true; }
 }

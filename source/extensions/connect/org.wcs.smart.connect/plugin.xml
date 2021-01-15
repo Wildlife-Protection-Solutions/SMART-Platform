@@ -475,7 +475,7 @@
             class="org.wcs.smart.connect.ui.server.configure.AutoOptionsPanel">
       </Panel>
       <Panel
-            class="org.wcs.smart.connect.ui.server.configure.ServerOptionsPanel">
+            class="org.wcs.smart.connect.ui.server.configure.ConnectionOptionsPanel">
       </Panel>
    </extension>
    <extension

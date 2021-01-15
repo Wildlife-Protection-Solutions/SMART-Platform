@@ -56,9 +56,10 @@ public class ServerOptionsWizardPage extends WizardPage  {
 		
 		Composite inner = new Composite(outer, SWT.NONE);
 		inner.setLayout(new GridLayout(2, false));
-		inner.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
+		inner.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 		
-		panel.createComposite(inner, true);
+		Composite pnl = panel.createComposite(inner, true);
+		pnl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		setTitle(Messages.ServerOptionsWizardPage_Title);
 		setTitle(panel.getName());

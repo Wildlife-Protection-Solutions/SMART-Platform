@@ -312,7 +312,7 @@ public class EditConnectServerInfoDialog extends SmartStyledTitleDialog{
 //			pnl.addChangeListener(validateListener);
 //		}
 		
-		serverpnl.initValues(server);
+		serverpnl.initValues(server, null);
 		serverpnl.addChangeListener(validateListener);
 		
 		validate();
