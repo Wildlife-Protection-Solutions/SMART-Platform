@@ -571,6 +571,7 @@ public class ExportMapWizardPage extends WizardPage {
     	cmbScaleFactor.setText("1"); //$NON-NLS-1$
     	cmbScaleFactor.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false));
     	((GridData)cmbScaleFactor.getLayoutData()).widthHint = 50;
+    	cmbScaleFactor.addListener(SWT.Modify, e->validate());
     	enableScaleFactor(true);
     }
     

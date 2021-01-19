@@ -271,7 +271,14 @@ public class NewIconSetDialog extends SmartStyledTitleDialog {
 		ins.add(""); //$NON-NLS-1$
 		ins.addAll(sets);
 		cmbViewer.setInput(ins);
-		cmbViewer.addSelectionChangedListener(e->templateSet=(IconSet) cmbViewer.getStructuredSelection().getFirstElement());
+		cmbViewer.addSelectionChangedListener(e->{
+			Object obj = cmbViewer.getStructuredSelection().getFirstElement();
+			if (obj instanceof IconSet) {
+				templateSet = (IconSet)obj;
+			}else {
+				templateSet = null;
+			}
+		});
 		
 		btnCustom.addListener(SWT.Selection, e->updateEnabled());
 		btnDefault.addListener(SWT.Selection, e->updateEnabled());
