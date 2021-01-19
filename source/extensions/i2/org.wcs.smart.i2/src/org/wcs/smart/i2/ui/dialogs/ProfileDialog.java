@@ -105,6 +105,13 @@ public class ProfileDialog extends SmartStyledDialog {
 
 	private static final String COLOR_KEY = "COLOR"; //$NON-NLS-1$
 
+	public enum Tab{
+		CONFIG,
+		TYPES,
+		RECORDS,
+		PERMISSIONS
+	};
+	
 	private IntelProfile config;
 	private List<IntelProfile> others;
 	private List<Employee> smartUsers; 
@@ -139,6 +146,7 @@ public class ProfileDialog extends SmartStyledDialog {
 	private Composite permComp;
 	
 	private boolean permissionModified = false;
+	private Tab initTab = null;
 	
 	private Listener generateKeyListener = e->{
 		String newKey = DataModelManager.INSTANCE.generateKey(txtName.getText(), others);
@@ -146,12 +154,16 @@ public class ProfileDialog extends SmartStyledDialog {
 	};
 	
 	public ProfileDialog(Shell parent, IntelProfile config, List<IntelProfile> others) {
+		this(parent, config, others, Tab.CONFIG);
+	}
+	
+	public ProfileDialog(Shell parent, IntelProfile config, List<IntelProfile> others, Tab initTab) {
 		super(parent);
 		this.config = config;
 		this.others = others;
+		this.initTab = initTab;
 	}
 	
-
 	@Override
 	public void cancelPressed() {
 		if (isDirty) {
@@ -396,7 +408,24 @@ public class ProfileDialog extends SmartStyledDialog {
 		scrollComp.setContent(stackPanel);
 		scrollComp.setMinSize(stackPanel.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		
-		sections.selectPanel(0);
+		switch(initTab) {
+		case CONFIG:
+			sections.selectPanel(0);
+			break;
+		case PERMISSIONS:
+			sections.selectPanel(3);
+			break;
+		case RECORDS:
+			sections.selectPanel(2);
+			break;
+		case TYPES:
+			sections.selectPanel(1);
+			break;
+		default:
+			sections.selectPanel(0);
+		
+		}
+		
 		
 		initData.schedule();
 		return parent;

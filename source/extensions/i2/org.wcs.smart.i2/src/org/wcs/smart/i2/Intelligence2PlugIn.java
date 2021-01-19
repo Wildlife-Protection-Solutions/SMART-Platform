@@ -97,6 +97,8 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 	public static final String ICON_SYSTEM_DATEATTRIBUTE = "org.wcs.smart.i2.query.systemdateattribute"; //$NON-NLS-1$
 	public static final String ICON_OPERATOR = "org.wcs.smart.i2.query.operator"; //$NON-NLS-1$
 	
+	public static final String ICON_PERMISSIONS = "org.wcs.smart.i2.permissions"; //$NON-NLS-1$
+	
 	// The shared instance
 	private static Intelligence2PlugIn plugin;
 
@@ -160,6 +162,7 @@ public class Intelligence2PlugIn extends AbstractUIPlugin {
 		
 		reg.put(ICON_CHECK,  imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/check_green.png")); //$NON-NLS-1$
 
+		reg.put(ICON_PERMISSIONS,  imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/permissions.png")); //$NON-NLS-1$
 	}
 	
 	/*

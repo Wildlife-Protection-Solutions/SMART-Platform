@@ -18,6 +18,7 @@ import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.ui.preference.AttributesPreferencePage;
 import org.wcs.smart.i2.ui.preference.EntityTypesPreferencePage;
 import org.wcs.smart.i2.ui.preference.IntelPreferenceDialog;
+import org.wcs.smart.i2.ui.preference.PermissionPreferencePage;
 import org.wcs.smart.i2.ui.preference.ProfilesPreferencePage;
 import org.wcs.smart.i2.ui.preference.RecordsPreferencePage;
 import org.wcs.smart.i2.ui.preference.RelationshipGroupsPreferencePage;
@@ -39,7 +40,11 @@ public class ShowProfileSettingsHandler {
 		manager.addToRoot(new SmartPreferenceNode("org.wcs.smart.i2.pref.profiles",  //$NON-NLS-1$
 				ContextInjectionFactory.make(ProfilesPreferencePage.class, context),
 				Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_ROOTENTITY)));
-			
+
+		manager.addToRoot(new SmartPreferenceNode("org.wcs.smart.i2.pref.permissions",  //$NON-NLS-1$
+				ContextInjectionFactory.make(PermissionPreferencePage.class, context),
+				Intelligence2PlugIn.getDefault().getImageRegistry().getDescriptor(Intelligence2PlugIn.ICON_PERMISSIONS)));
+		
 		manager.addToRoot(new SmartPreferenceNode("org.wcs.smart.i2.pref.attributes",  //$NON-NLS-1$
 				ContextInjectionFactory.make(AttributesPreferencePage.class, context),
 				SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.ATTRIBUTE_NUMBER_ICON)));
