@@ -167,7 +167,7 @@ public class SurveyCTDataBuilder extends CyberTrackerDataBuilder {
 				String key = e.getTag0();
 				SurveyDesign sd = SurveyHibernateManager.getInstance().getSurveyDesign(key, session);
 				if (sd != null) {
-					ctSurvey.setSurveyDesign(sd);
+					ctSurvey.setSurveyDesign(sd, key);
 				} else {
 					ctSurvey.addError(SurveyMeta.SURVEY_DESIGN, MessageFormat.format(Messages.CyberTrackerSurvey_Err_SurveyDesignNotFound, e.getN()));
 				}

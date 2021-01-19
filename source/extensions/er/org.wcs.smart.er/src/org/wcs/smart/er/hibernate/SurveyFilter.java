@@ -60,12 +60,7 @@ public class SurveyFilter {
 	public SurveyFilter(){
 		setDefaults();
 	}
-	
-	public void setMissionDateFilter(DateFilter dFilter, LocalDate start, LocalDate end){
-		this.missionDateFilter = dFilter;
-		this.missionStartDate = start;
-		this.missionEndDate = end;
-	}
+
 	
 	public DateFilter getMissionDateFilter(){
 		return missionDateFilter;
@@ -117,10 +112,17 @@ public class SurveyFilter {
 		return this.surveyDesignKeys;
 	}
 	
+	
+	public synchronized void setMissionDateFilter(DateFilter dFilter, LocalDate start, LocalDate end){
+		this.missionDateFilter = dFilter;
+		this.missionStartDate = start;
+		this.missionEndDate = end;
+	}
+	
 	/**
 	 * Resets all values to the default
 	 */
-	public void setDefaults(){
+	public synchronized void setDefaults(){
 		this.state = SurveyDesign.State.ACTIVE;
 		this.surveyNameFilter = null;
 		this.stringComparator = null;
@@ -134,7 +136,7 @@ public class SurveyFilter {
 	 * 
 	 * @param types list of patrol types
 	 */
-	public void setSurveyState(SurveyDesign.State state){
+	public synchronized void setSurveyState(SurveyDesign.State state){
 		this.state = state;
 	}
 	
@@ -145,7 +147,7 @@ public class SurveyFilter {
 	 * @param stringComparitor the types of string comparison or null
 	 * @param text the text to compare or null
 	 */
-	public void setSurveyNameFilter(StringComparison stringComparitor, String text){
+	public synchronized void setSurveyNameFilter(StringComparison stringComparitor, String text){
 		this.stringComparator = stringComparitor;
 		this.surveyNameFilter = text;
 	}
@@ -154,7 +156,7 @@ public class SurveyFilter {
 	 * Set to null to ignore filter
 	 * @param keys
 	 */
-	public void setSurveyDesignKeyFilters(String[] keys){
+	public synchronized void setSurveyDesignKeyFilters(String[] keys){
 		this.surveyDesignKeys = keys;
 	}
 	
@@ -165,8 +167,7 @@ public class SurveyFilter {
 	 * @param s
 	 * @return
 	 */
-	public List<SurveyMissionProxy> executeQuery(Session s){ 
-		
+	public synchronized List<SurveyMissionProxy> executeQuery(Session s){ 
 		
 		StringBuilder str = new StringBuilder();
 

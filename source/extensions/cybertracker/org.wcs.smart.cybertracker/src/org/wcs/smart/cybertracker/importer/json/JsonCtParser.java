@@ -442,9 +442,18 @@ public class JsonCtParser {
 			}
 		}
 		
+		
 		//configure data into observations
 		Category category = null;
 		if (categoryUuid != null ){
+			
+			if (newWaypoint.getObservationGroups().isEmpty()) {
+				WaypointObservationGroup g = new WaypointObservationGroup();
+				g.setWaypoint(newWaypoint);
+				newWaypoint.getObservationGroups().add(g);
+				g.setObservations(new ArrayList<>());
+			}
+			
 			category = (Category) session.get(Category.class, UuidUtils.stringToUuid(categoryUuid));
 			if (category == null || !category.getConservationArea().equals(ca)){
 				//category not found, lets return the waypoint without observations so we can
@@ -482,12 +491,7 @@ public class JsonCtParser {
 			}
 		}
 		
-		if (newWaypoint.getObservationGroups().isEmpty()) {
-			WaypointObservationGroup g = new WaypointObservationGroup();
-			g.setWaypoint(newWaypoint);
-			newWaypoint.getObservationGroups().add(g);
-			g.setObservations(new ArrayList<>());
-		}
+
 		WaypointObservationGroup grp = newWaypoint.getObservationGroups().get(0);
 		
 		if (attributes.entrySet().isEmpty()){

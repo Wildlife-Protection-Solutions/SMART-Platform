@@ -104,7 +104,7 @@ public class SurveyJsonUtils {
 		}
 		
 		CyberTrackerSurvey ctMission = new CyberTrackerSurvey(null, null);
-		ctMission.setSurveyDesign(design);
+		ctMission.setSurveyDesign(design, surveyDesign);
 		ctMission.setComment(comment);
 		ctMission.setStartSamplingUnit(startSu);
 		ctMission.setMembers(new ArrayList<Employee>());

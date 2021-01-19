@@ -133,6 +133,9 @@ public class NewSurveyDesignWizard extends Wizard implements IPageChangingListen
 
         session.beginTransaction();
 		try{
+			newDesign.getMissionProperties().forEach(m->session.saveOrUpdate(m.getAttribute()));
+			newDesign.getSamplingUnitAttributes().forEach(m->session.saveOrUpdate(m.getSamplingUnitAttribute()));
+			
 			session.save(newDesign);
 			
 			if (templatePage != null){

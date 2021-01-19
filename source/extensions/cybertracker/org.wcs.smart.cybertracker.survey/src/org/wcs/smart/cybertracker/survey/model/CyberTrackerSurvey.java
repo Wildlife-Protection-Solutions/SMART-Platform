@@ -69,6 +69,7 @@ public class CyberTrackerSurvey extends AbstractCyberTrackerData {
 	//used only for gui representation after initial load
 	private String ctLeader;
 	private List<String> ctMembers;
+	private String rawDesignKey;
 
 	public CyberTrackerSurvey(Map<String, E> elementsMap, List<S> sData) {
 		super(elementsMap, sData);
@@ -128,12 +129,13 @@ public class CyberTrackerSurvey extends AbstractCyberTrackerData {
 		return surveyDesign;
 	}
 
-	public void setSurveyDesign(SurveyDesign surveyDesign) {
+	public void setSurveyDesign(SurveyDesign surveyDesign, String rawDesignKey) {
 		this.surveyDesign = surveyDesign;
+		this.rawDesignKey = rawDesignKey;
 	}
 
 	public String getSurveyDesignKey() {
-		return surveyDesign != null ? surveyDesign.getKeyId() : null;
+		return surveyDesign != null ? surveyDesign.getKeyId() : rawDesignKey;
 	}
 	
 	public SamplingUnit getStartSamplingUnit() {
