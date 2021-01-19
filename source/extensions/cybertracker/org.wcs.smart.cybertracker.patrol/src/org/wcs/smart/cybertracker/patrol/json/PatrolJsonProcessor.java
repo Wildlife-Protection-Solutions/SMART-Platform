@@ -685,6 +685,7 @@ public class PatrolJsonProcessor implements IJsonProcessor {
 		PatrolWaypoint lastWaypoint = null;
 		if (legToUpdate != null){
 			for (PatrolLegDay pld : legToUpdate.getPatrolLegDays()){
+				if (pld.getWaypoints() == null) pld.setWaypoints(new ArrayList<>());
 				for (PatrolWaypoint pw: pld.getWaypoints()){
 					if (lastWaypoint == null ||
 							pw.getWaypoint().getDateTime().isAfter(lastWaypoint.getWaypoint().getDateTime())){
