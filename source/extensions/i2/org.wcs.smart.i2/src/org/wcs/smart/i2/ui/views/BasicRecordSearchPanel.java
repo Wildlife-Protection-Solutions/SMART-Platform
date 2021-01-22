@@ -199,6 +199,12 @@ public class BasicRecordSearchPanel extends Composite {
 		((GridLayout)btnComp.getLayout()).marginHeight  = 0;
 		btnComp.setEnabled(canViewRecord);
 		
+		Button btnSearch = toolkit.createButton(btnComp, Messages.BasicRecordSearchPanel_SearchBtn,  SWT.PUSH);
+		btnSearch.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false));
+		btnSearch.addListener(SWT.Selection, e->doSearch());
+		btnSearch.setEnabled(canViewRecord);
+		btnSearch.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
+		
 		Hyperlink btnExport = toolkit.createHyperlink(btnComp, Messages.BasicRecordSearchPanel_ExportLink, SWT.NONE);
 		btnExport.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
 		btnExport.addHyperlinkListener(new HyperlinkAdapter() {
@@ -210,10 +216,7 @@ public class BasicRecordSearchPanel extends Composite {
 		btnExport.setToolTipText(Messages.BasicRecordSearchPanel_ExportTooltip);
 		btnExport.setEnabled(IntelSecurityManager.INSTANCE.canViewRecordAny());
 		
-		Button btnSearch = toolkit.createButton(btnComp, Messages.BasicRecordSearchPanel_SearchBtn,  SWT.PUSH);
-		btnSearch.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
-		btnSearch.addListener(SWT.Selection, e->doSearch());
-		btnSearch.setEnabled(canViewRecord);
+		
 	
 	}
 

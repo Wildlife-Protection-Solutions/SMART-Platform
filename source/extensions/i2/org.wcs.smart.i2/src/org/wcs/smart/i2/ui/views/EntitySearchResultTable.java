@@ -338,7 +338,7 @@ public class EntitySearchResultTable extends Composite {
 					components.add(entityComposite);
 					toolkit.adapt(entityComposite);
 					entityComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-					
+										
 					Label l = toolkit.createLabel(main, "", SWT.SEPARATOR | SWT.HORIZONTAL); //$NON-NLS-1$
 					l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));	
 				}

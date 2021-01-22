@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.i2;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -100,7 +101,7 @@ public enum EntityManager {
 				case POSITION:
 					return false; // not supported
 				case DATE:
-					hql.setParameter("test", ((java.sql.Date)newId).toString()); //$NON-NLS-1$
+					hql.setParameter("test", ((LocalDate)newId).toString()); //$NON-NLS-1$
 					break;
 				case LIST:
 				case NUMERIC:

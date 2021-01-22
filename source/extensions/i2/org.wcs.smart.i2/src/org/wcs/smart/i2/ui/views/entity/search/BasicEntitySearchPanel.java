@@ -52,6 +52,7 @@ import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -138,6 +139,7 @@ public class BasicEntitySearchPanel extends Composite {
 
 		Button btnSearch = toolkit.createButton(bottom, Messages.EntitySearchView_SerachButton, SWT.PUSH);
 		btnSearch.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+		btnSearch.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
 		btnSearch.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {

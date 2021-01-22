@@ -21,9 +21,14 @@
  */
 package org.wcs.smart.i2.ui;
 
+import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
+import java.util.List;
 import java.util.Locale;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
@@ -39,8 +44,16 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.model.IntelAttribute;
+import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelRelationshipType;
+import org.wcs.smart.i2.search.SearchDataGenerator;
 import org.wcs.smart.i2.search.SearchManager;
 import org.wcs.smart.i2.security.IntelAdminUserLevel;
 import org.wcs.smart.user.UserLevelManager;
@@ -132,7 +145,7 @@ public class FuzzyPreferencePage extends PreferencePage implements
 		});
 		
 		/* - SECTION BELOW GENERATES RANDOM TEST DATA -*/
-		/*
+		
 		g = new Group(c, SWT.NONE);
 		g.setText("Random Sample Data Generation");
 		g.setLayout(new GridLayout());
@@ -179,16 +192,15 @@ public class FuzzyPreferencePage extends PreferencePage implements
 					public void run(IProgressMonitor monitor) throws InvocationTargetException,
 							InterruptedException {
 						
-						Session s = HibernateManager.openSession();
-						s.beginTransaction();
-						try{
-							SearchDataGenerator.generateAttribute(v1, v2, monitor, s);
-							s.getTransaction().commit();
-						}catch (Exception ex){
-							s.getTransaction().rollback();
-							throw new InvocationTargetException(ex);
-						}finally{
-							s.close();
+						try(Session s = HibernateManager.openSession()){
+							s.beginTransaction();
+							try{
+								SearchDataGenerator.generateAttribute(v1, v2, monitor, s);
+								s.getTransaction().commit();
+							}catch (Exception ex){
+								s.getTransaction().rollback();
+								throw new InvocationTargetException(ex);
+							}
 						}
 						
 					}
@@ -234,17 +246,19 @@ public class FuzzyPreferencePage extends PreferencePage implements
 					@Override
 					public void run(IProgressMonitor monitor) throws InvocationTargetException,
 							InterruptedException {
-						Session s = HibernateManager.openSession();
-						s.beginTransaction();
-						try{
-							List<IntelAttribute> attributes = s.createCriteria(IntelAttribute.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list();
-							SearchDataGenerator.generateEntityTypes(v1,v2, attributes, monitor, s);
-							s.getTransaction().commit();
-						}catch (Exception ex){
-							s.getTransaction().rollback();
-							throw new InvocationTargetException(ex);
-						}finally{
-							s.close();
+						try(Session s = HibernateManager.openSession()){
+							s.beginTransaction();
+							try{
+							
+								List<IntelAttribute> attributes = QueryFactory.buildQuery(s, IntelAttribute.class,
+									new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list();
+							
+								SearchDataGenerator.generateEntityTypes(v1,v2, attributes, monitor, s);
+								s.getTransaction().commit();
+							}catch (Exception ex){
+								s.getTransaction().rollback();
+								throw new InvocationTargetException(ex);
+							}
 						}			
 					}
 				});
@@ -297,18 +311,22 @@ public class FuzzyPreferencePage extends PreferencePage implements
 					@Override
 					public void run(IProgressMonitor monitor) throws InvocationTargetException,
 							InterruptedException {
-						Session s = HibernateManager.openSession();
-						s.beginTransaction();
-						try{
-							List<IntelAttribute> attributes = s.createCriteria(IntelAttribute.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list();
-							List<IntelEntityType> types = s.createCriteria(IntelEntityType.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list();
-							SearchDataGenerator.generateRelationshipTypes(v1, v2, v3, attributes, types, monitor, s);	
-							s.getTransaction().commit();
-						}catch (Exception ex){
-							s.getTransaction().rollback();
-							throw new InvocationTargetException(ex);
-						}finally{
-							s.close();
+						
+						try(Session s = HibernateManager.openSession()){
+							try {
+								s.beginTransaction();
+								List<IntelAttribute> attributes = QueryFactory.buildQuery(s, IntelAttribute.class,
+										new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list();
+								
+								List<IntelEntityType> types = QueryFactory.buildQuery(s, IntelEntityType.class,
+										new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list();
+								
+								SearchDataGenerator.generateRelationshipTypes(v1, v2, v3, attributes, types, monitor, s);	
+								s.getTransaction().commit();
+							}catch (Exception ex){
+								s.getTransaction().rollback();
+								throw new InvocationTargetException(ex);
+							}
 						}
 						
 					}
@@ -345,18 +363,22 @@ public class FuzzyPreferencePage extends PreferencePage implements
 					@Override
 					public void run(IProgressMonitor monitor) throws InvocationTargetException,
 							InterruptedException {
-						Session s = HibernateManager.openSession();
-						s.beginTransaction();
-						try{
-							List<IntelRelationshipType> relationshipTypes = s.createCriteria(IntelRelationshipType.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list();
-							List<IntelEntityType> types = s.createCriteria(IntelEntityType.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list();
-							SearchDataGenerator.generateEntities(v1, types, relationshipTypes, monitor, s);		
-							s.getTransaction().commit();
-						}catch (Exception ex){
-							s.getTransaction().rollback();
-							throw new InvocationTargetException(ex);
-						}finally{
-							s.close();
+						try(Session s = HibernateManager.openSession()){
+							s.beginTransaction();
+							try{
+								List<IntelRelationshipType> relationshipTypes = QueryFactory.buildQuery(s, IntelRelationshipType.class,
+										new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list();
+								
+								List<IntelEntityType> types = QueryFactory.buildQuery(s, IntelEntityType.class,
+										new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list();
+										
+								
+								SearchDataGenerator.generateEntities(v1, types, relationshipTypes, monitor, s);		
+								s.getTransaction().commit();
+							}catch (Exception ex){
+								s.getTransaction().rollback();
+								throw new InvocationTargetException(ex);
+							}
 						}
 						
 					}
@@ -392,16 +414,15 @@ public class FuzzyPreferencePage extends PreferencePage implements
 							
 					@Override
 					public void run(IProgressMonitor monitor) throws InvocationTargetException,InterruptedException {
-						Session s = HibernateManager.openSession();
-						s.beginTransaction();
-						try{
-							SearchDataGenerator.generateRecords(v1, monitor, s);		
-							s.getTransaction().commit();
-						}catch (Exception ex){
-							s.getTransaction().rollback();
-							throw new InvocationTargetException(ex);
-						}finally{
-							s.close();
+						try(Session s = HibernateManager.openSession()){
+							s.beginTransaction();
+							try{
+								SearchDataGenerator.generateRecords(v1, monitor, s);		
+								s.getTransaction().commit();
+							}catch (Exception ex){
+								s.getTransaction().rollback();
+								throw new InvocationTargetException(ex);
+							}
 						}	
 					}
 				});
@@ -410,7 +431,7 @@ public class FuzzyPreferencePage extends PreferencePage implements
 				}
 			}
 		});	
-		*/
+		
 		return c;
 	}
 

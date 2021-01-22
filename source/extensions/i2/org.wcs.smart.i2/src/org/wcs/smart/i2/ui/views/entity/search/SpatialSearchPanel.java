@@ -68,6 +68,7 @@ import org.hibernate.query.Query;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.osgi.service.event.EventHandler;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.ProfilesManager;
@@ -343,6 +344,7 @@ public class SpatialSearchPanel extends Composite{
 		
 		btnSearch = toolkit.createButton(this, Messages.SpatialSearchPanel_SearchLabel, SWT.PUSH);
 		btnSearch.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, false, 2, 1));
+		btnSearch.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
 		btnSearch.addListener(SWT.Selection, (event)->{
 			doSearch();
 		});

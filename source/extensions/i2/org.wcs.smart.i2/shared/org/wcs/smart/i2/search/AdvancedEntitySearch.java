@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -70,15 +71,20 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 		TOKEN_NOT_SUPPORTED
 	}
 	
-	private int maxResultCnt = MAX_RESULT_CNT;
+	public static AtomicLong tableCnter = new AtomicLong();
+
+	protected int maxResultCnt = MAX_RESULT_CNT;
 	
-	private String searchString = null;
+	protected String searchString = null;
 	
 	public static final String ENTITYTYPE_KEY = "et"; //$NON-NLS-1$
 	
 	public static final String ATTRIBUTE_KEY = "a"; //$NON-NLS-1$
 	
-	private Collection<ConservationArea> cas;
+	protected Collection<ConservationArea> cas;
+	
+	protected String resultsTable;
+	
 	
 	public static AdvancedEntitySearch parse(String searchString, ConservationArea ca){
 		return parse(searchString, Collections.singleton(ca));
@@ -105,6 +111,7 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 	
 	public AdvancedEntitySearch(Collection<ConservationArea> cas){
 		this.cas = cas;
+		this.resultsTable = "query_temp_i2search_" + tableCnter.getAndIncrement(); //$NON-NLS-1$
 	}
 	
 	public AdvancedEntitySearch(ConservationArea ca){
@@ -117,6 +124,12 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 	
 	public String getSearchString(){
 		return this.searchString;
+	}
+	
+	public void dropResultsTable(Session session) {
+		try {
+			session.createNativeQuery("DROP TABLE " + resultsTable).executeUpdate(); //$NON-NLS-1$
+		}catch (Exception ex) {}
 	}
 	
 	/**
@@ -185,22 +198,54 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 
 	
 	private List<UUID> runQueryString(Set<IntelProfile> profiles, Session session, Locale locale) throws Exception{
+		
+		String where = populateResultsTable(profiles, session, locale);
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append(" SELECT entity_uuid FROM " + resultsTable); //$NON-NLS-1$
+		sb.append(" WHERE "); //$NON-NLS-1$
+		sb.append(where);
+
+		
+		//query results
+		List<?> items = session.createNativeQuery(sb.toString()).list();
+		List<UUID> entities = new ArrayList<>();
+		for (Object x : items) {
+			byte[] bb = (byte[])x;
+			UUID eUuid = UuidUtils.byteToUUID(bb);
+			entities.add(eUuid);
+		}
+		
+		dropResultsTable(session);
+		
+		return entities;
+		
+	}
+	
+	protected String populateResultsTable(Set<IntelProfile> profiles, Session session, Locale locale) throws Exception {
 		String stokens[] = searchString.split("\\|"); //$NON-NLS-1$
 		
 		session.doWork(connection->{
-			try {
-				connection.createStatement().execute("DROP TABLE qt_temp"); //$NON-NLS-1$
-			}catch (Exception ex) {	}
+			for (String table: new String[] {resultsTable, "qt_temp2"}) { //$NON-NLS-1$ 
+				try {
+					connection.createStatement().execute("DROP TABLE " + table); //$NON-NLS-1$
+				}catch (Exception ex) {	}
+			}
+				
 		});
 				
 		
 		StringBuilder sb = new StringBuilder();
-		sb.append(" CREATE TABLE qt_temp (entity_uuid char(16) for bit data, entity_type_key varchar(128) )"); //$NON-NLS-1$
+		sb.append(" CREATE TABLE "); //$NON-NLS-1$
+		sb.append(resultsTable);
+		sb.append(" (entity_uuid char(16) for bit data, entity_type_key varchar(128) )"); //$NON-NLS-1$
 		session.createNativeQuery(sb.toString()).executeUpdate();
 		
 		
 		sb = new StringBuilder();
-		sb.append("INSERT INTO qt_temp (entity_uuid, entity_type_key ) ");  //$NON-NLS-1$
+		sb.append("INSERT INTO "); //$NON-NLS-1$
+		sb.append(resultsTable);
+		sb.append(" (entity_uuid, entity_type_key ) ");  //$NON-NLS-1$
 		sb.append(" SELECT DISTINCT ie.uuid, t.keyid "); //$NON-NLS-1$
 		sb.append(" FROM smart.i_entity ie join smart.i_entity_type t on ie.entity_type_uuid = t.uuid"); //$NON-NLS-1$
 		sb.append(" WHERE ie.ca_uuid in ( :cauuids ) and ie.profile_uuid in ( :profiles )"); //$NON-NLS-1$
@@ -228,7 +273,9 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 				cnt++;
 				
 				sb = new StringBuilder();
-				sb.append("ALTER TABLE qt_temp ADD COLUMN ");  //$NON-NLS-1$
+				sb.append("ALTER TABLE "); //$NON-NLS-1$
+				sb.append(resultsTable);
+				sb.append(" ADD COLUMN ");  //$NON-NLS-1$
 				sb.append(columnName);
 				sb.append(" boolean default false");  //$NON-NLS-1$
 					
@@ -244,12 +291,17 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 						break;
 					default: throw new UnsupportedOperationException("System attribute: " + attribute.name() + " no supported");  //$NON-NLS-1$//$NON-NLS-2$
 				}
+				
 				sb = new StringBuilder();
-				sb.append("UPDATE qt_temp SET " );  //$NON-NLS-1$
-				sb.append(columnName);
-				sb.append(" = true WHERE entity_uuid IN (");  //$NON-NLS-1$
+				sb.append("CREATE TABLE qt_temp2 (entity_uuid char(16) for bit data)");  //$NON-NLS-1$
+				session.createNativeQuery(sb.toString()).executeUpdate();
+					
+				sb = new StringBuilder();
+				sb.append("INSERT INTO qt_temp2 (entity_uuid) " );  //$NON-NLS-1$
 				sb.append("SELECT t.entity_uuid"); //$NON-NLS-1$
-				sb.append(" FROM qt_temp t join smart.i_entity e on t.entity_uuid = e.uuid "); //$NON-NLS-1$
+				sb.append(" FROM "); //$NON-NLS-1$
+				sb.append(resultsTable);
+				sb.append(" t join smart.i_entity e on t.entity_uuid = e.uuid "); //$NON-NLS-1$
 				sb.append(" WHERE e." + column); //$NON-NLS-1$
 					
 				if (bits[1].equalsIgnoreCase(Operator.BETWEEN.getKey())){
@@ -261,7 +313,6 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 				}
 					
 				sb.append(" :date1 and :date2 "); //$NON-NLS-1$ 
-				sb.append(" )" ); //$NON-NLS-1$
 					
 				LocalDate d1 = LocalDate.parse(bits[2], DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR));
 				LocalDate d2 = LocalDate.parse(bits[4], DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR));
@@ -270,6 +321,18 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 					.setParameter("date1", d1.atStartOfDay()) //$NON-NLS-1$
 					.setParameter("date2", d2.atTime(LocalTime.MAX)) //$NON-NLS-1$
 					.executeUpdate();
+				
+				sb = new StringBuilder();
+				sb.append("UPDATE "); //$NON-NLS-1$
+				sb.append(resultsTable );
+				sb.append(" set ");  //$NON-NLS-1$
+				sb.append(columnName);
+				sb.append(" = true where entity_uuid in (select entity_uuid from qt_temp2)");  //$NON-NLS-1$
+					
+				session.createNativeQuery(sb.toString()).executeUpdate();
+				
+				session.createNativeQuery("DROP TABLE qt_temp2").executeUpdate(); //$NON-NLS-1$
+				
 				
 				where.append(" " + columnName +" ");  //$NON-NLS-1$//$NON-NLS-2$
 			}else if (t.startsWith(ENTITYTYPE_KEY + " ")){ //$NON-NLS-1$
@@ -280,17 +343,20 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 				cnt++;
 				
 				sb = new StringBuilder();
-				sb.append("ALTER TABLE qt_temp ADD COLUMN ");  //$NON-NLS-1$
+				sb.append("ALTER TABLE "); //$NON-NLS-1$
+				sb.append(resultsTable);
+				sb.append(" ADD COLUMN ");  //$NON-NLS-1$
 				sb.append(columnName);
 				sb.append(" boolean default false");  //$NON-NLS-1$
 					
 				session.createNativeQuery(sb.toString()).executeUpdate();
 					
 				sb = new StringBuilder();
-				sb.append("UPDATE qt_temp SET " );  //$NON-NLS-1$
+				sb.append("UPDATE "); //$NON-NLS-1$
+				sb.append(resultsTable);
+				sb.append(" SET " );  //$NON-NLS-1$
 				sb.append(columnName);
-				sb.append(" = true WHERE entity_uuid IN (");  //$NON-NLS-1$
-				sb.append(" SELECT t.entity_uuid FROM qt_temp t WHERE t.entity_type_key = :key)");  //$NON-NLS-1$
+				sb.append(" = true WHERE entity_type_key = :key"); //$NON-NLS-1$
 				
 				session.createNativeQuery(sb.toString())
 					.setParameter("key", entityTypeKey)  //$NON-NLS-1$
@@ -306,16 +372,22 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 				cnt++;
 					
 				sb = new StringBuilder();
-				sb.append("ALTER TABLE qt_temp ADD COLUMN ");  //$NON-NLS-1$
+				sb.append("ALTER TABLE "); //$NON-NLS-1$
+				sb.append(resultsTable);
+				sb.append(" ADD COLUMN ");  //$NON-NLS-1$
 				sb.append(columnName);
-				sb.append(" boolean DEFAULT FALSE");  //$NON-NLS-1$
+				sb.append(" boolean default false");  //$NON-NLS-1$
+					
+				session.createNativeQuery(sb.toString()).executeUpdate();
+				
+				sb = new StringBuilder();
+				sb.append("CREATE TABLE qt_temp2 (entity_uuid char(16) for bit data)");  //$NON-NLS-1$
 					 
 				session.createNativeQuery(sb.toString()).executeUpdate();
 					
 				sb = new StringBuilder();
-				sb.append("UPDATE qt_temp SET " );  //$NON-NLS-1$
-				sb.append(columnName);
-				sb.append(" = true WHERE entity_uuid IN (");  //$NON-NLS-1$
+				sb.append("INSERT INTO qt_temp2 (entity_uuid) " );  //$NON-NLS-1$
+				
 					
 				IntelAttribute.AttributeType atype = IntelAttribute.AttributeType.parse(bits[1]);
 			
@@ -323,10 +395,12 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 				
 				if (atype == IntelAttribute.AttributeType.BOOLEAN){
 					sb.append("SELECT t.entity_uuid");  //$NON-NLS-1$
-					sb.append(" FROM qt_temp t join smart.i_entity_attribute_value v on t.entity_uuid = v.entity_uuid ");  //$NON-NLS-1$
+					sb.append(" FROM "); //$NON-NLS-1$
+					sb.append(resultsTable);
+					sb.append(" t join smart.i_entity_attribute_value v on t.entity_uuid = v.entity_uuid ");  //$NON-NLS-1$
 					sb.append(" join smart.i_attribute a on a.uuid = v.attribute_uuid and a.keyId = :attributeKey ");  //$NON-NLS-1$
 					sb.append(" WHERE v.double_value > 0.5 ");  //$NON-NLS-1$
-					sb.append(")"); //$NON-NLS-1$
+					
 						
 					session.createNativeQuery(sb.toString())
 						.setParameter("attributeKey", attributeKey)  //$NON-NLS-1$
@@ -334,7 +408,9 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 						
 				}else if (atype == IntelAttribute.AttributeType.TEXT){
 					sb.append("SELECT t.entity_uuid"); //$NON-NLS-1$
-					sb.append(" FROM qt_temp t join smart.i_entity_attribute_value v on t.entity_uuid = v.entity_uuid ");  //$NON-NLS-1$
+					sb.append(" FROM "); //$NON-NLS-1$
+					sb.append(resultsTable);
+					sb.append(" t join smart.i_entity_attribute_value v on t.entity_uuid = v.entity_uuid ");  //$NON-NLS-1$
 					sb.append(" join smart.i_attribute a on a.uuid = v.attribute_uuid and a.keyId = :attributeKey ");  //$NON-NLS-1$
 					sb.append(" WHERE LOWER(v.string_value)  ");  //$NON-NLS-1$
 						
@@ -351,8 +427,7 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 						value = "%" + value + "%"; //$NON-NLS-1$ //$NON-NLS-2$
 					}
 					sb.append(" LOWER(:value) "); //$NON-NLS-1$
-					sb.append(")");  //$NON-NLS-1$
-						
+				
 					session.createNativeQuery(sb.toString())
 						.setParameter("attributeKey", attributeKey)  //$NON-NLS-1$
 						.setParameter("value", value)  //$NON-NLS-1$
@@ -360,12 +435,14 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 						
 				}else if (atype == IntelAttribute.AttributeType.NUMERIC){
 					sb.append("SELECT t.entity_uuid"); //$NON-NLS-1$
-					sb.append(" FROM qt_temp t join smart.i_entity_attribute_value v on t.entity_uuid = v.entity_uuid "); //$NON-NLS-1$
+					sb.append(" FROM "); //$NON-NLS-1$
+					sb.append(resultsTable);
+					sb.append(" t join smart.i_entity_attribute_value v on t.entity_uuid = v.entity_uuid "); //$NON-NLS-1$
 					sb.append(" join smart.i_attribute a on a.uuid = v.attribute_uuid and a.keyId = :attributeKey "); //$NON-NLS-1$
 					sb.append(" WHERE v.double_value ");  //$NON-NLS-1$
 					sb.append(qbits[1]);
 					sb.append(" :value ");  //$NON-NLS-1$
-					sb.append(")");  //$NON-NLS-1$
+					
 						
 					session.createNativeQuery(sb.toString())
 						.setParameter("attributeKey", attributeKey)  //$NON-NLS-1$
@@ -374,7 +451,9 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 			
 				}else if (atype == IntelAttribute.AttributeType.DATE){
 					sb.append("SELECT t.entity_uuid"); //$NON-NLS-1$
-					sb.append(" FROM qt_temp t join smart.i_entity_attribute_value v on t.entity_uuid = v.entity_uuid "); //$NON-NLS-1$
+					sb.append(" FROM "); //$NON-NLS-1$
+					sb.append(resultsTable);
+					sb.append(" t join smart.i_entity_attribute_value v on t.entity_uuid = v.entity_uuid "); //$NON-NLS-1$
 					sb.append(" join smart.i_attribute a on a.uuid = v.attribute_uuid and a.keyId = :attributeKey "); //$NON-NLS-1$
 					sb.append(" WHERE v.string_value is not null and cast(v.string_value as date )"); //$NON-NLS-1$
 						
@@ -387,10 +466,10 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 					}
 						
 					sb.append(" :date1 and :date2 "); //$NON-NLS-1$ 
-					sb.append(")"); //$NON-NLS-1$
+					
 						
-					LocalDate d1 = LocalDate.parse(bits[2], DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR));
-					LocalDate d2 = LocalDate.parse(bits[4], DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR));
+					LocalDate d1 = LocalDate.parse(qbits[2], DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR));
+					LocalDate d2 = LocalDate.parse(qbits[4], DateTimeFormatter.ofPattern(IQueryFilter.DATE_FORMAT_STR));
 						
 					session.createNativeQuery(sb.toString())
 						.setParameter("date1", d1.atStartOfDay()) //$NON-NLS-1$
@@ -400,11 +479,13 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 				}else if (atype == IntelAttribute.AttributeType.LIST){
 						
 					sb.append("SELECT t.entity_uuid"); //$NON-NLS-1$
-					sb.append(" FROM qt_temp t join smart.i_entity_attribute_value v on t.entity_uuid = v.entity_uuid ");  //$NON-NLS-1$
+					sb.append(" FROM "); //$NON-NLS-1$
+					sb.append(resultsTable);
+					sb.append(" t join smart.i_entity_attribute_value v on t.entity_uuid = v.entity_uuid ");  //$NON-NLS-1$
 					sb.append(" join smart.i_attribute a on a.uuid = v.attribute_uuid and a.keyId = :attributeKey ");  //$NON-NLS-1$
 					sb.append(" join smart.i_attribute_list_item li on li.uuid = v.list_item_uuid ");  //$NON-NLS-1$
 					sb.append(" WHERE v.li.keyid = :keyId");  //$NON-NLS-1$
-					sb.append(" ) "); //$NON-NLS-1$
+					
 
 					String listKey = qbits[2];
 					session.createNativeQuery(sb.toString())
@@ -414,6 +495,17 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 				}else{
 					throw new Exception(MessageFormat.format(SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(Error.ATTRIBUTE_TYPE_NOT_SUPPORTED, locale), bits[1]));
 				}
+				
+				//qt_temp2 
+				sb = new StringBuilder();
+				sb.append("UPDATE "); //$NON-NLS-1$
+				sb.append(resultsTable);
+				sb.append(" set ");  //$NON-NLS-1$
+				sb.append(columnName);
+				sb.append(" = true where entity_uuid in (select entity_uuid from qt_temp2)");  //$NON-NLS-1$
+				session.createNativeQuery(sb.toString()).executeUpdate();
+				
+				session.createNativeQuery("DROP TABLE qt_temp2").executeUpdate(); //$NON-NLS-1$
 				
 			}else if (t.equalsIgnoreCase(Operator.AND.getKey())){
 				where.append(" AND "); //$NON-NLS-1$
@@ -427,28 +519,6 @@ public class AdvancedEntitySearch implements IIntelEntitySearch{
 				where.append(" ) "); //$NON-NLS-1$
 			}
 		}
-		
-		sb = new StringBuilder();
-		sb.append(" SELECT entity_uuid FROM qt_temp "); //$NON-NLS-1$
-		sb.append(" WHERE "); //$NON-NLS-1$
-		sb.append(where);
-
-		
-		//query results
-		List<?> items = session.createNativeQuery(sb.toString()).list();
-		List<UUID> entities = new ArrayList<>();
-		for (Object x : items) {
-			byte[] bb = (byte[])x;
-			UUID eUuid = UuidUtils.byteToUUID(bb);
-			entities.add(eUuid);
-		}
-		
-		try {
-			//drop results table
-			session.createNativeQuery("DROP TABLE qt_temp").executeUpdate(); //$NON-NLS-1$
-		}catch (Exception ex) {}
-		
-		return entities;
-		
+		return where.toString();
 	}
 }

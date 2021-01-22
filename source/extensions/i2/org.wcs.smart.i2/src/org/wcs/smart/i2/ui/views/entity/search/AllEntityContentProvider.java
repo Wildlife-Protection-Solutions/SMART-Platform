@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ILazyContentProvider;
@@ -59,8 +60,7 @@ import org.wcs.smart.i2.model.IntelEntityAttributeValue;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelProfile;
-import org.wcs.smart.i2.search.AdvancedEntitySearch;
-import org.wcs.smart.i2.search.IntelSearchResult;
+import org.wcs.smart.i2.search.NoResultAdvancedEntitySearch;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.UuidUtils;
@@ -263,7 +263,7 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 	 * @param sortColumn
 	 */
 	public void setSortColumn(String sortColumn) {
-		if (this.sortColumn.equalsIgnoreCase(sortColumn)) {
+		if (this.sortColumn != null && this.sortColumn.equalsIgnoreCase(sortColumn)) {
 			if (sortDirection == SWT.UP) {
 				sortDirection = SWT.DOWN;
 			}else if (sortDirection == SWT.DOWN) {
@@ -467,106 +467,127 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 		}
 	}
 	
+	private Job emptyFilterRefreshJob = new Job(Messages.AllEntityContentProvider_UpdateFilterJobName) {
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			try(Session session = HibernateManager.openSession()){
+				session.beginTransaction();
+				try {
+					StringBuilder sb = new StringBuilder();
+					sb.append("UPDATE "); //$NON-NLS-1$
+					sb.append( DB_NAME_NAME);
+					sb.append(" SET filter = true");  //$NON-NLS-1$
+					session.createNativeQuery(sb.toString()).executeUpdate();
+				} catch (Exception e) {
+					Intelligence2PlugIn.displayLog(e.getMessage(), e);
+				}
+				session.getTransaction().commit();
+			}
+			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+			
+			Display.getDefault().syncExec(()->{
+				//clear viewer and refresh
+				loaded.clear();						
+				for (int i = 0; i < data.currentCount; i ++) viewer.clear(i);						
+				viewer.setItemCount(data.totalCount);
+				data.currentCount = data.totalCount;
+				fireEvents();
+				viewer.refresh();
+			});
+			
+			return Status.OK_STATUS;
+		}
+	};
+	
+	private QualifiedName FILTER_KEY = new QualifiedName(AllEntityContentProvider.class.getCanonicalName(), "filter"); //$NON-NLS-1$
+	
+	private Job filterRefreshJob = new Job(Messages.AllEntityContentProvider_UpdateFilterJobName) {
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			NoResultAdvancedEntitySearch search = (NoResultAdvancedEntitySearch) getProperty(FILTER_KEY);
+			int newCount = 0;
+			try(Session session = HibernateManager.openSession()){
+				session.beginTransaction();
+				try {
+					Set<IntelProfile> profiles = new HashSet<>(ProfilesManager.INSTANCE.getActiveProfiles());
+					profiles = profiles.stream().filter(e->IntelSecurityManager.INSTANCE.canViewEntities(e)).collect(Collectors.toSet());
+					
+					search.doSearch(profiles, session, Locale.getDefault(), monitor);
+					
+					if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+					
+					StringBuilder sb = new StringBuilder();
+					sb.append("UPDATE " + DB_NAME_NAME + " SET filter = false"); //$NON-NLS-1$ //$NON-NLS-2$
+					session.createNativeQuery(sb.toString()).executeUpdate();
+					
+					if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+					
+					sb = new StringBuilder();
+					sb.append("UPDATE "); //$NON-NLS-1$
+					sb.append( DB_NAME_NAME );
+					sb.append(" SET filter = true WHERE entity_uuid in (select entity_uuid from "); //$NON-NLS-1$
+					sb.append( search.getResultsTable());
+					sb.append(")"); //$NON-NLS-1$
+					session.createNativeQuery(sb.toString()).executeUpdate();
+					
+					if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+					
+					sb = new StringBuilder();
+					sb.append(" SELECT count(*) FROM "+ DB_NAME_NAME + " WHERE filter = true"); //$NON-NLS-1$ //$NON-NLS-2$
+					newCount = (Integer)session.createNativeQuery(sb.toString()).uniqueResult();
+					
+					session.getTransaction().commit();	
+				} catch (Exception e) {
+					Intelligence2PlugIn.displayLog(e.getMessage(), e);
+					session.getTransaction().rollback();
+				}finally {
+					if (session.getTransaction().isActive()) session.getTransaction().rollback();
+				}
+			}
+			
+			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+			
+			final int icount = newCount;
+			Display.getDefault().syncExec(()->{
+				//clear viewer and refresh
+				loaded.clear();
+				if (data == null) return;
+				for (int i = 0; i < data.currentCount; i ++) viewer.clear(i);
+				data.currentCount = icount;
+				viewer.setItemCount(icount);
+				fireEvents();
+				viewer.refresh();
+			});
+			
+			return Status.OK_STATUS;
+		}
+	};
 	/**
 	 * Sets the filter string
 	 * @param filterString
 	 */
 	public void setFilter(String filterString) {
+		if (data != null) {
+			data.currentCount = 0;
+			viewer.setItemCount(0);
+		}
+		
 		if (filterString == null || filterString.isEmpty()) {
-			Job j = new Job(Messages.AllEntityContentProvider_UpdateFilterJobName) {
-
-				@Override
-				protected IStatus run(IProgressMonitor monitor) {
-					try(Session session = HibernateManager.openSession()){
-						session.beginTransaction();
-						try {
-							StringBuilder sb = new StringBuilder();
-							sb.append("UPDATE " + DB_NAME_NAME + " SET filter = true"); //$NON-NLS-1$ //$NON-NLS-2$
-							
-							session.createNativeQuery(sb.toString()).executeUpdate();
-							
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-						
-						session.getTransaction().commit();
-					}
-					Display.getDefault().syncExec(()->{
-						//clear viewer and refresh
-						loaded.clear();						
-						for (int i = 0; i < data.currentCount; i ++) viewer.clear(i);						
-						viewer.setItemCount(data.totalCount);
-						data.currentCount = data.totalCount;
-						fireEvents();
-						viewer.refresh();
-					});
-					
-					return Status.OK_STATUS;
-				}
-			};
-			j.schedule();
+			filterRefreshJob.cancel();
+			emptyFilterRefreshJob.cancel();
+			emptyFilterRefreshJob.schedule();
 			return;
 		}
 		
-		AdvancedEntitySearch search = new AdvancedEntitySearch(SmartDB.getCurrentConservationArea());
+		NoResultAdvancedEntitySearch search = new NoResultAdvancedEntitySearch(SmartDB.getCurrentConservationArea());
 		search.setSearchString(filterString);
 		
-		Job j = new Job(Messages.AllEntityContentProvider_UpdateFilterJobName) {
-
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				int newCount = 0;
-				try(Session session = HibernateManager.openSession()){
-					session.beginTransaction();
-					try {
-						Set<IntelProfile> profiles = new HashSet<>(ProfilesManager.INSTANCE.getActiveProfiles());
-						profiles = profiles.stream().filter(e->IntelSecurityManager.INSTANCE.canViewEntities(e)).collect(Collectors.toSet());
-						
-						IntelSearchResult e = search.doSearch(profiles, session, Locale.getDefault(), monitor);
-						
-						List<UUID> items = new ArrayList<>();
-						e.getAllResults().forEach(ii->items.add(ii.getEntityUuid()));
-						
-						StringBuilder sb = new StringBuilder();
-						sb.append("UPDATE " + DB_NAME_NAME + " SET filter = false"); //$NON-NLS-1$ //$NON-NLS-2$
-						session.createNativeQuery(sb.toString())
-						.executeUpdate();
-						
-						if (!items.isEmpty()) {
-							sb = new StringBuilder();
-							sb.append("UPDATE " + DB_NAME_NAME + " SET filter = true WHERE entity_uuid in (:uuids)"); //$NON-NLS-1$ //$NON-NLS-2$
-							
-							session.createNativeQuery(sb.toString())
-							.setParameterList("uuids", items) //$NON-NLS-1$
-							.executeUpdate();
-						}
-						
-						sb = new StringBuilder();
-						sb.append(" SELECT count(*) FROM "+ DB_NAME_NAME + " WHERE filter = true"); //$NON-NLS-1$ //$NON-NLS-2$
-						newCount = (Integer)session.createNativeQuery(sb.toString()).uniqueResult();
-						
-						session.getTransaction().commit();	
-					} catch (Exception e) {
-						Intelligence2PlugIn.displayLog(e.getMessage(), e);
-						session.getTransaction().rollback();
-					}	
-				}
-				final int icount = newCount;
-				Display.getDefault().syncExec(()->{
-					//clear viewer and refresh
-					loaded.clear();
-					if (data == null) return;
-					for (int i = 0; i < data.currentCount; i ++) viewer.clear(i);
-					data.currentCount = icount;
-					viewer.setItemCount(icount);
-					fireEvents();
-					viewer.refresh();
-				});
-				
-				return Status.OK_STATUS;
-			}
-		};
-		j.schedule();
+		filterRefreshJob.setProperty(FILTER_KEY, search);
+		emptyFilterRefreshJob.cancel();
+		filterRefreshJob.cancel();
+		filterRefreshJob.schedule();
 	}
 
 	/**

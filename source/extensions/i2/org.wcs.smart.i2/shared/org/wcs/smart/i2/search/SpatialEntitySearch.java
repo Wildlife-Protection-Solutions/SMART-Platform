@@ -44,8 +44,6 @@ import org.locationtech.jts.operation.distance.DistanceOp;
 import org.opengis.referencing.operation.TransformException;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
-import org.wcs.smart.i2.model.IntelEntity;
-import org.wcs.smart.i2.model.IntelEntityAttributeValue;
 import org.wcs.smart.i2.model.IntelEntitySearch;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelLocation;
@@ -131,9 +129,11 @@ public class SpatialEntitySearch implements IIntelEntitySearch {
 			attributes.addAll(q.list());
 		}
 		
-		List<IntelEntityAttributeValue> valuesToSearch = new ArrayList<>();
+		List<Object[]> valuesToSearch = new ArrayList<>();
+		@SuppressWarnings("unchecked")
+		Query<Object[]> values = session.createQuery("SELECT id.entity.uuid, numberValue, numberValue2 FROM IntelEntityAttributeValue WHERE id.entity.profile in (:profiles) AND id.attribute = :attribute and id.entity.entityType = :type "); //$NON-NLS-1$
 		for (IntelEntityTypeAttribute attribute : attributes) {
-			Query<IntelEntityAttributeValue> values = session.createQuery("FROM IntelEntityAttributeValue WHERE id.entity.profile in (:profiles) AND id.attribute = :attribute and id.entity.entityType = :type ", IntelEntityAttributeValue.class); //$NON-NLS-1$
+			if(attribute.getAttribute().getType() != AttributeType.POSITION) continue;
 			values.setParameter("attribute", attribute.getAttribute()); //$NON-NLS-1$
 			values.setParameter("type", attribute.getEntityType()); //$NON-NLS-1$
 			values.setParameter("profiles", profiles); //$NON-NLS-1$
@@ -141,7 +141,7 @@ public class SpatialEntitySearch implements IIntelEntitySearch {
 		}
 		
 		
-		HashMap<IntelEntity, Double> results = new HashMap<IntelEntity, Double>();
+		HashMap<UUID, Double> results = new HashMap<>();
 		if (this.recordUuid != null) {
 			if (record == null) {
 				throw new Exception("Record not found"); //$NON-NLS-1$
@@ -162,8 +162,8 @@ public class SpatialEntitySearch implements IIntelEntitySearch {
 		}
 		
 		List<IntelSearchResultItem> results2 = new ArrayList<>();
-		for (Entry<IntelEntity, Double> searches : results.entrySet()) {
-			IntelSearchResultItem item = new IntelSearchResultItem(searches.getKey().getUuid(), searches.getValue().doubleValue(), MessageFormat.format("{0} m", searches.getValue().doubleValue())); //$NON-NLS-1$
+		for (Entry<UUID, Double> searches : results.entrySet()) {
+			IntelSearchResultItem item = new IntelSearchResultItem(searches.getKey(), searches.getValue().doubleValue(), MessageFormat.format("{0} m", searches.getValue().doubleValue())); //$NON-NLS-1$
 			results2.add(item);
 		}
 		//reverse sort as rating is distance
@@ -171,7 +171,7 @@ public class SpatialEntitySearch implements IIntelEntitySearch {
 		return new IntelSearchResult(results2, 0);
 	}
 	
-	private void processGeometry(HashMap<IntelEntity, Double> results, Geometry geometry,  List<IntelEntityAttributeValue> valuesToSearch, Double maxDistance) throws TransformException {
+	private void processGeometry(HashMap<UUID, Double> results, Geometry geometry,  List<Object[]> valuesToSearch, Double maxDistance) throws TransformException {
 		if (geometry instanceof Point) {
 			processPoint(results, (Point)geometry, valuesToSearch, maxDistance);
 		}else {
@@ -179,53 +179,71 @@ public class SpatialEntitySearch implements IIntelEntitySearch {
 		}
 	}
 	
-	private void processPoint(HashMap<IntelEntity, Double> results, Point geometry,  List<IntelEntityAttributeValue> valuesToSearch, Double maxDistance) throws TransformException {
+	private void processPoint(HashMap<UUID, Double> results, Point geometry,  List<Object[]> valuesToSearch, Double maxDistance) throws TransformException {
+		
 		Coordinate locationc = ((Point)geometry).getCoordinate();
-		for (IntelEntityAttributeValue value : valuesToSearch) {
-			if (value.getAttribute().getType() != AttributeType.POSITION) continue;
-			if (value.getNumberValue() != null && value.getNumberValue2() != null) {
-				Coordinate vc = new Coordinate(value.getNumberValue(), value.getNumberValue2());
-				try {
-					double distance = JTS.orthodromicDistance(locationc, vc, GeometryUtils.SMART_CRS);
-					if (distance <= maxDistance) {
-						Double d = results.get(value.getEntity());
-						if (d == null) {
-							d = distance;
-						}else if (distance < d) {
-							d = distance;
-						}
-						results.put(value.getEntity(), d);				
+		if (locationc.getX() < -90 || locationc.getX() > 90 || locationc.getY() < -180 || locationc.getY() > 180) return;
+		
+		for (Object[] data : valuesToSearch) {
+			
+			Double d1 = (Double) data[1];
+			Double d2 = (Double) data[2];
+			
+			if (d1 == null || d2 == null) continue;
+			if (d2 < -90 || d2 > 90 || d1 < -180 || d2 > 180) continue;
+			
+			Coordinate vc = new Coordinate(d1, d2);
+			try {
+				double distance = JTS.orthodromicDistance(locationc, vc, GeometryUtils.SMART_CRS);
+				if (distance <= maxDistance) {
+					UUID eUuid = (UUID)data[0];
+					Double d = results.get(eUuid);
+					if (d == null) {
+						d = distance;
+					}else if (distance < d) {
+						d = distance;
 					}
-				}catch (Exception ex) {
-					Logger.getLogger(SpatialEntitySearch.class.getName()).log(Level.INFO, ex.getMessage(), ex);
+					results.put(eUuid, d);				
 				}
+			}catch (Exception ex) {
+				Logger.getLogger(SpatialEntitySearch.class.getName()).log(Level.INFO, ex.getMessage(), ex);
 			}
 		}
 	}
 
-	private void processOtherGeometry(HashMap<IntelEntity, Double> results, Geometry geometry,  List<IntelEntityAttributeValue> valuesToSearch, Double maxDistance) throws TransformException {
-		for (IntelEntityAttributeValue value : valuesToSearch) {
-			if (value.getNumberValue() == null || value.getNumberValue2() == null) continue;
+	private void processOtherGeometry(HashMap<UUID, Double> results, Geometry geometry,  List<Object[]> valuesToSearch, Double maxDistance) throws TransformException {
+		for (Object[] value : valuesToSearch) {
+			Double d1 = (Double)value[1];
+			Double d2 = (Double)value[2];
 			
-			Point vPnt = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(value.getNumberValue(), value.getNumberValue2()));
+			if (d1 == null || d2 == null) continue;
+			if (d2 < -90 || d2 > 90 || d1 < -180 || d2 > 180) continue;
+			
+			
+			Point vPnt = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(d1, d2));
 			Double distance = null;
 			if (geometry.intersects(vPnt)) {
 				distance = 0.0;
 			}else {
 				//potentially not accurate but should be close
 				//find the closest points in lat/long then computes the ortho distance between them
-				Coordinate[] closest = DistanceOp.nearestPoints(vPnt,  geometry);
-				distance = JTS.orthodromicDistance(closest[0], closest[1], GeometryUtils.SMART_CRS);
-			}
-			
-			Double d = results.get(value.getEntity());
-			if (distance <= maxDistance) {
-				if (d == null) {
-					d = distance;
-				}else if (distance < d) {
-					d = distance;
+				try {
+					Coordinate[] closest = DistanceOp.nearestPoints(vPnt,  geometry);
+					distance = JTS.orthodromicDistance(closest[0], closest[1], GeometryUtils.SMART_CRS);
+					
+					UUID euuid = (UUID)value[0];
+					Double d = results.get(euuid);
+					if (distance <= maxDistance) {
+						if (d == null) {
+							d = distance;
+						}else if (distance < d) {
+							d = distance;
+						}
+						results.put(euuid, d);
+					}
+				}catch (Exception ex) {
+					Logger.getLogger(SpatialEntitySearch.class.getName()).log(Level.INFO, ex.getMessage(), ex);
 				}
-				results.put(value.getEntity(), d);
 			}
 		}
 	}

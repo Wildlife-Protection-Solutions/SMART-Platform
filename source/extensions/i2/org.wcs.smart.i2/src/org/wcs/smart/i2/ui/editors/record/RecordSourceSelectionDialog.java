@@ -58,7 +58,6 @@ import org.wcs.smart.common.filter.DateFilterComposite;
 import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.common.filter.DateFilterDropDownComposite;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.observation.ObservationPlugIn;
 import org.wcs.smart.observation.WaypointSourceEngine;

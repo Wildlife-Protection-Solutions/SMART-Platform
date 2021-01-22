@@ -38,6 +38,7 @@ import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IStatusLineManager;
@@ -77,6 +78,7 @@ import org.hibernate.query.Query;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.io.ParseException;
+import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.project.ILayerListener;
 import org.locationtech.udig.project.LayerEvent;
@@ -245,6 +247,10 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 				params.put(IntelEntityServiceExtension.ENTITY_UUID_KEY, UuidUtils.uuidToString(editor.getEntity().getUuid()));
 				service = new IntelEntityService(params);
 				
+				//if service already exists then replace it
+				if (CatalogPlugin.getDefault().getLocalCatalog().getById(service.getClass(), service.getID(), new NullProgressMonitor()) != null) {
+					CatalogPlugin.getDefault().getLocalCatalog().replace(service.getID(), service);
+				}
 				
 				try {
 					Filter dateFilter = IntelEntityDataSource.createDateTimeFilter(dFilters[0] == null ? null : dFilters[0].atStartOfDay(), dFilters[1] == null ? null : dFilters[1].atTime(LocalTime.MAX));
@@ -729,6 +735,10 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
     public void dispose() {
         super.dispose();
         mapPart.dispose();
+        if (service != null) {
+        	service.dispose(new NullProgressMonitor());
+        	CatalogPlugin.getDefault().getLocalCatalog().remove(service);
+        }
         
     }
 

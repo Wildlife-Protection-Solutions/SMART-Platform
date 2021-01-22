@@ -92,8 +92,9 @@ public enum Resources {
 	}
 	
 	public Image getImage(IntelProfile profile) {
-		Color c = getColor(profile);
 		if (profileImages.containsKey(profile.getKeyId())) return profileImages.get(profile.getKeyId());
+		
+		Color c = getColor(profile);
 		if (c == null) return null;
 		
 		int size = 16;
@@ -109,6 +110,7 @@ public enum Resources {
 		profileImages.put(profile.getKeyId(), img);
 		return img;
 	}
+	
 	public Image getImage(IntelEntityType entity) {
 		if (typeImages.containsKey(entity)) return typeImages.get(entity);
 		if (entity.getIcon() == null) return null;

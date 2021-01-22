@@ -164,6 +164,7 @@ public abstract class EntitySearchPanel extends Composite {
 		btnAddFilter = toolkit.createButton(top, Messages.AdvancedEntitySearchPanel_addFilterBtn, SWT.PUSH);
 		btnAddFilter.addListener(SWT.Selection, e-> showFilterMenu(e));
 		btnAddFilter.setEnabled(IntelSecurityManager.INSTANCE.canViewEntityAny());
+		btnAddFilter.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		
 		toolbar = new ToolBar(top, SWT.FLAT);
 		toolbar.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
@@ -197,7 +198,8 @@ public abstract class EntitySearchPanel extends Composite {
 		btnSearch = toolkit.createButton(bottom, Messages.AdvancedEntitySearchPanel_SaveButton, SWT.PUSH);
 		btnSearch.addListener(SWT.Selection, e->doSearch());
 		btnSearch.setEnabled(IntelSecurityManager.INSTANCE.canViewEntityAny());
-		
+		btnSearch.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.REFRESH_ICON));
+
 		Hyperlink saveSearch = toolkit.createHyperlink(bottom, Messages.AdvancedEntitySearchPanel_SaveSearchlink, SWT.NONE);
 		saveSearch.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
 		saveSearch.addHyperlinkListener(new HyperlinkAdapter() {

@@ -22,7 +22,6 @@
 package org.wcs.smart.i2.search;
 
 import java.io.InputStream;
-import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -33,11 +32,10 @@ import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -61,6 +59,9 @@ import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.model.IntelObservation;
 import org.wcs.smart.i2.model.IntelObservationAttribute;
+import org.wcs.smart.i2.model.IntelProfile;
+import org.wcs.smart.i2.model.IntelProfileEntityType;
+import org.wcs.smart.i2.model.IntelProfileRecordSource;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordAttributeValue;
 import org.wcs.smart.i2.model.IntelRecordAttributeValueList;
@@ -145,15 +146,27 @@ public class SearchDataGenerator {
 	
 		List<IntelAttribute> attributes = new ArrayList<>();
 		
+		List<IntelAttribute> etypes = QueryFactory.buildQuery(session, IntelAttribute.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list();
+		Set<String> keys = etypes.stream().map(e->e.getKeyId()).collect(Collectors.toSet());
+		
 		monitor.beginTask("Generating Attributes", numberOfAttributes);
 		for (int i = 0; i < numberOfAttributes; i ++){
 			monitor.subTask(i + "/" + numberOfAttributes);
+			
+			int j = i;
+			String key = "attribute_" + j;
+			while(keys.contains(key)) {
+				j++;
+				key = "attribute_" + j;
+			}
+			
+			
 			IntelAttribute attribute = new IntelAttribute();
 			attribute.setConservationArea(SmartDB.getCurrentConservationArea());
-			attribute.setKeyId("attribute_" + i);
-			attribute.updateName(SmartDB.getCurrentLanguage(), "Attribute " + i);
+			attribute.setKeyId("attribute_" + j);
+			attribute.updateName(SmartDB.getCurrentLanguage(), "Attribute " + j);
 			attribute.setType(AttributeType.values()[i % AttributeType.values().length]);
-			
+			keys.add(attribute.getKeyId());
 			
 			if (attribute.getType() == AttributeType.LIST){
 				attribute.setAttributeList(new ArrayList<>());
@@ -176,27 +189,41 @@ public class SearchDataGenerator {
 	
 	public static List<IntelEntityType> generateEntityTypes(int numberOfTypes, int numberOfAttributePerType, List<IntelAttribute> attributes, IProgressMonitor monitor, Session session){
 		
+		List<IntelProfile> profiles = QueryFactory.buildQuery(session,  IntelProfile.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list();
+		
 		List<IntelEntityType> types = new ArrayList<>();
+
+		List<IntelEntityType> etypes = QueryFactory.buildQuery(session, IntelEntityType.class, new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list();
+		Set<String> keys = etypes.stream().map(e->e.getKeyId()).collect(Collectors.toSet());
 		
 		monitor.beginTask("Generating Entity Types", numberOfTypes);
 		for (int i = 0; i < numberOfTypes; i ++){
 			monitor.subTask(i + "/" + numberOfTypes);
+		
+			int j = i;
+			String key = "type" + j;
+			while(keys.contains(key)) {
+				j++;
+				key = "type" + j;
+			}
 			
 			IntelEntityType type = new IntelEntityType();
 			
 			type.setConservationArea(SmartDB.getCurrentConservationArea());
-			type.setKeyId("type" + i);
-			type.updateName(SmartDB.getCurrentLanguage(), "Type " + i);
+			type.setKeyId("type" + j);
+			type.updateName(SmartDB.getCurrentLanguage(), "Type " + j);
 			type.setAttributes(new ArrayList<IntelEntityTypeAttribute>());
+			keys.add(type.getKeyId());
 			
 			Set<IntelAttribute> atts = new HashSet<>();
 			for (int k = 0; k < numberOfAttributePerType; k ++){
 				IntelEntityTypeAttribute ia = new IntelEntityTypeAttribute();
 			
 				IntelAttribute a = attributes.get((int)Math.round(Math.random() * (attributes.size()-1)));
-				while(atts.contains(a)){
+				while(atts.contains(a) && (atts.size() < attributes.size())){
 					a = attributes.get((int)Math.round(Math.random() * (attributes.size()-1)));
 				}
+				if (atts.contains(a)) break;
 				
 				atts.add(a);
 				ia.setAttribute(a);
@@ -212,9 +239,19 @@ public class SearchDataGenerator {
 				type.setIdAttribute(type.getAttributes().get(0).getAttribute());
 			}
 			
+			type.setProfiles(new HashSet<>());
+			for (IntelProfile p : profiles) {
+				IntelProfileEntityType et = new IntelProfileEntityType();
+				et.setEntityType(type);
+				et.setProfile(p);
+				type.getProfiles().add(et);
+			}
+			
 			session.save(type);
 			types.add(type);
 			monitor.worked(1);
+			
+			
 		}
 		session.flush();
 		return types;
@@ -260,18 +297,22 @@ public class SearchDataGenerator {
 		IntelRecordAttributeValue value = new IntelRecordAttributeValue();
 		value.setAttribute(a);
 		
-		List<IntelEntity> entities = QueryFactory.buildQuery(session, IntelEntity.class, "entityType", a.getEntityType()).getResultList(); 
+		List<IntelEntity> entities = QueryFactory.buildQuery(session, IntelEntity.class, "entityType", a.getEntityType())
+				.setMaxResults(50)
+				.getResultList(); 
 		
 		List<IntelRecordAttributeValueList> items = new ArrayList<IntelRecordAttributeValueList>();
 		if (a.getIsMultiple()){
-			for (IntelEntity item : entities){
-				if (Math.random() < 0.35){
-					IntelRecordAttributeValueList newItem = new IntelRecordAttributeValueList();
-					newItem.getId().setValue(value);
-					newItem.getId().setElementUuid(item.getUuid());
-					items.add(newItem);
-				}
+			int max = Math.min(entities.size(), (int)Math.random() * 5);
+			
+			for (int i = 0; i < max; i ++) {
+				IntelEntity item = entities.get(i);
+				IntelRecordAttributeValueList newItem = new IntelRecordAttributeValueList();
+				newItem.getId().setValue(value);
+				newItem.getId().setElementUuid(item.getUuid());
+				items.add(newItem);
 			}
+			
 		}
 		if (items.size() == 0){
 			int index = (int)Math.round((entities.size()-1) * Math.random());
@@ -337,7 +378,6 @@ public class SearchDataGenerator {
 		return value;
 	}
 	
-	@SuppressWarnings("unchecked")
 	private static IntelObservationAttribute generateValue(Attribute a, List<String> strings, Session session){
 		IntelObservationAttribute value = new IntelObservationAttribute();
 		value.setAttribute(a);
@@ -360,9 +400,8 @@ public class SearchDataGenerator {
 			}
 			value.setStringValue(sb.toString());
 		}else if (a.getType() == Attribute.AttributeType.TREE){
-			List<AttributeTreeNode> nodes = session.createCriteria(AttributeTreeNode.class)
-					.add(Restrictions.eq("attribute", a))
-					.list();
+			List<AttributeTreeNode> nodes = QueryFactory.buildQuery(session, AttributeTreeNode.class, 
+					new Object[] {"attribute", a}).list();
 			int index = (int)Math.round((nodes.size()-1) * Math.random());
 			value.setAttributeTreeNode(nodes.get(index));
 		}
@@ -548,14 +587,11 @@ public class SearchDataGenerator {
 		}
 	}
 	
-	
-	@SuppressWarnings("unchecked")
-	public static void generateRecords(int numberRecords, IProgressMonitor monitor, Session session){
+	public static void generateRecords(int numberRecords, IProgressMonitor monitor, Session session) throws Exception{
+		
 		InputStream is = SearchDataGenerator.class.getClassLoader().getResourceAsStream("org/wcs/smart/i2/search/words.txt");
 		
 		Random random = new Random();
-		
-		
 		
 		List<String> items = new ArrayList<String>();
 		try(Scanner s = new Scanner(is).useDelimiter("\\n")){
@@ -568,18 +604,18 @@ public class SearchDataGenerator {
 		}
 		monitor.beginTask("Generating Records...", numberRecords);
 		
-		List<IntelEntity> entities = session.createCriteria(IntelEntity.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
-				.list();
 
-		Long cnt = (Long) session.createCriteria(IntelRecord.class).setProjection(Projections.rowCount()).uniqueResult();
-		DecimalFormat df = new DecimalFormat("000");
+		List<Category> categories = QueryFactory.buildQuery(session, Category.class,
+				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list();
+		
+		List<IntelEntity> entities = QueryFactory.buildQuery(session, IntelEntity.class,
+				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list();
+
+		List<IntelRecordSource> sources = QueryFactory.buildQuery(session, IntelRecordSource.class,
+				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list();
+		
 		for (int i = 0; i < numberRecords; i ++){
 			monitor.subTask("Generated Records " + i + " / " + numberRecords);
-			
-			List<IntelRecordSource> sources = session.createCriteria(IntelRecordSource.class)
-					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
-					.list();
 			
 			IntelRecord record = new IntelRecord();
 //			record.setAttachments(attachments);
@@ -589,9 +625,17 @@ public class SearchDataGenerator {
 			record.setPrimaryDate(LocalDateTime.now());
 			
 			IntelRecordSource src = sources.get(random.nextInt(sources.size() - 1));
+			src = session.get(IntelRecordSource.class, src.getUuid());
 			record.setRecordSource(src);
 			record.setAttributes(new ArrayList<>());
+			if (src.getProfiles().isEmpty()) {
+				throw new Exception("The record source has no profiles associated with it:" + src.getName());
+			}
 			
+			int max = src.getProfiles().size();
+			int idx = random.nextInt(max);
+			record.setProfile( ((IntelProfileRecordSource) src.getProfiles().toArray()[idx]).getProfile());
+
 			for (IntelRecordSourceAttribute attribute :src.getAttributes()){
 				
 				if (attribute.getAttribute() != null){
@@ -609,7 +653,7 @@ public class SearchDataGenerator {
 			int status = (int)Math.round(Math.random() * 2);
 			record.setStatus(IntelRecord.Status.values()[status]);
 			
-			int wordsTitle = (int)Math.round(Math.random() * 4);
+			int wordsTitle = random.nextInt(5);
 			if (wordsTitle == 0) wordsTitle = 1;
 			StringBuilder title = new StringBuilder();
 			for (int j = 0; j < wordsTitle; j ++){
@@ -618,10 +662,10 @@ public class SearchDataGenerator {
 				title.append(" ");
 			}
 			title.deleteCharAt(title.length() - 1);
-//			record.setTitle(WordUtils.capitalize(title.toString()));
+			record.setTitle(title.toString());
 			
 			
-			record.setTitle("Generated Record " + df.format(i+1 + cnt));
+//			record.setTitle("Generated Record " + df.format(i+1 + cnt));
 			
 			
 			int descTitle = (int)Math.round(Math.random() * 1000);
@@ -662,11 +706,8 @@ public class SearchDataGenerator {
 			long start = c.getTimeInMillis();
 			
 			session.save(record);
-			session.flush();
+			//session.flush();
 			
-			List<Category> categories = session.createCriteria(Category.class)
-					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
-					.list();
 			
 			for (int lcnt = 0; lcnt < 5; lcnt ++){
 				IntelLocation loc = new IntelLocation();
@@ -710,11 +751,12 @@ public class SearchDataGenerator {
 				}
 				
 				session.save(loc);
-				session.flush();
+				//session.flush();
 				
 				//add three observations
 				for (int oc = 0; oc < 3; oc++){
 					Category cat = categories.get(  (int)Math.round( (Math.random() * (categories.size()-1))) );
+					cat = session.get(Category.class,  cat.getUuid());
 					
 					IntelObservation ob = new IntelObservation();
 					ob.setCategory(cat);
@@ -730,7 +772,7 @@ public class SearchDataGenerator {
 					session.save(ob);
 				}
 				
-				session.flush();
+				//session.flush();
 				
 				
 				
@@ -750,6 +792,11 @@ public class SearchDataGenerator {
 			
 			session.clear();
 			monitor.worked(1);
+			
+			if (i %100 == 0) {
+				session.getTransaction().commit();
+				session.beginTransaction();
+			}
 		}
 	}
 }
