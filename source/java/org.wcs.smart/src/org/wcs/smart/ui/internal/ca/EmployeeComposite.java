@@ -767,14 +767,15 @@ public class EmployeeComposite extends Composite {
 		}
 		SmartUtils.initDateTimeWidget(dtEmploymentStart, e.getStartEmploymentDate());
 		
-		
-		if (e.getEndEmploymentDate() != null){
-			chNotActive.setSelection(true);
-			dtEmploymentEnd.setEnabled(true);
-			SmartUtils.initDateTimeWidget(dtEmploymentEnd, e.getEndEmploymentDate());
-		}else{
-			chNotActive.setSelection(false);
-			dtEmploymentEnd.setEnabled(false);
+		if (chNotActive != null) {
+			if (e.getEndEmploymentDate() != null){
+				chNotActive.setSelection(true);
+				dtEmploymentEnd.setEnabled(true);
+				SmartUtils.initDateTimeWidget(dtEmploymentEnd, e.getEndEmploymentDate());
+			}else{
+				chNotActive.setSelection(false);
+				dtEmploymentEnd.setEnabled(false);
+			}
 		}
 		
 		if (cmbViewerAgency != null){
@@ -826,7 +827,7 @@ public class EmployeeComposite extends Composite {
 			lstTeams.setInput(new ArrayList<>(e.getEmployeeTeams()));
 		}
 		
-		enableFields(!chNotActive.getSelection());
+		if (chNotActive != null) enableFields(!chNotActive.getSelection());
 		validate();
 	}
 	private void enableFields(boolean enable){
