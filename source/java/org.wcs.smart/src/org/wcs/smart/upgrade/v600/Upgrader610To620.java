@@ -76,9 +76,9 @@ public class Upgrader610To620 implements IDatabaseUpgrader {
 				"CREATE TABLE smart.icon (uuid char(16) for bit data not null, keyid varchar(64) not null, ca_uuid char(16) for bit data not null, primary key(uuid))", //$NON-NLS-1$
 				"CREATE TABLE smart.iconfile (uuid char(16) for bit data not null, icon_uuid char(16) for bit data not null, iconset_uuid char(16) for bit data not null, filename varchar(2064) not null, primary key(uuid))", //$NON-NLS-1$
 				
-				"GRANT ALL PRIVILEGES ON smart.iconset TO admin,manager,data_entry", //$NON-NLS-1$
-				"GRANT ALL PRIVILEGES ON smart.icon TO admin,manager,data_entry", //$NON-NLS-1$
-				"GRANT ALL PRIVILEGES ON smart.iconfile TO admin,manager,data_entry", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON smart.iconset TO admin,analyst,manager,data_entry", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON smart.icon TO admin,analyst,manager,data_entry", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON smart.iconfile TO admin,analyst,manager,data_entry", //$NON-NLS-1$
 				
 				"ALTER TABLE smart.dm_category add column icon_uuid char(16) for bit data", //$NON-NLS-1$
 				"ALTER TABLE smart.dm_attribute add column icon_uuid char(16) for bit data", //$NON-NLS-1$

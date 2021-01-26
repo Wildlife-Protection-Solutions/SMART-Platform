@@ -22,7 +22,7 @@
 package org.wcs.smart.incident;
 
 import java.text.MessageFormat;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.HashMap;
@@ -80,7 +80,7 @@ public class IncidentManager {
 			return null;
 		}else if (UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.DATA_ENTRY, UserLevelManager.ANALYST)){
 			
-			if (ChronoUnit.DAYS.between(waypoint.getDateTime(), LocalDate.now()) < (long)ops.getEditTime() ){
+			if (ChronoUnit.DAYS.between(waypoint.getDateTime(), LocalDateTime.now()) < (long)ops.getEditTime() ){
 				return null;
 			}else{
 				return MessageFormat.format(Messages.IncidentManager_IncidentTooOldToEdit, new Object[]{ops.getEditTime() }) ;

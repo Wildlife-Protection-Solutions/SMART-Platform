@@ -90,7 +90,6 @@ public class DataQueueCtMissionDatabaseUpgrader implements IDatabaseUpgrader {
 				"ALTER TABLE SMART.ct_survey_package ADD CONSTRAINT ct_survey_package_sd_uuid_fk FOREIGN KEY (SD_UUID) REFERENCES smart.survey_design (UUID) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 				"ALTER TABLE SMART.ct_survey_package ADD CONSTRAINT ct_survey_package_incident_uuid_fk FOREIGN KEY (incident_uuid) REFERENCES smart.configurable_model(UUID) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 				"ALTER TABLE SMART.ct_survey_package ADD CONSTRAINT ct_survey_package_ctprofile_uuid_fk FOREIGN KEY (ctprofile_uuid) REFERENCES smart.ct_properties_profile(UUID)  ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
-				
 
 				"GRANT ALL PRIVILEGES ON smart.ct_survey_package to data_entry", //$NON-NLS-1$
 				"GRANT ALL PRIVILEGES ON smart.ct_survey_package to manager", //$NON-NLS-1$

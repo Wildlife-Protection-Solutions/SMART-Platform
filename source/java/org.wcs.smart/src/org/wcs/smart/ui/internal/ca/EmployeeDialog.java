@@ -40,8 +40,10 @@ import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.SmartStyledDialog;
+import org.wcs.smart.user.UserLevelManager;
 
 /**
  * Dialog for creating new employees or
@@ -115,8 +117,14 @@ public class EmployeeDialog extends SmartStyledDialog {
 			style = style | EmployeeComposite.SMART_USER | EmployeeComposite.SMART_USER_LEVEL;
 		}
 		if (toUpdate != null){
-			style = style | EmployeeComposite.END_DATE;
+			if (UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.ADMIN) ||
+				(UserLevelManager.INSTANCE.supportsUser(SmartDB.getCurrentEmployee(), UserLevelManager.MANAGER)
+						&& !UserLevelManager.INSTANCE.supportsUser(toUpdate, UserLevelManager.ADMIN))){
+					
+				style = style | EmployeeComposite.END_DATE;
+			}
 		}
+			
 		eComposite = new EmployeeComposite(composite, style, agencies){
 			@Override
 			public boolean validate(){

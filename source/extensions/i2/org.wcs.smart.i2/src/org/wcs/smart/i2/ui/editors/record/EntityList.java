@@ -67,6 +67,7 @@ import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.security.IntelSecurityManager;
+import org.wcs.smart.i2.ui.TransparentInfoDialog;
 import org.wcs.smart.i2.ui.dialogs.RelationshipAttributeDialog;
 import org.wcs.smart.i2.ui.editors.RelationshipSearchJob;
 import org.wcs.smart.i2.ui.editors.record.EntityListComposite.Type;
@@ -209,7 +210,11 @@ public class EntityList extends Composite {
 		if (getCurrentSelection().isEmpty()) return;
 		
 		IntelEntity ie = getCurrentSelection().get(0);
-		if (!IntelSecurityManager.INSTANCE.canViewEntities(ie.getProfile())) return;
+		if (!IntelSecurityManager.INSTANCE.canViewEntities(ie.getProfile())) {
+			TransparentInfoDialog ti = new TransparentInfoDialog(getShell(), "Insufficient privileges to view entity");
+			ti.open();
+			return;
+		}
 		(new OpenEntityHandler()).openEntity(ie, listParent.getEditor().getContext());
 		
 	}

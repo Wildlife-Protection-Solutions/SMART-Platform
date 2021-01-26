@@ -281,6 +281,7 @@ public enum IntelSecurityManager {
 	
 	public boolean canViewRecordAny(){
 		return supportsPermissionAny(IntelPermission.ADMIN) ||
+				supportsPermissionAny(IntelPermission.READ_ONLY) ||
 				supportsPermissionAny(IntelPermission.RECORD_VIEW);
 	}
 	
@@ -296,6 +297,7 @@ public enum IntelSecurityManager {
 	
 	public boolean canViewEntityAny(){
 		return supportsPermissionAny(IntelPermission.ADMIN) ||
+				supportsPermissionAny(IntelPermission.READ_ONLY) ||
 				supportsPermissionAny(IntelPermission.ENTITY_VIEW);
 	}
 	public boolean canEditEntityAny(){
@@ -345,6 +347,7 @@ public enum IntelSecurityManager {
 	public boolean canEditRecordStatus(IntelProfile p){
 		return canEditRecordStatus(p.getUuid());
 	}
+	
 	public boolean canEditRecordStatus(UUID profileUuid){
 		
 		return supportsPermission(profileUuid, IntelPermission.ADMIN) ||

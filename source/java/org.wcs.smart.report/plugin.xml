@@ -75,6 +75,19 @@
       <handler
             class="org.wcs.smart.report.internal.ui.EditReportHandler$EditReportHandlerWrapper"
             commandId="org.wcs.smart.report.editReport">
+         <enabledWhen>
+            <with
+                  variable="selection">
+               <iterate
+                     ifEmpty="false"
+                     operator="or">
+                  <test
+                        args="edit"
+                        property="org.wcs.smart.report.menu.editable">
+                  </test>
+               </iterate>
+            </with>
+         </enabledWhen>
       </handler>
       <handler
             class="org.wcs.smart.report.internal.ui.NewFolderHandler$NewFolderHandlerWrapper"
@@ -83,6 +96,19 @@
       <handler
             class="org.wcs.smart.report.internal.ui.RenameReportItem$RenameReportItemWrapper"
             commandId="org.wcs.smart.report.renameReportItem">
+         <enabledWhen>
+            <with
+                  variable="selection">
+               <iterate
+                     ifEmpty="false"
+                     operator="or">
+                  <test
+                        args="rename"
+                        property="org.wcs.smart.report.menu.editable">
+                  </test>
+               </iterate>
+            </with>
+         </enabledWhen>
       </handler>
       <handler
             class="org.wcs.smart.report.internal.ui.DeleteReportItemHandler$DeleteReportItemHandlerWrapper"
@@ -210,6 +236,19 @@
       <handler
             class="org.wcs.smart.report.internal.ui.TranslateNamesHandler$TranslateNamesHandlerWrapper"
             commandId="org.wcs.smart.report.translateItem">
+         <enabledWhen>
+            <with
+                  variable="selection">
+               <iterate
+                     ifEmpty="false"
+                     operator="or">
+                  <test
+                        args="rename"
+                        property="org.wcs.smart.report.menu.editable">
+                  </test>
+               </iterate>
+            </with>
+         </enabledWhen>
       </handler>
       <handler
             class="org.wcs.smart.report.internal.ui.SaveAsReportHandler$SaveAsReportHandlerWrapper"
@@ -350,20 +389,6 @@
                mnemonic="%reportlist.popupmenu.editreport.command.mnemonic"
                style="push"
                tooltip="%reportlist.popupmenu.editreport.command.tooltip">
-            <visibleWhen
-                  checkEnabled="false">
-               <with
-                     variable="selection">
-                  <iterate
-                        ifEmpty="false"
-                        operator="or">
-                     <test
-                           args="edit"
-                           property="org.wcs.smart.report.menu.editable">
-                     </test>
-                  </iterate>
-               </with>
-            </visibleWhen>
          </command>
          <command
                commandId="org.wcs.smart.report.saveas"
@@ -391,20 +416,6 @@
                mnemonic="%reportlist.popupmenu.rename.command.mnemonic"
                style="push"
                tooltip="%reportlist.popupmenu.rename.command.tooltip">
-            <visibleWhen
-                  checkEnabled="false">
-               <with
-                     variable="selection">
-                  <iterate
-                        ifEmpty="false"
-                        operator="or">
-                     <test
-                           args="rename"
-                           property="org.wcs.smart.report.menu.editable">
-                     </test>
-                  </iterate>
-               </with>
-            </visibleWhen>
          </command>
          <command
                commandId="org.wcs.smart.report.translateItem"
@@ -412,20 +423,6 @@
                mnemonic="%translate.command.mnemonic"
                style="push"
                tooltip="%translate.command.tooltip">
-            <visibleWhen
-                  checkEnabled="false">
-               <with
-                     variable="selection">
-                  <iterate
-                        ifEmpty="false"
-                        operator="or">
-                     <test
-                           args="rename"
-                           property="org.wcs.smart.report.menu.editable">
-                     </test>
-                  </iterate>
-               </with>
-            </visibleWhen>
          </command>
          <command
                commandId="org.wcs.smart.report.exportReport"
@@ -458,20 +455,6 @@
                mnemonic="%reportlist.popupmenu.delete.command.mnemonic"
                style="push"
                tooltip="%reportlist.popupmenu.delete.command.tooltip">
-            <visibleWhen
-                  checkEnabled="false">
-               <with
-                     variable="selection">
-                  <iterate
-                        ifEmpty="false"
-                        operator="or">
-                     <test
-                           args="delete"
-                           property="org.wcs.smart.report.menu.editable">
-                     </test>
-                  </iterate>
-               </with>
-            </visibleWhen>
          </command>
       </menuContribution>
       <menuContribution
@@ -570,26 +553,6 @@
                   label="%edit.command.label"
                   mnemonic="e"
                   style="push">
-               <visibleWhen
-                     checkEnabled="false">
-                  <or>
-                     <test
-                           forcePluginActivation="true"
-                           property="org.wcs.smart.smartAdminUser"
-                           value="admin">
-                     </test>
-                     <test
-                           forcePluginActivation="true"
-                           property="org.wcs.smart.smartAdminUser"
-                           value="manager">
-                     </test>
-                     <test
-                           forcePluginActivation="true"
-                           property="org.wcs.smart.smartAdminUser"
-                           value="analyst">
-                     </test>
-                  </or>
-               </visibleWhen>
                <parameter
                      name="org.wcs.smart.perspectiveid"
                      value="org.wcs.smart.report.ReportPerspective">

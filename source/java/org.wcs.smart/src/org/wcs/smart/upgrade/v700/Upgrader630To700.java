@@ -99,6 +99,12 @@ public class Upgrader630To700 implements IDatabaseUpgrader {
 		
 		String[] sql = new String[] {
 				
+				//analyst permissions were missing in the 6 upgrades script; so rerun this here
+				//to ensure setup correctly
+				"GRANT ALL PRIVILEGES ON smart.iconset TO admin,analyst,manager,data_entry", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON smart.icon TO admin,analyst,manager,data_entry", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON smart.iconfile TO admin,analyst,manager,data_entry", //$NON-NLS-1$
+				
 				"alter table smart.LANGUAGE alter column code set data type varchar(8)",  //$NON-NLS-1$
 				"CREATE FUNCTION smart.tempuuid() returns char(16) for bit data LANGUAGE JAVA NOT deterministic external name 'org.wcs.smart.util.DerbyUtils.createUuid' PARAMETER STYLE JAVA NO SQL RETURNS NULL ON NULL INPUT", //$NON-NLS-1$
 				
@@ -107,6 +113,9 @@ public class Upgrader630To700 implements IDatabaseUpgrader {
 				
 				"GRANT ALL PRIVILEGES ON smart.employee_team TO admin,manager,analyst", //$NON-NLS-1$
 				"GRANT ALL PRIVILEGES ON smart.employee_team_member TO admin,manager,analyst", //$NON-NLS-1$
+				"GRANT SELECT ON smart.employee_team TO data_entry", //$NON-NLS-1$
+				"GRANT SELECT ON smart.employee_team_member TO data_entry", //$NON-NLS-1$
+				
 
 				"ALTER TABLE smart.employee_team ADD CONSTRAINT employeeteam_cauuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 				"ALTER TABLE smart.employee_team_member ADD CONSTRAINT employeeteammem_euuid FOREIGN KEY (employee_uuid) REFERENCES smart.employee(uuid) ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
@@ -142,13 +151,13 @@ public class Upgrader630To700 implements IDatabaseUpgrader {
 	            "CREATE FUNCTION smart.pointInPolygon(x double, y double, distance real, direction real, wkb blob) returns boolean LANGUAGE JAVA deterministic external name 'org.wcs.smart.util.GeometryUtils.pointInPolygon' PARAMETER STYLE JAVA NO SQL", //$NON-NLS-1$
 	            "GRANT EXECUTE ON FUNCTION smart.pointInPolygon TO analyst", //$NON-NLS-1$
 				"GRANT EXECUTE ON FUNCTION smart.pointInPolygon TO manager", //$NON-NLS-1$
-				"GRANT EXECUTE ON FUNCTION smart.pointInPolygon TO dataentry", //$NON-NLS-1$
+				"GRANT EXECUTE ON FUNCTION smart.pointInPolygon TO data_entry", //$NON-NLS-1$
 				
 	            "DROP FUNCTION smart.computeTileId", //$NON-NLS-1$
 	            "CREATE FUNCTION smart.computeTileId(x double, y double, distance real, direction real, destCrsWkt varchar(32672), originX double, originY double, gridSize double) returns varchar(32672) LANGUAGE JAVA deterministic external name 'org.wcs.smart.util.ReprojectUtils.computeTileId' PARAMETER STYLE JAVA NO SQL", //$NON-NLS-1$ 
 	            "GRANT EXECUTE ON FUNCTION smart.computeTileId TO analyst", //$NON-NLS-1$
 				"GRANT EXECUTE ON FUNCTION smart.computeTileId TO manager", //$NON-NLS-1$
-				"GRANT EXECUTE ON FUNCTION smart.computeTileId TO dataentry", //$NON-NLS-1$
+				"GRANT EXECUTE ON FUNCTION smart.computeTileId TO data_entry", //$NON-NLS-1$
 				
 				"alter table smart.cm_attribute_option alter column string_value set data type varchar(32672)", //$NON-NLS-1$
 				
@@ -197,6 +206,11 @@ public class Upgrader630To700 implements IDatabaseUpgrader {
 
 				"create table smart.wp_observation_attributes_list (list_element_uuid char(16) for bit data not null,observation_attribute_uuid char(16) for bit data not null,primary key (list_element_uuid, observation_attribute_uuid))", //$NON-NLS-1$
 				
+				// permissions
+				"GRANT ALL PRIVILEGES ON smart.wp_observation_group TO admin,manager,analyst,data_entry", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON smart.wp_observation TO admin,manager,analyst,data_entry", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON smart.wp_observation_attributes_list TO admin,manager,analyst,data_entry", //$NON-NLS-1$
+				
 				//add back constraints
 				"ALTER table smart.wp_observation ADD CONSTRAINT wo_ob_group_uuid_fk FOREIGN KEY (wp_group_uuid) REFERENCES smart.wp_observation_group (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 				"ALTER table smart.wp_observation_group ADD CONSTRAINT wo_obs_grp_wp_uuid_fk FOREIGN KEY (wp_uuid) REFERENCES smart.waypoint (uuid) ON UPDATE RESTRICT ON DELETE CASCADE  DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
@@ -228,6 +242,9 @@ public class Upgrader630To700 implements IDatabaseUpgrader {
 				"CREATE DERBY AGGREGATE smart.unionarea FOR blob RETURNS double precision EXTERNAL NAME 'org.wcs.smart.util.AreaUnionAggregate'", //$NON-NLS-1$
 				"CREATE DERBY AGGREGATE smart.concatagg FOR long varchar RETURNS long varchar EXTERNAL NAME 'org.wcs.smart.util.StringConcatAggregate'", //$NON-NLS-1$
 
+				"GRANT USAGE  ON DERBY AGGREGATE smart.unionarea TO manager,analyst,data_entry", //$NON-NLS-1$
+				"GRANT USAGE  ON DERBY AGGREGATE smart.concatagg TO manager,analyst,data_entry", //$NON-NLS-1$
+				
 				"CREATE FUNCTION smart.buffer(geom blob, buffer double precision) returns blob LANGUAGE JAVA NOT deterministic external name 'org.wcs.smart.util.GeometryUtils.buffer' PARAMETER STYLE JAVA NO SQL RETURNS NULL ON NULL INPUT", //$NON-NLS-1$
 				
 				//id integer to string
