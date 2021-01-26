@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.ui;
 
+import java.net.URL;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
@@ -49,6 +51,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
+import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.E3Utils;
@@ -76,7 +79,7 @@ public class BrowserView {
 	
 	private Browser browser ;
 	private Text txt;
-	private ToolItem btnBack , btnForward, btnSmartHome, btnRefresh;
+	private ToolItem btnBack , btnForward, btnSmartHome, btnRefresh, btnOpen;
 	
 	public BrowserView() {
 	}
@@ -151,6 +154,19 @@ public class BrowserView {
 			}	
 		});
 		
+		btnOpen = new ToolItem(toolBar3, SWT.PUSH);
+		btnOpen.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.BROWSER_OPEN));
+		btnOpen.setToolTipText(Messages.BrowserView_openinsystembrowser);
+		btnOpen.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				try {
+					PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(browser.getUrl()));
+				} catch (Exception ex) {
+					SmartPlugIn.displayLog(ex.getMessage(), ex);
+				}
+			}	
+		});
 		
 		browser = new Browser(all, SWT.NONE);
 		browser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));

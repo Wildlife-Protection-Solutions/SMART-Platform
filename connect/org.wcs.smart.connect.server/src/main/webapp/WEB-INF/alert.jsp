@@ -193,13 +193,13 @@
 	
 					<div style="float:left; position:relative; height:24px; width:20px;" class="awesome-marker-icon-${type.getMarkerColor()}-legend awesome-marker leaflet-zoom-animated" >
 						<i style="color:${type.getColor()}" class="fa fa-${type.getMarkerIcon()}">${type.getCustomIcon()}</i><br>
-					</div>
-	
+					</div>	
 	     			${type.getLabel()}
-	     			</input><br>
+	     			</input>
+	     			<br>
 	     			</div> 
 				</c:forEach> 
-				</p>
+				
 				</fieldset>
 				
 				<fieldset>
@@ -224,7 +224,6 @@
 				<c:forEach var="ca" items="${cas}" varStatus="count">
 					<input class='filterCa updateChange' name="${ca.getUuid()}" value="${ca.getUuid()}" type="checkbox">${ca.getLabel()}</input><br>
 				</c:forEach>
-				</p>
 				</fieldset>
 				
 				<fieldset style="margin-bottom:4px;">

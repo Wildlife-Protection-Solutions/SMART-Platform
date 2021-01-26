@@ -71,22 +71,17 @@ public class ShowConnectWebHandler {
 				mService.move(part, (MElementContainer<MUIElement>)((MArea)((MPlaceholder)element).getRef()).getChildren().get(0), 0);
 				ePartService.showPart(part, PartState.ACTIVATE);
 			}
+		
 			try(Session s = HibernateManager.openSession()){
 				ConnectServer cs = QueryFactory.buildQuery(s, ConnectServer.class, "conservationArea", SmartDB.getCurrentConservationArea()).uniqueResult(); //$NON-NLS-1$
 				if (cs != null){
 					part.getContext().set(BrowserView.DEFAULT_URL, cs.getServerUrl() + "/connect"); //$NON-NLS-1$
 				}				
 			}
-		
 			((BrowserView)E3Utils.getSourceObject(part)).goHome();
 		}else{
 			ePartService.activate(part);
 		}
-		
-		
-		
-		
-		
 	}
 	
 	public static class ShowConnectWebHandlerWrapper extends DIHandler<ShowConnectWebHandler>{

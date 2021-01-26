@@ -158,10 +158,11 @@ window.onload = function() {
 	queryDateUpdateHandler();
 	
 	const controlItemIcons = document.querySelectorAll('.control-item-icon');
-	controlItemIcons.forEach(el => el.addEventListener('click', function(e) {
+	Array.from(controlItemIcons).forEach(function(el){el.addEventListener('click', function(e) {
 		toggleDisplay(e.target.previousElementSibling);
 		toggleDisplay(e.target.parentNode.nextElementSibling);
-	}));
+	})
+	});
 	
 	// we are catching events at the query-list level
 	// in case we add or remove folders/items dynamically
@@ -314,7 +315,6 @@ function getQueryColor(id) {
 function addQueryLayer(id) {
 	var color = getQueryColor(id);
  	var oReq = new XMLHttpRequest();
- 	oReq.responseType = 'json';
  	oReq.onload = function() {
  		data = this.response;
  		
@@ -337,7 +337,7 @@ function addQueryLayer(id) {
  		}).bindPopup(function (layer) {
  		    var p = layer.feature.properties;
  		    var c = '<div class="queryPopupTitle">' + queryNames[id] + '</div><div class="queryPopupTable"><table><tbody>';
- 		    for(const prop in p) {
+ 		    for(var prop in p) {
  		    	c += "<tr><td>" + prop + "</td><td>" + p[prop] + "</td></tr>";
  		    }
  		    c += "</tbody></table></div>";
@@ -363,6 +363,7 @@ function addQueryLayer(id) {
 		dateFilter += "&end_date=" + endDateString; 
 	}
  	oReq.open("Get", QUERY_URL + id + "?format=geojson&srid=4326&date_filter=" + qdatefilter[queryTypeKeys[id]][0] + dateFilter , true);
+ 	oReq.responseType = 'json';
  	oReq.send();
  	return color;
 }

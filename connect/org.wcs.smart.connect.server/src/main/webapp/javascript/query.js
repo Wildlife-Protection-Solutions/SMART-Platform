@@ -13,6 +13,7 @@ var isDateChanging = false;
 
 var folderId;
 
+
 /* configure events on html elements */
 window.onload = function(){
 	menuCheckOnload();
@@ -177,7 +178,9 @@ function selectFolder(element){
 		document.getElementById('querypath').innerHTML = i18n("query.allqueries");
 	}
 	
-	Array.from(queryList.getElementsByClassName("folder-selected")).forEach(ele=>{
+	var list = Array.from(queryList.getElementsByClassName("folder-selected"))
+	
+	list.forEach(function(ele){
 		ele.classList.remove("folder-selected");
 		ele.parentElement.dataset.selected = "false";
 	});
@@ -550,7 +553,8 @@ function handleQueries() {
 	const data = JSON.parse(this.responseText);
 	var parent = document.getElementById('foldertable');
 	
-	Array.from(parent.children).forEach(c=>parent.removeChild(c));
+	var items = Array.from(parent.children);
+	items.forEach(function(c){ parent.removeChild(c)});
 	
 	queries = [];
 	var objects = document.querySelectorAll("div.queryrow");
@@ -642,11 +646,12 @@ function createQueryTable(){
 	var hide = document.getElementById('qhideexe').checked;
 
  	//clear current table
-	document.querySelectorAll("div.queryrow").forEach(element=>element.parentElement.removeChild(element));
+	var items = Array.from(document.querySelectorAll("div.queryrow"));
+	items.forEach(function(element) {element.parentElement.removeChild(element)});
 	
 	
 	var drawnRowCount = 1;
-	queries.forEach(query=>{
+	queries.forEach(function(query){
 		var row = tableCreateRow(querylist, 
 				[query.conservationArea, "<img src='../css/images/query_icons/" + query.iconName +"' title='" + query.type + "'>" ,  "<span title='" + query.id + " - " + query.name + "'> " + query.name , null], 
 				"queryrow " + (drawnRowCount % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
@@ -687,12 +692,13 @@ function updateFolderTable(){
 	var selectedCa = document.getElementById('caselect').value;
 	
 	if (selectedCa == "allcas"){
-		Array.from(foldertable.getElementsByClassName("folder")).forEach(element => element.style.display="");
+		var items = Array.from(foldertable.getElementsByClassName("folder"));
+		items.forEach(function(element){ element.style.display="" });
 	}else{
 		
 		var clearquery = false;
 		var visible = null;
-		Array.from(foldertable.getElementsByClassName("folder")).forEach(element => {
+		Array.from(foldertable.getElementsByClassName("folder")).forEach(function(element) {
 			if (element.getAttribute("data-cauuid") == selectedCa){
 				element.style.display="";
 				if (visible == null) visible = element;
@@ -722,13 +728,14 @@ function updateQueryTable(){
 		elementArray = Array.from(querytable.getElementsByClassName("queryrow"))
 	}else{
 		//hide all
-		Array.from(querytable.getElementsByClassName("queryrow")).forEach(element => element.style.display="none");
+		var items = Array.from(querytable.getElementsByClassName("queryrow"));
+		items.forEach(function(element) {element.style.display="none"});
 		//show folder
 		elementArray = Array.from(querytable.querySelectorAll("[data-folderid='" + selectedFolder + "']"));
 	}
 	
 	var rowcnt = 1;
-	elementArray.forEach(element => {
+	elementArray.forEach(function(element) {
 		if (!hide || element.getAttribute("data-canexe") == "true"){
 			if (isFoundInRow(element)){
 				element.style.display="";

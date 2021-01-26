@@ -1526,6 +1526,7 @@ public class Messages extends NLS {
 	public static String BooleanAttributeField_UnderfinedBooleanOption;
 	public static String BrowserView_hometooltip;
 	public static String BrowserView_nexttooltip;
+	public static String BrowserView_openinsystembrowser;
 	public static String BrowserView_previoustooltip;
 	public static String BrowserView_refreshtooltip;
 	public static String NumericAttributeField_InvalidNumericAttribute;

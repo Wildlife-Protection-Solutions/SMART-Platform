@@ -185,7 +185,7 @@ function selectFolder(element){
 		document.getElementById('reportpath').innerHTML = "All Reports";
 	}
 	
-	Array.from(folderTable.getElementsByClassName("folder-selected")).forEach(ele=>{
+	Array.from(folderTable.getElementsByClassName("folder-selected")).forEach(function(ele){
 		ele.classList.remove("folder-selected");
 		ele.parentElement.dataset.selected = "false";
 	});
@@ -324,10 +324,10 @@ function showReportOptions(){
 	//update report parameters required
 	var oReq = new XMLHttpRequest();
 	oReq.onload = showParameterSelection;
-	oReq.timeout = 15000;
 	oReq.onerror = parameterError;
 	oReq.ontimeout = parameterError;
 	oReq.open("Get", REPORTURL  + uuid + "/params", true);
+	oReq.timeout = 15000;
 	oReq.send();
 
 	
@@ -757,7 +757,7 @@ function loadReports() {
 function handleReports() {
 	const data = JSON.parse(this.responseText);
 	var parent = document.getElementById('foldertable');
-	Array.from(parent.children).forEach(c=>parent.removeChild(c));
+	Array.from(parent.children).forEach(function(c){parent.removeChild(c)});
 	
 	reports = [];
 	var objects = document.querySelectorAll("div.reportrow");
@@ -842,11 +842,11 @@ function createReportTable(){
 	var reportlist = document.getElementById('reporttable');
 	
  	//clear current table
-	document.querySelectorAll("div.reportrow").forEach(element=>element.parentElement.removeChild(element));
+	Array.from(document.querySelectorAll("div.reportrow")).forEach(function(element){element.parentElement.removeChild(element)});
 	
 	
 	var drawnRowCount = 1;
-	reports.forEach(report=>{
+	reports.forEach(function(report){
 		
 		var row = tableCreateRow(reportlist, 
  				[report.conservationArea, "<span title='" + report.id + "'> " + report.name , null], 
@@ -880,11 +880,11 @@ function updateFolderTable(){
 	var selectedCa = document.getElementById('caselect').value;
 	
 	if (selectedCa == "allcas"){
-		Array.from(foldertable.getElementsByClassName("folder")).forEach(element => element.style.display="");
+		Array.from(foldertable.getElementsByClassName("folder")).forEach(function(element){element.style.display=""});
 	}else{		
 		var clearreport = false;
 		var visible = null;
-		Array.from(foldertable.getElementsByClassName("folder")).forEach(element => {
+		Array.from(foldertable.getElementsByClassName("folder")).forEach(function(element){
 			if (element.getAttribute("data-cauuid") == selectedCa){
 				element.style.display="";
 				if (visible == null) visible = element;
@@ -912,12 +912,12 @@ function updateReportTable(){
 		elementArray = Array.from(reporttable.getElementsByClassName("reportrow"));
 	}else{
 		//hide all
-		Array.from(reporttable.getElementsByClassName("reportrow")).forEach(element => element.style.display="none");
+		Array.from(reporttable.getElementsByClassName("reportrow")).forEach(function(element){element.style.display="none"});
 		elementArray = Array.from(reporttable.querySelectorAll("[data-folderid='" + selectedFolder + "']"));
 	}
 	
 	var rowcnt = 1;
-	elementArray.forEach(element => {
+	elementArray.forEach(function(element) {
 		if (isFoundInRow(element)){
 			element.style.display="";
 			element.classList.remove("smart-table-rowon");

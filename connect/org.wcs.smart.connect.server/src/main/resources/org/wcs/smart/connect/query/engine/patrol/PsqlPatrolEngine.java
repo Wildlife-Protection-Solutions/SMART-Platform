@@ -290,9 +290,9 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 	 * @return select clause
 	 */
 	private String buildSelectClause() {
-		String[] ca = {"id", "name"}; //$NON-NLS-1$ //$NON-NLS-2$
+		String[] ca = {"id", "name", "uuid"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		
-		String[] results = {"ca_uuid", "p_uuid", "p_id", "p_start_date", "p_end_date", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+		String[] results = {"p_uuid", "p_id", "p_start_date", "p_end_date", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
 				"p_station_uuid", "p_team_uuid",  //$NON-NLS-1$ //$NON-NLS-2$
 				"p_objective", "pl_mandate_uuid", "p_type", "p_is_armed", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 				"pl_transport_uuid", "pl_id", //$NON-NLS-1$ //$NON-NLS-2$

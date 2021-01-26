@@ -189,10 +189,7 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	public static final String ENABLED_ICON = "org.wsc.smart.ENABLED_ICON"; //$NON-NLS-1$
 	public static final String DISABLED_ICON = "org.wsc.smart.DISABLED_ICON"; //$NON-NLS-1$
 	public static final String GROUP_ICON = "org.wsc.smart.GROUP_ICON"; //$NON-NLS-1$
-	/**
-	 * Image descriptor for map  icon
-	 */
-	public static final String RENAME_ICON = "org.wsc.smart.RENAME_ICON"; //$NON-NLS-1$
+
 	
 	/**
 	 * Cross CA Icon
@@ -221,6 +218,7 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	public static final String BROWSER_GO = "org.wsc.smart.browser.refersh"; //$NON-NLS-1$
 	public static final String BROWSER_HOME = "org.wsc.smart.browser.home"; //$NON-NLS-1$
 	public static final String BROWSER_STOP = "org.wsc.smart.browser.stop"; //$NON-NLS-1$
+	public static final String BROWSER_OPEN = "org.wsc.smart.browser.open"; //$NON-NLS-1$
 	
 	public static final String SAVE_ICON = "org.wsc.smart.save"; //$NON-NLS-1$
 	public static final String SAVEAS_ICON = "org.wsc.smart.saveas"; //$NON-NLS-1$
@@ -233,6 +231,7 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	 * Edit Icon
 	 */
 	public static final String EDIT_ICON = "org.wsc.smart.EDIT_ICON"; //$NON-NLS-1$
+	public static final String RENAME_ICON = EDIT_ICON;
 	/**
 	 * Undo Icon
 	 */
@@ -461,7 +460,6 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	     reg.put(IMG_DEC_FIELD_ERROR, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/ovr16/error_ovr.png")); //$NON-NLS-1$
 	     reg.put(IMG_DEC_FIELD_WARNING, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/ovr16/warning_ovr.png")); //$NON-NLS-1$
 	     reg.put(STYLE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/style.png")); //$NON-NLS-1$
-	     reg.put(RENAME_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/pencil.png")); //$NON-NLS-1$
 	     reg.put(ADD_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/add.png")); //$NON-NLS-1$
 	     
 	     reg.put(BROWSER_FORWARD, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/arrow_right.png")); //$NON-NLS-1$
@@ -469,6 +467,7 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	     reg.put(BROWSER_GO, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/refresh.png")); //$NON-NLS-1$
 	     reg.put(BROWSER_HOME, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/home.png")); //$NON-NLS-1$
 	     reg.put(BROWSER_STOP, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/stop.png")); //$NON-NLS-1$
+	     reg.put(BROWSER_OPEN, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/eview16/world.png")); //$NON-NLS-1$
 	     
 	     reg.put(ZOOM_IMAGE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/elcl16/zoom_tool.png")); //$NON-NLS-1$
 	     reg.put(RESIZE_IMAGE, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/resize.png")); //$NON-NLS-1$
