@@ -24,6 +24,7 @@ package org.wcs.smart.asset.ui.data;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -373,7 +374,7 @@ public abstract class AssetDataPanel {
 					Path tmpLocation = Files.createTempFile("smart_" + System.nanoTime(), ""); //$NON-NLS-1$ //$NON-NLS-2$
 					tmpLocation.toAbsolutePath().toFile().deleteOnExit();
 					sp.computeFileLocation(session);
-					Files.copy(sp.getAttachmentFile(), tmpLocation);
+					Files.copy(sp.getAttachmentFile(), tmpLocation, StandardCopyOption.REPLACE_EXISTING);
 					att.setCopyFromLocation(tmpLocation);
 					att.setFilename(sp.getFilename());
 					att.setWaypoint(cloneWp);
@@ -650,6 +651,7 @@ public abstract class AssetDataPanel {
 								e.getAttributes().forEach(a->{
 									a.getAttribute().getName();
 									a.getAttributeValueAsString(Locale.getDefault());
+									a.getAttributeListItems().size();
 								});
 							}
 						} );
@@ -974,7 +976,7 @@ public abstract class AssetDataPanel {
 								Path tmpLocation = Files.createTempFile("smart_" + System.nanoTime(), ""); //$NON-NLS-1$ //$NON-NLS-2$
 								tmpLocation.toAbsolutePath().toFile().deleteOnExit();
 								source.computeFileLocation(session);
-								Files.copy(source.getAttachmentFile(), tmpLocation);
+								Files.copy(source.getAttachmentFile(), tmpLocation, StandardCopyOption.REPLACE_EXISTING);
 								att.setCopyFromLocation(tmpLocation);
 								att.setFilename(source.getFilename());
 								att.setWaypoint(core.getWaypoint());
