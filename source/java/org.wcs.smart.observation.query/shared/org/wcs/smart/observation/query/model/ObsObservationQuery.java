@@ -72,6 +72,7 @@ public class ObsObservationQuery extends ObservationQuery implements IPagedQuery
 		q.setQueryFilter(getQueryFilter());
 		q.setVisibleColumns(getVisibleColumns());
 		q.setStyle(getStyle());
+		q.setShowDataColumnsOnly(isShowDataColumnsOnly());
 		return q;
 	}
 	/**

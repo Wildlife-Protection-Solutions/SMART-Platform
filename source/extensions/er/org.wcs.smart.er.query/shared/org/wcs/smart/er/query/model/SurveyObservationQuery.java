@@ -80,7 +80,8 @@ public class SurveyObservationQuery extends ObservationQuery implements ISurveyQ
 		q.setOwner(newEmployee);
 		q.setQueryFilter(getQueryFilter());
 		q.setVisibleColumns(getVisibleColumns());
-		
+		q.setShowDataColumnsOnly(isShowDataColumnsOnly());
+
 		q.setSurveyDesign(getSurveyDesign());
 		q.setStyle(getStyle());
 		return q;

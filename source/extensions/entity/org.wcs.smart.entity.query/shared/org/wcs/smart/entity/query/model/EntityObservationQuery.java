@@ -60,6 +60,7 @@ public class EntityObservationQuery extends ObservationQuery {
 		q.setQueryFilter(getQueryFilter());
 		q.setVisibleColumns(getVisibleColumns());
 		q.setStyle(getStyle());
+		q.setShowDataColumnsOnly(isShowDataColumnsOnly());
 		return q;
 	}
 

@@ -63,12 +63,10 @@ public abstract class SimpleQuery extends StyledQuery {
 	protected String strQueryFilter;
 	protected String visibleColumns = null;
 	
-	/* transient fieldss */
+	/* transient fields */
 	protected QueryFilter queryFilter;	//cached copy of the parsed query
 	private DateFilter dateFilter;
-//	@Transient
-//	protected volatile List<QueryColumn> queryColumns = null;
-	
+
 	/**
 	 * Creates a new waypoint query with the default
 	 * conservation area filter and no date filter
