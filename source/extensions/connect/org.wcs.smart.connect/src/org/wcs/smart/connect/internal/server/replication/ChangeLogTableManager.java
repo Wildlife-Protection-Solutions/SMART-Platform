@@ -100,30 +100,27 @@ public enum ChangeLogTableManager {
 	public void addItem(Session s, ChangeLogItem item){		
 		//i tired doing just a s.save(item) however I could not
 		//get this to work with the revision identify field
-		String tableName = HibernateManager.getTableName(ChangeLogItem.class);
-		
+	
 		boolean doAgain = true;
-		
 		//this may cause deadlock, if thats the case release the
 		//transaction and try again; note with current settings
 		//derby takes 60sec to timeout
 		while(doAgain) {
 			s.beginTransaction();
-		
 			try {
 				s.createNativeQuery("LOCK TABLE " + ChangeLogItem.TABLENAME + " IN EXCLUSIVE MODE") //$NON-NLS-1$ //$NON-NLS-2$
 					.executeUpdate();
 				doAgain = false;
+				
 			}catch (Exception ex) {
+				ex.printStackTrace();
 				s.getTransaction().rollback();
-			}
-			
+			}	
 		}
-		
 		
 		StringBuilder sb = new StringBuilder();
 		sb.append(" INSERT INTO "); //$NON-NLS-1$
-		sb.append(tableName);
+		sb.append(ChangeLogItem.TABLENAME);
 		sb.append(" (revision, uuid, action, filename, tablename, ca_uuid, key1_fieldname, key1, key2_fieldname, key2_str, key2_uuid, source)"); //$NON-NLS-1$
 		sb.append(" VALUES (smart.next_revision_id(:cauuid), :uuid, :action, :filename, :tablename, :cauuid2, :key1field, :key1, :key2field, :key2str, :key2uuid, :source)"); //$NON-NLS-1$
 		
@@ -144,7 +141,7 @@ public enum ChangeLogTableManager {
 		query.setParameter("key2uuid", item.getKey2() == null ? null : UuidUtils.uuidToByte(item.getKey2())); //$NON-NLS-1$
 		query.setParameter("source", item.getSource().name()); //$NON-NLS-1$
 		query.executeUpdate();
-		
+
 		s.getTransaction().commit();
 	}
 	

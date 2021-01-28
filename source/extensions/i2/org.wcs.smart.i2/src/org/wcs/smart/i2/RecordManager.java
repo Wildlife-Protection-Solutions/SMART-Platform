@@ -39,6 +39,7 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
@@ -131,8 +132,11 @@ public enum RecordManager {
 						continue;
 					}
 					if (!IntelSecurityManager.INSTANCE.canDeleteRecord(record.getProfile())){
-						MessageDialog.openError(context.get(Shell.class), Messages.RecordManager_ErrorTitle, 
-								MessageFormat.format(Messages.RecordManager_InsufficientPrivileges2, record.getTitle()));
+						final String title = record.getTitle();
+						Display.getDefault().syncExec(()->{
+							MessageDialog.openError(context.get(Shell.class), Messages.RecordManager_ErrorTitle, 
+								MessageFormat.format(Messages.RecordManager_InsufficientPrivileges2, title));
+						});
 						continue;
 					}
 					progress.subTask(record.getTitle());

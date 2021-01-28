@@ -26,6 +26,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import org.wcs.smart.connect.model.ChangeLogItem;
 import org.wcs.smart.connect.model.ConnectServerStatus;
@@ -55,6 +56,7 @@ public class DerbyUtil {
 	 */
 	public static Long getNextRevisionId(byte[] cauuid) throws SQLException{
 		if (cauuid == null) return -1l;
+
 		String sql = "select (case when max(revision) is null then -1 else max(revision) end) + 1 "  //$NON-NLS-1$
 				+ " from " + ChangeLogItem.TABLENAME + " where ca_uuid = ?"; //$NON-NLS-1$ //$NON-NLS-2$
 		Connection c = DriverManager.getConnection("jdbc:default:connection"); //$NON-NLS-1$
@@ -63,14 +65,19 @@ public class DerbyUtil {
 		//it prevents problems when two transactions are trying to save to the database at the 
 		//same time.
 		//related to #1790 & #1850
-		c.createStatement().execute("LOCK TABLE " + ChangeLogItem.TABLENAME + " IN EXCLUSIVE MODE"); //$NON-NLS-1$ //$NON-NLS-2$
-		
+		try(Statement s = c.createStatement()){
+			s.execute("LOCK TABLE " + ChangeLogItem.TABLENAME + " IN EXCLUSIVE MODE"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
 		try(PreparedStatement ps = c.prepareStatement(sql)){
 			ps.setBytes(1, cauuid);
-			ResultSet rs = ps.executeQuery();
-			rs.next();
-			return rs.getLong(1);
+			try(ResultSet rs = ps.executeQuery()){
+				rs.next();
+				return rs.getLong(1);
+			}
+		}finally {
+			c.close();
 		}
+		
 	}
 	
 	public static Boolean isReplicationEnabled(byte[] cauuid) throws SQLException{
