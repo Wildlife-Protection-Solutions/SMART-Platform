@@ -930,10 +930,12 @@ public abstract class AssetDataPanel {
 		try(Session session = HibernateManager.openSession(new AttachmentInterceptor(false))){
 			session.beginTransaction();
 			try {
+				
 				List<AssetWaypointAttachment> toSave = new ArrayList<>();
 				core.getWaypoint().setDateTime(dtWaypoint.getDateTime());
 				core.getWaypoint().setComment(dtWaypoint.getComment());
 				session.saveOrUpdate(core.getWaypoint());
+				session.flush();
 				
 				//validate and extend all deployments associated with the core
 				validateAndExtend(core.getWaypoint(), core.getAssetLinks(), session);
@@ -963,7 +965,6 @@ public abstract class AssetDataPanel {
 							core.getAssetLinks().add(toAssetWaypoint);
 						}
 						session.saveOrUpdate(toAssetWaypoint);
-
 						
 						if (fromaw.getAttachments() != null) {
 							for (AssetWaypointAttachment fromattachment : fromaw.getAttachments()) {
@@ -1041,8 +1042,8 @@ public abstract class AssetDataPanel {
 						session.delete(aw);
 					}
 					session.delete(from.getWaypoint());
-					
 				}
+				
 				for (AssetWaypoint aw : core.getAssetLinks()) {
 					aw.setIncidentLength(tmpwp.getIncidentLength());
 				}
@@ -1137,6 +1138,8 @@ public abstract class AssetDataPanel {
 		try(Session session = HibernateManager.openSession(new AttachmentInterceptor())){
 			session.beginTransaction();
 			try {
+				session.saveOrUpdate(waypoint.getWaypoint());
+								
 				List<AssetWaypoint> assetLinksToRemove = new ArrayList<AssetWaypoint>();
 				for (ISmartAttachment attachment : toRemove) {
 					//remove asset waypoint attachment link
@@ -1150,7 +1153,7 @@ public abstract class AssetDataPanel {
 						}
 						attachments.forEach(a->{
 							session.delete(a);
-							aw.getAttachments().remove(a);
+							a.getAssetWaypoint().getAttachments().remove(a);							
 						});
 						
 						//if no more attachment links we should remove the asset waypoint
