@@ -625,10 +625,9 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine  implements O
 		StringBuilder sb = new StringBuilder();
 
 		String[] selectFields = new String[] {
-				"ca_id","ca_name","mission_uuid","mission_enddate", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				"ca_uuid", "ca_id","ca_name","mission_uuid","mission_enddate", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 				"mission_id","mission_startdate","mission_leader", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				"surveydesign_name","surveydesign_enddate","surveydesign_startdate", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				"survey_id","survey_enddate","survey_startdate", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				"surveydesign_name", "survey_id", //$NON-NLS-1$ //$NON-NLS-2$ 
 				"samplingunit_uuid","samplingunit_id", //$NON-NLS-1$ //$NON-NLS-2$
 				"wp_uuid","wp_id","wp_x","wp_y","wp_time", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 				"wp_direction","wp_distance","wp_comment","wp_lastmodified", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$

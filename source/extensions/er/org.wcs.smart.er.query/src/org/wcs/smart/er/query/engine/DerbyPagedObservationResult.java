@@ -161,7 +161,7 @@ public class DerbyPagedObservationResult extends ObservationQueryResult<SurveyOb
 
 	@Override
 	protected String getDistinctWaypointQuery(String prefix, boolean includeObservation) {
-		return null;
+		return ((DerbyObservationEngine)engine).getDistinctWaypointQuery(prefix, includeObservation);
 	}
 
 	

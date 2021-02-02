@@ -38,6 +38,7 @@ import org.wcs.smart.observation.model.WaypointObservationAttributeList;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.IObservationPagedQueryResultSet;
+import org.wcs.smart.query.common.ui.image.PagedImageQueryResults;
 import org.wcs.smart.query.model.AttributeQueryColumn;
 import org.wcs.smart.query.model.CategoryQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
@@ -64,6 +65,18 @@ public abstract class ObservationQueryResult<T extends IObservationQueryResultIt
 	public ObservationQueryResult(ObservationQueryEngine<T> engine, int itemCount, int wpCount) {
 		super(engine, itemCount);
 		this.wp_count = wpCount;
+		
+		this.imageResults = new PagedImageQueryResults(engine) {		
+			@Override
+			protected String getImageQuery() {
+				return ObservationQueryResult.this.getImageQuery();
+			}
+
+			@Override
+			protected void initImageData() {
+				ObservationQueryResult.this.initImageData();
+			}
+		};
 	}
 
 	public ObservationQueryEngine<T> getEngineInternal() {
@@ -245,8 +258,16 @@ public abstract class ObservationQueryResult<T extends IObservationQueryResultIt
 
 	@Override
 	public IQueryResultSetIterator<? extends IAttachmentResultItem> getImageIterator(Session session) throws SQLException{
-		initImageData();
 
+		initImageData();
+		
+		return new AttachmentResultSetIterator(session, 
+				e->engine.asQueryAttachmentResultItem(e, session),
+				()->getImageQuery());
+	}
+	
+
+	private String getImageQuery() {
 		StringBuilder sb = new StringBuilder();
 		String part = getDistinctWaypointQuery("r.", true); //$NON-NLS-1$
 		
@@ -267,11 +288,8 @@ public abstract class ObservationQueryResult<T extends IObservationQueryResultIt
 		sb.append(" join " + imageResults.getResultsTable() + " b "); //$NON-NLS-1$ //$NON-NLS-2$
 		sb.append(" ON b.wp_uuid = foo.wp_uuid and b.ob_uuid is null"); //$NON-NLS-1$
 		
-		return new AttachmentResultSetIterator(session, 
-				e->engine.asQueryAttachmentResultItem(e, session),
-				()->sb.toString());
+		return sb.toString();
 	}
-	
 	protected abstract String getDistinctWaypointQuery(String prefix, boolean includeObservation);
 	
 

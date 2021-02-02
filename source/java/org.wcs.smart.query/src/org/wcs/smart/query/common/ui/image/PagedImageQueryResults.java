@@ -47,7 +47,7 @@ public abstract class PagedImageQueryResults {
 	private int imageDataCnt = -1;
 	
 	private IDesktopWOEngine<?> engine;
-	
+
 	public PagedImageQueryResults(IDesktopWOEngine<?> engine) {
 		this.engine = engine;
 	}
@@ -85,16 +85,20 @@ public abstract class PagedImageQueryResults {
 		this.imageDataCnt = imageDataCnt;
 	}
 	
-	public List<IAttachmentResultItem> getImageData(int offset, int pageSize) {
-		if (imageTempTable == null) {
-			initImageData();
-		}
-		
+	protected String getImageQuery() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("SELECT r.*, b.attach_uuid as attach_uuid FROM " ); //$NON-NLS-1$
 		sb.append(engine.getQueryDataTable() + " r "); //$NON-NLS-1$
 		sb.append(" join " + imageTempTable + " b "); //$NON-NLS-1$ //$NON-NLS-2$
 		sb.append("on r.wp_uuid = b.wp_uuid order by b.seq_order "); //$NON-NLS-1$
+		
+		return sb.toString();
+	}
+	
+	public List<IAttachmentResultItem> getImageData(int offset, int pageSize) {
+		if (imageTempTable == null) {
+			initImageData();
+		}
 		
 		List<IAttachmentResultItem>  imageData = new ArrayList<>();
 		try(Session session = HibernateManager.openSession()){
@@ -103,7 +107,7 @@ public abstract class PagedImageQueryResults {
 				@Override
 				public ResultSet execute(Connection c) throws SQLException {
 					return c.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)
-							.executeQuery(sb.toString());	
+							.executeQuery(PagedImageQueryResults.this.getImageQuery());	
 				}
 			});
 			

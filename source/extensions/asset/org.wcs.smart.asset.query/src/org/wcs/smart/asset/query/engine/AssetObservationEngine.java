@@ -555,7 +555,7 @@ public class AssetObservationEngine extends AssetQueryEngine implements Observat
 		StringBuilder sb = new StringBuilder();
 
 		String[] selectFields = new String[] {
-			"ca_id","ca_name","wp_uuid", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			"ca_uuid", "ca_id","ca_name","wp_uuid", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			"wp_id","wp_x","wp_y","wp_time", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			"wp_direction","wp_distance","wp_comment","asset_asset", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			"asset_station","asset_location","incident_length", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$

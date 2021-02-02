@@ -535,7 +535,7 @@ public class DerbyObservationEngine extends AbstractDerbyObservationQueryEngine 
 	}
 
 	String getDistinctWaypointQuery(String prefix, boolean includeObs) {
-		String[] fields = new String[] {"ca_id","ca_name","wp_source","wp_uuid", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		String[] fields = new String[] {"ca_uuid", "ca_id","ca_name","wp_source","wp_uuid", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 				"wp_id","wp_x","wp_y","wp_time", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 				"wp_lastmodified","wp_lastmodifiedbyname","wp_direction", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				"wp_distance","wp_comment"}; //$NON-NLS-1$ //$NON-NLS-2$
