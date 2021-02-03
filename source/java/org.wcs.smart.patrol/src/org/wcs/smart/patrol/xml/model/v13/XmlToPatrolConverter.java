@@ -365,12 +365,29 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 				}
 			}
 			if (e != null){
-				PatrolLegMember mem = new PatrolLegMember();
-				mem.setMember(e);
-				mem.setPatrolLeg(leg);
-				mem.setIsLeader(member.isIsLeader());
-				mem.setIsPilot(member.isIsPilot());
-				leg.getMembers().add(mem);
+				
+				boolean exists = false;
+				
+				for (PatrolLegMember existing : leg.getMembers()) {
+					if (existing.getMember().equals(e)) {
+						//add a warning
+						exists = true;
+						warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_duplicateWarning,
+								member.getGivenName(), member.getFamilyName(),member.getEmployeeId()));
+						if (member.isIsLeader()) existing.setIsLeader(true);
+						if (member.isIsPilot()) existing.setIsLeader(true);
+						break;
+					}
+				}
+				
+				if (!exists) {
+					PatrolLegMember mem = new PatrolLegMember();
+					mem.setMember(e);
+					mem.setPatrolLeg(leg);
+					mem.setIsLeader(member.isIsLeader());
+					mem.setIsPilot(member.isIsPilot());
+					leg.getMembers().add(mem);
+				}
 			}
 		}
 		

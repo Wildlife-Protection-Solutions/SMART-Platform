@@ -864,6 +864,8 @@ public class Messages extends NLS {
 
 	public static String XMLtoMissionConverter_AttachmentError;
 
+	public static String XMLtoMissionConverter_duplicatememberwarning;
+
 	public static String XMLtoMissionConverter_NoListItemsFound;
 
 	public static String XMLtoMissionConverter_ObserverNotFound;

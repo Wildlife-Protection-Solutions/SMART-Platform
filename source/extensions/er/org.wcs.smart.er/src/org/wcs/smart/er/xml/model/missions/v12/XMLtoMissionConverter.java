@@ -253,16 +253,30 @@ public class XMLtoMissionConverter implements IXmlToMissionConverter{
 			}
 			if(employee == null){
 				warnings.add(MessageFormat.format(Messages.XMLtoMissionConverter_17, new Object[]{ xmlMember.getGivenName(), xmlMember.getFamilyName()}));
-				return;
+				continue;
 			}else{
 				member.setMember(employee);				
 			}
+			
+
+			boolean exists = false;
+			for (MissionMember existing : m.getMembers()) {
+				if (existing.getMember().equals(member.getMember())) {
+					//add a warning
+					exists = true;
+					warnings.add(MessageFormat.format(Messages.XMLtoMissionConverter_duplicatememberwarning,
+							xmlMember.getGivenName(), xmlMember.getFamilyName(),xmlMember.getEmployeeId()));
+					
+					if (xmlMember.isLeader()) existing.setIsLeader(true);
+					break;
+				}
+			}
+			if (exists) continue;
+			
+			
 			member.setIsLeader(xmlMember.isLeader());
 			member.setMission(m);
-			
-			if(xmlMember.isLeader() == true){
-				m.setLeader(member);
-			}
+			if(xmlMember.isLeader() == true) m.setLeader(member);
 			m.getMembers().add(member);
 		}
 		

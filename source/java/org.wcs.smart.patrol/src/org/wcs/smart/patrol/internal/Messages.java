@@ -798,6 +798,7 @@ public static String PatrolFeatureSource_ProjectedWaypointLayerName;
 	public static String XmlToPatrolConverter_AttributeNotFound;
 	public static String XmlToPatrolConverter_DayOutsideLegRange;
 	public static String XmlToPatrolConverter_DuplicateAttributesError;
+	public static String XmlToPatrolConverter_duplicateWarning;
 	public static String XmlToPatrolConverter_Error_DuplicateAttributes;
 	public static String XmlToPatrolConverter_Error_InvalidTransportType;
 	public static String XmlToPatrolConverter_Error_MandateNotFound;
