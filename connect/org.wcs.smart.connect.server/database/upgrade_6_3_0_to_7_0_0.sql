@@ -170,7 +170,7 @@ create table connect.ct_package(
   uploaded_date timestamp not null,
   version varchar(256) not null,
   filename varchar(256) not null,
-  package_type varchar(256) not null;
+  package_type varchar(256) not null,
   name varchar(256) not null,
   status varchar(16) not null,
   work_item_uuid uuid,
@@ -435,8 +435,8 @@ CREATE TRIGGER trg_paws_parameter AFTER INSERT OR UPDATE OR DELETE ON smart.paws
 CREATE TABLE smart.wp_observation_group (uuid uuid not null, wp_uuid uuid not null, primary key (uuid));
 INSERT INTO smart.wp_observation_group (uuid, wp_uuid) SELECT uuid_generate_v4(), uuid FROM smart.waypoint WHERE uuid in (SELECT o.wp_uuid FROM smart.wp_observation o);
 
-CREATE TABLE smart.wp_observation_temp (uuid uuid not null, wp_group_uuid uuid not null, primary key (uuid))
-INSERT INTO smart.wp_observation_temp (uuid, wp_group_uuid) SELECT a.uuid, b.uuid FROM smart.wp_observation a JOIN smart.wp_observation_group b on b.wp_uuid = a.wp_uuid
+CREATE TABLE smart.wp_observation_temp (uuid uuid not null, wp_group_uuid uuid not null, primary key (uuid));
+INSERT INTO smart.wp_observation_temp (uuid, wp_group_uuid) SELECT a.uuid, b.uuid FROM smart.wp_observation a JOIN smart.wp_observation_group b on b.wp_uuid = a.uuid;
 ALTER TABLE smart.wp_observation ADD COLUMN wp_group_uuid uuid;
 UPDATE smart.wp_observation set wp_group_uuid = a.wp_group_uuid FROM smart.wp_observation_temp a WHERE a.uuid = smart.wp_observation.uuid;
 DROP table smart.wp_observation_temp;
@@ -477,7 +477,7 @@ CREATE TRIGGER trg_wp_group_observation AFTER INSERT OR UPDATE OR DELETE ON smar
 
 
 -- multi select list
-alter table smart.wp_observation_attributes drop trigger smart.trg_wp_observation_attributes
+DROP TRIGGER trg_wp_observation_attributes ON smart.wp_observation_attributes;
 
 CREATE TRIGGER trg_wp_observation_attributes AFTER INSERT OR DELETE OR UPDATE ON smart.wp_observation_attributes FOR EACH ROW EXECUTE PROCEDURE connect.trg_wp_observation_attributes();
 
@@ -841,6 +841,9 @@ DROP TABLE IF EXISTS smart.intelligence_source;
 DROP TABLE IF EXISTS smart.intel_record_query;
 DROP TABLE IF EXISTS smart.intel_summary_query;
 
+DROP FUNCTION IF EXISTS connect.trg_patrol_intelligence;
+DROP FUNCTION IF EXISTS connect.trg_intelligence_attachment;
+DROP FUNCTION IF EXISTS connect.trg_intelligence_point;
 
 DELETE FROM connect.connect_plugin_version where plugin_id = 'org.wcs.smart.intelligence';
 DELETE FROM connect.connect_plugin_version where plugin_id = 'org.wcs.smart.intelligence.query';
@@ -890,6 +893,9 @@ update smart.mission set start_date = cast(Start_datetime as date), end_date = c
 
 alter table smart.mission drop column start_datetime;
 alter table smart.mission drop column end_datetime;
+
+alter table smart.mission alter column start_date set not null;
+alter table smart.mission alter column end_date set not null;
 
 alter table smart.survey drop column start_date;
 alter table smart.survey drop column end_date;

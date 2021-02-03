@@ -312,13 +312,9 @@ public class UpgradeServlet extends HttpServlet {
 				"update smart.i_relationship_type set target_profile_uuid = src_profile_uuid", //$NON-NLS-1$
 				
 				"ALTER TABLE smart.i_entity ALTER COLUMN profile_uuid set not null", //$NON-NLS-1$
-				"ALTER TABLE smart.i_entity ADD CONSTRAINT i_entity_profileuuid_fk FOREIGN KEY (profile_uuid) REFERENCES smart.i_profile_config (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 				"ALTER TABLE smart.i_record ALTER COLUMN profile_uuid set not null", //$NON-NLS-1$
-				"ALTER TABLE smart.i_record ADD CONSTRAINT i_record_profileuuid_fk FOREIGN KEY (profile_uuid) REFERENCES smart.i_profile_config (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 				"ALTER TABLE smart.i_relationship_type ALTER COLUMN src_profile_uuid SET not null", //$NON-NLS-1$
 				"ALTER TABLE smart.i_relationship_type ALTER COLUMN target_profile_uuid SET not null", //$NON-NLS-1$
-				"ALTER TABLE smart.i_relationship_type ADD CONSTRAINT i_rtype_srcprofileuuid_fk FOREIGN KEY (src_profile_uuid) REFERENCES smart.i_profile_config (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
-				"ALTER TABLE smart.i_relationship_type ADD CONSTRAINT i_rtype_trgprofileuuid_fk FOREIGN KEY (target_profile_uuid) REFERENCES smart.i_profile_config (uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 				
 				"UPDATE smart.I_ENTITY_RECORD_QUERY set profile_filter = '" + profilekey + "'",  //$NON-NLS-1$ //$NON-NLS-2$
 				"UPDATE smart.i_entity_summary_query set profile_filter = '" + profilekey + "'",  //$NON-NLS-1$ //$NON-NLS-2$

@@ -1205,17 +1205,6 @@ BEGIN
  RETURN ROW;
 END$$;
 
-
---CREATE FUNCTION connect.trg_patrol_intelligence() RETURNS trigger
---    LANGUAGE plpgsql
---    AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
---     INSERT INTO connect.change_log
---         (uuid, action, tablename, key1_fieldname, key1, key2_fieldname, key2_uuid, key2_str, ca_uuid)
---         SELECT uuid_generate_v4(), TG_OP, TG_TABLE_SCHEMA::TEXT || '.' || TG_TABLE_NAME::TEXT, 'patrol_uuid', ROW.patrol_uuid, 'intelligence_uuid', ROW.intelligence_uuid, null, p.CA_UUID
---         from smart.patrol p where p.uuid = ROW.patrol_uuid;
---RETURN ROW; END$$;
-
-
 CREATE FUNCTION connect.trg_patrol_leg() RETURNS trigger
     LANGUAGE plpgsql
     AS $$ DECLARE ROW RECORD; BEGIN IF (TG_OP = 'UPDATE' OR TG_OP = 'INSERT') THEN ROW = NEW; ELSIF (TG_OP = 'DELETE') THEN ROW = OLD; END IF;
@@ -1870,6 +1859,7 @@ CREATE TABLE connect.alerts (
     track character varying NOT NULL,
     creator_uuid uuid,
     source character varying(32) DEFAULT 'USER'::character varying NOT NULL,
+    primary key (uuid),
     CONSTRAINT valid_level CHECK (((level > 0) AND (level < 6)))
 );
 
@@ -1951,7 +1941,7 @@ COMMENT ON COLUMN connect.change_log_history.last_delete_revision IS 'The last d
 CREATE TABLE connect.connect_plugin_version (
     plugin_id character varying NOT NULL,
     version character varying NOT NULL,
-    PRIMARY KEY (plugin_id, version)
+    PRIMARY KEY (plugin_id)
 );
 COMMENT ON TABLE connect.connect_plugin_version IS 'The list of plugin supported by the SMART Connect Server and their associated versions.  The version field should be the database schema version not the code version.';
 COMMENT ON COLUMN connect.connect_plugin_version.plugin_id IS 'The unique plugin identifier.';
@@ -1994,7 +1984,7 @@ CREATE TABLE connect.ct_package (
     name character varying(256) NOT NULL,
     status character varying(16) NOT NULL,
     work_item_uuid uuid,
-    package_type varchar(256),
+    package_type varchar(256) NOT NULL,
     UNIQUE(package_uuid),
     primary key(uuid)
 );
@@ -3360,7 +3350,8 @@ CREATE TABLE smart.i_observation_attribute_list (
 CREATE TABLE smart.i_permission (
     employee_uuid uuid NOT NULL,
     profile_uuid uuid NOT NULL,
-    permissions integer NOT NULL
+    permissions integer NOT NULL,
+    primary key(employee_uuid, profile_uuid)
 );
 
 
@@ -3566,6 +3557,7 @@ CREATE TABLE smart.icon (
     uuid uuid NOT NULL,
     keyid character varying(64) NOT NULL,
     ca_uuid uuid NOT NULL,
+    UNIQUE (keyid, ca_uuid),
     PRIMARY KEY (uuid)
 );
 
@@ -4398,7 +4390,7 @@ CREATE TABLE smart.track (
     patrol_leg_day_uuid uuid NOT NULL,
     geometry bytea NOT NULL,
     distance real NOT NULL,
-    PRIMARY KEY (uuid)
+    PRIMARY KEY (uuid, patrol_leg_day_uuid)
 );
 
 
@@ -4692,7 +4684,6 @@ CREATE TRIGGER trg_patrol_attribute AFTER INSERT OR DELETE OR UPDATE ON smart.pa
 CREATE TRIGGER trg_patrol_attribute_list AFTER INSERT OR DELETE OR UPDATE ON smart.patrol_attribute_list FOR EACH ROW EXECUTE PROCEDURE connect.trg_patrol_attribute_list();
 CREATE TRIGGER trg_patrol_attribute_value AFTER INSERT OR DELETE OR UPDATE ON smart.patrol_attribute_value FOR EACH ROW EXECUTE PROCEDURE connect.trg_patrol_attribute_value();
 CREATE TRIGGER trg_patrol_folder AFTER INSERT OR DELETE OR UPDATE ON smart.patrol_folder FOR EACH ROW EXECUTE PROCEDURE connect.trg_changelog_common();
---CREATE TRIGGER trg_patrol_intelligence AFTER INSERT OR DELETE OR UPDATE ON smart.patrol_intelligence FOR EACH ROW EXECUTE PROCEDURE connect.trg_patrol_intelligence();
 CREATE TRIGGER trg_patrol_leg AFTER INSERT OR DELETE OR UPDATE ON smart.patrol_leg FOR EACH ROW EXECUTE PROCEDURE connect.trg_patrol_leg();
 CREATE TRIGGER trg_patrol_leg_day AFTER INSERT OR DELETE OR UPDATE ON smart.patrol_leg_day FOR EACH ROW EXECUTE PROCEDURE connect.trg_patrol_leg_day();
 CREATE TRIGGER trg_patrol_leg_members AFTER INSERT OR DELETE OR UPDATE ON smart.patrol_leg_members FOR EACH ROW EXECUTE PROCEDURE connect.trg_patrol_leg_members();
@@ -4949,7 +4940,6 @@ ALTER TABLE ONLY smart.i_profile_entity_type ADD CONSTRAINT i_profile_entity_typ
 ALTER TABLE ONLY smart.i_profile_record_source ADD CONSTRAINT i_profile_record_source_profile_uuid_fkey FOREIGN KEY (profile_uuid) REFERENCES smart.i_profile_config(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE ONLY smart.i_profile_record_source ADD CONSTRAINT i_profile_record_source_record_source_uuid_fkey FOREIGN KEY (record_source_uuid) REFERENCES smart.i_recordsource(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE ONLY smart.i_record ADD CONSTRAINT i_record_profile_uuid_fkey FOREIGN KEY (profile_uuid) REFERENCES smart.i_profile_config(uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY DEFERRED;
-ALTER TABLE ONLY smart.i_record ADD CONSTRAINT i_record_profile_uuid_fkey1 FOREIGN KEY (profile_uuid) REFERENCES smart.i_profile_config(uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE ONLY smart.i_record_query ADD CONSTRAINT i_record_query_ca_uuid_fkey FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE ONLY smart.i_record_query ADD CONSTRAINT i_record_query_created_by_fkey FOREIGN KEY (created_by) REFERENCES smart.employee(uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE ONLY smart.i_record_query ADD CONSTRAINT i_record_query_last_modified_by_fkey FOREIGN KEY (last_modified_by) REFERENCES smart.employee(uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY DEFERRED;
@@ -4958,7 +4948,6 @@ ALTER TABLE ONLY smart.i_record_summary_query ADD CONSTRAINT i_record_summary_qu
 ALTER TABLE ONLY smart.i_record_summary_query ADD CONSTRAINT i_record_summary_query_last_modified_by_fkey FOREIGN KEY (last_modified_by) REFERENCES smart.employee(uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE ONLY smart.i_record_attribute_value_list ADD CONSTRAINT i_recordattributelist_valueuuid_fk FOREIGN KEY (value_uuid) REFERENCES smart.i_record_attribute_value(uuid) ON DELETE CASCADE DEFERRABLE;
 ALTER TABLE ONLY smart.i_relationship_type ADD CONSTRAINT i_relationship_type_src_profile_uuid_fkey FOREIGN KEY (src_profile_uuid) REFERENCES smart.i_profile_config(uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY DEFERRED;
-ALTER TABLE ONLY smart.i_relationship_type ADD CONSTRAINT i_relationship_type_src_profile_uuid_fkey1 FOREIGN KEY (src_profile_uuid) REFERENCES smart.i_profile_config(uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE ONLY smart.i_relationship_type ADD CONSTRAINT i_relationship_type_src_type_fk FOREIGN KEY (src_entity_type) REFERENCES smart.i_entity_type(uuid) ON DELETE CASCADE DEFERRABLE;
 ALTER TABLE ONLY smart.i_relationship_type ADD CONSTRAINT i_relationship_type_target_profile_uuid_fkey FOREIGN KEY (target_profile_uuid) REFERENCES smart.i_profile_config(uuid) ON UPDATE RESTRICT ON DELETE RESTRICT DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE ONLY smart.i_relationship_type ADD CONSTRAINT i_relationship_type_trg_type_fk FOREIGN KEY (target_entity_type) REFERENCES smart.i_entity_type(uuid) ON DELETE CASCADE DEFERRABLE;
