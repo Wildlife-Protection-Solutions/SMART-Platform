@@ -130,11 +130,11 @@ public class NameKeyComposite {
 			}
 		}
 		//update name field
-		String name = item.findNameNull(SmartDB.getCurrentLanguage()).strip();
+		String name = item.findNameNull(SmartDB.getCurrentLanguage());
 		if (name == null){
 			item.setName(item.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage()).strip());
 		}else{
-			item.setName(name);
+			item.setName(name.strip());
 		}
 		
 		item.setKeyId(txtKey.getText());
