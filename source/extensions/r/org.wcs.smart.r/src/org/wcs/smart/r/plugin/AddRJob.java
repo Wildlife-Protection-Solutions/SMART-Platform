@@ -86,7 +86,7 @@ public class AddRJob extends Job {
 			currentVersion = RPlugIn.DB_VERSION_1;
 		}
 		//upgrades from version1 to the current version
-		RDatabaseUpgrader.upgrade(RPlugIn.DB_VERSION_1, session);
+		RDatabaseUpgrader.upgrade(currentVersion, session);
 	}
 	
 

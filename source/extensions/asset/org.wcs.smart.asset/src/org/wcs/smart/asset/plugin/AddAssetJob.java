@@ -79,8 +79,7 @@ public class AddAssetJob extends Job {
 			createTables(session);
 			currentVersion = AssetPlugIn.DB_VERSION_1;
 		}
-		
-		AssetDatabaseUpgrader.upgrade(AssetPlugIn.DB_VERSION_1, session);
+		AssetDatabaseUpgrader.upgrade(currentVersion, session);
 	}
 	
 	@SuppressWarnings("nls")

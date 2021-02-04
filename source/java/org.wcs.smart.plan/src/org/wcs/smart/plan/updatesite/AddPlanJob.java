@@ -81,8 +81,7 @@ public class AddPlanJob extends Job {
 			createTables(session);
 			currentVersion = SmartPlanPlugIn.DB_VERSION_1;
 		}
-		
-		PlanDatabaseUpgrader.upgrade(SmartPlanPlugIn.DB_VERSION_1, session);
+		PlanDatabaseUpgrader.upgrade(currentVersion, session);
 	}
 	
 	private void createTables(Session session){

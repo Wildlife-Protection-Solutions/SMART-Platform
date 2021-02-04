@@ -79,8 +79,7 @@ public class AddEventJob extends Job {
 			createTables(session);
 			currentVersion = EventPlugIn.DB_VERSION_1;
 		}
-		
-		EventDatabaseUpgrader.upgrade(EventPlugIn.DB_VERSION_1, session);
+		EventDatabaseUpgrader.upgrade(currentVersion, session);
 	}
 	
 	private void createTables(Session session){

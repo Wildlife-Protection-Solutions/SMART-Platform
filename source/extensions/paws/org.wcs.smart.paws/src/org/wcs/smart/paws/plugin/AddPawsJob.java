@@ -86,7 +86,7 @@ public class AddPawsJob extends Job {
 			currentVersion = PawsPlugIn.DB_VERSION_1;
 		}
 		//upgrades from version1 to the current version
-		PawsDatabaseUpgrader.upgrade(PawsPlugIn.DB_VERSION_1, session);
+		PawsDatabaseUpgrader.upgrade(currentVersion, session);
 	}
 	
 
