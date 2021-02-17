@@ -58,52 +58,71 @@ public abstract class ChangeLogDeserializer {
 		this.changeLogFilestoreDir = changeLogFilestoreDir;
 	}
 	
+	/**
+	 * Updates the progress of change log
+	 * items processed. Overwrite to display
+	 * progress to user.
+	 * @param current the total number of items processed
+	 */
+	protected void updateProgress(int current){	}
+	
+	/**
+	 * Initializes the progress of items
+	 * to process with the total number of 
+	 * items.  Overwrite to display progress to user.
+	 * 
+	 * @param total total number of items to process
+	 */
+	protected void initProgress(int total) { }
 	
 	public void processFile(final Session session) throws Exception{
 		try{
-		this.session = session;
-		session.doWork(new Work() {
-			@Override
-			public void execute(Connection connection) throws SQLException {
-				
-				try(InputStream fin = Files.newInputStream(changeLogFile);
-						ObjectInputStream oin = new ObjectInputStream(fin)){
+			this.session = session;
+			
+			session.doWork(new Work() {
+				@Override
+				public void execute(Connection connection) throws SQLException {
 					
-					int size = oin.readInt();
-					
-					for (int i = 0; i < size; i ++){
-						ChangeLogItem it = (ChangeLogItem) oin.readObject();
-	
-						if (!shouldProcess(it, changeLogFilestoreDir)){
-							if (it.getAction() == Action.INSERT ||
-									it.getAction() == Action.UPDATE){
-								//read the remaining data and ignore
-								readObject(oin);
-							}
-							continue;
-						}
+					try(InputStream fin = Files.newInputStream(changeLogFile);
+							ObjectInputStream oin = new ObjectInputStream(fin)){
 						
-						if (it.getAction() == Action.DELETE){
-							processDataDelete(it, connection);
-						}else if (it.getAction() == Action.INSERT){
-							processDataInsert(it, readObject(oin), connection);
-						}else if (it.getAction() == Action.UPDATE){
-							processDataUpdate(it, readObject(oin), connection);
-						}else if(it.getAction() == Action.FS_DELETE){
-							processFileDelete(it, connection);
-						}else if(it.getAction() == Action.FS_UPDATE){
-							processFileUpdate(it, changeLogFilestoreDir, connection);
-						}else if(it.getAction() == Action.FS_INSERT){
-							processFileInsert(it, changeLogFilestoreDir, connection);
+						int size = oin.readInt();
+						initProgress(size);
+						
+						for (int i = 0; i < size; i ++){
+							updateProgress(i);
+							ChangeLogItem it = (ChangeLogItem) oin.readObject();
+		
+							if (!shouldProcess(it, changeLogFilestoreDir)){
+								if (it.getAction() == Action.INSERT ||
+										it.getAction() == Action.UPDATE){
+									//read the remaining data and ignore
+									readObject(oin);
+								}
+								continue;
+							}
+							
+							if (it.getAction() == Action.DELETE){
+								processDataDelete(it, connection);
+							}else if (it.getAction() == Action.INSERT){
+								processDataInsert(it, readObject(oin), connection);
+							}else if (it.getAction() == Action.UPDATE){
+								processDataUpdate(it, readObject(oin), connection);
+							}else if(it.getAction() == Action.FS_DELETE){
+								processFileDelete(it, connection);
+							}else if(it.getAction() == Action.FS_UPDATE){
+								processFileUpdate(it, changeLogFilestoreDir, connection);
+							}else if(it.getAction() == Action.FS_INSERT){
+								processFileInsert(it, changeLogFilestoreDir, connection);
+							}
+							it.setSource(Source.SERVER);
+							saveItem(it, session);
 						}
-						it.setSource(Source.SERVER);
-						saveItem(it, session);
+					}catch (Exception ex){
+						throw new SQLException (ex);
 					}
-				}catch (Exception ex){
-					throw new SQLException (ex);
 				}
-			}
-		});
+			});
 		}catch(GenericJDBCException ex){
 			//try to find the originating exception
 			Throwable t = ex.getCause();

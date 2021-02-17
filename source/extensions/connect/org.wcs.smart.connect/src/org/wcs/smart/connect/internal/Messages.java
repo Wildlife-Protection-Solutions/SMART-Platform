@@ -52,6 +52,7 @@ public class Messages extends NLS {
 	public static String ApplyChangeLogJob_RestartDialogTitle;
 	public static String ApplyChangeLogJob_RevisionError;
 	public static String ApplyChangeLogJob_SaveSubTask;
+	public static String ApplyChangeLogJob_savingresultsprogress;
 	public static String ApplyChangeLogJob_TaskName;
 	public static String ApplyChangeLogJob_UnknownError;
 	public static String ApplyChangeLogJob_UploadDbSubtask;
@@ -170,6 +171,7 @@ public class Messages extends NLS {
 	public static String ConnectUserAccountDialog_UsernameLabel;
 	public static String CopyProgressMonitor_TaskName;
 	public static String DerbyChangeLogDeserializer_InvalidNumberOfRows;
+	public static String DerbyChangeLogDeserializer_ProcessingRecordsTaskName;
 	public static String DerbyMetadataPackager_ServerStatusError;
 	public static String DownloadCaEngine_CaDataError;
 	public static String DownloadCaEngine_CaDownloadError;

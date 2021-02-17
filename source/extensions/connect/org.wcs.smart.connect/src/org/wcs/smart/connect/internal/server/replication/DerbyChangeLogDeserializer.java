@@ -39,6 +39,8 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
@@ -63,11 +65,28 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 	private Long lastUploadRevision = null;
 	private ConservationArea ca;
 	
-	public DerbyChangeLogDeserializer(Path changeLogFile, Path changeLogFilestoreDir, ConservationArea ca) {
+	private SubMonitor monitor;
+	private int totalWork = -1;
+	
+	public DerbyChangeLogDeserializer(Path changeLogFile, Path changeLogFilestoreDir, 
+			ConservationArea ca, IProgressMonitor monitor) {
 		super(changeLogFile, changeLogFilestoreDir);
 		this.ca = ca;
+		if (monitor != null) this.monitor = SubMonitor.convert( monitor );
 	}
 
+	@Override
+	protected void updateProgress(int current){
+		if (monitor == null) return;
+		monitor.worked(1);
+		if (current % 10 == 0) monitor.subTask(current + "/" + totalWork); //$NON-NLS-1$
+	}
+	@Override
+	protected void initProgress(int total) {
+		this.totalWork = total;
+		this.monitor.beginTask(Messages.DerbyChangeLogDeserializer_ProcessingRecordsTaskName, total);
+	}
+	
 	/**
 	 * Processes the change log file, updating the database as necessary.
 	 */
@@ -277,14 +296,15 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 		if (item.getFieldName2() != null){
 			sb.append(" AND " + item.getFieldName2()  + " = ?"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		PreparedStatement ps = c.prepareStatement(sb.toString());
-		ps.setBytes(1, UuidUtils.uuidToByte(item.getKey1()));
-		if (item.getKey2() != null){
-			ps.setBytes(2, UuidUtils.uuidToByte(item.getKey2()));	
-		}else if (item.getKey2String() != null){
-			ps.setString(2, item.getKey2String());
+		try(PreparedStatement ps = c.prepareStatement(sb.toString())){
+			ps.setBytes(1, UuidUtils.uuidToByte(item.getKey1()));
+			if (item.getKey2() != null){
+				ps.setBytes(2, UuidUtils.uuidToByte(item.getKey2()));	
+			}else if (item.getKey2String() != null){
+				ps.setString(2, item.getKey2String());
+			}
+			ps.executeUpdate();
 		}
-		ps.executeUpdate();
 	}
 	
 	@Override
@@ -307,24 +327,25 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 		if (item.getFieldName2() != null){
 			sb.append(" AND " + item.getFieldName2()  + " = ?"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		PreparedStatement ps = c.prepareStatement(sb.toString());
-		for (int i = 1; i <= params.size(); i ++){
-			if (params.get(i-1) instanceof UUID){
-				ps.setBytes(i,  UuidUtils.uuidToByte(((UUID)params.get(i-1))) );
-			}else{
-				ps.setObject(i, params.get(i-1));
+		try(PreparedStatement ps = c.prepareStatement(sb.toString())){
+			for (int i = 1; i <= params.size(); i ++){
+				if (params.get(i-1) instanceof UUID){
+					ps.setBytes(i,  UuidUtils.uuidToByte(((UUID)params.get(i-1))) );
+				}else{
+					ps.setObject(i, params.get(i-1));
+				}
 			}
-		}
-		ps.setObject(params.size() + 1, UuidUtils.uuidToByte(item.getKey1()));
-		if (item.getKey2() != null){
-			ps.setObject(params.size() + 2, UuidUtils.uuidToByte(item.getKey2()));
-		}else if (item.getKey2String() != null){
-			ps.setString(params.size() + 2, item.getKey2String());
-		}
-		
-		int cnt = ps.executeUpdate();
-		if (cnt != 1){
-			throw new SQLException(Messages.DerbyChangeLogDeserializer_InvalidNumberOfRows);
+			ps.setObject(params.size() + 1, UuidUtils.uuidToByte(item.getKey1()));
+			if (item.getKey2() != null){
+				ps.setObject(params.size() + 2, UuidUtils.uuidToByte(item.getKey2()));
+			}else if (item.getKey2String() != null){
+				ps.setString(params.size() + 2, item.getKey2String());
+			}
+			
+			int cnt = ps.executeUpdate();
+			if (cnt != 1){
+				throw new SQLException(Messages.DerbyChangeLogDeserializer_InvalidNumberOfRows);
+			}
 		}
 	}
 	
@@ -350,17 +371,18 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 		sb.append(") "); //$NON-NLS-1$
 		sb.append(values.toString());
 		sb.append(")"); //$NON-NLS-1$
-		PreparedStatement ps = c.prepareStatement(sb.toString() );
-		for (int i = 1; i <= params.size(); i ++){
-			if (params.get(i-1) instanceof UUID){
-				ps.setBytes(i,  UuidUtils.uuidToByte(((UUID)params.get(i-1))) );
-			}else{
-				ps.setObject(i, params.get(i-1));
+		try(PreparedStatement ps = c.prepareStatement(sb.toString() )){
+			for (int i = 1; i <= params.size(); i ++){
+				if (params.get(i-1) instanceof UUID){
+					ps.setBytes(i,  UuidUtils.uuidToByte(((UUID)params.get(i-1))) );
+				}else{
+					ps.setObject(i, params.get(i-1));
+				}
 			}
-		}
-		int cnt = ps.executeUpdate();
-		if (cnt != 1){
-			throw new SQLException(Messages.DerbyChangeLogDeserializer_InvalidNumberOfRows);
+			int cnt = ps.executeUpdate();
+			if (cnt != 1){
+				throw new SQLException(Messages.DerbyChangeLogDeserializer_InvalidNumberOfRows);
+			}
 		}
 	}
 }

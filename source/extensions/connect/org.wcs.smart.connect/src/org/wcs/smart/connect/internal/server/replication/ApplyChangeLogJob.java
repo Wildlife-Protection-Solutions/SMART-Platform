@@ -33,6 +33,7 @@ import java.util.HashMap;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
@@ -170,7 +171,7 @@ public class ApplyChangeLogJob extends Job {
 				constraint = (Exception) parent;
 				break;
 			}
-			if (parent == parent.getCause()) break;	//TODO: test this
+			if (parent == parent.getCause()) break;
 			parent = parent.getCause();
 		}
 		if (constraint != null){
@@ -198,7 +199,6 @@ public class ApplyChangeLogJob extends Job {
 			if (!pService.saveAll(true)){
 				//cannot do this check as there may be parts that do not need saving; just closing
 				//informant editor for example
-//			if (pService.getDirtyParts().size() > 0){
 				record.setStatus(Status.ERROR);
 				record.setErrorString(Messages.ApplyChangeLogJob_DirtyPartsNotClosedError);
 				return false;
@@ -213,27 +213,27 @@ public class ApplyChangeLogJob extends Job {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
-					monitor.beginTask(Messages.ApplyChangeLogJob_ApplyTaskName, 4);
+					SubMonitor sub = SubMonitor.convert(monitor, Messages.ApplyChangeLogJob_ApplyTaskName, 5);
 					try{
-						monitor.worked(1);
-						monitor.subTask(Messages.ApplyChangeLogJob_UploadDbSubtask);
-						applyFile();					
+						sub.split(1);
+						sub.subTask(Messages.ApplyChangeLogJob_UploadDbSubtask);
+						applyFile(sub.split(2));					
 						record.setStatus(Status.DONE);
-						monitor.worked(1);
 						
 						if (isLoggedIn){
-							monitor.subTask(Messages.ApplyChangeLogJob_ValidateUserSubTask);
+							
+							sub.subTask(Messages.ApplyChangeLogJob_ValidateUserSubTask);
 							if (!checkUser()){
 								return;
 							}
-							monitor.worked(1);
+							sub.split(1);
 							
-							monitor.subTask(Messages.ApplyChangeLogJob_RefreshUiSubTask);
+							sub.subTask(Messages.ApplyChangeLogJob_RefreshUiSubTask);
 							refreshUi(fpServer);
-							monitor.worked(1);
+							sub.split(1);
 						}
 						
-						monitor.done();
+						sub.done();
 					}catch (Exception ex){
 						processError(ex);
 					}	
@@ -309,8 +309,7 @@ public class ApplyChangeLogJob extends Job {
 	/*
 	 * applies change log file
 	 */
-	private void applyFile() throws NothingToUpdateException, Exception{
-		
+	private void applyFile(IProgressMonitor monitor) throws NothingToUpdateException, Exception{
 		Path filestoreDir = tempDirectory.resolve(ConnectSyncHistoryRecord.PACKAGE_FILESTORE_DIR);
 			
 		boolean replicationEnabled = DerbyReplicationManager.INSTANCE.getSystemReplicationState();
@@ -349,9 +348,10 @@ public class ApplyChangeLogJob extends Job {
 					}
 				}
 				//apply change log
-				applyChangeLog(filestoreDir, session);
+				applyChangeLog(filestoreDir, session, monitor);
 				
 				//update server revision
+				monitor.subTask(Messages.ApplyChangeLogJob_savingresultsprogress);
 				serverInfo.setServerRevision(metadata.getServerRevision());
 				session.saveOrUpdate(serverInfo);
 				session.getTransaction().commit();
@@ -388,8 +388,8 @@ public class ApplyChangeLogJob extends Job {
 		}
 	}
 	
-	private void applyChangeLog(Path changelogFilestore, Session session) throws Exception{
-		DerbyChangeLogDeserializer processor = new DerbyChangeLogDeserializer(changeLogFile, changelogFilestore, record.getConservationArea());
+	private void applyChangeLog(Path changelogFilestore, Session session, IProgressMonitor monitor) throws Exception{
+		DerbyChangeLogDeserializer processor = new DerbyChangeLogDeserializer(changeLogFile, changelogFilestore, record.getConservationArea(), monitor);
 		processor.processFile(session);
 	}
 	
@@ -472,7 +472,7 @@ public class ApplyChangeLogJob extends Job {
 							}
 						}
 	
-						//TODO: fix for CCAA analysis
+					
 						//update configuration to use new employee
 						ConservationAreaConfiguration cc = new ConservationAreaConfiguration(SmartDB.getCurrentConservationArea(),
 								Collections.singleton(currentEmployee.getConservationArea()),
@@ -512,9 +512,7 @@ public class ApplyChangeLogJob extends Job {
 						try{
 							pService.showPart(part, state);
 							Object e3part = E3Utils.getSourceObject(part);
-//							if (e3part instanceof EditorPart && )
 							if (e3part instanceof ErrorEditorPart){
-//								System.out.println(((EditorPart) e3part).getEditorSite().getId());
 								pService.hidePart(part, true);
 							}
 						}catch (Throwable ex){
