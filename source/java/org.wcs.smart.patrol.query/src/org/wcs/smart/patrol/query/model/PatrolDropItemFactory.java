@@ -94,6 +94,7 @@ import org.wcs.smart.query.ui.model.impl.AttributeListValueDropItem;
 import org.wcs.smart.query.ui.model.impl.AttributeTreeValueDropItem;
 import org.wcs.smart.query.ui.model.impl.AttributeValueDropItem;
 import org.wcs.smart.query.ui.model.impl.BasicDropItemFactory;
+import org.wcs.smart.query.ui.model.impl.CategoryValueDropItem;
 import org.wcs.smart.query.ui.model.impl.ErrorDropItem;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
@@ -378,6 +379,16 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 		return new AttributeTreeValueDropItem(true, item,cat);
 	}
 	
+	/**
+	 * Creates a category value drop item with encounter rate options
+	 * @param cat
+	 * @return
+	 */
+	@Override
+	public DropItem createCategoryValueDropItem(Category cat){
+		if (cat == null) return new CategoryValueDropItem(true);
+		return new CategoryValueDropItem(true, cat);
+	}
 	
 	/**
 	 * Generates drop items for the given query proxy.
