@@ -208,7 +208,7 @@ public class AssetDeploymentFilterProcessor implements IFilterProcessor{
 			
 		String sField = prefix(AssetDeployment.class) + ".start_date"; //$NON-NLS-1$
 		if (filterStart != null) {
-			String p1 = engine.addParameterValue(filterStart);
+			String p1 = engine.addParameterValue(java.sql.Timestamp.valueOf(filterStart));
 			sql.append(" CASE WHEN " + sField + " > " + p1 + " then " + sField + " else " + p1  + " end, "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		}else {
 			sql.append(sField + ","); //$NON-NLS-1$
@@ -216,7 +216,7 @@ public class AssetDeploymentFilterProcessor implements IFilterProcessor{
 		
 		String eField = prefix(AssetDeployment.class) + ".end_date"; //$NON-NLS-1$
 		if (filterStart != null) {
-			String p1 = engine.addParameterValue(filterEnd);
+			String p1 = engine.addParameterValue(java.sql.Timestamp.valueOf(filterEnd));
 			sql.append(" CASE WHEN " + eField + " is not null AND " + eField + " < " + p1 + " THEN " + eField ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			sql.append( " WHEN " + eField + " is not null THEN " + p1 ); //$NON-NLS-1$ //$NON-NLS-2$
 			sql.append(" WHEN " + eField + " is null AND CURRENT_TIMESTAMP < " + p1 + " THEN CURRENT_TIMESTAMP "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -314,16 +314,16 @@ public class AssetDeploymentFilterProcessor implements IFilterProcessor{
 				String startField = prefix(AssetDeployment.class) + ".start_date"; //$NON-NLS-1$
 				String endField = prefix(AssetDeployment.class) + ".end_date"; //$NON-NLS-1$
 				if (bits.length == 1){
-					String p1 = engine.addParameterValue(bits[0].atStartOfDay());
-					String p2 = engine.addParameterValue(bits[0].atTime(LocalTime.MAX));
+					String p1 = engine.addParameterValue(java.sql.Date.valueOf(bits[0]));
+					String p2 = engine.addParameterValue(java.sql.Date.valueOf(bits[0]));
 					
 					df.append("( "); //$NON-NLS-1$
 					df.append(" ( cast(" + startField + " as date) >= " + p1 ); //$NON-NLS-1$ //$NON-NLS-2$
 					df.append(" and cast(" + startField + " as date) <= " + p2 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					df.append(")"); //$NON-NLS-1$
 				}else if (bits.length == 2 && dateFilter.getDateFilterOption().isEndDateInclusive()){
-					String p1 = engine.addParameterValue(bits[0].atStartOfDay());
-					String p2 = engine.addParameterValue(bits[1].atTime(LocalTime.MAX));
+					String p1 = engine.addParameterValue(java.sql.Date.valueOf(bits[0]));
+					String p2 = engine.addParameterValue(java.sql.Date.valueOf(bits[1]));
 					
 					df.append("( "); //$NON-NLS-1$
 					df.append(" ( cast(" + startField + " as date) >= " + p1 ); //$NON-NLS-1$ //$NON-NLS-2$
@@ -337,8 +337,8 @@ public class AssetDeploymentFilterProcessor implements IFilterProcessor{
 					df.append(")"); //$NON-NLS-1$
 					
 				}else if (bits.length == 2){
-					String p1 = engine.addParameterValue(bits[0].atStartOfDay());
-					String p2 = engine.addParameterValue(bits[1].atStartOfDay());
+					String p1 = engine.addParameterValue(java.sql.Date.valueOf(bits[0]));
+					String p2 = engine.addParameterValue(java.sql.Date.valueOf(bits[1]));
 					
 					df.append("( "); //$NON-NLS-1$
 					df.append(" ( cast(" + startField + " as date) >= " + p1 ); //$NON-NLS-1$ //$NON-NLS-2$
