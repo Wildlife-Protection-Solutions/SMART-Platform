@@ -47,6 +47,8 @@ public class ReportParameter {
 	private List<String[]> options;
 	private boolean required = true;
 	
+	private boolean isMultiList = false;
+	
 	public ReportParameter(){
 		kids = new ArrayList<ReportParameter>();
 		options = new ArrayList<>();
@@ -106,5 +108,12 @@ public class ReportParameter {
 	
 	public void addOption(int index, String key, String value) {
 		options.add(index, new String[] {key, value});
+	}
+	
+	public boolean getIsMultiList() {
+		return isMultiList;
+	}
+	public void setIsMultiList(boolean isMultiList) {
+		this.isMultiList = isMultiList;
 	}
 }

@@ -92,7 +92,7 @@ public class AssetObservationResult extends ObservationQueryResult<AssetObservat
 		StringBuilder sb = new StringBuilder();
 
 		String[] selectFields = new String[] {
-				"ca_id","ca_name","wp_uuid", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				"ca_uuid","ca_id","ca_name","wp_uuid", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 				"wp_id","wp_x","wp_y","wp_time", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 				"wp_direction","wp_distance", //$NON-NLS-1$ //$NON-NLS-2$
 				"wp_comment","asset_asset","asset_station", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$

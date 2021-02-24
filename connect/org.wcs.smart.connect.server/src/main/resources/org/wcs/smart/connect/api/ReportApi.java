@@ -76,6 +76,7 @@ import org.eclipse.birt.report.engine.api.RenderOption;
 import org.eclipse.birt.report.engine.api.impl.ParameterSelectionChoice;
 import org.eclipse.birt.report.engine.api.impl.ReportEngine;
 import org.eclipse.birt.report.engine.api.impl.ScalarParameterDefn;
+import org.eclipse.birt.report.model.api.elements.DesignChoiceConstants;
 import org.hibernate.Session;
 import org.locationtech.udig.catalog.URLUtils;
 import org.wcs.smart.birt.BirtConstants;
@@ -650,6 +651,11 @@ public class ReportApi extends HttpServlet{
 			if (((ScalarParameterDefn)param).getControlType() == IScalarParameterDefn.LIST_BOX) {
 				isList = true;
 			}		
+			
+			if (((IScalarParameterDefn)param)
+					.getScalarParameterType().equalsIgnoreCase(DesignChoiceConstants.SCALAR_PARAM_TYPE_MULTI_VALUE)) {
+				pp.setIsMultiList(true);
+			}
 		}
 		
 		
@@ -770,7 +776,11 @@ public class ReportApi extends HttpServlet{
 					value = items.get(x+1);
 					break;
 			}
-			m.put(name, value);
+			if (p.getIsMultiList()) {
+				m.put(name, new Object[] {value});
+			}else {
+				m.put(name, value);
+			}
 		}
 	}
 }

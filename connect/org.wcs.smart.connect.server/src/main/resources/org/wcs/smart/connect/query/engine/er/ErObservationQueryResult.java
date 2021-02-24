@@ -126,11 +126,10 @@ public class ErObservationQueryResult extends ObservationQueryResult<SurveyObser
 		StringBuilder sb = new StringBuilder();
 
 		String[] selectFields = new String[] {
-				"ca_id","ca_name","mission_uuid","mission_enddate", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				"ca_uuid", "ca_id","ca_name","mission_uuid","mission_enddate", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 				"mission_id","mission_startdate","mission_leader", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				"surveydesign_name","surveydesign_enddate", //$NON-NLS-1$ //$NON-NLS-2$
-				"surveydesign_startdate","survey_id","survey_enddate", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				"survey_startdate","samplingunit_uuid","samplingunit_id",  //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
+				"surveydesign_name", //$NON-NLS-1$ 
+				"survey_id", "samplingunit_uuid","samplingunit_id",  //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
 				"wp_uuid","wp_id","wp_x","wp_y","wp_time","wp_direction", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 				"wp_distance","wp_comment","wp_lastmodified","wp_lastmodifiedbyname" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		};

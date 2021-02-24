@@ -64,7 +64,8 @@ public class ObsObservationQueryResult extends ObservationQueryResult<Observatio
 	protected String getDistinctWaypointQuery(String prefix, boolean includeObservation) {
 		StringBuilder sb = new StringBuilder();
 
-		String[] selectFields = new String[] { "ca_id", "ca_name", "wp_source", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		String[] selectFields = new String[] { 
+				"ca_uuid", "ca_id", "ca_name", "wp_source", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 				"wp_uuid", "wp_id", "wp_x", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				"wp_y", "wp_time", "wp_direction", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				"wp_distance", "wp_comment", "wp_lastmodified", //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
