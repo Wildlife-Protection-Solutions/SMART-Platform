@@ -548,7 +548,16 @@ public class CmXmlToSmartImporter {
 			cmNode.setModel(cm);
 			updateNames(cmNode, xmlNode.getName());
 			monitor.subTask(MessageFormat.format(Messages.CmXmlToSmartImporter_ImportingNode, cmNode.findName(langLookup.get(useAsDefault))));
-			cmNode.setCategory(fetchCategory(xmlNode.getCategoryKey(), xmlNode.getCategoryHkey()));
+			
+			if (xmlNode.getCategoryKey() != null) {
+				Category c = fetchCategory(xmlNode.getCategoryKey(), xmlNode.getCategoryHkey());
+				if (c == null) {
+					//don't import this node
+					// we can't find the category to associated it with
+					continue;
+				}
+				cmNode.setCategory(c);
+			}
 			cmNode.setPhotoAllowed(xmlNode.isPhotoAllowed());
 			cmNode.setPhotoRequired(xmlNode.isPhotoRequired());
 			cmNode.setCollectMultipleObservations(xmlNode.isCollectMultipleObs());
