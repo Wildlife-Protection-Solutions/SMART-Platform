@@ -561,7 +561,7 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 		sql.append(FixedColumns.CA_NAME.dbColName + " varchar(256),"); //$NON-NLS-1$
 		sql.append("wp_uuid char(16) for bit data,"); //$NON-NLS-1$ 
 		sql.append(FixedColumns.WAYPOINT_SOURCE.dbColName + " varchar(16),"); //$NON-NLS-1$
-		sql.append(FixedColumns.WAYPOINT_ID.dbColName + " integer,"); //$NON-NLS-1$
+		sql.append(FixedColumns.WAYPOINT_ID.dbColName + " varchar(32),"); //$NON-NLS-1$
 		sql.append(FixedColumns.WAYPOINT_X.dbColName + " double,"); //$NON-NLS-1$
 		sql.append(FixedColumns.WAYPOINT_Y.dbColName + " double,"); //$NON-NLS-1$
 		sql.append(FixedColumns.WAYPOINT_DIRECTION.dbColName + " real,"); //$NON-NLS-1$
@@ -601,7 +601,7 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 		it.setConservationAreaName(rs.getString(FixedColumns.CA_NAME.dbColName)); 
 		it.setSourceId(rs.getString(FixedColumns.WAYPOINT_SOURCE.dbColName)); 
 		it.setWaypointUuid(UuidUtils.byteToUUID(rs.getBytes("wp_uuid"))); //$NON-NLS-1$
-		it.setWaypointId(rs.getInt(FixedColumns.WAYPOINT_ID.dbColName)); 
+		it.setWaypointId(rs.getString(FixedColumns.WAYPOINT_ID.dbColName)); 
 		it.setWaypointX(rs.getDouble(FixedColumns.WAYPOINT_X.dbColName)); 
 		it.setWaypointY(rs.getDouble(FixedColumns.WAYPOINT_Y.dbColName)); 
 		it.setWaypointDateTime(rs.getTimestamp(FixedColumns.WAYPOINT_TIME.dbColName).toLocalDateTime());

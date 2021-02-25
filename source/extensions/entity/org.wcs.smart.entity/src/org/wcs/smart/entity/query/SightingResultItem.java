@@ -44,7 +44,7 @@ public class SightingResultItem implements IResultItem{
 	
 	private LocalDateTime wpDateTime;
 	private UUID waypointUuid;
-	private int waypointId;
+	private String waypointId;
 	private double waypointX;
 	private double waypointY;
 	private Float waypointDistance;
@@ -197,13 +197,13 @@ public class SightingResultItem implements IResultItem{
 	/**
 	 * @return waypoint id
 	 */
-	public int getWaypointId() {
+	public String getWaypointId() {
 		return waypointId;
 	}
 	/**
 	 * @param waypointId waypoint id
 	 */
-	public void setWaypointId(int waypointId) {
+	public void setWaypointId(String waypointId) {
 		this.waypointId = waypointId;
 	}
 	/**
