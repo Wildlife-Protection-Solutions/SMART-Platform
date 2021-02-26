@@ -310,6 +310,21 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 	 */
 	@Override
 	protected boolean performSave() {
+		
+		//validate keys
+		ArrayList<PatrolMandate> siblings = new ArrayList<PatrolMandate>(mandates);
+		for (Iterator<?> iterator = mandates.iterator(); iterator.hasNext();) {
+			PatrolMandate pm = (PatrolMandate) iterator.next();
+			siblings.remove(pm);
+			String error = DataModelManager.INSTANCE.validateKey(pm.getKeyId(), siblings);
+			siblings.add(pm);
+			if (error != null){
+				SmartPatrolPlugIn.displayLog(
+						Messages.PatrolMandatePropertyPage_Error_SavingUpdates + error, null);
+				return false;
+			}
+		}
+		
 		try(Session s = HibernateManager.openSession()) {
 			s.beginTransaction();
 			try {
@@ -317,7 +332,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 					s.delete(m);
 				}
 				s.flush();
-				ArrayList<PatrolMandate> siblings = new ArrayList<PatrolMandate>();
+				siblings = new ArrayList<PatrolMandate>();
 				for (Iterator<?> iterator = mandates.iterator(); iterator.hasNext();) {
 					PatrolMandate pm = (PatrolMandate) iterator.next();
 					siblings.remove(pm);
