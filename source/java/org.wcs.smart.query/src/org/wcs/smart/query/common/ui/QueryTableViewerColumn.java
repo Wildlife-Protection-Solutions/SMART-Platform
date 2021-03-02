@@ -62,6 +62,8 @@ public class QueryTableViewerColumn {
 		
 		if (column.getTooltip() != null){
 			tcolumn.getColumn().setToolTipText(column.getTooltip());
+		}else{
+			tcolumn.getColumn().setToolTipText(column.getName());
 		}
 		
 		if (sorter != null) {
