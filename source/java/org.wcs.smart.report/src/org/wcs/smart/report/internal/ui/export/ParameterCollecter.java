@@ -23,6 +23,7 @@ package org.wcs.smart.report.internal.ui.export;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -71,7 +72,7 @@ public class ParameterCollecter {
 	private Map<Report, Map<String, Object>> paramValues = null;
 	private Map<Report, List<IParameterDefnBase>> reportParameters;
 	/**
-	 * Gets all parameters associated with the given reports.
+	 * Gets all parameters associated with the given reports. 
 	 * @param reports reports to collect parameters for
 	 * @return a map of parameter name to parameter value or null if cancelled
 	 * @throws Exception
@@ -104,6 +105,12 @@ public class ParameterCollecter {
 			//allParameters.putAll( ParameterFinder.INSTANCE.getParameters(reports[i], ReportEngineManager.getBirtReportEngine()));
 		}
 		displayParameters();
+		
+		if (paramValues != null) {
+			for (Report r : reports) {
+				if (paramValues.get(r) == null) paramValues.put(r, Collections.emptyMap());
+			}
+		}
 		return paramValues;
 	}
 	private boolean isSame(IParameterDefnBase a, IParameterDefnBase b) {

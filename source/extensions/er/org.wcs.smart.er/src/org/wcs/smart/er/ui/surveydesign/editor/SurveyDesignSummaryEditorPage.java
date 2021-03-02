@@ -305,7 +305,7 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 		setPartName(design.getName() );		
 		form.setText(design.getName() + ": " + Messages.SurveyDesignSummaryEditorPage_SummaryPageLabel); //$NON-NLS-1$
 		
-		txtName.setText(design.getName());
+		txtName.setText(design.getName() == null ? "" : design.getName()); //$NON-NLS-1$
 
 		txtStatus.setText(design.getState().getGuiName(Locale.getDefault()));
 		txtKey.setText(design.getKeyId());

@@ -344,7 +344,9 @@ public class ReportView implements IReportListener{
 	
 	private Map<String, Object> getParameters() throws Exception{
 		ParameterCollecter paramCollector = new ParameterCollecter();	
-		Map<String, Object> selectedParams = paramCollector.getParameters(new Report[]{report}).get(report);
+		Map<Report, Map<String, Object>> all = paramCollector.getParameters(new Report[]{report});
+		if (all == null) return null;
+		Map<String, Object> selectedParams = all.get(report);
 		return selectedParams;
 	}
 

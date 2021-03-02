@@ -305,7 +305,10 @@ public class ExportReportEngine {
 		
 		
 		ParameterCollecter paramCollector = new ParameterCollecter();
-		Map<String, Object> reportParameters = paramCollector.getParameters(new Report[]{report}).get(report);
+		Map<Report, Map<String, Object>> allParams = paramCollector.getParameters(new Report[]{report});
+		if (allParams == null) return; //cancelled
+			 
+		Map<String, Object> reportParameters = allParams.get(report);
 		
 		PrintDialog pd = new PrintDialog(Display.getDefault().getActiveShell());
 		PrinterData data = pd.open();

@@ -56,7 +56,6 @@ import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerEditor;
-import org.eclipse.jface.viewers.TreeViewerFocusCellManager;
 import org.eclipse.jface.viewers.ViewerDropAdapter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
@@ -78,7 +77,6 @@ import org.hibernate.Session;
 import org.osgi.service.event.Event;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.query.ui.querylist.MultiFocusCellOwnerDrawHighlighter;
 import org.wcs.smart.report.IReportListener;
 import org.wcs.smart.report.ReportEventManager;
 import org.wcs.smart.report.ReportEventManager.EventType;
@@ -238,8 +236,8 @@ public class ReportListView {
 		reportList.setColumnProperties(new String[] { "col1" }); //$NON-NLS-1$
 		reportList.setCellModifier(new ReportItemNameCellEditor());
 		
-		new TreeViewerFocusCellManager
-				(reportList, new MultiFocusCellOwnerDrawHighlighter(reportList));
+//		new TreeViewerFocusCellManager
+//				(reportList, new MultiFocusCellOwnerDrawHighlighter(reportList));
 		ColumnViewerEditorActivationStrategy actSupport = new ColumnViewerEditorActivationStrategy(
 				reportList) {
 			
