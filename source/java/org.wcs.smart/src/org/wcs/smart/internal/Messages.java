@@ -46,6 +46,7 @@ public class Messages extends NLS {
 	public static String AddAttributeDialog1_OpAddExisting;
 	public static String AddAttributeDialog1_SelectAttribute_Label;
 	public static String AddAttributeDialog2_DialogTitle;
+	public static String AddAttributeDialog2_duplicateNameWarning;
 	public static String AddAttributeDialog2_Edit_DialogMessage2;
 	public static String AddAttributeDialog2_EditAttribute_DialogTitle;
 	public static String AddAttributeDialog2_New_DialogMessage;

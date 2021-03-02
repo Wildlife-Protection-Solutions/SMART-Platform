@@ -113,7 +113,7 @@ public class AttributeInfoPanel extends Composite {
 
 	public static int LIST_ICON_SIZE = 16;
 	
-	private NameKeyComposite nameKeyValues;
+	protected NameKeyComposite nameKeyValues;
 	
 	private Text txtMinValue;
 	private Text txtMaxValue;
@@ -803,7 +803,7 @@ public class AttributeInfoPanel extends Composite {
 	 */
 	public boolean validate(){
 		boolean error = nameKeyValues.validate();
-
+				
 		Attribute.AttributeType type = (Attribute.AttributeType)(((IStructuredSelection)cmbType.getSelection()).getFirstElement());
 		if (type.equals(AttributeType.BOOLEAN)){
 			
@@ -945,6 +945,7 @@ public class AttributeInfoPanel extends Composite {
 	 */
 	public void setAttribute(Attribute att, Collection<? extends NamedKeyItem> siblings, Language language){
 		nameKeyValues.initFields(att, siblings, language);
+		
 		this.currentDisplayLang = language;
 		
 		chRequired.setSelection(att.getIsRequired());

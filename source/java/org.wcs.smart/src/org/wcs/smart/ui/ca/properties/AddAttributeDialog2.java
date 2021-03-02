@@ -23,8 +23,10 @@ package org.wcs.smart.ui.ca.properties;
 
 import java.text.MessageFormat;
 import java.util.Collection;
+import java.util.Map.Entry;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
@@ -96,7 +98,24 @@ public class AddAttributeDialog2 extends SmartStyledTitleDialog {
 		myparent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		attributePanel = new AttributeInfoPanel(myparent, SWT.NONE, 
-				true, toUpdate.getKeyId() == null, currentSession);
+				true, toUpdate.getKeyId() == null, currentSession) {
+			
+			@Override
+			public boolean validate(){
+				AddAttributeDialog2.this.setErrorMessage(null);
+				boolean isvalid = super.validate();
+				
+				Entry<Language, String> duplicate = nameKeyValues.hasDuplicateName();
+				if (duplicate != null) {
+					String msg = MessageFormat.format(Messages.AddAttributeDialog2_duplicateNameWarning, duplicate.getValue());
+					AddAttributeDialog2.this.setMessage(msg, IMessageProvider.WARNING);
+					nameKeyValues.setNameWarning(msg);
+				}
+				
+				return isvalid;
+			}
+			
+		};
 		
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true,true);
 		gd.widthHint = 200;

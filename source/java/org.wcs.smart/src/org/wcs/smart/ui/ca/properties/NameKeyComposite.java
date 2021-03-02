@@ -35,17 +35,14 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Language;
@@ -78,6 +75,8 @@ public class NameKeyComposite {
 	private HashMap<Language, String> values = null;
 	
 	private Collection<? extends NamedKeyItem> siblings;
+	
+	private boolean generateKey = false;
 	
 	/**
 	 * 
@@ -143,6 +142,20 @@ public class NameKeyComposite {
 		}
 	}
 	
+	public Entry<Language, String> hasDuplicateName() {
+		if (siblings == null) return null;
+		for (Entry<Language, String> current : values.entrySet()) {
+			for (NamedKeyItem sibling : siblings) {
+				String name = sibling.findName(current.getKey());
+				if (name != null && current.getValue() != null) {
+					if (name.equalsIgnoreCase(current.getValue())) return current;
+				}
+			}
+		}
+		return null;
+	}
+	
+	
 	/**
 	 * Initializes the name and key values with the 
 	 * data from the data model object
@@ -196,23 +209,7 @@ public class NameKeyComposite {
 			boolean createNew, final IChangeListener onChange){
 		
 		values = new HashMap<Language, String>();
-		final KeyListener generateKeyListener = new KeyListener() {
-			@Override
-			public void keyReleased(KeyEvent e) {
-				if (currentSelection.isDefault()){
-					String newKey = DataModelManager.INSTANCE.generateKey(txtName.getText(), siblings);
-					txtKey.setText(newKey);
-				}
-				
-				if (canEdit && onChange != null){
-					onChange.itemModified();
-				}
-			}
-			
-			@Override
-			public void keyPressed(KeyEvent e) {
-			}
-		};
+
 		
 		/* Name */
 		if (canEdit) {
@@ -262,14 +259,18 @@ public class NameKeyComposite {
 		if (!canEdit){
 			txtName.setEditable(false);
 		}else if (createNew){
-			txtName.addKeyListener(generateKeyListener);
-		}else if (canEdit){
-			txtName.addListener(SWT.Modify, new Listener() {
-				@Override
-				public void handleEvent(Event event) {
-					if (onChange != null){
-						onChange.itemModified();
-					}
+			generateKey = true;
+		}
+		
+		if (canEdit || createNew) {
+			txtName.addListener(SWT.Modify, e->{
+				if (generateKey && currentSelection != null && currentSelection.isDefault()){
+					String newKey = DataModelManager.INSTANCE.generateKey(txtName.getText(), siblings);
+					txtKey.setText(newKey);
+				}
+				
+				if (canEdit && onChange != null){
+					onChange.itemModified();
 				}
 			});
 		}
@@ -313,7 +314,7 @@ public class NameKeyComposite {
 					int ret = id.openNoWarning();
 					if (ret != Window.CANCEL) {
 						txtKey.setText(id.getValue());
-						txtName.removeKeyListener(generateKeyListener);
+						generateKey = false;
 					}
 					
 					if (onChange != null){
@@ -330,12 +331,20 @@ public class NameKeyComposite {
 	 */
 	protected ControlDecoration createDecoration(Control control){
 		ControlDecoration cd = new ControlDecoration(control, SWT.LEFT | SWT.TOP);
-		cd.setImage(FieldDecorationRegistry.getDefault()
-				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+		cd.setImage(getErrorDecoration());
 		cd.setShowHover(true);
 		return cd;
 	}
 	
+	protected Image getErrorDecoration() {
+		return FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage();
+	}
+	
+	protected Image getWarningDecoration() {
+		return FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_WARNING).getImage();
+	}
 	/**
 	 * Validate the name and key fields.
 	 *   
@@ -362,8 +371,9 @@ public class NameKeyComposite {
 			Entry<Language, String> type = iterator.next();
 			errormsg = validateName(type.getKey(), type.getValue());
 			if (errormsg != null){
+				cdTxt.setImage(getErrorDecoration());
 				cdTxt.setDescriptionText(errormsg);
-				cdTxt.show();
+				cdTxt.show();				
 				error = true;
 				hide = false;
 			}
@@ -372,6 +382,23 @@ public class NameKeyComposite {
 			cdTxt.hide();
 		}
 		return error;
+	}
+	
+	/**
+	 * Displays the control decoration associated with the name
+	 * field as a warning with the given description.  If description
+	 * is null, then it hides the control decoration.
+	 * 
+	 * @param text
+	 */
+	public void setNameWarning(String text) {
+		if (text == null) {
+			cdTxt.hide();
+			return;
+		}
+		cdTxt.setImage(getWarningDecoration());
+		cdTxt.setDescriptionText(text);
+		cdTxt.show();
 	}
 
 	/**
