@@ -24,6 +24,7 @@ package org.wcs.smart.report.execute;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -78,6 +79,7 @@ public enum SmartReportRunner {
 			Path renderFile, int defaultDpi) throws Exception{
 		
 		if (Files.exists(renderFile)) Files.delete(renderFile);
+		if (reportParameters == null) reportParameters = Collections.emptyMap();
 		
 		Path reportFile = report.getFullPath();
 		
