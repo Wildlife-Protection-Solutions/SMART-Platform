@@ -58,6 +58,8 @@ public class AddAttributeDialog2 extends SmartStyledTitleDialog {
 	private AttributeInfoPanel attributePanel;  //attribute panel
 	private Session currentSession;
 	
+	private String message;
+	
 	/**
 	 * creates a new dialog
 	 * 
@@ -102,14 +104,18 @@ public class AddAttributeDialog2 extends SmartStyledTitleDialog {
 			
 			@Override
 			public boolean validate(){
+				nameKeyValues.setNameWarning(null);
+
 				AddAttributeDialog2.this.setErrorMessage(null);
 				boolean isvalid = super.validate();
 				
-				Entry<Language, String> duplicate = nameKeyValues.hasDuplicateName();
+				Entry<Language, String> duplicate = nameKeyValues.hasDuplicateName(toUpdate);
 				if (duplicate != null) {
 					String msg = MessageFormat.format(Messages.AddAttributeDialog2_duplicateNameWarning, duplicate.getValue());
 					AddAttributeDialog2.this.setMessage(msg, IMessageProvider.WARNING);
 					nameKeyValues.setNameWarning(msg);
+				}else {
+					AddAttributeDialog2.this.setMessage(message);
 				}
 				
 				return isvalid;
@@ -171,6 +177,8 @@ public class AddAttributeDialog2 extends SmartStyledTitleDialog {
 			setMessage(MessageFormat.format(Messages.AddAttributeDialog2_Edit_DialogMessage2, new Object[]{toUpdate.getName()}));
 			setTitle(Messages.AddAttributeDialog2_EditAttribute_DialogTitle);
 		}
+		message = getMessage();
+		
 		return myparent;
 	}
 	

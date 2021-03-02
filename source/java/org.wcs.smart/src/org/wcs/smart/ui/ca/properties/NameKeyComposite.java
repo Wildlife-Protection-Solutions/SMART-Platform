@@ -142,10 +142,11 @@ public class NameKeyComposite {
 		}
 	}
 	
-	public Entry<Language, String> hasDuplicateName() {
+	public Entry<Language, String> hasDuplicateName(NamedKeyItem item) {
 		if (siblings == null) return null;
 		for (Entry<Language, String> current : values.entrySet()) {
 			for (NamedKeyItem sibling : siblings) {
+				if (sibling.equals(item)) continue;
 				String name = sibling.findName(current.getKey());
 				if (name != null && current.getValue() != null) {
 					if (name.equalsIgnoreCase(current.getValue())) return current;
