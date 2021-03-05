@@ -187,6 +187,7 @@ public class NameKeyComposite {
 				}
 			}
 			txtName.setText(x);
+			if (txtName.getEnabled()) txtName.setFocus();
 		}
 		if (langViewer != null){
 			langViewer.setSelection(new StructuredSelection(defaultLang));
