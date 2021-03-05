@@ -89,7 +89,7 @@ public class GridArcImageExporter implements IQueryExporter {
 	    AbstractGridCoverage2DReader reader = (AbstractGridCoverage2DReader) frmt.getReader(sourceFile.toAbsolutePath().normalize().toFile());
 	    GridCoverage gridCoverage = reader.read(null);
 	        
-		ArcGridWriter writer = new ArcGridWriter(file);
+		ArcGridWriter writer = new ArcGridWriter(file.toFile());
 		writer.write(gridCoverage, null);
 		writer.dispose();
 
