@@ -61,6 +61,7 @@ public class Messages extends NLS {
 	public static String AttachmentView_zoomouttooltip;
 	public static String AttributeDialog_LoadError;
 	public static String AttributeDialog_Message;
+	public static String AttributeDialog_NewAttributeMessage;
 	public static String AttributeDialog_SaveError;
 	public static String AttributeDialog_ShellTitle;
 	public static String AttributeDialog_Title;
@@ -529,6 +530,7 @@ public class Messages extends NLS {
 	public static String EntityTypeDialog_DmAttributeTitle;
 	public static String EntityTypeDialog_DuplicatecheckLabel;
 	public static String EntityTypeDialog_DuplicatecheckTooltip;
+	public static String EntityTypeDialog_EditTypeMessage;
 	public static String EntityTypeDialog_EntityLoadError;
 	public static String EntityTypeDialog_EntityTypeSubTask;
 	public static String EntityTypeDialog_GroupWarning;
@@ -548,6 +550,7 @@ public class Messages extends NLS {
 	public static String EntityTypeDialog_NewGroupMnu;
 	public static String EntityTypeDialog_NewGroupName;
 	public static String EntityTypeDialog_NewGroupTitle;
+	public static String EntityTypeDialog_NewTypeMessage;
 	public static String EntityTypeDialog_NotConfiguredLabel;
 	public static String EntityTypeDialog_ProfilesLabel;
 	public static String EntityTypeDialog_ProfilesTab;
@@ -1656,6 +1659,7 @@ public class Messages extends NLS {
 	public static String RelationshipGraphLoadDataJob_JobTitle;
 	public static String RelationshipGroupDialog_LoadError;
 	public static String RelationshipGroupDialog_Message;
+	public static String RelationshipGroupDialog_NewGroupMessage;
 	public static String RelationshipGroupDialog_SaveError;
 	public static String RelationshipGroupDialog_Title;
 	public static String RelationshipGroupDialog_TypesLabel;
@@ -1685,6 +1689,7 @@ public class Messages extends NLS {
 	public static String RelationshipTypeDialog_Message;
 	public static String RelationshipTypeDialog_MoveDown;
 	public static String RelationshipTypeDialog_MoveUp;
+	public static String RelationshipTypeDialog_NewTypeMessage;
 	public static String RelationshipTypeDialog_SaveError;
 	public static String RelationshipTypeDialog_SourceEntityTypeRequired;
 	public static String RelationshipTypeDialog_SrcLabel;

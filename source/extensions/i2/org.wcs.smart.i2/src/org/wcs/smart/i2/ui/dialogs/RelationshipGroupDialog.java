@@ -165,8 +165,11 @@ public class RelationshipGroupDialog extends SmartStyledTitleDialog {
 		});
 		lstTypes.setInput(new String[]{DialogConstants.LOADING_TEXT});
 
-		setTitle(Messages.RelationshipGroupDialog_Title);
-		getShell().setText(Messages.RelationshipGroupDialog_Title);
+		String message = Messages.RelationshipGroupDialog_NewGroupMessage;
+		if (group.getName() != null) message = group.getName();
+		
+		setTitle(message);
+		getShell().setText(message);
 		setMessage(Messages.RelationshipGroupDialog_Message);
 		
 		return parent;

@@ -239,8 +239,14 @@ public class AttributeDialog extends SmartStyledTitleDialog {
 			}
 		});
 		
-		setTitle(Messages.AttributeDialog_Title);
-		getShell().setText(Messages.AttributeDialog_ShellTitle);
+		
+		String message = Messages.AttributeDialog_NewAttributeMessage;
+		if (attribute.getName() != null) message = attribute.getName();
+		setTitle(message);
+		getShell().setText(message);
+		
+		setTitle(message);
+		getShell().setText(message);
 		setMessage(Messages.AttributeDialog_Message);
 		
 		return parent;

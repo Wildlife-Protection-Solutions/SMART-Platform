@@ -971,9 +971,10 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 		selectTab(nameComp);
 		sections.selectPanel(0);
 
-		
-		setTitle(Messages.EntityTypeDialog_Title);
-		getShell().setText(Messages.EntityTypeDialog_Title);
+		String message = Messages.EntityTypeDialog_NewTypeMessage;
+		if (type.getName() != null) message = type.getName();
+		setTitle(message);
+		getShell().setText(message);
 		setMessage(Messages.EntityTypeDialog_Message);
 		
 		return parent;

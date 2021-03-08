@@ -741,8 +741,10 @@ public class RelationshipTypeDialog extends SmartStyledTitleDialog {
 			}
 		});
 		
-		setTitle(Messages.RelationshipTypeDialog_Title);
-		getShell().setText(Messages.RelationshipTypeDialog_Title);
+		String message = Messages.RelationshipTypeDialog_NewTypeMessage;
+		if (type.getName() != null) message = type.getName();
+		setTitle(message);
+		getShell().setText(message);
 		setMessage(Messages.RelationshipTypeDialog_Message);
 		
 		return parent;

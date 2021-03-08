@@ -244,9 +244,10 @@ public class RecordSourceDialog extends SmartStyledTitleDialog{
 		for (Button b : attributeButtons) b.setEnabled(false);
 		for (MenuItem b : attributeMenu) b.setEnabled(false);
 		
-		setTitle(currentSelection.getName().isEmpty() ? Messages.RecordSourceDialog_NewRecordSource : currentSelection.getName());
+		String message = currentSelection.getName().isEmpty() ? Messages.RecordSourceDialog_NewRecordSource : currentSelection.getName();
+		setTitle(message);
 		setMessage(Messages.RecordSourceAttributeDialog_Message);
-		getShell().setText(currentSelection.getName());
+		getShell().setText(message);
 		
 		loadSource.schedule();
 		

@@ -48,7 +48,6 @@ import org.wcs.smart.i2.model.IntelProfileEntityType;
 import org.wcs.smart.i2.model.IntelProfileRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSource;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
-import org.wcs.smart.i2.model.IntelWorkingSetQuery;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.Resources;
 
@@ -204,11 +203,11 @@ public enum ProfilesManager {
 	public void deleteProfile(IntelProfile profile, Session session) {
 		
 		// delete from working sets
-		Query<?> q = session.createQuery("delete from IntelWorkingSetEntity where id.entity in (FROM IntelEntity where profile = :profile)");
+		Query<?> q = session.createQuery("delete from IntelWorkingSetEntity where id.entity in (FROM IntelEntity where profile = :profile)"); //$NON-NLS-1$
 		q.setParameter("profile", profile); //$NON-NLS-1$
 		q.executeUpdate();
 
-		q = session.createQuery("delete from IntelWorkingSetRecord where id.record in (FROM IntelRecord where profile = :profile)");
+		q = session.createQuery("delete from IntelWorkingSetRecord where id.record in (FROM IntelRecord where profile = :profile)"); //$NON-NLS-1$
 		q.setParameter("profile", profile); //$NON-NLS-1$
 		q.executeUpdate();
 
