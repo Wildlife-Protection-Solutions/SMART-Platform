@@ -203,8 +203,10 @@ public class ProfilesPreferencePage extends PreferencePage implements IIntelPref
 					try(Session session = HibernateManager.openSession()){
 						XmlToProfile engine = new XmlToProfile(SmartDB.getCurrentConservationArea());						
 						IntelProfile ip = engine.importXmlData(p, monitor, eventBroker);
-						createEntityTemplates(ip);
-						ProfilesManager.INSTANCE.addActiveProfile(ip, eventBroker);
+						if (ip != null) {
+							createEntityTemplates(ip);
+							ProfilesManager.INSTANCE.addActiveProfile(ip, eventBroker);
+						}
 					}catch (Exception ex) {
 						throw new InvocationTargetException(ex);
 					}
