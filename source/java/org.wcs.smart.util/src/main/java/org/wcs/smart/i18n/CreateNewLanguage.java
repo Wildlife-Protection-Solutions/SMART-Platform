@@ -18,9 +18,9 @@ public class CreateNewLanguage {
 
 	//CT and entity extensions don't match the file structure and this tool won't work for those 
 	
-	public static final String ROOT_DIR = "C:\\data\\SMART\\Source\\trunk\\source";
+	public static final String ROOT_DIR = "C:\\data\\SMART\\Source\\trunk\\svn\\source";
 	
-	public static final String NEW_LANG = "ar";  //arabic
+	public static final String NEW_LANG = "ro";  
 	
 	public static final String FROM = "es";
 	
