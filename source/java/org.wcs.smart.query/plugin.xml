@@ -806,7 +806,7 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="toolbar:org.eclipse.ui.trim.status">
+            locationURI="toolbar:org.eclipse.ui.trim.status?before=org.wcs.smart.toolcontrol.status">
          <toolbar
                id="org.wcs.smart.query.queryError">
             <control

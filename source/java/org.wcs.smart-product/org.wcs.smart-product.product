@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="SMART" uid="smartapp" id="org.wcs.smart.smart" application="org.wcs.smart.product" version="7.0.0.qualifier" useFeatures="true" includeLaunchers="true">
+<product name="SMART" uid="smartapp" id="org.wcs.smart.smart" application="org.wcs.smart.product" version="7.0.1.qualifier" useFeatures="true" includeLaunchers="true">
 
    <aboutInfo>
       <image path="./images/nl/en/about.png"/>
@@ -125,7 +125,6 @@ limitations under the License.
       <feature id="org.eclipse.emf.common" installMode="root"/>
       <feature id="org.eclipse.rcp" installMode="root"/>
       <feature id="org.eclipse.equinox.p2.extras.feature" installMode="root"/>
-      <feature id="org.eclipse.equinox.core.feature" installMode="root"/>
       <feature id="javax.media.jai_imageio-feature" installMode="root"/>
       <feature id="openjfx.standard.feature" installMode="root"/>
       <feature id="openjfx.swt.feature" installMode="root"/>

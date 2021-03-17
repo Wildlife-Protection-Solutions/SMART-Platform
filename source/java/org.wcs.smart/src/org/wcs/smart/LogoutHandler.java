@@ -41,7 +41,7 @@ public class LogoutHandler {
 	 */
 	@Execute
 	public void execute()  {
-		PlatformUI.getWorkbench().restart();
+		PlatformUI.getWorkbench().restart();		
 	}
 	
 	// E3

@@ -204,10 +204,8 @@ public class AutoBackupEngine {
 		
 		try {
 			Path dir = Paths.get(properties.getProperty(PROP_BACKUP_LOCATION));
-			if (Files.list(dir).count() == 0 ){
-				//no files, nothing to delete
-				return;
-			}
+			if (!Files.exists(dir)) return;
+			if (Files.list(dir).count() == 0 ) return; 
 			
 			List<Path> kids = Files.list(dir).collect(Collectors.toList());
 			for (Path child : kids) {

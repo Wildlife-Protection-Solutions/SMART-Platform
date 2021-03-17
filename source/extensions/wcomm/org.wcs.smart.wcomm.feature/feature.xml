@@ -2,7 +2,7 @@
 <feature
       id="org.wcs.smart.wcomm.feature"
       label="SMART WCoMM Data Module"
-      version="7.0.0.qualifier"
+      version="7.0.1.qualifier"
       provider-name="org.wcs.smart"
       plugin="org.wcs.smart"
       license-feature="org.wcs.smart.license.feature"

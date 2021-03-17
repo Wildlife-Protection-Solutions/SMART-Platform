@@ -229,7 +229,8 @@ public class SmartConnect {
 			client = ((ResteasyClientBuilder)ClientBuilder.newBuilder())
 				.httpEngine(engine)
 				.build();
-
+			
+			
 			client.register(new AddAuthHeadersRequestFilter(username, password));
 			
 		}catch (Exception ex){

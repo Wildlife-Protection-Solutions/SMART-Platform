@@ -16,14 +16,18 @@
 	
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<smart.version>7.0.0-SNAPSHOT</smart.version>
+		<smart.version>7.0.1-SNAPSHOT</smart.version>
+		<birt.version>4.18.0-SNAPSHOT</birt.version>
 		<geotools.version>23.0</geotools.version>
 		<jts.version>1.16.1</jts.version>
 		<hibernate.version>5.4.3.Final</hibernate.version>
-		<ehcache.version>3.8.1</ehcache.version>
 		<resteasy.version>4.5.8.Final</resteasy.version>
 		<jackson.version>2.11.1</jackson.version>
 		<udig.version>3.0.0-SNAPSHOT</udig.version>
+		
+		<org.eclipse.jface.version>3.22.0</org.eclipse.jface.version>
+		<org.eclipse.ui.workbench.version>3.122.0</org.eclipse.ui.workbench.version>
+		<itext.version>7.1.14</itext.version>
 	</properties>
 	
 	<repositories>
@@ -32,7 +36,5 @@
 			<name>Open Source Geospatial Foundation Repository</name>
 			<url>https://repo.osgeo.org/repository/release/</url>
 		</repository>
-    	</repositories>   
-
-	
+    </repositories>   	
 </project>

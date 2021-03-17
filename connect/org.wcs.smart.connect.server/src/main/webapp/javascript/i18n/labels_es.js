@@ -235,4 +235,4 @@ labels_es = {
  "users.userdeleted": " eliminado",
  "users.usernamelabel": "Usuario: ",
  "users.userupdated": " actualizado",
-}\n
+}

@@ -2,16 +2,9 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART Query PlugIn
 Bundle-SymbolicName: org.wcs.smart.query;singleton:=true
-Bundle-Version: 7.0.0.qualifier
+Bundle-Version: 7.0.1.qualifier
 Bundle-Activator: org.wcs.smart.query.QueryPlugIn
-Require-Bundle: org.eclipse.ui.forms,
- org.locationtech.udig.catalog.rasterings;bundle-version="3.0.0";visibility:=reexport,
- org.wcs.smart.observation;bundle-version="[7.0.0,8.0.0)";visibility:=reexport,
- org.locationtech.udig.style.sld;bundle-version="3.0.0",
- org.locationtech.udig.render.gridcoverage.basic;bundle-version="3.0.0",
- org.locationtech.udig.style;bundle-version="3.0.0"
-Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-11
+Bundle-Vendor: org.wcs.smart
 Export-Package: org.wcs.smart.query,
  org.wcs.smart.query.common.engine,
  org.wcs.smart.query.common.engine.visitors,
@@ -38,7 +31,16 @@ Export-Package: org.wcs.smart.query,
  org.wcs.smart.query.ui.querylist,
  org.wcs.smart.query.xml,
  org.wcs.smart.query.xml.model
-Eclipse-BuddyPolicy: global
-Bundle-Vendor: org.wcs.smart
+Require-Bundle: org.eclipse.ui.forms,
+ org.locationtech.udig.catalog.rasterings;bundle-version="3.0.0";visibility:=reexport,
+ org.wcs.smart.observation;bundle-version="[7.0.0,8.0.0)";visibility:=reexport,
+ org.locationtech.udig.style.sld;bundle-version="3.0.0",
+ org.locationtech.udig.render.gridcoverage.basic;bundle-version="3.0.0",
+ org.locationtech.udig.style;bundle-version="3.0.0",
+ org.eclipse.e4.core.di
+Import-Package: javax.inject;version="1.0.0",
+ org.eclipse.e4.core.commands
 Automatic-Module-Name: org.wcs.smart.query
-Import-Package: org.eclipse.e4.core.commands
+Eclipse-BuddyPolicy: global
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: JavaSE-11

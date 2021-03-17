@@ -4,7 +4,7 @@
 
     <groupId>org.wcs.smart</groupId>
     <artifactId>smart-tycho</artifactId>
-    <version>7.0.0-SNAPSHOT</version>
+    <version>7.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     
     <description>
@@ -29,8 +29,8 @@
 
         <java-version>11</java-version>
         <javafx-lib-version>11.0.2</javafx-lib-version>
-	<tycho-version>1.3.0</tycho-version>
-        <tycho-extras-version>1.3.0</tycho-extras-version>
+	<tycho-version>2.2.0</tycho-version>
+        <!--<tycho-extras-version>1.3.0</tycho-extras-version>-->
         <tycho.disableP2Mirrors>true</tycho.disableP2Mirrors>
         
         <!-- necessary for e.g. hudson proxy settings
@@ -59,7 +59,7 @@
 					<artifact>
 						<groupId>org.wcs.smart</groupId>
 						<artifactId>org.wcs.smart.target</artifactId>
-						<version>7.0.0-SNAPSHOT</version>
+						<version>7.0.1-SNAPSHOT</version>
 					</artifact>
 				</target>
 				
