@@ -323,6 +323,6 @@ Export-Package: antlr,
  org.hibernate.type.descriptor.sql,
  org.hibernate.usertype,
  org.wcs.smart.hibernate
-Require-Bundle: org.eclipse.core.runtime;bundle-version="3.7.0"
+Require-Bundle: org.eclipse.core.runtime;bundle-version="3.20.0"
 Bundle-Vendor: org.wcs.smart
 Automatic-Module-Name: org.wcs.smart.hibernate.libs

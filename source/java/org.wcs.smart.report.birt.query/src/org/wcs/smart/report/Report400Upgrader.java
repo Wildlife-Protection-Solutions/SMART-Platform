@@ -244,7 +244,7 @@ public class Report400Upgrader implements IDatabaseUpgrader {
 				if (toUpdate != null && isSmart) {
 					String library = toUpdate.getTextContent();
 					Path p = FileSystems.getDefault().getPath(library);
-					Path remove = FileSystems.getDefault().getPath(".\\data\\filestore\\"); //$NON-NLS-1$
+					Path remove = FileSystems.getDefault().getPath("./data/filestore/"); //$NON-NLS-1$
 					Path newp = remove.relativize(p);
 					toUpdate.setTextContent(newp.toString());
 				}

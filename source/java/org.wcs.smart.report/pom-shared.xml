@@ -30,10 +30,5 @@
     			<artifactId>org.wcs.smart.core.query</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>org.eclipse.birt.runtime</groupId>
-			<artifactId>org.eclipse.birt.runtime</artifactId>
-			<version>${birt.version}</version>
-		</dependency>
 	</dependencies>
 </project>

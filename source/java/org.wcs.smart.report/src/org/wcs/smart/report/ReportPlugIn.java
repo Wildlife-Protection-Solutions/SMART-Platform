@@ -131,7 +131,7 @@ public class ReportPlugIn extends AbstractUIPlugin {
 	public void initReports(){
 		try {
 			String fileStore = SmartContext.INSTANCE.getFilestoreLocation();
-			ReportPlugin.getDefault().setResourcePreference(SmartBirtLibrary.getInstance().getLibraryLocation().toString());
+			ReportPlugin.getDefault().setResourcePreference(SmartBirtLibrary.getInstance().getLibraryLocation().toAbsolutePath().normalize().toString());
 			SessionHandle.setBirtResourcePath(fileStore);
 			SessionHandleAdapter.getInstance( ).getSessionHandle( ).setResourceFolder(fileStore);
 			SessionHandleAdapter.getInstance().getSessionHandle().setResourceLocator(BirtResourceLocator.INSTANCE);			

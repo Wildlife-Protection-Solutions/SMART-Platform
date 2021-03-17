@@ -1,9 +1,14 @@
 package org.wcs.smart.e4;
 
 import java.lang.reflect.Field;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.e4.ui.internal.css.swt.ICTabRendering;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
@@ -20,7 +25,22 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
 
 @SuppressWarnings("restriction")
-public class SmartTabRenderer extends CTabFolderRenderer implements ICTabRendering {
+public class SmartTabRenderer extends CTabFolderRenderer implements ICTabRendering, IPreferenceChangeListener {
+
+	/**
+	 * A named preference for setting CTabFolder's to be rendered with rounded
+	 * corners
+	 * <p>
+	 * The default value for this preference is: <code>false</code> (render
+	 * CTabFolder's with square corners)
+	 * </p>
+	 */
+	public static final String USE_ROUND_TABS = "USE_ROUND_TABS"; //$NON-NLS-1$
+
+	/**
+	 * Default value for "use round tabs" preference
+	 */
+	public static final boolean USE_ROUND_TABS_DEFAULT = false;
 
 	// Constants for circle drawing
 	static enum CirclePart {
@@ -49,38 +69,39 @@ public class SmartTabRenderer extends CTabFolderRenderer implements ICTabRenderi
 		}
 	}
 
+	static final int SQUARE_CORNER = 0;
+
 	// drop shadow constants
-	final static int SIDE_DROP_WIDTH = 3;
-	final static int BOTTOM_DROP_WIDTH = 4;
+	static final int SIDE_DROP_WIDTH = 3;
+	static final int BOTTOM_DROP_WIDTH = 4;
 
 	// keylines
-	final static int OUTER_KEYLINE = 1;
-	final static int INNER_KEYLINE = 0;
-	final static int TOP_KEYLINE = 0;
+	static final int OUTER_KEYLINE_WIDTH = 1;
+	static final int INNER_KEYLINE_WIDTH = 0;
+	static final int TOP_KEYLINE_WIDTH = 0;
+
+	// The tab has an outline, it contributes to the trim. See Bug 562183.
+	static final int TAB_OUTLINE_WIDTH = 0;
 
 	// Item Constants
 	static final int ITEM_TOP_MARGIN = 2;
 	static final int ITEM_BOTTOM_MARGIN = 6;
 	static final int ITEM_LEFT_MARGIN = 4;
 	static final int ITEM_RIGHT_MARGIN = 4;
-	static final int INTERNAL_SPACING = 4;
 
 	static final String E4_TOOLBAR_ACTIVE_IMAGE = "org.eclipse.e4.renderer.toolbar_background_active_image"; //$NON-NLS-1$
 	static final String E4_TOOLBAR_INACTIVE_IMAGE = "org.eclipse.e4.renderer.toolbar_background_inactive_image"; //$NON-NLS-1$
 
+	Rectangle rectShape;
 	int[] shape;
 
 	Image shadowImage, toolbarActiveImage, toolbarInactiveImage;
 
 	int cornerSize = 0;
 
-	boolean shadowEnabled = true;
+	boolean shadowEnabled = false;
 	Color shadowColor;
-	Color outerKeyline, innerKeyline;
-	Color[] activeToolbar;
-	int[] activePercents;
-	Color[] inactiveToolbar;
-	int[] inactivePercents;
+	Color outerKeylineColor, innerKeylineColor;
 	boolean active;
 
 	Color[] selectedTabFillColors;
@@ -96,20 +117,22 @@ public class SmartTabRenderer extends CTabFolderRenderer implements ICTabRenderi
 	private CTabFolderWrapper parentWrapper;
 
 	private Color hotUnselectedTabsColorBackground;
+	private Color selectedTabHighlightColor;
+	private boolean drawTabHighlightOnTop = true;
 
-	
-	private Color selectedTabColor;
-	
-	
-	public void setSelectedTabColor(Color color) {
-		this.selectedTabColor = color;
-	}
-	
+
+	private boolean drawCustomTabContentBackground = true;
+
 	@Inject
 	public SmartTabRenderer(CTabFolder parent) {
 		super(parent);
 		parentWrapper = new CTabFolderWrapper(parent);
-		
+
+		IEclipsePreferences preferences = getSwtRendererPreferences();
+		preferences.addPreferenceChangeListener(this);
+		parent.addDisposeListener(e -> preferences.removePreferenceChangeListener(this));
+
+		cornerRadiusPreferenceChanged();
 	}
 
 	@Override
@@ -120,25 +143,27 @@ public class SmartTabRenderer extends CTabFolderRenderer implements ICTabRenderi
 	@Override
 	protected Rectangle computeTrim(int part, int state, int x, int y, int width, int height) {
 		boolean onBottom = parent.getTabPosition() == SWT.BOTTOM;
-		int borderTop = onBottom ? INNER_KEYLINE + OUTER_KEYLINE : TOP_KEYLINE + OUTER_KEYLINE;
-		int borderBottom = onBottom ? TOP_KEYLINE + OUTER_KEYLINE : INNER_KEYLINE + OUTER_KEYLINE;
+		int borderTop = onBottom ? INNER_KEYLINE_WIDTH + OUTER_KEYLINE_WIDTH : TOP_KEYLINE_WIDTH + OUTER_KEYLINE_WIDTH;
+		int borderBottom = onBottom ? TOP_KEYLINE_WIDTH + OUTER_KEYLINE_WIDTH
+				: INNER_KEYLINE_WIDTH + OUTER_KEYLINE_WIDTH;
 		int marginWidth = parent.marginWidth;
 		int marginHeight = parent.marginHeight;
 		int sideDropWidth = shadowEnabled ? SIDE_DROP_WIDTH : 0;
+
+		// Trim is not affected by the corner size.
 		switch (part) {
 		case PART_BODY:
 			if (state == SWT.FILL) {
 				x = -1 - paddingLeft;
 				int tabHeight = parent.getTabHeight() + 1;
-				y = onBottom ? y - paddingTop - marginHeight - borderTop - (cornerSize / 4)
-						: y - paddingTop - marginHeight - tabHeight - borderTop - (cornerSize / 4);
+				y = onBottom ? y - paddingTop - marginHeight - borderTop - TAB_OUTLINE_WIDTH
+						: y - paddingTop - marginHeight - tabHeight - borderTop - TAB_OUTLINE_WIDTH;
 				width = 2 + paddingLeft + paddingRight;
-				height += paddingTop + paddingBottom;
-				height += tabHeight + (cornerSize / 4) + borderBottom + borderTop;
+				height += paddingTop + paddingBottom + TAB_OUTLINE_WIDTH;
+				height += tabHeight + borderBottom + borderTop;
 			} else {
-				x = x - marginWidth - OUTER_KEYLINE - INNER_KEYLINE - sideDropWidth - (cornerSize / 2);
-				width = width + 2 * OUTER_KEYLINE + 2 * INNER_KEYLINE + 2 * marginWidth + 2 * sideDropWidth
-						+ cornerSize;
+				x = x - marginWidth - OUTER_KEYLINE_WIDTH - INNER_KEYLINE_WIDTH - sideDropWidth;
+				width = width + 2 * OUTER_KEYLINE_WIDTH + 2 * INNER_KEYLINE_WIDTH + 2 * marginWidth + 2 * sideDropWidth;
 				int tabHeight = parent.getTabHeight() + 1; // TODO: Figure out
 				// what
 				// to do about the
@@ -153,20 +178,21 @@ public class SmartTabRenderer extends CTabFolderRenderer implements ICTabRenderi
 					// - borderTop: y - marginHeight - highlight_header -
 					// tabHeight
 					// - borderTop;
-					y = onBottom ? y - marginHeight - borderTop - (cornerSize / 4)
-							: y - marginHeight - tabHeight - borderTop - (cornerSize / 4);
-					height = height + borderBottom + borderTop + 2 * marginHeight + tabHeight + cornerSize / 2
-							+ cornerSize / 4 + (shadowEnabled ? BOTTOM_DROP_WIDTH : 0);
+					y = onBottom ? y - marginHeight - borderTop
+							: y - marginHeight - tabHeight - borderTop - TAB_OUTLINE_WIDTH;
+					height = height + borderBottom + borderTop + 2 * marginHeight + tabHeight + TAB_OUTLINE_WIDTH
+							+ (shadowEnabled ? BOTTOM_DROP_WIDTH : 0);
+					
 				}
 			}
 			break;
 		case PART_HEADER:
-			x = x - (INNER_KEYLINE + OUTER_KEYLINE) - sideDropWidth;
-			width = width + 2 * (INNER_KEYLINE + OUTER_KEYLINE + sideDropWidth);
+			x = x - (INNER_KEYLINE_WIDTH + OUTER_KEYLINE_WIDTH) - sideDropWidth;
+			width = width + 2 * (INNER_KEYLINE_WIDTH + OUTER_KEYLINE_WIDTH + sideDropWidth);
 			break;
 		case PART_BORDER:
-			x = x - INNER_KEYLINE - OUTER_KEYLINE - sideDropWidth - (cornerSize / 4);
-			width = width + 2 * (INNER_KEYLINE + OUTER_KEYLINE + sideDropWidth) + cornerSize / 2;
+			x = x - INNER_KEYLINE_WIDTH - OUTER_KEYLINE_WIDTH - sideDropWidth - ITEM_LEFT_MARGIN;
+			width = width + 2 * (INNER_KEYLINE_WIDTH + OUTER_KEYLINE_WIDTH + sideDropWidth) + ITEM_RIGHT_MARGIN;
 			height += borderTop + borderBottom;
 			y -= borderTop;
 			if (onBottom) {
@@ -174,7 +200,6 @@ public class SmartTabRenderer extends CTabFolderRenderer implements ICTabRenderi
 					height += 3;
 				}
 			}
-
 			break;
 		default:
 			if (0 <= part && part < parent.getItemCount()) {
@@ -194,8 +219,7 @@ public class SmartTabRenderer extends CTabFolderRenderer implements ICTabRenderi
 		hHint += paddingTop + paddingBottom;
 		if (0 <= part && part < parent.getItemCount()) {
 			gc.setAdvanced(true);
-			Point result = super.computeSize(part, state, gc, wHint, hHint);
-			return result;
+			return super.computeSize(part, state, gc, wHint, hHint);
 		}
 		return super.computeSize(part, state, gc, wHint, hHint);
 	}
@@ -214,17 +238,26 @@ public class SmartTabRenderer extends CTabFolderRenderer implements ICTabRenderi
 
 		switch (part) {
 		case PART_BACKGROUND:
-			this.drawCustomBackground(gc, bounds, state);
+			if (this.drawCustomTabContentBackground) {
+				this.drawCustomBackground(gc, bounds, state);
+			} else {
+				super.draw(part, state, bounds, gc);
+			}
 			return;
 		case PART_BODY:
 			this.drawTabBody(gc, bounds);
 			return;
 		case PART_HEADER:
 			this.drawTabHeader(gc, bounds, state);
-			this.drawCorners(gc, bounds);
+			if (cornerSize != SQUARE_CORNER) {
+				this.drawCorners(gc, bounds);
+			}
 			return;
 		default:
 			if (0 <= part && part < parent.getItemCount()) {
+				// Sometimes the clipping is incorrect, see Bug 428697 and Bug 563345
+				// Resetting it before draw the tabs prevents draw issues.
+				gc.setClipping((Rectangle) null);
 				gc.setAdvanced(true);
 				if (bounds.width == 0 || bounds.height == 0)
 					return;
@@ -235,10 +268,10 @@ public class SmartTabRenderer extends CTabFolderRenderer implements ICTabRenderi
 				} else {
 					drawUnselectedTab(part, gc, bounds, state);
 					if ((state & SWT.HOT) == 0 && !active) {
-//						gc.setAlpha(0x7f);
+						gc.setAlpha(0x7f);
 						state &= ~SWT.BACKGROUND;
 						super.draw(part, state, bounds, gc);
-//						gc.setAlpha(0xff);
+						gc.setAlpha(0xff);
 					} else {
 						state &= ~SWT.BACKGROUND;
 						super.draw(part, state, bounds, gc);
@@ -290,24 +323,9 @@ public class SmartTabRenderer extends CTabFolderRenderer implements ICTabRenderi
 	}
 
 	void drawTabHeader(GC gc, Rectangle bounds, int state) {
-		// gc.setClipping(bounds.x, bounds.y, bounds.width,
-		// parent.getTabHeight() + 1);
-//		if (true) return;
 		boolean onBottom = parent.getTabPosition() == SWT.BOTTOM;
-		int[] points = new int[1024];
-		int index = 0;
-		int radius = cornerSize / 2;
-		int marginWidth = parent.marginWidth;
-		int marginHeight = parent.marginHeight;
-		int delta = INNER_KEYLINE + OUTER_KEYLINE + 2 * (shadowEnabled ? SIDE_DROP_WIDTH : 0) + 2 * marginWidth;
-		int width = bounds.width - delta;
-		int height = bounds.height - INNER_KEYLINE - OUTER_KEYLINE - 2 * marginHeight
-				- (shadowEnabled ? BOTTOM_DROP_WIDTH : 0);
-		int circX = bounds.x + delta / 2 + radius;
-		int circY = bounds.y + radius;
-
-		int header = shadowEnabled ? onBottom ? 6 : 3 : 1; 
-		// this needs to be added to computeTrim for HEADER
+		// TODO: this needs to be added to computeTrim for HEADER
+		int header = shadowEnabled ? onBottom ? 6 : 3 : 1;
 		Rectangle trim = computeTrim(PART_HEADER, state, 0, 0, 0, 0);
 		trim.width = bounds.width - trim.width;
 
@@ -317,43 +335,24 @@ public class SmartTabRenderer extends CTabFolderRenderer implements ICTabRenderi
 
 		trim.x = -trim.x;
 		trim.y = onBottom ? bounds.height - parent.getTabHeight() - 1 - header : -trim.y;
-
 		draw(PART_BACKGROUND, SWT.NONE, trim, gc);
 
+		if (outerKeylineColor == null)
+			outerKeylineColor = gc.getDevice().getSystemColor(SWT.COLOR_BLACK);
+		gc.setForeground(outerKeylineColor);
 
+		if (cornerSize == SQUARE_CORNER) {
+			gc.drawRectangle(rectShape);
+		} else {
+			gc.drawPolyline(shape);
+		}
 		
-		int[] ltt = drawCircle(circX + 1, circY + 1, radius, CirclePart.LEFT_TOP);
-		System.arraycopy(ltt, 0, points, index, ltt.length);
-		index += ltt.length;
-
-		int[] lbb = drawCircle(circX + 1, circY + height - (radius * 2) - 2, radius, CirclePart.LEFT_BOTTOM);
-		System.arraycopy(lbb, 0, points, index, lbb.length);
-		index += lbb.length;
-
-		int[] rb = drawCircle(circX + width - (radius * 2) - 2, circY + height - (radius * 2) - 2, radius,
-				CirclePart.RIGHT_BOTTOM);
-		System.arraycopy(rb, 0, points, index, rb.length);
-		index += rb.length;
-
-		int[] rt = drawCircle(circX + width - (radius * 2) - 2, circY + 1, radius, CirclePart.RIGHT_TOP);
-		System.arraycopy(rt, 0, points, index, rt.length);
-		index += rt.length;
-		points[index++] = points[0];
-		points[index++] = points[1];
-
-		int[] tempPoints = new int[index];
-		System.arraycopy(points, 0, tempPoints, 0, index);
-
-		if (outerKeyline == null)
-			outerKeyline = gc.getDevice().getSystemColor(SWT.COLOR_BLACK);
-		gc.setForeground(outerKeyline);
-		gc.drawPolyline(shape);
-
 		//draw a bottom/top line
 		gc.setForeground(selectedTabFillColors[0]);
 		gc.setLineWidth(2);
 		if (!onBottom){
 			gc.drawLine(trim.x, trim.y + trim.height - 3,trim.x + trim.width, trim.y + trim.height - 3);
+
 		}else {
 			gc.drawLine(trim.x, trim.y + 1,trim.x + trim.width, trim.y + 1);
 		}
@@ -361,46 +360,58 @@ public class SmartTabRenderer extends CTabFolderRenderer implements ICTabRenderi
 	}
 
 	void drawTabBody(GC gc, Rectangle bounds) {
-		int[] points = new int[1024];
-		int index = 0;
-		int radius = cornerSize / 2;
 		int marginWidth = parent.marginWidth;
 		int marginHeight = parent.marginHeight;
-		int delta = INNER_KEYLINE + OUTER_KEYLINE + 2 * (shadowEnabled ? SIDE_DROP_WIDTH : 0) + 2 * marginWidth;
+		int delta = INNER_KEYLINE_WIDTH + OUTER_KEYLINE_WIDTH + 2 * (shadowEnabled ? SIDE_DROP_WIDTH : 0)
+				+ 2 * marginWidth;
 		int width = bounds.width - delta;
 		int height = Math.max(
-				parent.getTabHeight() + INNER_KEYLINE + OUTER_KEYLINE + (shadowEnabled ? BOTTOM_DROP_WIDTH : 0),
-				bounds.height - INNER_KEYLINE - OUTER_KEYLINE - 2 * marginHeight
+				parent.getTabHeight() + INNER_KEYLINE_WIDTH + OUTER_KEYLINE_WIDTH
+						+ (shadowEnabled ? BOTTOM_DROP_WIDTH : 0),
+				bounds.height - INNER_KEYLINE_WIDTH - OUTER_KEYLINE_WIDTH - 2 * marginHeight
 						- (shadowEnabled ? BOTTOM_DROP_WIDTH : 0));
 
-		
-		int circX = bounds.x + delta / 2 + radius;
-		int circY = bounds.y + radius;
+		// Remember for use in header drawing
+		if (cornerSize == SQUARE_CORNER) {
+			Rectangle rect = new Rectangle(bounds.x, bounds.y, width, height);
+			gc.fillRectangle(rect);
+			rectShape = rect;
+		} else {
+			int[] points = new int[1024];
+			int index = 0;
+			int radius = cornerSize / 2;
 
-		// Body
-		index = 0;
-		int[] ltt = drawCircle(circX, circY, radius, CirclePart.LEFT_TOP);
-		System.arraycopy(ltt, 0, points, index, ltt.length);
-		index += ltt.length;
+			int circX = bounds.x + delta / 2 + radius;
+			int circY = bounds.y + radius;
 
-		int[] lbb = drawCircle(circX, circY + height - (radius * 2), radius, CirclePart.LEFT_BOTTOM);
-		System.arraycopy(lbb, 0, points, index, lbb.length);
-		index += lbb.length;
+			// Body
+			index = 0;
+			int[] ltt = drawCircle(circX, circY, radius, CirclePart.LEFT_TOP);
+			System.arraycopy(ltt, 0, points, index, ltt.length);
+			index += ltt.length;
 
-		int[] rb = drawCircle(circX + width - (radius * 2), circY + height - (radius * 2), radius,
-				CirclePart.RIGHT_BOTTOM);
-		System.arraycopy(rb, 0, points, index, rb.length);
-		index += rb.length;
+			int[] lbb = drawCircle(circX, circY + height - (radius * 2), radius, CirclePart.LEFT_BOTTOM);
+			System.arraycopy(lbb, 0, points, index, lbb.length);
+			index += lbb.length;
 
-		int[] rt = drawCircle(circX + width - (radius * 2), circY, radius, CirclePart.RIGHT_TOP);
-		System.arraycopy(rt, 0, points, index, rt.length);
-		index += rt.length;
-		points[index++] = circX;
-		points[index++] = circY - radius;
+			int[] rb = drawCircle(circX + width - (radius * 2), circY + height - (radius * 2), radius,
+					CirclePart.RIGHT_BOTTOM);
+			System.arraycopy(rb, 0, points, index, rb.length);
+			index += rb.length;
 
-		int[] tempPoints = new int[index];
-		System.arraycopy(points, 0, tempPoints, 0, index);
-		gc.fillPolygon(tempPoints);
+			int[] rt = drawCircle(circX + width - (radius * 2), circY, radius, CirclePart.RIGHT_TOP);
+			System.arraycopy(rt, 0, points, index, rt.length);
+			index += rt.length;
+			points[index++] = circX;
+			points[index++] = circY - radius;
+
+			int[] tempPoints = new int[index];
+			System.arraycopy(points, 0, tempPoints, 0, index);
+			gc.fillPolygon(tempPoints);
+
+			// Remember for use in header drawing
+			shape = tempPoints;
+		}
 
 		// Fill in parent background for non-rectangular shape
 		Display display = parent.getDisplay();
@@ -408,53 +419,123 @@ public class SmartTabRenderer extends CTabFolderRenderer implements ICTabRenderi
 		// Shadow
 		if (shadowEnabled)
 			drawShadow(display, bounds, gc);
-
-		// Remember for use in header drawing
-		shape = tempPoints;
 	}
 
-	void drawSelectedTab(int itemIndex, GC gc, Rectangle bounds) {		
-		if (parent.getSingle() && parent.getItem(itemIndex).isShowing())
-			return;
-		boolean onBottom = parent.getTabPosition() == SWT.BOTTOM;
+	private int[] computeSquareTabOutline(boolean onBottom, int startX, int endX, int bottomY,
+			Rectangle bounds, Point parentSize) {
+		int index = 0;
+		int outlineY = onBottom ? bottomY + bounds.height : bounds.y;
+		int[] points = new int[20];
+
+		int margin = shadowEnabled ? SIDE_DROP_WIDTH
+				: (Objects.equals(outerKeylineColor, tabOutlineColor)
+						|| Objects.equals(outerKeylineColor, parent.getBackground())
+						? 0
+						: 1);
+		points[index++] = margin;
+		points[index++] = bottomY;
+		points[index++] = startX;
+		points[index++] = bottomY;
+
+		points[index++] = startX;
+		points[index++] = outlineY;
+
+		points[index++] = endX;
+		points[index++] = outlineY;
+
+		points[index++] = endX;
+		points[index++] = bottomY;
+
+		if (active) {
+			points[index++] = parentSize.x - 1 - margin;
+			points[index++] = bottomY;
+		}
+
+		points[index++] = parentSize.x - 1 - margin;
+		points[index++] = parentSize.y - 1;
+
+		points[index++] = points[0];
+		points[index++] = parentSize.y - 1;
+
+		points[index++] = points[0];
+		points[index++] = points[1];
+
+		int[] tmpPoints = new int[index];
+		System.arraycopy(points, 0, tmpPoints, 0, index);
+
+		return tmpPoints;
+	}
+
+
+	private int[] computeRoundTabOutline(int itemIndex, boolean onBottom, int bottomY, Rectangle bounds,
+			Point parentSize) {
+		int header = shadowEnabled ? 2 : 0;
+		int width = bounds.width;
 		int[] points = new int[1024];
-//		int header = shadowEnabled ? 2 : 0;
-		
 		int index = 0;
 		int radius = cornerSize / 2;
 		int circX = bounds.x + radius;
-		int circY = bounds.y + radius;
-	
-		// Body
-		index = 0;
+		int circY = onBottom ? bounds.y + bounds.height + 1 - header - radius : bounds.y - 1 + radius;
+		if (itemIndex == 0 && bounds.x == -computeTrim(CTabFolderRenderer.PART_HEADER, SWT.NONE, 0, 0, 0, 0).x) {
+			circX -= 1;
+			points[index++] = circX - radius;
+			points[index++] = bottomY;
 
-		points[index++] = bounds.x + radius;
-		points[index++] = bounds.y;
-		
-		int[] ltt = drawCircle(circX, circY, radius, CirclePart.LEFT_TOP);
-		System.arraycopy(ltt, 0, points, index, ltt.length);
-		index += ltt.length;
-		
-		points[index++] = bounds.x ;
-		points[index++] = bounds.y + bounds.height;
-			
-		points[index++] = bounds.x + bounds.width;
-		points[index++] = bounds.y + bounds.height;
-			
-		points[index++] = bounds.x + bounds.width;
-		points[index++] = bounds.y + radius;
-		
-		ltt = drawCircle(bounds.x + bounds.width - radius, circY, radius, CirclePart.RIGHT_TOP);
-
-		System.arraycopy(ltt, 0, points, index, ltt.length);
-		index += ltt.length;
-
-		if (onBottom) {
-			//fiip y
-			for (int i =1 ; i < points.length; i +=2) {
-				points[i] = (bounds.height + bounds.y) - points[i] + bounds.y;
+			points[index++] = circX - radius;
+			points[index++] = bottomY;
+		} else {
+			if (active) {
+				points[index++] = shadowEnabled ? SIDE_DROP_WIDTH : 0 + INNER_KEYLINE_WIDTH + OUTER_KEYLINE_WIDTH;
+				points[index++] = bottomY;
 			}
+			points[index++] = bounds.x;
+			points[index++] = bottomY;
 		}
+
+		int[] ltt = drawCircle(circX, circY, radius, CirclePart.left(onBottom));
+		if (!onBottom) {
+			mirrorCirclePoints(ltt);
+		}
+		System.arraycopy(ltt, 0, points, index, ltt.length);
+		index += ltt.length;
+		int[] rt = drawCircle(circX + width - (radius * 2), circY, radius, CirclePart.right(onBottom));
+		if (!onBottom) {
+			mirrorCirclePoints(rt);
+		}
+		System.arraycopy(rt, 0, points, index, rt.length);
+		index += rt.length;
+
+		points[index++] = bounds.width + circX - radius;
+		points[index++] = bottomY;
+
+		if (active) {
+			points[index++] = parentSize.x
+					- (shadowEnabled ? SIDE_DROP_WIDTH : 0 + INNER_KEYLINE_WIDTH + OUTER_KEYLINE_WIDTH);
+			points[index++] = bottomY;
+		}
+
+		int[] tmpPoints = new int[index];
+		System.arraycopy(points, 0, tmpPoints, 0, index);
+		return tmpPoints;
+	}
+
+	void drawSelectedTab(int itemIndex, GC gc, Rectangle bounds) {
+		if (parent.getSingle() && parent.getItem(itemIndex).isShowing())
+			return;
+
+		boolean onBottom = parent.getTabPosition() == SWT.BOTTOM;
+//		int header = shadowEnabled ? 2 : 0;
+		int header = 0;
+		int bottomY = onBottom ? bounds.y - header : bounds.y + bounds.height;
+		int selectionX1, selectionY1, selectionX2, selectionY2;
+		int startX, endX;
+		int[] tabOutlinePoints = null;
+		Point parentSize = parent.getSize();
+
+		gc.setClipping(0, onBottom ? bounds.y - header : bounds.y,
+				parentSize.x - (shadowEnabled ? SIDE_DROP_WIDTH : 0 + INNER_KEYLINE_WIDTH + OUTER_KEYLINE_WIDTH),
+				bounds.y + bounds.height);// bounds.height
+
 		Pattern backgroundPattern = null;
 		if (selectedTabFillColors == null) {
 			setSelectedTabFill(gc.getDevice().getSystemColor(SWT.COLOR_WHITE));
@@ -462,256 +543,211 @@ public class SmartTabRenderer extends CTabFolderRenderer implements ICTabRenderi
 		if (selectedTabFillColors.length == 1) {
 			gc.setBackground(selectedTabFillColors[0]);
 			gc.setForeground(selectedTabFillColors[0]);
-		} else if (!onBottom && selectedTabFillColors.length == 2) {
+		} else if (selectedTabFillColors.length == 2) {
 			// for now we support the 2-colors gradient for selected tab
-			backgroundPattern = new Pattern(gc.getDevice(), 0, 0, 0, bounds.height + 1, selectedTabFillColors[0],
-					selectedTabFillColors[1]);
+			if (!onBottom) {
+				backgroundPattern = new Pattern(gc.getDevice(), 0, 0, 0, bounds.height + 1, selectedTabFillColors[0],
+						selectedTabFillColors[1]);
+			} else {
+				backgroundPattern = new Pattern(gc.getDevice(), 0, 0, 0, bounds.height + 1, selectedTabFillColors[1],
+						selectedTabFillColors[0]);
+			}
+
 			gc.setBackgroundPattern(backgroundPattern);
 			gc.setForeground(selectedTabFillColors[1]);
 		}
+		
+		startX = bounds.x - 1;
+		endX = bounds.x + bounds.width;
+		selectionX1 = startX + 1;
+		selectionY1 = bottomY;
+		selectionX2 = endX - 1;
+		selectionY2 = bottomY;
 
-		int[] tmpPoints = new int[index];
-		System.arraycopy(points, 0, tmpPoints, 0, index);
-		gc.fillPolygon(tmpPoints);
+		boolean superimposeKeylineOutline = Objects.equals(outerKeylineColor, tabOutlineColor);
+		Rectangle outlineBoundsForOutline = new Rectangle( //
+				superimposeKeylineOutline ? bounds.x - OUTER_KEYLINE_WIDTH : bounds.x,
+				!onBottom && superimposeKeylineOutline ? bounds.y - OUTER_KEYLINE_WIDTH : bounds.y,
+				superimposeKeylineOutline ? bounds.width + OUTER_KEYLINE_WIDTH : bounds.width, //
+				bounds.height);
+		
+		if (cornerSize == SQUARE_CORNER) {
+			tabOutlinePoints = computeSquareTabOutline(onBottom, startX, endX, bottomY, outlineBoundsForOutline,
+					parentSize);
+			outlineBoundsForOutline.height += TAB_OUTLINE_WIDTH; // increase area to fill by outline thickness
+			gc.fillRectangle(outlineBoundsForOutline);
+		} else {
+			tabOutlinePoints = computeRoundTabOutline(itemIndex, onBottom, bottomY, outlineBoundsForOutline,
+					parentSize);
+			gc.fillPolygon(tabOutlinePoints);
+		}
 //		gc.drawLine(selectionX1, selectionY1, selectionX2, selectionY2);
-//		if (tabOutlineColor == null)
-//			tabOutlineColor = gc.getDevice().getSystemColor(SWT.COLOR_BLACK);
-//		gc.setForeground(tabOutlineColor);
-//		Color gradientLineTop = null;
-//		Pattern foregroundPattern = null;
-//		if (!active && !onBottom) {
-//			RGB blendColor = gc.getDevice().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW).getRGB();
-//			RGB topGradient = blend(blendColor, tabOutlineColor.getRGB(), 40);
-//			gradientLineTop = new Color(gc.getDevice(), topGradient);
-//			foregroundPattern = new Pattern(gc.getDevice(), 0, 0, 0, bounds.height + 1, gradientLineTop,
-//					gc.getDevice().getSystemColor(SWT.COLOR_WHITE));
-//			gc.setForegroundPattern(foregroundPattern);
-//		}
-//		gc.drawPolyline(tmpPoints);
-		Rectangle rect = null;
-		gc.setClipping(rect);
-//
-//		if (active) {
-////			if (outerKeyline == null)
-//				outerKeyline = gc.getDevice().getSystemColor(SWT.COLOR_RED);
-//			gc.setForeground(outerKeyline);
-//			gc.drawPolyline(shape);
-////			//		gc.setBackground(gc.getDevice().getSystemColor(SWT.COLOR_RED));
-////			//			gc.fillPolygon(shape);
-////		} else {
-////			if (!onBottom) {
-//////				gc.drawLine(startX, 0, endX, 0);
-////			}
-//		}
+
+		if (tabOutlineColor == null)
+			tabOutlineColor = gc.getDevice().getSystemColor(SWT.COLOR_BLACK);
+		gc.setForeground(tabOutlineColor);
+
+		Color gradientLineTop = null;
+		Pattern foregroundPattern = null;
+		if (!active && !onBottom) {
+			RGB blendColor = gc.getDevice().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW).getRGB();
+			RGB topGradient = blend(blendColor, tabOutlineColor.getRGB(), 40);
+			gradientLineTop = new Color(gc.getDevice(), topGradient);
+			foregroundPattern = new Pattern(gc.getDevice(), 0, 0, 0, bounds.height + 1, gradientLineTop,
+					gc.getDevice().getSystemColor(SWT.COLOR_WHITE));
+			gc.setForegroundPattern(foregroundPattern);
+		}
+
+		gc.setClipping((Rectangle) null);
+
+		if (active) {
+			if (outerKeylineColor == null)
+				outerKeylineColor = gc.getDevice().getSystemColor(SWT.COLOR_RED);
+			gc.setForeground(outerKeylineColor);
+			if (cornerSize == SQUARE_CORNER) {
+				gc.drawRectangle(rectShape);
+			} else {
+				gc.drawPolyline(shape);
+			}
+		} else {
+			if (!onBottom) {
+				gc.drawLine(startX, 0, endX, 0);
+			}
+		}
+
+		if (selectedTabHighlightColor != null) {
+			gc.setBackground(selectedTabHighlightColor);
+			boolean highlightOnTop = drawTabHighlightOnTop;
+			if (onBottom) {
+				highlightOnTop = !highlightOnTop;
+			}
+			int verticalOffset = highlightOnTop ? 0 : bounds.height - 2;
+			int horizontalOffset = itemIndex == 0 || cornerSize == SQUARE_CORNER ? 0 : 1;
+			int widthAdjustment = cornerSize == SQUARE_CORNER ? 0 : 1;
+			gc.fillRectangle(bounds.x + horizontalOffset, bounds.y + verticalOffset, bounds.width - widthAdjustment, 3);
+		}
 
 		if (backgroundPattern != null) {
 			backgroundPattern.dispose();
 		}
-//		if (gradientLineTop != null) {
-//			gradientLineTop.dispose();
-//		}
-//		if (foregroundPattern != null) {
-//			foregroundPattern.dispose();
-//		}
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-//		gc.setBackground(gc.getDevice().getSystemColor(SWT.COLOR_MAGENTA));
-//		gc.fillRectangle(bounds);
-//		if (true) return;
-//		boolean onBottom = parent.getTabPosition() == SWT.BOTTOM;
-//		int header = shadowEnabled ? 2 : 0;
-//		int width = bounds.width;
-//		int[] points = new int[1024];
-//		int index = 0;
-//		int radius = cornerSize / 2;
-//		int circX = bounds.x + radius;
-//		int circY = onBottom ? bounds.y + bounds.height + 1 - header - radius : bounds.y - 1 + radius;
-//		int selectionX1, selectionY1, selectionX2, selectionY2;
-//		int bottomY = onBottom ? bounds.y - header : bounds.y + bounds.height;
-//		if (itemIndex == 0
-//				&& bounds.x == -computeTrim(CTabFolderRenderer.PART_HEADER,
-//						SWT.NONE, 0, 0, 0, 0).x) {
-//			circX -= 1;
-//			points[index++] = circX - radius;
-//			points[index++] = bottomY;
-//
-//			points[index++] = selectionX1 = circX - radius;
-//			points[index++] = selectionY1 = bottomY;
-//		} else {
-//			if (active) {
-//				points[index++] = shadowEnabled ? SIDE_DROP_WIDTH : 0 + INNER_KEYLINE + OUTER_KEYLINE;
-//				points[index++] = bottomY;
-//			}
-//			points[index++] = selectionX1 = bounds.x;
-//			points[index++] = selectionY1 = bottomY;
-//		}
-//
-//		int[] ltt = drawCircle(circX, circY, radius, CirclePart.left(onBottom));
-//		int startX = ltt[ltt.length - 1];  //ltt[6]
-//		if (!onBottom) {
-//			mirrorCirclePoints(ltt);
-//		}
-//		System.arraycopy(ltt, 0, points, index, ltt.length);
-//		index += ltt.length;
-//		int[] rt = drawCircle(circX + width - (radius * 2), circY, radius, CirclePart.right(onBottom));
-//		int endX = rt[rt.length - 1]; //rt[rt.length - 4]
-//		if (!onBottom) {
-//			mirrorCirclePoints(rt);
-//		}
-//		System.arraycopy(rt, 0, points, index, rt.length);
-//		index += rt.length;
-//
-//		points[index++] = selectionX2 = bounds.width + circX - radius;
-//		points[index++] = selectionY2 = bottomY;
-//
-//		if (active) {
-//			points[index++] = parent.getSize().x
-//					- (shadowEnabled ? SIDE_DROP_WIDTH : 0 + INNER_KEYLINE + OUTER_KEYLINE);
-//			points[index++] = bottomY;
-//		}
-//		gc.setClipping(0, onBottom ? bounds.y - header : bounds.y,
-//				parent.getSize().x - (shadowEnabled ? SIDE_DROP_WIDTH : 0 + INNER_KEYLINE + OUTER_KEYLINE),
-//				bounds.y + bounds.height);// bounds.height
-//		// +
-//		// 4);
-//
-//		Pattern backgroundPattern = null;
-//		if (selectedTabFillColors == null) {
-//			setSelectedTabFill(gc.getDevice().getSystemColor(SWT.COLOR_WHITE));
-//		}
-//		if (selectedTabFillColors.length == 1) {
-//			gc.setBackground(selectedTabFillColors[0]);
-//			gc.setForeground(selectedTabFillColors[0]);
-//		} else if (!onBottom && selectedTabFillColors.length == 2) {
-//			// for now we support the 2-colors gradient for selected tab
-//			backgroundPattern = new Pattern(gc.getDevice(), 0, 0, 0, bounds.height + 1, selectedTabFillColors[0],
-//					selectedTabFillColors[1]);
-//			gc.setBackgroundPattern(backgroundPattern);
-//			gc.setForeground(selectedTabFillColors[1]);
-//		}
-//
-//		int[] tmpPoints = new int[index];
-//		System.arraycopy(points, 0, tmpPoints, 0, index);
-//		gc.fillPolygon(tmpPoints);
-//		gc.drawLine(selectionX1, selectionY1, selectionX2, selectionY2);
-//		if (tabOutlineColor == null)
-//			tabOutlineColor = gc.getDevice().getSystemColor(SWT.COLOR_BLACK);
-//		gc.setForeground(tabOutlineColor);
-//		Color gradientLineTop = null;
-//		Pattern foregroundPattern = null;
-//		if (!active && !onBottom) {
-//			RGB blendColor = gc.getDevice().getSystemColor(SWT.COLOR_WIDGET_LIGHT_SHADOW).getRGB();
-//			RGB topGradient = blend(blendColor, tabOutlineColor.getRGB(), 40);
-//			gradientLineTop = new Color(gc.getDevice(), topGradient);
-//			foregroundPattern = new Pattern(gc.getDevice(), 0, 0, 0, bounds.height + 1, gradientLineTop,
-//					gc.getDevice().getSystemColor(SWT.COLOR_WHITE));
-//			gc.setForegroundPattern(foregroundPattern);
-//		}
-//		gc.drawPolyline(tmpPoints);
-//		Rectangle rect = null;
-//		gc.setClipping(rect);
-//
-//		if (active) {
-//			if (outerKeyline == null)
-//				outerKeyline = gc.getDevice().getSystemColor(SWT.COLOR_RED);
-//			gc.setForeground(outerKeyline);
-//			gc.drawPolyline(shape);
-//			//		gc.setBackground(gc.getDevice().getSystemColor(SWT.COLOR_RED));
-//			//			gc.fillPolygon(shape);
-//		} else {
-//			if (!onBottom) {
-//				gc.drawLine(startX, 0, endX, 0);
-//			}
-//		}
-//
-//		if (backgroundPattern != null) {
-//			backgroundPattern.dispose();
-//		}
-//		if (gradientLineTop != null) {
-//			gradientLineTop.dispose();
-//		}
-//		if (foregroundPattern != null) {
-//			foregroundPattern.dispose();
-//		}
+		if (foregroundPattern != null) {
+			foregroundPattern.dispose();
+		}
+
+		gc.setForeground(tabOutlineColor);
+		if (TAB_OUTLINE_WIDTH > 0) {
+			gc.drawPolyline(tabOutlinePoints);
+		}
 	}
 
 	void drawUnselectedTab(int itemIndex, GC gc, Rectangle bounds, int state) {
 		if ((state & SWT.HOT) != 0) {
 			int header = shadowEnabled ? 2 : 0;
 			int width = bounds.width;
-			int height = bounds.height;
 			boolean onBottom = parent.getTabPosition() == SWT.BOTTOM;
-			int[] points = new int[1024];
-			int[] inactive = new int[8];
-			int index = 0, inactive_index = 0;
-			int radius = cornerSize / 2;
-			int circX = bounds.x + radius;
-			int circY = bounds.y - 1 + radius;
+			int bottomY = onBottom ? bounds.y - header : bounds.y + bounds.height;
 
-			points[index++] = bounds.x + radius;
-			points[index++] = bounds.y;
-			
-			int[] ltt = drawCircle(circX, circY, radius, CirclePart.LEFT_TOP);
-			System.arraycopy(ltt, 0, points, index, ltt.length);
-			index += ltt.length;
-			
-			points[index++] = bounds.x ;
-			points[index++] = bounds.y + bounds.height;
-				
-			points[index++] = bounds.x + bounds.width;
-			points[index++] = bounds.y + bounds.height;
-				
-			points[index++] = bounds.x + bounds.width;
-			points[index++] = bounds.y + radius;
-			
-			ltt = drawCircle(bounds.x + bounds.width - radius, circY, radius, CirclePart.RIGHT_TOP);
-
-			System.arraycopy(ltt, 0, points, index, ltt.length);
-			index += ltt.length;
-
-			if (onBottom) {
-				//fiip y
-				for (int i =1 ; i < points.length; i +=2) {
-					points[i] = (bounds.height + bounds.y) - points[i] + bounds.y;
+			// Remember for use in header drawing
+			if (cornerSize == SQUARE_CORNER) {
+				Color color = hotUnselectedTabsColorBackground;
+				if (color == null) {
+					// Fallback: if color was not set, use white for highlighting
+					// hot tab.
+					color = gc.getDevice().getSystemColor(SWT.COLOR_WHITE);
 				}
-			}
+				gc.setBackground(color);
 
-//			gc.setClipping(points[0], onBottom ? bounds.y - header : bounds.y,
-//					parent.getSize().x - (shadowEnabled ? SIDE_DROP_WIDTH : 0 + INNER_KEYLINE + OUTER_KEYLINE),
-//					bounds.y + bounds.height);
-			Color color = hotUnselectedTabsColorBackground;
-			if (color == null) {
-				// Fallback: if color was not set, use white for highlighting
-				// hot tab.
-				color = gc.getDevice().getSystemColor(SWT.COLOR_WHITE);
-			}
-			gc.setBackground(color);
-			int[] tmpPoints = new int[index];
-			System.arraycopy(points, 0, tmpPoints, 0, index);
-			gc.fillPolygon(tmpPoints);
-			Color tempBorder = new Color(gc.getDevice(), 182, 188, 204);
-			gc.setForeground(tempBorder);
-			tempBorder.dispose();
-			if (active) {
-				gc.drawPolyline(tmpPoints);
+				Rectangle rect = new Rectangle(bounds.x, bounds.y, bounds.width, bounds.height);
+				gc.fillRectangle(rect);
 			} else {
-				gc.drawLine(inactive[0], inactive[1], inactive[2], inactive[3]);
-				gc.drawLine(inactive[4], inactive[5], inactive[6], inactive[7]);
+				int[] points = new int[1024];
+				int[] inactive = new int[8];
+				int index = 0, inactive_index = 0;
+				int radius = cornerSize / 2;
+				int circX = bounds.x + radius;
+				int circY = onBottom ? bounds.y + bounds.height + 1 - header - radius : bounds.y - 1 + radius;
+
+				int leftIndex = circX;
+				if (itemIndex == 0) {
+					if (parent.getSelectionIndex() != 0)
+						leftIndex -= 1;
+					points[index++] = leftIndex - radius;
+					points[index++] = bottomY;
+				} else {
+					points[index++] = bounds.x;
+					points[index++] = bottomY;
+				}
+
+				if (!active) {
+					System.arraycopy(points, 0, inactive, 0, index);
+					inactive_index += 2;
+				}
+
+				int rightIndex = circX - 1;
+
+				int[] ltt = drawCircle(leftIndex, circY, radius, CirclePart.left(onBottom));
+				if (!onBottom) {
+					mirrorCirclePoints(ltt);
+				}
+				System.arraycopy(ltt, 0, points, index, ltt.length);
+				index += ltt.length;
+
+				if (!active) {
+					System.arraycopy(ltt, 0, inactive, inactive_index, 2);
+					inactive_index += 2;
+				}
+
+				int[] rt = drawCircle(rightIndex + width - (radius * 2), circY, radius, CirclePart.right(onBottom));
+				if (!onBottom) {
+					mirrorCirclePoints(rt);
+				}
+				System.arraycopy(rt, 0, points, index, rt.length);
+				index += rt.length;
+
+				if (!active) {
+					System.arraycopy(rt, rt.length - 4, inactive, inactive_index, 2);
+					inactive[inactive_index] -= 1;
+					inactive_index += 2;
+				}
+
+				points[index++] = bounds.width + rightIndex - radius;
+				points[index++] = bottomY;
+
+				if (!active) {
+					System.arraycopy(points, index - 2, inactive, inactive_index, 2);
+					inactive[inactive_index] -= 1;
+					inactive_index += 2;
+				}
+				gc.setClipping(points[0], onBottom ? bounds.y - header : bounds.y,
+						parent.getSize().x
+								- (shadowEnabled ? SIDE_DROP_WIDTH : 0 + INNER_KEYLINE_WIDTH + OUTER_KEYLINE_WIDTH),
+						bounds.y + bounds.height);
+
+				Color color = hotUnselectedTabsColorBackground;
+				if (color == null) {
+					// Fallback: if color was not set, use white for highlighting
+					// hot tab.
+					color = gc.getDevice().getSystemColor(SWT.COLOR_WHITE);
+				}
+				gc.setBackground(color);
+
+				int[] tmpPoints = new int[index];
+				System.arraycopy(points, 0, tmpPoints, 0, index);
+				gc.fillPolygon(tmpPoints);
+
+				if (tabOutlineColor == null)
+					tabOutlineColor = gc.getDevice().getSystemColor(SWT.COLOR_BLACK);
+				gc.setForeground(tabOutlineColor);
+
+				if (active) {
+					gc.drawPolyline(tmpPoints);
+				} else {
+					gc.drawLine(inactive[0], inactive[1], inactive[2], inactive[3]);
+					gc.drawLine(inactive[4], inactive[5], inactive[6], inactive[7]);
+				}
+				gc.setClipping((Rectangle) null);
 			}
 
-			Rectangle rect = null;
-			gc.setClipping(rect);
-
-			if (outerKeyline == null)
-				outerKeyline = gc.getDevice().getSystemColor(SWT.COLOR_BLACK);
 			// gc.setForeground(outerKeyline);
 			// gc.drawPolyline(shape);
 		}
@@ -729,7 +765,6 @@ public class SmartTabRenderer extends CTabFolderRenderer implements ICTabRenderi
 	}
 
 	static int[] drawCircle(int xC, int yC, int r, CirclePart circlePart) {
-		if (r == 0) return new int[] {xC, yC};
 		int x = 0, y = r, u = 1, v = 2 * r - 1, e = 0;
 		int[] points = new int[1024];
 		int[] pointsMirror = new int[1024];
@@ -823,7 +858,6 @@ public class SmartTabRenderer extends CTabFolderRenderer implements ICTabRenderi
 		for (int i = SIZE; i < fillHeight; i += SIZE) {
 			xFill = i;
 			gc.drawImage(shadowImage, 0, SIZE, SIZE, SIZE, 2, i, SIZE, SIZE);
-			
 		}
 
 		// Pad the rest of the shadow
@@ -919,8 +953,7 @@ public class SmartTabRenderer extends CTabFolderRenderer implements ICTabRenderi
 		return dst;
 	}
 
-	private void convolve(float[] kernel, int[] inPixels, int[] outPixels,
-			int width, int height, boolean alpha) {
+	private void convolve(float[] kernel, int[] inPixels, int[] outPixels, int width, int height, boolean alpha) {
 		int kernelWidth = kernel.length;
 		int kernelMid = kernelWidth / 2;
 		for (int y = 0; y < height; y++) {
@@ -1003,7 +1036,7 @@ public class SmartTabRenderer extends CTabFolderRenderer implements ICTabRenderi
 
 	@Override
 	public void setCornerRadius(int radius) {
-		cornerSize = radius;
+		cornerSize = (radius < 6) ? 0 : radius;
 		parent.redraw();
 	}
 
@@ -1022,11 +1055,17 @@ public class SmartTabRenderer extends CTabFolderRenderer implements ICTabRenderi
 
 	@Override
 	public void setOuterKeyline(Color color) {
-		this.outerKeyline = color;
+		this.outerKeylineColor = color;
 		// TODO: HACK! Should be set based on pseudo-state.
 		if (color != null) {
 			setActive(!(color.getRed() == 255 && color.getGreen() == 255 && color.getBlue() == 255));
 		}
+		parent.redraw();
+	}
+
+	@Override
+	public void setSelectedTabHighlight(Color color) {
+		this.selectedTabHighlightColor = color;
 		parent.redraw();
 	}
 
@@ -1062,36 +1101,44 @@ public class SmartTabRenderer extends CTabFolderRenderer implements ICTabRenderi
 
 	@Override
 	public void setInnerKeyline(Color color) {
-		this.innerKeyline = color;
+		this.innerKeylineColor = color;
 		parent.redraw();
-	}
-
-	public void setActiveToolbarGradient(Color[] color, int[] percents) {
-		activeToolbar = color;
-		activePercents = percents;
-	}
-
-	public void setInactiveToolbarGradient(Color[] color, int[] percents) {
-		inactiveToolbar = color;
-		inactivePercents = percents;
 	}
 
 	public void setActive(boolean active) {
 		this.active = active;
 	}
 
+	/**
+	 * Sets whether to use a custom tab background (reusing tab colors and
+	 * gradients), or default one from plain CTabFolder (using widget background
+	 * color).
+	 *
+	 * @param drawCustomTabContentBackground
+	 */
+	@Override
+	public void setDrawCustomTabContentBackground(boolean drawCustomTabContentBackground) {
+		this.drawCustomTabContentBackground = drawCustomTabContentBackground;
+	}
+
+	/**
+	 * Draws tab content background, deriving the colors from the tab colors.
+	 *
+	 * @param gc
+	 * @param bounds
+	 * @param state
+	 */
 	private void drawCustomBackground(GC gc, Rectangle bounds, int state) {
 		boolean selected = (state & SWT.SELECTED) != 0;
-		Color defaultBackground = selected ? parent.getSelectionBackground() : parent.getBackground();
 		boolean vertical = selected ? parentWrapper.isSelectionGradientVertical() : parentWrapper.isGradientVertical();
 		Rectangle partHeaderBounds = computeTrim(PART_HEADER, state, bounds.x, bounds.y, bounds.width, bounds.height);
 
-		drawUnselectedTabBackground(gc, partHeaderBounds, state, vertical, defaultBackground);
-		drawTabBackground(gc, bounds, state, vertical, defaultBackground);
+		drawUnselectedTabBackground(gc, partHeaderBounds, state, vertical, parent.getBackground());
+		drawSelectedTabBackground(gc, partHeaderBounds, state, vertical, parent.getBackground());
 	}
 
-	private void drawUnselectedTabBackground(GC gc, Rectangle partHeaderBounds,
-			int state, boolean vertical, Color defaultBackground) {
+	private void drawUnselectedTabBackground(GC gc, Rectangle partHeaderBounds, int state, boolean vertical,
+			Color defaultBackground) {
 		if (unselectedTabsColors == null) {
 			boolean selected = (state & SWT.SELECTED) != 0;
 			unselectedTabsColors = selected ? parentWrapper.getSelectionGradientColors()
@@ -1104,44 +1151,46 @@ public class SmartTabRenderer extends CTabFolderRenderer implements ICTabRenderi
 			unselectedTabsPercents = new int[] { 100 };
 		}
 
-		drawBackground(gc, partHeaderBounds.x, partHeaderBounds.y - 1, partHeaderBounds.width,
-			partHeaderBounds.height, defaultBackground, unselectedTabsColors, unselectedTabsPercents, vertical);
-		
+		drawBackground(gc, partHeaderBounds.x, partHeaderBounds.y - 1, partHeaderBounds.width, partHeaderBounds.height,
+				defaultBackground, unselectedTabsColors, unselectedTabsPercents, vertical);
 	}
 
-	private void drawTabBackground(GC gc, Rectangle partHeaderBounds,
-			int state, boolean vertical, Color defaultBackground) {
+	private void drawSelectedTabBackground(GC gc, Rectangle partHeaderBounds, int state, boolean vertical,
+			Color defaultBackground) {
 //		Color[] colors = selectedTabFillColors;
 //		int[] percents = selectedTabFillPercents;
-
-		Color[] colors = new Color[] {gc.getDevice().getSystemColor(SWT.COLOR_WHITE)};
-		int[] percents = new int[] {100};
-		if (colors != null && colors.length == 2) {
-			colors = new Color[] { colors[1], colors[1] };
-		}
-		if (colors == null) {
-			boolean selected = (state & SWT.SELECTED) != 0;
-			colors = selected ? parentWrapper.getSelectionGradientColors() : parentWrapper.getGradientColors();
-			percents = selected ? parentWrapper.getSelectionGradientPercents() : parentWrapper.getGradientPercents();
-		}
-		if (colors == null) {
-			colors = new Color[] { gc.getDevice().getSystemColor(SWT.COLOR_WHITE) };
-			percents = new int[] { 100 };
-		}
+//
+//		if (colors != null && colors.length == 2) {
+//			colors = new Color[] { colors[1], colors[1] };
+//		}
+//		if (colors == null) {
+//			boolean selected = (state & SWT.SELECTED) != 0;
+//			colors = selected ? parentWrapper.getSelectionGradientColors() : parentWrapper.getGradientColors();
+//			percents = selected ? parentWrapper.getSelectionGradientPercents() : parentWrapper.getGradientPercents();
+//		}
+//		if (colors == null) {
+//			colors = new Color[] { gc.getDevice().getSystemColor(SWT.COLOR_WHITE) };
+//			percents = new int[] { 100 };
+//		}
 		
-		if (parent.getTabPosition() == SWT.BOTTOM) {
-			drawBackground(gc, partHeaderBounds.x, 1, partHeaderBounds.width,
-					parent.getBounds().height - partHeaderBounds.height, defaultBackground, colors, percents, vertical);
-		}else {
-			drawBackground(gc, partHeaderBounds.x, partHeaderBounds.height - 1, partHeaderBounds.width,
-				parent.getBounds().height, defaultBackground, colors, percents, vertical);
-		}
+		Color[] colors = new Color[] { gc.getDevice().getSystemColor(SWT.COLOR_WHITE) };
+		int[] percents = new int[] { 100 };
+		
+		boolean onBottom = parent.getTabPosition() == SWT.BOTTOM;
+		int borderTop = onBottom ? INNER_KEYLINE_WIDTH + OUTER_KEYLINE_WIDTH : TOP_KEYLINE_WIDTH + OUTER_KEYLINE_WIDTH;
+		Rectangle parentBounds = parent.getBounds();
+		int y = (onBottom) ? 0 : partHeaderBounds.y + partHeaderBounds.height - 1;
+		int height = (onBottom) ? parentBounds.height - partHeaderBounds.height + 2 * paddingTop + 2 * borderTop
+				: parentBounds.height - partHeaderBounds.height;
+
+		drawBackground(gc, partHeaderBounds.x, y, partHeaderBounds.width, height, defaultBackground, colors, percents,
+				vertical);
 	}
 
 	/*
 	 * Copied the relevant parts from the package private
-	 * org.eclipse.swt.custom.CTabFolderRenderer.drawBackground(GC, int[], int,
-	 * int, int, int, Color, Image, Color[], int[], boolean) method.
+	 * org.eclipse.swt.custom.CTabFolderRenderer.drawBackground(GC, int[], int, int,
+	 * int, int, Color, Image, Color[], int[], boolean) method.
 	 */
 	private void drawBackground(GC gc, int x, int y, int width, int height, Color defaultBackground, Color[] colors,
 			int[] percents, boolean vertical) {
@@ -1323,5 +1372,29 @@ public class SmartTabRenderer extends CTabFolderRenderer implements ICTabRenderi
 			}
 			return null;
 		}
+	}
+
+	@Override
+	public void setSelectedTabHighlightTop(boolean drawTabHiglightOnTop) {
+		this.drawTabHighlightOnTop = drawTabHiglightOnTop;
+		parent.redraw();
+	}
+
+	private void cornerRadiusPreferenceChanged() {
+		IEclipsePreferences preferences = getSwtRendererPreferences();
+		boolean useRound = preferences.getBoolean(USE_ROUND_TABS, USE_ROUND_TABS_DEFAULT);
+		setCornerRadius(useRound ? 16 : 0);
+	}
+
+	@Override
+	public void preferenceChange(PreferenceChangeEvent event) {
+		if (!USE_ROUND_TABS.equals(event.getKey())) {
+			return;
+		}
+		cornerRadiusPreferenceChanged();
+	}
+
+	private IEclipsePreferences getSwtRendererPreferences() {
+		return InstanceScope.INSTANCE.getNode("org.eclipse.e4.ui.workbench.renderers.swt"); //$NON-NLS-1$
 	}
 }

@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.connect.report;
 
+import java.lang.reflect.Field;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -36,10 +39,16 @@ import org.eclipse.birt.report.engine.api.EngineConstants;
 import org.eclipse.birt.report.engine.api.IReportEngine;
 import org.eclipse.birt.report.engine.api.IReportEngineFactory;
 import org.eclipse.core.internal.registry.RegistryProviderFactory;
+import org.eclipse.core.internal.runtime.InternalPlatform;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 import org.locationtech.udig.catalog.internal.wms.WmsPlugin;
 import org.locationtech.udig.render.wms.basic.WMSPlugin;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkListener;
+import org.osgi.framework.wiring.BundleCapability;
+import org.osgi.framework.wiring.FrameworkWiring;
+import org.osgi.resource.Requirement;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.report.udig.CatalogPluginWrapper;
 import org.wcs.smart.connect.report.udig.ProjectPluginWrapper;
@@ -103,10 +112,55 @@ public class BirtEngine {
 			
 			try {
 				Platform.startup(config);
+				try {
+					
+					FrameworkWiring fw = new FrameworkWiring() {
+						
+						@Override
+						public Bundle getBundle() {
+							// TODO Auto-generated method stub
+							return null;
+						}
+						
+						@Override
+						public boolean resolveBundles(Collection<Bundle> bundles) {
+							// TODO Auto-generated method stub
+							return false;
+						}
+						
+						@Override
+						public void refreshBundles(Collection<Bundle> bundles, FrameworkListener... listeners) {
+							// TODO Auto-generated method stub
+							
+						}
+						
+						@Override
+						public Collection<Bundle> getRemovalPendingBundles() {
+							return Collections.emptySet();
+						}
+						
+						@Override
+						public Collection<Bundle> getDependencyClosure(Collection<Bundle> bundles) {
+							return Collections.emptySet();
+						}
+						
+						@Override
+						public Collection<BundleCapability> findProviders(Requirement requirement) {
+							return Collections.emptySet();
+						}
+					};
+					Field pinCodeField = InternalPlatform.getDefault().getClass().getDeclaredField("fwkWiring");
+					pinCodeField.setAccessible(true);
+					pinCodeField.set(InternalPlatform.getDefault(), fw);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 				
 			} catch (BirtException e) {
 				e.printStackTrace();
 			}
+			
+			
 			
 			IReportEngineFactory factory = (IReportEngineFactory) Platform
 					.createFactoryObject(IReportEngineFactory.EXTENSION_REPORT_ENGINE_FACTORY);

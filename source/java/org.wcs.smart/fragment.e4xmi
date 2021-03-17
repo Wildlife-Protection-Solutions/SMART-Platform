@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="ASCII"?>
+<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:commands="http://www.eclipse.org/ui/2010/UIModel/application/commands" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmlns:menu="http://www.eclipse.org/ui/2010/UIModel/application/ui/menu" xmi:id="_6KPoAID5Eeuxlo8SndIirg">
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_7KY2YID5Eeuxlo8SndIirg" featurename="children" parentElementId="org.eclipse.ui.trim.status" positionInList="">
+    <elements xsi:type="menu:ToolControl" xmi:id="_nDouEID6Eeuxlo8SndIirg" elementId="org.wcs.smart.toolcontrol.status" contributionURI="bundleclass://org.wcs.smart/org.wcs.smart.ui.ToolBarSpacerControl">
+      <tags>stretch</tags>
+    </elements>
+    <elements xsi:type="menu:ToolBar" xmi:id="_PfWNQIEOEeuxlo8SndIirg" elementId="org.wcs.smart.status.toolbar">
+      <children xsi:type="menu:HandledToolItem" xmi:id="_s4mPIIEiEeuxlo8SndIirg" elementId="org.wcs.smart.handledtoolitem.resetperspective" label="%resetwindows.command.label1" iconURI="platform:/plugin/org.wcs.smart/images/icons/shared16/refresh.png" tooltip="%resetwindows.command.tooltip" command="_sLDtUIEaEeuxlo8SndIirg">
+        <tags>FORCE_TEXT</tags>
+      </children>
+      <children xsi:type="menu:ToolBarSeparator" xmi:id="_EaI98IEPEeuxlo8SndIirg" elementId="org.wcs.smart.separator2"/>
+    </elements>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_KrF9oIEaEeuxlo8SndIirg" featurename="commands" parentElementId="xpath:/">
+    <elements xsi:type="commands:Command" xmi:id="_sLDtUIEaEeuxlo8SndIirg" elementId="org.wcs.smart.command.resetperspective" commandName="%resetwindows.command.name"/>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="__Qg7QIEaEeuxlo8SndIirg" featurename="handlers" parentElementId="xpath:/">
+    <elements xsi:type="commands:Handler" xmi:id="_rB5MMIEiEeuxlo8SndIirg" elementId="org.wcs.smart.handler.resetpersective" contributionURI="bundleclass://org.wcs.smart/org.wcs.smart.ui.SmartResetPerspectiveHandler" command="_sLDtUIEaEeuxlo8SndIirg"/>
+  </fragments>
+</fragment:ModelFragments>

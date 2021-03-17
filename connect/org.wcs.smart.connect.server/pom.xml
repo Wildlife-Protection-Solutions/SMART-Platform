@@ -217,14 +217,10 @@
 		</dependency>
 		<dependency>
 			<groupId>org.hibernate</groupId>
-            <artifactId>hibernate-jcache</artifactId>
+            		<artifactId>hibernate-ehcache</artifactId>
 			<version>${hibernate.version}</version>
-        </dependency>
-		<dependency>
-    		<groupId>org.ehcache</groupId>
-   			<artifactId>ehcache</artifactId>
-			<version>${ehcache.version}</version>
-        </dependency>	
+        	</dependency>
+		
 		<!-- tomcat provided dependencies -->
 		<dependency>
 			<groupId>javax.servlet</groupId>
@@ -710,47 +706,38 @@
 		</dependency>
 			
 		<!-- BIRT -->
-		<!-- required to prevent class "org.eclipse.core.runtime.IExtensionRegistry"'s signer information does not match signer information of other classes in the same package -->
-		<!--<dependency>
-    			<groupId>org.eclipse.birt.runtime</groupId>
-    			<artifactId>org.eclipse.datatools.connectivity.oda</artifactId>
-    			<version>3.4.3.v201405301249</version>
-		</dependency>
-		<dependency>
-    			<groupId>org.eclipse.equinox</groupId>
-    			<artifactId>common</artifactId>
-    			<version>3.6.200-v20130402-1505</version>
-		</dependency>
-	-->
 		
-	
+		
+		
+		<!--eclipse for udig -->
+		<dependency>
+  			<groupId>org.eclipse.platform</groupId>
+  			<artifactId>org.eclipse.jface</artifactId>
+  			<version>3.22.0</version>
+		</dependency>
 		
 		<dependency>
-    			<groupId>com.ibm.icu</groupId>
-    			<artifactId>icu4j</artifactId>
-    			<version>59.1</version>
-		</dependency>
-		<dependency>
-	    		<groupId>joda-time</groupId>
-	    		<artifactId>joda-time</artifactId>
-	    		<version>1.6</version>
-		</dependency>
-		<dependency>
-	    		<groupId>org.picocontainer</groupId>
-	    		<artifactId>picocontainer</artifactId>
-	    		<version>2.15</version>
-		</dependency>
-		<dependency>
-	    		<groupId>com.google.guava</groupId>
-	    		<artifactId>guava</artifactId>
-	    		<version>22.0</version>
-		</dependency>
-
-
-		<dependency>
-    		<groupId>org.eclipse.birt.runtime.3_7_1</groupId>
-    		<artifactId>Tidy</artifactId>
-    		<version>1</version>
+  			<groupId>org.eclipse.platform</groupId>
+  			<artifactId>org.eclipse.ui.workbench</artifactId>
+  			<version>3.122.0</version>
+  			
+  			<exclusions>
+				<exclusion>
+					<groupId>org.eclipse.platform</groupId>
+					<artifactId>org.eclipse.swt.gtk.linux.aarch64</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.eclipse.platform</groupId>
+					<artifactId>org.eclipse.swt.gtk.linux.arm</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.eclipse.platform</groupId>
+					<artifactId>org.eclipse.e4.ui.workbench.swt</artifactId>
+				</exclusion>
+				
+			</exclusions>
+			
+			
 		</dependency>
 		
 		<dependency>
@@ -759,47 +746,510 @@
 		    <version>2.1.0</version>
 		</dependency>
 		
+		
+		
+		
+		
 		<dependency>
-    		<groupId>org.eclipse.scout.sdk.deps</groupId>
-    		<artifactId>org.eclipse.jface</artifactId>
-    		<version>3.12.0.v20160518-1929</version>
-    			
-    			<exclusions>
-    				<exclusion>
-    					<groupId>org.eclipse.scout.sdk.deps</groupId>
-    					<artifactId>org.eclipse.swt.win32.win32.x86</artifactId>
-    				</exclusion>
-    				
-    		</exclusions>
-    		
-    		
+			<groupId>org.eclipse.birt</groupId>
+			<artifactId>org.eclipse.birt.report.engine.emitter.config</artifactId>
+			<version>4.18.0-SNAPSHOT</version>
 		</dependency>
-	
 		<dependency>
-    		<groupId>org.eclipse.scout.sdk.deps</groupId>
-    		<artifactId>org.eclipse.ui.workbench</artifactId>
-    		<version>3.108.0.v20160602-1232</version>
-    		<exclusions>
-				<exclusion>
-        			<groupId>org.eclipse.scout.sdk.deps</groupId>
-        			<artifactId>org.eclipse.core.runtime</artifactId>
-				</exclusion>
-				<exclusion>
-        			<groupId>org.eclipse.scout.sdk.deps</groupId>
-        			<artifactId>org.eclipse.jface</artifactId>
-				</exclusion>
-				<exclusion>
-        			<groupId>org.eclipse.scout.sdk.deps</groupId>
-        			<artifactId>org.eclipse.swt.win32.win32.x86</artifactId>
-				</exclusion>
-    
-  		</exclusions>
+			<groupId>org.eclipse.birt</groupId>
+			<artifactId>org.eclipse.birt.report.engine.emitter.config.docx</artifactId>
+			<version>4.18.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.birt</groupId>
+			<artifactId>org.eclipse.birt.report.engine.emitter.config.pdf</artifactId>
+			<version>4.18.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.birt</groupId>
+			<artifactId>org.eclipse.birt.report.engine.emitter.config.odt</artifactId>
+			<version>4.18.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.birt</groupId>
+			<artifactId>org.eclipse.birt.report.engine.emitter.config.html</artifactId>
+			<version>4.18.0-SNAPSHOT</version>
+		</dependency>		
+				<dependency>
+			<groupId>org.eclipse.birt</groupId>
+			<artifactId>org.eclipse.birt.report.engine.emitter.html</artifactId>
+			<version>4.18.0-SNAPSHOT</version>
+		</dependency>
+				<dependency>
+			<groupId>org.eclipse.birt</groupId>
+			<artifactId>org.eclipse.birt.report.engine.emitter.config.wpml</artifactId>
+			<version>4.18.0-SNAPSHOT</version>
+		</dependency>		
+				<dependency>
+			<groupId>org.eclipse.birt</groupId>
+			<artifactId>org.eclipse.birt.report.engine.emitter.wpml</artifactId>
+			<version>4.18.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.birt</groupId>
+			<artifactId>org.eclipse.birt.report.engine.ooxml</artifactId>
+			<version>4.18.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.birt</groupId>
+			<artifactId>org.eclipse.birt.report.engine.odf</artifactId>
+			<version>4.18.0-SNAPSHOT</version>
+		</dependency>		
+		<dependency>
+			<groupId>org.eclipse.birt</groupId>
+			<artifactId>org.eclipse.birt.report.engine.emitter.odt</artifactId>
+			<version>4.18.0-SNAPSHOT</version>
+		</dependency>
+				<dependency>
+			<groupId>org.eclipse.birt</groupId>
+			<artifactId>org.eclipse.birt.report.engine.emitter.docx</artifactId>
+			<version>4.18.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.birt</groupId>
+			<artifactId>org.eclipse.birt.report.engine.emitter.pdf</artifactId>
+			<version>4.18.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.birt</groupId>
+			<artifactId>org.eclipse.birt</artifactId>
+			<version>4.18.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.birt</groupId>
+			<artifactId>org.eclipse.birt.core</artifactId>
+			<version>4.18.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.birt</groupId>
+			<artifactId>org.eclipse.birt.data</artifactId>
+			<version>4.18.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.birt</groupId>
+			<artifactId>org.eclipse.birt.data.aggregation</artifactId>
+			<version>4.18.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.birt</groupId>
+			<artifactId>org.eclipse.birt.data.oda.pojo</artifactId>
+			<version>4.18.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.birt</groupId>
+			<artifactId>org.eclipse.birt.report.data.adapter</artifactId>
+			<version>4.18.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.birt</groupId>
+			<artifactId>org.eclipse.birt.report.data.oda.jdbc</artifactId>
+			<version>4.18.0-SNAPSHOT</version>
+		</dependency>
+				<dependency>
+			<groupId>org.eclipse.birt</groupId>
+			<artifactId>org.eclipse.birt.report.engine</artifactId>
+			<version>4.18.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.birt</groupId>
+			<artifactId>org.eclipse.birt.report.engine.dataextraction</artifactId>
+			<version>4.18.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.birt</groupId>
+			<artifactId>org.eclipse.birt.report.engine.dataextraction.csv</artifactId>
+			<version>4.18.0-SNAPSHOT</version>
+		</dependency>		
+		<dependency>
+			<groupId>org.eclipse.birt</groupId>
+			<artifactId>org.eclipse.birt.report.engine.fonts</artifactId>
+			<version>4.18.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.birt</groupId>
+			<artifactId>org.eclipse.birt.report.engine.odf</artifactId>
+			<version>4.18.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.birt</groupId>
+			<artifactId>org.eclipse.birt.report.engine.script.javascript</artifactId>
+			<version>4.18.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.birt</groupId>
+			<artifactId>org.eclipse.birt.report.model</artifactId>
+			<version>4.18.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.birt</groupId>
+			<artifactId>org.eclipse.birt.report.model.adapter.oda</artifactId>
+			<version>4.18.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.birt</groupId>
+			<artifactId>org.eclipse.birt.chart.reportitem.ui</artifactId>
+			<version>4.18.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.birt</groupId>
+			<artifactId>org.eclipse.birt.chart.reportitem</artifactId>
+			<version>4.18.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.birt</groupId>
+			<artifactId>org.eclipse.birt.chart.engine</artifactId>
+			<version>4.18.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.birt</groupId>
+			<artifactId>org.eclipse.birt.chart.engine.extension</artifactId>
+			<version>4.18.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.birt</groupId>
+			<artifactId>org.eclipse.birt.chart.device.extension</artifactId>
+			<version>4.18.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.birt</groupId>
+			<artifactId>org.eclipse.birt.chart.device.pdf</artifactId>
+			<version>4.18.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.birt</groupId>
+			<artifactId>org.eclipse.birt.chart.device.svg</artifactId>
+			<version>4.18.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.birt</groupId>
+			<artifactId>org.eclipse.birt.report.item.crosstab.core</artifactId>
+			<version>4.18.0-SNAPSHOT</version>
 		</dependency>
 		
 		<dependency>
-    		<groupId>info.debatty</groupId>
-    		<artifactId>java-string-similarity</artifactId>
-    		<version>1.1.0</version>
+			<groupId>com.itextpdf</groupId>
+			<artifactId>itext7-core</artifactId>
+  			<version>7.1.14</version>
+  			  <type>pom</type>
 		</dependency>
+		
+		<dependency>
+  <groupId>net.sf.jtidy</groupId>
+  <artifactId>jtidy</artifactId>
+  <version>r938</version>
+</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.datatools.plugins</groupId>
+			<artifactId>org.eclipse.datatools.connectivity</artifactId>
+			<version>1.14.102-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.datatools.plugins</groupId>
+			<artifactId>org.eclipse.datatools.connectivity.oda</artifactId>
+			<version>3.6.101-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+		  <groupId>org.eclipse.datatools.plugins</groupId>
+  <artifactId>org.eclipse.datatools.connectivity.oda.consumer</artifactId>
+  <version>3.4.101-SNAPSHOT</version>
+  </dependency>
+  
+  
+  
+  
+  
+  
+	
+<!-- 	<dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.datatools.sqltools.parsers.sql.query</artifactId> -->
+<!--        <version>1.3.0.201603142002</version> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.datatools.enablement.ibm.db2.zseries.dbdefinition</artifactId> -->
+<!--        <version>1.1.0.201603142002</version> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>com.ibm.icu</artifactId> -->
+<!--        <version>56.1.0.v201601250100</version> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.datatools.sqltools.data.core</artifactId> -->
+<!--        <version>1.3.0.201603142002</version> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.emf.ecore.xmi</artifactId> -->
+<!--        <version>2.12.0.v20160420-0247</version> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.emf.ecore</artifactId> -->
+<!--        <version>2.12.0.v20160420-0247</version> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.datatools.connectivity.oda</artifactId> -->
+<!--        <version>3.5.0.201603142002</version> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.datatools.enablement.ibm.db2.luw</artifactId> -->
+<!--        <version>1.1.0.201603142002</version> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.datatools.modelbase.derby</artifactId> -->
+<!--        <version>1.1.0.201603142002</version> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.datatools.connectivity.sqm.core</artifactId> -->
+<!--        <version>1.3.0.201603142002</version> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.datatools.enablement.ibm.db2</artifactId> -->
+<!--        <version>1.1.0.201603142002</version> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.datatools.enablement.sap.maxdb</artifactId> -->
+<!--        <version>1.1.0.201603142002</version> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.datatools.enablement.ibm.informix</artifactId> -->
+<!--        <version>1.1.0.201603142002</version> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.datatools.enablement.ibm.db2.zseries</artifactId> -->
+<!--        <version>1.1.0.201603142002</version> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.datatools.connectivity.console.profile</artifactId> -->
+<!--        <version>1.1.0.201603142002</version> -->
+<!--     </dependency> -->
+    <dependency>
+      <groupId>org.eclipse.datatools.plugins</groupId>
+       <artifactId>org.eclipse.datatools.connectivity.oda.consumer</artifactId>
+       <version>3.4.101-SNAPSHOT</version>
+    </dependency>
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.datatools.sqltools.parsers.sql</artifactId> -->
+<!--        <version>1.1.0.201603142002</version> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.datatools.sqltools.result</artifactId> -->
+<!--        <version>1.2.0.201603142002</version> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.datatools.connectivity.apache.derby</artifactId> -->
+<!--        <version>1.1.0.201603142002</version> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.emf.ecore.change</artifactId> -->
+<!--        <version>2.11.0.v20160420-0247</version> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.datatools.enablement.hsqldb</artifactId> -->
+<!--        <version>1.1.0.201603142002</version> -->
+<!--     </dependency> -->
+    <dependency>
+      <groupId>org.eclipse.datatools.plugins</groupId>
+       <artifactId>org.eclipse.datatools.connectivity.oda.design</artifactId>
+       <version>3.5.101-SNAPSHOT</version>
+    </dependency>
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.datatools.enablement.oda.ws</artifactId> -->
+<!--        <version>1.3.0.201603142002</version> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.datatools.connectivity.oda.flatfile</artifactId> -->
+<!--        <version>3.2.0.201603142002</version> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.datatools.connectivity</artifactId> -->
+<!--        <version>1.13.0.201603142002</version> -->
+<!--     </dependency> -->
+    <dependency>
+      <groupId>org.eclipse.datatools.plugins</groupId>
+       <artifactId>org.eclipse.datatools.connectivity.oda.profile</artifactId>
+       <version>3.4.101-SNAPSHOT</version>
+    </dependency>
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.osgi.services</artifactId> -->
+<!--        <version>3.5.100.v20160504-1419</version> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.datatools.enablement.msft.sqlserver.dbdefinition</artifactId> -->
+<!--        <version>1.1.0.201603142002</version> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.apache.derby</artifactId> -->
+<!--        <version>10.11.1.1_v201605202053</version> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.datatools.sqltools.parsers.sql.lexer</artifactId> -->
+<!--        <version>1.1.0.201603142002</version> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.datatools.enablement.ibm.db2.luw.dbdefinition</artifactId> -->
+<!--        <version>1.1.0.201603142002</version> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.datatools.enablement.hsqldb.dbdefinition</artifactId> -->
+<!--        <version>1.1.0.201603142002</version> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.help</artifactId> -->
+<!--        <version>3.7.0.v20160602-1307</version> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.equinox.app</artifactId> -->
+<!--        <version>1.3.400.v20150715-1528</version> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.datatools.enablement.msft.sqlserver</artifactId> -->
+<!--        <version>1.1.0.201603142002</version> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.datatools.modelbase.sql</artifactId> -->
+<!--        <version>1.1.0.201603142002</version> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.datatools.enablement.ibm.informix.dbdefinition</artifactId> -->
+<!--        <version>1.1.0.201603142002</version> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.datatools.modelbase.sql.query</artifactId> -->
+<!--        <version>1.2.0.201603142002</version> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.datatools.enablement.oracle.dbdefinition</artifactId> -->
+<!--        <version>1.1.0.201603142002</version> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.datatools.enablement.ibm</artifactId> -->
+<!--        <version>1.1.0.201603142002</version> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.datatools.enablement.oracle</artifactId> -->
+<!--        <version>1.1.0.201603142002</version> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.datatools.enablement.oda.xml</artifactId> -->
+<!--        <version>1.3.0.201603142002</version> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.datatools.enablement.postgresql</artifactId> -->
+<!--        <version>1.2.0.201603142002</version> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.datatools.enablement.postgresql.dbdefinition</artifactId> -->
+<!--        <version>1.1.0.201603142002</version> -->
+<!--     </dependency> -->
+    <dependency>
+      <groupId>org.eclipse.birt.runtime</groupId>
+       <artifactId>org.eclipse.datatools.modelbase.dbdefinition</artifactId>
+       <version>1.1.0.201603142002</version>
+    </dependency>
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.datatools.enablement.ibm.db2.iseries</artifactId> -->
+<!--        <version>1.1.0.201603142002</version> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.datatools.enablement.mysql</artifactId> -->
+<!--        <version>1.1.0.201603142002</version> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.update.configurator</artifactId> -->
+<!--        <version>3.3.400.v20160506-0750</version> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.datatools.enablement.mysql.dbdefinition</artifactId> -->
+<!--        <version>1.1.0.201603142002</version> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.datatools.enablement.ibm.db2.iseries.dbdefinition</artifactId> -->
+<!--        <version>1.1.0.201603142002</version> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.datatools.connectivity.apache.derby.dbdefinition</artifactId> -->
+<!--        <version>1.1.0.201603142002</version> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.datatools.connectivity.dbdefinition.genericJDBC</artifactId> -->
+<!--        <version>1.1.0.201603142002</version> -->
+<!--     </dependency> -->
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.datatools.connectivity.db.generic</artifactId> -->
+<!--        <version>1.1.0.201603142002</version> -->
+<!--     </dependency> -->
+
+<!--     <dependency> -->
+<!--       <groupId>org.eclipse.birt.runtime</groupId> -->
+<!--        <artifactId>org.eclipse.datatools.enablement.sap.maxdb.dbdefinition</artifactId> -->
+<!--        <version>1.1.0.201603142002</version> -->
+<!--     </dependency> -->
+
+
 	</dependencies>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 </project>

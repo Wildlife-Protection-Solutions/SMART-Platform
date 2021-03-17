@@ -21,7 +21,7 @@
     			<artifactId>org.wcs.smart.core.core</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
-		<dependency>
+		<!--<dependency>
 			<groupId>org.eclipse.birt.runtime</groupId>
 			<artifactId>org.eclipse.birt.runtime</artifactId>
 			<version>${birt.version}</version>
@@ -32,6 +32,6 @@
          				<artifactId>org.apache.batik.pdf</artifactId>
 				</exclusion>
       			</exclusions> 
-		</dependency>
+		</dependency>-->
 	</dependencies>	
 </project>

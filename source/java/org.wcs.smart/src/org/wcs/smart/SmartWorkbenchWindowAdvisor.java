@@ -36,11 +36,9 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.ui.basic.MTrimBar;
 import org.eclipse.e4.ui.model.application.ui.basic.MTrimElement;
-import org.eclipse.e4.ui.model.application.ui.menu.MToolBar;
 import org.eclipse.e4.ui.model.application.ui.menu.MToolControl;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
-import org.eclipse.e4.ui.workbench.renderers.swt.TrimBarLayout;
 import org.eclipse.jface.preference.IPreferenceNode;
 import org.eclipse.jface.preference.PreferenceManager;
 import org.eclipse.ui.IPartListener2;
@@ -242,6 +240,7 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 		IEclipseContext ctx = (IEclipseContext) PlatformUI.getWorkbench()
 				.getService(IEclipseContext.class);
 		EModelService modelService = ctx.get(EModelService.class);
+		
 		MTrimBar element = (MTrimBar) modelService.find("org.eclipse.ui.main.toolbar", ctx.get(MApplication.class)); //$NON-NLS-1$
 		int src = -1;
 		int trg = -1;
@@ -259,35 +258,8 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 			element.getChildren().remove(src);
 			element.getChildren().add(trg, e);
 		}
-		
-		//this gets hidden by some visibility changes events that I don't have control over;
-		//so instead we ensure it is visible here.
-		MTrimBar statusBar = (MTrimBar) modelService.find("org.eclipse.ui.trim.status", ctx.get(MApplication.class)); //$NON-NLS-1$
-		statusBar.setVisible(true);
 
-		
-		//when we added the -Dosgi.framework.extensions=org.eclipse.fx.osgi vm argument
-		//this caused the undoredo toolbar to show up - I couldn't figure out why so
-		//for now I hide it (removing it causes other issues)
-		MToolBar x = (MToolBar)modelService.find("undoredo.toolbar", ctx.get(MApplication.class)); //$NON-NLS-1$
-		if (x != null) {
-			x.setVisible(false);
-			x.setToBeRendered(false);
-		}
-		
-		//move the start status bar to the right and add spacer as require
-		MTrimElement smartStatusBar = (MTrimElement)modelService.find("org.wcs.smart.status.toolbar", statusBar); //$NON-NLS-1$
-		statusBar.getChildren().remove(smartStatusBar);
-		
-		MToolControl tc = modelService.createModelElement(MToolControl.class);
-		tc.setElementId("org.wcs.smart.trim.status.spacer"); //$NON-NLS-1$
-		tc.getTags().add(TrimBarLayout.SPACER);
-		statusBar.getChildren().add(1, tc);
-		statusBar.getChildren().add(smartStatusBar);
-		
-		
 		InactivityTimeoutHandler.INSTANCE.reset();
-
     }
     
     public void postWindowCreate() {
@@ -319,6 +291,14 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 				}catch (Exception ex){
 					SmartPlugIn.log(ex.getMessage(), ex);
 				}
+				
+				//hide status line control
+				IEclipseContext ctx = (IEclipseContext) PlatformUI.getWorkbench()
+						.getService(IEclipseContext.class);
+				EModelService modelService = ctx.get(EModelService.class);
+				MToolControl x = (MToolControl) modelService.find("org.eclipse.ui.StatusLine", ctx.get(MApplication.class)); //$NON-NLS-1$
+				((MToolControl)x).setToBeRendered(true);
+				((MToolControl)x).setToBeRendered(false);
 				return Status.OK_STATUS;
 			}
 		};

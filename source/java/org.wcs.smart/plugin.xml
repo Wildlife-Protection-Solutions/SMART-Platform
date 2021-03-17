@@ -865,25 +865,6 @@
                tooltip="%style.command.tooltip.0">
          </command>
       </menuContribution>
-      <menuContribution
-            allPopups="false"
-            locationURI="toolbar:org.eclipse.ui.trim.status">
-         <toolbar
-               id="org.wcs.smart.status.toolbar">
-            <command
-                  commandId="org.wcs.smart.command.resetperspective"
-                  icon="images/icons/shared16/refresh.png"
-                  label="%resetwindows.command.label1"
-                  mode="FORCE_TEXT"
-                  style="push"
-                  tooltip="%resetwindows.command.tooltip">
-            </command>
-            <separator
-                  name="org.wcs.smart.separator2"
-                  visible="true">
-            </separator>
-         </toolbar>
-      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -918,10 +899,6 @@
       <command
             id="org.wcs.smart.command.ca.areas.show"
             name="%boundaries.command.name">
-      </command>
-      <command
-            id="org.wcs.smart.command.resetperspective"
-            name="%resetwindows.command.name">
       </command>
       <command
             id="org.wcs.smart.command.ca.delete"
@@ -1146,10 +1123,6 @@
       <handler
             class="org.wcs.smart.ui.TranslateNamesHandler$TranslateNamesHandlerWrapper"
             commandId="org.wcs.smart.command.translateitem">
-      </handler>
-      <handler
-            class="org.eclipse.ui.internal.handlers.ResetPerspectiveHandler"
-            commandId="org.wcs.smart.command.resetperspective">
       </handler>
       <handler
             class="org.wcs.smart.ui.ShowPerspectiveHandler$ShowPerspectiveHandlerWrapper"
@@ -1753,6 +1726,10 @@
             beforefragment="true"
             class="org.wcs.smart.e4.SmartE4ModelProcessor">
       </processor>
+      <fragment
+            apply="always"
+            uri="fragment.e4xmi">
+      </fragment>
    </extension>
    <extension
          point="org.wcs.smart.startUpOption">

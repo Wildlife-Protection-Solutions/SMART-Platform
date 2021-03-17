@@ -41,19 +41,10 @@
     			<version>${smart.version}</version>
 		</dependency>
 		<dependency>
-    			<groupId>org.eclipse.birt.runtime</groupId>
-    			<artifactId>org.eclipse.datatools.connectivity.oda</artifactId>
-    			<version>3.4.3.v201405301249</version>
+    			<groupId>org.eclipse.datatools.plugins</groupId>
+  				<artifactId>org.eclipse.datatools.connectivity.oda</artifactId>
+    			<version>3.6.101-SNAPSHOT</version>
 		</dependency>
-		<dependency>
-    			<groupId>com.ibm.icu</groupId>
-    			<artifactId>icu4j</artifactId>
-    			<version>50.1.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.birt.runtime</groupId>
-			<artifactId>org.eclipse.birt.runtime</artifactId>
-			<version>${birt.version}</version>
-		</dependency>
-	</dependencies>	
+		
+	</dependencies> 	
 </project>

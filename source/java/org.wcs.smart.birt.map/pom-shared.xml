@@ -51,14 +51,43 @@
 	    		<version>2.9.3</version>
 		</dependency>
 		
+		<!--
 		<dependency>
     		<groupId>org.eclipse.scout.sdk.deps</groupId>
     		<artifactId>org.eclipse.ui.workbench</artifactId>
     		<version>3.108.0.v20160602-1232</version>
     		<scope>provided</scope>
 		</dependency>
-		
-
+		-->
+		<dependency>
+  			<groupId>org.eclipse.platform</groupId>
+  			<artifactId>org.eclipse.ui.workbench</artifactId>
+  			<version>3.122.0</version>
+  			
+  			<exclusions>
+				<exclusion>  
+					<groupId>org.eclipse.platform</groupId>
+      					<artifactId>org.eclipse.swt.gtk.linux.aarch64</artifactId>
+				</exclusion>
+				<exclusion>  
+					<groupId>org.eclipse.platform</groupId>
+      					<artifactId>org.eclipse.swt.gtk.linux.arm</artifactId>
+				</exclusion>
+				<exclusion>  
+					<groupId>com.sun.jna</groupId>
+      					<artifactId>com.sun.jna</artifactId>
+				</exclusion>
+				<exclusion>  
+					<groupId>com.sun.jna</groupId>
+      					<artifactId>com.sun.jna.platform</artifactId>
+				</exclusion>
+			</exclusions> 
+		</dependency>
+		<dependency>
+  			<groupId>org.mozilla</groupId>
+  			<artifactId>rhino</artifactId>
+  			<version>1.7.13</version>
+		</dependency>
 		
 	</dependencies>	
 </project>
