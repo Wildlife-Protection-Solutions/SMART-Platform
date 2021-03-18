@@ -721,23 +721,5 @@
             clazz="org.wcs.smart.asset.plugin.ChangeTrackerInstaller">
       </ChangeLogTracker>
    </extension>
-   <extension
-         point="org.eclipse.equinox.p2.engine.actions">
-      <action
-            class="org.wcs.smart.asset.plugin.OnInstallAction"
-            name="org.wcs.smart.asset.onInstall"
-            touchpointType="org.eclipse.equinox.p2.osgi"
-            version="1.0.0">
-      </action>
-   </extension>
-   <extension
-         point="org.eclipse.equinox.p2.engine.actions">
-      <action
-            class="org.wcs.smart.asset.plugin.OnUninstallAction"
-            name="org.wcs.smart.asset.onUninstall"
-            touchpointType="org.eclipse.equinox.p2.osgi"
-            version="1.0.0">
-      </action>
-   </extension>
 
 </plugin>
