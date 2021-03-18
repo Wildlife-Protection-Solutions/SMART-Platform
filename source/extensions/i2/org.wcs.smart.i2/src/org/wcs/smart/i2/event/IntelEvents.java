@@ -107,6 +107,7 @@ public class IntelEvents {
 
 	//changes to profiles config or active profiles
 	public static final String PROFILES_ALL = "PROFILES/*"; //$NON-NLS-1$
+	public static final String PROFIlE_DELETE = "PROFIlES/DELETE"; //$NON-NLS-1$
 	//changes in active profile
 	public static final String ACTIVE_PROFILES = "PROFILES/ACTIVE"; //$NON-NLS-1$
 	//changes in profile config

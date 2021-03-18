@@ -74,6 +74,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.birt.IntelReportManager;
+import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelProfileEntityType;
@@ -337,20 +338,16 @@ public class ProfilesPreferencePage extends PreferencePage implements IIntelPref
 		};
 		if (confirm.open() != Window.OK) return ;
 			
+		boolean ok = true;
 		try(Session session = HibernateManager.openSession()){
-			ProfilesManager.INSTANCE.canDelete(p, session);
-			
-			session.getTransaction().begin();
-			try {
-				ProfilesManager.INSTANCE.deleteProfile(p, session);
-				session.getTransaction().commit();
-			}catch (Exception ex) {
-				session.getTransaction().rollback();
-				throw ex;
-			}
+			ProfilesManager.INSTANCE.deleteProfile(p, session);
 		}catch (Exception ex) {
+			ok = false;
 			Intelligence2PlugIn.displayLog(Messages.ProfilesPreferencePage_DeleteError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 		}
+		//fire deleted event after session is closed
+		if (ok) eventBroker.post(IntelEvents.PROFIlE_DELETE, p);
+		
 		refresh();
 	}
 	
