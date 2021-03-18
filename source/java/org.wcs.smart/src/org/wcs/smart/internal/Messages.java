@@ -281,6 +281,7 @@ public class Messages extends NLS {
 	public static String CaImporter_ExtraDataWarning2;
 	public static String CaImporter_ExtraDataWarning3;
 	public static String CaImporter_InvalidExportVersion;
+	public static String CaImporter_NotCaFile;
 	public static String CaImporter_Progress_BackupCurrent;
 	public static String CaImporter_Progress_CleanUp;
 	public static String CaImporter_Progress_ImportingCa;

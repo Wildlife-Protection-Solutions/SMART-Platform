@@ -111,6 +111,9 @@ public class CaImporter {
 			try(ZipFile archiveFile = new ZipFile(file.normalize().toAbsolutePath().toFile())){
 				ZipArchiveEntry zipEntry = archiveFile.getEntry(ICaDataExportEngine.CA_INFO_FILENAME);
 				Path p = temp.resolve(ICaDataExportEngine.CA_INFO_FILENAME);
+				if (!Files.exists(p)) {
+					throw new Exception(Messages.CaImporter_NotCaFile);
+				}
 				Files.createDirectories(p.getParent());
 				Files.copy(archiveFile.getInputStream(zipEntry), p);
 				
