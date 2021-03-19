@@ -10,8 +10,8 @@
 		<relativePath>../</relativePath>
 	</parent>
 	
-	<name>Patrol Demo Data Generator</name>
-	<artifactId>org.wcs.smart.datagenerator</artifactId>
+	<name>Ecologicial Records Demo Data Generator</name>
+	<artifactId>org.wcs.smart.datagenerator.er</artifactId>
   	<packaging>eclipse-plugin</packaging>
 	<version>7.0.1-SNAPSHOT</version>
 	

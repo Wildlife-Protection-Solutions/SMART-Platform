@@ -10,7 +10,7 @@
     <relativePath>../</relativePath>
   </parent>
 
-  <artifactId>org.wcs.smart.datagenerator.feature</artifactId>
+  <artifactId>org.wcs.smart.datagenerator.er.feature</artifactId>
   <packaging>eclipse-feature</packaging>
-  <version>7.0.0-SNAPSHOT</version>
+  <version>7.0.1-SNAPSHOT</version>
 </project>

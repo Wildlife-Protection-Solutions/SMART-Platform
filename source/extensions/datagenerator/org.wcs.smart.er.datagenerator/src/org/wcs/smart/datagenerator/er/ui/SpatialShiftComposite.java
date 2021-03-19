@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.datagenerator.ui;
+package org.wcs.smart.datagenerator.er.ui;
 
 import java.awt.Point;
 import java.lang.reflect.InvocationTargetException;
@@ -61,7 +61,6 @@ import org.geotools.referencing.CRS;
 import org.hibernate.Session;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
-import org.locationtech.jts.geom.LineString;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IService;
@@ -74,21 +73,19 @@ import org.locationtech.udig.project.internal.command.navigation.ZoomExtentComma
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
 import org.locationtech.udig.project.internal.commands.DeleteLayersCommand;
 import org.locationtech.udig.project.internal.render.ViewportModel;
-import org.locationtech.udig.project.render.IViewportModelListener;
-import org.locationtech.udig.project.render.ViewportModelEvent;
 import org.locationtech.udig.project.ui.render.glass.GlassPane;
 import org.locationtech.udig.project.ui.viewers.MapViewer;
 import org.opengis.referencing.operation.MathTransform;
 import org.wcs.smart.ca.Area;
-import org.wcs.smart.datagenerator.DataGeneratorPlugIn;
-import org.wcs.smart.datagenerator.internal.Messages;
+import org.wcs.smart.datagenerator.er.ErDataGeneratorPlugIn;
+import org.wcs.smart.datagenerator.er.internal.Messages;
+import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.MissionDay;
+import org.wcs.smart.er.model.MissionTrack;
+import org.wcs.smart.er.model.SurveyWaypointSource;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.patrol.model.Patrol;
-import org.wcs.smart.patrol.model.PatrolLeg;
-import org.wcs.smart.patrol.model.PatrolLegDay;
-import org.wcs.smart.patrol.model.PatrolWaypointSource;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.util.GeometryUtils;
 
@@ -101,7 +98,7 @@ import org.wcs.smart.util.GeometryUtils;
  */
 public class SpatialShiftComposite  extends Composite{
 
-	private DataGeneratorView view;
+	private ErDataGeneratorView view;
 	
 	@Inject private UISynchronize ui;
 	
@@ -124,7 +121,7 @@ public class SpatialShiftComposite  extends Composite{
 	private boolean doValidate = true;
 	private List<Layer> shapefileLayers;
 	
-	public SpatialShiftComposite(Composite parent, DataGeneratorView view) {
+	public SpatialShiftComposite(Composite parent, ErDataGeneratorView view) {
 		super(parent, SWT.NONE);
 		this.view = view;
 		createContents();
@@ -134,7 +131,7 @@ public class SpatialShiftComposite  extends Composite{
 	private void createContents() {
 		setLayout(new GridLayout());
 		
-		Composite infoComp = view.createHeader(this, Messages.SpatialShiftComposite_ShiftText);
+		Composite infoComp = view.createHeader(this, Messages.SpatialShiftComposite_Message);
 		infoComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		FormToolkit toolkit = view.toolkit;
@@ -357,7 +354,7 @@ public class SpatialShiftComposite  extends Composite{
 							Envelope e = JTS.transform(re, CRS.findMathTransform(re.getCoordinateReferenceSystem(), SmartDB.DATABASE_CRS));
 							updateXY(e);
 						}catch (Exception ex) {
-							DataGeneratorPlugIn.log(ex.getMessage(), ex);
+							ErDataGeneratorPlugIn.log(ex.getMessage(), ex);
 							ui.syncExec(()->{
 								MessageDialog.openError(getShell(), Messages.SpatialShiftComposite_ReadErrorTitle, MessageFormat.format(Messages.SpatialShiftComposite_ReadErrorMsg, sfile.toString(), ex.getMessage()));
 							});
@@ -367,7 +364,7 @@ public class SpatialShiftComposite  extends Composite{
 					}
 				});
 			}catch (Exception ex) {
-				DataGeneratorPlugIn.log(ex.getMessage(), ex);
+				ErDataGeneratorPlugIn.log(ex.getMessage(), ex);
 			}
 		}
 	}
@@ -407,16 +404,14 @@ public class SpatialShiftComposite  extends Composite{
 		Envelope e2 = new Envelope(env);
 		e2.expandBy(  Math.max(env.getWidth(), env.getHeight()) * 0.1);
 		map.getMap().sendCommandSync(new ZoomCommand(e2));
-		
 		final Envelope env1 = env;
-		map.getViewport().setGlass(new GlassPane(map.getViewport()) {
 
+		map.getViewport().setGlass(new GlassPane(map.getViewport()) {
 			@Override
 			public void draw(GC graphics) {
 				Point c1 = map.getMap().getViewportModel().worldToPixel(new Coordinate(env1.getMinX(), env1.getMinY()));
 				Point c2 = map.getMap().getViewportModel().worldToPixel(new Coordinate(env1.getMaxX(), env1.getMaxY()));
 				if (c1 == null || c2 == null) return;
-				
 				graphics.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_RED));
 				graphics.setLineWidth(2);
 				graphics.drawRectangle(c1.x, c1.y, c2.x - c1.x, c2.y - c1.y);
@@ -433,7 +428,7 @@ public class SpatialShiftComposite  extends Composite{
 			
 			newMapviewer.getMap().getViewportModelInternal().setCRS(ViewportModel.BAD_DEFAULT);
 			newMapviewer.getMap().getViewportModelInternal().setCRS(Area.AREA_CRS);
-			LoadDefaultLayersJob job2 = new LoadDefaultLayersJob(newMapviewer.getMap(), true);
+			LoadDefaultLayersJob job2 = new LoadDefaultLayersJob(newMapviewer.getMap(), false);
 			job2.schedule();
 			try {
 				job2.join();
@@ -443,7 +438,7 @@ public class SpatialShiftComposite  extends Composite{
 			
 			currentMapviewer.getMap().getViewportModelInternal().setCRS(ViewportModel.BAD_DEFAULT);
 			currentMapviewer.getMap().getViewportModelInternal().setCRS(Area.AREA_CRS);
-			LoadDefaultLayersJob job = new LoadDefaultLayersJob(currentMapviewer.getMap(), true);
+			LoadDefaultLayersJob job = new LoadDefaultLayersJob(currentMapviewer.getMap(), false);
 			job.schedule();
 			try {
 				job.join();
@@ -456,7 +451,7 @@ public class SpatialShiftComposite  extends Composite{
 				
 				Object[] data = (Object[]) s.createQuery("SELECT min(rawX), min(rawY), max(rawX), max(rawY) FROM Waypoint WHERE sourceId = :source AND conservationArea = :ca") //$NON-NLS-1$
 					.setParameter("ca",  SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
-					.setParameter("source", PatrolWaypointSource.PATROL_WP_SOURCE_ID)  //$NON-NLS-1$
+					.setParameter("source", SurveyWaypointSource.KEY)  //$NON-NLS-1$
 					.uniqueResult();
 				
 				double minx = 0;
@@ -474,38 +469,31 @@ public class SpatialShiftComposite  extends Composite{
 				
 				env = new Envelope(minx,  maxx,  miny,  maxy);
 				
-				List<Patrol> patrols = QueryFactory.buildQuery(s, Patrol.class, 
-						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}) //$NON-NLS-1$
+				List<Mission> missions = QueryFactory.buildQuery(s, Mission.class, 
+						new Object[] {"survey.surveyDesign.conservationArea", SmartDB.getCurrentConservationArea()}) //$NON-NLS-1$
 						.list();
 			
-				for (Patrol p : patrols) {
-					for (PatrolLeg l : p.getLegs()) {
-						for (PatrolLegDay pld : l.getPatrolLegDays()) {
-							try {
-								if (pld.getTrack() == null) continue;
-								for (LineString ls : pld.getTrack().getLineStrings()) {
-									env.expandToInclude(ls.getEnvelopeInternal());
-								}
-							}catch (Exception ex) {
-								ex.printStackTrace();
+				for (Mission mission : missions) {
+					for (MissionDay missionDay : mission.getMissionDays()) {
+						try {
+							if (missionDay.getTracks() == null) continue;
+							for (MissionTrack t : missionDay.getTracks()) {
+								env.expandToInclude(t.getLineString().getEnvelopeInternal());
 							}
+						}catch (Exception ex) {
+							ex.printStackTrace();
 						}
 					}
 				}
 			}
 			
 			SpatialShiftComposite.this.currentBounds = env;
-			addGlassPane(currentMapviewer, SpatialShiftComposite.this.currentBounds);
 			
-//			currentMapviewer.getMap().getViewportModelInternal().addViewportModelListener(new IViewportModelListener() {
-//				
-//				@Override
-//				public void changed(ViewportModelEvent event) {
-//					currentMapviewer.getRenderManager().refresh(null);
-//
-//				}
-//			});
-//			
+			currentMapviewer.getMap().sendCommandSync(new ZoomExtentCommand());
+			
+			addGlassPane(currentMapviewer, env);
+			
+
 			ui.asyncExec(()->{
 				doValidate = false;
 				try {

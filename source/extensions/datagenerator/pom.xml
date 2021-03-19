@@ -137,6 +137,9 @@
 				<module>org.wcs.smart.datagenerator.updatesite</module>
 				<module>org.wcs.smart.datagenerator</module>
 				<module>org.wcs.smart.datagenerator.feature</module>
+				
+				<module>org.wcs.smart.datagenerator.er</module>
+				<module>org.wcs.smart.datagenerator.er.feature</module>
 			</modules>
 		</profile>
 		

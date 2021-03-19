@@ -1,12 +1,12 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Patrol Demo Data Generator
-Bundle-SymbolicName: org.wcs.smart.datagenerator;singleton:=true
+Bundle-SymbolicName: org.wcs.smart.datagenerator.er;singleton:=true
 Bundle-Version: 7.0.1.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Bundle-Vendor: org.wcs.smart
-Bundle-Activator: org.wcs.smart.datagenerator.DataGeneratorPlugIn
+Bundle-Activator: org.wcs.smart.datagenerator.er.ErDataGeneratorPlugIn
 Bundle-ActivationPolicy: lazy
-Require-Bundle: org.wcs.smart.patrol;bundle-version="[7.0.0,8.0.0)"
+Require-Bundle: org.wcs.smart.er;bundle-version="7.0.1"
 Automatic-Module-Name: org.wcs.smart.datagenerator
-Export-Package: org.wcs.smart.datagenerator.model.xml
+Export-Package: org.wcs.smart.datagenerator.er.model.xml
