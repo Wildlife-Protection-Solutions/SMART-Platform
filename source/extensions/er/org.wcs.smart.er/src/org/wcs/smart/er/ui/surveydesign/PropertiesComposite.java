@@ -54,6 +54,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesignProperty;
@@ -106,10 +107,14 @@ public class PropertiesComposite extends SurveyDesignComposite {
 		Composite btnCmp = new Composite(part, SWT.NONE);
 		btnCmp.setLayout(new GridLayout(1, false));
 		btnCmp.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false));
-
+		((GridLayout)btnCmp.getLayout()).marginWidth = 0;
+		((GridLayout)btnCmp.getLayout()).marginHeight = 0;
+		
 		final Button btnAdd = new Button(btnCmp, SWT.NONE);
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
+		btnAdd.setBackground(btnAdd.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnAdd.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		btnAdd.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -122,6 +127,8 @@ public class PropertiesComposite extends SurveyDesignComposite {
 		final Button btnDelete = new Button(btnCmp, SWT.NONE);
 		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		btnDelete.setBackground(btnDelete.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		btnDelete.setEnabled(false);
 		btnDelete.addSelectionListener(new SelectionAdapter(){
 			@Override
