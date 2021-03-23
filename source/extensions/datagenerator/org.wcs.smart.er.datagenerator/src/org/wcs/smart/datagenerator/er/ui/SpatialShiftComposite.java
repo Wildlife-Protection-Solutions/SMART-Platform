@@ -73,6 +73,8 @@ import org.locationtech.udig.project.internal.command.navigation.ZoomExtentComma
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
 import org.locationtech.udig.project.internal.commands.DeleteLayersCommand;
 import org.locationtech.udig.project.internal.render.ViewportModel;
+import org.locationtech.udig.project.render.IViewportModelListener;
+import org.locationtech.udig.project.render.ViewportModelEvent;
 import org.locationtech.udig.project.ui.render.glass.GlassPane;
 import org.locationtech.udig.project.ui.viewers.MapViewer;
 import org.opengis.referencing.operation.MathTransform;
@@ -230,7 +232,13 @@ public class SpatialShiftComposite  extends Composite{
 		});
 		
 		
-		refreshBounds();
+		currentMapviewer.getMap().getViewportModelInternal().addViewportModelListener(new IViewportModelListener() {			
+			@Override
+			public void changed(ViewportModelEvent event) {
+				currentMapviewer.getMap().getViewportModelInternal().removeViewportModelListener(this);
+				refreshBounds();
+			}
+		});
 	}
 	
 	public void refreshBounds() {
@@ -487,10 +495,9 @@ public class SpatialShiftComposite  extends Composite{
 				}
 			}
 			
-			SpatialShiftComposite.this.currentBounds = env;
-			
 			currentMapviewer.getMap().sendCommandSync(new ZoomExtentCommand());
 			
+			SpatialShiftComposite.this.currentBounds = env;
 			addGlassPane(currentMapviewer, env);
 			
 
