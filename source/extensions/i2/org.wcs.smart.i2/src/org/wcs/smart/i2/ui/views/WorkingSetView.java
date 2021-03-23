@@ -451,6 +451,12 @@ public class WorkingSetView {
 			}
 		});
 		addDropListener(parent);
+		
+		if (WorkingSetManager.INSTANCE.getActiveWorkingSet() != null) {
+			IntelWorkingSet temp =  new IntelWorkingSet();
+			temp.setUuid(WorkingSetManager.INSTANCE.getActiveWorkingSet());
+			setWorkingSet(temp);
+		}
 	}
 	
 	/**

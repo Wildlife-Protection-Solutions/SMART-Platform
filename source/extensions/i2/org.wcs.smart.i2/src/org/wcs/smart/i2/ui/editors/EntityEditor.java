@@ -23,6 +23,7 @@ package org.wcs.smart.i2.ui.editors;
 
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
@@ -1347,7 +1348,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 			rType = session.get(IntelRelationshipType.class, rType.getUuid());
 			targetEntity = session.get(IntelEntity.class, targetEntity.getUuid());
 			targetEntity.getAttributes().size();
-			
+			targetEntity.getIdAttributeAsText();
 			if (rType.getRelationshipGroup() != null) rType.getRelationshipGroup().getNames().size();
 			rType.getSourceProfile().equals(getEntity().getProfile());
 			rType.getTargetProfile().equals(targetEntity.getProfile());
@@ -2034,7 +2035,14 @@ public class EntityEditor extends EditorPart implements MapPart{
 		for (Listener l : ls) txtScratchpad.addListener(SWT.Modify, l);
 		
 		if (entity.getPrimaryAttachment() != null){
-			if (Files.exists(entity.getPrimaryAttachment().getAttachmentFile())){
+
+			Path fileName = null;
+			if (entity.getPrimaryAttachment().getCopyFromLocation() != null){
+				fileName = entity.getPrimaryAttachment().getCopyFromLocation();
+			}else {
+				fileName = entity.getPrimaryAttachment().getAttachmentFile();
+			}
+			if (Files.exists(fileName)){
 				Thumbnail thum = new Thumbnail(entity.getPrimaryAttachment(), THUMB_SIZE);
 				imgMain = thum.getImage();
 				lblMainImage.redraw();

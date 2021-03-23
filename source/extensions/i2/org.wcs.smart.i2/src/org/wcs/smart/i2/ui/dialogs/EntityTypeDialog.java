@@ -316,8 +316,12 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 								sub.split(1);
 								s.saveOrUpdate(type); 
 							}
-							
 
+							//set order and update groups
+							for (int i = 0; i < groups.size(); i ++){
+								groups.get(i).setOrder(i);
+								s.saveOrUpdate(groups.get(i));
+							}
 							
 							if (type.getDmAttribute() == null) {
 								s.createQuery("UPDATE IntelEntity SET dmAttributeListItem = null WHERE entityType = :type") //$NON-NLS-1$
@@ -351,11 +355,6 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 								throw new Exception(v);
 							}
 							
-							//set order and update groups
-							for (int i = 0; i < groups.size(); i ++){
-								groups.get(i).setOrder(i);
-								s.saveOrUpdate(groups.get(i));
-							}
 							
 							for (IntelEntityTypeAttribute a : attributeList){
 								if (!type.getAttributes().contains(a)){
