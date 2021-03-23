@@ -27,6 +27,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 import org.eclipse.datatools.connectivity.oda.IBlob;
@@ -267,6 +268,8 @@ public class SmartTableResultSet  implements IResultSet {
 		lastObject = getCurrentItem(index);
 		if (lastObject instanceof Time) {
 			return (Time) lastObject;
+		}else if (lastObject instanceof LocalTime) {
+			return Time.valueOf((LocalTime)lastObject);
 		}
 		throw new UnsupportedOperationException();
 	}
@@ -287,6 +290,8 @@ public class SmartTableResultSet  implements IResultSet {
 		lastObject = getCurrentItem(index);
 		if (lastObject instanceof Timestamp) {
 			return (Timestamp) lastObject;
+		}else if (lastObject instanceof LocalDateTime) {
+			return Timestamp.valueOf((LocalDateTime)lastObject);
 		}
 		throw new UnsupportedOperationException();
 	}
