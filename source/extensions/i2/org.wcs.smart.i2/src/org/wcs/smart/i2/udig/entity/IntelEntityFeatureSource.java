@@ -119,13 +119,13 @@ public class IntelEntityFeatureSource extends ContentFeatureSource {
 				StringBuilder sb = new StringBuilder();
 				sb.append("the_geom:"); //$NON-NLS-1$
 				sb.append(geomType.getGeomType());
-				sb.append(":srid=4326,fid:String,id:String,date:Date,comment:String,record:String,record_date:Date,record_uuid:String,system_id:String"); //$NON-NLS-1$
+				sb.append(":srid=4326,fid:String,id:String,date:Date,comment:String,record:String,record_date:Date,record_uuid:String,system_id:String,entityid:String"); //$NON-NLS-1$
 				return sb.toString();
 			case ATTRIBUTE:
 				sb = new StringBuilder();
 				sb.append("the_geom:"); //$NON-NLS-1$
 				sb.append(geomType.getGeomType());
-				sb.append(":srid=4326,fid:String,attribute:String"); //$NON-NLS-1$
+				sb.append(":srid=4326,fid:String,entityid:String,attribute:String"); //$NON-NLS-1$
 				return sb.toString();
 			case DM_OBS:
 				sb = new StringBuilder();

@@ -74,13 +74,14 @@ public class IntelEntityFeatureReader implements FeatureReader<SimpleFeatureType
 		
 		if(geomType == LocationLayerType.POINT || geomType == LocationLayerType.POLYGON) {
 			
-			ArrayList<IntelLocation> locations = new ArrayList<IntelLocation>();
+			ArrayList<IntelEntityLocation> locations = new ArrayList<>();
 			List<IntelEntityLocation> alllocations = EntityManager.INSTANCE.getEntityLocations(session, entityUuid, dFilter);
 			
 			for (IntelEntityLocation location : alllocations){
 				if (( location.getLocation().isPoint() && geomType == LocationLayerType.POINT )||
 						( location.getLocation().isPolygon() && geomType == LocationLayerType.POLYGON)){
-					locations.add(location.getLocation());
+					location.getEntity().getIdAttributeAsText();
+					locations.add(location);
 				}
 			}
 			fIterator = locations.iterator();
@@ -148,15 +149,16 @@ public class IntelEntityFeatureReader implements FeatureReader<SimpleFeatureType
 	public SimpleFeature next() throws IOException, IllegalArgumentException,
 			NoSuchElementException {		
 		if (geomType == LocationLayerType.POINT || geomType == LocationLayerType.POLYGON) {
-			return IntelEntityFeatureReader.getIntelLocationAsFeature((IntelLocation)fIterator.next(), ftype);
+			return IntelEntityFeatureReader.getIntelLocationAsFeature((IntelEntityLocation)fIterator.next(), ftype);
 		}else if (geomType == LocationLayerType.DM_OBS) {
 			return IntelEntityFeatureReader.getWaypointAsFeature((Waypoint)fIterator.next(), ftype, session);
 		}
 		return null;
 	}
 	
-	private static SimpleFeature getIntelLocationAsFeature(IntelLocation location, SimpleFeatureType ftype){
-		Object data[] = new Object[9];		
+	private static SimpleFeature getIntelLocationAsFeature(IntelEntityLocation elocation, SimpleFeatureType ftype){
+		Object data[] = new Object[10];		
+		IntelLocation location = elocation.getLocation();
 		try {
 			data[0] = location.getGeometry();
 		} catch (ParseException e) {
@@ -170,6 +172,7 @@ public class IntelEntityFeatureReader implements FeatureReader<SimpleFeatureType
 		data[6] = location.getRecord().getDateCreated();
 		data[7] = UuidUtils.uuidToString(location.getRecord().getUuid());
 		data[8] = UuidUtils.uuidToString(location.getUuid());
+		data[9] = elocation.getEntity().getIdAttributeAsText();
 		
 		return SimpleFeatureBuilder.build(ftype, data, (String)data[1]);
 	}
