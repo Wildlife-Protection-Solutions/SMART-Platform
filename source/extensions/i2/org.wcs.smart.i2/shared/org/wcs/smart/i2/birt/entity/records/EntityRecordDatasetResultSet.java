@@ -27,6 +27,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -300,6 +301,8 @@ public class EntityRecordDatasetResultSet implements IResultSet {
 		lastRowItem = getCurrentItem(index);
 		if (lastRowItem instanceof Time) {
 			return (Time) lastRowItem;
+		}else if (lastRowItem instanceof LocalTime) {
+			return Time.valueOf((LocalTime)lastRowItem);
 		}
 		throw new UnsupportedOperationException();
 	}
@@ -320,6 +323,8 @@ public class EntityRecordDatasetResultSet implements IResultSet {
 		lastRowItem = getCurrentItem(index);
 		if (lastRowItem instanceof Timestamp) {
 			return (Timestamp) lastRowItem;
+		}else if (lastRowItem instanceof LocalDateTime) {
+			return Timestamp.valueOf((LocalDateTime)lastRowItem);
 		}
 		throw new UnsupportedOperationException();
 	}

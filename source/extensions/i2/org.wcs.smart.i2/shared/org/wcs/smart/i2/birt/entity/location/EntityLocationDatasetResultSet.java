@@ -389,6 +389,8 @@ public class EntityLocationDatasetResultSet implements IResultSet {
 		lastRowItem = getCurrentItem(index);
 		if (lastRowItem instanceof Time) {
 			return (Time) lastRowItem;
+		}else if (lastRowItem instanceof LocalTime) {
+			return Time.valueOf((LocalTime)lastRowItem);
 		}
 		throw new UnsupportedOperationException();
 	}
@@ -411,6 +413,8 @@ public class EntityLocationDatasetResultSet implements IResultSet {
 			return (Timestamp) lastRowItem;
 		}else if (lastRowItem instanceof Date) {
 			return new Timestamp(((Date)lastRowItem).getTime());
+		}else if (lastRowItem instanceof LocalDateTime) {
+			return Timestamp.valueOf((LocalDateTime)lastRowItem);
 		}
 		throw new UnsupportedOperationException();
 	}

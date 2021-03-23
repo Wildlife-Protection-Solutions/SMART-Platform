@@ -27,6 +27,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -326,6 +327,8 @@ public class IntelQueryDatasetResultSet implements IResultSet {
 		lastRowItem = getCurrentItem(index);
 		if (lastRowItem instanceof Time) {
 			return (Time) lastRowItem;
+		}else if (lastRowItem instanceof LocalTime) {
+			return Time.valueOf((LocalTime)lastRowItem);
 		}else if (lastRowItem instanceof Timestamp) {
 			return new Time(((Timestamp)lastRowItem).getTime());
 		}
@@ -348,6 +351,8 @@ public class IntelQueryDatasetResultSet implements IResultSet {
 		lastRowItem = getCurrentItem(index);
 		if (lastRowItem instanceof Timestamp) {
 			return (Timestamp) lastRowItem;
+		}else if (lastRowItem instanceof LocalDateTime) {
+			return Timestamp.valueOf((LocalDateTime)lastRowItem);
 		}
 		throw new UnsupportedOperationException();
 	}
