@@ -46,6 +46,7 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.MultiPoint;
 import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.linearref.LengthLocationMap;
 import org.locationtech.jts.shape.random.RandomPointsBuilder;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.Employee;
@@ -66,6 +67,7 @@ import org.wcs.smart.er.model.MissionMember;
 import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.MissionTrack;
+import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyWaypoint;
@@ -99,6 +101,7 @@ public class ErDataGenerator implements IDataEngine{
 	private HashMap<Range, ObservationConfiguration> observationWeightMap;
 	
 	private SurveyDesign design;
+	private List<SamplingUnit> samplingUnits;
 	
 	private Random random = new Random();
 	private List<Survey> newSurveys;
@@ -126,6 +129,8 @@ public class ErDataGenerator implements IDataEngine{
 					throw new Exception(MessageFormat.format(Messages.ErDataGenerator_SurveyDesignNotFound, config.getSurveyDesignKey()));
 				}
 				
+				samplingUnits = QueryFactory.buildQuery(session, SamplingUnit.class, 
+						new Object[] {"surveyDesign", design}).list(); //$NON-NLS-1$
 				
 				//setup weighting based on configurable model
 				Set<Category> items = null;
@@ -359,6 +364,31 @@ public class ErDataGenerator implements IDataEngine{
 
 			int switchdir = random.nextInt(10) + 10;
 			
+			
+			SamplingUnit unit = null;
+			Geometry unitGeom = null;
+			if (samplingUnits.size() > 0) {
+				unit = samplingUnits.get(random.nextInt(samplingUnits.size()));
+				
+				unitGeom = unit.getGeometry();
+				Coordinate c = null;
+				if (unitGeom instanceof Point) {
+					c = ((Point)unitGeom).getCoordinate();
+				}else if (unitGeom instanceof LineString) {
+					c = ((LineString)unitGeom).getCoordinateN(0);
+				}else {
+					unit = null;
+					unitGeom = null;
+				}
+				
+				if (c != null) {
+					double percent1 = (random.nextInt(100) + 1) / 100.0;
+					double percent2 = (random.nextInt(100) + 1) / 100.0;					
+					startc = new Coordinate(c.x + xdir * (maxdegrees * percent1),  c.y + ydir * (maxdegrees * percent2)  );
+				}
+			}
+			
+			
 			for (int i = 0; i < numTrackPoints; i++) {
 			
 				if (i % switchdir == 0) {
@@ -372,17 +402,24 @@ public class ErDataGenerator implements IDataEngine{
 				LocalTime wpTime = LocalTime.ofSecondOfDay(time);
 				LocalDateTime wpDateTime = LocalDateTime.of(date, wpTime);
 				
-				
 				Waypoint trackPoint = new Waypoint();
 				trackPoint.setDateTime( wpDateTime );
 				trackPoint.setRawX(startc.x);
 				trackPoint.setRawY(startc.y);
 				trackpoints.add(trackPoint);
 
-				//move coordinate 
+				//move coordinate
 				double percent1 = (random.nextInt(100) + 1) / 100.0;
 				double percent2 = (random.nextInt(100) + 1) / 100.0;
-				startc = new Coordinate(startc.x + xdir * (maxdegrees * percent1),  startc.y + ydir * (maxdegrees * percent2)  );				
+				if (unitGeom instanceof Point) {
+					startc = ((Point)unitGeom).getCoordinate();
+					startc = new Coordinate(startc.x + xdir * (maxdegrees * percent1),  startc.y + ydir * (maxdegrees * percent2)  );
+				}else if (unitGeom instanceof LineString) {
+					startc = LengthLocationMap.getLocation((LineString)unitGeom, (unitGeom.getLength() / numTrackPoints) * i).getCoordinate((LineString)unitGeom);
+					startc = new Coordinate(startc.x + xdir * (maxdegrees * percent1),  startc.y + ydir * (maxdegrees * percent2)  );
+				}else {
+					startc = new Coordinate(startc.x + xdir * (maxdegrees * percent1),  startc.y + ydir * (maxdegrees * percent2)  );
+				}
 			}
 			
 			LineString track = ObservationGPSDataImport.convertToLineString(trackpoints);
@@ -400,6 +437,8 @@ public class ErDataGenerator implements IDataEngine{
 			
 			waypoints.sort((a,b)->a.getDateTime().compareTo(b.getDateTime()));
 			
+		
+			
 			for (int i = 0; i < numWaypoints; i++) {
 				Employee observer = null;
 				
@@ -410,7 +449,6 @@ public class ErDataGenerator implements IDataEngine{
 				wp.setId(String.valueOf(i+1));
 				wp.setSourceId(SurveyWaypointSource.KEY);
 				wp.setObservationGroups(new ArrayList<>());
-				
 				if (design.getTrackDistanceDirection()) {
 					wp.setDirection((float)( random.nextInt(36000) / 100.0 ) );
 					wp.setDistance( (float)(random.nextDouble() * 5000.0));
@@ -421,6 +459,7 @@ public class ErDataGenerator implements IDataEngine{
 				session.save(wp);
 				
 				SurveyWaypoint pw = new SurveyWaypoint();
+				pw.setSamplingUnit(unit);
 				pw.setMissionDay(missionDay);
 				pw.setWaypoint(wp);
 				missionDay.getWaypoints().add(pw);
