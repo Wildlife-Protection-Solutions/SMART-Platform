@@ -21,10 +21,13 @@
  */
 package org.wcs.smart.util;
 
+import java.awt.image.BufferedImage;
+import java.awt.image.SinglePixelPackedSampleModel;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -809,7 +812,49 @@ public class SmartUtils {
 	}
 	
 	public static Image readSvg(Display display, InputStream is, Integer size) throws IOException, TranscoderException {
-		PNGTranscoder transcoder = new PNGTranscoder();
+		PNGTranscoder transcoder = new PNGTranscoder() {
+			//hack because teh transcoder batik jar doesn't require the codec jar which contains
+			//the PNGTranscoderInternalCodecWriteAdapter; so the osgi class loader fails 
+			public void writeImage(BufferedImage img, TranscoderOutput output) throws TranscoderException {
+
+				OutputStream ostream = output.getOutputStream();
+				if (ostream == null) {
+			            throw new TranscoderException("Invalid output stream"); //$NON-NLS-1$
+				}
+
+				//
+				// This is a trick so that viewers which do not support the alpha
+				// channel will see a white background (and not a black one).
+				//
+				boolean forceTransparentWhite = false;
+
+				if (hints.containsKey(PNGTranscoder.KEY_FORCE_TRANSPARENT_WHITE)) {
+					forceTransparentWhite = (Boolean) hints.get(PNGTranscoder.KEY_FORCE_TRANSPARENT_WHITE);
+				}
+
+				if (forceTransparentWhite) {
+					SinglePixelPackedSampleModel sppsm;
+					sppsm = (SinglePixelPackedSampleModel) img.getSampleModel();
+					forceTransparentWhite(img, sppsm);
+				}
+
+				try {
+					Class<?> clazz = Class
+							.forName("org.apache.batik.ext.awt.image.codec.png.PNGTranscoderInternalCodecWriteAdapter"); //$NON-NLS-1$
+					WriteAdapter adapter = (WriteAdapter) clazz.getDeclaredConstructor().newInstance();
+					if (adapter == null) {
+						throw new TranscoderException("Could not write PNG file because no WriteAdapter is availble"); //$NON-NLS-1$
+					}
+					adapter.writeImage(this, img, output);
+				} catch (TranscoderException e) {
+					throw e;
+				} catch (Exception e) {
+					throw new TranscoderException(e);
+				}
+
+			}
+		};
+		
 		if (size != null) {
 			transcoder.addTranscodingHint(SVGAbstractTranscoder.KEY_WIDTH, (float)size);
 			transcoder.addTranscodingHint(SVGAbstractTranscoder.KEY_HEIGHT, (float)size);
