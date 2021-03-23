@@ -233,7 +233,13 @@ public class SpatialShiftComposite  extends Composite{
 		});
 		
 		
-		refreshBounds();
+		currentMapviewer.getMap().getViewportModelInternal().addViewportModelListener(new IViewportModelListener() {			
+			@Override
+			public void changed(ViewportModelEvent event) {
+				currentMapviewer.getMap().getViewportModelInternal().removeViewportModelListener(this);
+				refreshBounds();
+			}
+		});
 	}
 	
 	public void refreshBounds() {
@@ -408,6 +414,8 @@ public class SpatialShiftComposite  extends Composite{
 		e2.expandBy(  Math.max(env.getWidth(), env.getHeight()) * 0.1);
 		map.getMap().sendCommandSync(new ZoomCommand(e2));
 		
+		map.getMap().getRenderManager().refresh(null);
+		
 		final Envelope env1 = env;
 		map.getViewport().setGlass(new GlassPane(map.getViewport()) {
 
@@ -423,7 +431,7 @@ public class SpatialShiftComposite  extends Composite{
 			}
 			
 		});
-		map.getMap().getRenderManager().refresh(null);
+		
 	}
 	
 	private Job refreshBounds = new Job("refresh current bounds") { //$NON-NLS-1$
@@ -433,7 +441,7 @@ public class SpatialShiftComposite  extends Composite{
 			
 			newMapviewer.getMap().getViewportModelInternal().setCRS(ViewportModel.BAD_DEFAULT);
 			newMapviewer.getMap().getViewportModelInternal().setCRS(Area.AREA_CRS);
-			LoadDefaultLayersJob job2 = new LoadDefaultLayersJob(newMapviewer.getMap(), true);
+			LoadDefaultLayersJob job2 = new LoadDefaultLayersJob(newMapviewer.getMap(), false);
 			job2.schedule();
 			try {
 				job2.join();
@@ -443,7 +451,7 @@ public class SpatialShiftComposite  extends Composite{
 			
 			currentMapviewer.getMap().getViewportModelInternal().setCRS(ViewportModel.BAD_DEFAULT);
 			currentMapviewer.getMap().getViewportModelInternal().setCRS(Area.AREA_CRS);
-			LoadDefaultLayersJob job = new LoadDefaultLayersJob(currentMapviewer.getMap(), true);
+			LoadDefaultLayersJob job = new LoadDefaultLayersJob(currentMapviewer.getMap(), false);
 			job.schedule();
 			try {
 				job.join();
@@ -494,18 +502,12 @@ public class SpatialShiftComposite  extends Composite{
 				}
 			}
 			
+			currentMapviewer.getMap().sendCommandSync(new ZoomExtentCommand());
+
 			SpatialShiftComposite.this.currentBounds = env;
 			addGlassPane(currentMapviewer, SpatialShiftComposite.this.currentBounds);
 			
-//			currentMapviewer.getMap().getViewportModelInternal().addViewportModelListener(new IViewportModelListener() {
-//				
-//				@Override
-//				public void changed(ViewportModelEvent event) {
-//					currentMapviewer.getRenderManager().refresh(null);
-//
-//				}
-//			});
-//			
+			
 			ui.asyncExec(()->{
 				doValidate = false;
 				try {
