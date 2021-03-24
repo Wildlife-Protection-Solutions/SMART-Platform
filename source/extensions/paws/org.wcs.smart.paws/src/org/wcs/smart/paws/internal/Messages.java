@@ -89,7 +89,15 @@ public class Messages extends NLS {
 
 	public static String ConfigurationEditor_NameRequired;
 
+	public static String ConfigurationEditor_NoneOption;
+
 	public static String ConfigurationEditor_OtherLayers;
+
+	public static String ConfigurationEditor_PatrolFilters;
+
+	public static String ConfigurationEditor_RasterFilesOp;
+
+	public static String ConfigurationEditor_RasterFiltes;
 
 	public static String ConfigurationEditor_RunBtn;
 
@@ -116,6 +124,8 @@ public class Messages extends NLS {
 	public static String ConfigurationEditor_ShapefileOp;
 
 	public static String ConfigurationEditor_Shapefiles;
+
+	public static String ConfigurationEditor_TiffFiles;
 
 	public static String ConfigurationEditor_unitsTooltip1;
 
@@ -197,8 +207,12 @@ public class Messages extends NLS {
 	public static String PawsManager_GridParametersRequired;
 	public static String PawsManager_GridSize;
 	public static String PawsManager_GridSizeRequired;
+
+	public static String PawsManager_MandateParameter;
 	public static String PawsManager_OtherFiles;
 	public static String PawsManager_TrainingResolution;
+
+	public static String PawsManager_TransportTypeParameter;
 	public static String PawsRunJob_APIError;
 
 	public static String PawsRunJob_BasemapFileUploadError;

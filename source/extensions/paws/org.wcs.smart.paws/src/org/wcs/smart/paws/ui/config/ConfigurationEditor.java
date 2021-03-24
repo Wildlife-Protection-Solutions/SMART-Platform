@@ -26,6 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,6 +37,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -88,7 +90,10 @@ import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.patrol.model.PatrolMandate;
+import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.paws.PawsEvent;
 import org.wcs.smart.paws.PawsFileManager;
 import org.wcs.smart.paws.PawsManager;
@@ -101,8 +106,11 @@ import org.wcs.smart.paws.ui.ErrorText;
 import org.wcs.smart.paws.ui.HeaderComposite;
 import org.wcs.smart.paws.ui.HidePartsPartListener;
 import org.wcs.smart.paws.ui.NewPawsRunHandler;
+import org.wcs.smart.ui.CheckBoxDropDown;
 import org.wcs.smart.ui.SmartStyledInputDialog;
+import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SharedUtils;
+import org.wcs.smart.util.UuidUtils;
 
 
 /**
@@ -123,10 +131,11 @@ public class ConfigurationEditor extends EditorPart {
 	private FormToolkit toolkit;
 
 	private HeaderComposite compHeader;
-	private ComboViewer cmbBound,cmbTrainingRes, cmbClassifier; // cmbCrs, cmbRoad, cmbRiver, cmbContour,
+	private ComboViewer cmbBound,cmbTrainingRes, cmbClassifier;
+	private CheckBoxDropDown cmbTransportType, cmbMandateType;
 	private ListViewer lstOther;
-//	private ErrorText txtBounds;
 	private ErrorText txtGridSize;
+	private Button btnMandateType, btnTransportType;
 	
 	private ClassificationComposite classComposite;
 
@@ -267,6 +276,32 @@ public class ConfigurationEditor extends EditorPart {
 					}
 				}
 				
+				pp = getOrCreateParameter(pw, PawsParameter.FixedParameter.PTRANSPORT_FILTER);
+				if (btnTransportType.getSelection()) {
+					Collection<?> items = cmbTransportType.getCheckObjects();
+					if (items.isEmpty()) {
+						pp.setValue(null);
+					}else {
+						String v = items.stream().map(e-> UuidUtils.uuidToString(((PatrolTransportType)e).getUuid())).collect(Collectors.joining(PawsManager.PARAMETER_SPACER));
+						pp.setValue(v);
+					}
+				}else {
+					pp.setValue(null);
+				}
+				
+				pp = getOrCreateParameter(pw, PawsParameter.FixedParameter.PMANDATE_FILTER);
+				if (btnMandateType.getSelection()) {
+					Collection<?> items = cmbMandateType.getCheckObjects();
+					if (items.isEmpty()) {
+						pp.setValue(null);
+					}else {
+						String v = items.stream().map(e-> UuidUtils.uuidToString(((PatrolMandate)e).getUuid())).collect(Collectors.joining(PawsManager.PARAMETER_SPACER)); 
+						pp.setValue(v);
+					}
+				}else {
+					pp.setValue(null);
+				}
+				
 				pp = getOrCreateParameter(pw, PawsParameter.FixedParameter.GRID_SIZE);
 				pp.setValue(txtGridSize.getText());
 				
@@ -378,6 +413,7 @@ public class ConfigurationEditor extends EditorPart {
 		handlers.add(handler);
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void createEventHandlers() {
 		//on delete close editor
 		handlers = new ArrayList<>();
@@ -515,7 +551,13 @@ public class ConfigurationEditor extends EditorPart {
 		
 		Composite bmlayers = toolkit.createComposite(core);
 		bmlayers.setLayout(new GridLayout());
-		bmlayers.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		bmlayers.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 0, 2));
+		((GridLayout)bmlayers.getLayout()).marginWidth = 0;
+		((GridLayout)bmlayers.getLayout()).marginHeight = 0;
+		
+		Composite patrolfilters = toolkit.createComposite(core);
+		patrolfilters.setLayout(new GridLayout());
+		patrolfilters.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridLayout)bmlayers.getLayout()).marginWidth = 0;
 		((GridLayout)bmlayers.getLayout()).marginHeight = 0;
 		
@@ -605,6 +647,23 @@ public class ConfigurationEditor extends EditorPart {
 				setDirty(true);
 				lstOther.refresh();
 			});
+			
+			mi = new MenuItem(mnuTemp, SWT.PUSH);
+			mi.setText(Messages.ConfigurationEditor_RasterFilesOp);
+			mi.addListener(SWT.Selection, evt->{
+				FileDialog fd = new FileDialog(tb.getShell(), SWT.OPEN | SWT.MULTI);
+				fd.setText(Messages.ConfigurationEditor_RasterFiltes);
+				fd.setFilterExtensions(new String[] {"*.tif;*.tiff", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
+				fd.setFilterNames(new String[] {Messages.ConfigurationEditor_TiffFiles, Messages.ConfigurationEditor_allFiles});
+				
+				String fname = fd.open();
+				if (fname == null) return;
+				for (String s : fd.getFileNames()) {
+					((Collection<Object>)lstOther.getInput()).add(Paths.get(fd.getFilterPath()).resolve(s));
+				}
+				setDirty(true);
+				lstOther.refresh();
+			});
 			mnuTemp.setVisible(true);
 		});
 		
@@ -685,6 +744,66 @@ public class ConfigurationEditor extends EditorPart {
 		cmbClassifier.setSelection(new StructuredSelection(PawsParameter.ClassifierModel.DECISION_TREE));
 		cmbClassifier.addPostSelectionChangedListener(e->setDirty(true));
 		
+		
+		//patrol filters section
+		SmartUiUtils.createHeaderLabel(patrolfilters, Messages.ConfigurationEditor_PatrolFilters);
+		
+		inner = toolkit.createComposite(patrolfilters);
+		inner.setLayout(new GridLayout(3 , false));
+		inner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		l = toolkit.createLabel(inner, PawsManager.INSTANCE.getName(PawsParameter.FixedParameter.PTRANSPORT_FILTER) + ":"); //$NON-NLS-1$
+		
+		btnTransportType = new Button(inner, SWT.CHECK);
+		btnTransportType.setSelection(false);
+		btnTransportType.addListener(SWT.Selection, e->{
+			cmbTransportType.setEnabled(btnTransportType.getSelection());
+			setDirty(true);
+			if (!btnTransportType.getSelection()) {
+				cmbTransportType.setValue(Collections.emptyList());
+			}
+		});
+		
+		cmbTransportType = new CheckBoxDropDown(inner);
+		cmbTransportType.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		cmbTransportType.setBackground(inner.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		cmbTransportType.setContentProvider(ArrayContentProvider.getInstance());
+		cmbTransportType.setLabelProvider(new LabelProvider() {
+			public String getText(Object element) {
+				if (element instanceof PatrolTransportType) return ((PatrolTransportType)element).getName();
+				return super.getText(element);
+			}
+		});
+		cmbTransportType.setEnabled(false);
+		cmbTransportType.setInput(Collections.singletonList(DialogConstants.LOADING_TEXT));
+		cmbTransportType.addSelectionChangedListener(e->setDirty(true));
+		
+		
+		l = toolkit.createLabel(inner, PawsManager.INSTANCE.getName(PawsParameter.FixedParameter.PMANDATE_FILTER) + ":"); //$NON-NLS-1$
+		
+		btnMandateType = new Button(inner, SWT.CHECK);
+		btnMandateType.setSelection(true);
+		btnMandateType.setSelection(false);
+		btnMandateType.addListener(SWT.Selection, e->{
+			cmbMandateType.setEnabled(btnMandateType.getSelection());		
+			setDirty(true);
+			if (!btnMandateType.getSelection()) {
+				cmbMandateType.setValue(Collections.emptyList());
+			}
+		});
+		cmbMandateType = new CheckBoxDropDown(inner);
+		cmbMandateType.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		cmbMandateType.setBackground(inner.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		cmbMandateType.setContentProvider(ArrayContentProvider.getInstance());
+		cmbMandateType.setLabelProvider(new LabelProvider() {
+			public String getText(Object element) {
+				if (element instanceof PatrolMandate) return ((PatrolMandate)element).getName();
+				return super.getText(element);
+			}
+		});
+		cmbMandateType.setInput(Collections.singletonList(DialogConstants.LOADING_TEXT));
+		cmbMandateType.addSelectionChangedListener(e->setDirty(true));
+
 	}
 	
 	public void fireModified(boolean isNew, PawsConfiguration pc) {
@@ -752,6 +871,9 @@ public class ConfigurationEditor extends EditorPart {
 		protected IStatus run(IProgressMonitor monitor) {
 			List<Object> options = new ArrayList<>();
 			List<Projection> allPrjs = new ArrayList<>();
+			List<PatrolTransportType> ptypes = new ArrayList<>();
+			List<PatrolMandate> mandates = new ArrayList<>();
+			
 			try(Session session = HibernateManager.openSession()){			
 				List<Area.AreaType> types = session.createQuery("SELECT DISTINCT type FROM Area WHERE conservationArea = :ca", Area.AreaType.class) //$NON-NLS-1$
 					.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
@@ -769,10 +891,41 @@ public class ConfigurationEditor extends EditorPart {
 						PawsPlugIn.log(e.getMessage(),e);
 					}	
 				});
+				
+				List<PatrolTransportType> temp = ( QueryFactory.buildQuery(session, PatrolTransportType.class, 
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list() ); //$NON-NLS-1$
+				
+				temp.sort((a,b)->{
+					if (a.getIsActive() == b.getIsActive()) {
+						return Collator.getInstance().compare(a.getName(), b.getName());
+					}else {
+						if (a.getIsActive()) return 1;
+						return -1;
+					}
+				});
+				ptypes.addAll(temp);
+				
+				List<PatrolMandate> temp2 = (QueryFactory.buildQuery(session, PatrolMandate.class,
+						new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list()); //$NON-NLS-1$
+				temp2.sort((a,b)->{
+					if (a.getIsActive() == b.getIsActive()) {
+						return Collator.getInstance().compare(a.getName(), b.getName());
+					}else {
+						if (a.getIsActive()) return 1;
+						return -1;
+					}
+				});
+				mandates.addAll(temp2);
 			}
 			
 			Display.getDefault().syncExec(()->{
 				cmbBound.setInput(new ArrayList<>(options));
+				cmbMandateType.setInput(mandates);
+				cmbTransportType.setInput(ptypes);
+				
+//				cmbMandateType.setSelection(new StructuredSelection(mandates.get(0)));
+//				cmbTransportType.setSelection(new StructuredSelection(ptypes.get(0)));
+				
 				if (options.contains(Area.AreaType.CA)) cmbBound.setSelection(new StructuredSelection(Area.AreaType.CA));
 			});
 			
@@ -815,6 +968,36 @@ public class ConfigurationEditor extends EditorPart {
 							cmbBound.refresh();
 							cmbBound.setSelection(new StructuredSelection(pp));
 						}
+					}
+					try(Session session = HibernateManager.openSession()){
+						pp = pw.findParameter(PawsParameter.FixedParameter.PTRANSPORT_FILTER.name());
+						if (pp != null && pp.getValue() != null) {
+							String[] items = pp.getValue().split(PawsManager.PARAMETER_SPACER); 
+							List<Object> checked = new ArrayList<>();
+							for (String uuid : items) {
+								checked.add(session.get(PatrolTransportType.class, UuidUtils.stringToUuid(uuid)));
+							}
+							cmbTransportType.setValue(checked);
+							btnTransportType.setSelection(!checked.isEmpty());
+						}else {
+							btnTransportType.setSelection(false);
+						}
+						cmbTransportType.setEnabled(btnTransportType.getSelection());
+						
+						pp = pw.findParameter(PawsParameter.FixedParameter.PMANDATE_FILTER.name());
+						if (pp != null && pp.getValue() != null) {
+							String[] items = pp.getValue().split(PawsManager.PARAMETER_SPACER);
+							List<Object> checked = new ArrayList<>();
+							for (String uuid : items) {
+								checked.add(session.get(PatrolMandate.class, UuidUtils.stringToUuid(uuid)));
+							}
+							cmbMandateType.setValue(checked);
+							btnMandateType.setSelection(!checked.isEmpty());
+							
+						}else {
+							btnMandateType.setSelection(false);
+						}
+						cmbMandateType.setEnabled(btnMandateType.getSelection());
 					}
 					
 					

@@ -84,7 +84,6 @@ public class PawsRunJob extends Job{
 			return Status.OK_STATUS;
 		}
 		
-
 		try{
 			PawsService service;
 			try(Session session = HibernateManager.openSession()){

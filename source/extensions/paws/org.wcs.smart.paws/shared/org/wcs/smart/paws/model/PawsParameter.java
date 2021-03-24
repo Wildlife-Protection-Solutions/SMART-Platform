@@ -44,7 +44,9 @@ public class PawsParameter extends UuidItem{
 		LYR_OTHER,
 		GRID_SIZE,
 		TRAINING_RES,
-		CLASSIFIER_MODEL
+		CLASSIFIER_MODEL,
+		PTRANSPORT_FILTER,
+		PMANDATE_FILTER
 	}
 	
 	public static enum ClassifierModel{

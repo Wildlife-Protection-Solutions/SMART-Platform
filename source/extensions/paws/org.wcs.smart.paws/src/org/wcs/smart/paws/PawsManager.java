@@ -57,6 +57,8 @@ public enum PawsManager {
 	
 	INSTANCE;
 	
+	public static final String PARAMETER_SPACER = ","; //$NON-NLS-1$
+	
 	public String createLabel(Query q) {
 		return q.getName() + " (" + QueryTypeManager.INSTANCE.findQueryType(q.getTypeKey()).getGuiName() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
@@ -72,7 +74,8 @@ public enum PawsManager {
 			service = new PawsService();
 			service.setConservationArea(SmartDB.getCurrentConservationArea());
 		}
-		service.setApiKey("a2e5c3f769924a1b98189b652e81c9d9"); //$NON-NLS-1$
+		
+		service.setApiKey("1d43720ec3fe47d5928dd4cda7d66440"); //$NON-NLS-1$
 		service.setTaskApiUrl("https://paws-api-backend-api-mgmt.azure-api.net/taskmanagement/task"); //$NON-NLS-1$
 		service.setPawsApiUrl("https://paws-api-backend-api-mgmt.azure-api.net/paws/predict-risk"); //$NON-NLS-1$
 		service.setClientId("61619872-cd80-41ec-a799-b7c7fba349ce"); //$NON-NLS-1$
@@ -264,12 +267,13 @@ public enum PawsManager {
 	
 	public String getName(PawsParameter.FixedParameter fixedParameter){
 		switch(fixedParameter){
-//		case GRID_CRS: return "CRS" ;
 		case GRID_SIZE: return Messages.PawsManager_GridSize;
 		case LYR_BOUNDARY: return Messages.PawsManager_CABoundary;
 		case LYR_OTHER: return Messages.PawsManager_OtherFiles;
 		case CLASSIFIER_MODEL: return Messages.PawsManager_ClassifierModel;
 		case TRAINING_RES: return Messages.PawsManager_TrainingResolution;
+		case PTRANSPORT_FILTER: return Messages.PawsManager_TransportTypeParameter;
+		case PMANDATE_FILTER: return Messages.PawsManager_MandateParameter;
 		}
 		return null;
 	}

@@ -38,11 +38,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.geotools.coverage.grid.GridCoverage2D;
+import org.geotools.coverage.grid.io.AbstractGridFormat;
+import org.geotools.coverage.grid.io.GridCoverage2DReader;
+import org.geotools.coverage.grid.io.GridFormatFinder;
+import org.geotools.coverage.processing.Operations;
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFinder;
 import org.geotools.data.DataUtilities;
@@ -54,6 +60,7 @@ import org.geotools.data.shapefile.ShapefileDataStoreFactory;
 import org.geotools.data.store.ReprojectingFeatureCollection;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
+import org.geotools.gce.geotiff.GeoTiffWriter;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.hibernate.ScrollableResults;
@@ -71,7 +78,10 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.patrol.model.PatrolMandate;
+import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.paws.PawsFileManager;
+import org.wcs.smart.paws.PawsManager;
 import org.wcs.smart.paws.model.PawsConfiguration;
 import org.wcs.smart.paws.model.PawsParameter;
 import org.wcs.smart.paws.model.PawsQueryClass;
@@ -185,7 +195,10 @@ public class PawsDataEngine {
 			shapefiles.put("boundary_file_name", "ca_boundary.zip"); //$NON-NLS-1$ //$NON-NLS-2$
 			
 			JSONArray other = new JSONArray();
+			JSONArray rasters = new JSONArray();
 			shapefiles.put("additional_shape_files", other); //$NON-NLS-1$
+			shapefiles.put("raster_files", rasters); //$NON-NLS-1$
+			
 			for (PawsParameter ppc : run.getConfiguration().getParameters()) {
 				if (!ppc.getKey().equals(PawsParameter.FixedParameter.LYR_OTHER.name())) continue;
 				String value = ppc.getValue();
@@ -196,15 +209,21 @@ public class PawsDataEngine {
 					
 					JSONObject item = new JSONObject();
 					item.put("file_name", atype.name() + ".zip"); //$NON-NLS-1$ //$NON-NLS-2$
-					item.put("layer_name",  atype); //$NON-NLS-1$
+					item.put("layer_name",  atype.name()); //$NON-NLS-1$
 					other.add(item);
 					
 				}else if (value.startsWith(PawsParameter.FILE_PREFIX)) {
 					String filename = value.substring(PawsParameter.FILE_PREFIX.length());
+					
 					JSONObject item = new JSONObject();
 					item.put("file_name",  SharedUtils.getFilenameWithoutExtension(filename) + ".zip"); //$NON-NLS-1$ //$NON-NLS-2$
 					item.put("layer_name",  SharedUtils.getFilenameWithoutExtension(filename)); //$NON-NLS-1$
-					other.add(item);
+					
+					if (isRaster(filename)) { 
+						rasters.add(item);
+					}else {
+						other.add(item);
+					}
 				}
 			}
 
@@ -216,6 +235,30 @@ public class PawsDataEngine {
 			patrolobs.put("start_date", formatter.format(run.getDataStartDate())); //$NON-NLS-1$
 			patrolobs.put("end_date", formatter.format(run.getDataEndDate())); //$NON-NLS-1$
 			patrolobs.put("file_name", DATA_FILE_NAME); //$NON-NLS-1$
+			
+			pp = run.getConfiguration().findParameter(PawsParameter.FixedParameter.PTRANSPORT_FILTER.name());
+			if (pp != null && pp.getValue() != null) {
+				String[] bits = pp.getValue().split(PawsManager.PARAMETER_SPACER);
+				JSONArray items = new JSONArray();
+				for (String bit : bits) {
+					UUID uuid = UuidUtils.stringToUuid(bit);
+					PatrolTransportType type = session.get(PatrolTransportType.class, uuid);
+					if (type != null) items.add(type.getKeyId());
+				}
+				patrolobs.put("transport_type", items); //$NON-NLS-1$
+			}
+			
+			pp = run.getConfiguration().findParameter(PawsParameter.FixedParameter.PMANDATE_FILTER.name());
+			if (pp != null && pp.getValue() != null) {
+				String[] bits = pp.getValue().split(PawsManager.PARAMETER_SPACER);
+				JSONArray items = new JSONArray();
+				for (String bit : bits) {
+					UUID uuid = UuidUtils.stringToUuid(bit);
+					PatrolMandate type = session.get(PatrolMandate.class, uuid);
+					if (type != null) items.add(type.getKeyId());
+				}
+				patrolobs.put("mandate_type", items); //$NON-NLS-1$
+			}
 			
 			//illegal class mappings
 			JSONArray mappings = new JSONArray();
@@ -241,15 +284,11 @@ public class PawsDataEngine {
 				filter.put("filter", columns); //$NON-NLS-1$
 				filters.add(filter);
 				
-				
 				mapping.put("classification_class_filters", filters); //$NON-NLS-1$
-				
 				mappings.add(mapping);
 			}
 			config.put("illegal_activity_class_mappings", mappings); //$NON-NLS-1$
-			
-//			config.put("protected_area_name", run.getConservationArea().getName());
-		
+				
 			JSONObject modelexperimentation = new JSONObject();
 			config.put("model_experimentation", modelexperimentation); //$NON-NLS-1$
 			pp = run.getConfiguration().findParameter(PawsParameter.FixedParameter.TRAINING_RES.name());
@@ -281,8 +320,7 @@ public class PawsDataEngine {
 		
 		//BOUNDARY
 		PawsParameter pp = configuration.findParameter(PawsParameter.FixedParameter.LYR_BOUNDARY.name());
-		
-				
+			
 		if (pp.getValue().startsWith(PawsParameter.AREA_PREFIX)){
 			//export area to shapefiles
 			Path zip = target.resolve("ca_boundary.shp"); //$NON-NLS-1$
@@ -307,9 +345,53 @@ public class PawsDataEngine {
 				String filename = ppw.getValue().substring(PawsParameter.FILE_PREFIX.length());
 				Path srcShp = PawsFileManager.INSTANCE.getDirectory(configuration).resolve(filename);
 				Path targetShp = target.resolve(filename);
-				packageShapefile(srcShp, targetShp);
+				
+				if (isRaster(filename)) {
+					packageRaster(srcShp, targetShp);
+				}else {
+					packageShapefile(srcShp, targetShp);
+				}
 			}
 		}
+	}
+	
+	/*
+	 * determine if the raster file is a tiff file
+	 */
+	private boolean isRaster(String filename) {
+		return filename.endsWith(".tif") || filename.endsWith(".tiff"); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+	
+	/**
+	 * Exports shapefile to targetFile (shape), then zips the results
+	 * @param shpFile
+	 * @param targetFile
+	 * @throws Exception
+	 */
+	private void packageRaster(Path rasterFile, Path targetFile) throws Exception{
+	    AbstractGridFormat format = GridFormatFinder.findFormat(rasterFile.toFile());
+        GridCoverage2DReader reader = format.getReader(rasterFile.toFile());
+        GridCoverage2D coverage = reader.read(null);
+        
+        Path temp = null;
+    
+        //reproject to target CRS
+        if (!CRS.equalsIgnoreMetadata(coverage.getCoordinateReferenceSystem(), targetCrs)) {
+        	//reproject
+        	GridCoverage2D transformed = (GridCoverage2D) Operations.DEFAULT.resample(coverage,targetCrs);
+        	temp = Files.createTempFile("", rasterFile.getFileName().toString()); //$NON-NLS-1$
+        	(new GeoTiffWriter(temp.toFile())).write(transformed, null);
+        }
+		
+		//zip 
+		String targetname = SharedUtils.getFilenameWithoutExtension(targetFile.getFileName().toString());
+		Path zipFile = targetFile.getParent().resolve(targetname + ".zip"); //$NON-NLS-1$
+		if (temp != null) {
+			zipShapefile(temp, zipFile);
+		}else {
+			zipShapefile(targetFile, zipFile);
+		}
+		
 	}
 	
 	/**
@@ -576,6 +658,8 @@ public class PawsDataEngine {
 			headers.add("Patrol Start Date"); //$NON-NLS-1$
 			headers.add("Patrol End Date"); //$NON-NLS-1$
 			headers.add("Patrol ID"); //$NON-NLS-1$
+			headers.add("Patrol Transport Type"); //$NON-NLS-1$
+			headers.add("Mandate"); //$NON-NLS-1$
 			headers.add("X"); //$NON-NLS-1$
 			headers.add("Y"); //$NON-NLS-1$
 			int datacols = 0;
@@ -589,12 +673,14 @@ public class PawsDataEngine {
 			
 			//join to patrols to get start date, end date and patrol id if available
 			StringBuilder select = new StringBuilder();
-			select.append("SELECT p.id, p.start_date, p.end_date, a.* FROM "); //$NON-NLS-1$
+			select.append("SELECT p.id, p.start_date, p.end_date, pt.keyid as pt_keyid, pm.keyid as pm_keyid, a.* FROM "); //$NON-NLS-1$
 			select.append(tablename);
 			select.append(" a LEFT JOIN smart.patrol_waypoint pw on pw.wp_uuid = a.wp_uuid "); //$NON-NLS-1$
 			select.append(" LEFT JOIN smart.patrol_leg_day pld on pld.uuid = pw.leg_day_uuid "); //$NON-NLS-1$
 			select.append(" left join smart.patrol_leg pl on pld.patrol_leg_uuid = pl.uuid "); //$NON-NLS-1$
 			select.append(" left join smart.patrol p on p.uuid = pl.patrol_uuid "); //$NON-NLS-1$
+			select.append(" left join smart.patrol_transport pt on pt.uuid = pl.transport_uuid "); //$NON-NLS-1$
+			select.append(" left join smart.patrol_mandate pm on pm.uuid = pl.mandate_uuid "); //$NON-NLS-1$
 
 			
 			DateTimeFormatter ff = DateTimeFormatter.ofPattern(DATE_FORMAT);
@@ -608,9 +694,12 @@ public class PawsDataEngine {
 					LocalDate pstart = ((java.sql.Date)items[1]).toLocalDate();
 					LocalDate pend = ((java.sql.Date)items[2]).toLocalDate();
 					
-					double x = (double)items[5];
-					double y = (double)items[6];
-					LocalDateTime datetime = ((java.sql.Timestamp)items[7]).toLocalDateTime();
+					String transport = (String)items[3];
+					String mandate = (String)items[4];
+					
+					double x = (double)items[7];
+					double y = (double)items[8];
+					LocalDateTime datetime = ((java.sql.Timestamp)items[9]).toLocalDateTime();
 										
 					//Waypoint Date
 					int index = 0;
@@ -626,6 +715,10 @@ public class PawsDataEngine {
 					//PatrolID
 					data[index++] = pid;
 					
+					//Transport & Mandate
+					data[index++] = transport;
+					data[index++] = mandate;
+					
 					//X
 					data[index++] = String.valueOf(x);
 					//Y
@@ -633,7 +726,7 @@ public class PawsDataEngine {
 					
 					
 					for (int i = 1; i <= datacols; i ++) {
-						data[index++] = (String)items[7+i];
+						data[index++] = (String)items[9+i];
 					}
 					writer.writeNext(data);
 				}
