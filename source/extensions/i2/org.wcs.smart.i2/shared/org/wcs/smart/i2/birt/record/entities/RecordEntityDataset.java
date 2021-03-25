@@ -61,6 +61,7 @@ public class RecordEntityDataset implements IQuery {
 		parameters = new HashMap<Integer,Object>();
 		
 	}
+
 	@Override
 	public void prepare(String queryText) throws OdaException {
 		if (connection.hasPermission(Permission.RECORD).isEmpty()) {
@@ -101,9 +102,9 @@ public class RecordEntityDataset implements IQuery {
 
 	@Override
 	public IResultSet executeQuery() throws OdaException {
-		RecordEntityDatasetResultSet set = new RecordEntityDatasetResultSet((RecordEntityDatasetResultSetMetadata)getMetaData(), 
-				connection, parameters,
-				(RecordParameterMetadata)getParameterMetaData());
+		RecordEntityDatasetResultSet set = new RecordEntityDatasetResultSet(
+				(RecordEntityDatasetResultSetMetadata)getMetaData(),
+				(RecordParameterMetadata)getParameterMetaData(), connection, parameters);
 		return set;
 	}
 

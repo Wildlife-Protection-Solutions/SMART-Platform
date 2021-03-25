@@ -42,7 +42,9 @@ import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.query.Query;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.common.attachment.ISmartAttachment;
+import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection.Permission;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
@@ -58,6 +60,8 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class RecordEntityDatasetResultSet implements IResultSet {
 
+	private static final Object INSUFFICIENT_PRIVILEGES = new Object();
+	
 	private long m_maxRows = -1;
 	private int m_currentRowId = -1;
 
@@ -68,6 +72,8 @@ public class RecordEntityDatasetResultSet implements IResultSet {
 	private RecordEntityDatasetResultSetMetadata metadata;
 	private AbstractIntelBirtConnection connection;
 	
+	private Set<IntelProfile> entityProfiles;
+	
 	/**
 	 * Creates a new summary results set
 	 * 
@@ -77,11 +83,15 @@ public class RecordEntityDatasetResultSet implements IResultSet {
 	 *            the metadata
 	 */
 	public RecordEntityDatasetResultSet( RecordEntityDatasetResultSetMetadata metadata,
-			AbstractIntelBirtConnection connection, 
-			HashMap<Integer, Object> parameters,
-			RecordParameterMetadata pmetadata) {
-		this.connection = connection;
+			RecordParameterMetadata pmetadata,
+			AbstractIntelBirtConnection connection,
+			 HashMap<Integer, Object> parameters) {
+		
 		this.metadata = metadata;
+		this.connection = connection;
+		
+		entityProfiles = connection.hasPermission(Permission.ENTITY);
+
 		Set<IntelProfile> profiles = connection.hasPermission(Permission.RECORD);
 		
 		int index = pmetadata.findParameterIndex(DataSourceParameter.RECORD_UUID.getName());
@@ -137,9 +147,10 @@ public class RecordEntityDatasetResultSet implements IResultSet {
 		if (results.next()){
 			currentItem = results.get();
 			
-			if (((IntelEntityRecord)((Object[])currentItem)[0]).getEntity().getPrimaryAttachment() != null){
+			IntelEntityRecord record = (IntelEntityRecord) ((Object[])currentItem)[0];
+			if (record.getEntity().getPrimaryAttachment() != null){
 				try{
-					((IntelEntityRecord)((Object[])currentItem)[0]).getEntity().getPrimaryAttachment().computeFileLocation(connection.getSession());
+					record.getEntity().getPrimaryAttachment().computeFileLocation(connection.getSession());
 				}catch (Exception ex){
 					Logger.getLogger(RecordEntityDatasetResultSet.class.getName()).log(Level.WARNING, ex.getMessage(), ex);
 				}
@@ -170,6 +181,7 @@ public class RecordEntityDatasetResultSet implements IResultSet {
 	public String getString(int index) throws OdaException {
 		lastRowItem = getCurrentItem(index);
 		if (lastRowItem == null) return ""; //$NON-NLS-1$
+		if (lastRowItem == INSUFFICIENT_PRIVILEGES) SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(IIntelligenceLabelProvider.INSUFFICIENT_PRIVILEGES_LABEL, connection.getCurrentLocale());
 		return lastRowItem.toString();
 	}
 
@@ -181,11 +193,16 @@ public class RecordEntityDatasetResultSet implements IResultSet {
 	private Object getCurrentItem(int colIndex) {
 		if (currentItem == null) return null;
 		IntelEntityRecord i = (IntelEntityRecord) ((Object[])currentItem)[0];
-		Object value = RecordEntityDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i, connection.getCurrentLocale());
-		if (value instanceof ISmartAttachment) {
-			return connection.decryptAttachment((ISmartAttachment)value);
+		
+		if (entityProfiles.contains(i.getEntity().getProfile())) {
+			Object value = RecordEntityDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i, connection.getCurrentLocale());
+			if (value instanceof ISmartAttachment) {
+				return connection.decryptAttachment((ISmartAttachment)value);
+			}
+			return value;
+		}else {
+			return INSUFFICIENT_PRIVILEGES;
 		}
-		return value;
 	}
 
 	/**
@@ -283,6 +300,8 @@ public class RecordEntityDatasetResultSet implements IResultSet {
 			return java.sql.Date.valueOf( (((LocalDateTime)lastRowItem)).toLocalDate() );
 		}else if (lastRowItem == null){
 			return null;
+		}else if (lastRowItem == INSUFFICIENT_PRIVILEGES) {
+			return null;
 		}
 		throw new UnsupportedOperationException();
 	}
@@ -305,7 +324,10 @@ public class RecordEntityDatasetResultSet implements IResultSet {
 			return (Time) lastRowItem;
 		}else if (lastRowItem instanceof LocalTime) {
 			return Time.valueOf((LocalTime)lastRowItem);
+		}else if (lastRowItem == INSUFFICIENT_PRIVILEGES) {
+			return null;
 		}
+		
 		throw new UnsupportedOperationException();
 	}
 
@@ -327,6 +349,8 @@ public class RecordEntityDatasetResultSet implements IResultSet {
 			return (Timestamp) lastRowItem;
 		}else if (lastRowItem instanceof LocalDateTime) {
 			return Timestamp.valueOf((LocalDateTime)lastRowItem);
+		}else if (lastRowItem == INSUFFICIENT_PRIVILEGES) {
+			return null;			
 		}
 		throw new UnsupportedOperationException();
 	}
@@ -386,6 +410,8 @@ public class RecordEntityDatasetResultSet implements IResultSet {
 		} else if (lastRowItem instanceof Double) {
 			return ((Double) lastRowItem) <= 0.5;
 		}else if (lastRowItem == null){
+			return false;
+		}else if (lastRowItem == INSUFFICIENT_PRIVILEGES) {
 			return false;
 		}
 		throw new UnsupportedOperationException();

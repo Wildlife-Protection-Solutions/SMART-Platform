@@ -83,6 +83,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.gpx.GPSBabel;
 import org.wcs.smart.gpx.GPSDataImport;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.IntelligenceLabelProviderImpl;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityLocation;
@@ -268,7 +269,11 @@ public class LocationListComposite extends Composite{
 					int cnt = 0;
 					for (IntelEntityLocation l : editor.getEntityLocationLinks()){
 						if (l.getLocation().equals(element)){
-							sb.append(l.getEntity().getIdAttributeAsText());
+							if (IntelSecurityManager.INSTANCE.canViewEntities(l.getEntity().getProfile())) {
+								sb.append(l.getEntity().getIdAttributeAsText());
+							}else {
+								sb.append(IntelligenceLabelProviderImpl.INSUFFICIENT_PRIVILEGES);
+							}
 							sb.append("; "); //$NON-NLS-1$
 							cnt++;
 						}
@@ -385,13 +390,15 @@ public class LocationListComposite extends Composite{
 						linkToAll.addSelectionListener(addEntityLinkListener);
 						new MenuItem(linkSubMenu, SWT.SEPARATOR);
 						for (IntelEntity entity : toAdd){
-							MenuItem linkTo = new MenuItem(linkSubMenu, SWT.PUSH);
-							linkTo.setText(entity.getIdAttributeAsText());
-							if (entity.getEntityType().getIcon() != null){
-								linkTo.setImage(Resources.INSTANCE.getImage(entity.getEntityType()));
+							if (IntelSecurityManager.INSTANCE.canViewEntities(entity.getProfile())) {
+								MenuItem linkTo = new MenuItem(linkSubMenu, SWT.PUSH);
+								linkTo.setText(entity.getIdAttributeAsText());
+								if (entity.getEntityType().getIcon() != null){
+									linkTo.setImage(Resources.INSTANCE.getImage(entity.getEntityType()));
+								}
+								linkTo.setData(entity);
+								linkTo.addSelectionListener(addEntityLinkListener);
 							}
-							linkTo.setData(entity);
-							linkTo.addSelectionListener(addEntityLinkListener);
 						}
 					}else{
 						MenuItem noMore = new MenuItem(linkSubMenu, SWT.PUSH);
@@ -404,13 +411,15 @@ public class LocationListComposite extends Composite{
 						linkToAll.addSelectionListener(dropEntityLinkListener);
 						new MenuItem(dropLinkSubMenu, SWT.SEPARATOR);
 						for (IntelEntity entity : toDrop){
-							MenuItem linkTo = new MenuItem(dropLinkSubMenu, SWT.PUSH);
-							linkTo.setText(entity.getIdAttributeAsText());
-							if (entity.getEntityType().getIcon() != null){
-								linkTo.setImage(Resources.INSTANCE.getImage(entity.getEntityType()));
+							if (IntelSecurityManager.INSTANCE.canViewEntities(entity.getProfile())) {
+								MenuItem linkTo = new MenuItem(dropLinkSubMenu, SWT.PUSH);
+								linkTo.setText(entity.getIdAttributeAsText());
+								if (entity.getEntityType().getIcon() != null){
+									linkTo.setImage(Resources.INSTANCE.getImage(entity.getEntityType()));
+								}
+								linkTo.setData(entity);
+								linkTo.addSelectionListener(dropEntityLinkListener);
 							}
-							linkTo.setData(entity);
-							linkTo.addSelectionListener(dropEntityLinkListener);
 						}
 					}else{
 						MenuItem noMore = new MenuItem(dropLinkSubMenu, SWT.PUSH);

@@ -248,6 +248,7 @@ public class Messages extends NLS {
 	public static String EntityEditor_HiddenMsg;
 	public static String EntityEditor_HiddenTooltip;
 	public static String EntityEditor_HistoryLabel;
+	public static String EntityEditor_InsufficientprovilegesToView;
 	public static String EntityEditor_LinkNotFound;
 	public static String EntityEditor_ListItemAtt;
 	public static String EntityEditor_MapTitle;
@@ -262,6 +263,7 @@ public class Messages extends NLS {
 	public static String EntityEditor_OpenTargetMenuLabel;
 	public static String EntityEditor_PdfErrorMsg;
 	public static String EntityEditor_PdfErrorTitle;
+	public static String EntityEditor_ProfileColumnName;
 	public static String EntityEditor_ProfileLabel;
 	public static String EntityEditor_PropertiesMnuItem;
 	public static String EntityEditor_printtooltip;
@@ -338,6 +340,7 @@ public class Messages extends NLS {
 	public static String EntityImportEngine_SaveError;
 	public static String EntityImportEngine_WarningMessage;
 	public static String EntityImportEngine_WarningTitle;
+	public static String EntityList_CannotViewEntity;
 	public static String EntityList_CreatedMsg;
 	public static String EntityList_CreatedTitle;
 	public static String EntityList_CreateError;
@@ -349,7 +352,9 @@ public class Messages extends NLS {
 	public static String EntityList_NewRelMenuItem;
 	public static String EntityList_NoTypesFoundMsg;
 	public static String EntityList_OpenItem;
+	public static String EntityList_ProfileNotActive;
 	public static String EntityList_RemoveItem;
+	public static String EntityList_TypeProfileTooltip;
 	public static String EntityListComposite_CannotAddEntity;
 	public static String EntityListComposite_EntityLinkAdded;
 	public static String EntityListComposite_SearchButton;
@@ -701,7 +706,6 @@ public class Messages extends NLS {
 	public static String GPSDeviceSelectionDialog_ErrorLoadingOptions;
 	public static String GPSDeviceSelectionDialog_Message;
 	public static String GPSDeviceSelectionDialog_Title;
-	public static String HiddenWorkingSetItem_WorkingSetItemHidden;
 	public static String ImageSizeLabelProvider_Large;
 	public static String ImageSizeLabelProvider_Medium;
 	public static String ImageSizeLabelProvider_Small;

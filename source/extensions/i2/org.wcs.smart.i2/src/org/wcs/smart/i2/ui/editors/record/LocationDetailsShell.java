@@ -42,9 +42,11 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.i2.internal.IntelligenceLabelProviderImpl;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntityLocation;
 import org.wcs.smart.i2.model.IntelLocation;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.ObservationTreeViewer;
 import org.wcs.smart.ui.SmartShellDialog;
 
@@ -156,7 +158,12 @@ public class LocationDetailsShell extends SmartShellDialog{
 				@Override
 				public String getText(Object element){
 					if (element instanceof IntelEntityLocation){
-						return ((IntelEntityLocation) element).getEntity().getIdAttributeAsText();
+						IntelEntityLocation l = (IntelEntityLocation)element;
+						if (IntelSecurityManager.INSTANCE.canViewEntities(l.getEntity().getProfile())) {
+							return ((IntelEntityLocation) element).getEntity().getIdAttributeAsText();
+						}else {
+							return IntelligenceLabelProviderImpl.INSUFFICIENT_PRIVILEGES;
+						}
 					}
 					return super.getText(element);
 				}

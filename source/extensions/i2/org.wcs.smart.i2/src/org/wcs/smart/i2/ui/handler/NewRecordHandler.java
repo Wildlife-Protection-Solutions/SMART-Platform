@@ -133,8 +133,6 @@ public class NewRecordHandler {
 						ie.getPrimaryAttachment().computeFileLocation(session);
 					}catch (Exception ex) {}
 					
-					if (!newRecord.getProfile().equals(ie.getProfile())) return;
-					
 					IntelEntityRecord rr = new IntelEntityRecord();
 					rr.setRecord(newRecord);
 					rr.setEntity(ie);

@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.ui.editors.record;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -56,9 +57,11 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityType;
+import org.wcs.smart.i2.model.IntelProfileEntityType;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.i2.ui.dialogs.NewEntityDialog;
@@ -141,7 +144,7 @@ public class EntityListShell extends SmartShellDialog {
 					tblEntityTypeList.setInput(new String[]{DialogConstants.LOADING_TEXT});
 					loadEntityTypesJob.schedule();
 				}else if (selection == NEW_ENTITY){
-					NewEntityDialog dialog = new NewEntityDialog(editor.getSite().getShell(), false, editor.getRecord().getProfile());
+					NewEntityDialog dialog = new NewEntityDialog(editor.getSite().getShell(), false, null);
 					ContextInjectionFactory.inject(dialog, context);
 					if (dialog.open() == NewEntityDialog.OK){
 						editor.linkEntity(dialog.getNewEntity());
@@ -252,10 +255,23 @@ public class EntityListShell extends SmartShellDialog {
 		protected IStatus run(IProgressMonitor monitor) {
 			List<IntelEntityType> types = new ArrayList<IntelEntityType>();
 			try(Session s = HibernateManager.openSession()){
-				types.addAll (s.createQuery("SELECT t FROM IntelEntityType t join t.profiles p WHERE t.conservationArea = :ca and p.id.profile.uuid = :profile", IntelEntityType.class) //$NON-NLS-1$
+				types.addAll (s.createQuery("SELECT t FROM IntelEntityType t join t.profiles p WHERE t.conservationArea = :ca ", IntelEntityType.class) //$NON-NLS-1$
 				.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
-				.setParameter("profile", editor.getInputInternal().getRecordProfileUuid()) //$NON-NLS-1$
 				.list() );
+				
+				for (Iterator<IntelEntityType> iterator = types.iterator(); iterator.hasNext();) {
+					IntelEntityType intelEntityType = iterator.next();
+					boolean add = false;
+					for (IntelProfileEntityType it : intelEntityType.getProfiles()) {
+						if (ProfilesManager.INSTANCE.getActiveProfiles().contains(it.getProfile())) {
+							if (IntelSecurityManager.INSTANCE.canViewEntities(it.getProfile())) {
+								add = true;
+								break;
+							}
+						}
+					}
+					if (!add) iterator.remove();
+				}
 			}
 			
 			Display.getDefault().syncExec(() -> {if (!tblEntityTypeList.getTable().isDisposed()){tblEntityTypeList.setInput(types);}});
@@ -272,10 +288,11 @@ public class EntityListShell extends SmartShellDialog {
 			if (lastSelectedType != null){
 				try(Session s = HibernateManager.openSession()){					
 					entities.addAll( QueryFactory.buildQuery(s, IntelEntity.class, 
-							new Object[]{"entityType", lastSelectedType}, //$NON-NLS-1$
-							new Object[] {"profile.uuid", editor.getInputInternal().getRecordProfileUuid()}) //$NON-NLS-1$
+							new Object[]{"entityType", lastSelectedType}) //$NON-NLS-1$
 							.getResultList());
+
 					for (IntelEntity e : entities){
+						if (!IntelSecurityManager.INSTANCE.canViewEntities(e.getProfile())) continue;
 						e.getIdAttributeAsText();
 						if (e.getPrimaryAttachment() != null){
 							try {

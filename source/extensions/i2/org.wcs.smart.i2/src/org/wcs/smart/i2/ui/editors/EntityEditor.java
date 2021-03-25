@@ -181,6 +181,7 @@ import org.wcs.smart.i2.ui.RelationshipGroupLabelProvider;
 import org.wcs.smart.i2.ui.RelationshipTypeLabelProvider;
 import org.wcs.smart.i2.ui.Resources;
 import org.wcs.smart.i2.ui.SectionTabHeader;
+import org.wcs.smart.i2.ui.TransparentInfoDialog;
 import org.wcs.smart.i2.ui.dialogs.AttributeFieldEditor;
 import org.wcs.smart.i2.ui.dialogs.RelationshipAttributeDialog;
 import org.wcs.smart.i2.ui.dialogs.RelationshipSelectorDialog;
@@ -429,6 +430,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 					r.getRecord().getDateCreated();
 					r.getRecord().getDateModified();
 					r.getRecord().getTitle();
+					r.getRecord().getProfile().getName();
 					if (r.getRecord().getRecordSource() != null){
 						r.getRecord().getRecordSource().getIcon();
 						sources.add(r.getRecord().getRecordSource());
@@ -1696,14 +1698,19 @@ public class EntityEditor extends EditorPart implements MapPart{
 		tblRecords.getTable().setHeaderVisible(true);
 		tblRecords.getTable().setLinesVisible(true);
 		
-		String[] columns = new String[]{Messages.EntityEditor_ShortNameColumnLabel, Messages.EntityEditor_RecordDatefieldName, Messages.EntityEditor_SourceColumnLabel, Messages.EntityEditor_StatusColumnLabel};
+		String[] columns = new String[]{Messages.EntityEditor_ShortNameColumnLabel,
+				Messages.EntityEditor_RecordDatefieldName, 
+				Messages.EntityEditor_SourceColumnLabel,
+				Messages.EntityEditor_ProfileColumnName,
+				Messages.EntityEditor_StatusColumnLabel};
 		ColumnLabelProvider[] lbls = new ColumnLabelProvider[]{
 				new RecordLabelProvider(RecordLabelProvider.RecordField.TITLE),
 				new RecordLabelProvider(RecordLabelProvider.RecordField.PRIMARY_DATE),
 				new RecordLabelProvider(RecordLabelProvider.RecordField.SOURCE),
+				new RecordLabelProvider(RecordLabelProvider.RecordField.PROFILE),
 				new RecordLabelProvider(RecordLabelProvider.RecordField.STATUS),
 		};
-		int[] width = new int[]{400, 100, 100, 100};
+		int[] width = new int[]{400, 100, 100, 100, 100};
 		tblRecords.getTable().setData(TBLRECORD_LBLPROVIDER_KEY, lbls[0]);
 		for (int i = 0; i < columns.length; i ++){
 			TableViewerColumn col = new TableViewerColumn(tblRecords, SWT.NONE);
@@ -1724,7 +1731,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		new AbstractEntityEditorShellListener<IntelRecord, RecordDetailsShell>(tblRecords) {			
 			@Override
 			protected RecordDetailsShell getShellDialog(IntelRecord currentSelection) {
-				
+				if (!IntelSecurityManager.INSTANCE.canViewRecords(currentSelection.getProfile())) return null;
 				if (shellDialog == null || shellDialog.isDisposed()){
 					return  new RecordDetailsShell(getSite().getShell(),currentSelection);
 				}else if (!shellDialog.getRecord().equals(currentSelection)){
@@ -1769,8 +1776,6 @@ public class EntityEditor extends EditorPart implements MapPart{
 							createNewRecord();
 						}
 					});
-					
-					
 				}
 			}
 			
@@ -1780,20 +1785,22 @@ public class EntityEditor extends EditorPart implements MapPart{
 	}
 	
 	private void createNewRecord() {
-		if (!IntelSecurityManager.INSTANCE.canCreateRecord(input.getProfileUuid())) return;
 		IEclipseContext ctx = context.createChild();
 		ctx.set(NewRecordHandler.ENTITY_UUID_LINK, Collections.singleton(getEntity().getUuid()));
-		ctx.set(NewRecordHandler.PROFILE_LINK, getEntity().getProfile());
-
 		(new NewRecordHandler()).createNewRecord(ctx);
 	}
 	
 	
 	private void openSelectedRecord(){
-		if (!IntelSecurityManager.INSTANCE.canViewRecords(input.getProfileUuid())) return;
+		
 		if (tblRecords.getSelection().isEmpty()) return;
 		Object x = ((IStructuredSelection)tblRecords.getSelection()).getFirstElement();
 		if (x instanceof IntelRecord){
+			if (!IntelSecurityManager.INSTANCE.canViewRecords( ((IntelRecord)x).getProfile() )) {
+				TransparentInfoDialog ti = new TransparentInfoDialog(getSite().getShell(), Messages.EntityEditor_InsufficientprovilegesToView);
+				ti.open();
+				return;
+			}
 			openRecord((IntelRecord)x);
 		}
 	}

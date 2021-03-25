@@ -43,9 +43,11 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.EntityManager;
+import org.wcs.smart.i2.internal.IntelligenceLabelProviderImpl;
 import org.wcs.smart.i2.model.IntelEntity;
 import org.wcs.smart.i2.model.IntelEntityLocation;
 import org.wcs.smart.i2.model.IntelLocation;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.udig.LocationLayerType;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.observation.WaypointSourceEngine;
@@ -168,9 +170,15 @@ public class IntelEntityFeatureReader implements FeatureReader<SimpleFeatureType
 		data[2] = location.getId();
 		data[3] = location.getDateTime();
 		data[4] = location.getComment();
-		data[5] = location.getRecord().getTitle();
-		data[6] = location.getRecord().getDateCreated();
-		data[7] = UuidUtils.uuidToString(location.getRecord().getUuid());
+		if (!IntelSecurityManager.INSTANCE.canViewRecords(location.getRecord().getProfile())) {
+			data[5] = IntelligenceLabelProviderImpl.INSUFFICIENT_PRIVILEGES;
+			data[6] = null;
+			data[7] = null;
+		}else {
+			data[5] = location.getRecord().getTitle();
+			data[6] = location.getRecord().getDateCreated();
+			data[7] = UuidUtils.uuidToString(location.getRecord().getUuid());
+		}
 		data[8] = UuidUtils.uuidToString(location.getUuid());
 		data[9] = elocation.getEntity().getIdAttributeAsText();
 		

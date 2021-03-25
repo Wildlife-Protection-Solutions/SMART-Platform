@@ -46,9 +46,11 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.i2.internal.IntelligenceLabelProviderImpl;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntityRecord;
 import org.wcs.smart.i2.model.IntelRecord;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.ui.SmartShellDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -229,12 +231,18 @@ public class RecordDetailsShell extends SmartShellDialog{
 				narr = temp.getDescription();
 				dCreated = temp.getDateCreated();
 				dModified = temp.getDateModified();
+				
 				for (IntelEntityRecord e : temp.getEntities()){
-					sbEntities.append(e.getEntity().getIdAttributeAsText());
+					if (IntelSecurityManager.INSTANCE.canViewEntities(e.getEntity().getProfile())) {
+						sbEntities.append(e.getEntity().getIdAttributeAsText());
+					}else {
+						sbEntities.append(IntelligenceLabelProviderImpl.INSUFFICIENT_PRIVILEGES);
+					}
 					sbEntities.append(", "); //$NON-NLS-1$
 				}
 				if (sbEntities.length() > 0) sbEntities.delete(sbEntities.length() - 2, sbEntities.length());
 			}
+			
 			final String name1 = name;
 			final String narr1 = narr == null ? "" : narr; //$NON-NLS-1$
 			final LocalDateTime dCreated1 = dCreated;

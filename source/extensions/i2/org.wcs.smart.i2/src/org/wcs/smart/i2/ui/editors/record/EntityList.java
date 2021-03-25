@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.window.DefaultToolTip;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -37,6 +38,7 @@ import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowData;
@@ -55,7 +57,9 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.event.IntelEvents;
+import org.wcs.smart.i2.internal.IntelligenceLabelProviderImpl;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttachment;
 import org.wcs.smart.i2.model.IntelEntity;
@@ -67,6 +71,7 @@ import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.security.IntelSecurityManager;
+import org.wcs.smart.i2.ui.Resources;
 import org.wcs.smart.i2.ui.TransparentInfoDialog;
 import org.wcs.smart.i2.ui.dialogs.RelationshipAttributeDialog;
 import org.wcs.smart.i2.ui.editors.RelationshipSearchJob;
@@ -211,7 +216,12 @@ public class EntityList extends Composite {
 		
 		IntelEntity ie = getCurrentSelection().get(0);
 		if (!IntelSecurityManager.INSTANCE.canViewEntities(ie.getProfile())) {
-			TransparentInfoDialog ti = new TransparentInfoDialog(getShell(), "Insufficient privileges to view entity");
+			TransparentInfoDialog ti = new TransparentInfoDialog(getShell(), Messages.EntityList_CannotViewEntity);
+			ti.open();
+			return;
+		}
+		if (!ProfilesManager.INSTANCE.getActiveProfiles().contains(ie.getProfile())) {
+			TransparentInfoDialog ti = new TransparentInfoDialog(getShell(), MessageFormat.format(Messages.EntityList_ProfileNotActive, ie.getProfile().getName()));
 			ti.open();
 			return;
 		}
@@ -235,17 +245,27 @@ public class EntityList extends Composite {
 						mnuRelationship = null;
 					}
 				}else{
-					if (mnuDelete == null || mnuDelete.isDisposed()){
+					boolean canDelete = false;
+					for (IntelEntity ie : getCurrentSelection()) {
+						if (IntelSecurityManager.INSTANCE.canViewEntities(ie.getProfile())) {
+							canDelete = true;
+						}
+					}
+					if ((mnuDelete == null || mnuDelete.isDisposed() && canDelete)){
 						mnuDelete = new MenuItem(mnuEntities, SWT.PUSH, 0);
 						mnuDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 						mnuDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 						mnuDelete.addSelectionListener(new SelectionAdapter() {
-							
+								
 							@Override
 							public void widgetSelected(SelectionEvent e) {
 								listParent.deleteEntityLink();
 							}
 						});
+					}
+					if (!canDelete && mnuDelete != null && !mnuDelete.isDisposed()) {
+						mnuDelete.dispose();
+						mnuDelete = null;
 					}
 					if (mnuRelationship != null) {
 						mnuRelationship.dispose();
@@ -257,6 +277,7 @@ public class EntityList extends Composite {
 							List<IntelEntity> targets = listParent.getEditor().getRecord().getEntities()
 								.stream()
 								.map(ie->ie.getEntity())
+								.filter(ie->IntelSecurityManager.INSTANCE.canViewEntities(ie.getProfile()))
 								.collect(Collectors.toList());
 							targets.remove(srcEntity);
 							
@@ -515,103 +536,147 @@ public class EntityList extends Composite {
 			((GridLayout)getLayout()).marginWidth = 0;
 			addListener(this);
 			
-			Thumbnail t = new Thumbnail(item.getEntity().getPrimaryAttachment(), THUMB_SIZE);
-			Composite c = t.createThumbnail(this, type == Type.LIST ?  SWT.NONE : SWT.BORDER);
-			addListener(c);
-			toolkit.adapt(c);
-			c.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
-			((GridData)c.getLayoutData()).widthHint = THUMB_SIZE;
-			((GridData)c.getLayoutData()).heightHint = THUMB_SIZE;
-			
-			if (type == Type.LIST){
-				Label l = toolkit.createLabel(this, item.getEntity().getIdAttributeAsText(), SWT.WRAP);
+			if (!IntelSecurityManager.INSTANCE.canViewEntities(item.getEntity().getProfile())) {
+				
+				Label l = toolkit.createLabel(this,IntelligenceLabelProviderImpl.INSUFFICIENT_PRIVILEGES, SWT.WRAP);
 				l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-				((GridData)l.getLayoutData()).widthHint = 100;
 				addListener(l);
-				
-			}else if (type == Type.DETAILS){
-			
-				Composite info = toolkit.createComposite(this, SWT.NONE);
-				info.setLayout(new GridLayout());
-				((GridLayout)info.getLayout()).marginWidth = 0;
-				((GridLayout)info.getLayout()).marginHeight = 0;
-				info.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-				addListener(info);
-				
-				Label l = toolkit.createLabel(info, item.getEntity().getIdAttributeAsText(), SWT.WRAP);
-				l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 				((GridData)l.getLayoutData()).widthHint = 100;
-				addListener(l);
+				l.addListener(SWT.MouseHover, this);
+			}else {
+				Thumbnail t = new Thumbnail(item.getEntity().getPrimaryAttachment(), THUMB_SIZE);
+				Composite c = t.createThumbnail(this, type == Type.LIST ?  SWT.NONE : SWT.BORDER);
+				addListener(c);
+				toolkit.adapt(c);
+				c.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+				((GridData)c.getLayoutData()).widthHint = THUMB_SIZE;
+				((GridData)c.getLayoutData()).heightHint = THUMB_SIZE;
+					
+				if (type == Type.LIST){
+					Label l = toolkit.createLabel(this, item.getEntity().getIdAttributeAsText(), SWT.WRAP);
+					l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+					((GridData)l.getLayoutData()).widthHint = 100;
+					addListener(l);
+					
+					l.addListener(SWT.MouseHover, this);
+					this.addListener(SWT.MouseHover, this);
+
+				}else if (type == Type.DETAILS){
 				
-				
-				
-				List<IntelRecordAttachment> allAttachments = listParent.getEditor().getRecord().getAttachments();
-				List<IntelAttachment> toShow1 = new ArrayList<IntelAttachment>();
-				List<IntelEntityAttachment> toShow2 = new ArrayList<IntelEntityAttachment>();
-				if(allAttachments != null){
-					for (IntelEntityAttachment att : item.getEntity().getEntityAttachments()){
-						for (IntelRecordAttachment a : allAttachments){
-							if (att.getAttachment().equals(a.getAttachment())){
-								toShow1.add(a.getAttachment());
-								break;
-							}
-						}
-					}
-					for (IntelEntityAttachment att : listParent.getEditor().getSummaryPage().getAttachmentPanel().getNewEntityAttachments()){
-						if(att.getEntity().equals(item.getEntity())){
+					Composite info = toolkit.createComposite(this, SWT.NONE);
+					info.setLayout(new GridLayout());
+					((GridLayout)info.getLayout()).marginWidth = 0;
+					((GridLayout)info.getLayout()).marginHeight = 0;
+					info.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+					addListener(info);
+					
+					
+					Label l = toolkit.createLabel(info, item.getEntity().getIdAttributeAsText(), SWT.WRAP);
+					l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+					((GridData)l.getLayoutData()).widthHint = 100;
+					addListener(l);
+					
+					Composite temp = toolkit.createComposite(info);
+					temp.setLayout(new GridLayout(2, true));
+					temp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+					((GridLayout)temp.getLayout()).marginWidth = 0;
+					((GridLayout)temp.getLayout()).marginHeight = 0;
+					
+					Composite temp1 = toolkit.createComposite(temp);
+					temp1.setLayout(new GridLayout(2, false));
+					temp1.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+					((GridLayout)temp1.getLayout()).marginWidth = 0;
+					((GridLayout)temp1.getLayout()).marginHeight = 0;
+					
+					l = toolkit.createLabel(temp1, ""); //$NON-NLS-1$
+					l.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false));
+					l.setImage(Resources.INSTANCE.getImage(item.getEntity().getEntityType()));
+					
+					l = toolkit.createLabel(temp1, item.getEntity().getEntityType().getName());
+					l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+					
+					
+					Composite temp2 = toolkit.createComposite(temp);
+					temp2.setLayout(new GridLayout(2, false));
+					temp2.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
+					((GridLayout)temp2.getLayout()).marginWidth = 0;
+					((GridLayout)temp2.getLayout()).marginHeight = 0;
+					
+					l = toolkit.createLabel(temp2, ""); //$NON-NLS-1$
+					l.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false));
+					l.setImage(Resources.INSTANCE.getImage(item.getEntity().getProfile()));
+					
+					l = toolkit.createLabel(temp2, item.getEntity().getProfile().getName());
+					l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+										
+					List<IntelRecordAttachment> allAttachments = listParent.getEditor().getRecord().getAttachments();
+					List<IntelAttachment> toShow1 = new ArrayList<IntelAttachment>();
+					List<IntelEntityAttachment> toShow2 = new ArrayList<IntelEntityAttachment>();
+					if(allAttachments != null){
+						for (IntelEntityAttachment att : item.getEntity().getEntityAttachments()){
 							for (IntelRecordAttachment a : allAttachments){
 								if (att.getAttachment().equals(a.getAttachment())){
-									toShow2.add(att);
+									toShow1.add(a.getAttachment());
 									break;
 								}
 							}
 						}
-					}
-				}
-				
-				Composite attach = toolkit.createComposite(info, SWT.NONE);
-				attach.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, true));
-				((GridData)attach.getLayoutData()).widthHint = 100;
-				RowLayout layout = new RowLayout();
-				layout.wrap = true;
-				layout.marginBottom = layout.marginLeft = layout.marginRight = layout.marginTop = 0;
-				attach.setLayout(layout);
-				addListener(attach);
-				
-				for (IntelAttachment att : toShow1){
-					Thumbnail thumb = new Thumbnail(att, THUMB_SIZE-5);
-					Composite c2 = thumb.createThumbnail(attach, SWT.NONE);
-					toolkit.adapt(c2);
-					c2.setLayoutData(new RowData(THUMB_SIZE-5,THUMB_SIZE-5));
-					c2.setToolTipText(att.getFilename());
-					addListener(c2);
-					
-				}
-				for (IntelEntityAttachment att : toShow2){
-					Thumbnail thumb = new Thumbnail(att.getAttachment(), THUMB_SIZE-2);
-					Composite c2 = thumb.createThumbnail(attach, SWT.BORDER);
-					toolkit.adapt(c2);
-					c2.setLayoutData(new RowData(THUMB_SIZE-2,THUMB_SIZE-2));
-					c2.setToolTipText(att.getAttachment().getFilename());
-					
-					Menu menu = new Menu(c2);
-					c2.setMenu(menu);
-					MenuItem mi = new MenuItem(menu, SWT.PUSH);
-					mi.setText(Messages.EntityList_RemoveItem);
-					mi.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-					mi.addSelectionListener(new SelectionAdapter() {
-						@Override
-						public void widgetSelected(SelectionEvent e) {
-							listParent.getEditor().getSummaryPage().getAttachmentPanel().getNewEntityAttachments().remove(att);
-							setEntities(listParent.getEditor().getRecord().getEntities());
+						for (IntelEntityAttachment att : listParent.getEditor().getSummaryPage().getAttachmentPanel().getNewEntityAttachments()){
+							if(att.getEntity().equals(item.getEntity())){
+								for (IntelRecordAttachment a : allAttachments){
+									if (att.getAttachment().equals(a.getAttachment())){
+										toShow2.add(att);
+										break;
+									}
+								}
+							}
 						}
-					});
+					}
+					
+					Composite attach = toolkit.createComposite(info, SWT.NONE);
+					attach.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+					((GridData)attach.getLayoutData()).widthHint = 100;
+					RowLayout layout = new RowLayout();
+					layout.wrap = true;
+					layout.marginBottom = layout.marginLeft = layout.marginRight = layout.marginTop = 0;
+					attach.setLayout(layout);
+					addListener(attach);
+					
+					for (IntelAttachment att : toShow1){
+						Thumbnail thumb = new Thumbnail(att, THUMB_SIZE-5);
+						Composite c2 = thumb.createThumbnail(attach, SWT.NONE);
+						toolkit.adapt(c2);
+						c2.setLayoutData(new RowData(THUMB_SIZE-5,THUMB_SIZE-5));
+						c2.setToolTipText(att.getFilename());
+						addListener(c2);
+						
+					}
+					for (IntelEntityAttachment att : toShow2){
+						Thumbnail thumb = new Thumbnail(att.getAttachment(), THUMB_SIZE-2);
+						Composite c2 = thumb.createThumbnail(attach, SWT.BORDER);
+						toolkit.adapt(c2);
+						c2.setLayoutData(new RowData(THUMB_SIZE-2,THUMB_SIZE-2));
+						c2.setToolTipText(att.getAttachment().getFilename());
+						
+						Menu menu = new Menu(c2);
+						c2.setMenu(menu);
+						MenuItem mi = new MenuItem(menu, SWT.PUSH);
+						mi.setText(Messages.EntityList_RemoveItem);
+						mi.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+						mi.addSelectionListener(new SelectionAdapter() {
+							@Override
+							public void widgetSelected(SelectionEvent e) {
+								listParent.getEditor().getSummaryPage().getAttachmentPanel().getNewEntityAttachments().remove(att);
+								setEntities(listParent.getEditor().getRecord().getEntities());
+							}
+						});
+					}
+					
+					l = toolkit.createLabel(info, MessageFormat.format(Messages.EntityList_LocationLabel, locationCount));
+					l.setToolTipText(locationTooltip);
+					l.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
+					addListener(l);
 				}
-				
-				l = toolkit.createLabel(info, MessageFormat.format(Messages.EntityList_LocationLabel, locationCount));
-				l.setToolTipText(locationTooltip);
-				l.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
-				addListener(l);
 			}
 			
 		}
@@ -656,6 +721,11 @@ public class EntityList extends Composite {
 		public void handleEvent(Event event) {
 			if (event.type == SWT.MouseDoubleClick){
 				openEntity();
+			}else if (event.type == SWT.MouseHover){
+				String tt = MessageFormat.format(Messages.EntityList_TypeProfileTooltip,item.getEntity().getEntityType().getName(), "\n", item.getEntity().getProfile().getName()); //$NON-NLS-1$
+				DefaultToolTip tip = new DefaultToolTip((Control) event.widget);
+				tip.setText(tt);
+				tip.setShift(new Point(10,0));
 			}else if (event.type == SWT.MouseEnter){
 				mouseOver = true;
 				colorAll();

@@ -100,6 +100,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.EntityManager;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.internal.IntelligenceLabelProviderImpl;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
@@ -111,6 +112,7 @@ import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.model.IntelObservation;
 import org.wcs.smart.i2.model.IntelObservationAttribute;
 import org.wcs.smart.i2.model.IntelValueItem;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.udig.LocationLayerType;
 import org.wcs.smart.i2.udig.entity.IntelEntityDataSource;
 import org.wcs.smart.i2.udig.entity.IntelEntityService;
@@ -173,7 +175,12 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 				}
 				return MessageFormat.format(Messages.EntityEditorMapComposite_ObservationsLabel, cnt);
 			};
-			if (this == SOURCE_LINK) return location.getRecord().getTitle();
+			if (this == SOURCE_LINK) {
+				if (IntelSecurityManager.INSTANCE.canViewRecords(location.getRecord().getProfile())) {
+					return location.getRecord().getTitle();
+				}
+				return IntelligenceLabelProviderImpl.INSUFFICIENT_PRIVILEGES;
+			}
 			if (this == SOURCE) return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(IIntelligenceLabelProvider.PROFILE_SOURCE_LABEL, Locale.getDefault());
 			return ""; //$NON-NLS-1$
 			
@@ -372,7 +379,9 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 	}
 
 	private synchronized void createLayerGlyphs() {
-		for (Image i : layerGlyphs) i.dispose();
+		for (Image i : layerGlyphs) {
+			if (i != null && !i.isDisposed()) i.dispose();
+		}
 		layerGlyphs.clear();
 		
 		if (locationLayers == null || locationLayers.isEmpty()) return;
@@ -437,15 +446,10 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 		geomTypeColumn.getColumn().setWidth(25);
 		geomTypeColumn.setLabelProvider(new ColumnLabelProvider() {
 			
-//			private Image polygon = AWTSWTImageUtils.createSWTImage(Glyph.polygon(new Color(15,58,122, 50), new Color(15,58,122), 1));
-//			private Image point = AWTSWTImageUtils.createSWTImage(Glyph.point(new Color(15,58,122), new Color(15,58,122, 50)));
-			
 			private List<Image> todispose = new ArrayList<>();
 			
 			@Override
 			public void dispose(){
-//				polygon.dispose();
-//				point.dispose();
 				todispose.forEach(e->e.dispose());
 				todispose.clear();
 				super.dispose();
@@ -499,7 +503,8 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 		new AbstractEntityEditorShellListener<IntelEntityLocation, RecordDetailsShell>(locationTable, 4) {			
 			@Override
 			protected RecordDetailsShell getShellDialog(IntelEntityLocation currentSelection) {
-				return  new RecordDetailsShell(locationTable.getControl().getShell(),currentSelection.getLocation().getRecord());
+				if (!IntelSecurityManager.INSTANCE.canViewRecords(currentSelection.getLocation().getRecord().getProfile())) return null;
+				return new RecordDetailsShell(locationTable.getControl().getShell(),currentSelection.getLocation().getRecord());
 			}
 		};
 
@@ -560,46 +565,49 @@ public class EntityEditorMapComposite extends Composite implements MapPart{
 		Menu mnu = new Menu(locationTable.getTable());
 		locationTable.getTable().setMenu(mnu);
 		
-		MenuItem openItem = new MenuItem(mnu, SWT.PUSH);
-		openItem.setText(Messages.EntityEditorMapComposite_OpenSrcMenuItem);
-		openItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.GOTO_ICON));
-		openItem.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				Object selection = getSelectedLocation();
-				if (selection == null) return;
-				
-				if (selection instanceof IntelEntityLocation) {
-					(new OpenRecordHandler()).openRecord(((IntelEntityLocation) selection).getLocation().getRecord(),false);
-				}else if (selection instanceof Waypoint) {
-					Waypoint wp = (Waypoint)selection;
-					IWaypointSourceProvider srcProvider = WaypointSourceEngine.INSTANCE.findUiProvider(wp.getSourceId());
-					if (srcProvider == null) return;
-					srcProvider.findAndShow(wp.getUuid());
-				}
-			}
-		});
+		
 		
 		mnu.addMenuListener(new MenuListener() {
 			
 			@Override
 			public void menuShown(MenuEvent e) {
-				for (MenuItem mi : mnu.getItems()){
-					if (mi != openItem){
-						mi.dispose();
-					}
-				}
+				for (MenuItem mi : mnu.getItems()) mi.dispose();
+					
 				if (!editor.getEditMode()) return;
 				
 				Object loc = getSelectedLocation();
 				if (loc == null) return;
 				
 				if (loc instanceof IntelEntityLocation) {
+					IntelEntityLocation location = (IntelEntityLocation)loc;
 					try {
-						if (!( ((IntelEntityLocation)loc).getLocation().getGeometry() instanceof org.locationtech.jts.geom.Point)) return;
+						if (!( location.getLocation().getGeometry() instanceof org.locationtech.jts.geom.Point)) 
+							return;
 					} catch (ParseException e1) {
 						Intelligence2PlugIn.log(e1.getMessage(),e1);
 						return;
+					}
+
+					if (IntelSecurityManager.INSTANCE.canViewRecords(location.getLocation().getRecord().getProfile())) {
+						MenuItem openItem = new MenuItem(mnu, SWT.PUSH);
+						openItem.setText(Messages.EntityEditorMapComposite_OpenSrcMenuItem);
+						openItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.GOTO_ICON));
+						openItem.addSelectionListener(new SelectionAdapter() {
+							@Override
+							public void widgetSelected(SelectionEvent e) {
+								Object selection = getSelectedLocation();
+								if (selection == null) return;
+								
+								if (selection instanceof IntelEntityLocation) {
+									(new OpenRecordHandler()).openRecord(((IntelEntityLocation) selection).getLocation().getRecord(),false);
+								}else if (selection instanceof Waypoint) {
+									Waypoint wp = (Waypoint)selection;
+									IWaypointSourceProvider srcProvider = WaypointSourceEngine.INSTANCE.findUiProvider(wp.getSourceId());
+									if (srcProvider == null) return;
+									srcProvider.findAndShow(wp.getUuid());
+								}
+							}
+						});
 					}
 				}
 				

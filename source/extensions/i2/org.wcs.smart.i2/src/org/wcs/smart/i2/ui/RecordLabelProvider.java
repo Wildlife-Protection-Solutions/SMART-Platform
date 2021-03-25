@@ -30,9 +30,12 @@ import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
+import org.wcs.smart.i2.internal.IntelligenceLabelProviderImpl;
 import org.wcs.smart.i2.internal.Messages;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordSource;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
 
 /**
@@ -49,6 +52,7 @@ public class RecordLabelProvider extends ColumnLabelProvider{
 		TITLE_CREATED,
 		STATUS,
 		SOURCE,
+		PROFILE,
 		PRIMARY_DATE;
 		
 		public String getLabel(IntelRecord record){
@@ -61,6 +65,8 @@ public class RecordLabelProvider extends ColumnLabelProvider{
 				return DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(record.getPrimaryDate());
 			case STATUS:
 				return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(record.getStatus(), Locale.getDefault());
+			case PROFILE:
+				return record.getProfile().getName();
 			case SOURCE:
 				if (record.getRecordSource() == null) return ""; //$NON-NLS-1$
 				return record.getRecordSource().getName();
@@ -90,27 +96,67 @@ public class RecordLabelProvider extends ColumnLabelProvider{
 	@Override
 	public String getText(Object element){
 		if (element instanceof IntelRecord){
-			return field.getLabel((IntelRecord) element);
-		}else if (element instanceof RecordEditorInput && field == RecordField.TITLE){
-			return ((RecordEditorInput) element).getName();
-		}else if (element instanceof RecordEditorInput && field == RecordField.TITLE_CREATED){
-			return MessageFormat.format(Messages.RecordLabelProvider_0Name1DateCreated, ((RecordEditorInput) element).getName(), DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(((RecordEditorInput) element).getDateCreated()));
+			IntelRecord record = (IntelRecord)element;
+			if (field == RecordField.PROFILE) {
+				return field.getLabel(record);
+			}
+			if (IntelSecurityManager.INSTANCE.canViewRecords( record.getProfile())) {
+				return field.getLabel(record);
+			}else {
+				if (field == RecordField.TITLE) return IntelligenceLabelProviderImpl.INSUFFICIENT_PRIVILEGES;
+				return ""; //$NON-NLS-1$
+			}
+		}else if (element instanceof RecordEditorInput) {
+			RecordEditorInput input = (RecordEditorInput)element;
+			IntelProfile temp = new IntelProfile();
+			temp.setUuid(input.getRecordProfileUuid());
+			if (IntelSecurityManager.INSTANCE.canViewRecords(temp)) {
+				if (field == RecordField.TITLE){
+					return input.getName();
+				}else if (field == RecordField.TITLE_CREATED){
+					return MessageFormat.format(Messages.RecordLabelProvider_0Name1DateCreated, input.getName(), DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(input.getDateCreated()));
+				}
+			}else {
+				if (field == RecordField.TITLE) return IntelligenceLabelProviderImpl.INSUFFICIENT_PRIVILEGES;
+				return ""; //$NON-NLS-1$
+			}
 		}
 		return super.getText(element);
 	}
 	
 	@Override
 	public Image getImage(Object element){
-		if (field != RecordField.TITLE) return null;
 		
-		IntelRecordSource src = null;
-		if (element instanceof IntelRecord){
-			src = ((IntelRecord) element).getRecordSource();
-		}else if (element instanceof RecordEditorInput){
-			src = new IntelRecordSource();
-			src.setUuid(((RecordEditorInput) element).getRecordSourceUuid());
+		
+		if (field == RecordField.PROFILE) {
+			if (element instanceof IntelRecord) {
+				IntelRecord record = (IntelRecord)element;
+				return Resources.INSTANCE.getImage( record.getProfile() );
+			}else if (element instanceof RecordEditorInput) {
+				RecordEditorInput i = (RecordEditorInput)element;
+				IntelProfile t = new IntelProfile();
+				t.setUuid(i.getRecordProfileUuid());
+				return Resources.INSTANCE.getImage(t);
+			}
 		}
-		if (src != null) return Resources.INSTANCE.getImage(src);
+		if (field == RecordField.TITLE) {
+			IntelRecordSource src = null;
+			if (element instanceof IntelRecord){
+				src = ((IntelRecord) element).getRecordSource();
+			}else if (element instanceof RecordEditorInput){
+				src = new IntelRecordSource();
+				src.setUuid(((RecordEditorInput) element).getRecordSourceUuid());
+			}
+			if (src != null) return Resources.INSTANCE.getImage(src);
+		}
+		if (field == RecordField.STATUS) {
+			if (element instanceof IntelRecord){
+				if (IntelSecurityManager.INSTANCE.canViewRecords(((IntelRecord)element).getProfile())) {
+					return Resources.INSTANCE.getImage(((IntelRecord) element).getStatus());
+				}
+			}
+		}
+			
 		return null;
 	}
 	

@@ -42,10 +42,13 @@ import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.query.Query;
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection.Permission;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
 import org.wcs.smart.i2.model.IntelEntity;
+import org.wcs.smart.i2.model.IntelEntityLocation;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.observation.model.Waypoint;
@@ -59,6 +62,8 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class EntityLocationDatasetResultSet implements IResultSet {
 
+	private static final Object INSUFFICIENT_PRIVILEGES = new Object();
+
 	private long m_maxRows = -1;
 	private int m_currentRowId = -1;
 
@@ -71,6 +76,9 @@ public class EntityLocationDatasetResultSet implements IResultSet {
 	private Locale l;
 	
 	private IntelEntity entity = null;
+	private Set<IntelProfile> viewableRecords = null;
+	
+	private int recordSourceLinkColumn = -1;
 	
 	/**
 	 * Creates a new summary results set
@@ -86,7 +94,13 @@ public class EntityLocationDatasetResultSet implements IResultSet {
 			EntityLocationParameterMetadata pmetadata) {
 		this.l = connection.getCurrentLocale();
 		this.metadata = metadata;
-	
+		viewableRecords = connection.hasPermission(Permission.RECORD);
+		try {
+			recordSourceLinkColumn = findColumn(EntityLocationDatasetResultSetMetadata.Column.SOURCELINK.id);
+		}catch (OdaException ex) {
+			throw new RuntimeException(ex);
+		}
+		
 		Set<IntelProfile> profiles = connection.hasPermission(Permission.ENTITY);
 
 		String q1 = "SELECT count(*) FROM IntelEntityLocation l WHERE l.id.entity.entityType = :type and l.id.entity.profile in (:profiles)"; //$NON-NLS-1$
@@ -256,6 +270,7 @@ public class EntityLocationDatasetResultSet implements IResultSet {
 	public String getString(int index) throws OdaException {
 		lastRowItem = getCurrentItem(index);
 		if (lastRowItem == null) return ""; //$NON-NLS-1$
+		if (lastRowItem == INSUFFICIENT_PRIVILEGES) return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(IIntelligenceLabelProvider.INSUFFICIENT_PRIVILEGES_LABEL, l);
 		return lastRowItem.toString();
 	}
 
@@ -267,6 +282,13 @@ public class EntityLocationDatasetResultSet implements IResultSet {
 	private Object getCurrentItem(int colIndex) {
 		if (currentItem == null) return null;
 		Object[] data = (Object[])currentItem;
+		
+		if (colIndex == recordSourceLinkColumn) {
+			IntelEntityLocation location = (IntelEntityLocation) data[0];
+			if (!viewableRecords.contains(location.getLocation().getRecord().getProfile())) {
+				return INSUFFICIENT_PRIVILEGES;
+			}
+		}
 		if (data.length == 1) {
 			return EntityLocationDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(data[0], l, entity);
 		}else {
@@ -369,6 +391,8 @@ public class EntityLocationDatasetResultSet implements IResultSet {
 			return java.sql.Date.valueOf( (((LocalDateTime)lastRowItem)).toLocalDate() );
 		}else if (lastRowItem == null){
 			return null;
+		}else if (lastRowItem == INSUFFICIENT_PRIVILEGES) {
+			return null;
 		}
 		throw new UnsupportedOperationException();
 	}
@@ -391,6 +415,8 @@ public class EntityLocationDatasetResultSet implements IResultSet {
 			return (Time) lastRowItem;
 		}else if (lastRowItem instanceof LocalTime) {
 			return Time.valueOf((LocalTime)lastRowItem);
+		}else if (lastRowItem == INSUFFICIENT_PRIVILEGES) {
+			return null;
 		}
 		throw new UnsupportedOperationException();
 	}
@@ -415,6 +441,8 @@ public class EntityLocationDatasetResultSet implements IResultSet {
 			return new Timestamp(((Date)lastRowItem).getTime());
 		}else if (lastRowItem instanceof LocalDateTime) {
 			return Timestamp.valueOf((LocalDateTime)lastRowItem);
+		}else if (lastRowItem == INSUFFICIENT_PRIVILEGES) {
+			return null;
 		}
 		throw new UnsupportedOperationException();
 	}
@@ -475,6 +503,8 @@ public class EntityLocationDatasetResultSet implements IResultSet {
 			return ((Double) lastRowItem) <= 0.5;
 		}else if (lastRowItem == null){
 			return false;
+		}else if (lastRowItem == INSUFFICIENT_PRIVILEGES) {
+			return false;
 		}
 		throw new UnsupportedOperationException();
 	}
@@ -518,7 +548,7 @@ public class EntityLocationDatasetResultSet implements IResultSet {
 	 */
 	public int findColumn(String columnName) throws OdaException {
 		for (int i = 0; i < metadata.getColumnCount(); i++) {
-			if (metadata.getColumnName(i).equals(columnName)) {
+			if (metadata.getColumnName(i+1).equals(columnName)) {
 				return i + 1;
 			}
 		}

@@ -163,15 +163,16 @@ public class EntityListComposite extends Composite{
 								if (x != null) entity = (IntelEntity)x;
 							}
 							if (entity == null) return;
-							if (entity.getProfile().getUuid().equals(editor.getInputInternal().getRecordProfileUuid())) {
-								linkEntity((IntelEntity)element);
-							}else {
-								//show error
-								String message = MessageFormat.format(Messages.EntityListComposite_CannotAddEntity,
-										entity.getIdAttributeAsText(), entity.getProfile().getName(), editor.getRecord().getProfile().getName());
-								TransparentInfoDialog ti = new TransparentInfoDialog(getShell(), message);
-								ti.open();
-							}
+//							if (entity.getProfile().getUuid().equals(editor.getInputInternal().getRecordProfileUuid())) {
+							//allow linking of any entity type
+							linkEntity((IntelEntity)element);
+//							}else {
+//								//show error
+//								String message = MessageFormat.format(Messages.EntityListComposite_CannotAddEntity,
+//										entity.getIdAttributeAsText(), entity.getProfile().getName(), editor.getRecord().getProfile().getName());
+//								TransparentInfoDialog ti = new TransparentInfoDialog(getShell(), message);
+//								ti.open();
+//							}
 							
 						}
 					}
@@ -276,9 +277,9 @@ public class EntityListComposite extends Composite{
 								add = false;
 							}
 						}
-						if (!toadd.getProfile().equals(editor.getRecord().getProfile())) {
-							add =  false;
-						}
+//						if (!toadd.getProfile().equals(editor.getRecord().getProfile())) {
+//							add =  false;
+//						}
 						if (add){
 							IntelEntityRecord r = new IntelEntityRecord();
 							r.setEntity(toadd);
@@ -326,6 +327,9 @@ public class EntityListComposite extends Composite{
 		List<IntelEntity> r = lstEntities.getCurrentSelection();
 		if (r != null && !r.isEmpty()){
 			for (IntelEntity toDelete : r){
+				//if you don't have permission to view the entity then you can't remove it
+				if (!IntelSecurityManager.INSTANCE.canViewEntities(toDelete.getProfile())) continue;
+				
 				//remove any links not yet saved links to attachments and locations
 				for (Iterator<IntelEntityAttachment> iterator = editor.getSummaryPage().getAttachmentPanel().getNewEntityAttachments().iterator(); iterator.hasNext();) {
 					IntelEntityAttachment a = (IntelEntityAttachment) iterator.next();

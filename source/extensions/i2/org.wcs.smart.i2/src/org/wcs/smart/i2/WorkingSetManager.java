@@ -35,6 +35,7 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.event.IntelEvents;
+import org.wcs.smart.i2.internal.IntelligenceLabelProviderImpl;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
 import org.wcs.smart.i2.model.IWorkingSetMapLayer;
@@ -69,7 +70,7 @@ public enum WorkingSetManager {
 		
 		public String getMessage() {
 			if (this == LayerStatus.INSUFFICIENT_PRIV) {
-				return Messages.HiddenWorkingSetItem_WorkingSetItemHidden;
+				return IntelligenceLabelProviderImpl.INSUFFICIENT_PRIVILEGES; 
 			}else if (this == LayerStatus.INACTIVE_PROFILE) {
 				return Messages.WorkingSetManager_ProfileNotActive;
 			}else {

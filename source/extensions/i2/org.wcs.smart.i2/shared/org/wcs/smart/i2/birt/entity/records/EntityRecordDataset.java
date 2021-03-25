@@ -68,8 +68,8 @@ public class EntityRecordDataset  implements IQuery {
 	public EntityRecordDataset(AbstractIntelBirtConnection connection){
 		this.connection = connection;
 		parameters = new HashMap<Integer,Object>();
-		
 	}
+	
 	@Override
 	public void prepare(String queryText) throws OdaException {
 		Set<IntelProfile> profiles = connection.hasPermission(Permission.ENTITY);

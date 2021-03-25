@@ -40,6 +40,8 @@ import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.query.Query;
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection;
 import org.wcs.smart.i2.birt.datasource.AbstractIntelBirtConnection.Permission;
 import org.wcs.smart.i2.birt.datasource.DataSourceParameter;
@@ -55,6 +57,8 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class EntityRecordDatasetResultSet implements IResultSet {
 
+	private static final Object INSUFFICIENT_PRIVILEGES = new Object();
+
 	private long m_maxRows = -1;
 	private int m_currentRowId = -1;
 
@@ -63,6 +67,9 @@ public class EntityRecordDatasetResultSet implements IResultSet {
 	
 	private EntityRecordDatasetResultSetMetadata metadata;
 	private ScrollableResults results;
+	
+	private Set<IntelProfile> viewableRecords;
+	private AbstractIntelBirtConnection connection;
 	
 	/**
 	 * Creates a new summary results set
@@ -76,9 +83,12 @@ public class EntityRecordDatasetResultSet implements IResultSet {
 			EntityRecordDatasetResultSetMetadata metadata, 
 			AbstractIntelBirtConnection connection, HashMap<Integer, Object> parameters,
 			EntityRecordParameterMetadata pmetadata) {
-		
-		this.metadata = metadata;
 	
+		this.metadata = metadata;
+		this.connection = connection;
+		
+		viewableRecords = connection.hasPermission(Permission.RECORD);
+		
 		Set<IntelProfile> profiles = connection.hasPermission(Permission.ENTITY);
 		
 		String q1 = "SELECT count(*) FROM IntelEntityRecord l WHERE l.id.entity.entityType = :type and l.id.entity.profile IN (:profiles)"; //$NON-NLS-1$
@@ -172,6 +182,7 @@ public class EntityRecordDatasetResultSet implements IResultSet {
 	public String getString(int index) throws OdaException {
 		lastRowItem = getCurrentItem(index);
 		if (lastRowItem == null) return ""; //$NON-NLS-1$
+		if (lastRowItem == INSUFFICIENT_PRIVILEGES) SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(IIntelligenceLabelProvider.INSUFFICIENT_PRIVILEGES_LABEL, connection.getCurrentLocale());
 		return lastRowItem.toString();
 	}
 
@@ -183,7 +194,11 @@ public class EntityRecordDatasetResultSet implements IResultSet {
 	private Object getCurrentItem(int colIndex) {
 		if (currentItem == null) return null;
 		IntelEntityRecord i = (IntelEntityRecord) ((Object[])currentItem)[0];
-		return EntityRecordDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i);
+		if (viewableRecords.contains(i.getRecord().getProfile())) {
+			return EntityRecordDatasetResultSetMetadata.Column.values()[colIndex-1].getValue(i);
+		}else {
+			return INSUFFICIENT_PRIVILEGES;
+		}
 	}
 
 	/**
@@ -281,6 +296,8 @@ public class EntityRecordDatasetResultSet implements IResultSet {
 			return java.sql.Date.valueOf( (((LocalDateTime)lastRowItem)).toLocalDate() );
 		}else if (lastRowItem == null){
 			return null;
+		}else if (lastRowItem == INSUFFICIENT_PRIVILEGES) {
+			return null;
 		}
 		throw new UnsupportedOperationException();
 	}
@@ -303,6 +320,8 @@ public class EntityRecordDatasetResultSet implements IResultSet {
 			return (Time) lastRowItem;
 		}else if (lastRowItem instanceof LocalTime) {
 			return Time.valueOf((LocalTime)lastRowItem);
+		}else if (lastRowItem == INSUFFICIENT_PRIVILEGES) {
+			return null;
 		}
 		throw new UnsupportedOperationException();
 	}
@@ -325,6 +344,8 @@ public class EntityRecordDatasetResultSet implements IResultSet {
 			return (Timestamp) lastRowItem;
 		}else if (lastRowItem instanceof LocalDateTime) {
 			return Timestamp.valueOf((LocalDateTime)lastRowItem);
+		}else if (lastRowItem == INSUFFICIENT_PRIVILEGES) {
+			return null;
 		}
 		throw new UnsupportedOperationException();
 	}
@@ -384,6 +405,8 @@ public class EntityRecordDatasetResultSet implements IResultSet {
 		} else if (lastRowItem instanceof Double) {
 			return ((Double) lastRowItem) <= 0.5;
 		}else if (lastRowItem == null){
+			return false;
+		}else if (lastRowItem == INSUFFICIENT_PRIVILEGES) {
 			return false;
 		}
 		throw new UnsupportedOperationException();

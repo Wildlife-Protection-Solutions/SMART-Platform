@@ -48,6 +48,7 @@ import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.internal.IntelligenceLabelProviderImpl;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttributeListItem;
 import org.wcs.smart.i2.model.IntelEntity;
@@ -62,6 +63,7 @@ import org.wcs.smart.i2.model.IntelRecord;
 import org.wcs.smart.i2.model.IntelRecordAttachment;
 import org.wcs.smart.i2.model.IntelRecordAttributeValue;
 import org.wcs.smart.i2.model.IntelRecordAttributeValueList;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.xml.record.AttachmentType;
 import org.wcs.smart.i2.xml.record.AttributeType;
 import org.wcs.smart.i2.xml.record.LabelUuid;
@@ -292,9 +294,12 @@ public class RecordXmlExporter {
 				
 				//entity attachments
 				for (IntelEntityRecord entity : record.getEntities()){
+					if(!IntelSecurityManager.INSTANCE.canViewEntities(entity.getEntity().getProfile())) continue;
+					
 					for (IntelEntityAttachment ea : entity.getEntity().getEntityAttachments()){
 						if (!ea.getAttachment().equals(attachment.getAttachment())) continue;
 						LabelUuid entityAttachment = new LabelUuid();
+						
 						entityAttachment.setUuid(UuidUtils.uuidToString(entity.getEntity().getUuid()));
 						xmlAttachment.getEntities().add(entityAttachment);
 					}
@@ -305,11 +310,19 @@ public class RecordXmlExporter {
 		
 		if (record.getEntities() != null){
 			for (IntelEntityRecord r : record.getEntities()){
-				LabelUuid entity = factory.createLabelUuid();
-				entity.setUuid(UuidUtils.uuidToString(r.getEntity().getUuid()));
-				entity.setName(r.getEntity().getIdAttributeAsText());
-				entity.setKeyid(r.getEntity().getEntityType().getKeyId());
-				xmlRecord.getEntities().add(entity);
+				if (IntelSecurityManager.INSTANCE.canViewEntities(r.getEntity().getProfile())) {
+					LabelUuid entity = factory.createLabelUuid();
+					entity.setUuid(UuidUtils.uuidToString(r.getEntity().getUuid()));
+					entity.setName(r.getEntity().getIdAttributeAsText());
+					entity.setKeyid(r.getEntity().getEntityType().getKeyId());
+					xmlRecord.getEntities().add(entity);
+				}else {
+					LabelUuid entity = factory.createLabelUuid();
+					entity.setUuid(IntelligenceLabelProviderImpl.INSUFFICIENT_PRIVILEGES);
+					entity.setName(IntelligenceLabelProviderImpl.INSUFFICIENT_PRIVILEGES);
+					entity.setKeyid(r.getEntity().getEntityType().getKeyId());
+					xmlRecord.getEntities().add(entity);	
+				}
 			}
 		}
 		
@@ -325,11 +338,19 @@ public class RecordXmlExporter {
 				
 				List<IntelEntityLocation> entities = QueryFactory.buildQuery(session, IntelEntityLocation.class, "id.location", location).getResultList(); //$NON-NLS-1$
 				for (IntelEntityLocation entity : entities){
-					LabelUuid xmlEntity =factory.createLabelUuid();;
-					xmlEntity.setUuid(UuidUtils.uuidToString(entity.getEntity().getUuid()));
-					xmlEntity.setName(entity.getEntity().getIdAttributeAsText());
-					xmlEntity.setKeyid(entity.getEntity().getEntityType().getKeyId());
-					xmlLocation.getEntities().add(xmlEntity);
+					if (IntelSecurityManager.INSTANCE.canViewEntities(entity.getEntity().getProfile())) {
+						LabelUuid xmlEntity =factory.createLabelUuid();
+						xmlEntity.setUuid(UuidUtils.uuidToString(entity.getEntity().getUuid()));
+						xmlEntity.setName(entity.getEntity().getIdAttributeAsText());
+						xmlEntity.setKeyid(entity.getEntity().getEntityType().getKeyId());
+						xmlLocation.getEntities().add(xmlEntity);
+					}else {
+						LabelUuid xmlEntity =factory.createLabelUuid();
+						xmlEntity.setUuid(IntelligenceLabelProviderImpl.INSUFFICIENT_PRIVILEGES);
+						xmlEntity.setName(IntelligenceLabelProviderImpl.INSUFFICIENT_PRIVILEGES);
+						xmlEntity.setKeyid(entity.getEntity().getEntityType().getKeyId());
+						xmlLocation.getEntities().add(xmlEntity);
+					}
 				}
 				
 				if (location.getObservations() != null){

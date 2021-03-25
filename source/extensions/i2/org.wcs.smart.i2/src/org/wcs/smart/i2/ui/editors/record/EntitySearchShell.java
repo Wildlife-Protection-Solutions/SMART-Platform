@@ -23,9 +23,10 @@ package org.wcs.smart.i2.ui.editors.record;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -55,9 +56,12 @@ import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.ProfilesManager;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
+import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.search.BasicEntitySearch;
+import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.EntityTypeLabelProvider;
 import org.wcs.smart.ui.SmartShellDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -177,7 +181,13 @@ public class EntitySearchShell extends SmartShellDialog {
 			List<InternalSearchResult> entities = new ArrayList<InternalSearchResult>();
 			try(Session s = HibernateManager.openSession()){
 				BasicEntitySearch search = new BasicEntitySearch(searchText[0], SmartDB.getCurrentConservationArea(), 50);
-				search.doSearch(Collections.singleton(editor.getRecord().getProfile()), s, Locale.getDefault(), new NullProgressMonitor()).getAllResults().forEach(result->{
+				
+				Set<IntelProfile> profiles = new HashSet<>();
+				for (IntelProfile p : ProfilesManager.INSTANCE.getActiveProfiles()) {
+					if (IntelSecurityManager.INSTANCE.canViewEntities(p)) profiles.add(p);
+				}
+				
+				search.doSearch(profiles, s, Locale.getDefault(), new NullProgressMonitor()).getAllResults().forEach(result->{
 					InternalSearchResult r = new InternalSearchResult();
 					IntelEntity ei = s.get(IntelEntity.class, result.getEntityUuid());
 					r.rating = result.getFormattedRating();

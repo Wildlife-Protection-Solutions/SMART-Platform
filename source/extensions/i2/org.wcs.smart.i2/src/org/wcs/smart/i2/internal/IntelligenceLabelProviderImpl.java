@@ -75,7 +75,7 @@ import org.wcs.smart.ui.SmartLabelProvider;
 public class IntelligenceLabelProviderImpl implements
 		IIntelligenceLabelProvider {
 
-
+	public final static String INSUFFICIENT_PRIVILEGES = "**Insufficient Privileges**";
 	
 	public static String getEdgeStyleName(RelationshipDiagramEdgeStyleOptions.EdgeStyle style) {
 		switch(style) {
@@ -148,6 +148,7 @@ public class IntelligenceLabelProviderImpl implements
 		}
 		if (item == DM_SOURCE_LABEL) return Messages.IntelligenceLabelProviderImpl_CoreObservationSrc;
 		if (item == PROFILE_SOURCE_LABEL) return Messages.IntelligenceLabelProviderImpl_ProfileObservationSrc;
+		if (item == INSUFFICIENT_PRIVILEGES_LABEL) return INSUFFICIENT_PRIVILEGES;
 		
 		if (item == QUERY_COLUMN_CATEGORY_LABEL) return Messages.IntelligenceLabelProviderImpl_QueryCategoryLabel;
 		if (item == OBS_COUNT_LABEL ) return Messages.IntelligenceLabelProviderImpl_QueryObservationCntLabel;
