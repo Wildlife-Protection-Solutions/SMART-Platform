@@ -924,7 +924,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		sb.append("UPDATE "); //$NON-NLS-1$
 		sb.append( queryDataTable );
 		sb.append(" SET wp_lastmodifiedbyname = ? WHERE wp_lastmodifiedby = ?"); //$NON-NLS-1$
-		logger.finest(sql.toString());
+		logger.finest(sb.toString());
 		
 		PreparedStatement lastmodified = c.prepareStatement(sb.toString());
 		int cnt = 0;

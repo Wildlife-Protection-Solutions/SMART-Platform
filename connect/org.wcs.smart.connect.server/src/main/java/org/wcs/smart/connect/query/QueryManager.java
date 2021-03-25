@@ -422,7 +422,6 @@ public enum QueryManager {
 			cnt++;
 			query += sql;
 		}
-		System.out.println(query);
 		NativeQuery<?> nq = session.createNativeQuery(query);
 		for (Entry<String, Object> param : params.entrySet()) {
 			nq.setParameter(param.getKey(),  param.getValue());

@@ -102,6 +102,7 @@ public class AdvancedLabelProviderImpl implements
 		if (item == PROFILE_SOURCE_LABEL) return Messages.getString("AdvancedLabelProviderImpl.ProfileObservation", l); //$NON-NLS-1$
 		if (item == QUERY_COLUMN_CATEGORY_LABEL) return Messages.getString("AdvancedLabelProviderImpl.CategoryColumnLabel", l); //$NON-NLS-1$
 		if (item == OBS_COUNT_LABEL ) return Messages.getString("AdvancedLabelProviderImpl.ObservationColumnLabel", l); //$NON-NLS-1$
+		if (item == INSUFFICIENT_PRIVILEGES_LABEL ) return Messages.getString("AdvancedLabelProviderImpl.InsufficientPrivileges", l); //$NON-NLS-1$
 		if (item == IntelWorkingSetCategory.ENTITY) return Messages.getString("AdvancedLabelProviderImpl.WsEnitiesLabel", l); //$NON-NLS-1$
 		if (item == IntelWorkingSetCategory.RECORD) return Messages.getString("AdvancedLabelProviderImpl.WsRecordsLabel", l); //$NON-NLS-1$
 		if (item == IntelWorkingSetCategory.QUERIES) return Messages.getString("AdvancedLabelProviderImpl.WsQueriesLabel", l); //$NON-NLS-1$
