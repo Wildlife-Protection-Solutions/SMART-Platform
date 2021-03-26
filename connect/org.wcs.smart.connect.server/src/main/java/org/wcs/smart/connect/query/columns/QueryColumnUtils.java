@@ -27,6 +27,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -132,6 +133,7 @@ public class QueryColumnUtils {
 	 * @return
 	 * @throws SQLException
 	 */
+	@SuppressWarnings("unchecked")
 	public static List<QueryColumn> getDataModelColumns(Session session, Locale l, ConservationAreaFilter caFilter) throws SQLException{
 		List<QueryColumn> keys = new ArrayList<QueryColumn>();
 		
@@ -160,26 +162,38 @@ public class QueryColumnUtils {
 		org.hibernate.query.Query<?> attquery = session.createQuery(query);
 		attquery.setParameterList("cauuids", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
 		attquery.setParameter("cnt", Long.valueOf(caFilter.getConservationAreaFilterIds().size())); //$NON-NLS-1$
-		
-		//this gets the attribute name based on the requested locale name query 
-		String nameQueryHql = "SELECT a.value FROM Label a, Attribute c where c.conservationArea.uuid in (:cauuids) AND a.id.element = c.uuid and c.keyId = :attributeKey ORDER By case when upper(a.id.language.code) = upper(:code1) then 1 else case when upper(a.id.language.code) = upper(:code2) then 2 else case when a.id.language.default = true then 3 else 4 end end end "; //$NON-NLS-1$
-		
-		org.hibernate.query.Query<?> nameQuery = session.createQuery(nameQueryHql);
-		
+
+		// this gets the attribute name based on the requested locale name query
+		String nameQueryHql = "SELECT c.keyId, a.value, case when upper(a.id.language.code) = :code1 then 1 when upper(a.id.language.code) = :code2 then 2 when a.id.language.default = true then 3 else 4 end as lorder " //$NON-NLS-1$
+				+ "FROM Label a, Attribute c where c.conservationArea.uuid in (:cauuids) " //$NON-NLS-1$
+				+ "AND a.id.element = c.uuid ORDER BY c.keyId, lorder, c.conservationArea.uuid ";  //$NON-NLS-1$
+
+		String allLocal = l.toString().toUpperCase();
+		String local = l.getLanguage().toUpperCase();
+
+		List<Object[]> labels = session.createQuery(nameQueryHql).setParameter("code1", allLocal) //$NON-NLS-1$
+				.setParameter("code2", local) //$NON-NLS-1$
+				.setParameterList("cauuids", caFilter.getConservationAreaFilterIds()) //$NON-NLS-1$
+				.list();
+
+		HashMap<String, String> attribute2name = new HashMap<>();
+		for (Object[] x : labels) {
+			String keyid = (String) x[0];
+			String name = (String) x[1];
+			if (!attribute2name.containsKey(keyid)) {
+				attribute2name.put(keyid, name);
+			}
+		}
+
 		List<?> attributes = attquery.list();
 		List<QueryColumn> attributeColumns = new ArrayList<QueryColumn>();
-		for (Object attributeRow : attributes){
-			Object[] attribute = (Object[])attributeRow;
+		for (Object attributeRow : attributes) {
+			Object[] attribute = (Object[]) attributeRow;
 			String keyid = (String) attribute[0];
 			AttributeType atype = (AttributeType) attribute[1];
-			
-			nameQuery.setParameter("attributeKey", keyid); //$NON-NLS-1$
-			nameQuery.setParameter("code1", l.toString()); //$NON-NLS-1$
-			nameQuery.setParameter("code2", l.getLanguage()); //$NON-NLS-1$
-			nameQuery.setParameterList("cauuids", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
-			nameQuery.setMaxResults(1);
-			String name = (String) nameQuery.uniqueResult();
-			
+
+			String name = attribute2name.get(keyid);
+
 			attributeColumns.add(new AttributeQueryColumn(name, keyid, atype) {
 				
 				@Override
