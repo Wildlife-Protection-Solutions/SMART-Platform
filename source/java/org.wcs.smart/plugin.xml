@@ -37,7 +37,7 @@
             name="SMART">
          <property
                name="windowImages"
-               value="./images/icons/smart16.gif,./images/icons/smart32.gif,./images/icons/smart48.gif,./images/icons/smart64.gif,./images/icons/smart128.gif">
+               value="./images/icons/windowImages/smart16.png,./images/icons/windowImages/smart32.png,./images/icons/windowImages/smart48.png,./images/icons/windowImages/smart64.png,./images/icons/windowImages/smart128.png,./images/icons/windowImages/smart256.png">
          </property>
          <property
                name="appName"
@@ -686,7 +686,7 @@
             </separator>
             <command
                   commandId="org.eclipse.ui.help.aboutAction"
-                  icon="images/icons/smart16.gif"
+                  icon="images/icons/obj16/smart.png"
                   label="%about.command.label"
                   mnemonic="%about.command.mnemonic"
                   style="push">
@@ -1212,7 +1212,7 @@
             banner="images/icons/wizban/smart_wiz.png"
             class="org.wcs.smart.udig.catalog.smart.ui.SmartAreaWizardPage"
             description="%addsmartlayer.wizardPage.description"
-            icon="images/icons/smart16.gif"
+            icon="images/icons/obj16/smart.png"
             name="%addsmartlayer.wizardPage.name">
       </wizardPage>
    </extension>

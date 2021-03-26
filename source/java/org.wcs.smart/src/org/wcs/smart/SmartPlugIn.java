@@ -438,9 +438,10 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	     reg.put(ATTRIBUTE_MULTI_LIST_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/attribute_multi_list.png")); //$NON-NLS-1$
 	     reg.put(ATTRIBUTE_TREE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/attribute_tree.png")); //$NON-NLS-1$
 	     reg.put(ATTRIBUTE_DATE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/attribute_date.png")); //$NON-NLS-1$
-	     reg.put(DATA_MODEL_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/smart16.gif")); //$NON-NLS-1$
 	     
-	     reg.put(SMART_48_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "/images/icons/smart48.gif")); //$NON-NLS-1$
+	     reg.put(DATA_MODEL_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/smart.png")); //$NON-NLS-1$
+	     reg.put(SMART_48_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "/images/icons/obj48/smart.png")); //$NON-NLS-1$
+	     
 	     reg.put(SMART_EMPLOYEE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/user_orange.png")); //$NON-NLS-1$
 	     reg.put(EMPLOYEE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/user_green.png")); //$NON-NLS-1$
 	     reg.put(STATION_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/station.png")); //$NON-NLS-1$

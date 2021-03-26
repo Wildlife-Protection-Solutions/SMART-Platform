@@ -4,7 +4,7 @@
 <product name="SMART" uid="smartapp" id="org.wcs.smart.smart" application="org.wcs.smart.product" version="7.0.1.qualifier" useFeatures="true" includeLaunchers="true">
 
    <aboutInfo>
-      <image path="./images/nl/en/about.png"/>
+      <image path="/org.wcs.smart/images/nl/en/about.png"/>
       <text>
          %aboutText
       </text>
@@ -20,16 +20,16 @@
       </vmArgsMac>
    </launcherArgs>
 
-   <windowImages i16="./images/icons/smart16.gif" i32="./images/icons/smart32.gif" i48="./images/icons/smart48.gif" i64="./images/icons/smart64.gif" i128="./images/icons/smart128.gif"/>
+   <windowImages i16="/org.wcs.smart/images/icons/windowImages/smart16.png" i32="/org.wcs.smart/images/icons/windowImages/smart32.png" i48="/org.wcs.smart/images/icons/windowImages/smart48.png" i64="/org.wcs.smart/images/icons/windowImages/smart64.png" i128="/org.wcs.smart/images/icons/windowImages/smart128.png" i256="/org.wcs.smart/images/icons/windowImages/smart256.png"/>
 
    <splash
       location="org.wcs.smart"
       handlerType="interactive" />
    <launcher name="SMART">
-      <linux icon="./images/icons/smart.xpm"/>
-      <macosx icon="./images/icons/smart.icns"/>
+      <linux icon="/org.wcs.smart/images/icons/smart.xpm"/>
+      <macosx icon="/org.wcs.smart/images/icons/smart.icns"/>
       <win useIco="true">
-         <ico path="./images/icons/smart.ico"/>
+         <ico path="/org.wcs.smart/images/icons/smart.ico"/>
          <bmp/>
       </win>
    </launcher>
