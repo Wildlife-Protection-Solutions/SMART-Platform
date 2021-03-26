@@ -135,6 +135,11 @@ public class QueryResultsTablePage  extends EditorPart  {
 		return this.content.getDateFilter();
 	}
 	
+	
+	public void setDateFilter(DateFilter filter) {
+		this.content.setDateFilter(filter);
+	}
+	
 	/**
 	 * validates the date filter
 	 */

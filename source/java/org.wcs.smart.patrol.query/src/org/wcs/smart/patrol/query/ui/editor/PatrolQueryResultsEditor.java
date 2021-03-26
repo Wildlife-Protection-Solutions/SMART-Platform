@@ -96,6 +96,7 @@ import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryProxy;
+import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.ui.QueryEditorUtils;
 import org.wcs.smart.query.ui.definition.QueryDefView;
 import org.wcs.smart.query.ui.editor.IMapQueryEditor;
@@ -327,6 +328,11 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 	@Override
 	public void validate(){
 		page1.validate();
+	}
+	
+	@Override
+	public void setDateFilter(DateFilter filter) {
+		this.page1.setDateFilter(filter);
 	}
 	
 	/**

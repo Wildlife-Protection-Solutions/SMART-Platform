@@ -64,6 +64,7 @@ import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryProxy;
+import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.IDateFilter;
 import org.wcs.smart.query.ui.QueryDateFilterComposite;
 import org.wcs.smart.query.ui.QueryEditorUtils;
@@ -313,6 +314,11 @@ public abstract class SummaryEditor extends EditorPart implements IQueryEditor, 
 		return this.isDirty;
 	}
 
+	@Override
+	public void setDateFilter(DateFilter dateFilter) {
+		this.dateFilterComposite.setDateFilter(dateFilter);
+	}
+	
 	/**
 	 * Saves the current query
 	 * @see org.eclipse.ui.part.EditorPart#doSave(org.eclipse.core.runtime.IProgressMonitor)

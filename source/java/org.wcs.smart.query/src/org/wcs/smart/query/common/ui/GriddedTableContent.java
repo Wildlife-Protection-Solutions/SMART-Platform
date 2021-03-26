@@ -109,6 +109,10 @@ public class GriddedTableContent {
 		return this.dateComposite.getDateFilter();
 	}
 	
+	public void setDateFilter(DateFilter dateFilter) {
+		this.dateComposite.setDateFilter(dateFilter);
+	}
+	
 	/**
 	 * Validates the dates for the query
 	 */

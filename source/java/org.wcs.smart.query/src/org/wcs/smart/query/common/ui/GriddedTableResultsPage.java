@@ -105,6 +105,9 @@ public class GriddedTableResultsPage  extends EditorPart  {
 		return this.content.getDateFilter();
 	}
 	
+	public void setDateFilter(DateFilter dateFilter){
+		this.content.setDateFilter(dateFilter);
+	}
 	
 	/**
 	 * @see org.eclipse.ui.part.WorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)

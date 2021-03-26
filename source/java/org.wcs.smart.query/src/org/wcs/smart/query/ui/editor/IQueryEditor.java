@@ -23,6 +23,7 @@ package org.wcs.smart.query.ui.editor;
 
 import org.eclipse.swt.widgets.Listener;
 import org.wcs.smart.query.model.QueryProxy;
+import org.wcs.smart.query.model.filter.DateFilter;
 
 /**
  * All query editor should implement this interface.
@@ -103,4 +104,10 @@ public interface IQueryEditor {
 	 * Refresh the query ui after an edit is made
 	 */
 	public default void refreshResults(){}
+	
+	/**
+	 * Sets the editor date filter if applicable
+	 * @param filter
+	 */
+	public void setDateFilter(DateFilter filter);
 }

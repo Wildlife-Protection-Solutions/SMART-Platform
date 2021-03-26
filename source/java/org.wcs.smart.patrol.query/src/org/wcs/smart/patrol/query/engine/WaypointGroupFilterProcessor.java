@@ -141,6 +141,14 @@ public class WaypointGroupFilterProcessor extends org.wcs.smart.observation.quer
 		sql.append(prefix(PatrolLegDay.class));
 		sql.append(".patrol_leg_uuid "); //$NON-NLS-1$
 		
+
+		if (dateFilter != null) {
+			String filter = PatrolFilterSqlGenerator.INSTANCE.toSql(dateFilter, engine);
+			if (filter.length() > 0) {
+				sql.append(" and "); //$NON-NLS-1$
+				sql.append(filter);
+			}
+		}
 		
 		sql.append(" left join "); //$NON-NLS-1$
 		sql.append(name(PatrolLegMember.class));
@@ -177,14 +185,6 @@ public class WaypointGroupFilterProcessor extends org.wcs.smart.observation.quer
 		sql.append(" on "); //$NON-NLS-1$
 		sql.append(prefix(Waypoint.class) + ".uuid = "); //$NON-NLS-1$
 		sql.append(prefix(PatrolWaypoint.class) + ".wp_uuid"); //$NON-NLS-1$
-
-		if (dateFilter != null) {
-			String filter = PatrolFilterSqlGenerator.INSTANCE.toSql(dateFilter, engine);
-			if (filter.length() > 0) {
-				sql.append(" and "); //$NON-NLS-1$
-				sql.append(filter);
-			}
-		}
 		
 		sql.append(" left join "); //$NON-NLS-1$
 		sql.append(namePrefix(WaypointObservationGroup.class));
@@ -280,12 +280,22 @@ public class WaypointGroupFilterProcessor extends org.wcs.smart.observation.quer
 				sql.append(cfilter);
 			}
 		}
+		
 		sql.append(" join "); //$NON-NLS-1$
 
 		sql.append(name(PatrolLegDay.class));
 		sql.append(" as ");//$NON-NLS-1$
 		sql.append(prefix(PatrolLegDay.class)); 
 		sql.append(" ON " + prefix(PatrolLegDay.class) + ".patrol_leg_uuid = " + prefix(PatrolLeg.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		
+		if (dateFilter != null) {
+			String dfilter = getSqlGenerator().toSql(dateFilter, engine);
+			if (dfilter.length() > 0) {
+				sql.append(" and "); //$NON-NLS-1$
+				sql.append(dfilter);
+			}
+		}
+		
 		sql.append(" join "); //$NON-NLS-1$
 		
 		sql.append(name(PatrolWaypoint.class));
@@ -299,13 +309,7 @@ public class WaypointGroupFilterProcessor extends org.wcs.smart.observation.quer
 		sql.append(prefix(Waypoint.class)); 
 		sql.append(" on " + prefix(PatrolWaypoint.class) + ".wp_uuid = " + prefix(Waypoint.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		
-		if (dateFilter != null) {
-			String dfilter = getSqlGenerator().toSql(dateFilter, engine);
-			if (dfilter.length() > 0) {
-				sql.append(" and "); //$NON-NLS-1$
-				sql.append(dfilter);
-			}
-		}
+		
 		
 		sql.append(" join "); //$NON-NLS-1$
 		sql.append(name(WaypointObservationGroup.class));

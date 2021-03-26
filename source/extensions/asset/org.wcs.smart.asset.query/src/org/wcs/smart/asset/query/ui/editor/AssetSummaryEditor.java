@@ -47,6 +47,7 @@ import org.wcs.smart.query.common.ui.ISummaryEditor;
 import org.wcs.smart.query.common.ui.SummaryEditor;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryProxy;
+import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.ui.editor.IMapQueryEditor;
 import org.wcs.smart.query.ui.editor.IQueryEditor;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
@@ -170,7 +171,11 @@ public class AssetSummaryEditor extends MultiPageEditorPart implements IQueryEdi
 		updatePartName();
 		
 	}
-
+	@Override
+	public void setDateFilter(DateFilter dateFilter) {
+		page1.setDateFilter(dateFilter);
+	}
+	
 	@Override
 	public boolean isSaveAsAllowed() {
 		return page1.isSaveAsAllowed();

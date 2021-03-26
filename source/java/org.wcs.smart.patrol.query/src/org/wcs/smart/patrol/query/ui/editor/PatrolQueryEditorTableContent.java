@@ -126,6 +126,12 @@ public class PatrolQueryEditorTableContent {
 	}
 	
 	/**
+	 * @return the date filter
+	 */
+	public void setDateFilter(DateFilter dateFilter){
+		this.dateComposite.setDateFilter(dateFilter);
+	}
+	/**
 	 * validates the date filter
 	 */
 	public void validate(){

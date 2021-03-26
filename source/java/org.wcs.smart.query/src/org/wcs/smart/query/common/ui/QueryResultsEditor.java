@@ -74,6 +74,7 @@ import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryProxy;
+import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.ui.QueryEditorUtils;
 import org.wcs.smart.query.ui.definition.QueryDefView;
 import org.wcs.smart.query.ui.editor.IMapQueryEditor;
@@ -255,6 +256,11 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 				return;
 			}
 		}
+	}
+	
+	@Override
+	public void setDateFilter(DateFilter filter) {
+		page1.setDateFilter(filter);
 	}
 	
 	public void showTablePage() {

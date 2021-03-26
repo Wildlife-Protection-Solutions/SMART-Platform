@@ -32,6 +32,7 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.EditorPart;
+import org.wcs.smart.ca.Projection;
 import org.wcs.smart.patrol.query.model.IPatrolQueryResultItem;
 import org.wcs.smart.query.common.ui.QueryResultsTable;
 import org.wcs.smart.query.model.filter.DateFilter;
@@ -122,6 +123,10 @@ public class PatrolQueryTableResultsPage extends EditorPart  {
 	 */
 	public DateFilter getDateFilter(){
 		return this.content.getDateFilter();
+	}
+	
+	public void setDateFilter(DateFilter dateFilter) {
+		this.content.setDateFilter(dateFilter);
 	}
 	
 	/**

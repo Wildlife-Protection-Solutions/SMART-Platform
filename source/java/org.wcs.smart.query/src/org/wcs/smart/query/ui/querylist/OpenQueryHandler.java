@@ -34,6 +34,7 @@ import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.ui.editor.IQueryEditor;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
 /**
  * Command handler for adding a new folder to 
@@ -73,7 +74,10 @@ public class OpenQueryHandler {
 				//ensure data model is loaded; otherwise end up with deadlocking issues
 				QueryDataModelManager.getInstance().getDataModel();
 			}
-			 
+			IEditorPart part = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findEditor(input);
+			if (part != null && part instanceof IQueryEditor) {
+				((IQueryEditor)part).setDateFilter(input.getDateFilter());
+			}
 			return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, input.getType().getEditorId());	
 		} catch (Throwable t) {
 			QueryPlugIn.displayLog(t.getLocalizedMessage(), t);

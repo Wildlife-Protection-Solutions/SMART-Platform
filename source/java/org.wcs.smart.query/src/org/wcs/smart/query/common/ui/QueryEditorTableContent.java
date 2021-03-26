@@ -121,6 +121,11 @@ public class QueryEditorTableContent {
 		return this.dateComposite.getDateFilter();
 	}
 	
+	public void setDateFilter(DateFilter filter){
+		this.dateComposite.setDateFilter(filter);
+	}
+	
+	
 	/**
 	 * Updates the results table data.  This
 	 * runs in the display thread.

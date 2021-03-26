@@ -59,6 +59,7 @@ import org.wcs.smart.query.event.QueryListenerAdapter;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryProxy;
+import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.ui.QueryEditorUtils;
 import org.wcs.smart.query.ui.definition.QueryDefView;
 import org.wcs.smart.query.ui.editor.IQueryEditor;
@@ -360,6 +361,10 @@ public abstract class GriddedEditor extends MultiPageEditorPart implements MapPa
 		return true;
 	}
 
+	@Override
+	public void setDateFilter(DateFilter dateFilter) {
+		this.resultPage.setDateFilter(dateFilter);
+	}
 	
 	@Override
 	public boolean isDirty(){

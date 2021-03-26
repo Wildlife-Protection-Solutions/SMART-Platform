@@ -48,6 +48,9 @@ public class RunDateDialog extends SmartStyledTitleDialog {
 
 	private List<IDateFieldFilter> fields;
 	private DateFilter selection;
+	
+	private static DateFilter lastSelection = null;
+	
 	protected RunDateDialog(Shell parent, List<IDateFieldFilter> fields) {
 		super(parent);
 		this.fields = fields;
@@ -61,6 +64,7 @@ public class RunDateDialog extends SmartStyledTitleDialog {
 	
 	public void okPressed() {
 		selection = dateComposite.getDateFilter();
+		lastSelection = selection;
 		super.okPressed();
 	}
 	
@@ -87,6 +91,11 @@ public class RunDateDialog extends SmartStyledTitleDialog {
 
 		dateComposite = new QueryDateFilterComposite(dateFilterComp, 
 				fields.toArray(new IDateFieldFilter[fields.size()]), IDateFilter.DATE_FILTERS);
+		
+		if (lastSelection != null ) {
+			dateComposite.setDateFilter(lastSelection);
+		}
+		
 		//hack to get 2line layout
 		Composite d = (Composite) dateComposite.getChildren()[0];
 		d.setLayout(new GridLayout());

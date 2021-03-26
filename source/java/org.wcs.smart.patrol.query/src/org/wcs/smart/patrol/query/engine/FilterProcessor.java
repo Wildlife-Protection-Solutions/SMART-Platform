@@ -78,10 +78,6 @@ public class FilterProcessor extends org.wcs.smart.observation.query.engine.Filt
 	@Override
 	protected void processDatFilter(DateFilter dateFilter, StringBuilder fromSql) throws SQLException {
 		if (dateFilter == null) return;
-		if (dateFilter.getDateFieldOption() == WaypointDateField.INSTANCE) {
-			super.processDatFilter(dateFilter, fromSql);
-			return;
-		}
 		
 		fromSql.append(" JOIN "); //$NON-NLS-1$
 		fromSql.append(namePrefix(PatrolWaypoint.class));
@@ -186,7 +182,15 @@ public class FilterProcessor extends org.wcs.smart.observation.query.engine.Filt
 		sql.append(".uuid = "); //$NON-NLS-1$
 		sql.append(prefix(PatrolLegDay.class));
 		sql.append(".patrol_leg_uuid "); //$NON-NLS-1$
-				
+		
+		if (dateFilter != null ) {
+			String filter = getSqlGenerator().toSql(dateFilter, engine);
+			if (filter.length() > 0) {
+				sql.append(" and "); //$NON-NLS-1$
+				sql.append(filter);
+			}
+		}
+		
 		sql.append(" left join "); //$NON-NLS-1$
 		sql.append(name(PatrolLegMember.class));
 		usedTables.add(PatrolLegMember.class);
@@ -230,13 +234,6 @@ public class FilterProcessor extends org.wcs.smart.observation.query.engine.Filt
 		sql.append(prefix(Waypoint.class));
 		sql.append(".uuid "); //$NON-NLS-1$
 		
-		if (dateFilter != null) {
-			String filter = getSqlGenerator().toSql(dateFilter, engine);
-			if (filter.length() > 0) {
-				sql.append(" and "); //$NON-NLS-1$
-				sql.append(filter);
-			}
-		}
 		
 		if (populateObservation || 
 				observationFilterVisitor.hasAttributeFilter() || 

@@ -58,6 +58,7 @@ import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryProxy;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
+import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.ui.QueryEditorUtils;
 import org.wcs.smart.query.ui.definition.QueryDefView;
 import org.wcs.smart.query.ui.editor.IMapQueryEditor;
@@ -170,6 +171,12 @@ public class CompoundQueryEditor extends MultiPageEditorPart implements MapPart,
 		runQueryJob.schedule();
 	}
 	
+	/**
+	 * Does nothing for compound queries
+	 */
+	@Override
+	public void setDateFilter(DateFilter dateFilter) {
+	}
 	
 	@Override
 	public QueryEditorInput getInputInternal() {
