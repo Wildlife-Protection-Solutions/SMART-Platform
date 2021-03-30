@@ -841,31 +841,44 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		logger.finest(sql);
 		c.createStatement().execute(sql);
 		
-		//populate labels
-		for (int i = 0; i <categoryCount; i ++){
+		//find names for each level
+		for (int i = 1; i <= categoryCount; i++) {
+			sql = "ALTER TABLE " + categoryTable + " ADD name_" + i + " varchar(1024)"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			logger.finest(sql);
+			c.createStatement().execute(sql);
+
 			sb = new StringBuilder();
-			sb.append("UPDATE " + queryDataTable + " SET category_" + i + " = "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			sb.append(" (SELECT "); //$NON-NLS-1$
+			sb.append("UPDATE "); //$NON-NLS-1$
+			sb.append(categoryTable);
+			sb.append(" SET name_" + i); //$NON-NLS-1$
+			sb.append(" = (SELECT "); //$NON-NLS-1$
 			sb.append(tablePrefix(Label.class));
 			sb.append(".value FROM "); //$NON-NLS-1$
 			sb.append(tableNamePrefix(Label.class));
 			sb.append(","); //$NON-NLS-1$
 			sb.append(tableNamePrefix(Language.class));
-			sb.append(","); //$NON-NLS-1$
-			sb.append(categoryTable + " mash"); //$NON-NLS-1$
 			sb.append(" WHERE "); //$NON-NLS-1$
 			sb.append(tablePrefix(Label.class) + ".language_uuid = "); //$NON-NLS-1$
 			sb.append(tablePrefix(Language.class) + ".uuid "); //$NON-NLS-1$
 			sb.append(" AND "); //$NON-NLS-1$
-			sb.append(queryDataTable + ".OB_CATEGORY_UUID "  ); //$NON-NLS-1$
-			sb.append(" = "); //$NON-NLS-1$
-			sb.append("mash.uuid "); //$NON-NLS-1$
-			sb.append(" AND "); //$NON-NLS-1$
-			sb.append("mash.mashup_" + (i+1) + " = " ); //$NON-NLS-1$ //$NON-NLS-2$
-			sb.append(tablePrefix(Label.class) + ".element_uuid"); //$NON-NLS-1$
-			sb.append(" ORDER BY CASE WHEN upper(code) = upper('" + locale.toString() + "') THEN 1 ELSE "); //$NON-NLS-1$ //$NON-NLS-2$
-			sb.append(" CASE WHEN upper(code) = ('" + locale.getLanguage() + "') THEN 2 ELSE "); //$NON-NLS-1$ //$NON-NLS-2$
+			sb.append(tablePrefix(Label.class) + ".element_uuid = "); //$NON-NLS-1$
+			sb.append(categoryTable);
+			sb.append(".mashup_" + i); //$NON-NLS-1$
+			sb.append(" ORDER BY CASE WHEN upper(code) = '" + locale.toString().toUpperCase() + "' THEN 1 ELSE "); //$NON-NLS-1$ //$NON-NLS-2$
+			sb.append(" CASE WHEN upper(code) = '" + locale.getLanguage().toUpperCase() + "' THEN 2 ELSE "); //$NON-NLS-1$ //$NON-NLS-2$
 			sb.append(" CASE WHEN isdefault THEN 3 ELSE 4 END END END LIMIT 1)"); //$NON-NLS-1$
+
+			logger.finest(sb.toString());
+			c.createStatement().execute(sb.toString());
+		}
+				
+		//populate labels
+		for (int i = 0; i <categoryCount; i ++){
+			sb = new StringBuilder();
+			sb.append("UPDATE " + queryDataTable + " SET category_" + i + " = name_" + (i+1)); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			sb.append(" FROM "); //$NON-NLS-1$
+			sb.append(categoryTable);
+			sb.append(" ct WHERE uuid  = " + queryDataTable + ".ob_category_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
 			
 			logger.finest(sb.toString());
 			c.createStatement().execute(sb.toString());
