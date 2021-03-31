@@ -521,8 +521,8 @@ public class RasterService extends AbstractRasterService implements IQueryServic
 		rb.setEnvelope(
 				new Envelope2D(
 					query.getCoordinateReferenceSystem(), 
-					(metadata.getMinXTile()-1)* gridCellSize + 0.5* gridCellSize + query.getGridOrigin().x, 
-					(metadata.getMinYTile()-1) * gridCellSize - 0.5*gridCellSize + query.getGridOrigin().y, 
+					(metadata.getMinXTile()-1)* gridCellSize + query.getGridOrigin().x, 
+					(metadata.getMinYTile()-1) * gridCellSize + query.getGridOrigin().y, 
 					width * gridCellSize , height*gridCellSize)); 
 		rb.setTable(  results.getData(), 
 				results.getMetadata());

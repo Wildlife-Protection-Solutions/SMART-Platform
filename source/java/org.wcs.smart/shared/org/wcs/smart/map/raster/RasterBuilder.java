@@ -32,8 +32,6 @@ import java.awt.image.DataBufferFloat;
 import java.awt.image.Raster;
 import java.awt.image.SampleModel;
 import java.awt.image.WritableRaster;
-import java.io.BufferedWriter;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -48,8 +46,6 @@ import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.gce.geotiff.GeoTiffWriter;
 import org.geotools.geometry.Envelope2D;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.wcs.smart.util.SharedUtils;
 
 import it.geosolutions.jaiext.range.NoDataContainer;
 
@@ -174,66 +170,13 @@ public class RasterBuilder {
 
 				writer.write(inputCov, null);
 			}
-			
 			allFiles.add(out);
-			String baseFile = out.toString().substring(0,  out.toString().lastIndexOf('.'));
-			createProjectionFile(baseFile, envelope.getCoordinateReferenceSystem());
-			createWorldFile(baseFile, gridCellSize, envelope.getMinX(), envelope.getMaxY());
 			this.file = out;
 
 		}catch (Exception ex){
 			throw ex;
 		}
 	}
-
-	/**
-	 * Writes required world file
-	 * @param baseFile
-	 * @param gridSize
-	 * @param xmin
-	 * @param ymax
-	 * @throws IOException
-	 */
-	private void createWorldFile(final String baseFile,
-			double gridSize, double xmin, double ymax) throws IOException {
-		final Path prjFile = Paths.get(new StringBuffer(baseFile).append(".tfw") //$NON-NLS-1$
-				.toString());
-		allFiles.add(prjFile);
-		try(BufferedWriter out = Files.newBufferedWriter(prjFile)){
-			out.write(String.valueOf(gridSize));
-			out.write(SharedUtils.LINE_SEPARATOR);
-			out.write("0"); //$NON-NLS-1$
-			out.write(SharedUtils.LINE_SEPARATOR);
-			out.write("0"); //$NON-NLS-1$
-			out.write(SharedUtils.LINE_SEPARATOR);
-			out.write(String.valueOf(-gridSize));
-			out.write(SharedUtils.LINE_SEPARATOR);
-			out.write(String.valueOf(xmin));
-			out.write(SharedUtils.LINE_SEPARATOR);
-			out.write(String.valueOf(ymax));
-			out.write(SharedUtils.LINE_SEPARATOR);
-		}
-
-	}
-	
-	/**
-	 * Writes projection file
-	 * @param baseFile
-	 * @param coordinateReferenceSystem
-	 * @throws IOException
-	 */
-	private void createProjectionFile(final String baseFile,
-			final CoordinateReferenceSystem coordinateReferenceSystem)
-			throws IOException {
-		final Path prjFile = Paths.get(new StringBuffer(baseFile).append(".prj") //$NON-NLS-1$
-				.toString());
-		allFiles.add(prjFile);
-		try(BufferedWriter out = Files.newBufferedWriter(prjFile)){
-			out.write(coordinateReferenceSystem.toWKT());
-		}
-		
-	}
-
 	/**
 	 * Creates a raster based on the list of values for band 0 
 	 * @return {@link WritableRaster}

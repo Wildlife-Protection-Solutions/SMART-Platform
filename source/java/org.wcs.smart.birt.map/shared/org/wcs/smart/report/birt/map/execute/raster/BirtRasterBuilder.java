@@ -146,8 +146,8 @@ public class BirtRasterBuilder {
 				
 		Envelope2D env = new Envelope2D(
 				crs, 
-				(minX-1)* cellSize + 0.5* cellSize + originX, 
-				(minY-1) * cellSize - 0.5*cellSize + originY, 
+				(minX-1)* cellSize + originX, 
+				(minY-1) * cellSize + originY, 
 				rasterWidth * cellSize , rasterHeight * cellSize);
 		
 		rasterTempFile = Files.createTempFile("smart" + System.nanoTime(), ".tiff"); //$NON-NLS-1$ //$NON-NLS-2$
