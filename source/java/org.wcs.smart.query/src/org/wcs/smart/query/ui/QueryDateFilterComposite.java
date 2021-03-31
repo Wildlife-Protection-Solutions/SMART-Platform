@@ -322,6 +322,7 @@ public class QueryDateFilterComposite extends Composite {
 	}
 	
 	public void setDateFilter(DateFilter filter){
+		if (filter == null) return;
 		cmbDateField.setSelection(new StructuredSelection(filter.getDateFieldOption()));
 		
 		if (filter.getDateFilterOption() instanceof CustomDateFilter){

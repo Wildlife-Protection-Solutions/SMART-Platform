@@ -37,7 +37,7 @@
             name="SMART">
          <property
                name="windowImages"
-               value="./images/icons/windowImages/smart16.png,./images/icons/windowImages/smart32.png,./images/icons/windowImages/smart48.png,./images/icons/windowImages/smart64.png,./images/icons/windowImages/smart128.png,./images/icons/windowImages/smart256.png">
+               value="images/icons/windowImages/smart16.png,images/icons/windowImages/smart32.png,images/icons/windowImages/smart48.png,images/icons/windowImages/smart64.png,images/icons/windowImages/smart128.png,images/icons/windowImages/smart256.png">
          </property>
          <property
                name="appName"
@@ -49,7 +49,7 @@
          </property>
          <property
                name="aboutImage"
-               value="./images/nl/en/about.png">
+               value="images/nl/en/about.png">
          </property>
          <property
                name="rendererFactoryUri"

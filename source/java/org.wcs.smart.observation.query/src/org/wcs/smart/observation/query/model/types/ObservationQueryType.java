@@ -185,7 +185,6 @@ public class ObservationQueryType implements IMappableQueryType {
 		
 		//validate query
 		String queryString = filters;
-		System.out.println(queryString);
 		if (queryString.isEmpty()) return null;
 		try(Reader is = new StringReader(queryString)){
 			Parser parser = new Parser(is);

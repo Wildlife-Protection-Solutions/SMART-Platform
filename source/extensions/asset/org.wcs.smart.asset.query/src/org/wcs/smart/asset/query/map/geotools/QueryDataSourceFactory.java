@@ -23,7 +23,6 @@ package org.wcs.smart.asset.query.map.geotools;
 
 import java.awt.RenderingHints.Key;
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
@@ -51,7 +50,7 @@ public class QueryDataSourceFactory implements DataStoreFactorySpi{
 	 * @see org.geotools.data.DataAccessFactory#canProcess(java.util.Map)
 	 */
 	@Override
-	public boolean canProcess(Map<String, Serializable> params) {
+	public boolean canProcess(Map<String, ?> params) {
 		if (params.containsKey(QUERY_UUID.key)){
 			return true;
 		}
@@ -103,7 +102,7 @@ public class QueryDataSourceFactory implements DataStoreFactorySpi{
 	 * @see org.geotools.data.DataStoreFactorySpi#createDataStore(java.util.Map)
 	 */
 	@Override
-	public DataStore createDataStore(Map<String, Serializable> params)
+	public DataStore createDataStore(Map<String, ?> params)
 			throws IOException {
 		return null;
 	}
@@ -112,7 +111,7 @@ public class QueryDataSourceFactory implements DataStoreFactorySpi{
 	 * @see org.geotools.data.DataStoreFactorySpi#createNewDataStore(java.util.Map)
 	 */
 	@Override
-	public DataStore createNewDataStore(Map<String, Serializable> arg0)
+	public DataStore createNewDataStore(Map<String, ?> arg0)
 			throws IOException {
 		throw new UnsupportedOperationException(Messages.QueryDataSourceFactory_ReadOnlyError);
 	}

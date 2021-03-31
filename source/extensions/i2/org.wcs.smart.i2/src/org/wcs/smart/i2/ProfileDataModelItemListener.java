@@ -101,8 +101,7 @@ public enum ProfileDataModelItemListener implements IDataModelItemListener {
 				processFilter(filter.getFilter(), attribute);
 				q.setQueryString(filter.asString());
 			}catch (Exception ex) {
-				System.out.println(q.getName());
-				ex.printStackTrace();
+				Intelligence2PlugIn.log(ex.getMessage(),ex);
 			}
 		}
 		
@@ -117,8 +116,7 @@ public enum ProfileDataModelItemListener implements IDataModelItemListener {
 				processFilter(filter.getFilter(), attribute);
 				q.setQueryString(filter.asString());
 			}catch (Exception ex) {
-				System.out.println(q.getName());
-				ex.printStackTrace();
+				Intelligence2PlugIn.log(ex.getMessage(),ex);
 			}
 		}
 		

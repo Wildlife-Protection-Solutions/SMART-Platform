@@ -127,7 +127,6 @@ public class ExportNavigationLayerToConnect implements INavigationExportAction {
 			total = layers.size();
 
 			Path tempDir = Files.createTempDirectory("smartnav"); //$NON-NLS-1$
-			System.out.println(tempDir);
 			for (NavigationLayer navigationlayer : layers) {
 				
 				Path tempFile = tempDir.resolve(ExportNavigationManager.INSTANCE.getExportFileName(navigationlayer));

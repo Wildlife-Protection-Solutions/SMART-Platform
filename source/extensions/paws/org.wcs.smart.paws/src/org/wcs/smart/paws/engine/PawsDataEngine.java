@@ -30,12 +30,12 @@ import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
@@ -104,6 +104,7 @@ import au.com.bytecode.opencsv.CSVWriter;
 public class PawsDataEngine {
 
 	private static final String DATE_FORMAT = "MMMM dd, yyyy"; //$NON-NLS-1$
+	private static final String TIME_FORMAT = "h:mm:ss a"; //$NON-NLS-1$
 
 	public static final String DATA_FILE_NAME  = "SMARTdata.csv"; //$NON-NLS-1$
 	
@@ -247,7 +248,9 @@ public class PawsDataEngine {
 				}
 				patrolobs.put("transport_type", items); //$NON-NLS-1$
 			}
-			
+			else {
+				patrolobs.put("transport_type", new JSONArray()); //$NON-NLS-1$	
+			}
 			pp = run.getConfiguration().findParameter(PawsParameter.FixedParameter.PMANDATE_FILTER.name());
 			if (pp != null && pp.getValue() != null) {
 				String[] bits = pp.getValue().split(PawsManager.PARAMETER_SPACER);
@@ -258,6 +261,8 @@ public class PawsDataEngine {
 					if (type != null) items.add(type.getKeyId());
 				}
 				patrolobs.put("mandate_type", items); //$NON-NLS-1$
+			}else {
+				patrolobs.put("mandate_type", new JSONArray()); //$NON-NLS-1$
 			}
 			
 			//illegal class mappings
@@ -684,6 +689,8 @@ public class PawsDataEngine {
 
 			
 			DateTimeFormatter ff = DateTimeFormatter.ofPattern(DATE_FORMAT);
+			DateTimeFormatter timef = DateTimeFormatter.ofPattern(TIME_FORMAT, Locale.ROOT);
+			
 			try(ScrollableResults results = session.createNativeQuery(select.toString()).scroll()){
 				while(results.next()) {
 					String[] data = new String[headers.size()];
@@ -704,7 +711,7 @@ public class PawsDataEngine {
 					//Waypoint Date
 					int index = 0;
 					data[index++] = ff.format(datetime);
-					data[index++] = DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM).format(datetime.toLocalTime());
+					data[index++] = timef.format(datetime.toLocalTime());
 					
 					//Start Date
 					data[index++] = ff.format(pstart);

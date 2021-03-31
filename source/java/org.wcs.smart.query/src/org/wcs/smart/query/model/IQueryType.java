@@ -24,8 +24,6 @@ package org.wcs.smart.query.model;
 import java.net.URL;
 import java.util.List;
 
-import javax.annotation.Nonnull;
-
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 import org.wcs.smart.query.ui.model.IDefinitionPanel;
@@ -144,7 +142,6 @@ public interface IQueryType {
 	 * 
 	 * @return array of result providers.  
 	 */
-	@Nonnull
 	public IQueryResultInfoProvider[] getResultProviders();
 	
 	/**

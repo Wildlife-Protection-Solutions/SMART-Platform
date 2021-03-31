@@ -261,7 +261,6 @@ public class Upgrader630To700 implements IDatabaseUpgrader {
 
 		for (String s : sql) {
 			SmartPlugIn.logInfo(s);
-			System.out.println(s);
 			c.createStatement().execute(s);
 		}
 		
