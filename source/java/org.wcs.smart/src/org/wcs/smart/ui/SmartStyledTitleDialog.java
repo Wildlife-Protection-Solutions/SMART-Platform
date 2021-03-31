@@ -23,6 +23,7 @@ package org.wcs.smart.ui;
 
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.control.SmartUiUtils;
 
 /**
@@ -42,6 +43,7 @@ public abstract class SmartStyledTitleDialog extends TitleAreaDialog {
 	public void create() {
 		super.create();
 		SmartUiUtils.colorDialog(getShell());
+		super.setTitleImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.SMART_48_ICON));
 	}
 	
 	@Override
