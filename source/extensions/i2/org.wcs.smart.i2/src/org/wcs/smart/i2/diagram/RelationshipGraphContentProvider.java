@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.i2.diagram;
 
-import org.eclipse.gef.zest.fx.jface.IGraphContentProvider;
+import org.eclipse.gef4.zest.fx.jface.IGraphContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.wcs.smart.i2.model.IntelEntityRelationship;
 

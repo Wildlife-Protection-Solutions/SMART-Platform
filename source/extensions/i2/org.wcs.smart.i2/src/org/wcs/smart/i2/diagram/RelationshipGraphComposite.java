@@ -34,19 +34,17 @@ import java.util.UUID;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
-import org.eclipse.gef.common.adapt.inject.AdapterInjectionSupport;
-import org.eclipse.gef.common.adapt.inject.AdapterInjectionSupport.LoggingMode;
-import org.eclipse.gef.layout.ILayoutAlgorithm;
-import org.eclipse.gef.layout.algorithms.BoxLayoutAlgorithm;
-import org.eclipse.gef.layout.algorithms.GridLayoutAlgorithm;
-import org.eclipse.gef.layout.algorithms.HorizontalShiftAlgorithm;
-import org.eclipse.gef.layout.algorithms.RadialLayoutAlgorithm;
-import org.eclipse.gef.layout.algorithms.SpringLayoutAlgorithm;
-import org.eclipse.gef.layout.algorithms.SugiyamaLayoutAlgorithm;
-import org.eclipse.gef.layout.algorithms.SugiyamaLayoutAlgorithm.Direction;
-import org.eclipse.gef.layout.algorithms.TreeLayoutAlgorithm;
-import org.eclipse.gef.zest.fx.jface.ZestContentViewer;
-import org.eclipse.gef.zest.fx.jface.ZestFxJFaceModule;
+import org.eclipse.gef4.layout.ILayoutAlgorithm;
+import org.eclipse.gef4.layout.algorithms.BoxLayoutAlgorithm;
+import org.eclipse.gef4.layout.algorithms.GridLayoutAlgorithm;
+import org.eclipse.gef4.layout.algorithms.HorizontalShiftAlgorithm;
+import org.eclipse.gef4.layout.algorithms.RadialLayoutAlgorithm;
+import org.eclipse.gef4.layout.algorithms.SpringLayoutAlgorithm;
+import org.eclipse.gef4.layout.algorithms.SugiyamaLayoutAlgorithm;
+import org.eclipse.gef4.layout.algorithms.SugiyamaLayoutAlgorithm.Direction;
+import org.eclipse.gef4.layout.algorithms.TreeLayoutAlgorithm;
+import org.eclipse.gef4.zest.fx.jface.ZestContentViewer;
+import org.eclipse.gef4.zest.fx.jface.ZestFxJFaceModule;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -335,14 +333,16 @@ public class RelationshipGraphComposite extends Composite {
 
 		graphContentProvider = new RelationshipGraphContentProvider();
 		graphLabelProvider = new RelationshipGraphLabelProvider(graphContentProvider);
-		graphViewer = new ZestContentViewer(new ZestFxJFaceModule() {
-			@Override
-			protected void enableAdapterMapInjection() {
-				//https://bugs.eclipse.org/bugs/show_bug.cgi?id=496777
-				//https://bugs.eclipse.org/bugs/show_bug.cgi?id=545947
-				install(new AdapterInjectionSupport(LoggingMode.PRODUCTION));
-			}
-		});
+		ZestFxJFaceModule mm = new ZestFxJFaceModule();
+		graphViewer = new ZestContentViewer(mm);
+//		new ZestFxJFaceModule() {
+//			@Override
+//			protected void enableAdapterMapInjection() {
+//				//https://bugs.eclipse.org/bugs/show_bug.cgi?id=496777
+//				//https://bugs.eclipse.org/bugs/show_bug.cgi?id=545947
+//				install(new AdapterInjectionSupport(LoggingMode.PRODUCTION));
+//			}
+//		});
 		graphViewer.createControl(mainCmp, SWT.NONE);
 		
 		graphViewer.setContentProvider(graphContentProvider);

@@ -24,8 +24,8 @@ package org.wcs.smart.i2.diagram;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.gef.zest.fx.ZestProperties;
-import org.eclipse.gef.zest.fx.jface.IGraphAttributesProvider;
+import org.eclipse.gef4.zest.fx.ZestProperties;
+import org.eclipse.gef4.zest.fx.jface.IGraphAttributesProvider;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.IFontProvider;
 import org.eclipse.jface.viewers.LabelProvider;
