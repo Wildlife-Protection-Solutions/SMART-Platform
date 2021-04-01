@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.i2.diagram;
 
-import org.eclipse.gef.zest.fx.jface.IGraphContentProvider;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.zest.core.viewers.IGraphEntityContentProvider;
 import org.wcs.smart.i2.model.IntelEntityRelationship;
 
 /**
@@ -31,7 +31,7 @@ import org.wcs.smart.i2.model.IntelEntityRelationship;
  * @author elitvin
  * @since 6.0.0
  */
-public class RelationshipGraphContentProvider implements IGraphContentProvider {
+public class RelationshipGraphContentProvider implements IGraphEntityContentProvider {
 	
 	private IRelationshipGraphData graphData;
 
@@ -45,7 +45,7 @@ public class RelationshipGraphContentProvider implements IGraphContentProvider {
 	}
 	
 	@Override
-	public Object[] getNodes() {
+	public Object[] getElements(Object element) {
 		if (graphData != null ) {
 			return graphData.getEntities();
 		}
@@ -53,22 +53,22 @@ public class RelationshipGraphContentProvider implements IGraphContentProvider {
 	}
 	
 	@Override
-	public Object[] getAdjacentNodes(Object node) {
+	public Object[] getConnectedTo(Object node) {
 		if (graphData != null) {
 			return graphData.getTargets(node);
 		}
 		return null;
 	}
 
-	@Override
-	public boolean hasNestedGraph(Object node) {
-		return false;
-	}
-
-	@Override
-	public Object[] getNestedGraphNodes(Object node) {
-		return null;
-	}
+//	@Override
+//	public boolean hasNestedGraph(Object node) {
+//		return false;
+//	}
+//
+//	@Override
+//	public Object[] getNestedGraphNodes(Object node) {
+//		return null;
+//	}
 
 	public boolean isRootNode(Object node) {
 		if (graphData != null) {
@@ -83,4 +83,6 @@ public class RelationshipGraphContentProvider implements IGraphContentProvider {
 		}
 		return null;
 	}
+
+
 }
