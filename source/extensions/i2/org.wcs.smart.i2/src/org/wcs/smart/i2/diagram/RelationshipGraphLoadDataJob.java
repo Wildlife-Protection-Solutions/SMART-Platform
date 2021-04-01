@@ -105,6 +105,7 @@ public abstract class RelationshipGraphLoadDataJob extends Job {
 			//load required lazy data
 			for (IntelEntity e : entities) {
 				if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+				e.getProfile().getName();
 				e.getEntityType().getAttributes().size();
 				for (IntelEntityTypeAttribute a : e.getEntityType().getAttributes()) {
 					a.getAttribute().getNames().size();

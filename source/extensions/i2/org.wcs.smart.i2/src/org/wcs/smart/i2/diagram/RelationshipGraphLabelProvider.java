@@ -21,32 +21,36 @@
  */
 package org.wcs.smart.i2.diagram;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.text.MessageFormat;
 
-import org.eclipse.gef4.zest.fx.ZestProperties;
-import org.eclipse.gef4.zest.fx.jface.IGraphAttributesProvider;
-import org.eclipse.jface.viewers.IColorProvider;
+import org.eclipse.draw2d.IFigure;
+import org.eclipse.draw2d.Label;
 import org.eclipse.jface.viewers.IFontProvider;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.zest.core.viewers.EntityConnectionData;
+import org.eclipse.zest.core.viewers.IConnectionStyleProvider;
+import org.eclipse.zest.core.viewers.IEntityStyleProvider;
+import org.eclipse.zest.core.viewers.IFigureProvider;
+import org.eclipse.zest.core.widgets.ZestStyles;
+import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.IntelEntity;
-import org.wcs.smart.i2.model.IntelEntityAttributeValue;
 import org.wcs.smart.i2.model.IntelEntityRelationship;
-import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
 import org.wcs.smart.i2.model.RelationshipDiagramEdgeStyleOptions;
+import org.wcs.smart.i2.model.RelationshipDiagramEdgeStyleOptions.EdgeStyle;
 import org.wcs.smart.i2.model.RelationshipDiagramEntityTypeStyle;
 import org.wcs.smart.i2.model.RelationshipDiagramNodeStyleOptions;
 import org.wcs.smart.i2.model.RelationshipDiagramNodeStyleOptions.ImageSizeOption;
 import org.wcs.smart.i2.model.RelationshipDiagramRelationshipTypeStyle;
 import org.wcs.smart.i2.model.RelationshipDiagramStyle;
 import org.wcs.smart.i2.model.RelationshipDiagramStyleOptions;
-import org.wcs.smart.i2.ui.AttributeValueLabelProvider;
 import org.wcs.smart.ui.Thumbnail;
+
 
 /**
  * Label provider for graph that displays {@link IntelEntity} relationships.
@@ -55,14 +59,11 @@ import org.wcs.smart.ui.Thumbnail;
  * @since 6.0.0
  *
  */
-public class RelationshipGraphLabelProvider extends LabelProvider implements IGraphAttributesProvider, IColorProvider, IFontProvider {
-	
-	private static final int TOOLTIP_TRUNCATE_LENGTH = 100;
+public class RelationshipGraphLabelProvider extends LabelProvider implements IFigureProvider, 
+	IConnectionStyleProvider, IEntityStyleProvider,  IFontProvider {
 	
 	private RelationshipGraphContentProvider graphContentProvider;
 	private RelationshipDiagramStyle style;
-	
-	private AttributeValueLabelProvider attributeLabelProvider = new AttributeValueLabelProvider();
 	
 	public RelationshipGraphLabelProvider(RelationshipGraphContentProvider graphContentProvider) {
 		this.graphContentProvider = graphContentProvider; 
@@ -110,6 +111,15 @@ public class RelationshipGraphLabelProvider extends LabelProvider implements IGr
 		if (element instanceof IntelEntity) {
 			IntelEntity e = (IntelEntity) element;
 			return e.getIdAttributeAsText();
+		}else if (element instanceof EntityConnectionData) {
+			EntityConnectionData data = (EntityConnectionData)element;
+			IntelEntityRelationship r = getRelationship(data.source, data.dest);
+			
+			if (r != null) {
+				if (style == null) return r.getRelationshipType().getName();
+				if (getEdgeOptions(r).isShowLabel()) return r.getRelationshipType().getName();
+				return null;
+			}
 		}
 		return super.getText(element);
 	}
@@ -125,98 +135,145 @@ public class RelationshipGraphLabelProvider extends LabelProvider implements IGr
 		return super.getImage(element);
 	}
 
-	@Override
-	public Map<String, Object> getNodeAttributes(Object node) {
-		if (node instanceof IntelEntity) {
-			IntelEntity e = (IntelEntity) node;
-			Map<String, Object> attributes = new HashMap<>();
-			attributes.put(ZestProperties.TOOLTIP__N, buildTooltip(e));
-			return attributes;
-		}
-		return null;
-	}
-	
-	private String buildTooltip(IntelEntity e) {
-		StringBuilder sb = new StringBuilder();
-		for (IntelEntityTypeAttribute a : e.getEntityType().getAttributes()) {
-			if (sb.length() > 0) {
-				sb.append("\n"); //$NON-NLS-1$
-			}
-			sb.append(a.getAttribute().getName()).append(": "); //$NON-NLS-1$
-			String text = ""; //$NON-NLS-1$
-			for (IntelEntityAttributeValue v : e.getAttributes()) {
-				if (v.getAttribute().equals(a.getAttribute())){
-					text = attributeLabelProvider.getText(v);
-					break;
-				}
-			}
-			//truncate long values
-			if (text.length() > TOOLTIP_TRUNCATE_LENGTH + 5) {
-				text = text.substring(0, TOOLTIP_TRUNCATE_LENGTH) + "..."; //$NON-NLS-1$
-			}
-			sb.append(text);
-		}
-		return sb.toString();
-	}
-	
-	@Override
-	public Map<String, Object> getEdgeAttributes(Object sourceNode, Object targetNode) {
-		Map<String, Object> attributes = new HashMap<>();
-		IntelEntityRelationship r = getRelationship(sourceNode, targetNode);
-		if (r != null && style != null) {
-			RelationshipDiagramEdgeStyleOptions options = getEdgeOptions(r);
-
-			switch (options.getStyle()) {
-			case LINE: break;
-			case ARROW:
-				attributes.put(ZestProperties.TARGET_DECORATION__E, 
-						new javafx.scene.shape.Polygon(0, 0, 10, 3, 10, -3));
-				break;
-			}
-			
-			String color = options.getColorAsString();
-			attributes.put(ZestProperties.TARGET_DECORATION_CSS_STYLE__E, "-fx-stroke: "+color+"; -fx-fill: "+color+";"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			attributes.put(ZestProperties.CURVE_CSS_STYLE__E, "-fx-stroke: "+color+";"); //$NON-NLS-1$ //$NON-NLS-2$
-			
-			if (options.isShowLabel()) {
-				attributes.put(ZestProperties.LABEL__NE, r.getRelationshipType().getName());
-			}
-		}
-		
-		return attributes;
-	}
-
-	@Override
-	public Map<String, Object> getGraphAttributes() {
-		return null;
-	}
-
-	@Override
-	public Map<String, Object> getNestedGraphAttributes(Object nestingNode) {
-		return null;
-	}
-
-	@Override
-	public Color getForeground(Object element) {
-		if (style != null) {
-			return getNodeOptions(element).getForegroundColor();
-		}
-		return null;
-	}
-
-	@Override
-	public Color getBackground(Object element) {
-		if (style != null) {
-			return getNodeOptions(element).getBackgroudColor();
-		}
-		return null;
-	}
+//	@Override
+//	public Color getForeground(Object element) {
+//		if (style != null) {
+//			return getNodeOptions(element).getForegroundColor();
+//		}
+//		return null;
+//	}
+//
+//	@Override
+//	public Color getBackground(Object element) {
+//		if (style != null) {
+//			return getNodeOptions(element).getBackgroudColor();
+//		}
+//		return null;
+//	}
 
 	@Override
 	public Font getFont(Object element) {
 		if (style != null) {
 			FontData fd = getNodeOptions(element).getFontData();
 			return fd != null ? new Font(Display.getCurrent(), fd) : null;
+		}
+		return null;
+	}
+
+	@Override
+	public Color getNodeHighlightColor(Object element) {
+		return Display.getDefault().getSystemColor(SWT.COLOR_RED);
+	}
+
+	@Override
+	public Color getBorderColor(Object entity) {
+		return null;
+	}
+
+	@Override
+	public Color getBorderHighlightColor(Object entity) {
+		return Display.getDefault().getSystemColor(SWT.COLOR_BLUE);
+	}
+
+	@Override
+	public int getBorderWidth(Object entity) {
+		return 0;
+	}
+
+	@Override
+	public Color getBackgroundColour(Object entity) {
+		if (style != null) {
+			return getNodeOptions(entity).getBackgroudColor();
+		}
+		return null;
+	}
+
+	@Override
+	public Color getForegroundColour(Object entity) {
+		if (style != null) {
+			return getNodeOptions(entity).getForegroundColor();
+		}
+		return null;
+	}
+
+	@Override
+	public IFigure getTooltip(Object element) {
+		if (element instanceof IntelEntity) {
+			IntelEntity ie = (IntelEntity)element;
+			
+			String lbl = MessageFormat.format(Messages.RelationshipGraphLabelProvider_EntityTooltip, 
+					ie.getIdAttributeAsText(), "\n", ie.getEntityType().getName(), //$NON-NLS-1$
+					"\n", ie.getProfile().getName()); //$NON-NLS-1$
+			Label l = new Label(lbl);
+			return l;
+			
+		}else if (element instanceof EntityConnectionData) {
+			EntityConnectionData cd = (EntityConnectionData)element;
+			IntelEntityRelationship r = getRelationship(cd.source, cd.dest);
+			if (r != null) {
+				String lbl = MessageFormat.format(Messages.RelationshipGraphLabelProvider_RelationshipTooltip,
+						r.getRelationshipType().getName(), "\n", //$NON-NLS-1$
+						r.getSourceEntity().getIdAttributeAsText(), "\n", //$NON-NLS-1$
+						r.getTargetEntity().getIdAttributeAsText());
+				return new Label(lbl);
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public boolean fisheyeNode(Object entity) {
+		return false;
+	}
+
+	@Override
+	public int getConnectionStyle(Object object) {
+		if (style == null) return 0;
+		if (object instanceof EntityConnectionData) {
+			IntelEntityRelationship r = getRelationship(((EntityConnectionData)object).source, ((EntityConnectionData)object).dest);
+			RelationshipDiagramEdgeStyleOptions options = getEdgeOptions(r);
+			if (options != null) {
+				if (options.getStyle() == EdgeStyle.ARROW) return ZestStyles.CONNECTIONS_DIRECTED;
+						
+			}
+		}
+		return 0;
+	}
+
+	@Override
+	public Color getColor(Object object) {
+		if (style == null) return null;
+		if (object instanceof EntityConnectionData) {
+			IntelEntityRelationship r = getRelationship(((EntityConnectionData)object).source, ((EntityConnectionData)object).dest);
+			RelationshipDiagramEdgeStyleOptions options = getEdgeOptions(r);
+			if (options != null) {
+				return options.getColor();
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public Color getHighlightColor(Object rel) {
+		return Display.getDefault().getSystemColor(SWT.COLOR_RED);
+	}
+
+	@Override
+	public int getLineWidth(Object object) {
+		return 1;
+	}
+
+	@Override
+	public IFigure getFigure(Object element) {
+		if (element instanceof IntelEntity) {
+			String text = getText(element);
+			if (text == null || text.isEmpty()) text = " "; //$NON-NLS-1$
+			IFigure figure = new EntityFigure(text, getImage(element), true);
+			Font f = getFont(element);
+			figure.setForegroundColor(getForegroundColour(element));
+			if (f != null) figure.setFont(f);
+			figure.setToolTip(getTooltip(element));
+			return figure;
 		}
 		return null;
 	}

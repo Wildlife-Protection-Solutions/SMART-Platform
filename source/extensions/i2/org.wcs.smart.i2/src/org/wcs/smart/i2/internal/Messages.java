@@ -1660,6 +1660,8 @@ public class Messages extends NLS {
 	public static String RelationshipGraphFilterComposite_EntityTypes;
 	public static String RelationshipGraphFilterComposite_Filter;
 	public static String RelationshipGraphFilterComposite_RelationshipTypes;
+	public static String RelationshipGraphLabelProvider_EntityTooltip;
+	public static String RelationshipGraphLabelProvider_RelationshipTooltip;
 	public static String RelationshipGraphLoadDataJob_JobTitle;
 	public static String RelationshipGroupDialog_LoadError;
 	public static String RelationshipGroupDialog_Message;

@@ -34,17 +34,6 @@ import java.util.UUID;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
-import org.eclipse.gef4.layout.ILayoutAlgorithm;
-import org.eclipse.gef4.layout.algorithms.BoxLayoutAlgorithm;
-import org.eclipse.gef4.layout.algorithms.GridLayoutAlgorithm;
-import org.eclipse.gef4.layout.algorithms.HorizontalShiftAlgorithm;
-import org.eclipse.gef4.layout.algorithms.RadialLayoutAlgorithm;
-import org.eclipse.gef4.layout.algorithms.SpringLayoutAlgorithm;
-import org.eclipse.gef4.layout.algorithms.SugiyamaLayoutAlgorithm;
-import org.eclipse.gef4.layout.algorithms.SugiyamaLayoutAlgorithm.Direction;
-import org.eclipse.gef4.layout.algorithms.TreeLayoutAlgorithm;
-import org.eclipse.gef4.zest.fx.jface.ZestContentViewer;
-import org.eclipse.gef4.zest.fx.jface.ZestFxJFaceModule;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -67,6 +56,13 @@ import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Section;
+import org.eclipse.zest.core.viewers.GraphViewer;
+import org.eclipse.zest.layouts.LayoutAlgorithm;
+import org.eclipse.zest.layouts.LayoutStyles;
+import org.eclipse.zest.layouts.algorithms.GridLayoutAlgorithm;
+import org.eclipse.zest.layouts.algorithms.RadialLayoutAlgorithm;
+import org.eclipse.zest.layouts.algorithms.SpringLayoutAlgorithm;
+import org.eclipse.zest.layouts.algorithms.TreeLayoutAlgorithm;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.wcs.smart.ca.UuidItem;
@@ -100,7 +96,7 @@ public class RelationshipGraphComposite extends Composite {
 	private RelationshipGraphFilterComposite cmpFilter;
 	private ComboViewer cmbStyle;
 	private ComboViewer cmbLayout;
-	private ZestContentViewer graphViewer;
+	private GraphViewer graphViewer;
 	private RelationshipGraphLabelProvider graphLabelProvider;
 	private RelationshipGraphContentProvider graphContentProvider;
 	
@@ -108,8 +104,8 @@ public class RelationshipGraphComposite extends Composite {
 	private IRelationshipGraphData graphDelayedInput;
 	private boolean graphDelayedRefresh;
 
-	private ILayoutAlgorithm defaultLayoutAlogorithm;
-	private Map<ILayoutAlgorithm, String> layoutAlgorithms;
+	private LayoutAlgorithm defaultLayoutAlogorithm;
+	private Map<LayoutAlgorithm, String> layoutAlgorithms;
 
 	private EventHandler styleHandler = new EventHandler() {
 		@Override
@@ -232,15 +228,12 @@ public class RelationshipGraphComposite extends Composite {
 	}
 
 	private void initLayoutAlgorithms() {
-		defaultLayoutAlogorithm = new RadialLayoutAlgorithm();
+		defaultLayoutAlogorithm = new RadialLayoutAlgorithm(LayoutStyles.NO_LAYOUT_NODE_RESIZING );
 		layoutAlgorithms = new HashMap<>();
 		layoutAlgorithms.put(defaultLayoutAlogorithm, Messages.RelationshipGraphComposite_LayoutAlogorithm_Radial);
-		layoutAlgorithms.put(new BoxLayoutAlgorithm(), Messages.RelationshipGraphComposite_LayoutAlogorithm_Box);
-		layoutAlgorithms.put(new GridLayoutAlgorithm(), Messages.RelationshipGraphComposite_LayoutAlogorithm_Grid);
-		layoutAlgorithms.put(new SpringLayoutAlgorithm(), Messages.RelationshipGraphComposite_LayoutAlogorithm_Spring);
-		layoutAlgorithms.put(new TreeLayoutAlgorithm(), Messages.RelationshipGraphComposite_LayoutAlogorithm_Tree);
-		layoutAlgorithms.put(new SugiyamaLayoutAlgorithm(Direction.VERTICAL, new SugiyamaLayoutAlgorithm.DFSLayerProvider()), Messages.RelationshipGraphComposite_LayoutAlogorithm_Sugiyama);
-		layoutAlgorithms.put(new HorizontalShiftAlgorithm(), Messages.RelationshipGraphComposite_LayoutAlogorithm_HorizontalShift);
+		layoutAlgorithms.put(new GridLayoutAlgorithm(LayoutStyles.NO_LAYOUT_NODE_RESIZING ), Messages.RelationshipGraphComposite_LayoutAlogorithm_Grid);
+		layoutAlgorithms.put(new SpringLayoutAlgorithm(LayoutStyles.NO_LAYOUT_NODE_RESIZING ), Messages.RelationshipGraphComposite_LayoutAlogorithm_Spring);
+		layoutAlgorithms.put(new TreeLayoutAlgorithm(LayoutStyles.NO_LAYOUT_NODE_RESIZING ), Messages.RelationshipGraphComposite_LayoutAlogorithm_Tree);
 	}
 
 	private void createContent(Composite parent) {
@@ -306,7 +299,7 @@ public class RelationshipGraphComposite extends Composite {
 				return layoutAlgorithms.get(element);
 			}
 		});
-		List<Entry<ILayoutAlgorithm, String>> algEntries = new ArrayList<>(layoutAlgorithms.entrySet());
+		List<Entry<LayoutAlgorithm, String>> algEntries = new ArrayList<>(layoutAlgorithms.entrySet());
 		Collections.sort(algEntries, (e1, e2) -> e1.getValue().compareTo(e2.getValue()));
 		cmbLayout.setInput(algEntries.stream().map(e -> e.getKey()).toArray());
 		cmbLayout.setSelection(new StructuredSelection(defaultLayoutAlogorithm));
@@ -315,13 +308,13 @@ public class RelationshipGraphComposite extends Composite {
 			public void selectionChanged(SelectionChangedEvent event) {
 				IStructuredSelection selection = (IStructuredSelection) cmbLayout.getStructuredSelection();
 				if (selection != null && !selection.isEmpty()) {
-					ILayoutAlgorithm layoutAlgorithm = (ILayoutAlgorithm) selection.getFirstElement();
+					LayoutAlgorithm layoutAlgorithm = (LayoutAlgorithm) selection.getFirstElement();
 					graphViewer.setLayoutAlgorithm(layoutAlgorithm);
 					String id = getPreferencesId();
 					if (id != null && !id.isEmpty()) {
 						Intelligence2PlugIn.getDefault().getPreferenceStore().setValue(PREFERENCE_LAYOUT_ALGORITHM_KEY + id, layoutAlgorithm.getClass().getCanonicalName());
 					}
-					delayedUpdateGraph(null, true);
+					graphViewer.applyLayout();
 				}
 			}
 		});
@@ -333,17 +326,9 @@ public class RelationshipGraphComposite extends Composite {
 
 		graphContentProvider = new RelationshipGraphContentProvider();
 		graphLabelProvider = new RelationshipGraphLabelProvider(graphContentProvider);
-		ZestFxJFaceModule mm = new ZestFxJFaceModule();
-		graphViewer = new ZestContentViewer(mm);
-//		new ZestFxJFaceModule() {
-//			@Override
-//			protected void enableAdapterMapInjection() {
-//				//https://bugs.eclipse.org/bugs/show_bug.cgi?id=496777
-//				//https://bugs.eclipse.org/bugs/show_bug.cgi?id=545947
-//				install(new AdapterInjectionSupport(LoggingMode.PRODUCTION));
-//			}
-//		});
-		graphViewer.createControl(mainCmp, SWT.NONE);
+		graphViewer = new GraphViewer(mainCmp, SWT.NONE);
+		graphViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+//		graphViewer.createControl(mainCmp, SWT.NONE);
 		
 		graphViewer.setContentProvider(graphContentProvider);
 		graphViewer.setLabelProvider(graphLabelProvider);
@@ -394,6 +379,15 @@ public class RelationshipGraphComposite extends Composite {
 	}
 
 	private void delayedUpdateGraph(IRelationshipGraphData input, boolean refresh) {
+//		if (true) {
+//			Object[] x = graphViewer.getNodeElements();
+//			
+//			for (Object y : x) {
+//				System.out.println(y);
+//			}
+//			
+//			return ;
+//		}
 		IEditorPart part = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();
 		if (part == parentEditor) {
 			//graph is in active editor and we need to set input right away
@@ -444,7 +438,7 @@ public class RelationshipGraphComposite extends Composite {
 		if (id == null || id.isEmpty()) return;
 		String layoutAlgClass = Intelligence2PlugIn.getDefault().getPreferenceStore().getString(PREFERENCE_LAYOUT_ALGORITHM_KEY + id);
 		if (layoutAlgClass != null && !layoutAlgClass.isEmpty()) {
-			for (ILayoutAlgorithm layoutAlgorithm : layoutAlgorithms.keySet()) {
+			for (LayoutAlgorithm layoutAlgorithm : layoutAlgorithms.keySet()) {
 				if (layoutAlgClass.equals(layoutAlgorithm.getClass().getCanonicalName())) {
 					cmbLayout.setSelection(new StructuredSelection(layoutAlgorithm));
 					return;
