@@ -749,6 +749,20 @@ public class ConfigurationEditor extends EditorPart {
 		SmartUiUtils.createHeaderLabel(patrolfilters, Messages.ConfigurationEditor_PatrolFilters);
 		
 		inner = toolkit.createComposite(patrolfilters);
+		inner.setLayout(new GridLayout(2 , false));
+		inner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridLayout)inner.getLayout()).marginWidth = 0;
+		((GridLayout)inner.getLayout()).marginHeight = 0;
+		
+		l = toolkit.createLabel(inner, ""); //$NON-NLS-1$
+		l.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.WARN_ICON));
+		
+		l = toolkit.createLabel(inner, "", SWT.WRAP); //$NON-NLS-1$
+		l.setText(Messages.ConfigurationEditor_FilterWarning);
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		
+		inner = toolkit.createComposite(patrolfilters);
 		inner.setLayout(new GridLayout(3 , false));
 		inner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		

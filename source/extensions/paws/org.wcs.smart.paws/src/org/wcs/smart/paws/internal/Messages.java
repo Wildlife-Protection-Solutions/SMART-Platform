@@ -73,6 +73,8 @@ public class Messages extends NLS {
 
 	public static String ConfigurationEditor_ErrorTitls;
 
+	public static String ConfigurationEditor_FilterWarning;
+
 	public static String ConfigurationEditor_GISLayersTooltip;
 
 	public static String ConfigurationEditor_groupByTooltip;
