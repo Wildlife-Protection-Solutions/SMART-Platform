@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.model;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Embeddable;
@@ -32,7 +33,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import com.google.common.base.Objects;
 
 /**
  * Mapping record sources to profiles
@@ -119,13 +119,13 @@ public class IntelProfileRecordSource {
 			if (this == key) return true;
 			if (getClass() != key.getClass()) return false;
 			IProfileRecordPk p = (IProfileRecordPk)key;
-			return Objects.equal(p.source, this.source) &&
-					Objects.equal(p.profile, this.profile);
+			return Objects.equals(p.source, this.source) &&
+					Objects.equals(p.profile, this.profile);
 					
 		}
 		@Override
 		public int hashCode() {
-			return Objects.hashCode(source, profile);
+			return Objects.hash(source, profile);
 		}
 	}
 }

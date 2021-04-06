@@ -17,26 +17,15 @@ and relationships.
       Copyright (c): 2012, 2013 Wildlife Conservation Society
    </copyright>
 
+   <includes
+         id="org.eclipse.zest"
+         version="0.0.0"/>
+
    <plugin
          id="org.wcs.smart.i2"
          download-size="0"
          install-size="0"
          version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="com.google.inject"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="com.google.inject.multibindings"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
          unpack="false"/>
 
 </feature>
