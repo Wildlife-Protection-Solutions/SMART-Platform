@@ -427,29 +427,32 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		lblAdvanced.setVisible(true);// false
 		widgets.add(lblAdvanced);
 		
-//		Label label = new Label(right, SWT.NONE);
-//		label.setVisible(false);
+		Composite bottom = new Composite(right, SWT.NONE);
+		bottom.setLayout(new GridLayout(2, false));
+		((GridLayout)bottom.getLayout()).marginWidth = 0;
+		((GridLayout)bottom.getLayout()).marginHeight = 0;
+		bottom.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
-
-		
-		Label lblLang = new Label(right, SWT.NONE);
+		Label lblLang = new Label(bottom, SWT.NONE);
 		lblLang.setText(Locale.getDefault().getDisplayName());
-		lblLang.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, false, false));
+		lblLang.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, true, false));
 		
-		Composite composite_1 = new Composite(right, SWT.NONE);
-		composite_1.setLayout(new GridLayout(3, false));
-		composite_1.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
+		Composite composite_1 = new Composite(bottom, SWT.NONE);
+		composite_1.setLayout(new GridLayout(2, true));
+		composite_1.setLayoutData(new GridData(SWT.RIGHT, SWT.NONE, false, false));
+		((GridLayout)composite_1.getLayout()).marginWidth = 0;
 		
 		btnCancel = new Button(composite_1, SWT.PUSH);
 		btnCancel.setText(Messages.InteractiveSplashHandler_Exit_Button); 
-		btnCancel.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
+		btnCancel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 				
 		btnOk = new Button(composite_1, SWT.PUSH);
 		btnOk.setText(Messages.InteractiveSplashHandler_Login_Button); 
-		btnOk.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
+		btnOk.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
-//		((GridData)btnCancel.getLayoutData()).widthHint = btnOk.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
-//		((GridData)btnOk.getLayoutData()).widthHint = btnOk.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
+		int size = (int) (Math.max(btnOk.computeSize(SWT.DEFAULT, SWT.DEFAULT).x, btnCancel.computeSize(SWT.DEFAULT, SWT.DEFAULT).x) * 2.5);
+		((GridData)btnCancel.getLayoutData()).widthHint = size;
+		((GridData)btnOk.getLayoutData()).widthHint = size;
 				
 		//does different layout stuff for odd display zoom settings
 		//if the login button is off the splash screen page then
@@ -478,7 +481,8 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		widgets.add(btnOk);
 		widgets.add(btnCancel);
 	
-		right.setTabList(new Control[]{cmvConservationArea.getControl(),cmbUserName, txtPassword, composite_1, lblAdvanced});
+		right.setTabList(new Control[]{cmvConservationArea.getControl(),cmbUserName, txtPassword, lblAdvanced, bottom});
+		bottom.setTabList(new Control[]{composite_1});
 		composite_1.setTabList(new Control[]{btnOk, btnCancel});
 		enableControls(false);
 		
