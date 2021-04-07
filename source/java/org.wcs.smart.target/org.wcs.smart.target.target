@@ -11,7 +11,7 @@
             <unit id="org.eclipse.nebula.widgets.tablecombo" version="1.2.0.202011020719"/>
         </location>
          <location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="slicer" includeSource="true" type="InstallableUnit">
-            <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/I20210223201916/repository"/>
+            <repository location="https://download.eclipse.org/tools/orbit/downloads/drops/R20210223232630/repository"/>
 	         <unit id="com.google.inject" version="3.0.0.v201605172100"/>
             <unit id="net.miginfocom.layout" version="3.7.1.v200911230030"/>
             <unit id="net.miginfocom.layout.swt" version="3.7.1.v201505121915"/>
