@@ -23,13 +23,10 @@ package org.wcs.smart.ui;
 
 import java.text.MessageFormat;
 
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.FocusEvent;
-import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -59,8 +56,6 @@ public class TranslateNameComposite extends Composite {
 	
 	private NamedItem item;
 	private Language currentLanguage = null;
-	
-	private String error;
 	
 	public TranslateNameComposite(Composite parent, NamedItem item) {
 		super(parent, SWT.NONE);
@@ -96,44 +91,18 @@ public class TranslateNameComposite extends Composite {
 		final ControlDecoration cd = createControlDecoration(text);
 		cd.hide();
 		
-		text.addFocusListener(new FocusListener() {
-			@Override
-			public void focusLost(FocusEvent e) {
-				if (!isInnerChange() && item != null) {
-					boolean changed = false;
-					error = validateDisplayName(text.getText());
-					if (error != null) {
-						MessageDialog.openError(getShell(), Messages.TranslateNameComposite_ErrorDialog_Title, error);
-						text.setText(item.getName() != null ? item.getName() : ""); //$NON-NLS-1$
-					}else{
-						changed = !text.getText().equals(item.getName());
-						item.setName(text.getText());
-						item.updateName(currentLanguage, item.getName());
-						
-					}
-					if (changed){
-						//only fire if name actually changed
-						handleChanged();
-					}
-				}
-			}
-			
-			@Override
-			public void focusGained(FocusEvent e) {
-			}
-		});
 		text.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
 				if (!isInnerChange() && item != null) {
-					error = validateDisplayName(text.getText());
-					if (error != null) {
-						cd.setDescriptionText(error);
-						cd.show();
-					}else{
-						cd.hide();
-					}
-					handleChanged();
+					boolean changed = false;
+					String error = validate();
+					if (error != null) return;
+					
+					changed = !text.getText().equals(item.getName());
+					item.setName(text.getText());
+					item.updateName(currentLanguage, item.getName());
+					if (changed) handleChanged();
 				}
 			}
 		});
@@ -156,7 +125,8 @@ public class TranslateNameComposite extends Composite {
 		});
 	}
 
-	private String validateDisplayName(String name) {
+	protected String validate() {
+		String name = text.getText();
 		if (name.length() > org.wcs.smart.ca.Label.MAX_LENGTH) {
 			return MessageFormat.format(Messages.TranslateNameComposite_MaxLengthError, org.wcs.smart.ca.Label.MAX_LENGTH);
 		}
@@ -204,7 +174,4 @@ public class TranslateNameComposite extends Composite {
 		this.currentLanguage = currentLanguage;
 	}
 
-	public String getError() {
-		return error;
-	}
 }

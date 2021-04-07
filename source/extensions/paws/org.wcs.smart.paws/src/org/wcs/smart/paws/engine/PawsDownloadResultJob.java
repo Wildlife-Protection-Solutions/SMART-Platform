@@ -128,7 +128,6 @@ public class PawsDownloadResultJob extends Job {
 			String endpoint = prun.getRunId() + "/risk_prediction"; //$NON-NLS-1$
 			
 			List<String> tocopy = StorageApi.INSTANCE.getBlobs(containerURL, endpoint);
-			tocopy.add(prun.getRunId() + "/processed_data/" + PawsResultManager.PROJ_FILE); //$NON-NLS-1$
 			
 			for (String result : tocopy) {
 				BlockBlobURL blobUrl = containerURL.createBlockBlobURL(result);

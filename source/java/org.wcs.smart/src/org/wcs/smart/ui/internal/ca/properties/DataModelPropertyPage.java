@@ -85,6 +85,7 @@ import org.wcs.smart.ca.datamodel.ICategoryVisitor;
 import org.wcs.smart.ca.datamodel.ITreeNodeVisitor;
 import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -352,6 +353,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		
 		Composite buttonPanel = new Composite(rightPanel, SWT.NONE);
 		buttonPanel.setLayout(new GridLayout(4, false));
+		((GridLayout)buttonPanel.getLayout()).marginWidth = 0;
 		buttonPanel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 		
 		btnAddCategory = new Button(buttonPanel, SWT.PUSH);
@@ -409,12 +411,11 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		setButtonLayoutData(btnDeleteElement);
 		
 		
-		Group infoPanel = new Group(rightPanel, SWT.SHADOW_ETCHED_IN);
-		((Group)infoPanel).setText(Messages.DataModelPropertyPage_PropertiesGroup_Label);
+		SmartUiUtils.createHeaderLabel(rightPanel, Messages.DataModelPropertyPage_PropertiesGroup_Label);
 		
+		Composite infoPanel = new Composite(rightPanel, SWT.SHADOW_ETCHED_IN);
 		infoPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		infoPanel.setLayout(new GridLayout(1, false));
-		
 		
 		infoInnerPanel = new Composite(infoPanel, SWT.NONE);
 		infoInnerPanel.setLayout(new StackLayout());

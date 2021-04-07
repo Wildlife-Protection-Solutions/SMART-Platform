@@ -693,6 +693,7 @@ public class EmployeePropertyPage extends SmartStyledTitleDialog{
 		Object x = lstTeams.getStructuredSelection().getFirstElement();
 		if (!(x instanceof EmployeeTeam)) return;
 		EmployeeTeam editTeam = (EmployeeTeam)x;
+		
 		CreateEditNamedItemDialog dialog = new CreateEditNamedItemDialog(getShell(), editTeam) {
 			protected Control createDialogArea(Composite parent) {
 				Control c = super.createDialogArea(parent);

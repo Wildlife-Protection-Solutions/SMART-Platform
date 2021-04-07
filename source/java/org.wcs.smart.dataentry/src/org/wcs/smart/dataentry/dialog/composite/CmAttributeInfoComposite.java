@@ -169,11 +169,12 @@ public abstract class CmAttributeInfoComposite extends AbstractInfoComposite {
 				
 				@Override
 				public Path getImageFile() {
+					CmAttribute cmNode = getSourceObject();
+					if (cmNode == null) return null;
 					if (isCustom()) {
-						return getSourceObject().getImageFile();
+						return cmNode.getImageFile();
 					}
 					
-					CmAttribute cmNode = getSourceObject();
 					if (cmNode.getAttribute() == null) return null;
 					Icon i = cmNode.getAttribute().getIcon();
 					if (i == null) return null;

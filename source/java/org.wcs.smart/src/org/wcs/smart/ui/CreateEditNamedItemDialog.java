@@ -93,7 +93,13 @@ public class CreateEditNamedItemDialog extends SmartStyledTitleDialog {
 	}
 
 	protected boolean validate() {
-		String err = tnc.getError();
+		String err = tnc.validate();
+		setError(err);
+		boolean ok = err == null;
+		return ok;
+	}
+	
+	protected void setError(String err) {
 		boolean ok = err == null;
 		setErrorMessage(err);
 		Button btn = getButton(IDialogConstants.OK_ID);
@@ -104,9 +110,8 @@ public class CreateEditNamedItemDialog extends SmartStyledTitleDialog {
 				btn.setEnabled(false);
 			}
 		}
-		return ok;
+		
 	}
-	
 	@Override
 	protected void createButtonsForButtonBar(Composite parent){
 		super.createButtonsForButtonBar(parent);
@@ -125,7 +130,7 @@ public class CreateEditNamedItemDialog extends SmartStyledTitleDialog {
 		if (!validate() || !saveToDatabase()){
 			return false;
 		}
-		;
+		
 		setDirty(false);
 		return true;
 	}
@@ -163,6 +168,12 @@ public class CreateEditNamedItemDialog extends SmartStyledTitleDialog {
 			protected void handleChanged() {
 				super.handleChanged();
 				setDirty(true);
+			}
+			
+			protected String validate() {
+				String error = super.validate();
+				setError(error);
+				return error;
 			}
 		};
 		tnc.setCurrentLanguage(SmartDB.getCurrentLanguage());

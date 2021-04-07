@@ -104,6 +104,8 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 	private List<IconSet> sets = null;
 	private List<Icon> icons = null;
 	
+	private Composite main = null;
+	
 	private Session session;
 	private boolean isDirty = false;
 	
@@ -114,7 +116,7 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 	@Override
 	public Point getInitialSize() {
 		Point pnt = super.getInitialSize();
-		pnt.y = 500;
+		pnt.y = 550;
 		return pnt;
 	}
 	
@@ -178,7 +180,7 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 		session = HibernateManager.openSession(new AttachmentInterceptor());
 		session.beginTransaction();
 		
-		Composite main = new Composite(parent, SWT.BORDER);
+		main = new Composite(parent, SWT.BORDER);
 		main.setLayout(new GridLayout());
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridLayout)main.getLayout()).marginWidth = 0;
@@ -457,7 +459,6 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 		tiDelete.addListener(SWT.Selection, e->deleteIconSet());
 		
 		imageTable = new IconTable(top, SWT.BORDER);
-		imageTable.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 		imageTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		
 		lstIconsets.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -626,7 +627,7 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 				if (!icons.isEmpty()) {
 					createIconTable(sets, icons);
 				}
-				
+				main.layout(true, true);
 			});
 			return Status.OK_STATUS;
 		}

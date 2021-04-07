@@ -55,10 +55,9 @@ public class IconPanel extends Composite {
 	public IconPanel(Composite parent, boolean canEdit) {
 		super(parent, SWT.NONE);
 		this.canEdit = canEdit;
-		super.setBackgroundMode(SWT.INHERIT_DEFAULT);
 		setLayout(new GridLayout());
 		((GridLayout)getLayout()).marginWidth = 0;
-		((GridLayout)getLayout()).marginHeight = 0;
+		((GridLayout)getLayout()).marginHeight = 0;	
 	}
 	
 	private void fireSelectionListeners() {
@@ -77,6 +76,7 @@ public class IconPanel extends Composite {
 		for (Control c : getChildren()) c.dispose();
 		if (icon == null) {
 			Composite c = new Composite(this, SWT.NONE);
+			c.setBackground(getBackground());
 			c.setLayout(new GridLayout(2, false));
 			c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridLayout)c.getLayout()).marginWidth = 0;
@@ -84,15 +84,17 @@ public class IconPanel extends Composite {
 			
 			Label l = new Label(c, SWT.NONE);
 			l.setText(Messages.IconPanel_NoIconLabel);
-			
+			l.setBackground(getBackground());
 			if (canEdit) {
 				Link lnk = new Link(c, SWT.NONE);
 				lnk.setText("<a>" + DialogConstants.EDIT_LINK_TEXT + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 				lnk.addListener(SWT.Selection, e->editIcons());
+				lnk.setBackground(getBackground());
 			}
 			
 			//spacer for images
 			Composite images = new Composite(this, SWT.NONE);
+			images.setBackground(getBackground());
 			images.setLayout(new GridLayout());
 			images.setLayoutData(new GridData());
 			((GridData)images.getLayoutData()).heightHint = ICON_SIZE;
@@ -103,23 +105,28 @@ public class IconPanel extends Composite {
 			c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridLayout)c.getLayout()).marginWidth = 0;
 			((GridLayout)c.getLayout()).marginHeight = 0;
+			c.setBackground(getBackground());
 			
 			Label l = new Label(c, SWT.NONE);
 			l.setText(icon.getName() == null ? "" : icon.getName()); //$NON-NLS-1$
+			l.setBackground(getBackground());
 			
 			if (canEdit) {
 				Composite cc = new Composite(c, SWT.NONE);
 				cc.setLayout(new GridLayout(2, false));
 				((GridLayout)cc.getLayout()).marginWidth = 0;
 				((GridLayout)cc.getLayout()).marginHeight = 0;
+				cc.setBackground(getBackground());
 				
 				Link lnk = new Link(cc, SWT.NONE);
 				lnk.setText("<a>" + DialogConstants.EDIT_LINK_TEXT + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 				lnk.addListener(SWT.Selection, e->editIcons());
+				lnk.setBackground(getBackground());
 				
 				lnk = new Link(cc, SWT.NONE);
 				lnk.setText("<a>" + Messages.IconPanel_clearLabel + "</a>");  //$NON-NLS-1$ //$NON-NLS-2$
 				lnk.addListener(SWT.Selection, e->clearIcon());
+				lnk.setBackground(getBackground());
 			}
 			
 			Composite images = new Composite(this, SWT.NONE);
@@ -128,6 +135,7 @@ public class IconPanel extends Composite {
 			((RowLayout)images.getLayout()).wrap = true;
 			images.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 			((GridData)images.getLayoutData()).widthHint = images.getClientArea().width;
+			images.setBackground(getBackground());
 
 			for (IconFile file : icon.getFiles()) {
 				
@@ -135,6 +143,7 @@ public class IconPanel extends Composite {
 				temp.setLayout(new GridLayout());
 				((GridLayout)temp.getLayout()).marginWidth = 0;
 				((GridLayout)temp.getLayout()).marginHeight = 0;
+				temp.setBackground(getBackground());
 				
 				Thumbnail t = new Thumbnail(file, ICON_SIZE, true);
 				t.setImageName(icon.getName());
@@ -142,9 +151,11 @@ public class IconPanel extends Composite {
 				cc.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, false, false));
 				((GridData)cc.getLayoutData()).widthHint = ICON_SIZE;
 				((GridData)cc.getLayoutData()).heightHint = ICON_SIZE;
+				cc.setBackground(getBackground());
 				
 				l = new Label(temp, SWT.NONE);
-				l.setText(file.getIconSet().getName());				
+				l.setText(file.getIconSet().getName());		
+				l.setBackground(getBackground());
 			}
 		}
 		this.layout(true);

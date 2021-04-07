@@ -352,10 +352,12 @@ public class AttributeTree {
 								f = ff.getAttachmentFile();
 							}
 							Image mm = SmartUtils.getImage(f, AttributeInfoPanel.LIST_ICON_SIZE);
-							try {
-								gc.drawImage(mm, 0,0, AttributeInfoPanel.LIST_ICON_SIZE,AttributeInfoPanel.LIST_ICON_SIZE,i*(AttributeInfoPanel.LIST_ICON_SIZE+5),0,AttributeInfoPanel.LIST_ICON_SIZE,AttributeInfoPanel.LIST_ICON_SIZE);
-							}finally {
-								mm.dispose();
+							if (mm != null) {
+								try {
+									gc.drawImage(mm, 0,0, AttributeInfoPanel.LIST_ICON_SIZE,AttributeInfoPanel.LIST_ICON_SIZE,i*(AttributeInfoPanel.LIST_ICON_SIZE+5),0,AttributeInfoPanel.LIST_ICON_SIZE,AttributeInfoPanel.LIST_ICON_SIZE);
+								}finally {
+									mm.dispose();
+								}
 							}
 						}
 					}finally {

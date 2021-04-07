@@ -321,24 +321,13 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 	 */
 	private void createUI() {
 		
+		
 		fCompositeLogin = new Composite(getSplash(), SWT.BORDER);
 		
 		GridLayout layout = new GridLayout(F_COLUMN_COUNT, false);
 		fCompositeLogin.setLayout(layout);		
-		((GridLayout)fCompositeLogin.getLayout()).marginBottom = 5;
 		((GridLayout)fCompositeLogin.getLayout()).marginHeight = 0;
-		Composite left = new Composite(fCompositeLogin, SWT.NONE);
-		
-		left.setLayout(new GridLayout());
-		left.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		((GridLayout)left.getLayout()).marginWidth = 0;
-		((GridLayout)left.getLayout()).marginHeight = 0;
-		//((GridData)left.getLayoutData()).widthHint = 135;
-		((GridData)left.getLayoutData()).widthHint = (int)(getSplash().getBounds().width * 0.25);
-		
-		Label lblLang = new Label(left, SWT.NONE);
-		lblLang.setText(Locale.getDefault().getDisplayName());
-		lblLang.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, true));
+		((GridLayout)fCompositeLogin.getLayout()).marginWidth= 0;
 		
 		Composite right = new Composite(fCompositeLogin, SWT.NONE);
 		right.setLayout(new GridLayout(2, false));
@@ -347,9 +336,11 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		right.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Label lblSpacer = new Label(right, SWT.NONE);
-		lblSpacer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		lblSpacer.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 		int hh = (int)(getSplash().getBounds().height * 0.3);
 		((GridData)lblSpacer.getLayoutData()).heightHint = hh;
+		((GridData)lblSpacer.getLayoutData()).widthHint = 0;
+		lblSpacer.setVisible(false);
 		
 		//version label
 		Label lblVersion = new Label(right, SWT.NONE);
@@ -377,6 +368,7 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		GridData data = new GridData(SWT.FILL, SWT.FILL, true, true);
 		data.horizontalSpan = F_COLUMN_COUNT;
 		spanner.setLayoutData(data);
+		spanner.setVisible(false);
 
 		progressLabel = new Label(right, SWT.RIGHT);
 		progressLabel.setText("Progress Label"); //$NON-NLS-1$
@@ -384,9 +376,12 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		progressLabel.setLayoutData(data);
 		progressLabel.setVisible(true);// false
 		
+		int padding = (int)(getSplash().getBounds().width * 0.25);
+		
 		Label lblLabel = new Label(right, SWT.NONE);
 		lblLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblLabel.setText(Messages.InteractiveSplashHandler_Ca_Label);
+		((GridData)lblLabel.getLayoutData()).horizontalIndent = padding;
 		
 		Combo cmbConservationArea = new Combo(right, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbConservationArea.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
@@ -399,6 +394,7 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		Label lblUserName = new Label(right, SWT.NONE);
 		lblUserName.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblUserName.setText(Messages.InteractiveSplashHandler_Username_Label);
+		((GridData)lblUserName.getLayoutData()).horizontalIndent = padding;
 
 		// bug https://www.assembla.com/spaces/smart-cs/tickets/54#/activity/ticket:
 		cmbUserName = new Combo(right, SWT.NONE);
@@ -409,6 +405,7 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		Label lblPassword = new Label(right, SWT.NONE);
 		lblPassword.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblPassword.setText(Messages.InteractiveSplashHandler_Password_Label);
+		((GridData)lblPassword.getLayoutData()).horizontalIndent = padding;
 
 		txtPassword = new Text(right, SWT.PASSWORD | SWT.BORDER);
 		txtPassword.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
@@ -430,26 +427,33 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		lblAdvanced.setVisible(true);// false
 		widgets.add(lblAdvanced);
 		
-		Label label = new Label(right, SWT.NONE);
-		label.setVisible(false);
+		Composite bottom = new Composite(right, SWT.NONE);
+		bottom.setLayout(new GridLayout(2, false));
+		((GridLayout)bottom.getLayout()).marginWidth = 0;
+		((GridLayout)bottom.getLayout()).marginHeight = 0;
+		bottom.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
-		Composite composite_1 = new Composite(right, SWT.NONE);
-		GridLayout gl = new GridLayout(2, true);
-		gl.marginLeft = 40;
-		gl.marginRight = 0;
-		gl.makeColumnsEqualWidth = true;
-		composite_1.setLayout(gl);
-		composite_1.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
+		Label lblLang = new Label(bottom, SWT.NONE);
+		lblLang.setText(Locale.getDefault().getDisplayName());
+		lblLang.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, true, false));
 		
+		Composite composite_1 = new Composite(bottom, SWT.NONE);
+		composite_1.setLayout(new GridLayout(2, true));
+		composite_1.setLayoutData(new GridData(SWT.RIGHT, SWT.NONE, false, false));
+		((GridLayout)composite_1.getLayout()).marginWidth = 0;
 		
 		btnCancel = new Button(composite_1, SWT.PUSH);
 		btnCancel.setText(Messages.InteractiveSplashHandler_Exit_Button); 
-		btnCancel.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
-		
+		btnCancel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+				
 		btnOk = new Button(composite_1, SWT.PUSH);
 		btnOk.setText(Messages.InteractiveSplashHandler_Login_Button); 
-		btnOk.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false));
+		btnOk.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
+		int size = (int) (Math.max(btnOk.computeSize(SWT.DEFAULT, SWT.DEFAULT).x, btnCancel.computeSize(SWT.DEFAULT, SWT.DEFAULT).x) * 2.5);
+		((GridData)btnCancel.getLayoutData()).widthHint = size;
+		((GridData)btnOk.getLayoutData()).widthHint = size;
+				
 		//does different layout stuff for odd display zoom settings
 		//if the login button is off the splash screen page then
 		//move the layout around so it ends up on the page
@@ -477,7 +481,8 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		widgets.add(btnOk);
 		widgets.add(btnCancel);
 	
-		right.setTabList(new Control[]{cmvConservationArea.getControl(),cmbUserName, txtPassword, composite_1, lblAdvanced});
+		right.setTabList(new Control[]{cmvConservationArea.getControl(),cmbUserName, txtPassword, lblAdvanced, bottom});
+		bottom.setTabList(new Control[]{composite_1});
 		composite_1.setTabList(new Control[]{btnOk, btnCancel});
 		enableControls(false);
 		

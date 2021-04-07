@@ -27,10 +27,10 @@
 
 .MPartStack {
 	swt-tab-renderer: url('bundleclass://org.wcs.smart/org.wcs.smart.e4.SmartTabRenderer');
-	swt-unselected-hot-tab-color-background: #C7D2E5;
+	swt-unselected-hot-tab-color-background: #99b2c8;
     swt-unselected-tabs-color:  #FFFFFF;
     swt-selected-tab-fill: #EDEDED;
-    swt-outer-keyline-color: #C7D2E5;
+    swt-outer-keyline-color: #99b2c8;
     swt-tab-outline: #00FF00;
     swt-shadow-visible: false;
     swt-shadow-color: #0000FF;
@@ -42,9 +42,9 @@
 }
 
 .MPartStack.active {
-    swt-selected-tab-fill: #748DBD;   
+    swt-selected-tab-fill: #778b9b;   
     swt-tab-outline: white;
-    swt-outer-keyline-color: #C7D2E5;
+    swt-outer-keyline-color: #99b2c8;
 	swt-corner-radius: 15;
 	swt-shadow-visible: false;
 	swt-corner-radius: 0px;
@@ -59,18 +59,18 @@
 
 /* customized SMART tab bar*/
 .SMARTTabMouseOver{
-	background-color: #D4E5D6;
+	background-color: #a7cbc5;
 }
 
 /* no tab bar */
 .SMARTTabBar{
-	background-color: #ECF4ED;
+	background-color: #d3e5e2;
 }
 .SMARTTab{
-	background-color: #ECF4ED;
+	background-color: #d3e5e2;
 }
 .SMARTTabSelected{
-	background-color: #BCD7BF;
+	background-color: #7bb2a7;
 }
 /* there is probably a better way to do this but
 * I use these colors to get the selected and none selected
@@ -78,23 +78,23 @@
 * in the correct color
 */
 .SMARTTabColors{
-	background-color: #BCD7BF; /* active color */
+	background-color: #7bb2a7; /* active color */
 	color: #EDEDED; /*non-active color */
 }
 /* active tab bar */
 .MPartStack.active .SMARTTabMouseOver{
-	background-color: #D4E5D6;
+	background-color: #a7cbc5;
 }
 .MPartStack.active .SMARTTabSelected{
-	background-color: #BCD7BF;
+	background-color: #7bb2a7;
 }
 
 .MPartStack.active .SMARTTabBar{
-	background-color: #ECF4ED;
+	background-color: #d3e5e2;
 }
 
 .MPartStack.active .SMARTTab{
-	background-color: #ECF4ED;
+	background-color: #d3e5e2;
 }
 
 /* inactive tab bar */
@@ -116,25 +116,25 @@
 
 
 .SMARTSection{
-	background-color: #CEDEE1;
+	background-color: #ccddeb;
 }
 .SMARTSection Label{
-	background-color: #CEDEE1;
+	background-color: #ccddeb;
 }
 
 .SMARTSection Hyperlink{
-	background-color: #CEDEE1;
+	background-color: #ccddeb;
 }
 
 .SMARTSubSection{
-	background-color: #E6EEF0;
+	background-color: #dde8f2;
 }
 .SMARTSubSection Label{
-	background-color: #E6EEF0;
+	background-color: #dde8f2;
 }
 
 .SMARTSubSection Hyperlink{
-	background-color: #E6EEF0;
+	background-color: #dde8f2;
 }
 
 Section {
@@ -145,39 +145,39 @@ Section {
 	visibility: visible;
 
   /* declared in CSS rules */
-	background-color-titlebar: #CEDEE1; /*#33446B;*/
-	background-color-gradient-titlebar: #CEDEE1;
+	background-color-titlebar: #ccddeb; /*#333b43;*/
+	background-color-gradient-titlebar: #ccddeb;
 	border-color-titlebar: #FFFFFF;
   	
-  	color: #33446B;
+  	color: #333b43;
 }
 
 .SMARTFormHeader Label{
-	background-color: '#A6C4C9';
-	color: #33446B;
+	background-color: '#aac6de';
+	color: #333b43;
 }
 
 .SMARTFormHeader IdFieldHeader{
-	background-color: '#A6C4C9';
-	color: #33446B;
+	background-color: '#aac6de';
+	color: #333b43;
 }
 
 .SMARTFormHeader IntelQueryNameLabel{
-	background-color: '#A6C4C9';
-	color: #33446B;
+	background-color: '#aac6de';
+	color: #333b43;
 }
 
 .SMARTFormHeader ToolBar{
-	background-color: '#A6C4C9';
-	color: #33446B;
+	background-color: '#aac6de';
+	color: #333b43;
 }
 .SMARTFormHeader{
-	background-color: '#A6C4C9';
-	color: #33446B;
+	background-color: '#aac6de';
+	color: #333b43;
 }
 FormHeading{
-	background-color: '#A6C4C9';
-	color: #33446B;
+	background-color: '#aac6de';
+	color: #333b43;
 }
 
 Form{
@@ -208,14 +208,14 @@ ToolBar{
 CTabFolder{
 	swt-tab-renderer: url('bundleclass://org.wcs.smart/org.wcs.smart.e4.SmartTabRenderer');
 	swt-corner-radius: 0px;
-	swt-selected-tab-fill: #BCD7BF;
-	swt-unselected-hot-tab-color-background: #D4E5D6;
-    swt-unselected-tabs-color:  #ECF4ED;
+	swt-selected-tab-fill: #7bb2a7;
+	swt-unselected-hot-tab-color-background: #a7cbc5;
+    swt-unselected-tabs-color:  #d3e5e2;
 
-    swt-outer-keyline-color: #ECF4ED;
-    swt-tab-outline: #BCD7BF;
+    swt-outer-keyline-color: #d3e5e2;
+    swt-tab-outline: #7bb2a7;
     swt-shadow-visible: false;
-    swt-shadow-color: #ECF4ED;
+    swt-shadow-color: #d3e5e2;
     swt-simple: true;
     
     background-color:white;        
@@ -230,16 +230,16 @@ CTabItem:selected{
 }
 
 .MPartStack.active CTabFolder{
-	swt-tab-renderer: url('bundleclass://org.wcs.smart/org.wcs.smart.e4.SmartTabRenderer');
-	swt-corner-radius: 0px;
-	swt-selected-tab-fill: #BCD7BF;
-	swt-unselected-hot-tab-color-background: #D4E5D6;
-    swt-unselected-tabs-color:  #ECF4ED;
+    swt-tab-renderer: url('bundleclass://org.wcs.smart/org.wcs.smart.e4.SmartTabRenderer');
+    swt-corner-radius: 0px;
+    swt-selected-tab-fill: #7bb2a7;
+    swt-unselected-hot-tab-color-background: #a7cbc5;
+    swt-unselected-tabs-color:  #d3e5e2;
 
-    swt-outer-keyline-color: #ECF4ED;
-    swt-tab-outline: #BCD7BF;
+    swt-outer-keyline-color: #d3e5e2;
+    swt-tab-outline: #7bb2a7;
     swt-shadow-visible: false;
-    swt-shadow-color: #ECF4ED;
+    swt-shadow-color: #d3e5e2;
     swt-simple: true;
     
     background-color:white;        
@@ -247,10 +247,10 @@ CTabItem:selected{
 }
 
 .MPartStack CTabFolder{
-	swt-tab-renderer: url('bundleclass://org.wcs.smart/org.wcs.smart.e4.SmartTabRenderer');
-	swt-corner-radius: 0px;
-	swt-selected-tab-fill: #EDEDED;
-	swt-unselected-hot-tab-color-background: #EDEDED;
+    swt-tab-renderer: url('bundleclass://org.wcs.smart/org.wcs.smart.e4.SmartTabRenderer');
+    swt-corner-radius: 0px;
+    swt-selected-tab-fill: #EDEDED;
+    swt-unselected-hot-tab-color-background: #EDEDED;
     swt-unselected-tabs-color:  #FFFFFF;
 
     swt-outer-keyline-color: #FFFFFF;

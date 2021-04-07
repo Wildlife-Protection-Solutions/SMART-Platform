@@ -226,7 +226,13 @@ public class EditListDialog extends SmartStyledTitleDialog{
 
 		org.eclipse.swt.widgets.Label label = new org.eclipse.swt.widgets.Label(cmpTop, SWT.NONE);
 		label.setText(Messages.EditListDialog_ConfigurationName);
-		TranslateNameComposite tnc = new TranslateNameComposite(cmpTop, attribute.getConfig());
+		TranslateNameComposite tnc = new TranslateNameComposite(cmpTop, attribute.getConfig()) {
+			protected String validate() {
+				String x = super.validate();
+				setErrorMessage(x);
+				return x;
+			}
+		};
 		tnc.setCurrentLanguage(SmartDB.getCurrentLanguage());
 	}
 	

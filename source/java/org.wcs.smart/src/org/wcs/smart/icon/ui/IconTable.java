@@ -107,6 +107,7 @@ public class IconTable extends Composite implements Listener {
 		((GridLayout)getLayout()).marginWidth = 0;
 		((GridLayout)getLayout()).marginHeight = 0;
 		
+
 		infoSection = new ScrolledForm(this, SWT.V_SCROLL);
 		infoSection.setExpandHorizontal(true);
 		infoSection.setExpandVertical(true);
@@ -247,7 +248,8 @@ public class IconTable extends Composite implements Listener {
 				Composite thumbNameComp = t.thumb.createThumbnail(parent, 0, SWT.NONE, false);
 				thumbNameComp.setToolTipText(t.file.getIcon().getName());
 				thumbNameComp.setData(t);
-				thumbNameComp.setBackground(thumb.getBackground());
+				thumbNameComp.setBackground(getDisplay().getSystemColor(SWT.COLOR_WHITE));
+				
 				t.thumbGui = thumbNameComp;
 			}
 		}
