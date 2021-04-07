@@ -457,7 +457,6 @@ public class IconsetPropertyPage extends SmartStyledTitleDialog {
 		tiDelete.addListener(SWT.Selection, e->deleteIconSet());
 		
 		imageTable = new IconTable(top, SWT.BORDER);
-		imageTable.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 		imageTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		
 		lstIconsets.addSelectionChangedListener(new ISelectionChangedListener() {
