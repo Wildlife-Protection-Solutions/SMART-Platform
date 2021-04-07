@@ -1034,172 +1034,381 @@
             <names language_code="en" value="Number of Age or Sex Unknown"/>
             <names language_code="ka" value="ასაკის და სქესის რაოდენობა უცნობია"/>
         </attribute>
+        
         <attribute key="threat" isrequired="false" type="TREE">
-            <names language_code="ka" value="საფრთხე"/>
             <names language_code="en" value="Threat"/>
             <tree key="residentialcommercialdevelopment" isactive="true">
                 <names language_code="en" value="Residential &amp; Commercial Development"/>
-                <names language_code="ka" value="საცხოვრებელი და კომერციული განვითარება"/>
                 <children key="housingurbanareas" isactive="true">
                     <names language_code="en" value="Housing &amp; Urban Areas"/>
-                    <names language_code="ka" value="საცხოვრებელი და ურბანული ტერიტორიები"/>
                 </children>
                 <children key="commericalindustrialareas" isactive="true">
                     <names language_code="en" value="Commercial &amp; Industrial Areas"/>
-                    <names language_code="ka" value="კომერციული და ინდუსტრიული ტერიტორიები"/>
                 </children>
                 <children key="tourismrecreationareas" isactive="true">
                     <names language_code="en" value="Tourism &amp; Recreation Areas"/>
-                    <names language_code="ka" value="ტურიზმის და რეკრეაციის ტერიტორიები"/>
                 </children>
             </tree>
             <tree key="agricultureaquaculture" isactive="true">
-                <names language_code="ka" value="სოფლის მეურნეობა და წყლის მეურნეობა (აკვაკულტურა)"/>
                 <names language_code="en" value="Agriculture &amp; Aquaculture"/>
                 <children key="annualperennialnontimbercrops" isactive="true">
-                    <names language_code="ka" value="ერთწლიანი და მრავალწლიანი დარგული კულტურები"/>
                     <names language_code="en" value="Annual &amp; Perennial Non-Timber Crops"/>
+                    <children key="shiftingagriculture" isactive="true">
+                        <names language_code="en" value="Shifting Agriculture"/>
+                    </children>
+                    <children key="smallholderfarming" isactive="true">
+                        <names language_code="en" value="Small-Holder Farming"/>
+                    </children>
+                    <children key="agroindustryfarming" isactive="true">
+                        <names language_code="en" value="Agro-Industry Farming"/>
+                    </children>
+                    <children key="scaleunknownunrecorded" isactive="true">
+                        <names language_code="en" value="Scale Unknown/Unrecorded"/>
+                    </children>
                 </children>
                 <children key="woodpulpplantations" isactive="true">
-                    <names language_code="ka" value="ხის პლანტაციები"/>
                     <names language_code="en" value="Wood &amp; Pulp Plantations"/>
+                    <children key="smallholderplantations" isactive="true">
+                        <names language_code="en" value="Small-Holder Plantations"/>
+                    </children>
+                    <children key="agroindustryplantations" isactive="true">
+                        <names language_code="en" value="Agro-Industry Plantations"/>
+                    </children>
+                    <children key="scaleunknownunrecorded" isactive="true">
+                        <names language_code="en" value="Scale Unknown/Unrecorded"/>
+                    </children>
                 </children>
                 <children key="livestockfarmingranching" isactive="true">
-                    <names language_code="ka" value="მეცხოველეობა"/>
                     <names language_code="en" value="Livestock Farming &amp; Ranching"/>
+                    <children key="nomadicgrazing" isactive="true">
+                        <names language_code="en" value="Nomadic Grazing"/>
+                    </children>
+                    <children key="smallholdergrazingranchingorfarming" isactive="true">
+                        <names language_code="en" value="Small-Holder Grazing, Ranching or Farming"/>
+                    </children>
+                    <children key="agroindustrygrazingranchingorfarming" isactive="true">
+                        <names language_code="en" value="Agro-Industry Grazing, Ranching or Farming"/>
+                    </children>
+                    <children key="scaleunknownunrecorded" isactive="true">
+                        <names language_code="en" value="Scale Unknown/Unrecorded"/>
+                    </children>
                 </children>
                 <children key="marinefreshwateraquaculture" isactive="true">
-                    <names language_code="ka" value="ზღვისა და მტკნარი წყლის აკვაკულტურა"/>
                     <names language_code="en" value="Marine &amp; Freshwater Aquaculture"/>
+                    <children key="subsistenceartisanalaquaculture" isactive="true">
+                        <names language_code="en" value="Subsistence/Artisanal Aquaculture"/>
+                    </children>
+                    <children key="industrialaquaculture" isactive="true">
+                        <names language_code="en" value="Industrial Aquaculture"/>
+                    </children>
+                    <children key="scaleunknownunrecorded" isactive="true">
+                        <names language_code="en" value="Scale Unknown/Unrecorded"/>
+                    </children>
                 </children>
             </tree>
             <tree key="energyproductionmining" isactive="true">
-                <names language_code="ka" value="ენერგიის წარმოება და სამთო მრეწველობა"/>
                 <names language_code="en" value="Energy Production &amp; Mining"/>
                 <children key="oilgasdrlling" isactive="true">
                     <names language_code="en" value="Oil &amp; Gas Drilling"/>
-                    <names language_code="ka" value="ნავთობისა და გაზის ბურღვა"/>
                 </children>
                 <children key="miningquarrying" isactive="true">
                     <names language_code="en" value="Mining &amp; Quarrying"/>
-                    <names language_code="ka" value="სამთო სამრეწველო მოპოვების საქმიანობები"/>
                 </children>
                 <children key="renewableenergy" isactive="true">
                     <names language_code="en" value="Renewable Energy"/>
-                    <names language_code="ka" value="განახლებადი ენერგია"/>
                 </children>
             </tree>
             <tree key="transportationservicecorridors" isactive="true">
                 <names language_code="en" value="Transportation &amp; Service Corridors"/>
-                <names language_code="ka" value="ტრანსპორტირება და მომსახურების კორიდორები"/>
                 <children key="roadsrailroads" isactive="true">
                     <names language_code="en" value="Roads &amp; Railroads"/>
-                    <names language_code="ka" value="გზები და რკინისგზები"/>
                 </children>
                 <children key="utilityservicelines" isactive="true">
                     <names language_code="en" value="Utility &amp; Service Lines"/>
-                    <names language_code="ka" value="კომუნალური და მომსახურების ხაზები"/>
                 </children>
                 <children key="shippinglanes" isactive="true">
-                    <names language_code="ka" value="გადაზიდვის ბილიკები"/>
                     <names language_code="en" value="Shipping Lanes"/>
                 </children>
                 <children key="flightpaths" isactive="true">
                     <names language_code="en" value="Flight Paths"/>
                 </children>
-                <children key="horsetrail" isactive="true">
-                    <names language_code="ka" value="ცხენის ბილიკი"/>
-                    <names language_code="en" value="Horse Trail"/>
-                </children>
             </tree>
             <tree key="biologicalresourceuse" isactive="true">
                 <names language_code="en" value="Biological Resource Use"/>
-                <names language_code="ka" value="ბიოლოგიური რესურსების გამოყენება"/>
                 <children key="huntingcollectingterrestrialanimals" isactive="true">
                     <names language_code="en" value="Hunting &amp; Collecting Terrestrial Animals"/>
-                    <names language_code="ka" value="ნადირობა"/>
+                    <children key="intentionalusespeciesbeingassessedisthetarget" isactive="true">
+                        <names language_code="en" value="Intentional Use (species being assessed is the target)"/>
+                    </children>
+                    <children key="unintentionaleffectsspeciesbeingassessedisnotthetarget" isactive="true">
+                        <names language_code="en" value="Unintentional Effects (species being assessed is not the target)"/>
+                    </children>
+                    <children key="persecutioncontrol" isactive="true">
+                        <names language_code="en" value="Persecution/Control"/>
+                    </children>
+                    <children key="motivationunknownunrecorded" isactive="true">
+                        <names language_code="en" value="Motivation Unknown/Unrecorded"/>
+                    </children>
                 </children>
                 <children key="gatheringterrestrialplants" isactive="true">
-                    <names language_code="ka" value="ტყის არამერქნული პროდუქტების შეგროვება"/>
                     <names language_code="en" value="Gathering Terrestrial Plants"/>
+                    <children key="intentionalusespeciesbeingassessedisthetarget" isactive="true">
+                        <names language_code="en" value="Intentional Use (species being assessed is the target)"/>
+                    </children>
+                    <children key="unintentionaleffectsspeciesbeingassessedisnotthetarget" isactive="true">
+                        <names language_code="en" value="Unintentional Effects (species being assessed is not the target)"/>
+                    </children>
+                    <children key="persecutioncontrol" isactive="true">
+                        <names language_code="en" value="Persecution/Control"/>
+                    </children>
+                    <children key="motivationunknownunrecorded" isactive="true">
+                        <names language_code="en" value="Motivation Unknown/Unrecorded"/>
+                    </children>
                 </children>
                 <children key="loggingwoodharvesting" isactive="true">
-                    <names language_code="ka" value="ხე-ტყის ჭრა"/>
                     <names language_code="en" value="Logging &amp; Wood Harvesting"/>
+                    <children key="intentionalusesubsistencesmallscalespeciesbeingassessedisthetarget" isactive="true">
+                        <names language_code="en" value="Intentional Use: Subsistence/Small Scale (species being assessed is the target"/>
+                    </children>
+                    <children key="intentionaluselargescalespeciesbeingassessedisthetarget" isactive="true">
+                        <names language_code="en" value="Intentional Use: Large Scale (species being assessed is the target)"/>
+                    </children>
+                    <children key="unintentionaleffectssubsistencesmallscalespeciesbeingassessedisnotthetarget" isactive="true">
+                        <names language_code="en" value="Unintentional Effects: Subsistence/Small Scale (species being assessed is not the target)"/>
+                    </children>
+                    <children key="unintentionaleffectslargescalespeciesbeingassessedisnotthetarget" isactive="true">
+                        <names language_code="en" value="Unintentional Effects: Large Scale (species being assessed is not the target)"/>
+                    </children>
+                    <children key="motivationunknownunrecorded" isactive="true">
+                        <names language_code="en" value="Motivation Unknown/Unrecorded"/>
+                    </children>
                 </children>
                 <children key="fishingharvestingaquaticresources" isactive="true">
-                    <names language_code="ka" value="თევზაობა და წყლის რესურსების მოპოვება"/>
                     <names language_code="en" value="Fishing &amp; Harvesting Aquatic Resources"/>
+                    <children key="intentionalusesubsistencesmallscalespeciesbeingassessedisthetarget" isactive="true">
+                        <names language_code="en" value="Intentional Use: Subsistence/Small Scale (species being assessed is the target)"/>
+                    </children>
+                    <children key="intentionaluselargescalespeciesbeingassessedisthetarget" isactive="true">
+                        <names language_code="en" value="Intentional Use: Large Scale (species being assessed is the target)"/>
+                    </children>
+                    <children key="unintentionaleffectssubsistencesmallscalespeciesbeingassessedisnotthetarget" isactive="true">
+                        <names language_code="en" value="Unintentional Effects: Subsistence/Small Scale (species being assessed is not the target)"/>
+                    </children>
+                    <children key="unintentionaleffectslargescalespeciesbeingassessedisnotthetarget" isactive="true">
+                        <names language_code="en" value="Unintentional Effects: Large Scale (species being assessed is not the target)"/>
+                    </children>
+                    <children key="persecutioncontrol" isactive="true">
+                        <names language_code="en" value="Persecution/Control"/>
+                    </children>
+                    <children key="motivationunknownunrecorded" isactive="true">
+                        <names language_code="en" value="Motivation Unknown/Unrecorded"/>
+                    </children>
+                </children>
+            </tree>
+            <tree key="humanintrusionsdisturbance" isactive="true">
+                <names language_code="en" value="Human Intrusions &amp; Disturbance"/>
+                <children key="recreationalactivities" isactive="true">
+                    <names language_code="en" value="Recreational Activities"/>
+                </children>
+                <children key="warcivilunrestmilitaryexercises" isactive="true">
+                    <names language_code="en" value="War, Civil Unrest &amp; Military Exercises"/>
+                </children>
+                <children key="workotheractivities" isactive="true">
+                    <names language_code="en" value="Work &amp; Other Activities"/>
                 </children>
             </tree>
             <tree key="naturalsystemmodifications" isactive="true">
                 <names language_code="en" value="Natural System Modifications"/>
-                <names language_code="ka" value="ბუნებრივი სისტემის ცვლილებები"/>
                 <children key="firefiresuppression" isactive="true">
                     <names language_code="en" value="Fire &amp; Fire Suppression"/>
+                    <children key="increaseinfirefrequencyintensity" isactive="true">
+                        <names language_code="en" value="Increase In Fire Frequency/Intensity"/>
+                    </children>
+                    <children key="suppressioninfirefrequencyintensity" isactive="true">
+                        <names language_code="en" value="Suppression In Fire Frequency/Intensity"/>
+                    </children>
+                    <children key="trendunknownunrecorded" isactive="true">
+                        <names language_code="en" value="Trend Unknown/Unrecorded"/>
+                    </children>
                 </children>
                 <children key="damswatermanagementuse" isactive="true">
                     <names language_code="en" value="Dams &amp; Water Management/Use"/>
-                    <names language_code="ka" value="კაშხალი და წყლის მენეჯმენტი / გამოყენება"/>
+                    <children key="abstractionofsurfacewaterdomesticuse" isactive="true">
+                        <names language_code="en" value="Abstraction of Surface Water (domestic use)"/>
+                    </children>
+                    <children key="abstractionofsurfacewatercommercialuse" isactive="true">
+                        <names language_code="en" value="Abstraction of Surface Water (commercial use)"/>
+                    </children>
+                    <children key="abstractionofsurfacewateragriculturaluse" isactive="true">
+                        <names language_code="en" value="Abstraction of Surface Water (agricultural use)"/>
+                    </children>
+                    <children key="abstractionofsurfacewaterunknownuse" isactive="true">
+                        <names language_code="en" value="Abstraction of Surface Water (unknown use)"/>
+                    </children>
+                    <children key="abstractionofgroundwaterdomesticuse" isactive="true">
+                        <names language_code="en" value="Abstraction of Ground Water (domestic use)"/>
+                    </children>
+                    <children key="abstractionofgroundwatercommercialuse" isactive="true">
+                        <names language_code="en" value="Abstraction of Ground Water (commercial use)"/>
+                    </children>
+                    <children key="abstractionofgroundwateragriculturaluse" isactive="true">
+                        <names language_code="en" value="Abstraction of Ground Water (agricultural use)"/>
+                    </children>
+                    <children key="abstractionofgroundwaterunknownuse" isactive="true">
+                        <names language_code="en" value="Abstraction of Ground Water (unknown use)"/>
+                    </children>
+                    <children key="smalldams" isactive="true">
+                        <names language_code="en" value="Small Dams"/>
+                    </children>
+                    <children key="largedams" isactive="true">
+                        <names language_code="en" value="Large Dams"/>
+                    </children>
+                    <children key="damssizeunknown" isactive="true">
+                        <names language_code="en" value="Dams (size unknown)"/>
+                    </children>
                 </children>
                 <children key="otherecosystemmodifications" isactive="true">
-                    <names language_code="ka" value="ეკოსისტემების სხვა ცვლილებები"/>
                     <names language_code="en" value="Other Ecosystem Modifications"/>
                 </children>
             </tree>
             <tree key="invasiveotherproblematicspeciesgenes" isactive="true">
-                <names language_code="en" value="Invasive &amp; Other Problematic Species &amp; Genes"/>
-                <names language_code="ka" value="ინვაზიური და სხვა პრობლემატური სახეობები და გენები"/>
+                <names language_code="en" value="Invasive &amp; Other Problematic Species, Genes &amp; Diseases"/>
                 <children key="invasivenonnativealienspecies" isactive="true">
-                    <names language_code="en" value="Invasive Non-Native/Alien Species"/>
-                    <names language_code="ka" value="ინვაზიური არა-ადგილობრივი / უცხოური სახეობები"/>
+                    <names language_code="en" value="Invasive Non-Native/Alien Species/Diseases"/>
+                    <children key="unspecifiedspecies" isactive="true">
+                        <names language_code="en" value="Unspecified Species"/>
+                    </children>
+                    <children key="namesspecies" isactive="true">
+                        <names language_code="en" value="Names Species"/>
+                    </children>
                 </children>
                 <children key="problematicnativespecies" isactive="true">
-                    <names language_code="ka" value="პრობლემატური ადგილობრივი სახეობები"/>
-                    <names language_code="en" value="Problematic Native Species"/>
+                    <names language_code="en" value="Problematic Native Species/Diseases"/>
+                    <children key="unspecifiedspecies" isactive="true">
+                        <names language_code="en" value="Unspecified Species"/>
+                    </children>
+                    <children key="namedspecies" isactive="true">
+                        <names language_code="en" value="Named Species"/>
+                    </children>
                 </children>
                 <children key="introducedgeneticmaterial" isactive="true">
                     <names language_code="en" value="Introduced Genetic Material"/>
-                    <names language_code="ka" value="შემოტანილი გენეტიკური მასალა"/>
+                </children>
+                <children key="problematicspeciesdiseasesofunknownorigin" isactive="true">
+                    <names language_code="en" value="Problematic species/diseases of unknown origin"/>
+                    <children key="unspecifiedspecies" isactive="true">
+                        <names language_code="en" value="Unspecified Species"/>
+                    </children>
+                    <children key="namedspecies" isactive="true">
+                        <names language_code="en" value="Named Species"/>
+                    </children>
+                </children>
+                <children key="viralprioninduceddiseases" isactive="true">
+                    <names language_code="en" value="Viral/Prion-Induced Diseases"/>
+                    <children key="unspecifiedspeciesdisease" isactive="true">
+                        <names language_code="en" value="Unspecified Species/Disease"/>
+                    </children>
+                    <children key="namedspeciesdisease" isactive="true">
+                        <names language_code="en" value="Named Species/Disease"/>
+                    </children>
+                </children>
+                <children key="diseasesofunknowncause" isactive="true">
+                    <names language_code="en" value="Diseases of Unknown Cause"/>
                 </children>
             </tree>
             <tree key="pollution" isactive="true">
-                <names language_code="ka" value="დაბინძურება"/>
                 <names language_code="en" value="Pollution"/>
                 <children key="householdsewageurbanwastewater" isactive="true">
-                    <names language_code="en" value="Household Sewage &amp; Urban Waste Water"/>
-                    <names language_code="ka" value="საყოფაცხოვრებო კანალიზაცია და ურბანული ნარჩენების წყალი"/>
+                    <names language_code="en" value="Domestic &amp; Urban Waste Water"/>
+                    <children key="sewage" isactive="true">
+                        <names language_code="en" value="Sewage"/>
+                    </children>
+                    <children key="runoff" isactive="true">
+                        <names language_code="en" value="Run-off"/>
+                    </children>
+                    <children key="typeunknownunrecorded" isactive="true">
+                        <names language_code="en" value="Type Unknown/Unrecorded"/>
+                    </children>
                 </children>
                 <children key="industrialmilitaryeffluents" isactive="true">
-                    <names language_code="ka" value="სამრეწველო და სამხედრო საქმიანობა"/>
                     <names language_code="en" value="Industrial &amp; Military Effluents"/>
+                    <children key="oilspills" isactive="true">
+                        <names language_code="en" value="Oil Spills"/>
+                    </children>
+                    <children key="seepagefrommining" isactive="true">
+                        <names language_code="en" value="Seepage From Mining"/>
+                    </children>
+                    <children key="typeunknownunrecorded" isactive="true">
+                        <names language_code="en" value="Type Unknown/Unrecorded"/>
+                    </children>
                 </children>
                 <children key="agriculturalforestryeffluents" isactive="true">
                     <names language_code="en" value="Agricultural &amp; Forestry Effluents"/>
-                    <names language_code="ka" value="სასოფლო-სამეურნეო და სატყეო მეურნეობები"/>
+                    <children key="nutrientloads" isactive="true">
+                        <names language_code="en" value="Nutrient loads"/>
+                    </children>
+                    <children key="soilerosionsedimentation" isactive="true">
+                        <names language_code="en" value="Soil Erosion, Sedimentation"/>
+                    </children>
+                    <children key="herbicidespesticides" isactive="true">
+                        <names language_code="en" value="Herbicides &amp; Pesticides"/>
+                    </children>
+                    <children key="typeunknownunrecorded" isactive="true">
+                        <names language_code="en" value="Type Unknown/Unrecorded"/>
+                    </children>
                 </children>
                 <children key="garbagesolidwaste" isactive="true">
-                    <names language_code="ka" value="ნაგავი და მყარი ნარჩენები"/>
                     <names language_code="en" value="Garbage &amp; Solid Waste"/>
                 </children>
                 <children key="airbornepollutants" isactive="true">
-                    <names language_code="ka" value="ჰაერის დაბინძურება"/>
                     <names language_code="en" value="Air-Borne Pollutants"/>
+                    <children key="acidrain" isactive="true">
+                        <names language_code="en" value="Acid Rain"/>
+                    </children>
+                    <children key="smog" isactive="true">
+                        <names language_code="en" value="Smog"/>
+                    </children>
+                    <children key="ozone" isactive="true">
+                        <names language_code="en" value="Ozone"/>
+                    </children>
+                    <children key="typeunknownunrecorded" isactive="true">
+                        <names language_code="en" value="Type Unknown/Unrecorded"/>
+                    </children>
                 </children>
                 <children key="excessenergy" isactive="true">
-                    <names language_code="ka" value="ჭარბი ენერგია"/>
                     <names language_code="en" value="Excess Energy"/>
+                    <children key="lightpollution" isactive="true">
+                        <names language_code="en" value="Light Pollution"/>
+                    </children>
+                    <children key="thermalpollution" isactive="true">
+                        <names language_code="en" value="Thermal Pollution"/>
+                    </children>
+                    <children key="noisepollution" isactive="true">
+                        <names language_code="en" value="Noise Pollution"/>
+                    </children>
+                    <children key="typeunknownunrecorded" isactive="true">
+                        <names language_code="en" value="Type Unknown/Unrecorded"/>
+                    </children>
+                </children>
+            </tree>
+            <tree key="geologicevents" isactive="true">
+                <names language_code="en" value="Geologic Events"/>
+                <children key="volcanoes" isactive="true">
+                    <names language_code="en" value="Volcanoes"/>
+                </children>
+                <children key="earthquakestsunamis" isactive="true">
+                    <names language_code="en" value="Earthquakes/Tsunamis"/>
+                </children>
+                <children key="avalancheslandslides" isactive="true">
+                    <names language_code="en" value="Avalanches/Landslides"/>
                 </children>
             </tree>
             <tree key="climatechangesevereweather" isactive="true">
                 <names language_code="en" value="Climate Change &amp; Severe Weather"/>
-                <names language_code="ka" value="კლიმატური ცვლილებები და მკაცრი ამინდი"/>
                 <children key="habitatshiftingalteration" isactive="true">
                     <names language_code="en" value="Habitat Shifting &amp; Alteration"/>
-                    <names language_code="ka" value="ჰაბიტატების მონაცვლეობა და ცვლილება"/>
                 </children>
                 <children key="droughts" isactive="true">
-                    <names language_code="ka" value="გვალვები"/>
                     <names language_code="en" value="Droughts"/>
                 </children>
                 <children key="temperatureextremes" isactive="true">
@@ -1207,10 +1416,22 @@
                 </children>
                 <children key="stormsflooding" isactive="true">
                     <names language_code="en" value="Storms &amp; Flooding"/>
-                    <names language_code="ka" value="წვიმა და წყალდიდობა"/>
+                </children>
+                <children key="otherimpacts" isactive="true">
+                    <names language_code="en" value="Other Impacts"/>
+                </children>
+            </tree>
+            <tree key="otheroptions" isactive="true">
+                <names language_code="en" value="Other Options"/>
+                <children key="otherthreat" isactive="true">
+                    <names language_code="en" value="Other Threat"/>
                 </children>
             </tree>
         </attribute>
+        
+        
+        
+        
         <attribute key="typeoffishingequipment" isrequired="false" type="LIST" iconkey="fishing_tools">
             <names language_code="en" value="Type of Fishing Equipment"/>
             <values key="rod" isactive="true" iconkey="rod">
