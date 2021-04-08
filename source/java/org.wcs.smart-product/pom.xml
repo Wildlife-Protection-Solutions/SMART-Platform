@@ -25,6 +25,7 @@
                 <version>${tycho-version}</version>
                 <configuration>
                     <createArtifactRepository>true</createArtifactRepository>
+                    
                 </configuration>
             </plugin>
 
@@ -32,6 +33,16 @@
 			<groupId>org.eclipse.tycho</groupId>
 			<artifactId>tycho-p2-director-plugin</artifactId>
 			<version>${tycho-version}</version>
+			<configuration>
+				<products>
+            				<product>
+                				<id>smartapp</id>
+                				<rootFolders>
+                    					<macosx>SMART.app</macosx>
+                				</rootFolders>
+            				</product>
+        			</products>
+        		</configuration>
 			<executions>
 				<execution>
 					<id>materialize-products</id>
@@ -60,7 +71,7 @@
                         <version>3.1.0</version>
                         <executions>
                             <execution>
-                                <id>copy-resources</id>
+                                <id>copy-resources-windows</id>
                                 <phase>compile</phase>
                                 <goals>
                                     <goal>copy-resources</goal>
@@ -100,6 +111,36 @@
                                         <resource>
                                         <directory>${basedir}/win64_includes/items</directory>
                                         </resource>
+                                    </resources>              
+                                </configuration>            
+                            </execution>
+                            
+                            <execution>
+                                <id>copy-resources-mac-jre</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${basedir}/target/products/smartapp/macosx/cocoa/x86_64/SMART.app/jre</outputDirectory>
+                                    <resources>          
+                                        <resource>
+                                        <directory>${basedir}/macosx_includes/items/jre</directory>
+                                        </resource>
+                                    </resources>              
+                                </configuration>            
+                            </execution>
+                            
+                            <execution>
+                                <id>copy-resources-mac-resources</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${basedir}/target/products/smartapp/macosx/cocoa/x86_64/SMART.app/Contents/MacOS</outputDirectory>
+                                    <resources>          
+                                        <resource><directory>${basedir}/macosx_includes/items/MacOS</directory></resource>
                                     </resources>              
                                 </configuration>            
                             </execution>
