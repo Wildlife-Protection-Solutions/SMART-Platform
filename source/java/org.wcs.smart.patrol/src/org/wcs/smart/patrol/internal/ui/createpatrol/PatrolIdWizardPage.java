@@ -24,6 +24,7 @@ package org.wcs.smart.patrol.internal.ui.createpatrol;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
+import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.IPatrolItemChangeListener;
 import org.wcs.smart.patrol.internal.ui.PatrolIdComposite;
@@ -80,6 +81,8 @@ public class PatrolIdWizardPage extends NewPatrolWizardPage implements IPatrolIt
 	 */
 	@Override
 	public void initModel(Patrol p, Session session) {
+		String id = PatrolHibernateManager.generatePatrolId(p, session);
+		p.setId(id);
 		patrolIdComp.setValues(p, session);
 	}
 

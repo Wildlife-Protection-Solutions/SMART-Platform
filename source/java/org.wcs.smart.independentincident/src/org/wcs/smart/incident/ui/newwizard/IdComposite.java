@@ -97,8 +97,6 @@ public class IdComposite extends AbstractIncidentComposite {
 		});
 		txtId.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		
-
 		return item;
 	}
 

@@ -75,7 +75,7 @@ public class Patrol extends UuidItem implements IFolderItem<PatrolFolder> {
 	/**
 	 * Maximum patrol id length
 	 */
-	public static final Integer MAX_ID_LENGTH = 32;
+	public static final Integer MAX_ID_LENGTH = 256;
 	/**
 	 * Maximum length of patrol objective
 	 */

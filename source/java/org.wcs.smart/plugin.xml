@@ -1335,6 +1335,10 @@
             class="org.wcs.smart.ca.UuidItem"
             supportsCcaa="false">
       </class>
+      <class
+            class="org.wcs.smart.ca.ConservationAreaProperty"
+            supportsCcaa="true">
+      </class>
    </extension>
    <extension
          point="org.locationtech.udig.project.ui.tool">

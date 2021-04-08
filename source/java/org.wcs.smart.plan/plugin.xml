@@ -878,7 +878,7 @@
       <wizardpage
             class="org.wcs.smart.plan.internal.ui.patrol.NewPatrolPlanWizardPage"
             id="newpatrol.plan"
-            location="after=newpatrol.patrolid">
+            location="before=newpatrol.transporttype">
       </wizardpage>
    </extension>
 

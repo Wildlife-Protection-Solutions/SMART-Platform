@@ -53,7 +53,15 @@ public class DeleteConservationAreaHandler implements ICaDeleteHandler{
 		deleteDataModel(ca, session);
 		monitor.subTask(Messages.DeleteConservationAreaHandler_Progress_Stations);
 		deleteStations(ca, session);
+		monitor.subTask(Messages.DeleteConservationAreaHandler_DeletePropertiesProgress);
+		deleteCaProperties(ca, session);
 
+	}
+	
+	private void deleteCaProperties(ConservationArea ca, Session session) throws Exception{
+		Query<?> q = session.createQuery("delete from ConservationAreaProperty where conservationArea = :ca"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.executeUpdate();
 	}
 	
 	private void deleteAgencyRanks(ConservationArea ca, Session session) throws Exception{

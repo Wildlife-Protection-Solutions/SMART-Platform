@@ -220,7 +220,6 @@ public class DataLoader {
 			p.setStartDate(localdate);
 			p.setEndDate(localdate);
 			p.setConservationArea(SmartDB.getCurrentConservationArea());
-			p.setId(PatrolHibernateManager.generatePatrolId(p, session));
 			p.setLegs(new ArrayList<>());
 			p.setPatrolType(tt.getPatrolType());
 			addedPatrols.add(p);
@@ -234,6 +233,8 @@ public class DataLoader {
 			m.setMember(SmartDB.getCurrentEmployee());
 			m.setPatrolLeg(pl);
 			
+			p.setId(PatrolHibernateManager.generatePatrolId(p, session));
+
 			pl.setStartDate(localdate);
 			pl.setEndDate(localdate);
 			pl.setId("Leg 1"); //$NON-NLS-1$

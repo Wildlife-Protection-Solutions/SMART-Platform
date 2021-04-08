@@ -565,7 +565,7 @@
    <extension
          point="org.wcs.smart.idgenerator">
       <idgenerator
-            uicontribution="org.wcs.smart.icident.IncidentIdGeneratorContribution">
+            uicontribution="org.wcs.smart.incident.IncidentIdGeneratorContribution">
       </idgenerator>
    </extension>
 
