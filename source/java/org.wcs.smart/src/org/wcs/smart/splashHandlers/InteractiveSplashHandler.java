@@ -481,7 +481,7 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		widgets.add(btnOk);
 		widgets.add(btnCancel);
 	
-		right.setTabList(new Control[]{cmvConservationArea.getControl(),cmbUserName, txtPassword, lblAdvanced, bottom});
+		right.setTabList(new Control[]{cmvConservationArea.getControl(),cmbUserName, txtPassword, bottom, lblAdvanced});
 		bottom.setTabList(new Control[]{composite_1});
 		composite_1.setTabList(new Control[]{btnOk, btnCancel});
 		enableControls(false);
