@@ -61,6 +61,7 @@ import org.wcs.smart.cybertracker.patrol.model.CtPatrolLink;
 import org.wcs.smart.cybertracker.patrol.model.CtPatrolWpLink;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
+import org.wcs.smart.patrol.PatrolIdGenerator;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
@@ -204,7 +205,7 @@ public class PatrolDialog extends SmartStyledTitleDialog{
 		newPatrol.setStartDate(start);
 		newPatrol.setEndDate(end);
 		
-		newPatrol.setId(PatrolHibernateManager.generatePatrolId(newPatrol, session));
+		newPatrol.setId(PatrolIdGenerator.INSTANCE.generatePatrolId(newPatrol, session));
 		if (newPatrol.getPatrolType() == null){
 			if (newPatrol.getFirstLeg().getType() != null){
 				newPatrol.setPatrolType(newPatrol.getFirstLeg().getType().getPatrolType());

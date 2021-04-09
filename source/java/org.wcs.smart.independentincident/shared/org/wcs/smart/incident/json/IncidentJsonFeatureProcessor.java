@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.incident.json;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
@@ -31,6 +32,7 @@ import org.json.simple.JSONObject;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.incident.IIncidentLabelProvider;
+import org.wcs.smart.incident.IncidentIdGenerator;
 import org.wcs.smart.incident.IndepedentIncidentSource;
 import org.wcs.smart.observation.json.IJsonFeatureProcessor;
 import org.wcs.smart.observation.model.Waypoint;
@@ -92,6 +94,9 @@ public class IncidentJsonFeatureProcessor extends IJsonFeatureProcessor {
 		Waypoint wp = super.createWaypoint(feature, ca, session, l);
 		wp.setSourceId(IndepedentIncidentSource.KEY);
 		
+		if (wp.getId() == null) {
+			wp.setId(IncidentIdGenerator.INSTANCE.getNextIncidentId(session, ca, Collections.singleton(wp.getSourceId())));
+		}
 		//reset uuids as we don't do any mapping at this time
 		//the future plan is to map these to existing objects in our 
 		//database and update the existing objects

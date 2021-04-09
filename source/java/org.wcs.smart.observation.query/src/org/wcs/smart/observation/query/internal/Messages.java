@@ -41,6 +41,7 @@ public class Messages extends NLS {
 	public static String FixedQueryColumn_yColumnName;
 	public static String GeneralContentProvider_ConservationAreaLabel;
 	public static String GeneralContentProvider_ObserverLabel;
+	public static String GeneralContentProvider_WaypointIdName;
 	public static String GriddedFilterPanel_CopyError;
 	public static String GriddedFilterPanel_RefreshJobName;
 	public static String GriddedQuery_DefaultQueryName;
@@ -89,6 +90,7 @@ public class Messages extends NLS {
 	public static String WaypointAttachmentTooltipProvider_WpObsLbl;
 	public static String WaypointFilterProcessor_filterProgress;
 	public static String WaypointFilterProcessor_progress1;
+	public static String WaypointIdFilterDropItem_IdFieldName;
 	public static String WaypointSourceFilter_InvalidSourceFilter;
 	public static String WaypointSourceFilterDropItem_IncidentSourceDropItem;
 	public static String WaypointSourceGroupByDropItem_AllLabel;

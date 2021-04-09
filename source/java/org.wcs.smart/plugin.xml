@@ -16,6 +16,7 @@
  <extension-point id="org.wcs.smart.dbStartUp" name="org.wcs.smart.startup.db" schema="schema/org.wcs.smart.startup.db.exsd"/>
  <extension-point id="org.wcs.smart.changeLogEventHandler" name="Replication Event Handler" schema="schema/org.wcs.smart.changelog.handler.exsd"/>
  <extension-point id="org.wcs.smart.userlevel" name="SMART User Level" schema="schema/org.wcs.smart.userlevel.exsd"/>
+ <extension-point id="org.wcs.smart.idgenerator" name="ID Generator" schema="schema/org.wcs.smart.idgenerator.exsd"/>
    <extension
          id="product"
          name="Smart Application"
@@ -1334,6 +1335,10 @@
             class="org.wcs.smart.ca.UuidItem"
             supportsCcaa="false">
       </class>
+      <class
+            class="org.wcs.smart.ca.ConservationAreaProperty"
+            supportsCcaa="true">
+      </class>
    </extension>
    <extension
          point="org.locationtech.udig.project.ui.tool">
@@ -1628,6 +1633,11 @@
             class="org.wcs.smart.ui.internal.preference.InactivityTimeoutPreferencePage"
             id="org.eclipse.ui.preferencePages.Workbench"
             name="&lt;Hack to Remove Error in Log File org.eclipse.ui.ide&gt;">
+      </page>
+      <page
+            class="org.wcs.smart.ui.internal.preference.IDTokenPreferencePage"
+            id="org.wcs.smart.preference.IdTokens"
+            name="%PatternIdDefintionPage">
       </page>
    </extension>
    <extension

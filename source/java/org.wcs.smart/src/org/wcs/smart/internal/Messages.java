@@ -423,6 +423,7 @@ public class Messages extends NLS {
 	public static String ConservationAreaManager_Progress_RemoveFileStore;
 	public static String ConservationAreaManager_Progress_Restarting;
 	public static String ConservationAreaTemplateCloner_CloningIcons;
+	public static String ConservationAreaTemplateCloner_CopyingProperties;
 	public static String ConservationAreaTemplateCloner_Progress_CopyAgencyRank;
 	public static String ConservationAreaTemplateCloner_Progress_CopyCaInfo;
 	public static String ConservationAreaTemplateCloner_Progress_CopyDataModel;
@@ -625,6 +626,7 @@ public class Messages extends NLS {
 	public static String DeleteConservationArea_UserNameConfirmation_DialogButton;
 	public static String DeleteConservationArea_UserNameConfirmation_DialogMessage;
 	public static String DeleteConservationArea_UserNameConfirmation_DialogTitle;
+	public static String DeleteConservationAreaHandler_DeletePropertiesProgress;
 	public static String DeleteConservationAreaHandler_deleteTeamsTaskName;
 	public static String DeleteConservationAreaHandler_Progress_AgencyRank;
 	public static String DeleteConservationAreaHandler_Progress_DataModel;
@@ -960,6 +962,21 @@ public class Messages extends NLS {
 	public static String IconsetPropertyPage_Message;
 	public static String IconsetPropertyPage_SaveError;
 	public static String IconsetPropertyPage_Title;
+	public static String IdGeneratorManager_DayToken;
+	public static String IdGeneratorManager_HourToken;
+	public static String IdGeneratorManager_LeaderFamilyToken;
+	public static String IdGeneratorManager_LeaderGivenToekn;
+	public static String IdGeneratorManager_LeaderInitialToken;
+	public static String IdGeneratorManager_MinuteToken;
+	public static String IdGeneratorManager_MonthToken;
+	public static String IdGeneratorManager_ObserverFamilyToken;
+	public static String IdGeneratorManager_ObserverGivenTooken;
+	public static String IdGeneratorManager_ObserverInitialToken;
+	public static String IdGeneratorManager_SecondToken;
+	public static String IdGeneratorManager_TimestampToken;
+	public static String IdGeneratorManager_YearToken;
+	public static String IDTokenPreferencePage_AllTokens;
+	public static String IDTokenPreferencePage_SaveError;
 	public static String ImageSelectionControl_AllImages1;
 	public static String ImageSelectionControl_BitmapFiles;
 	public static String ImageSelectionControl_JpegFiles;

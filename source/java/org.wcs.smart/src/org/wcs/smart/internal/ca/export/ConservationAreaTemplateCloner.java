@@ -38,6 +38,7 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
+import org.wcs.smart.ca.ConservationAreaProperty;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.ca.Rank;
@@ -105,6 +106,9 @@ public class ConservationAreaTemplateCloner implements
 		cloneMapStyles(engine);
 		progress.worked(1);
 		
+		progress.subTask(Messages.ConservationAreaTemplateCloner_CopyingProperties);
+		cloneProperties(engine);
+		progress.worked(1);
 	}
 	
 	/**
@@ -191,7 +195,24 @@ public class ConservationAreaTemplateCloner implements
 		}
 		session.flush();
 	}
-	
+	/*
+	 * clone saved map styles
+	 */
+	private void cloneProperties(ConservationAreaClonerEngine engine){
+		Session session = engine.getSession();
+		
+		List<ConservationAreaProperty> toclone = QueryFactory.buildQuery(session, ConservationAreaProperty.class, 
+				new Object[] {"conservationArea", engine.getTemplateCa()}).list(); //$NON-NLS-1$
+		
+		for (ConservationAreaProperty item : toclone){
+			ConservationAreaProperty clone = new ConservationAreaProperty();
+			clone.setConservationArea(engine.getNewCa());
+			clone.setKey(item.getKey());
+			clone.setValue(item.getValue());
+			session.save(clone);
+		}
+		session.flush();
+	}
 	
 	/*
 	 * clone the data model (including icons)

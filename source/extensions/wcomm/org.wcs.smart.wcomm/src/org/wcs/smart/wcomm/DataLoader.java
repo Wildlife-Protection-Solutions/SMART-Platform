@@ -59,7 +59,7 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
-import org.wcs.smart.patrol.PatrolHibernateManager;
+import org.wcs.smart.patrol.PatrolIdGenerator;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
@@ -220,7 +220,6 @@ public class DataLoader {
 			p.setStartDate(localdate);
 			p.setEndDate(localdate);
 			p.setConservationArea(SmartDB.getCurrentConservationArea());
-			p.setId(PatrolHibernateManager.generatePatrolId(p, session));
 			p.setLegs(new ArrayList<>());
 			p.setPatrolType(tt.getPatrolType());
 			addedPatrols.add(p);
@@ -234,6 +233,8 @@ public class DataLoader {
 			m.setMember(SmartDB.getCurrentEmployee());
 			m.setPatrolLeg(pl);
 			
+			p.setId(PatrolIdGenerator.INSTANCE.generatePatrolId(p, session));
+
 			pl.setStartDate(localdate);
 			pl.setEndDate(localdate);
 			pl.setId("Leg 1"); //$NON-NLS-1$

@@ -64,7 +64,7 @@ import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationAttributeList;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.patrol.PatrolEventManager;
-import org.wcs.smart.patrol.PatrolHibernateManager;
+import org.wcs.smart.patrol.PatrolIdGenerator;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
@@ -179,7 +179,6 @@ public class DataGenerator implements IDataEngine{
 		p.setConservationArea(SmartDB.getCurrentConservationArea());
 		
 		p.setArmed(random.nextInt(100) <= 50);
-		p.setId(PatrolHibernateManager.generatePatrolId(p, session));
 		
 		//team is optional
 		int v = random.nextInt(teams.size()+1);
@@ -247,6 +246,9 @@ public class DataGenerator implements IDataEngine{
 		if (pl.getPatrol().getPatrolType().requiresPilot()) {
 			pl.setPilot(pl.getMembers().get(0));	
 		}
+
+		//id might be based on leader
+		p.setId(PatrolIdGenerator.INSTANCE.generatePatrolId(p, session));
 		
 		//generate a start position for the patrol
 		Coordinate startc = generatePosition();

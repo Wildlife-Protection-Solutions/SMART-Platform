@@ -28,7 +28,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.PatrolEventManager;
-import org.wcs.smart.patrol.PatrolHibernateManager;
+import org.wcs.smart.patrol.PatrolIdGenerator;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
@@ -66,7 +66,7 @@ public class SavePatrolPartJob extends Job {
 			
 				if (patrolPart instanceof Patrol) {
 					if (((Patrol) patrolPart).getId() == null) {
-						String id = PatrolHibernateManager.generatePatrolId(
+						String id = PatrolIdGenerator.INSTANCE.generatePatrolId(
 							((Patrol) patrolPart), saveSession);
 						((Patrol) patrolPart).setId(id);
 					}

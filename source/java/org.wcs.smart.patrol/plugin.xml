@@ -1220,10 +1220,6 @@
    <extension
          point="org.wcs.smart.patrol.wizardpage">
       <wizardpage
-            class="org.wcs.smart.patrol.internal.ui.createpatrol.PatrolIdWizardPage"
-            id="newpatrol.patrolid">
-      </wizardpage>
-      <wizardpage
             class="org.wcs.smart.patrol.internal.ui.createpatrol.TransportTypeWizardPage"
             id="newpatrol.transporttype">
       </wizardpage>
@@ -1262,6 +1258,10 @@
       <wizardpage
             class="org.wcs.smart.patrol.internal.ui.createpatrol.PatrolAttributeWizardPage"
             id="newpatrol.customattributes">
+      </wizardpage>
+      <wizardpage
+            class="org.wcs.smart.patrol.internal.ui.createpatrol.PatrolIdWizardPage"
+            id="newpatrol.patrolid">
       </wizardpage>
       <wizardpage
             class="org.wcs.smart.patrol.internal.ui.createpatrol.MultiLegWizardPage"
@@ -1320,5 +1320,11 @@
             id="org.wcs.smart.patrol.service"
             name="%map.service.name.patrol">
       </service>
+   </extension>
+   <extension
+         point="org.wcs.smart.idgenerator">
+      <idgenerator
+            uicontribution="org.wcs.smart.patrol.PatrolIdGeneratorContribution">
+      </idgenerator>
    </extension>
 </plugin>

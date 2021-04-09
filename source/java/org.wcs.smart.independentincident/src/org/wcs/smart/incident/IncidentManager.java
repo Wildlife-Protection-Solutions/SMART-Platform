@@ -26,14 +26,12 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.hibernate.Session;
-import org.hibernate.query.Query;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.observation.ObservationHibernateManager;
@@ -118,22 +116,11 @@ public class IncidentManager {
 		}
 	}	
 	
-	/**
-	 * Computes the next incident ID
-	 * 
-	 * @param session
-	 * @return
-	 */
+	
 	public String getNextIncidentId(Session session) {
 		Set<String> incidentsources = getIncidentProviders().stream()
 				.map(e->e.getWaypointSourceKey()).collect(Collectors.toSet());
 		
-		Query<?> q = session.createQuery("SELECT count(*) FROM Waypoint WHERE sourceId IN (:source) AND conservationArea = :ca"); //$NON-NLS-1$
-		q.setParameterList("source", incidentsources); //$NON-NLS-1$
-		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-		List<?> maxIs = q.list();
-		long id = 1;
-		if (maxIs.size() > 0 && maxIs.get(0) != null ) id = (Long) maxIs.get(0);
-		return String.valueOf(id);
+		return IncidentIdGenerator.INSTANCE.getNextIncidentId(session, SmartDB.getCurrentConservationArea(), incidentsources);
 	}
 }

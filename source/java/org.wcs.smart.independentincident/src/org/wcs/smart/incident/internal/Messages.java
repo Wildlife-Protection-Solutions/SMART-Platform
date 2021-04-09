@@ -78,6 +78,12 @@ public class Messages extends NLS {
 	public static String IncidentFilterDialog_IncludeAllOption;
 	public static String IncidentFilterDialog_ShellTitle;
 	public static String IncidentFilterDialog_SourceFilterSection;
+	public static String IncidentIdGeneratorContribution_DuplicateWarning;
+	public static String IncidentIdGeneratorContribution_InvalidPattern;
+	public static String IncidentIdGeneratorContribution_PatternLabel;
+	public static String IncidentIdGeneratorContribution_SectionHeader;
+	public static String IncidentIdGeneratorContribution_UniqueLabel;
+	public static String IncidentIdGeneratorContribution_UniqueTooltip;
 	public static String IncidentImporter_ConvertingProgress;
 	public static String IncidentImporter_ErrorMessage;
 	public static String IncidentImporter_ErrorUnzipping;

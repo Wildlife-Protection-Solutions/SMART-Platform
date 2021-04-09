@@ -562,5 +562,11 @@
             class="org.wcs.smart.incident.IndependentIncidentProvider">
       </incidentprovider>
    </extension>
+   <extension
+         point="org.wcs.smart.idgenerator">
+      <idgenerator
+            uicontribution="org.wcs.smart.incident.IncidentIdGeneratorContribution">
+      </idgenerator>
+   </extension>
 
 </plugin>

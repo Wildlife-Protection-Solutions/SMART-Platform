@@ -253,10 +253,14 @@ public class Upgrader630To700 implements IDatabaseUpgrader {
 				"ALTER TABLE smart.waypoint drop column id", //$NON-NLS-1$
 				"RENAME column smart.waypoint.id_str to id", //$NON-NLS-1$
 				"ALTER TABLE smart.waypoint alter column id set not null", //$NON-NLS-1$
-				
-				
+				 
 				"DROP FUNCTION smart.tempuuid", //$NON-NLS-1$
 				
+				"CREATE TABLE smart.conservation_area_property(uuid char(16) for bit data not null, ca_uuid char(16) for bit data not null, pkey varchar(256) not null, value varchar(1024), primary key (uuid), unique(ca_uuid, pkey))", //$NON-NLS-1$
+				"ALTER TABLE smart.conservation_area_property ADD CONSTRAINT caproperty_ca_uuid FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON smart.conservation_area_property TO admin,manager,analyst,data_entry", //$NON-NLS-1$
+				
+				"alter table smart.patrol alter column id set data type varchar(256)", //$NON-NLS-1$
 		};
 
 		for (String s : sql) {
