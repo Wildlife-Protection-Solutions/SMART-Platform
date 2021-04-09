@@ -51,13 +51,12 @@ import org.wcs.smart.util.SmartUtils;
  *
  */
 public class PatrolIdGeneratorContribution implements IdGeneratorContribution {
-
-
 	
 	private Text txtPattern;
 	private Button btnUnique;
-	private ControlDecoration cdPattern;
-	
+	private ControlDecoration cdPatternErr;
+	private ControlDecoration cdPatternWarn;
+
 	public PatrolIdGeneratorContribution() {
 	}
 
@@ -83,6 +82,7 @@ public class PatrolIdGeneratorContribution implements IdGeneratorContribution {
 				btnUnique.setSelection(false);
 			}
 		}
+		updateDecorations();
 	}
 
 	@Override
@@ -104,20 +104,17 @@ public class PatrolIdGeneratorContribution implements IdGeneratorContribution {
 		txtPattern = new Text(inner, SWT.BORDER);
 		txtPattern.setText(""); //$NON-NLS-1$
 		txtPattern.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		txtPattern.addListener(SWT.Modify,e->{
-			String error = validate();
-			if (error == null) {
-				cdPattern.hide();
-			}else {
-				cdPattern.setDescriptionText(error);
-				cdPattern.show();
-			}
-		});
+		txtPattern.addListener(SWT.Modify,e->updateDecorations());
 		
-		cdPattern = new ControlDecoration(txtPattern, SWT.LEFT);
-		cdPattern.setImage(FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
-		cdPattern.setShowHover(true);
-		cdPattern.hide();
+		cdPatternErr = new ControlDecoration(txtPattern, SWT.LEFT);
+		cdPatternErr.setImage(FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+		cdPatternErr.setShowHover(true);
+		cdPatternErr.hide();
+		
+		cdPatternWarn = new ControlDecoration(txtPattern, SWT.LEFT);
+		cdPatternWarn.setImage(FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_WARNING).getImage());
+		cdPatternWarn.setShowHover(true);
+		cdPatternWarn.hide();
 		
 		l = new Label(inner, SWT.NONE);
 		l.setText(Messages.PatrolIdGeneratorContribution_UnqiueLabel);
@@ -125,6 +122,7 @@ public class PatrolIdGeneratorContribution implements IdGeneratorContribution {
 
 		btnUnique = new Button(inner, SWT.CHECK);
 		btnUnique.setSelection(true);
+		btnUnique.addListener(SWT.Selection, e->updateDecorations());
 		
 		Text info = new Text(inner, SWT.BORDER | SWT.MULTI);
 		info.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
@@ -164,6 +162,22 @@ public class PatrolIdGeneratorContribution implements IdGeneratorContribution {
 		return null;		
 	}
 	
+	private void updateDecorations() {
+		String error = validate();
+		cdPatternWarn.hide();
+		
+		if (error != null) {
+			cdPatternErr.setDescriptionText(error);
+			cdPatternErr.show();
+			return;
+		}
+		
+		cdPatternErr.hide();
+		if (!btnUnique.getSelection() && IdGeneratorEngine.INSTANCE.likelyDuplicate(txtPattern.getText())) {
+			cdPatternWarn.setDescriptionText(Messages.PatrolIdGeneratorContribution_DuplicateWarning);
+			cdPatternWarn.show();
+		}
+	}
 	
 	@Override
 	public boolean save(Session session) {

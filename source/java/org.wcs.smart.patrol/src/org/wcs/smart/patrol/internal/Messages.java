@@ -364,6 +364,7 @@ public static String PatrolFeatureSource_ProjectedWaypointLayerName;
 	public static String PatrolIdComposite_Id_Label;
 	public static String PatrolIdComposite_Title;
 	public static String PatrolIdComposite_WarningDialogTitle;
+	public static String PatrolIdGeneratorContribution_DuplicateWarning;
 	public static String PatrolIdGeneratorContribution_InvalidPattern;
 	public static String PatrolIdGeneratorContribution_PatrolTokens;
 	public static String PatrolIdGeneratorContribution_PatternLabel;

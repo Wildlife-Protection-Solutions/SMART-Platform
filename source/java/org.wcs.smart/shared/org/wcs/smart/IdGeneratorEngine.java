@@ -74,6 +74,22 @@ public enum IdGeneratorEngine {
 		}
 	}
 	
+	/**
+	 * Determines if the given pattern is likely to produce duplicate
+	 * identifiers.  See ticket 3121
+	 * 
+	 * Check currently checks for timestamp or (hour&minute).  If neither
+	 * of these exist in the pattern then it returns true;
+	 *  
+	 * @param pattern
+	 * @return
+	 */
+	public boolean likelyDuplicate(String pattern) {
+		if (pattern.contains(Token.TIMESTAMP.token)) return false;
+		if (pattern.contains(Token.MINUTE.token) && pattern.contains(Token.HOUR.token) ) return false;
+		return true;
+	}
+	
 	private String formatValue2(int value) {
 		if (value < 10) {
 			return "0" + String.valueOf(value); //$NON-NLS-1$

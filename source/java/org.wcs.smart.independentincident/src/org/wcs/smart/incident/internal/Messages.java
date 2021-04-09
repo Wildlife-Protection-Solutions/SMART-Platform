@@ -78,6 +78,7 @@ public class Messages extends NLS {
 	public static String IncidentFilterDialog_IncludeAllOption;
 	public static String IncidentFilterDialog_ShellTitle;
 	public static String IncidentFilterDialog_SourceFilterSection;
+	public static String IncidentIdGeneratorContribution_DuplicateWarning;
 	public static String IncidentIdGeneratorContribution_InvalidPattern;
 	public static String IncidentIdGeneratorContribution_PatternLabel;
 	public static String IncidentIdGeneratorContribution_SectionHeader;
