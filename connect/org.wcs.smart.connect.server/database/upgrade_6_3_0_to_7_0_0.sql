@@ -926,6 +926,22 @@ alter table connect.alerts alter column date set data type timestamp without tim
 -- WAYPOINT ID to string ---
 alter table smart.waypoint alter column id type varchar(32);
 
+-- additions for token id generation
+alter table smart.patrol alter column id set data type varchar(256);
+
+CREATE TABLE smart.conservation_area_property(
+ uuid uuid not null, 
+ ca_uuid uuid not null, 
+ pkey varchar(256) not null, 
+ value varchar(1024), 
+ primary key (uuid), 
+ unique(ca_uuid, pkey)
+);
+ALTER TABLE SMART.conservation_area_property ADD FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+
+CREATE TRIGGER trg_conservation_area_property AFTER INSERT OR UPDATE OR DELETE ON smart.conservation_area_property FOR EACH ROW execute procedure connect.trg_changelog_common();
+
+				
 
 ------------ VERSIONS ------------
 update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.asset';

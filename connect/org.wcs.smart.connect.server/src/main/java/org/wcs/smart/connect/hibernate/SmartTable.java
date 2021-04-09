@@ -51,6 +51,7 @@ import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.ConservationAreaProperty;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.EmployeeTeam;
 import org.wcs.smart.ca.EmployeeTeamMember;
@@ -281,7 +282,7 @@ public enum SmartTable {
 	CTPATROLLINK(CtPatrolLink.class, ".patrolLeg.patrol.conservationArea"),
 	CTMISSIONLINK(CtMissionLink.class, ".mission.survey.surveyDesign.conservationArea"),
 	CTINCIDENTLINK(CtIncidentLink.class, ".waypoint.conservationArea"),
-	
+	CAPROPERTY(ConservationAreaProperty.class, null),
 	CTPATROLWPLINK(CtPatrolWpLink.class, ".link.patrolLeg.patrol.conservationArea"),
 	CTMISSIONWPLINK(CtMissionWpLink.class, ".link.mission.survey.surveyDesign.conservationArea"),
 	
