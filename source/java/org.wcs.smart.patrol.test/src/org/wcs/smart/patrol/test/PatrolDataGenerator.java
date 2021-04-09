@@ -33,6 +33,7 @@ import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.patrol.PatrolHibernateManager;
+import org.wcs.smart.patrol.PatrolIdGenerator;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
@@ -137,7 +138,7 @@ public class PatrolDataGenerator {
 			p.setObjective(generateString(words, random));
 			
 //			p.setId("TRK_" + i + "_" + PatrolHibernateManager.generatePatrolId(p, session));
-			p.setId(PatrolHibernateManager.generatePatrolId(p, session));
+			p.setId(PatrolIdGenerator.INSTANCE.generatePatrolId(p, session));
 			
 			
 			p.setTeam(teams.get( random.nextInt(teams.size() - 1) ));

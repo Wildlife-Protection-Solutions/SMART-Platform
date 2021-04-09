@@ -25,19 +25,13 @@ import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.hibernate.Session;
-import org.hibernate.query.Query;
-import org.wcs.smart.IdGeneratorManager;
-import org.wcs.smart.ca.ConservationAreaProperty;
-import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.observation.ObservationHibernateManager;
@@ -123,62 +117,10 @@ public class IncidentManager {
 	}	
 	
 	
-	/**
-	 * Computes the next incident ID
-	 * 
-	 * @param session
-	 * @return
-	 */
 	public String getNextIncidentId(Session session) {
-		
-		ConservationAreaProperty prop = QueryFactory.buildQuery(session, ConservationAreaProperty.class, 
-				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
-				new Object[] {"key", IncidentIdGeneratorContribution.PATTERN_PROPERY_KEY}).uniqueResult(); //$NON-NLS-1$
-		
-		if (prop == null || prop.getValue() == null || prop.getValue().trim().isBlank()) {
-			
-			Set<String> incidentsources = getIncidentProviders().stream()
-					.map(e->e.getWaypointSourceKey()).collect(Collectors.toSet());
-			
-			Query<?> q = session.createQuery("SELECT count(*) FROM Waypoint WHERE sourceId IN (:source) AND conservationArea = :ca"); //$NON-NLS-1$
-			q.setParameterList("source", incidentsources); //$NON-NLS-1$
-			q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-			List<?> maxIs = q.list();
-			long id = 1;
-			if (maxIs.size() > 0 && maxIs.get(0) != null ) id = (Long) maxIs.get(0);
-			return String.valueOf(id);
-		}
-		
-		String nextId = IdGeneratorManager.INSTANCE.generateId(prop.getValue(), Collections.emptyMap());
-		
-		prop = QueryFactory.buildQuery(session, ConservationAreaProperty.class, 
-				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
-				new Object[] {"key", IncidentIdGeneratorContribution.UNIQUE_PROPERTY_KEY}).uniqueResult(); //$NON-NLS-1$
-		if (prop == null || prop.getValue() == null || prop.getValue().equalsIgnoreCase(IncidentIdGeneratorContribution.NOTUNIQUE_VALUE)) return nextId;
-		
-		//make this id unique by adding _x on the end
-		
 		Set<String> incidentsources = getIncidentProviders().stream()
 				.map(e->e.getWaypointSourceKey()).collect(Collectors.toSet());
 		
-		int cnt = 1;
-		String id = nextId;
-		
-		while(true) {
-			Query<?> q = session.createQuery("SELECT count(*) FROM Waypoint WHERE sourceId IN (:source) AND conservationArea = :ca AND id = :id"); //$NON-NLS-1$
-			q.setParameterList("source", incidentsources); //$NON-NLS-1$
-			q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-			q.setParameter("id", id); //$NON-NLS-1$
-			Long number = (Long) q.uniqueResult();
-			if (number == 0) return id;
-			
-			id = nextId + "_" + cnt; //$NON-NLS-1$
-			if (id.length() > Waypoint.ID_MAX_LENGTH) {
-				String part ="_" + cnt; //$NON-NLS-1$
-				id = nextId.substring(0,  nextId.length() - 1 - part.length()) + part;
-			}
-			cnt++;
-		}
-		
+		return IncidentIdGenerator.INSTANCE.getNextIncidentId(session, SmartDB.getCurrentConservationArea(), incidentsources);
 	}
 }

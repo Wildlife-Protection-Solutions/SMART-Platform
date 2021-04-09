@@ -22,11 +22,8 @@
 package org.wcs.smart.patrol;
 
 import java.nio.file.Paths;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -38,12 +35,9 @@ import javax.persistence.criteria.Root;
 
 import org.hibernate.Session;
 import org.hibernate.query.Query;
-import org.wcs.smart.IdGeneratorManager;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.ConservationAreaProperty;
-import org.wcs.smart.ca.Employee;
 import org.wcs.smart.dataentry.model.ScreenOption;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -81,8 +75,6 @@ public class PatrolHibernateManager extends HibernateManager{
 	 * Text to identify patrol id as auto-generated
 	 */
 	public static final String AUTO_GENERATE_TEXT = Messages.Patrol_SystemGenerateId_Name;
-	
-	private static NumberFormat PATROL_ID_FORMATTER = new DecimalFormat("000000"); //$NON-NLS-1$
 	
 	/**
 	 * Gets all teams (active and in-active) for a given conservation area
@@ -368,92 +360,7 @@ public class PatrolHibernateManager extends HibernateManager{
 		return false;
 	}
 	
-	/**
-	 * Computes the next patrol id;
-	 * @param p patrol to compute id for
-	 * @param s active session (should be inside the transaction that is saving patrol)
-	 * 
-	 * @return patrol id for given patrol
-	 */
-	//TODO: consider implementing regex expression in derby
-	//and using that instead of loading all patrol ids
-	//(was testing for ~32000 and performance was not affect)
-	public static String generatePatrolId(Patrol p, Session s) {
-		
-		ConservationAreaProperty prop = QueryFactory.buildQuery(s, ConservationAreaProperty.class, 
-				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
-				new Object[] {"key", PatrolIdGeneratorContribution.PATTERN_PROPERY_KEY}).uniqueResult(); //$NON-NLS-1$
-		if (prop == null || prop.getValue() == null || prop.getValue().strip().isBlank()) {
-		
-			StringBuilder sb = new StringBuilder();
-			sb.append(p.getConservationArea().getId());
 	
-			Query<?> q = s
-					.createQuery("SELECT id FROM Patrol WHERE id like :id and conservationArea = :ca"); //$NON-NLS-1$
-			q.setParameter("id", sb.toString() + "%_%"); //$NON-NLS-1$ //$NON-NLS-2$
-			q.setParameter("ca", p.getConservationArea()); //$NON-NLS-1$
-	
-			long idNumber = 0;
-			List<?> results = q.list();
-			for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
-				String localId = (String) iterator.next();
-				try {
-					int idx = localId.lastIndexOf('_');
-					String keypart = localId.substring(0, idx);
-					if (keypart.equalsIgnoreCase(p.getConservationArea().getId())){
-						String numpart = localId.substring(idx+1);
-						long tmp = Integer.parseInt(numpart);
-						if (tmp > idNumber) idNumber = tmp;
-					}
-					//break;
-				} catch (Exception ex) {
-					// not of the form CAID_# skip this one
-				}
-			}
-			sb.append("_"); //$NON-NLS-1$
-			idNumber = (idNumber + 1) % 1000000;
-			if (idNumber <= 0) {
-				idNumber = 1;
-			}
-			sb.append(PATROL_ID_FORMATTER.format(idNumber));
-
-			return sb.toString();
-		}
-		
-		String pattern = prop.getValue();
-		Employee leader = null;
-		for (PatrolLeg l : p.getLegs()) {
-			leader = l.getLeader().getMember();
-		}
-		HashMap<String, Employee> employees = new HashMap<>();
-		employees.put(IdGeneratorManager.LEADER_KEY,leader);
-		String nextId = IdGeneratorManager.INSTANCE.generateId(pattern, employees);
-
-		prop = QueryFactory.buildQuery(s, ConservationAreaProperty.class, 
-				new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
-				new Object[] {"key", PatrolIdGeneratorContribution.UNIQUE_PROPERTY_KEY}).uniqueResult(); //$NON-NLS-1$
-		if (prop == null || prop.getValue() == null || prop.getValue().strip().isBlank() || prop.getValue().equalsIgnoreCase(PatrolIdGeneratorContribution.NOTUNIQUE_VALUE)) {
-			return nextId;
-		}
-		
-		int cnt = 1;
-		String id = nextId;
-		
-		while(true) {
-			Long number = (Long)s.createQuery("SELECT count(*) FROM Patrol WHERE id = :id AND conservationArea = :ca") //$NON-NLS-1$
-					.setParameter("id", id) //$NON-NLS-1$
-					.setParameter("ca", p.getConservationArea()) //$NON-NLS-1$
-					.uniqueResult();
-			if (number == 0) return id;
-			
-			id = nextId + "_" + cnt; //$NON-NLS-1$
-			if (id.length() > Patrol.MAX_ID_LENGTH) {
-				String part ="_" + cnt; //$NON-NLS-1$
-				id = nextId.substring(0,  nextId.length() - 1 - part.length()) + part;
-			}
-			cnt++;
-		}
-	}
 	
 	/**
 	 * Saves a given patrol to the database first starting a transaction.
@@ -490,7 +397,7 @@ public class PatrolHibernateManager extends HibernateManager{
 	 */
 	public static void savePatrol(Patrol patrol, Session session, boolean saveWaypoints) throws Exception{
 		if (patrol.getId() == null || patrol.getId().equals(AUTO_GENERATE_TEXT)){
-			String id = PatrolHibernateManager.generatePatrolId(patrol, session);
+			String id = PatrolIdGenerator.INSTANCE.generatePatrolId(patrol, session);
 			patrol.setId(id);
 		}
 		

@@ -8,7 +8,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="smart.conservation_area_propery")
+@Table(name="smart.conservation_area_property")
 public class ConservationAreaProperty extends UuidItem{
 
 	/**

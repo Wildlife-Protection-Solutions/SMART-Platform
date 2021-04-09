@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.IdGeneratorContribution;
+import org.wcs.smart.IdGeneratorEngine;
 import org.wcs.smart.IdGeneratorManager;
 import org.wcs.smart.ca.ConservationAreaProperty;
 import org.wcs.smart.common.control.SmartUiUtils;
@@ -51,11 +52,7 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class PatrolIdGeneratorContribution implements IdGeneratorContribution {
 
-	public static final String PATTERN_PROPERY_KEY = "patrol.id.pattern"; //$NON-NLS-1$
-	public static final String UNIQUE_PROPERTY_KEY = "patrol.id.unique"; //$NON-NLS-1$
-	
-	public static final String UNIQUE_VALUE = "true"; //$NON-NLS-1$
-	public static final String NOTUNIQUE_VALUE = "false"; //$NON-NLS-1$
+
 	
 	private Text txtPattern;
 	private Button btnUnique;
@@ -73,14 +70,14 @@ public class PatrolIdGeneratorContribution implements IdGeneratorContribution {
 	@Override
 	public void initComponent(Session session) {
 		
-		ConservationAreaProperty prop = getProperty(PATTERN_PROPERY_KEY, session);
+		ConservationAreaProperty prop = getProperty(PatrolIdGenerator.PATTERN_PROPERY_KEY, session);
 		if (prop != null && prop.getValue() != null) {
 			txtPattern.setText(prop.getValue());
 		}
 		
-		prop = getProperty(UNIQUE_PROPERTY_KEY, session);
+		prop = getProperty(PatrolIdGenerator.UNIQUE_PROPERTY_KEY, session);
 		if (prop != null && prop.getValue() != null) {
-			if (prop.getValue().equalsIgnoreCase(UNIQUE_VALUE)) {
+			if (prop.getValue().equalsIgnoreCase(PatrolIdGenerator.UNIQUE_VALUE)) {
 				btnUnique.setSelection(true);
 			}else {
 				btnUnique.setSelection(false);
@@ -136,11 +133,15 @@ public class PatrolIdGeneratorContribution implements IdGeneratorContribution {
 		StringBuilder sb = new StringBuilder();
 		sb.append(Messages.PatrolIdGeneratorContribution_PatrolTokens);
 		sb.append("\n"); //$NON-NLS-1$
-		IdGeneratorManager.Token[] tokens = new IdGeneratorManager.Token[] {IdGeneratorManager.Token.LEADER_FAMILY, IdGeneratorManager.Token.LEADER_GIVEN, IdGeneratorManager.Token.LEADER_INITIALS};
-		for (IdGeneratorManager.Token token : tokens) {
+		IdGeneratorEngine.Token[] tokens = new IdGeneratorEngine.Token[] {
+				IdGeneratorEngine.Token.LEADER_FAMILY, 
+				IdGeneratorEngine.Token.LEADER_GIVEN, 
+				IdGeneratorEngine.Token.LEADER_INITIALS};
+		
+		for (IdGeneratorEngine.Token token : tokens) {
 			sb.append(token.token);
 			sb.append(" - "); //$NON-NLS-1$
-			sb.append(token.getDescription());
+			sb.append(IdGeneratorManager.INSTANCE.getDescription(token));
 			sb.append("\n"); //$NON-NLS-1$
 		}
 		sb.deleteCharAt(sb.length() - 1);
@@ -152,7 +153,7 @@ public class PatrolIdGeneratorContribution implements IdGeneratorContribution {
 	private String validate() {
 		String text = txtPattern.getText();
 		
-		for (IdGeneratorManager.Token token : IdGeneratorManager.Token.values()) {
+		for (IdGeneratorEngine.Token token : IdGeneratorEngine.Token.values()) {
 			text = text.replace(token.token, ""); //$NON-NLS-1$
 		}
 		
@@ -169,25 +170,25 @@ public class PatrolIdGeneratorContribution implements IdGeneratorContribution {
 		
 		if (validate() != null) return false;
 		
-		ConservationAreaProperty prop = getProperty(PATTERN_PROPERY_KEY, session);
+		ConservationAreaProperty prop = getProperty(PatrolIdGenerator.PATTERN_PROPERY_KEY, session);
 		if (prop == null) {
 			prop = new ConservationAreaProperty();
 			prop.setConservationArea(SmartDB.getCurrentConservationArea());
-			prop.setKey(PATTERN_PROPERY_KEY);
+			prop.setKey(PatrolIdGenerator.PATTERN_PROPERY_KEY);
 		}
 		prop.setValue(txtPattern.getText());
 		session.saveOrUpdate(prop);
 		
-		prop = getProperty(UNIQUE_PROPERTY_KEY, session);
+		prop = getProperty(PatrolIdGenerator.UNIQUE_PROPERTY_KEY, session);
 		if (prop == null) {
 			prop = new ConservationAreaProperty();
 			prop.setConservationArea(SmartDB.getCurrentConservationArea());
-			prop.setKey(UNIQUE_PROPERTY_KEY);
+			prop.setKey(PatrolIdGenerator.UNIQUE_PROPERTY_KEY);
 		}
 		if (btnUnique.getSelection()) {
-			prop.setValue(UNIQUE_VALUE);
+			prop.setValue(PatrolIdGenerator.UNIQUE_VALUE);
 		}else {
-			prop.setValue(NOTUNIQUE_VALUE);
+			prop.setValue(PatrolIdGenerator.NOTUNIQUE_VALUE);
 		}
 		session.saveOrUpdate(prop);
 		

@@ -64,7 +64,7 @@ import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationAttributeList;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.patrol.PatrolEventManager;
-import org.wcs.smart.patrol.PatrolHibernateManager;
+import org.wcs.smart.patrol.PatrolIdGenerator;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
@@ -248,7 +248,7 @@ public class DataGenerator implements IDataEngine{
 		}
 
 		//id might be based on leader
-		p.setId(PatrolHibernateManager.generatePatrolId(p, session));
+		p.setId(PatrolIdGenerator.INSTANCE.generatePatrolId(p, session));
 		
 		//generate a start position for the patrol
 		Coordinate startc = generatePosition();

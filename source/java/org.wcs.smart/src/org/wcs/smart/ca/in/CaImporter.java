@@ -110,10 +110,12 @@ public class CaImporter {
 			//to validate we only need to unzip a few files to do validation the CA_INFO_FILENAME from the package
 			try(ZipFile archiveFile = new ZipFile(file.normalize().toAbsolutePath().toFile())){
 				ZipArchiveEntry zipEntry = archiveFile.getEntry(ICaDataExportEngine.CA_INFO_FILENAME);
-				Path p = temp.resolve(ICaDataExportEngine.CA_INFO_FILENAME);
-				if (!Files.exists(p)) {
+				
+				if (zipEntry == null) {
 					throw new Exception(Messages.CaImporter_NotCaFile);
 				}
+				
+				Path p = temp.resolve(ICaDataExportEngine.CA_INFO_FILENAME);
 				Files.createDirectories(p.getParent());
 				Files.copy(archiveFile.getInputStream(zipEntry), p);
 				

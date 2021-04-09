@@ -36,6 +36,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.hibernate.Session;
 import org.wcs.smart.IdGeneratorContribution;
+import org.wcs.smart.IdGeneratorEngine;
 import org.wcs.smart.IdGeneratorManager;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -81,10 +82,10 @@ public class IDTokenPreferencePage extends PreferencePage implements IWorkbenchP
 		info.setEditable(false);
 		StringBuilder sb = new StringBuilder();
 		sb.append(Messages.IDTokenPreferencePage_AllTokens + "\n"); //$NON-NLS-1$
-		for (IdGeneratorManager.Token token : IdGeneratorManager.SHARED) {
+		for (IdGeneratorEngine.Token token : IdGeneratorManager.SHARED) {
 			sb.append(token.token);
 			sb.append(" - "); //$NON-NLS-1$
-			sb.append(token.getDescription());
+			sb.append(IdGeneratorManager.INSTANCE.getDescription(token));
 			sb.append("\n"); //$NON-NLS-1$
 		}
 		sb.deleteCharAt(sb.length() - 1);

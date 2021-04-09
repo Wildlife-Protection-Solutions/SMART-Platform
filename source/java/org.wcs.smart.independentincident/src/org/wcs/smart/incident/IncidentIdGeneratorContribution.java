@@ -34,7 +34,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.IdGeneratorContribution;
-import org.wcs.smart.IdGeneratorManager;
+import org.wcs.smart.IdGeneratorEngine;
 import org.wcs.smart.ca.ConservationAreaProperty;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -51,12 +51,6 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class IncidentIdGeneratorContribution implements IdGeneratorContribution {
 
-	public static final String PATTERN_PROPERY_KEY = "incident.id.pattern"; //$NON-NLS-1$
-	public static final String UNIQUE_PROPERTY_KEY = "incident.id.unique"; //$NON-NLS-1$
-	
-	public static final String UNQIUE_VALUE = "true"; //$NON-NLS-1$
-	public static final String NOTUNIQUE_VALUE = "false"; //$NON-NLS-1$
-	
 	private Text txtPattern;
 	private Button btnUnique;
 	private ControlDecoration cdPattern;
@@ -67,14 +61,14 @@ public class IncidentIdGeneratorContribution implements IdGeneratorContribution 
 	@Override
 	public void initComponent(Session session) {
 		
-		ConservationAreaProperty prop = getProperty(PATTERN_PROPERY_KEY, session);
+		ConservationAreaProperty prop = getProperty(IncidentIdGenerator.PATTERN_PROPERY_KEY, session);
 		if (prop != null && prop.getValue() != null) {
 			txtPattern.setText(prop.getValue());
 		}
 		
-		prop = getProperty(UNIQUE_PROPERTY_KEY, session);
+		prop = getProperty(IncidentIdGenerator.UNIQUE_PROPERTY_KEY, session);
 		if (prop != null && prop.getValue() != null) {
-			if (prop.getValue().equalsIgnoreCase(UNQIUE_VALUE)) {
+			if (prop.getValue().equalsIgnoreCase(IncidentIdGenerator.UNQIUE_VALUE)) {
 				btnUnique.setSelection(true);
 			}else {
 				btnUnique.setSelection(false);
@@ -128,7 +122,7 @@ public class IncidentIdGeneratorContribution implements IdGeneratorContribution 
 	private String validate() {
 		String text = txtPattern.getText();
 		
-		for (IdGeneratorManager.Token token : IdGeneratorManager.Token.values()) {
+		for (IdGeneratorEngine.Token token : IdGeneratorEngine.Token.values()) {
 			text = text.replace(token.token, ""); //$NON-NLS-1$
 		}
 		
@@ -144,25 +138,25 @@ public class IncidentIdGeneratorContribution implements IdGeneratorContribution 
 	public boolean save(Session session) {
 		
 		if (validate() != null) return false;
-		ConservationAreaProperty prop = getProperty(PATTERN_PROPERY_KEY, session);
+		ConservationAreaProperty prop = getProperty(IncidentIdGenerator.PATTERN_PROPERY_KEY, session);
 		if (prop == null) {
 			prop = new ConservationAreaProperty();
 			prop.setConservationArea(SmartDB.getCurrentConservationArea());
-			prop.setKey(PATTERN_PROPERY_KEY);
+			prop.setKey(IncidentIdGenerator.PATTERN_PROPERY_KEY);
 		}
 		prop.setValue(txtPattern.getText());
 		session.saveOrUpdate(prop);
 		
-		prop = getProperty(UNIQUE_PROPERTY_KEY, session);
+		prop = getProperty(IncidentIdGenerator.UNIQUE_PROPERTY_KEY, session);
 		if (prop == null) {
 			prop = new ConservationAreaProperty();
 			prop.setConservationArea(SmartDB.getCurrentConservationArea());
-			prop.setKey(UNIQUE_PROPERTY_KEY);
+			prop.setKey(IncidentIdGenerator.UNIQUE_PROPERTY_KEY);
 		}
 		if (btnUnique.getSelection()) {
-			prop.setValue(UNQIUE_VALUE);
+			prop.setValue(IncidentIdGenerator.UNQIUE_VALUE);
 		}else {
-			prop.setValue(NOTUNIQUE_VALUE);
+			prop.setValue(IncidentIdGenerator.NOTUNIQUE_VALUE);
 		}
 		session.saveOrUpdate(prop);
 		
