@@ -41,6 +41,7 @@ import org.wcs.smart.observation.query.ObservationQueryPlugIn;
 import org.wcs.smart.observation.query.internal.Messages;
 import org.wcs.smart.observation.query.model.ObservationGriddedQuery;
 import org.wcs.smart.observation.query.model.ObservationSummaryQuery;
+import org.wcs.smart.observation.query.model.filter.WaypointIdFilter;
 import org.wcs.smart.observation.query.model.filter.WaypointSourceFilter;
 import org.wcs.smart.observation.query.model.filter.WaypointSourceGroupBy;
 import org.wcs.smart.observation.query.ui.WaypointSourceGroupByViewer;
@@ -129,7 +130,8 @@ public class ObservationDropItemFactory extends BasicDropItemFactory implements 
 				}
 			}else{
 				if (source == GeneralItem.WAYPOINT_SOURCE ||
-						source == GeneralItem.OBSERVER){
+						source == GeneralItem.OBSERVER || 
+						source == GeneralItem.WAYPOINT_ID){
 					items = new DropItem[]{createWaypointSourceFilterDropItem((GeneralContentProvider.GeneralItem)source)};
 				}
 			}
@@ -144,6 +146,8 @@ public class ObservationDropItemFactory extends BasicDropItemFactory implements 
 	public DropItem createWaypointSourceFilterDropItem(GeneralContentProvider.GeneralItem source){
 		if (source == GeneralContentProvider.GeneralItem.WAYPOINT_SOURCE){
 			return new WaypointSourceFilterDropItem();
+		}else if (source == GeneralContentProvider.GeneralItem.WAYPOINT_ID){
+				return new WaypointIdFilterDropItem();
 		}else if (source == GeneralContentProvider.GeneralItem.OBSERVER){
 			return createObserverDropItem();
 		}
@@ -286,6 +290,8 @@ public class ObservationDropItemFactory extends BasicDropItemFactory implements 
 	public DropItem[] filterToDropItem(IFilter f, Session session) throws Exception{
 		if (f instanceof WaypointSourceFilter){
 			return createDropItems((WaypointSourceFilter)f, session);
+		}else if (f instanceof WaypointIdFilter) {
+			return createDropItems((WaypointIdFilter)f, session);
 		}else if (f instanceof BooleanExpression){
 			return createDropItems((BooleanExpression)f, session);
 		}
@@ -310,6 +316,12 @@ public class ObservationDropItemFactory extends BasicDropItemFactory implements 
 		return results;
 	}
 
+	private DropItem[] createDropItems(WaypointIdFilter filter, Session session) throws Exception {
+		DropItem di = new WaypointIdFilterDropItem();
+		di.initializeData(new Object[]{filter.getOperator(), filter.getWaypointIdFilter()});
+		return new DropItem[]{di};
+	}
+	
 	private DropItem[] createDropItems(WaypointSourceFilter filter, Session session) throws Exception {
 		IWaypointSource src = WaypointSourceEngine.INSTANCE.getSource(filter.getWaypointSourceKey());
 		DropItem di;

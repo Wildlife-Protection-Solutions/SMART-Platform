@@ -1637,7 +1637,7 @@
       <page
             class="org.wcs.smart.ui.internal.preference.IDTokenPreferencePage"
             id="org.wcs.smart.preference.IdTokens"
-            name="ID Generator">
+            name="%PatternIdDefintionPage">
       </page>
    </extension>
    <extension

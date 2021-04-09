@@ -59,6 +59,7 @@ TOKEN :
  | < OBSERVATION_FILTER_TYPE_KEY : "observation" >
  | < WAYPOINT_FILTER_TYPE_KEY : "waypoint" >
  | < WAYPOINT_SOURCE_KEY : "wpn:src" >
+ | < WAYPOINT_ID_KEY : "wpn:id" >
  | < WAYPOINT_OBSERVER_KEY : "wpnobs:observer" >}
 /* Summary Query */
 TOKEN :
@@ -556,6 +557,13 @@ IFilter StringExpression():
   		< QUOTED_STRING > {value = token.image;}
   		{
     		filter = WaypointSourceFilter.createFilter(value,op);
+  		}
+  	| 
+		 < WAYPOINT_ID_KEY >
+  		  op = StringOp()
+  		< QUOTED_STRING > {value = token.image;}
+  		{
+    		filter = WaypointIdFilter.createFilter(value,op);
   		}
 	|
 		< WAYPOINT_OBSERVER_KEY >

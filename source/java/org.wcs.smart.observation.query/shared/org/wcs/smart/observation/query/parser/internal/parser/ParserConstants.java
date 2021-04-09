@@ -117,37 +117,39 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int WAYPOINT_SOURCE_KEY = 57;
   /** RegularExpression Id. */
-  int WAYPOINT_OBSERVER_KEY = 58;
+  int WAYPOINT_ID_KEY = 58;
   /** RegularExpression Id. */
-  int SUM_CAT_VALUE_KEY = 59;
+  int WAYPOINT_OBSERVER_KEY = 59;
   /** RegularExpression Id. */
-  int SUM_ATTRIBUTE_VALUE_KEY = 60;
+  int SUM_CAT_VALUE_KEY = 60;
   /** RegularExpression Id. */
-  int SUM_CAT_ATT_VALUE_KEY = 61;
+  int SUM_ATTRIBUTE_VALUE_KEY = 61;
   /** RegularExpression Id. */
-  int SUM_ATTRIBUTE_VALUE_LISTTREE_KEY = 62;
+  int SUM_CAT_ATT_VALUE_KEY = 62;
   /** RegularExpression Id. */
-  int SUM_CAT_ATT_VALUE_LISTTREE_KEY = 63;
+  int SUM_ATTRIBUTE_VALUE_LISTTREE_KEY = 63;
   /** RegularExpression Id. */
-  int AGG = 64;
+  int SUM_CAT_ATT_VALUE_LISTTREE_KEY = 64;
   /** RegularExpression Id. */
-  int DATE_GROUPBY_ITEM = 65;
+  int AGG = 65;
   /** RegularExpression Id. */
-  int QUERY_SPLITTER = 66;
+  int DATE_GROUPBY_ITEM = 66;
   /** RegularExpression Id. */
-  int CATEGORY_GROUPBY_ITEM = 67;
+  int QUERY_SPLITTER = 67;
   /** RegularExpression Id. */
-  int AREA_GROUPBY_ITEM = 68;
+  int CATEGORY_GROUPBY_ITEM = 68;
   /** RegularExpression Id. */
-  int ATTRIBUTE_GROUPBY_ITEM = 69;
+  int AREA_GROUPBY_ITEM = 69;
   /** RegularExpression Id. */
-  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 70;
+  int ATTRIBUTE_GROUPBY_ITEM = 70;
   /** RegularExpression Id. */
-  int WAYPOINT_SOURCE_GROUP_BY = 71;
+  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 71;
   /** RegularExpression Id. */
-  int CA_GROUP_BY = 72;
+  int WAYPOINT_SOURCE_GROUP_BY = 72;
   /** RegularExpression Id. */
-  int QUOTED_STRING = 73;
+  int CA_GROUP_BY = 73;
+  /** RegularExpression Id. */
+  int QUOTED_STRING = 74;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -212,6 +214,7 @@ public interface ParserConstants {
     "\"observation\"",
     "\"waypoint\"",
     "\"wpn:src\"",
+    "\"wpn:id\"",
     "\"wpnobs:observer\"",
     "<SUM_CAT_VALUE_KEY>",
     "<SUM_ATTRIBUTE_VALUE_KEY>",

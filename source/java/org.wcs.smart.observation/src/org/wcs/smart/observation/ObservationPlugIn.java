@@ -46,6 +46,10 @@ public class ObservationPlugIn extends AbstractUIPlugin {
 	 * waypoint source icon
 	 */
 	public static final String WAYPOINT_SOURCE_ICON = "org.wcs.smart.observation.waypointsource"; //$NON-NLS-1$
+	/**
+	 * waypoint id icon
+	 */
+	public static final String WAYPOINT_ID_ICON = "org.wcs.smart.observation.waypointid"; //$NON-NLS-1$
 	
 	// The shared instance
 	private static ObservationPlugIn plugin;
@@ -126,6 +130,10 @@ public class ObservationPlugIn extends AbstractUIPlugin {
 		reg.put(WAYPOINT_SOURCE_ICON,
 				imageDescriptorFromPlugin(PLUGIN_ID,
 						"images/icons/obj16/waypoint_source.png"));//$NON-NLS-1$
+		
+		reg.put(WAYPOINT_ID_ICON,
+				imageDescriptorFromPlugin(PLUGIN_ID,
+						"images/icons/obj16/waypoint_id.png"));//$NON-NLS-1$
 		super.initializeImageRegistry(reg);
 	}
 }
