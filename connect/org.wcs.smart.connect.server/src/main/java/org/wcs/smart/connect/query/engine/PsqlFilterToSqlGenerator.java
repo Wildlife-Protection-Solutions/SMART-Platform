@@ -78,6 +78,7 @@ import org.wcs.smart.er.query.model.SurveyWaypointQuery;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.query.model.filter.WaypointIdFilter;
 import org.wcs.smart.observation.query.model.filter.WaypointSourceFilter;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
@@ -189,6 +190,8 @@ public enum PsqlFilterToSqlGenerator {
 			return asSql((EntityAttributeFilter)filter, engine);
 		}else if (filter instanceof WaypointSourceFilter){
 			return asSql((WaypointSourceFilter)filter, engine);
+		}else if (filter instanceof WaypointIdFilter){
+			return asSql((WaypointIdFilter)filter, engine);			
 		}else if (filter instanceof SurveyFilter){
 			return asSql((SurveyFilter)filter, engine);
 		}else if (filter instanceof MissionFilter){
@@ -762,7 +765,22 @@ public enum PsqlFilterToSqlGenerator {
 		return sb.toString();
 	}
 
-	
+	/*
+	 * Waypoint id filter
+	 */
+	protected String asSql(WaypointIdFilter filter, IQueryEngine engine) throws SQLException{
+		StringBuilder sb = new StringBuilder();
+		sb.append(engine.tablePrefix(Waypoint.class));
+		sb.append(".id "); //$NON-NLS-1$
+		sb.append(asSql(filter.getOperator()));
+		String value = SharedUtils.stripQuotes(filter.getWaypointIdFilter());
+		if (filter.getOperator() == Operator.STR_CONTAINS ) {
+			value = "%" + value + "%"; //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		String src = engine.addParameterValue(value);
+		sb.append(" " + src + " "); //$NON-NLS-1$ //$NON-NLS-2$
+		return sb.toString();
+	}
 	
 	public String asSql(EntityAttributeFilter filter, IQueryEngine engine) throws SQLException{
 		FilterTable t = ((AbstractQueryEngine)engine).filterTables.get(filter);
