@@ -16,10 +16,10 @@
         </attribute>
         <attribute key="treespecies_timber" isrequired="false" type="LIST">
             <names language_code="en" value="Timber Tree Species"/>
-            <values key="ebony" isactive="true">
+            <values key="ebony" isactive="true" iconkey="ebony">
                 <names language_code="en" value="Ebony"/>
             </values>
-            <values key="rosewood" isactive="true">
+            <values key="rosewood" isactive="true" iconkey="rosewood">
                 <names language_code="en" value="Rosewood"/>
             </values>
             <values key="other" isactive="true">
@@ -80,7 +80,7 @@
             <values key="confiscated" isactive="true" iconkey="confiscated_1">
                 <names language_code="en" value="Confiscated"/>
             </values>
-            <values key="destroyed" isactive="true" iconkey="destroyed">
+            <values key="destroyed" isactive="true" iconkey="destroyed2">
                 <names language_code="en" value="Destroyed"/>
             </values>
             <values key="collected" isactive="true" iconkey="collected">
@@ -129,7 +129,7 @@
                 <names language_code="en" value="Other"/>
             </values>
         </attribute>
-        <attribute key="numberofbundles" isrequired="false" type="NUMERIC">
+        <attribute key="numberofbundles" isrequired="false" type="NUMERIC" iconkey="bundles">
             <qa_minmax>
                 <MinValue>0.0</MinValue>
             </qa_minmax>
@@ -302,7 +302,7 @@
             </qa_minmax>
             <names language_code="en" value="Number of Transportation"/>
         </attribute>
-        <attribute key="numberofbags" isrequired="false" type="NUMERIC">
+        <attribute key="numberofbags" isrequired="false" type="NUMERIC" iconkey="bags">
             <qa_minmax>
                 <MinValue>0.0</MinValue>
             </qa_minmax>
@@ -550,22 +550,22 @@
         </attribute>
         <attribute key="units" isrequired="false" type="LIST">
             <names language_code="en" value="Units"/>
-            <values key="m3" isactive="true">
+            <values key="m3" isactive="true" iconkey="m3">
                 <names language_code="en" value="m3"/>
             </values>
-            <values key="kg" isactive="true">
+            <values key="kg" isactive="true" iconkey="kg">
                 <names language_code="en" value="kg"/>
             </values>
-            <values key="meter" isactive="true">
+            <values key="meter" isactive="true" iconkey="meter">
                 <names language_code="en" value="meter"/>
             </values>
-            <values key="bags" isactive="true">
+            <values key="bags" isactive="true" iconkey="bags">
                 <names language_code="en" value="bags"/>
             </values>
-            <values key="bundles" isactive="true">
+            <values key="bundles" isactive="true" iconkey="bundles">
                 <names language_code="en" value="bundles"/>
             </values>
-            <values key="pieces" isactive="true">
+            <values key="pieces" isactive="true" iconkey="pieces">
                 <names language_code="en" value="pieces"/>
             </values>
         </attribute>
@@ -688,7 +688,7 @@
                 <names language_code="en" value="Large"/>
             </values>
         </attribute>
-        <attribute key="weightkg" isrequired="false" type="NUMERIC">
+        <attribute key="weightkg" isrequired="false" type="NUMERIC" iconkey="kg">
             <qa_minmax>
                 <MinValue>0.0</MinValue>
             </qa_minmax>
@@ -734,18 +734,18 @@
             </qa_minmax>
             <names language_code="en" value="Number of Planks"/>
         </attribute>
-        <attribute key="cropplanted" isrequired="false" type="LIST">
+        <attribute key="cropplanted" isrequired="false" type="LIST" iconkey="crop_field">
             <names language_code="en" value="Crop Planted"/>
-            <values key="tobacco" isactive="true">
+            <values key="tobacco" isactive="true" iconkey="tobacco">
                 <names language_code="en" value="Tobacco"/>
             </values>
-            <values key="banana" isactive="true">
+            <values key="banana" isactive="true" iconkey="banana">
                 <names language_code="en" value="Banana"/>
             </values>
-            <values key="sugarcane" isactive="true">
+            <values key="sugarcane" isactive="true" iconkey="sugar_cane">
                 <names language_code="en" value="Sugar Cane"/>
             </values>
-            <values key="pumpkins" isactive="true">
+            <values key="pumpkins" isactive="true" iconkey="pumpkins"> 
                 <names language_code="en" value="Pumpkins"/>
             </values>
             <values key="chili" isactive="true">
@@ -757,10 +757,10 @@
             <values key="casher" isactive="true">
                 <names language_code="en" value="Casher"/>
             </values>
-            <values key="cassava" isactive="true">
+            <values key="cassava" isactive="true" iconkey="cassava">
                 <names language_code="en" value="Cassava"/>
             </values>
-            <values key="corn" isactive="true">
+            <values key="corn" isactive="true" iconkey="corn">
                 <names language_code="en" value="Corn"/>
             </values>
             <values key="rice" isactive="true">
@@ -776,7 +776,7 @@
             </qa_minmax>
             <names language_code="en" value="Number of Carcasses"/>
         </attribute>
-        <attribute key="quantity" isrequired="false" type="NUMERIC">
+        <attribute key="quantity" isrequired="false" type="NUMERIC" iconkey="quantity">
             <qa_minmax>
                 <MinValue>0.0</MinValue>
             </qa_minmax>
@@ -805,43 +805,43 @@
             <names language_code="ka" value="სიკვდილის მიზეზი"/>
             <tree key="natural" isactive="true" iconkey="natural">
                 <names language_code="en" value="Natural"/>
-                <children key="disease" isactive="true">
+                <children key="disease" isactive="true" iconkey="disease">
                     <names language_code="en" value="Disease"/>
                 </children>
-                <children key="oldage" isactive="true">
+                <children key="oldage" isactive="true" iconkey="old_age">
                     <names language_code="en" value="Old Age"/>
                 </children>
-                <children key="accident" isactive="true">
+                <children key="accident" isactive="true" iconkey="accident">
                     <names language_code="en" value="Accident"/>
-                    <children key="runoverbyvehicle" isactive="true">
+                    <children key="runoverbyvehicle" isactive="true" iconkey="run_over_by_vehicle">
                         <names language_code="en" value="Run over by vehicle"/>
                     </children>
-                    <children key="drowned" isactive="true">
+                    <children key="drowned" isactive="true" iconkey="drowned">
                         <names language_code="en" value="Drowned"/>
                     </children>
-                    <children key="electrocuted" isactive="true">
+                    <children key="electrocuted" isactive="true" iconkey="electrocuted">
                         <names language_code="en" value="Electrocuted"/>
                     </children>
                 </children>
-                <children key="predation" isactive="true">
+                <children key="predation" isactive="true" iconkey="predation">
                     <names language_code="en" value="Predation"/>
                 </children>
             </tree>
             <tree key="legal" isactive="true" iconkey="legal">
                 <names language_code="en" value="Legal"/>
-                <children key="sporthunting" isactive="true">
+                <children key="sporthunting" isactive="true" iconkey="trophy_hunting">
                     <names language_code="en" value="Sport Hunting"/>
                 </children>
                 <children key="problemanimalcontrol" isactive="true">
                     <names language_code="en" value="Problem Animal Control"/>
                 </children>
-                <children key="culling" isactive="true">
+                <children key="culling" isactive="true" iconkey="culling">
                     <names language_code="en" value="Culling"/>
                 </children>
             </tree>
             <tree key="illegal" isactive="true" iconkey="illegal">
                 <names language_code="en" value="Illegal"/>
-                <children key="gunshot" isactive="true" iconkey="firearms">
+                <children key="gunshot" isactive="true" iconkey="gunshot">
                     <names language_code="en" value="Gunshot"/>
                 </children>
                 <children key="trapping" isactive="true" iconkey="traps_snares">
@@ -860,13 +860,13 @@
         </attribute>
         <attribute key="caliber" isrequired="false" type="LIST">
             <names language_code="en" value="Caliber"/>
-            <values key="c556" isactive="true">
+            <values key="c556" isactive="true" iconkey="c5_56">
                 <names language_code="en" value="5 56"/>
             </values>
             <values key="c762" isactive="true">
                 <names language_code="en" value="7 62"/>
             </values>
-            <values key="guage12" isactive="true">
+            <values key="guage12" isactive="true" iconkey="gauge12">
                 <names language_code="en" value="12 gauge"/>
             </values>
             <values key="other" isactive="true">
@@ -946,7 +946,7 @@
                 <names language_code="en" value="Heard Only"/>
             </values>
         </attribute>
-        <attribute key="nameornames" isrequired="false" type="TEXT">
+        <attribute key="nameornames" isrequired="false" type="TEXT" iconkey="name">
             <qa_regex></qa_regex>
             <names language_code="en" value="Name or Names"/>
         </attribute>
@@ -972,7 +972,7 @@
             <names language_code="en" value="Species"/>
             <names language_code="ka" value="სახეობა"/>
         </attribute>
-        <attribute key="areaburnedha" isrequired="false" type="NUMERIC">
+        <attribute key="areaburnedha" isrequired="false" type="NUMERIC" iconkey="area_ha">
             <qa_minmax>
                 <MinValue>0.0</MinValue>
             </qa_minmax>
@@ -1456,13 +1456,13 @@
                 <names language_code="en" value="Other"/>
             </values>
         </attribute>
-        <attribute key="numberofpeople" isrequired="false" type="NUMERIC">
+        <attribute key="numberofpeople" isrequired="false" type="NUMERIC" iconkey="number_of_people">
             <qa_minmax>
                 <MinValue>0.0</MinValue>
             </qa_minmax>
             <names language_code="en" value="Number of People"/>
         </attribute>
-        <attribute key="numberofdryingracks" isrequired="false" type="NUMERIC">
+        <attribute key="numberofdryingracks" isrequired="false" type="NUMERIC" iconkey="number_of_drying_racks">
             <qa_minmax>
                 <MinValue>0.0</MinValue>
             </qa_minmax>
@@ -1610,7 +1610,7 @@
                 <attribute isactive="true" attributekey="actiontaken_items"/>
                 <attribute isactive="true" attributekey="numberofdomesticanimals"/>
             </category>
-            <category key="landclearing" ismultiple="true" isactive="true">
+            <category key="landclearing" ismultiple="true" isactive="true" iconkey="clearing">
                 <names language_code="en" value="Land Clearing"/>
                 <attribute isactive="true" attributekey="sizeofclearingha"/>
                 <attribute isactive="true" attributekey="actiontaken_landclearning"/>
@@ -1709,7 +1709,7 @@
                 <attribute isactive="true" attributekey="weightkg"/>
             </category>
         </category>
-        <category key="features" ismultiple="true" isactive="true">
+        <category key="features" ismultiple="true" isactive="true" iconkey="features">
             <names language_code="en" value="Features"/>
             <names language_code="ka" value="მახასიათებლები"/>
             <category key="figtree" ismultiple="true" isactive="true">
