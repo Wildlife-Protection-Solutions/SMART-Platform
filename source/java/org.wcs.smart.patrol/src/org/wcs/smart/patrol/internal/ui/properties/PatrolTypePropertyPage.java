@@ -59,6 +59,8 @@ import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MenuListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
@@ -66,6 +68,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
@@ -880,7 +883,26 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 		viewerColumn.setEditingSupport(new EditingSupport(viewer){
 			@Override
 			protected CellEditor getCellEditor(Object element) {
-				ComboBoxViewerCellEditor typeEditor = new ComboBoxViewerCellEditor(viewer.getTable());
+				ComboBoxViewerCellEditor typeEditor = new ComboBoxViewerCellEditor(viewer.getTable(), SWT.READ_ONLY) {
+					@Override
+					protected Control createControl(Composite parent) {
+						final Control control = super.createControl(parent);
+						getViewer().getCCombo().addSelectionListener(new SelectionAdapter() {
+							@Override
+							public void widgetSelected(SelectionEvent e) {
+								// if the list is not visible, assume the user is done
+								if (!getViewer().getCCombo().getListVisible())
+									// since I cannot access
+									// applyEditorValueAndDeactivate();
+									focusLost();
+							}
+						});
+						return control;
+					}
+				};
+				typeEditor.setActivationStyle(ColumnViewerEditorActivationEvent.MOUSE_DOUBLE_CLICK_SELECTION );
+
+				
 				typeEditor.setLabelProvider(new LabelProvider(){
 					public String getText(Object element){
 						if (element instanceof PatrolType) return ((PatrolType) element).getType().getGuiName(Locale.getDefault());
