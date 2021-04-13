@@ -22,7 +22,6 @@
 package org.wcs.smart.i2.ui.editors.record;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -54,7 +53,6 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.ProfilesManager;
@@ -255,22 +253,23 @@ public class EntityListShell extends SmartShellDialog {
 		protected IStatus run(IProgressMonitor monitor) {
 			List<IntelEntityType> types = new ArrayList<IntelEntityType>();
 			try(Session s = HibernateManager.openSession()){
-				types.addAll (s.createQuery("SELECT t FROM IntelEntityType t join t.profiles p WHERE t.conservationArea = :ca ", IntelEntityType.class) //$NON-NLS-1$
+				List<IntelEntityType> temp = s.createQuery("SELECT t FROM IntelEntityType t join t.profiles p WHERE t.conservationArea = :ca", IntelEntityType.class) //$NON-NLS-1$
 				.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
-				.list() );
+				.list() ;
 				
-				for (Iterator<IntelEntityType> iterator = types.iterator(); iterator.hasNext();) {
-					IntelEntityType intelEntityType = iterator.next();
-					boolean add = false;
+				for (IntelEntityType intelEntityType : temp) {
 					for (IntelProfileEntityType it : intelEntityType.getProfiles()) {
 						if (ProfilesManager.INSTANCE.getActiveProfiles().contains(it.getProfile())) {
 							if (IntelSecurityManager.INSTANCE.canViewEntities(it.getProfile())) {
-								add = true;
+								if (!types.contains(it.getEntityType())) {
+									types.add(it.getEntityType());
+								}
 								break;
 							}
 						}
 					}
-					if (!add) iterator.remove();
+					
+					
 				}
 			}
 			
@@ -286,13 +285,15 @@ public class EntityListShell extends SmartShellDialog {
 		protected IStatus run(IProgressMonitor monitor) {
 			List<IntelEntity> entities = new ArrayList<IntelEntity>();
 			if (lastSelectedType != null){
-				try(Session s = HibernateManager.openSession()){					
-					entities.addAll( QueryFactory.buildQuery(s, IntelEntity.class, 
-							new Object[]{"entityType", lastSelectedType}) //$NON-NLS-1$
-							.getResultList());
-
+				try(Session s = HibernateManager.openSession()){
+					entities.addAll(s.createQuery("FROM IntelEntity WHERE entityType = :type and profile in (:profiles)", IntelEntity.class) //$NON-NLS-1$
+							.setParameter("type", lastSelectedType) //$NON-NLS-1$
+							.setParameterList("profiles", ProfilesManager.INSTANCE.getActiveProfiles()) //$NON-NLS-1$
+							.list());
+					
 					for (IntelEntity e : entities){
 						if (!IntelSecurityManager.INSTANCE.canViewEntities(e.getProfile())) continue;
+
 						e.getIdAttributeAsText();
 						if (e.getPrimaryAttachment() != null){
 							try {
