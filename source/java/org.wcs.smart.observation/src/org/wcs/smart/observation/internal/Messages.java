@@ -226,10 +226,26 @@ public class Messages extends NLS {
 
 	public static String ObservationOptionsPropertyPage_DistanceBearingTitle;
 
+	public static String ObservationOptionsPropertyPage_NameRequired;
+
+	public static String ObservationOptionsPropertyPage_NewTypeHeader;
+
+	public static String ObservationOptionsPropertyPage_NewTypeHeader2;
+
+	public static String ObservationOptionsPropertyPage_NewTypeMessage;
+
 	public static String ObservationOptionsPropertyPage_ObserverDescription;
 	public static String ObservationOptionsPropertyPage_ObserverLabel;
 
 	public static String ObservationOptionsPropertyPage_ObserverOp;
+
+	public static String ObservationOptionsPropertyPage_SignatureHeader;
+
+	public static String ObservationOptionsPropertyPage_SignatureInfo;
+
+	public static String ObservationOptionsPropertyPage_SignatureKeyColumn;
+
+	public static String ObservationOptionsPropertyPage_SignatureNameColumn;
 
 	public static String PatrolHibernateManager_Error_CouldNoLoadPatrolOptions;
 	public static String ObservationSummaryWizardPage_ObserverLabel;
@@ -278,6 +294,8 @@ public class Messages extends NLS {
 	public static String WaypointInfoView_LoadingThumbnails;
 
 	public static String WaypointInfoView_ObsGroupHeader;
+
+	public static String WaypointInfoView_SignaturesSection;
 	public static String WaypointInfoView_UpdateJobName;
 	public static String WaypointInfoView_WaypointIdLabel;
 

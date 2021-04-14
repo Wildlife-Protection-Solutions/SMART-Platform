@@ -23,7 +23,11 @@ package org.wcs.smart.dataentry.model;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -39,6 +43,7 @@ import javax.persistence.Transient;
 
 import org.hibernate.annotations.OrderBy;
 import org.wcs.smart.ca.NamedItem;
+import org.wcs.smart.ca.SignatureType;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.util.UuidUtils;
 
@@ -49,6 +54,8 @@ import org.wcs.smart.util.UuidUtils;
 @Entity
 @Table(name = "smart.cm_node")
 public class CmNode extends NamedItem implements IImageAssociatedObject {
+
+	private static final String SIGNATURE_SPACER = ","; //$NON-NLS-1$
 
 	private static final long serialVersionUID = 1L;
 	
@@ -65,6 +72,7 @@ public class CmNode extends NamedItem implements IImageAssociatedObject {
 	private DisplayMode displayMode;
 	private Path imageFile;
 	private String extension; //image name extension
+	private String signatures; //comma delimiter list of signature uuids valid for this node (if category)
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="cm_uuid", referencedColumnName="uuid")
@@ -180,6 +188,41 @@ public class CmNode extends NamedItem implements IImageAssociatedObject {
 	}
 	public void setExtension(String extension) {
 		this.extension = extension;
+	}
+	
+	@Column(name="signatures")
+	public String getSignatures() {
+		return this.signatures;
+	}
+	public void setSignatures(String signatures) {
+		this.signatures = signatures;
+	}
+	
+	@Transient
+	public Set<UUID> getSignatureUuids(){
+		if (getSignatures() == null) return Collections.emptySet();
+		Set<UUID> items = new HashSet<>();
+		for (String uuid : getSignatures().split(SIGNATURE_SPACER)) {
+			try {
+				items.add(UuidUtils.stringToUuid(uuid));
+			}catch (Exception ex) {}
+		}
+		return items;
+	}
+
+	@Transient
+	public void setSignatures(Set<SignatureType> types) {
+		StringBuilder sb = new StringBuilder();
+		for (SignatureType t : types) {
+			sb.append(UuidUtils.uuidToString(t.getUuid()));
+			sb.append(SIGNATURE_SPACER);
+		}
+		if (sb.length() == 0) {
+			setSignatures((String)null);
+			return;
+		}
+		sb.deleteCharAt(sb.length() - 1);
+		setSignatures(sb.toString());
 	}
 	
 	@Transient

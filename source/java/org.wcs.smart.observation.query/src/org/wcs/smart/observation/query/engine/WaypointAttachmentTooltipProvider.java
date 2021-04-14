@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.observation.WaypointSourceEngine;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
@@ -128,8 +129,12 @@ public class WaypointAttachmentTooltipProvider extends Job {
 			l.setText(Messages.WaypointAttachmentTooltipProvider_SourceLbl);
 			l.setBackground(details.getBackground());
 			
+			String src = fwp.getSourceId();
+			try {
+				src = WaypointSourceEngine.INSTANCE.getSource(fwp.getSourceId()).getName(Locale.getDefault());
+			}catch (Exception ex) {}
 			l = new Label(main, SWT.NONE);
-			l.setText(fwp.getSourceId());
+			l.setText(src);
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			l.setBackground(details.getBackground());
 			

@@ -76,7 +76,6 @@ import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.ca.icon.IconSet;
 import org.wcs.smart.common.attachment.AttachmentUtil;
 import org.wcs.smart.common.attachment.ISmartAttachment;
-import org.wcs.smart.common.attachment.SmartAttachmentLabelProvider;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -97,6 +96,7 @@ import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
+import org.wcs.smart.observation.ui.ObservationAttachmentLabelProvider;
 import org.wcs.smart.observation.ui.input.ObservationWizard;
 import org.wcs.smart.observation.ui.input.ObservationWizardDialog;
 import org.wcs.smart.ui.SmartLabelProvider;
@@ -486,8 +486,7 @@ public class IncidentSummaryPage extends EditorPart {
 		l.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false));
 		attachments = new ListViewer(right);
 		attachments.setContentProvider(ArrayContentProvider.getInstance());
-		attachments.setLabelProvider(new SmartAttachmentLabelProvider(){
-			
+		attachments.setLabelProvider(new ObservationAttachmentLabelProvider(){
 			public String getText(Object element) {
 				if (element instanceof ObservationAttachment){
 					return "**" + super.getText(element); //$NON-NLS-1$

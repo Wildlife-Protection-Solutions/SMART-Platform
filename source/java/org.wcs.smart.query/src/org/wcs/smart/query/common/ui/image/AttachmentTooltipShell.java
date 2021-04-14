@@ -72,8 +72,6 @@ public class AttachmentTooltipShell extends SmartShellDialog{
 		results.createTooltip(data, parent);
 		
 		parent.layout(true, true);
-//		int height = parent.computeSize(400, SWT.DEFAULT).y;
-//		if (height > 500) height = 500;
 		shell.setSize(400, 250);
 	}
 

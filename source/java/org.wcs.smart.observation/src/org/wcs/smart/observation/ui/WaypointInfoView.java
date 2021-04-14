@@ -117,7 +117,12 @@ public class WaypointInfoView {
 	};
 	
 	private Composite compThumbnails;
+	private Composite compSignatures;
 	private List<ThumbnailComposite> obsThumbs = null;
+	private Composite innerSignatures;
+	private List<Label> categoryLabels = new ArrayList<>();
+	private List<Label> attributeLabels = new ArrayList<>();
+	private List<Label> attributeValuesLabels = new ArrayList<>();
 	
 	// job to update view
 	private Job updateUiJob = new Job(Messages.WaypointInfoView_UpdateJobName){
@@ -133,6 +138,7 @@ public class WaypointInfoView {
 				return Status.OK_STATUS;
 			}
 			final List<Thumbnail> thumbnails = new ArrayList<Thumbnail>();
+			final List<Thumbnail> signatures = new ArrayList<Thumbnail>();
 
 			Waypoint currentWp = null;
 			
@@ -188,6 +194,7 @@ public class WaypointInfoView {
 						if (currentWp.getAttachments() != null){
 							for(WaypointAttachment att: currentWp.getAttachments()){
 								try{
+									if (att.getSignatureType() != null) att.getSignatureType().getName();
 									att.computeFileLocation(s);
 								}catch (Exception ex){
 									ObservationPlugIn.log(ex.getMessage(), ex);
@@ -202,12 +209,11 @@ public class WaypointInfoView {
 			
 			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 
-
-			final Waypoint lcurrentWp = currentWp;
+			categoryLabels.clear();
+			attributeLabels.clear();
+			attributeValuesLabels.clear();
 			
-			final List<Label> categoryLabels = new ArrayList<Label>();
-			final List<Label> attributeLabels = new ArrayList<Label>();
-			final List<Label> attributeValuesLabels = new ArrayList<Label>();
+			final Waypoint lcurrentWp = currentWp;
 			
 			// update ui with observation information 
 			infoSection.getDisplay().syncExec(new Runnable(){
@@ -218,6 +224,7 @@ public class WaypointInfoView {
 
 					for (Control c : infoSection.getBody().getChildren()) {
 						c.dispose();
+						innerSignatures = null;
 					}
 					if (obsThumbs != null){
 						for (ThumbnailComposite c : obsThumbs ){
@@ -298,13 +305,19 @@ public class WaypointInfoView {
 					}
 					
 			
-					compThumbnails = toolkit.createComposite(infoSection.getBody());
+					compThumbnails = toolkit.createComposite(infoSection.getBody(), SWT.NONE);
 					compThumbnails.setLayout(new GridLayout());
 					compThumbnails.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 					if (showImages && lcurrentWp != null && lcurrentWp.getAttachments() != null && lcurrentWp.getAttachments().size() > 1){
 						toolkit.createLabel(compThumbnails, Messages.WaypointInfoView_LoadingThumbnails); 
 					}
 
+					compSignatures = toolkit.createComposite(infoSection.getBody(), SWT.NONE);
+					compSignatures.setLayout(new GridLayout());
+					((GridLayout)compSignatures.getLayout()).marginWidth = 0;
+					((GridLayout)compSignatures.getLayout()).marginHeight = 0;
+					compSignatures.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+					
 					createHiddenLabels();
 					
 					infoSection.getBody().pack();
@@ -329,7 +342,11 @@ public class WaypointInfoView {
 			//load thumbnails
 			if (currentWp != null && currentWp.getAttachments() != null){
 				for(WaypointAttachment att: currentWp.getAttachments()){
-					thumbnails.add(new Thumbnail(att));
+					if (att.getSignatureType() == null) {
+						thumbnails.add(new Thumbnail(att));
+					}else {
+						signatures.add(new Thumbnail(att));
+					}
 				}
 			}
 			for (ThumbnailComposite com : obsThumbs){
@@ -348,55 +365,43 @@ public class WaypointInfoView {
 							c.createThumbs();
 						}
 						for (Control c : compThumbnails.getChildren()) c.dispose();
+						for (Control c : compSignatures.getChildren()) c.dispose();
+						innerSignatures = null;
 						
 						for (Thumbnail nail : thumbnails){
 							Composite parent = toolkit.createComposite(compThumbnails);
 							nail.createThumbnail(parent);
 						}
-				
-						Listener resize = new Listener(){
-							@Override
-							public void handleEvent(Event event) {
-								
-								int mainWidth = infoSection.getClientArea().width - infoSection.getVerticalBar().getSize().x;
-								
-								for (Label l : categoryLabels){
-									((GridData)l.getLayoutData()).widthHint = mainWidth;
-								}
-								for (Label l : attributeLabels){
-									int x = l.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
-									if (x > 0.5 * mainWidth){
-										x = (int)(0.5 * mainWidth);
-									}
-									((GridData)l.getLayoutData()).widthHint = x;
-								
-								}
-								
-								for (Label l : attributeValuesLabels){
-									int x = l.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
-									if (x > 0.5 * mainWidth){
-										x = (int)(0.5 * mainWidth);
-									}
-									((GridData)l.getLayoutData()).widthHint = x;
-								}
-	
-								
-								infoSection.getBody().layout(true);
-								
-								int width = compThumbnails.getSize().x - infoSection.getVerticalBar().getSize().x-5;
-								int cols = (int)Math.floor(width / 100.0);
-								compThumbnails.setLayout(new GridLayout(cols, false));
-								for (ThumbnailComposite c : obsThumbs){
-									c.updateLayout(cols);
-									((GridData)c.getLayoutData()).widthHint = mainWidth;
-									c.layout(true);
-								}
-								compThumbnails.layout(true);
-								infoSection.reflow(true);
-							}
-						};
 						
-						compThumbnails.addListener(SWT.Resize, resize);
+						if (!signatures.isEmpty()) {
+							
+							Label l = toolkit.createLabel(compSignatures, "", SWT.SEPARATOR | SWT.HORIZONTAL); //$NON-NLS-1$
+							l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+							l = toolkit.createLabel(compSignatures, Messages.WaypointInfoView_SignaturesSection);
+							l.setFont(boldFont);
+							l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+							
+							innerSignatures = toolkit.createComposite(compSignatures);
+							innerSignatures.setLayout(new GridLayout());
+							innerSignatures.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+							for (Thumbnail nail : signatures){
+								Composite parent = toolkit.createComposite(innerSignatures);
+								parent.setLayout(new GridLayout());
+								((GridLayout)parent.getLayout()).marginWidth = 0;
+								((GridLayout)parent.getLayout()).marginHeight = 0;
+								((GridLayout)parent.getLayout()).verticalSpacing = 0;
+								
+								Composite p = toolkit.createComposite(parent);
+								nail.createThumbnail(p);
+								
+								l = toolkit.createLabel(parent, ((WaypointAttachment)nail.getAttachment()).getSignatureType().getName() );
+								l.setLayoutData(new GridData(SWT.CENTER, SWT.FILL, true, false));
+							}
+						}
+						
+						
+						
+
 						compThumbnails.layout(true);
 						
 						infoSection.getBody().pack();
@@ -535,6 +540,54 @@ public class WaypointInfoView {
 		
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		infoSection.setLayoutData(gd);
+		
+		//resize listener
+		Listener resize = new Listener(){
+			@Override
+			public void handleEvent(Event event) {
+				
+				int mainWidth = infoSection.getClientArea().width - infoSection.getVerticalBar().getSize().x;
+				
+				for (Label l : categoryLabels){
+					((GridData)l.getLayoutData()).widthHint = mainWidth;
+				}
+				for (Label l : attributeLabels){
+					int x = l.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
+					if (x > 0.5 * mainWidth){
+						x = (int)(0.5 * mainWidth);
+					}
+					((GridData)l.getLayoutData()).widthHint = x;
+				
+				}
+				
+				for (Label l : attributeValuesLabels){
+					int x = l.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
+					if (x > 0.5 * mainWidth){
+						x = (int)(0.5 * mainWidth);
+					}
+					((GridData)l.getLayoutData()).widthHint = x;
+				}
+
+				
+				infoSection.getBody().layout(true);
+				if (compThumbnails != null) {
+					int width = infoSection.getParent().getSize().x - infoSection.getVerticalBar().getSize().x-5;
+					int cols = (int)Math.floor(width / 105.0);
+					compThumbnails.setLayout(new GridLayout(cols, false));
+					if (innerSignatures != null) innerSignatures.setLayout(new GridLayout(cols, false));
+					for (ThumbnailComposite c : obsThumbs){
+						c.updateLayout(cols);
+						((GridData)c.getLayoutData()).widthHint = mainWidth;
+						c.layout(true);
+					}
+					compThumbnails.layout(true);
+					if (innerSignatures != null) innerSignatures.layout(true);
+				}
+				infoSection.reflow(true);
+			}
+		};
+		
+		infoSection.addListener(SWT.Resize, resize);
 	}
 	
 	

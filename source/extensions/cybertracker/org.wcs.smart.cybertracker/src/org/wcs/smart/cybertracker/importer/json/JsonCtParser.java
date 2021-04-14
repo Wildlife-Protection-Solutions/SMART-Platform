@@ -51,8 +51,10 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.locationtech.jts.geom.Coordinate;
+import org.wcs.smart.SignatureTypeManager;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.SignatureType;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -429,10 +431,20 @@ public class JsonCtParser {
 			}
 			if (key.startsWith(ScreensUtil.RESULT_PHOTO)){
 				waypointAttachments.add(new AttachmentInfo(AttachmentInfo.AttachmentType.PHOTO, (String)e.getValue()));
-			}
-			if (key.startsWith(ScreensUtil.RESULT_AUDIO)) {
+			}else if (key.startsWith(ScreensUtil.RESULT_AUDIO)) {
 				waypointAttachments.add(new AttachmentInfo(AttachmentInfo.AttachmentType.AUDIO, (String)e.getValue()));
+			}else if (key.startsWith(ScreensUtil.RESULT_SIGNATURE)) {
+				String keyId = key.split("_")[2].toLowerCase().trim(); //$NON-NLS-1$
+				
+				SignatureType stype = SignatureTypeManager.INSTANCE.findType(keyId, ca, session);
+				if (stype == null) {
+					warnings.add(MessageFormat.format(Messages.JsonCtParser_SignatureTypeNotFoundWarning, keyId));
+					waypointAttachments.add(new AttachmentInfo(AttachmentInfo.AttachmentType.PHOTO, ((String)e.getValue())));
+				}else {
+					waypointAttachments.add(new AttachmentInfo(AttachmentInfo.AttachmentType.SIGNATURE, ((String)e.getValue()), stype));
+				}
 			}
+			
 			//default values
 			if (key.equalsIgnoreCase(ScreensUtil.RESULT_DEFAULT_ATTRIBUTE_VALUES) ){
 				String jsonDefaults = (String) e.getValue();
@@ -597,7 +609,7 @@ public class JsonCtParser {
 		
 		for (AttachmentInfo value : values){
 			
-			if (value.getType() == AttachmentInfo.AttachmentType.PHOTO) {
+			if (value.getType() == AttachmentInfo.AttachmentType.PHOTO || value.getType() == AttachmentInfo.AttachmentType.SIGNATURE) {
 				//picture object; create a temporary file add it to waypoint observation
 				String fileName = PHOTO_KEY + "_" + imagecnt + "." + JPEG_EXT;   //$NON-NLS-1$//$NON-NLS-2$
 					
@@ -614,6 +626,10 @@ public class JsonCtParser {
 					attachment.setCopyFromLocation(temp);
 					attachment.setFilename(fileName);
 					attachments.add(attachment);
+					
+					if (value.getType() == AttachmentInfo.AttachmentType.SIGNATURE) {
+						attachment.setSignatureType(value.getSignatureType());
+					}
 				}
 			}else if (value.getType() == AttachmentInfo.AttachmentType.AUDIO) {
 				String fileName = AUDIO_KEY + "_" + imagecnt + "." + WAVE_EXT;   //$NON-NLS-1$//$NON-NLS-2$
@@ -746,14 +762,24 @@ public class JsonCtParser {
 	
 	
 	private static class AttachmentInfo{
-		enum AttachmentType {PHOTO, AUDIO};
+		enum AttachmentType {PHOTO, AUDIO, SIGNATURE};
 		
 		private AttachmentType type;
 		private String data;
+		private SignatureType stype;
+		
+		public AttachmentInfo(AttachmentType type, String data, SignatureType stype) {
+			this(type, data);
+			this.stype = stype;
+		}
 		
 		public AttachmentInfo(AttachmentType type, String data) {
 			this.data = data;
 			this.type = type;
+			this.stype = null;
+		}
+		public SignatureType getSignatureType() {
+			return this.stype;
 		}
 		public String getData() {
 			return this.data;

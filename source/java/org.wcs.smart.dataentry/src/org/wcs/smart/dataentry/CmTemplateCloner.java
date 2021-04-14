@@ -28,7 +28,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -36,6 +38,7 @@ import org.hibernate.Interceptor;
 import org.hibernate.query.Query;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
+import org.wcs.smart.ca.SignatureType;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -227,6 +230,16 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 			clonedNode.setCategory(findNewCategory(toCopy.getCategory()));
 		}else{
 			clonedNode.setCategory(null);
+		}
+		if (toCopy.getSignatureUuids() != null) {
+			Set<SignatureType> stypes = new HashSet<>();
+			for (UUID cuuid : toCopy.getSignatureUuids()) {
+				SignatureType temp = new SignatureType();
+				temp.setUuid(cuuid);
+				SignatureType newItem = engine.getNewConservationItem(temp);
+				if (newItem != null) stypes.add(newItem);
+			}
+			clonedNode.setSignatures(stypes);
 		}
 		engine.copyLabels(toCopy, clonedNode);
 		for (CmAttribute att : toCopy.getCmAttributes()){

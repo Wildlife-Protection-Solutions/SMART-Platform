@@ -182,7 +182,7 @@ public class Thumbnail {
 		return createThumbnail(parent, 0, style);
 	}
 	
-	ISmartAttachment getAttachment() {
+	public ISmartAttachment getAttachment() {
 		return this.attachment;
 	}
 	

@@ -17,16 +17,16 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for LanguageListType complex type.
+ * <p>Java class for SignatureTypeList complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="LanguageListType">
+ * &lt;complexType name="SignatureTypeList">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="language" type="{http://www.smartconservationsoftware.org/xml/1.0/dataentry}LanguageType" maxOccurs="unbounded"/>
+ *         &lt;element name="signatureType" type="{http://www.smartconservationsoftware.org/xml/1.0/dataentry}SignatureType" maxOccurs="unbounded"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -36,41 +36,41 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "LanguageListType", propOrder = {
-    "language"
+@XmlType(name = "SignatureTypeList", propOrder = {
+    "signatureType"
 })
-public class LanguageListType {
+public class SignatureTypeList {
 
     @XmlElement(required = true)
-    protected List<LanguageType> language;
+    protected List<SignatureType> signatureType;
 
     /**
-     * Gets the value of the language property.
+     * Gets the value of the signatureType property.
      * 
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the language property.
+     * This is why there is not a <CODE>set</CODE> method for the signatureType property.
      * 
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
-     *    getLanguage().add(newItem);
+     *    getSignatureType().add(newItem);
      * </pre>
      * 
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link LanguageType }
+     * {@link SignatureType }
      * 
      * 
      */
-    public List<LanguageType> getLanguage() {
-        if (language == null) {
-            language = new ArrayList<LanguageType>();
+    public List<SignatureType> getSignatureType() {
+        if (signatureType == null) {
+            signatureType = new ArrayList<SignatureType>();
         }
-        return this.language;
+        return this.signatureType;
     }
 
 }

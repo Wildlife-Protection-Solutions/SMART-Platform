@@ -1339,6 +1339,10 @@
             class="org.wcs.smart.ca.ConservationAreaProperty"
             supportsCcaa="true">
       </class>
+      <class
+            class="org.wcs.smart.ca.SignatureType"
+            supportsCcaa="false">
+      </class>
    </extension>
    <extension
          point="org.locationtech.udig.project.ui.tool">

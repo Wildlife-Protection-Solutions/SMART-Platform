@@ -18,18 +18,19 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for CmExtraDataLabelKeyType complex type.
+ * <p>Java class for SignatureType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="CmExtraDataLabelKeyType">
+ * &lt;complexType name="SignatureType">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="label" type="{http://www.smartconservationsoftware.org/xml/1.0/dataentry}NameType" maxOccurs="unbounded"/>
+ *         &lt;element name="name" type="{http://www.smartconservationsoftware.org/xml/1.0/dataentry}NameType" maxOccurs="unbounded"/>
  *       &lt;/sequence>
- *       &lt;attribute name="key" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="uuid" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="keyid" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -38,29 +39,31 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "CmExtraDataLabelKeyType", propOrder = {
-    "label"
+@XmlType(name = "SignatureType", propOrder = {
+    "name"
 })
-public class CmExtraDataLabelKeyType {
+public class SignatureType {
 
     @XmlElement(required = true)
-    protected List<NameType> label;
-    @XmlAttribute(name = "key")
-    protected String key;
+    protected List<NameType> name;
+    @XmlAttribute(name = "uuid")
+    protected String uuid;
+    @XmlAttribute(name = "keyid")
+    protected String keyid;
 
     /**
-     * Gets the value of the label property.
+     * Gets the value of the name property.
      * 
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the label property.
+     * This is why there is not a <CODE>set</CODE> method for the name property.
      * 
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
-     *    getLabel().add(newItem);
+     *    getName().add(newItem);
      * </pre>
      * 
      * 
@@ -70,35 +73,59 @@ public class CmExtraDataLabelKeyType {
      * 
      * 
      */
-    public List<NameType> getLabel() {
-        if (label == null) {
-            label = new ArrayList<NameType>();
+    public List<NameType> getName() {
+        if (name == null) {
+            name = new ArrayList<NameType>();
         }
-        return this.label;
+        return this.name;
     }
 
     /**
-     * Gets the value of the key property.
+     * Gets the value of the uuid property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getKey() {
-        return key;
+    public String getUuid() {
+        return uuid;
     }
 
     /**
-     * Sets the value of the key property.
+     * Sets the value of the uuid property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setKey(String value) {
-        this.key = value;
+    public void setUuid(String value) {
+        this.uuid = value;
+    }
+
+    /**
+     * Gets the value of the keyid property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getKeyid() {
+        return keyid;
+    }
+
+    /**
+     * Sets the value of the keyid property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setKeyid(String value) {
+        this.keyid = value;
     }
 
 }

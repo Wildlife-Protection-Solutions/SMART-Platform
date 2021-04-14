@@ -23,10 +23,14 @@ package org.wcs.smart.dataentry.dialog.composite;
 
 import java.nio.file.Path;
 import java.text.MessageFormat;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -37,7 +41,9 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
+import org.wcs.smart.SignatureTypeManager;
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.ca.SignatureType;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.ca.icon.IconFile;
@@ -54,6 +60,8 @@ import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.DisplayMode;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.NamedItemLabelProvider;
 
 /**
  * Info composite for {@link CmNode}
@@ -72,6 +80,7 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 	private Button btnCollectMultiple;
 	private Button btnSingleGpsPoint;
 	private ImageSelectionControl imageControl;
+	private CheckboxTableViewer chSignatures;
 	
 	private boolean isGroup;
 	private List<CmAttributeConfig> deletedConfigs;
@@ -279,6 +288,31 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 		
 		addImageRow(container);
 
+		List<SignatureType> sTypes = SignatureTypeManager.INSTANCE.getTypes(session, SmartDB.getCurrentConservationArea());
+		if (!sTypes.isEmpty()) {
+			label = new Label(container, SWT.NONE);
+			label.setText(Messages.CmNodeInfoComposite_SignaturesLabel);
+			label.setToolTipText(Messages.CmNodeInfoComposite_SignaturesTooltip);
+			label.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+			
+			chSignatures = CheckboxTableViewer.newCheckList(container, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
+			chSignatures.setLabelProvider(new NamedItemLabelProvider());
+			chSignatures.setContentProvider(ArrayContentProvider.getInstance());
+			chSignatures.setInput(sTypes);
+			chSignatures.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			((GridData)chSignatures.getControl().getLayoutData()).heightHint = 80;
+			
+			chSignatures.addCheckStateListener(e->{
+				Set<SignatureType> types = new HashSet<>();
+				for (Object x : chSignatures.getCheckedElements()) {
+					if (x instanceof SignatureType) types.add((SignatureType) x);
+				}
+				node.setSignatures(types);
+				fireModelChanged();
+			});
+		}
+		
+		
 		addSourceObjectChangedListener(new ISourceObjectChangedListener() {
 			@Override
 			public void sourceObjectChanged(Object newObject, Language language) {
@@ -413,6 +447,7 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 		return node;
 	}
 
+	@SuppressWarnings("unchecked")
 	public void setSourceObject(CmNode node, Language currentLanguage) {
 		this.node = node;
 		try {
@@ -420,6 +455,14 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 			if (node.getCategory() != null) {
 				if (node.getCategory().getIcon() != null) {
 					loadFiles(node.getCategory().getIcon(), session);
+				}
+				
+				if (chSignatures != null) {
+					chSignatures.setAllChecked(false);
+					Set<UUID> items = node.getSignatureUuids();
+					for (SignatureType t : ((List<SignatureType>)chSignatures.getInput())){
+						if (items.contains(t.getUuid()))chSignatures.setChecked(t, true); 
+					}
 				}
 			}
 		

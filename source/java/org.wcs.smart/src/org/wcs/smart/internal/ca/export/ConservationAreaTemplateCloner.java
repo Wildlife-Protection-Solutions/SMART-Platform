@@ -35,6 +35,7 @@ import javax.persistence.criteria.Root;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
+import org.wcs.smart.SignatureTypeManager;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
@@ -42,6 +43,7 @@ import org.wcs.smart.ca.ConservationAreaProperty;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.ca.Rank;
+import org.wcs.smart.ca.SignatureType;
 import org.wcs.smart.ca.SmartStyle;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -108,7 +110,25 @@ public class ConservationAreaTemplateCloner implements
 		
 		progress.subTask(Messages.ConservationAreaTemplateCloner_CopyingProperties);
 		cloneProperties(engine);
+		cloneSignatures(engine);
 		progress.worked(1);
+	}
+	
+	
+	private void cloneSignatures(ConservationAreaClonerEngine engine) {
+		List<SignatureType> types = SignatureTypeManager.INSTANCE.getTypes(engine.getSession(), engine.getTemplateCa());
+		
+		for (SignatureType t : types) {
+			SignatureType clone = new SignatureType();
+			engine.copyLabels(t, clone);
+			clone.setConservationArea(engine.getNewCa());
+			clone.setKeyId(t.getKeyId());
+			SignatureTypeManager.INSTANCE.saveType(clone, engine.getSession());
+			
+			engine.addConservationItemMapping(t, clone);
+		}
+		engine.getSession().flush();
+		
 	}
 	
 	/**

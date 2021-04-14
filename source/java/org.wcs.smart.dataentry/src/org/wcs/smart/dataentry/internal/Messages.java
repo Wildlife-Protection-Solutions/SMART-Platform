@@ -62,6 +62,8 @@ public class Messages extends NLS {
 	public static String CmNodeInfoComposite_PhotoRequiredTooltip;
 	public static String CmNodeInfoComposite_RecordSingleGpsPoint;
 	public static String CmNodeInfoComposite_RecordSingleGpsPointTooltip;
+	public static String CmNodeInfoComposite_SignaturesLabel;
+	public static String CmNodeInfoComposite_SignaturesTooltip;
 	public static String CmRootNodeInfoComposite_IconSetOption;
 	public static String CmRootNodeInfoComposite_InstantGps;
 	public static String CmRootNodeInfoComposite_InstantGpsTooltip;
@@ -104,6 +106,7 @@ public class Messages extends NLS {
 	public static String CmXmlToSmartImporter_ReadFile_Error;
 	public static String CmXmlToSmartImporter_Reading;
 	public static String CmXmlToSmartImporter_Saving;
+	public static String CmXmlToSmartImporter_SignatureTypeNotFound;
 	public static String CmXmlToSmartImporter_Validating;
 	public static String CmXmlToSmartImporter_Warn_DefaultConfigMissing;
 	public static String CmXmlToSmartImporter_Warn_NoConfigAssigned;

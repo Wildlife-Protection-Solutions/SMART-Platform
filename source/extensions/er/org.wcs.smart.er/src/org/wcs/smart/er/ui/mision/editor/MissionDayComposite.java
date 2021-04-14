@@ -114,6 +114,7 @@ import org.wcs.smart.gpx.GPSDataImport;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.common.importwp.ImportGpsDataWizard;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.ui.AttachmentCellEditor;
 import org.wcs.smart.observation.ui.ObservationCellEditor;
@@ -633,7 +634,12 @@ public class MissionDayComposite {
 						wp.getSamplingUnit().getId();
 					}
 					//lazy load
-					wp.getWaypoint().getAllObservations();				
+					wp.getWaypoint().getAllObservations();	
+					if (wp.getWaypoint().getAttachments() != null) {
+						for (WaypointAttachment wa : wp.getWaypoint().getAttachments()){
+							if (wa.getSignatureType() != null) wa.getSignatureType().getName();
+						}
+					}
 				}
 				observationTable.setInput(missionDay.getWaypoints());
 				observationTable.refresh();

@@ -256,11 +256,23 @@ public class Upgrader630To700 implements IDatabaseUpgrader {
 				 
 				"DROP FUNCTION smart.tempuuid", //$NON-NLS-1$
 				
+				//conservation area properties for id patterns
 				"CREATE TABLE smart.conservation_area_property(uuid char(16) for bit data not null, ca_uuid char(16) for bit data not null, pkey varchar(256) not null, value varchar(1024), primary key (uuid), unique(ca_uuid, pkey))", //$NON-NLS-1$
 				"ALTER TABLE smart.conservation_area_property ADD CONSTRAINT caproperty_ca_uuid FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 				"GRANT ALL PRIVILEGES ON smart.conservation_area_property TO admin,manager,analyst,data_entry", //$NON-NLS-1$
 				
 				"alter table smart.patrol alter column id set data type varchar(256)", //$NON-NLS-1$
+				
+				//signatures
+				"CREATE TABLE smart.signature_type (uuid char(16) for bit data not null, ca_uuid char(16) for bit data not null, keyid varchar(128) not null, primary key (uuid), unique(ca_uuid, keyid))", //$NON-NLS-1$
+				"ALTER TABLE smart.WP_ATTACHMENTS add column signature_type_uuid char(16) for bit data", //$NON-NLS-1$
+				"ALTER TABLE smart.WP_ATTACHMENTS  ADD CONSTRAINT wp_attachments_signature_type_fk FOREIGN KEY (signature_type_uuid) REFERENCES smart.signature_type(uuid) ON DELETE SET NULL ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"ALTER TABLE smart.signature_type  ADD CONSTRAINT signature_type_ca_uuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON smart.signature_type TO admin,manager,analyst,data_entry", //$NON-NLS-1$
+				
+				"ALTER TABLE smart.cm_node add column signatures long varchar" //$NON-NLS-1$
+				
+				
 		};
 
 		for (String s : sql) {
@@ -430,7 +442,7 @@ public class Upgrader630To700 implements IDatabaseUpgrader {
 					IconUtils.upgradeDataModel(c, iconuuid, icon[5], cuuid);
 					
 					//end of updates
-					if (icon[0].equalsIgnoreCase("xanthopsar_flavus")) break; //$NON-NLS-1$
+					if (icon[0].equalsIgnoreCase("yellow_billed_ox_pecker")) break; //$NON-NLS-1$
 				}
 				
 			}

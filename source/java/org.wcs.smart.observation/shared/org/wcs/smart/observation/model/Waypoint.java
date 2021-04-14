@@ -359,6 +359,7 @@ public class Waypoint extends UuidItem {
 
 					att.setCopyFromLocation(tmpLocation);
 					att.setFilename(sp.getFilename());
+					att.setSignatureType(sp.getSignatureType());
 					att.setWaypoint(wp);
 					wp.getAttachments().add(att);
 				} catch (Exception ex) {

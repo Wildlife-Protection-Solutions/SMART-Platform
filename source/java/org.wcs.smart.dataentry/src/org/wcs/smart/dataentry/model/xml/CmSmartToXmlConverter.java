@@ -25,6 +25,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.MessageFormat;
+import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -37,6 +38,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.ca.SignatureType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.DmObject;
@@ -62,6 +64,7 @@ import org.wcs.smart.dataentry.model.xml.generated.ListItemType;
 import org.wcs.smart.dataentry.model.xml.generated.NameType;
 import org.wcs.smart.dataentry.model.xml.generated.NodeType;
 import org.wcs.smart.dataentry.model.xml.generated.NodeTypeList;
+import org.wcs.smart.dataentry.model.xml.generated.SignatureTypeList;
 import org.wcs.smart.dataentry.model.xml.generated.TreeNodeType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -124,8 +127,35 @@ public class CmSmartToXmlConverter {
 				monitor.worked(1);
 				if (monitor.isCanceled()) return null;
 				
+				
+				//find and write signatures
+				Set<UUID> signatures = new HashSet<>();
+				ArrayDeque<CmNode> nodes = new ArrayDeque<>();
+				nodes.addAll(cm.getNodes());
+				while(!nodes.isEmpty()) {
+					CmNode node = nodes.remove();
+					signatures.addAll(node.getSignatureUuids());
+					nodes.addAll(node.getChildren());
+				}
+				Set<UUID> validsignatures = new HashSet<>();
+				if (!signatures.isEmpty()) {
+					xml.setSignatures(new SignatureTypeList());
+					for (UUID sig : signatures) {
+						SignatureType stype = session.get(SignatureType.class, sig);
+						if (stype != null) {
+							org.wcs.smart.dataentry.model.xml.generated.SignatureType xtype = new org.wcs.smart.dataentry.model.xml.generated.SignatureType();
+							xtype.setUuid(UuidUtils.uuidToString(stype.getUuid()));
+							setNames(xtype.getName(), stype.getNames(), null, llookup);
+							xtype.setKeyid(stype.getKeyId());
+							xml.getSignatures().getSignatureType().add(xtype);
+							validsignatures.add(stype.getUuid());
+						}
+					}
+				}
+				
+				//nodes
 				monitor.subTask(Messages.CmSmartToXmlConverter_ProcessCmNodes);
-				processCmNodes(cm, xml, llookup, session, includeDmIcon, monitor);
+				processCmNodes(cm, xml, llookup, session, includeDmIcon, validsignatures, monitor);
 				monitor.worked(1);
 				if (monitor.isCanceled()) return null;
 				
@@ -239,19 +269,22 @@ public class CmSmartToXmlConverter {
 
 	private static void processCmNodes(ConfigurableModel cm,
 			org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xml,
-			HashMap<String, Language> llookup, Session session, boolean includeDmIcon, IProgressMonitor monitor) {
+			HashMap<String, Language> llookup, Session session, boolean includeDmIcon, 
+			Set<UUID> validsignatures, IProgressMonitor monitor) {
 
 		NodeTypeList ntl = new NodeTypeList();
 		xml.setNodes(ntl);
 		if (cm.getNodes() != null) {
 			for (CmNode node : cm.getNodes()){
-				processCmNode(node, ntl.getNode(), llookup, session, includeDmIcon, monitor);
+				processCmNode(node, ntl.getNode(), llookup, session, includeDmIcon, validsignatures, monitor);
 			}
 		}
 	}
 
 	private static void processCmNode(CmNode node, List<NodeType> xmlNodes,
-			HashMap<String, Language> llookup, Session session, boolean includeDmIcon, IProgressMonitor monitor) {
+			HashMap<String, Language> llookup, Session session, boolean includeDmIcon, 
+			Set<UUID> validsignatures,
+			IProgressMonitor monitor) {
 
 		monitor.subTask(MessageFormat.format(Messages.CmSmartToXmlConverter_ProcessingNode, node.getName()));
 		NodeType nt = new NodeType();
@@ -260,7 +293,16 @@ public class CmSmartToXmlConverter {
 			nt.setCategoryKey(node.getCategory().getKeyId());
 			nt.setCategoryHkey(node.getCategory().getHkey());
 			nt.setDmUuid(toString(node.getCategory().getUuid()));
+			
+			for (UUID uuid : node.getSignatureUuids()) {
+				if (validsignatures.contains(uuid)) {
+					org.wcs.smart.dataentry.model.xml.generated.SignatureType xs = new org.wcs.smart.dataentry.model.xml.generated.SignatureType();
+					xs.setUuid(UuidUtils.uuidToString(uuid));
+					nt.getSignatureType().add(xs);
+				}
+			}
 		}
+		
 		nt.setPhotoAllowed(node.isPhotoAllowed());
 		nt.setPhotoRequired(node.isPhotoRequired());
 		if (node.getDisplayMode() != null) {
@@ -340,7 +382,7 @@ public class CmSmartToXmlConverter {
 		
 		if (node.getChildren() != null) {
 			for (CmNode cn : node.getChildren()) {
-				processCmNode(cn, nt.getNode(), llookup, session, includeDmIcon, monitor);
+				processCmNode(cn, nt.getNode(), llookup, session, includeDmIcon, validsignatures, monitor);
 				if (monitor.isCanceled()) return;
 			}
 		}

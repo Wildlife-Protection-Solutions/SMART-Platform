@@ -28,8 +28,10 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -42,10 +44,12 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
+import org.wcs.smart.SignatureTypeManager;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
+import org.wcs.smart.ca.SignatureType;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -109,6 +113,8 @@ public class CmXmlToSmartImporter {
 	private List<String> warnings;
 	private Map<String, UuidItem> dataMap;
 
+	private HashMap<String, SignatureType> signatures;
+	
 	/**
 	 * 
 	 * @param xmlFile
@@ -171,6 +177,7 @@ public class CmXmlToSmartImporter {
 		treeNodeLookup = new HashMap<String, AttributeTreeNode>();
 		warnings = new ArrayList<String>();
 		dataMap = new HashMap<>();
+		signatures = new HashMap<>();
 		
 		compatibilityConfigIndexes = new HashMap<>();
 		
@@ -194,6 +201,32 @@ public class CmXmlToSmartImporter {
 			cm.setDisplayMode(getDisplayMode(xmlCm.getDisplayMode()));
 			cm.setInstantGps(xmlCm.isInstantGps());
 			cm.setPhotoFirst(xmlCm.isPhotoFirst());
+			
+			//signatures
+			List<SignatureType> types = SignatureTypeManager.INSTANCE.getTypes(session,  SmartDB.getCurrentConservationArea());
+			
+			if (xmlCm.getSignatures() != null) {
+				for (org.wcs.smart.dataentry.model.xml.generated.SignatureType st : xmlCm.getSignatures().getSignatureType()) {
+					String keyId = st.getKeyid();
+					
+					SignatureType existing = null;
+					for (SignatureType t : types) {
+						if (t.getKeyId().equalsIgnoreCase(keyId)) {
+							existing = t;
+							break;
+						}
+					}
+					if (existing == null) {
+						warnings.add(MessageFormat.format(Messages.CmXmlToSmartImporter_SignatureTypeNotFound, keyId));
+						existing = SignatureTypeManager.INSTANCE.createType(SmartDB.getCurrentConservationArea());
+						existing.setKeyId(keyId);
+						updateNames(existing, st.getName());
+						session.saveOrUpdate(existing);
+					}
+					signatures.put(st.getUuid(), existing);
+				}
+			}
+			
 			//icon set
 			if (xmlCm.getIconSet() != null && !xmlCm.getIconSet().isEmpty()) {
 				IconSet is = QueryFactory.buildQuery(session, IconSet.class, 
@@ -557,6 +590,14 @@ public class CmXmlToSmartImporter {
 					continue;
 				}
 				cmNode.setCategory(c);
+				
+				if (xmlNode.getSignatureType() != null) {
+					Set<SignatureType> bits = new HashSet<>();
+					for (org.wcs.smart.dataentry.model.xml.generated.SignatureType s : xmlNode.getSignatureType()) {
+						bits.add(signatures.get(s.getUuid()));
+					}
+					cmNode.setSignatures(bits);
+				}
 			}
 			cmNode.setPhotoAllowed(xmlNode.isPhotoAllowed());
 			cmNode.setPhotoRequired(xmlNode.isPhotoRequired());

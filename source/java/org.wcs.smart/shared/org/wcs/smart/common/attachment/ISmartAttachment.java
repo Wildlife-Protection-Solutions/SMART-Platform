@@ -33,7 +33,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
 
 /**
- * Interface that represents attachments used within {@link AttachmentComposite}.
+ * Interface that represents attachments.
  * Classes that implement this interface will also be handled by {@link AttachmentInterceptor}
  * if one is attached to hibernate session in order to save related files
  * is datastore.

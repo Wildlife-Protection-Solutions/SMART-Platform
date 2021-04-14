@@ -394,7 +394,6 @@ public class AttachmentTable extends Composite implements Listener {
 			private static final String LAST_SELECTION_INDEX_KEY = "last_selection_index"; //$NON-NLS-1$
 			IAttachmentResultItem file;
 			Thumbnail thumb;
-//			String tooltip;
 			Composite thumbGui;
 			
 			boolean isSelected;
@@ -403,7 +402,6 @@ public class AttachmentTable extends Composite implements Listener {
 			
 			public ThumbInfo(IAttachmentResultItem file){
 				this.file = file;
-//				tooltip = file.getHeaderString();
 			}
 			
 			public void createThumb(){

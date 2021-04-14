@@ -30,9 +30,11 @@ import org.eclipse.swt.widgets.Event;
 import org.hibernate.Session;
 import org.wcs.smart.common.attachment.AttachmentComposite;
 import org.wcs.smart.common.attachment.IAttachmentsChangeListener;
+import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
+import org.wcs.smart.observation.ui.ObservationAttachmentLabelProvider;
 
 /**
  * Incident attachments composite.
@@ -56,6 +58,20 @@ public class IncidentAttachmentComposite extends AbstractIncidentComposite {
 			@Override
 			protected WaypointAttachment createNewAttachement() {
 				return new WaypointAttachment();
+			}
+			@Override
+			protected void createControls() {
+				super.createControls();
+				tblAttachments.setLabelProvider(new ObservationAttachmentLabelProvider(){
+					@Override
+					public String getText(Object element) {
+						String text = super.getText(element);
+						if (element instanceof ISmartAttachment){
+							if (other.contains(element)) text = "**" + text; //$NON-NLS-1$
+						}
+						return text;
+					}
+				});
 			}
 		};
 		attachmentComp.addAttachmentsChangeListener(new IAttachmentsChangeListener() {

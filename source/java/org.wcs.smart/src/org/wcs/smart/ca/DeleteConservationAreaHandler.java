@@ -55,7 +55,13 @@ public class DeleteConservationAreaHandler implements ICaDeleteHandler{
 		deleteStations(ca, session);
 		monitor.subTask(Messages.DeleteConservationAreaHandler_DeletePropertiesProgress);
 		deleteCaProperties(ca, session);
-
+		deleteSignatures(ca, session);
+	}
+	
+	private void deleteSignatures(ConservationArea ca, Session session) throws Exception{
+		Query<?> q = session.createQuery("delete from SignatureType where conservationArea = :ca"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.executeUpdate();
 	}
 	
 	private void deleteCaProperties(ConservationArea ca, Session session) throws Exception{

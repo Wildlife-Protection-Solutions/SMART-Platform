@@ -15,6 +15,7 @@ public class Messages extends NLS {
 	public static String JsonCtParser_NoFeatureFound;
 	public static String JsonCtParser_ObserverNotFound;
 	public static String JsonCtParser_ParseError;
+	public static String JsonCtParser_SignatureTypeNotFoundWarning;
 	public static String JsonFileProcessor_DataMissing;
 	public static String JsonFileProcessor_DataSavedRefreshError;
 	public static String JsonFileProcessor_ErrorMessage;

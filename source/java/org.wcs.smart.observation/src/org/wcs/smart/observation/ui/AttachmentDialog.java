@@ -89,6 +89,22 @@ public class AttachmentDialog extends SmartStyledTitleDialog{
 			protected WaypointAttachment createNewAttachement() {
 				return new WaypointAttachment();
 			}
+
+			@Override
+			protected void createControls() {
+				super.createControls();
+				tblAttachments.setLabelProvider(new ObservationAttachmentLabelProvider(){
+					@Override
+					public String getText(Object element) {
+						String text = super.getText(element);
+						if (element instanceof ISmartAttachment){
+							if (other.contains(element)) text = "**" + text; //$NON-NLS-1$
+						}
+						return text;
+					}
+				});
+			}
+
 		};
 		attachmentComposite.addAttachmentsChangeListener(new IAttachmentsChangeListener() {
 			@Override

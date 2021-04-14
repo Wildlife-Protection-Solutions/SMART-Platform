@@ -70,14 +70,14 @@ import org.wcs.smart.ui.properties.DialogConstants;
  */
 public abstract class AttachmentComposite<T extends ISmartAttachment> extends Composite {
 
-	private TableViewer tblAttachments;
+	protected TableViewer tblAttachments;
 	
-	private ArrayList<T> attachments = new ArrayList<T>();
-	private List<ISmartAttachment> other = new ArrayList<ISmartAttachment>();
-	private List<ISmartAttachment> all = new ArrayList<ISmartAttachment>();
+	protected ArrayList<T> attachments = new ArrayList<T>();
+	protected List<ISmartAttachment> other = new ArrayList<ISmartAttachment>();
+	protected List<ISmartAttachment> all = new ArrayList<ISmartAttachment>();
 	
-	private Button btnRemove, btnOpen;
-	private MenuItem miRemove, miOpen;
+	protected Button btnRemove, btnOpen;
+	protected MenuItem miRemove, miOpen;
 	
 	private List<IAttachmentsChangeListener> attachmentsChangeListeners = new ArrayList<IAttachmentsChangeListener>();
 
@@ -86,7 +86,7 @@ public abstract class AttachmentComposite<T extends ISmartAttachment> extends Co
 		createControls();
 	}
 
-	private void createControls() {
+	protected void createControls() {
 		this.setLayout(new GridLayout(2, false));
 		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridLayout)getLayout()).marginWidth = 0;

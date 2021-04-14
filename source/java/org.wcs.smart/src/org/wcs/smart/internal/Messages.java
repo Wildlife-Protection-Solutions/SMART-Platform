@@ -1234,6 +1234,8 @@ public class Messages extends NLS {
 	public static String SelectPointOnMapDialog_SelectMapPointdialogTitle;
 	public static String ShowDataModelPropertyPageHandler_Error_CouldNotLoadDataModel;
 	public static String ShowDataModelPropertyPageHandler_Progress_LoadingDataModel;
+	public static String SignatureTypeManager_DefaultSignatureTypeName;
+	public static String SignatureTypeManager_DeleteError;
 	public static String SmartAreaWizardPage_CrossCaErrorMessage;
 	public static String SmartAreaWizardPage_Error_LoadingSmartResources;
 	public static String SmartAreaWizardPage_SmartLayerConnectionPage_Title;

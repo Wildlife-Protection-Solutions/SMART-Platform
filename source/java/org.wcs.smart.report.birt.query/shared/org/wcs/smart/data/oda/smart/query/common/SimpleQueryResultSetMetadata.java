@@ -91,6 +91,8 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 		//add attachment column if this is an attachment dataset
 		if (hasAttachment) {
 			vis.add(AttachmentFilenameQueryColumn.INSTANCE);
+			vis.add(SignatureTypeQueryColumn.KEY_COLUMN);
+			vis.add(SignatureTypeQueryColumn.NAME_COLUMN);
 			vis.add(AttachmentByteQueryColumn.INSTANCE);
 		}
 			

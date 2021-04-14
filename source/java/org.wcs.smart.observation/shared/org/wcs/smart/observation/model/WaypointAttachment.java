@@ -33,6 +33,7 @@ import javax.persistence.Transient;
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.SignatureType;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.util.UuidUtils;
 
@@ -50,7 +51,8 @@ public class WaypointAttachment extends ISmartAttachment {
 	private static final long serialVersionUID = 1L;
 	
 	private Waypoint wp;
-
+	private SignatureType signatureType; 
+	
 	public WaypointAttachment(){
 		
 	}
@@ -63,6 +65,15 @@ public class WaypointAttachment extends ISmartAttachment {
 	public void setWaypoint(Waypoint wp){
 		this.wp = wp;
 		super.attachmentFile = null;
+	}
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="signature_type_uuid", referencedColumnName="uuid")
+	public SignatureType getSignatureType(){
+		return this.signatureType;
+	}
+	public void setSignatureType(SignatureType stype){
+		this.signatureType = stype;
 	}
 
 	
