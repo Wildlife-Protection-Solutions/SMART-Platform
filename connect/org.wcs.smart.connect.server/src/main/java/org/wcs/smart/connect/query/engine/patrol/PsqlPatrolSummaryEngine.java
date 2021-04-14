@@ -1977,7 +1977,7 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine implements ISum
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
 		sql.append("ca_uuid UUID,"); //$NON-NLS-1$
 		sql.append("p_uuid UUID,"); //$NON-NLS-1$
-		sql.append("p_id varchar(32),"); //$NON-NLS-1$
+		sql.append("p_id varchar(256),"); //$NON-NLS-1$
 		sql.append("p_station_uuid UUID,"); //$NON-NLS-1$
 		sql.append("p_team_uuid UUID,"); //$NON-NLS-1$
 		sql.append("p_objective varchar(8192),"); //$NON-NLS-1$

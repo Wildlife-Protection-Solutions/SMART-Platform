@@ -354,7 +354,7 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
 		sql.append("ca_uuid uuid,"); //$NON-NLS-1$
 		sql.append("p_uuid uuid,"); //$NON-NLS-1$
-		sql.append("p_id varchar(32),"); //$NON-NLS-1$
+		sql.append("p_id varchar(256),"); //$NON-NLS-1$
 		sql.append("p_station_uuid uuid,"); //$NON-NLS-1$
 		sql.append("p_team_uuid uuid,"); //$NON-NLS-1$
 		sql.append("p_objective varchar(8192),"); //$NON-NLS-1$
