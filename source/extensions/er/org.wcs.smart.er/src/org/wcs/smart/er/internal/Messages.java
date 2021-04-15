@@ -869,6 +869,8 @@ public class Messages extends NLS {
 	public static String XMLtoMissionConverter_NoListItemsFound;
 
 	public static String XMLtoMissionConverter_ObserverNotFound;
+
+	public static String XMLtoMissionConverter_SignatureTypeNotFound;
 	
 	static {
 		// initialize resource bundle

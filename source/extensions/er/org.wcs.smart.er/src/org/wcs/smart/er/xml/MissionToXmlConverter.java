@@ -32,6 +32,7 @@ import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyWaypoint;
+import org.wcs.smart.er.xml.model.missions.v12.AttachmentType;
 import org.wcs.smart.er.xml.model.missions.v12.MembersType;
 import org.wcs.smart.er.xml.model.missions.v12.MissionDayType;
 import org.wcs.smart.er.xml.model.missions.v12.MissionPropertyValuesType;
@@ -192,7 +193,12 @@ public class MissionToXmlConverter {
 		xml.setY(wp.getWaypoint().getY());
 		
 		for (WaypointAttachment attach : wp.getWaypoint().getAttachments()){
-			xml.getAttachments().add(attach.getFilename());
+			AttachmentType xmlattach = new AttachmentType();
+			xmlattach.setFilename(attach.getFilename());
+			if (attach.getSignatureType() != null) {
+				xmlattach.setSignatureTypeKey(attach.getSignatureType().getKeyId());
+			}
+			xml.getAttachments().add(xmlattach);
 		}
 		
 		for (WaypointObservationGroup g : wp.getWaypoint().getObservationGroups()) {
@@ -214,7 +220,9 @@ public class MissionToXmlConverter {
 		xml.setCategoryKey(observation.getCategory().getHkey());
 		
 		for (ObservationAttachment attach : observation.getAttachments()){
-			xml.getAttachments().add(attach.getFilename());
+			AttachmentType xmlattach = new AttachmentType();
+			xmlattach.setFilename(attach.getFilename());
+			xml.getAttachments().add(xmlattach);
 		}
 		
 		if (observation.getObserver() != null){

@@ -15,16 +15,16 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for SurveyType complex type.
+ * <p>Java class for AttachmentType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="SurveyType">
+ * &lt;complexType name="AttachmentType">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;attribute name="id" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="surveyDesignKeyId" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="filename" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="signatureTypeKey" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -33,60 +33,60 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "SurveyType")
-public class SurveyType {
+@XmlType(name = "AttachmentType")
+public class AttachmentType {
 
-    @XmlAttribute(name = "id")
-    protected String id;
-    @XmlAttribute(name = "surveyDesignKeyId")
-    protected String surveyDesignKeyId;
+    @XmlAttribute(name = "filename")
+    protected String filename;
+    @XmlAttribute(name = "signatureTypeKey")
+    protected String signatureTypeKey;
 
     /**
-     * Gets the value of the id property.
+     * Gets the value of the filename property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getId() {
-        return id;
+    public String getFilename() {
+        return filename;
     }
 
     /**
-     * Sets the value of the id property.
+     * Sets the value of the filename property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setId(String value) {
-        this.id = value;
+    public void setFilename(String value) {
+        this.filename = value;
     }
 
     /**
-     * Gets the value of the surveyDesignKeyId property.
+     * Gets the value of the signatureTypeKey property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getSurveyDesignKeyId() {
-        return surveyDesignKeyId;
+    public String getSignatureTypeKey() {
+        return signatureTypeKey;
     }
 
     /**
-     * Sets the value of the surveyDesignKeyId property.
+     * Sets the value of the signatureTypeKey property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setSurveyDesignKeyId(String value) {
-        this.surveyDesignKeyId = value;
+    public void setSignatureTypeKey(String value) {
+        this.signatureTypeKey = value;
     }
 
 }

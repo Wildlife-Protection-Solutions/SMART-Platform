@@ -58,7 +58,7 @@ targetNamespace="http://www.smartconservationsoftware.org/xml/1.2/mission">
     		<element name="comment" type="string" maxOccurs="1"
     			minOccurs="0">
     		</element>
-    		<element name="attachments" type="string"
+    		<element name="attachments" type="tns:AttachmentType"
     			maxOccurs="unbounded" minOccurs="0">
     		</element>
     		<element name="groups"
@@ -77,7 +77,7 @@ targetNamespace="http://www.smartconservationsoftware.org/xml/1.2/mission">
     			type="tns:WaypointObservationAttributeType" maxOccurs="unbounded"
     			minOccurs="0">
     		</element>
-    		<element name="attachments" type="string"
+    		<element name="attachments" type="tns:AttachmentType"
     			maxOccurs="unbounded" minOccurs="0">
     		</element>
     		<element name="observer" type="tns:MembersType" maxOccurs="1" minOccurs="0"></element>
@@ -126,5 +126,10 @@ targetNamespace="http://www.smartconservationsoftware.org/xml/1.2/mission">
     	<sequence>
     		<element name="observations" type="tns:WaypointObservationType" maxOccurs="unbounded" minOccurs="0"></element>
     	</sequence>
+    </complexType>
+
+    <complexType name="AttachmentType">
+    	<attribute name="filename" type="string"></attribute>
+    	<attribute name="signatureTypeKey" type="string"></attribute>
     </complexType>
 </schema>
