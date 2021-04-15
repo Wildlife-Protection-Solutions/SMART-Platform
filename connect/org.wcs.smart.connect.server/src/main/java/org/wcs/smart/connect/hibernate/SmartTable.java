@@ -59,6 +59,7 @@ import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.ca.Rank;
+import org.wcs.smart.ca.SignatureType;
 import org.wcs.smart.ca.SmartStyle;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.ca.UuidItem;
@@ -489,6 +490,8 @@ public enum SmartTable {
 	
 	COMMUNITY_WAYPOINT(SmartCollectWaypoint.class, ".waypoint.conservationArea"),
 	COMMUNITY_PACKAGE(SmartCollectPackage.class, null),
+	
+	SIGNATURE_TYPE(SignatureType.class, null),
 	;
 	
 	public Class<?> hibernateClass;

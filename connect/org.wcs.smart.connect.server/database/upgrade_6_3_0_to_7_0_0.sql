@@ -941,6 +941,23 @@ ALTER TABLE SMART.conservation_area_property ADD FOREIGN KEY (ca_uuid) REFERENCE
 
 CREATE TRIGGER trg_conservation_area_property AFTER INSERT OR UPDATE OR DELETE ON smart.conservation_area_property FOR EACH ROW execute procedure connect.trg_changelog_common();
 
+
+-- additions signature data types
+CREATE TABLE smart.signature_type (
+  uuid uuid not null, 
+  ca_uuid uuid not null, 
+  keyid varchar(128) not null, 
+  primary key (uuid), 
+  unique(ca_uuid, keyid)
+);
+
+ALTER TABLE smart.WP_ATTACHMENTS add column signature_type_uuid uuid;
+
+ALTER TABLE smart.WP_ATTACHMENTS ADD FOREIGN KEY (signature_type_uuid) REFERENCES smart.signature_type(uuid) ON DELETE SET NULL ON UPDATE RESTRICT DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.signature_type ADD FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.cm_node add column signatures varchar;
+
+CREATE TRIGGER trg_signature_type AFTER INSERT OR UPDATE OR DELETE ON smart.signature_type FOR EACH ROW execute procedure connect.trg_changelog_common();			
 				
 
 ------------ VERSIONS ------------
