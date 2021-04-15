@@ -15,16 +15,16 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for TrackType complex type.
+ * <p>Java class for AttachmentType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="TrackType">
+ * &lt;complexType name="AttachmentType">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;attribute name="geom" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="distance" type="{http://www.w3.org/2001/XMLSchema}double" />
+ *       &lt;attribute name="filename" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="signatureTypeKey" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -33,60 +33,60 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "TrackType")
-public class TrackType {
+@XmlType(name = "AttachmentType")
+public class AttachmentType {
 
-    @XmlAttribute(name = "geom")
-    protected String geom;
-    @XmlAttribute(name = "distance")
-    protected Double distance;
+    @XmlAttribute(name = "filename")
+    protected String filename;
+    @XmlAttribute(name = "signatureTypeKey")
+    protected String signatureTypeKey;
 
     /**
-     * Gets the value of the geom property.
+     * Gets the value of the filename property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getGeom() {
-        return geom;
+    public String getFilename() {
+        return filename;
     }
 
     /**
-     * Sets the value of the geom property.
+     * Sets the value of the filename property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setGeom(String value) {
-        this.geom = value;
+    public void setFilename(String value) {
+        this.filename = value;
     }
 
     /**
-     * Gets the value of the distance property.
+     * Gets the value of the signatureTypeKey property.
      * 
      * @return
      *     possible object is
-     *     {@link Double }
+     *     {@link String }
      *     
      */
-    public Double getDistance() {
-        return distance;
+    public String getSignatureTypeKey() {
+        return signatureTypeKey;
     }
 
     /**
-     * Sets the value of the distance property.
+     * Sets the value of the signatureTypeKey property.
      * 
      * @param value
      *     allowed object is
-     *     {@link Double }
+     *     {@link String }
      *     
      */
-    public void setDistance(Double value) {
-        this.distance = value;
+    public void setSignatureTypeKey(String value) {
+        this.signatureTypeKey = value;
     }
 
 }

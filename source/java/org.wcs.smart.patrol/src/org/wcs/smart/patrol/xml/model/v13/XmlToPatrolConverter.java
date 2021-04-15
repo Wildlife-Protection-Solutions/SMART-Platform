@@ -44,9 +44,11 @@ import javax.xml.bind.Unmarshaller;
 
 import org.hibernate.Session;
 import org.hibernate.query.Query;
+import org.wcs.smart.SignatureTypeManager;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.NamedItem;
+import org.wcs.smart.ca.SignatureType;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
@@ -473,8 +475,21 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 		if (attachmentLocation != null){
 			if (xml.getAttachments().size() > 0){
 				wp.setAttachments(new ArrayList<WaypointAttachment>());
-				for ( String filename : xml.getAttachments()){
+				for ( AttachmentType attach : xml.getAttachments()){
+					String filename = attach.getFilename();
+					
 					WaypointAttachment att = new WaypointAttachment();
+					
+					if (attach.getSignatureTypeKey() != null && !attach.getSignatureTypeKey().trim().isEmpty()) {
+						SignatureType stype = SignatureTypeManager.INSTANCE.findType(attach.getSignatureTypeKey(), ca, session);
+						if (stype != null) {
+							att.setSignatureType(stype);
+						}else {
+							warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_SignatureTypeKeyNotFound, attach.getSignatureTypeKey()));
+						}
+						
+					}
+					
 					Path f = attachmentLocation.resolve(PatrolXmlManager.ATTACHMENT_DIR_NAME)
 							.resolve(filename );
 					if (!Files.exists(f)){
@@ -518,7 +533,8 @@ public class XmlToPatrolConverter implements IXmlToPatrolConverter{
 		if (attachmentLocation != null){
 			if (xml.getAttachments().size() > 0){
 				ob.setAttachments(new ArrayList<ObservationAttachment>());
-				for ( String filename : xml.getAttachments()){
+				for ( AttachmentType attachment : xml.getAttachments()){
+					String filename = attachment.getFilename();
 					ObservationAttachment att = new ObservationAttachment();
 					Path f = attachmentLocation.resolve(PatrolXmlManager.ATTACHMENT_DIR_NAME)
 							.resolve( filename );

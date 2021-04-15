@@ -816,6 +816,7 @@ public static String PatrolFeatureSource_ProjectedWaypointLayerName;
 	public static String XmlToPatrolConverter_NoValidListItemsFound;
 	public static String XmlToPatrolConverter_ObserverNotFound;
 	public static String XmlToPatrolConverter_ReadError;
+	public static String XmlToPatrolConverter_SignatureTypeKeyNotFound;
 	public static String XmlToPatrolConverter_TreeAttributesNotSupported;
 	public static String XmlToPatrolConverter2_ReadError;
 	public static String XmlToPatrolConverter_Warning_AttachmentFileNotFound;

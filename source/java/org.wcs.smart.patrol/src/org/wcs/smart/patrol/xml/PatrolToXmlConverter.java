@@ -44,6 +44,7 @@ import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.xml.model.LabelType;
+import org.wcs.smart.patrol.xml.model.v13.AttachmentType;
 import org.wcs.smart.patrol.xml.model.v13.ObjectiveType;
 import org.wcs.smart.patrol.xml.model.v13.PatrolLegDayType;
 import org.wcs.smart.patrol.xml.model.v13.PatrolLegType;
@@ -198,7 +199,12 @@ public class PatrolToXmlConverter {
 		xml.setY(wp.getWaypoint().getY());
 		
 		for (WaypointAttachment attach : wp.getWaypoint().getAttachments()){
-			xml.getAttachments().add(attach.getFilename());
+			AttachmentType xmlattach = new AttachmentType();
+			xmlattach.setFilename(attach.getFilename());
+			if (attach.getSignatureType() != null) {
+				xmlattach.setSignatureTypeKey(attach.getSignatureType().getKeyId());
+			}
+			xml.getAttachments().add(xmlattach);
 		}
 		
 		for (WaypointObservationGroup g : wp.getWaypoint().getObservationGroups()) {
@@ -218,7 +224,9 @@ public class PatrolToXmlConverter {
 		xml.setCategoryKey(observation.getCategory().getHkey());
 		
 		for (ObservationAttachment attach : observation.getAttachments()){
-			xml.getAttachments().add(attach.getFilename());
+			AttachmentType xmlattach = new AttachmentType();
+			xmlattach.setFilename(attach.getFilename());
+			xml.getAttachments().add(xmlattach);
 		}
 		
 		if (observation.getObserver() != null){

@@ -95,7 +95,7 @@ elementFormDefault="qualified">
     		<element name="comment" type="string" maxOccurs="1"
     			minOccurs="0">
     		</element>
-    		<element name="attachments" type="string"
+    		<element name="attachments" type="tns:AttachmentType"
     			maxOccurs="unbounded" minOccurs="0">
     		</element>
     		<element name="groups"
@@ -125,7 +125,7 @@ elementFormDefault="qualified">
     			type="tns:WaypointObservationAttributeType" maxOccurs="unbounded"
     			minOccurs="0">
     		</element>
-    		<element name="attachments" type="string"
+    		<element name="attachments" type="tns:AttachmentType"
     			maxOccurs="unbounded" minOccurs="0">
     		</element>
     		<element name="observer" type="tns:PatrolMemberType" maxOccurs="1" minOccurs="0"></element>
@@ -186,5 +186,10 @@ elementFormDefault="qualified">
     	<attribute name="key" type="string"></attribute>
     	<attribute name="stringValue" type="string"></attribute>
     	<attribute name="doubleValue" type="double"></attribute>
+    </complexType>
+
+    <complexType name="AttachmentType">
+    	<attribute name="filename" type="string"></attribute>
+    	<attribute name="signatureTypeKey" type="string"></attribute>
     </complexType>
 </schema>
