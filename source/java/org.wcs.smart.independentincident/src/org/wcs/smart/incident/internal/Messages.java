@@ -175,6 +175,7 @@ public class Messages extends NLS {
 	public static String XmlToIncident_NoValidItemsForMultiList;
 	public static String XmlToIncident_NoValueFound;
 	public static String XmlToIncident_ObserverNotFound;
+	public static String XmlToIncident_SignatureTypeNotFound;
 	public static String XmlToIncident_StringValueNotFound;
 	public static String XmlToIncident_TooManyAttributes;
 	public static String XmlToIncident_TreeNodeNotFound;

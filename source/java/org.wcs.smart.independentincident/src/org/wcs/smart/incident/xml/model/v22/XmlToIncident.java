@@ -39,8 +39,10 @@ import javax.xml.bind.Unmarshaller;
 
 import org.hibernate.Session;
 import org.hibernate.query.Query;
+import org.wcs.smart.SignatureTypeManager;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.SignatureType;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -149,8 +151,20 @@ public class XmlToIncident implements IXmlToIncidentConverter{
 		if (attachmentLocation != null){
 			if (xml.getAttachments().size() > 0){
 				incident.setAttachments(new ArrayList<WaypointAttachment>());
-				for ( String filename : xml.getAttachments()){
+				for ( AttachmentType attType : xml.getAttachments()){
 					WaypointAttachment att = new WaypointAttachment();
+					
+					String filename = attType.getFilename();
+					
+					if (attType.getSignatureTypeKey() != null && !attType.getSignatureTypeKey().trim().isEmpty()) {
+						SignatureType stype = SignatureTypeManager.INSTANCE.findType(attType.getSignatureTypeKey(), ca, session);
+						if (stype == null) {
+							warnings.add(MessageFormat.format(Messages.XmlToIncident_SignatureTypeNotFound,attType.getSignatureTypeKey()));
+						}else {
+							att.setSignatureType(stype);
+						}
+					}
+					
 					Path f = attachmentLocation.toAbsolutePath()
 							.resolve(IncidentXmlManager.ATTACHMENT_DIR_NAME)
 							.resolve(filename);
@@ -194,8 +208,9 @@ public class XmlToIncident implements IXmlToIncidentConverter{
 		if (attachmentLocation != null){
 			if (xml.getAttachments().size() > 0){
 				ob.setAttachments(new ArrayList<ObservationAttachment>());
-				for ( String filename : xml.getAttachments()){
+				for ( AttachmentType attachment : xml.getAttachments()){
 					ObservationAttachment att = new ObservationAttachment();
+					String filename = attachment.getFilename();
 					
 					Path f = attachmentLocation.toAbsolutePath()
 							.resolve(IncidentXmlManager.ATTACHMENT_DIR_NAME)

@@ -15,7 +15,7 @@ elementFormDefault="qualified">
     		<element name="comment" type="string" maxOccurs="1"
     			minOccurs="0">
     		</element>
-    		<element name="attachments" type="string"
+    		<element name="attachments" type="tns:AttachmentType"
     			maxOccurs="unbounded" minOccurs="0">
     		</element>
     		<element name="groups"
@@ -35,7 +35,7 @@ elementFormDefault="qualified">
  			type="tns:WaypointObservationAttributeType" maxOccurs="unbounded"
  			minOccurs="0">
  		</element>
- 		<element name="attachments" type="string" maxOccurs="unbounded"
+ 		<element name="attachments" type="tns:AttachmentType" maxOccurs="unbounded"
  			minOccurs="0">
  		</element>
  		<element name="observer" type="tns:EmployeeType" maxOccurs="1" minOccurs="0"></element>
@@ -76,8 +76,8 @@ elementFormDefault="qualified">
  	</sequence>
  </complexType>
 
-
- <complexType name="ItemKey">
- 	<attribute name="itemKey" type="string"></attribute>
+ <complexType name="AttachmentType">
+ 	<attribute name="signatureTypeKey" type="string"></attribute>
+ 	<attribute name="filename" type="string"></attribute>
  </complexType>
 </schema>

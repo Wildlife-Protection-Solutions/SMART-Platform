@@ -26,6 +26,7 @@ import java.time.format.DateTimeFormatter;
 import javax.xml.datatype.DatatypeConfigurationException;
 
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.incident.xml.model.v22.AttachmentType;
 import org.wcs.smart.incident.xml.model.v22.EmployeeType;
 import org.wcs.smart.incident.xml.model.v22.WaypointObservationAttributeType;
 import org.wcs.smart.incident.xml.model.v22.WaypointObservationGroupType;
@@ -60,7 +61,12 @@ public class IncidentToXml {
 		wt.setY(incident.getY());
 		
 		for (WaypointAttachment attach : incident.getAttachments()){
-			wt.getAttachments().add(attach.getFilename());
+			AttachmentType xmlattach = new AttachmentType();
+			xmlattach.setFilename(attach.getFilename());
+			if (attach.getSignatureType() != null) {
+				xmlattach.setSignatureTypeKey(attach.getSignatureType().getKeyId());
+			}
+			wt.getAttachments().add(xmlattach);
 		}
 		
 		for (WaypointObservationGroup g : incident.getObservationGroups()) {
@@ -80,7 +86,9 @@ public class IncidentToXml {
 				}
 				
 				for (ObservationAttachment attach : ob.getAttachments()){
-					wot.getAttachments().add(attach.getFilename());
+					AttachmentType xmlattach = new AttachmentType();
+					xmlattach.setFilename(attach.getFilename());
+					wot.getAttachments().add(xmlattach);
 				}
 				
 				for (WaypointObservationAttribute att : ob.getAttributes()){
