@@ -78,6 +78,8 @@ import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.util.UuidUtils;
 
+import javassist.bytecode.AttributeInfo;
+
 /**
  * Parses sighting data from cybertracker JSON data.
  * 
@@ -376,10 +378,12 @@ public class JsonCtParser {
 		
 		//attribute information
 		HashMap<Integer, List<ObservationInfo>> attributes = new HashMap<>();
+		HashMap<Integer, List<AttachmentInfo>> observationAttachments = new HashMap<>();
 		List<AttachmentInfo> waypointAttachments = new ArrayList<>();
+		
 		//default values
 		JSONObject defaultValues = null;
-		
+		int imagecounter = 0;
 		for (Entry<?,?> e : (Set<Entry<?,?>>)observations.entrySet()){
 			String key = (String)e.getKey();
 			if (key.startsWith(JsonKey.CATEGORY.key + CyberTrackerConfExporter.KEY_SEP)){
@@ -429,19 +433,34 @@ public class JsonCtParser {
 					data.add(new ObservationInfo(JsonKey.ATTRIBUTE_LIST.key, (String)bits[4], JsonKey.ATTRIBUTE_LIST.key + CyberTrackerConfExporter.KEY_SEP + (String)bits[4]));
 				}
 			}
-			if (key.startsWith(ScreensUtil.RESULT_PHOTO)){
-				waypointAttachments.add(new AttachmentInfo(AttachmentInfo.AttachmentType.PHOTO, (String)e.getValue()));
-			}else if (key.startsWith(ScreensUtil.RESULT_AUDIO)) {
-				waypointAttachments.add(new AttachmentInfo(AttachmentInfo.AttachmentType.AUDIO, (String)e.getValue()));
+			if (key.startsWith(ScreensUtil.RESULT_PHOTO) || key.startsWith(ScreensUtil.RESULT_AUDIO)){
+				//SMART_Photo0:0 SMART_Photo1:1 SMART_Photo0:0
+				AttachmentInfo.AttachmentType type = AttachmentInfo.AttachmentType.PHOTO;
+				if (key.startsWith(ScreensUtil.RESULT_AUDIO)) {
+					type = AttachmentInfo.AttachmentType.AUDIO;
+				}
+				AttachmentInfo info = new AttachmentInfo(type, (String)e.getValue(), imagecounter++);
+				if (key.contains(String.valueOf(CyberTrackerConfExporter.KEY_SEP))) {
+					int obsnum = Integer.parseInt(key.split(String.valueOf(CyberTrackerConfExporter.KEY_SEP))[1]); 
+				
+					List<AttachmentInfo> data = observationAttachments.get(obsnum);
+					if (data == null){
+						data = new ArrayList<AttachmentInfo>();
+						observationAttachments.put(obsnum, data);
+					}
+					data.add(info);
+				}else {
+					waypointAttachments.add(info);
+				}
 			}else if (key.startsWith(ScreensUtil.RESULT_SIGNATURE)) {
 				String keyId = key.split("_")[2].toLowerCase().trim(); //$NON-NLS-1$
 				
 				SignatureType stype = SignatureTypeManager.INSTANCE.findType(keyId, ca, session);
 				if (stype == null) {
 					warnings.add(MessageFormat.format(Messages.JsonCtParser_SignatureTypeNotFoundWarning, keyId));
-					waypointAttachments.add(new AttachmentInfo(AttachmentInfo.AttachmentType.PHOTO, ((String)e.getValue())));
+					waypointAttachments.add(new AttachmentInfo(AttachmentInfo.AttachmentType.PHOTO, ((String)e.getValue()), imagecounter++));
 				}else {
-					waypointAttachments.add(new AttachmentInfo(AttachmentInfo.AttachmentType.SIGNATURE, ((String)e.getValue()), stype));
+					waypointAttachments.add(new AttachmentInfo(AttachmentInfo.AttachmentType.SIGNATURE, ((String)e.getValue()), imagecounter++, stype));
 				}
 			}
 			
@@ -518,6 +537,21 @@ public class JsonCtParser {
 				ob.setObservation(wp);
 				wp.getAttributes().add(ob);
 			}
+			
+			//add attachments to observation
+			wp.setAttachments(new ArrayList<>());
+			for(List<AttachmentInfo> data : observationAttachments.values()) {
+				for (AttachmentInfo info : data) {
+					WaypointAttachment wa = parseAttachment(info);
+					if (wa != null) {
+						ObservationAttachment oa = new ObservationAttachment();
+						oa.setCopyFromLocation(wa.getCopyFromLocation());
+						oa.setFilename(wa.getFilename());
+						oa.setObservation(wp);
+						wp.getAttachments().add(oa);
+					}
+				}
+			}
 		}else{
 			for (Entry<Integer, List<ObservationInfo>> e : attributes.entrySet()){
 				int order = e.getKey();
@@ -532,6 +566,22 @@ public class JsonCtParser {
 				wp.setCategory(category);
 				
 				wp.setAttributes(new ArrayList<WaypointObservationAttribute>());
+				
+				//add attachments to observation
+				List<AttachmentInfo> data = observationAttachments.get(order);
+				if (data != null) {
+					wp.setAttachments(new ArrayList<>());
+					for (AttachmentInfo info : data) {
+						WaypointAttachment wa = parseAttachment(info);
+						if (wa != null) {
+							ObservationAttachment oa = new ObservationAttachment();
+							oa.setCopyFromLocation(wa.getCopyFromLocation());
+							oa.setFilename(wa.getFilename());
+							oa.setObservation(wp);
+							wp.getAttachments().add(oa);
+						}
+					}
+				}
 				
 				//add attributes
 				List<WaypointObservationAttribute>  obs = createWaypointObservationAttribute(values, category, null, session);
@@ -558,12 +608,10 @@ public class JsonCtParser {
 				
 			}
 		}
-		//parse attachments
-		List<WaypointAttachment> attachments = parseAttachments(waypointAttachments);
-		if (!attachments.isEmpty() && newWaypoint.getAttachments()== null){
-			newWaypoint.setAttachments(new ArrayList<WaypointAttachment>());
-		}
-		for (WaypointAttachment att : attachments){
+		//parse waypoint attachments (these are sigantures)
+		newWaypoint.setAttachments(new ArrayList<>());
+		for (AttachmentInfo ai : waypointAttachments) {
+			WaypointAttachment att = parseAttachment(ai);
 			att.setWaypoint(newWaypoint);
 			newWaypoint.getAttachments().add(att);
 		}
@@ -603,51 +651,95 @@ public class JsonCtParser {
 //	private AttributeTreeNode findAttributeTreeNode(String uuid, Session session) throws Exception{
 //		return JsonUtils.findAttributeTreeNode(uuid, session);
 //	}	
-	private List<WaypointAttachment> parseAttachments(List<AttachmentInfo> values) throws Exception{
-		int imagecnt = 0;
-		List<WaypointAttachment> attachments = new ArrayList<>();
-		
-		for (AttachmentInfo value : values){
-			
-			if (value.getType() == AttachmentInfo.AttachmentType.PHOTO || value.getType() == AttachmentInfo.AttachmentType.SIGNATURE) {
-				//picture object; create a temporary file add it to waypoint observation
-				String fileName = PHOTO_KEY + "_" + imagecnt + "." + JPEG_EXT;   //$NON-NLS-1$//$NON-NLS-2$
-					
-				Path temp = Files.createTempFile("SMART_" + System.nanoTime(), "." + JPEG_EXT);   //$NON-NLS-1$//$NON-NLS-2$
-				BufferedImage image = null;
-				try(InputStream in = new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(value.getData()))){
-					image = ImageIO.read(in);					
-				}
-				if (image == null){
-					warnings.add(MessageFormat.format(Messages.JsonCtParser_CouldNotImportPhoto, value));
-				}else{
-					ImageIO.write(image, JPEG_EXT.toUpperCase(Locale.ROOT), temp.toAbsolutePath().toFile());	
-					WaypointAttachment attachment = new WaypointAttachment();
-					attachment.setCopyFromLocation(temp);
-					attachment.setFilename(fileName);
-					attachments.add(attachment);
-					
-					if (value.getType() == AttachmentInfo.AttachmentType.SIGNATURE) {
-						attachment.setSignatureType(value.getSignatureType());
-					}
-				}
-			}else if (value.getType() == AttachmentInfo.AttachmentType.AUDIO) {
-				String fileName = AUDIO_KEY + "_" + imagecnt + "." + WAVE_EXT;   //$NON-NLS-1$//$NON-NLS-2$
-				Path temp = Files.createTempFile("SMART_" + System.nanoTime(), "." + WAVE_EXT);   //$NON-NLS-1$//$NON-NLS-2$
-				try(InputStream in = new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(value.getData()))){
-					Files.copy(in, temp, StandardCopyOption.REPLACE_EXISTING);
-				}
+//	private List<WaypointAttachment> parseAttachments(List<AttachmentInfo> values) throws Exception{
+//		int imagecnt = 0;
+//		List<WaypointAttachment> attachments = new ArrayList<>();
+//		
+//		for (AttachmentInfo value : values){
+//			
+//			if (value.getType() == AttachmentInfo.AttachmentType.PHOTO || value.getType() == AttachmentInfo.AttachmentType.SIGNATURE) {
+//				//picture object; create a temporary file add it to waypoint observation
+//				String fileName = PHOTO_KEY + "_" + imagecnt + "." + JPEG_EXT;   //$NON-NLS-1$//$NON-NLS-2$
+//					
+//				Path temp = Files.createTempFile("SMART_" + System.nanoTime(), "." + JPEG_EXT);   //$NON-NLS-1$//$NON-NLS-2$
+//				BufferedImage image = null;
+//				try(InputStream in = new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(value.getData()))){
+//					image = ImageIO.read(in);					
+//				}
+//				if (image == null){
+//					warnings.add(MessageFormat.format(Messages.JsonCtParser_CouldNotImportPhoto, value));
+//				}else{
+//					ImageIO.write(image, JPEG_EXT.toUpperCase(Locale.ROOT), temp.toAbsolutePath().toFile());	
+//					WaypointAttachment attachment = new WaypointAttachment();
+//					attachment.setCopyFromLocation(temp);
+//					attachment.setFilename(fileName);
+//					attachments.add(attachment);
+//					
+//					if (value.getType() == AttachmentInfo.AttachmentType.SIGNATURE) {
+//						attachment.setSignatureType(value.getSignatureType());
+//					}
+//				}
+//			}else if (value.getType() == AttachmentInfo.AttachmentType.AUDIO) {
+//				String fileName = AUDIO_KEY + "_" + imagecnt + "." + WAVE_EXT;   //$NON-NLS-1$//$NON-NLS-2$
+//				Path temp = Files.createTempFile("SMART_" + System.nanoTime(), "." + WAVE_EXT);   //$NON-NLS-1$//$NON-NLS-2$
+//				try(InputStream in = new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(value.getData()))){
+//					Files.copy(in, temp, StandardCopyOption.REPLACE_EXISTING);
+//				}
+//				WaypointAttachment attachment = new WaypointAttachment();
+//				attachment.setCopyFromLocation(temp);
+//				attachment.setFilename(fileName);
+//				attachments.add(attachment);	
+//				
+//			}else {
+//				throw new IllegalStateException(MessageFormat.format("Attachment type {0} not supported.", value.getType().name() )); //$NON-NLS-1$
+//			}
+//		}
+//		return attachments;
+//	}
+	
+	private WaypointAttachment parseAttachment(AttachmentInfo info) throws Exception{
+		if (info.getType() == AttachmentInfo.AttachmentType.PHOTO
+				|| info.getType() == AttachmentInfo.AttachmentType.SIGNATURE) {
+			// picture object; create a temporary file add it to waypoint observation
+			String fileName = PHOTO_KEY + "_" + info.getImageCount() + "." + JPEG_EXT; //$NON-NLS-1$//$NON-NLS-2$
+
+			Path temp = Files.createTempFile("SMART_" + System.nanoTime(), "." + JPEG_EXT); //$NON-NLS-1$//$NON-NLS-2$
+			BufferedImage image = null;
+			try (InputStream in = new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(info.getData()))) {
+				image = ImageIO.read(in);
+			}
+			if (image == null) {
+				warnings.add(MessageFormat.format(Messages.JsonCtParser_CouldNotImportPhoto, info));
+				return null;
+			} else {
+				ImageIO.write(image, JPEG_EXT.toUpperCase(Locale.ROOT), temp.toAbsolutePath().toFile());
 				WaypointAttachment attachment = new WaypointAttachment();
 				attachment.setCopyFromLocation(temp);
 				attachment.setFilename(fileName);
-				attachments.add(attachment);	
-				
-			}else {
-				throw new IllegalStateException(MessageFormat.format("Attachment type {0} not supported.", value.getType().name() )); //$NON-NLS-1$
+
+				if (info.getType() == AttachmentInfo.AttachmentType.SIGNATURE) {
+					attachment.setSignatureType(info.getSignatureType());
+				}
+				return attachment;
 			}
+		} else if (info.getType() == AttachmentInfo.AttachmentType.AUDIO) {
+			String fileName = AUDIO_KEY + "_" + info.getImageCount() + "." + WAVE_EXT; //$NON-NLS-1$//$NON-NLS-2$
+			Path temp = Files.createTempFile("SMART_" + System.nanoTime(), "." + WAVE_EXT); //$NON-NLS-1$//$NON-NLS-2$
+			try (InputStream in = new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(info.getData()))) {
+				Files.copy(in, temp, StandardCopyOption.REPLACE_EXISTING);
+			}
+			WaypointAttachment attachment = new WaypointAttachment();
+			attachment.setCopyFromLocation(temp);
+			attachment.setFilename(fileName);
+			return attachment;
+
+		} else {
+			throw new IllegalStateException(
+					MessageFormat.format("Attachment type {0} not supported.", info.getType().name())); //$NON-NLS-1$
 		}
-		return attachments;
+
 	}
+	
 	/**
 	 * Parses the values into waypoint observation attributes
 	 * @param values
@@ -767,16 +859,21 @@ public class JsonCtParser {
 		private AttachmentType type;
 		private String data;
 		private SignatureType stype;
+		private int count;
 		
-		public AttachmentInfo(AttachmentType type, String data, SignatureType stype) {
-			this(type, data);
+		public AttachmentInfo(AttachmentType type, String data, int count, SignatureType stype) {
+			this(type, data, count);
 			this.stype = stype;
 		}
 		
-		public AttachmentInfo(AttachmentType type, String data) {
+		public AttachmentInfo(AttachmentType type, String data, int count) {
 			this.data = data;
 			this.type = type;
 			this.stype = null;
+			this.count = count;
+		}
+		public int getImageCount() {
+			return this.count;
 		}
 		public SignatureType getSignatureType() {
 			return this.stype;
