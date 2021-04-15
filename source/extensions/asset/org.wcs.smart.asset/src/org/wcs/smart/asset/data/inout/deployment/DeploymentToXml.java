@@ -49,6 +49,7 @@ import org.wcs.smart.asset.data.inout.deployment.xml.v10.ObjectFactory;
 import org.wcs.smart.asset.data.inout.deployment.xml.v10.XmlAssetDeployment;
 import org.wcs.smart.asset.data.inout.deployment.xml.v10.XmlAssetDeploymentAttribute;
 import org.wcs.smart.asset.data.inout.deployment.xml.v10.XmlAssetDeploymentDisruption;
+import org.wcs.smart.asset.data.inout.deployment.xml.v10.XmlAttachmentType;
 import org.wcs.smart.asset.data.inout.deployment.xml.v10.XmlWaypoint;
 import org.wcs.smart.asset.data.inout.deployment.xml.v10.XmlWaypointObservation;
 import org.wcs.smart.asset.data.inout.deployment.xml.v10.XmlWaypointObservationAttribute;
@@ -212,7 +213,12 @@ public class DeploymentToXml {
 			xml.getWaypoints().add(xmlw);
 			
 			for (AssetWaypointAttachment awa : aw.getAttachments()) {
-				xmlw.getAttachments().add(awa.getWaypointAttachment().getFilename());
+				XmlAttachmentType atype = new XmlAttachmentType();
+				atype.setFilename(awa.getWaypointAttachment().getFilename());
+				if (awa.getWaypointAttachment().getSignatureType() != null) {
+					atype.setSignatureTypeKey(awa.getWaypointAttachment().getSignatureType().getKeyId());
+				}
+				xmlw.getAttachments().add(atype);
 			}
 			
 			for(WaypointObservationGroup group : aw.getWaypoint().getObservationGroups()) {
@@ -255,7 +261,9 @@ public class DeploymentToXml {
 					}
 					
 					for (ObservationAttachment oa : wo.getAttachments()) {
-						xmlwo.getAttachments().add(oa.getFilename());
+						XmlAttachmentType atype = new XmlAttachmentType();
+						atype.setFilename(oa.getFilename());
+						xmlw.getAttachments().add(atype);
 					}
 					xmlg.getObservations().add(xmlwo);
 				}

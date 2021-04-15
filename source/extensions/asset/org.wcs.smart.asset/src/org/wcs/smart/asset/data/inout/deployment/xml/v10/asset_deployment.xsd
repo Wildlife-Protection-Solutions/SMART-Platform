@@ -43,7 +43,7 @@ xmlns:tns="http://www.smartconservationsoftware.org/xml/1.0/assetdeployment" ele
     <complexType name="XmlWaypoint">
     	<sequence>
     		<element name="comment" type="string"></element>
-    		<element name="attachments" type="string"
+    		<element name="attachments" type="tns:XmlAttachmentType"
     			maxOccurs="unbounded" minOccurs="0">
     		</element>
     		<element name="observations"
@@ -71,7 +71,7 @@ xmlns:tns="http://www.smartconservationsoftware.org/xml/1.0/assetdeployment" ele
     			type="tns:XmlWaypointObservationAttribute" maxOccurs="unbounded"
     			minOccurs="0">
     		</element>
-    		<element name="attachments" type="string"
+    		<element name="attachments" type="tns:XmlAttachmentType"
     			maxOccurs="unbounded" minOccurs="0">
     		</element>
     	</sequence>
@@ -89,4 +89,9 @@ xmlns:tns="http://www.smartconservationsoftware.org/xml/1.0/assetdeployment" ele
     </complexType>
 
     <element name="Deployment" type="tns:XmlAssetDeployment"></element>
+
+    <complexType name="XmlAttachmentType">
+    	<attribute name="filename" type="string"></attribute>
+    	<attribute name="signatureTypeKey" type="string"></attribute>
+    </complexType>
 </schema>

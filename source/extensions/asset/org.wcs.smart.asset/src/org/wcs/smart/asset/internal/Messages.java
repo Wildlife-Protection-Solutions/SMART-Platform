@@ -672,6 +672,7 @@ public class Messages extends NLS {
 	public static String DeploymentFromXml_OverlappingTimeFrame;
 	public static String DeploymentFromXml_SaveError;
 	public static String DeploymentFromXml_SavingSubTask;
+	public static String DeploymentFromXml_SignatureTypeNotFound;
 	public static String DeploymentFromXml_StationNotFound;
 	public static String DeploymentFromXml_TreeNodeNotFound;
 	public static String DeploymentFromXml_unzipError;

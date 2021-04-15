@@ -43,6 +43,7 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
+import org.wcs.smart.SignatureTypeManager;
 import org.wcs.smart.asset.AssetEvents;
 import org.wcs.smart.asset.AssetPlugIn;
 import org.wcs.smart.asset.data.inout.deployment.DeploymentToXml;
@@ -62,6 +63,7 @@ import org.wcs.smart.asset.model.AssetWaypointAttachment;
 import org.wcs.smart.asset.model.AssetWaypointSource;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.SignatureType;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
@@ -242,8 +244,20 @@ public class DeploymentFromXml {
 				
 				deployment.getAssetWaypoints().add(aw);
 				
-				for (String filename : xmlwp.getAttachments()) {
+				for (XmlAttachmentType xmlattachment : xmlwp.getAttachments()) {
+					String filename = xmlattachment.getFilename();
+					
 					WaypointAttachment attachment = new WaypointAttachment();
+					
+					if (xmlattachment.getSignatureTypeKey() != null && !xmlattachment.getSignatureTypeKey().trim().isEmpty()) {
+						SignatureType stype = SignatureTypeManager.INSTANCE.findType(xmlattachment.getSignatureTypeKey(), ca, session);
+						if (stype != null) {
+							attachment.setSignatureType(stype);
+						}else {
+							warnings.add(MessageFormat.format(Messages.DeploymentFromXml_SignatureTypeNotFound,xmlattachment.getSignatureTypeKey()));
+						}
+					}
+					
 					Path fname = workingDir.resolve(DeploymentToXml.ATTCHMENT_DIR).resolve(filename);
 					if (!Files.exists(fname)) {
 						warnings.add(MessageFormat.format(Messages.DeploymentFromXml_WaypointAttachmentNotFound, fname));
@@ -288,7 +302,8 @@ public class DeploymentFromXml {
 						}
 						group.getObservations().add(wo);
 						
-						for (String filename : xmlo.getAttachments()) {
+						for (XmlAttachmentType xmlattachment : xmlo.getAttachments()) {
+							String filename = xmlattachment.getFilename();
 							ObservationAttachment attachment = new ObservationAttachment();
 							
 							Path fname = workingDir.resolve(DeploymentToXml.ATTCHMENT_DIR).resolve(filename);
