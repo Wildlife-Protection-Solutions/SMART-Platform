@@ -44,8 +44,8 @@ public class SignatureTypeQueryColumn extends QueryColumn{
 		
 		public String getName() {
 			switch(this) {
-			case KEY: return "Signature Type Key";
-			case NAME: return "Signature Type Name";
+			case KEY: return "Signature Type Key"; //$NON-NLS-1$
+			case NAME: return "Signature Type Name"; //$NON-NLS-1$
 			}
 			return ""; //$NON-NLS-1$
 		}

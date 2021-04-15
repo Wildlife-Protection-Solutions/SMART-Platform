@@ -48,6 +48,7 @@ import org.json.simple.JSONObject;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.SignatureType;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
@@ -89,7 +90,8 @@ public abstract class IJsonFeatureProcessor {
 		INVALID_MLIST_ATTRIBUTE,
 		INVALID_MLIST2_ATTRIBUTE,
 		INVALID_TREE_ATTRIBUTE,
-		INVALID_NUMBER_ATTRIBUTE;
+		INVALID_NUMBER_ATTRIBUTE,
+		SIGNATURE_TYPE_NOT_FOUND;
 		
 		public String getMessage(Locale l) {
 			return SmartContext.INSTANCE.getClass(IObservationLabelProvider.class).getLabel(this, l);
@@ -211,7 +213,7 @@ public abstract class IJsonFeatureProcessor {
 		wp.setAttachments(new ArrayList<>());
 
 		if (atts.containsKey("attachments")) { //$NON-NLS-1$
-			List<WaypointAttachment> attachments = parseAttachments(atts);
+			List<WaypointAttachment> attachments = parseAttachments(atts, ca, session, locale);
 			attachments.forEach(a->{
 				a.setWaypoint(wp);
 				wp.getAttachments().add(a);
@@ -270,7 +272,7 @@ public abstract class IJsonFeatureProcessor {
 						Category c = findCategory(categoryKey, ca, session);
 
 						if (ob.containsKey("attachments")) { //$NON-NLS-1$
-							List<WaypointAttachment> attachments = parseAttachments(ob);
+							List<WaypointAttachment> attachments = parseAttachments(ob, ca, session, locale);
 							attachments.forEach(a->{
 								ObservationAttachment oa = new ObservationAttachment();
 								oa.setFilename(a.getFilename());
@@ -326,7 +328,7 @@ public abstract class IJsonFeatureProcessor {
 
 	}
 
-	private List<WaypointAttachment> parseAttachments(JSONObject atts) throws IOException{
+	private List<WaypointAttachment> parseAttachments(JSONObject atts, ConservationArea ca, Session session, Locale locale) throws IOException{
 		JSONArray jattachments = (JSONArray)atts.get("attachments"); //$NON-NLS-1$
 		List<WaypointAttachment> attachments = new ArrayList<>();
 		
@@ -335,6 +337,10 @@ public abstract class IJsonFeatureProcessor {
 			
 			String fname = (String) jattachment.get("filename"); //$NON-NLS-1$
 			String data = (String)jattachment.get("data"); //base64 encoded //$NON-NLS-1$
+			String sigtype = null;
+			if (jattachment.containsKey("signatureType")) { //$NON-NLS-1$
+				sigtype = (String) jattachment.get("signatureType"); //$NON-NLS-1$
+			}
 			//decode data
 			byte[] decoded = DatatypeConverter.parseBase64Binary(data);
 			
@@ -349,9 +355,21 @@ public abstract class IJsonFeatureProcessor {
 			attachment.setFilename(fname);
 			attachment.setCopyFromLocation(tempFile);
 			attachments.add(attachment);
+			
+			if (sigtype != null) {
+				SignatureType stype = QueryFactory.buildQuery(session, SignatureType.class,
+						new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+						new Object[] {"keyId", sigtype}).uniqueResult(); //$NON-NLS-1$	
+				if (stype != null) {
+					attachment.setSignatureType(stype);
+				}else {
+					warnings.add(MessageFormat.format(Messages.SIGNATURE_TYPE_NOT_FOUND.getMessage(locale), sigtype));
+				}
+			}
 		}
 		return attachments;
 	}
+	
 	private Category findCategory(String hkey, ConservationArea ca, Session session) {
 		Category c = QueryFactory.buildQuery(session, Category.class, new Object[] { "conservationArea", ca }, //$NON-NLS-1$
 				new Object[] { "hkey", hkey }).uniqueResult(); //$NON-NLS-1$

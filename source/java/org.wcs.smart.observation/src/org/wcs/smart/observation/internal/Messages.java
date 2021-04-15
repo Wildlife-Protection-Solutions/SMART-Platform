@@ -218,6 +218,8 @@ public class Messages extends NLS {
 
 	public static String ObservationLabelProvider_noprocessor;
 
+	public static String ObservationLabelProvider_SignatureTypeNotFound;
+
 	public static String ObservationLabelProvider_typemissing;
 
 	public static String ObservationOptionsPropertyPage_ComputationDetails;
