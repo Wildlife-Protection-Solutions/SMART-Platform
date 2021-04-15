@@ -22,7 +22,9 @@
 package org.wcs.smart.connect.api;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -45,9 +47,18 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
+import javax.xml.bind.JAXBException;
 
 import org.hibernate.Session;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Label;
+import org.wcs.smart.ca.SignatureType;
+import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.ca.datamodel.SimpleDataModel;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.AttachmentInterceptor;
 import org.wcs.smart.connect.hibernate.HibernateManager;
@@ -55,6 +66,9 @@ import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.WaypointSourceEngine;
 import org.wcs.smart.connect.security.CaAction;
 import org.wcs.smart.connect.security.SecurityManager;
+import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.internal.ca.datamodel.xml.DataModelToXmlConverter;
+import org.wcs.smart.internal.ca.datamodel.xml.XmlSmartDataModelManager;
 import org.wcs.smart.observation.json.IJsonFeatureProcessor;
 import org.wcs.smart.observation.json.JsonFileProcessor;
 import org.wcs.smart.observation.model.IWaypointSource;
@@ -84,13 +98,62 @@ public class DataApi extends HttpServlet{
 	@Context private HttpServletResponse response;
 	@Context private HttpServletRequest request;
 	
+
+	/**
+	 * Gets the signature type metadata for a conservation area.  Signature types can be
+	 * added to waypoint attachments to identify specific signatures.
+	 * 
+	 * @param uuid
+	 * @return
+	 */
 	@GET
-	@Path("/data/{cauuid}")
-	public String processJsonData2(
-			@Parameter(description="uuid of the conservation area associated with the data") @PathParam("cauuid") String uuid) {
-		return uuid;
+	@Path("/metadata/signatures/{cauuid}")
+	@Produces({ MediaType.APPLICATION_JSON })
+	public Response getDataModel(
+			@Parameter(description="uuid of the conservation area to get signature defintions for") @PathParam("cauuid") String uuid) {
+		
+		UUID caUuid = parseUuid(uuid);
+		
+		try(Session s = HibernateManager.getSession(context)){
+			s.beginTransaction();
+			try {
+				if (!SecurityManager.INSTANCE.canAccess(s, 
+						request.getUserPrincipal().getName(), 
+						CaAction.VIEWCA_KEY,
+						caUuid)){
+					logger.info("User " + request.getUserPrincipal().getName() + " does not have permission to view ca."); //$NON-NLS-1$ //$NON-NLS-2$
+					throw new SmartConnectException(Response.Status.UNAUTHORIZED);
+				}
+				
+				
+				ConservationArea ca = s.get(ConservationArea.class, caUuid);
+				if (ca == null) throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("DataModelApi.CaNotFound", request.getLocale())); //$NON-NLS-1$
+					
+				
+				List<SignatureType> types = QueryFactory.buildQuery(s, SignatureType.class, 
+						new Object[] {"conservationArea", ca}).list();
+				
+				JSONArray items = new JSONArray();
+				for (SignatureType type : types) {
+					JSONObject t = new JSONObject();
+					t.put("key", type.getKeyId());
+					for (Label l : type.getNames()) {
+						String key = "name_" + l.getLanguage().getCode();
+						t.put(key,l.getValue());
+					}
+					items.put(t);
+				}
+				return Response.status(Response.Status.OK)
+						.entity(items.toString())
+						.type(MediaType.APPLICATION_JSON)
+						.build();
+			}finally {
+				s.getTransaction().commit();
+			}
+		}
 		
 	}
+	
 	@POST
 	@Path("/data/{cauuid}")
 	public ProcessingResult processJsonData(

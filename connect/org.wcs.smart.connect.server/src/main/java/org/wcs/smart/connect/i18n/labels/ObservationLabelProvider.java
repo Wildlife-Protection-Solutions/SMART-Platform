@@ -57,7 +57,7 @@ public class ObservationLabelProvider implements IObservationLabelProvider {
 		if (item == IJsonFeatureProcessor.Messages.INVALID_MLIST2_ATTRIBUTE) return Messages.getString("ObservationLabelProvider_invalidemlist2", l); //$NON-NLS-1$
 		if (item == IJsonFeatureProcessor.Messages.INVALID_TREE_ATTRIBUTE) return Messages.getString("ObservationLabelProvider_invalidtreeitem", l); //$NON-NLS-1$
 		if (item == IJsonFeatureProcessor.Messages.INVALID_NUMBER_ATTRIBUTE) return Messages.getString("ObservationLabelProvider_invalidnumeric", l); //$NON-NLS-1$
-
+		if (item == IJsonFeatureProcessor.Messages.SIGNATURE_TYPE_NOT_FOUND) return Messages.getString("ObservationLabelProvider.SignatureTypeNotFound", l); //$NON-NLS-1$
 		return ""; //$NON-NLS-1$
 	}
 
