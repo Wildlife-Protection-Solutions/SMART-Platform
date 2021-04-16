@@ -43,10 +43,10 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
-import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.ICombinableDropItem;
 import org.wcs.smart.query.ui.model.IGroupByDropItem;
-import org.wcs.smart.query.ui.model.ListItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.ListItem;
 
 /**
  * A category group by item for summary queries.

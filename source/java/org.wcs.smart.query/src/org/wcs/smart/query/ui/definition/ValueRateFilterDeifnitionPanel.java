@@ -47,9 +47,9 @@ import org.wcs.smart.query.common.model.SummaryQuery;
 import org.wcs.smart.query.event.QueryEventManager;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.QueryProxy;
-import org.wcs.smart.query.model.filter.IFilter.FilterType;
-import org.wcs.smart.query.ui.model.DropItem;
-import org.wcs.smart.query.ui.model.IDefinitionPanel;
+import org.wcs.smart.query.model.filter.FilterType;
+import org.wcs.smart.query.ui.model.IQueryDefinitionPanel;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
 
 
 /**
@@ -58,7 +58,7 @@ import org.wcs.smart.query.ui.model.IDefinitionPanel;
  * @author Emily
  *
  */
-public abstract class ValueRateFilterDeifnitionPanel implements IDefinitionPanel{
+public abstract class ValueRateFilterDeifnitionPanel implements IQueryDefinitionPanel{
 
 	public static final String ID ="org.wcs.smart.query.definition.RateValueFilter"; //$NON-NLS-1$
 	public static final String PANEL_TITLE = Messages.ValueRateFilterDeifnitionPanel_PanelTitle;

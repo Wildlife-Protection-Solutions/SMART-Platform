@@ -26,8 +26,8 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IFilterDropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
 
 /**
  * Category drop item.

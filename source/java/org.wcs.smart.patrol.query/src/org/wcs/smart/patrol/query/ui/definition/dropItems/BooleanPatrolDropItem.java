@@ -28,8 +28,8 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.patrol.query.model.IPatrolQueryOption;
-import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IFilterDropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
 
 /**
  * Patrol drop item that is represented as a boolean expression..

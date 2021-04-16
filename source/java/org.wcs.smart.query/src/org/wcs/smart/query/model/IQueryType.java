@@ -26,8 +26,8 @@ import java.util.List;
 
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
-import org.wcs.smart.query.ui.model.IDefinitionPanel;
-import org.wcs.smart.query.ui.model.IDropItemFactory;
+import org.wcs.smart.query.ui.model.IQueryDropItemFactory;
+import org.wcs.smart.query.ui.model.IQueryDefinitionPanel;
 /**
  * Query type extension point.
  * 
@@ -109,14 +109,14 @@ public interface IQueryType {
 	 * 
 	 * @return drop item factory for query type
 	 */
-	public IDropItemFactory getDropItemFactory();
+	public IQueryDropItemFactory getDropItemFactory();
 	
 	/**
 	 * Updates the query definition from the various drop panel components
 	 * @param query the query object to update
 	 * @param components the drop panel components that define the new query definition
 	 */
-	public void updateQueryDefinition(Query query, List<IDefinitionPanel> components);
+	public void updateQueryDefinition(Query query, List<IQueryDefinitionPanel> components);
 	
 	/**
 	 * Determines if the provided components create a valid query
@@ -125,7 +125,7 @@ public interface IQueryType {
 	 * @param components the various components that define the query definition
 	 * @return null if query is valid otherwise error string
 	 */
-	public String validateQuery(List<IDefinitionPanel> components);
+	public String validateQuery(List<IQueryDefinitionPanel> components);
 	
 	/**
 	 * This url is currently used in the new query wizard.  

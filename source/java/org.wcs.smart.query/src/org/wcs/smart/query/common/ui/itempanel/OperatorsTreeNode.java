@@ -29,8 +29,8 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.filter.Operator;
 import org.wcs.smart.query.internal.Messages;
-import org.wcs.smart.query.model.filter.Operator;
 
 /**
  * Item Tree Node to display operators.

@@ -21,11 +21,11 @@
  */
 package org.wcs.smart.patrol.query.parser.internal.filter;
 
+import org.wcs.smart.filter.IFilter;
+import org.wcs.smart.filter.IFilterVisitor;
+import org.wcs.smart.filter.Operator;
 import org.wcs.smart.patrol.query.model.PatrolQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolQueryOptions;
-import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.IFilterVisitor;
-import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.util.SharedUtils;
 
 /**

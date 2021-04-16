@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.model.filter;
 
+import org.wcs.smart.filter.IFilter;
 
 /**
  * Query filter that wraps the filter with the filter type.
@@ -43,12 +44,12 @@ public class QueryFilter {
 	 * @param filter
 	 * @param filterType
 	 */
-	public static QueryFilter createFilter(IFilter filter, IFilter.FilterType filterType){
+	public static QueryFilter createFilter(IFilter filter, FilterType filterType){
 		return new QueryFilter(filter, filterType);
 	}
 	
 	private IFilter filter;
-	private IFilter.FilterType filterType;
+	private FilterType filterType;
 	
 	/**
 	 * Creates a new query filter of type observation
@@ -56,7 +57,7 @@ public class QueryFilter {
 	 */
 	public QueryFilter(IFilter filter){
 		this.filter = filter;
-		this.filterType = IFilter.FilterType.OBSERVATION;
+		this.filterType = FilterType.OBSERVATION;
 	}
 	
 	/**
@@ -64,7 +65,7 @@ public class QueryFilter {
 	 * @param filter
 	 * @param filterType
 	 */
-	public QueryFilter(IFilter filter, IFilter.FilterType filterType){
+	public QueryFilter(IFilter filter, FilterType filterType){
 		this.filter = filter;
 		this.filterType = filterType;
 	}
@@ -89,7 +90,7 @@ public class QueryFilter {
 	 * 
 	 * @return the filter type
 	 */
-	public IFilter.FilterType getFilterType(){
+	public FilterType getFilterType(){
 		return this.filterType;
 	}
 }

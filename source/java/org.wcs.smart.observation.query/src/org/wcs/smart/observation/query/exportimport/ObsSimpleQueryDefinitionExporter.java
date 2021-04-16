@@ -22,11 +22,11 @@
 package org.wcs.smart.observation.query.exportimport;
 
 import org.hibernate.Session;
+import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.observation.query.model.ObsObservationQuery;
 import org.wcs.smart.observation.query.model.ObservationWaypointQuery;
 import org.wcs.smart.query.common.importexport.SimpleQueryDefinitionExporter;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.xml.model.QueryType;
 
 /**

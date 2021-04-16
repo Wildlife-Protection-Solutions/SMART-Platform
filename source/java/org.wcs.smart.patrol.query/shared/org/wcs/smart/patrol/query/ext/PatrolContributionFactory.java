@@ -24,9 +24,9 @@ package org.wcs.smart.patrol.query.ext;
 import java.util.List;
 
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.filter.IFilter;
+import org.wcs.smart.filter.Operator;
 import org.wcs.smart.query.model.filter.EmptyFilter;
-import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.model.summary.IGroupBy;
 
 /**

@@ -19,50 +19,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.model.filter;
+package org.wcs.smart.query.ui.model;
+
+import org.hibernate.Session;
+import org.wcs.smart.query.model.QueryProxy;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.IDropItemFactory;
 
 /**
- * A query filter.
+ * Factory for creating drop items.
+ * 
  * @author Emily
- * @since 1.0.0
+ *
  */
-public interface IFilter {
+public interface IQueryDropItemFactory extends IDropItemFactory{
 
-	public enum FilterType{
-		OBSERVATION("observation"),  //$NON-NLS-1$
-		GROUP("obsgroup"), //$NON-NLS-1$
-		WAYPOINT("waypoint"); //$NON-NLS-1$
-	
-		private String key;
-		
-		FilterType(String key){
-			this.key = key;
-		}
-		public String getKey(){
-			return this.key;
-		}		
-		public static FilterType parse(String type){
-			if (type.equals(WAYPOINT.key)) return WAYPOINT;
-			if (type.equals(GROUP.key)) return GROUP;
-			return OBSERVATION;
-		}
-	};
-	
-
-	
 	/**
-	 * @return the string representation of the filter
+	 * Generates all drop items for a given query
+	 * @param q
+	 * @param session
 	 */
-	public String asString();
-	
-	
-	/**
-	 * runs the visitor on any children filters
-	 * then on the filter implementation
-	 * 
-	 * @param visitor
-	 */
-	public void accept(IFilterVisitor visitor);
-	
-	
+	public void generateDropItems(QueryProxy q, Session session); 
 }

@@ -24,9 +24,9 @@ package org.wcs.smart.query.common.engine.visitors;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.wcs.smart.filter.IFilter;
+import org.wcs.smart.filter.IFilterVisitor;
 import org.wcs.smart.query.model.filter.AreaFilter;
-import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.IFilterVisitor;
 
 /**
  * Filter visitor that collection area filters.

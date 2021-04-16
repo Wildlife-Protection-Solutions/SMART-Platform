@@ -26,8 +26,8 @@ import java.util.List;
 
 import org.hibernate.Session;
 import org.wcs.smart.query.model.summary.AbstractGroupByViewer;
-import org.wcs.smart.query.ui.model.DropItem;
-import org.wcs.smart.query.ui.model.ListItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.ListItem;
 
 /**
  * Group by query item for patrol intelligence group bys

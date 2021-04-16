@@ -21,10 +21,10 @@
  */
 package org.wcs.smart.query.common.engine.visitors;
 
-import org.wcs.smart.query.model.filter.AttributeFilter;
-import org.wcs.smart.query.model.filter.CategoryFilter;
-import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.IFilterVisitor;
+import org.wcs.smart.filter.AttributeFilter;
+import org.wcs.smart.filter.CategoryFilter;
+import org.wcs.smart.filter.IFilter;
+import org.wcs.smart.filter.IFilterVisitor;
 import org.wcs.smart.query.model.filter.ObserverFilter;
 
 /**

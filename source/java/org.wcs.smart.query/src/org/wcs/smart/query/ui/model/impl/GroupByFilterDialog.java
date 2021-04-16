@@ -45,9 +45,9 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.ui.model.IGroupByDropItem;
-import org.wcs.smart.query.ui.model.ListItem;
 import org.wcs.smart.ui.CheckboxSelectorKeyAdapter;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
+import org.wcs.smart.ui.ca.datamodel.dropitem.ListItem;
 
 /**
  * Dialog for selecting items group by items

@@ -35,8 +35,8 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.CustomArea;
 import org.wcs.smart.query.model.filter.AreaFilter;
-import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IFilterDropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
 
 /**
  * An drop item for a custom area filter.

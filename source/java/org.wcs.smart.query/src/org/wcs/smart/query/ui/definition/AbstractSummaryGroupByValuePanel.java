@@ -31,10 +31,10 @@ import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.event.QueryEventManager;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.QueryProxy;
-import org.wcs.smart.query.ui.model.DropItem;
-import org.wcs.smart.query.ui.model.IDefinitionPanel;
 import org.wcs.smart.query.ui.model.IGroupByDropItem;
+import org.wcs.smart.query.ui.model.IQueryDefinitionPanel;
 import org.wcs.smart.query.ui.model.IValueDropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
 
 /**
  * Basic summary group by panel.  This consists of an row and column group by area as
@@ -43,7 +43,7 @@ import org.wcs.smart.query.ui.model.IValueDropItem;
  * @author Emily
  *
  */
-public abstract class AbstractSummaryGroupByValuePanel implements IDefinitionPanel {
+public abstract class AbstractSummaryGroupByValuePanel implements IQueryDefinitionPanel {
 
 	/**
 	 * Various drop item lists
@@ -64,13 +64,13 @@ public abstract class AbstractSummaryGroupByValuePanel implements IDefinitionPan
 	}
 	
 	/**
-	 * @see org.wcs.smart.query.ui.model.IDefinitionPanel#getId()
+	 * @see org.wcs.smart.query.ui.model.IQueryDefinitionPanel#getId()
 	 */
 	@Override
 	public abstract String getId() ;
 
 	/**
-	 * @see org.wcs.smart.query.ui.model.IDefinitionPanel#getGuiName()
+	 * @see org.wcs.smart.query.ui.model.IQueryDefinitionPanel#getGuiName()
 	 */
 	@Override
 	public abstract String getGuiName();
@@ -85,7 +85,7 @@ public abstract class AbstractSummaryGroupByValuePanel implements IDefinitionPan
 	public abstract ListDefinitionPanel createListDropTargetPanel(ListTargetType type);
 
 	/**
-	 * @see org.wcs.smart.query.ui.model.IDefinitionPanel#validate()
+	 * @see org.wcs.smart.query.ui.model.IQueryDefinitionPanel#validate()
 	 */
 	@Override
 	public abstract String validate();
@@ -94,7 +94,7 @@ public abstract class AbstractSummaryGroupByValuePanel implements IDefinitionPan
 	 * Adds the drop item to either the row group by list or the value list
 	 * depending on the drop item type.
 	 * 
-	 * @see org.wcs.smart.query.ui.model.IDefinitionPanel#addItem(org.wcs.smart.query.ui.model.DropItem)
+	 * @see org.wcs.smart.query.ui.model.IQueryDefinitionPanel#addItem(org.wcs.smart.query.ui.model.DropItem)
 	 */
 	@Override
 	public void addItem(DropItem item) {
@@ -108,7 +108,7 @@ public abstract class AbstractSummaryGroupByValuePanel implements IDefinitionPan
 	/**
 	 * Removes the drop item
 	 * 
-	 * @see org.wcs.smart.query.ui.model.IDefinitionPanel#removeItem(org.wcs.smart.query.ui.model.DropItem)
+	 * @see org.wcs.smart.query.ui.model.IQueryDefinitionPanel#removeItem(org.wcs.smart.query.ui.model.DropItem)
 	 */
 	@Override
 	public void removeItem(DropItem item) {
@@ -129,7 +129,7 @@ public abstract class AbstractSummaryGroupByValuePanel implements IDefinitionPan
 	}
 	
 	/**
-	 * @see org.wcs.smart.query.ui.model.IDefinitionPanel#createComposite(org.eclipse.swt.widgets.Composite)
+	 * @see org.wcs.smart.query.ui.model.IQueryDefinitionPanel#createComposite(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
 	public Composite createComposite(Composite parent) {
@@ -245,7 +245,7 @@ public abstract class AbstractSummaryGroupByValuePanel implements IDefinitionPan
 	}
 	
 	/**
-	 * @see org.wcs.smart.query.ui.model.IDefinitionPanel#dispose()
+	 * @see org.wcs.smart.query.ui.model.IQueryDefinitionPanel#dispose()
 	 */
 	@Override
 	public void dispose() {
@@ -258,14 +258,14 @@ public abstract class AbstractSummaryGroupByValuePanel implements IDefinitionPan
 	}
 
 	/**
-	 * @see org.wcs.smart.query.ui.model.IDefinitionPanel#getQueryPart()
+	 * @see org.wcs.smart.query.ui.model.IQueryDefinitionPanel#getQueryPart()
 	 */
 	@Override
 	public abstract String getQueryPart();
 
 	/**
 	 * Saves the items from the row, column and value panels
-	 * @see org.wcs.smart.query.ui.model.IDefinitionPanel#saveItems(org.wcs.smart.query.model.QueryProxy)
+	 * @see org.wcs.smart.query.ui.model.IQueryDefinitionPanel#saveItems(org.wcs.smart.query.model.QueryProxy)
 	 */
 	@Override
 	public void saveItems(QueryProxy q) {
@@ -276,7 +276,7 @@ public abstract class AbstractSummaryGroupByValuePanel implements IDefinitionPan
 
 	/**
 	 * Inits the items in the row, column and value panels
-	 * @see org.wcs.smart.query.ui.model.IDefinitionPanel#initItems(org.wcs.smart.query.model.QueryProxy)
+	 * @see org.wcs.smart.query.ui.model.IQueryDefinitionPanel#initItems(org.wcs.smart.query.model.QueryProxy)
 	 */
 	@Override
 	public void initItems(QueryProxy q) {
@@ -287,7 +287,7 @@ public abstract class AbstractSummaryGroupByValuePanel implements IDefinitionPan
 	}
 
 	/**
-	 * @see org.wcs.smart.query.ui.model.IDefinitionPanel#clear()
+	 * @see org.wcs.smart.query.ui.model.IQueryDefinitionPanel#clear()
 	 */
 	@Override
 	public void clear() {
@@ -297,7 +297,7 @@ public abstract class AbstractSummaryGroupByValuePanel implements IDefinitionPan
 	}
 
 	/**
-	 * @see org.wcs.smart.query.ui.model.IDefinitionPanel#finishDrag(org.wcs.smart.query.ui.model.DropItem)
+	 * @see org.wcs.smart.query.ui.model.IQueryDefinitionPanel#finishDrag(org.wcs.smart.query.ui.model.DropItem)
 	 */
 	@Override
 	public void finishDrag(DropItem item) {
@@ -307,7 +307,7 @@ public abstract class AbstractSummaryGroupByValuePanel implements IDefinitionPan
 	}
 
 	/**
-	 * @see org.wcs.smart.query.ui.model.IDefinitionPanel#fireQueryChangedListeners()
+	 * @see org.wcs.smart.query.ui.model.IQueryDefinitionPanel#fireQueryChangedListeners()
 	 */
 	@Override
 	public void fireQueryChangedListeners() {
@@ -315,7 +315,7 @@ public abstract class AbstractSummaryGroupByValuePanel implements IDefinitionPan
 	}
 
 	/**
-	 * @see org.wcs.smart.query.ui.model.IDefinitionPanel#getDropTargetComposite()
+	 * @see org.wcs.smart.query.ui.model.IQueryDefinitionPanel#getDropTargetComposite()
 	 */
 	@Override
 	public Composite getDropTargetComposite() {

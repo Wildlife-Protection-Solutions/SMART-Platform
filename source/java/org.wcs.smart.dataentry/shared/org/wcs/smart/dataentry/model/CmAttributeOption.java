@@ -63,6 +63,22 @@ public class CmAttributeOption extends UuidItem {
 		END;//Messages.CmAttributeOption_EnterOnceType_END);
 	}
 	
+	public enum VisibleWhen{
+		ALWAYS(1),
+		NEVER(0),
+		CUSTOM (2);
+		
+		int value;
+		
+		VisibleWhen(int value){
+			this.value = value;
+		}
+		public int getValue() {
+			return value;
+		}
+	}
+	
+	
 	private CmAttribute cmAttribute;
 	private String optionId; //NOTE: we cannot map this as emun in case we want to support some external options
 	private String stringValue;
@@ -149,6 +165,19 @@ public class CmAttributeOption extends UuidItem {
 		} else {
 			this.doubleValue = value ? 1.0 : 0.0;
 		}
+	}
+	@Transient
+	public VisibleWhen getVisibleWhen() {
+		int intvalue = ((Double)getDoubleValue()).intValue();
+		for (VisibleWhen v : VisibleWhen.values()) {
+			if (v.value == intvalue) return v;
+		}
+		return VisibleWhen.ALWAYS;
+	}
+	@Transient
+	public void setVisibleWhen(VisibleWhen v, String advancedFilter) {
+		setDoubleValue(((Integer)v.value).doubleValue());
+		setStringValue(advancedFilter);
 	}
 	
 	@Column(name="uuid_value")

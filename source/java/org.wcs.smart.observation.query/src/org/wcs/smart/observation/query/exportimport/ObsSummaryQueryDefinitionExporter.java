@@ -22,10 +22,10 @@
 package org.wcs.smart.observation.query.exportimport;
 
 import org.hibernate.Session;
+import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.observation.query.model.ObservationSummaryQuery;
 import org.wcs.smart.query.common.importexport.SummaryQueryDefinitionExporter;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.summary.GroupByPart;
 import org.wcs.smart.query.xml.model.QueryType;
 

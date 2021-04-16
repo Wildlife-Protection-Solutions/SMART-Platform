@@ -26,9 +26,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.query.model.filter.AreaFilter;
-import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IFilterDropItem;
 import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
 
 /**
  * An area drop item for area filters.

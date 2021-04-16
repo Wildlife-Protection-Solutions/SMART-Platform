@@ -60,9 +60,9 @@ import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.event.QueryEventManager;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.QueryProxy;
-import org.wcs.smart.query.ui.model.DropItem;
-import org.wcs.smart.query.ui.model.IDefinitionPanel;
+import org.wcs.smart.query.ui.model.IQueryDefinitionPanel;
 import org.wcs.smart.ui.ProjectionLabelProvider;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
 import org.wcs.smart.util.ReprojectUtils;
 
 /**
@@ -73,7 +73,7 @@ import org.wcs.smart.util.ReprojectUtils;
  * @author Emily
  *
  */
-public abstract class AbstractGridDefinitionPanel implements IDefinitionPanel {
+public abstract class AbstractGridDefinitionPanel implements IQueryDefinitionPanel {
 
 	private Composite main;
 	private Label lblUnits;
@@ -137,19 +137,19 @@ public abstract class AbstractGridDefinitionPanel implements IDefinitionPanel {
 	}
 	
 	/**
-	 * @see org.wcs.smart.query.ui.model.IDefinitionPanel#getId()
+	 * @see org.wcs.smart.query.ui.model.IQueryDefinitionPanel#getId()
 	 */
 	@Override
 	public abstract String getId();
 
 	/**
-	 * @see org.wcs.smart.query.ui.model.IDefinitionPanel#getGuiName()
+	 * @see org.wcs.smart.query.ui.model.IQueryDefinitionPanel#getGuiName()
 	 */
 	@Override
 	public abstract String getGuiName();
 
 	/**
-	 * @see org.wcs.smart.query.ui.model.IDefinitionPanel#validate()
+	 * @see org.wcs.smart.query.ui.model.IQueryDefinitionPanel#validate()
 	 */
 	@Override
 	public abstract String validate();
@@ -157,7 +157,7 @@ public abstract class AbstractGridDefinitionPanel implements IDefinitionPanel {
 	
 	/**
 	 * adds the drop item to the value list
-	 * @see org.wcs.smart.query.ui.model.IDefinitionPanel#addItem(org.wcs.smart.query.ui.model.DropItem)
+	 * @see org.wcs.smart.query.ui.model.IQueryDefinitionPanel#addItem(org.wcs.smart.query.ui.model.DropItem)
 	 */
 	@Override
 	public void addItem(DropItem item) {
@@ -165,7 +165,7 @@ public abstract class AbstractGridDefinitionPanel implements IDefinitionPanel {
 	}
 
 	/** removes the drop item from the value list
-	 * @see org.wcs.smart.query.ui.model.IDefinitionPanel#removeItem(org.wcs.smart.query.ui.model.DropItem)
+	 * @see org.wcs.smart.query.ui.model.IQueryDefinitionPanel#removeItem(org.wcs.smart.query.ui.model.DropItem)
 	 */
 	@Override
 	public void removeItem(DropItem item) {
@@ -183,7 +183,7 @@ public abstract class AbstractGridDefinitionPanel implements IDefinitionPanel {
 
 	
 	/**
-	 * @see org.wcs.smart.query.ui.model.IDefinitionPanel#createComposite(org.eclipse.swt.widgets.Composite)
+	 * @see org.wcs.smart.query.ui.model.IQueryDefinitionPanel#createComposite(org.eclipse.swt.widgets.Composite)
 	 */
 	@Override
 	public Composite createComposite(Composite parent) {
@@ -266,7 +266,7 @@ public abstract class AbstractGridDefinitionPanel implements IDefinitionPanel {
 	}
 
 	/**
-	 * @see org.wcs.smart.query.ui.model.IDefinitionPanel#dispose()
+	 * @see org.wcs.smart.query.ui.model.IQueryDefinitionPanel#dispose()
 	 */
 	@Override
 	public void dispose() {

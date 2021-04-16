@@ -22,12 +22,12 @@
 package org.wcs.smart.patrol.query.exportimport;
 
 import org.hibernate.Session;
+import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.patrol.query.model.PatrolQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolGroupBy;
 import org.wcs.smart.query.common.importexport.SummaryQueryDefinitionExporter;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.summary.GroupByPart;
 import org.wcs.smart.query.model.summary.IGroupBy;
 import org.wcs.smart.query.model.summary.IGroupBy.GroupByType;

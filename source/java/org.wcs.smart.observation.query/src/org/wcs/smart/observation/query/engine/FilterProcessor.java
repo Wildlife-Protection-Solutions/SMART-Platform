@@ -37,6 +37,10 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.filter.AttributeFilter;
+import org.wcs.smart.filter.IFilter;
+import org.wcs.smart.filter.IFilterVisitor;
+import org.wcs.smart.filter.Operator;
 import org.wcs.smart.observation.WaypointSourceEngine;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.model.Waypoint;
@@ -54,14 +58,10 @@ import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.common.engine.visitors.AttributeFilterCollectorVisitor;
 import org.wcs.smart.query.common.engine.visitors.HasObservationFilterVisitor;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.filter.AttributeFilter;
 import org.wcs.smart.query.model.filter.AttributeInfo;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.EmptyFilter;
-import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.IFilterVisitor;
-import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
 
 /**

@@ -39,11 +39,11 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.wcs.smart.observation.WaypointSourceEngine;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.query.internal.Messages;
-import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.ICombinableDropItem;
 import org.wcs.smart.query.ui.model.IGroupByDropItem;
-import org.wcs.smart.query.ui.model.ListItem;
 import org.wcs.smart.query.ui.model.impl.GroupByFilterDialog;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.ListItem;
 /**
  * Group by option for waypoint source field
  * @author Emily

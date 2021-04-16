@@ -35,10 +35,10 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.filter.Operator;
 import org.wcs.smart.observation.query.internal.Messages;
-import org.wcs.smart.query.model.filter.Operator;
-import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IFilterDropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
 /**
  * Drop item for filtering on waypoint source field.
  * @author Emily

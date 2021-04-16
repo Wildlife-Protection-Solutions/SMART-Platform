@@ -13,11 +13,11 @@ import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryProxy;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
-import org.wcs.smart.query.ui.model.DropItem;
-import org.wcs.smart.query.ui.model.IDropItemFactory;
+import org.wcs.smart.query.ui.model.IQueryDropItemFactory;
 import org.wcs.smart.query.ui.model.impl.ErrorDropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
 
-public class CompoundQueryDropFactory implements IDropItemFactory{
+public class CompoundQueryDropFactory implements IQueryDropItemFactory{
 
 	public static CompoundQueryDropFactory INSTANCE = new CompoundQueryDropFactory();
 	

@@ -25,9 +25,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
-import org.wcs.smart.query.model.filter.IFilter;
 
 public interface IFilterProcessor {
 	/**

@@ -47,13 +47,13 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.filter.Operator;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.internal.Messages;
-import org.wcs.smart.query.model.filter.Operator;
-import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IFilterDropItem;
 import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
 import org.wcs.smart.util.UuidUtils;
 
 /**

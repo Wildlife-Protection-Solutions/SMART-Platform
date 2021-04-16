@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.query.model.filter;
 
+import org.wcs.smart.filter.IFilter;
+import org.wcs.smart.filter.IFilterVisitor;
+import org.wcs.smart.filter.Operator;
 import org.wcs.smart.util.SharedUtils;
 
 /**

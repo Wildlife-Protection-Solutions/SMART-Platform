@@ -22,10 +22,10 @@
 package org.wcs.smart.observation.query.exportimport;
 
 import org.hibernate.Session;
+import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.observation.query.model.ObservationGriddedQuery;
 import org.wcs.smart.query.common.importexport.GridQueryDefinitionExporter;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.xml.model.QueryType;
 
 /**

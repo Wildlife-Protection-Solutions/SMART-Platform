@@ -22,7 +22,7 @@
 package org.wcs.smart.query.ui.definition;
 
 import org.eclipse.swt.widgets.Composite;
-import org.wcs.smart.query.ui.model.DropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
 
 /**
  * Abstract class for a query definition 

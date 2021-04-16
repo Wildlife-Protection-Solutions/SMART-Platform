@@ -29,9 +29,9 @@ import java.util.List;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.query.ui.model.DropItem;
-import org.wcs.smart.query.ui.model.ListItem;
 import org.wcs.smart.query.ui.model.impl.BasicDropItemFactory;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.ListItem;
 import org.wcs.smart.util.UuidUtils;
 
 /**

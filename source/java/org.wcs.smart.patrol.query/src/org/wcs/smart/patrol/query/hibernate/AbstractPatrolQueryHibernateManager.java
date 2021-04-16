@@ -30,7 +30,7 @@ import org.hibernate.query.Query;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.ui.model.ListItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.ListItem;
 import org.wcs.smart.util.UuidUtils;
 
 /**

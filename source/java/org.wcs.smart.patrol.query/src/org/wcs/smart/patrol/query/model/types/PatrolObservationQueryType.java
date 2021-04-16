@@ -54,9 +54,9 @@ import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
 import org.wcs.smart.query.ui.definition.BasicFilterDefintionPanel;
 import org.wcs.smart.query.ui.definition.ConservationAreaFilterPanel;
-import org.wcs.smart.query.ui.model.DropItem;
-import org.wcs.smart.query.ui.model.IDefinitionPanel;
-import org.wcs.smart.query.ui.model.IDropItemFactory;
+import org.wcs.smart.query.ui.model.IQueryDefinitionPanel;
+import org.wcs.smart.query.ui.model.IQueryDropItemFactory;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
 
 /**
  * Patrol observation type
@@ -65,7 +65,7 @@ import org.wcs.smart.query.ui.model.IDropItemFactory;
  */
 public class PatrolObservationQueryType implements IMappableQueryType {
 
-	private static IDropItemFactory dropItemFactory = null;
+	private static IQueryDropItemFactory dropItemFactory = null;
 	
 	/**
 	 * @see org.wcs.smart.query.model.IQueryType#getHibernateClass()
@@ -132,7 +132,7 @@ public class PatrolObservationQueryType implements IMappableQueryType {
 	 * @see org.wcs.smart.query.model.IQueryType#getDropItemFactory()
 	 */
 	@Override
-	public IDropItemFactory getDropItemFactory() {
+	public IQueryDropItemFactory getDropItemFactory() {
 		if (dropItemFactory == null){
 			dropItemFactory = new PatrolDropItemFactory(){
 				@Override
@@ -158,8 +158,8 @@ public class PatrolObservationQueryType implements IMappableQueryType {
 	 * @see org.wcs.smart.query.model.IQueryType#updateQueryDefinition(org.wcs.smart.query.model.Query, java.util.List)
 	 */
 	@Override
-	public void updateQueryDefinition(Query query, List<IDefinitionPanel> components) {
-		for (IDefinitionPanel p : components){
+	public void updateQueryDefinition(Query query, List<IQueryDefinitionPanel> components) {
+		for (IQueryDefinitionPanel p : components){
 			if (p.getId().equals(BasicFilterDefintionPanel.ID)){
 				((PatrolObservationQuery)query).setQueryFilter(p.getQueryPart());
 			}else if (p.getId().equals(ConservationAreaFilterPanel.ID)){
@@ -172,11 +172,11 @@ public class PatrolObservationQueryType implements IMappableQueryType {
 	 * @see org.wcs.smart.query.model.IQueryType#validateQuery(java.util.List)
 	 */
 	@Override
-	public String validateQuery(List<IDefinitionPanel> components) {
+	public String validateQuery(List<IQueryDefinitionPanel> components) {
 		String filters= ""; //$NON-NLS-1$
 		
 		// validate each panel
-		for (IDefinitionPanel p : components){
+		for (IQueryDefinitionPanel p : components){
 			String panelError = p.validate();
 			if (panelError != null){
 				return panelError;

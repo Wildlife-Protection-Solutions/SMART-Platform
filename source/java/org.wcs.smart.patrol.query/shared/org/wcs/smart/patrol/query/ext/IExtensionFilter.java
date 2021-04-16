@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.patrol.query.ext;
 
-import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.Operator;
+import org.wcs.smart.filter.IFilter;
+import org.wcs.smart.filter.Operator;
 /**
  * Filter wrapper for extension items.
  * 

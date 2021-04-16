@@ -23,6 +23,8 @@ package org.wcs.smart.query.ui.model;
 
 import java.util.List;
 
+import org.wcs.smart.ui.ca.datamodel.dropitem.ListItem;
+
 
 /**
  * Group by drop item interface.

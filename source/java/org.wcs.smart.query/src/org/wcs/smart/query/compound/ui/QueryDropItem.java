@@ -46,7 +46,7 @@ import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.IDateFilter;
 import org.wcs.smart.query.ui.QueryDateFilterComposite;
-import org.wcs.smart.query.ui.model.DropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
 import org.wcs.smart.util.UuidUtils;
 
 /**

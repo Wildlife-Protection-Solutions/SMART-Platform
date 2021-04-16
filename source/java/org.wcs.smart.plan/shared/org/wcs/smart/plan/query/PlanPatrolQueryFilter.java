@@ -21,11 +21,11 @@
  */
 package org.wcs.smart.plan.query;
 
+import org.wcs.smart.filter.IFilter;
+import org.wcs.smart.filter.IFilterVisitor;
+import org.wcs.smart.filter.Operator;
 import org.wcs.smart.patrol.query.ext.IExtensionFilter;
 import org.wcs.smart.patrol.query.model.IPatrolQueryOption;
-import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.IFilterVisitor;
-import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
 

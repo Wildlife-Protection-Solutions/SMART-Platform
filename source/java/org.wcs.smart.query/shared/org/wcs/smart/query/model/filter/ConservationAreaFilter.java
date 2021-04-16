@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.UUID;
 
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.filter.IFilter;
+import org.wcs.smart.filter.IFilterVisitor;
 import org.wcs.smart.util.UuidUtils;
 
 /**

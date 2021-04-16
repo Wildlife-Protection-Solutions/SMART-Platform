@@ -23,13 +23,15 @@ package org.wcs.smart.query.ui.model;
 
 import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.query.model.QueryProxy;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.IDefinitionPanel;
 
 /**
  * Drop panel for placing drop items
  * @author egouge
  * @since 1.0.0
  */
-public interface IDefinitionPanel {
+public interface IQueryDefinitionPanel extends IDefinitionPanel{
 	
 	/**
 	 * Query definition panel extension id

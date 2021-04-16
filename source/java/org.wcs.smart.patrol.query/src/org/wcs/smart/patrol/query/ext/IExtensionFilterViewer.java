@@ -23,9 +23,9 @@ package org.wcs.smart.patrol.query.ext;
 
 import org.eclipse.swt.graphics.Image;
 import org.hibernate.Session;
+import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.query.common.engine.IQueryEngine;
-import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.ui.model.DropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
 
 /**
  * Maps an IExtensionFilter to the associated UI

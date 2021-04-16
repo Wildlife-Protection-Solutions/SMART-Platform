@@ -22,10 +22,10 @@
 package org.wcs.smart.query.common.importexport;
 
 import org.hibernate.Session;
+import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.xml.model.QueryPart;
 import org.wcs.smart.query.xml.model.QueryType;
 

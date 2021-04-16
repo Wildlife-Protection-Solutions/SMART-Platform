@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.dataentry.CmAttributeOptionLabelProvider;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmAttributeOption.EnterOnceType;
@@ -60,7 +61,7 @@ public class CmAttributeOptionFactory {
 		CmAttributeOption option = new CmAttributeOption();
 		option.setCmAttribute(attribute);
 		option.setOptionId(CmAttributeOption.ID_IS_VISIBLE);
-		option.setDoubleValue(1.0); //true by default
+		option.setVisibleWhen(CmAttributeOption.VisibleWhen.ALWAYS, null);
 		return option;
 	}
 	

@@ -25,11 +25,11 @@ import java.util.Locale;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.NamedKeyItem;
+import org.wcs.smart.filter.IFilter;
+import org.wcs.smart.filter.IFilterVisitor;
 import org.wcs.smart.patrol.query.model.PatrolQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolQueryOptionType;
 import org.wcs.smart.patrol.query.parser.internal.filter.PatrolFilter;
-import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.IFilterVisitor;
 import org.wcs.smart.query.xml.model.QueryType;
 import org.wcs.smart.query.xml.model.UuidItemType;
 import org.wcs.smart.util.UuidUtils;

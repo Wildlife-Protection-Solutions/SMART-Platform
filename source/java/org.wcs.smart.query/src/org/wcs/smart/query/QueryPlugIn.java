@@ -45,10 +45,8 @@ import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.common.ui.GridQueryColumnLabelProvider;
-import org.wcs.smart.query.common.ui.OperatorLabelProvider;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IGridQueryColumnLabelProvider;
-import org.wcs.smart.query.model.filter.IOperatorLabelProvider;
 import org.wcs.smart.query.model.filter.date.IQueryDateLabelProvider;
 import org.wcs.smart.query.ui.AbstractQueryPropertyProvider;
 import org.wcs.smart.query.ui.MultiCaQueryPerspective;
@@ -245,7 +243,6 @@ public class QueryPlugIn extends AbstractUIPlugin {
 		
 		DefinitionPanelManager.createInstance();
 				
-		SmartContext.INSTANCE.setClass(IOperatorLabelProvider.class, new OperatorLabelProvider());
 		SmartContext.INSTANCE.setClass(IGridQueryColumnLabelProvider.class, new GridQueryColumnLabelProvider());
 		SmartContext.INSTANCE.setClass(IQueryDateLabelProvider.class, new QueryDateLabelProvider());
 		

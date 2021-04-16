@@ -22,6 +22,8 @@
 package org.wcs.smart.query.model.filter;
 
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.filter.IFilter;
+import org.wcs.smart.filter.IFilterVisitor;
 import org.wcs.smart.query.model.CustomArea;
 
 
@@ -140,10 +142,6 @@ public class AreaFilter implements IFilter {
 	public void changeGeometryType(AreaFilterGeometryType geomType){
 		this.geomType = geomType;
 	}
-	
-
-	
-
 	
 	public void accept(IFilterVisitor visitor){
 		visitor.visit(this);

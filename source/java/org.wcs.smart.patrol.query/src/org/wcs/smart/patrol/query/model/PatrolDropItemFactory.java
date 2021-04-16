@@ -39,6 +39,9 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
+import org.wcs.smart.filter.BooleanFilter;
+import org.wcs.smart.filter.IFilter;
+import org.wcs.smart.filter.Operator;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
 import org.wcs.smart.patrol.query.ext.IExtensionFilter;
@@ -74,9 +77,6 @@ import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.ui.itempanel.SummaryDataModelContentProvider;
 import org.wcs.smart.query.common.ui.itempanel.SummaryDmObject;
 import org.wcs.smart.query.model.QueryProxy;
-import org.wcs.smart.query.model.filter.BooleanExpression;
-import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.model.filter.date.IDateGroupBy;
 import org.wcs.smart.query.model.summary.GroupByPart;
 import org.wcs.smart.query.model.summary.IGroupBy;
@@ -86,9 +86,7 @@ import org.wcs.smart.query.model.summary.SumQueryDefinition;
 import org.wcs.smart.query.model.summary.ValuePart;
 import org.wcs.smart.query.ui.definition.BasicFilterDefintionPanel;
 import org.wcs.smart.query.ui.definition.ValueRateFilterDeifnitionPanel;
-import org.wcs.smart.query.ui.model.DropItem;
-import org.wcs.smart.query.ui.model.IDropItemFactory;
-import org.wcs.smart.query.ui.model.ListItem;
+import org.wcs.smart.query.ui.model.IQueryDropItemFactory;
 import org.wcs.smart.query.ui.model.impl.AbstractValueDropItem;
 import org.wcs.smart.query.ui.model.impl.AttributeListValueDropItem;
 import org.wcs.smart.query.ui.model.impl.AttributeTreeValueDropItem;
@@ -96,6 +94,8 @@ import org.wcs.smart.query.ui.model.impl.AttributeValueDropItem;
 import org.wcs.smart.query.ui.model.impl.BasicDropItemFactory;
 import org.wcs.smart.query.ui.model.impl.CategoryValueDropItem;
 import org.wcs.smart.query.ui.model.impl.ErrorDropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.ListItem;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
 
@@ -104,7 +104,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author Emily
  *
  */
-public class PatrolDropItemFactory extends BasicDropItemFactory implements IDropItemFactory {
+public class PatrolDropItemFactory extends BasicDropItemFactory implements IQueryDropItemFactory {
 
 	public static PatrolDropItemFactory INSTANCE = new PatrolDropItemFactory();
 	
@@ -486,14 +486,14 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 			return createDropItems((PatrolUuidFilter)f, session);
 		}else if (f instanceof IExtensionFilter){
 			return createDropItems((IExtensionFilter)f, session);
-		}else if (f instanceof BooleanExpression){
-			return createDropItems((BooleanExpression)f, session);
+		}else if (f instanceof BooleanFilter){
+			return createDropItems((BooleanFilter)f, session);
 		}
 		return super.filterToDropItem(f, session);
 		
 	}
 	
-	public DropItem[] createDropItems(BooleanExpression exp, Session session) throws Exception{
+	public DropItem[] createDropItems(BooleanFilter exp, Session session) throws Exception{
 		DropItem[] its1 = filterToDropItem(exp.getFilter1(), session);
 		DropItem opDropItem = BasicDropItemFactory.createBooleanOpDropItem();
 		opDropItem.initializeData(exp.getOperator().asSmartValue());

@@ -26,7 +26,7 @@ import java.util.HashMap;
 
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.ui.definition.QueryDefPanel;
-import org.wcs.smart.query.ui.model.DropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
 /**
  * A query proxy used for GUI interactions.
  * 

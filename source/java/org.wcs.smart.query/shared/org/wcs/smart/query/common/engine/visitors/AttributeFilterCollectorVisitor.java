@@ -24,10 +24,10 @@ package org.wcs.smart.query.common.engine.visitors;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.wcs.smart.query.model.filter.AttributeFilter;
+import org.wcs.smart.filter.AttributeFilter;
+import org.wcs.smart.filter.IFilter;
+import org.wcs.smart.filter.IFilterVisitor;
 import org.wcs.smart.query.model.filter.AttributeInfo;
-import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.IFilterVisitor;
 
 /**
  * Attribute Filter collector. This visitor collects

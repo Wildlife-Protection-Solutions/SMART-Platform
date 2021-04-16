@@ -56,8 +56,8 @@ import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryProxy;
 import org.wcs.smart.query.ui.QuerySourceProvider;
 import org.wcs.smart.query.ui.editor.IQueryEditor;
-import org.wcs.smart.query.ui.model.DropItem;
-import org.wcs.smart.query.ui.model.IDropItemFactory;
+import org.wcs.smart.query.ui.model.IQueryDropItemFactory;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
 import org.wcs.smart.util.E3Utils;
 
 /**
@@ -324,7 +324,7 @@ public class QueryDefView  {
 	/**
 	 * @return the drop item factory for dropping items into the query
 	 */
-	public IDropItemFactory getDropItemFactory(){
+	public IQueryDropItemFactory getDropItemFactory(){
 		if (current != null){
 			return current.getQueryType().getDropItemFactory();
 		}

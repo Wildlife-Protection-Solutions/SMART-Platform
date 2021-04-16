@@ -24,7 +24,7 @@ package org.wcs.smart.query.compound.ui;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.ui.QuerySourceProvider;
 import org.wcs.smart.query.ui.definition.ListDefinitionPanel;
-import org.wcs.smart.query.ui.model.DropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
 
 /**
  * Definition panel for list of queries.

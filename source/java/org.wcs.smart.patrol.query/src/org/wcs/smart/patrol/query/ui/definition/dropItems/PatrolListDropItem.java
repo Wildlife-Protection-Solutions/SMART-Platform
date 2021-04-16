@@ -53,9 +53,9 @@ import org.wcs.smart.query.QueryFilterConfigManager;
 import org.wcs.smart.query.QueryFilterConfigManager.IConfigurationChangeListener;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.QueryFilterConfiguration;
-import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IFilterDropItem;
-import org.wcs.smart.query.ui.model.ListItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.ListItem;
 import org.wcs.smart.util.UuidUtils;
 
 /**

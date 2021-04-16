@@ -48,15 +48,15 @@ import org.wcs.smart.query.event.QueryEventManager;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.QueryProxy;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
-import org.wcs.smart.query.ui.model.DropItem;
-import org.wcs.smart.query.ui.model.IDefinitionPanel;
+import org.wcs.smart.query.ui.model.IQueryDefinitionPanel;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
 
 /**
  * Conservation area filter panel.
  * @author Emily
  *
  */
-public class ConservationAreaFilterPanel implements IDefinitionPanel, SelectionListener{
+public class ConservationAreaFilterPanel implements IQueryDefinitionPanel, SelectionListener{
 	
 	/**
 	 * Panel Id

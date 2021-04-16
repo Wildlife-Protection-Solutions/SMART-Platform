@@ -52,22 +52,21 @@ import org.wcs.smart.query.common.model.SummaryQuery;
 import org.wcs.smart.query.event.QueryEventManager;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.QueryProxy;
-import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.IFilter.FilterType;
-import org.wcs.smart.query.ui.model.DropItem;
-import org.wcs.smart.query.ui.model.IDefinitionPanel;
-import org.wcs.smart.query.ui.model.ProxyItem;
+import org.wcs.smart.query.model.filter.FilterType;
+import org.wcs.smart.query.ui.model.IQueryDefinitionPanel;
 import org.wcs.smart.query.ui.model.impl.BasicDropItemFactory;
-import org.wcs.smart.query.ui.model.impl.BracketDropItem;
-import org.wcs.smart.query.ui.model.impl.NotDropItem;
 import org.wcs.smart.ui.ca.datamodel.TreeDropDownViewer;
+import org.wcs.smart.ui.ca.datamodel.dropitem.BracketDropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.NotDropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.ProxyItem;
 
 /**
  * Simple filter definition panel.
  * @author Emily
  *
  */
-public class BasicFilterDefintionPanel implements IDefinitionPanel {
+public class BasicFilterDefintionPanel implements IQueryDefinitionPanel {
 
 	public static final String ID = "org.wcs.smart.query.common.definition.filter"; //$NON-NLS-1$
 	final static Transfer[] types = new Transfer[] { LocalSelectionTransfer.getTransfer() };
@@ -82,7 +81,7 @@ public class BasicFilterDefintionPanel implements IDefinitionPanel {
 	protected QueryProxy currentQuery = null;
 	
 	private TreeDropDownViewer treeEditor = null;
-	private Set<IDefinitionPanel> targetPanels;
+	private Set<IQueryDefinitionPanel> targetPanels;
 	
 	private DropItem dragItem;
 	
@@ -95,7 +94,7 @@ public class BasicFilterDefintionPanel implements IDefinitionPanel {
 	 * 
 	 */
 	public BasicFilterDefintionPanel(){
-		this.targetPanels = new HashSet<IDefinitionPanel>();
+		this.targetPanels = new HashSet<IQueryDefinitionPanel>();
 		targetPanels.add(this);
 	}
 	
@@ -117,7 +116,7 @@ public class BasicFilterDefintionPanel implements IDefinitionPanel {
 	 * adds addition panels as possible drop targets
 	 * @param panel
 	 */
-	public void addDropTargetPanel(IDefinitionPanel panel){
+	public void addDropTargetPanel(IQueryDefinitionPanel panel){
 		this.targetPanels.add(panel);
 	}
 	
@@ -132,7 +131,7 @@ public class BasicFilterDefintionPanel implements IDefinitionPanel {
 	 * Sets the filter type
 	 * @param filterType
 	 */
-	public void setFilterType(IFilter.FilterType filterType){
+	public void setFilterType(FilterType filterType){
 		if (filterType.equals(FilterType.WAYPOINT)){
 			btnWaypoint.setSelection(true);
 			btnObservation.setSelection(false);
@@ -197,11 +196,11 @@ public class BasicFilterDefintionPanel implements IDefinitionPanel {
 			if (items.size() > 0){
 				//if non-empty filter then include filter type
 				if (btnWaypoint.getSelection()){
-					query.append(IFilter.FilterType.WAYPOINT.getKey());
+					query.append(FilterType.WAYPOINT.getKey());
 				}else if (btnGroup.getSelection()) {
-					query.append(IFilter.FilterType.GROUP.getKey());
+					query.append(FilterType.GROUP.getKey());
 				}else{
-					query.append(IFilter.FilterType.OBSERVATION.getKey());
+					query.append(FilterType.OBSERVATION.getKey());
 				}
 				query.append("|"); //$NON-NLS-1$
 			}
@@ -316,7 +315,7 @@ public class BasicFilterDefintionPanel implements IDefinitionPanel {
 
 	
 	/**
-	 * @see org.wcs.smart.query.ui.IDefinitionPanel.IDropPanel#finishDrag(org.wcs.smart.query.ui.formulaDnd.DropItem)
+	 * @see org.wcs.smart.query.ui.IQueryDefinitionPanel.IDropPanel#finishDrag(org.wcs.smart.query.ui.formulaDnd.DropItem)
 	 */
 	public void finishDrag(DropItem di){
 		if (di.getTargetPanel() != this){
@@ -372,19 +371,19 @@ public class BasicFilterDefintionPanel implements IDefinitionPanel {
 			}
 		};
 		btnWaypoint = new Button(filterTypeComp, SWT.RADIO);
-		btnWaypoint.setText(BasicDropItemFactory.INSTANCE.getFilterTypeName(IFilter.FilterType.WAYPOINT));
+		btnWaypoint.setText(BasicDropItemFactory.INSTANCE.getFilterTypeName(FilterType.WAYPOINT));
 		btnWaypoint.setToolTipText(Messages.FilterDropTargetPanel_waypointtooltip);
 		btnWaypoint.setSelection(true);
 		btnWaypoint.addListener(SWT.Selection, selectListener);
 		
 		btnGroup = new Button(filterTypeComp, SWT.RADIO);
-		btnGroup.setText(BasicDropItemFactory.INSTANCE.getFilterTypeName(IFilter.FilterType.GROUP));
+		btnGroup.setText(BasicDropItemFactory.INSTANCE.getFilterTypeName(FilterType.GROUP));
 		btnGroup.setToolTipText(Messages.BasicFilterDefintionPanel_obsGroupTooltip);
 		btnGroup.setSelection(false);
 		btnGroup.addListener(SWT.Selection, selectListener);
 		
 		btnObservation = new Button(filterTypeComp, SWT.RADIO);
-		btnObservation.setText(BasicDropItemFactory.INSTANCE.getFilterTypeName(IFilter.FilterType.OBSERVATION));
+		btnObservation.setText(BasicDropItemFactory.INSTANCE.getFilterTypeName(FilterType.OBSERVATION));
 		btnObservation.addListener(SWT.Selection, selectListener);
 		btnObservation.setToolTipText(Messages.FilterDropTargetPanel_observationtooltip);
 		
@@ -511,7 +510,7 @@ public class BasicFilterDefintionPanel implements IDefinitionPanel {
 				orderElements();
 				
 				dragItem = null;
-				for(IDefinitionPanel target : targetPanels){
+				for(IQueryDefinitionPanel target : targetPanels){
 					((BasicFilterDefintionPanel)target).dragItem = null;
 				}
 				

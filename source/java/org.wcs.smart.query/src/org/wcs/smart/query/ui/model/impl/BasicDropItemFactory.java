@@ -40,23 +40,23 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.filter.AttributeFilter;
+import org.wcs.smart.filter.BooleanFilter;
+import org.wcs.smart.filter.BracketFilter;
+import org.wcs.smart.filter.CategoryAttributeFilter;
+import org.wcs.smart.filter.CategoryFilter;
+import org.wcs.smart.filter.IFilter;
+import org.wcs.smart.filter.NotFilter;
+import org.wcs.smart.filter.Operator;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.QueryProxy;
 import org.wcs.smart.query.model.filter.AreaFilter;
-import org.wcs.smart.query.model.filter.AttributeFilter;
-import org.wcs.smart.query.model.filter.BooleanExpression;
-import org.wcs.smart.query.model.filter.BracketFilter;
-import org.wcs.smart.query.model.filter.CategoryAttributeFilter;
-import org.wcs.smart.query.model.filter.CategoryFilter;
 import org.wcs.smart.query.model.filter.EmptyFilter;
-import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.IFilter.FilterType;
-import org.wcs.smart.query.model.filter.NotExpression;
+import org.wcs.smart.query.model.filter.FilterType;
 import org.wcs.smart.query.model.filter.ObserverFilter;
-import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.model.filter.date.DateGroupByViewer;
 import org.wcs.smart.query.model.filter.date.IDateGroupBy;
 import org.wcs.smart.query.model.summary.AreaGroupBy;
@@ -76,16 +76,20 @@ import org.wcs.smart.query.model.summary.IGroupByViewer;
 import org.wcs.smart.query.model.summary.IValueItem;
 import org.wcs.smart.query.model.summary.ObserverGroupBy;
 import org.wcs.smart.query.model.summary.ObserverGroupByViewer;
-import org.wcs.smart.query.ui.model.DropItem;
-import org.wcs.smart.query.ui.model.IDropItemFactory;
-import org.wcs.smart.query.ui.model.ListItem;
-import org.wcs.smart.query.ui.model.impl.BracketDropItem.BracketType;
+import org.wcs.smart.query.ui.model.IQueryDropItemFactory;
 import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.ui.ca.datamodel.dropitem.AttributeDropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.AttributeTreeDropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.BooleanOpDropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.BracketDropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.BracketDropItem.BracketType;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.ListItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.NotDropItem;
 import org.wcs.smart.util.UuidUtils;
 
-public class BasicDropItemFactory implements IDropItemFactory{
+public class BasicDropItemFactory implements IQueryDropItemFactory{
 
-	public static ListItem ANY_OPTION = new ListItem(null, Messages.AttributeFilter_AnyListItemOption, AttributeFilter.ANY_OPTION_KEY);
 	
 	public static BasicDropItemFactory INSTANCE = new BasicDropItemFactory();
 	
@@ -93,7 +97,7 @@ public class BasicDropItemFactory implements IDropItemFactory{
 		
 	}
 	
-	public String getFilterTypeName(IFilter.FilterType type){
+	public String getFilterTypeName(FilterType type){
 		if (type == FilterType.WAYPOINT){
 			return Messages.IFilter_IncidentFilterName;
 		}else if (type == FilterType.OBSERVATION){
@@ -148,9 +152,9 @@ public class BasicDropItemFactory implements IDropItemFactory{
 				ca.getAttribute().getType() == AttributeType.DATE ){
 			return new AttributeDropItem(ca);
 		}else if (ca.getAttribute().getType() == AttributeType.LIST ){
-			return new AttributeListDropItem(ca);
+			return new AttributeListQueryDropItem(ca);
 		}else if (ca.getAttribute().getType() == AttributeType.MLIST ){
-			return new AttributeMListDropItem(ca);
+			return new AttributeMListQueryDropItem(ca);
 		}else if (ca.getAttribute().getType() == AttributeType.TREE ){
 			return new AttributeTreeDropItem(ca);
 		}
@@ -164,9 +168,9 @@ public class BasicDropItemFactory implements IDropItemFactory{
 				attribute.getType() == AttributeType.DATE ){
 			return new AttributeDropItem(attribute);
 		}else if (attribute.getType() == AttributeType.LIST ){
-			return new AttributeListDropItem(attribute);
+			return new AttributeListQueryDropItem(attribute);
 		}else if (attribute.getType() == AttributeType.MLIST ){
-			return new AttributeMListDropItem(attribute);
+			return new AttributeMListQueryDropItem(attribute);
 		}else if (attribute.getType() == AttributeType.TREE ){
 			return new AttributeTreeDropItem(attribute);
 		}
@@ -364,12 +368,12 @@ public class BasicDropItemFactory implements IDropItemFactory{
 			return createDropItems((CategoryAttributeFilter)f, session);
 		}else if (f instanceof CategoryFilter){
 			return createDropItems((CategoryFilter)f, session);
-		}else if (f instanceof BooleanExpression){
-			return createDropItems((BooleanExpression)f, session);
+		}else if (f instanceof BooleanFilter){
+			return createDropItems((BooleanFilter)f, session);
 		}else if (f instanceof BracketFilter){
 			return createDropItems((BracketFilter)f, session);
-		}else if (f instanceof NotExpression){
-			return createDropItems((NotExpression)f, session);
+		}else if (f instanceof NotFilter){
+			return createDropItems((NotFilter)f, session);
 		}else if (f instanceof ObserverFilter){
 			return createDropItems((ObserverFilter)f, session);
 		}else if (f instanceof EmptyFilter){
@@ -429,7 +433,7 @@ public class BasicDropItemFactory implements IDropItemFactory{
 	 * 
 	 * @see org.wcs.smart.query.parser.filter.IFilter#getDropItems(org.hibernate.Session)
 	 * 
-	 * @return {@link AttributeDropItem} or {@link AttributeListDropItem} 
+	 * @return {@link AttributeDropItem} or {@link AttributeListQueryDropItem} 
 	 * or {@link AttributeTreeDropItem} depending on 
 	 * attribute type.
 	 */
@@ -499,7 +503,7 @@ public class BasicDropItemFactory implements IDropItemFactory{
 		return att;
 	}
 
-	public DropItem[] createDropItems(BooleanExpression exp, Session session) throws Exception{
+	public DropItem[] createDropItems(BooleanFilter exp, Session session) throws Exception{
 		DropItem[] its1 = filterToDropItem(exp.getFilter1(), session);
 		DropItem opDropItem = BasicDropItemFactory.createBooleanOpDropItem();
 		opDropItem.initializeData(exp.getOperator().asSmartValue());
@@ -533,7 +537,7 @@ public class BasicDropItemFactory implements IDropItemFactory{
 	/**
 	 * @see org.wcs.smart.query.parser.filter.IFilter#getDropItems(org.hibernate.Session)
 	 * 
-	 * @return {@link AttributeDropItem} or {@link AttributeListDropItem} 
+	 * @return {@link AttributeDropItem} or {@link AttributeListQueryDropItem} 
 	 * or {@link AttributeTreeDropItem} depending on 
 	 * attribute type.
 	 */
@@ -598,7 +602,7 @@ public class BasicDropItemFactory implements IDropItemFactory{
 	}
 	
 
-	public DropItem[] createDropItems(NotExpression filter, Session session) throws Exception{
+	public DropItem[] createDropItems(NotFilter filter, Session session) throws Exception{
 		DropItem[] its1 =filterToDropItem(filter.getFilter(), session);
 		DropItem[] results = new DropItem[its1.length + 1];
 		for (int i = 0; i < its1.length; i ++){

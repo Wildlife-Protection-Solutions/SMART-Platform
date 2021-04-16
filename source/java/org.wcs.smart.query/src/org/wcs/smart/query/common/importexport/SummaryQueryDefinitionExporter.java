@@ -22,11 +22,11 @@
 package org.wcs.smart.query.common.importexport;
 
 import org.hibernate.Session;
+import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.common.model.SummaryQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.DateFilter;
-import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.date.Last30DaysDateFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
 import org.wcs.smart.query.model.summary.GroupByPart;

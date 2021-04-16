@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.HashSet;
 
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.observation.WaypointSourceEngine;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.model.Waypoint;
@@ -47,8 +48,6 @@ import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.EmptyFilter;
-import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.date.WaypointDateField;
 
 /**
  * Processes an query filter creating a temporary table

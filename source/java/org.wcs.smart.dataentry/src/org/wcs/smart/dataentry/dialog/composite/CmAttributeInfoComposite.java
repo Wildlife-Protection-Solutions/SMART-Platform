@@ -52,6 +52,7 @@ import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmAttributeOption.EnterOnceType;
+import org.wcs.smart.dataentry.model.CmAttributeOption.VisibleWhen;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.SmartDB;
@@ -255,9 +256,51 @@ public abstract class CmAttributeInfoComposite extends AbstractInfoComposite {
 		}
 	}
 	
-	protected Button createIsVisibleControl(Composite container) {
-		return createBooleanControl(container, CmAttributeOption.ID_IS_VISIBLE, 
-				Messages.CmAttributeInfoComposite_Option_IsVisible, "", Messages.CmAttributeInfoComposite_enabledTooltip); //$NON-NLS-1$
+	protected ComboViewer createIsVisibleControl(Composite container) {
+		
+		final Label label = new Label(container, SWT.NONE);
+		label.setText(Messages.CmAttributeInfoComposite_Option_IsVisible);
+		label.setToolTipText(Messages.CmAttributeInfoComposite_enabledTooltip);
+		
+		ComboViewer cmbVisibleWhen = new ComboViewer(container, SWT.DROP_DOWN | SWT.READ_ONLY);
+		cmbVisibleWhen.setContentProvider(ArrayContentProvider.getInstance());
+		cmbVisibleWhen.setLabelProvider(new LabelProvider() {
+			@Override
+			public String getText(Object x) {
+				switch(((CmAttributeOption.VisibleWhen)x)) {
+					case ALWAYS: return "Always";
+					case CUSTOM: return "Custom";
+					case NEVER: return "Never";
+				}
+				return "";
+			}
+		});
+		cmbVisibleWhen.setInput(CmAttributeOption.VisibleWhen.values());
+		cmbVisibleWhen.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		addSourceObjectChangedListener(new ISourceObjectChangedListener() {
+			@Override
+			public void sourceObjectChanged(Object newObject, Language language) {
+				CmAttributeOption option = getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_IS_VISIBLE);
+				CmAttributeOption.VisibleWhen op = option.getVisibleWhen();
+				if (op == null) op = CmAttributeOption.VisibleWhen.ALWAYS;
+				cmbVisibleWhen.setSelection(new StructuredSelection(op));
+			}
+		});
+		cmbVisibleWhen.addPostSelectionChangedListener(e->{
+				Object x = cmbVisibleWhen.getStructuredSelection().getFirstElement();
+				if (x == null) return ;
+				if (!(x instanceof CmAttributeOption.VisibleWhen)) return;
+				
+				CmAttributeOption.VisibleWhen value = ((CmAttributeOption.VisibleWhen)x);
+				if (value == VisibleWhen.ALWAYS || value == VisibleWhen.NEVER) {
+					getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_IS_VISIBLE).setVisibleWhen(value, null);
+				}else {
+					
+				}
+				fireModelChanged();
+		});
+		return cmbVisibleWhen;
 	}
 	
 	protected Button createBooleanControl(Composite parent, final String optionId, String text, String cbText, String tooltip) {

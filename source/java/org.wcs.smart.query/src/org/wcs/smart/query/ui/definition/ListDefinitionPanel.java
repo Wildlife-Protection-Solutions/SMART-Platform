@@ -45,17 +45,17 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.wcs.smart.query.event.QueryEventManager;
 import org.wcs.smart.query.model.QueryProxy;
-import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.ICombinableDropItem;
-import org.wcs.smart.query.ui.model.IDefinitionPanel;
-import org.wcs.smart.query.ui.model.ProxyItem;
+import org.wcs.smart.query.ui.model.IQueryDefinitionPanel;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.ProxyItem;
 
 /**
  * Drop panel that represents a simple list of drop items.
  * @author egouge
  * @since 1.0.0
  */
-public abstract class ListDefinitionPanel implements IDefinitionPanel{
+public abstract class ListDefinitionPanel implements IQueryDefinitionPanel{
 
 	final static Transfer[] types = new Transfer[] { LocalSelectionTransfer.getTransfer() };
 	
@@ -276,7 +276,7 @@ public abstract class ListDefinitionPanel implements IDefinitionPanel{
 
 	
 	/**
-	 * @see org.wcs.smart.query.ui.IDefinitionPanel.IDropPanel#finishDrag(org.wcs.smart.query.ui.formulaDnd.DropItem)
+	 * @see org.wcs.smart.query.ui.IQueryDefinitionPanel.IDropPanel#finishDrag(org.wcs.smart.query.ui.formulaDnd.DropItem)
 	 */
 	@Override
 	public void finishDrag(DropItem di){
@@ -399,7 +399,7 @@ public abstract class ListDefinitionPanel implements IDefinitionPanel{
 					return;
 				}
 				if (dragItem.getTargetPanel() != ListDefinitionPanel.this){
-					IDefinitionPanel target =  dragItem.getTargetPanel();
+					IQueryDefinitionPanel target =  (IQueryDefinitionPanel) dragItem.getTargetPanel();
 					dragItem.moveParent(ListDefinitionPanel.this);
 					target.finishDrag(dragItem);
 					
@@ -488,7 +488,7 @@ public abstract class ListDefinitionPanel implements IDefinitionPanel{
 	}
 	
 	/**
-	 * @see org.wcs.smart.query.ui.IDefinitionPanel.IDropPanel#layout()
+	 * @see org.wcs.smart.query.ui.IQueryDefinitionPanel.IDropPanel#layout()
 	 */
 	public void layout() {
 		orderElements();

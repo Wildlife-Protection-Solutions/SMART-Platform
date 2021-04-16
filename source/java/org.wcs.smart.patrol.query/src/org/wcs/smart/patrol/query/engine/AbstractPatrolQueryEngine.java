@@ -33,7 +33,7 @@ import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.query.common.engine.AbstractQueryEngine;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.filter.IFilter;
+import org.wcs.smart.query.model.filter.FilterType;
 
 /**
  * Query engine for executing 
@@ -82,11 +82,11 @@ public abstract class AbstractPatrolQueryEngine extends AbstractQueryEngine impl
 	 * @return
 	 */
 	@Override
-	public IFilterProcessor getFilterProcessor(IFilter.FilterType filterType, 
+	public IFilterProcessor getFilterProcessor(FilterType filterType, 
 			String queryDataTable, Query query){
-		if (filterType == IFilter.FilterType.OBSERVATION){
+		if (filterType == FilterType.OBSERVATION){
 			return new FilterProcessor(queryDataTable, this, query);
-		}else if (filterType == IFilter.FilterType.GROUP) {
+		}else if (filterType == FilterType.GROUP) {
 			return new WaypointGroupFilterProcessor(queryDataTable, this, query);
 		}else{
 			return new WaypointFilterProcessor(queryDataTable, this, query);

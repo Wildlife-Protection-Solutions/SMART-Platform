@@ -47,6 +47,7 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
@@ -58,7 +59,7 @@ import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.filter.IFilter;
+import org.wcs.smart.query.model.filter.FilterType;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.UuidUtils;
 
@@ -170,7 +171,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	 * @param queryDataTable
 	 * @return
 	 */
-	public abstract IFilterProcessor getFilterProcessor(IFilter.FilterType filterType, String queryDataTable, Query query);
+	public abstract IFilterProcessor getFilterProcessor(FilterType filterType, String queryDataTable, Query query);
 	
 	
 	

@@ -36,8 +36,8 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.wcs.smart.query.common.ui.EncounterRateDialog;
 import org.wcs.smart.query.internal.Messages;
-import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IValueDropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
 
 /**
  * An abstract value drop item that includes the ability

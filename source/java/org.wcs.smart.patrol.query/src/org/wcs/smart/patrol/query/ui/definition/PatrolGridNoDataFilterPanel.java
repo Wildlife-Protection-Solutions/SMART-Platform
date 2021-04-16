@@ -37,7 +37,7 @@ import org.wcs.smart.patrol.query.model.PatrolGridQueryDefinition;
 import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.model.QueryProxy;
-import org.wcs.smart.query.model.filter.IFilter.FilterType;
+import org.wcs.smart.query.model.filter.FilterType;
 import org.wcs.smart.query.ui.definition.BasicFilterDefintionPanel;
 
 /**

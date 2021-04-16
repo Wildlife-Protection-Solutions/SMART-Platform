@@ -41,9 +41,9 @@ import org.wcs.smart.query.model.IQueryResultInfoProvider;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
-import org.wcs.smart.query.ui.model.DropItem;
-import org.wcs.smart.query.ui.model.IDefinitionPanel;
-import org.wcs.smart.query.ui.model.IDropItemFactory;
+import org.wcs.smart.query.ui.model.IQueryDropItemFactory;
+import org.wcs.smart.query.ui.model.IQueryDefinitionPanel;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
 
 /**
  * Query type representation for Compound Map Queries
@@ -89,18 +89,18 @@ public class CompoundMapQueryType implements IQueryType {
 	}
 
 	@Override
-	public IDropItemFactory getDropItemFactory() {
+	public IQueryDropItemFactory getDropItemFactory() {
 		return CompoundQueryDropFactory.INSTANCE;
 	}
 
 	@Override
 	public void updateQueryDefinition(Query query,
-			List<IDefinitionPanel> components) {
+			List<IQueryDefinitionPanel> components) {
 		CompoundMapQuery cq = (CompoundMapQuery)query;
 		if (cq.getLayers() == null){
 			cq.setLayers(new ArrayList<CompoundMapQueryLayer>());
 		}
-		for (IDefinitionPanel p : components){
+		for (IQueryDefinitionPanel p : components){
 			if (p.getId().equals(CompoundDefinitionPanel.ID)){
 				List<CompoundMapQueryLayer> newLayers = new ArrayList<CompoundMapQueryLayer>();
 				
@@ -143,9 +143,9 @@ public class CompoundMapQueryType implements IQueryType {
 	}
 
 	@Override
-	public String validateQuery(List<IDefinitionPanel> components) {
+	public String validateQuery(List<IQueryDefinitionPanel> components) {
 		String error = null;
-		for (IDefinitionPanel p : components){
+		for (IQueryDefinitionPanel p : components){
 			error = p.validate();
 		}
 		if (error != null){

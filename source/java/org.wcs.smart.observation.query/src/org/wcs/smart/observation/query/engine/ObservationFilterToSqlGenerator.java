@@ -27,6 +27,8 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.filter.IFilter;
+import org.wcs.smart.filter.Operator;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.query.model.filter.WaypointIdFilter;
@@ -34,8 +36,6 @@ import org.wcs.smart.observation.query.model.filter.WaypointSourceFilter;
 import org.wcs.smart.query.common.engine.DerbyFilterToSqlGenerator;
 import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
-import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.util.SharedUtils;
 
 /**

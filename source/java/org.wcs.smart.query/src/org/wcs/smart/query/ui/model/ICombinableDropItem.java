@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.ui.model;
 
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
 
 /**
  * Drop item that has the ability to add another

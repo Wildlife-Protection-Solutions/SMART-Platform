@@ -32,6 +32,14 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.filter.AttributeFilter;
+import org.wcs.smart.filter.BooleanFilter;
+import org.wcs.smart.filter.BracketFilter;
+import org.wcs.smart.filter.CategoryAttributeFilter;
+import org.wcs.smart.filter.CategoryFilter;
+import org.wcs.smart.filter.IFilter;
+import org.wcs.smart.filter.NotFilter;
+import org.wcs.smart.filter.Operator;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -40,18 +48,10 @@ import org.wcs.smart.query.common.engine.AbstractQueryEngine.FilterTable;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.filter.AreaFilter;
 import org.wcs.smart.query.model.filter.AreaFilter.AreaFilterGeometryType;
-import org.wcs.smart.query.model.filter.AttributeFilter;
-import org.wcs.smart.query.model.filter.BooleanExpression;
-import org.wcs.smart.query.model.filter.BracketFilter;
-import org.wcs.smart.query.model.filter.CategoryAttributeFilter;
-import org.wcs.smart.query.model.filter.CategoryFilter;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.EmptyFilter;
-import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.NotExpression;
 import org.wcs.smart.query.model.filter.ObserverFilter;
-import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
 import org.wcs.smart.util.UuidUtils;
 
@@ -76,8 +76,8 @@ public class DerbyFilterToSqlGenerator {
 			return toSql((AreaFilter)filter, engine);
 		}else if (filter instanceof AttributeFilter){
 			return asSql((AttributeFilter)filter, engine);
-		}else if (filter instanceof BooleanExpression){
-			return asSql((BooleanExpression)filter, engine);
+		}else if (filter instanceof BooleanFilter){
+			return asSql((BooleanFilter)filter, engine);
 		}else if (filter instanceof BracketFilter){
 			return asSql((BracketFilter)filter, engine);
 		}else if (filter instanceof CategoryAttributeFilter){
@@ -86,8 +86,8 @@ public class DerbyFilterToSqlGenerator {
 			return asSql((CategoryFilter)filter, engine);
 		}else if (filter instanceof EmptyFilter){
 			return ""; //$NON-NLS-1$
-		}else if (filter instanceof NotExpression){
-			return asSql((NotExpression)filter, engine);
+		}else if (filter instanceof NotFilter){
+			return asSql((NotFilter)filter, engine);
 		}else if (filter instanceof DateFilter){
 			return toSql((DateFilter)filter, engine);
 		}else if (filter instanceof ObserverFilter){
@@ -151,16 +151,6 @@ public class DerbyFilterToSqlGenerator {
 	protected String asSql(AttributeFilter filter, IQueryEngine engine) throws SQLException{
 		FilterTable t = ((AbstractQueryEngine)engine).filterTables.get(filter);
 		if (t != null) return t.tablename + "." + t.columnname + " is not null";  //$NON-NLS-1$//$NON-NLS-2$
-		
-		
-		String attprefix = engine.tablePrefix(Attribute.class);
-		if (attprefix == null){
-			throw new IllegalStateException(Messages.AttributeFilter_InvalidAttributePrefix);
-		}
-		String attObprefix = engine.tablePrefix(WaypointObservationAttribute.class);
-		if (attObprefix == null){
-			throw new IllegalStateException(Messages.AttributeFilter_InvalidWaypointObservationPrefix);
-		}
 
 		if (filter.getAttributeType() == AttributeType.BOOLEAN){
 			return " (qa.\"" + filter.getAttributeKey() + "\" > 0.5 ) ";			//$NON-NLS-1$ //$NON-NLS-2$
@@ -203,7 +193,7 @@ public class DerbyFilterToSqlGenerator {
 	/*
 	 * boolean filter
 	 */
-	protected String asSql(BooleanExpression filter, IQueryEngine engine) throws SQLException{
+	protected String asSql(BooleanFilter filter, IQueryEngine engine) throws SQLException{
 		String part1 = toSql(filter.getFilter1(), engine);
 		String part2 = toSql(filter.getFilter2(), engine);
 		return part1 + " " + asSql(filter.getOperator()) + " " + part2; //$NON-NLS-1$ //$NON-NLS-2$
@@ -248,7 +238,7 @@ public class DerbyFilterToSqlGenerator {
 	/*
 	 * not expression
 	 */
-	protected String asSql(NotExpression filter, IQueryEngine engine) throws SQLException{
+	protected String asSql(NotFilter filter, IQueryEngine engine) throws SQLException{
 		return asSql(Operator.NOT) + " ( " + toSql(filter.getFilter(), engine) + ")"; //$NON-NLS-1$ //$NON-NLS-2$	
 	}
 	

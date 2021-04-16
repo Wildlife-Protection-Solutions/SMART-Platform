@@ -36,7 +36,7 @@ import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.ui.itempanel.IQueryItemPanel;
-import org.wcs.smart.query.ui.model.IDefinitionPanel;
+import org.wcs.smart.query.ui.model.IQueryDefinitionPanel;
 
 /**
  * Query definition panel manager.  Loads and creates
@@ -83,7 +83,7 @@ public class DefinitionPanelManager {
 			isValidAttribute ="isMultiCa"; //$NON-NLS-1$
 		}
 		IConfigurationElement[] config = Platform.getExtensionRegistry()
-				.getConfigurationElementsFor(IDefinitionPanel.PANEL_EXTENSION_ID);
+				.getConfigurationElementsFor(IQueryDefinitionPanel.PANEL_EXTENSION_ID);
 		for (IConfigurationElement e : config) {
 			String id = e.getAttribute("id"); //$NON-NLS-1$
 			if (id.equals(panelId)){
@@ -100,19 +100,19 @@ public class DefinitionPanelManager {
 	 * @param panelId
 	 * @return
 	 */
-	public IDefinitionPanel createDefinitionPanel(String panelId){
+	public IQueryDefinitionPanel createDefinitionPanel(String panelId){
 		String isValidAttribute = "isSingleCa"; //$NON-NLS-1$
 		if (SmartDB.isMultipleAnalysis()){
 			isValidAttribute ="isMultiCa"; //$NON-NLS-1$
 		}
-		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(IDefinitionPanel.PANEL_EXTENSION_ID);
+		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(IQueryDefinitionPanel.PANEL_EXTENSION_ID);
 		for (IConfigurationElement e : config) {
 			String id = e.getAttribute("id"); //$NON-NLS-1$
 			Boolean isValid = Boolean.valueOf(e.getAttribute(isValidAttribute));
 			 			            
 			if (isValid && id.equals(panelId)){
 				try {
-					IDefinitionPanel pnl = (IDefinitionPanel)e.createExecutableExtension("panel"); //$NON-NLS-1$
+					IQueryDefinitionPanel pnl = (IQueryDefinitionPanel)e.createExecutableExtension("panel"); //$NON-NLS-1$
 					ContextInjectionFactory.inject(pnl, localContext);
 					return pnl;
 				} catch (CoreException ex) {

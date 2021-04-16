@@ -41,8 +41,8 @@ import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.QueryProxy;
 import org.wcs.smart.query.ui.QuerySourceProvider;
-import org.wcs.smart.query.ui.model.DropItem;
-import org.wcs.smart.query.ui.model.IDefinitionPanel;
+import org.wcs.smart.query.ui.model.IQueryDefinitionPanel;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
 
 /**
  * Manages the set of definition panels associated with a query type.
@@ -54,7 +54,7 @@ public class QueryDefPanel {
 
 	private Composite main;
 	private IQueryType queryType;
-	private List<IDefinitionPanel> dropPanels;
+	private List<IQueryDefinitionPanel> dropPanels;
 	
 	private String currentPanel;
 	private QueryDefView parentView;
@@ -69,14 +69,14 @@ public class QueryDefPanel {
 	public QueryDefPanel(IQueryType queryType, QueryDefView parentView){
 		this.parentView = parentView;
 		this.queryType = queryType;
-		dropPanels = new ArrayList<IDefinitionPanel>();
+		dropPanels = new ArrayList<IQueryDefinitionPanel>();
 	}
 	
 	/**
 	 * Gets all definition panels.
 	 * @return
 	 */
-	public List<IDefinitionPanel> getDefinitionPanels(){
+	public List<IQueryDefinitionPanel> getDefinitionPanels(){
 		return this.dropPanels;
 	}
 	
@@ -84,7 +84,7 @@ public class QueryDefPanel {
 	 * Disposes of all panels and composite
 	 */
 	public void dispose(){
-		for (IDefinitionPanel p : dropPanels){
+		for (IQueryDefinitionPanel p : dropPanels){
 			p.dispose();
 		}
 		if(main != null){
@@ -96,7 +96,7 @@ public class QueryDefPanel {
 	 * Clears all panel
 	 */
 	public void clear(){
-		for (IDefinitionPanel p : dropPanels){
+		for (IQueryDefinitionPanel p : dropPanels){
 			p.clear();
 		}
 	}
@@ -107,11 +107,11 @@ public class QueryDefPanel {
 	 * @param itemPanelId the item panel that created the drop item
 	 */
 	public void addItem(DropItem dropItem, String itemPanelId){
-		IDefinitionPanel panel = null;
+		IQueryDefinitionPanel panel = null;
 		if (dropPanels.size() == 1){
 			panel = dropPanels.get(0);
 		}else if (dropPanels.size() > 1){
-			panel = (IDefinitionPanel) tabFolder.getSelection().getData();
+			panel = (IQueryDefinitionPanel) tabFolder.getSelection().getData();
 		}
 		if (panel != null){
 			String itemId = QueryTypeManager.INSTANCE.getQueryItemPanel(queryType, panel.getId());
@@ -128,7 +128,7 @@ public class QueryDefPanel {
 	 * @param q
 	 */
 	public void initItems(QueryProxy q) throws Exception{
-		for (IDefinitionPanel p : dropPanels){
+		for (IQueryDefinitionPanel p : dropPanels){
 			p.initItems(q);
 		}
 	}
@@ -138,7 +138,7 @@ public class QueryDefPanel {
 	 * @param q
 	 */
 	public void saveItems(QueryProxy q){
-		for (IDefinitionPanel p : dropPanels){
+		for (IQueryDefinitionPanel p : dropPanels){
 			p.saveItems(q);
 		}
 	}
@@ -168,7 +168,7 @@ public class QueryDefPanel {
 					Messages.QueryDefPanel_QueryTypeNotSupported,
 					new Object[] { queryType.getGuiName() }));
 		} else if (panelIds.length == 1) {
-			IDefinitionPanel pnl = parentView.getPart().getContext().get(DefinitionPanelManager.class).createDefinitionPanel(panelIds[0]);
+			IQueryDefinitionPanel pnl = parentView.getPart().getContext().get(DefinitionPanelManager.class).createDefinitionPanel(panelIds[0]);
 
 			Composite c = pnl.createComposite(main);
 			dropPanels.add(pnl);
@@ -187,7 +187,7 @@ public class QueryDefPanel {
 			for (int i = 0; i < panelIds.length; i++) {
 				CTabItem item = new CTabItem(tabFolder, SWT.NONE);
 
-				IDefinitionPanel pnl = parentView.getPart().getContext().get(DefinitionPanelManager.class).createDefinitionPanel(panelIds[i]);
+				IQueryDefinitionPanel pnl = parentView.getPart().getContext().get(DefinitionPanelManager.class).createDefinitionPanel(panelIds[i]);
 				if (pnl != null) {
 					item.setText(pnl.getGuiName());
 					Composite comp = pnl.createComposite(tabFolder);
@@ -209,12 +209,12 @@ public class QueryDefPanel {
 				public void widgetSelected(SelectionEvent e) {
 					CTabItem sel = tabFolder.getSelection();
 					if (sel != null) {
-						setQueryDefinitionPanel(((IDefinitionPanel)sel.getData()).getId());
+						setQueryDefinitionPanel(((IQueryDefinitionPanel)sel.getData()).getId());
 					}
 				}
 			});
 			tabFolder.setSelection(0);
-			setQueryDefinitionPanel(((IDefinitionPanel) tabFolder.getItem(0).getData()).getId());
+			setQueryDefinitionPanel(((IQueryDefinitionPanel) tabFolder.getItem(0).getData()).getId());
 
 		}
 		parent.layout(true);
@@ -244,8 +244,8 @@ public class QueryDefPanel {
 	 * @param panelId
 	 * @return
 	 */
-	public IDefinitionPanel findQueryDefinitionPanel(String panelId){
-		for (IDefinitionPanel pnl : dropPanels){
+	public IQueryDefinitionPanel findQueryDefinitionPanel(String panelId){
+		for (IQueryDefinitionPanel pnl : dropPanels){
 			if (pnl.getId().equals(panelId)){
 				return pnl;
 			}

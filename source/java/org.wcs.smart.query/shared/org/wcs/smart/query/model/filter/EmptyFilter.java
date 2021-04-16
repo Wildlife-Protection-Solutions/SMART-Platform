@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.query.model.filter;
 
+import org.wcs.smart.filter.IFilter;
+import org.wcs.smart.filter.IFilterVisitor;
 
 /**
  * A class to represent and empty filter.
