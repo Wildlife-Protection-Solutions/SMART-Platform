@@ -26,15 +26,15 @@ import java.sql.SQLException;
 
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.entity.query.parser.internal.EntityAttributeFilter;
+import org.wcs.smart.filter.AttributeFilter;
+import org.wcs.smart.filter.IFilter;
+import org.wcs.smart.filter.Operator;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.query.model.filter.WaypointSourceFilter;
 import org.wcs.smart.query.common.engine.AbstractQueryEngine.FilterTable;
 import org.wcs.smart.query.common.engine.DerbyFilterToSqlGenerator;
 import org.wcs.smart.query.common.engine.IQueryEngine;
-import org.wcs.smart.query.model.filter.AttributeFilter;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
-import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.util.SharedUtils;
 
 /**

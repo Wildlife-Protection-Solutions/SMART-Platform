@@ -32,18 +32,29 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
-import org.wcs.smart.event.filter.AttributeFilter;
-import org.wcs.smart.event.filter.BooleanFilter;
-import org.wcs.smart.event.filter.BracketFilter;
-import org.wcs.smart.event.filter.CategoryAttributeFilter;
-import org.wcs.smart.event.filter.CategoryFilter;
-import org.wcs.smart.event.filter.IFilter;
-import org.wcs.smart.event.filter.NotFilter;
-import org.wcs.smart.event.filter.Operator;
 import org.wcs.smart.event.internal.Messages;
-import org.wcs.smart.event.ui.filter.BracketDropItem.BracketType;
+import org.wcs.smart.filter.AttributeFilter;
+import org.wcs.smart.filter.BooleanFilter;
+import org.wcs.smart.filter.BracketFilter;
+import org.wcs.smart.filter.CategoryAttributeFilter;
+import org.wcs.smart.filter.CategoryFilter;
+import org.wcs.smart.filter.IFilter;
+import org.wcs.smart.filter.NotFilter;
+import org.wcs.smart.filter.Operator;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.ca.datamodel.dropitem.AttributeDropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.AttributeListDropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.AttributeMListDropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.AttributeTreeDropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.BooleanOpDropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.BracketDropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.BracketDropItem.BracketType;
+import org.wcs.smart.ui.ca.datamodel.dropitem.CategoryDropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.IDropItemFactory;
+import org.wcs.smart.ui.ca.datamodel.dropitem.ListItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.NotDropItem;
 
 /**
  * Factory for generating drop items.
@@ -52,20 +63,8 @@ import org.wcs.smart.hibernate.SmartDB;
  *
  */
 public enum DropItemFactory {
-	INSTANCE;
 	
-	public static final AttributeListItem ANY_ATTRIBUTE = new AttributeListItem() {
-		private static final long serialVersionUID = 1L;
-		@Override
-		public String getKeyId() {
-			return AttributeFilter.ANY_OPTION_KEY;
-		}
-		
-		@Override
-		public String getName() {
-			return Messages.DropItemFactory_AnyOptionLabel;
-		}
-	};
+	INSTANCE;
 	
 	/**
 	 * populates the list of drop items with all the drop items associated with the filter
@@ -89,16 +88,16 @@ public enum DropItemFactory {
 				di.initializeData(initData);
 			}else if (aa.getType() == AttributeType.LIST) {
 				String attributeKey = ff.getValue().toString();
-				AttributeListItem found = null;
+				ListItem found = null;
 				for (AttributeListItem ii : aa.getAttributeList()) {
 					if (ii.getKeyId().equalsIgnoreCase(attributeKey)) {
-						found = ii;
+						found = new ListItem(ii.getUuid(), ii.getName(), ii.getKeyId());
 						break;
 					}
 				}
 				if (found == null) {
-					if (attributeKey.equalsIgnoreCase(ANY_ATTRIBUTE.getKeyId())) {
-						found = ANY_ATTRIBUTE;
+					if (attributeKey.equalsIgnoreCase(IDropItemFactory.ANY_OPTION.getKey())) {
+						found = IDropItemFactory.ANY_OPTION;
 					}
 				}
 				if (found == null) {
@@ -107,14 +106,14 @@ public enum DropItemFactory {
 				di.initializeData(found);
 			}else if (aa.getType() == AttributeType.MLIST) {
 				
-				List<AttributeListItem> aitems = new ArrayList<>();
+				List<ListItem> aitems = new ArrayList<>();
 				
 				String[] attributeKey = ff.getValue().toString().split(AttributeFilter.MLIST_SEPERATOR);
 				for (String liKey : attributeKey) {
-					AttributeListItem found = null;
+					ListItem found = null;
 					for (AttributeListItem ii : aa.getAttributeList()) {
 						if (ii.getKeyId().equalsIgnoreCase(liKey)) {
-							found = ii;
+							found = new ListItem(ii.getUuid(), ii.getName(),ii.getKeyId());
 							break;
 						}
 					}
@@ -178,13 +177,13 @@ public enum DropItemFactory {
 				di.initializeData(initData);
 			}else if (aa.getType() == AttributeType.LIST) {
 				String attributeKey = ff.getAttributeFilter().getValue().toString();
-				AttributeListItem found = null;
+				ListItem found = null;
 				if (attributeKey.equalsIgnoreCase(AttributeFilter.ANY_OPTION_KEY)) {
-					found = DropItemFactory.ANY_ATTRIBUTE;
+					found = IDropItemFactory.ANY_OPTION;
 				}else {
 					for (AttributeListItem ii : aa.getAttributeList()) {
 						if (ii.getKeyId().equalsIgnoreCase(attributeKey)) {
-							found = ii;
+							found = new ListItem(ii.getUuid(), ii.getName(), ii.getKeyId());
 							break;
 						}
 					}
@@ -195,14 +194,14 @@ public enum DropItemFactory {
 				di.initializeData(found);
 			}else if (aa.getType() == AttributeType.MLIST) {
 				
-				List<AttributeListItem> aitems = new ArrayList<>();
+				List<ListItem> aitems = new ArrayList<>();
 				
 				String[] attributeKey = ff.getAttributeFilter().getValue().toString().split(AttributeFilter.MLIST_SEPERATOR);
 				for (String liKey : attributeKey) {
-					AttributeListItem found = null;
+					ListItem found = null;
 					for (AttributeListItem ii : aa.getAttributeList()) {
 						if (ii.getKeyId().equalsIgnoreCase(liKey)) {
-							found = ii;
+							found = new ListItem(ii.getUuid(), ii.getName(), ii.getKeyId());
 							break;
 						}
 					}

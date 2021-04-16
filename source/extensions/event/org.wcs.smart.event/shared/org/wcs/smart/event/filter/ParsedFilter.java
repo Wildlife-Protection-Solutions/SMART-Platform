@@ -31,6 +31,7 @@ import java.util.logging.Logger;
 
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.event.filter.parse.Parser;
+import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.model.IWaypointSourceEngine;
 

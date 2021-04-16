@@ -24,8 +24,8 @@ package org.wcs.smart.asset.query.ui.definition;
 import org.wcs.smart.asset.query.internal.Messages;
 import org.wcs.smart.query.ui.definition.AbstractSummaryGroupByValuePanel;
 import org.wcs.smart.query.ui.definition.ListDefinitionPanel;
-import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.impl.AbstractValueDropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
 
 /**
  * Summary asset query definition panel. This panel allows

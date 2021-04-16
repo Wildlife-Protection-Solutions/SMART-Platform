@@ -47,8 +47,8 @@ import org.wcs.smart.query.model.IQueryResultInfoProvider;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 import org.wcs.smart.query.ui.definition.ConservationAreaFilterPanel;
-import org.wcs.smart.query.ui.model.IDefinitionPanel;
-import org.wcs.smart.query.ui.model.IDropItemFactory;
+import org.wcs.smart.query.ui.model.IQueryDefinitionPanel;
+import org.wcs.smart.query.ui.model.IQueryDropItemFactory;
 
 /**
  * Mission query type.
@@ -97,15 +97,15 @@ public class MissionTrackQueryType implements IMappableQueryType {
 	}
 
 	@Override
-	public IDropItemFactory getDropItemFactory() {
+	public IQueryDropItemFactory getDropItemFactory() {
 		return SurveyDropItemFactory.INSTANCE;		
 	}
 
 	@Override
 	public void updateQueryDefinition(Query query,
-			List<IDefinitionPanel> components) {
+			List<IQueryDefinitionPanel> components) {
 		MissionTrackQuery squery = (MissionTrackQuery)query;
-		for (IDefinitionPanel panel : components){
+		for (IQueryDefinitionPanel panel : components){
 			if (panel.getId().equals(TrackFilterDefinitionPanel.ID)){
 				squery.setSurveyDesign(  ((TrackFilterDefinitionPanel)panel).getSurveyDesign()  );
 				squery.setQueryFilter(  ((TrackFilterDefinitionPanel)panel).getQueryPart()  );
@@ -117,9 +117,9 @@ public class MissionTrackQueryType implements IMappableQueryType {
 	}
 
 	@Override
-	public String validateQuery(List<IDefinitionPanel> components) {
+	public String validateQuery(List<IQueryDefinitionPanel> components) {
 		String filter = ""; //$NON-NLS-1$
-		for (IDefinitionPanel panel : components){
+		for (IQueryDefinitionPanel panel : components){
 			String msg = panel.validate();
 			if (msg != null){
 				return msg;

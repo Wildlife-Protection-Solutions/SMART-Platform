@@ -25,9 +25,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.wcs.smart.er.query.filter.MissionPropertyFilter;
+import org.wcs.smart.filter.IFilter;
+import org.wcs.smart.filter.IFilterVisitor;
 import org.wcs.smart.query.model.filter.AttributeInfo;
-import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.IFilterVisitor;
 
 /**
  * Finds all mission property filters and combines them

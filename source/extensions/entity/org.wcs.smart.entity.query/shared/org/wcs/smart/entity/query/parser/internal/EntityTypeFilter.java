@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.entity.query.parser.internal;
 
-import org.wcs.smart.query.model.filter.AttributeFilter;
-import org.wcs.smart.query.model.filter.Operator;
+import org.wcs.smart.filter.AttributeFilter;
+import org.wcs.smart.filter.Operator;
 
 /**
  * Filter for entity type filters; extends the existing attribute file.

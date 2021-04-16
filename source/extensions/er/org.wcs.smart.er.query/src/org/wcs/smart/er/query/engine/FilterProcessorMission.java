@@ -47,6 +47,7 @@ import org.wcs.smart.er.query.engine.visitors.MissionPropertyFilterCollectorVisi
 import org.wcs.smart.er.query.engine.visitors.SamplingUnitAttributeFilterCollectorVisitor;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.internal.Messages;
+import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.model.Query;
@@ -54,7 +55,6 @@ import org.wcs.smart.query.model.filter.AttributeInfo;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.EmptyFilter;
-import org.wcs.smart.query.model.filter.IFilter;
 
 /**
  * Processes an query filter creating a temporary table

@@ -2,8 +2,8 @@ package org.wcs.smart.er.query.filter;
 
 import java.util.UUID;
 
-import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.IFilterVisitor;
+import org.wcs.smart.filter.IFilter;
+import org.wcs.smart.filter.IFilterVisitor;
 import org.wcs.smart.util.UuidUtils;
 
 public class MissionMemberFilter implements IFilter {

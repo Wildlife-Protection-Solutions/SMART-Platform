@@ -24,9 +24,9 @@ package org.wcs.smart.asset.query.exportimport;
 import org.hibernate.Session;
 import org.wcs.smart.asset.query.model.AssetObservationQuery;
 import org.wcs.smart.asset.query.model.AssetWaypointQuery;
+import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.query.common.importexport.SimpleQueryDefinitionExporter;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.xml.model.QueryType;
 
 /**

@@ -24,7 +24,7 @@ package org.wcs.smart.asset.query.ui;
 import java.util.List;
 
 import org.hibernate.Session;
-import org.wcs.smart.query.ui.model.ListItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.ListItem;
 
 /**
  * Details for asset group by options

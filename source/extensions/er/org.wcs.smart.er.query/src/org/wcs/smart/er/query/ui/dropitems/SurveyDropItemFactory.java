@@ -94,6 +94,10 @@ import org.wcs.smart.er.query.ui.panels.item.SamplingUnitWrapper;
 import org.wcs.smart.er.query.ui.panels.item.SurveyGroupByContentProvider;
 import org.wcs.smart.er.query.ui.panels.item.SurveyValuesTreeNode;
 import org.wcs.smart.er.query.ui.panels.item.TrackObservationFilterItemPanel;
+import org.wcs.smart.filter.AttributeFilter;
+import org.wcs.smart.filter.BooleanFilter;
+import org.wcs.smart.filter.IFilter;
+import org.wcs.smart.filter.Operator;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -105,10 +109,6 @@ import org.wcs.smart.query.common.ui.itempanel.SummaryDmObject;
 import org.wcs.smart.query.model.CustomArea;
 import org.wcs.smart.query.model.QueryProxy;
 import org.wcs.smart.query.model.filter.AreaFilter;
-import org.wcs.smart.query.model.filter.AttributeFilter;
-import org.wcs.smart.query.model.filter.BooleanExpression;
-import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.model.filter.date.IDateGroupBy;
 import org.wcs.smart.query.model.summary.CombinedValueItem;
 import org.wcs.smart.query.model.summary.GridQueryDefinition;
@@ -118,15 +118,10 @@ import org.wcs.smart.query.model.summary.IGroupByViewer;
 import org.wcs.smart.query.model.summary.IValueItem;
 import org.wcs.smart.query.model.summary.SumQueryDefinition;
 import org.wcs.smart.query.model.summary.ValuePart;
-import org.wcs.smart.query.ui.model.DropItem;
-import org.wcs.smart.query.ui.model.IDropItemFactory;
+import org.wcs.smart.query.ui.model.IQueryDropItemFactory;
 import org.wcs.smart.query.ui.model.IValueDropItem;
-import org.wcs.smart.query.ui.model.ListItem;
 import org.wcs.smart.query.ui.model.impl.AbstractValueDropItem;
-import org.wcs.smart.query.ui.model.impl.AttributeDropItem;
-import org.wcs.smart.query.ui.model.impl.AttributeListDropItem;
 import org.wcs.smart.query.ui.model.impl.AttributeListValueDropItem;
-import org.wcs.smart.query.ui.model.impl.AttributeTreeDropItem;
 import org.wcs.smart.query.ui.model.impl.AttributeTreeValueDropItem;
 import org.wcs.smart.query.ui.model.impl.AttributeValueDropItem;
 import org.wcs.smart.query.ui.model.impl.BasicDropItemFactory;
@@ -134,6 +129,11 @@ import org.wcs.smart.query.ui.model.impl.CategoryDropItem;
 import org.wcs.smart.query.ui.model.impl.CategoryValueDropItem;
 import org.wcs.smart.query.ui.model.impl.ErrorDropItem;
 import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.ui.ca.datamodel.dropitem.AttributeDropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.AttributeListDropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.AttributeTreeDropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.ListItem;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -141,7 +141,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author Emily
  *
  */
-public class SurveyDropItemFactory extends BasicDropItemFactory implements IDropItemFactory {
+public class SurveyDropItemFactory extends BasicDropItemFactory implements IQueryDropItemFactory {
 
 	public static SurveyDropItemFactory INSTANCE = new SurveyDropItemFactory();
 	
@@ -732,14 +732,14 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 			return createDropItems((SurveyFilter)f, session);
 		}else if (f instanceof TrackTypeFilter){
 			return createDropItems((TrackTypeFilter)f, session);
-		}else if (f instanceof BooleanExpression){
-			return createDropItems((BooleanExpression)f, session);
+		}else if (f instanceof BooleanFilter){
+			return createDropItems((BooleanFilter)f, session);
 		}
 		return super.filterToDropItem(f, session);
 		
 	}
 	
-	public DropItem[] createDropItems(BooleanExpression exp, Session session) throws Exception{
+	public DropItem[] createDropItems(BooleanFilter exp, Session session) throws Exception{
 		DropItem[] its1 = filterToDropItem(exp.getFilter1(), session);
 		DropItem opDropItem = BasicDropItemFactory.createBooleanOpDropItem();
 		opDropItem.initializeData(exp.getOperator().asSmartValue());

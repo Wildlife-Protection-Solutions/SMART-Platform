@@ -28,16 +28,16 @@ import java.util.stream.Collectors;
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.IDataModelItemListener;
-import org.wcs.smart.event.filter.AttributeFilter;
-import org.wcs.smart.event.filter.BooleanFilter;
-import org.wcs.smart.event.filter.BracketFilter;
-import org.wcs.smart.event.filter.CategoryAttributeFilter;
-import org.wcs.smart.event.filter.CategoryFilter;
-import org.wcs.smart.event.filter.IFilter;
-import org.wcs.smart.event.filter.NotFilter;
-import org.wcs.smart.event.filter.Operator;
 import org.wcs.smart.event.filter.ParsedFilter;
 import org.wcs.smart.event.model.EFilter;
+import org.wcs.smart.filter.AttributeFilter;
+import org.wcs.smart.filter.BooleanFilter;
+import org.wcs.smart.filter.BracketFilter;
+import org.wcs.smart.filter.CategoryAttributeFilter;
+import org.wcs.smart.filter.CategoryFilter;
+import org.wcs.smart.filter.IFilter;
+import org.wcs.smart.filter.NotFilter;
+import org.wcs.smart.filter.Operator;
 import org.wcs.smart.hibernate.QueryFactory;
 
 /**

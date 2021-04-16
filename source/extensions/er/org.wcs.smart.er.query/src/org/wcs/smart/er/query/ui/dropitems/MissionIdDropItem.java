@@ -44,11 +44,11 @@ import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.filter.MissionFilter;
 import org.wcs.smart.er.query.internal.Messages;
+import org.wcs.smart.filter.Operator;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
-import org.wcs.smart.query.model.filter.Operator;
-import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IFilterDropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
 
 /**
  * Mission id drop item.

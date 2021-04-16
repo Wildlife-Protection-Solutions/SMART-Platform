@@ -55,15 +55,15 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
+import org.wcs.smart.filter.BooleanFilter;
+import org.wcs.smart.filter.IFilter;
+import org.wcs.smart.filter.Operator;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.ui.itempanel.SummaryDataModelContentProvider;
 import org.wcs.smart.query.common.ui.itempanel.SummaryDmObject;
 import org.wcs.smart.query.model.QueryProxy;
-import org.wcs.smart.query.model.filter.BooleanExpression;
-import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.model.summary.GroupByPart;
 import org.wcs.smart.query.model.summary.IGroupBy;
 import org.wcs.smart.query.model.summary.IGroupByViewer;
@@ -71,20 +71,20 @@ import org.wcs.smart.query.model.summary.IValueItem;
 import org.wcs.smart.query.model.summary.SumQueryDefinition;
 import org.wcs.smart.query.model.summary.ValuePart;
 import org.wcs.smart.query.ui.definition.BasicFilterDefintionPanel;
-import org.wcs.smart.query.ui.model.DropItem;
-import org.wcs.smart.query.ui.model.IDropItemFactory;
+import org.wcs.smart.query.ui.model.IQueryDropItemFactory;
 import org.wcs.smart.query.ui.model.impl.AttributeListValueDropItem;
 import org.wcs.smart.query.ui.model.impl.AttributeTreeValueDropItem;
 import org.wcs.smart.query.ui.model.impl.AttributeValueDropItem;
 import org.wcs.smart.query.ui.model.impl.BasicDropItemFactory;
 import org.wcs.smart.query.ui.model.impl.ErrorDropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
 
 /**
  * Drop item factory for asset queries.
  * @author Emily
  *
  */
-public class AssetDropItemFactory extends BasicDropItemFactory implements IDropItemFactory {
+public class AssetDropItemFactory extends BasicDropItemFactory implements IQueryDropItemFactory {
 
 	public static AssetDropItemFactory INSTANCE = new AssetDropItemFactory();
 	
@@ -373,8 +373,8 @@ public class AssetDropItemFactory extends BasicDropItemFactory implements IDropI
 	public DropItem[] filterToDropItem(IFilter f, Session session) throws Exception{
 		if (f instanceof AssetFilter){
 			return createDropItems((AssetFilter)f, session);
-		}else if (f instanceof BooleanExpression){
-			return createDropItems((BooleanExpression)f, session);
+		}else if (f instanceof BooleanFilter){
+			return createDropItems((BooleanFilter)f, session);
 		}else if (f instanceof AssetAttributeFilter) {
 			return createDropItems((AssetAttributeFilter)f, session);
 		}
@@ -414,7 +414,7 @@ public class AssetDropItemFactory extends BasicDropItemFactory implements IDropI
 		return att;
 	}
 	
-	public DropItem[] createDropItems(BooleanExpression exp, Session session) throws Exception{
+	public DropItem[] createDropItems(BooleanFilter exp, Session session) throws Exception{
 		DropItem[] its1 = filterToDropItem(exp.getFilter1(), session);
 		DropItem opDropItem = BasicDropItemFactory.createBooleanOpDropItem();
 		opDropItem.initializeData(exp.getOperator().asSmartValue());

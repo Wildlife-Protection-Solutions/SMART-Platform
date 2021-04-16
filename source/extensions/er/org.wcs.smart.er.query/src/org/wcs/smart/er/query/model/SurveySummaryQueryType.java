@@ -59,10 +59,10 @@ import org.wcs.smart.query.model.summary.IGroupBy;
 import org.wcs.smart.query.model.summary.IValueItem;
 import org.wcs.smart.query.model.summary.SumQueryDefinition;
 import org.wcs.smart.query.ui.definition.ConservationAreaFilterPanel;
-import org.wcs.smart.query.ui.model.DropItem;
-import org.wcs.smart.query.ui.model.IDefinitionPanel;
-import org.wcs.smart.query.ui.model.IDropItemFactory;
+import org.wcs.smart.query.ui.model.IQueryDefinitionPanel;
+import org.wcs.smart.query.ui.model.IQueryDropItemFactory;
 import org.wcs.smart.query.ui.model.impl.AbstractValueDropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
 /**
  * Summary query type
  * @author Emily
@@ -70,7 +70,7 @@ import org.wcs.smart.query.ui.model.impl.AbstractValueDropItem;
  */
 public class SurveySummaryQueryType implements IQueryType {
 	
-	private static IDropItemFactory dropItemFactory;
+	private static IQueryDropItemFactory dropItemFactory;
 	
 	/**
 	 * @see org.wcs.smart.query.model.IQueryType#getHibernateClass()
@@ -132,7 +132,7 @@ public class SurveySummaryQueryType implements IQueryType {
 	 * @see org.wcs.smart.query.model.IQueryType#getDropItemFactory()
 	 */
 	@Override
-	public IDropItemFactory getDropItemFactory() {
+	public IQueryDropItemFactory getDropItemFactory() {
 		if (dropItemFactory == null){
 			dropItemFactory = new SurveyDropItemFactory(){
 				@Override
@@ -156,14 +156,14 @@ public class SurveySummaryQueryType implements IQueryType {
 	 * @see org.wcs.smart.query.model.IQueryType#updateQueryDefinition(org.wcs.smart.query.model.Query, java.util.List)
 	 */
 	@Override
-	public void updateQueryDefinition(Query query, List<IDefinitionPanel> components) {
+	public void updateQueryDefinition(Query query, List<IQueryDefinitionPanel> components) {
 	
 		SurveySummaryQuery summary = (SurveySummaryQuery)query;
 		
 		String filters= ""; //$NON-NLS-1$
 		String definition = ""; //$NON-NLS-1$
 		
-		for (IDefinitionPanel p : components){
+		for (IQueryDefinitionPanel p : components){
 			if (p.getId().equals(SimpleValueRateFilterPanel.ID)){
 				filters = p.getQueryPart();
 			}else if (p.getId().equals(SummaryDefinitionPanel.ID)){
@@ -183,12 +183,12 @@ public class SurveySummaryQueryType implements IQueryType {
 	 * @see org.wcs.smart.query.model.IQueryType#validateQuery(java.util.List)
 	 */
 	@Override
-	public String validateQuery(List<IDefinitionPanel> components) {
+	public String validateQuery(List<IQueryDefinitionPanel> components) {
 		String filters= ""; //$NON-NLS-1$
 		String definition = ""; //$NON-NLS-1$
 		
 		// validate each panel
-		for (IDefinitionPanel p : components){
+		for (IQueryDefinitionPanel p : components){
 			String panelError = p.validate();
 			if (panelError != null){
 				return panelError;

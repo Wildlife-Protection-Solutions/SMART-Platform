@@ -4,6 +4,7 @@ package org.wcs.smart.entity.query.parser.internal.parser;
 import java.util.*;
 import org.wcs.smart.entity.query.parser.internal.*;
 import org.wcs.smart.query.model.filter.*;
+import org.wcs.smart.filter.*;
 import org.wcs.smart.query.model.summary.*;
 import org.wcs.smart.observation.query.model.filter.*;
 
@@ -161,12 +162,12 @@ public class Parser implements ParserConstants {
   }
 
   final public QueryFilter QueryFilterInternal() throws ParseException {
-        IFilter.FilterType filterType = IFilter.FilterType.OBSERVATION;
+        FilterType filterType = FilterType.OBSERVATION;
         IFilter expr = EmptyFilter.INSTANCE;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case DM_KEY:
       jj_consume_token(DM_KEY);
-                        filterType = IFilter.FilterType.parse(token.image);
+                        filterType = FilterType.parse(token.image);
       jj_consume_token(QUERY_SPLITTER);
       break;
     default:
@@ -350,7 +351,7 @@ public class Parser implements ParserConstants {
       }
       op = BooleanOp();
       expr2 = BooleanPart();
-                  expr = BooleanExpression.create(expr, expr2, op);
+                  expr = BooleanFilter.create(expr, expr2, op);
     }
           {if (true) return expr;}
     throw new Error("Missing return statement in function");
@@ -411,7 +412,7 @@ public class Parser implements ParserConstants {
       throw new ParseException();
     }
                 if (hasNot){
-              filter = NotExpression.createNotExpression(filter);
+              filter = NotFilter.createNotExpression(filter);
             }
                 {if (true) return filter;}
     throw new Error("Missing return statement in function");

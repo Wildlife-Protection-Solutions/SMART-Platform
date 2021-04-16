@@ -35,6 +35,8 @@ import org.wcs.smart.entity.query.model.EntityObservationResultItem;
 import org.wcs.smart.entity.query.model.columns.FixedQueryColumn;
 import org.wcs.smart.entity.query.parser.internal.EntityAttributeFilter;
 import org.wcs.smart.entity.query.parser.internal.EntityTypeFilter;
+import org.wcs.smart.filter.IFilter;
+import org.wcs.smart.filter.IFilterVisitor;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IAttachmentResultItem;
 import org.wcs.smart.query.common.engine.IObservationQueryResultItem;
@@ -42,8 +44,6 @@ import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.engine.ObservationQueryResult;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
-import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.IFilterVisitor;
 import org.wcs.smart.util.UuidUtils;
 
 /**

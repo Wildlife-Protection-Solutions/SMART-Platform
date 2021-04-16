@@ -3,6 +3,7 @@ SMART Query Engine Language Syntax & Semantic actions
 =============================================*/options{  LOOKAHEAD= 1;  CHOICE_AMBIGUITY_CHECK = 2;  OTHER_AMBIGUITY_CHECK = 1;  STATIC = false;  DEBUG_PARSER = false;  DEBUG_LOOKAHEAD = false;  DEBUG_TOKEN_MANAGER = false;  ERROR_REPORTING = true;  JAVA_UNICODE_ESCAPE = true;  UNICODE_INPUT = false;  IGNORE_CASE = false;  USER_TOKEN_MANAGER = false;  USER_CHAR_STREAM = false;  BUILD_PARSER = true;  BUILD_TOKEN_MANAGER = true;  SANITY_CHECK = true;  FORCE_LA_CHECK = false;}PARSER_BEGIN(Parser)package org.wcs.smart.entity.query.parser.internal.parser;
 import java.util.*;
 import org.wcs.smart.entity.query.parser.internal.*;import org.wcs.smart.query.model.filter.*;
+import org.wcs.smart.filter.*;
 import org.wcs.smart.query.model.summary.*;
 import org.wcs.smart.observation.query.model.filter.*;
 
@@ -160,14 +161,14 @@ QueryFilter QueryFilter() :
 
 QueryFilter QueryFilterInternal():
 {
-	IFilter.FilterType filterType = IFilter.FilterType.OBSERVATION;
+	FilterType filterType = FilterType.OBSERVATION;
 	IFilter expr = EmptyFilter.INSTANCE;
 }
 {
 	(
 	    < DM_KEY >
 	    {
-			filterType = IFilter.FilterType.parse(token.image);
+			filterType = FilterType.parse(token.image);
 		}
 	  	< QUERY_SPLITTER >
 	)?
@@ -347,7 +348,7 @@ IFilter ExpressionPart():
  	 op = BooleanOp()
 	  expr2 = BooleanPart()
 		{
-		  expr = BooleanExpression.create(expr, expr2, op);
+		  expr = BooleanFilter.create(expr, expr2, op);
 		}
 
 	  )*
@@ -375,7 +376,7 @@ IFilter BooleanPart() :
 		}
 	)	{
 		if (hasNot){
-	      filter = NotExpression.createNotExpression(filter);	    }
+	      filter = NotFilter.createNotExpression(filter);	    }
   		return filter;
 	}}
 

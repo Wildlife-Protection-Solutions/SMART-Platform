@@ -50,9 +50,9 @@ import org.wcs.smart.query.model.filter.date.WaypointDateField;
 import org.wcs.smart.query.ui.definition.BasicFilterDefintionPanel;
 import org.wcs.smart.query.ui.definition.BasicGridDefinitionPanel;
 import org.wcs.smart.query.ui.definition.ConservationAreaFilterPanel;
-import org.wcs.smart.query.ui.model.DropItem;
-import org.wcs.smart.query.ui.model.IDefinitionPanel;
-import org.wcs.smart.query.ui.model.IDropItemFactory;
+import org.wcs.smart.query.ui.model.IQueryDefinitionPanel;
+import org.wcs.smart.query.ui.model.IQueryDropItemFactory;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
 
 /**
  * Patrol Query Type
@@ -61,7 +61,7 @@ import org.wcs.smart.query.ui.model.IDropItemFactory;
  */
 public class EntityGridQueryType implements IMappableQueryType {
 
-	private static IDropItemFactory dropItemFactory = null;
+	private static IQueryDropItemFactory dropItemFactory = null;
 	
 	/**
 	 * @see org.wcs.smart.query.model.IQueryType#getHibernateClass()
@@ -123,7 +123,7 @@ public class EntityGridQueryType implements IMappableQueryType {
 	 * @see org.wcs.smart.query.model.IQueryType#getDropItemFactory()
 	 */
 	@Override
-	public IDropItemFactory getDropItemFactory() {
+	public IQueryDropItemFactory getDropItemFactory() {
 		if (dropItemFactory == null){
 			dropItemFactory = new EntityDropItemFactory(){
 				@Override
@@ -145,14 +145,14 @@ public class EntityGridQueryType implements IMappableQueryType {
 	 * @see org.wcs.smart.query.model.IQueryType#updateQueryDefinition(org.wcs.smart.query.model.Query, java.util.List)
 	 */
 	@Override
-	public void updateQueryDefinition(Query query, List<IDefinitionPanel> components) {
+	public void updateQueryDefinition(Query query, List<IQueryDefinitionPanel> components) {
 	
 		GriddedQuery summary = (GriddedQuery)query;
 		
 		String filters= ""; //$NON-NLS-1$
 		String definition = ""; //$NON-NLS-1$
 		
-		for (IDefinitionPanel p : components){
+		for (IQueryDefinitionPanel p : components){
 			if (p.getId().equals(BasicGridDefinitionPanel.ID)){
 				definition = p.getQueryPart();
 				if (((BasicGridDefinitionPanel)p).getCrs() != null){
@@ -172,12 +172,12 @@ public class EntityGridQueryType implements IMappableQueryType {
 	 * @see org.wcs.smart.query.model.IQueryType#validateQuery(java.util.List)
 	 */
 	@Override
-	public String validateQuery(List<IDefinitionPanel> components) {
+	public String validateQuery(List<IQueryDefinitionPanel> components) {
 		String filters= ""; //$NON-NLS-1$
 		String definition = ""; //$NON-NLS-1$
 		
 		// validate each panel
-		for (IDefinitionPanel p : components){
+		for (IQueryDefinitionPanel p : components){
 			String panelError = p.validate();
 			if (panelError != null){
 				return panelError;

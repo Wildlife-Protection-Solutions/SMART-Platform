@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.hibernate.Session;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
-import org.wcs.smart.query.ui.model.ListItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.ListItem;
 
 public interface ISurveyGroupByViewer{
 

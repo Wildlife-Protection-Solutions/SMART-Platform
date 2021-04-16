@@ -24,7 +24,7 @@ package org.wcs.smart.asset.query.ui.definition.dropItems;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.query.ui.itempanel.AttributeWrapper;
 import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.query.ui.model.impl.AttributeDropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.AttributeDropItem;
 
 /**
  * drop item for asset attributes

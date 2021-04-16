@@ -24,9 +24,9 @@ package org.wcs.smart.er.query.importexport;
 import org.hibernate.Session;
 import org.wcs.smart.er.query.model.ISurveyQuery;
 import org.wcs.smart.er.query.model.SurveyGriddedQuery;
+import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.query.common.importexport.GridQueryDefinitionExporter;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.xml.model.QueryPart;
 import org.wcs.smart.query.xml.model.QueryType;
 

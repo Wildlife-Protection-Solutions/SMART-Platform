@@ -37,7 +37,7 @@ import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.AbstractQueryEngine;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.filter.IFilter;
+import org.wcs.smart.query.model.filter.FilterType;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -76,10 +76,10 @@ public abstract class DerbyEntityQueryEngine extends AbstractQueryEngine{
 	 * @param queryDataTable
 	 * @return
 	 */
-	public IFilterProcessor getFilterProcessor(IFilter.FilterType filterType, String queryDataTable, Query query){
-		if (filterType == IFilter.FilterType.OBSERVATION){
+	public IFilterProcessor getFilterProcessor(FilterType filterType, String queryDataTable, Query query){
+		if (filterType == FilterType.OBSERVATION){
 			return new FilterProcessor(queryDataTable, this, query);
-		}else if (filterType == IFilter.FilterType.GROUP) {
+		}else if (filterType == FilterType.GROUP) {
 			return new WaypointGroupFilterProcessor(queryDataTable, this, query);
 		}else {
 			return new WaypointFilterProcessor(queryDataTable, this, query);

@@ -56,8 +56,8 @@ import org.wcs.smart.query.ui.definition.AbstractSummaryGroupByValuePanel;
 import org.wcs.smart.query.ui.definition.DefinitionPanelManager;
 import org.wcs.smart.query.ui.definition.ListDefinitionPanel;
 import org.wcs.smart.query.ui.itempanel.IQueryItemPanel;
-import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.impl.AbstractValueDropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
 
 /**
  * Summary patrol query definition panel. This panel allows

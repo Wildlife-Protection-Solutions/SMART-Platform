@@ -22,7 +22,7 @@
 package org.wcs.smart.entity.query.engine.visitor;
 
 import org.wcs.smart.entity.query.parser.internal.EntityAttributeFilter;
-import org.wcs.smart.query.model.filter.IFilter;
+import org.wcs.smart.filter.IFilter;
 
 /**
  * Determines if an observation filter (category or attribute filter)

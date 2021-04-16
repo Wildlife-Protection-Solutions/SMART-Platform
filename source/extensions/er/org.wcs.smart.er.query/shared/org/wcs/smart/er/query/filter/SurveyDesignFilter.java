@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.er.query.filter;
 
-import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.IFilterVisitor;
+import org.wcs.smart.filter.IFilter;
+import org.wcs.smart.filter.IFilterVisitor;
 
 /**
  * Filter for survey design objects.

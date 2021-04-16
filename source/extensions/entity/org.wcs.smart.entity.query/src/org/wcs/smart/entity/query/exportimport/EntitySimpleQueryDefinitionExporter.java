@@ -24,9 +24,9 @@ package org.wcs.smart.entity.query.exportimport;
 import org.hibernate.Session;
 import org.wcs.smart.entity.query.model.EntityObservationQuery;
 import org.wcs.smart.entity.query.model.EntityWaypointQuery;
+import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.query.common.importexport.SimpleQueryDefinitionExporter;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.xml.model.QueryType;
 
 /**

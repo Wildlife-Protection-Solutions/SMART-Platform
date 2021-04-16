@@ -78,8 +78,6 @@ import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.util.UuidUtils;
 
-import javassist.bytecode.AttributeInfo;
-
 /**
  * Parses sighting data from cybertracker JSON data.
  * 

@@ -2,7 +2,7 @@
 package org.wcs.smart.event.filter.parse;
 
 import java.util.*;
-import org.wcs.smart.event.filter.*;
+import org.wcs.smart.filter.*;
 
 public class Parser implements ParserConstants {
 

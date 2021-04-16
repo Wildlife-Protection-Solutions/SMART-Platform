@@ -22,7 +22,7 @@
 package org.wcs.smart.entity.query.ui.definition;
 
 import org.wcs.smart.entity.model.EntityAttribute;
-import org.wcs.smart.query.ui.model.impl.AttributeTreeDropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.AttributeTreeDropItem;
 
 /**
  * 

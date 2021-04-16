@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.er.query.ui.panels.definition;
 
-import org.wcs.smart.query.model.filter.IFilter;
+import org.wcs.smart.query.model.filter.FilterType;
 
 /**
  * A definition panel for filtering survey track queries.  Excludes the incident/observation
@@ -45,7 +45,7 @@ public class TrackFilterDefinitionPanel extends FilterDefintionPanel {
 	}
 	
 	@Override
-	public void setFilterType(IFilter.FilterType filterType){
+	public void setFilterType(FilterType filterType){
 		
 	}
 }

@@ -22,7 +22,7 @@
 package org.wcs.smart.entity.query.ui.definition;
 
 import org.wcs.smart.entity.model.EntityAttribute;
-import org.wcs.smart.query.ui.model.impl.AttributeListDropItem;
+import org.wcs.smart.query.ui.model.impl.AttributeListQueryDropItem;
 
 /**
  * Attribute list type drop item for filtering
@@ -32,7 +32,7 @@ import org.wcs.smart.query.ui.model.impl.AttributeListDropItem;
  * @author Emily
  * @since 1.0.0
  */
-public class EntityAttributeListDropItem extends AttributeListDropItem {
+public class EntityAttributeListDropItem extends AttributeListQueryDropItem {
 
 	public EntityAttributeListDropItem(EntityAttribute ea) {
 		super(ea.getDmAttribute());

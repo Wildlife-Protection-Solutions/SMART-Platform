@@ -63,7 +63,7 @@ import org.wcs.smart.query.model.QueryProxy;
 import org.wcs.smart.query.ui.definition.BasicFilterDefintionPanel;
 import org.wcs.smart.query.ui.definition.DefinitionPanelManager;
 import org.wcs.smart.query.ui.itempanel.IQueryItemPanel;
-import org.wcs.smart.query.ui.model.DropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
 
 /**
  * A definition panel for filtering survey queries.  Includes the ability to

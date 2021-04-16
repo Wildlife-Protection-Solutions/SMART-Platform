@@ -34,9 +34,9 @@ import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetAttributeListItem;
 import org.wcs.smart.asset.query.ui.itempanel.AttributeWrapper;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.query.ui.model.ListItem;
-import org.wcs.smart.query.ui.model.impl.AttributeListDropItem;
 import org.wcs.smart.query.ui.model.impl.BasicDropItemFactory;
+import org.wcs.smart.ui.ca.datamodel.dropitem.AttributeListDropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.ListItem;
 
 /**
  * Attribute list drop item
@@ -72,7 +72,6 @@ public class AssetAttributeListDropItem extends AttributeListDropItem {
 						//add the any item
 						items.add(0, BasicDropItemFactory.ANY_OPTION);				
 						if (currentSelection != null && !items.contains(currentSelection)){
-							//item is not longer active; but still in query
 							items.add(currentSelection);
 						}
 					}finally{
@@ -88,6 +87,7 @@ public class AssetAttributeListDropItem extends AttributeListDropItem {
 						if (currentSelection != null && !items.contains(currentSelection)){
 							items.add(currentSelection);
 						}
+						
 						listViewer.setInput(items.toArray(new ListItem[items.size()]));
 						if (currentSelection != null){
 							listViewer.setSelection(new StructuredSelection(currentSelection));

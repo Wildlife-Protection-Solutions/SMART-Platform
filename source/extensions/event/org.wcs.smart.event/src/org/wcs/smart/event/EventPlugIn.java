@@ -28,10 +28,8 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
-import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.datamodel.DataModelManager;
-import org.wcs.smart.event.internal.ActionLabelProviderImpl;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -48,8 +46,7 @@ public class EventPlugIn extends AbstractUIPlugin {
 	public static final String ICON_ACTION = "org.wcs.smart.event.icon.action"; //$NON-NLS-1$
 	public static final String ICON_ACTION_EVENT = "org.wcs.smart.event.icon.actionevent"; //$NON-NLS-1$
 	public static final String ICON_FILTER = "org.wcs.smart.event.icon.filter"; //$NON-NLS-1$
-	public static final String ICON_DELETE_MINI = "org.wcs.smart.event.icon.deletemini"; //$NON-NLS-1$
-	
+		
 	public static final String DB_VERSION_2 = "2.0"; //$NON-NLS-1$
 	public static final String DB_VERSION_1 = "1.0"; //$NON-NLS-1$
 	
@@ -69,7 +66,6 @@ public class EventPlugIn extends AbstractUIPlugin {
 		plugin = this;
 		
 		ConservationAreaManager.getInstance().addDeleteHandler(new ConservationAreaDeleteHandler(), ConservationAreaDeleteHandler.EXECUTE_ORDER);
-		SmartContext.INSTANCE.setClass(IActionLabelProvider.class, new ActionLabelProviderImpl());
 		DataModelManager.INSTANCE.addItemChangeListener(EventDataModelItemListener.INSTANCE);
 	}
 
@@ -123,7 +119,5 @@ public class EventPlugIn extends AbstractUIPlugin {
 		reg.put(ICON_ACTION, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/action.png")); //$NON-NLS-1$
 		reg.put(ICON_ACTION_EVENT, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/action_event.png")); //$NON-NLS-1$
 		reg.put(ICON_FILTER, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/event_filter.png")); //$NON-NLS-1$
-		reg.put(ICON_DELETE_MINI, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/delete_mini.png")); //$NON-NLS-1$
-		
 	}
 }

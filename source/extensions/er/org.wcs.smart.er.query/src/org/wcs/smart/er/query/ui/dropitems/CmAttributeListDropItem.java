@@ -40,9 +40,9 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryDataModelManager;
-import org.wcs.smart.query.ui.model.ListItem;
-import org.wcs.smart.query.ui.model.impl.AttributeListDropItem;
 import org.wcs.smart.query.ui.model.impl.BasicDropItemFactory;
+import org.wcs.smart.ui.ca.datamodel.dropitem.AttributeListDropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.ListItem;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -90,7 +90,6 @@ public class CmAttributeListDropItem extends AttributeListDropItem {
 						//add the any item
 						items.add(0, BasicDropItemFactory.ANY_OPTION);				
 						if (currentSelection != null && !items.contains(currentSelection)){
-							//item is not longer active; but still in query
 							items.add(currentSelection);
 						}
 	
@@ -104,9 +103,11 @@ public class CmAttributeListDropItem extends AttributeListDropItem {
 						if (listViewer == null || listViewer.getCombo().isDisposed()){
 							return;
 						}
+						
 						if (currentSelection != null && !items.contains(currentSelection)){
 							items.add(currentSelection);
 						}
+	
 						listViewer.setInput(items.toArray(new ListItem[items.size()]));
 						if (currentSelection != null){
 							listViewer.setSelection(new StructuredSelection(currentSelection));

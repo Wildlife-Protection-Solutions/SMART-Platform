@@ -46,13 +46,18 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.wcs.smart.event.internal.Messages;
 import org.wcs.smart.ui.ca.datamodel.TreeDropDownViewer;
+import org.wcs.smart.ui.ca.datamodel.dropitem.BracketDropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.IDefinitionPanel;
+import org.wcs.smart.ui.ca.datamodel.dropitem.NotDropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.ProxyItem;
 
 /**
  * Simple filter definition panel.
  * @author Emily
  *
  */
-public class DefinitionPanel {
+public class DefinitionPanel implements IDefinitionPanel {
 
 	public static final String ID = "org.wcs.smart.event.filter"; //$NON-NLS-1$
 	final static Transfer[] types = new Transfer[] { LocalSelectionTransfer.getTransfer() };

@@ -47,6 +47,7 @@ import org.wcs.smart.asset.model.Asset;
 import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetStation;
 import org.wcs.smart.asset.query.internal.Messages;
+import org.wcs.smart.filter.Operator;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -54,7 +55,6 @@ import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
 import org.wcs.smart.query.common.ui.itempanel.ItemTreeNodeContentProvider;
 import org.wcs.smart.query.common.ui.itempanel.ItemTreeNodeTree;
 import org.wcs.smart.query.common.ui.itempanel.OperatorsTreeNode;
-import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.ui.itempanel.AbstractQueryItemPanel;
 
 /**

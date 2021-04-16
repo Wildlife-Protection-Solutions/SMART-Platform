@@ -41,7 +41,7 @@ import org.wcs.smart.query.ui.definition.BasicFilterDefintionPanel;
 import org.wcs.smart.query.ui.definition.DefinitionPanelManager;
 import org.wcs.smart.query.ui.definition.ValueRateFilterDeifnitionPanel;
 import org.wcs.smart.query.ui.itempanel.IQueryItemPanel;
-import org.wcs.smart.query.ui.model.DropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
 
 /**
  * Definition panel that allows for the definition of both

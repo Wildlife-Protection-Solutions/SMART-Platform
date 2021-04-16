@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.asset.query.parser.internal.filter;
 
-import org.wcs.smart.query.model.filter.AttributeFilter;
-import org.wcs.smart.query.model.filter.Operator;
+import org.wcs.smart.filter.AttributeFilter;
+import org.wcs.smart.filter.Operator;
 import org.wcs.smart.util.SharedUtils;
 
 /**

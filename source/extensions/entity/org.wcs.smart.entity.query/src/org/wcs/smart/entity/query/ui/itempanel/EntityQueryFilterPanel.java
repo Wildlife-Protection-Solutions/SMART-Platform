@@ -45,6 +45,7 @@ import org.wcs.smart.ca.IAreaModifiedListener;
 import org.wcs.smart.entity.event.EntityEventManager;
 import org.wcs.smart.entity.event.IEntityListener;
 import org.wcs.smart.entity.query.internal.Messages;
+import org.wcs.smart.filter.Operator;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.query.ui.itempanel.GeneralContentProvider.GeneralItem;
 import org.wcs.smart.observation.query.ui.itempanel.GeneralTreeNode;
@@ -55,7 +56,6 @@ import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
 import org.wcs.smart.query.common.ui.itempanel.ItemTreeNodeContentProvider;
 import org.wcs.smart.query.common.ui.itempanel.ItemTreeNodeTree;
 import org.wcs.smart.query.common.ui.itempanel.OperatorsTreeNode;
-import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.ui.itempanel.AbstractQueryItemPanel;
 
 /**

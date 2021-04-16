@@ -50,6 +50,10 @@ import org.wcs.smart.entity.query.ui.itempanel.ConservationAreaTreeNode;
 import org.wcs.smart.entity.query.ui.itempanel.EntityGriddedItemPanel;
 import org.wcs.smart.entity.query.ui.itempanel.EntityQueryFilterPanel;
 import org.wcs.smart.entity.query.ui.itempanel.EntitySummaryItemPanel;
+import org.wcs.smart.filter.AttributeFilter;
+import org.wcs.smart.filter.BooleanFilter;
+import org.wcs.smart.filter.IFilter;
+import org.wcs.smart.filter.Operator;
 import org.wcs.smart.observation.WaypointSourceEngine;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.query.model.filter.WaypointSourceFilter;
@@ -65,10 +69,6 @@ import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.ui.itempanel.SummaryDataModelContentProvider;
 import org.wcs.smart.query.common.ui.itempanel.SummaryDmObject;
 import org.wcs.smart.query.model.QueryProxy;
-import org.wcs.smart.query.model.filter.AttributeFilter;
-import org.wcs.smart.query.model.filter.BooleanExpression;
-import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.model.filter.date.IDateGroupBy;
 import org.wcs.smart.query.model.summary.GridQueryDefinition;
 import org.wcs.smart.query.model.summary.GroupByPart;
@@ -79,17 +79,18 @@ import org.wcs.smart.query.model.summary.SumQueryDefinition;
 import org.wcs.smart.query.model.summary.ValuePart;
 import org.wcs.smart.query.ui.definition.BasicFilterDefintionPanel;
 import org.wcs.smart.query.ui.definition.BasicGridDefinitionPanel;
-import org.wcs.smart.query.ui.model.DropItem;
-import org.wcs.smart.query.ui.model.IDropItemFactory;
-import org.wcs.smart.query.ui.model.ListItem;
+import org.wcs.smart.query.ui.model.IQueryDropItemFactory;
 import org.wcs.smart.query.ui.model.impl.BasicDropItemFactory;
 import org.wcs.smart.query.ui.model.impl.ErrorDropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.ListItem;
+
 /**
  * Drop item factory for observation queries
  * @author Emily
  *
  */
-public class EntityDropItemFactory extends BasicDropItemFactory implements IDropItemFactory {
+public class EntityDropItemFactory extends BasicDropItemFactory implements IQueryDropItemFactory {
 
 	public static EntityDropItemFactory INSTANCE = new EntityDropItemFactory();
 	
@@ -331,12 +332,12 @@ public class EntityDropItemFactory extends BasicDropItemFactory implements IDrop
 			return createDropItems((EntityTypeFilter)f, session);
 		}else if (f instanceof WaypointSourceFilter){
 			return createDropItems((WaypointSourceFilter)f, session);
-		}else if (f instanceof BooleanExpression){
-			return createDropItems((BooleanExpression)f, session);
+		}else if (f instanceof BooleanFilter){
+			return createDropItems((BooleanFilter)f, session);
 		}
 		return super.filterToDropItem(f, session);
 	}
-	public DropItem[] createDropItems(BooleanExpression exp, Session session) throws Exception{
+	public DropItem[] createDropItems(BooleanFilter exp, Session session) throws Exception{
 		DropItem[] its1 = filterToDropItem(exp.getFilter1(), session);
 		DropItem opDropItem = BasicDropItemFactory.createBooleanOpDropItem();
 		opDropItem.initializeData(exp.getOperator().asSmartValue());

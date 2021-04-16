@@ -60,7 +60,7 @@ import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
-import org.wcs.smart.query.model.filter.IFilter.FilterType;
+import org.wcs.smart.query.model.filter.FilterType;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
 import org.wcs.smart.util.UuidUtils;
@@ -79,7 +79,7 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 		tablePrefix.put(Entity.class, "e"); //$NON-NLS-1$
 		tablePrefix.put(EntityType.class, "et"); //$NON-NLS-1$
 		tablePrefix.put(EntityAttributeValue.class, "eav"); //$NON-NLS-1$
-		tablePrefix.put(EntityAttribute.class, "ea"); //$NON-NLS-1$
+		tablePrefix.put(EntityAttribute.class, "ea"); //$NON-NLS-1$	
 	}
 
 	/**
