@@ -203,7 +203,7 @@ public class AttributeDropItem extends DropItem {
 		layout.marginWidth = 0;
 		layout.marginHeight = 0;
 		main.setLayout(layout);
-		main.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, true));
+		main.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 		
 		lblAttribute = new Label(main, SWT.NONE);
 		if (type == AttributeType.TEXT || type == AttributeType.NUMERIC ) {
@@ -240,7 +240,7 @@ public class AttributeDropItem extends DropItem {
 					}
 				}
 			});
-			GridData gd = new GridData();
+			GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
 			gd.minimumWidth = 50;
 			gd.widthHint = 100;
 			value.setLayoutData(gd);

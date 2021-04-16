@@ -87,7 +87,7 @@ public class AttributeMListDropItem extends DropItem {
 					for (AttributeListItem item : a.getActiveListItems()){
 						items.add(new ListItem(item.getUuid(), item.getName(), item.getKeyId(), item.getIsActive()));
 					}
-					items.add(0, IDropItemFactory.ANY_OPTION);		
+//					items.add(0, IDropItemFactory.ANY_OPTION);		
 					
 					if (currentSelection != null) {
 						for (ListItem i : currentSelection) {
@@ -227,7 +227,7 @@ public class AttributeMListDropItem extends DropItem {
 		gl.marginHeight = 0;
 		
 		main.setLayout(gl);
-		main.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, true));
+		main.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 		
 		lblAttribute = new Label(main, SWT.NONE);
 
@@ -254,6 +254,7 @@ public class AttributeMListDropItem extends DropItem {
 		((GridLayout)color.getLayout()).marginWidth = 0;
 		((GridLayout)color.getLayout()).marginHeight = 0;
 		color.setBackground(color.getDisplay().getSystemColor(SWT.COLOR_WHITE));
+		color.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		listViewer = new CheckBoxDropDown(color);
 		listViewer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));

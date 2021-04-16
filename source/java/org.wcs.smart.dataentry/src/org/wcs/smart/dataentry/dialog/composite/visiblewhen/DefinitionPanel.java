@@ -1,0 +1,442 @@
+package org.wcs.smart.dataentry.dialog.composite.visiblewhen;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.eclipse.jface.util.LocalSelectionTransfer;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DropTarget;
+import org.eclipse.swt.dnd.DropTargetAdapter;
+import org.eclipse.swt.dnd.DropTargetEvent;
+import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.ui.ca.datamodel.TreeDropDownViewer;
+import org.wcs.smart.ui.ca.datamodel.dropitem.BooleanOpDropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.BracketDropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.IDefinitionPanel;
+import org.wcs.smart.ui.ca.datamodel.dropitem.NotDropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.ProxyItem;
+
+public class DefinitionPanel  implements IDefinitionPanel {
+
+	public static final String ID = "org.wcs.smart.dataentry.visiblewhen"; //$NON-NLS-1$
+	final static Transfer[] types = new Transfer[] { LocalSelectionTransfer.getTransfer() };
+	
+	private Composite mainComposite;
+	private ScrolledComposite dropTarget = null;
+	private Composite dropTargetContent;
+	
+	private ProxyItem proxy = null;	//drag proxy item
+
+	protected ArrayList<DropItem> items = new ArrayList<DropItem>();	//list of controls in formula
+	
+	private TreeDropDownViewer treeEditor = null;
+	private Set<DefinitionPanel> targetPanels;
+	
+	private DropItem dragItem;
+	
+	/**
+	 * Creates a new drop target panel.
+	 * 
+	 */
+	public DefinitionPanel(Shell parent){
+		this.targetPanels = new HashSet<DefinitionPanel>();
+		treeEditor = new TreeDropDownViewer(parent);
+		targetPanels.add(this);
+	}
+	
+	/**
+	 * Return the unique identifier for the panel
+	 */
+	public String getId(){
+		return ID;
+	}
+	
+	/**
+	 * Return the gui name
+	 */
+	public String getGuiName(){
+		return "";
+	}
+	
+	/**
+	 * @return 
+	 */
+	public static Transfer[] getTransferTypes() {
+		return types;
+	}
+
+	public void dispose(){
+		mainComposite.dispose();
+	}
+
+	/**
+	 * Clears all items from the query and hides the 
+	 * proxy.
+	 * 
+	 */
+	public void clear(){
+		for (DropItem item: items){
+			if (item == proxy){
+				continue;
+			}
+			if (item != null){
+				item.dispose();
+			}
+		}
+		proxy.getWidget().setVisible(false);
+		items.clear();
+		dropTarget.redraw();
+		if (this.dragItem != null){
+			this.dragItem.dispose();
+			this.dragItem = null;
+		}		
+	}
+	
+	/**
+	 * @return the current set of drop items associated
+	 * with this query
+	 */
+	public List<DropItem> getItems(){
+		return items;
+	}
+	
+	/**
+	 * Converts the items that make up the query to 
+	 * a query string.
+	 * 
+	 * @return the query string represented by the items in the query panel
+	 */
+	public String getQueryPart(){
+		StringBuilder query = new StringBuilder();
+		for (Object item : items){
+			if (item instanceof DropItem){
+				DropItem it = (DropItem)item;
+				query.append(it.asQueryPart());
+				query.append(" "); //$NON-NLS-1$
+			}
+		}
+		return query.toString().trim();
+	}
+	
+	/**
+	 * 
+	 * @return attribute tree viewer for drop down tree attributes
+	 */
+	public TreeDropDownViewer getTreeEditor(){
+		return this.treeEditor;
+	}
+	
+	/**
+	 * Validates the items in the filter panel 
+	 */
+	public String validate(){
+		return null;
+	}
+	
+	/**
+	 * Adds all items to the current query.  
+	 * <p>This does not fire the query changed event.
+	 * </p>
+	 * 
+	 * @param items
+	 */
+	public void addItems(Collection<DropItem> items) {
+		if (items != null) {
+			for (DropItem item : items) {
+				item.createWidget(this, dropTargetContent);
+				this.items.add(item);
+			}
+		}
+		orderElements();
+	}
+	
+	/**
+	 * Adds a drop item to the query formula; fires a query changed
+	 *  event after item added
+	 * @param item drop item to add
+	 */
+	public void addItem(DropItem item) {
+		item.createWidget(this, dropTargetContent);
+		
+		if (items.size() > 0){
+			if (!(item instanceof NotDropItem || item instanceof BracketDropItem)){
+				DropItem it = new BooleanOpDropItem();
+				it.createWidget(this, dropTargetContent);
+				items.add(it);	
+			}
+		}
+		items.add(item);
+		orderElements();
+		fireQueryChangedListeners();
+	}
+
+	/**
+	 * Remove an element from the drop item
+	 * 
+	 * @param item item to remove
+	 */
+	public void removeItem(DropItem item){
+		if (items.remove(item)){
+			item.dispose();
+		}
+		orderElements();
+	}
+	
+	/**
+	 * Redraws the items in the query formula in the correct order
+	 */
+	public void orderElements() {
+		if (dropTarget == null || dropTarget.isDisposed()) return;
+		int currx = 0;
+		int curry = 0;
+		int maxWidth = dropTarget.getBounds().width;
+		int height = 10;
+		int width = 0;
+		for (int i = 0; i < items.size(); i++) {
+			Point pnt = items.get(i).getWidget().computeSize(SWT.DEFAULT, SWT.DEFAULT);
+			height = Math.max(33,pnt.y);
+			if (currx + pnt.x > maxWidth && currx != 0) {
+				// move to next line
+				width = Math.max(width, currx);
+				curry += height;
+				currx = 0;
+			}
+			items.get(i).getWidget().setBounds(currx, curry, pnt.x, height);
+			currx += pnt.x;
+			if (items.get(i).getWidget() != null) {
+				items.get(i).getWidget().layout();
+			}
+		}
+		width = Math.max(width, currx);
+		dropTargetContent.setSize(width, curry + height);
+		dropTarget.redraw();
+	}
+
+
+	
+	/**
+	 * @see org.wcs.smart.query.ui.IDefinitionPanel.IDropPanel#finishDrag(org.wcs.smart.query.ui.formulaDnd.DropItem)
+	 */
+	public void finishDrag(DropItem di){
+		if (di.getTargetPanel() != this){
+			items.remove(di);
+		}
+		if (di.getTargetPanel() == null && !items.contains(di)){
+			int index= items.indexOf(proxy);
+			
+			proxy.getWidget().setVisible(false);
+			if (index >= 0){
+				items.add(index, di);
+			}else{
+				items.add(di);
+			}
+			di.getWidget().setVisible(true);
+		}
+		items.remove(proxy);
+		proxy.getWidget().setVisible(false);
+		dragItem = null;
+		
+		orderElements();
+		fireQueryChangedListeners();
+
+	}
+	
+	public void redraw(){
+		orderElements();
+	}
+	
+	/**
+	 * Creates the drop target composite
+	 * @param parent
+	 * @return
+	 * 
+	 */
+	public Composite createComposite(Composite parent) {
+		
+		mainComposite = new Composite(parent, SWT.NONE);
+		mainComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		GridLayout layout = new GridLayout();
+		layout.horizontalSpacing = 0;
+		layout.verticalSpacing = 0;
+		layout.marginWidth = 0;
+		layout.marginHeight = 0;
+		mainComposite.setLayout(layout);
+		
+		dropTarget = new ScrolledComposite(mainComposite, SWT.H_SCROLL | SWT.V_SCROLL | SWT.NONE);
+		dropTarget.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		dropTarget.addListener(SWT.Resize, new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				orderElements();
+			}
+		});		
+		
+		dropTargetContent = new Composite(dropTarget, SWT.NONE);
+		dropTargetContent.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
+		dropTarget.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
+		dropTarget.setContent(dropTargetContent);
+		
+		DropTarget dtarget = new DropTarget(dropTarget, DND.DROP_MOVE);
+		dtarget.setTransfer(types);
+		dtarget.addDropListener(new DropTargetAdapter() {
+
+			
+			@Override
+			public void dragEnter(DropTargetEvent event) {
+				if (dragItem == null){
+					StructuredSelection selection = (StructuredSelection) LocalSelectionTransfer.getTransfer().getSelection();
+					if (selection == null) {
+						return;
+					}
+					//hide drop item and setup proxy
+					dragItem = (DropItem)selection.getFirstElement();
+				}
+				if (!targetPanels.contains(dragItem.getTargetPanel())){
+					event.detail  = DND.DROP_NONE;
+					dragItem = null;
+					return;
+				}
+				
+				if (dragItem.getWidget().isVisible()){
+					dragItem.getWidget().setVisible(false);
+					int i = items.indexOf(dragItem);
+					if ( i < 0){
+						items.add(proxy);
+					}else{
+						items.add(i, proxy);
+						items.remove(dragItem);
+					}
+				}else if (!proxy.getWidget().isVisible()){
+					moveElements(event.x, event.y);
+					
+				}
+				proxy.setLabelText(dragItem.getText());
+				proxy.getWidget().setVisible(true);
+				orderElements();
+			}
+
+			public void dragLeave(DropTargetEvent event) {
+				if (proxy.getWidget().isVisible() && dragItem.getTargetPanel() != DefinitionPanel.this){
+					items.remove(proxy);
+					proxy.getWidget().setVisible(false);
+				}
+				orderElements();
+			}
+			
+			@Override
+			public void dragOperationChanged(DropTargetEvent event) {
+			}
+
+			@Override
+			public void dragOver(DropTargetEvent event) {
+				if (event.detail != DND.DROP_NONE){
+					if (dragItem == null) return;
+					moveElements(event.x, event.y);
+					orderElements();
+				}
+				
+			}
+
+			@Override
+			public void dropAccept(DropTargetEvent event) {
+			}
+
+			@Override
+			public void drop(DropTargetEvent event) {
+				if (event.detail == DND.DROP_NONE || dragItem == null){
+					return;
+				}
+
+				if (dragItem.getTargetPanel() != DefinitionPanel.this){
+					DefinitionPanel target =  (DefinitionPanel) dragItem.getTargetPanel();
+					dragItem.moveParent(DefinitionPanel.this);
+					target.finishDrag(dragItem);
+				}
+				moveElements(event.x, event.y);
+				//remove proxy and put back the drop item
+				int i = items.indexOf(proxy);
+				items.add(i, dragItem);
+				dragItem.getWidget().setVisible(true);
+				items.remove(proxy);
+				proxy.getWidget().setVisible(false);
+				orderElements();
+				
+				dragItem = null;
+				for(DefinitionPanel target : targetPanels){
+					((DefinitionPanel)target).dragItem = null;
+				}
+				
+
+			}
+
+			private void moveElements(int x, int y) {
+				DropItem target = null;
+				boolean before = false;
+				for (DropItem children : items) {
+					Rectangle childBounds = children.getWidget().getBounds();
+					Point p = children.getWidget().getParent().toDisplay(childBounds.x, childBounds.y);
+					Rectangle r = new Rectangle(p.x, p.y, childBounds.width,childBounds.height);
+					if (r.contains(x, y)) {
+						target = children;
+						before = x < p.x + (childBounds.width / 2.0);
+						break;
+					}
+				}
+				if (target == null) {
+					items.remove(proxy);
+					items.add(proxy);
+				} else if (target == proxy) {
+					return;
+				} else {
+					items.remove(proxy);
+					int toIndex = items.indexOf(target);
+					if (!before) {
+						toIndex++;
+					}
+					if (toIndex < 0) {
+						toIndex = 0;
+					}
+					items.add(toIndex, proxy);
+				}
+			}
+		});
+	
+		dropTarget.setSize(dropTarget.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		dropTargetContent.setSize(dropTarget.computeSize(SWT.DEFAULT,
+				SWT.DEFAULT));
+		
+		//create proxy item
+		proxy = new ProxyItem();
+		proxy.createWidget(this, dropTargetContent);
+		proxy.getWidget().setVisible(false);
+		
+		return mainComposite;
+	}
+
+	/**
+	 * Fired when the query is modified; implementations can overwrite
+	 */
+	public void fireQueryChangedListeners() {
+	}
+
+	public Composite getDropTargetComposite() {
+		return dropTargetContent;
+	}
+
+}

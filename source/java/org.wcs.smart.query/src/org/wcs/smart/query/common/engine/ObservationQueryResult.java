@@ -33,8 +33,12 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.observation.model.ObservationAttachment;
+import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationAttributeList;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.IObservationPagedQueryResultSet;
@@ -290,6 +294,58 @@ public abstract class ObservationQueryResult<T extends IObservationQueryResultIt
 		
 		return sb.toString();
 	}
+	
+	@Override
+	protected synchronized void initImageData() {
+		try(Session s = HibernateManager.openSession()){
+			s.beginTransaction();
+			try {
+				String imageTempTable = engine.createTempTableName();
+				
+				StringBuilder sb = new StringBuilder();
+				sb.append("CREATE TABLE "); //$NON-NLS-1$
+				sb.append(imageTempTable);
+				sb.append("(attach_uuid char(16) for bit data, wp_uuid char(16) for bit data, ob_uuid char(16) for bit data, seq_order integer GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1))"); //$NON-NLS-1$
+				s.createNativeQuery(sb.toString()).executeUpdate();
+				
+				sb = new StringBuilder();
+				sb.append(" INSERT INTO "); //$NON-NLS-1$
+				sb.append(imageTempTable + "(attach_uuid, wp_uuid, ob_uuid) "); //$NON-NLS-1$
+				sb.append(" SELECT z.attach_uuid, z.wp_uuid, z.ob_uuid FROM ( "); //$NON-NLS-1$
+				sb.append("SELECT "); //$NON-NLS-1$
+				sb.append(engine.tablePrefix(ObservationAttachment.class) + ".uuid as attach_uuid, "); //$NON-NLS-1$
+				sb.append("a.wp_time, a.wp_id, a.wp_uuid as wp_uuid, a.ob_uuid as ob_uuid "); //$NON-NLS-1$
+				sb.append(" FROM "); //$NON-NLS-1$
+				sb.append( getResultsTable() + " a "); //$NON-NLS-1$
+				sb.append(" JOIN "); //$NON-NLS-1$
+				sb.append(engine.tableNamePrefix(ObservationAttachment.class ));
+				sb.append(" ON "); //$NON-NLS-1$
+				sb.append( engine.tablePrefix(ObservationAttachment.class) + ".obs_uuid = a.ob_uuid "); //$NON-NLS-1$ 
+				sb.append( " UNION "); //$NON-NLS-1$
+				sb.append("SELECT c.uuid as attach_uuid, a.wp_time, a.wp_id, a.wp_uuid as wp_uuid, cast(null as char(16) for bit data) as ob_uuid " ); //$NON-NLS-1$
+				sb.append(" FROM "); //$NON-NLS-1$
+				sb.append( getResultsTable() + " a "); //$NON-NLS-1$
+				sb.append(" JOIN "); //$NON-NLS-1$
+				sb.append(" smart.wp_attachments c on c.wp_uuid = a.wp_uuid "); //$NON-NLS-1$
+				sb.append(" ) z ORDER BY z.wp_time desc, z.wp_id "); //$NON-NLS-1$
+				s.createNativeQuery(sb.toString()).executeUpdate();
+				
+				sb = new StringBuilder();
+				sb.append("SELECT count(*) FROM "); //$NON-NLS-1$
+				sb.append(imageTempTable);
+				
+				int imageDataCnt = (int) s.createNativeQuery(sb.toString()).uniqueResult();
+				
+				imageResults.setResults(imageTempTable, imageDataCnt);
+				s.getTransaction().commit();
+			}catch (Exception ex) {
+				imageResults.setResults(null, -1);
+				s.getTransaction().rollback();
+				QueryPlugIn.log("Error computing attachment details: " + ex.getMessage(), ex); //$NON-NLS-1$
+			}
+		}
+	}
+	
 	protected abstract String getDistinctWaypointQuery(String prefix, boolean includeObservation);
 	
 

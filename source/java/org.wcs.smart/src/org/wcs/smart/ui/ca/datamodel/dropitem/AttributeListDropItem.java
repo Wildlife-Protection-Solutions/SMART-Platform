@@ -209,7 +209,7 @@ public class AttributeListDropItem extends DropItem {
 		gl.marginHeight = 0;
 		
 		main.setLayout(gl);
-		main.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, true));
+		main.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 		
 		lblAttribute = new Label(main, SWT.NONE);
 
@@ -221,7 +221,6 @@ public class AttributeListDropItem extends DropItem {
 		listViewer.getCombo().setFont(smallerFont);
 		listViewer.setContentProvider(ArrayContentProvider.getInstance());
 		listViewer.setLabelProvider(ListItem.createLabelProvider());
-		
 		listViewer.addPostSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -235,6 +234,7 @@ public class AttributeListDropItem extends DropItem {
 			}
 		});
 		listViewer.setInput(new String[] {DialogConstants.LOADING_TEXT});
+		listViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		initDrag(main);
 		initDrag(lblAttribute);

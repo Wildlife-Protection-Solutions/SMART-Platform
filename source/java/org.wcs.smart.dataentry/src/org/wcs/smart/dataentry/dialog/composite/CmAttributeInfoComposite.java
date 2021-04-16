@@ -46,6 +46,7 @@ import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.dataentry.CmAttributeOptionLabelProvider;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab;
+import org.wcs.smart.dataentry.dialog.composite.visiblewhen.VisibleWhenDialog;
 import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
@@ -296,7 +297,8 @@ public abstract class CmAttributeInfoComposite extends AbstractInfoComposite {
 				if (value == VisibleWhen.ALWAYS || value == VisibleWhen.NEVER) {
 					getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_IS_VISIBLE).setVisibleWhen(value, null);
 				}else {
-					
+					VisibleWhenDialog d = new VisibleWhenDialog(getShell(), attribute);
+					d.open();
 				}
 				fireModelChanged();
 		});

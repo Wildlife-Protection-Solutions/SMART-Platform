@@ -217,7 +217,7 @@ public class AttributeTreeDropItem extends DropItem {
 		gl.marginHeight = 0;
 		
 		main.setLayout(gl);
-		main.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, true));
+		main.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 		
 		lblAttribute = new Label(main, SWT.NONE);
 
@@ -225,10 +225,12 @@ public class AttributeTreeDropItem extends DropItem {
 		gl = new GridLayout(2, false);
 		gl.horizontalSpacing = 5;
 		gl.verticalSpacing = 5;
+		gl.marginLeft = 5;
 		gl.marginWidth = 0;
 		gl.marginHeight = 0;
 		t.setLayout(gl);
 		t.setBackground(Display.getDefault().getSystemColor( SWT.COLOR_WHITE ));
+		t.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		lblitem = new Label(t, SWT.NONE);
 		lblitem.setBackground(Display.getDefault().getSystemColor( SWT.COLOR_WHITE ));
@@ -236,6 +238,7 @@ public class AttributeTreeDropItem extends DropItem {
 		fd.setHeight(fd.getHeight() - 1);
 		smallerFont2 = new Font(Display.getCurrent(), fd);
 		lblitem.setFont(smallerFont2);
+		lblitem.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		btnEdit = new Button(t, SWT.DOWN | SWT.ARROW);
 		//btnEdit.setText("..."); //$NON-NLS-1$

@@ -70,11 +70,12 @@ public abstract class DropItem {
 	 * 
 	 * @param panel target drop panel for the drop item widget 
 	 */
-	public void createWidget(IDefinitionPanel panel, Composite parent){
+	public Composite createWidget(IDefinitionPanel panel, Composite parent){
 		this.targetPanel = panel;
 		widget = createCompositeInternal(parent);
 	
 		SmartUiUtils.makeTransparent(widget);
+		return widget;
 	}
 	
 	/**
