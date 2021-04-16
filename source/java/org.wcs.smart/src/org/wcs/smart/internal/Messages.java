@@ -686,6 +686,7 @@ public class Messages extends NLS {
 	public static String DialogConstants_LoadingText;
 	public static String DialogConstants_SaveButton_Label;
 	public static String DrawPolygonTool_InvalidPolygon;
+	public static String DropItem_removetooltip;
 	public static String EditProjectionDialog_Dialog_Message;
 	public static String EditProjectionDialog_Dialog_Title;
 	public static String EditProjectionDialog_Error_DefLength;
@@ -975,6 +976,7 @@ public class Messages extends NLS {
 	public static String IdGeneratorManager_SecondToken;
 	public static String IdGeneratorManager_TimestampToken;
 	public static String IdGeneratorManager_YearToken;
+	public static String IDropItemFactory_AnyOption;
 	public static String IDTokenPreferencePage_AllTokens;
 	public static String IDTokenPreferencePage_SaveError;
 	public static String ImageSelectionControl_AllImages1;
@@ -1089,6 +1091,7 @@ public class Messages extends NLS {
 	public static String LegendLayerStyleConfigurator_ShowInLegendImage;
 	public static String LegendLayerStyleConfigurator_ShowInLegendTooltip;
 	public static String LegendLayerStyleConfigurator_VisibleLayers;
+	public static String ListItem_InactiveLabel;
 	public static String LoadBasemapDialog_Error_BasemapNoSelected;
 	public static String LoadBasemapDialog_LoadButton;
 	public static String LoadBasemapDialog_Loading;

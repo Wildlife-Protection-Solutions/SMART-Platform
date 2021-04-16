@@ -39,6 +39,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.DataModelMergeAndUpdater;
 import org.wcs.smart.ca.datamodel.DataModelMerger;
 import org.wcs.smart.ca.datamodel.SimpleDataModel;
+import org.wcs.smart.filter.Operator;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.internal.ca.datamodel.xml.DataModelXmlToSimpleDataModelConverter;
@@ -160,6 +161,22 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 		if (value.equals(AREATABLE_AREA_KEY)) return Messages.SmartLabelProvider_areaareamname;
 		if (value.equals(AREATABLE_GEOMETRY_KEY)) return Messages.SmartLabelProvider_areageometryname;
 		
+		if (value == Operator.AND) return "AND";
+		if (value == Operator.BETWEEN) return "between";
+		if (value == Operator.BRACKETS) return "(  )"; //$NON-NLS-1$
+		if (value == Operator.EQUALS) return "="; //$NON-NLS-1$
+		if (value == Operator.GREATERTHAN) return ">"; //$NON-NLS-1$
+		if (value == Operator.GREATERTHANEQUALS) return ">="; //$NON-NLS-1$
+		if (value == Operator.LESSTHAN) return "<"; //$NON-NLS-1$
+		if (value == Operator.LESSTHANEQUALS) return "<="; //$NON-NLS-1$
+		if (value == Operator.NOT) return "NOT";
+		if (value == Operator.NOTEQUALS) return "!="; //$NON-NLS-1$
+		if (value == Operator.NOT_BETWEEN) return "not between";
+		if (value == Operator.OR) return "OR";
+		if (value == Operator.STR_CONTAINS) return "contains";
+		if (value == Operator.STR_EQUALS) return "equals";
+		if (value == Operator.STR_NOTCONTAINS) return "not contins";
+		if (value == Operator.EXACT) return "EXACT";
 		return null;
 	}
 
