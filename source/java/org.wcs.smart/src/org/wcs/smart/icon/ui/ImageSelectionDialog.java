@@ -49,6 +49,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowData;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -72,6 +73,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.ui.properties.FilterComposite;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 
@@ -83,6 +85,7 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class ImageSelectionDialog extends SmartStyledTitleDialog {
 
+	private static final String NAMEKEY = "KEY"; //$NON-NLS-1$
 	private static final String WIDGET_KEY = "WIDGET"; //$NON-NLS-1$
 	private static final String IMAGE_KEY = "IMAGE"; //$NON-NLS-1$
 	private static final String PATH_KEY = "PATH"; //$NON-NLS-1$
@@ -228,7 +231,9 @@ public class ImageSelectionDialog extends SmartStyledTitleDialog {
 		
 		iconTable.addListener(SWT.Resize, e->{
 			if (core == null || core.isDisposed()) return;
-			core.setSize(core.computeSize(iconTable.getClientArea().width - scroll.getVerticalBar().getSize().x - 10, SWT.DEFAULT));	
+			core.setVisible(false);
+			core.setSize(core.computeSize(iconTable.getClientArea().width - scroll.getVerticalBar().getSize().x - 10, SWT.DEFAULT));
+			core.setVisible(true);
 		});
 				
 		l = new Label(iconTable, SWT.NONE);
@@ -319,8 +324,43 @@ public class ImageSelectionDialog extends SmartStyledTitleDialog {
 	private void createIconTable(SortedMap<String, Set<String>> paths) {
 		for (Control c : iconTable.getChildren()) c.dispose();
 		
+		FilterComposite txtFilter = new FilterComposite(iconTable, SWT.NONE);
+		txtFilter.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		txtFilter.addChangeListener(new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				String txtFilterText = txtFilter.getPatternFilter();
+				
+				Set<String> items =  paths.keySet();
+				if (txtFilterText != null && !txtFilterText.trim().isBlank()) {
+					items = new HashSet<>();
+					txtFilterText = txtFilterText.trim().toLowerCase();
+					for (String key : paths.keySet()) {
+						if (key.toLowerCase().contains(txtFilterText)) {
+							items.add(key);
+						}
+					}
+				}
+
+				core.setVisible(false);
+				for (Control kid : core.getChildren()) {
+					if (items.contains(kid.getData(NAMEKEY))){
+						kid.setVisible(true);
+						((RowData)kid.getLayoutData()).exclude = false;
+					}else {
+						kid.setVisible(false);
+						((RowData)kid.getLayoutData()).exclude = true;
+					}
+				}
+				core.setVisible(true);
+				core.setSize(core.computeSize(iconTable.getClientArea().width, SWT.DEFAULT));
+				iconTable.layout();		
+			}
+		});
+		
 		scroll = new ScrolledComposite(iconTable, SWT.V_SCROLL | SWT.BORDER);
 		scroll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		scroll.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		
 		core = new Composite(scroll, SWT.NONE);
 		core.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -332,8 +372,7 @@ public class ImageSelectionDialog extends SmartStyledTitleDialog {
 		((RowLayout)core.getLayout()).wrap = true;
 		((RowLayout)core.getLayout()).marginWidth = 0;
 		((RowLayout)core.getLayout()).marginHeight = 0;
-		
-		
+	
 		for (String name : paths.keySet()) {
 			Set<String> icons = paths.get(name);
 			
@@ -343,6 +382,9 @@ public class ImageSelectionDialog extends SmartStyledTitleDialog {
 				outer.setBackground(getShell().getDisplay().getSystemColor(SWT.COLOR_WHITE));
 				((GridLayout)outer.getLayout()).marginWidth = 4;
 				((GridLayout)outer.getLayout()).marginHeight = 4;
+				outer.setData(NAMEKEY, name);
+				outer.setLayoutData(new RowData());
+				((RowData)outer.getLayoutData()).exclude = false;
 				
 				Label l = new Label(outer, SWT.NONE);
 				l.setText(name);

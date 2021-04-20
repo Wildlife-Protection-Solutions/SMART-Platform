@@ -307,7 +307,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			}
 			
 		};
-		FilteredTree fTree = new FilteredTree(leftPanel, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER, patternFilter, true);
+		FilteredTree fTree = new FilteredTree(leftPanel, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER, patternFilter, true, false);
 		viewer = fTree.getViewer();
 		viewer.setContentProvider(new DataModelContentProvider());
 		viewer.setLabelProvider(new DataModelLabelProvider(getLanguage()));

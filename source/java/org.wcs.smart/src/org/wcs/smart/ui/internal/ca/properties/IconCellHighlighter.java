@@ -70,18 +70,22 @@ public class IconCellHighlighter extends FocusCellHighlighter {
 		Listener listener = event -> {
 			if ((event.detail & SWT.SELECTED) > 0) {
 				ViewerCell focusCell = getFocusCell();
-				ViewerRow row = focusCell.getViewerRow();
-
-				Assert.isNotNull(row, "Internal structure invalid. Item without associated row is not possible."); //$NON-NLS-1$
-
-				ViewerCell cell = row.getCell(event.index);
-
-				if (focusCell == null || !cell.equals(focusCell)) {
-					removeSelectionInformation(event, cell);
+				if (focusCell == null) {
 					event.detail &= ~SWT.SELECTED;
-
-				} else {
-					markFocusedCell(event, cell);
+				}else {
+					ViewerRow row = focusCell.getViewerRow();
+	
+					Assert.isNotNull(row, "Internal structure invalid. Item without associated row is not possible."); //$NON-NLS-1$
+	
+					ViewerCell cell = row.getCell(event.index);
+	
+					if (focusCell == null || !cell.equals(focusCell)) {
+						removeSelectionInformation(event, cell);
+						event.detail &= ~SWT.SELECTED;
+	
+					} else {
+						markFocusedCell(event, cell);
+					}
 				}
 			}
 		};

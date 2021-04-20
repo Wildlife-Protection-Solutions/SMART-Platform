@@ -27,7 +27,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.Collator;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
@@ -37,16 +36,17 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationStrategy;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.ILazyContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TableViewerEditor;
 import org.eclipse.jface.viewers.TableViewerFocusCellManager;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
@@ -59,7 +59,9 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
@@ -75,6 +77,7 @@ import org.wcs.smart.icon.ui.ImageSelectionDialog;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.ui.properties.FilterComposite;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -125,6 +128,21 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 //	private IconFile selectedFile = null;
 	private IconSet currentSet = null;
 	private TableViewerFocusCellManager focusManager ;
+	
+	private String txtFilterText = null;
+	
+	private ViewerFilter iconFilter = new ViewerFilter() {
+		
+		@Override
+		public boolean select(Viewer viewer, Object parentElement, Object element) {
+			if (txtFilterText == null || txtFilterText.isEmpty()) return true;
+			
+			if (element instanceof Icon) {
+				return ((Icon)element).getName().toLowerCase().contains(txtFilterText);
+			}
+			return false;
+		}
+	};
 	
 	public IconSelectionDialog(Shell parentShell, Type type, List<IconSet> activeSets) {
 		super(parentShell);
@@ -435,6 +453,18 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 		return panel;
 	}
 	
+	private void createFilterText(Composite parent) {
+		FilterComposite txtFilter = new FilterComposite(parent, SWT.NONE);
+		txtFilter.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		txtFilter.addChangeListener(new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				txtFilterText = txtFilter.getPatternFilter();
+				if (txtFilterText != null) txtFilterText = txtFilterText.toLowerCase().trim();
+				tblIcons.refresh();	
+			}
+		});		
+	}
 	
 	private Composite createLibraryComposite(Composite parent, List<IconSet> sets) {
 		Composite panel = new Composite(parent, SWT.NONE);
@@ -442,9 +472,10 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 		((GridLayout)panel.getLayout()).marginWidth = 0;
 		((GridLayout)panel.getLayout()).marginHeight= 0;
 		
+		createFilterText(panel);
 		
 		tblIcons = new TableViewer(panel,  SWT.FULL_SELECTION | SWT.SINGLE | SWT.BORDER | SWT.VIRTUAL);
-		
+		tblIcons.setFilters(new ViewerFilter[] {iconFilter});
 		if (type == Type.SINGLE_SELECT) {
 			IconCellHighlighter cellHighlighter = new IconCellHighlighter(tblIcons);
 			focusManager = new TableViewerFocusCellManager(tblIcons, cellHighlighter);
@@ -453,24 +484,7 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 		}		
 		
 		tblIcons.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		tblIcons.setContentProvider(new ILazyContentProvider() {
-			
-			List<?> data;
-			@Override
-			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-				if (newInput instanceof List) {
-					data = (List<?>) newInput;
-				}else {
-					data = Collections.singletonList(newInput);
-				}
-			}
-
-			@Override
-			public void updateElement(int index) {
-				tblIcons.replace(data.get(index), index);
-			}
-		});
-//		tblIcons.setContentProvider(ArrayContentProvider.getInstance());
+		tblIcons.setContentProvider(ArrayContentProvider.getInstance());
 		
 		tblIcons.getTable().setHeaderVisible(true);
 		tblIcons.getTable().setLinesVisible(false);
@@ -653,7 +667,7 @@ public class IconSelectionDialog extends SmartStyledTitleDialog {
 				if (tblIcons.getControl().isDisposed()) return;
 				tblIcons.setItemCount(thisicons.size());
 				tblIcons.setInput(thisicons);
-				tblIcons.getTable().getColumn(1).pack();
+//				tblIcons.getTable().getColumn(1).pack();
 			});
 			
 			return Status.OK_STATUS;
