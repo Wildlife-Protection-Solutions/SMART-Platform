@@ -561,7 +561,8 @@ public class MapItemExecutor implements IReportItemExecutor{
 		} else if (bounds.getOption() == BoundsOption.ALL_QUERY_LAYERS){
 			for (Layer l : addCommand.getLayers()) {
 				if (zoomToBounds == null) {
-					zoomToBounds = l.getBounds(new NullProgressMonitor(), renderedMap.getViewportModel().getCRS());
+					ReferencedEnvelope env = l.getBounds(new NullProgressMonitor(), renderedMap.getViewportModel().getCRS());
+					if (!env.isNull()) zoomToBounds = env;
 				}else {
 					zoomToBounds.expandToInclude(l.getBounds(new NullProgressMonitor(), renderedMap.getViewportModel().getCRS()));
 				}
