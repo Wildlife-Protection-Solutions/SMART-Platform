@@ -21,8 +21,11 @@
  */
 package org.wcs.smart.observation.ui;
 
+import java.text.MessageFormat;
+
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.common.attachment.SmartAttachmentLabelProvider;
+import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.model.WaypointAttachment;
 
 /**
@@ -41,9 +44,7 @@ public class ObservationAttachmentLabelProvider extends SmartAttachmentLabelProv
 			if (element instanceof WaypointAttachment) {
 				WaypointAttachment wa = (WaypointAttachment)element;
 				if (wa.getSignatureType() != null) {
-					sb.append(" (Signature: " );
-					sb.append(wa.getSignatureType().getName());
-					sb.append(")");
+					sb.append(MessageFormat.format(Messages.ObservationAttachmentLabelProvider_SignatureTypeLabel, wa.getSignatureType().getName()));
 				}
 			}
 			return sb.toString();

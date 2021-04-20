@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
-import org.wcs.smart.dataentry.CmAttributeOptionLabelProvider;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmAttributeOption.EnterOnceType;

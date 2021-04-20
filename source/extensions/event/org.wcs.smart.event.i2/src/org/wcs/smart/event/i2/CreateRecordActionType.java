@@ -63,7 +63,6 @@ import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationAttributeList;
-import org.wcs.smart.util.UuidUtils;
 
 /**
  * Create new profile record action type

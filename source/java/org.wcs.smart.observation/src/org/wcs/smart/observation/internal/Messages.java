@@ -165,6 +165,8 @@ public class Messages extends NLS {
 	public static String GPSDataImport_Progress_ParsingWaypoints;
 	public static String GPSDataImport_Progress_ReadingData;
 	
+	public static String ObservationAttachmentLabelProvider_SignatureTypeLabel;
+
 	public static String ObservationCellEditor_LoadDataModel_JobName;
 	public static String ObservationCellEditor_NoObservations_Label;
 	public static String ObservationCloner_ProgressName;

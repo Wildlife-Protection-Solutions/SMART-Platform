@@ -850,6 +850,7 @@ public class Messages extends NLS {
 	public static String IntelligenceLabelProviderImpl_ExactOp;
 	public static String IntelligenceLabelProviderImpl_GeomColumnLabel;
 	public static String IntelligenceLabelProviderImpl_IDColumnLabel;
+	public static String IntelligenceLabelProviderImpl_InsufficientPrivileges;
 	public static String IntelligenceLabelProviderImpl_ListAttributeName;
 	public static String IntelligenceLabelProviderImpl_NotBetweenLabel;
 	public static String IntelligenceLabelProviderImpl_NotContainsLabel;

@@ -75,7 +75,7 @@ import org.wcs.smart.ui.SmartLabelProvider;
 public class IntelligenceLabelProviderImpl implements
 		IIntelligenceLabelProvider {
 
-	public final static String INSUFFICIENT_PRIVILEGES = "**Insufficient Privileges**";
+	public final static String INSUFFICIENT_PRIVILEGES = Messages.IntelligenceLabelProviderImpl_InsufficientPrivileges;
 	
 	public static String getEdgeStyleName(RelationshipDiagramEdgeStyleOptions.EdgeStyle style) {
 		switch(style) {

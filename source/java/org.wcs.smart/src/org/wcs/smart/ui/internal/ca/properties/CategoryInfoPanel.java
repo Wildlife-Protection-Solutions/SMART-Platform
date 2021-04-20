@@ -35,7 +35,6 @@ import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.ca.properties.NameKeyComposite;
 

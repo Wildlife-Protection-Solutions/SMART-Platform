@@ -27,8 +27,8 @@ import java.util.Locale;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.connect.dataqueue.i2.internal.Messages;
 import org.wcs.smart.connect.dataqueue.model.DataQueueItem;
 import org.wcs.smart.connect.dataqueue.model.LocalDataQueueItem;
@@ -66,7 +66,7 @@ public class RecordProcessor implements IItemProcessor {
 		LocalDataQueueItem litem = (LocalDataQueueItem)item;
 		Path file = litem.getFullFilePath();
 		
-		IEventBroker broker = SmartPlugIn.getDefault().getWorkbench().getService(IEclipseContext.class).get(IEventBroker.class);
+		IEventBroker broker = PlatformUI.getWorkbench().getService(IEclipseContext.class).get(IEventBroker.class);
 		try(Session session = HibernateManager.openSession()){
 			RecordXmlImporter importer = new RecordXmlImporter(session);
 			importer.importRecord(file, monitor);

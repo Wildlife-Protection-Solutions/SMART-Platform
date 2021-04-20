@@ -112,6 +112,7 @@ public class NewMappingDialog extends SmartStyledTitleDialog {
 		return this.mapping;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public void okPressed() {
 		EntityMapping.Type type = EntityMapping.Type.FIXED;
@@ -210,6 +211,7 @@ public class NewMappingDialog extends SmartStyledTitleDialog {
 		return true;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public Control createDialogArea(Composite parent){
 		parent = (Composite) super.createDialogArea(parent);

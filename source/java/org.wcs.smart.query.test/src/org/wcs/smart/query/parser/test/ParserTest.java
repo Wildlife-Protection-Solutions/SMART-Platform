@@ -26,9 +26,9 @@ import java.io.InputStream;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.patrol.query.parser.internal.parser.ParseException;
 import org.wcs.smart.patrol.query.parser.internal.parser.Parser;
-import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.QueryFilter;
 
 /**
