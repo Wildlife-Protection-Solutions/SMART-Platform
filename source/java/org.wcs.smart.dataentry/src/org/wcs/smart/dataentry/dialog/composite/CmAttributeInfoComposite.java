@@ -32,6 +32,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -40,13 +41,15 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.icon.Icon;
 import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.dataentry.CmAttributeOptionLabelProvider;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditorDefaultTab;
-import org.wcs.smart.dataentry.dialog.composite.visiblewhen.VisibleWhenDialog;
 import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
@@ -263,21 +266,29 @@ public abstract class CmAttributeInfoComposite extends AbstractInfoComposite {
 		label.setText(Messages.CmAttributeInfoComposite_Option_IsVisible);
 		label.setToolTipText(Messages.CmAttributeInfoComposite_enabledTooltip);
 		
-		ComboViewer cmbVisibleWhen = new ComboViewer(container, SWT.DROP_DOWN | SWT.READ_ONLY);
+		Composite edit = new Composite(container, SWT.NONE);
+		edit.setLayout(new GridLayout(2, false));
+		edit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		ComboViewer cmbVisibleWhen = new ComboViewer(edit, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbVisibleWhen.setContentProvider(ArrayContentProvider.getInstance());
 		cmbVisibleWhen.setLabelProvider(new LabelProvider() {
 			@Override
 			public String getText(Object x) {
-				switch(((CmAttributeOption.VisibleWhen)x)) {
-					case ALWAYS: return "Always";
-					case CUSTOM: return "Custom";
-					case NEVER: return "Never";
-				}
-				return "";
+				return CmAttributeOptionLabelProvider.INSTANCE.getGuiName( ((CmAttributeOption.VisibleWhen)x));
 			}
 		});
 		cmbVisibleWhen.setInput(CmAttributeOption.VisibleWhen.values());
 		cmbVisibleWhen.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		ToolBar tb = new ToolBar(edit, SWT.NONE);
+		ToolItem btnEdit = new ToolItem(tb, SWT.PUSH);
+//		btnEdit.setBackground(edit.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnEdit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		btnEdit.setEnabled(false);
+		btnEdit.addListener(SWT.Selection,  e->{
+			editVisibleWhenExpression();
+		});
 		
 		addSourceObjectChangedListener(new ISourceObjectChangedListener() {
 			@Override
@@ -296,15 +307,27 @@ public abstract class CmAttributeInfoComposite extends AbstractInfoComposite {
 				CmAttributeOption.VisibleWhen value = ((CmAttributeOption.VisibleWhen)x);
 				if (value == VisibleWhen.ALWAYS || value == VisibleWhen.NEVER) {
 					getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_IS_VISIBLE).setVisibleWhen(value, null);
+					btnEdit.setEnabled(false);
 				}else {
-					VisibleWhenDialog d = new VisibleWhenDialog(getShell(), attribute);
-					d.open();
+					btnEdit.setEnabled(true);
+					if (value != getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_IS_VISIBLE).getVisibleWhen()) {
+						if (!editVisibleWhenExpression()) {
+							cmbVisibleWhen.setSelection(new StructuredSelection(getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_IS_VISIBLE).getVisibleWhen()));
+						}
+					}
 				}
 				fireModelChanged();
 		});
 		return cmbVisibleWhen;
 	}
 	
+	private boolean editVisibleWhenExpression() {
+		VisibleWhenDialog d = new VisibleWhenDialog(getShell(), attribute);
+		if (d.open() != Window.OK) return false;
+		getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_IS_VISIBLE).setVisibleWhen(VisibleWhen.CUSTOM, d.getQueryExpression());
+		fireModelChanged();
+		return true;
+	}
 	protected Button createBooleanControl(Composite parent, final String optionId, String text, String cbText, String tooltip) {
 		final Label label = new Label(parent, SWT.NONE);
 		label.setText(text);

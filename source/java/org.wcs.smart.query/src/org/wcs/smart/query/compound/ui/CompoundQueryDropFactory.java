@@ -14,8 +14,8 @@ import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryProxy;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
 import org.wcs.smart.query.ui.model.IQueryDropItemFactory;
-import org.wcs.smart.query.ui.model.impl.ErrorDropItem;
 import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.ErrorDropItem;
 
 public class CompoundQueryDropFactory implements IQueryDropItemFactory{
 

@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.ui.model.impl;
+package org.wcs.smart.ui.ca.datamodel.dropitem;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
@@ -28,8 +28,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
+import org.wcs.smart.SmartPlugIn;
 
 /**
  * A drop item for displaying error messages.  This item
@@ -82,7 +81,7 @@ public class ErrorDropItem extends DropItem {
 		c.setLayout(gl);
 		
 		Label lblImage = new Label(c, SWT.NONE);
-		lblImage.setImage(QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.EXCLAMATION_ICON));
+		lblImage.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ERROR_ICON));
 		lblImage.setBackground(redColor);
 		Label lbl = new Label(c, SWT.NONE);
 		lbl.setText(errorMessage);

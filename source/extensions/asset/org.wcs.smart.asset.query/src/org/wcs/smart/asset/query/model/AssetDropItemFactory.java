@@ -76,8 +76,8 @@ import org.wcs.smart.query.ui.model.impl.AttributeListValueDropItem;
 import org.wcs.smart.query.ui.model.impl.AttributeTreeValueDropItem;
 import org.wcs.smart.query.ui.model.impl.AttributeValueDropItem;
 import org.wcs.smart.query.ui.model.impl.BasicDropItemFactory;
-import org.wcs.smart.query.ui.model.impl.ErrorDropItem;
 import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.ErrorDropItem;
 
 /**
  * Drop item factory for asset queries.

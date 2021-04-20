@@ -127,12 +127,12 @@ import org.wcs.smart.query.ui.model.impl.AttributeValueDropItem;
 import org.wcs.smart.query.ui.model.impl.BasicDropItemFactory;
 import org.wcs.smart.query.ui.model.impl.CategoryDropItem;
 import org.wcs.smart.query.ui.model.impl.CategoryValueDropItem;
-import org.wcs.smart.query.ui.model.impl.ErrorDropItem;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.ca.datamodel.dropitem.AttributeDropItem;
 import org.wcs.smart.ui.ca.datamodel.dropitem.AttributeListDropItem;
 import org.wcs.smart.ui.ca.datamodel.dropitem.AttributeTreeDropItem;
 import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.ErrorDropItem;
 import org.wcs.smart.ui.ca.datamodel.dropitem.ListItem;
 import org.wcs.smart.util.UuidUtils;
 

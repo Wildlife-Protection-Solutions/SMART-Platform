@@ -1,0 +1,287 @@
+ /*=============================================
+SMART Query Engine Language Syntax & Semantic actions 
+=============================================*/options{  LOOKAHEAD= 1;  CHOICE_AMBIGUITY_CHECK = 2;  OTHER_AMBIGUITY_CHECK = 1;  STATIC = false;  DEBUG_PARSER = false;  DEBUG_LOOKAHEAD = false;  DEBUG_TOKEN_MANAGER = false;  ERROR_REPORTING = true;  JAVA_UNICODE_ESCAPE = true;  UNICODE_INPUT = false;  IGNORE_CASE = false;  USER_TOKEN_MANAGER = false;  USER_CHAR_STREAM = false;  BUILD_PARSER = true;  BUILD_TOKEN_MANAGER = true;  SANITY_CHECK = true;  FORCE_LA_CHECK = false;}PARSER_BEGIN(Parser)package org.wcs.smart.dataentry.visiblewhen.filter;
+import java.util.*;
+import org.wcs.smart.filter.*;
+
+public class Parser{}PARSER_END(Parser)SKIP :{  " "| "\t"| "\r"| "\n"}/*--------- Comments  -----------------*/SPECIAL_TOKEN :{  < LINE_COMMENT : "//" (~[ "\r", "\n" ])* >| < MULTI_LINE_COMMENT :    "/*" (~[ "*" ])* "*"    (      "*"    |      (        ~[ "*", "/" ] (~[ "*" ])* "*"      )    )*    "/" >}/*--------- Keywords  -----------------*/TOKEN [ IGNORE_CASE ] :{  < K_AND : "and" >| < K_NOT : "not" >| < K_OR : "or" >
+| < K_EXACT : "exact" >}
+
+
+TOKEN :
+{
+  < COMMA : "," >
+| < LESS : "<" >
+| < LESSEQUAL : "<=" >
+| < GREATER : ">" >
+| < GREATEREQUAL : ">=" >
+| < EQUAL : "=" >
+| < NOTEQUAL : "!=" >
+| < NOTEQUAL2 : "<>" >
+| < OPENPAREN : "(" >
+| < CLOSEPAREN : ")" >
+| < SLASH : "/" >
+| < PLUS : "+" >
+| < MINUS : "-" >
+| < CONTAINS : "contains" >
+| < NOT_CONTAINS : "notcontains" >
+| < STREQUALS : "equals" >
+| < BETWEEN : "between" >
+}TOKEN : /* Numeric Constants */{  < NUMBER :
+  	(["-","+"])?< FLOAT >  | (["-","+"])?< FLOAT >    (      [ "e", "E" ] ([ "-", "+" ])? < FLOAT >    )?     >| < #FLOAT :    < INTEGER >  | < INTEGER > ("." < INTEGER >)?  | "." < INTEGER >     >| < #INTEGER : (< DIGIT >)+ >| < #DIGIT : [ "0"-"9" ] >}TOKEN : /* Literal Constants */{  < S_CONST_LITERAL :    "true"  | "false"  | "null" >}
+/* Query Filters */
+TOKEN : 
+{
+  < ATT_STR_KEY : "attribute:s:"< DM_KEY > >
+ | < ATT_VALUE_KEY : "attribute:n:"< DM_KEY > >
+ | < ATT_BOOL_KEY : "attribute:b:"< DM_KEY > >
+ | < ATT_LIST_KEY : "attribute:l:"< DM_KEY > >
+ | < ATT_MLIST_KEY : "attribute:m:"< DM_KEY > >
+ | < ATT_TREE_KEY : "attribute:t:"< DM_KEY > >
+ | < ATT_DATE_KEY : "attribute:d:"< DM_KEY > >
+ | < DM_KEY : (< LETTER >)+(< DIGIT > | < LETTER > | < SPECIAL_CHARS >)* >
+ | < DATE_STRING : < DIGIT > < DIGIT > < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT >> 
+ | < #LETTER : [ "a"-"z", "A"-"Z" ] >
+ | < #SPECIAL_CHARS : ("." | "_")>}TOKEN :{  < QUOTED_STRING :    "\""    (      (~[ "\"", "\\", "\n", "\r" ])    | ("\\" ~[ "\n", "\r" ])    )*    "\""     >}/* ------------ Expressions ----------------------*/
+IFilter ParseQuery():
+{
+  IFilter expr = null; 
+}
+{
+  expr = ExpressionPart()
+ {
+  return expr;
+ }
+}
+
+IFilter ExpressionPart():
+{
+  IFilter expr = null;
+  Operator op = null;
+  IFilter expr2 = null;}
+{
+  expr = BooleanPart()
+ 	(
+ 	 op = BooleanOp()
+	  expr2 = BooleanPart()
+		{
+		  expr = BooleanFilter.create(expr, expr2, op);
+		}
+
+	  )*
+	{
+	  return expr;
+	}}
+
+IFilter BooleanPart() :
+{
+  IFilter filter = null;
+  boolean hasNot = false;
+  }
+{
+	(< K_NOT > {hasNot = true;} )?
+	(
+		
+		filter = AttributeExpression()
+		|
+		(< OPENPAREN >filter = ExpressionPart()< CLOSEPAREN >)
+		{	  		filter = BracketFilter.createFilter(filter);
+		}
+	)	{
+		if (hasNot){
+	      filter = NotFilter.createNotExpression(filter);	    }
+  		return filter;
+	}}
+
+IFilter BooleanItemExpression():
+{
+  IFilter filter = null;}
+{	< ATT_BOOL_KEY >  	{
+    	filter = AttributeFilter.createBooleanFilter(token.image);
+    	return filter;  	}
+}
+
+
+
+
+IFilter NumberExpression():
+{
+  IFilter filter = null;
+  Operator op = null;
+  String key = null;
+  Double value = null;
+}
+{
+	
+	( 
+		< ATT_VALUE_KEY> {key = token.image;}
+	   	op = NumberOp()
+	   	< NUMBER > {value = Double.parseDouble(token.image);}
+	)
+	{
+  		filter = AttributeFilter.createValueFilter(key, op, value);
+		return filter;
+	}
+}
+
+
+IFilter AttributeExpression():
+{
+	IFilter filter = null;
+	String key;
+	Operator op;
+	String value;	
+}
+{
+	(/* String comparison */
+	filter = StringExpression()
+	|
+	/* Numeric comparison */
+	filter = NumberExpression()
+	| 
+	/* boolean */
+	filter = BooleanItemExpression()
+	| 
+	/* date */
+	filter = DateItemExpression()
+	|	
+	/* attribute list items */
+	(
+		< ATT_LIST_KEY > {key = token.image;}		    
+		<  EQUAL > {op = Operator.parseOperator(token.image);}
+		< DM_KEY >  {value = token.image;}
+	)
+	{
+		filter = AttributeFilter.createListItemFilter(key,op,value);
+	}
+	|	
+	/* multi attribute list items */
+	(
+		< ATT_MLIST_KEY > {key = token.image;}		    
+		(<  K_OR > | < K_AND > | < K_EXACT >) {op = Operator.parseOperator(token.image);}
+		value = MultiList()
+	)
+	{
+		filter = AttributeFilter.createListItemFilter(key,op,value);
+	}
+	
+	| 
+	/* attribute tree items */
+	(
+		< ATT_TREE_KEY > {key = token.image;}		    
+		<  EQUAL > {op = Operator.parseOperator(token.image);}
+		< DM_KEY >  {value = token.image;}
+	)
+	{
+		filter = AttributeFilter.createTreeItemFilter(key,op,value);
+	} 	
+	)
+	{
+		return filter;
+	}
+}
+IFilter DateItemExpression():
+{
+  IFilter filter = null;
+  String key = null;
+  String date1 = null;
+  String date2 = null;
+  Operator op = null;
+}
+{
+	
+	(
+		< ATT_DATE_KEY > {key = token.image;}
+		op = DateOp()
+		< DATE_STRING >  {date1 = token.image;}
+		< K_AND >
+		< DATE_STRING > {date2 = token.image;}
+	)
+	{
+  		filter = AttributeFilter.createDateFilter(key, date1, date2, op);
+  		return filter;
+	}
+}
+
+
+IFilter StringExpression():
+{
+  IFilter filter = null;
+  Operator op = null;
+  String key = null;
+  String value = null;}
+{	< ATT_STR_KEY > {key = token.image;}
+	op = StringOp()
+	< QUOTED_STRING > {value = token.image;}
+	{
+  		filter = AttributeFilter.createStringFilter(key, op, value);
+  		return filter;	}
+}
+
+String MultiList() :
+{
+  String list = "";
+} {
+  (( < DM_KEY > { list=token.image; })(  ","  < DM_KEY > { list += "," + token.image; })*)
+  {
+    return list;
+  }
+}
+  
+Operator NumberOp() :
+{}
+{
+   (
+    < EQUAL >
+  | < NOTEQUAL >
+  | < NOTEQUAL2 >
+  | < GREATER >
+  | < GREATEREQUAL >
+  | < LESS >
+  | < LESSEQUAL >
+  )
+  {
+    return Operator.parseOperator(token.image);
+  }
+}
+
+Operator StringOp() :
+{}
+{
+  (
+   < CONTAINS >
+  | < STREQUALS >
+	| < NOT_CONTAINS >
+  )
+  {
+    return Operator.parseOperator(token.image);
+  }
+}
+
+Operator BooleanOp() :
+{}
+{
+  (
+   < K_AND >
+  | < K_OR>
+  )
+  {
+    return Operator.parseOperator(token.image);
+  }
+}
+
+Operator DateOp() :
+{
+  String fulltoken = null;
+}
+{
+  (
+   < BETWEEN > {fulltoken = token.image;}
+  |
+  	< K_NOT > {fulltoken = token.image;}
+  	< BETWEEN > {fulltoken = fulltoken + " " + token.image;}
+ )
+  {
+    return Operator.parseOperator(fulltoken);
+  }
+}

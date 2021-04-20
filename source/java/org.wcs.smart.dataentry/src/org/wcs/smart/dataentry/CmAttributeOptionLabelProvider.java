@@ -42,4 +42,12 @@ public enum CmAttributeOptionLabelProvider {
 		return ""; //$NON-NLS-1$
 	}
 
+	public String getGuiName(CmAttributeOption.VisibleWhen visibleWhen){
+		switch(visibleWhen) {
+			case ALWAYS: return Messages.CmAttributeOptionLabelProvider_AlwaysVisible;
+			case CUSTOM: return Messages.CmAttributeOptionLabelProvider_CustomExpression;
+			case NEVER: return Messages.CmAttributeOptionLabelProvider_NeverVisible;
+		}
+		return ""; //$NON-NLS-1$
+	}
 }

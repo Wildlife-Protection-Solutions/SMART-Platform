@@ -62,7 +62,11 @@ public class BooleanOpDropItem extends DropItem {
 	 */
 	@Override
 	public void initializeData(Object operatorValue){
-		currentSelection = (String) operatorValue;
+		if( operatorValue instanceof Operator ) {
+			currentSelection = ((Operator)operatorValue).asSmartValue();
+		}else {
+			currentSelection = (String) operatorValue;
+		}
 	}
 	
 

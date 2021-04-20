@@ -40,8 +40,8 @@ import org.wcs.smart.entity.query.parser.internal.EntityAttributeGroupBy;
 import org.wcs.smart.entity.query.ui.definition.EntityDropItemFactory;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.model.summary.AbstractGroupByViewer;
-import org.wcs.smart.query.ui.model.impl.ErrorDropItem;
 import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
+import org.wcs.smart.ui.ca.datamodel.dropitem.ErrorDropItem;
 import org.wcs.smart.ui.ca.datamodel.dropitem.ListItem;
 
 public class EntityAttributeGroupByViewer extends AbstractGroupByViewer<EntityAttributeGroupBy>{

@@ -1,4 +1,25 @@
-package org.wcs.smart.dataentry.dialog.composite.visiblewhen;
+/*
+ * Copyright (C) 2021 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.dataentry.dialog.composite;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,6 +53,12 @@ import org.wcs.smart.ui.ca.datamodel.dropitem.IDefinitionPanel;
 import org.wcs.smart.ui.ca.datamodel.dropitem.NotDropItem;
 import org.wcs.smart.ui.ca.datamodel.dropitem.ProxyItem;
 
+/**
+ * A formula definition panel for visible when expressions
+ * 
+ * @author Emily
+ *
+ */
 public class DefinitionPanel  implements IDefinitionPanel {
 
 	public static final String ID = "org.wcs.smart.dataentry.visiblewhen"; //$NON-NLS-1$
@@ -71,7 +98,7 @@ public class DefinitionPanel  implements IDefinitionPanel {
 	 * Return the gui name
 	 */
 	public String getGuiName(){
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 	
 	/**
