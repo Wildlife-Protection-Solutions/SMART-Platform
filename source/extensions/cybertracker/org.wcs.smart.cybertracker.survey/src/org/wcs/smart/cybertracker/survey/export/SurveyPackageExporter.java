@@ -160,7 +160,7 @@ public enum SurveyPackageExporter {
 				
 				//convert to xml
 				Path cmFile = tempDir.resolve(CM_MODEL_FILE);
-				org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xmlModel = CmSmartToXmlConverter.convert(modelToExport, sub.split(1));
+				org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xmlModel = CmSmartToXmlConverter.convertToSmartMobileXML(modelToExport, sub.split(1));
 				
 				//create and add help files
 				toIncludeInZip.addAll( CtJsonExportUtils.addHelpFiles(xmlModel, tempDir) );

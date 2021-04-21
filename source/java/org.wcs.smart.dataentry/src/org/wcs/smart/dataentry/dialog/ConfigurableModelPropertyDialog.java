@@ -433,7 +433,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 					try {
 						monitor.beginTask(Messages.ConfigurableModelPropertyDialog_Exporting, 8);
 						monitor.subTask(Messages.ConfigurableModelPropertyDialog_Converting);
-						org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xml = CmSmartToXmlConverter.convert(cm, monitor);
+						org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xml = CmSmartToXmlConverter.convertToXml(cm, monitor);
 						
 						monitor.subTask(Messages.ConfigurableModelPropertyDialog_Writing);
 						if (xml == null || monitor.isCanceled()) return;

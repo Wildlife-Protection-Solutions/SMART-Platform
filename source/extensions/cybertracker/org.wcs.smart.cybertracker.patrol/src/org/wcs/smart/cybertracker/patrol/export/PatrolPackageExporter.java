@@ -162,7 +162,7 @@ public enum PatrolPackageExporter {
 				
 				
 				//convert to xml
-				org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xmlModel = CmSmartToXmlConverter.convert(modelToExport, true, sub.split(1));
+				org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xmlModel = CmSmartToXmlConverter.convertToSmartMobileXML(modelToExport, sub.split(1));
 
 				//create and add help files
 				toIncludeInZip.addAll( CtJsonExportUtils.addHelpFiles(xmlModel, tempDir) );

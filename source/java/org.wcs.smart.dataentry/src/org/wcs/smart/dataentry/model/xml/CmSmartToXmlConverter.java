@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.dataentry.model.xml;
 
+import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -66,6 +67,13 @@ import org.wcs.smart.dataentry.model.xml.generated.NodeType;
 import org.wcs.smart.dataentry.model.xml.generated.NodeTypeList;
 import org.wcs.smart.dataentry.model.xml.generated.SignatureTypeList;
 import org.wcs.smart.dataentry.model.xml.generated.TreeNodeType;
+import org.wcs.smart.dataentry.visiblewhen.filter.Parser;
+import org.wcs.smart.filter.AttributeFilter;
+import org.wcs.smart.filter.BooleanFilter;
+import org.wcs.smart.filter.BracketFilter;
+import org.wcs.smart.filter.IFilter;
+import org.wcs.smart.filter.NotFilter;
+import org.wcs.smart.filter.Operator;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.util.SharedUtils;
@@ -82,28 +90,37 @@ public class CmSmartToXmlConverter {
 	
 	//EG: added support to export cm not in the database
 	/**
-	 * Configurable Model can have a UUID or not.  If it has a UUID the model will be reloaded from the database, otherwise
-	 * the object provided will be used.  This was done to support exporting the "original data model" to cybertracker.
+	 * This function should be used to export the configurable model to an xml
+	 * file without including referenced data model icons.  (for exporting from one
+	 * ca into another ca).  
+	 * 
 	 * @param cm
-
 	 * @param monitor
 	 * @return
+	 * @throws Exception 
 	 */
-	public static org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel convert(ConfigurableModel cm, IProgressMonitor monitor) {
+	public static org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel convertToXml(ConfigurableModel cm, IProgressMonitor monitor) throws Exception {
 		return convert(cm, false, monitor);
 	}
 	
 	/**
 	 * Configurable Model can have a UUID or not.  If it has a UUID the model will be reloaded from the database, otherwise
 	 * the object provided will be used.  This was done to support exporting the "original data model" to cybertracker.
+	 * 
+	 * This function should be used when converting for SMART Mobile/Cybertracker.  This will include
+	 * data model icons and convert the visible when strings to SMART Mobile format. 
+	 * 
 	 * @param cm
-	 * @param includeDmIcons - if set to true the imageFile will be populated for nodes 
-	 * that have a data model icon but not a custom icon. If false this attribute will not
-	 * be populated for these nodes 
 	 * @param monitor
 	 * @return
+	 * @throws Exception 
 	 */
-	public static org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel convert(ConfigurableModel cm, boolean includeDmIcon, IProgressMonitor monitor) {
+	public static org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel convertToSmartMobileXML(ConfigurableModel cm, IProgressMonitor monitor) throws Exception {
+		return convert(cm, true, monitor);
+	}
+	
+	private static org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel convert(ConfigurableModel cm, 
+			boolean forCybertracker, IProgressMonitor monitor) throws Exception {
 		org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xml = new org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel();
 
 		try(Session session = HibernateManager.openSession()){
@@ -155,12 +172,12 @@ public class CmSmartToXmlConverter {
 				
 				//nodes
 				monitor.subTask(Messages.CmSmartToXmlConverter_ProcessCmNodes);
-				processCmNodes(cm, xml, llookup, session, includeDmIcon, validsignatures, monitor);
+				processCmNodes(cm, xml, llookup, session, forCybertracker, validsignatures, monitor);
 				monitor.worked(1);
 				if (monitor.isCanceled()) return null;
 				
 				monitor.subTask(Messages.CmSmartToXmlConverter_ProcessAttributeConfigs);
-				processCmAttributeConfigs(cm, xml, llookup, session, includeDmIcon, monitor);
+				processCmAttributeConfigs(cm, xml, llookup, session, forCybertracker, monitor);
 				monitor.worked(1);
 				if (monitor.isCanceled()) return null;
 				
@@ -183,7 +200,7 @@ public class CmSmartToXmlConverter {
 
 	private static void processCmAttributeConfigs(ConfigurableModel cm,
 			org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xml,
-			HashMap<String, Language> llookup, Session session, boolean includeDmIcon, IProgressMonitor monitor) {
+			HashMap<String, Language> llookup, Session session, boolean forCybertracker, IProgressMonitor monitor) {
 		Collection<CmAttributeConfig> configs = Collections.emptyList();
 		if (cm.getUuid() == null) {
 			//if there is no uuid; then we just use what is in the cm 
@@ -204,8 +221,8 @@ public class CmSmartToXmlConverter {
 			xmlConfig.setAttributeKey(config.getAttribute().getKeyId());
 			xmlConfig.setAttributeUuid(toString(config.getAttribute().getUuid()));
 			
-			processCmListItems(config.getList(), config.getModel(), xmlConfig.getListItem(), llookup, includeDmIcon, monitor);
-			processCmTreeNodes(config.getTree(), config.getModel(), xmlConfig.getTreeNode(), llookup, includeDmIcon, monitor);
+			processCmListItems(config.getList(), config.getModel(), xmlConfig.getListItem(), llookup, forCybertracker, monitor);
+			processCmTreeNodes(config.getTree(), config.getModel(), xmlConfig.getTreeNode(), llookup, forCybertracker, monitor);
 			
 			xml.getAttributeConfig().add(xmlConfig);
 		}
@@ -217,7 +234,7 @@ public class CmSmartToXmlConverter {
 	}
 	
 	private static void processCmTreeNodes(List<CmAttributeTreeNode> cmList, ConfigurableModel cm,
-			List<TreeNodeType> xmlList, HashMap<String, Language> llookup, boolean includeDmIcon, IProgressMonitor monitor) {
+			List<TreeNodeType> xmlList, HashMap<String, Language> llookup, boolean forCybertracker, IProgressMonitor monitor) {
 		if(monitor.isCanceled()) return;
 		for (CmAttributeTreeNode cmNode : cmList) {
 			TreeNodeType xmlNode = new TreeNodeType();
@@ -234,18 +251,18 @@ public class CmSmartToXmlConverter {
 			if (cmNode.getDisplayMode() != null) {
 				xmlNode.setDisplayMode(cmNode.getDisplayMode().name());
 			}
-			xmlNode.setImageFile(getImageFileRef(cmNode, cm, includeDmIcon));
+			xmlNode.setImageFile(getImageFileRef(cmNode, cm, forCybertracker));
 			xmlNode.setIsCustomImage(isCustomIcon(cmNode));
 			if (cmNode.getUuid() != null) {
 				xmlNode.setId(cmNode.getUuid().toString()); //this will allow to reference this item in extradata
 			}
-			processCmTreeNodes(cmNode.getChildren(), cm, xmlNode.getChildren(), llookup, includeDmIcon, monitor);
+			processCmTreeNodes(cmNode.getChildren(), cm, xmlNode.getChildren(), llookup, forCybertracker, monitor);
 			xmlList.add(xmlNode);
 		}
 	}
 
 	private static void processCmListItems(List<CmAttributeListItem> cmList, ConfigurableModel cm,
-			List<ListItemType> xmlList,	HashMap<String, Language> llookup, boolean includeDmIcon, IProgressMonitor monitor) {
+			List<ListItemType> xmlList,	HashMap<String, Language> llookup, boolean forCybertracker, IProgressMonitor monitor) {
 
 		if(monitor.isCanceled()) return;
 		for (CmAttributeListItem cmNode : cmList) {
@@ -258,7 +275,7 @@ public class CmSmartToXmlConverter {
 				xmlNode.setKeyRef(cmNode.getListItem().getKeyId());
 				xmlNode.setDmUuid(toString(cmNode.getListItem().getUuid()));
 			}
-			xmlNode.setImageFile(getImageFileRef(cmNode, cm, includeDmIcon));
+			xmlNode.setImageFile(getImageFileRef(cmNode, cm, forCybertracker));
 			xmlNode.setIsCustomImage(isCustomIcon(cmNode));
 			if (cmNode.getUuid() != null) {
 				xmlNode.setId(cmNode.getUuid().toString()); //this will allow to reference this item in extradata
@@ -269,22 +286,22 @@ public class CmSmartToXmlConverter {
 
 	private static void processCmNodes(ConfigurableModel cm,
 			org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xml,
-			HashMap<String, Language> llookup, Session session, boolean includeDmIcon, 
-			Set<UUID> validsignatures, IProgressMonitor monitor) {
+			HashMap<String, Language> llookup, Session session, boolean forCybertracker, 
+			Set<UUID> validsignatures, IProgressMonitor monitor) throws Exception {
 
 		NodeTypeList ntl = new NodeTypeList();
 		xml.setNodes(ntl);
 		if (cm.getNodes() != null) {
 			for (CmNode node : cm.getNodes()){
-				processCmNode(node, ntl.getNode(), llookup, session, includeDmIcon, validsignatures, monitor);
+				processCmNode(node, ntl.getNode(), llookup, session, forCybertracker, validsignatures, monitor);
 			}
 		}
 	}
 
 	private static void processCmNode(CmNode node, List<NodeType> xmlNodes,
-			HashMap<String, Language> llookup, Session session, boolean includeDmIcon, 
+			HashMap<String, Language> llookup, Session session, boolean forCybertracker, 
 			Set<UUID> validsignatures,
-			IProgressMonitor monitor) {
+			IProgressMonitor monitor) throws Exception {
 
 		monitor.subTask(MessageFormat.format(Messages.CmSmartToXmlConverter_ProcessingNode, node.getName()));
 		NodeType nt = new NodeType();
@@ -309,7 +326,7 @@ public class CmSmartToXmlConverter {
 			nt.setDisplayMode(node.getDisplayMode().name());
 		}
 		
-		nt.setImageFile(getImageFileRef(node, node.getModel(), includeDmIcon));
+		nt.setImageFile(getImageFileRef(node, node.getModel(), forCybertracker));
 		nt.setIsCustomImage(isCustomIcon(node));
 		
 		if (node.getUuid() != null) {
@@ -328,7 +345,7 @@ public class CmSmartToXmlConverter {
 				at.setRequired(ca.getAttribute().getIsRequired());
 				
 				at.setIsCustomImage(isCustomIcon(ca));
-				at.setImageFile(getImageFileRef(ca, node.getModel(), includeDmIcon));
+				at.setImageFile(getImageFileRef(ca, node.getModel(), forCybertracker));
 		
 				if (ca.getAttribute().getMinValue() != null) {
 					at.setMinValue(ca.getAttribute().getMinValue());
@@ -368,7 +385,15 @@ public class CmSmartToXmlConverter {
 						}
 					}
 					at.getOption().add(aot);
+					
+					if (forCybertracker && option.getOptionId().equalsIgnoreCase(CmAttributeOption.ID_IS_VISIBLE)) {
+						System.out.println(option.getDoubleValue());
+						if (option.getDoubleValue().intValue() == CmAttributeOption.VisibleWhen.CUSTOM.getValue()) {
+							aot.setStringValue(convertVisibleWhenExpression(option.getStringValue()));
+						}
+					}
 				}
+				
 				if (ca.getUuid() != null) {
 					at.setId(ca.getUuid().toString()); //this will allow to reference this item in extradata
 				}
@@ -382,13 +407,165 @@ public class CmSmartToXmlConverter {
 		
 		if (node.getChildren() != null) {
 			for (CmNode cn : node.getChildren()) {
-				processCmNode(cn, nt.getNode(), llookup, session, includeDmIcon, validsignatures, monitor);
+				processCmNode(cn, nt.getNode(), llookup, session, forCybertracker, validsignatures, monitor);
 				if (monitor.isCanceled()) return;
 			}
 		}
 		xmlNodes.add(nt);
 	}
 
+	/**
+	 * Convert the visible when expression into the xforms (odk)
+	 * https://docs.getodk.org/form-operators-functions/
+	 * -> this is required for SMART Mobile packages
+	 * 
+	 * @param expression
+	 * @return
+	 * @throws Exception
+	 */
+	private static String convertVisibleWhenExpression(String expression) throws Exception{
+		Parser parser = new Parser(new StringReader(expression));
+		IFilter filter = parser.ParseQuery();
+		StringBuilder sb = new StringBuilder();
+		processFilter(filter,  sb);
+		return sb.toString();
+	}
+	
+	private static void processFilter(IFilter filter, StringBuilder sb) {
+		if (filter instanceof BooleanFilter) {
+			BooleanFilter bfilter = (BooleanFilter)filter;
+			processFilter(bfilter.getFilter1(), sb);
+			sb.append(" "); //$NON-NLS-1$
+			sb.append(bfilter.getOperator().asSmartValue().toLowerCase());
+			sb.append(" "); //$NON-NLS-1$
+			processFilter(bfilter.getFilter2(), sb);
+		}else if (filter instanceof BracketFilter) {
+			BracketFilter bfilter = (BracketFilter)filter;
+			sb.append(" ( "); //$NON-NLS-1$
+			processFilter(bfilter.getFilter(), sb);
+			sb.append(" ) "); //$NON-NLS-1$
+		}else if (filter instanceof NotFilter) {
+			NotFilter bfilter = (NotFilter)filter;
+			sb.append(" not( "); //$NON-NLS-1$
+			processFilter(bfilter.getFilter(), sb);
+			sb.append(" ) "); //$NON-NLS-1$
+		}else if (filter instanceof AttributeFilter) {
+			AttributeFilter afilter = (AttributeFilter)filter;
+			sb.append(" "); //$NON-NLS-1$
+			
+			switch(afilter.getAttributeType()) {
+			case BOOLEAN:
+				sb.append(" ${"); //$NON-NLS-1$
+				sb.append(afilter.getAttributeKey());
+				sb.append("}"); //$NON-NLS-1$
+				sb.append(" "); //$NON-NLS-1$
+				break;
+			case DATE:
+				if (afilter.getOperator() ==  Operator.NOT_BETWEEN) {
+					sb.append(" not ("); //$NON-NLS-1$
+				}else {
+					sb.append(" ("); //$NON-NLS-1$
+				}
+				sb.append(" ${"); //$NON-NLS-1$
+				sb.append(afilter.getAttributeKey());
+				sb.append("} >= "); //$NON-NLS-1$
+				sb.append(afilter.getValue().toString());
+				sb.append(" "); //$NON-NLS-1$
+				sb.append(" and "); //$NON-NLS-1$
+				sb.append(" ${"); //$NON-NLS-1$
+				sb.append(afilter.getAttributeKey());
+				sb.append("} <= "); //$NON-NLS-1$
+				sb.append(afilter.getValue().toString());
+				sb.append(" "); //$NON-NLS-1$
+				
+				sb.append(" )"); //$NON-NLS-1$
+				break;
+			case LIST:
+				if (afilter.getValue().toString().equalsIgnoreCase(AttributeFilter.ANY_OPTION_KEY)) {
+					sb.append(" ${"); //$NON-NLS-1$
+					sb.append(afilter.getAttributeKey());
+					sb.append("} != ''"); //$NON-NLS-1$
+				}else {
+					sb.append(" ${"); //$NON-NLS-1$
+					sb.append(afilter.getAttributeKey());
+					sb.append("} = '"); //$NON-NLS-1$
+					sb.append(afilter.getValue().toString());
+					sb.append("' "); //$NON-NLS-1$
+				}
+				break;
+			case MLIST:
+				sb.append(" ( "); //$NON-NLS-1$
+				sb.append("${"); //$NON-NLS-1$
+				sb.append(afilter.getAttributeKey());
+				sb.append("}"); //$NON-NLS-1$
+				
+				if (afilter.getOperator() == Operator.OR) {
+					sb.append(" or "); //$NON-NLS-1$
+				}else if (afilter.getOperator() == Operator.AND) {
+					sb.append(" and "); //$NON-NLS-1$
+				}else if (afilter.getOperator() == Operator.EXACT) {
+					sb.append(" exact "); //$NON-NLS-1$
+				}
+				
+				sb.append(" [ "); //$NON-NLS-1$
+				for (String key : afilter.getValue().toString().split(AttributeFilter.MLIST_SEPERATOR)) {
+					sb.append("'"); //$NON-NLS-1$
+					sb.append(key);
+					sb.append("', "); //$NON-NLS-1$
+				}
+				sb.deleteCharAt(sb.length() - 1);
+				sb.deleteCharAt(sb.length() - 1);
+				sb.append("] ) "); //$NON-NLS-1$
+				break;
+			case NUMERIC:
+				sb.append(" ${"); //$NON-NLS-1$
+				sb.append(afilter.getAttributeKey());
+				sb.append("} "); //$NON-NLS-1$
+				sb.append(afilter.getOperator().asSmartValue() );
+				sb.append(" "); //$NON-NLS-1$
+				sb.append(afilter.getValue().toString());
+				sb.append(" "); //$NON-NLS-1$
+				break;
+			case TEXT:
+				
+				if (afilter.getOperator() == Operator.EQUALS) {
+					sb.append(" ${"); //$NON-NLS-1$
+					sb.append(afilter.getAttributeKey());
+					sb.append("} = '"); //$NON-NLS-1$
+					sb.append(afilter.getValue().toString());
+					sb.append("' "); //$NON-NLS-1$
+				}else if (afilter.getOperator() == Operator.STR_CONTAINS) {
+					sb.append(" contains(${"); //$NON-NLS-1$
+					sb.append(afilter.getAttributeKey());
+					sb.append("}, '"); //$NON-NLS-1$
+					sb.append(afilter.getValue().toString());
+					sb.append("')"); //$NON-NLS-1$
+				}else if (afilter.getOperator() == Operator.STR_NOTCONTAINS) {
+					sb.append(" not(contains(${"); //$NON-NLS-1$
+					sb.append(afilter.getAttributeKey());
+					sb.append("}, '"); //$NON-NLS-1$
+					sb.append(afilter.getValue().toString());
+					sb.append("'))"); //$NON-NLS-1$
+				}
+				break;
+			case TREE:
+				sb.append(" ${"); //$NON-NLS-1$
+				sb.append(afilter.getAttributeKey());
+				sb.append("} = '"); //$NON-NLS-1$
+				sb.append(afilter.getValue().toString());
+				sb.append("' "); //$NON-NLS-1$
+				break;
+			default:
+				break;
+			
+			}
+			
+			
+		}
+	}
+	
+	
+	
 	private static HashMap<String, Language> processLanguages(ConfigurableModel cm, org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xml) {
 		HashMap<String, Language> lookup = new HashMap<String, Language>();
 		LanguageListType llt = new LanguageListType();
@@ -437,12 +614,6 @@ public class CmSmartToXmlConverter {
 				list.add(nt);
 			}
 		}
-//		for (Label lbl: names){
-//			NameType nt = new NameType();
-//			nt.setValue(lbl.getValue());
-//			nt.setLanguageCode(llookup.get(UuidUtils.uuidToString(lbl.getLanguage().getUuid())).getCode());
-//			list.add(nt);
-//		}
 	}
 
 	private static boolean isCustomIcon(IImageAssociatedObject obj) {
@@ -452,7 +623,7 @@ public class CmSmartToXmlConverter {
 		if (obj instanceof CmAttributeTreeNode) return ((CmAttributeTreeNode) obj).hasCustomImage();
 		return false;
 	}
-	private static String getImageFileRef(IImageAssociatedObject obj, ConfigurableModel cm, boolean includeDmIcon) {
+	private static String getImageFileRef(IImageAssociatedObject obj, ConfigurableModel cm, boolean forCybertracker) {
 		Path file = obj.getImageFile();
 		if (obj.getUuid() == null) {
 			DmObject dm = null;

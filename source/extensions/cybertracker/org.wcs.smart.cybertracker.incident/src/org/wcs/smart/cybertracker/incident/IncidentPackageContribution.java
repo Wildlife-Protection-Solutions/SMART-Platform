@@ -150,7 +150,12 @@ public class IncidentPackageContribution implements IPackageContribution{
 		};
 	
 		//convert to xml
-		org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xmlModel = CmSmartToXmlConverter.convert(cm, true, monitor);
+		org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xmlModel = null;
+		try {
+			xmlModel = CmSmartToXmlConverter.convertToSmartMobileXML(cm, monitor);
+		}catch (Exception ex) {
+			throw new IOException(ex);
+		}
 		//create and add help files
 		for (Path f :  CtJsonExportUtils.addHelpFiles(xmlModel, tempDir)  ) {
 			updates.addFile(f);
