@@ -387,7 +387,6 @@ public class CmSmartToXmlConverter {
 					at.getOption().add(aot);
 					
 					if (forCybertracker && option.getOptionId().equalsIgnoreCase(CmAttributeOption.ID_IS_VISIBLE)) {
-						System.out.println(option.getDoubleValue());
 						if (option.getDoubleValue().intValue() == CmAttributeOption.VisibleWhen.CUSTOM.getValue()) {
 							aot.setStringValue(convertVisibleWhenExpression(option.getStringValue()));
 						}
