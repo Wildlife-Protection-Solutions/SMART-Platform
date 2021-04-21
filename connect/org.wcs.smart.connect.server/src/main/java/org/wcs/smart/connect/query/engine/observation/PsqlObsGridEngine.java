@@ -45,6 +45,7 @@ import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.GridQueryResults;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
 import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolEngine;
+import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
@@ -57,8 +58,7 @@ import org.wcs.smart.query.common.model.QueryGridResultItem;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.EmptyFilter;
-import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.IFilter.FilterType;
+import org.wcs.smart.query.model.filter.FilterType;
 import org.wcs.smart.query.model.filter.QueryFilter;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 import org.wcs.smart.query.model.summary.AttributeValueItem;
@@ -500,9 +500,9 @@ public class PsqlObsGridEngine extends AbstractQueryEngine{
 
 	private IFilterProcessor getFilterProcessor(FilterType filterType,
 			String queryDataTable) {
-		if (filterType == IFilter.FilterType.OBSERVATION){
+		if (filterType == FilterType.OBSERVATION){
 			return new ObsFilterProcessor(queryDataTable, this);
-		}else if (filterType == IFilter.FilterType.GROUP){
+		}else if (filterType == FilterType.GROUP){
 			return new ObsWaypointGroupFilterProcessor(queryDataTable, this);
 		}else{
 			return new ObsWaypointFilterProcessor(queryDataTable, this);

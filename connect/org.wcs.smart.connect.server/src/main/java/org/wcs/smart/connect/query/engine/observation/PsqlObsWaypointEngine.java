@@ -33,6 +33,7 @@ import org.hibernate.jdbc.ReturningWork;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
 import org.wcs.smart.connect.query.engine.IWOEngine;
+import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.query.model.ObservationWaypointQuery;
 import org.wcs.smart.query.common.engine.IQueryResult;
@@ -40,8 +41,7 @@ import org.wcs.smart.query.common.engine.WaypointQueryResultItem;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.DateFilter;
-import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.IFilter.FilterType;
+import org.wcs.smart.query.model.filter.FilterType;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 
 /**
@@ -210,9 +210,9 @@ public class PsqlObsWaypointEngine extends AbstractQueryEngine implements IWOEng
 
 	private IFilterProcessor getFilterProcessor(FilterType filterType,
 			String queryDataTable) {
-		if (filterType == IFilter.FilterType.OBSERVATION){
+		if (filterType == FilterType.OBSERVATION){
 			return new ObsFilterProcessor(queryDataTable, this);
-		}else if (filterType == IFilter.FilterType.GROUP){
+		}else if (filterType == FilterType.GROUP){
 			return new ObsWaypointGroupFilterProcessor(queryDataTable, this);
 		}else{
 			return new ObsWaypointFilterProcessor(queryDataTable, this);

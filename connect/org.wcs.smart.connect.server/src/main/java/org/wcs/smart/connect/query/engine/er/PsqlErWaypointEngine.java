@@ -47,8 +47,7 @@ import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
-import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.IFilter.FilterType;
+import org.wcs.smart.query.model.filter.FilterType;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 
 /**
@@ -277,9 +276,9 @@ public class PsqlErWaypointEngine extends PsqlErEngine implements IWOEngine<Surv
 			String queryDataTable,
 			SurveyDesignFilter sdFilter) {
 
-		if (filterType == IFilter.FilterType.OBSERVATION){
+		if (filterType == FilterType.OBSERVATION){
 			return new ErFilterProcessor(queryDataTable, this, sdFilter);
-		}else if (filterType == IFilter.FilterType.GROUP){
+		}else if (filterType == FilterType.GROUP){
 				return new ErWaypointGroupFilterProcessor(queryDataTable, this, sdFilter);
 		}else{
 			return new ErWaypointFilterProcessor(queryDataTable, this, sdFilter);

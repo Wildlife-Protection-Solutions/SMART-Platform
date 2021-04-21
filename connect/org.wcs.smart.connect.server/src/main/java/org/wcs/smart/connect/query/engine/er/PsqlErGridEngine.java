@@ -74,6 +74,8 @@ import org.wcs.smart.er.query.filter.SamplingUnitFilter.Source;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.filter.summary.MissionValueItem;
 import org.wcs.smart.er.query.model.SurveyGriddedQuery;
+import org.wcs.smart.filter.IFilter;
+import org.wcs.smart.filter.IFilterVisitor;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
@@ -92,9 +94,7 @@ import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.EmptyFilter;
-import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.IFilter.FilterType;
-import org.wcs.smart.query.model.filter.IFilterVisitor;
+import org.wcs.smart.query.model.filter.FilterType;
 import org.wcs.smart.query.model.filter.QueryFilter;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 import org.wcs.smart.query.model.summary.AttributeValueItem;
@@ -876,9 +876,9 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 			String queryDataTable,
 			SurveyDesignFilter sdFilter) {
 
-		if (filterType == IFilter.FilterType.OBSERVATION){
+		if (filterType == FilterType.OBSERVATION){
 			return new ErFilterProcessor(queryDataTable, this, sdFilter);
-		}else if (filterType == IFilter.FilterType.GROUP){
+		}else if (filterType == FilterType.GROUP){
 				return new ErWaypointGroupFilterProcessor(queryDataTable, this, sdFilter);
 		}else{
 			return new ErWaypointFilterProcessor(queryDataTable, this, sdFilter);

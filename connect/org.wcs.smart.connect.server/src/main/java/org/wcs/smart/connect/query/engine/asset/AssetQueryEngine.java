@@ -43,7 +43,7 @@ import org.wcs.smart.asset.model.AssetWaypoint;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.filter.IFilter;
+import org.wcs.smart.query.model.filter.FilterType;
 
 /**
  * Query engine for executing 
@@ -152,10 +152,10 @@ public abstract class AssetQueryEngine extends AbstractQueryEngine {
 	 * @param queryDataTable
 	 * @return
 	 */
-	protected IFilterProcessor getFilterProcessor(IFilter.FilterType filterType, String queryDataTable, Query query){
-		if (filterType == IFilter.FilterType.OBSERVATION){
+	protected IFilterProcessor getFilterProcessor(FilterType filterType, String queryDataTable, Query query){
+		if (filterType == FilterType.OBSERVATION){
 			return new AssetFilterProcessor(queryDataTable, this, query);
-		}else if (filterType == IFilter.FilterType.GROUP){
+		}else if (filterType == FilterType.GROUP){
 				return new AssetWaypointGroupFilterProcessor(queryDataTable, this, query);
 		}else{
 			return new AssetWaypointFilterProcessor(queryDataTable, this, query);

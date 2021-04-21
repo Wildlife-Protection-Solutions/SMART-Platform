@@ -37,6 +37,7 @@ import org.hibernate.jdbc.ReturningWork;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
+import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.patrol.model.Patrol;
@@ -49,8 +50,7 @@ import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.DateFilter;
-import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.IFilter.FilterType;
+import org.wcs.smart.query.model.filter.FilterType;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 
 public class PsqlPatrolEngine extends AbstractQueryEngine{
@@ -61,9 +61,9 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 	private String queryDataTable;
 	
 	public static IFilterProcessor getFilterProcessor(FilterType filterType, String queryDataTable, AbstractQueryEngine engine) {
-		if (filterType == IFilter.FilterType.OBSERVATION){
+		if (filterType == FilterType.OBSERVATION){
 			return new PatrolFilterProcessor(queryDataTable, engine);
-		}else if (filterType == IFilter.FilterType.GROUP) {
+		}else if (filterType == FilterType.GROUP) {
 			return new PatrolWaypointGroupFilterProcessor(queryDataTable, engine);
 		}else{
 			return new PatrolWaypointFilterProcessor(queryDataTable, engine);

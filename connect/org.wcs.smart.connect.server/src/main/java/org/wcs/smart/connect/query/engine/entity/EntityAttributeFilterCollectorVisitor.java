@@ -26,11 +26,11 @@ import java.sql.Connection;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.entity.query.parser.internal.EntityAttributeFilter;
+import org.wcs.smart.filter.AttributeFilter;
+import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.query.common.engine.visitors.AttributeFilterCollectorVisitor;
-import org.wcs.smart.query.model.filter.AttributeFilter;
 import org.wcs.smart.query.model.filter.AttributeInfo;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
-import org.wcs.smart.query.model.filter.IFilter;
 
 /**
  * Attribute Filter collector. This visitor collects

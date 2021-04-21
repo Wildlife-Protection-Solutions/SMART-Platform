@@ -45,6 +45,8 @@ import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.query.model.EntityObservationQuery;
 import org.wcs.smart.entity.query.model.EntityObservationResultItem;
 import org.wcs.smart.entity.query.parser.internal.EntityAttributeFilter;
+import org.wcs.smart.filter.IFilter;
+import org.wcs.smart.filter.IFilterVisitor;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
@@ -53,9 +55,7 @@ import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
-import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.IFilter.FilterType;
-import org.wcs.smart.query.model.filter.IFilterVisitor;
+import org.wcs.smart.query.model.filter.FilterType;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 
 /**
@@ -359,9 +359,9 @@ public class PsqlEntityObservationEngine extends AbstractQueryEngine implements 
 	}
 
 	private IFilterProcessor getFilterProcessor(FilterType filterType, String queryDataTable) {
-		if (filterType == IFilter.FilterType.OBSERVATION){
+		if (filterType == FilterType.OBSERVATION){
 			return new PsqlEntityFilterProcessor(queryDataTable, this);
-		}else if (filterType == IFilter.FilterType.GROUP){
+		}else if (filterType == FilterType.GROUP){
 			return new PsqlEntityWaypointGroupFilterProcessor(queryDataTable, this);
 		}else{
 			return new PsqlEntityWaypointFilterProcessor(queryDataTable, this);

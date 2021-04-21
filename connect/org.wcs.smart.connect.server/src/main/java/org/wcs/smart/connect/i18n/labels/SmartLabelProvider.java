@@ -31,6 +31,7 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.DataModelMergeAndUpdater;
 import org.wcs.smart.ca.datamodel.SimpleDataModel;
 import org.wcs.smart.connect.i18n.Messages;
+import org.wcs.smart.filter.Operator;
 import org.wcs.smart.internal.ca.datamodel.xml.DataModelXmlToSimpleDataModelConverter;
 import org.wcs.smart.internal.ca.datamodel.xml.XmlDataModelValidator;
 
@@ -131,6 +132,26 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 		if (value.equals(AREATABLE_AREA_KEY)) return Messages.getString("SmartLabelProvider.AreaAreamColumn", l); //$NON-NLS-1$
 		if (value.equals(AREATABLE_GEOMETRY_KEY)) return Messages.getString("SmartLabelProvider.AreaGeometryColumn", l); //$NON-NLS-1$
 		
+		if (value instanceof Operator){
+			switch((Operator)value){
+				case EQUALS:{ return "=";} //$NON-NLS-1$
+				case LESSTHAN:{ return "<";} //$NON-NLS-1$
+				case LESSTHANEQUALS:{ return "<=";} //$NON-NLS-1$
+				case GREATERTHAN:{ return ">";} //$NON-NLS-1$
+				case GREATERTHANEQUALS:{ return ">=";} //$NON-NLS-1$
+				case NOTEQUALS:{ return "!=";} //$NON-NLS-1$
+				case STR_EQUALS:{ return Messages.getString("OperatorLabelProvider.equalsLabel", l);} //$NON-NLS-1$
+				case STR_CONTAINS:{ return Messages.getString("OperatorLabelProvider.containsLabel", l);} //$NON-NLS-1$
+				case STR_NOTCONTAINS:{ return Messages.getString("OperatorLabelProvider.notContains", l);} //$NON-NLS-1$
+				case BETWEEN:{ return Messages.getString("OperatorLabelProvider.BetweenLabel", l);} //$NON-NLS-1$
+				case NOT_BETWEEN:{ return Messages.getString("OperatorLabelProvider.notBetweenLabel", l);} //$NON-NLS-1$
+				case AND:{ return Messages.getString("OperatorLabelProvider.AndLabel", l);} //$NON-NLS-1$
+				case OR:{ return Messages.getString("OperatorLabelProvider.OrLabel", l);} //$NON-NLS-1$
+				case NOT:{ return Messages.getString("OperatorLabelProvider.NotLabel", l);} //$NON-NLS-1$
+				case BRACKETS:{ return "( )"; } //$NON-NLS-1$
+				case EXACT: return Messages.getString("OperatorLabelProvider.ExactOperator", l); //$NON-NLS-1$
+			}
+		}
 		return null;
 	}
 	

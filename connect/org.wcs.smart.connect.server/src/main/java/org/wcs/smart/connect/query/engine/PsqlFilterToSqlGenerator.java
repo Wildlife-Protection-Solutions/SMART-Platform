@@ -75,6 +75,14 @@ import org.wcs.smart.er.query.model.SurveyGriddedQuery;
 import org.wcs.smart.er.query.model.SurveyObservationQuery;
 import org.wcs.smart.er.query.model.SurveySummaryQuery;
 import org.wcs.smart.er.query.model.SurveyWaypointQuery;
+import org.wcs.smart.filter.AttributeFilter;
+import org.wcs.smart.filter.BooleanFilter;
+import org.wcs.smart.filter.BracketFilter;
+import org.wcs.smart.filter.CategoryAttributeFilter;
+import org.wcs.smart.filter.CategoryFilter;
+import org.wcs.smart.filter.IFilter;
+import org.wcs.smart.filter.NotFilter;
+import org.wcs.smart.filter.Operator;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
@@ -101,18 +109,10 @@ import org.wcs.smart.plan.query.PlanPatrolQueryFilter;
 import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.model.filter.AreaFilter;
 import org.wcs.smart.query.model.filter.AreaFilter.AreaFilterGeometryType;
-import org.wcs.smart.query.model.filter.AttributeFilter;
-import org.wcs.smart.query.model.filter.BooleanExpression;
-import org.wcs.smart.query.model.filter.BracketFilter;
-import org.wcs.smart.query.model.filter.CategoryAttributeFilter;
-import org.wcs.smart.query.model.filter.CategoryFilter;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.EmptyFilter;
-import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.NotExpression;
 import org.wcs.smart.query.model.filter.ObserverFilter;
-import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
@@ -144,8 +144,8 @@ public enum PsqlFilterToSqlGenerator {
 			return asSql((AreaFilter)filter, engine);
 		}else if (filter instanceof AttributeFilter){
 			return asSql((AttributeFilter)filter, engine);
-		}else if (filter instanceof BooleanExpression){
-			return asSql((BooleanExpression)filter, engine);
+		}else if (filter instanceof BooleanFilter){
+			return asSql((BooleanFilter)filter, engine);
 		}else if (filter instanceof BracketFilter){
 			return asSql((BracketFilter)filter, engine);
 		}else if (filter instanceof CategoryAttributeFilter){
@@ -154,8 +154,8 @@ public enum PsqlFilterToSqlGenerator {
 			return asSql((CategoryFilter)filter, engine);
 		}else if (filter instanceof EmptyFilter){
 			return ""; //$NON-NLS-1$
-		}else if (filter instanceof NotExpression){
-			return asSql((NotExpression)filter, engine);
+		}else if (filter instanceof NotFilter){
+			return asSql((NotFilter)filter, engine);
 		}else if (filter instanceof DateFilter){
 			return asSql((DateFilter)filter, engine);
 		}else if (filter instanceof ObserverFilter){
@@ -382,7 +382,7 @@ public enum PsqlFilterToSqlGenerator {
 	/*
 	 * boolean filter
 	 */
-	protected String asSql(BooleanExpression filter, IQueryEngine engine) throws SQLException{
+	protected String asSql(BooleanFilter filter, IQueryEngine engine) throws SQLException{
 		String part1 = toSql(filter.getFilter1(), engine);
 		String part2 = toSql(filter.getFilter2(), engine);
 		return part1 + " " + asSql(filter.getOperator()) + " " + part2; //$NON-NLS-1$ //$NON-NLS-2$
@@ -424,7 +424,7 @@ public enum PsqlFilterToSqlGenerator {
 	/*
 	 * not expression
 	 */
-	protected String asSql(NotExpression filter, IQueryEngine engine) throws SQLException{
+	protected String asSql(NotFilter filter, IQueryEngine engine) throws SQLException{
 		return asSql(Operator.NOT) + " ( " + toSql(filter.getFilter(), engine) + ")"; //$NON-NLS-1$ //$NON-NLS-2$	
 	}
 	
