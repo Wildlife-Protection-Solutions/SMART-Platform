@@ -67,9 +67,21 @@ public class IconTable extends Composite implements Listener {
 	private Job loadImagesJob = new Job("loading images") { //$NON-NLS-1$
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
+			if (currentIndex == 0) {
+				//starting at beginning - clear any existing thumbs 
+				Display.getDefault().syncExec(()->{
+					if (thumb != null) thumb.dispose();
+					thumb = new ThumbnailComposite(infoSection.getBody());
+					thumb.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+					thumb.setBackground(getBackground());
+					infoSection.setOrigin(0, 0);	
+				});
+				
+			}
 			while(true){
 				//create spaces for remaining images
 				if (attachments == null) return Status.CANCEL_STATUS;
+				if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 				monitor.setTaskName(currentIndex + "/" + attachments.size()); //$NON-NLS-1$
 				if (currentIndex >= attachments.size()) {
 					break;
@@ -83,17 +95,11 @@ public class IconTable extends Composite implements Listener {
 					thumb.addFiles(items);
 					thumb.createThumbs();
 					getParent().layout(true, true);
-					layoutAttachments();
 					needmore[0] = needsToLoad();
 				});
-				
+				if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 				if (!needmore[0]) break;	
 			}
-			
-			Display.getDefault().syncExec(()->{
-				layoutAttachments();
-				
-			});	
 			return Status.OK_STATUS;
 		}		
 	};
@@ -144,23 +150,11 @@ public class IconTable extends Composite implements Listener {
 	 * @param resultSet
 	 */
 	public void setAttachments(List<IconFile> attachments) {
-		this.attachments = attachments;
-		currentIndex = 0;
+		loadImagesJob.cancel();
 		Display.getDefault().syncExec(()->{
-			if (thumb != null) {
-				thumb.dispose();
-				thumb = null;
-			}
-			if (infoSection == null || infoSection.isDisposed()) return;
-			thumb = new ThumbnailComposite(infoSection.getBody());
-			thumb.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			thumb.setBackground(getBackground());
-			infoSection.setOrigin(0, 0);
-			
-			layoutAttachments();
-			
-		    resize();
-		   
+			this.attachments = attachments;
+			currentIndex = 0;
+			loadImagesJob.schedule();
 		});
 	}
 	
@@ -169,7 +163,7 @@ public class IconTable extends Composite implements Listener {
 		if (event == null || event.type == SWT.Resize){
 			if (infoSection == null || infoSection.isDisposed()) return;
 			if (thumb != null){
-				layoutAttachments();
+				scheduleLoadJob();
 				resize();
 			}
 		}
@@ -210,13 +204,6 @@ public class IconTable extends Composite implements Listener {
 	    infoSection.setMinSize(p);
 	}
 
-	
-	/*
-	 * layout attachments
-	 */
-	private void layoutAttachments() {
-		scheduleLoadJob();
-	}
 	
 	/*
 	 * A composite for thumbnails
