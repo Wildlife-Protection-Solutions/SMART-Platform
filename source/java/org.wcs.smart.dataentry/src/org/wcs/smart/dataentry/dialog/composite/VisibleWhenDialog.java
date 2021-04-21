@@ -74,6 +74,7 @@ import org.wcs.smart.ui.ca.datamodel.dropitem.AttributeTreeDropItem;
 import org.wcs.smart.ui.ca.datamodel.dropitem.BooleanOpDropItem;
 import org.wcs.smart.ui.ca.datamodel.dropitem.BracketDropItem;
 import org.wcs.smart.ui.ca.datamodel.dropitem.BracketDropItem.BracketType;
+import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.ui.ca.datamodel.dropitem.DropItem;
 import org.wcs.smart.ui.ca.datamodel.dropitem.ErrorDropItem;
 import org.wcs.smart.ui.ca.datamodel.dropitem.IDropItemFactory;
@@ -382,7 +383,7 @@ public class VisibleWhenDialog extends SmartStyledTitleDialog {
 			if (cc instanceof Label) {
 				Label l = (Label) cc;
 				if (l.getText() != null && !l.getText().trim().isEmpty()) {
-					l.setText(l.getText().replaceAll(a.getAttribute().getName(), "")); //$NON-NLS-1$
+					l.setText(l.getText().replaceAll(SmartUtils.formatStringForLabel(a.getAttribute().getName()), "")); //$NON-NLS-1$
 					((GridLayout)l.getParent().getLayout()).numColumns = ((GridLayout)l.getParent().getLayout()).numColumns + 1; 
 					cmbAttribute.getControl().setParent(l.getParent());
 					cmbAttribute.getControl().moveAbove(l);

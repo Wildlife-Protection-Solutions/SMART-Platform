@@ -196,6 +196,12 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 		miEdit.addListener(SWT.Selection,  e->editSignatureType());
 		miEdit.setEnabled(false);
 		
+		MenuItem miEditKey = new MenuItem(mnu, SWT.PUSH);
+		miEditKey.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
+		miEditKey.setText(DialogConstants.EDIT_KEY_BUTTON_TEXT);
+		miEditKey.addListener(SWT.Selection,  e->editSignatureKey());
+		miEditKey.setEnabled(false);
+		
 		MenuItem miDelete = new MenuItem(mnu, SWT.PUSH);
 		miDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		miDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
@@ -231,10 +237,12 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 		SmartUiUtils.createHeaderLabel(container, Messages.ObservationOptionsPropertyPage_DistanceBearingOpLabel);
 		
 		tblSignatures.addSelectionChangedListener(e->{
-			miEdit.setEnabled(!tblSignatures.getSelection().isEmpty());
-			btnEdit.setEnabled(!tblSignatures.getSelection().isEmpty());
-			miDelete.setEnabled(!tblSignatures.getSelection().isEmpty());
-			btnDelete.setEnabled(!tblSignatures.getSelection().isEmpty());
+			boolean v = !tblSignatures.getSelection().isEmpty();
+			miEdit.setEnabled(v);
+			miEditKey.setEnabled(v);
+			btnEdit.setEnabled(v);
+			miDelete.setEnabled(v);
+			btnDelete.setEnabled(v);
 		});
 		Composite g = new Composite(container, SWT.NONE);
 		g.setLayout(new GridLayout(2, false));

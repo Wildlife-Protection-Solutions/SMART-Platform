@@ -161,22 +161,22 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 		if (value.equals(AREATABLE_AREA_KEY)) return Messages.SmartLabelProvider_areaareamname;
 		if (value.equals(AREATABLE_GEOMETRY_KEY)) return Messages.SmartLabelProvider_areageometryname;
 		
-		if (value == Operator.AND) return "AND";
-		if (value == Operator.BETWEEN) return "between";
+		if (value == Operator.AND) return Messages.SmartLabelProvider_AndOperator;
+		if (value == Operator.BETWEEN) return Messages.SmartLabelProvider_BetweenOperator;
 		if (value == Operator.BRACKETS) return "(  )"; //$NON-NLS-1$
 		if (value == Operator.EQUALS) return "="; //$NON-NLS-1$
 		if (value == Operator.GREATERTHAN) return ">"; //$NON-NLS-1$
 		if (value == Operator.GREATERTHANEQUALS) return ">="; //$NON-NLS-1$
 		if (value == Operator.LESSTHAN) return "<"; //$NON-NLS-1$
 		if (value == Operator.LESSTHANEQUALS) return "<="; //$NON-NLS-1$
-		if (value == Operator.NOT) return "NOT";
+		if (value == Operator.NOT) return Messages.SmartLabelProvider_NotOperator;
 		if (value == Operator.NOTEQUALS) return "!="; //$NON-NLS-1$
-		if (value == Operator.NOT_BETWEEN) return "not between";
-		if (value == Operator.OR) return "OR";
-		if (value == Operator.STR_CONTAINS) return "contains";
-		if (value == Operator.STR_EQUALS) return "equals";
-		if (value == Operator.STR_NOTCONTAINS) return "not contins";
-		if (value == Operator.EXACT) return "EXACT";
+		if (value == Operator.NOT_BETWEEN) return Messages.SmartLabelProvider_NotBetweenOperator;
+		if (value == Operator.OR) return Messages.SmartLabelProvider_OrOperator;
+		if (value == Operator.STR_CONTAINS) return Messages.SmartLabelProvider_ContainsOperator;
+		if (value == Operator.STR_EQUALS) return Messages.SmartLabelProvider_EqualsOperator;
+		if (value == Operator.STR_NOTCONTAINS) return Messages.SmartLabelProvider_NotContainsOperator;
+		if (value == Operator.EXACT) return Messages.SmartLabelProvider_ExactOperator;
 		return null;
 	}
 
