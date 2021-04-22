@@ -783,10 +783,11 @@ from smart.E_ACTION where type_key in ('org.wcs.smart.profile.newrecord', 'org.w
 CREATE TABLE connect.smartcollect_user(
   uuid uuid not null, state varchar(32) not null, 
   source varchar(4096) not null, 
+  device_id varchar(32) not null,
   validation_sent_date timestamp, 
   validation_key varchar(64), 
   primary key (uuid), 
-  unique(source)
+  unique(source, device_id)
 );
 
 

@@ -19,7 +19,9 @@ public class SmartCollectConnectUser extends UuidItem{
 	private static final long serialVersionUID = 1L;
 	
 	private SmartCollectUser.State state;
+	
 	private String source;
+	private String deviceId;
 	
 	private LocalDateTime validationSentDate;
 	private String validationKey;
@@ -33,6 +35,10 @@ public class SmartCollectConnectUser extends UuidItem{
 		this.state = state;
 	}
 	
+	/**
+	 * The email address or phone number of the source
+	 * @return
+	 */
 	@Column(name="source")
 	public String getSource() {
 		return this.source;
@@ -40,6 +46,15 @@ public class SmartCollectConnectUser extends UuidItem{
 	public void setSource(String source) {
 		this.source = source;
 	}
+	
+	@Column(name="device_id")
+	public String getDeviceId() {
+		return this.deviceId;
+	}
+	public void setDeviceId(String deviceId) {
+		this.deviceId = deviceId;
+	}
+	
 	
 	@Column(name="validation_sent_date")
 	public LocalDateTime getValidateSentDate() {

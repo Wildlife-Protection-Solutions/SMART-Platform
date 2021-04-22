@@ -22,9 +22,7 @@
 package org.wcs.smart.connect.api;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -47,8 +45,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
-import javax.xml.bind.JAXBException;
 
 import org.hibernate.Session;
 import org.json.JSONArray;
@@ -56,9 +52,6 @@ import org.json.JSONObject;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.SignatureType;
-import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.ca.datamodel.SimpleDataModel;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.AttachmentInterceptor;
 import org.wcs.smart.connect.hibernate.HibernateManager;
@@ -67,8 +60,6 @@ import org.wcs.smart.connect.query.WaypointSourceEngine;
 import org.wcs.smart.connect.security.CaAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.hibernate.QueryFactory;
-import org.wcs.smart.internal.ca.datamodel.xml.DataModelToXmlConverter;
-import org.wcs.smart.internal.ca.datamodel.xml.XmlSmartDataModelManager;
 import org.wcs.smart.observation.json.IJsonFeatureProcessor;
 import org.wcs.smart.observation.json.JsonFileProcessor;
 import org.wcs.smart.observation.model.IWaypointSource;
@@ -131,14 +122,14 @@ public class DataApi extends HttpServlet{
 					
 				
 				List<SignatureType> types = QueryFactory.buildQuery(s, SignatureType.class, 
-						new Object[] {"conservationArea", ca}).list();
+						new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
 				
 				JSONArray items = new JSONArray();
 				for (SignatureType type : types) {
 					JSONObject t = new JSONObject();
-					t.put("key", type.getKeyId());
+					t.put("key", type.getKeyId()); //$NON-NLS-1$
 					for (Label l : type.getNames()) {
-						String key = "name_" + l.getLanguage().getCode();
+						String key = "name_" + l.getLanguage().getCode(); //$NON-NLS-1$
 						t.put(key,l.getValue());
 					}
 					items.put(t);

@@ -89,12 +89,13 @@
 	     <div id="collectusertable" class="table-cell smart-table">
 	  	  <div class="table-row smart-table-header">
 			  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.collectusername"/></div>
+			  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.collectdeviceid"/></div>
 			  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.collectuserstatus"/></div>
 			  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.collectuseractions"/></div>
 		  </div>
 	    </div>
 	   </div>
-	   <p class="top-spacer"><fmt:message key="cybertracker.maxusers1"/> <a href="../api/collect/source" target="collectusers"><fmt:message key="cybertracker.maxusers2"/></a></p>
+	   <p class="top-spacer"><fmt:message key="cybertracker.maxusers1"/> <a href="../api/smartcollect/source" target="collectusers"><fmt:message key="cybertracker.maxusers2"/></a></p>
 	   
 	 </div>
 </div>		

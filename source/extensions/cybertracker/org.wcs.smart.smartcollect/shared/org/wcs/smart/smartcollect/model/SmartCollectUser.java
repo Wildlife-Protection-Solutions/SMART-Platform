@@ -39,6 +39,8 @@ public class SmartCollectUser {
 	}
 	
 	private String source;
+	private String deviceId;
+	
 	private State state;
 	private UUID uuid;
 	
@@ -65,6 +67,18 @@ public class SmartCollectUser {
 	
 	public void setSource(String source) {
 		this.source = source;
+	}
+	/**
+	 * The device id, combined with the source this makes
+	 * a unique user
+	 * @return
+	 */
+	public String getDeviceId() {
+		return this.deviceId;
+	}
+	
+	public void setDeviceId(String deviceId) {
+		this.deviceId = deviceId;
 	}
 	
 	public State getState() {

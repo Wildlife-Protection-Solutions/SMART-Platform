@@ -451,7 +451,7 @@ function collectUserCallback(){
  	for (var i = 0; i < users.length; i ++){
  		drawnRowCount++;
  		var row = tableCreateRow(parent, 
- 				[users[i].source, users[i].state, null], 
+ 				[users[i].source, users[i].deviceId, users[i].state, null], 
  				"ctuserrow " + (drawnRowCount % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
 
  					

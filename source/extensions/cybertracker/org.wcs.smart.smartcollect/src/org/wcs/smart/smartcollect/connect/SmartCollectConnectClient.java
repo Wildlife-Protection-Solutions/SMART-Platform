@@ -45,7 +45,7 @@ public interface SmartCollectConnectClient {
 	
 	@GET
     @Path("/smartcollect/source")
-    public List<SmartCollectUser> getUser(@QueryParam("source") String userid);
+    public List<SmartCollectUser> getUsers(@QueryParam("source") String userid, @QueryParam("deviceId") String deviceId);
 
 	@PUT
 	@Path("/smartcollect/source/{uuid}")

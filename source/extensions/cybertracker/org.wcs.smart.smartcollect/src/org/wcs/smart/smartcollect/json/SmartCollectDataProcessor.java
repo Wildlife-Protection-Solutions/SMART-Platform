@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.ws.rs.core.Response;
@@ -113,7 +114,7 @@ public class SmartCollectDataProcessor implements IJsonProcessor {
 		SmartCollectWaypoint currentWaypoint = null;
 		
 		//preprocess users
-		Set<String> users = new HashSet<>();
+		Set<DeviceUser> users = new HashSet<>();
 		for (JSONObject feature : features){
 			JSONObject properties = (JSONObject) feature.get(JsonCtParser.PROPERTIES_KEY);
 			if (properties == null) continue;
@@ -127,7 +128,11 @@ public class SmartCollectDataProcessor implements IJsonProcessor {
 			
 			String wpsource = ((String)sighting.get(SmartCollectPackageManager.USERNAMEMETADATA_KEY));
 			if (wpsource == null) continue;
-			users.add(wpsource);
+			
+			String deviceId = ((String)properties.get(JsonCtParser.DEVICE_ID));
+			if (deviceId == null) continue;
+			
+			users.add(new DeviceUser(wpsource, deviceId));
 		}
 		
 		if (users.isEmpty()) {
@@ -135,7 +140,7 @@ public class SmartCollectDataProcessor implements IJsonProcessor {
 		}
 		
 		//check the state for the users
-		Map<String, SmartCollectUser> userStatus = getUserState(users);
+		Map<DeviceUser, SmartCollectUser> userStatus = getUserState(users);
 		//if we have new users or validaton pending then we need more information
 		Set<SmartCollectUser> notok = new HashSet<>();
 		for (SmartCollectUser user : userStatus.values()) {
@@ -149,7 +154,7 @@ public class SmartCollectDataProcessor implements IJsonProcessor {
 		if (!notok.isEmpty()) {
 			final StringBuilder sb = new StringBuilder();
 			for (SmartCollectUser u : notok) {
-				sb.append(u.getSource() + "[" + u.getState() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
+				sb.append(u.getSource() + " (" + u.getDeviceId() + ") [" + u.getState() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
 				sb.append(", "); //$NON-NLS-1$
 			}
 			sb.delete(sb.length() - 2, sb.length());
@@ -196,7 +201,7 @@ public class SmartCollectDataProcessor implements IJsonProcessor {
 			}
 		}
 		
-		Map<String, Integer> blacklistCount = new HashMap<>();
+		Map<DeviceUser, Integer> blacklistCount = new HashMap<>();
 		
 		for (JSONObject feature : features){
 			JsonCtParser parser = new JsonCtParser();
@@ -228,13 +233,20 @@ public class SmartCollectDataProcessor implements IJsonProcessor {
 					warnings.add(Messages.SmartCollectDataProcessor_NoUserForFeature + feature.toString());
 					continue;
 				}
-			
-				if (userStatus.get(wpsource).getState() == State.BLACKLISTED) {
-					Integer cnt = blacklistCount.get(wpsource);
+				String deviceId = ((String)properties.get(JsonCtParser.DEVICE_ID));
+				if (deviceId == null) {
+					warnings.add("No device id specified for SMARTCollect feature.  Feature will not be loaded:" + feature.toString());
+					continue;
+				}
+
+				DeviceUser user = new DeviceUser(wpsource, deviceId);
+				
+				if (userStatus.get(user).getState() == State.BLACKLISTED) {
+					Integer cnt = blacklistCount.get(user);
 					if (cnt == null) {
-						blacklistCount.put(wpsource, 1);
+						blacklistCount.put(user, 1);
 					}else {
-						blacklistCount.put(wpsource, cnt+ 1);
+						blacklistCount.put(user, cnt+ 1);
 					}
 					
 					continue;
@@ -285,8 +297,8 @@ public class SmartCollectDataProcessor implements IJsonProcessor {
 		if (discardall) {
 			warnings.add(MessageFormat.format(Messages.SmartCollectDataProcessor_FeaturesDiscared, processedFeatures.size()));
 		}
-		for (Entry<String, Integer> bcnt : blacklistCount.entrySet()) {
-			warnings.add(MessageFormat.format(Messages.SmartCollectDataProcessor_UserBlacklistedFeaturesDiscarded, bcnt.getKey(), bcnt.getValue()));
+		for (Entry<DeviceUser, Integer> bcnt : blacklistCount.entrySet()) {
+			warnings.add(MessageFormat.format(Messages.SmartCollectDataProcessor_UserBlacklistedFeaturesDiscarded, bcnt.getKey().user + " (" + bcnt.getKey().deviceid + ")", bcnt.getValue())); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		//display warnings to user; this may throw a cancelled exception if the user doesn't want to proceed
 		displayWarnings(warnings);
@@ -355,7 +367,7 @@ public class SmartCollectDataProcessor implements IJsonProcessor {
 	}
 	
 	
-	private Map<String, SmartCollectUser> getUserState(Set<String> users) {
+	private Map<DeviceUser, SmartCollectUser> getUserState(Set<DeviceUser> users) {
 		
 		SmartConnect[] connect = {null};
 
@@ -406,10 +418,10 @@ public class SmartCollectDataProcessor implements IJsonProcessor {
 		ResteasyWebTarget target = rclient.target(connect[0].getServer().getServerUrl() + SmartConnect.API_URL);
 		client = target.proxy(SmartCollectConnectClient.class);
 		
-		Map<String, SmartCollectUser> cusers = new HashMap<>();
-		for (String user : users) {
-			List<SmartCollectUser> cuser = client.getUser(user);
-			for (SmartCollectUser i : cuser) cusers.put(i.getSource(),i);
+		Map<DeviceUser, SmartCollectUser> cusers = new HashMap<>();
+		for (DeviceUser user : users) {
+			List<SmartCollectUser> cuser = client.getUsers(user.user, user.deviceid);
+			for (SmartCollectUser i : cuser) cusers.put(user,i);
 		}
 		
 		return cusers;
@@ -428,6 +440,28 @@ public class SmartCollectDataProcessor implements IJsonProcessor {
 	private void blacklistUser(SmartCollectUser user) {
 		try(Response r = client.updateUserState(user.getUuid().toString(), SmartCollectUser.State.BLACKLISTED.name(), Boolean.FALSE.toString())){
 			user.setState(State.BLACKLISTED);
+		}
+	}
+	
+	class DeviceUser{
+		String user;
+		String deviceid;
+		
+		public DeviceUser(String user, String deviceId) {
+			this.user = user;
+			this.deviceid = deviceId;
+		}
+		@Override
+		public int hashCode() {
+			return Objects.hash(user, deviceid);
+		}
+		@Override
+		public boolean equals(Object other) {
+			if (other == null) return false;
+			if (this == other) return true;
+			if (other.getClass() != getClass()) return false;
+			return Objects.equals(deviceid, ((DeviceUser)other).deviceid) &&
+					Objects.equals(user, ((DeviceUser)other).user); 
 		}
 	}
 }

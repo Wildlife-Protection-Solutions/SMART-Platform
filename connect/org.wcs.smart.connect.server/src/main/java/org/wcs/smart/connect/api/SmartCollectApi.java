@@ -102,7 +102,8 @@ public class SmartCollectApi {
 	@Operation(description="if no query parameter is specified this returns all collect users; "
 			+ "otherwise it returns the collect user with the matching source (if not found a new one is created and returned)")
 	public List<SmartCollectUser> getUsers(
-			@Parameter(description = "the identifier for the user to return; if not found a new user with this identifier is created") @QueryParam("source") String source, 
+			@Parameter(description = "the identifier for the user to return; if not found a new user with this identifier is created") @QueryParam("source") String source,
+			@Parameter(description = "the deviceid for the user to return; must be provided if source is provided ") @QueryParam("deviceId") String deviceId,
 			@Parameter(description = "the search string to use to search for users.  only used if the source parameter is null ") @QueryParam("search") String search, 
 			@Parameter(description = "the maximum results from the search; only used if search parameter i not null") @QueryParam("limit") String limit ) {
 		if (source == null) {
@@ -112,11 +113,7 @@ public class SmartCollectApi {
 				try{
 					s.beginTransaction();
 					for (SmartCollectConnectUser user : QueryFactory.buildQuery(s, SmartCollectConnectUser.class).list()){
-						SmartCollectUser u = new SmartCollectUser();
-						u.setSource(user.getSource());
-						u.setState(user.getState());
-						u.setUuid(user.getUuid());
-						users.add(u);
+						users.add(toSmartCollectUser(user));
 					}
 					s.getTransaction().commit();
 				}catch (Exception ex) {
@@ -144,11 +141,7 @@ public class SmartCollectApi {
 							.setMaxResults(thislimit)
 							.list();
 					for (SmartCollectConnectUser user : cus){
-						SmartCollectUser u = new SmartCollectUser();
-						u.setSource(user.getSource());
-						u.setState(user.getState());
-						u.setUuid(user.getUuid());
-						users.add(u);
+						users.add(toSmartCollectUser(user));
 					}
 					s.getTransaction().commit();
 				}catch (Exception ex) {
@@ -167,11 +160,13 @@ public class SmartCollectApi {
 			try{
 				s.beginTransaction();
 				user = QueryFactory.buildQuery(s, SmartCollectConnectUser.class, 
-							"source", source).uniqueResult(); //$NON-NLS-1$
+							new Object[]{"source", source}, //$NON-NLS-1$
+							new Object[] {"deviceId", deviceId}).uniqueResult(); //$NON-NLS-1$
 				if (user == null) {
 					//create a new user
 					user = new SmartCollectConnectUser();
 					user.setSource(source);
+					user.setDeviceId(deviceId);
 					user.setState(SmartCollectUser.State.NEW);
 					
 					s.save(user);
@@ -181,14 +176,18 @@ public class SmartCollectApi {
 				throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, Messages.getString("SmartCollectApi_ValidateUserError", request.getLocale()), ex); //$NON-NLS-1$
 			}
 			
-			SmartCollectUser cu = new SmartCollectUser();
-			cu.setSource(user.getSource());
-			cu.setState(user.getState());
-			cu.setUuid(user.getUuid());
-			return Collections.singletonList(cu);
+			return Collections.singletonList(toSmartCollectUser(user));
 		}
 	}
 	
+	private SmartCollectUser toSmartCollectUser(SmartCollectConnectUser user) {
+		SmartCollectUser u = new SmartCollectUser();
+		u.setSource(user.getSource());
+		u.setState(user.getState());
+		u.setUuid(user.getUuid());
+		u.setDeviceId(user.getDeviceId());
+		return u;
+	}
 	@GET
     @Path("/source/{uuid: [a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}}")
 	@Operation(description="get full details about a community user")
