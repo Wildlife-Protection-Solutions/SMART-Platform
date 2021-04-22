@@ -173,6 +173,7 @@ public class VisibleWhenDialog extends SmartStyledTitleDialog {
 		if (query != null && !query.isBlank()) {
 			showAdvanced();
 			parseQuery(query);
+			validate();
 		}else {
 			showBasic();
 		}
@@ -308,15 +309,17 @@ public class VisibleWhenDialog extends SmartStyledTitleDialog {
 					String hkey = (String) afilter.getValue();
 					ArrayDeque<AttributeTreeNode> nodes = new ArrayDeque<>();
 					nodes.addAll(dattribute.getTree());
+					boolean ok = false;
 					while(!nodes.isEmpty()) {
 						AttributeTreeNode node  = nodes.remove();
 						if (node.getHkey().equalsIgnoreCase(hkey)) {
 							di.initializeData(node);
+							ok = true;
 							break;
 						}
 						nodes.addAll(node.getChildren());
 					}
-					di = new ErrorDropItem(MessageFormat.format(Messages.VisibleWhenDialog_NotTreeNodeFound, hkey, dattribute.getName()));
+					if (!ok) di = new ErrorDropItem(MessageFormat.format(Messages.VisibleWhenDialog_NotTreeNodeFound, hkey, dattribute.getName()));
 					break;
 				default:
 					break;
@@ -354,11 +357,8 @@ public class VisibleWhenDialog extends SmartStyledTitleDialog {
 
 	}
 	private void modified() {
-		if (!validate()) {
-			getButton(IDialogConstants.OK_ID).setEnabled(false);
-		}else {
-			getButton(IDialogConstants.OK_ID).setEnabled(true);
-		}
+		boolean enabled = validate();
+		if (getButton(IDialogConstants.OK_ID) != null) getButton(IDialogConstants.OK_ID).setEnabled(enabled);
 	}
 	
 	private void updateAttributeSelection() {
@@ -497,11 +497,17 @@ public class VisibleWhenDialog extends SmartStyledTitleDialog {
 		case TEXT:
 			return new AttributeDropItem(attribute);
 		case LIST:
-			return new AttributeListDropItem(attribute);
+			AttributeListDropItem di = new AttributeListDropItem(attribute);
+			di.setOnlyActive(true);
+			return di;
 		case MLIST:
-			return new AttributeMListDropItem(attribute);
+			AttributeMListDropItem mdi = new AttributeMListDropItem(attribute);
+			mdi.setOnlyActive(true);
+			return mdi;
 		case TREE:
-			return new AttributeTreeDropItem(attribute);
+			AttributeTreeDropItem tdi = new AttributeTreeDropItem(attribute);
+			tdi.setOnlyActive(true);
+			return tdi;
 		};
 		throw new IllegalStateException(MessageFormat.format(Messages.VisibleWhenDialog_InvalidType, attribute.getType().getName(Locale.getDefault())));
 	}

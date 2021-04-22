@@ -66,6 +66,8 @@ public class AttributeListDropItem extends DropItem {
 	
 	protected ListItem currentSelection = null;
 
+	//if true only active list items will be displayed as options
+	private boolean onlyActive = false;
 	/*
 	 * Job to load the attribute list options
 	 */
@@ -79,8 +81,13 @@ public class AttributeListDropItem extends DropItem {
 				s.beginTransaction();
 				try{
 					Attribute a = s.get(Attribute.class, attribute.getUuid());
-					a.getAttributeList().forEach(li->items.add(new ListItem(li.getUuid(), li.getName(), li.getKeyId())));
-					items.forEach(l->l.getName());
+					if (onlyActive) {
+						a.getActiveListItems().forEach(li->items.add(new ListItem(li.getUuid(), li.getName(), li.getKeyId())));
+						items.forEach(l->l.getName());
+					}else{
+						a.getAttributeList().forEach(li->items.add(new ListItem(li.getUuid(), li.getName(), li.getKeyId())));
+						items.forEach(l->l.getName());
+					}
 					
 					//add the any item
 					items.add(0, IDropItemFactory.ANY_OPTION);				
@@ -141,6 +148,15 @@ public class AttributeListDropItem extends DropItem {
 	protected AttributeListDropItem(String text, String key) {
 		this.text = text;
 		this.key = key;
+	}
+	
+	/**
+	 * If set to true only active list items are displayed in drop
+	 * down; otherwise all items are displayed 
+	 * @param onlyActive
+	 */
+	public void setOnlyActive(boolean onlyActive) {
+		this.onlyActive = onlyActive;
 	}
 	
 	/**

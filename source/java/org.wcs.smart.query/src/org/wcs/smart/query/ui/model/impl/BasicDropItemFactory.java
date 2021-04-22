@@ -157,7 +157,7 @@ public class BasicDropItemFactory implements IQueryDropItemFactory{
 		}else if (ca.getAttribute().getType() == AttributeType.MLIST ){
 			return new AttributeMListQueryDropItem(ca);
 		}else if (ca.getAttribute().getType() == AttributeType.TREE ){
-			return new AttributeTreeDropItem(ca);
+			return new AttributeTreeQueryDropItem(ca);
 		}
 		return null;
 	}
@@ -173,7 +173,7 @@ public class BasicDropItemFactory implements IQueryDropItemFactory{
 		}else if (attribute.getType() == AttributeType.MLIST ){
 			return new AttributeMListQueryDropItem(attribute);
 		}else if (attribute.getType() == AttributeType.TREE ){
-			return new AttributeTreeDropItem(attribute);
+			return new AttributeTreeQueryDropItem(attribute);
 		}
 		return null;
 	}

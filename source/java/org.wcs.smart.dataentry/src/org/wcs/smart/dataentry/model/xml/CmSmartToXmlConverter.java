@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.dataentry.model.xml;
 
+import java.io.IOException;
 import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -388,7 +389,7 @@ public class CmSmartToXmlConverter {
 					
 					if (forCybertracker && option.getOptionId().equalsIgnoreCase(CmAttributeOption.ID_IS_VISIBLE)) {
 						if (option.getDoubleValue().intValue() == CmAttributeOption.VisibleWhen.CUSTOM.getValue()) {
-							aot.setStringValue(convertVisibleWhenExpression(option.getStringValue()));
+							aot.setStringValue(convertVisibleWhenExpression(option.getStringValue(), node));
 						}
 					}
 				}
@@ -422,40 +423,80 @@ public class CmSmartToXmlConverter {
 	 * @return
 	 * @throws Exception
 	 */
-	private static String convertVisibleWhenExpression(String expression) throws Exception{
+	private static String convertVisibleWhenExpression(String expression, CmNode node) throws IOException{
 		Parser parser = new Parser(new StringReader(expression));
-		IFilter filter = parser.ParseQuery();
-		StringBuilder sb = new StringBuilder();
-		processFilter(filter,  sb);
-		return sb.toString();
+		try {
+			IFilter filter = parser.ParseQuery();
+			StringBuilder sb = new StringBuilder();
+			processFilter(filter,  sb, node);
+			return sb.toString();
+		}catch (Exception ex) {
+			throw new IOException(ex);
+		}
 	}
 	
-	private static void processFilter(IFilter filter, StringBuilder sb) {
+	private static CmAttribute findAttributeId(String attributeKey, CmNode node) throws IOException{
+		for (CmAttribute cmattribute : node.getCmAttributes()) {
+			if (cmattribute.getAttribute().getKeyId().equalsIgnoreCase(attributeKey)) {
+				return cmattribute;
+			}
+		}	
+		throw new IOException(MessageFormat.format(Messages.CmSmartToXmlConverter_invalidVisibleWhenExpression, node.getCategory().getName(), attributeKey));
+	}
+	
+	private static CmAttributeListItem findAttributeListItem(CmAttribute attribute, String listItemKey, CmNode node) throws IOException{
+		for (CmAttributeListItem li : attribute.getConfig().getList()) {
+			if (li.getListItem().getKeyId().equalsIgnoreCase(listItemKey)) {
+				return li;
+			}
+		}
+		//list node doesn't exist or is not configured for this attribute
+		return null;
+	}
+	
+	private static CmAttributeTreeNode findAttributeTreeNode(CmAttribute attribute, String treehKey, CmNode node) throws IOException{
+		ArrayDeque<CmAttributeTreeNode> search = new ArrayDeque<>();
+		search.addAll(attribute.getConfig().getTree());
+		while(!search.isEmpty()) {
+			CmAttributeTreeNode item = search.remove();
+			if (item.getDmTreeNode().getHkey().equalsIgnoreCase(treehKey)){
+				return item;
+			}
+			search.addAll(item.getChildren());
+		}
+		//tree node doesn't exist or is not configured for this attribute
+		return null;
+	}
+	
+	private static void processFilter(IFilter filter, StringBuilder sb, CmNode node) throws IOException{
+		
 		if (filter instanceof BooleanFilter) {
 			BooleanFilter bfilter = (BooleanFilter)filter;
-			processFilter(bfilter.getFilter1(), sb);
+			processFilter(bfilter.getFilter1(), sb, node);
 			sb.append(" "); //$NON-NLS-1$
 			sb.append(bfilter.getOperator().asSmartValue().toLowerCase());
 			sb.append(" "); //$NON-NLS-1$
-			processFilter(bfilter.getFilter2(), sb);
+			processFilter(bfilter.getFilter2(), sb, node);
 		}else if (filter instanceof BracketFilter) {
 			BracketFilter bfilter = (BracketFilter)filter;
 			sb.append(" ( "); //$NON-NLS-1$
-			processFilter(bfilter.getFilter(), sb);
+			processFilter(bfilter.getFilter(), sb, node);
 			sb.append(" ) "); //$NON-NLS-1$
 		}else if (filter instanceof NotFilter) {
 			NotFilter bfilter = (NotFilter)filter;
 			sb.append(" not( "); //$NON-NLS-1$
-			processFilter(bfilter.getFilter(), sb);
+			processFilter(bfilter.getFilter(), sb, node);
 			sb.append(" ) "); //$NON-NLS-1$
 		}else if (filter instanceof AttributeFilter) {
 			AttributeFilter afilter = (AttributeFilter)filter;
 			sb.append(" "); //$NON-NLS-1$
 			
+			CmAttribute cattribute = findAttributeId(afilter.getAttributeKey(), node);
+			String attributeKey = cattribute.getUuid().toString();
 			switch(afilter.getAttributeType()) {
 			case BOOLEAN:
 				sb.append(" ${"); //$NON-NLS-1$
-				sb.append(afilter.getAttributeKey());
+				sb.append(attributeKey);
 				sb.append("}"); //$NON-NLS-1$
 				sb.append(" "); //$NON-NLS-1$
 				break;
@@ -466,13 +507,13 @@ public class CmSmartToXmlConverter {
 					sb.append(" ("); //$NON-NLS-1$
 				}
 				sb.append(" ${"); //$NON-NLS-1$
-				sb.append(afilter.getAttributeKey());
+				sb.append(attributeKey);
 				sb.append("} >= "); //$NON-NLS-1$
 				sb.append(afilter.getValue().toString());
 				sb.append(" "); //$NON-NLS-1$
 				sb.append(" and "); //$NON-NLS-1$
 				sb.append(" ${"); //$NON-NLS-1$
-				sb.append(afilter.getAttributeKey());
+				sb.append(attributeKey);
 				sb.append("} <= "); //$NON-NLS-1$
 				sb.append(afilter.getValue().toString());
 				sb.append(" "); //$NON-NLS-1$
@@ -482,43 +523,67 @@ public class CmSmartToXmlConverter {
 			case LIST:
 				if (afilter.getValue().toString().equalsIgnoreCase(AttributeFilter.ANY_OPTION_KEY)) {
 					sb.append(" ${"); //$NON-NLS-1$
-					sb.append(afilter.getAttributeKey());
+					sb.append(attributeKey);
 					sb.append("} != ''"); //$NON-NLS-1$
 				}else {
-					sb.append(" ${"); //$NON-NLS-1$
-					sb.append(afilter.getAttributeKey());
-					sb.append("} = '"); //$NON-NLS-1$
-					sb.append(afilter.getValue().toString());
-					sb.append("' "); //$NON-NLS-1$
+					CmAttributeListItem li = findAttributeListItem(cattribute, afilter.getValue().toString(), node);
+					if (li == null) {
+						//always false as list item not configured for this attribute
+						sb.append(" boolean(0) "); //$NON-NLS-1$
+					}else {
+						sb.append(" ${"); //$NON-NLS-1$
+						sb.append(afilter.getAttributeKey());
+						sb.append("} = '"); //$NON-NLS-1$
+						sb.append(li.getUuid().toString());
+						sb.append("' "); //$NON-NLS-1$
+					}
 				}
 				break;
 			case MLIST:
-				sb.append(" ( "); //$NON-NLS-1$
-				sb.append("${"); //$NON-NLS-1$
-				sb.append(afilter.getAttributeKey());
-				sb.append("}"); //$NON-NLS-1$
+				StringBuilder temp = new StringBuilder();
+				temp.append(" checklist_match ( "); //$NON-NLS-1$
+				temp.append("${"); //$NON-NLS-1$
+				temp.append(attributeKey);
+				temp.append("}, "); //$NON-NLS-1$
 				
 				if (afilter.getOperator() == Operator.OR) {
-					sb.append(" or "); //$NON-NLS-1$
+					temp.append(" 'or' "); //$NON-NLS-1$
 				}else if (afilter.getOperator() == Operator.AND) {
-					sb.append(" and "); //$NON-NLS-1$
+					temp.append(" 'and' "); //$NON-NLS-1$
 				}else if (afilter.getOperator() == Operator.EXACT) {
-					sb.append(" exact "); //$NON-NLS-1$
+					temp.append(" 'exact' "); //$NON-NLS-1$
 				}
 				
-				sb.append(" [ "); //$NON-NLS-1$
+				temp.append(" [ "); //$NON-NLS-1$
 				for (String key : afilter.getValue().toString().split(AttributeFilter.MLIST_SEPERATOR)) {
-					sb.append("'"); //$NON-NLS-1$
-					sb.append(key);
-					sb.append("', "); //$NON-NLS-1$
+					
+					CmAttributeListItem li = findAttributeListItem(cattribute, key, node);
+					if (li != null) {
+						temp.append("'"); //$NON-NLS-1$
+						temp.append(li.getUuid().toString());
+						temp.append("', "); //$NON-NLS-1$
+					}else {
+						//list item not configured for this attribute
+						if (afilter.getOperator() == Operator.OR) {
+							//skip item; or might be true if one of others
+						}else {
+							//and/exact can never be true so assume false
+							sb.append(" boolean(0)"); //$NON-NLS-1$
+							temp = null;
+							break;
+						}
+					}
 				}
-				sb.deleteCharAt(sb.length() - 1);
-				sb.deleteCharAt(sb.length() - 1);
-				sb.append("] ) "); //$NON-NLS-1$
+				if (temp != null) {
+					temp.deleteCharAt(temp.length() - 1);
+					temp.deleteCharAt(temp.length() - 1);
+					temp.append("] ) "); //$NON-NLS-1$
+					sb.append( temp );
+				}
 				break;
 			case NUMERIC:
 				sb.append(" ${"); //$NON-NLS-1$
-				sb.append(afilter.getAttributeKey());
+				sb.append(attributeKey);
 				sb.append("} "); //$NON-NLS-1$
 				sb.append(afilter.getOperator().asSmartValue() );
 				sb.append(" "); //$NON-NLS-1$
@@ -529,30 +594,36 @@ public class CmSmartToXmlConverter {
 				
 				if (afilter.getOperator() == Operator.EQUALS) {
 					sb.append(" ${"); //$NON-NLS-1$
-					sb.append(afilter.getAttributeKey());
+					sb.append(attributeKey);
 					sb.append("} = '"); //$NON-NLS-1$
 					sb.append(afilter.getValue().toString());
 					sb.append("' "); //$NON-NLS-1$
 				}else if (afilter.getOperator() == Operator.STR_CONTAINS) {
 					sb.append(" contains(${"); //$NON-NLS-1$
-					sb.append(afilter.getAttributeKey());
+					sb.append(attributeKey);
 					sb.append("}, '"); //$NON-NLS-1$
 					sb.append(afilter.getValue().toString());
 					sb.append("')"); //$NON-NLS-1$
 				}else if (afilter.getOperator() == Operator.STR_NOTCONTAINS) {
 					sb.append(" not(contains(${"); //$NON-NLS-1$
-					sb.append(afilter.getAttributeKey());
+					sb.append(attributeKey);
 					sb.append("}, '"); //$NON-NLS-1$
 					sb.append(afilter.getValue().toString());
 					sb.append("'))"); //$NON-NLS-1$
 				}
 				break;
 			case TREE:
-				sb.append(" ${"); //$NON-NLS-1$
-				sb.append(afilter.getAttributeKey());
-				sb.append("} = '"); //$NON-NLS-1$
-				sb.append(afilter.getValue().toString());
-				sb.append("' "); //$NON-NLS-1$
+				CmAttributeTreeNode tnode = findAttributeTreeNode(cattribute,afilter.getValue().toString(), node);
+				if (tnode == null) {
+					//always false as node doesn't exist for this configuration
+					sb.append(" boolean(0) "); //$NON-NLS-1$
+				}else {
+					sb.append(" ${"); //$NON-NLS-1$
+					sb.append(attributeKey);
+					sb.append("} = '"); //$NON-NLS-1$
+					sb.append(tnode.getUuid().toString());
+					sb.append("' "); //$NON-NLS-1$
+				}
 				break;
 			default:
 				break;

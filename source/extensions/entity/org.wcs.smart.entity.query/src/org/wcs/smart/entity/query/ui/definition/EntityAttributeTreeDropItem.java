@@ -22,7 +22,7 @@
 package org.wcs.smart.entity.query.ui.definition;
 
 import org.wcs.smart.entity.model.EntityAttribute;
-import org.wcs.smart.ui.ca.datamodel.dropitem.AttributeTreeDropItem;
+import org.wcs.smart.query.ui.model.impl.AttributeTreeQueryDropItem;
 
 /**
  * 
@@ -32,7 +32,7 @@ import org.wcs.smart.ui.ca.datamodel.dropitem.AttributeTreeDropItem;
  * @author Emily
  * @since 1.0.0
  */
-public class EntityAttributeTreeDropItem extends AttributeTreeDropItem{
+public class EntityAttributeTreeDropItem extends AttributeTreeQueryDropItem{
 
 	public EntityAttributeTreeDropItem(EntityAttribute ea) {
 		super(ea.getDmAttribute());

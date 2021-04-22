@@ -73,6 +73,7 @@ public class Messages extends NLS {
 	public static String CmRootNodeInfoComposite_NoneOption;
 	public static String CmRootNodeInfoComposite_PhotoFirst;
 	public static String CmRootNodeInfoComposite_PhotoFirstTooltip;
+	public static String CmSmartToXmlConverter_invalidVisibleWhenExpression;
 	public static String CmSmartToXmlConverter_ProcessAttributeConfigs;
 	public static String CmSmartToXmlConverter_ProcessCmNodes;
 	public static String CmSmartToXmlConverter_ProcessExtraData;

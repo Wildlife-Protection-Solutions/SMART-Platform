@@ -73,6 +73,9 @@ public class AttributeMListDropItem extends DropItem {
 	protected Collection<ListItem> currentSelection = null;
 	protected Operator currentOp = null;
 	
+	//if true only active list items will be displayed as options
+	private boolean onlyActive = false;
+	
 	protected Job loadItemsJobs = new Job("loading datamodel list items"){ //$NON-NLS-1$
 
 		@Override
@@ -84,10 +87,15 @@ public class AttributeMListDropItem extends DropItem {
 				try{
 					Attribute a = s.get(Attribute.class, attribute.getUuid());
 					
-					for (AttributeListItem item : a.getActiveListItems()){
-						items.add(new ListItem(item.getUuid(), item.getName(), item.getKeyId(), item.getIsActive()));
+					if (onlyActive) {
+						for (AttributeListItem item : a.getActiveListItems()){
+							items.add(new ListItem(item.getUuid(), item.getName(), item.getKeyId(), item.getIsActive()));
+						}
+					}else {
+						for (AttributeListItem item : a.getAttributeList()){
+							items.add(new ListItem(item.getUuid(), item.getName(), item.getKeyId(), item.getIsActive()));
+						}
 					}
-//					items.add(0, IDropItemFactory.ANY_OPTION);		
 					
 					if (currentSelection != null) {
 						for (ListItem i : currentSelection) {
@@ -144,6 +152,15 @@ public class AttributeMListDropItem extends DropItem {
 	protected AttributeMListDropItem(String text, String key) {
 		this.text = text;
 		this.key = key;
+	}
+	
+	/**
+	 * If set to true only active list items are displayed in drop
+	 * down; otherwise all items are displayed 
+	 * @param onlyActive
+	 */
+	public void setOnlyActive(boolean onlyActive) {
+		this.onlyActive = onlyActive;
 	}
 	
 	/**

@@ -72,15 +72,19 @@ public class AttributeTreeDropItem extends DropItem {
 	private Font smallerFont2;
 	private Button btnEdit = null;
 	
-	private Attribute attribute = null;
-	private List<AttributeTreeNode> roots = null;
+	protected Attribute attribute = null;
+	protected List<AttributeTreeNode> roots = null;
 	protected AttributeTreeNode currentSelection = null;
-	private Object input = DialogConstants.LOADING_TEXT;
-	private TreeDropDownViewer treeviewer;
+	protected Object input = DialogConstants.LOADING_TEXT;
+	protected TreeDropDownViewer treeviewer;
+	
+	//if true only active list items will be displayed as options
+	private boolean onlyActive = false;
+	
 	/*
 	 * Job to load the attribute list options
 	 */
-	private Job loadItemsJobs = new Job("loading tree items"){ //$NON-NLS-1$
+	protected Job loadItemsJobs = new Job("loading tree items"){ //$NON-NLS-1$
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -89,14 +93,22 @@ public class AttributeTreeDropItem extends DropItem {
 				try{
 					roots = new ArrayList<>();
 					Attribute a = s.get(Attribute.class,  attribute.getUuid());
-					roots.addAll(a.getTree());
 					
+					if (onlyActive) {
+						roots.addAll(a.getTree());
+					}else {
+						roots.addAll(a.getTree());
+					}
 					List<AttributeTreeNode> toVisit = new ArrayList<>();
-					toVisit.addAll(a.getActiveTreeNodes());
+					toVisit.addAll(roots);
 					while(!toVisit.isEmpty()) {
 						AttributeTreeNode n = toVisit.remove(0);
 						n.getName();
-						if (n.getChildren() != null) toVisit.addAll(n.getChildren());
+						if (onlyActive) {
+							if (n.getActiveChildren() != null) toVisit.addAll(n.getActiveChildren());
+						}else {
+							if (n.getChildren() != null) toVisit.addAll(n.getChildren());
+						}
 					}
 					
 				}catch(Exception ex){
@@ -157,6 +169,14 @@ public class AttributeTreeDropItem extends DropItem {
 		this.attribute = att;
 	}
 
+	/**
+	 * If set to true only active tree items are displayed in drop
+	 * down; otherwise all items are displayed 
+	 * @param onlyActive
+	 */
+	public void setOnlyActive(boolean onlyActive) {
+		this.onlyActive = onlyActive;
+	}
 	
 	/**
 	 * @param data - the AttributeTreeNode
@@ -272,6 +292,10 @@ public class AttributeTreeDropItem extends DropItem {
 		loadItemsJobs.schedule();
 	}
 	
+	protected AttributeTreeContentProvider getContentProvider(){
+		return new AttributeTreeContentProvider(onlyActive, false);
+	}
+	
 	protected void showTree(){
 		
 		treeviewer = getTreeEditor();
@@ -279,8 +303,7 @@ public class AttributeTreeDropItem extends DropItem {
 			 return;
 		}
 		
-		AttributeTreeContentProvider cProvider = new AttributeTreeContentProvider(false, false);
-		treeviewer.getTreeViewer().setContentProvider(cProvider);
+		treeviewer.getTreeViewer().setContentProvider(getContentProvider());
 		if (lProvider == null){
 			lProvider = new AttributeTreeLabelProvider();
 		}
