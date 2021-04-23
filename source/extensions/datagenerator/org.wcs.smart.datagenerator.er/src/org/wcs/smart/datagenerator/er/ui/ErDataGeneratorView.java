@@ -925,14 +925,11 @@ public class ErDataGeneratorView {
 				//hack to move the combo viewer after the attribute name
 				toolkit.adapt(attributePanel.getChildren()[index+1], false, false);
 				v.getControl().moveBelow(attributePanel.getChildren()[index + 1]);
-//				Control fieldPart = attributePanel.getChildren()[index + 2];
-//				enableAttributeField(fieldPart, false);
 				field.setEnabled(false);
 				v.addSelectionChangedListener(new ISelectionChangedListener() {
 					@Override
 					public void selectionChanged(SelectionChangedEvent event) {
 						Object x = v.getStructuredSelection().getFirstElement();
-//						enableAttributeField(fieldPart, x == ObservationConfiguration.Type.FIXED);
 						field.setEnabled(x == ObservationConfiguration.Type.FIXED);
 					}
 				});

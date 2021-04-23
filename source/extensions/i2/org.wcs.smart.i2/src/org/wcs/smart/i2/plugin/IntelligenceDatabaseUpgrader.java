@@ -306,6 +306,11 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 				"ALTER TABLE smart.i_profile_entity_type ADD CONSTRAINT profileentitytype_profileuuid_fk FOREIGN KEY (profile_uuid) REFERENCES smart.i_profile_config (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 				"ALTER TABLE smart.i_profile_record_source ADD CONSTRAINT profilerecordtype_recordsourceuuid_fk FOREIGN KEY (record_source_uuid) REFERENCES smart.I_RECORDSOURCE (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 				"ALTER TABLE smart.i_profile_record_source ADD CONSTRAINT profilerecordtype_profileuuid_fk FOREIGN KEY (profile_uuid) REFERENCES smart.i_profile_config (uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				
+				"alter table smart.I_ENTITY_ATTRIBUTE_VALUE alter column string_value set data type varchar(8200)", //$NON-NLS-1$
+				"alter table smart.I_ENTITY_RELATIONSHIP_ATTRIBUTE_VALUE alter column string_value set data type varchar(8200)", //$NON-NLS-1$
+				"alter table smart.I_OBSERVATION_ATTRIBUTE alter column string_value set data type varchar(8200)", //$NON-NLS-1$
+				"alter table smart.I_RECORD_ATTRIBUTE_VALUE alter column string_value set data type varchar(8200)", //$NON-NLS-1$
 		};
 		for (String s : sql){
 			session.createNativeQuery(s).executeUpdate();

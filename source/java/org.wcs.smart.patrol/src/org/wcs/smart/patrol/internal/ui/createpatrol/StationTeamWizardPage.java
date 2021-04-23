@@ -58,18 +58,13 @@ public class StationTeamWizardPage extends NewPatrolWizardPage {
 	public void createControl(Composite parent) {
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		main.setLayout(new GridLayout(1, false));
-		
-//		
-		Composite center = new Composite(main, SWT.NONE);
-		center.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
-		center.setLayout(new GridLayout(1, false));
+		main.setLayout(new GridLayout(2, true));
 		
 		teamList = new TeamComposite();
-		teamList.createComponent(center, SWT.NONE);
+		teamList.createComponent(main, SWT.NONE);
 		
 		stationList = new StationComposite();
-		stationList.createComponent(center,  SWT.NONE);
+		stationList.createComponent(main,  SWT.NONE);
    		
 		setTitle(Messages.StationTeamWizardPage_Title);
 		setMessage(Messages.StationTeamWizardPage_PageMessage);

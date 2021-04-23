@@ -27,6 +27,7 @@ import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.swt.widgets.Composite;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.common.celleditor.ComboBoxViewerCellEditor;
 import org.wcs.smart.common.celleditor.DateCellEditor;
 import org.wcs.smart.common.celleditor.DoubleCellEditor;
@@ -134,7 +135,7 @@ public abstract class AbstractQueryColumnEditor extends EditingSupport {
 
 	protected CellEditor getTextCellEditor() {
 		if (textCellEdit == null) {
-			textCellEdit = CellEditorFactory.newTextCellEditor((Composite) getViewer().getControl());
+			textCellEdit = CellEditorFactory.newTextCellEditor((Composite) getViewer().getControl(), Attribute.STRING_ATTRIBUTE_MAX_LENGTH);
 		}
 		return textCellEdit;
 	}

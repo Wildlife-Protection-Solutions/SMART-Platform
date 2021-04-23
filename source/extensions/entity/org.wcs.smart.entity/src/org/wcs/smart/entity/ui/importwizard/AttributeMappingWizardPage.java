@@ -50,12 +50,12 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.entity.EntityCsvImporter;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.EntityAttribute;
@@ -123,10 +123,12 @@ public class AttributeMappingWizardPage extends WizardPage {
 		c.setLayout(new GridLayout());
 		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Group groupA = new Group(c, SWT.NONE);
+		SmartUiUtils.createHeaderLabel(c,Messages.AttributeMappingWizardPage_ConfigurationSectionName);
+		
+		Composite groupA = new Composite(c, SWT.NONE);
 		groupA.setLayout(new GridLayout(2, false));
 		groupA.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		groupA.setText(Messages.AttributeMappingWizardPage_ConfigurationSectionName);
+		
 
 		Label l = new Label(groupA, SWT.NONE);
 		l.setText(Messages.AttributeMappingWizardPage_SkipHeadersLabel);
@@ -162,13 +164,9 @@ public class AttributeMappingWizardPage extends WizardPage {
 			});
 		}
 		
+		SmartUiUtils.createHeaderLabel(c,Messages.AttributeMappingWizardPage_MappingGroupLabel);
 		
-		Group groupB = new Group(c, SWT.NONE);
-		groupB.setLayout(new GridLayout(1, false));
-		groupB.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		groupB.setText(Messages.AttributeMappingWizardPage_MappingGroupLabel);
-		
-		ScrolledComposite scroll = new ScrolledComposite(groupB, SWT.V_SCROLL | SWT.H_SCROLL);
+		ScrolledComposite scroll = new ScrolledComposite(c, SWT.V_SCROLL | SWT.H_SCROLL);
 		scroll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)scroll.getLayoutData()).heightHint = 200;
 		scroll.setExpandHorizontal(true);

@@ -61,7 +61,7 @@ public class Attribute extends DmObject{
 	
 	private static final long serialVersionUID = 1L;
 	
-	public static final int STRING_ATTRIBUTE_MAX_LENGTH = 1024;
+	public static final int STRING_ATTRIBUTE_MAX_LENGTH = 8200;
 	public static final String DATE_FORMAT = "yyyy-mm-dd"; //$NON-NLS-1$
 	
 	/**

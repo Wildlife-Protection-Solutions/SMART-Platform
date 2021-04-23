@@ -270,7 +270,11 @@ public class Upgrader630To700 implements IDatabaseUpgrader {
 				"ALTER TABLE smart.signature_type  ADD CONSTRAINT signature_type_ca_uuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 				"GRANT ALL PRIVILEGES ON smart.signature_type TO admin,manager,analyst,data_entry", //$NON-NLS-1$
 				
-				"ALTER TABLE smart.cm_node add column signatures long varchar" //$NON-NLS-1$
+				"ALTER TABLE smart.cm_node add column signatures long varchar", //$NON-NLS-1$
+				
+				
+				"ALTER TABLE smart.wp_observation_attributes alter column string_value set data type varchar(8200)", //$NON-NLS-1$
+				"ALTER TABLE smart.patrol_attribute_value alter column string_value set data type varchar(8200)", //$NON-NLS-1$
 				
 				
 		};

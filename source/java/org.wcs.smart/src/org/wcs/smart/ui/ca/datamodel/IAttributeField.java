@@ -69,6 +69,15 @@ public interface IAttributeField<T> {
 	public void addModifyListener(Listener listener);
 	
 	/**
+	 * Add a listener when the field is resized.  Currently only
+	 * applies to the StringAttributeField where the 
+	 * text box can be resized by the user.
+	 * 
+	 * @param listener
+	 */
+	public default void addResizeListener(Listener listener) {}
+	
+	/**
 	 * @return the attribute represented by the field
 	 */
 	public Attribute getAttribute();

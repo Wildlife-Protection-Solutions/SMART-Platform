@@ -74,8 +74,6 @@ public class PatrolLegLeaderChangeDialog extends SmartStyledTitleDialog implemen
 	private Button opCustom;
 	private Collection<PatrolLeg> legsToUpdate;
 	
-
-	
 	/**
 	 * Creates a new dialog 
 	 * @param parentShell the parent shell
@@ -163,7 +161,7 @@ public class PatrolLegLeaderChangeDialog extends SmartStyledTitleDialog implemen
 		/* new leader/pilot */
 		leaderPilotcomp = new LeaderPilotComposite();
 		Composite c = leaderPilotcomp.createComponent(parent, SWT.NONE);
-		c.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		leaderPilotcomp.setValues(this.newLeg, null);
 		leaderPilotcomp.addChangeListener(new IPatrolItemChangeListener() {
 			@Override
@@ -171,7 +169,7 @@ public class PatrolLegLeaderChangeDialog extends SmartStyledTitleDialog implemen
 				validate();
 			}
 		});
-		
+		c.layout(true);
 		setTitle(MessageFormat.format(Messages.PatrolLegLeaderChangeDialog_DialogTitle2, existingLeg.getId()));
 		super.getShell().setText(Messages.PatrolLegLeaderChangeDialog_DialogTitle);
 		setMessage(Messages.PatrolLegLeaderChangeDialog_DialogMessage);

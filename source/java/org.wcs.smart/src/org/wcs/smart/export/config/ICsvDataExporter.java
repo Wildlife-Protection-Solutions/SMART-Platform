@@ -51,4 +51,26 @@ public interface ICsvDataExporter {
 	public boolean exportCsvFile(Path file, char delimiter, ConservationArea ca, 
 			boolean headers, Charset cs, IProgressMonitor monitor, Session session) throws Exception;
 	
+	
+	/**
+	 * Replaces line feeds with a space character.
+	 * 
+	 * @param data
+	 */
+	public static void removeLineFeeds(String[] data) {
+		for (int i = 0; i < data.length; i ++) {
+			if (data[i] != null) data[i] = data[i].replaceAll("(\\r\\n|\\n)", " "); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+	}
+	
+	/**
+	 * Converts line feeds to "\\n" fields in the csv file.  We have to escape the \
+	 * because \ is used as an escape character in the csv file
+	 * @param data
+	 */
+	public static void replaceLineFeeds(String[] data) {
+		for (int i = 0; i < data.length; i ++) {
+			if (data[i] != null) data[i] = data[i].replaceAll("(\\r\\n|\\n)", "\\\\\\\\n"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+	}
 }

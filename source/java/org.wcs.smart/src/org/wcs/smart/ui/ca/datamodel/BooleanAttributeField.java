@@ -125,7 +125,7 @@ public class BooleanAttributeField implements IAttributeField<Boolean> {
 		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)comp.getLayoutData()).horizontalIndent = 5;
 		GridLayout gl = new GridLayout(3, false);
-		gl.verticalSpacing = gl.marginHeight = 0;
+		gl.marginHeight = 2;
 		comp.setLayout(gl);
 		comp.setBackground(comp.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		

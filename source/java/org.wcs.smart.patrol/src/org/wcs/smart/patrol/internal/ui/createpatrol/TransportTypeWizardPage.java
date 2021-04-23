@@ -60,7 +60,7 @@ public class TransportTypeWizardPage extends NewPatrolWizardPage {
 		
 		Composite center = new Composite(main, SWT.NONE);
 		center.setLayout(new GridLayout(2, false));
-		center.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
+		center.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		transportType = new PatrolTransportComposite();
 		transportType.createComponent(center, SWT.NONE);

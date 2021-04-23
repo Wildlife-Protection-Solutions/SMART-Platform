@@ -144,6 +144,8 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 		
 		scrolled = new ScrolledComposite(parent,  SWT.V_SCROLL | SWT.H_SCROLL );
 		scrolled.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridData)scrolled.getLayoutData()).heightHint = 450;
+		((GridData)scrolled.getLayoutData()).widthHint = 750;
 		scrolled.setShowFocusedControl(true);
 		scrolled.setExpandHorizontal(true);
 		scrolled.setExpandVertical(true);
@@ -178,7 +180,7 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 			int width = -1;
 			@Override
 			public void handleEvent(Event event) {		
-				int newWidth = mParent.getSize().x;
+				int newWidth = mParent.getSize().x - mScrolled.getVerticalBar().getSize().x;
 			    if (newWidth != width) {
 			        mScrolled.setMinHeight(mParent.computeSize(newWidth, SWT.DEFAULT).y);
 			        width = newWidth;
@@ -188,7 +190,7 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 		parent.addListener(SWT.Paint, new Listener() {
 			@Override
 			public void handleEvent(Event event) {
-				int newWidth = mParent.getSize().x;
+				int newWidth = mParent.getSize().x - mScrolled.getVerticalBar().getSize().x;				
 				mScrolled.setMinHeight(mParent.computeSize(newWidth,SWT.DEFAULT).y);
 				fparent.removeListener(SWT.Paint, this);
 			}
@@ -211,30 +213,6 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 		}
 		return null;
 	}
-	
-//	/**
-//	 * Deletes the given cateory and all associated observations
-//	 * @param category
-//	 * @param comp
-//	 */
-//	private void deleteCategory(Category category, Composite comp, ScrolledComposite scrolled){
-//		getWizardLocal().removeObservations(category);
-//		Composite parent = comp.getParent();
-//		comp.dispose();
-//		parent.layout();
-//		scrolled.layout(true);
-//	}
-//	
-//	private void deleteObservation(WaypointObservation obs, TableViewer viewer,  Composite comp, ScrolledComposite scrolled){
-//		getWizardLocal().removeObservation(obs);
-//		if (getWizardLocal().getWaypointObservation(obs.getCategory()).isEmpty()) {
-//			deleteCategory(obs.getCategory(), comp, scrolled);
-//		}else {
-//			viewer.refresh();
-//		}
-//	}
-	
-
 	
 	/**
 	 * Users cannot go back from this page.

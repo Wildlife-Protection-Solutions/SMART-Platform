@@ -185,7 +185,7 @@ public class TreeDropDownViewer {
 			}
 
 		};
-		fTree = new LocalFilteredTree(parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI, patternFilter, true);
+		fTree = new LocalFilteredTree(parent, SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI, patternFilter, true, true);
 		
 		fTree.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
 		
@@ -261,8 +261,8 @@ public class TreeDropDownViewer {
 		/**
 		 * @param parent
 		 */
-		protected LocalFilteredTree(Composite parent, int style, PatternFilter patternFilter, boolean newLook) {
-			super(parent, style, patternFilter, newLook);
+		protected LocalFilteredTree(Composite parent, int style, PatternFilter patternFilter, boolean newLook, boolean useFastLookUp) {
+			super(parent, style, patternFilter, newLook, useFastLookUp);
 		}
 
 		public void clearText(){

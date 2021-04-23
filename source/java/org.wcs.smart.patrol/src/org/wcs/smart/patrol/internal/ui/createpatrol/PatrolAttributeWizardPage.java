@@ -45,6 +45,7 @@ public class PatrolAttributeWizardPage extends NewPatrolWizardPage implements IP
 	
 	private PatrolAttributeComposite attributeComposite = null;
 	private List<PatrolAttribute> attributes;
+	private ScrolledComposite scroll;
 	
 	/**
 	 */
@@ -61,14 +62,16 @@ public class PatrolAttributeWizardPage extends NewPatrolWizardPage implements IP
 	 */
 	@Override
 	public void createControl(Composite parent) {
-		ScrolledComposite scroll = new ScrolledComposite(parent, SWT.V_SCROLL);
+		scroll = new ScrolledComposite(parent, SWT.V_SCROLL);
 		scroll.setExpandHorizontal(true);
 		scroll.setExpandVertical(true);
 
 		attributeComposite = new PatrolAttributeComposite(attributes);
 		attributeComposite.addChangeListener(this);
 		Composite acomp = attributeComposite.createComponent(scroll, SWT.NONE);
-
+		scroll.addListener(SWT.Resize, e->{
+			scroll.setMinSize(scroll.getSize().x - scroll.getVerticalBar().getSize().x,  acomp.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
+		});
 		scroll.setContent(acomp);
 		scroll.setMinSize(acomp.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		
@@ -98,6 +101,7 @@ public class PatrolAttributeWizardPage extends NewPatrolWizardPage implements IP
 	@Override
 	public void initModel(Patrol p, Session session) {
 		attributeComposite.setValues(p, session);
+		scroll.layout(true,  true);
 	}
 
 	@Override

@@ -157,6 +157,8 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 			Composite tmp = new Composite(main, SWT.NONE);
 			tmp.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false));
 			tmp.setLayout(new GridLayout(2, false));
+			((GridLayout)tmp.getLayout()).marginWidth = 0;
+			((GridLayout)tmp.getLayout()).marginHeight = 0;
 			lblDateInfo = new Label(tmp, SWT.NONE);
 			lblDateInfo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			
@@ -208,6 +210,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		
 		Composite buttonPanel = new Composite(main, SWT.NONE);
 		buttonPanel.setLayout(new GridLayout(7, false));
+		((GridLayout)buttonPanel.getLayout()).marginWidth = 0;
 		
 		final Button btnChangeTransport = new Button(buttonPanel, SWT.PUSH);
 		btnChangeTransport.setText(Messages.PatrolLegsComposite_ChangeTransport_Button);
@@ -368,7 +371,8 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 	}
 
 	private void updateDateText() {
-		lblDateInfo.setText(START_INFO_LABEL + ": " + dateFormatter.format(patrolStartDate) + "  " + END_INFO_LABEL + ": " + dateFormatter.format(patrolEndDate) ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
+		lblDateInfo.setText(START_INFO_LABEL + ": " + dateFormatter.format(patrolStartDate) + "  " + END_INFO_LABEL + ": " + dateFormatter.format(patrolEndDate) ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		lblDateInfo.getParent().getParent().layout(true, true);
 	}
 	
 	private void mergeLegs() {

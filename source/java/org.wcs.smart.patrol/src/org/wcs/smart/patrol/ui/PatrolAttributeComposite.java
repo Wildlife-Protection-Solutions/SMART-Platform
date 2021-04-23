@@ -95,8 +95,9 @@ public class PatrolAttributeComposite extends PatrolItemComposite {
 			}
 			IAttributeField<?> field = AttributeFieldFactory.findAttributeField(temp);
 			field2attribute.put(field, pa);
-			field.addModifyListener(e->modified());
 			field.createComposite(ctemp);
+			field.addModifyListener(e->modified());
+			field.addResizeListener(e->parent.notifyListeners(SWT.Resize, e));
 			ctemp.addListener(SWT.Dispose, e->field.dispose());
 			fields.add(field);
 			

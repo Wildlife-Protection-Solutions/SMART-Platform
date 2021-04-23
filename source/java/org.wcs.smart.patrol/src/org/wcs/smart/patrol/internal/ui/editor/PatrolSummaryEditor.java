@@ -84,6 +84,8 @@ import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.common.control.MultiLineText;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.patrol.PatrolEventManager;
@@ -262,6 +264,7 @@ public class PatrolSummaryEditor extends EditorPart {
 		top.setLayout(new GridLayout(2, true));
 		((GridLayout)top.getLayout()).marginWidth = 0;
 		((GridLayout)top.getLayout()).marginHeight = 0;
+		((GridLayout)top.getLayout()).marginTop = 10;
 		
 		scrolltop.setContent(top);
 		
@@ -356,6 +359,7 @@ public class PatrolSummaryEditor extends EditorPart {
 		employeeList = new TableViewer(employeeTable);
 		employeeList.setContentProvider(ArrayContentProvider.getInstance());
 		employeeList.setLabelProvider(new EmployeeLabelProvider());
+		employeeList.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		//note: layout data on employeeTable is set up below
 		
@@ -697,7 +701,7 @@ public class PatrolSummaryEditor extends EditorPart {
 			dataSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			dataSection.setText(Messages.PatrolSummaryEditor_SectionName);
 			
-			Composite core = toolkit.createComposite(dataSection);
+			Composite core = toolkit.createComposite(dataSection, SWT.NONE);
 			core.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			dataSection.setClient(core);
 			core.setLayout(new GridLayout(3, false));
@@ -724,12 +728,25 @@ public class PatrolSummaryEditor extends EditorPart {
 					l.setText(pa.getName().substring(0, 25) + "...:") ; //$NON-NLS-1$
 					l.setToolTipText(pa.getName());
 				}
-				Text txt = toolkit.createText(core, value == null ? "" : value.getAttributeValueAsString(Locale.getDefault())); //$NON-NLS-1$
-				txt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-				((GridData)txt.getLayoutData()).widthHint = WIDTH_HINT;
-				txt.setEditable(false);
+				l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+				((GridData)l.getLayoutData()).verticalIndent = 2;
+				
+				String attributeValue = ""; //$NON-NLS-1$
+				if (value != null) attributeValue = value.getAttributeValueAsString(Locale.getDefault());
+				if (pa.getType() == AttributeType.TEXT) {
+					MultiLineText txt = new MultiLineText(core);
+					txt.setText(attributeValue);
+					txt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+					txt.setEditable(false);
+					txt.addListener(SWT.Resize, e->scrolltop.setMinSize(top.computeSize(SWT.DEFAULT,  SWT.DEFAULT)));
+				}else {
+					Text txt = toolkit.createText(core, attributeValue, SWT.WRAP);
+					txt.setEditable(false);
+					txt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				}
 
-				createEditLink(toolkit, core, new PatrolAttributeComposite(editAttributes));
+				Hyperlink link = createEditLink(toolkit, core, new PatrolAttributeComposite(editAttributes));
+				link.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, false, false));
 			}
 		}
 

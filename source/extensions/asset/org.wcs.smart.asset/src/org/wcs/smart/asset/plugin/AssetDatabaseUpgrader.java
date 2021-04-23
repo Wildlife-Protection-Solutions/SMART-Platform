@@ -107,8 +107,12 @@ public class AssetDatabaseUpgrader implements IDatabaseUpgrader {
 				"DROP FUNCTION smart.to_double", //$NON-NLS-1$
 				
 				"ALTER TABLE smart.asset_station alter column buffer set not null",  //$NON-NLS-1$
-				"ALTER TABLE smart.asset_station_location alter column buffer set not null" //$NON-NLS-1$
+				"ALTER TABLE smart.asset_station_location alter column buffer set not null", //$NON-NLS-1$
 
+				"ALTER TABLE smart.asset_attribute_value alter column string_value set data type varchar(8200)",  //$NON-NLS-1$
+				"ALTER TABLE smart.asset_deployment_attribute_value alter column string_value set data type varchar(8200)",  //$NON-NLS-1$
+				"ALTER TABLE smart.asset_station_attribute_value alter column string_value set data type varchar(8200)",  //$NON-NLS-1$
+				"ALTER TABLE smart.asset_deployment_attribute_value alter column string_value set data type varchar(8200)",  //$NON-NLS-1$
 		};
 		
 		for (String s : sql){

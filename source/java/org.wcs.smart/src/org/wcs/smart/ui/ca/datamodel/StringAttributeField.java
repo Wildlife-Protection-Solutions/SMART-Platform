@@ -32,9 +32,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeValidator;
+import org.wcs.smart.common.control.MultiLineText;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -52,7 +52,7 @@ public class StringAttributeField implements IAttributeField<String>{
 	private String originalValue = null;
 	
 	private Label lbl;
-	private Text txt;
+	private MultiLineText txt;
 	private ControlDecoration cd;
 	
 	private Collection<Listener> listeners;
@@ -91,9 +91,11 @@ public class StringAttributeField implements IAttributeField<String>{
 	public void createComposite(Composite parent) {
 		lbl = new Label(parent, SWT.NONE);
 		lbl.setText(SmartUtils.formatStringForLabel(attribute.getName()) + ":"); //$NON-NLS-1$
-		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));
+		((GridData)lbl.getLayoutData()).verticalIndent = 2;
 		
-		txt = new Text(parent, SWT.BORDER);
+		txt = new MultiLineText(parent);
+		txt.setTextLimit(Attribute.STRING_ATTRIBUTE_MAX_LENGTH);
 		txt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)txt.getLayoutData()).horizontalIndent = 5;
 		txt.addListener(SWT.Modify, new Listener(){
@@ -113,6 +115,10 @@ public class StringAttributeField implements IAttributeField<String>{
 		this.originalValue = ""; //$NON-NLS-1$
 	}
 
+	@Override
+	public void addResizeListener(Listener l) {
+		txt.addListener(SWT.Resize, l);
+	}
 	/**
 	 * Fired when the valid is modified
 	 * @param listener

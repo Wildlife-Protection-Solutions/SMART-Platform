@@ -36,7 +36,9 @@ import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
@@ -71,7 +73,7 @@ public class CellEditorFactory {
 		return new IntegerCellEditor(parent);
 	}
 	
-	public static TextCellEditor newTextCellEditor(Composite parent) {
+	public static TextCellEditor newTextCellEditor(Composite parent, Integer maxLength) {
 		return new TextCellEditor(parent){
 			@Override
 			public LayoutData getLayoutData() {
@@ -79,6 +81,12 @@ public class CellEditorFactory {
 				layoutData.verticalAlignment = SWT.CENTER;
 				layoutData.minimumHeight = getControl().computeSize(SWT.DEFAULT, SWT.DEFAULT,true).y;
 				return layoutData;
+			}
+			@Override
+			protected Control createControl(Composite parent) {
+				Text control = (Text)super.createControl(parent);
+				if (maxLength != null) control.setTextLimit(maxLength);
+				return control;
 			}
 		};
 	}

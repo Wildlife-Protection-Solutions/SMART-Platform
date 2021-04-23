@@ -179,6 +179,11 @@ public class ObservationDialog extends SmartStyledDialog {
 	public Point getInitialSize(){
 		return new Point(800, 700);
 	}
+	
+	private void resize(ScrolledComposite scroll, Composite kid) {
+		scroll.setMinSize(scroll.getSize().x-scroll.getVerticalBar().getSize().x, kid.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
+	}
+	
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		getShell().setText(Messages.ObservationDialog_Title);
@@ -546,11 +551,13 @@ public class ObservationDialog extends SmartStyledDialog {
 			ArrayList<Attribute> allAttributes = new ArrayList<>();
 			c.getAllAttribute(allAttributes, true);
 			
+			top.addListener(SWT.Resize, e->resize(scattributes, attributes));
 			
 			List<IAttributeField<?>> fields = new ArrayList<>();
 			for (Attribute a :allAttributes){
 				IAttributeField<?> field = AttributeFieldFactory.findAttributeField(a);
 				field.createComposite(attributes);
+				field.addResizeListener(e->resize(scattributes, attributes));
 				attributes.addListener(SWT.Dispose, e->field.dispose());
 				
 				if (a.getType() == AttributeType.TREE){

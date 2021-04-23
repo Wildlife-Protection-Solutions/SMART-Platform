@@ -107,6 +107,7 @@ public class PatrolTransportChangeDialog extends SmartStyledTitleDialog implemen
 		newLeg.setPatrol(existingLeg.getPatrol());
 		newLeg.setType(existingLeg.getType());
 		newLeg.setPatrolLegDays(new ArrayList<>());
+		newLeg.setMandate(existingLeg.getMandate());
 		PatrolLegDay d0 = new PatrolLegDay();
 		d0.setPatrolLeg(newLeg);
 		newLeg.getPatrolLegDays().add(d0);
@@ -172,11 +173,15 @@ public class PatrolTransportChangeDialog extends SmartStyledTitleDialog implemen
 		
 		compMandate = new PatrolMandateComposite();
 		
-		Composite c = compTransportType.createComponent(parent, SWT.NONE);
-		c.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		Composite section = new Composite(parent, SWT.NONE);
+		section.setLayout(new GridLayout(2, true));
+		section.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Composite m = compMandate.createComponent(parent, SWT.NONE);
-		m.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		Composite c = compTransportType.createComponent(section, SWT.NONE);
+		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		Composite m = compMandate.createComponent(section, SWT.NONE);
+		m.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		boolean close = false;
 		if (!session.isOpen()){

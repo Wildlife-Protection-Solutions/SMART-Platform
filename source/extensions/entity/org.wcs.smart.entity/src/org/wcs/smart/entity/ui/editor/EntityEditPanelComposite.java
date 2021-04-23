@@ -42,6 +42,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
@@ -110,6 +111,7 @@ public class EntityEditPanelComposite extends Composite{
 	private ControlDecoration cdY;
 	
 	private Composite main;
+	private ScrolledComposite scroll;
 	
 	private HashMap<EntityAttribute, IAttributeField<?>> attributeToEdit = null;
 	
@@ -117,8 +119,9 @@ public class EntityEditPanelComposite extends Composite{
 	 * Creates a new panel
 	 * @param parent
 	 */
-	public EntityEditPanelComposite(Composite parent){
+	public EntityEditPanelComposite(ScrolledComposite parent){
 		super(parent, SWT.NONE);
+		this.scroll = parent;
 		GridLayout gl = new GridLayout();
 		gl.marginWidth = 0;
 		gl.marginHeight = 0;
@@ -464,6 +467,7 @@ public class EntityEditPanelComposite extends Composite{
 			EntityAttributeWrapper wrapper = new EntityAttributeWrapper(ea);
 			IAttributeField<?> field = AttributeFieldFactory.findAttributeField(wrapper);
 			field.createComposite(comp);
+			field.addResizeListener(e->scroll.setMinSize(scroll.getContent().computeSize(SWT.DEFAULT, SWT.DEFAULT)));
 			attributeToEdit.put(ea, field);
 		}
 	}

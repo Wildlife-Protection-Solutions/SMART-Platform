@@ -21,10 +21,15 @@
  */
 package org.wcs.smart.patrol.internal.ui.editpatrol;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
@@ -99,14 +104,29 @@ public class EditPatrolItemDialog extends AbstractPropertyJHeaderDialog{
 	 */
 	@Override
 	protected Composite createContent(Composite parent) {
-		Composite comp = item.createComponent(parent, SWT.NONE);
+		
+		Composite outer = new Composite(parent, SWT.NONE);
+		outer.setLayout(new GridLayout());
+		
+		item.createComponent(outer, SWT.NONE);
 		item.addChangeListener(listener);
-		try(Session s = HibernateManager.openSession()){
-			item.setValues(patrol, s);
-		}		
+		
+		Job init = new Job("initialize") { //$NON-NLS-1$
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				parent.getDisplay().syncExec(()->{
+					try(Session s = HibernateManager.openSession()){
+						item.setValues(patrol, s);
+					}		
+				});
+				return Status.OK_STATUS;
+			}
+		};
+		init.schedule();
+
 		setTitle(item.getTitle());
 		setChangesMade(false);
-		return comp;
+		return outer;
 	}
 	
 	

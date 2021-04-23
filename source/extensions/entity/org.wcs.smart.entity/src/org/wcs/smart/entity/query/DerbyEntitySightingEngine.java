@@ -616,7 +616,7 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 		byte[] entityUuid = rs.getBytes("entity_uuid"); //$NON-NLS-1$
 		it.setEntityUuid(UuidUtils.byteToUUID(entityUuid));
 		
-		
+	
 		for (EntityAttribute ea : query.getEntityType().getAttributes()){
 			Object x = rs.getObject("ea_" + ea.getKeyId()); //$NON-NLS-1$
 			if (x != null && ea.getDmAttribute().getType() == AttributeType.DATE){

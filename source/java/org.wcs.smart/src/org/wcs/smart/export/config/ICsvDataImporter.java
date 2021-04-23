@@ -54,4 +54,16 @@ public interface ICsvDataImporter {
 	 * <code>null</code> or an empty list if no warnings generated
 	 */
 	public List<String> getWarnings();
+	
+	/**
+	 * Replaces "\\n" in a csv string with a linefeed character to
+	 * make multi-line string
+	 * 
+	 * @param data
+	 * @return
+	 */
+	public static String replaceLineFeeds(String data) {
+		return data.replace("\\n", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
+
+	}
 }

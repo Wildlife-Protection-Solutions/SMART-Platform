@@ -74,6 +74,7 @@ import org.wcs.smart.asset.model.AssetAttribute;
 import org.wcs.smart.asset.model.AssetAttribute.AttributeType;
 import org.wcs.smart.asset.model.AssetAttributeListItem;
 import org.wcs.smart.ca.Projection;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.common.control.MultiLineText;
 import org.wcs.smart.common.control.OnOffButton;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -497,6 +498,7 @@ public class AttributeFieldEditor {
 		
 		if (attribute.getType() == AttributeType.TEXT){
 			txtMulti = new MultiLineText(parent);
+			txtMulti.setTextLimit(Attribute.STRING_ATTRIBUTE_MAX_LENGTH);
 			txtMulti.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)txtMulti.getLayoutData()).widthHint = 100;
 			txtMulti.addListener(SWT.Modify, (e)->modified());

@@ -26,7 +26,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -50,6 +51,7 @@ import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityAttributeValue;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.model.Status;
+import org.wcs.smart.export.config.ICsvDataImporter;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.GeometryUtils;
@@ -154,7 +156,8 @@ public class EntityCsvImporter {
 		CoordinateReferenceSystem crs = ReprojectUtils.stringToCrs(configuration.getProjection().getDefinition());
 		int lineCount = 0;
 		try(CSVReader csvReader = new CSVReader(
-				new InputStreamReader(Files.newInputStream(importFile), StandardCharsets.UTF_8), configuration.getDelimiter())){  
+				new InputStreamReader(Files.newInputStream(importFile), StandardCharsets.UTF_8),
+				configuration.getDelimiter())){  
 			
 			if (configuration.getSkipHeader()){
 				csvReader.readNext();
@@ -414,7 +417,7 @@ public class EntityCsvImporter {
 		}
 		
 		if (ea.getDmAttribute().getType() == AttributeType.TEXT){
-			return value;
+			return ICsvDataImporter.replaceLineFeeds(value);
 		}
 		
 		if (ea.getDmAttribute().getType() == AttributeType.NUMERIC){
@@ -441,8 +444,7 @@ public class EntityCsvImporter {
 		
 		if (ea.getDmAttribute().getType() == AttributeType.DATE){
 			try{
-				SimpleDateFormat sdf = new SimpleDateFormat(configuration.getDateFormatString());
-				return sdf.parse(value);
+				return LocalDate.parse(value, DateTimeFormatter.ofPattern(configuration.getDateFormatString()));
 			}catch (Exception ex){
 				warnings.add(MessageFormat.format(Messages.EntityCsvImporter_ValueNotSet, new Object[]{value, ea.getName(), lineNumber}));
 			}

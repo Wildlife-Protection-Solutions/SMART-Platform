@@ -101,12 +101,20 @@ public class MultiLineText extends Composite implements Listener{
 		addListener(SWT.Resize, e->{
 			text.setBounds(0, 0, super.getBounds().width - offset, lastHeight);// super.getBounds().height - offset);
 			move.setBounds(super.getBounds().width - imagewidth - offset, super.getBounds().height - imagewidth - offset, imagewidth, imagewidth);
-
 		});
 		
 		super.setBounds(r);
 	}
 	
+	/**
+	 * Sets the editable state.
+	 * 
+	 * @param editable
+	 */
+	public void setEditable(boolean editable) {
+		text.setEditable(editable);
+		text.setBackground(getDisplay().getSystemColor(SWT.COLOR_WHITE));
+	}
 	/**
 	 * Sets the maximum number of characters that
 	 * can be placed in the text box.

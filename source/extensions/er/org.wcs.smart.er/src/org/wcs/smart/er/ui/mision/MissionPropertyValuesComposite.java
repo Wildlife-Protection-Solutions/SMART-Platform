@@ -47,6 +47,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
@@ -112,6 +113,7 @@ public class MissionPropertyValuesComposite extends MissionComposite implements 
 			if (mp.getAttribute().getType() == AttributeType.TEXT){
 				Text txt = new Text(outer, SWT.BORDER);
 				txt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				txt.setTextLimit(Attribute.STRING_ATTRIBUTE_MAX_LENGTH);
 				controls.put(mp.getAttribute(), txt);
 				txt.addModifyListener(this);
 			} else if(mp.getAttribute().getType() == AttributeType.NUMERIC){

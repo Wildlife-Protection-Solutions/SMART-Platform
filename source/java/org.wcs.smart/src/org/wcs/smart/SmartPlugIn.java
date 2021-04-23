@@ -262,7 +262,7 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	public static final String PDF_ICON = "org.wcs.smart.pdf"; //$NON-NLS-1$
 	public static final String RUN_ICON = "org.wcs.smart.run"; //$NON-NLS-1$
 	
-	public static final String AUDIO_CLIP_IMG = "images/audio_clip.svg"; //$NON-NLS-1$
+	public static final String AUDIO_CLIP_IMG = "images/icons/audio_clip.svg"; //$NON-NLS-1$
 	
 	public static final String DELETE_MINI_ICON = "org.wcs.smart.deletemini"; //$NON-NLS-1$
 	/**
@@ -510,7 +510,7 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	     
 	     reg.put(RUN_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/run.png")); //$NON-NLS-1$
 
-	     reg.put(DELETE_MINI_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/delete_mini.png"));
+	     reg.put(DELETE_MINI_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/delete_mini.png")); //$NON-NLS-1$
 	}
 	
 	/**

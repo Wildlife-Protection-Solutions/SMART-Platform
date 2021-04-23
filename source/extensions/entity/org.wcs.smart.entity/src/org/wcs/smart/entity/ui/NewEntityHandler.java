@@ -36,6 +36,7 @@ import org.wcs.smart.entity.ui.typelist.EntityTypeListView;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
+import org.wcs.smart.ui.SmartWizardDialog;
 
 /**
  * Create new entity type handler
@@ -55,7 +56,7 @@ public class NewEntityHandler {
 			}
 		}
 		NewEntityTypeWizard wizard = new NewEntityTypeWizard();
-		WizardDialog newEntityDialog = new WizardDialog(activeShell, wizard);
+		WizardDialog newEntityDialog = new SmartWizardDialog(activeShell, wizard);
 		if (newEntityDialog.open() == Window.OK){
 			(new ShowFieldDataPerspective()).execute(EntityTypeListView.ID, activeWindow);
 			// open in editor

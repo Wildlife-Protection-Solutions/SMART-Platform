@@ -49,6 +49,7 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.Widget;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.observation.internal.Messages;
@@ -236,8 +237,9 @@ public class ObservationItemList {
 		}
 		
 		parent.layout(true);
-		int newWidth = parent.getSize().x;
-		((ScrolledComposite)parent.getParent()).setMinHeight(parent.computeSize(newWidth, SWT.DEFAULT).y);
+		ScrolledComposite scomp = (ScrolledComposite) parent.getParent();
+		int newWidth = parent.getSize().x - scomp.getVerticalBar().getSize().x;
+		scomp.setMinHeight(parent.computeSize(newWidth, SWT.DEFAULT).y);
 	}
 	
 	
@@ -304,32 +306,33 @@ public class ObservationItemList {
 			((GridLayout)attributes.getLayout()).marginWidth = 0;
 			((GridLayout)attributes.getLayout()).marginHeight = 0;
 			
-			int cnt = 0;
-			
-			for (WaypointObservationAttribute a : wo.getAttributes()) {
-				Label l = new Label(attributes, SWT.NONE);
-				l.setText(SmartUtils.formatStringForLabel(a.getAttribute().getName()) +":"); //$NON-NLS-1$
-				l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
-
-				l = new Label(attributes, SWT.NONE);
-				l.setText(SmartUtils.formatStringForLabel(a.getAttributeValueAsString(Locale.getDefault())));
-				l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-				
-				cnt++;
-				if (cnt >= 2 && hideDetails) {
-					l.setText( l.getText() + "   ..."); //$NON-NLS-1$
-					break;
+			if (!hideDetails) {
+				for (WaypointObservationAttribute a : wo.getAttributes()) {
+					Label l = new Label(attributes, SWT.NONE);
+					l.setText(SmartUtils.formatStringForLabel(a.getAttribute().getName()) +":"); //$NON-NLS-1$
+					l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
+	
+					
+					if (a.getAttribute().getType() == AttributeType.TEXT) {
+						l = new Label(attributes, SWT.WRAP);
+						l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+						((GridData)l.getLayoutData()).widthHint = 100;
+					}else {
+						l = new Label(attributes, SWT.NONE);
+						l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+					}
+	
+					l.setText(SmartUtils.formatStringForLabel(a.getAttributeValueAsString(Locale.getDefault())));
 				}
 			}
-			if (cnt < 2 || !hideDetails) {
-				Label l = new Label(attributes, SWT.NONE);
-				l.setText(Messages.ObservationItemList_Attachments);
-				l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
+			
+			Label l = new Label(attributes, SWT.NONE);
+			l.setText(Messages.ObservationItemList_Attachments);
+			l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 		
-				l = new Label(attributes, SWT.NONE);
-				l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-				l.setText(MessageFormat.format("{0}", wo.getAttachments().size())); //$NON-NLS-1$
-			}
+			l = new Label(attributes, SWT.NONE);
+			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			l.setText(MessageFormat.format("{0}", wo.getAttachments().size())); //$NON-NLS-1$
 			
 			ToolBar btns = new ToolBar(right, SWT.VERTICAL);
 			btns.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, false, false));

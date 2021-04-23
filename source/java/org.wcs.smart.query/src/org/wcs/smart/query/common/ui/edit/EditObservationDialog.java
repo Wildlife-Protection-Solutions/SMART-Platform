@@ -221,6 +221,8 @@ public class EditObservationDialog extends SmartStyledTitleDialog{
 			attributeComposite.setExpandHorizontal(true);
 			attributeComposite.setExpandVertical(true);
 			
+			
+			all.addListener(SWT.Resize, e->resize());
 			lastCategory = category;
 			loadTrees(allAttributes);
 			configureAttribute(allAttributes);
@@ -250,6 +252,10 @@ public class EditObservationDialog extends SmartStyledTitleDialog{
 			}
 		}
 	}
+	
+	private void resize() {
+		attributeComposite.setMinSize(attributeComposite.getSize().x-attributeComposite.getVerticalBar().getSize().x, attributeKidComposite.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
+	}
 	private void configureAttribute(List<Attribute> allAttributes){
 		if (attributeKidComposite != null){
 			attributeKidComposite.dispose();
@@ -264,6 +270,7 @@ public class EditObservationDialog extends SmartStyledTitleDialog{
 			IAttributeField<?> field = AttributeFieldFactory.findAttributeField(attribute);
 			
 			field.createComposite(attributeKidComposite);
+			field.addResizeListener(e->resize());
 			attributeFields.add(field);
 			attributeKidComposite.addListener(SWT.Dispose,e->field.dispose());
 			

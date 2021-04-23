@@ -177,6 +177,7 @@ public class EntityCsvExporter implements ICsvDataExporter {
 					i++;
 				}
 				
+				ICsvDataExporter.replaceLineFeeds(csvout);
 				writer.writeNext(csvout);
 			}
 			return true;
@@ -189,18 +190,13 @@ public class EntityCsvExporter implements ICsvDataExporter {
 		if (SmartDB.isMultipleAnalysis()){
 			return EntityTypeCcaaManager.getInstance().getEntities(entityType.getKeyId(), session);
 		}
-		
-		session.beginTransaction();
-		try{
-			Object[][] filters = new Object[onlyActive?2:1][2];
-			filters[0] = new Object[] {"entityType", entityType}; //$NON-NLS-1$
-			if (onlyActive) {
-				filters[1] = new Object[] {"status", Status.ACTIVE}; //$NON-NLS-1$
-			}
-			return QueryFactory.buildQuery(session, Entity.class, filters).getResultList();
-		}finally{
-			session.getTransaction().rollback();
+
+		Object[][] filters = new Object[onlyActive?2:1][2];
+		filters[0] = new Object[] {"entityType", entityType}; //$NON-NLS-1$
+		if (onlyActive) {
+			filters[1] = new Object[] {"status", Status.ACTIVE}; //$NON-NLS-1$
 		}
+		return QueryFactory.buildQuery(session, Entity.class, filters).getResultList();
 	}
 
 	

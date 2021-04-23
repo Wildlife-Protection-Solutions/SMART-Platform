@@ -171,6 +171,9 @@ public class ERDatabaseUpgrader implements IDatabaseUpgrader {
 				"alter table smart.survey drop column end_date",
 				"alter table smart.survey_design drop column start_date",
 				"alter table smart.survey_design drop column end_date",
+				
+				"ALTER TABLE smart.MISSION_PROPERTY_VALUE alter column string_value set data type varchar(8200)",
+				"ALTER TABLE smart.SAMPLING_UNIT_ATTRIBUTE_VALUE alter column string_value set data type varchar(8200)"
 		};
 		
 		for (String s : sql){

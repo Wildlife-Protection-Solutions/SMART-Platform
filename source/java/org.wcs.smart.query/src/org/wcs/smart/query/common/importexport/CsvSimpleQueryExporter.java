@@ -34,6 +34,7 @@ import java.util.Locale;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.ca.Projection;
+import org.wcs.smart.export.config.ICsvDataExporter;
 import org.wcs.smart.query.common.engine.IColumnInfoProvider;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.engine.IQueryResult;
@@ -108,6 +109,7 @@ public class CsvSimpleQueryExporter extends SimpleQueryExporter implements ICsvQ
 			QueryColumn qc = queryColumns.get(i);
 			data[i] = qc.getValueAsString(qc.getValue(row));
 		}
+		ICsvDataExporter.removeLineFeeds(data);
 		writer.writeNext(data);
 	}
 

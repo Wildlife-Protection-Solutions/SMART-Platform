@@ -98,7 +98,7 @@ public class NumericAttributeField implements IAttributeField<Double> {
 	public void createComposite(Composite parent) {
 		lbl = new Label(parent, SWT.NONE);
 		lbl.setText(SmartUtils.formatStringForLabel(attribute.getName()) + ":"); //$NON-NLS-1$
-		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
+		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		txt = new Text(parent, SWT.BORDER);
 		txt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));

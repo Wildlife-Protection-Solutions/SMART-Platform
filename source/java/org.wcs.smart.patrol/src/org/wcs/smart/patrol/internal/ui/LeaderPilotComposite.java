@@ -27,17 +27,20 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.patrol.PatrolEventManager;
@@ -60,8 +63,8 @@ public class LeaderPilotComposite extends PatrolLegItemComposite{
 	private static final String ERROR_PILOT_REQUIRED = Messages.LeaderPilotComposite_Error_PilotRequired;
 	private static final String ERROR_LEADER_REQUIRED = Messages.LeaderPilotComposite_Error_LeaderRequired;
 	
-	private ComboViewer patrolLeaderViewer = null;
-	private ComboViewer patrolPilotViewer = null;
+	private TableViewer patrolLeaderViewer = null;
+	private TableViewer patrolPilotViewer = null;
 	private Label lblPilot;
 	
 	/**
@@ -77,14 +80,23 @@ public class LeaderPilotComposite extends PatrolLegItemComposite{
 	public Composite createComponent(Composite parent, int style) {
 
 		Composite center = new Composite(parent, SWT.NONE);
-		center.setLayout(new GridLayout(2, false));
-		center.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
+		center.setLayout(new GridLayout(2, true));
+		center.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
 		Label lbl = new Label(center, SWT.NONE);
 		lbl.setText(Messages.LeaderPilotComposite_LeaderLabel);
-		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
-		patrolLeaderViewer = new ComboViewer(center, SWT.DROP_DOWN | SWT.READ_ONLY);
-		patrolLeaderViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		lblPilot = new Label(center, SWT.NONE);
+		lblPilot.setText(Messages.LeaderPilotComposite_PilotLabel);
+		lblPilot.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		
+		Composite table = new Composite(center, SWT.NONE);
+		table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		table.setLayout(new TableColumnLayout());
+		((GridData)table.getLayoutData()).heightHint = 200;
+
+		patrolLeaderViewer = new TableViewer(table, SWT.BORDER | SWT.SINGLE);
 		patrolLeaderViewer.setContentProvider(ArrayContentProvider.getInstance());
 		patrolLeaderViewer.setLabelProvider(new EmployeeLabelProvider());
 		patrolLeaderViewer.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -94,13 +106,16 @@ public class LeaderPilotComposite extends PatrolLegItemComposite{
 				fireChangeListeners();	
 			}
 		});
+		((TableColumnLayout)table.getLayout()).setColumnData(
+				new TableColumn(patrolLeaderViewer.getTable(), SWT.NONE),
+	            new ColumnWeightData(100));
 		
-		lblPilot = new Label(center, SWT.NONE);
-		lblPilot.setText(Messages.LeaderPilotComposite_PilotLabel);
-		lblPilot.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-			
-		patrolPilotViewer = new ComboViewer(center, SWT.DROP_DOWN | SWT.READ_ONLY);
-		patrolPilotViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		table = new Composite(center, SWT.NONE);
+		table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		table.setLayout(new TableColumnLayout());
+		((GridData)table.getLayoutData()).heightHint = 200;
+
+		patrolPilotViewer = new TableViewer(table,  SWT.BORDER | SWT.SINGLE);
 		patrolPilotViewer.setContentProvider(ArrayContentProvider.getInstance());
 		patrolPilotViewer.setLabelProvider(new EmployeeLabelProvider());
 		patrolPilotViewer.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -110,6 +125,9 @@ public class LeaderPilotComposite extends PatrolLegItemComposite{
 				fireChangeListeners();	
 			}
 		});
+		((TableColumnLayout)table.getLayout()).setColumnData(
+				new TableColumn(patrolPilotViewer.getTable(), SWT.NONE),
+	            new ColumnWeightData(100));
 		
 		patrolPilotViewer.getControl().setVisible(false);
 		lblPilot.setVisible(false);
@@ -151,12 +169,17 @@ public class LeaderPilotComposite extends PatrolLegItemComposite{
 		List<PatrolLegMember> wrinput = new ArrayList<PatrolLegMember>(sortedList);
 		patrolLeaderViewer.setInput(wrinput);
 
+		PatrolLegMember selection = null;
 		if (patrolLeg.getLeader() != null){
-			patrolLeaderViewer.setSelection(new StructuredSelection(patrolLeg.getLeader()));
-		}else{
-			patrolLeaderViewer.setSelection(new StructuredSelection(sortedList.get(0)));
+			selection = patrolLeg.getLeader();
+		}else if (sortedList.size() > 0){
+			selection = sortedList.get(0);
 		}
-
+		if (selection != null) {
+			patrolLeaderViewer.setSelection(new StructuredSelection(selection));
+			patrolLeaderViewer.reveal(selection);
+		}
+		
 		lblPilot.setVisible(patrolLeg.getPatrol().hasPilot());
 		patrolPilotViewer.getControl().setVisible(patrolLeg.getPatrol().hasPilot());
 		if (patrolLeg.getPatrol().hasPilot()){
@@ -166,8 +189,22 @@ public class LeaderPilotComposite extends PatrolLegItemComposite{
 			}else{
 				patrolPilotViewer.setSelection(new StructuredSelection(sortedList.get(0)));
 			}
+			
+			selection = null;
+			if (patrolLeg.getLeader() != null){
+				selection = patrolLeg.getPilot();
+			}else if (sortedList.size() > 0){
+				selection = sortedList.get(0);
+			}
+			if (selection != null) {
+				patrolPilotViewer.setSelection(new StructuredSelection(selection));
+				patrolPilotViewer.reveal(selection);
+			}
 		}
 		validate();
+		
+		patrolPilotViewer.getControl().getParent().layout();
+		patrolLeaderViewer.getControl().getParent().layout();
 	}
 	
 	public void refresh(){
@@ -189,10 +226,15 @@ public class LeaderPilotComposite extends PatrolLegItemComposite{
 	public void setEmployeeList(List<Employee> list, Patrol patrol){
 		//leader list
 		patrolLeaderViewer.setInput(list);		
+		Employee selection = null;
 		if (patrol.getFirstLeg().getLeader() != null){
-			patrolLeaderViewer.setSelection(new StructuredSelection(patrol.getFirstLeg().getLeader().getMember()));
+			selection = patrol.getFirstLeg().getLeader().getMember();
 		}else if (list.size() > 0){
-			patrolLeaderViewer.setSelection(new StructuredSelection(list.get(0)));
+			selection = list.get(0);
+		}
+		if (selection != null) {
+			patrolLeaderViewer.setSelection(new StructuredSelection(selection));
+			patrolLeaderViewer.reveal(selection);
 		}
 
 		//pilot list

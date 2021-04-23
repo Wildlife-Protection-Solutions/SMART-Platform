@@ -73,6 +73,7 @@ import org.wcs.smart.entity.ui.ExportEntityDialog;
 import org.wcs.smart.entity.ui.importwizard.ImportEntitiesWizard;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.SmartWizardDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -295,7 +296,7 @@ public class EntitiesPage extends EditorPart implements IEntityTypeEditorPage {
 	
 	private void importEntities(){
 		EntityCsvImporter importer = new EntityCsvImporter(parentEditor.getEntityType());
-		WizardDialog wd = new WizardDialog(getSite().getShell(), new ImportEntitiesWizard(importer));
+		WizardDialog wd = new SmartWizardDialog(getSite().getShell(), new ImportEntitiesWizard(importer));
 		wd.open();
 	}
 	

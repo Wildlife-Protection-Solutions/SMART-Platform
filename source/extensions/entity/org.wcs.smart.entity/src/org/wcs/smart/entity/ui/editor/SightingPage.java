@@ -64,6 +64,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.common.engine.CleanUpQueryJob;
 import org.wcs.smart.query.ui.QueryDateFilterComposite;
 import org.wcs.smart.query.ui.importexport.ExportQueryWizard;
+import org.wcs.smart.ui.SmartWizardDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 /**
  * Sightings editor page that allows users to perform simple queries
@@ -219,7 +220,7 @@ public class SightingPage extends EditorPart implements IEntityTypeEditorPage {
 					return;
 				}
 				ExportQueryWizard wizard = new ExportQueryWizard(currentQuery);
-				WizardDialog dialog = new WizardDialog(parentEditor.getSite().getShell(), wizard);
+				WizardDialog dialog = new SmartWizardDialog(parentEditor.getSite().getShell(), wizard);
 				dialog.open();
 			}
 		});

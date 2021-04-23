@@ -54,6 +54,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
@@ -290,6 +291,7 @@ public class EditSamplingUnitDialog extends SmartStyledTitleDialog implements Mo
 				final Text txtAttribute = new Text(comp, SWT.BORDER);
 				txtAttribute.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 				txtAttribute.addModifyListener(this);
+				txtAttribute.setTextLimit(Attribute.STRING_ATTRIBUTE_MAX_LENGTH);
 				final ControlDecoration cd = createDecoration(txtAttribute);
 				cd.hide();
 			

@@ -103,7 +103,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 	private List<Attribute> catAttributes;
 	private List<ObservationAttachment> currentAttachments;
 	private boolean attsModified = false;
-	
+	private ScrolledComposite scComp ;
 	private WaypointObservation editingOb = null;
 	
 	/* for multi-observation categories */
@@ -235,7 +235,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 		lbl = new Label(top, SWT.SEPARATOR | SWT.HORIZONTAL);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		ScrolledComposite scComp = new ScrolledComposite(top, SWT.V_SCROLL);
+		scComp = new ScrolledComposite(top, SWT.V_SCROLL);
 		scComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)scComp.getLayoutData()).heightHint = 200;
 		
@@ -592,6 +592,8 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 		attachmentViewer.setInput(currentAttachments);
 		attsModified = false;
 		
+		scComp.layout(true, true);
+		
 		if (attributeTable != null){
 			attributeTable.getControl().setData(AttributeTable.EDITING_OBS_KEY, wo);
 			attributeTable.reveal(wo);
@@ -641,6 +643,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 			IAttributeField<?> field = AttributeFieldFactory.findAttributeField(att);
 			attributeFields.add(field);
 			field.createComposite(cattribute);
+			field.addResizeListener(e->scComp.setMinSize(scComp.getContent().computeSize(SWT.DEFAULT, SWT.DEFAULT)));
 		}
 		if (attributeFields.size() > 0){
 			attributeFields.get(0).setFocus();

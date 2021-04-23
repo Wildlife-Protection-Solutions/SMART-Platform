@@ -961,6 +961,23 @@ ALTER TABLE smart.cm_node add column signatures varchar;
 CREATE TRIGGER trg_signature_type AFTER INSERT OR UPDATE OR DELETE ON smart.signature_type FOR EACH ROW execute procedure connect.trg_changelog_common();			
 				
 
+------------ LARGER TEXT STRINGS FOR ATTRIBUTE VALUES -------------
+ALTER TABLE smart.wp_observation_attributes alter column string_value set data type varchar(8200);
+ALTER TABLE smart.patrol_attribute_value alter column string_value set data type varchar(8200);
+ALTER TABLE smart.asset_attribute_value alter column string_value set data type varchar(8200);
+ALTER TABLE smart.asset_deployment_attribute_value alter column string_value set data type varchar(8200);
+ALTER TABLE smart.asset_station_attribute_value alter column string_value set data type varchar(8200);
+ALTER TABLE smart.asset_deployment_attribute_value alter column string_value set data type varchar(8200);
+ALTER TABLE smart.MISSION_PROPERTY_VALUE alter column string_value set data type varchar(8200);
+ALTER TABLE smart.SAMPLING_UNIT_ATTRIBUTE_VALUE alter column string_value set data type varchar(8200);
+alter table smart.ENTITY_ATTRIBUTE_VALUE alter column string_value set data type varchar(8200);
+alter table smart.I_ENTITY_ATTRIBUTE_VALUE alter column string_value set data type varchar(8200);
+alter table smart.I_ENTITY_RELATIONSHIP_ATTRIBUTE_VALUE alter column string_value set data type varchar(8200);
+alter table smart.I_OBSERVATION_ATTRIBUTE alter column string_value set data type varchar(8200);
+alter table smart.I_RECORD_ATTRIBUTE_VALUE alter column string_value set data type varchar(8200);
+
+
+
 ------------ VERSIONS ------------
 update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.asset';
 update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.asset.query';
@@ -969,6 +986,7 @@ update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org
 update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.cybertracker.survey';
 update connect.connect_plugin_version set version = '7.0' where plugin_id = 'org.wcs.smart.cybertracker';
 update connect.connect_plugin_version set version = '3.0' where plugin_id = 'org.wcs.smart.er';
+update connect.connect_plugin_version set version = '3.0' where plugin_id = 'org.wcs.smart.entity';
 
 insert into connect.connect_plugin_version (version, plugin_id) values ('1.0', 'org.wcs.smart.paws');
 insert into connect.connect_plugin_version (version, plugin_id) values ('2.0', 'org.wcs.smart.cybertracker.incident');
@@ -983,6 +1001,7 @@ update connect.ca_plugin_version set version = '2.0' where plugin_id = 'org.wcs.
 update connect.ca_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.cybertracker.survey';
 update connect.ca_plugin_version set version = '7.0' where plugin_id = 'org.wcs.smart.cybertracker';
 update connect.ca_plugin_version set version = '3.0' where plugin_id = 'org.wcs.smart.er';
+update connect.ca_plugin_version set version = '3.0' where plugin_id = 'org.wcs.smart.entity';
 update connect.ca_plugin_version set version = '7.0.0' where plugin_id = 'org.wcs.smart';
 
 update connect.connect_version set version = '7.0.0', last_updated = now();		

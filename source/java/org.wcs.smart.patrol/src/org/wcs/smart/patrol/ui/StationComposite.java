@@ -27,18 +27,21 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -55,7 +58,7 @@ import org.wcs.smart.patrol.model.Patrol;
  */
 public class StationComposite extends PatrolItemComposite{
 
-	private ComboViewer stationList;
+	private TableViewer stationList;
 
 	/*
 	 * Station label provider
@@ -82,25 +85,35 @@ public class StationComposite extends PatrolItemComposite{
 	public Composite createComponent(Composite parent, int style) {
 
 		Composite center = new Composite(parent, SWT.NONE);
-		center.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		center.setLayout(new GridLayout(2, false));
+		center.setLayout(new GridLayout());
+		center.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridLayout)center.getLayout()).marginWidth = 0;
+		((GridLayout)center.getLayout()).marginHeight = 0;
 		
 		
 		Label lbl = new Label(center, SWT.NONE);
 		lbl.setText(Messages.StationComposite_Station_Label);
-		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
-		stationList = new ComboViewer(center, SWT.DROP_DOWN | SWT.READ_ONLY);
+		Composite table = new Composite(center, SWT.NONE);
+		table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		table.setLayout(new TableColumnLayout());
+		((GridData)table.getLayoutData()).heightHint = 100;
+
+		stationList = new TableViewer(table, SWT.BORDER | SWT.SINGLE);
 		stationList.setContentProvider(ArrayContentProvider.getInstance());
 		stationList.setLabelProvider(lblProvider);
-		stationList.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		((GridData)stationList.getCombo().getLayoutData()).widthHint = 100;
+		stationList.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		((GridData)stationList.getControl().getLayoutData()).widthHint = 100;
 		stationList.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				fireChangeListeners();	
 			}
 		});
+		((TableColumnLayout)table.getLayout()).setColumnData(
+				new TableColumn(stationList.getTable(), SWT.NONE),
+	            new ColumnWeightData(100));
 		return center;
 	}
 
@@ -183,9 +196,10 @@ public class StationComposite extends PatrolItemComposite{
 		}else{
 			stationList.setSelection(new StructuredSelection(none));
 		}
+		stationList.getControl().getParent().layout();
 		
 	}
-	public ComboViewer getViewer(){
+	public TableViewer getViewer(){
 		return stationList;
 	}
 }

@@ -74,9 +74,12 @@ public class EntityDatabaseUpgrader implements IDatabaseUpgrader {
 	public static final void upgrade(String currentVersion, Session session){
 		if (currentVersion.equals(EntityPlugIn.DB_VERSION_1)){
 			upgradeV1ToV2(session);
+			upgradeV2ToV3(session);
+		}else if (currentVersion.equals(EntityPlugIn.DB_VERSION_2)){
+			upgradeV2ToV3(session);
 		}
 	}
-	
+			
 	private static void upgradeV1ToV2(Session session){
 		@SuppressWarnings("nls")
 		String[] sql = new String[]{
@@ -109,5 +112,16 @@ public class EntityDatabaseUpgrader implements IDatabaseUpgrader {
 			session.createNativeQuery(s).executeUpdate();
 		}
 		HibernateManager.setPlugInVersion(EntityPlugIn.PLUGIN_ID, EntityPlugIn.DB_VERSION_2, session);
+	}
+	
+	private static void upgradeV2ToV3(Session session){
+		@SuppressWarnings("nls")
+		String[] sql = new String[]{
+				"alter table smart.ENTITY_ATTRIBUTE_VALUE alter column string_value set data type varchar(8200)",
+		};
+		for (String s : sql){
+			session.createNativeQuery(s).executeUpdate();
+		}
+		HibernateManager.setPlugInVersion(EntityPlugIn.PLUGIN_ID, EntityPlugIn.DB_VERSION_3, session);
 	}
 }
