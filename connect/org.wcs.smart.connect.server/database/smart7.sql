@@ -2197,15 +2197,34 @@ COMMENT ON COLUMN connect.work_item.status IS 'Status of upload and processing';
 COMMENT ON COLUMN connect.work_item.message IS 'Error message or other info message asociated with upload.';
 
 CREATE TABLE connect.smartcollect_user(
-  uuid uuid not null, state varchar(32) not null, 
-  source varchar(4096) not null, 
+  uuid uuid not null, 
+  state varchar(32) not null, 
+  source varchar(4096) not null,
+  device_id varchar(32) not null, 
   validation_sent_date timestamp, 
   validation_key varchar(64), 
   primary key (uuid), 
-  unique(source)
+  unique(source, device_id)
 );
 
 
+
+CREATE TABLE smart.conservation_area_property(
+ uuid uuid not null, 
+ ca_uuid uuid not null, 
+ pkey varchar(256) not null, 
+ value varchar(1024), 
+ primary key (uuid), 
+ unique(ca_uuid, pkey)
+);
+
+CREATE TABLE smart.signature_type (
+  uuid uuid not null, 
+  ca_uuid uuid not null, 
+  keyid varchar(128) not null, 
+  primary key (uuid), 
+  unique(ca_uuid, keyid)
+);
 
 -- SMART TABLES
 CREATE TABLE smart.agency (
@@ -2253,7 +2272,7 @@ CREATE TABLE smart.asset_attribute_list_item (
 CREATE TABLE smart.asset_attribute_value (
     asset_uuid uuid NOT NULL,
     attribute_uuid uuid NOT NULL,
-    string_value character varying(1024),
+    string_value character varying(8200),
     list_item_uuid uuid,
     double_value1 double precision,
     double_value2 double precision,
@@ -2283,7 +2302,7 @@ CREATE TABLE smart.asset_deployment_disruption (
 CREATE TABLE smart.asset_deployment_attribute_value (
     asset_deployment_uuid uuid NOT NULL,
     attribute_uuid uuid NOT NULL,
-    string_value character varying(1024),
+    string_value character varying(8200),
     list_item_uuid uuid,
     double_value1 double precision,
     double_value2 double precision,
@@ -2364,7 +2383,7 @@ CREATE TABLE smart.asset_station_attribute (
 CREATE TABLE smart.asset_station_attribute_value (
     station_uuid uuid NOT NULL,
     attribute_uuid uuid NOT NULL,
-    string_value character varying(1024),
+    string_value character varying(8200),
     list_item_uuid uuid,
     double_value1 double precision,
     double_value2 double precision,
@@ -2553,6 +2572,7 @@ CREATE TABLE smart.cm_node (
     use_single_gps_point boolean,
     display_mode character varying(10),
     imagetype character varying(32),
+    signatures varchar,
     PRIMARY KEY (uuid)
 );
 
@@ -2685,7 +2705,8 @@ CREATE TABLE smart.ct_incident_link (
 );
 
 CREATE TABLE smart.ct_incident_package(
-	uuid uuid not null, name varchar(512), 
+	uuid uuid not null, 
+	name varchar(512), 
 	ca_uuid uuid not null,
 	cm_uuid uuid, 
 	ctprofile_uuid uuid, 
@@ -2999,7 +3020,7 @@ CREATE TABLE smart.entity_attribute_value (
     entity_attribute_uuid uuid NOT NULL,
     entity_uuid uuid NOT NULL,
     number_value double precision,
-    string_value character varying(1024),
+    string_value character varying(8200),
     list_element_uuid uuid,
     tree_node_uuid uuid,
     PRIMARY KEY (entity_attribute_uuid, entity_uuid)
@@ -3196,7 +3217,7 @@ CREATE TABLE smart.i_entity_attachment (
 CREATE TABLE smart.i_entity_attribute_value (
     entity_uuid uuid NOT NULL,
     attribute_uuid uuid NOT NULL,
-    string_value character varying(1024),
+    string_value character varying(8200),
     double_value double precision,
     double_value2 double precision,
     list_item_uuid uuid,
@@ -3247,7 +3268,7 @@ CREATE TABLE smart.i_entity_relationship (
 CREATE TABLE smart.i_entity_relationship_attribute_value (
     entity_relationship_uuid uuid NOT NULL,
     attribute_uuid uuid NOT NULL,
-    string_value character varying(1024),
+    string_value character varying(8200),
     double_value double precision,
     double_value2 double precision,
     list_item_uuid uuid,
@@ -3335,7 +3356,7 @@ CREATE TABLE smart.i_observation_attribute (
     attribute_uuid uuid NOT NULL,
     list_element_uuid uuid,
     tree_node_uuid uuid,
-    string_value character varying(1024),
+    string_value character varying(8200),
     double_value double precision,
     PRIMARY KEY (uuid),
     UNIQUE (observation_uuid, attribute_uuid)
@@ -3409,7 +3430,7 @@ CREATE TABLE smart.i_record_attribute_value (
     uuid uuid NOT NULL,
     record_uuid uuid NOT NULL,
     attribute_uuid uuid NOT NULL,
-    string_value character varying(1024),
+    string_value character varying(8200),
     double_value double precision,
     double_value2 double precision,
     PRIMARY KEY (uuid)
@@ -3731,7 +3752,7 @@ CREATE TABLE smart.mission_property_value (
     mission_uuid uuid NOT NULL,
     mission_attribute_uuid uuid NOT NULL,
     number_value double precision,
-    string_value character varying(1024),
+    string_value character varying(8200),
     list_element_uuid uuid,
     PRIMARY KEY (mission_uuid, mission_attribute_uuid)
 );
@@ -3845,7 +3866,7 @@ CREATE TABLE smart.observation_query (
 CREATE TABLE smart.patrol (
     uuid uuid NOT NULL,
     ca_uuid uuid NOT NULL,
-    id character varying(32) NOT NULL,
+    id character varying(256) NOT NULL,
     station_uuid uuid,
     team_uuid uuid,
     objective character varying,
@@ -3882,7 +3903,7 @@ CREATE TABLE smart.patrol_attribute_list (
 CREATE TABLE smart.patrol_attribute_value (
     patrol_uuid uuid NOT NULL,
     patrol_attribute_uuid uuid NOT NULL,
-    string_value character varying(1024),
+    string_value character varying(8200),
     number_value double precision,
     list_item_uuid uuid,
     PRIMARY KEY (patrol_uuid, patrol_attribute_uuid)
@@ -4173,7 +4194,7 @@ CREATE TABLE smart.sampling_unit_attribute_list (
 CREATE TABLE smart.sampling_unit_attribute_value (
     su_attribute_uuid uuid NOT NULL,
     su_uuid uuid NOT NULL,
-    string_value character varying(1024),
+    string_value character varying(8200),
     number_value double precision,
     list_element_uuid uuid,
     PRIMARY KEY (su_attribute_uuid, su_uuid)
@@ -4428,10 +4449,12 @@ CREATE TABLE smart.waypoint_query (
 CREATE TABLE smart.wp_attachments (
     uuid uuid NOT NULL,
     wp_uuid uuid NOT NULL,
+    signature_type_uuid uuid,
     filename character varying(1024) NOT NULL,
     PRIMARY KEY (uuid)
 );
-
+	
+	
 CREATE TABLE smart.wp_observation (
     uuid uuid NOT NULL,
     category_uuid uuid NOT NULL,
@@ -4447,7 +4470,7 @@ CREATE TABLE smart.wp_observation_attributes (
     list_element_uuid uuid,
     tree_node_uuid uuid,
     number_value double precision,
-    string_value character varying(1024),
+    string_value character varying(8200),
     PRIMARY KEY (uuid),
     unique(observation_uuid, attribute_uuid)
 );
@@ -4481,6 +4504,7 @@ CREATE TABLE smart.smartcollect_package(
   maplayersdef varchar(32672),
   primary key (uuid));
 
+ALTER TABLE SMART.conservation_area_property ADD FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE ONLY smart.asset_attribute_list_item ADD CONSTRAINT asset_li_keyid_attribute_uuid_unq UNIQUE (keyid, attribute_uuid);
 ALTER TABLE ONLY smart.asset_module_settings ADD CONSTRAINT asset_module_key_ca_unq UNIQUE (keyid, ca_uuid);
 ALTER TABLE ONLY smart.asset_station ADD CONSTRAINT asset_sn_id_ca_unq UNIQUE (id, ca_uuid);
@@ -4527,7 +4551,7 @@ CREATE TRIGGER dq_last_modified_trigger BEFORE UPDATE ON connect.data_queue FOR 
 CREATE TRIGGER trg_connect_account_after AFTER INSERT ON connect.change_log FOR EACH ROW EXECUTE PROCEDURE connect.trg_changelog_after();
 CREATE TRIGGER trg_connect_account_before BEFORE INSERT ON connect.change_log FOR EACH ROW EXECUTE PROCEDURE connect.trg_changelog_before();
 CREATE TRIGGER web_roles_mgr AFTER INSERT ON connect.users FOR EACH ROW EXECUTE PROCEDURE public.manage_user_roles();
-
+CREATE TRIGGER trg_conservation_area_property AFTER INSERT OR UPDATE OR DELETE ON smart.conservation_area_property FOR EACH ROW execute procedure connect.trg_changelog_common();
 CREATE TRIGGER trg_agency AFTER INSERT OR DELETE OR UPDATE ON smart.agency FOR EACH ROW EXECUTE PROCEDURE connect.trg_changelog_common();
 CREATE TRIGGER trg_area_geometries AFTER INSERT OR DELETE OR UPDATE ON smart.area_geometries FOR EACH ROW EXECUTE PROCEDURE connect.trg_changelog_common();
 CREATE TRIGGER trg_asset AFTER INSERT OR DELETE OR UPDATE ON smart.asset FOR EACH ROW EXECUTE PROCEDURE connect.trg_changelog_common();
@@ -4736,6 +4760,7 @@ CREATE TRIGGER trg_wp_observation AFTER INSERT OR DELETE OR UPDATE ON smart.wp_o
 CREATE TRIGGER trg_wp_observation_attributes AFTER INSERT OR DELETE OR UPDATE ON smart.wp_observation_attributes FOR EACH ROW EXECUTE PROCEDURE connect.trg_wp_observation_attributes();
 CREATE TRIGGER trg_wp_observation_attributes_list AFTER INSERT OR DELETE OR UPDATE ON smart.wp_observation_attributes_list FOR EACH ROW EXECUTE PROCEDURE connect.trg_wp_observation_attributes_list();
 CREATE TRIGGER ct_incident_package AFTER INSERT OR UPDATE OR DELETE ON  smart.ct_incident_package FOR EACH ROW execute procedure connect.trg_changelog_common();
+CREATE TRIGGER trg_signature_type AFTER INSERT OR UPDATE OR DELETE ON smart.signature_type FOR EACH ROW execute procedure connect.trg_changelog_common();			
 
 
 ALTER TABLE ONLY connect.alerts ADD CONSTRAINT alerts_ca_uuid_fkey FOREIGN KEY (ca_uuid) REFERENCES connect.ca_info(ca_uuid) ON UPDATE RESTRICT ON DELETE CASCADE;
@@ -5186,6 +5211,8 @@ ALTER TABLE ONLY smart.waypoint_query ADD CONSTRAINT waypoint_query_ca_uuid_fk F
 ALTER TABLE ONLY smart.waypoint_query ADD CONSTRAINT waypoint_query_creator_uuid_fk FOREIGN KEY (creator_uuid) REFERENCES smart.employee(uuid) ON DELETE CASCADE DEFERRABLE;
 ALTER TABLE ONLY smart.waypoint_query ADD CONSTRAINT waypoint_query_folder_uuid_fk FOREIGN KEY (folder_uuid) REFERENCES smart.query_folder(uuid) ON DELETE CASCADE DEFERRABLE;
 ALTER TABLE ONLY smart.wp_attachments ADD CONSTRAINT wp_attachments_wp_uuid_fk FOREIGN KEY (wp_uuid) REFERENCES smart.waypoint(uuid) ON DELETE CASCADE DEFERRABLE;
+ALTER TABLE smart.WP_ATTACHMENTS ADD FOREIGN KEY (signature_type_uuid) REFERENCES smart.signature_type(uuid) ON DELETE SET NULL ON UPDATE RESTRICT DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.signature_type ADD FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE ONLY smart.wp_observation_group ADD CONSTRAINT wp_observation_group_wp_uuid_fkey FOREIGN KEY (wp_uuid) REFERENCES smart.waypoint(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE ONLY smart.wp_observation ADD CONSTRAINT wp_observation_wp_group_uuid_fkey FOREIGN KEY (wp_group_uuid) REFERENCES smart.wp_observation_group(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE smart.smartcollect_waypoint ADD FOREIGN KEY (wp_uuid) REFERENCES smart.waypoint(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
@@ -5297,7 +5324,7 @@ INSERT INTO connect.connect_version (version, last_updated, filestore_version) V
 --INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.intelligence','4.0');
 --INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.intelligence.query','2.0');
 INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.plan','4.0');
-INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.entity','2.0');
+INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.entity','3.0');
 INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.er','3.0');
 INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.connect','1.0');
 INSERT INTO connect.connect_plugin_version (plugin_id, version) VALUES ('org.wcs.smart.connect.cybertracker','2.0');
