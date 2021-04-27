@@ -198,7 +198,10 @@ public class RecordCsvExporter implements ICsvDataExporter {
 						}
 					}
 				}
-				writer.writeNext(headers.toArray(new String[headers.size()]));
+				String[] sdata = headers.toArray(new String[headers.size()]);
+				ICsvDataExporter.removeLineFeeds(sdata);
+				writer.writeNext(sdata);
+
 				monitor.worked(1);
 			}	
 		}

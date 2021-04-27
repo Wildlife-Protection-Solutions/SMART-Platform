@@ -88,6 +88,7 @@ import org.hibernate.Session;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Projection;
+import org.wcs.smart.common.control.MultiLineText;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -828,11 +829,7 @@ public class RecordSummaryPage extends EditorPart{
 							});
 						}
 						
-						if (af.getTextAttributeControl() != null) {
-							af.getTextAttributeControl().addListener(SWT.Resize, e->{
-								summaryScroll.setMinSize(summaryScroll.getContent().computeSize(SWT.DEFAULT, SWT.DEFAULT));
-							});
-						}
+						af.addResizeListener(e->summaryScroll.setMinSize(summaryScroll.getContent().computeSize(SWT.DEFAULT, SWT.DEFAULT)));
 						
 						if (a.getDuplicateCheck()) addDuplicateIdChecker(af);
 					}else{
@@ -877,11 +874,22 @@ public class RecordSummaryPage extends EditorPart{
 					l = toolkit.createLabel(content, name + ":"); //$NON-NLS-1$
 					l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 					
-					l = toolkit.createLabel(content,value);
-					l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-					if (v != null){
-						if (a.isListAttribute()){
-							readOnlyLabels.put(v, l);
+					if (v != null && v.getAttribute() != null 
+							&& v.getAttribute().getAttribute() != null 
+							&& v.getAttribute().getAttribute().getType() == AttributeType.TEXT) {
+						MultiLineText txt = new MultiLineText(content);
+						txt.setEditable(false);
+						txt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+						txt.setText(value);
+						((GridData)txt.getLayoutData()).widthHint = 100;
+						txt.addListener(SWT.Resize, e->summaryScroll.setMinSize(summaryScroll.getContent().computeSize(SWT.DEFAULT, SWT.DEFAULT)));
+					}else {
+						l = toolkit.createLabel(content,value);
+						l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+						if (v != null){
+							if (a.isListAttribute()){
+								readOnlyLabels.put(v, l);
+							}
 						}
 					}
 				}

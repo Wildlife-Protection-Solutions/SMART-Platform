@@ -181,6 +181,7 @@ public class TreeEditorField<T>  {
 		dropDownComposite.setLayout(layout);
 		dropDownComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)dropDownComposite.getLayoutData()).horizontalIndent = 5;
+		((GridData)dropDownComposite.getLayoutData()).widthHint = 50;
 
 		txtText = new Text(dropDownComposite, SWT.NONE);
 		txtText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));

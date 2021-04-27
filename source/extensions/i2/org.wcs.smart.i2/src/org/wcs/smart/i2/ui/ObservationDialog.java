@@ -148,10 +148,11 @@ public class ObservationDialog extends SmartStyledDialog {
 		}else {
 			try(Session session = HibernateManager.openSession()){
 				//clone waypoint for editing so we can cancel this dialog
-				IntelLocation tmp = session.get(IntelLocation.class, location.getUuid());
-				observations = new ArrayList<>(tmp.getObservations());
+				//IntelLocation tmp = session.get(IntelLocation.class, location.getUuid());
+				observations = new ArrayList<>(location.getObservations());
 				observations.forEach(o->{
 					o.getCategory().getName();
+					o.getCategory().getFullCategoryName();
 					o.getObservationAttributes().forEach(a->{
 						a.getStringValue();
 						a.getAttribute().getName();
@@ -473,6 +474,11 @@ public class ObservationDialog extends SmartStyledDialog {
 				IAttributeField<?> field = AttributeFieldFactory.findAttributeField(a);
 				field.createComposite(attributes);
 				attributes.addListener(SWT.Dispose, e->field.dispose());
+				field.addResizeListener(e->{
+					Point p = attributes.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+					p.x = p.x - scattributes.getVerticalBar().getSize().x;
+					scattributes.setMinSize(p);
+				});
 				
 				if (a.getType() == AttributeType.TREE){
 					List<AttributeTreeNode> nodes = new ArrayList<AttributeTreeNode>();

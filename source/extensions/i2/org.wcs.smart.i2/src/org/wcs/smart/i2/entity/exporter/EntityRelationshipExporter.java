@@ -38,6 +38,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
+import org.wcs.smart.export.config.ICsvDataExporter;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.internal.Messages;
@@ -243,7 +244,9 @@ public class EntityRelationshipExporter {
 							}
 						}
 					}
-					writer.writeNext(headers.toArray(new String[headers.size()]));
+					String[] sdata = headers.toArray(new String[headers.size()]);
+					ICsvDataExporter.removeLineFeeds(sdata);
+					writer.writeNext(sdata);
 					if (monitor.isCanceled()) return false;
 				}
 			}
@@ -299,7 +302,9 @@ public class EntityRelationshipExporter {
 								headers.add(provider.getText(v));
 							}
 						}
-						writer.writeNext(headers.toArray(new String[headers.size()]));
+						String[] sdata = headers.toArray(new String[headers.size()]);
+						ICsvDataExporter.removeLineFeeds(sdata);
+						writer.writeNext(sdata);
 						
 						if (monitor.isCanceled()) return false;
 					}

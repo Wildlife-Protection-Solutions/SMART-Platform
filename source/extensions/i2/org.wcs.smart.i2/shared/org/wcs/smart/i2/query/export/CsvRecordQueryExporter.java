@@ -42,6 +42,7 @@ import org.locationtech.jts.geom.Point;
 import org.opengis.referencing.operation.MathTransform;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.Projection;
+import org.wcs.smart.export.config.ICsvDataExporter;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
 import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
@@ -161,7 +162,9 @@ public class CsvRecordQueryExporter implements IQueryExporter{
 						data.add(results.getQueryColumns().get(i).getValue(item,l));
 					}
 				}
-				writer.writeNext(data.toArray(new String[data.size()]));	
+				String[] sdata = data.toArray(new String[data.size()]);
+				ICsvDataExporter.removeLineFeeds(sdata);
+				writer.writeNext(sdata);	
 			}		
 		}
 		return Collections.singletonList(destination);

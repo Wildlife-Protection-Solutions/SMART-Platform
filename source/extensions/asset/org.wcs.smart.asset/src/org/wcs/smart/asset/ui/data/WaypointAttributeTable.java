@@ -391,8 +391,9 @@ public class WaypointAttributeTable {
 					ll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 					((GridData)ll.getLayoutData()).horizontalIndent = 20;
 					
-					ll = toolkit.createLabel(c, a.getAttributeValueAsString(Locale.getDefault()));
+					ll = toolkit.createLabel(c, a.getAttributeValueAsString(Locale.getDefault()), SWT.WRAP);
 					ll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+					((GridData)ll.getLayoutData()).widthHint = 50;
 					
 				}
 			}

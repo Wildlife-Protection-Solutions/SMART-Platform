@@ -168,11 +168,8 @@ public class RelationshipAttributeDialog  extends SmartStyledTitleDialog {
 					modified();
 				}
 			});
-			if (editor.getTextAttributeControl() != null) {
-				editor.getTextAttributeControl().addListener(SWT.Resize, ex->{
-					scroll.setMinSize(core.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-				});
-			}
+			
+			editor.addResizeListener(ex->scroll.setMinSize(core.computeSize(SWT.DEFAULT, SWT.DEFAULT)));
 		}
 		
 		((ScrolledComposite)core.getParent()).setMinSize(core.computeSize(SWT.DEFAULT, SWT.DEFAULT));

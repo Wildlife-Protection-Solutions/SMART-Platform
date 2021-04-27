@@ -529,9 +529,7 @@ public class NewEntityDialog extends SmartStyledTitleDialog{
 						AttributeFieldEditor leditor = new AttributeFieldEditor(content, attribute.getAttribute());
 						leditor.addSelectionListener(listener);
 						attributeControls.add(leditor);
-						if (leditor.getTextAttributeControl() != null) {
-							leditor.getTextAttributeControl().addListener(SWT.Resize, e-> sc.setMinSize(content.computeSize(SWT.DEFAULT, SWT.DEFAULT)));
-						}
+						leditor.addResizeListener(e-> sc.setMinSize(content.computeSize(SWT.DEFAULT, SWT.DEFAULT)));
 						if (attribute.getDuplicateCheck()) addDuplicateIdChecker(leditor);
 					}
 				});
@@ -557,9 +555,7 @@ public class NewEntityDialog extends SmartStyledTitleDialog{
 				leditor.addSelectionListener(listener);
 				attributeControls.add(leditor);
 				
-				if (leditor.getTextAttributeControl() != null) {
-					leditor.getTextAttributeControl().addListener(SWT.Resize, e-> sc.setMinSize(content.computeSize(SWT.DEFAULT, SWT.DEFAULT)));
-				}
+				leditor.addResizeListener(e-> sc.setMinSize(content.computeSize(SWT.DEFAULT, SWT.DEFAULT)));
 				if (attribute.getDuplicateCheck()) addDuplicateIdChecker(leditor);
 			}
 		});

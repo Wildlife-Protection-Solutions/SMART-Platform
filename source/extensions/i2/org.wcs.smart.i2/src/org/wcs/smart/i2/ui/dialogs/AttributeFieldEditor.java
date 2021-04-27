@@ -60,6 +60,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.ISharedImages;
@@ -339,16 +340,7 @@ public class AttributeFieldEditor {
 			l.widgetSelected(null);
 		}
 	}
-	
-	/**
-	 * 
-	 * @return the multi line text attribute control.  May need to add
-	 * resize listeners to this control to correctly update the ui
-	 */
-	public MultiLineText getTextAttributeControl() { 
-		return txtMulti; 
-	}
-	
+		
 	/**
 	 * returns true if the value is set; false if not set and should be removed
 	 * from attribute list.
@@ -545,8 +537,15 @@ public class AttributeFieldEditor {
 		return add;
 	}
 	
-
-	
+	/**
+	 * Adds a listener when the multi-line text editor
+	 * is resized
+	 * 
+	 * @param l
+	 */
+	public void addResizeListener(Listener l) {
+		if (txtMulti != null) txtMulti.addListener(SWT.Resize, l);
+	}
 	
 	public void initControl(IntelEntityRelationshipAttributeValue value){
 		if (attribute.getType() == AttributeType.TEXT){

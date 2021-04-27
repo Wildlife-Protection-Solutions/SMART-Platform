@@ -138,6 +138,7 @@ import org.wcs.smart.birt.ui.ReportEngineManager;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.common.attachment.AttachmentUtil;
 import org.wcs.smart.common.attachment.ISmartAttachment;
+import org.wcs.smart.common.control.MultiLineText;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -169,6 +170,7 @@ import org.wcs.smart.i2.model.IntelRelationshipGroup;
 import org.wcs.smart.i2.model.IntelRelationshipType;
 import org.wcs.smart.i2.model.IntelRelationshipTypeAttribute;
 import org.wcs.smart.i2.model.OtherAttributeGroup;
+import org.wcs.smart.i2.model.IntelAttribute.AttributeType;
 import org.wcs.smart.i2.search.AdvancedEntitySearch;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.AttributeValueLabelProvider;
@@ -2186,6 +2188,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 							}
 						});
 					}
+					e.addResizeListener(evt->attributelist.reflow(true));
 					fieldEditors.add(e);
 					
 				}else{
@@ -2200,9 +2203,17 @@ public class EntityEditor extends EditorPart implements MapPart{
 							
 						}
 					}
-					Text tmp = toolkit.createText(part, text, SWT.BORDER);
-					tmp.setEditable(false);
-					tmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+					if (a.getAttribute().getType() == AttributeType.TEXT) {
+						MultiLineText tmp = new MultiLineText(part);
+						tmp.setText(text);
+						tmp.setEditable(false);
+						tmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+						tmp.addListener(SWT.Resize, evt->attributelist.reflow(true));
+					}else {
+						Text tmp = toolkit.createText(part, text, SWT.BORDER);
+						tmp.setEditable(false);
+						tmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+					}
 				}	
 			}
 			
@@ -2214,6 +2225,7 @@ public class EntityEditor extends EditorPart implements MapPart{
 		tabList.selectTab(0);
 		
 		compAttributes.layout(true);
+		outer.layout(true,true);
 		
 		//attachment composite
 		if (getEditMode()){

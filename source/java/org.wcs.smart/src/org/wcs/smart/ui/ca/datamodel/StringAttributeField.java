@@ -119,6 +119,7 @@ public class StringAttributeField implements IAttributeField<String>{
 	public void addResizeListener(Listener l) {
 		txt.addListener(SWT.Resize, l);
 	}
+	
 	/**
 	 * Fired when the valid is modified
 	 * @param listener
