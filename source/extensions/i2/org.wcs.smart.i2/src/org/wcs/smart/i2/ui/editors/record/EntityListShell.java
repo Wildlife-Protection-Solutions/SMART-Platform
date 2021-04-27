@@ -164,7 +164,7 @@ public class EntityListShell extends SmartShellDialog {
 				List<? extends Object> entities = view.getEntities();
 				//filter entities on profile
 				for (Object x : entities) {
-					if (x instanceof IntelEntity && ((IntelEntity)x).getProfile().getUuid().equals(editor.getInputInternal().getRecordProfileUuid())) {
+					if (x instanceof IntelEntity ) {
 						allItems.add(x);
 					}
 				}

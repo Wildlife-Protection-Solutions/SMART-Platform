@@ -744,7 +744,6 @@ public class AllPanel extends Composite {
 							if (E3Utils.isCompatibilityEditor(p)){
 								Object editor = E3Utils.getSourceObject(p);
 								if (editor instanceof RecordEditor && ((RecordEditor)editor).getEditMode()){
-									if ( !((RecordEditor)editor).getRecord().getProfile().getUuid().equals(profileUuid) ) continue;
 											
 									if (!first) {
 										new MenuItem(subRecord, SWT.SEPARATOR);

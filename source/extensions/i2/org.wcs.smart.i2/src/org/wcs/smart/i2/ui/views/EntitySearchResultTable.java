@@ -705,20 +705,18 @@ public class EntitySearchResultTable extends Composite {
 										new MenuItem(subRecord, SWT.SEPARATOR);
 										first = true;
 									}
-									if (((RecordEditor)editor).getRecord().getProfile().equals(cProfile)) {
-										MenuItem relate = new MenuItem(subRecord, SWT.PUSH);
-										relate.setText( ((RecordEditor)editor).getRecord().getTitle()  );
-										relate.addSelectionListener(new SelectionAdapter() {
-											@Override
-											public void widgetSelected(SelectionEvent e) {
-												if (!getCurrentSelection().isEmpty()){
-													for (IntelEntity entity : getCurrentSelection()){
-														((RecordEditor)editor).linkEntity(entity);
-													}
+									MenuItem relate = new MenuItem(subRecord, SWT.PUSH);
+									relate.setText( ((RecordEditor)editor).getRecord().getTitle()  );
+									relate.addSelectionListener(new SelectionAdapter() {
+										@Override
+										public void widgetSelected(SelectionEvent e) {
+											if (!getCurrentSelection().isEmpty()){
+												for (IntelEntity entity : getCurrentSelection()){
+													((RecordEditor)editor).linkEntity(entity);
 												}
 											}
-										});
-									}
+										}
+									});
 								}
 							}
 						}
