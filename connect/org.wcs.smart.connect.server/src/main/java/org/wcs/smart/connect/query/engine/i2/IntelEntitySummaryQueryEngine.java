@@ -567,7 +567,7 @@ public class IntelEntitySummaryQueryEngine implements IIntelQueryEngine{
 			//group by position attributes are dealt with in a different way; should never execute this code
 			throw new IllegalStateException("Should not group by position attributes."); //$NON-NLS-1$
 		case TEXT:
-			return "varchar (1024)"; //$NON-NLS-1$
+			return "varchar (" + IntelAttribute.MAX_TEXT_LENGTH +")"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return null;
 	}

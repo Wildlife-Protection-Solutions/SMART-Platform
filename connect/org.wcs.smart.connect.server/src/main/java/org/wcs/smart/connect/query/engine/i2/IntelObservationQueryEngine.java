@@ -50,6 +50,7 @@ import org.wcs.smart.connect.security.AdvIntelAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.i2.IIntelQueryEngine;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
+import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelRecordObservationQuery;
 import org.wcs.smart.i2.query.CaQueryItemProvider;
@@ -289,7 +290,7 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine{
 		};
 		
 		String[][] sortColumns = new String[][]{
-			{"str_sort", "varchar(1024)"}, //$NON-NLS-1$ //$NON-NLS-2$
+			{"str_sort", "varchar(" + IntelAttribute.MAX_TEXT_LENGTH + ")"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			{"dbl_sort", "double precision"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"date_sort", "date"}		 //$NON-NLS-1$ //$NON-NLS-2$
 		};

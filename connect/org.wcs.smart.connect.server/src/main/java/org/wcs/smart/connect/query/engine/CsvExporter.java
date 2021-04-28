@@ -37,6 +37,7 @@ import org.hibernate.Session;
 import org.wcs.smart.IProjectionProvider;
 import org.wcs.smart.ProjectionUtils;
 import org.wcs.smart.connect.i18n.Messages;
+import org.wcs.smart.export.config.ICsvDataExporter;
 import org.wcs.smart.i2.query.IQueryColumn;
 import org.wcs.smart.i2.query.PagedResultSetIterator;
 import org.wcs.smart.query.common.engine.IQueryResultSetIterator;
@@ -110,6 +111,7 @@ public class CsvExporter {
 					for (int i = 0; i < cols.size(); i ++){
 						data[i] = results.getValueAsString(resultItem, cols.get(i), session);
 					}
+					ICsvDataExporter.removeLineFeeds(data);
 					writer.writeNext(data);
 					
 				}

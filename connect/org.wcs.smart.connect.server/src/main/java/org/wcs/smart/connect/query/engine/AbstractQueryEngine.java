@@ -383,7 +383,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		case BOOLEAN:
 			return "double precision"; //$NON-NLS-1$
 		case TEXT:
-			return "varchar(1024)"; //$NON-NLS-1$
+			return "varchar(" + Attribute.STRING_ATTRIBUTE_MAX_LENGTH + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 		case DATE:
 			return "varchar(10)"; //$NON-NLS-1$
 		case MLIST:

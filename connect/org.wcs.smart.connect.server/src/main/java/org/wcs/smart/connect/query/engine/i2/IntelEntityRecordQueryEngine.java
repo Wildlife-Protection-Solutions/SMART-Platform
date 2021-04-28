@@ -45,6 +45,7 @@ import org.wcs.smart.connect.security.AdvIntelAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.i2.IIntelQueryEngine;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
+import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelEntityRecordQuery;
 import org.wcs.smart.i2.model.IntelEntityType;
 import org.wcs.smart.i2.model.IntelEntityTypeAttribute;
@@ -277,7 +278,7 @@ public class IntelEntityRecordQueryEngine implements IIntelQueryEngine {
 	private void configureTableContents(String observationTable, List<Object[]> filterToColumn, boolean obsFilter, IQueryItemProvider fItemProvider, Session session){
 			
 		String[][] sortColumns = new String[][]{
-			{"str_sort", "varchar(1024)"}, //$NON-NLS-1$ //$NON-NLS-2$
+			{"str_sort", "varchar(" + IntelAttribute.MAX_TEXT_LENGTH + ")"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			{"dbl_sort", "double precision"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"date_sort", "date"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"entity_id", "varchar(1024)"} //$NON-NLS-1$ //$NON-NLS-2$

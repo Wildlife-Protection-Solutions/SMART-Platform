@@ -31,6 +31,7 @@ import java.util.logging.Logger;
 import org.hibernate.Session;
 import org.wcs.smart.NamedPreparedStatement;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.connect.i18n.Messages;
@@ -110,7 +111,7 @@ public class EntityAttributeFilterVisitor  implements IFilterVisitor{
 					tmp.append("double precision"); //$NON-NLS-1$
 				}else if (ff.getAttributeType() == AttributeType.TEXT ||
 						ff.getAttributeType() == AttributeType.DATE){
-					tmp.append("varchar(1024)"); //$NON-NLS-1$
+					tmp.append("varchar(" + Attribute.STRING_ATTRIBUTE_MAX_LENGTH + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 				}else if (ff.getAttributeType() == AttributeType.LIST ||
 						ff.getAttributeType() == AttributeType.TREE){
 					tmp.append("varchar(128)"); //$NON-NLS-1$

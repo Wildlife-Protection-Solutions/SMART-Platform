@@ -284,7 +284,7 @@ public abstract class AbstractDbFeatureResultSet<T extends IResultItem> implemen
 		if (!hasSortColumns) {
 			// add the sort columns
 			session.createNativeQuery("ALTER TABLE " + queryDataTable + " add column sortKeyDbl float").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
-			session.createNativeQuery("ALTER TABLE " + queryDataTable + " add column sortKeyTxt varchar(1024)").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
+			session.createNativeQuery("ALTER TABLE " + queryDataTable + " add column sortKeyTxt varchar(" + Attribute.STRING_ATTRIBUTE_MAX_LENGTH + ")").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
 			hasSortColumns = true;
 		}
 
