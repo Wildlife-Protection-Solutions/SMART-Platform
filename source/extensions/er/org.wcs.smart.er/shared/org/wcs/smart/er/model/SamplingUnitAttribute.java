@@ -35,6 +35,7 @@ import javax.persistence.Table;
 import org.hibernate.annotations.OrderBy;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedKeyItem;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 
 /**
@@ -52,7 +53,7 @@ public class SamplingUnitAttribute extends NamedKeyItem{
 	/**
 	 * Maximum length of string attribute value
 	 */
-	public static final int MAX_STRING_LENGTH = 1024;
+	public static final int MAX_STRING_LENGTH = Attribute.STRING_ATTRIBUTE_MAX_LENGTH;
 	
 	private AttributeType type;
 	

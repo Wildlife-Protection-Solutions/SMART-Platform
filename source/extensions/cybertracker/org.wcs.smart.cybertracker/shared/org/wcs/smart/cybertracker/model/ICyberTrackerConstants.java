@@ -25,6 +25,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -101,7 +102,7 @@ public interface ICyberTrackerConstants {
 	public static final String STR_TRUE = "True"; //$NON-NLS-1$
 	public static final String STR_FALSE = "False"; //$NON-NLS-1$
 	
-	public static final int MAX_TEXT_ATTRIBUTE_LENGTH = 1024;
+	public static final int MAX_TEXT_ATTRIBUTE_LENGTH = Attribute.STRING_ATTRIBUTE_MAX_LENGTH;
 
 	public static final String ATTRIBUTE_DEFAULT_VALUES_SEPATATOR = ";"; //$NON-NLS-1$
 	

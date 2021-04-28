@@ -41,6 +41,7 @@ import org.hibernate.annotations.OrderBy;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedKeyItem;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.i2.IIntelligenceLabelProvider;
 
 /**
@@ -54,7 +55,7 @@ public class IntelAttribute extends NamedKeyItem{
 
 	private static final long serialVersionUID = 1L;
 	
-	public static final int MAX_TEXT_LENGTH = 1024; 
+	public static final int MAX_TEXT_LENGTH = Attribute.STRING_ATTRIBUTE_MAX_LENGTH; 
 			
 	public enum AttributeType{
 		NUMERIC("n"), //$NON-NLS-1$

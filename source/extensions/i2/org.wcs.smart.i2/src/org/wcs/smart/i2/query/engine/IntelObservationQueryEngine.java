@@ -45,6 +45,7 @@ import org.hibernate.query.Query;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.io.WKBReader;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.i2.IIntelQueryEngine;
 import org.wcs.smart.i2.InternalQueryManager;
@@ -290,7 +291,7 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine {
 		};
 		
 		String[][] sortColumns = new String[][]{
-			{"str_sort", "varchar(1024)"}, //$NON-NLS-1$ //$NON-NLS-2$
+			{"str_sort", "varchar(" + Attribute.STRING_ATTRIBUTE_MAX_LENGTH + ")"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"dbl_sort", "double"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"date_sort", "date"}		 //$NON-NLS-1$ //$NON-NLS-2$
 		};

@@ -126,7 +126,7 @@ public abstract class ObservationQueryResult<T extends IObservationQueryResultIt
 			if (!hasSortColumns){
 				//add the sort columns
 				c.createStatement().execute("ALTER TABLE " + getResultsTable() + " add column " + NUMBER_SORT + " double"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				c.createStatement().execute("ALTER TABLE " + getResultsTable() + " add column " + TXT_SORT + " varchar(1024)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				c.createStatement().execute("ALTER TABLE " + getResultsTable() + " add column " + TXT_SORT + " varchar(" + Attribute.STRING_ATTRIBUTE_MAX_LENGTH + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 				c.commit();
 				hasSortColumns = true;
 			}

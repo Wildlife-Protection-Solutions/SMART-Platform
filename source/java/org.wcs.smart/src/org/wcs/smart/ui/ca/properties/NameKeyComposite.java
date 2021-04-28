@@ -276,7 +276,7 @@ public class NameKeyComposite {
 				}
 			});
 		}
-		txtName.setTextLimit(1024);
+		txtName.setTextLimit(org.wcs.smart.ca.Label.MAX_LENGTH);
 	
 		/* Key */
 		Label lblNewLabel_1 = new Label(parent, SWT.NONE);

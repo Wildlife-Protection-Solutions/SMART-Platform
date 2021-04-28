@@ -93,7 +93,7 @@ public class SurveyPagedResultUtils  {
 		if (!hasSortColumns){
 			//add the sort columns
 			c.createStatement().execute("ALTER TABLE " + dataTable + " add column " + ObservationQueryResult.NUMBER_SORT +" double"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			c.createStatement().execute("ALTER TABLE " + dataTable + " add column " + ObservationQueryResult.TXT_SORT + " varchar(1024)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			c.createStatement().execute("ALTER TABLE " + dataTable + " add column " + ObservationQueryResult.TXT_SORT + " varchar(" + Attribute.STRING_ATTRIBUTE_MAX_LENGTH + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			c.commit();
 			hasSortColumns = true;
 		}
@@ -285,7 +285,7 @@ public class SurveyPagedResultUtils  {
 		if (create) {
 			sql.append("CREATE TABLE "); //$NON-NLS-1$
 			sql.append(labeltable); 
-			sql.append(" (uuid char(16) for bit data, value varchar(1024))"); //$NON-NLS-1$ 
+			sql.append(" (uuid char(16) for bit data, value varchar(" + Attribute.STRING_ATTRIBUTE_MAX_LENGTH + "))"); //$NON-NLS-1$ //$NON-NLS-2$ 
 			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().execute(sql.toString());
 		}

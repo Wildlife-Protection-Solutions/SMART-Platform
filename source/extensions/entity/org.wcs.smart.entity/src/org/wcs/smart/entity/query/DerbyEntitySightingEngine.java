@@ -37,6 +37,7 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Label;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.Entity;
@@ -578,8 +579,9 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 		for (EntityAttribute ea : query.getEntityType().getAttributes()){
 			sql.append(", ea_" + ea.getKeyId()); //$NON-NLS-1$
 			if (ea.getDmAttribute().getType() == AttributeType.TEXT ||
-					ea.getDmAttribute().getType() == AttributeType.DATE ||
-					ea.getDmAttribute().getType() == AttributeType.LIST ||
+					ea.getDmAttribute().getType() == AttributeType.DATE) {
+				sql.append(" varchar(" + Attribute.STRING_ATTRIBUTE_MAX_LENGTH + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+			}else if (ea.getDmAttribute().getType() == AttributeType.LIST ||
 					ea.getDmAttribute().getType() == AttributeType.TREE){
 				sql.append(" varchar(1024)"); //$NON-NLS-1$
 			}else if (ea.getDmAttribute().getType() == AttributeType.BOOLEAN || 

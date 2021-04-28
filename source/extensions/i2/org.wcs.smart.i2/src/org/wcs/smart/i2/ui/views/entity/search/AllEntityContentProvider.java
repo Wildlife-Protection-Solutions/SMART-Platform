@@ -333,7 +333,7 @@ public class AllEntityContentProvider implements ILazyContentProvider {
 			break;
 		
 		case TEXT:
-			sb.append(" varchar(1024)"); //$NON-NLS-1$
+			sb.append(" varchar(" + IntelAttribute.MAX_TEXT_LENGTH + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 			break;
 		case LIST:
 		case EMPLOYEE:
