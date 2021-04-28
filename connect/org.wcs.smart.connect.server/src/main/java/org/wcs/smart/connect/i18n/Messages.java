@@ -21,17 +21,43 @@
  */
 package org.wcs.smart.connect.i18n;
 
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 public class Messages {
 	private static final String BUNDLE_NAME = "org.wcs.smart.connect.i18n.messages"; //$NON-NLS-1$
 
+	//these are for getting patrol metadata; this identifiers
+	//which languages i18n labels are provided for
+	private static Set<Locale> supportedLocales = new HashSet<>();
+	static{
+			supportedLocales.add(new Locale("ar")); //$NON-NLS-1$
+			supportedLocales.add(new Locale("es")); //$NON-NLS-1$
+			supportedLocales.add(new Locale("ka")); //$NON-NLS-1$
+			supportedLocales.add(new Locale("th")); //$NON-NLS-1$
+	};
 
 	private Messages() {
 	}
 
+	/**
+	 * If the locale is one of the supported languages returns
+	 * the translated string or else returns null;
+	 * @param key
+	 * @param locale
+	 * @return
+	 */
+	public static String getLocaleString(String key, Locale locale) {
+		if (locale != null && supportedLocales.contains(locale)){
+			return getString(key, locale);
+		}
+		return null;
+	}
+
+		
 	public static String getString(String key, Locale locale) {
 		try {
 			String value = null;

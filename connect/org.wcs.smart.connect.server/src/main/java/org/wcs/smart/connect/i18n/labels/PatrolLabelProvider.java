@@ -21,9 +21,11 @@
  */
 package org.wcs.smart.connect.i18n.labels;
 
+import java.util.HashMap;
 import java.util.Locale;
 
 import org.wcs.smart.connect.i18n.Messages;
+import org.wcs.smart.patrol.metadata.PatrolAttributeMetadata;
 import org.wcs.smart.patrol.model.IPatrolLabelProvider;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.PatrolWaypointSource;
@@ -63,6 +65,74 @@ public class PatrolLabelProvider implements IPatrolLabelProvider {
 		if (item.equals(MANDATENAME_KEY)) return Messages.getString("PatrolLabelProvider.MandateColumn", l); //$NON-NLS-1$
 		if (item.equals(MANDATEACTIVE_KEY)) return Messages.getString("PatrolLabelProvider.MandateActiveColumn", l); //$NON-NLS-1$
 		return null;
+	}
+	
+	@Override
+	public HashMap<Locale, String> getNames(PatrolAttributeMetadata.FixedMetadata metadataOption){
+		HashMap<Locale, String> translations = new HashMap<>();
+		
+		String key = ""; //$NON-NLS-1$
+		switch(metadataOption) {
+		case ARMED: 
+			key = "PatrolLabelProvider.ArmedMetadata"; //$NON-NLS-1$
+			break;
+		case COMMENT:
+			key = "PatrolLabelProvider.CommentMetadata"; //$NON-NLS-1$
+			break;
+		case EMPLOYEES:
+			key = "PatrolLabelProvider.MembersMetadata"; //$NON-NLS-1$
+			break;
+		case ENDDATE:
+			key = "PatrolLabelProvider.EndDateMetadata"; //$NON-NLS-1$
+			break;
+		case LEADER:
+			key = "PatrolLabelProvider.LeaderMetadata"; //$NON-NLS-1$
+			break;
+		case MANDATE:
+			key = "PatrolLabelProvider.MandateMetadata"; //$NON-NLS-1$
+			break;
+		case OBJECTIVE:
+			key = "PatrolLabelProvider.ObjectiveMetadata"; //$NON-NLS-1$
+			break;
+		case PATROLID:
+			key = "PatrolLabelProvider.PatrolIdMetadata"; //$NON-NLS-1$
+			break;
+		case PILOT:
+			key = "PatrolLabelProvider.PilotMetadata"; //$NON-NLS-1$
+			break;
+		case STARTDATE:
+			key = "PatrolLabelProvider.StartDateMetadata"; //$NON-NLS-1$
+			break;
+		case STATION:
+			key = "PatrolLabelProvider.StationMetadata"; //$NON-NLS-1$
+			break;
+		case TEAM:
+			key = "PatrolLabelProvider.TeamMetadata"; //$NON-NLS-1$
+			break;
+		case TRANSPORT_TYPE:
+			key = "PatrolLabelProvider.TransporttypeMetadata"; //$NON-NLS-1$
+			break;
+		default:
+			break;
+		
+		}
+		
+		
+		//english
+		Locale en = Locale.forLanguageTag("en"); //$NON-NLS-1$
+		String enl = Messages.getString(key, Locale.ROOT);
+		translations.put(en, enl);
+
+		for (Locale locale : Locale.getAvailableLocales()) {
+			if (locale.equals(en)) continue;
+			
+			String value = Messages.getLocaleString(key, locale);
+			if (value != null) {
+				translations.put(locale, value);
+			}
+		}
+		
+		return translations;
 	}
 
 }

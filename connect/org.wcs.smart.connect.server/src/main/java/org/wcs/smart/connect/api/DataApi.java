@@ -23,6 +23,7 @@ package org.wcs.smart.connect.api;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -63,6 +64,8 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.json.IJsonFeatureProcessor;
 import org.wcs.smart.observation.json.JsonFileProcessor;
 import org.wcs.smart.observation.model.IWaypointSource;
+import org.wcs.smart.patrol.metadata.PatrolAttributeMetadata;
+import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.util.UuidUtils;
 
 import io.swagger.v3.oas.annotations.Parameter;
@@ -138,6 +141,59 @@ public class DataApi extends HttpServlet{
 						.entity(items.toString())
 						.type(MediaType.APPLICATION_JSON)
 						.build();
+			}finally {
+				s.getTransaction().commit();
+			}
+		}
+		
+	}
+	
+	/**
+	 * Gets the patrol metadata for a conservation area.
+	 * 
+	 * @param uuid
+	 * @return
+	 */
+	@GET
+	@Path("/metadata/patrol/{cauuid}")
+	@Produces({ MediaType.APPLICATION_JSON })
+	public List<PatrolAttributeMetadata> getPatrolMetadata(
+			@Parameter(description="uuid of the conservation area to get patrol metadata for") @PathParam("cauuid") String uuid) {
+		
+		UUID caUuid = parseUuid(uuid);
+		
+		try(Session s = HibernateManager.getSession(context)){
+			s.beginTransaction();
+			try {
+				if (!SecurityManager.INSTANCE.canAccess(s, 
+						request.getUserPrincipal().getName(), 
+						CaAction.VIEWCA_KEY,
+						caUuid)){
+					logger.info("User " + request.getUserPrincipal().getName() + " does not have permission to view ca."); //$NON-NLS-1$ //$NON-NLS-2$
+					throw new SmartConnectException(Response.Status.UNAUTHORIZED);
+				}
+				
+				
+				ConservationArea ca = s.get(ConservationArea.class, caUuid);
+				if (ca == null) throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("DataModelApi.CaNotFound", request.getLocale())); //$NON-NLS-1$
+					
+				List<PatrolAttributeMetadata> pMetadata = new ArrayList<>();
+				for (PatrolAttributeMetadata.FixedMetadata fixed : PatrolAttributeMetadata.FixedMetadata.values()) {
+					pMetadata.add(fixed.toMetadata(s, ca));
+				}
+				
+				List<PatrolAttribute> customs = QueryFactory.buildQuery(s, PatrolAttribute.class, 
+						new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
+				for (PatrolAttribute custom : customs) {
+					pMetadata.add(PatrolAttributeMetadata.toMetadata(custom));
+				}
+				
+				return pMetadata;
+				
+//				return Response.status(Response.Status.OK)
+//						.entity(items.toString())
+//						.type(MediaType.APPLICATION_JSON)
+//						.build();
 			}finally {
 				s.getTransaction().commit();
 			}
