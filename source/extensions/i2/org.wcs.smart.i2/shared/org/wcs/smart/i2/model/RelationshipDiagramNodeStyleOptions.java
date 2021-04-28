@@ -24,6 +24,7 @@ package org.wcs.smart.i2.model;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.RGB;
 import org.wcs.smart.util.ColorUtil;
 
 import com.google.gson.Gson;
@@ -104,7 +105,7 @@ public class RelationshipDiagramNodeStyleOptions {
 		return color;
 		
 	}
-	public void setBackgroudColor(Color color) {
+	public void setBackgroudColor(RGB color) {
 		json.addProperty(BG_COLOR_KEY, ColorUtil.color2HexStr(color));
 	}
 
@@ -114,7 +115,7 @@ public class RelationshipDiagramNodeStyleOptions {
 		return color;
 		
 	}
-	public void setForegroundColor(Color color) {
+	public void setForegroundColor(RGB color) {
 		json.addProperty(FG_COLOR_KEY, ColorUtil.color2HexStr(color));
 	}
 	

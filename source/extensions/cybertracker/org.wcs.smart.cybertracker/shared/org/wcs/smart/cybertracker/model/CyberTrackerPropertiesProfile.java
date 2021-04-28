@@ -623,6 +623,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	@Transient
 	public Color getTrackColor() {
 		Integer color = getIntValue(ProfileOptionID.TRACK_COLOR);
+		if (color == -1) return null;
 		return new Color(color);
 	}
 	

@@ -24,6 +24,7 @@ package org.wcs.smart.i2.diagram.style;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jface.preference.ColorSelector;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -40,8 +41,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.wcs.smart.common.control.ColorSelector;
-import org.wcs.smart.common.control.ColorSelector.IColorSelectionChangeListener;
 import org.wcs.smart.i2.internal.IntelligenceLabelProviderImpl;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.RelationshipDiagramEdgeStyleOptions;
@@ -77,7 +76,7 @@ public class RelationshipDiagramEdgeStyleOptionsComposite extends Composite {
 		this.options = options;
 		if (options != null) {
 			fireListeners = false;
-			csEdgeColor.setColor(options.getColor());
+			csEdgeColor.setColorValue(options.getColor().getRGB());
 			cbEdgeStyle.setSelection(new StructuredSelection(options.getStyle()));
 			btnShowLabel.setSelection(options.isShowLabel());
 			fireListeners = true;
@@ -89,13 +88,10 @@ public class RelationshipDiagramEdgeStyleOptionsComposite extends Composite {
 		lblEdgeColor.setText(Messages.RelationshipDiagramEdgeStyleOptionsComposite_Color);
 		
 		csEdgeColor = new ColorSelector(parent);
-		csEdgeColor.addColorSelectionChangeListener(new IColorSelectionChangeListener() {
-			@Override
-			public void colorSelectionChanged(Color color) {
-				if (options != null && fireListeners) {
-					options.setColor(color);
-					fireOptionsChanged(options);
-				}
+		csEdgeColor.addListener(e->{
+			if (options != null && fireListeners) {
+				options.setColor(csEdgeColor.getColorValue());
+				fireOptionsChanged(options);
 			}
 		});
 		

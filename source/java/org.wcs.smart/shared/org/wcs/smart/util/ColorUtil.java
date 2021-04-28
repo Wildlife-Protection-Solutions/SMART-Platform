@@ -22,6 +22,7 @@
 package org.wcs.smart.util;
 
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 
 /**
@@ -37,11 +38,11 @@ public class ColorUtil {
 	 * Convert {@link Color} into hex string representation (e.g. "#FFFFFF")
 	 * 
 	 */
-	public static String color2HexStr(Color color) {
+	public static String color2HexStr(RGB color) {
 		if (color == null) {
 			return null;
 		}
-		String hex = String.format("#%02X%02X%02X", color.getRed(), color.getGreen(), color.getBlue()); //$NON-NLS-1$
+		String hex = String.format("#%02X%02X%02X", color.red, color.green, color.blue); //$NON-NLS-1$
 		return hex;
 	}
 	

@@ -29,9 +29,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
+import org.eclipse.jface.preference.ColorSelector;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -47,18 +47,15 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.ColorDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.control.SmartUiUtils;
@@ -77,7 +74,7 @@ import org.wcs.smart.cybertracker.model.ProjectionFormat;
  */
 public class CyberTrackerPropertiesComposite extends Composite {
 	
-	private static final String COLOR_KEY = "COLOR"; //$NON-NLS-1$
+	private static final String CLEARKEY = "CLEAR"; //$NON-NLS-1$
 	private static final String COLOR_OP_KEY = "COLOROP"; //$NON-NLS-1$
 
 	private enum PhotoSize{
@@ -149,8 +146,8 @@ public class CyberTrackerPropertiesComposite extends Composite {
     private Button btnLock100;
     private Button btnUseMapOnSkip;
     
-    private Label btnTrackColor;
-    private List<Label> btnThemeColors;
+    private ColorSelector btnTrackColor;
+    private List<ColorSelector> btnThemeColors;
     
     private ComboViewer cbProjection;
     private Text txtUtmZome;
@@ -1082,13 +1079,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		});	
 		controls.add(btnLock100);
 	}
-	private void disposeColor(Label label) {
-		Color c = (Color) label.getData(COLOR_KEY);
-		if (c != null) {
-			c.dispose();
-		}
-		label.setData(COLOR_KEY, null);
-	}
+
 	
 	private void validateCamera() {
 		if (!btnOpResize.getSelection()) {
@@ -1270,52 +1261,26 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		llGeneral.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		Composite part = new Composite(parent, SWT.NONE);
-		part.setLayout(new GridLayout(4, false));
+		part.setLayout(new GridLayout(3, false));
 		part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
 		Label ltrack = new Label(part, SWT.NONE);
 		ltrack.setText(Messages.CyberTrackerPropertiesComposite_TrackColorOp);
 	
-		btnTrackColor = new Label(part, SWT.NONE);
-		btnTrackColor.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		((GridData)btnTrackColor.getLayoutData()).widthHint = 30;
-		btnTrackColor.addListener(SWT.Dispose, e->disposeColor(btnTrackColor));		
-		
-		btnTrackColor.addListener(SWT.Paint, e->{
-			if (btnTrackColor.getData(COLOR_KEY) != null) e.gc.drawRectangle(0, 0, btnTrackColor.getBounds().width-1, btnTrackColor.getBounds().height-1);
-		});
-		WidgetElement.setCSSClass(btnTrackColor, "customcolor"); //$NON-NLS-1$
-		controls.add(btnTrackColor);
-		
-		Button btnSetTrackColor = new Button(part, SWT.PUSH);
-		btnSetTrackColor.setText("..."); //$NON-NLS-1$
-		controls.add(btnSetTrackColor);
-		
+		btnTrackColor = new ColorSelector(part);
+		controls.add(btnTrackColor.getButton());
+		btnTrackColor.addListener(e->{
+			btnTrackColor.getButton().setData(CLEARKEY, Boolean.FALSE);
+			changesMade();	
+		});		
 		Button btnTrackClear = new Button(part, SWT.PUSH);
 		controls.add(btnTrackClear);
 		btnTrackClear.setText(Messages.CyberTrackerPropertiesComposite_ClearButton);
 		btnTrackClear.addListener(SWT.Selection, e->{
-			disposeColor(btnTrackColor);
-			btnTrackColor.setBackground(null);
+			btnTrackColor.setColorValue(new RGB(255, 255, 255));
+			btnTrackColor.getButton().setData(CLEARKEY, Boolean.TRUE);
 			changesMade();
 		});
-		Listener changeColorTrack = e->{
-			ColorDialog cd = new ColorDialog(parent.getShell());
-			cd.setRGB(btnTrackColor.getBackground().getRGB());
-			cd.setText(Messages.CyberTrackerPropertiesComposite_ColorSelectionDialogTitle);
-			RGB rgb = cd.open();
-			if (rgb == null) return;
-			
-			disposeColor(btnTrackColor);
-			Color newColor = new Color(parent.getDisplay(), rgb);
-			btnTrackColor.setData(COLOR_KEY, newColor);
-			btnTrackColor.setBackground(newColor);
-			changesMade();
-		};
-		
-		btnSetTrackColor.addListener(SWT.Selection, changeColorTrack);
-		btnTrackColor.addListener(SWT.MouseDoubleClick, changeColorTrack);
-		
 		
 		ProfileOptionID[] colorops = new ProfileOptionID[] {
 				ProfileOptionID.THEME_COLOR_1,
@@ -1334,47 +1299,24 @@ public class CyberTrackerPropertiesComposite extends Composite {
 			default: l.setText(""); //$NON-NLS-1$
 			}
 			
-			Label colorLabel = new Label(part, SWT.NONE);
-			colorLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-			((GridData)colorLabel.getLayoutData()).widthHint = 30;
-			colorLabel.addListener(SWT.Dispose, e->disposeColor(colorLabel));		
-			WidgetElement.setCSSClass(colorLabel, "customcolor"); //$NON-NLS-1$
-			colorLabel.addListener(SWT.Paint, e->{
-				if (colorLabel.getData(COLOR_KEY) != null) e.gc.drawRectangle(0, 0, colorLabel.getBounds().width-1, colorLabel.getBounds().height-1);
+			ColorSelector colorLabel = new ColorSelector(part);
+			colorLabel.getButton().setData(COLOR_OP_KEY, op);
+			colorLabel.addListener(e->{
+				colorLabel.getButton().setData(CLEARKEY, Boolean.FALSE);
+				changesMade();	
 			});
-			colorLabel.setData(COLOR_OP_KEY, op);
-			controls.add(colorLabel);
 
-			Button btnColor = new Button(part, SWT.PUSH);
-			btnColor.setText("..."); //$NON-NLS-1$
-			controls.add(btnColor);
+			controls.add(colorLabel.getButton());
 
 			Button btnClear = new Button(part, SWT.PUSH);
 			btnClear.setText(Messages.CyberTrackerPropertiesComposite_ClearButton);
 			controls.add(btnClear);
 			btnClear.addListener(SWT.Selection, e->{
-				disposeColor(colorLabel);
-				colorLabel.setBackground(null);
+				colorLabel.setColorValue(new RGB(255, 255, 255));
+				colorLabel.getButton().setData(CLEARKEY, Boolean.TRUE);
 				changesMade();
-			});
-			
-			Listener changeColor = e->{
-				ColorDialog cd = new ColorDialog(parent.getShell());
-				cd.setRGB(colorLabel.getBackground().getRGB());
-				cd.setText(Messages.CyberTrackerPropertiesComposite_ColorSelectionDialogTitle);
-				RGB rgb = cd.open();
-				if (rgb == null) return;
-				
-				disposeColor(colorLabel);
-				Color newColor = new Color(parent.getDisplay(), rgb);
-				colorLabel.setData(COLOR_KEY, newColor);
-				colorLabel.setBackground(newColor);
-				changesMade();
-			};
-			
-			btnColor.addListener(SWT.Selection, changeColor);
-			colorLabel.addListener(SWT.MouseDoubleClick, changeColor);
-			
+				});
+
 			btnThemeColors.add(colorLabel);
 		}
 		
@@ -1436,18 +1378,17 @@ public class CyberTrackerPropertiesComposite extends Composite {
 	
 		java.awt.Color r = ctProperties.getTrackColor();
 		if (r != null) {
-			Color c = new Color(getDisplay(), r.getRed(), r.getGreen(), r.getBlue(), 255);
-			btnTrackColor.setData(COLOR_KEY, c);
-			btnTrackColor.setBackground(c);
+			btnTrackColor.setColorValue(new RGB(r.getRed(),r.getGreen(), r.getBlue()));
 		}
+		btnTrackColor.getButton().setData(CLEARKEY, r==null);
 		
-		for (Label l : btnThemeColors) {
-			r = ctProperties.getThemeColor((ProfileOptionID) l.getData(COLOR_OP_KEY));
+		
+		for (ColorSelector l : btnThemeColors) {
+			r = ctProperties.getThemeColor((ProfileOptionID) l.getButton().getData(COLOR_OP_KEY));
 			if (r != null) {
-				Color c = new Color(getDisplay(), r.getRed(), r.getGreen(), r.getBlue(), 255);
-				l.setData(COLOR_KEY, c);
-				l.setBackground(c);
+				l.setColorValue(new RGB(r.getRed(),r.getGreen(), r.getBlue()));	
 			}
+			l.getButton().setData(CLEARKEY, r==null);
 		}
 		
 		btnOpResize.setSelection(ctProperties.getResizePhoto());
@@ -1530,18 +1471,18 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		ctProperties.setLock100(btnLock100.getSelection());
 		ctProperties.setUseMapOnSkip(btnUseMapOnSkip.getSelection());
 		
-		Color c = (Color)btnTrackColor.getData(COLOR_KEY);
-		if (c == null) {
-			ctProperties.setTrackColor(null);
+		RGB c = btnTrackColor.getColorValue();
+		if (!((Boolean)btnTrackColor.getButton().getData(CLEARKEY))) {
+			ctProperties.setTrackColor(new java.awt.Color(c.red, c.green, c.blue));
 		}else {
-			ctProperties.setTrackColor(new java.awt.Color(c.getRed(), c.getGreen(), c.getBlue()));
+			ctProperties.setTrackColor(null);
 		}
-		for (Label l : btnThemeColors) {
-			c = (Color) l.getData(COLOR_KEY);
-			if (c != null) {
-				ctProperties.setThemeColor((ProfileOptionID) l.getData(COLOR_OP_KEY), new java.awt.Color(c.getRed(), c.getGreen(), c.getBlue()));
+		for (ColorSelector l : btnThemeColors) {
+			c = l.getColorValue();
+			if (!((Boolean)l.getButton().getData(CLEARKEY))) {
+				ctProperties.setThemeColor((ProfileOptionID) l.getButton().getData(COLOR_OP_KEY), new java.awt.Color(c.red, c.green, c.blue));
 			}else {
-				ctProperties.setThemeColor((ProfileOptionID) l.getData(COLOR_OP_KEY), null);
+				ctProperties.setThemeColor((ProfileOptionID) l.getButton().getData(COLOR_OP_KEY), null);
 			}
 		}
 		

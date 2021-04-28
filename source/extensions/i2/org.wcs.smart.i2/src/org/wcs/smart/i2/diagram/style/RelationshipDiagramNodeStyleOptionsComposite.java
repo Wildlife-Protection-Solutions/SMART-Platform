@@ -24,6 +24,7 @@ package org.wcs.smart.i2.diagram.style;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jface.preference.ColorSelector;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -31,14 +32,11 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.wcs.smart.common.control.ColorSelector;
-import org.wcs.smart.common.control.ColorSelector.IColorSelectionChangeListener;
 import org.wcs.smart.common.control.FontSelector;
 import org.wcs.smart.common.control.FontSelector.IFontSelectionChangeListener;
 import org.wcs.smart.i2.internal.Messages;
@@ -77,9 +75,9 @@ public class RelationshipDiagramNodeStyleOptionsComposite extends Composite {
 		if (options != null) {
 			fireListeners = false;
 			cmbImageSize.setSelection(new StructuredSelection(options.getImageSize()));
-			csBackgroundColor.setColor(options.getBackgroudColor());
+			csBackgroundColor.setColorValue(options.getBackgroudColor().getRGB());
 			fontSelector.setFontData(options.getFontData());
-			csForegroundColor.setColor(options.getForegroundColor());
+			csForegroundColor.setColorValue(options.getForegroundColor().getRGB());
 			fireListeners = true;
 		}
 	}
@@ -108,13 +106,10 @@ public class RelationshipDiagramNodeStyleOptionsComposite extends Composite {
 		lblBackgroundColor.setText(Messages.RelationshipDiagramNodeStyleOptionsComposite_BackgroundColor);
 
 		csBackgroundColor = new ColorSelector(parent);
-		csBackgroundColor.addColorSelectionChangeListener(new IColorSelectionChangeListener() {
-			@Override
-			public void colorSelectionChanged(Color color) {
-				if (options != null && fireListeners) {
-					options.setBackgroudColor(color);
-					fireOptionsChanged(options);
-				}
+		csBackgroundColor.addListener(e->{
+			if (options != null && fireListeners) {
+				options.setBackgroudColor(csBackgroundColor.getColorValue());
+				fireOptionsChanged(options);
 			}
 		});
 
@@ -136,13 +131,10 @@ public class RelationshipDiagramNodeStyleOptionsComposite extends Composite {
 		lblForegroundColor.setText(Messages.RelationshipDiagramNodeStyleOptionsComposite_ForegroundColor);
 
 		csForegroundColor = new ColorSelector(parent);
-		csForegroundColor.addColorSelectionChangeListener(new IColorSelectionChangeListener() {
-			@Override
-			public void colorSelectionChanged(Color color) {
-				if (options != null && fireListeners) {
-					options.setForegroundColor(color);
-					fireOptionsChanged(options);
-				}
+		csForegroundColor.addListener(e->{
+			if (options != null && fireListeners) {
+				options.setForegroundColor(csForegroundColor.getColorValue());
+				fireOptionsChanged(options);
 			}
 		});
 

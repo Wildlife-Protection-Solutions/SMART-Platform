@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.model;
 
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.RGB;
 import org.wcs.smart.util.ColorUtil;
 
 import com.google.gson.Gson;
@@ -70,7 +71,7 @@ public class RelationshipDiagramEdgeStyleOptions {
 		return json.get(COLOR_KEY).getAsString();
 	}
 	
-	public void setColor(Color color) {
+	public void setColor(RGB color) {
 		json.addProperty(COLOR_KEY, ColorUtil.color2HexStr(color));
 	}
 
