@@ -21,9 +21,12 @@
  */
 package org.wcs.smart.patrol.internal.ui;
 
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.ResourceBundle;
 
 import org.wcs.smart.patrol.internal.Messages;
+import org.wcs.smart.patrol.metadata.PatrolAttributeMetadata;
 import org.wcs.smart.patrol.model.IPatrolLabelProvider;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.PatrolWaypointSource;
@@ -61,4 +64,71 @@ public class PatrolLabelProvider implements IPatrolLabelProvider {
 		return null;
 	}
 
+	public HashMap<Locale, String> getNames(PatrolAttributeMetadata.FixedMetadata metadataOption){
+		HashMap<Locale, String> translations = new HashMap<>();
+		
+		String key = ""; //$NON-NLS-1$
+		switch(metadataOption) {
+		case ARMED: 
+			key = Messages.PatrolLabelProvider_ArmedMetadata;
+			break;
+		case COMMENT:
+			key = Messages.PatrolLabelProvider_CommentMetadata;
+			break;
+		case EMPLOYEES:
+			key = Messages.PatrolLabelProvider_EmployeesMetadata;
+			break;
+		case ENDDATE:
+			key = Messages.PatrolLabelProvider_EndDateMetadata;
+			break;
+		case LEADER:
+			key = Messages.PatrolLabelProvider_LeaderMetadata;
+			break;
+		case MANDATE:
+			key = Messages.PatrolLabelProvider_MandateMetadata;
+			break;
+		case OBJECTIVE:
+			key = Messages.PatrolLabelProvider_ObjectiveMetdata;
+			break;
+		case PATROLID:
+			key = Messages.PatrolLabelProvider_PidMetadata;
+			break;
+		case PILOT:
+			key = Messages.PatrolLabelProvider_PilotMetadata;
+			break;
+		case STARTDATE:
+			key = Messages.PatrolLabelProvider_StationDateMetadata;
+			break;
+		case STATION:
+			key = Messages.PatrolLabelProvider_StationMetadata;
+			break;
+		case TEAM:
+			key = Messages.PatrolLabelProvider_TeamMetadata;
+			break;
+		case TRANSPORT_TYPE:
+			key = Messages.PatrolLabelProvider_TransportTypeMetadata;
+			break;
+		default:
+			break;
+		
+		}
+		//english
+		Locale en = Locale.forLanguageTag("en"); //$NON-NLS-1$
+		String enl = ResourceBundle.getBundle(Messages.BUNDLE_NAME, Locale.ROOT).getString(key); //$NON-NLS-1$
+		translations.put(en, enl);
+
+		for (Locale locale : Locale.getAvailableLocales()) {
+			if (locale.equals(en)) continue;
+			try {
+				ResourceBundle b = ResourceBundle.getBundle(Messages.BUNDLE_NAME, locale); //$NON-NLS-1$
+				if (b != null) {
+					String value = b.getString(key);
+					translations.put(locale, value);	
+				}
+			}catch (Exception ex) {
+			}
+		}
+		
+		return translations;
+	}
 }

@@ -3,7 +3,8 @@ package org.wcs.smart.patrol.internal;
 import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
-	private static final String BUNDLE_NAME = "org.wcs.smart.patrol.internal.messages"; //$NON-NLS-1$
+	public static final String BUNDLE_NAME = "org.wcs.smart.patrol.internal.messages"; //$NON-NLS-1$
+	
 	public static String AddWaypointDialog_DialogMessage;
 	public static String AddWaypointDialog_DialogTitle;
 	public static String AddWaypointDialog_Error_CouldNotParseCrs;
@@ -391,17 +392,30 @@ public static String PatrolFeatureSource_ProjectedWaypointLayerName;
 	public static String PatrolImporter_UnableToProcessFile;
 	public static String PatrolImporter_Warn_DataDuplicate;
 	public static String PatrolImporter_Warn_SameId;
+	public static String PatrolLabelProvider_ArmedMetadata;
+	public static String PatrolLabelProvider_CommentMetadata;
 	public static String PatrolLabelProvider_DescriptionColumnName;
+	public static String PatrolLabelProvider_EmployeesMetadata;
+	public static String PatrolLabelProvider_EndDateMetadata;
+	public static String PatrolLabelProvider_LeaderMetadata;
 	public static String PatrolLabelProvider_MandateActiveColumnName;
 	public static String PatrolLabelProvider_MandateColumnName;
+	public static String PatrolLabelProvider_MandateMetadata;
+	public static String PatrolLabelProvider_ObjectiveMetdata;
 	public static String PatrolLabelProvider_PatrolMandateColumnName;
 	public static String PatrolLabelProvider_PatrolTeamColumnNameKey;
 	public static String PatrolLabelProvider_PatrolTransportTypeColumnName;
 	public static String PatrolLabelProvider_PatrolTypeColumnName;
+	public static String PatrolLabelProvider_PidMetadata;
+	public static String PatrolLabelProvider_PilotMetadata;
+	public static String PatrolLabelProvider_StationDateMetadata;
+	public static String PatrolLabelProvider_StationMetadata;
 	public static String PatrolLabelProvider_TeamActiveColumnName;
 	public static String PatrolLabelProvider_TeamColumnName;
+	public static String PatrolLabelProvider_TeamMetadata;
 	public static String PatrolLabelProvider_TransportActiveColumnName;
 	public static String PatrolLabelProvider_TransportTypeColumnName;
+	public static String PatrolLabelProvider_TransportTypeMetadata;
 	public static String PatrolLeaderWizardPage_LeaderPilotTitle;
 	public static String PatrolLeaderWizardPage_LeaderTitle;
 	public static String PatrolLeaderWizardPage_PageMessage_Leader;

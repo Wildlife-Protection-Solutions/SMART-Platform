@@ -21,7 +21,11 @@
  */
 package org.wcs.smart.patrol.model;
 
+import java.util.HashMap;
+import java.util.Locale;
+
 import org.wcs.smart.ISharedLabelProvider;
+import org.wcs.smart.patrol.metadata.PatrolAttributeMetadata;
 
 /**
  * Label provider for patrol options.  Must provide values
@@ -45,4 +49,6 @@ public interface IPatrolLabelProvider extends ISharedLabelProvider {
 	public static final String TRANSPORTTYPE_KEY = "transporttypekey"; //$NON-NLS-1$
 	public static final String MANDATENAME_KEY = "mandatenamekey"; //$NON-NLS-1$
 	public static final String MANDATEACTIVE_KEY = "mandateactivekey"; //$NON-NLS-1$
+	
+	public HashMap<Locale, String> getNames(PatrolAttributeMetadata.FixedMetadata metadataOption);
 }
