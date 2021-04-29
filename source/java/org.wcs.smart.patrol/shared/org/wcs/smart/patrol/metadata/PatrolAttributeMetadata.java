@@ -75,6 +75,14 @@ public class PatrolAttributeMetadata {
 			this.type = type;
 		}
 		
+		public String getKey() {
+			return this.key;
+		}
+		
+		public Attribute.AttributeType getType(){
+			return this.type;
+		}
+		
 		public PatrolAttributeMetadata toMetadata(Session session, ConservationArea ca) {
 			PatrolAttributeMetadata item = new PatrolAttributeMetadata(key, type);
 			if (this == TRANSPORT_TYPE || this == MANDATE ||

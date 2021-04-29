@@ -72,7 +72,6 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
@@ -80,6 +79,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
+import org.wcs.smart.patrol.metadata.PatrolAttributeMetadata;
 import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.model.PatrolAttributeListItem;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
@@ -97,9 +97,6 @@ import org.wcs.smart.ui.properties.DialogConstants;
  */
 public class EditPatrolAttributeDialog extends SmartStyledTitleDialog implements SelectionListener{
 	
-	
-	private Collection<? extends NamedKeyItem> siblings;	//attributes that are siblings to the current attribute being updated/created
-	
 	private NameKeyComposite nameKeyControls;
 	
 	private ComboViewer cmbType;
@@ -110,6 +107,7 @@ public class EditPatrolAttributeDialog extends SmartStyledTitleDialog implements
 	private Composite listPanel;
 	
 	private PatrolAttribute pAttribute;
+	private Collection<PatrolAttribute> siblings;
 	
 	private List<PatrolAttributeListItem> deleted;
 	
@@ -126,13 +124,19 @@ public class EditPatrolAttributeDialog extends SmartStyledTitleDialog implements
 	 */
 	public EditPatrolAttributeDialog(Shell parentShell,  
 			PatrolAttribute toUpdate,  
-			Collection<? extends NamedKeyItem> siblings) {
+			Collection<PatrolAttribute> siblings) {
 		
 		super(parentShell);
 		deleted = new ArrayList<>();
 		this.pAttribute = toUpdate;
 		
-		this.siblings = new ArrayList<NamedKeyItem>(siblings);
+		this.siblings = new ArrayList<>(siblings);
+		for (PatrolAttributeMetadata.FixedMetadata md : PatrolAttributeMetadata.FixedMetadata.values()) {
+			PatrolAttribute item = new PatrolAttribute();
+			item.setKeyId(md.getKey().toLowerCase(Locale.ROOT));
+			item.setType(md.getType());
+			this.siblings.add(item);
+		}
 		this.siblings.remove(toUpdate);
 	}
 	
