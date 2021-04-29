@@ -97,6 +97,7 @@ public class IncidentIdGeneratorContribution implements IdGeneratorContribution 
 		txtPattern = new Text(inner, SWT.BORDER);
 		txtPattern.setText(""); //$NON-NLS-1$
 		txtPattern.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)txtPattern.getLayoutData()).widthHint = 100;
 		txtPattern.addListener(SWT.Modify,e->updateDecorations());
 
 		cdPatternErr = new ControlDecoration(txtPattern, SWT.LEFT);
@@ -131,15 +132,19 @@ public class IncidentIdGeneratorContribution implements IdGeneratorContribution 
 		}
 		
 		cdPatternErr.hide();
-		if (!btnUnique.getSelection() && IdGeneratorEngine.INSTANCE.likelyDuplicate(txtPattern.getText())) {
-			cdPatternWarn.setDescriptionText(Messages.IncidentIdGeneratorContribution_DuplicateWarning);
-			cdPatternWarn.show();
+		if (!txtPattern.getText().trim().isBlank()) {
+			if (!btnUnique.getSelection() && IdGeneratorEngine.INSTANCE.likelyDuplicate(txtPattern.getText())) {
+				cdPatternWarn.setDescriptionText(Messages.IncidentIdGeneratorContribution_DuplicateWarning);
+				cdPatternWarn.show();
+			}
 		}
 	}
 	
 	
 	private String validate() {
 		String text = txtPattern.getText();
+		
+		if (text.trim().isBlank()) return null;
 		
 		for (IdGeneratorEngine.Token token : IdGeneratorEngine.Token.values()) {
 			text = text.replace(token.token, ""); //$NON-NLS-1$
