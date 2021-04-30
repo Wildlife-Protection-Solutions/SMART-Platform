@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.text.MessageFormat;
 import java.util.Properties;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.eclipse.core.runtime.preferences.ConfigurationScope;
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.wcs.smart.internal.Messages;
@@ -56,9 +57,15 @@ public class SmartProperties {
 	public static final String PROP_BACKUP_DIR = "BACKUP"; //$NON-NLS-1$
 	
 	private static final String SYSPROP_GPS_BABEL = "GPSBABEL"; //$NON-NLS-1$
-	public static final String SYSPROP_DATASTORE = "DATASTORE_DIR"; //$NON-NLS-1$
-	private static final String SYSPROP_BACKUPDIR = "BACKUP_DIR"; //$NON-NLS-1$
 	
+	public static String SYSPROP_DATASTORE = "DATASTORE_DIR"; //$NON-NLS-1$
+	private static String SYSPROP_BACKUPDIR = "BACKUP_DIR"; //$NON-NLS-1$
+	static {
+		if (SystemUtils.IS_OS_MAC) {
+			SYSPROP_DATASTORE = "OSX.DATASTORE_DIR"; //$NON-NLS-1$
+			SYSPROP_BACKUPDIR= "OSX.DATASTORE_DIR"; //$NON-NLS-1$
+		}
+	}
 	
 	//subloction of filestore within the data directory
 	private static final String FILESTORE_DIR_NAME = "filestore" + File.separator; //$NON-NLS-1$
