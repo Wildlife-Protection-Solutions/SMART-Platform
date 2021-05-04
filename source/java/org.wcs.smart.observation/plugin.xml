@@ -80,6 +80,10 @@
             class="org.wcs.smart.observation.model.WaypointObservationAttributeList"
             supportsCcaa="true">
       </class>
+      <class
+            class="org.wcs.smart.observation.model.DataLink"
+            supportsCcaa="false">
+      </class>
    </extension>
    <extension
          point="org.eclipse.ui.menus">

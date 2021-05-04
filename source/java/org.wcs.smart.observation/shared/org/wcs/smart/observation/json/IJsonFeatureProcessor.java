@@ -45,6 +45,7 @@ import javax.xml.bind.DatatypeConverter;
 import org.hibernate.Session;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.locationtech.jts.geom.Coordinate;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -62,6 +63,7 @@ import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.model.WaypointObservationAttributeList;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
 
 
@@ -74,6 +76,9 @@ import org.wcs.smart.util.UuidUtils;
  */
 public abstract class IJsonFeatureProcessor {
 
+	public static final String OBSGROUP_DATATYPE = "obsgroup"; //$NON-NLS-1$
+	
+	public static final String JSON_SMARTATTRIBUTES = "smartAttributes";  //$NON-NLS-1$
 	private static final String DATE_TIME_PATTERN = "yyyy-MM-dd'T'H:m:s"; //$NON-NLS-1$
 	public static final String JSON_PROPERTIES = "properties"; //$NON-NLS-1$
 	public static final String JSON_SMARTDATATYPE = "smartDataType"; //$NON-NLS-1$
@@ -159,7 +164,37 @@ public abstract class IJsonFeatureProcessor {
 		return this.warnings;
 	}
 
+	/**
+	 * Converts the "dateTime" property into a local date time
+	 * @param properties
+	 * @return
+	 */
+	protected LocalDateTime getDateTime(JSONObject properties) {
+		String strDateTime = properties.get("dateTime").toString(); //$NON-NLS-1$
+
+		DateTimeFormatter pattern = DateTimeFormatter.ofPattern(DATE_TIME_PATTERN);
+		LocalDateTime wpdatetime = LocalDateTime.parse(strDateTime, pattern);
+		return wpdatetime;
+	}
 	
+	
+	/**
+	 * reads geometry from feature and
+	 *  converts it to a coordinate
+	 * 
+	 * @param properties
+	 * @return
+	 */
+	protected Coordinate getPosition(JSONObject feature) {
+		JSONArray cs = (JSONArray) ((JSONObject) feature.get("geometry")).get("coordinates"); //$NON-NLS-1$ //$NON-NLS-2$
+		double x = ((Number) cs.get(0)).doubleValue();
+		double y = ((Number) cs.get(1)).doubleValue();
+		
+		LocalDateTime dt = getDateTime((JSONObject)feature.get(JSON_PROPERTIES));
+		Long time = SharedUtils.toLongTime(dt);
+		
+		return new Coordinate(x, y, time);
+	}
 	/**
 	 * Converts a GeoJSON feature into a SMART Waypoint object.
 	 * 
@@ -175,35 +210,32 @@ public abstract class IJsonFeatureProcessor {
 	protected Waypoint createWaypoint(JSONObject feature, ConservationArea ca, Session session, Locale locale) throws IOException{
 
 		// get cordinates
-		JSONArray cs = (JSONArray) ((JSONObject) feature.get("geometry")).get("coordinates"); //$NON-NLS-1$ //$NON-NLS-2$
-		double x = (Double) cs.get(0);
-		double y = (Double) cs.get(1);
-
+		
+		Coordinate location = getPosition(feature);
 		JSONObject props = (JSONObject) feature.get(JSON_PROPERTIES);
 
-		String strDateTime = props.get("dateTime").toString(); //$NON-NLS-1$
+		LocalDateTime wpdatetime = getDateTime(props);
 
-		DateTimeFormatter pattern = DateTimeFormatter.ofPattern(DATE_TIME_PATTERN);
-		LocalDateTime wpdatetime = LocalDateTime.parse(strDateTime, pattern);
-
-		JSONObject atts = (JSONObject) props.get("smartAttributes"); //$NON-NLS-1$
+		JSONObject atts = (JSONObject) props.get(JSON_SMARTATTRIBUTES);
 
 		Waypoint wp = new Waypoint();
 		wp.setConservationArea(ca);
 		wp.setDateTime(wpdatetime);
-		wp.setRawX(x);
-		wp.setRawY(y);
+		wp.setRawX(location.x);
+		wp.setRawY(location.y);
 
 		if (atts.containsKey("incidentId")) { //$NON-NLS-1$
 			wp.setId(atts.get("incidentId").toString()); //$NON-NLS-1$
+		}else if (atts.containsKey("id")) { //$NON-NLS-1$
+			wp.setId(atts.get("id").toString()); //$NON-NLS-1$
 		}
 
 		if (atts.containsKey("distance")) { //$NON-NLS-1$
 			wp.setDistance(((Number) atts.get("distance")).floatValue()); //$NON-NLS-1$
 		}
 
-		if (atts.containsKey("direction")) { //$NON-NLS-1$
-			wp.setDirection(((Number) atts.get("direction")).floatValue()); //$NON-NLS-1$
+		if (atts.containsKey("bearing")) { //$NON-NLS-1$
+			wp.setDirection(((Number) atts.get("bearing")).floatValue()); //$NON-NLS-1$
 		}
 
 		if (atts.containsKey("comment")) { //$NON-NLS-1$
@@ -227,8 +259,8 @@ public abstract class IJsonFeatureProcessor {
 		}
 		
 		wp.setObservationGroups(new ArrayList<>());
-		if (atts.containsKey("groups")) { //$NON-NLS-1$
-			JSONArray groups = (JSONArray) atts.get("groups"); //$NON-NLS-1$
+		if (atts.containsKey("observationGroups")) { //$NON-NLS-1$
+			JSONArray groups = (JSONArray) atts.get("observationGroups"); //$NON-NLS-1$
 			for (int j = 0; j < groups.size(); j++) {
 				JSONObject group = (JSONObject) groups.get(j);
 
@@ -371,6 +403,7 @@ public abstract class IJsonFeatureProcessor {
 	}
 	
 	private Category findCategory(String hkey, ConservationArea ca, Session session) {
+		if (!hkey.endsWith(".")) hkey = hkey + ".";  //$NON-NLS-1$//$NON-NLS-2$
 		Category c = QueryFactory.buildQuery(session, Category.class, new Object[] { "conservationArea", ca }, //$NON-NLS-1$
 				new Object[] { "hkey", hkey }).uniqueResult(); //$NON-NLS-1$
 		return c;
@@ -400,31 +433,22 @@ public abstract class IJsonFeatureProcessor {
 	
 		switch (a.getAttribute().getType()) {
 		case BOOLEAN:
-			if (value instanceof Boolean) {
-				Boolean b = (Boolean) value;
-				a.setNumberValue(b ? 1.0 : 0.0);
-			} else if (value instanceof Double) {
-				a.setNumberValue((Double) value);
-			}else if (value instanceof String) {
-				if (((String) value).equalsIgnoreCase("true")) { //$NON-NLS-1$
+			try {
+				if (parseBoolean(value)) {
 					a.setNumberValue(1.0);
-				}else if (((String) value).equalsIgnoreCase("false")) { //$NON-NLS-1$
+				}else {
 					a.setNumberValue(0.0);
 				}
-			}
-			if (a.getNumberValue() == null) {
+			}catch (Exception ex) {
 				throw new Exception(MessageFormat.format(
 						Messages.INVALID_BOOLEAN_ATTRIBUTE.getMessage(locale),
 						value.toString(), a.getAttribute().getName()));
 			}
 			break;
 		case DATE:
-			if (value instanceof String) {
-				LocalDate d = LocalDate.parse((String) value);
-				a.setDateValue(d);
-			} else if (value instanceof LocalDate) {
-				a.setDateValue((LocalDate) value);
-			} else {
+			try {
+				a.setDateValue(parseDate(value));
+			}catch (Exception ex) {
 				throw new Exception(MessageFormat.format(
 						Messages.INVALID_DATE_ATTRIBUTE.getMessage(locale),
 						value.toString(), a.getAttribute().getName()));
@@ -481,9 +505,9 @@ public abstract class IJsonFeatureProcessor {
 			}
 			break;
 		case NUMERIC:
-			if (value instanceof Number) {
-				a.setNumberValue(((Number) value).doubleValue());
-			} else {
+			try {
+				a.setNumberValue(parseNumeric(value));
+			} catch (Exception ex) {
 				throw new Exception(MessageFormat.format(
 						Messages.INVALID_NUMBER_ATTRIBUTE.getMessage(locale),
 						value.toString(), a.getAttribute().getName()));
@@ -495,7 +519,8 @@ public abstract class IJsonFeatureProcessor {
 		case TREE:
 
 			String tkey = value.toString();
-
+			if (!tkey.endsWith(".")) tkey = tkey + ".";  //$NON-NLS-1$//$NON-NLS-2$
+			
 			Deque<AttributeTreeNode> q = new ArrayDeque<>();
 			q.addAll(a.getAttribute().getTree());
 			AttributeTreeNode found = null;
@@ -519,5 +544,33 @@ public abstract class IJsonFeatureProcessor {
 			break;
 		}
 	}
+	
+	protected Boolean parseBoolean( Object value) throws Exception{
+		if (value instanceof Boolean) {
+			return (Boolean) value;
+		} else if (value instanceof Double) {
+			return (((Double)value) > 0.5);
+		}else if (value instanceof String) {
+			if (((String) value).equalsIgnoreCase("true")) { //$NON-NLS-1$
+				return Boolean.TRUE;
+			}else if (((String) value).equalsIgnoreCase("false")) { //$NON-NLS-1$
+				return Boolean.FALSE;
+			}
+		}
+		throw new Exception(MessageFormat.format("Could not parse boolean value from {0}", value.toString())); //$NON-NLS-1$
+	}
 
+	protected LocalDate parseDate( Object value ) throws Exception{
+		if (value instanceof String) {
+			return LocalDate.parse((String) value);
+		} else if (value instanceof LocalDate) {
+			return ((LocalDate) value);
+		}
+		throw new Exception(MessageFormat.format("Could not parse date value from {0}", value.toString())); //$NON-NLS-1$
+	}
+	
+	protected Double parseNumeric( Object value ) throws Exception{
+		if (value instanceof Number) return (((Number) value).doubleValue());
+		throw new Exception(MessageFormat.format("Could not parse number value from {0}", value.toString())); //$NON-NLS-1$
+	}
 }

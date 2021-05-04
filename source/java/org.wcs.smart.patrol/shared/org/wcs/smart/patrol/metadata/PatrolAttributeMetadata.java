@@ -60,11 +60,9 @@ public class PatrolAttributeMetadata {
 		MANDATE("mandate", Attribute.AttributeType.LIST), //$NON-NLS-1$
 		OBJECTIVE("objective", Attribute.AttributeType.TEXT), //$NON-NLS-1$
 		COMMENT("comment", Attribute.AttributeType.TEXT), //$NON-NLS-1$
-		STARTDATE("startDate", Attribute.AttributeType.DATE), //$NON-NLS-1$
-		ENDDATE("endDate", Attribute.AttributeType.DATE), //$NON-NLS-1$
-		EMPLOYEES("employees", Attribute.AttributeType.LIST), //$NON-NLS-1$
+		EMPLOYEES("members", Attribute.AttributeType.LIST), //$NON-NLS-1$
 		LEADER("leader", Attribute.AttributeType.LIST), //$NON-NLS-1$
-		PILOT("leader", Attribute.AttributeType.LIST), //$NON-NLS-1$
+		PILOT("pilot", Attribute.AttributeType.LIST), //$NON-NLS-1$
 		PATROLID("patrolId", Attribute.AttributeType.TEXT); //$NON-NLS-1$
 		
 		String key;
@@ -86,10 +84,8 @@ public class PatrolAttributeMetadata {
 		public PatrolAttributeMetadata toMetadata(Session session, ConservationArea ca) {
 			PatrolAttributeMetadata item = new PatrolAttributeMetadata(key, type);
 			if (this == TRANSPORT_TYPE || this == MANDATE ||
-				this == STARTDATE || this == EMPLOYEES || this == LEADER) {
+				this == EMPLOYEES || this == LEADER) {
 				item.setRequired(true);
-			}else if (this == LEADER) {
-				
 			}else {
 				item.setRequired(false);
 			}

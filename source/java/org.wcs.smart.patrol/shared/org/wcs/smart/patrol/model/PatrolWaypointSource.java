@@ -33,8 +33,10 @@ import javax.persistence.Query;
 import org.hibernate.Session;
 import org.hibernate.StatelessSession;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.observation.json.IJsonFeatureProcessor;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.patrol.json.PatrolJsonFeatureProcessor;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -59,6 +61,11 @@ public class PatrolWaypointSource implements IWaypointSource {
 	@Override
 	public String getName(Locale l) {
 		return SmartContext.INSTANCE.getClass(IPatrolLabelProvider.class).getLabel(this, l);
+	}
+
+	@Override
+	public Class<? extends IJsonFeatureProcessor> getJsonFeatureProcessor() {
+		return PatrolJsonFeatureProcessor.class;
 	}
 
 	public String getDatastoreFileLocation(Patrol p){

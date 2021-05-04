@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Locale;
 
 import org.wcs.smart.ISharedLabelProvider;
+import org.wcs.smart.patrol.json.PatrolJsonFeatureProcessor;
 import org.wcs.smart.patrol.metadata.PatrolAttributeMetadata;
 
 /**
@@ -51,4 +52,6 @@ public interface IPatrolLabelProvider extends ISharedLabelProvider {
 	public static final String MANDATEACTIVE_KEY = "mandateactivekey"; //$NON-NLS-1$
 	
 	public HashMap<Locale, String> getNames(PatrolAttributeMetadata.FixedMetadata metadataOption);
+	
+	public String getMessage(PatrolJsonFeatureProcessor.Messages message, Locale l);
 }

@@ -63,6 +63,7 @@ import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.PatrolLegStartDateComparator;
 import org.wcs.smart.patrol.PatrolUtils;
+import org.wcs.smart.patrol.UiPatrolUtils;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.editpatrol.EditPatrolDateLegsDialog;
@@ -163,7 +164,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 			lblDateInfo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			
 			lnkEditDate = new Link(tmp, SWT.NONE);
-			lnkEditDate.setText("<a>" + PatrolUtils.EDIT_LINK_TEXT + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
+			lnkEditDate.setText("<a>" + UiPatrolUtils.EDIT_LINK_TEXT + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 			lnkEditDate.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 			lnkEditDate.addSelectionListener(new SelectionAdapter(){
 				public void widgetSelected(SelectionEvent e) {

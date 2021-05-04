@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2021 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -29,16 +29,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.swt.graphics.Image;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.LineString;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
-import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Track;
-import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.TrackUtil;
 
 /**
@@ -49,49 +45,6 @@ import org.wcs.smart.util.TrackUtil;
  */
 public class PatrolUtils {
 
-	public static final String EDIT_LINK_TEXT = DialogConstants.EDIT_LINK_TEXT;
-	/**
-	 * Returns the image to use for a given patrol type or
-	 * null if no image found
-	 * 
-	 * @param type patrol type
-	 * 
-	 * @return image associated with patrol type
-	 */
-	public static Image getImage(PatrolType.Type type){
-		if (type == PatrolType.Type.GROUND){
-			return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.GROUND_PATROL_ICON);
-		}else if (type == PatrolType.Type.MARINE){
-			return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.MARINE_PATROL_ICON);
-		}else if (type == PatrolType.Type.AIR){
-			return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.AIR_PATROL_ICON);
-		}else if (type == PatrolType.Type.MIXED){
-			return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.MIXED_PATROL_ICON);
-		}
-		return null;
-	}
-	
-	/**
-	 * Returns the image descriptor to use for a given patrol type or
-	 * null if no image found
-	 * 
-	 * @param type patrol type
-	 * 
-	 * @return image descriptor associated with patrol type
-	 */
-	public static ImageDescriptor getImageDescriptor(PatrolType.Type type){
-		if (type == PatrolType.Type.GROUND){
-			return SmartPatrolPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPatrolPlugIn.GROUND_PATROL_ICON);
-		}else if (type == PatrolType.Type.MARINE){
-			return SmartPatrolPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPatrolPlugIn.MARINE_PATROL_ICON);
-		}else if (type == PatrolType.Type.AIR){
-			return SmartPatrolPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPatrolPlugIn.AIR_PATROL_ICON);
-		}else if (type == PatrolType.Type.MIXED){
-			return SmartPatrolPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPatrolPlugIn.MIXED_PATROL_ICON);
-		}
-		return null;
-	}
-	
 	/**
 	 * Converts a set of coordinate to a track.  Coordinates are first sorted
 	 * by date/time which should be stored in the  z coordinate IN GMT. Use
@@ -109,7 +62,7 @@ public class PatrolUtils {
 		t.setLineStrings(Arrays.asList(track));
 		return t;
 	}
-	
+
 	/**
 	 * Takes a Patrol adds in single-day PatrolLegs(with PatrolLegDays) for any days
 	 *  between the start and end dates that do not have a PatrolLeg on them. 
@@ -122,11 +75,11 @@ public class PatrolUtils {
 			legList = new ArrayList<PatrolLeg>();
 			patrol.setLegs(legList);
 		}
-		createLegDaysForMissingDays(patrol, patrol.getStartDate(), patrol.getEndDate(), legList);
+		PatrolUtils.createLegDaysForMissingDays(patrol, patrol.getStartDate(), patrol.getEndDate(), legList);
 	}
 
 	/**
-	 * Takes a Patrol and a list of PatrolLegs and extends PatrolLegs (with emptry PatrolLegDays) for any days
+	 * Takes a Patrol and a list of PatrolLegs and extends PatrolLegs (with empty PatrolLegDays) for any days
 	 * between the start and end dates that do not have a PatrolLeg on them. The date range and list of legs is passed in
 	 * because the PatrolLegsComposite works on a cloned list of legs.
 	 * 
@@ -141,7 +94,7 @@ public class PatrolUtils {
 		for(PatrolLeg leg : legs) {
 			// while there is no leg on the day after this leg ends, and it is still within the patrol date range,
 			LocalDate working = leg.getEndDate().plusDays(1);
-			while(!working.isAfter(endDate) && !hasLegOnDate(legs, working)){
+			while(!working.isAfter(endDate) && !PatrolUtils.hasLegOnDate(legs, working)){
 				// extend this leg by one day
 				PatrolLegDay pld = new PatrolLegDay();
 				pld.setPatrolLeg(leg);
@@ -173,7 +126,7 @@ public class PatrolUtils {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Loops through a list of PatrolLegs and returns the earliest startDate and latest EndDate.
 	 * 
@@ -192,5 +145,5 @@ public class PatrolUtils {
 		}
 		return dates;
 	}
-	
+
 }

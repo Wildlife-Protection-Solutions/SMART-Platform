@@ -44,6 +44,7 @@ public class CaDeleteHandler implements ICaDeleteHandler {
 		
 		monitor.subTask(Messages.CaDeleteHandler_ProgressDeleteWp);
 		deleteWaypoints(ca, session);
+		deleteDataLinks(ca, session);
 
 	}
 	
@@ -53,4 +54,9 @@ public class CaDeleteHandler implements ICaDeleteHandler {
 		q.executeUpdate();
 	}
 
+	private void deleteDataLinks(ConservationArea ca, Session session){
+		Query<?> q = session.createQuery("delete from DataLink where conservationArea = :ca"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.executeUpdate();
+	}
 }

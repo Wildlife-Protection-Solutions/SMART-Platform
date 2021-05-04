@@ -47,7 +47,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
-import org.wcs.smart.patrol.PatrolUtils;
+import org.wcs.smart.patrol.UiPatrolUtils;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolLeg;
@@ -103,7 +103,7 @@ public class PatrolTransportComposite extends PatrolLegItemComposite{
 			}
 			public Image getImage(Object element) {
 				if (element instanceof PatrolTransportType){
-					return PatrolUtils.getImage(((PatrolTransportType) element).getPatrolType());
+					return UiPatrolUtils.getImage(((PatrolTransportType) element).getPatrolType());
 				}
 				return null;
 			}

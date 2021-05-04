@@ -56,6 +56,14 @@ public class PatrolAttribute extends NamedKeyItem{
 
 	private static final long serialVersionUID = 1L;
 	
+	public static final Attribute.AttributeType[] SUPPORTED_TYPES = new Attribute.AttributeType[]{
+		Attribute.AttributeType.NUMERIC,
+		Attribute.AttributeType.TEXT,
+		Attribute.AttributeType.LIST,
+		Attribute.AttributeType.BOOLEAN,
+		Attribute.AttributeType.DATE,
+	};
+	
 	private ConservationArea conservationArea;
 	private Attribute.AttributeType type;
 	private boolean isActive;

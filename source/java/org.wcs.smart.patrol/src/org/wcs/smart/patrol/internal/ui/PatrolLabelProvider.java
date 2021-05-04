@@ -26,6 +26,7 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 import org.wcs.smart.patrol.internal.Messages;
+import org.wcs.smart.patrol.json.PatrolJsonFeatureProcessor;
 import org.wcs.smart.patrol.metadata.PatrolAttributeMetadata;
 import org.wcs.smart.patrol.model.IPatrolLabelProvider;
 import org.wcs.smart.patrol.model.PatrolType;
@@ -61,9 +62,43 @@ public class PatrolLabelProvider implements IPatrolLabelProvider {
 		if (item.equals(TRANSPORTTYPE_KEY)) return Messages.PatrolLabelProvider_PatrolTypeColumnName;
 		if (item.equals(MANDATENAME_KEY)) return Messages.PatrolLabelProvider_PatrolMandateColumnName;
 		if (item.equals(MANDATEACTIVE_KEY)) return Messages.PatrolLabelProvider_MandateActiveColumnName;
+		
+		if (item instanceof PatrolJsonFeatureProcessor.Messages) {
+			return getMessage((PatrolJsonFeatureProcessor.Messages)item, l);
+		}
 		return null;
 	}
 
+	@Override
+	public String getMessage(PatrolJsonFeatureProcessor.Messages message, Locale l) {
+		switch(message) {
+		case COMPLETE_MSG: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE;
+		case INVALID_DATA_TYPE: return Messages.PatrolLabelProvider_JSONPROCESSOR_1;
+		case INVALID_FEATURE_TYPE: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_2;
+		case MISSING_PROPERTY: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_3;
+		case PATROLLEG_LINK_MISSING: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_4;
+		case PATROL_LINK_MISSING: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_5;
+		case PATROL_LINK_EXISTS: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_6;
+		case PATROLLEG_LINK_EXISTS: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_7;
+		case PATROLLEG_MISSING: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_8;
+		case TRANSPORTTYPE_MISSING: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_9;
+		case MANDATE_MISSING: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_10;
+		case MANDATE_EXISTING: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_11;
+		case EMPLOYEE_NOT_FOUND: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_12;
+		case NO_EMPLOYEES: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_13;
+		case NO_LEADER: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_14;
+		case NO_PILOT: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_15;
+		case INVALID_PATROL_UUID: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_16;
+		case INVALID_PATROLLEG_UUID: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_17;
+		case PATROL_EXISTS: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_18;
+		case PATROLLEG_EXISTS: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_19;
+		case TEAM_MISSING: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_20;
+		case STATION_MISSING: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_21;
+		case CUSTOM_ATTRIBUTE_ERROR: return Messages.PatrolLabelProvider_JSONPROCESSOR_COMPLETE_22;
+		}
+		return ""; //$NON-NLS-1$
+	}
+	
 	public HashMap<Locale, String> getNames(PatrolAttributeMetadata.FixedMetadata metadataOption){
 		HashMap<Locale, String> translations = new HashMap<>();
 		
@@ -77,9 +112,6 @@ public class PatrolLabelProvider implements IPatrolLabelProvider {
 			break;
 		case EMPLOYEES:
 			key = Messages.PatrolLabelProvider_EmployeesMetadata;
-			break;
-		case ENDDATE:
-			key = Messages.PatrolLabelProvider_EndDateMetadata;
 			break;
 		case LEADER:
 			key = Messages.PatrolLabelProvider_LeaderMetadata;
@@ -96,9 +128,6 @@ public class PatrolLabelProvider implements IPatrolLabelProvider {
 		case PILOT:
 			key = Messages.PatrolLabelProvider_PilotMetadata;
 			break;
-		case STARTDATE:
-			key = Messages.PatrolLabelProvider_StationDateMetadata;
-			break;
 		case STATION:
 			key = Messages.PatrolLabelProvider_StationMetadata;
 			break;
@@ -114,13 +143,13 @@ public class PatrolLabelProvider implements IPatrolLabelProvider {
 		}
 		//english
 		Locale en = Locale.forLanguageTag("en"); //$NON-NLS-1$
-		String enl = ResourceBundle.getBundle(Messages.BUNDLE_NAME, Locale.ROOT).getString(key); //$NON-NLS-1$
+		String enl = ResourceBundle.getBundle("", Locale.ROOT).getString(key); //$NON-NLS-1$
 		translations.put(en, enl);
 
 		for (Locale locale : Locale.getAvailableLocales()) {
 			if (locale.equals(en)) continue;
 			try {
-				ResourceBundle b = ResourceBundle.getBundle(Messages.BUNDLE_NAME, locale); //$NON-NLS-1$
+				ResourceBundle b = ResourceBundle.getBundle("", locale); //$NON-NLS-1$
 				if (b != null) {
 					String value = b.getString(key);
 					translations.put(locale, value);	

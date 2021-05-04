@@ -91,7 +91,7 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolEventManager.EventType;
 import org.wcs.smart.patrol.PatrolEventManager.IPatrolEventListener;
-import org.wcs.smart.patrol.PatrolUtils;
+import org.wcs.smart.patrol.UiPatrolUtils;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.ArmedComposite;
@@ -130,7 +130,7 @@ public class PatrolSummaryEditor extends EditorPart {
 	/**
 	 * 
 	 */
-	private static final String EDIT_LABEL = PatrolUtils.EDIT_LINK_TEXT;
+	private static final String EDIT_LABEL = UiPatrolUtils.EDIT_LINK_TEXT;
 	private static final int WIDTH_HINT = 50;	//width hint for fields
 	private static final int EMPLOYEE_LIST_HEIGHT_HINT = 50;
 	

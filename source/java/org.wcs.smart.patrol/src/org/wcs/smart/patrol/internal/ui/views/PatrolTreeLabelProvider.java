@@ -37,7 +37,7 @@ import org.wcs.smart.ca.IFolder;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.common.folder.NoneFolder;
-import org.wcs.smart.patrol.PatrolUtils;
+import org.wcs.smart.patrol.UiPatrolUtils;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.views.DateGroupBy.Type;
@@ -71,7 +71,7 @@ public class PatrolTreeLabelProvider extends ColumnLabelProvider {
 	public Image getImage(Object element){
 		if (element instanceof PatrolEditorInput){
 			PatrolEditorInput p = (PatrolEditorInput)element;
-			return PatrolUtils.getImage(p.getType());			
+			return UiPatrolUtils.getImage(p.getType());			
 		}else if (element instanceof PatrolMandate){
 			return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_MANDATE_ICON);
 		}else if (element instanceof Team){
@@ -79,9 +79,9 @@ public class PatrolTreeLabelProvider extends ColumnLabelProvider {
 		}else if (element instanceof Station){
 			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.STATION_ICON);
 		}else if (element instanceof PatrolType.Type){
-			return PatrolUtils.getImage((PatrolType.Type)element);	
+			return UiPatrolUtils.getImage((PatrolType.Type)element);	
 		}else if (element instanceof PatrolTransportType){
-			return PatrolUtils.getImage(((PatrolTransportType)element).getPatrolType());
+			return UiPatrolUtils.getImage(((PatrolTransportType)element).getPatrolType());
 		}else if (element instanceof DateGroupBy){
 			if (((DateGroupBy)element).getType() == Type.MONTH){
 				return SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.MONTH_ICON);

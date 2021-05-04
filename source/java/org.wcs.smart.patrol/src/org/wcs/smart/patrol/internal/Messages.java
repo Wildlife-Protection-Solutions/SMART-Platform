@@ -3,6 +3,7 @@ package org.wcs.smart.patrol.internal;
 import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
+	
 	public static final String BUNDLE_NAME = "org.wcs.smart.patrol.internal.messages"; //$NON-NLS-1$
 	
 	public static String AddWaypointDialog_DialogMessage;
@@ -323,20 +324,13 @@ public class Messages extends NLS {
 	public static String PatrolExporter_Progress_Exporting;
 	public static String PatrolExporter_Progress_PackagingResults;
 	public static String PatrolExporter_Progress_WritingToFile;
-public static String PatrolFeatureSource_ProjectedWaypointLayerName;
+	public static String PatrolFeatureSource_ProjectedWaypointLayerName;
 	public static String PatrolFeatureSource_TrackLayerName;
 	public static String PatrolFeatureSource_WaypointLayerName;
-	//	public static String PatrolFilterDialog_Apply_Button;
 	public static String PatrolFilterDialog_DialogMessage;
 	public static String PatrolFilterDialog_DialogTitle;
-//	public static String PatrolFilterDialog_Error_DateMustBeSelected;
-//	public static String PatrolFilterDialog_Error_EndDateBeforeStart;
-//	public static String PatrolFilterDialog_OpContainDatesLabel_A;
-//	public static String PatrolFilterDialog_OpContainDatesLabel_B;
-//	public static String PatrolFilterDialog_OpFilterDatesLabel;
 	public static String PatrolFilterDialog_OpFilterPatrolIdLabel;
 	public static String PatrolFilterDialog_OpFilterTypesLabel;
-//	public static String PatrolFilterDialog_OpIncludeAllDatesLabel;
 	public static String PatrolFilterDialog_OpIncludeAllPatrolsIdsLabel;
 	public static String PatrolFilterDialog_OpIncludeAllTypesLabel;
 	public static String PatrolFilterDialog_PatrolDatesGroupLabel;
@@ -397,6 +391,52 @@ public static String PatrolFeatureSource_ProjectedWaypointLayerName;
 	public static String PatrolLabelProvider_DescriptionColumnName;
 	public static String PatrolLabelProvider_EmployeesMetadata;
 	public static String PatrolLabelProvider_EndDateMetadata;
+	public static String PatrolLabelProvider_JSONPROCESSOR_1;
+
+	public static String PatrolLabelProvider_JSONPROCESSOR_COMPLETE;
+
+	public static String PatrolLabelProvider_JSONPROCESSOR_COMPLETE_10;
+
+	public static String PatrolLabelProvider_JSONPROCESSOR_COMPLETE_11;
+
+	public static String PatrolLabelProvider_JSONPROCESSOR_COMPLETE_12;
+
+	public static String PatrolLabelProvider_JSONPROCESSOR_COMPLETE_13;
+
+	public static String PatrolLabelProvider_JSONPROCESSOR_COMPLETE_14;
+
+	public static String PatrolLabelProvider_JSONPROCESSOR_COMPLETE_15;
+
+	public static String PatrolLabelProvider_JSONPROCESSOR_COMPLETE_16;
+
+	public static String PatrolLabelProvider_JSONPROCESSOR_COMPLETE_17;
+
+	public static String PatrolLabelProvider_JSONPROCESSOR_COMPLETE_18;
+
+	public static String PatrolLabelProvider_JSONPROCESSOR_COMPLETE_19;
+
+	public static String PatrolLabelProvider_JSONPROCESSOR_COMPLETE_2;
+
+	public static String PatrolLabelProvider_JSONPROCESSOR_COMPLETE_20;
+
+	public static String PatrolLabelProvider_JSONPROCESSOR_COMPLETE_21;
+
+	public static String PatrolLabelProvider_JSONPROCESSOR_COMPLETE_22;
+
+	public static String PatrolLabelProvider_JSONPROCESSOR_COMPLETE_3;
+
+	public static String PatrolLabelProvider_JSONPROCESSOR_COMPLETE_4;
+
+	public static String PatrolLabelProvider_JSONPROCESSOR_COMPLETE_5;
+
+	public static String PatrolLabelProvider_JSONPROCESSOR_COMPLETE_6;
+
+	public static String PatrolLabelProvider_JSONPROCESSOR_COMPLETE_7;
+
+	public static String PatrolLabelProvider_JSONPROCESSOR_COMPLETE_8;
+
+	public static String PatrolLabelProvider_JSONPROCESSOR_COMPLETE_9;
+
 	public static String PatrolLabelProvider_LeaderMetadata;
 	public static String PatrolLabelProvider_MandateActiveColumnName;
 	public static String PatrolLabelProvider_MandateColumnName;

@@ -28,7 +28,7 @@ import java.util.UUID;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
-import org.wcs.smart.patrol.PatrolUtils;
+import org.wcs.smart.patrol.UiPatrolUtils;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolType;
@@ -140,7 +140,7 @@ public class PatrolEditorInput implements IEditorInput {
 	 */
 	@Override
 	public ImageDescriptor getImageDescriptor() {		
-		return PatrolUtils.getImageDescriptor(this.type);
+		return UiPatrolUtils.getImageDescriptor(this.type);
 	}
 
 	/**

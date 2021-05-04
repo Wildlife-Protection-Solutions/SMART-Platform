@@ -178,13 +178,7 @@ public class EditPatrolAttributeDialog extends SmartStyledTitleDialog implements
 				return ((Attribute.AttributeType)element).getName(Locale.getDefault());
 			}
 		});
-		cmbType.setInput(new Object[]{
-				Attribute.AttributeType.NUMERIC,
-				Attribute.AttributeType.TEXT,
-				Attribute.AttributeType.LIST,
-				Attribute.AttributeType.BOOLEAN,
-				Attribute.AttributeType.DATE,
-		});
+		cmbType.setInput(PatrolAttribute.SUPPORTED_TYPES);
 		
 		Combo combo = cmbType.getCombo();
 		combo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
