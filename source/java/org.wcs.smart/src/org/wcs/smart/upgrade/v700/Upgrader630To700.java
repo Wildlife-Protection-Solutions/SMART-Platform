@@ -276,7 +276,9 @@ public class Upgrader630To700 implements IDatabaseUpgrader {
 				"ALTER TABLE smart.wp_observation_attributes alter column string_value set data type varchar(8200)", //$NON-NLS-1$
 				"ALTER TABLE smart.patrol_attribute_value alter column string_value set data type varchar(8200)", //$NON-NLS-1$
 				
-				
+				"CREATE TABLE smart.data_link(uuid char(16) for bit data not null,ca_uuid char(16) for bit data not null,data_type varchar(128) not null, provider_id char(16) for bit data not null,smart_id char(16) for bit data not null, last_modified timestamp, unique(provider_id), primary key (uuid))", //$NON-NLS-1$
+				"ALTER TABLE smart.data_link ADD CONSTRAINT datalink_ca_uuid FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON smart.data_link TO admin,manager,analyst,data_entry", //$NON-NLS-1$
 		};
 
 		for (String s : sql) {

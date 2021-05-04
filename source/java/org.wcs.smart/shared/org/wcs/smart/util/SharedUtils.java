@@ -93,7 +93,7 @@ public class SharedUtils {
 		return LocalDateTime.ofInstant(Instant.ofEpochMilli(z), ZoneOffset.UTC);
 	}
 	/**
-	 * converst the z value from a track coordinate to the local date time
+	 * converts the z value from a track coordinate to the local date time
 	 * @param c
 	 * @return
 	 */

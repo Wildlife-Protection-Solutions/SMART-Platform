@@ -52,11 +52,17 @@ public class TrackUtil {
 		}
 
 		// copy the list so changes don't affect other parts of the s/w
-		coordinates = new ArrayList<Coordinate>(coordinates);
-		for (int i = 0; i < coordinates.size(); i ++){
-			coordinates.set(i, new Coordinate(coordinates.get(i)));
-		}
+		coordinates = new ArrayList<>(coordinates);
 		
+		//check for initial duplicate and remove
+		if (coordinates.size() > 2) {
+			Coordinate c1 = coordinates.get(0);
+			Coordinate c2 = coordinates.get(1);
+			if (c1.x == c2.x && c1.y == c2.y && c1.z == c2.z) {
+				coordinates.remove(0);
+			}
+		}
+
 		Collections.sort(coordinates, new Comparator<Coordinate>() {
 			@Override
 			public int compare(Coordinate o1, Coordinate o2) {
@@ -69,4 +75,27 @@ public class TrackUtil {
 		return track;
 	}
 	
+//	public static void main(String[] args) {
+//		Coordinate c1 = new Coordinate(0, 0, 0);
+//		Coordinate c2 = new Coordinate(0, 0, 0.5);
+//		Coordinate c3 = new Coordinate(1, 1, 1);
+//		Coordinate c4 = new Coordinate(3, 3, 3);
+//		Coordinate c5 = new Coordinate(2, 2, 2);
+//		
+//		List<Coordinate> items = new ArrayList<>();
+//		items.add(c1);
+//		items.add(c2);
+//		items.add(c3);
+//		items.add(c4);
+//		items.add(c5);
+//		
+//		LineString ls = convertToLineString(items);
+//		
+//		for (Coordinate c : items) {
+//			System.out.println("Coordinate(" + c.x + " " + c.y + " " + c.z + ")");
+//		}
+//		
+//		System.out.println(ls.toText());
+//	}
 }
+

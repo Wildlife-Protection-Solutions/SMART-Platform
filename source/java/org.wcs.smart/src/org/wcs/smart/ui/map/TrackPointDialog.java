@@ -58,6 +58,8 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CTabFolder;
+import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -73,8 +75,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.TabFolder;
-import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.ui.XMLMemento;
 import org.geotools.data.DataUtilities;
 import org.geotools.data.FeatureStore;
@@ -174,19 +174,20 @@ public abstract class TrackPointDialog extends SmartStyledTitleDialog implements
 	 * @see org.eclipse.jface.dialogs.TitleAreaDialog#createDialogArea(org.eclipse.swt.widgets.Composite)
 	 */
 	protected Control createDialogArea(Composite parent) {
+		parent = (Composite) super.createDialogArea(parent);
 		super.setMessage(Messages.TrackPointDialog_DialogMessage);
 		
 		SashForm main = new SashForm(parent, SWT.HORIZONTAL);
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		TabFolder tabFolder = new TabFolder(main, SWT.TOP);
+		CTabFolder tabFolder = new CTabFolder(main, SWT.TOP);
 		tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		//point list
 		createPointList(tabFolder);
 		
 		//map layers
-		TabItem  layerListTabItem = new TabItem(tabFolder, SWT.NONE);
+		CTabItem  layerListTabItem = new CTabItem(tabFolder, SWT.NONE);
 		layerListTabItem.setText(Messages.TrackPointDialog_MapLayersTableName);
 		
 		Composite layersTab = new Composite(tabFolder, SWT.NONE);
@@ -223,8 +224,8 @@ public abstract class TrackPointDialog extends SmartStyledTitleDialog implements
 	/*
 	 * setup point list and layer list
 	 */
-	private void createPointList(TabFolder tabFolder) {
-		TabItem pntsTabItem = new TabItem(tabFolder, SWT.NONE);
+	private void createPointList(CTabFolder tabFolder) {
+		CTabItem pntsTabItem = new CTabItem(tabFolder, SWT.NONE);
 		pntsTabItem.setText(Messages.TrackPointDialog_TrackPointsTabName);
 		
 		Composite pntsTab = new Composite(tabFolder, SWT.NONE);
@@ -364,6 +365,8 @@ public abstract class TrackPointDialog extends SmartStyledTitleDialog implements
 		
 		if (canEdit){
 			btnUndo = new Button(buttonPanel, SWT.NONE);
+			btnUndo.setBackground(buttonPanel.getDisplay().getSystemColor(SWT.COLOR_WHITE));
+			btnUndo.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.UNDO_ICON));
 			btnUndo.setText(Messages.TrackPointDialog_UndoButtonText);
 			btnUndo.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
 			btnUndo.addSelectionListener(new SelectionAdapter() {
@@ -375,6 +378,8 @@ public abstract class TrackPointDialog extends SmartStyledTitleDialog implements
 			btnUndo.setEnabled(false);
 			
 			Button btnDelete = new Button(buttonPanel, SWT.NONE);
+			btnDelete.setBackground(buttonPanel.getDisplay().getSystemColor(SWT.COLOR_WHITE));
+			btnDelete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 			btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 			btnDelete.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 			btnDelete.addSelectionListener(new SelectionAdapter() {
