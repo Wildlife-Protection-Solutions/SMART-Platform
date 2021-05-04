@@ -183,6 +183,7 @@ import org.wcs.smart.i2.model.IntelWorkingSetRecord;
 import org.wcs.smart.i2.model.RelationshipDiagramEntityTypeStyle;
 import org.wcs.smart.i2.model.RelationshipDiagramRelationshipTypeStyle;
 import org.wcs.smart.i2.model.RelationshipDiagramStyle;
+import org.wcs.smart.observation.model.DataLink;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.observation.model.Waypoint;
@@ -288,6 +289,7 @@ public enum SmartTable {
 	CTMISSIONWPLINK(CtMissionWpLink.class, ".link.mission.survey.surveyDesign.conservationArea"),
 	
 	CMPTPROPPROFILE(ConfigurableModelCtPropertiesProfile.class, ".id.model.conservationArea"),
+	DATALINK(DataLink.class, null),
 	DASHBOARD(Dashboard.class, null),
 	ENTITY(Entity.class,".entityType.conservationArea"),
 	ENTITYATTRIBUTE(EntityAttribute.class,".entityType.conservationArea"),

@@ -189,11 +189,7 @@ public class DataApi extends HttpServlet{
 				}
 				
 				return pMetadata;
-				
-//				return Response.status(Response.Status.OK)
-//						.entity(items.toString())
-//						.type(MediaType.APPLICATION_JSON)
-//						.build();
+
 			}finally {
 				s.getTransaction().commit();
 			}

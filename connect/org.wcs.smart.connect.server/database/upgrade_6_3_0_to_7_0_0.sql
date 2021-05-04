@@ -976,6 +976,12 @@ alter table smart.I_ENTITY_RELATIONSHIP_ATTRIBUTE_VALUE alter column string_valu
 alter table smart.I_OBSERVATION_ATTRIBUTE alter column string_value set data type varchar(8200);
 alter table smart.I_RECORD_ATTRIBUTE_VALUE alter column string_value set data type varchar(8200);
 
+-- datalink for api ---
+CREATE TABLE smart.data_link(uuid uuid not null, ca_uuid uuid not null, data_type varchar(128) not null, provider_id uuid not null, smart_id uuid not null, last_modified timestamp without time zone, unique(provider_id), primary key (uuid));
+ALTER TABLE smart.data_link ADD FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY DEFERRED;
+
+CREATE TRIGGER trg_data_link_type AFTER INSERT OR UPDATE OR DELETE ON smart.data_link FOR EACH ROW execute procedure connect.trg_changelog_common();			
+
 
 
 ------------ VERSIONS ------------

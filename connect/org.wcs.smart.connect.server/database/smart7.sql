@@ -4504,6 +4504,18 @@ CREATE TABLE smart.smartcollect_package(
   maplayersdef varchar(32672),
   primary key (uuid));
 
+CREATE TABLE smart.data_link(
+  uuid uuid not null, 
+  ca_uuid uuid not null, 
+  data_type varchar(128) not null, 
+  provider_id uuid not null, 
+  smart_id uuid not null, 
+  last_modified timestamp without time zone, 
+  unique(provider_id), 
+  primary key (uuid)
+);
+
+
 ALTER TABLE SMART.conservation_area_property ADD FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE ONLY smart.asset_attribute_list_item ADD CONSTRAINT asset_li_keyid_attribute_uuid_unq UNIQUE (keyid, attribute_uuid);
 ALTER TABLE ONLY smart.asset_module_settings ADD CONSTRAINT asset_module_key_ca_unq UNIQUE (keyid, ca_uuid);
@@ -4761,6 +4773,7 @@ CREATE TRIGGER trg_wp_observation_attributes AFTER INSERT OR DELETE OR UPDATE ON
 CREATE TRIGGER trg_wp_observation_attributes_list AFTER INSERT OR DELETE OR UPDATE ON smart.wp_observation_attributes_list FOR EACH ROW EXECUTE PROCEDURE connect.trg_wp_observation_attributes_list();
 CREATE TRIGGER ct_incident_package AFTER INSERT OR UPDATE OR DELETE ON  smart.ct_incident_package FOR EACH ROW execute procedure connect.trg_changelog_common();
 CREATE TRIGGER trg_signature_type AFTER INSERT OR UPDATE OR DELETE ON smart.signature_type FOR EACH ROW execute procedure connect.trg_changelog_common();			
+CREATE TRIGGER trg_data_link_type AFTER INSERT OR UPDATE OR DELETE ON smart.data_link FOR EACH ROW execute procedure connect.trg_changelog_common();			
 
 
 ALTER TABLE ONLY connect.alerts ADD CONSTRAINT alerts_ca_uuid_fkey FOREIGN KEY (ca_uuid) REFERENCES connect.ca_info(ca_uuid) ON UPDATE RESTRICT ON DELETE CASCADE;
@@ -5223,6 +5236,7 @@ ALTER TABLE smart.smartcollect_package ADD FOREIGN KEY (ctprofile_uuid) REFERENC
 ALTER TABLE SMART.ct_incident_package ADD CONSTRAINT ct_incident_package_ca_uuid_fk FOREIGN KEY (CA_UUID) REFERENCES smart.conservation_area(UUID) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE SMART.ct_incident_package ADD CONSTRAINT ct_incident_package_cm_uuid_fk FOREIGN KEY (CM_UUID) REFERENCES smart.configurable_model(UUID) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE SMART.ct_incident_package ADD CONSTRAINT ct_incident_package_ctprofile_uuid_fk FOREIGN KEY (ctprofile_uuid) REFERENCES smart.ct_properties_profile(UUID) ON UPDATE RESTRICT ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED;
+ALTER TABLE smart.data_link ADD FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(uuid) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY DEFERRED;
 
 
 CREATE TRIGGER trg_smartcollect_package AFTER INSERT OR UPDATE OR DELETE ON smart.smartcollect_package FOR EACH ROW execute procedure connect.trg_changelog_common();

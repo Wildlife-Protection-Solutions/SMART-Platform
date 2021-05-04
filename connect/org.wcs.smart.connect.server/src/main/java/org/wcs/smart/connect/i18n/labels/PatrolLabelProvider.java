@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Locale;
 
 import org.wcs.smart.connect.i18n.Messages;
+import org.wcs.smart.patrol.json.PatrolJsonFeatureProcessor;
 import org.wcs.smart.patrol.metadata.PatrolAttributeMetadata;
 import org.wcs.smart.patrol.model.IPatrolLabelProvider;
 import org.wcs.smart.patrol.model.PatrolType;
@@ -64,6 +65,10 @@ public class PatrolLabelProvider implements IPatrolLabelProvider {
 		if (item.equals(TRANSPORTTYPE_KEY)) return Messages.getString("PatrolLabelProvider.TransportPatrolColumn", l); //$NON-NLS-1$
 		if (item.equals(MANDATENAME_KEY)) return Messages.getString("PatrolLabelProvider.MandateColumn", l); //$NON-NLS-1$
 		if (item.equals(MANDATEACTIVE_KEY)) return Messages.getString("PatrolLabelProvider.MandateActiveColumn", l); //$NON-NLS-1$
+		
+		if (item instanceof PatrolJsonFeatureProcessor.Messages) {
+			return getMessage((PatrolJsonFeatureProcessor.Messages)item, l);
+		}
 		return null;
 	}
 	
@@ -82,9 +87,6 @@ public class PatrolLabelProvider implements IPatrolLabelProvider {
 		case EMPLOYEES:
 			key = "PatrolLabelProvider.MembersMetadata"; //$NON-NLS-1$
 			break;
-		case ENDDATE:
-			key = "PatrolLabelProvider.EndDateMetadata"; //$NON-NLS-1$
-			break;
 		case LEADER:
 			key = "PatrolLabelProvider.LeaderMetadata"; //$NON-NLS-1$
 			break;
@@ -99,9 +101,6 @@ public class PatrolLabelProvider implements IPatrolLabelProvider {
 			break;
 		case PILOT:
 			key = "PatrolLabelProvider.PilotMetadata"; //$NON-NLS-1$
-			break;
-		case STARTDATE:
-			key = "PatrolLabelProvider.StartDateMetadata"; //$NON-NLS-1$
 			break;
 		case STATION:
 			key = "PatrolLabelProvider.StationMetadata"; //$NON-NLS-1$
@@ -134,5 +133,36 @@ public class PatrolLabelProvider implements IPatrolLabelProvider {
 		
 		return translations;
 	}
+	
+	@Override
+	public String getMessage(PatrolJsonFeatureProcessor.Messages message, Locale l) {
+		switch(message) {
+			case COMPLETE_MSG: return Messages.getString("PatrolLabelProvider.JSONPATROL_1", l); //$NON-NLS-1$
+			case INVALID_DATA_TYPE: return Messages.getString("PatrolLabelProvider.JSONPATROL_2", l); //$NON-NLS-1$
+			case INVALID_FEATURE_TYPE: return Messages.getString("PatrolLabelProvider.JSONPATROL_3", l); //$NON-NLS-1$
+			case MISSING_PROPERTY: return Messages.getString("PatrolLabelProvider.JSONPATROL_4", l); //$NON-NLS-1$
+			case PATROLLEG_LINK_MISSING: return Messages.getString("PatrolLabelProvider.JSONPATROL_5", l); //$NON-NLS-1$
+			case PATROL_LINK_MISSING: return Messages.getString("PatrolLabelProvider.JSONPATROL_6", l); //$NON-NLS-1$
+			case PATROL_LINK_EXISTS: return Messages.getString("PatrolLabelProvider.JSONPATROL_7", l); //$NON-NLS-1$
+			case PATROLLEG_LINK_EXISTS: return Messages.getString("PatrolLabelProvider.JSONPATROL_8", l); //$NON-NLS-1$
+			case PATROLLEG_MISSING: return Messages.getString("PatrolLabelProvider.JSONPATROL_9", l); //$NON-NLS-1$
+			case TRANSPORTTYPE_MISSING: return Messages.getString("PatrolLabelProvider.JSONPATROL_10", l); //$NON-NLS-1$
+			case MANDATE_MISSING: return Messages.getString("PatrolLabelProvider.JSONPATROL_11", l); //$NON-NLS-1$
+			case MANDATE_EXISTING: return Messages.getString("PatrolLabelProvider.JSONPATROL_12", l); //$NON-NLS-1$
+			case EMPLOYEE_NOT_FOUND: return Messages.getString("PatrolLabelProvider.JSONPATROL_13", l); //$NON-NLS-1$
+			case NO_EMPLOYEES: return Messages.getString("PatrolLabelProvider.JSONPATROL_14", l); //$NON-NLS-1$
+			case NO_LEADER: return Messages.getString("PatrolLabelProvider.JSONPATROL_15", l); //$NON-NLS-1$
+			case NO_PILOT: return Messages.getString("PatrolLabelProvider.JSONPATROL_16", l); //$NON-NLS-1$
+			case INVALID_PATROL_UUID: return Messages.getString("PatrolLabelProvider.JSONPATROL_17", l); //$NON-NLS-1$
+			case INVALID_PATROLLEG_UUID: return Messages.getString("PatrolLabelProvider.JSONPATROL_18", l); //$NON-NLS-1$
+			case PATROL_EXISTS: return Messages.getString("PatrolLabelProvider.JSONPATROL_19", l); //$NON-NLS-1$
+			case PATROLLEG_EXISTS: return Messages.getString("PatrolLabelProvider.JSONPATROL_20", l); //$NON-NLS-1$
+			case TEAM_MISSING: return Messages.getString("PatrolLabelProvider.JSONPATROL_21", l); //$NON-NLS-1$
+			case STATION_MISSING: return Messages.getString("PatrolLabelProvider.JSONPATROL_22", l); //$NON-NLS-1$
+			case CUSTOM_ATTRIBUTE_ERROR: return Messages.getString("PatrolLabelProvider.JSONPATROL_23", l); //$NON-NLS-1$
+		}
+		return ""; //$NON-NLS-1$
+	}
+
 
 }
