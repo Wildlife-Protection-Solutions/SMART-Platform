@@ -44,13 +44,6 @@
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.birt.report.engine.emitter.config.ppt"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="org.eclipse.birt.report.engine.emitter.config.wpml"
          download-size="0"
          install-size="0"
@@ -80,13 +73,6 @@
 
    <plugin
          id="org.eclipse.birt.report.engine.emitter.postscript"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.birt.report.engine.emitter.ppt"
          download-size="0"
          install-size="0"
          version="0.0.0"
