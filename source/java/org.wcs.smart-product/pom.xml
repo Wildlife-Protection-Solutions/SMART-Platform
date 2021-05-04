@@ -138,7 +138,7 @@
                                     <goal>copy-resources</goal>
                                 </goals>
                                 <configuration>
-                                    <outputDirectory>${basedir}/target/products/smartapp/macosx/cocoa/x86_64/SMART.app/Contents/MacOS</outputDirectory>
+                                    <outputDirectory>${basedir}/target/products/smartapp/macosx/cocoa/x86_64/SMART.app/Contents/Resources</outputDirectory>
                                     <resources>          
                                         <resource><directory>${basedir}/macosx_includes/items/MacOS</directory></resource>
                                     </resources>              
