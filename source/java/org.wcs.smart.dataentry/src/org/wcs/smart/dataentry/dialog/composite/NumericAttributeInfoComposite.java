@@ -198,6 +198,12 @@ public class NumericAttributeInfoComposite extends CmAttributeInfoComposite {
 		if (cmAttr.getNode().isCollectMultipleObservations()) {
 			return Messages.CmAttributeInfoComposite_NotAllowedInMultiObservationMode;
 		}
+		for (CmAttribute kid : cmAttr.getNode().getCmAttributes()) {
+			if (kid == cmAttr) continue;
+			if (kid.isGrouped()) {
+				return Messages.ListAttributeInfoComposite_NotSupportedWithoutAttributeGroup;
+			}
+		}
 		if (cmAttr.getOrder() > 0) {
 			CmAttribute prevAttr = cmAttr.getNode().getCmAttributes().get(cmAttr.getOrder()-1);
 			if (!prevAttr.isMultiselect() || !prevAttr.isVisible()) {

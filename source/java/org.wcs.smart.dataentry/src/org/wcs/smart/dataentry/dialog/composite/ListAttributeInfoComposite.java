@@ -157,6 +157,13 @@ public class ListAttributeInfoComposite extends CmAttributeConfInfoComposite {
 		if (cmAttr.getNode().isCollectMultipleObservations()) {
 			return Messages.CmAttributeInfoComposite_NotAllowedInMultiObservationMode;
 		}
+		
+		for (CmAttribute kid : cmAttr.getNode().getCmAttributes()) {
+			if (kid == cmAttr) continue;
+			if (kid.isGrouped()) {
+				return Messages.ListAttributeInfoComposite_NotSupportedWithoutAttributeGroup;
+			}
+		}
 		CmAttribute cmMultiAttr = getMulultiSelectedAttr(cmAttr.getNode());
 		if (cmMultiAttr != null && !cmAttr.equals(cmMultiAttr)) {
 			return MessageFormat.format(Messages.ListAttributeInfoComposite_MultiselectHint, cmMultiAttr.findNameNull(currentLanguage));
