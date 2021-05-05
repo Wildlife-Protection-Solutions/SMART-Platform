@@ -126,14 +126,17 @@ public class Messages extends NLS {
 	public static String ConfigurableModelEditDialog_SaveMessage;
 	public static String ConfigurableModelEditDialog_SaveTitle;
 	public static String ConfigurableModelEditDialog_Title;
+	public static String ConfigurableModelEditorDefaultTab_AddToAttributeGroup;
 	public static String ConfigurableModelEditorDefaultTab_HelpContentTabLabel;
 	public static String ConfigurableModelEditorDefaultTab_PropertiesTabLabel;
+	public static String ConfigurableModelEditorDefaultTab_RemoveFromAttributeEGroup;
 	public static String ConfigurableModelEditorDefaultTab_TabName;
 	public static String ConfigurableModelFactory_BlankCmTaskName;
 	public static String ConfigurableModelFactory_ProcessCmNode;
 	public static String ConfigurableModelFactory_ProcessDefaultConfigs;
 	public static String ConfigurableModelFactory_ProgressMessage;
 	public static String ConfigurableModelFactory_TaskName;
+	public static String ConfigurableModelLabelProvider_AttributeGroupLabel;
 	public static String ConfigurableModelPropertyDialog_AllFiles;
 	public static String ConfigurableModelPropertyDialog_Button_Create;
 	public static String ConfigurableModelPropertyDialog_Button_Edit;

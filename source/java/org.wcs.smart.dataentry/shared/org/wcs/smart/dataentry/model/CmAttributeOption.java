@@ -56,6 +56,9 @@ public class CmAttributeOption extends UuidItem {
 	public static final String ID_HELP_TEXT = "HELP_TEXT"; //$NON-NLS-1$
 	public static final String ID_HELP_IMAGE_FORMAT = "HELP_IMAGE_FORMAT"; //$NON-NLS-1$
 	public static final String ID_HELP_IMAGE_LOCATION = "HELP_IMAGE_LOCATION"; //$NON-NLS-1$
+	
+	
+	public static final String ID_INPUTGROUP = "INPUT_GROUP"; //$NON-NLS-1$
 
 	public static enum EnterOnceType {
 		NONE,//Messages.CmAttributeOption_EnterOnceType_NONE),

@@ -40,6 +40,8 @@ import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.events.MenuEvent;
+import org.eclipse.swt.events.MenuListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -52,6 +54,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider.CmRootNode;
 import org.wcs.smart.dataentry.dialog.composite.AbstractInfoComposite;
@@ -145,6 +148,8 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 		stackPanel.layout(true);
 	}
 	
+	private MenuItem miAddGroup, miRemoveGroup;
+	
 	@Override
 	public Composite createTabContent(Composite parent) {
 		ConfigurableModel model = dialog.getModel();
@@ -157,7 +162,7 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 		languageViewer = new LanguageViewer(innerLeft, SWT.DROP_DOWN | SWT.READ_ONLY, SmartDB.getCurrentConservationArea());
 		languageViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		modelTreeViewer = new TreeViewer(innerLeft, SWT.V_SCROLL | SWT.H_SCROLL| SWT.BORDER);
+		modelTreeViewer = new TreeViewer(innerLeft, SWT.V_SCROLL | SWT.H_SCROLL| SWT.BORDER | SWT.MULTI);
 		modelTreeViewer.setLabelProvider(new ConfigurableModelLabelProvider());
 		modelTreeViewer.setContentProvider(new ConfigurableModelTreeContentProvider(true));
 		modelTreeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -209,6 +214,79 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 		
 		Menu treeMenu = new Menu(modelTreeViewer.getControl());
 		
+		
+		treeMenu.addMenuListener(new MenuListener() {
+			
+			@Override
+			public void menuShown(MenuEvent e) {
+				boolean canGroup = !modelTreeViewer.getStructuredSelection().isEmpty();
+				boolean isVisible = true;
+				boolean canUngroup = false;
+				CmNode parent = null;
+
+				for (Iterator<?> iterator2 = modelTreeViewer.getStructuredSelection().iterator(); iterator2.hasNext();) {
+					Object item = iterator2.next();
+					if (!(item instanceof CmAttribute)) {
+						isVisible = false;
+						break;
+					}
+					
+					CmAttribute attribute = (CmAttribute)item;
+					canUngroup = attribute.isGrouped();
+							
+					if (parent == null) {
+						parent = attribute.getNode();
+					}else {
+						if (parent != attribute.getNode()) {
+							canGroup = false;
+							break;
+						}
+					}
+					if (attribute.getAttribute().getType() == Attribute.AttributeType.DATE ||
+							attribute.getAttribute().getType() == Attribute.AttributeType.TREE ||
+							attribute.getAttribute().getType() == Attribute.AttributeType.MLIST) {
+						canGroup = false;
+						break;
+					}
+				}
+
+				if (isVisible) {
+					if (miAddGroup == null) {
+						MenuItem sep = new MenuItem(treeMenu, SWT.SEPARATOR);
+						miAddGroup = new MenuItem(treeMenu, SWT.PUSH);
+						miAddGroup.setData(sep);
+						miAddGroup.setText(Messages.ConfigurableModelEditorDefaultTab_AddToAttributeGroup);
+						miAddGroup.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
+						miAddGroup.addListener(SWT.Selection, lt->groupSelectedAttributes());
+					}
+					miAddGroup.setEnabled(canGroup);
+					
+					if (miRemoveGroup == null) {
+						miRemoveGroup = new MenuItem(treeMenu, SWT.PUSH);
+						miRemoveGroup.setText(Messages.ConfigurableModelEditorDefaultTab_RemoveFromAttributeEGroup);
+						miRemoveGroup.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
+						miRemoveGroup.addListener(SWT.Selection, lt->unGroupSelectedAttributes());
+					}
+					miRemoveGroup.setEnabled(canUngroup);	
+				}else {
+					if (miAddGroup != null) {
+						((MenuItem)miAddGroup.getData()).dispose();
+						miAddGroup.dispose();
+						miAddGroup = null;
+					}
+					if (miRemoveGroup != null) {
+						miRemoveGroup.dispose();
+						miRemoveGroup = null;
+					}
+				}
+				
+			}
+			
+			@Override
+			public void menuHidden(MenuEvent e) {
+			}
+		});
+		
 		for (final ControlButton cbtn : ControlButton.values()){
 			if (cbtn == ControlButton.DELETE) {
 				new MenuItem(treeMenu, SWT.SEPARATOR);
@@ -241,6 +319,7 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 			dialog.setButtonLayoutData(btn);
 			controlButtons.put(cbtn,btn);
 		}		
+		
 		modelTreeViewer.getControl().setMenu(treeMenu);
 		
 		
@@ -355,6 +434,37 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 		return container;
 	}
 
+	private void groupSelectedAttributes() {
+
+		List<CmAttribute> items = new ArrayList<>();
+		for (Iterator<?> iterator = modelTreeViewer.getStructuredSelection().iterator(); iterator.hasNext();) {
+			Object item = iterator.next();
+			if (!(item instanceof CmAttribute)) continue;
+			items.add((CmAttribute) item);
+		}
+		if (items.isEmpty()) return;
+		
+		((ConfigurableModelTreeContentProvider)modelTreeViewer.getContentProvider()).addToGroup(items);
+		modelTreeViewer.refresh();
+		Object groupnode = ((ConfigurableModelTreeContentProvider)modelTreeViewer.getContentProvider()).findGroupNode(items.get(0).getNode());
+		if (groupnode != null) modelTreeViewer.setExpandedState(groupnode, true);
+	}
+	
+	private void unGroupSelectedAttributes() {
+		List<CmAttribute> items = new ArrayList<>();
+		for (Iterator<?> iterator = modelTreeViewer.getStructuredSelection().iterator(); iterator.hasNext();) {
+			Object item = iterator.next();
+			if (!(item instanceof CmAttribute)) continue;
+			items.add((CmAttribute) item);			
+		}
+		if (items.isEmpty()) return;
+		
+		((ConfigurableModelTreeContentProvider)modelTreeViewer.getContentProvider()).removeFromGroup(items);
+		modelTreeViewer.refresh();
+		Object groupnode = ((ConfigurableModelTreeContentProvider)modelTreeViewer.getContentProvider()).findGroupNode(items.get(0).getNode());
+		if (groupnode != null) modelTreeViewer.setExpandedState(groupnode, true);
+	}
+	
 	private void doControlButtonPress(ControlButton cbtn) {
 		Control currentPanel = ((StackLayout)infoInnerPanel.getLayout()).topControl;
 		if (currentPanel instanceof AbstractInfoComposite){
@@ -365,6 +475,8 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 			if (x != null) modelTreeViewer.setExpandedState(x, true);
 		}
 	}
+	
+	
 	private void updateRightPanelState() {
 		IStructuredSelection selection = (IStructuredSelection) modelTreeViewer.getSelection();
 		Object obj = selection.getFirstElement();
@@ -415,6 +527,7 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 				
 			}
 		}
+		
 		for (Button btn : controlButtons.values()){
 			((MenuItem)btn.getData(MENU_ITEM_KEY)).setEnabled(btn.isEnabled());
 		}

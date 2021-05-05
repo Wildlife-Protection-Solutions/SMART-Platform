@@ -158,32 +158,7 @@ public class ConfigurableModel extends NamedItem {
 		}
 	}
 
-	/**
-	 * Moves {@link CmAttribute} to a new position in the sibling list.
-	 * 
-	 * @param source the attribute to move
-	 * @param target the attribute to move it to
-	 * @param moveBefore if it should be moved before or after the <b>source</b> parameter
-	 */
-	@Transient
-	public void moveAttributePosition(CmAttribute source, CmAttribute target, boolean moveBefore) {
-		if (source == target || source.equals(target)) {
-			return;
-		}
-		if (source.getNode() != null) {
-			List<CmAttribute> attrList = source.getNode().getCmAttributes();
-			attrList.remove(source);
-			if (moveBefore) {
-				attrList.add(source.getNode().getCmAttributes().indexOf(target), source);
-			} else {
-				attrList.add(source.getNode().getCmAttributes().indexOf(target) + 1, source);
-			}
-			
-			for (int i = 0; i < attrList.size(); i ++){
-				attrList.get(i).setOrder(i);
-			}
-		}
-	}
+
 
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="model")
 	@MapKey(name="attribute")

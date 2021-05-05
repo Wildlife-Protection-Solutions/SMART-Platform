@@ -391,4 +391,21 @@ public class CmAttribute extends NamedItem implements IImageAssociatedObject{
 	public String getHelpImageFileRootName() {
 		return "cm_help_" + UuidUtils.uuidToString(getUuid()); //$NON-NLS-1$
 	}
+	
+	@Transient
+	public boolean isGrouped() {
+		if (getCmAttributeOptions().get(CmAttributeOption.ID_INPUTGROUP) == null) return false;
+		return getCmAttributeOptions().get(CmAttributeOption.ID_INPUTGROUP).getBooleanValue();
+	}
+	
+	@Transient
+	public void setGrouped(boolean isgrouped) {
+		if (getCmAttributeOptions().get(CmAttributeOption.ID_INPUTGROUP) == null) {
+			if (!isgrouped)  return;
+			CmAttributeOption op = new CmAttributeOption();
+			op.setCmAttribute(this);
+			getCmAttributeOptions().put(CmAttributeOption.ID_INPUTGROUP, op);
+		}
+		getCmAttributeOptions().get(CmAttributeOption.ID_INPUTGROUP).setBooleanValue(isgrouped);
+	}
 }

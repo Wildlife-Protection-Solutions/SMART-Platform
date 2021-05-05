@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.dataentry.dialog;
 
+import java.util.Collections;
+import java.util.List;
+
 import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -65,13 +68,52 @@ public class ConfigurableModelTreeDropListener extends ViewerDropAdapter {
 			cm.moveNodePosition((CmNode)obj, (CmNode)getCurrentTarget(), getCurrentLocation() == LOCATION_BEFORE);
 			return true;
 		} else if (obj instanceof CmAttribute && getCurrentTarget() instanceof CmAttribute) {
-			ConfigurableModel cm = (ConfigurableModel)viewer.getInput();
-			cm.moveAttributePosition((CmAttribute)obj, (CmAttribute)getCurrentTarget(), getCurrentLocation() == LOCATION_BEFORE);
+//			ConfigurableModel cm = (ConfigurableModel)viewer.getInput();
+			moveAttributePosition((CmAttribute)obj, (CmAttribute)getCurrentTarget(), getCurrentLocation() == LOCATION_BEFORE);
 			return true;
 		}
 		return false;
 	}
 
+	/**
+	 * Moves {@link CmAttribute} to a new position in the sibling list.
+	 * 
+	 * @param source the attribute to move
+	 * @param target the attribute to move it to
+	 * @param moveBefore if it should be moved before or after the <b>source</b> parameter
+	 */
+	public void moveAttributePosition(CmAttribute source, CmAttribute target, boolean moveBefore) {
+		if (source == target || source.equals(target)) {
+			return;
+		}
+		if (source.getNode() != null) {
+			
+			
+			
+			List<CmAttribute> attrList = source.getNode().getCmAttributes();
+			attrList.remove(source);
+			if (moveBefore) {
+				attrList.add(source.getNode().getCmAttributes().indexOf(target), source);
+			} else {
+				attrList.add(source.getNode().getCmAttributes().indexOf(target) + 1, source);
+			}
+			
+			for (int i = 0; i < attrList.size(); i ++){
+				attrList.get(i).setOrder(i);
+			}
+
+			if (source.isGrouped() && !target.isGrouped()) {
+				((ConfigurableModelTreeContentProvider)viewer.getContentProvider()).removeFromGroup(Collections.singletonList(source));
+			}
+			if (!source.isGrouped() && target.isGrouped()) {
+				((ConfigurableModelTreeContentProvider)viewer.getContentProvider()).addToGroup(Collections.singletonList(source));
+			}
+			((ConfigurableModelTreeContentProvider)viewer.getContentProvider()).reset(source.getNode());
+			viewer.refresh();
+			Object groupnode = ((ConfigurableModelTreeContentProvider)viewer.getContentProvider()).findGroupNode(source.getNode());
+			if (groupnode != null) viewer.setExpandedState(groupnode, true);
+		}
+	}
 	/**
 	 * @see org.eclipse.jface.viewers.ViewerDropAdapter#validateDrop(java.lang.Object, int, org.eclipse.swt.dnd.TransferData)
 	 */

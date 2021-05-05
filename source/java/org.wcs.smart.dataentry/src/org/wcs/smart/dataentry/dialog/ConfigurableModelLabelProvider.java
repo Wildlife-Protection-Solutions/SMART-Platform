@@ -33,6 +33,7 @@ import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.dataentry.DataentryPlugIn;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider.CmRootNode;
+import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.hibernate.SmartDB;
@@ -71,6 +72,9 @@ public class ConfigurableModelLabelProvider extends LabelProvider implements ICo
 		if (element instanceof CmRootNode) {
 			return getText(((CmRootNode)element).model);
 		}
+		if (element instanceof ConfigurableModelTreeContentProvider.MatrixNode) {
+			return Messages.ConfigurableModelLabelProvider_AttributeGroupLabel;
+		}
 		return super.getText(element);
 	}
 	
@@ -83,6 +87,9 @@ public class ConfigurableModelLabelProvider extends LabelProvider implements ICo
 			return DataModel.getAttributeImage((((CmAttribute)element).getAttribute()).getType());
 		} else if (element instanceof CmRootNode){
 			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DATA_MODEL_ICON);
+		} else if (element instanceof ConfigurableModelTreeContentProvider.MatrixNode){
+			return DataentryPlugIn.getDefault().getImageRegistry().get(DataentryPlugIn.ATTRIBUTE_GROUP_ICON);
+
 		}
 		return null;
 	}
