@@ -32,11 +32,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -614,23 +612,23 @@ public class ConfigurationEditor extends EditorPart {
 		tiAdd.addListener(SWT.Selection, e->{
 			Menu mnuTemp = new Menu(tb);
 			
-			Set<Area.AreaType> atypes = new HashSet<>();
-			try(Session session = HibernateManager.openSession()){
-				atypes.addAll(session.createQuery("SELECT DISTINCT type FROM Area WHERE conservationArea = :ca", Area.AreaType.class) //$NON-NLS-1$
-						.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
-						.list());
-			}
-			
-			for (Area.AreaType t : Area.AreaType.values()) {
-				if (!atypes.contains(t)) continue;
-				MenuItem mi = new MenuItem(mnuTemp, SWT.PUSH);
-				mi.setText(t.getGuiName(Locale.getDefault()));
-				mi.addListener(SWT.Selection, evt->{
-					((Collection<Object>)lstOther.getInput()).add(t);
-					setDirty(true);
-					lstOther.refresh();
-				});
-			}
+//			Set<Area.AreaType> atypes = new HashSet<>();
+//			try(Session session = HibernateManager.openSession()){
+//				atypes.addAll(session.createQuery("SELECT DISTINCT type FROM Area WHERE conservationArea = :ca", Area.AreaType.class) //$NON-NLS-1$
+//						.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
+//						.list());
+//			}
+//			
+//			for (Area.AreaType t : Area.AreaType.values()) {
+//				if (!atypes.contains(t)) continue;
+//				MenuItem mi = new MenuItem(mnuTemp, SWT.PUSH);
+//				mi.setText(t.getGuiName(Locale.getDefault()));
+//				mi.addListener(SWT.Selection, evt->{
+//					((Collection<Object>)lstOther.getInput()).add(t);
+//					setDirty(true);
+//					lstOther.refresh();
+//				});
+//			}
 			MenuItem mi = new MenuItem(mnuTemp, SWT.PUSH);
 			mi.setText(Messages.ConfigurationEditor_ShapefileOp);
 			mi.addListener(SWT.Selection, evt->{
