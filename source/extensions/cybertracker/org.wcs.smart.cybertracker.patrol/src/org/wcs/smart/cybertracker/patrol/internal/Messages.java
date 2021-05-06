@@ -69,13 +69,19 @@ public class Messages extends NLS {
 
 	public static String CtPatrolPackageConfigurator_CmRequired;
 
+	public static String CtPatrolPackageConfigurator_CustomSettings;
+
 	public static String CtPatrolPackageConfigurator_DateProperty;
 
 	public static String CtPatrolPackageConfigurator_DefaultName;
 
 	public static String CtPatrolPackageConfigurator_DetailsLabel;
 
+	public static String CtPatrolPackageConfigurator_FrequencyTooltip;
+
 	public static String CtPatrolPackageConfigurator_InvalidPackageType;
+
+	public static String CtPatrolPackageConfigurator_InvalidTrackTimerOption;
 
 	public static String CtPatrolPackageConfigurator_NameLabel;
 

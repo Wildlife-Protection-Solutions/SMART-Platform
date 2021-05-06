@@ -57,10 +57,12 @@ import org.wcs.smart.cybertracker.export.CtJsonExportUtils.Type;
 import org.wcs.smart.cybertracker.export.IPackageContribution;
 import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
+import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption;
 import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.cybertracker.patrol.internal.Messages;
 import org.wcs.smart.cybertracker.patrol.model.PatrolCtPackage;
 import org.wcs.smart.cybertracker.patrol.model.PatrolMetadataField;
+import org.wcs.smart.cybertracker.patrol.model.TransportTypeTrackTimerSetting;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
@@ -375,6 +377,28 @@ public enum PatrolPackageExporter {
 		JSONObject joo = (JSONObject) transportScreen.get(PatrolMetadataField.TRANSPORT.getJsonKey());
 		JSONArray it = (JSONArray) joo.get(CtJsonExportUtils.JSON_OPTION_PROP_KEY);
 		if (it.size() == 0) throw new IOException(Messages.PatrolPackageExporter_NoPatrolTypes);
+		
+		if (map.containsKey(TransportTypeTrackTimerSetting.METADATA_KEY)) {
+			List<TransportTypeTrackTimerSetting> tts = TransportTypeTrackTimerSetting.fromString(map.get(TransportTypeTrackTimerSetting.METADATA_KEY).getStringValue(), session);
+			for (int i = 0; i < it.size(); i ++) {
+				JSONObject o = (JSONObject)it.get(i);
+				String tkey = o.get(CtJsonExportUtils.JSON_PROP_KEY).toString();
+				if (tkey == null) continue;
+				
+				for (TransportTypeTrackTimerSetting s : tts) {
+					if (s.getTransportType().getKeyId().equalsIgnoreCase(tkey)) {
+						JSONObject ctsettings = new JSONObject();
+						o.put("ct_settings", ctsettings); //$NON-NLS-1$
+						
+						ctsettings.put(CyberTrackerPropertiesProfileOption.ProfileOptionID.WAYPOINT_TIMER_TYPE.name().toLowerCase(), s.getTrackTimerOption().name());
+						ctsettings.put(CyberTrackerPropertiesProfileOption.ProfileOptionID.WAYPOINT_TIMER.name().toLowerCase(), s.getValue());
+						break;
+					}
+				}
+			}
+		}
+		
+		
 		metadataScreens.add(transportScreen);
 		
 		metadataScreens.add(convertArmed(map.get(PatrolMetadataField.ARMED.name()), session, ctpackage.getConservationArea()));

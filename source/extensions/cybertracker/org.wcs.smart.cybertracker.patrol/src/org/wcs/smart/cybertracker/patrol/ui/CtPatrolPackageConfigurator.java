@@ -22,11 +22,15 @@
 package org.wcs.smart.cybertracker.patrol.ui;
 
 import java.nio.file.Path;
+import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
@@ -53,7 +57,9 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
@@ -72,15 +78,23 @@ import org.wcs.smart.cybertracker.export.PackageContributionManager;
 import org.wcs.smart.cybertracker.export.data.DataModelWrapper;
 import org.wcs.smart.cybertracker.model.ConfigurableModelCtPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
+import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption;
+import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption.TrackTimerOp;
 import org.wcs.smart.cybertracker.model.ICtPackage;
+import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.cybertracker.patrol.internal.Messages;
 import org.wcs.smart.cybertracker.patrol.model.PatrolCtPackage;
+import org.wcs.smart.cybertracker.patrol.model.TransportTypeTrackTimerSetting;
 import org.wcs.smart.cybertracker.properties.CtProfileLabelProvider;
 import org.wcs.smart.cybertracker.properties.CyberTrackerPropertiesDialog;
+import org.wcs.smart.cybertracker.properties.TrackTimerOptionLabelProvider;
 import org.wcs.smart.dataentry.DataentryHibernateManager;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelLabelProvider;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.patrol.PatrolHibernateManager;
+import org.wcs.smart.patrol.model.PatrolTransportType;
+import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 
@@ -101,8 +115,11 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 	private List<IPackageUiContribution> contributions = null;
 	private ConfigurableModel selectedModel = null;
 	private CyberTrackerPropertiesProfile cmDefaultProfile = null;
-
+	private Map<PatrolTransportType, Object[]> typeControls;
+	
 	private Consumer<String> onValidate;
+	
+	private Button btnUseCustomTt;
 	
 	private boolean isInit = false;
 	
@@ -244,6 +261,70 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 		});
 		
 		
+		// -- Custom track trim settings --
+		Label lblTt = new Label(g, SWT.NONE);
+		lblTt.setText(Messages.CtPatrolPackageConfigurator_CustomSettings);
+		lblTt.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+		((GridData)lblTt.getLayoutData()).verticalIndent = 2;
+		
+		Composite ctt = new Composite(g, SWT.NONE);
+		ctt.setLayout(new GridLayout(1, false));
+		((GridLayout)ctt.getLayout()).marginWidth = 0;
+		((GridLayout)ctt.getLayout()).marginHeight = 0;
+		ctt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		btnUseCustomTt = new Button(ctt, SWT.CHECK);
+		btnUseCustomTt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)btnUseCustomTt.getLayoutData()).verticalIndent = 2;
+		
+		List<PatrolTransportType> types = null;
+		try(Session session = HibernateManager.openSession()){
+			types = PatrolHibernateManager.getActiveTransportTypes(ctpackage.getConservationArea(), session);
+		}
+		
+		TrackTimerOptionLabelProvider lblprovider = new TrackTimerOptionLabelProvider();
+		ScrolledComposite scrolltt = new ScrolledComposite(ctt, SWT.V_SCROLL);
+		scrolltt.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)scrolltt.getLayoutData()).heightHint = 150;
+		Composite inner = new Composite(scrolltt, SWT.NONE);
+		scrolltt.setContent(inner);
+		inner.setLayout(new GridLayout(3, false));
+				
+		typeControls = new HashMap<>();
+		
+		for (PatrolTransportType type : types) {
+			Label ltype = new Label(inner, SWT.NONE);
+			ltype.setText(type.getName());
+			ltype.setEnabled(false);
+			
+			ComboViewer cmbOp = new ComboViewer(inner, SWT.DROP_DOWN | SWT.READ_ONLY);
+			cmbOp.setContentProvider(ArrayContentProvider.getInstance());
+			cmbOp.setLabelProvider(lblprovider);
+			cmbOp.setInput(CyberTrackerPropertiesProfileOption.TrackTimerOp.values());
+			cmbOp.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			cmbOp.getControl().setEnabled(false);
+			cmbOp.addPostSelectionChangedListener(e->{
+				if (cmbOp.getControl().getEnabled()) validate();
+			});
+			
+			Text txtValue = new Text(inner, SWT.BORDER);
+			txtValue.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			txtValue.setEnabled(false);
+			txtValue.addListener(SWT.Modify,e->{
+				if (txtValue.isEnabled()) validate();
+			});
+			txtValue.setToolTipText(Messages.CtPatrolPackageConfigurator_FrequencyTooltip);
+			typeControls.put(type, new Object[] {cmbOp, txtValue, ltype});
+		}
+		scrolltt.setExpandHorizontal(true);
+		inner.setSize(inner.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		((GridData)scrolltt.getLayoutData()).heightHint = Math.min(150, inner.computeSize(SWT.DEFAULT, SWT.DEFAULT).y);
+		btnUseCustomTt.addListener(SWT.Selection,e->{
+			boolean v = btnUseCustomTt.getSelection();
+			for (Control kid : ((Composite)scrolltt.getContent()).getChildren()) kid.setEnabled(v);
+			validate();
+		});
+		
 		//main page contributions
 		if (contributions != null) {
 			for (IPackageUiContribution cc : contributions) {
@@ -256,7 +337,7 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 		
 		scroll.setMinSize(main.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		
-		//tab contributaions
+		//tab contributions
 		if (contributions != null) {
 			for (IPackageUiContribution cc : contributions) {
 				if (cc.isTab()) {
@@ -288,6 +369,43 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 				}
 				ctpackage.setCtProfile((CyberTrackerPropertiesProfile) profileViewer.getStructuredSelection().getFirstElement());
 				ctpackage.setName(txtName.getText());
+				
+				
+				
+				List<MetadataFieldValue> md = ctpackage.getMetadataValues();
+				MetadataFieldValue ttts = null;
+				for (MetadataFieldValue v : md) {
+					if (v.getMetadataKey().equalsIgnoreCase(TransportTypeTrackTimerSetting.METADATA_KEY)){
+						ttts = v;
+						break;
+					}
+				}
+				if (btnUseCustomTt.getSelection()) {
+					if (ttts == null) {
+						ttts = new MetadataFieldValue();
+						ttts.setMetadataKey(TransportTypeTrackTimerSetting.METADATA_KEY);
+						ttts.setCtPackage(ctpackage);
+						ttts.setConservationArea(ctpackage.getConservationArea());
+						ctpackage.getMetadataValues().add(ttts);
+					}
+					
+					List<TransportTypeTrackTimerSetting> items = new ArrayList<>();
+					for (Entry<PatrolTransportType, Object[]> value : typeControls.entrySet()) {
+						PatrolTransportType type = value.getKey();
+						ComboViewer cm = (ComboViewer) value.getValue()[0];
+						CyberTrackerPropertiesProfileOption.TrackTimerOp op = (TrackTimerOp) cm.getStructuredSelection().getFirstElement();
+						Text txt = (Text) value.getValue()[1];
+						int tvalue = Integer.parseInt(txt.getText());
+						TransportTypeTrackTimerSetting setting = new TransportTypeTrackTimerSetting(type, op, tvalue);
+						items.add(setting);
+					}
+					ttts.setStringValue(TransportTypeTrackTimerSetting.toString(items));
+				}else {
+					if (ttts != null) {
+						ttts.setStringValue(null);
+					}
+				}
+				
 				session.saveOrUpdate(ctpackage);
 				session.flush();
 				for (IPackageUiContribution cc : contributions) {
@@ -315,6 +433,23 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 			if (profileViewer.getSelection().isEmpty()) {
 				throw new Exception(Messages.CtPatrolPackageConfigurator_ProfileRequired);
 			}
+			
+			if (btnUseCustomTt.getSelection()) {
+				for (Entry<PatrolTransportType, Object[]> value : typeControls.entrySet()) {
+					ComboViewer cm = (ComboViewer) value.getValue()[0];
+					if (!(cm.getStructuredSelection().getFirstElement() instanceof CyberTrackerPropertiesProfileOption.TrackTimerOp)) {
+						throw new Exception(MessageFormat.format(Messages.CtPatrolPackageConfigurator_InvalidTrackTimerOption, value.getKey().getName()));
+					}
+					Text txt = (Text) value.getValue()[1];
+					try {
+						int v = Integer.parseInt(txt.getText());
+						if (v < 0) throw new Exception();
+					}catch (Exception ex) {
+						throw new Exception(MessageFormat.format(Messages.CtPatrolPackageConfigurator_InvalidTrackTimerOption, value.getKey().getName()));
+					}
+				}
+			}
+			
 			for (IPackageUiContribution cc : contributions) {
 				String x = cc.isValid();
 				if (x != null) throw new Exception(x);
@@ -354,6 +489,7 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 				List<Object> modelList = new ArrayList<>();
 				List<CyberTrackerPropertiesProfile>  profiles = new ArrayList<>();
 				DataModelWrapper dm = new DataModelWrapper();
+				List<TransportTypeTrackTimerSetting> ttsettings = null;
 				
 				PatrolCtPackage init = null;
 				try(Session session = HibernateManager.openSession()){
@@ -382,14 +518,31 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 							init.getIncidentModel().getUuid();
 						}
 					}
+					
+					if (init.getCtProfile() != null) {
+						init.getCtProfile().getWaypointTimerType();
+						init.getCtProfile().getWaypointTimerValue();
+					}
+					
+					MetadataFieldValue tts = null;
+					for (MetadataFieldValue v : ctpackage.getMetadataValues()) {
+						if (v.getMetadataKey().equalsIgnoreCase(TransportTypeTrackTimerSetting.METADATA_KEY)) {
+							tts = v;
+							break;
+						}
+					}
+					if (tts != null) ttsettings = TransportTypeTrackTimerSetting.fromString(tts.getStringValue(), session);
 				}
+				
 				if (init.isDataModel()) {
 					context.set(ConfigurableModel.class, new ConfigurableModel());
 				}else {
 					context.set(ConfigurableModel.class, init.getConfigurableModel());
 				}
-				PatrolCtPackage finit = init;
 				
+				PatrolCtPackage finit = init;
+				List<TransportTypeTrackTimerSetting> fttsettings = ttsettings;
+
 				Display.getDefault().syncExec(()->{
 					try {
 						isInit = true;
@@ -402,12 +555,41 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 							modelViewer.setSelection(new StructuredSelection(dm));
 						}
 						
+						CyberTrackerPropertiesProfile profile = null;
 						if (finit.getCtProfile() != null) {
-							profileViewer.setSelection(new StructuredSelection(finit.getCtProfile()));
-						}else {
-							if (!profiles.isEmpty()) profileViewer.setSelection(new StructuredSelection(profiles.get(0)));
+							profile = finit.getCtProfile();
+						}else if (!profiles.isEmpty()) {
+							profile = profiles.get(0);
+						}
+						if (profile != null) {
+							profileViewer.setSelection(new StructuredSelection(profile));
+								
+							CyberTrackerPropertiesProfileOption.TrackTimerOp op = profile.getWaypointTimerType();
+							int time = profile.getWaypointTimerValue();
+								
+							for (Object[] controls : typeControls.values()) {
+								((ComboViewer)controls[0]).setSelection(new StructuredSelection(op));
+								((Text)controls[1]).setText(String.valueOf(time));
+							}
 						}
 						
+						
+						if (fttsettings == null) {
+							btnUseCustomTt.setSelection(false);
+						}else {
+							btnUseCustomTt.setSelection(true);
+							for (TransportTypeTrackTimerSetting s : fttsettings) {
+								Object[] controls = typeControls.get(s.getTransportType());
+								if ( controls == null ) continue;
+								((ComboViewer)controls[0]).setSelection(new StructuredSelection(s.getTrackTimerOption()));
+								((Text)controls[1]).setText(String.valueOf(s.getValue()));
+								
+								
+								((Text)controls[1]).setEnabled(true);
+								((ComboViewer)controls[0]).getControl().setEnabled(true);
+								((Label)controls[2]).setEnabled(true);
+							}
+						}
 					}finally {
 						isInit = false;
 					}
@@ -481,6 +663,20 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 			l.setText(local.getCtProfile().getName());
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+			
+			boolean hasCustom = false; 
+			for (MetadataFieldValue mv : local.getMetadataValues()) {
+				if (mv.getMetadataKey().equals(TransportTypeTrackTimerSetting.METADATA_KEY)) {
+					hasCustom = mv.getStringValue() != null && !mv.getStringValue().isBlank();
+					break;
+				}
+			}
+
+			l = new Label(inner, SWT.NONE);
+			l.setText(Messages.CtPatrolPackageConfigurator_CustomSettings + (hasCustom ? SmartLabelProvider.BOOLEAN_TRUE_LABEL : SmartLabelProvider.BOOLEAN_FALSE_LABEL));
+			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+			
 			
 			for ( IPackageContribution c : PackageContributionManager.INSTANCE.getContributionItems()) {
 				c.createDetails(inner, local, session);

@@ -432,12 +432,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		sightingFixCountDecoration.setShowHover(true);
 		sightingFixCountDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesDialog_SightingFixCountInvalid, CyberTrackerPropertiesProfile.SIGHTING_FIX_COUNT_MIN_VALUE, CyberTrackerPropertiesProfile.SIGHTING_FIX_COUNT_MAX_VALUE));
 		sightingFixCountDecoration.hide();
-		
-	
-
-
-		
-		
+				
 		Label lblTrackTimer = new Label(gpsContainer, SWT.NONE);
 		lblTrackTimer.setText(Messages.CyberTrackerPropertiesDialog_TrackTimer1);
 		lblTrackTimer.setToolTipText(Messages.CyberTrackerPropertiesDialog_TrackTimer_Tooltip);
@@ -449,15 +444,7 @@ public class CyberTrackerPropertiesComposite extends Composite {
 		((GridLayout)trackTimer.getLayout()).marginHeight = 0;
 		
 		cmbTrackTimer = new ComboViewer(trackTimer, SWT.DROP_DOWN | SWT.READ_ONLY);
-		cmbTrackTimer.setLabelProvider(new LabelProvider() {
-			public String getText(Object element) {
-				switch((CyberTrackerPropertiesProfileOption.TrackTimerOp)element) {
-				case DISTANCE: return Messages.CyberTrackerPropertiesComposite_TrackTimerDistanceOp;
-				case TIME: return Messages.CyberTrackerPropertiesComposite_TrackTimerTimeOp;
-				}
-				return ""; //$NON-NLS-1$
-			}
-		});
+		cmbTrackTimer.setLabelProvider(new TrackTimerOptionLabelProvider());
 		cmbTrackTimer.setContentProvider(ArrayContentProvider.getInstance());
 		cmbTrackTimer.setInput(CyberTrackerPropertiesProfileOption.TrackTimerOp.values());
 		cmbTrackTimer.setSelection(new StructuredSelection(CyberTrackerPropertiesProfileOption.TrackTimerOp.TIME));

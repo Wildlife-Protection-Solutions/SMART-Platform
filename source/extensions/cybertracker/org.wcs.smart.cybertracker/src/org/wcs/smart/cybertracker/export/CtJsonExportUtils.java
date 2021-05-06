@@ -82,6 +82,16 @@ import org.wcs.smart.util.UuidUtils;
 public class CtJsonExportUtils {
 	
 	/**
+	 * JSON uuid property key value
+	 */
+	public static final String JSON_PROP_UUID = "uuid"; //$NON-NLS-1$
+
+	/**
+	 * JSON key propery key value
+	 */
+	public static final String JSON_PROP_KEY = "key"; //$NON-NLS-1$
+
+	/**
 	 * The SMART JSON format version
 	 */
 	public static final String SMART_JSON_VERSION = "7.0"; //$NON-NLS-1$
@@ -654,8 +664,8 @@ public class CtJsonExportUtils {
 				new Object[] {"isActive", true}).list(); //$NON-NLS-1$
 		for (NamedKeyItem t : items) {
 			JSONObject ttype = new JSONObject();
-			ttype.put("uuid", UuidUtils.uuidToString(t.getUuid())); //$NON-NLS-1$
-			ttype.put("key", t.getKeyId()); //$NON-NLS-1$
+			ttype.put(JSON_PROP_UUID, UuidUtils.uuidToString(t.getUuid()));
+			ttype.put(JSON_PROP_KEY, t.getKeyId());
 			ttype.put(JSON_OPTION_LABEL_DEFAULT_KEY, t.findName(ca.getDefaultLanguage())); 
 			for (Label l : t.getNames()) {
 				ttype.put(JSON_OPTION_LABEL_PREFIX_KEY + l.getLanguage().getCode(), l.getValue()); 
@@ -705,8 +715,8 @@ public class CtJsonExportUtils {
 		
 		for (NamedKeyItem t : items) {
 			JSONObject ttype = new JSONObject();
-			ttype.put("uuid", UuidUtils.uuidToString(t.getUuid())); //$NON-NLS-1$
-			ttype.put("key", t.getKeyId()); //$NON-NLS-1$
+			ttype.put(JSON_PROP_UUID, UuidUtils.uuidToString(t.getUuid()));
+			ttype.put(JSON_PROP_KEY, t.getKeyId()); 
 			ttype.put(JSON_OPTION_LABEL_DEFAULT_KEY, t.findName(ca.getDefaultLanguage()));
 			for (Label l : t.getNames()) {
 				ttype.put(JSON_OPTION_LABEL_PREFIX_KEY + l.getLanguage().getCode(), l.getValue());
