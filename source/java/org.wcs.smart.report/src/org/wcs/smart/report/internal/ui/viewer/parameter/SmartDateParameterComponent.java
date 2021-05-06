@@ -239,7 +239,9 @@ public class SmartDateParameterComponent implements IBirtParameterComponent, Lis
 		if (dates == null) {
 			if (op.getQueryKey().equals(AllDatesFilter.INSTANCE.getQueryKey())) {
 				
-				start = LocalDate.MIN;
+				//I tried LocalDate.MIN here, but that doesn't produce a date
+				//that is valid with sql queries.
+				start = LocalDate.of(1900, 01, 01);
 				end = ChronoUnit.DAYS.addTo(LocalDate.now(), 1); // today plus 1 day
 				try(Session session = HibernateManager.openSession()){
 					try {
