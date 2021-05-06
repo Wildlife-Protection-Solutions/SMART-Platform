@@ -199,17 +199,23 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		edit.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EDIT_ICON));
 		edit.addListener(SWT.Selection, e->editCm());
 		
-		new MenuItem(menu, SWT.SEPARATOR);
-		
+
 		MenuItem add = new MenuItem(menu, SWT.PUSH);
 		add.setText(Messages.ConfigurableModelPropertyDialog_Button_Create);
 		add.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 		add.addListener(SWT.Selection, e->createNewCm());
 		
+		new MenuItem(menu, SWT.SEPARATOR);
+		
 		MenuItem miImport = new MenuItem(menu, SWT.PUSH);
 		miImport.setText(Messages.ConfigurableModelPropertyDialog_Button_Import_File);
 		miImport.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.IMPORT_ICON));
 		miImport.addListener(SWT.Selection, e->importXml());
+		
+		MenuItem export = new MenuItem(menu, SWT.PUSH);
+		export.setText(Messages.ConfigurableModelPropertyDialog_Button_Export_File);
+		export.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EXPORT_ICON));
+		export.addListener(SWT.Selection, e->exportXml());
 		
 		new MenuItem(menu, SWT.SEPARATOR);
 		
@@ -217,13 +223,6 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		delete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		delete.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
 		delete.addListener(SWT.Selection, e->deleteCm());
-		
-		new MenuItem(menu, SWT.SEPARATOR);
-		
-		MenuItem export = new MenuItem(menu, SWT.PUSH);
-		export.setText(Messages.ConfigurableModelPropertyDialog_Button_Export_File);
-		export.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EXPORT_ICON));
-		export.addListener(SWT.Selection, e->exportXml());
 		
 		menu.addMenuListener(new MenuListener(){
 			@Override

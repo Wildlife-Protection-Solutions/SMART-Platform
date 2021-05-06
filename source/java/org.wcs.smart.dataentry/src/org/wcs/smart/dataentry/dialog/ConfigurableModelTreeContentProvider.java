@@ -51,7 +51,7 @@ public class ConfigurableModelTreeContentProvider implements ITreeContentProvide
 	private boolean showAttributes = true;
 	private String message = null;
 	
-	private Map<CmNode, List<?>> kids;
+	private Map<CmNode, MatrixNode> matrixNodes;
 	/**
 	 * Creates a new content provider
 	 * 
@@ -78,8 +78,7 @@ public class ConfigurableModelTreeContentProvider implements ITreeContentProvide
 		message = null;
 		if (newInput instanceof ConfigurableModel){
 			rootNode.model = (ConfigurableModel) newInput;
-			
-			kids = new HashMap<>();
+			matrixNodes = new HashMap<>();
 		}else if (newInput instanceof String){
 			message = (String) newInput;
 		}
@@ -95,7 +94,26 @@ public class ConfigurableModelTreeContentProvider implements ITreeContentProvide
 		return showRoot ? new Object[]{rootNode} : getChildren(rootNode.model);
 	}
 
-	public void addToGroup(List<CmAttribute> attributes) {
+	/**
+	 * 
+	 * @param attribute
+	 * @return true if attribue can be grouped, false otherwise
+	 */
+	public boolean canAddToGroup(CmAttribute attribute) {
+		if (attribute.getAttribute().getType() == Attribute.AttributeType.DATE ||
+				attribute.getAttribute().getType() == Attribute.AttributeType.TREE ||
+				attribute.getAttribute().getType() == Attribute.AttributeType.MLIST) {
+			return false;
+		}
+		return true;		
+	}
+	
+	/**
+	 * Adds the set of attributes to the current attribute group
+	 * 
+	 * @param attributes
+	 */
+	public void addToGroup(List<CmAttribute> attributes, boolean reorder) {
 		CmNode parent = null;
 		
 		for (CmAttribute item : attributes) {
@@ -104,45 +122,49 @@ public class ConfigurableModelTreeContentProvider implements ITreeContentProvide
 			}else {
 				if (parent != item.getNode()) return;
 			}
-			if (item.getAttribute().getType() == Attribute.AttributeType.DATE ||
-					item.getAttribute().getType() == Attribute.AttributeType.TREE ||
-					item.getAttribute().getType() == Attribute.AttributeType.MLIST) {
-				return;
+			if (!canAddToGroup(item)) return;
+		}
+		
+		//reorder
+		if (reorder) {
+			int min = -1;
+			for (int i = 0; i < parent.getCmAttributes().size(); i ++) {
+				CmAttribute x = parent.getCmAttributes().get(i);
+				if (x.isGrouped() && min == -1) {
+						min = i;
+						break;
+				}
 			}
-			
+			if (min == -1) {
+				//no existing group
+				min = attributes.get(0).getOrder();
+				for (CmAttribute x : attributes) {
+					if (x.getOrder() < min) min = x.getOrder();
+				}
+				min = min - 1;
+			}
+			parent.getCmAttributes().removeAll(attributes);
+			parent.getCmAttributes().addAll(min, attributes);
 		}
 
 		for (CmAttribute x : attributes) {
 			x.setGrouped(Boolean.TRUE);
 		}
-		kids.remove(parent);
 		reorder(parent);
 	}
 	
-
-	
-	public void reset(CmNode parent) {
-		kids.remove(parent);
-	}
-	
 	private void reorder(CmNode parent) {
-		getChildren(parent);
-		//re-order nodes
 		int cnt = 1;
-		for (Object kid : kids.get(parent)) {
-			if (kid instanceof CmAttribute) {
-				((CmAttribute)kid).setOrder(cnt++);
-			}else {
-				for (CmAttribute kkid : ((MatrixNode)kid).getKids()) {
-					kkid.setOrder(cnt++);
-				}
-			}
-		}
+		for (CmAttribute kid : parent.getCmAttributes()) kid.setOrder(cnt++);
 	}
 	
-	public void removeFromGroup(List<CmAttribute> attributes) {
+	/**
+	 * remove the attributes from the current group
+	 * @param attributes
+	 */
+	public void removeFromGroup(List<CmAttribute> attributes, boolean reorder) {
+		//ensure they all have the same parent
 		CmNode parent = null;
-	
 		for (CmAttribute item : attributes) {
 			if (parent == null) {
 				parent = item.getNode();
@@ -150,21 +172,34 @@ public class ConfigurableModelTreeContentProvider implements ITreeContentProvide
 				if (parent != item.getNode()) return;
 			}
 		}
+		
 
+		//reorder
+		if (reorder) {
+			int max = -1;
+			for (int i = 0; i < parent.getCmAttributes().size(); i ++) {
+				CmAttribute x = parent.getCmAttributes().get(i);
+				if (x.isGrouped() && i > max) {
+					max = i;
+				}
+			}
+			if (max == -1) {
+				//add these at end
+				parent.getCmAttributes().removeAll(attributes);
+				parent.getCmAttributes().addAll(attributes);
+			}else {
+				parent.getCmAttributes().removeAll(attributes);
+				max = max - attributes.size()+1;
+				parent.getCmAttributes().addAll(max, attributes);
+			}
+		}
+				
 		for (CmAttribute x : attributes) {
 			x.setGrouped(Boolean.FALSE);
 		}
-		kids.remove(parent);
 		reorder(parent);
 	}
-	
-	public MatrixNode findGroupNode(CmNode parent) {
-		if (!kids.containsKey(parent)) getChildren(parent);
-		for (Object x : kids.get(parent)) {
-			if (x instanceof MatrixNode) return (MatrixNode) x;
-		}
-		return null;
-	}
+
 	
 	@Override
 	public Object[] getChildren(Object parentElement) {
@@ -175,8 +210,6 @@ public class ConfigurableModelTreeContentProvider implements ITreeContentProvide
 				return nodes.toArray();
 			}
 			if (showAttributes){
-				if (kids.get(parentElement) != null) return kids.get(parentElement).toArray();
-				
 				List<CmAttribute> attributes = n.getCmAttributes();
 				if (attributes == null || attributes.isEmpty()) return new Object[] {};
 				
@@ -185,7 +218,12 @@ public class ConfigurableModelTreeContentProvider implements ITreeContentProvide
 				for (CmAttribute attribute : n.getCmAttributes()) {
 					if (attribute.isGrouped()) {
 						if (mNode == null) {
-							mNode = new MatrixNode((CmNode)parentElement);
+							mNode = matrixNodes.get((CmNode)parentElement);
+							if (mNode == null) {
+								mNode = new MatrixNode((CmNode)parentElement);
+								matrixNodes.put(((CmNode)parentElement), mNode);
+							}
+							mNode.getKids().clear();
 							lkids.add(mNode);
 						}
 						mNode.addKid(attribute);
@@ -194,7 +232,6 @@ public class ConfigurableModelTreeContentProvider implements ITreeContentProvide
 						lkids.add(attribute);
 					}
 				}
-				kids.put((CmNode)parentElement, lkids);
 				return lkids.toArray();
 			}
 		}
@@ -219,13 +256,8 @@ public class ConfigurableModelTreeContentProvider implements ITreeContentProvide
 			return n.getParent();
 		} else if (element instanceof CmAttribute) {
 			CmAttribute cma = (CmAttribute) element;
-			if (!kids.containsKey(cma.getNode())) getChildren(cma.getNode());
-				
-			if (kids.get(cma.getNode()).contains(cma)) return cma.getNode();
-			for (Object x : kids.get(cma.getNode())) {
-				if (x instanceof MatrixNode) return x;
-			}
 			
+			if (cma.isGrouped()) return matrixNodes.get(cma.getNode());
 			return cma.getNode();
 		} else if (element instanceof MatrixNode) {
 			return ((MatrixNode)element).parent;
@@ -285,6 +317,9 @@ public class ConfigurableModelTreeContentProvider implements ITreeContentProvide
 		}
 		public void addKid(CmAttribute kid) {
 			this.kids.add(kid);
+		}
+		public CmNode getParent() {
+			return this.parent;
 		}
 	}
 }

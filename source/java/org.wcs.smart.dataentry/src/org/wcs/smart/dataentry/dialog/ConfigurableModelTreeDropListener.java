@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.dataentry.dialog;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -29,6 +30,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.ViewerDropAdapter;
 import org.eclipse.swt.dnd.TransferData;
+import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider.MatrixNode;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
@@ -42,13 +44,16 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
 public class ConfigurableModelTreeDropListener extends ViewerDropAdapter {
 
 	private TreeViewer viewer;
+	private ConfigurableModelTreeContentProvider provider;
 	
 	/**
+	 * The viewer must have a ConfigurableModelTreeContentProvider contentProvider.
 	 * @param viewer
 	 */
 	protected ConfigurableModelTreeDropListener(TreeViewer viewer) {
 		super(viewer);
 		this.viewer = viewer;
+		this.provider = (ConfigurableModelTreeContentProvider)viewer.getContentProvider();
 	}
 
 	/**
@@ -68,9 +73,35 @@ public class ConfigurableModelTreeDropListener extends ViewerDropAdapter {
 			cm.moveNodePosition((CmNode)obj, (CmNode)getCurrentTarget(), getCurrentLocation() == LOCATION_BEFORE);
 			return true;
 		} else if (obj instanceof CmAttribute && getCurrentTarget() instanceof CmAttribute) {
-//			ConfigurableModel cm = (ConfigurableModel)viewer.getInput();
 			moveAttributePosition((CmAttribute)obj, (CmAttribute)getCurrentTarget(), getCurrentLocation() == LOCATION_BEFORE);
 			return true;
+		} else if (obj instanceof MatrixNode && getCurrentTarget() instanceof CmAttribute) {
+			
+			CmAttribute target = (CmAttribute)getCurrentTarget();
+			MatrixNode matrix = (MatrixNode)obj;
+			List<CmAttribute> attrList = new ArrayList<>();
+			boolean isBefore = getCurrentLocation() == LOCATION_BEFORE;
+			
+			for(CmAttribute a : matrix.getParent().getCmAttributes()) {
+				if (a == target) {
+					if (!isBefore) attrList.add(a);
+					for (CmAttribute x : matrix.getKids()) {
+						attrList.add(x);
+					}
+					if (isBefore)attrList.add(a);
+				}else if (!matrix.getKids().contains(a) && !attrList.contains(a)) {
+					attrList.add(a);
+				}
+			}
+			int order = 1;
+			target.getNode().getCmAttributes().clear();
+			for (CmAttribute a : attrList) {
+				a.setOrder(order++);
+				target.getNode().getCmAttributes().add(a);
+			}
+			viewer.refresh();
+			return true;
+			
 		}
 		return false;
 	}
@@ -87,9 +118,6 @@ public class ConfigurableModelTreeDropListener extends ViewerDropAdapter {
 			return;
 		}
 		if (source.getNode() != null) {
-			
-			
-			
 			List<CmAttribute> attrList = source.getNode().getCmAttributes();
 			attrList.remove(source);
 			if (moveBefore) {
@@ -103,15 +131,12 @@ public class ConfigurableModelTreeDropListener extends ViewerDropAdapter {
 			}
 
 			if (source.isGrouped() && !target.isGrouped()) {
-				((ConfigurableModelTreeContentProvider)viewer.getContentProvider()).removeFromGroup(Collections.singletonList(source));
+				provider.removeFromGroup(Collections.singletonList(source), false);
 			}
 			if (!source.isGrouped() && target.isGrouped()) {
-				((ConfigurableModelTreeContentProvider)viewer.getContentProvider()).addToGroup(Collections.singletonList(source));
+				provider.addToGroup(Collections.singletonList(source), false);
 			}
-			((ConfigurableModelTreeContentProvider)viewer.getContentProvider()).reset(source.getNode());
 			viewer.refresh();
-			Object groupnode = ((ConfigurableModelTreeContentProvider)viewer.getContentProvider()).findGroupNode(source.getNode());
-			if (groupnode != null) viewer.setExpandedState(groupnode, true);
 		}
 	}
 	/**
@@ -140,8 +165,20 @@ public class ConfigurableModelTreeDropListener extends ViewerDropAdapter {
 			CmAttribute sourceAttr = (CmAttribute) obj;
 			if (target instanceof CmAttribute) {
 				CmAttribute targetAttr = (CmAttribute) target;
+				
+				//if target is in matrix 
+				if (provider.getParent(targetAttr) instanceof MatrixNode) {
+					if (!provider.canAddToGroup(sourceAttr)) return false;
+				}
 				return sourceAttr.getNode().equals(targetAttr.getNode());
 			}
+		} else if (obj instanceof MatrixNode) {
+			MatrixNode node = (MatrixNode)obj;
+			if (target instanceof CmAttribute) {
+				if (((CmAttribute) target).isGrouped()) return false;
+				return ((CmAttribute)target).getNode() == node.getParent();
+			}
+			
 		}
 		return false;
 	}

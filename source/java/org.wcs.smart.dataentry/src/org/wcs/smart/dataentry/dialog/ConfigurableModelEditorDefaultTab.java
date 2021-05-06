@@ -444,10 +444,10 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 		}
 		if (items.isEmpty()) return;
 		
-		((ConfigurableModelTreeContentProvider)modelTreeViewer.getContentProvider()).addToGroup(items);
+		((ConfigurableModelTreeContentProvider)modelTreeViewer.getContentProvider()).addToGroup(items, true);
 		modelTreeViewer.refresh();
-		Object groupnode = ((ConfigurableModelTreeContentProvider)modelTreeViewer.getContentProvider()).findGroupNode(items.get(0).getNode());
-		if (groupnode != null) modelTreeViewer.setExpandedState(groupnode, true);
+		
+		dialog.notifyChangesMade();
 	}
 	
 	private void unGroupSelectedAttributes() {
@@ -459,10 +459,10 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 		}
 		if (items.isEmpty()) return;
 		
-		((ConfigurableModelTreeContentProvider)modelTreeViewer.getContentProvider()).removeFromGroup(items);
+		((ConfigurableModelTreeContentProvider)modelTreeViewer.getContentProvider()).removeFromGroup(items, true);
 		modelTreeViewer.refresh();
-		Object groupnode = ((ConfigurableModelTreeContentProvider)modelTreeViewer.getContentProvider()).findGroupNode(items.get(0).getNode());
-		if (groupnode != null) modelTreeViewer.setExpandedState(groupnode, true);
+		
+		dialog.notifyChangesMade();
 	}
 	
 	private void doControlButtonPress(ControlButton cbtn) {

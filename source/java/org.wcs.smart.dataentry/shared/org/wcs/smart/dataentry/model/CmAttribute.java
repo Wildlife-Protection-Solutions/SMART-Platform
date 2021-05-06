@@ -403,6 +403,7 @@ public class CmAttribute extends NamedItem implements IImageAssociatedObject{
 		if (getCmAttributeOptions().get(CmAttributeOption.ID_INPUTGROUP) == null) {
 			if (!isgrouped)  return;
 			CmAttributeOption op = new CmAttributeOption();
+			op.setOptionId(CmAttributeOption.ID_INPUTGROUP);
 			op.setCmAttribute(this);
 			getCmAttributeOptions().put(CmAttributeOption.ID_INPUTGROUP, op);
 		}
