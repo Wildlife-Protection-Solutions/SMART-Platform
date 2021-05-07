@@ -69,6 +69,7 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
+import org.wcs.smart.cybertracker.ctpackage.ui.CtPackageExportDialog;
 import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackageConfigurator;
 import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackageProperty;
 import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackagePropertyProvider;
@@ -531,7 +532,7 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 							break;
 						}
 					}
-					if (tts != null) ttsettings = TransportTypeTrackTimerSetting.fromString(tts.getStringValue(), session);
+					if (tts != null) ttsettings = TransportTypeTrackTimerSetting.fromString(tts.getStringValue(), init.getConservationArea(), session);
 				}
 				
 				if (init.isDataModel()) {

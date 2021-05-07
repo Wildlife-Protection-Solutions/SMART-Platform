@@ -21,7 +21,12 @@
  */
 package org.wcs.smart.er.model;
 
+import java.util.HashMap;
+import java.util.Locale;
+
 import org.wcs.smart.ISharedLabelProvider;
+import org.wcs.smart.er.json.MissionAttributeMetadata;
+import org.wcs.smart.er.json.MissionJsonFeatureProcessor;
 
 /**
  * Label provider for survey items.  Must provide values for
@@ -32,6 +37,7 @@ import org.wcs.smart.ISharedLabelProvider;
  *
  */
 public interface IErLabelProvider extends ISharedLabelProvider{
+	
 	public static final String ID_COLUMN_KEY = "idcolumnlabelkey"; //$NON-NLS-1$
 	public static final String LENGTH_COLUMN_KEY = "lengthcolumnlabelkey"; //$NON-NLS-1$
 	public static final String STATE_COLUMN_KEY = "statecolumnlabelkey"; //$NON-NLS-1$
@@ -44,5 +50,13 @@ public interface IErLabelProvider extends ISharedLabelProvider{
 	public static final String SD_KEY_COL_KEY = "sdkeycolumnkey"; //$NON-NLS-1$
 	public static final String SD_NAME_COL_KEY = "sdnamecolumnkey"; //$NON-NLS-1$
 	
+	public static final String SURVEY_NAME = "survey"; //$NON-NLS-1$
 	
+	public HashMap<Locale, String> getNames(MissionAttributeMetadata.MissionMetadata metadataOption);
+	
+	public HashMap<Locale, String> getNames(MissionAttributeMetadata.MissionWaypointMetadata metadataOption);
+	
+	public HashMap<Locale, String> getNames(MissionAttributeMetadata.MissionTrackMetadata metadataOption);
+
+	public String getMessage(MissionJsonFeatureProcessor.Messages message, Locale l) ;
 }

@@ -174,10 +174,62 @@ public class Messages extends NLS {
 	public static String ErLabelProvider_DescriptionColumn;
 	public static String ErLabelProvider_EndDateColumn;
 	public static String ErLabelProvider_KeyColumn;
+	public static String ErLabelProvider_MissionJsonMessage1;
+
+	public static String ErLabelProvider_MissionJsonMessage10;
+
+	public static String ErLabelProvider_MissionJsonMessage11;
+
+	public static String ErLabelProvider_MissionJsonMessage12;
+
+	public static String ErLabelProvider_MissionJsonMessage13;
+
+	public static String ErLabelProvider_MissionJsonMessage14;
+
+	public static String ErLabelProvider_MissionJsonMessage15;
+
+	public static String ErLabelProvider_MissionJsonMessage16;
+
+	public static String ErLabelProvider_MissionJsonMessage17;
+
+	public static String ErLabelProvider_MissionJsonMessage18;
+
+	public static String ErLabelProvider_MissionJsonMessage2;
+
+	public static String ErLabelProvider_MissionJsonMessage3;
+
+	public static String ErLabelProvider_MissionJsonMessage4;
+
+	public static String ErLabelProvider_MissionJsonMessage5;
+
+	public static String ErLabelProvider_MissionJsonMessage6;
+
+	public static String ErLabelProvider_MissionJsonMessage7;
+
+	public static String ErLabelProvider_MissionJsonMessage8;
+
+	public static String ErLabelProvider_MissionJsonMessage9;
+
+	public static String ErLabelProvider_MissionMetadataBearing;
+
+	public static String ErLabelProvider_MissionMetadataComment;
+
+	public static String ErLabelProvider_MissionMetadataDistance;
+
+	public static String ErLabelProvider_MissionMetadataId;
+
+	public static String ErLabelProvider_MissionMetadataLeader;
+
+	public static String ErLabelProvider_MissionMetadataMembers;
+
+	public static String ErLabelProvider_MissionMetadataSamplingUnit;
+
 	public static String ErLabelProvider_NameColumn;
 	public static String ErLabelProvider_sd_table_name;
 	public static String ErLabelProvider_StartDateColumn;
 	public static String ErLabelProvider_StatusColumn;
+
+	public static String ErLabelProvider_SurveyLabel;
 	public static String ErLabelProvider_su_table_name;
 	public static String ExportWizard_DirectoryMessage;
 	public static String ExportWizard_ExportDialogTitle;

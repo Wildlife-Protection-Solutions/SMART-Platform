@@ -39,6 +39,7 @@ import org.wcs.smart.SmartContext;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.dataentry.model.ScreenOption;
+import org.wcs.smart.er.MissionIdGenerator;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.Survey;
@@ -57,7 +58,6 @@ import org.wcs.smart.observation.model.WaypointObservationGroup;
 public class SurveyHibernateManager {
 
 	private static ISurveyHibernateManager instance;
-	private static NumberFormat MISSION_ID_FORMATTER = new DecimalFormat("000000"); //$NON-NLS-1$
 	
 	
 	public static ISurveyHibernateManager getInstance(){
@@ -100,7 +100,7 @@ public class SurveyHibernateManager {
 	
 	public static void saveMission(Mission mission, Session session, boolean saveWaypoints) throws Exception{
 		if (mission.getId() == null ){
-			String id = SurveyHibernateManager.generateMissionId(session);
+			String id = MissionIdGenerator.INSTANCE.generateMissionId(mission, session);
 			mission.setId(id);
 		}
 		
@@ -150,40 +150,6 @@ public class SurveyHibernateManager {
 		}
 	}
 	
-	public static String generateMissionId( Session s) {
-		StringBuilder sb = new StringBuilder();
-
-		sb.append(SmartDB.getCurrentConservationArea().getId());
-
-		CriteriaBuilder cb = s.getCriteriaBuilder();
-		CriteriaQuery<Mission> c = cb.createQuery(Mission.class);
-		Root<Mission> from = c.from(Mission.class);
-		c.where(cb.like(from.get("id"), sb.toString() + "%")); //$NON-NLS-1$ //$NON-NLS-2$
-		c.orderBy(cb.desc(from.get("id"))); //$NON-NLS-1$
-		List<Mission> results = s.createQuery(c).getResultList();
-		
-		long idNumber = 0;
-		for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
-			Mission m =  (Mission) iterator.next();
-			String localId = m.getId(); 
-			try {
-				int offset = localId.lastIndexOf('_') + 1;
-				idNumber = Integer.parseInt(localId.substring(offset));
-				break;
-			} catch (Exception ex) {
-				// not of the form CAID_# skip this one
-			}
-		}
-		sb.append("_"); //$NON-NLS-1$
-		//sb.append("M"); //$NON-NLS-1$  //not so good for non-english language installs. Just going to leave it without a prefix I guess.
-		idNumber = (idNumber + 1) % 1000000;
-		if (idNumber <= 0) {
-			idNumber = 1;
-		}
-		sb.append(MISSION_ID_FORMATTER.format(idNumber));
-
-		return sb.toString();
-	}
 
 	public static Map<MissionScreenOptionMeta, ScreenOption> getMissionScreenOptions(ConservationArea ca, Session session) {
 		List<ScreenOption> results = QueryFactory.buildQuery(session, ScreenOption.class,

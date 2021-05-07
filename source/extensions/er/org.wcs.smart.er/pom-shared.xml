@@ -30,6 +30,11 @@
     			<artifactId>org.wcs.smart.core.dataentry</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
+		<dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-jackson2-provider</artifactId>
+            <version>${resteasy.version}</version>
+        </dependency>
 	</dependencies>
 	
 </project>

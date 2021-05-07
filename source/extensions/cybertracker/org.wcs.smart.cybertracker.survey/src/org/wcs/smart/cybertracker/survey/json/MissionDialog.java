@@ -61,6 +61,7 @@ import org.hibernate.Session;
 import org.wcs.smart.cybertracker.survey.internal.Messages;
 import org.wcs.smart.cybertracker.survey.model.CtMissionLink;
 import org.wcs.smart.cybertracker.survey.model.CtMissionWpLink;
+import org.wcs.smart.er.MissionIdGenerator;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
@@ -278,7 +279,7 @@ public class MissionDialog extends SmartStyledTitleDialog {
 		}
 		newMission.setStartDate(startDate);
 		newMission.setEndDate(endDate);
-		newMission.setId(SurveyHibernateManager.generateMissionId(session));
+		newMission.setId(MissionIdGenerator.INSTANCE.generateMissionId(newMission, session));
 		
 		session.saveOrUpdate(newMission.getSurvey());
 		SurveyHibernateManager.saveMission(newMission, session, true);

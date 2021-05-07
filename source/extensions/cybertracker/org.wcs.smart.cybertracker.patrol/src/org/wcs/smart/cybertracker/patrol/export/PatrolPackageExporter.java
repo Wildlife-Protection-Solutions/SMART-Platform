@@ -379,7 +379,7 @@ public enum PatrolPackageExporter {
 		if (it.size() == 0) throw new IOException(Messages.PatrolPackageExporter_NoPatrolTypes);
 		
 		if (map.containsKey(TransportTypeTrackTimerSetting.METADATA_KEY)) {
-			List<TransportTypeTrackTimerSetting> tts = TransportTypeTrackTimerSetting.fromString(map.get(TransportTypeTrackTimerSetting.METADATA_KEY).getStringValue(), session);
+			List<TransportTypeTrackTimerSetting> tts = TransportTypeTrackTimerSetting.fromString(map.get(TransportTypeTrackTimerSetting.METADATA_KEY).getStringValue(), ctpackage.getConservationArea(), session);
 			for (int i = 0; i < it.size(); i ++) {
 				JSONObject o = (JSONObject)it.get(i);
 				String tkey = o.get(CtJsonExportUtils.JSON_PROP_KEY).toString();

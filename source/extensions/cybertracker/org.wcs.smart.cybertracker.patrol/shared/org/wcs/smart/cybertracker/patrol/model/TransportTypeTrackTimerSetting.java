@@ -25,8 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfileOption;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 
 /**
@@ -82,12 +82,12 @@ public class TransportTypeTrackTimerSetting {
 	 * @param session
 	 * @return
 	 */
-	private static TransportTypeTrackTimerSetting fromStringSingle(String value, Session session) {
+	private static TransportTypeTrackTimerSetting fromStringSingle(String value, ConservationArea ca, Session session) {
 		String[] bits = value.split(FIELD_SEP);
 		if (bits.length != 3) return null;
 		
 		PatrolTransportType type = session.createQuery("FROM PatrolTransportType WHERE conservationArea = :ca and keyId = :key", PatrolTransportType.class) //$NON-NLS-1$
-				.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
+				.setParameter("ca", ca) //$NON-NLS-1$
 				.setParameter("key", bits[0]) //$NON-NLS-1$
 				.uniqueResult();
 		if (type == null) return null;
@@ -134,12 +134,12 @@ public class TransportTypeTrackTimerSetting {
 	 * @param session
 	 * @return
 	 */
-	public static List<TransportTypeTrackTimerSetting> fromString(String value, Session session){
+	public static List<TransportTypeTrackTimerSetting> fromString(String value, ConservationArea ca, Session session){
 		List<TransportTypeTrackTimerSetting> items = new ArrayList<>();
 		if (value == null || value.isEmpty()) return items;
 		String[] parts = value.split("\\|"); //$NON-NLS-1$
 		for (String part : parts) {
-			TransportTypeTrackTimerSetting item = fromStringSingle(part, session);
+			TransportTypeTrackTimerSetting item = fromStringSingle(part, ca, session);
 			if (item != null) {
 				items.add(item);
 			}

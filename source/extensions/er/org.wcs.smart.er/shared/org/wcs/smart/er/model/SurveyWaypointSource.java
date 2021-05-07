@@ -34,6 +34,8 @@ import javax.persistence.Query;
 import org.hibernate.Session;
 import org.hibernate.StatelessSession;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.er.json.MissionJsonFeatureProcessor;
+import org.wcs.smart.observation.json.IJsonFeatureProcessor;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.util.UuidUtils;
@@ -136,5 +138,10 @@ public class SurveyWaypointSource implements IWaypointSource{
 		sb.append(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT).withLocale(l).format(wp.getDateTime()));
 		sb.append(")"); //$NON-NLS-1$
 		return sb.toString();		
+	}
+	
+	@Override
+	public Class<? extends IJsonFeatureProcessor> getJsonFeatureProcessor() {
+		return MissionJsonFeatureProcessor.class;
 	}
 }

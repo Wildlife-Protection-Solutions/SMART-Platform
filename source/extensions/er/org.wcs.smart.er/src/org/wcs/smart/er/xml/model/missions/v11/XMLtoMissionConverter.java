@@ -46,6 +46,7 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
+import org.wcs.smart.er.MissionIdGenerator;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
@@ -158,19 +159,20 @@ public class XMLtoMissionConverter implements IXmlToMissionConverter{
 		}else{
 			mission.setEndDate(null);
 		}
-		
-		if(keepIDs){
-			mission.setId(xml.getId());
-		}else{
-			mission.setId(SurveyHibernateManager.generateMissionId(session));
-		}
-		
+
 		setMembersAndLeader(mission, xml);
 		if(mission.getLeader() == null){
 			addValidationError(Messages.XMLtoMissionConverter_16);
 		}
 		
 		createAndSetSurvey(mission, xml);
+		
+		if(keepIDs){
+			mission.setId(xml.getId());
+		}else{
+			mission.setId(MissionIdGenerator.INSTANCE.generateMissionId(mission, session));
+		}
+		
 		mission.setMissionDays(new ArrayList<MissionDay>());
 		
 		setMissionPropertyValues(mission, xml);
