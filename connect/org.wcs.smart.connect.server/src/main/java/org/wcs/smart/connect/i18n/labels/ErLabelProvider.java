@@ -21,9 +21,13 @@
  */
 package org.wcs.smart.connect.i18n.labels;
 
+import java.util.HashMap;
 import java.util.Locale;
 
 import org.wcs.smart.connect.i18n.Messages;
+import org.wcs.smart.er.json.MissionAttributeMetadata.MissionMetadata;
+import org.wcs.smart.er.json.MissionAttributeMetadata.MissionTrackMetadata;
+import org.wcs.smart.er.json.MissionAttributeMetadata.MissionWaypointMetadata;
 import org.wcs.smart.er.model.IErLabelProvider;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
@@ -58,6 +62,112 @@ public class ErLabelProvider implements IErLabelProvider{
 		if (item.equals(SD_STATUS_COL_KEY)) return Messages.getString("ErLabelProvider.StatusColumn", l); //$NON-NLS-1$
 		if (item.equals(SD_KEY_COL_KEY)) return Messages.getString("ErLabelProvider.KeyColumn", l); //$NON-NLS-1$
 		if (item.equals(SD_NAME_COL_KEY)) return Messages.getString("ErLabelProvider.NameColumn", l); //$NON-NLS-1$
+		if (item == IErLabelProvider.SURVEY_NAME) return Messages.getString("ErLabelProvider.SurveyName", l); //$NON-NLS-1$
 		return null;
+	}
+
+	@Override
+	public String getMessage(org.wcs.smart.er.json.MissionJsonFeatureProcessor.Messages message, Locale l) {
+		switch(message){
+		case MISSION_LINK_EXISTS: return Messages.getString("ErLabelProvider.JsonProcessorMessage1", l); //$NON-NLS-1$
+		case COMPLETE_MSG: return Messages.getString("ErLabelProvider.JsonProcessorMessage2", l); //$NON-NLS-1$
+		case MISSION_LINK_MISSING: return Messages.getString("ErLabelProvider.JsonProcessorMessage3", l); //$NON-NLS-1$
+		case INVALID_MISSION_UUID: return Messages.getString("ErLabelProvider.JsonProcessorMessage4", l); //$NON-NLS-1$
+		case MISSIONDAY_MISSING: return Messages.getString("ErLabelProvider.JsonProcessorMessage5", l); //$NON-NLS-1$
+		case MISSING_PROPERTY: return Messages.getString("ErLabelProvider.JsonProcessorMessage6", l); //$NON-NLS-1$
+		case MISSION_EXISTS: return Messages.getString("ErLabelProvider.JsonProcessorMessage7", l); //$NON-NLS-1$
+		case INVALID_SURVEY_UUID: return Messages.getString("ErLabelProvider.JsonProcessorMessage8", l); //$NON-NLS-1$
+		case SURVEY_NOT_FOUND: return Messages.getString("ErLabelProvider.JsonProcessorMessage9", l); //$NON-NLS-1$
+		case EMPLOYEE_NOT_FOUND: return Messages.getString("ErLabelProvider.JsonProcessorMessage10", l); //$NON-NLS-1$
+		case NO_LEADER: return Messages.getString("ErLabelProvider.JsonProcessorMessage11", l); //$NON-NLS-1$
+		case NO_EMPLOYEES: return Messages.getString("ErLabelProvider.JsonProcessorMessage12", l); //$NON-NLS-1$
+		case CUSTOM_ATTRIBUTE_ERROR: return Messages.getString("ErLabelProvider.JsonProcessorMessage13", l); //$NON-NLS-1$
+		case INVALID_DATA_TYPE: return Messages.getString("ErLabelProvider.JsonProcessorMessage14", l); //$NON-NLS-1$
+		case INVALID_FEATURE_TYPE: return Messages.getString("ErLabelProvider.JsonProcessorMessage15", l); //$NON-NLS-1$
+		case SU_MISSING: return Messages.getString("ErLabelProvider.JsonProcessorMessage16", l); //$NON-NLS-1$
+		case TRACKID: return Messages.getString("ErLabelProvider.JsonProcessorMessage17", l); //$NON-NLS-1$
+		case DESIGN_MISSING: return Messages.getString("ErLabelProvider.JsonProcessorMessage18", l); //$NON-NLS-1$
+		}
+		return ""; //$NON-NLS-1$
+	}
+
+	@Override
+	public HashMap<Locale, String> getNames(MissionMetadata metadataOption) {
+	HashMap<Locale, String> translations = new HashMap<>();
+		
+		String key = ""; //$NON-NLS-1$
+		switch(metadataOption) {
+		case COMMENT: key = "ErLabelProvider.CommentMetadata"; //$NON-NLS-1$
+			break;
+		case EMPLOYEES: key = "ErLabelProvider.MembersMetadata"; //$NON-NLS-1$
+			break;
+		case LEADER: key = "ErLabelProvider.LeaderMetadata"; //$NON-NLS-1$
+			break;
+		case MISSIONID: key = "ErLabelProvider.MissionIdMetadata"; //$NON-NLS-1$
+			break;
+		case SURVEY: key = "ErLabelProvider.SurveyMetadata"; //$NON-NLS-1$
+			break; 
+		case SURVEYDESIGN: key = "ErLabelProvider.SurveyDesignMetadata"; //$NON-NLS-1$
+			break;
+		default:
+			break;
+	
+		}
+		addTranslations(translations, key);
+		return translations;
+	}
+
+	@Override
+	public HashMap<Locale, String> getNames(MissionWaypointMetadata metadataOption) {
+		HashMap<Locale, String> translations = new HashMap<>();
+		
+		String key = ""; //$NON-NLS-1$
+		switch(metadataOption) {
+		case SAMPLING_UNIT: key = "ErLabelProvider.SuMetadata"; //$NON-NLS-1$
+			break;
+		case BEARING: key = "ErLabelProvider.BearingMetadata"; //$NON-NLS-1$
+			break;
+		case COMMENT: key = "ErLabelProvider.CommentMetadata"; //$NON-NLS-1$
+			break;
+		case DISTANCE: key = "ErLabelProvider.DistanceMetadata"; //$NON-NLS-1$
+			break;
+		default:
+			break;
+		}
+		addTranslations(translations, key);
+		return translations;
+	}
+
+	@Override
+	public HashMap<Locale, String> getNames(MissionTrackMetadata metadataOption) {
+		HashMap<Locale, String> translations = new HashMap<>();
+		
+		String key = ""; //$NON-NLS-1$
+		switch(metadataOption) {
+		case SAMPLING_UNIT: key = "ErLabelProvider.SamplingUnitMetadata"; //$NON-NLS-1$
+			break;
+		default:
+			break;
+		
+		
+		}
+		addTranslations(translations, key);
+		return translations;
+	}
+	
+	private void addTranslations(HashMap<Locale, String> translations, String key) {
+		//english
+		Locale en = Locale.forLanguageTag("en"); //$NON-NLS-1$
+		String enl = Messages.getString(key, Locale.ROOT);
+		translations.put(en, enl);
+
+		for (Locale locale : Locale.getAvailableLocales()) {
+			if (locale.equals(en)) continue;
+			
+			String value = Messages.getLocaleString(key, locale);
+			if (value != null) {
+				translations.put(locale, value);
+			}
+		}
 	}
 }

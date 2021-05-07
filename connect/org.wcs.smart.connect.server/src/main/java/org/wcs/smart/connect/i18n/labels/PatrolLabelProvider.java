@@ -26,7 +26,8 @@ import java.util.Locale;
 
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.patrol.json.PatrolJsonFeatureProcessor;
-import org.wcs.smart.patrol.metadata.PatrolAttributeMetadata;
+import org.wcs.smart.patrol.json.PatrolAttributeMetadata;
+import org.wcs.smart.patrol.json.PatrolAttributeMetadata.PatrolWaypointMetadata;
 import org.wcs.smart.patrol.model.IPatrolLabelProvider;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.PatrolWaypointSource;
@@ -73,7 +74,7 @@ public class PatrolLabelProvider implements IPatrolLabelProvider {
 	}
 	
 	@Override
-	public HashMap<Locale, String> getNames(PatrolAttributeMetadata.FixedMetadata metadataOption){
+	public HashMap<Locale, String> getNames(PatrolAttributeMetadata.FixedPatrolMetadata metadataOption){
 		HashMap<Locale, String> translations = new HashMap<>();
 		
 		String key = ""; //$NON-NLS-1$
@@ -113,10 +114,12 @@ public class PatrolLabelProvider implements IPatrolLabelProvider {
 			break;
 		default:
 			break;
-		
 		}
-		
-		
+		addTranslations(translations, key);
+		return translations;
+	}
+
+	private void addTranslations(HashMap<Locale, String> translations, String key) {
 		//english
 		Locale en = Locale.forLanguageTag("en"); //$NON-NLS-1$
 		String enl = Messages.getString(key, Locale.ROOT);
@@ -130,8 +133,6 @@ public class PatrolLabelProvider implements IPatrolLabelProvider {
 				translations.put(locale, value);
 			}
 		}
-		
-		return translations;
 	}
 	
 	@Override
@@ -162,6 +163,29 @@ public class PatrolLabelProvider implements IPatrolLabelProvider {
 			case CUSTOM_ATTRIBUTE_ERROR: return Messages.getString("PatrolLabelProvider.JSONPATROL_23", l); //$NON-NLS-1$
 		}
 		return ""; //$NON-NLS-1$
+	}
+
+	@Override
+	public HashMap<Locale, String> getNames(PatrolWaypointMetadata metadataOption) {
+		HashMap<Locale, String> translations = new HashMap<>();
+		
+		String key = ""; //$NON-NLS-1$
+		switch(metadataOption) {
+		case BEARING:
+			key = "PatrolLabelProvider.Bearing"; //$NON-NLS-1$
+			break;
+		case COMMENT:
+			key = "PatrolLabelProvider.Comment"; //$NON-NLS-1$
+			break;
+		case DISTANCE:
+			key = "PatrolLabelProvider.Distance"; //$NON-NLS-1$
+			break;
+		default:
+			break;
+		
+		}
+		addTranslations(translations, key);
+		return translations;
 	}
 
 
