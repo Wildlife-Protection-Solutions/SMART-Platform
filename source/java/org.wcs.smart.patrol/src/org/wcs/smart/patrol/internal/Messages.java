@@ -387,8 +387,14 @@ public class Messages extends NLS {
 	public static String PatrolImporter_Warn_DataDuplicate;
 	public static String PatrolImporter_Warn_SameId;
 	public static String PatrolLabelProvider_ArmedMetadata;
+
+	public static String PatrolLabelProvider_Bearing;
+	public static String PatrolLabelProvider_Comment;
+
 	public static String PatrolLabelProvider_CommentMetadata;
 	public static String PatrolLabelProvider_DescriptionColumnName;
+
+	public static String PatrolLabelProvider_Distance;
 	public static String PatrolLabelProvider_EmployeesMetadata;
 	public static String PatrolLabelProvider_EndDateMetadata;
 	public static String PatrolLabelProvider_JSONPROCESSOR_1;

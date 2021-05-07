@@ -79,7 +79,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
-import org.wcs.smart.patrol.metadata.PatrolAttributeMetadata;
+import org.wcs.smart.patrol.json.PatrolAttributeMetadata;
 import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.model.PatrolAttributeListItem;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
@@ -131,7 +131,7 @@ public class EditPatrolAttributeDialog extends SmartStyledTitleDialog implements
 		this.pAttribute = toUpdate;
 		
 		this.siblings = new ArrayList<>(siblings);
-		for (PatrolAttributeMetadata.FixedMetadata md : PatrolAttributeMetadata.FixedMetadata.values()) {
+		for (PatrolAttributeMetadata.FixedPatrolMetadata md : PatrolAttributeMetadata.FixedPatrolMetadata.values()) {
 			PatrolAttribute item = new PatrolAttribute();
 			item.setKeyId(md.getKey().toLowerCase(Locale.ROOT));
 			item.setType(md.getType());

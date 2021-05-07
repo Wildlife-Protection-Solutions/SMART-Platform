@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.metadata;
+package org.wcs.smart.patrol.json;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,9 +34,12 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.NamedKeyItem;
+import org.wcs.smart.ca.SignatureType;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.observation.json.IJsonFeatureProcessor;
+import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.patrol.model.IPatrolLabelProvider;
 import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.patrol.model.PatrolMandate;
@@ -44,15 +47,19 @@ import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.util.UuidUtils;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 /**
  * Managing patrol metadata
  * 
  * @author Emily
  *
  */
+@JsonInclude(Include.NON_NULL)
 public class PatrolAttributeMetadata {
 	
-	public enum FixedMetadata{
+	public enum FixedPatrolMetadata{
 		TRANSPORT_TYPE("transportType", Attribute.AttributeType.LIST), //$NON-NLS-1$
 		ARMED("isArmed", Attribute.AttributeType.BOOLEAN), //$NON-NLS-1$
 		TEAM("team", Attribute.AttributeType.LIST), //$NON-NLS-1$
@@ -68,7 +75,7 @@ public class PatrolAttributeMetadata {
 		String key;
 		Attribute.AttributeType type;
 		
-		FixedMetadata(String key, Attribute.AttributeType type){
+		FixedPatrolMetadata(String key, Attribute.AttributeType type){
 			this.key = key;
 			this.type = type;
 		}
@@ -141,7 +148,7 @@ public class PatrolAttributeMetadata {
 			
 			if (this == PILOT || this == LEADER) {
 				item.options = null;
-				item.setLinkTo(FixedMetadata.EMPLOYEES.key);
+				item.setLinkTo(FixedPatrolMetadata.EMPLOYEES.key);
 			}
 			
 			if (this == PILOT) {
@@ -151,7 +158,7 @@ public class PatrolAttributeMetadata {
 				for (PatrolTransportType type : types) {
 					if (type.getPatrolType().requiresPilot()) {
 						if (sb.length() > 0) sb.append(" OR "); //$NON-NLS-1$
-						sb.append(FixedMetadata.TRANSPORT_TYPE.key);
+						sb.append(FixedPatrolMetadata.TRANSPORT_TYPE.key);
 						sb.append(" = '"); //$NON-NLS-1$
 						sb.append(type.getKeyId());
 						sb.append("'"); //$NON-NLS-1$
@@ -162,8 +169,54 @@ public class PatrolAttributeMetadata {
 			
 			return item;
 		}
+	}
+	
+	public enum PatrolWaypointMetadata{
+		DISTANCE(IJsonFeatureProcessor.WaypointMetadata.DISTANCE.getKey(), Attribute.AttributeType.NUMERIC), 
+		BEARING(IJsonFeatureProcessor.WaypointMetadata.BEARING.getKey(), Attribute.AttributeType.NUMERIC),
+		COMMENT(IJsonFeatureProcessor.WaypointMetadata.COMMENT.getKey(), Attribute.AttributeType.TEXT);
 		
+		String key;
+		Attribute.AttributeType type;
 		
+		PatrolWaypointMetadata(String key, Attribute.AttributeType type){
+			this.key = key;
+			this.type = type;
+		}
+		
+		public String getKey() {
+			return this.key;
+		}
+		
+		public Attribute.AttributeType getType(){
+			return this.type;
+		}
+		
+		/**
+		 * May return null if the metadata option is not valid for
+		 * the current Conservation Area settings.
+		 * 
+		 * @param session
+		 * @param ca
+		 * @return
+		 */
+		public PatrolAttributeMetadata toMetadata(Session session, ConservationArea ca) {
+			
+			if (this == BEARING || this == DISTANCE) {
+				//see what the field data settings are
+				ObservationOptions op = session.get(ObservationOptions.class, ca.getUuid());
+				if (op == null || !op.getTrackDistanceDirection()) return null;
+			}
+			
+			PatrolAttributeMetadata item = new PatrolAttributeMetadata(key, type);
+			item.setRequired(false);
+
+			HashMap<Locale, String> names = SmartContext.INSTANCE.getClass(IPatrolLabelProvider.class).getNames(this);
+			for (Entry<Locale, String> name : names.entrySet()) {
+				item.addName(item.new Name(name.getValue(), name.getKey().toString()));
+			}
+			return item;
+		}
 	}
 	
 	private String id;
@@ -203,6 +256,7 @@ public class PatrolAttributeMetadata {
 	}
 	
 	public String getType(){
+		if (type == null) return null;
 		return this.type.name();
 	}
 	public String getRequiredWhen() {
@@ -283,6 +337,33 @@ public class PatrolAttributeMetadata {
 				item.addListOption(op);
 			}
 			
+		}
+		return item;
+	}
+	
+	/**
+	 * will return null if no signature types are configured for ca
+	 * 
+	 * @param session
+	 * @param ca
+	 * @return
+	 */
+	public static PatrolAttributeMetadata getSignatureMetadata(Session session, ConservationArea ca) {
+		PatrolAttributeMetadata item = new PatrolAttributeMetadata(IJsonFeatureProcessor.JSON_SIGNATURETYPE_KEY, null);
+		item.names = null;
+		item.requiredWhen = null;
+		item.options = new ArrayList<>();
+		List<SignatureType> types = QueryFactory.buildQuery(session, SignatureType.class, 
+				new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
+		if (types.isEmpty()) return null;
+		
+		for (SignatureType type : types) {
+			ListOption op = item.new ListOption(type.getKeyId());
+			
+			for (Label l : type.getNames()) {
+				op.addName(item.new Name(l.getValue(), l.getLanguage().getCode()));
+			}
+			item.addListOption(op);
 		}
 		return item;
 	}

@@ -51,7 +51,6 @@ import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.patrol.PatrolIdGenerator;
 import org.wcs.smart.patrol.PatrolUtils;
-import org.wcs.smart.patrol.metadata.PatrolAttributeMetadata;
 import org.wcs.smart.patrol.model.IPatrolLabelProvider;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolAttribute;
@@ -263,6 +262,7 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 				dlink.setConservationArea(ca);
 				dlink.setProviderId(link.getValue());
 				dlink.setSmartId(link.getKey().getUuid());
+				dlink.setDataType(OBSGROUP_DATATYPE);
 				session.save(dlink);
 			}
 		}
@@ -292,10 +292,10 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		newLeg.getPatrolLegDays().get(0).setStartTime(date.toLocalTime());
 				
 		String[] required = new String[] {
-				JSON_PATROLUUID, JSON_PATROLLEGUUID, PatrolAttributeMetadata.FixedMetadata.TRANSPORT_TYPE.getKey(),
-				PatrolAttributeMetadata.FixedMetadata.MANDATE.getKey(),
-				PatrolAttributeMetadata.FixedMetadata.EMPLOYEES.getKey(),
-				PatrolAttributeMetadata.FixedMetadata.LEADER.getKey()
+				JSON_PATROLUUID, JSON_PATROLLEGUUID, PatrolAttributeMetadata.FixedPatrolMetadata.TRANSPORT_TYPE.getKey(),
+				PatrolAttributeMetadata.FixedPatrolMetadata.MANDATE.getKey(),
+				PatrolAttributeMetadata.FixedPatrolMetadata.EMPLOYEES.getKey(),
+				PatrolAttributeMetadata.FixedPatrolMetadata.LEADER.getKey()
 		};
 		for (String r : required) {
 			if (!attributes.containsKey(r)) throw new Exception(MessageFormat.format(Messages.MISSING_PROPERTY.getMessage(l), r));
@@ -324,8 +324,8 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		newPatrol.setArmed(false);
 		
 		String teamKey = null;
-		if (attributes.containsKey(PatrolAttributeMetadata.FixedMetadata.TEAM.getKey())) {
-			teamKey = (String)attributes.get(PatrolAttributeMetadata.FixedMetadata.TEAM.getKey());
+		if (attributes.containsKey(PatrolAttributeMetadata.FixedPatrolMetadata.TEAM.getKey())) {
+			teamKey = (String)attributes.get(PatrolAttributeMetadata.FixedPatrolMetadata.TEAM.getKey());
 			
 			Team pTeam = session.createQuery("FROM Team WHERE conservationArea = :ca and keyId = :key", Team.class) //$NON-NLS-1$
 					.setParameter("ca",ca ) //$NON-NLS-1$
@@ -340,8 +340,8 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		}
 		
 		String stationKey = null;
-		if (attributes.containsKey(PatrolAttributeMetadata.FixedMetadata.STATION.getKey())) {
-			stationKey = (String)attributes.get(PatrolAttributeMetadata.FixedMetadata.STATION.getKey());
+		if (attributes.containsKey(PatrolAttributeMetadata.FixedPatrolMetadata.STATION.getKey())) {
+			stationKey = (String)attributes.get(PatrolAttributeMetadata.FixedPatrolMetadata.STATION.getKey());
 			
 			try {
 				UUID stationUuid = UuidUtils.stringToUuid(stationKey);
@@ -354,23 +354,23 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 			}
 		}
 		
-		if (attributes.containsKey(PatrolAttributeMetadata.FixedMetadata.COMMENT.getKey())) {
-			String comment = (String) attributes.get(PatrolAttributeMetadata.FixedMetadata.COMMENT.getKey());
+		if (attributes.containsKey(PatrolAttributeMetadata.FixedPatrolMetadata.COMMENT.getKey())) {
+			String comment = (String) attributes.get(PatrolAttributeMetadata.FixedPatrolMetadata.COMMENT.getKey());
 			newPatrol.setComment(comment);
 		}
 		
-		if (attributes.containsKey(PatrolAttributeMetadata.FixedMetadata.OBJECTIVE.getKey())) {
-			String comment = (String) attributes.get(PatrolAttributeMetadata.FixedMetadata.OBJECTIVE.getKey());
+		if (attributes.containsKey(PatrolAttributeMetadata.FixedPatrolMetadata.OBJECTIVE.getKey())) {
+			String comment = (String) attributes.get(PatrolAttributeMetadata.FixedPatrolMetadata.OBJECTIVE.getKey());
 			newPatrol.setObjective(comment);
 		}
 		
-		if (attributes.containsKey(PatrolAttributeMetadata.FixedMetadata.PATROLID.getKey())) {
-			String id = (String) attributes.get(PatrolAttributeMetadata.FixedMetadata.PATROLID.getKey());
+		if (attributes.containsKey(PatrolAttributeMetadata.FixedPatrolMetadata.PATROLID.getKey())) {
+			String id = (String) attributes.get(PatrolAttributeMetadata.FixedPatrolMetadata.PATROLID.getKey());
 			newPatrol.setId(id.trim());
 		}
 		
-		if (attributes.containsKey(PatrolAttributeMetadata.FixedMetadata.ARMED.getKey())) {
-			String armed = (String)attributes.get(PatrolAttributeMetadata.FixedMetadata.ARMED.getKey());
+		if (attributes.containsKey(PatrolAttributeMetadata.FixedPatrolMetadata.ARMED.getKey())) {
+			String armed = (String)attributes.get(PatrolAttributeMetadata.FixedPatrolMetadata.ARMED.getKey());
 			if (armed.equalsIgnoreCase(Boolean.TRUE.toString())) {
 				newPatrol.setArmed(true);
 			}
@@ -383,12 +383,12 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		
 		//members leader & pilot
 		newLeg.setMembers(new ArrayList<>());
-		JSONArray employees = (JSONArray) attributes.get(PatrolAttributeMetadata.FixedMetadata.EMPLOYEES.getKey());
+		JSONArray employees = (JSONArray) attributes.get(PatrolAttributeMetadata.FixedPatrolMetadata.EMPLOYEES.getKey());
 		
-		String leader = (String) attributes.get(PatrolAttributeMetadata.FixedMetadata.LEADER.getKey());
+		String leader = (String) attributes.get(PatrolAttributeMetadata.FixedPatrolMetadata.LEADER.getKey());
 		String pilot = null;
-		if (attributes.containsKey(PatrolAttributeMetadata.FixedMetadata.PILOT.getKey())) {
-			pilot = (String) attributes.get(PatrolAttributeMetadata.FixedMetadata.PILOT.getKey());
+		if (attributes.containsKey(PatrolAttributeMetadata.FixedPatrolMetadata.PILOT.getKey())) {
+			pilot = (String) attributes.get(PatrolAttributeMetadata.FixedPatrolMetadata.PILOT.getKey());
 		}
 		boolean hasleader = false;
 		boolean haspilot = false;
@@ -642,10 +642,10 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		
 		String[] required = new String[] {
 				JSON_PATROLUUID, JSON_PATROLLEGUUID, 
-				PatrolAttributeMetadata.FixedMetadata.TRANSPORT_TYPE.getKey(),
-				PatrolAttributeMetadata.FixedMetadata.MANDATE.getKey(),
-				PatrolAttributeMetadata.FixedMetadata.EMPLOYEES.getKey(),
-				PatrolAttributeMetadata.FixedMetadata.LEADER.getKey()
+				PatrolAttributeMetadata.FixedPatrolMetadata.TRANSPORT_TYPE.getKey(),
+				PatrolAttributeMetadata.FixedPatrolMetadata.MANDATE.getKey(),
+				PatrolAttributeMetadata.FixedPatrolMetadata.EMPLOYEES.getKey(),
+				PatrolAttributeMetadata.FixedPatrolMetadata.LEADER.getKey()
 		};
 		for (String r : required) {
 			if (!attributes.containsKey(r)) throw new Exception(MessageFormat.format(Messages.MISSING_PROPERTY.getMessage(l), r));
@@ -690,12 +690,12 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		
 		//members leader & pilot
 		newLeg.setMembers(new ArrayList<>());
-		JSONArray employees = (JSONArray) attributes.get(PatrolAttributeMetadata.FixedMetadata.EMPLOYEES.getKey());
+		JSONArray employees = (JSONArray) attributes.get(PatrolAttributeMetadata.FixedPatrolMetadata.EMPLOYEES.getKey());
 		
-		String leader = (String) attributes.get(PatrolAttributeMetadata.FixedMetadata.LEADER.getKey());
+		String leader = (String) attributes.get(PatrolAttributeMetadata.FixedPatrolMetadata.LEADER.getKey());
 		String pilot = null;
-		if (attributes.containsKey(PatrolAttributeMetadata.FixedMetadata.PILOT.getKey())) {
-			pilot = (String) attributes.get(PatrolAttributeMetadata.FixedMetadata.PILOT.getKey());
+		if (attributes.containsKey(PatrolAttributeMetadata.FixedPatrolMetadata.PILOT.getKey())) {
+			pilot = (String) attributes.get(PatrolAttributeMetadata.FixedPatrolMetadata.PILOT.getKey());
 		}
 		boolean hasleader = false;
 		boolean haspilot = false;
@@ -766,7 +766,7 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 	 */
 	private PatrolTransportType findTransportType(ConservationArea ca, Session session, JSONObject attributes, Locale l)
 			throws Exception {
-		String typeKey = (String)attributes.get(PatrolAttributeMetadata.FixedMetadata.TRANSPORT_TYPE.getKey());
+		String typeKey = (String)attributes.get(PatrolAttributeMetadata.FixedPatrolMetadata.TRANSPORT_TYPE.getKey());
 		PatrolTransportType tType = session.createQuery("FROM PatrolTransportType WHERE conservationArea = :ca and keyId = :key", PatrolTransportType.class) //$NON-NLS-1$
 				.setParameter("ca",ca ) //$NON-NLS-1$
 				.setParameter("key", typeKey) //$NON-NLS-1$
@@ -787,7 +787,7 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 	 * @throws Exception
 	 */
 	private PatrolMandate findPatrolMandate(ConservationArea ca, Session session, JSONObject attributes, Locale l) throws Exception{
-		String mandateKey = (String)attributes.get(PatrolAttributeMetadata.FixedMetadata.MANDATE.getKey());
+		String mandateKey = (String)attributes.get(PatrolAttributeMetadata.FixedPatrolMetadata.MANDATE.getKey());
 		PatrolMandate pMandate = session.createQuery("FROM PatrolMandate WHERE conservationArea = :ca and keyId = :key", PatrolMandate.class) //$NON-NLS-1$
 				.setParameter("ca",ca ) //$NON-NLS-1$
 				.setParameter("key", mandateKey) //$NON-NLS-1$

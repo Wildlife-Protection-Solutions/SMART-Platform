@@ -76,6 +76,8 @@ import org.wcs.smart.util.UuidUtils;
  */
 public abstract class IJsonFeatureProcessor {
 
+	public static final String JSON_SIGNATURETYPE_KEY = "signatureType"; //$NON-NLS-1$
+
 	public static final String OBSGROUP_DATATYPE = "obsgroup"; //$NON-NLS-1$
 	
 	public static final String JSON_SMARTATTRIBUTES = "smartAttributes";  //$NON-NLS-1$
@@ -84,6 +86,21 @@ public abstract class IJsonFeatureProcessor {
 	public static final String JSON_SMARTDATATYPE = "smartDataType"; //$NON-NLS-1$
 	public static final String JSON_SMARTFEATURETYPE = "smartFeatureType"; //$NON-NLS-1$
 	public static final String JSON_FT_OBSERVATION = "observation"; //$NON-NLS-1$
+	
+	public enum WaypointMetadata{
+		DISTANCE("distance"), //$NON-NLS-1$
+		BEARING("bearing"), //$NON-NLS-1$
+		COMMENT("comment"); //$NON-NLS-1$
+		
+		String key;
+		
+		WaypointMetadata(String key) {
+			this.key = key;
+		}
+		public String getKey() {
+			return this.key;
+		}
+	}
 	
 	public enum Messages{
 		EMPLOYEE_NOT_FOUND,
@@ -230,16 +247,16 @@ public abstract class IJsonFeatureProcessor {
 			wp.setId(atts.get("id").toString()); //$NON-NLS-1$
 		}
 
-		if (atts.containsKey("distance")) { //$NON-NLS-1$
-			wp.setDistance(((Number) atts.get("distance")).floatValue()); //$NON-NLS-1$
+		if (atts.containsKey(WaypointMetadata.DISTANCE.key)) { 
+			wp.setDistance(((Number) atts.get(WaypointMetadata.DISTANCE.key)).floatValue()); 
 		}
 
-		if (atts.containsKey("bearing")) { //$NON-NLS-1$
-			wp.setDirection(((Number) atts.get("bearing")).floatValue()); //$NON-NLS-1$
+		if (atts.containsKey(WaypointMetadata.BEARING.key)) { 
+			wp.setDirection(((Number) atts.get(WaypointMetadata.BEARING.key)).floatValue()); 
 		}
 
-		if (atts.containsKey("comment")) { //$NON-NLS-1$
-			wp.setComment(atts.get("comment").toString()); //$NON-NLS-1$
+		if (atts.containsKey(WaypointMetadata.COMMENT.key)) { 
+			wp.setComment(atts.get(WaypointMetadata.COMMENT.key).toString()); 
 		}
 
 		wp.setAttachments(new ArrayList<>());
@@ -370,8 +387,8 @@ public abstract class IJsonFeatureProcessor {
 			String fname = (String) jattachment.get("filename"); //$NON-NLS-1$
 			String data = (String)jattachment.get("data"); //base64 encoded //$NON-NLS-1$
 			String sigtype = null;
-			if (jattachment.containsKey("signatureType")) { //$NON-NLS-1$
-				sigtype = (String) jattachment.get("signatureType"); //$NON-NLS-1$
+			if (jattachment.containsKey(JSON_SIGNATURETYPE_KEY)) { 
+				sigtype = (String) jattachment.get(JSON_SIGNATURETYPE_KEY);
 			}
 			//decode data
 			byte[] decoded = DatatypeConverter.parseBase64Binary(data);

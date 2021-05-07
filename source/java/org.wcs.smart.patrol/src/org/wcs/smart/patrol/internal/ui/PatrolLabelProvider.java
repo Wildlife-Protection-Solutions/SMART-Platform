@@ -26,8 +26,8 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 import org.wcs.smart.patrol.internal.Messages;
+import org.wcs.smart.patrol.json.PatrolAttributeMetadata;
 import org.wcs.smart.patrol.json.PatrolJsonFeatureProcessor;
-import org.wcs.smart.patrol.metadata.PatrolAttributeMetadata;
 import org.wcs.smart.patrol.model.IPatrolLabelProvider;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.PatrolWaypointSource;
@@ -99,7 +99,45 @@ public class PatrolLabelProvider implements IPatrolLabelProvider {
 		return ""; //$NON-NLS-1$
 	}
 	
-	public HashMap<Locale, String> getNames(PatrolAttributeMetadata.FixedMetadata metadataOption){
+	public HashMap<Locale, String> getNames(PatrolAttributeMetadata.PatrolWaypointMetadata metadataOption){
+		HashMap<Locale, String> translations = new HashMap<>();
+		
+		String key = ""; //$NON-NLS-1$
+		switch(metadataOption) {
+		case DISTANCE: 
+			key = Messages.PatrolLabelProvider_Distance;
+			break;
+		case BEARING:
+			key = Messages.PatrolLabelProvider_Bearing;
+			break;
+		case COMMENT:
+			key = Messages.PatrolLabelProvider_Comment;
+			break;
+		default:
+			break;
+		}
+		
+		//english
+		Locale en = Locale.forLanguageTag("en"); //$NON-NLS-1$
+		String enl = ResourceBundle.getBundle("", Locale.ROOT).getString(key); //$NON-NLS-1$
+		translations.put(en, enl);
+
+		for (Locale locale : Locale.getAvailableLocales()) {
+			if (locale.equals(en)) continue;
+			try {
+				ResourceBundle b = ResourceBundle.getBundle("", locale); //$NON-NLS-1$
+				if (b != null) {
+					String value = b.getString(key);
+					translations.put(locale, value);	
+				}
+			}catch (Exception ex) {
+			}
+		}
+		
+		return translations;
+	}
+
+	public HashMap<Locale, String> getNames(PatrolAttributeMetadata.FixedPatrolMetadata metadataOption){
 		HashMap<Locale, String> translations = new HashMap<>();
 		
 		String key = ""; //$NON-NLS-1$
