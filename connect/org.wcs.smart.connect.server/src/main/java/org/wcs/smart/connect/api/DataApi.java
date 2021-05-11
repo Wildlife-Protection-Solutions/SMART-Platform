@@ -57,9 +57,11 @@ import org.wcs.smart.connect.query.WaypointSourceEngine;
 import org.wcs.smart.connect.security.CaAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.er.json.MissionAttributeMetadata;
+import org.wcs.smart.er.json.SurveyDesignMetadata;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.json.IJsonFeatureProcessor;
 import org.wcs.smart.observation.json.JsonFileProcessor;
+import org.wcs.smart.observation.model.DataLink;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.patrol.json.PatrolAttributeMetadata;
 import org.wcs.smart.patrol.model.PatrolAttribute;
@@ -162,7 +164,7 @@ public class DataApi extends HttpServlet{
 	@GET
 	@Path("/metadata/mission/{cauuid}")
 	@Produces({ MediaType.APPLICATION_JSON })
-	public MissionMetadata getMissionMetadata(
+	public List<SurveyDesignMetadata> getMissionMetadata(
 			@Parameter(description="uuid of the conservation area to get mission metadata for") @PathParam("cauuid") String uuid) {
 		
 		UUID caUuid = parseUuid(uuid);
@@ -181,31 +183,8 @@ public class DataApi extends HttpServlet{
 				
 				ConservationArea ca = s.get(ConservationArea.class, caUuid);
 				if (ca == null) throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("DataModelApi.CaNotFound", request.getLocale())); //$NON-NLS-1$
-					
-				List<MissionAttributeMetadata> pMetadata = new ArrayList<>();
-				for (MissionAttributeMetadata.MissionMetadata fixed : MissionAttributeMetadata.MissionMetadata.values()) {
-					pMetadata.add(fixed.toMetadata(s, ca));
-				}		
-
-				List<MissionAttributeMetadata> wpMetadata = new ArrayList<>();
-				for (MissionAttributeMetadata.MissionWaypointMetadata fixed : MissionAttributeMetadata.MissionWaypointMetadata.values()) {
-					wpMetadata.add(fixed.toMetadata(s, ca));
-				}
 				
-				List<MissionAttributeMetadata> trackMetadata = new ArrayList<>();
-				for (MissionAttributeMetadata.MissionTrackMetadata fixed : MissionAttributeMetadata.MissionTrackMetadata.values()) {
-					trackMetadata.add(fixed.toMetadata(s, ca));
-				}
-				
-				List<MissionAttributeMetadata> designs = MissionAttributeMetadata.surveyDesignToMetadata(s, ca);
-				
-				MissionMetadata metadata = new MissionMetadata();
-				metadata.missionMetadata = pMetadata;
-				metadata.waypointMetadata = wpMetadata;
-				metadata.trackMetadata = trackMetadata;
-				metadata.designMetadata = designs;
-				metadata.signatureMetadata = MissionAttributeMetadata.getSignatureMetadata(s, ca);
-				return metadata;
+				return SurveyDesignMetadata.getMetadata(ca, s);
 
 			}finally {
 				s.getTransaction().commit();
@@ -228,7 +207,7 @@ public class DataApi extends HttpServlet{
 			if (p != null) processors.add(p);
 		}
 		
-		
+		ProcessingResult rr = null;
 		try(Session s = HibernateManager.getSession(context, request.getLocale(), new AttachmentInterceptor())){
 			s.beginTransaction();
 			try {
@@ -265,12 +244,23 @@ public class DataApi extends HttpServlet{
 					if (processor != null) processor.dispose();
 				}
 				
-				ProcessingResult rr = new ProcessingResult(processor.getWarnings(), processor.getMessages().stream().collect(Collectors.joining(" "))); //$NON-NLS-1$
-				return rr;
+				
+				rr = new ProcessingResult(processor.getWarnings(), processor.getMessages().stream().collect(Collectors.joining(" "))); //$NON-NLS-1$
 			}catch (Exception ex) {
 				s.getTransaction().rollback();
 				throw ex;
 			}
+			
+			s.beginTransaction();
+			try {
+				DataLink.cleanUp(s);
+				s.getTransaction().commit();
+			}catch (Exception ex) {
+				logger.log(Level.WARNING, ex.getMessage(), ex);
+				s.getTransaction().rollback();
+			}
+			
+			return rr;
 		}
 		
 	}

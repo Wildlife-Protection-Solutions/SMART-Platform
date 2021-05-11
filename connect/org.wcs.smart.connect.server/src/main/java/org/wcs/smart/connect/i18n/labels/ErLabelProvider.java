@@ -28,6 +28,7 @@ import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.er.json.MissionAttributeMetadata.MissionMetadata;
 import org.wcs.smart.er.json.MissionAttributeMetadata.MissionTrackMetadata;
 import org.wcs.smart.er.json.MissionAttributeMetadata.MissionWaypointMetadata;
+import org.wcs.smart.er.json.MissionJsonFeatureProcessor;
 import org.wcs.smart.er.model.IErLabelProvider;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
@@ -63,11 +64,12 @@ public class ErLabelProvider implements IErLabelProvider{
 		if (item.equals(SD_KEY_COL_KEY)) return Messages.getString("ErLabelProvider.KeyColumn", l); //$NON-NLS-1$
 		if (item.equals(SD_NAME_COL_KEY)) return Messages.getString("ErLabelProvider.NameColumn", l); //$NON-NLS-1$
 		if (item == IErLabelProvider.SURVEY_NAME) return Messages.getString("ErLabelProvider.SurveyName", l); //$NON-NLS-1$
+		if (item instanceof MissionJsonFeatureProcessor.Messages) return getMessage((MissionJsonFeatureProcessor.Messages)item, l);
 		return null;
 	}
 
 	@Override
-	public String getMessage(org.wcs.smart.er.json.MissionJsonFeatureProcessor.Messages message, Locale l) {
+	public String getMessage(MissionJsonFeatureProcessor.Messages message, Locale l) {
 		switch(message){
 		case MISSION_LINK_EXISTS: return Messages.getString("ErLabelProvider.JsonProcessorMessage1", l); //$NON-NLS-1$
 		case COMPLETE_MSG: return Messages.getString("ErLabelProvider.JsonProcessorMessage2", l); //$NON-NLS-1$
@@ -87,6 +89,8 @@ public class ErLabelProvider implements IErLabelProvider{
 		case SU_MISSING: return Messages.getString("ErLabelProvider.JsonProcessorMessage16", l); //$NON-NLS-1$
 		case TRACKID: return Messages.getString("ErLabelProvider.JsonProcessorMessage17", l); //$NON-NLS-1$
 		case DESIGN_MISSING: return Messages.getString("ErLabelProvider.JsonProcessorMessage18", l); //$NON-NLS-1$
+		case SURVEY_EXISTS: return Messages.getString("ErLabelProvider.ErLabelProvider.JsonProcessorMessage19", l); //$NON-NLS-1$
+		case SURVEY_LINK_EXISTS: return Messages.getString("ErLabelProvider.ErLabelProvider.JsonProcessorMessage20", l); //$NON-NLS-1$
 		}
 		return ""; //$NON-NLS-1$
 	}
