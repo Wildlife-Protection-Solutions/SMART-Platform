@@ -173,6 +173,10 @@ public class Messages extends NLS {
 	public static String ERDatabaseUpgrader_UpgradeTask;
 	public static String ErLabelProvider_DescriptionColumn;
 	public static String ErLabelProvider_EndDateColumn;
+
+	public static String ErLabelProvider_ErLabelProvider_MissionJsonMessage19;
+
+	public static String ErLabelProvider_ErLabelProvider_MissionJsonMessage20;
 	public static String ErLabelProvider_KeyColumn;
 	public static String ErLabelProvider_MissionJsonMessage1;
 

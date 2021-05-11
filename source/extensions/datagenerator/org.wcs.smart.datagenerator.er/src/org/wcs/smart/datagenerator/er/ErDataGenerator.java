@@ -58,9 +58,9 @@ import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.datagenerator.er.internal.Messages;
 import org.wcs.smart.datagenerator.er.model.ObservationConfiguration;
 import org.wcs.smart.datagenerator.er.model.SurveyConfiguration;
+import org.wcs.smart.er.MissionIdGenerator;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
-import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.MissionMember;
@@ -235,6 +235,7 @@ public class ErDataGenerator implements IDataEngine{
 			Mission mission = createMission(session, monitor);
 			survey.getMissions().add(mission);
 			mission.setSurvey(survey);
+			mission.setId(MissionIdGenerator.INSTANCE.generateMissionId(mission, session));
 			session.saveOrUpdate(mission);
 			mission.getMissionDays().forEach(m->{
 				m.getWaypoints().forEach(wp->{
@@ -263,7 +264,6 @@ public class ErDataGenerator implements IDataEngine{
 		mission.setComment(null);
 		mission.setStartDate(start);
 		mission.setEndDate(end);
-		mission.setId(SurveyHibernateManager.generateMissionId(session));
 		mission.setMissionDays(new ArrayList<>());
 		mission.setMembers(new ArrayList<MissionMember>());
 		mission.setMissionPropertyValues(new ArrayList<MissionPropertyValue>());
@@ -318,7 +318,7 @@ public class ErDataGenerator implements IDataEngine{
 			mission.getMembers().add(member);
 		}		
 		mission.getMembers().get(0).setIsLeader(true);
-
+		
 		//generate a start position for the mission
 		Coordinate startc = generatePosition();
 		

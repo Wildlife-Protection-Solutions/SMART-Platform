@@ -74,12 +74,17 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 
+	private static final String SURVEY_KEY_ID = "id"; //$NON-NLS-1$
+
 	private static final String MISSION_DATATYPE = "mission"; //$NON-NLS-1$
+	private static final String SURVEY_DATATYPE = "survey"; //$NON-NLS-1$
 	
 	private static final String JSON_MISSIONUUID = "missionUuid"; //$NON-NLS-1$
+	private static final String JSON_SURVEYUUID = "surveyUuid"; //$NON-NLS-1$
 	
 	public static final String JSON_FT_START = "start"; //$NON-NLS-1$
 	public static final String JSON_FT_END = "end"; //$NON-NLS-1$
+	public static final String JSON_FT_NEW = "new"; //$NON-NLS-1$
 	public static final String JSON_FT_TRACKPOINT = "trackpoint"; //$NON-NLS-1$
 	
 	public enum Messages{
@@ -100,6 +105,8 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		SU_MISSING,
 		DESIGN_MISSING,
 		TRACKID,
+		SURVEY_EXISTS,
+		SURVEY_LINK_EXISTS,
 		COMPLETE_MSG;
 		
 		public String getMessage(Locale l) {
@@ -116,7 +123,8 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 	 */
 	@Override
 	public boolean canProcess(String featureType) {
-		return featureType.equalsIgnoreCase(MISSION_DATATYPE); 
+		return featureType.equalsIgnoreCase(MISSION_DATATYPE) 
+				|| featureType.equalsIgnoreCase(SURVEY_DATATYPE);
 	}
 
 	/**
@@ -132,10 +140,85 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 
 		JSONObject props = (JSONObject) feature.get(JSON_PROPERTIES);
 
-		String dtype = props.get(JSON_SMARTDATATYPE).toString(); 
-		if (!dtype.equalsIgnoreCase(MISSION_DATATYPE))
-			throw new Exception(MessageFormat.format(Messages.INVALID_DATA_TYPE.getMessage(l), dtype, MISSION_DATATYPE));
+		String dtype = props.get(JSON_SMARTDATATYPE).toString();
+		if (dtype.equalsIgnoreCase(MISSION_DATATYPE)) {
+			processMissionDataType(feature, ca, session, l);
+		}else if (dtype.equalsIgnoreCase(SURVEY_DATATYPE)) {
+			processSurveyDataType(feature, ca, session, l);
+		}else {
+			throw new Exception(MessageFormat.format(Messages.INVALID_DATA_TYPE.getMessage(l), dtype, MISSION_DATATYPE, SURVEY_DATATYPE));
+		}
+		
+	}
+	
+	private void processSurveyDataType(JSONObject feature, ConservationArea ca, Session session, Locale l) throws Exception{
+		JSONObject props = (JSONObject) feature.get(JSON_PROPERTIES);
+		
+		if (!props.containsKey(IJsonFeatureProcessor.JSON_SMARTATTRIBUTES)) {
+			throw new Exception(MessageFormat.format(Messages.MISSING_PROPERTY.getMessage(l), IJsonFeatureProcessor.JSON_SMARTATTRIBUTES));
+		}
+		
+		String ftype = props.get(JSON_SMARTFEATURETYPE).toString();
+		
+		if (!ftype.equalsIgnoreCase(JSON_FT_NEW)) {
+			throw new Exception(MessageFormat.format(Messages.INVALID_FEATURE_TYPE.getMessage(l), ftype, JSON_FT_NEW));
+		}
+		
+		JSONObject attributes = (JSONObject) props.get(IJsonFeatureProcessor.JSON_SMARTATTRIBUTES);
 
+		String[] required = new String[] {JSON_SURVEYUUID,
+				MissionAttributeMetadata.MissionMetadata.SURVEYDESIGN.getKey()};
+		for (String r : required) {
+			if (!attributes.containsKey(r)) throw new Exception(MessageFormat.format(Messages.MISSING_PROPERTY.getMessage(l), r));
+		}
+		
+		UUID srcSurveyUuid = null;
+		try {
+			srcSurveyUuid = UuidUtils.stringToUuid((String)attributes.get(JSON_SURVEYUUID));
+		}catch (Exception ex) {
+			throw new Exception(MessageFormat.format(Messages.INVALID_SURVEY_UUID.getMessage(l), props.get(JSON_SURVEYUUID)));
+		}
+
+		Survey temp = findSurveyLink(srcSurveyUuid, ca, session, l);
+		if (temp != null) {
+			//a link to a mission already exists in the database for this uuid; 
+			throw new Exception(MessageFormat.format(Messages.SURVEY_EXISTS.getMessage(l), srcSurveyUuid));
+		}
+		
+		//check for survey design
+		String sd = (String)attributes.get(MissionAttributeMetadata.MissionMetadata.SURVEYDESIGN.getKey());
+		SurveyDesign design = findSurveyDesign(sd, ca, session, l);
+		if (design == null) {
+			throw new Exception(MessageFormat.format(Messages.DESIGN_MISSING.getMessage(l), sd));
+		}
+		
+		String id = null;
+		if (attributes.containsKey(SURVEY_KEY_ID)) {
+			id = (String)attributes.get(SURVEY_KEY_ID);
+		}
+
+		//create new Survey
+		Survey survey = new Survey();
+		survey.setMissions(new ArrayList<>());
+		survey.setSurveyDesign(design);
+		if (id.trim().isBlank()) {
+			id = MissionIdGenerator.INSTANCE.generateSurveyId(survey, session, l);
+		}
+		survey.setId(  id );
+		session.save(survey);
+		session.flush();
+		DataLink dlink = new DataLink();
+		dlink.setConservationArea(ca);
+		dlink.setProviderId(srcSurveyUuid);
+		dlink.setSmartId(survey.getUuid());
+		dlink.setDataType(SURVEY_DATATYPE);
+		session.save(dlink);
+	}
+	
+	
+	private void processMissionDataType(JSONObject feature, ConservationArea ca, Session session, Locale l) throws Exception{
+		JSONObject props = (JSONObject) feature.get(JSON_PROPERTIES);
+		
 		if (!props.containsKey(IJsonFeatureProcessor.JSON_SMARTATTRIBUTES)) {
 			throw new Exception(MessageFormat.format(Messages.MISSING_PROPERTY.getMessage(l), IJsonFeatureProcessor.JSON_SMARTATTRIBUTES));
 		}
@@ -150,7 +233,15 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		}else if (ftype.equalsIgnoreCase(JSON_FT_TRACKPOINT)) {
 			processTrackPoint(feature, ca, session, l);
 		}else {
-			throw new Exception(MessageFormat.format(Messages.INVALID_FEATURE_TYPE.getMessage(l), ftype, JSON_FT_OBSERVATION));
+			StringBuilder sb = new StringBuilder();
+			sb.append(JSON_FT_OBSERVATION);
+			sb.append(", "); //$NON-NLS-1$
+			sb.append(JSON_FT_START);
+			sb.append(", "); //$NON-NLS-1$
+			sb.append(JSON_FT_END);
+			sb.append(", "); //$NON-NLS-1$
+			sb.append(JSON_FT_TRACKPOINT);
+			throw new Exception(MessageFormat.format(Messages.INVALID_FEATURE_TYPE.getMessage(l), ftype, sb.toString()));
 		}
 
 	}
@@ -187,6 +278,10 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		
 		if (toUpdate == null) throw new Exception(Messages.MISSIONDAY_MISSING.getMessage(l));
 		if (toUpdate.getWaypoints() == null) toUpdate.setWaypoints(new ArrayList<>());
+		
+		if (toUpdate.getEndTime().equals(LocalTime.MAX) || toUpdate.getEndTime().isBefore(date.toLocalTime())) {
+			toUpdate.setEndTime(date.toLocalTime());
+		}
 		
 		Waypoint wp = super.createWaypoint(feature, ca, session, l);
 		if (wp.getId() == null) {
@@ -288,7 +383,8 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		createMissingDays(newMission);
 		
 		newMission.getMissionDays().get(0).setStartTime(date.toLocalTime());
-				
+		newMission.getMissionDays().get(0).setEndTime(date.toLocalTime());
+
 		String[] required = new String[] {JSON_MISSIONUUID};
 		for (String r : required) {
 			if (!attributes.containsKey(r)) throw new Exception(MessageFormat.format(Messages.MISSING_PROPERTY.getMessage(l), r));
@@ -321,7 +417,9 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		if (srcSurveyUuid != null) {
 			survey = findSurvey(srcSurveyUuid, ca, session, l);
 			if (survey == null) {
-				//a link to a mission already exists in the database for this uuid; 
+				survey = findSurveyLink(srcSurveyUuid, ca, session, l);
+			}
+			if (survey == null) {
 				throw new Exception(MessageFormat.format(Messages.SURVEY_NOT_FOUND.getMessage(l), srcSurveyUuid));
 			}
 		}else {
@@ -498,7 +596,6 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		//update end date if required
 		if (mission.getEndDate().isBefore(date.toLocalDate())) {
 			mission.setEndDate(date.toLocalDate());
-			
 			createMissingDays(mission);
 		}
 		
@@ -513,7 +610,7 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		
 		for (MissionDay d : mission.getMissionDays()) {
 			if (d.getDate().equals(date.toLocalDate())) {
-				if (date.toLocalTime().isAfter(d.getEndTime())) {
+				if (d.getEndTime().equals(LocalTime.MAX) ||  date.toLocalTime().isAfter(d.getEndTime())) {
 					d.setEndTime(date.toLocalTime());
 				}
 				addTrackPoint(d, position, su, l);
@@ -560,7 +657,9 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		if (toUpdate.getStartTime().equals(LocalTime.MIN) || date.toLocalTime().isBefore(toUpdate.getStartTime())) {
 			toUpdate.setStartTime(date.toLocalTime());
 		}
-		
+		if (toUpdate.getEndTime().equals(LocalTime.MAX) ||  toUpdate.getEndTime().isBefore(date.toLocalTime())) {
+			toUpdate.setEndTime(date.toLocalTime());
+		}
 		SamplingUnit su = null;
 		if (attributes.containsKey(MissionAttributeMetadata.MissionWaypointMetadata.SAMPLING_UNIT.getKey())) {
 			String suid = attributes.get(MissionAttributeMetadata.MissionWaypointMetadata.SAMPLING_UNIT.getKey()).toString();
@@ -616,8 +715,10 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		}
 
 		List<Coordinate> items = new ArrayList<>();
-		for (Coordinate c : track.getLineString().getCoordinates()) {
-			items.add(c);
+		if (track.getLineString() != null) {
+			for (Coordinate c : track.getLineString().getCoordinates()) {
+				items.add(c);
+			}
 		}
 		items.add(position);		
 		if (items.size() == 1) items.add(position);
@@ -661,7 +762,7 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 	}
 	
 	private SurveyDesign findSurveyDesign(String designKey, ConservationArea ca, Session session, Locale l) {
-		SurveyDesign design = session.createQuery("FROM surveyDesign WHERE keyId = :key and conservationArea = :ca ", SurveyDesign.class) //$NON-NLS-1$
+		SurveyDesign design = session.createQuery("FROM SurveyDesign WHERE keyId = :key and conservationArea = :ca ", SurveyDesign.class) //$NON-NLS-1$
 				.setParameter("key", designKey) //$NON-NLS-1$
 				.setParameter("ca", ca) //$NON-NLS-1$
 				.uniqueResult();
@@ -693,6 +794,31 @@ public class MissionJsonFeatureProcessor extends IJsonFeatureProcessor {
 		//update last modified
 		link.setLastModified(LocalDateTime.now());
 		return mission;
+	}
+	
+	private Survey findSurveyLink(UUID providerUuid, ConservationArea ca, Session session, Locale l) throws Exception{
+		DataLink link = session.createQuery("FROM DataLink WHERE conservationArea = :ca and providerId = :puuid and dataType = :datatype", DataLink.class) //$NON-NLS-1$
+		.setParameter("ca",ca) //$NON-NLS-1$
+		.setParameter("puuid", providerUuid) //$NON-NLS-1$
+		.setParameter("datatype", SURVEY_DATATYPE) //$NON-NLS-1$
+		.uniqueResult();
+		
+		if (link == null) return null;
+		
+		Survey survey = session.get(Survey.class, link.getSmartId());
+		if (survey == null) {
+			//the object this links to does exist, so lets delete it and allow a new one
+			session.delete(link);
+			return null;
+		}
+		if (!survey.getSurveyDesign().getConservationArea().equals(ca)) {
+			throw new Exception(Messages.SURVEY_LINK_EXISTS.getMessage(l));
+		}
+			
+		
+		//update last modified
+		link.setLastModified(LocalDateTime.now());
+		return survey;
 	}
 
 	private WaypointObservationGroup findWaypointObservationGroup(UUID providerUuid, ConservationArea ca, Session session) {

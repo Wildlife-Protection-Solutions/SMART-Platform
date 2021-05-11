@@ -71,6 +71,8 @@ public class ErLabelProvider implements IErLabelProvider{
 		if (item.equals(SD_KEY_COL_KEY)) return Messages.ErLabelProvider_KeyColumn;
 		if (item.equals(SD_NAME_COL_KEY)) return Messages.ErLabelProvider_NameColumn;
 		if (item == SURVEY_NAME)  return Messages.ErLabelProvider_SurveyLabel;
+		if (item instanceof MissionJsonFeatureProcessor.Messages ) return getMessage((MissionJsonFeatureProcessor.Messages)item, l);
+		
 		return null;
 	}
 
@@ -189,6 +191,8 @@ public class ErLabelProvider implements IErLabelProvider{
 			case SU_MISSING: return Messages.ErLabelProvider_MissionJsonMessage16;
 			case TRACKID: return Messages.ErLabelProvider_MissionJsonMessage17;
 			case DESIGN_MISSING: return Messages.ErLabelProvider_MissionJsonMessage18;
+			case SURVEY_EXISTS: return Messages.ErLabelProvider_ErLabelProvider_MissionJsonMessage19;
+			case SURVEY_LINK_EXISTS: return Messages.ErLabelProvider_ErLabelProvider_MissionJsonMessage20;
 		}
 		return ""; //$NON-NLS-1$
 	}

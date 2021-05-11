@@ -33,16 +33,11 @@ import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Label;
-import org.wcs.smart.ca.NamedKeyItem;
-import org.wcs.smart.ca.SignatureType;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.model.IErLabelProvider;
-import org.wcs.smart.er.model.MissionAttribute;
-import org.wcs.smart.er.model.SamplingUnit;
-import org.wcs.smart.er.model.Survey;
-import org.wcs.smart.er.model.SurveyDesign;
-import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.er.model.MissionAttributeListItem;
+import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.observation.json.IJsonFeatureProcessor;
 import org.wcs.smart.util.UuidUtils;
 
@@ -58,8 +53,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 @JsonInclude(Include.NON_NULL)
 public class MissionAttributeMetadata {
 	
-	private static final String SU_KEY = "samplingunit"; //$NON-NLS-1$
-	private static final String SD_PROPERTIES_KEY = "properties"; //$NON-NLS-1$
+	private static final String SU_KEY = "samplingUnit"; //$NON-NLS-1$
 	
 	public enum MissionTrackMetadata{
 		SAMPLING_UNIT(SU_KEY, Attribute.AttributeType.LIST);
@@ -83,11 +77,11 @@ public class MissionAttributeMetadata {
 		public MissionAttributeMetadata toMetadata(Session session, ConservationArea ca) {
 			MissionAttributeMetadata item = new MissionAttributeMetadata(key, type);
 			item.setRequired(false);
-			item.setLinkTo(MissionMetadata.SURVEYDESIGN.getKey() + "." + SD_PROPERTIES_KEY +"." + MissionWaypointMetadata.SAMPLING_UNIT.getKey()); //$NON-NLS-1$ //$NON-NLS-2$
+			item.setLinkTo(SurveyDesignMetadata.SU_KEY);
 			item.options = null;
 			HashMap<Locale, String> names = SmartContext.INSTANCE.getClass(IErLabelProvider.class).getNames(this);
 			for (Entry<Locale, String> name : names.entrySet()) {
-				item.addName(item.new Name(name.getValue(), name.getKey().toString()));
+				item.addName(new Name(name.getValue(), name.getKey().toString()));
 			}
 			return item;
 		}
@@ -121,15 +115,15 @@ public class MissionAttributeMetadata {
 			item.setRequired(false);
 
 			if (this == SAMPLING_UNIT) {
-				item.setLinkTo(MissionMetadata.SURVEYDESIGN.getKey() + "." + SD_PROPERTIES_KEY +"." + MissionWaypointMetadata.SAMPLING_UNIT.getKey()); //$NON-NLS-1$ //$NON-NLS-2$
+				item.setLinkTo(SurveyDesignMetadata.SU_KEY);
 				item.options = null;
 			}
 			if (this == DISTANCE || this == BEARING) {
-				item.setRequiredExpression(MissionMetadata.SURVEYDESIGN.getKey() + "." + SD_PROPERTIES_KEY +"." + getKey() + " = true");  //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
+				item.setRequired(true);
 			}
 			HashMap<Locale, String> names = SmartContext.INSTANCE.getClass(IErLabelProvider.class).getNames(this);
 			for (Entry<Locale, String> name : names.entrySet()) {
-				item.addName(item.new Name(name.getValue(), name.getKey().toString()));
+				item.addName(new Name(name.getValue(), name.getKey().toString()));
 			}
 			return item;
 		}
@@ -173,7 +167,7 @@ public class MissionAttributeMetadata {
 			
 			HashMap<Locale, String> names = SmartContext.INSTANCE.getClass(IErLabelProvider.class).getNames(this);
 			for (Entry<Locale, String> name : names.entrySet()) {
-				item.addName(item.new Name(name.getValue(), name.getKey().toString()));
+				item.addName(new Name(name.getValue(), name.getKey().toString()));
 			}
 			
 			if (this == EMPLOYEES) {
@@ -182,25 +176,25 @@ public class MissionAttributeMetadata {
 						.setParameter("ca",ca) //$NON-NLS-1$
 						.list();
 				for (Employee e : employees) {
-					MissionAttributeMetadata.ListOption op = item.new ListOption(UuidUtils.uuidToString(e.getUuid()));
+					MissionAttributeMetadata.ListOption op = new ListOption(UuidUtils.uuidToString(e.getUuid()));
 					String name = SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getEmployeeShortLabel(e, Locale.getDefault());
-					op.addName(item.new Name(name, null));
+					op.addName(new Name(name, null));
 					item.addListOption(op);
 				}			
 			}
 			
 			if (this == SURVEYDESIGN) {
-				item.setLinkTo(MissionMetadata.SURVEYDESIGN.getKey());
+				item.setLinkTo(SurveyDesignMetadata.SD_ID_KEY);
 				item.setRequiredExpression(SURVEY.getKey() + " = null"); //$NON-NLS-1$
 			}
 			
 			if (this == LEADER) {
 				item.options = null;
-				item.setLinkTo(MissionMetadata.EMPLOYEES.key);
+				item.setLinkTo(SurveyDesignMetadata.MISSIONMETADATA_KEY + "." + MissionMetadata.EMPLOYEES.key); //$NON-NLS-1$
 			}
 			
 			if (this == SURVEY) {
-				item.setLinkTo(MissionMetadata.SURVEYDESIGN.getKey() + "." + SD_PROPERTIES_KEY +"." + MissionMetadata.SURVEY.getKey()); //$NON-NLS-1$ //$NON-NLS-2$
+				item.setLinkTo(SurveyDesignMetadata.SURVEY_KEY);
 				item.options = null;
 			}
 			
@@ -214,8 +208,6 @@ public class MissionAttributeMetadata {
 	private List<ListOption> options;
 	private String requiredWhen;
 	private String linkTo;
-	
-	private HashMap<String, Object> properties;
 	
 	public MissionAttributeMetadata(String id, Attribute.AttributeType type) {
 		this.id = id;
@@ -236,11 +228,7 @@ public class MissionAttributeMetadata {
 	public String getId() {
 		return this.id;
 	}
-	
-	public HashMap<String, Object> getProperties(){
-		return this.properties;
-	}
-	
+		
 	public List<Name> getNames(){
 		return this.names;
 	}
@@ -275,7 +263,8 @@ public class MissionAttributeMetadata {
 		this.options.add(op);
 	}
 	
-	public class ListOption{
+	@JsonInclude(Include.NON_NULL)
+	public static class ListOption{
 		private String id;
 		private List<Name> names;
 		
@@ -297,7 +286,7 @@ public class MissionAttributeMetadata {
 	}
 	
 	@JsonInclude(Include.NON_NULL)
-	public class Name{
+	public static class Name{
 		private String name;
 		private String locale;
 		
@@ -315,112 +304,24 @@ public class MissionAttributeMetadata {
 		}
 	}
 	
-	public static MissionAttributeMetadata toMetadata(MissionAttribute attribute) {
-		MissionAttributeMetadata item = new MissionAttributeMetadata(attribute.getKeyId(), attribute.getType());
-		item.setRequired(false);
-		for (Label l : attribute.getNames()) {
-			item.addName(item.new Name(l.getValue(), l.getLanguage().getCode()));
-		}
+	public static MissionAttributeMetadata toMetadata(MissionProperty p) {
+		MissionAttributeMetadata md = new MissionAttributeMetadata(p.getAttribute().getKeyId(), p.getAttribute().getType());
+		md.setRequired(false);
+		md.setLinkTo(null);
 		
-		if (attribute.getType() == Attribute.AttributeType.LIST) {
-			
-			for (NamedKeyItem kid: attribute.getAttributeList()) {
-				MissionAttributeMetadata.ListOption op = item.new ListOption(kid.getKeyId());
-				for (Label l : kid.getNames()) {
-					op.addName(item.new Name(l.getValue(), l.getLanguage().getCode()));
+		if (p.getAttribute().getType() == AttributeType.LIST) {
+			md.options = new ArrayList<>();
+			for (MissionAttributeListItem li : p.getAttribute().getAttributeList()) {
+				ListOption op = new ListOption(li.getKeyId());
+				for (Label l : li.getNames()) {
+					op.addName(new Name(l.getValue(), l.getLanguage().getCode()));
 				}
-				item.addListOption(op);
+				md.options.add(op);
 			}
-			
 		}
-		return item;
+		return md;
 	}
 	
-	/**
-	 * will return null if no signature types are configured for ca
-	 * 
-	 * @param session
-	 * @param ca
-	 * @return
-	 */
-	public static MissionAttributeMetadata getSignatureMetadata(Session session, ConservationArea ca) {
-		MissionAttributeMetadata item = new MissionAttributeMetadata(IJsonFeatureProcessor.JSON_SIGNATURETYPE_KEY, null);
-		item.names = null;
-		item.requiredWhen = null;
-		item.options = new ArrayList<>();
-		List<SignatureType> types = QueryFactory.buildQuery(session, SignatureType.class, 
-				new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
-		if (types.isEmpty()) return null;
-		for (SignatureType type : types) {
-			ListOption op = item.new ListOption(type.getKeyId());
-			
-			for (Label l : type.getNames()) {
-				op.addName(item.new Name(l.getValue(), l.getLanguage().getCode()));
-			}
-			item.addListOption(op);
-		}
-		return item;
-	}
-	
-	
-	public static List<MissionAttributeMetadata> surveyDesignToMetadata(Session session, ConservationArea ca) {
-		List<MissionAttributeMetadata> items = new ArrayList<>();
-		List<SurveyDesign> designs = 
-				session.createQuery("FROM SurveyDesign WHERE conservationArea = :ca AND state = :state", SurveyDesign.class) //$NON-NLS-1$
-				.setParameter("ca", ca) //$NON-NLS-1$
-				.setParameter("state", SurveyDesign.State.ACTIVE) //$NON-NLS-1$
-				.list();
-		
-		for (SurveyDesign d : designs) {
-			MissionAttributeMetadata item = new MissionAttributeMetadata(d.getKeyId(),null);
-			items.add(item);
-			item.requiredWhen = null;
-			item.properties = new HashMap<>();
-			
-			for (Label l : d.getNames()) {
-				item.addName(item.new Name(l.getValue(), l.getLanguage().getCode()));
-			}
-			
-			item.properties.put(MissionWaypointMetadata.BEARING.getKey(), d.getTrackDistanceDirection());
-			item.properties.put(MissionWaypointMetadata.DISTANCE.getKey(), d.getTrackDistanceDirection());
-			
-			MissionAttributeMetadata suMetadata = new MissionAttributeMetadata(MissionWaypointMetadata.SAMPLING_UNIT.getKey(), AttributeType.LIST);
-			List<SamplingUnit> units =
-					session.createQuery("FROM SamplingUnit WHERE surveyDesign = :design", SamplingUnit.class) //$NON-NLS-1$
-					.setParameter("design", d)							 //$NON-NLS-1$
-					.list();
-			
-			if (!units.isEmpty()) {
-				suMetadata.names = null;
-				suMetadata.requiredWhen = null;
-				for (SamplingUnit unit : units) {
-					MissionAttributeMetadata.ListOption sop = item.new ListOption(UuidUtils.uuidToString(unit.getUuid()));
-					sop.addName(item.new Name(unit.getId(), null));
-					suMetadata.addListOption(sop);
-				}
-				item.properties.put(suMetadata.getId(), suMetadata);
-			}
-			
-			MissionAttributeMetadata sMetadata = new MissionAttributeMetadata(MissionMetadata.SURVEY.getKey(), AttributeType.LIST);
-			List<Survey> surveys = 
-					session.createQuery("FROM Survey WHERE surveyDesign = :design", Survey.class) //$NON-NLS-1$
-					.setParameter("design",d) //$NON-NLS-1$
-					.list();
-			if (!surveys.isEmpty()) {
-				sMetadata.names = null;
-				sMetadata.requiredWhen = null;
-				for (Survey s : surveys) {
-					MissionAttributeMetadata.ListOption sop = item.new ListOption(UuidUtils.uuidToString(s.getUuid()));
-					sop.addName(item.new Name(s.getId(), null));
-					sMetadata.addListOption(sop);
-				}
-				item.properties.put(sMetadata.getId(), sMetadata);
-			}
-			
-		}
-		return items;
-		
-	}
 	
 	
 }
