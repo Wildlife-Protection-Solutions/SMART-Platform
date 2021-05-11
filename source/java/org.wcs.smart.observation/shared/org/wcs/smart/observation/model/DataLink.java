@@ -11,6 +11,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
 
@@ -87,4 +88,16 @@ public class DataLink extends UuidItem{
 		this.lastUpdated = LocalDateTime.now();
 	}
 	
+	/*
+	 * We don't use this on the desktop version of SMART however
+	 * it is used on Connect.  This prevents sync conflicts (the same
+	 * data being deleted on server and desktop). Most data
+	 * processing is supposed to be happening on connect so this
+	 * should be ok.
+	 */
+	public static void cleanUp(Session session) {
+		session.createQuery("DELETE FROM DataLink WHERE lastModified < :date") //$NON-NLS-1$
+			.setParameter("date",LocalDateTime.now().minusMonths(6)) //$NON-NLS-1$
+			.executeUpdate();
+	}
 }

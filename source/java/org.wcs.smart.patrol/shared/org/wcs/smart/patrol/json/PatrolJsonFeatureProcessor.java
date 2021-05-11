@@ -22,9 +22,13 @@
 package org.wcs.smart.patrol.json;
 
 import java.text.MessageFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -178,12 +182,12 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		//update leg dates
 		if (date.toLocalDate().isBefore(leg.getStartDate())) {
 			leg.setStartDate(date.toLocalDate());
-			leg.createLegDays(session);
+			createLegDays(leg, session);
 		}
 		
 		if (date.toLocalDate().isAfter(leg.getEndDate())) {
 			leg.setEndDate(date.toLocalDate());
-			leg.createLegDays(session);
+			createLegDays(leg, session);
 		}
 
 		//update patrol dates
@@ -193,8 +197,6 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		if (date.toLocalDate().isAfter(leg.getPatrol().getEndDate())) {
 			leg.getPatrol().setEndDate(date.toLocalDate());
 		}
-		session.saveOrUpdate(leg.getPatrol());
-		session.flush();
 		
 		PatrolLegDay toUpdate = null;
 		for (PatrolLegDay day : leg.getPatrolLegDays()) {
@@ -206,6 +208,14 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		
 		if (toUpdate == null) throw new Exception(Messages.PATROLLEG_MISSING.getMessage(l));
 		if (toUpdate.getWaypoints() == null) toUpdate.setWaypoints(new ArrayList<>());
+		
+		//new day or time before new time
+		if (toUpdate.getUuid() == null || toUpdate.getEndTime().isBefore(date.toLocalTime())) {
+			toUpdate.setEndTime(date.toLocalTime());
+		}
+		
+		session.saveOrUpdate(leg.getPatrol());
+		session.flush();
 		
 		Waypoint wp = super.createWaypoint(feature, ca, session, l);
 		if (wp.getId() == null) {
@@ -288,9 +298,10 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		modifiedFeatures.add(newPatrol);
 		PatrolLeg newLeg = newPatrol.addLeg();
 		
-		newLeg.createLegDays(session);
+		createLegDays(newLeg, session);
 		newLeg.getPatrolLegDays().get(0).setStartTime(date.toLocalTime());
-				
+		newLeg.getPatrolLegDays().get(0).setEndTime(date.toLocalTime());
+
 		String[] required = new String[] {
 				JSON_PATROLUUID, JSON_PATROLLEGUUID, PatrolAttributeMetadata.FixedPatrolMetadata.TRANSPORT_TYPE.getKey(),
 				PatrolAttributeMetadata.FixedPatrolMetadata.MANDATE.getKey(),
@@ -477,6 +488,7 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		//add a track point
 		Coordinate position = super.getPosition(feature);
 		PatrolLegDay pday = newLeg.getPatrolLegDays().get(0);
+		
 		addTrackPoint(pday, position);		
 		
 		
@@ -536,12 +548,12 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		modifiedFeatures.add(patrol);
 		if (!leg.getEndDate().equals(date.toLocalDate())) {
 			leg.setEndDate(date.toLocalDate());
-			leg.createLegDays(session);
+			createLegDays(leg, session);
 		}
 		
 		for (PatrolLegDay d : leg.getPatrolLegDays()) {
 			if (d.getDate().equals(date.toLocalDate())) {
-				if (date.toLocalTime().isAfter(d.getEndTime())) {
+				if (d.getEndTime().equals(LocalTime.MAX) || date.toLocalTime().isAfter(d.getEndTime())) {
 					d.setEndTime(date.toLocalTime());
 				}
 				addTrackPoint(d, position);
@@ -572,12 +584,12 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		//update leg dates
 		if (date.toLocalDate().isBefore(leg.getStartDate())) {
 			leg.setStartDate(date.toLocalDate());
-			leg.createLegDays(session);
+			createLegDays(leg, session);
 		}
 		
 		if (date.toLocalDate().isAfter(leg.getEndDate())) {
 			leg.setEndDate(date.toLocalDate());
-			leg.createLegDays(session);
+			createLegDays(leg, session);
 		}
 		
 		//update patrol dates
@@ -599,6 +611,9 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 
 		if (toUpdate.getStartTime().equals(LocalTime.MIN) || date.toLocalTime().isBefore(toUpdate.getStartTime())) {
 			toUpdate.setStartTime(date.toLocalTime());
+		}
+		if (toUpdate.getEndTime().equals(LocalTime.MAX) || toUpdate.getEndTime().isBefore(date.toLocalTime())) {
+			toUpdate.setEndTime(date.toLocalTime());
 		}
 		addTrackPoint(toUpdate, position);
 	}
@@ -671,7 +686,10 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		newLeg.setEndDate(date.toLocalDate());
 		newLeg.setId(String.valueOf((patrolToUpdate.getLegs().size() + 1)));
 		
-		newLeg.createLegDays(session);
+		createLegDays(newLeg, session);
+		
+		newLeg.getPatrolLegDays().get(0).setStartTime(date.toLocalTime());
+		newLeg.getPatrolLegDays().get(0).setEndTime(date.toLocalTime());
 		
 		PatrolMandate pMandate = null;
 		try {
@@ -877,5 +895,59 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		//update last modified
 		link.setLastModified(LocalDateTime.now());
 		return p;
+	}
+	
+	
+	public void createLegDays(PatrolLeg leg, Session session){
+		
+		if (leg.getPatrolLegDays() == null) leg.setPatrolLegDays(new ArrayList<>());
+		
+		List<PatrolLegDay> days = leg.getPatrolLegDays();
+		
+		//lets make a hash set of existing leg days; 
+		//we try to re-use these so associated data is not lost
+		HashMap<LocalDate, PatrolLegDay> current = new HashMap<LocalDate, PatrolLegDay>();
+		for (PatrolLegDay day : days){
+			current.put(day.getDate(), day);
+		}
+
+		// -- the remaining days
+		LocalDate working = leg.getStartDate();
+		while (working.isBefore(leg.getEndDate()) || working.isEqual(leg.getEndDate()) ){
+			
+			PatrolLegDay existing = current.remove(working);
+			if (existing != null){
+				if (existing.getStartTime() == null) existing.setStartTime(LocalTime.MIN);
+				if (existing.getEndTime() == null) existing.setEndTime(LocalTime.MAX);
+			}else{
+				PatrolLegDay previousDay = new PatrolLegDay();
+				previousDay.setDate( working );
+				previousDay.setStartTime( LocalTime.MIN );
+				previousDay.setEndTime( LocalTime.MAX );
+				previousDay.setPatrolLeg(leg);
+				days.add(previousDay);
+				
+			}
+			working = ChronoUnit.DAYS.addTo(working, 1);
+		}
+	
+		//remove old legs that weren't used
+		for (PatrolLegDay day : current.values()){
+			//we need to make sure we delete all waypoints here
+			if (day.getWaypoints() != null){
+				for (PatrolWaypoint pw : day.getWaypoints()){
+					session.delete(pw.getWaypoint());
+				}
+			}
+			days.remove(day);
+		}
+		
+		//sort 
+		Collections.sort(days, new Comparator<PatrolLegDay>() {
+			@Override
+			public int compare(PatrolLegDay o1, PatrolLegDay o2) {
+				return o1.getDate().compareTo(o2.getDate());
+			}
+		});
 	}
 }
