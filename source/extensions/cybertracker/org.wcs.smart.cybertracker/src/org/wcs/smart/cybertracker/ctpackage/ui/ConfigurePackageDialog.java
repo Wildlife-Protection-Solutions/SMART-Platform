@@ -26,6 +26,7 @@ import javax.inject.Inject;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -52,6 +53,8 @@ public class ConfigurePackageDialog extends SmartStyledTitleDialog{
 	@Inject
 	private IEclipseContext context;
 	
+	private boolean isModified = false;
+	
 	public ConfigurePackageDialog(Shell parentShell, ICtPackage toEdit) {
 		super(parentShell);
 		this.toEdit = toEdit;
@@ -60,16 +63,41 @@ public class ConfigurePackageDialog extends SmartStyledTitleDialog{
 	@Override
 	protected void okPressed() {
 		try {
-			config.save();
-			getButton(IDialogConstants.OK_ID).setEnabled(false);
+			save();
 		}catch (Exception ex) {
 			CyberTrackerPlugIn.displayError(Messages.ConfigurePackageDialog_ErrorTitle, Messages.ConfigurePackageDialog_ErrorMessage +ex.getMessage(), ex);
 		}
 	}
 
+	private boolean save() throws Exception{
+		if (getErrorMessage() != null) {
+			MessageDialog.openInformation(getShell(), Messages.ConfigurePackageDialog_SaveTitle, Messages.ConfigurePackageDialog_ErrorsExistMsg);
+			return false;
+		}
+			
+		config.save();
+		isModified = false;
+		getButton(IDialogConstants.OK_ID).setEnabled(false);
+		return true;
+	}
+
+	@Override
+	protected void cancelPressed() {
+		if (isModified) {
+			if (MessageDialog.openQuestion(getShell(), Messages.ConfigurePackageDialog_SaveChangesTitle,Messages.ConfigurePackageDialog_UnSavedChangesMSg)) {
+				try {
+					if (!save()) return;
+				}catch (Exception ex) {
+					CyberTrackerPlugIn.displayError(Messages.ConfigurePackageDialog_ErrorTitle, Messages.ConfigurePackageDialog_ErrorMessage +ex.getMessage(), ex);
+				}
+			}
+		}
+		super.cancelPressed();
+	}
+	
 	protected void createButtonsForButtonBar(Composite parent) {
 		Button btn = createButton(parent, IDialogConstants.OK_ID, DialogConstants.SAVE_TEXT, true);
-		btn.setEnabled(false);
+		btn.setEnabled(isModified);
 		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CLOSE_LABEL, true);
 	}
 	
@@ -86,17 +114,22 @@ public class ConfigurePackageDialog extends SmartStyledTitleDialog{
 			throw new IllegalStateException(Messages.ConfigurePackageDialog_ManagerNotFound + toEdit.getTypeIdentifier());
 		}
 		
-		config.createGui(parent, toEdit, e->{
-			if (getButton(IDialogConstants.OK_ID) == null) return;
+		config.createGui(parent, toEdit, e -> {
+			if (getButton(IDialogConstants.OK_ID) == null)
+				return;
 			if (e == null) {
 				setErrorMessage(null);
-				getButton(IDialogConstants.OK_ID).setEnabled(true);
-			}else {
+				getButton(IDialogConstants.OK_ID).setEnabled(isModified);
+			} else {
 				setErrorMessage(e);
 				getButton(IDialogConstants.OK_ID).setEnabled(false);
 			}
+		}, e -> {
+			isModified = e;
+			getButton(IDialogConstants.OK_ID).setEnabled(true);
 		});
 		
+		if (toEdit.getUuid() == null) isModified = true;
 		setMessage(Messages.ConfigurePackageDialog_ShellMessage);
 		setTitle(Messages.ConfigurePackageDialog_ShellTitle);
 		getShell().setText(Messages.ConfigurePackageDialog_ShellTitle);

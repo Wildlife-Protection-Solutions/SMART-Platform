@@ -106,6 +106,7 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 	private CyberTrackerPropertiesProfile cmDefaultProfile = null;
 
 	private Consumer<String> onValidate;
+	private Consumer<Boolean> onModified;
 	
 	private boolean isInit = false;
 	
@@ -114,7 +115,9 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 	private IEclipseContext context;
 	
 	@Override
-	public void createGui(Composite parent, ICtPackage ctitem, Consumer<String> validate) {
+	public void createGui(Composite parent, ICtPackage ctitem, Consumer<String> validate,
+			Consumer<Boolean> modified) {
+		
 		contributions = new ArrayList<>();
 		contributions.add(new SmartCollectConnectDataContribution().getUiController());
 		for ( IPackageContribution c : PackageContributionManager.INSTANCE.getContributionItems()) {
@@ -125,6 +128,7 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 		
 		contributions.forEach(e->ContextInjectionFactory.inject(e, context));
 		
+		this.onModified = modified;
 		this.onValidate = validate;
 		if (!(ctitem instanceof SmartCollectPackage)) throw new IllegalStateException(Messages.SmartCollectPackageConfigurator_InvalidType);
 		this.ctpackage = (SmartCollectPackage) ctitem;
@@ -303,6 +307,11 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 	}
 	
 	private void validate() {
+		validate(true);
+	}
+	
+	private void validate(boolean modified) {
+		if (modified) onModified.accept(true);
 		
 		try {
 			if (txtName.getText().isBlank()) {
@@ -574,7 +583,7 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 						}else {
 							if (!profiles.isEmpty()) profileViewer.setSelection(new StructuredSelection(profiles.get(0)));
 						}
-						
+						validate(false);
 					}finally {
 						isInit = false;
 					}

@@ -72,10 +72,14 @@ public class Messages extends NLS {
 	public static String ConfigurableModelEditorCyberTrackerTab_ProfileDetailsMessage;
 	public static String ConfigurableModelEditorCyberTrackerTab_profileLoadJobname;
 	public static String ConfigurePackageDialog_ErrorMessage;
+	public static String ConfigurePackageDialog_ErrorsExistMsg;
 	public static String ConfigurePackageDialog_ErrorTitle;
 	public static String ConfigurePackageDialog_ManagerNotFound;
+	public static String ConfigurePackageDialog_SaveChangesTitle;
+	public static String ConfigurePackageDialog_SaveTitle;
 	public static String ConfigurePackageDialog_ShellMessage;
 	public static String ConfigurePackageDialog_ShellTitle;
+	public static String ConfigurePackageDialog_UnSavedChangesMSg;
 	public static String ConfigurePackagesDialog_AddMenuItem;
 	public static String ConfigurePackagesDialog_addtooltip;
 	public static String ConfigurePackagesDialog_CopyLabel;

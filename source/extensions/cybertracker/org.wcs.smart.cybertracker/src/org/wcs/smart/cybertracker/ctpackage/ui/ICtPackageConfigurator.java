@@ -39,7 +39,8 @@ public interface ICtPackageConfigurator {
 	 * @param parent
 	 * @param ctpackage
 	 */
-	public void createGui(Composite parent, ICtPackage ctpackage, Consumer<String> validate);
+	public void createGui(Composite parent, ICtPackage ctpackage, 
+			Consumer<String> onValidate, Consumer<Boolean> onModified);
 	
 	/**
 	 * Create the details section for describing the settings

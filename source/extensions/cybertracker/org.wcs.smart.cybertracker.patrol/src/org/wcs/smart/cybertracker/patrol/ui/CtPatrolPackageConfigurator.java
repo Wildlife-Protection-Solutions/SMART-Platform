@@ -69,7 +69,6 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
-import org.wcs.smart.cybertracker.ctpackage.ui.CtPackageExportDialog;
 import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackageConfigurator;
 import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackageProperty;
 import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackagePropertyProvider;
@@ -119,6 +118,7 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 	private Map<PatrolTransportType, Object[]> typeControls;
 	
 	private Consumer<String> onValidate;
+	private Consumer<Boolean> onModified;
 	
 	private Button btnUseCustomTt;
 	
@@ -136,10 +136,12 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 	}
 	
 	@Override
-	public void createGui(Composite parent, ICtPackage ctitem, Consumer<String> onValidate) {
+	public void createGui(Composite parent, ICtPackage ctitem, Consumer<String> onValidate,
+			Consumer<Boolean> onModified) {
 		contributions.forEach(e->ContextInjectionFactory.inject(e, context));
 		
 		this.onValidate = onValidate;
+		this.onModified = onModified;
 		if (!(ctitem instanceof PatrolCtPackage)) throw new IllegalStateException(Messages.CtPatrolPackageConfigurator_InvalidPackageType);
 		this.ctpackage = (PatrolCtPackage) ctitem;
 	
@@ -421,6 +423,10 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 	}
 
 	private void validate() {
+		validate(true);
+	}
+	private void validate(boolean modified) {
+		if (modified) onModified.accept(true);
 		
 		try {
 			if (txtName.getText().isBlank()) {
@@ -498,6 +504,7 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 					modelList.add(dm);
 					
 					profiles.addAll(CyberTrackerHibernateManager.getPropertiesProfiles(session));
+					profiles.forEach(p->p.getOptions().size());
 					
 					if (ctpackage != null && ctpackage.getUuid() != null) {
 						init = session.get(PatrolCtPackage.class, ctpackage.getUuid());
@@ -591,6 +598,8 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 								((Label)controls[2]).setEnabled(true);
 							}
 						}
+						
+						validate(false);
 					}finally {
 						isInit = false;
 					}

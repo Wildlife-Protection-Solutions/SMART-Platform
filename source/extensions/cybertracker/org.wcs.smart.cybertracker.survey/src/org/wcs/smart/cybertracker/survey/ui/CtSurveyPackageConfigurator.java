@@ -104,7 +104,8 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 	private CyberTrackerPropertiesProfile cmDefaultProfile = null;
 
 	private Consumer<String> onValidate;
-	
+	private Consumer<Boolean> onModified;
+
 	private boolean isInit = false;
 	
 	@Inject
@@ -119,9 +120,11 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 	}
 	
 	@Override
-	public void createGui(Composite parent, ICtPackage ctitem, Consumer<String> onValidate) {
+	public void createGui(Composite parent, ICtPackage ctitem, Consumer<String> onValidate,
+			Consumer<Boolean> onModified) {
 		contributions.forEach(e->ContextInjectionFactory.inject(e, context));
 		
+		this.onModified = onModified;
 		this.onValidate = onValidate;
 		if (!(ctitem instanceof SurveyCtPackage)) throw new IllegalStateException(Messages.CtSurveyPackageConfigurator_InvalidType);
 		this.ctpackage = (SurveyCtPackage) ctitem;
@@ -297,6 +300,11 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 	}
 
 	private void validate() {
+		validate(true);
+	}
+	
+	private void validate(boolean isModified) {
+		if (isModified) onModified.accept(true);
 		
 		try {
 			if (txtName.getText().isBlank()) {
@@ -404,6 +412,7 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 					}finally {
 						isInit = false;
 					}
+					validate(false);
 				});
 				
 				return Status.OK_STATUS;

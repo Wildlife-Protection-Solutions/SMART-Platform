@@ -102,7 +102,8 @@ public class CtIncidentPackageConfigurator implements ICtPackageConfigurator {
 	private CyberTrackerPropertiesProfile cmDefaultProfile = null;
 
 	private Consumer<String> onValidate;
-	
+	private Consumer<Boolean> onModified;
+
 	private boolean isInit = false;
 	
 	@Inject
@@ -116,10 +117,12 @@ public class CtIncidentPackageConfigurator implements ICtPackageConfigurator {
 	}
 	
 	@Override
-	public void createGui(Composite parent, ICtPackage ctitem, Consumer<String> onValidate) {
+	public void createGui(Composite parent, ICtPackage ctitem, Consumer<String> onValidate,
+			Consumer<Boolean> onModified) {
 		contributions.forEach(e->ContextInjectionFactory.inject(e, context));
 		
 		this.onValidate = onValidate;
+		this.onModified = onModified;
 		if (!(ctitem instanceof IncidentCtPackage)) throw new IllegalStateException(Messages.CtIncidentPackageConfigurator_InvalidType);
 		this.ctpackage = (IncidentCtPackage) ctitem;
 	
@@ -300,6 +303,10 @@ public class CtIncidentPackageConfigurator implements ICtPackageConfigurator {
 	}
 
 	private void validate() {
+		validate(true);
+	}
+	private void validate(boolean modified) {
+		if (modified) onModified.accept(true);
 		
 		try {
 			if (txtName.getText().isBlank()) {
@@ -400,7 +407,7 @@ public class CtIncidentPackageConfigurator implements ICtPackageConfigurator {
 						}else {
 							if (!profiles.isEmpty()) profileViewer.setSelection(new StructuredSelection(profiles.get(0)));
 						}
-						
+						validate(false);
 					}finally {
 						isInit = false;
 					}
