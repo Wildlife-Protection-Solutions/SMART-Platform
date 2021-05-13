@@ -45,6 +45,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.SignatureTypeManager;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
@@ -68,8 +69,9 @@ import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.DisplayMode;
+import org.wcs.smart.dataentry.model.xml.external.ICmXmlExtraDataImporter;
 import org.wcs.smart.dataentry.model.xml.external.IConvertedCmExtraData;
-import org.wcs.smart.dataentry.model.xml.external.IXmlCmExtraDataContribution;
+import org.wcs.smart.dataentry.model.xml.external.XmlCmExtraDataImporterFactory;
 import org.wcs.smart.dataentry.model.xml.generated.AttributeOptionType;
 import org.wcs.smart.dataentry.model.xml.generated.AttributeType;
 import org.wcs.smart.dataentry.model.xml.generated.CmAttributeConfigType;
@@ -270,7 +272,15 @@ public class CmXmlToSmartImporter {
 			if (monitor.isCanceled()) return null;
 			//converting extra data
 			List<IConvertedCmExtraData> convertedExtraData = new ArrayList<IConvertedCmExtraData>();
-			for (IXmlCmExtraDataContribution edc : XmlCmExtraDataContributionFactory.getContributions()) {
+			 
+			List<ICmXmlExtraDataImporter> extensions = Collections.emptyList();
+			try{
+				extensions = XmlCmExtraDataImporterFactory.getImporters();
+			}catch (Exception ex) {
+				SmartPlugIn.log(Messages.XmlCmExtraDataContributionFactory_ErrorParseExtraData, ex);
+			}
+			 
+			for (ICmXmlExtraDataImporter edc : extensions) {
 				IConvertedCmExtraData extraData = edc.fromXml(xmlCm.getExtraData(), dataMap, session);
 				if (extraData != null) {
 					if (extraData.getWarnings() != null) {

@@ -54,13 +54,13 @@ public class ConvertedConnectCt2CmExtraData implements IConvertedCmExtraData {
 	
 	public ConvertedConnectCt2CmExtraData(List<CmExtraDataType> extraDataList, Map<String, UuidItem> dataMap, Session session) {
 		for (CmExtraDataType extraDataType : extraDataList) {
-			if(ConnectCt2CmXmlExtraDataContribution.TYPE_ALERT.equals(extraDataType.getType())) {
+			if(ConnectCt2CmXmlExtraDataExporter.TYPE_ALERT.equals(extraDataType.getType())) {
 				ConnectAlert a = createAlert(extraDataType, dataMap);
 				if (a != null) {
 					alerts.add(a);
 				}
 			}
-			if(ConnectCt2CmXmlExtraDataContribution.TYPE_PROPERTIES.equals(extraDataType.getType())) {
+			if(ConnectCt2CmXmlExtraDataExporter.TYPE_PROPERTIES.equals(extraDataType.getType())) {
 				properties = createProperties(extraDataType);
 			}
 		}
@@ -69,9 +69,9 @@ public class ConvertedConnectCt2CmExtraData implements IConvertedCmExtraData {
 	private ConnectAlert createAlert(CmExtraDataType dataType, Map<String, UuidItem> dataMap) {
 		ConnectAlert a = new ConnectAlert();
 		for (CmExtraDataStringKeyType strKeyType : dataType.getStringKey()) {
-			if (ConnectCt2CmXmlExtraDataContribution.KEY_ALERT_TYPE.equals(strKeyType.getKey())) {
+			if (ConnectCt2CmXmlExtraDataExporter.KEY_ALERT_TYPE.equals(strKeyType.getKey())) {
 				a.setTypeInternal(strKeyType.getValue());
-			} if (ConnectCt2CmXmlExtraDataContribution.KEY_ALERT_ITEM.equals(strKeyType.getKey())) {
+			} if (ConnectCt2CmXmlExtraDataExporter.KEY_ALERT_ITEM.equals(strKeyType.getKey())) {
 				UuidItem item = dataMap.get(strKeyType.getValue());
 				if (item != null) {
 					a.setAlertItem(item);
@@ -79,7 +79,7 @@ public class ConvertedConnectCt2CmExtraData implements IConvertedCmExtraData {
 					warnings.add(MessageFormat.format(Messages.ConvertedConnectCt2CmExtraData_InvalidReference, strKeyType.getValue()));
 					return null;
 				}
-			} if (ConnectCt2CmXmlExtraDataContribution.KEY_ALERT_ATTRIBUTE.equals(strKeyType.getKey())) {
+			} if (ConnectCt2CmXmlExtraDataExporter.KEY_ALERT_ATTRIBUTE.equals(strKeyType.getKey())) {
 				UuidItem item = dataMap.get(strKeyType.getValue());
 				if (item != null) {
 					a.setAttrubute((CmAttribute)item);
@@ -90,7 +90,7 @@ public class ConvertedConnectCt2CmExtraData implements IConvertedCmExtraData {
 			}
 		}
 		for (CmExtraDataIntegerKeyType intKeyType : dataType.getIntegerKey()) {
-			if (ConnectCt2CmXmlExtraDataContribution.KEY_ALERT_LEVEL.equals(intKeyType.getKey())) {
+			if (ConnectCt2CmXmlExtraDataExporter.KEY_ALERT_LEVEL.equals(intKeyType.getKey())) {
 				a.setLevel(intKeyType.getValue());
 			}
 		}
@@ -112,16 +112,16 @@ public class ConvertedConnectCt2CmExtraData implements IConvertedCmExtraData {
 		ConnectCtProperties p = new ConnectCtProperties();
 		
 		for (CmExtraDataIntegerKeyType intKeyType : dataType.getIntegerKey()) {
-			if (ConnectCt2CmXmlExtraDataContribution.KEY_PING_FREQUENCY.equals(intKeyType.getKey())) {
+			if (ConnectCt2CmXmlExtraDataExporter.KEY_PING_FREQUENCY.equals(intKeyType.getKey())) {
 				p.setPingFrequency(intKeyType.getValue());
-			}else if (ConnectCt2CmXmlExtraDataContribution.KEY_DATAUPLOAD_FREQUENCY.equals(intKeyType.getKey())) {
+			}else if (ConnectCt2CmXmlExtraDataExporter.KEY_DATAUPLOAD_FREQUENCY.equals(intKeyType.getKey())) {
 				p.setDataFrequency(intKeyType.getValue());
 			}
 		}
 		
 		
 		for (CmExtraDataStringKeyType strKeyType : dataType.getStringKey()) {
-			if (ConnectCt2CmXmlExtraDataContribution.KEY_PING_ALERTTYPE.equals(strKeyType.getKey()) && strKeyType.getValue() != null) {
+			if (ConnectCt2CmXmlExtraDataExporter.KEY_PING_ALERTTYPE.equals(strKeyType.getKey()) && strKeyType.getValue() != null) {
 				p.setPingType(UuidUtils.stringToUuid(strKeyType.getValue()));
 			}
 		}

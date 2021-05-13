@@ -90,7 +90,8 @@ public abstract class IJsonFeatureProcessor {
 	public enum WaypointMetadata{
 		DISTANCE("distance"), //$NON-NLS-1$
 		BEARING("bearing"), //$NON-NLS-1$
-		COMMENT("comment"); //$NON-NLS-1$
+		COMMENT("comment"), //$NON-NLS-1$
+		OBSERVER("observer"); //$NON-NLS-1$
 		
 		String key;
 		
@@ -275,6 +276,16 @@ public abstract class IJsonFeatureProcessor {
 			wp.setUuid(incidentUuid);
 		}
 		
+		Employee wpobserver = null;
+		if (atts.containsKey("observer")) { //$NON-NLS-1$
+			String euuid = atts.get("observer").toString(); //$NON-NLS-1$
+			wpobserver = findEmployee(euuid, ca, session);
+			if (wpobserver == null) {
+				warnings.add(MessageFormat
+						.format(Messages.EMPLOYEE_NOT_FOUND.getMessage(locale), euuid));
+			}
+		}
+		
 		wp.setObservationGroups(new ArrayList<>());
 		if (atts.containsKey("observationGroups")) { //$NON-NLS-1$
 			JSONArray groups = (JSONArray) atts.get("observationGroups"); //$NON-NLS-1$
@@ -305,7 +316,7 @@ public abstract class IJsonFeatureProcessor {
 						
 
 						JSONObject ob = (JSONObject) obs.get(i);
-
+						wo.setObserver(wpobserver);
 						if (ob.containsKey("observer")) { //$NON-NLS-1$
 							String euuid = ob.get("observer").toString(); //$NON-NLS-1$
 							Employee e = findEmployee(euuid, ca, session);

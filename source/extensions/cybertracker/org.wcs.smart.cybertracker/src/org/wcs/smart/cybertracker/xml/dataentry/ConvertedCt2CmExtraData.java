@@ -52,7 +52,7 @@ public class ConvertedCt2CmExtraData implements IConvertedCmExtraData {
 	
 	public ConvertedCt2CmExtraData(List<CmExtraDataType> extraDataList, Session session) {
 		for (CmExtraDataType extraDataType : extraDataList) {
-			if(Ct2CmXmlExtraDataContribution.TYPE_PROFILE.equals(extraDataType.getType())) {
+			if(Ct2CmXmlExtraDataExporter.TYPE_PROFILE.equals(extraDataType.getType())) {
 				profile = fetchProfile(extraDataType, session);
 				break;
 			}
@@ -68,7 +68,7 @@ public class ConvertedCt2CmExtraData implements IConvertedCmExtraData {
 		Language language = SmartDB.getCurrentConservationArea().getDefaultLanguage();
 		String codeWarnLabel = language.getCode();
 		for (CmExtraDataLabelKeyType labelKeyType : dataType.getLabelKey()) {
-			if (Ct2CmXmlExtraDataContribution.KEY_NAME.equals(labelKeyType.getKey())) {
+			if (Ct2CmXmlExtraDataExporter.KEY_NAME.equals(labelKeyType.getKey())) {
 				name = findNameInLanguage(language, labelKeyType.getLabel());
 				if (name == null) {
 					language = SmartDB.getCurrentLanguage();

@@ -127,6 +127,9 @@ public class SurveyDesignMetadata {
 				md.waypointMetadata.add(MissionAttributeMetadata.MissionWaypointMetadata.DISTANCE.toMetadata(session, ca));
 				md.waypointMetadata.add(MissionAttributeMetadata.MissionWaypointMetadata.BEARING.toMetadata(session, ca));
 			}
+			if (d.getTrackObserver()) {
+				md.waypointMetadata.add(MissionAttributeMetadata.MissionWaypointMetadata.OBSERVER.toMetadata(session, ca));
+			}
 			
 			for (MissionAttributeMetadata.MissionMetadata mmd : MissionAttributeMetadata.MissionMetadata.values()) {
 				md.missionMetadata.add(mmd.toMetadata(session, ca));

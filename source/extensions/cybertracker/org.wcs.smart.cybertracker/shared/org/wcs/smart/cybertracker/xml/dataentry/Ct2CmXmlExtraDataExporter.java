@@ -23,16 +23,13 @@ package org.wcs.smart.cybertracker.xml.dataentry;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.Label;
-import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.cybertracker.model.ConfigurableModelCtPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
-import org.wcs.smart.dataentry.model.xml.external.IConvertedCmExtraData;
-import org.wcs.smart.dataentry.model.xml.external.IXmlCmExtraDataContribution;
+import org.wcs.smart.dataentry.model.xml.external.ICmXmlExtraDataExporter;
 import org.wcs.smart.dataentry.model.xml.generated.CmExtraDataLabelKeyType;
 import org.wcs.smart.dataentry.model.xml.generated.CmExtraDataType;
 import org.wcs.smart.dataentry.model.xml.generated.NameType;
@@ -45,7 +42,7 @@ import org.wcs.smart.hibernate.QueryFactory;
  * @author elitvin
  * @since 4.0.0
  */
-public class Ct2CmXmlExtraDataContribution implements IXmlCmExtraDataContribution {
+public class Ct2CmXmlExtraDataExporter implements ICmXmlExtraDataExporter {
 
 	static final String TYPE_PROFILE = "ct_profile"; //$NON-NLS-1$
 
@@ -81,11 +78,6 @@ public class Ct2CmXmlExtraDataContribution implements IXmlCmExtraDataContributio
 		data.getLabelKey().add(nameKey);
 
 		return data;
-	}
-	
-	@Override
-	public IConvertedCmExtraData fromXml(List<CmExtraDataType> extraDataList, Map<String, UuidItem> dataMap, Session session) {
-		return new ConvertedCt2CmExtraData(extraDataList, session);
 	}
 
 }

@@ -21,16 +21,21 @@
  */
 package org.wcs.smart.connect.api;
 
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -56,8 +61,14 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 import javax.xml.bind.JAXBException;
 
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.io.IOUtils;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.RegistryFactory;
 import org.hibernate.Session;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
@@ -73,6 +84,10 @@ import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.security.CaAction;
 import org.wcs.smart.connect.security.SecurityManager;
+import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.dataentry.model.xml.CmSmartToXml;
+import org.wcs.smart.dataentry.model.xml.CmXmlManager;
+import org.wcs.smart.dataentry.model.xml.external.ICmXmlExtraDataExporter;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.internal.ca.datamodel.xml.DataModelToXmlConverter;
 import org.wcs.smart.internal.ca.datamodel.xml.DataModelXmlToSimpleDataModelConverter;
@@ -278,5 +293,82 @@ public class DataModelApi extends HttpServlet{
 			}
 		}
 		return allWarnings;
+	}
+	
+	
+	
+	@GET
+	@Path("/metadata/configurablemodel/{modeluuid}")
+	@Produces({ MediaType.APPLICATION_XML })
+	public Response getConfigurableModel(
+			@Parameter(description="the configurable model uuid") @PathParam("modeluuid") String uuid) {
+	
+		UUID cmUuid = parseUuid(uuid);
+		
+		try(Session s = HibernateManager.getSession(context)){
+			s.beginTransaction();
+			try {
+				ConfigurableModel model = s.get(ConfigurableModel.class, cmUuid);
+				if (model == null) throw new SmartConnectException(Response.Status.NOT_FOUND, "Invalid configurable model uuid.");
+					
+				if (!SecurityManager.INSTANCE.canAccess(s, 
+						request.getUserPrincipal().getName(), 
+						CaAction.VIEWCA_KEY,
+						model.getConservationArea().getUuid())){
+					logger.info("User " + request.getUserPrincipal().getName() + " does not have permission to view ca."); //$NON-NLS-1$ //$NON-NLS-2$
+					throw new SmartConnectException(Response.Status.UNAUTHORIZED);
+				}
+				
+				CmSmartToXml converter = new CmSmartToXml(s);
+				
+				converter.convert(model, new NullProgressMonitor());
+
+				java.nio.file.Path zipFile = Files.createTempFile("configurablemodel", "zip");
+
+				try (ZipArchiveOutputStream tOut = new ZipArchiveOutputStream(
+						new BufferedOutputStream(Files.newOutputStream(zipFile)))) {
+					ZipArchiveEntry zipEntry = new ZipArchiveEntry("configurablemodel.xml");
+					tOut.putArchiveEntry(zipEntry);
+					CmXmlManager.writeDataModel(converter.getXmlModel(), tOut);
+					tOut.closeArchiveEntry();
+
+					for (Entry<String, java.nio.file.Path> include : converter.getReferencedFiles().entrySet()) {
+						zipEntry = new ZipArchiveEntry(include.getKey());
+						tOut.putArchiveEntry(zipEntry);
+						try (InputStream is = Files.newInputStream(include.getValue())) {
+							IOUtils.copy(is, tOut);
+						}
+						tOut.closeArchiveEntry();
+					}
+
+				} catch (Exception ex) {
+					throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, ex);
+				}
+
+				StreamingOutput stream = new StreamingOutput() {
+					@Override
+					public void write(OutputStream output) throws IOException {
+						IOUtils.copy(Files.newInputStream(zipFile), output);
+
+						Files.delete(zipFile);
+
+					}
+				};
+				String filename = "cm." + uuid + ".zip"; //$NON-NLS-1$ //$NON-NLS-2$
+
+				return Response.status(Response.Status.PARTIAL_CONTENT).entity(stream)
+						.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM)
+						.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"") //$NON-NLS-1$ //$NON-NLS-2$
+						.build();
+				    
+				
+			} catch (Exception e) {
+				logger.log(Level.SEVERE, e.getMessage(), e);
+				throw new SmartConnectException(Status.INTERNAL_SERVER_ERROR, e);
+			}finally {
+				s.getTransaction().commit();
+			}
+		}
+		
 	}
 }

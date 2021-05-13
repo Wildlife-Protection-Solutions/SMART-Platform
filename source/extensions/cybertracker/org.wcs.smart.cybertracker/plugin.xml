@@ -364,9 +364,12 @@
    </extension>
    <extension
          point="org.wcs.smart.dataentry.xml">
-      <contribution
-            class="org.wcs.smart.cybertracker.xml.dataentry.Ct2CmXmlExtraDataContribution">
-      </contribution>
+      <importer
+            class="org.wcs.smart.cybertracker.xml.dataentry.Ct2CmXmlExtraDataImporter">
+      </importer>
+      <exporter
+            class="org.wcs.smart.cybertracker.xml.dataentry.Ct2CmXmlExtraDataExporter">
+      </exporter>
    </extension>
    <extension
          point="org.wcs.smart.caLogin">

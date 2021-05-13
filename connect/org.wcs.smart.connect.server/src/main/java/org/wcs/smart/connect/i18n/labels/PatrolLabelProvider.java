@@ -180,6 +180,9 @@ public class PatrolLabelProvider implements IPatrolLabelProvider {
 		case DISTANCE:
 			key = "PatrolLabelProvider.Distance"; //$NON-NLS-1$
 			break;
+		case OBSERVER:
+			key = "PatrolLabelProvider.Observer"; //$NON-NLS-1$
+			break;
 		default:
 			break;
 		

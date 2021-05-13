@@ -26,10 +26,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -38,8 +38,6 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.hibernate.Session;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.wcs.smart.ca.datamodel.DmObject;
-import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.CtJsonExportUtils;
 import org.wcs.smart.cybertracker.export.IPackageContribution;
@@ -47,21 +45,14 @@ import org.wcs.smart.cybertracker.incident.IncidentPackageContribution;
 import org.wcs.smart.cybertracker.incident.internal.Messages;
 import org.wcs.smart.cybertracker.incident.model.IncidentCtPackage;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
-import org.wcs.smart.dataentry.model.CmAttribute;
-import org.wcs.smart.dataentry.model.CmAttributeListItem;
-import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
-import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
-import org.wcs.smart.dataentry.model.IImageAssociatedObject;
-import org.wcs.smart.dataentry.model.xml.CmSmartToXmlConverter;
+import org.wcs.smart.dataentry.model.xml.CmSmartToXml;
 import org.wcs.smart.dataentry.model.xml.CmXmlManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.ObservationOptions;
-import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
-import org.wcs.smart.util.UuidUtils;
 import org.wcs.smart.util.ZipUtil;
 
 /**
@@ -96,7 +87,7 @@ public enum IncidentPackageExporter {
 					modelToExport = session.get(ConfigurableModel.class, modelToExport.getUuid());
 				}
 				
-				//reload package so we don't have hiberante issues
+				//reload package so we don't have hibernate issues
 				IncidentCtPackage localpackage = session.get(IncidentCtPackage.class, ctPackage.getUuid());
 				
 				
@@ -129,10 +120,10 @@ public enum IncidentPackageExporter {
 				Path cmFile = tempDir.resolve(CM_MODEL_FILE);
 				
 				//convert to xml
-				org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xmlModel = CmSmartToXmlConverter.convertToSmartMobileXML(modelToExport, sub.split(1));
-
-				//create and add help files
-				toIncludeInZip.addAll( CtJsonExportUtils.addHelpFiles(xmlModel, tempDir) );
+				CmSmartToXml convert = new CmSmartToXml(session, true);
+				convert.convert(modelToExport, monitor);
+				org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xmlModel = convert.getXmlModel();
+				
 
 				//write xml
 				try(OutputStream out = Files.newOutputStream(cmFile)){
@@ -140,17 +131,17 @@ public enum IncidentPackageExporter {
 				}
 				toIncludeInZip.add(cmFile);
 				
-				//include configurable model image files
-				sub.split(1);
-				Path dataFolder = modelToExport.getFileDataStoreLocation();
-				if (dataFolder != null && Files.exists(dataFolder) && Files.isDirectory(dataFolder)) {
-					Files.list(dataFolder).forEach(f->toIncludeInZip.add(f));
-				}
-				
 				//include data model image files and update xmlModel
 				sub.split(1);
-				includeDmIcons(modelToExport, toIncludeInZip, tempDir, session);
-				
+				for (Entry<String,Path> icon : convert.getReferencedFiles().entrySet()) {
+					Path toPath = tempDir.resolve(icon.getKey());
+					Path fromPath = icon.getValue();
+					if (!Files.exists(toPath)) Files.copy(fromPath, toPath);
+					toIncludeInZip.add(toPath);
+				}
+				//create and add help files
+				toIncludeInZip.addAll( CtJsonExportUtils.addHelpFiles(xmlModel, tempDir) );
+
 				//include ca logo
 				Path logo = modelToExport.getConservationArea().getLogo();
 				if (logo != null && Files.exists(logo)) {
@@ -219,80 +210,6 @@ public enum IncidentPackageExporter {
 		}
 	}
 	
-	private void processFile(DmObject object, IImageAssociatedObject cmObject, ConfigurableModel cm, 
-			Set<Path> toIncludeInZip, Path tempDir, Session session) throws IOException {
-		IconFile file = object.getIcon().getIconFile(cm.getIconSet());
-		if (file != null ) {
-			
-			file.computeFileLocation(session);
-			
-			Path fromPath = file.getAttachmentFile();
-			String fileName = cmObject.getImageFile() == null? cmObject.getDefaultImageFileName() : cmObject.getImageFile().getFileName().toString();			
-			if (cmObject.getUuid() == null) {
-				fileName = UuidUtils.uuidToString(object.getUuid());
-			}
-			Path toPath = tempDir.resolve(SharedUtils.getFilenameWithoutExtension(fileName) + "." + SharedUtils.getFilenameExtension(fromPath.getFileName().toString())); //$NON-NLS-1$
-			if (Files.exists(toPath)) return;
-			Files.copy(fromPath, toPath);
-			if (!toIncludeInZip.contains(toPath)) toIncludeInZip.add(toPath);
-		}
-	}
-	
-	
-	private void includeDmIcons(ConfigurableModel cm, Set<Path> toIncludeInZip, 
-			Path tempDir, Session session) throws IOException {
-		List<Object> toProcess = new ArrayList<>();
-		toProcess.addAll(cm.getNodes());
-		List<Object> processed = new ArrayList<>();
-		while(!toProcess.isEmpty()) {
-			Object objectNode = toProcess.remove(0);
-			if (processed.contains(objectNode)) continue;
-			processed.add(objectNode);
-			
-			if (objectNode instanceof CmNode) {
-				CmNode node = (CmNode)objectNode;
-				toProcess.addAll(node.getChildren());
-				
-				if (!node.hasCustomImage() && node.getCategory() != null && node.getCategory().getIcon() != null ) {
-					processFile(node.getCategory(), node, cm, toIncludeInZip, tempDir, session);
-				}
-				if (node.getCmAttributes() != null) {
-					toProcess.addAll(node.getCmAttributes());
-				}
-			}else if (objectNode instanceof CmAttribute) {
-				CmAttribute node = (CmAttribute)objectNode;
-				
-				if (!node.hasCustomImage() && node.getAttribute() != null && node.getAttribute().getIcon() != null ) {
-					processFile(node.getAttribute(), node, cm, toIncludeInZip, tempDir, session);
-				}
-				
-				
-				if (node.getCurrentList() != null) {
-					toProcess.addAll(node.getCurrentList());
-				}
-				if (node.getCurrentTree() != null) {
-					toProcess.addAll(node.getCurrentTree());
-				}
-			}else if (objectNode instanceof CmAttributeListItem) {
-				CmAttributeListItem node = (CmAttributeListItem)objectNode;
-				
-				if (!node.hasCustomImage() && node.getListItem() != null && node.getListItem().getIcon() != null ) {
-					processFile(node.getListItem(), node, cm, toIncludeInZip, tempDir, session);
-				}
-			}else if (objectNode instanceof CmAttributeTreeNode) {
-				CmAttributeTreeNode node = (CmAttributeTreeNode)objectNode;
-				
-				if (!node.hasCustomImage() && node.getDmTreeNode() != null && node.getDmTreeNode().getIcon() != null ) {
-					processFile(node.getDmTreeNode(), node, cm, toIncludeInZip, tempDir, session);
-				}
-				
-				
-				if (node.getChildren() != null) {
-					toProcess.addAll(node.getChildren());
-				}
-			}
-		}
-	}
 	
 	private void writeProjectFile(String name, ConfigurableModel cm, String version, Path logoFile, Path outputFile, Path metadataFile, HashMap<String, Object> projectAdditions) throws IOException {
 		CtJsonExportUtils.writeProjectJson(name, version, CM_MODEL_FILE, logoFile, outputFile, metadataFile, projectAdditions);

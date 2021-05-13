@@ -113,6 +113,9 @@ public class PatrolLabelProvider implements IPatrolLabelProvider {
 		case COMMENT:
 			key = Messages.PatrolLabelProvider_Comment;
 			break;
+		case OBSERVER:
+			key = Messages.PatrolLabelProvider_Observer;
+			break;
 		default:
 			break;
 		}

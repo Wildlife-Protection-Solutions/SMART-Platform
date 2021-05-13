@@ -182,6 +182,7 @@ public enum QueryTypeManager {
 	}
 	
 	
+	@SuppressWarnings("unchecked")
 	private synchronized void readTypesOnly(){
 		if (allTypes != null){
 			return;

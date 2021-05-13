@@ -29,10 +29,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.xml.bind.JAXBException;
+import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.contexts.IEclipseContext;
@@ -43,8 +40,6 @@ import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.wcs.smart.ca.datamodel.DmObject;
-import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.cybertracker.export.CtJsonExportUtils;
 import org.wcs.smart.cybertracker.export.IPackageContribution;
 import org.wcs.smart.cybertracker.export.IPackageUiContribution;
@@ -52,18 +47,11 @@ import org.wcs.smart.cybertracker.export.data.DataModelWrapper;
 import org.wcs.smart.cybertracker.incident.internal.Messages;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 import org.wcs.smart.cybertracker.model.IIncidentCtPackage;
-import org.wcs.smart.dataentry.model.CmAttribute;
-import org.wcs.smart.dataentry.model.CmAttributeListItem;
-import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
-import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
-import org.wcs.smart.dataentry.model.IImageAssociatedObject;
-import org.wcs.smart.dataentry.model.xml.CmSmartToXmlConverter;
+import org.wcs.smart.dataentry.model.xml.CmSmartToXml;
 import org.wcs.smart.dataentry.model.xml.CmXmlManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.util.SharedUtils;
-import org.wcs.smart.util.UuidUtils;
 
 /**
  * Package contribution for adding incident model to CT package
@@ -150,33 +138,32 @@ public class IncidentPackageContribution implements IPackageContribution{
 		};
 	
 		//convert to xml
-		org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xmlModel = null;
-		try {
-			xmlModel = CmSmartToXmlConverter.convertToSmartMobileXML(cm, monitor);
-		}catch (Exception ex) {
-			throw new IOException(ex);
-		}
-		//create and add help files
-		for (Path f :  CtJsonExportUtils.addHelpFiles(xmlModel, tempDir)  ) {
-			updates.addFile(f);
-		}
-
-		//write file
-		try(OutputStream out = Files.newOutputStream(incidentFile)){
-			try {
-				CmXmlManager.writeDataModel(xmlModel, out);
-			} catch (JAXBException e) {
-				throw new IOException(e);
-			}
-		}
-		updates.addFile(incidentFile);
-		
 		try(Session s = HibernateManager.openSession()){
-			ConfigurableModel tm = cm;
-			if (tm.getUuid() != null) {
-				tm = s.get(ConfigurableModel.class, cm.getUuid());
+			//convert to xml
+			CmSmartToXml convert = new CmSmartToXml(s, true);
+			convert.convert(cm, monitor);
+			org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xmlModel = convert.getXmlModel();
+			
+			//write xml
+			try(OutputStream out = Files.newOutputStream(incidentFile)){
+				CmXmlManager.writeDataModel(xmlModel, out);
+			}catch (Exception ex) {
+				throw new IOException(ex);
 			}
-			includeDmIcons(tm, updates, tempDir, s);	
+			updates.addFile(incidentFile);
+			
+			//create and add help files
+			for (Path f :  CtJsonExportUtils.addHelpFiles(xmlModel, tempDir)  ) {
+				updates.addFile(f);
+			}
+			
+			//include data model image files and update xmlModel
+			for (Entry<String,Path> icon : convert.getReferencedFiles().entrySet()) {
+				Path toPath = tempDir.resolve(icon.getKey());
+				Path fromPath = icon.getValue();
+				if (!Files.exists(toPath)) Files.copy(fromPath, toPath);
+				updates.addFile(toPath);
+			}
 		}
 		
 		
@@ -203,76 +190,5 @@ public class IncidentPackageContribution implements IPackageContribution{
 		}
 	}
 	
-	private void includeDmIcons(ConfigurableModel cm, PackageContribution updates, Path tempDir, Session session) throws IOException {
-		List<Object> toProcess = new ArrayList<>();
-		toProcess.addAll(cm.getNodes());
-		List<Object> processed = new ArrayList<>();
-		while(!toProcess.isEmpty()) {
-			Object objectNode = toProcess.remove(0);
-			if (processed.contains(objectNode)) continue;
-			processed.add(objectNode);
-			
-			if (objectNode instanceof CmNode) {
-				CmNode node = (CmNode)objectNode;
-				toProcess.addAll(node.getChildren());
-				
-				if (!node.hasCustomImage() && node.getCategory() != null && node.getCategory().getIcon() != null ) {
-					processFile(node.getCategory(), node, cm, updates, tempDir, session);
-				}
-				if (node.getCmAttributes() != null) {
-					toProcess.addAll(node.getCmAttributes());
-				}
-			}else if (objectNode instanceof CmAttribute) {
-				CmAttribute node = (CmAttribute)objectNode;
-				
-				if (!node.hasCustomImage() && node.getAttribute() != null && node.getAttribute().getIcon() != null ) {
-					processFile(node.getAttribute(), node, cm, updates, tempDir, session);
-				}
-				
-				if (node.getCurrentList() != null) {
-					toProcess.addAll(node.getCurrentList());
-				}
-				if (node.getCurrentTree() != null) {
-					toProcess.addAll(node.getCurrentTree());
-				}
-			}else if (objectNode instanceof CmAttributeListItem) {
-				CmAttributeListItem node = (CmAttributeListItem)objectNode;
-				
-				if (!node.hasCustomImage() && node.getListItem() != null && node.getListItem().getIcon() != null ) {
-					processFile(node.getListItem(), node, cm, updates, tempDir, session);
-				}
-			}else if (objectNode instanceof CmAttributeTreeNode) {
-				CmAttributeTreeNode node = (CmAttributeTreeNode)objectNode;
-				
-				if (!node.hasCustomImage() && node.getDmTreeNode() != null && node.getDmTreeNode().getIcon() != null ) {
-					processFile(node.getDmTreeNode(), node, cm, updates, tempDir, session);
-				}
-				
-				
-				if (node.getChildren() != null) {
-					toProcess.addAll(node.getChildren());
-				}
-			}
-		}
-		
-	}
-	
-	private void processFile(DmObject object, IImageAssociatedObject cmObject, ConfigurableModel cm, 
-			PackageContribution updates, Path tempDir, Session session) throws IOException {
-		
-		IconFile file = object.getIcon().getIconFile(cm.getIconSet());
-		if (file != null) {
-			file.computeFileLocation(session);
-			Path fromPath = file.getAttachmentFile();
-			String fileName = cmObject.getImageFile() == null? cmObject.getDefaultImageFileName() : cmObject.getImageFile().getFileName().toString();
-			if (cmObject.getUuid() == null) {
-				fileName = UuidUtils.uuidToString(object.getUuid());
-			}
-			Path toPath = tempDir.resolve(SharedUtils.getFilenameWithoutExtension(fileName) + "." + SharedUtils.getFilenameExtension(fromPath.getFileName().toString())); //$NON-NLS-1$
-			if (Files.exists(toPath)) return;
-			Files.copy(fromPath, toPath);
-			updates.addFile(toPath);
-		}
-	}
 	
 }

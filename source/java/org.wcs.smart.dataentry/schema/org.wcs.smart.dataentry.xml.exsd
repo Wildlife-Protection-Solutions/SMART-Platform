@@ -18,7 +18,8 @@
       </annotation>
       <complexType>
          <sequence minOccurs="1" maxOccurs="unbounded">
-            <element ref="contribution"/>
+            <element ref="exporter" minOccurs="0" maxOccurs="unbounded"/>
+            <element ref="importer" minOccurs="0" maxOccurs="unbounded"/>
          </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
@@ -47,7 +48,7 @@
       </complexType>
    </element>
 
-   <element name="contribution">
+   <element name="exporter">
       <complexType>
          <attribute name="class" type="string" use="required">
             <annotation>
@@ -56,6 +57,21 @@
                </documentation>
                <appinfo>
                   <meta.attribute kind="java" basedOn=":org.wcs.smart.dataentry.model.xml.external.IXmlCmExtraDataContribution"/>
+               </appinfo>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="importer">
+      <complexType>
+         <attribute name="class" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appinfo>
+                  <meta.attribute kind="java" basedOn=":org.wcs.smart.dataentry.model.xml.external.ICmXmlExtraDataImporter"/>
                </appinfo>
             </annotation>
          </attribute>

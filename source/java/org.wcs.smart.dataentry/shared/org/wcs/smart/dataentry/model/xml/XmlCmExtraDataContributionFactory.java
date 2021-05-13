@@ -26,10 +26,10 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.Platform;
-import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.dataentry.internal.Messages;
-import org.wcs.smart.dataentry.model.xml.external.IXmlCmExtraDataContribution;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IExtensionRegistry;
+import org.eclipse.core.runtime.RegistryFactory;
+import org.wcs.smart.dataentry.model.xml.external.ICmXmlExtraDataExporter;
 
 /**
  * Factory for providing all contributed information added via extension point
@@ -40,25 +40,31 @@ import org.wcs.smart.dataentry.model.xml.external.IXmlCmExtraDataContribution;
  */
 public class XmlCmExtraDataContributionFactory {
 
-	private static List<IXmlCmExtraDataContribution> contributions = null;
+	private static List<ICmXmlExtraDataExporter> contributions = null;
 	
-	public static List<IXmlCmExtraDataContribution> getContributions() {
-		if (contributions == null) {
-			if (Platform.getExtensionRegistry() == null) return Collections.emptyList();
-			List<IXmlCmExtraDataContribution> items = new ArrayList<IXmlCmExtraDataContribution>();
-			IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(IXmlCmExtraDataContribution.EXTENSION_ID);
-			try {
-				for (IConfigurationElement e : config) {
-					IXmlCmExtraDataContribution contribution = (IXmlCmExtraDataContribution)e.createExecutableExtension("class"); //$NON-NLS-1$
-					items.add(contribution);
-				}
-				contributions = items;
-			} catch (Exception ex) {
-				SmartPlugIn.displayLog(Messages.XmlCmExtraDataContributionFactory_ErrorParseExtraData, ex);
+	private static volatile Object lock = new Object();
+	
+	public static List<ICmXmlExtraDataExporter> getExporters() throws Exception {
+		if (contributions != null) return contributions;
+		synchronized (lock) {
+			if (contributions != null) return contributions;
+			IExtensionRegistry registry = RegistryFactory.getRegistry();
+			if (registry == null) {
 				return Collections.emptyList();
 			}
+
+			List<ICmXmlExtraDataExporter> items = new ArrayList<ICmXmlExtraDataExporter>();
+			IExtensionPoint pnt = registry.getExtensionPoint(ICmXmlExtraDataExporter.EXTENSION_ID);
+			IConfigurationElement[] config = pnt.getConfigurationElements();
+			for (IConfigurationElement e : config) {
+				if (e.getName().equals("exporter")) { //$NON-NLS-1$
+					ICmXmlExtraDataExporter contribution = (ICmXmlExtraDataExporter)e.createExecutableExtension("class"); //$NON-NLS-1$
+					items.add(contribution);
+				}
+			}
+			contributions = items;
+			return contributions;
 		}
-		return contributions;
 	}
 	
 }

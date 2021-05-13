@@ -50,7 +50,6 @@ import org.wcs.smart.observation.WaypointSourceEngine;
 import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.json.IJsonFeatureProcessor;
 import org.wcs.smart.observation.json.JsonFileProcessor;
-import org.wcs.smart.observation.model.DataLink;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.model.IWaypointSourceProvider;
 

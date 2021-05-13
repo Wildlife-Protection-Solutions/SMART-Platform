@@ -26,33 +26,21 @@ import java.util.Map;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.UuidItem;
-import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.xml.generated.CmExtraDataType;
 
 /**
- * Contribution for the Configurable Model Export/Import functionality to handle
+ * Contribution for the Configurable Model Import functionality to handle
  * "extra-data" section of XML file. Contributions are provided via extension point.
  * 
  * @author elitvin
  * @since 4.0.0
  */
-public interface IXmlCmExtraDataContribution {
+public interface ICmXmlExtraDataImporter {
 
 	/**
 	 * Extension id
 	 */
-	public static final String EXTENSION_ID = "org.wcs.smart.dataentry.xml"; //$NON-NLS-1$
-	
-	/**
-	 * Returns "extra-data" that current extension points wants to save
-	 * to XML file for given configurable model.
-	 * 
-	 * @param cm
-	 * @param session 
-	 * @return List<CmExtraDataType>
-	 * @throws Exception
-	 */
-	public List<CmExtraDataType> exportData(ConfigurableModel cm, Session session);
+	public static final String EXTENSION_ID = ICmXmlExtraDataExporter.EXTENSION_ID;
 
 	/**
 	 * Converts XML extra-data to some inner structure but do not perform actual save operation.

@@ -68,9 +68,12 @@
    </extension>
    <extension
          point="org.wcs.smart.dataentry.xml">
-      <contribution
-            class="org.wcs.smart.connect.cybertracker.xml.dataentry.ConnectCt2CmXmlExtraDataContribution">
-      </contribution>
+      <importer
+            class="org.wcs.smart.connect.cybertracker.xml.dataentry.ConnectCt2CmXmlExtraDataImporter">
+      </importer>
+      <exporter
+            class="org.wcs.smart.connect.cybertracker.xml.dataentry.ConnectCt2CmXmlExtraDataExporter">
+      </exporter>
    </extension>
    <extension
          point="org.wcs.smart.connect.configure.optionpanel">

@@ -118,20 +118,16 @@ public class BirtEngine {
 						
 						@Override
 						public Bundle getBundle() {
-							// TODO Auto-generated method stub
 							return null;
 						}
 						
 						@Override
 						public boolean resolveBundles(Collection<Bundle> bundles) {
-							// TODO Auto-generated method stub
 							return false;
 						}
 						
 						@Override
 						public void refreshBundles(Collection<Bundle> bundles, FrameworkListener... listeners) {
-							// TODO Auto-generated method stub
-							
 						}
 						
 						@Override

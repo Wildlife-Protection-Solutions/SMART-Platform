@@ -73,7 +73,7 @@ import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.dataentry.DataentryHibernateManager;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
-import org.wcs.smart.dataentry.model.xml.CmSmartToXmlConverter;
+import org.wcs.smart.dataentry.model.xml.CmSmartToXml;
 import org.wcs.smart.dataentry.model.xml.CmXmlManager;
 import org.wcs.smart.dataentry.model.xml.CmXmlToSmartImporter;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -432,40 +432,44 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 					try {
 						monitor.beginTask(Messages.ConfigurableModelPropertyDialog_Exporting, 8);
 						monitor.subTask(Messages.ConfigurableModelPropertyDialog_Converting);
-						org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xml = CmSmartToXmlConverter.convertToXml(cm, monitor);
 						
-						monitor.subTask(Messages.ConfigurableModelPropertyDialog_Writing);
-						if (xml == null || monitor.isCanceled()) return;
+						try(Session session = HibernateManager.openSession()){
+							CmSmartToXml converter = new CmSmartToXml(session);
+							converter.convert(cm, monitor);
+							org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xml = converter.getXmlModel();
 						
-						int index = f.getFileName().toString().lastIndexOf('.');
-						String name = f.getFileName().toString();
-						if (index >= 0){
-							name= name.substring(0, index);
+							monitor.subTask(Messages.ConfigurableModelPropertyDialog_Writing);
+							if (xml == null || monitor.isCanceled()) return;
+							
+							int index = f.getFileName().toString().lastIndexOf('.');
+							String name = f.getFileName().toString();
+							if (index >= 0){
+								name= name.substring(0, index);
+							}
+							tmpFolder = SmartFileUtils.createTempDirectory("smart_cm_export"); //$NON-NLS-1$
+							Path xmlFile = tmpFolder.resolve(name + ".xml"); //$NON-NLS-1$
+							
+							try(OutputStream fout = Files.newOutputStream(xmlFile)){
+								CmXmlManager.writeDataModel(xml, fout);
+							}
+							
+							monitor.worked(1);
+							monitor.subTask(Messages.ConfigurableModelPropertyDialog_Zipping);
+							if (monitor.isCanceled()) return;
+							
+							List<Path> toZip = new ArrayList<>();
+							toZip.add(xmlFile);
+							
+							Path dataFolder = cm.getFileDataStoreLocation();
+							if (dataFolder != null && Files.exists(dataFolder) && Files.isDirectory(dataFolder)) {
+								Files.list(dataFolder).forEach(file->toZip.add(file));							
+							}
+							//we don't add the data model icons here as they are not required
+							//for importing the configurable model
+							
+							ZipUtil.createZip(toZip.toArray(new Path[toZip.size()]), f, monitor);
+							if (monitor.isCanceled()) return;
 						}
-						tmpFolder = SmartFileUtils.createTempDirectory("smart_cm_export"); //$NON-NLS-1$
-						Path xmlFile = tmpFolder.resolve(name + ".xml"); //$NON-NLS-1$
-						
-						try(OutputStream fout = Files.newOutputStream(xmlFile)){
-							CmXmlManager.writeDataModel(xml, fout);
-						}
-						
-						monitor.worked(1);
-						monitor.subTask(Messages.ConfigurableModelPropertyDialog_Zipping);
-						if (monitor.isCanceled()) return;
-						
-						List<Path> toZip = new ArrayList<>();
-						toZip.add(xmlFile);
-						
-						Path dataFolder = cm.getFileDataStoreLocation();
-						if (dataFolder != null && Files.exists(dataFolder) && Files.isDirectory(dataFolder)) {
-							Files.list(dataFolder).forEach(file->toZip.add(file));							
-						}
-						//we don't add the data model icons here as they are not required
-						//for importing the configurable model
-						
-						ZipUtil.createZip(toZip.toArray(new Path[toZip.size()]), f, monitor);
-						if (monitor.isCanceled()) return;
-						
 						monitor.done();
 						Display.getDefault().syncExec(new Runnable(){
 							@Override

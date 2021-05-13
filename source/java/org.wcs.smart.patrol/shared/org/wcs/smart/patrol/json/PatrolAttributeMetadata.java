@@ -59,6 +59,14 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 @JsonInclude(Include.NON_NULL)
 public class PatrolAttributeMetadata {
 	
+	public static final FixedPatrolMetadata[] LEG_METADATA_FIELDS = {
+			FixedPatrolMetadata.TRANSPORT_TYPE,
+			FixedPatrolMetadata.EMPLOYEES,
+			FixedPatrolMetadata.LEADER,
+			FixedPatrolMetadata.PILOT,
+			FixedPatrolMetadata.MANDATE
+	};
+	
 	public enum FixedPatrolMetadata{
 		TRANSPORT_TYPE("transportType", Attribute.AttributeType.LIST), //$NON-NLS-1$
 		ARMED("isArmed", Attribute.AttributeType.BOOLEAN), //$NON-NLS-1$
@@ -67,7 +75,7 @@ public class PatrolAttributeMetadata {
 		MANDATE("mandate", Attribute.AttributeType.LIST), //$NON-NLS-1$
 		OBJECTIVE("objective", Attribute.AttributeType.TEXT), //$NON-NLS-1$
 		COMMENT("comment", Attribute.AttributeType.TEXT), //$NON-NLS-1$
-		EMPLOYEES("members", Attribute.AttributeType.LIST), //$NON-NLS-1$
+		EMPLOYEES("members", Attribute.AttributeType.MLIST), //$NON-NLS-1$
 		LEADER("leader", Attribute.AttributeType.LIST), //$NON-NLS-1$
 		PILOT("pilot", Attribute.AttributeType.LIST), //$NON-NLS-1$
 		PATROLID("patrolId", Attribute.AttributeType.TEXT); //$NON-NLS-1$
@@ -99,7 +107,7 @@ public class PatrolAttributeMetadata {
 
 			HashMap<Locale, String> names = SmartContext.INSTANCE.getClass(IPatrolLabelProvider.class).getNames(this);
 			for (Entry<Locale, String> name : names.entrySet()) {
-				item.addName(item.new Name(name.getValue(), name.getKey().toString()));
+				item.addName(new Name(name.getValue(), name.getKey().toString()));
 			}
 			
 			List<? extends NamedKeyItem> kids = null;
@@ -113,9 +121,9 @@ public class PatrolAttributeMetadata {
 			
 			if (kids != null) {
 				for (NamedKeyItem kid: kids) {
-					PatrolAttributeMetadata.ListOption op = item.new ListOption(kid.getKeyId());
+					PatrolAttributeMetadata.ListOption op = new ListOption(kid.getKeyId());
 					for (Label l : kid.getNames()) {
-						op.addName(item.new Name(l.getValue(), l.getLanguage().getCode()));
+						op.addName(new Name(l.getValue(), l.getLanguage().getCode()));
 					}
 					item.addListOption(op);
 				}
@@ -124,9 +132,9 @@ public class PatrolAttributeMetadata {
 			if (this == STATION) {
 				List<Station> stations = QueryFactory.buildQuery(session, Station.class, new Object[] {"conservationArea",ca}).list(); //$NON-NLS-1$
 				for (Station station: stations) {
-					PatrolAttributeMetadata.ListOption op = item.new ListOption(UuidUtils.uuidToString(station.getUuid()));
+					PatrolAttributeMetadata.ListOption op = new ListOption(UuidUtils.uuidToString(station.getUuid()));
 					for (Label l : station.getNames()) {
-						op.addName(item.new Name(l.getValue(), l.getLanguage().getCode()));
+						op.addName(new Name(l.getValue(), l.getLanguage().getCode()));
 					}
 					item.addListOption(op);
 				}
@@ -138,9 +146,9 @@ public class PatrolAttributeMetadata {
 						.setParameter("ca",ca) //$NON-NLS-1$
 						.list();
 				for (Employee e : employees) {
-					PatrolAttributeMetadata.ListOption op = item.new ListOption(UuidUtils.uuidToString(e.getUuid()));
+					PatrolAttributeMetadata.ListOption op = new ListOption(UuidUtils.uuidToString(e.getUuid()));
 					String name = SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getEmployeeShortLabel(e, Locale.getDefault());
-					op.addName(item.new Name(name, null));
+					op.addName(new Name(name, null));
 					item.addListOption(op);
 				}
 						
@@ -174,7 +182,8 @@ public class PatrolAttributeMetadata {
 	public enum PatrolWaypointMetadata{
 		DISTANCE(IJsonFeatureProcessor.WaypointMetadata.DISTANCE.getKey(), Attribute.AttributeType.NUMERIC), 
 		BEARING(IJsonFeatureProcessor.WaypointMetadata.BEARING.getKey(), Attribute.AttributeType.NUMERIC),
-		COMMENT(IJsonFeatureProcessor.WaypointMetadata.COMMENT.getKey(), Attribute.AttributeType.TEXT);
+		COMMENT(IJsonFeatureProcessor.WaypointMetadata.COMMENT.getKey(), Attribute.AttributeType.TEXT),
+		OBSERVER(IJsonFeatureProcessor.WaypointMetadata.OBSERVER.getKey(), Attribute.AttributeType.LIST);
 		
 		String key;
 		Attribute.AttributeType type;
@@ -201,19 +210,27 @@ public class PatrolAttributeMetadata {
 		 * @return
 		 */
 		public PatrolAttributeMetadata toMetadata(Session session, ConservationArea ca) {
-			
+
+			PatrolAttributeMetadata item = new PatrolAttributeMetadata(key, type);
+			item.setRequired(false);
+
 			if (this == BEARING || this == DISTANCE) {
 				//see what the field data settings are
 				ObservationOptions op = session.get(ObservationOptions.class, ca.getUuid());
 				if (op == null || !op.getTrackDistanceDirection()) return null;
 			}
-			
-			PatrolAttributeMetadata item = new PatrolAttributeMetadata(key, type);
-			item.setRequired(false);
 
+			if (this == OBSERVER) {
+				ObservationOptions op = session.get(ObservationOptions.class, ca.getUuid());
+				if (op == null || !op.getTrackObserver()) return null;
+				
+				item.setLinkTo("patrolMetadata." + FixedPatrolMetadata.EMPLOYEES.getKey()); //$NON-NLS-1$
+				item.options = null;
+			}
+			
 			HashMap<Locale, String> names = SmartContext.INSTANCE.getClass(IPatrolLabelProvider.class).getNames(this);
 			for (Entry<Locale, String> name : names.entrySet()) {
-				item.addName(item.new Name(name.getValue(), name.getKey().toString()));
+				item.addName(new Name(name.getValue(), name.getKey().toString()));
 			}
 			return item;
 		}
@@ -230,7 +247,7 @@ public class PatrolAttributeMetadata {
 		this.id = id;
 		names = new ArrayList<>();
 		this.type = type;
-		if (type == Attribute.AttributeType.LIST) {
+		if (type != null && type.isList()) {
 			options = new ArrayList<>();
 		}
 		requiredWhen = Boolean.TRUE.toString();
@@ -240,9 +257,11 @@ public class PatrolAttributeMetadata {
 	public void setLinkTo(String optionLink) {
 		this.linkTo = optionLink;
 	}
+	
 	public String getLinkTo() {
 		return this.linkTo;
 	}
+	
 	public String getId() {
 		return this.id;
 	}
@@ -262,8 +281,13 @@ public class PatrolAttributeMetadata {
 	public String getRequiredWhen() {
 		return this.requiredWhen;
 	}
+	
 	public List<ListOption> getListOptions(){
 		return this.options;
+	}
+	
+	public void setListOptions(List<ListOption> options) {
+		this.options = options;
 	}
 	
 	public void setRequired(boolean isRequired) {
@@ -281,7 +305,8 @@ public class PatrolAttributeMetadata {
 		this.options.add(op);
 	}
 	
-	public class ListOption{
+	@JsonInclude(Include.NON_NULL)
+	public static class ListOption{
 		private String id;
 		private List<Name> names;
 		
@@ -302,7 +327,8 @@ public class PatrolAttributeMetadata {
 		}
 	}
 	
-	public class Name{
+	@JsonInclude(Include.NON_NULL)
+	public static class Name{
 		private String name;
 		private String locale;
 		
@@ -324,15 +350,15 @@ public class PatrolAttributeMetadata {
 		PatrolAttributeMetadata item = new PatrolAttributeMetadata(attribute.getKeyId(), attribute.getType());
 		item.setRequired(false);
 		for (Label l : attribute.getNames()) {
-			item.addName(item.new Name(l.getValue(), l.getLanguage().getCode()));
+			item.addName(new Name(l.getValue(), l.getLanguage().getCode()));
 		}
 		
 		if (attribute.getType() == Attribute.AttributeType.LIST) {
 			
 			for (NamedKeyItem kid: attribute.getAttributeList()) {
-				PatrolAttributeMetadata.ListOption op = item.new ListOption(kid.getKeyId());
+				PatrolAttributeMetadata.ListOption op = new ListOption(kid.getKeyId());
 				for (Label l : kid.getNames()) {
-					op.addName(item.new Name(l.getValue(), l.getLanguage().getCode()));
+					op.addName(new Name(l.getValue(), l.getLanguage().getCode()));
 				}
 				item.addListOption(op);
 			}
@@ -358,10 +384,10 @@ public class PatrolAttributeMetadata {
 		if (types.isEmpty()) return null;
 		
 		for (SignatureType type : types) {
-			ListOption op = item.new ListOption(type.getKeyId());
+			ListOption op = new ListOption(type.getKeyId());
 			
 			for (Label l : type.getNames()) {
-				op.addName(item.new Name(l.getValue(), l.getLanguage().getCode()));
+				op.addName(new Name(l.getValue(), l.getLanguage().getCode()));
 			}
 			item.addListOption(op);
 		}

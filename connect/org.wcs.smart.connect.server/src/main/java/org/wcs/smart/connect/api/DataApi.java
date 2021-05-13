@@ -64,6 +64,7 @@ import org.wcs.smart.observation.json.JsonFileProcessor;
 import org.wcs.smart.observation.model.DataLink;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.patrol.json.PatrolAttributeMetadata;
+import org.wcs.smart.patrol.json.PatrolAttributeMetadata.FixedPatrolMetadata;
 import org.wcs.smart.patrol.model.PatrolAttribute;
 import org.wcs.smart.util.UuidUtils;
 
@@ -130,6 +131,17 @@ public class DataApi extends HttpServlet{
 					pMetadata.add(fixed.toMetadata(s, ca));
 				}
 				
+				List<PatrolAttributeMetadata> lMetadata = new ArrayList<>();
+				for (PatrolAttributeMetadata.FixedPatrolMetadata fixed : PatrolAttributeMetadata.LEG_METADATA_FIELDS) {
+					PatrolAttributeMetadata md = fixed.toMetadata(s, ca);
+					if (fixed != FixedPatrolMetadata.LEADER && fixed != FixedPatrolMetadata.PILOT) {
+						md.setLinkTo("patrolMetadata." + fixed.getKey()); //$NON-NLS-1$
+					}
+					md.setListOptions(null);
+					lMetadata.add(md);
+				}
+				
+				
 				List<PatrolAttribute> customs = QueryFactory.buildQuery(s, PatrolAttribute.class, 
 						new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
 				for (PatrolAttribute custom : customs) {
@@ -144,6 +156,7 @@ public class DataApi extends HttpServlet{
 				
 				PatrolMetadata metadata = new PatrolMetadata();
 				metadata.patrolMetadata = pMetadata;
+				metadata.patrolLegMetadata = lMetadata;
 				metadata.waypointMetadata = wpMetadata;
 				metadata.signatureMetadata = PatrolAttributeMetadata.getSignatureMetadata(s, ca);
 				return metadata;
@@ -298,6 +311,7 @@ public class DataApi extends HttpServlet{
 	@JsonInclude(Include.NON_NULL)
 	class PatrolMetadata{
 		List<PatrolAttributeMetadata> patrolMetadata;
+		List<PatrolAttributeMetadata> patrolLegMetadata;
 		List<PatrolAttributeMetadata> waypointMetadata;
 		PatrolAttributeMetadata signatureMetadata;
 		
@@ -305,40 +319,17 @@ public class DataApi extends HttpServlet{
 			return patrolMetadata;
 		}
 		
+		public List<PatrolAttributeMetadata> getPatrolLegMetadata(){
+			return patrolLegMetadata;
+		}
+		
 		public List<PatrolAttributeMetadata> getWaypointMetadata(){
 			return waypointMetadata;
 		}
 		
-		public PatrolAttributeMetadata getSignatureMetadata() {
+		public PatrolAttributeMetadata getSignatureTypes() {
 			return this.signatureMetadata;
 		}
 	}
 	
-	@JsonInclude(Include.NON_NULL)
-	class MissionMetadata{
-		List<MissionAttributeMetadata> missionMetadata;
-		List<MissionAttributeMetadata> waypointMetadata;
-		List<MissionAttributeMetadata> trackMetadata;
-		List<MissionAttributeMetadata> designMetadata;
-		MissionAttributeMetadata signatureMetadata;
-
-		public List<MissionAttributeMetadata> getMissionMetadata(){
-			return missionMetadata;
-		}
-		
-		public List<MissionAttributeMetadata> getWaypointMetadata(){
-			return waypointMetadata;
-		}
-		
-		public List<MissionAttributeMetadata> getTrackMetadata(){
-			return trackMetadata;
-		}
-		
-		public List<MissionAttributeMetadata> getSurveyDesign(){
-			return designMetadata;
-		}
-		public MissionAttributeMetadata getSignatureMetadata() {
-			return this.signatureMetadata;
-		}
-	}
 }

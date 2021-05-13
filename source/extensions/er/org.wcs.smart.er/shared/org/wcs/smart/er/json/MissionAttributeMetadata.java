@@ -34,7 +34,6 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.model.IErLabelProvider;
 import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.er.model.MissionProperty;
@@ -92,7 +91,8 @@ public class MissionAttributeMetadata {
 		DISTANCE(IJsonFeatureProcessor.WaypointMetadata.DISTANCE.getKey(), Attribute.AttributeType.NUMERIC), 
 		BEARING(IJsonFeatureProcessor.WaypointMetadata.BEARING.getKey(), Attribute.AttributeType.NUMERIC),
 		COMMENT(IJsonFeatureProcessor.WaypointMetadata.COMMENT.getKey(), Attribute.AttributeType.TEXT),
-		SAMPLING_UNIT(SU_KEY, Attribute.AttributeType.LIST);
+		SAMPLING_UNIT(SU_KEY, Attribute.AttributeType.LIST),
+		OBSERVER(IJsonFeatureProcessor.WaypointMetadata.OBSERVER.getKey(), Attribute.AttributeType.LIST);
 		
 		String key;
 		Attribute.AttributeType type;
@@ -118,9 +118,13 @@ public class MissionAttributeMetadata {
 				item.setLinkTo(SurveyDesignMetadata.SU_KEY);
 				item.options = null;
 			}
-			if (this == DISTANCE || this == BEARING) {
+			if (this == DISTANCE || this == BEARING || this == OBSERVER) {
 				item.setRequired(true);
+				if (this == OBSERVER) {
+					item.setLinkTo(SurveyDesignMetadata.MISSIONMETADATA_KEY + "." + MissionMetadata.EMPLOYEES.getKey()); //$NON-NLS-1$
+				}
 			}
+			
 			HashMap<Locale, String> names = SmartContext.INSTANCE.getClass(IErLabelProvider.class).getNames(this);
 			for (Entry<Locale, String> name : names.entrySet()) {
 				item.addName(new Name(name.getValue(), name.getKey().toString()));
@@ -131,10 +135,10 @@ public class MissionAttributeMetadata {
 	
 	public enum MissionMetadata{
 		COMMENT("comment", Attribute.AttributeType.TEXT), //$NON-NLS-1$
-		EMPLOYEES("members", Attribute.AttributeType.LIST), //$NON-NLS-1$
+		EMPLOYEES("members", Attribute.AttributeType.MLIST), //$NON-NLS-1$
 		LEADER("leader", Attribute.AttributeType.LIST), //$NON-NLS-1$
 		SURVEY("survey", Attribute.AttributeType.LIST), //$NON-NLS-1$
-		SURVEYDESIGN("surveydesign", Attribute.AttributeType.LIST), //$NON-NLS-1$
+		SURVEYDESIGN("surveyDesign", Attribute.AttributeType.LIST), //$NON-NLS-1$
 		MISSIONID("missionId", Attribute.AttributeType.TEXT); //$NON-NLS-1$
 		
 		String key;
@@ -213,7 +217,7 @@ public class MissionAttributeMetadata {
 		this.id = id;
 		names = new ArrayList<>();
 		this.type = type;
-		if (type != null && type == Attribute.AttributeType.LIST) {
+		if (type != null && type.isList()) {
 			options = new ArrayList<>();
 		}
 		requiredWhen = Boolean.TRUE.toString();		
@@ -309,7 +313,7 @@ public class MissionAttributeMetadata {
 		md.setRequired(false);
 		md.setLinkTo(null);
 		
-		if (p.getAttribute().getType() == AttributeType.LIST) {
+		if (p.getAttribute().getType().isList()) {
 			md.options = new ArrayList<>();
 			for (MissionAttributeListItem li : p.getAttribute().getAttributeList()) {
 				ListOption op = new ListOption(li.getKeyId());

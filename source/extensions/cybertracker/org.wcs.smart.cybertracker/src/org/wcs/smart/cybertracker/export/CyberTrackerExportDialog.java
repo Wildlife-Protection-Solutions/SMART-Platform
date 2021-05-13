@@ -26,6 +26,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.List;
@@ -418,7 +419,7 @@ public abstract class CyberTrackerExportDialog extends SmartStyledTitleDialog {
 						} else {
 							progress.subTask(Messages.CyberTrackerExportDialog_Task_Copy);
 							try {
-								Files.copy(generated, selectedFile);
+								Files.copy(generated, selectedFile, StandardCopyOption.REPLACE_EXISTING);
 							} catch (IOException e) {
 								CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.CyberTrackerExportDialog_Error_CopyFailed, e);
 								return;

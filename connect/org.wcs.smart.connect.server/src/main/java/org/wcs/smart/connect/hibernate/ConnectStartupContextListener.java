@@ -57,6 +57,9 @@ import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 
 import org.apache.commons.logging.LogFactory;
+import org.eclipse.birt.core.framework.FrameworkException;
+import org.eclipse.birt.core.framework.PlatformConfig;
+import org.eclipse.birt.core.framework.jar.ServiceLauncher;
 import org.geotools.data.DataAccessFinder;
 import org.geotools.data.DataStoreFinder;
 import org.geotools.factory.CommonFactoryFinder;
@@ -479,6 +482,13 @@ public class ConnectStartupContextListener implements ServletContextListener{
 		sce.getServletContext().setAttribute(EXECUTOR_KEY, scheduler);
 		
 		initCleanUpJob(sf, scheduler, sce.getServletContext());
+
+		//bundle loader for extension points
+		try {
+			(new ServiceLauncher( )).startup(new PlatformConfig());
+		} catch (FrameworkException e1) {
+			logger.log(Level.WARNING, e1.getMessage(), e1);
+		}
 	}
 	
 	private void initCleanUpJob(SessionFactory sf, ScheduledExecutorService scheduler, ServletContext context){

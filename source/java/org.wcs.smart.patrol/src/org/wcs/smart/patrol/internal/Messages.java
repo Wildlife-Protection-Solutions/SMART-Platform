@@ -448,6 +448,8 @@ public class Messages extends NLS {
 	public static String PatrolLabelProvider_MandateColumnName;
 	public static String PatrolLabelProvider_MandateMetadata;
 	public static String PatrolLabelProvider_ObjectiveMetdata;
+
+	public static String PatrolLabelProvider_Observer;
 	public static String PatrolLabelProvider_PatrolMandateColumnName;
 	public static String PatrolLabelProvider_PatrolTeamColumnNameKey;
 	public static String PatrolLabelProvider_PatrolTransportTypeColumnName;

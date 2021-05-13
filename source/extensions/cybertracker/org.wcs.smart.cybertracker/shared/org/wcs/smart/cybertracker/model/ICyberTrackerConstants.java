@@ -97,7 +97,7 @@ public interface ICyberTrackerConstants {
 	public static final int DOWNLOAD_CODE_NO_DATA = 301; //Connections, but no data
 	public static final int DOWNLOAD_CODE_SUCCESS = 302; //Connections and data downloaded
 	
-	public static final String CT_DATE_FORMAT = "MM/dd/yy"; //$NON-NLS-1$
+	public static final String CT_DATE_FORMAT = "M/d/y"; //$NON-NLS-1$
 
 	public static final String STR_TRUE = "True"; //$NON-NLS-1$
 	public static final String STR_FALSE = "False"; //$NON-NLS-1$

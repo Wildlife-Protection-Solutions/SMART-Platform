@@ -23,19 +23,16 @@ package org.wcs.smart.connect.cybertracker.xml.dataentry;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.hibernate.Session;
-import org.wcs.smart.ca.UuidItem;
-import org.wcs.smart.connect.cybertracker.ConnectCtHibernateManager;
 import org.wcs.smart.connect.cybertracker.model.ConnectAlert;
 import org.wcs.smart.connect.cybertracker.model.ConnectCtProperties;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
-import org.wcs.smart.dataentry.model.xml.external.IConvertedCmExtraData;
-import org.wcs.smart.dataentry.model.xml.external.IXmlCmExtraDataContribution;
+import org.wcs.smart.dataentry.model.xml.external.ICmXmlExtraDataExporter;
 import org.wcs.smart.dataentry.model.xml.generated.CmExtraDataIntegerKeyType;
 import org.wcs.smart.dataentry.model.xml.generated.CmExtraDataStringKeyType;
 import org.wcs.smart.dataentry.model.xml.generated.CmExtraDataType;
+import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -45,7 +42,7 @@ import org.wcs.smart.util.UuidUtils;
  * @author elitvin
  * @since 4.0.0
  */
-public class ConnectCt2CmXmlExtraDataContribution implements IXmlCmExtraDataContribution {
+public class ConnectCt2CmXmlExtraDataExporter implements ICmXmlExtraDataExporter {
 
 	static final String TYPE_PROPERTIES = "connect_ct_properties"; //$NON-NLS-1$
 	static final String TYPE_ALERT = "connect_ct_alert"; //$NON-NLS-1$
@@ -66,14 +63,14 @@ public class ConnectCt2CmXmlExtraDataContribution implements IXmlCmExtraDataCont
 			return result;
 		}
 		
-		ConnectCtProperties p = ConnectCtHibernateManager.getCtProperties(cm, s);
+		ConnectCtProperties p = getCtProperties(cm, s);
 		if (p != null) {
 			CmExtraDataType data = fromProperties(p);
 			data.setType(TYPE_PROPERTIES);
 			result.add(data);
 		}
 		
-		List<ConnectAlert> alerts = ConnectCtHibernateManager.getConnectAlerts(cm, s, false);
+		List<ConnectAlert> alerts = getConnectAlerts(cm, s);
 		for (ConnectAlert a : alerts) {
 			CmExtraDataType data = fromAlert(a);
 			data.setType(TYPE_ALERT);
@@ -135,10 +132,33 @@ public class ConnectCt2CmXmlExtraDataContribution implements IXmlCmExtraDataCont
 
 		return data;
 	}
-
-	@Override
-	public IConvertedCmExtraData fromXml(List<CmExtraDataType> extraDataList, Map<String, UuidItem> dataMap, Session session) {
-		return new ConvertedConnectCt2CmExtraData(extraDataList, dataMap, session);
+	
+	public static ConnectCtProperties getCtProperties(ConfigurableModel cm, Session s) {
+		if (cm.getUuid() == null) {
+			ConnectCtProperties p = new ConnectCtProperties();
+			p.setModel(cm);
+			p.setPingFrequency(ConnectCtProperties.FREQUENCY_DEFAULT_VALUE);
+			return p;
+		}
+		List<ConnectCtProperties> items = QueryFactory.buildQuery(s, ConnectCtProperties.class, "model", cm).list();  //$NON-NLS-1$
+		switch (items.size()) {
+		case 0:
+			//no properties yet -> create new one
+			ConnectCtProperties p = new ConnectCtProperties();
+			p.setModel(cm);
+			p.setPingFrequency(ConnectCtProperties.FREQUENCY_DEFAULT_VALUE);
+			return p;
+		case 1:
+			return items.get(0);
+		default:
+			//invalid case (this is suppose to be one-to-one relationship)
+			//should never happen!!!
+			return items.get(0);
+		}
+	}
+	
+	private List<ConnectAlert> getConnectAlerts(ConfigurableModel cm, Session s) {
+		return QueryFactory.buildQuery(s, ConnectAlert.class, "model", cm).list();  //$NON-NLS-1$		
 	}
 
 }
