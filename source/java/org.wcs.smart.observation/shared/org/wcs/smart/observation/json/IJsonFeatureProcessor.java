@@ -56,6 +56,7 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.IObservationLabelProvider;
+import org.wcs.smart.observation.model.DataLink;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
@@ -296,7 +297,7 @@ public abstract class IJsonFeatureProcessor {
 		
 				if (group.containsKey("groupUuid")) { //$NON-NLS-1$
 					//group to update
-					UUID groupUuid = UuidUtils.stringToUuid((String)atts.get(group.get("groupUuid"))); //$NON-NLS-1$
+					UUID groupUuid = UuidUtils.stringToUuid(group.get("groupUuid").toString()); //$NON-NLS-1$
 					wgroup.setUuid(groupUuid);
 				}
 				
@@ -600,5 +601,26 @@ public abstract class IJsonFeatureProcessor {
 	protected Double parseNumeric( Object value ) throws Exception{
 		if (value instanceof Number) return (((Number) value).doubleValue());
 		throw new Exception(MessageFormat.format("Could not parse number value from {0}", value.toString())); //$NON-NLS-1$
+	}
+	
+	protected WaypointObservationGroup findWaypointObservationGroup(UUID providerUuid, ConservationArea ca, Session session) {
+		DataLink link = session.createQuery("FROM DataLink WHERE conservationArea = :ca and providerId = :puuid and dataType = :datatype", DataLink.class) //$NON-NLS-1$
+			.setParameter("ca",ca) //$NON-NLS-1$
+			.setParameter("puuid", providerUuid) //$NON-NLS-1$
+			.setParameter("datatype", OBSGROUP_DATATYPE) //$NON-NLS-1$
+			.uniqueResult();
+		
+		if (link == null) return null;
+		
+		WaypointObservationGroup p = session.get(WaypointObservationGroup.class, link.getSmartId());
+		if (p == null) {
+			session.delete(link);
+			return null;
+		}
+		if (!p.getWaypoint().getConservationArea().equals(ca)) return null;
+		
+		//update last modified
+		link.setLastModified(LocalDateTime.now());
+		return p;
 	}
 }

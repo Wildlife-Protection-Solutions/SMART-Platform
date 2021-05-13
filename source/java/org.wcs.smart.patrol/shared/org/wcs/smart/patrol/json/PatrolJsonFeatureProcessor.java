@@ -82,7 +82,9 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 
 	private static final String JSON_PATROLLEGUUID = "patrolLegUuid"; //$NON-NLS-1$
 	private static final String JSON_PATROLUUID = "patrolUuid"; //$NON-NLS-1$
+	
 	private static final String PATROL_DATATYPE = "patrol"; //$NON-NLS-1$
+	private static final String INCIDENT_DATATYPE = "patrolincident"; //$NON-NLS-1$
 	private static final String LEG_DATATYPE = "patrolleg"; //$NON-NLS-1$
 	
 	public static final String JSON_FT_START = "start"; //$NON-NLS-1$
@@ -218,46 +220,30 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		session.flush();
 		
 		Waypoint wp = super.createWaypoint(feature, ca, session, l);
+		wp.setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
 		if (wp.getId() == null) {
 			wp.setId(String.valueOf(toUpdate.getWaypoints().size() + 1));
 		}
-		List<WaypointObservationGroup> toremove = new ArrayList<>();
-		boolean hasobs = wp.getAllObservations().size() > 0;
 		
-		for (WaypointObservationGroup group : wp.getObservationGroups()) {
-			if (group.getUuid() == null) continue;
+		Waypoint existingWp = findIncidentLink(wp.getUuid(), ca, session, l);
+		HashMap<WaypointObservationGroup, UUID> links = new HashMap<>();
 
-			WaypointObservationGroup currentGroup = findWaypointObservationGroup(group.getUuid(), ca, session);
-			if (currentGroup != null) {
-				//add observations to existing group
-				currentGroup.getObservations().addAll(group.getObservations());
-				for (WaypointObservation i : group.getObservations()) i.setObservationGroup(currentGroup);
-				
-				toremove.add(group);
-				session.saveOrUpdate(currentGroup);
-			}
-		}
-		
-		wp.getObservationGroups().removeAll(toremove);
-		for (WaypointObservationGroup g : toremove) {
-			session.saveOrUpdate(g);
-		}
-		
-		if (!hasobs || !wp.getObservationGroups().isEmpty()) {
-			//save this waypoint
-			
-			HashMap<WaypointObservationGroup, UUID> links = new HashMap<>();
-			
+		if (existingWp == null) {
+			UUID src = wp.getUuid();
+			wp.setUuid(null);
+			//create a new waypoint & associated links
 			for (WaypointObservationGroup g : wp.getObservationGroups()) {
 				if (g.getUuid() != null) {
-					UUID uuid = g.getUuid();
+					//clear any old link
+					session.createQuery("DELETE From DataLink WHERE providerId = :uuid") //$NON-NLS-1$
+						.setParameter("uuid", g.getUuid()) //$NON-NLS-1$
+						.executeUpdate();
+					links.put(g,g.getUuid());
 					g.setUuid(null);
-					links.put(g,uuid);
+					
 				}
 			}
 
-			wp.setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
-			
 			PatrolWaypoint pwp = new PatrolWaypoint();
 			pwp.setWaypoint(wp);
 			pwp.setPatrolLegDay(toUpdate);
@@ -267,16 +253,60 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 			
 			session.flush();
 			
-			for (Entry<WaypointObservationGroup, UUID> link : links.entrySet()) {
+			if (src != null) {
 				DataLink dlink = new DataLink();
 				dlink.setConservationArea(ca);
-				dlink.setProviderId(link.getValue());
-				dlink.setSmartId(link.getKey().getUuid());
-				dlink.setDataType(OBSGROUP_DATATYPE);
+				dlink.setProviderId(src);
+				dlink.setSmartId(wp.getUuid());
+				dlink.setDataType(INCIDENT_DATATYPE);
 				session.save(dlink);
 			}
+			
+			
+			
+		}else {
+			//merge observation groups with existing wp
+			
+			//add observations
+			List<WaypointObservationGroup> add = new ArrayList<>();
+			for (WaypointObservationGroup group : wp.getObservationGroups()) {
+				if (group.getUuid() == null) {
+					add.add(group);
+				}else {
+					WaypointObservationGroup existing = findWaypointObservationGroup(group.getUuid(), ca, session);
+					if (existing == null || !existing.getWaypoint().equals(existingWp)) {
+						add.add( group );
+					}else {
+						//add observation from group to existing
+						for (WaypointObservation o : group.getObservations()) {
+							existing.getObservations().add(o);
+							o.setObservationGroup(existing);
+						}
+					}
+				}
+			}
+			for (WaypointObservationGroup g : add) {
+				if (g.getUuid() != null) links.put(g, g.getUuid());
+				g.setUuid(null);
+				existingWp.getObservationGroups().add(g);
+				g.setWaypoint(existingWp);
+			}
+			session.saveOrUpdate(existingWp);
+			for (WaypointObservationGroup g : existingWp.getObservationGroups()) session.saveOrUpdate(g);
+
 		}
 		
+		session.flush();
+		for (Entry<WaypointObservationGroup, UUID> link : links.entrySet()) {
+			DataLink dlink = new DataLink();
+			dlink.setConservationArea(ca);
+			dlink.setProviderId(link.getValue());
+			dlink.setSmartId(link.getKey().getUuid());
+			dlink.setDataType(OBSGROUP_DATATYPE);
+			session.save(dlink);
+		}
+		
+
 		if (toUpdate.getStartTime().equals(LocalTime.MIN) || date.toLocalTime().isBefore(toUpdate.getStartTime())) {
 			toUpdate.setStartTime(date.toLocalTime());
 		}
@@ -879,24 +909,7 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 		link.setLastModified(LocalDateTime.now());
 		return p;
 	}	
-	
-	private WaypointObservationGroup findWaypointObservationGroup(UUID providerUuid, ConservationArea ca, Session session) {
-		DataLink link = session.createQuery("FROM DataLink WHERE conservationArea = :ca and providerId = :puuid and dataType = :datatype", DataLink.class) //$NON-NLS-1$
-			.setParameter("ca",ca) //$NON-NLS-1$
-			.setParameter("puuid", providerUuid) //$NON-NLS-1$
-			.setParameter("datatype", OBSGROUP_DATATYPE) //$NON-NLS-1$
-			.uniqueResult();
-		
-		if (link == null) return null;
-		
-		WaypointObservationGroup p = session.get(WaypointObservationGroup.class, link.getSmartId());
-		if (p == null || !p.getWaypoint().getConservationArea().equals(ca)) return null;
-		
-		//update last modified
-		link.setLastModified(LocalDateTime.now());
-		return p;
-	}
-	
+
 	
 	public void createLegDays(PatrolLeg leg, Session session){
 		
@@ -950,4 +963,30 @@ public class PatrolJsonFeatureProcessor extends IJsonFeatureProcessor {
 			}
 		});
 	}
+	
+	private Waypoint findIncidentLink(UUID providerUuid, ConservationArea ca, Session session, Locale l) throws Exception{
+		DataLink link = session.createQuery("FROM DataLink WHERE conservationArea = :ca and providerId = :puuid and dataType = :datatype", DataLink.class) //$NON-NLS-1$
+			.setParameter("ca",ca) //$NON-NLS-1$
+			.setParameter("puuid", providerUuid) //$NON-NLS-1$
+			.setParameter("datatype", INCIDENT_DATATYPE) //$NON-NLS-1$
+			.uniqueResult();
+		
+		if (link == null) return null;
+		
+		Waypoint waypoint = session.get(Waypoint.class, link.getSmartId());
+		if (waypoint == null) {
+			session.delete(link);
+			return null;
+		}
+		if (!waypoint.getConservationArea().equals(ca)) {
+			throw new Exception("Link Conservation Area doesn't match waypoint Conservation Area"); //$NON-NLS-1$
+		}
+		
+		if (!waypoint.getSourceId().equals(PatrolWaypointSource.PATROL_WP_SOURCE_ID)) {
+			throw new Exception("Link is not a patrol incident"); //$NON-NLS-1$
+		}
+		//update last modified
+		link.setLastModified(LocalDateTime.now());
+		return waypoint;
+	}	
 }
