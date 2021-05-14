@@ -537,7 +537,7 @@ public class CmSmartToXml {
 						sb.append(" boolean(0) "); //$NON-NLS-1$
 					}else {
 						sb.append(" ${"); //$NON-NLS-1$
-						sb.append(afilter.getAttributeKey());
+						sb.append(attributeKey);
 						sb.append("} = '"); //$NON-NLS-1$
 						sb.append(li.getUuid().toString());
 						sb.append("' "); //$NON-NLS-1$
@@ -552,14 +552,14 @@ public class CmSmartToXml {
 				temp.append("}, "); //$NON-NLS-1$
 				
 				if (afilter.getOperator() == Operator.OR) {
-					temp.append(" 'or' "); //$NON-NLS-1$
+					temp.append(" 'or'"); //$NON-NLS-1$
 				}else if (afilter.getOperator() == Operator.AND) {
-					temp.append(" 'and' "); //$NON-NLS-1$
+					temp.append(" 'and'"); //$NON-NLS-1$
 				}else if (afilter.getOperator() == Operator.EXACT) {
-					temp.append(" 'exact' "); //$NON-NLS-1$
+					temp.append(" 'exact'"); //$NON-NLS-1$
 				}
 				
-				temp.append(" [ "); //$NON-NLS-1$
+				temp.append(", [ "); //$NON-NLS-1$
 				for (String key : afilter.getValue().toString().split(AttributeFilter.MLIST_SEPERATOR)) {
 					
 					CmAttributeListItem li = findAttributeListItem(cattribute, key, node);
@@ -786,22 +786,4 @@ public class CmSmartToXml {
 	private String findFileName(String cmFileName, String dmIconFileName) {
 		return SharedUtils.getFilenameWithoutExtension(cmFileName) + "." + SharedUtils.getFilenameExtension(dmIconFileName); //$NON-NLS-1$
 	}
-	
-//	private void processFile(DmObject object, IImageAssociatedObject cmObject, 
-//			Path tempDir, Session session) throws IOException {
-//		
-//		IconFile file = object.getIcon().getIconFile(cmModel.getIconSet());
-//		if (file != null) {
-//			file.computeFileLocation(session);
-//			Path fromPath = file.getAttachmentFile();
-//			String fileName = cmObject.getImageFile() == null? cmObject.getDefaultImageFileName() : cmObject.getImageFile().getFileName().toString();
-//			if (cmObject.getUuid() == null) {
-//				fileName = UuidUtils.uuidToString(object.getUuid());
-//			}
-//			Path toPath = tempDir.resolve(SharedUtils.getFilenameWithoutExtension(fileName) + "." + SharedUtils.getFilenameExtension(fromPath.getFileName().toString())); //$NON-NLS-1$
-//			if (Files.exists(toPath)) return;
-//			Files.copy(fromPath, toPath);
-//			
-//		}
-//	}
 }

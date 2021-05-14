@@ -174,6 +174,7 @@ public class VisibleWhenDialog extends SmartStyledTitleDialog {
 			showAdvanced();
 			parseQuery(query);
 			validate();
+			lnkAdvanced.setText("<a>" + Messages.VisibleWhenDialog_BasicOption + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 		}else {
 			showBasic();
 		}
@@ -434,6 +435,7 @@ public class VisibleWhenDialog extends SmartStyledTitleDialog {
 		
 		cc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		cc.setBackground(leftPart.getBackground());
+		((GridData)cc.getLayoutData()).heightHint = 200;
 		
 		Composite rightPart = new Composite(outer, SWT.BORDER);
 		rightPart.setLayout(new GridLayout());
@@ -441,9 +443,10 @@ public class VisibleWhenDialog extends SmartStyledTitleDialog {
 		((GridLayout)rightPart.getLayout()).marginWidth = 0;
 		((GridLayout)rightPart.getLayout()).marginHeight = 0;
 		
+		
 		TableViewer lstOptions = new TableViewer(rightPart, SWT.V_SCROLL);
 		lstOptions.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-//		((GridData)lstOptions.getControl().getLayoutData()).heightHint = 250;
+		//((GridData)lstOptions.getControl().getLayoutData()).heightHint = 250;
 		lstOptions.setContentProvider(ArrayContentProvider.getInstance());
 		lstOptions.setLabelProvider(new LabelProvider() {
 			@Override
