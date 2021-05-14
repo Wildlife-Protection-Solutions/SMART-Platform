@@ -559,7 +559,7 @@ public class CmSmartToXml {
 					temp.append(" 'exact'"); //$NON-NLS-1$
 				}
 				
-				temp.append(", [ "); //$NON-NLS-1$
+				temp.append(", make_list("); //$NON-NLS-1$
 				for (String key : afilter.getValue().toString().split(AttributeFilter.MLIST_SEPERATOR)) {
 					
 					CmAttributeListItem li = findAttributeListItem(cattribute, key, node);
@@ -582,7 +582,7 @@ public class CmSmartToXml {
 				if (temp != null) {
 					temp.deleteCharAt(temp.length() - 1);
 					temp.deleteCharAt(temp.length() - 1);
-					temp.append("] ) "); //$NON-NLS-1$
+					temp.append(") ) "); //$NON-NLS-1$
 					sb.append( temp );
 				}
 				break;
