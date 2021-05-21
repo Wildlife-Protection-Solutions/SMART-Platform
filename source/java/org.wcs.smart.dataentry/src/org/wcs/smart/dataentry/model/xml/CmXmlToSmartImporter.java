@@ -601,9 +601,9 @@ public class CmXmlToSmartImporter {
 				}
 				cmNode.setCategory(c);
 				
-				if (xmlNode.getSignatureType() != null) {
+				if (xmlNode.getSignature() != null) {
 					Set<SignatureType> bits = new HashSet<>();
-					for (org.wcs.smart.dataentry.model.xml.generated.SignatureType s : xmlNode.getSignatureType()) {
+					for (org.wcs.smart.dataentry.model.xml.generated.SignatureType s : xmlNode.getSignature()) {
 						bits.add(signatures.get(s.getUuid()));
 					}
 					cmNode.setSignatures(bits);

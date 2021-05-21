@@ -321,7 +321,7 @@ public class CmSmartToXml {
 				if (signatures.contains(uuid)) {
 					org.wcs.smart.dataentry.model.xml.generated.SignatureType xs = new org.wcs.smart.dataentry.model.xml.generated.SignatureType();
 					xs.setUuid(UuidUtils.uuidToString(uuid));
-					nt.getSignatureType().add(xs);
+					nt.getSignature().add(xs);
 				}
 			}
 		}

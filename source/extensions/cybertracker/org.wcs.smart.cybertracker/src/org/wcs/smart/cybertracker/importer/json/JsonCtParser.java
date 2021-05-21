@@ -451,8 +451,7 @@ public class JsonCtParser {
 					waypointAttachments.add(info);
 				}
 			}else if (key.startsWith(ScreensUtil.RESULT_SIGNATURE)) {
-				String keyId = key.split("_")[2].toLowerCase().trim(); //$NON-NLS-1$
-				
+				String keyId = key.replaceFirst(ScreensUtil.RESULT_SIGNATURE, ""); //$NON-NLS-1$
 				SignatureType stype = SignatureTypeManager.INSTANCE.findType(keyId, ca, session);
 				if (stype == null) {
 					warnings.add(MessageFormat.format(Messages.JsonCtParser_SignatureTypeNotFoundWarning, keyId));

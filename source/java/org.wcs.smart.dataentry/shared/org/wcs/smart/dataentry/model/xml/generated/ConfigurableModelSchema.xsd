@@ -80,7 +80,7 @@ elementFormDefault="qualified">
     		<element name="attribute" type="smrt:AttributeType"
     			maxOccurs="unbounded" minOccurs="0">
     		</element>
-    		<element name="signatureType" type="smrt:SignatureType"
+    		<element name="signature" type="smrt:SignatureType"
     			maxOccurs="unbounded" minOccurs="0">
     		</element>
     	</sequence>

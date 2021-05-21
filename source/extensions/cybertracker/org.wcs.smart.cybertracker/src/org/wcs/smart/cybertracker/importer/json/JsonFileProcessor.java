@@ -262,6 +262,7 @@ public class JsonFileProcessor {
 			throw ex;
 	
 		}catch (Throwable ex){
+			if (session.getTransaction().isActive()) session.getTransaction().rollback();
 			returnValue.message = Messages.JsonFileProcessor_ErrorMessage + ex.getMessage();
 			returnValue.ex = ex;
 			returnValue.status = FileStatus.ERROR;

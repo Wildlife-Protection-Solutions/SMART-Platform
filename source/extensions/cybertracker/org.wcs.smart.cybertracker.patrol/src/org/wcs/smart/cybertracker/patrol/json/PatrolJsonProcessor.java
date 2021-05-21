@@ -54,6 +54,7 @@ import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.importer.json.IJsonProcessor;
 import org.wcs.smart.cybertracker.importer.json.JsonCtParser;
 import org.wcs.smart.cybertracker.importer.json.JsonTrackUtils;
+import org.wcs.smart.cybertracker.importer.json.UserCancelledException;
 import org.wcs.smart.cybertracker.patrol.export.PatrolJsonUtils;
 import org.wcs.smart.cybertracker.patrol.export.PatrolScreensUtil;
 import org.wcs.smart.cybertracker.patrol.internal.Messages;
