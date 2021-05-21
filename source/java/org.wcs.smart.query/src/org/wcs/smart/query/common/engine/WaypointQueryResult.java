@@ -56,7 +56,7 @@ import org.wcs.smart.query.model.QueryColumn;
  * @param <T>
  */
 //wp_x, wp_y
-public abstract class WaypointQueryResult<T extends IWaypointQueryResultItem> extends AbstractPagedQueryResultSet<T> implements IDesktopPagedImageResultSet, ISearchabledResultSet<T>{
+public abstract class WaypointQueryResult<T extends IWaypointQueryResultItem> extends AbstractPagedQueryResultSet<T> implements IDesktopPagedImageResultSet, ISearchabledResultSet<T>, IColumnInfoProvider{
 	
 	protected Set<String> dataColumns = null;
 	private Envelope bounds = null;
@@ -230,6 +230,7 @@ public abstract class WaypointQueryResult<T extends IWaypointQueryResultItem> ex
 		return items;
 	}
 
+	@Override
 	public boolean isDataColumn(QueryColumn column) {
 		return dataColumns != null && dataColumns.contains(column.getKey());
 	}
