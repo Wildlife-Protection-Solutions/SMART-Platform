@@ -90,6 +90,8 @@ public class SurveyCtPackageManager implements ICtPackageManager {
 		SurveyCtPackage ctpackage = new SurveyCtPackage();
 		ctpackage.setConservationArea(SmartDB.getCurrentConservationArea());
 		ctpackage.setName(Messages.SurveyCtPackageManager_DefaultPackageName);
+		ctpackage.setMetadataValues(new ArrayList<>());
+
 		return ctpackage;
 	}
 	

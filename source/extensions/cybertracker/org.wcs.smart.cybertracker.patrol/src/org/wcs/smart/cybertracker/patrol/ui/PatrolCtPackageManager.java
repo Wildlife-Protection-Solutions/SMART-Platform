@@ -91,6 +91,7 @@ public class PatrolCtPackageManager implements ICtPackageManager {
 		PatrolCtPackage ctpackage = new PatrolCtPackage();
 		ctpackage.setConservationArea(SmartDB.getCurrentConservationArea());
 		ctpackage.setName(Messages.PatrolCtPackageManager_DefaultName);
+		ctpackage.setMetadataValues(new ArrayList<>());
 		return ctpackage;
 	}
 	

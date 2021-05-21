@@ -64,6 +64,7 @@ public class IncidentPackageManager implements ICtPackageManager {
 		IncidentCtPackage ctpackage = new IncidentCtPackage();
 		ctpackage.setConservationArea(SmartDB.getCurrentConservationArea());
 		ctpackage.setName(Messages.IncidentPackageManager_IncidentPackageDefaultName);
+		ctpackage.setMetadataValues(new ArrayList<>());
 		return ctpackage;
 	}
 

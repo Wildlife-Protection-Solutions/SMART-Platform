@@ -109,6 +109,7 @@ public class SmartCollectPackageManager implements ICtPackageManager {
 		SmartCollectPackage ctpackage = new SmartCollectPackage();
 		ctpackage.setConservationArea(SmartDB.getCurrentConservationArea());
 		ctpackage.setName(Messages.SmartCollectPackageManager_DefaultPackageName);
+		ctpackage.setMetadataValues(new ArrayList<>());
 		return ctpackage;
 	}
 
