@@ -56,7 +56,6 @@ import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.query.WaypointSourceEngine;
 import org.wcs.smart.connect.security.CaAction;
 import org.wcs.smart.connect.security.SecurityManager;
-import org.wcs.smart.er.json.MissionAttributeMetadata;
 import org.wcs.smart.er.json.SurveyDesignMetadata;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.json.IJsonFeatureProcessor;

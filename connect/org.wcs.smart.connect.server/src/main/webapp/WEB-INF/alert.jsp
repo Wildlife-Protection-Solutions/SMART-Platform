@@ -98,6 +98,17 @@
 		  "<c:out value="${layer.isActive()}"/>"],
 	  </c:forEach>
 	];
+	
+	var basemapLayers = [ 
+		  <c:forEach var="layer" items="${basemapLayers}">
+			  {
+				  "name": "<c:out value="${layer[0]}"/>", 
+				  "url": "<c:out value="${layer[1]}"/>",
+				  "uuid": "<c:out value="${layer[2]}"/>",
+				  "visible": <c:out value="${layer[3]}"/>
+			  },
+		  </c:forEach>
+		];
 </script>
 
 <title><fmt:message key="alert.maptitle" /></title>

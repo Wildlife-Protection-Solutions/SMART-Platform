@@ -61,7 +61,7 @@ public class SmartUser extends ConnectUuidItem {
 	private LocalDateTime resetDate;
 	
 	private UUID homeCaUuid;
-	
+	private String defaultBasemaps;
 	
 	@Column(name="username")
 	public String getUsername() {
@@ -129,4 +129,18 @@ public class SmartUser extends ConnectUuidItem {
 		this.homeCaUuid = homeCaUuid;
 	}
 	
+	/**
+	 * comma delimited string of basemap uuids to
+	 * have visible on the smart map by default
+	 * 
+	 * @return
+	 */
+	@JsonIgnore
+	@Column(name="default_basemaps")
+	public String getDefaultBasemaps() {
+		return defaultBasemaps;
+	}
+	public void setDefaultBasemaps(String defaultBasemaps) {
+		this.defaultBasemaps = defaultBasemaps;
+	}
 }

@@ -33,6 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.hibernate.Session;
 import org.wcs.smart.connect.SmartUtils;
+import org.wcs.smart.connect.api.BasemapTileServer;
 import org.wcs.smart.connect.api.ConnectRESTApplication;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.model.Alert;
@@ -68,6 +69,7 @@ public class AlertServlet extends HttpServlet{
 		List<AlertType> alertTypes = null;
 		List<MapLayer> mapLayers = null;
 		List<AlertFilterDefault> defaults = null;
+		List<Object[]> basemaps = null;
 		boolean canUpdate = false;
 		boolean canDelete = false;
 		
@@ -87,6 +89,8 @@ public class AlertServlet extends HttpServlet{
 			defaults = HibernateManager.getAlertFilterDefaults(session);
 			canUpdate = SecurityManager.INSTANCE.canAccessAtLeastOneResouce(session, request.getUserPrincipal().getName(), AlertAction.UPDATE_ALERTS_KEY);
 			canDelete = SecurityManager.INSTANCE.canAccessAtLeastOneResouce(session, request.getUserPrincipal().getName(), AlertAction.DELETE_ALERTS_KEY);
+			
+			basemaps = BasemapTileServer.getBasemapLayers(session, request.getUserPrincipal().getName());
 		}finally{
 			session.getTransaction().rollback();
 		}
@@ -96,6 +100,7 @@ public class AlertServlet extends HttpServlet{
 		request.setAttribute("cas", authorizedCas); //$NON-NLS-1$
 		request.setAttribute("alertTypes", alertTypes); //$NON-NLS-1$
 		request.setAttribute("mapLayers", mapLayers); //$NON-NLS-1$
+		request.setAttribute("basemapLayers", basemaps); //$NON-NLS-1$
 		request.setAttribute("startingZoom", defaults.get(0).getStartingZoomLevel()); //$NON-NLS-1$
 		request.setAttribute("startingLong", defaults.get(0).getStartingLong()); //$NON-NLS-1$
 		request.setAttribute("startingLat", defaults.get(0).getStartingLat()); //$NON-NLS-1$

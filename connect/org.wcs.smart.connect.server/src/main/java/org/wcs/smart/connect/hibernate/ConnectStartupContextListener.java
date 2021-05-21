@@ -107,6 +107,8 @@ import org.wcs.smart.connect.model.AbstractSmartAction;
 import org.wcs.smart.connect.model.Alert;
 import org.wcs.smart.connect.model.AlertFilterDefault;
 import org.wcs.smart.connect.model.AlertType;
+import org.wcs.smart.connect.model.BasemapBounds;
+import org.wcs.smart.connect.model.BasemapTile;
 import org.wcs.smart.connect.model.CaPluginVersion;
 import org.wcs.smart.connect.model.ConnectPluginVersion;
 import org.wcs.smart.connect.model.ConnectUuidItem;
@@ -441,6 +443,8 @@ public class ConnectStartupContextListener implements ServletContextListener{
 		config.addAnnotatedClass(CyberTrackerApiKey.class);
 		config.addAnnotatedClass(CyberTrackerNavigationLayer.class);
 		config.addAnnotatedClass(SmartCollectConnectUser.class);
+		config.addAnnotatedClass(BasemapTile.class);
+		config.addAnnotatedClass(BasemapBounds.class);
 
 		try{
 			for(Class<?> c : SmartHibernateConfiguration.INSTANCE.getTables()){
@@ -486,6 +490,7 @@ public class ConnectStartupContextListener implements ServletContextListener{
 		//bundle loader for extension points
 		try {
 			(new ServiceLauncher( )).startup(new PlatformConfig());
+			BirtEngine.getBirtEngine(sce.getServletContext());
 		} catch (FrameworkException e1) {
 			logger.log(Level.WARNING, e1.getMessage(), e1);
 		}

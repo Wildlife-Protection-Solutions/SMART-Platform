@@ -81,6 +81,7 @@ public class ConnectRESTApplication extends Application {
 		resources.add(SharedLinkApi.class);
 		resources.add(Uploader.class);
 		resources.add(SmartCollectApi.class);
+		resources.add(BasemapTileServer.class);
 		
 		resources.add(SmartConnectExceptionMapper.class);
 		resources.add(GeneralExceptionMapper.class);

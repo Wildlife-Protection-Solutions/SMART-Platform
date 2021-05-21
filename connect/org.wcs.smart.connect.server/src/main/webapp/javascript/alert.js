@@ -41,11 +41,6 @@ window.onload = function() {
 	var osmAttrib='Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
 	var osm = new L.TileLayer(osmUrl, {minZoom: 1, maxZoom: 18, attribution: osmAttrib});
 	
-	var baseMaps = {
-			"Basemap Off": L.tileLayer(''),
-			"OSM basemap": osm,
-	};
-	
 	dataLayers = {
 	};
 	
@@ -82,10 +77,40 @@ window.onload = function() {
 	getMapFilters();//get the map filter defaults and set them before we make the first call to get alerts/events
 	//also it adds the realtime layer to map once the map filter defaults are setup.
 	
+	var baseMaps = {
+			"Basemap Off": L.tileLayer(''),
+			"OSM basemap": osm,
+	};
+	
+	var smartLayers = [];
+	var updateLayerFunction = function(event){
+		var onlayers = [];
+		smartLayers.forEach(element=>{
+				if (map.hasLayer(element)) {
+					onlayers.push(element.options.uuid);
+				}
+			});		
+		updateUserBasemapVisibility(onlayers);
+	};
+	
+	for (i = 0; i < basemapLayers.length; ++i) {
+		var bmlayer = L.tileLayer('https://localhost:8443/server/' + basemapLayers[i].url, {uuid: basemapLayers[i].uuid});
+		dataLayers[basemapLayers[i].name] =  bmlayer;
+		
+		if (basemapLayers[i].visible){
+			bmlayer.addTo(map);
+		}
+		
+		smartLayers.push(bmlayer);
+		bmlayer.on("add", updateLayerFunction);
+		bmlayer.on("remove", updateLayerFunction);
+	}
+	
 	//add layer control to map
 	layerControl = L.control.layers(baseMaps, dataLayers, {position: 'topleft'});
 	layerControl.addTo(map);
 
+	
 	var legend = document.getElementsByClassName("legend");
 	
 //Map setup complete.
@@ -1214,5 +1239,16 @@ function allAlertDeleted() {
 	}
 	clearTimeout(deletetimer);  //reset the delay if another delete is completed before 2 sec is up.
 	deletetimer = setTimeout(refreshAlerts,2000); //don't want to run this a million times, just run it after waiting for 2sec 
+	return false;
+}
+
+function updateUserBasemapVisibility(uuidlist){
+	
+	var oReq = new XMLHttpRequest();
+	//oReq.onload = alertCreated;
+	oReq.open("PUT", "../api/basemap", true);
+	oReq.setRequestHeader("Content-type", "application/json");
+	oReq.send(JSON.stringify(uuidlist));
+	
 	return false;
 }

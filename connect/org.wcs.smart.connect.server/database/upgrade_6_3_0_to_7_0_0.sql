@@ -983,6 +983,57 @@ ALTER TABLE smart.data_link ADD FOREIGN KEY (ca_uuid) REFERENCES smart.conservat
 CREATE TRIGGER trg_data_link_type AFTER INSERT OR UPDATE OR DELETE ON smart.data_link FOR EACH ROW execute procedure connect.trg_changelog_common();			
 
 
+-- tile cache --
+
+CREATE TABLE connect.tile_cache(
+  uuid UUID NOT NULL,
+  map_uuid UUID NOT NULL,
+  z int,
+  x int,
+  y int,
+  data bytea,
+  last_accessed timestamp,
+  primary key (uuid),
+  unique(map_uuid,x,y,z)
+);
+ALTER TABLE connect.tile_cache ADD FOREIGN KEY (map_uuid) REFERENCES smart.saved_maps(uuid) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY DEFERRED;
+
+CREATE TABLE connect.tile_cache_bounds(
+  map_uuid UUID NOT NULL,
+  x_min double precision,
+  x_max double precision,
+  y_min double precision,
+  y_max double precision,
+  primary key (map_uuid)
+);
+ALTER TABLE connect.tile_cache_bounds ADD FOREIGN KEY (map_uuid) REFERENCES smart.saved_maps(uuid) ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY DEFERRED;
+
+
+CREATE OR REPLACE FUNCTION connect.tile_cache_cleanup() RETURNS trigger LANGUAGE PLPGSQL AS $$
+BEGIN 
+  DELETE FROM connect.tile_cache where map_uuid = NEW.uuid;
+  DELETE FROM connect.tile_cache_bounds where map_uuid = NEW.uuid; 
+  RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER trg_tile_cache AFTER UPDATE OF map_def ON smart.saved_maps FOR EACH ROW execute procedure connect.tile_cache_cleanup();
+
+-- function for accessing files that also update the last_accessed field of the table
+CREATE FUNCTION connect.find_tile(uuid, int, int, int) RETURNS bytea LANGUAGE PLPGSQL AS $$
+DECLARE
+  r RECORD;
+BEGIN
+  SELECT * INTO r FROM connect.tile_cache where map_uuid = $1 and x = $3 and y = $4 and z = $2;
+  IF r IS NULL THEN
+  	RETURN NULL;
+  END IF;
+  UPDATE connect.tile_cache set last_accessed = now() where uuid = r.uuid;
+  RETURN r.data; 
+END;
+$$;
+
+ALTER TABLE connect.users ADD COLUMN default_basemaps varchar;
 
 ------------ VERSIONS ------------
 update connect.connect_plugin_version set version = '2.0' where plugin_id = 'org.wcs.smart.asset';

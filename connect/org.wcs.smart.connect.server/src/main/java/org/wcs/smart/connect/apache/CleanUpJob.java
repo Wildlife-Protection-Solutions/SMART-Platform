@@ -169,10 +169,22 @@ public class CleanUpJob implements Runnable {
 			
 			//clean up gfw files logged
 			cleanUpGlobalForestWatchFiles();
+			
+			//clean up tile image cache
+			cleanUpTileImageCache(s);
 		}
 		
 		cleanReportImages();
 		cleanTemporaryFiles();
+	}
+	
+	private void cleanUpTileImageCache(Session session) {
+		session.beginTransaction();
+		LocalDateTime deleteData = LocalDate.now().minusMonths(2).atStartOfDay();
+		session.createQuery("DELETE FROM BasemapTile WHERE lastAccessed < :date") //$NON-NLS-1$
+			.setParameter("date", deleteData) //$NON-NLS-1$
+			.executeUpdate();
+		session.getTransaction().commit();
 	}
 	
 	private void cleanTemporaryFiles() {
