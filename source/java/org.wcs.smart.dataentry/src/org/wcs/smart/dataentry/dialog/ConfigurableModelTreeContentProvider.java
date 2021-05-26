@@ -107,7 +107,58 @@ public class ConfigurableModelTreeContentProvider implements ITreeContentProvide
 		}
 		return true;		
 	}
-	
+
+	/**
+	 * Determines if the matrix node associated with the given parent node is still
+	 * valid after the specified attributes are added or removed from the node.
+	 * Valid means that there is at least one list and one non-list node.
+	 * @param parentNode
+	 * @param toAdd
+	 * @param toRemove
+	 * @return
+	 */
+	public boolean isGroupValid(Object parentNode, List<CmAttribute> toAdd, List<CmAttribute> toRemove) {
+
+		if (toAdd == null) toAdd = new ArrayList<>();
+		if (toRemove == null) toRemove = new ArrayList<>();
+		
+		Object[] kids = getChildren(parentNode);
+		MatrixNode mn = null;
+		for (Object k : kids) {
+			if (k instanceof MatrixNode) {
+				mn = (MatrixNode) k;
+				break;
+			}
+		}
+		
+		List<CmAttribute> items = null;
+		if (mn == null) {
+			items = new ArrayList<>(toAdd);
+			items.removeAll(toRemove);
+		}else {
+			items = new ArrayList<>();
+			for (Object k : getChildren(mn)) {
+				if (k instanceof CmAttribute) items.add((CmAttribute) k);
+			}
+			
+			items.addAll(toAdd);
+			items.removeAll(toRemove);
+		}
+		
+		
+		if (items.isEmpty()) return true;
+		//otherwise we need at least one list and one non-list
+		int listcnt = 0;
+		int othercnt = 0;
+		for (CmAttribute i : items) {
+			if (i.getAttribute().getType() == Attribute.AttributeType.LIST) {
+				listcnt++;
+			}else {
+				othercnt++;
+			}
+		}
+		return listcnt >= 1 && othercnt >= 1;
+	}
 	/**
 	 * Adds the set of attributes to the current attribute group
 	 * 
@@ -145,6 +196,23 @@ public class ConfigurableModelTreeContentProvider implements ITreeContentProvide
 			}
 			parent.getCmAttributes().removeAll(attributes);
 			parent.getCmAttributes().addAll(min, attributes);
+			
+			//ensure list attributes appear first in the list
+			int lastindex = 0;
+			for (int i = 0; i < parent.getCmAttributes().size(); i ++) {
+				if (parent.getCmAttributes().get(i).getAttribute().getType() != Attribute.AttributeType.LIST) {
+					lastindex = i;
+					break;
+				}
+			}
+			List<CmAttribute> tomove = new ArrayList<>();
+			for (int i = lastindex; i < parent.getCmAttributes().size(); i ++) {
+				if (parent.getCmAttributes().get(i).getAttribute().getType() == Attribute.AttributeType.LIST) {
+					tomove.add(parent.getCmAttributes().get(i));
+				}
+			}
+			parent.getCmAttributes().removeAll(tomove);
+			parent.getCmAttributes().addAll(lastindex+1, tomove);
 		}
 
 		for (CmAttribute x : attributes) {

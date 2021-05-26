@@ -30,6 +30,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.ViewerDropAdapter;
 import org.eclipse.swt.dnd.TransferData;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider.MatrixNode;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmNode;
@@ -162,23 +163,85 @@ public class ConfigurableModelTreeDropListener extends ViewerDropAdapter {
 				return (p1 == p2) || (p1.equals(p2));
 			}
 		} else if (obj instanceof CmAttribute) {
+
 			CmAttribute sourceAttr = (CmAttribute) obj;
+			CmNode targetNode = null;
+			if (target instanceof MatrixNode) {
+				targetNode = ((MatrixNode)target).getParent();
+			}else if (target instanceof CmAttribute) {
+				targetNode = ((CmAttribute)target).getNode();
+			}
+			
+			if (!sourceAttr.getNode().equals(targetNode)) return false;
+			
+			boolean isBefore = getCurrentLocation() == LOCATION_BEFORE;
+			
+			if (provider.getParent(sourceAttr) instanceof MatrixNode) {
+				//moving attribute inside a matrix node
+				if (sourceAttr.getAttribute().getType() == Attribute.AttributeType.LIST) {
+					//if this is the only list in the matrix node you can't move it
+					MatrixNode mn = (MatrixNode) provider.getParent(sourceAttr);
+					int listcnt = 0;
+					for (CmAttribute a : mn.getKids()) {
+						if (a.getAttribute().getType() == Attribute.AttributeType.LIST) listcnt ++;
+					}
+					if (listcnt == 1) return false;
+				
+					//target must be after matrixnode ; after list or before list
+					if (provider.getParent(target) instanceof MatrixNode) {
+						if (isBefore && (target instanceof CmAttribute) ) {
+							CmAttribute trg = (CmAttribute)target;
+							if (trg.getAttribute().getType() == Attribute.AttributeType.LIST) return true;
+							return false;
+						}else if (!isBefore && (target instanceof CmAttribute) ) {
+							CmAttribute trg = (CmAttribute)target;
+							if (trg.getAttribute().getType() == Attribute.AttributeType.LIST) return true;
+							return false;
+						}else if (!isBefore && (target instanceof MatrixNode) ) {
+							return true;
+						}
+						return false;
+					}
+				}else {
+					//if moving out of matrix make sure there is at least one other non-list node
+					if (!(provider.getParent(target) instanceof MatrixNode)) {
+						MatrixNode mn = (MatrixNode) provider.getParent(sourceAttr);
+						int listcnt = 0;
+						for (CmAttribute a : mn.getKids()) {
+							if (a.getAttribute().getType() != Attribute.AttributeType.LIST) listcnt ++;
+						}
+						if (listcnt == 1) return false;
+					}
+				}
+			}
+			
+			
 			if (target instanceof CmAttribute) {
 				CmAttribute targetAttr = (CmAttribute) target;
-				
 				//if target is in matrix 
 				if (provider.getParent(targetAttr) instanceof MatrixNode) {
+					if (sourceAttr.getAttribute().getType() != Attribute.AttributeType.LIST) {
+						//if target is not list then it can only be added after list
+						//cannot be before list
+						if (target instanceof CmAttribute) {
+							if (((CmAttribute)target).getAttribute().getType() == Attribute.AttributeType.LIST) return false;
+						}
+					}else {
+						//have to add a list  next to another list
+						if (((CmAttribute)target).getAttribute().getType() != Attribute.AttributeType.LIST) return false;
+					}
+					
 					if (!provider.canAddToGroup(sourceAttr)) return false;
 				}
 				return sourceAttr.getNode().equals(targetAttr.getNode());
 			}
+			return false;
 		} else if (obj instanceof MatrixNode) {
 			MatrixNode node = (MatrixNode)obj;
 			if (target instanceof CmAttribute) {
 				if (((CmAttribute) target).isGrouped()) return false;
 				return ((CmAttribute)target).getNode() == node.getParent();
 			}
-			
 		}
 		return false;
 	}

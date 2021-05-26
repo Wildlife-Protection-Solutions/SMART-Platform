@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.dataentry.dialog;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -57,6 +58,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider.CmRootNode;
+import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider.MatrixNode;
 import org.wcs.smart.dataentry.dialog.composite.AbstractInfoComposite;
 import org.wcs.smart.dataentry.dialog.composite.AbstractInfoComposite.IModelChangedListener;
 import org.wcs.smart.dataentry.dialog.composite.BooleanAttributeInfoComposite;
@@ -223,7 +225,8 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 				boolean isVisible = true;
 				boolean canUngroup = false;
 				CmNode parent = null;
-
+				
+				List<CmAttribute> selectedItems = new ArrayList<>();
 				for (Iterator<?> iterator2 = modelTreeViewer.getStructuredSelection().iterator(); iterator2.hasNext();) {
 					Object item = iterator2.next();
 					if (!(item instanceof CmAttribute)) {
@@ -232,24 +235,36 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 					}
 					
 					CmAttribute attribute = (CmAttribute)item;
-					canUngroup = attribute.isGrouped();
-							
+					
+					if (attribute.isGrouped()) {
+						canUngroup = true;
+						canGroup = false;
+					}
+					
 					if (parent == null) {
 						parent = attribute.getNode();
 					}else {
 						if (parent != attribute.getNode()) {
 							canGroup = false;
-							break;
 						}
 					}
 					if (attribute.getAttribute().getType() == Attribute.AttributeType.DATE ||
 							attribute.getAttribute().getType() == Attribute.AttributeType.TREE ||
 							attribute.getAttribute().getType() == Attribute.AttributeType.MLIST) {
 						canGroup = false;
-						break;
+					}else {
+						selectedItems.add(attribute);
 					}
 				}
 
+				//can only group if the group has at least one list or we are adding a lit
+				if (isVisible && canGroup) {
+					canGroup = ((ConfigurableModelTreeContentProvider)modelTreeViewer.getContentProvider()).isGroupValid(parent, selectedItems, null);
+				}
+				if (isVisible && canUngroup) {
+					canUngroup = ((ConfigurableModelTreeContentProvider)modelTreeViewer.getContentProvider()).isGroupValid(parent, null, selectedItems);
+				}
+				
 				if (isVisible) {
 					if (miAddGroup == null) {
 						MenuItem sep = new MenuItem(treeMenu, SWT.SEPARATOR);
@@ -539,6 +554,53 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 		addedConfigs.forEach(e->s.saveOrUpdate(e));
 		dialog.getModel().getDefaultConfigs().values().forEach(e->s.saveOrUpdate(e));
 		deletedConfigs.clear();
+	}
+	
+	/**
+	 * Does validation if it is required for the tab.
+	 * @return error message or null
+	 */
+	@Override
+	public String validate() {
+		//ensure all matrixnodes have at least one list attribute and one non-list attribute
+		//and that all list attributes appear first
+		ConfigurableModelTreeContentProvider provider = ((ConfigurableModelTreeContentProvider)modelTreeViewer.getContentProvider());
+		
+		List<Object> nodestovalidate = new ArrayList<>();
+		for (Object start : provider.getElements(null)) {
+			nodestovalidate.add(start);
+		}
+		while(!nodestovalidate.isEmpty()) {
+			Object x = nodestovalidate.remove(0);
+			
+			if (x instanceof MatrixNode) {
+				//valid node
+				MatrixNode mn = (MatrixNode)x;
+				int listcnt = 0;
+				int othercnt = 0;
+				String cname = mn.getParent().getCategory().getName();
+				for (int i = 0; i < mn.getKids().size(); i ++) {
+					CmAttribute a = mn.getKids().get(i);
+					if (a.getAttribute().getType() == Attribute.AttributeType.LIST) {
+						if (othercnt > 0) {
+							return MessageFormat.format(Messages.ConfigurableModelEditorDefaultTab_InvalidOrder, cname);
+						}
+						listcnt++;
+					}else {
+						othercnt ++;
+					}
+				}
+				
+				if (listcnt == 0) return MessageFormat.format(Messages.ConfigurableModelEditorDefaultTab_MissingList, cname);
+				if (othercnt == 0) return MessageFormat.format(Messages.ConfigurableModelEditorDefaultTab_MissingNonList, cname);
+				
+				
+			}else {
+				//add children
+				for (Object kid : provider.getChildren(x)) nodestovalidate.add(kid);
+			}
+		}
+		return null;
 	}
 
 	@Override

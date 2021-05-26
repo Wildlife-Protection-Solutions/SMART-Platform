@@ -128,6 +128,9 @@ public class Messages extends NLS {
 	public static String ConfigurableModelEditDialog_Title;
 	public static String ConfigurableModelEditorDefaultTab_AddToAttributeGroup;
 	public static String ConfigurableModelEditorDefaultTab_HelpContentTabLabel;
+	public static String ConfigurableModelEditorDefaultTab_InvalidOrder;
+	public static String ConfigurableModelEditorDefaultTab_MissingList;
+	public static String ConfigurableModelEditorDefaultTab_MissingNonList;
 	public static String ConfigurableModelEditorDefaultTab_PropertiesTabLabel;
 	public static String ConfigurableModelEditorDefaultTab_RemoveFromAttributeEGroup;
 	public static String ConfigurableModelEditorDefaultTab_TabName;
