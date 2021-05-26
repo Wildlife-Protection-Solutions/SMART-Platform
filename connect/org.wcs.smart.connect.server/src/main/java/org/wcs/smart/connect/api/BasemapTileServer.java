@@ -459,53 +459,55 @@ public class BasemapTileServer {
 		synchronized (TILE_CREATION_LOCK) {
 			try (Session session = HibernateManager.getSession(context)){
 				session.beginTransaction();
-			
-				BasemapBounds bnds = session.get(BasemapBounds.class, layer.getUuid());
-				if (bnds != null) {
-					re = new ReferencedEnvelope(bnds.getXMin(), bnds.getXMax(), bnds.getYMin(), bnds.getYMax(), GeometryUtils.SMART_CRS);
-				}else {
-					Map thisMap = BirtMapFactory.createMap();
-					((MapImpl) thisMap).getContextModel().eSetDeliver(false);
-					((MapImpl) thisMap).eSetDeliver(false);
-			
-					(new RestoreMapSettings()).applyTo((Map) thisMap, layer, layer.getConservationArea(),
-							new IDatabaseConnectionProvider() {
-								private static final long serialVersionUID = 1L;
-			
-								@Override
-								public Session openSession() {
-									return session;
-								}
-			
-								@Override
-								public Locale getLocale() {
-									return Locale.getDefault();
-								}
-			
-								@Override
-								public void finishSession(Session session) {
-								}
-							});
-					CoordinateReferenceSystem sphericalMercator = CRS.decode("EPSG:3857", true); //$NON-NLS-1$
-					thisMap.sendCommandSync(new ChangeCRSCommand(sphericalMercator));
-		
-					// determine bounds of map
-					re = thisMap.getBounds(new NullProgressMonitor());
-					
-					re = re.transform(GeometryUtils.SMART_CRS, false);
-	
-					BasemapBounds bnd = new BasemapBounds();
-					bnd.setBasemapUuid(layer.getUuid());
-					bnd.setXMax(re.getMaxX());
-					bnd.setYMin(re.getMinY());
-					bnd.setXMin(re.getMinX());
-					bnd.setYMax(re.getMaxY());
-					session.save(bnd);
-					
-					session.getTransaction().commit();
-
-				}
+				try {
+					BasemapBounds bnds = session.get(BasemapBounds.class, layer.getUuid());
+					if (bnds != null) {
+						re = new ReferencedEnvelope(bnds.getXMin(), bnds.getXMax(), bnds.getYMin(), bnds.getYMax(), GeometryUtils.SMART_CRS);
+					}else {
+						Map thisMap = BirtMapFactory.createMap();
+						((MapImpl) thisMap).getContextModel().eSetDeliver(false);
+						((MapImpl) thisMap).eSetDeliver(false);
 				
+						(new RestoreMapSettings()).applyTo((Map) thisMap, layer, layer.getConservationArea(),
+								new IDatabaseConnectionProvider() {
+									private static final long serialVersionUID = 1L;
+				
+									@Override
+									public Session openSession() {
+										return session;
+									}
+				
+									@Override
+									public Locale getLocale() {
+										return Locale.getDefault();
+									}
+				
+									@Override
+									public void finishSession(Session session) {
+									}
+								});
+						CoordinateReferenceSystem sphericalMercator = CRS.decode("EPSG:3857", true); //$NON-NLS-1$
+						thisMap.sendCommandSync(new ChangeCRSCommand(sphericalMercator));
+			
+						// determine bounds of map
+						re = thisMap.getBounds(new NullProgressMonitor());
+						
+						re = re.transform(GeometryUtils.SMART_CRS, false);
+		
+						BasemapBounds bnd = new BasemapBounds();
+						bnd.setBasemapUuid(layer.getUuid());
+						bnd.setXMax(re.getMaxX());
+						bnd.setYMin(re.getMinY());
+						bnd.setXMin(re.getMinX());
+						bnd.setYMax(re.getMaxY());
+						session.save(bnd);
+						
+						session.getTransaction().commit();
+					}
+				}catch (Exception ex) {
+						session.getTransaction().rollback();
+						throw ex;
+				}				
 			}
 			
 			ReferencedEnvelope ll = re.transform(GeometryUtils.SMART_CRS, false);
@@ -738,7 +740,7 @@ public class BasemapTileServer {
 		public void addLayer(TileJobItem item) {
 			synchronized (layersProcessing) {
 				if (!layersProcessing.contains(item)) {
-					layersProcessing.add(item);	
+					layersProcessing.add(0, item);	
 					ExecutorService executor = (ExecutorService) context.getAttribute(ConnectStartupContextListener.EXECUTOR_KEY);
 					executor.execute(this);	
 				}
@@ -757,8 +759,13 @@ public class BasemapTileServer {
 		private void generateTiles(Session session, TileJobItem item)
 				throws NoSuchAuthorityCodeException, FactoryException, IOException, TransformException {
 
-			if (findTile(session, item.def, item.xmin, item.ymin, item.z ) != null) {
-				return;
+			session.beginTransaction();
+			try {
+				if (findTile(session, item.def, item.xmin, item.ymin, item.z ) != null) {
+					return;
+				}
+			}finally {
+				session.getTransaction().commit();
 			}
 			
 			int startx = item.xmin;

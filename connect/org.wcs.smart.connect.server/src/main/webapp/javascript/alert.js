@@ -94,7 +94,7 @@ window.onload = function() {
 	};
 	
 	for (i = 0; i < basemapLayers.length; ++i) {
-		var bmlayer = L.tileLayer('https://localhost:8443/server/' + basemapLayers[i].url, {uuid: basemapLayers[i].uuid});
+		var bmlayer = L.tileLayer('../' + basemapLayers[i].url, {uuid: basemapLayers[i].uuid});
 		dataLayers[basemapLayers[i].name] =  bmlayer;
 		
 		if (basemapLayers[i].visible){
