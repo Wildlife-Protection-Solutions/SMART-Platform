@@ -108,6 +108,7 @@
 	    <location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="slicer" includeSource="true" type="InstallableUnit">
 		    <repository location="jar:file:/C:/data/SMART/Source/Trunk/svn/source/java/org.wcs.smart.target/birt-source-4.18.0-20210317.zip!/"/>
 		    <unit id="org.eclipse.birt.feature.group" version="4.18.0.v202103171650"/>
+		    <unit id="org.eclipse.birt.rcp.feature.group" version="4.18.0.v202103171650"/>
 	    </location>
 	    <location includeSource="true" missingManifest="generate" type="Maven">
 		    <groupId>com.itextpdf</groupId>
