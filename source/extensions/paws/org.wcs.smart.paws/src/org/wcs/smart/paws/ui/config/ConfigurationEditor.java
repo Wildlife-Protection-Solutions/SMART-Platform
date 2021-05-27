@@ -52,8 +52,10 @@ import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.ListViewer;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
@@ -122,6 +124,7 @@ public class ConfigurationEditor extends EditorPart {
 	public static final String ID = "org.wcs.smart.paws.configuration.editor"; //$NON-NLS-1$
 	
 	private static final String CUSTOM_FILE = Messages.ConfigurationEditor_CustomFile;
+	private static final Object EMPTY = new Object();
 
 	private IEclipseContext parentContext;
 	private List<EventHandler> handlers = null;
@@ -130,6 +133,7 @@ public class ConfigurationEditor extends EditorPart {
 
 	private HeaderComposite compHeader;
 	private ComboViewer cmbBound,cmbTrainingRes, cmbClassifier;
+	private ComboViewer cmbLandcover, cmbElevation;
 	private CheckBoxDropDown cmbTransportType, cmbMandateType;
 	private ListViewer lstOther;
 	private ErrorText txtGridSize;
@@ -227,6 +231,37 @@ public class ConfigurationEditor extends EditorPart {
 				}else {
 					pp.setValue(null);
 				}
+				
+				//elevation
+				//update boundary
+				Object[][] rasterItems = new Object[][] {
+						{PawsParameter.FixedParameter.LYR_ELEVATION, cmbElevation, Messages.ConfigurationEditor_ElevationRasterName},
+						{PawsParameter.FixedParameter.LYR_LANDCOVER, cmbLandcover, Messages.ConfigurationEditor_LandCoverRasterName}
+				};
+				for (Object[] item : rasterItems) {
+					pp = getOrCreateParameter(pw, (FixedParameter) item[0]);
+					ComboViewer cmb = (ComboViewer)item[1];
+					Object newitem = cmb.getStructuredSelection().getFirstElement();
+					if (newitem instanceof Path || newitem == EMPTY) {
+						//new file
+						if (newitem == EMPTY) {
+							pp.setValue(null);
+						}else if (newitem instanceof Path) {
+							Path source = (Path)newitem;
+							if (!Files.exists(source)) {
+								throw new Exception(MessageFormat.format(Messages.ConfigurationEditor_RasterFileNotFound, (String)item[2], source.toString()));
+							}
+							
+							Path target = generateUniqueName(source, pw);
+							fileNames.add(SharedUtils.getFilenameWithoutExtension(target.getFileName().toString()));
+							filesToCopy.add(new Path[] {source, target});
+							pp.setValue(target.getFileName().toString());
+						}
+					}else if (newitem instanceof String) {
+						fileNames.add(SharedUtils.getFilenameWithoutExtension((String)newitem));
+					}
+				}
+				
 				
 				//other files
 				List<PawsParameter> tokeep = new ArrayList<>();
@@ -348,6 +383,28 @@ public class ConfigurationEditor extends EditorPart {
 			
 		}
 		lstOther.refresh();
+		
+		Object[][] rasterItems = new Object[][] {
+			{PawsParameter.FixedParameter.LYR_ELEVATION, cmbElevation},
+			{PawsParameter.FixedParameter.LYR_LANDCOVER, cmbLandcover}
+		};
+		for (Object[] item : rasterItems) {
+			ComboViewer cmbViewer = (ComboViewer)item[1];
+			
+			List<Object> newitems = new ArrayList<>();
+			newitems.add(EMPTY);
+			newitems.add(CUSTOM_FILE);
+			
+			pp = getOrCreateParameter(pw, (FixedParameter) item[0]);
+			Object selection = EMPTY;
+			if (pp != null && pp.getValue() != null) {
+				newitems.add(pp.getValue());
+				selection = pp.getValue();
+			}
+			cmbViewer.setInput(newitems);
+			cmbViewer.refresh();
+			cmbViewer.setSelection(new StructuredSelection(selection));
+		}
 	
 		if (isNew) setInput(new ConfigEditorInput(pw));
 		ConfigurationEditor.this.setPartName(pw.getName());
@@ -569,6 +626,18 @@ public class ConfigurationEditor extends EditorPart {
 		Label l = toolkit.createLabel(inner, PawsManager.INSTANCE.getName(FixedParameter.LYR_BOUNDARY) + ":"); //$NON-NLS-1$
 		cmbBound = createBmCombo(inner);
 		cmbBound.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		l = toolkit.createLabel(inner, Messages.ConfigurationEditor_ElevationLbl);
+		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		l.setToolTipText(Messages.ConfigurationEditor_ElevationTooltip);
+		
+		cmbElevation = createFileSelector(inner);
+		
+		l = toolkit.createLabel(inner, Messages.ConfigurationEditor_LandCoverLbl);
+		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		l.setToolTipText(Messages.ConfigurationEditor_LandCoverTooltip);
+		
+		cmbLandcover = createFileSelector(inner);
 		
 		l = toolkit.createLabel(inner, Messages.ConfigurationEditor_OtherLayers);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
@@ -818,6 +887,61 @@ public class ConfigurationEditor extends EditorPart {
 
 	}
 	
+	private ComboViewer createFileSelector(Composite parent) {
+		
+		Combo cBnd = new Combo(parent, SWT.FLAT | SWT.READ_ONLY | SWT.BORDER);
+		cBnd.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		ComboViewer cmbViewer = new ComboViewer(cBnd);
+		cmbViewer.setContentProvider(ArrayContentProvider.getInstance());
+		cmbViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		cmbViewer.setLabelProvider(new LabelProvider() {
+				@Override
+				public String getText(Object element) {
+					if (element instanceof Path) return ((Path)element).toString();
+					if (element instanceof String) return (String) element;
+					if (element == CUSTOM_FILE) return CUSTOM_FILE;
+					return ""; //$NON-NLS-1$
+				}
+		});;
+		
+		List<Object> items = new ArrayList<>();
+		items.add(EMPTY);
+		items.add(CUSTOM_FILE);
+		cmbViewer.setInput(items);
+		final ISelectionChangedListener listener = new ISelectionChangedListener() {
+			@SuppressWarnings("unchecked")
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				Object x = cmbViewer.getStructuredSelection().getFirstElement();
+				setDirty(true);
+				if (x != CUSTOM_FILE) return;
+				
+				FileDialog fd = new FileDialog(parent.getShell(), SWT.OPEN);
+				 fd.setText(Messages.ConfigurationEditor_SelectFile);
+				 fd.setFilterExtensions(new String[] {"*.tiff;*.tif", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
+				 fd.setFilterNames(new String[] {Messages.ConfigurationEditor_TifFiles, Messages.ConfigurationEditor_AllFiles});
+				 String file = fd.open();
+				 if (file == null) return;
+				 Path p = Paths.get(file);
+				 if (!Files.exists(p)) {
+					 MessageDialog.openWarning(parent.getShell(), Messages.ConfigurationEditor_NotFoundTitle, MessageFormat.format(Messages.ConfigurationEditor_NotFoundMsg, p.toString()));
+					 return;
+				 }
+				 List<Object> litems = (List<Object>) cmbViewer.getInput();
+				 if (!litems.contains(p)) litems.add(p);
+				 cmbViewer.refresh();
+				 
+				 cmbViewer.removePostSelectionChangedListener(this);
+				 cmbViewer.setSelection(new StructuredSelection(p));
+				 cmbViewer.addPostSelectionChangedListener(this);
+				 
+				 setDirty(true);
+			}};
+			
+		cmbViewer.addPostSelectionChangedListener( listener );
+		 return cmbViewer;
+	}
+	
 	public void fireModified(boolean isNew, PawsConfiguration pc) {
 		HashMap<String, Object> data = new HashMap<String, Object>();
 		data.put(UIEvents.EventTags.ELEMENT, parentContext.get(MPart.class));
@@ -981,6 +1105,25 @@ public class ConfigurationEditor extends EditorPart {
 							cmbBound.setSelection(new StructuredSelection(pp));
 						}
 					}
+					
+					Object[][] rasterItems = new Object[][] {
+						{PawsParameter.FixedParameter.LYR_ELEVATION, cmbElevation},
+						{PawsParameter.FixedParameter.LYR_LANDCOVER, cmbLandcover}
+					};
+					for (Object[] item : rasterItems) {
+						pp = getOrCreateParameter(pw, (FixedParameter) item[0]);
+						ComboViewer cmb = (ComboViewer)item[1];
+						
+						if (pp == null || pp.getValue() == null) {
+							cmb.setSelection(new StructuredSelection(EMPTY));
+						}else {
+							List<Object> items = (List<Object>) cmb.getInput();
+							items.add(pp.getValue());
+							cmb.refresh();
+							cmb.setSelection(new StructuredSelection(pp.getValue()));
+						}	
+					}
+					
 					try(Session session = HibernateManager.openSession()){
 						pp = pw.findParameter(PawsParameter.FixedParameter.PTRANSPORT_FILTER.name());
 						if (pp != null && pp.getValue() != null) {
@@ -1112,16 +1255,12 @@ public class ConfigurationEditor extends EditorPart {
 
 				try {
 					//delete any files not referenced
-					List<Path> toDelete = new ArrayList<>();
 					try(Stream<Path> files = Files.list(root)){
-						files.forEach(other->{
-					
+						files.forEach(other->{					
 						String name = SharedUtils.getFilenameWithoutExtension(other.getFileName().toString());
 						if (!fileNames.contains(name)) {
 							deletedFiles.add(other.getFileName().toString());
-							toDelete.add(other);
 							try{
-								
 								Files.deleteIfExists(other);
 							}catch (IOException ex) {
 								PawsPlugIn.log(ex.getMessage(), ex);

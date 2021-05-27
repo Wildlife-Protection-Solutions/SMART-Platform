@@ -82,8 +82,10 @@ import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.paws.PawsFileManager;
 import org.wcs.smart.paws.PawsManager;
+import org.wcs.smart.paws.PawsPlugIn;
 import org.wcs.smart.paws.model.PawsConfiguration;
 import org.wcs.smart.paws.model.PawsParameter;
+import org.wcs.smart.paws.model.PawsParameter.FixedParameter;
 import org.wcs.smart.paws.model.PawsQueryClass;
 import org.wcs.smart.paws.model.PawsRun;
 import org.wcs.smart.paws.model.PawsRun.Status;
@@ -192,13 +194,43 @@ public class PawsDataEngine {
 			config.put("geo_feature_shape_files", shapefiles); //$NON-NLS-1$
 			
 			pp = run.getConfiguration().findParameter(PawsParameter.FixedParameter.LYR_BOUNDARY.name());
-			shapefiles.put("boundary_layer_name", "ca_boundary"); //$NON-NLS-1$ //$NON-NLS-2$
-			shapefiles.put("boundary_file_name", "ca_boundary.zip"); //$NON-NLS-1$ //$NON-NLS-2$
+			
+			String blayername = "ca_boundary"; //$NON-NLS-1$
+			String bfilename = "ca_boundary.zip"; //$NON-NLS-1$
+			
+			if (pp.getValue().startsWith(PawsParameter.FILE_PREFIX)){
+				String filename = pp.getValue().substring(PawsParameter.FILE_PREFIX.length());
+				bfilename = filename;
+				blayername = SharedUtils.getFilenameWithoutExtension(filename);
+			}
+			
+			shapefiles.put("boundary_layer_name", blayername); //$NON-NLS-1$
+			shapefiles.put("boundary_file_name", bfilename); //$NON-NLS-1$ 
 			
 			JSONArray other = new JSONArray();
-			JSONArray rasters = new JSONArray();
+			JSONObject rasters = new JSONObject();
+			JSONArray additionalrasters = new JSONArray();
 			shapefiles.put("additional_shape_files", other); //$NON-NLS-1$
 			shapefiles.put("raster_files", rasters); //$NON-NLS-1$
+			rasters.put("additional_raster_files", additionalrasters); //$NON-NLS-1$
+			
+			Object[][] data = new Object[][] {
+					{PawsParameter.FixedParameter.LYR_ELEVATION, "elevation_file_name", "elevation_layer_name"}, //$NON-NLS-1$ //$NON-NLS-2$
+					{PawsParameter.FixedParameter.LYR_LANDCOVER, "landcover_file_name", "landcover_layer_name"} //$NON-NLS-1$ //$NON-NLS-2$
+			};
+			for (Object[] d : data){
+				PawsParameter.FixedParameter param = (FixedParameter) d[0];
+				String filename= (String) d[1];
+				String layername = (String) d[2];
+				pp = run.getConfiguration().findParameter(param.name());
+				if (pp == null || pp.getValue().isBlank()) {
+					rasters.put(filename, "");  //$NON-NLS-1$
+					rasters.put(layername, ""); //$NON-NLS-1$
+				}else {
+					rasters.put(filename,  SharedUtils.getFilenameWithoutExtension(pp.getValue()) + ".zip"); //$NON-NLS-1$
+					rasters.put(layername,  SharedUtils.getFilenameWithoutExtension(pp.getValue()));
+				}
+			}
 			
 			for (PawsParameter ppc : run.getConfiguration().getParameters()) {
 				if (!ppc.getKey().equals(PawsParameter.FixedParameter.LYR_OTHER.name())) continue;
@@ -221,7 +253,7 @@ public class PawsDataEngine {
 					item.put("layer_name",  SharedUtils.getFilenameWithoutExtension(filename)); //$NON-NLS-1$
 					
 					if (isRaster(filename)) { 
-						rasters.add(item);
+						additionalrasters.add(item);
 					}else {
 						other.add(item);
 					}
@@ -338,6 +370,18 @@ public class PawsDataEngine {
 			packageShapefile(srcShp, targetShp);
 		}
 		
+		//elevation and landcover
+		for  (PawsParameter.FixedParameter param : new PawsParameter.FixedParameter[] {PawsParameter.FixedParameter.LYR_ELEVATION, PawsParameter.FixedParameter.LYR_LANDCOVER}) {
+			pp = configuration.findParameter(param.name());
+			if (pp != null && !pp.getValue().isBlank()) {
+				String filename = pp.getValue();
+				Path srcRaster = PawsFileManager.INSTANCE.getDirectory(configuration).resolve(filename);
+				Path targetFile = target.resolve(filename);
+				packageRaster(srcRaster, targetFile);
+			}
+		}
+
+		
 		//ALL OTHER LAYERS
 		for (PawsParameter ppw : configuration.getParameters()) {
 			if (!ppw.getKey().equals(PawsParameter.FixedParameter.LYR_OTHER.name())) continue;
@@ -377,24 +421,32 @@ public class PawsDataEngine {
 	    AbstractGridFormat format = GridFormatFinder.findFormat(rasterFile.toFile());
         GridCoverage2DReader reader = format.getReader(rasterFile.toFile());
         GridCoverage2D coverage = reader.read(null);
-        
+
         Path temp = null;
     
         //reproject to target CRS
         if (!CRS.equalsIgnoreMetadata(coverage.getCoordinateReferenceSystem(), targetCrs)) {
         	//reproject
         	GridCoverage2D transformed = (GridCoverage2D) Operations.DEFAULT.resample(coverage,targetCrs);
-        	temp = Files.createTempFile("", rasterFile.getFileName().toString()); //$NON-NLS-1$
+        	temp = Files.createTempDirectory("smart").resolve(rasterFile.getFileName().toString()); //$NON-NLS-1$
         	(new GeoTiffWriter(temp.toFile())).write(transformed, null);
         }
+        reader.dispose();
+        coverage.dispose(true);
 		
 		//zip 
 		String targetname = SharedUtils.getFilenameWithoutExtension(targetFile.getFileName().toString());
 		Path zipFile = targetFile.getParent().resolve(targetname + ".zip"); //$NON-NLS-1$
 		if (temp != null) {
-			zipShapefile(temp, zipFile);
+			zipFile(temp, zipFile, true);
+			try {
+				Files.delete(temp.getParent());
+			}catch (Exception ex) {
+				PawsPlugIn.log(ex.getMessage(), ex);
+			}
+			
 		}else {
-			zipShapefile(targetFile, zipFile);
+			zipFile(rasterFile, zipFile, false);
 		}
 		
 	}
@@ -432,11 +484,10 @@ public class PawsDataEngine {
 		
 		shapefile.dispose();
 		
-		
 		//zip 
 		String targetname = SharedUtils.getFilenameWithoutExtension(targetFile.getFileName().toString());
 		Path zipFile = targetFile.getParent().resolve(targetname + ".zip"); //$NON-NLS-1$
-		zipShapefile(targetFile, zipFile);
+		zipFile(targetFile, zipFile, true);
 		
 	}
 	
@@ -487,23 +538,22 @@ public class PawsDataEngine {
 		
 		String targetname = SharedUtils.getFilenameWithoutExtension(targetFile.getFileName().toString());
 		Path zipFile = targetFile.getParent().resolve(targetname + ".zip"); //$NON-NLS-1$
-		zipShapefile(targetFile, zipFile);
+		zipFile(targetFile, zipFile, true);
 		
 	}
 	
-	private void zipShapefile(Path shapefile, Path zipFile) throws IOException {
-		String targetname = SharedUtils.getFilenameWithoutExtension(zipFile.getFileName().toString());
+	private void zipFile(Path srcFile, Path zipFile, boolean deleteSource) throws IOException {
+		String targetname = SharedUtils.getFilenameWithoutExtension(srcFile.getFileName().toString());
 
 		List<Path> allFiles = new ArrayList<>();
-		try(Stream<Path> files = Files.list(shapefile.getParent())){
+		try(Stream<Path> files = Files.list(srcFile.getParent())){
 			allFiles.addAll(files.filter(item -> SharedUtils.getFilenameWithoutExtension(item.getFileName().toString()).equals(targetname))
 				.collect(Collectors.toList()));
 		}
 		ZipUtil.createZip(allFiles, zipFile, new NullProgressMonitor());
 		
-		for (Path f : allFiles ) {
-			Files.delete(f);
-		}
+		if (deleteSource) for (Path f : allFiles ) Files.delete(f);
+		
 		packageFiles.add(zipFile);
 	}
 	

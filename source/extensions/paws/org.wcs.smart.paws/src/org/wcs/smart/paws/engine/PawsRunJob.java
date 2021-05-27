@@ -83,7 +83,7 @@ public class PawsRunJob extends Job{
 			handleError(Messages.PawsRunJob_PackageError, ex);
 			return Status.OK_STATUS;
 		}
-		
+
 		try{
 			PawsService service;
 			try(Session session = HibernateManager.openSession()){

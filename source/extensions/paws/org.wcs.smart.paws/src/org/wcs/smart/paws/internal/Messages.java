@@ -45,6 +45,8 @@ public class Messages extends NLS {
 
 	public static String ConfigurationEditor_allFiles;
 
+	public static String ConfigurationEditor_AllFiles;
+
 	public static String ConfigurationEditor_BoundaryRequired;
 
 	public static String ConfigurationEditor_ClassificationSection;
@@ -69,6 +71,12 @@ public class Messages extends NLS {
 
 	public static String ConfigurationEditor_DirCreateError;
 
+	public static String ConfigurationEditor_ElevationLbl;
+
+	public static String ConfigurationEditor_ElevationRasterName;
+
+	public static String ConfigurationEditor_ElevationTooltip;
+
 	public static String ConfigurationEditor_ErrorTitle;
 
 	public static String ConfigurationEditor_ErrorTitls;
@@ -83,6 +91,12 @@ public class Messages extends NLS {
 
 	public static String ConfigurationEditor_InvalidGridSize;
 
+	public static String ConfigurationEditor_LandCoverLbl;
+
+	public static String ConfigurationEditor_LandCoverRasterName;
+
+	public static String ConfigurationEditor_LandCoverTooltip;
+
 	public static String ConfigurationEditor_loadingjobname;
 
 	public static String ConfigurationEditor_MapLayers;
@@ -93,9 +107,15 @@ public class Messages extends NLS {
 
 	public static String ConfigurationEditor_NoneOption;
 
+	public static String ConfigurationEditor_NotFoundMsg;
+
+	public static String ConfigurationEditor_NotFoundTitle;
+
 	public static String ConfigurationEditor_OtherLayers;
 
 	public static String ConfigurationEditor_PatrolFilters;
+
+	public static String ConfigurationEditor_RasterFileNotFound;
 
 	public static String ConfigurationEditor_RasterFilesOp;
 
@@ -119,6 +139,8 @@ public class Messages extends NLS {
 
 	public static String ConfigurationEditor_SaveTitle;
 
+	public static String ConfigurationEditor_SelectFile;
+
 	public static String ConfigurationEditor_SelectMsg;
 
 	public static String ConfigurationEditor_SelectShapefile;
@@ -128,6 +150,8 @@ public class Messages extends NLS {
 	public static String ConfigurationEditor_Shapefiles;
 
 	public static String ConfigurationEditor_TiffFiles;
+
+	public static String ConfigurationEditor_TifFiles;
 
 	public static String ConfigurationEditor_unitsTooltip1;
 

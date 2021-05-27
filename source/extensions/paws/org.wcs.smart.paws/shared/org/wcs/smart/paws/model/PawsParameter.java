@@ -41,6 +41,8 @@ public class PawsParameter extends UuidItem{
 	
 	public static enum FixedParameter{
 		LYR_BOUNDARY,
+		LYR_ELEVATION,
+		LYR_LANDCOVER,
 		LYR_OTHER,
 		GRID_SIZE,
 		TRAINING_RES,
