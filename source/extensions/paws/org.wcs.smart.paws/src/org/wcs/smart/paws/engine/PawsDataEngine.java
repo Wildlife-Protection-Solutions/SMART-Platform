@@ -193,6 +193,9 @@ public class PawsDataEngine {
 			JSONObject shapefiles = new JSONObject();
 			config.put("geo_feature_shape_files", shapefiles); //$NON-NLS-1$
 			
+			JSONObject rasters = new JSONObject();
+			config.put("raster_files", rasters); //$NON-NLS-1$
+			
 			pp = run.getConfiguration().findParameter(PawsParameter.FixedParameter.LYR_BOUNDARY.name());
 			
 			String blayername = "ca_boundary"; //$NON-NLS-1$
@@ -208,10 +211,9 @@ public class PawsDataEngine {
 			shapefiles.put("boundary_file_name", bfilename); //$NON-NLS-1$ 
 			
 			JSONArray other = new JSONArray();
-			JSONObject rasters = new JSONObject();
-			JSONArray additionalrasters = new JSONArray();
 			shapefiles.put("additional_shape_files", other); //$NON-NLS-1$
-			shapefiles.put("raster_files", rasters); //$NON-NLS-1$
+			
+			JSONArray additionalrasters = new JSONArray();
 			rasters.put("additional_raster_files", additionalrasters); //$NON-NLS-1$
 			
 			Object[][] data = new Object[][] {
