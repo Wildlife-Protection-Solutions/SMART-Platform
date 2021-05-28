@@ -483,6 +483,7 @@ public class PawsDataEngine {
 		fs.setTransaction(new DefaultTransaction());
 		fs.addFeatures( rfc );
 		fs.getTransaction().commit();
+		fs.getTransaction().close();
 		
 		shapefile.dispose();
 		
@@ -532,9 +533,9 @@ public class PawsDataEngine {
 		FeatureStore<SimpleFeatureType, SimpleFeature> fs = 
 				(FeatureStore<SimpleFeatureType, SimpleFeature>) shapefile.getFeatureSource(shapefile.getTypeNames()[0]);
 		fs.setTransaction(new DefaultTransaction());
-		
 		fs.addFeatures( DataUtilities.collection(features) );
 		fs.getTransaction().commit();
+		fs.getTransaction().close();
 		
 		shapefile.dispose();
 		
