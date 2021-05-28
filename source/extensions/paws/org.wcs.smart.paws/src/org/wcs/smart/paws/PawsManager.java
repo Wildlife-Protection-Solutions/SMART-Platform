@@ -274,6 +274,8 @@ public enum PawsManager {
 		case TRAINING_RES: return Messages.PawsManager_TrainingResolution;
 		case PTRANSPORT_FILTER: return Messages.PawsManager_TransportTypeParameter;
 		case PMANDATE_FILTER: return Messages.PawsManager_MandateParameter;
+		case LYR_ELEVATION: return Messages.PawsManager_ElevationLbl;
+		case LYR_LANDCOVER: return Messages.PawsManager_LandCoverLbl;
 		}
 		return null;
 	}

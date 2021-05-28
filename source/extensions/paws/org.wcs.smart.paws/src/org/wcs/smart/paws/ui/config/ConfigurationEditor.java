@@ -627,13 +627,13 @@ public class ConfigurationEditor extends EditorPart {
 		cmbBound = createBmCombo(inner);
 		cmbBound.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		l = toolkit.createLabel(inner, Messages.ConfigurationEditor_ElevationLbl);
+		l = toolkit.createLabel(inner, PawsManager.INSTANCE.getName(FixedParameter.LYR_ELEVATION));
 		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		l.setToolTipText(Messages.ConfigurationEditor_ElevationTooltip);
 		
 		cmbElevation = createFileSelector(inner);
 		
-		l = toolkit.createLabel(inner, Messages.ConfigurationEditor_LandCoverLbl);
+		l = toolkit.createLabel(inner, PawsManager.INSTANCE.getName(FixedParameter.LYR_LANDCOVER));
 		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		l.setToolTipText(Messages.ConfigurationEditor_LandCoverTooltip);
 		

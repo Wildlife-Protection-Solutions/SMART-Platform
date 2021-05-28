@@ -71,7 +71,7 @@ public class Messages extends NLS {
 
 	public static String ConfigurationEditor_DirCreateError;
 
-	public static String ConfigurationEditor_ElevationLbl;
+	public static String PawsManager_ElevationLbl;
 
 	public static String ConfigurationEditor_ElevationRasterName;
 
@@ -91,7 +91,7 @@ public class Messages extends NLS {
 
 	public static String ConfigurationEditor_InvalidGridSize;
 
-	public static String ConfigurationEditor_LandCoverLbl;
+	public static String PawsManager_LandCoverLbl;
 
 	public static String ConfigurationEditor_LandCoverRasterName;
 
@@ -104,8 +104,6 @@ public class Messages extends NLS {
 	public static String ConfigurationEditor_MeterLbl;
 
 	public static String ConfigurationEditor_NameRequired;
-
-	public static String ConfigurationEditor_NoneOption;
 
 	public static String ConfigurationEditor_NotFoundMsg;
 
