@@ -63,8 +63,6 @@ public class Messages extends NLS {
 	public static String AttributeDialog_Message;
 	public static String AttributeDialog_NewAttributeMessage;
 	public static String AttributeDialog_SaveError;
-	public static String AttributeDialog_ShellTitle;
-	public static String AttributeDialog_Title;
 	public static String AttributeDialog_TypeLabel;
 	public static String AttributeDMAdvisor_AttributeUsedInObs;
 	public static String AttributeFieldEditor_InvalidCoordinate;
@@ -198,7 +196,6 @@ public class Messages extends NLS {
 	public static String DmAttributeDeleteAdvisor_LinkedAttributeMsg;
 	public static String DmAttributeEditAdvisor_ManagedAttributeMsg;
 	public static String DrawPointTool_InvalidPointMsg;
-	public static String DrawPolygonTool_InvalidPolygonMsg;
 	public static String DropItem_DeleteItemTooltip;
 	public static String DropItemFactory_AreaTypeNotFound;
 	public static String DropItemFactory_AttributeKeyNotFound;
@@ -531,11 +528,9 @@ public class Messages extends NLS {
 	public static String EntityTypeDialog_CloseConfirmTitle;
 	public static String EntityTypeDialog_DataModelTab;
 	public static String EntityTypeDialog_DialogFilter;
-	public static String EntityTypeDialog_DmAttributeLabel;
 	public static String EntityTypeDialog_DmAttributeTitle;
 	public static String EntityTypeDialog_DuplicatecheckLabel;
 	public static String EntityTypeDialog_DuplicatecheckTooltip;
-	public static String EntityTypeDialog_EditTypeMessage;
 	public static String EntityTypeDialog_EntityLoadError;
 	public static String EntityTypeDialog_EntityTypeSubTask;
 	public static String EntityTypeDialog_GroupWarning;
@@ -557,7 +552,6 @@ public class Messages extends NLS {
 	public static String EntityTypeDialog_NewGroupTitle;
 	public static String EntityTypeDialog_NewTypeMessage;
 	public static String EntityTypeDialog_NotConfiguredLabel;
-	public static String EntityTypeDialog_ProfilesLabel;
 	public static String EntityTypeDialog_ProfilesTab;
 	public static String EntityTypeDialog_RemoveBtn;
 	public static String EntityTypeDialog_RemoveDialogMsg;
@@ -565,7 +559,6 @@ public class Messages extends NLS {
 	public static String EntityTypeDialog_SaveError;
 	public static String EntityTypeDialog_SaveRequired;
 	public static String EntityTypeDialog_SaveTypeTask;
-	public static String EntityTypeDialog_Title;
 	public static String EntityTypeDialog_UnlinkMessage;
 	public static String EntityTypeDialog_UnlinkTitle;
 	public static String EntityTypeDialog_WarningDialogMsg;
@@ -741,7 +734,6 @@ public class Messages extends NLS {
 	public static String IntelDataToXml_conversionTask;
 	public static String IntelDataToXml_ConvservationFailedMsg;
 	public static String IntelDataToXml_entityTypeTask;
-	public static String IntelDataToXml_ExportTask;
 	public static String IntelDataToXml_ExportTask2;
 	public static String IntelDataToXml_ExportTaskName;
 	public static String IntelDataToXml_recordSourceTask;
@@ -1456,7 +1448,6 @@ public class Messages extends NLS {
 	public static String RecordSourceDialog_NameSection;
 	public static String RecordSourceDialog_NewRecordSource;
 	public static String RecordSourceDialog_ProfileError;
-	public static String RecordSourceDialog_ProfilesLabel;
 	public static String RecordSourceDialog_ProfilesSection;
 	public static String RecordSourceGroupByDropItem_AllOption;
 	public static String RecordSourceSelectionDialog_DateFilter;
@@ -1478,7 +1469,6 @@ public class Messages extends NLS {
 	public static String RecordSummaryPage_CreatedByLabel;
 	public static String RecordSummaryPage_CreateLabel;
 	public static String RecordSummaryPage_DetailsSection;
-	public static String RecordSummaryPage_DuplicateTitleWarning;
 	public static String RecordSummaryPage_EntitiesSection;
 	public static String RecordSummaryPage_EntityDetailLink;
 	public static String RecordSummaryPage_EntityListLink;
@@ -1644,12 +1634,9 @@ public class Messages extends NLS {
 	public static String RelationshipDiagramTreeRootStyleObjects_EntityType;
 	public static String RelationshipDiagramTreeRootStyleObjects_RelationshipType;
 	public static String RelationshipDiagramTreeRootStyleObjects_RootNode;
-	public static String RelationshipGraphComposite_LayoutAlogorithm_Box;
 	public static String RelationshipGraphComposite_LayoutAlogorithm_Grid;
-	public static String RelationshipGraphComposite_LayoutAlogorithm_HorizontalShift;
 	public static String RelationshipGraphComposite_LayoutAlogorithm_Radial;
 	public static String RelationshipGraphComposite_LayoutAlogorithm_Spring;
-	public static String RelationshipGraphComposite_LayoutAlogorithm_Sugiyama;
 	public static String RelationshipGraphComposite_Layout;
 	public static String RelationshipGraphComposite_LayoutAlogorithm_Tree;
 	public static String RelationshipGraphComposite_LayoutLbl;
@@ -1668,7 +1655,6 @@ public class Messages extends NLS {
 	public static String RelationshipGroupDialog_Message;
 	public static String RelationshipGroupDialog_NewGroupMessage;
 	public static String RelationshipGroupDialog_SaveError;
-	public static String RelationshipGroupDialog_Title;
 	public static String RelationshipGroupDialog_TypesLabel;
 	public static String RelationshipGroupListDialog_ConfirmDeleteMes;
 	public static String RelationshipGroupListDialog_ConfirmDeleteTitle;
@@ -1704,7 +1690,6 @@ public class Messages extends NLS {
 	public static String RelationshipTypeDialog_srcProfile;
 	public static String RelationshipTypeDialog_TargetEntityTypeRequired;
 	public static String RelationshipTypeDialog_TargetLabel;
-	public static String RelationshipTypeDialog_Title;
 	public static String RelationshipTypeDialog_targetProfileRequired;
 	public static String RelationshipTypeDialog_trgProfile;
 	public static String RelationshipTypeDialog_ValidSourceEntityTypeRequired;

@@ -1,7 +1,6 @@
 package org.wcs.smart.i2.ui.editors;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +22,6 @@ import org.locationtech.udig.project.ILayer;
 import org.locationtech.udig.project.ILayerListener;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.internal.StyleBlackboard;
-import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.Intelligence2PlugIn;
 import org.wcs.smart.i2.WorkingSetManager;
