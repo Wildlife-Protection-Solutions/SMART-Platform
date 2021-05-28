@@ -691,7 +691,7 @@ public class RecordsView {
 				int cnt = 0;
 				for (UUID record : toExport){
 					try{
-						if (exporter.exportRecord(record, progress.newChild(1))) cnt ++;
+						if (exporter.exportToFile(record, progress.newChild(1))) cnt ++;
 					}catch(OperationCanceledException ex) {
 						break;
 					}catch (Exception ex){

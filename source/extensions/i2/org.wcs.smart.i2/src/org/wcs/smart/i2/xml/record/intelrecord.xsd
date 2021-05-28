@@ -30,6 +30,7 @@ xmlns:tns="http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.rec
     		</element>
     	</sequence>
     	<attribute name="profileKey" type="string"></attribute>
+    	<attribute name="uuid" type="string"></attribute>
     </complexType>
 
     <complexType name="LabelUuid">

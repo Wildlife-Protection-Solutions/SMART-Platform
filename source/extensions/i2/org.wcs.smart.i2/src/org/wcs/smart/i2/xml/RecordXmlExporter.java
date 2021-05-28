@@ -109,20 +109,62 @@ public class RecordXmlExporter {
 		this.destFolder = destFolder;
 	}
 	
+	public  boolean exportToDirectory(UUID recordUuid, Path directory, IProgressMonitor monitor) throws Exception{
+		SubMonitor progress = SubMonitor.convert(monitor,2);
+		
+		RecordType xmlRecord = null;
+		String fileName = null;
+
+		List<ISmartAttachment> attachmentsToInclude = new ArrayList<>();
+			
+		try(Session session = HibernateManager.openSession()){
+			IntelRecord record = (IntelRecord) session.get(IntelRecord.class, recordUuid);
+			if (record == null) throw new Exception(Messages.RecordXmlExporter_RecordNotFound);
+			progress.subTask(MessageFormat.format(Messages.RecordXmlExporter_SubTaskName, record.getTitle()));
+			
+			fileName = URLUtils.cleanFilename(record.getTitle());
+			if (fileName.length() > 100){
+				fileName = fileName.substring(0, 100);
+			}
+			
+			xmlRecord = convertRecord(record, attachmentsToInclude, session);
+		}
+		
+		Path xmlFile = directory.resolve(fileName + ".xml"); //$NON-NLS-1$
+		try(OutputStream out = Files.newOutputStream(xmlFile)){
+			writeRecord(xmlRecord, out);
+		}
+		Path attachDir = null;
+		if (attachmentsToInclude.size() > 0){
+			attachDir = directory.resolve(ATTACHMENT_DIR);
+			Files.createDirectory(attachDir);
+			for (ISmartAttachment f : attachmentsToInclude){
+				try {
+					EncryptUtils.decryptAttachment(f, attachDir.resolve(f.getFilename()));
+				}catch (Exception ex) {
+					//unable to decrypt
+				}
+			}
+		}
+		return true;
+	}
+	
 	/**
 	 * 
 	 * @param recordUuid
+	 * @param fileName file name without extension to call output file; if null will be named after record
 	 * @param monitor the progress monitor to use for reporting progress to the user. It is the caller's responsibility 
 	 * to call done() on the given monitor
 	 * @return
 	 * @throws Exception
 	 */
-	public  boolean exportRecord(UUID recordUuid, IProgressMonitor monitor) throws Exception{
+	public boolean exportToFile(UUID recordUuid, IProgressMonitor monitor) throws Exception{
 		SubMonitor progress = SubMonitor.convert(monitor,2);
 		
 		RecordType xmlRecord = null;
-		String fileName = null;
 		Path outputFile = null;
+		String fileName = null;
+		
 		List<ISmartAttachment> attachmentsToInclude = new ArrayList<>();
 			
 		try(Session session = HibernateManager.openSession()){
@@ -135,6 +177,7 @@ public class RecordXmlExporter {
 			if (fileName.length() > 100){
 				fileName = fileName.substring(0, 100);
 			}
+			
 			outputFile = destFolder.resolve(fileName + ".zip"); //$NON-NLS-1$
 			if (!overwriteAll && Files.exists(outputFile)){
 				final String oFile = outputFile.toString();
@@ -210,6 +253,7 @@ public class RecordXmlExporter {
 		xmlRecord.setTitle(record.getTitle());
 		xmlRecord.setStatus(record.getStatus().name());
 		xmlRecord.setProfileKey(record.getProfile().getKeyId());
+		xmlRecord.setUuid( UuidUtils.uuidToString(record.getUuid()) );
 		xmlRecord.setPrimaryDate(SmartUtils.toXmlDateTime(record.getPrimaryDate()));
 		
 		if (record.getDescription() != null) xmlRecord.setNarrative(record.getDescription());

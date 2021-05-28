@@ -54,6 +54,7 @@ import org.wcs.smart.i2.model.IntelRecordAttributeValueList;
 import org.wcs.smart.i2.model.IntelRecordSourceAttribute;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.GeometryUtils;
+import org.wcs.smart.util.UuidUtils;
 
 import au.com.bytecode.opencsv.CSVWriter;
 
@@ -125,10 +126,9 @@ public class RecordCsvExporter implements ICsvDataExporter {
 				}
 				headers.add(MessageFormat.format("{0}({1})", name, ia.getSource().getName())); //$NON-NLS-1$
 			}
-			
-			
-
 		}
+		headers.add("UUID"); //$NON-NLS-1$
+
 		
 		IIntelligenceLabelProvider ll = SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class);
 		monitor.worked(1);
@@ -198,6 +198,8 @@ public class RecordCsvExporter implements ICsvDataExporter {
 						}
 					}
 				}
+				headers.add(UuidUtils.uuidToString(r.getUuid()));
+				
 				String[] sdata = headers.toArray(new String[headers.size()]);
 				ICsvDataExporter.removeLineFeeds(sdata);
 				writer.writeNext(sdata);

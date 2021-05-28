@@ -153,7 +153,9 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine {
 						
 						fmonitor.checkCanceled();
 						computeCount(session);
+						connection.setAutoCommit(false);
 						computeBounds(session);
+						connection.setAutoCommit(true);
 						
 						fmonitor.worked(1);
 						
@@ -185,8 +187,9 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine {
 						fmonitor.checkCanceled();
 						fmonitor.subTask(Messages.IntelObservationQueryEngine_Progress7);
 						computeCount(session);
+						connection.setAutoCommit(false);
 						computeBounds(session);
-						
+						connection.setAutoCommit(true);
 						fmonitor.worked(1);
 						
 						//session.getTransaction().commit();
@@ -216,12 +219,14 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine {
 		Query<?> q = session.createNativeQuery("SELECT loc_geometry FROM " + queryResults.getQueryDataTable() ); //$NON-NLS-1$
 		List<?> geoms = q.list();
 		Envelope env = null;
+		WKBReader reader = new WKBReader();
+		
 		for (Object x : geoms){
 			if (x == null)  continue;
 			if (!(x instanceof Blob))  continue;
 			
 			Blob b = (Blob)x;
-			WKBReader reader = new WKBReader();
+			
 			try{
 				Envelope e = reader.read(b.getBytes(1l, (int) b.length())).getEnvelopeInternal();
 				if (env == null){
@@ -231,10 +236,12 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine {
 				}
 			}catch(Exception ex){
 				//eat this
+				ex.printStackTrace();
 			}
 		}
 		queryResults.setBounds(env);
 	}
+	
 	/*
 	 * Configures the query columns; removing non populated attribute columns
 	 */
@@ -291,7 +298,7 @@ public class IntelObservationQueryEngine implements IIntelQueryEngine {
 		};
 		
 		String[][] sortColumns = new String[][]{
-			{"str_sort", "varchar(" + Attribute.STRING_ATTRIBUTE_MAX_LENGTH + ")"}, //$NON-NLS-1$ //$NON-NLS-2$
+			{"str_sort", "varchar(" + Attribute.STRING_ATTRIBUTE_MAX_LENGTH + ")"}, //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			{"dbl_sort", "double"}, //$NON-NLS-1$ //$NON-NLS-2$
 			{"date_sort", "date"}		 //$NON-NLS-1$ //$NON-NLS-2$
 		};

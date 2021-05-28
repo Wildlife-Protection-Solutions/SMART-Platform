@@ -127,7 +127,7 @@ public class ShpRecordQueryExporter implements IQueryExporter {
 		}
 		
 		Path pointPath = destination.getParent().resolve(pointFile);
-		Path polygonPath = destination.getParent().resolve(pointFile);
+		Path polygonPath = destination.getParent().resolve(polygonFile);
 		
 		URL shpPointFile = URLUtils.fileToURL(pointPath.toFile());
 		URL shpPolygonFile = URLUtils.fileToURL(polygonPath.toFile());
@@ -164,6 +164,7 @@ public class ShpRecordQueryExporter implements IQueryExporter {
 			
 			fs.addFeatures( DataUtilities.collection(reprojected) );
 			fs.getTransaction().commit();
+			fs.getTransaction().close();
 			
 			shapefile.dispose();
 		}

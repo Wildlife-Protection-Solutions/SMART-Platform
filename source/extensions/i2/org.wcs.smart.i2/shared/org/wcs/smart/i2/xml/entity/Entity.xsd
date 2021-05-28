@@ -68,6 +68,7 @@ elementFormDefault="qualified">
 		</sequence>
 		<attribute name="entityTypeKey" type="string"></attribute>
 		<attribute name="profileKey" type="string"></attribute>
+		<attribute name="uuid" type="string"></attribute>
 	</complexType>
 
 	<complexType name="Relationship">

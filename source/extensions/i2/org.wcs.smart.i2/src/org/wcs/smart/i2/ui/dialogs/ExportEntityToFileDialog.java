@@ -179,7 +179,7 @@ public class ExportEntityToFileDialog extends SmartStyledTitleDialog {
 						}
 						if (format == Format.XML) {
 							EntityToXml hh = new EntityToXml(s);
-							hh.export(outFile, entityUuids, includeRecords, includeRelationships, includeRecordXml, progress.split(1));
+							hh.exportToZip(outFile, entityUuids, includeRecords, includeRelationships, includeRecordXml, progress.split(1));
 						}else if (format == Format.CSV) {
 							
 							EntityRelationshipExporter exporter = new EntityRelationshipExporter();

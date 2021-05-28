@@ -36,7 +36,8 @@ import javax.xml.bind.annotation.XmlType;
  *         &lt;element name="locations" type="{http://www.smartconservationsoftware.org/xml/2.0/org.wcs.smart.i2.entity}Location" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *       &lt;attribute name="entityTypeKey" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="profileKey" type="{http://www.w3.org/2001/XMLSchema}string" />       
+ *       &lt;attribute name="profileKey" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="uuid" type="{http://www.w3.org/2001/XMLSchema}string" />       
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -67,7 +68,8 @@ public class Entity {
     protected String entityTypeKey;
     @XmlAttribute(name = "profileKey")
     protected String profileKey;
-
+    @XmlAttribute(name = "uuid")
+    protected String uuid;
     /**
      * Gets the value of the id property.
      * 
@@ -278,6 +280,30 @@ public class Entity {
      */
     public void setProfileKey(String value) {
         this.profileKey = value;
+    }
+    
+    /**
+     * Gets the value of the uuid property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getUuid() {
+        return uuid;
+    }
+
+    /**
+     * Sets the value of the uuid property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setUuid(String value) {
+        this.uuid = value;
     }
 
 }

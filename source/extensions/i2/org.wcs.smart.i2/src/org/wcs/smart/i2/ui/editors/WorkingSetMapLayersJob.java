@@ -255,19 +255,10 @@ public class WorkingSetMapLayersJob extends Job {
 					
 		//parse date filter
 		LocalDate[] dates = null;
-		String dateFilter = workingset.getEntityDateFilter();
 		try{
-			String[] bits = dateFilter.split(":"); //$NON-NLS-1$
-			DateFilter initFilter = DateFilter.valueOf(bits[0]);
-			if (initFilter == DateFilter.CUSTOM){
-				dates = new LocalDate[] {
-						LocalDate.parse(bits[1], DateTimeFormatter.ISO_LOCAL_DATE),
-						LocalDate.parse(bits[2], DateTimeFormatter.ISO_LOCAL_DATE)};
-			}else{
-				dates = new LocalDate[]{initFilter.getStartDate(), initFilter.getEndDate()};
-			}
+			dates = workingset.parseEntityDateFilter();
 		}catch (Exception ex){
-			Intelligence2PlugIn.log(Messages.WorkingSetMapLayersJob_ParseError + dateFilter + ". " + ex.getMessage(), ex); //$NON-NLS-1$
+			Intelligence2PlugIn.log(Messages.WorkingSetMapLayersJob_ParseError + workingset.getEntityDateFilter() + ". " + ex.getMessage(), ex); //$NON-NLS-1$
 		}
 			
 		List<LayerInfo> toAdd = new ArrayList<LayerInfo>();

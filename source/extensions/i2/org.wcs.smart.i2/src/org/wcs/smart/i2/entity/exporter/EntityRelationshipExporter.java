@@ -119,7 +119,7 @@ public class EntityRelationshipExporter {
 	 * @param monitor
 	 * @return
 	 */
-	private boolean doExport(Collection<UUID> entities, int degrees, Path entityFile, Path relationshipFile, char delimiter, Charset cs, IProgressMonitor monitor) throws Exception {
+	public boolean doExport(Collection<UUID> entities, int degrees, Path entityFile, Path relationshipFile, char delimiter, Charset cs, IProgressMonitor monitor) throws Exception {
 		if (monitor == null) monitor = new NullProgressMonitor();
 		
 		monitor.beginTask(Messages.EntityRelationshipExporter_ProgressMsg, 4);
@@ -138,39 +138,47 @@ public class EntityRelationshipExporter {
 			Set<IntelEntity> toSearch = new HashSet<>();
 			toSearch.addAll(entitiesToExport);
 			
-			
 			monitor.setTaskName(Messages.EntityRelationshipExporter_TaskMsg);
-			while(degree <= degrees && !toSearch.isEmpty()){
-				degree++;
-				if (monitor.isCanceled()) return false;
-				entitiesToExport.addAll(toSearch);
-				//find all relationships whose source or target entity 
-				//is in tosearch
-				
-				String hql = "From IntelEntityRelationship WHERE sourceEntity IN (:toSearch) or targetEntity IN (:toSearch)"; //$NON-NLS-1$
+			if (degrees == 0) {
+				//only include relationships between entities
+				String hql = "From IntelEntityRelationship WHERE sourceEntity IN (:toSearch) and targetEntity IN (:toSearch)"; //$NON-NLS-1$
 				Query<IntelEntityRelationship> q = s.createQuery(hql, IntelEntityRelationship.class);
 				q.setParameterList("toSearch", toSearch); //$NON-NLS-1$
+				relationshipsToExport.addAll(q.list());
 				
-				List<IntelEntityRelationship> relationships = q.list();
-				
-				Set<IntelEntity> search = new HashSet<IntelEntity>();
-				for (IntelEntityRelationship r : relationships){
-					boolean src = toSearch.contains(r.getSourceEntity());
-					boolean trg = toSearch.contains(r.getTargetEntity());
+			} else {
+				while(degree <= degrees && !toSearch.isEmpty()){
+					degree++;
+					if (monitor.isCanceled()) return false;
+					entitiesToExport.addAll(toSearch);
+					//find all relationships whose source or target entity 
+					//is in tosearch
 					
-					relationshipsToExport.add(r);
+					String hql = "From IntelEntityRelationship WHERE sourceEntity IN (:toSearch) or targetEntity IN (:toSearch)"; //$NON-NLS-1$
+					Query<IntelEntityRelationship> q = s.createQuery(hql, IntelEntityRelationship.class);
+					q.setParameterList("toSearch", toSearch); //$NON-NLS-1$
 					
-					if (src && !trg){
-						search.add(r.getTargetEntity());
+					List<IntelEntityRelationship> relationships = q.list();
+					
+					Set<IntelEntity> search = new HashSet<IntelEntity>();
+					for (IntelEntityRelationship r : relationships){
+						boolean src = toSearch.contains(r.getSourceEntity());
+						boolean trg = toSearch.contains(r.getTargetEntity());
+						
+						relationshipsToExport.add(r);
+						
+						if (src && !trg){
+							search.add(r.getTargetEntity());
+						}
+						if (trg && !src){
+							search.add(r.getSourceEntity());
+						}
 					}
-					if (trg && !src){
-						search.add(r.getSourceEntity());
-					}
+					toSearch = search;
+					
 				}
-				toSearch = search;
-				
+				entitiesToExport.addAll(toSearch);
 			}
-			entitiesToExport.addAll(toSearch);
 			
 			if (monitor.isCanceled()) return false;
 			monitor.worked(1);

@@ -21,6 +21,10 @@
  */
 package org.wcs.smart.i2.ui.views;
 
+import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -49,6 +53,9 @@ import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -78,6 +85,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
@@ -86,6 +94,7 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
+import org.locationtech.udig.catalog.URLUtils;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.filter.DateFilterComposite;
 import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
@@ -93,6 +102,7 @@ import org.wcs.smart.common.filter.DateFilterDropDownComposite;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.Intelligence2PlugIn;
+import org.wcs.smart.i2.WorkingSetDataExporter;
 import org.wcs.smart.i2.WorkingSetManager;
 import org.wcs.smart.i2.WorkingSetManager.LayerStatus;
 import org.wcs.smart.i2.event.IntelEvents;
@@ -148,6 +158,7 @@ public class WorkingSetView {
 	private Shell activeShell;
 	
 	private Label lblWorkingSet;
+	private ToolItem exportItem;
 	private ToolItem copyItem;
 	private ToolItem newItem;
 	private ToolItem selectItem;
@@ -196,38 +207,30 @@ public class WorkingSetView {
 		
 		ToolBar tools = new ToolBar(header, SWT.FLAT);
 		
+		exportItem = new ToolItem(tools, SWT.PUSH);
+		exportItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EXPORT_ICON));
+		exportItem.setToolTipText(Messages.WorkingSetView_ExportTooltip);
+		exportItem.addListener(SWT.Selection,e->exportWorkingSet());
+		exportItem.setEnabled(false);
+		
 		if (IntelSecurityManager.INSTANCE.canEditWorkingSet()) {
 			copyItem = new ToolItem(tools, SWT.PUSH);
 			copyItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_WORKINGSET_COPY));
 			copyItem.setToolTipText(Messages.WorkingSetView_copyTooltip);
-			copyItem.addSelectionListener(new SelectionAdapter() {
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					copyWorkingSet();	
-				}
-			});
+			copyItem.addListener(SWT.Selection, e->copyWorkingSet());	
 			copyItem.setEnabled(false);
 			
 			newItem = new ToolItem(tools, SWT.PUSH);
 			newItem.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ADD_ICON));
 			newItem.setToolTipText(Messages.WorkingSetView_createnewTooltip);
-			newItem.addSelectionListener(new SelectionAdapter() {
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					newWorkingSet();	
-				}
-			});
+			newItem.addListener(SWT.Selection, e->newWorkingSet());	
 		}
 		
 		selectItem = new ToolItem(tools, SWT.PUSH);
 		selectItem.setImage(Intelligence2PlugIn.getDefault().getImageRegistry().get(Intelligence2PlugIn.ICON_WORKINGSET_SELECT));
 		selectItem.setToolTipText(Messages.WorkingSetView_selectTooltip);
-		selectItem.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				selectWorkingSet();	
-			}
-		});
+		selectItem.addListener(SWT.Selection, e->selectWorkingSet());	
+
 		
 		DateFilterComposite.DateFilter[] defaultFilters = new DateFilter[]{
 				DateFilter.LAST_30_DAYS,
@@ -654,7 +657,54 @@ public class WorkingSetView {
 			setWorkingSet(newWorkingSet, context);
 		}
 	}
-
+	
+	private void exportWorkingSet(){
+		UUID setUuid = WorkingSetManager.INSTANCE.getActiveWorkingSet();
+	
+		IntelWorkingSet set = null;
+		try(Session session = HibernateManager.openSession()){
+			set = session.get(IntelWorkingSet.class, setUuid);
+		}
+		if (set == null) return;
+		
+		
+		FileDialog fd = new FileDialog(activeShell, SWT.SAVE);
+		fd.setFilterExtensions(new String[] {"*.zip", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
+		fd.setFilterNames(new String[] {Messages.WorkingSetView_ZipFiles, Messages.WorkingSetView_AllFiles});
+		fd.setText(Messages.WorkingSetView_ExportFileTitle);
+		fd.setFileName(URLUtils.cleanFilename(set.getName()) + ".zip"); //$NON-NLS-1$
+		String fname = fd.open();
+		if (fname == null) return;
+		
+		if (!fname.endsWith(".zip")) fname = fname + ".zip"; //$NON-NLS-1$ //$NON-NLS-2$
+		
+		Path output = Paths.get(fname);
+		if (Files.exists(output)) {
+			if (!MessageDialog.openQuestion(activeShell, Messages.WorkingSetView_FileExistsTitle, MessageFormat.format(Messages.WorkingSetView_FileExistsMsg, output.toString()))) {
+				return;
+			}
+		}
+		
+		final IntelWorkingSet fset = set;
+		ProgressMonitorDialog dialog = new ProgressMonitorDialog(activeShell);
+		try {
+			dialog.run(true, true,  new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					try {
+						WorkingSetDataExporter.INSTANCE.export(fset, output, monitor);
+					}catch (Exception ex) {
+						throw new InvocationTargetException(ex);
+					}
+				}
+			});
+		}catch (Exception ex) {
+			Intelligence2PlugIn.displayLog(ex.getCause() != null ? ex.getCause().getMessage() : ex.getMessage(),  ex);
+			return;
+		}
+		MessageDialog.openInformation(activeShell, Messages.WorkingSetView_CompleteTitle, MessageFormat.format(Messages.WorkingSetView_CompleteMsg, output.toString()));
+	}
+	
 	private void copyWorkingSet(){
 		IntelWorkingSet set = null;
 		try(Session s = HibernateManager.openSession()){
@@ -734,7 +784,6 @@ public class WorkingSetView {
 	@Optional
 	private void workingSetSet(@UIEventTopic(IntelEvents.ACTIVE_WS_SET) IntelWorkingSet activeWorkingSet){
 		setWorkingSet(activeWorkingSet);
-		if (copyItem != null) copyItem.setEnabled(activeWorkingSet != null);
 	}
 	
 	@Inject
@@ -820,6 +869,9 @@ public class WorkingSetView {
 	}
 	
 	private void setWorkingSet(IntelWorkingSet set){	
+		if (copyItem != null) copyItem.setEnabled(set != null);
+		if (exportItem != null) exportItem.setEnabled(set != null);
+		
 		loadWorkingSetJob.setWorkingSetUuid(set == null ? null : set.getUuid());
 		loadWorkingSetJob.schedule();
 	}
@@ -964,18 +1016,11 @@ public class WorkingSetView {
 				
 				DateFilter initFilter = DateFilter.LAST_YEAR;
 				LocalDate[] dates = new LocalDate[]{initFilter.getStartDate(), initFilter.getEndDate()};
-				if (ws != null){
-					String dateFilter = ws.getEntityDateFilter();
+				if (ws != null){					
 					try{
-						String[] bits = dateFilter.split(":"); //$NON-NLS-1$
-						initFilter = DateFilter.valueOf(bits[0]);
-						if (initFilter == DateFilter.CUSTOM){
-							dates = new LocalDate[] {
-									LocalDate.parse(bits[1], DateTimeFormatter.BASIC_ISO_DATE),
-									LocalDate.parse(bits[2], DateTimeFormatter.BASIC_ISO_DATE)};
-						}
+						dates = ws.parseEntityDateFilter();
 					}catch (Exception ex){
-						Intelligence2PlugIn.log("Unable to parse entity date filter for working set : " + dateFilter + ". " + ex.getMessage(), ex); //$NON-NLS-1$ //$NON-NLS-2$
+						Intelligence2PlugIn.log("Unable to parse entity date filter for working set : " + ws.getEntityDateFilter() + ". " + ex.getMessage(), ex); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 					
 				}

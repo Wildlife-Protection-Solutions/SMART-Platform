@@ -23,7 +23,6 @@ package org.wcs.smart.i2.query.engine;
 
 import java.text.MessageFormat;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.hibernate.Session;
@@ -64,11 +63,11 @@ public class SqlGenerator {
 	
 	public static String generateDateClause(LocalDate[] filter, String fieldName){
 		if (filter[0] == null && filter[1] != null){
-			return " ( cast(" + fieldName + " as date) <= '" + filter[1].atTime(LocalTime.MAX).toString()+ "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			return " ( cast(" + fieldName + " as date) <= '" + filter[1].toString()+ "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}else if (filter[0] != null && filter[1] == null){
-			return " ( cast(" + fieldName + " as date) >= '" + filter[0].atStartOfDay().toString()+ "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			return " ( cast(" + fieldName + " as date) >= '" + filter[0].toString()+ "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}else if (filter[0] != null && filter[1] != null){
-			return " ( cast(" + fieldName + " as date) >= '" + filter[0].atStartOfDay().toString() + "'  AND cast(" + fieldName + " as date) <= '" + filter[0].atTime(LocalTime.MAX).toString()  + "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+			return " ( cast(" + fieldName + " as date) >= '" + filter[0].toString() + "'  AND cast(" + fieldName + " as date) <= '" + filter[0].toString()  + "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		}
 		return null;
 	}
@@ -144,6 +143,6 @@ public class SqlGenerator {
 	
 	
 	public static void logString(String string){
-		System.out.println(string);
+//		System.out.println(string);
 	}
 }

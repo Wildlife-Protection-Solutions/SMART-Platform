@@ -1792,6 +1792,8 @@ public class Messages extends NLS {
 	public static String WKTGeometryDialog_Message;
 	public static String WKTGeometryDialog_ShellTitle;
 	public static String WKTGeometryDialog_Title;
+	public static String WorkingSetDataExporter_ExportTask;
+	public static String WorkingSetDataExporter_queriesTask;
 	public static String WorkingSetListDialog_addTooltip;
 	public static String WorkingSetListDialog_CopyLabel;
 	public static String WorkingSetListDialog_copytooltip;
@@ -1822,12 +1824,19 @@ public class Messages extends NLS {
 	public static String WorkingSetMapLayersJob_ParseError;
 	public static String WorkingSetMapLayersJob_QueryNotFound;
 	public static String WorkingSetQueryLayersJob_QueryRunError;
+	public static String WorkingSetView_AllFiles;
 	public static String WorkingSetView_CannotAddItemNotMappable;
+	public static String WorkingSetView_CompleteMsg;
+	public static String WorkingSetView_CompleteTitle;
 	public static String WorkingSetView_copyTooltip;
 	public static String WorkingSetView_createnewTooltip;
 	public static String WorkingSetView_DefaultName;
 	public static String WorkingSetView_DefaultWsName;
 	public static String WorkingSetView_DeleteError;
+	public static String WorkingSetView_ExportFileTitle;
+	public static String WorkingSetView_ExportTooltip;
+	public static String WorkingSetView_FileExistsMsg;
+	public static String WorkingSetView_FileExistsTitle;
 	public static String WorkingSetView_InvalidName;
 	public static String WorkingSetView_loadingJobName;
 	public static String WorkingSetView_NewDialogMsg;
@@ -1839,6 +1848,7 @@ public class Messages extends NLS {
 	public static String WorkingSetView_SaveDateError;
 	public static String WorkingSetView_SaveVisibilityError;
 	public static String WorkingSetView_selectTooltip;
+	public static String WorkingSetView_ZipFiles;
 	public static String WptTypeSelectionDialog_selectAll;
 	public static String WptTypeSelectionDialog_selectNone;
 	public static String WptTypeSelectionDialog_Title;

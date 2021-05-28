@@ -97,24 +97,44 @@ public class EntityToXml {
 		this.session = session;
 	}
 	
-	public void export(Path outputFile, List<UUID> entities, boolean includeRecordLinks, boolean includeRelationships, boolean includeRecordXml, IProgressMonitor monitor) throws Exception{
+	public void exportToZip(Path zipFile, List<UUID> entities, boolean includeRecordLinks, boolean includeRelationships, boolean includeRecordXml, IProgressMonitor monitor) throws Exception{
 		SubMonitor progress = SubMonitor.convert(monitor, Messages.EntityToXml_TaskName, 4);
 		toXml(entities, includeRecordLinks, includeRelationships, progress.split(3));
 		if (data  != null) {
-			writeData(outputFile, includeRecordXml, progress.split(1));
+			writeData(zipFile, null, includeRecordXml, progress.split(1));
 		}else {
 			throw new IOException(Messages.IntelDataToXml_ConvservationFailedMsg);
 		}
 		
 	}
 	
-	private void writeData(Path outputFile, boolean includeRecordXml,  IProgressMonitor monitor) throws Exception {
+	public void exportToDirectory(Path dir, List<UUID> entities, boolean includeRecordLinks, boolean includeRelationships, boolean includeRecordXml, IProgressMonitor monitor) throws Exception{
+		SubMonitor progress = SubMonitor.convert(monitor, Messages.EntityToXml_TaskName, 4);
+		toXml(entities, includeRecordLinks, includeRelationships, progress.split(3));
+		if (data  != null) {
+			writeData(null, dir, includeRecordXml, progress.split(1));
+		}else {
+			throw new IOException(Messages.IntelDataToXml_ConvservationFailedMsg);
+		}
+		
+	}
+	
+	private void writeData(Path outputFile, Path dir,
+			boolean includeRecordXml,  IProgressMonitor monitor) throws Exception {
 		SubMonitor progress = SubMonitor.convert(monitor, includeRecordXml ? 3 : 6);
 		
 		monitor.subTask(Messages.EntityToXml_ZipSubTask);
 		progress.split(1);
 		
-		Path tempDir = Files.createTempDirectory("smart." + System.nanoTime()); //$NON-NLS-1$
+		Path tempDir = null;
+		if (outputFile != null) {
+			tempDir = Files.createTempDirectory("smart." + System.nanoTime()); //$NON-NLS-1$
+		}else if (dir != null) {
+			tempDir = dir;
+		}else {
+			throw new IllegalStateException();
+		}
+		
 		try {
 			//write xml data
 			Path xmlFile = tempDir.resolve(XML_DATA_FILENAME);
@@ -161,17 +181,18 @@ public class EntityToXml {
 
 			//zip together
 			progress.subTask(Messages.EntityToXml_compresssubtask);
-			List<Path> files = Files.list(tempDir).collect(Collectors.toList());
-			ZipUtil.createZip(files, outputFile, progress.split(1));
+			if (outputFile != null) {
+				List<Path> files = Files.list(tempDir).collect(Collectors.toList());
+				ZipUtil.createZip(files, outputFile, progress.split(1));
+			}
 		}finally {
 			//clean up
 			try {
-				SmartUtils.deleteDirectory(tempDir);
+				if (outputFile != null) SmartUtils.deleteDirectory(tempDir);
 			}catch (Exception ex) {
 				Intelligence2PlugIn.log(ex.getMessage(), ex);
 			}
 		}
-		
 	}
 	
 	private void toXml(List<UUID> entities, boolean includeRecordLinks, boolean includeRelationships, IProgressMonitor monitor) {
@@ -248,6 +269,7 @@ public class EntityToXml {
 			xmlEntity.setScratchpad(entity.getComment());
 			xmlEntity.setId(entity.getIdAttributeAsText());
 			xmlEntity.setProfileKey(entity.getProfile().getKeyId());
+			xmlEntity.setUuid(UuidUtils.uuidToString(entity.getUuid()));
 			if (entity.getEntityAttachments() != null) {
 				for (IntelEntityAttachment attach : entity.getEntityAttachments()) {
 					Attachment xmlAttachment = new Attachment();
