@@ -22,7 +22,7 @@
 package org.wcs.smart.i2;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
@@ -44,7 +44,6 @@ import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.entity.exporter.EntityRelationshipExporter;
 import org.wcs.smart.i2.internal.Messages;
 import org.wcs.smart.i2.model.AbstractIntelQuery;
@@ -75,8 +74,10 @@ public enum WorkingSetDataExporter {
 	private static final String XML_FOLDER = "xml"; //$NON-NLS-1$
 	
 
-	public void export(IntelWorkingSet ws, Path exportFile, IProgressMonitor monitor) throws Exception {
-		
+	public void export(IntelWorkingSet ws, Path exportFile, char delimiter, Charset charset, Projection prj, IProgressMonitor monitor) throws Exception {
+		if (exportFile.getParent() == null || !Files.isDirectory(exportFile.getParent())) throw new IllegalStateException("invalid output file"); //$NON-NLS-1$
+
+		Files.createDirectories(exportFile.getParent());
 		Path tempDir = Files.createTempDirectory("smartwsexport"); //$NON-NLS-1$	
 		try {
 			SubMonitor sub = SubMonitor.convert(monitor);
@@ -101,14 +102,14 @@ public enum WorkingSetDataExporter {
 			try(Session session = HibernateManager.openSession()){
 				ws = session.get(IntelWorkingSet.class, ws.getUuid());
 				
-				exportEntitiesCsv(ws, entitiescsv, sub.split(1));
+				exportEntitiesCsv(ws, entitiescsv, delimiter, charset, sub.split(1));
 				exportEntitiesXml(ws, entitiesxml, session, sub.split(1));
 				
 				Path rfile = recordscsv.resolve("records.csv"); //$NON-NLS-1$
-				exportRecordsCsv(ws, rfile, session, sub.split(1));
+				exportRecordsCsv(ws, rfile, session, delimiter, charset, sub.split(1));
 				exportRecordsXml(ws, recordsxml, session, sub.split(1));
 				
-				exportQueries(ws, queries, session, sub.split(1));
+				exportQueries(ws, queries, session, delimiter, charset, prj, sub.split(1));
 			}
 			
 			//zip everything up
@@ -122,7 +123,7 @@ public enum WorkingSetDataExporter {
 		}
 	}
 	
-	private void exportQueries(IntelWorkingSet ws, Path exportDir, Session session, IProgressMonitor monitor) throws Exception {
+	private void exportQueries(IntelWorkingSet ws, Path exportDir, Session session, char delimiter, Charset charset, Projection prj, IProgressMonitor monitor) throws Exception {
 		
 		SubMonitor toDo = SubMonitor.convert(monitor);
 		toDo.beginTask(Messages.WorkingSetDataExporter_queriesTask, ws.getQueries().size());
@@ -160,15 +161,11 @@ public enum WorkingSetDataExporter {
 			exports.add(new ShpRecordQueryExporter());
 			exports.add(new CsvEntitySummaryQueryExporter());
 			
-			Projection prj = new Projection();
-			prj.setParsedCoordinateReferenceSystem(SmartDB.DATABASE_CRS);
-			
 			HashMap<ExportOption, Object> exportOptions = new HashMap<>();
-			exportOptions.put(ExportOption.DELIMITER, ',');
-			exportOptions.put(ExportOption.ENCODING, StandardCharsets.UTF_8);
+			exportOptions.put(ExportOption.DELIMITER, delimiter);
+			exportOptions.put(ExportOption.ENCODING, charset);
 			exportOptions.put(ExportOption.LOCALE, Locale.getDefault());
 			exportOptions.put(ExportOption.PROJECTION, prj);
-			
 			
 			for (IQueryExporter exporter : exports) {
 				if (exporter.canExport(query.getTypeKey())) {
@@ -177,9 +174,9 @@ public enum WorkingSetDataExporter {
 				}
 			}
 		}
-		
 	}
-	private void exportEntitiesCsv(IntelWorkingSet ws, Path exportDir, IProgressMonitor monitor) throws Exception {
+	
+	private void exportEntitiesCsv(IntelWorkingSet ws, Path exportDir, char delimiter, Charset cs, IProgressMonitor monitor) throws Exception {
 		Set<UUID> toexport = new HashSet<>();
 		for (IntelWorkingSetEntity entity : ws.getEntities()) {
 			if (IntelSecurityManager.INSTANCE.canViewEntities(entity.getEntity().getProfile())) {
@@ -191,7 +188,7 @@ public enum WorkingSetDataExporter {
 		EntityRelationshipExporter erexporter = new EntityRelationshipExporter();
 		Path entityFile = exportDir.resolve("entities.csv"); //$NON-NLS-1$
 		Path relationshipFile = exportDir.resolve("relationships.csv"); //$NON-NLS-1$
-		erexporter.doExport(toexport, 0, entityFile, relationshipFile, ',', StandardCharsets.UTF_8, monitor);
+		erexporter.doExport(toexport, 0, entityFile, relationshipFile, delimiter, cs, monitor);
 	}
 	
 	private void exportEntitiesXml(IntelWorkingSet ws, Path exportDir, Session session, IProgressMonitor monitor) throws Exception {
@@ -208,7 +205,7 @@ public enum WorkingSetDataExporter {
 	}
 	
 	
-	private void exportRecordsCsv(IntelWorkingSet ws, Path exportFile, Session session, IProgressMonitor monitor) throws Exception {
+	private void exportRecordsCsv(IntelWorkingSet ws, Path exportFile, Session session, char delimiter, Charset cs, IProgressMonitor monitor) throws Exception {
 		Set<UUID> toexport = new HashSet<>();
 		for (IntelWorkingSetRecord record : ws.getRecords()) {
 			if (IntelSecurityManager.INSTANCE.canViewRecords(record.getRecord().getProfile())) {
@@ -218,12 +215,10 @@ public enum WorkingSetDataExporter {
 		if (toexport.isEmpty()) return;
 		
 		RecordCsvExporter exporter = new RecordCsvExporter(new ArrayList<>(toexport));
-		exporter.exportCsvFile(exportFile, ',', ws.getConservationArea(), true, StandardCharsets.UTF_8, monitor, session);
-		
+		exporter.exportCsvFile(exportFile, delimiter, ws.getConservationArea(), true, cs, monitor, session);
 	}
 	
-	private void exportRecordsXml(IntelWorkingSet ws, Path exportDir, Session session, IProgressMonitor monitor) throws Exception {
-		
+	private void exportRecordsXml(IntelWorkingSet ws, Path exportDir, Session session, IProgressMonitor monitor) throws Exception {	
 		RecordXmlExporter exporter = new RecordXmlExporter(exportDir);
 		for (IntelWorkingSetRecord wsr : ws.getRecords()) {
 			if (IntelSecurityManager.INSTANCE.canViewRecords(wsr.getRecord().getProfile())) {

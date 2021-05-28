@@ -22,6 +22,7 @@
 package org.wcs.smart.i2.ui.views;
 
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -85,7 +86,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
@@ -94,8 +94,8 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
-import org.locationtech.udig.catalog.URLUtils;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.filter.DateFilterComposite;
 import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.common.filter.DateFilterDropDownComposite;
@@ -122,6 +122,7 @@ import org.wcs.smart.i2.query.QueryManager;
 import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.Resources;
 import org.wcs.smart.i2.ui.TransparentInfoDialog;
+import org.wcs.smart.i2.ui.WorkingSetExportDialog;
 import org.wcs.smart.i2.ui.WorkingSetLabelProvider;
 import org.wcs.smart.i2.ui.dialogs.WorkingSetListDialog;
 import org.wcs.smart.i2.ui.editors.record.RecordEditorInput;
@@ -130,6 +131,7 @@ import org.wcs.smart.i2.ui.handler.OpenQueryHandler;
 import org.wcs.smart.i2.ui.handler.OpenRecordHandler;
 import org.wcs.smart.ui.SmartStyledInputDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -667,24 +669,26 @@ public class WorkingSetView {
 		}
 		if (set == null) return;
 		
+		WorkingSetExportDialog wdialog = new WorkingSetExportDialog(activeShell, set);
+		if (wdialog.open() != Window.OK) return;
 		
-		FileDialog fd = new FileDialog(activeShell, SWT.SAVE);
-		fd.setFilterExtensions(new String[] {"*.zip", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
-		fd.setFilterNames(new String[] {Messages.WorkingSetView_ZipFiles, Messages.WorkingSetView_AllFiles});
-		fd.setText(Messages.WorkingSetView_ExportFileTitle);
-		fd.setFileName(URLUtils.cleanFilename(set.getName()) + ".zip"); //$NON-NLS-1$
-		String fname = fd.open();
-		if (fname == null) return;
 		
-		if (!fname.endsWith(".zip")) fname = fname + ".zip"; //$NON-NLS-1$ //$NON-NLS-2$
-		
-		Path output = Paths.get(fname);
+		Path output = Paths.get(wdialog.getFilename());
 		if (Files.exists(output)) {
 			if (!MessageDialog.openQuestion(activeShell, Messages.WorkingSetView_FileExistsTitle, MessageFormat.format(Messages.WorkingSetView_FileExistsMsg, output.toString()))) {
 				return;
 			}
 		}
 		
+		char delimiter = wdialog.getDelimiter();
+		Charset charset = wdialog.getCharset();
+		Projection prj = wdialog.getProjection();
+		try {
+			prj.setParsedCoordinateReferenceSystem(ReprojectUtils.stringToCrs(prj.getDefinition()));
+		}catch (Exception ex) {
+			Intelligence2PlugIn.displayLog(ex.getMessage(), ex);
+			return;
+		}
 		final IntelWorkingSet fset = set;
 		ProgressMonitorDialog dialog = new ProgressMonitorDialog(activeShell);
 		try {
@@ -692,7 +696,7 @@ public class WorkingSetView {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					try {
-						WorkingSetDataExporter.INSTANCE.export(fset, output, monitor);
+						WorkingSetDataExporter.INSTANCE.export(fset, output, delimiter, charset, prj, monitor);
 					}catch (Exception ex) {
 						throw new InvocationTargetException(ex);
 					}
