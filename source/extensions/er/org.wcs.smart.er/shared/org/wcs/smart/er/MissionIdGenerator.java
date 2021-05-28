@@ -34,7 +34,6 @@ import javax.persistence.criteria.Root;
 
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
-import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.er.model.IErLabelProvider;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.Survey;

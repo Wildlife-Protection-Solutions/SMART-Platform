@@ -154,7 +154,7 @@ public class SmartCollectDataProcessor implements IJsonProcessor {
 		if (!notok.isEmpty()) {
 			final StringBuilder sb = new StringBuilder();
 			for (SmartCollectUser u : notok) {
-				sb.append(u.getSource() + " (" + u.getDeviceId() + ") [" + u.getState() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
+				sb.append(u.getSource() + " (" + u.getDeviceId() + ") [" + u.getState() + "]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				sb.append(", "); //$NON-NLS-1$
 			}
 			sb.delete(sb.length() - 2, sb.length());
@@ -235,7 +235,7 @@ public class SmartCollectDataProcessor implements IJsonProcessor {
 				}
 				String deviceId = ((String)properties.get(JsonCtParser.DEVICE_ID));
 				if (deviceId == null) {
-					warnings.add("No device id specified for SMARTCollect feature.  Feature will not be loaded:" + feature.toString());
+					warnings.add(MessageFormat.format(Messages.SmartCollectDataProcessor_MissingDeviceId, feature.toString()));
 					continue;
 				}
 

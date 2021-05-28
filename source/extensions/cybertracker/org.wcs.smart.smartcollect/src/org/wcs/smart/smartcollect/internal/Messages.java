@@ -65,6 +65,7 @@ public class Messages extends NLS {
 	public static String SmartCollectDataProcessor_EventError;
 	public static String SmartCollectDataProcessor_FeaturesDiscared;
 	public static String SmartCollectDataProcessor_Message;
+	public static String SmartCollectDataProcessor_MissingDeviceId;
 	public static String SmartCollectDataProcessor_NoUserForFeature;
 	public static String SmartCollectDataProcessor_ParseError;
 	public static String SmartCollectDataProcessor_Title;
