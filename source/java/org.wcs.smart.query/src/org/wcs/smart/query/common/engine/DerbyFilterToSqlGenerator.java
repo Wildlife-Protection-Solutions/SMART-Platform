@@ -29,7 +29,6 @@ import java.util.UUID;
 
 import org.locationtech.jts.io.WKBReader;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.filter.AttributeFilter;
@@ -43,7 +42,6 @@ import org.wcs.smart.filter.Operator;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
-import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.query.common.engine.AbstractQueryEngine.FilterTable;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.filter.AreaFilter;

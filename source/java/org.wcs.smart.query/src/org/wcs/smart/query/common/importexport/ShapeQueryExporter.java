@@ -161,9 +161,9 @@ public abstract class ShapeQueryExporter extends SimpleQueryExporter implements 
 		FeatureStore<SimpleFeatureType, SimpleFeature> fs = 
 				(FeatureStore<SimpleFeatureType, SimpleFeature>) shapefile.getFeatureSource(shapefile.getTypeNames()[0]);
 		fs.setTransaction(new DefaultTransaction());
-		
 		fs.addFeatures( DataUtilities.collection(reprojected) );
 		fs.getTransaction().commit();
+		fs.getTransaction().close();
 		
 		shapefile.dispose();
 		
