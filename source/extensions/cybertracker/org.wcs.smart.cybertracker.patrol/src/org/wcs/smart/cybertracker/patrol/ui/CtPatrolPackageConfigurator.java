@@ -22,6 +22,7 @@
 package org.wcs.smart.cybertracker.patrol.ui;
 
 import java.nio.file.Path;
+import java.text.Collator;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -500,7 +501,9 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 				
 				PatrolCtPackage init = null;
 				try(Session session = HibernateManager.openSession()){
-					modelList.addAll(DataentryHibernateManager.getConfigurableModels(session));
+					List<ConfigurableModel> models = DataentryHibernateManager.getConfigurableModels(session);
+					models.sort((a,b)->Collator.getInstance().compare(a.getName().toLowerCase(),  b.getName().toLowerCase()));
+					modelList.addAll(models);
 					modelList.add(dm);
 					
 					profiles.addAll(CyberTrackerHibernateManager.getPropertiesProfiles(session));
@@ -551,6 +554,7 @@ public class CtPatrolPackageConfigurator implements ICtPackageConfigurator {
 				PatrolCtPackage finit = init;
 				List<TransportTypeTrackTimerSetting> fttsettings = ttsettings;
 
+				profiles.sort((a,b)->Collator.getInstance().compare(a.getName().toLowerCase(), b.getName().toLowerCase()));
 				Display.getDefault().syncExec(()->{
 					try {
 						isInit = true;

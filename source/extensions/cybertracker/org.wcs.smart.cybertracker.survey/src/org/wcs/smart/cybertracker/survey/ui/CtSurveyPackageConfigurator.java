@@ -22,6 +22,7 @@
 package org.wcs.smart.cybertracker.survey.ui;
 
 import java.nio.file.Path;
+import java.text.Collator;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -387,6 +388,9 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 						}
 					}
 				}
+				designs.sort((a,b)->Collator.getInstance().compare(a.getName().toLowerCase(), b.getName().toLowerCase()));
+				profiles.sort((a,b)->Collator.getInstance().compare(a.getName().toLowerCase(), b.getName().toLowerCase()));
+
 				if (init.getSurveyDesign() != null) {
 					context.set(ConfigurableModel.class, init.getConfigurableModel());
 				}

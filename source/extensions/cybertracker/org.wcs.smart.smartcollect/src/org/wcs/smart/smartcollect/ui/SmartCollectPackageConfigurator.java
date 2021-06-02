@@ -23,6 +23,7 @@ package org.wcs.smart.smartcollect.ui;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.text.Collator;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -533,7 +534,9 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 				
 				SmartCollectPackage init = null;
 				try(Session session = HibernateManager.openSession()){
-					modelList.addAll(DataentryHibernateManager.getConfigurableModels(session));
+					List<ConfigurableModel> models = DataentryHibernateManager.getConfigurableModels(session);
+					models.sort((a,b)->Collator.getInstance().compare(a.getName().toLowerCase(),  b.getName().toLowerCase()));
+					modelList.addAll(models);
 					modelList.add(dm);
 					
 					profiles.addAll(CyberTrackerHibernateManager.getPropertiesProfiles(session));
@@ -556,8 +559,8 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 					if (init.getMetadataValues() != null) init.getMetadataValues().size();
 				}
 				
-				
-				
+				profiles.sort((a,b)->Collator.getInstance().compare(a.getName().toLowerCase(), b.getName().toLowerCase()));
+
 				if (init.isDataModel()) {
 					context.set(ConfigurableModel.class, new ConfigurableModel());
 				}else {
