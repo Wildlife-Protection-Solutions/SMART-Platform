@@ -194,6 +194,7 @@ public class ConfigurableModelTreeContentProvider implements ITreeContentProvide
 				}
 				min = min - 1;
 			}
+			if (min<=0) min = 0;
 			parent.getCmAttributes().removeAll(attributes);
 			parent.getCmAttributes().addAll(min, attributes);
 			
@@ -212,7 +213,7 @@ public class ConfigurableModelTreeContentProvider implements ITreeContentProvide
 				}
 			}
 			parent.getCmAttributes().removeAll(tomove);
-			parent.getCmAttributes().addAll(lastindex+1, tomove);
+			parent.getCmAttributes().addAll(lastindex, tomove);
 		}
 
 		for (CmAttribute x : attributes) {

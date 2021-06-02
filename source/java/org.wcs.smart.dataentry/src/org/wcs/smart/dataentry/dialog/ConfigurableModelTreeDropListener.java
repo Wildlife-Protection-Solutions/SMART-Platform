@@ -75,6 +75,29 @@ public class ConfigurableModelTreeDropListener extends ViewerDropAdapter {
 			return true;
 		} else if (obj instanceof CmAttribute && getCurrentTarget() instanceof CmAttribute) {
 			moveAttributePosition((CmAttribute)obj, (CmAttribute)getCurrentTarget(), getCurrentLocation() == LOCATION_BEFORE);
+		} else if (obj instanceof CmAttribute && getCurrentTarget() instanceof MatrixNode) {
+			//MatrixNode target = (MatrixNode)getCurrentTarget();
+			CmAttribute source = (CmAttribute)obj;
+			
+			boolean isBefore = getCurrentLocation() == LOCATION_BEFORE;
+			if (!isBefore) return false;
+			
+			List<CmAttribute> attrList = source.getNode().getCmAttributes();
+			attrList.remove(source);
+			int index = 0;
+			for (int i = 0; i < attrList.size(); i ++) {
+				if (attrList.get(i).isGrouped()) {
+					index = i;
+					break;
+				}
+			}
+			attrList.add(index, source);
+			
+			for (int i = 0; i < attrList.size(); i ++){
+				attrList.get(i).setOrder(i);
+			}
+
+			viewer.refresh();
 			return true;
 		} else if (obj instanceof MatrixNode && getCurrentTarget() instanceof CmAttribute) {
 			
@@ -234,6 +257,8 @@ public class ConfigurableModelTreeDropListener extends ViewerDropAdapter {
 					if (!provider.canAddToGroup(sourceAttr)) return false;
 				}
 				return sourceAttr.getNode().equals(targetAttr.getNode());
+			}else if (target instanceof MatrixNode) {
+				return true;
 			}
 			return false;
 		} else if (obj instanceof MatrixNode) {
