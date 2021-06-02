@@ -41,6 +41,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 import javax.xml.bind.DatatypeConverter;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -697,23 +699,36 @@ public class JsonCtParser {
 	private WaypointAttachment parseAttachment(AttachmentInfo info) throws Exception{
 		if (info.getType() == AttachmentInfo.AttachmentType.PHOTO
 				|| info.getType() == AttachmentInfo.AttachmentType.SIGNATURE) {
+			
 			// picture object; create a temporary file add it to waypoint observation
-			String fileName = PHOTO_KEY + "_" + info.getImageCount() + "." + JPEG_EXT; //$NON-NLS-1$//$NON-NLS-2$
-
-			Path temp = Files.createTempFile("SMART_" + System.nanoTime(), "." + JPEG_EXT); //$NON-NLS-1$//$NON-NLS-2$
 			BufferedImage image = null;
-			try (InputStream in = new ByteArrayInputStream(DatatypeConverter.parseBase64Binary(info.getData()))) {
+			
+			//determine file extension; assume jpeg by default
+			String ext = JPEG_EXT;
+			byte[] data = DatatypeConverter.parseBase64Binary(info.getData());
+			try(ImageInputStream iis = ImageIO.createImageInputStream(data)){
+				Iterator<ImageReader> iter = ImageIO.getImageReaders(iis);
+				if (iter.hasNext()) {
+					ImageReader ir = iter.next();
+					ext = ir.getFormatName();
+				}
+			}
+							
+			try (InputStream in = new ByteArrayInputStream(data)) {
 				image = ImageIO.read(in);
 			}
+			
+			String fileName = PHOTO_KEY + "_" + info.getImageCount() + "." + ext; //$NON-NLS-1$//$NON-NLS-2$
+			Path temp = Files.createTempFile("SMART_" + System.nanoTime(), "." + ext); //$NON-NLS-1$//$NON-NLS-2$
+				
 			if (image == null) {
 				warnings.add(MessageFormat.format(Messages.JsonCtParser_CouldNotImportPhoto, info));
 				return null;
 			} else {
-				ImageIO.write(image, JPEG_EXT.toUpperCase(Locale.ROOT), temp.toAbsolutePath().toFile());
+				ImageIO.write(image, ext.toUpperCase(Locale.ROOT), temp.toAbsolutePath().toFile());
 				WaypointAttachment attachment = new WaypointAttachment();
 				attachment.setCopyFromLocation(temp);
 				attachment.setFilename(fileName);
-
 				if (info.getType() == AttachmentInfo.AttachmentType.SIGNATURE) {
 					attachment.setSignatureType(info.getSignatureType());
 				}
