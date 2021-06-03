@@ -411,7 +411,7 @@ public class HibernateManager extends SmartHibernateManager{
 		return validatePassword(password, e.getSmartPassword());
 	}
 	
-	private static boolean validatePassword(String password, String employeePassword){
+	public static boolean validatePassword(String password, String employeePassword){
 		if (employeePassword == null) return false;
 		return BCrypt.checkpw(password, employeePassword);
 	}
@@ -432,7 +432,7 @@ public class HibernateManager extends SmartHibernateManager{
 	 * @return the Employee associated with the username and password; null if nobody found
 	 * @throws Exception
 	 */
-	public static Employee validateUser(String userName, String password, ConservationArea ca) throws Exception{
+	public static Employee validateUser(String userName, String password, ConservationArea ca) {
 		
 		try(Session s = HibernateManager.openSession()){
 			
