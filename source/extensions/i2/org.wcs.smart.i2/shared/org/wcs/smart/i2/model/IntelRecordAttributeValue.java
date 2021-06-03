@@ -172,7 +172,9 @@ public class IntelRecordAttributeValue extends UuidItem{
 					return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(Boolean.FALSE, l);
 				}
 			case DATE:
-				return DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(getDateValue());
+				LocalDate dvalue = getDateValue();
+				if (dvalue == null) return "";
+				return DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(dvalue);
 			case LIST:
 			case EMPLOYEE:
 				return String.valueOf(listItems.size());

@@ -817,8 +817,7 @@ public class RecordSourceDialog extends SmartStyledTitleDialog{
 			
 			session.beginTransaction();
 			try{
-				session.saveOrUpdate(currentSelection);
-				session.flush();
+				
 				
 				//delete all attribute values for attributes removed from given source
 				for (IntelRecordSourceAttribute a : attributesToDelete){
@@ -839,6 +838,8 @@ public class RecordSourceDialog extends SmartStyledTitleDialog{
 				//	session.delete(a);
 				//	currentSelection.getAttributes().remove(a);
 				}
+				session.flush();
+				session.saveOrUpdate(currentSelection);
 				session.flush();
 				
 				//delete all attributes values for attributes that changes from multi to single

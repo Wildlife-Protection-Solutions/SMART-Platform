@@ -451,6 +451,7 @@
                </visibleWhen>
             </command>
             <menu
+                  id="org.wcs.smart.i2.menu.main.importexport"
                   label="%menu.importexportdata.label">
                <command
                      commandId="org.wcs.smart.i2.entity.import"
@@ -498,6 +499,7 @@
                <command
                      commandId="org.wcs.smart.i2.command.record.import.xml"
                      icon="platform:/plugin/org.wcs.smart/images/icons/shared16/export.png"
+                     id="org.wcs.smart.i2.command.record.import.xml"
                      label="%ImportRecordsXmlLabel"
                      style="push">
                   <visibleWhen
