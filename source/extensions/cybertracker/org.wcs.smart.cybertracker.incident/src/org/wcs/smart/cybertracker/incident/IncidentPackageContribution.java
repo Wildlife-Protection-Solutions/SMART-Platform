@@ -29,6 +29,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.List;
 import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -144,6 +145,11 @@ public class IncidentPackageContribution implements IPackageContribution{
 			convert.convert(cm, monitor);
 			org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xmlModel = convert.getXmlModel();
 			
+			//create and add help files
+			//do this before writing xml as it modifies xml
+			List<Path> filestoadd = CtJsonExportUtils.addHelpFiles(s.get(ConfigurableModel.class,cm.getUuid()), xmlModel, tempDir);
+			filestoadd.forEach(e->updates.addFile(e));
+			
 			//write xml
 			try(OutputStream out = Files.newOutputStream(incidentFile)){
 				CmXmlManager.writeDataModel(xmlModel, out);
@@ -151,11 +157,6 @@ public class IncidentPackageContribution implements IPackageContribution{
 				throw new IOException(ex);
 			}
 			updates.addFile(incidentFile);
-			
-			//create and add help files
-			for (Path f :  CtJsonExportUtils.addHelpFiles(xmlModel, tempDir)  ) {
-				updates.addFile(f);
-			}
 			
 			//include data model image files and update xmlModel
 			for (Entry<String,Path> icon : convert.getReferencedFiles().entrySet()) {

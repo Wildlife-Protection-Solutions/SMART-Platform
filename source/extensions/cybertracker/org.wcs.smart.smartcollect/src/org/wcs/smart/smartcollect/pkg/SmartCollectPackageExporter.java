@@ -123,7 +123,12 @@ public enum SmartCollectPackageExporter {
 				CmSmartToXml convert = new CmSmartToXml(session, true);
 				convert.convert(modelToExport, monitor);
 				org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xmlModel = convert.getXmlModel();
-				
+
+				//create and add help files
+				//must be done before we write to xml as this changes xml
+				sub.split(1);
+				toIncludeInZip.addAll( CtJsonExportUtils.addHelpFiles(modelToExport, xmlModel, tempDir) );
+
 
 				//write xml
 				try(OutputStream out = Files.newOutputStream(cmFile)){
@@ -139,11 +144,6 @@ public enum SmartCollectPackageExporter {
 					if (!Files.exists(toPath)) Files.copy(fromPath, toPath);
 					toIncludeInZip.add(toPath);
 				}
-				
-				//create and add help files
-				sub.split(1);
-				toIncludeInZip.addAll( CtJsonExportUtils.addHelpFiles(xmlModel, tempDir) );
-
 				
 				//include ca logo
 				Path logo = modelToExport.getConservationArea().getLogo();

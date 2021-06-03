@@ -63,6 +63,7 @@ import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttribute.HelpImageLocation;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
+import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.ScreenOption;
 import org.wcs.smart.dataentry.model.ScreenOptionUuid;
 import org.wcs.smart.dataentry.model.xml.generated.AttributeOptionType;
@@ -781,7 +782,7 @@ public class CtJsonExportUtils {
 		return typeOp;
 	}
 	
-	public static List<Path> addHelpFiles(org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xmlModel, Path targetDir) throws IOException {
+	public static List<Path> addHelpFiles(ConfigurableModel model, org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xmlModel, Path targetDir) throws IOException {
 		//create html help files 
 		List<NodeType> xmlnodes = new ArrayList<>();
 		xmlnodes.addAll(xmlModel.getNodes().getNode());
@@ -824,6 +825,21 @@ public class CtJsonExportUtils {
 					Files.writeString(p, html);
 					filesToAdd.add(p);
 					
+					
+					Path imgFile = null;
+					if (temp.getHelpFormat() != null) {
+						if (temp.getImportHelpFile() != null) {
+							imgFile = temp.getImportHelpFile();
+						}else {
+							imgFile = model.getFileDataStoreLocation().resolve(temp.getHelpImage());
+						}
+					}
+					if (imgFile != null) {
+						Path target = targetDir.resolve(imgFile.getFileName());
+						Files.copy(imgFile, target);
+						filesToAdd.add(target);
+					}
+
 					AttributeOptionType op = new AttributeOptionType();
 					op.setId("HELP_HTML_FILE"); //$NON-NLS-1$
 					op.setStringValue(p.getFileName().toString());
