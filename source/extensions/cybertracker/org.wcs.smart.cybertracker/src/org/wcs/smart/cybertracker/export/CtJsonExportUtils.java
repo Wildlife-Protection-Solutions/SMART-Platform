@@ -836,8 +836,11 @@ public class CtJsonExportUtils {
 					}
 					if (imgFile != null) {
 						Path target = targetDir.resolve(imgFile.getFileName());
-						Files.copy(imgFile, target);
-						filesToAdd.add(target);
+						if(!Files.exists(target)) {
+							//file may exist if the patrol cm uses same cm as incident model
+							Files.copy(imgFile, target);
+							filesToAdd.add(target);
+						}
 					}
 
 					AttributeOptionType op = new AttributeOptionType();
