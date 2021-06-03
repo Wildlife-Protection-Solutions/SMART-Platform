@@ -1022,7 +1022,7 @@ public class WorkingSetView {
 				LocalDate[] dates = new LocalDate[]{initFilter.getStartDate(), initFilter.getEndDate()};
 				if (ws != null){					
 					try{
-						dates = ws.parseEntityDateFilter();
+						dates = WorkingSetManager.INSTANCE.parseEntityDateFilter(ws);
 					}catch (Exception ex){
 						Intelligence2PlugIn.log("Unable to parse entity date filter for working set : " + ws.getEntityDateFilter() + ". " + ex.getMessage(), ex); //$NON-NLS-1$ //$NON-NLS-2$
 					}

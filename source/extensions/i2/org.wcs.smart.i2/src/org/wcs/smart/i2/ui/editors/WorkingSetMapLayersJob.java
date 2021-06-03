@@ -254,7 +254,7 @@ public class WorkingSetMapLayersJob extends Job {
 		//parse date filter
 		LocalDate[] dates = null;
 		try{
-			dates = workingset.parseEntityDateFilter();
+			dates = WorkingSetManager.INSTANCE.parseEntityDateFilter(workingset);
 		}catch (Exception ex){
 			Intelligence2PlugIn.log(Messages.WorkingSetMapLayersJob_ParseError + workingset.getEntityDateFilter() + ". " + ex.getMessage(), ex); //$NON-NLS-1$
 		}

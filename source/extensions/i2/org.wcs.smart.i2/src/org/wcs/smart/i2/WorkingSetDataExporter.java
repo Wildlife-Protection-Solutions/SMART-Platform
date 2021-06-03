@@ -131,7 +131,7 @@ public enum WorkingSetDataExporter {
 		HashMap<String, Object> queryParams = new HashMap<>();
 		queryParams.put(Locale.class.getName(), Locale.getDefault());
 		queryParams.put(ConservationArea.class.getName(), Collections.singleton(ws.getConservationArea()));
-		queryParams.put(LocalDate.class.getName(), ws.parseEntityDateFilter() );
+		queryParams.put(LocalDate.class.getName(), WorkingSetManager.INSTANCE.parseEntityDateFilter(ws) );
 		queryParams.put(Session.class.getName(), session);
 		
 		Set<String> pKeys = new HashSet<>();

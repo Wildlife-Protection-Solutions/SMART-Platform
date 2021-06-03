@@ -22,6 +22,8 @@
 package org.wcs.smart.i2;
 
 import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Locale;
@@ -32,6 +34,7 @@ import java.util.stream.Collectors;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.hibernate.Session;
+import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.event.IntelEvents;
@@ -467,4 +470,19 @@ public enum WorkingSetManager {
 		return clone;
 	}
 	
+	
+	public LocalDate[] parseEntityDateFilter(IntelWorkingSet wset) {
+		String dateFilter = wset.getEntityDateFilter();
+		if (dateFilter == null) return null;
+		
+		String[] bits = dateFilter.split(":"); //$NON-NLS-1$
+		DateFilter initFilter = DateFilter.valueOf(bits[0]);
+		if (initFilter == DateFilter.CUSTOM){
+			return new LocalDate[] {
+					LocalDate.parse(bits[1], DateTimeFormatter.BASIC_ISO_DATE),
+					LocalDate.parse(bits[2], DateTimeFormatter.BASIC_ISO_DATE)};
+		}else {
+			return new LocalDate[]{initFilter.getStartDate(), initFilter.getEndDate()};
+		}
+	}
 }

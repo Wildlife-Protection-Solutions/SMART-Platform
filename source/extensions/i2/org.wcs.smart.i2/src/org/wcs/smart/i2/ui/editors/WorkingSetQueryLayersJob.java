@@ -116,7 +116,7 @@ public class WorkingSetQueryLayersJob extends WorkingSetMapLayersJob {
 		if (workingset != null){
 			LocalDate[] dates = null;
 			try{
-				dates = workingset.parseEntityDateFilter();
+				dates = WorkingSetManager.INSTANCE.parseEntityDateFilter(workingset);
 			}catch (Exception ex){
 				Intelligence2PlugIn.log("Unable to parse entity date filter for working set : " + workingset.getEntityDateFilter() + ". " + ex.getMessage(), ex); //$NON-NLS-1$ //$NON-NLS-2$
 			}

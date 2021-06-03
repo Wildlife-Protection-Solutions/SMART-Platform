@@ -21,9 +21,7 @@
  */
 package org.wcs.smart.i2.model;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -34,12 +32,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.NamedItem;
-import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 
 /**
  * Model class of i_working_set.
@@ -197,22 +193,6 @@ public class IntelWorkingSet extends NamedItem implements IIntelAuditItem{
 	@Column(name="entity_date_filter")
 	public String getEntityDateFilter() {
 		return this.entityDateFilter;
-	}
-
-	@Transient
-	public LocalDate[] parseEntityDateFilter() {
-		String dateFilter = getEntityDateFilter();
-		if (dateFilter == null) return null;
-		
-		String[] bits = dateFilter.split(":"); //$NON-NLS-1$
-		DateFilter initFilter = DateFilter.valueOf(bits[0]);
-		if (initFilter == DateFilter.CUSTOM){
-			return new LocalDate[] {
-					LocalDate.parse(bits[1], DateTimeFormatter.BASIC_ISO_DATE),
-					LocalDate.parse(bits[2], DateTimeFormatter.BASIC_ISO_DATE)};
-		}else {
-			return new LocalDate[]{initFilter.getStartDate(), initFilter.getEndDate()};
-		}
 	}
 	
 	/**
