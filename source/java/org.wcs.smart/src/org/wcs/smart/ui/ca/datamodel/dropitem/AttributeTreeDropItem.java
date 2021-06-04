@@ -261,6 +261,8 @@ public class AttributeTreeDropItem extends DropItem {
 		lblitem.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		btnEdit = new Button(t, SWT.DOWN | SWT.ARROW);
+		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+
 		//btnEdit.setText("..."); //$NON-NLS-1$
 		fd = (btnEdit.getFont().getFontData()[0]);
 		fd.setHeight(fd.getHeight() - 2);

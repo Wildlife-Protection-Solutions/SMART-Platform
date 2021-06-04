@@ -46,6 +46,7 @@ import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
+import org.wcs.smart.util.SmartFileUtils;
 
 /**
  * Dialog for importing CyberTracker data from file.
@@ -130,12 +131,10 @@ public class CyberTrackerFileImportDialog extends SmartStyledTitleDialog {
 		Link lnkOp = new Link(opComp, SWT.NONE);
 		lnkOp.setText("<a>" + Messages.CyberTrackerFileImportDialog_OpenArchiveFolderOp + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 		lnkOp.addListener(SWT.Selection,e->{
-			Desktop diapi = Desktop.getDesktop();
+			
 			try {
 				Path f = ICyberTrackerConstants.getStorageFolder(SmartDB.getCurrentConservationArea());
-				//if the folder doesn't exists then opening fails, so make sure the directory exists
-				if (!Files.exists(f)) Files.createDirectories(f);
-				diapi.open(f.toFile());
+				SmartFileUtils.openFileBrowser(f);
 			} catch (IOException e1) {
 				CyberTrackerPlugIn.log(e1.getMessage(),  e1);
 			}

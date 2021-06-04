@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.util;
 
+import java.awt.Desktop;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -38,23 +39,71 @@ public class SmartFileUtils {
 	public static Path createTempDirectory(String prefix) throws IOException {
 		final Path temp;
 		temp = Files.createTempFile(prefix, Long.toString(System.nanoTime()));
-		
+
 		Files.delete(temp);
 		SmartUtils.createDirectory(temp);
-		
+
 		return temp;
-	}	
+	}
 
 	public static void deleteTempDirectory(Path tempDir) {
-		if (tempDir == null) return;
+		if (tempDir == null)
+			return;
 		try {
 			SmartUtils.deleteDirectory(tempDir);
 		} catch (IOException e) {
-			//ignore
+			// ignore
 			SmartPlugIn.log(e.getMessage(), e);
 		}
-	}	
-	
+	}
+
+	// https://stackoverflow.com/questions/18004150/desktop-api-is-not-supported-on-the-current-platform
+	public static final void openFileBrowser(Path file) throws IOException {
+		if (!Files.exists(file))
+			Files.createDirectories(file);
+
+		if (Desktop.isDesktopSupported()) {
+			if (Desktop.getDesktop().isSupported(Desktop.Action.OPEN)) {
+				Desktop.getDesktop().open(file.toAbsolutePath().toFile());
+			}
+		} else {
+			String s = System.getProperty("os.name").toLowerCase(); //$NON-NLS-1$
+
+			if (s.contains("mac")) { //$NON-NLS-1$
+				if (runCommand("open", file)) //$NON-NLS-1$
+					return;
+			} else if (s.contains("linux")) { //$NON-NLS-1$
+				if (runCommand("kde-open", file)) //$NON-NLS-1$
+					return;
+				if (runCommand("gnome-open", file)) //$NON-NLS-1$
+					return;
+				if (runCommand("xdg-open", file)) //$NON-NLS-1$
+					return;
+			}
+		}
+		// not supported
+		return;
+	}
+
+	private static boolean runCommand(String command, Path file) {
+
+		String[] parts = new String[] { command, file.toAbsolutePath().toString() };
+		try {
+			Process p = Runtime.getRuntime().exec(parts);
+			if (p == null)
+				return false;
+
+			try {
+				int retval = p.waitFor();
+				if (retval == 0) {
+					return true;
+				}
+				return false;
+			} catch (Exception ex) {
+				return false;
+			}
+		} catch (IOException e) {
+			return false;
+		}
+	}
 }
-
-

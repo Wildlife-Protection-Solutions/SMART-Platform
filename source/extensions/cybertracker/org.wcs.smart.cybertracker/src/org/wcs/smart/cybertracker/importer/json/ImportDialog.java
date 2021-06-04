@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.cybertracker.importer.json;
 
-import java.awt.Desktop;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
@@ -71,6 +70,7 @@ import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.SmartStyledTitleDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.SmartFileUtils;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -291,12 +291,9 @@ public class ImportDialog extends SmartStyledTitleDialog{
 		lnkOp.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false, 2, 1));
 		lnkOp.setText("<a>" + Messages.CyberTrackerFileImportDialog_OpenArchiveFolderOp + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 		lnkOp.addListener(SWT.Selection,e->{
-			Desktop diapi = Desktop.getDesktop();
 			try {
 				Path f = ICyberTrackerConstants.getStorageFolder(SmartDB.getCurrentConservationArea());
-				//if the folder doesn't exists then opening fails, so make sure the directory exists
-				if (!Files.exists(f)) Files.createDirectories(f);
-				diapi.open(f.toAbsolutePath().toFile());
+				SmartFileUtils.openFileBrowser(f);
 			} catch (IOException e1) {
 				CyberTrackerPlugIn.log(e1.getMessage(),  e1);
 			}

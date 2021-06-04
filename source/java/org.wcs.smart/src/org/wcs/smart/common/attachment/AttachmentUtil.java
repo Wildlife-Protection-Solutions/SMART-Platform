@@ -34,33 +34,33 @@ import org.wcs.smart.cipher.EncryptUtils;
  * @since 1.0.0
  */
 public class AttachmentUtil {
-	
+
 	public static final void openAttachment(ISmartAttachment attachment) {
 		if (attachment.getCopyFromLocation() != null) {
 			launch(attachment.getCopyFromLocation());
 		} else {
-			try{
+			try {
 				Path p = EncryptUtils.decryptAttachment(attachment);
 				if (p != null) {
 					p.toFile().deleteOnExit();
 					launch(p);
 				}
-				
-			}catch (Exception ex){
+
+			} catch (Exception ex) {
 				SmartPlugIn.displayLog(ex.getMessage(), ex);
 			}
 		}
 	}
-	
+
 	public static final void launch(Path file) {
 		Program.launch(file.normalize().toAbsolutePath().toString());
 	}
-	
+
 	public static final void launch(String url) {
 		try {
 			Program.launch(url);
 		} catch (Exception ex) {
 		}
 	}
-	
+
 }

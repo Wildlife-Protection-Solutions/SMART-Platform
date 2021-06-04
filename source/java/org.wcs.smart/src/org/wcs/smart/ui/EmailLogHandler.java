@@ -23,18 +23,26 @@ package org.wcs.smart.ui;
 
 import java.awt.Desktop;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.jface.dialogs.IInputValidator;
+import org.eclipse.jface.dialogs.InputDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.osgi.framework.Bundle;
@@ -127,10 +135,50 @@ public class EmailLogHandler {
 			
 		}
 		
-		String mailto = "mailto:?subject=" + enc("SMART Error Log") + "&body=" + enc(sb.toString());	 //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		try {
 			//TODO: test this on linux and mac
-			Desktop.getDesktop().mail(new URI(mailto));
+			if (Desktop.isDesktopSupported()) {
+				String mailto = "mailto:?subject=" + enc("SMART Error Log") + "&body=" + enc(sb.toString());	 //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				Desktop.getDesktop().mail(new URI(mailto));
+			} else if (System.getProperty("os.name").toLowerCase().contains("mac")) { //$NON-NLS-1$ //$NON-NLS-2$
+				//use the mac email program
+				
+				InputDialog id = new InputDialog(activeShell, Messages.EmailLogHandler_InputTitle,
+						Messages.EmailLogHandler_InputMessage,
+						"", new IInputValidator() { //$NON-NLS-1$
+							@Override
+							public String isValid(String newText) {
+								if (newText.isBlank() 
+										|| newText.isEmpty() 
+										|| newText.matches(".*\\s+.*")) return Messages.EmailLogHandler_EmailRequired; //$NON-NLS-1$
+								return null;
+							}
+						});
+				if (id.open() != Window.OK) return;
+				
+				String[] parts = new String[] {"mail", "-s SMART_ERROR_LOG", id.getValue()}; //$NON-NLS-1$ //$NON-NLS-2$
+				//String part = "/usr/bin/mail -s SMART_ERROR_LOG " + id.getValue();
+	            Process p = Runtime.getRuntime().exec(parts);
+	            try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(p.getOutputStream()))){
+	            	bw.write(sb.toString());
+	            }
+	            try {
+	            	int timeout = 5;
+	            	if (!p.waitFor(timeout, TimeUnit.SECONDS)) {
+	            		throw new Exception(MessageFormat.format(Messages.EmailLogHandler_Timeout, timeout));
+	            	}
+	            	if (p.exitValue() != 0) {
+	            		throw new Exception(Messages.EmailLogHandler_Error);
+	            	}
+	            }catch (Exception ex) {
+	            	SmartPlugIn.displayError(MessageFormat.format(Messages.EmailLogHandler_ErrorTryAgain, ex.getMessage()),ex);
+	            }
+
+				 
+			}else {
+				//your os does not support email;
+				MessageDialog.openInformation(activeShell, Messages.EmailLogHandler_ErrorTitle, Messages.EmailLogHandler_ErrorMsg);
+			}
 		} catch (Exception e) {
 			SmartPlugIn.log(e.getMessage(), e);
 		}		

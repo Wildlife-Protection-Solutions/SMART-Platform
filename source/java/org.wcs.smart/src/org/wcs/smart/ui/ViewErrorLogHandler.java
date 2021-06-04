@@ -21,10 +21,13 @@
  */
 package org.wcs.smart.ui;
 
+import java.nio.file.Paths;
+
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.internal.about.AboutUtils;
+import org.wcs.smart.common.attachment.AttachmentUtil;
 
 
 /**
@@ -38,7 +41,8 @@ public class ViewErrorLogHandler {
 	
 	@Execute
 	public void execute(Shell activeShell) {
-		AboutUtils.openErrorLogBrowser(activeShell);
+		String f = Platform.getLogFileLocation().toOSString();
+		AttachmentUtil.launch(Paths.get(f));
 	}
 	
 	public static class ViewErrorLogHandlerWrapper extends DIHandler<ViewErrorLogHandler>{

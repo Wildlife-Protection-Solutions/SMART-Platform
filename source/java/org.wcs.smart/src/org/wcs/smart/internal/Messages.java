@@ -694,7 +694,15 @@ public class Messages extends NLS {
 	public static String EditProjectionDialog_Error_ParsingWKT;
 	public static String EditProjectionDialog_Name_Label;
 	public static String EditProjectionDialog_WKT_Label;
+	public static String EmailLogHandler_EmailRequired;
+	public static String EmailLogHandler_Error;
+	public static String EmailLogHandler_ErrorMsg;
+	public static String EmailLogHandler_ErrorTitle;
+	public static String EmailLogHandler_ErrorTryAgain;
 	public static String EmailLogHandler_fileAttachmentWarning;
+	public static String EmailLogHandler_InputMessage;
+	public static String EmailLogHandler_InputTitle;
+	public static String EmailLogHandler_Timeout;
 	public static String Employee_Agency_Label;
 	public static String Employee_Birthdate_Label;
 	public static String Employee_CAStartDate_Label;

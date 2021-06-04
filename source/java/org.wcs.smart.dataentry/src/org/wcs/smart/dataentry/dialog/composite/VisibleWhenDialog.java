@@ -191,6 +191,7 @@ public class VisibleWhenDialog extends SmartStyledTitleDialog {
 			if (c instanceof Composite) ((Composite)c).dispose();
 		}
 		createBasicPanel(expression);
+		getShell().layout(true, true);
 	}
 
 	private void showAdvanced() {
@@ -198,6 +199,7 @@ public class VisibleWhenDialog extends SmartStyledTitleDialog {
 			if (c instanceof Composite) ((Composite)c).dispose();
 		}
 		advanced = createAdvancedPanel(expression);
+		getShell().layout(true, true);
 	}
 
 	private void parseQuery(String query) {
@@ -375,7 +377,7 @@ public class VisibleWhenDialog extends SmartStyledTitleDialog {
 		expression.setData(DROPITEM_KEY, i);
 		Composite widget = i.createWidget(definitionPanel, expression);
 		
-		widget.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		widget.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 		
 		ArrayDeque<Control> c = new ArrayDeque<>();
 		c.add(widget);
@@ -398,8 +400,8 @@ public class VisibleWhenDialog extends SmartStyledTitleDialog {
 		}
 	
 		cmbAttribute.getControl().setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
-		expression.getParent().layout(true);	
-		expression.layout(true);
+		expression.getParent().layout(true, true);	
+//		expression.layout(true);
 	}
 	
 	private void createBasicPanel(Composite parent) {

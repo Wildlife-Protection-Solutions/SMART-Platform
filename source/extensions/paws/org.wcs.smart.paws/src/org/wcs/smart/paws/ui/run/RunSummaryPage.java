@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.paws.ui.run;
 
-import java.awt.Desktop;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
@@ -76,6 +76,7 @@ import org.wcs.smart.paws.model.PawsService;
 import org.wcs.smart.paws.ui.HeaderComposite;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.util.SmartFileUtils;
 
 /**
  * PAWS Editor summary page
@@ -485,7 +486,8 @@ public class RunSummaryPage extends EditorPart {
 				@Override
 				public void linkActivated(HyperlinkEvent e) {
 					try {
-						Desktop.getDesktop().open(  PawsFileManager.INSTANCE.getDirectory(run).toFile() );
+						Path f =  PawsFileManager.INSTANCE.getDirectory(run);
+						SmartFileUtils.openFileBrowser(f);
 					} catch (IOException e1) {
 						PawsPlugIn.displayLog(e1.getMessage(), e1);
 					}
