@@ -1,0 +1,186 @@
+package org.wcs.smart.i2.migrate.intelligence.wizard;
+
+import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubMonitor;
+import org.eclipse.e4.core.contexts.EclipseContextFactory;
+import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.hibernate.Session;
+import org.locationtech.jts.geom.Coordinate;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Employee;
+import org.wcs.smart.common.attachment.AttachmentInterceptor;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.event.IntelEvents;
+import org.wcs.smart.i2.migrate.MigratePlugin;
+import org.wcs.smart.i2.migrate.intelligence.IntelMappingRecord;
+import org.wcs.smart.i2.migrate.intelligence.IntelligenceItem;
+import org.wcs.smart.i2.migrate.intelligence.Smart6Database;
+import org.wcs.smart.i2.model.IntelAttachment;
+import org.wcs.smart.i2.model.IntelLocation;
+import org.wcs.smart.i2.model.IntelRecord;
+import org.wcs.smart.i2.model.IntelRecordAttachment;
+import org.wcs.smart.i2.model.IntelRecordAttributeValue;
+import org.wcs.smart.map.GeometryFactoryProvider;
+import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolWaypoint;
+
+public class ConversionJob implements IRunnableWithProgress {
+
+	private List<IntelMappingRecord> mappings;
+	private Smart6Database smart6;
+	
+	public ConversionJob(List<IntelMappingRecord> mappings, Smart6Database smart6) {
+		this.mappings = mappings;
+		this.smart6 = smart6;
+	}
+	@Override
+	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+		
+		Set<ConservationArea> cas = mappings.stream()
+				.map(e->e.getConservationArea()).collect(Collectors.toSet());
+		
+		List<IntelRecord> thisCaNewRecords = new ArrayList<>();
+		
+		SubMonitor task = SubMonitor.convert(monitor);
+		task.beginTask("Converting Intelligence Data", cas.size());
+		
+		try(Session session = HibernateManager.openSession(new AttachmentInterceptor(false))){
+			session.beginTransaction();
+			try {
+				for (ConservationArea ca : cas) {
+					SubMonitor catask = task.split(1);
+					
+					Collection<IntelligenceItem> items = smart6.getIntelItems(ca);
+					catask.beginTask(ca.getNameLabel(), items.size());
+					
+					for(IntelligenceItem item : items) {
+						catask.split(1);
+						IntelMappingRecord mapping = null;
+						for (IntelMappingRecord mr : mappings) {
+							if (mr.getConservationArea().equals(ca) &&
+									mr.getSmart6Source().getUuid().equals(item.getSource())) {
+								mapping = mr;
+								break;
+							}
+						}
+						if (mapping != null) {
+							IntelRecord r = convertItem(item, mapping, session);
+							if (ca.equals(SmartDB.getCurrentConservationArea())) {
+								thisCaNewRecords.add(r);
+							}
+						}
+					}
+				
+				}
+				
+				session.getTransaction().commit();
+			}catch (Exception ex) {
+				session.getTransaction().rollback();
+				throw new InvocationTargetException(ex);
+			}
+		}
+
+		IEventBroker eventBroker = EclipseContextFactory.getServiceContext(MigratePlugin.getDefault().getBundle().getBundleContext()).get(IEventBroker.class);
+		eventBroker.send(IntelEvents.RECORD_NEW, thisCaNewRecords);
+	}
+	
+	private IntelRecord convertItem(IntelligenceItem item, IntelMappingRecord mapping, Session session) {
+		
+		IntelRecord record = new IntelRecord();
+		record.setConservationArea(mapping.getConservationArea());
+		record.setRecordSource(mapping.getRecordSource());
+		record.setProfile(mapping.getProfile());
+		record.setStatus(IntelRecord.Status.NEW);
+		
+		record.setTitle(item.getName());
+		record.setDescription(item.getDescription());
+		record.setComment("Imported from SMART 6 intelligence data.");
+		
+		record.setPrimaryDate(item.getRecievedDate().atStartOfDay());
+		
+		if (item.getCreator() != null) {
+			Employee e = session.get(Employee.class, item.getCreator());
+			if (e != null && e.getConservationArea().equals(record.getConservationArea())) {
+				record.setCreatedBy(e);
+			}
+		}
+		if (record.getCreatedBy() == null) record.setCreatedBy(SmartDB.getCurrentEmployee());
+		
+		record.setDateCreated(LocalDateTime.now());
+		
+		record.setAttachments(new ArrayList<>());
+		record.setLocations(new ArrayList<>());
+		int cnt = 1;
+		for (Coordinate c : item.getPoints()) {
+			IntelLocation location = new IntelLocation();
+			location.setConservationArea(record.getConservationArea());
+			location.setId(String.valueOf(cnt++));
+			location.setGeometry(GeometryFactoryProvider.getFactory().createPoint(c));
+			location.setRecord(record);
+			location.setDateTime(record.getPrimaryDate());
+			record.getLocations().add(location);
+		}
+		
+		record.setAttributes(new ArrayList<>());
+		if (mapping.getToDateMapping() != null && item.getToDate() != null) {
+			IntelRecordAttributeValue value = new IntelRecordAttributeValue();
+			value.setAttribute(mapping.getToDateMapping());
+			value.setDateValue(item.getToDate());
+			value.setRecord(record);
+			record.getAttributes().add(value);
+		}
+		if (mapping.getFromDateMapping() != null && item.getRecievedDate() != null) {
+			if (!mapping.getToDateMapping().equals(mapping.getFromDateMapping())) {
+				IntelRecordAttributeValue value = new IntelRecordAttributeValue();
+				value.setAttribute(mapping.getFromDateMapping());
+				value.setDateValue(item.getToDate());
+				value.setRecord(record);
+				record.getAttributes().add(value);
+			}
+		}
+		
+		if (item.getPatroluuid() != null) {
+			Patrol p = session.get(Patrol.class, item.getPatroluuid());
+			if (p != null) {
+				//link to first waypoint in patrol
+				List<PatrolWaypoint> ps = p.getFirstLeg().getPatrolLegDays().get(0).getWaypoints();
+				if (ps.size() > 0) {
+					record.setSmartSource(ps.get(0).getWaypoint());
+				}
+			}
+		}
+		
+		session.save(record);
+		
+		
+		for (Path p : item.getAttachments()) {
+			IntelAttachment ia = new IntelAttachment();
+			ia.setConservationArea(mapping.getConservationArea());
+			ia.setCopyFromLocation(p);
+			ia.setFilename(p.getFileName().toString());
+			ia.setDateCreated(LocalDateTime.now());
+			ia.setCreatedBy(record.getCreatedBy());
+			session.save(ia);
+			
+			IntelRecordAttachment recordattachment = new IntelRecordAttachment();
+			recordattachment.setAttachment(ia);
+			recordattachment.setRecord(record);
+			record.getAttachments().add(recordattachment);
+		}
+		session.flush();
+		return record;
+		
+	}
+
+}

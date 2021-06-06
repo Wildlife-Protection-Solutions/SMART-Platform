@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.wcs.smart.i2.menu.main.importexport?after=org.wcs.smart.i2.command.record.import.xml">
+         <separator
+               name="org.wcs.smart.i2.migrate.separator1"
+               visible="true">
+         </separator>
+         <command
+               commandId="org.wcs.smart.i2.migrate.intelligence"
+               icon="platform:/plugin/org.wcs.smart/images/icons/shared16/import.png"
+               style="push">
+         </command>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="org.wcs.smart.i2.migrate.intelligence.MigrateSmart6IntelligenceHandler$MigrateSmart6IntelligenceHandlerWrapper"
+            commandId="org.wcs.smart.i2.migrate.intelligence">
+      </handler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            id="org.wcs.smart.i2.migrate.intelligence"
+            name="Import SMART6 Intelligence Data ">
+      </command>
+   </extension>
+
+</plugin>
