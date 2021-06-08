@@ -134,7 +134,8 @@ public class PatrolMandateComposite extends PatrolLegItemComposite{
 		}});
 		patrolMandateViewer.setInput(mandates.toArray());
 		
-		PatrolMandate selection = mandates.get(0);
+		
+		PatrolMandate selection = null;
 		if (mandates.size() > 0){
 			selection = mandates.get(0);
 		}
@@ -146,8 +147,10 @@ public class PatrolMandateComposite extends PatrolLegItemComposite{
 		}else{
 			selection = leg.getMandate();
 		}
-		patrolMandateViewer.setSelection(new StructuredSelection(selection));
-		patrolMandateViewer.reveal(selection);
+		if (selection != null) {
+			patrolMandateViewer.setSelection(new StructuredSelection(selection));
+			patrolMandateViewer.reveal(selection);
+		}
 		patrolMandateViewer.getControl().getParent().layout();
 	}
 
