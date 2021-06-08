@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2021 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i2.migrate.intelligence.wizard;
 
 import java.lang.reflect.InvocationTargetException;
@@ -15,14 +36,23 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.i2.migrate.MigratePlugin;
 import org.wcs.smart.i2.migrate.intelligence.IntelMappingRecord;
 import org.wcs.smart.i2.migrate.intelligence.IntelligenceSource;
 import org.wcs.smart.i2.migrate.intelligence.Smart6Database;
+import org.wcs.smart.i2.migrate.internal.Messages;
+import org.wcs.smart.i2.security.IntelAdminUserLevel;
 import org.wcs.smart.ui.UserNamePasswordDialog;
 
-
+/**
+ * Job to validate the username and passwords for all conservation
+ * areas selected (for both SMART6 and 7+ database);
+ * 
+ * @author Emily
+ *
+ */
 public class ValidateUserJob implements IRunnableWithProgress {
 
 	private Smart6Database smart6;
@@ -52,14 +82,14 @@ public class ValidateUserJob implements IRunnableWithProgress {
 		this.records = null;
 		
 		SubMonitor task = SubMonitor.convert(monitor);
-		task.beginTask("validating users", 2);
+		task.beginTask(Messages.ValidateUserJob_taskname, 2);
 		
 		ok = true;
 		
 		getShell().getDisplay().syncExec(()->{
-			task.split(1).beginTask("validating SMART 6 users.", 1);
+			task.split(1).beginTask(Messages.ValidateUserJob_smart6subtask, 1);
 
-			UserNamePasswordDialog udialog = new UserNamePasswordDialog(getShell(), "Validate Users", "Enter username and password for the Conservation Areas", IDialogConstants.OK_LABEL);
+			UserNamePasswordDialog udialog = new UserNamePasswordDialog(getShell(), Messages.ValidateUserJob_DialogTitle, Messages.ValidateUserJob_AllCaMsg, IDialogConstants.OK_LABEL);
 			if (udialog.open() != Window.OK) {
 				ok = false;
 				return;
@@ -67,8 +97,6 @@ public class ValidateUserJob implements IRunnableWithProgress {
 			
 			String username = udialog.getUserName();
 			String password = udialog.getPassword();
-			
-			
 			
 			List<ConservationArea> smart6error = new ArrayList<>();
 			for (ConservationArea ca : toValidate) {
@@ -84,8 +112,8 @@ public class ValidateUserJob implements IRunnableWithProgress {
 			while(!smart6error.isEmpty()) {
 				ConservationArea ca = smart6error.remove(0);
 				udialog = new UserNamePasswordDialog(getShell(), 
-						"Validate Users", 
-						MessageFormat.format("Invalid username/password for SMART 6 Conservation Area {0}. Please try again.", ca.getNameLabel()),
+						Messages.ValidateUserJob_DialogTitle, 
+						MessageFormat.format(Messages.ValidateUserJob_Invalid6Ca, ca.getNameLabel()),
 						IDialogConstants.OK_LABEL);
 				
 				if (udialog.open() != Window.OK) {
@@ -103,26 +131,38 @@ public class ValidateUserJob implements IRunnableWithProgress {
 			}
 			
 			//valid smart7
-			task.split(1).beginTask("validating SMART users.", 1);
+			task.split(1).beginTask(Messages.ValidateUserJob_smart7subtask, 1);
 			List<ConservationArea> smart7error = new ArrayList<>();
 			for (ConservationArea ca : toValidate) {
-				if (HibernateManager.validateUser(username, password, ca) == null) {
+				Employee emp = HibernateManager.validateUser(username, password, ca);
+				if ( emp == null) {
 					smart7error.add(ca);
+				}else {
+					if (!emp.getSmartUserLevels().contains(IntelAdminUserLevel.INSTANCE.getKey())){
+						//must be an intel-admin user
+						smart7error.add(ca);
+					}
 				}
 			}
 			while(!smart7error.isEmpty()) {
 				ConservationArea ca = smart7error.remove(0);
 				udialog = new UserNamePasswordDialog(getShell(), 
-						"Validate Users", 
-						MessageFormat.format("Invalid username/password for SMART Conservation Area {0}. Please try again.", ca.getNameLabel()),
+						Messages.ValidateUserJob_DialogTitle, 
+						MessageFormat.format(Messages.ValidateUserJob_Invalid7Ca, ca.getNameLabel(), IntelAdminUserLevel.INSTANCE.getKey()),
 						IDialogConstants.OK_LABEL);
 				
 				if (udialog.open() != Window.OK) {
 					ok = false;
 					return;
 				}
-				if (HibernateManager.validateUser(udialog.getUserName(), udialog.getPassword(), ca) == null) {
+				Employee emp = HibernateManager.validateUser(udialog.getUserName(), udialog.getPassword(), ca);
+				if ( emp == null) {
 					smart7error.add(0, ca);
+				}else {
+					if (!emp.getSmartUserLevels().contains(IntelAdminUserLevel.INSTANCE.getKey())){
+						//must be an intel-admin user
+						smart7error.add(0, ca);
+					}
 				}
 			}
 		});

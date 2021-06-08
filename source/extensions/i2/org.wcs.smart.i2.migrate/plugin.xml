@@ -14,6 +14,19 @@
                commandId="org.wcs.smart.i2.migrate.intelligence"
                icon="platform:/plugin/org.wcs.smart/images/icons/shared16/import.png"
                style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <and>
+                  <test
+                        property="org.wcs.smart.i2.permission"
+                        value="intel_admin">
+                  </test>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.caSingle">
+                  </test>
+               </and>
+            </visibleWhen>
          </command>
       </menuContribution>
    </extension>

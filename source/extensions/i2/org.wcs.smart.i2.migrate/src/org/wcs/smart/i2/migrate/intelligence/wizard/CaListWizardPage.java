@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2021 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i2.migrate.intelligence.wizard;
 
 import java.util.ArrayList;
@@ -14,14 +35,21 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.i2.migrate.internal.Messages;
 import org.wcs.smart.ui.CheckboxSelectorKeyAdapter;
 
+/**
+ * List Conservation Areas with intelligence records
+ * 
+ * @author Emily
+ *
+ */
 public class CaListWizardPage extends WizardPage {
 
 	private CheckboxTableViewer tblConservationAreas;
 	
 	protected CaListWizardPage() {
-		super("CALISTPAGE");
+		super("CALISTPAGE"); //$NON-NLS-1$
 	}
 
 	public List<ConservationArea> getConservationAreas() {
@@ -68,8 +96,8 @@ public class CaListWizardPage extends WizardPage {
 		});
 		setControl(temp);
 		
-		setTitle("Conservation Areas");
-		setMessage("Select the Conservation Area to import data from.  Only Conservation Areas that exist in the SMART 6 backup and current SMART version are listed.");
+		setTitle(Messages.CaListWizardPage_Title);
+		setMessage(Messages.CaListWizardPage_Message);
 	}
 
 	public void setConservationArea(List<ConservationArea> cas) {

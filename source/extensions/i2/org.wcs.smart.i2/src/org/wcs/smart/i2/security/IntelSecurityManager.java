@@ -101,6 +101,10 @@ public enum IntelSecurityManager {
 	}
 	
 	
+	/**
+	 * true if user has admin permissions
+	 * @return
+	 */
 	public boolean canConfigureAny() {
 		return supportsPermissionAny(IntelPermission.ADMIN);
 	}

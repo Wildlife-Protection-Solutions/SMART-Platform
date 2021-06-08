@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2021 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i2.migrate.intelligence.wizard;
 
 import java.io.IOException;
@@ -14,7 +35,14 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.i2.migrate.MigratePlugin;
 import org.wcs.smart.i2.migrate.intelligence.Smart6Database;
+import org.wcs.smart.i2.migrate.internal.Messages;
 
+/**
+ * Wizard for migrating SMART6 intelligence records to SMART7+ profile records
+ * 
+ * @author Emily
+ *
+ */
 public class MigrateIntelligenceWizard extends Wizard  implements IPageChangingListener {
 
 	private Smart6WizardPage page1;
@@ -78,7 +106,7 @@ public class MigrateIntelligenceWizard extends Wizard  implements IPageChangingL
      */
 	public void addPages() {
     	
-    	setWindowTitle("Migrate SMART 6 Intelligence Data");
+    	setWindowTitle(Messages.MigrateIntelligenceWizard_Title);
     	
     	page1 = new Smart6WizardPage();
     	page2 = new CaListWizardPage();
@@ -116,7 +144,7 @@ public class MigrateIntelligenceWizard extends Wizard  implements IPageChangingL
 			}
 			
 			if (toProcess == null || toProcess.isEmpty()) {
-				MessageDialog.openError(getShell(), "No Conservation Areas", "No matching conservation areas found with intelligence data");
+				MessageDialog.openError(getShell(), Messages.MigrateIntelligenceWizard_NoCas, Messages.MigrateIntelligenceWizard_NoMatchingCas);
 				event.doit = false;
 			}else {
 				page2.setConservationArea(toProcess);
@@ -141,10 +169,10 @@ public class MigrateIntelligenceWizard extends Wizard  implements IPageChangingL
 	
 	private void processException(Exception ex) {
 		ex.printStackTrace();
-		String msg = "";
+		String msg = ""; //$NON-NLS-1$
 		Throwable t = ex;
 		while(t != null) {
-			if (t.getMessage() != null) msg += " " + t.getMessage();
+			if (t.getMessage() != null) msg += " " + t.getMessage(); //$NON-NLS-1$
 			t = t.getCause();
 		}
 		MigratePlugin.displayLog(msg, ex);

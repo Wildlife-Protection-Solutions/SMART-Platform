@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2021 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i2.migrate.intelligence.wizard;
 
 import java.util.ArrayList;
@@ -34,6 +55,7 @@ import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.migrate.intelligence.IntelMappingRecord;
+import org.wcs.smart.i2.migrate.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttribute;
 import org.wcs.smart.i2.model.IntelProfile;
 import org.wcs.smart.i2.model.IntelProfileRecordSource;
@@ -43,9 +65,16 @@ import org.wcs.smart.i2.ui.ProfileLabelProvider;
 import org.wcs.smart.i2.ui.RecordSourceLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 
+/**
+ * Wizard page to collect mapping information for converting
+ * intelligence records.
+ * 
+ * @author Emily
+ *
+ */
 public class RecordMappingPage extends WizardPage {
 
-	private static final String DO_NOT_IMPORT = "DO NOT IMPORT";
+	private static final String DO_NOT_IMPORT = Messages.RecordMappingPage_DoNotImportOption;
 	private List<IntelMappingRecord> mappings = null;
 	private List<Object[]> rows;
 	
@@ -56,7 +85,7 @@ public class RecordMappingPage extends WizardPage {
 	private Map<IntelProfile, List<IntelRecordSource>> recordSources;
 	
 	protected RecordMappingPage() {
-		super("MappingPage");
+		super("MappingPage"); //$NON-NLS-1$
 	}
 
 	@Override
@@ -106,8 +135,9 @@ public class RecordMappingPage extends WizardPage {
 		
 		Composite inner = new Composite(main, SWT.NONE);
 		inner.setLayout(new GridLayout(6, true));
+		inner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		String[]  headers = new String[]{"Conservation Area", "Intelligence Source", "Profile", "Record Source", "From Attribute", "To Attribute"};
+		String[]  headers = new String[]{Messages.RecordMappingPage_CaHeader, Messages.RecordMappingPage_SrcHeader, Messages.RecordMappingPage_ProfileHeader, Messages.RecordMappingPage_RecordHeader, Messages.RecordMappingPage_FromDateHeader, Messages.RecordMappingPage_ToDateHeader};
 		for (String h : headers) {
 			Label l = new Label(inner, SWT.NONE);
 			l.setText(h);
@@ -178,7 +208,7 @@ public class RecordMappingPage extends WizardPage {
 					setErrorMessage(null);
 					if (x2 instanceof IntelRecordSourceAttribute && x1 instanceof IntelRecordSourceAttribute) {
 						if(x1.equals(x2)) {
-							setErrorMessage("Cannot map the From and To attributes to the same record source attribute.");
+							setErrorMessage(Messages.RecordMappingPage_CannotMapToSameAttribute);
 						}
 					}
 					getContainer().updateButtons();	
@@ -199,7 +229,7 @@ public class RecordMappingPage extends WizardPage {
 				Object currentSelection = cmbRecordSource.getStructuredSelection().getFirstElement();
 				List<IntelRecordSource> items = recordSources.get((IntelProfile)x);
 				List<Object> input = new ArrayList<>();
-				input.add("");
+				input.add(""); //$NON-NLS-1$
 				input.addAll(items);
 				cmbRecordSource.setInput(input);
 				if (items.contains(currentSelection)) {
@@ -240,7 +270,7 @@ public class RecordMappingPage extends WizardPage {
 							.stream()
 							.filter(xx -> (xx.getAttribute() != null && xx.getAttribute().getType() == IntelAttribute.AttributeType.DATE))
 							.collect(Collectors.toList());
-					atts.add(0,  "");
+					atts.add(0,  ""); //$NON-NLS-1$
 					cmbFrom.setInput(atts);
 					cmbTo.setInput(atts);
 				}
@@ -265,17 +295,19 @@ public class RecordMappingPage extends WizardPage {
 		
 		scomp = new ScrolledComposite(temp, SWT.V_SCROLL | SWT.H_SCROLL);
 		scomp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		scomp.setExpandHorizontal(true);
 		
 		main = new Composite(scomp, SWT.NONE);
 		scomp.setContent(main);
 		main.setLayout(new GridLayout());
 		
-		setTitle("Mappings");
-		setMessage("Map the SMART 6 intelligence source to Profile record sources.");
+		
+		setTitle(Messages.RecordMappingPage_Title);
+		setMessage(Messages.RecordMappingPage_Message);
 	}
 
 	
-	Job loadData = new Job("load data") {
+	Job loadData = new Job("load data") { //$NON-NLS-1$
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -292,7 +324,7 @@ public class RecordMappingPage extends WizardPage {
 				for (ConservationArea ca : cas) {
 					List<IntelProfile> profiles = QueryFactory.buildQuery(session, 
 							IntelProfile.class,
-							new Object[] {"conservationArea", ca}).list();
+							new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
 					
 					profiles.forEach(e->e.getName());
 					List<Object> pprofiles = new ArrayList<>(profiles);
@@ -301,7 +333,7 @@ public class RecordMappingPage extends WizardPage {
 					
 					for (IntelProfile profile : profiles) {
 						List<IntelProfileRecordSource> items = QueryFactory.buildQuery(session, IntelProfileRecordSource.class, 
-								new Object[] {"id.profile", profile}).list();
+								new Object[] {"id.profile", profile}).list(); //$NON-NLS-1$
 						List<IntelRecordSource> sources = items.stream().map(e->e.getRecordSource()).collect(Collectors.toList());
 						sources.forEach(e->{
 							e.getName();

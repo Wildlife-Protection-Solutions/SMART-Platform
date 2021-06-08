@@ -1,7 +1,29 @@
+/*
+ * Copyright (C) 2021 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.i2.migrate.intelligence.wizard;
 
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
+import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,7 +35,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.e4.core.contexts.EclipseContextFactory;
 import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.locationtech.jts.geom.Coordinate;
 import org.wcs.smart.ca.ConservationArea;
@@ -26,6 +50,7 @@ import org.wcs.smart.i2.migrate.MigratePlugin;
 import org.wcs.smart.i2.migrate.intelligence.IntelMappingRecord;
 import org.wcs.smart.i2.migrate.intelligence.IntelligenceItem;
 import org.wcs.smart.i2.migrate.intelligence.Smart6Database;
+import org.wcs.smart.i2.migrate.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttachment;
 import org.wcs.smart.i2.model.IntelLocation;
 import org.wcs.smart.i2.model.IntelRecord;
@@ -35,6 +60,13 @@ import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 
+/**
+ * Job to convert SMART6 intelligence records to profile records
+ * and save them to the database
+ *  
+ * @author Emily
+ *
+ */
 public class ConversionJob implements IRunnableWithProgress {
 
 	private List<IntelMappingRecord> mappings;
@@ -53,8 +85,9 @@ public class ConversionJob implements IRunnableWithProgress {
 		List<IntelRecord> thisCaNewRecords = new ArrayList<>();
 		
 		SubMonitor task = SubMonitor.convert(monitor);
-		task.beginTask("Converting Intelligence Data", cas.size());
+		task.beginTask(Messages.ConversionJob_TaskName, cas.size());
 		
+		int added = 0;
 		try(Session session = HibernateManager.openSession(new AttachmentInterceptor(false))){
 			session.beginTransaction();
 			try {
@@ -76,6 +109,7 @@ public class ConversionJob implements IRunnableWithProgress {
 						}
 						if (mapping != null) {
 							IntelRecord r = convertItem(item, mapping, session);
+							added ++;
 							if (ca.equals(SmartDB.getCurrentConservationArea())) {
 								thisCaNewRecords.add(r);
 							}
@@ -93,6 +127,11 @@ public class ConversionJob implements IRunnableWithProgress {
 
 		IEventBroker eventBroker = EclipseContextFactory.getServiceContext(MigratePlugin.getDefault().getBundle().getBundleContext()).get(IEventBroker.class);
 		eventBroker.send(IntelEvents.RECORD_NEW, thisCaNewRecords);
+		
+		final int fadded = added;
+		Display.getDefault().syncExec(()->{
+			MessageDialog.openInformation(Display.getDefault().getActiveShell(), Messages.ConversionJob_CompleteTitle, MessageFormat.format(Messages.ConversionJob_CompleteMsg, fadded));
+		});
 	}
 	
 	private IntelRecord convertItem(IntelligenceItem item, IntelMappingRecord mapping, Session session) {
@@ -105,7 +144,7 @@ public class ConversionJob implements IRunnableWithProgress {
 		
 		record.setTitle(item.getName());
 		record.setDescription(item.getDescription());
-		record.setComment("Imported from SMART 6 intelligence data.");
+		record.setComment(Messages.ConversionJob_ProfileRecordComment);
 		
 		record.setPrimaryDate(item.getRecievedDate().atStartOfDay());
 		
