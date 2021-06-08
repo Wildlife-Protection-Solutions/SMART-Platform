@@ -225,7 +225,7 @@ public class PawsDataEngine {
 				String filename= (String) d[1];
 				String layername = (String) d[2];
 				pp = run.getConfiguration().findParameter(param.name());
-				if (pp == null || pp.getValue().isBlank()) {
+				if (pp == null || pp.getValue() == null || pp.getValue().isBlank()) {
 					rasters.put(filename, "");  //$NON-NLS-1$
 					rasters.put(layername, ""); //$NON-NLS-1$
 				}else {
@@ -375,7 +375,7 @@ public class PawsDataEngine {
 		//elevation and landcover
 		for  (PawsParameter.FixedParameter param : new PawsParameter.FixedParameter[] {PawsParameter.FixedParameter.LYR_ELEVATION, PawsParameter.FixedParameter.LYR_LANDCOVER}) {
 			pp = configuration.findParameter(param.name());
-			if (pp != null && !pp.getValue().isBlank()) {
+			if (pp != null && pp.getValue() != null && !pp.getValue().isBlank()) {
 				String filename = pp.getValue();
 				Path srcRaster = PawsFileManager.INSTANCE.getDirectory(configuration).resolve(filename);
 				Path targetFile = target.resolve(filename);
