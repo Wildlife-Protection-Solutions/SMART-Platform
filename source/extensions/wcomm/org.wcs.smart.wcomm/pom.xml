@@ -5,12 +5,12 @@
 	<parent>
 		<groupId>org.wcs.smart.wcomm</groupId>
 		<artifactId>smart-tycho</artifactId>
-		<version>7.0.2-SNAPSHOT</version>
+		<version>7.0.3-SNAPSHOT</version>
 	</parent>
 	
 	<name>SMART WCoMM Module</name>
 	<artifactId>org.wcs.smart.wcomm</artifactId>
   	<packaging>eclipse-plugin</packaging>
-	<version>7.0.2-SNAPSHOT</version>
+	<version>7.0.3-SNAPSHOT</version>
 	
 </project>

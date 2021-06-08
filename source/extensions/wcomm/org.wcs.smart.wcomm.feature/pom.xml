@@ -6,10 +6,10 @@
   <parent>
     <groupId>org.wcs.smart.wcomm</groupId>
     <artifactId>smart-tycho</artifactId>
-    <version>7.0.2-SNAPSHOT</version>
+    <version>7.0.3-SNAPSHOT</version>
    </parent>
 
   <artifactId>org.wcs.smart.wcomm.feature</artifactId>
   <packaging>eclipse-feature</packaging>
-  <version>7.0.2-SNAPSHOT</version>
+  <version>7.0.3-SNAPSHOT</version>
 </project>

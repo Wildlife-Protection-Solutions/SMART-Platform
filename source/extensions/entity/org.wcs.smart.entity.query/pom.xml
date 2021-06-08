@@ -6,13 +6,13 @@
 	<parent>
 		<groupId>org.wcs.smart</groupId>
 		<artifactId>smart-tycho</artifactId>
-		<version>7.0.2-SNAPSHOT</version>
+		<version>7.0.3-SNAPSHOT</version>
 		<relativePath>../../../java</relativePath>
 	</parent>
 	
 	<name>SMART Entity Query Module</name>
 	<artifactId>org.wcs.smart.entity.query</artifactId>
   	<packaging>eclipse-plugin</packaging>
-	<version>7.0.2-SNAPSHOT</version>
+	<version>7.0.3-SNAPSHOT</version>
 	
 </project>

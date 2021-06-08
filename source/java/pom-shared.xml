@@ -5,11 +5,11 @@
 	
 	<groupId>org.wcs.smart.core</groupId>
 	<artifactId>smart</artifactId>
-	<version>7.0.2-SNAPSHOT</version>
+	<version>7.0.3-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<properties>
-		<smart.version>7.0.2-SNAPSHOT</smart.version>
+		<smart.version>7.0.3-SNAPSHOT</smart.version>
 		<geotools.version>25.0</geotools.version>
 		<jts.version>1.16.1</jts.version>
 		<hibernate.version>5.4.3.Final</hibernate.version>

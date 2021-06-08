@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Plan CyberTracker
 Bundle-SymbolicName: org.wcs.smart.cybertracker.plan;singleton:=true
-Bundle-Version: 7.0.2.qualifier
+Bundle-Version: 7.0.3.qualifier
 Bundle-Activator: org.wcs.smart.cybertracker.plan.PlanCyberTrackerPlugIn
 Bundle-Vendor: org.wcs.smart
 Require-Bundle: org.eclipse.ui.forms,

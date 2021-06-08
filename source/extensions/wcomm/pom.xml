@@ -4,7 +4,7 @@
 
     <groupId>org.wcs.smart.wcomm</groupId>
     <artifactId>smart-tycho</artifactId>
-    <version>7.0.2-SNAPSHOT</version>
+    <version>7.0.3-SNAPSHOT</version>
     <packaging>pom</packaging>
     
     <description>
@@ -54,7 +54,7 @@
 					<artifact>
 						<groupId>org.wcs.smart</groupId>
 						<artifactId>org.wcs.smart.target</artifactId>
-						<version>7.0.2-SNAPSHOT</version>
+						<version>7.0.3-SNAPSHOT</version>
 					</artifact>
 				</target>
 				

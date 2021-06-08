@@ -6,13 +6,13 @@
 	<parent>
 		<groupId>org.wcs.smart.datagenerator</groupId>
 		<artifactId>smart-tycho</artifactId>
-		<version>7.0.2-SNAPSHOT</version>
+		<version>7.0.3-SNAPSHOT</version>
 		<relativePath>../</relativePath>
 	</parent>
 	
 	<name>Patrol Demo Data Generator</name>
 	<artifactId>org.wcs.smart.datagenerator</artifactId>
   	<packaging>eclipse-plugin</packaging>
-	<version>7.0.2-SNAPSHOT</version>
+	<version>7.0.3-SNAPSHOT</version>
 	
 </project>
