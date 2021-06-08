@@ -28,6 +28,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.fieldassist.ControlDecoration;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
@@ -49,6 +51,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.ca.datamodel.TreeDropDownViewer;
 import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
 import org.wcs.smart.ui.properties.AttributeTreeLabelProvider;
@@ -80,6 +83,7 @@ public class AttributeTreeDropItem extends DropItem {
 	
 	//if true only active list items will be displayed as options
 	private boolean onlyActive = false;
+	private ControlDecoration cd;
 	
 	/*
 	 * Job to load the attribute list options
@@ -223,7 +227,7 @@ public class AttributeTreeDropItem extends DropItem {
 		}
 		return query.toString();
 	}
-
+	
 	/**
 	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#createComposite(org.eclipse.swt.widgets.Composite)
 	 */
@@ -259,6 +263,11 @@ public class AttributeTreeDropItem extends DropItem {
 		smallerFont2 = new Font(Display.getCurrent(), fd);
 		lblitem.setFont(smallerFont2);
 		lblitem.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		((GridData)lblitem.getLayoutData()).horizontalIndent = 4;
+		cd = new ControlDecoration(lblitem, SWT.LEFT);
+		cd.setImage(FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_WARNING).getImage());
+		cd.setDescriptionText(Messages.AttributeTreeDropItem_valueNotSelected);
+		cd.hide();
 		
 		btnEdit = new Button(t, SWT.DOWN | SWT.ARROW);
 		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
@@ -284,6 +293,7 @@ public class AttributeTreeDropItem extends DropItem {
 			lblitem.setText( formatStringForLabel(currentSelection.getName()));
 		}else{
 			lblitem.setText(""); //$NON-NLS-1$
+			cd.show();
 		}
 		
 		lblAttribute.setText(formatStringForLabel(this.text + " = ")); //$NON-NLS-1$
@@ -322,8 +332,10 @@ public class AttributeTreeDropItem extends DropItem {
 				if (!lblitem.isDisposed()){
 					if (currentSelection != null){
 						lblitem.setText( formatStringForLabel(currentSelection.getName()));
+						cd.hide();
 					}else{
 						lblitem.setText(""); //$NON-NLS-1$
+						cd.show();
 					}
 				}
 				getTargetPanel().redraw();

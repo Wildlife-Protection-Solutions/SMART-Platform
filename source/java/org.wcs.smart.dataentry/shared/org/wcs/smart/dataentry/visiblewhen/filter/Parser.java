@@ -10,6 +10,7 @@ public class Parser implements ParserConstants {
   final public IFilter ParseQuery() throws ParseException {
   IFilter expr = null;
     expr = ExpressionPart();
+    jj_consume_token(0);
   {if (true) return expr;}
     throw new Error("Missing return statement in function");
   }

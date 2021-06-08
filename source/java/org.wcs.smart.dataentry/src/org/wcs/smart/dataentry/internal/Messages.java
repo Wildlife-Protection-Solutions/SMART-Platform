@@ -281,6 +281,7 @@ public class Messages extends NLS {
 	public static String VisibleWhenDialog_AttributeTypeDifferent;
 	public static String VisibleWhenDialog_BasicOption;
 	public static String VisibleWhenDialog_FilterNotSupported;
+	public static String VisibleWhenDialog_InvalidExpressionMsg;
 	public static String VisibleWhenDialog_InvalidType;
 	public static String VisibleWhenDialog_ListItemNotFound;
 	public static String VisibleWhenDialog_ListItemNotFound2;

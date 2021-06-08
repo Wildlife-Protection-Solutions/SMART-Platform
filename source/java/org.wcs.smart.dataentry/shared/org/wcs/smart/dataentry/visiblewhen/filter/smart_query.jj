@@ -49,6 +49,7 @@ IFilter ParseQuery():
 }
 {
   expr = ExpressionPart()
+  < EOF >
  {
   return expr;
  }

@@ -146,6 +146,7 @@ public class Messages extends NLS {
 	public static String Attribute_BooleanAttribute_True_Label;
 	public static String AttributeDMAdvisor_Error_AttributeReferenced2;
 	public static String AttributeDMAdvisor_Error_NotAttribute;
+	public static String AttributeDropItem_InvalidValue;
 	public static String AttributeInfoPanel_Aggregations_Label;
 	public static String AttributeInfoPanel_Aggregations_ToolTip;
 	public static String AttributeInfoPanel_ConvertToMultiList;
@@ -176,6 +177,7 @@ public class Messages extends NLS {
 	public static String AttributeItemDialog_Dialog_Message1;
 	public static String AttributeItemDialog_Dialog_Title;
 	public static String AttributeItemDialog_IconLabel;
+	public static String AttributeMListDropItem_SelectionRequired;
 	public static String AttributeTree_AddButton_Tooltip;
 	public static String AttributeTree_CollapseAll;
 	public static String AttributeTree_ConfirmDelete_DialogMessage1;
@@ -198,6 +200,7 @@ public class Messages extends NLS {
 	public static String AttributeTree_SortAllButton;
 	public static String AttributeTree_SortAllTooltip;
 	public static String AttributeTree_TreeNodeColumn;
+	public static String AttributeTreeDropItem_valueNotSelected;
 	public static String AttributeTreeLabelProvider_RootNode_Label;
 	public static String AttributeTreeNodeDMAdvisor_Error_NotTreeNode;
 	public static String AttributeTreeNodeDMAdvisor_Error_TreeNodeReferenced;

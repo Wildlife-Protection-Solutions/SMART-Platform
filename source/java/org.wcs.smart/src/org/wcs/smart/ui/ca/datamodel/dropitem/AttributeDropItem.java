@@ -24,6 +24,8 @@ package org.wcs.smart.ui.ca.datamodel.dropitem;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
+import org.eclipse.jface.fieldassist.ControlDecoration;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -43,6 +45,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.filter.Operator;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -69,6 +72,8 @@ public class AttributeDropItem extends DropItem {
 	private AttributeType type = null;
 	
 	private Font smallerFont;
+	private ControlDecoration cd;
+	
 	
 	/**
 	 * Creates a new attribute drop item
@@ -238,6 +243,14 @@ public class AttributeDropItem extends DropItem {
 						value.setToolTipText(value.getText());
 						currentValue = value.getText();
 					}
+					if (type == AttributeType.NUMERIC) {
+						try {
+							Double.parseDouble(currentValue);
+							cd.hide();
+						}catch (Exception ex) {
+							cd.show();
+						}
+					}
 				}
 			});
 			GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
@@ -248,6 +261,14 @@ public class AttributeDropItem extends DropItem {
 			Operator[] options = null;
 			if (type == AttributeType.NUMERIC) {
 				options = Operator.NUMERIC_OPS;
+				
+				cd = new ControlDecoration(value, SWT.LEFT);
+				cd.setImage(FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_WARNING).getImage());
+				cd.setDescriptionText(Messages.AttributeDropItem_InvalidValue);
+				cd.show();
+				
+				((GridData)value.getLayoutData()).horizontalIndent = 5;
+				
 			} else if (type == AttributeType.TEXT) {
 				options = Operator.STRING_OPS;
 			}

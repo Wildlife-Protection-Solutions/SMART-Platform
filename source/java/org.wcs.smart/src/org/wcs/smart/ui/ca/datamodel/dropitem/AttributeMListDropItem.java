@@ -29,6 +29,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.fieldassist.ControlDecoration;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -50,6 +52,7 @@ import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.filter.AttributeFilter;
 import org.wcs.smart.filter.Operator;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.CheckBoxDropDown;
 
 /**
@@ -72,6 +75,7 @@ public class AttributeMListDropItem extends DropItem {
 	
 	protected Collection<ListItem> currentSelection = null;
 	protected Operator currentOp = null;
+	private ControlDecoration cd;
 	
 	//if true only active list items will be displayed as options
 	private boolean onlyActive = false;
@@ -116,6 +120,11 @@ public class AttributeMListDropItem extends DropItem {
 					listViewer.setInput(items);
 					if (currentSelection != null){
 						listViewer.setValue(currentSelection);
+					}
+					if (currentSelection == null || currentSelection.isEmpty()) {
+						cd.show();
+					}else {
+						cd.hide();
 					}
 					getTargetPanel().redraw();
 				}});
@@ -276,6 +285,16 @@ public class AttributeMListDropItem extends DropItem {
 		listViewer = new CheckBoxDropDown(color);
 		listViewer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)listViewer.getLayoutData()).widthHint = 200;
+		((GridData)listViewer.getLayoutData()).horizontalIndent = 5;
+	
+		cd = new ControlDecoration(listViewer, SWT.LEFT);
+		cd.setImage(FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_WARNING).getImage());
+		cd.setDescriptionText(Messages.AttributeMListDropItem_SelectionRequired);
+		if (currentSelection == null || currentSelection.isEmpty()) {
+			cd.show();
+		}else {
+			cd.hide();
+		}
 		
 		FontData fd = (listViewer.getFont().getFontData()[0]);
 		fd.setHeight(fd.getHeight() - 1);
@@ -300,6 +319,11 @@ public class AttributeMListDropItem extends DropItem {
 				if (!(lastSelection != null && selection.size() == lastSelection.size()
 						&& selection.containsAll(lastSelection))){
 					queryChanged();	
+				}
+				if (selection.isEmpty()) {
+					cd.show();
+				}else {
+					cd.hide();
 				}
 			}
 		});

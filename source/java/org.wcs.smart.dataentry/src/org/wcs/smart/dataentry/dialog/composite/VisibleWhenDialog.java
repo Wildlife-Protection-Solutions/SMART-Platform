@@ -354,7 +354,7 @@ public class VisibleWhenDialog extends SmartStyledTitleDialog {
 			setErrorMessage(null);
 			return true;
 		}catch (Exception ex) {
-			setErrorMessage(ex.getMessage());
+			setErrorMessage(Messages.VisibleWhenDialog_InvalidExpressionMsg);
 			return false;
 		}
 
