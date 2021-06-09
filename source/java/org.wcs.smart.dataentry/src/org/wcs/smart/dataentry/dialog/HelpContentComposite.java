@@ -312,10 +312,37 @@ public class HelpContentComposite extends Composite {
 	private void importHelp() {
 		importShell = new Shell(getShell(), SWT.PRIMARY_MODAL | SWT.RESIZE );
 		importShell.setLayout(new GridLayout(2, true));
-		((GridLayout)importShell.getLayout()).marginWidth = 0;
-		((GridLayout)importShell.getLayout()).marginHeight = 0;
+		((GridLayout)importShell.getLayout()).marginWidth = 3;
+		((GridLayout)importShell.getLayout()).marginHeight = 3;
+		importShell.setBackground(importShell.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		
+//		Composite outer = new Composite(importShell, SWT.NONE);
+//		outer.setLayout(new GridLayout());
+//		outer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+//		((GridLayout)outer.getLayout()).marginWidth = 0;
+//		((GridLayout)outer.getLayout()).marginHeight = 0;
+//		outer.setBackground(outer.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		
+		Composite wrapper = new Composite(importShell, SWT.NONE);
+		wrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		TableViewer lstAttribute = new TableViewer(importShell, SWT.V_SCROLL | SWT.H_SCROLL);
+		TableViewer lstCm = new TableViewer(wrapper, SWT.BORDER);
+		lstCm.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		lstCm.setLabelProvider(new LabelProvider() {
+			@Override
+			public String getText(Object element) {
+				if (element instanceof ConfigurableModel) return ((ConfigurableModel)element).getName();
+				return super.getText(element);
+			}
+		});
+		TableColumn tc = new TableColumn(lstCm.getTable(), SWT.NONE);
+		TableColumnLayout layout = new TableColumnLayout();
+		layout.setColumnData(tc, new ColumnWeightData(1));
+		wrapper.setLayout(layout);
+		lstCm.setContentProvider(ArrayContentProvider.getInstance());
+		lstCm.setInput(otherConfigurableModels);
+		
+		TableViewer lstAttribute = new TableViewer(importShell, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
 		lstAttribute.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		lstAttribute.setLabelProvider(new LabelProvider() {
 			@Override
@@ -364,31 +391,7 @@ public class HelpContentComposite extends Composite {
 				importShell = null;
 			}
 		});
-		Composite outer = new Composite(importShell, SWT.NONE);
-		outer.setLayout(new GridLayout());
-		outer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		((GridLayout)outer.getLayout()).marginWidth = 0;
-		((GridLayout)outer.getLayout()).marginHeight = 0;
-		outer.setBackground(outer.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		
-		Composite wrapper = new Composite(outer, SWT.NONE);
-		wrapper.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-		TableViewer lstCm = new TableViewer(wrapper, SWT.NONE);
-		lstCm.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		lstCm.setLabelProvider(new LabelProvider() {
-			@Override
-			public String getText(Object element) {
-				if (element instanceof ConfigurableModel) return ((ConfigurableModel)element).getName();
-				return super.getText(element);
-			}
-		});
-		TableColumn tc = new TableColumn(lstCm.getTable(), SWT.NONE);
-		TableColumnLayout layout = new TableColumnLayout();
-		layout.setColumnData(tc, new ColumnWeightData(1));
-		wrapper.setLayout(layout);
-		lstCm.setContentProvider(ArrayContentProvider.getInstance());
-		lstCm.setInput(otherConfigurableModels);
 		lstCm.addSelectionChangedListener(e->{
 			lstAttribute.setInput(DialogConstants.LOADING_TEXT);
 			
@@ -435,13 +438,16 @@ public class HelpContentComposite extends Composite {
 					return Status.OK_STATUS;
 				}		
 			};
+			
+			
 			j.schedule();
 		});
 		
-		Button btnClose = new Button(outer, SWT.PUSH);
+		Button btnClose = new Button(importShell, SWT.PUSH);
 		btnClose.setText(IDialogConstants.CLOSE_LABEL);
-		btnClose.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
-		btnClose.setBackground(outer.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+		btnClose.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false, 2, 1));
+		((GridData)btnClose.getLayoutData()).widthHint = (int)(btnClose.computeSize(SWT.DEFAULT, SWT.DEFAULT).x * 1.5);
+//		btnClose.setBackground(outer.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
 		btnClose.addListener(SWT.Selection, e->{importShell.dispose();importShell=null;});
 		importShell.setSize(500, 200);
 		Point p = tb.getLocation();
