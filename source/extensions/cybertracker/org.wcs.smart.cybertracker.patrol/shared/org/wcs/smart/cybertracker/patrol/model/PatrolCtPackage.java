@@ -119,7 +119,7 @@ public class PatrolCtPackage extends AbstractCtPackage implements ICmProvider, I
 				
 				if (v.getUuidList() != null) {
 					mcopy.setUuidList(new ArrayList<>());
-					for (MetadataFieldUuidValue uuidValue : mcopy.getUuidList()) {
+					for (MetadataFieldUuidValue uuidValue : v.getUuidList()) {
 						MetadataFieldUuidValue uuidcopy = new MetadataFieldUuidValue();
 						uuidcopy.setMetadata(mcopy);
 						uuidcopy.setUuidValue(uuidValue.getUuidValue());
