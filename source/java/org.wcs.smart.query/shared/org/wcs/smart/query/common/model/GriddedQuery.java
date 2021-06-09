@@ -23,8 +23,6 @@ package org.wcs.smart.query.common.model;
 
 import java.awt.Point;
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -267,13 +265,6 @@ public abstract class GriddedQuery extends StyledQuery {
 	public File getRasterFileName() {
 		// ensure query dir exists
 		Path dir = SmartContext.INSTANCE.getTempFilestoreLocation();
-		if (!Files.exists(dir)) {
-			try {
-				Files.createDirectories(dir);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
 
 		// create raster file name
 		String fName = null;

@@ -440,17 +440,6 @@ public class RasterService extends AbstractRasterService implements IQueryServic
 							}
 						}
 					}
-	//				String[] toDelete = tempDirectory.list(new FilenameFilter() {					
-	//					@Override
-	//					public boolean accept(File dir, String name) {
-	//						int index = name.lastIndexOf('.');
-	//						if (index < 0){
-	//							return false;
-	//						}
-	//						String subpart = name.substring(0, index);
-	//						return (subpart.equals(namePrefix));
-	//					}
-	//				});
 					
 					for (Path p : toDelete) {
 						try {

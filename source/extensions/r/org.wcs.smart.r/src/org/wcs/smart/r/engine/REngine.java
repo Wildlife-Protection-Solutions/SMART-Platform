@@ -25,7 +25,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -137,7 +136,6 @@ public class REngine {
 					String filename = UuidUtils.uuidToString(query.getQuery().getUuid()) + "." + System.nanoTime() + "." + query.getQueryExporter().getDefaultExtension(); //$NON-NLS-1$ //$NON-NLS-2$
 					
 					Path p = SmartContext.INSTANCE.getTempFilestoreLocation().resolve(filename).normalize();
-					Files.createDirectories(p.getParent());
 					queryFiles.add(p);
 					HashMap<String, Object> parameters = new HashMap<>();
 					

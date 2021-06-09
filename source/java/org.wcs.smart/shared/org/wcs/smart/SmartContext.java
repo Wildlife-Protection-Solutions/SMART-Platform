@@ -21,6 +21,8 @@
  */
 package org.wcs.smart;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -69,10 +71,19 @@ public enum SmartContext {
 	 * A temporary working directory.  Files in this directory are not
 	 * included in system backups or CA exports (nor at they sync'd to Connect).
 	 * 
-	 * @return
+	 * This function creates the directory if it is not already created
+	 * @return 
 	 */
 	public Path getTempFilestoreLocation(){
-		return Paths.get(pairs.get(TEMP_FILESTORE_KEY));
+		Path path = Paths.get(pairs.get(TEMP_FILESTORE_KEY)).normalize();
+		if (!Files.exists(path)) {
+			try {
+				Files.createDirectories(path);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return path;
 	}
 	
 	public void setTempFilestoreLocation(Path location){
