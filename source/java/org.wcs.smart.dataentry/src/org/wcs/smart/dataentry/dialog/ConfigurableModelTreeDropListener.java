@@ -75,6 +75,7 @@ public class ConfigurableModelTreeDropListener extends ViewerDropAdapter {
 			return true;
 		} else if (obj instanceof CmAttribute && getCurrentTarget() instanceof CmAttribute) {
 			moveAttributePosition((CmAttribute)obj, (CmAttribute)getCurrentTarget(), getCurrentLocation() == LOCATION_BEFORE);
+			return true;
 		} else if (obj instanceof CmAttribute && getCurrentTarget() instanceof MatrixNode) {
 			//MatrixNode target = (MatrixNode)getCurrentTarget();
 			CmAttribute source = (CmAttribute)obj;

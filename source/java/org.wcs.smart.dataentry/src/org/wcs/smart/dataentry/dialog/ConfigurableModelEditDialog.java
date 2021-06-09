@@ -333,7 +333,7 @@ public class ConfigurableModelEditDialog extends SmartStyledTitleDialog {
 	protected boolean performSave() {
 		String error = validateTabs();
 		if (error != null) {
-			MessageDialog.openError(getShell(), Messages.ConfigurableModelEditDialog_ErrorTitle, Messages.ConfigurableModelEditDialog_ErrorMsg + SharedUtils.LINE_SEPARATOR + error);
+			MessageDialog.openError(getShell(), Messages.ConfigurableModelEditDialog_ErrorTitle, Messages.ConfigurableModelEditDialog_ErrorMsg + SharedUtils.LINE_SEPARATOR + SharedUtils.LINE_SEPARATOR + error);
 			return false;
 		}
 		final boolean[] ret = new boolean[]{false};

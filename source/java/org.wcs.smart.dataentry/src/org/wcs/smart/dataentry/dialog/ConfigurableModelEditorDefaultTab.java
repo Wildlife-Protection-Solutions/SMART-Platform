@@ -91,7 +91,8 @@ import org.wcs.smart.ui.properties.LanguageViewer;
 public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEditorTabContent {
 
 	private static final String MENU_ITEM_KEY = "MENU_ITEM"; //$NON-NLS-1$
-
+	private static final long MAX_MATRIX_COMBOS = 200;
+	
 	public static enum ControlButton {
 		ADD_GROUP(Messages.AbstractInfoComposite_Button_AddGroup),
 		ADD_CATEGORY(Messages.AbstractInfoComposite_Button_AddCategory), 
@@ -578,6 +579,9 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 				MatrixNode mn = (MatrixNode)x;
 				int listcnt = 0;
 				int othercnt = 0;
+				
+				long totalListItemCnt = 1;
+				
 				String cname = mn.getParent().getCategory().getName();
 				for (int i = 0; i < mn.getKids().size(); i ++) {
 					CmAttribute a = mn.getKids().get(i);
@@ -585,6 +589,9 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 						if (othercnt > 0) {
 							return MessageFormat.format(Messages.ConfigurableModelEditorDefaultTab_InvalidOrder, cname);
 						}
+						
+						long cnt = a.getConfig().getList().stream().filter(e->e.getIsActive()).count();
+						totalListItemCnt = totalListItemCnt * cnt;
 						listcnt++;
 					}else {
 						othercnt ++;
@@ -593,7 +600,8 @@ public class ConfigurableModelEditorDefaultTab implements IConfigurableModelEdit
 				
 				if (listcnt == 0) return MessageFormat.format(Messages.ConfigurableModelEditorDefaultTab_MissingList, cname);
 				if (othercnt == 0) return MessageFormat.format(Messages.ConfigurableModelEditorDefaultTab_MissingNonList, cname);
-				
+				if (totalListItemCnt > MAX_MATRIX_COMBOS) 
+					return MessageFormat.format(Messages.ConfigurableModelEditorDefaultTab_TooManyCombos, cname, totalListItemCnt, MAX_MATRIX_COMBOS);
 				
 			}else {
 				//add children

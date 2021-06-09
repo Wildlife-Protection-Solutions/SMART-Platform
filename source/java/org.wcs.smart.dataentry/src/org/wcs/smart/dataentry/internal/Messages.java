@@ -134,6 +134,7 @@ public class Messages extends NLS {
 	public static String ConfigurableModelEditorDefaultTab_PropertiesTabLabel;
 	public static String ConfigurableModelEditorDefaultTab_RemoveFromAttributeEGroup;
 	public static String ConfigurableModelEditorDefaultTab_TabName;
+	public static String ConfigurableModelEditorDefaultTab_TooManyCombos;
 	public static String ConfigurableModelFactory_BlankCmTaskName;
 	public static String ConfigurableModelFactory_ProcessCmNode;
 	public static String ConfigurableModelFactory_ProcessDefaultConfigs;
