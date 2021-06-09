@@ -67,6 +67,9 @@ public class ConfigurableModelLabelProvider extends LabelProvider implements ICo
 				l = i.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage());
 			}
 			
+//			if (element instanceof CmAttribute) {
+//				l = l + "(" + ((CmAttribute)element).getOrder() + ")";
+//			}
 			return l;
 		}
 		if (element instanceof CmRootNode) {

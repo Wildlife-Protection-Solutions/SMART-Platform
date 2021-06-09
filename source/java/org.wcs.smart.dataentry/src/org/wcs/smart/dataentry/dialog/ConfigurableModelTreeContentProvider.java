@@ -179,13 +179,15 @@ public class ConfigurableModelTreeContentProvider implements ITreeContentProvide
 		//reorder
 		if (reorder) {
 			int min = -1;
+			List<CmAttribute> existingGroups = new ArrayList<>();
 			for (int i = 0; i < parent.getCmAttributes().size(); i ++) {
 				CmAttribute x = parent.getCmAttributes().get(i);
-				if (x.isGrouped() && min == -1) {
-						min = i;
-						break;
+				if (x.isGrouped()) {
+					existingGroups.add(x);
+					if (min == -1) min = i;
 				}
 			}
+			
 			if (min == -1) {
 				//no existing group
 				min = attributes.get(0).getOrder();
@@ -194,26 +196,31 @@ public class ConfigurableModelTreeContentProvider implements ITreeContentProvide
 				}
 				min = min - 1;
 			}
-			if (min<=0) min = 0;
-			parent.getCmAttributes().removeAll(attributes);
-			parent.getCmAttributes().addAll(min, attributes);
+			if (min <= 0) min = 0;
 			
-			//ensure list attributes appear first in the list
+			existingGroups.addAll(attributes);
+
+			//sort existing groups to list appears first
 			int lastindex = 0;
-			for (int i = 0; i < parent.getCmAttributes().size(); i ++) {
-				if (parent.getCmAttributes().get(i).getAttribute().getType() != Attribute.AttributeType.LIST) {
+			for (int i = 0; i < existingGroups.size(); i ++) {
+				if (existingGroups.get(i).getAttribute().getType() != Attribute.AttributeType.LIST) {
 					lastindex = i;
 					break;
 				}
 			}
 			List<CmAttribute> tomove = new ArrayList<>();
-			for (int i = lastindex; i < parent.getCmAttributes().size(); i ++) {
-				if (parent.getCmAttributes().get(i).getAttribute().getType() == Attribute.AttributeType.LIST) {
-					tomove.add(parent.getCmAttributes().get(i));
+			for (int i = lastindex; i < existingGroups.size(); i ++) {
+				if (existingGroups.get(i).getAttribute().getType() == Attribute.AttributeType.LIST) {
+					tomove.add(existingGroups.get(i));
 				}
 			}
-			parent.getCmAttributes().removeAll(tomove);
-			parent.getCmAttributes().addAll(lastindex, tomove);
+			existingGroups.removeAll(tomove);
+			existingGroups.addAll(lastindex, tomove);
+			
+
+			//remove and re-insert the attribute groups in the correct location 
+			parent.getCmAttributes().removeAll(existingGroups);
+			parent.getCmAttributes().addAll(min, existingGroups);
 		}
 
 		for (CmAttribute x : attributes) {
