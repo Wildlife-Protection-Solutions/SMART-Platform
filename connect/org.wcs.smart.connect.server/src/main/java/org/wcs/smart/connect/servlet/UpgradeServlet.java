@@ -966,6 +966,16 @@ public class UpgradeServlet extends HttpServlet {
 	
 	
 	private void createCcaaIconSets(Connection c) throws SQLException {
+		
+		//first see if CCAA ca exists
+		try(PreparedStatement psca = c.prepareStatement("SELECT count(*) FROM smart.conservation_area WHERE uuid = ?")){ //$NON-NLS-1$
+			psca.setObject(1, ConservationArea.MULTIPLE_CA);
+			try(ResultSet rs = psca.executeQuery()){
+				rs.next();
+				if (rs.getInt(1) == 0) return;
+			}
+		}
+		
 		PreparedStatement psiconset = c
 				.prepareStatement("INSERT INTO smart.iconset (uuid, keyid, ca_uuid, is_default) VALUES (?, ?, ?, ?)"); //$NON-NLS-1$
 		PreparedStatement pslabel = c
