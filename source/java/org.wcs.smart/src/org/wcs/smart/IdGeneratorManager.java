@@ -85,6 +85,8 @@ public enum IdGeneratorManager {
 		}catch (Exception ex){
 			SmartPlugIn.log("Error getting id generator extensions", ex); //$NON-NLS-1$
 		}
+		//need to sort these so the ui is consistent each time
+		items.sort((a,b)->a.getClass().getName().compareTo(b.getClass().getName()));
 		return items;
 	}
 
