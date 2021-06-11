@@ -1,0 +1,2577 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<report xmlns="http://www.eclipse.org/birt/2005/design" version="3.2.23" id="1">
+    <property name="createdBy">Eclipse BIRT Designer Version 4.18.0.v202103171650</property>
+    <text-property name="title">Incident Report</text-property>
+    <property name="layoutPreference">auto layout</property>
+    <parameters>
+        <scalar-parameter name="Incident UUID" id="13">
+            <property name="valueType">static</property>
+            <property name="dataType">string</property>
+            <property name="distinct">true</property>
+            <list-property name="selectionList"/>
+            <property name="paramType">simple</property>
+            <property name="controlType">text-box</property>
+            <structure name="format">
+                <property name="category">Unformatted</property>
+            </structure>
+        </scalar-parameter>
+    </parameters>
+    <data-sources>
+        <oda-data-source extensionID="org.wcs.smart.incident.birt.oda.IncidentDriver" name="Data Source" id="625"/>
+    </data-sources>
+    <data-sets>
+        <oda-data-set extensionID="org.wcs.smart.incident.birt.incident.details" name="details" id="626">
+            <text-property name="displayName">Incidents</text-property>
+            <list-property name="columnHints">
+                <structure>
+                    <property name="columnName">wp:uuid</property>
+                    <property name="alias">Incident UUID</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">Incident UUID</text-property>
+                    <text-property name="heading">Incident UUID</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">wp:id</property>
+                    <property name="alias">Incident ID</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">Incident ID</text-property>
+                    <text-property name="heading">Incident ID</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">wp:datetime</property>
+                    <property name="alias">Date Time</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">Date Time</text-property>
+                    <text-property name="heading">Date Time</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">wp:rawx</property>
+                    <property name="alias">Raw X</property>
+                    <property name="analysis">measure</property>
+                    <text-property name="displayName">Raw X</text-property>
+                    <text-property name="heading">Raw X</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">wp:rawy</property>
+                    <property name="alias">Raw Y</property>
+                    <property name="analysis">measure</property>
+                    <text-property name="displayName">Raw Y</text-property>
+                    <text-property name="heading">Raw Y</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">wp:distance</property>
+                    <property name="alias">Distance</property>
+                    <property name="analysis">measure</property>
+                    <text-property name="displayName">Distance</text-property>
+                    <text-property name="heading">Distance</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">wp:direction</property>
+                    <property name="alias">Bearing</property>
+                    <property name="analysis">measure</property>
+                    <text-property name="displayName">Bearing</text-property>
+                    <text-property name="heading">Bearing</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">wp:projx</property>
+                    <property name="alias">X</property>
+                    <property name="analysis">measure</property>
+                    <text-property name="displayName">X</text-property>
+                    <text-property name="heading">X</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">wp:projy</property>
+                    <property name="alias">Y</property>
+                    <property name="analysis">measure</property>
+                    <text-property name="displayName">Y</text-property>
+                    <text-property name="heading">Y</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">wp:comment</property>
+                    <property name="alias">Comments</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">Comments</text-property>
+                    <text-property name="heading">Comments</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">wp:observer</property>
+                    <property name="alias">Observer</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">Observer</text-property>
+                    <text-property name="heading">Observer</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">ca:id</property>
+                    <property name="alias">Conservation Area ID</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">Conservation Area ID</text-property>
+                    <text-property name="heading">Conservation Area ID</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">ca:name</property>
+                    <property name="alias">Conservation Area Name</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">Conservation Area Name</text-property>
+                    <text-property name="heading">Conservation Area Name</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">wp:rawgeometry</property>
+                    <property name="alias">Raw Geometry</property>
+                    <text-property name="displayName">Raw Geometry</text-property>
+                    <text-property name="heading">Raw Geometry</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">wp:geometry</property>
+                    <property name="alias">Geometry</property>
+                    <text-property name="displayName">Geometry</text-property>
+                    <text-property name="heading">Geometry</text-property>
+                </structure>
+            </list-property>
+            <list-property name="parameters">
+                <structure>
+                    <property name="name">Incident UUID</property>
+                    <property name="paramName">Incident UUID</property>
+                    <property name="nativeName">Incident UUID</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                    <property name="position">1</property>
+                    <property name="isOptional">true</property>
+                    <property name="allowNull">true</property>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+            </list-property>
+            <structure name="cachedMetaData">
+                <list-property name="resultSet">
+                    <structure>
+                        <property name="position">1</property>
+                        <property name="name">Incident UUID</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">2</property>
+                        <property name="name">Incident ID</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">3</property>
+                        <property name="name">Date Time</property>
+                        <property name="dataType">date-time</property>
+                    </structure>
+                    <structure>
+                        <property name="position">4</property>
+                        <property name="name">Raw X</property>
+                        <property name="dataType">float</property>
+                    </structure>
+                    <structure>
+                        <property name="position">5</property>
+                        <property name="name">Raw Y</property>
+                        <property name="dataType">float</property>
+                    </structure>
+                    <structure>
+                        <property name="position">6</property>
+                        <property name="name">Distance</property>
+                        <property name="dataType">float</property>
+                    </structure>
+                    <structure>
+                        <property name="position">7</property>
+                        <property name="name">Bearing</property>
+                        <property name="dataType">float</property>
+                    </structure>
+                    <structure>
+                        <property name="position">8</property>
+                        <property name="name">X</property>
+                        <property name="dataType">float</property>
+                    </structure>
+                    <structure>
+                        <property name="position">9</property>
+                        <property name="name">Y</property>
+                        <property name="dataType">float</property>
+                    </structure>
+                    <structure>
+                        <property name="position">10</property>
+                        <property name="name">Comments</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">11</property>
+                        <property name="name">Observer</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">12</property>
+                        <property name="name">Conservation Area ID</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">13</property>
+                        <property name="name">Conservation Area Name</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">14</property>
+                        <property name="name">Raw Geometry</property>
+                        <property name="dataType">javaObject</property>
+                    </structure>
+                    <structure>
+                        <property name="position">15</property>
+                        <property name="name">Geometry</property>
+                        <property name="dataType">javaObject</property>
+                    </structure>
+                </list-property>
+            </structure>
+            <property name="dataSource">Data Source</property>
+            <list-property name="resultSet">
+                <structure>
+                    <property name="position">1</property>
+                    <property name="name">wp:uuid</property>
+                    <property name="nativeName">wp:uuid</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">2</property>
+                    <property name="name">wp:id</property>
+                    <property name="nativeName">wp:id</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">3</property>
+                    <property name="name">wp:datetime</property>
+                    <property name="nativeName">wp:datetime</property>
+                    <property name="dataType">date-time</property>
+                    <property name="nativeDataType">93</property>
+                </structure>
+                <structure>
+                    <property name="position">4</property>
+                    <property name="name">wp:rawx</property>
+                    <property name="nativeName">wp:rawx</property>
+                    <property name="dataType">float</property>
+                    <property name="nativeDataType">8</property>
+                </structure>
+                <structure>
+                    <property name="position">5</property>
+                    <property name="name">wp:rawy</property>
+                    <property name="nativeName">wp:rawy</property>
+                    <property name="dataType">float</property>
+                    <property name="nativeDataType">8</property>
+                </structure>
+                <structure>
+                    <property name="position">6</property>
+                    <property name="name">wp:distance</property>
+                    <property name="nativeName">wp:distance</property>
+                    <property name="dataType">float</property>
+                    <property name="nativeDataType">8</property>
+                </structure>
+                <structure>
+                    <property name="position">7</property>
+                    <property name="name">wp:direction</property>
+                    <property name="nativeName">wp:direction</property>
+                    <property name="dataType">float</property>
+                    <property name="nativeDataType">8</property>
+                </structure>
+                <structure>
+                    <property name="position">8</property>
+                    <property name="name">wp:projx</property>
+                    <property name="nativeName">wp:projx</property>
+                    <property name="dataType">float</property>
+                    <property name="nativeDataType">8</property>
+                </structure>
+                <structure>
+                    <property name="position">9</property>
+                    <property name="name">wp:projy</property>
+                    <property name="nativeName">wp:projy</property>
+                    <property name="dataType">float</property>
+                    <property name="nativeDataType">8</property>
+                </structure>
+                <structure>
+                    <property name="position">10</property>
+                    <property name="name">wp:comment</property>
+                    <property name="nativeName">wp:comment</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">11</property>
+                    <property name="name">wp:observer</property>
+                    <property name="nativeName">wp:observer</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">12</property>
+                    <property name="name">ca:id</property>
+                    <property name="nativeName">ca:id</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">13</property>
+                    <property name="name">ca:name</property>
+                    <property name="nativeName">ca:name</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">14</property>
+                    <property name="name">wp:rawgeometry</property>
+                    <property name="nativeName">wp:rawgeometry</property>
+                    <property name="dataType">javaObject</property>
+                    <property name="nativeDataType">2000</property>
+                </structure>
+                <structure>
+                    <property name="position">15</property>
+                    <property name="name">wp:geometry</property>
+                    <property name="nativeName">wp:geometry</property>
+                    <property name="dataType">javaObject</property>
+                    <property name="nativeDataType">2000</property>
+                </structure>
+            </list-property>
+            <xml-property name="queryText"><![CDATA[]]></xml-property>
+            <xml-property name="designerValues"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<model:DesignValues xmlns:design="http://www.eclipse.org/datatools/connectivity/oda/design" xmlns:model="http://www.eclipse.org/birt/report/model/adapter/odaModel">
+  <Version>2.0</Version>
+  <DataSetParameters>
+    <parameter>
+      <design:ParameterDefinition>
+        <design:inOutMode>In</design:inOutMode>
+        <design:attributes>
+          <design:identifier>
+            <design:name>Incident UUID</design:name>
+            <design:position>1</design:position>
+          </design:identifier>
+          <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+          <design:precision>-1</design:precision>
+          <design:scale>-1</design:scale>
+          <design:nullability>Nullable</design:nullability>
+        </design:attributes>
+        <design:inputAttributes>
+          <design:elementAttributes>
+            <design:optional>true</design:optional>
+          </design:elementAttributes>
+        </design:inputAttributes>
+      </design:ParameterDefinition>
+    </parameter>
+  </DataSetParameters>
+  <design:ResultSets derivedMetaData="true">
+    <design:resultSetDefinitions>
+      <design:resultSetColumns>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>wp:uuid</design:name>
+              <design:position>1</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>Incident UUID</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>Incident UUID</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>wp:id</design:name>
+              <design:position>2</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>Incident ID</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>Incident ID</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>wp:datetime</design:name>
+              <design:position>3</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>93</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>Date Time</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>Date Time</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>wp:rawx</design:name>
+              <design:position>4</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>8</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>Raw X</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>Raw X</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>wp:rawy</design:name>
+              <design:position>5</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>8</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>Raw Y</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>Raw Y</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>wp:distance</design:name>
+              <design:position>6</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>8</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>Distance</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>Distance</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>wp:direction</design:name>
+              <design:position>7</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>8</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>Bearing</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>Bearing</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>wp:projx</design:name>
+              <design:position>8</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>8</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>X</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>X</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>wp:projy</design:name>
+              <design:position>9</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>8</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>Y</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>Y</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>wp:comment</design:name>
+              <design:position>10</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>Comments</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>Comments</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>wp:observer</design:name>
+              <design:position>11</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>Observer</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>Observer</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>ca:id</design:name>
+              <design:position>12</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>Conservation Area ID</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>Conservation Area ID</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>ca:name</design:name>
+              <design:position>13</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>Conservation Area Name</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>Conservation Area Name</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>wp:rawgeometry</design:name>
+              <design:position>14</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>2000</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>Raw Geometry</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>Raw Geometry</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>wp:geometry</design:name>
+              <design:position>15</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>2000</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>Geometry</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>Geometry</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+      </design:resultSetColumns>
+      <design:criteria/>
+    </design:resultSetDefinitions>
+  </design:ResultSets>
+</model:DesignValues>]]></xml-property>
+        </oda-data-set>
+        <oda-data-set extensionID="org.wcs.smart.incident.birt.incident.attachments" name="attachments" id="879">
+            <text-property name="displayName">Incidents</text-property>
+            <list-property name="columnHints">
+                <structure>
+                    <property name="columnName">attachment:uuid</property>
+                    <property name="alias">Attachment UUID</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">Attachment UUID</text-property>
+                    <text-property name="heading">Attachment UUID</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">wp:uuid</property>
+                    <property name="alias">Waypoint UUID</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">Waypoint UUID</text-property>
+                    <text-property name="heading">Waypoint UUID</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">obs:uuid</property>
+                    <property name="alias">Observation UUID</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">Observation UUID</text-property>
+                    <text-property name="heading">Observation UUID</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">signaturetype:key</property>
+                    <property name="alias">Signature Type Key</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">Signature Type Key</text-property>
+                    <text-property name="heading">Signature Type Key</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">signaturetypen:ame</property>
+                    <property name="alias">Signature Type Name</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">Signature Type Name</text-property>
+                    <text-property name="heading">Signature Type Name</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">attachment:filename</property>
+                    <property name="alias">Filename</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">Filename</text-property>
+                    <text-property name="heading">Filename</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">attachment:data</property>
+                    <property name="alias">Data</property>
+                    <property name="analysis">attribute</property>
+                    <text-property name="displayName">Data</text-property>
+                    <text-property name="heading">Data</text-property>
+                </structure>
+            </list-property>
+            <list-property name="parameters">
+                <structure>
+                    <property name="name">Incident UUID</property>
+                    <property name="paramName">Incident UUID</property>
+                    <property name="nativeName">Incident UUID</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                    <property name="position">1</property>
+                    <property name="isOptional">true</property>
+                    <property name="allowNull">true</property>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+            </list-property>
+            <structure name="cachedMetaData">
+                <list-property name="resultSet">
+                    <structure>
+                        <property name="position">1</property>
+                        <property name="name">Attachment UUID</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">2</property>
+                        <property name="name">Waypoint UUID</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">3</property>
+                        <property name="name">Observation UUID</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">4</property>
+                        <property name="name">Signature Type Key</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">5</property>
+                        <property name="name">Signature Type Name</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">6</property>
+                        <property name="name">Filename</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">7</property>
+                        <property name="name">Data</property>
+                        <property name="dataType">blob</property>
+                    </structure>
+                </list-property>
+            </structure>
+            <property name="dataSource">Data Source</property>
+            <list-property name="resultSet">
+                <structure>
+                    <property name="position">1</property>
+                    <property name="name">attachment:uuid</property>
+                    <property name="nativeName">attachment:uuid</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">2</property>
+                    <property name="name">wp:uuid</property>
+                    <property name="nativeName">wp:uuid</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">3</property>
+                    <property name="name">obs:uuid</property>
+                    <property name="nativeName">obs:uuid</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">4</property>
+                    <property name="name">signaturetype:key</property>
+                    <property name="nativeName">signaturetype:key</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">5</property>
+                    <property name="name">signaturetypen:ame</property>
+                    <property name="nativeName">signaturetypen:ame</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">6</property>
+                    <property name="name">attachment:filename</property>
+                    <property name="nativeName">attachment:filename</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">7</property>
+                    <property name="name">attachment:data</property>
+                    <property name="nativeName">attachment:data</property>
+                    <property name="dataType">blob</property>
+                    <property name="nativeDataType">2004</property>
+                </structure>
+            </list-property>
+            <xml-property name="queryText"><![CDATA[]]></xml-property>
+            <xml-property name="designerValues"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<model:DesignValues xmlns:design="http://www.eclipse.org/datatools/connectivity/oda/design" xmlns:model="http://www.eclipse.org/birt/report/model/adapter/odaModel">
+  <Version>2.0</Version>
+  <DataSetParameters>
+    <parameter>
+      <design:ParameterDefinition>
+        <design:inOutMode>In</design:inOutMode>
+        <design:attributes>
+          <design:identifier>
+            <design:name>Incident UUID</design:name>
+            <design:position>1</design:position>
+          </design:identifier>
+          <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+          <design:precision>-1</design:precision>
+          <design:scale>-1</design:scale>
+          <design:nullability>Nullable</design:nullability>
+        </design:attributes>
+        <design:inputAttributes>
+          <design:elementAttributes>
+            <design:optional>true</design:optional>
+          </design:elementAttributes>
+        </design:inputAttributes>
+      </design:ParameterDefinition>
+    </parameter>
+  </DataSetParameters>
+  <design:ResultSets derivedMetaData="true">
+    <design:resultSetDefinitions>
+      <design:resultSetColumns>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>attachment:uuid</design:name>
+              <design:position>1</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>Attachment UUID</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>Attachment UUID</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>wp:uuid</design:name>
+              <design:position>2</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>Waypoint UUID</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>Waypoint UUID</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>obs:uuid</design:name>
+              <design:position>3</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>Observation UUID</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>Observation UUID</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>signaturetype:key</design:name>
+              <design:position>4</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>Signature Type Key</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>Signature Type Key</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>signaturetypen:ame</design:name>
+              <design:position>5</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>Signature Type Name</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>Signature Type Name</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>attachment:filename</design:name>
+              <design:position>6</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>Filename</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>Filename</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>attachment:data</design:name>
+              <design:position>7</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>2004</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>Data</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>Data</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+      </design:resultSetColumns>
+      <design:criteria/>
+    </design:resultSetDefinitions>
+  </design:ResultSets>
+</model:DesignValues>]]></xml-property>
+        </oda-data-set>
+        <oda-data-set extensionID="org.wcs.smart.incident.birt.incident.observations" name="observations" id="957">
+            <text-property name="displayName">Incidents</text-property>
+            <list-property name="columnHints">
+                <structure>
+                    <property name="columnName">obs:uuid</property>
+                    <property name="alias">Observation UUID</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">Observation UUID</text-property>
+                    <text-property name="heading">Observation UUID</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">group:uuid</property>
+                    <property name="alias">Observation Group UUID</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">Observation Group UUID</text-property>
+                    <text-property name="heading">Observation Group UUID</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">category:leaf</property>
+                    <property name="alias">Category - Leaf</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">Category - Leaf</text-property>
+                    <text-property name="heading">Category - Leaf</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">category:other</property>
+                    <property name="alias">Category - Other</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">Category - Other</text-property>
+                    <text-property name="heading">Category - Other</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">category:full</property>
+                    <property name="alias">Category - Full</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">Category - Full</text-property>
+                    <text-property name="heading">Category - Full</text-property>
+                </structure>
+            </list-property>
+            <list-property name="parameters">
+                <structure>
+                    <property name="name">Incident UUID</property>
+                    <property name="paramName">Incident UUID</property>
+                    <property name="nativeName">Incident UUID</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                    <property name="position">1</property>
+                    <property name="isOptional">true</property>
+                    <property name="allowNull">true</property>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+            </list-property>
+            <structure name="cachedMetaData">
+                <list-property name="resultSet">
+                    <structure>
+                        <property name="position">1</property>
+                        <property name="name">Observation UUID</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">2</property>
+                        <property name="name">Observation Group UUID</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">3</property>
+                        <property name="name">Category - Leaf</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">4</property>
+                        <property name="name">Category - Other</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">5</property>
+                        <property name="name">Category - Full</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                </list-property>
+            </structure>
+            <property name="dataSource">Data Source</property>
+            <list-property name="resultSet">
+                <structure>
+                    <property name="position">1</property>
+                    <property name="name">obs:uuid</property>
+                    <property name="nativeName">obs:uuid</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">2</property>
+                    <property name="name">group:uuid</property>
+                    <property name="nativeName">group:uuid</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">3</property>
+                    <property name="name">category:leaf</property>
+                    <property name="nativeName">category:leaf</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">4</property>
+                    <property name="name">category:other</property>
+                    <property name="nativeName">category:other</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">5</property>
+                    <property name="name">category:full</property>
+                    <property name="nativeName">category:full</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+            </list-property>
+            <xml-property name="queryText"><![CDATA[]]></xml-property>
+            <xml-property name="designerValues"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<model:DesignValues xmlns:design="http://www.eclipse.org/datatools/connectivity/oda/design" xmlns:model="http://www.eclipse.org/birt/report/model/adapter/odaModel">
+  <Version>2.0</Version>
+  <DataSetParameters>
+    <parameter>
+      <design:ParameterDefinition>
+        <design:inOutMode>In</design:inOutMode>
+        <design:attributes>
+          <design:identifier>
+            <design:name>Incident UUID</design:name>
+            <design:position>1</design:position>
+          </design:identifier>
+          <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+          <design:precision>-1</design:precision>
+          <design:scale>-1</design:scale>
+          <design:nullability>Nullable</design:nullability>
+        </design:attributes>
+        <design:inputAttributes>
+          <design:elementAttributes>
+            <design:optional>true</design:optional>
+          </design:elementAttributes>
+        </design:inputAttributes>
+      </design:ParameterDefinition>
+    </parameter>
+  </DataSetParameters>
+  <design:ResultSets derivedMetaData="true">
+    <design:resultSetDefinitions>
+      <design:resultSetColumns>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>obs:uuid</design:name>
+              <design:position>1</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>Observation UUID</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>Observation UUID</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>group:uuid</design:name>
+              <design:position>2</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>Observation Group UUID</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>Observation Group UUID</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>category:leaf</design:name>
+              <design:position>3</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>Category - Leaf</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>Category - Leaf</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>category:other</design:name>
+              <design:position>4</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>Category - Other</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>Category - Other</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>category:full</design:name>
+              <design:position>5</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>Category - Full</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>Category - Full</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+      </design:resultSetColumns>
+      <design:criteria/>
+    </design:resultSetDefinitions>
+  </design:ResultSets>
+</model:DesignValues>]]></xml-property>
+        </oda-data-set>
+        <oda-data-set extensionID="org.wcs.smart.incident.birt.incident.observations.attributes" name="attributes" id="958">
+            <text-property name="displayName">Incidents</text-property>
+            <list-property name="columnHints">
+                <structure>
+                    <property name="columnName">obs:uuid</property>
+                    <property name="alias">Observation UUID</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">Observation UUID</text-property>
+                    <text-property name="heading">Observation UUID</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">attribute:name</property>
+                    <property name="alias">Attribute Name</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">Attribute Name</text-property>
+                    <text-property name="heading">Attribute Name</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">attribute:value</property>
+                    <property name="alias">Attribute Value As String</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">Attribute Value As String</text-property>
+                    <text-property name="heading">Attribute Value As String</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">attribute:stringvalue</property>
+                    <property name="alias">String Value</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">String Value</text-property>
+                    <text-property name="heading">String Value</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">attribute:numbervalue</property>
+                    <property name="alias">Number Value</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">Number Value</text-property>
+                    <text-property name="heading">Number Value</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">attribute:booleanvalue</property>
+                    <property name="alias">Boolean Value</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">Boolean Value</text-property>
+                    <text-property name="heading">Boolean Value</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">attribute:datevalue</property>
+                    <property name="alias">Date Value</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">Date Value</text-property>
+                    <text-property name="heading">Date Value</text-property>
+                </structure>
+            </list-property>
+            <list-property name="parameters">
+                <structure>
+                    <property name="name">Incident UUID</property>
+                    <property name="paramName">Incident UUID</property>
+                    <property name="nativeName">Incident UUID</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                    <property name="position">1</property>
+                    <property name="isOptional">true</property>
+                    <property name="allowNull">true</property>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+            </list-property>
+            <structure name="cachedMetaData">
+                <list-property name="resultSet">
+                    <structure>
+                        <property name="position">1</property>
+                        <property name="name">Observation UUID</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">2</property>
+                        <property name="name">Attribute Name</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">3</property>
+                        <property name="name">Attribute Value As String</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">4</property>
+                        <property name="name">String Value</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">5</property>
+                        <property name="name">Number Value</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">6</property>
+                        <property name="name">Boolean Value</property>
+                        <property name="dataType">boolean</property>
+                    </structure>
+                    <structure>
+                        <property name="position">7</property>
+                        <property name="name">Date Value</property>
+                        <property name="dataType">date</property>
+                    </structure>
+                </list-property>
+            </structure>
+            <property name="dataSource">Data Source</property>
+            <list-property name="resultSet">
+                <structure>
+                    <property name="position">1</property>
+                    <property name="name">obs:uuid</property>
+                    <property name="nativeName">obs:uuid</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">2</property>
+                    <property name="name">attribute:name</property>
+                    <property name="nativeName">attribute:name</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">3</property>
+                    <property name="name">attribute:value</property>
+                    <property name="nativeName">attribute:value</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">4</property>
+                    <property name="name">attribute:stringvalue</property>
+                    <property name="nativeName">attribute:stringvalue</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">12</property>
+                </structure>
+                <structure>
+                    <property name="position">5</property>
+                    <property name="name">attribute:numbervalue</property>
+                    <property name="nativeName">attribute:numbervalue</property>
+                    <property name="dataType">string</property>
+                    <property name="nativeDataType">2</property>
+                </structure>
+                <structure>
+                    <property name="position">6</property>
+                    <property name="name">attribute:booleanvalue</property>
+                    <property name="nativeName">attribute:booleanvalue</property>
+                    <property name="dataType">boolean</property>
+                    <property name="nativeDataType">16</property>
+                </structure>
+                <structure>
+                    <property name="position">7</property>
+                    <property name="name">attribute:datevalue</property>
+                    <property name="nativeName">attribute:datevalue</property>
+                    <property name="dataType">date</property>
+                    <property name="nativeDataType">91</property>
+                </structure>
+            </list-property>
+            <xml-property name="queryText"><![CDATA[]]></xml-property>
+            <xml-property name="designerValues"><![CDATA[<?xml version="1.0" encoding="UTF-8"?>
+<model:DesignValues xmlns:design="http://www.eclipse.org/datatools/connectivity/oda/design" xmlns:model="http://www.eclipse.org/birt/report/model/adapter/odaModel">
+  <Version>2.0</Version>
+  <DataSetParameters>
+    <parameter>
+      <design:ParameterDefinition>
+        <design:inOutMode>In</design:inOutMode>
+        <design:attributes>
+          <design:identifier>
+            <design:name>Incident UUID</design:name>
+            <design:position>1</design:position>
+          </design:identifier>
+          <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+          <design:precision>-1</design:precision>
+          <design:scale>-1</design:scale>
+          <design:nullability>Nullable</design:nullability>
+        </design:attributes>
+        <design:inputAttributes>
+          <design:elementAttributes>
+            <design:optional>true</design:optional>
+          </design:elementAttributes>
+        </design:inputAttributes>
+      </design:ParameterDefinition>
+    </parameter>
+  </DataSetParameters>
+  <design:ResultSets derivedMetaData="true">
+    <design:resultSetDefinitions>
+      <design:resultSetColumns>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>obs:uuid</design:name>
+              <design:position>1</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>Observation UUID</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>Observation UUID</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>attribute:name</design:name>
+              <design:position>2</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>Attribute Name</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>Attribute Name</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>attribute:value</design:name>
+              <design:position>3</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>Attribute Value As String</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>Attribute Value As String</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>attribute:stringvalue</design:name>
+              <design:position>4</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>String Value</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>String Value</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>attribute:numbervalue</design:name>
+              <design:position>5</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>2</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>Number Value</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>Number Value</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>attribute:booleanvalue</design:name>
+              <design:position>6</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>16</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>Boolean Value</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>Boolean Value</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+        <design:resultColumnDefinitions>
+          <design:attributes>
+            <design:identifier>
+              <design:name>attribute:datevalue</design:name>
+              <design:position>7</design:position>
+            </design:identifier>
+            <design:nativeDataTypeCode>91</design:nativeDataTypeCode>
+            <design:precision>-1</design:precision>
+            <design:scale>-1</design:scale>
+            <design:nullability>Unknown</design:nullability>
+            <design:uiHints>
+              <design:displayName>Date Value</design:displayName>
+            </design:uiHints>
+          </design:attributes>
+          <design:usageHints>
+            <design:label>Date Value</design:label>
+            <design:formattingHints>
+              <design:displaySize>-1</design:displaySize>
+            </design:formattingHints>
+          </design:usageHints>
+        </design:resultColumnDefinitions>
+      </design:resultSetColumns>
+      <design:criteria/>
+    </design:resultSetDefinitions>
+  </design:ResultSets>
+</model:DesignValues>]]></xml-property>
+        </oda-data-set>
+        <joint-data-set name="observation_attributes" id="959">
+            <list-property name="columnHints">
+                <structure>
+                    <property name="columnName">attributes::obs:uuid</property>
+                    <property name="alias">attributes::Observation UUID</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">attributes::obs:uuid</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">observations::category:full</property>
+                    <property name="alias">Category - Full</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">observations::category:full</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">observations::category:other</property>
+                    <property name="alias">Category - Other</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">observations::category:other</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">attributes::attribute:stringvalue</property>
+                    <property name="alias">String Value</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">attributes::attribute:stringvalue</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">attributes::attribute:numbervalue</property>
+                    <property name="alias">Number Value</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">attributes::attribute:numbervalue</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">observations::obs:uuid</property>
+                    <property name="alias">observations::Observation UUID</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">observations::obs:uuid</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">attributes::attribute:datevalue</property>
+                    <property name="alias">Date Value</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">attributes::attribute:datevalue</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">attributes::attribute:booleanvalue</property>
+                    <property name="alias">Boolean Value</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">attributes::attribute:booleanvalue</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">observations::group:uuid</property>
+                    <property name="alias">Observation Group UUID</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">observations::group:uuid</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">observations::category:leaf</property>
+                    <property name="alias">Category - Leaf</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">observations::category:leaf</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">attributes::attribute:name</property>
+                    <property name="alias">Attribute Name</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">attributes::attribute:name</text-property>
+                </structure>
+                <structure>
+                    <property name="columnName">attributes::attribute:value</property>
+                    <property name="alias">Attribute Value As String</property>
+                    <property name="analysis">dimension</property>
+                    <text-property name="displayName">attributes::attribute:value</text-property>
+                </structure>
+            </list-property>
+            <list-property name="parameters">
+                <structure>
+                    <property name="name">observations::Incident UUID</property>
+                    <property name="dataType">string</property>
+                    <property name="position">0</property>
+                    <property name="isOptional">true</property>
+                    <property name="allowNull">true</property>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+                <structure>
+                    <property name="name">attributes::Incident UUID</property>
+                    <property name="dataType">string</property>
+                    <property name="position">1</property>
+                    <property name="isOptional">true</property>
+                    <property name="allowNull">true</property>
+                    <property name="isInput">true</property>
+                    <property name="isOutput">false</property>
+                </structure>
+            </list-property>
+            <structure name="cachedMetaData">
+                <list-property name="resultSet">
+                    <structure>
+                        <property name="position">1</property>
+                        <property name="name">observations::Observation UUID</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">2</property>
+                        <property name="name">Observation Group UUID</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">3</property>
+                        <property name="name">Category - Leaf</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">4</property>
+                        <property name="name">Category - Other</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">5</property>
+                        <property name="name">Category - Full</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">6</property>
+                        <property name="name">attributes::Observation UUID</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">7</property>
+                        <property name="name">Attribute Name</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">8</property>
+                        <property name="name">Attribute Value As String</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">9</property>
+                        <property name="name">String Value</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">10</property>
+                        <property name="name">Number Value</property>
+                        <property name="dataType">string</property>
+                    </structure>
+                    <structure>
+                        <property name="position">11</property>
+                        <property name="name">Boolean Value</property>
+                        <property name="dataType">boolean</property>
+                    </structure>
+                    <structure>
+                        <property name="position">12</property>
+                        <property name="name">Date Value</property>
+                        <property name="dataType">date</property>
+                    </structure>
+                </list-property>
+            </structure>
+            <simple-property-list name="dataSets">
+                <value>observations</value>
+                <value>attributes</value>
+            </simple-property-list>
+            <list-property name="joinConditions">
+                <structure>
+                    <property name="joinType">left-out</property>
+                    <property name="joinOperator">eq</property>
+                    <property name="leftDataSet">observations</property>
+                    <property name="rightDataSet">attributes</property>
+                    <expression name="leftExpression">dataSetRow["Observation UUID"]</expression>
+                    <expression name="rightExpression">dataSetRow["Observation UUID"]</expression>
+                </structure>
+            </list-property>
+        </joint-data-set>
+    </data-sets>
+    <styles>
+        <style name="Header" id="462">
+            <property name="backgroundColor">#F0F0F0</property>
+            <property name="fontFamily">sans-serif</property>
+            <property name="fontSize">10pt</property>
+            <property name="fontWeight">bold</property>
+            <property name="color">#004080</property>
+            <property name="marginTop">5pt</property>
+            <property name="marginBottom">5pt</property>
+            <property name="paddingTop">5pt</property>
+            <property name="paddingLeft">2pt</property>
+            <property name="paddingBottom">5pt</property>
+            <property name="paddingRight">2pt</property>
+        </style>
+        <style name="ReportLabel" id="530">
+            <property name="fontFamily">sans-serif</property>
+            <property name="fontSize">9pt</property>
+            <property name="marginTop">1pt</property>
+            <property name="marginBottom">0pt</property>
+        </style>
+    </styles>
+    <page-setup>
+        <simple-master-page name="NewSimpleMasterPage" id="12"/>
+    </page-setup>
+    <body>
+        <label id="878">
+            <property name="fontFamily">sans-serif</property>
+            <property name="fontSize">14pt</property>
+            <property name="fontWeight">bold</property>
+            <property name="color">#004080</property>
+            <property name="textAlign">center</property>
+            <text-property name="text">Incident Report</text-property>
+        </label>
+        <text-data id="779">
+            <property name="fontFamily">sans-serif</property>
+            <property name="fontSize">12pt</property>
+            <property name="color">#004080</property>
+            <property name="marginBottom">5pt</property>
+            <property name="textAlign">center</property>
+            <property name="dataSet">details</property>
+            <list-property name="boundDataColumns">
+                <structure>
+                    <property name="name">Incident UUID</property>
+                    <text-property name="displayName">Incident UUID</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Incident UUID"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">Incident ID</property>
+                    <text-property name="displayName">Incident ID</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Incident ID"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">Date Time</property>
+                    <text-property name="displayName">Date Time</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Date Time"]</expression>
+                    <property name="dataType">date-time</property>
+                </structure>
+                <structure>
+                    <property name="name">Raw X</property>
+                    <text-property name="displayName">Raw X</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Raw X"]</expression>
+                    <property name="dataType">float</property>
+                </structure>
+                <structure>
+                    <property name="name">Raw Y</property>
+                    <text-property name="displayName">Raw Y</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Raw Y"]</expression>
+                    <property name="dataType">float</property>
+                </structure>
+                <structure>
+                    <property name="name">Distance</property>
+                    <text-property name="displayName">Distance</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Distance"]</expression>
+                    <property name="dataType">float</property>
+                </structure>
+                <structure>
+                    <property name="name">Bearing</property>
+                    <text-property name="displayName">Bearing</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Bearing"]</expression>
+                    <property name="dataType">float</property>
+                </structure>
+                <structure>
+                    <property name="name">X</property>
+                    <text-property name="displayName">X</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["X"]</expression>
+                    <property name="dataType">float</property>
+                </structure>
+                <structure>
+                    <property name="name">Y</property>
+                    <text-property name="displayName">Y</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Y"]</expression>
+                    <property name="dataType">float</property>
+                </structure>
+                <structure>
+                    <property name="name">Comments</property>
+                    <text-property name="displayName">Comments</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Comments"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">Observer</property>
+                    <text-property name="displayName">Observer</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Observer"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">Conservation Area ID</property>
+                    <text-property name="displayName">Conservation Area ID</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Conservation Area ID"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">Conservation Area Name</property>
+                    <text-property name="displayName">Conservation Area Name</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Conservation Area Name"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">Raw Geometry</property>
+                    <text-property name="displayName">Raw Geometry</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Raw Geometry"]</expression>
+                    <property name="dataType">javaObject</property>
+                </structure>
+                <structure>
+                    <property name="name">Geometry</property>
+                    <text-property name="displayName">Geometry</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Geometry"]</expression>
+                    <property name="dataType">javaObject</property>
+                </structure>
+            </list-property>
+            <expression name="valueExpr">row["Conservation Area Name"]</expression>
+            <property name="contentType">html</property>
+        </text-data>
+        <label id="461">
+            <property name="style">Header</property>
+            <property name="marginTop">0pt</property>
+            <property name="marginBottom">0pt</property>
+            <text-property name="text">Incident Details</text-property>
+        </label>
+        <grid id="726">
+            <property name="dataSet">details</property>
+            <list-property name="boundDataColumns">
+                <structure>
+                    <property name="name">Incident UUID</property>
+                    <text-property name="displayName">Incident UUID</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Incident UUID"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">Incident ID</property>
+                    <text-property name="displayName">Incident ID</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Incident ID"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">Date Time</property>
+                    <text-property name="displayName">Date Time</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Date Time"]</expression>
+                    <property name="dataType">date-time</property>
+                </structure>
+                <structure>
+                    <property name="name">Raw X</property>
+                    <text-property name="displayName">Raw X</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Raw X"]</expression>
+                    <property name="dataType">float</property>
+                </structure>
+                <structure>
+                    <property name="name">Raw Y</property>
+                    <text-property name="displayName">Raw Y</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Raw Y"]</expression>
+                    <property name="dataType">float</property>
+                </structure>
+                <structure>
+                    <property name="name">Distance</property>
+                    <text-property name="displayName">Distance</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Distance"]</expression>
+                    <property name="dataType">float</property>
+                </structure>
+                <structure>
+                    <property name="name">Bearing</property>
+                    <text-property name="displayName">Bearing</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Bearing"]</expression>
+                    <property name="dataType">float</property>
+                </structure>
+                <structure>
+                    <property name="name">X</property>
+                    <text-property name="displayName">X</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["X"]</expression>
+                    <property name="dataType">float</property>
+                </structure>
+                <structure>
+                    <property name="name">Y</property>
+                    <text-property name="displayName">Y</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Y"]</expression>
+                    <property name="dataType">float</property>
+                </structure>
+                <structure>
+                    <property name="name">Comments</property>
+                    <text-property name="displayName">Comments</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Comments"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">Observer</property>
+                    <text-property name="displayName">Observer</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Observer"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">Conservation Area ID</property>
+                    <text-property name="displayName">Conservation Area ID</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Conservation Area ID"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">Conservation Area Name</property>
+                    <text-property name="displayName">Conservation Area Name</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Conservation Area Name"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">Raw Geometry</property>
+                    <text-property name="displayName">Raw Geometry</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Raw Geometry"]</expression>
+                    <property name="dataType">javaObject</property>
+                </structure>
+                <structure>
+                    <property name="name">Geometry</property>
+                    <text-property name="displayName">Geometry</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Geometry"]</expression>
+                    <property name="dataType">javaObject</property>
+                </structure>
+                <structure>
+                    <property name="name">Column Binding</property>
+                    <expression name="expression" type="javascript">row["Conservation Area Name"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+            </list-property>
+            <column id="727"/>
+            <column id="728"/>
+            <row id="729">
+                <cell id="730">
+                    <grid id="732">
+                        <column id="733">
+                            <property name="width">0.8229166666666666in</property>
+                        </column>
+                        <column id="734">
+                            <property name="width">3.0729166666666665in</property>
+                        </column>
+                        <row id="735">
+                            <cell id="736">
+                                <label id="747">
+                                    <property name="style">ReportLabel</property>
+                                    <text-property name="text">Incident ID:</text-property>
+                                </label>
+                            </cell>
+                            <cell id="737">
+                                <text-data id="751">
+                                    <property name="style">ReportLabel</property>
+                                    <expression name="valueExpr">row["Incident ID"]</expression>
+                                    <property name="contentType">html</property>
+                                </text-data>
+                            </cell>
+                        </row>
+                        <row id="738">
+                            <cell id="739">
+                                <label id="748">
+                                    <property name="style">ReportLabel</property>
+                                    <text-property name="text">Date/Time:</text-property>
+                                </label>
+                            </cell>
+                            <cell id="740">
+                                <text-data id="752">
+                                    <property name="style">ReportLabel</property>
+                                    <expression name="valueExpr">row["Date Time"]</expression>
+                                    <property name="contentType">html</property>
+                                </text-data>
+                            </cell>
+                        </row>
+                        <row id="741">
+                            <cell id="742">
+                                <label id="749">
+                                    <property name="style">ReportLabel</property>
+                                    <text-property name="text">Observer:</text-property>
+                                </label>
+                            </cell>
+                            <cell id="743">
+                                <text-data id="753">
+                                    <property name="style">ReportLabel</property>
+                                    <expression name="valueExpr">row["Observer"]</expression>
+                                    <property name="contentType">html</property>
+                                </text-data>
+                            </cell>
+                        </row>
+                        <row id="744">
+                            <cell id="745">
+                                <label id="750">
+                                    <property name="style">ReportLabel</property>
+                                    <text-property name="text">Comments:</text-property>
+                                </label>
+                            </cell>
+                            <cell id="746">
+                                <text-data id="754">
+                                    <property name="style">ReportLabel</property>
+                                    <expression name="valueExpr">row["Comments"]</expression>
+                                    <property name="contentType">html</property>
+                                </text-data>
+                            </cell>
+                        </row>
+                    </grid>
+                </cell>
+                <cell id="731">
+                    <grid id="755">
+                        <column id="756">
+                            <property name="width">0.9791666666666666in</property>
+                        </column>
+                        <column id="757">
+                            <property name="width">2.9375in</property>
+                        </column>
+                        <row id="758">
+                            <cell id="759">
+                                <label id="760">
+                                    <property name="style">ReportLabel</property>
+                                    <text-property name="text">Location:</text-property>
+                                </label>
+                            </cell>
+                            <cell id="761">
+                                <text-data id="762">
+                                    <property name="style">ReportLabel</property>
+                                    <expression name="valueExpr">row["X"] + "," + row["Y"]</expression>
+                                    <property name="contentType">html</property>
+                                </text-data>
+                            </cell>
+                        </row>
+                        <row id="763">
+                            <cell id="764">
+                                <label id="765">
+                                    <property name="style">ReportLabel</property>
+                                    <text-property name="text">Raw Location:</text-property>
+                                </label>
+                            </cell>
+                            <cell id="766">
+                                <text-data id="767">
+                                    <property name="style">ReportLabel</property>
+                                    <expression name="valueExpr">row["Raw X"] + "," + row["Raw Y"]</expression>
+                                    <property name="contentType">html</property>
+                                </text-data>
+                            </cell>
+                        </row>
+                        <row id="768">
+                            <cell id="769">
+                                <label id="770">
+                                    <property name="style">ReportLabel</property>
+                                    <text-property name="text">Distance:</text-property>
+                                </label>
+                            </cell>
+                            <cell id="771">
+                                <text-data id="772">
+                                    <property name="style">ReportLabel</property>
+                                    <expression name="valueExpr">row["Distance"]</expression>
+                                    <property name="contentType">html</property>
+                                </text-data>
+                            </cell>
+                        </row>
+                        <row id="773">
+                            <cell id="774">
+                                <text id="778">
+                                    <property name="style">ReportLabel</property>
+                                    <property name="contentType">html</property>
+                                    <text-property name="content"><![CDATA[Bearing (<SUP>o</SUP>):]]></text-property>
+                                </text>
+                            </cell>
+                            <cell id="776">
+                                <text-data id="777">
+                                    <property name="style">ReportLabel</property>
+                                    <expression name="valueExpr">row["Bearing"]</expression>
+                                    <property name="contentType">html</property>
+                                </text-data>
+                            </cell>
+                        </row>
+                    </grid>
+                </cell>
+            </row>
+        </grid>
+        <label id="527">
+            <property name="style">Header</property>
+            <text-property name="text">Observations</text-property>
+        </label>
+        <table id="960">
+            <property name="dataSet">observation_attributes</property>
+            <list-property name="boundDataColumns">
+                <structure>
+                    <property name="name">observations::Observation UUID</property>
+                    <text-property name="displayName">observations::obs:uuid</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["observations::Observation UUID"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">Observation Group UUID</property>
+                    <text-property name="displayName">observations::group:uuid</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Observation Group UUID"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">Category - Leaf</property>
+                    <text-property name="displayName">observations::category:full</text-property>
+                    <expression name="expression" type="javascript">row["Category - Full"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Category - Other</property>
+                    <text-property name="displayName">observations::category:other</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Category - Other"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">Category - Full</property>
+                    <text-property name="displayName">observations::category:full</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Category - Full"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">attributes::Observation UUID</property>
+                    <text-property name="displayName">attributes::obs:uuid</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["attributes::Observation UUID"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">Attribute Name</property>
+                    <text-property name="displayName">attributes::attribute:name</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Attribute Name"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">Attribute Value As String</property>
+                    <text-property name="displayName">attributes::attribute:value</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Attribute Value As String"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">String Value</property>
+                    <text-property name="displayName">attributes::attribute:stringvalue</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["String Value"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">Number Value</property>
+                    <text-property name="displayName">attributes::attribute:numbervalue</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Number Value"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">Boolean Value</property>
+                    <text-property name="displayName">attributes::attribute:booleanvalue</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Boolean Value"]</expression>
+                    <property name="dataType">boolean</property>
+                </structure>
+                <structure>
+                    <property name="name">Date Value</property>
+                    <text-property name="displayName">attributes::attribute:datevalue</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Date Value"]</expression>
+                    <property name="dataType">date</property>
+                </structure>
+            </list-property>
+            <column id="1024">
+                <property name="width">0.71875in</property>
+            </column>
+            <column id="1025">
+                <property name="width">1.15625in</property>
+            </column>
+            <column id="1026">
+                <property name="width">6.072916666666667in</property>
+            </column>
+            <header>
+                <row id="961">
+                    <cell id="962"/>
+                    <cell id="964"/>
+                    <cell id="966"/>
+                </row>
+            </header>
+            <group id="1036">
+                <property name="groupName">Observation Group</property>
+                <expression name="keyExpr" type="javascript">row["Observation Group UUID"]</expression>
+                <structure name="toc">
+                    <expression name="expressionValue" type="javascript">row["Observation Group UUID"]</expression>
+                </structure>
+                <property name="hideDetail">false</property>
+                <header>
+                    <row id="1037">
+                        <property name="borderBottomStyle">solid</property>
+                        <property name="borderBottomWidth">thin</property>
+                        <cell id="1038">
+                            <property name="borderBottomStyle">solid</property>
+                            <property name="borderBottomWidth">thin</property>
+                        </cell>
+                        <cell id="1039"/>
+                        <cell id="1040"/>
+                    </row>
+                </header>
+                <footer>
+                    <row id="1050">
+                        <cell id="1051"/>
+                        <cell id="1052"/>
+                        <cell id="1053"/>
+                    </row>
+                </footer>
+            </group>
+            <group id="1064">
+                <property name="groupName">Observation</property>
+                <expression name="keyExpr" type="javascript">row["observations::Observation UUID"]</expression>
+                <structure name="toc">
+                    <expression name="expressionValue" type="javascript">row["observations::Observation UUID"]</expression>
+                </structure>
+                <property name="hideDetail">false</property>
+                <header>
+                    <row id="1065">
+                        <cell id="1066">
+                            <property name="colSpan">3</property>
+                            <property name="rowSpan">1</property>
+                            <data id="1092">
+                                <property name="style">ReportLabel</property>
+                                <property name="fontWeight">bold</property>
+                                <property name="resultSetColumn">Category - Leaf</property>
+                            </data>
+                        </cell>
+                    </row>
+                </header>
+                <footer>
+                    <row id="1078">
+                        <cell id="1079"/>
+                        <cell id="1080"/>
+                        <cell id="1081"/>
+                    </row>
+                </footer>
+            </group>
+            <detail>
+                <row id="986">
+                    <cell id="987"/>
+                    <cell id="989">
+                        <text-data id="1094">
+                            <property name="style">ReportLabel</property>
+                            <property name="marginLeft">15pt</property>
+                            <expression name="valueExpr">row["Attribute Name"] + ":"</expression>
+                            <property name="contentType">html</property>
+                        </text-data>
+                    </cell>
+                    <cell id="991">
+                        <data id="1002">
+                            <property name="style">ReportLabel</property>
+                            <property name="resultSetColumn">Attribute Value As String</property>
+                        </data>
+                    </cell>
+                </row>
+            </detail>
+            <footer>
+                <row id="1011">
+                    <cell id="1012"/>
+                    <cell id="1013"/>
+                    <cell id="1014"/>
+                </row>
+            </footer>
+        </table>
+        <label id="528">
+            <property name="style">Header</property>
+            <text-property name="text">Attachments</text-property>
+        </label>
+        <table id="896">
+            <property name="dataSet">attachments</property>
+            <list-property name="boundDataColumns">
+                <structure>
+                    <property name="name">Attachment UUID</property>
+                    <text-property name="displayName">Attachment UUID</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Attachment UUID"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">Waypoint UUID</property>
+                    <text-property name="displayName">Waypoint UUID</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Waypoint UUID"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">Observation UUID</property>
+                    <text-property name="displayName">Observation UUID</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Observation UUID"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">Signature Type Key</property>
+                    <text-property name="displayName">Signature Type Key</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Signature Type Key"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">Signature Type Name</property>
+                    <text-property name="displayName">Signature Type Name</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Signature Type Name"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">Filename</property>
+                    <text-property name="displayName">Filename</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Filename"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">Data</property>
+                    <text-property name="displayName">Data</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Data"]</expression>
+                    <property name="dataType">blob</property>
+                </structure>
+            </list-property>
+            <list-property name="filter">
+                <structure>
+                    <property name="operator">is-null</property>
+                    <expression name="expr" type="javascript">row["Signature Type Key"]</expression>
+                    <property name="updateAggregation">true</property>
+                </structure>
+            </list-property>
+            <column id="940">
+                <property name="width">0.9583333333333334in</property>
+            </column>
+            <column id="941">
+                <property name="width">6.989583333333333in</property>
+            </column>
+            <header>
+                <row id="897">
+                    <cell id="908"/>
+                    <cell id="910"/>
+                </row>
+            </header>
+            <detail>
+                <row id="912">
+                    <cell id="923">
+                        <property name="verticalAlign">middle</property>
+                        <data id="924">
+                            <property name="style">ReportLabel</property>
+                            <property name="resultSetColumn">Filename</property>
+                        </data>
+                    </cell>
+                    <cell id="925">
+                        <image id="942">
+                            <property name="height">1.9583333333333333in</property>
+                            <property name="width">2.1979166666666665in</property>
+                            <property name="source">expr</property>
+                            <property name="proportionalScale">true</property>
+                            <expression name="valueExpr">row["Data"]</expression>
+                        </image>
+                    </cell>
+                </row>
+            </detail>
+            <footer>
+                <row id="927">
+                    <cell id="933"/>
+                    <cell id="934"/>
+                </row>
+            </footer>
+        </table>
+        <table id="943">
+            <property name="dataSet">attachments</property>
+            <list-property name="boundDataColumns">
+                <structure>
+                    <property name="name">Attachment UUID</property>
+                    <text-property name="displayName">Attachment UUID</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Attachment UUID"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">Waypoint UUID</property>
+                    <text-property name="displayName">Waypoint UUID</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Waypoint UUID"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">Observation UUID</property>
+                    <text-property name="displayName">Observation UUID</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Observation UUID"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">Signature Type Key</property>
+                    <text-property name="displayName">Signature Type Key</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Signature Type Key"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">Signature Type Name</property>
+                    <text-property name="displayName">Signature Type Name</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Signature Type Name"]</expression>
+                    <property name="dataType">string</property>
+                </structure>
+                <structure>
+                    <property name="name">Filename</property>
+                    <text-property name="displayName">Signature</text-property>
+                    <expression name="expression" type="javascript">row["Signature Type Name"]</expression>
+                    <property name="dataType">string</property>
+                    <property name="allowExport">true</property>
+                </structure>
+                <structure>
+                    <property name="name">Data</property>
+                    <text-property name="displayName">Data</text-property>
+                    <expression name="expression" type="javascript">dataSetRow["Data"]</expression>
+                    <property name="dataType">blob</property>
+                </structure>
+            </list-property>
+            <list-property name="filter">
+                <structure>
+                    <property name="operator">is-not-null</property>
+                    <expression name="expr" type="javascript">row["Signature Type Key"]</expression>
+                    <property name="updateAggregation">true</property>
+                </structure>
+            </list-property>
+            <column id="955">
+                <property name="width">0.9583333333333334in</property>
+            </column>
+            <column id="956">
+                <property name="width">6.989583333333333in</property>
+            </column>
+            <header>
+                <row id="944">
+                    <cell id="945"/>
+                    <cell id="946"/>
+                </row>
+            </header>
+            <detail>
+                <row id="947">
+                    <cell id="948">
+                        <property name="verticalAlign">middle</property>
+                        <data id="949">
+                            <property name="style">ReportLabel</property>
+                            <property name="resultSetColumn">Filename</property>
+                        </data>
+                    </cell>
+                    <cell id="950">
+                        <image id="951">
+                            <property name="height">1.9583333333333333in</property>
+                            <property name="width">2.1979166666666665in</property>
+                            <property name="source">expr</property>
+                            <property name="proportionalScale">true</property>
+                            <expression name="valueExpr">row["Data"]</expression>
+                        </image>
+                    </cell>
+                </row>
+            </detail>
+            <footer>
+                <row id="952">
+                    <cell id="953"/>
+                    <cell id="954"/>
+                </row>
+            </footer>
+        </table>
+        <label id="529">
+            <property name="style">Header</property>
+            <text-property name="text">Map</text-property>
+        </label>
+        <extended-item extensionName="org.wcs.smart.report.birt.SmartMap" id="721">
+            <property name="org.wcs.smart.birt.map.basemap">default</property>
+            <property name="org.wcs.smart.birt.map.layers2">
+                <extended-item extensionName="org.wcs.smart.report.birt.MapLayer" id="725">
+                    <property name="org.wcs.smart.birt.map.layerName">Incidents</property>
+                    <property name="org.wcs.smart.birt.map.layerStyle">[{"id":"org.locationtech.udig.style.filter","value":"&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n&lt;styleEntry type=\"FilterContent\" version=\"1.0\"/>"},{"id":"org.locationtech.udig.style.sld","value":"&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n&lt;styleEntry type=\"SLDStyle\" version=\"1.0\">&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;UTF-8&amp;quot;?&amp;gt;&amp;lt;sld:UserStyle xmlns=&amp;quot;http://www.opengis.net/sld&amp;quot; xmlns:sld=&amp;quot;http://www.opengis.net/sld&amp;quot; xmlns:gml=&amp;quot;http://www.opengis.net/gml&amp;quot; xmlns:ogc=&amp;quot;http://www.opengis.net/ogc&amp;quot;&amp;gt;&amp;lt;sld:Name&amp;gt;newLayer&amp;lt;/sld:Name&amp;gt;&amp;lt;sld:FeatureTypeStyle&amp;gt;&amp;lt;sld:Name&amp;gt;group0&amp;lt;/sld:Name&amp;gt;&amp;lt;sld:FeatureTypeName&amp;gt;Feature&amp;lt;/sld:FeatureTypeName&amp;gt;&amp;lt;sld:SemanticTypeIdentifier&amp;gt;generic:geometry&amp;lt;/sld:SemanticTypeIdentifier&amp;gt;&amp;lt;sld:SemanticTypeIdentifier&amp;gt;simple&amp;lt;/sld:SemanticTypeIdentifier&amp;gt;&amp;lt;sld:Rule&amp;gt;&amp;lt;sld:Name&amp;gt;default rule&amp;lt;/sld:Name&amp;gt;&amp;lt;sld:Title&amp;gt;default rule&amp;lt;/sld:Title&amp;gt;&amp;lt;sld:PointSymbolizer&amp;gt;&amp;lt;sld:Graphic&amp;gt;&amp;lt;sld:Mark&amp;gt;&amp;lt;sld:WellKnownName&amp;gt;X&amp;lt;/sld:WellKnownName&amp;gt;&amp;lt;sld:Fill&amp;gt;&amp;lt;sld:CssParameter name=&amp;quot;fill&amp;quot;&amp;gt;#0000FF&amp;lt;/sld:CssParameter&amp;gt;&amp;lt;/sld:Fill&amp;gt;&amp;lt;sld:Stroke/&amp;gt;&amp;lt;/sld:Mark&amp;gt;&amp;lt;sld:Size&amp;gt;15&amp;lt;/sld:Size&amp;gt;&amp;lt;/sld:Graphic&amp;gt;&amp;lt;/sld:PointSymbolizer&amp;gt;&amp;lt;/sld:Rule&amp;gt;&amp;lt;/sld:FeatureTypeStyle&amp;gt;&amp;lt;/sld:UserStyle&amp;gt;&lt;/styleEntry>"},{"id":"org.locationtech.udig.mapgraphic.style.font","value":"&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n&lt;styleEntry COLOR=\"-16777216\" FONT_NAME=\"Dialog\" SIZE=\"8\" STYLE=\"0\"/>"},{"id":"org.locationtech.udig.mapgraphic.scaledenom.style","value":"&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n&lt;styleEntry COLOR=\"-1\" LABEL_PREFIX=\"\"/>"}]</property>
+                    <property name="org.wcs.smart.birt.map.layerType">POINT</property>
+                    <property name="org.wcs.smart.birt.map.geomColumn">wp:geometry</property>
+                    <property name="dataSet">details</property>
+                </extended-item>
+                <extended-item extensionName="org.wcs.smart.report.birt.MapLayer" id="724">
+                    <property name="org.wcs.smart.birt.map.layerName">Incidents</property>
+                    <property name="org.wcs.smart.birt.map.layerStyle">[{"id":"org.locationtech.udig.style.filter","value":"&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n&lt;styleEntry type=\"FilterContent\" version=\"1.0\"/>"},{"id":"org.locationtech.udig.style.sld","value":"&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n&lt;styleEntry type=\"SLDStyle\" version=\"1.0\">&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;UTF-8&amp;quot;?&amp;gt;&amp;lt;sld:UserStyle xmlns=&amp;quot;http://www.opengis.net/sld&amp;quot; xmlns:sld=&amp;quot;http://www.opengis.net/sld&amp;quot; xmlns:gml=&amp;quot;http://www.opengis.net/gml&amp;quot; xmlns:ogc=&amp;quot;http://www.opengis.net/ogc&amp;quot;&amp;gt;&amp;lt;sld:Name&amp;gt;newLayer&amp;lt;/sld:Name&amp;gt;&amp;lt;sld:FeatureTypeStyle&amp;gt;&amp;lt;sld:Name&amp;gt;group0&amp;lt;/sld:Name&amp;gt;&amp;lt;sld:FeatureTypeName&amp;gt;Feature&amp;lt;/sld:FeatureTypeName&amp;gt;&amp;lt;sld:SemanticTypeIdentifier&amp;gt;generic:geometry&amp;lt;/sld:SemanticTypeIdentifier&amp;gt;&amp;lt;sld:SemanticTypeIdentifier&amp;gt;simple&amp;lt;/sld:SemanticTypeIdentifier&amp;gt;&amp;lt;sld:Rule&amp;gt;&amp;lt;sld:Name&amp;gt;default rule&amp;lt;/sld:Name&amp;gt;&amp;lt;sld:Title&amp;gt;default rule&amp;lt;/sld:Title&amp;gt;&amp;lt;sld:PointSymbolizer&amp;gt;&amp;lt;sld:Graphic&amp;gt;&amp;lt;sld:Mark&amp;gt;&amp;lt;sld:WellKnownName&amp;gt;circle&amp;lt;/sld:WellKnownName&amp;gt;&amp;lt;sld:Fill&amp;gt;&amp;lt;sld:CssParameter name=&amp;quot;fill&amp;quot;&amp;gt;#0080FF&amp;lt;/sld:CssParameter&amp;gt;&amp;lt;/sld:Fill&amp;gt;&amp;lt;sld:Stroke/&amp;gt;&amp;lt;/sld:Mark&amp;gt;&amp;lt;sld:Size&amp;gt;10&amp;lt;/sld:Size&amp;gt;&amp;lt;/sld:Graphic&amp;gt;&amp;lt;/sld:PointSymbolizer&amp;gt;&amp;lt;/sld:Rule&amp;gt;&amp;lt;/sld:FeatureTypeStyle&amp;gt;&amp;lt;/sld:UserStyle&amp;gt;&lt;/styleEntry>"},{"id":"org.locationtech.udig.mapgraphic.style.font","value":"&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n&lt;styleEntry COLOR=\"-16777216\" FONT_NAME=\"Dialog\" SIZE=\"8\" STYLE=\"0\"/>"},{"id":"org.locationtech.udig.mapgraphic.scaledenom.style","value":"&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n&lt;styleEntry COLOR=\"-1\" LABEL_PREFIX=\"\"/>"}]</property>
+                    <property name="org.wcs.smart.birt.map.layerType">POINT</property>
+                    <property name="org.wcs.smart.birt.map.geomColumn">wp:rawgeometry</property>
+                    <property name="dataSet">details</property>
+                </extended-item>
+            </property>
+            <property name="height">5.552083333333333in</property>
+            <property name="width">7.927083333333333in</property>
+        </extended-item>
+    </body>
+</report>
