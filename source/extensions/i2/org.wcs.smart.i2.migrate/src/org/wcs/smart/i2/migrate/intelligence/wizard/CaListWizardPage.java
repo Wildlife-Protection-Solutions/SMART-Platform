@@ -48,7 +48,7 @@ public class CaListWizardPage extends WizardPage {
 
 	private CheckboxTableViewer tblConservationAreas;
 	
-	protected CaListWizardPage() {
+	public CaListWizardPage() {
 		super("CALISTPAGE"); //$NON-NLS-1$
 	}
 

@@ -184,7 +184,7 @@ public class IntelEntityRelationship extends UuidItem{
 	}
 	
 	/**
-	 * Sets the relationship srouce
+	 * Sets the relationship source
 	 * @param source
 	 */
 	public void setSourceId(UUID sourceId){

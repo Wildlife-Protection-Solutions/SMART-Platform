@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.migrate.intelligence.wizard;
+package org.wcs.smart.i2.migrate.entity.wizard;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -37,25 +37,28 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.i2.migrate.ExtractDbJob;
 import org.wcs.smart.i2.migrate.MigratePlugin;
-import org.wcs.smart.i2.migrate.intelligence.Intel6Database;
+import org.wcs.smart.i2.migrate.entity.Entity6Database;
+import org.wcs.smart.i2.migrate.entity.EntityMigrationJob;
+import org.wcs.smart.i2.migrate.intelligence.wizard.CaListWizardPage;
+import org.wcs.smart.i2.migrate.intelligence.wizard.Smart6WizardPage;
 import org.wcs.smart.i2.migrate.internal.Messages;
 
 /**
- * Wizard for migrating SMART6 intelligence records to SMART7+ profile records
+ * Wizard for migrating SMART6 entity records to SMART7+ profile records
  * 
  * @author Emily
  *
  */
-public class MigrateIntelligenceWizard extends Wizard  implements IPageChangingListener {
+public class MigrateEntityWizard extends Wizard  implements IPageChangingListener {
 
 	private Smart6WizardPage page1;
 	private CaListWizardPage page2;
-	private RecordMappingPage page3;
+	private EntityTypeMappingPage page3;
 	
-	private Intel6Database smart6;
+	private Entity6Database smart6;
 	private List<ConservationArea> toProcess;
 	
-	public MigrateIntelligenceWizard() {
+	public MigrateEntityWizard() {
 		super();
 		setNeedsProgressMonitor(true);
 	}
@@ -89,7 +92,8 @@ public class MigrateIntelligenceWizard extends Wizard  implements IPageChangingL
 
 	@Override
 	public boolean performFinish() {
-		ConversionJob job = new ConversionJob(page3.getMappings(), smart6);
+		EntityMigrationJob job = new EntityMigrationJob(smart6, page3.getMappings());
+		
 		try {
 			getContainer().run(true, true, job);
 		} catch (InvocationTargetException | InterruptedException e) {
@@ -113,7 +117,7 @@ public class MigrateIntelligenceWizard extends Wizard  implements IPageChangingL
     	
     	page1 = new Smart6WizardPage();
     	page2 = new CaListWizardPage();
-    	page3 = new RecordMappingPage();
+    	page3 = new EntityTypeMappingPage();
     	
     	super.addPage(page1);
     	super.addPage(page2);
@@ -135,25 +139,27 @@ public class MigrateIntelligenceWizard extends Wizard  implements IPageChangingL
 			}
 			String fname = page1.getFile();
 			try {
-				ExtractDbJob<Intel6Database> job = new ExtractDbJob<Intel6Database>(fname) {
-					protected List<ConservationArea> getConservationAreasWithData(Intel6Database db) throws SQLException{
-						return db.getConservationAreasIntelWithData();	
+				ExtractDbJob<Entity6Database> job = new ExtractDbJob<Entity6Database>(fname) {
+
+					@Override
+					protected List<ConservationArea> getConservationAreasWithData(Entity6Database database) throws SQLException {
+						return database.getConservationAreasWithEntity();
 					}
 
 					@Override
-					protected Intel6Database createDatabase(Path path) throws SQLException {
-						return new Intel6Database(path);
+					protected Entity6Database createDatabase(Path path) throws SQLException {
+						return new Entity6Database(path);
 					}
 
 					@Override
-					protected boolean validateVersion(Intel6Database database) throws SQLException {
-						return database.validateIntelligenceVersion();
-					}
-				};
+					protected boolean validateVersion(Entity6Database database) throws SQLException {
+						return database.validateEntityVersion();
+					}};
 				getContainer().run(true, true, job);
 				
 				this.toProcess = job.getConservationAreas();
-				this.smart6 = job.getDatabase();
+				this.smart6 = (Entity6Database)job.getDatabase();
+				
 			} catch (Exception e) {
 				processException(e);
 				event.doit = false;
@@ -192,6 +198,7 @@ public class MigrateIntelligenceWizard extends Wizard  implements IPageChangingL
 			if (t.getMessage() != null) msg += " " + t.getMessage(); //$NON-NLS-1$
 			t = t.getCause();
 		}
+		if (msg.isEmpty()) msg = "Error converting data: " +  ex.getStackTrace()[0].toString();
 		MigratePlugin.displayLog(msg, ex);
 	}
 

@@ -47,9 +47,9 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.migrate.MigratePlugin;
+import org.wcs.smart.i2.migrate.intelligence.Intel6Database;
 import org.wcs.smart.i2.migrate.intelligence.IntelMappingRecord;
 import org.wcs.smart.i2.migrate.intelligence.IntelligenceItem;
-import org.wcs.smart.i2.migrate.intelligence.Smart6Database;
 import org.wcs.smart.i2.migrate.internal.Messages;
 import org.wcs.smart.i2.model.IntelAttachment;
 import org.wcs.smart.i2.model.IntelLocation;
@@ -70,9 +70,9 @@ import org.wcs.smart.patrol.model.PatrolWaypoint;
 public class ConversionJob implements IRunnableWithProgress {
 
 	private List<IntelMappingRecord> mappings;
-	private Smart6Database smart6;
+	private Intel6Database smart6;
 	
-	public ConversionJob(List<IntelMappingRecord> mappings, Smart6Database smart6) {
+	public ConversionJob(List<IntelMappingRecord> mappings, Intel6Database smart6) {
 		this.mappings = mappings;
 		this.smart6 = smart6;
 	}

@@ -21,16 +21,10 @@
  */
 package org.wcs.smart.i2.migrate.intelligence;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.nio.file.Path;
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.SQLNonTransientConnectionException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -38,11 +32,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.apache.commons.io.FileUtils;
 import org.locationtech.jts.geom.Coordinate;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.migrate.Smart6Database;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -52,61 +44,21 @@ import org.wcs.smart.util.UuidUtils;
  * @author Emily
  *
  */
-public class Smart6Database implements Closeable{
+public class Intel6Database extends Smart6Database {
 
-	private Path derbyPath;
-	private Path filestore;
-	private Path root;
-	
-	private Connection connection;
-	
-	public Smart6Database(Path dir) throws SQLException {
-		this.root = dir;
-		//these might not actually be correct if users configured custom ones
-		derbyPath = dir.resolve("smartdb"); //$NON-NLS-1$
-		filestore = dir.resolve("filestore"); //$NON-NLS-1$
-		
-		String csrc = "jdbc:derby:" + derbyPath.toAbsolutePath().normalize().toString(); //$NON-NLS-1$
-		csrc += ";user=" + SmartDB.DbUser.ADMIN.getUserName() + ";password=" + SmartDB.DbUser.ADMIN.getPassword(); //$NON-NLS-1$ //$NON-NLS-2$
-		
-		connection = DriverManager.getConnection(csrc);
+	public Intel6Database(Path dir) throws SQLException {
+		super(dir);
 	}
-	
+		
 	public boolean validateIntelligenceVersion() throws SQLException {
-		String sql = "SELECT version FROM smart.db_version WHERE plugin_id = 'org.wcs.smart.intelligence'"; //$NON-NLS-1$
-		try(Statement s = connection.createStatement()){
-			try(ResultSet rs = s.executeQuery(sql)){
-				if (rs.next()) {
-					String version = rs.getString(1);
-					return version.equals("4.0"); //$NON-NLS-1$
-				}
-			}
-		}
-		return false;
+		String version = getVersion("org.wcs.smart.intelligence"); //$NON-NLS-1$
+		return version.equals("4.0"); //$NON-NLS-1$
 	}
 	
-	public List<ConservationArea> getConservationAreasWithData()  throws SQLException{
+	
+	public List<ConservationArea> getConservationAreasIntelWithData()  throws SQLException{
 		String sql = "SELECT uuid, id, name FROM smart.conservation_area WHERE uuid in ( SELECT ca_uuid FROM smart.intelligence )"; //$NON-NLS-1$
-		
-		List<ConservationArea> cas = new ArrayList<>();
-		
-		try(Statement s = connection.createStatement()){
-			try(ResultSet rs = s.executeQuery(sql)){
-				while(rs.next()) {
-					UUID uuid = UuidUtils.byteToUUID(rs.getBytes(1));
-					String id = rs.getString(2);
-					String name = rs.getString(3);
-					
-					ConservationArea ca = new ConservationArea();
-					ca.setUuid(uuid);
-					ca.setId(id);
-					ca.setName(name);
-					
-					cas.add(ca);
-				}
-			}
-		}
-		return cas;
+		return getConservationAreas(sql);
 	}
 
 	public Collection<IntelligenceItem> getIntelItems(ConservationArea ca) throws SQLException{
@@ -205,7 +157,7 @@ public class Smart6Database implements Closeable{
 		return sources.values();
 	}
 	
-	public List<IntelligenceSource> getSources(Collection<ConservationArea> cas) throws SQLException{
+	public List<IntelligenceSource> getIntelSources(Collection<ConservationArea> cas) throws SQLException{
 		
 		List<IntelligenceSource> sources = new ArrayList<>();
 		
@@ -252,46 +204,5 @@ public class Smart6Database implements Closeable{
 	}
 	
 	
-	public boolean validateUser(ConservationArea ca, String username, String password) throws SQLException{
-
-		String sql = "SELECT smartpassword FROM smart.employee WHERE ca_uuid = ? AND smartuserid = ?"; //$NON-NLS-1$
-		String capass = null;
-		try(PreparedStatement s = connection.prepareStatement(sql)){
-			s.setBytes(1, UuidUtils.uuidToByte(ca.getUuid()));
-			s.setString(2, username);
-			
-			try(ResultSet rs = s.executeQuery()){
-				if (rs.next()) {
-					capass = rs.getString(1);
-				}
-			}
-		}
-		
-		if (capass == null) return false;
-		return HibernateManager.validatePassword(password, capass);
-
-	}
 	
-	
-	@Override
-	public void close() throws IOException {
-		try {
-			//connection.close();
-			//shut down the connection
-			String csrc = "jdbc:derby:" + derbyPath.toAbsolutePath().normalize().toString(); //$NON-NLS-1$
-			csrc += ";user=" + SmartDB.DbUser.ADMIN.getUserName() + ";password=" + SmartDB.DbUser.ADMIN.getPassword(); //$NON-NLS-1$ //$NON-NLS-2$
-			csrc += ";shutdown=true"; //$NON-NLS-1$
-			DriverManager.getConnection(csrc);
-		 } catch (SQLNonTransientConnectionException e) {
-			 //derby throws this exception when shutdown is ok
-			 if (!"08006".equals(e.getSQLState())) { //$NON-NLS-1$
-				 throw new IOException(e);
-			 }
-		} catch (SQLException e) {
-			throw new IOException(e);
-		}
-		
-		//delete temporary file
-		FileUtils.deleteDirectory(root.toFile());
-	}
 }

@@ -42,7 +42,7 @@ public class Smart6WizardPage extends WizardPage {
 
 	private Text txtFile;
 	
-	protected Smart6WizardPage() {
+	public Smart6WizardPage() {
 		super("SMART6Page"); //$NON-NLS-1$
 	}
 

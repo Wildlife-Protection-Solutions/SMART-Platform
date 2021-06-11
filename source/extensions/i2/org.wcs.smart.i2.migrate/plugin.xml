@@ -28,6 +28,24 @@
                </and>
             </visibleWhen>
          </command>
+         <command
+               commandId="org.wcs.smart.i2.migrate.entity"
+               icon="platform:/plugin/org.wcs.smart/images/icons/shared16/import.png"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <and>
+                  <test
+                        property="org.wcs.smart.i2.permission"
+                        value="intel_admin">
+                  </test>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.caSingle">
+                  </test>
+               </and>
+            </visibleWhen>
+         </command>
       </menuContribution>
    </extension>
    <extension
@@ -36,12 +54,20 @@
             class="org.wcs.smart.i2.migrate.intelligence.MigrateSmart6IntelligenceHandler$MigrateSmart6IntelligenceHandlerWrapper"
             commandId="org.wcs.smart.i2.migrate.intelligence">
       </handler>
+      <handler
+            class="org.wcs.smart.i2.migrate.entity.MigrateSmart6EntityHandler$MigrateSmart6EntityHandlerWrapper"
+            commandId="org.wcs.smart.i2.migrate.entity">
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
       <command
             id="org.wcs.smart.i2.migrate.intelligence"
             name="Import SMART6 Intelligence Data ">
+      </command>
+      <command
+            id="org.wcs.smart.i2.migrate.entity"
+            name="Import SMART6 Entity Data ">
       </command>
    </extension>
 

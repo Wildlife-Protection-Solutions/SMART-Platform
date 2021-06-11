@@ -19,13 +19,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.i2.migrate.intelligence.wizard;
+package org.wcs.smart.i2.migrate;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -40,7 +41,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.i2.migrate.MigratePlugin;
-import org.wcs.smart.i2.migrate.intelligence.Smart6Database;
+import org.wcs.smart.i2.migrate.Smart6Database;
 import org.wcs.smart.i2.migrate.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.ZipUtil;
@@ -51,24 +52,31 @@ import org.wcs.smart.util.ZipUtil;
  * @author Emily
  *
  */
-public class ExtractDbJob implements IRunnableWithProgress{
+public abstract class ExtractDbJob<T extends Smart6Database> implements IRunnableWithProgress{
 
 	private String filename;
 	
-	private Smart6Database smart6db;
+	private T smart6db;
 	private List<ConservationArea> toProcess;
 	
 	public ExtractDbJob(String filename) {
 		this.filename = filename;
 	}
 	
-	public Smart6Database getDatabase() {
+	public T getDatabase() {
 		return this.smart6db;
 	}
 	
 	public List<ConservationArea> getConservationAreas(){
 		return this.toProcess;
 	}
+	
+	protected abstract T createDatabase(Path path) throws SQLException;
+	
+	protected abstract List<ConservationArea> getConservationAreasWithData(T database) throws SQLException;
+	
+	protected abstract boolean validateVersion(T database ) throws SQLException;
+
 	
 	@Override
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
@@ -92,15 +100,15 @@ public class ExtractDbJob implements IRunnableWithProgress{
 		
 		task.split(1).beginTask(Messages.ExtractDbJob_subtask2, 1);
 		try {
-			Smart6Database smart6db = new Smart6Database(dir);
+			T smart6db = createDatabase(dir);
 			try {
-				if (!smart6db.validateIntelligenceVersion()){
+				if (!validateVersion(smart6db)){
 					throw new Exception(Messages.ExtractDbJob_invalidVersion);
 				}
 				
 				task.split(1).beginTask(Messages.ExtractDbJob_subtask3, 1);
 
-				List<ConservationArea> s6 = smart6db.getConservationAreasWithData();
+				List<ConservationArea> s6 = getConservationAreasWithData(smart6db);
 				Set<UUID> uuids6 = s6.stream().map(e->e.getUuid()).collect(Collectors.toSet());
 				
 				toProcess= new ArrayList<>();

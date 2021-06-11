@@ -993,7 +993,7 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 			Label l = new Label(dataModelComp, SWT.NONE);
 			l.setText(Messages.EntityTypeDialog_AttributeLabel);
 			
-			Text txtDmAttribute = new Text(dataModelComp, SWT.DEFAULT);
+			Text txtDmAttribute = new Text(dataModelComp, SWT.READ_ONLY | SWT.BORDER);
 			txtDmAttribute.setText(MessageFormat.format("{0} ({1})", type.getDmAttribute().getName(), type.getDmAttribute().getKeyId() )); //$NON-NLS-1$
 			txtDmAttribute.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 			
@@ -1007,7 +1007,7 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 			l = new Label(dataModelComp, SWT.NONE);
 			l.setText(Messages.EntityTypeDialog_ActiveFilterLabel);
 			
-			Text txtDmFilter = new Text(dataModelComp, SWT.DEFAULT);
+			Text txtDmFilter = new Text(dataModelComp, SWT.BORDER | SWT.READ_ONLY);
 			txtDmFilter.setText(type.getActiveFilter() == null ? "" : type.getActiveFilter() ); //$NON-NLS-1$
 			txtDmFilter.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
@@ -1354,6 +1354,9 @@ public class EntityTypeDialog extends SmartStyledTitleDialog {
 						groups = s.createQuery(c).getResultList();
 						
 						for (IntelEntityTypeAttributeGroup g : groups) g.getNames().size();
+						type.getAttributes().forEach(e->{
+							if (e.getAttribute() != null) e.getAttribute().getAttributeList().size();
+						});
 					}
 					monitor.worked(1);
 				}
