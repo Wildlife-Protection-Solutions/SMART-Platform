@@ -234,6 +234,8 @@ public class MissionJsonProcessor implements IJsonProcessor {
 					continue;
 				}
 				
+				session.flush();
+				
 				//Parse the waypoint information 				
 				Waypoint wp = parser.createWaypoint(feature, SmartDB.getCurrentConservationArea(), session);
 				warnings.addAll(parser.getWarnings());
@@ -445,6 +447,20 @@ public class MissionJsonProcessor implements IJsonProcessor {
 							wo.setObservationGroup(mwpg);
 							mwpg.getObservations().add(wo);
 						}
+						
+						//copy attachments
+						if (wp.getAttachments() != null) {
+							if (mwpg.getWaypoint().getAttachments() == null) mwpg.getWaypoint().setAttachments(new ArrayList<>());						
+							for (WaypointAttachment wa : wp.getAttachments()) {
+								wa.setWaypoint(mwpg.getWaypoint());
+								mwpg.getWaypoint().getAttachments().add(wa);
+								
+								wa.computeFileLocation(Paths.get(SmartDB.getCurrentConservationArea().getFileDataStoreLocation())
+										.resolve(SURVEY_WP_SRC.getDatastoreFileLocation(link.getMission(), session))
+										.resolve(wa.getFilename()));
+							
+							}
+						}
 					}else if (mwp != null) {
 						//create a new group with these observations
 						if (mwp.getObservationGroups() == null) mwp.setObservationGroups(new ArrayList<>());
@@ -457,7 +473,19 @@ public class MissionJsonProcessor implements IJsonProcessor {
 							newGroup.getObservations().add(wo);
 						}
 						
-						session.save(newGroup);
+						//copy attachments
+						if (wp.getAttachments() != null) {
+							if (mwp.getAttachments() == null) mwp.setAttachments(new ArrayList<>());						
+							for (WaypointAttachment wa : wp.getAttachments()) {
+								wa.setWaypoint(mwp);
+								mwp.getAttachments().add(wa);
+							
+								wa.computeFileLocation(Paths.get(SmartDB.getCurrentConservationArea().getFileDataStoreLocation())
+										.resolve(SURVEY_WP_SRC.getDatastoreFileLocation(link.getMission(), session))
+										.resolve(wa.getFilename()));
+							}
+						}
+//						session.save(newGroup);
 						
 						//update patrol links
 						CtMissionWpLink wplink = new CtMissionWpLink();
