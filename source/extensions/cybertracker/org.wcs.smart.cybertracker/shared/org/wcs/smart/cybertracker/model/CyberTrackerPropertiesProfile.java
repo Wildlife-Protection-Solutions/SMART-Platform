@@ -568,7 +568,7 @@ public class CyberTrackerPropertiesProfile extends NamedItem {
 	
 	public Object getDefaultValue(ProfileOptionID option) {
 		switch(option) {
-		case INCIDENT_GROUP_UI: return true;
+		case INCIDENT_GROUP_UI: return false;
 		case ALLOW_SKIP_MANUAL_GPS: return allowSkipManualGps;
 		case APP_NAME: return "SMART Mobile Application";  //$NON-NLS-1$
 		case AUTO_NEXT: return autoNext;
