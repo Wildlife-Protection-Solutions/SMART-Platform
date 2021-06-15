@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.hibernate.Session;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.observation.ObservationHibernateManager;
@@ -117,10 +118,10 @@ public class IncidentManager {
 	}	
 	
 	
-	public String getNextIncidentId(Session session) {
+	public String getNextIncidentId(Session session, Employee observer) {
 		Set<String> incidentsources = getIncidentProviders().stream()
 				.map(e->e.getWaypointSourceKey()).collect(Collectors.toSet());
 		
-		return IncidentIdGenerator.INSTANCE.getNextIncidentId(session, SmartDB.getCurrentConservationArea(), incidentsources);
+		return IncidentIdGenerator.INSTANCE.getNextIncidentId(session, SmartDB.getCurrentConservationArea(), incidentsources, observer);
 	}
 }

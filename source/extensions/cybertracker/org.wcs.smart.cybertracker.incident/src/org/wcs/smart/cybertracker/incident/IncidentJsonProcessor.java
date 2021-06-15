@@ -33,6 +33,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.json.simple.JSONObject;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
@@ -164,7 +165,15 @@ public class IncidentJsonProcessor implements IJsonProcessor {
 					if (rootLink != null) rootLink.setWaypoint(parsedWp);
 					if (currentLink.getRootId() != null && currentLink.getIncidentGroupId() != null) currentLink.setObservationGroup(parsedWp.getObservationGroups().get(0));
 					
-					currentLink.getWaypoint().setId(IncidentManager.getInstance().getNextIncidentId(session));
+					Employee observer = null;
+					for (WaypointObservation so : currentLink.getWaypoint().getAllObservations()) {
+						if (so.getObserver() != null) {
+							observer = so.getObserver();
+							break;
+						}
+					}
+					
+					currentLink.getWaypoint().setId(IncidentManager.getInstance().getNextIncidentId(session, observer));
 					currentLink.getWaypoint().setSourceId(IndepedentIncidentSource.KEY);
 					currentLink.getWaypoint().setConservationArea(SmartDB.getCurrentConservationArea());
 

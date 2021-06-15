@@ -65,7 +65,7 @@ public class NewIncidentWizard extends Wizard implements IPageChangingListener {
 		newIncident.setAttachments(new ArrayList<WaypointAttachment>());
 
 		session = HibernateManager.openSession();
-		newIncident.setId(IncidentManager.getInstance().getNextIncidentId(session));
+		newIncident.setId(IncidentManager.getInstance().getNextIncidentId(session, null));
 		ops = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
 	}
 

@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.IdGeneratorContribution;
 import org.wcs.smart.IdGeneratorEngine;
+import org.wcs.smart.IdGeneratorManager;
 import org.wcs.smart.ca.ConservationAreaProperty;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -118,6 +119,27 @@ public class IncidentIdGeneratorContribution implements IdGeneratorContribution 
 		btnUnique.setSelection(true);
 		btnUnique.addListener(SWT.Selection,e->updateDecorations());
 		
+		Text info = new Text(inner, SWT.BORDER | SWT.MULTI);
+		info.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		info.setEditable(false);
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append(Messages.IncidentIdGeneratorContribution_incidentpatteronly);
+		sb.append("\n"); //$NON-NLS-1$
+		IdGeneratorEngine.Token[] tokens = new IdGeneratorEngine.Token[] {
+				IdGeneratorEngine.Token.OBSERVER_FAMILY, 
+				IdGeneratorEngine.Token.OBSERVER_GIVEN, 
+				IdGeneratorEngine.Token.OBSERVER_INITIALS};
+		
+		for (IdGeneratorEngine.Token token : tokens) {
+			sb.append(token.token);
+			sb.append(" - "); //$NON-NLS-1$
+			sb.append(IdGeneratorManager.INSTANCE.getDescription(token));
+			sb.append("\n"); //$NON-NLS-1$
+		}
+		sb.deleteCharAt(sb.length() - 1);
+		info.setText(sb.toString());
+		
 		return part;
 	}
 	
@@ -150,7 +172,7 @@ public class IncidentIdGeneratorContribution implements IdGeneratorContribution 
 			text = text.replace(token.token, ""); //$NON-NLS-1$
 		}
 		
-		if (!SmartUtils.isSimpleString(text.trim(), 
+		if (!text.isBlank() && !SmartUtils.isSimpleString(text.trim(), 
 				SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Waypoint.ID_MAX_LENGTH) ) {
 			return MessageFormat.format(Messages.IncidentIdGeneratorContribution_InvalidPattern, Waypoint.ID_MAX_LENGTH, SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
 		}

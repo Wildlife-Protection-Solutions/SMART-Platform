@@ -158,7 +158,7 @@ public class PatrolIdGeneratorContribution implements IdGeneratorContribution {
 			text = text.replace(token.token, ""); //$NON-NLS-1$
 		}
 		
-		if (!SmartUtils.isSimpleString(text.trim(), 
+		if (!text.isBlank() && !SmartUtils.isSimpleString(text.trim(), 
 				SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Patrol.MAX_ID_LENGTH) ) {
 			return MessageFormat.format(Messages.PatrolIdGeneratorContribution_InvalidPattern, Patrol.MAX_ID_LENGTH, SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
 		}

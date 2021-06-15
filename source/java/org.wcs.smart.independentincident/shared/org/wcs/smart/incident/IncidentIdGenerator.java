@@ -21,8 +21,9 @@
  */
 package org.wcs.smart.incident;
 
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.hibernate.Session;
@@ -30,6 +31,7 @@ import org.hibernate.query.Query;
 import org.wcs.smart.IdGeneratorEngine;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ConservationAreaProperty;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.observation.model.Waypoint;
 
@@ -58,7 +60,7 @@ public enum IncidentIdGenerator {
 	 * 
 	 * @return
 	 */
-	public String getNextIncidentId(Session session, ConservationArea ca, Set<String> incidentsources) {
+	public String getNextIncidentId(Session session, ConservationArea ca, Set<String> incidentsources, Employee observer) {
 		
 		ConservationAreaProperty prop = QueryFactory.buildQuery(session, ConservationAreaProperty.class, 
 				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
@@ -75,7 +77,10 @@ public enum IncidentIdGenerator {
 			return String.valueOf(id);
 		}
 		
-		String nextId = IdGeneratorEngine.INSTANCE.generateId(prop.getValue(), Collections.emptyMap());
+		//find observation
+		Map<String, Employee> employees = new HashMap<>();
+		employees.put(IdGeneratorEngine.OBSERVER_KEY, observer);
+		String nextId = IdGeneratorEngine.INSTANCE.generateId(prop.getValue(), employees);
 		
 		prop = QueryFactory.buildQuery(session, ConservationAreaProperty.class, 
 				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
