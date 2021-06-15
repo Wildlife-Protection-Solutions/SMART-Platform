@@ -189,6 +189,11 @@ public class SmartCollectIncidentEditor extends MultiPageEditorPart implements M
 					session.beginTransaction();
 					this.incident = (SmartCollectWaypoint) session.load(SmartCollectWaypoint.class, uuid);
 					this.incident.getWaypoint().getId();
+					if (this.incident.getWaypoint().getAttachments() != null) {
+						this.incident.getWaypoint().getAttachments().forEach(wa ->{
+							if (wa.getSignatureType() != null) wa.getSignatureType().getName();
+						});
+					}
 					
 					try{
 						ObservationHibernateManager.computeAttachmentLocations(incident.getWaypoint(), session);
