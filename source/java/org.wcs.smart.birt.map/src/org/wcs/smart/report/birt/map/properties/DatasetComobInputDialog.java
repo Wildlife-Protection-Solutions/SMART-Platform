@@ -240,7 +240,13 @@ public class DatasetComobInputDialog extends Dialog {
 			@Override
 			public String getText(Object element){
 				if (element instanceof LayerDefinition){
-					return ((LayerDefinition)element).getHandle().getName() + " [" + ((LayerDefinition) element).getInfo().getLayerType() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+					
+					String lname = ((LayerDefinition) element).getInfo().getLayerName();
+					if (lname == null) {
+						return ((LayerDefinition)element).getHandle().getName() + " [" + ((LayerDefinition) element).getInfo().getLayerType() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+					}else {
+						return ((LayerDefinition)element).getHandle().getName() + " - " + lname + " [" + ((LayerDefinition) element).getInfo().getLayerType() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+					}
 				}
 				return super.getText(element);
 			}
