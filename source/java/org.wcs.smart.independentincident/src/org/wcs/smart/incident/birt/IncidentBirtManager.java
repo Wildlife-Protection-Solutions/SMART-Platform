@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2021 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.incident.birt.ui;
+package org.wcs.smart.incident.birt;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,6 +27,8 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.Set;
 import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
@@ -36,14 +38,17 @@ import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.IndepedentIncidentSource;
+import org.wcs.smart.incident.birt.ui.IncidentBirtPerspective;
+import org.wcs.smart.incident.birt.ui.IncidentBirtTemplateEditorInput;
+import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 
 /**
- * Main class for managing the exporting of plans to 
- * pdf using the BIRT reporting interface.
+ * Main class for managing the BIRT templates for exporting 
+ * incidents to pdf.
  * 
  * @author Emily
- * @since 2.0.0
+ * @since 7.0.0
  */
 public enum IncidentBirtManager {
 	
@@ -107,16 +112,21 @@ public enum IncidentBirtManager {
 	 */
 	public void importIncidentTemplate(Path newTemplate) throws IOException{
 		Path f = getIncidentDirectory().resolve(PLAN_TEMPLATE);
-		SmartUtils.copyFile(newTemplate, f);
+		SmartUtils.copyFile(newTemplate, f, StandardCopyOption.REPLACE_EXISTING);
 	}
 	
 	/**
 	 * Export the incident to PDF
 	 * @param incidentUuid
 	 */
-	public static void exportToPdf(UUID incidentUuid){
-//		ExportPlanJob job = new ExportPlanJob(planUuid);
-//		job.schedule();
+	public void exportToPdf(UUID incidentUuid){
+		ExportIncidentJob job = new ExportIncidentJob(incidentUuid);
+		job.schedule();
+	}
+	
+	public void exportToPdf(Set<UUID> incidentUuids, Path output){
+		ExportIncidentJob job = new ExportIncidentJob(incidentUuids, output);
+		job.schedule();
 	}
 	
 	/**
@@ -139,7 +149,7 @@ public enum IncidentBirtManager {
 			IncidentBirtTemplateEditorInput input = new IncidentBirtTemplateEditorInput(getCustomIncidentTemplateLocation());
 			templateEditor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, IReportEditorContants.DESIGN_EDITOR_ID);
 		}catch (Exception ex){
-			IncidentPlugIn.displayLog("Could not edit incident template." + "\n\n" + ex.getLocalizedMessage(), ex); 
+			IncidentPlugIn.displayLog(Messages.IncidentBirtManager_editerror + "\n\n" + ex.getLocalizedMessage(), ex);  //$NON-NLS-1$
 			return;
 		}
 	}

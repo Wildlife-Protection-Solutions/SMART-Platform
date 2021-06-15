@@ -19,22 +19,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.incident.birt.ui;
+package org.wcs.smart.incident;
 
-import org.wcs.smart.birt.ui.BasicReportPerspective;
+import org.eclipse.core.expressions.PropertyTester;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PlatformUI;
+import org.wcs.smart.incident.ui.IncidentEditorInput;
 
 /**
- * 
- * Smart Report Designer Perspective for editing incident template
- * 
- * @author egouge
- * 
+ * Property tester to determine if the current editor is an incident editor.
+ * @author Emily
+ *
  */
-public class IncidentBirtPerspective extends BasicReportPerspective {
+public class IncidentEditorPropertyTester extends PropertyTester {
 
-	public static final String ID = "org.wcs.smart.incident.birt.template.perspective"; //$NON-NLS-1$
-	
-	public IncidentBirtPerspective() {
-		super();
+	public IncidentEditorPropertyTester() {
 	}
+
+	@Override
+	public boolean test(Object receiver, String property, Object[] args, Object expectedValue) {
+		if (property.equals("editor")) { //$NON-NLS-1$
+			IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+			if(page != null) {
+				return (page.getActiveEditor() != null && page.getActiveEditor().getEditorInput() instanceof IncidentEditorInput);
+			}
+		}
+		return false;
+	}
+
 }

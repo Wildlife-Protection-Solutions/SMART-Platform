@@ -27,26 +27,26 @@ import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.incident.birt.SmartIncidentDriver;
+import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.util.UuidUtils;
 
 /**
- * SMART plan target result set metadata.
+ * Incident observation attribute result set metadata
  * 
  * @author Emily
- * @since 2.0.0
  *
  */
 public class IncidentObservationAttributeDatasetResultSetMetadata implements IResultSetMetaData {
 
 	public enum Column {
-		OBS_UUID("Observation UUID", "obs:uuid", java.sql.Types.VARCHAR),
-		ATTRIBUTE("Attribute Name", "attribute:name", java.sql.Types.VARCHAR), 
-		TEXT_VALUE("Attribute Value As String", "attribute:value", java.sql.Types.VARCHAR), 
-		STRING_VALUE("String Value", "attribute:stringvalue", java.sql.Types.VARCHAR), 
-		NUMBER_VALUE("Number Value", "attribute:numbervalue", java.sql.Types.NUMERIC), 
-		BOOLEAN_VALUE("Boolean Value", "attribute:booleanvalue", java.sql.Types.BOOLEAN),
-		DATE_VALUE("Date Value", "attribute:datevalue", java.sql.Types.DATE);
+		OBS_UUID(Messages.IncidentObservationAttributeDatasetResultSetMetadata_uuidcolumnname, "obs:uuid", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		ATTRIBUTE(Messages.IncidentObservationAttributeDatasetResultSetMetadata_namecolumnname, "attribute:name", java.sql.Types.VARCHAR),  //$NON-NLS-1$
+		TEXT_VALUE(Messages.IncidentObservationAttributeDatasetResultSetMetadata_valueasstringcolumnname, "attribute:value", java.sql.Types.VARCHAR),  //$NON-NLS-1$
+		STRING_VALUE(Messages.IncidentObservationAttributeDatasetResultSetMetadata_stringvaluecolumnname, "attribute:stringvalue", java.sql.Types.VARCHAR),  //$NON-NLS-1$
+		NUMBER_VALUE(Messages.IncidentObservationAttributeDatasetResultSetMetadata_numbervaluecolumnname, "attribute:numbervalue", java.sql.Types.NUMERIC),  //$NON-NLS-1$
+		BOOLEAN_VALUE(Messages.IncidentObservationAttributeDatasetResultSetMetadata_booleanvaluecolumnname, "attribute:booleanvalue", java.sql.Types.BOOLEAN), //$NON-NLS-1$
+		DATE_VALUE(Messages.IncidentObservationAttributeDatasetResultSetMetadata_datevaluecolumnname, "attribute:datevalue", java.sql.Types.DATE); //$NON-NLS-1$
 		
 		public String name;
 		public String key;

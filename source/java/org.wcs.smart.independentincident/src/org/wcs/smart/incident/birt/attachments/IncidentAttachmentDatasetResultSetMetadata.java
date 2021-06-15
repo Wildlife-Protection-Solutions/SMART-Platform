@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2021 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -24,42 +24,35 @@ package org.wcs.smart.incident.birt.attachments;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.eclipse.datatools.connectivity.oda.impl.Blob;
-import org.locationtech.jts.geom.Coordinate;
 import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.common.attachment.ISmartAttachment;
-import org.wcs.smart.data.oda.smart.query.common.AttachmentByteQueryColumn;
 import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.birt.SmartIncidentDriver;
-import org.wcs.smart.map.GeometryFactoryProvider;
+import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.observation.model.ObservationAttachment;
-import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
-import org.wcs.smart.util.UuidUtils;
 
 /**
- * SMART plan target result set metadata.
+ * Incident attachment results set metadata
  * 
  * @author Emily
- * @since 2.0.0
  *
  */
 public class IncidentAttachmentDatasetResultSetMetadata implements IResultSetMetaData {
 
 	public enum Column {
 
-		UUID ("Attachment UUID", "attachment:uuid", java.sql.Types.VARCHAR),
-		WP_UUID("Waypoint UUID", "wp:uuid", java.sql.Types.VARCHAR),
-		OBS_UUID("Observation UUID", "obs:uuid", java.sql.Types.VARCHAR), //$NON-NLS-1$
-		SIGNATURETYPEKEY("Signature Type Key", "signaturetype:key", java.sql.Types.VARCHAR),
-		SIGNATURETYPENAME("Signature Type Name", "signaturetypen:ame", java.sql.Types.VARCHAR),
-		FILENAME("Filename", "attachment:filename", java.sql.Types.VARCHAR),
-		DATA("Data", "attachment:data", java.sql.Types.BLOB);
+		UUID (Messages.IncidentAttachmentDatasetResultSetMetadata_attachmentuuidcolumnname, "attachment:uuid", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		WP_UUID(Messages.IncidentAttachmentDatasetResultSetMetadata_waypointuuidcolumnname, "wp:uuid", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		OBS_UUID(Messages.IncidentAttachmentDatasetResultSetMetadata_obsuuidcolumnname, "obs:uuid", java.sql.Types.VARCHAR),  //$NON-NLS-1$
+		SIGNATURETYPEKEY(Messages.IncidentAttachmentDatasetResultSetMetadata_signaturekeycolumnname, "signaturetype:key", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		SIGNATURETYPENAME(Messages.IncidentAttachmentDatasetResultSetMetadata_signaturenamecolumnname, "signaturetype:name", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		FILENAME(Messages.IncidentAttachmentDatasetResultSetMetadata_filenamecolumnname, "attachment:filename", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		DATA(Messages.IncidentAttachmentDatasetResultSetMetadata_datacolumnname, "attachment:data", java.sql.Types.BLOB); //$NON-NLS-1$
 		
 		public String name;
 		public String key;

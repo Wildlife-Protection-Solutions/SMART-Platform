@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2021 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,7 +27,8 @@ import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 
 
 /**
- * Entity record parameter metadata
+ * Incident dataset parameter metadata - these datasets have a single
+ * parameter (incident uuid formatted as string).
  * 
  * @author Emily
  *

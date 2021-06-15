@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2021 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,11 +27,12 @@ import org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSourceWizard
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.wcs.smart.incident.internal.Messages;
+
 /**
- * SMART Plan datasource wizard page.
+ * SMART incident data source wizard page
  * 
  * @author Emily
- * @since 2.0.0
  *
  */
 public class IncidentDataSourceWizardPage extends DataSourceWizardPage {
@@ -50,7 +51,7 @@ public class IncidentDataSourceWizardPage extends DataSourceWizardPage {
 	@Override
 	public void createPageCustomControl(Composite arg0) {
 		Label lbl = new Label(arg0, SWT.NONE);
-		lbl.setText("This data source is not configurable.");
+		lbl.setText(Messages.IncidentDataSourceWizardPage_notconfigurable);
 	}
 
 	@Override

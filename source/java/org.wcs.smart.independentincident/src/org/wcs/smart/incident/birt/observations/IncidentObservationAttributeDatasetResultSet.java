@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2021 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -32,9 +32,9 @@ import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 
 /**
- * SMRAT Plan target result set
+ * SMRAT Incident observation attributes result set
+ * 
  * @author Emily
- * @since 2.0.0
  *
  */
 public class IncidentObservationAttributeDatasetResultSet extends AbstractIncidentResultSet<IncidentObservationAttributeDatasetResultSetMetadata>{

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2021 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -38,13 +38,13 @@ import org.wcs.smart.incident.birt.observations.IncidentObservationAttributeData
 import org.wcs.smart.incident.birt.observations.IncidentObservationDataset;
 
 import com.ibm.icu.util.ULocale;
+
 /**
- * Connection for the SMART plan driver.
+ * Connection for the SMART incident driver.
  * 
- * Extends the query SmartConnection;
  * 
  * @author Emily
- * @since 2.0.0
+ * @since 7.0.0
  *
  */
 public class SmartIncidentConnection implements IConnection {
@@ -81,7 +81,7 @@ public class SmartIncidentConnection implements IConnection {
 		}
 		
 		throw new OdaException(
-				MessageFormat.format("Unsupported Dataset",
+				MessageFormat.format("Unsupported Dataset", //$NON-NLS-1$
 						new Object[]{dataSetType}));
 	}
 
@@ -100,7 +100,7 @@ public class SmartIncidentConnection implements IConnection {
 			}else if (dataSetType.equals(IncidentObservationAttributeDataset.DATASET_TYPE)){
 				return new IncidentObservationAttributeDataset(this);
 			}
-			throw new OdaException(MessageFormat.format("Unsupported Dataset",new Object[]{dataSetType}));
+			throw new OdaException(MessageFormat.format("Unsupported Dataset",new Object[]{dataSetType})); //$NON-NLS-1$
 		} catch (Exception e) {
 			throw new OdaException(e);
 		}
@@ -151,6 +151,7 @@ public class SmartIncidentConnection implements IConnection {
 		
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void setAppContext(Object context) throws OdaException {
 		if (context instanceof Map){

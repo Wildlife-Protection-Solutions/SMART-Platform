@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2021 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -26,10 +26,9 @@ import org.wcs.smart.birt.ui.IReportEditorManager;
 import org.wcs.smart.birt.ui.RCPMultiPageReportEditor;
 
 /**
- * Report plan manager for editing plan template
+ * Report plan manager for editing incident birt templates
  * 
  * @author Emily
- * @since 2.0.0
  *
  */
 public class IncidentBirtEditorManager implements IReportEditorManager {

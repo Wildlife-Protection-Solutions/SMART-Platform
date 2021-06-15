@@ -21,20 +21,28 @@
  */
 package org.wcs.smart.incident.birt.ui;
 
-import org.wcs.smart.birt.ui.BasicReportPerspective;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.wcs.smart.incident.birt.IncidentBirtManager;
 
 /**
+ * Handler to edit the incident template
  * 
- * Smart Report Designer Perspective for editing incident template
- * 
- * @author egouge
- * 
+ * @author Emily
+ *
  */
-public class IncidentBirtPerspective extends BasicReportPerspective {
+@SuppressWarnings("restriction")
+public class EditTemplateHandler {
 
-	public static final String ID = "org.wcs.smart.incident.birt.template.perspective"; //$NON-NLS-1$
-	
-	public IncidentBirtPerspective() {
-		super();
+	@Execute
+	public void execute(){
+		IncidentBirtManager.INSTANCE.editTemplate();
 	}
+	
+	public static class EditTemplateHandlerWrapper extends DIHandler<EditTemplateHandler>{
+		public EditTemplateHandlerWrapper(){
+			super(EditTemplateHandler.class);
+		}
+	}
+
 }

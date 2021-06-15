@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2021 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -24,19 +24,18 @@ package org.wcs.smart.incident.birt.details;
 import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
-import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.incident.birt.AbstractIncidentDataset;
 import org.wcs.smart.incident.birt.SmartIncidentConnection;
 
 /**
- * Plan patrols query
+ * Incident dataset
  * 
  * @author Emily
  *
  */
 public class IncidentDataset extends AbstractIncidentDataset{
 
-	public static final String DATASET_TYPE = "org.wcs.smart.incident.birt.incident.details";
+	public static final String DATASET_TYPE = "org.wcs.smart.incident.birt.incident.details"; //$NON-NLS-1$
 	
 	public IncidentDataset(SmartIncidentConnection connection) {
 		super(connection, DATASET_TYPE);

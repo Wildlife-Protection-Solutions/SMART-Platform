@@ -43,6 +43,15 @@
             allPopups="false"
             locationURI="toolbar:org.wcs.smart.observation.ui.incidientView">
          <command
+               commandId="org.wcs.smart.incident.pdf"
+               style="push"
+               tooltip="%command.tooltip.pdf.exportmulti">
+            <parameter
+                  name="org.wcs.smart.incident.exportpdf.editor"
+                  value="false">
+            </parameter>
+         </command>
+         <command
                commandId="org.wcs.smart.incident.delete"
                label="%delete.command.name"
                style="push"
@@ -56,7 +65,8 @@
          </command>
          <command
                commandId="org.wcs.smart.independentincident.filter"
-               style="push">
+               style="push"
+               tooltip="%command.tooltip.filter">
          </command>
       </menuContribution>
       <menuContribution
@@ -89,6 +99,30 @@
                   style="push"
                   tooltip="%import.command.tooltip">
             </command>
+            <menu
+                  id="org.wcs.smart.incident.birt.template"
+                  label="%menu.label.incidenttemplate">
+               <command
+                     commandId="org.wcs.smart.incident.birt.template.edit"
+                     style="push">
+               </command>
+               <separator
+                     name="org.wcs.smart.incident.birt.template.separator"
+                     visible="true">
+               </separator>
+               <command
+                     commandId="org.wcs.smart.incident.birt.template.revert"
+                     style="push">
+               </command>
+               <command
+                     commandId="org.wcs.smart.incident.birt.template.export"
+                     style="push">
+               </command>
+               <command
+                     commandId="org.wcs.smart.incident.birt.template.import"
+                     style="push">
+               </command>
+            </menu>
             <separator
                   name="org.wcs.smart.independentincident.separator2"
                   visible="true">
@@ -145,9 +179,21 @@
                commandId="org.wcs.smart.incident.open"
                style="push">
          </command>
+         <separator
+               name="org.wcs.smart.independentincident.separator2"
+               visible="true">
+         </separator>
          <command
                commandId="org.wcs.smart.incident.new"
                style="push">
+         </command>
+         <command
+               commandId="org.wcs.smart.incident.pdf"
+               style="push">
+            <parameter
+                  name="org.wcs.smart.incident.exportpdf.editor"
+                  value="false">
+            </parameter>
          </command>
          <separator
                name="org.wcs.smart.independentincident.separator1"
@@ -302,6 +348,57 @@
                   </and>
                </visibleWhen>
             </command>
+            <command
+                  commandId="org.wcs.smart.incident.editor.pdf"
+                  label="%command.label.odf"
+                  mode="FORCE_TEXT"
+                  style="push"
+                  tooltip="%command.tooltip.pdf.single">
+               <visibleWhen>
+                  <and>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.caSingle">
+                     </test>
+                     <with
+                           variable="activeWorkbenchWindow.activePerspective">
+                        <equals
+                              value="org.wcs.smart.observation.FieldDataPerspective">
+                        </equals>
+                     </with>
+                     <test
+                           property="org.wcs.smart.fielddata.focusview"
+                           value="org.wcs.smart.observation.ui.incidientView">
+                     </test>
+                     <or>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="admin">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="dataentry">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="analyst">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="manager">
+                        </test>
+                     </or>
+                  </and>
+               </visibleWhen>
+               <parameter
+                     name="org.wcs.smart.incident.exportpdf.editor"
+                     value="true">
+               </parameter>
+            </command>
          </toolbar>
          <toolbar
                id="vertical.org.wcs.smart.incident.toolbar2">
@@ -400,6 +497,53 @@
                </visibleWhen>
             </command>
          </toolbar>
+         <toolbar
+               id="vertical.org.wcs.smart.incident.toolbar.3">
+            <command
+                  commandId="org.eclipse.ui.file.save"
+                  disabledIcon="platform:/plugin/org.wcs.smart/images/icons/shared16/save_disabled.png"
+                  icon="platform:/plugin/org.wcs.smart/images/icons/shared16/save.png"
+                  label="%command.label.save"
+                  mode="FORCE_TEXT"
+                  style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <with
+                        variable="activeWorkbenchWindow.activePerspective">
+                     <equals
+                           value="org.wcs.smart.incident.birt.template.perspective">
+                     </equals>
+                  </with>
+               </visibleWhen>
+            </command>
+         </toolbar>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.wcs.smart.menu.file?before=org.wcs.menu.file.changeuserpassword">
+         <separator
+               name="org.wcs.smart.incident.main.separator3"
+               visible="true">
+         </separator>
+         <command
+               commandId="org.eclipse.ui.file.save"
+               disabledIcon="platform:/plugin/org.wcs.smart/images/icons/shared16/save_disabled.png"
+               icon="platform:/plugin/org.wcs.smart/images/icons/shared16/save.png"
+               style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <with
+                     variable="activeWorkbenchWindow.activePerspective">
+                  <equals
+                        value="org.wcs.smart.incident.birt.template.perspective">
+                  </equals>
+               </with>
+            </visibleWhen>
+         </command>
+         <separator
+               name="org.wcs.smart.incident.main.separator4"
+               visible="true">
+         </separator>
       </menuContribution>
    </extension>
    <extension
@@ -428,6 +572,40 @@
             id="org.wcs.smart.incident.open"
             name="%command.openincident.name">
       </command>
+      <command
+            id="org.wcs.smart.incident.birt.template.edit"
+            name="%command.name.edittemplate">
+      </command>
+      <command
+            id="org.wcs.smart.incident.birt.template.revert"
+            name="%command.name.reverttemplate">
+      </command>
+      <command
+            id="org.wcs.smart.incident.birt.template.export"
+            name="%command.name.exporttemplate">
+      </command>
+      <command
+            id="org.wcs.smart.incident.birt.template.import"
+            name="%command.name.importtemplate">
+      </command>
+      <command
+            id="org.wcs.smart.incident.editor.pdf"
+            name="%command.name.pdf.multi">
+         <commandParameter
+               id="org.wcs.smart.incident.exportpdf.editor"
+               name="Single Export Or Multiple Export"
+               optional="true">
+         </commandParameter>
+      </command>
+      <command
+            id="org.wcs.smart.incident.pdf"
+            name="%command.name.pdf.single">
+         <commandParameter
+               id="org.wcs.smart.incident.exportpdf.editor"
+               name="Single Export Or Multiple Export"
+               optional="true">
+         </commandParameter>
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.commandImages">
@@ -450,6 +628,30 @@
       <image
             commandId="org.wcs.smart.independentincident.import"
             icon="platform:/plugin/org.wcs.smart/images/icons/shared16/import.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.incident.birt.template.import"
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/import.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.incident.birt.template.edit"
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/edit.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.incident.birt.template.export"
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/export.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.incident.birt.template.revert"
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/refresh.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.incident.editor.pdf"
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/pdf.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.incident.pdf"
+            icon="platform:/plugin/org.wcs.smart/images/icons/shared16/pdf.png">
       </image>
    </extension>
    <extension
@@ -537,6 +739,59 @@
                </iterate>
             </with>
          </enabledWhen>
+      </handler>
+      <handler
+            class="org.wcs.smart.incident.birt.ui.EditTemplateHandler$EditTemplateHandlerWrapper"
+            commandId="org.wcs.smart.incident.birt.template.edit">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
+      </handler>
+      <handler
+            class="org.wcs.smart.incident.birt.ui.RevertTemplateHandler$RevertTemplateHandlerWrapper"
+            commandId="org.wcs.smart.incident.birt.template.revert">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
+      </handler>
+      <handler
+            class="org.wcs.smart.incident.birt.ui.ExportTemplateHandler$ExportTemplateHandlerWrapper"
+            commandId="org.wcs.smart.incident.birt.template.export">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
+      </handler>
+      <handler
+            class="org.wcs.smart.incident.birt.ui.ImportTemplateHandler$ImportTemplateHandlerWrapper"
+            commandId="org.wcs.smart.incident.birt.template.import">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
+      </handler>
+      <handler
+            class="org.wcs.smart.incident.birt.ui.ExportIncidentPdfHandler$ExportIncidentPdfHandlerWrapper"
+            commandId="org.wcs.smart.incident.editor.pdf">
+         <enabledWhen>
+            <test
+                  property="org.wcs.smart.incident.editor">
+            </test>
+         </enabledWhen>
+      </handler>
+      <handler
+            class="org.wcs.smart.incident.birt.ui.ExportIncidentPdfHandler$ExportIncidentPdfHandlerWrapper"
+            commandId="org.wcs.smart.incident.pdf">
       </handler>
    </extension>
    <extension
@@ -860,7 +1115,7 @@
       <perspective
             class="org.wcs.smart.incident.birt.ui.IncidentBirtPerspective"
             id="org.wcs.smart.incident.birt.template.perspective"
-            name="Incident Temploate BIRT Editor">
+            name="%perspective.name.birt.template">
       </perspective>
    </extension>
    <extension
@@ -869,6 +1124,16 @@
             EditorInput="org.wcs.smart.incident.birt.ui.IncidentBirtTemplateEditorInput"
             EditorManager="org.wcs.smart.incident.birt.ui.IncidentBirtEditorManager">
       </EditorManager>
+   </extension>
+   <extension
+         point="org.eclipse.core.expressions.propertyTesters">
+      <propertyTester
+            class="org.wcs.smart.incident.IncidentEditorPropertyTester"
+            id="org.wcs.smart.incident.editor"
+            namespace="org.wcs.smart.incident"
+            properties="editor"
+            type="java.lang.Object">
+      </propertyTester>
    </extension>
 
 </plugin>

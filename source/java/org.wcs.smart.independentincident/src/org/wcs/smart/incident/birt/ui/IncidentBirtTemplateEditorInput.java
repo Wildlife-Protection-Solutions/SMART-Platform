@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2021 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -24,8 +24,9 @@ package org.wcs.smart.incident.birt.ui;
 import java.nio.file.Path;
 
 import org.eclipse.birt.report.designer.internal.ui.editors.ReportEditorInput;
+
 /**
- * Editor input for plan template editor.
+ * Editor input for incident birt template editor.
  * 
  * @author Emily
  *

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2021 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -21,22 +21,18 @@
  */
 package org.wcs.smart.incident.birt.observations;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import org.locationtech.udig.catalog.document.IAttachment;
-import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.incident.birt.AbstractIncidentResultSet;
 import org.wcs.smart.incident.birt.SmartIncidentConnection;
-import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 
 /**
- * SMRAT Plan target result set
+ * Incident observation result set 
+ * 
  * @author Emily
- * @since 2.0.0
  *
  */
 public class IncidentObservationDatasetResultSet extends AbstractIncidentResultSet<IncidentObservationDatasetResultSetMetadata>{

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2021 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -25,15 +25,18 @@ import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.locationtech.jts.geom.Coordinate;
 import org.wcs.smart.incident.birt.SmartIncidentDriver;
+import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.map.GeometryFactoryProvider;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.UuidUtils;
 
 /**
- * SMART plan target result set metadata.
+ * Incident dataset result set metadata
  * 
  * @author Emily
- * @since 2.0.0
+ * 
  *
  */
 public class IncidentDatasetResultSetMetadata implements IResultSetMetaData {
@@ -44,22 +47,22 @@ public class IncidentDatasetResultSetMetadata implements IResultSetMetaData {
 
 	public enum Column {
 
-		UUID ("Incident UUID", "wp:uuid", java.sql.Types.VARCHAR),
-		ID("Incident ID", "wp:id", java.sql.Types.VARCHAR),
-		DATETIME("Date Time", "wp:datetime", java.sql.Types.TIMESTAMP), //$NON-NLS-1$
-		RAW_X("Raw X", "wp:rawx", java.sql.Types.DOUBLE),
-		RAW_Y("Raw Y", "wp:rawy", java.sql.Types.DOUBLE),
-		DISTANCE("Distance", "wp:distance", java.sql.Types.DOUBLE),
-		BEARING("Bearing", "wp:direction", java.sql.Types.DOUBLE),
-		X("X", "wp:projx", java.sql.Types.DOUBLE),
-		Y("Y", "wp:projy", java.sql.Types.DOUBLE),
-		COMMENTS("Comments", "wp:comment", java.sql.Types.VARCHAR),
-		OBSERVER("Observer", "wp:observer", java.sql.Types.VARCHAR),
-		CA_ID("Conservation Area ID", "ca:id", java.sql.Types.VARCHAR),
-		CA_NAME("Conservation Area Name", "ca:name", java.sql.Types.VARCHAR),
+		UUID (Messages.IncidentDatasetResultSetMetadata_uuidcolumnname, "wp:uuid", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		ID(Messages.IncidentDatasetResultSetMetadata_idcolumnname, "wp:id", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		DATETIME(Messages.IncidentDatasetResultSetMetadata_datetimecolumnname, "wp:datetime", java.sql.Types.TIMESTAMP), //$NON-NLS-1$
+		RAW_X(Messages.IncidentDatasetResultSetMetadata_rawxcolumnname, "wp:rawx", java.sql.Types.DOUBLE), //$NON-NLS-1$
+		RAW_Y(Messages.IncidentDatasetResultSetMetadata_rawycolumnname, "wp:rawy", java.sql.Types.DOUBLE), //$NON-NLS-1$
+		DISTANCE(Messages.IncidentDatasetResultSetMetadata_distancecolumnname, "wp:distance", java.sql.Types.DOUBLE), //$NON-NLS-1$
+		BEARING(Messages.IncidentDatasetResultSetMetadata_bearingcolumnname, "wp:direction", java.sql.Types.DOUBLE), //$NON-NLS-1$
+		X(Messages.IncidentDatasetResultSetMetadata_xcolumnname, "wp:projx", java.sql.Types.DOUBLE), //$NON-NLS-1$
+		Y(Messages.IncidentDatasetResultSetMetadata_ycolumnname, "wp:projy", java.sql.Types.DOUBLE), //$NON-NLS-1$
+		COMMENTS(Messages.IncidentDatasetResultSetMetadata_commentscolumnname, "wp:comment", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		OBSERVER(Messages.IncidentDatasetResultSetMetadata_observercolumnname, "wp:observer", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		CA_ID(Messages.IncidentDatasetResultSetMetadata_caidcolumnname, "ca:id", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		CA_NAME(Messages.IncidentDatasetResultSetMetadata_canamecolumnname, "ca:name", java.sql.Types.VARCHAR), //$NON-NLS-1$
 		
-		RAW_GEOMETRY("Raw Geometry", RAW_GEOM_COLUMN_NAME, java.sql.Types.JAVA_OBJECT),
-		GEOMETRY("Geometry", GEOM_COLUMN_NAME, java.sql.Types.JAVA_OBJECT);
+		RAW_GEOMETRY(Messages.IncidentDatasetResultSetMetadata_rawgeomcolumnname, RAW_GEOM_COLUMN_NAME, java.sql.Types.JAVA_OBJECT),
+		GEOMETRY(Messages.IncidentDatasetResultSetMetadata_geomcolumnname, GEOM_COLUMN_NAME, java.sql.Types.JAVA_OBJECT);
 	
 		public String name;
 		public String key;
@@ -80,7 +83,12 @@ public class IncidentDatasetResultSetMetadata implements IResultSetMetaData {
 			case DISTANCE: return wp.getDistance();
 			case GEOMETRY: return GeometryFactoryProvider.getFactory().createPoint(new Coordinate(wp.getX(), wp.getY()));
 			case ID: return wp.getId();
-			case OBSERVER: return "IMPLEMENT THIS";
+			case OBSERVER: {
+				for (WaypointObservation wo : wp.getAllObservations()) {
+					if (wo.getObserver() != null) return SmartLabelProvider.getShortLabel(wo.getObserver());
+				}
+				return ""; //$NON-NLS-1$
+			}
 			case X: return wp.getX();
 			case Y: return wp.getY();
 			case RAW_GEOMETRY: return GeometryFactoryProvider.getFactory().createPoint(new Coordinate(wp.getRawX(), wp.getRawY()));

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2021 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -21,13 +21,6 @@
  */
 package org.wcs.smart.incident.birt.ui;
 
-import java.util.List;
-import java.util.UUID;
-
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.datatools.connectivity.oda.IConnection;
 import org.eclipse.datatools.connectivity.oda.IDriver;
 import org.eclipse.datatools.connectivity.oda.IParameterMetaData;
@@ -42,30 +35,17 @@ import org.eclipse.datatools.connectivity.oda.design.ResultSetDefinition;
 import org.eclipse.datatools.connectivity.oda.design.ui.designsession.DesignSessionUtil;
 import org.eclipse.datatools.connectivity.oda.design.ui.wizards.DataSetWizardPage;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
-import org.hibernate.Session;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.QueryFactory;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.incident.IncidentPlugIn;
-import org.wcs.smart.incident.IndepedentIncidentSource;
 import org.wcs.smart.incident.birt.SmartIncidentDriver;
 import org.wcs.smart.incident.birt.details.IncidentDataset;
-import org.wcs.smart.observation.model.Waypoint;
-import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
- * SMART Patrol Plan datasource wizard page.
+ * SMART incident dataset wizard page.
  * 
  * @author Emily
- * @since 2.0.0
  *
  */
 public class IncidentDatasetWizardPage extends DataSetWizardPage {

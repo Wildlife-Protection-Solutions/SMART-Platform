@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2021 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -21,30 +21,15 @@
  */
 package org.wcs.smart.incident.birt.observations;
 
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
-import org.eclipse.datatools.connectivity.oda.impl.Blob;
-import org.locationtech.jts.geom.Coordinate;
-import org.wcs.smart.cipher.EncryptUtils;
-import org.wcs.smart.common.attachment.ISmartAttachment;
-import org.wcs.smart.data.oda.smart.query.common.AttachmentByteQueryColumn;
-import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.birt.SmartIncidentDriver;
-import org.wcs.smart.map.GeometryFactoryProvider;
-import org.wcs.smart.observation.model.ObservationAttachment;
-import org.wcs.smart.observation.model.Waypoint;
-import org.wcs.smart.observation.model.WaypointAttachment;
+import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.util.UuidUtils;
 
 /**
- * SMART plan target result set metadata.
+ * Incident observation result set metadata
  * 
  * @author Emily
  * @since 2.0.0
@@ -53,11 +38,11 @@ import org.wcs.smart.util.UuidUtils;
 public class IncidentObservationDatasetResultSetMetadata implements IResultSetMetaData {
 
 	public enum Column {
-		OBS_UUID("Observation UUID", "obs:uuid", java.sql.Types.VARCHAR), //$NON-NLS-1$
-		GROUP_UUID("Observation Group UUID", "group:uuid", java.sql.Types.VARCHAR), //$NON-NLS-1$
-		LEAF_CATEOGRY("Category - Leaf", "category:leaf", java.sql.Types.VARCHAR),
-		OTHER_CATEOGRY("Category - Other", "category:other", java.sql.Types.VARCHAR),
-		CATEOGRY("Category - Full", "category:full", java.sql.Types.VARCHAR);
+		OBS_UUID(Messages.IncidentObservationDatasetResultSetMetadata_obsuuidcolumnname, "obs:uuid", java.sql.Types.VARCHAR),  //$NON-NLS-1$
+		GROUP_UUID(Messages.IncidentObservationDatasetResultSetMetadata_groupuuidcolumnname, "group:uuid", java.sql.Types.VARCHAR),  //$NON-NLS-1$
+		LEAF_CATEOGRY(Messages.IncidentObservationDatasetResultSetMetadata_catleafcolumnname, "category:leaf", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		OTHER_CATEOGRY(Messages.IncidentObservationDatasetResultSetMetadata_catothercolumnname, "category:other", java.sql.Types.VARCHAR), //$NON-NLS-1$
+		CATEOGRY(Messages.IncidentObservationDatasetResultSetMetadata_catfullcolumnname, "category:full", java.sql.Types.VARCHAR); //$NON-NLS-1$
 		
 		public String name;
 		public String key;
@@ -76,7 +61,7 @@ public class IncidentObservationDatasetResultSetMetadata implements IResultSetMe
 			case LEAF_CATEOGRY: return wo.getCategory().getName();
 			case OBS_UUID: return UuidUtils.uuidToString(wo.getUuid());
 			case OTHER_CATEOGRY:{
-				if (wo.getCategory().getParent() == null) return "";
+				if (wo.getCategory().getParent() == null) return ""; //$NON-NLS-1$
 				return wo.getCategory().getParent().getFullCategoryName();
 			}
 			default:

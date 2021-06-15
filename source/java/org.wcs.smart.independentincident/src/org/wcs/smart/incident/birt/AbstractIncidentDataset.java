@@ -1,10 +1,30 @@
+/*
+ * Copyright (C) 2021 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.incident.birt;
 
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.util.HashMap;
 import java.util.UUID;
 
 import org.eclipse.datatools.connectivity.oda.IParameterMetaData;
@@ -14,10 +34,14 @@ import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.eclipse.datatools.connectivity.oda.SortSpec;
 import org.eclipse.datatools.connectivity.oda.spec.QuerySpecification;
-import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.util.UuidUtils;
 
-
+/**
+ * BIRT incident dataset shared functions 
+ * 
+ * @author Emily
+ *
+ */
 public abstract class AbstractIncidentDataset implements IQuery{
 
 	protected SmartIncidentConnection connection;
@@ -211,10 +235,10 @@ public abstract class AbstractIncidentDataset implements IQuery{
 				try {
 					incidentUuid = UuidUtils.stringToUuid((String)value);
 				}catch (Exception ex) {
-					throw new OdaException("Invalid value for incident uuid parameter");
+					throw new OdaException("Invalid value for incident uuid parameter"); //$NON-NLS-1$
 				}
 			}else if (value != null){
-				throw new OdaException("Invalid value for incident uuid parameter");
+				throw new OdaException("Invalid value for incident uuid parameter"); //$NON-NLS-1$
 			}
 		}
 	}

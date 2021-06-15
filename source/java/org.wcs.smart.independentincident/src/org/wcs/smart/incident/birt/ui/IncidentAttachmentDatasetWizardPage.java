@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2021 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,10 +27,9 @@ import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.wcs.smart.incident.birt.attachments.IncidentAttachmentDataset;
 
 /**
- * SMART Patrol Plan datasource wizard page.
+ * Incident Attachment dataset wizard page.
  * 
  * @author Emily
- * @since 2.0.0
  *
  */
 public class IncidentAttachmentDatasetWizardPage extends IncidentDatasetWizardPage {

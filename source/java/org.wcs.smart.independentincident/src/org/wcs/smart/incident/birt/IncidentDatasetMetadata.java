@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2021 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -27,7 +27,7 @@ import org.eclipse.datatools.connectivity.oda.IResultSet;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 
 /**
- * SMART plan dataset metadata.
+ * SMART incident dataset metadata.
  * 
  * @author Emily
  * @since 2.0.0
@@ -80,7 +80,7 @@ public class IncidentDatasetMetadata implements IDataSetMetaData {
 	 * getDataSourceProductName()
 	 */
 	public String getDataSourceProductName() throws OdaException {
-		return "SMART Incident";
+		return "SMART Incident"; //$NON-NLS-1$
 	}
 
 	/*

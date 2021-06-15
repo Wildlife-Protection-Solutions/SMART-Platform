@@ -710,7 +710,7 @@
                     <text-property name="heading">Signature Type Key</text-property>
                 </structure>
                 <structure>
-                    <property name="columnName">signaturetypen:ame</property>
+                    <property name="columnName">signaturetype:name</property>
                     <property name="alias">Signature Type Name</property>
                     <property name="analysis">dimension</property>
                     <text-property name="displayName">Signature Type Name</text-property>
@@ -816,8 +816,8 @@
                 </structure>
                 <structure>
                     <property name="position">5</property>
-                    <property name="name">signaturetypen:ame</property>
-                    <property name="nativeName">signaturetypen:ame</property>
+                    <property name="name">signaturetype:name</property>
+                    <property name="nativeName">signaturetype:name</property>
                     <property name="dataType">string</property>
                     <property name="nativeDataType">12</property>
                 </structure>
@@ -952,7 +952,7 @@
         <design:resultColumnDefinitions>
           <design:attributes>
             <design:identifier>
-              <design:name>signaturetypen:ame</design:name>
+              <design:name>signaturetype:name</design:name>
               <design:position>5</design:position>
             </design:identifier>
             <design:nativeDataTypeCode>12</design:nativeDataTypeCode>
