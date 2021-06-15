@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
@@ -103,7 +104,7 @@ public class ReportPlan {
 	 */
 	public static void importPlanTemplate(Path newTemplate) throws IOException{
 		Path f = SmartPlanPlugIn.getDefault().getPlanDirectory().resolve(PLAN_TEMPLATE);
-		SmartUtils.copyFile(newTemplate, f);
+		SmartUtils.copyFile(newTemplate, f, StandardCopyOption.REPLACE_EXISTING);
 	}
 	
 	/**
