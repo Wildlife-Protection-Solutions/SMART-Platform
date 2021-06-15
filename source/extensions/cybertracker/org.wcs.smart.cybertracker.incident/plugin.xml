@@ -49,12 +49,12 @@
          <toolbar
                id="vertical.org.wcs.smart.cybertracker.incident">
             <command
-                  commandId="org.wcs.smart.cybertracker.packages.show"
-                  icon="platform:/plugin/org.wcs.smart.cybertracker/images/etool16/smartmobileexport.png"
-                  label="%export.command.label"
+                  commandId="org.wcs.smart.cybertracker.json.import"
+                  icon="platform:/plugin/org.wcs.smart.cybertracker/images/etool16/smartmobileimport.png"
+                  label="%import.command.label"
                   mode="FORCE_TEXT"
                   style="push"
-                  tooltip="%export.command.tooltip">
+                  tooltip="%import.command.tooltip">
                <visibleWhen>
                   <and>
                      <test
@@ -97,12 +97,12 @@
                </visibleWhen>
             </command>
             <command
-                  commandId="org.wcs.smart.cybertracker.json.import"
-                  icon="platform:/plugin/org.wcs.smart.cybertracker/images/etool16/smartmobileimport.png"
-                  label="%import.command.label"
+                  commandId="org.wcs.smart.cybertracker.packages.show"
+                  icon="platform:/plugin/org.wcs.smart.cybertracker/images/etool16/smartmobileexport.png"
+                  label="%export.command.label"
                   mode="FORCE_TEXT"
                   style="push"
-                  tooltip="%import.command.tooltip">
+                  tooltip="%export.command.tooltip">
                <visibleWhen>
                   <and>
                      <test
