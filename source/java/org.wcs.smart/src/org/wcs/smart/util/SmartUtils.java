@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -278,10 +279,10 @@ public class SmartUtils {
 	 * @param to file to copy to
 	 * @return
 	 */
-	public static boolean copyFile(Path from, Path to) {
+	public static boolean copyFile(Path from, Path to, CopyOption... options) {
 		try {
 			Files.createDirectories(to.getParent());
-			Files.copy(from, to);
+			Files.copy(from, to, options);
 			return true;
 		} catch (IOException e) {
 			SmartPlugIn.displayLog(MessageFormat.format(
