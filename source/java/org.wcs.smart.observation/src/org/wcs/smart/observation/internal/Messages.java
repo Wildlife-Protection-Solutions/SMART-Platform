@@ -132,11 +132,15 @@ public class Messages extends NLS {
 	public static String ImportGPSWizardPage_PageName;
 	public static String ImportGPSWizardPage_PageTitle;
 	
+	public static String ImportJsonDataHandler_allfiles;
+
 	public static String ImportJsonDataHandler_CompleteMessage;
 
 	public static String ImportJsonDataHandler_CompleteTitle;
 
 	public static String ImportJsonDataHandler_ContinueButton;
+
+	public static String ImportJsonDataHandler_jsonfiles;
 
 	public static String ImportJsonDataHandler_TaskName;
 

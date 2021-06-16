@@ -115,12 +115,6 @@
                   </test>
                </visibleWhen>
             </command>
-            <command
-                  commandId="org.wcs.smart.observation.import.json"
-                  icon="platform:/plugin/org.wcs.smart/images/icons/shared16/import.png"
-                  label="Import JSON Data..."
-                  style="push">
-            </command>
             <separator
                   name="org.wcs.smart.fielddata.dataseparater4"
                   visible="true">

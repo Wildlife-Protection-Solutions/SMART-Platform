@@ -279,6 +279,16 @@
                      </and>
                   </visibleWhen>
                </command>
+               <separator
+                     name="org.wcs.smart.connect.separator1"
+                     visible="true">
+               </separator>
+               <command
+                     commandId="org.wcs.smart.observation.import.json"
+                     icon="platform:/plugin/org.wcs.smart/images/icons/shared16/import.png"
+                     label="Import JSON Data..."
+                     style="push">
+               </command>
             </menu>
             <menu
                   id="org.wcs.smart.connect.configuration"

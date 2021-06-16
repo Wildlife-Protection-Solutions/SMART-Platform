@@ -68,6 +68,8 @@ public class ImportJsonDataHandler {
 	
 		//get file to process
 		FileDialog d = new FileDialog(activeShell);
+		d.setFilterExtensions(new String[] {"*.json", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
+		d.setFilterNames(new String[] {Messages.ImportJsonDataHandler_jsonfiles, Messages.ImportJsonDataHandler_allfiles});
 		String f = d.open();
 		if (f == null) return;
 		
