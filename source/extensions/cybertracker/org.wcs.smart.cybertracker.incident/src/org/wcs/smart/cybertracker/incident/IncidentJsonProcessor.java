@@ -162,7 +162,7 @@ public class IncidentJsonProcessor implements IJsonProcessor {
 						}
 					}
 					
-					currentLink.getWaypoint().setId(IncidentManager.getInstance().getNextIncidentId(session, observer));
+					currentLink.getWaypoint().setId(IncidentManager.getInstance().getNextIncidentId(session, currentLink.getWaypoint().getDateTime(), observer));
 					currentLink.getWaypoint().setSourceId(IndepedentIncidentSource.KEY);
 					currentLink.getWaypoint().setConservationArea(SmartDB.getCurrentConservationArea());
 
