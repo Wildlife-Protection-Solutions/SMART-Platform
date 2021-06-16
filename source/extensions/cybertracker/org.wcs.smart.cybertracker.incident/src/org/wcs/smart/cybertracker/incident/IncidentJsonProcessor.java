@@ -144,17 +144,6 @@ public class IncidentJsonProcessor implements IJsonProcessor {
 						groupMappings.add(rootLink);
 					}
 				}
-//			
-//				if (currentLink.getLastObservationCounter() == null) {
-//					if (observationCounter != 1)  continue; //not the first observation in the group; cannot process
-//					currentLink.setLastObservationCounter(observationCounter);
-//				}else if (currentLink.getLastObservationCounter() + 1 != observationCounter) {
-//					//not the next observation in the group; cannot process
-//					continue;
-//				}else {
-//					currentLink.setLastObservationCounter(observationCounter);
-//				}
-//			
 			
 				//Parse the waypoint information 				
 				Waypoint parsedWp = parser.createWaypoint(feature, SmartDB.getCurrentConservationArea(), session);

@@ -44,12 +44,14 @@ import org.wcs.smart.cybertracker.export.IPackageContribution;
 import org.wcs.smart.cybertracker.incident.IncidentPackageContribution;
 import org.wcs.smart.cybertracker.incident.internal.Messages;
 import org.wcs.smart.cybertracker.incident.model.IncidentCtPackage;
+import org.wcs.smart.cybertracker.incident.model.IncidentMetadataField;
+import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
+import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.xml.CmSmartToXml;
 import org.wcs.smart.dataentry.model.xml.CmXmlManager;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.util.SmartUtils;
@@ -152,7 +154,7 @@ public enum IncidentPackageExporter {
 
 				sub.split(1);
 				Path profileFile = tempDir.resolve(CT_PROFILE_FILE);
-				ObservationOptions ops = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
+				ObservationOptions ops = ObservationHibernateManager.getPatrolOptions(ctPackage.getConservationArea(),session);
 				profileToJson(session.get(CyberTrackerPropertiesProfile.class, localpackage.getCtProfile().getUuid()), 
 						ops.getTrackDistanceDirection(), ops.getTrackObserver(),
 						session, context, profileFile, ctprofileAdditions);
@@ -173,7 +175,7 @@ public enum IncidentPackageExporter {
 				
 				//metadata
 				Path metadataFile = tempDir.resolve(SMARTCOLLECT_METADATA_FILE);
-				createMetadata(metadataFile);
+				createIncidentMetadataJson(metadataFile, localpackage, session);
 				toIncludeInZip.add(metadataFile);
 				
 				//project file
@@ -196,16 +198,26 @@ public enum IncidentPackageExporter {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private void createMetadata(Path incidentJson) throws IOException {
+	public void createIncidentMetadataJson(Path incidentJson, AbstractCtPackage ctpackage, Session session) throws IOException {
 		JSONArray metadataScreens = new JSONArray();
 		metadataScreens.add(CtJsonExportUtils.createDataType(IncidentPackageContribution.INCIDENT_RESOURCE_ID));
 		
+		//observer employee options
+		MetadataFieldValue md = null;
+		for (MetadataFieldValue v : ctpackage.getMetadataValues()) {
+			if (v.getMetadataKey().equalsIgnoreCase(IncidentMetadataField.MEMBERS.name())) {
+				md = v;
+				break;
+			}
+		}
+		if (md != null) {
+			ObservationOptions ops = ObservationHibernateManager.getPatrolOptions(ctpackage.getConservationArea(), session);
+			md.setVisible(ops.getTrackObserver());
+			
+			JSONObject emp = CtJsonExportUtils.convertEmployees(md, false, false, session, ctpackage.getConservationArea());
+			metadataScreens.add(emp);
+		}
 		
-		JSONObject dataType = new JSONObject();
-		dataType.put(CtJsonExportUtils.JSON_OPTION_TYPE_KEY, CtJsonExportUtils.Type.TEXT.name());
-		dataType.put(CtJsonExportUtils.JSON_ISVISIBILE_PROP_KEY, false);
-		dataType.put(CtJsonExportUtils.JSON_OPTION_GENERATED_KEY, true);
-		dataType.put(CtJsonExportUtils.JSON_REQUIRED_PROP_KEY, true);
 		
 		try(BufferedWriter fw = Files.newBufferedWriter(incidentJson)){
 			fw.write(metadataScreens.toJSONString());

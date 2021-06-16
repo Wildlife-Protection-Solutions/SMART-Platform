@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.cybertracker.incident;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.FileVisitResult;
@@ -39,20 +38,20 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wcs.smart.cybertracker.export.CtJsonExportUtils;
 import org.wcs.smart.cybertracker.export.IPackageContribution;
 import org.wcs.smart.cybertracker.export.IPackageUiContribution;
 import org.wcs.smart.cybertracker.export.data.DataModelWrapper;
 import org.wcs.smart.cybertracker.incident.internal.Messages;
+import org.wcs.smart.cybertracker.incident.pkg.IncidentPackageExporter;
+import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.ICtPackage;
 import org.wcs.smart.cybertracker.model.IIncidentCtPackage;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.xml.CmSmartToXml;
 import org.wcs.smart.dataentry.model.xml.CmXmlManager;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * Package contribution for adding incident model to CT package
@@ -107,7 +106,7 @@ public class IncidentPackageContribution implements IPackageContribution{
 			try(Session session = HibernateManager.openSession()){
 				DataModelWrapper wrapper = new DataModelWrapper();
 				cm = wrapper.buildConfigurableModel(session, monitor);
-				cm.setConservationArea(SmartDB.getCurrentConservationArea());
+				cm.setConservationArea(ctpackage.getConservationArea());
 			}
 		}else if (pp.getHasIncident()) {
 			cm = (ConfigurableModel)pp.getIncidentModel();
@@ -138,6 +137,8 @@ public class IncidentPackageContribution implements IPackageContribution{
 			}
 		};
 	
+		Path metadataFile = tempDir.resolve(INCIDENT_METADATA_FILE);
+		
 		//convert to xml
 		try(Session s = HibernateManager.openSession()){
 			//convert to xml
@@ -165,13 +166,10 @@ public class IncidentPackageContribution implements IPackageContribution{
 				if (!Files.exists(toPath)) Files.copy(fromPath, toPath);
 				updates.addFile(toPath);
 			}
+			
+			IncidentPackageExporter.INSTANCE.createIncidentMetadataJson(metadataFile, (AbstractCtPackage)pp, s);
+			updates.addFile(metadataFile);
 		}
-		
-		
-		Path metadataFile = tempDir.resolve(INCIDENT_METADATA_FILE);
-		createIncidentJson(metadataFile);
-		updates.addFile(metadataFile);
-		
 		
 		JSONObject metadata = new JSONObject();
 		metadata.put("decoder","sourceparser_smartconfigurabledatamodel"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -181,15 +179,5 @@ public class IncidentPackageContribution implements IPackageContribution{
 		return updates;
 		
 	}
-
-	@SuppressWarnings("unchecked")
-	private void createIncidentJson(Path incidentJson) throws IOException {
-		JSONArray metadataScreens = new JSONArray();
-		metadataScreens.add(CtJsonExportUtils.createDataType(INCIDENT_RESOURCE_ID));
-		try(BufferedWriter fw = Files.newBufferedWriter(incidentJson)){
-			fw.write(metadataScreens.toJSONString());
-		}
-	}
-	
 	
 }

@@ -28,7 +28,10 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -38,14 +41,19 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.CheckStateChangedEvent;
+import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
@@ -54,6 +62,7 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
@@ -62,6 +71,8 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.EmployeeTeam;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackageConfigurator;
@@ -73,15 +84,25 @@ import org.wcs.smart.cybertracker.export.PackageContributionManager;
 import org.wcs.smart.cybertracker.export.data.DataModelWrapper;
 import org.wcs.smart.cybertracker.incident.internal.Messages;
 import org.wcs.smart.cybertracker.incident.model.IncidentCtPackage;
+import org.wcs.smart.cybertracker.incident.model.IncidentMetadataField;
+import org.wcs.smart.cybertracker.model.AbstractCtPackage;
 import org.wcs.smart.cybertracker.model.ConfigurableModelCtPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.ICtPackage;
+import org.wcs.smart.cybertracker.model.MetadataFieldUuidValue;
+import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.cybertracker.properties.CtProfileLabelProvider;
 import org.wcs.smart.cybertracker.properties.CyberTrackerPropertiesDialog;
 import org.wcs.smart.dataentry.DataentryHibernateManager;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelLabelProvider;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.ObservationHibernateManager;
+import org.wcs.smart.observation.model.ObservationOptions;
+import org.wcs.smart.ui.CheckboxSelectorKeyAdapter;
+import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -105,6 +126,9 @@ public class CtIncidentPackageConfigurator implements ICtPackageConfigurator {
 	private Consumer<String> onValidate;
 	private Consumer<Boolean> onModified;
 
+	private CheckboxTableViewer lstEmployees;
+	private Font boldFont;
+	
 	private boolean isInit = false;
 	
 	@Inject
@@ -148,18 +172,13 @@ public class CtIncidentPackageConfigurator implements ICtPackageConfigurator {
 		scroll.setContent(main);
 		mainTab.setControl(scroll);
 		
-		Composite g = new Composite(main, SWT.NONE);
-		g.setLayout(new GridLayout());
-		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		Composite outer = new Composite(main, SWT.NONE);
+		outer.setLayout(new GridLayout());
+		outer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Composite header = new Composite(g, SWT.NONE);
-		header.setLayout(new GridLayout());
-		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		Label headerLabel = new Label(header, SWT.NONE);
-		headerLabel.setText(Messages.CtIncidentPackageConfigurator_ConfigurationSectionHeader);
-		WidgetElement.setCSSClass(header, SmartUiUtils.HEADER_CLASS);
+		SmartUiUtils.createHeaderLabel(outer, Messages.CtIncidentPackageConfigurator_ConfigurationSectionHeader);
 		
-		g = new Composite(g, SWT.NONE);
+		Composite g = new Composite(outer, SWT.NONE);
 		g.setLayout(new GridLayout(2, false));
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
@@ -245,6 +264,75 @@ public class CtIncidentPackageConfigurator implements ICtPackageConfigurator {
 			dialog.open();
 		});
 		
+		ObservationOptions ops = null;
+		try(Session session = HibernateManager.openSession()){
+			ops = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
+		}
+		
+		if (ops != null && ops.getTrackObserver()) {
+			
+			SmartUiUtils.createHeaderLabel(outer, Messages.CtIncidentPackageConfigurator_ObserverHeader);
+			
+			Composite obs = new Composite(outer, SWT.NONE);
+			obs.setLayout(new GridLayout());
+			obs.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			
+			Label l = new Label(obs, SWT.WRAP);
+			l.setText(Messages.CtIncidentPackageConfigurator_EmployeeListDetails);
+			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			((GridData)l.getLayoutData()).widthHint = 200;
+			
+			ColumnLabelProvider employeeLblProvider = new ColumnLabelProvider() {
+
+				@Override
+				public String getText(Object element) {
+					if (element instanceof EmployeeTeam) return ((EmployeeTeam)element).getName();
+					if (element instanceof Employee) return SmartLabelProvider.getShortLabel((Employee)element);
+					return super.getText(element);
+				}
+				
+				@Override
+				public Font getFont(Object element) {
+					if (element instanceof EmployeeTeam || element instanceof Employee) return null;
+					return boldFont;
+				}
+			};
+			
+			lstEmployees = CheckboxTableViewer.newCheckList(obs, SWT.BORDER | SWT.MULTI);
+			lstEmployees.getTable().addKeyListener(new CheckboxSelectorKeyAdapter(lstEmployees));
+			lstEmployees.setContentProvider(ArrayContentProvider.getInstance());
+			lstEmployees.setLabelProvider(employeeLblProvider);
+			lstEmployees.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			((GridData)lstEmployees.getControl().getLayoutData()).heightHint = 80;
+			FontData fd = lstEmployees.getControl().getFont().getFontData()[0];
+			fd.setStyle(SWT.BOLD);
+			boldFont = new Font(lstEmployees.getControl().getDisplay(), fd);
+			lstEmployees.getControl().addListener(SWT.Dispose,e->boldFont.dispose());
+			ViewerFilter filter = new ViewerFilter() {
+				@Override
+				public boolean select(Viewer viewer, Object parentElement, Object element) {
+					if (element instanceof Employee || element instanceof EmployeeTeam) return lstEmployees.getChecked(element);
+					return true;
+				}
+			};
+			lstEmployees.addCheckStateListener(new ICheckStateListener() {
+				
+				@Override
+				public void checkStateChanged(CheckStateChangedEvent event) {
+					validate(true);
+				}
+			});
+			Button btnChecked = new Button(obs, SWT.CHECK);
+			btnChecked.setText(Messages.CtIncidentPackageConfigurator_ShowOnlyChecked);
+			btnChecked.addListener(SWT.Selection, e->{
+				lstEmployees.getControl().setVisible(false);
+				if (btnChecked.getSelection()) lstEmployees.addFilter(filter);
+				else lstEmployees.removeFilter(filter);
+				lstEmployees.getControl().setVisible(true);
+			});
+			
+			
+		}
 		
 		//main page contributions
 		if (contributions != null) {
@@ -290,6 +378,45 @@ public class CtIncidentPackageConfigurator implements ICtPackageConfigurator {
 				}
 				ctpackage.setCtProfile((CyberTrackerPropertiesProfile) profileViewer.getStructuredSelection().getFirstElement());
 				ctpackage.setName(txtName.getText());
+				
+				MetadataFieldValue mdObserver = findMetadataValue(IncidentMetadataField.MEMBERS, ctpackage);
+				if (lstEmployees != null) {
+					mdObserver.setVisible(true);
+					
+					if (mdObserver.getUuidList() == null) mdObserver.setUuidList(new ArrayList<>());
+					List<MetadataFieldUuidValue> items = new ArrayList<>();
+					
+					for (Object x : lstEmployees.getCheckedElements()) {
+						UUID uuid = null;
+						if (x instanceof Employee) {
+							uuid = ((Employee)x).getUuid();
+						}else if (x instanceof EmployeeTeam) {
+							uuid = ((EmployeeTeam)x).getUuid();
+						}
+						if (uuid == null) continue;
+						
+						MetadataFieldUuidValue value = null;
+						for (MetadataFieldUuidValue mdvalue: mdObserver.getUuidList()) {
+							if (mdvalue.getUuidValue().equals(uuid)) {
+								value = mdvalue;
+								break;
+							}
+						}
+						if (value == null) {
+							value = new MetadataFieldUuidValue();
+							value.setUuidValue(uuid);
+							value.setMetadata(mdObserver);
+						}
+						items.add(value);
+					}
+					mdObserver.getUuidList().clear();
+					mdObserver.getUuidList().addAll(items);
+					
+				}else {
+					mdObserver.setVisible(false);
+				}
+				
+				
 				session.saveOrUpdate(ctpackage);
 				session.flush();
 				for (IPackageUiContribution cc : contributions) {
@@ -302,7 +429,27 @@ public class CtIncidentPackageConfigurator implements ICtPackageConfigurator {
 			}
 		}
 	}
-
+	
+	private MetadataFieldValue findMetadataValue(IncidentMetadataField field, IncidentCtPackage ppackage) {
+		MetadataFieldValue v = null;
+		for (MetadataFieldValue md : ppackage.getMetadataValues()) {
+			if (md.getMetadataKey().equalsIgnoreCase(field.name())) {
+				v = md;
+				break;
+			}
+		}
+		
+		if (v == null) {
+			v = new MetadataFieldValue();
+			v.setCtPackage((AbstractCtPackage)ppackage);
+			v.setConservationArea(ppackage.getConservationArea());
+			v.setMetadataKey(field.name());
+			ppackage.getMetadataValues().add(v);
+		}
+		v.setVisible(true);
+		return v;
+	}
+	
 	private void validate() {
 		validate(true);
 	}
@@ -321,6 +468,20 @@ public class CtIncidentPackageConfigurator implements ICtPackageConfigurator {
 			if (profileViewer.getSelection().isEmpty()) {
 				throw new Exception(Messages.CtIncidentPackageConfigurator_SettingsRequired);
 			}
+			
+			if (lstEmployees != null) {
+				boolean ok = false;
+				for (Object x : lstEmployees.getCheckedElements()) {
+					if (x instanceof Employee || x instanceof EmployeeTeam) {
+						ok = true;
+						break;
+					}
+				}
+				if (!ok) {
+					throw new Exception(Messages.CtIncidentPackageConfigurator_ObserverRequired);
+				}
+			}
+			
 			for (IPackageUiContribution cc : contributions) {
 				String x = cc.isValid();
 				if (x != null) throw new Exception(x);
@@ -362,7 +523,18 @@ public class CtIncidentPackageConfigurator implements ICtPackageConfigurator {
 				DataModelWrapper dm = new DataModelWrapper();
 				
 				IncidentCtPackage init = null;
+				List<EmployeeTeam> eteams ;
+				List<Employee> es;
+				
 				try(Session session = HibernateManager.openSession()){
+					
+					eteams = QueryFactory.buildQuery(session, EmployeeTeam.class, 
+							new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}).list(); //$NON-NLS-1$
+					
+					es = QueryFactory.buildQuery(session, Employee.class, 
+							new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
+							new Object[] {"endEmploymentDate", null}).list(); //$NON-NLS-1$
+							
 					
 					List<ConfigurableModel> models = DataentryHibernateManager.getConfigurableModels(session);
 					models.sort((a,b)->Collator.getInstance().compare(a.getName().toLowerCase(),  b.getName().toLowerCase()));
@@ -386,9 +558,38 @@ public class CtIncidentPackageConfigurator implements ICtPackageConfigurator {
 							init.getCtProfile().getUuid();
 						}
 					}
+					init.getMetadataValues().forEach(e->{
+						e.getMetadataKey();
+						if (e.getUuidList() != null) {
+							e.getUuidList().forEach(md->md.getUuidValue());
+						}
+					});
 				}
+				eteams.sort((a,b)->Collator.getInstance().compare(a.getName(), b.getName()));
+				es.sort((a,b)->Collator.getInstance().compare(SmartLabelProvider.getShortLabel(a), SmartLabelProvider.getShortLabel(b)));
+				
 				profiles.sort((a,b)->Collator.getInstance().compare(a.getName().toLowerCase(), b.getName().toLowerCase()));
 
+				List<Object> observerOptions = new ArrayList<>();
+				if (!eteams.isEmpty()) {
+					observerOptions.add(Messages.CtIncidentPackageConfigurator_Teams);
+					observerOptions.addAll(eteams);
+					observerOptions.add(Messages.CtIncidentPackageConfigurator_Employees);
+				}
+				observerOptions.addAll(es);
+				
+				List<Object> checked = new ArrayList<>();
+				MetadataFieldValue mv = findMetadataValue(IncidentMetadataField.MEMBERS, init);
+				if (mv != null && mv.getUuidList() != null) {
+					Set<UUID> uuids = mv.getUuidList().stream().map(z->z.getUuidValue()).collect(Collectors.toSet());
+					for (EmployeeTeam e : eteams) {
+						if (uuids.contains(e.getUuid())) checked.add(e);
+					}
+					for (Employee e : es) {
+						if (uuids.contains(e.getUuid())) checked.add(e);
+					}
+				}
+				
 				if (init.isDataModel()) {
 					context.set(ConfigurableModel.class, new ConfigurableModel());
 				}else {
@@ -412,6 +613,11 @@ public class CtIncidentPackageConfigurator implements ICtPackageConfigurator {
 							profileViewer.setSelection(new StructuredSelection(finit.getCtProfile()));
 						}else {
 							if (!profiles.isEmpty()) profileViewer.setSelection(new StructuredSelection(profiles.get(0)));
+						}
+						
+						if (lstEmployees !=  null) {
+							lstEmployees.setInput(observerOptions);
+							lstEmployees.setCheckedElements(checked.toArray());
 						}
 						validate(false);
 					}finally {
