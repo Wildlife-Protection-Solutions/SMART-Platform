@@ -27,8 +27,8 @@ import java.util.List;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -53,7 +53,7 @@ public class ObserverWizardPage extends WizardPage {
 
 	private NewIncidentWizard wizard;
 	
-	private TableViewer tblEmployees;
+	private ListViewer tblEmployees;
 	private static final String NONE = ""; //$NON-NLS-1$
 
 	public ObserverWizardPage(NewIncidentWizard wizard){
@@ -71,19 +71,16 @@ public class ObserverWizardPage extends WizardPage {
 	
 	@Override
 	public void createControl(Composite parent) {
-		Composite center = new Composite(parent, SWT.NONE);
-		GridLayout gl = new GridLayout();
-		gl.marginWidth = 15;
-		center.setLayout(gl);
 		
-		Composite item = new Composite(center, SWT.NONE);
+		Composite item = new Composite(parent, SWT.NONE);
 		item.setLayout(new GridLayout());
+		item.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		
 		Label l = new Label(item, SWT.NONE);
 		l.setText(Messages.ObserverWizardPage_ObserverField);
 			
-		tblEmployees = new TableViewer(item, SWT.BORDER | SWT.V_SCROLL);
+		tblEmployees = new ListViewer(item, SWT.BORDER | SWT.V_SCROLL);
 		tblEmployees.setContentProvider(ArrayContentProvider.getInstance());
 		tblEmployees.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)tblEmployees.getControl().getLayoutData()).heightHint = 200;
@@ -110,7 +107,7 @@ public class ObserverWizardPage extends WizardPage {
 		setTitle(Messages.ObserverWizardPage_PageTitle);
 		setMessage(Messages.ObserverWizardPage_PageMessage);
 		
-		super.setControl(center);
+		super.setControl(item);
 	}
 
 	public String validate(){
@@ -125,11 +122,4 @@ public class ObserverWizardPage extends WizardPage {
 		return null;
 	}
 	
-//	public void updateIncident(Waypoint incident){
-//		getWizard().s
-//	}
-//	
-//	public void initPage(Waypoint incident, Session session){
-//		validate();
-//	}
 }
