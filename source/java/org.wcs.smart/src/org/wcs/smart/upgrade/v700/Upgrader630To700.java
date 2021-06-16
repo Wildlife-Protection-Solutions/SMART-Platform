@@ -249,7 +249,7 @@ public class Upgrader630To700 implements IDatabaseUpgrader {
 				
 				//id integer to string
 				"ALTER TABLE smart.WAYPOINT add column id_str varchar(256)", //$NON-NLS-1$
-				"UPDATE smart.waypoint set id_str = trim(cast(id as char(256)))", //$NON-NLS-1$
+				"UPDATE smart.waypoint set id_str = trim(cast(id as char(32)))", //$NON-NLS-1$
 				"ALTER TABLE smart.waypoint drop column id", //$NON-NLS-1$
 				"RENAME column smart.waypoint.id_str to id", //$NON-NLS-1$
 				"ALTER TABLE smart.waypoint alter column id set not null", //$NON-NLS-1$
