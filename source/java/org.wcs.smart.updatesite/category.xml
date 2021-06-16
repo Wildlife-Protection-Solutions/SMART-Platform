@@ -69,6 +69,75 @@
    <feature url="features/org.wcs.smart.smartcollect.feature_7.0.3.qualifier.jar" id="org.wcs.smart.smartcollect.feature" version="7.0.3.qualifier">
       <category name="smartcollect"/>
    </feature>
+   <feature id="org.wcs.smart.plan.feature.nl">
+      <category name="planning"/>
+   </feature>
+   <feature id="org.wcs.smart.smartcollect.feature.nl">
+      <category name="smartcollect"/>
+   </feature>
+   <feature id="org.wcs.smart.paws.feature.nl">
+      <category name="paws"/>
+   </feature>
+   <feature id="org.wcs.smart.r.feature.nl">
+      <category name="r"/>
+   </feature>
+   <feature id="org.wcs.smart.event.feature.nl">
+      <category name="events"/>
+   </feature>
+   <feature id="org.wcs.smart.event.i2.feature.nl">
+      <category name="events"/>
+   </feature>
+   <feature id="org.wcs.smart.i2.feature.nl">
+      <category name="profiles"/>
+   </feature>
+   <feature id="org.wcs.smart.asset.feature.nl">
+      <category name="asset"/>
+   </feature>
+   <feature id="org.wcs.smart.feature.nl">
+      <category name="languagepacks"/>
+   </feature>
+   <feature id="org.wcs.smart.independentincident.feature.nl">
+      <category name="independentincident"/>
+   </feature>
+   <feature id="org.wcs.smart.entity.feature.nl">
+      <category name="entity"/>
+   </feature>
+   <feature id="org.wcs.smart.er.feature.nl">
+      <category name="ecologicalrecords"/>
+   </feature>
+   <feature id="org.wcs.smart.connect.cybertracker.feature.nl">
+      <category name="connect"/>
+   </feature>
+   <feature id="org.wcs.smart.connect.feature.nl">
+      <category name="connect"/>
+   </feature>
+   <feature id="org.wcs.smart.cybertracker.incident.feature.nl">
+      <category name="smartmobile"/>
+   </feature>
+   <feature id="org.wcs.smart.cybertracker.patrol.feature.nl">
+      <category name="smartmobile"/>
+   </feature>
+   <feature id="org.wcs.smart.cybertracker.plan.feature.nl">
+      <category name="smartmobile"/>
+   </feature>
+   <feature id="org.wcs.smart.cybertracker.survey.feature.nl">
+      <category name="smartmobile"/>
+   </feature>
+   <feature id="org.wcs.smart.connect.dataqueue.cybertracker.feature.nl">
+      <category name="connectdq"/>
+   </feature>
+   <feature id="org.wcs.smart.connect.dataqueue.er.feature.nl">
+      <category name="connectdq"/>
+   </feature>
+   <feature id="org.wcs.smart.connect.dataqueue.feature.nl">
+      <category name="connectdq"/>
+   </feature>
+   <feature id="org.wcs.smart.connect.dataqueue.i2.feature.nl">
+      <category name="connectdq"/>
+   </feature>
+   <feature id="org.wcs.smart.connect.dataqueue.independentincident.feature.nl">
+      <category name="connectdq"/>
+   </feature>
    <category-def name="planning" label="SMART Planning Plug-in">
       <description>
          The SMART Planning plug-in contains a plan module that allows users to organize, maintain and query planning information. Plans allow for a set of targets (such as total distance patrolled or specific locations to visit) to be assigned to a patrol or series of patrols.
