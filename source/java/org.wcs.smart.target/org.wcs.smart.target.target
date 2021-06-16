@@ -110,9 +110,31 @@
 		    <unit id="org.eclipse.birt.feature.group" version="4.18.0.v202103171650"/>
 		    <unit id="org.eclipse.birt.rcp.feature.group" version="4.18.0.v202103171650"/>
 	    </location>
+	    <location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="slicer" includeSource="true" type="InstallableUnit">
+		    <repository location="jar:file:/C:/data/SMART/Source/Trunk/svn/source/java/org.wcs.smart.target/babel-R0.15.1-mars.zip!/"/>
+		    <unit id="org.eclipse.babel.nls_birt_ar.feature.group" version="4.5.0.v20171231064042"/>
+		    <unit id="org.eclipse.babel.nls_birt_es.feature.group" version="4.5.0.v20171231064042"/>
+		    <unit id="org.eclipse.babel.nls_birt_fr.feature.group" version="4.5.0.v20171231064042"/>
+		    <unit id="org.eclipse.babel.nls_birt_hi.feature.group" version="4.5.0.v20171231064042"/>
+		    <unit id="org.eclipse.babel.nls_birt_id.feature.group" version="4.5.0.v20171231064042"/>
+		    <unit id="org.eclipse.babel.nls_birt_ml.feature.group" version="4.5.0.v20171231064042"/>
+		    <unit id="org.eclipse.babel.nls_birt_mn.feature.group" version="4.5.0.v20171231064042"/>
+		    <unit id="org.eclipse.babel.nls_birt_pt.feature.group" version="4.5.0.v20171231064042"/>
+		    <unit id="org.eclipse.babel.nls_birt_ru.feature.group" version="4.5.0.v20171231064042"/>
+		    <unit id="org.eclipse.babel.nls_birt_th.feature.group" version="4.5.0.v20171231064042"/>
+		    <unit id="org.eclipse.babel.nls_birt_uk.feature.group" version="4.5.0.v20171231064042"/>
+		    <unit id="org.eclipse.babel.nls_birt_vi.feature.group" version="4.5.0.v20171231064042"/>
+		    <unit id="org.eclipse.babel.nls_birt_zh.feature.group" version="4.5.0.v20171231064042"/>
+	    </location>
 	    <location includeSource="true" missingManifest="generate" type="Maven">
 		    <groupId>com.itextpdf</groupId>
 		    <artifactId>kernel</artifactId>
+		    <version>7.1.14</version>
+		    <type>jar</type>
+	    </location>
+	    <location includeSource="true" missingManifest="generate" type="Maven">
+		    <groupId>com.itextpdf</groupId>
+		    <artifactId>layout</artifactId>
 		    <version>7.1.14</version>
 		    <type>jar</type>
 	    </location>
@@ -124,21 +146,42 @@
 	    </location>
 	    <location includeSource="true" missingManifest="generate" type="Maven">
 		    <groupId>com.itextpdf</groupId>
-		    <artifactId>io</artifactId>
-		    <version>7.1.14</version>
-		    <type>jar</type>
-	    </location>
-	    <location includeSource="true" missingManifest="generate" type="Maven">
-		    <groupId>com.itextpdf</groupId>
 		    <artifactId>font-asian</artifactId>
 		    <version>7.1.14</version>
 		    <type>jar</type>
 	    </location>
 	    <location includeSource="true" missingManifest="generate" type="Maven">
 		    <groupId>com.itextpdf</groupId>
-		    <artifactId>layout</artifactId>
+		    <artifactId>io</artifactId>
 		    <version>7.1.14</version>
 		    <type>jar</type>
+	    </location>
+	    <location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="slicer" includeSource="true" type="InstallableUnit">
+		    <repository location="https://download.eclipse.org/technology/babel/update-site/R0.18.3/2020-12/"/>
+		    <unit id="org.eclipse.babel.nls_datatools_ar.feature.group" version="4.18.0.v20210327075149"/>
+		    <unit id="org.eclipse.babel.nls_datatools_es.feature.group" version="4.18.0.v20210327075149"/>
+		    <unit id="org.eclipse.babel.nls_datatools_fr.feature.group" version="4.18.0.v20210327075149"/>
+		    <unit id="org.eclipse.babel.nls_datatools_hi.feature.group" version="4.18.0.v20210327075149"/>
+		    <unit id="org.eclipse.babel.nls_datatools_id.feature.group" version="4.18.0.v20210327075149"/>
+		    <unit id="org.eclipse.babel.nls_datatools_mn.feature.group" version="4.18.0.v20210327075149"/>
+		    <unit id="org.eclipse.babel.nls_datatools_pt.feature.group" version="4.18.0.v20210327075149"/>
+		    <unit id="org.eclipse.babel.nls_datatools_ru.feature.group" version="4.18.0.v20210327075149"/>
+		    <unit id="org.eclipse.babel.nls_datatools_th.feature.group" version="4.18.0.v20210327075149"/>
+		    <unit id="org.eclipse.babel.nls_datatools_uk.feature.group" version="4.18.0.v20210327075149"/>
+		    <unit id="org.eclipse.babel.nls_datatools_zh.feature.group" version="4.18.0.v20210327075149"/>
+		    <unit id="org.eclipse.babel.nls_eclipse_ar.feature.group" version="4.18.0.v20210327075149"/>
+		    <unit id="org.eclipse.babel.nls_eclipse_es.feature.group" version="4.18.0.v20210327075149"/>
+		    <unit id="org.eclipse.babel.nls_eclipse_fr.feature.group" version="4.18.0.v20210327075149"/>
+		    <unit id="org.eclipse.babel.nls_eclipse_hi.feature.group" version="4.18.0.v20210327075149"/>
+		    <unit id="org.eclipse.babel.nls_eclipse_id.feature.group" version="4.18.0.v20210327075149"/>
+		    <unit id="org.eclipse.babel.nls_eclipse_ml.feature.group" version="4.18.0.v20210327075149"/>
+		    <unit id="org.eclipse.babel.nls_eclipse_mn.feature.group" version="4.18.0.v20210327075149"/>
+		    <unit id="org.eclipse.babel.nls_eclipse_pt.feature.group" version="4.18.0.v20210327075149"/>
+		    <unit id="org.eclipse.babel.nls_eclipse_ru.feature.group" version="4.18.0.v20210327075149"/>
+		    <unit id="org.eclipse.babel.nls_eclipse_th.feature.group" version="4.18.0.v20210327075149"/>
+		    <unit id="org.eclipse.babel.nls_eclipse_uk.feature.group" version="4.18.0.v20210327075149"/>
+		    <unit id="org.eclipse.babel.nls_eclipse_vi.feature.group" version="4.18.0.v20210327075149"/>
+		    <unit id="org.eclipse.babel.nls_eclipse_zh.feature.group" version="4.18.0.v20210327075149"/>
 	    </location>
     </locations>
 </target>
