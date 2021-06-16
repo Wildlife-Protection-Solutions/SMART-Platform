@@ -23,6 +23,9 @@ package org.wcs.smart.patrol;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -35,6 +38,7 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
+import org.wcs.smart.patrol.model.PatrolLegDay;
 
 /**
  * Patrol ID Generator
@@ -114,9 +118,22 @@ public enum PatrolIdGenerator {
 		for (PatrolLeg l : p.getLegs()) {
 			leader = l.getLeader().getMember();
 		}
+		
+		//find earliest time
+		LocalDateTime startDateTime = null;
+		for (PatrolLeg leg : p.getLegs()) {
+			for (PatrolLegDay d : leg.getPatrolLegDays()) {
+				if (startDateTime == null || d.getDate().atTime(d.getStartTime()).isBefore(startDateTime)) {
+					startDateTime = d.getDate().atTime(d.getStartTime());
+				}
+			}
+		}
+		if (startDateTime == null) startDateTime = p.getStartDate().atStartOfDay();
+		
+		
 		HashMap<String, Employee> employees = new HashMap<>();
 		employees.put(IdGeneratorEngine.LEADER_KEY,leader);
-		String nextId = IdGeneratorEngine.INSTANCE.generateId(pattern, employees);
+		String nextId = IdGeneratorEngine.INSTANCE.generateId(pattern, startDateTime, employees);
 
 		prop = QueryFactory.buildQuery(s, ConservationAreaProperty.class, 
 				new Object[] {"conservationArea", p.getConservationArea()}, //$NON-NLS-1$

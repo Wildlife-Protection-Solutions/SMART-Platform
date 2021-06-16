@@ -96,6 +96,7 @@ public class IdComposite extends AbstractIncidentComposite {
 			}
 		});
 		txtId.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)txtId.getLayoutData()).widthHint = 200;
 		
 		return item;
 	}
@@ -112,7 +113,7 @@ public class IdComposite extends AbstractIncidentComposite {
 	}
 
 	@Override
-	public void initFields(Waypoint incident, Session session) {
+	public void initFields(Waypoint incident, Session session) {	
 		txtId.setText(incident.getId());
 		if (cmbType != null) {		
 			cmbType.setSelection(new StructuredSelection(IncidentManager.getInstance().getIncidentProvider(incident.getSourceId())));

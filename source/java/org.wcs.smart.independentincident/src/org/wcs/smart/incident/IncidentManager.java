@@ -117,11 +117,11 @@ public class IncidentManager {
 		}
 	}	
 	
-	
-	public String getNextIncidentId(Session session, Employee observer) {
+	public String getNextIncidentId(Session session, LocalDateTime dateTime, Employee observer) {
 		Set<String> incidentsources = getIncidentProviders().stream()
 				.map(e->e.getWaypointSourceKey()).collect(Collectors.toSet());
 		
-		return IncidentIdGenerator.INSTANCE.getNextIncidentId(session, SmartDB.getCurrentConservationArea(), incidentsources, observer);
+		return IncidentIdGenerator.INSTANCE.getNextIncidentId(session, SmartDB.getCurrentConservationArea(), incidentsources, 
+				dateTime, observer);
 	}
 }

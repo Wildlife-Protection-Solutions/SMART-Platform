@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.incident;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,7 +61,8 @@ public enum IncidentIdGenerator {
 	 * 
 	 * @return
 	 */
-	public String getNextIncidentId(Session session, ConservationArea ca, Set<String> incidentsources, Employee observer) {
+	public String getNextIncidentId(Session session, ConservationArea ca, Set<String> incidentsources, 
+			LocalDateTime dateTime, Employee observer) {
 		
 		ConservationAreaProperty prop = QueryFactory.buildQuery(session, ConservationAreaProperty.class, 
 				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
@@ -80,7 +82,7 @@ public enum IncidentIdGenerator {
 		//find observation
 		Map<String, Employee> employees = new HashMap<>();
 		employees.put(IdGeneratorEngine.OBSERVER_KEY, observer);
-		String nextId = IdGeneratorEngine.INSTANCE.generateId(prop.getValue(), employees);
+		String nextId = IdGeneratorEngine.INSTANCE.generateId(prop.getValue(), dateTime, employees);
 		
 		prop = QueryFactory.buildQuery(session, ConservationAreaProperty.class, 
 				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
@@ -106,6 +108,20 @@ public enum IncidentIdGenerator {
 			}
 			cnt++;
 		}
+		
+	}
+	
+	
+	public boolean requiresObserver(Session session, ConservationArea ca) {
+		ConservationAreaProperty prop = QueryFactory.buildQuery(session, ConservationAreaProperty.class, 
+				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+				new Object[] {"key", PATTERN_PROPERY_KEY}).uniqueResult(); //$NON-NLS-1$
+		
+		if (prop == null || prop.getValue() == null || prop.getValue().trim().isBlank()) return false;
+		return prop.getValue().contains(IdGeneratorEngine.Token.OBSERVER_FAMILY.token) ||
+				prop.getValue().contains(IdGeneratorEngine.Token.OBSERVER_GIVEN.token) ||
+				prop.getValue().contains(IdGeneratorEngine.Token.OBSERVER_INITIALS.token);
+			
 		
 	}
 }

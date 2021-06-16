@@ -61,7 +61,7 @@ public class Waypoint extends UuidItem {
 	private static final long serialVersionUID = 1L;
 
 	public static final int COMMENT_MAX_LENGTH = 4096;
-	public static final int ID_MAX_LENGTH = 32;
+	public static final int ID_MAX_LENGTH = 256;
 	
 	private ConservationArea ca;
 

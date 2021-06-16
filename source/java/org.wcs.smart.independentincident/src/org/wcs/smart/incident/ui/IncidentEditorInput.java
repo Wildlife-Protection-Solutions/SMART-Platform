@@ -46,7 +46,7 @@ public class IncidentEditorInput implements IEditorInput {
 	private LocalDateTime dateTime;
 	private String sourceKey;
 	
-	public IncidentEditorInput(UUID uuid, String sourceKey){
+	private IncidentEditorInput(UUID uuid, String sourceKey){
 		this.uuid = uuid;
 		this.sourceKey = sourceKey;
 	}

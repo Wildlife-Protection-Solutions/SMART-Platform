@@ -38,9 +38,12 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.incident.IncidentManager;
 import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.internal.Messages;
+import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
 
 /**
@@ -80,8 +83,14 @@ public class OpenIncidentHandler {
 				}	
 			}
 		}else {
-			IncidentEditorInput ii = new IncidentEditorInput(incidentUuid, sourceKey);
-			incidents.add(ii);
+			
+			try(Session session = HibernateManager.openSession()){
+				Waypoint wp = session.get(Waypoint.class, incidentUuid);
+				if (wp != null) {
+					IncidentEditorInput ii = new IncidentEditorInput(wp.getUuid(), wp.getId(), wp.getDateTime(), wp.getSourceId());
+					incidents.add(ii);
+				}
+			}
 		}
 		
 		//get the context here as this is not pure e4

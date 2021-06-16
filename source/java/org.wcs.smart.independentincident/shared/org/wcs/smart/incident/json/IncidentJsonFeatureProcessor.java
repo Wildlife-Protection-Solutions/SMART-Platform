@@ -111,7 +111,7 @@ public class IncidentJsonFeatureProcessor extends IJsonFeatureProcessor {
 					break;
 				}
 			}
-			wp.setId(IncidentIdGenerator.INSTANCE.getNextIncidentId(session, ca, Collections.singleton(wp.getSourceId()), observer));
+			wp.setId(IncidentIdGenerator.INSTANCE.getNextIncidentId(session, ca, Collections.singleton(wp.getSourceId()), wp.getDateTime(), observer));
 		}
 		
 		Waypoint addTo = null;

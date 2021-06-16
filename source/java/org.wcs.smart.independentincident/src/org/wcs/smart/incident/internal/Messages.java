@@ -215,6 +215,10 @@ public class Messages extends NLS {
 	public static String MultiIncidentExportDialog_NothingToExport;
 	public static String NewIncidentWizard_SaveError;
 	public static String NewIncidentWizard_WizardTitle;
+	public static String ObserverWizardPage_NoneUnknownOption;
+	public static String ObserverWizardPage_ObserverField;
+	public static String ObserverWizardPage_PageMessage;
+	public static String ObserverWizardPage_PageTitle;
 	public static String OpenIncidentHandler_IncidentOpenError;
 	public static String RevertTemplateHandler_ConfirmMessage;
 	public static String RevertTemplateHandler_ConfirmTitle;

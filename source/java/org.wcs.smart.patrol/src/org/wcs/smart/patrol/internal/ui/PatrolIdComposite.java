@@ -66,7 +66,7 @@ public class PatrolIdComposite extends PatrolItemComposite {
 		
 		Composite center = new Composite(main, SWT.NONE);
 		center.setLayout(new GridLayout(2, false));
-		center.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
+		center.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 		Label lbl = new Label(center, SWT.NONE);
 		lbl.setText(Messages.PatrolIdComposite_Id_Label);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
@@ -75,9 +75,9 @@ public class PatrolIdComposite extends PatrolItemComposite {
 		txtPatrolId.setTextLimit(Patrol.MAX_ID_LENGTH);
 		txtPatrolId.setText(PatrolHibernateManager.AUTO_GENERATE_TEXT);
 		
-		GridData data = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
+		GridData data = new GridData(SWT.FILL, SWT.CENTER, true, true, 1, 1);
 		data.horizontalIndent = 8;
-		data.widthHint = 200;
+//		data.widthHint = 200;
 		txtPatrolId.setLayoutData(data);
 		
 		cdPatrolId = createDecoration(txtPatrolId);

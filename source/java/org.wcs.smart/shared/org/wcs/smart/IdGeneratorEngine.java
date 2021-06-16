@@ -21,6 +21,8 @@
  */
 package org.wcs.smart;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Map;
 
@@ -105,19 +107,17 @@ public enum IdGeneratorEngine {
 	 * 
 	 * @return
 	 */
-	public String generateId(String pattern, Map<String,Employee> employees) {
-		ZonedDateTime now = ZonedDateTime.now();
+	public String generateId(String pattern, LocalDateTime dateTime, Map<String,Employee> employees) {
 		
-		String day = formatValue2(now.getDayOfMonth());
-		String month = formatValue2(now.getMonthValue());
-		String year = String.valueOf(now.getYear());
+		String day = formatValue2(dateTime.getDayOfMonth());
+		String month = formatValue2(dateTime.getMonthValue());
+		String year = String.valueOf(dateTime.getYear());
 		
-		String hour = formatValue2(now.getHour());
-		String min = formatValue2(now.getMinute());
-		String sec = formatValue2(now.getSecond());
+		String hour = formatValue2(dateTime.getHour());
+		String min = formatValue2(dateTime.getMinute());
+		String sec = formatValue2(dateTime.getSecond());
 		
-		
-		String timestamp = String.valueOf(now.toEpochSecond());
+		String timestamp = String.valueOf(dateTime.atZone(ZoneId.systemDefault()).toEpochSecond());
 		
 		pattern = pattern.replace(Token.MINUTE.token, min);
 		pattern = pattern.replace(Token.SECOND.token, sec);
