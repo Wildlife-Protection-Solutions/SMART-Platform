@@ -114,7 +114,6 @@ public class ExportIncidentJob extends Job {
 						}});
 				}					
 			}catch (Exception ex) {
-				//TODO:
 				IncidentPlugIn.displayLog(ex.getMessage(), ex);
 			}
 		}else {

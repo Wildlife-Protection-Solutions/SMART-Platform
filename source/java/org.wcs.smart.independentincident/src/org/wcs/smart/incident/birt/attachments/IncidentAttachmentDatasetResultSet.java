@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.wcs.smart.common.attachment.ISmartAttachment;
+import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.birt.AbstractIncidentResultSet;
 import org.wcs.smart.incident.birt.SmartIncidentConnection;
 import org.wcs.smart.observation.model.ObservationAttachment;
@@ -61,8 +62,7 @@ public class IncidentAttachmentDatasetResultSet extends AbstractIncidentResultSe
 				try {
 					wa.computeFileLocation(session);
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					IncidentPlugIn.log(e.getMessage(),e);
 				}
 				allAttachments.add(wa);
 			});
@@ -72,8 +72,7 @@ public class IncidentAttachmentDatasetResultSet extends AbstractIncidentResultSe
 					try {
 						oa.computeFileLocation(session);
 					} catch (Exception e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+						IncidentPlugIn.log(e.getMessage(), e);
 					}
 					allAttachments.add(oa);
 				}
