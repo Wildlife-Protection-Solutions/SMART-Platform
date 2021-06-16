@@ -4420,7 +4420,7 @@ CREATE TABLE smart.waypoint (
     uuid uuid NOT NULL,
     ca_uuid uuid NOT NULL,
     source character varying(16) NOT NULL,
-    id varchar(32) NOT NULL,
+    id varchar(256) NOT NULL,
     x double precision NOT NULL,
     y double precision NOT NULL,
     datetime timestamp without time zone NOT NULL,

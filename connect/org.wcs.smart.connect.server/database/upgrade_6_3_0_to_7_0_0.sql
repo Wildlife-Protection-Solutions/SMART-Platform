@@ -925,7 +925,7 @@ alter table connect.shared_links alter column date_created set data type timesta
 alter table connect.alerts alter column date set data type timestamp without time zone;
 
 -- WAYPOINT ID to string ---
-alter table smart.waypoint alter column id type varchar(32);
+alter table smart.waypoint alter column id type varchar(256);
 
 -- additions for token id generation
 alter table smart.patrol alter column id set data type varchar(256);
