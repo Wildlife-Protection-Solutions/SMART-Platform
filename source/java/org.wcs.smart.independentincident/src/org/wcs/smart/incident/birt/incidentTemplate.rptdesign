@@ -2339,7 +2339,11 @@
                         <text-data id="1094">
                             <property name="style">ReportLabel</property>
                             <property name="marginLeft">15pt</property>
-                            <expression name="valueExpr">row["Attribute Name"] + ":"</expression>
+                            <expression name="valueExpr">if (row["Attribute Name"] == null){&#13;
+  "";&#13;
+}else{&#13;
+  row["Attribute Name"] + ":"&#13;
+}</expression>
                             <property name="contentType">html</property>
                         </text-data>
                     </cell>

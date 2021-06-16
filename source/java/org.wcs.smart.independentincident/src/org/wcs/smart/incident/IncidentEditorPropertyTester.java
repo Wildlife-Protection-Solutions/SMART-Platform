@@ -39,10 +39,14 @@ public class IncidentEditorPropertyTester extends PropertyTester {
 	@Override
 	public boolean test(Object receiver, String property, Object[] args, Object expectedValue) {
 		if (property.equals("editor")) { //$NON-NLS-1$
+			if (PlatformUI.getWorkbench() == null || 
+					PlatformUI.getWorkbench().getActiveWorkbenchWindow() == null) return false;
+			
 			IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
-			if(page != null) {
-				return (page.getActiveEditor() != null && page.getActiveEditor().getEditorInput() instanceof IncidentEditorInput);
-			}
+			if (page == null) return false;
+			
+			return (page.getActiveEditor() != null && page.getActiveEditor().getEditorInput() instanceof IncidentEditorInput);
+			
 		}
 		return false;
 	}
