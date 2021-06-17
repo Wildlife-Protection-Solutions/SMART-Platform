@@ -990,6 +990,7 @@ public class Messages extends NLS {
 	public static String IDropItemFactory_AnyOption;
 	public static String IDTokenPreferencePage_AllTokens;
 	public static String IDTokenPreferencePage_SaveError;
+	public static String IDTokenPreferencePage_uniqueinfodetails;
 	public static String ImageSelectionControl_AllImages1;
 	public static String ImageSelectionControl_BitmapFiles;
 	public static String ImageSelectionControl_JpegFiles;

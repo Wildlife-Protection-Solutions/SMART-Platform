@@ -119,10 +119,13 @@ public class Messages extends NLS {
 	public static String IncidentIdGeneratorContribution_DuplicateWarning;
 	public static String IncidentIdGeneratorContribution_incidentpatteronly;
 	public static String IncidentIdGeneratorContribution_InvalidPattern;
+	public static String IncidentIdGeneratorContribution_InvalidUnqPattern;
 	public static String IncidentIdGeneratorContribution_PatternLabel;
 	public static String IncidentIdGeneratorContribution_SectionHeader;
 	public static String IncidentIdGeneratorContribution_UniqueLabel;
 	public static String IncidentIdGeneratorContribution_UniqueTooltip;
+	public static String IncidentIdGeneratorContribution_UnqPatternLbl;
+	public static String IncidentIdGeneratorContribution_UnqPatternTooltip;
 	public static String IncidentImporter_ConvertingProgress;
 	public static String IncidentImporter_ErrorMessage;
 	public static String IncidentImporter_ErrorUnzipping;

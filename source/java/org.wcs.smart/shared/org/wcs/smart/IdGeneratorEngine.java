@@ -23,8 +23,9 @@ package org.wcs.smart;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.wcs.smart.ca.Employee;
 
@@ -37,6 +38,12 @@ import org.wcs.smart.ca.Employee;
 public enum IdGeneratorEngine {
 
 	INSTANCE;
+	
+
+	/**
+	 * default pattern to use for making ids unique
+	 */
+	public static final String DEFAULT_UNIQUE_STR = "-{000}"; //$NON-NLS-1$
 	
 	
 	/**
@@ -160,5 +167,40 @@ public enum IdGeneratorEngine {
 		
 		
 		return pattern;
+	}
+	
+	/**
+	 * 
+	 * Takes a unique pattern and uses that to format
+	 * the given number.  The unique pattern needs
+	 * to be of the form .*{000}.* where the number
+	 * of 0's represents the number of digits in the number
+	 * to display 
+	 * @param number
+	 * @param format
+	 * @return
+	 */
+	public String formatUniqueNumber(int number, String format) {
+		Pattern ptn = Pattern.compile("(.*)\\{(0+)\\}(.*)"); //$NON-NLS-1$
+		Matcher m = ptn.matcher(format);
+		if (!m.matches()) {
+			//invalid format
+			return String.valueOf(number);
+		}
+		
+		String prefix = m.group(1);
+		String numberpart = m.group(2);
+		String postfix = m.group(3);
+		
+		String str = String.valueOf(number);
+
+		StringBuilder sb = new StringBuilder();
+		if (prefix != null) sb.append(prefix);
+		for (int i = 0; i < (numberpart.length() - str.length()); i ++) {
+			sb.append("0"); //$NON-NLS-1$
+		}
+		sb.append(str);
+		if (postfix != null) sb.append(postfix);
+		return sb.toString();
 	}
 }

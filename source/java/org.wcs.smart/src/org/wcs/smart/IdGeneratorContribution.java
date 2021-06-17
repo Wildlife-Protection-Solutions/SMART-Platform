@@ -33,7 +33,7 @@ import org.hibernate.Session;
  *
  */
 public interface IdGeneratorContribution {
-
+	
 	/**
 	 * Initialize the UI elements 
 	 * @param session
@@ -56,4 +56,6 @@ public interface IdGeneratorContribution {
 	 * @return
 	 */
 	public boolean save(Session session);
+	
+	
 }

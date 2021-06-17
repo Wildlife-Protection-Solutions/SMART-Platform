@@ -39,9 +39,9 @@ import org.wcs.smart.internal.Messages;
 public enum IdGeneratorManager {
 
 	INSTANCE;
-	
-	public static final String EXTENSION_ID = "org.wcs.smart.idgenerator"; //$NON-NLS-1$
 
+	public static final String EXTENSION_ID = "org.wcs.smart.idgenerator"; //$NON-NLS-1$
+	
 	/**
 	 * Tokens that are universal
 	 */
@@ -90,5 +90,6 @@ public enum IdGeneratorManager {
 		return items;
 	}
 
+	
 }
 

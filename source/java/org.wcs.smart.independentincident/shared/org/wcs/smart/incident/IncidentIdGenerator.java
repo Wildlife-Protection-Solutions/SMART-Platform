@@ -48,6 +48,7 @@ public enum IncidentIdGenerator {
 	
 	public static final String PATTERN_PROPERY_KEY = "incident.id.pattern"; //$NON-NLS-1$
 	public static final String UNIQUE_PROPERTY_KEY = "incident.id.unique"; //$NON-NLS-1$
+	public static final String UNIQUE_PATTERN_PROPERTY_KEY = "incident.id.unique.pattern"; //$NON-NLS-1$
 	
 	public static final String UNQIUE_VALUE = "true"; //$NON-NLS-1$
 	public static final String NOTUNIQUE_VALUE = "false"; //$NON-NLS-1$
@@ -64,10 +65,28 @@ public enum IncidentIdGenerator {
 	public String getNextIncidentId(Session session, ConservationArea ca, Set<String> incidentsources, 
 			LocalDateTime dateTime, Employee observer) {
 		
+		
+		boolean makeUnique = true;
 		ConservationAreaProperty prop = QueryFactory.buildQuery(session, ConservationAreaProperty.class, 
 				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
-				new Object[] {"key", PATTERN_PROPERY_KEY}).uniqueResult(); //$NON-NLS-1$
+				new Object[] {"key", UNIQUE_PROPERTY_KEY}).uniqueResult(); //$NON-NLS-1$
+		if (prop == null || prop.getValue() == null || prop.getValue().equalsIgnoreCase(NOTUNIQUE_VALUE)) {
+			makeUnique = false;
+		}
 		
+		prop = QueryFactory.buildQuery(session, ConservationAreaProperty.class, 
+				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+				new Object[] {"key", UNIQUE_PATTERN_PROPERTY_KEY}).uniqueResult(); //$NON-NLS-1$
+		
+		String unqString = IdGeneratorEngine.DEFAULT_UNIQUE_STR;
+		if (prop != null && prop.getValue() != null) {
+			unqString = prop.getValue();
+		}
+		
+		String nextId = "0"; //$NON-NLS-1$
+		prop = QueryFactory.buildQuery(session, ConservationAreaProperty.class, 
+				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
+				new Object[] {"key", PATTERN_PROPERY_KEY}).uniqueResult(); //$NON-NLS-1$
 		if (prop == null || prop.getValue() == null || prop.getValue().trim().isBlank()) {
 			
 			Query<?> q = session.createQuery("SELECT count(*) FROM Waypoint WHERE sourceId IN (:source) AND conservationArea = :ca"); //$NON-NLS-1$
@@ -76,18 +95,15 @@ public enum IncidentIdGenerator {
 			List<?> maxIs = q.list();
 			long id = 1;
 			if (maxIs.size() > 0 && maxIs.get(0) != null ) id = (Long) maxIs.get(0);
-			return String.valueOf(id);
+			nextId = String.valueOf(id);
+		}else {
+			//find observer
+			Map<String, Employee> employees = new HashMap<>();
+			employees.put(IdGeneratorEngine.OBSERVER_KEY, observer);
+			nextId = IdGeneratorEngine.INSTANCE.generateId(prop.getValue(), dateTime, employees);
 		}
 		
-		//find observation
-		Map<String, Employee> employees = new HashMap<>();
-		employees.put(IdGeneratorEngine.OBSERVER_KEY, observer);
-		String nextId = IdGeneratorEngine.INSTANCE.generateId(prop.getValue(), dateTime, employees);
-		
-		prop = QueryFactory.buildQuery(session, ConservationAreaProperty.class, 
-				new Object[] {"conservationArea", ca}, //$NON-NLS-1$
-				new Object[] {"key", UNIQUE_PROPERTY_KEY}).uniqueResult(); //$NON-NLS-1$
-		if (prop == null || prop.getValue() == null || prop.getValue().equalsIgnoreCase(NOTUNIQUE_VALUE)) return nextId;
+		if (!makeUnique) return nextId;
 		
 		//make this id unique by adding _x on the end
 		int cnt = 1;
@@ -101,9 +117,11 @@ public enum IncidentIdGenerator {
 			Long number = (Long) q.uniqueResult();
 			if (number == 0) return id;
 			
-			id = nextId + "_" + cnt; //$NON-NLS-1$
+			String cntstr = IdGeneratorEngine.INSTANCE.formatUniqueNumber(cnt, unqString);
+			
+			id = nextId + cntstr;
 			if (id.length() > Waypoint.ID_MAX_LENGTH) {
-				String part ="_" + cnt; //$NON-NLS-1$
+				String part = cntstr;
 				id = nextId.substring(0,  nextId.length() - 1 - part.length()) + part;
 			}
 			cnt++;

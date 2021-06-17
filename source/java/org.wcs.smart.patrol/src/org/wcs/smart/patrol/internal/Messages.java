@@ -361,9 +361,15 @@ public class Messages extends NLS {
 	public static String PatrolIdComposite_WarningDialogTitle;
 	public static String PatrolIdGeneratorContribution_DuplicateWarning;
 	public static String PatrolIdGeneratorContribution_InvalidPattern;
+
+	public static String PatrolIdGeneratorContribution_InvalidUnqPattern;
 	public static String PatrolIdGeneratorContribution_PatrolTokens;
 	public static String PatrolIdGeneratorContribution_PatternLabel;
 	public static String PatrolIdGeneratorContribution_SectionHeader;
+	public static String PatrolIdGeneratorContribution_UniquePatternLbl;
+
+	public static String PatrolIdGeneratorContribution_UniquePatternTooltip;
+
 	public static String PatrolIdGeneratorContribution_UniqueTooltip;
 	public static String PatrolIdGeneratorContribution_UnqiueLabel;
 	public static String PatrolIdWizardPage_PageMessage;

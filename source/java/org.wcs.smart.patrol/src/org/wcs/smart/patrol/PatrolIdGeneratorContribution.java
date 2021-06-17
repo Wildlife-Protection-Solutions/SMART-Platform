@@ -22,6 +22,8 @@
 package org.wcs.smart.patrol;
 
 import java.text.MessageFormat;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
@@ -40,8 +42,8 @@ import org.wcs.smart.ca.ConservationAreaProperty;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.internal.Messages;
-import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -54,7 +56,9 @@ public class PatrolIdGeneratorContribution implements IdGeneratorContribution {
 	
 	private Text txtPattern;
 	private Button btnUnique;
+	private Text txtUnqPattern;
 	private ControlDecoration cdPatternErr;
+	private ControlDecoration cdPatternUnqErr;
 	private ControlDecoration cdPatternWarn;
 
 	public PatrolIdGeneratorContribution() {
@@ -82,6 +86,15 @@ public class PatrolIdGeneratorContribution implements IdGeneratorContribution {
 				btnUnique.setSelection(false);
 			}
 		}
+		prop = getProperty(PatrolIdGenerator.UNIQUE_PATTERN_PROPERTY_KEY, session);
+		if (prop != null && prop.getValue() != null) {
+			txtUnqPattern.setText(prop.getValue());
+		}else {
+			txtUnqPattern.setText(IdGeneratorEngine.DEFAULT_UNIQUE_STR);
+		}
+		
+		txtUnqPattern.setEnabled(btnUnique.getSelection());
+		
 		updateDecorations();
 	}
 
@@ -123,7 +136,30 @@ public class PatrolIdGeneratorContribution implements IdGeneratorContribution {
 
 		btnUnique = new Button(inner, SWT.CHECK);
 		btnUnique.setSelection(true);
-		btnUnique.addListener(SWT.Selection, e->updateDecorations());
+		
+		
+		Label pl = new Label(inner, SWT.NONE);
+		pl.setText(Messages.PatrolIdGeneratorContribution_UniquePatternLbl);
+		pl.setToolTipText(Messages.PatrolIdGeneratorContribution_UniquePatternTooltip);
+
+		txtUnqPattern = new Text(inner, SWT.BORDER);
+		txtUnqPattern.setText(IdGeneratorEngine.DEFAULT_UNIQUE_STR);
+		txtUnqPattern.addListener(SWT.Modify,e->updateDecorations());
+		txtUnqPattern.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)txtUnqPattern.getLayoutData()).horizontalIndent = 3;
+		
+		cdPatternUnqErr = new ControlDecoration(txtUnqPattern, SWT.LEFT);
+		cdPatternUnqErr.setImage(FieldDecorationRegistry.getDefault().getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+		cdPatternUnqErr.setShowHover(true);
+		cdPatternUnqErr.hide();
+		
+		btnUnique.addListener(SWT.Selection,e->{
+			updateDecorations();
+			txtUnqPattern.setEnabled(btnUnique.getSelection());
+			pl.setEnabled(btnUnique.getSelection());	
+		});
+		txtUnqPattern.setEnabled(btnUnique.getSelection());
+		pl.setEnabled(btnUnique.getSelection());
 		
 		Text info = new Text(inner, SWT.BORDER | SWT.MULTI);
 		info.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
@@ -149,24 +185,17 @@ public class PatrolIdGeneratorContribution implements IdGeneratorContribution {
 		return part;
 	}
 
-	private String validate() {
-		String text = txtPattern.getText();
-		
-		if (text.trim().isBlank()) return null;
-		
-		for (IdGeneratorEngine.Token token : IdGeneratorEngine.Token.values()) {
-			text = text.replace(token.token, ""); //$NON-NLS-1$
-		}
-		
-		if (!text.isBlank() && !SmartUtils.isSimpleString(text.trim(), 
-				SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Patrol.MAX_ID_LENGTH) ) {
-			return MessageFormat.format(Messages.PatrolIdGeneratorContribution_InvalidPattern, Patrol.MAX_ID_LENGTH, SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
-		}
-		return null;		
-	}
-	
 	private void updateDecorations() {
-		String error = validate();
+		String error = validateUniquePattern();
+		if (error != null) {
+			cdPatternUnqErr.setDescriptionText(error);
+			cdPatternUnqErr.show();
+		}else {
+			cdPatternUnqErr.hide();
+		}
+		
+		
+		error = validatePattern();
 		cdPatternWarn.hide();
 		
 		if (error != null) {
@@ -176,35 +205,73 @@ public class PatrolIdGeneratorContribution implements IdGeneratorContribution {
 		}
 		
 		cdPatternErr.hide();
-		
 		if (!txtPattern.getText().trim().isBlank()) {
 			if (!btnUnique.getSelection() && IdGeneratorEngine.INSTANCE.likelyDuplicate(txtPattern.getText())) {
 				cdPatternWarn.setDescriptionText(Messages.PatrolIdGeneratorContribution_DuplicateWarning);
 				cdPatternWarn.show();
 			}
 		}
+		
+		
+		
 	}
 	
+	private String validatePattern() {
+		String text = txtPattern.getText();
+		
+		if (text.trim().isBlank()) return null;
+		
+		for (IdGeneratorEngine.Token token : IdGeneratorEngine.Token.values()) {
+			text = text.replace(token.token, ""); //$NON-NLS-1$
+		}
+		
+		if (!text.isBlank() && !SmartUtils.isSimpleString(text.trim(), 
+				SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Waypoint.ID_MAX_LENGTH) ) {
+			return MessageFormat.format(Messages.PatrolIdGeneratorContribution_InvalidPattern, Waypoint.ID_MAX_LENGTH, SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc);
+		}
+		return null;
+	}
+
+	private String validateUniquePattern() {
+		//validate unique pattern
+		if (btnUnique.getSelection()) {
+			String text = txtUnqPattern.getText();
+			if (text.isBlank() ) {
+				return Messages.PatrolIdGeneratorContribution_InvalidUnqPattern;
+			}
+			Pattern ptn = Pattern.compile("(.*)\\{(0+)\\}(.*)"); //$NON-NLS-1$
+			Matcher m = ptn.matcher(text);
+			if (!m.matches()) {
+				return Messages.PatrolIdGeneratorContribution_InvalidUnqPattern;
+			}
+			String part = text.replaceAll("\\{" + m.group(2) + "\\}", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			if (part.length() > 0 && 
+					!SmartUtils.isSimpleString(part,SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX)) {
+				return Messages.PatrolIdGeneratorContribution_InvalidUnqPattern;
+			}
+		}
+		return null;
+	}
+	
+	private String validate() {
+		String x = validatePattern();
+		if (x != null) return x;
+		x = validateUniquePattern();
+		return x;			
+	}
+	
+	
+
+
 	@Override
 	public boolean save(Session session) {
 		
 		if (validate() != null) return false;
-		
-		ConservationAreaProperty prop = getProperty(PatrolIdGenerator.PATTERN_PROPERY_KEY, session);
-		if (prop == null) {
-			prop = new ConservationAreaProperty();
-			prop.setConservationArea(SmartDB.getCurrentConservationArea());
-			prop.setKey(PatrolIdGenerator.PATTERN_PROPERY_KEY);
-		}
+		ConservationAreaProperty prop = getOrCreateProperty(PatrolIdGenerator.PATTERN_PROPERY_KEY, session);
 		prop.setValue(txtPattern.getText());
 		session.saveOrUpdate(prop);
 		
-		prop = getProperty(PatrolIdGenerator.UNIQUE_PROPERTY_KEY, session);
-		if (prop == null) {
-			prop = new ConservationAreaProperty();
-			prop.setConservationArea(SmartDB.getCurrentConservationArea());
-			prop.setKey(PatrolIdGenerator.UNIQUE_PROPERTY_KEY);
-		}
+		prop = getOrCreateProperty(PatrolIdGenerator.UNIQUE_PROPERTY_KEY, session);
 		if (btnUnique.getSelection()) {
 			prop.setValue(PatrolIdGenerator.UNIQUE_VALUE);
 		}else {
@@ -212,7 +279,22 @@ public class PatrolIdGeneratorContribution implements IdGeneratorContribution {
 		}
 		session.saveOrUpdate(prop);
 		
+		prop = getOrCreateProperty(PatrolIdGenerator.UNIQUE_PATTERN_PROPERTY_KEY, session);
+		prop.setValue(txtUnqPattern.getText());
+		session.saveOrUpdate(prop);
+		
 		return true;
 	}
+	
+	private ConservationAreaProperty getOrCreateProperty(String key, Session session) {
+		ConservationAreaProperty prop = getProperty(key, session);
+		if (prop == null) {
+			prop = new ConservationAreaProperty();
+			prop.setConservationArea(SmartDB.getCurrentConservationArea());
+			prop.setKey(key);
+		}
+		return prop;
+	}
+	
 
 }

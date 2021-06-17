@@ -77,8 +77,9 @@ public class IDTokenPreferencePage extends PreferencePage implements IWorkbenchP
 		((GridLayout)c.getLayout()).marginWidth = 0;
 		((GridLayout)c.getLayout()).marginHeight = 0;
 		
-		Text info = new Text(c, SWT.BORDER | SWT.MULTI);
+		Text info = new Text(c, SWT.BORDER | SWT.MULTI | SWT.WRAP );
 		info.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)info.getLayoutData()).widthHint = 200;
 		info.setEditable(false);
 		StringBuilder sb = new StringBuilder();
 		sb.append(Messages.IDTokenPreferencePage_AllTokens + "\n"); //$NON-NLS-1$
@@ -89,6 +90,8 @@ public class IDTokenPreferencePage extends PreferencePage implements IWorkbenchP
 			sb.append("\n"); //$NON-NLS-1$
 		}
 		sb.deleteCharAt(sb.length() - 1);
+		sb.append("\n\n"); //$NON-NLS-1$
+		sb.append(Messages.IDTokenPreferencePage_uniqueinfodetails);
 		info.setText(sb.toString());
 		
 		

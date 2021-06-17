@@ -23,9 +23,7 @@ package org.wcs.smart.patrol;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -54,6 +52,7 @@ public enum PatrolIdGenerator {
 
 	public static final String PATTERN_PROPERY_KEY = "patrol.id.pattern"; //$NON-NLS-1$
 	public static final String UNIQUE_PROPERTY_KEY = "patrol.id.unique"; //$NON-NLS-1$
+	public static final String UNIQUE_PATTERN_PROPERTY_KEY = "patrol.id.unique.pattern"; //$NON-NLS-1$
 	
 	public static final String UNIQUE_VALUE = "true"; //$NON-NLS-1$
 	public static final String NOTUNIQUE_VALUE = "false"; //$NON-NLS-1$
@@ -73,9 +72,29 @@ public enum PatrolIdGenerator {
 		
 		if (p.getConservationArea() == null) throw new RuntimeException("Conservation area required for computing patrol id"); //$NON-NLS-1$
 		
+		boolean makeUnique = true;
 		ConservationAreaProperty prop = QueryFactory.buildQuery(s, ConservationAreaProperty.class, 
 				new Object[] {"conservationArea", p.getConservationArea()}, //$NON-NLS-1$
+				new Object[] {"key", UNIQUE_PROPERTY_KEY}).uniqueResult(); //$NON-NLS-1$
+		if (prop == null || prop.getValue() == null || prop.getValue().equalsIgnoreCase(NOTUNIQUE_VALUE)) {
+			makeUnique = false;
+		}
+		
+		prop = QueryFactory.buildQuery(s, ConservationAreaProperty.class, 
+				new Object[] {"conservationArea", p.getConservationArea()}, //$NON-NLS-1$
+				new Object[] {"key", UNIQUE_PATTERN_PROPERTY_KEY}).uniqueResult(); //$NON-NLS-1$
+		
+		String unqString = IdGeneratorEngine.DEFAULT_UNIQUE_STR;
+		if (prop != null && prop.getValue() != null) {
+			unqString = prop.getValue();
+		}
+		
+		prop = QueryFactory.buildQuery(s, ConservationAreaProperty.class, 
+				new Object[] {"conservationArea", p.getConservationArea()}, //$NON-NLS-1$
 				new Object[] {"key", PATTERN_PROPERY_KEY}).uniqueResult(); //$NON-NLS-1$
+		
+		String nextId = "0"; //$NON-NLS-1$
+		
 		if (prop == null || prop.getValue() == null || prop.getValue().strip().isBlank()) {
 		
 			StringBuilder sb = new StringBuilder();
@@ -110,37 +129,32 @@ public enum PatrolIdGenerator {
 			}
 			sb.append(PATROL_ID_FORMATTER.format(idNumber));
 
-			return sb.toString();
-		}
+			nextId = sb.toString();
+		}else {
 		
-		String pattern = prop.getValue();
-		Employee leader = null;
-		for (PatrolLeg l : p.getLegs()) {
-			leader = l.getLeader().getMember();
-		}
-		
-		//find earliest time
-		LocalDateTime startDateTime = null;
-		for (PatrolLeg leg : p.getLegs()) {
-			for (PatrolLegDay d : leg.getPatrolLegDays()) {
-				if (startDateTime == null || d.getDate().atTime(d.getStartTime()).isBefore(startDateTime)) {
-					startDateTime = d.getDate().atTime(d.getStartTime());
+			String pattern = prop.getValue();
+			Employee leader = null;
+			for (PatrolLeg l : p.getLegs()) {
+				leader = l.getLeader().getMember();
+			}
+			
+			//find earliest time
+			LocalDateTime startDateTime = null;
+			for (PatrolLeg leg : p.getLegs()) {
+				for (PatrolLegDay d : leg.getPatrolLegDays()) {
+					if (startDateTime == null || d.getDate().atTime(d.getStartTime()).isBefore(startDateTime)) {
+						startDateTime = d.getDate().atTime(d.getStartTime());
+					}
 				}
 			}
+			if (startDateTime == null) startDateTime = p.getStartDate().atStartOfDay();
+			
+			
+			HashMap<String, Employee> employees = new HashMap<>();
+			employees.put(IdGeneratorEngine.LEADER_KEY,leader);
+			nextId = IdGeneratorEngine.INSTANCE.generateId(pattern, startDateTime, employees);
 		}
-		if (startDateTime == null) startDateTime = p.getStartDate().atStartOfDay();
-		
-		
-		HashMap<String, Employee> employees = new HashMap<>();
-		employees.put(IdGeneratorEngine.LEADER_KEY,leader);
-		String nextId = IdGeneratorEngine.INSTANCE.generateId(pattern, startDateTime, employees);
-
-		prop = QueryFactory.buildQuery(s, ConservationAreaProperty.class, 
-				new Object[] {"conservationArea", p.getConservationArea()}, //$NON-NLS-1$
-				new Object[] {"key", UNIQUE_PROPERTY_KEY}).uniqueResult(); //$NON-NLS-1$
-		if (prop == null || prop.getValue() == null || prop.getValue().strip().isBlank() || prop.getValue().equalsIgnoreCase(NOTUNIQUE_VALUE)) {
-			return nextId;
-		}
+		if (!makeUnique) return nextId;
 		
 		int cnt = 1;
 		String id = nextId;
@@ -152,9 +166,10 @@ public enum PatrolIdGenerator {
 					.uniqueResult();
 			if (number == 0) return id;
 			
-			id = nextId + "_" + cnt; //$NON-NLS-1$
+			String cntstr = IdGeneratorEngine.INSTANCE.formatUniqueNumber(cnt, unqString);
+			id = nextId + cntstr;
 			if (id.length() > Patrol.MAX_ID_LENGTH) {
-				String part ="_" + cnt; //$NON-NLS-1$
+				String part = cntstr;
 				id = nextId.substring(0,  nextId.length() - 1 - part.length()) + part;
 			}
 			cnt++;
