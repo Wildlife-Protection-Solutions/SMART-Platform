@@ -106,11 +106,6 @@
 		    <unit id="org.eclipse.e4.tools.spies.feature.feature.group" version="0.18.0.v20200923-1237"/>
 	    </location>
 	    <location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="slicer" includeSource="true" type="InstallableUnit">
-		    <repository location="jar:file:/C:/data/SMART/Source/Trunk/svn/source/java/org.wcs.smart.target/birt-source-4.18.0-20210317.zip!/"/>
-		    <unit id="org.eclipse.birt.feature.group" version="4.18.0.v202103171650"/>
-		    <unit id="org.eclipse.birt.rcp.feature.group" version="4.18.0.v202103171650"/>
-	    </location>
-	    <location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="slicer" includeSource="true" type="InstallableUnit">
 		    <repository location="jar:file:/C:/data/SMART/Source/Trunk/svn/source/java/org.wcs.smart.target/babel-R0.15.1-mars.zip!/"/>
 		    <unit id="org.eclipse.babel.nls_birt_ar.feature.group" version="4.5.0.v20171231064042"/>
 		    <unit id="org.eclipse.babel.nls_birt_es.feature.group" version="4.5.0.v20171231064042"/>
@@ -125,36 +120,6 @@
 		    <unit id="org.eclipse.babel.nls_birt_uk.feature.group" version="4.5.0.v20171231064042"/>
 		    <unit id="org.eclipse.babel.nls_birt_vi.feature.group" version="4.5.0.v20171231064042"/>
 		    <unit id="org.eclipse.babel.nls_birt_zh.feature.group" version="4.5.0.v20171231064042"/>
-	    </location>
-	    <location includeSource="true" missingManifest="generate" type="Maven">
-		    <groupId>com.itextpdf</groupId>
-		    <artifactId>kernel</artifactId>
-		    <version>7.1.14</version>
-		    <type>jar</type>
-	    </location>
-	    <location includeSource="true" missingManifest="generate" type="Maven">
-		    <groupId>com.itextpdf</groupId>
-		    <artifactId>layout</artifactId>
-		    <version>7.1.14</version>
-		    <type>jar</type>
-	    </location>
-	    <location includeSource="true" missingManifest="generate" type="Maven">
-		    <groupId>com.itextpdf</groupId>
-		    <artifactId>hyph</artifactId>
-		    <version>7.1.14</version>
-		    <type>jar</type>
-	    </location>
-	    <location includeSource="true" missingManifest="generate" type="Maven">
-		    <groupId>com.itextpdf</groupId>
-		    <artifactId>font-asian</artifactId>
-		    <version>7.1.14</version>
-		    <type>jar</type>
-	    </location>
-	    <location includeSource="true" missingManifest="generate" type="Maven">
-		    <groupId>com.itextpdf</groupId>
-		    <artifactId>io</artifactId>
-		    <version>7.1.14</version>
-		    <type>jar</type>
 	    </location>
 	    <location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="slicer" includeSource="true" type="InstallableUnit">
 		    <repository location="https://download.eclipse.org/technology/babel/update-site/R0.18.3/2020-12/"/>
@@ -182,6 +147,41 @@
 		    <unit id="org.eclipse.babel.nls_eclipse_uk.feature.group" version="4.18.0.v20210327075149"/>
 		    <unit id="org.eclipse.babel.nls_eclipse_vi.feature.group" version="4.18.0.v20210327075149"/>
 		    <unit id="org.eclipse.babel.nls_eclipse_zh.feature.group" version="4.18.0.v20210327075149"/>
+	    </location>
+	    <location includeSource="true" missingManifest="generate" type="Maven">
+		    <groupId>com.itextpdf</groupId>
+		    <artifactId>kernel</artifactId>
+		    <version>7.1.14</version>
+		    <type>jar</type>
+	    </location>
+	    <location includeSource="true" missingManifest="generate" type="Maven">
+		    <groupId>com.itextpdf</groupId>
+		    <artifactId>font-asian</artifactId>
+		    <version>7.1.14</version>
+		    <type>jar</type>
+	    </location>
+	    <location includeSource="true" missingManifest="generate" type="Maven">
+		    <groupId>com.itextpdf</groupId>
+		    <artifactId>io</artifactId>
+		    <version>7.1.14</version>
+		    <type>jar</type>
+	    </location>
+	    <location includeSource="true" missingManifest="generate" type="Maven">
+		    <groupId>com.itextpdf</groupId>
+		    <artifactId>layout</artifactId>
+		    <version>7.1.14</version>
+		    <type>jar</type>
+	    </location>
+	    <location includeSource="true" missingManifest="generate" type="Maven">
+		    <groupId>com.itextpdf</groupId>
+		    <artifactId>hyph</artifactId>
+		    <version>7.1.14</version>
+		    <type>jar</type>
+	    </location>
+	    <location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="slicer" includeSource="true" type="InstallableUnit">
+		    <repository location="jar:file:/C:/data/SMART/Source/Trunk/svn/source/java/org.wcs.smart.target/birt-source-4.18.0-20210618.zip!/"/>
+		    <unit id="org.eclipse.birt.feature.group" version="4.18.0.v202106181740"/>
+		    <unit id="org.eclipse.birt.rcp.feature.group" version="4.18.0.v202106181740"/>
 	    </location>
     </locations>
 </target>

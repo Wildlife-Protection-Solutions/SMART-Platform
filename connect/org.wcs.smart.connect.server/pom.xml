@@ -600,8 +600,21 @@
             <groupId>org.eclipse.platform</groupId>
             <artifactId>org.eclipse.jface</artifactId>
             <version>${org.eclipse.jface.version}</version>
+            
+             <exclusions>
+                <exclusion>
+                    <groupId>org.eclipse.platform</groupId>
+                    <artifactId>org.eclipse.equinox.common</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
        
+          <dependency>
+            <groupId>org.eclipse.platform</groupId>
+            <artifactId>org.eclipse.equinox.common</artifactId>
+            <version>3.14.100</version>
+        </dependency>
+        
         <dependency>
             <groupId>org.eclipse.birt</groupId>
             <artifactId>org.eclipse.birt.report.engine.emitter.config.wpml</artifactId>
