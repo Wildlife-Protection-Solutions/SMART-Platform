@@ -627,13 +627,15 @@ public class ConnectAlertUiController implements IPackageUiContribution{
 									tnodes.addAll(a.getCurrentTree());
 									while(!tnodes.isEmpty()) {
 										CmAttributeTreeNode nn = tnodes.removeFirst();
-										nn.getDmTreeNode().getNames().size();
 										nn.getNames().size();
-										if (nn.getDmTreeNode().getIcon() != null) {
-											
-											nn.getDmTreeNode().getIcon().getFiles().forEach(f->{
-												nn.getDmTreeNode().getIcon().getIconFile(f.getIconSet()).computeFileLocation(s);
-											});
+										
+										if (nn.getDmTreeNode() != null) {
+											nn.getDmTreeNode().getNames().size();
+											if (nn.getDmTreeNode().getIcon() != null) {
+												nn.getDmTreeNode().getIcon().getFiles().forEach(f->{
+													nn.getDmTreeNode().getIcon().getIconFile(f.getIconSet()).computeFileLocation(s);
+												});
+											}
 										}
 										nn.getImageFile();
 										if (nn.getChildren() != null) tnodes.addAll(nn.getChildren());
