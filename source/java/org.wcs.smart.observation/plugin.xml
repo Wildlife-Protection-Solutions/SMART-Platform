@@ -290,7 +290,7 @@
             </command>
             <command
                   id="org.wcs.smart.observation.import.json"
-                  name="Import JSON Data">
+                  name="%command.name.importjson">
             </command>
    </extension>
    <extension
