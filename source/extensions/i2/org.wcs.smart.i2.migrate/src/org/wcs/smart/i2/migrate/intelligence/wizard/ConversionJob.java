@@ -28,6 +28,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -71,11 +72,13 @@ public class ConversionJob implements IRunnableWithProgress {
 
 	private List<IntelMappingRecord> mappings;
 	private Intel6Database smart6;
-	
-	public ConversionJob(List<IntelMappingRecord> mappings, Intel6Database smart6) {
+	private Map<ConservationArea, Employee> userMappings;
+	public ConversionJob(List<IntelMappingRecord> mappings, Intel6Database smart6, Map<ConservationArea, Employee> userMappings) {
 		this.mappings = mappings;
 		this.smart6 = smart6;
+		this.userMappings = userMappings;
 	}
+	
 	@Override
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 		
@@ -152,11 +155,16 @@ public class ConversionJob implements IRunnableWithProgress {
 			Employee e = session.get(Employee.class, item.getCreator());
 			if (e != null && e.getConservationArea().equals(record.getConservationArea())) {
 				record.setCreatedBy(e);
+				record.setLastModifiedBy(e);
 			}
 		}
-		if (record.getCreatedBy() == null) record.setCreatedBy(SmartDB.getCurrentEmployee());
+		if (record.getCreatedBy() == null) {
+			record.setCreatedBy(userMappings.get(record.getConservationArea()));
+			record.setLastModifiedBy(userMappings.get(record.getConservationArea()));
+		}
 		
 		record.setDateCreated(LocalDateTime.now());
+		record.setDateModified(LocalDateTime.now());
 		
 		record.setAttachments(new ArrayList<>());
 		record.setLocations(new ArrayList<>());

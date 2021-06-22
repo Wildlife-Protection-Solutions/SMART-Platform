@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Profile Data Migration Tools
+Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.wcs.smart.i2.migrate;singleton:=true
 Bundle-Version: 7.0.2.qualifier
 Bundle-Activator: org.wcs.smart.i2.migrate.MigratePlugin

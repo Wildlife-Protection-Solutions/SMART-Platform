@@ -25,6 +25,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -32,6 +33,7 @@ import org.eclipse.core.runtime.SubMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.i2.migrate.UserValidationManager;
 import org.wcs.smart.i2.migrate.intelligence.Intel6Database;
 import org.wcs.smart.i2.migrate.intelligence.IntelMappingRecord;
@@ -51,6 +53,7 @@ public class ValidateUserJob implements IRunnableWithProgress {
 	private List<ConservationArea> toValidate;
 	private Shell shell;
 	
+	private Map<ConservationArea, Employee> employees;
 	private List<IntelMappingRecord> records ;
 	
 	public ValidateUserJob(Intel6Database db, List<ConservationArea> toValidate, Shell shell) {
@@ -67,8 +70,10 @@ public class ValidateUserJob implements IRunnableWithProgress {
 		return this.records;
 	}
 	
-	private boolean ok = false;
-	
+	public  Map<ConservationArea, Employee> getEmployeeMapping() {
+		return this.employees;
+	}
+		
 	@Override
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 		this.records = null;
@@ -76,13 +81,11 @@ public class ValidateUserJob implements IRunnableWithProgress {
 		SubMonitor task = SubMonitor.convert(monitor);
 		task.beginTask(Messages.ValidateUserJob_taskname, 2);
 		
-		ok = true;
-		
 		getShell().getDisplay().syncExec(()->{
-			ok = UserValidationManager.INSTANCE.validate(toValidate, smart6, getShell(), task);
+			employees = UserValidationManager.INSTANCE.validate(toValidate, smart6, getShell(), task);
 		});
 		
-		if (!ok) return;
+		if (employees == null) return;
 		//users are validated move on to next page
 		List<IntelMappingRecord> lrecords = new ArrayList<>();
 		try {

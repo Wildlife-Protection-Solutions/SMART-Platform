@@ -49,22 +49,26 @@ public class IntelHibernateListener implements PreInsertEventListener, PreUpdate
 
 	@Override
 	public boolean onPreUpdate(PreUpdateEvent event) {
+		
 		if (event.getEntity() instanceof IIntelAuditItem){
 			IIntelAuditItem item = (IIntelAuditItem) event.getEntity();
 			
 			LocalDateTime now = LocalDateTime.now();
 			if (item.getCreatedBy() == null){
-    			item.setCreatedBy(SmartDB.getCurrentEmployee());
-    			item.setDateCreated(now);
-    			setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "createdBy", item.getCreatedBy(), item); //$NON-NLS-1$
-                setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "dateCreated", item.getDateCreated(), item); //$NON-NLS-1$
+				if (item.getConservationArea().equals(SmartDB.getCurrentEmployee().getConservationArea())) {
+	    			item.setCreatedBy(SmartDB.getCurrentEmployee());
+	    			item.setDateCreated(now);
+	    			setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "createdBy", item.getCreatedBy(), item); //$NON-NLS-1$
+	                setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "dateCreated", item.getDateCreated(), item); //$NON-NLS-1$
+				}
             }
 			
-			item.setLastModifiedBy(SmartDB.getCurrentEmployee());
+			if (item.getConservationArea().equals(SmartDB.getCurrentEmployee().getConservationArea())) {
+				item.setLastModifiedBy(SmartDB.getCurrentEmployee());
+				setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "lastModifiedBy", item.getLastModifiedBy(), item); //$NON-NLS-1$
+			}
 			item.setDateModified(now);
-			
-			 setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "lastModifiedBy", item.getLastModifiedBy(), item); //$NON-NLS-1$
-             setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "dateModified", item.getDateModified(), item); //$NON-NLS-1$
+			setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "dateModified", item.getDateModified(), item); //$NON-NLS-1$
 		}
 		return false;
 	}
@@ -76,19 +80,19 @@ public class IntelHibernateListener implements PreInsertEventListener, PreUpdate
 			
 			LocalDateTime now = LocalDateTime.now();			
 			if (item.getCreatedBy() == null){
-    			item.setCreatedBy(SmartDB.getCurrentEmployee());
-    			item.setDateCreated(now);
-    			setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "createdBy", item.getCreatedBy(), item); //$NON-NLS-1$
-                setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "dateCreated", item.getDateCreated(), item); //$NON-NLS-1$
+				if (item.getConservationArea().equals(SmartDB.getCurrentEmployee().getConservationArea())) {
+	    			item.setCreatedBy(SmartDB.getCurrentEmployee());
+	    			item.setDateCreated(now);
+	    			setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "createdBy", item.getCreatedBy(), item); //$NON-NLS-1$
+	                setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "dateCreated", item.getDateCreated(), item); //$NON-NLS-1$
+				}
             }
-			
-			item.setLastModifiedBy(SmartDB.getCurrentEmployee());
+			if (item.getLastModifiedBy() == null && item.getConservationArea().equals(SmartDB.getCurrentEmployee().getConservationArea())) {
+				item.setLastModifiedBy(SmartDB.getCurrentEmployee());
+				setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "lastModifiedBy", item.getLastModifiedBy(), item); //$NON-NLS-1$
+			}
 			item.setDateModified(now);
-			setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "lastModifiedBy", item.getLastModifiedBy(), item); //$NON-NLS-1$
             setValue(event.getState(), event.getPersister().getEntityMetamodel().getPropertyNames(), "dateModified", item.getDateModified(), item); //$NON-NLS-1$
-
-            
-			 
 		}
 		return false;
 	}

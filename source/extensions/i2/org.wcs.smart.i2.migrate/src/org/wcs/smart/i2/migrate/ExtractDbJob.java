@@ -40,8 +40,6 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
-import org.wcs.smart.i2.migrate.MigratePlugin;
-import org.wcs.smart.i2.migrate.Smart6Database;
 import org.wcs.smart.i2.migrate.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.ZipUtil;

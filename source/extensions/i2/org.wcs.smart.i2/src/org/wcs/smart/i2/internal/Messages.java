@@ -585,12 +585,14 @@ public class Messages extends NLS {
 	public static String EntityTypeManager_InvalidTextFilterOp;
 	public static String EntityTypeManager_ListItemNotFound;
 	public static String EntityTypeManager_NumericParseError;
+	public static String EntityTypesPreferencePage_DatamodelLinkWarning;
 	public static String EntityTypesPreferencePage_DeleteEntityTypeMsg;
 	public static String EntityTypesPreferencePage_DeleteError;
 	public static String EntityTypesPreferencePage_EntityTypeColumn;
 	public static String EntityTypesPreferencePage_ErrorTitle;
 	public static String EntityTypesPreferencePage_Message;
 	public static String EntityTypesPreferencePage_Title;
+	public static String EntityTypesPreferencePage_WarningMsg;
 	public static String EntityTypeTreeFilterItem_EntitiesLabel;
 	public static String ExportEntityToFileDialog_CharacterSetOp;
 	public static String ExportEntityToFileDialog_CharacterSetTooltip;

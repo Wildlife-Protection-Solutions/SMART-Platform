@@ -63,11 +63,11 @@
          point="org.eclipse.ui.commands">
       <command
             id="org.wcs.smart.i2.migrate.intelligence"
-            name="Import SMART6 Intelligence Data ">
+            name="%command.intelligence.name">
       </command>
       <command
             id="org.wcs.smart.i2.migrate.entity"
-            name="Import SMART6 Entity Data ">
+            name="%command.entity.name">
       </command>
    </extension>
 

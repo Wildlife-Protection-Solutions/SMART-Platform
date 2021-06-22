@@ -58,7 +58,6 @@ public class Entity6Database extends Smart6Database{
 		return getConservationAreas(sql);
 	}
 
-//	public AttributeItem
 	public Collection<EntityTypeItem> getTypes(ConservationArea ca) throws SQLException{
 		List<EntityTypeItem> sources = new ArrayList<>();
 		
@@ -69,7 +68,7 @@ public class Entity6Database extends Smart6Database{
 		sb.append(" WHERE a.ca_uuid = ? "); //$NON-NLS-1$
 		
 		String namesSql = "SELECT language_uuid, value FROM smart.i18n_label WHERE element_uuid = ?"; //$NON-NLS-1$
-		String attSql = "SELECT uuid, dm_attribute_uuid, attribute_order, is_primary, keyid FROM smart.entity_attribute WHERE entity_type_uuid = ?";
+		String attSql = "SELECT uuid, dm_attribute_uuid, attribute_order, is_primary, keyid FROM smart.entity_attribute WHERE entity_type_uuid = ?"; //$NON-NLS-1$
 		try(PreparedStatement s = connection.prepareStatement(sb.toString());
 				PreparedStatement names = connection.prepareStatement(namesSql);
 				PreparedStatement attributes = connection.prepareStatement(attSql)){
@@ -159,8 +158,8 @@ public class Entity6Database extends Smart6Database{
 		HashMap<UUID, EntityItem> items = new HashMap<>();
 		
 		StringBuilder sb = new StringBuilder();
-		sb.append("SELECT uuid, id, status, attribute_list_item_uuid, x, y ");
-		sb.append(" FROM smart.entity WHERE entity_type_uuid = ?");
+		sb.append("SELECT uuid, id, status, attribute_list_item_uuid, x, y "); //$NON-NLS-1$
+		sb.append(" FROM smart.entity WHERE entity_type_uuid = ?"); //$NON-NLS-1$
 		
 		try(PreparedStatement ps = connection.prepareStatement(sb.toString())){
 			ps.setBytes(1, UuidUtils.uuidToByte(entityType));
@@ -193,8 +192,8 @@ public class Entity6Database extends Smart6Database{
 		
 		//add attributes
 		sb = new StringBuilder();
-		sb.append("SELECT a.entity_attribute_uuid, a.entity_uuid, a.number_value, a.string_value, a.list_element_uuid, a.tree_node_uuid ");
-		sb.append(" FROM smart.entity_attribute_value a join smart.entity b on a.entity_uuid = b.uuid WHERE b.entity_type_uuid = ?");
+		sb.append("SELECT a.entity_attribute_uuid, a.entity_uuid, a.number_value, a.string_value, a.list_element_uuid, a.tree_node_uuid "); //$NON-NLS-1$
+		sb.append(" FROM smart.entity_attribute_value a join smart.entity b on a.entity_uuid = b.uuid WHERE b.entity_type_uuid = ?"); //$NON-NLS-1$
 		
 		try(PreparedStatement ps = connection.prepareStatement(sb.toString())){
 			ps.setBytes(1, UuidUtils.uuidToByte(entityType));

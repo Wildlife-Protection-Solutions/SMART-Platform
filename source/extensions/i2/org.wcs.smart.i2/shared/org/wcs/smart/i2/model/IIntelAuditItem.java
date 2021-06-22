@@ -23,6 +23,7 @@ package org.wcs.smart.i2.model;
 
 import java.time.LocalDateTime;
 
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 
 /**
@@ -34,6 +35,12 @@ import org.wcs.smart.ca.Employee;
  *
  */
 public interface IIntelAuditItem {
+	
+	/**
+	 * Gets the conservation area for the item
+	 * @return
+	 */
+	public ConservationArea getConservationArea();
 	
 	/**
 	 * Get the date_created.

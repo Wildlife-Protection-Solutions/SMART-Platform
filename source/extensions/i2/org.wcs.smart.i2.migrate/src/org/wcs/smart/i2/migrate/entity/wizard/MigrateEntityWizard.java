@@ -25,8 +25,12 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.List;
+import java.util.Map;
 
+import org.eclipse.e4.core.contexts.EclipseContextFactory;
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.jface.dialogs.IPageChangingListener;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.PageChangingEvent;
@@ -35,6 +39,8 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Employee;
+import org.wcs.smart.i2.event.IntelEvents;
 import org.wcs.smart.i2.migrate.ExtractDbJob;
 import org.wcs.smart.i2.migrate.MigratePlugin;
 import org.wcs.smart.i2.migrate.entity.Entity6Database;
@@ -57,6 +63,7 @@ public class MigrateEntityWizard extends Wizard  implements IPageChangingListene
 	
 	private Entity6Database smart6;
 	private List<ConservationArea> toProcess;
+	private Map<ConservationArea, Employee> userMapping;
 	
 	public MigrateEntityWizard() {
 		super();
@@ -92,15 +99,26 @@ public class MigrateEntityWizard extends Wizard  implements IPageChangingListene
 
 	@Override
 	public boolean performFinish() {
-		EntityMigrationJob job = new EntityMigrationJob(smart6, page3.getMappings());
+		EntityMigrationJob job = new EntityMigrationJob(smart6, page3.getMappings(), userMapping);
 		
 		try {
 			getContainer().run(true, true, job);
-		} catch (InvocationTargetException | InterruptedException e) {
+		}catch (InterruptedException e) {
+			return false;
+		} catch (InvocationTargetException e) {
 			processException(e);
 			return false;
 		}
 		
+		try {
+			IEventBroker eventBroker = EclipseContextFactory.getServiceContext(MigratePlugin.getDefault().getBundle().getBundleContext()).get(IEventBroker.class);
+			eventBroker.send(IntelEvents.ENTITY_TYPE_NEW, job.getSavedTypes());
+		}catch (Exception ex) {
+			MigratePlugin.log(ex.getMessage(), ex);
+		}
+		
+		String message = MessageFormat.format(Messages.MigrateEntityWizard_CompleteMessage, job.getSavedTypes().size(), job.getSavedEntities());
+		MessageDialog.openInformation(getShell(), Messages.MigrateEntityWizard_CompleteTitle, message);
 		return true;
 	}
 
@@ -181,6 +199,7 @@ public class MigrateEntityWizard extends Wizard  implements IPageChangingListene
 					event.doit = false;
 					return;
 				}
+				userMapping = job.getEmployeeMapping();
 				page3.setMappings(job.getMappingRecords());
 			} catch (Exception e) {
 				processException(e);
@@ -198,7 +217,7 @@ public class MigrateEntityWizard extends Wizard  implements IPageChangingListene
 			if (t.getMessage() != null) msg += " " + t.getMessage(); //$NON-NLS-1$
 			t = t.getCause();
 		}
-		if (msg.isEmpty()) msg = "Error converting data: " +  ex.getStackTrace()[0].toString();
+		if (msg.isEmpty()) msg = MessageFormat.format(Messages.MigrateEntityWizard_ConversionError,  ex.getStackTrace()[0].toString());
 		MigratePlugin.displayLog(msg, ex);
 	}
 

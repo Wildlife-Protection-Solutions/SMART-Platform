@@ -86,9 +86,7 @@ public class Smart6WizardPage extends WizardPage {
 		setControl(outer);
 		
 		setTitle(Messages.Smart6WizardPage_Title);
-		setMessage(Messages.Smart6WizardPage_Message);
-		
+		setMessage(Messages.Smart6WizardPage_Message);		
 	}
-
 	
 }

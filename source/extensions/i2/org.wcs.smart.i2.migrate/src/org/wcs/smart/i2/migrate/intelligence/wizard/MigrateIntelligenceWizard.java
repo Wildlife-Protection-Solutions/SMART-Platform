@@ -26,6 +26,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jface.dialogs.IPageChangingListener;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -35,6 +36,7 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.i2.migrate.ExtractDbJob;
 import org.wcs.smart.i2.migrate.MigratePlugin;
 import org.wcs.smart.i2.migrate.intelligence.Intel6Database;
@@ -54,6 +56,7 @@ public class MigrateIntelligenceWizard extends Wizard  implements IPageChangingL
 	
 	private Intel6Database smart6;
 	private List<ConservationArea> toProcess;
+	private Map<ConservationArea, Employee> userMappings;
 	
 	public MigrateIntelligenceWizard() {
 		super();
@@ -89,7 +92,7 @@ public class MigrateIntelligenceWizard extends Wizard  implements IPageChangingL
 
 	@Override
 	public boolean performFinish() {
-		ConversionJob job = new ConversionJob(page3.getMappings(), smart6);
+		ConversionJob job = new ConversionJob(page3.getMappings(), smart6, userMappings);
 		try {
 			getContainer().run(true, true, job);
 		} catch (InvocationTargetException | InterruptedException e) {
@@ -175,6 +178,7 @@ public class MigrateIntelligenceWizard extends Wizard  implements IPageChangingL
 					event.doit = false;
 					return;
 				}
+				userMappings = job.getEmployeeMapping();
 				page3.setMappings(job.getMappingRecords());
 			} catch (Exception e) {
 				processException(e);

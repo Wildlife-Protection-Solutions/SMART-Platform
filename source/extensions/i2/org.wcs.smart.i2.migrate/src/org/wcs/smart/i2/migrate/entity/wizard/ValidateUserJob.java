@@ -22,34 +22,23 @@
 package org.wcs.smart.i2.migrate.entity.wizard;
 
 import java.lang.reflect.InvocationTargetException;
-import java.sql.SQLException;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.i2.migrate.MigratePlugin;
 import org.wcs.smart.i2.migrate.UserValidationManager;
 import org.wcs.smart.i2.migrate.entity.Entity6Database;
 import org.wcs.smart.i2.migrate.entity.EntityTypeItem;
 import org.wcs.smart.i2.migrate.entity.EntityTypeMappingRecord;
-import org.wcs.smart.i2.migrate.intelligence.IntelMappingRecord;
-import org.wcs.smart.i2.migrate.intelligence.IntelligenceSource;
 import org.wcs.smart.i2.migrate.internal.Messages;
-import org.wcs.smart.i2.security.IntelAdminUserLevel;
-import org.wcs.smart.ui.UserNamePasswordDialog;
 
 /**
  * Job to validate the username and passwords for all conservation
@@ -62,8 +51,10 @@ public class ValidateUserJob implements IRunnableWithProgress {
 
 	private Entity6Database smart6;
 	private List<ConservationArea> toValidate;
+	
 	private Shell shell;
 	
+	private Map<ConservationArea, Employee> employees;
 	private List<EntityTypeMappingRecord> records ;
 	
 	public ValidateUserJob(Entity6Database db, List<ConservationArea> toValidate, Shell shell) {
@@ -80,7 +71,9 @@ public class ValidateUserJob implements IRunnableWithProgress {
 		return this.records;
 	}
 	
-	private boolean ok = false;
+	public  Map<ConservationArea, Employee> getEmployeeMapping() {
+		return this.employees;
+	}
 	
 	@Override
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
@@ -89,12 +82,11 @@ public class ValidateUserJob implements IRunnableWithProgress {
 		SubMonitor task = SubMonitor.convert(monitor);
 		task.beginTask(Messages.ValidateUserJob_taskname, 2);
 		
-		ok = true;
 		Display.getDefault().syncExec(()->{
-			ok = UserValidationManager.INSTANCE.validate(toValidate, smart6, getShell(), task);
+			employees = UserValidationManager.INSTANCE.validate(toValidate, smart6, getShell(), task);
 		});
 		
-		if (!ok) return;
+		if (employees == null) return;
 		//users are validated move on to next page
 		List<EntityTypeMappingRecord> lrecords = new ArrayList<>();
 		try {

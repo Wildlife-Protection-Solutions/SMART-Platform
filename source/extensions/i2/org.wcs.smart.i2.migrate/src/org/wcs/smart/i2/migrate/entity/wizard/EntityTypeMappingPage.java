@@ -57,7 +57,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
  * Wizard page to collect mapping information for converting
- * intelligence records.
+ * smart6 entities to profile entities.
  * 
  * @author Emily
  *
@@ -109,7 +109,7 @@ public class EntityTypeMappingPage extends WizardPage {
 		inner.setLayout(new GridLayout(3, true));
 		inner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		String[]  headers = new String[]{"Conservation Area", "Entity Type", "Profile"};
+		String[]  headers = new String[]{Messages.EntityTypeMappingPage_CaColumnTitle, Messages.EntityTypeMappingPage_CaTypeName, Messages.EntityTypeMappingPage_CaProfileName};
 		for (String h : headers) {
 			Label l = new Label(inner, SWT.NONE);
 			l.setText(h);
@@ -121,8 +121,11 @@ public class EntityTypeMappingPage extends WizardPage {
 			l.setText(record.getConservationArea().getId());
 			
 			l = new Label(inner, SWT.NONE);
-			//TODO: display name
-			l.setText(record.getEntitytype().getKeyId());
+			
+			String name = record.getEntitytype().getNames().get(record.getConservationArea().getDefaultLanguage().getUuid());
+			if (name == null && !record.getEntitytype().getNames().isEmpty()) name = record.getEntitytype().getNames().values().iterator().next();
+			name = name + " (" + record.getEntitytype().getKeyId() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+			l.setText(name);
 			
 			TableComboViewer cmbProfile = new TableComboViewer(inner, SWT.READ_ONLY | SWT.DROP_DOWN | SWT.BORDER);
 			cmbProfile.setContentProvider(ArrayContentProvider.getInstance());
@@ -130,7 +133,6 @@ public class EntityTypeMappingPage extends WizardPage {
 			cmbProfile.setInput(new String[]{DialogConstants.LOADING_TEXT});
 			cmbProfile.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			SmartUiUtils.configure(cmbProfile);
-			
 			
 			rows.add(new Object[] {record, cmbProfile,});
 		}
@@ -158,9 +160,8 @@ public class EntityTypeMappingPage extends WizardPage {
 		scomp.setContent(main);
 		main.setLayout(new GridLayout());
 		
-		
-		setTitle("Mappings");
-		setMessage("Map Entity Types to Profiles");
+		setTitle(Messages.EntityTypeMappingPage_Title);
+		setMessage(Messages.EntityTypeMappingPage_Message);
 	}
 
 	

@@ -415,12 +415,19 @@ public class EntityTypesPreferencePage extends PreferencePage implements IIntelP
 		List<IntelEntityType> toDelete = new ArrayList<IntelEntityType>();
 		StringBuilder sb = new StringBuilder();
 		
+		StringBuilder dm = new StringBuilder();
 		for (Iterator<?> iterator = ((IStructuredSelection)cmbTypes.getSelection()).iterator(); iterator.hasNext();) {
 			Object x = iterator.next();
 			if (x instanceof IntelEntityType){
-				toDelete.add((IntelEntityType)x);
-				sb.append(((IntelEntityType) x).getName());
+				IntelEntityType t = ((IntelEntityType)x);
+				toDelete.add(t);
+				sb.append(t.getName());
 				sb.append(", "); //$NON-NLS-1$
+				
+				if (t.getDmAttribute() != null) {
+					dm.append(t.getName() + ": " + t.getDmAttribute().getName() + "\n"); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+			
 			}
 		}
 		sb.deleteCharAt(sb.length() - 1);
@@ -430,6 +437,9 @@ public class EntityTypesPreferencePage extends PreferencePage implements IIntelP
 			return;
 		}
 		
+		if (dm.length() != 0) {
+			MessageDialog.openInformation(getShell(), Messages.EntityTypesPreferencePage_WarningMsg, Messages.EntityTypesPreferencePage_DatamodelLinkWarning + "\n\n" + dm.toString()); //$NON-NLS-3$
+		}
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try {
 			pmd.run(true, false, new IRunnableWithProgress() {
@@ -443,6 +453,7 @@ public class EntityTypesPreferencePage extends PreferencePage implements IIntelP
 
 						for (IntelEntityType t : toDelete){
 							monitor.subTask(t.getName());
+							
 							
 							try {
 								if (!DeleteManager.canDelete(t, s)) {

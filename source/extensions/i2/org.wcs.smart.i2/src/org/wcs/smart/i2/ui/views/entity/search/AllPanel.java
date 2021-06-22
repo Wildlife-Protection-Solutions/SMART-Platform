@@ -219,7 +219,11 @@ public class AllPanel extends Composite {
 				if (entityTable == null || entityTable.getControl().isDisposed()) {
 					refresh(0);
 				}else {
-					((AllEntityContentProvider)entityTable.getContentProvider()).setFilter(getQueryString());
+					if (validate() == null) {
+						((AllEntityContentProvider)entityTable.getContentProvider()).setFilter(getQueryString());
+					}else {
+						//super.clearPanel();
+					}
 				}
 			}
 			
