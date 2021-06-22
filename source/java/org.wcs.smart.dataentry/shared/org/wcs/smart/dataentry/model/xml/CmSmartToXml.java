@@ -464,7 +464,7 @@ public class CmSmartToXml {
 		search.addAll(attribute.getConfig().getTree());
 		while(!search.isEmpty()) {
 			CmAttributeTreeNode item = search.remove();
-			if (item.getDmTreeNode().getHkey().equalsIgnoreCase(treehKey)){
+			if (item.getDmTreeNode() != null && item.getDmTreeNode().getHkey().equalsIgnoreCase(treehKey)){
 				return item;
 			}
 			search.addAll(item.getChildren());
