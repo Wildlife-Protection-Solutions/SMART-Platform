@@ -108,8 +108,15 @@ public class PatrolSmartQuery extends AbstractSmartQuery {
 	@Override
 	public IResultSet executeQuery(AbstractSmartBirtQuery query, SmartConnection connection) throws OdaException {
 		//create date filter
-		LocalDate startDate = ((java.sql.Date) query.getParameters().get(SmartParameterMetaData.Parameter.STARTDATE)).toLocalDate();
-		LocalDate endDate = ((java.sql.Date) query.getParameters().get(SmartParameterMetaData.Parameter.ENDDATE)).toLocalDate();
+		LocalDate startDate = null;
+		LocalDate endDate = null;
+		
+		if (query.getParameters().containsKey(SmartParameterMetaData.Parameter.STARTDATE)) {
+			startDate = ((java.sql.Date) query.getParameters().get(SmartParameterMetaData.Parameter.STARTDATE)).toLocalDate();
+		}
+		if (query.getParameters().containsKey(SmartParameterMetaData.Parameter.ENDDATE)) {
+			endDate = ((java.sql.Date) query.getParameters().get(SmartParameterMetaData.Parameter.ENDDATE)).toLocalDate();
+		}
 		
 		if (startDate == null || endDate == null){
 			if (query.getQuery().getTypeKey().equals(PatrolSummaryQuery.KEY)){
