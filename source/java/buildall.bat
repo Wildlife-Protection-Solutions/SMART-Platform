@@ -7,7 +7,8 @@ SET outputlocation=C:\data\SMART\Builds\SMART7\%RESULT%
 echo %outputlocation%
 
 REM run maven to build packages
-mvn clean install -Pallplatforms,core,plugins,utils,migrationtools,languagepacks
+call mvn clean install -Pallplatforms,core,plugins,utils,migrationtools,languagepacks
+REM call mvn install -Pallplatforms,migrationtools
 
 del %outputlocation%\smartapp-win32.win32.x86_64.zip
 copy .\org.wcs.smart-product\target\products\smartapp-win32.win32.x86_64.zip %outputlocation%
@@ -31,7 +32,7 @@ move %outputlocation%\org.wcs.smart.updatesite-%version%-SNAPSHOT.zip %outputloc
 move %outputlocation%\org.wcs.smart.migrationtools.updatesite-%version%-SNAPSHOT.zip %outputlocation%\migrationtools_%version%.zip
 move %outputlocation%\org.wcs.smart.utils.updatesite-%version%-SNAPSHOT.zip %outputlocation%\smartutils_%version%.zip
 
-@RD \s \q %outputlocation%\smartapp-win32.win32.x86_64
+@RD /s /q %outputlocation%\smartapp-win32.win32.x86_64
 
 powershell Expand-Archive %outputlocation%\smartapp-win32.win32.x86_64.zip %outputlocation%\smartapp-win32.win32.x86_64
 
@@ -41,6 +42,3 @@ copy %outputlocation%\site_%version%.zip %outputlocation%\smartapp-win32.win32.x
 copy %outputlocation%\migrationtools_%version%.zip %outputlocation%\smartapp-win32.win32.x86_64\updatesite
 
 REM complete - start smart and install plugins/restore backup
-
-
-
