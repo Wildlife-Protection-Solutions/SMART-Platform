@@ -304,66 +304,7 @@
 				<module>../extensions/qa/org.wcs.smart.qa.patrol</module>
 			</modules>
 		</profile>
-		
-		<profile>
-			<id>coreupdate</id>
-			<modules>
-				<module>org.wcs.smart.license.feature</module>
-				<module>org.wcs.smart.updatesite</module>
-				
-				<module>org.wcs.smart.upgrade</module>
-				<module>org.wcs.smart.upgrade.core.feature</module>
-				<module>org.wcs.smart.upgrade.feature</module>
-				
-				<module>org.wcs.smart</module>
-				<module>org.wcs.smart-feature</module>
-				<module>org.wcs.smart.birt-feature</module>
-				<module>org.wcs.smart.p2-feature</module>
-				<module>org.wcs.smart.udig-feature</module>
-				<module>org.wcs.smart.target</module>
-				<module>org.wcs.smart.p2</module>
-				<module>org.wcs.smart.dom.events</module>
-				<module>org.wcs.smart.udig.catalog.image.auxxml</module>
-        			<module>org.wcs.smart.udig.customization</module>
-        			<module>org.wcs.smart.birt</module>
-        			<module>org.wcs.smart.dataentry</module>	
-        			<module>org.wcs.smart.help</module>
-        			<module>org.wcs.smart.query</module>
-        			<module>org.wcs.smart.report</module>
-        			<module>org.wcs.smart.report.birt.query</module>
-        			<module>org.wcs.smart.observation</module>
-        			<module>org.wcs.smart.observation.query</module>
-        			<module>org.wcs.smart.observation.query.report</module>
-				<module>org.wcs.smart.birt.map</module>	
-        			<module>org.wcs.smart.patrol</module>
-        			<module>org.wcs.smart.patrol.query</module>
-        			<module>org.wcs.smart.patrol.query.report</module>
-        			<module>org.wcs.smart.reporttable</module>
-        			
-        			<module>../extensions/qa/org.wcs.smart.qa</module>
-				<module>../extensions/qa/org.wcs.smart.qa.patrol</module>
-			</modules>
 			
-			<build>
-			<plugins><plugin>
-        			<groupId>com.coderplus.maven.plugins</groupId>
-        			<artifactId>copy-rename-maven-plugin</artifactId>
-        			<version>1.0</version>
-        			<executions>
-          			<execution>
-            			<id>copy-file</id>
-            			<phase>clean</phase>
-            			<goals><goal>copy</goal></goals>
-            			<configuration>
-              				<sourceFile>org.wcs.smart.updatesite/category.core.xml</sourceFile>
-              				<destinationFile>org.wcs.smart.updatesite/category.xml</destinationFile>
-            			</configuration>
-          			</execution>
-        			</executions>
-      			</plugin></plugins>
-  			</build>
-		</profile>
-		
 		<profile>
 			<id>plan</id>
 			<modules>
@@ -375,21 +316,6 @@
 				<module>org.wcs.smart.plan.feature</module>
 			</modules>
 		</profile>
-<!-- REMOVED SMART 7
-		<profile>
-			<id>intelligence</id>
-			<modules>
-				<module>org.wcs.smart.license.feature</module>
-				<module>org.wcs.smart.updatesite</module>
-				
-				<module>org.wcs.smart.intelligence</module>
-				<module>org.wcs.smart.intelligence.query</module>
-				<module>org.wcs.smart.intelligence.query.report</module>
-				<module>org.wcs.smart.intelligence.core.feature</module>
-				<module>org.wcs.smart.intelligence.feature</module>
-			</modules>
-		</profile>
--->
 		
 		<profile>
 			<id>incident</id>
@@ -564,13 +490,6 @@
 				<module>org.wcs.smart.license.feature</module>
 				<module>org.wcs.smart.updatesite</module>
 
-<!-- REMOVE SMART 7			
-        			<module>org.wcs.smart.intelligence</module>
-				<module>org.wcs.smart.intelligence.query</module>
-				<module>org.wcs.smart.intelligence.query.report</module>
-				<module>org.wcs.smart.intelligence.core.feature</module>
-				<module>org.wcs.smart.intelligence.feature</module>
--->				
 				<module>org.wcs.smart.plan</module>
 				<module>org.wcs.smart.plan.core.feature</module>
 				<module>org.wcs.smart.plan.feature</module>
@@ -661,6 +580,32 @@
 			</modules>
 		</profile>
 		<profile>
+			<id>pluginutils</id>
+			
+			<modules>
+				<module>org.wcs.smart.license.feature</module>
+				<module>org.wcs.smart.utils.updatesite</module>
+
+				<module>../extensions/i2/org.wcs.smart.i2.migrate</module>
+				<module>../extensions/i2/org.wcs.smart.i2.migrate.feature</module>
+				
+				<module>../extensions/paws/org.wcs.smart.paws</module>
+				<module>../extensions/paws/org.wcs.smart.paws.core.feature</module>
+				<module>../extensions/paws/org.wcs.smart.paws.feature</module>
+				
+				<module>../extensions/paws/translations/org.wcs.smart.paws.nl</module>
+				<module>../extensions/paws/translations/org.wcs.smart.paws.feature.nl</module>
+				
+				<module>../extensions/wcomm/org.wcs.smart.wcomm</module>
+				<module>../extensions/wcomm/org.wcs.smart.wcomm.feature</module>
+				
+				<module>../extensions/datagenerator/org.wcs.smart.datagenerator</module>
+				<module>../extensions/datagenerator/org.wcs.smart.datagenerator.feature</module>
+				<module>../extensions/datagenerator/org.wcs.smart.datagenerator.er</module>
+				<module>../extensions/datagenerator/org.wcs.smart.datagenerator.er.feature</module>
+			</modules>
+		</profile>
+		<profile>
 			<id>languagepacks</id>
 			<modules>
 				<module>../translations/org.wcs.smart.birt.map.nl</module>
@@ -746,10 +691,6 @@
 
 				<module>../extensions/r/translations/org.wcs.smart.r.nl</module>
 				<module>../extensions/r/translations/org.wcs.smart.r.feature.nl</module>		
-				
-				
-				<module>../extensions/paws/translations/org.wcs.smart.paws.nl</module>
-				<module>../extensions/paws/translations/org.wcs.smart.paws.feature.nl</module>
 			</modules>
 		</profile>
 	</profiles>

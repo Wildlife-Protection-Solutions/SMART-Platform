@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature id="org.wcs.smart.paws.feature">
+      <category name="paws"/>
+   </feature>
+   <feature id="org.wcs.smart.paws.feature.nl">
+      <category name="paws"/>
+   </feature>
+   <feature id="org.wcs.smart.datagenerator.er.feature">
+      <category name="datagenerator"/>
+   </feature>
+   <feature id="org.wcs.smart.datagenerator.feature">
+      <category name="datagenerator"/>
+   </feature>
+   <feature id="org.wcs.smart.wcomm.feature">
+      <category name="migrationtools"/>
+   </feature>
+   <feature id="org.wcs.smart.i2.migrate.feature">
+      <category name="migrationtools"/>
+   </feature>
+   <category-def name="paws" label="SMART PAWS Plug-in">
+      <description>
+         Provides a link for accessing the PAWS prediction tools.
+      </description>
+   </category-def>
+   <category-def name="datagenerator" label="Data Generator Tools">
+      <description>
+         Tools to generate a set of radom test data.
+      </description>
+   </category-def>
+   <category-def name="migrationtools" label="Migration Tools">
+      <description>
+         Data migration tools
+      </description>
+   </category-def>
+</site>

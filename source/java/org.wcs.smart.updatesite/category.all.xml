@@ -60,9 +60,6 @@
    <feature url="features/org.wcs.smart.event.feature_7.0.0.qualifier.jar" id="org.wcs.smart.event.feature" version="7.0.0.qualifier">
       <category name="events"/>
    </feature>
-   <feature url="features/org.wcs.smart.paws.feature_7.0.0.qualifier.jar" id="org.wcs.smart.paws.feature" version="7.0.0.qualifier">
-      <category name="paws"/>
-   </feature>
    <feature url="features/org.wcs.smart.cybertracker.feature_7.0.0.qualifier.jar" id="org.wcs.smart.cybertracker.feature" version="7.0.0.qualifier">
       <category name="smartmobile"/>
    </feature>
@@ -125,9 +122,6 @@
    </feature>
    <feature url="features/org.wcs.smart.event.i2.feature.nl_7.0.0.jar" id="org.wcs.smart.event.i2.feature.nl" version="7.0.0">
       <category name="events"/>
-   </feature>
-   <feature url="features/org.wcs.smart.paws.feature.nl_7.0.0.jar" id="org.wcs.smart.paws.feature.nl" version="7.0.0">
-      <category name="paws"/>
    </feature>
    <feature url="features/org.wcs.smart.r.feature.nl_7.0.0.jar" id="org.wcs.smart.r.feature.nl" version="7.0.0">
       <category name="r"/>
@@ -196,11 +190,6 @@
    <category-def name="r" label="SMART R Scripts Plug-in">
       <description>
          The SMART R Script plug-in supports the use of R within the SMART Desktop environment.  R Scripts can be imported into and run from within SMART using the results from queries as parameters to the scripts.
-      </description>
-   </category-def>
-   <category-def name="paws" label="SMART PAWS Plug-in">
-      <description>
-         Provides a link for accessing the PAWS prediction tools.
       </description>
    </category-def>
    <category-def name="smartcollect" label="SMART Collect"/>

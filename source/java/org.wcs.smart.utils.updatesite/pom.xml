@@ -5,14 +5,14 @@
     <modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>org.wcs.smart.wcomm</groupId>
+		<groupId>org.wcs.smart</groupId>
 		<artifactId>smart-tycho</artifactId>
 		<version>7.0.3-SNAPSHOT</version>
 	</parent>
 
-    <artifactId>org.wcs.smart.wcomm.updatesite</artifactId>
-    <packaging>eclipse-repository</packaging>
-    <version>7.0.3-SNAPSHOT</version>
+	<artifactId>org.wcs.smart.utils.updatesite</artifactId>
+	<packaging>eclipse-repository</packaging>
+	<version>7.0.3-SNAPSHOT</version>
 
 
 </project>
