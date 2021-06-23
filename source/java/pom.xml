@@ -580,15 +580,12 @@
 			</modules>
 		</profile>
 		<profile>
-			<id>pluginutils</id>
+			<id>utils</id>
 			
 			<modules>
 				<module>org.wcs.smart.license.feature</module>
 				<module>org.wcs.smart.utils.updatesite</module>
 
-				<module>../extensions/i2/org.wcs.smart.i2.migrate</module>
-				<module>../extensions/i2/org.wcs.smart.i2.migrate.feature</module>
-				
 				<module>../extensions/paws/org.wcs.smart.paws</module>
 				<module>../extensions/paws/org.wcs.smart.paws.core.feature</module>
 				<module>../extensions/paws/org.wcs.smart.paws.feature</module>
@@ -596,13 +593,25 @@
 				<module>../extensions/paws/translations/org.wcs.smart.paws.nl</module>
 				<module>../extensions/paws/translations/org.wcs.smart.paws.feature.nl</module>
 				
-				<module>../extensions/wcomm/org.wcs.smart.wcomm</module>
-				<module>../extensions/wcomm/org.wcs.smart.wcomm.feature</module>
-				
 				<module>../extensions/datagenerator/org.wcs.smart.datagenerator</module>
 				<module>../extensions/datagenerator/org.wcs.smart.datagenerator.feature</module>
 				<module>../extensions/datagenerator/org.wcs.smart.datagenerator.er</module>
 				<module>../extensions/datagenerator/org.wcs.smart.datagenerator.er.feature</module>
+			</modules>
+		</profile>
+		<profile>
+			<id>migrationtools</id>
+			
+			<modules>
+				<module>org.wcs.smart.license.feature</module>
+				<module>org.wcs.smart.migrationtools.updatesite</module>
+
+				<module>../extensions/i2/org.wcs.smart.i2.migrate</module>
+				<module>../extensions/i2/org.wcs.smart.i2.migrate.feature</module>
+				
+				<module>../extensions/wcomm/org.wcs.smart.wcomm</module>
+				<module>../extensions/wcomm/org.wcs.smart.wcomm.feature</module>
+				
 			</modules>
 		</profile>
 		<profile>
