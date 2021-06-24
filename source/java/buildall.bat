@@ -5,6 +5,7 @@ echo The directory is %RESULT%
 
 SET outputlocation=C:\data\SMART\Builds\SMART7\%RESULT%
 echo %outputlocation%
+MKDIR %outputlocation%
 
 REM run maven to build packages
 call mvn clean install -Pallplatforms,core,plugins,utils,migrationtools,languagepacks
