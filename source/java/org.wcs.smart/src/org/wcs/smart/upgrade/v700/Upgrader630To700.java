@@ -448,7 +448,7 @@ public class Upgrader630To700 implements IDatabaseUpgrader {
 					IconUtils.upgradeDataModel(c, iconuuid, icon[5], cuuid);
 					
 					//end of updates
-					if (icon[0].equalsIgnoreCase("yellow_billed_ox_pecker")) break; //$NON-NLS-1$
+					if (icon[0].equalsIgnoreCase("tragelaphus_strepsiceros")) break; //$NON-NLS-1$
 				}
 				
 			}
