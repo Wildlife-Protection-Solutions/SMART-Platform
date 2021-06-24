@@ -49,6 +49,7 @@ import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.swt.widgets.Widget;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.icon.IconFile;
 import org.wcs.smart.common.control.SmartUiUtils;
@@ -307,7 +308,16 @@ public class ObservationItemList {
 			((GridLayout)attributes.getLayout()).marginHeight = 0;
 			
 			if (!hideDetails) {
-				for (WaypointObservationAttribute a : wo.getAttributes()) {
+				
+				List<Attribute> sortedattributes = new ArrayList<Attribute>();
+				wo.getCategory().getAllAttribute(sortedattributes, null);
+				List<WaypointObservationAttribute> sorted = new ArrayList<>(wo.getAttributes());
+				sorted.sort((a,b)->{
+					return Integer.compare(sortedattributes.indexOf(a.getAttribute()),sortedattributes.indexOf(b.getAttribute()));
+				});
+				
+				
+				for (WaypointObservationAttribute a : sorted) {
 					Label l = new Label(attributes, SWT.NONE);
 					l.setText(SmartUtils.formatStringForLabel(a.getAttribute().getName()) +":"); //$NON-NLS-1$
 					l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));

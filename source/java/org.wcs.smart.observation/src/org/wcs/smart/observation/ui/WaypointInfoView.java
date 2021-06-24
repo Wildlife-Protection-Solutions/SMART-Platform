@@ -25,8 +25,6 @@ import java.text.MessageFormat;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -63,7 +61,6 @@ import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.hibernate.Session;
 import org.locationtech.udig.project.AdaptableFeature;
 import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -154,28 +151,8 @@ public class WaypointInfoView {
 							for (WaypointObservationGroup g : currentWp.getObservationGroups()) {
 								for (WaypointObservation wo : g.getObservations()) {
 									wo.getCategory().getFullCategoryName();
-									
-									//sort observation attribute based on data model order
-									Category c = (Category) s.load(Category.class, wo.getCategory().getUuid());
-									final List<Attribute> attributes = new ArrayList<Attribute>();
-									c.getAllAttribute(attributes, null);
-									List<WaypointObservationAttribute> tmp = new ArrayList<WaypointObservationAttribute>();
-									tmp.addAll(wo.getAttributes());
-									Collections.sort(tmp, new Comparator<WaypointObservationAttribute>() {
-										@Override
-										public int compare(
-												WaypointObservationAttribute o1,
-												WaypointObservationAttribute o2) {
-											int index1 = attributes.indexOf(o1.getAttribute());
-											int index2 = attributes.indexOf(o2.getAttribute());
-											if (index1 == index2){
-												return 0;
-											}
-											if (index1 > index2) return 1;
-											return -1;
-										}
-									});
-									for (WaypointObservationAttribute woa : tmp) {
+									wo.getCategory().getAllAttribute(new ArrayList<>(), null);
+									for (WaypointObservationAttribute woa : wo.getAttributes()) {
 										woa.getAttribute().getName();
 										woa.getAttributeValueAsString(Locale.getDefault());
 									}
@@ -269,7 +246,18 @@ public class WaypointInfoView {
 								attributeComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 								if (showText) {
-									for (WaypointObservationAttribute woa : wo.getAttributes()) {
+									
+									//need to sort attributes
+									
+									final List<Attribute> attributes = new ArrayList<Attribute>();
+									wo.getCategory().getAllAttribute(attributes, null);
+									
+									List<WaypointObservationAttribute> sortedwo = new ArrayList<>(wo.getAttributes());
+									sortedwo.sort((a,b)->{
+										return Integer.compare(attributes.indexOf(a.getAttribute()),attributes.indexOf(b.getAttribute()));
+									});
+									
+									for (WaypointObservationAttribute woa : sortedwo) {
 										Label l = toolkit.createLabel(attributeComp,SmartUtils.formatStringForLabel(woa.getAttribute().getName() + ":"), SWT.WRAP); //$NON-NLS-1$
 										l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 										((GridData) l.getLayoutData()).widthHint = 100;
