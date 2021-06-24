@@ -253,7 +253,7 @@ public class UpgradeServlet extends HttpServlet {
 					}
 					
 					//upgrade icons
-					upgradeIcons(c, "agouti_paca", "yellow_billed_ox_pecker");  //$NON-NLS-1$//$NON-NLS-2$
+					upgradeIcons(c, "agouti_paca", "tragelaphus_strepsiceros");  //$NON-NLS-1$//$NON-NLS-2$
 					
 					//create ccaa icon sets
 					createCcaaIconSets(c);
