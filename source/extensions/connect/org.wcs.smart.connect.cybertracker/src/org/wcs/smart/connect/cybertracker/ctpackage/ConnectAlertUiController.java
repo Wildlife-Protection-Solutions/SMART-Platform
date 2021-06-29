@@ -36,7 +36,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
@@ -153,13 +152,7 @@ public class ConnectAlertUiController implements IPackageUiContribution{
 		((GridLayout)alertComp.getLayout()).marginHeight = 0;
 		alertComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		Composite header = new Composite(alertComp, SWT.NONE);
-		header.setLayout(new GridLayout());
-		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		WidgetElement.setCSSClass(header, SmartUiUtils.HEADER_CLASS); 
-		
-		Label l = new Label(header, SWT.NONE);
-		l.setText(Messages.ConnectAlertUiController_SectionHeader);
+		SmartUiUtils.createHeaderLabel(alertComp, Messages.ConnectAlertUiController_SectionHeader);
 
 		sash = new SashForm(alertComp, SWT.HORIZONTAL);
 		sash.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));

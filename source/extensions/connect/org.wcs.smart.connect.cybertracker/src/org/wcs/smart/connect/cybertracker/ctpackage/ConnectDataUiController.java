@@ -27,7 +27,6 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -115,13 +114,8 @@ public class ConnectDataUiController implements IPackageUiContribution{
 		((GridLayout)upDataComp.getLayout()).marginWidth = 0;
 		((GridLayout)upDataComp.getLayout()).marginHeight = 0;
 		
-		Composite header = new Composite(upDataComp, SWT.NONE);
-		header.setLayout(new GridLayout());
-		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		WidgetElement.setCSSClass(header, SmartUiUtils.HEADER_CLASS);
+		SmartUiUtils.createHeaderLabel(upDataComp, Messages.ConnectDataUiController_DataUploadsLabel);
 		
-		Label l = new Label(header, SWT.NONE);
-		l.setText(Messages.ConnectDataUiController_DataUploadsLabel);
 		Composite core = new Composite(upDataComp, SWT.FLAT);
 		core.setLayout(new GridLayout(4, false));
 		core.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -169,13 +163,7 @@ public class ConnectDataUiController implements IPackageUiContribution{
 		((GridLayout)posComp.getLayout()).marginWidth = 0;
 		((GridLayout)posComp.getLayout()).marginHeight = 0;
 		
-		header = new Composite(posComp, SWT.NONE);
-		header.setLayout(new GridLayout());
-		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 5, 1));
-		WidgetElement.setCSSClass(header, SmartUiUtils.HEADER_CLASS);
-		
-		l = new Label(header, SWT.NONE);
-		l.setText(Messages.ConnectDataUiController_PositionLabel);
+		SmartUiUtils.createHeaderLabel(upDataComp, Messages.ConnectDataUiController_PositionLabel);
 		
 		core = new Composite(posComp, SWT.FLAT);
 		core.setLayout(new GridLayout(5, false));
@@ -288,15 +276,11 @@ public class ConnectDataUiController implements IPackageUiContribution{
 							if (!sendevents) {
 								cmbPositionType.setSelection(new StructuredSelection(temp));
 							}else {
-								fireEvents = false;
-								try {
-									cmbPositionType.setSelection(new StructuredSelection(temp));	
-								}finally {
-									fireEvents = true;
-								}
+								cmbPositionType.setSelection(new StructuredSelection(temp));	
 							}
 						}
 					}
+					
 
 				});
 			}
