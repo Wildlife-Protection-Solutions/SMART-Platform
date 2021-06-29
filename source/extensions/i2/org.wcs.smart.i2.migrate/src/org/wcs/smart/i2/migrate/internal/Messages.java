@@ -33,6 +33,7 @@ public class Messages extends NLS {
 	public static String ConversionJob_TaskName;
 	public static String EntityMigrationJob_ActiveName;
 	public static String EntityMigrationJob_ContinueButton;
+	public static String EntityMigrationJob_DuplicateAttributes;
 	public static String EntityMigrationJob_EntityMigrationComment;
 	public static String EntityMigrationJob_ErrorAttributeNotFound;
 	public static String EntityMigrationJob_ErrorDataModelAttributeNotFound;

@@ -421,6 +421,7 @@ public class EntityMigrationJob implements IRunnableWithProgress {
 		}
 		
 		session.save(entityType);
+		session.flush();
 		
 		IntelEntityTypeAttributeGroup primaryGroup = new IntelEntityTypeAttributeGroup();
 		primaryGroup.setEntityType(entityType);
@@ -429,6 +430,7 @@ public class EntityMigrationJob implements IRunnableWithProgress {
 		primaryGroup.updateName(SmartDB.getCurrentLanguage(), primaryGroup.getName());
 		primaryGroup.updateName(ca.getDefaultLanguage(), primaryGroup.getName());
 		session.save(primaryGroup);
+		session.flush();
 		
 		eIdAttribute.setAttributeGroup(primaryGroup);
 		sattribute.setAttributeGroup(primaryGroup);
@@ -490,23 +492,35 @@ public class EntityMigrationJob implements IRunnableWithProgress {
 					IntelAttribute ia = searchForAttribute(session, attributeItem, dmAttribute, ca);
 
 					if (ia != null) {
-						attributeMapping.put(attributeItem.getUuid(), ia);
-						IntelEntityTypeAttribute iea = new IntelEntityTypeAttribute();
-						iea.setAttribute(ia);
-						iea.setDuplicateCheck(false);
-						iea.setEntityType(entityType);
-						if (attributeItem.isPrimary()) {
-							iea.setAttributeGroup(primaryGroup);
+						boolean canadd = true;
+						for (IntelEntityTypeAttribute current : entityType.getAttributes()) {
+							if (current.getAttribute().equals(ia)) {
+								warnings.add(MessageFormat.format(Messages.EntityMigrationJob_DuplicateAttributes, ia.getName(), ia.getKeyId()));
+								canadd = false;
+								break;
+							}
 						}
-						iea.setOrder(attributeItem.getOrder());
 						
-						entityType.getAttributes().add(iea);
+						if (canadd) {
+							attributeMapping.put(attributeItem.getUuid(), ia);
+							
+							IntelEntityTypeAttribute iea = new IntelEntityTypeAttribute();
+							iea.setAttribute(ia);
+							iea.setDuplicateCheck(false);
+							iea.setEntityType(entityType);
+							if (attributeItem.isPrimary()) {
+								iea.setAttributeGroup(primaryGroup);
+							}
+							iea.setOrder(attributeItem.getOrder());
+							
+							entityType.getAttributes().add(iea);
+						}
 					}
 				}
 			}
 
 		}
-		
+		session.flush();
 		if (item.getType() == Type.FIXED) {
 			//add a position attribute
 			IntelAttribute position = findPositionAttribute(session, ca);
@@ -517,7 +531,7 @@ public class EntityMigrationJob implements IRunnableWithProgress {
 			entityType.getAttributes().add(eposition);
 					
 		}
-		
+		session.flush();
 		//re-sort attribute
 		int order = 1;
 		for (IntelEntityTypeAttribute ia : entityType.getAttributes()) {
