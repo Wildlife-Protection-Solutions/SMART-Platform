@@ -30,6 +30,7 @@ Require-Bundle: org.eclipse.ui.workbench,
  org.eclipse.zest.core;bundle-version="1.5.300",
  org.eclipse.zest.layouts;bundle-version="1.1.300"
 Export-Package: org.wcs.smart.i2,
+ org.wcs.smart.i2.birt,
  org.wcs.smart.i2.event,
  org.wcs.smart.i2.model,
  org.wcs.smart.i2.search,

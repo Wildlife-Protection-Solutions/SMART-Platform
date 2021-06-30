@@ -49,6 +49,7 @@ public class Messages extends NLS {
 	public static String EntityMigrationJob_StatusName;
 	public static String EntityMigrationJob_SubTask;
 	public static String EntityMigrationJob_TaskName;
+	public static String EntityMigrationJob_templatesubtask;
 	public static String EntityMigrationJob_WarningListItemAdded;
 	public static String EntityMigrationJob_WarningMsg;
 	public static String EntityMigrationJob_WarningTitle;

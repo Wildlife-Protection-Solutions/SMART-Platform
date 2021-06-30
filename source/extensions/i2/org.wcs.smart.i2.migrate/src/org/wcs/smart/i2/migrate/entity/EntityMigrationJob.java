@@ -51,6 +51,8 @@ import org.wcs.smart.filter.Operator;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.i2.birt.IntelReportManager;
+import org.wcs.smart.i2.migrate.MigratePlugin;
 import org.wcs.smart.i2.migrate.entity.EntityItem.Status;
 import org.wcs.smart.i2.migrate.entity.EntityTypeItem.Type;
 import org.wcs.smart.i2.migrate.internal.Messages;
@@ -111,7 +113,7 @@ public class EntityMigrationJob implements IRunnableWithProgress {
 	@Override
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 	
-		monitor.beginTask(Messages.EntityMigrationJob_TaskName, mappings.size() + 2);
+		monitor.beginTask(Messages.EntityMigrationJob_TaskName, mappings.size()*2 + 2);
 		idAttribute = new HashMap<>();
 		positionAttribute = new HashMap<>();
 		statusAttribute = new HashMap<>();
@@ -149,9 +151,11 @@ public class EntityMigrationJob implements IRunnableWithProgress {
 					throw new InterruptedException();
 					
 				}
+				
+				session.flush();
+				
 				monitor.worked(1);
 				session.getTransaction().commit();
-				monitor.worked(1);
 			}catch (InterruptedException ex) {
 				session.getTransaction().rollback();
 				throw ex;
@@ -161,6 +165,28 @@ public class EntityMigrationJob implements IRunnableWithProgress {
 			}
 		}
 
+		//create BIRT templates
+		try(Session session = HibernateManager.openSession()){
+			session.beginTransaction();
+			try {
+				for (IntelEntityType type : newTypes) {
+					
+					monitor.subTask(MessageFormat.format(Messages.EntityMigrationJob_templatesubtask, type.getName() ) );
+					try {
+						type = session.get(IntelEntityType.class, type.getUuid());
+						IntelReportManager.INSTANCE.generateTemplate(type);
+						monitor.worked(1);
+					}catch (Exception ex) {
+						MigratePlugin.log(ex.getMessage(), ex);
+					}
+				}
+				session.getTransaction().commit();
+			}catch (Exception ex) {
+				session.getTransaction().rollback();
+				MigratePlugin.log(ex.getMessage(), ex);
+			}
+		}
+		monitor.worked(1);
 		return;
 	}
 	
@@ -677,6 +703,7 @@ public class EntityMigrationJob implements IRunnableWithProgress {
 		ia.setType(AttributeType.TEXT);
 		ia.updateName(ca.getDefaultLanguage(), Messages.EntityMigrationJob_IDName);
 		ia.updateName(SmartDB.getCurrentLanguage(), Messages.EntityMigrationJob_IDName);
+		ia.setName(Messages.EntityMigrationJob_IDName);
 		
 		session.save(ia);
 		
@@ -720,6 +747,7 @@ public class EntityMigrationJob implements IRunnableWithProgress {
 		ia.setType(AttributeType.POSITION);
 		ia.updateName(ca.getDefaultLanguage(), Messages.EntityMigrationJob_PositionName);
 		ia.updateName(SmartDB.getCurrentLanguage(), Messages.EntityMigrationJob_PositionName);
+		ia.setName(Messages.EntityMigrationJob_PositionName);
 		
 		session.save(ia);
 		positionAttribute.put(ca.getUuid(), ia);
@@ -772,12 +800,14 @@ public class EntityMigrationJob implements IRunnableWithProgress {
 		ia.setType(AttributeType.LIST);
 		ia.updateName(ca.getDefaultLanguage(), Messages.EntityMigrationJob_StatusName);
 		ia.updateName(SmartDB.getCurrentLanguage(), Messages.EntityMigrationJob_StatusName);
+		ia.setName(Messages.EntityMigrationJob_StatusName);
 		ia.setAttributeList(new ArrayList<>());
 		
 		IntelAttributeListItem active = new IntelAttributeListItem();
 		active.setKeyId(Status.ACTIVE.name().toLowerCase());
 		active.updateName(ca.getDefaultLanguage(), Messages.EntityMigrationJob_ActiveName);
 		active.updateName(SmartDB.getCurrentLanguage(), Messages.EntityMigrationJob_ActiveName);
+		active.setName(Messages.EntityMigrationJob_ActiveName);
 		active.setAttribute(ia);
 		ia.getAttributeList().add(active);
 		
@@ -785,6 +815,7 @@ public class EntityMigrationJob implements IRunnableWithProgress {
 		inactive.setKeyId(Status.INACTIVE.name().toLowerCase());
 		inactive.updateName(ca.getDefaultLanguage(), Messages.EntityMigrationJob_InactiveName);
 		inactive.updateName(SmartDB.getCurrentLanguage(), Messages.EntityMigrationJob_InactiveName);
+		inactive.setName(Messages.EntityMigrationJob_InactiveName);
 		inactive.setAttribute(ia);
 		ia.getAttributeList().add(inactive);
 		
