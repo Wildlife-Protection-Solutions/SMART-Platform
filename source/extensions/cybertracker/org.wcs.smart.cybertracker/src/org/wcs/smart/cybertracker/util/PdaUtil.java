@@ -69,12 +69,13 @@ public class PdaUtil {
 		if (!Files.exists(folder)) SmartUtils.createDirectory(folder);
 
 
-//		WinRegistry.writeStringValue(WinRegistry.HKEY_CURRENT_USER, ICyberTrackerConstants.REG_KEY_PATH,
-//				getRegistryKey(ca), folder.getCanonicalPath());
+		WinRegistry.writeStringValue(WinRegistry.HKEY_CURRENT_USER, ICyberTrackerConstants.REG_KEY_PATH,
+				getRegistryKey(ca), folder.toAbsolutePath().normalize().toString());
 	}
 
 	public static void deleteRegistryKey(ConservationArea ca) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-//		WinRegistry.deleteValue(WinRegistry.HKEY_CURRENT_USER, ICyberTrackerConstants.REG_KEY_PATH, getRegistryKey(ca));
+		WinRegistry.deleteValue(WinRegistry.HKEY_CURRENT_USER, ICyberTrackerConstants.REG_KEY_PATH, 
+				getRegistryKey(ca));
 	}
 	
 	public static int uploadPda(Path file) throws Exception {
