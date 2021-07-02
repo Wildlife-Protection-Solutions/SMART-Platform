@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Asset Query Report PlugIn
 Bundle-SymbolicName: org.wcs.smart.asset.query.report;singleton:=true
-Bundle-Version: 7.0.3.qualifier
+Bundle-Version: 7.0.4.qualifier
 Bundle-Activator: org.wcs.smart.asset.report.query.AssetQueryReportPlugIn
 Require-Bundle: org.wcs.smart.asset.query;bundle-version="[7.0.0,8.0.0)",
  org.wcs.smart.report;bundle-version="[7.0.0,8.0.0)",

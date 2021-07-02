@@ -6,13 +6,13 @@
 	<parent>
 		<groupId>org.wcs.smart</groupId>
 		<artifactId>smart-tycho</artifactId>
-		<version>7.0.3-SNAPSHOT</version>
+		<version>7.0.4-SNAPSHOT</version>
 		<relativePath>../../../java</relativePath>
 	</parent>
 	
 	<name>Ecologicial Records Demo Data Generator</name>
 	<artifactId>org.wcs.smart.datagenerator.er</artifactId>
   	<packaging>eclipse-plugin</packaging>
-	<version>7.0.3-SNAPSHOT</version>
+	<version>7.0.4-SNAPSHOT</version>
 	
 </project>

@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.wcs.smart</groupId>
     <artifactId>smart-tycho</artifactId>
-    <version>7.0.3-SNAPSHOT</version>
+    <version>7.0.4-SNAPSHOT</version>
   </parent>
 
   <artifactId>org.wcs.smart.birt.feature</artifactId>

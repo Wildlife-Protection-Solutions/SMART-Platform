@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.wcs.smart.core</groupId>
 		<artifactId>smart</artifactId>
-		<version>7.0.3-SNAPSHOT</version>
+		<version>7.0.4-SNAPSHOT</version>
 		<relativePath>../pom-shared.xml</relativePath>
 	</parent>
 

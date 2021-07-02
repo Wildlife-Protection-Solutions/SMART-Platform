@@ -5,12 +5,12 @@
 	<parent>
 		<groupId>org.wcs.smart</groupId>
 		<artifactId>smart-tycho</artifactId>
-		<version>7.0.3-SNAPSHOT</version>
+		<version>7.0.4-SNAPSHOT</version>
 	</parent>
 	
 	<name>SMART Observation Query Report Module</name>
 	<artifactId>org.wcs.smart.observation.query.report</artifactId>
   	<packaging>eclipse-plugin</packaging>
-	<version>7.0.3-SNAPSHOT</version>
+	<version>7.0.4-SNAPSHOT</version>
 
 </project>

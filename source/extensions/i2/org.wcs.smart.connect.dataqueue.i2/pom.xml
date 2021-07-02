@@ -6,13 +6,13 @@
 	<parent>
 		<groupId>org.wcs.smart</groupId>
 		<artifactId>smart-tycho</artifactId>
-		<version>7.0.3-SNAPSHOT</version>
+		<version>7.0.4-SNAPSHOT</version>
 		<relativePath>../../../java</relativePath>
 	</parent>
 	
 	<name>SMART Connect Advanced Intelligence Data Queue Module</name>
 	<artifactId>org.wcs.smart.connect.dataqueue.i2</artifactId>
   	<packaging>eclipse-plugin</packaging>
-	<version>7.0.3-SNAPSHOT</version>
+	<version>7.0.4-SNAPSHOT</version>
 	
 </project>

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Independent Incident Data Queue Processor
 Bundle-SymbolicName: org.wcs.smart.connect.dataqueue.cybertracker;singleton:=true
-Bundle-Version: 7.0.3.qualifier
+Bundle-Version: 7.0.4.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Require-Bundle: org.wcs.smart.connect.dataqueue;bundle-version="[7.0.0,8.0.0)",
  org.wcs.smart.connect.cybertracker;bundle-version="[7.0.0,8.0.0)",
