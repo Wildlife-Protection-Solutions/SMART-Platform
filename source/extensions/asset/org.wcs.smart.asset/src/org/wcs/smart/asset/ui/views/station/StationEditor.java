@@ -137,7 +137,8 @@ public class StationEditor extends EditorPart implements MapPart {
 	private IPartListener2 partlistener = new IPartListener2(){
         public void partActivated( IWorkbenchPartReference partRef ) {
             if (partRef.getPart(false) == StationEditor.this && getMap() != ApplicationGIS.NO_MAP) {
-            	if (!currentPage.getMapViewer().getControl().isDisposed()) {
+            	if (currentPage.getMapViewer() != null && currentPage.getMapViewer().getControl() != null &&
+            			!currentPage.getMapViewer().getControl().isDisposed()) {
             		IToolManager toolManager = ApplicationGIS.getToolManager();
             		toolManager.setCurrentEditor( StationEditor.this );
             	}
