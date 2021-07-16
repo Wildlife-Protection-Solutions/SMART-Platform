@@ -73,7 +73,6 @@ public class ConnectRESTApplication extends Application {
 		resources.add(DataApi.class);
 		resources.add(DataQueue.class);
 		resources.add(DesktopUser.class);
-		resources.add(GlobalForestWatchApi.class);
 		resources.add(QueryApi.class);
 		resources.add(QueryTypeApi.class);
 		resources.add(QuicklinkApi.class);

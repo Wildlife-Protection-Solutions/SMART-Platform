@@ -21,19 +21,14 @@
  */
 package org.wcs.smart.connect.apache;
 
-import java.io.IOException;
 import java.nio.file.DirectoryStream;
-import java.nio.file.FileVisitResult;
-import java.nio.file.FileVisitor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -55,7 +50,6 @@ import org.wcs.smart.cipher.EncryptUtils;
 import org.wcs.smart.connect.api.DataQueue;
 import org.wcs.smart.connect.api.ReportApi;
 import org.wcs.smart.connect.api.Uploader;
-import org.wcs.smart.connect.api.noa.GlobalForestWatchNoa;
 import org.wcs.smart.connect.dataqueue.ServerDataQueueItem;
 import org.wcs.smart.connect.datastore.DataStoreManager;
 import org.wcs.smart.connect.hibernate.HibernateManager;
@@ -166,10 +160,7 @@ public class CleanUpJob implements Runnable {
 			
 			//clean up temporary tables
 			cleanupQueryTempTables(s);
-			
-			//clean up gfw files logged
-			cleanUpGlobalForestWatchFiles();
-			
+						
 			//clean up tile image cache
 			cleanUpTileImageCache(s);
 		}
@@ -357,56 +348,6 @@ public class CleanUpJob implements Runnable {
 		}
 	}
 
-	/**
-	 * Clean up items in the change log table.
-	 * @param session
-	 */
-	private void cleanUpGlobalForestWatchFiles(){
-		if (gfwCleanUpDays == null || gfwCleanUpDays <= 0) return;
-		
-		Path gfwPath = DataStoreManager.INSTANCE.getRootDirectory().resolve(GlobalForestWatchNoa.LOG_DIRECTORY);
-		if (!Files.exists(gfwPath)) return;
-		
-		
-		LocalDateTime lastDate = LocalDateTime.now().minusDays(gfwCleanUpDays);
-		DateTimeFormatter df = DateTimeFormatter.ofPattern(GlobalForestWatchNoa.DATE_FORMAT);
-		try {
-			Files.walkFileTree(gfwPath, new FileVisitor<Path>() {
-					@Override
-					public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-						String fileName = file.getFileName().toString();
-						int firstIndex = fileName.indexOf('.');
-						int lastIndex = fileName.indexOf('.', firstIndex+1);
-						if (firstIndex < 0 || lastIndex < 0)  return null;
-						
-						String datetime = fileName.substring(firstIndex+1, lastIndex);
-						try {
-							LocalDateTime dd = LocalDateTime.parse(datetime, df);
-							if (dd.isBefore(lastDate)) {
-								Files.delete(file);
-							}
-						}catch (Exception ex) {
-							logger.log(Level.WARNING,  "Error cleaning up gfw directory: " + ex.getMessage(), ex); //$NON-NLS-1$
-						}
-						return FileVisitResult.CONTINUE;
-					}
-
-					@Override
-					public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-						return FileVisitResult.CONTINUE;
-					}
-					@Override
-					public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
-						return FileVisitResult.CONTINUE;
-					}
-					@Override
-					public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-						return FileVisitResult.CONTINUE;
-				}});
-		} catch (IOException ex) {
-			logger.log(Level.WARNING,  "Error cleaning up gfw directory: " + ex.getMessage(), ex); //$NON-NLS-1$
-		}
-	}
 	
 	/*
 	 * delete items from the data queue table and associated files

@@ -1064,6 +1064,7 @@ update connect.ca_plugin_version set version = '7.0.0' where plugin_id = 'org.wc
 update connect.connect_version set version = '7.0.0', last_updated = now();		
 --update connect.connect_version set filestore_version = '7.0.0';
 
+drop table connect.gfw;
 
 ---- change ca version so users cannot sync with this and cause problems ---- 
 update connect.ca_info SET version = uuid_generate_v4();

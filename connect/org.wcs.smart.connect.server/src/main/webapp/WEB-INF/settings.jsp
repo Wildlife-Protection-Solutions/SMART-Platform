@@ -144,35 +144,6 @@
 	</form>
 </div>
 
-<!-- Global Forest Watch -->
-<div class="settingsTable">
-	<div class="block settings-header"><fmt:message key="settings.gfwtable.sectionname"/></div>
-	<button class="button top-spacer" id="btnNewGFW"><fmt:message key="settings.gfwtable.newbutton"/></button>
-	<table id="gfwtable" class="top-spacer smart-table">
-  	<tr class="table-row smart-table-header">
-			<th class="table-cell smart-table-cell"><fmt:message key="settings.gfwtable.alerttype"/></th>
-			<th class="table-cell smart-table-cell"><fmt:message key="settings.gfwtable.alertlevel"/></th>
-			<th class="table-cell smart-table-cell"><fmt:message key="settings.gfwtable.webhook"/></th>
-			<th class="table-cell smart-table-cell"><fmt:message key="settings.gfwtable.datapush"/></th>
-			<th class="table-cell smart-table-cell"><fmt:message key="settings.style.actions" /></th>
-	</tr>
-	</table>
-	<br>
-	<div class="infomessage msgsection" style="display:block;">
-<p><fmt:message key="settings.gfwinstructions1"/></p>
-<ol>
-  <li><fmt:message key="settings.gfwinstructions2"/><a href="https://www.globalforestwatch.org">https://www.globalforestwatch.org</a></li>
-  <li><fmt:message key="settings.gfwinstructions3"/></li>
-  <li><fmt:message key="settings.gfwinstructions4"/></li>
-  <li><fmt:message key="settings.gfwinstructions5"/></li>
-  <li><fmt:message key="settings.gfwinstructions6"/></li>
-  <li><fmt:message key="settings.gfwinstructions7"/></li>
-  </ol>
-<p><fmt:message key="settings.gfwinstructions8"/></p>
-</div>
-</div>
-
-
 <div class="settingsTable">
 	<div class="block settings-header"><fmt:message key="settings.styleconfigurationheader" /></div>
 	<button class="button top-spacer" id="btnNewStyleConfiguration"><fmt:message key="settings.addnewstyleconfiguration" /></button>

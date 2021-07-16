@@ -2023,16 +2023,6 @@ CREATE TABLE connect.data_queue (
     PRIMARY KEY (uuid)
 );
 
-CREATE TABLE connect.gfw (
-    uuid uuid NOT NULL,
-    alert_uuid uuid NOT NULL,
-    last_data timestamp without time zone,
-    creator_uuid uuid NOT NULL,
-    level smallint NOT NULL,
-    PRIMARY KEY (uuid)
-);
-
-
 CREATE TABLE connect.map_layers (
     uuid uuid NOT NULL,
     active boolean NOT NULL,
@@ -4790,8 +4780,6 @@ ALTER TABLE ONLY connect.ct_package ADD CONSTRAINT ct_package_ca_uuid_fkey FOREI
 ALTER TABLE ONLY connect.data_queue ADD CONSTRAINT data_queue_ca_uuid_fk FOREIGN KEY (ca_uuid) REFERENCES connect.ca_info(ca_uuid) ON UPDATE RESTRICT ON DELETE CASCADE;
 ALTER TABLE ONLY connect.users_default_dashboard ADD CONSTRAINT default_dashboard_dashboard_fk FOREIGN KEY (dashboard_uuid) REFERENCES connect.dashboards(uuid) ON DELETE CASCADE DEFERRABLE;
 ALTER TABLE ONLY connect.users_default_dashboard ADD CONSTRAINT default_dashboard_user_fk FOREIGN KEY (user_uuid) REFERENCES connect.users(uuid) ON DELETE CASCADE DEFERRABLE;
-ALTER TABLE ONLY connect.gfw ADD CONSTRAINT gfw_alert_uuid_fkey FOREIGN KEY (alert_uuid) REFERENCES connect.alert_types(uuid);
-ALTER TABLE ONLY connect.gfw ADD CONSTRAINT gfw_creator_uuid_fkey FOREIGN KEY (creator_uuid) REFERENCES connect.users(uuid);
 ALTER TABLE ONLY connect.quicklinks ADD CONSTRAINT quicklink_user_fk FOREIGN KEY (created_by_user_uuid) REFERENCES connect.users(uuid) ON DELETE CASCADE DEFERRABLE;
 ALTER TABLE ONLY connect.user_quicklinks ADD CONSTRAINT quicklink_user_fk FOREIGN KEY (user_uuid) REFERENCES connect.users(uuid) ON DELETE CASCADE DEFERRABLE;
 ALTER TABLE ONLY connect.role_actions ADD CONSTRAINT role_actions_role_id_fkey FOREIGN KEY (role_id) REFERENCES connect.roles(role_id) ON UPDATE CASCADE ON DELETE CASCADE;
