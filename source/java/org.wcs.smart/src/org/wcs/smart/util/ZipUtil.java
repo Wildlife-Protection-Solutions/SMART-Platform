@@ -261,7 +261,7 @@ public class ZipUtil {
     			 String content = item[1];
         		 ZipEntry zipEntry = new ZipEntry(fname); 
     	         tOut.putNextEntry(zipEntry);
-    	         fOut.write(content.getBytes(StandardCharsets.UTF_8));
+    	         tOut.write(content.getBytes(StandardCharsets.UTF_8));
     	         tOut.closeEntry();
     		 }
 

@@ -21,7 +21,13 @@
  */
 package org.wcs.smart.connect.api;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.text.MessageFormat;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,11 +35,16 @@ import java.util.logging.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.type.PostgresUUIDType;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.datastore.DataStoreManager;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
+import org.wcs.smart.connect.model.CyberTrackerNavigationLayer;
+import org.wcs.smart.connect.model.CyberTrackerPackage;
+import org.wcs.smart.connect.model.WorkItem;
 import org.wcs.smart.connect.query.QueryManager;
 import org.wcs.smart.connect.uploader.sync.ChangeLogManager;
+import org.wcs.smart.hibernate.QueryFactory;
 
 /**
  * Job to delete a Conservation Area.  This has a lock so only
@@ -65,9 +76,12 @@ public class DeleteCaJob implements Runnable {
 	@Override
 	public void run() {
 		synchronized (LOCK) {
+			
 			try(Session session = factory.openSession()){
 				session.beginTransaction();
 				try {
+					Set<Path> filesToDelete = new HashSet<>();
+					
 					UUID caUuidToDelete = serverDelete.getUuid();
 					serverDelete = (ConservationAreaInfo) session.get(ConservationAreaInfo.class, caUuidToDelete);
 					if (serverDelete == null) {
@@ -79,6 +93,36 @@ public class DeleteCaJob implements Runnable {
 					if (deleteAll){
 						// delete query actions associated with any query from the CA being deleted
 						QueryManager.INSTANCE.removeAccessToQueriesFromCa(serverDelete.getUuid(), session);
+						
+						ConservationArea ca = session.get(ConservationArea.class, serverDelete.getUuid());
+
+						//package files 
+						List<CyberTrackerNavigationLayer> navlayers = QueryFactory.buildQuery(session, CyberTrackerNavigationLayer.class, 
+								new Object[] {"conservationArea", ca}).list();
+						for (CyberTrackerNavigationLayer layer : navlayers) {
+							java.nio.file.Path toDelete = DataStoreManager.INSTANCE.getRootDirectory()
+									.resolve(CyberTracker.CT_NAVIGATION_DATASTORE_LOCATION).resolve(layer.getFilename());
+							filesToDelete.add(toDelete);
+						}
+						
+						List<CyberTrackerPackage> ctpackages = QueryFactory.buildQuery(session, CyberTrackerPackage.class, 
+								new Object[] {"conservationArea", ca}).list();
+						for (CyberTrackerPackage layer : ctpackages) {
+							java.nio.file.Path toDelete = DataStoreManager.INSTANCE.getRootDirectory()
+									.resolve(CyberTracker.CT_PACKAGE_DATASTORE_LOCATION).resolve(layer.getFilename());
+							filesToDelete.add(toDelete);
+						}
+						
+						//workitem files
+						List<WorkItem> workitems = QueryFactory.buildQuery(session, WorkItem.class, 
+								new Object[] {"conservationAreaInfo", serverDelete}).list();
+						for (WorkItem workitem : workitems) {
+							if (workitem.getLocalFilename() != null && !workitem.getLocalFilename().isEmpty()) {
+								java.nio.file.Path toDelete = DataStoreManager.INSTANCE.getFile(workitem.getLocalFilename());
+								filesToDelete.add(toDelete);
+							}
+						}
+				
 					}
 	
 					//disable change tracking while we delete the Conservation Area
@@ -114,6 +158,15 @@ public class DeleteCaJob implements Runnable {
 						
 					session.getTransaction().commit();
 					
+					for (Path toDelete : filesToDelete) {
+						if (Files.exists(toDelete)) {
+							try {
+								Files.delete(toDelete);
+							}catch (Exception ex) {
+								logger.warning(MessageFormat.format("Could not delete file: {0}", toDelete.toString()));  //$NON-NLS-1$
+							}
+						}
+					}
 					//delete all ca data and findstore
 					try{
 						DataStoreManager.INSTANCE.deleteDirectory(caUuidToDelete);

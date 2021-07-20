@@ -560,13 +560,6 @@ public class CyberTracker extends HttpServlet{
 				if (!ctpackage.getConservationArea().equals(cainfo)) {
 					throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("CyberTracker.PackageExistsError", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 				}
-				
-				//delete file
-				java.nio.file.Path toDelete = DataStoreManager.INSTANCE.getRootDirectory()
-						.resolve(CT_PACKAGE_DATASTORE_LOCATION).resolve(ctpackage.getFilename());
-				if (Files.exists(toDelete)) {
-					Files.delete(toDelete);	
-				}
 			}
 			ctpackage.setType(proxy.getType());
 
@@ -585,6 +578,13 @@ public class CyberTracker extends HttpServlet{
 			sb.append(".zip"); //$NON-NLS-1$
 			ctpackage.setFilename(sb.toString());
 			s.saveOrUpdate(ctpackage);
+			
+			//delete file
+			java.nio.file.Path toDelete = DataStoreManager.INSTANCE.getRootDirectory()
+					.resolve(CT_PACKAGE_DATASTORE_LOCATION).resolve(ctpackage.getFilename());
+			if (Files.exists(toDelete)) {
+				Files.delete(toDelete);	
+			}
 			
 			WorkItem up = new WorkItem();
 			up.setLocale(request.getLocale());
@@ -703,14 +703,8 @@ public class CyberTracker extends HttpServlet{
 				if (!ctpackage.getConservationArea().equals(cainfo)) {
 					throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("CyberTracker.PackageExistsError", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 				}
-				
-				//delete file
-				java.nio.file.Path toDelete = DataStoreManager.INSTANCE.getRootDirectory()
-						.resolve(CT_NAVIGATION_DATASTORE_LOCATION).resolve(ctpackage.getFilename());
-				if (Files.exists(toDelete)) {
-					Files.delete(toDelete);	
-				}
 			}
+
 			
 			java.nio.file.Path upDir =  DataStoreManager.INSTANCE.getRootDirectory().resolve(CT_NAVIGATION_DATASTORE_LOCATION);
 			if (!Files.exists(upDir)) Files.createDirectories(upDir);
@@ -726,6 +720,13 @@ public class CyberTracker extends HttpServlet{
 			sb.append(".zip"); //$NON-NLS-1$
 			ctpackage.setFilename(sb.toString());
 			s.saveOrUpdate(ctpackage);
+			
+			//delete any existing file
+			java.nio.file.Path toDelete = DataStoreManager.INSTANCE.getRootDirectory()
+					.resolve(CT_NAVIGATION_DATASTORE_LOCATION).resolve(ctpackage.getFilename());
+			if (Files.exists(toDelete)) {
+				Files.delete(toDelete);	
+			}
 			
 			WorkItem up = new WorkItem();
 			up.setLocale(request.getLocale());

@@ -167,6 +167,7 @@ public class BrowserView {
 				}
 			}	
 		});
+		btnOpen.setEnabled(false);
 		
 		browser = new Browser(all, SWT.NONE);
 		browser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -191,6 +192,7 @@ public class BrowserView {
 			
 			@Override
 			public void changed(ProgressEvent event) {
+				btnOpen.setEnabled(!browser.getUrl().toLowerCase().startsWith("about")); //$NON-NLS-1$
 				if (event.total == 0) return;
 				if (event.total == event.current) return;
 				if (btnRefresh.isDisposed()) return;
