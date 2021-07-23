@@ -64,6 +64,41 @@
 					-->
                 </configuration>
             </plugin>
+  
+            <plugin>
+                <groupId>io.openapitools.swagger</groupId>
+                <artifactId>swagger-maven-plugin</artifactId>
+               
+                <executions>
+                    <execution>
+                    	<id>generate-core-api</id>
+                        <goals><goal>generate</goal></goals>
+                         <configuration>
+                             <resourcePackages>
+                                 <resourcePackage>org.wcs.smart.connect.api</resourcePackage>
+                            </resourcePackages>
+                            <outputDirectory>${basedir}/swagger/</outputDirectory>
+                            <outputFilename>smartconnect-api-${project.version}</outputFilename>
+                            <outputFormats>YAML</outputFormats>
+                            <prettyPrint>true</prettyPrint>
+                        </configuration>
+                    </execution>
+                    
+                    <execution>
+                    	<id>generate-noa-api</id>
+                        <goals><goal>generate</goal></goals>
+                        <configuration>
+                            <resourcePackages>
+                                <resourcePackage>org.wcs.smart.connect.api.noa</resourcePackage>
+                            </resourcePackages>
+                            <outputDirectory>${basedir}/swagger/</outputDirectory>
+                            <outputFilename>smartconnect-noa-${project.version}</outputFilename>
+                            <outputFormats>YAML</outputFormats>
+                            <prettyPrint>true</prettyPrint>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
            
         </plugins>
     </build>

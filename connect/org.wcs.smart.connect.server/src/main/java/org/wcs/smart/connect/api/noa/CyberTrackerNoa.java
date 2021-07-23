@@ -68,6 +68,7 @@ import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.Alert;
+import org.wcs.smart.connect.model.AlertType;
 import org.wcs.smart.connect.model.CyberTrackerApiKey;
 import org.wcs.smart.connect.model.CyberTrackerNavigationLayer;
 import org.wcs.smart.connect.model.CyberTrackerPackage;
@@ -189,8 +190,9 @@ public class CyberTrackerNoa {
     @Path("packages/")
 	@Produces({ MediaType.APPLICATION_JSON })
 	@Operation(description = "Gets the details about all SMART Mobile packages authorized by the api key.",
-			security = {@SecurityRequirement(name="apikeyheader"), @SecurityRequirement(name="apikeyquery")})
-	@ApiResponse(responseCode = "200", description = "OK", content = {@Content(array = @ArraySchema(arraySchema = @Schema(implementation=CyberTrackerPackageProxy.class)))})
+			security = {@SecurityRequirement(name="apikeyheader"), 
+					@SecurityRequirement(name="apikeyquery")})
+	@ApiResponse(responseCode = "200", description = "OK",  content = {@Content(array = @ArraySchema(schema = @Schema(implementation=CyberTrackerPackageProxy.class)))})
 	@ApiResponse(responseCode = "401", description = "Invalid authorization credientials")
 	public List<CyberTrackerPackageProxy> getPackages( ){
 		
@@ -285,8 +287,9 @@ public class CyberTrackerNoa {
     @Path("navigation/")
 	@Produces({ MediaType.APPLICATION_JSON })
 	@Operation(description = "Gets the details about all SMART Mobile navigation layers authorized by the api key.",
-			security = {@SecurityRequirement(name="apikeyheader"), @SecurityRequirement(name="apikeyquery")})
-	@ApiResponse(responseCode = "200", description = "OK", content = {@Content(array = @ArraySchema(arraySchema = @Schema(implementation=CyberTrackerPackageProxy.class)))})
+			security = {@SecurityRequirement(name="apikeyheader"), 
+					@SecurityRequirement(name="apikeyquery")})
+	@ApiResponse(responseCode = "200", description = "OK", content = {@Content(array = @ArraySchema(schema = @Schema(implementation=CyberTrackerNavigationProxy.class)))})
 	@ApiResponse(responseCode = "401", description = "Invalid authorization credientials")
 	public List<CyberTrackerNavigationProxy> getNavigationLayers( ){
 		
@@ -313,7 +316,8 @@ public class CyberTrackerNoa {
 	@GET
     @Path("navigation/{uuid}")
 	@Operation(description = "Gets the entire Navigation layer as a zip file.",
-			security = {@SecurityRequirement(name="apikeyheader"), @SecurityRequirement(name="apikeyquery")})
+			security = {@SecurityRequirement(name="apikeyheader"), 
+					@SecurityRequirement(name="apikeyquery")})
 	@ApiResponse(responseCode = "200", description="Data returned successfully")
 	@ApiResponse(responseCode = "401", description = "Invalid authorization credientials")
 	@ApiResponse(responseCode = "404", description = "Requested navigation layer not found")

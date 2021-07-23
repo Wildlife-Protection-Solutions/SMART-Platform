@@ -90,7 +90,7 @@ public class SmartCollectNoa {
     @Path("packages/")
 	@Produces({ MediaType.APPLICATION_JSON })
 	@Operation(description = "Gets the details about all SMART Collect packages on this server.")
-	@ApiResponse(responseCode = "200", description = "OK", content = {@Content(array = @ArraySchema(arraySchema = @Schema(implementation=CyberTrackerPackageProxy.class)))})
+	@ApiResponse(responseCode = "200", description = "OK", content = {@Content(array = @ArraySchema(schema = @Schema(implementation=CyberTrackerPackageProxy.class)))})
 	public List<CyberTrackerPackageProxy> getPackages( ){
 		
 		Session s = HibernateManager.getSession(context);

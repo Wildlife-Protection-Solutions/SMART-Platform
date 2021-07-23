@@ -145,7 +145,8 @@ public class ConnectAlert extends HttpServlet {
 	@GET
     @Path("/alertTypes/")
 	@Operation(description = "Lists all alert types configured in SMART Connect")
-	@ApiResponse(responseCode = "200", description = "OK", content = {@Content(array = @ArraySchema(schema = @Schema(implementation=AlertType.class)))})
+	@ApiResponse(responseCode = "200", description = "OK", 
+		content = {@Content(array = @ArraySchema(schema = @Schema(implementation=AlertType.class)))})
     public List<AlertType> getAlertTypes(){
 		validateUser(AlertAction.VIEW_ALERTS_KEY);
 		Session s = HibernateManager.getSession(context);
