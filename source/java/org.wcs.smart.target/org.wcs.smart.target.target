@@ -122,7 +122,7 @@
 		    <unit id="org.eclipse.babel.nls_birt_zh.feature.group" version="4.5.0.v20171231064042"/>
 	    </location>
 	    <location includeAllPlatforms="true" includeConfigurePhase="true" includeMode="slicer" includeSource="true" type="InstallableUnit">
-		    <repository location="https://download.eclipse.org/technology/babel/update-site/R0.18.3/2020-12/"/>
+		    <repository location="https://archive.eclipse.org/technology/babel/update-site/R0.18.3/2020-12/"/>
 		    <unit id="org.eclipse.babel.nls_datatools_ar.feature.group" version="4.18.0.v20210327075149"/>
 		    <unit id="org.eclipse.babel.nls_datatools_es.feature.group" version="4.18.0.v20210327075149"/>
 		    <unit id="org.eclipse.babel.nls_datatools_fr.feature.group" version="4.18.0.v20210327075149"/>
