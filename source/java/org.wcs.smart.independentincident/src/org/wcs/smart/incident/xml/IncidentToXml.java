@@ -59,6 +59,7 @@ public class IncidentToXml {
 		wt.setId(incident.getId());
 		wt.setX(incident.getX());
 		wt.setY(incident.getY());
+		wt.setType(incident.getSourceId());
 		
 		for (WaypointAttachment attach : incident.getAttachments()){
 			AttachmentType xmlattach = new AttachmentType();

@@ -35,8 +35,12 @@ public class IncidentLabelProvider implements IIncidentLabelProvider {
 	
 	@Override
 	public String getLabel(Object item, Locale l) {
-		if (item instanceof IndepedentIncidentSource){
+		if (item instanceof IndepedentIncidentSource ){
 			 return Messages.IndepedentIncidentSource_IndIncidentWaypointsourceName;
+		}
+		
+		if (item instanceof IntegrateIncidentSource ){
+			 return Messages.IncidentLabelProvider_SmartIntegrateIncident;
 		}
 		
 		if (item == IncidentJsonFeatureProcessor.Messages.COMPLETE_MSG) return Messages.IncidentLabelProvider_jsonloaded;

@@ -144,6 +144,7 @@ public class Messages extends NLS {
 	public static String IncidentLabelProvider_invaliddatatype;
 	public static String IncidentLabelProvider_invalidfeaturetype;
 	public static String IncidentLabelProvider_jsonloaded;
+	public static String IncidentLabelProvider_SmartIntegrateIncident;
 	public static String IncidentManager_IncidentTooOldToEdit;
 	public static String IncidentManager_Insufficientprivleges;
 	public static String IncidentMapLayer_IncidentPositionName;
@@ -180,6 +181,7 @@ public class Messages extends NLS {
 	public static String IncidentSummaryPage_EditButtonName;
 	public static String IncidentSummaryPage_EmployeeLoadJobName;
 	public static String IncidentSummaryPage_IdLabel;
+	public static String IncidentSummaryPage_IncidentSourceField;
 	public static String IncidentSummaryPage_LastModified1;
 	public static String IncidentSummaryPage_LastModified2;
 	public static String IncidentSummaryPage_LocationLabel;

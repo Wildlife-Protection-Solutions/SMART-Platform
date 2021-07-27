@@ -36,6 +36,10 @@
             class="org.wcs.smart.incident.IndepedentIncidentSource"
             ui_provider="org.wcs.smart.incident.ui.IndIncidentSourceUiProvider">
       </ObservationSource>
+      <ObservationSource
+            class="org.wcs.smart.incident.IntegrateIncidentSource"
+            ui_provider="org.wcs.smart.incident.ui.IntegrateIncidentSourceUiProvider">
+      </ObservationSource>
    </extension>
    <extension
          point="org.eclipse.ui.menus">
@@ -815,6 +819,9 @@
          point="org.wcs.smart.independentincident.provider">
       <incidentprovider
             class="org.wcs.smart.incident.IndependentIncidentProvider">
+      </incidentprovider>
+      <incidentprovider
+            class="org.wcs.smart.incident.IntegrateIncidentProvider">
       </incidentprovider>
    </extension>
    <extension

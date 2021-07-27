@@ -5,28 +5,29 @@ xmlns:tns="http://www.smartconservationsoftware.org/xml/2.2/independentincident"
 elementFormDefault="qualified">
 
  <complexType name="WaypointType">
-    	<sequence>
-    		<element name="direction" type="float" maxOccurs="1"
-    			minOccurs="0">
-    		</element>
-    		<element name="distance" type="float" maxOccurs="1"
-    			minOccurs="0">
-    		</element>
-    		<element name="comment" type="string" maxOccurs="1"
-    			minOccurs="0">
-    		</element>
-    		<element name="attachments" type="tns:AttachmentType"
-    			maxOccurs="unbounded" minOccurs="0">
-    		</element>
-    		<element name="groups"
-    			type="tns:WaypointObservationGroupType" maxOccurs="unbounded" minOccurs="0">
-    		</element>
-    	</sequence>
-    	<attribute name="id" type="string"></attribute>
-    	<attribute name="x" type="double"></attribute>
-    	<attribute name="y" type="double"></attribute>
-    	<attribute name="dateTime" type="string"></attribute>
-    </complexType>
+ 	<sequence>
+ 		<element name="direction" type="float" maxOccurs="1"
+ 			minOccurs="0">
+ 		</element>
+ 		<element name="distance" type="float" maxOccurs="1"
+ 			minOccurs="0">
+ 		</element>
+ 		<element name="comment" type="string" maxOccurs="1"
+ 			minOccurs="0">
+ 		</element>
+ 		<element name="attachments" type="tns:AttachmentType"
+ 			maxOccurs="unbounded" minOccurs="0">
+ 		</element>
+ 		<element name="groups" type="tns:WaypointObservationGroupType"
+ 			maxOccurs="unbounded" minOccurs="0">
+ 		</element>
+ 	</sequence>
+ 	<attribute name="id" type="string"></attribute>
+ 	<attribute name="x" type="double"></attribute>
+ 	<attribute name="y" type="double"></attribute>
+ 	<attribute name="dateTime" type="string"></attribute>
+ 	<attribute name="type" type="string"></attribute>
+ </complexType>
 
 
  <complexType name="WaypointObservationType">

@@ -89,6 +89,7 @@ import org.wcs.smart.incident.ui.newwizard.IdComposite;
 import org.wcs.smart.incident.ui.newwizard.IncidentAttachmentComposite;
 import org.wcs.smart.incident.ui.newwizard.LocationComposite;
 import org.wcs.smart.observation.ObservationHibernateManager;
+import org.wcs.smart.observation.WaypointSourceEngine;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.observation.model.Waypoint;
@@ -124,6 +125,7 @@ public class IncidentSummaryPage extends EditorPart {
 	private Text txtDistance;
 	private Text txtPrjLocation;
 	private Text txtDirection;
+	private Label txtType;
 	private Label lblLastModified;
 //	private Label lblLastModifiedBy;
 	
@@ -208,7 +210,7 @@ public class IncidentSummaryPage extends EditorPart {
 						DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).format(incident.getLastModified())));
 			}
 			this.lblLastModified.setText(sb.toString());
-			
+			this.txtType.setText(WaypointSourceEngine.INSTANCE.getSource(incident.getSourceId()).getName(Locale.getDefault()));
 			this.txtIncidentId.setText(incident.getId());
 			this.txtDate.setText(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(incident.getDateTime()));
 			this.txtTime.setText(DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM).format(incident.getDateTime()));
@@ -418,6 +420,8 @@ public class IncidentSummaryPage extends EditorPart {
 		Composite top = toolkit.createComposite(summarySection, SWT.NONE);
 		top.setLayout(new GridLayout(2, true));
 		top.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridLayout)top.getLayout()).marginWidth = 0;
+		((GridLayout)top.getLayout()).marginHeight = 0;
 		summarySection.setClient(top);
 		
 		Composite left= toolkit.createComposite(top, SWT.NONE);
@@ -472,6 +476,11 @@ public class IncidentSummaryPage extends EditorPart {
 			txtPrjLocation.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			toolkit.createLabel(left, ""); //$NON-NLS-1$
 		}
+		
+		toolkit.createLabel(left, Messages.IncidentSummaryPage_IncidentSourceField);
+		
+		txtType = toolkit.createLabel(left, ""); //$NON-NLS-1$
+		txtType.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		Label l = toolkit.createLabel(right, Messages.IncidentSummaryPage_CommentsLabel);
 		l.setLayoutData(new GridData(SWT.CENTER, SWT.TOP, false, false));

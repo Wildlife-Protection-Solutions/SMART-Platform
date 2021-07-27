@@ -35,6 +35,7 @@ import org.wcs.smart.SmartContext;
 public abstract class ILabelProvider {
 
 	public static enum Key{
+		IntegrateDataProvider_Name,
 		IncidentDataProvider_Name,
 		IncidentDataProvder_IncidentNotFound,
 		IncidentDataProvder_WpIdLbl

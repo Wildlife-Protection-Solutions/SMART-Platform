@@ -51,7 +51,6 @@ import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.incident.IIncidentXmlImporter;
 import org.wcs.smart.incident.IncidentPlugIn;
-import org.wcs.smart.incident.IndepedentIncidentSource;
 import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.ui.SmartStyledInputDialog;
@@ -243,7 +242,7 @@ public class IncidentImporter implements IIncidentXmlImporter{
 			Long cnt = QueryFactory.buildCountQuery(session, Waypoint.class, 
 					new Object[] {"conservationArea", SmartDB.getCurrentConservationArea()}, //$NON-NLS-1$
 					new Object[] {"id", wp.getId() }, //$NON-NLS-1$
-					new Object[] {"sourceId", IndepedentIncidentSource.KEY}); //$NON-NLS-1$
+					new Object[] {"sourceId", wp.getSourceId()}); //$NON-NLS-1$
 			if (cnt > 0){
 				final boolean[] cont = new boolean[]{true};
 				final String  pid = wp.getId();

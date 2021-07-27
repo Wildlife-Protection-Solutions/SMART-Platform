@@ -33,6 +33,7 @@ import javax.xml.bind.annotation.XmlType;
  *         &lt;element name="groups" type="{http://www.smartconservationsoftware.org/xml/2.2/independentincident}WaypointObservationGroupType" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *       &lt;attribute name="id" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="type" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="x" type="{http://www.w3.org/2001/XMLSchema}double" />
  *       &lt;attribute name="y" type="{http://www.w3.org/2001/XMLSchema}double" />
  *       &lt;attribute name="dateTime" type="{http://www.w3.org/2001/XMLSchema}string" />
@@ -60,6 +61,8 @@ public class WaypointType {
     protected List<WaypointObservationGroupType> groups;
     @XmlAttribute(name = "id")
     protected String id;
+    @XmlAttribute(name = "type")
+    protected String type;
     @XmlAttribute(name = "x")
     protected Double x;
     @XmlAttribute(name = "y")
@@ -221,6 +224,30 @@ public class WaypointType {
         this.id = value;
     }
 
+    /**
+     * Gets the value of the type property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
+     */
+    public String getType() {
+        return type;
+    }
+
+    /**
+     * Sets the value of the type property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
+     */
+    public void setType(String value) {
+        this.type = value;
+    }
+    
     /**
      * Gets the value of the x property.
      * 

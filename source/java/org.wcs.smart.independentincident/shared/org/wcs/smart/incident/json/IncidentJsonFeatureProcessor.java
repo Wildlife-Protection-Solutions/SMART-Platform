@@ -28,10 +28,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.hibernate.Session;
 import org.json.simple.JSONObject;
@@ -41,8 +41,10 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.incident.IIncidentLabelProvider;
 import org.wcs.smart.incident.IncidentIdGenerator;
 import org.wcs.smart.incident.IndepedentIncidentSource;
+import org.wcs.smart.incident.IntegrateIncidentSource;
 import org.wcs.smart.observation.json.IJsonFeatureProcessor;
 import org.wcs.smart.observation.model.DataLink;
+import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationGroup;
@@ -57,7 +59,8 @@ import com.ibm.icu.text.MessageFormat;
  */
 public class IncidentJsonFeatureProcessor extends IJsonFeatureProcessor {
 
-	private static final String DATATYPE = "incident"; //$NON-NLS-1$
+	private static final String INCIDENT_DATATYPE = "incident"; //$NON-NLS-1$
+	private static final String INTEGRATE_DATATYPE = "integrateincident"; //$NON-NLS-1$
 	
 	public enum Messages{
 		INVALID_DATA_TYPE,
@@ -69,7 +72,7 @@ public class IncidentJsonFeatureProcessor extends IJsonFeatureProcessor {
 		}
 	}
 	
-	private Set<Waypoint> createdFeatures = new HashSet<>();
+	private Map<String, Set<Waypoint>> createdFeatures = new HashMap<>();
 
 	/**
 	 * @return <code>true</code> if this processor can process the given feature
@@ -77,15 +80,16 @@ public class IncidentJsonFeatureProcessor extends IJsonFeatureProcessor {
 	 */
 	@Override
 	public boolean canProcess(String featureType) {
-		return featureType.equalsIgnoreCase(DATATYPE); 
+		return featureType.equalsIgnoreCase(INCIDENT_DATATYPE) ||
+				featureType.equalsIgnoreCase(INTEGRATE_DATATYPE);
 	}
 
 	/**
 	 * 
 	 * @return set of features created by this processor
 	 */
-	public Set<Waypoint> getCreatedFeatures(){
-		return this.createdFeatures;
+	public Set<Waypoint> getCreatedFeatures(IWaypointSource source){
+		return this.createdFeatures.get(source.getKey());
 	}
 	
 	@Override
@@ -94,8 +98,8 @@ public class IncidentJsonFeatureProcessor extends IJsonFeatureProcessor {
 		JSONObject props = (JSONObject) feature.get(JSON_PROPERTIES);
 
 		String dtype = props.get(JSON_SMARTDATATYPE).toString(); 
-		if (!dtype.equalsIgnoreCase(DATATYPE))
-			throw new Exception(MessageFormat.format(Messages.INVALID_DATA_TYPE.getMessage(l), dtype, DATATYPE));
+		if (!dtype.equalsIgnoreCase(INCIDENT_DATATYPE) && !dtype.equalsIgnoreCase(INTEGRATE_DATATYPE))
+			throw new Exception(MessageFormat.format(Messages.INVALID_DATA_TYPE.getMessage(l), dtype, INCIDENT_DATATYPE));
 
 		String ftype = props.get(JSON_SMARTFEATURETYPE).toString();
 		if (!ftype.equalsIgnoreCase(JSON_FT_OBSERVATION))
@@ -103,6 +107,10 @@ public class IncidentJsonFeatureProcessor extends IJsonFeatureProcessor {
 
 		Waypoint wp = super.createWaypoint(feature, ca, session, l);
 		wp.setSourceId(IndepedentIncidentSource.KEY);
+		if (dtype.equalsIgnoreCase(INTEGRATE_DATATYPE)) {
+			wp.setSourceId(IntegrateIncidentSource.KEY);	
+		}
+		
 		if (wp.getId() == null) {
 			Employee observer = null;
 			for (WaypointObservation so : wp.getAllObservations()) {
@@ -143,7 +151,7 @@ public class IncidentJsonFeatureProcessor extends IJsonFeatureProcessor {
 				dl.setConservationArea(ca);
 				dl.setProviderId(srcUuid);
 				dl.setSmartId(wp.getUuid());
-				dl.setDataType(DATATYPE);
+				dl.setDataType(INCIDENT_DATATYPE);
 				session.save(dl);
 			}else {
 				links.clear();
@@ -187,7 +195,8 @@ public class IncidentJsonFeatureProcessor extends IJsonFeatureProcessor {
 			dl.setDataType(IJsonFeatureProcessor.OBSGROUP_DATATYPE);
 			session.save(dl);
 		}
-		createdFeatures.add(wp);
+		if (!createdFeatures.containsKey(wp.getSourceId())) createdFeatures.put(wp.getSourceId(), new HashSet<>());
+		createdFeatures.get(wp.getSourceId()).add(wp);
 	}
 
 	/**
@@ -199,8 +208,17 @@ public class IncidentJsonFeatureProcessor extends IJsonFeatureProcessor {
 		if (createdFeatures.isEmpty())
 			return null;
  
-		return MessageFormat.format(Messages.COMPLETE_MSG.getMessage(l), createdFeatures.size(),
-				createdFeatures.stream().map(wp->wp.getId()).collect(Collectors.joining(", "))); //$NON-NLS-1$
+		StringBuilder sb = new StringBuilder();
+		for (Set<Waypoint> items : createdFeatures.values()) {
+			for (Waypoint wp : items) {
+				sb.append(wp.getId());
+				sb.append(", "); //$NON-NLS-1$
+			}
+		}
+		sb.deleteCharAt(sb.length() - 1);
+		sb.deleteCharAt(sb.length() - 1);
+		
+		return MessageFormat.format(Messages.COMPLETE_MSG.getMessage(l), createdFeatures.size(), sb.toString());
 	}
 	
 	
@@ -208,7 +226,7 @@ public class IncidentJsonFeatureProcessor extends IJsonFeatureProcessor {
 		DataLink link = session.createQuery("FROM DataLink WHERE conservationArea = :ca and providerId = :puuid and dataType = :datatype", DataLink.class) //$NON-NLS-1$
 			.setParameter("ca",ca) //$NON-NLS-1$
 			.setParameter("puuid", providerUuid) //$NON-NLS-1$
-			.setParameter("datatype", DATATYPE) //$NON-NLS-1$
+			.setParameter("datatype", INCIDENT_DATATYPE) //$NON-NLS-1$
 			.uniqueResult();
 		
 		if (link == null) return null;

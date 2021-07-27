@@ -51,6 +51,7 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.incident.IndepedentIncidentSource;
+import org.wcs.smart.incident.IntegrateIncidentSource;
 import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.incident.xml.IXmlToIncidentConverter;
 import org.wcs.smart.incident.xml.IncidentToXml;
@@ -139,6 +140,9 @@ public class XmlToIncident implements IXmlToIncidentConverter{
 		
 		incident= new Waypoint();
 		incident.setSourceId(IndepedentIncidentSource.KEY);
+		if (xml.getType() != null && xml.getType().equalsIgnoreCase(IntegrateIncidentSource.KEY)) {
+			incident.setSourceId(IntegrateIncidentSource.KEY);	
+		}
 		incident.setConservationArea(ca);
 		incident.setComment(xml.getComment());
 		incident.setDirection(xml.getDirection());

@@ -15,6 +15,7 @@ public class Messages extends NLS {
 	public static String EditIncidentAction_MovedMsg;
 	public static String IncidentEditWaypointDialog_WpNotFound;
 	public static String IncidentLabelProvider_DataProviderName;
+	public static String IncidentLabelProvider_IntegrateDataProviderName;
 	public static String IncidentLabelProvider_NotFoundError;
 	public static String IncidentLabelProvider_WaypointLbl;
 	public static String OpenIncidentAction_ActionName;
