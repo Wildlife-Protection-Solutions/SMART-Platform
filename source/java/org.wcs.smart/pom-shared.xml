@@ -34,7 +34,12 @@
 			<artifactId>org.wcs.smart.core.hibernate</artifactId>
 			<version>${smart.version}</version>
 		</dependency>
-
+        <dependency>
+            <groupId>de.svenkubiak</groupId>
+            <artifactId>jBCrypt</artifactId>
+            <version>0.4.1</version>
+            <scope>provided</scope>
+        </dependency>
 		<dependency>
 			<groupId>org.geotools</groupId>
 			<artifactId>gt-opengis</artifactId>

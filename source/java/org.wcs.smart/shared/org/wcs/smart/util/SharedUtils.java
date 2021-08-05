@@ -28,6 +28,7 @@ import java.time.ZoneOffset;
 import javax.persistence.Transient;
 
 import org.locationtech.jts.geom.Coordinate;
+import org.mindrot.jbcrypt.BCrypt;
 
 /**
  * Collection of utilities shared with Desktop and Connect applications.
@@ -108,5 +109,15 @@ public class SharedUtils {
 	@Transient
 	public static long toLongTime(LocalDateTime datetime) {
 		return datetime.toInstant(ZoneOffset.UTC).toEpochMilli();		
+	}
+	
+	/**
+	 * generate a bcrypt password from plain-text password
+	 * 
+	 * @param password
+	 * @return
+	 */
+	public static String generatePassword(String password){
+		return BCrypt.hashpw(password, BCrypt.gensalt(13));
 	}
 }

@@ -59,7 +59,7 @@ import org.wcs.smart.util.I18nUtil;
  */
 public class HibernateManager {
 	
-	public static final String DATABASE_VERSION = "7.0.0"; //$NON-NLS-1$
+	public static final String DATABASE_VERSION = "7.0.5"; //$NON-NLS-1$
 	public static final String FILESTORE_VERSION = "7.0.0"; //$NON-NLS-1$
 	
 	public static final String CONTEXT_KEY = "SessionFactory"; //$NON-NLS-1$

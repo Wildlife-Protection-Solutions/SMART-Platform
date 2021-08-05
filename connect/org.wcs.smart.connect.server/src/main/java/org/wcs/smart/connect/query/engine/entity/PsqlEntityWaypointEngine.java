@@ -36,7 +36,6 @@ import org.wcs.smart.connect.query.engine.IFilterProcessor;
 import org.wcs.smart.connect.query.engine.IWOEngine;
 import org.wcs.smart.entity.query.model.EntityWaypointQuery;
 import org.wcs.smart.entity.query.model.EntityWaypointResultItem;
-import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.SimpleQuery;

@@ -45,7 +45,6 @@ import org.wcs.smart.connect.query.engine.IFilterProcessor;
 import org.wcs.smart.connect.query.engine.ISummaryEngine;
 import org.wcs.smart.connect.query.engine.ListItem;
 import org.wcs.smart.connect.query.engine.SummaryItemLabelProvider;
-import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;

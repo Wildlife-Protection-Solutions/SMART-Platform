@@ -387,6 +387,8 @@ public class IncidentSummaryPage extends EditorPart {
 		Composite top = toolkit.createComposite(summarySection, SWT.NONE);
 		top.setLayout(new GridLayout(2, true));
 		top.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridLayout)top.getLayout()).marginWidth = 0;
+		((GridLayout)top.getLayout()).marginHeight = 0;
 		summarySection.setClient(top);
 		
 		Composite left= toolkit.createComposite(top, SWT.NONE);

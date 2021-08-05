@@ -570,6 +570,7 @@ public class CyberTracker extends HttpServlet{
 			ctpackage.setName(proxy.getName());
 			ctpackage.setUploadedDate(ZonedDateTime.now());
 			ctpackage.setVersion(proxy.getVersion());
+			ctpackage.setPassword(proxy.getPassword());
 			
 			StringBuilder sb = new StringBuilder();
 			sb.append(UuidUtils.uuidToString(ctpackage.getCtPackageUuid()));

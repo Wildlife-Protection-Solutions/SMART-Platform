@@ -23,7 +23,6 @@ package org.wcs.smart.connect.api;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -31,7 +30,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -64,11 +62,7 @@ import javax.xml.bind.JAXBException;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.io.IOUtils;
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IExtensionPoint;
-import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.RegistryFactory;
 import org.hibernate.Session;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
@@ -87,7 +81,6 @@ import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.dataentry.model.xml.CmSmartToXml;
 import org.wcs.smart.dataentry.model.xml.CmXmlManager;
-import org.wcs.smart.dataentry.model.xml.external.ICmXmlExtraDataExporter;
 import org.wcs.smart.hibernate.QueryFactory;
 import org.wcs.smart.internal.ca.datamodel.xml.DataModelToXmlConverter;
 import org.wcs.smart.internal.ca.datamodel.xml.DataModelXmlToSimpleDataModelConverter;
@@ -309,7 +302,7 @@ public class DataModelApi extends HttpServlet{
 			s.beginTransaction();
 			try {
 				ConfigurableModel model = s.get(ConfigurableModel.class, cmUuid);
-				if (model == null) throw new SmartConnectException(Response.Status.NOT_FOUND, "Invalid configurable model uuid.");
+				if (model == null) throw new SmartConnectException(Response.Status.NOT_FOUND, "Invalid configurable model uuid."); //$NON-NLS-1$
 					
 				if (!SecurityManager.INSTANCE.canAccess(s, 
 						request.getUserPrincipal().getName(), 
@@ -323,11 +316,11 @@ public class DataModelApi extends HttpServlet{
 				
 				converter.convert(model, new NullProgressMonitor());
 
-				java.nio.file.Path zipFile = Files.createTempFile("configurablemodel", "zip");
+				java.nio.file.Path zipFile = Files.createTempFile("configurablemodel", "zip"); //$NON-NLS-1$ //$NON-NLS-2$
 
 				try (ZipArchiveOutputStream tOut = new ZipArchiveOutputStream(
 						new BufferedOutputStream(Files.newOutputStream(zipFile)))) {
-					ZipArchiveEntry zipEntry = new ZipArchiveEntry("configurablemodel.xml");
+					ZipArchiveEntry zipEntry = new ZipArchiveEntry("configurablemodel.xml"); //$NON-NLS-1$
 					tOut.putArchiveEntry(zipEntry);
 					CmXmlManager.writeDataModel(converter.getXmlModel(), tOut);
 					tOut.closeArchiveEntry();

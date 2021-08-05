@@ -75,7 +75,6 @@ public class CleanUpJob implements Runnable {
 	private Integer syncDownloadAvailableHrs = null;
 	private Integer caExportAvailableDays = null;
 	private Integer changeLogCleanUpDays = null;
-	private Integer gfwCleanUpDays = null;
 	private ServletContext context;
 	
 	public CleanUpJob(SessionFactory sessionFactory, ServletContext context){
@@ -90,7 +89,6 @@ public class CleanUpJob implements Runnable {
 		syncDownloadAvailableHrs = getEnvironmentVariable(EnvironmentVariables.Variable.SYNC_DOWNLOAD_AVAILABLE);
 		caExportAvailableDays = getEnvironmentVariable(EnvironmentVariables.Variable.CA_EXPORT_AVAILABLE);
 		changeLogCleanUpDays = getEnvironmentVariable(EnvironmentVariables.Variable.CHANGELOG_CLEAN_UP_DAYS);
-		gfwCleanUpDays = getEnvironmentVariable(EnvironmentVariables.Variable.GFW_CLEAN_UP_DAYS);
 		
 		try{
 			cleanUp();

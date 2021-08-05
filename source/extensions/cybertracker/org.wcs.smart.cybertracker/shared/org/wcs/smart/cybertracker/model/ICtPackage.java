@@ -72,6 +72,14 @@ public interface ICtPackage {
 	 * @return the key that identifies the package type 
 	 */
 	public String getTypeIdentifier();
+	
+	/**
+	 * Bcrypt hashed password associated with the pacakge 
+	 * @return
+	 */
+	public default String getPassword() {
+		return null;
+	}
 
 	/**
 	 * Create a copy of this package

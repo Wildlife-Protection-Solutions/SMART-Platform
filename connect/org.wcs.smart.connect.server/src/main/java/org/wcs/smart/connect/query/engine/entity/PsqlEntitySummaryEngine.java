@@ -54,7 +54,6 @@ import org.wcs.smart.entity.query.engine.visitor.HasObservationFilterVisitor;
 import org.wcs.smart.entity.query.engine.visitor.HasObservationGroupByVisitor;
 import org.wcs.smart.entity.query.model.EntitySummaryQuery;
 import org.wcs.smart.entity.query.parser.internal.EntityAttributeGroupBy;
-import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;

@@ -24,6 +24,7 @@ package org.wcs.smart.smartcollect.ui;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.text.Collator;
+import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -40,7 +41,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -56,6 +56,7 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
@@ -96,11 +97,17 @@ import org.wcs.smart.ui.properties.DialogConstants;
  */
 public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 
+	private static final String MODIFIED_FLAG = "MODIFIED"; //$NON-NLS-1$
+
+	private static final int MIN_PASSWORD_LENGTH = 3;
+	
 	private SmartCollectPackage ctpackage;
 	
 	private ComboViewer modelViewer;
 	private ComboViewer profileViewer;
-	private Text txtName;
+	private Text txtName, txtPasswordPkg;
+	private Button btnPrivatePkg;
+	private Label lPassword;
 	
 	private List<IPackageUiContribution> contributions = null;
 	private ConfigurableModel selectedModel = null;
@@ -159,12 +166,7 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 		g.setLayout(new GridLayout());
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		Composite header = new Composite(g, SWT.NONE);
-		header.setLayout(new GridLayout());
-		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		Label headerLabel = new Label(header, SWT.NONE);
-		headerLabel.setText(Messages.SmartCollectPackageConfigurator_ConfigurationSection);
-		WidgetElement.setCSSClass(header, SmartUiUtils.HEADER_CLASS);
+		SmartUiUtils.createHeaderLabel(g, Messages.SmartCollectPackageConfigurator_ConfigurationSection);
 		
 		g = new Composite(g, SWT.NONE);
 		g.setLayout(new GridLayout(2, false));
@@ -257,6 +259,38 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 			dialog.open();
 		});
 		
+		Label lblPrivatePkg = new Label(g, SWT.NONE);
+		lblPrivatePkg.setText(Messages.SmartCollectPackageConfigurator_PrivatePkgLabel);
+		lblPrivatePkg.setToolTipText(Messages.SmartCollectPackageConfigurator_PrivatePkgTooltip);
+	
+		Composite ct = new Composite(g, SWT.NONE);
+		ct.setLayout(new GridLayout(3, false));
+		((GridLayout)ct.getLayout()).marginWidth = 0;
+		((GridLayout)ct.getLayout()).marginHeight = 0;
+		ct.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		btnPrivatePkg = new Button(ct, SWT.CHECK );
+			
+		lPassword = new Label(ct, SWT.NONE);
+		lPassword.setText(Messages.SmartCollectPackageConfigurator_PasswordLbl);
+		lPassword.setToolTipText(Messages.SmartCollectPackageConfigurator_PasswordTooltip);
+		txtPasswordPkg = new Text(ct, SWT.PASSWORD | SWT.BORDER);
+		txtPasswordPkg.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		txtPasswordPkg.addListener(SWT.Modify, e->{
+			if (!isInit) {
+				validate();
+				txtPasswordPkg.setData(MODIFIED_FLAG, Boolean.TRUE);
+			}
+		});
+		
+		btnPrivatePkg.addListener(SWT.Selection,e->{
+			if (!isInit) validate();
+			lPassword.setEnabled(btnPrivatePkg.getSelection());
+			txtPasswordPkg.setEnabled(btnPrivatePkg.getSelection());
+		});
+		btnPrivatePkg.setSelection(false);
+		lPassword.setEnabled(false);
+		txtPasswordPkg.setEnabled(false);
 		
 		//main page contributions
 		if (contributions != null) {
@@ -315,6 +349,12 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 		if (modified) onModified.accept(true);
 		
 		try {
+			if (btnPrivatePkg.getSelection()) {
+				if (txtPasswordPkg.getText().strip().isBlank() || 
+						txtPasswordPkg.getText().length() <= MIN_PASSWORD_LENGTH) {
+					throw new Exception(MessageFormat.format(Messages.SmartCollectPackageConfigurator_PasswordError, MIN_PASSWORD_LENGTH)); 
+				}
+			}
 			if (txtName.getText().isBlank()) {
 				throw new Exception(Messages.SmartCollectPackageConfigurator_NameRequired);
 			}
@@ -376,6 +416,21 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 			((GridLayout)inner.getLayout()).marginHeight = 0;
 			
 			Label l= new Label(inner, SWT.NONE);
+			l.setText(Messages.SmartCollectPackageConfigurator_SecuritySection);
+			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			((GridData)l.getLayoutData()).verticalIndent = 5;
+			
+			if (local.getPassword() == null) {
+				l = new Label(inner, SWT.NONE);
+				l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+				l.setText(Messages.SmartCollectPackageConfigurator_PublicPackage);
+			}else {
+				l = new Label(inner, SWT.NONE);
+				l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+				l.setText(Messages.SmartCollectPackageConfigurator_PrivatePackage);
+			}
+			
+			l= new Label(inner, SWT.NONE);
 			l.setText(Messages.SmartCollectPackageConfigurator_CMLabel);
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)l.getLayoutData()).verticalIndent = 5;
@@ -508,6 +563,13 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 				ctpackage.setCtProfile((CyberTrackerPropertiesProfile) profileViewer.getStructuredSelection().getFirstElement());
 				ctpackage.setName(txtName.getText());
 				
+				if ( (Boolean)txtPasswordPkg.getData(MODIFIED_FLAG) ) {
+					ctpackage.setPackagePassword(txtPasswordPkg.getText());
+				}else {
+					ctpackage.setPackagePassword(null);
+				}
+				
+				
 				session.saveOrUpdate(ctpackage);
 				session.flush();
 				for (IPackageUiContribution cc : contributions) {
@@ -586,6 +648,20 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 						}else {
 							if (!profiles.isEmpty()) profileViewer.setSelection(new StructuredSelection(profiles.get(0)));
 						}
+						
+						if (finit.getPassword() != null) {
+							btnPrivatePkg.setSelection(true);
+							txtPasswordPkg.setText(finit.getPassword());
+							txtPasswordPkg.setEnabled(true);
+							lPassword.setEnabled(true);
+						}else {
+							btnPrivatePkg.setSelection(false);
+							txtPasswordPkg.setText(""); //$NON-NLS-1$
+							txtPasswordPkg.setEnabled(false);
+							lPassword.setEnabled(false);
+						}
+						txtPasswordPkg.setData(MODIFIED_FLAG, Boolean.FALSE);
+						
 						validate(false);
 					}finally {
 						isInit = false;

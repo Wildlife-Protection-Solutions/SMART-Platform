@@ -41,7 +41,6 @@ import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.engine.visitors.SurveyHasObservationFilterVisitor;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.model.MissionQuery;
-import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;

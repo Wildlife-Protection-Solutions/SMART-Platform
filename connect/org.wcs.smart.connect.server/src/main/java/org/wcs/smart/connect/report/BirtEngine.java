@@ -145,7 +145,7 @@ public class BirtEngine {
 							return Collections.emptySet();
 						}
 					};
-					Field pinCodeField = InternalPlatform.getDefault().getClass().getDeclaredField("fwkWiring");
+					Field pinCodeField = InternalPlatform.getDefault().getClass().getDeclaredField("fwkWiring"); //$NON-NLS-1$
 					pinCodeField.setAccessible(true);
 					pinCodeField.set(InternalPlatform.getDefault(), fw);
 				} catch (Exception e) {

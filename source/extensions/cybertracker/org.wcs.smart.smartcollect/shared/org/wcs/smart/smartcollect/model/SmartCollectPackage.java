@@ -36,6 +36,7 @@ import org.wcs.smart.cybertracker.model.ICtPackage;
 import org.wcs.smart.cybertracker.model.MetadataFieldUuidValue;
 import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.util.SharedUtils;
 
 /**
  * SMART Collect package 
@@ -50,6 +51,8 @@ public class SmartCollectPackage extends AbstractCtPackage implements ICmProvide
 	private static final long serialVersionUID = 1L;
 	
 	public static final String PACKAGE_TYPENAME = "SMARTCOLLECT"; //$NON-NLS-1$
+	
+	public static final String PACKAGE_PASSWORD_MD_KEY = "collect.password"; //$NON-NLS-1$
 	
 	//configurable model
 	private ConfigurableModel cm;
@@ -74,6 +77,50 @@ public class SmartCollectPackage extends AbstractCtPackage implements ICmProvide
 		return PACKAGE_TYPENAME;
 	}
 
+	/**
+	 * 
+	 * @return the encrypted version of the package password
+	 */
+	@Transient
+	@Override
+	public String getPassword() {
+		if (getMetadataValues() == null) return null;
+		for (MetadataFieldValue value : getMetadataValues()) {
+			if (value.getMetadataKey().equals(PACKAGE_PASSWORD_MD_KEY)) return value.getStringValue();
+		}
+		return null;
+	}
+	
+	/**
+	 * Updates the package password.
+	 * @param raw The plain text password; this will encrypt it using
+	 * bcrypt before storing it to the database
+	 */
+	public void setPackagePassword(String raw) {
+		MetadataFieldValue pw = null; 
+		for (MetadataFieldValue value : getMetadataValues()) {
+			if (value.getMetadataKey().equals(PACKAGE_PASSWORD_MD_KEY)) {
+				pw = value;
+				break;
+			}
+		}
+		if (raw == null) {
+			if (pw != null) {
+				//remove this
+				getMetadataValues().remove(pw);
+			}
+		}else {
+			if (pw == null) {
+				pw = new MetadataFieldValue();
+				pw.setConservationArea(getConservationArea());
+				pw.setCtPackage(this);
+				pw.setMetadataKey(PACKAGE_PASSWORD_MD_KEY);
+				getMetadataValues().add(pw);
+			}
+			pw.setStringValue(SharedUtils.generatePassword(raw));
+		}
+	}
+	
 	@Transient
 	@Override
 	public ICtPackage copy() {

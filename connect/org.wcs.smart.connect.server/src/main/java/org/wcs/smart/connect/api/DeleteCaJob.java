@@ -98,7 +98,7 @@ public class DeleteCaJob implements Runnable {
 
 						//package files 
 						List<CyberTrackerNavigationLayer> navlayers = QueryFactory.buildQuery(session, CyberTrackerNavigationLayer.class, 
-								new Object[] {"conservationArea", ca}).list();
+								new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
 						for (CyberTrackerNavigationLayer layer : navlayers) {
 							java.nio.file.Path toDelete = DataStoreManager.INSTANCE.getRootDirectory()
 									.resolve(CyberTracker.CT_NAVIGATION_DATASTORE_LOCATION).resolve(layer.getFilename());
@@ -106,7 +106,7 @@ public class DeleteCaJob implements Runnable {
 						}
 						
 						List<CyberTrackerPackage> ctpackages = QueryFactory.buildQuery(session, CyberTrackerPackage.class, 
-								new Object[] {"conservationArea", ca}).list();
+								new Object[] {"conservationArea", ca}).list(); //$NON-NLS-1$
 						for (CyberTrackerPackage layer : ctpackages) {
 							java.nio.file.Path toDelete = DataStoreManager.INSTANCE.getRootDirectory()
 									.resolve(CyberTracker.CT_PACKAGE_DATASTORE_LOCATION).resolve(layer.getFilename());
@@ -115,7 +115,7 @@ public class DeleteCaJob implements Runnable {
 						
 						//workitem files
 						List<WorkItem> workitems = QueryFactory.buildQuery(session, WorkItem.class, 
-								new Object[] {"conservationAreaInfo", serverDelete}).list();
+								new Object[] {"conservationAreaInfo", serverDelete}).list(); //$NON-NLS-1$
 						for (WorkItem workitem : workitems) {
 							if (workitem.getLocalFilename() != null && !workitem.getLocalFilename().isEmpty()) {
 								java.nio.file.Path toDelete = DataStoreManager.INSTANCE.getFile(workitem.getLocalFilename());

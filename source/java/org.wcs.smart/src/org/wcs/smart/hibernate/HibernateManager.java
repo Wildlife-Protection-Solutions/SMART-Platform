@@ -82,6 +82,7 @@ import org.wcs.smart.internal.Messages;
 import org.wcs.smart.user.UserLevelManager;
 import org.wcs.smart.util.I18nUtil;
 import org.wcs.smart.util.ReprojectUtils;
+import org.wcs.smart.util.SharedUtils;
 
 /**
  * Hibernate manager to manage database connections.
@@ -417,7 +418,7 @@ public class HibernateManager extends SmartHibernateManager{
 	}
 	
 	public static String generatePassword(String password){
-		return BCrypt.hashpw(password, BCrypt.gensalt(13));
+		return SharedUtils.generatePassword(password);
 	}
 	
 	/**
