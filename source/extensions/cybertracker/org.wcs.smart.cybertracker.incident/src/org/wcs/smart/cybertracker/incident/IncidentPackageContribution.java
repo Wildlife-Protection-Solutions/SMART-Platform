@@ -148,8 +148,10 @@ public class IncidentPackageContribution implements IPackageContribution{
 			
 			//create and add help files
 			//do this before writing xml as it modifies xml
-			List<Path> filestoadd = CtJsonExportUtils.addHelpFiles(s.get(ConfigurableModel.class,cm.getUuid()), xmlModel, tempDir);
-			filestoadd.forEach(e->updates.addFile(e));
+			if (cm.getUuid() != null) {
+				List<Path> filestoadd = CtJsonExportUtils.addHelpFiles(s.get(ConfigurableModel.class,cm.getUuid()), xmlModel, tempDir);
+				filestoadd.forEach(e->updates.addFile(e));
+			}
 			
 			//write xml
 			try(OutputStream out = Files.newOutputStream(incidentFile)){
