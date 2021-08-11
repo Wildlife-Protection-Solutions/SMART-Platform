@@ -111,12 +111,14 @@ public class CleanUpJob implements Runnable {
 		try(Session s = sessionFactory.openSession()){
 			//list all files in uploads directory			
 			Path uploadDir = DataStoreManager.INSTANCE.getRootDirectory().resolve(Uploader.DATASTORE_DIR);
-			try(DirectoryStream<Path> stream = Files.newDirectoryStream(uploadDir)){
-				for (Path path : stream){
-					checkAndDelete(s, path);
+			if (Files.exists(uploadDir)) {
+				try(DirectoryStream<Path> stream = Files.newDirectoryStream(uploadDir)){
+					for (Path path : stream){
+						checkAndDelete(s, path);
+					}
+				}catch (Exception ex){
+					logger.log(Level.WARNING, "Unable to list files in uploads directory for cleaning.", ex); //$NON-NLS-1$
 				}
-			}catch (Exception ex){
-				logger.log(Level.WARNING, "Unable to list files in uploads directory for cleaning.", ex); //$NON-NLS-1$
 			}
 			
 			//ca export directory
