@@ -32,6 +32,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.transaction.Synchronization;
+import javax.ws.rs.NotAuthorizedException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -212,6 +213,20 @@ public class DataQueueView{
 	
 	Job refreshServerItemsJob = new Job(Messages.DataQueueView_ServerRefreshJobName){
 
+		private void getConnect() {
+			ui.syncExec(new Runnable(){
+				@Override
+				public void run() {
+					DataQueueServerDialog cd = new DataQueueServerDialog(shell);
+					if (cd.open() != Window.OK){
+						tblServer.setInput(new String[]{Messages.DataQueueView_ServerRefreshError1});
+						return;
+					}
+					connect = cd.getConnection();		
+				}	
+			});
+		}
+		
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			try{
@@ -229,30 +244,34 @@ public class DataQueueView{
 					
 					if (server != null && user != null){
 						if (user.getConnectUsername() != null && user.getConnectPassword() != null){
-							connect = SmartConnect.findInstance(server, user.getConnectUsername(), ConnectPlugIn.decryptPassword(user));
+							try {
+								connect = SmartConnect.findInstance(server, user.getConnectUsername(), ConnectPlugIn.decryptPassword(user));
+							}catch (Exception ex) {
+								ex.printStackTrace();
+								connect = null;
+							}
 						}
 						
 					}
 					if (connect == null){
-						ui.syncExec(new Runnable(){
-							@Override
-							public void run() {
-								DataQueueServerDialog cd = new DataQueueServerDialog(shell);
-								if (cd.open() != Window.OK){
-									tblServer.setInput(new String[]{Messages.DataQueueView_ServerRefreshError1});
-									return;
-								}
-								connect = cd.getConnection();		
-							}	
-						});
+						getConnect();
 					}
 					
 				}
-				if (connect == null){
-					return Status.OK_STATUS;
+				if (connect == null) return Status.OK_STATUS;
+				
+				List<DataQueueItem> serverItems = null;
+				try{
+					serverItems = ConnectDataQueue.INSTANCE.getQueuedItems(connect, SmartDB.getCurrentConservationArea());
+				}catch (NotAuthorizedException ex) {
 				}
 				
-				List<DataQueueItem> serverItems = ConnectDataQueue.INSTANCE.getQueuedItems(connect, SmartDB.getCurrentConservationArea());
+				if (serverItems == null) {
+					getConnect();
+				}
+				if (connect == null) return Status.OK_STATUS;
+				
+				serverItems = ConnectDataQueue.INSTANCE.getQueuedItems(connect, SmartDB.getCurrentConservationArea());
 				
 				monitor.worked(1);
 				monitor.subTask(Messages.DataQueueView_ServerRefreshTask3);
@@ -273,19 +292,20 @@ public class DataQueueView{
 					}
 				}
 				
+				List<DataQueueItem> fserverItems = serverItems;
 				ui.syncExec(new Runnable() {
 					
 					@Override
 					public void run() {
 						if (tblServer == null || tblServer.getTable().isDisposed()) return;
-						tblServer.setInput(serverItems);
+						tblServer.setInput(fserverItems);
 						tblServer.refresh();
 					}
 				});
 				monitor.done();
 			}catch (Exception ex){
 				String message = Messages.DataQueueView_ServerRefreshError2 + ex.getMessage();
-				ConnectDataQueuePlugin.log(message, ex);
+				ConnectDataQueuePlugin.displayLog(message, ex);
 				
 				final String error = message;
 				ui.syncExec(new Runnable() {
