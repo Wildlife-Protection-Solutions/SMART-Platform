@@ -266,6 +266,10 @@ public class Messages extends NLS {
 	public static String ShowConfigurableModelHandler_LoadDataModel_Error;
 	public static String ShowConfigurableModelHandler_NoDmDialog_Message;
 	public static String ShowConfigurableModelHandler_NoDmDialog_Title;
+	public static String TextAttributeInfoComposite_NumPadOp;
+	public static String TextAttributeInfoComposite_NumPadTooltip;
+	public static String TextAttributeInfoComposite_QRCodeOp;
+	public static String TextAttributeInfoComposite_QRCodeTooltip;
 	public static String TreeAttributeInfoComposite_ConfirmRevert_Message;
 	public static String TreeAttributeInfoComposite_ConfirmRevert_Title;
 	public static String TreeAttributeInfoComposite_deafultValueTooltip;

@@ -29,6 +29,7 @@ import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
@@ -50,6 +51,8 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
  */
 public class TextAttributeInfoComposite extends CmAttributeInfoComposite {
 
+	private static final String QAKEY = "UPDATE"; //$NON-NLS-1$
+
 	/**
 	 * @param parent
 	 * @param model
@@ -67,6 +70,75 @@ public class TextAttributeInfoComposite extends CmAttributeInfoComposite {
 		createIsVisibleControl(container);
 		createTextStringControl(container, CmAttributeOption.ID_DEFAULT_VALUE, Messages.CmAttributeInfoComposite_Option_DefaultValue);
 
+		Label label = new Label(container, SWT.NONE);
+		label.setText(Messages.TextAttributeInfoComposite_QRCodeOp);
+		label.setToolTipText(Messages.TextAttributeInfoComposite_QRCodeTooltip);
+		
+		Button btnQa = new Button(container, SWT.CHECK);
+		btnQa.setData(QAKEY, false);
+		btnQa.addListener(SWT.Selection, e->{
+			if (!(Boolean)btnQa.getData(QAKEY)){
+				CmAttributeOption option = getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_QR_CODE);
+				if (option == null) {
+					option = new CmAttributeOption();
+					option.setCmAttribute(getSourceObject());
+					option.setOptionId(CmAttributeOption.ID_QR_CODE);
+					getSourceObject().getCmAttributeOptions().put(CmAttributeOption.ID_QR_CODE, option);
+				}
+				option.setBooleanValue(btnQa.getSelection());
+				fireModelChanged();
+			}
+		});
+		addSourceObjectChangedListener(new ISourceObjectChangedListener() {
+			@Override
+			public void sourceObjectChanged(Object newObject, Language language) {
+				CmAttributeOption option = getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_QR_CODE);
+				Boolean value = Boolean.FALSE;
+				if (option != null && option.getBooleanValue() != null) value = option.getBooleanValue();
+				
+				btnQa.setData(QAKEY, true);
+				try {
+					btnQa.setSelection(value);
+				}finally {
+					btnQa.setData(QAKEY, false);
+				}
+			}
+		});
+		
+		label = new Label(container, SWT.NONE);
+		label.setText(Messages.TextAttributeInfoComposite_NumPadOp);
+		label.setToolTipText(Messages.TextAttributeInfoComposite_NumPadTooltip);
+		
+		Button btnNumpad = new Button(container, SWT.CHECK);
+		btnNumpad.setData(QAKEY, false);
+		btnNumpad.addListener(SWT.Selection, e->{
+			if (!(Boolean)btnNumpad.getData(QAKEY)){
+				CmAttributeOption option = getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_USENUMPAD);
+				if (option == null) {
+					option = new CmAttributeOption();
+					option.setCmAttribute(getSourceObject());
+					option.setOptionId(CmAttributeOption.ID_USENUMPAD);
+					getSourceObject().getCmAttributeOptions().put(CmAttributeOption.ID_USENUMPAD, option);
+				}
+				option.setBooleanValue(btnNumpad.getSelection());
+				fireModelChanged();
+			}
+		});
+		addSourceObjectChangedListener(new ISourceObjectChangedListener() {
+			@Override
+			public void sourceObjectChanged(Object newObject, Language language) {
+				CmAttributeOption option = getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_USENUMPAD);
+				Boolean value = Boolean.FALSE;
+				if (option != null && option.getBooleanValue() != null) value = option.getBooleanValue();
+				
+				btnNumpad.setData(QAKEY, true);
+				try {
+					btnNumpad.setSelection(value);
+				}finally {
+					btnNumpad.setData(QAKEY, false);
+				}
+			}
+		});
 	}
 
 	private Text createTextStringControl(Composite parent, final String optionId, String labelText) {

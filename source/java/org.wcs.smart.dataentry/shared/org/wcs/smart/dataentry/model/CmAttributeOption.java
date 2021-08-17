@@ -52,6 +52,8 @@ public class CmAttributeOption extends UuidItem {
 	public static final String ID_NUMERIC = "NUMERIC"; //$NON-NLS-1$
 	public static final String ID_ENTER_ONCES = "ENTER_ONCE"; //$NON-NLS-1$
 	public static final String ID_IMAGE_EXT = "IMAGE"; //$NON-NLS-1$
+	public static final String ID_QR_CODE = "QR_CODE"; //$NON-NLS-1$
+	public static final String ID_USENUMPAD = "USE_NUMPAD"; //$NON-NLS-1$
 	
 	public static final String ID_HELP_TEXT = "HELP_TEXT"; //$NON-NLS-1$
 	public static final String ID_HELP_IMAGE_FORMAT = "HELP_IMAGE_FORMAT"; //$NON-NLS-1$
