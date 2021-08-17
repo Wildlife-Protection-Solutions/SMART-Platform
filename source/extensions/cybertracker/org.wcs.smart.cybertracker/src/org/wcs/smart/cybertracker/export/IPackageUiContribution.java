@@ -42,10 +42,11 @@ public interface IPackageUiContribution {
 	 * 
 	 * @param parent
 	 * @param ctpackage cybertracker package, can be null if not applicable
-	 * @param onModified called when an element is modified
+	 * @param onModified function to call when element is modified 
+	 * @param onInitialized function to call when element is initialized (must be called in display thread)
 	 * @return
 	 */
-	public Composite createUi(Composite parent, ICtPackage ctpackage, Listener onModified);
+	public Composite createUi(Composite parent, ICtPackage ctpackage, Listener onModified, Runnable onInitilized);
 	
 	/**
 	 * 

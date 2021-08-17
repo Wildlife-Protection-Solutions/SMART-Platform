@@ -94,6 +94,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 	
 	private CheckboxTableViewer lstEmployees;
 	private Listener onModified;
+	private Runnable onInitilized;
 	
 	private ICtPackage ctpackage;
 	private boolean fireEvents = true;
@@ -117,9 +118,10 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 	
 	
 	@Override
-	public Composite createUi(Composite parent, ICtPackage ctpackage, Listener onModified) {
+	public Composite createUi(Composite parent, ICtPackage ctpackage, Listener onModified, Runnable onInitilized) {
 		this.ctpackage = ctpackage;
 		this.onModified = onModified;
+		this.onInitilized = onInitilized;
 		
 		Composite outer = new Composite(parent, SWT.NONE);
 		outer.setLayout(new GridLayout());
@@ -131,7 +133,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 		headerComp.setLayout(new GridLayout(4, false));
 		headerComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		WidgetElement.setCSSClass(headerComp, SmartUiUtils.HEADER_CLASS);
-
+		
 		Label col1 = new Label(headerComp, SWT.NONE);
 		col1.setText(Messages.PatrolMetadataPackageContribution_FieldLabel);
 		col1.setToolTipText(Messages.PatrolMetadataPackageContribution_FieldTooltip);
@@ -716,6 +718,7 @@ public class PatrolMetadataPackageContribution implements IPackageUiContribution
 				}finally {
 					fireEvents = true;
 				}
+				onInitilized.run();
 			});
 			
 			

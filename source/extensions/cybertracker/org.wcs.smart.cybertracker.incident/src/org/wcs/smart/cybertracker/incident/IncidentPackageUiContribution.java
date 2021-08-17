@@ -75,9 +75,11 @@ public class IncidentPackageUiContribution implements IPackageUiContribution{
 	private ICtPackage ctPackage;
 	private boolean isInit = false;
 	
+	private Runnable onInitilized;
 	
 	@Override
-	public Composite createUi(Composite parent, ICtPackage ctPackage, Listener onValidate) {
+	public Composite createUi(Composite parent, ICtPackage ctPackage, Listener onValidate, Runnable onInitilized) {
+		this.onInitilized = onInitilized;
 		if (! (ctPackage instanceof IIncidentCtPackage) ) return null;
 		
 		Composite g = new Composite(parent, SWT.NONE);
@@ -241,12 +243,16 @@ public class IncidentPackageUiContribution implements IPackageUiContribution{
 					}else {
 						cmbModel.setSelection(new StructuredSelection(fselection));
 					}
+					
+					onInitilized.run();
 				});
+				
 				
 				return Status.OK_STATUS;
 			}finally {
 				isInit = false;
 			}
+			
 		} 
 		
 	};

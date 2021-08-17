@@ -38,6 +38,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
@@ -62,7 +63,8 @@ public class ConnectDataUiController implements IPackageUiContribution{
 	private ICtPackage ctpackage;
 
 	private Listener onModified;
-	
+	private Runnable onInitilized;
+
 	private Button btnUploadData;
 	private Label lblUp1, lblUp2;
 	private Text txtDataPeriod;
@@ -99,9 +101,10 @@ public class ConnectDataUiController implements IPackageUiContribution{
 	}
 	
 	@Override
-	public Composite createUi(Composite parent, ICtPackage ctpackage, Listener onModified) {
+	public Composite createUi(Composite parent, ICtPackage ctpackage, Listener onModified, Runnable onInitilized) {
 		this.ctpackage = ctpackage;
 		this.onModified = onModified;
+		this.onInitilized = onInitilized;
 		
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayout(new GridLayout());
@@ -224,7 +227,6 @@ public class ConnectDataUiController implements IPackageUiContribution{
 			refreshAlertTypes(true);
 		});
 		
-		refreshAlertTypes(false);		
 		
 		if (ctpackage instanceof AbstractCtPackage) {
 			try {
@@ -254,7 +256,8 @@ public class ConnectDataUiController implements IPackageUiContribution{
 			}
 			
 		}
-
+		refreshAlertTypes(false);		
+		
 		
 		return main;
 	}
@@ -263,26 +266,30 @@ public class ConnectDataUiController implements IPackageUiContribution{
 		(new LoadAlertTypesJob(context, force) {
 			@Override
 			public void typesLoaded(List<AlertType> atypes) {
-				final boolean sendevents = (types == null);
-				types = atypes;
-				cmbPositionType.getControl().getDisplay().asyncExec(()->{
-					cmbPositionType.setInput(types);
-					
-					if (ctpackage instanceof AbstractCtPackage) {
-						MetadataFieldValue data = findCreateMetadataField(CtConnectPackageMetadata.Properties.POSITION_UPLOAD.name(), (AbstractCtPackage)ctpackage);
-						if (data.getUuidValue() != null) {
-							AlertType temp = new AlertType();
-							temp.setUuid(data.getUuidValue());
-							if (!sendevents) {
-								cmbPositionType.setSelection(new StructuredSelection(temp));
-							}else {
-								cmbPositionType.setSelection(new StructuredSelection(temp));	
+				try {
+					fireEvents = false;
+					final boolean sendevents = (types == null);
+					types = atypes;
+					cmbPositionType.getControl().getDisplay().asyncExec(()->{
+						cmbPositionType.setInput(types);
+						
+						if (ctpackage instanceof AbstractCtPackage) {
+							MetadataFieldValue data = findCreateMetadataField(CtConnectPackageMetadata.Properties.POSITION_UPLOAD.name(), (AbstractCtPackage)ctpackage);
+							if (data.getUuidValue() != null) {
+								AlertType temp = new AlertType();
+								temp.setUuid(data.getUuidValue());
+								if (!sendevents) {
+									cmbPositionType.setSelection(new StructuredSelection(temp));
+								}else {
+									cmbPositionType.setSelection(new StructuredSelection(temp));	
+								}
 							}
 						}
-					}
-					
-
-				});
+					});
+				}finally {
+					fireEvents = false;
+				}
+				Display.getDefault().syncExec(()->onInitilized.run());
 			}
 		}).schedule();
 	}

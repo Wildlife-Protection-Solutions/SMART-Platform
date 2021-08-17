@@ -296,7 +296,7 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 		if (contributions != null) {
 			for (IPackageUiContribution cc : contributions) {
 				if (!cc.isTab()) {
-					Composite part = cc.createUi(main, ctpackage, e->validate());
+					Composite part = cc.createUi(main, ctpackage, e->validate(), ()->validate(false));
 					if (part != null) part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));	
 				}
 			}
@@ -313,7 +313,7 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 					Composite all = new Composite(tabs, SWT.NONE);
 					all.setLayout(new GridLayout());
 					item.setControl(all);
-					Composite part = cc.createUi(all, ctpackage, e->validate());
+					Composite part = cc.createUi(all, ctpackage, e->validate(), ()->validate(false));
 					if (part != null) part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 				}
 			}

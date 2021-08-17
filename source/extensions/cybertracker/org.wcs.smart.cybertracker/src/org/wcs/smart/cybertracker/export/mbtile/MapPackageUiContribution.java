@@ -41,7 +41,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -149,7 +148,8 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 
 	private AbstractCtPackage ctpackage; 
 	private List<PackageMapLayer> layers = null;
-	private Listener onValidate;
+	private Listener onModified;
+	private Runnable onInitilized;
 	
 	private boolean isInit = false;
 	
@@ -255,9 +255,10 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 	
 
 	@Override
-	public Composite createUi(Composite parent, ICtPackage ctpackage, Listener onValidate) {
+	public Composite createUi(Composite parent, ICtPackage ctpackage, Listener onModified, Runnable onInitilized) {
 		this.ctpackage = (AbstractCtPackage) ctpackage;
-		this.onValidate = onValidate;
+		this.onModified = onModified;
+		this.onInitilized = onInitilized;
 		
 		try {
 			this.layers = new ArrayList<>(this.ctpackage.getMapLayers());
@@ -274,12 +275,7 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 		((GridLayout)g.getLayout()).marginWidth = 0;
 		((GridLayout)g.getLayout()).marginHeight = 0;
 		
-		Composite header = new Composite(g, SWT.NONE);
-		header.setLayout(new GridLayout());
-		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		Label headerLabel = new Label(header, SWT.NONE);
-		headerLabel.setText(Messages.MapPackageContribution_BasemapOpsTitle);
-		WidgetElement.setCSSClass(header, SmartUiUtils.HEADER_CLASS);
+		SmartUiUtils.createHeaderLabel(g, Messages.MapPackageContribution_BasemapOpsTitle);
 		
 		mapComposite = new Composite(g, SWT.NONE);
 		mapComposite.setLayout(new GridLayout());
@@ -360,7 +356,7 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 				}
 			}
 			lstMapFiles.refresh();
-			if (!isInit) onValidate.handleEvent(null);
+			if (!isInit) onModified.handleEvent(null);
 			
 		});
 		
@@ -373,7 +369,7 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 				if (mapfiles.remove(item)) deletedfiles.add((Path)item);
 			}
 			lstMapFiles.refresh();
-			if (!isInit) onValidate.handleEvent(null);
+			if (!isInit) onModified.handleEvent(null);
 		});
 		
 		smartComp = new Composite(stackComposite, SWT.NONE);
@@ -415,7 +411,7 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 			enableControls.forEach(c->c.setEnabled(enabled));
 			if (!isInit) {
 				basemapSelected();
-				onValidate.handleEvent(null);
+				onModified.handleEvent(null);
 			}
 		});
 		
@@ -459,7 +455,7 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 			txtBounds.setText(re.toString());
 			
 			updateZoom();
-			if (!isInit) onValidate.handleEvent(null);
+			if (!isInit) onModified.handleEvent(null);
 		});
 		enableControls.add(btnSelectBm);
 		
@@ -505,7 +501,7 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 				minBounds.setSelection(new StructuredSelection(getMaxZoom()));
 			}
 			checkTiles();
-			if (!isInit) onValidate.handleEvent(null);
+			if (!isInit) onModified.handleEvent(null);
 		});
 		minBounds.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		enableControls.add(minBounds.getControl());
@@ -530,7 +526,7 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 				maxBounds.setSelection(new StructuredSelection(getMinZoom()));
 			}
 			checkTiles();
-			if (!isInit) onValidate.handleEvent(null);
+			if (!isInit) onModified.handleEvent(null);
 		});
 		maxBounds.getControl().setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		enableControls.add(maxBounds.getControl());
@@ -557,12 +553,8 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 	}
 
 	private void createOptionLayers(Composite parent) {
-		Composite header = new Composite(parent, SWT.NONE);
-		header.setLayout(new GridLayout());
-		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		Label headerLabel = new Label(header, SWT.NONE);
-		headerLabel.setText(Messages.MapPackageUiContribution_OtherSection);
-		WidgetElement.setCSSClass(header, SmartUiUtils.HEADER_CLASS);
+		
+		SmartUiUtils.createHeaderLabel(parent, Messages.MapPackageUiContribution_OtherSection);
 		
 		Composite otherComposite = new Composite(parent, SWT.NONE);
 		otherComposite.setLayout(new GridLayout(2, false));
@@ -654,7 +646,7 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 		layers.add(index, (PackageMapLayer)item);
 		
 		lstOther.refresh();
-		onValidate.handleEvent(null);
+		onModified.handleEvent(null);
 	}
 	
 	
@@ -725,7 +717,7 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 						}
 						Display.getDefault().asyncExec(() -> {
 							lstOther.refresh();
-							onValidate.handleEvent(null);
+							onModified.handleEvent(null);
 
 						});
 						return true;
@@ -744,7 +736,7 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 			layers.remove(item);
 		}
 		lstOther.refresh();
-		if (!isInit) onValidate.handleEvent(null);
+		if (!isInit) onModified.handleEvent(null);
 
 		
 	}
@@ -954,6 +946,7 @@ public class MapPackageUiContribution implements IPackageUiContribution{
 			Display.getDefault().asyncExec(()->{
 				cmbBasemap.setInput(items);
 				initialize();
+				onInitilized.run();
 			});
 			
 			return Status.OK_STATUS;

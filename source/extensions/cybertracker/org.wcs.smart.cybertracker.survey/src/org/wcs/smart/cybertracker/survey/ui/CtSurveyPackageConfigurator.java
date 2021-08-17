@@ -38,7 +38,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.e4.ui.css.swt.dom.WidgetElement;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -154,12 +153,7 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 		g.setLayout(new GridLayout());
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		Composite header = new Composite(g, SWT.NONE);
-		header.setLayout(new GridLayout());
-		header.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		Label headerLabel = new Label(header, SWT.NONE);
-		headerLabel.setText(Messages.CtSurveyPackageConfigurator_ConfigurationHeader);
-		WidgetElement.setCSSClass(header, SmartUiUtils.HEADER_CLASS); 
+		SmartUiUtils.createHeaderLabel(g,  Messages.CtSurveyPackageConfigurator_ConfigurationHeader);
 		
 		g = new Composite(g, SWT.NONE);
 		g.setLayout(new GridLayout(2, false));
@@ -251,7 +245,7 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 		if (contributions != null) {
 			for (IPackageUiContribution cc : contributions) {
 				if (!cc.isTab()) {
-					Composite part = cc.createUi(main, ctpackage, e->validate());
+					Composite part = cc.createUi(main, ctpackage, e->validate(), ()->validate(false));
 					if (part != null) part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));	
 				}
 			}
@@ -268,7 +262,7 @@ public class CtSurveyPackageConfigurator implements ICtPackageConfigurator {
 					Composite all = new Composite(tabs, SWT.NONE);
 					all.setLayout(new GridLayout());
 					item.setControl(all);
-					Composite part = cc.createUi(all, ctpackage, e->validate());
+					Composite part = cc.createUi(all, ctpackage, e->validate(), ()->validate(false));
 					if (part != null) part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 				}
 			}

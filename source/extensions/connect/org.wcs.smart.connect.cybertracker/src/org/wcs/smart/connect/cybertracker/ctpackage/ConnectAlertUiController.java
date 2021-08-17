@@ -104,6 +104,7 @@ public class ConnectAlertUiController implements IPackageUiContribution{
 	private SashForm sash;
 	
 	private Listener onModified;
+	private Runnable onInitilized;
 
 	private List<CtPackageAlert> currentAlerts;
 	private HashMap<ConfigurableModel, List<CtPackageAlert>> cmAlerts;
@@ -125,9 +126,10 @@ public class ConnectAlertUiController implements IPackageUiContribution{
 	}
 	
 	@Override
-	public Composite createUi(Composite parent, ICtPackage ctpackage, Listener onModified) {
+	public Composite createUi(Composite parent, ICtPackage ctpackage, Listener onModified, Runnable onInitilized) {
 		this.ctpackage = ctpackage;
 		this.onModified = onModified;
+		this.onInitilized = onInitilized;
 		
 		this.cmAlerts = new HashMap<>();
 		this.currentAlerts = new ArrayList<>();
@@ -575,7 +577,8 @@ public class ConnectAlertUiController implements IPackageUiContribution{
 			try(Session session = HibernateManager.openSession()){
 				currentAlerts.addAll(CtPackageAlert.fromString((AbstractCtPackage)ctpackage, session));
 			}
-			Display.getDefault().asyncExec(()->{alertList.refresh();});
+			Display.getDefault().asyncExec(()->{alertList.refresh();onInitilized.run();});
+			
 			return Status.OK_STATUS;
 		}
 	};
@@ -645,6 +648,7 @@ public class ConnectAlertUiController implements IPackageUiContribution{
 					if (modelViewer.getControl().isDisposed()) return;
 					modelViewer.setLabelProvider(new ConnectCmTreeLabelProvider());
 					modelViewer.setInput(currentModel);
+					onInitilized.run();
 				});
 
 			}

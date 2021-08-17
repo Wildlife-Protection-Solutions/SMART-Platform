@@ -93,6 +93,7 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 	private ICtPackage ctpackage;
 	private boolean fireEvents = true;
 	private Font boldFont;
+	private Runnable onInitilized;
 	
 	@Override
 	public boolean isTab() { 
@@ -110,9 +111,10 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 	}
 	
 	@Override
-	public Composite createUi(Composite parent, ICtPackage ctpackage, Listener onModified) {
+	public Composite createUi(Composite parent, ICtPackage ctpackage, Listener onModified, Runnable onInitilized) {
 		this.ctpackage = ctpackage;
 		this.onModified = onModified;
+		this.onInitilized = onInitilized;
 		
 		Composite outer = new Composite(parent, SWT.NONE);
 		outer.setLayout(new GridLayout());
@@ -505,6 +507,7 @@ public class SurveyMetadataPackageContribution implements IPackageUiContribution
 				}finally {
 					fireEvents = true;
 				}
+				onInitilized.run();
 			});
 			
 			return Status.OK_STATUS;
