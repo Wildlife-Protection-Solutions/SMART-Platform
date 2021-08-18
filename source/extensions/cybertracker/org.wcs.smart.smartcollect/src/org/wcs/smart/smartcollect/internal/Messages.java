@@ -84,6 +84,8 @@ public class Messages extends NLS {
 	public static String SmartCollectPackageConfigurator_CMLabel;
 	public static String SmartCollectPackageConfigurator_CmRequired;
 	public static String SmartCollectPackageConfigurator_ConfigurationSection;
+	public static String SmartCollectPackageConfigurator_connectnotconfigured;
+	public static String SmartCollectPackageConfigurator_copytooltip;
 	public static String SmartCollectPackageConfigurator_DataModelLabel;
 	public static String SmartCollectPackageConfigurator_Date;
 	public static String SmartCollectPackageConfigurator_DeafultName;
@@ -102,10 +104,13 @@ public class Messages extends NLS {
 	public static String SmartCollectPackageConfigurator_PrivatePkgLabel;
 	public static String SmartCollectPackageConfigurator_PrivatePkgTooltip;
 	public static String SmartCollectPackageConfigurator_PublicPackage;
+	public static String SmartCollectPackageConfigurator_saverequired;
 	public static String SmartCollectPackageConfigurator_SecuritySection;
 	public static String SmartCollectPackageConfigurator_SettingsRequired;
 	public static String SmartCollectPackageConfigurator_SettingsTab;
 	public static String SmartCollectPackageConfigurator_UnknownErrorLabel;
+	public static String SmartCollectPackageConfigurator_urlerror;
+	public static String SmartCollectPackageConfigurator_urltooltip;
 	public static String SmartCollectPackageConfigurator_UserGroupOpLabel;
 	public static String SmartCollectPackageConfigurator_UserGroupOpTooltip1;
 	public static String SmartCollectPackageConfigurator_UserGroupOpTooltip2;

@@ -24,6 +24,7 @@ package org.wcs.smart.cybertracker.model;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -47,6 +48,11 @@ import org.wcs.smart.util.UuidUtils;
 public interface ICtPackage {
 
 	public static final String PACKAGE_DATE_FORMAT = "yyyyMMddHHmmss"; //$NON-NLS-1$
+	
+	/**
+	 * Metadata key for flagging package and private or public
+	 */
+	public static final String PRIVATE_PROP_KEY = "PKG_ISPRIVATE";  //$NON-NLS-1$
 
 	/**
 	 * Unique identifier
@@ -74,12 +80,11 @@ public interface ICtPackage {
 	public String getTypeIdentifier();
 	
 	/**
-	 * Bcrypt hashed password associated with the pacakge 
+	 * Gets a set of metadata values about the package
+	 * 
 	 * @return
 	 */
-	public default String getPassword() {
-		return null;
-	}
+	public List<MetadataFieldValue> getMetadataValues();
 
 	/**
 	 * Create a copy of this package
@@ -87,6 +92,7 @@ public interface ICtPackage {
 	 * @return
 	 */
 	public ICtPackage copy();
+	
 	
 	@Transient
 	public default Path getLocalFile() throws IOException {

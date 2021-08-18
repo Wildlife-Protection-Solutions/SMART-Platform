@@ -57,6 +57,7 @@ import org.wcs.smart.connect.internal.server.FileUploaderJob;
 import org.wcs.smart.connect.ui.server.ConnectDialog;
 import org.wcs.smart.cybertracker.ctpackage.ui.ICtExportAction;
 import org.wcs.smart.cybertracker.model.ICtPackage;
+import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.cybertracker.model.NavigationLayer;
 import org.wcs.smart.cybertracker.navigation.ExportNavigationManager;
 
@@ -140,7 +141,14 @@ public class ExportCtPackageToConnect implements ICtExportAction {
 				proxy.setName(ctpackage.getName());
 				proxy.setVersion(version);
 				proxy.setType(ctpackage.getTypeIdentifier());
-				proxy.setPassword(ctpackage.getPassword());
+				proxy.setIsPrivate(false);
+				
+				for (MetadataFieldValue v : ctpackage.getMetadataValues()) {
+					if (v.getMetadataKey().equals(ICtPackage.PRIVATE_PROP_KEY)) {
+						proxy.setIsPrivate(v.getBooleanValue());
+						break;
+					}
+				}
 				
 				String location = null;
 				try(Response response = simple.uploadCtPackage(Files.size(file), ctpackage.getUuid().toString(), proxy)){

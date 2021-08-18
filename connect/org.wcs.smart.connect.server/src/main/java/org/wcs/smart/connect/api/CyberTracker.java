@@ -566,12 +566,11 @@ public class CyberTracker extends HttpServlet{
 			java.nio.file.Path upDir =  DataStoreManager.INSTANCE.getRootDirectory().resolve(CT_PACKAGE_DATASTORE_LOCATION);
 			if (!Files.exists(upDir)) Files.createDirectories(upDir);
 			
+			ctpackage.setIsPrivate(proxy.getIsPrivate());
 			ctpackage.setStatus(Status.UPLOADING);
 			ctpackage.setName(proxy.getName());
 			ctpackage.setUploadedDate(ZonedDateTime.now());
 			ctpackage.setVersion(proxy.getVersion());
-			ctpackage.setPassword(proxy.getPassword());
-			
 			StringBuilder sb = new StringBuilder();
 			sb.append(UuidUtils.uuidToString(ctpackage.getCtPackageUuid()));
 			sb.append("."); //$NON-NLS-1$

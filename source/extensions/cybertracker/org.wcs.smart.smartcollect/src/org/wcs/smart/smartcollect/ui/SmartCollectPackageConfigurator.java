@@ -22,9 +22,9 @@
 package org.wcs.smart.smartcollect.ui;
 
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.text.Collator;
-import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -66,7 +66,9 @@ import org.eclipse.swt.widgets.ToolItem;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.control.SmartUiUtils;
+import org.wcs.smart.connect.ConnectHibernateManager;
 import org.wcs.smart.connect.cybertracker.ctpackage.ConnectDataContribution;
+import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackageConfigurator;
 import org.wcs.smart.cybertracker.ctpackage.ui.ICtPackageProperty;
@@ -78,12 +80,14 @@ import org.wcs.smart.cybertracker.export.data.DataModelWrapper;
 import org.wcs.smart.cybertracker.model.ConfigurableModelCtPropertiesProfile;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesProfile;
 import org.wcs.smart.cybertracker.model.ICtPackage;
+import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.cybertracker.properties.CtProfileLabelProvider;
 import org.wcs.smart.cybertracker.properties.CyberTrackerPropertiesDialog;
 import org.wcs.smart.dataentry.DataentryHibernateManager;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelLabelProvider;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.smartcollect.SmartCollectPlugIn;
 import org.wcs.smart.smartcollect.connect.SmartCollectConnectDataContribution;
 import org.wcs.smart.smartcollect.internal.Messages;
 import org.wcs.smart.smartcollect.model.SmartCollectPackage;
@@ -96,18 +100,16 @@ import org.wcs.smart.ui.properties.DialogConstants;
  *
  */
 public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
-
-	private static final String MODIFIED_FLAG = "MODIFIED"; //$NON-NLS-1$
-
-	private static final int MIN_PASSWORD_LENGTH = 3;
 	
 	private SmartCollectPackage ctpackage;
 	
 	private ComboViewer modelViewer;
 	private ComboViewer profileViewer;
-	private Text txtName, txtPasswordPkg;
-	private Button btnPrivatePkg;
-	private Label lPassword;
+	private Text txtName;
+	private Button btnPrivate;
+	private Text txtUrl;
+	private Label lblWarn;
+	private ToolBar privateTb;
 	
 	private List<IPackageUiContribution> contributions = null;
 	private ConfigurableModel selectedModel = null;
@@ -172,8 +174,17 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 		g.setLayout(new GridLayout(2, false));
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		Label warnLabel = new Label(g, SWT.WRAP);
-		warnLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		Composite parts = new Composite(g, SWT.NONE);
+		parts.setLayout(new GridLayout(2, false));
+		parts.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		((GridLayout)parts.getLayout()).marginWidth = 0;
+		((GridLayout)parts.getLayout()).marginHeight = 0;
+		
+		Label lblWarnheader = new Label(parts, SWT.NONE);
+		lblWarnheader.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.WARN_ICON));
+		
+		Label warnLabel = new Label(parts, SWT.WRAP);
+		warnLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)warnLabel.getLayoutData()).widthHint = 200;
 		warnLabel.setText(Messages.SmartCollectPackageConfigurator_WarningLabel);
 		
@@ -258,39 +269,59 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 			Dialog dialog = new CyberTrackerPropertiesDialog(c.getShell(), (CyberTrackerPropertiesProfile)x);
 			dialog.open();
 		});
-		
-		Label lblPrivatePkg = new Label(g, SWT.NONE);
-		lblPrivatePkg.setText(Messages.SmartCollectPackageConfigurator_PrivatePkgLabel);
-		lblPrivatePkg.setToolTipText(Messages.SmartCollectPackageConfigurator_PrivatePkgTooltip);
 	
+		Label lblPrivate = new Label(g, SWT.NONE);
+		lblPrivate.setText(Messages.SmartCollectPackageConfigurator_PrivatePkgLabel);
+		lblPrivate.setToolTipText(Messages.SmartCollectPackageConfigurator_PrivatePkgTooltip);
+		
+		btnPrivate = new Button(g, SWT.CHECK);
+		btnPrivate.addListener(SWT.Selection, e->{
+			if (!isInit) validate();
+			updateUrl();
+		});
+	
+		new Label(g, SWT.NONE);
+		
+		Composite urlpart = new Composite(g, SWT.NONE);
+		urlpart.setLayout(new GridLayout(2, false));
+		urlpart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridLayout)urlpart.getLayout()).marginWidth = 0;
+		((GridLayout)urlpart.getLayout()).marginHeight = 0;
+		
+		txtUrl = new Text(urlpart, SWT.WRAP | SWT.READ_ONLY | SWT.BORDER);
+		txtUrl.setEditable(false);
+		txtUrl.setEnabled(false);
+		txtUrl.setText(""); //$NON-NLS-1$
+		txtUrl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)txtUrl.getLayoutData()).heightHint = 50;
+		
+		privateTb = new ToolBar(urlpart, SWT.FLAT);
+		privateTb.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		
+		ToolItem btnCopy = new ToolItem(privateTb, SWT.PUSH);
+		btnCopy.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.COPY_ICON));
+		btnCopy.setToolTipText(Messages.SmartCollectPackageConfigurator_copytooltip);
+		btnCopy.addListener(SWT.Selection,e->{
+			txtUrl.setRedraw(false);
+			txtUrl.selectAll();
+			txtUrl.copy();
+			txtUrl.clearSelection();
+			txtUrl.setRedraw(true);
+			
+		});
+		
+		new Label(g, SWT.NONE);
+		
+		lblWarn = new Label(g, SWT.WRAP);
+		lblWarn.setText(Messages.SmartCollectPackageConfigurator_urltooltip);
+		lblWarn.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)lblWarn.getLayoutData()).widthHint = 50;
+
 		Composite ct = new Composite(g, SWT.NONE);
 		ct.setLayout(new GridLayout(3, false));
 		((GridLayout)ct.getLayout()).marginWidth = 0;
 		((GridLayout)ct.getLayout()).marginHeight = 0;
-		ct.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
-		btnPrivatePkg = new Button(ct, SWT.CHECK );
-			
-		lPassword = new Label(ct, SWT.NONE);
-		lPassword.setText(Messages.SmartCollectPackageConfigurator_PasswordLbl);
-		lPassword.setToolTipText(Messages.SmartCollectPackageConfigurator_PasswordTooltip);
-		txtPasswordPkg = new Text(ct, SWT.PASSWORD | SWT.BORDER);
-		txtPasswordPkg.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		txtPasswordPkg.addListener(SWT.Modify, e->{
-			if (!isInit) {
-				validate();
-				txtPasswordPkg.setData(MODIFIED_FLAG, Boolean.TRUE);
-			}
-		});
-		
-		btnPrivatePkg.addListener(SWT.Selection,e->{
-			if (!isInit) validate();
-			lPassword.setEnabled(btnPrivatePkg.getSelection());
-			txtPasswordPkg.setEnabled(btnPrivatePkg.getSelection());
-		});
-		btnPrivatePkg.setSelection(false);
-		lPassword.setEnabled(false);
-		txtPasswordPkg.setEnabled(false);
+		ct.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		//main page contributions
 		if (contributions != null) {
@@ -322,6 +353,38 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 		loadData();
 	}
 	
+	private void updateUrl() {
+		lblWarn.setEnabled(btnPrivate.getSelection());
+		txtUrl.setEnabled(btnPrivate.getSelection());
+		privateTb.setEnabled(btnPrivate.getSelection());
+		if (!txtUrl.getEnabled()) {
+			txtUrl.setText(""); //$NON-NLS-1$
+		}else {
+			if (ctpackage.getUuid() == null) {
+				txtUrl.setText(Messages.SmartCollectPackageConfigurator_saverequired);	
+			}else {
+				ConnectServer cs;
+				try(Session s = HibernateManager.openSession()){
+					cs = ConnectHibernateManager.getConnectServer(s);
+				}
+				if (cs == null) {
+					txtUrl.setText(Messages.SmartCollectPackageConfigurator_connectnotconfigured);
+				}else {
+					String surl = cs.getServerUrl();
+				
+					try {
+						URL url = new URL(surl);
+						String link = SmartCollectPackage.generateSmartMobileAppLink(url, ctpackage.getUuid());
+						txtUrl.setText(link);
+					}catch (Exception ex) {
+						SmartCollectPlugIn.log(ex.getMessage(), ex);
+						txtUrl.setText(Messages.SmartCollectPackageConfigurator_urlerror);
+					}
+				}
+			}
+		}
+	}
+	
 	private CyberTrackerPropertiesProfile getAssciatedProfile(Object src) {
 		try (Session session = HibernateManager.openSession()){
 			if (src instanceof ConfigurableModel) {
@@ -349,12 +412,6 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 		if (modified) onModified.accept(true);
 		
 		try {
-			if (btnPrivatePkg.getSelection()) {
-				if (txtPasswordPkg.getText().strip().isBlank() || 
-						txtPasswordPkg.getText().length() <= MIN_PASSWORD_LENGTH) {
-					throw new Exception(MessageFormat.format(Messages.SmartCollectPackageConfigurator_PasswordError, MIN_PASSWORD_LENGTH)); 
-				}
-			}
 			if (txtName.getText().isBlank()) {
 				throw new Exception(Messages.SmartCollectPackageConfigurator_NameRequired);
 			}
@@ -415,22 +472,28 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 			((GridLayout)inner.getLayout()).marginWidth = 0;
 			((GridLayout)inner.getLayout()).marginHeight = 0;
 			
-			Label l= new Label(inner, SWT.NONE);
+			Label l = new Label(inner, SWT.NONE);
 			l.setText(Messages.SmartCollectPackageConfigurator_SecuritySection);
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)l.getLayoutData()).verticalIndent = 5;
 			
-			if (local.getPassword() == null) {
-				l = new Label(inner, SWT.NONE);
-				l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-				l.setText(Messages.SmartCollectPackageConfigurator_PublicPackage);
-			}else {
-				l = new Label(inner, SWT.NONE);
-				l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
-				l.setText(Messages.SmartCollectPackageConfigurator_PrivatePackage);
+			l = new Label(inner, SWT.NONE);
+			l.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_TRANSPARENT));
+			boolean isPrivate = false;
+			for (MetadataFieldValue v : local.getMetadataValues()) {
+				if (v.getMetadataKey().equals(ICtPackage.PRIVATE_PROP_KEY)) {
+					isPrivate = v.getBooleanValue();
+					break;
+				}
 			}
+			if (isPrivate) {
+				l.setText(Messages.SmartCollectPackageConfigurator_PrivatePackage);
+			}else {
+				l.setText(Messages.SmartCollectPackageConfigurator_PublicPackage);
+			}
+			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			
-			l= new Label(inner, SWT.NONE);
+			l = new Label(inner, SWT.NONE);
 			l.setText(Messages.SmartCollectPackageConfigurator_CMLabel);
 			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)l.getLayoutData()).verticalIndent = 5;
@@ -563,12 +626,22 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 				ctpackage.setCtProfile((CyberTrackerPropertiesProfile) profileViewer.getStructuredSelection().getFirstElement());
 				ctpackage.setName(txtName.getText());
 				
-				if ( (Boolean)txtPasswordPkg.getData(MODIFIED_FLAG) ) {
-					ctpackage.setPackagePassword(txtPasswordPkg.getText());
-				}else {
-					ctpackage.setPackagePassword(null);
+				MetadataFieldValue privatemd = null;
+				for (MetadataFieldValue v : ctpackage.getMetadataValues()) {
+					if (v.getMetadataKey().equals(ICtPackage.PRIVATE_PROP_KEY)){
+						privatemd = v;
+						break;
+					}
 				}
-				
+				if (privatemd == null) {
+					privatemd = new MetadataFieldValue();
+					privatemd.setMetadataKey(ICtPackage.PRIVATE_PROP_KEY);
+					privatemd.setCtPackage(ctpackage);
+					privatemd.setConservationArea(ctpackage.getConservationArea());
+					if (ctpackage.getMetadataValues() == null) ctpackage.setMetadataValues(new ArrayList<>());
+					ctpackage.getMetadataValues().add(privatemd);
+				}
+				privatemd.setBooleanValue(btnPrivate.getSelection());
 				
 				session.saveOrUpdate(ctpackage);
 				session.flush();
@@ -576,11 +649,13 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 					cc.updatePackage(ctpackage);
 				}
 				session.getTransaction().commit();
+				
 			}catch (Exception ex) {
 				session.getTransaction().rollback();
 				throw ex;
 			}
 		}
+		updateUrl();
 	}
 	
 	
@@ -649,18 +724,12 @@ public class SmartCollectPackageConfigurator implements ICtPackageConfigurator {
 							if (!profiles.isEmpty()) profileViewer.setSelection(new StructuredSelection(profiles.get(0)));
 						}
 						
-						if (finit.getPassword() != null) {
-							btnPrivatePkg.setSelection(true);
-							txtPasswordPkg.setText(finit.getPassword());
-							txtPasswordPkg.setEnabled(true);
-							lPassword.setEnabled(true);
-						}else {
-							btnPrivatePkg.setSelection(false);
-							txtPasswordPkg.setText(""); //$NON-NLS-1$
-							txtPasswordPkg.setEnabled(false);
-							lPassword.setEnabled(false);
+						for (MetadataFieldValue v : finit.getMetadataValues()) {
+							if (v.getMetadataKey().equalsIgnoreCase(ICtPackage.PRIVATE_PROP_KEY)) {
+								btnPrivate.setSelection(v.getBooleanValue());
+							}
 						}
-						txtPasswordPkg.setData(MODIFIED_FLAG, Boolean.FALSE);
+						updateUrl();
 						
 						validate(false);
 					}finally {

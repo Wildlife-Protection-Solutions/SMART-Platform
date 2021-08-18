@@ -21,7 +21,9 @@
  */
 package org.wcs.smart.smartcollect.model;
 
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.UUID;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -36,7 +38,6 @@ import org.wcs.smart.cybertracker.model.ICtPackage;
 import org.wcs.smart.cybertracker.model.MetadataFieldUuidValue;
 import org.wcs.smart.cybertracker.model.MetadataFieldValue;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
-import org.wcs.smart.util.SharedUtils;
 
 /**
  * SMART Collect package 
@@ -51,8 +52,6 @@ public class SmartCollectPackage extends AbstractCtPackage implements ICmProvide
 	private static final long serialVersionUID = 1L;
 	
 	public static final String PACKAGE_TYPENAME = "SMARTCOLLECT"; //$NON-NLS-1$
-	
-	public static final String PACKAGE_PASSWORD_MD_KEY = "collect.password"; //$NON-NLS-1$
 	
 	//configurable model
 	private ConfigurableModel cm;
@@ -75,50 +74,6 @@ public class SmartCollectPackage extends AbstractCtPackage implements ICmProvide
 	@Transient
 	public String getTypeIdentifier() {
 		return PACKAGE_TYPENAME;
-	}
-
-	/**
-	 * 
-	 * @return the encrypted version of the package password
-	 */
-	@Transient
-	@Override
-	public String getPassword() {
-		if (getMetadataValues() == null) return null;
-		for (MetadataFieldValue value : getMetadataValues()) {
-			if (value.getMetadataKey().equals(PACKAGE_PASSWORD_MD_KEY)) return value.getStringValue();
-		}
-		return null;
-	}
-	
-	/**
-	 * Updates the package password.
-	 * @param raw The plain text password; this will encrypt it using
-	 * bcrypt before storing it to the database
-	 */
-	public void setPackagePassword(String raw) {
-		MetadataFieldValue pw = null; 
-		for (MetadataFieldValue value : getMetadataValues()) {
-			if (value.getMetadataKey().equals(PACKAGE_PASSWORD_MD_KEY)) {
-				pw = value;
-				break;
-			}
-		}
-		if (raw == null) {
-			if (pw != null) {
-				//remove this
-				getMetadataValues().remove(pw);
-			}
-		}else {
-			if (pw == null) {
-				pw = new MetadataFieldValue();
-				pw.setConservationArea(getConservationArea());
-				pw.setCtPackage(this);
-				pw.setMetadataKey(PACKAGE_PASSWORD_MD_KEY);
-				getMetadataValues().add(pw);
-			}
-			pw.setStringValue(SharedUtils.generatePassword(raw));
-		}
 	}
 	
 	@Transient
@@ -157,4 +112,23 @@ public class SmartCollectPackage extends AbstractCtPackage implements ICmProvide
 		}
 		return copy;
 	}
+	
+	
+	@Transient
+	public static String generateSmartMobileAppLink(URL url, UUID ctPackageUuid) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("http://clientapp.cybertracker.org/install/"); //$NON-NLS-1$
+		sb.append(url.getProtocol());
+		sb.append("/"); //$NON-NLS-1$
+		sb.append(url.getHost());
+		if (url.getPort() != -1) {
+			sb.append(":"); //$NON-NLS-1$
+			sb.append(url.getPort());
+		}
+		sb.append(url.getPath().replaceAll("/", "_")); //$NON-NLS-1$ //$NON-NLS-2$
+		sb.append("_noa_smartcollect_packages_"); //$NON-NLS-1$
+		sb.append(ctPackageUuid.toString());
+		return sb.toString();
+	}
+	
 }

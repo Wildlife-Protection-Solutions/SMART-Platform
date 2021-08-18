@@ -68,7 +68,7 @@ public class CyberTrackerPackage extends UuidItem{
 	private UUID workItem;
 	private UUID ctpackage;
 	private String type;
-	private String password;
+	private boolean isPrivate;
 
 	@Column(name="uploaded_date")
 	@JsonDeserialize(using = ZonedDateTimeDeserializer.class)  
@@ -139,16 +139,7 @@ public class CyberTrackerPackage extends UuidItem{
 	public void setWorkItem(UUID workItemUuid){
 		this.workItem = workItemUuid;
 	}
-	
-	@Column(name="password")
-	public String getPassword() {
-		return this.password;
-	}
-	
-	public void setPassword(String password) {
-		this.password = password;
-	}
-	
+
 	@Column(name="package_uuid")
 	public UUID getCtPackageUuid() {
 		return this.ctpackage;
@@ -157,6 +148,16 @@ public class CyberTrackerPackage extends UuidItem{
 	public void setCtPackageUuid(UUID ctpackage) {
 		this.ctpackage = ctpackage;
 	}
+	
+	@Column(name="is_private")
+	public boolean getIsPrivate() {
+		return this.isPrivate;
+	}
+	
+	public void setIsPrivate(boolean isPrivate) {
+		this.isPrivate = isPrivate;
+	}
+	
 	@Transient
 	public CyberTrackerPackageProxy asProxy() {
 		CyberTrackerPackageProxy proxy = new CyberTrackerPackageProxy();

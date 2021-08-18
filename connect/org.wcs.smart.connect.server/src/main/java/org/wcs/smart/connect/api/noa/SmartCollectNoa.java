@@ -27,11 +27,11 @@ import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -47,7 +47,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
 import org.hibernate.Session;
-import org.mindrot.jbcrypt.BCrypt;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.api.ConnectRESTApplication;
 import org.wcs.smart.connect.api.CyberTracker;
@@ -81,11 +80,6 @@ public class SmartCollectNoa {
 	
 	private final Logger logger = Logger.getLogger(SmartCollectNoa.class.getName());
 
-	/**
-	 * The request header parameter for package passwords 
-	 */
-	public static final String PASS_HEADER_PARAM = "X-PKG-PASS"; //$NON-NLS-1$
-	
 	@Context private ServletContext context;
 	@Context private HttpServletResponse response;
 	@Context private HttpServletRequest request;
@@ -94,13 +88,9 @@ public class SmartCollectNoa {
 	@GET
     @Path("packages/")
 	@Produces({ MediaType.APPLICATION_JSON })
-	@Operation(description = "Gets the details about all SMART Collect packages on this server. By default only "
-			+ "public packages are returned.  To get private packages supply the X-PKG-PASS header, "
-			+ "if supplied only private packages with matching passwords will be returned.")
+	@Operation(description = "Gets the details about all SMART Collect packages on this server.")
 	@ApiResponse(responseCode = "200", description = "OK", content = {@Content(array = @ArraySchema(schema = @Schema(implementation=CyberTrackerPackageProxy.class)))})
 	public List<CyberTrackerPackageProxy> getPackages(){
-		
-		String password = request.getHeader(PASS_HEADER_PARAM);
 		
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
@@ -108,18 +98,9 @@ public class SmartCollectNoa {
 			List<CyberTrackerPackage> ctpackages = QueryFactory.buildQuery(s, CyberTrackerPackage.class, 
 					"type", SmartCollectPackage.PACKAGE_TYPENAME).list(); //$NON-NLS-1$
 		
-			List<CyberTrackerPackageProxy> proxies = new ArrayList<>();
-			
-			for (CyberTrackerPackage p : ctpackages) {
-				if (password == null) {
-					if (p.getPassword() == null) proxies.add(p.asProxy());
-				}else {
-					if (p.getPassword() != null &&
-							BCrypt.checkpw(password, p.getPassword()) ){
-						proxies.add(p.asProxy());
-					}
-				}
-			}		
+			List<CyberTrackerPackageProxy> proxies = ctpackages.stream()
+					.filter(e->!e.getIsPrivate())
+					.map(e->e.asProxy()).collect(Collectors.toList());
 			return proxies;
 		}finally {
 			s.getTransaction().commit();
@@ -131,7 +112,7 @@ public class SmartCollectNoa {
 	 */
 	@GET
     @Path("packages/{uuid}")
-	@Operation(description = "Gets the SMART Collect package as a zip file. If the package is a private package the password must be supplied in the X-PKG-PASS header.")
+	@Operation(description = "Gets the SMART Collect package as a zip file.")
 	@ApiResponse(responseCode = "200", description="Package returned successfully")
 	@ApiResponse(responseCode = "404", description = "Requested package not found")
 	public Response getCtPackage(@PathParam("uuid") String packageUuidstr){
@@ -142,7 +123,6 @@ public class SmartCollectNoa {
 		}catch (Exception ex) {
 			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("SmartCollectNoa.InvalidIdentifier", request.getLocale()));  //$NON-NLS-1$
 		}
-		String password = request.getHeader(PASS_HEADER_PARAM);
 		
 		java.nio.file.Path file = null;
 		Session s = HibernateManager.getSession(context);
@@ -152,12 +132,6 @@ public class SmartCollectNoa {
 					"ctPackageUuid", packageUuid).uniqueResult(); //$NON-NLS-1$
 			if (ctpackage == null) throw new SmartConnectException(Response.Status.NOT_FOUND);
 			if (!ctpackage.getType().equals(SmartCollectPackage.PACKAGE_TYPENAME)) throw new SmartConnectException(Response.Status.NOT_FOUND); 
-			
-			if (ctpackage.getPassword() != null) {
-				if (password == null || !BCrypt.checkpw(password, ctpackage.getPassword())) {
-					throw new SmartConnectException(Response.Status.UNAUTHORIZED);
-				}
-			}
 			file = DataStoreManager.INSTANCE.getRootDirectory()
 					.resolve(CyberTracker.CT_PACKAGE_DATASTORE_LOCATION).resolve(ctpackage.getFilename());
 		}finally {
@@ -201,7 +175,7 @@ public class SmartCollectNoa {
 	@GET
     @Path("packages/info/{uuid}")
 	@Produces({ MediaType.APPLICATION_JSON })
-	@Operation(description = "Gets the details about a given SMART Collect package including the revision number and last uploaded date. If the package is a private package the password must be supplied in the X-PKG-PASS header.")
+	@Operation(description = "Gets the details about a given SMART Collect package including the revision number and last uploaded date.")
 	@ApiResponse(responseCode = "200", description = "OK", content = {@Content(schema = @Schema(implementation=CyberTrackerPackageProxy.class))})
 	@ApiResponse(responseCode = "400", description = "Invalid package identifier")
 	public CyberTrackerPackageProxy getPackageDetails(@PathParam("uuid") String packageUuidstr){
@@ -212,8 +186,6 @@ public class SmartCollectNoa {
 		}catch (Exception ex) {
 			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("CyberTrackerNoa.InvalidPackageError", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 		}
-		
-		String password = request.getHeader(PASS_HEADER_PARAM);
 
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
@@ -223,11 +195,6 @@ public class SmartCollectNoa {
 			
 			if (ctpackage == null) throw new SmartConnectException(Response.Status.NOT_FOUND);
 			if (!ctpackage.getType().equals(SmartCollectPackage.PACKAGE_TYPENAME)) throw new SmartConnectException(Response.Status.NOT_FOUND);
-			if (ctpackage.getPassword() != null) {
-				if (password == null || !BCrypt.checkpw(password, ctpackage.getPassword())) {
-					throw new SmartConnectException(Response.Status.UNAUTHORIZED);
-				}
-			}
 			return ctpackage.asProxy();
 		}finally {
 			s.getTransaction().commit();

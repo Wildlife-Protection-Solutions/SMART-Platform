@@ -73,6 +73,7 @@ import org.wcs.smart.connect.model.CyberTrackerNavigationLayer;
 import org.wcs.smart.connect.model.CyberTrackerPackage;
 import org.wcs.smart.connect.model.GeoJsonAlert;
 import org.wcs.smart.hibernate.QueryFactory;
+import org.wcs.smart.smartcollect.model.SmartCollectPackage;
 import org.wcs.smart.util.UuidUtils;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -176,7 +177,8 @@ public class CyberTrackerNoa {
 					"ctPackageUuid", packageUuid).uniqueResult(); //$NON-NLS-1$
 			
 			if (ctpackage == null) throw new SmartConnectException(Response.Status.NOT_FOUND);
-			if (!ctpackage.getConservationArea().getUuid().equals(tokenCaUuid)) throw new SmartConnectException(Response.Status.FORBIDDEN); 
+			if (!ctpackage.getConservationArea().getUuid().equals(tokenCaUuid)) throw new SmartConnectException(Response.Status.FORBIDDEN);
+			if (ctpackage.getType().equalsIgnoreCase(SmartCollectPackage.PACKAGE_TYPENAME)) throw new SmartConnectException(Response.Status.NOT_FOUND);
 			
 			return ctpackage.asProxy();
 		}finally {
@@ -206,6 +208,7 @@ public class CyberTrackerNoa {
 			List<CyberTrackerPackageProxy> proxies = new ArrayList<>();
 			
 			for (CyberTrackerPackage p : ctpackages) {
+				if (p.getType().equalsIgnoreCase(SmartCollectPackage.PACKAGE_TYPENAME)) continue;
 				proxies.add(p.asProxy());
 			}
 		
@@ -244,7 +247,7 @@ public class CyberTrackerNoa {
 					"ctPackageUuid", packageUuid).uniqueResult(); //$NON-NLS-1$
 			if (ctpackage == null) throw new SmartConnectException(Response.Status.NOT_FOUND);
 			if (!ctpackage.getConservationArea().getUuid().equals(tokenCaUuid)) throw new SmartConnectException(Response.Status.FORBIDDEN); 
-			
+			if (ctpackage.getType().equalsIgnoreCase(SmartCollectPackage.PACKAGE_TYPENAME)) throw new SmartConnectException(Response.Status.NOT_FOUND);
 			file = DataStoreManager.INSTANCE.getRootDirectory()
 					.resolve(CyberTracker.CT_PACKAGE_DATASTORE_LOCATION).resolve(ctpackage.getFilename());
 		}finally {

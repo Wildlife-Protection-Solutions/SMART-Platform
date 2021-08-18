@@ -27,8 +27,6 @@ import java.util.UUID;
 import org.wcs.smart.connect.util.ZonedDateTimeDeserializer;
 import org.wcs.smart.connect.util.ZonedDateTimeSerializer;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
@@ -49,8 +47,7 @@ public class CyberTrackerPackageProxy {
 	private String revision;
 	private String name;
 	
-	@JsonInclude(Include.NON_NULL)
-	private String password;
+	private boolean isPrivate;
 	
 	@JsonDeserialize(using = ZonedDateTimeDeserializer.class)  
 	@JsonSerialize(using = ZonedDateTimeSerializer.class)
@@ -110,10 +107,11 @@ public class CyberTrackerPackageProxy {
 		this.type = type;
 	}
 	
-	public String getPassword() {
-		return this.password;
+	public boolean getIsPrivate() {
+		return this.isPrivate;
 	}
-	public void setPassword(String password) {
-		this.password = password;
+	
+	public void setIsPrivate(boolean isPrivate) {
+		this.isPrivate = isPrivate;
 	}
 }

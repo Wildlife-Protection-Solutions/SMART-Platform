@@ -38,7 +38,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
@@ -72,9 +71,7 @@ public class ConnectDataUiController implements IPackageUiContribution{
 	private Label lblPos1, lblPos2;
 	private Text txtPositionPeriod;
 	private ComboViewer cmbPositionType;
-	
-	private List<AlertType> types = null;
-	
+		
 	@Inject private IEclipseContext context;
 
 	private boolean fireEvents = true;
@@ -268,28 +265,36 @@ public class ConnectDataUiController implements IPackageUiContribution{
 			public void typesLoaded(List<AlertType> atypes) {
 				try {
 					fireEvents = false;
-					final boolean sendevents = (types == null);
-					types = atypes;
+					List<AlertType> types = new ArrayList<>(atypes);
 					cmbPositionType.getControl().getDisplay().asyncExec(()->{
 						cmbPositionType.setInput(types);
 						
 						if (ctpackage instanceof AbstractCtPackage) {
 							MetadataFieldValue data = findCreateMetadataField(CtConnectPackageMetadata.Properties.POSITION_UPLOAD.name(), (AbstractCtPackage)ctpackage);
 							if (data.getUuidValue() != null) {
-								AlertType temp = new AlertType();
-								temp.setUuid(data.getUuidValue());
-								if (!sendevents) {
-									cmbPositionType.setSelection(new StructuredSelection(temp));
-								}else {
-									cmbPositionType.setSelection(new StructuredSelection(temp));	
+								
+								AlertType temp = null;
+								for (AlertType t : types) {
+									if (t.getUuid().equals(data.getUuidValue())){
+										temp = t;
+										break;
+									}
 								}
+								if (temp == null) {
+									temp = new AlertType();
+									temp.setUuid(data.getUuidValue());
+									temp.setLabel(data.getUuid().toString());
+									types.add(temp);
+									cmbPositionType.refresh();
+								}
+								cmbPositionType.setSelection(new StructuredSelection(temp));
 							}
 						}
+						onInitilized.run();
 					});
 				}finally {
 					fireEvents = true;
 				}
-				Display.getDefault().syncExec(()->onInitilized.run());
 			}
 		}).schedule();
 	}

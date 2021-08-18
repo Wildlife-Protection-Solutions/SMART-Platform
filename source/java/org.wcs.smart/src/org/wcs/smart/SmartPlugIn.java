@@ -256,7 +256,7 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	public static final String MERGE_TRACK_ICON = "org.wcs.smart.track.merge"; //$NON-NLS-1$
 	public static final String EDIT_TRACK_ICON = "org.wcs.smart.track.edit"; //$NON-NLS-1$
 	public static final String ZOOM_TRACK_ICON = "org.wcs.smart.track.zoom"; //$NON-NLS-1$
-	
+	public static final String COPY_ICON = "org.wcs.smart.copy"; //$NON-NLS-1$
 	public static final String EXPORT_ICON = "org.wcs.smart.export"; //$NON-NLS-1$
 	public static final String IMPORT_ICON = "org.wcs.smart.import"; //$NON-NLS-1$
 	public static final String PDF_ICON = "org.wcs.smart.pdf"; //$NON-NLS-1$
@@ -505,6 +505,7 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	     reg.put(SAVE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/save.png")); //$NON-NLS-1$
 	     reg.put(SAVEAS_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/saveas.png")); //$NON-NLS-1$
 	     reg.put(SAVEALL_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/saveall.png")); //$NON-NLS-1$
+	     reg.put(COPY_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/shared16/copy.png")); //$NON-NLS-1$
 	     
 	     reg.put(AREA_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/etool16/area_polygon.png")); //$NON-NLS-1$
 	     
