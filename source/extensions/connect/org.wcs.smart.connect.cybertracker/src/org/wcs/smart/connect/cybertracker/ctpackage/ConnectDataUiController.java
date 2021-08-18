@@ -287,7 +287,7 @@ public class ConnectDataUiController implements IPackageUiContribution{
 						}
 					});
 				}finally {
-					fireEvents = false;
+					fireEvents = true;
 				}
 				Display.getDefault().syncExec(()->onInitilized.run());
 			}
