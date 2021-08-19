@@ -9,7 +9,9 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/infoerror.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/cybertracker.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/dialog.js"></script>
-
+<script type="text/javascript"> 
+var smartmobilelink = "${smartmobilelink}";
+</script>
 
 
 <title><fmt:message key="cybertracker.packagestitle"/></title>
@@ -46,7 +48,7 @@
 	  </div>	
 	  
 	  <!-- Navigation Layer Table -->
-	  <p class="top-spacer label-header" style="border-top:1px solid; padding-top:4px"><fmt:message key="cybertracker.routestable"/></p>
+	  <p class="top-spacer label-header" style="margin-top:50px; border-top:1px solid; padding-top:4px"><fmt:message key="cybertracker.routestable"/></p>
 	  
 	  <div class="top-spacer" >
 	    <div id="navlayertable" class="table-cell smart-table">
@@ -59,6 +61,20 @@
 		  </div>
 	    </div>
 	    <a id="navrefreshnow" href="#"><fmt:message key="cybertracker.refresh"/></a>
+	  </div>
+	  
+	  <!-- Private Packages Table -->
+	  <p class="top-spacer label-header" style="margin-top:50px; border-top:1px solid; padding-top:4px"><fmt:message key="cybertracker.privatepackages"/></p>
+	  
+	  <div class="top-spacer" >
+	    <div id="privatepackagetable" class="table-cell smart-table">
+	  	  <div class="table-row smart-table-header">
+			  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.privatepackagesname"/></div>
+			  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.privatepackagesca"/></div>
+			  <div class="table-cell smart-table-cell"><fmt:message key="cybertracker.privatepackageslink"/></div>
+		  </div>
+	    </div>
+	    <a id="privatepackagerefreshnow" href="#"><fmt:message key="cybertracker.refresh"/></a>
 	  </div>
 	  
 	  <!--  API Key Table -->

@@ -127,7 +127,7 @@ public class SmartCollectPackage extends AbstractCtPackage implements ICmProvide
 		}
 		sb.append(url.getPath().replaceAll("/", "_")); //$NON-NLS-1$ //$NON-NLS-2$
 		sb.append("_noa_smartcollect_packages_"); //$NON-NLS-1$
-		sb.append(ctPackageUuid.toString());
+		if (ctPackageUuid != null) sb.append(ctPackageUuid.toString());
 		return sb.toString();
 	}
 	

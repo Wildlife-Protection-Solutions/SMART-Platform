@@ -7,12 +7,14 @@ window.onload = function(){
 	menuCheckOnload();
 	
 	refreshPackageList();
+	refreshPrivatePackageList();
 	refreshApiKeyTable();
 	refreshNavigationList();
 	getCollectUsers();
 	
 	document.querySelector("#refreshnow").onclick=function(){refreshPackageList(); return false;};
 	document.querySelector("#navrefreshnow").onclick=function(){refreshNavigationList(); return false;};
+	document.querySelector("#privatepackagerefreshnow").onclick=function(){refreshPrivatePackageList(); return false;};
 }
 
 function confirmResetApi(){
@@ -159,6 +161,62 @@ function refreshPackageList(){
  	oReq.send();
 }
 
+function refreshPrivatePackageList(){
+	
+	//clear current table
+	var objects = document.querySelectorAll("div.pprow");
+	for (var i = 0; i < objects.length; i++){
+		var ele = objects[i];
+		ele.parentElement.removeChild(ele);
+	}
+
+	var parent = document.querySelector("#privatepackagetable");
+	var row = document.createElement("div");
+	row.className="pprow";
+	row.innerHTML=i18n("cybertracker.loadingpackagesmsg");
+	parent.appendChild(row);
+		
+ 	var oReq = new XMLHttpRequest();
+ 	oReq.onload = createPrivatePackageTable;
+ 	oReq.open("Get", CTURL + "/packages?private=true", true);
+ 	oReq.send();
+}
+
+
+function createPrivatePackageTable(){
+	if (this.status != 200) {
+		var msg = i18n("cybertracker.loadingpackageserror");
+		if (this.status == 401){
+			msg += i18n("cybertracker.unauthorized");
+		}
+		try {
+			msg += JSON.parse(this.responseText).error
+		} catch (err) {
+		}
+		displayError(msg);
+		return;
+	}
+	//clear current table
+	var objects = document.querySelectorAll("div.pprow");
+	for (var i = 0; i < objects.length; i++){
+		var ele = objects[i];
+		ele.parentElement.removeChild(ele);
+	}
+	
+	var parent = document.querySelector("#privatepackagetable");
+ 	var packages = JSON.parse(this.responseText);
+ 	
+ 	for (var i = 0; i < packages.length; i ++){
+ 		
+		var link = smartmobilelink + packages[i].uuid;
+		
+ 		tableCreateRow(parent, 
+ 				[packages[i].name, packages[i].caLabel, link], 
+ 				"pprow " + (i % 2 == 1 ? "smart-table-rowon" : "smart-table-rowoff"));
+ 		
+ 		//row.dataset.packageuuid = packages[i].uuid;
+ 	}
+}
 
 function createPackageTable(){
 	if (this.status != 200) {

@@ -117,7 +117,8 @@ public class CyberTracker extends HttpServlet{
 	@GET
     @Path("/packages")
 	@Produces({ MediaType.APPLICATION_JSON })
-    public List<CyberTrackerPackageProxy> getPackages(@QueryParam("cauuid") String cauuid){
+    public List<CyberTrackerPackageProxy> getPackages(@QueryParam("cauuid") String cauuid,
+    		@QueryParam("private") String privatepkg){
 		UUID caUuid = null;
 		try {
 			if (cauuid != null && !cauuid.trim().isEmpty()) {
@@ -126,6 +127,12 @@ public class CyberTracker extends HttpServlet{
 		}catch (Exception ex){
 			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("CyberTracker.InvalidCaUuid", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 		}
+		
+		boolean onlyprivate = false;
+		if (privatepkg != null && privatepkg.trim().equalsIgnoreCase("true")) { //$NON-NLS-1$
+			onlyprivate = true;
+		}
+		
 		List<CyberTrackerPackageProxy> proxies = new ArrayList<>();
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
@@ -136,12 +143,15 @@ public class CyberTracker extends HttpServlet{
 			for (CyberTrackerPackage ca : items) {
 				if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), CyberTrackerAction.KEY, ca.getConservationArea().getUuid())){
 					if (caUuid == null || caUuid.equals(ca.getConservationArea().getUuid())) {
-						proxies.add(ca.asProxy());
+						if (onlyprivate) {
+							if (ca.getIsPrivate()) proxies.add(ca.asProxy());
+						}else {
+							proxies.add(ca.asProxy());
+						}
 					}
 				}
 			}
 		
-			
 			Collections.sort(proxies, (a,b)->{
 				if (a.getCaUuid().equals(b.getCaUuid())) return a.getName().compareToIgnoreCase(b.getName());
 				return a.getCaLabel().compareToIgnoreCase(b.getCaLabel());
