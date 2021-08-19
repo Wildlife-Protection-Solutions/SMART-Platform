@@ -44,6 +44,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -132,6 +134,7 @@ public class IncidentSummaryPage extends EditorPart {
 	private ListViewer attachments;
 	
 	private Composite observationComp;
+	private Font boldFont;
 	
 	public IncidentSummaryPage(IncidentEditor editor){
 		this.editor = editor;
@@ -310,7 +313,7 @@ public class IncidentSummaryPage extends EditorPart {
 			for (WaypointObservationGroup g : incident.getObservationGroups()) {
 				
 				Composite group = toolkit.createComposite(observationComp, SWT.BORDER);
-				group.setLayout(new GridLayout(2, true));
+				group.setLayout(new GridLayout());
 				group.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				
 				for (int i = 0; i < g.getObservations().size(); i ++) {
@@ -341,10 +344,16 @@ public class IncidentSummaryPage extends EditorPart {
 					Label l = toolkit.createLabel(left, SmartUtils.formatStringForLabel(wo.getCategory().getName()));
 					l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 					
-					l = toolkit.createLabel(left, wo.getCategory().getParent() == null ? "" :SmartUtils.formatStringForLabel(wo.getCategory().getParent().getFullCategoryName()), SWT.WRAP );	 //$NON-NLS-1$
-					l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+					l.setFont(boldFont);
+					String name = ""; //$NON-NLS-1$
+					if (wo.getCategory().getParent() != null) {
+						name += SmartUtils.formatStringForLabel(wo.getCategory().getParent().getFullCategoryName()) ;
+					}
+					l = toolkit.createLabel(left, name, SWT.WRAP );
+					l.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, true));
 					l.addListener(SWT.Resize,labelResize);
-
+					l.setFont(boldFont);
+					
 					Composite right = toolkit.createComposite(group);
 					right.setLayout(new GridLayout(2, false));
 					right.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -356,11 +365,11 @@ public class IncidentSummaryPage extends EditorPart {
 					attributes.setLayout(new GridLayout(2, false));
 					((GridLayout)attributes.getLayout()).marginWidth = 0;
 					((GridLayout)attributes.getLayout()).marginHeight = 0;
-					
-					
+					((GridData)attributes.getLayoutData()).horizontalIndent = 64;
+
 					for (WaypointObservationAttribute a : wo.getAttributes()) {
 						l = toolkit.createLabel(attributes,SmartUtils.formatStringForLabel(a.getAttribute().getName()) +":"); //$NON-NLS-1$
-						l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
+						l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 						
 						l = toolkit.createLabel(attributes, SmartUtils.formatStringForLabel(a.getAttributeValueAsString(Locale.getDefault())), SWT.WRAP);
 						l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -369,7 +378,7 @@ public class IncidentSummaryPage extends EditorPart {
 					}
 					
 					l = toolkit.createLabel(attributes,Messages.IncidentSummaryPage_AttachmentsLabel);
-					l.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
+					l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 				
 					l = toolkit.createLabel(attributes, MessageFormat.format("{0}", wo.getAttachments().size())); //$NON-NLS-1$
 					l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -545,11 +554,13 @@ public class IncidentSummaryPage extends EditorPart {
 		observationComp = toolkit.createComposite(scroll);
 		scroll.setContent(observationComp);
 		observationComp.setLayout(new GridLayout());
-//		observationComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridLayout)observationComp.getLayout()).marginWidth = 0;
 		((GridLayout)observationComp.getLayout()).marginHeight = 0;
 		
-//		observationComp.setSize(observationComp.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+		FontData fd = observationComp.getFont().getFontData()[0];
+		fd.setStyle(SWT.BOLD);
+		boldFont = new Font(l.getDisplay(),fd);
+		observationComp.addListener(SWT.Dispose, e->boldFont.dispose());
 		
 		Composite bottomComp = toolkit.createComposite(observationTableComp);
 		bottomComp.setLayout(new GridLayout(2, false));
