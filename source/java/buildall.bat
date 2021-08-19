@@ -1,4 +1,4 @@
-SET version=7.0.4
+SET version=7.1.0
 
 for /f %%i in ('date /t') do set RESULT=%%i
 echo The directory is %RESULT%

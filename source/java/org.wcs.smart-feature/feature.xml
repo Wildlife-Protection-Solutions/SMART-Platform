@@ -5,7 +5,7 @@
       version="7.0.5.qualifier"
       provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.license.feature"
-      license-feature-version="7.1.0">
+      license-feature-version="7.1.0.qualifier">
 
    <description url="http://www.smartconservationtools.org">
       The main SMART feature that includes all the core SMART modules.
