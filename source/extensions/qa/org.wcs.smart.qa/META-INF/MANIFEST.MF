@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART Quality Assurance PlugIn
 Bundle-SymbolicName: org.wcs.smart.qa;singleton:=true
-Bundle-Version: 7.0.4.qualifier
+Bundle-Version: 7.1.0
 Bundle-Activator: org.wcs.smart.qa.QaPlugIn
 Bundle-Vendor: org.wcs.smart
 Require-Bundle: org.eclipse.ui,

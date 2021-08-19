@@ -6,13 +6,13 @@
 	<parent>
 		<groupId>org.wcs.smart.imageprocessor</groupId>
 		<artifactId>smart-tycho</artifactId>
-		<version>7.0.4-SNAPSHOT</version>
+		<version>7.1.0-SNAPSHOT</version>
 		<relativePath>../</relativePath>
 	</parent>
 	
 	<name>SMART Image Processor</name>
 	<artifactId>org.wcs.smart.imageprocessor</artifactId>
   	<packaging>eclipse-plugin</packaging>
-	<version>7.0.3-SNAPSHOT</version>
+	<version>7.1.0-SNAPSHOT</version>
 	
 </project>

@@ -2,10 +2,10 @@
 <feature
       id="org.wcs.smart.udig.feature"
       label="SMART UDig Feature"
-      version="7.0.4.qualifier"
+      version="7.1.0"
       provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.license.feature"
-      license-feature-version="7.0.4.qualifier">
+      license-feature-version="7.1.0">
 
    <description>
       Provides all the required uDig functions to support mapping.
