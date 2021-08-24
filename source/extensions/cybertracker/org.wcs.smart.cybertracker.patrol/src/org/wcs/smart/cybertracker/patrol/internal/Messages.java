@@ -30,6 +30,7 @@ public class Messages extends NLS {
 	public static String AddDataQueueCtPatrolJob_ErrorLabel;
 	public static String AddDataQueueCtPatrolJob_ErrorMsg;
 	public static String AddDataQueueCtPatrolJob_InstallMsg;
+
 	public static String DataQueueCtPatrolDatabaseUpgrader_UpgradeTask;
 	public static String DataQueueCtPatrolJob_ErrorMsg;
 	public static String DataQueueCtPatrolJob_UninstallingTaskName;
@@ -237,6 +238,8 @@ public class Messages extends NLS {
 	public static String PatrolPackageExporter_CommentPageLabel;
 	public static String PatrolPackageExporter_LeaderPageLabel;
 	public static String PatrolPackageExporter_MandatePageLabel;
+
+	public static String PatrolPackageExporter_MandatesRequired;
 
 	public static String PatrolPackageExporter_NoPatrolTypes;
 	public static String PatrolPackageExporter_ObjectivePageLabel;

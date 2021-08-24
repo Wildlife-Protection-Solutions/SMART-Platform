@@ -331,12 +331,16 @@ public enum PatrolPackageExporter {
 		
 		metadataScreens.add(convertStations(map.get(PatrolMetadataField.STATION.name()), session, ctpackage.getConservationArea()));
 		
-		metadataScreens.add(CtJsonExportUtils.convertKeyOptions(map.get(PatrolMetadataField.MANDATE.name()), 
+		JSONObject mandateScreen = CtJsonExportUtils.convertKeyOptions(map.get(PatrolMetadataField.MANDATE.name()), 
 				PatrolMandate.class, PatrolMetadataField.MANDATE.getJsonKey(), 
 				Messages.PatrolPackageExporter_MandatePageLabel,
 				getTranslations(Messages.PatrolPackageExporter_MandatePageLabel, "PatrolPackageExporter_MandatePageLabel", ctpackage.getConservationArea()), //$NON-NLS-1$
 				PatrolMetadataField.MANDATE.isRequired(), 
-				PatrolMetadataField.MANDATE.isFixed(), session, ctpackage.getConservationArea()));
+				PatrolMetadataField.MANDATE.isFixed(), session, ctpackage.getConservationArea());
+		metadataScreens.add(mandateScreen);
+		JSONObject mds = (JSONObject) mandateScreen.get(PatrolMetadataField.MANDATE.getJsonKey());
+		JSONArray mit = (JSONArray) mds.get(CtJsonExportUtils.JSON_OPTION_PROP_KEY);
+		if (mit.size() == 0) throw new IOException(Messages.PatrolPackageExporter_MandatesRequired);
 		
 		metadataScreens.add(CtJsonExportUtils.convertStringOp(map.get(PatrolMetadataField.OBJECTIVE.name()), 
 				PatrolMetadataField.OBJECTIVE.getJsonKey(), 
