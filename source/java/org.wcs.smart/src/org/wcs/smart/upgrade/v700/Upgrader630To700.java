@@ -29,6 +29,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -387,6 +388,16 @@ public class Upgrader630To700 implements IDatabaseUpgrader {
 					}
 				}
 				
+				HashSet<String> keyids = new HashSet<>();
+				try(PreparedStatement ps1 = c.prepareStatement("SELECT keyid FROM smart.icon WHERE ca_uuid = ?")){ //$NON-NLS-1$
+					ps1.setBytes(1, cuuid);
+					try(ResultSet rs1 = ps1.executeQuery()){
+						while(rs1.next()) {
+							keyids.add(rs1.getString(1));
+						}
+					}
+				}
+				
 				if (lineuuid == null && blackuuid == null && coloruuid == null) {
 					//not iconsets in this conservation area
 					continue;
@@ -400,10 +411,14 @@ public class Upgrader630To700 implements IDatabaseUpgrader {
 					}
 					if (!found) continue;
 					
+					//icon already exists; ignore
+					String keyid = icon[0];
+					if (keyids.contains(keyid)) continue;
+					
 					byte[] iconuuid = DerbyUtils.createUuid();
 					
 					psicon.setBytes(1, iconuuid);
-					psicon.setString(2, icon[0]);
+					psicon.setString(2, keyid);
 					psicon.setBytes(3, cuuid);
 					psicon.addBatch();
 					
