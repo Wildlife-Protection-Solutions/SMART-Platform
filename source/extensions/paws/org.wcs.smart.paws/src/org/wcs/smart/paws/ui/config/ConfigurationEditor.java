@@ -88,6 +88,7 @@ import org.osgi.service.event.EventHandler;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.Projection;
+import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.common.control.SmartUiUtils;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.QueryFactory;
@@ -228,6 +229,7 @@ public class ConfigurationEditor extends EditorPart {
 					if (vname.startsWith(PawsParameter.FILE_PREFIX)) {
 						fileNames.add( SharedUtils.getFilenameWithoutExtension( vname.substring(PawsParameter.FILE_PREFIX.length())  ) );
 					}
+					pp.setValue(vname);
 				}else {
 					pp.setValue(null);
 				}
@@ -364,13 +366,21 @@ public class ConfigurationEditor extends EditorPart {
 		List<Object> citems = (List<Object>)cmbBound.getInput();
 		
 		PawsParameter pp = pw.findParameter( PawsParameter.FixedParameter.LYR_BOUNDARY.name() );
-		citems.remove(pp);
-		citems.add(pp);
+
+		String areaKey = null;
+		if (pp.getValue().startsWith(PawsParameter.AREA_PREFIX )) {
+			areaKey = pp.getValue().substring(PawsParameter.AREA_PREFIX.length());
+		}
 		
 		for (Iterator<Object> iterator = citems.iterator(); iterator.hasNext();) {
 			Object object = (Object) iterator.next();
 			if (object instanceof Path) iterator.remove();
+			if (object instanceof PawsParameter) iterator.remove();
+			if (object instanceof AreaType && areaKey != null && areaKey.equals(((AreaType)object).name())) {
+				iterator.remove();
+			}
 		}
+		citems.add(pp);
 		
 		cmbBound.refresh();
 		cmbBound.setSelection(new StructuredSelection(pp));
