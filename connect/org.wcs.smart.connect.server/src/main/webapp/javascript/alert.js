@@ -1049,8 +1049,10 @@ function stylePoints(feature, latlng) {
 function styleFunction(feature) {
 	var color = styleColors[feature.properties.typeuuid]; //styleColors is defined in alert.jsp's <head>
 	var opacity = styleOpacity[feature.properties.typeuuid]; //styleColors is defined in alert.jsp's <head>
-    return {"fillOpacity": opacity, 
-    	"color":color,
+	if (opacity == "") opacity = 1;
+    return {
+	    "fillOpacity": opacity, 
+    	"color": color,
     	"weight": 3,
     	"opacity":opacity,
     	};
