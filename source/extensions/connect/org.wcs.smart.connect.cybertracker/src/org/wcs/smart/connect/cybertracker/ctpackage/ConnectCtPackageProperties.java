@@ -148,7 +148,7 @@ public class ConnectCtPackageProperties implements ICtPackagePropertyProvider {
 
 					}
 					if (cs != null) {
-						if (user != null && !user.getConnectPassword().isBlank()) {
+						if (user != null && user.getConnectPassword() != null && !user.getConnectPassword().isBlank()) {
 							try {
 								SmartConnect temp = SmartConnect.findInstance(cs, user.getConnectUsername(), ConnectPlugIn.decryptPassword(user));
 								if (temp != null) {
