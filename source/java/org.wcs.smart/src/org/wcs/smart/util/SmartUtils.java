@@ -33,6 +33,7 @@ import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -40,8 +41,10 @@ import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 import java.util.zip.ZipFile;
 
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -56,7 +59,6 @@ import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.batik.transcoder.image.PNGTranscoder;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.collections.comparators.NullComparator;
-import org.apache.commons.io.FileUtils;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
@@ -237,20 +239,45 @@ public class SmartUtils {
 	}
 
 	public static void deleteDirectory(final Path dir) throws IOException { 
-		FileUtils.deleteDirectory(dir.toAbsolutePath().normalize().toFile());
+		if (!Files.exists(dir)) return;
+		
+		boolean isposix = dir.getFileSystem().supportedFileAttributeViews().contains("posix");
+		
+		 try (Stream<Path> tree = Files.walk(dir).sorted(Comparator.reverseOrder())) {
+			 Iterator<Path> i = tree.iterator();
+			 while(i.hasNext()) {
+				 Path next = i.next();
+		         if (isposix) {
+		        	 Files.setPosixFilePermissions(next, PosixFilePermissions.fromString("rw-rw-rw-"));	 
+		         }else {
+		        	 next.toFile().setWritable(true);
+		         }
+				 Files.delete(next);
+			 }
+		 }
 	}
 
 	public static void copyDirectory(Path source, Path target) throws IOException {
-		FileUtils.copyDirectory(source.toAbsolutePath().normalize().toFile(), 
-				target.toAbsolutePath().normalize().toFile());
+		try (Stream<Path> tree = Files.walk(source)) {
+		    Iterator<Path> i = tree.iterator();
+		    while (i.hasNext()) {
+		        Path sourceItem = i.next();
+		        Path dest = target.resolve(source.relativize(sourceItem));
+		        if (Files.isDirectory(sourceItem)) {
+		            Files.createDirectories(dest);
+		        } else {
+		            Files.copy(sourceItem, dest);
+		        }
+		    }
+		}
 
 	}
 	
 	public static void moveDirectory(Path source, Path target) throws IOException {
-		FileUtils.moveDirectory(source.toAbsolutePath().normalize().toFile(), 
-				target.toAbsolutePath().normalize().toFile());
-
+		Files.move(source, target);
 	}
+	
+	
 	
 	/**
 	 * Creates the given directory.  

@@ -35,7 +35,6 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
 import org.hibernate.Session;
@@ -63,6 +62,7 @@ import org.wcs.smart.i2.security.IntelSecurityManager;
 import org.wcs.smart.i2.ui.entity.exporter.RecordCsvExporter;
 import org.wcs.smart.i2.xml.EntityToXml;
 import org.wcs.smart.i2.xml.RecordXmlExporter;
+import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 import org.wcs.smart.util.ZipUtil;
 
@@ -116,7 +116,7 @@ public enum WorkingSetDataExporter {
 			ZipUtil.createZip(new Path[] {entities, records, queries}, exportFile, sub.split(1));
 		}finally {
 			try {
-				FileUtils.deleteDirectory(tempDir.toAbsolutePath().toFile());
+				SmartUtils.deleteDirectory(tempDir.toAbsolutePath());
 			}catch (IOException ex) {
 				Intelligence2PlugIn.log(ex.getMessage(), ex);
 			}
