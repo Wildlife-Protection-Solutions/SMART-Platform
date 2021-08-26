@@ -165,7 +165,7 @@ public class MapPackageContribution implements IPackageContribution{
 			MbTileGenerator generator = new MbTileGenerator();
 			mapDefObject.put(CtJsonExportUtils.BASEMAP_KEY, MAPFILE);
 			int minZoom = ((Long)obj.get(BaseMapKeys.MINZOOM.jsonkey)).intValue();
-			int maxZoom = ((Long)obj.get(BaseMapKeys.MINZOOM.jsonkey)).intValue();
+			int maxZoom = ((Long)obj.get(BaseMapKeys.MAXZOOM.jsonkey)).intValue();
 			
 			double xmin = (double) obj.get(BaseMapKeys.XMIN.jsonkey);
 			double xmax = (double) obj.get(BaseMapKeys.XMAX.jsonkey);
