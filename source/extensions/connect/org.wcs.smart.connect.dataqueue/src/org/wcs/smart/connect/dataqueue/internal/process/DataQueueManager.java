@@ -345,6 +345,7 @@ public enum DataQueueManager {
 				final List<Path> filesToDelete = new ArrayList<Path>();
 				
 				for (LocalDataQueueItem i : toDelete){
+					i = s.get(LocalDataQueueItem.class, i.getUuid());
 					s.delete(i);
 					if (i.getFile() != null){
 						filesToDelete.add(i.getFullFilePath());
