@@ -36,6 +36,7 @@ import org.wcs.smart.data.oda.smart.impl.GeometryColumn;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
 import org.wcs.smart.data.oda.smart.impl.SmartParameterMetaData;
 import org.wcs.smart.data.oda.smart.query.common.EmptyResultSet;
+import org.wcs.smart.er.query.filter.MissionStartDateField;
 import org.wcs.smart.er.query.model.MissionQuery;
 import org.wcs.smart.er.query.model.MissionTrackQuery;
 import org.wcs.smart.er.query.model.MissionTrackResultItem;
@@ -48,6 +49,7 @@ import org.wcs.smart.query.common.engine.WaypointQueryResultItem;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.CustomDateFilter;
+import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 import org.wcs.smart.query.model.filter.date.IQueryDateLabelProvider;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
 import org.wcs.smart.query.model.summary.DateGroupBy;
@@ -124,9 +126,15 @@ public class SurveyReportQuery extends AbstractSmartQuery {
 			}
 		}
 		
+		IDateFieldFilter field = WaypointDateField.INSTANCE;
+		if (query.getQuery().getTypeKey().equalsIgnoreCase(MissionQuery.KEY) ||
+				query.getQuery().getTypeKey().equalsIgnoreCase(MissionTrackQuery.KEY)) {
+			field = MissionStartDateField.INSTANCE;
+		}
+		
 		CustomDateFilter cd = new CustomDateFilter();
 		cd.setDates(startDate, endDate);
-		DateFilter dateFilter = new DateFilter(WaypointDateField.INSTANCE,cd);
+		DateFilter dateFilter = new DateFilter(field,cd);
 
 		query.getQuery().setDateFilter(dateFilter);
 		//the result set
