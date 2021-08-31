@@ -93,7 +93,7 @@ public class MissionIdGroupByViewer extends AbstractGroupByViewer<MissionIdGroup
 		if (filter == null){
 			//get all surveys for the current ca
 			c.where(cb.equal(fromdesign.get("conservationArea"), SmartDB.getCurrentConservationArea())); //$NON-NLS-1$ 
-			c.orderBy(cb.asc(fromdesign.get("keyId")), cb.desc(from.get("startDate")), cb.desc(fromdesign.get("startDate"))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
+			c.orderBy(cb.asc(fromdesign.get("keyId")), cb.desc(from.get("startDate"))); //$NON-NLS-1$ //$NON-NLS-2$ 
 			List<Mission> missions = session.createQuery(c).getResultList();
 			
 			for (Mission m : missions){
@@ -105,8 +105,7 @@ public class MissionIdGroupByViewer extends AbstractGroupByViewer<MissionIdGroup
 					cb.equal(fromdesign.get("conservationArea"), SmartDB.getCurrentConservationArea()), //$NON-NLS-1$ 
 					cb.equal(fromdesign.get("keyId"), filter.getKey()))); //$NON-NLS-1$ 
 			c.orderBy(cb.asc(fromdesign.get("keyId")),  //$NON-NLS-1$ 
-					cb.desc(from.get("startDate")),  //$NON-NLS-1$
-					cb.desc(fromdesign.get("startDate")));  //$NON-NLS-1$ 
+					cb.desc(from.get("startDate")));  //$NON-NLS-1$ 
 			List<Mission> missions = session.createQuery(c).getResultList();
 			
 			for (Mission m : missions){
