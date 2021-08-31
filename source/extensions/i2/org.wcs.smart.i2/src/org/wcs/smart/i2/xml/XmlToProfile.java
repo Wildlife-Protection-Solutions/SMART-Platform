@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -117,7 +118,10 @@ public class XmlToProfile {
 			//lets find all xml files
 			
 			Path xmlFile = null;
-			List<Path> files = Files.list(rootPath).collect(Collectors.toList());
+			List<Path> files = null;
+			try(Stream<Path> stream = Files.list(rootPath)){
+				files = stream.collect(Collectors.toList());
+			}
 			for (Path f : files) {
 				if (f.getFileName().toString().endsWith(".xml")) { //$NON-NLS-1$
 					xmlFile = f;

@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -182,7 +183,10 @@ public class EntityToXml {
 			//zip together
 			progress.subTask(Messages.EntityToXml_compresssubtask);
 			if (outputFile != null) {
-				List<Path> files = Files.list(tempDir).collect(Collectors.toList());
+				List<Path> files = null;
+				try(Stream<Path> stream = Files.list(tempDir)){
+					files = stream.collect(Collectors.toList());
+				}
 				ZipUtil.createZip(files, outputFile, progress.split(1));
 			}
 		}finally {

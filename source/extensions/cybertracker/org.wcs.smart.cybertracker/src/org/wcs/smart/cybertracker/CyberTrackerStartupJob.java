@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -112,8 +113,8 @@ public class CyberTrackerStartupJob extends Job {
 		
 		long bound = dayLimit * 24 * 60 * 60 * 1000;
 		
-		try {
-			Files.list(folder).forEach(file->{
+		try(Stream<Path> stream = Files.list(folder)){
+			stream.forEach(file->{
 				try {
 					if (ChronoUnit.MILLIS.between(LocalDateTime.now(), LocalDateTime.ofInstant( Files.getLastModifiedTime(file).toInstant(), ZoneId.systemDefault()) ) > bound) {
 						Files.delete(file);

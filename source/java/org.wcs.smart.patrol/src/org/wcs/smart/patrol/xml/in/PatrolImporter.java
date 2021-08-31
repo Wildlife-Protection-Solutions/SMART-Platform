@@ -27,6 +27,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubMonitor;
@@ -106,7 +107,10 @@ public class PatrolImporter {
 		progress.split(1);
 		IXmlToPatrolConverter converter = null;
 		Path xmlFile = null;
-		List<Path> files = Files.list(directory).collect(Collectors.toList());
+		List<Path> files = null;
+		try(Stream<Path> stream = Files.list(directory)){
+			files = stream.collect(Collectors.toList());
+		}
 		progress.subTask(Messages.PatrolImporter_Progress_ReadingFile);
 		for (Path f : files) {
 			if (!Files.isDirectory(f)){

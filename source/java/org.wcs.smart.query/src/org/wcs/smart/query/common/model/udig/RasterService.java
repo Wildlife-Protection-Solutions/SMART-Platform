@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -429,7 +430,10 @@ public class RasterService extends AbstractRasterService implements IQueryServic
 				}
 
 				try {
-					List<Path> kids = Files.list(tempDirectory).collect(Collectors.toList());
+					List<Path> kids = null;
+					try(Stream<Path> kidstream = Files.list(tempDirectory)){
+						kids = kidstream.collect(Collectors.toList());
+					}
 					List<Path> toDelete = new ArrayList<>();
 					for (Path p : kids){
 						int index = p.getFileName().toString().lastIndexOf('.');

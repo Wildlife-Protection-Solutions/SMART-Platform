@@ -41,6 +41,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Properties;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -205,9 +206,13 @@ public class AutoBackupEngine {
 		try {
 			Path dir = Paths.get(properties.getProperty(PROP_BACKUP_LOCATION));
 			if (!Files.exists(dir)) return;
-			if (Files.list(dir).count() == 0 ) return; 
 			
-			List<Path> kids = Files.list(dir).collect(Collectors.toList());
+			List<Path> kids = null;
+			try(Stream<Path> stream = Files.list(dir)){
+				kids = stream.collect(Collectors.toList());
+			}
+			if (kids.size() == 0 ) return; 
+			
 			for (Path child : kids) {
 
 				if (child.getFileName().toString().equals(".") || //$NON-NLS-1$

@@ -34,6 +34,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -155,7 +156,11 @@ public class CaExporter {
 	}
 	
 	protected void zipTempDirectory(Path tempDir, Path destFile, IProgressMonitor monitor) throws Exception{
-		ZipUtil.createZip(Files.list(tempDir).collect(Collectors.toList()), destFile, monitor);		
+		List<Path> files = null;
+		try(Stream<Path> stream = Files.list(tempDir)){
+			files = stream.collect(Collectors.toList());
+		}
+		ZipUtil.createZip(files, destFile, monitor);		
 	}
 	
 	/**

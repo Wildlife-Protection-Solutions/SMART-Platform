@@ -27,6 +27,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -152,15 +153,17 @@ public class PawsStartUpJob extends Job {
 				List<Path> toDelete = new ArrayList<>();
 
 				try (Session session = HibernateManager.openSession()){
-					Files.list(dir).forEach(path->{
-						if (Files.exists(path) && Files.isDirectory(path)) {
-							UUID runuuid = UuidUtils.stringToUuid(path.getFileName().toString());
-							PawsRun r = session.get(PawsRun.class, runuuid);
-							if (r == null) {
-								toDelete.add(path);
+					try(Stream<Path> files = Files.list(dir)){
+						files.forEach(path->{
+							if (Files.exists(path) && Files.isDirectory(path)) {
+								UUID runuuid = UuidUtils.stringToUuid(path.getFileName().toString());
+								PawsRun r = session.get(PawsRun.class, runuuid);
+								if (r == null) {
+									toDelete.add(path);
+								}
 							}
-						}
-					});
+						});
+					}
 					
 				}catch (Exception ex) {
 					ex.printStackTrace();

@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -150,9 +151,11 @@ public class IncidentImporter implements IIncidentXmlImporter{
 			throw new Exception (MessageFormat.format(Messages.IncidentImporter_ErrorUnzipping, new Object[]{ zipFile.toAbsolutePath().toString()}));
 		}
 		
-		
 		//file xml file
-		List<Path> files = Files.list(directory).collect(Collectors.toList());
+		List<Path> files = null;
+		try(Stream<Path> stream = Files.list(directory)){
+			files = stream.collect(Collectors.toList());
+		}
 		
 		progress.subTask(Messages.IncidentImporter_ReadingXmlProgress);
 			

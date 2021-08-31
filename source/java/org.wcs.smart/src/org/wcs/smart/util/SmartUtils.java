@@ -240,18 +240,11 @@ public class SmartUtils {
 
 	public static void deleteDirectory(final Path dir) throws IOException { 
 		if (!Files.exists(dir)) return;
-		
-		boolean isposix = dir.getFileSystem().supportedFileAttributeViews().contains("posix");
-		
-		 try (Stream<Path> tree = Files.walk(dir).sorted(Comparator.reverseOrder())) {
+
+		try (Stream<Path> tree = Files.walk(dir).sorted(Comparator.reverseOrder())) {
 			 Iterator<Path> i = tree.iterator();
 			 while(i.hasNext()) {
 				 Path next = i.next();
-		         if (isposix) {
-		        	 Files.setPosixFilePermissions(next, PosixFilePermissions.fromString("rw-rw-rw-"));	 
-		         }else {
-		        	 next.toFile().setWritable(true);
-		         }
 				 Files.delete(next);
 			 }
 		 }

@@ -29,6 +29,7 @@ import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.eclipse.birt.core.framework.IConfigurationElement;
 import org.eclipse.birt.report.designer.internal.ui.util.UIHelper;
@@ -102,9 +103,11 @@ public class EntityExportDialog extends SmartStyledTitleDialog {
 			}
 		}
 		try {
-			if (Files.list(p).count() > 0){
-				if (!MessageDialog.openQuestion(getShell(), Messages.EntityExportDialog_OverwriteTitle, MessageFormat.format(Messages.EntityExportDialog_OverwriteMsg, p.toString()))){
-					return;
+			try(Stream<Path> stream = Files.list(p)){
+				if (stream.count() > 0){
+					if (!MessageDialog.openQuestion(getShell(), Messages.EntityExportDialog_OverwriteTitle, MessageFormat.format(Messages.EntityExportDialog_OverwriteMsg, p.toString()))){
+						return;
+					}
 				}
 			}
 		} catch (IOException ex) {

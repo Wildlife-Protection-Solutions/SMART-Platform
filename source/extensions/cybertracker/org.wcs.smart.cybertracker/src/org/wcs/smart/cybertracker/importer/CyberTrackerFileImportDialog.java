@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -266,8 +267,8 @@ public class CyberTrackerFileImportDialog extends SmartStyledTitleDialog {
 	private Path[] getStorageFiles() {
 		Path storageFolder = ICyberTrackerConstants.getStorageFolder(SmartDB.getCurrentConservationArea());
 		
-		try {
-			List<Path> items = Files.list(storageFolder).collect(Collectors.toList());
+		try (Stream<Path> stream = Files.list(storageFolder)){
+			List<Path> items = stream.collect(Collectors.toList());
 			return items.toArray(new Path[items.size()]);
 		}catch (IOException ex) {
 			CyberTrackerPlugIn.log(ex.getMessage(), ex);
