@@ -130,7 +130,9 @@ public interface ISurveyHibernateManager {
 
 
 	/**
-	 * Finds the survey with the given key.
+	 * Finds a survey with the given name.  If more than
+	 * one exists it returns the first one.
+	 *  
 	 * @param key survey key
 	 * @param session
 	 * @return the associated survey or null

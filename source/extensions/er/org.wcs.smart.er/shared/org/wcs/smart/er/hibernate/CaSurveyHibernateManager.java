@@ -259,6 +259,8 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 				cb.equal(from.get("id"), id), //$NON-NLS-1$
 				cb.equal(from.join("surveyDesign").get("conservationArea"), ca) //$NON-NLS-1$ //$NON-NLS-2$
 				));
-		return session.createQuery(c).uniqueResult();
+		List<Survey> items = session.createQuery(c).list();
+		if (items.size() == 0) return null;
+		return items.get(0);
 	}
 }
