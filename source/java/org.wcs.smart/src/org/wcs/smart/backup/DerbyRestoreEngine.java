@@ -341,26 +341,6 @@ public class DerbyRestoreEngine {
 		}
 		progress.worked(1);
 
-//		/* delete existing data */
-//		try {
-//			SmartUtils.deleteDirectory(dbFile);
-//			SmartUtils.deleteDirectory(dataFile);
-//		} catch (Exception ex) {
-//			String cleanUpErr = cleanUp(new Path[] { temp, dbFileBack,
-//					dataFileBack });
-//			if (cleanUpErr.length() > 0) {
-//				throw new Exception(
-//						Messages.DerbyRestoreEngine_Error_Failure
-//								+ cleanUpErr
-//								+ "\n\n" //$NON-NLS-1$
-//								+ ex.getLocalizedMessage(), ex);
-//			}
-//
-//			throw new Exception(
-//					Messages.DerbyRestoreEngine_Error_CouldNotDeleteCurrentData
-//							+ ex.getLocalizedMessage(), ex);
-//		}
-
 		/* restore the unzipped backup files */
 		progress.subTask(Messages.DerbyRestoreEngine_Progress_RestoringFiles);
 		try {
@@ -502,10 +482,13 @@ public class DerbyRestoreEngine {
 				try {
 					SmartUtils.deleteDirectory(dirs[i]);
 				} catch (Exception ex) {
+					
+					SmartPlugIn.log(ex.getMessage(), ex);
 					try {
-						strNoDelete.append(dirs[i].normalize().toString() + "\n"); //$NON-NLS-1$
+						strNoDelete.append(dirs[i].normalize().toAbsolutePath().toString()+ "\n"); //$NON-NLS-1$
 					} catch (Exception ex2) {
-						strNoDelete.append(dirs[i].normalize().toString() + "\n"); //$NON-NLS-1$
+						SmartPlugIn.log(ex2.getMessage(), ex2);
+						strNoDelete.append(dirs[i].normalize().toAbsolutePath().toString() + "\n"); //$NON-NLS-1$
 					}
 				}
 			}
