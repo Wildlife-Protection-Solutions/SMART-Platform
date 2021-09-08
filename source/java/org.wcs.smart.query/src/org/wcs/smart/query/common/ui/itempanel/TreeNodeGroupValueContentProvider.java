@@ -185,7 +185,8 @@ public class TreeNodeGroupValueContentProvider implements ITreeContentProvider {
 			if (p == null){
 				return ((WrappedTreeNode) element).getParent();
 			}else{
-				return new WrappedTreeNode(((WrappedTreeNode) element).getParent(), p);
+				return p;
+				//return new WrappedTreeNode(((WrappedTreeNode) element).getParent(), p);
 			}			
 		}
 		return null;
