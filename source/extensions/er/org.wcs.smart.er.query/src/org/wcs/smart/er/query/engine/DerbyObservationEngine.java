@@ -572,8 +572,8 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine  implements O
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
 		it.setConservationAreaUuid(UuidUtils.byteToUUID(rs.getBytes("ca_uuid"))); //$NON-NLS-1$
 		it.setMissionUuid(UuidUtils.byteToUUID(rs.getBytes("mission_uuid"))); //$NON-NLS-1$
-		it.setMissionStart(rs.getDate("mission_enddate") == null ? null : rs.getDate("mission_enddate").toLocalDate()); //$NON-NLS-1$ //$NON-NLS-2$
-		it.setMissionEnd(rs.getDate("mission_startdate") == null ? null : rs.getDate("mission_startdate").toLocalDate()); //$NON-NLS-1$ //$NON-NLS-2$
+		it.setMissionEnd(rs.getDate("mission_enddate") == null ? null : rs.getDate("mission_enddate").toLocalDate()); //$NON-NLS-1$ //$NON-NLS-2$
+		it.setMissionStart(rs.getDate("mission_startdate") == null ? null : rs.getDate("mission_startdate").toLocalDate()); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setMissionId(rs.getString("mission_id")); //$NON-NLS-1$
 		it.setMissionLeader(rs.getString("mission_leader")); //$NON-NLS-1$
 		
