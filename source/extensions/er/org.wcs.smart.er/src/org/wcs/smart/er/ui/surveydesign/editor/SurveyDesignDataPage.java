@@ -531,7 +531,7 @@ public class SurveyDesignDataPage extends EditorPart {
 			try(Session s= HibernateManager.openSession()){
 				s.beginTransaction();
 				try{
-					SurveyFilter sf = new SurveyFilter();
+					SurveyFilter sf =  SurveyFilter.newInstance();
 					sf.setSurveyState(null);
 					sf.setSurveyDesignKeyFilters(new String[]{parentEditor.getSurveyDesign().getKeyId()});
 	

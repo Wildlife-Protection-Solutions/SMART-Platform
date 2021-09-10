@@ -175,7 +175,7 @@ public class SurveyDesignListView implements IDoubleClickListener, IUpdatableVie
 		((FillLayout)parent.getLayout()).marginHeight = 0;
 		((FillLayout)parent.getLayout()).marginWidth = 0;
 		
-		filter = new SurveyFilter();
+		filter = SurveyFilter.newInstance();
 		context.set(SurveyFilter.class, filter);
 		
 		designFilter = new SurveyDesignFilter(SmartDB.getCurrentConservationArea());
