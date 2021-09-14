@@ -64,6 +64,7 @@ import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
@@ -944,6 +945,102 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 		sql.deleteCharAt(sql.length() - 1);
 		sql.append(") "); //$NON-NLS-1$
 		
+		if (caFilter != null) {
+			String cfilter = PsqlFilterToSqlGenerator.INSTANCE.asSql(caFilter, tablePrefix(Waypoint.class), this);
+			if (cfilter.length() > 0) {
+				sql.append(" and "); //$NON-NLS-1$
+				sql.append(" ( "); //$NON-NLS-1$
+				sql.append(cfilter);
+				sql.append(" ) "); //$NON-NLS-1$
+			}
+		}
+
+		if (dateFilter != null) {
+			String dfilter = PsqlFilterToSqlGenerator.INSTANCE.toSql(dateFilter, this);
+			if (dfilter.length() > 0) {
+				sql.append(" and "); //$NON-NLS-1$
+				sql.append(" ( "); //$NON-NLS-1$
+				sql.append(dfilter);
+				sql.append(" ) "); //$NON-NLS-1$
+			}
+		}
+
+		logger.finest(sql.toString());
+		try (NamedPreparedStatement ps = parseQueryString(c, sql.toString())) {
+			ps.executeUpdate();
+		}
+	}
+	
+	@Override
+	public void createWaypointGroupTable(Connection c, String waypointTable, Collection<IWaypointSource> sources, ConservationAreaFilter caFilter, DateFilter dateFilter) throws SQLException {
+		// -- build temporary table
+		StringBuilder sql = new StringBuilder();
+		sql.append("CREATE TABLE " + waypointTable + " (wp_group_uuid uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
+		logger.finest(sql.toString());
+		c.createStatement().execute(sql.toString());
+
+		// -- create index
+		sql = new StringBuilder();
+		sql.append("CREATE INDEX " + getIndexName(waypointTable) + "_wpuuid_idx on " + waypointTable + " (wp_group_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		logger.finest(sql.toString());
+		c.createStatement().execute(sql.toString());
+
+		// -- populate table
+		clearParameters();
+		sql = new StringBuilder();
+		sql = new StringBuilder();
+		sql.append("INSERT INTO "); //$NON-NLS-1$
+		sql.append(waypointTable);
+		sql.append("(wp_group_uuid) SELECT DISTINCT "); //$NON-NLS-1$
+		sql.append(tablePrefix(WaypointObservationGroup.class));
+		sql.append(".uuid "); //$NON-NLS-1$
+		sql.append("FROM "); //$NON-NLS-1$
+
+		sql.append(tableNamePrefix(Waypoint.class));
+
+		sql.append(" join "); //$NON-NLS-1$
+		sql.append(tableNamePrefix(WaypointObservationGroup.class));
+		sql.append(" on " + tablePrefix(Waypoint.class) + ".uuid = " + tablePrefix(WaypointObservationGroup.class) + ".wp_uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sql.append (" JOIN "); //$NON-NLS-1$
+		sql.append(tableNamePrefix(PatrolWaypoint.class));
+		sql.append(" ON "); //$NON-NLS-1$
+		sql.append(tablePrefix(PatrolWaypoint.class));
+		sql.append(".wp_uuid = "); //$NON-NLS-1$
+		sql.append(tablePrefix(Waypoint.class));
+		sql.append(".uuid "); //$NON-NLS-1$
+		
+		sql.append (" JOIN "); //$NON-NLS-1$
+		sql.append(tableNamePrefix(PatrolLegDay.class));
+		sql.append(" ON "); //$NON-NLS-1$
+		sql.append(tablePrefix(PatrolWaypoint.class));
+		sql.append(".leg_day_uuid = "); //$NON-NLS-1$
+		sql.append(tablePrefix(PatrolLegDay.class));
+		sql.append(".uuid "); //$NON-NLS-1$
+		
+		sql.append (" JOIN "); //$NON-NLS-1$
+		sql.append(tableNamePrefix(PatrolLeg.class));
+		sql.append(" ON "); //$NON-NLS-1$
+		sql.append(tablePrefix(PatrolLeg.class));
+		sql.append(".uuid = "); //$NON-NLS-1$
+		sql.append(tablePrefix(PatrolLegDay.class));
+		sql.append(".patrol_leg_uuid "); //$NON-NLS-1$
+		
+		sql.append (" JOIN "); //$NON-NLS-1$
+		sql.append(tableNamePrefix(Patrol.class));
+		sql.append(" ON "); //$NON-NLS-1$
+		sql.append(tablePrefix(Patrol.class));
+		sql.append(".uuid = "); //$NON-NLS-1$
+		sql.append(tablePrefix(PatrolLeg.class));
+		sql.append(".patrol_uuid "); //$NON-NLS-1$
+
+		sql.append(" WHERE "); //$NON-NLS-1$
+
+		sql.append("source in ("); //$NON-NLS-1$
+		for (IWaypointSource src : sources) {
+			sql.append("'" + src.getKey() + "',"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		sql.deleteCharAt(sql.length() - 1);
+		sql.append(")"); //$NON-NLS-1$
 		if (caFilter != null) {
 			String cfilter = PsqlFilterToSqlGenerator.INSTANCE.asSql(caFilter, tablePrefix(Waypoint.class), this);
 			if (cfilter.length() > 0) {

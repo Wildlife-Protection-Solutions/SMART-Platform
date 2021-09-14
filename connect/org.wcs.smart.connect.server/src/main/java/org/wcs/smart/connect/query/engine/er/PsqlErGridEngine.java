@@ -49,6 +49,7 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.WKBReader;
+import org.wcs.smart.NamedPreparedStatement;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -65,6 +66,7 @@ import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.query.engine.grids.MissionExistsCellMerger;
 import org.wcs.smart.er.query.engine.grids.SurveyCntValueComputer;
 import org.wcs.smart.er.query.engine.visitors.SurveyHasObservationFilterVisitor;
@@ -76,9 +78,11 @@ import org.wcs.smart.er.query.filter.summary.MissionValueItem;
 import org.wcs.smart.er.query.model.SurveyGriddedQuery;
 import org.wcs.smart.filter.IFilter;
 import org.wcs.smart.filter.IFilterVisitor;
+import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.model.WaypointObservationGroup;
 import org.wcs.smart.query.common.engine.AddCellMerger;
 import org.wcs.smart.query.common.engine.DistanceValueComputer;
 import org.wcs.smart.query.common.engine.ExistsValueComputer;
@@ -896,4 +900,178 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 		return "mission_day"; //$NON-NLS-1$
 	}
 	
+	@Override
+	public void createWaypointGroupTable(Connection c, String waypointTable, Collection<IWaypointSource> sources, ConservationAreaFilter caFilter, DateFilter dateFilter) throws SQLException {
+		// -- build temporary table
+		StringBuilder sql = new StringBuilder();
+		sql.append("CREATE TABLE " + waypointTable + " (wp_group_uuid uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
+		logger.finest(sql.toString());
+		c.createStatement().execute(sql.toString());
+
+		// -- create index
+		sql = new StringBuilder();
+		sql.append("CREATE INDEX " + getIndexName(waypointTable) + "_wpuuid_idx on " + waypointTable + " (wp_group_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		logger.finest(sql.toString());
+		c.createStatement().execute(sql.toString());
+
+		// -- populate table
+		clearParameters();
+		sql = new StringBuilder();
+		sql = new StringBuilder();
+		sql.append("INSERT INTO "); //$NON-NLS-1$
+		sql.append(waypointTable);
+		sql.append("(wp_group_uuid) SELECT DISTINCT "); //$NON-NLS-1$
+		sql.append(tablePrefix(WaypointObservationGroup.class));
+		sql.append(".uuid "); //$NON-NLS-1$
+		sql.append("FROM "); //$NON-NLS-1$
+
+		sql.append(tableNamePrefix(Waypoint.class));
+
+		sql.append(" join "); //$NON-NLS-1$
+		sql.append(tableNamePrefix(WaypointObservationGroup.class));
+		sql.append(" on " + tablePrefix(Waypoint.class) + ".uuid = " + tablePrefix(WaypointObservationGroup.class) + ".wp_uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		
+		sql.append (" JOIN "); //$NON-NLS-1$
+		sql.append(tableNamePrefix(SurveyWaypoint.class));
+		sql.append(" ON "); //$NON-NLS-1$
+		sql.append(tablePrefix(SurveyWaypoint.class));
+		sql.append(".wp_uuid = "); //$NON-NLS-1$
+		sql.append(tablePrefix(Waypoint.class));
+		sql.append(".uuid "); //$NON-NLS-1$
+		
+		sql.append (" JOIN "); //$NON-NLS-1$
+		sql.append(tableNamePrefix(MissionDay.class));
+		sql.append(" ON "); //$NON-NLS-1$
+		sql.append(tablePrefix(SurveyWaypoint.class));
+		sql.append(".mission_day_uuid = "); //$NON-NLS-1$
+		sql.append(tablePrefix(MissionDay.class));
+		sql.append(".uuid "); //$NON-NLS-1$
+		
+		sql.append (" JOIN "); //$NON-NLS-1$
+		sql.append(tableNamePrefix(Mission.class));
+		sql.append(" ON "); //$NON-NLS-1$
+		sql.append(tablePrefix(Mission.class));
+		sql.append(".uuid = "); //$NON-NLS-1$
+		sql.append(tablePrefix(MissionDay.class));
+		sql.append(".mission_uuid "); //$NON-NLS-1$
+
+		sql.append(" WHERE "); //$NON-NLS-1$
+
+		sql.append("source in ("); //$NON-NLS-1$
+		for (IWaypointSource src : sources) {
+			sql.append("'" + src.getKey() + "',"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		sql.deleteCharAt(sql.length() - 1);
+		sql.append(")"); //$NON-NLS-1$
+		if (caFilter != null) {
+			String cfilter = PsqlFilterToSqlGenerator.INSTANCE.asSql(caFilter, tablePrefix(Waypoint.class), this);
+			if (cfilter.length() > 0) {
+				sql.append(" and "); //$NON-NLS-1$
+				sql.append(" ( "); //$NON-NLS-1$
+				sql.append(cfilter);
+				sql.append(" ) "); //$NON-NLS-1$
+			}
+		}
+
+		if (dateFilter != null) {
+			String dfilter = PsqlFilterToSqlGenerator.INSTANCE.toSql(dateFilter, this);
+			if (dfilter.length() > 0) {
+				sql.append(" and "); //$NON-NLS-1$
+				sql.append(" ( "); //$NON-NLS-1$
+				sql.append(dfilter);
+				sql.append(" ) "); //$NON-NLS-1$
+			}
+		}
+
+		logger.finest(sql.toString());
+		try (NamedPreparedStatement ps = parseQueryString(c, sql.toString())) {
+			ps.executeUpdate();
+		}
+	}
+	
+	@Override
+	public void createWaypointTable(Connection c, String waypointTable, Collection<IWaypointSource> sources, ConservationAreaFilter caFilter, DateFilter dateFilter) throws SQLException {
+		// -- build temporary table
+		StringBuilder sql = new StringBuilder();
+		sql.append("CREATE TABLE " + waypointTable + " (wp_uuid uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
+		logger.finest(sql.toString());
+		c.createStatement().execute(sql.toString());
+
+		// -- create index
+		sql = new StringBuilder();
+		sql.append("CREATE INDEX " + getIndexName(waypointTable) + "_wpuuid_idx on " + waypointTable + " (wp_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		logger.finest(sql.toString());
+		c.createStatement().execute(sql.toString());
+
+		// -- populate table
+		clearParameters();
+		sql = new StringBuilder();
+		sql.append("INSERT INTO "); //$NON-NLS-1$
+		sql.append(waypointTable);
+		sql.append("(wp_uuid) SELECT "); //$NON-NLS-1$
+		sql.append(tablePrefix(Waypoint.class));
+		sql.append(".uuid "); //$NON-NLS-1$
+		sql.append("FROM "); //$NON-NLS-1$
+		sql.append(tableName(Waypoint.class));
+		sql.append(" as ");//$NON-NLS-1$
+		sql.append(tablePrefix(Waypoint.class));
+
+		sql.append (" JOIN "); //$NON-NLS-1$
+		sql.append(tableNamePrefix(SurveyWaypoint.class));
+		sql.append(" ON "); //$NON-NLS-1$
+		sql.append(tablePrefix(SurveyWaypoint.class));
+		sql.append(".wp_uuid = "); //$NON-NLS-1$
+		sql.append(tablePrefix(Waypoint.class));
+		sql.append(".uuid "); //$NON-NLS-1$
+		
+		sql.append (" JOIN "); //$NON-NLS-1$
+		sql.append(tableNamePrefix(MissionDay.class));
+		sql.append(" ON "); //$NON-NLS-1$
+		sql.append(tablePrefix(SurveyWaypoint.class));
+		sql.append(".mission_day_uuid = "); //$NON-NLS-1$
+		sql.append(tablePrefix(MissionDay.class));
+		sql.append(".uuid "); //$NON-NLS-1$
+		
+		sql.append (" JOIN "); //$NON-NLS-1$
+		sql.append(tableNamePrefix(Mission.class));
+		sql.append(" ON "); //$NON-NLS-1$
+		sql.append(tablePrefix(Mission.class));
+		sql.append(".uuid = "); //$NON-NLS-1$
+		sql.append(tablePrefix(MissionDay.class));
+		sql.append(".mission_uuid "); //$NON-NLS-1$
+		
+		sql.append(" WHERE "); //$NON-NLS-1$
+
+		sql.append("source in ("); //$NON-NLS-1$
+		for (IWaypointSource src : sources) {
+			sql.append("'" + src.getKey() + "',"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		sql.deleteCharAt(sql.length() - 1);
+		sql.append(") "); //$NON-NLS-1$
+		
+		if (caFilter != null) {
+			String cfilter = PsqlFilterToSqlGenerator.INSTANCE.asSql(caFilter, tablePrefix(Waypoint.class), this);
+			if (cfilter.length() > 0) {
+				sql.append(" and "); //$NON-NLS-1$
+				sql.append(" ( "); //$NON-NLS-1$
+				sql.append(cfilter);
+				sql.append(" ) "); //$NON-NLS-1$
+			}
+		}
+
+		if (dateFilter != null) {
+			String dfilter = PsqlFilterToSqlGenerator.INSTANCE.toSql(dateFilter, this);
+			if (dfilter.length() > 0) {
+				sql.append(" and "); //$NON-NLS-1$
+				sql.append(" ( "); //$NON-NLS-1$
+				sql.append(dfilter);
+				sql.append(" ) "); //$NON-NLS-1$
+			}
+		}
+
+		logger.finest(sql.toString());
+		try (NamedPreparedStatement ps = parseQueryString(c, sql.toString())) {
+			ps.executeUpdate();
+		}
+	}
 }
