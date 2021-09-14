@@ -178,10 +178,6 @@ public class FilterProcessor extends org.wcs.smart.observation.query.engine.Filt
 	@Override
 	protected void processDatFilter(DateFilter dateFilter, StringBuilder fromSql) throws SQLException {
 		if (dateFilter == null) return;
-		if (dateFilter.getDateFieldOption() == WaypointDateField.INSTANCE) {
-			super.processDatFilter(dateFilter, fromSql);
-			return;
-		}
 		
 		fromSql.append(" JOIN "); //$NON-NLS-1$
 		fromSql.append(namePrefix(SurveyWaypoint.class));
